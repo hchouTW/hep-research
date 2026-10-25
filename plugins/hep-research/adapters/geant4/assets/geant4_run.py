@@ -52,7 +52,7 @@ Usage (from the plugin root):
   python3 adapters/geant4/assets/geant4_run.py check-spec --spec SPEC.json
   python3 adapters/geant4/assets/geant4_run.py from-geometry --geometry studies/G.geometry.json --profile PROFILE.json --out SPEC.json
   python3 adapters/geant4/assets/geant4_run.py run --spec SPEC.json --exe EXE --build-record BUILD.json --work DIR --run-id ID --record OUT.json
-      [--evidence-role ROLE --point-id ID [--logical-run-seed S]] [--simroot SIMROOT]
+      [--evidence-role ROLE --point-id ID [--logical-run-seed S] [--seed-group NAME]] [--simroot SIMROOT]
   python3 adapters/geant4/assets/geant4_run.py scan --base SPEC.json --grid GRID.json --exe EXE --build-record BUILD.json --out-dir DIR --events-per-second R [--seeding per-event|stream]
   python3 adapters/geant4/assets/geant4_run.py chunk --spec SPEC.json --exe EXE --build-record BUILD.json --work DIR --start A --stop B --seed S --id ID --out OUT.json
   python3 adapters/geant4/assets/geant4_run.py summarize --merged MERGED.json [--work DIR] [--single-record RUN.json]
@@ -95,7 +95,7 @@ import simreco_spec as RS  # noqa: E402
 # every source file of each program's build, as paths under assets/, per program (adapter 0.2.0: the g4sim/ group was
 # added and MiniJson.hh moved there, so the keys of sources_sha256 changed once, from bare names to these paths;
 # adapter 0.3.0: a map per program instead of one flat tuple, the keys of a layered_sim record are unchanged)
-ADAPTER_VERSION = "0.4.1"
+ADAPTER_VERSION = "0.5.0"
 SCHEMAS = ASSETS / "schemas"
 STRING_COLUMNS = ("primary_end_process",)  # the only non-numeric CSV column (output.schema.json)
 A2_OUTPUTS = ("summary.json", "column_map.json", "probe.json", "observables_dump.csv")  # adapter 0.2.0
@@ -673,6 +673,8 @@ def write_run_record(path: Path, run_id: str, spec_path: Path, spec: dict, exe: 
     command actually run, interpreter first), script_sha256 (this script, keyed as it appears in argv) and
     versions.plugin_release (contracts/identity.py), as run_workflow.py writes them."""
     sim = result["simulation"]
+    if isinstance((spec.get("output") or {}).get("blocks"), dict):  # 0.5.0: K and B, for the seed_group rule (C2.1)
+        sim["blocks"] = {k: spec["output"]["blocks"][k] for k in ("blocks", "block_size")}
     complete_summary(work / run_id, run_id, sim, result["outputs"])
     program = sim["program"]["name"]
     src = spec.get("gun") or spec.get("source") or {}
@@ -703,7 +705,7 @@ def write_run_record(path: Path, run_id: str, spec_path: Path, spec: dict, exe: 
 def _evidence_fields(sim: dict, args) -> None:
     """A1.4: what the run is for in a study (extension.simulation.evidence_role, point_id) and its seed scheme
     (hash-v1 with the logical-run seed S, or legacy)."""
-    for key in ("evidence_role", "point_id", "logical_run_seed"):
+    for key in ("evidence_role", "point_id", "logical_run_seed", "seed_group"):
         if getattr(args, key, None) is not None:
             sim[key] = getattr(args, key)
     if getattr(args, "logical_run_seed", None) is not None or sim.get("program", {}).get("name") == "element_sim":
@@ -777,6 +779,8 @@ def cmd_run(args) -> tuple[str, dict]:
             and args.logical_run_seed != spec["run"]["logical_run_seed"]:
         raise SpecError(f"--logical-run-seed {args.logical_run_seed} is not the spec's run.logical_run_seed "
                         f"{spec['run']['logical_run_seed']}")
+    if getattr(args, "seed_group", None) is not None and args.logical_run_seed is None:
+        raise SpecError("--seed-group needs --logical-run-seed (the S its runs share)")
     if args.logical_run_seed is not None:  # A1.4: a single job of logical run S has the seed pair (H(S,0,0), H(S,0,1))
         first = int(spec["run"].get("first_event", 0))
         want = list(job_seeds(args.logical_run_seed, first))
@@ -1327,6 +1331,8 @@ def main(argv=None) -> int:
     p.add_argument("--evidence-role", help="what the run is for in a study: trial, nominal, scan, control, variation, "
                                            "calibration (extension.simulation.evidence_role)")
     p.add_argument("--point-id", help="the evidence point of the study this run is")
+    p.add_argument("--seed-group", help="adapter 0.5.0 (Geant4 program C2.1): the declared seed_group whose runs share "
+                   "S (Geant4 search values: S = H(search_id, 'search', seed_group)); needs --logical-run-seed")
     p.add_argument("--logical-run-seed", type=int, help="S = H(study_id, role, point_id); run.seeds must be its job "
                                                         "seeds (seed_scheme hash-v1)")
     p.add_argument("--simroot", help="the simroot executable for an element_sim event file (default: next to --exe)")

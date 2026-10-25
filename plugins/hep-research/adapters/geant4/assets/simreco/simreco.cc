@@ -692,7 +692,7 @@ int main(int argc, char** argv) {
     std::string run = "{\"seeding\": \"per-event\", \"logical_run_seed\": " + std::to_string(s.seed) +
                       ", \"weight_column\": \"unit\", \"replica\": " + std::to_string(s.replica) +
                       ", \"tail_sources_simulated\": " + tails + "}";
-    std::ofstream(s.out_summary) << acc.Json(run, "{\"name\": \"simreco\", \"version\": \"0.4.1\"}");
+    std::ofstream(s.out_summary) << acc.Json(run, "{\"name\": \"simreco\", \"version\": \"0.5.0\"}");
   }
   std::cout << "SIMRECO_EVENTS " << nevents << "\nSIMRECO_TAILS " << tails << std::endl;
   return Status("ok", "");

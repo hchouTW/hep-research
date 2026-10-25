@@ -105,6 +105,11 @@ class Campaign:
             R.write_design(self.proj)
         shutil.copy(PROFILE, self.art / "j15.realization.json")
 
+    def study_id(self, sid: str) -> str:
+        """The study_id of study sid, from which its runs are seeded S = H(study_id, role, point_id); a subclass may
+        derive it otherwise (Geant4 program C2: a confirmation study's id from the search, core/simulation/seeds.py)."""
+        return f"j15-{sid}"
+
     def derived(self, sid: str) -> dict:
         out = self.art / "studies" / sid / "derived.element_sim.json"
         out.parent.mkdir(parents=True, exist_ok=True)
@@ -257,7 +262,7 @@ class Campaign:
     def tracking(self, sid: str) -> dict:
         cand, fom, den, req = R.STUDIES[sid]
         rig = float(den["rigidity_GV"])
-        study_id = f"j15-{sid}"
+        study_id = self.study_id(sid)
         base = self.gun(self.derived(sid), "proton", (math.hypot(rig, MP) - MP) * 1000)
         width = 0.00025 if rig < 10 else 0.002
         obs = self.core_obs(width)
@@ -309,7 +314,7 @@ class Campaign:
     def study_spec(self, sid, kind, observable_name, particle, ek, rig, obs, conv, stat, plan, scope_extra,
                    variations, physics_note):
         sdir = self.art / "studies" / sid
-        spec = {"schema": "geant4-study-spec/1", "study_id": f"j15-{sid}",
+        spec = {"schema": "geant4-study-spec/1", "study_id": self.study_id(sid),
                 "label": "SYNTHETIC J15 F4 study (journey J15; names no experiment)",
                 "geant4": {"version": "11.4.3", "documentation": [
                     {"name": "Geant4 upstream source, tag v11.4.3", "version": "11.4.3", "relied_on": True}]},
@@ -447,7 +452,7 @@ class Campaign2(Campaign):
         cand, fom, den, req = R.STUDIES[sid]
         rig = 500.0
         ek = (math.hypot(rig, MP) - MP) * 1000
-        study_id = f"j15-{sid}"
+        study_id = self.study_id(sid)
         base = self.gun(self.derived(sid), "proton", ek)
         obs = self.core_obs(0.005) + [{"name": "flip", "source_column": "charge_flip", "estimator": "proportion",
                                        "thresholds": [0.5], "bins": {"lo": 0, "hi": 2, "width": 1}, "selection": SEL}]
@@ -525,7 +530,7 @@ class Campaign2(Campaign):
         sid = "N6-CAL10"
         cand, fom, den, req = R.STUDIES[sid]
         ek = 10000.0
-        study_id = f"j15-{sid}"
+        study_id = self.study_id(sid)
         base = self.gun(self.derived(sid), "e-", ek)
         obs = [{"name": "containment", "source_column": "containment", "bins": {"lo": 0, "hi": 1.0001, "width": 0.0001}},
                {"name": "rear_leak", "source_column": "rear_leak_fraction", "bins": {"lo": 0, "hi": 1, "width": 0.0001},

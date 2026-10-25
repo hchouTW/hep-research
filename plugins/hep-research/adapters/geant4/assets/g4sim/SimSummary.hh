@@ -7,6 +7,8 @@
 // and overflow, count_if (x > threshold), and Neumaier-compensated sum and sum of squares, min and max. Blocks of
 // several threads or jobs merge by block number. Selection rules follow the Python operators: a missing column fails;
 // numbers compare with numbers and strings with strings; across types == fails, != holds and an ordering fails.
+// From adapter 0.5.0 (Geant4 program C2.1) an observable declared with values keeps each block's raw selected values,
+// written in event order when no block holds more than values_max of them (else values_omitted), merge rule concat.
 #ifndef G4SIM_SIMSUMMARY_HH
 #define G4SIM_SIMSUMMARY_HH
 
@@ -45,6 +47,8 @@ struct ObservableDecl {
   std::vector<Condition> selection;
   double lo = 0., hi = 0., width = 0.;
   std::vector<double> thresholds;
+  bool values = false;
+  long valuesMax = 10000;
 };
 
 // Neumaier's variant of Kahan summation.
@@ -64,6 +68,7 @@ struct Block {
   Neumaier sum, sumsq;
   bool any = false;
   double min = 0., max = 0.;
+  std::vector<std::pair<long, double>> vals;  // (event, value) when the observable keeps values
 };
 
 inline int BinCount(const ObservableDecl& o) {
@@ -198,6 +203,7 @@ class SummaryAccumulator {
       if (!blk.any || x < blk.min) blk.min = x;
       if (!blk.any || x > blk.max) blk.max = x;
       blk.any = true;
+      if (d.values) blk.vals.emplace_back(event, x);
       double j = std::floor((x - d.lo) / d.width);
       if (j < 0) ++blk.underflow;
       else if (j >= static_cast<double>(blk.hist.size())) ++blk.overflow;
@@ -225,6 +231,7 @@ class SummaryAccumulator {
         a.sum.Add(c.sum.c);
         a.sumsq.Add(c.sumsq.s);
         a.sumsq.Add(c.sumsq.c);
+        a.vals.insert(a.vals.end(), c.vals.begin(), c.vals.end());
         if (c.any) {
           a.min = a.any ? std::min(a.min, c.min) : c.min;
           a.max = a.any ? std::max(a.max, c.max) : c.max;
@@ -240,6 +247,7 @@ class SummaryAccumulator {
   std::string Json(const std::string& runJson, const std::string& producerJson) const {
     long inBlocks = 0;
     for (long e : fEvents) inBlocks += e;
+    bool anyValues = false;
     std::ostringstream o;
     std::string run = runJson.empty() || runJson == "{}" ? "{" : runJson.substr(0, runJson.rfind('}')) + ", ";
     o << "{\"summary_version\": \"simulation-summary/1\", \"run\": " << run << "\"first_event\": " << fFirst
@@ -258,6 +266,10 @@ class SummaryAccumulator {
         << "}, \"thresholds\": [";
       for (std::size_t t = 0; t < d.thresholds.size(); ++t) o << (t ? ", " : "") << Num(d.thresholds[t]);
       o << "], \"blocks\": [";
+      std::size_t biggest = 0;
+      for (const Block& k : fBlocks[i]) biggest = std::max(biggest, k.vals.size());
+      bool keep = d.values && static_cast<long>(biggest) <= d.valuesMax;
+      anyValues = anyValues || d.values;
       for (std::size_t b = 0; b < fBlocks[i].size(); ++b) {
         const Block& k = fBlocks[i][b];
         o << (b ? ", " : "") << "{\"block\": " << b << ", \"events\": " << fEvents[b] << ", \"n\": " << k.n
@@ -266,13 +278,30 @@ class SummaryAccumulator {
         o << "], \"underflow\": " << k.underflow << ", \"overflow\": " << k.overflow << ", \"count_if\": [";
         for (std::size_t t = 0; t < k.countIf.size(); ++t) o << (t ? ", " : "") << k.countIf[t];
         o << "], \"sum\": " << Num(k.sum.Value()) << ", \"sumsq\": " << Num(k.sumsq.Value())
-          << ", \"min\": " << (k.any ? Num(k.min) : "null") << ", \"max\": " << (k.any ? Num(k.max) : "null") << "}";
+          << ", \"min\": " << (k.any ? Num(k.min) : "null") << ", \"max\": " << (k.any ? Num(k.max) : "null");
+        if (keep) {
+          std::vector<std::pair<long, double>> v = k.vals;
+          std::stable_sort(v.begin(), v.end(), [](const auto& p, const auto& q) { return p.first < q.first; });
+          o << ", \"values\": [";
+          for (std::size_t j = 0; j < v.size(); ++j) o << (j ? ", " : "") << Num(v[j].second);
+          o << "]";
+        }
+        o << "}";
       }
-      o << "]}";
+      o << "]";
+      if (d.values) {
+        o << ", \"values_max\": " << d.valuesMax;
+        if (keep)
+          o << ", \"quantile_method\": \"hyndman-fan-7\"";
+        else
+          o << ", \"values_omitted\": " << Quote("a block holds " + std::to_string(biggest) +
+                                                 " values, more than values_max " + std::to_string(d.valuesMax));
+      }
+      o << "}";
     }
     o << "], \"merge\": {\"events\": \"sum\", \"n\": \"sum\", \"hist\": \"hist\", \"underflow\": \"sum\", "
          "\"overflow\": \"sum\", \"count_if\": \"sum\", \"sum\": \"sum\", \"sumsq\": \"sum\", \"min\": \"min\", "
-         "\"max\": \"max\"}}\n";
+         "\"max\": \"max\"" << (anyValues ? ", \"values\": \"concat\"" : "") << "}}\n";
     return o.str();
   }
 

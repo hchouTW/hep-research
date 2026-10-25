@@ -6,7 +6,11 @@ floor(i / B); events with i >= K B are ignored and counted) and per declared obs
 name, source_column, selection, bins {lo, hi, width}, thresholds), the accumulators: integers n (selected events),
 per-bin histogram counts with separate underflow and overflow, count_if[] (x > threshold, strictly greater), and
 floating sum, sum of squares (Neumaier-compensated), min and max; also the number of events per block. Summaries of
-several jobs of one logical run merge by block number with the rule of each accumulator (MERGE). Standard library
+several jobs of one logical run merge by block number with the rule of each accumulator (MERGE). From Geant4 program
+C2.1 an observable may declare values: true (optional values_max, default VALUES_MAX): each block then also keeps
+its raw selected values in event order, so quantiles can be empirical (core.stats.batch_means.empirical_quantile);
+when any block holds more than values_max values the observable keeps none and says so (values_omitted), and merged
+blocks concatenate their values (merge rule concat; the caller passes the jobs in event order). Standard library
 only."""
 from __future__ import annotations
 
@@ -16,6 +20,8 @@ from pathlib import Path
 
 SUMMARY_VERSION = "simulation-summary/1"
 OBSERVABLES_VERSION = "simulation-observables/1"
+VALUES_MAX = 10_000
+QUANTILE_METHOD = "hyndman-fan-7"
 MERGE = {"events": "sum", "n": "sum", "hist": "hist", "underflow": "sum", "overflow": "sum", "count_if": "sum",
          "sum": "sum", "sumsq": "sum", "min": "min", "max": "max"}
 OPS = {"==": lambda a, b: a == b, "!=": lambda a, b: a != b, "<": lambda a, b: a < b, "<=": lambda a, b: a <= b,
@@ -78,6 +84,8 @@ def build(rows, observables: list[dict], block_size: int, blocks: int, first_eve
     if not (isinstance(block_size, int) and block_size >= 1 and isinstance(blocks, int) and blocks >= 1):
         raise SummaryError("block size B and block count K must be positive integers")
     acc = {o["name"]: [_empty_block(b, o) for b in range(blocks)] for o in observables}
+    vals: dict[str, list[list[tuple[int, float]]]] = {o["name"]: [[] for _ in range(blocks)] for o in observables
+                                                      if o.get("values")}
     sums = {o["name"]: [[Neumaier(), Neumaier()] for _ in range(blocks)] for o in observables}
     events, ignored = [0] * blocks, 0
     for row in rows:
@@ -97,6 +105,8 @@ def build(rows, observables: list[dict], block_size: int, blocks: int, first_eve
                 raise SummaryError(f"event {row['event']}: column {o['source_column']!r} is not a finite number")
             blk, (s, s2) = acc[o["name"]][b], sums[o["name"]][b]
             blk["n"] += 1
+            if o["name"] in vals:
+                vals[o["name"]][b].append((int(row["event"]), x))
             s.add(x)
             s2.add(x * x)
             blk["min"] = x if blk["min"] is None else min(blk["min"], x)
@@ -116,13 +126,34 @@ def build(rows, observables: list[dict], block_size: int, blocks: int, first_eve
         for b, blk in enumerate(acc[o["name"]]):
             blk["events"] = events[b]
             blk["sum"], blk["sumsq"] = sums[o["name"]][b][0].value, sums[o["name"]][b][1].value
-        out_obs.append({"name": o["name"], "source_column": o["source_column"], "selection": o.get("selection") or [],
-                        "bins": o["bins"], "thresholds": o.get("thresholds") or [], "blocks": acc[o["name"]]})
+        out = {"name": o["name"], "source_column": o["source_column"], "selection": o.get("selection") or [],
+               "bins": o["bins"], "thresholds": o.get("thresholds") or [], "blocks": acc[o["name"]]}
+        if o["name"] in vals:
+            _set_values(out, [[x for _, x in sorted(v, key=lambda e: e[0])] for v in vals[o["name"]]],
+                        int(o.get("values_max", VALUES_MAX)))
+        out_obs.append(out)
+    merge_rules = dict(MERGE, **({"values": "concat"} if vals else {}))
     return {"summary_version": SUMMARY_VERSION,
             "run": {**(run or {}), "first_event": first_event, "block_size": block_size, "blocks": blocks,
                     "events_in_blocks": sum(events), "events_ignored": ignored,
                     "producer": producer or {"name": "python-csv"}},
-            "observables": out_obs, "merge": dict(MERGE)}
+            "observables": out_obs, "merge": merge_rules}
+
+
+def _set_values(obs: dict, per_block: list[list[float]], values_max: int) -> None:
+    """Write each block's values, or none of them (values_omitted) when a block holds more than values_max."""
+    obs["values_max"] = values_max
+    biggest = max(len(v) for v in per_block)
+    if biggest > values_max:
+        obs["values_omitted"] = f"a block holds {biggest} values, more than values_max {values_max}"
+        obs.pop("quantile_method", None)
+        for blk in obs["blocks"]:
+            blk.pop("values", None)
+        return
+    obs.pop("values_omitted", None)
+    obs["quantile_method"] = QUANTILE_METHOD
+    for blk, v in zip(obs["blocks"], per_block):
+        blk["values"] = v
 
 
 def _merge_block(a: dict, b: dict) -> dict:
@@ -153,9 +184,18 @@ def merge(summaries: list[dict]) -> dict:
         for o_out, o in zip(out["observables"], s["observables"]):
             if o_out["bins"] != o["bins"] or o_out["thresholds"] != o["thresholds"]:
                 raise SummaryError(f"{o['name']}: different binning or thresholds do not merge")
+            keep = "values_max" in o_out and "values_omitted" not in o_out and "values_omitted" not in o
             for blk in o["blocks"]:
                 i = blk["block"]
-                o_out["blocks"][i] = _merge_block(o_out["blocks"][i], blk)
+                merged = _merge_block(o_out["blocks"][i], blk)
+                if keep:
+                    merged["values"] = list(o_out["blocks"][i].get("values", [])) + list(blk.get("values", []))
+                o_out["blocks"][i] = merged
+            if "values_max" in o_out:
+                if keep:
+                    _set_values(o_out, [b["values"] for b in o_out["blocks"]], o_out["values_max"])
+                else:
+                    _set_values(o_out, [[0.0] * (o_out["values_max"] + 1)], o_out["values_max"])
         out["run"]["events_in_blocks"] += s["run"]["events_in_blocks"]
         out["run"]["events_ignored"] += s["run"]["events_ignored"]
     return out
@@ -189,6 +229,13 @@ def block_means(obs: dict) -> list[float]:
     if any(b["n"] == 0 for b in obs["blocks"]):
         raise SummaryError(f"{obs['name']}: a block has no selected event, so it has no mean")
     return [b["sum"] / b["n"] for b in obs["blocks"]]
+
+
+def block_values(obs: dict) -> list[list[float]]:
+    """The raw selected values of every block (SummaryError when the observable keeps none)."""
+    if "values_max" not in obs or obs.get("values_omitted"):
+        raise SummaryError(f"{obs['name']}: no per-block values ({obs.get('values_omitted') or 'not declared'})")
+    return [b["values"] for b in obs["blocks"]]
 
 
 def block_proportions(obs: dict, threshold_index: int = 0) -> list[float]:

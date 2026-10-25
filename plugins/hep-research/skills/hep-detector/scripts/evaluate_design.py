@@ -59,7 +59,14 @@ Subcommands:
   finalists, and a consistency check of the finalists and a sample of points against run (relative difference at most
   1e-12). Stored as runs/SEARCH-*.computational-run.json (search_summary; large point sets in a .points.jsonl listed in
   output_hashes). It writes no candidate and no evaluation, no verdict and no ranking; the run is exempt from the
-  orphan-run rule and an evaluation that names it is design.search_point_not_expanded.
+  orphan-run rule and an evaluation that names it is design.search_point_not_expanded. From C2 (contracts CV-C2,
+  geant4 adapter 0.5.0), budget.geant4 > 0 with a geant4 block adds S2 (--geant4-work DIR, HEP_GEANT4_CONFIG): the
+  top_k designs of distinct topologies are refined on Geant4 search values (design_search_lib/geant4_values.py: short
+  element_sim and simreco runs, tail sources off, optimistic), each generation in one seed_group (paired comparison,
+  gate G-C2a switches to independent seeds), one survivor per topology; the survivors are the finalists, every S is in
+  search_summary.seeds.geant4_search, and the runs stay in the work folder. search --diagnose RUN writes
+  runs/DIAG-*.computational-run.json (each expanded finalist's F1 and Geant4 search values minus its official
+  evaluation; no evaluation, no verdict).
 - expand --search (C1): one finalist of a search as a candidate, decoded from its genome as the search decoded it
   (overrides on the base candidate, or an independent candidate when a subsystem is dropped; the effective digest
   must equal the point's); other points are refused. Then run, budget and report as for any candidate; report lists
@@ -1671,8 +1678,15 @@ def search_design(args) -> dict:
         raise UsageError(f"the search spec names {spec['design_spec']['path']} ({spec['design_spec']['sha256'][:12]}), "
                          f"the current design-spec is {cur_rel} ({sha256(proj.root / cur_rel)[:12]}): a requirement "
                          "change is a new design-spec version and a new search")
-    if (spec.get("budget") or {}).get("geant4", 0) != 0:
-        raise UsageError("budget.geant4 > 0: Geant4 search values arrive with C2; this search runs at F1 only")
+    g4_budget = (spec.get("budget") or {}).get("geant4", 0)
+    g4 = spec.get("geant4")
+    if bool(g4_budget) != bool(g4):
+        raise UsageError("budget.geant4 > 0 and the geant4 block go together (C2.2): Geant4 search values need both")
+    if g4 and not getattr(args, "geant4_work", None):
+        raise UsageError("budget.geant4 > 0: give --geant4-work DIR (runs, scratch artifacts and cache, kept outside "
+                         "the artifacts_dir) and HEP_GEANT4_CONFIG (element_sim, simreco, build_record)")
+    if g4 and not (g4.get("targets")):
+        raise UsageError("geant4.targets names no objective")
     if len(spec["objectives"]) > MAX_OBJECTIVES:
         raise UsageError(f"{len(spec['objectives'])} objectives: at most {MAX_OBJECTIVES} (exact hypervolume); express "
                          "the rest as constraints")
@@ -1688,6 +1702,11 @@ def search_design(args) -> dict:
         seen[t["label"]] = n + 1
         if n:
             t["label"] = f"{t['label']}#{n + 1}"
+    if g4:
+        labels = {t["label"]: t for t in objectives}
+        unknown = sorted(set(g4["targets"]) - set(labels))
+        if unknown:
+            raise UsageError(f"geant4.targets {unknown} are not objective labels ({sorted(labels)})")
     budget = spec["budget"]["evaluations"]
     max_evals = min(budget, args.max_evaluations) if args.max_evaluations else budget
     opt = spec["optimizer"]
@@ -1787,6 +1806,8 @@ def search_design(args) -> dict:
             sob = SOBOL.Sobol(len(space.genes)).points(1, opt["population"] - len(proposals))
             initial = [g for _, g, _ in proposals] + [NSGA2.from_unit(space.genes, u) for u in sob]
             result = NSGA2.run(space.genes, initial, evaluate, lambda g: space.repair(g)[0], hv_of, settings, max_evals)
+            s2 = geant4_refinement(args, proj, space, spec, objectives, points, new_point, objective_vector,
+                                   NSGA2, HV) if g4 else None
         finally:
             proj.docs.pop(cpath, None)
             proj.candidates.pop(cid, None)
@@ -1804,7 +1825,7 @@ def search_design(args) -> dict:
     NSGA2.crowding(inds, list(range(len(inds))))
     order = sorted(inds, key=lambda i: (-i.crowding, i.key))
     finalists, topologies = [], set()
-    for ind in order:
+    for ind in (order if s2 is None else []):
         topo = points[ind.key]["topology"]
         if spec["finalists"].get("distinct_topologies", True) and topo in topologies:
             continue
@@ -1812,7 +1833,10 @@ def search_design(args) -> dict:
         finalists.append(ind.key)
         if len(finalists) >= spec["finalists"]["max"]:
             break
+    if s2 is not None:  # C2.4: the finalists are S2's survivors, fixed from the Geant4 search values before expand
+        finalists = list(s2["finalists"])[:spec["finalists"]["max"]]
     finalists.sort()
+
     def all_values(p: dict) -> bool:
         return all((p["values"].get(t["label"]) or {}).get("value") is not None for t in objectives + constraints)
     rng = random.Random(opt["seed"] + 1)
@@ -1870,32 +1894,37 @@ def search_design(args) -> dict:
         "materials_version": spec["materials_version"], "materials_sha256": materials_sha,
         "objectives": [public(t) for t in objectives], "constraints": [public(t) for t in constraints],
         "reference_point_normalised": ref,
-        "budget": {"evaluations": budget, "geant4": 0, "max_evaluations": max_evals},
+        "budget": {"evaluations": budget, "geant4": g4_budget, "max_evaluations": max_evals},
         "optimizer": {"name": "nsga2", "implementation": "evaluate_design.py search (design_search_lib.nsga2)",
                       "backend": None, "seed": opt["seed"],
                       "config": {k: v for k, v in settings.items() if k != "seed"},
                       "initialisation": {"sobol_skip": 1, "proposals": len(proposals)},
                       "generations_run": result["generations"], "stopped": result["stopped"]},
-        "levels": ["F1"],
+        "levels": ["F1", "geant4"] if s2 else ["F1"],
         "genome": [{k: v for k, v in g.items()} for g in space.genes],
-        "evaluated": {"F1": counts["F1"], "geant4": 0, "distinct_designs": len(points),
+        "evaluated": {"F1": counts["F1"], "geant4": s2["runs"] if s2 else 0, "distinct_designs": len(points),
                       "topologies": len({p["topology"] for p in points}), "invalid_not_evaluated": counts["invalid"],
                       "tool_calls": tool_calls},
         "points": summary_points, "front": sorted(front),
         "hypervolume": [{"generation": g_, "value": v_} for g_, v_ in result["hypervolume"]],
         "front_hypervolume": front_hv,
-        "finalists": [{"index": k, "fixed_before": "expand", "topology": points[k]["topology"]} for k in finalists],
+        "finalists": [{"index": k, "fixed_before": "expand", "topology": points[k]["topology"],
+                       **({"fixed_from": "geant4"} if s2 else {})} for k in finalists],
         "proposals": [{"id": prop["id"], "reason": prop["reason"],
                        "index": next((k for k, pid in proposal_of.items() if pid == prop["id"]), None)}
                       for prop, _, _ in proposals],
-        "consistency": consistency, "seeds": {"optimizer": opt["seed"], "geant4_search": []},
+        "consistency": consistency,
+        "seeds": {"optimizer": opt["seed"], "geant4_search": s2["seeds"] if s2 else []},
         "timing": {"seconds_per_tool_call": seconds_per_call},
         "note": SEARCH_NOTE}
     if points_file:
         summary["points_file"] = points_file
+    if s2:
+        summary["geant4"] = s2["record"]
     ext = {"input_manifest": [{"path": args.spec, "sha256": spec_sha}, {"path": cur_rel, "sha256": sha256(proj.root / cur_rel)}]
            + [{"path": r, "sha256": sha256(proj.root / r)} for r in chain_rels]
-           + [{"path": p, "sha256": h} for p, h in assets],
+           + [{"path": p, "sha256": h} for p, h in assets]
+           + ([{"path": g4["realization"], "sha256": sha256(proj.root / g4["realization"])}] if g4 else []),
            "tools": [{"name": "evaluate_design.search", "version": plugin_version()}]
            + [{"name": Path(e).stem, "version": plugin_version()} for e in used_tools],
            "commands": [" ".join(argv)],
@@ -1924,6 +1953,187 @@ def search_design(args) -> dict:
             "next": [f"evaluate_design.py expand --artifacts DIR --search {run_rel} --point {k} --candidate-id NAME"
                      for k in finalists],
             "note": SEARCH_NOTE + "; state the search size and that the finalists are not confirmed in the reply"}
+
+
+def geant4_refinement(args, proj: design.Project, space: SearchSpace, spec: dict, objectives: list[dict],
+                      points: list[dict], new_point, objective_vector, NSGA2, HV) -> dict:
+    """C2.2-C2.3, S2: refine the top_k designs of distinct topologies of the S1 search front on Geant4 search values.
+    Every generation is one seed_group (S = H(search_id, "search", gen-g)): the survivors are re-evaluated with the
+    generation's offspring (continuous genes mutated), so each comparison within a generation is paired. Gate G-C2a:
+    in generation 0 (the trial) the median Var(independent) / Var(paired) of the child-parent differences; below the
+    threshold the later generations seed every design on its own (noted). Survival keeps one design per topology,
+    by constrained non-dominated sorting on the objectives (the Geant4 value where a target is declared, the F1 search
+    value otherwise). No verdict, no ranking: the survivors become the finalists."""
+    import random
+    import statistics as st
+    from core.simulation.seeds import search_group_seed
+    from core.stats.decisions import paired_statistic
+    scripts = str(SEARCH_LIB.parent)
+    if scripts not in sys.path:
+        sys.path.insert(0, scripts)
+    from design_search_lib.geant4_values import Geant4SearchError, Geant4Values
+    g4 = spec["geant4"]
+    budget = spec["budget"]["geant4"]
+    cfg_path = os.environ.get("HEP_GEANT4_CONFIG")
+    if not cfg_path:
+        raise UsageError("budget.geant4 > 0 needs HEP_GEANT4_CONFIG (element_sim, simreco, build_record)")
+    cfg = json.loads(Path(os.path.expanduser(cfg_path)).read_text(encoding="utf-8"))
+    try:
+        vals = Geant4Values(cfg, Path(args.geant4_work).expanduser().resolve() / args.id, proj.root, args.id, g4,
+                            created())
+    except Geant4SearchError as exc:
+        raise UsageError(str(exc)) from None
+    labels = [t["label"] for t in objectives]
+    by_label = {t["label"]: t for t in objectives}
+    # the top_k designs of distinct topologies: all evaluated designs ranked by constrained non-dominated sorting and,
+    # within a front, by crowding distance; the first design of each topology until top_k (the S1 front alone may
+    # hold a single topology)
+    pool = [NSGA2.Individual(genome=[], objectives=objective_vector(p["index"]), violation=p["violation"],
+                             key=p["index"]) for p in points if p.get("evaluated", True)]
+    parents: dict[str, int] = {}
+    for fr in NSGA2.sort_fronts(pool):
+        NSGA2.crowding(pool, fr)
+        for i in sorted(fr, key=lambda j: (-pool[j].crowding, pool[j].key)):
+            if len(parents) < g4["top_k"]:
+                parents.setdefault(points[pool[i].key]["topology"], pool[i].key)
+        if len(parents) >= g4["top_k"]:
+            break
+    cont = [i for i, g in enumerate(space.genes) if g["type"] == "real"]
+    rng = random.Random(spec["optimizer"]["seed"] + 2)
+    eta = spec["optimizer"].get("eta_m", 20.0)
+    threshold = float(g4.get("paired_threshold", 2.0))
+    paired, gate, generations, seeds_used = True, None, [], []
+    last_vectors: dict[int, list[float]] = {}
+    sign = {t["label"]: (1.0 if t["better"] == "smaller" else -1.0) for t in objectives}
+    for gen in range(g4["generations"]):
+        group = f"gen-{gen}"
+        members: list[tuple[int, int | None]] = []
+        for topo, k in sorted(parents.items()):
+            members.append((k, None))
+            for _ in range(g4["offspring"] if cont else 0):
+                child = list(space.genome_from_dict(points[k]["genome"]))
+                must = rng.choice(cont)
+                for i in cont:
+                    if i == must or rng.random() < 1.0 / len(cont):
+                        gd = space.genes[i]
+                        child[i] = NSGA2._poly_mutation(float(child[i]), gd["lo"], gd["hi"], eta, rng)
+                kk = new_point(space.repair(child)[0], "random")
+                if points[kk]["topology"] == topo and kk not in [m for m, _ in members]:
+                    members.append((kk, k))
+        need = len(members) * len(g4["targets"])
+        if vals.runs + need > budget:
+            generations.append({"generation": gen, "stopped": f"the Geant4 budget ({budget} runs) would be exceeded "
+                                f"({vals.runs} used, {need} needed)"})
+            break
+        results: dict[int, dict] = {}
+        for k, _ in members:
+            seed = search_group_seed(args.id, group if paired else f"{group}:p{k}")
+            if seed not in seeds_used:
+                seeds_used.append(seed)
+            short = f"search-g{gen}-p{k}"
+            base_rel = proj.rel(proj.candidates[space.base])
+            doc = expanded_candidate(space, points[k], short,
+                                     [dict(Writer(proj).input_ref(base_rel), binding="parameters")])
+            cid = f"{space.ns}:{short}"
+            row = {}
+            for label in sorted(g4["targets"]):
+                try:
+                    row[label] = vals.value(Path(__file__).resolve(), doc, cid, short, points[k]["effective_digest"],
+                                            label, by_label[label], seed, group if paired else None, k)
+                except Geant4SearchError as exc:
+                    row[label] = {"value": None, "error": str(exc)[:500], "seed": seed}
+            results[k] = row
+            points[k].setdefault("geant4", []).append({"generation": gen, "seed_group": group if paired else None,
+                                                       "seed": seed, "values": row})
+        if gen == 0:  # gate G-C2a on the trial generation: child-parent differences of each target
+            ratios = []
+            for k, par in members:
+                if par is None:
+                    continue
+                for label in g4["targets"]:
+                    a, b = results[k].get(label) or {}, results[par].get(label) or {}
+                    if a.get("blocks") and b.get("blocks") and len(a["blocks"]) == len(b["blocks"]):
+                        se_p = paired_statistic((a["blocks"], b["blocks"]), "absolute")["se"]
+                        if se_p > 0:
+                            ratios.append((a["se"] ** 2 + b["se"] ** 2) / se_p ** 2)
+            ratio = st.median(ratios) if ratios else None
+            paired = ratio is not None and ratio >= threshold
+            gate = {"variance_ratio": ratio, "pairs": len(ratios), "threshold": threshold,
+                    "comparison_after_trial": "paired" if paired else "independent",
+                    "note": None if paired else "Var(independent) / Var(paired) below the threshold (or not "
+                    "measurable): later generations seed every design on its own"}
+
+        def vector(k: int) -> list[float]:
+            out = []
+            for t, x in zip(objectives, objective_vector(k)):
+                r = results[k].get(t["label"]) if t["label"] in g4["targets"] else None
+                if r is not None:
+                    v = r.get("value")
+                    out.append(sign[t["label"]] * v / abs(t["reference_point"]) if v is not None else math.inf)
+                else:
+                    out.append(x)
+            return out
+        survivors = {}
+        for topo in sorted(parents):
+            pool = [NSGA2.Individual(genome=[], objectives=vector(k), violation=points[k]["violation"], key=k)
+                    for k, _ in members if points[k]["topology"] == topo]
+            survivors[topo] = NSGA2.survive(pool, 1)[0].key
+        generations.append({"generation": gen, "seed_group": group if paired or gen == 0 else None,
+                            "comparison": "paired" if (paired or gen == 0) else "independent",
+                            "members": [{"index": k, "parent": par} for k, par in members],
+                            "survivors": sorted(survivors.values())})
+        parents = survivors
+        last_vectors = {k: vector(k) for k in survivors.values()}
+    # the survivors in the order the finalists rule takes them: rank and crowding on their last Geant4 values
+    order = sorted(parents.values())
+    if generations and "members" in generations[-1]:
+        pool = [NSGA2.Individual(genome=[], objectives=last_vectors[k], violation=points[k]["violation"], key=k)
+                for k in order]
+        ranked = []
+        for fr in NSGA2.sort_fronts(pool):
+            NSGA2.crowding(pool, fr)
+            ranked += [pool[i].key for i in sorted(fr, key=lambda j: (-pool[j].crowding, pool[j].key))]
+        order = ranked
+    record = {"targets": g4["targets"], "events": vals.events, "blocks": vals.blocks, "top_k": g4["top_k"],
+              "generations_declared": g4["generations"], "offspring": g4["offspring"],
+              "realization": g4["realization"], "reco": g4["reco"], "versions": vals.versions,
+              "gate_g_c2a": gate, "generations": generations, "runs": vals.runs, "cache_hits": vals.cache_hits,
+              "labels": labels,
+              "note": "Geant4 search values select designs; they are optimistic (no tail source), are not "
+                      "evaluations, and their seeds never serve a confirmation study (CV-C2)"}
+    return {"finalists": order, "seeds": sorted(seeds_used), "runs": vals.runs, "record": record}
+
+
+def search_diagnose(args) -> dict:
+    """C2.4: the diagnostic run of a search (runs/DIAG-<search id>.computational-run.json): for each candidate expanded
+    from one of its finalists, the search value (F1 and, from C2, the last Geant4 search value) minus the official
+    evaluation or F4 confirmation of the same figure of merit and denominator. It writes no evaluation and decides
+    nothing (winner's curse and model differences, section C.4.6)."""
+    proj = load_project(args)
+    run_path = proj.resolve(args.diagnose)
+    run = proj.docs.get(run_path)
+    if run is None or not design.is_search_run(run):
+        raise UsageError(f"--diagnose {args.diagnose}: not a search run in the artifacts_dir")
+    sid = run["extension"]["search_summary"]["search_id"]
+    rows = [r for r in search_minus_official(proj) if r["search"] == sid]
+    rel = f"runs/DIAG-{sid}.computational-run.json"
+    w = Writer(proj)
+    evals = sorted({r["evaluation"] for r in rows})
+    eval_rels = [proj.rel(e.path) for e in proj.evals.values() if e.eid in evals]
+    inputs = [w.input_ref(proj.rel(run_path))] + [w.input_ref(r) for r in sorted(eval_rels)]
+    argv = ["python3", "skills/hep-detector/scripts/evaluate_design.py", "search", "--diagnose", args.diagnose]
+    ext = {"input_manifest": [{"path": i["ref"], "sha256": i["sha256"]} for i in inputs],
+           "tools": [{"name": "evaluate_design.search_diagnose", "version": plugin_version()}],
+           "commands": [" ".join(argv)], "environment": {"python": platform.python_version()}, "seeds": {},
+           "tolerances": {}, "exit_status": 0, "output_hashes": {}, "argv": argv,
+           "search_diagnostic": {"search": proj.rel(run_path), "rows": rows,
+                                 "note": "search values minus official evaluations: a diagnostic of the winner's "
+                                         "curse and of model differences; it writes no evaluation and supports no "
+                                         "verdict"}}
+    doc = envelope("computational-run", f"{sid}-diagnostic", ext, inputs, [], statuses(inputs, "unvalidated"))
+    w.json(rel, doc)
+    return {"status": "ok", "exit": 0, "diagnostic": rel, "rows": rows,
+            "note": "explain any large search_minus_official in the reply; it changes no verdict"}
 
 
 def expanded_candidate(space: SearchSpace, point: dict, short: str, inputs: list) -> dict:
@@ -2213,7 +2423,8 @@ def report(args) -> dict:
     text = render(full, args.omit or [])
     if gaps:
         text += "\n## Search values against official evaluations\n\n" + "".join(
-            f"- {g['candidate']} ({g['search']} point {g['point']}), {g['figure_of_merit']}: search value "
+            f"- {g['candidate']} ({g['search']} point {g['point']}), {g['figure_of_merit']}: "
+            f"{'Geant4 ' if g['search_level'] == 'geant4' else ''}search value "
             f"{g['search_value']:.6g}, official {g['evaluation']} {g['official_value']:.6g} "
             f"(search minus official {g['search_minus_official']:.6g}); search values decide nothing\n" for g in gaps)
     w.write(md_rel, text.encode("utf-8"))
@@ -2256,6 +2467,9 @@ def search_minus_official(proj: design.Project) -> list[dict]:
             continue
         for t in s.get("objectives", []) + s.get("constraints", []):
             sv = (point["values"].get(t["label"]) or {}).get("value")
+            g4_rows = [r for r in point.get("geant4") or [] if (r["values"].get(t["label"]) or {}).get("value")
+                       is not None]
+            gv = g4_rows[-1]["values"][t["label"]]["value"] if g4_rows else None  # C2: the last Geant4 search value
             for ev in sorted(proj.evals.values(), key=lambda e: e.rel):
                 ext = ev.ext
                 if (ext.get("candidate") != cid or ext.get("figure_of_merit") != t["figure_of_merit"] or ev.errors
@@ -2263,11 +2477,12 @@ def search_minus_official(proj: design.Project) -> list[dict]:
                         or not all(design.close(ext.get("denominator", {}).get(k), v)
                                    for k, v in t["denominator"].items())):
                     continue
-                if sv is not None:
-                    out.append({"candidate": cid, "search": m.group(1), "point": int(m.group(2)),
-                                "figure_of_merit": t["figure_of_merit"], "search_value": sv, "evaluation": ev.eid,
-                                "fidelity": ev.fidelity, "official_value": ext["value"],
-                                "search_minus_official": sv - ext["value"]})
+                for level, value in (("F1", sv), ("geant4", gv)):
+                    if value is not None:
+                        out.append({"candidate": cid, "search": m.group(1), "point": int(m.group(2)),
+                                    "figure_of_merit": t["figure_of_merit"], "search_level": level,
+                                    "search_value": value, "evaluation": ev.eid, "fidelity": ev.fidelity,
+                                    "official_value": ext["value"], "search_minus_official": value - ext["value"]})
     return out
 
 
@@ -2365,10 +2580,15 @@ def main(argv=None) -> int:
     p = sub.add_parser("search", help="automated candidate generation at F1: search values, search front, finalists "
                                       "(C1); writes no candidate and no evaluation")
     p.add_argument("--artifacts", type=Path, required=True)
-    p.add_argument("--spec", required=True, help="the search spec file (design-search-spec/1) in the artifacts_dir")
-    p.add_argument("--id", required=True, help="SEARCH-... (file runs/<id>.computational-run.json)")
+    p.add_argument("--spec", help="the search spec file (design-search-spec/1) in the artifacts_dir")
+    p.add_argument("--id", help="SEARCH-... (file runs/<id>.computational-run.json)")
+    p.add_argument("--diagnose", help="C2: a search run; writes runs/DIAG-<id>.computational-run.json with each "
+                                      "expanded finalist's search value minus its official evaluation (no search)")
     p.add_argument("--max-evaluations", dest="max_evaluations", type=int,
                    help="safety cap on the evaluations (default: the search spec's budget)")
+    p.add_argument("--geant4-work", dest="geant4_work", type=Path,
+                   help="C2: the folder for the Geant4 search runs, their scratch artifacts and cache (outside the "
+                        "artifacts_dir); needs HEP_GEANT4_CONFIG")
     p.add_argument("--status", choices=ARTIFACT_LABELS, default="unvalidated")
     p = sub.add_parser("expand", help="one scan point or search finalist as a candidate, to evaluate and compare "
                                       "(M4, C1)")
@@ -2415,7 +2635,14 @@ def main(argv=None) -> int:
         elif args.command == "search":
             if args.max_evaluations is not None and args.max_evaluations < 1:
                 raise UsageError("--max-evaluations is a positive number")
-            out = search_design(args)
+            if args.diagnose:
+                if args.spec or args.id:
+                    raise UsageError("--diagnose takes no --spec or --id: it reads a finished search")
+                out = search_diagnose(args)
+            elif not (args.spec and args.id):
+                raise UsageError("search needs --spec and --id (or --diagnose SEARCH-RUN)")
+            else:
+                out = search_design(args)
         elif args.command == "expand":
             if bool(args.scan) == bool(args.search):
                 raise UsageError("give exactly one of --scan or --search")

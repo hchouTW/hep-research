@@ -1,5 +1,5 @@
 {
- "$comment": "simulation-observables/1 (contracts CV-A1, Geant4 program A1.5; owner contracts, content proposed by hep-detector): the observables a simulation run summary accumulates. An array of declarations; a study spec's top-level observables and a simulation program's output.observables reference it. Fields may be added (R2). CV-B2 adds the gaussian-core estimator.",
+ "$comment": "simulation-observables/1 (contracts CV-A1, Geant4 program A1.5; owner contracts, content proposed by hep-detector): the observables a simulation run summary accumulates. An array of declarations; a study spec's top-level observables and a simulation program's output.observables reference it. Fields may be added (R2). CV-B2 adds the gaussian-core estimator. Geant4 program C2.1 adds values (keep each block's raw selected values, for empirical quantiles) and values_max.",
  "type": "array",
  "minItems": 1,
  "items": {
@@ -119,6 +119,15 @@
     "description": "estimator gaussian-core: the half-width of the truncation window in units of the core width (default 2)",
     "type": "number",
     "exclusiveMinimum": 0
+   },
+   "values": {
+    "description": "Geant4 program C2.1: keep each block's raw selected values in event order in the summary (empirical quantiles, Hyndman-Fan type 7); none are kept when a block holds more than values_max",
+    "type": "boolean"
+   },
+   "values_max": {
+    "description": "the per-block limit of values (default 10000)",
+    "type": "integer",
+    "minimum": 1
    }
   },
   "additionalProperties": false

@@ -780,6 +780,9 @@ def cmd_label(args) -> tuple[str, dict]:
         if rec.get("artifact_type") != "computational-run":
             raise StudyError(f"{path}: not a computational-run")
         sim = get(rec, "extension.simulation") or {}
+        if sim.get("evidence_role") == "search":  # CV-C2 (C2.6): search values select designs, they are no evidence
+            raise StudyError(f"{path}: a Geant4 search run (evidence_role search) cannot be evidence of a study; a "
+                             "confirmation study runs on its own seeds")
         key = (("S", sim["logical_run_seed"]) if sim.get("seed_scheme") == "hash-v1" else
                ("legacy", tuple(get(rec, "extension.seeds.layered_sim") or sim.get("random", {}).get("seeds") or [])))
         if key in seen and key[1]:  # A1.4: S (or a legacy run's full seed pair) is not repeated within a study

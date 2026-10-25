@@ -117,6 +117,31 @@ class G4simSelfTest(unittest.TestCase):
                 from contracts.schema import validate
                 self.assertTrue(validate(got, "simulation_summary.json").ok)
 
+    def test_values_equal_core_simulation_summary(self):
+        """C2.1: per-block values in event order (also when the work was split across accumulators), values_omitted
+        above values_max, and the merge rule concat."""
+        rng = random.Random(9)
+        obs = [{"name": "v", "source_column": "x", "bins": {"lo": -1.0, "hi": 1.0, "width": 0.5}, "values": True,
+                "selection": [{"column": "fate", "op": "==", "value": 1}]},
+               {"name": "big", "source_column": "x", "bins": {"lo": -1.0, "hi": 1.0, "width": 0.5}, "values": True,
+                "values_max": 5},
+               {"name": "plain", "source_column": "x", "bins": {"lo": -1.0, "hi": 1.0, "width": 0.5}}]
+        rows = [{"event": i, "x": rng.uniform(-1.2, 1.2), "fate": rng.choice([0, 1])} for i in range(160)]
+        want = S.build(rows, obs, 10, 16, 0)
+        for split in (1, 4):
+            got = self.ask({"summary": {"observables": obs, "block_size": 10, "blocks": 16, "first_event": 0,
+                                        "rows": rows, "split": split}})["summary"]
+            with self.subTest(split=split):
+                self.assertEqual(got["merge"], want["merge"])
+                for og, ow in zip(got["observables"], want["observables"]):
+                    self.assertEqual({k: og.get(k) for k in ("values_max", "values_omitted", "quantile_method")},
+                                     {k: ow.get(k) for k in ("values_max", "values_omitted", "quantile_method")},
+                                     og["name"])
+                    self.assertEqual([b.get("values") for b in og["blocks"]], [b.get("values") for b in ow["blocks"]],
+                                     og["name"])
+                from contracts.schema import validate
+                self.assertTrue(validate(got, "simulation_summary.json").ok)
+
 
 if __name__ == "__main__":
     unittest.main()

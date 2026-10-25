@@ -173,6 +173,22 @@ class Simreco(unittest.TestCase):
                     self.assertAlmostEqual(bc[k], bp[k], delta=1e-12 * max(1.0, abs(bp[k])))
         self.assertEqual(summ["run"]["tail_sources_simulated"], [])
 
+    def test_values_equal_python_from_the_csv(self):
+        """Adapter 0.5.0 (C2.1): an observable declared with values keeps each block's values in event order, as the
+        Python builder does from the same CSV; the empirical quantile estimator then reads them."""
+        d = self.toy(100.0)
+        spec = reco()
+        spec["output"]["observables"][0]["values"] = True
+        rows, summ = self.run_reco(d, spec)
+        py = S.build(rows, spec["output"]["observables"], 250, 16, 0, {"seeding": "per-event"},
+                     {"name": "python", "version": "-"})
+        oc, op = summ["observables"][0], py["observables"][0]
+        self.assertEqual([b["values"] for b in oc["blocks"]], [b["values"] for b in op["blocks"]])
+        self.assertEqual(oc["quantile_method"], "hyndman-fan-7")
+        self.assertNotIn("values", summ["observables"][1]["blocks"][0])
+        q = E.estimate(summ, {"name": "res", "estimator": "quantile", "quantile": 0.84})
+        self.assertEqual(q["quantile_method"], "hyndman-fan-7")
+
     def width_and_flips(self, d, spec, replicas=1):
         widths, flips, sel = [], 0, 0
         for m in range(replicas):

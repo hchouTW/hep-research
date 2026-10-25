@@ -222,6 +222,30 @@ GEANT4-F4). `CORE_VERSION` stays 1.1.0 (new `core.stats.decisions.change`, `core
   CV-B2 scope keys, `element_sim_spec`, the kinds `tracking-resolution` and `charge-confusion`, and material `z`,
   `a_g_mole`, `radiation_length_mm`.
 
+Geant4 program stage C2 (Geant4 search values and F4 confirmation): geant4 adapter 0.5.0, contracts CV-C2 (in the
+unreleased 3.13.0), VALIDATION DESIGN-SEARCH-G4.
+
+- `core/stats/decisions.py`: paired mode (`paired_statistic`; `equivalence` and `change` accept `pairing="paired"`
+  with per-block estimates of one seed_group); the default stays independent.
+- `core/simulation/summary.py`: an observable declared with `values: true` keeps per-block raw values (`values_max`,
+  `values_omitted`, merge rule concat); `core/stats/batch_means.py` `empirical_quantile` (Hyndman-Fan type 7), used
+  by the quantile estimator when values are kept; `core/simulation/estimates.py` `block_estimates`;
+  `core/simulation/seeds.py` `search_group_seed`, `confirmation_study_id`, `seed_uniqueness_problems`. Schemas
+  `simulation_summary.json` and `simulation_observables.json` gain the optional fields.
+- geant4 adapter 0.5.0: `g4sim/SimSummary.hh` writes values like the Python builder (element_sim, simreco,
+  layered_sim); `geant4_run.py run --seed-group`; run records carry `simulation.blocks`.
+- Contracts CV-C2: evidence role `search` and `simulation.seed_group`; `contracts/design.py` refuses an evaluation
+  that reuses a Geant4 search seed (`design.contract_mismatch`) and a seed repeated outside one seed_group
+  (`design.seed_reuse`); `check_geant4_study.py label` refuses a search run as study evidence.
+- `evaluate_design.py search`: `budget.geant4 > 0` with a `geant4` block and `--geant4-work` runs S2 (Geant4 search
+  values from short element_sim and simreco runs, `design_search_lib/geant4_values.py`, cached; generations in one
+  seed_group with gate G-C2a; one survivor per topology; finalists `fixed_from: geant4`); `search --diagnose` writes
+  `runs/DIAG-*` with each expanded finalist's F1 and Geant4 search values minus its official or F4 value; the
+  report lists the Geant4 rows too.
+- J15 `live.py`: a study's id comes from `study_id()` (a confirmation study derives it from the search).
+- Docs: the D2 automated candidate generation section of `system-design-workflow.md`, the study protocol, the
+  capability map and matrix.
+
 Geant4 program stage B3 (the J15 design project): journey J15, `examples/design-minimal-spectrometer`, geant4
 adapter 0.4.1 (VALIDATION GEANT4-J15). No contracts bump.
 

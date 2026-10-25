@@ -406,6 +406,7 @@ GEANT4_QUALIFICATION = {
 # CV-C1 (geant4 program C1.6): the search_summary rules of a search run apply natively from this contract version. The
 # number is the placeholder of the stage; it is fixed at release in merge order (all CV-* numbers are >= 3.13.0).
 SEARCH_SUMMARY_FROM = "3.13.0"
+SEARCH_SEED_RULE_FROM = "3.13.0"  # CV-C2 (Geant4 program C2.6): evaluations never reuse a Geant4 search seed
 
 
 def _search_summary(doc: dict, ext: dict, rep: Report) -> None:
@@ -702,7 +703,7 @@ def _configuration(b: dict, i: int, rep: Report) -> None:
 
 
 GEANT4_EVIDENCE_ROLES = ("trial", "nominal", "scan", "control", "variation", "calibration",
-                         "regression")  # CV-A1; CV-B2 adds regression (B2.7); C2 adds search
+                         "regression", "search")  # CV-A1; CV-B2 adds regression (B2.7); CV-C2 adds search (C2.2)
 GEANT4_SEED_SCHEMES = ("hash-v1", "legacy")
 
 
@@ -718,6 +719,10 @@ def _evidence_role(sim: dict, rep: Report) -> None:
     if scheme is not None and scheme not in GEANT4_SEED_SCHEMES:
         rep.add("error", "$.extension.simulation.seed_scheme", "geant4.seed_scheme_unknown",
                 f"seed scheme {scheme!r} is not one of {list(GEANT4_SEED_SCHEMES)}")
+    group = sim.get("seed_group")  # CV-C2 (C2.1): the declared seed_group whose runs share S
+    if group is not None and not (isinstance(group, str) and group and scheme == "hash-v1"):
+        rep.add("error", "$.extension.simulation.seed_group", "geant4.seed_scheme_unknown",
+                "seed_group is a non-empty string on a hash-v1 run (its runs share the logical-run seed)")
     if scheme == "hash-v1" and not (isinstance(sim.get("logical_run_seed"), int)
                                     and 1 <= sim["logical_run_seed"] <= 2 ** 31 - 1):
         rep.add("error", "$.extension.simulation.logical_run_seed", "geant4.seed_scheme_unknown",

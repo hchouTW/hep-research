@@ -28,7 +28,22 @@
   "materials_version": {"type": "string", "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"},
   "budget": {"type": "object", "required": ["evaluations"], "additionalProperties": false, "properties": {
    "evaluations": {"type": "integer", "minimum": 1},
-   "geant4": {"$comment": "Geant4 search values arrive in C2; C1 accepts only 0", "type": "integer", "minimum": 0}}},
+   "geant4": {"$comment": "C2: the most Geant4 search runs S2 may make (one element_sim and one simreco run per design evaluation); 0 keeps the search at F1; > 0 needs the geant4 block", "type": "integer", "minimum": 0}}},
+  "geant4": {"$comment": "Geant4 program C2.2: S2 refines the top_k designs of distinct topologies from S1 on Geant4 search values (short element_sim and simreco runs, a declared event count, K blocks), every generation in one seed_group (paired comparison) unless gate G-C2a switches to independent seeds",
+   "type": "object", "additionalProperties": false,
+   "required": ["realization", "reco", "events", "targets", "top_k", "generations", "offspring"], "properties": {
+   "realization": {"description": "element_sim.realization/1 profile, a path in the artifacts_dir", "type": "string", "minLength": 1},
+   "reco": {"description": "the simreco.spec/1 fields other than output (point resolution, radiation lengths, tof, fit); tail sources stay off, so a Geant4 search value is optimistic", "type": "object"},
+   "events": {"description": "events per Geant4 search run, a multiple of blocks", "type": "integer", "minimum": 32},
+   "blocks": {"description": "K, default 16", "type": "integer", "minimum": 2},
+   "targets": {"description": "objective label -> the simreco observable that gives its Geant4 search value and the beam particle (the rigidity comes from the objective's denominator; at least one target)", "type": "object",
+    "additionalProperties": {"type": "object", "additionalProperties": false, "required": ["observable", "particle"], "properties": {
+     "observable": {"type": "object"}, "particle": {"enum": ["proton", "e-", "e+", "mu-", "mu+"]}}}},
+   "top_k": {"type": "integer", "minimum": 1},
+   "generations": {"type": "integer", "minimum": 1},
+   "offspring": {"description": "mutated designs per parent and generation (continuous genes only)", "type": "integer", "minimum": 1},
+   "paired_threshold": {"description": "gate G-C2a: below this Var(independent) / Var(paired) the later generations use independent seeds (default 2)", "type": "number", "exclusiveMinimum": 0},
+   "threads": {"type": "integer", "minimum": 1}}},
   "optimizer": {"type": "object", "required": ["name", "population", "generations", "seed"], "additionalProperties": false,
    "properties": {
     "name": {"enum": ["nsga2"]},
