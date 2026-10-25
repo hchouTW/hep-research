@@ -1,0 +1,87 @@
+{
+ "schema": "element_sim.spec/1",
+ "world": {
+  "material": "G4_Galactic",
+  "half_mm": [
+   200.0,
+   200.0,
+   200.0
+  ]
+ },
+ "elements": [
+  {
+   "name": "Slab",
+   "material": "Si_ctl",
+   "centre_mm": [
+    0.0,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    0.4685,
+    100.0,
+    100.0
+   ],
+   "role": "passive"
+  },
+  {
+   "name": "Plane",
+   "material": "G4_Si",
+   "centre_mm": [
+    100.0,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    0.0005,
+    150.0,
+    150.0
+   ],
+   "role": "tracker-plane"
+  }
+ ],
+ "physics": {
+  "em_constructor": "G4EmStandardPhysics_option4",
+  "default_cut_mm": 0.7
+ },
+ "source": {
+  "type": "gun",
+  "particle": "proton",
+  "energy_MeV": 999062.1680877301,
+  "position_mm": [
+   -150.0,
+   0.0,
+   0.0
+  ],
+  "direction": [
+   1.0,
+   0.0,
+   0.0
+  ]
+ },
+ "run": {
+  "events": 8000,
+  "seeds": [
+   2031225257,
+   1825382993
+  ],
+  "seeding": "per-event",
+  "logical_run_seed": 1439471284,
+  "run_manager": "mt",
+  "threads": 8,
+  "first_event": 0
+ },
+ "output": {
+  "event_file": {
+   "level": "crossings"
+  }
+ },
+ "materials": [
+  {
+   "name": "Si_ctl",
+   "z": 14,
+   "a_g_mole": 28.0855,
+   "density_g_cm3": 2.0271
+  }
+ ]
+}

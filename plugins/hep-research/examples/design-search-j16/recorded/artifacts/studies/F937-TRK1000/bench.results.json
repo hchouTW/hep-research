@@ -1,0 +1,227 @@
+{
+ "benchmarks": [
+  {
+   "benchmark": "material-definition",
+   "grade": "verification",
+   "problems": [],
+   "reference": {
+    "source": "the study spec's independent material sources and the candidate's declared x/X0",
+    "validity": "verification of the realized geometry",
+    "version": "as declared"
+   },
+   "rows": [
+    {
+     "declared": 0.03,
+     "element": "passive",
+     "geantino_x_over_x0": 0.03,
+     "relative": 0.0
+    },
+    {
+     "declared": 0.01,
+     "element": "Si1",
+     "geantino_x_over_x0": 0.01,
+     "relative": 0.0
+    },
+    {
+     "declared": 0.01,
+     "element": "Si2",
+     "geantino_x_over_x0": 0.01,
+     "relative": 0.0
+    },
+    {
+     "declared": 0.01,
+     "element": "Si3",
+     "geantino_x_over_x0": 0.01,
+     "relative": 0.0
+    },
+    {
+     "declared": 0.01,
+     "element": "Si4",
+     "geantino_x_over_x0": 0.01,
+     "relative": 0.0
+    },
+    {
+     "declared": 0.01,
+     "element": "Si5",
+     "geantino_x_over_x0": 0.01,
+     "relative": 0.0
+    },
+    {
+     "declared": 0.01,
+     "element": "Si6",
+     "geantino_x_over_x0": 0.01,
+     "relative": 0.0
+    },
+    {
+     "declared": 0.01,
+     "element": "Si7",
+     "geantino_x_over_x0": 0.01,
+     "relative": 0.0
+    }
+   ],
+   "scope": {
+    "geometry_sha256": "35c509a9cda4ece6c09ff63a4237eef6ecb030e23b6a1277e0fcc084aa5ae3fd",
+    "realization_sha256": "c897f1010a2fb736ccec9f87370b54b759566e611f0be171b0ac227b3f557613"
+   },
+   "statistic": "geantino x/X0 per tracker plane against the candidate; densities against independent sources",
+   "tolerance": {
+    "density_relative": 0.001,
+    "relative": 0.01
+   },
+   "validation_evidence": false,
+   "verdict": "pass"
+  },
+  {
+   "benchmark": "field-propagation",
+   "compared": 3500,
+   "geant4": 5.662002422468504e-06,
+   "grade": "verification",
+   "max_dt_ps": 0.0,
+   "problems": [],
+   "reference": {
+    "source": "analytic helix of a charged particle in uniform fields (core/simulation/helix.py)",
+    "validity": "deterministic: charged geantinos have no interactions",
+    "version": "exact"
+   },
+   "reference_value": 0.0,
+   "scope": {
+    "field_configuration_sha256": "f6bdd1cf208479bc4fee50d2ed38c69ce7aa353ac0ac7ca8ef787368c9f56a8e"
+   },
+   "statistic": "largest in-plane distance from the analytic helix (um) and TOF time difference (ps)",
+   "tolerance": {
+    "in_plane_um": 0.5,
+    "time_ps": 1.0
+   },
+   "validation_evidence": false,
+   "verdict": "pass"
+  },
+  {
+   "benchmark": "reco-closure",
+   "entries": 8000,
+   "geant4": 0.9842306107528763,
+   "grade": "verification",
+   "problems": [],
+   "pull_mean": -0.007723101328589981,
+   "pull_width": 0.9842306107528763,
+   "pull_width_mc_sigma": 0.007905694150420948,
+   "reference": {
+    "source": "the truth of the simulated charged geantinos",
+    "validity": "closure of the fit; no physics",
+    "version": "exact"
+   },
+   "reference_value": 1.0,
+   "residual_mean": -2.6514968033785365e-05,
+   "scope": {
+    "particle": "chargedgeantino",
+    "reco_spec_sha256": "bc317112b9fd5d8fd636dd5d5fb5f045084e836077981859ec3c15fe3568eb21",
+    "rigidity_GV": 1000.0
+   },
+   "statistic": "pull width and bias of the signed inverse rigidity",
+   "validation_evidence": false,
+   "verdict": "pass"
+  },
+  {
+   "benchmark": "multiple-scattering-reference",
+   "canonical_ties": 0,
+   "configuration": "isolated",
+   "configuration_basis": {
+    "artifact_id": "geant4-run-msref-1000gv-nominal",
+    "run_record": "../../../A/artifacts/runs/msref-1000gv-nominal.computational-run.json",
+    "sha256": "9087d8e719f4fadfa03efc511db472d44814220ad8d036d05865ae4c02d00122"
+   },
+   "configuration_gap": null,
+   "geant4": 1.1317867941591317e-06,
+   "geant4_dof": 15,
+   "grade": "reference",
+   "hash_scheme": "tree-v1",
+   "naming_sha256": "ce24aafbd8369b6aa407d7cf32bd12d545df2a754c2602c3f7e60978e2410fc0",
+   "negative_control": {
+    "at_claimed_detection_limit": false,
+    "controls": [
+     {
+      "at_claimed_detection_limit": true,
+      "crossings": "../msref/msref-1000gv-density-plus.crossings.csv",
+      "detection_limit_relative": 0.06603148595716732,
+      "injected": "slab density x 1.13",
+      "injected_relative": 0.1299999999999999,
+      "injection_in_run": 0.12999999999999967,
+      "run_record": "../../../A/artifacts/runs/msref-1000gv-density-plus.computational-run.json",
+      "se_of_shift": 0.010396175939930091,
+      "shift": 0.057134320180965946,
+      "sign": "+",
+      "status": "caught"
+     },
+     {
+      "at_claimed_detection_limit": false,
+      "crossings": "../msref/msref-1000gv-density-minus.crossings.csv",
+      "detection_limit_relative": 0.06374117809773304,
+      "injected": "slab density x 0.87",
+      "injected_relative": -0.13,
+      "injection_in_run": -0.13,
+      "run_record": "../../../A/artifacts/runs/msref-1000gv-density-minus.computational-run.json",
+      "se_of_shift": 0.009302955198675484,
+      "shift": -0.07986704732462749,
+      "sign": "-",
+      "status": "caught"
+     }
+    ],
+    "detection_limit_relative": 0.06603148595716732,
+    "detection_limit_sign": "+-",
+    "status": "caught"
+   },
+   "reference": {
+    "source": "Lynch and Dahl, Nucl. Instrum. Meth. B 58 (1991) 6, F = 98 % Gaussian fit to Moliere; accuracy Lynch and Dahl, NIM B 58 (1991) 6, '2% or better' against Moliere (abstract; PDG 1998 section 23.3, page read 2026-10-24)",
+    "validity": "as declared",
+    "version": "1991"
+   },
+   "reference_value": 1.12734306066744e-06,
+   "relative_difference": 0.003941775708505846,
+   "relative_se": 0.00680969567994677,
+   "scope": {
+    "material": [
+     "G4_Si"
+    ],
+    "particle": [
+     "proton"
+    ],
+    "rigidity_GV": 1000.0,
+    "thickness_x0": 0.01
+   },
+   "selection": {
+    "blocks": 16,
+    "events": 8000
+   },
+   "statistic": "core width of the projected exit angle (rad), central 98 %",
+   "target_geometry_sha256": "8b4d477abb13714d3a782d674379a3556fe411f3deebd4f592e1690d713829de",
+   "target_slabs": [
+    "Plane",
+    "Slab"
+   ],
+   "tolerance": {
+    "parts": {
+     "binning": 0.0,
+     "k_sigma": 3.0,
+     "mc_statistics": 0.02042908703984031,
+     "reference_accuracy": 0.02
+    },
+    "total": 0.040429087039840314
+   },
+   "tree_sha256": "25031bba8d1c549d7b1ffed9fa94a878df335cde35ad3d6181816efcfe6491de",
+   "validation_evidence": true,
+   "verdict": "pass",
+   "world_material": "G4_Galactic"
+  }
+ ],
+ "constants": {
+  "K_MeV_mol_cm2": 0.3070749269094836,
+  "m_e_MeV": 0.51099895069,
+  "source": "core/constants (CODATA 2022)"
+ },
+ "failed": [],
+ "gaps": [
+  "multiple-scattering-reference: a negative control's shift of the observable is not at the claimed detection limit 0.06603 (|shift| <= 1.1 DL)"
+ ],
+ "note": "reference inputs come from the study spec; the Geant4 material dump is never read",
+ "status": "ok",
+ "status_label": "unvalidated"
+}

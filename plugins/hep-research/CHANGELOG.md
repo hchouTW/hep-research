@@ -222,6 +222,23 @@ GEANT4-F4). `CORE_VERSION` stays 1.1.0 (new `core.stats.decisions.change`, `core
   CV-B2 scope keys, `element_sim_spec`, the kinds `tracking-resolution` and `charge-confusion`, and material `z`,
   `a_g_mole`, `radiation_length_mm`.
 
+Geant4 program stage C3 (examples): journey J16, `examples/design-search-j16` (VALIDATION
+DESIGN-SEARCH-EXAMPLES). No contract or adapter version change.
+
+- `examples/design-search-j16/`: the search on Examples A and B (F1, seeded NSGA-II), finalists expanded and
+  evaluated, Example B's `capability.unavailable` requirements carried, reports and `search --diagnose`; one Example
+  A finalist confirmed live at F4 (`live.py`, recorded): the upgrade was refused on the multiple-scattering
+  reference's control (beyond 1.1 detection limits), shown as recorded; `space.realization.json` for Example A;
+  `tests/examples/test_design_search_j16.py`.
+- J15's `live.py` campaign takes the study prefix, the realization profile's name, the reference slab's thickness and
+  the materials from class attributes (J16 reuses it; J15 unchanged).
+- `evaluate_design.py`: the rows of `search_minus_official` (`search --diagnose`, `report`) carry `f4_qualified` for
+  F4 evaluations, so an F4 evaluation of a study whose upgrade was refused is marked (it decides nothing).
+- The optional Bayesian-optimisation backend (`adapters/design-bo/`) is not provided: Ax and BoTorch are not installed
+  in either environment; the search runs NSGA-II.
+- Docs: J16 in `docs/researcher-journeys.md`, `docs/maintenance.md`, the capability map and matrix, the design
+  workflow's example; routing case `j16`.
+
 Geant4 program stage C2 (Geant4 search values and F4 confirmation): geant4 adapter 0.5.0, contracts CV-C2 (in the
 unreleased 3.13.0), VALIDATION DESIGN-SEARCH-G4.
 

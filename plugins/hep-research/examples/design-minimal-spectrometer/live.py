@@ -74,6 +74,14 @@ MATERIALS = [
 
 
 class Campaign:
+    # what a subclass may change for another design (J16 reuses this campaign for Example A): the realization
+    # profile's file name in the artifacts_dir, the thickness of the multiple-scattering reference slab (the
+    # design's silicon plane) and the study spec's materials
+    prefix = "j15"
+    profile_name = "j15.realization.json"
+    slab_mm = 0.3
+    materials = MATERIALS
+
     def __init__(self, work: Path, cfg: dict):
         self.work = work
         self.cfg = {k: str(Path(os.path.expanduser(v))) for k, v in cfg.items()}
@@ -103,18 +111,18 @@ class Campaign:
     def setup(self):
         if not (self.art / "design-spec.v1.json").is_file():
             R.write_design(self.proj)
-        shutil.copy(PROFILE, self.art / "j15.realization.json")
+        shutil.copy(PROFILE, self.art / self.profile_name)
 
     def study_id(self, sid: str) -> str:
         """The study_id of study sid, from which its runs are seeded S = H(study_id, role, point_id); a subclass may
         derive it otherwise (Geant4 program C2: a confirmation study's id from the search, core/simulation/seeds.py)."""
-        return f"j15-{sid}"
+        return f"{self.prefix}-{sid}"
 
     def derived(self, sid: str) -> dict:
         out = self.art / "studies" / sid / "derived.element_sim.json"
         out.parent.mkdir(parents=True, exist_ok=True)
         self.go(RUN, "from-geometry", "--geometry", self.art / "studies" / f"G-{sid}.geometry.json", "--profile",
-                self.art / "j15.realization.json", "--out", out)
+                self.art / self.profile_name, "--out", out)
         return json.loads(out.read_text())
 
     def simulate(self, study_id, name, role, point, spec, events) -> Path:
@@ -210,7 +218,7 @@ class Campaign:
             spec = {"schema": "element_sim.spec/1",
                     "world": {"material": "G4_Galactic", "half_mm": [200.0, 200.0, 200.0]},
                     "elements": [{"name": "Slab", "material": "G4_Si" if fac == 1 else "Si_ctl",
-                                  "centre_mm": [0.0, 0.0, 0.0], "half_mm": [0.15, 100.0, 100.0], "role": "passive"},
+                                  "centre_mm": [0.0, 0.0, 0.0], "half_mm": [self.slab_mm / 2, 100.0, 100.0], "role": "passive"},
                                  {"name": "Plane", "material": "G4_Si", "centre_mm": [100.0, 0.0, 0.0],
                                   "half_mm": [0.0005, 150.0, 150.0], "role": "tracker-plane"}],
                     "physics": {"em_constructor": "G4EmStandardPhysics_option4", "default_cut_mm": 0.7},
@@ -221,7 +229,7 @@ class Campaign:
                     "output": {"event_file": {"level": "crossings"}}}
             if fac != 1:
                 spec["materials"] = [{"name": "Si_ctl", "z": 14, "a_g_mole": 28.0855, "density_g_cm3": 2.33 * fac}]
-            rec = self.simulate(f"j15-{tag}", f"{tag}-{name}", role, name, spec, 8000)
+            rec = self.simulate(f"{self.prefix}-{tag}", f"{tag}-{name}", role, name, spec, 8000)
             out[name] = (rec, self.dump(rec, self.work / "bench" / "msref" / f"{tag}-{name}.crossings.csv"))
         return out
 
@@ -230,7 +238,7 @@ class Campaign:
         rel = lambda p: os.path.relpath(p, cfg_dir)  # noqa: E731
         return {"benchmark": "multiple-scattering-reference", "element_spec": rel(self.art / "specs" /
                 f"msref-{rig_gv:g}gv-nominal.spec.json"), "crossings": rel(m["nominal"][1]), "measuring_plane": "Plane",
-                "material": "G4_Si", "particle": "proton", "momentum_MeV": rig_gv * 1000.0, "thickness_mm": 0.3,
+                "material": "G4_Si", "particle": "proton", "momentum_MeV": rig_gv * 1000.0, "thickness_mm": self.slab_mm,
                 "target_slabs": ["Slab", "Plane"], "run_record": rel(m["nominal"][0]),
                 "tolerance": {"reference_accuracy_relative": 0.02, "k_sigma": 3.0,
                               "reference_source": "Lynch and Dahl, NIM B 58 (1991) 6, '2% or better' against Moliere "
@@ -247,13 +255,13 @@ class Campaign:
         c = cand.split("-")[1]
         geo = json.loads(json.dumps(base))
         geo["source"].update(particle="geantino", energy_MeV=1000.0)
-        g = self.simulate(f"j15-{c}-verification", f"{c}-geantino", "calibration", "geantino", geo, 2000)
+        g = self.simulate(f"{self.prefix}-{c}-verification", f"{c}-geantino", "calibration", "geantino", geo, 2000)
         ch = json.loads(json.dumps(base))
         ch["source"].update(particle="chargedgeantino", energy_MeV=1000.0)
-        q = self.simulate(f"j15-{c}-verification", f"{c}-chargedgeantino", "calibration", "chargedgeantino", ch, 500)
+        q = self.simulate(f"{self.prefix}-{c}-verification", f"{c}-chargedgeantino", "calibration", "chargedgeantino", ch, 500)
         hi = json.loads(json.dumps(base))
         hi["source"].update(particle="chargedgeantino", energy_MeV=1.0e6)
-        h = self.simulate(f"j15-{c}-verification", f"{c}-closure", "calibration", "closure", hi, 8000)
+        h = self.simulate(f"{self.prefix}-{c}-verification", f"{c}-closure", "calibration", "closure", hi, 8000)
         clo = self.reco(h, self.reco_spec(self.core_obs(0.002), 8000), f"{c}-closure-reco")
         return {"geantino": g, "charged": q, "closure": h, "closure_reco": clo,
                 "charged_dump": self.dump(q, self.work / "bench" / c / "chargedgeantino.crossings.csv")}
@@ -319,8 +327,8 @@ class Campaign:
                 "geant4": {"version": "11.4.3", "documentation": [
                     {"name": "Geant4 upstream source, tag v11.4.3", "version": "11.4.3", "relied_on": True}]},
                 "geometry_source": {"kind": "design", "description": f"derived by geant4_run.py from-geometry from "
-                                    f"studies/G-{sid}.geometry.json and j15.realization.json", "uses_replicas": False},
-                "materials": MATERIALS,
+                                    f"studies/G-{sid}.geometry.json and {self.profile_name}", "uses_replicas": False},
+                "materials": self.materials,
                 "reproducibility": {"data_paths_recorded": True, "build_record": self.cfg["build_record"]},
                 "downstream_use": {"kind": "other", "note": f"F4 evaluation of {observable_name} (journey J15)"},
                 "observable": {"name": observable_name, "kind": kind, "domain": "em",
@@ -349,7 +357,7 @@ class Campaign:
         geom = t["geom"]
         _, keys = self.go(BENCH, "scope-keys", "--element-spec", self.art / "specs" / f"{sid}-nominal.spec.json",
                           "--reco-spec", self.art / "specs" / f"{sid}-nominal-on.reco.json", "--geometry", geom,
-                          "--realization", self.art / "j15.realization.json")
+                          "--realization", self.art / self.profile_name)
         variations = {v: d for v, (d, _) in t["variations"].items()}
         study, sdir = self.study_spec(
             sid, "tracking-resolution", "momentum-resolution-core", "proton", ek, rig, t["obs"],
@@ -359,7 +367,7 @@ class Campaign:
             {"benchmarks": [{"name": n, "grade": "verification" if n != "multiple-scattering-reference" else "reference"}
                             for n in ("material-definition", "field-propagation", "reco-closure",
                                       "multiple-scattering-reference")]},
-            {"material": "G4_Si", "thickness_x0": [0.3 / X0_SI] * 2, "rigidity_GV": [rig, rig], **keys["scope_keys"]},
+            {"material": "G4_Si", "thickness_x0": [self.slab_mm / X0_SI] * 2, "rigidity_GV": [rig, rig], **keys["scope_keys"]},
             variations, "Gaussian core width of (1/R_reco - 1/R_true) R_true of selected tracks")
         S = lambda k: self.summary(t["reco"][k])  # noqa: E731
         self.go(CHECK, "run", "--spec", study, "--summary", f"nominal={S('nominal-off')}", "--summary",
@@ -373,7 +381,7 @@ class Campaign:
         g_run = self.sim_work / f"{c}-geantino"
         entries = [
             {"benchmark": "material-definition", "element_spec": rel(self.art / "specs" / f"{sid}-nominal.spec.json"),
-             "geometry": rel(geom), "realization": rel(self.art / "j15.realization.json"),
+             "geometry": rel(geom), "realization": rel(self.art / self.profile_name),
              "run_record": rel(sh["geantino"]), "csv": rel(g_run / "events.csv"),
              "column_map": rel(g_run / "column_map.json"), "tolerance_relative": 0.01},
             {"benchmark": "field-propagation", "element_spec": rel(self.art / "specs" / f"{c}-chargedgeantino.spec.json"),
@@ -478,7 +486,7 @@ class Campaign2(Campaign):
         sh = shared[cand]
         _, keys = self.go(BENCH, "scope-keys", "--element-spec", self.art / "specs" / f"{sid}-nominal.spec.json",
                           "--reco-spec", self.art / "specs" / f"{sid}-nominal-on.reco.json", "--geometry", geom,
-                          "--realization", self.art / "j15.realization.json")
+                          "--realization", self.art / self.profile_name)
         variations = {"emy": "reference list FTFP_BERT_EMY: Urban multiple scattering for protons (option 3) "
                             "instead of WentzelVI (option 4)"}
         study, sdir = self.study_spec(
@@ -489,7 +497,7 @@ class Campaign2(Campaign):
             {"benchmarks": [{"name": n, "grade": g} for n, g in (
                 ("material-definition", "verification"), ("field-propagation", "verification"),
                 ("reco-closure", "verification"), ("ms-tail-reference", "reference"))]},
-            {"material": "G4_Si", "thickness_x0": [0.3 / X0_SI] * 2, "rigidity_GV": [rig, rig], **keys["scope_keys"]},
+            {"material": "G4_Si", "thickness_x0": [self.slab_mm / X0_SI] * 2, "rigidity_GV": [rig, rig], **keys["scope_keys"]},
             variations, "fraction of selected tracks whose reconstructed charge sign is opposite to the truth")
         S = lambda k: self.summary(reco[k])  # noqa: E731
         self.go(CHECK, "run", "--spec", study, "--summary", f"nominal={S('nominal-off')}", "--summary",
@@ -502,7 +510,7 @@ class Campaign2(Campaign):
         g_run = self.sim_work / f"{c}-geantino"
         entries = [
             {"benchmark": "material-definition", "element_spec": rel(self.art / "specs" / f"{sid}-nominal.spec.json"),
-             "geometry": rel(geom), "realization": rel(self.art / "j15.realization.json"),
+             "geometry": rel(geom), "realization": rel(self.art / self.profile_name),
              "run_record": rel(sh["geantino"]), "csv": rel(g_run / "events.csv"),
              "column_map": rel(g_run / "column_map.json"), "tolerance_relative": 0.01},
             {"benchmark": "field-propagation", "element_spec": rel(self.art / "specs" / f"{c}-chargedgeantino.spec.json"),
@@ -686,7 +694,7 @@ class Campaign3(Campaign2):
         g_run = self.sim_work / "N6-geantino"
         geom = self.art / "studies" / f"G-{sid}.geometry.json"
         md = {"benchmark": "material-definition", "element_spec": nominal_spec, "geometry": rel(geom),
-              "realization": rel(self.art / "j15.realization.json"), "run_record": rel(sh["geantino"]),
+              "realization": rel(self.art / self.profile_name), "run_record": rel(sh["geantino"]),
               "csv": rel(g_run / "events.csv"), "column_map": rel(g_run / "column_map.json"), "tolerance_relative": 0.02}
         entries.append(md)
         pb_dir = self.sim_work / "ladder-geantino-pb-control"

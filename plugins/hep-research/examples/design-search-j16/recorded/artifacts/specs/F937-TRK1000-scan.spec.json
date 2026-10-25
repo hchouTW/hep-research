@@ -1,0 +1,228 @@
+{
+ "elements": [
+  {
+   "centre_mm": [
+    -24.098253,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    1491.896334,
+    600.0,
+    600.0
+   ],
+   "material": "G4_Galactic",
+   "name": "FieldRegion",
+   "role": "passive"
+  },
+  {
+   "centre_mm": [
+    -1495.994587,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    0.46849999999999997,
+    500.0,
+    500.0
+   ],
+   "material": "G4_Si",
+   "mother": "FieldRegion",
+   "name": "Si1",
+   "role": "tracker-plane"
+  },
+  {
+   "centre_mm": [
+    -244.520628,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    0.46849999999999997,
+    500.0,
+    500.0
+   ],
+   "material": "G4_Si",
+   "mother": "FieldRegion",
+   "name": "Si2",
+   "role": "tracker-plane"
+  },
+  {
+   "centre_mm": [
+    95.178167,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    0.46849999999999997,
+    500.0,
+    500.0
+   ],
+   "material": "G4_Si",
+   "mother": "FieldRegion",
+   "name": "Si3",
+   "role": "tracker-plane"
+  },
+  {
+   "centre_mm": [
+    145.178167,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    0.46849999999999997,
+    500.0,
+    500.0
+   ],
+   "material": "G4_Si",
+   "mother": "FieldRegion",
+   "name": "Si4",
+   "role": "tracker-plane"
+  },
+  {
+   "centre_mm": [
+    278.780412,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    0.46849999999999997,
+    500.0,
+    500.0
+   ],
+   "material": "G4_Si",
+   "mother": "FieldRegion",
+   "name": "Si5",
+   "role": "tracker-plane"
+  },
+  {
+   "centre_mm": [
+    1338.842156,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    0.46849999999999997,
+    500.0,
+    500.0
+   ],
+   "material": "G4_Si",
+   "mother": "FieldRegion",
+   "name": "Si6",
+   "role": "tracker-plane"
+  },
+  {
+   "centre_mm": [
+    1447.798081,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    0.46849999999999997,
+    500.0,
+    500.0
+   ],
+   "material": "G4_Si",
+   "mother": "FieldRegion",
+   "name": "Si7",
+   "role": "tracker-plane"
+  },
+  {
+   "centre_mm": [
+    -1700.0,
+    0.0,
+    0.0
+   ],
+   "half_mm": [
+    1.33455,
+    500.0,
+    500.0
+   ],
+   "material": "G4_Al",
+   "name": "Support",
+   "role": "passive"
+  }
+ ],
+ "field": {
+  "delta_chord_mm": 0.25,
+  "delta_intersection_mm": 1e-05,
+  "delta_one_step_mm": 0.01,
+  "driver": "InterpolationDriver",
+  "max_epsilon_step": 0.001,
+  "max_step_mm": 10.0,
+  "max_track_time_ns": 1000.0,
+  "min_epsilon_step": 5e-05,
+  "regions": [
+   {
+    "b_tesla": [
+     0.0,
+     0.0,
+     0.10011680109224372
+    ],
+    "element": "FieldRegion"
+   }
+  ],
+  "stepper": "DormandPrince745"
+ },
+ "note": "derived by geant4_run.py from-geometry from candidate ams-like-v1:cand-F937 (figure of merit momentum-resolution-core); never edited by hand (Geant4 program B1.8)",
+ "output": {
+  "event_file": {
+   "compression": 1,
+   "level": "crossings"
+  }
+ },
+ "physics": {
+  "default_cut_mm": 0.35,
+  "reference_list": "FTFP_BERT_EMZ"
+ },
+ "provenance": {
+  "candidate": "ams-like-v1:cand-F937",
+  "generator": "geant4_run.py from-geometry (adapter 0.5.0)",
+  "geometry": {
+   "path": "~/Workspace/geant4-work/sim-c3/j16/A/artifacts/studies/G-F937-TRK1000.geometry.json",
+   "sha256": "35c509a9cda4ece6c09ff63a4237eef6ecb030e23b6a1277e0fcc084aa5ae3fd"
+  },
+  "mapping_version": "1.1.0",
+  "parameter_digest": "1089e68fa3e66c77b706c6a1ac81d3aeeabfe6fd7ab495bf1e0948583304879c",
+  "realization": {
+   "path": "~/Workspace/geant4-work/sim-c3/j16/A/artifacts/space.realization.json",
+   "sha256": "c897f1010a2fb736ccec9f87370b54b759566e611f0be171b0ac227b3f557613"
+  }
+ },
+ "run": {
+  "events": 5040,
+  "first_event": 0,
+  "logical_run_seed": 2043210505,
+  "run_manager": "mt",
+  "seeding": "per-event",
+  "seeds": [
+   365760330,
+   830954590
+  ],
+  "threads": 8
+ },
+ "schema": "element_sim.spec/1",
+ "source": {
+  "direction": [
+   1.0,
+   0.0,
+   0.0
+  ],
+  "energy_MeV": 999062.1680877301,
+  "particle": "proton",
+  "position_mm": [
+   -2100.0,
+   0.0,
+   0.0
+  ],
+  "type": "gun"
+ },
+ "world": {
+  "half_mm": [
+   2200.0,
+   800.0,
+   800.0
+  ],
+  "material": "G4_Galactic"
+ }
+}

@@ -318,6 +318,7 @@ from the plugin root (each takes `--help`; the seeds are in each `output/report.
 | `examples/stats-benchmarks/<name>/` (hep-statistics audit benchmarks: `coverage-grid`, ...; `--toys` sets the budget) | - |
 | `examples/geant4-thin-silicon/` (offline replay of recorded Geant4 11.4.3 runs; `--live` reruns them) | J14 |
 | `examples/design-minimal-spectrometer/` (offline replay of the recorded J15 campaign; `live.py` reruns it) | J15 |
+| `examples/design-search-j16/` (searches on Examples A and B; offline replay of the recorded Example A confirmation; `live.py` reruns it) | J16 |
 
 `tests/examples/` compares a fresh run with the
 committed output. When a change alters a committed number, explain why in the commit, regenerate the output, and

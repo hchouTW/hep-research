@@ -307,4 +307,7 @@ evaluations exist.
 `examples/design-minimal-spectrometer` (J15, synthetic) takes three candidates from F1 to F4 with Geant4: the 1 GV
 resolution studies qualify through the four conditions and decide, the 100 GV ones are refused on a recorded
 reference-control gap, charge confusion waits for D0-b and shower containment has no reference.
+`examples/design-search-j16` (J16, synthetic) runs the search on Examples A and B: the finalists go through the
+report gates (basis, refused ranking, `capability.unavailable` rows), and one Example A finalist's F4 confirmation
+is shown as recorded (its upgrade refused on a reference control).
 <!-- /example -->

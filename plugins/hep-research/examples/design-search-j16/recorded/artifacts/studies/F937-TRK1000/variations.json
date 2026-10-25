@@ -1,0 +1,66 @@
+{
+ "domain": "em",
+ "envelope_relative": 0.01856406539838892,
+ "nominal": {
+  "model_assignment": {
+   "domain": "em",
+   "em_constructor": "G4EmStandardPhysics_option4",
+   "fluctuation_model": "Urban",
+   "known": true
+  },
+  "run_record_id": "geant4-reco-F937-TRK1000-nominal-off",
+  "summary": "~/Workspace/geant4-work/sim-c3/j16/confirm/sim/F937-TRK1000-nominal-off/summary_r000.json",
+  "value": 0.2647994305398886
+ },
+ "note": "model envelope (max - min over the listed variations and the nominal), not a standard deviation; it includes each run's MC statistical spread (see se_of_relative_difference: a difference below about 2 SE is not resolved); hand it to hep-statistics as a model envelope",
+ "observable": "core",
+ "variations": [
+  {
+   "listed": true,
+   "model_assignment": {
+    "domain": "em",
+    "em_constructor": "G4EmStandardPhysics_option3",
+    "fluctuation_model": "Urban",
+    "known": true
+   },
+   "nominal_model_assignment": {
+    "domain": "em",
+    "em_constructor": "G4EmStandardPhysics_option4",
+    "fluctuation_model": "Urban",
+    "known": true
+   },
+   "relative_to_nominal": -0.01856406539838892,
+   "resolved": false,
+   "run_record_id": "geant4-reco-F937-TRK1000-emy-off",
+   "se": 0.004250440150062473,
+   "se_of_relative_difference": 0.020189720038377986,
+   "summary": "~/Workspace/geant4-work/sim-c3/j16/confirm/sim/F937-TRK1000-emy-off/summary_r000.json",
+   "value": 0.25988367659388995,
+   "variation": "emy"
+  },
+  {
+   "listed": false,
+   "model_assignment": {
+    "domain": "em",
+    "em_constructor": "G4EmStandardPhysics_option4",
+    "fluctuation_model": "Urban",
+    "known": true
+   },
+   "nominal_model_assignment": {
+    "domain": "em",
+    "em_constructor": "G4EmStandardPhysics_option4",
+    "fluctuation_model": "Urban",
+    "known": true
+   },
+   "reason": "same model for this particle and energy: a false zero difference, not a systematic",
+   "relative_to_nominal": -0.04664034878576751,
+   "resolved": true,
+   "run_record_id": "geant4-reco-F937-TRK1000-qgsp-bic-off",
+   "se": 0.0034612102790322783,
+   "se_of_relative_difference": 0.017911599281015773,
+   "summary": "~/Workspace/geant4-work/sim-c3/j16/confirm/sim/F937-TRK1000-qgsp-bic-off/summary_r000.json",
+   "value": 0.25244909274123556,
+   "variation": "qgsp-bic"
+  }
+ ]
+}
