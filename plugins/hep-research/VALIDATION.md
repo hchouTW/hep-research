@@ -3266,6 +3266,29 @@ Not done in this stage: the independent
 new-problem run by an agent that did not take part (C1.10, section A.8), the `review.py` Markdown review, the release
 manifest. The adequacy table is unchanged; search values remain F1 optimistic bounds and decide nothing.
 
+## 0.39.0 release check (2026-10-25, E2 and the CI lock)
+
+Release branch `release/0.39.0` from main `bc7b1c18` (main CI green). It ships the Geant4 program stages A1, C1, A2,
+B1, B2, B3, C2 and C3 with their §A.8 checks and G5 confirmations (#274-#287); contracts 3.13.0, `CORE_VERSION`
+1.1.0, geant4 adapter 0.5.0, adequacy table 1.2.0 (provisional). The ams02-research companion needs no change.
+
+What changed in the release branch: version 0.39.0 in both manifests, `pyproject.toml`, the README, two assets and the
+theory-profile scripts (profile artifacts carry the new version); CHANGELOG `Unreleased` is now `0.39.0`; examples
+regenerated with E2 (`bc-propagation-fit` with the CI lock), only version strings and the hashes that cover them change
+(`unfolding-coverage` restored), and the design reports of Examples A and B now name adequacy table 1.2.0 (B2 bumped
+it without regenerating them; no verdict changes); reference inventory regenerated. J16 now replays from a snapshot of
+Examples A and B's 0.38.0 artifacts (`recorded/sources/`): its recorded searches name the design-spec by sha256, and
+the regenerated sibling outputs changed it (`expand --search` refused: "the search spec ... changed since the
+search"); `output/results.json` is byte-identical, and the gate verdict snapshot lists the 56 snapshotted artifacts
+(all valid, strict too). The 13 sci-fix ledger entries of stage A1 name release 0.39.0, and advisories SFA-2026-039
+and SFA-2026-040 are fixed in 0.39.0 (the first check run failed `test_scifix_ledger` on the missing `Unreleased`
+section and the snapshot test on the new artifacts; both pass after these changes).
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 29 pass, 0 fail, 2 skipped (CLI host checks); 5527 tests in 456 modules, 5374 pass, 0 failures, 153 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 29 pass, 0 fail, 2 skipped; 5527 tests, 5282 pass, 0 failures, 245 skipped |
+
 ## 0.38.0 release check (2026-10-24, E2 and the CI lock)
 
 Release branch `release/0.38.0` from main `38cbff8e` (main CI green). It ships #271: the maintainer's decisions on the

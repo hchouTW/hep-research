@@ -5109,7 +5109,9 @@
    "id": "GEANT4-GRADE-TABLE",
    "title": "Geant4 benchmark class taken from the contracts table, not declared by the study record",
    "changelog": {
-    "kind": "unreleased"
+    "kind": "release",
+    "release": "0.39.0",
+    "detail": "Geant4 program stage A1 (CV-A1)"
    },
    "severity": "S2",
    "evidence_tests": [
@@ -5176,7 +5178,9 @@
    "id": "GEANT4-SETUP-MATCHED-CLASS",
    "title": "longitudinal-profile is a setup-matched benchmark, not a reference one",
    "changelog": {
-    "kind": "unreleased"
+    "kind": "release",
+    "release": "0.39.0",
+    "detail": "Geant4 program stage A1 (CV-A1)"
    },
    "severity": "S2",
    "evidence_tests": [
@@ -5229,7 +5233,9 @@
    "id": "GEANT4-SCOPE-KIND",
    "title": "a Geant4 study scope is checked by its controlled observable kind",
    "changelog": {
-    "kind": "unreleased"
+    "kind": "release",
+    "release": "0.39.0",
+    "detail": "Geant4 program stage A1 (CV-A1)"
    },
    "severity": "S2",
    "evidence_tests": [
@@ -5296,7 +5302,9 @@
    "id": "GEANT4-SCOPE-MISSING-DIMENSION",
    "title": "every scope dimension of a Geant4 benchmark must be declared and inside",
    "changelog": {
-    "kind": "unreleased"
+    "kind": "release",
+    "release": "0.39.0",
+    "detail": "Geant4 program stage A1 (CV-A1)"
    },
    "severity": "S2",
    "evidence_tests": [
@@ -5363,7 +5371,9 @@
    "id": "GEANT4-ISOLATION",
    "title": "a counted Geant4 benchmark needs an isolated target, derived from its run record and re-derived by dependencies.py",
    "changelog": {
-    "kind": "unreleased"
+    "kind": "release",
+    "release": "0.39.0",
+    "detail": "Geant4 program stage A1 (CV-A1)"
    },
    "severity": "S2",
    "evidence_tests": [
@@ -5460,7 +5470,9 @@
    "id": "GEANT4-GATE-SCAN-COMPLETENESS",
    "title": "the Geant4 convergence gate needs every declared scan value; the two finest are declared values",
    "changelog": {
-    "kind": "unreleased"
+    "kind": "release",
+    "release": "0.39.0",
+    "detail": "Geant4 program stage A1 (CV-A1)"
    },
    "severity": "S2",
    "evidence_tests": [
@@ -5513,7 +5525,9 @@
    "id": "GEANT4-GATE-IUT",
    "title": "the Geant4 convergence gate is an equivalence test; unresolved is incomplete",
    "changelog": {
-    "kind": "unreleased"
+    "kind": "release",
+    "release": "0.39.0",
+    "detail": "Geant4 program stage A1 (CV-A1)"
    },
    "severity": "S2",
    "evidence_tests": [
@@ -5582,7 +5596,9 @@
    "id": "GEANT4-BATCH-MEANS-SE",
    "title": "Geant4 study SEs from batch means over K blocks instead of a seeded bootstrap",
    "changelog": {
-    "kind": "unreleased"
+    "kind": "release",
+    "release": "0.39.0",
+    "detail": "Geant4 program stage A1 (CV-A1)"
    },
    "severity": "S1",
    "evidence_tests": [
@@ -5689,7 +5705,9 @@
    "id": "GEANT4-LOW-COUNT-EXACT",
    "title": "exact intervals for Geant4 study counts below 100 or with an empty block",
    "changelog": {
-    "kind": "unreleased"
+    "kind": "release",
+    "release": "0.39.0",
+    "detail": "Geant4 program stage A1 (CV-A1)"
    },
    "severity": "S1",
    "evidence_tests": [
@@ -5794,7 +5812,9 @@
    "id": "GEANT4-MPV-ESTIMATOR",
    "title": "Geant4 MPV as the mean of three-point block modes instead of a five-point fit with bootstrap SE",
    "changelog": {
-    "kind": "unreleased"
+    "kind": "release",
+    "release": "0.39.0",
+    "detail": "Geant4 program stage A1 (CV-A1)"
    },
    "severity": "S1",
    "evidence_tests": [
@@ -5899,7 +5919,9 @@
    "id": "GEANT4-CONTROL-SHIFT",
    "title": "Geant4 negative controls judged on the observable shift, in both directions",
    "changelog": {
-    "kind": "unreleased"
+    "kind": "release",
+    "release": "0.39.0",
+    "detail": "Geant4 program stage A1 (CV-A1)"
    },
    "severity": "S2",
    "evidence_tests": [
@@ -5957,7 +5979,9 @@
    "id": "GEANT4-DETECTION-LIMIT",
    "title": "Geant4 detection limit with the t_0.977 quantile of the shift's SE",
    "changelog": {
-    "kind": "unreleased"
+    "kind": "release",
+    "release": "0.39.0",
+    "detail": "Geant4 program stage A1 (CV-A1)"
    },
    "severity": "S2",
    "evidence_tests": [
@@ -6015,7 +6039,9 @@
    "id": "DESIGN-F4-LABEL-PASSTHROUGH",
    "title": "evaluate_design.py f4 passes run records to label and reports a refused upgrade or missing results as incomplete",
    "changelog": {
-    "kind": "unreleased"
+    "kind": "release",
+    "release": "0.39.0",
+    "detail": "Geant4 program stage A1 (evaluate_design.py f4 label passthrough)"
    },
    "severity": "S4",
    "evidence_tests": [
