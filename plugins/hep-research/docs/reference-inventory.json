@@ -14,8 +14,8 @@
    "uncited": 0
   },
   "hep-computing": {
-   "references": 35,
-   "bytes": 299243,
+   "references": 36,
+   "bytes": 318226,
    "uncited": 0
   },
   "hep-detector": {
@@ -136,6 +136,7 @@
    "lines": 227,
    "linked_from_skill_md": true,
    "cited_by": [
+    "contracts/naming/surfaces.json",
     "skills/hep-authoring/SKILL.md",
     "skills/hep-authoring/references/academic-papers-guide.md",
     "skills/hep-authoring/references/artifact-packaging-for-release.md",
@@ -426,6 +427,7 @@
    "lines": 239,
    "linked_from_skill_md": false,
    "cited_by": [
+    "contracts/naming/surfaces.json",
     "skills/hep-authoring/references/equation-and-notation-auditing.md",
     "skills/hep-authoring/references/figures-and-tables.md",
     "skills/hep-authoring/references/latex-venue-setup.md",
@@ -898,6 +900,7 @@
    "lines": 99,
    "linked_from_skill_md": true,
    "cited_by": [
+    "contracts/naming/surfaces.json",
     "skills/hep-authoring/references/astroparticle-and-cosmic-ray-papers.md",
     "skills/hep-authoring/references/evidence-linked-writing.md",
     "skills/hep-authoring/references/plagiarism-and-text-reuse-checking.md",
@@ -1132,14 +1135,16 @@
   {
    "path": "skills/hep-computing/references/analysis-data-pipelines.md",
    "owner": "hep-computing",
-   "bytes": 11550,
-   "lines": 149,
+   "bytes": 12647,
+   "lines": 171,
    "linked_from_skill_md": true,
    "cited_by": [
+    "contracts/naming/surfaces.json",
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/assets/time_slice_reduction.py",
     "skills/hep-computing/references/columnar-and-large-scale-data.md",
     "skills/hep-computing/references/python-hep-coding-patterns.md",
+    "skills/hep-computing/references/semantic-naming.md",
     "skills/hep-measurement/README.md",
     "skills/hep-measurement/references/analysis-design.md",
     "skills/hep-measurement/references/correction-chain.md",
@@ -1189,6 +1194,7 @@
    "cited_by": [
     "adapters/batch-schedulers/htcondor_backend.py",
     "adapters/batch-schedulers/slurm_backend.py",
+    "contracts/naming/surfaces.json",
     "skills/hep-computing/README.md",
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/references/analysis-workflows.md",
@@ -1313,14 +1319,16 @@
   {
    "path": "skills/hep-computing/references/engineering-playbook.md",
    "owner": "hep-computing",
-   "bytes": 11497,
-   "lines": 155,
+   "bytes": 12816,
+   "lines": 179,
    "linked_from_skill_md": true,
    "cited_by": [
+    "contracts/naming/surfaces.json",
     "core/status.py",
     "skills/hep-computing/README.md",
     "skills/hep-computing/SKILL.md",
-    "skills/hep-computing/references/agile-development-guide.md"
+    "skills/hep-computing/references/agile-development-guide.md",
+    "skills/hep-computing/references/semantic-naming.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "ceed8ab2 2026-10-22"
@@ -1328,16 +1336,18 @@
   {
    "path": "skills/hep-computing/references/environments-and-containers.md",
    "owner": "hep-computing",
-   "bytes": 3994,
-   "lines": 57,
+   "bytes": 5359,
+   "lines": 81,
    "linked_from_skill_md": true,
    "cited_by": [
+    "contracts/naming/surfaces.json",
     "skills/hep-computing/README.md",
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/references/bash-balanced-design-guidelines.md",
     "skills/hep-computing/references/engineering-playbook.md",
     "skills/hep-computing/references/preservation-checklist.md",
-    "skills/hep-computing/references/root-usage-patterns.md"
+    "skills/hep-computing/references/root-usage-patterns.md",
+    "skills/hep-computing/references/semantic-naming.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "efa283c7 2026-10-13"
@@ -1456,14 +1466,16 @@
   {
    "path": "skills/hep-computing/references/python-balanced-design-guidelines.md",
    "owner": "hep-computing",
-   "bytes": 5712,
-   "lines": 82,
+   "bytes": 7486,
+   "lines": 106,
    "linked_from_skill_md": true,
    "cited_by": [
+    "contracts/naming/surfaces.json",
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/references/agile-development-guide.md",
     "skills/hep-computing/references/python-hep-coding-patterns.md",
     "skills/hep-computing/references/root-balanced-design-guidelines.md",
+    "skills/hep-computing/references/semantic-naming.md",
     "skills/hep-ml/references/deep-learning-guide.md"
    ],
    "cited_by_other_skills": [
@@ -1478,6 +1490,7 @@
    "lines": 124,
    "linked_from_skill_md": true,
    "cited_by": [
+    "contracts/naming/surfaces.json",
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/references/analysis-data-pipelines.md",
     "skills/hep-computing/references/crash-and-memory-debugging.md",
@@ -1546,6 +1559,7 @@
    "lines": 70,
    "linked_from_skill_md": true,
    "cited_by": [
+    "contracts/naming/surfaces.json",
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/references/columnar-and-large-scale-data.md",
     "skills/hep-computing/scripts/check_histogram_errors.py",
@@ -1555,6 +1569,45 @@
     "hep-ml"
    ],
    "last_commit": "3b3dca7d 2026-10-17"
+  },
+  {
+   "path": "skills/hep-computing/references/semantic-naming.md",
+   "owner": "hep-computing",
+   "bytes": 13428,
+   "lines": 191,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "contracts/naming/surfaces.json",
+    "contracts/schemas/project_config.json",
+    "contracts/stanzas/context-resolution.md",
+    "core/OWNERS.json",
+    "core/naming/README.md",
+    "core/naming/__init__.py",
+    "core/naming/data/forbidden.json",
+    "skills/hep-authoring/SKILL.md",
+    "skills/hep-citations/SKILL.md",
+    "skills/hep-computing/SKILL.md",
+    "skills/hep-computing/references/analysis-data-pipelines.md",
+    "skills/hep-computing/references/engineering-playbook.md",
+    "skills/hep-computing/references/environments-and-containers.md",
+    "skills/hep-computing/references/python-balanced-design-guidelines.md",
+    "skills/hep-computing/scripts/extract_names.py",
+    "skills/hep-detector/SKILL.md",
+    "skills/hep-measurement/SKILL.md",
+    "skills/hep-ml/SKILL.md",
+    "skills/hep-statistics/SKILL.md",
+    "skills/hep-theory/SKILL.md"
+   ],
+   "cited_by_other_skills": [
+    "hep-authoring",
+    "hep-citations",
+    "hep-detector",
+    "hep-measurement",
+    "hep-ml",
+    "hep-statistics",
+    "hep-theory"
+   ],
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-computing/references/software-architecture.md",
@@ -1674,6 +1727,7 @@
    "lines": 282,
    "linked_from_skill_md": true,
    "cited_by": [
+    "contracts/naming/surfaces.json",
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/calorimetry-ecal-hcal.md",
@@ -2075,7 +2129,7 @@
     "tests/skills/hep_detector/test_frontend_waveforms.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "c639f76c 2026-10-26"
+   "last_commit": "9c12f2b6 2026-10-26"
   },
   {
    "path": "skills/hep-detector/references/front-end-waveform-processing.md",
@@ -2571,6 +2625,7 @@
    "lines": 139,
    "linked_from_skill_md": true,
    "cited_by": [
+    "contracts/naming/surfaces.json",
     "profiles/experiments/ams-02/modules/methods/efficiency-acceptance-backgrounds.md",
     "skills/hep-computing/references/analysis-data-pipelines.md",
     "skills/hep-computing/references/root-balanced-design-guidelines.md",
@@ -2811,6 +2866,7 @@
    "lines": 106,
    "linked_from_skill_md": true,
    "cited_by": [
+    "contracts/naming/surfaces.json",
     "profiles/experiments/ams-02/index.md",
     "profiles/experiments/ams-02/modules/methods/analysis-artifacts.md",
     "profiles/experiments/ams-02/modules/methods/efficiency-acceptance-backgrounds.md",
@@ -3386,6 +3442,7 @@
    "lines": 104,
    "linked_from_skill_md": false,
    "cited_by": [
+    "contracts/naming/surfaces.json",
     "skills/hep-ml/references/checkpointing.md",
     "skills/hep-ml/references/data-loading.md",
     "skills/hep-ml/references/deep-learning-guide.md",
@@ -3766,6 +3823,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "adapters/pyhf-combine/assets/pyhf_nuisance_diagnostics.py",
+    "contracts/naming/surfaces.json",
     "skills/hep-measurement/references/hep-measurement-guide.md",
     "skills/hep-measurement/references/systematics.md",
     "skills/hep-statistics/SKILL.md",
@@ -4379,6 +4437,7 @@
    "lines": 99,
    "linked_from_skill_md": true,
    "cited_by": [
+    "contracts/naming/surfaces.json",
     "profiles/theory/higgs-bb-width/index.md",
     "profiles/theory/higgs-bb-width/models/running-mass-hbb.md",
     "skills/hep-theory/SKILL.md",

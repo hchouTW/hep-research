@@ -1,0 +1,171 @@
+{
+ "$comment": "contracts/naming/surfaces.json: the surface registry (spec \u00a76.2): one owner per surface, kinds with level floors, the rename policy, cross-surface references (mirrored), declarations the rules need and the owner section.",
+ "type": "object",
+ "required": [
+  "surfaces_version",
+  "surfaces"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "surfaces_version": {
+   "const": "1.0.0"
+  },
+  "$comment": {
+   "type": "string"
+  },
+  "surfaces": {
+   "type": "array",
+   "minItems": 17,
+   "maxItems": 17,
+   "items": {
+    "type": "object",
+    "required": [
+     "surface_id",
+     "name",
+     "owner",
+     "extractor",
+     "kinds",
+     "rename_policy",
+     "references_to",
+     "referenced_by",
+     "requires_declarations",
+     "doc"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "surface_id": {
+      "type": "string",
+      "pattern": "^N(?:[1-9]|1[0-7])$"
+     },
+     "name": {
+      "type": "string",
+      "minLength": 1
+     },
+     "owner": {
+      "type": "string",
+      "enum": [
+       "hep-measurement",
+       "hep-detector",
+       "hep-statistics",
+       "hep-theory",
+       "hep-computing",
+       "hep-ml",
+       "hep-citations",
+       "hep-authoring"
+      ]
+     },
+     "extractor": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "kinds": {
+      "type": "object",
+      "additionalProperties": {
+       "type": "object",
+       "required": [
+        "level_floor"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "level_floor": {
+         "type": "string",
+         "enum": [
+          "C0",
+          "C1",
+          "C2",
+          "C3",
+          "C4"
+         ]
+        },
+        "format": {
+         "type": "string",
+         "minLength": 1
+        },
+        "fixed_names": {
+         "type": "array",
+         "items": {
+          "type": "string",
+          "minLength": 1
+         }
+        },
+        "rename_policy": {
+         "type": "string",
+         "enum": [
+          "matrix",
+          "dedup-only",
+          "deprecate",
+          "never"
+         ]
+        }
+       }
+      }
+     },
+     "rename_policy": {
+      "type": "string",
+      "enum": [
+       "matrix",
+       "dedup-only",
+       "deprecate",
+       "never"
+      ]
+     },
+     "references_to": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "required": [
+        "surface",
+        "kind"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "surface": {
+         "type": "string",
+         "pattern": "^N(?:[1-9]|1[0-7])$"
+        },
+        "kind": {
+         "type": "string",
+         "minLength": 1
+        }
+       }
+      }
+     },
+     "referenced_by": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "required": [
+        "surface",
+        "kind"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "surface": {
+         "type": "string",
+         "pattern": "^N(?:[1-9]|1[0-7])$"
+        },
+        "kind": {
+         "type": "string",
+         "minLength": 1
+        }
+       }
+      }
+     },
+     "requires_declarations": {
+      "type": "array",
+      "items": {
+       "type": "string",
+       "minLength": 1
+      }
+     },
+     "doc": {
+      "type": "string",
+      "pattern": "^skills/[a-z-]+/references/[a-z0-9-]+\\.md#naming-n[0-9]+$"
+     }
+    }
+   }
+  }
+ }
+}

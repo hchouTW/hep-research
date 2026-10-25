@@ -1,0 +1,8 @@
+{
+ "vocabulary_version": "1.0.0",
+ "$comment": "Default vocabulary, layer 3: conventional symbols and short local names (principle P7). Matched case-insensitively.",
+ "symbols": ["alpha", "beta", "gamma", "delta", "epsilon", "eps", "zeta", "theta", "iota", "kappa", "lambda", "lam", "rho",
+   "sigma", "omega", "psi", "xi", "pi", "chi", "mu", "nu", "tau", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k",
+   "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "dx", "dy", "dz", "dt", "dn", "lo", "hi",
+   "x0", "y0", "z0", "t0", "n0", "w0", "s0", "x1", "x2", "y1", "y2", "ij", "ab", "uv", "xy", "xyz", "rx", "ry", "rz"]
+}

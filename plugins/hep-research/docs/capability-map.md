@@ -53,6 +53,7 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | root-and-columnar-io | ROOT, PyROOT, uproot/awkward and columnar data tools | hep-computing | tool | yes | C4, C5, C7 |  |
 | reproducibility | Environment manifests, run records, workflows and preservation | hep-computing | tool | yes | C2, C3, C6 |  |
 | task-authoring | Implementation-ready research tasks for coding agents | hep-computing | tool | yes |  |  |
+| semantic-naming | Semantic naming governance: one data model, rule registry, engine, disposition and report for every naming surface; extractors for code identifiers, files, configuration and flags, plugin vocabulary; the plugin's own naming gate | hep-computing | tool | yes | NAMING-P1, NAMING-P2 |  |
 | ml-training | Grouped splits, training, inference domain flags, calibration and ML artifacts | hep-ml | tool | yes | ML2, ML4 |  |
 | bdt-pipeline | BDT pipeline for analyses (cross-training, negative weights, working points) | hep-ml | tool | yes | ML3 |  |
 | ml-eras | Era changes in machine-learning studies | hep-ml | documentation | yes | ML1 |  |

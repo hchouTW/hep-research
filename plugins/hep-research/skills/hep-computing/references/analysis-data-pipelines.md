@@ -146,3 +146,25 @@ reduced number.
 `<plugin root>/skills/hep-computing/assets/time_slice_reduction.py` implements this (`reduce`, `partial` as a
 `local_partition.py` worker, `finalize`); its tests show a slice split across two files counted once and the
 partitioned result equal to a single run.
+
+
+<a id="naming-n2"></a>
+### Naming: files and directories (N2)
+- **Extractor:** `extract_names.py --surface N2` (inputs: every file and folder under the scope folders; a file a JSON manifest lists with a sha256 is `manifest_checksummed`)
+- **Entity kinds and level floors:** generated from `contracts/naming/surfaces.json`, not restated by hand:
+
+<!-- naming-kinds:N2: generated from contracts/naming/surfaces.json by contracts/naming_registry.py sections; do not edit -->
+
+| Kind | Level floor | Format | Rename policy |
+|---|---|---|---|
+| `output` | C2 | — | matrix |
+| `manifest_checksummed` | C3 | — | matrix |
+
+<!-- /naming-kinds:N2 -->
+
+- **The name must say:** the quantity, selection, sample and status the file holds; never a version or state (`final2`, `v3`, `new`), which lives in provenance
+- **Rename policy:** matrix
+- **Rules:** see the registry for surface N2 (`naming.common.*`, `naming.n2.*`, `naming.cross.*`)
+- **Good / bad:** `rigidity_spectrum_proton.pdf` / `plot_final2.pdf`, `output.root`
+
+Procedure, levels and report: [semantic naming charter](semantic-naming.md).

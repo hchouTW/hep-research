@@ -1,0 +1,314 @@
+"""Semantic naming engine (spec §7-§8): classify an inventory, judge it against the rule registry, select the
+reporting scope, decide each finding's action and validate a change set.
+
+classify(inventories, surfaces, declarations): tokens, references_status (§7.3), contract_level and contract_basis
+(§7.4) for every entity; the extractor never fills these.
+judge(...): every active rule on every entity of its surfaces, over the complete inventory; a waiver (explicit
+entity ids, waivable rules only) or a kind the rule does not cover gives not_applicable; an inventory that scanned zero
+inputs, or a surface the caller expects without an inventory, gives unsupported for each of its rules. The state of a
+result comes from the rule's outcome contract through the state_for function the caller passes (contracts layer).
+action_for(...): the decision procedure of §8.2 (no-rename restrictions first, then the matrix, then the request
+scope); severity settings never reach it (I8).
+validate_change_set(...): the six ordered checks of §8.4.
+core imports only core; the report shape and the severities live in contracts/naming_check.py. Standard library only.
+"""
+from __future__ import annotations
+
+import hashlib
+from pathlib import Path
+
+from core.naming import predicates as P
+from core.naming.model import max_level
+from core.naming.vocab import forbidden_table
+
+ENGINE_VERSION = "1.0.0"
+RELATIONAL = ("uniqueness", "reference", "pairing", "declared-match", "similarity")
+DEDUP_PREDICATES = ("uniqueness",)
+
+
+class Context:
+    def __init__(self, entities, surfaces, vocab, declarations=None, annotations=None, inventories=()):
+        self.entities = entities
+        self.surfaces = {s["surface_id"]: s for s in surfaces}
+        self.vocab = vocab
+        self.declarations = declarations or {}
+        self.annotations = annotations or {}
+        self.inventories = set(inventories)
+        self.forbidden = forbidden_table()
+        self.by_id = {e["entity_id"]: e for e in entities}
+        self.by_name: dict[tuple, list] = {}
+        self._by_surface: dict[str, list] = {}
+        for e in entities:
+            self.by_name.setdefault((e["surface"], e["name"]), []).append(e)
+            self._by_surface.setdefault(e["surface"], []).append(e)
+
+    def surface(self, sid: str) -> dict:
+        return self.surfaces[sid]
+
+    def entities_in(self, sid: str) -> list:
+        return self._by_surface.get(sid, [])
+
+
+def _root(r: str) -> str:
+    r = str(r).replace("\\", "/").strip("/")
+    return "" if r in ("", ".") else r
+
+
+def covers(coverage, surface: str, roots) -> bool:
+    """True when the coverage strings ("<surface>:<glob>") cover the full range of surface within every scope root:
+    "<surface>:**" or "<surface>:<ancestor of the root>/**"."""
+    globs = [c.split(":", 1)[1] for c in coverage if c.startswith(f"{surface}:")]
+    for r in [_root(x) for x in roots] or [""]:
+        ok = False
+        for g in globs:
+            if g in ("**", "./**"):
+                ok = True
+            elif g.endswith("/**"):
+                base = _root(g[:-3])
+                ok = base == "" or r == base or r.startswith(base + "/")
+            if ok:
+                break
+        if not ok:
+            return False
+    return True
+
+
+def references_status(e: dict, roots, registry: dict) -> str:
+    if not e["search_coverage"]:
+        return "not_searched"
+    needed = {e["surface"]} | {s["surface"] for s in registry[e["surface"]]["referenced_by"]}
+    return "complete" if all(covers(e["search_coverage"], s, roots) for s in needed) else "partial"
+
+
+def _ref_file(ref_from: str, by_id: dict) -> str | None:
+    if ref_from in by_id:
+        return by_id[ref_from]["scope"]["file"]
+    if "#" in ref_from and ":" in ref_from.split("#", 1)[0]:
+        return ref_from.split("#", 1)[0].split(":", 1)[1]
+    return ref_from.rsplit(":", 1)[0] if ":" in ref_from else ref_from
+
+
+def declared_names(declarations: dict) -> dict[str, list[str]]:
+    """{member (entity id or container/name): [declaration names]} for every declaration with sources."""
+    out: dict[str, list[str]] = {}
+    for name, decl in (declarations or {}).items():
+        for s in (decl or {}).get("sources", []) if isinstance(decl, dict) else []:
+            for m in s.get("members", []) if isinstance(s, dict) else []:
+                out.setdefault(m, []).append(name)
+    return out
+
+
+def classify(entities, roots_of: dict, surfaces, declarations=None, vocab=None) -> list[dict]:
+    """Fill the engine fields in place and return the entities. roots_of maps a surface to its scope roots."""
+    registry = {s["surface_id"]: s for s in surfaces}
+    by_id = {e["entity_id"]: e for e in entities}
+    declared = declared_names(declarations or {})
+    ctx = Context(entities, surfaces, vocab) if vocab is not None else None
+    for e in entities:
+        reg = registry[e["surface"]]
+        e["tokens"] = P.entity_tokens(e, ctx) if ctx is not None else list(e.get("tokens", []))
+        e["references_status"] = references_status(e, roots_of.get(e["surface"], ["."]), registry)
+        kind = reg["kinds"].get(e["entity_kind"], {})
+        basis = []
+        floor = kind.get("level_floor", "C0")
+        if floor != "C0":
+            basis.append(f"kind-floor:{e['entity_kind']}")
+        source_level = "C4" if e["source"] == "external" else "C0"
+        if e["source"] == "external":
+            basis.append("source:external")
+        refs = e["references"]
+        if e["references_status"] != "complete":
+            evidence = "C2"
+            basis.append(f"evidence:references-{e['references_status']}")
+        elif all(r.get("kind") == "in-scope" for r in refs):
+            evidence = "C0"
+        elif all(_ref_file(r["from"], by_id) == e["scope"]["file"] for r in refs):
+            evidence = "C1"
+            basis.append("evidence:same-file")
+        else:
+            evidence = "C2"
+            basis.append("evidence:other-files")
+        names = declared.get(e["entity_id"], []) + declared.get(f"{e['scope']['container']}/{e['name']}", [])
+        declared_level = "C3" if names else "C0"
+        basis += [f"declared:{n}" for n in dict.fromkeys(names)]
+        e["contract_level"] = max_level(floor, source_level, evidence, declared_level)
+        e["contract_basis"] = basis
+    return entities
+
+
+def merge_annotations(entities, annotations: dict) -> None:
+    """Meaning fields a review filled in replace the unknown ones (meaning.source becomes annotation)."""
+    for e in entities:
+        ann = annotations.get(e["entity_id"])
+        if not ann or not ann.get("meaning"):
+            continue
+        filled = {k: v for k, v in ann["meaning"].items() if k in ("concept_id", "unit", "status_label") and v is not None}
+        if filled:
+            e["meaning"].update(filled)
+            e["meaning"]["source"] = "annotation"
+
+
+def _waived(waivers, rule, eid) -> bool:
+    return rule.get("waivable", False) and any(w.get("rule_id") == rule["rule_id"] and eid in (w.get("entity_ids") or [])
+                                               for w in waivers or [])
+
+
+def judge(inventories, rules, surfaces, *, vocab, state_for, declarations=None, annotations=None, waivers=(),
+          expect=(), report_all=False, deterministic_only=False) -> dict:
+    """Judge the inventories. Returns {"entities", "results", "reported", "not_run", "notes"}: results hold one entry per
+    (entity, rule) (entity_id None for a surface-level unsupported result); reported is the subset in the reporting
+    scope (§7.7)."""
+    entities = [e for inv in inventories for e in inv["entities"]]
+    roots_of = {inv["surface"]: inv["scope_roots"] for inv in inventories}
+    annotations = annotations or {}
+    merge_annotations(entities, annotations)
+    classify(entities, roots_of, surfaces, declarations, vocab)
+    supplied = {inv["surface"] for inv in inventories}
+    ctx = Context(entities, surfaces, vocab, declarations, annotations, supplied)
+    active = [r for r in rules if r["lifecycle"] == "active"
+              and not (deterministic_only and r["determinism"] != "deterministic")]
+    results, not_run, notes = [], [], []
+    if vocab.shadowed:
+        notes.append(f"vocabulary shadowing: {'; '.join(vocab.shadowed[:20])}")
+    empty = {inv["surface"] for inv in inventories if inv["inputs_scanned"] == 0}
+    missing = [s for s in dict.fromkeys(expect) if s not in supplied]
+    for sid in sorted(empty) + missing:
+        why = (f"the {sid} extractor scanned zero inputs" if sid in empty else
+               f"no {sid} inventory was supplied" + ("" if ctx.surfaces[sid]["extractor"] else
+                                                     " (its extractor is not implemented yet)"))
+        for r in active:
+            if sid in r["surfaces"] and r["predicate"] != "semantic":
+                results.append(_result(None, sid, r, "naming.no_inputs", why, {}, state_for))
+                not_run.append({"check": f"{r['rule_id']}@{r['version']} on {sid}", "reason": why, "required": True})
+    for e in entities:
+        for r in active:
+            if e["surface"] not in r["surfaces"] or e["surface"] in empty:
+                continue
+            kinds = r.get("params", {}).get("kinds")
+            if kinds and e["entity_kind"] not in kinds:
+                results.append(_result(e, e["surface"], r, "naming.kind_not_covered", "", {}, None))
+                continue
+            sources = r.get("params", {}).get("sources")
+            if sources and e["source"] not in sources:
+                results.append(_result(e, e["surface"], r, "naming.external_name", "", {}, None))
+                continue
+            if _waived(waivers, r, e["entity_id"]):
+                results.append(_result(e, e["surface"], r, "naming.waived", "", {}, None))
+                continue
+            code, issue, extra = P.PREDICATES[r["predicate"]](e, r, ctx)
+            results.append(_result(e, e["surface"], r, code, issue, extra, state_for))
+    changed = {e["entity_id"] for e in entities if e["change"] != "unchanged"}
+    reported = []
+    for res in results:
+        eid = res["entity_id"]
+        if report_all or eid is None or eid in changed or (
+                res["predicate"] in RELATIONAL and set(res["extra"].get("related", [])) & changed):
+            reported.append(res)
+    return {"entities": entities, "results": results, "reported": reported, "not_run": not_run, "notes": notes,
+            "context": ctx}
+
+
+def _result(e, sid, rule, code, issue, extra, state_for) -> dict:
+    state = "not_applicable" if state_for is None else state_for(rule, code)
+    return {"entity_id": e["entity_id"] if e else None, "surface": sid, "rule_id": rule["rule_id"],
+            "rule_version": rule["version"], "predicate": rule["predicate"], "determinism": rule["determinism"],
+            "owner": rule["owner"], "state": state, "reason_code": code, "issue": issue, "extra": extra}
+
+
+def rename_policy(e: dict, registry: dict) -> str:
+    reg = registry[e["surface"]]
+    return reg["kinds"].get(e["entity_kind"], {}).get("rename_policy", reg["rename_policy"])
+
+
+def action_for(result: dict, e: dict | None, registry: dict, in_request: bool) -> tuple[str, dict | None]:
+    """(action, handoff) for one result, per §8.2."""
+    state = result["state"]
+    if state in ("satisfied", "not_applicable"):
+        return "none", None
+    if state == "unsupported" or e is None:
+        return "report-missing", None
+    if state == "unverified":
+        return "gather-evidence", None
+    policy, level = rename_policy(e, registry), e["contract_level"]
+    owner = registry[e["surface"]]["owner"]
+    if level == "C4" or policy == "never":
+        return "propose-alias", None
+    if policy == "dedup-only" and result["predicate"] not in DEDUP_PREDICATES:
+        return "report-only", None
+    if level in ("C0", "C1"):
+        action = "fix"
+    elif level == "C2":
+        action = "fix-with-change-set"
+    else:
+        return "propose-then-change-set-after-approval", {
+            "owner": owner, "rerun": [f"{owner}: redo the steps that read {e['name']}",
+                                      "naming_check.py check on the changed inventories"],
+            "policy": policy}
+    if not in_request:
+        action = "propose"
+    return action, None
+
+
+def file_sha256(path: Path) -> str | None:
+    try:
+        return hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    except OSError:
+        return None
+
+
+def validate_change_set(cs: dict, entities, surfaces, project_root, supplied_surfaces, inventory_digests=()) -> dict:
+    """The ordered checks of §8.4; stops at the first failure. Returns {status, exit_code, check, code, message}."""
+    registry = {s["surface_id"]: s for s in surfaces}
+    by_id = {e["entity_id"]: e for e in entities}
+    e = by_id.get(cs["entity_id"])
+
+    def out(status, code_, check, code, message):
+        return {"status": status, "exit_code": code_, "check": check, "code": code, "message": message}
+    if e is None:
+        return out("input-error", 2, 0, "naming.change_set_entity_unknown",
+                   f"{cs['entity_id']} is in none of the supplied inventories")
+    policy = rename_policy(e, registry)
+    if e["contract_level"] == "C4" or policy == "never":
+        return out("fail", 1, 1, "naming.rename_forbidden",
+                   f"{e['name']} is {e['contract_level']} with rename policy {policy}: never renamed; propose an alias")
+    if policy == "dedup-only":
+        dups = [x for x in entities if x is not e and x["surface"] == e["surface"] and x["name"] == e["name"]
+                and x["change"] != "removed"]
+        if not dups:
+            return out("fail", 1, 1, "naming.rename_not_dedup",
+                       f"{e['surface']} renames only to remove a duplicate; {e['name']} has none")
+    if e["references_status"] != "complete":
+        return out("incomplete", 3, 2, "naming.references_incomplete",
+                   f"references of {e['name']} are {e['references_status']}: search them all before renaming")
+    needed = [s["surface"] for s in registry[e["surface"]]["referenced_by"]]
+    lacking = [s for s in needed if s not in supplied_surfaces]
+    if lacking:
+        return out("incomplete", 3, 3, "naming.inventory_missing",
+                   f"no inventory for {', '.join(lacking)}, which refer to {e['surface']} names")
+    stale = [p for p, d in sorted(cs["source_sha256"].items()) if file_sha256(Path(project_root) / p) != d]
+    stale_inv = [d for d in cs["inventory_digests"].values() if inventory_digests and d not in set(inventory_digests)]
+    if stale or stale_inv:
+        what = ", ".join(stale) if stale else "the inventories"
+        return out("incomplete", 3, 4, "naming.change_set_stale",
+                   f"{what} changed since the change set was built: re-run the inventory")
+    replaced = {r["location"] for r in cs["replacements"]}
+    unmatched = [r["from"] for r in e["references"] if r["from"] not in replaced]
+    if unmatched:
+        return out("fail", 1, 5, "naming.replacement_missing",
+                   f"{len(unmatched)} reference(s) have no replacement, e.g. {', '.join(unmatched[:3])}")
+    if e["contract_level"] == "C3":
+        ap = cs.get("approval") or {}
+        if not (ap.get("required") and ap.get("by") and ap.get("at")):
+            return out("fail", 1, 6, "naming.approval_missing", f"{e['name']} is C3: record the user's approval first")
+    if policy == "deprecate" and not (cs.get("deprecated_alias") or {}).get("old"):
+        return out("fail", 1, 6, "naming.deprecated_alias_missing",
+                   f"{e['surface']} {e['entity_kind']} renames keep the old name as a deprecated alias")
+    return out("pass", 0, 6, "naming.change_set_valid", f"the change set for {e['name']} passes the six checks")
+
+
+def is_inside(path: Path, folder: Path) -> bool:
+    try:
+        Path(path).resolve().relative_to(Path(folder).resolve())
+        return True
+    except ValueError:
+        return False

@@ -1,0 +1,381 @@
+{
+ "surfaces_version": "1.0.0",
+ "$comment": "Surface registry of the semantic naming charter (skills/hep-computing/references/semantic-naming.md); checked by contracts/naming_registry.py; schema contracts/schemas/naming_surfaces.json. Kind names are a first draft: they may change, level floors may not be lowered.",
+ "surfaces": [
+  {
+   "surface_id": "N1",
+   "name": "Code identifiers",
+   "owner": "hep-computing",
+   "extractor": "skills/hep-computing/scripts/extract_names.py",
+   "kinds": {
+    "local": {
+     "level_floor": "C0",
+     "format": "^_+$|^_*[a-z][a-z0-9_]*$|^_*[A-Z][A-Za-z0-9]*$|^_*[A-Z][A-Z0-9_]*$|^_*(?:[a-z][a-z0-9]*|[A-Z][A-Za-z]?[0-9]*)(?:_+(?:[a-z0-9]+|[A-Z][A-Za-z]?[0-9]*))*_*$"
+    },
+    "private": {
+     "level_floor": "C1",
+     "format": "^_+$|^_*[a-z][a-z0-9_]*$|^_*[A-Z][A-Za-z0-9]*$|^_*[A-Z][A-Z0-9_]*$|^_*(?:[a-z][a-z0-9]*|[A-Z][A-Za-z]?[0-9]*)(?:_+(?:[a-z0-9]+|[A-Z][A-Za-z]?[0-9]*))*_*$"
+    },
+    "module_public": {
+     "level_floor": "C2",
+     "format": "^_+$|^_*[a-z][a-z0-9_]*$|^_*[A-Z][A-Za-z0-9]*$|^_*[A-Z][A-Z0-9_]*$|^_*(?:[a-z][a-z0-9]*|[A-Z][A-Za-z]?[0-9]*)(?:_+(?:[a-z0-9]+|[A-Z][A-Za-z]?[0-9]*))*_*$"
+    },
+    "plugin_core_api": {
+     "level_floor": "C3",
+     "format": "^_+$|^_*[a-z][a-z0-9_]*$|^_*[A-Z][A-Za-z0-9]*$|^_*[A-Z][A-Z0-9_]*$|^_*(?:[a-z][a-z0-9]*|[A-Z][A-Za-z]?[0-9]*)(?:_+(?:[a-z0-9]+|[A-Z][A-Za-z]?[0-9]*))*_*$",
+     "rename_policy": "deprecate"
+    }
+   },
+   "rename_policy": "matrix",
+   "references_to": [
+    {
+     "surface": "N5",
+     "kind": "reads-config-key"
+    }
+   ],
+   "referenced_by": [],
+   "requires_declarations": [],
+   "doc": "skills/hep-computing/references/python-balanced-design-guidelines.md#naming-n1"
+  },
+  {
+   "surface_id": "N2",
+   "name": "Files and directories",
+   "owner": "hep-computing",
+   "extractor": "skills/hep-computing/scripts/extract_names.py",
+   "kinds": {
+    "output": {
+     "level_floor": "C2"
+    },
+    "manifest_checksummed": {
+     "level_floor": "C3"
+    }
+   },
+   "rename_policy": "matrix",
+   "references_to": [],
+   "referenced_by": [
+    {
+     "surface": "N14",
+     "kind": "includegraphics"
+    }
+   ],
+   "requires_declarations": [],
+   "doc": "skills/hep-computing/references/analysis-data-pipelines.md#naming-n2"
+  },
+  {
+   "surface_id": "N3",
+   "name": "Objects inside ROOT files",
+   "owner": "hep-computing",
+   "extractor": null,
+   "kinds": {
+    "object": {
+     "level_floor": "C2"
+    },
+    "shape_histogram": {
+     "level_floor": "C3",
+     "format": "^[A-Za-z0-9_]+(Up|Down)?$"
+    }
+   },
+   "rename_policy": "matrix",
+   "references_to": [],
+   "referenced_by": [
+    {
+     "surface": "N10",
+     "kind": "shape-histogram"
+    },
+    {
+     "surface": "N14",
+     "kind": "figure-source"
+    }
+   ],
+   "requires_declarations": [],
+   "doc": "skills/hep-computing/references/root-usage-patterns.md#naming-n3"
+  },
+  {
+   "surface_id": "N4",
+   "name": "Branches and columns",
+   "owner": "hep-computing",
+   "extractor": null,
+   "kinds": {
+    "project_column": {
+     "level_floor": "C2"
+    }
+   },
+   "rename_policy": "matrix",
+   "references_to": [],
+   "referenced_by": [],
+   "requires_declarations": [],
+   "doc": "skills/hep-computing/references/python-hep-coding-patterns.md#naming-n4"
+  },
+  {
+   "surface_id": "N5",
+   "name": "Configuration keys, environment variables, CLI flags",
+   "owner": "hep-computing",
+   "extractor": "skills/hep-computing/scripts/extract_names.py",
+   "kinds": {
+    "project_config_key": {
+     "level_floor": "C2",
+     "format": "^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$"
+    },
+    "project_cli_flag": {
+     "level_floor": "C2",
+     "format": "^--?[a-z0-9][a-z0-9]*(?:-[a-z0-9]+)*$"
+    },
+    "plugin_cli_flag": {
+     "level_floor": "C3",
+     "format": "^--?[a-z0-9][a-z0-9]*(?:-[a-z0-9]+)*$",
+     "rename_policy": "deprecate"
+    },
+    "env_var": {
+     "level_floor": "C2",
+     "format": "^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*$"
+    }
+   },
+   "rename_policy": "matrix",
+   "references_to": [],
+   "referenced_by": [
+    {
+     "surface": "N1",
+     "kind": "reads-config-key"
+    }
+   ],
+   "requires_declarations": [],
+   "doc": "skills/hep-computing/references/environments-and-containers.md#naming-n5"
+  },
+  {
+   "surface_id": "N6",
+   "name": "Batch jobs, workflow rules, chunks",
+   "owner": "hep-computing",
+   "extractor": null,
+   "kinds": {
+    "job": {
+     "level_floor": "C1"
+    },
+    "log_pattern": {
+     "level_floor": "C3"
+    }
+   },
+   "rename_policy": "matrix",
+   "references_to": [],
+   "referenced_by": [],
+   "requires_declarations": [],
+   "doc": "skills/hep-computing/references/batch-scheduling.md#naming-n6"
+  },
+  {
+   "surface_id": "N7",
+   "name": "Samples, datasets, run ranges",
+   "owner": "hep-measurement",
+   "extractor": null,
+   "kinds": {
+    "internal_alias": {
+     "level_floor": "C1"
+    }
+   },
+   "rename_policy": "matrix",
+   "references_to": [],
+   "referenced_by": [],
+   "requires_declarations": [],
+   "doc": "skills/hep-measurement/references/analysis-design.md#naming-n7"
+  },
+  {
+   "surface_id": "N8",
+   "name": "Selections, cutflows, regions",
+   "owner": "hep-measurement",
+   "extractor": null,
+   "kinds": {
+    "selection": {
+     "level_floor": "C2"
+    }
+   },
+   "rename_policy": "matrix",
+   "references_to": [],
+   "referenced_by": [],
+   "requires_declarations": [],
+   "doc": "skills/hep-measurement/references/analysis-design.md#naming-n8"
+  },
+  {
+   "surface_id": "N9",
+   "name": "Systematic variations",
+   "owner": "hep-measurement",
+   "extractor": null,
+   "kinds": {
+    "variation": {
+     "level_floor": "C3"
+    }
+   },
+   "rename_policy": "matrix",
+   "references_to": [],
+   "referenced_by": [],
+   "requires_declarations": [],
+   "doc": "skills/hep-measurement/references/systematics.md#naming-n9"
+  },
+  {
+   "surface_id": "N10",
+   "name": "Nuisances, POIs, channels, samples",
+   "owner": "hep-statistics",
+   "extractor": null,
+   "kinds": {
+    "nuisance": {
+     "level_floor": "C3"
+    },
+    "channel": {
+     "level_floor": "C3"
+    },
+    "observed_data": {
+     "level_floor": "C4",
+     "fixed_names": [
+      "data_obs"
+     ]
+    }
+   },
+   "rename_policy": "matrix",
+   "references_to": [
+    {
+     "surface": "N3",
+     "kind": "shape-histogram"
+    }
+   ],
+   "referenced_by": [],
+   "requires_declarations": [
+    "correlation-inventory"
+   ],
+   "doc": "skills/hep-statistics/references/nuisance-modeling.md#naming-n10"
+  },
+  {
+   "surface_id": "N11",
+   "name": "Calibrations, conditions tags, efficiency maps",
+   "owner": "hep-detector",
+   "extractor": null,
+   "kinds": {
+    "project_output": {
+     "level_floor": "C2"
+    }
+   },
+   "rename_policy": "matrix",
+   "references_to": [],
+   "referenced_by": [],
+   "requires_declarations": [],
+   "doc": "skills/hep-detector/references/calibration-and-alignment.md#naming-n11"
+  },
+  {
+   "surface_id": "N12",
+   "name": "Models, checkpoints, features",
+   "owner": "hep-ml",
+   "extractor": null,
+   "kinds": {
+    "model_artifact": {
+     "level_floor": "C2"
+    }
+   },
+   "rename_policy": "matrix",
+   "references_to": [],
+   "referenced_by": [],
+   "requires_declarations": [],
+   "doc": "skills/hep-ml/references/reproducibility.md#naming-n12"
+  },
+  {
+   "surface_id": "N13",
+   "name": "Theory parameters, scheme labels",
+   "owner": "hep-theory",
+   "extractor": null,
+   "kinds": {
+    "parameter": {
+     "level_floor": "C2"
+    }
+   },
+   "rename_policy": "matrix",
+   "references_to": [],
+   "referenced_by": [],
+   "requires_declarations": [],
+   "doc": "skills/hep-theory/references/regularization-and-schemes.md#naming-n13"
+  },
+  {
+   "surface_id": "N14",
+   "name": "Figure files, table files, LaTeX labels, macros",
+   "owner": "hep-authoring",
+   "extractor": null,
+   "kinds": {
+    "label": {
+     "level_floor": "C2"
+    },
+    "macro": {
+     "level_floor": "C2"
+    }
+   },
+   "rename_policy": "matrix",
+   "references_to": [
+    {
+     "surface": "N2",
+     "kind": "includegraphics"
+    },
+    {
+     "surface": "N3",
+     "kind": "figure-source"
+    }
+   ],
+   "referenced_by": [],
+   "requires_declarations": [],
+   "doc": "skills/hep-authoring/references/latex-mechanics-and-tooling.md#naming-n14"
+  },
+  {
+   "surface_id": "N15",
+   "name": "BibTeX keys",
+   "owner": "hep-authoring",
+   "extractor": null,
+   "kinds": {
+    "bib_key": {
+     "level_floor": "C2"
+    }
+   },
+   "rename_policy": "dedup-only",
+   "references_to": [],
+   "referenced_by": [],
+   "requires_declarations": [],
+   "doc": "skills/hep-authoring/references/citations-and-bibliography.md#naming-n15"
+  },
+  {
+   "surface_id": "N16",
+   "name": "Plugin contract vocabulary",
+   "owner": "hep-computing",
+   "extractor": "skills/hep-computing/scripts/extract_names.py",
+   "kinds": {
+    "contract_term": {
+     "level_floor": "C3",
+     "format": "^[a-z][a-z0-9]*(?:[-_][a-z0-9]+)*$"
+    },
+    "skill_name": {
+     "level_floor": "C3",
+     "format": "^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$"
+    },
+    "script_name": {
+     "level_floor": "C3",
+     "format": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*\\.(?:py|sh|C)$"
+    },
+    "schema_name": {
+     "level_floor": "C3",
+     "format": "^[a-z][a-z0-9]*(?:_[a-z0-9]+)*\\.json$"
+    }
+   },
+   "rename_policy": "deprecate",
+   "references_to": [],
+   "referenced_by": [],
+   "requires_declarations": [],
+   "doc": "skills/hep-computing/references/engineering-playbook.md#naming-n16"
+  },
+  {
+   "surface_id": "N17",
+   "name": "Literature record IDs",
+   "owner": "hep-citations",
+   "extractor": null,
+   "kinds": {
+    "record_id": {
+     "level_floor": "C4"
+    }
+   },
+   "rename_policy": "never",
+   "references_to": [],
+   "referenced_by": [],
+   "requires_declarations": [],
+   "doc": "skills/hep-citations/references/citation-verification.md#naming-n17"
+  }
+ ]
+}

@@ -1,0 +1,101 @@
+{
+ "$comment": "naming_annotations.json: the agent's semantic review of named entities (spec \u00a76.4). high confidence needs the implementation read, references complete and every referrer read; only then does a semantic rule decide.",
+ "type": "object",
+ "required": [
+  "annotations_version",
+  "annotations"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "annotations_version": {
+   "const": "1.0.0"
+  },
+  "annotations": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "entity_id",
+     "confidence",
+     "evidence",
+     "referrers_read",
+     "recorded_by"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "entity_id": {
+      "type": "string",
+      "minLength": 1
+     },
+     "meaning": {
+      "type": "object",
+      "required": [],
+      "additionalProperties": false,
+      "properties": {
+       "concept_id": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "unit": {
+        "type": [
+         "string",
+         "null"
+        ]
+       },
+       "status_label": {
+        "type": [
+         "string",
+         "null"
+        ]
+       }
+      }
+     },
+     "semantic_verdict": {
+      "type": "string",
+      "enum": [
+       "consistent",
+       "inconsistent"
+      ]
+     },
+     "proposed": {
+      "type": [
+       "string",
+       "null"
+      ]
+     },
+     "confidence": {
+      "type": "string",
+      "enum": [
+       "high",
+       "medium",
+       "low"
+      ]
+     },
+     "evidence": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "referrers_read": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "intended_distinct": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "recorded_by": {
+      "type": "string"
+     }
+    }
+   }
+  }
+ }
+}

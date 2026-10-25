@@ -79,3 +79,27 @@ repository conventions when they intentionally differ.
 | `[:, 0]` without `ak.num(...) >= 1` | index error or wrong event | mask on multiplicity first |
 | `import ROOT` at module top in a tool that must run without ROOT | `--help` fails without ROOT | import inside the function |
 | `class .*Utils` with only `@staticmethod` | no responsibility | module-level functions |
+
+
+<a id="naming-n1"></a>
+### Naming: code identifiers (N1)
+- **Extractor:** `extract_names.py --surface N1` (inputs: the Python files under the scope folders; C++ and shell are not read yet)
+- **Entity kinds and level floors:** generated from `contracts/naming/surfaces.json`, not restated by hand:
+
+<!-- naming-kinds:N1: generated from contracts/naming/surfaces.json by contracts/naming_registry.py sections; do not edit -->
+
+| Kind | Level floor | Format | Rename policy |
+|---|---|---|---|
+| `local` | C0 | `^_+$\|^_*[a-z][a-z0-9_]*$\|^_*[A-Z][A-Za-z0-9]*$\|^_*[A-Z][A-Z0-9_]*$\|^_*(?:[a-z][a-z0-9]*\|[A-Z][A-Za-z]?[0-9]*)(?:_+(?:[a-z0-9]+\|[A-Z][A-Za-z]?[0-9]*))*_*$` | matrix |
+| `private` | C1 | `^_+$\|^_*[a-z][a-z0-9_]*$\|^_*[A-Z][A-Za-z0-9]*$\|^_*[A-Z][A-Z0-9_]*$\|^_*(?:[a-z][a-z0-9]*\|[A-Z][A-Za-z]?[0-9]*)(?:_+(?:[a-z0-9]+\|[A-Z][A-Za-z]?[0-9]*))*_*$` | matrix |
+| `module_public` | C2 | `^_+$\|^_*[a-z][a-z0-9_]*$\|^_*[A-Z][A-Za-z0-9]*$\|^_*[A-Z][A-Z0-9_]*$\|^_*(?:[a-z][a-z0-9]*\|[A-Z][A-Za-z]?[0-9]*)(?:_+(?:[a-z0-9]+\|[A-Z][A-Za-z]?[0-9]*))*_*$` | matrix |
+| `plugin_core_api` | C3 | `^_+$\|^_*[a-z][a-z0-9_]*$\|^_*[A-Z][A-Za-z0-9]*$\|^_*[A-Z][A-Z0-9_]*$\|^_*(?:[a-z][a-z0-9]*\|[A-Z][A-Za-z]?[0-9]*)(?:_+(?:[a-z0-9]+\|[A-Z][A-Za-z]?[0-9]*))*_*$` | deprecate |
+
+<!-- /naming-kinds:N1 -->
+
+- **The name must say:** what the function does or the variable holds, in the project's terms, with the unit of a quantity
+- **Rename policy:** matrix; `deprecate` for the plugin's core API (`core/`, `contracts/`)
+- **Rules:** see the registry for surface N1 (`naming.common.*`, `naming.n1.*`, `naming.cross.*`)
+- **Good / bad:** `apply_selection_cuts`, `rigidity_gv` / `process_data`, `tmp`
+
+Procedure, levels and report: [semantic naming charter](semantic-naming.md).

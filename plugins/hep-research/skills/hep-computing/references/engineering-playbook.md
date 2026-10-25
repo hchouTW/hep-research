@@ -152,3 +152,27 @@ prints text only. The per-script table is in the skill's `README.md`.
   corrected code ran), `possibly affected` (no trace, an unknown release, or an unreleased build), and
   `outputs_not_artifacts` (script output the scan cannot see: ask whether they used it). The scan is read-only and
   blocks nothing; never recompute results or edit the project on its findings without the user's request.
+
+
+<a id="naming-n16"></a>
+### Naming: plugin contract vocabulary (N16)
+- **Extractor:** `extract_names.py --surface N16` (inputs: the artifact types, `contracts/vocab/`, skill, script and schema names of the plugin itself)
+- **Entity kinds and level floors:** generated from `contracts/naming/surfaces.json`, not restated by hand:
+
+<!-- naming-kinds:N16: generated from contracts/naming/surfaces.json by contracts/naming_registry.py sections; do not edit -->
+
+| Kind | Level floor | Format | Rename policy |
+|---|---|---|---|
+| `contract_term` | C3 | `^[a-z][a-z0-9]*(?:[-_][a-z0-9]+)*$` | deprecate |
+| `skill_name` | C3 | `^[a-z][a-z0-9]*(?:-[a-z0-9]+)*$` | deprecate |
+| `script_name` | C3 | `^[a-z][a-z0-9]*(?:_[a-z0-9]+)*\.(?:py\|sh\|C)$` | deprecate |
+| `schema_name` | C3 | `^[a-z][a-z0-9]*(?:_[a-z0-9]+)*\.json$` | deprecate |
+
+<!-- /naming-kinds:N16 -->
+
+- **The name must say:** the concept the term stands for, in the contract's established shape
+- **Rename policy:** `deprecate`: add the new term, keep the old one as a deprecated alias for at least one minor version
+- **Rules:** see the registry for surface N16 (`naming.common.*`, `naming.n16.*`, `naming.cross.*`)
+- **Good / bad:** `computational-run` / `run2`, `new-result`
+
+Procedure, levels and report: [semantic naming charter](semantic-naming.md).
