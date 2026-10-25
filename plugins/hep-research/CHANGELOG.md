@@ -3,6 +3,58 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+hep-detector front-end electronics for reconstruction, simulation and calibration (VALIDATION FRONTEND-RECO-SIM). No contracts,
+`core/` or adapter version change; `frontend_response.py` now imports `core.stats._linalg.solve`.
+
+- `frontend_response.py` gains five subcommands (tool contract `frontend_response.json`: 15 operations):
+  `optimal-filter` (weights and variance of a sampled CR-(RC)^n pulse with exponentially correlated electronic noise
+  and Campbell pileup noise, against the uncorrelated template and the largest sample; `--constraints phase` and/or
+  `baseline` by Lagrange multipliers; the relative bias from phase errors; the gain on a constant baseline offset; the
+  linearized errors of a joint amplitude and time fit), `hit-efficiency` (efficiency of a Landau or Gaussian signal
+  with a charge fraction, noise and a Gaussian threshold spread, and the noise occupancy per sample and per window,
+  channel-averaged in closed form; the operating window for an efficiency and an occupancy target; Landau from
+  Nolan's integral for the stable law alpha = 1, beta = 1, scale pi/2), and `waveform-toy` (a seeded synthetic
+  sampled readout with AR(1) noise, Poisson pileup, phase jitter and an ADC, reconstructed by four estimators, with
+  closure z-scores against the analytic prediction; `status_label` synthetic), `s-curve` (binomial
+  maximum-likelihood fit of a threshold scan with inverse-Fisher errors and the deviance, or the expected errors of a
+  scan design) and `threshold-trim` (dispersion left by a trim DAC: uniform residual inside the range, the excess
+  beyond it, DAC nonlinearity).
+- `front-end-electronics-and-signal-processing.md`: continuous versus sampled noise occupancy and the threshold-spread
+  average; efficiency with a fluctuating signal and the operating window (worked example); constrained optimal
+  filters, the baseline gain, time from samples, the waveform toy; ToT inversion; bandwidth and rise time; digital
+  pulse processing for spectroscopy; pulse-shape discrimination; the electronics calibration rewritten as an ordered
+  chain (robust pedestals and the noise covariance, binomial S-curve fits and scan
+  design, trim residual, templates and weights, calibration closure in simulation); new misconceptions and
+  deliverables. The worked
+  optimal-filter and phase-error numbers already on the page are now reproduced by the tool and pinned by tests.
+- New reference `readout-digitization-and-overlay.md` (linked from `detector-simulation.md` and the front-end page):
+  a nine-step digitization recipe, overlay and premixing rules (no noise counted twice, the sum before the
+  nonlinearities, sub-threshold content lost by a suppressed overlay, same period, pileup counted once) and the
+  closure checks that validate a digitization. Cross-links from `event-reconstruction.md` and
+  `tracking-and-vertexing.md`; bibliography adds Jordanov and Knoll (1994) and Nolan (1997).
+- Tests: `tests/skills/hep_detector/test_frontend_waveforms.py` (33 tests); `FrontendResponseContractTests` cover
+  the five new operations.
+- Sources: the constrained optimal filter cites the ATLAS liquid-argon paper arXiv:0709.1094, the overlay rules the
+  HSF detector-simulation white paper arXiv:1803.04165 (bibliography entries added).
+- **The charge-injection gain is not the signal gain (sci-fix FRONTEND-INJECTION-GAIN, S3).** The front-end page's
+  calibration chain treated the gain from charge injection as the gain for sensor signals. An injected pulse has no
+  collection time (so no ballistic deficit) and sometimes no sensor capacitance, so the two differ; the page now says
+  to cross-check with a source or minimum-ionizing particles and lists the misconception. Sources: arXiv:1306.6756v2
+  sec. II-C and arXiv:0912.2642v4 sec. 3.1.2, eq. 5 (the physics-to-calibration pulse ratio `M_phys/M_cali`), both
+  read in full text; regression test `InjectionGainGuidance` in `test_frontend_waveforms.py`. Committed apart from
+  the `feat:` calibration commit (maintainer decision D-C4).
+- Developer document `docs/dev/frontend-electronics/frontend-reco-sim-calibration.md` (English, task format, passes
+  `lint_task.py`): the evaluation, the completed work, and stages FE0-FE5 with isolated-worktree execution,
+  acceptance criteria and open decisions.
+- **Fixed: `frontend_response.py` exit code of an input error that names JSON.** The CLI serialized the result inside
+  the input-error handler and took any `ValueError` whose message contained "JSON" for a non-finite result, so such an
+  input error exited 1 (`failed`) instead of 2 (`invalid-input`). The result is now serialized after the input checks;
+  a non-finite result still exits 1. Tests: `CommandLine.test_input_error_naming_json_exits_2` and
+  `test_non_finite_result_exits_1` in `test_frontend_waveforms.py`. The bug is in 0.40.0 too; no input of 0.40.0 is
+  known to reach it.
+
 ## 0.40.0 (2026-10-25)
 
 Minor release; contracts 3.13.0, `CORE_VERSION` 1.1.0 and geant4 adapter 0.5.0 unchanged. It ships the follow-ups

@@ -2756,6 +2756,69 @@ Contracts: the 13 new keys are core `convention_keys` and also `conditional_conv
 description change and the 8 Th14 cases (paid; pending approval). Pre-existing on main: 5 tests of
 `tests/contracts/test_simulated_dataset.py` fail under a whole-directory pytest run and pass alone (order dependent).
 
+## FRONTEND-RECO-SIM (2026-10-25, Linux x86_64 container, Python 3.13.17, NumPy 2.5.3, SciPy 1.18.1 for the oracles, no SymPy or mpmath; branch `worktree-frontend-reco-sim` from main `bc7b1c18`, unreleased)
+
+hep-detector front-end electronics for reconstruction and simulation: `frontend_response.py` subcommands
+`optimal-filter`, `hit-efficiency`, `waveform-toy`, `s-curve`, `threshold-trim`; the reference additions and the new
+`readout-digitization-and-overlay.md`. No contracts, `core/` or adapter version change.
+
+| Check | Result |
+|---|---|
+| Page numbers already on the front-end page (optimal filter, phase error) | recomputed with NumPy before any code: template 1.117, largest sample 1.066, optimal 1.037; white-noise phase bias -0.041 / -0.333 % at -/+2 ns, -0.787 / -1.538 % at -/+5 ns; correlated +0.93 / -1.79 % at -/+2 ns, -5.81 % at 5 ns; all as printed; `optimal-filter` reproduces them and `test_frontend_waveforms.py` pins them |
+| Pulse autocorrelation (closed form) | against trapezoid integration for n = 1, 2, 4 and four lags; zero lag equals int g^2 |
+| Optimal filter | Lagrange conditions (w . g = 1, R w parallel to g) to 1e-9; no worse than the template or the largest sample; white noise equals the template; Campbell pileup per sample exact; constraints: w . g' = 0 and sum w = 0 to 1e-10, the phase-constrained bias even and quadratic in the phase error; joint amplitude-time errors against a SciPy least-squares MC (4000 pulses: 0.431 ns, 0.778) and the sign of the correlation on rising and falling edges |
+| Landau | against SciPy 1.18.1 `landau` (S1(1, 1, 1, 0), mapped with scale pi/2 and location ln(pi/2)) to 3.5e-13 over lambda -5 to 100 during development, recorded values to 1e-10 in the test; against the oscillatory integral (independent standard-library implementation) to 2e-6; MPV -0.222783, peak 0.1806556; CDF derivative equals the density |
+| Hit efficiency | Landau case against `scipy.integrate.quad` (0.98796331) and a 4e6-event MC (0.987947 +- 0.000055); Gaussian case closed form; threshold-spread averages of the Rice rate and of the per-sample tail against numerical averages over thresholds; the worked operating window of the page |
+| Waveform toy | closure |z| < 4 for bias and width of four estimators with correlated noise and exponential-amplitude pileup (several seeds and 200 000 events during development); the standard error of the width uses the fourth moment (the Gaussian formula overstated the z-scores for exponential pileup); the baseline constraint removes the pileup mean bias; jitter and saturation flagged |
+| Mutants | eight local mutants of the new code; six killed by the new tests (Landau MPV constant, threshold-spread factor, autocorrelation power, Gaussian width, phase sign, fourth-moment error); the endpoint constant of the Zolotarev integral is equivalent within the adaptive tolerance; the amplitude-time correlation sign got its own test afterwards |
+| S-curve | fit equal to `scipy.optimize.minimize` (Nelder-Mead) of the same likelihood to 1e-3 e; a NumPy MC of 2000 scans (T 3700 e, sigma 300 e, 8 charges every 200 e, 100 injections): sd 17.9 and 17.5 e against the design prediction 18.3 and 17.3 e, pulls 0.98 and 1.02 wide, mean noise pull -0.12 (maximum-likelihood bias); 1/sqrt(N) scaling exact; coarse and inconsistent scans flagged |
+| Threshold trim | against a NumPy MC of 2e6 channels with rounded, clipped codes: 441.76 e and 18.28 % beyond the range for (1500 e, 4 bits, 250 e), tool 441.57 e and 18.24 %; 258.47 e for (800 e, 5 bits, 60 e), tool 258.73 e; wide-range limit D/sqrt(12) and the nonlinearity in quadrature exact |
+| Tool contract | `contracts/tool_contract.py`: pass, 15 operations; `FrontendResponseContractTests` with the five new operations |
+| Aggregate (`tools/run_all_checks.py --part all --no-cli --jobs 2`) | 27 of 31 checks pass, 2 skip (host CLIs); unittest 5549 run, 5237 pass, 294 skipped, 18 failures or errors, all outside hep-detector and all from this environment: SymPy and mpmath are not installed and PyPI is unreachable (16), and `test_paper_skeleton` and `test_ci_plan.RunnerRecord` fail identically on a clean checkout of main here; `ams_optional` fails on the same missing SymPy. Rerun in E2 before merging |
+
+**Independent review R720d9d2e80** of `docs/dev/frontend-electronics/frontend-reco-sim-calibration.md`
+(`skills/hep-authoring/scripts/review.py`, models opus and sonnet, `--lens-model design=opus --filter-model opus
+--expert-model opus --own-config`, isolation precondition `fork-denied`; advisory): round 1, 9 slots, the expert slot
+and the filter (36 findings, 26 kept). All findings disposed: 35 changed (each verified by the author against the plugin
+files or a tool run), 1 declined (the branch name it reported was in this file and had been fixed). Canary hit rate
+2/2. The facts lens slot S4 was rejected twice (it copied the document to run `lint_task.py`) and is escalated for a
+human; the review stays open until then. The substantive corrections: the FE1-1 criterion could not fail (thresholds
+far below the Landau peak), the threshold spread is routed pre-trim to `threshold-trim` and post-trim to
+`hit-efficiency`, the FE3 corrected spread is clipped at zero, the stage base follows P.10.2, the C4 guidance change is
+flagged for classification and has a second located source (arXiv:0912.2642, sec. 3.1.2).
+
+**FE0 pre-merge acceptance in E2 (2026-10-25).** Environment: E2 venv `~/.venvs/hep-research-e2`, macOS 26.5 arm64,
+Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1, SymPy 1.14.0, mpmath 1.3.0; host CLIs Claude Code 2.1.310 and codex-cli
+0.160.0; worktree `.claude/worktrees/frontend-fe0`, branch `worktree-frontend-fe0` from main `d5c8ff24` (0.40.0),
+patches 0001-0004 applied with `git am --3way`: only the generated reference inventory conflicted (regenerated), and
+the CHANGELOG entry, which auto-merged into the released 0.39.0 section, was moved to Unreleased. Checked at commit
+`6f156782` (after the C4 split): `tools/run_all_checks.py --out <scratch>` with the host CLIs, 31 of 31 checks pass;
+unittest 5573 run, 5420 pass, 153 skipped, 0 failures or errors (458 modules); no `ModuleNotFoundError`; the two
+failures FE0-1 allows (`test_paper_skeleton`, `test_ci_plan.RunnerRecord`) do not occur here, nor does the
+`ams_optional` failure of the container run. ruff 0.16.10 on the changed Python files and `core contracts`, and
+mypy 2.4.0, clean. The task document passes `lint_task.py --repo .` (0 errors, 0 warnings).
+
+**sci-fix FRONTEND-INJECTION-GAIN (C4, S3; maintainer decision D-C4 2026-10-25: split from the `feat:` calibration
+commit).** The calibration chain no longer takes the charge-injection gain for the signal gain. Sources read in the
+full text on 2026-10-25: arXiv:1306.6756v2 sec. II-C ("a factor to correct for differences between the physics signal
+and calibration pulses") and arXiv:0912.2642v4 sec. 3.1.2, eq. 5 (the factor `1/(M_phys/M_cali)` "quantifies the
+ratio of response to a calibration pulse and an ionization pulse corresponding to the same input current"); the second
+source had only been located through a search index before. Parent: `9a116535` (the branch with C4 removed).
+
+| Evidence test (file::Class::method) | Oracle kind | Parent commit result | Fix commit result | Skipped? | Environment |
+|---|---|---|---|---|---|
+| `tests/skills/hep_detector/test_frontend_waveforms.py::InjectionGainGuidance::test_injection_bullet_separates_injection_and_signal_gain` | behavioral (guidance text with both locators) | fail (assertion) | pass | no | E2 |
+| `tests/skills/hep_detector/test_frontend_waveforms.py::InjectionGainGuidance::test_misconception_is_listed` | behavioral | fail (assertion) | pass | no | E2 |
+
+**Fix: exit code of an input error that names JSON (2026-10-25, E2).** `main()` serialized the result inside the
+`try` that maps a `ValueError` to exit 2, and took a message containing "JSON" for a non-finite result (exit 1). The
+serialization now has its own `try`. `CommandLine.test_input_error_naming_json_exits_2` (an input error with "JSON"
+in its message, raised in-process) fails on the unfixed script (exit 1, `SystemExit` not raised) and passes on the fix;
+`test_non_finite_result_exits_1` (an exception while computing, and `enc` at 1e300, an infinite result) passes on both.
+
+Software checks show contract consistency and agreement with the named oracles, not physical validity: the Landau
+model has no Bichsel broadening, and the toy is synthetic.
+
 ## DESIGN-SEARCH-EXAMPLES (2026-10-25, E2: macOS 26.5 arm64, Apple clang 21.0.0, Geant4 11.4.3 build A, Python 3.13; branch `worktree-geant4-c3` from main `2af81a39`, unreleased)
 
 Geant4 program stage C3 (spec section C.7): journey J16, `examples/design-search-j16`. No code change outside the

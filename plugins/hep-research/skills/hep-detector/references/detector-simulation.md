@@ -100,7 +100,11 @@ and zero suppression, time structure including any integration window that admit
 out-of-time signals, and the dead/noisy channel map for the period being simulated.
 The electronics relations it needs (noise correlations, pulse shape and phase,
 optimal-filter weights, quantization, gain switching) are in
-[front-end electronics and signal processing](front-end-electronics-and-signal-processing.md).
+[front-end electronics and signal processing](front-end-electronics-and-signal-processing.md). The ordered
+digitization recipe, the rules for overlay and premixing (no noise counted twice, the sum
+taken before saturation and zero suppression, overlay from the same period) and the
+closure checks that validate the digitization are in
+[readout digitization and overlay](readout-digitization-and-overlay.md).
 
 Digitization is the most common place for a data-simulation mismatch that no
 calibration fixes, because it is the stage most often simplified. Specific things worth

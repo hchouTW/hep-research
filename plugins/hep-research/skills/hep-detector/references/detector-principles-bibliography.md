@@ -97,6 +97,34 @@ criteria as above.
 - M. Moll, "Displacement damage in silicon detectors for high energy physics", IEEE Trans.
   Nucl. Sci. 65 (2018) 1561-1582, DOI 10.1109/TNS.2018.2819506. Leakage current, depletion
   voltage and trapping after irradiation.
+- V. T. Jordanov and G. F. Knoll, "Digital synthesis of pulse shapes in real time for high
+  resolution radiation spectroscopy", Nucl. Instrum. Methods A345 (1994) 337-345 (title,
+  volume and pages read from the article's first page, University of Michigan Deep Blue
+  copy, 2026-10-25; DOI not checked). Recursive trapezoidal and triangular digital shaping;
+  flat tops against ballistic deficit and trapping.
+<!-- example: source citations (experiments named as the source of a general method) -->
+- M. Aharrouche et al., "Response uniformity of the ATLAS liquid argon electromagnetic
+  calorimeter", arXiv:0709.1094 (read 2026-10-25; journal reference not checked). Optimal
+  filtering coefficients from the pulse shape, its derivative and the pedestal-run noise
+  autocorrelation by Lagrange multipliers.
+- N. Nikiforou for the ATLAS Collaboration, "Performance of the ATLAS liquid argon
+  calorimeter after three years of LHC operation and plans for a future upgrade",
+  arXiv:1306.6756v2 (full text read 2026-10-25). Cell energy from samples with the ramp, the DAC
+  calibration and the physics-to-calibration pulse ratio `M_phys/M_cali` (sec. II-C).
+- G. Aad et al., "Readiness of the ATLAS liquid argon calorimeter for LHC collisions",
+  arXiv:0912.2642v4 (sec. 3.1.2, pp. 16-17, read in the full text 2026-10-25; journal
+  reference not checked). Cell energy reconstruction (eq. 5); `M_phys/M_cali` as the ratio of the
+  responses to calibration and ionization pulses of the same input current.
+<!-- /example -->
+- J. Apostolakis et al., "HEP Software Foundation Community White Paper Working Group -
+  Detector Simulation", arXiv:1803.04165 (read 2026-10-25). Zero-bias overlay against
+  premixing; non-zero-suppressed samples and nonlinear signal addition as the overlay's
+  difficulties.
+- J. P. Nolan, "Numerical calculation of stable densities and distribution functions",
+  Commun. Statist. Stochastic Models 13 (1997) 759-774, DOI 10.1080/15326349708807450
+  (matched against Crossref, 2026-10-25). The integral representation used for the Landau
+  density and distribution function in `frontend_response.py` (Landau = stable law
+  `alpha = 1`, `beta = 1`, scale `pi/2`).
 
 ## Timing detectors ([timing detectors](timing-detectors.md))
 

@@ -19,8 +19,8 @@
    "uncited": 0
   },
   "hep-detector": {
-   "references": 39,
-   "bytes": 558103,
+   "references": 40,
+   "bytes": 585335,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1913,8 +1913,8 @@
   {
    "path": "skills/hep-detector/references/detector-principles-bibliography.md",
    "owner": "hep-detector",
-   "bytes": 14847,
-   "lines": 190,
+   "bytes": 17036,
+   "lines": 218,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/charge-confusion.md",
@@ -1922,7 +1922,7 @@
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "5fa57b0a 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/detector-principles-summary.md",
@@ -1943,8 +1943,8 @@
   {
    "path": "skills/hep-detector/references/detector-simulation.md",
    "owner": "hep-detector",
-   "bytes": 14085,
-   "lines": 227,
+   "bytes": 14397,
+   "lines": 231,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
@@ -1956,6 +1956,7 @@
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
     "skills/hep-detector/references/geant4-study-protocol.md",
+    "skills/hep-detector/references/readout-digitization-and-overlay.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-ml/references/fast-simulation-validation.md",
     "skills/hep-theory/references/event-generation.md"
@@ -1964,7 +1965,7 @@
     "hep-ml",
     "hep-theory"
    ],
-   "last_commit": "3f4f9985 2026-10-21"
+   "last_commit": "765bf693 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/detector-systems-overview.md",
@@ -1996,8 +1997,8 @@
   {
    "path": "skills/hep-detector/references/event-reconstruction.md",
    "owner": "hep-detector",
-   "bytes": 12735,
-   "lines": 207,
+   "bytes": 13318,
+   "lines": 214,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/calibration-and-alignment.md",
@@ -2005,10 +2006,11 @@
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/detector-simulation.md",
+    "skills/hep-detector/references/readout-digitization-and-overlay.md",
     "skills/hep-detector/references/timing-detectors.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "765bf693 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/extensive-air-showers.md",
@@ -2037,8 +2039,8 @@
   {
    "path": "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
    "owner": "hep-detector",
-   "bytes": 25618,
-   "lines": 387,
+   "bytes": 39840,
+   "lines": 559,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
@@ -2048,14 +2050,17 @@
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/detector-simulation.md",
+    "skills/hep-detector/references/event-reconstruction.md",
+    "skills/hep-detector/references/readout-digitization-and-overlay.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-detector/references/timing-detectors.md",
     "skills/hep-detector/references/tracking-and-vertexing.md",
     "skills/hep-detector/references/triggers-luminosity-pileup.md",
-    "skills/hep-detector/scripts/frontend_response.py"
+    "skills/hep-detector/scripts/frontend_response.py",
+    "tests/skills/hep_detector/test_frontend_waveforms.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e03c0396 2026-10-22"
+   "last_commit": "5fa57b0a 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
@@ -2314,6 +2319,19 @@
    "last_commit": "9257d7b5 2026-10-15"
   },
   {
+   "path": "skills/hep-detector/references/readout-digitization-and-overlay.md",
+   "owner": "hep-detector",
+   "bytes": 9615,
+   "lines": 142,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-detector/references/detector-simulation.md",
+    "skills/hep-detector/references/front-end-electronics-and-signal-processing.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "5fa57b0a 2026-10-25"
+  },
+  {
    "path": "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md",
    "owner": "hep-detector",
    "bytes": 10709,
@@ -2379,7 +2397,8 @@
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
     "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
-    "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md"
+    "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
+    "skills/hep-detector/references/readout-digitization-and-overlay.md"
    ],
    "cited_by_other_skills": [
     "hep-citations"
@@ -2453,8 +2472,8 @@
   {
    "path": "skills/hep-detector/references/tracking-and-vertexing.md",
    "owner": "hep-detector",
-   "bytes": 16388,
-   "lines": 245,
+   "bytes": 16699,
+   "lines": 248,
    "linked_from_skill_md": true,
    "cited_by": [
     "contracts/rules/design_adequacy.json",
@@ -2481,7 +2500,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "54b9cd4b 2026-10-21"
+   "last_commit": "765bf693 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/triggers-luminosity-pileup.md",
@@ -2499,6 +2518,7 @@
     "skills/hep-detector/references/event-reconstruction.md",
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
     "skills/hep-detector/references/muon-systems.md",
+    "skills/hep-detector/references/readout-digitization-and-overlay.md",
     "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-detector/references/timing-detectors.md",
@@ -4601,6 +4621,10 @@
    "skills/hep-theory/references/cosmic-ray-new-physics.md",
    "skills/hep-theory/references/cosmic-ray-phenomenology.md",
    "skills/hep-theory/references/cosmic-ray-propagation.md"
+  ],
+  "readout": [
+   "skills/hep-detector/references/readout-digitization-and-overlay.md",
+   "skills/hep-detector/references/signal-formation-and-readout.md"
   ],
   "reconstruction": [
    "skills/hep-detector/references/event-reconstruction.md",

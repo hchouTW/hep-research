@@ -1436,6 +1436,1115 @@
     "network": false,
     "subprocess": false
    }
+  },
+  {
+   "operation_id": "optimal-filter",
+   "summary": "Amplitude weights and variances from a few samples of a known CR-(RC)^n pulse (optimal filter with exponentially correlated electronic noise plus Campbell pileup noise, uncorrelated template fit, largest sample), the relative amplitude bias from phase errors, the gain on a constant baseline offset, and the linearized errors of a joint amplitude and time fit",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--order",
+      "input": "order"
+     },
+     {
+      "flag": "--peaking",
+      "input": "peaking"
+     },
+     {
+      "flag": "--period",
+      "input": "period"
+     },
+     {
+      "flag": "--samples",
+      "input": "samples"
+     },
+     {
+      "flag": "--first-offset",
+      "input": "first_offset"
+     },
+     {
+      "flag": "--rho",
+      "input": "rho"
+     },
+     {
+      "flag": "--pileup-rate",
+      "input": "pileup_rate"
+     },
+     {
+      "flag": "--constraints",
+      "input": "constraints"
+     },
+     {
+      "flag": "--pileup-rms",
+      "input": "pileup_rms"
+     },
+     {
+      "flag": "--amplitude",
+      "input": "amplitude"
+     },
+     {
+      "flag": "--phase-errors",
+      "input": "phase_errors"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "order",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "shaper order n of CR-(RC)^n, integer 1-10",
+     "default": 1
+    },
+    {
+     "name": "peaking",
+     "kind": "time",
+     "unit": "ns",
+     "required": true,
+     "constraint": "peaking time t_p = n tau, > 0"
+    },
+    {
+     "name": "period",
+     "kind": "time",
+     "unit": "ns",
+     "required": true,
+     "constraint": "sampling period, > 0"
+    },
+    {
+     "name": "samples",
+     "kind": "counts",
+     "unit": "1",
+     "required": true,
+     "constraint": "number of samples, integer 1-64"
+    },
+    {
+     "name": "first_offset",
+     "kind": "time",
+     "unit": "ns",
+     "required": true,
+     "constraint": "time of the first sample relative to the pulse peak (negative before it)"
+    },
+    {
+     "name": "rho",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "electronic-noise correlation between neighbouring samples, in [0, 1)",
+     "default": 0.0
+    },
+    {
+     "name": "pileup_rate",
+     "kind": "rate",
+     "unit": "Hz",
+     "required": false,
+     "constraint": "pileup pulse rate per channel, >= 0",
+     "default": 0.0
+    },
+    {
+     "name": "constraints",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "optimal-filter constraints, any of 'phase' (w . g' = 0) and 'baseline' (sum w = 0); fewer constraints than samples"
+    },
+    {
+     "name": "pileup_rms",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "rms pileup amplitude sqrt(<a^2>) in units of the per-sample electronic noise, >= 0",
+     "default": 0.0
+    },
+    {
+     "name": "amplitude",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "pulse amplitude in noise units, > 0, for the amplitude and time fit errors"
+    },
+    {
+     "name": "phase_errors",
+     "kind": "time",
+     "unit": "ns",
+     "required": false,
+     "constraint": "phase errors to evaluate; positive: the pulse started earlier than assumed"
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "command",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "assumptions",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "validity",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "sample_times_ns",
+     "kind": "time",
+     "unit": "ns"
+    },
+    {
+     "name": "pulse_samples",
+     "kind": "parameter",
+     "unit": "1"
+    },
+    {
+     "name": "weights_optimal",
+     "kind": "parameter",
+     "unit": "1"
+    },
+    {
+     "name": "sigma_optimal",
+     "kind": "parameter",
+     "unit": "1"
+    },
+    {
+     "name": "sigma_template_uncorrelated",
+     "kind": "parameter",
+     "unit": "1"
+    },
+    {
+     "name": "sigma_largest_sample",
+     "kind": "parameter",
+     "unit": "1"
+    },
+    {
+     "name": "largest_sample_index",
+     "kind": "counts",
+     "unit": "1"
+    },
+    {
+     "name": "pileup_sigma_per_sample",
+     "kind": "parameter",
+     "unit": "1"
+    },
+    {
+     "name": "baseline_offset_gain",
+     "kind": "parameter",
+     "unit": "1"
+    },
+    {
+     "name": "constraints",
+     "kind": "label",
+     "unit": "n/a"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the result is not finite for these inputs (overflow or division by zero); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"failed\", \"error\": ...} and stderr one line"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range (including a relation the subcommand checks, such as R_p > 0 or rho within [-1/(N-1), 1]); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
+  },
+  {
+   "operation_id": "hit-efficiency",
+   "summary": "Hit efficiency of a channel versus threshold for a Landau (most probable value, xi) or Gaussian signal with a charge-sharing fraction, noise and a channel-to-channel threshold spread, and the noise occupancy (probability above threshold at a sample, Rice up-crossings in a window for CR-(RC)^n), with the operating window that meets an efficiency and an occupancy target",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--thresholds",
+      "input": "thresholds"
+     },
+     {
+      "flag": "--scan",
+      "input": "scan"
+     },
+     {
+      "flag": "--noise",
+      "input": "noise"
+     },
+     {
+      "flag": "--signal-model",
+      "input": "signal_model"
+     },
+     {
+      "flag": "--mpv",
+      "input": "mpv"
+     },
+     {
+      "flag": "--xi",
+      "input": "xi"
+     },
+     {
+      "flag": "--mean",
+      "input": "mean"
+     },
+     {
+      "flag": "--sigma-signal",
+      "input": "sigma_signal"
+     },
+     {
+      "flag": "--signal-fraction",
+      "input": "signal_fraction"
+     },
+     {
+      "flag": "--threshold-dispersion",
+      "input": "threshold_dispersion"
+     },
+     {
+      "flag": "--peaking",
+      "input": "peaking"
+     },
+     {
+      "flag": "--order",
+      "input": "order"
+     },
+     {
+      "flag": "--noise-type",
+      "input": "noise_type"
+     },
+     {
+      "flag": "--series-fraction",
+      "input": "series_fraction"
+     },
+     {
+      "flag": "--window",
+      "input": "window"
+     },
+     {
+      "flag": "--min-efficiency",
+      "input": "min_efficiency"
+     },
+     {
+      "flag": "--max-occupancy",
+      "input": "max_occupancy"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "thresholds",
+     "kind": "charge",
+     "unit": "{Q}",
+     "required": false,
+     "constraint": "thresholds; exactly one of thresholds or scan"
+    },
+    {
+     "name": "scan",
+     "kind": "charge",
+     "unit": "{Q}",
+     "required": false,
+     "constraint": "LOW HIGH STEPS: STEPS (integer 2-400) thresholds from LOW to HIGH; exactly one of thresholds or scan"
+    },
+    {
+     "name": "noise",
+     "kind": "charge",
+     "unit": "{Q}",
+     "required": true,
+     "constraint": "noise sigma (ENC), > 0"
+    },
+    {
+     "name": "signal_model",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "'landau' or 'gauss'",
+     "default": "landau"
+    },
+    {
+     "name": "mpv",
+     "kind": "charge",
+     "unit": "{Q}",
+     "required": false,
+     "constraint": "landau: most probable signal, > 0"
+    },
+    {
+     "name": "xi",
+     "kind": "charge",
+     "unit": "{Q}",
+     "required": false,
+     "constraint": "landau: width parameter xi, > 0"
+    },
+    {
+     "name": "mean",
+     "kind": "charge",
+     "unit": "{Q}",
+     "required": false,
+     "constraint": "gauss: mean signal, > 0"
+    },
+    {
+     "name": "sigma_signal",
+     "kind": "charge",
+     "unit": "{Q}",
+     "required": false,
+     "constraint": "gauss: signal sigma, >= 0"
+    },
+    {
+     "name": "signal_fraction",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "fraction of the signal on the channel, in (0, 1]",
+     "default": 1.0
+    },
+    {
+     "name": "threshold_dispersion",
+     "kind": "charge",
+     "unit": "{Q}",
+     "required": false,
+     "constraint": "channel-to-channel threshold sigma, >= 0",
+     "default": 0.0
+    },
+    {
+     "name": "peaking",
+     "kind": "time",
+     "unit": "ns",
+     "required": false,
+     "constraint": "peaking time for the noise crossing rate, > 0"
+    },
+    {
+     "name": "order",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "shaper order, integer 1-10",
+     "default": 2
+    },
+    {
+     "name": "noise_type",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "'series', 'parallel' or 'mixed'",
+     "default": "series"
+    },
+    {
+     "name": "series_fraction",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "mixed only: series fraction of the noise variance, in [0, 1]"
+    },
+    {
+     "name": "window",
+     "kind": "time",
+     "unit": "ns",
+     "required": false,
+     "constraint": "readout or integration window, > 0; needs peaking"
+    },
+    {
+     "name": "min_efficiency",
+     "kind": "probability",
+     "unit": "1",
+     "required": false,
+     "constraint": "efficiency target for the operating window"
+    },
+    {
+     "name": "max_occupancy",
+     "kind": "probability",
+     "unit": "1",
+     "required": false,
+     "constraint": "noise occupancy target per channel and window (per sample without window)"
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "command",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "assumptions",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "validity",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "signal",
+     "kind": "parameter",
+     "unit": "{Q}"
+    },
+    {
+     "name": "noise_sigma",
+     "kind": "charge",
+     "unit": "{Q}"
+    },
+    {
+     "name": "threshold_dispersion",
+     "kind": "charge",
+     "unit": "{Q}"
+    },
+    {
+     "name": "sigma_for_efficiency",
+     "kind": "charge",
+     "unit": "{Q}"
+    },
+    {
+     "name": "nu0_hz",
+     "kind": "rate",
+     "unit": "Hz"
+    },
+    {
+     "name": "thresholds",
+     "kind": "probability",
+     "unit": "1"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the result is not finite for these inputs (overflow or division by zero); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"failed\", \"error\": ...} and stderr one line"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range (including a relation the subcommand checks, such as R_p > 0 or rho within [-1/(N-1), 1]); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
+  },
+  {
+   "operation_id": "waveform-toy",
+   "summary": "Seeded synthetic sampled readout of a CR-(RC)^n pulse with exponentially correlated noise, Poisson pileup (fixed or exponential amplitudes), Gaussian phase jitter and a uniform ADC with pedestal and saturation, reconstructed with the largest sample, the uncorrelated template fit and two optimal filters (electronic-only and pileup-matched weights); bias and resolution of each with Monte Carlo errors and closure against the analytic prediction; output labelled synthetic",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--order",
+      "input": "order"
+     },
+     {
+      "flag": "--peaking",
+      "input": "peaking"
+     },
+     {
+      "flag": "--period",
+      "input": "period"
+     },
+     {
+      "flag": "--samples",
+      "input": "samples"
+     },
+     {
+      "flag": "--first-offset",
+      "input": "first_offset"
+     },
+     {
+      "flag": "--rho",
+      "input": "rho"
+     },
+     {
+      "flag": "--pileup-rate",
+      "input": "pileup_rate"
+     },
+     {
+      "flag": "--constraints",
+      "input": "constraints"
+     },
+     {
+      "flag": "--amplitude",
+      "input": "amplitude"
+     },
+     {
+      "flag": "--events",
+      "input": "events"
+     },
+     {
+      "flag": "--seed",
+      "input": "seed"
+     },
+     {
+      "flag": "--phase-jitter",
+      "input": "phase_jitter"
+     },
+     {
+      "flag": "--pileup-mean-amp",
+      "input": "pileup_mean_amp"
+     },
+     {
+      "flag": "--pileup-amplitudes",
+      "input": "pileup_amplitudes"
+     },
+     {
+      "flag": "--adc-lsb",
+      "input": "adc_lsb"
+     },
+     {
+      "flag": "--adc-bits",
+      "input": "adc_bits"
+     },
+     {
+      "flag": "--pedestal",
+      "input": "pedestal"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "order",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "shaper order n of CR-(RC)^n, integer 1-10",
+     "default": 1
+    },
+    {
+     "name": "peaking",
+     "kind": "time",
+     "unit": "ns",
+     "required": true,
+     "constraint": "peaking time t_p = n tau, > 0"
+    },
+    {
+     "name": "period",
+     "kind": "time",
+     "unit": "ns",
+     "required": true,
+     "constraint": "sampling period, > 0"
+    },
+    {
+     "name": "samples",
+     "kind": "counts",
+     "unit": "1",
+     "required": true,
+     "constraint": "number of samples, integer 1-64"
+    },
+    {
+     "name": "first_offset",
+     "kind": "time",
+     "unit": "ns",
+     "required": true,
+     "constraint": "time of the first sample relative to the pulse peak (negative before it)"
+    },
+    {
+     "name": "rho",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "electronic-noise correlation between neighbouring samples, in [0, 1)",
+     "default": 0.0
+    },
+    {
+     "name": "pileup_rate",
+     "kind": "rate",
+     "unit": "Hz",
+     "required": false,
+     "constraint": "pileup pulse rate per channel, >= 0",
+     "default": 0.0
+    },
+    {
+     "name": "constraints",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "optimal-filter constraints, any of 'phase' (w . g' = 0) and 'baseline' (sum w = 0); fewer constraints than samples"
+    },
+    {
+     "name": "amplitude",
+     "kind": "parameter",
+     "unit": "1",
+     "required": true,
+     "constraint": "pulse amplitude in noise units, > 0"
+    },
+    {
+     "name": "events",
+     "kind": "counts",
+     "unit": "1",
+     "required": false,
+     "constraint": "events, integer 100-200000",
+     "default": 20000
+    },
+    {
+     "name": "seed",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "random seed, integer >= 0",
+     "default": 1
+    },
+    {
+     "name": "phase_jitter",
+     "kind": "time",
+     "unit": "ns",
+     "required": false,
+     "constraint": "Gaussian phase sigma, >= 0",
+     "default": 0.0
+    },
+    {
+     "name": "pileup_mean_amp",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "mean pileup amplitude in noise units, >= 0",
+     "default": 0.0
+    },
+    {
+     "name": "pileup_amplitudes",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "'fixed' or 'exponential'",
+     "default": "fixed"
+    },
+    {
+     "name": "adc_lsb",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "ADC bin in noise units, > 0 (no ADC when absent)"
+    },
+    {
+     "name": "adc_bits",
+     "kind": "counts",
+     "unit": "1",
+     "required": false,
+     "constraint": "ADC bits, integer 4-24",
+     "default": 12
+    },
+    {
+     "name": "pedestal",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "pedestal in noise units",
+     "default": 5.0
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "command",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "assumptions",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "validity",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "status_label",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "seed",
+     "kind": "parameter",
+     "unit": "1"
+    },
+    {
+     "name": "events",
+     "kind": "counts",
+     "unit": "1"
+    },
+    {
+     "name": "sample_times_ns",
+     "kind": "time",
+     "unit": "ns"
+    },
+    {
+     "name": "pileup_mean_offset_per_sample",
+     "kind": "parameter",
+     "unit": "1"
+    },
+    {
+     "name": "saturated_events",
+     "kind": "counts",
+     "unit": "1"
+    },
+    {
+     "name": "estimators",
+     "kind": "parameter",
+     "unit": "1"
+    },
+    {
+     "name": "constraints",
+     "kind": "label",
+     "unit": "n/a"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the result is not finite for these inputs (overflow or division by zero); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"failed\", \"error\": ...} and stderr one line"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range (including a relation the subcommand checks, such as R_p > 0 or rho within [-1/(N-1), 1]); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
+  },
+  {
+   "operation_id": "s-curve",
+   "summary": "Binomial maximum-likelihood fit of a threshold scan (hits out of injections at increasing injected charge) to Phi((Q - T)/sigma): threshold, noise, their inverse-Fisher errors and correlation, deviance and its chi2 p-value; or, in design mode, the expected errors of a scan at an assumed threshold and noise",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--charges",
+      "input": "charges"
+     },
+     {
+      "flag": "--injections",
+      "input": "injections"
+     },
+     {
+      "flag": "--hits",
+      "input": "hits"
+     },
+     {
+      "flag": "--design-threshold",
+      "input": "design_threshold"
+     },
+     {
+      "flag": "--design-noise",
+      "input": "design_noise"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "charges",
+     "kind": "charge",
+     "unit": "{Q}",
+     "required": true,
+     "constraint": "injected charges, strictly increasing, at least 3"
+    },
+    {
+     "name": "injections",
+     "kind": "counts",
+     "unit": "1",
+     "required": true,
+     "constraint": "injections per charge, positive integers: one for all or one per charge"
+    },
+    {
+     "name": "hits",
+     "kind": "counts",
+     "unit": "1",
+     "required": false,
+     "constraint": "fit mode: hits per charge, integers in [0, injections]; the scan must cross 50 %"
+    },
+    {
+     "name": "design_threshold",
+     "kind": "charge",
+     "unit": "{Q}",
+     "required": false,
+     "constraint": "design mode (with design_noise): assumed threshold"
+    },
+    {
+     "name": "design_noise",
+     "kind": "charge",
+     "unit": "{Q}",
+     "required": false,
+     "constraint": "design mode (with design_threshold): assumed noise, > 0"
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "command",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "assumptions",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "validity",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "mode",
+     "kind": "label",
+     "unit": "n/a"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the result is not finite for these inputs (overflow or division by zero); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"failed\", \"error\": ...} and stderr one line"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range (including a relation the subcommand checks, such as R_p > 0 or rho within [-1/(N-1), 1]); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
+  },
+  {
+   "operation_id": "threshold-trim",
+   "summary": "Threshold dispersion after per-channel trim of a Gaussian untrimmed spread with a trim DAC of 2^b codes of a given step (uniform residual inside the range, the excess beyond it) and an rms DAC nonlinearity, with the fraction of channels beyond the trim range",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--spread",
+      "input": "spread"
+     },
+     {
+      "flag": "--trim-bits",
+      "input": "trim_bits"
+     },
+     {
+      "flag": "--trim-step",
+      "input": "trim_step"
+     },
+     {
+      "flag": "--dac-nonlinearity",
+      "input": "dac_nonlinearity"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "spread",
+     "kind": "charge",
+     "unit": "{Q}",
+     "required": true,
+     "constraint": "untrimmed threshold spread (Gaussian sigma), > 0"
+    },
+    {
+     "name": "trim_bits",
+     "kind": "counts",
+     "unit": "1",
+     "required": true,
+     "constraint": "trim DAC bits, integer 1-16"
+    },
+    {
+     "name": "trim_step",
+     "kind": "charge",
+     "unit": "{Q}",
+     "required": true,
+     "constraint": "trim DAC step, > 0"
+    },
+    {
+     "name": "dac_nonlinearity",
+     "kind": "charge",
+     "unit": "{Q}",
+     "required": false,
+     "constraint": "rms trim DAC nonlinearity, >= 0",
+     "default": 0.0
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "command",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "assumptions",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "validity",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "untrimmed_spread",
+     "kind": "charge",
+     "unit": "{Q}"
+    },
+    {
+     "name": "trim_range_half_width",
+     "kind": "charge",
+     "unit": "{Q}"
+    },
+    {
+     "name": "fraction_beyond_range",
+     "kind": "probability",
+     "unit": "1"
+    },
+    {
+     "name": "residual_dispersion",
+     "kind": "charge",
+     "unit": "{Q}"
+    },
+    {
+     "name": "quantization_part",
+     "kind": "charge",
+     "unit": "{Q}"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the result is not finite for these inputs (overflow or division by zero); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"failed\", \"error\": ...} and stderr one line"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range (including a relation the subcommand checks, such as R_p > 0 or rho within [-1/(N-1), 1]); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
   }
  ]
 }

@@ -304,6 +304,23 @@ FRONTEND_OPS = {  # operation id -> (arguments that succeed, arguments that are 
     "leakage-scale": (["--current", "100", "--from-celsius", "20", "--to-celsius", "-10"],
                       ["--current", "100", "--from-celsius", "20"]),
     "cluster-noise": (["--channels", "3", "--sigma", "1", "--rho", "0.2"], ["--channels", "3", "--sigma", "1", "--rho", "2"]),
+    "optimal-filter": (["--order", "4", "--peaking", "45", "--period", "25", "--samples", "5", "--first-offset", "-25",
+                        "--rho", "0.3", "--pileup-rate", "1e6", "--pileup-rms", "2", "--amplitude", "40",
+                        "--phase-errors", "-2", "2", "--constraints", "phase"],
+                       ["--peaking", "45", "--period", "25", "--samples", "5", "--first-offset", "-25", "--rho", "1"]),
+    "hit-efficiency": (["--thresholds", "3000", "6000", "--noise", "1000", "--mpv", "23000", "--xi", "1500",
+                        "--threshold-dispersion", "300", "--peaking", "25", "--window", "25", "--min-efficiency", "0.99",
+                        "--max-occupancy", "1e-4"],
+                       ["--thresholds", "3000", "--noise", "1000", "--mpv", "23000"]),
+    "waveform-toy": (["--order", "2", "--peaking", "30", "--period", "10", "--samples", "6", "--first-offset", "-20",
+                      "--amplitude", "20", "--events", "200", "--pileup-rate", "1e6", "--pileup-mean-amp", "2",
+                      "--phase-jitter", "1", "--adc-lsb", "0.5", "--constraints", "baseline"],
+                     ["--peaking", "30", "--period", "10", "--samples", "6", "--first-offset", "-20", "--amplitude",
+                      "20", "--events", "5"]),
+    "s-curve": (["--charges", "3000", "3400", "3800", "4200", "--injections", "100", "--hits", "2", "30", "70", "98"],
+                ["--charges", "3000", "3400", "3800", "--injections", "100"]),
+    "threshold-trim": (["--spread", "1500", "--trim-bits", "4", "--trim-step", "250", "--dac-nonlinearity", "20"],
+                       ["--spread", "1500", "--trim-bits", "40", "--trim-step", "250"]),
 }
 
 
