@@ -152,7 +152,7 @@ Hashes differ after `git am`; identify commits by their messages.
 | FE2 | `waveform-toy` and `optimal-filter` accept a measured per-sample noise covariance (including non-exponential correlation); `waveform-toy` generates noise by Cholesky; both compute weights and predictions from the same matrix |
 | FE3 | `s-curve` batch fit of many channels from CSV; per-channel results and a threshold-dispersion summary that states which dispersion goes to which downstream tool |
 | FE4 | (after D-FE4) simreco `noise-digitization` parameters derivable from `hit-efficiency` |
-| FE5 | (after D-FE5) shrink the front-end reference page: split plan and wiring |
+| FE5 | shrink the front-end reference page: two new pages, hub registration (D-FE5) |
 
 ### Out of Scope
 
@@ -469,6 +469,11 @@ Follows `docs/dev/geant4-architecture/geant4-program.md` §P.10 [C]; the only ex
   3. Use a `move:` commit with no content change. Leave at the old location a pointer headed "… (moved)" for one minor
      version and record in `pointers` the version that removes it (`docs/maintenance.md`, "Adding a topic").
   4. Regenerate the reference inventory; update the reference count in the README.
+- *At FE5 [C]:* the front-end page went from 40,480 bytes (after FE1 and FE4) to 23,863 bytes in the `move:` commit
+  and to about 24.2 KB with the sentence that names the two new pages, under the line. The "(moved)" pointers are
+  sections of a live page, not pointer pages, so `check_wiring.py` does not expire them: their `pointers` entries
+  (keyed `page#anchor`, `remove_in` 0.42.0) say to remove them by hand. Links whose topic moved (Campbell pileup, SiPM
+  saturation, dead time, the sampled-waveform estimators) now point to the new pages.
 
 ## Deliverables
 
@@ -587,8 +592,10 @@ Test requirements:
   FRONTEND-INJECTION-GAIN, both sources read in the full text, regression test `InjectionGainGuidance`).
 - **[C] D-FE4**: decided 2026-10-25 by the maintainer: do FE4, new options only (`feat:`); defaults and the J15/J16
   records unchanged.
-- **[U] D-FE5**: Do FE5? Which sections move (photosensor and LAr TPC alone do not reach 24 KB)? Register the front-end
-  page as a hub? Blocks: FE5. Decided by: Maintainer. Type: Requires Confirmation.
+- **[C] D-FE5**: decided 2026-10-25 by the maintainer: do FE5 with two new pages,
+  `front-end-waveform-processing.md` (sampled-waveform amplitude and time, pileup, photosensor and LAr TPC readout,
+  digital pulse processing, pulse-shape discrimination) and `front-end-calibration.md` (calibration and simulation of
+  the electronics); the front-end page is registered as a hub.
 - **[U] FE1 spectrum**: Is there a thin-silicon charge spectrum that may be placed publicly in `assets/`? If not, tests
   use synthetic tables only. Blocks: Nothing (test data only). Decided by: Maintainer. Type: Open Question.
 - **[C] E2 versions**: recorded at FE0 (VALIDATION FRONTEND-RECO-SIM): Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1,

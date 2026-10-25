@@ -874,12 +874,14 @@ class InjectionGainGuidance(unittest.TestCase):
     calibration pulses) and arXiv:0912.2642v4 sec. 3.1.2, eq. 5 (its inverse is the response ratio of a calibration
     and an ionization pulse of the same input current)."""
     PAGE = PLUGIN / 'skills' / 'hep-detector' / 'references' / 'front-end-electronics-and-signal-processing.md'
+    CALIBRATION = PAGE.with_name('front-end-calibration.md')  # the calibration section's page since FE5
 
     def setUp(self):
         self.text = self.PAGE.read_text(encoding='utf-8')
 
     def test_injection_bullet_separates_injection_and_signal_gain(self):
-        calibration = self.text.split('## Calibration of the electronics', 1)[1].split('\n## ', 1)[0]
+        text = self.CALIBRATION.read_text(encoding='utf-8')
+        calibration = text.split('## Calibration of the electronics', 1)[1].split('\n## ', 1)[0]
         bullet = calibration.split('- **Charge injection**', 1)[1].split('\n- **', 1)[0]
         flat = ' '.join(bullet.split())
         self.assertIn('the injection gain and the physics-signal gain differ', flat)

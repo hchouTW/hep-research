@@ -2756,6 +2756,24 @@ Contracts: the 13 new keys are core `convention_keys` and also `conditional_conv
 description change and the 8 Th14 cases (paid; pending approval). Pre-existing on main: 5 tests of
 `tests/contracts/test_simulated_dataset.py` fail under a whole-directory pytest run and pass alone (order dependent).
 
+## FRONTEND-FE5 (2026-10-25, E2: macOS 26.5 arm64, Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1, SymPy 1.14.0, mpmath 1.3.0; branch `worktree-frontend-fe5` in `.claude/worktrees/frontend-fe5`, unreleased)
+
+Stage FE5: the front-end reference page split in three. Maintainer decision D-FE5 (2026-10-25): two new pages, the
+front-end page registered as a hub. Stacked on FE4. Worktree checks at the start: top level the worktree, branch
+`worktree-frontend-fe5`, status clean.
+
+| Check | Result |
+|---|---|
+| No content change (`move:` commit) | every non-blank line of the old page is in one of the three pages (multiset comparison: 0 lines lost); the only new lines are the two titles, their introductions and the eight "(moved)" pointers |
+| Size | front-end page 40,480 -> 23,863 bytes after the move, 24,202 with the sentence naming the new pages (warning line 24,576); new pages 12,656 and 6,034 bytes; `reference_inventory.py --check` pass, the page no longer warned |
+| Wiring | `check_wiring.py --since` the FE4 head: pass (hub registered; the new pages reachable through it; CHANGELOG names both); section pointers recorded under `pointers` with `remove_in` 0.42.0 and a note that `check_wiring.py` checks pointer pages only |
+| Links | `test_reference_links` pass; links into moved sections and links whose topic moved retargeted; `InjectionGainGuidance` reads the calibration page; FRONTEND-INJECTION-GAIN internal sources split between the two pages |
+| Validation commands | static part pass, `lint_task.py` 0 errors |
+| Full check at `a1267715` | 31 of 31 checks pass with the host CLIs; unittest 5598 run, 5445 pass, 153 skipped, 0 failures or errors |
+
+FE0 head `297169a3` alone (with the exit-code fix), full check: 31 of 31 pass; unittest 5575 run, 5422 pass, 153
+skipped, 0 failures or errors.
+
 ## FRONTEND-FE4 (2026-10-25, E2: macOS 26.5 arm64, Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1, SymPy 1.14.0, mpmath 1.3.0; branch `worktree-frontend-fe4` in `.claude/worktrees/frontend-fe4`, unreleased)
 
 Stage FE4: `hit-efficiency` fills the `noise-digitization` tail source of the Geant4 adapter's simreco. Maintainer

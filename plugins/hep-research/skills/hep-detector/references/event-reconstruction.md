@@ -58,7 +58,8 @@ template fit, optimal filter, possibly constrained against phase or baseline err
 bias depends on the phase, the pileup level and the baseline; its weights are conditions
 data, and simulation must use the same ones. The estimators, their bias and noise, and the
 threshold-level operating window (efficiency against noise occupancy for the charge on the
-channel) are in [front-end electronics](front-end-electronics-and-signal-processing.md#amplitude-and-time-from-sampled-waveforms).
+channel) are in [front-end waveform processing](front-end-waveform-processing.md#amplitude-and-time-from-sampled-waveforms)
+and [front-end electronics](front-end-electronics-and-signal-processing.md#thresholds-fake-hits-and-zero-suppression).
 
 **Check:** Dead and noisy channel maps match between data and simulation period by period (luminosity-weighted), and threshold turn-ons are modeled.
 

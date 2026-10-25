@@ -85,7 +85,7 @@ quadrature:
   contribution falls as `1/E`. It is the term that grows when pileup increases, and
   the reason optimal cluster size is pileup-dependent. Coherent noise makes the
   cluster noise grow faster than `sqrt(N_cells)`, and the pileup part follows
-  Campbell's theorem ([front-end electronics and signal processing](front-end-electronics-and-signal-processing.md)).
+  Campbell's theorem ([front-end waveform processing](front-end-waveform-processing.md#pileup-of-pulses-baseline-and-rate)).
 - **`c`, the constant term** - calibration non-uniformity, channel-to-channel
   intercalibration error, hardware non-uniformity (dead material, cracks, temperature
   and light-collection variations), energy leakage (only approximately: leakage grows with energy and adds a low-side tail that a constant term does not describe), and in hadronic calorimeters the

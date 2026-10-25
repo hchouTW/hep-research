@@ -109,7 +109,7 @@ observable ([detector simulation](detector-simulation.md#validating-the-simulati
   this check).
 - **Calibration closure**: run the data's calibration procedures (pedestal, injection,
   S-curve fits, trim) on simulated calibration data and recover the constants the
-  digitization was given ([calibration of the electronics](front-end-electronics-and-signal-processing.md#calibration-of-the-electronics)).
+  digitization was given ([calibration of the electronics](front-end-calibration.md#calibration-of-the-electronics)).
 - **Charge scale and sharing**: most probable value per channel after the same calibration
   chain, and cluster size and charge sharing versus incidence angle.
 - Tune digitization parameters only on these control observables, with the physical

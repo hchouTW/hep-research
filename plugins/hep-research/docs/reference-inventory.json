@@ -19,8 +19,8 @@
    "uncited": 0
   },
   "hep-detector": {
-   "references": 40,
-   "bytes": 586341,
+   "references": 42,
+   "bytes": 589007,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1687,7 +1687,7 @@
     "skills/hep-detector/references/detector-simulation.md",
     "skills/hep-detector/references/detector-systems-overview.md",
     "skills/hep-detector/references/event-reconstruction.md",
-    "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
+    "skills/hep-detector/references/front-end-calibration.md",
     "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
     "skills/hep-detector/references/muon-systems.md",
     "skills/hep-detector/references/response-and-forward-folding.md",
@@ -1703,7 +1703,7 @@
   {
    "path": "skills/hep-detector/references/calorimetry-ecal-hcal.md",
    "owner": "hep-detector",
-   "bytes": 12998,
+   "bytes": 13005,
    "lines": 208,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -1743,7 +1743,7 @@
   {
    "path": "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
    "owner": "hep-detector",
-   "bytes": 11288,
+   "bytes": 11302,
    "lines": 162,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -1751,6 +1751,7 @@
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
+    "skills/hep-detector/references/front-end-waveform-processing.md",
     "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
@@ -1943,8 +1944,8 @@
   {
    "path": "skills/hep-detector/references/detector-simulation.md",
    "owner": "hep-detector",
-   "bytes": 14397,
-   "lines": 231,
+   "bytes": 14467,
+   "lines": 232,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
@@ -1997,8 +1998,8 @@
   {
    "path": "skills/hep-detector/references/event-reconstruction.md",
    "owner": "hep-detector",
-   "bytes": 13318,
-   "lines": 214,
+   "bytes": 13430,
+   "lines": 215,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/calibration-and-alignment.md",
@@ -2010,7 +2011,7 @@
     "skills/hep-detector/references/timing-detectors.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "765bf693 2026-10-25"
+   "last_commit": "e4841301 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/extensive-air-showers.md",
@@ -2037,31 +2038,62 @@
    "last_commit": "af7ad3bb 2026-10-21"
   },
   {
+   "path": "skills/hep-detector/references/front-end-calibration.md",
+   "owner": "hep-detector",
+   "bytes": 6034,
+   "lines": 83,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
+    "skills/hep-detector/references/readout-digitization-and-overlay.md",
+    "tests/skills/hep_detector/test_frontend_waveforms.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "e4841301 2026-10-25"
+  },
+  {
    "path": "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
    "owner": "hep-detector",
-   "bytes": 40480,
-   "lines": 566,
+   "bytes": 24202,
+   "lines": 362,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
-    "skills/hep-detector/references/calorimetry-ecal-hcal.md",
-    "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
     "skills/hep-detector/references/detector-measurement-framework.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/detector-simulation.md",
     "skills/hep-detector/references/event-reconstruction.md",
+    "skills/hep-detector/references/front-end-calibration.md",
+    "skills/hep-detector/references/front-end-waveform-processing.md",
     "skills/hep-detector/references/geant4-study-protocol.md",
     "skills/hep-detector/references/readout-digitization-and-overlay.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-detector/references/timing-detectors.md",
     "skills/hep-detector/references/tracking-and-vertexing.md",
-    "skills/hep-detector/references/triggers-luminosity-pileup.md",
     "skills/hep-detector/scripts/frontend_response.py",
     "tests/skills/hep_detector/test_frontend_waveforms.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ba0a6f62 2026-10-25"
+   "last_commit": "e4841301 2026-10-25"
+  },
+  {
+   "path": "skills/hep-detector/references/front-end-waveform-processing.md",
+   "owner": "hep-detector",
+   "bytes": 12708,
+   "lines": 172,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-detector/references/calorimetry-ecal-hcal.md",
+    "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
+    "skills/hep-detector/references/detector-simulation.md",
+    "skills/hep-detector/references/event-reconstruction.md",
+    "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
+    "skills/hep-detector/references/signal-formation-and-readout.md",
+    "skills/hep-detector/references/triggers-luminosity-pileup.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "e4841301 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
@@ -2106,7 +2138,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "bbeb133f 2026-10-25"
+   "last_commit": "cdcb3651 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/ground-based-detection-arrays.md",
@@ -2216,7 +2248,7 @@
     "skills/hep-detector/references/detector-glossary.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
-    "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
+    "skills/hep-detector/references/front-end-waveform-processing.md",
     "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
     "skills/hep-detector/references/signal-formation-and-readout.md"
    ],
@@ -2322,15 +2354,16 @@
   {
    "path": "skills/hep-detector/references/readout-digitization-and-overlay.md",
    "owner": "hep-detector",
-   "bytes": 9615,
+   "bytes": 9593,
    "lines": 142,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/detector-simulation.md",
+    "skills/hep-detector/references/front-end-calibration.md",
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "5fa57b0a 2026-10-25"
+   "last_commit": "e4841301 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md",
@@ -2386,7 +2419,7 @@
   {
    "path": "skills/hep-detector/references/signal-formation-and-readout.md",
    "owner": "hep-detector",
-   "bytes": 19259,
+   "bytes": 19273,
    "lines": 258,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -2506,7 +2539,7 @@
   {
    "path": "skills/hep-detector/references/triggers-luminosity-pileup.md",
    "owner": "hep-detector",
-   "bytes": 16505,
+   "bytes": 16512,
    "lines": 241,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -2517,7 +2550,7 @@
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/detector-simulation.md",
     "skills/hep-detector/references/event-reconstruction.md",
-    "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
+    "skills/hep-detector/references/front-end-waveform-processing.md",
     "skills/hep-detector/references/muon-systems.md",
     "skills/hep-detector/references/readout-digitization-and-overlay.md",
     "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md",
@@ -4460,6 +4493,10 @@
    "skills/hep-computing/references/batch-site-cern-htcondor.md",
    "skills/hep-computing/references/batch-site-nstccore-slurm.md"
   ],
+  "calibration": [
+   "skills/hep-detector/references/calibration-and-alignment.md",
+   "skills/hep-detector/references/front-end-calibration.md"
+  ],
   "cern": [
    "skills/hep-computing/references/batch-site-cern-htcondor.md",
    "skills/hep-computing/references/storage-cern-eos.md"
@@ -4510,6 +4547,11 @@
    "skills/hep-theory/references/dis-structure-functions.md",
    "skills/hep-theory/references/polarized-dis.md"
   ],
+  "end": [
+   "skills/hep-detector/references/front-end-calibration.md",
+   "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
+   "skills/hep-detector/references/front-end-waveform-processing.md"
+  ],
   "engineering": [
    "skills/hep-computing/references/engineering-playbook.md",
    "skills/hep-computing/references/loop-engineering.md",
@@ -4532,6 +4574,11 @@
   "figure": [
    "skills/hep-authoring/references/diagram-figure-style.md",
    "skills/hep-authoring/references/figures-and-tables.md"
+  ],
+  "front": [
+   "skills/hep-detector/references/front-end-calibration.md",
+   "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
+   "skills/hep-detector/references/front-end-waveform-processing.md"
   ],
   "function": [
    "skills/hep-theory/references/dis-structure-functions.md",
@@ -4609,6 +4656,10 @@
    "skills/hep-detector/references/detector-design-principles.md",
    "skills/hep-detector/references/detector-principles-bibliography.md",
    "skills/hep-detector/references/detector-principles-summary.md"
+  ],
+  "processing": [
+   "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
+   "skills/hep-detector/references/front-end-waveform-processing.md"
   ],
   "python": [
    "skills/hep-computing/references/python-balanced-design-guidelines.md",

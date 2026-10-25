@@ -6461,8 +6461,14 @@
     },
     {
      "kind": "internal",
+     "citation": "skills/hep-detector/references/front-end-calibration.md",
+     "locator": "Calibration of the electronics, Charge injection (moved from the front-end page in FE5)",
+     "read": "2026-10-25"
+    },
+    {
+     "kind": "internal",
      "citation": "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
-     "locator": "Calibration of the electronics, Charge injection; Misconceptions",
+     "locator": "Misconceptions",
      "read": "2026-10-25"
     }
    ],
