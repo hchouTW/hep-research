@@ -279,3 +279,24 @@ sample comes from `toy_spectrometer.py`.
 - For any calibration update: what was re-derived, what was re-validated, and a
   before/after comparison of the affected distributions.
 - Correlation treatment of calibration uncertainties across regions and samples.
+
+<a id="naming-n11"></a>
+### Naming: calibrations, conditions tags and efficiency maps (N11)
+- **Extractor:** `extract_names.py --surface N11` (hep-detector; inputs: response artifacts and their matrix references, conditions fields and era versions, configuration keys and Python assignments of global and conditions tags)
+- **Entity kinds and level floors:** generated from `contracts/naming/surfaces.json`, not restated by hand:
+
+<!-- naming-kinds:N11: generated from contracts/naming/surfaces.json by contracts/naming_registry.py sections; do not edit -->
+
+| Kind | Level floor | Format | Rename policy |
+|---|---|---|---|
+| `project_output` | C2 | — | matrix |
+| `conditions_tag` | C2 | — | matrix |
+
+<!-- /naming-kinds:N11 -->
+
+- **The name must say:** the detector quantity, the method and the period a calibration or map covers (`muon_id_eff_tnp_2018`); a conditions tag is quoted exactly as the conditions database gives it
+- **Rename policy:** matrix; conditions tags are C4 (`source: external`): never renamed, only mapped
+- **Rules:** see the registry for surface N11 (`naming.common.*`, `naming.n11.*`, `naming.cross.*`)
+- **Good / bad:** `ecal_energy_scale_2017`, `muon_id_eff_tnp_2018` / `calib_new`, `eff_map2`
+
+Procedure, levels and report: [semantic naming charter](../../hep-computing/references/semantic-naming.md).

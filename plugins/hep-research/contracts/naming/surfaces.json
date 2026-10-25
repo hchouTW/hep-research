@@ -65,7 +65,7 @@
    "surface_id": "N3",
    "name": "Objects inside ROOT files",
    "owner": "hep-computing",
-   "extractor": null,
+   "extractor": "skills/hep-computing/scripts/extract_names.py",
    "kinds": {
     "object": {
      "level_floor": "C2"
@@ -94,10 +94,11 @@
    "surface_id": "N4",
    "name": "Branches and columns",
    "owner": "hep-computing",
-   "extractor": null,
+   "extractor": "skills/hep-computing/scripts/extract_names.py",
    "kinds": {
     "project_column": {
-     "level_floor": "C2"
+     "level_floor": "C2",
+     "format": "^(?:[a-z][a-z0-9]*|[A-Z][a-z0-9]*)(?:_[a-z0-9]+)*$"
     }
    },
    "rename_policy": "matrix",
@@ -145,13 +146,16 @@
    "surface_id": "N6",
    "name": "Batch jobs, workflow rules, chunks",
    "owner": "hep-computing",
-   "extractor": null,
+   "extractor": "skills/hep-computing/scripts/extract_names.py",
    "kinds": {
     "job": {
      "level_floor": "C1"
     },
     "log_pattern": {
      "level_floor": "C3"
+    },
+    "chunk": {
+     "level_floor": "C1"
     }
    },
    "rename_policy": "matrix",
@@ -164,10 +168,16 @@
    "surface_id": "N7",
    "name": "Samples, datasets, run ranges",
    "owner": "hep-measurement",
-   "extractor": null,
+   "extractor": "skills/hep-measurement/scripts/extract_names.py",
    "kinds": {
     "internal_alias": {
      "level_floor": "C1"
+    },
+    "run_range": {
+     "level_floor": "C1"
+    },
+    "dataset": {
+     "level_floor": "C2"
     }
    },
    "rename_policy": "matrix",
@@ -180,9 +190,12 @@
    "surface_id": "N8",
    "name": "Selections, cutflows, regions",
    "owner": "hep-measurement",
-   "extractor": null,
+   "extractor": "skills/hep-measurement/scripts/extract_names.py",
    "kinds": {
     "selection": {
+     "level_floor": "C2"
+    },
+    "region": {
      "level_floor": "C2"
     }
    },
@@ -196,7 +209,7 @@
    "surface_id": "N9",
    "name": "Systematic variations",
    "owner": "hep-measurement",
-   "extractor": null,
+   "extractor": "skills/hep-measurement/scripts/extract_names.py",
    "kinds": {
     "variation": {
      "level_floor": "C3"
@@ -212,13 +225,27 @@
    "surface_id": "N10",
    "name": "Nuisances, POIs, channels, samples",
    "owner": "hep-statistics",
-   "extractor": null,
+   "extractor": "skills/hep-statistics/scripts/extract_names.py",
    "kinds": {
     "nuisance": {
-     "level_floor": "C3"
+     "level_floor": "C3",
+     "format": "^[A-Za-z][A-Za-z0-9_]*$"
     },
     "channel": {
-     "level_floor": "C3"
+     "level_floor": "C3",
+     "format": "^[A-Za-z][A-Za-z0-9_]*$"
+    },
+    "process": {
+     "level_floor": "C3",
+     "format": "^[A-Za-z][A-Za-z0-9_]*$"
+    },
+    "poi": {
+     "level_floor": "C3",
+     "format": "^[A-Za-z][A-Za-z0-9_]*$"
+    },
+    "rate_parameter": {
+     "level_floor": "C3",
+     "format": "^[A-Za-z][A-Za-z0-9_]*$"
     },
     "observed_data": {
      "level_floor": "C4",
@@ -244,9 +271,12 @@
    "surface_id": "N11",
    "name": "Calibrations, conditions tags, efficiency maps",
    "owner": "hep-detector",
-   "extractor": null,
+   "extractor": "skills/hep-detector/scripts/extract_names.py",
    "kinds": {
     "project_output": {
+     "level_floor": "C2"
+    },
+    "conditions_tag": {
      "level_floor": "C2"
     }
    },
@@ -260,9 +290,15 @@
    "surface_id": "N12",
    "name": "Models, checkpoints, features",
    "owner": "hep-ml",
-   "extractor": null,
+   "extractor": "skills/hep-ml/scripts/extract_names.py",
    "kinds": {
     "model_artifact": {
+     "level_floor": "C2"
+    },
+    "checkpoint": {
+     "level_floor": "C2"
+    },
+    "feature": {
      "level_floor": "C2"
     }
    },
@@ -276,9 +312,12 @@
    "surface_id": "N13",
    "name": "Theory parameters, scheme labels",
    "owner": "hep-theory",
-   "extractor": null,
+   "extractor": "skills/hep-theory/scripts/extract_names.py",
    "kinds": {
     "parameter": {
+     "level_floor": "C2"
+    },
+    "scheme_label": {
      "level_floor": "C2"
     }
    },
@@ -292,12 +331,22 @@
    "surface_id": "N14",
    "name": "Figure files, table files, LaTeX labels, macros",
    "owner": "hep-authoring",
-   "extractor": null,
+   "extractor": "skills/hep-authoring/scripts/extract_names.py",
    "kinds": {
     "label": {
-     "level_floor": "C2"
+     "level_floor": "C2",
+     "format": "^(?:fig|tab|eq|sec|subsec|app|ch|lst|alg|thm|lem|def|prop|cor|rem|fn):[A-Za-z0-9_.:\\-]+$"
     },
     "macro": {
+     "level_floor": "C2"
+    },
+    "figure_file": {
+     "level_floor": "C2"
+    },
+    "table_file": {
+     "level_floor": "C2"
+    },
+    "label_reference": {
      "level_floor": "C2"
     }
    },
@@ -310,9 +359,18 @@
     {
      "surface": "N3",
      "kind": "figure-source"
+    },
+    {
+     "surface": "N14",
+     "kind": "label"
     }
    ],
-   "referenced_by": [],
+   "referenced_by": [
+    {
+     "surface": "N14",
+     "kind": "label"
+    }
+   ],
    "requires_declarations": [],
    "doc": "skills/hep-authoring/references/latex-mechanics-and-tooling.md#naming-n14"
   },
@@ -320,7 +378,7 @@
    "surface_id": "N15",
    "name": "BibTeX keys",
    "owner": "hep-authoring",
-   "extractor": null,
+   "extractor": "skills/hep-authoring/scripts/extract_names.py",
    "kinds": {
     "bib_key": {
      "level_floor": "C2"
@@ -365,10 +423,26 @@
    "surface_id": "N17",
    "name": "Literature record IDs",
    "owner": "hep-citations",
-   "extractor": null,
+   "extractor": "skills/hep-citations/scripts/extract_names.py",
    "kinds": {
     "record_id": {
      "level_floor": "C4"
+    },
+    "doi": {
+     "level_floor": "C4",
+     "format": "^10\\.\\d{4,9}/\\S*[^\\s.,;:]$"
+    },
+    "arxiv_id": {
+     "level_floor": "C4",
+     "format": "^(?:\\d{4}\\.\\d{4,5}|[a-z][a-z\\-]*(?:\\.[A-Z]{2})?/\\d{7})(?:v\\d+)?$"
+    },
+    "inspire_id": {
+     "level_floor": "C4",
+     "format": "^\\d+$"
+    },
+    "ads_bibcode": {
+     "level_floor": "C4",
+     "format": "^\\d{4}[A-Za-z&.]{5}[A-Za-z0-9.]{4}[A-Za-z.][0-9.]{4}[A-Z]$"
     }
    },
    "rename_policy": "never",

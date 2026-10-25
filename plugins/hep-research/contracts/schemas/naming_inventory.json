@@ -1,5 +1,5 @@
 {
- "$comment": "naming_inventory.json: what an extractor (skills/<owner>/scripts/extract_names.py) writes for one surface (semantic naming spec \u00a76.1). Holds every name of the surface within scope_roots plus the names removed in this change. A working file of <project>/naming/, never of artifacts_dir. The engine fills tokens, references_status, contract_level and contract_basis.",
+ "$comment": "naming_inventory.json: what an extractor (skills/<owner>/scripts/extract_names.py) writes for one surface (semantic naming spec §6.1). Holds every name of the surface within scope_roots plus the names removed in this change. A working file of <project>/naming/, never of artifacts_dir. The engine fills tokens, references_status, contract_level and contract_basis.",
  "type": "object",
  "required": [
   "inventory_version",
@@ -258,9 +258,50 @@
        "$ref": "common.json#/$defs/version"
       }
      }
+    },
+    "targets": {
+     "type": "array",
+     "$comment": "names this entity refers to on its own or another surface (a \\\\ref to a label, an included figure file, the shape histograms a nuisance reads); derived: the target's name is built from this entity's name, so a rename of this entity renames it too (cross-surface change sets)",
+     "items": {
+      "type": "object",
+      "required": [
+       "surface",
+       "name",
+       "kind"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "surface": {
+        "type": "string",
+        "pattern": "^N(?:[1-9]|1[0-7])$"
+       },
+       "name": {
+        "type": "string",
+        "minLength": 1
+       },
+       "kind": {
+        "type": "string",
+        "minLength": 1
+       },
+       "file": {
+        "type": "string"
+       },
+       "container": {
+        "type": "string"
+       },
+       "derived": {
+        "type": "boolean"
+       },
+       "entity_kind": {
+        "type": "string",
+        "minLength": 1,
+        "$comment": "the kind the target entity has (a label reference targets a label, not another reference)"
+       }
+      }
+     }
     }
    },
-   "$comment": "tokens, references_status, contract_level and contract_basis are the engine's: an extractor leaves them out (spec \u00a76.1); the report's classified entities carry them"
+   "$comment": "tokens, references_status, contract_level and contract_basis are the engine's: an extractor leaves them out (spec §6.1); the report's classified entities carry them"
   }
  }
 }

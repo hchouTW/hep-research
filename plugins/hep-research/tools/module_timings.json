@@ -422,5 +422,14 @@
   "tests.tools.test_statistics_evidence": 0.1,
   "tests.tools.test_subprocess_timeouts": 2.5,
   "tests.tools.test_validate_skill_bundle": 0.2
- }
+ },
+ "tests.core.test_naming_cross_surface": 0.06,
+ "tests.skills.hep_computing.test_extract_names_root": 0.36,
+ "tests.skills.hep_statistics.test_extract_names": 0.05,
+ "tests.skills.hep_measurement.test_extract_names": 0.06,
+ "tests.skills.hep_authoring.test_extract_names": 0.06,
+ "tests.skills.hep_detector.test_extract_names": 0.05,
+ "tests.skills.hep_ml.test_extract_names": 0.05,
+ "tests.skills.hep_theory.test_extract_names": 0.05,
+ "tests.skills.hep_citations.test_extract_names": 0.06
 }

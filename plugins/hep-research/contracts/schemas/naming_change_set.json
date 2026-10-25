@@ -1,5 +1,5 @@
 {
- "$comment": "naming_change_set.json: the complete plan for one rename (spec \u00a76.6), validated by contracts/naming_check.py validate-change-set in the order of \u00a78.4.",
+ "$comment": "naming_change_set.json: the complete plan for one rename (spec §6.6), validated by contracts/naming_check.py validate-change-set in the order of §8.4.",
  "type": "object",
  "required": [
   "change_set_id",
@@ -166,6 +166,28 @@
    "items": {
     "type": "string",
     "minLength": 1
+   }
+  },
+  "trigger": {
+   "type": "object",
+   "$comment": "the finding that asks for the rename; a dedup-only surface (N15) renames only for a uniqueness finding",
+   "required": [
+    "rule_id"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "rule_id": {
+     "type": "string"
+    },
+    "rule_version": {
+     "type": "string"
+    },
+    "predicate": {
+     "type": "string"
+    },
+    "reason_code": {
+     "type": "string"
+    }
    }
   }
  }

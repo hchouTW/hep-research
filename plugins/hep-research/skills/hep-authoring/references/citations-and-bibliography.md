@@ -224,3 +224,23 @@ releasing restricted artifacts is outside the statement-writing task.
   notice and sometimes flag this explicitly.
 
 **Done when:** `check_manuscript.py --main` reports no missing or duplicate keys, and no two `.bib` entries share a DOI, arXiv id or INSPIRE record.
+
+<a id="naming-n15"></a>
+### Naming: BibTeX keys (N15)
+- **Extractor:** `extract_names.py --surface N15` (hep-authoring; inputs: every `.bib` file in scope, with each record's DOI or arXiv id; references are the `\cite`-family commands of the `.tex` files)
+- **Entity kinds and level floors:** generated from `contracts/naming/surfaces.json`, not restated by hand:
+
+<!-- naming-kinds:N15: generated from contracts/naming/surfaces.json by contracts/naming_registry.py sections; do not edit -->
+
+| Kind | Level floor | Format | Rename policy |
+|---|---|---|---|
+| `bib_key` | C2 | — | dedup-only |
+
+<!-- /naming-kinds:N15 -->
+
+- **The name must say:** nothing beyond identifying the record: a stable key (`Aguilar:2015ooa` from INSPIRE) is kept as it is
+- **Rename policy:** dedup-only: a key is renamed only to merge two keys of one record (F15); any other finding is reported, not fixed
+- **Rules:** see the registry for surface N15 (`naming.common.*`, `naming.n15.*`, `naming.cross.*`)
+- **Good / bad:** `Aguilar:2015ooa` / two keys for one DOI
+
+Procedure, levels and report: [semantic naming charter](../../hep-computing/references/semantic-naming.md).

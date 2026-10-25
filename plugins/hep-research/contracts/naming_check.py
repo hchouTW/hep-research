@@ -16,13 +16,15 @@ violated correctness rule (declared-match, reference, pairing, uniqueness, statu
 style rule (forbidden, pattern, vocabulary) or semantic rule is a warning in a user project, an error with --strict or
 naming.strict; every unverified or unsupported result is unresolved, so a check without evidence never exits 0.
 Severity never changes an action (I8). By default findings cover the names added, modified or removed and the names
-whose relational judgement involves them; --all reports every name. Relational rules always see the whole inventory.
+whose relational judgement involves them; --all reports every name, and so does a check whose inventories carry no
+change marks (made without --changed). Relational rules always see the whole inventory.
 
 --project DIR reads the optional naming block of hep-research.project.json (strict, glossary, waivers) and refuses an
 --out inside its artifacts_dir: naming working files (inventories, annotations, reports, change sets) are never
 artifacts (I9). A declaration file is a JSON object {"declaration": "<name>", "sources": [{"id", "correlated",
-"members": [entity_id or "<container>/<name>", ...]}]}; the correlation-inventory format is provisional until the
-contract surfaces ship (spec Q1). Standard library only.
+"members": [entity_id, "<container>/<name>" or a bare name, ...]}]}, or a measurement-spec artifact, whose systematics
+ledger (name, correlation_key, era_correlation, optional nuisance_names) is read as the correlation inventory
+(core/naming/declarations.py; provisional, spec Q1). Standard library only.
 """
 from __future__ import annotations
 
@@ -41,6 +43,7 @@ from contracts.naming_registry import RULES, SURFACES  # noqa: E402
 from contracts.rule_registry import state_for  # noqa: E402
 from contracts.schema import validate  # noqa: E402
 from core.naming import engine as E  # noqa: E402
+from core.naming.declarations import correlation_inventory  # noqa: E402
 from core.naming.model import STATES  # noqa: E402
 from core.naming.vocab import Vocabulary, data_versions  # noqa: E402
 from core.terminology.glossary import load_glossary  # noqa: E402
@@ -224,9 +227,13 @@ def cmd_check(args) -> int:
         declarations = {}
         for p in args.declaration or []:
             d = _load(p)
+            if d.get("artifact_type") == "measurement-spec":
+                d = correlation_inventory(d)
             name = d.get("declaration")
             if not isinstance(name, str):
-                return fail(f"{p}: a declaration names itself in 'declaration'")
+                return fail(f"{p}: a declaration names itself in 'declaration' (or is a measurement-spec artifact)")
+            if name == "correlation-inventory":
+                d = correlation_inventory(d)
             declarations[name] = d
             inputs[f"declaration:{name}"] = _sha(p)
         waivers = settings.get("waivers", [])
@@ -237,9 +244,12 @@ def cmd_check(args) -> int:
     strict = bool(args.strict or settings.get("strict"))
     if args.out is not None and proj is not None and proj.artifacts_dir and E.is_inside(args.out, proj.artifacts_dir):
         return fail(f"--out {args.out} is inside artifacts_dir: naming working files stay out of it (I9); use <project>/naming/")
+    marked = any(inv.get("changed_since") for inv in inventories)
+    notes = [] if marked or args.all else ["no inventory was made with --changed: every name is reported (as --all), "
+                                           "since without change marks nothing would be in the reporting scope"]
     rep = run_check(inventories, rules=rules, surfaces=surfaces, glossary=glossary, profile_terms=profile_terms,
                     declarations=declarations, annotations=annotations, waivers=waivers, expect=args.expect or (),
-                    strict=strict, report_all=args.all, inputs=inputs,
+                    strict=strict, report_all=args.all or not marked, inputs=inputs, extra_notes=notes,
                     scope={"surfaces": seen, "expect": list(args.expect or []), "all": bool(args.all)})
     rep.pop("_judged")
     if args.format == "table":
@@ -313,6 +323,7 @@ def cmd_validate_change_set(args) -> int:
         print(json.dumps({"status": "input-error", "error": str(exc)}))
         return 2
     entities = [e for inv in inventories for e in inv["entities"]]
+    E.link_targets(entities)
     E.classify(entities, {inv["surface"]: inv["scope_roots"] for inv in inventories}, surfaces["surfaces"])
     out = E.validate_change_set(cs, entities, surfaces["surfaces"], args.project_root,
                                 {inv["surface"] for inv in inventories}, digests)

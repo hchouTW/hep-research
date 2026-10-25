@@ -236,3 +236,27 @@ international collaborations):
   track down and fix under a deadline.
 
 **Done when:** the document compiles from a clean directory with the intended engine, with no undefined references and fonts embedded (`pdffonts`).
+
+<a id="naming-n14"></a>
+### Naming: figure files, table files, LaTeX labels and macros (N14)
+- **Extractor:** `extract_names.py --surface N14` (hep-authoring; inputs: every `.tex` file in scope: `\label`, macros, label references, `\includegraphics` and `\input`/`\include`, each reference targeting what it names)
+- **Entity kinds and level floors:** generated from `contracts/naming/surfaces.json`, not restated by hand:
+
+<!-- naming-kinds:N14: generated from contracts/naming/surfaces.json by contracts/naming_registry.py sections; do not edit -->
+
+| Kind | Level floor | Format | Rename policy |
+|---|---|---|---|
+| `label` | C2 | `^(?:fig\|tab\|eq\|sec\|subsec\|app\|ch\|lst\|alg\|thm\|lem\|def\|prop\|cor\|rem\|fn):[A-Za-z0-9_.:\-]+$` | matrix |
+| `macro` | C2 | — | matrix |
+| `figure_file` | C2 | — | matrix |
+| `table_file` | C2 | — | matrix |
+| `label_reference` | C2 | — | matrix |
+
+<!-- /naming-kinds:N14 -->
+
+- **The name must say:** a type prefix and the content (`fig:rigidity_spectrum`, `tab:systematics`); a macro says the quantity it typesets; a figure file is named for its content as in N2
+- **Rename policy:** matrix
+- **Rules:** see the registry for surface N14 (`naming.common.*`, `naming.n14.*`, `naming.cross.*`)
+- **Good / bad:** `fig:proton_flux_ratio`, `\fluxunit` / `fig:fig3`, `\newfig`
+
+Procedure, levels and report: [semantic naming charter](../../hep-computing/references/semantic-naming.md).

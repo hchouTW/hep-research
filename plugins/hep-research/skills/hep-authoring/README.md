@@ -12,7 +12,7 @@ Use when the deliverable is physics writing or its presentation: drafting or rev
 |---|---|
 | `SKILL.md` | entry point |
 | `references/` | forty-nine references: the papers guide and the diagrams guide route to the rest (writing, bibliography and citation style, evidence-linked writing, revisions, reviews, venues, figures, diagrams per field, outreach, theses, proposals); reading and sources are hep-citations's |
-| `scripts/` | eleven command-line tools, the skill-local package `communication_lib/` behind six of them, and `review_lib/` behind `review.py` |
+| `scripts/` | twelve command-line tools (among them `extract_names.py`, the naming extractor for LaTeX names and BibTeX keys), the skill-local package `communication_lib/` behind six of them, and `review_lib/` behind `review.py` |
 | `assets/` | `paper/` (LaTeX skeleton, a Chinese thesis skeleton for XeLaTeX, BibTeX, methodology manual, adaptation manifest, audience templates, glossary template), `diagrams/` (editable skeletons), `reporting-policies.json`, `paper-blueprints.json`, `review-lenses.json` and `review-hosts.json` (independent review) |
 | `examples/` | worked diagram examples by field and the evidence-linked writing example (`evidence-linked/`, with byte-stable committed reports) |
 

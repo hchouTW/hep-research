@@ -376,13 +376,16 @@
   },
   {
    "id": "semantic-naming",
-   "capability": "Semantic naming governance: one data model, rule registry, engine, disposition and report for every naming surface; extractors for code identifiers, files, configuration and flags, plugin vocabulary; the plugin's own naming gate",
+   "capability": "Semantic naming governance: one data model, rule registry, engine, disposition and report for every naming surface; an extractor for every surface (code, files, ROOT objects, columns, configuration, jobs, samples, selections, variations, nuisances, calibrations, models, theory parameters, LaTeX names, BibTeX keys, plugin vocabulary, literature ids) in its owner skill; names across surfaces (derived shape histograms, label references); the plugin's own naming gate",
    "owner": "hep-computing",
    "state": "tool",
    "v1": true,
    "items": [
     "NAMING-P1",
-    "NAMING-P2"
+    "NAMING-P2",
+    "NAMING-P3",
+    "NAMING-P4",
+    "NAMING-P5"
    ]
   },
   {

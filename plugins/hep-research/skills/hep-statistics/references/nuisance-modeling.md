@@ -249,3 +249,28 @@ with `--saveShapes` the pre- and post-fit shapes), and `diffNuisances.py` prints
 `plotImpacts.py`; Combine defines the impact with the nuisance at its **post-fit** `+-1 sigma` and plots
 the post-fit minus pre-fit value over the pre-fit uncertainty, `(theta - theta_0)/Delta theta`, with the post-fit/pre-fit
 width ratio ([non-standard usage](https://cms-analysis.github.io/HiggsAnalysis-CombinedLimit/latest/part3/nonstandard/)).
+
+<a id="naming-n10"></a>
+### Naming: nuisances, POIs, channels and processes (N10)
+- **Extractor:** `extract_names.py --surface N10` (hep-statistics; inputs: Combine datacards, pyhf JSON workspaces, statistical-result artifacts; a shape nuisance's `<process>_<nuisance>Up`/`Down` histograms and a process's nominal template are derived N3 targets)
+- **Entity kinds and level floors:** generated from `contracts/naming/surfaces.json`, not restated by hand:
+
+<!-- naming-kinds:N10: generated from contracts/naming/surfaces.json by contracts/naming_registry.py sections; do not edit -->
+
+| Kind | Level floor | Format | Rename policy |
+|---|---|---|---|
+| `nuisance` | C3 | `^[A-Za-z][A-Za-z0-9_]*$` | matrix |
+| `channel` | C3 | `^[A-Za-z][A-Za-z0-9_]*$` | matrix |
+| `process` | C3 | `^[A-Za-z][A-Za-z0-9_]*$` | matrix |
+| `poi` | C3 | `^[A-Za-z][A-Za-z0-9_]*$` | matrix |
+| `rate_parameter` | C3 | `^[A-Za-z][A-Za-z0-9_]*$` | matrix |
+| `observed_data` | C4 | —; fixed: `data_obs` | matrix |
+
+<!-- /naming-kinds:N10 -->
+
+- **The name must say:** the source of the uncertainty and its correlation scope; a name **is** a correlation (same name: one parameter), so the names follow the correlation inventory (a measurement-spec's systematics ledger: `correlation_key`, `era_correlation`, optional `nuisance_names`), never spelling
+- **Rename policy:** matrix; every kind is C3, `data_obs` is fixed by Combine (C4)
+- **Rules:** see the registry for surface N10 (`naming.common.*`, `naming.n10.*`, `naming.cross.*`)
+- **Good / bad:** `lumi_2018`, `jes_flavor` (one name in every channel that shares it) / `lumi2018` next to `lumi_2018`, `sys1`
+
+Procedure, levels and report: [semantic naming charter](../../hep-computing/references/semantic-naming.md).

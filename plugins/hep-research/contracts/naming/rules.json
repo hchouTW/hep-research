@@ -61,6 +61,9 @@
    "surfaces": [
     "N1",
     "N5",
+    "N8",
+    "N9",
+    "N10",
     "N16"
    ],
    "predicate": "vocabulary",
@@ -75,7 +78,15 @@
      "contract_term",
      "skill_name",
      "script_name",
-     "schema_name"
+     "schema_name",
+     "selection",
+     "region",
+     "variation",
+     "nuisance",
+     "process",
+     "channel",
+     "poi",
+     "rate_parameter"
     ],
     "sources": [
      "project"
@@ -111,6 +122,9 @@
    "surfaces": [
     "N1",
     "N5",
+    "N6",
+    "N14",
+    "N15",
     "N16"
    ],
    "predicate": "uniqueness",
@@ -126,7 +140,11 @@
      "contract_term",
      "skill_name",
      "script_name",
-     "schema_name"
+     "schema_name",
+     "job",
+     "label",
+     "macro",
+     "bib_key"
     ]
    },
    "determinism": "deterministic",
@@ -153,7 +171,7 @@
    "owner": "hep-computing",
    "waivable": true,
    "lifecycle": "active",
-   "source_sha256": "b96cb7bd50308ce56559c27b39c0ebcd427b86b1180c673df2c44bda200bf969"
+   "source_sha256": "0642d0f33eb507c71e37e1f239ddecf1943256117427d808e2da7730c481e622"
   },
   {
    "rule_id": "naming.common.reference",
@@ -161,7 +179,19 @@
    "surfaces": [
     "N1",
     "N2",
+    "N3",
+    "N4",
     "N5",
+    "N6",
+    "N7",
+    "N8",
+    "N9",
+    "N10",
+    "N11",
+    "N12",
+    "N13",
+    "N14",
+    "N15",
     "N16"
    ],
    "predicate": "reference",
@@ -171,29 +201,38 @@
      "naming.references_resolve"
     ],
     "violated": [
-     "naming.reference_to_removed"
+     "naming.reference_to_removed",
+     "naming.target_missing"
     ],
     "not_applicable": [
      "naming.waived"
     ],
     "unverified": [
-     "naming.references_partial"
+     "naming.references_partial",
+     "naming.target_inventory_missing"
     ],
     "unsupported": [
      "naming.no_inputs"
     ]
    },
-   "rationale": "A removed or renamed name that is still referenced breaks its referrers; references must be searched in full before a rename.",
+   "rationale": "A removed or renamed name that is still referenced breaks its referrers, and a name that refers to another (a \\ref to a label, an included figure, a nominal template) must find it; references must be searched in full before a rename.",
    "owner": "hep-computing",
    "waivable": true,
    "lifecycle": "active",
-   "source_sha256": "2c0a8f2dfeae0a8287bc174f71f7fc45d1946d90a43c98bc6879ad44a702cbd7"
+   "source_sha256": "36ed26048516ecf60a3b571f97ebdd1f2b0ff4099dff61310a295d10336a9223"
   },
   {
    "rule_id": "naming.common.status-honesty",
    "version": "1.0.0",
    "surfaces": [
-    "N2"
+    "N2",
+    "N7",
+    "N8",
+    "N9",
+    "N10",
+    "N11",
+    "N12",
+    "N13"
    ],
    "predicate": "status-honesty",
    "params": {
@@ -250,7 +289,8 @@
     "N13",
     "N14",
     "N15",
-    "N16"
+    "N16",
+    "N17"
    ],
    "predicate": "semantic",
    "determinism": "review",
@@ -453,7 +493,7 @@
    "owner": "hep-statistics",
    "waivable": false,
    "lifecycle": "active",
-   "source_sha256": "edce389eea4ab823cdad75b4c179afc92d78c8787f7a20d1a9d874431773e1c7"
+   "source_sha256": "3b7fe2b5637feaa1a6cac71edb4e583eea4db3582567e03d3b7e2abb6e62fb62"
   },
   {
    "rule_id": "naming.n10.declared-correlation",
@@ -495,7 +535,7 @@
    "owner": "hep-statistics",
    "waivable": false,
    "lifecycle": "active",
-   "source_sha256": "992653ae2be7c115e83869cce9f85ed81f83010d87a786c173d572d77779b85f"
+   "source_sha256": "18c4baf844b2a766dd4d76c1d8267b28b58084cf7087bad78dec9687330afc92"
   },
   {
    "rule_id": "naming.n10.near-duplicate",
@@ -540,7 +580,287 @@
    "owner": "hep-statistics",
    "waivable": true,
    "lifecycle": "active",
-   "source_sha256": "21eb84364b48cbac27e6b97ab6e2e7bf861e76d84c7c7a6e50de23aa894402fc"
+   "source_sha256": "8df8dfaa07d6158cf05ed301c6c1f5c179432a14afeeeb1295923e31e30a5217"
+  },
+  {
+   "rule_id": "naming.n4.block-member",
+   "version": "1.0.0",
+   "surfaces": [
+    "N4"
+   ],
+   "predicate": "pattern",
+   "params": {
+    "sources": [
+     "project"
+    ]
+   },
+   "determinism": "deterministic",
+   "outcome_contract": {
+    "satisfied": [
+     "naming.format_ok"
+    ],
+    "violated": [
+     "naming.format_mismatch"
+    ],
+    "not_applicable": [
+     "naming.no_format",
+     "naming.waived",
+     "naming.external_name"
+    ],
+    "unverified": [],
+    "unsupported": [
+     "naming.no_inputs"
+    ]
+   },
+   "rationale": "Columns a project defines are <block>_<member>: a lower-case or capitalized block and lower-case members (mu_pt, Muon_pt_corr), never camelCase (F16).",
+   "owner": "hep-computing",
+   "waivable": true,
+   "lifecycle": "active",
+   "source_sha256": "74e3b2f1793c7f7bfb291609a87078ac2d21085b4c3ec4407a447bb728663d21"
+  },
+  {
+   "rule_id": "naming.n10.name-format",
+   "version": "1.0.0",
+   "surfaces": [
+    "N10"
+   ],
+   "predicate": "pattern",
+   "params": {
+    "sources": [
+     "project"
+    ]
+   },
+   "determinism": "deterministic",
+   "outcome_contract": {
+    "satisfied": [
+     "naming.format_ok"
+    ],
+    "violated": [
+     "naming.format_mismatch"
+    ],
+    "not_applicable": [
+     "naming.no_format",
+     "naming.waived",
+     "naming.external_name"
+    ],
+    "unverified": [],
+    "unsupported": [
+     "naming.no_inputs"
+    ]
+   },
+   "rationale": "Nuisances, processes, channels and parameters become RooFit names: a letter, then letters, digits and underscores only; a hyphen, dot or space breaks expressions and file look-ups (P6).",
+   "owner": "hep-statistics",
+   "waivable": true,
+   "lifecycle": "active",
+   "source_sha256": "74e3b2f1793c7f7bfb291609a87078ac2d21085b4c3ec4407a447bb728663d21"
+  },
+  {
+   "rule_id": "naming.n10.shape-pairing",
+   "version": "1.0.0",
+   "surfaces": [
+    "N10"
+   ],
+   "predicate": "pairing",
+   "params": {
+    "via": "targets",
+    "needs": [
+     "N3"
+    ],
+    "kinds": [
+     "nuisance",
+     "process"
+    ]
+   },
+   "determinism": "deterministic",
+   "outcome_contract": {
+    "satisfied": [
+     "naming.pair_complete"
+    ],
+    "violated": [
+     "naming.pair_missing"
+    ],
+    "not_applicable": [
+     "naming.not_paired",
+     "naming.kind_not_covered"
+    ],
+    "unverified": [
+     "naming.inventory_missing"
+    ],
+    "unsupported": [
+     "naming.no_inputs"
+    ]
+   },
+   "rationale": "A shape nuisance reads <process>_<nuisance>Up and Down, and a process its nominal template, through the shapes lines: each derived histogram must be in the ROOT file (F18).",
+   "owner": "hep-statistics",
+   "waivable": false,
+   "lifecycle": "active",
+   "source_sha256": "3b7fe2b5637feaa1a6cac71edb4e583eea4db3582567e03d3b7e2abb6e62fb62"
+  },
+  {
+   "rule_id": "naming.n14.label-prefix",
+   "version": "1.0.0",
+   "surfaces": [
+    "N14"
+   ],
+   "predicate": "pattern",
+   "params": {
+    "kinds": [
+     "label"
+    ]
+   },
+   "determinism": "deterministic",
+   "outcome_contract": {
+    "satisfied": [
+     "naming.format_ok"
+    ],
+    "violated": [
+     "naming.format_mismatch"
+    ],
+    "not_applicable": [
+     "naming.no_format",
+     "naming.waived",
+     "naming.kind_not_covered"
+    ],
+    "unverified": [],
+    "unsupported": [
+     "naming.no_inputs"
+    ]
+   },
+   "rationale": "A LaTeX label says what it labels with a type prefix (fig:, tab:, eq:, sec:, ...) and then the content (fig:rigidity_spectrum), so a reference reads correctly and two kinds never collide (P1, P6).",
+   "owner": "hep-authoring",
+   "waivable": true,
+   "lifecycle": "active",
+   "source_sha256": "74e3b2f1793c7f7bfb291609a87078ac2d21085b4c3ec4407a447bb728663d21"
+  },
+  {
+   "rule_id": "naming.n15.duplicate-record",
+   "version": "1.0.0",
+   "surfaces": [
+    "N15"
+   ],
+   "predicate": "uniqueness",
+   "params": {
+    "by": "concept",
+    "kinds": [
+     "bib_key"
+    ]
+   },
+   "determinism": "deterministic",
+   "outcome_contract": {
+    "satisfied": [
+     "naming.unique"
+    ],
+    "violated": [
+     "naming.duplicate_record"
+    ],
+    "not_applicable": [
+     "naming.removed",
+     "naming.waived",
+     "naming.kind_not_covered"
+    ],
+    "unverified": [
+     "naming.references_partial"
+    ],
+    "unsupported": [
+     "naming.no_inputs"
+    ]
+   },
+   "rationale": "One record (one DOI or arXiv id) under two BibTeX keys cites the same work twice; deduplication is the only reason to rename a key (F15).",
+   "owner": "hep-authoring",
+   "waivable": true,
+   "lifecycle": "active",
+   "source_sha256": "0642d0f33eb507c71e37e1f239ddecf1943256117427d808e2da7730c481e622"
+  },
+  {
+   "rule_id": "naming.n17.identifier-format",
+   "version": "1.0.0",
+   "surfaces": [
+    "N17"
+   ],
+   "predicate": "pattern",
+   "params": {
+    "kinds": [
+     "doi",
+     "arxiv_id",
+     "inspire_id",
+     "ads_bibcode"
+    ]
+   },
+   "determinism": "deterministic",
+   "outcome_contract": {
+    "satisfied": [
+     "naming.format_ok"
+    ],
+    "violated": [
+     "naming.format_mismatch"
+    ],
+    "not_applicable": [
+     "naming.no_format",
+     "naming.kind_not_covered"
+    ],
+    "unverified": [],
+    "unsupported": [
+     "naming.no_inputs"
+    ]
+   },
+   "rationale": "A DOI, arXiv id, INSPIRE record id or ADS bibcode has a fixed form; one that does not match was mistyped or mis-imported and is corrected in the ledger by the verifying procedure, never renamed (I4).",
+   "owner": "hep-citations",
+   "waivable": false,
+   "lifecycle": "active",
+   "source_sha256": "74e3b2f1793c7f7bfb291609a87078ac2d21085b4c3ec4407a447bb728663d21"
+  },
+  {
+   "rule_id": "naming.cross.glossary-identifier",
+   "version": "1.0.0",
+   "surfaces": [
+    "N1",
+    "N2",
+    "N3",
+    "N4",
+    "N5",
+    "N6",
+    "N7",
+    "N8",
+    "N9",
+    "N10",
+    "N11",
+    "N12",
+    "N13",
+    "N14",
+    "N15",
+    "N16"
+   ],
+   "predicate": "declared-match",
+   "params": {
+    "declaration": "glossary",
+    "sources": [
+     "project"
+    ]
+   },
+   "determinism": "deterministic",
+   "outcome_contract": {
+    "satisfied": [
+     "naming.concept_identifier_used"
+    ],
+    "violated": [
+     "naming.concept_identifier_differs"
+    ],
+    "not_applicable": [
+     "naming.no_glossary_identifiers",
+     "naming.no_declared_concept",
+     "naming.waived",
+     "naming.external_name"
+    ],
+    "unverified": [],
+    "unsupported": [
+     "naming.no_inputs"
+    ]
+   },
+   "rationale": "When the project glossary declares the identifier for a concept (identifiers), every surface spells that concept with it: pt in the code, the columns, the nuisances and the labels, not pt here and transverse_momentum there (P2).",
+   "owner": "hep-computing",
+   "waivable": true,
+   "lifecycle": "active",
+   "source_sha256": "18c4baf844b2a766dd4d76c1d8267b28b58084cf7087bad78dec9687330afc92"
   }
  ]
 }
