@@ -48,6 +48,12 @@ hep-detector front-end electronics for reconstruction, simulation and calibratio
 - Developer document `docs/dev/frontend-electronics/frontend-reco-sim-calibration.md` (English, task format, passes
   `lint_task.py`): the evaluation, the completed work, and stages FE0-FE5 with isolated-worktree execution,
   acceptance criteria and open decisions.
+- **Fixed: `frontend_response.py` exit code of an input error that names JSON.** The CLI serialized the result inside
+  the input-error handler and took any `ValueError` whose message contained "JSON" for a non-finite result, so such an
+  input error exited 1 (`failed`) instead of 2 (`invalid-input`). The result is now serialized after the input checks;
+  a non-finite result still exits 1. Tests: `CommandLine.test_input_error_naming_json_exits_2` and
+  `test_non_finite_result_exits_1` in `test_frontend_waveforms.py`. The bug is in 0.40.0 too; no input of 0.40.0 is
+  known to reach it.
 
 ## 0.40.0 (2026-10-25)
 

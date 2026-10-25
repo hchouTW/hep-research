@@ -2810,6 +2810,12 @@ source had only been located through a search index before. Parent: `9a116535` (
 | `tests/skills/hep_detector/test_frontend_waveforms.py::InjectionGainGuidance::test_injection_bullet_separates_injection_and_signal_gain` | behavioral (guidance text with both locators) | fail (assertion) | pass | no | E2 |
 | `tests/skills/hep_detector/test_frontend_waveforms.py::InjectionGainGuidance::test_misconception_is_listed` | behavioral | fail (assertion) | pass | no | E2 |
 
+**Fix: exit code of an input error that names JSON (2026-10-25, E2).** `main()` serialized the result inside the
+`try` that maps a `ValueError` to exit 2, and took a message containing "JSON" for a non-finite result (exit 1). The
+serialization now has its own `try`. `CommandLine.test_input_error_naming_json_exits_2` (an input error with "JSON"
+in its message, raised in-process) fails on the unfixed script (exit 1, `SystemExit` not raised) and passes on the fix;
+`test_non_finite_result_exits_1` (an exception while computing, and `enc` at 1e300, an infinite result) passes on both.
+
 Software checks show contract consistency and agreement with the named oracles, not physical validity: the Landau
 model has no Bichsel broadening, and the toy is synthetic.
 

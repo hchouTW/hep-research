@@ -1482,13 +1482,14 @@ def main():
             result = threshold_trim(args.spread, args.trim_bits, args.trim_step, args.dac_nonlinearity)
         else:
             result = cluster_noise(args.channels, args.sigma, args.rho)
-        text = json.dumps({'status': args.status, 'command': args.command, **result}, indent=2, allow_nan=False)
     except (OverflowError, ZeroDivisionError) as exc:
         return _fail(f'{exc} (result not finite: check the input range)')
     except ValueError as exc:
-        if 'JSON' in str(exc):
-            return _fail('result not finite: check the input range')
         parser.error(str(exc))
+    try:
+        text = json.dumps({'status': args.status, 'command': args.command, **result}, indent=2, allow_nan=False)
+    except ValueError:
+        return _fail('result not finite: check the input range')
     print(text)
     return 0
 

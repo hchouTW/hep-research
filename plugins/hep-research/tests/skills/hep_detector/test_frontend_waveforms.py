@@ -12,12 +12,15 @@ Oracles, each independent of the code under test:
 - the page's own worked numbers (front-end-electronics-and-signal-processing.md, optimal filter and phase error).
 Standard library only.
 """
+import contextlib
+import io
 import json
 import math
 import subprocess
 import sys
 import unittest
 from pathlib import Path
+from unittest import mock
 
 PLUGIN = Path(__file__).resolve().parents[3]
 SCRIPT = PLUGIN / 'skills' / 'hep-detector' / 'scripts' / 'frontend_response.py'
@@ -375,6 +378,28 @@ class CommandLine(unittest.TestCase):
             out = json.loads(proc.stdout, parse_constant=lambda c: self.fail(c))
             self.assertEqual(out['command'], args[0])
             self.assertEqual(out['status'], 'unvalidated')
+
+    def test_non_finite_result_exits_1(self):
+        for args in (['hit-efficiency', '--thresholds', '1e300', '--noise', '1e-300', '--signal-model', 'gauss',
+                      '--mean', '1', '--sigma-signal', '1'],  # an exception while computing
+                     ['enc', '--capacitance', '1e300', '--peaking', '25', '--en', '1e300']):  # an infinite result
+            proc = self.run_cli(args)
+            self.assertEqual(proc.returncode, 1, proc.stdout)
+            self.assertEqual(json.loads(proc.stdout)['error_kind'], 'failed')
+            self.assertNotIn('Traceback', proc.stderr)
+
+    def test_input_error_naming_json_exits_2(self):
+        # an input error whose message names JSON (as a bad input file's would) is not a non-finite result
+        def bad_input(*args):
+            raise ValueError('--noise-covariance: not valid JSON')
+        stdout = io.StringIO()
+        argv = ['frontend_response.py', 'cluster-noise', '--channels', '3', '--sigma', '1', '--rho', '0.1']
+        with mock.patch.object(fr, 'cluster_noise', bad_input), mock.patch.object(sys, 'argv', argv), \
+                contextlib.redirect_stdout(stdout), contextlib.redirect_stderr(io.StringIO()):
+            with self.assertRaises(SystemExit) as caught:
+                fr.main()
+        self.assertEqual(caught.exception.code, 2)
+        self.assertEqual(json.loads(stdout.getvalue())['error_kind'], 'invalid-input')
 
     def test_bad_inputs_exit_2(self):
         bad = (
