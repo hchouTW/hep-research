@@ -96,7 +96,7 @@ size is declared before its runs, a step a human checks. J15 met the same limit 
 | `run.py` | Offline replay: both searches (from `recorded/search/`; `--live-search` reruns them), expansion, evaluations, the recorded confirmation, reports, criteria; writes `output/results.json` |
 | `live.py` | The live Example A confirmation; rewrites `recorded/` without a guard, so run it only for a new study (`--work DIR`; needs Geant4 11.4.3 with `element_sim`, `simroot` and `simreco`, `HEP_GEANT4_CONFIG`) |
 | `space.realization.json` | The realization profile for Example A (SYNTHETIC: uniform field, no magnet material) |
-| `recorded/` | The two search runs (`search/`, gzip: NSGA-II's libm calls differ in the last bit between platforms, so a rerun elsewhere may take another trajectory) and the confirmation's run records (gzip), specs, study inputs and geometry file; home paths written as `~` |
+| `recorded/` | Examples A and B's artifacts as of 0.38.0 (`sources/A`, `sources/B`: the searches name the design-spec by sha256, and the sibling examples' outputs carry the plugin version), the two search runs (`search/`, gzip: NSGA-II's libm calls differ in the last bit between platforms, so a rerun elsewhere may take another trajectory) and the confirmation's run records (gzip), specs, study inputs and geometry file; home paths written as `~` |
 | `output/results.json` | The derived results; `output/A/` and `output/B/` are regenerated on each replay and not committed |
 
 From the plugin root: `python3 examples/design-search-j16/run.py [--out DIR] [--live-search]`. The test is

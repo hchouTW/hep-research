@@ -1,0 +1,84 @@
+{
+ "contract_version": "3.13.0",
+ "artifact_id": "collider-tracker-v1-CALC-ECAL-P-run",
+ "artifact_type": "computational-run",
+ "objective": "detector system design: computational-run written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.13.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-P.json",
+   "sha256": "c58ed225e7ad3c06e035a26ae4b48a47a98969ba14757cd74a1a148226835b1a",
+   "artifact_type": "design-candidate",
+   "artifact_id": "collider-tracker-v1-cand-P",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  }
+ ],
+ "outputs": [
+  {
+   "ref": "outputs/CALC-ECAL-P.json"
+  }
+ ],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "input_manifest": [
+   {
+    "path": "candidates/cand-P.json",
+    "sha256": "c58ed225e7ad3c06e035a26ae4b48a47a98969ba14757cd74a1a148226835b1a"
+   }
+  ],
+  "tools": [
+   {
+    "name": "calorimeter-resolution",
+    "version": "0.38.0"
+   }
+  ],
+  "commands": [
+   "python3 skills/hep-detector/scripts/calorimeter_resolution.py --evaluate --stochastic 0.05 --noise 0.2 --constant 0.005 --energy 50.0 --status synthetic"
+  ],
+  "environment": {
+   "python": "3.13.2",
+   "platform": "macOS-26.5"
+  },
+  "seeds": {},
+  "tolerances": {},
+  "exit_status": 0,
+  "output_hashes": {
+   "outputs/CALC-ECAL-P.json": "a972fb9c8b981055cc11ae52c143ecc5ba261e22504464b09cc56d6bb52adb97"
+  },
+  "argv": [
+   "python3",
+   "skills/hep-detector/scripts/calorimeter_resolution.py",
+   "--evaluate",
+   "--stochastic",
+   "0.05",
+   "--noise",
+   "0.2",
+   "--constant",
+   "0.005",
+   "--energy",
+   "50.0",
+   "--status",
+   "synthetic"
+  ],
+  "script_sha256": {
+   "skills/hep-detector/scripts/calorimeter_resolution.py": "95e271ce83513d9ee9faf62c0aa95e8cac78915e7c44631bc76c641b80d458ab"
+  }
+ }
+}

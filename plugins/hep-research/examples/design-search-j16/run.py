@@ -36,9 +36,11 @@ HERE = Path(__file__).resolve().parent
 PLUGIN = HERE.parents[1]
 EVAL = PLUGIN / "skills" / "hep-detector" / "scripts" / "evaluate_design.py"
 CHECK = PLUGIN / "skills" / "hep-detector" / "scripts" / "check_geant4_study.py"
-SRC_A = PLUGIN / "examples" / "design-space-spectrometer" / "output"
-SRC_B = PLUGIN / "examples" / "design-collider-tracker" / "output"
 RECORDED = HERE / "recorded"
+# Examples A and B as of their 0.38.0 outputs, snapshotted: the recorded searches name the design-spec by sha256,
+# and the sibling examples' outputs carry the plugin version, so they change at every release.
+SRC_A = RECORDED / "sources" / "A"  # from examples/design-space-spectrometer/output
+SRC_B = RECORDED / "sources" / "B"  # from examples/design-collider-tracker/output
 NS_A, NS_B = "ams-like-v1", "collider-tracker-v1"
 CREATED = "2026-10-25"
 EPOCH = "1792886400"  # 2026-10-25T00:00:00Z

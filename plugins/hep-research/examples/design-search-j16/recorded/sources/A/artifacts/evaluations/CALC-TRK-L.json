@@ -1,0 +1,76 @@
+{
+ "contract_version": "3.13.0",
+ "artifact_id": "ams-like-v1-CALC-TRK-L",
+ "artifact_type": "design-evaluation",
+ "objective": "detector system design: design-evaluation written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.13.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-L.json",
+   "sha256": "ef58a8a647e7955151a576174d510dbbb719f0fb6a3a9f9bd3f031c358c0b138",
+   "artifact_type": "design-candidate",
+   "artifact_id": "ams-like-v1-cand-L",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  },
+  {
+   "ref": "runs/CALC-TRK-L.computational-run.json",
+   "sha256": "35fad8d385fe30af1b82f947ff6589dece8ada6cea0428128665fd5fc9f2740b",
+   "artifact_type": "computational-run",
+   "artifact_id": "ams-like-v1-CALC-TRK-L-run",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "evaluation_id": "ams-like-v1:CALC-TRK-L",
+  "candidate": "ams-like-v1:cand-L",
+  "figure_of_merit": "momentum-resolution-core",
+  "denominator": {
+   "rigidity_GV": 1000.0,
+   "species": "proton"
+  },
+  "bound": "optimistic",
+  "fidelity": "F1",
+  "value": 0.22924454800949662,
+  "unit": "1",
+  "run_ref": "runs/CALC-TRK-L.computational-run.json",
+  "parameter_refs": [
+   "DES-MAG-001.parameters.field_T",
+   "DES-TRK-001.parameters.layer_positions_m",
+   "DES-TRK-001.parameters.layer_x_over_x0",
+   "DES-TRK-001.parameters.passive_x_over_x0",
+   "DES-TRK-001.parameters.point_resolution_um"
+  ],
+  "parameter_digest": "9da74b0afe37589e2509a31591f135f379666712630ee58d652ab3d9a296042d",
+  "validity": {
+   "assumptions": [
+    "uniform field over the lever arm",
+    "lambda = 0 (p = p_T), normal incidence",
+    "Gaussian point errors",
+    "no misalignment",
+    "material spread uniformly along the track"
+   ],
+   "in_domain": true
+  }
+ }
+}

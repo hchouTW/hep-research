@@ -4,7 +4,7 @@
  "artifact_type": "design-evaluation",
  "objective": "detector system design: design-evaluation written by evaluate_design.py",
  "versions": {
-  "plugin": "0.38.0",
+  "plugin": "0.39.0",
   "contracts": "3.13.0",
   "plugin_release": {
    "release": "unreleased",
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-N6.json",
-   "sha256": "fd5508b85067117462b871f8c418283be0e10f6f6582d5f43e03c2cee6dc1205",
+   "sha256": "5e9184cac42f1a237e9911a1c487716d9aee0fc6ec54f976b565125e87eef669",
    "artifact_type": "design-candidate",
    "artifact_id": "j15-v1-cand-N6",
    "status": [
@@ -28,7 +28,7 @@
   },
   {
    "ref": "studies/N6-TRK1/study-notails.computational-run.json",
-   "sha256": "7faf27991602951f0988e104e2d7d1f4afc9cd88b07fcbe7b1e50e9c07c44007",
+   "sha256": "f5d85cc1c42cf8abffcf9992922a52c2070b7cb2e2f3616265018f0108f7eb5b",
    "artifact_type": "computational-run",
    "artifact_id": "j15-N6-TRK1-study-validated"
   }

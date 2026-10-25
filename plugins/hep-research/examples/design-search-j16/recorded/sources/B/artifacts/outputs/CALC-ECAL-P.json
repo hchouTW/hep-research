@@ -1,0 +1,19 @@
+{
+  "status": "synthetic",
+  "method": "direct evaluation of a^2/E + b^2/E^2 + c^2",
+  "energy_gev": 50.0,
+  "relative_resolution": 0.009539392014169458,
+  "absolute_resolution_gev": 0.4769696007084729,
+  "term_contributions_squared": {
+    "stochastic": 5.000000000000001e-05,
+    "noise": 1.6e-05,
+    "constant": 2.5e-05
+  },
+  "dominant_term": "stochastic",
+  "extrapolated": null,
+  "crossovers": {
+    "noise_equals_stochastic_gev": 16.0,
+    "stochastic_equals_constant_gev": 100.00000000000001,
+    "noise_equals_constant_gev": 40.0
+  }
+}

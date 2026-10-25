@@ -3,7 +3,24 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.39.0 (2026-10-25)
+
+Minor release, contracts 3.13.0, `CORE_VERSION` 1.1.0, geant4 adapter 0.5.0. It ships the Geant4 program (spec
+`docs/dev/geant4-architecture/geant4-program.md`) stages A1, C1, A2, B1, B2, B3, C2 and C3 with their §A.8 checks
+and G5 confirmations (#274-#287): Geant4 correctness fixes, automated candidate generation, the `element_sim`,
+`simroot` and `simreco` programs, the F4 interface and qualification path, Geant4 search values with F4
+confirmation, and journeys J15 and J16. The stage entries below list the details.
+
+**Before you upgrade** (each stage's own list below has the rest):
+- Geant4 study records written from 0.20.0 to 0.38.x with `validated-in-scope` can fail `validate.py --strict`
+  (SFA-2026-039, SFA-2026-040): regenerate them, then redo their F4 evaluations with `evaluate_design.py f4 --replace`.
+- `check_geant4_study.py summarize` is retired (use `adapters/geant4/assets/summary_from_csv.py`).
+- Rebuild layered_sim (`geant4_run.py build-sim`): source hash keys, per-event seeding by default in `scan`, the
+  moved `MiniJson.hh`.
+- A `tracking-resolution` study is upgraded only through the qualification path; `charge-confusion` cannot be
+  upgraded yet (D0-b). The adequacy table 1.2.0 (provisional) floors a qualified F4 resolution at 2 %.
+- simreco 0.4.1 changes strip digitization and shower containment: reconstructions with noise-digitization differ.
+- An evaluation that names a search run or reuses a Geant4 search seed is an error.
 
 Geant4 program, stage A1 (correctness fixes; spec `docs/dev/geant4-architecture/geant4-program.md`, approved
 2026-10-24). Contracts CV-A1 (sci-fix) shares the unreleased contracts 3.13.0 with stage C1: the new rules apply

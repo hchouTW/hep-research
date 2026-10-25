@@ -4,7 +4,7 @@
  "artifact_type": "communication",
  "objective": "detector system design: communication written by evaluate_design.py",
  "versions": {
-  "plugin": "0.38.0",
+  "plugin": "0.39.0",
   "contracts": "3.13.0",
   "plugin_release": {
    "release": "unreleased",
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "design-spec.v1.json",
-   "sha256": "2f7483c011ed6384da1f74b85374207b7c151e163bae1c396c9a9a48f28ed124",
+   "sha256": "4b5a786780f151ce271dc19c6a532674d9b932d4ba5d9e546f5cb91757d5f883",
    "artifact_type": "design-spec",
    "artifact_id": "collider-tracker-v1-spec-v1",
    "status": [
@@ -27,7 +27,7 @@
   },
   {
    "ref": "evaluations/CALC-ECAL-A.json",
-   "sha256": "d9ff42ad2e6db95dd8362ca76deb65ceb8479aaa07bc4dd6f72b42a9a007f126",
+   "sha256": "abda7c838225ab0d016614baaa59e7e7ba9f1bd163655ff1c9b444c98fc0726e",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-ECAL-A",
    "status": [
@@ -36,7 +36,7 @@
   },
   {
    "ref": "evaluations/CALC-ECAL-B.json",
-   "sha256": "9f1d4b458385f45e6a55d931a9ebbcadb489f16203e5f70a35ebb234b5c7d63a",
+   "sha256": "c1897b7f34c3163f75182127e3b00033155bc5ed66ac16c7ce68075267ab7c03",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-ECAL-B",
    "status": [
@@ -45,7 +45,7 @@
   },
   {
    "ref": "evaluations/CALC-ECAL-P.json",
-   "sha256": "f26d941431943ef4a700f1c4489db5dbe1a05c9760b99906c1095207859c75b2",
+   "sha256": "69e87714e16a6a7613652ca4f9a900e165de7a107b591e1f861f327c88a4f7af",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-ECAL-P",
    "status": [
@@ -54,7 +54,7 @@
   },
   {
    "ref": "evaluations/CALC-MASS-A.json",
-   "sha256": "e397706e861cbbadc0351899a30560cd4134b6934ba4822fb381c3e2756d3b77",
+   "sha256": "9eff5f269da37a2f2b58a72a09e060eb1ac82a4bd4f4c2f952e278388908eec4",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-MASS-A",
    "status": [
@@ -63,7 +63,7 @@
   },
   {
    "ref": "evaluations/CALC-MASS-B.json",
-   "sha256": "4470ab85b91b12bc5c49181ea8b217cc449abce3230a908c4683b5dc74f3fe5d",
+   "sha256": "1d5c2f4398690b6db7e8cf2bb5993edb4536d8393e351b15841c4c15421467e1",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-MASS-B",
    "status": [
@@ -72,7 +72,7 @@
   },
   {
    "ref": "evaluations/CALC-MASS-P.json",
-   "sha256": "10c4392d738ee5c30318403387c5a9554cdf9fd9f375c655e35dc452e88a7dc1",
+   "sha256": "ead2eab3654cb9bd8facee051e1ca56ed1d047ccbc047b72aa61f8c65734263f",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-MASS-P",
    "status": [
@@ -81,7 +81,7 @@
   },
   {
    "ref": "evaluations/CALC-TRK-A.json",
-   "sha256": "f53dbea5e76f9427900acbe0f71a6d530f579e025950f951cb23716c5fd4770c",
+   "sha256": "596cf193d83a0c1afd06a65f174573c728dcf83e55e4b54b68fbad51b4ddebe5",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-TRK-A",
    "status": [
@@ -90,7 +90,7 @@
   },
   {
    "ref": "evaluations/CALC-TRK-B.json",
-   "sha256": "fc85c68cd4527ff54d8ceb8f150373fe0ff8262b1f05a168ed83baa891c8293b",
+   "sha256": "cf164ecb93bbeca1fff611cea3e6ffa35aada8194c42a3980b97f586083e471c",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-TRK-B",
    "status": [
@@ -99,7 +99,7 @@
   },
   {
    "ref": "evaluations/CALC-TRK-P.json",
-   "sha256": "7c53e5e5863e36800fb077a40513b51d61d8aa746e6079780c1e2f90141aeefe",
+   "sha256": "2c37a05b9414fb3cf57ea914c992e42c586e0e8cf512217dbae60bb073abf207",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-TRK-P",
    "status": [
@@ -297,7 +297,7 @@
    "design_id": "collider-tracker-v1",
    "note": "derived by contracts/design.py from the artifacts; verdicts guard against oversight and shortcuts, not deliberate forgery (LIM-02), and authorize nothing",
    "adequacy": {
-    "version": "1.1.0",
+    "version": "1.2.0",
     "state": "initial-default",
     "frozen": false,
     "provisional_pass": true

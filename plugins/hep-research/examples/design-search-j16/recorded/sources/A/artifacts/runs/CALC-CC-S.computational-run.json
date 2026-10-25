@@ -1,0 +1,90 @@
+{
+ "contract_version": "3.13.0",
+ "artifact_id": "ams-like-v1-CALC-CC-S-run",
+ "artifact_type": "computational-run",
+ "objective": "detector system design: computational-run written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.13.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-S.json",
+   "sha256": "aa0c62ea3099772e3302a814f658ec6b0b1a9e53fc852a1910d41f549abba8fb",
+   "artifact_type": "design-candidate",
+   "artifact_id": "ams-like-v1-cand-S",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  },
+  {
+   "ref": "evaluations/CALC-TRK-S.json",
+   "sha256": "4d89ac151e32912e0c0c4c775685dc23defd7a35ca0c1e6996548eed72453083",
+   "artifact_type": "design-evaluation",
+   "artifact_id": "ams-like-v1-CALC-TRK-S",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "outputs": [
+  {
+   "ref": "outputs/CALC-CC-S.json"
+  }
+ ],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "input_manifest": [
+   {
+    "path": "candidates/cand-S.json",
+    "sha256": "aa0c62ea3099772e3302a814f658ec6b0b1a9e53fc852a1910d41f549abba8fb"
+   }
+  ],
+  "tools": [
+   {
+    "name": "charge-confusion-rate",
+    "version": "0.38.0"
+   }
+  ],
+  "commands": [
+   "python3 skills/hep-detector/scripts/charge_confusion_rate.py gaussian-core --edges 1000.0 2000.0 --sigma-inv-r 0.0004394251686829922 --status synthetic"
+  ],
+  "environment": {
+   "python": "3.13.2",
+   "platform": "macOS-26.5"
+  },
+  "seeds": {},
+  "tolerances": {},
+  "exit_status": 0,
+  "output_hashes": {
+   "outputs/CALC-CC-S.json": "7ded5ed05e3cb198228bed57f1df4b7033caf58c917cc397255cf1c85a987a6c"
+  },
+  "argv": [
+   "python3",
+   "skills/hep-detector/scripts/charge_confusion_rate.py",
+   "gaussian-core",
+   "--edges",
+   "1000.0",
+   "2000.0",
+   "--sigma-inv-r",
+   "0.0004394251686829922",
+   "--status",
+   "synthetic"
+  ],
+  "script_sha256": {
+   "skills/hep-detector/scripts/charge_confusion_rate.py": "501a1e971cee8e4e773315eec13c28fb9d540ac4903976c52bffc9871bd056e6"
+  }
+ }
+}

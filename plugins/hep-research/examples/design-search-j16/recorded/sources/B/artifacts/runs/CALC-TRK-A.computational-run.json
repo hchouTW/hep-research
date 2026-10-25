@@ -1,0 +1,102 @@
+{
+ "contract_version": "3.13.0",
+ "artifact_id": "collider-tracker-v1-CALC-TRK-A-run",
+ "artifact_type": "computational-run",
+ "objective": "detector system design: computational-run written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.13.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-A.json",
+   "sha256": "bf63dc4cbc011c431983709e03f41f88f3368a93a56b37b95462a3bca44f233a",
+   "artifact_type": "design-candidate",
+   "artifact_id": "collider-tracker-v1-cand-A",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  }
+ ],
+ "outputs": [
+  {
+   "ref": "outputs/CALC-TRK-A.json"
+  }
+ ],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "input_manifest": [
+   {
+    "path": "candidates/cand-A.json",
+    "sha256": "bf63dc4cbc011c431983709e03f41f88f3368a93a56b37b95462a3bca44f233a"
+   }
+  ],
+  "tools": [
+   {
+    "name": "tracker-resolution",
+    "version": "0.38.0"
+   }
+  ],
+  "commands": [
+   "python3 skills/hep-detector/scripts/tracker_resolution.py momentum --positions-m 0.1 0.183333 0.266667 0.35 0.433333 0.516667 0.6 0.683333 0.766667 0.85 0.933333 1.016667 1.1 --point-resolution-um 20.0 --field-tesla 3.8 --x-over-x0 0.36 --charge 1 --mass-gev 0.1056583755 --pt 100.0 --status synthetic"
+  ],
+  "environment": {
+   "python": "3.13.2",
+   "platform": "macOS-26.5"
+  },
+  "seeds": {},
+  "tolerances": {},
+  "exit_status": 0,
+  "output_hashes": {
+   "outputs/CALC-TRK-A.json": "4f7a7f39e861357ffa16b26d5962d221d90e0df3b628a87955b822ea40c70b19"
+  },
+  "argv": [
+   "python3",
+   "skills/hep-detector/scripts/tracker_resolution.py",
+   "momentum",
+   "--positions-m",
+   "0.1",
+   "0.183333",
+   "0.266667",
+   "0.35",
+   "0.433333",
+   "0.516667",
+   "0.6",
+   "0.683333",
+   "0.766667",
+   "0.85",
+   "0.933333",
+   "1.016667",
+   "1.1",
+   "--point-resolution-um",
+   "20.0",
+   "--field-tesla",
+   "3.8",
+   "--x-over-x0",
+   "0.36",
+   "--charge",
+   "1",
+   "--mass-gev",
+   "0.1056583755",
+   "--pt",
+   "100.0",
+   "--status",
+   "synthetic"
+  ],
+  "script_sha256": {
+   "skills/hep-detector/scripts/tracker_resolution.py": "767043e87f2c00903246bce1627ec40cd7d9bf0a2fdac100e756a9d09bd56fbc"
+  }
+ }
+}

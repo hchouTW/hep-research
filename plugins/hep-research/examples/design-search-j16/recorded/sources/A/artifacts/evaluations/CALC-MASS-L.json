@@ -1,0 +1,72 @@
+{
+ "contract_version": "3.13.0",
+ "artifact_id": "ams-like-v1-CALC-MASS-L",
+ "artifact_type": "design-evaluation",
+ "objective": "detector system design: design-evaluation written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.13.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-L.json",
+   "sha256": "ef58a8a647e7955151a576174d510dbbb719f0fb6a3a9f9bd3f031c358c0b138",
+   "artifact_type": "design-candidate",
+   "artifact_id": "ams-like-v1-cand-L",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  },
+  {
+   "ref": "runs/CALC-MASS-L.computational-run.json",
+   "sha256": "ad56f2ab13415e6cc13545f0ca4a54f8e903db3f7bd549200347e6b17bdc9040",
+   "artifact_type": "computational-run",
+   "artifact_id": "ams-like-v1-CALC-MASS-L-run",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "evaluation_id": "ams-like-v1:CALC-MASS-L",
+  "candidate": "ams-like-v1:cand-L",
+  "figure_of_merit": "mass-budget",
+  "denominator": {},
+  "bound": "estimate",
+  "fidelity": "F1",
+  "value": 2395.0,
+  "unit": "kg",
+  "run_ref": "runs/CALC-MASS-L.computational-run.json",
+  "parameter_refs": [
+   "budgets.mass.DES-MAG-001",
+   "budgets.mass.DES-TRK-001",
+   "subsystems"
+  ],
+  "parameter_digest": "2d2cfd4e59391a6bffbd9e36b2b9095617a1eb7719c364f61878a6234ae6d0bb",
+  "validity": {
+   "assumptions": [],
+   "in_domain": true
+  },
+  "uncertainty": {
+   "minus": 119.75,
+   "plus": 119.75,
+   "coverage": 0.6827,
+   "interval": "central",
+   "distribution": "gaussian"
+  }
+ }
+}

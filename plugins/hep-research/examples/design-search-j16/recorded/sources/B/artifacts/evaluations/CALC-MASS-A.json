@@ -1,0 +1,73 @@
+{
+ "contract_version": "3.13.0",
+ "artifact_id": "collider-tracker-v1-CALC-MASS-A",
+ "artifact_type": "design-evaluation",
+ "objective": "detector system design: design-evaluation written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.13.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-A.json",
+   "sha256": "bf63dc4cbc011c431983709e03f41f88f3368a93a56b37b95462a3bca44f233a",
+   "artifact_type": "design-candidate",
+   "artifact_id": "collider-tracker-v1-cand-A",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  },
+  {
+   "ref": "runs/CALC-MASS-A.computational-run.json",
+   "sha256": "cbdc1394e00c92fae196a92511d5fabd6886f9581d5a28f051af52abccfc4654",
+   "artifact_type": "computational-run",
+   "artifact_id": "collider-tracker-v1-CALC-MASS-A-run",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "evaluation_id": "collider-tracker-v1:CALC-MASS-A",
+  "candidate": "collider-tracker-v1:cand-A",
+  "figure_of_merit": "mass-budget",
+  "denominator": {},
+  "bound": "estimate",
+  "fidelity": "F1",
+  "value": 22500.0,
+  "unit": "kg",
+  "run_ref": "runs/CALC-MASS-A.computational-run.json",
+  "parameter_refs": [
+   "budgets.mass.DES-ECAL-001",
+   "budgets.mass.DES-MAG-001",
+   "budgets.mass.DES-TRK-001",
+   "subsystems"
+  ],
+  "parameter_digest": "6c8e97b49cc922c8ba386e9bbd1295bfe06bf7efe89eb36231afd3a8947a7f4b",
+  "validity": {
+   "assumptions": [],
+   "in_domain": true
+  },
+  "uncertainty": {
+   "minus": 1125.0,
+   "plus": 1125.0,
+   "coverage": 0.6827,
+   "interval": "central",
+   "distribution": "gaussian"
+  }
+ }
+}

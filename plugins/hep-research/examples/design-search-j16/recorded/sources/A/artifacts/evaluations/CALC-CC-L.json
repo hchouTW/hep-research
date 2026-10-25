@@ -1,0 +1,79 @@
+{
+ "contract_version": "3.13.0",
+ "artifact_id": "ams-like-v1-CALC-CC-L",
+ "artifact_type": "design-evaluation",
+ "objective": "detector system design: design-evaluation written by evaluate_design.py",
+ "versions": {
+  "plugin": "0.38.0",
+  "contracts": "3.13.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  }
+ },
+ "provenance": {
+  "producer_skill": "hep-detector",
+  "created": "2026-10-24"
+ },
+ "inputs": [
+  {
+   "ref": "candidates/cand-L.json",
+   "sha256": "ef58a8a647e7955151a576174d510dbbb719f0fb6a3a9f9bd3f031c358c0b138",
+   "artifact_type": "design-candidate",
+   "artifact_id": "ams-like-v1-cand-L",
+   "status": [
+    "synthetic"
+   ],
+   "binding": "parameters"
+  },
+  {
+   "ref": "runs/CALC-CC-L.computational-run.json",
+   "sha256": "453a13e5ca48e71c08ab30b22c39dd4758331922763d7499ab2bb7cce104f6d9",
+   "artifact_type": "computational-run",
+   "artifact_id": "ams-like-v1-CALC-CC-L-run",
+   "status": [
+    "synthetic"
+   ]
+  },
+  {
+   "ref": "evaluations/CALC-TRK-L.json",
+   "sha256": "14218d24b9cdd82375ad7aaf0e5b1fba0cf055b20d21a1f1c3d237517c2e8fd1",
+   "artifact_type": "design-evaluation",
+   "artifact_id": "ams-like-v1-CALC-TRK-L",
+   "status": [
+    "synthetic"
+   ]
+  }
+ ],
+ "outputs": [],
+ "status": [
+  "synthetic"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "evaluation_id": "ams-like-v1:CALC-CC-L",
+  "candidate": "ams-like-v1:cand-L",
+  "figure_of_merit": "charge-confusion-rate",
+  "denominator": {
+   "rigidity_GV": 1000.0,
+   "species": "proton",
+   "charge_sign": "positive",
+   "curvature_offset_per_GV": 0.0
+  },
+  "bound": "optimistic",
+  "fidelity": "F1",
+  "value": 6.4394109427811344e-06,
+  "unit": "1",
+  "run_ref": "runs/CALC-CC-L.computational-run.json",
+  "parameter_refs": [],
+  "parameter_digest": "44136fa355b3678a1146ad16f7e8649e94fb4fc21fe77e8310c060f61caaff8a",
+  "validity": {
+   "assumptions": [
+    "Gaussian curvature core only",
+    "no curvature offset",
+    "sigma(1/R) at the denominator rigidity"
+   ],
+   "in_domain": true
+  }
+ }
+}

@@ -1,0 +1,63 @@
+{
+  "status": "ok",
+  "status_label": "synthetic",
+  "label": "[General method]",
+  "inputs": {
+    "command": "momentum",
+    "positions_m": [
+      0.1,
+      0.183333,
+      0.266667,
+      0.35,
+      0.433333,
+      0.516667,
+      0.6,
+      0.683333,
+      0.766667,
+      0.85,
+      0.933333,
+      1.016667,
+      1.1
+    ],
+    "point_resolution_um": [
+      20.0
+    ],
+    "field_tesla": 3.8,
+    "x_over_x0": 0.36,
+    "charge": 1.0,
+    "beta": null,
+    "mass_gev": 0.1056583755,
+    "pt": [
+      100.0
+    ],
+    "lever_arm_m": null
+  },
+  "defaults_used": [
+    "lever_arm_m: the span of the positions"
+  ],
+  "n_layers": 13,
+  "lever_arm_m": 1.0,
+  "intrinsic": {
+    "sigma_curvature_per_m": 0.00012873312385148749,
+    "exact_coefficient": 6.436656192574375,
+    "gluckstern_coefficient": 6.507913734559685,
+    "gluckstern_sigma_curvature_per_m": 0.00013015827469119368,
+    "exact_over_gluckstern_variance": 0.9782211527831984,
+    "slope_per_gev": 0.00011300196836724491,
+    "gluckstern_slope_per_gev": 0.00011425296613136987,
+    "note": "Gluckstern assumes N equally spaced points over the lever arm; the exact fit uses the given positions"
+  },
+  "points": [
+    {
+      "pt_gev": 100.0,
+      "beta": 0.9999994418158517,
+      "intrinsic_relative": 0.011300196836724492,
+      "scattering_relative": 0.008426887108760748,
+      "scattering_relative_highland": 0.0071628540424466345,
+      "total_relative": 0.014096342606950083
+    }
+  ],
+  "mdr_intrinsic_gev": 8849.403372781098,
+  "mdr_total_gev_beta1": 8849.089158750905,
+  "scattering_convention": "PDG 0.016 GeV/c; the Highland form (0.0136 GeV) is scattering_relative_highland"
+}
