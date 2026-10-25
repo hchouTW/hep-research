@@ -210,7 +210,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `event-reconstruction.md` | hep-detector | 13.4 | no | 7 | - | e2957da1 2026-10-25 |
 | `extensive-air-showers.md` | hep-detector | 9.0 | yes | 11 | hep-citations | af7ad3bb 2026-10-21 |
 | `front-end-calibration.md` | hep-detector | 6.0 | no | 3 | - | e2957da1 2026-10-25 |
-| `front-end-electronics-and-signal-processing.md` | hep-detector | 24.3 | yes | 15 | - | a1267715 2026-10-25 |
+| `front-end-electronics-and-signal-processing.md` | hep-detector | 24.3 | yes | 15 | - | c639f76c 2026-10-26 |
 | `front-end-waveform-processing.md` | hep-detector | 12.7 | no | 7 | - | a1267715 2026-10-25 |
 | `gaseous-and-specialized-tracking-technologies.md` | hep-detector | 15.8 | no | 8 | hep-citations | 9257d7b5 2026-10-15 |
 | `geant4-study-protocol.md` | hep-detector | 43.2 | no | 11 | hep-citations | f360dcc6 2026-10-25 |
