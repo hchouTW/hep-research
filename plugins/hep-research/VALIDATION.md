@@ -2756,6 +2756,31 @@ Contracts: the 13 new keys are core `convention_keys` and also `conditional_conv
 description change and the 8 Th14 cases (paid; pending approval). Pre-existing on main: 5 tests of
 `tests/contracts/test_simulated_dataset.py` fail under a whole-directory pytest run and pass alone (order dependent).
 
+## FRONTEND-FE1 (2026-10-25, E2: macOS 26.5 arm64, Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1, SymPy 1.14.0, mpmath 1.3.0; branch `worktree-frontend-fe1` in `.claude/worktrees/frontend-fe1`, unreleased)
+
+Stage FE1 of `docs/dev/frontend-electronics/frontend-reco-sim-calibration.md`: the table signal model of
+`hit-efficiency`. **Exception to §P.10.2 (task document §0 item 2):** the maintainer asked for FE1-FE3 to run
+unattended while FE0 (#294) was still open, so FE1 is based on the FE0 branch head `317e452f`, not on a main that
+contains FE0; it is rebased onto main and all checks rerun before it merges. Worktree checks at the start: top level
+the worktree, branch `worktree-frontend-fe1`, status clean.
+
+| Check | Result |
+|---|---|
+| FE1-1 Landau density table (MPV 23000 e, xi 1500 e, noise 1000 e; 8000-60000 e, step 25 e) | relative difference < 1e-3 at 16000-24000 e against the `landau` model truncated at 60000 e. Amended criterion: as written (untruncated `landau`) it cannot hold, since the normalized table misses the tail beyond its end (0.88 % for a table to 200 000 e; the tail falls as about xi/(Q - MPV)); interpolation adds 4.5 % (linear CDF) or 2.3 % (linear density) at 16000 e with a 150 e step, falling as the step squared (prototype, recorded in the task document). `validity` flags the truncation |
+| FE1-2 negative control (+300 e shift) | relative difference > 9 % at every threshold |
+| FE1-3 Gaussian density table (mean 20000 e, sigma 1000 e, step 50 e) | efficiency within 1e-4 of the closed form at 17000-23000 e; a 5 % wider table differs by more than 1e-3 |
+| Count table | bins with edges at the midpoints, uniform within a bin, against a hand computation; the signal fraction scales the charge axis; thresholds outside the table flagged |
+| FE1-4 bad files | missing, empty, header only, one row, wrong names, three columns, a short row, not a number, nan, inf, not increasing, a repeated charge, a negative value (positive total), zero total, not UTF-8: exit 2, `invalid-input`, no traceback; `frontend_response.py` in `MISSING_FILE_ARGS` |
+| Mutants | 8 local mutants of the new code (density interpolation, count edges, signal-fraction scaling, normalization, truncation flag, outside-range flag, strict increase, negative values) all killed by `HitEfficiencyTable`; the negative-value mutant survived the first version of the test (that case also had a zero total) and the case was fixed |
+| Validation commands 1-6 | unit tests (108), tool contract pass, reference inventory pass, wiring pass, ruff 0.16.10 clean, static checks pass |
+| Full check (command 7) at `1214aebd` | 31 of 31 checks pass with the host CLIs; unittest 5579 run, 5426 pass, 153 skipped, 0 failures or errors |
+
+Software checks only: the table model reproduces the Landau and Gaussian models it was sampled from; no measured
+thin-silicon spectrum was used (open question "FE1 spectrum").
+
+**Rebased (2026-10-25)** onto `297169a3`, the FE0 commit that fixes the exit code of an input error naming JSON (no
+conflict). The full check above ran before the rebase; the full check of the rebased stack is in FRONTEND-FE3.
+
 ## FRONTEND-RECO-SIM (2026-10-25, Linux x86_64 container, Python 3.13.17, NumPy 2.5.3, SciPy 1.18.1 for the oracles, no SymPy or mpmath; branch `worktree-frontend-reco-sim` from main `bc7b1c18`, unreleased)
 
 hep-detector front-end electronics for reconstruction and simulation: `frontend_response.py` subcommands

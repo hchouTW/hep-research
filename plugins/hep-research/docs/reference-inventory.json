@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 40,
-   "bytes": 585335,
+   "bytes": 585608,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1922,7 +1922,7 @@
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "5fa57b0a 2026-10-25"
+   "last_commit": "6f156782 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/detector-principles-summary.md",
@@ -2039,8 +2039,8 @@
   {
    "path": "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
    "owner": "hep-detector",
-   "bytes": 39840,
-   "lines": 559,
+   "bytes": 40113,
+   "lines": 562,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
@@ -2060,7 +2060,7 @@
     "tests/skills/hep_detector/test_frontend_waveforms.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "5fa57b0a 2026-10-25"
+   "last_commit": "6f156782 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",

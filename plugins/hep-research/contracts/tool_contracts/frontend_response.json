@@ -1683,7 +1683,7 @@
   },
   {
    "operation_id": "hit-efficiency",
-   "summary": "Hit efficiency of a channel versus threshold for a Landau (most probable value, xi) or Gaussian signal with a charge-sharing fraction, noise and a channel-to-channel threshold spread, and the noise occupancy (probability above threshold at a sample, Rice up-crossings in a window for CR-(RC)^n), with the operating window that meets an efficiency and an occupancy target",
+   "summary": "Hit efficiency of a channel versus threshold for a Landau (most probable value, xi), Gaussian or tabulated (measured or simulated charge spectrum from a CSV file) signal with a charge-sharing fraction, noise and a channel-to-channel threshold spread, and the noise occupancy (probability above threshold at a sample, Rice up-crossings in a window for CR-(RC)^n), with the operating window that meets an efficiency and an occupancy target",
    "invocation": {
     "kind": "cli",
     "output": "json-stdout",
@@ -1703,6 +1703,10 @@
      {
       "flag": "--signal-model",
       "input": "signal_model"
+     },
+     {
+      "flag": "--spectrum",
+      "input": "spectrum"
      },
      {
       "flag": "--mpv",
@@ -1789,8 +1793,15 @@
      "kind": "parameter",
      "unit": "n/a",
      "required": false,
-     "constraint": "'landau' or 'gauss'",
+     "constraint": "'landau', 'gauss' or 'table' (table needs spectrum)",
      "default": "landau"
+    },
+    {
+     "name": "spectrum",
+     "kind": "path",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "table only: CSV with header charge,density or charge,count; charges strictly increasing, values finite and >= 0, positive total, at least two rows"
     },
     {
      "name": "mpv",
@@ -1957,7 +1968,7 @@
     {
      "exit_code": 2,
      "status": "invalid-input",
-     "meaning": "an argument is missing, malformed or out of range (including a relation the subcommand checks, such as R_p > 0 or rho within [-1/(N-1), 1]); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
+     "meaning": "an argument is missing, malformed or out of range, or the spectrum file cannot be read or is malformed (header, columns, non-finite or negative values, charges not increasing, zero total) (including a relation the subcommand checks, such as R_p > 0 or rho within [-1/(N-1), 1]); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
     }
    ],
    "required_capabilities": [],

@@ -11,7 +11,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-authoring | 49 | 355 | 0 |
 | hep-citations | 11 | 83 | 0 |
 | hep-computing | 35 | 299 | 0 |
-| hep-detector | 40 | 585 | 0 |
+| hep-detector | 40 | 586 | 0 |
 | hep-measurement | 12 | 119 | 0 |
 | hep-ml | 42 | 194 | 0 |
 | hep-statistics | 14 | 198 | 0 |
@@ -199,13 +199,13 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `detector-design-principles.md` | hep-detector | 5.7 | yes | 5 | - | 97c6b0b5 2026-10-24 |
 | `detector-glossary.md` | hep-detector | 6.0 | no | 5 | - | 9257d7b5 2026-10-15 |
 | `detector-measurement-framework.md` | hep-detector | 11.0 | no | 11 | hep-citations, hep-measurement | 9257d7b5 2026-10-15 |
-| `detector-principles-bibliography.md` | hep-detector | 17.0 | no | 3 | - | 5fa57b0a 2026-10-25 |
+| `detector-principles-bibliography.md` | hep-detector | 17.0 | no | 3 | - | 6f156782 2026-10-25 |
 | `detector-principles-summary.md` | hep-detector | 15.1 | yes | 5 | - | 485e96cb 2026-10-17 |
 | `detector-simulation.md` | hep-detector | 14.4 | yes | 13 | hep-ml, hep-theory | 765bf693 2026-10-25 |
 | `detector-systems-overview.md` | hep-detector | 12.7 | no | 14 | hep-measurement | 9257d7b5 2026-10-15 |
 | `event-reconstruction.md` | hep-detector | 13.3 | no | 7 | - | 765bf693 2026-10-25 |
 | `extensive-air-showers.md` | hep-detector | 9.0 | yes | 11 | hep-citations | af7ad3bb 2026-10-21 |
-| `front-end-electronics-and-signal-processing.md` | hep-detector | 39.8 | yes | 15 | - | 5fa57b0a 2026-10-25 |
+| `front-end-electronics-and-signal-processing.md` | hep-detector | 40.1 | yes | 15 | - | 6f156782 2026-10-25 |
 | `gaseous-and-specialized-tracking-technologies.md` | hep-detector | 15.8 | no | 8 | hep-citations | 9257d7b5 2026-10-15 |
 | `geant4-study-protocol.md` | hep-detector | 42.8 | no | 11 | hep-citations | bbeb133f 2026-10-25 |
 | `ground-based-detection-arrays.md` | hep-detector | 11.7 | no | 7 | - | 9257d7b5 2026-10-15 |

@@ -369,7 +369,8 @@ Follows `docs/dev/geant4-architecture/geant4-program.md` §P.10 [C]; the only ex
   2. Build a monotone CDF:
      - `density`: trapezoidal integration, then normalize;
      - `count`: entries are bin centres, edges at the midpoints between neighbours;
-     - interpolate linearly between points;
+     - interpolate linearly between points: the density for `density` (so the CDF between points is the exact
+       integral, quadratic), the CDF within a bin for `count` (uniform bins) [C, FE1];
      - outside the table range use 0 below and 1 above, and flag in `validity` every threshold beyond the range.
   3. `--signal-fraction` scales the table's charge axis; `--threshold-dispersion` and the occupancy calculation are
      unchanged.
@@ -494,7 +495,12 @@ Follows `docs/dev/geant4-architecture/geant4-program.md` §P.10 [C]; the only ex
 
 - **FE1-1** A density table sampled from the `landau` model (MPV 23000 e, ξ 1500 e, σ 1000 e) with charge step ≤ 150 e
   (0.1 ξ): at thresholds 16000–24000 e every 1000 e (Landau inefficiency 1.8e-6 to 0.36), the relative difference
-  between the `table` and `landau` inefficiencies is < 1e-3.
+  between the `table` and `landau` inefficiencies is < 1e-3. *Amended at FE1 (2026-10-25) [C]:* as written the
+  criterion cannot hold. The table is normalized over its range, and the Landau tail beyond Q falls only as about
+  ξ/(Q − MPV): a table to 200 000 e misses 0.88 %, which raises every inefficiency by that fraction. Interpolation adds
+  about 4.5 % (linear CDF) or 2.3 % (linear density) at 16000 e with a 150 e step, falling as the step squared. The test
+  therefore compares with the `landau` model truncated at the table's upper end (60 000 e) and uses a 25 e step (still
+  ≤ 150 e); `validity` flags a table that ends above 1e-3 of its peak.
 - **FE1-2** Negative control: the same table with its charge axis shifted by +300 e (0.2 ξ) must fail the FE1-1 check; at
   these thresholds the relative difference is at least 9 % (computed with `hit-efficiency` at MPV 23300 e [C]).
 - **FE1-3** A Gaussian signal (mean 20000 e, σ 1000 e) as a density table with step ≤ 50 e (0.05 σ): at thresholds

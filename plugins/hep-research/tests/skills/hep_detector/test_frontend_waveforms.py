@@ -9,7 +9,11 @@ Oracles, each independent of the code under test:
   (scipy.stats.landau, which is the stable law S1(1, 1, 1, 0): phi(lambda) = landau.pdf with loc ln(pi/2) and
   scale pi/2) and from scipy.integrate.quad of the efficiency integral; a NumPy/SciPy Monte Carlo of a joint amplitude
   and time least-squares fit (4000 pulses, recorded below);
-- the page's own worked numbers (front-end-electronics-and-signal-processing.md, optimal filter and phase error).
+- the page's own worked numbers (front-end-electronics-and-signal-processing.md, optimal filter and phase error);
+- table signal model (FE1): a Landau density table against the Landau model truncated at the table's end (the Landau
+  itself checked above against SciPy and the oscillatory integral), with a +300 e shifted table as negative control;
+  a Gaussian density table against the closed form, with a 5 % wider table as negative control; a count table
+  computed by hand (bin edges at the midpoints, uniform within a bin).
 Standard library only.
 """
 import contextlib
@@ -18,6 +22,7 @@ import json
 import math
 import subprocess
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -232,6 +237,119 @@ class HitEfficiency(unittest.TestCase):
         with self.assertRaises(ValueError):
             fr.hit_efficiency([1000], 100, 'landau', mpv=20000, xi=1000, signal_fraction=1.5)
 
+
+
+class HitEfficiencyTable(unittest.TestCase):
+    """FE1: the table (measured or simulated spectrum) signal model of hit-efficiency."""
+    MPV, XI, NOISE = 23000.0, 1500.0, 1000.0
+    THRESHOLDS = list(range(16000, 24001, 1000))
+    STEP, Q_LO, Q_HI = 25.0, 8000.0, 60000.0  # step <= 150 e as FE1-1 asks; 25 e keeps the interpolation < 1e-3
+
+    @classmethod
+    def setUpClass(cls):
+        n = int((cls.Q_HI - cls.Q_LO) / cls.STEP)
+        cls.charges = [cls.Q_LO + i * cls.STEP for i in range(n + 1)]
+        cls.density = [fr.landau_pdf(cls._lam(q)) / cls.XI for q in cls.charges]
+        # oracle: the Landau model truncated at the table's upper end (the table is normalized over its range)
+        top = fr.landau_cdf(cls._lam(cls.Q_HI))
+        cache = {}
+
+        def cdf(q):
+            key = round(q, 3)
+            if key not in cache:
+                cache[key] = min(fr.landau_cdf(cls._lam(min(q, cls.Q_HI))), top) / top
+            return cache[key]
+        cls.truncated_ineff = {t: fr._gauss_expect(cdf, t, cls.NOISE) for t in cls.THRESHOLDS}
+
+    @classmethod
+    def _lam(cls, q):
+        return (q - cls.MPV) / cls.XI + fr.LANDAU_MPV
+
+    def table_ineff(self, charges, density, **kw):
+        r = fr.hit_efficiency(self.THRESHOLDS, self.NOISE, 'table', spectrum=('density', charges, density), **kw)
+        return {row['threshold']: row['inefficiency'] for row in r['thresholds']}, r
+
+    def test_landau_density_table_reproduces_landau(self):  # FE1-1
+        ineff, r = self.table_ineff(self.charges, self.density)
+        for t in self.THRESHOLDS:
+            self.assertLess(abs(ineff[t] / self.truncated_ineff[t] - 1), 1e-3, msg=t)
+        self.assertGreater(self.truncated_ineff[16000], 1e-6)  # the deep tail is really probed (1.8e-6 untruncated)
+        self.assertTrue(any('table ends at' in v for v in r['validity']))  # a Landau table is always truncated
+
+    def test_shifted_table_fails_the_check(self):  # FE1-2, negative control
+        shifted = [q + 300 for q in self.charges]
+        ineff, _ = self.table_ineff(shifted, self.density)
+        for t in self.THRESHOLDS:
+            self.assertGreater(abs(ineff[t] / self.truncated_ineff[t] - 1), 0.09, msg=t)
+
+    def test_gaussian_density_table_matches_closed_form(self):  # FE1-3
+        mu, sig, step = 20000.0, 1000.0, 50.0
+        qs = [mu - 10 * sig + i * step for i in range(int(20 * sig / step) + 1)]
+        dens = [math.exp(-((q - mu) / sig) ** 2 / 2) for q in qs]  # unnormalized: the tool normalizes
+        total = math.hypot(sig, self.NOISE)
+        thresholds = list(range(17000, 23001, 500))
+        r = fr.hit_efficiency(thresholds, self.NOISE, 'table', spectrum=('density', qs, dens))
+        for row in r['thresholds']:
+            want = 0.5 * math.erfc((row['threshold'] - mu) / (total * math.sqrt(2)))
+            self.assertLess(abs(row['efficiency'] - want), 1e-4, msg=row['threshold'])
+        self.assertFalse(any('table ends at' in v for v in r['validity']))
+        wider = [math.exp(-((q - mu) / (1.05 * sig)) ** 2 / 2) for q in qs]  # negative control: 5 % wider signal
+        r = fr.hit_efficiency(thresholds, self.NOISE, 'table', spectrum=('density', qs, wider))
+        worst = max(abs(row['efficiency'] - 0.5 * math.erfc((row['threshold'] - mu) / (total * math.sqrt(2))))
+                    for row in r['thresholds'])
+        self.assertGreater(worst, 1e-3)
+
+    def test_count_table_bins_and_signal_fraction(self):
+        # bin centres 0, 1, 2, 3 with counts 1, 2, 3, 4: edges -0.5, 0.5, 1.5, 2.5, 3.5, uniform within a bin
+        spectrum = ('count', [0.0, 1.0, 2.0, 3.0], [1.0, 2.0, 3.0, 4.0])
+        r = fr.hit_efficiency([1.0, 3.0], 1e-6, 'table', spectrum=spectrum)
+        self.assertAlmostEqual(r['thresholds'][0]['inefficiency'], (1 + 2 * 0.5) / 10, places=9)
+        self.assertAlmostEqual(r['thresholds'][1]['inefficiency'], (1 + 2 + 3 + 4 * 0.5) / 10, places=9)
+        self.assertEqual(r['signal']['charge_range_on_channel'], [-0.5, 3.5])
+        half = fr.hit_efficiency([0.5, 1.5], 1e-6, 'table', spectrum=spectrum, signal_fraction=0.5)
+        self.assertAlmostEqual(half['thresholds'][0]['inefficiency'], r['thresholds'][0]['inefficiency'], places=9)
+        outside = fr.hit_efficiency([5.0], 1e-6, 'table', spectrum=spectrum)
+        self.assertAlmostEqual(outside['thresholds'][0]['efficiency'], 0.0, places=12)
+        self.assertTrue(any('outside the table range' in v for v in outside['validity']))
+
+    def test_model_and_file_must_agree(self):
+        with self.assertRaises(ValueError):
+            fr.hit_efficiency([1.0], 1.0, 'table')
+        with self.assertRaises(ValueError):
+            fr.hit_efficiency([1.0], 1.0, 'gauss', mean=5, sigma_signal=1, spectrum=('count', [0.0, 1.0], [1.0, 1.0]))
+
+    def test_bad_spectrum_files_are_invalid_input(self):  # FE1-4
+        cases = {
+            'empty': b'', 'header only': b'charge,density\n', 'one row': b'charge,density\n1,2\n',
+            'wrong names': b'q,density\n1,2\n2,3\n', 'three columns': b'charge,density,x\n1,2,3\n2,3,4\n',
+            'short row': b'charge,count\n1,2\n2\n', 'not a number': b'charge,count\n1,2\n2,abc\n',
+            'nan': b'charge,count\n1,2\n2,nan\n', 'inf': b'charge,count\n1,inf\n2,3\n',
+            'not increasing': b'charge,count\n2,2\n1,3\n', 'repeated charge': b'charge,count\n1,2\n1,3\n',
+            'negative': b'charge,density\n1,5\n2,-1\n3,4\n',  # positive total
+            'zero total': b'charge,count\n1,0\n2,0\n',
+            'not utf-8': b'charge,count\n1,2\n2,\xff\xfe\n',
+        }
+        with tempfile.TemporaryDirectory() as tmp:
+            paths = {'missing': str(Path(tmp) / 'absent.csv')}
+            for i, (name, data) in enumerate(cases.items()):
+                path = Path(tmp) / f'case{i}.csv'
+                path.write_bytes(data)
+                paths[name] = str(path)
+            for name, path in paths.items():
+                proc = subprocess.run([sys.executable, '-I', str(SCRIPT), 'hit-efficiency', '--thresholds', '1',
+                                       '--noise', '1', '--signal-model', 'table', '--spectrum', path],
+                                      capture_output=True, text=True, timeout=120)
+                with self.subTest(name):
+                    self.assertEqual(proc.returncode, 2, proc.stdout)
+                    self.assertEqual(json.loads(proc.stdout)['error_kind'], 'invalid-input')
+                    self.assertNotIn('Traceback', proc.stderr)
+            good = Path(tmp) / 'good.csv'
+            good.write_text('charge,count\n0,1\n1,2\n2,3\n3,4\n', encoding='utf-8')
+            proc = subprocess.run([sys.executable, '-I', str(SCRIPT), 'hit-efficiency', '--thresholds', '1',
+                                   '--noise', '1e-6', '--signal-model', 'table', '--spectrum', str(good)],
+                                  capture_output=True, text=True, timeout=120)
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            self.assertAlmostEqual(json.loads(proc.stdout)['thresholds'][0]['inefficiency'], 0.2, places=9)
 
 class WaveformToy(unittest.TestCase):
     ARGS = dict(order=4, peaking_ns=45, period_ns=25, samples=7, first_offset_ns=-50, amplitude=50)
