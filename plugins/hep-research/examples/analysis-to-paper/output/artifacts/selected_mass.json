@@ -8,7 +8,7 @@
   "theory": []
  },
  "versions": {
-  "plugin": "0.40.0",
+  "plugin": "0.41.0",
   "contracts": "3.13.0",
   "profiles": {}
  },

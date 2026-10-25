@@ -3450,6 +3450,24 @@ Not done in this stage: the independent
 new-problem run by an agent that did not take part (C1.10, section A.8), the `review.py` Markdown review, the release
 manifest. The adequacy table is unchanged; search values remain F1 optimistic bounds and decide nothing.
 
+## 0.41.0 release check (2026-10-26, E2 and the CI lock)
+
+Release branch `release/0.41.0` from main `b50db9b4` (main CI green). It ships #294-#300 (FRONTEND-RECO-SIM with the
+sci-fix FRONTEND-INJECTION-GAIN and the exit-code fix, FRONTEND-FE1 to FRONTEND-FE5, the simulated thin-silicon
+spectrum); contracts 3.13.0, `CORE_VERSION` 1.1.0 and geant4 adapter 0.5.0 unchanged. The new ledger entry is a
+documentation fix of text added in this cycle, so it changes no released number and needs no advisory. The
+ams02-research companion needs no change.
+
+What changed in the release branch: version 0.41.0 in both manifests, `pyproject.toml`, the README, two assets and the
+theory-profile scripts (profile artifacts carry the new version); CHANGELOG `Unreleased` is now `0.41.0`; examples
+regenerated with E2 (`bc-propagation-fit` with the CI lock): only version strings and the hashes that cover them change
+(`unfolding-coverage` restored); reference inventory regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 29 pass, 0 fail, 2 skipped (CLI host checks); 5601 tests in 458 modules, 5448 pass, 0 failures, 153 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 29 pass, 0 fail, 2 skipped; 5601 tests, 5356 pass, 0 failures, 245 skipped |
+
 ## 0.40.0 release check (2026-10-25, E2 and the CI lock)
 
 Release branch `release/0.40.0` from main `9d12d8ae` (main CI green). It ships #289-#292 (F4-REFUSED-STUDY,

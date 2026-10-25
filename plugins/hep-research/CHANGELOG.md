@@ -3,7 +3,21 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.41.0 (2026-10-26)
+
+Minor release; contracts 3.13.0, `CORE_VERSION` 1.1.0 and geant4 adapter 0.5.0 unchanged. It ships the front-end
+electronics work for reconstruction, simulation and calibration (#294-#300): five new `frontend_response.py`
+subcommands, then a table signal model, a measured noise covariance, batch S-curve fits and the simreco
+`noise-digitization` numbers; the front-end reference page split in three; and a simulated thin-silicon spectrum.
+
+**Before you upgrade** (details in each entry below):
+- The front-end page's sections on sampled waveforms, pileup, photosensors, LAr TPC, digital pulse processing and
+  pulse-shape discrimination are now in `front-end-waveform-processing.md`, and its calibration and simulation
+  sections in `front-end-calibration.md`. Links to their old anchors reach a "(moved)" pointer until 0.42.0.
+- `frontend_response.py`: an input error whose message contains "JSON" now exits 2 (`invalid-input`); it exited 1
+  before. A non-finite result still exits 1.
+- sci-fix FRONTEND-INJECTION-GAIN (S3): the calibration chain no longer takes the charge-injection gain for the
+  signal gain.
 
 hep-detector front-end electronics for reconstruction, simulation and calibration (VALIDATION FRONTEND-RECO-SIM). No contracts,
 `core/` or adapter version change; `frontend_response.py` now imports `core.stats._linalg.solve`.
