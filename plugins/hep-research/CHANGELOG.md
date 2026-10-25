@@ -115,6 +115,15 @@ D-FE5: two new pages).
   references. After the move: the front-end page's introduction names the two pages, and links whose topic moved
   (Campbell pileup, SiPM saturation, dead time, sampled-waveform estimators) point to the new page.
 
+hep-detector front-end: a simulated thin-silicon spectrum for the table signal model.
+
+- `skills/hep-detector/assets/thin-silicon-300um-mu10gev.geant4-pai.csv` (with a provenance `.json`): journey J14's
+  recorded Geant4 PAI run `mpv-pai` (10 GeV mu-, 300 um silicon) binned in 100 e, for `hit-efficiency --signal-model
+  table`. Its low-side tail is far wider than Landau's (at 16 000 e and ENC 1000 e the inefficiency is 9.5e-4 against
+  1.7e-6); status `unvalidated`, a simulation, not a measurement. Front-end page: one sentence. Tests:
+  `HitEfficiencyGeant4Spectrum` (3 tests). Decisions recorded: review R720d9d2e80 slot S4 accepted as missing; FE1
+  spectrum: this simulated table, no measured one.
+
 ## 0.40.0 (2026-10-25)
 
 Minor release; contracts 3.13.0, `CORE_VERSION` 1.1.0 and geant4 adapter 0.5.0 unchanged. It ships the follow-ups

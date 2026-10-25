@@ -117,7 +117,7 @@ Hashes differ after `git am`; identify commits by their messages.
 | Static checks `tools/run_all_checks.py --part static --no-cli` (rerun after calibration and after this document) | 27 of 29 pass, 2 skip (host CLI); ruff clean; tool contract pass; `tools/check_wiring.py --since bc7b1c18` pass |
 | Full check `tools/run_all_checks.py --part all --no-cli --jobs 2` (before calibration; the run recorded in VALIDATION) | 31 checks: 27 pass, 2 skip (host CLI), 2 fail (`unittest`, `ams_optional`) |
 | Unit tests in that full check | 5549 run: 5237 pass, 294 skipped, 18 failures or errors, none caused by this work: 16 `ModuleNotFoundError` (SymPy or mpmath missing; PyPI unreachable there); `tests.skills.hep_authoring.test_paper_skeleton` and `tests.tools.test_ci_plan.RunnerRecord` fail the same way on a clean main; `ams_optional` fails on the same missing SymPy |
-| Independent review R720d9d2e80 | All findings disposed (35 changed, 1 declined). Facts-lens slot S4 was rejected twice and escalated for a human; the review stays open until then (recorded in VALIDATION by patch 0004) |
+| Independent review R720d9d2e80 | All findings disposed (35 changed, 1 declined). Facts-lens slot S4 was rejected twice and escalated for a human; the maintainer accepted it as missing on 2026-10-26 (the shadow facts slot S3 was accepted), which closes the escalation (VALIDATION FRONTEND-RECO-SIM) |
 
 ## Objective
 
@@ -596,8 +596,12 @@ Test requirements:
   `front-end-waveform-processing.md` (sampled-waveform amplitude and time, pileup, photosensor and LAr TPC readout,
   digital pulse processing, pulse-shape discrimination) and `front-end-calibration.md` (calibration and simulation of
   the electronics); the front-end page is registered as a hub.
-- **[U] FE1 spectrum**: Is there a thin-silicon charge spectrum that may be placed publicly in `assets/`? If not, tests
-  use synthetic tables only. Blocks: Nothing (test data only). Decided by: Maintainer. Type: Open Question.
+- **[C] FE1 spectrum**: decided 2026-10-26 by the maintainer: no measured spectrum (a search on 2026-10-26 found no
+  open dataset ready to place in `assets/`); instead a simulated one,
+  `skills/hep-detector/assets/thin-silicon-300um-mu10gev.geant4-pai.csv`, binned from J14's recorded Geant4 PAI run
+  `mpv-pai` (10 GeV mu-, 300 um silicon; the rerun reproduced the recorded event file's hash). Its low-side tail is far
+  wider than Landau's (`HitEfficiencyGeant4Spectrum`); it stays `unvalidated`, and users give their own measured
+  spectrum with `--spectrum`.
 - **[C] E2 versions**: recorded at FE0 (VALIDATION FRONTEND-RECO-SIM): Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1,
   SymPy 1.14.0, mpmath 1.3.0.
 

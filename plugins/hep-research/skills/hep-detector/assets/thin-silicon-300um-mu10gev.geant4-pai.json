@@ -1,0 +1,31 @@
+{
+ "spectrum": "thin-silicon-300um-mu10gev.geant4-pai.csv",
+ "status_label": "unvalidated",
+ "kind": "simulated charge spectrum (Geant4), not a measurement",
+ "use": "frontend_response.py hit-efficiency --signal-model table --spectrum <this csv>: a low-side tail wider than Landau, for 300 um of silicon crossed at normal incidence by 10 GeV mu-; scale with --signal-fraction for charge sharing",
+ "columns": {
+  "charge": "bin centre, electrons",
+  "count": "events in the bin"
+ },
+ "binning": {
+  "width_electrons": 100,
+  "first_edge_electrons": 13300,
+  "last_edge_electrons": 308600,
+  "rows": 2953,
+  "events": 1200000,
+  "events_outside": 0
+ },
+ "conversion": {
+  "pair_energy_eV": 3.65,
+  "source": "PDG RPP, as cited in skills/hep-detector/references/signal-formation-and-readout.md and tracking-and-vertexing.md (w_i about 3.65 eV in silicon)",
+  "charge_electrons": "edep_Si_MeV x 1e6 / pair_energy_eV; no Fano fluctuation, no charge collection loss, no electronics noise (hit-efficiency adds the noise)"
+ },
+ "source_run": {
+  "record": "examples/geant4-thin-silicon/recorded/runs/mpv-pai.computational-run.json",
+  "spec": "examples/geant4-thin-silicon/recorded/specs/mpv-pai.json",
+  "description": "journey J14 variation mpv-pai: 1 200 000 mu- of 10 GeV through 300 um silicon (2.329 g/cm3), G4EmStandardPhysics_option4 with /process/em/AddPAIRegion all SiRegion PAI, cut 0.01 mm, Geant4 11.4.3 build A",
+  "events_csv_sha256": "61dd5bf409f2e2a73c732e4bc39e13cb5654a8be26d4df82501ba7045e22b1e8",
+  "reproduced": "2026-10-26: the recorded spec rerun with the recorded executable (sha256 d39225ea...) and build record gave spec, events, materials, data-path and log files with the recorded hashes"
+ },
+ "checks": "tests/skills/hep_detector/test_frontend_waveforms.py::HitEfficiencyGeant4Spectrum"
+}
