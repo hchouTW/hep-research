@@ -97,6 +97,16 @@ criteria as above.
 - M. Moll, "Displacement damage in silicon detectors for high energy physics", IEEE Trans.
   Nucl. Sci. 65 (2018) 1561-1582, DOI 10.1109/TNS.2018.2819506. Leakage current, depletion
   voltage and trapping after irradiation.
+- V. T. Jordanov and G. F. Knoll, "Digital synthesis of pulse shapes in real time for high
+  resolution radiation spectroscopy", Nucl. Instrum. Methods A345 (1994) 337-345 (title,
+  volume and pages read from the article's first page, University of Michigan Deep Blue
+  copy, 2026-10-25; DOI not checked). Recursive trapezoidal and triangular digital shaping;
+  flat tops against ballistic deficit and trapping.
+- J. P. Nolan, "Numerical calculation of stable densities and distribution functions",
+  Commun. Statist. Stochastic Models 13 (1997) 759-774, DOI 10.1080/15326349708807450
+  (matched against Crossref, 2026-10-25). The integral representation used for the Landau
+  density and distribution function in `frontend_response.py` (Landau = stable law
+  `alpha = 1`, `beta = 1`, scale `pi/2`).
 
 ## Timing detectors ([timing detectors](timing-detectors.md))
 

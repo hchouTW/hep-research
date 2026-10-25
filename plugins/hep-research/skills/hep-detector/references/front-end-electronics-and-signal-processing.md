@@ -8,7 +8,13 @@ statistics are in [cherenkov imaging variants and photosensors](cherenkov-imagin
 simulation is the Digitization section of [detector simulation](detector-simulation.md).
 `<plugin root>/skills/hep-detector/scripts/frontend_response.py` evaluates the relations below
 (ENC, noise-hit rate, timing, quantization, pileup, SiPM, ballistic deficit, dead time,
-cluster noise) and flags inputs outside their validity range.
+cluster noise) and flags inputs outside their validity range. For reconstruction and
+simulation it also gives the optimal-filter weights of a sampled pulse with correlated and
+pileup noise, with phase and baseline constraints and the joint amplitude-time errors
+(`optimal-filter`), the hit efficiency of a Landau or Gaussian signal against the noise
+occupancy, threshold by threshold (`hit-efficiency`), and a seeded synthetic sampled readout
+reconstructed by those estimators with closure against the analytic prediction
+(`waveform-toy`).
 
 **Scope.** This file models electronics *as part of the response*: what it does to the
 numbers an analysis sees, how to calibrate it, and how to simulate it. It does not cover
@@ -16,9 +22,10 @@ circuit, ASIC or FPGA design (transistor sizing, feedback topology, layout, powe
 PLL design, firmware coding or timing closure), component or ADC/TDC architecture
 selection for a new design, radiation-hardening design, grounding and signal integrity,
 or DAQ networking. For those, say so and point to engineering sources (for example the
-Spieler and Radeka references in the [bibliography](detector-principles-bibliography.md)). Code that implements a filter
-or a digitizer model is a hep-computing deliverable; ML waveform reconstruction is
-hep-ml's.
+Spieler and Radeka references in the [bibliography](detector-principles-bibliography.md)). Production code that implements
+a filter or a digitizer model in an experiment's software is a hep-computing deliverable
+(this page and the toy give its specification and its checks); ML waveform reconstruction
+is hep-ml's.
 
 Labels: *exact* (follows from the stated model), *approximate*, *empirical*,
 *device-specific* (take the number from the apparatus, never from memory).
@@ -38,6 +45,8 @@ question, first establish:
 5. Dynamic range: saturation, gain switching, nonlinearity.
 6. Rate limits: pileup of pulses, dead time, buffers, trigger rules.
 7. How each of these is calibrated, monitored, and reproduced in simulation.
+8. What charge reaches one channel (sharing, trapping, ballistic deficit) and therefore
+   where the operating window between efficiency and noise occupancy lies.
 
 ## Signal induction
 
@@ -159,6 +168,30 @@ distribution, not only its width, and its spectrum when tails appear.
   0.493 for `n = 4`); for CR-RC (`n = 1`) with series noise `nu_0` is undefined without a further
   bandwidth limit. Fake hits per event = channels × window × `nu`. A "5 sigma threshold"
   is not "no fakes" for 10^8 channels.
+- **Continuous versus sampled comparison.** Rice counts up-crossings of a continuously
+  compared signal. A readout that compares samples (zero suppression on ADC samples) is
+  noisy with probability `Q(T/sigma)` per sample (`Q` the Gaussian upper tail), correlated
+  between neighbouring samples; a binary channel open for a window `W` is noisy with
+  probability at most `Q(T/sigma) + nu W` (it starts above threshold or crosses). Use the
+  decision rule of the actual readout. With a Gaussian threshold spread `sigma_thr` across
+  channels the channel-averaged rates are exact in closed form: `Q(T/s)` and
+  `nu_0 (sigma/s) exp(-T^2 / 2 s^2)` with `s^2 = sigma^2 + sigma_thr^2`; the low-threshold
+  channels dominate, so trim before quoting a fake rate.
+- **Efficiency with a fluctuating signal and the operating window** (*approximate*: signal
+  and noise independent and additive). With a signal `Q` of distribution `F_Q` on the
+  channel, the channel-averaged inefficiency at threshold `T` is `E[F_Q(T + s u)]` over
+  `u ~ N(0, 1)`. For a Landau signal the low side is very steep, so the efficiency is set
+  by the fraction of the charge that reaches the channel: sharing between strips or pixels,
+  trapping after irradiation, a ballistic deficit. Example (`hit-efficiency`, Landau with
+  most probable value 23 000 e and `xi = 1500 e`, about 300 um of silicon; ENC 1000 e,
+  `sigma_thr = 300 e`, CR-RC^2 with `t_p = 25 ns`, series noise, 25 ns window; targets
+  efficiency >= 99 % and noise occupancy <= 10^-4): the window runs from 4500 e
+  (occupancy 5.7e-5; 4.1e-4 at 4000 e) to beyond 9000 e with the full charge; with half the
+  charge on the channel (track at a strip boundary) the efficiency at 9000 e is 98.8 %, so
+  the window ends at 8500 e; with 20 % of the charge no threshold meets both targets. The
+  Landau low tail is thinner than that of real thin silicon (Bichsel straggling,
+  delta-ray escape, cluster splitting): use the measured charge spectrum on the channel for
+  the inefficiency below about 1 %, and the measured noise tail above about 6 sigma.
 - **Zero suppression** with seed/neighbour thresholds keeps clusters but truncates
   their tails; cluster charge and centroid are then biased for low-`S/N` clusters, and
   the bias differs between data and simulation if the thresholds or noise differ.
@@ -198,8 +231,36 @@ distribution, not only its width, and its spectrum when tails appear.
 - **Out-of-time pileup**: fit several pulses with templates at neighbouring bunch
   crossings (multi-pulse fit), or deconvolve (for example the deconvolution readout
   mode of silicon strip front ends); both trade noise for pileup rejection.
+- **Constrained filters** (*exact* for the linear model; Lagrange multipliers): minimizing
+  `w^T R w` subject to `w · g = 1` and `w · c_k = 0` gives `w = R^-1 C (C^T R^-1 C)^-1 e_1`
+  with `C = [g, c_1, ...]` and variance `((C^T R^-1 C)^-1)_11`. With `c = g'` (Cleland and
+  Stern) the first-order phase sensitivity vanishes; with `c = (1, ..., 1)` a constant
+  baseline offset (pedestal drift, the mean of unipolar pileup) does not bias the amplitude.
+  Each constraint costs noise. Example (`optimal-filter`: CR-RC^4, `t_p = 45 ns`, 7 samples
+  every 25 ns from three before the peak, `rho = 0.6`, pileup 2 MHz of rms amplitude
+  4 sigma): unconstrained sigma 1.38 with phase bias +1.9 % / −3.0 % at ∓2 ns and
+  `sum w = 0.56`; with the phase constraint sigma 1.40 and −0.5 % at either sign (second
+  order); with the baseline constraint sigma 1.49 and `sum w = 0`.
+- **Baseline gain.** A constant offset `b` on every sample biases any linear estimate by
+  `b sum w`. For unipolar pulses `sum w` is of order one unless a baseline constraint or
+  pre-samples are used, so a pedestal error or the Campbell mean of pileup (`nu <a> ∫ g dt`)
+  appears directly as an amplitude bias that changes with luminosity.
+- **Time from samples.** A joint fit of amplitude and time (model `A g(t + d)`) has, to
+  first order, the inverse Fisher matrix of the columns `g` and `A g'` as covariance
+  (*approximate*, linearized at the true phase). Example: CR-RC^4, `t_p = 45 ns`, 5 samples
+  every 25 ns from one before the peak, white noise, `A = 50 sigma`: `sigma_t = 0.43 ns`,
+  `sigma_A = 0.79 sigma` (a least-squares Monte Carlo gives 0.431 ns and 0.78). Below
+  `A/sigma` of about 10 the free-time fit follows the noise and the linearized error is
+  optimistic.
 - **Pulse-shape stability**: pulse shape changes with temperature, gain switch, and
   radiation; a template measured once is a conditions item with a validity range.
+- **Checking an estimator before full simulation.** `frontend_response.py waveform-toy`
+  simulates the sampled pulse with correlated noise, Poisson pileup, phase jitter and an
+  ADC, and reconstructs it with the largest sample, the uncorrelated template, and optimal
+  filters with electronic-only and pileup-matched weights; without jitter and ADC the bias
+  and width of each must agree with the analytic prediction (closure z-scores), and with
+  them the departure measures the effect of jitter or quantization. It is synthetic and
+  establishes the estimator's behaviour, not the detector's.
 
 ## Digitization: ADC and TDC
 
@@ -218,7 +279,13 @@ distribution, not only its width, and its spectrum when tails appear.
   loss. Recovering saturated pulses from the leading edge is a correction with its own
   uncertainty.
 - **Time-over-threshold** encodes amplitude nonlinearly and depends on pulse shape and
-  baseline; calibrate per channel with injected charge.
+  baseline; calibrate per channel with injected charge. The shape of `ToT(Q)` is
+  device-specific: roughly logarithmic in `Q` when the pulse tail is exponential, nearly
+  linear with a constant-current discharge of the feedback. The charge resolution is
+  `sigma_ToT / (dToT/dQ)`, so it degrades where `ToT(Q)` flattens, and the inverse is
+  steep near threshold, where a small threshold shift moves the reconstructed charge most.
+  Invert the measured curve channel by channel in reconstruction and generate ToT from the
+  same curve (with its spread) in simulation, never from a generic shape.
 
 ## Time pickoff
 
@@ -243,6 +310,11 @@ distribution, not only its width, and its spectrum when tails appear.
   nonlinearity calibrated by code density; clock distribution adds jitter with a
   *global* part (common to all channels, cancels in time differences within one event)
   and a *local* part (per board or PLL, averages over independent boards).
+- **Bandwidth and rise time.** For a single-pole system the 10-90 % rise time is
+  `2.2 RC = 0.35 / f_3dB` (*exact*). The rms widths of cascaded responses add in quadrature
+  (*exact*: variances add under convolution of non-negative responses); 10-90 % rise times
+  only approximately so. More bandwidth sharpens the edge but admits more series noise, so
+  the jitter `t_r / (S/N)` has an optimum bandwidth rather than improving without limit.
 - The per-detector budgets (sensor, photostatistics, calibration, geometry, reference
   time) are in [timing detectors](timing-detectors.md).
 
@@ -309,6 +381,40 @@ The statistics (Poisson photoelectrons, excess noise factor) are in
   reliable, which biases `dE/dx` and particle identification for those tracks.
 - See [noble liquid neutrino and rare event detectors](noble-liquid-neutrino-and-rare-event-detectors.md) for the detector physics.
 
+## Digital pulse processing for spectroscopy
+
+- In spectroscopy (germanium, silicon drift detectors, bolometric and rare-event
+  readout) the preamplifier output is digitized and shaped digitally. Recursive algorithms
+  give trapezoidal or triangular shapes in real time (V. T. Jordanov and G. F. Knoll, Nucl.
+  Instrum. Methods A345 (1994) 337); a flat top longer than the spread of charge-collection
+  times removes the ballistic deficit and reduces the effect of charge trapping, which a
+  sharply peaked shape of the same noise would not.
+- The rise (integration) time sets the series-parallel noise trade as the peaking time does
+  for an analog shaper (Shaping above); the flat top and rise time together set the dead
+  time per pulse, so resolution trades against throughput. A fast parallel channel (short
+  shaping) detects pileup and rejects or flags it; the rejected fraction is a rate-dependent
+  live-time loss to be measured ([triggers luminosity pileup](triggers-luminosity-pileup.md)).
+- The digital deconvolution of the preamplifier decay (pole-zero in the digital domain)
+  must use the per-channel decay constant: a wrong one tilts the flat top, so the amplitude
+  depends on where it is sampled and the resolution degrades with rate.
+
+## Pulse-shape discrimination
+
+- Discrimination by pulse shape (scintillators with neutron-gamma separation, prompt
+  fraction in liquid argon, single- versus multi-site events in germanium) reconstructs a
+  shape variable, typically the ratio of tail (or prompt) charge to total charge, from the
+  digitized waveform ([noble liquid neutrino and rare event detectors](noble-liquid-neutrino-and-rare-event-detectors.md)).
+- The usual figure of merit `FOM = |mu_1 - mu_2| / (FWHM_1 + FWHM_2)` assumes two Gaussian
+  peaks. When the width of the ratio is set by photoelectron statistics (a binomial prompt
+  fraction), it scales as `1/sqrt(N_pe)`, so the FOM falls toward low energy as about
+  `sqrt(E)` (*approximate*). Quote the FOM, and above all the measured leakage at the stated
+  acceptance, in energy bins: the leakage at 10^-6 and beyond is set by non-Gaussian tails
+  (pileup, afterpulses, baseline errors, saturation), which a FOM does not predict.
+- The shape variable depends on the digitization: the sampling rate and bandwidth that
+  resolve the prompt part, the baseline estimate, the integration windows and their
+  alignment to the pulse start, and saturation of large pulses. Simulate the shape variable
+  through the same digitization chain, or calibrate its distribution on tagged data.
+
 ## Radiation and the electronics
 
 - **Single-event upsets** flip configuration or data bits: channels become noisy, dead,
@@ -339,19 +445,16 @@ The statistics (Poisson photoelectrons, excess noise factor) are in
 
 ## Simulation of the electronics
 
-- Simulate in the same order as the hardware: induced signal, preamplifier and
-  shaper, noise with its measured correlations (from pedestal data), pileup in the
-  integration window, digitization (thresholds, ADC range, gain switching, time
-  quantization), then the same feature extraction and zero suppression as online.
-- Overlaying recorded zero-bias or random-trigger data brings in the real noise and
-  pileup, including correlations and non-Gaussian tails, which independent Gaussian
-  noise does not.
-- Use the same pulse templates and optimal-filter weights in simulation as in data
-  for the same conditions; otherwise amplitude bias and resolution differ.
-- Emulate trigger firmware bit for bit where trigger efficiency is taken from
-  simulation.
-- Thresholds, noise, dead channels, and SEU-affected periods are time-dependent
-  conditions; simulate them per period ([detector simulation](detector-simulation.md)).
+Simulate the electronics in the same order as the hardware, from the conditions of the
+period being simulated: induced signal, preamplifier and shaper, noise with its measured
+correlations, sampling phase, pileup over the whole pulse support, the sum in the linear
+domain and then the nonlinearities (saturation, gain selection, ADC, pedestal), firmware
+feature extraction and zero suppression bit for bit, and reconstruction with the same
+templates, weights and constants as data. The step-by-step recipe, the rules for overlay
+and premixing (no noise counted twice, the sum taken before saturation and zero
+suppression, a suppressed overlay loses sub-threshold content, overlay from the same
+period, pileup counted once) and the closure checks that validate the digitization are in
+[readout digitization and overlay](readout-digitization-and-overlay.md).
 
 ## Common misconceptions and failure modes
 
@@ -370,6 +473,13 @@ The statistics (Poisson photoelectrons, excess noise factor) are in
 - **"The dead-channel map is static."** Upsets, dose, and temperature change it.
 - **Electronics nonlinearity calibrated away as a physics effect** (SiPM saturation,
   gain switching).
+- **"Efficiency is `Phi((Q - T)/sigma)` at the mean charge."** Average over the charge
+  distribution on the channel; sharing and trapping move the operating window.
+- **"A Landau fit predicts the inefficiency."** Its low tail is too thin for thin silicon;
+  measure the charge spectrum near threshold.
+- **"Noise occupancy is the Rice rate."** For sampled comparisons it is the per-sample tail
+  probability; for a gated binary channel both terms.
+- **"A phase-insensitive filter is free."** The constraint costs noise; quote both.
 
 ## Deliverables
 
@@ -382,5 +492,9 @@ The statistics (Poisson photoelectrons, excess noise factor) are in
   correlation including pileup), and their bias and resolution.
 - Dynamic range: saturation, gain switching, nonlinearity, and their calibration.
 - Rate behaviour: pileup, baseline shifts, dead time, buffer losses, live fraction.
+- The operating window: efficiency and noise occupancy versus threshold for the charge on
+  the channel (with sharing and radiation), and its evolution with dose.
 - The electronics calibration chain and its conditions, and how each element is
   reproduced in simulation.
+- For simulation, the digitization, overlay and closure deliverables of
+  [readout digitization and overlay](readout-digitization-and-overlay.md).

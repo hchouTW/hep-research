@@ -27,7 +27,10 @@ threshold and Lorentz drift; analog
 or multi-threshold readout that interpolates the charge division between neighboring
 channels does substantially better, at the cost of calibration complexity - the
 interpolation depends on the charge-sharing model, which is itself a calibration that
-drifts with radiation damage and bias voltage.
+drifts with radiation damage and bias voltage. Sharing also lowers the charge on each
+channel, so hit efficiency at a threshold depends on the track position in the cell; the
+efficiency-occupancy window for a given charge on the channel is in
+[front-end electronics](front-end-electronics-and-signal-processing.md#thresholds-fake-hits-and-zero-suppression).
 
 **Silicon response and radiation damage** (approximate; PDG RPP 2025, sec. 35.8). A
 pair costs `w_i ≈ 3.65 eV`; a minimum-ionizing particle deposits most probably about

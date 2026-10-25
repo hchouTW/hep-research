@@ -53,6 +53,13 @@ information irreversibly** at the readout, so a signal below threshold is not me
 noisy, it is absent - which produces an efficiency turn-on that must be modeled rather
 than assumed flat.
 
+Amplitude and time come from the digitized samples through an estimator (largest sample,
+template fit, optimal filter, possibly constrained against phase or baseline errors) whose
+bias depends on the phase, the pileup level and the baseline; its weights are conditions
+data, and simulation must use the same ones. The estimators, their bias and noise, and the
+threshold-level operating window (efficiency against noise occupancy for the charge on the
+channel) are in [front-end electronics](front-end-electronics-and-signal-processing.md#amplitude-and-time-from-sampled-waveforms).
+
 **Check:** Dead and noisy channel maps match between data and simulation period by period (luminosity-weighted), and threshold turn-ons are modeled.
 
 ## Clustering
