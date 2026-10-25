@@ -3,6 +3,46 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+hep-detector front-end electronics for reconstruction, simulation and calibration (VALIDATION FRONTEND-RECO-SIM). No contracts,
+`core/` or adapter version change; `frontend_response.py` now imports `core.stats._linalg.solve`.
+
+- `frontend_response.py` gains five subcommands (tool contract `frontend_response.json`: 15 operations):
+  `optimal-filter` (weights and variance of a sampled CR-(RC)^n pulse with exponentially correlated electronic noise
+  and Campbell pileup noise, against the uncorrelated template and the largest sample; `--constraints phase` and/or
+  `baseline` by Lagrange multipliers; the relative bias from phase errors; the gain on a constant baseline offset; the
+  linearized errors of a joint amplitude and time fit), `hit-efficiency` (efficiency of a Landau or Gaussian signal
+  with a charge fraction, noise and a Gaussian threshold spread, and the noise occupancy per sample and per window,
+  channel-averaged in closed form; the operating window for an efficiency and an occupancy target; Landau from
+  Nolan's integral for the stable law alpha = 1, beta = 1, scale pi/2), and `waveform-toy` (a seeded synthetic
+  sampled readout with AR(1) noise, Poisson pileup, phase jitter and an ADC, reconstructed by four estimators, with
+  closure z-scores against the analytic prediction; `status_label` synthetic), `s-curve` (binomial
+  maximum-likelihood fit of a threshold scan with inverse-Fisher errors and the deviance, or the expected errors of a
+  scan design) and `threshold-trim` (dispersion left by a trim DAC: uniform residual inside the range, the excess
+  beyond it, DAC nonlinearity).
+- `front-end-electronics-and-signal-processing.md`: continuous versus sampled noise occupancy and the threshold-spread
+  average; efficiency with a fluctuating signal and the operating window (worked example); constrained optimal
+  filters, the baseline gain, time from samples, the waveform toy; ToT inversion; bandwidth and rise time; digital
+  pulse processing for spectroscopy; pulse-shape discrimination; the electronics calibration rewritten as an ordered
+  chain (robust pedestals and the noise covariance, binomial S-curve fits and scan
+  design, trim residual, templates and weights, calibration closure in simulation); new misconceptions and
+  deliverables. The worked
+  optimal-filter and phase-error numbers already on the page are now reproduced by the tool and pinned by tests.
+- New reference `readout-digitization-and-overlay.md` (linked from `detector-simulation.md` and the front-end page):
+  a nine-step digitization recipe, overlay and premixing rules (no noise counted twice, the sum before the
+  nonlinearities, sub-threshold content lost by a suppressed overlay, same period, pileup counted once) and the
+  closure checks that validate a digitization. Cross-links from `event-reconstruction.md` and
+  `tracking-and-vertexing.md`; bibliography adds Jordanov and Knoll (1994) and Nolan (1997).
+- Tests: `tests/skills/hep_detector/test_frontend_waveforms.py` (31 tests); `FrontendResponseContractTests` cover
+  the five new operations.
+- Sources: the constrained optimal filter cites the ATLAS liquid-argon paper arXiv:0709.1094,
+  the overlay rules the HSF detector-simulation white paper
+  arXiv:1803.04165 (bibliography entries added).
+- Developer document `docs/dev/frontend-electronics/frontend-reco-sim-calibration.md` (English, task format, passes
+  `lint_task.py`): the evaluation, the completed work, and stages FE0-FE5 with isolated-worktree execution,
+  acceptance criteria and open decisions.
+
 ## 0.40.0 (2026-10-25)
 
 Minor release; contracts 3.13.0, `CORE_VERSION` 1.1.0 and geant4 adapter 0.5.0 unchanged. It ships the follow-ups
@@ -376,44 +416,6 @@ adapter 0.4.1 (VALIDATION GEANT4-J15). No contracts bump.
 - J15's `live.py export` writes `~` for the home directory in the recorded files and rewrites the sha256 citations
   of the files it changes (the packaging scan refuses private paths).
 - Docs: J15 in `docs/researcher-journeys.md`, `docs/maintenance.md`, the capability map and matrix; routing case `j15`.
-
-hep-detector front-end electronics for reconstruction, simulation and calibration (VALIDATION FRONTEND-RECO-SIM). No contracts,
-`core/` or adapter version change; `frontend_response.py` now imports `core.stats._linalg.solve`.
-
-- `frontend_response.py` gains five subcommands (tool contract `frontend_response.json`: 15 operations):
-  `optimal-filter` (weights and variance of a sampled CR-(RC)^n pulse with exponentially correlated electronic noise
-  and Campbell pileup noise, against the uncorrelated template and the largest sample; `--constraints phase` and/or
-  `baseline` by Lagrange multipliers; the relative bias from phase errors; the gain on a constant baseline offset; the
-  linearized errors of a joint amplitude and time fit), `hit-efficiency` (efficiency of a Landau or Gaussian signal
-  with a charge fraction, noise and a Gaussian threshold spread, and the noise occupancy per sample and per window,
-  channel-averaged in closed form; the operating window for an efficiency and an occupancy target; Landau from
-  Nolan's integral for the stable law alpha = 1, beta = 1, scale pi/2), and `waveform-toy` (a seeded synthetic
-  sampled readout with AR(1) noise, Poisson pileup, phase jitter and an ADC, reconstructed by four estimators, with
-  closure z-scores against the analytic prediction; `status_label` synthetic), `s-curve` (binomial
-  maximum-likelihood fit of a threshold scan with inverse-Fisher errors and the deviance, or the expected errors of a
-  scan design) and `threshold-trim` (dispersion left by a trim DAC: uniform residual inside the range, the excess
-  beyond it, DAC nonlinearity).
-- `front-end-electronics-and-signal-processing.md`: continuous versus sampled noise occupancy and the threshold-spread
-  average; efficiency with a fluctuating signal and the operating window (worked example); constrained optimal
-  filters, the baseline gain, time from samples, the waveform toy; ToT inversion; bandwidth and rise time; digital
-  pulse processing for spectroscopy; pulse-shape discrimination; the electronics calibration rewritten as an ordered
-  chain (robust pedestals and the noise covariance, binomial S-curve fits and scan
-  design, trim residual, templates and weights, calibration closure in simulation); new misconceptions and
-  deliverables. The worked
-  optimal-filter and phase-error numbers already on the page are now reproduced by the tool and pinned by tests.
-- New reference `readout-digitization-and-overlay.md` (linked from `detector-simulation.md` and the front-end page):
-  a nine-step digitization recipe, overlay and premixing rules (no noise counted twice, the sum before the
-  nonlinearities, sub-threshold content lost by a suppressed overlay, same period, pileup counted once) and the
-  closure checks that validate a digitization. Cross-links from `event-reconstruction.md` and
-  `tracking-and-vertexing.md`; bibliography adds Jordanov and Knoll (1994) and Nolan (1997).
-- Tests: `tests/skills/hep_detector/test_frontend_waveforms.py` (31 tests); `FrontendResponseContractTests` cover
-  the five new operations.
-- Sources: the constrained optimal filter cites the ATLAS liquid-argon paper arXiv:0709.1094,
-  the overlay rules the HSF detector-simulation white paper
-  arXiv:1803.04165 (bibliography entries added).
-- Developer document `docs/dev/frontend-electronics/frontend-reco-sim-calibration.md` (Traditional Chinese, task
-  format, passes `lint_task.py`): the evaluation, the completed work, and stages F0-F5 with isolated-worktree
-  execution, acceptance criteria and open decisions.
 
 ## 0.38.0 (2026-10-24)
 
