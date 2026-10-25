@@ -17,7 +17,7 @@ the expected errors of a scan design, and the threshold dispersion after per-cha
 list; a non-empty validity list means the input is outside the range where the relation holds.
 
 Subcommands (numbers on the command line, except the table spectrum of hit-efficiency and the measured noise
-covariance of optimal-filter and waveform-toy; JSON on stdout):
+covariance of optimal-filter and waveform-toy, and the scan file of s-curve; JSON on stdout):
   enc          ENC (electrons) from capacitance, series/parallel/1/f noise, peaking time, order
   noise-rate   Rice up-crossing rate above a threshold, fake hits per event
   timing       jitter, leading-edge walk, constant-fraction mode, TDC quantization
@@ -34,8 +34,9 @@ covariance of optimal-filter and waveform-toy; JSON on stdout):
                   operating window
   waveform-toy    seeded synthetic sampled readout (noise, pileup, jitter, ADC) reconstructed by those
                   estimators, with closure against the analytic prediction
-  s-curve         binomial fit of a threshold scan (threshold, noise, errors, goodness of fit), or the
-                  expected errors of a scan design
+  s-curve         binomial fit of a threshold scan (threshold, noise, errors, goodness of fit), the
+                  expected errors of a scan design, or a batch of channels from a file with the threshold-dispersion
+                  summary
   threshold-trim  threshold dispersion after per-channel trim (trim range, step, DAC nonlinearity)
 
 Conventions: the shaper's response to a unit input charge is g(t) = (t/tau)^n exp(-t/tau),
@@ -1386,6 +1387,125 @@ def scurve_design(charges, injections, threshold, noise):
     return out
 
 
+def read_scan_file(path):
+    """Threshold scans of many channels from CSV with header channel,charge,injections,hits (one row per channel and
+    charge; a channel's charges strictly increasing in file order). Returns {channel: (charges, injections, hits)} in
+    file order. Every problem with the file is a ValueError (invalid input)."""
+    try:
+        with open(path, encoding='utf-8', newline='') as fh:
+            rows = list(csv.reader(fh))
+    except (OSError, csv.Error, UnicodeDecodeError) as exc:
+        raise ValueError(f'cannot read the scan file {path}: {exc}') from None
+    rows = [r for r in rows if any(c.strip() for c in r)]
+    if not rows:
+        raise ValueError('the scan file is empty')
+    if [c.strip().lower() for c in rows[0]] != ['channel', 'charge', 'injections', 'hits']:
+        raise ValueError('the scan file needs the header channel,charge,injections,hits')
+    if len(rows) < 2:
+        raise ValueError('the scan file has no data rows')
+    channels = {}
+    for line, row in enumerate(rows[1:], start=2):
+        if len(row) != 4:
+            raise ValueError(f'scan file line {line}: expected 4 columns, found {len(row)}')
+        name = row[0].strip()
+        if not name:
+            raise ValueError(f'scan file line {line}: empty channel')
+        try:
+            q = float(row[1])
+            n, k = int(row[2]), int(row[3])
+        except ValueError:
+            raise ValueError(f'scan file line {line}: charge must be a number, injections and hits integers') from None
+        if not math.isfinite(q):
+            raise ValueError(f'scan file line {line}: the charge must be finite')
+        if n < 1 or not 0 <= k <= n:
+            raise ValueError(f'scan file line {line}: injections must be positive and hits between 0 and injections')
+        qs, ns, ks = channels.setdefault(name, ([], [], []))
+        if qs and q <= qs[-1]:
+            raise ValueError(f'scan file line {line}: charges of channel {name} must be strictly increasing')
+        qs.append(q)
+        ns.append(n)
+        ks.append(k)
+    return channels
+
+
+SCURVE_MIN_P = 1e-3  # channels with a worse fit leave the batch summary
+
+
+def _median(xs):
+    s = sorted(xs)
+    m = len(s) // 2
+    return s[m] if len(s) % 2 else (s[m - 1] + s[m]) / 2
+
+
+def scurve_batch(channels):
+    """S-curve fits of many channels ({channel: (charges, injections, hits)}) and the threshold-dispersion summary.
+
+    A channel whose fit raises (no 50 % crossing, too few charges, singular information) is failed; a fitted channel
+    enters the summary only if it converged, has at least 2 points between 5 % and 95 % and p >= 1e-3, else it is
+    excluded. The corrected dispersion removes the mean squared fit error from the sample variance of the thresholds.
+    """
+    if not channels:
+        raise ValueError('no channels to fit')
+    fitted, failed, excluded = [], [], []
+    for name, (qs, ns, ks) in channels.items():
+        try:
+            r = scurve_fit(qs, ks, ns)
+        except ValueError as exc:
+            failed.append({'channel': name, 'reason': str(exc)})
+            continue
+        r = {'channel': name, **{k: v for k, v in r.items() if k != 'assumptions'}}
+        reasons = []
+        if not r['converged']:
+            reasons.append('not converged')
+        if r['points_in_transition'] < 2:
+            reasons.append('fewer than 2 points between 5 % and 95 %')
+        if r['p_value'] is None or r['p_value'] < SCURVE_MIN_P:
+            reasons.append('p < 1e-3')
+        r['included'] = not reasons
+        if reasons:
+            excluded.append({'channel': name, 'reasons': reasons})
+        fitted.append(r)
+    inc = [r for r in fitted if r['included']]
+    ts = [r['threshold'] for r in inc]
+    validity = []
+    summary = {'mean_threshold': None, 'threshold_sd': None, 'threshold_mad_sigma': None,
+               'mean_fit_error_squared': None, 'threshold_dispersion_corrected': None, 'median_noise': None,
+               'fitted_channels_with_p_below_1e-3': sum(1 for r in fitted
+                                                        if r['p_value'] is not None and r['p_value'] < SCURVE_MIN_P)}
+    if inc:
+        summary['mean_threshold'] = sum(ts) / len(ts)
+        summary['median_noise'] = _median([r['noise'] for r in inc])
+        med = _median(ts)
+        summary['threshold_mad_sigma'] = 1.4826 * _median([abs(x - med) for x in ts])
+        summary['mean_fit_error_squared'] = sum(r['sigma_threshold'] ** 2 for r in inc) / len(inc)
+    if len(inc) >= 2:
+        mean = summary['mean_threshold']
+        var = sum((x - mean) ** 2 for x in ts) / (len(ts) - 1)
+        summary['threshold_sd'] = math.sqrt(var)
+        radicand = var - summary['mean_fit_error_squared']
+        summary['threshold_dispersion_corrected'] = math.sqrt(radicand) if radicand > 0 else 0.0
+        if radicand <= 0:
+            validity.append('dispersion not above the fit error: the threshold spread is not resolved by these scans '
+                            '(corrected dispersion reported as 0)')
+    else:
+        validity.append(f'{len(inc)} channel(s) in the summary: the dispersion needs at least 2')
+    total = len(channels)
+    if len(excluded) + len(failed) > 0.05 * total:
+        validity.append(f'{len(excluded) + len(failed)} of {total} channels excluded or failed (more than 5 %): the '
+                        'dispersion may be biased, since such channels tend to have the most extreme thresholds')
+    return {'mode': 'batch', 'n_channels': total, 'n_included': len(inc), 'n_excluded': len(excluded),
+            'n_failed': len(failed), 'summary': summary, 'channels': fitted, 'excluded_channels': excluded,
+            'failed_channels': failed,
+            'note': ('threshold_dispersion_corrected is the value to pass on: to threshold-trim --spread if the scans '
+                     'were taken before trim, to hit-efficiency --threshold-dispersion if after trim; '
+                     'fitted_channels_with_p_below_1e-3 counts all fitted channels, the other summary fields the '
+                     'included ones'),
+            'assumptions': ['each channel as in the single fit: binomial hits with a Gaussian-noise turn-on; channels '
+                            'independent; the corrected dispersion subtracts the mean inverse-Fisher variance of the '
+                            'thresholds, which holds when the fit errors are near their asymptotic values'],
+            'validity': validity}
+
+
 def threshold_trim(spread, trim_bits, trim_step, dac_nonlinearity=0.0):
     """Threshold dispersion after per-channel trim: a Gaussian untrimmed spread, a trim DAC of 2^b codes of step D
     centred on the target. Channels inside the range keep a uniform residual (rms D/sqrt(12)); channels beyond
@@ -1580,9 +1700,12 @@ def main():
     p.add_argument('--pedestal', type=float, default=5.0, help='pedestal in noise units (default 5)')
 
     p = sub.add_parser('s-curve', help='S-curve fit of a threshold scan, or the errors of a scan design')
-    p.add_argument('--charges', type=float, nargs='+', required=True, help='injected charges, increasing')
-    p.add_argument('--injections', type=int, nargs='+', required=True,
+    p.add_argument('--charges', type=float, nargs='+', help='injected charges, increasing')
+    p.add_argument('--injections', type=int, nargs='+',
                    help='injections per charge (one value for all, or one per charge)')
+    p.add_argument('--scan-file', dest='scan_file',
+                   help='batch mode: CSV with header channel,charge,injections,hits for many channels (not with '
+                        '--charges, --injections, --hits or --design-*)')
     p.add_argument('--hits', type=int, nargs='+', help='hits per charge (fit mode)')
     p.add_argument('--design-threshold', type=float, dest='design_threshold',
                    help='design mode: assumed threshold, same unit as the charges')
@@ -1657,7 +1780,16 @@ def main():
                                   args.amplitude, args.events, args.seed, rho, args.phase_jitter,
                                   args.pileup_rate, args.pileup_mean_amp, args.pileup_amplitudes, args.adc_lsb,
                                   args.adc_bits, args.pedestal, args.constraints, cov)
+        elif args.command == 's-curve' and args.scan_file is not None:
+            given = [f for f, v in (('--charges', args.charges), ('--injections', args.injections),
+                                    ('--hits', args.hits), ('--design-threshold', args.design_threshold),
+                                    ('--design-noise', args.design_noise)) if v is not None]
+            if given:
+                raise ValueError(f'--scan-file excludes {", ".join(given)}')
+            result = scurve_batch(read_scan_file(args.scan_file))
         elif args.command == 's-curve':
+            if args.charges is None or args.injections is None:
+                raise ValueError('give --charges and --injections (or --scan-file for a batch)')
             design = args.design_threshold is not None or args.design_noise is not None
             if design == (args.hits is not None):
                 raise ValueError('give --hits (fit) or both --design-threshold and --design-noise (design)')

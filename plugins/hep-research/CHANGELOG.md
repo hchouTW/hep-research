@@ -77,6 +77,18 @@ FRONTEND-FE2).
   `--rho` the outputs are unchanged; a rho^|i-j| file gives the `--rho` numbers to 1e-12 (its Cholesky factor is the
   AR(1) recursion). Tests: `MeasuredNoiseCovariance` (5 tests).
 
+hep-detector front-end FE3: batch S-curve fits (VALIDATION FRONTEND-FE3).
+
+- `s-curve --scan-file FILE` (CSV `channel,charge,injections,hits`; not with `--charges`, `--injections`, `--hits` or
+  `--design-*`): each channel is fitted as in the single fit. A channel whose fit raises goes to `failed_channels`;
+  one that did not converge, has fewer than 2 points between 5 % and 95 % or p < 1e-3 goes to `excluded_channels`.
+  The summary of the included channels gives the mean threshold, `threshold_sd`, `threshold_mad_sigma` (1.4826 MAD),
+  `threshold_dispersion_corrected` = sqrt(max(0, sd^2 - mean sigma_T^2)) (0 with a `validity` note when the spread is
+  not above the fit error) and the median noise, plus the count of fitted channels with p < 1e-3. `validity` warns
+  when more than 5 % of the channels are excluded or failed; `note` says where the corrected dispersion goes
+  (`threshold-trim --spread` before trim, `hit-efficiency --threshold-dispersion` after). File errors exit 2.
+- Tests: `SCurveBatch` (6 tests, 60 Monte Carlo batches of 200 channels).
+
 ## 0.40.0 (2026-10-25)
 
 Minor release; contracts 3.13.0, `CORE_VERSION` 1.1.0 and geant4 adapter 0.5.0 unchanged. It ships the follow-ups

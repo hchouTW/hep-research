@@ -17,6 +17,10 @@ Oracles, each independent of the code under test:
 - measured noise covariance (FE2): a rho^|i-j| matrix against the --rho path (to 1e-12); the sample covariance of
   20 000 draws against the input matrix within 4 Gaussian standard errors per element (AR(1) draws as negative
   control); the common-mode variance 0.3 (sum w)^2 of a linear estimator in closed form; SHA-256 recomputed.
+- batch S-curve (FE3): per-channel results against single fits; the corrected dispersion against the generated
+  spread (150 e) and against each batch's own true-threshold sd (Monte Carlo, 60 batches of 200 channels, hits
+  drawn with erfc), the uncorrected sd as negative control; the MAD against sqrt(150^2 + mean fit error^2), the
+  unscaled MAD as negative control; median and count recomputed from the per-channel results.
 Standard library only.
 """
 import contextlib
@@ -569,6 +573,164 @@ class SCurve(unittest.TestCase):
         with self.assertRaises(ValueError):
             fr.scurve_fit(self.CHARGES, self.HITS, [100, 100])
 
+
+
+def scan_batch(rng, n_channels, spread, mean=3700.0, noise=300.0, injections=100,
+               charges=tuple(3000.0 + 200 * i for i in range(8))):
+    """Synthetic threshold scans: thresholds N(mean, spread^2), binomial hits with Phi((Q - T)/noise) (erfc)."""
+    channels, truth = {}, []
+    for c in range(n_channels):
+        t = rng.gauss(mean, spread)
+        truth.append(t)
+        hits = []
+        for q in charges:
+            prob = 0.5 * math.erfc(-(q - t) / (noise * math.sqrt(2)))
+            hits.append(sum(1 for _ in range(injections) if rng.random() < prob))
+        channels[f'ch{c}'] = (list(charges), [injections] * len(charges), hits)
+    return channels, truth
+
+
+def sample_sd(xs):
+    m = sum(xs) / len(xs)
+    return math.sqrt(sum((x - m) ** 2 for x in xs) / (len(xs) - 1))
+
+
+class SCurveBatch(unittest.TestCase):
+    """FE3: batch S-curve fits of many channels and the threshold-dispersion summary."""
+    BATCHES = 60
+
+    @classmethod
+    def setUpClass(cls):
+        import random
+        rng = random.Random(2)  # seed 1 draws true thresholds with sd 151.6 over 200 batches (a 3-sigma excursion)
+        cls.runs = []
+        for _ in range(cls.BATCHES):
+            channels, truth = scan_batch(rng, 200, 150.0)
+            cls.runs.append((channels, truth, fr.scurve_batch(channels)))
+
+    def mc(self, values):
+        mean = sum(values) / len(values)
+        return mean, sample_sd(values) / math.sqrt(len(values))
+
+    def test_batch_equals_single_fits(self):  # FE3-1
+        channels, _, out = self.runs[0]
+        by_name = {r['channel']: r for r in out['channels']}
+        for name, (qs, ns, ks) in channels.items():
+            single = fr.scurve_fit(qs, ks, ns)
+            got = by_name[name]
+            for key, value in single.items():
+                if key != 'assumptions':
+                    self.assertEqual(got[key], value, (name, key))
+
+    def test_corrected_dispersion_recovers_the_spread(self):  # FE3-2
+        corrected = [out['summary']['threshold_dispersion_corrected'] for _, _, out in self.runs]
+        mean, se = self.mc(corrected)
+        self.assertLess(abs(mean - 150.0), 3 * se, (mean, se))
+        # seed-independent form: against each batch's own true-threshold sd
+        paired = [out['summary']['threshold_dispersion_corrected'] - sample_sd(truth) for _, truth, out in self.runs]
+        mean_p, se_p = self.mc(paired)
+        self.assertLess(abs(mean_p), 3 * se_p, (mean_p, se_p))
+        # negative control: the uncorrected sd is biased up by the fit error (about 18 e in quadrature)
+        raw = [out['summary']['threshold_sd'] - sample_sd(truth) for _, truth, out in self.runs]
+        mean_r, se_r = self.mc(raw)
+        self.assertGreater(mean_r, 3 * se_r)
+
+    def test_unresolved_dispersion_is_clipped_at_zero(self):  # FE3-3
+        import random
+        seen_clipped = False
+        for spread in (0.0, 5.0):
+            rng = random.Random(11)
+            for _ in range(8):
+                channels, _ = scan_batch(rng, 50, spread)
+                out = fr.scurve_batch(channels)
+                value = out['summary']['threshold_dispersion_corrected']
+                self.assertTrue(math.isfinite(value) and value >= 0)
+                clipped = out['summary']['threshold_sd'] ** 2 <= out['summary']['mean_fit_error_squared']
+                self.assertEqual(clipped, any('dispersion not above the fit error' in v for v in out['validity']))
+                if clipped:
+                    self.assertEqual(value, 0.0)
+                    seen_clipped = True
+                    json.dumps(out, allow_nan=False)  # always finite: never an exit 1
+        self.assertTrue(seen_clipped)
+
+    def test_failed_and_excluded_channels_stay_out(self):  # FE3-4
+        import random
+        channels, _ = scan_batch(random.Random(3), 20, 150.0)
+        charges = channels['ch0'][0]
+        channels['dead'] = (charges, [100] * 8, [0, 0, 0, 1, 2, 1, 0, 3])  # never crosses 50 %
+        channels['noisy'] = (charges, [100] * 8, [0, 10, 45, 50, 52, 55, 90, 100])  # converges, p ~ 1e-12
+        out = fr.scurve_batch(channels)
+        self.assertEqual([f['channel'] for f in out['failed_channels']], ['dead'])
+        self.assertIn('noisy', [e['channel'] for e in out['excluded_channels']])
+        self.assertIn('p < 1e-3', [e for e in out['excluded_channels'] if e['channel'] == 'noisy'][0]['reasons'])
+        clean = fr.scurve_batch({k: v for k, v in channels.items() if k not in ('dead', 'noisy')})
+        self.assertEqual(out['summary']['threshold_sd'], clean['summary']['threshold_sd'])
+        self.assertEqual(out['n_failed'], 1)
+        self.assertEqual(out['n_included'] + out['n_excluded'] + out['n_failed'], out['n_channels'])
+        self.assertTrue(any('more than 5 %' in v for v in out['validity']))  # 2 of 22
+
+    def test_mad_scale_and_recomputed_fields(self):  # FE3-5
+        # the MAD of the fitted thresholds estimates their spread, sqrt(150^2 + fit error^2), for Gaussian thresholds
+        mads, want = [], []
+        for _, _, out in self.runs:
+            mads.append(out['summary']['threshold_mad_sigma'])
+            want.append(math.sqrt(150.0 ** 2 + out['summary']['mean_fit_error_squared']))
+        mean, se = self.mc([m - w for m, w in zip(mads, want)])
+        self.assertLess(abs(mean), 3 * se, (mean, se))
+        unscaled = [m / 1.4826 - w for m, w in zip(mads, want)]  # negative control: the MAD without the factor
+        mean_u, se_u = self.mc(unscaled)
+        self.assertGreater(abs(mean_u), 3 * se_u)
+        for _, _, out in self.runs[:5]:
+            inc = sorted(r['noise'] for r in out['channels'] if r['included'])
+            mid = len(inc) // 2
+            median = inc[mid] if len(inc) % 2 else (inc[mid - 1] + inc[mid]) / 2
+            self.assertEqual(out['summary']['median_noise'], median)
+            bad = sum(1 for r in out['channels'] if r['p_value'] < 1e-3)
+            self.assertEqual(out['summary']['fitted_channels_with_p_below_1e-3'], bad)
+
+    def test_scan_file_cli_and_bad_files(self):
+        import random
+        channels, _ = scan_batch(random.Random(4), 5, 150.0)
+        lines = ['channel,charge,injections,hits']
+        for name, (qs, ns, ks) in channels.items():
+            lines += [f'{name},{q:g},{n},{k}' for q, n, k in zip(qs, ns, ks)]
+        good = '\n'.join(lines) + '\n'
+        cases = {'empty': '', 'header only': 'channel,charge,injections,hits\n',
+                 'wrong header': good.replace('hits', 'k', 1), 'three columns': 'channel,charge,injections\na,1,2\n',
+                 'not a number': good.replace('3000,', 'abc,', 1), 'nan charge': good.replace('3000,', 'nan,', 1),
+                 'fractional injections': good.replace(',100,', ',100.5,', 1),
+                 'hits above injections': 'channel,charge,injections,hits\na,1,10,11\n',
+                 'zero injections': 'channel,charge,injections,hits\na,1,0,0\n',
+                 'empty channel': 'channel,charge,injections,hits\n,1,10,1\n',
+                 'not increasing': 'channel,charge,injections,hits\na,2,10,1\na,1,10,2\n'}
+        with tempfile.TemporaryDirectory() as tmp:
+            paths = {'missing': str(Path(tmp) / 'absent.csv')}
+            for i, (name, text) in enumerate(cases.items()):
+                path = Path(tmp) / f'case{i}.csv'
+                path.write_text(text, encoding='utf-8')
+                paths[name] = str(path)
+            raw = Path(tmp) / 'latin.csv'
+            raw.write_bytes(b'channel,charge,injections,hits\n\xff,1,10,1\n')
+            paths['not utf-8'] = str(raw)
+            good_path = Path(tmp) / 'good.csv'
+            good_path.write_text(good, encoding='utf-8')
+            argvs = {name: ['--scan-file', path] for name, path in paths.items()}
+            argvs['with --charges'] = ['--scan-file', str(good_path), '--charges', '1', '2', '3']
+            argvs['with --injections'] = ['--scan-file', str(good_path), '--injections', '100']
+            argvs['no input'] = ['--hits', '1', '2', '3']
+            for name, extra in argvs.items():
+                proc = subprocess.run([sys.executable, '-I', str(SCRIPT), 's-curve', *extra], capture_output=True,
+                                      text=True, timeout=120)
+                with self.subTest(name):
+                    self.assertEqual(proc.returncode, 2, proc.stdout)
+                    self.assertEqual(json.loads(proc.stdout)['error_kind'], 'invalid-input')
+                    self.assertNotIn('Traceback', proc.stderr)
+            proc = subprocess.run([sys.executable, '-I', str(SCRIPT), 's-curve', '--scan-file', str(good_path)],
+                                  capture_output=True, text=True, timeout=120)
+            self.assertEqual(proc.returncode, 0, proc.stderr)
+            out = json.loads(proc.stdout)
+            self.assertEqual(out['mode'], 'batch')
+            self.assertEqual(out['summary']['threshold_sd'], fr.scurve_batch(channels)['summary']['threshold_sd'])
 
 class ThresholdTrim(unittest.TestCase):
     def test_against_monte_carlo_of_trim_codes(self):
