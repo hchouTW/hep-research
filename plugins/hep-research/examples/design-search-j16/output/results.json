@@ -1,0 +1,477 @@
+{
+ "A": {
+  "comparison_basis": {
+   "declared": true,
+   "holds": false,
+   "reason": "a difference with its uncertainty exceeds the tolerance"
+  },
+  "confirmation": {
+   "candidate": "ams-like-v1:cand-F937",
+   "f4_exit": 0,
+   "fidelity": "F4",
+   "gaps": [
+    "multiple-scattering-reference: a negative control's shift of the observable is not at the claimed detection limit 0.06603 (|shift| <= 1.1 DL)"
+   ],
+   "study": "F937-TRK1000",
+   "upgrade": {
+    "refused": [
+     "1 gap(s) remain"
+    ]
+   },
+   "value": 0.31334402923510385
+  },
+  "diagnostic": [
+   {
+    "candidate": "ams-like-v1:cand-F1047",
+    "fidelity": "F1",
+    "search_level": "F1",
+    "search_minus_official": 0.0
+   },
+   {
+    "candidate": "ams-like-v1:cand-F1047",
+    "fidelity": "F1",
+    "search_level": "F1",
+    "search_minus_official": 0.0
+   },
+   {
+    "candidate": "ams-like-v1:cand-F1047",
+    "fidelity": "F1",
+    "search_level": "F1",
+    "search_minus_official": 0.0
+   },
+   {
+    "candidate": "ams-like-v1:cand-F937",
+    "fidelity": "F1",
+    "search_level": "F1",
+    "search_minus_official": 0.0
+   },
+   {
+    "candidate": "ams-like-v1:cand-F937",
+    "f4_qualified": false,
+    "fidelity": "F4",
+    "search_level": "F1",
+    "search_minus_official": -0.05303001362132803
+   },
+   {
+    "candidate": "ams-like-v1:cand-F937",
+    "fidelity": "F1",
+    "search_level": "F1",
+    "search_minus_official": 0.0
+   },
+   {
+    "candidate": "ams-like-v1:cand-F937",
+    "fidelity": "F1",
+    "search_level": "F1",
+    "search_minus_official": 0.0
+   },
+   {
+    "candidate": "ams-like-v1:cand-F961",
+    "fidelity": "F1",
+    "search_level": "F1",
+    "search_minus_official": 0.0
+   },
+   {
+    "candidate": "ams-like-v1:cand-F961",
+    "fidelity": "F1",
+    "search_level": "F1",
+    "search_minus_official": 0.0
+   },
+   {
+    "candidate": "ams-like-v1:cand-F961",
+    "fidelity": "F1",
+    "search_level": "F1",
+    "search_minus_official": 0.0
+   }
+  ],
+  "errors": [],
+  "finalists": [
+   {
+    "candidate": "ams-like-v1:cand-F937",
+    "index": 937,
+    "mass_kg": 1411.4212152914122,
+    "topology": "DES-MAG-001:bending+DES-TRK-001:tracking[N=7]",
+    "values": {
+     "REQ-CC-001": 6.113881838190221e-05,
+     "REQ-TRK-001": 0.2603140156137758
+    }
+   },
+   {
+    "candidate": "ams-like-v1:cand-F961",
+    "index": 961,
+    "mass_kg": 5089.078555464811,
+    "topology": "DES-MAG-001:bending+DES-TOF-S01:tof+DES-TRK-001:tracking[N=9]",
+    "values": {
+     "REQ-CC-001": 3.955208039642103e-59,
+     "REQ-TRK-001": 0.061834166734479556
+    }
+   },
+   {
+    "candidate": "ams-like-v1:cand-F1047",
+    "index": 1047,
+    "mass_kg": 6924.864375919348,
+    "topology": "DES-MAG-001:bending+DES-TRK-001:tracking[N=9]",
+    "values": {
+     "REQ-CC-001": 1.5540783828015726e-104,
+     "REQ-TRK-001": 0.046123569231345904
+    }
+   }
+  ],
+  "gate_flags": [
+   "gate.H1_missing",
+   "gate.H2_missing",
+   "gate.H3_missing"
+  ],
+  "ranking": {
+   "reasons": [
+    "comparison_basis does not hold: a difference with its uncertainty exceeds the tolerance (ART-15, RPT-07)",
+    "ams-like-v1:cand-F937, ams-like-v1:cand-F961, ams-like-v1:cand-L, ams-like-v1:cand-S have no non-optimistic, current expected-precision evaluation (CHN-06)"
+   ],
+   "status": "refused"
+  },
+  "report": "reports/j16-a.json",
+  "rows": {
+   "CON-MASS-001 cand-F1047": {
+    "codes": [
+     "estimate.decides"
+    ],
+    "result": "fail"
+   },
+   "CON-MASS-001 cand-F937": {
+    "codes": [
+     "estimate.decides"
+    ],
+    "result": "pass"
+   },
+   "CON-MASS-001 cand-F961": {
+    "codes": [
+     "margin.within_uncertainty"
+    ],
+    "result": "inconclusive"
+   },
+   "REQ-CC-001 cand-F1047": {
+    "codes": [
+     "bound.direction"
+    ],
+    "result": "inconclusive"
+   },
+   "REQ-CC-001 cand-F937": {
+    "codes": [
+     "bound.direction"
+    ],
+    "result": "inconclusive"
+   },
+   "REQ-CC-001 cand-F961": {
+    "codes": [
+     "bound.direction"
+    ],
+    "result": "inconclusive"
+   },
+   "REQ-TRK-001 cand-F1047": {
+    "codes": [
+     "bound.direction"
+    ],
+    "result": "inconclusive"
+   },
+   "REQ-TRK-001 cand-F937": {
+    "codes": [
+     "fidelity.insufficient"
+    ],
+    "result": "inconclusive"
+   },
+   "REQ-TRK-001 cand-F961": {
+    "codes": [
+     "bound.direction"
+    ],
+    "result": "inconclusive"
+   }
+  },
+  "screening": null,
+  "search": {
+   "consistency_max_relative_difference": 0.0,
+   "distinct_designs": 1109,
+   "evaluations": 1200,
+   "finalists": [
+    937,
+    961,
+    1047
+   ],
+   "front": 88,
+   "proposals": [
+    "P-long",
+    "P-ends",
+    "P-base"
+   ],
+   "stopped": "budget",
+   "topologies": 12
+  }
+ },
+ "B": {
+  "comparison_basis": {
+   "declared": true,
+   "holds": false,
+   "reason": "a difference with its uncertainty exceeds the tolerance"
+  },
+  "confirmation": null,
+  "diagnostic": [
+   {
+    "candidate": "collider-tracker-v1:cand-F1037",
+    "fidelity": "F1",
+    "search_level": "F1",
+    "search_minus_official": 0.0
+   },
+   {
+    "candidate": "collider-tracker-v1:cand-F1037",
+    "fidelity": "F1",
+    "search_level": "F1",
+    "search_minus_official": 0.0
+   },
+   {
+    "candidate": "collider-tracker-v1:cand-F1037",
+    "fidelity": "F1",
+    "search_level": "F1",
+    "search_minus_official": 0.0
+   },
+   {
+    "candidate": "collider-tracker-v1:cand-F1061",
+    "fidelity": "F1",
+    "search_level": "F1",
+    "search_minus_official": 0.0
+   },
+   {
+    "candidate": "collider-tracker-v1:cand-F1061",
+    "fidelity": "F1",
+    "search_level": "F1",
+    "search_minus_official": 0.0
+   },
+   {
+    "candidate": "collider-tracker-v1:cand-F1061",
+    "fidelity": "F1",
+    "search_level": "F1",
+    "search_minus_official": 0.0
+   },
+   {
+    "candidate": "collider-tracker-v1:cand-F959",
+    "fidelity": "F1",
+    "search_level": "F1",
+    "search_minus_official": 0.0
+   },
+   {
+    "candidate": "collider-tracker-v1:cand-F959",
+    "fidelity": "F1",
+    "search_level": "F1",
+    "search_minus_official": 0.0
+   },
+   {
+    "candidate": "collider-tracker-v1:cand-F959",
+    "fidelity": "F1",
+    "search_level": "F1",
+    "search_minus_official": 0.0
+   }
+  ],
+  "errors": [],
+  "finalists": [
+   {
+    "candidate": "collider-tracker-v1:cand-F959",
+    "index": 959,
+    "mass_kg": 34867.03280587675,
+    "topology": "DES-ECAL-001:calorimetry-em+DES-MAG-001:bending+DES-TRK-001:tracking[N=10]",
+    "values": {
+     "REQ-ECAL-001": 0.007028920705734487,
+     "REQ-TRK-001": 0.024216196382656444
+    }
+   },
+   {
+    "candidate": "collider-tracker-v1:cand-F1037",
+    "index": 1037,
+    "mass_kg": 21011.401313231898,
+    "topology": "DES-ECAL-001:calorimetry-em+DES-MAG-001:bending+DES-TRK-001:tracking[N=8]",
+    "values": {
+     "REQ-ECAL-001": 0.007013816027281601,
+     "REQ-TRK-001": 0.062232879517927255
+    }
+   },
+   {
+    "candidate": "collider-tracker-v1:cand-F1061",
+    "index": 1061,
+    "mass_kg": 24505.858308898718,
+    "topology": "DES-ECAL-001:calorimetry-em+DES-MAG-001:bending+DES-TRK-001:tracking[N=13]",
+    "values": {
+     "REQ-ECAL-001": 0.007000144630363612,
+     "REQ-TRK-001": 0.03968483501235877
+    }
+   }
+  ],
+  "gate_flags": [
+   "gate.H1_missing",
+   "gate.H2_missing",
+   "gate.H3_missing"
+  ],
+  "ranking": {
+   "reasons": [
+    "comparison_basis does not hold: a difference with its uncertainty exceeds the tolerance (ART-15, RPT-07)",
+    "collider-tracker-v1:cand-A, collider-tracker-v1:cand-B, collider-tracker-v1:cand-F959 have no non-optimistic, current expected-precision evaluation (CHN-06)"
+   ],
+   "status": "refused"
+  },
+  "report": "reports/j16-b.json",
+  "rows": {
+   "CON-MASS-001 cand-F1037": {
+    "codes": [
+     "margin.within_uncertainty"
+    ],
+    "result": "inconclusive"
+   },
+   "CON-MASS-001 cand-F1061": {
+    "codes": [
+     "margin.within_uncertainty"
+    ],
+    "result": "inconclusive"
+   },
+   "CON-MASS-001 cand-F959": {
+    "codes": [
+     "margin.within_uncertainty"
+    ],
+    "result": "inconclusive"
+   },
+   "REQ-CONT-001 cand-F1037": {
+    "codes": [
+     "capability.unavailable"
+    ],
+    "result": "inconclusive"
+   },
+   "REQ-CONT-001 cand-F1061": {
+    "codes": [
+     "capability.unavailable"
+    ],
+    "result": "inconclusive"
+   },
+   "REQ-CONT-001 cand-F959": {
+    "codes": [
+     "capability.unavailable"
+    ],
+    "result": "inconclusive"
+   },
+   "REQ-ECAL-001 cand-F1037": {
+    "codes": [
+     "bound.direction"
+    ],
+    "result": "inconclusive"
+   },
+   "REQ-ECAL-001 cand-F1061": {
+    "codes": [
+     "bound.direction"
+    ],
+    "result": "inconclusive"
+   },
+   "REQ-ECAL-001 cand-F959": {
+    "codes": [
+     "bound.direction"
+    ],
+    "result": "inconclusive"
+   },
+   "REQ-HCAL-001 cand-F1037": {
+    "codes": [
+     "capability.unavailable"
+    ],
+    "result": "inconclusive"
+   },
+   "REQ-HCAL-001 cand-F1061": {
+    "codes": [
+     "capability.unavailable"
+    ],
+    "result": "inconclusive"
+   },
+   "REQ-HCAL-001 cand-F959": {
+    "codes": [
+     "capability.unavailable"
+    ],
+    "result": "inconclusive"
+   },
+   "REQ-PU-001 cand-F1037": {
+    "codes": [
+     "capability.unavailable"
+    ],
+    "result": "inconclusive"
+   },
+   "REQ-PU-001 cand-F1061": {
+    "codes": [
+     "capability.unavailable"
+    ],
+    "result": "inconclusive"
+   },
+   "REQ-PU-001 cand-F959": {
+    "codes": [
+     "capability.unavailable"
+    ],
+    "result": "inconclusive"
+   },
+   "REQ-TRG-001 cand-F1037": {
+    "codes": [
+     "capability.unavailable"
+    ],
+    "result": "inconclusive"
+   },
+   "REQ-TRG-001 cand-F1061": {
+    "codes": [
+     "capability.unavailable"
+    ],
+    "result": "inconclusive"
+   },
+   "REQ-TRG-001 cand-F959": {
+    "codes": [
+     "capability.unavailable"
+    ],
+    "result": "inconclusive"
+   },
+   "REQ-TRK-001 cand-F1037": {
+    "codes": [
+     "bound.excludes"
+    ],
+    "result": "fail"
+   },
+   "REQ-TRK-001 cand-F1061": {
+    "codes": [
+     "bound.excludes"
+    ],
+    "result": "fail"
+   },
+   "REQ-TRK-001 cand-F959": {
+    "codes": [
+     "bound.direction"
+    ],
+    "result": "inconclusive"
+   }
+  },
+  "screening": null,
+  "search": {
+   "consistency_max_relative_difference": 0.0,
+   "distinct_designs": 1121,
+   "evaluations": 1200,
+   "finalists": [
+    959,
+    1037,
+    1061
+   ],
+   "front": 141,
+   "proposals": [
+    "P-base"
+   ],
+   "stopped": "budget",
+   "topologies": 6
+  }
+ },
+ "note": "SYNTHETIC: the search proposes candidates; verdicts, screening, comparison basis and ranking come only from contracts/design.py; search values are not evaluations and no optimum is claimed",
+ "pass": {
+  "a_confirmation_recorded_as_is": true,
+  "a_consistency": true,
+  "a_finalists_reported": true,
+  "a_no_errors": true,
+  "a_proposals_recorded": true,
+  "a_ranking_refused_without_expected_precision": true,
+  "a_search_ran": true,
+  "b_no_errors": true,
+  "b_ranking_refused": true,
+  "b_search_ran": true,
+  "b_unavailable_carried": true
+ }
+}

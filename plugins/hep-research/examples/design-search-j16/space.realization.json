@@ -1,0 +1,105 @@
+{
+ "schema": "element_sim.realization/1",
+ "note": "J16 realization profile for Example A (the AMS-like space spectrometer of examples/design-space-spectrometer): the facts the candidate does not give (origin, stack axis, field direction, world, transverse sizes, the passive support upstream of the first plane). SYNTHETIC geometry: a uniform field with sharp edges, no magnet material, no TOF, no calorimeter",
+ "geometry_kind": "layered-spectrometer",
+ "mapping_versions": [
+  "1.0.0",
+  "1.1.0"
+ ],
+ "stack_axis": "x",
+ "field_direction": [
+  0.0,
+  0.0,
+  1.0
+ ],
+ "origin_mm": [
+  -1500.0,
+  0.0,
+  0.0
+ ],
+ "world": {
+  "material": "G4_Galactic",
+  "half_mm": [
+   2200.0,
+   800.0,
+   800.0
+  ]
+ },
+ "templates": {
+  "tracking": {
+   "material": "G4_Si",
+   "radiation_length_mm": 93.7,
+   "radiation_length_source": "PDG Atomic and Nuclear Properties, silicon: X0 = 9.370 cm (https://pdg.lbl.gov/2020/AtomicNuclearProperties/HTML/silicon_Si.html, read 2026-10-21)",
+   "transverse_half_mm": [
+    500.0,
+    500.0
+   ],
+   "name_prefix": "Si"
+  },
+  "bending": {
+   "element": "FieldRegion",
+   "material": "G4_Galactic",
+   "margin_mm": 20.0,
+   "transverse_half_mm": [
+    600.0,
+    600.0
+   ]
+  },
+  "passive": {
+   "element": "Support",
+   "material": "G4_Al",
+   "radiation_length_mm": 88.97,
+   "radiation_length_source": "PDG Atomic and Nuclear Properties 2024, aluminum: X0 = 8.897 cm (https://pdg.lbl.gov/2024/AtomicNuclearProperties/, read 2026-10-25)",
+   "position_m": -0.2,
+   "transverse_half_mm": [
+    500.0,
+    500.0
+   ]
+  }
+ },
+ "elements": [],
+ "field": {
+  "stepper": "DormandPrince745",
+  "driver": "InterpolationDriver",
+  "delta_chord_mm": 0.25,
+  "delta_one_step_mm": 0.01,
+  "delta_intersection_mm": 1e-05,
+  "min_epsilon_step": 5e-05,
+  "max_epsilon_step": 0.001,
+  "max_step_mm": 10.0,
+  "max_track_time_ns": 1000.0
+ },
+ "physics": {
+  "reference_list": "FTFP_BERT_EMZ",
+  "default_cut_mm": 0.7
+ },
+ "source": {
+  "type": "gun",
+  "particle": "proton",
+  "energy_MeV": 999061.7,
+  "position_mm": [
+   -2100.0,
+   0.0,
+   0.0
+  ],
+  "direction": [
+   1.0,
+   0.0,
+   0.0
+  ]
+ },
+ "run": {
+  "events": 100,
+  "first_event": 0,
+  "run_manager": "serial",
+  "threads": 1,
+  "seeding": "per-event",
+  "logical_run_seed": 1
+ },
+ "output": {
+  "event_file": {
+   "level": "crossings",
+   "compression": 1
+  }
+ }
+}

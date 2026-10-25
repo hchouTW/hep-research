@@ -1604,6 +1604,14 @@
   "ok": true,
   "strict_ok": true
  },
+ "examples/design-search-j16/recorded/artifacts/studies/F937-TRK1000/study.computational-run.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "examples/design-search-j16/recorded/artifacts/studies/F937-TRK1000/table.dataset-record.json": {
+  "ok": true,
+  "strict_ok": true
+ },
  "examples/design-space-spectrometer/output/artifacts/candidates/cand-L.json": {
   "ok": true,
   "strict_ok": true

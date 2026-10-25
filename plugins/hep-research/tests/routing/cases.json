@@ -5343,6 +5343,24 @@
    "note": "the design loop and the Geant4 study stay in hep-detector; building and running the programs is hep-computing"
   },
   {
+   "id": "j16",
+   "lang": "en",
+   "kind": "journey",
+   "prompt": "Generate candidate layouts automatically from my design-spec and base candidate (how many planes, where, which field), evaluate the few finalists, confirm one with a detector simulation (Geant4) study, and give me the verdicts without claiming an optimum.",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "design principles and trade-offs"
+   ],
+   "journey": "J16",
+   "set": "GEANT4",
+   "chain": [
+    "hep-detector",
+    "hep-computing",
+    "hep-detector"
+   ],
+   "note": "the search, the evaluations and the confirmation study stay in hep-detector; building and running the Geant4 programs is hep-computing"
+  },
+  {
    "id": "dsd-direct-1",
    "lang": "en",
    "kind": "direct",

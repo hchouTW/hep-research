@@ -2756,6 +2756,39 @@ Contracts: the 13 new keys are core `convention_keys` and also `conditional_conv
 description change and the 8 Th14 cases (paid; pending approval). Pre-existing on main: 5 tests of
 `tests/contracts/test_simulated_dataset.py` fail under a whole-directory pytest run and pass alone (order dependent).
 
+## DESIGN-SEARCH-EXAMPLES (2026-10-25, E2: macOS 26.5 arm64, Apple clang 21.0.0, Geant4 11.4.3 build A, Python 3.13; branch `worktree-geant4-c3` from main `2af81a39`, unreleased)
+
+Geant4 program stage C3 (spec section C.7): journey J16, `examples/design-search-j16`. No code change outside the
+example, J15's campaign (study prefix, realization-profile name, reference-slab thickness and materials as class
+attributes, J15's values unchanged) and the registration; no contract or adapter version change.
+
+| Check | Result |
+|---|---|
+| Example A search | base `cand-S`; plane count 4-9 and positions over 0-3 m, field 0.1-0.5 T, optional TOF slot; objectives REQ-TRK-001 (1 TV) and CON-MASS-001, constraint REQ-CC-001; three seed proposals (proposer llm); 1200 F1 evaluations, 1109 distinct designs, 12 topologies, search front 88, finalists 937 (7 planes, 0.10 T), 961 (9 planes, 0.36 T, TOF), 1047 (9 planes, 0.49 T); consistency against `run` 0 |
+| Example B search | base `cand-B`; plane count 8-13 and positions, field 1-2 T (the role rule's limit, so the 3.8 T `cand-A` is outside the space), ECAL stochastic term; objectives REQ-TRK-001, REQ-ECAL-001, CON-MASS-001; 1200 evaluations, 1121 designs, 6 topologies, front 141, finalists 959, 1037, 1061; the four `capability.unavailable` requirements recorded for each finalist and inconclusive with `capability.unavailable` in the report |
+| Reports (gate G-C3) | both: screening and verdicts from `design.py` (A: CON-MASS-001 pass for 937 and fail for 1047, resolution and charge confusion `bound.direction`; B: REQ-TRK-001 `bound.excludes` for the two lighter finalists, which the search kept as trade-offs because the requirement was an objective, not a constraint); comparison basis declared, does not hold (mass differences beyond 5 %); ranking refused (basis, and no expected-precision evaluation); gates H1-H3 flagged; no `design.py` error |
+| Example A F4 confirmation (`live.py`, recorded 200 kB) | `cand-F937`, 1 TV protons, J15's campaign with `space.realization.json` and the aluminium support's independent entry; seeds from `confirmation_study_id(SEARCH-J16A, ...)`; trial 1600, then 5040 events (nominal, cut scan, two variations, tails off and on). Upgrade **refused**: the multiple-scattering reference (0.937 mm silicon, the planes' x/X0 0.01) agrees with Lynch-Dahl to +0.39 % and both controls are caught, but the -13 % control shifted -8.0 % against DL 6.4 % (beyond 1.1 DL); recorded and not rerun. The F4 evaluation (0.313 against 0.260 at F1) is unqualified: REQ-TRK-001 for `cand-F937` inconclusive with `fidelity.insufficient` |
+| Offline replay | `tests/examples/test_design_search_j16.py`: every criterion, results within 1e-9 of the committed `output/results.json`, the confirmation shown as recorded, the reply facts (search size, basis, ranking) |
+| Bayesian-optimisation backend | not provided (`adapters/design-bo/` 0.1.0 is optional, P.7 item 14): neither environment has Ax or BoTorch, and an untested backend is not shipped; the search runs NSGA-II (C3.4: the fallback is noted) |
+
+Problems found and fixed: the first export missed a refused study's run records (a refused study lists them in
+`inputs`, not `evidence_records`); `live.py export` and the replay now read both, as J15's replay does. The fixed
+size of J15's reference controls (+-13 %) misses 1.1 DL when the detection limit is small (100 GV in J15, 1 TV here):
+sizing the control from a declared detection limit before the runs is a follow-up for the campaign code, and a new
+reference study is the only way to qualify these points.
+
+**`review.py` Markdown review** of the J16 README (R0b7acaa370, models opus and sonnet, `--lens-model design=opus
+--filter-model opus`, own configuration; advisory, `reviews/R0b7acaa370/report.md` in
+`~/Workspace/hep-research-tasks/geant4-program/c3/review`): round 1, 6 slots and the filter (13 findings, 5 kept):
+all disposed, 12 changed, 1 declined (each reference control is judged against its own detection limit). Rounds 2
+and 3, 6 slots each: the seeding sentence corrected (only the study's own runs use `confirmation_study_id`; the shared
+verification and reference runs use fixed ids), `confirmation_study_id` has no attempt input (a new attempt needs a
+new search or design), the re-labelling replay and the unqualified F4 evaluation it writes stated, Example B's
+verdicts and mass limits completed, the single seed proposal of Example B stated. Code from the review:
+`search_minus_official` (`search --diagnose`, `report`) carries `f4_qualified` for F4 evaluations, so a refused
+study's F4 row is marked. The round limit is reached, so the review is escalated: **open, waiting for a human
+`resolve`**. The reviewers caught the mechanism's planted canaries.
+
 ## DESIGN-SEARCH-G4 (2026-10-25, E2: macOS 26.5 arm64, Apple clang 21.0.0, Geant4 11.4.3 build A, Python 3.13; branch `worktree-geant4-c2` from main `98658064`, unreleased)
 
 Geant4 program stage C2 (spec section C.6): Geant4 search values and F4 confirmation, geant4 adapter 0.5.0, contracts

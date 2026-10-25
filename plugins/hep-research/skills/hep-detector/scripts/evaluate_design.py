@@ -2482,7 +2482,11 @@ def search_minus_official(proj: design.Project) -> list[dict]:
                         out.append({"candidate": cid, "search": m.group(1), "point": int(m.group(2)),
                                     "figure_of_merit": t["figure_of_merit"], "search_level": level,
                                     "search_value": value, "evaluation": ev.eid, "fidelity": ev.fidelity,
-                                    "official_value": ext["value"], "search_minus_official": value - ext["value"]})
+                                    "official_value": ext["value"], "search_minus_official": value - ext["value"],
+                                    # an F4 evaluation of a study that was not re-issued validated-in-scope decides
+                                    # nothing (fidelity.insufficient); the diagnostic keeps that visible
+                                    **({"f4_qualified": not getattr(ev, "f4_unqualified", False)}
+                                       if ev.fidelity == "F4" else {})})
     return out
 
 

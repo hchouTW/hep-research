@@ -1,0 +1,102 @@
+{
+ "schema": "simreco.spec/1",
+ "point_resolution_um": {
+  "bending": 10.0,
+  "non_bending": 30.0
+ },
+ "radiation_length_mm": {
+  "G4_Si": 93.7
+ },
+ "tof": {
+  "sigma_t_ps": 100.0
+ },
+ "output": {
+  "observables": [
+   {
+    "name": "core",
+    "source_column": "inv_rig_res",
+    "estimator": "gaussian-core",
+    "bins": {
+     "lo": -2.0,
+     "hi": 2.0,
+     "width": 0.002
+    },
+    "selection": [
+     {
+      "column": "selected",
+      "op": "==",
+      "value": 1
+     }
+    ]
+   },
+   {
+    "name": "pull",
+    "source_column": "rho_pull",
+    "bins": {
+     "lo": -10,
+     "hi": 10,
+     "width": 0.05
+    },
+    "selection": [
+     {
+      "column": "selected",
+      "op": "==",
+      "value": 1
+     }
+    ]
+   },
+   {
+    "name": "residual",
+    "source_column": "inv_rig_res",
+    "bins": {
+     "lo": -2.0,
+     "hi": 2.0,
+     "width": 0.002
+    },
+    "selection": [
+     {
+      "column": "selected",
+      "op": "==",
+      "value": 1
+     }
+    ]
+   },
+   {
+    "name": "beta",
+    "source_column": "beta_res",
+    "bins": {
+     "lo": -0.5,
+     "hi": 0.5,
+     "width": 0.0005
+    },
+    "selection": [
+     {
+      "column": "selected",
+      "op": "==",
+      "value": 1
+     }
+    ]
+   },
+   {
+    "name": "tofdt",
+    "source_column": "tof2_layer_resid_ps",
+    "bins": {
+     "lo": -2000,
+     "hi": 2000,
+     "width": 5
+    },
+    "selection": [
+     {
+      "column": "selected",
+      "op": "==",
+      "value": 1
+     }
+    ]
+   }
+  ],
+  "blocks": {
+   "blocks": 16,
+   "block_size": 315
+  }
+ }
+}
