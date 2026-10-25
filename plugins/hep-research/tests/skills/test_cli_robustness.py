@@ -42,6 +42,8 @@ MISSING_FILE_ARGS = {
                                                        "--artifact-id", "a", "--objective", "o", "--out", OUT],
     "skills/hep-detector/scripts/calorimeter_resolution.py": ["--fit", M],
     "skills/hep-detector/scripts/tag_and_probe_efficiency.py": ["--probes", M, "--pass-column", "p"],
+    "skills/hep-detector/scripts/frontend_response.py": [["hit-efficiency", "--thresholds", "1", "--noise", "1",
+                                                           "--signal-model", "table", "--spectrum", M]],
     "skills/hep-measurement/scripts/isotope_fraction.py": ["fit", "--config", M, "--data", M, "--seed", "1"],
     "skills/hep-measurement/scripts/collection_time.py": ["accumulate", "--config", M, M],
     "skills/hep-measurement/scripts/acceptance_from_generation.py": ["--config", M, "--events", M],
@@ -182,7 +184,6 @@ MISSING_FILE_ARGS = {
 }
 NO_INPUT_FILE = {  # script: why the missing-file check does not apply
     "skills/hep-detector/scripts/cherenkov_angle.py": "numbers on the command line",
-    "skills/hep-detector/scripts/frontend_response.py": "numbers on the command line",
     "skills/hep-detector/scripts/pid_separation_power.py": "numbers on the command line",
     "skills/hep-detector/scripts/tracker_resolution.py": "numbers on the command line",
     "skills/hep-detector/scripts/xmax_gaisser_hillas.py": "numbers on the command line",

@@ -16,7 +16,7 @@ labelled synthetic in status_label). For calibration: the binomial fit of a thre
 the expected errors of a scan design, and the threshold dispersion after per-channel trim. Each result carries its assumptions and a validity
 list; a non-empty validity list means the input is outside the range where the relation holds.
 
-Subcommands (all numbers on the command line; JSON on stdout):
+Subcommands (numbers on the command line, except the table spectrum of hit-efficiency; JSON on stdout):
   enc          ENC (electrons) from capacitance, series/parallel/1/f noise, peaking time, order
   noise-rate   Rice up-crossing rate above a threshold, fake hits per event
   timing       jitter, leading-edge walk, constant-fraction mode, TDC quantization
@@ -29,7 +29,8 @@ Subcommands (all numbers on the command line; JSON on stdout):
   leakage-scale  silicon leakage current at another temperature, I ~ T^2 exp(-E_eff / 2kT)
   optimal-filter  amplitude weights and variance from a few samples (optimal filter, uncorrelated template,
                   largest sample) with correlated and pileup noise; phase-error and baseline bias; time error
-  hit-efficiency  efficiency (Landau or Gaussian signal) and noise occupancy versus threshold; operating window
+  hit-efficiency  efficiency (Landau, Gaussian or tabulated signal) and noise occupancy versus threshold;
+                  operating window
   waveform-toy    seeded synthetic sampled readout (noise, pileup, jitter, ADC) reconstructed by those
                   estimators, with closure against the analytic prediction
   s-curve         binomial fit of a threshold scan (threshold, noise, errors, goodness of fit), or the
@@ -48,11 +49,14 @@ amplitudes in units of the per-sample electronic noise sigma for a unit-peak pul
 one unit of the user's choice (electrons, say). Standard library plus the plugin's core/stats linear solver.
 See <plugin root>/skills/hep-detector/references/front-end-electronics-and-signal-processing.md.
 Status: --status (default unvalidated; one of the core artifact_statuses) is echoed as status.
-Exit codes: 0 ok; 1 the computation failed or the input file is unreadable or invalid (JSON with ok false);
-2 invalid input (JSON with error_kind invalid-input on stdout, the usage on stderr).
+Exit codes: 0 ok; 1 the computation failed (a result not finite; JSON with ok false);
+2 invalid input, including an unreadable or malformed input file (JSON with error_kind invalid-input on stdout,
+the usage on stderr).
 Run: python3 <plugin root>/skills/hep-detector/scripts/frontend_response.py enc --capacitance 10 --en 1 --leakage 1000 --peaking 25
 """
 import argparse
+import bisect
+import csv
 import json
 import math
 import sys
@@ -793,16 +797,96 @@ def _gauss_expect(f, mean, sigma, points=160, span=9.0):
     return total * h / 3 / math.sqrt(2 * math.pi)
 
 
+SPECTRUM_TAIL_FRACTION = 1e-3  # last density over the peak density above which a table is flagged as truncated
+
+
+def read_spectrum(path):
+    """A measured or simulated charge spectrum from CSV with header charge,density or charge,count (charges strictly
+    increasing, values non-negative, positive total). Returns (kind, charges, values). Every problem with the file
+    is a ValueError (invalid input)."""
+    try:
+        with open(path, encoding='utf-8', newline='') as fh:
+            rows = list(csv.reader(fh))
+    except (OSError, csv.Error, UnicodeDecodeError) as exc:
+        raise ValueError(f'cannot read the spectrum file {path}: {exc}') from None
+    rows = [r for r in rows if any(c.strip() for c in r)]
+    if not rows:
+        raise ValueError('the spectrum file is empty')
+    header = [c.strip().lower() for c in rows[0]]
+    if header not in (['charge', 'density'], ['charge', 'count']):
+        raise ValueError("the spectrum file needs the header charge,density or charge,count")
+    kind = header[1]
+    if len(rows) < 3:
+        raise ValueError('the spectrum file needs at least two data rows')
+    charges, values = [], []
+    for line, row in enumerate(rows[1:], start=2):
+        if len(row) != 2:
+            raise ValueError(f'spectrum file line {line}: expected 2 columns, found {len(row)}')
+        try:
+            q, v = float(row[0]), float(row[1])
+        except ValueError:
+            raise ValueError(f'spectrum file line {line}: not a number') from None
+        if not (math.isfinite(q) and math.isfinite(v)):
+            raise ValueError(f'spectrum file line {line}: charge and {kind} must be finite')
+        if v < 0:
+            raise ValueError(f'spectrum file line {line}: negative {kind}')
+        if charges and q <= charges[-1]:
+            raise ValueError(f'spectrum file line {line}: charges must be strictly increasing')
+        charges.append(q)
+        values.append(v)
+    if sum(values) <= 0:
+        raise ValueError(f'the spectrum file has zero total {kind}')
+    return kind, charges, values
+
+
+def _table_cdf(kind, charges, values, scale):
+    """Monotone CDF of a tabulated spectrum, with the charge axis multiplied by scale (the signal fraction).
+
+    density: linear between the points, so the CDF is the trapezoid integral (exact at the points, quadratic
+    between). count: bin centres, edges at the midpoints between neighbours (the outer bins as wide as their
+    neighbour gap), uniform within a bin. Normalized over the table; 0 below it, 1 above it."""
+    qs = [q * scale for q in charges]
+    if kind == 'density':
+        edges, dens = qs, [v / scale for v in values]
+        cum = [0.0]
+        for i in range(1, len(qs)):
+            cum.append(cum[-1] + 0.5 * (dens[i] + dens[i - 1]) * (qs[i] - qs[i - 1]))
+    else:
+        mids = [(a + b) / 2 for a, b in zip(qs, qs[1:])]
+        edges = [qs[0] - (mids[0] - qs[0]), *mids, qs[-1] + (qs[-1] - mids[-1])]
+        cum = [0.0]
+        for v in values:
+            cum.append(cum[-1] + v)
+    total = cum[-1]
+    lo, hi = edges[0], edges[-1]
+
+    def cdf(q):
+        if q <= lo:
+            return 0.0
+        if q >= hi:
+            return 1.0
+        i = bisect.bisect_right(edges, q) - 1
+        h = q - edges[i]
+        if kind == 'density':
+            width = edges[i + 1] - edges[i]
+            part = dens[i] * h + 0.5 * (dens[i + 1] - dens[i]) / width * h * h
+        else:
+            part = (cum[i + 1] - cum[i]) * h / (edges[i + 1] - edges[i])
+        return min(1.0, max(0.0, (cum[i] + part) / total))
+    return cdf, lo, hi, values[-1] / max(values)
+
+
 def hit_efficiency(thresholds, noise, signal_model='landau', mpv=None, xi=None, mean=None, sigma_signal=None,
                    signal_fraction=1.0, threshold_dispersion=0.0, peaking_ns=None, order=2, noise_type='series',
-                   series_fraction=None, window_ns=None, min_efficiency=None, max_occupancy=None):
+                   series_fraction=None, window_ns=None, min_efficiency=None, max_occupancy=None, spectrum=None):
     """Hit efficiency and noise occupancy versus threshold: the operating window of a binary or zero-suppressed
     channel.
 
-    Efficiency: P(f Q + noise + threshold offset > T) for a Landau (MPV, xi) or Gaussian signal Q on the channel
-    (fraction f of the deposit), noise sigma and a Gaussian channel-to-channel threshold spread, averaged over
-    channels. Occupancy: the probability that noise alone is above threshold at one sampling instant, and the
-    expected noise up-crossings in a window (Rice, CR-(RC)^n), both averaged over the threshold spread.
+    Efficiency: P(f Q + noise + threshold offset > T) for a Landau (MPV, xi), Gaussian or tabulated (measured or
+    simulated; spectrum = (kind, charges, values) from read_spectrum) signal Q on the channel (fraction f of the
+    deposit), noise sigma and a Gaussian channel-to-channel threshold spread, averaged over channels. Occupancy: the
+    probability that noise alone is above threshold at one sampling instant, and the expected noise up-crossings in
+    a window (Rice, CR-(RC)^n), both averaged over the threshold spread.
     """
     if not thresholds:
         raise ValueError('give at least one threshold')
@@ -840,8 +924,20 @@ def hit_efficiency(thresholds, noise, signal_model='landau', mpv=None, xi=None, 
         def ineff(t):
             return _phi((t - mu) / tot)
         model = {'model': 'gauss', 'mean_on_channel': mu, 'sigma_on_channel': ss}
+    elif signal_model == 'table':
+        if spectrum is None:
+            raise ValueError('the table signal needs --spectrum FILE')
+        kind, charges, values = spectrum
+        table_cdf, q_lo, q_hi, end_ratio = _table_cdf(kind, charges, values, frac)
+
+        def ineff(t):
+            return _gauss_expect(table_cdf, t, s_eff)
+        model = {'model': 'table', 'spectrum_kind': kind, 'spectrum_rows': len(charges),
+                 'charge_range_on_channel': [q_lo, q_hi], 'last_over_peak': end_ratio}
     else:
-        raise ValueError("signal model must be 'landau' or 'gauss'")
+        raise ValueError("signal model must be 'landau', 'gauss' or 'table'")
+    if spectrum is not None and signal_model != 'table':
+        raise ValueError('--spectrum goes with --signal-model table')
     nu0 = None
     if peaking_ns is not None:
         rate = noise_rate(0.0, peaking_ns, order, noise_type, series_fraction)
@@ -905,6 +1001,17 @@ def hit_efficiency(thresholds, noise, signal_model='landau', mpv=None, xi=None, 
     if frac < 1:
         out['validity'].append('signal fraction below 1 (charge sharing): efficiency at the cell edge, not '
                                'averaged over the track position')
+    if signal_model == 'table':
+        out['assumptions'].append('table signal: normalized over the table range (charge on the channel = signal '
+                                  'fraction x table charge); density linear between points, counts uniform within '
+                                  'bins whose edges are the midpoints; no signal below or above the table')
+        outside = [r['threshold'] for r in rows if not q_lo <= r['threshold'] <= q_hi]
+        if outside:
+            out['validity'].append(f'thresholds outside the table range {q_lo:g} to {q_hi:g}: {outside}')
+        if end_ratio > SPECTRUM_TAIL_FRACTION:
+            out['validity'].append(f'the table ends at {end_ratio:.2g} of its peak: the probability beyond its last '
+                                   'charge is missing from the normalization and raises every inefficiency by that '
+                                   'fraction (a Landau tail falls only as 1/charge); extend the table')
     return out
 
 
@@ -1359,7 +1466,8 @@ def main():
     g.add_argument('--scan', type=float, nargs=3, metavar=('LOW', 'HIGH', 'STEPS'),
                    help='scan STEPS thresholds evenly from LOW to HIGH')
     p.add_argument('--noise', type=float, required=True, help='noise sigma (ENC), in the unit of the charges')
-    p.add_argument('--signal-model', choices=['landau', 'gauss'], default='landau', dest='signal_model')
+    p.add_argument('--signal-model', choices=['landau', 'gauss', 'table'], default='landau', dest='signal_model')
+    p.add_argument('--spectrum', help='table: CSV with header charge,density or charge,count (charges increasing)')
     p.add_argument('--mpv', type=float, help='landau: most probable deposited charge')
     p.add_argument('--xi', type=float, help='landau: width parameter xi (FWHM is about 4.02 xi)')
     p.add_argument('--mean', type=float, help='gauss: mean signal')
@@ -1457,10 +1565,11 @@ def main():
                 thresholds = [low + (high - low) * i / (int(steps) - 1) for i in range(int(steps))]
             else:
                 thresholds = args.thresholds
+            spectrum = read_spectrum(args.spectrum) if args.spectrum is not None else None
             result = hit_efficiency(thresholds, args.noise, args.signal_model, args.mpv, args.xi, args.mean,
                                     args.sigma_signal, args.signal_fraction, args.threshold_dispersion, args.peaking,
                                     args.order, args.noise_type, args.series_fraction, args.window,
-                                    args.min_efficiency, args.max_occupancy)
+                                    args.min_efficiency, args.max_occupancy, spectrum)
         elif args.command == 'waveform-toy':
             result = waveform_toy(args.order, args.peaking, args.period, args.samples, args.first_offset,
                                   args.amplitude, args.events, args.seed, args.rho, args.phase_jitter,

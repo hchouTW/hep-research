@@ -55,6 +55,17 @@ hep-detector front-end electronics for reconstruction, simulation and calibratio
   `test_non_finite_result_exits_1` in `test_frontend_waveforms.py`. The bug is in 0.40.0 too; no input of 0.40.0 is
   known to reach it.
 
+hep-detector front-end FE1: a tabulated signal for `hit-efficiency` (VALIDATION FRONTEND-FE1).
+
+- `hit-efficiency --signal-model table --spectrum FILE`: a measured or simulated charge spectrum from CSV (`charge,density`
+  or `charge,count`), for the low-side tail that a Landau model makes too thin. A density is linear between its points
+  (trapezoid-integrated CDF), counts are bins with edges at the midpoints; the CDF is normalized over the table and is
+  0 below and 1 above it; `--signal-fraction` scales the charge axis. `validity` flags thresholds outside the table and
+  a table that ends above 1e-3 of its peak (its missing tail would raise every inefficiency). Every file problem is
+  invalid input (exit 2, JSON), never a traceback. Tool contract: `spectrum` input (kind path); `frontend_response.py`
+  is now in `MISSING_FILE_ARGS` of `tests/skills/test_cli_robustness.py`.
+- Front-end page: one sentence on using the table for the low-side tail. Tests: `HitEfficiencyTable` (6 tests).
+
 ## 0.40.0 (2026-10-25)
 
 Minor release; contracts 3.13.0, `CORE_VERSION` 1.1.0 and geant4 adapter 0.5.0 unchanged. It ships the follow-ups

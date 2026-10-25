@@ -192,7 +192,10 @@ distribution, not only its width, and its spectrum when tails appear.
   the window ends at 8500 e; with 20 % of the charge no threshold meets both targets. The
   Landau low tail is thinner than that of real thin silicon (Bichsel straggling,
   delta-ray escape, cluster splitting): use the measured charge spectrum on the channel for
-  the inefficiency below about 1 %, and the measured noise tail above about 6 sigma.
+  the inefficiency below about 1 %, and the measured noise tail above about 6 sigma. For that
+  low-side tail, give the measured spectrum as a table (`hit-efficiency --signal-model table
+  --spectrum FILE`, CSV `charge,density` or `charge,count`); the table is normalized over its
+  range, so it must reach far enough up that the missing tail is negligible.
 - **Zero suppression** with seed/neighbour thresholds keeps clusters but truncates
   their tails; cluster charge and centroid are then biased for low-`S/N` clusters, and
   the bias differs between data and simulation if the thresholds or noise differ.

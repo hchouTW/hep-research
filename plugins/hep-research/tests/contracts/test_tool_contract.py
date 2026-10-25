@@ -311,7 +311,7 @@ FRONTEND_OPS = {  # operation id -> (arguments that succeed, arguments that are 
     "hit-efficiency": (["--thresholds", "3000", "6000", "--noise", "1000", "--mpv", "23000", "--xi", "1500",
                         "--threshold-dispersion", "300", "--peaking", "25", "--window", "25", "--min-efficiency", "0.99",
                         "--max-occupancy", "1e-4"],
-                       ["--thresholds", "3000", "--noise", "1000", "--mpv", "23000"]),
+                       ["--thresholds", "3000", "--noise", "1000", "--signal-model", "table"]),  # table without --spectrum
     "waveform-toy": (["--order", "2", "--peaking", "30", "--period", "10", "--samples", "6", "--first-offset", "-20",
                       "--amplitude", "20", "--events", "200", "--pileup-rate", "1e6", "--pileup-mean-amp", "2",
                       "--phase-jitter", "1", "--adc-lsb", "0.5", "--constraints", "baseline"],
