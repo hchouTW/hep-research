@@ -66,6 +66,17 @@ hep-detector front-end FE1: a tabulated signal for `hit-efficiency` (VALIDATION 
   is now in `MISSING_FILE_ARGS` of `tests/skills/test_cli_robustness.py`.
 - Front-end page: one sentence on using the table for the low-side tail. Tests: `HitEfficiencyTable` (6 tests).
 
+hep-detector front-end FE2: a measured noise covariance for `optimal-filter` and `waveform-toy` (VALIDATION
+FRONTEND-FE2).
+
+- `--noise-covariance FILE` (`{"covariance": [[...]]}`, one row per sample, units of the per-sample noise sigma
+  squared; not with `--rho`) on both subcommands, read by one function: weights and predictions use the matrix plus
+  the Campbell pileup term, and `waveform-toy` draws the noise as `L z` (Cholesky). A matrix that is not square of the
+  sample count, finite, symmetric and positive definite is refused, never repaired (exit 2). New outputs `noise_model`
+  (`ar1` or `measured`) and `noise_covariance_sha256` (SHA-256 of the compact JSON of the matrix as floats). With
+  `--rho` the outputs are unchanged; a rho^|i-j| file gives the `--rho` numbers to 1e-12 (its Cholesky factor is the
+  AR(1) recursion). Tests: `MeasuredNoiseCovariance` (5 tests).
+
 ## 0.40.0 (2026-10-25)
 
 Minor release; contracts 3.13.0, `CORE_VERSION` 1.1.0 and geant4 adapter 0.5.0 unchanged. It ships the follow-ups
