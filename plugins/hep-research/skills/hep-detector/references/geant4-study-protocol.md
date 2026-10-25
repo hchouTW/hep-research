@@ -238,6 +238,18 @@ shift = (control - nominal) / reference; it is caught when its benchmark verdict
 (`detection_limit_sign`). A single miss is recorded, never rerun with another seed; gross controls (multiple
 scattering off) do not count. A benchmark whose control is not caught is not evidence for its scope.
 
+New studies of the multiple-scattering reference declare `control_rule: "declared-size/1"` (decided 2026-10-25; the
+factors are provisional). The window above is narrow compared with the scatter of a measured shift, so a correctly
+sized control is refused often; the declared rule fixes the size before the runs instead. Run the nominal, then
+`geant4_benchmarks.py plan-controls --config C`: it prints the planned DL (from the nominal alone) and the +- areal-
+density changes whose expected shift, through Lynch and Dahl's formula, is 1.25 x that DL (the width scales about as
+the square root of the density, so a density change of DL would move it only about DL/2). Write those
+`injected_relative` values and the rule into the config, then make the control runs. A control counts when it is
+caught and its expected shift is at most 1.5 x the planned DL (by construction for planned controls; a gross control
+fails it), and the benchmark claims the largest detection limit a caught control demonstrated, max(DL, |shift|): never
+less than a control showed. The rule applies to studies run under it; a study recorded under the window rule keeps
+that rule and its outcome (J15 at 100 GV and J16 at 1 TV stay refused).
+
 **The multiple-scattering core estimator.** Lynch and Dahl's theta0 is the width of a Gaussian fitted to the central
 98 % of the angles, which is what `multiple-scattering-reference` computes (truncated-normal maximum likelihood in the
 symmetric window holding 98 %). RMS(central 98 %) / 0.8673, the estimator of the `multiple-scattering` sanity

@@ -3266,6 +3266,32 @@ Not done in this stage: the independent
 new-problem run by an agent that did not take part (C1.10, section A.8), the `review.py` Markdown review, the release
 manifest. The adequacy table is unchanged; search values remain F1 optimistic bounds and decide nothing.
 
+## DECLARED-SIZE-CONTROLS (2026-10-25, E2 and the CI lock; branch `feat/declared-size-controls` on `feat/search-roles-geometry`)
+
+Follow-up recorded at stages B3 and C3: the multiple-scattering reference refused J15 at 100 GV and J16 at 1 TV
+because a +-13 % density control's shift exceeded 1.1 DL. The recorded controls (shift / DL): J15 1 GV +7.3/8.1 %,
+-7.0/8.1 %; 100 GV +6.3/6.3 %, -8.1/6.3 % (refused); 500 GV +6.7/7.6 %, -6.7/7.3 %; J16 1 TV +5.7/6.6 %, -8.0/6.4 %
+(refused); SE of a shift 0.9-1.1 %. The window between caught (|offset| > tolerance) and 1.1 DL is about 2.6-3.6 %
+wide against that scatter, so even a well-sized control misses it often (about 0.8 for both controls at J16 1 TV,
+centred), and the protocol's "inject an error of the DL's size" moves the width only about DL/2 (theta0 ~ sqrt(x)).
+Decision (maintainer, 2026-10-25, option D, for new studies only; factors provisional): control rule
+`declared-size/1`.
+
+| Check | Result |
+|---|---|
+| `ms_expected_shift`: +-13 % areal density at 1 GV, 0.3 mm Si | +5.5 to 7.5 % and -6 to -8.5 %, minus side larger, 0 at 0 |
+| J15's recorded 100 GV numbers under both rules | window rule refuses the minus control; declared-size/1: both sized and caught, claimed DL 8.14 % (the demonstrated shift) |
+| Oversized (3.6 x planned DL), uncaught and undeclared controls | not counted; the claimed DL is never below a caught control's shift |
+| `run_detector_benchmark` on synthetic dumps and records (+-13 % density) | the declared fields appear only with the rule; the window rule's output is unchanged |
+| `plan-controls` from a nominal dump | +- injections whose expected shift is +-1.25 x the planned DL (to 1e-5), within the 1.5 ceiling |
+| `control_rule` validation | an unknown rule, or declared-size/1 on another benchmark, is refused |
+| J14, J15, J16 regenerated | only the `geant4_benchmarks.py` tool hash changes; J15's and J16's refusals stand (results identical) |
+| `run_all_checks.py --no-cli --jobs 6`, E2 | 29 pass, 0 fail, 2 skipped; 5535 tests, 0 failures, 153 skipped |
+| Same with the CI lock | 29 pass, 0 fail, 2 skipped; 5535 tests, 0 failures, 245 skipped |
+
+Not done: a live study under the rule (it needs local Geant4 time, a new study id, and the maintainer's go-ahead);
+`declared-size/1` for the slab benchmarks (their responses to an injection are not modelled).
+
 ## SEARCH-ROLES-1.1.0 (2026-10-25, E2 and the CI lock; branch `feat/search-roles-geometry` from main `8b41af25`)
 
 Follow-up recorded at stage C2 (DESIGN-SEARCH-G4 limits): role rules 1.0.0 named a search-added TOF's and
