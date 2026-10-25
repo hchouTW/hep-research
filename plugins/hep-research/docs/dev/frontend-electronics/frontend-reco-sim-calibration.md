@@ -429,7 +429,7 @@ Follows `docs/dev/geant4-architecture/geant4-program.md` §P.10 [C]; the only ex
      | `threshold_mad_sigma` | `1.4826 × MAD` |
      | `threshold_dispersion_corrected` | `sqrt(max(0, threshold_sd² − mean(σ_T²)))`; if the radicand is ≤ 0, report 0 and write "dispersion not above the fit error" in `validity` |
      | median noise | Median of fitted noise |
-     | count of p < 1e-3 | Number of channels with p < 1e-3 |
+     | count of p < 1e-3 | Number of channels with p < 1e-3 (*at FE3 [C]:* over all fitted channels, `fitted_channels_with_p_below_1e-3`; over the included ones it would always be 0) |
 
      The summary is always finite and never causes exit 1.
   5. Downstream flow, stated in the output `note`: `threshold_dispersion_corrected` is the value to pass on — to
@@ -529,7 +529,8 @@ Follows `docs/dev/geant4-architecture/geant4-program.md` §P.10 [C]; the only ex
 - **FE3-4** A batch with one channel that never crosses 50 % and one with p < 1e-3 completes; the first is in
   `failed_channels`, the second in `excluded_channels`; neither enters the summary.
 - **FE3-5** For Gaussian synthetic thresholds the expectation of `threshold_mad_sigma` is within 3 MC standard errors of
-  the true σ; the summary's median noise and count of p < 1e-3 equal the values recomputed from the per-channel results.
+  the true σ (*at FE3 [C]:* the σ of the fitted thresholds, sqrt(σ² + mean σ_T²); the MAD is not corrected for the
+  fit error); the summary's median noise and count of p < 1e-3 equal the values recomputed from the per-channel results.
 
 #### All stages
 
