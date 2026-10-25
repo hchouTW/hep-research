@@ -238,8 +238,11 @@ shift = (control - nominal) / reference; it is caught when its benchmark verdict
 (`detection_limit_sign`). A single miss is recorded, never rerun with another seed; gross controls (multiple
 scattering off) do not count. A benchmark whose control is not caught is not evidence for its scope.
 
-New studies of the multiple-scattering reference declare `control_rule: "declared-size/1"` (decided 2026-10-25; the
-factors are provisional). The window above is narrow compared with the scatter of a measured shift, so a correctly
+New studies of the multiple-scattering reference, stopping power and thin-layer MPV declare
+`control_rule: "declared-size/1"` (decided 2026-10-25; the factors are provisional). Stopping power and MPV respond
+about linearly to an areal-density change (Bethe at the shifted mid-slab energy, the Landau-Vavilov Delta_p; checked
+against J14's recorded controls); use `plan-controls --benchmark NAME`. The injection must be visible in the control's
+run record, so records without an effective config, such as J14's, cannot use the rule. The window above is narrow compared with the scatter of a measured shift, so a correctly
 sized control is refused often; the declared rule fixes the size before the runs instead. Run the nominal, then
 `geant4_benchmarks.py plan-controls --config C`: it prints the planned DL (from the nominal alone) and the +- areal-
 density changes whose expected shift, through Lynch and Dahl's formula, is 1.25 x that DL (the width scales about as

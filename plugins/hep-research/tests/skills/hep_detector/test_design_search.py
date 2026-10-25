@@ -70,8 +70,9 @@ def spec_a(art: Path, **over) -> dict:
             "finalists": {"max": 3, "distinct_topologies": True},
             "proposals": [{"id": "P-base", "reason": "the base layout as a seed",
                            "parameters": {"DES-MAG-001.parameters.field_T": 0.14}},
-                          {"id": "P-tof", "reason": "a time-of-flight pair for low-rigidity PID",
-                           "enabled": {"tof": True}}],
+                          {"id": "P-tof", "reason": "a time-of-flight pair for low-rigidity PID, between tracker planes",
+                           "enabled": {"tof": True},
+                           "parameters": {"DES-TOF-S01.parameters.layer_positions_m": [0.125, 1.125]}}],
             "consistency_samples": 3}
     spec.update(over)
     return spec
@@ -613,6 +614,35 @@ class Validity(unittest.TestCase):
             [("DES-ECAL-001", "depth_x0", [5.0, 30.0]), ("DES-RICH-001", "radiator_length_cm", [1.0, 200.0])],
             {"DES-ECAL-001.parameters.depth_x0": 17.0, "DES-RICH-001.parameters.radiator_length_cm": 3.0})
         self.expected_base_extent_violation(v, why)
+
+    def test_tof_planes_against_trackers_and_extents(self):
+        """A TOF plane (centre +- half its thickness) on a tracking plane or inside a calorimeter's extent is an
+        overlap; a TOF that is the calorimeter's daughter may sit inside it; planes between them are valid."""
+        spec = spec_a(self.art, free_parameters=[], slots={"tof": [0, 1], "calorimetry-em": [0, 1]},
+                      regenerate_budgets=[])
+        space = space_for(self.art, spec)
+
+        def why(tof_pos, parent=None):
+            prop = {"id": "P", "reason": "r", "enabled": {"tof": True, "calorimetry-em": True},
+                    "parameters": {"DES-TOF-S01.parameters.layer_positions_m": tof_pos,
+                                   "DES-ECAL-S01.parameters.front_position_m": 2.2}}
+            if parent:
+                prop["parent"] = {"DES-TOF-S01": parent}
+            g, _ = space.repair(space.proposal_genome(prop))
+            _, facts = space.decode(g, "s", f"{NS_A}:x")
+            return space.violation(facts)
+
+        v, reasons = why([0.125, 1.125])
+        self.assertEqual((v, reasons), (0.0, []))
+        v, reasons = why([0.5, 1.125])  # 0.5 m is a tracking plane of cand-S
+        self.assertTrue(any(r.startswith("overlap: DES-TOF-S01 plane at 0.5 m and DES-TRK-001 plane at 0.5 m")
+                            for r in reasons), reasons)
+        self.assertGreater(v, 0)
+        v, reasons = why([0.125, 2.3])  # inside the calorimeter (front 2.2 m)
+        self.assertTrue(any(r.startswith("overlap: DES-TOF-S01 plane at 2.3 m and DES-ECAL-S01") for r in reasons),
+                        reasons)
+        v, reasons = why([0.125, 2.3], parent="DES-ECAL-S01")
+        self.assertFalse(any("DES-ECAL-S01" in r for r in reasons), reasons)
 
     def test_parent_reset_when_the_mother_is_disabled(self):
         spec = spec_a(self.art, free_parameters=[], slots={"calorimetry-em": [0, 1], "rich": [0, 1]},

@@ -3266,6 +3266,29 @@ Not done in this stage: the independent
 new-problem run by an agent that did not take part (C1.10, section A.8), the `review.py` Markdown review, the release
 manifest. The adequacy table is unchanged; search values remain F1 optimistic bounds and decide nothing.
 
+## DECLARED-SIZE-SLABS-TOF-OVERLAP (2026-10-25, E2 and the CI lock; branch `feat/declared-size-slabs-tof-overlap` from main `c2236ba9`)
+
+The two follow-ups left by DECLARED-SIZE-CONTROLS and SEARCH-ROLES-1.1.0.
+
+`declared-size/1` for `stopping-power` and `thin-layer-mpv`: the expected shift of an areal-density injection d is
+(1 + d) x Bethe at the shifted mid-slab energy over Bethe at the nominal one (stopping power: mean loss over the spec
+thickness), and Delta_p of the scaled areal density over the nominal (MPV); the density effect stays at the spec
+density's Sternheimer parameters. The injection must be in the control's run record (effective config, to 1e-6), as
+for the multiple-scattering reference. `range` (its response depends on whether density or thickness changed) and
+`longitudinal-profile` keep the window rule.
+
+| Check | Result |
+|---|---|
+| Modelled response against J14's recorded Geant4 controls (an independent oracle: the shifts Geant4 produced) | stopping power +3.8 % / -4.0 % density: within 2 SE of +3.81 % / -3.98 %; MPV +-6.9 %: within 2 SE of +7.12 % / -7.03 % (slope above 1, as Delta_p ~ xi (ln xi + C)) |
+| J14's controls under `declared-size/1` | not counted: its run records carry no effective config, so the injection cannot be checked; under the window rule J14 ran with they still count |
+| `plan-controls --benchmark stopping-power` on J14's nominal | +- injections with expected shift +-1.25 x the planned DL; injection about equal to the shift (slope about 1) |
+| Rule coverage | accepted for the three modelled benchmarks; refused for `range` and `longitudinal-profile` |
+| TOF plane overlap in `search` (`test_tof_planes_against_trackers_and_extents`) | a TOF plane on a tracking plane (0.5 m in cand-S) or inside a calorimeter (front 2.2 m) is an overlap; as the calorimeter's daughter it is not; planes between tracker planes are valid |
+| `test_proposals_are_flagged` | its TOF proposal moved between the tracker planes (0.125, 1.125 m): at the rule's default positions the first plane sat on cand-S's plane at 0 m and the design is now invalid |
+| J14, J15, J16 regenerated | only tool hashes change; J16 (rules 1.0.0, no TOF positions) unchanged |
+| `run_all_checks.py --no-cli --jobs 6`, E2 | RESULT_E2 |
+| Same with the CI lock | RESULT_CI |
+
 ## DECLARED-SIZE-CONTROLS (2026-10-25, E2 and the CI lock; branch `feat/declared-size-controls` on `feat/search-roles-geometry`)
 
 Follow-up recorded at stages B3 and C3: the multiple-scattering reference refused J15 at 100 GV and J16 at 1 TV

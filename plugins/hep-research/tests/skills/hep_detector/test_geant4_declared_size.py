@@ -78,7 +78,7 @@ class DeclaredSize(unittest.TestCase):
         with self.assertRaises(G.BenchmarkError):
             G.control_rule({"benchmark": "multiple-scattering-reference", "control_rule": "window/2"})
         with self.assertRaises(G.BenchmarkError):
-            G.control_rule({"benchmark": "stopping-power", "control_rule": "declared-size/1"})
+            G.control_rule({"benchmark": "range", "control_rule": "declared-size/1"})
 
 
 def write_dump(path: Path, theta: float, seed: int, n: int = 20000) -> None:
@@ -127,6 +127,65 @@ class Wiring(unittest.TestCase):
                                max(c["demonstrated_detection_limit_relative"] for c in nc["controls"]))
         self.assertNotIn("control_rule", window["negative_control"])
         self.assertNotIn("sized", window["negative_control"]["controls"][0])
+
+
+J14 = PLUGIN / "examples" / "geant4-thin-silicon" / "output"
+
+
+def j14(name: str) -> tuple[dict, dict, Path]:
+    cfg_path = J14 / f"benchmarks-{name}.config.json"
+    cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
+    study = json.loads((cfg_path.parent / cfg["study_spec"]).read_text(encoding="utf-8"))
+    return cfg["benchmarks"][0], study, cfg_path
+
+
+class SlabBenchmarks(unittest.TestCase):
+    """F1: declared-size/1 for stopping-power and thin-layer-mpv, with the modelled response checked against J14's
+    recorded Geant4 controls (an independent oracle: the shifts Geant4 produced for the same injections)."""
+
+    def test_the_response_matches_j14s_recorded_controls(self):
+        for name in ("sp", "mpv"):
+            b, study, _ = j14(name)
+            recorded = json.loads((J14 / f"benchmarks-{name}.json").read_text(encoding="utf-8"))["benchmarks"][0]
+            for c in recorded["negative_control"]["controls"]:
+                with self.subTest(benchmark=b["benchmark"], injected=c["injected_relative"]):
+                    exp = G.expected_shift(b, study, c["injected_relative"])
+                    self.assertLess(abs(exp - c["shift"]), 2 * c["se_of_shift"], (exp, c["shift"], c["se_of_shift"]))
+        b, study, _ = j14("mpv")
+        self.assertGreater(G.expected_shift(b, study, 0.069), 0.069)  # Delta_p ~ xi (ln xi + C): slope above 1
+
+    def test_the_rule_covers_the_modelled_benchmarks_only(self):
+        for name in ("stopping-power", "thin-layer-mpv", "multiple-scattering-reference"):
+            self.assertEqual(G.control_rule({"benchmark": name, "control_rule": "declared-size/1"}), "declared-size/1")
+        for name in ("range", "longitudinal-profile"):
+            with self.assertRaises(G.BenchmarkError):
+                G.control_rule({"benchmark": name, "control_rule": "declared-size/1"})
+
+    def test_j14s_records_cannot_carry_the_declared_rule(self):
+        """J14's run records predate the effective config, so the injection in a control's run cannot be checked:
+        under declared-size/1 its controls are undeclared and not counted (the window rule J14 ran with is kept)."""
+        b, study, cfg_path = j14("sp")
+        res = G.evaluate(b, G.source(b, cfg_path.parent), study, cfg_path.parent)
+        nc = G.controls(dict(b, control_rule="declared-size/1"), res, study, cfg_path.parent)
+        self.assertEqual(nc["control_rule"], "declared-size/1")
+        self.assertTrue(all(c["expected_shift_relative"] is None and not c["sized"] for c in nc["controls"]))
+        self.assertFalse(nc["at_claimed_detection_limit"])
+        window = G.controls(b, res, study, cfg_path.parent)
+        self.assertTrue(window["at_claimed_detection_limit"])  # unchanged under the rule it ran with
+
+    def test_plan_controls_for_stopping_power(self):
+        import contextlib
+        import io
+        _, _, cfg_path = j14("sp")
+        buf = io.StringIO()
+        with contextlib.redirect_stdout(buf):
+            code = G.main(["plan-controls", "--config", str(cfg_path), "--benchmark", "stopping-power"])
+        out = json.loads(buf.getvalue())
+        self.assertEqual(code, 0, out)
+        dlp = out["planned_detection_limit_relative"]
+        for c, sign in zip(out["controls"], (1, -1)):
+            self.assertAlmostEqual(c["expected_shift_relative"], sign * 1.25 * dlp, delta=1e-5)
+            self.assertAlmostEqual(c["injected_relative"], sign * 1.25 * dlp, delta=0.01)  # slope about 1
 
 
 class PlanControls(unittest.TestCase):

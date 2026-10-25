@@ -1594,8 +1594,9 @@ class SearchSpace:
 
     def violation(self, facts: dict) -> tuple[float, list[str]]:
         """v = sum of normalised violations (section C.4.5): spacing shortfall / minimum spacing, length outside the
-        envelope / envelope length, overlap length / envelope length (or the union of the two extents), and the
-        number of daughters nested deeper than one level."""
+        envelope / envelope length, overlap length / envelope length (or the union of the two extents; TOF planes
+        against the other extents and the tracking planes, _plane_overlaps), and the number of daughters nested deeper
+        than one level."""
         v, why = 0.0, []
         vals = facts["values"]
         length = self.envelope
@@ -1653,6 +1654,57 @@ class SearchSpace:
                 if ov > 0:
                     v += ov / (length or (max(a1, b1) - min(a0, b0)))
                     why.append(f"overlap: {sa} and {sb} overlap by {ov:.6g} m")
+        dv, dwhy = self._plane_overlaps(vals, extents, length)
+        return self._nesting(vals, v + dv, why + dwhy)
+
+    def _effective_params(self, s: dict, st: dict) -> dict:
+        """A slot's parameter values as decoded: the base's values under the decoded free ones (a base slot), or the
+        decoded values (an added slot)."""
+        if not s["base"]:
+            return dict(st["params"])
+        return {**{k: q.get("value") for k, q in self.base_subs[s["sid"]]["parameters"].items()}, **st["params"]}
+
+    def _plane_overlaps(self, vals: dict, extents: list, length) -> tuple[float, list[str]]:
+        """TOF planes (rules 1.1.0: layer_positions_m with layer_thickness_m, each plane centre +- half its thickness)
+        against the extents of the other subsystems (a TOF that is a daughter of that subsystem excepted) and against
+        the tracking planes (centre +- half the sensor thickness when it is known): overlap length / envelope length
+        (or the union of the two)."""
+        v, why = 0.0, []
+        tofs, trackers = [], []
+        for s in self.slots:
+            st = vals[s["sid"]]
+            if not st["enabled"]:
+                continue
+            p = self._effective_params(s, st)
+            pos = p.get("layer_positions_m")
+            if not isinstance(pos, list):
+                continue
+            if s["role"] == "tof" and isinstance(p.get("layer_thickness_m"), (int, float)):
+                tofs.append((s["sid"], st["parent"], [float(z) for z in pos], float(p["layer_thickness_m"])))
+            elif s["role"] == "tracking":
+                thick = p.get("sensor_thickness_um")
+                trackers.append((s["sid"], [float(z) for z in pos],
+                                 float(thick) * 1e-6 if isinstance(thick, (int, float)) else 0.0))
+        for sid, parent, pos, t in tofs:
+            for z in pos:
+                a0, a1 = z - t / 2, z + t / 2
+                for sb, _pb, b0, b1 in extents:
+                    if sb == parent:
+                        continue
+                    ov = min(a1, b1) - max(a0, b0)
+                    if ov > 0:
+                        v += ov / (length or (max(a1, b1) - min(a0, b0)))
+                        why.append(f"overlap: {sid} plane at {z:.6g} m and {sb} overlap by {ov:.6g} m")
+                for tid, tpos, ts in trackers:
+                    for zt in tpos:
+                        ov = (t + ts) / 2 - abs(zt - z)
+                        if ov > 0:
+                            v += ov / (length or (t + ts))
+                            why.append(f"overlap: {sid} plane at {z:.6g} m and {tid} plane at {zt:.6g} m overlap by "
+                                       f"{ov:.6g} m")
+        return v, why
+
+    def _nesting(self, vals: dict, v: float, why: list[str]) -> tuple[float, list[str]]:
         for s in self.slots:
             parent = vals[s["sid"]]["parent"]
             if vals[s["sid"]]["enabled"] and parent and vals.get(parent, {}).get("parent"):

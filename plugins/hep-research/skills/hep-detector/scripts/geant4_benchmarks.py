@@ -115,13 +115,15 @@ on the slab's density or thickness; scope particle, material, thickness_x0, rigi
 (regression: core.stats.decisions.change between two versions; never affects the label). scope-keys prints the keys
 a study declares (field configuration, reco spec, geometry and realization-profile hashes).
 Control rules (per benchmark, control_rule): shift-window/1 (default) counts a caught control whose |shift| <= 1.1 DL;
-declared-size/1 (multiple-scattering-reference; for new studies) fixes each control's size before the runs: its
-expected shift follows from injected_relative through Lynch and Dahl's formula, the control counts when caught and the
+declared-size/1 (multiple-scattering-reference, stopping-power, thin-layer-mpv; for new studies) fixes each
+control's size before the runs: its expected shift follows from injected_relative through the benchmark's own
+reference (Lynch and Dahl's theta0; Bethe at the shifted mid-slab energy; Landau-Vavilov Delta_p), the injection
+checked in the control's run record, the control counts when caught and the
 expected shift is at most 1.5 x the planned detection limit (from the nominal run alone), and the benchmark claims the
 largest detection limit a caught control demonstrated, max(DL, |shift|). plan-controls prints the planned limit and
 the +- injections for an expected shift of 1.25 x it (both factors provisional).
 Usage: geant4_benchmarks.py run --config CONFIG.json [--out OUT.json] [--status LABEL]
-       geant4_benchmarks.py plan-controls --config CONFIG.json [--index N]
+       geant4_benchmarks.py plan-controls --config CONFIG.json [--benchmark NAME] [--index N]
        geant4_benchmarks.py scope-keys [--element-spec SPEC] [--reco-spec RECO] [--geometry G] [--realization P]
        geant4_benchmarks.py reference --study-spec SPEC.json --material NAME --particle P --energy-mev E [--thickness-mm T]
 Output JSON: status, status_label, inputs, defaults_used, benchmarks [{benchmark, grade, reference {source, version,
@@ -1208,6 +1210,8 @@ def _areal_density_change(b: dict, nc: dict, cfg_dir: Path) -> float | None:
 
 
 CONTROL_RULES = ("shift-window/1", "declared-size/1")
+# the benchmarks whose response to an areal-density injection is modelled (expected_shift)
+DECLARED_BENCHMARKS = ("multiple-scattering-reference", "stopping-power", "thin-layer-mpv")
 # declared-size/1 (maintainer decision 2026-10-25, provisional values): plan-controls sizes each control for an expected
 # shift of DECLARED_TARGET_FACTOR x the planned detection limit; a control counts only when its expected shift is at
 # most DECLARED_CEILING_FACTOR x that limit (and it is caught).
@@ -1216,13 +1220,14 @@ DECLARED_TARGET_FACTOR, DECLARED_CEILING_FACTOR = 1.25, 1.5
 
 def control_rule(b: dict) -> str:
     """The benchmark's control rule: shift-window/1 (default: caught and |shift| <= 1.1 DL after the runs) or
-    declared-size/1 (multiple-scattering-reference only: the size fixed by the injection before the runs)."""
+    declared-size/1 (DECLARED_BENCHMARKS: the size fixed by the injection before the runs)."""
     rule = b.get("control_rule", "shift-window/1")
     if rule not in CONTROL_RULES:
         raise BenchmarkError(f"{b.get('benchmark')}: control_rule {rule!r} is not one of {list(CONTROL_RULES)}")
-    if rule == "declared-size/1" and b.get("benchmark") != "multiple-scattering-reference":
+    if rule == "declared-size/1" and b.get("benchmark") not in DECLARED_BENCHMARKS:
         raise BenchmarkError(f"{b.get('benchmark')}: control_rule declared-size/1 is implemented for "
-                             "multiple-scattering-reference only (its response to the injection is Lynch and Dahl's)")
+                             f"{', '.join(DECLARED_BENCHMARKS)} (the benchmarks whose response to an areal-density "
+                             "injection is modelled)")
     return rule
 
 
@@ -1247,6 +1252,33 @@ def ms_expected_shift(b: dict, study: dict, injected_relative: float) -> float:
         raise BenchmarkError("injected_relative must be above -1")
     return (lynch_dahl_theta0(m["z"], m["a_g_mole"], x * (1 + float(injected_relative)), p, beta, abs(z))
             / lynch_dahl_theta0(m["z"], m["a_g_mole"], x, p, beta, abs(z)) - 1)
+
+
+def slab_expected_shift(b: dict, study: dict, injected_relative: float) -> float:
+    """The expected shift of a slab benchmark's observable when the slab's areal density changes by injected_relative
+    on the Geant4 side (the reference keeping the spec): stopping-power, mean loss / spec thickness = (1 + d) x Bethe
+    at the shifted mid-slab energy over Bethe at the nominal one; thin-layer-mpv, Delta_p of the scaled areal density
+    over the nominal (xi ~ x, plus its log term). The density effect stays at the spec density's Sternheimer
+    parameters (a second-order change for thin slabs)."""
+    d = float(injected_relative)
+    if not -1.0 < d:
+        raise BenchmarkError("injected_relative must be above -1")
+    mat = material(study, b["material"])
+    mass, z = particle_props(b["particle"])
+    e, t = float(b["energy_MeV"]), float(b["thickness_mm"])
+    if b["benchmark"] == "stopping-power":
+        loss = bethe(e, mass, z, mat) * mat["density_g_cm3"] * t / 10
+        return (1 + d) * bethe(e - (1 + d) * loss / 2, mass, z, mat) / bethe(e - loss / 2, mass, z, mat) - 1
+    if b["benchmark"] == "thin-layer-mpv":
+        return landau_mpv(e, mass, z, mat, t * (1 + d))["delta_p_MeV"] / landau_mpv(e, mass, z, mat, t)["delta_p_MeV"] - 1
+    raise BenchmarkError(f"{b['benchmark']}: no modelled response to an areal-density injection")
+
+
+def expected_shift(b: dict, study: dict, injected_relative: float) -> float:
+    """declared-size/1: a control's expected shift of the observable from its areal-density injection alone."""
+    if b.get("benchmark") == "multiple-scattering-reference":
+        return ms_expected_shift(b, study, injected_relative)
+    return slab_expected_shift(b, study, injected_relative)
 
 
 def declared_size(ctl: list[dict], planned_dl: float) -> dict:
@@ -1299,7 +1331,7 @@ def run_detector_benchmark(b: dict, study: dict, cfg_dir: Path) -> dict:
                         "at_claimed_detection_limit": bool(caught and abs(shift) <= 1.1 * dl),
                         "crossings": nc["crossings"], "run_record": nc.get("run_record")})
             if rule == "declared-size/1":
-                ctl[-1]["expected_shift_relative"] = (ms_expected_shift(b, study, nc["injected_relative"])
+                ctl[-1]["expected_shift_relative"] = (expected_shift(b, study, nc["injected_relative"])
                                                       if isinstance(nc.get("injected_relative"), (int, float))
                                                       else None)
         signs = {c["sign"] for c in ctl if c["status"] == "caught"}
@@ -1368,6 +1400,7 @@ def controls(b: dict, res: dict, study: dict, cfg_dir: Path) -> dict:
     DL = tol + |rel| + t_0.977(nu) se_shift when caught and |shift| <= 1.1 DL. Both directions validate the claim;
     one direction narrows it to that sign (detection_limit_sign)."""
     entries = b.get("negative_controls") or ([b["negative_control"]] if b.get("negative_control") else [])
+    rule = control_rule(b)
     se_n, dof_n = res.get("relative_se"), res.get("geant4_dof")
     tol, rel = res["tolerance"]["total"], res["relative_difference"]
     out, dls = [], []
@@ -1387,15 +1420,25 @@ def controls(b: dict, res: dict, study: dict, cfg_dir: Path) -> dict:
                     "at_claimed_detection_limit": bool(caught and shift is not None and abs(shift) <= 1.1 * dl),
                     "relative_difference": nres.get("relative_difference"), "verdict_on_control": nres["verdict"],
                     "summary": nc.get("summary"), "csv": nc.get("csv"), "run_record": nc.get("run_record")})
+        if rule == "declared-size/1":  # the injection must be in the control's run (effective config), as for the MS
+            injected = _areal_density_change(b, nc, cfg_dir)
+            ok = injected is not None and isinstance(nc.get("injected_relative"), (int, float)) and \
+                abs(injected - nc["injected_relative"]) <= 1e-6 * max(1.0, abs(injected))
+            out[-1].update(injection_in_run=injected,
+                           expected_shift_relative=expected_shift(b, study, nc["injected_relative"]) if ok else None)
     if not out:
         planned = detection_limit(tol, rel, math.sqrt(2) * se_n, 2 * dof_n)["value"] if se_n and dof_n else None
         return {"status": "missing", "planned_detection_limit_relative": planned,
                 "planned_basis": "a control with the nominal's SE (se_shift = sqrt(2) se, nu = 2 (K - 1))"}
     signs = {c["sign"] for c in out if c["status"] == "caught"}
-    return {"status": "caught" if all(c["status"] == "caught" for c in out) else "not-caught", "controls": out,
-            "at_claimed_detection_limit": all(c["at_claimed_detection_limit"] for c in out),
-            "detection_limit_relative": max(dls), "detection_limit_sign": "+-" if signs == {"+", "-"} else
-            "".join(sorted(signs)) or None}
+    doc = {"status": "caught" if all(c["status"] == "caught" for c in out) else "not-caught", "controls": out,
+           "at_claimed_detection_limit": all(c["at_claimed_detection_limit"] for c in out),
+           "detection_limit_relative": max(dls), "detection_limit_sign": "+-" if signs == {"+", "-"} else
+           "".join(sorted(signs)) or None}
+    if rule == "declared-size/1":
+        doc.update(declared_size(out, planned_detection_limit(res)))
+        doc["at_claimed_detection_limit"] = all(c["at_claimed_detection_limit"] for c in out)
+    return doc
 
 
 def run_benchmark(b: dict, study: dict, cfg_dir: Path) -> dict:
@@ -1503,9 +1546,9 @@ def cmd_run(args) -> tuple[str, dict]:
 
 
 def plan_injection(b: dict, study: dict, target: float) -> float:
-    """The areal-density change whose expected shift (ms_expected_shift) is target, by bisection (monotonic)."""
+    """The areal-density change whose expected shift (expected_shift) is target, by bisection (monotonic)."""
     lo, hi = (0.0, 4.0) if target > 0 else (-0.95, 0.0)
-    f = lambda d: ms_expected_shift(b, study, d) - target  # noqa: E731
+    f = lambda d: expected_shift(b, study, d) - target  # noqa: E731
     if f(lo) * f(hi) > 0:
         raise BenchmarkError(f"no areal-density change in [{lo}, {hi}] gives an expected shift of {target:.4g}")
     for _ in range(200):
@@ -1518,28 +1561,31 @@ def plan_injection(b: dict, study: dict, target: float) -> float:
 
 
 def cmd_plan_controls(args) -> tuple[str, dict]:
-    """declared-size/1: from the nominal run of a config's multiple-scattering-reference (before any control runs),
-    the planned detection limit and the +- areal-density changes whose expected shift is DECLARED_TARGET_FACTOR x that
-    limit, to write into negative_controls (injected_relative) with control_rule declared-size/1 before the control
-    runs are made."""
+    """declared-size/1: from the nominal run of a config's benchmark (--benchmark, one of DECLARED_BENCHMARKS; before
+    any control runs), the planned detection limit and the +- areal-density changes whose expected shift is
+    DECLARED_TARGET_FACTOR x that limit, to write into negative_controls (injected_relative) with control_rule
+    declared-size/1 before the control runs are made."""
     cfg_path = Path(args.config)
     cfg = json.loads(cfg_path.read_text(encoding="utf-8"))
     cfg_dir = cfg_path.resolve().parent
     study = json.loads((cfg_dir / cfg["study_spec"]).read_text(encoding="utf-8"))
-    refs = [b for b in cfg.get("benchmarks", []) if b.get("benchmark") == "multiple-scattering-reference"]
+    if args.benchmark not in DECLARED_BENCHMARKS:
+        raise BenchmarkError(f"--benchmark {args.benchmark}: declared-size/1 covers {', '.join(DECLARED_BENCHMARKS)}")
+    refs = [b for b in cfg.get("benchmarks", []) if b.get("benchmark") == args.benchmark]
     if not refs or not 0 <= args.index < len(refs):
-        raise BenchmarkError(f"the config has {len(refs)} multiple-scattering-reference benchmark(s); --index "
-                             f"{args.index} names none")
+        raise BenchmarkError(f"the config has {len(refs)} {args.benchmark} benchmark(s); --index {args.index} names "
+                             "none")
     b = refs[args.index]
-    res = bench_ms_reference(b, study, cfg_dir)
+    res = bench_ms_reference(b, study, cfg_dir) if args.benchmark == "multiple-scattering-reference" else \
+        evaluate(b, source(b, cfg_dir), study, cfg_dir)
     dlp = planned_detection_limit(res)
     target = DECLARED_TARGET_FACTOR * dlp
     plans = []
     for sign in (+1, -1):
         d = plan_injection(b, study, sign * target)
         plans.append({"sign": "+" if sign > 0 else "-", "injected_relative": round(d, 6),
-                      "expected_shift_relative": ms_expected_shift(b, study, round(d, 6))})
-    return "ok", {"benchmark": "multiple-scattering-reference", "nominal": {
+                      "expected_shift_relative": expected_shift(b, study, round(d, 6))})
+    return "ok", {"benchmark": args.benchmark, "nominal": {
         "relative_difference": res["relative_difference"], "relative_se": res["relative_se"],
         "tolerance": res["tolerance"]["total"], "verdict": res["verdict"]},
         "control_rule": "declared-size/1", "planned_detection_limit_relative": dlp,
@@ -1596,7 +1642,8 @@ def main(argv=None) -> int:
     p = sub.add_parser("plan-controls", help="declared-size/1: size the reference's negative controls from the "
                                              "nominal run's planned detection limit, before the control runs")
     p.add_argument("--config", required=True)
-    p.add_argument("--index", type=int, default=0, help="which multiple-scattering-reference of the config (0)")
+    p.add_argument("--benchmark", default="multiple-scattering-reference", choices=DECLARED_BENCHMARKS)
+    p.add_argument("--index", type=int, default=0, help="which benchmark of that name in the config (0)")
     p = sub.add_parser("scope-keys", help="the declared-scope keys of a detector-level study (CV-B2)")
     for name in ("--element-spec", "--reco-spec", "--geometry", "--realization"):
         p.add_argument(name)
