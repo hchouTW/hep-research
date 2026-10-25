@@ -216,7 +216,7 @@
   },
   {
    "ref": "evaluations/SIM-N4-TRK1.json",
-   "sha256": "c2f6d9fec55f3590964ffa6516055b250b798e0ea19544f554f0574a84ff9c4b",
+   "sha256": "0e86eb33db4a447006febf1450e9b0543ac45a48baf606d42237a37da80a5296",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-SIM-N4-TRK1",
    "status": [
@@ -225,28 +225,8 @@
    ]
   },
   {
-   "ref": "evaluations/SIM-N4-TRK100.json",
-   "sha256": "4e92fb00aaa999b781a3406926a56e724d4c93ef2944ae01d3c52b2d5b68aaec",
-   "artifact_type": "design-evaluation",
-   "artifact_id": "j15-v1-SIM-N4-TRK100",
-   "status": [
-    "unvalidated",
-    "synthetic"
-   ]
-  },
-  {
-   "ref": "evaluations/SIM-N6-CAL10.json",
-   "sha256": "742634445fb870b33868f509f2a702c192074a2257cbac74a1b1249b13c7a71a",
-   "artifact_type": "design-evaluation",
-   "artifact_id": "j15-v1-SIM-N6-CAL10",
-   "status": [
-    "unvalidated",
-    "synthetic"
-   ]
-  },
-  {
    "ref": "evaluations/SIM-N6-TRK1-notails.json",
-   "sha256": "bec213397ba88c2981ec57c7cc7183698134dd1aa50e43ecd76080ba40802530",
+   "sha256": "f63c241dc71857a45321ac2d5798de5e149d1a106ce46c1871acd967b6394b13",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-SIM-N6-TRK1-notails",
    "status": [
@@ -256,7 +236,7 @@
   },
   {
    "ref": "evaluations/SIM-N6-TRK1.json",
-   "sha256": "2cea8238d86f01d41136e0b25fc13e4b0cad65319c284899614277959204560a",
+   "sha256": "57017f437a7de389ea613dfabddcbc45cb278453b84a7500289a4a28d9b78467",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-SIM-N6-TRK1",
    "status": [
@@ -265,30 +245,10 @@
    ]
   },
   {
-   "ref": "evaluations/SIM-N6-TRK100.json",
-   "sha256": "fb68bc083e043240bb0ab54d752f3d5f4e462cc3eddf9ef8bc0adb238c6d6e84",
-   "artifact_type": "design-evaluation",
-   "artifact_id": "j15-v1-SIM-N6-TRK100",
-   "status": [
-    "unvalidated",
-    "synthetic"
-   ]
-  },
-  {
    "ref": "evaluations/SIM-N8-TRK1.json",
-   "sha256": "d5a73e413485ec0e200aa2271c3fcd55548f35f313c47c39686baf1f0dfd3c29",
+   "sha256": "decbcf2895c162a4395f4119e7d189c9f7837139185df87b4f1f71b4b3a2a827",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-SIM-N8-TRK1",
-   "status": [
-    "unvalidated",
-    "synthetic"
-   ]
-  },
-  {
-   "ref": "evaluations/SIM-N8-TRK100.json",
-   "sha256": "0dbc059965a0d081db32fbc630dd56fb4e11f848d5b8ca2f1b3dd45a230c9b0a",
-   "artifact_type": "design-evaluation",
-   "artifact_id": "j15-v1-SIM-N8-TRK100",
    "status": [
     "unvalidated",
     "synthetic"
@@ -388,7 +348,7 @@
     ]
    },
    {
-    "text": "j15-v1:REQ-CAL-001 for j15-v1:cand-N6: inconclusive (fidelity.insufficient)",
+    "text": "j15-v1:REQ-CAL-001 for j15-v1:cand-N6: inconclusive (no codes)",
     "result_ref": "design-spec.v1.json",
     "status": [
      "unvalidated",
@@ -660,24 +620,6 @@
          "reasons": [
           "rigidity_GV = 500.0, the requirement needs 1.0 +- 0.0"
          ]
-        },
-        {
-         "evaluation": "j15-v1:SIM-N4-TRK100",
-         "file": "evaluations/SIM-N4-TRK100.json",
-         "row": 7,
-         "verdict": "inconclusive",
-         "code": "domain.mismatch",
-         "bound": "estimate",
-         "fidelity_vector": [
-          {
-           "figure_of_merit": "momentum-resolution-core",
-           "fidelity": "F4",
-           "evaluation": "j15-v1:SIM-N4-TRK100"
-          }
-         ],
-         "reasons": [
-          "rigidity_GV = 100.0, the requirement needs 1.0 +- 0.0"
-         ]
         }
        ],
        "conflict_inspect": [],
@@ -846,24 +788,6 @@
          ],
          "reasons": [
           "rigidity_GV = 500.0, the requirement needs 1.0 +- 0.0"
-         ]
-        },
-        {
-         "evaluation": "j15-v1:SIM-N6-TRK100",
-         "file": "evaluations/SIM-N6-TRK100.json",
-         "row": 7,
-         "verdict": "inconclusive",
-         "code": "domain.mismatch",
-         "bound": "estimate",
-         "fidelity_vector": [
-          {
-           "figure_of_merit": "momentum-resolution-core",
-           "fidelity": "F4",
-           "evaluation": "j15-v1:SIM-N6-TRK100"
-          }
-         ],
-         "reasons": [
-          "rigidity_GV = 100.0, the requirement needs 1.0 +- 0.0"
          ]
         }
        ],
@@ -1037,24 +961,6 @@
          "reasons": [
           "rigidity_GV = 500.0, the requirement needs 1.0 +- 0.0"
          ]
-        },
-        {
-         "evaluation": "j15-v1:SIM-N8-TRK100",
-         "file": "evaluations/SIM-N8-TRK100.json",
-         "row": 7,
-         "verdict": "inconclusive",
-         "code": "domain.mismatch",
-         "bound": "estimate",
-         "fidelity_vector": [
-          {
-           "figure_of_merit": "momentum-resolution-core",
-           "fidelity": "F4",
-           "evaluation": "j15-v1:SIM-N8-TRK100"
-          }
-         ],
-         "reasons": [
-          "rigidity_GV = 100.0, the requirement needs 1.0 +- 0.0"
-         ]
         }
        ],
        "conflict_inspect": [],
@@ -1142,22 +1048,6 @@
            "figure_of_merit": "momentum-resolution-core",
            "fidelity": "F1",
            "evaluation": "j15-v1:CALC-TR100-N4"
-          }
-         ],
-         "reasons": []
-        },
-        {
-         "evaluation": "j15-v1:SIM-N4-TRK100",
-         "file": "evaluations/SIM-N4-TRK100.json",
-         "row": 8,
-         "verdict": "inconclusive",
-         "code": "fidelity.insufficient",
-         "bound": "estimate",
-         "fidelity_vector": [
-          {
-           "figure_of_merit": "momentum-resolution-core",
-           "fidelity": "F4",
-           "evaluation": "j15-v1:SIM-N4-TRK100"
           }
          ],
          "reasons": []
@@ -1261,16 +1151,6 @@
             "evaluation": "j15-v1:CALC-TR100-N4"
            }
           ]
-         },
-         {
-          "evaluation": "j15-v1:SIM-N4-TRK100",
-          "fidelity_vector": [
-           {
-            "figure_of_merit": "momentum-resolution-core",
-            "fidelity": "F4",
-            "evaluation": "j15-v1:SIM-N4-TRK100"
-           }
-          ]
          }
         ],
         "review_axis": "not-reviewed",
@@ -1324,22 +1204,6 @@
            "figure_of_merit": "momentum-resolution-core",
            "fidelity": "F1",
            "evaluation": "j15-v1:CALC-TR100-N6"
-          }
-         ],
-         "reasons": []
-        },
-        {
-         "evaluation": "j15-v1:SIM-N6-TRK100",
-         "file": "evaluations/SIM-N6-TRK100.json",
-         "row": 8,
-         "verdict": "inconclusive",
-         "code": "fidelity.insufficient",
-         "bound": "estimate",
-         "fidelity_vector": [
-          {
-           "figure_of_merit": "momentum-resolution-core",
-           "fidelity": "F4",
-           "evaluation": "j15-v1:SIM-N6-TRK100"
           }
          ],
          "reasons": []
@@ -1461,16 +1325,6 @@
             "evaluation": "j15-v1:CALC-TR100-N6"
            }
           ]
-         },
-         {
-          "evaluation": "j15-v1:SIM-N6-TRK100",
-          "fidelity_vector": [
-           {
-            "figure_of_merit": "momentum-resolution-core",
-            "fidelity": "F4",
-            "evaluation": "j15-v1:SIM-N6-TRK100"
-           }
-          ]
          }
         ],
         "review_axis": "not-reviewed",
@@ -1524,22 +1378,6 @@
            "figure_of_merit": "momentum-resolution-core",
            "fidelity": "F1",
            "evaluation": "j15-v1:CALC-TR100-N8"
-          }
-         ],
-         "reasons": []
-        },
-        {
-         "evaluation": "j15-v1:SIM-N8-TRK100",
-         "file": "evaluations/SIM-N8-TRK100.json",
-         "row": 8,
-         "verdict": "inconclusive",
-         "code": "fidelity.insufficient",
-         "bound": "estimate",
-         "fidelity_vector": [
-          {
-           "figure_of_merit": "momentum-resolution-core",
-           "fidelity": "F4",
-           "evaluation": "j15-v1:SIM-N8-TRK100"
           }
          ],
          "reasons": []
@@ -1641,16 +1479,6 @@
             "figure_of_merit": "momentum-resolution-core",
             "fidelity": "F1",
             "evaluation": "j15-v1:CALC-TR100-N8"
-           }
-          ]
-         },
-         {
-          "evaluation": "j15-v1:SIM-N8-TRK100",
-          "fidelity_vector": [
-           {
-            "figure_of_merit": "momentum-resolution-core",
-            "fidelity": "F4",
-            "evaluation": "j15-v1:SIM-N8-TRK100"
            }
           ]
          }
@@ -1779,27 +1607,7 @@
          "reasons": []
         }
        ],
-       "skipped": [
-        {
-         "evaluation": "j15-v1:SIM-N6-CC500",
-         "file": "evaluations/SIM-N6-CC500.json",
-         "row": 5,
-         "verdict": "inconclusive",
-         "code": "chain.incomplete",
-         "bound": "estimate",
-         "fidelity_vector": [
-          {
-           "figure_of_merit": "charge-confusion-rate",
-           "fidelity": "F4",
-           "evaluation": "j15-v1:SIM-N6-CC500"
-          }
-         ],
-         "reasons": [
-          "missing upstream charge-confusion-data-validation",
-          "missing upstream rigidity-scale-offset"
-         ]
-        }
-       ],
+       "skipped": [],
        "conflict_inspect": [],
        "maturity": {
         "fidelity_axis": "undetermined",
@@ -1823,8 +1631,7 @@
         ],
         "review_axis": "not-reviewed",
         "status_axis": [
-         "synthetic",
-         "unvalidated"
+         "synthetic"
         ]
        },
        "missing_evidence": [
@@ -1944,51 +1751,18 @@
         "j15-v1:cand-N6"
        ],
        "result": "inconclusive",
-       "codes": [
-        "fidelity.insufficient"
-       ],
+       "codes": [],
        "provisional": false,
-       "missing_evaluations": false,
-       "used": [
-        {
-         "evaluation": "j15-v1:SIM-N6-CAL10",
-         "file": "evaluations/SIM-N6-CAL10.json",
-         "row": 8,
-         "verdict": "inconclusive",
-         "code": "fidelity.insufficient",
-         "bound": "estimate",
-         "fidelity_vector": [
-          {
-           "figure_of_merit": "shower-containment",
-           "fidelity": "F4",
-           "evaluation": "j15-v1:SIM-N6-CAL10"
-          }
-         ],
-         "reasons": []
-        }
-       ],
+       "missing_evaluations": true,
+       "used": [],
        "skipped": [],
        "conflict_inspect": [],
        "maturity": {
         "fidelity_axis": "undetermined",
         "lowest_chain_fidelity": null,
-        "participating": [
-         {
-          "evaluation": "j15-v1:SIM-N6-CAL10",
-          "fidelity_vector": [
-           {
-            "figure_of_merit": "shower-containment",
-            "fidelity": "F4",
-            "evaluation": "j15-v1:SIM-N6-CAL10"
-           }
-          ]
-         }
-        ],
+        "participating": [],
         "review_axis": "not-reviewed",
-        "status_axis": [
-         "synthetic",
-         "unvalidated"
-        ]
+        "status_axis": []
        },
        "missing_evidence": [
         "shower-containment at F4 or above (compliance threshold)"

@@ -32,8 +32,9 @@ Subcommands:
   label --upgrade with --label-spec/--label-benchmarks/--label-convergence, and the run records, reference records and
   variation table passed on with --label-run-record/--label-reference-record/--label-variations); value, statistical
   uncertainty and model envelope from the record; bound optimistic for resolution and confusion unless every tail
-  source was simulated. A refused upgrade, or a validated-in-scope record without results.<fom>, is incomplete (exit 3)
-  with the reasons; label's own exit 1, 2, 3 map to failed, rejected, incomplete.
+  source was simulated. A refused upgrade (now, or recorded in the study record by an earlier label --upgrade), or a
+  validated-in-scope record without results.<fom>, is incomplete (exit 3) with the reasons and writes nothing; label's
+  own exit 1, 2, 3 map to failed, rejected, incomplete.
 - f5 (M3, FID-01, FID-06, FID-07): an F5 evaluation from a user-supplied dataset-record's design_measurement, bound
   to the dataset by hash and to the candidate by the digest of the measured configuration's parameters; it decides only
   after a human measurement-acceptance record approves the dataset and covers the candidate.
@@ -549,7 +550,9 @@ def f4(args) -> dict:
     one; the evaluation names the geometry file the study used in geometry_ref; --label-results and --label-geometry
     are passed on to label as --results and --geometry); the bound follows FID-03. A1.17: label exits 0 when it wrote a
     record (granted or refused upgrade) and 2 on unusable input; its exit 1, 2, 3 map to failed, rejected,
-    incomplete, and a refused upgrade or a validated record without results.<fom> is incomplete (exit 3)."""
+    incomplete, and a refused upgrade or a validated record without results.<fom> is incomplete (exit 3). A study
+    record whose earlier label --upgrade was refused (study.upgrade_refused) is refused the same way: its F4 evaluation
+    would decide nothing (ART-31), so none is written."""
     proj = load_project(args)
     if args.label_spec:
         cmd = [sys.executable, "-B", str(PLUGIN / "skills/hep-detector/scripts/check_geant4_study.py"), "label",
@@ -583,6 +586,12 @@ def f4(args) -> dict:
     study = proj.docs.get(study_path)
     if study is None or study.get("artifact_type") != "computational-run":
         raise UsageError(f"--study {args.study} is not a computational-run in the artifacts_dir")
+    refused = ((study.get("extension") or {}).get("study") or {}).get("upgrade_refused")
+    if refused and "validated-in-scope" not in (study.get("status") or []):
+        return {"status": "incomplete", "exit": 3, "reason": "upgrade-refused", "refused": refused,
+                "gaps": ((study.get("extension") or {}).get("study") or {}).get("gaps", []),
+                "note": "the study record's label --upgrade was refused; an F4 evaluation needs a validated-in-scope "
+                        "study (contracts/design.py check_f4)"}
     chain = proj.candidate_chain(args.candidate)
     if chain is None:
         raise UsageError(f"no design-candidate {args.candidate!r} (or a base) in the artifacts_dir")

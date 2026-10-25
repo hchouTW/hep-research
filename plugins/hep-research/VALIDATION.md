@@ -3266,6 +3266,25 @@ Not done in this stage: the independent
 new-problem run by an agent that did not take part (C1.10, section A.8), the `review.py` Markdown review, the release
 manifest. The adequacy table is unchanged; search values remain F1 optimistic bounds and decide nothing.
 
+## F4-REFUSED-STUDY (2026-10-25, E2 and the CI lock; branch `fix/f4-refused-study` from main `ec403217`)
+
+Follow-up recorded at stage C3 (J16 README review R0b7acaa370): `evaluate_design.py f4 --study` on a study record
+whose `label --upgrade` had been refused wrote an F4 evaluation that decided nothing (ART-31), while the same refusal
+through `f4 --label-spec` was already incomplete (exit 3). Now `label --upgrade` keeps a refusal's reasons in the record
+(`extension.study.upgrade_refused`), and `f4` refuses such a record (exit 3, `upgrade-refused`, the reasons and the
+record's gaps) and writes nothing. A study never labelled with `--upgrade` keeps the below-screening evaluation (tests
+T33, T46, T47 and the staleness test of `test_design_m2.py` use it).
+
+| Check | Result |
+|---|---|
+| `test_design_f4_label.py` (new `test_b2_f4_on_a_recorded_refusal_writes_nothing`; `test_b` checks the recorded reasons) | pass |
+| J15 regenerated | criteria all pass; the refused SIM-N4/N6/N8-TRK100, SIM-N6-CC500 and SIM-N6-CAL10 evaluations are no longer written (`f4_written: false`); verdicts unchanged, the rows lose the row-8 entries |
+| J16 regenerated | the confirmation gives `f4_exit` 3 and no evaluation; `REQ-TRK-001 cand-F937` stays inconclusive (its code is now the F1 bound's `bound.direction`); the diagnostic F4 row is gone; `test_design_search_j16.py` checks the refusal |
+| J14 regenerated | study records name the new `check_geant4_study.py` hash only |
+| Gate verdict snapshot | the 5 removed J15 evaluations dropped, nothing else |
+| `run_all_checks.py --no-cli --jobs 6`, E2 | 29 pass, 0 fail, 2 skipped; 5528 tests, 0 failures, 153 skipped |
+| Same with the CI lock | 29 pass, 0 fail, 2 skipped; 5528 tests, 0 failures, 245 skipped |
+
 ## 0.39.0 release check (2026-10-25, E2 and the CI lock)
 
 Release branch `release/0.39.0` from main `bc7b1c18` (main CI green). It ships the Geant4 program stages A1, C1, A2,

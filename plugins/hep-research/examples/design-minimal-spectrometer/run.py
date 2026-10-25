@@ -206,12 +206,12 @@ def candidate(name: str) -> dict:
     return envelope("design-candidate", f"{NS}-{name}", ext)
 
 
-def evaluate(art: Path, *args: str) -> dict:
+def evaluate(art: Path, *args: str, ok: tuple = (0,)) -> dict:
     env = dict(os.environ, SOURCE_DATE_EPOCH=EPOCH)
     p = subprocess.run([sys.executable, "-B", str(EVAL), *args, "--artifacts", str(art)], capture_output=True,
                        text=True, env=env, timeout=600)
     out = json.loads(p.stdout)
-    if p.returncode != 0:
+    if p.returncode not in ok:
         raise RuntimeError(f"evaluate_design.py {args}: {out}")
     return out
 
@@ -325,7 +325,8 @@ def label(art: Path, sid: str, results: str, write: str) -> dict:
 
 def replay_f4(art: Path) -> dict:
     """The F4 studies (B3.6) from recorded/ (written by live.py): run records unpacked, every study re-labelled
-    offline (qualification path, D0-c uncertainty) and its F4 evaluation written; nothing is simulated here."""
+    offline (qualification path, D0-c uncertainty) and its F4 evaluation written; a study whose upgrade is refused
+    gets none (f4 is incomplete, exit 3: it would decide nothing); nothing is simulated here."""
     if not (RECORDED / "runs").is_dir():
         return {}
     (art / "runs").mkdir(exist_ok=True)
@@ -346,8 +347,11 @@ def replay_f4(art: Path) -> dict:
             lab = label(art, sid, results, write)
             res = json.loads((art / "studies" / sid / results).read_text(encoding="utf-8"))["results"][fom]
             f4 = evaluate(art, "f4", "--candidate", f"{NS}:{cand}", "--requirement", req, "--study",
-                          f"studies/{sid}/{write}", "--id", eid)
+                          f"studies/{sid}/{write}", "--id", eid, ok=(0, 3))
+            if f4.get("status") == "incomplete" and f4.get("reason") != "upgrade-refused":
+                raise RuntimeError(f"f4 {eid}: {f4}")
             out[eid] = {"upgrade": lab.get("upgrade"), "gaps": lab.get("gaps"), "value": res["value"],
+                        "f4_written": f4.get("status") != "incomplete",
                         "uncertainty": res.get("uncertainty"), "model_envelope": res.get("model_envelope"),
                         "tail_sources_simulated": json.loads((art / "studies" / sid / results).read_text())[
                             "tail_sources_simulated"], "bound": f4.get("bound")}

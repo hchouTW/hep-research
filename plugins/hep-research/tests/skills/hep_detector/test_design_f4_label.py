@@ -62,6 +62,17 @@ class F4LabelPassthrough(Base):
         self.assertTrue(any("no run record" in r for r in out["refused"]), out)
         record = json.loads((self.b.art / STUDY).read_text(encoding="utf-8"))
         self.assertEqual(record["status"], ["unvalidated"])
+        self.assertEqual(record["extension"]["study"]["upgrade_refused"], out["refused"])
+
+    def test_b2_f4_on_a_recorded_refusal_writes_nothing(self):
+        """The refusal stays in the record, so a later f4 --study without --label-spec refuses it too instead of
+        writing an F4 evaluation that decides nothing (ART-31)."""
+        self.f4()
+        code, out = ev(self.b, "f4", "--candidate", f"{NS}:cand-B", "--requirement", "REQ-TRK-001", "--study", STUDY,
+                       "--id", "SIM-G4")
+        self.assertEqual((code, out["status"], out["reason"]), (3, "incomplete", "upgrade-refused"), out)
+        self.assertTrue(any("no run record" in r for r in out["refused"]), out)
+        self.assertFalse((self.b.art / "evaluations" / "SIM-G4.json").exists())
 
     def test_c_an_upgrade_without_results_is_incomplete(self):
         code, out = self.f4(*self.runs(), "--label-variations", self.j14 / "output" / "variations-mpv.json")

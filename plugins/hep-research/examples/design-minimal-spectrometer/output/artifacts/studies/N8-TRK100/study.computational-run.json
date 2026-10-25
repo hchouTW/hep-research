@@ -462,6 +462,9 @@
     "noise-digitization",
     "pattern-recognition"
    ],
+   "upgrade_refused": [
+    "1 gap(s) remain"
+   ],
    "variations": {
     "domain": "em",
     "envelope_relative": 0.030528085479857355,
@@ -537,7 +540,7 @@
   "tools": [
    {
     "name": "check_geant4_study.py",
-    "version": "401158b903e87ec5"
+    "version": "d50a985be6f6d422"
    },
    {
     "name": "geant4_benchmarks.py",

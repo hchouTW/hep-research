@@ -7,8 +7,8 @@
   },
   "confirmation": {
    "candidate": "ams-like-v1:cand-F937",
-   "f4_exit": 0,
-   "fidelity": "F4",
+   "f4_exit": 3,
+   "fidelity": null,
    "gaps": [
     "multiple-scattering-reference: a negative control's shift of the observable is not at the claimed detection limit 0.06603 (|shift| <= 1.1 DL)"
    ],
@@ -18,7 +18,7 @@
      "1 gap(s) remain"
     ]
    },
-   "value": 0.31334402923510385
+   "value": null
   },
   "diagnostic": [
    {
@@ -44,13 +44,6 @@
     "fidelity": "F1",
     "search_level": "F1",
     "search_minus_official": 0.0
-   },
-   {
-    "candidate": "ams-like-v1:cand-F937",
-    "f4_qualified": false,
-    "fidelity": "F4",
-    "search_level": "F1",
-    "search_minus_official": -0.05303001362132803
    },
    {
     "candidate": "ams-like-v1:cand-F937",
@@ -174,7 +167,7 @@
    },
    "REQ-TRK-001 cand-F937": {
     "codes": [
-     "fidelity.insufficient"
+     "bound.direction"
     ],
     "result": "inconclusive"
    },

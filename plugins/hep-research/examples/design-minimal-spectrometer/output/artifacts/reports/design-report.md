@@ -16,10 +16,10 @@ The adequacy table is an initial default until physics review: every pass is pro
 | j15-v1:REQ-TRK-002 (driving) | j15-v1:cand-N6 | inconclusive | fidelity.insufficient | undetermined (participating down to F1) | synthetic, unvalidated | momentum-resolution-core at F3 or above (compliance threshold) | next-study |
 | j15-v1:REQ-TRK-002 (driving) | j15-v1:cand-N8 | inconclusive | fidelity.insufficient | undetermined (participating down to F1) | synthetic, unvalidated | momentum-resolution-core at F3 or above (compliance threshold) | next-study |
 | j15-v1:REQ-CC-001 (driving) | j15-v1:cand-N4 | inconclusive | bound.direction | undetermined (participating down to F1) | synthetic | charge-confusion-data-validation at F4 or above (required for compliance, ADQ-02); charge-confusion-rate at F4 or above (compliance threshold); momentum-resolution-core at F3 or above (in the chain of j15-v1:CALC-CC-N4, now F1); rigidity-scale-offset at F5 or above (required for compliance, ADQ-02) | next-study |
-| j15-v1:REQ-CC-001 (driving) | j15-v1:cand-N6 | inconclusive | bound.direction | undetermined (participating down to F1) | synthetic, unvalidated | charge-confusion-data-validation at F4 or above (required for compliance, ADQ-02); charge-confusion-rate at F4 or above (compliance threshold); momentum-resolution-core at F3 or above (in the chain of j15-v1:CALC-CC-N6, now F1); rigidity-scale-offset at F5 or above (required for compliance, ADQ-02) | next-study |
+| j15-v1:REQ-CC-001 (driving) | j15-v1:cand-N6 | inconclusive | bound.direction | undetermined (participating down to F1) | synthetic | charge-confusion-data-validation at F4 or above (required for compliance, ADQ-02); charge-confusion-rate at F4 or above (compliance threshold); momentum-resolution-core at F3 or above (in the chain of j15-v1:CALC-CC-N6, now F1); rigidity-scale-offset at F5 or above (required for compliance, ADQ-02) | next-study |
 | j15-v1:REQ-CC-001 (driving) | j15-v1:cand-N8 | inconclusive | bound.direction | undetermined (participating down to F1) | synthetic | charge-confusion-data-validation at F4 or above (required for compliance, ADQ-02); charge-confusion-rate at F4 or above (compliance threshold); momentum-resolution-core at F3 or above (in the chain of j15-v1:CALC-CC-N8, now F1); rigidity-scale-offset at F5 or above (required for compliance, ADQ-02) | next-study |
 | j15-v1:REQ-CAL-001 (driving) | j15-v1:cand-N4 | inconclusive | - | undetermined (no evaluation used) | - | shower-containment at F4 or above (compliance threshold) | next-study |
-| j15-v1:REQ-CAL-001 (driving) | j15-v1:cand-N6 | inconclusive | fidelity.insufficient | undetermined (participating down to F4) | synthetic, unvalidated | shower-containment at F4 or above (compliance threshold) | next-study |
+| j15-v1:REQ-CAL-001 (driving) | j15-v1:cand-N6 | inconclusive | - | undetermined (no evaluation used) | - | shower-containment at F4 or above (compliance threshold) | next-study |
 | j15-v1:REQ-CAL-001 (driving) | j15-v1:cand-N8 | inconclusive | - | undetermined (no evaluation used) | - | shower-containment at F4 or above (compliance threshold) | next-study |
 | j15-v1:CON-MASS-001 (hard; scope DES-TRK-001, DES-MAG-001, DES-TOF-001, DES-CAL-001) | j15-v1:cand-N4 | pass (provisional) | estimate.decides | F1 | synthetic | - | - |
 | j15-v1:CON-MASS-001 (hard; scope DES-TRK-001, DES-MAG-001, DES-TOF-001, DES-CAL-001) | j15-v1:cand-N6 | pass (provisional) | estimate.decides | F1 | synthetic | - | - |
@@ -36,7 +36,6 @@ The adequacy table is an initial default until physics review: every pass is pro
 - j15-v1:REQ-TRK-001 / j15-v1:cand-N4: skipped j15-v1:CALC-TOY100-N4 (row 7, domain.mismatch)
 - j15-v1:REQ-TRK-001 / j15-v1:cand-N4: skipped j15-v1:CALC-TR100-N4 (row 7, domain.mismatch)
 - j15-v1:REQ-TRK-001 / j15-v1:cand-N4: skipped j15-v1:CALC-TR500-N4 (row 7, domain.mismatch)
-- j15-v1:REQ-TRK-001 / j15-v1:cand-N4: skipped j15-v1:SIM-N4-TRK100 (row 7, domain.mismatch)
 - j15-v1:REQ-TRK-001 / j15-v1:cand-N6: used j15-v1:CALC-TOY1-N6 (row 12, fidelity.insufficient)
 - j15-v1:REQ-TRK-001 / j15-v1:cand-N6: used j15-v1:CALC-TR1-N6 (row 12, fidelity.insufficient)
 - j15-v1:REQ-TRK-001 / j15-v1:cand-N6: used j15-v1:SIM-N6-TRK1-notails (row 11, bound.direction)
@@ -44,24 +43,20 @@ The adequacy table is an initial default until physics review: every pass is pro
 - j15-v1:REQ-TRK-001 / j15-v1:cand-N6: skipped j15-v1:CALC-TOY100-N6 (row 7, domain.mismatch)
 - j15-v1:REQ-TRK-001 / j15-v1:cand-N6: skipped j15-v1:CALC-TR100-N6 (row 7, domain.mismatch)
 - j15-v1:REQ-TRK-001 / j15-v1:cand-N6: skipped j15-v1:CALC-TR500-N6 (row 7, domain.mismatch)
-- j15-v1:REQ-TRK-001 / j15-v1:cand-N6: skipped j15-v1:SIM-N6-TRK100 (row 7, domain.mismatch)
 - j15-v1:REQ-TRK-001 / j15-v1:cand-N8: used j15-v1:CALC-TOY1-N8 (row 12, fidelity.insufficient)
 - j15-v1:REQ-TRK-001 / j15-v1:cand-N8: used j15-v1:CALC-TR1-N8 (row 12, fidelity.insufficient)
 - j15-v1:REQ-TRK-001 / j15-v1:cand-N8: used j15-v1:SIM-N8-TRK1 (row 16, estimate.decides)
 - j15-v1:REQ-TRK-001 / j15-v1:cand-N8: skipped j15-v1:CALC-TOY100-N8 (row 7, domain.mismatch)
 - j15-v1:REQ-TRK-001 / j15-v1:cand-N8: skipped j15-v1:CALC-TR100-N8 (row 7, domain.mismatch)
 - j15-v1:REQ-TRK-001 / j15-v1:cand-N8: skipped j15-v1:CALC-TR500-N8 (row 7, domain.mismatch)
-- j15-v1:REQ-TRK-001 / j15-v1:cand-N8: skipped j15-v1:SIM-N8-TRK100 (row 7, domain.mismatch)
 - j15-v1:REQ-TRK-002 / j15-v1:cand-N4: used j15-v1:CALC-TOY100-N4 (row 12, fidelity.insufficient)
 - j15-v1:REQ-TRK-002 / j15-v1:cand-N4: used j15-v1:CALC-TR100-N4 (row 11, bound.direction)
-- j15-v1:REQ-TRK-002 / j15-v1:cand-N4: used j15-v1:SIM-N4-TRK100 (row 8, fidelity.insufficient)
 - j15-v1:REQ-TRK-002 / j15-v1:cand-N4: skipped j15-v1:CALC-TOY1-N4 (row 7, domain.mismatch)
 - j15-v1:REQ-TRK-002 / j15-v1:cand-N4: skipped j15-v1:CALC-TR1-N4 (row 7, domain.mismatch)
 - j15-v1:REQ-TRK-002 / j15-v1:cand-N4: skipped j15-v1:CALC-TR500-N4 (row 7, domain.mismatch)
 - j15-v1:REQ-TRK-002 / j15-v1:cand-N4: skipped j15-v1:SIM-N4-TRK1 (row 7, domain.mismatch)
 - j15-v1:REQ-TRK-002 / j15-v1:cand-N6: used j15-v1:CALC-TOY100-N6 (row 12, fidelity.insufficient)
 - j15-v1:REQ-TRK-002 / j15-v1:cand-N6: used j15-v1:CALC-TR100-N6 (row 11, bound.direction)
-- j15-v1:REQ-TRK-002 / j15-v1:cand-N6: used j15-v1:SIM-N6-TRK100 (row 8, fidelity.insufficient)
 - j15-v1:REQ-TRK-002 / j15-v1:cand-N6: skipped j15-v1:CALC-TOY1-N6 (row 7, domain.mismatch)
 - j15-v1:REQ-TRK-002 / j15-v1:cand-N6: skipped j15-v1:CALC-TR1-N6 (row 7, domain.mismatch)
 - j15-v1:REQ-TRK-002 / j15-v1:cand-N6: skipped j15-v1:CALC-TR500-N6 (row 7, domain.mismatch)
@@ -69,16 +64,13 @@ The adequacy table is an initial default until physics review: every pass is pro
 - j15-v1:REQ-TRK-002 / j15-v1:cand-N6: skipped j15-v1:SIM-N6-TRK1 (row 7, domain.mismatch)
 - j15-v1:REQ-TRK-002 / j15-v1:cand-N8: used j15-v1:CALC-TOY100-N8 (row 12, fidelity.insufficient)
 - j15-v1:REQ-TRK-002 / j15-v1:cand-N8: used j15-v1:CALC-TR100-N8 (row 11, bound.direction)
-- j15-v1:REQ-TRK-002 / j15-v1:cand-N8: used j15-v1:SIM-N8-TRK100 (row 8, fidelity.insufficient)
 - j15-v1:REQ-TRK-002 / j15-v1:cand-N8: skipped j15-v1:CALC-TOY1-N8 (row 7, domain.mismatch)
 - j15-v1:REQ-TRK-002 / j15-v1:cand-N8: skipped j15-v1:CALC-TR1-N8 (row 7, domain.mismatch)
 - j15-v1:REQ-TRK-002 / j15-v1:cand-N8: skipped j15-v1:CALC-TR500-N8 (row 7, domain.mismatch)
 - j15-v1:REQ-TRK-002 / j15-v1:cand-N8: skipped j15-v1:SIM-N8-TRK1 (row 7, domain.mismatch)
 - j15-v1:REQ-CC-001 / j15-v1:cand-N4: used j15-v1:CALC-CC-N4 (row 11, bound.direction)
 - j15-v1:REQ-CC-001 / j15-v1:cand-N6: used j15-v1:CALC-CC-N6 (row 11, bound.direction)
-- j15-v1:REQ-CC-001 / j15-v1:cand-N6: skipped j15-v1:SIM-N6-CC500 (row 5, chain.incomplete)
 - j15-v1:REQ-CC-001 / j15-v1:cand-N8: used j15-v1:CALC-CC-N8 (row 11, bound.direction)
-- j15-v1:REQ-CAL-001 / j15-v1:cand-N6: used j15-v1:SIM-N6-CAL10 (row 8, fidelity.insufficient)
 - j15-v1:CON-MASS-001 / j15-v1:cand-N4: used j15-v1:CALC-MASS-N4 (row 16, estimate.decides)
 - j15-v1:CON-MASS-001 / j15-v1:cand-N6: used j15-v1:CALC-MASS-N6 (row 16, estimate.decides)
 - j15-v1:CON-MASS-001 / j15-v1:cand-N8: used j15-v1:CALC-MASS-N8 (row 16, estimate.decides)
