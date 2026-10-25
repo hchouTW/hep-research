@@ -101,6 +101,19 @@ maintainer decision D-FE4: new options only).
 - Front-end page and Geant4 study protocol: one sentence each. Tool contract: inputs `threshold_enc`,
   `simreco_channels`, `simreco_sides`. Tests: `SimrecoBlock` (6 tests).
 
+hep-detector front-end FE5: the front-end reference page split in three (VALIDATION FRONTEND-FE5; maintainer decision
+D-FE5: two new pages).
+
+- Moved without a content change: amplitude and time from sampled waveforms, pileup of pulses, photosensor readout,
+  LAr TPC signal processing, digital pulse processing and pulse-shape discrimination to the new
+  `skills/hep-detector/references/front-end-waveform-processing.md`; calibration and simulation of the electronics to
+  the new `skills/hep-detector/references/front-end-calibration.md`. `front-end-electronics-and-signal-processing.md`
+  goes from 40.5 KB to 23.9 KB, under the 24 KB warning line, and keeps a "(moved)" pointer for each section until
+  0.42.0 (recorded under `pointers` in `tools/wiring_known_gaps.json`); it is registered there as a hep-detector hub.
+  Links into the moved sections, the `InjectionGainGuidance` test and the internal source of ledger entry
+  FRONTEND-INJECTION-GAIN follow the move; the reference inventory is regenerated and the README counts forty-two
+  references.
+
 ## 0.40.0 (2026-10-25)
 
 Minor release; contracts 3.13.0, `CORE_VERSION` 1.1.0 and geant4 adapter 0.5.0 unchanged. It ships the follow-ups

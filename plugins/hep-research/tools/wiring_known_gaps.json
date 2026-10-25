@@ -13,7 +13,8 @@
   ],
   "hep-detector": [
    "references/detector-simulation.md",
-   "references/detector-design-principles.md"
+   "references/detector-design-principles.md",
+   "references/front-end-electronics-and-signal-processing.md"
   ],
   "hep-ml": [
    "references/deep-learning-guide.md"
@@ -23,7 +24,56 @@
    "references/hadron-structure-essentials.md"
   ]
  },
- "pointers": {},
+ "pointers": {
+  "skills/hep-detector/references/front-end-electronics-and-signal-processing.md#amplitude-and-time-from-sampled-waveforms": {
+   "pointer_since": "0.41.0",
+   "remove_in": "0.42.0",
+   "moved_to": "skills/hep-detector/references/front-end-waveform-processing.md#amplitude-and-time-from-sampled-waveforms",
+   "note": "a section pointer inside a live page (FE5): check_wiring.py checks pointer pages only, so remove this section by hand in remove_in"
+  },
+  "skills/hep-detector/references/front-end-electronics-and-signal-processing.md#pileup-of-pulses-baseline-and-rate": {
+   "pointer_since": "0.41.0",
+   "remove_in": "0.42.0",
+   "moved_to": "skills/hep-detector/references/front-end-waveform-processing.md#pileup-of-pulses-baseline-and-rate",
+   "note": "a section pointer inside a live page (FE5): check_wiring.py checks pointer pages only, so remove this section by hand in remove_in"
+  },
+  "skills/hep-detector/references/front-end-electronics-and-signal-processing.md#photosensor-readout": {
+   "pointer_since": "0.41.0",
+   "remove_in": "0.42.0",
+   "moved_to": "skills/hep-detector/references/front-end-waveform-processing.md#photosensor-readout",
+   "note": "a section pointer inside a live page (FE5): check_wiring.py checks pointer pages only, so remove this section by hand in remove_in"
+  },
+  "skills/hep-detector/references/front-end-electronics-and-signal-processing.md#lar-tpc-signal-processing": {
+   "pointer_since": "0.41.0",
+   "remove_in": "0.42.0",
+   "moved_to": "skills/hep-detector/references/front-end-waveform-processing.md#lar-tpc-signal-processing",
+   "note": "a section pointer inside a live page (FE5): check_wiring.py checks pointer pages only, so remove this section by hand in remove_in"
+  },
+  "skills/hep-detector/references/front-end-electronics-and-signal-processing.md#digital-pulse-processing-for-spectroscopy": {
+   "pointer_since": "0.41.0",
+   "remove_in": "0.42.0",
+   "moved_to": "skills/hep-detector/references/front-end-waveform-processing.md#digital-pulse-processing-for-spectroscopy",
+   "note": "a section pointer inside a live page (FE5): check_wiring.py checks pointer pages only, so remove this section by hand in remove_in"
+  },
+  "skills/hep-detector/references/front-end-electronics-and-signal-processing.md#pulse-shape-discrimination": {
+   "pointer_since": "0.41.0",
+   "remove_in": "0.42.0",
+   "moved_to": "skills/hep-detector/references/front-end-waveform-processing.md#pulse-shape-discrimination",
+   "note": "a section pointer inside a live page (FE5): check_wiring.py checks pointer pages only, so remove this section by hand in remove_in"
+  },
+  "skills/hep-detector/references/front-end-electronics-and-signal-processing.md#calibration-of-the-electronics": {
+   "pointer_since": "0.41.0",
+   "remove_in": "0.42.0",
+   "moved_to": "skills/hep-detector/references/front-end-calibration.md#calibration-of-the-electronics",
+   "note": "a section pointer inside a live page (FE5): check_wiring.py checks pointer pages only, so remove this section by hand in remove_in"
+  },
+  "skills/hep-detector/references/front-end-electronics-and-signal-processing.md#simulation-of-the-electronics": {
+   "pointer_since": "0.41.0",
+   "remove_in": "0.42.0",
+   "moved_to": "skills/hep-detector/references/front-end-calibration.md#simulation-of-the-electronics",
+   "note": "a section pointer inside a live page (FE5): check_wiring.py checks pointer pages only, so remove this section by hand in remove_in"
+  }
+ },
  "readme_counts": {
   "hep-authoring": [
    {
