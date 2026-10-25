@@ -2817,7 +2817,10 @@ path_m, depth_X0, z_front_m), not for the geometry mapping, so such a subsystem 
 values vary only subsystems that carry mapping fields. Pairing gave no gain here (ratio 1.58); the paired estimate
 stays valid but the search fell back to independent seeds, as the gate intends. G5: the C++ changes
 (`g4sim/SimSummary.hh`, `SimObservables.hh`) use only the C++ standard library and the adapter's own headers; no
-Geant4 example code; reviewer confirmation pending (the maintainer's).
+Geant4 example code. Evidence: the 3 changed C++ files (`SimSummary.hh`, `SimObservables.hh`, `simreco.cc`)
+against all 5,657 `.cc`, `.hh`, `.icc` files of the Geant4 11.4.3 examples tree, normalized lines: 0 shared runs of 3
+or 4 consecutive lines (`c2/g5_scan_k3.json`, `c2/g5_scan_k4.json`; positive control of GEANT4-A8-CHECKS gives 51).
+Reviewer confirmation: confirmed by the maintainer on 2026-10-25.
 
 ## GEANT4-J15 (2026-10-24/25, E2: macOS 26.5 arm64, Apple clang 21.0.0, Geant4 11.4.3 build A, Python 3.13; branch `worktree-geant4-b3` from main `a97a40e2`)
 
@@ -2970,7 +2973,7 @@ Decisions and deviations, recorded here:
   CI job runs (the tests pass on both); the §A.8 agent run and the Markdown review are B3's (B3.8).
 
 G5: simreco links no Geant4 code; it reads the CSV files simroot writes. The reviewer's confirmation for element_sim
-and simroot (GEANT4-ELEMENT) is still pending.
+and simroot (GEANT4-ELEMENT) was recorded on 2026-10-25.
 
 ## GEANT4-ELEMENT (2026-10-24, E2: macOS 26.5 arm64, Apple clang 21.0.0, CMake 4.3.2, Geant4 11.4.3 build A, Python 3.13; branch `worktree-geant4-b1` from main `14e45d13`)
 
@@ -3035,8 +3038,8 @@ G-B1b were rerun on the fixed build.
 G5: element_sim, simroot and the SimProbe field section are written from the Geant4 API; no example code (B5 or any
 other) was copied or adapted. Evidence: the 13 new or changed C++ files against all 5,657 `.cc`, `.hh`, `.icc` files of
 the Geant4 11.4.3 examples tree, normalized lines: 0 shared runs of 3 or 4 consecutive lines (`g5_scan_k3.json`,
-`g5_scan_k4.json`; the positive control of GEANT4-A8-CHECKS gives 51). Reviewer confirmation: pending (the
-maintainer's to record).
+`g5_scan_k4.json`; the positive control of GEANT4-A8-CHECKS gives 51). Reviewer confirmation: confirmed by the
+maintainer on 2026-10-25.
 
 ## GEANT4-A8-CHECKS (2026-10-24, E2; branch `worktree-geant4-a8` from main `263eff50`)
 
