@@ -31,7 +31,7 @@ covariance of optimal-filter and waveform-toy, and the scan file of s-curve; JSO
   optimal-filter  amplitude weights and variance from a few samples (optimal filter, uncorrelated template,
                   largest sample) with correlated and pileup noise; phase-error and baseline bias; time error
   hit-efficiency  efficiency (Landau, Gaussian or tabulated signal) and noise occupancy versus threshold;
-                  operating window
+                  operating window; the noise-digitization numbers of the Geant4 adapter's simreco
   waveform-toy    seeded synthetic sampled readout (noise, pileup, jitter, ADC) reconstructed by those
                   estimators, with closure against the analytic prediction
   s-curve         binomial fit of a threshold scan (threshold, noise, errors, goodness of fit), the
@@ -1065,6 +1065,51 @@ def hit_efficiency(thresholds, noise, signal_model='landau', mpv=None, xi=None, 
     return out
 
 
+SIMRECO_SCHEMA = 'adapters/geant4/assets/simreco/spec.schema.json'
+
+
+def simreco_digitization(result, reference_signal, reference_name, channels, sides=2):
+    """The efficiency, noise_hits_per_plane and threshold of simreco's noise-digitization tail source from one
+    hit-efficiency result (one threshold, with the occupancy per window), added to the result.
+
+    simreco's threshold is a fraction of the hit charge, which it shares between two strips; it is the threshold over
+    the reference signal (the most probable, mean or peak charge before any sharing fraction). A space point needs
+    every side of a plane (sides 2: strips in y and z): efficiency eps**sides; noise points per plane from noise
+    alone (mu = occupancy x channels per side, independent sides), mu**sides. simreco's own defaults are unchanged.
+    """
+    rows = result['thresholds']
+    if len(rows) != 1:
+        raise ValueError('the simreco block needs exactly one threshold')
+    row = rows[0]
+    if 'noise_occupancy_upper_bound' not in row:
+        raise ValueError('the simreco block needs the noise occupancy per window: give --peaking and --window')
+    if isinstance(channels, bool) or not isinstance(channels, int) or channels < 1:
+        raise ValueError('--simreco-channels must be an integer >= 1')
+    if sides not in (1, 2):
+        raise ValueError('--simreco-sides must be 1 or 2')
+    ref = _num(reference_signal, 'reference signal')
+    fraction = row['threshold'] / ref
+    if not 0 <= fraction <= 1:
+        raise ValueError(f'threshold {row["threshold"]:g} is outside 0 to the reference signal {ref:g} '
+                         f'({reference_name}): simreco takes a threshold fraction from 0 to 1')
+    mu = row['noise_occupancy_upper_bound'] * channels
+    result['simreco_noise_digitization'] = {'threshold': fraction, 'efficiency': row['efficiency'] ** sides,
+                                            'noise_hits_per_plane': mu ** sides}
+    result['simreco_derivation'] = {
+        'threshold': row['threshold'], 'threshold_over_noise': row['threshold_over_noise'],
+        'reference_signal': ref, 'reference': reference_name, 'channel_efficiency': row['efficiency'],
+        'channels_per_side': channels, 'sides': sides, 'noise_hits_per_side': mu,
+        'note': f'merge into the reco spec as tail_sources.noise-digitization with on true and pitch_y_um, pitch_z_um '
+                f'and sharing_um ({SIMRECO_SCHEMA}); simreco\'s defaults (threshold 0.2, efficiency 1, no noise hits) '
+                f'are unchanged'}
+    result['assumptions'].append(
+        'simreco block: threshold fraction = threshold / reference signal (simreco shares a hit\'s charge between '
+        'two strips and has no charge fluctuation); plane efficiency = channel efficiency ** sides and noise points '
+        'from noise alone = (occupancy upper bound x channels per side) ** sides, sides independent; ghost points of '
+        'a noise strip with a signal strip are not counted (they lie on the signal\'s strip line)')
+    return result
+
+
 # ---------------------------------------------------------------- waveform toy
 
 def _poisson(rng, mean):
@@ -1665,6 +1710,8 @@ def main():
     g.add_argument('--thresholds', type=float, nargs='+', help='thresholds, in the unit of the charges')
     g.add_argument('--scan', type=float, nargs=3, metavar=('LOW', 'HIGH', 'STEPS'),
                    help='scan STEPS thresholds evenly from LOW to HIGH')
+    g.add_argument('--threshold-enc', type=float, dest='threshold_enc',
+                   help='one threshold in units of the noise sigma (ENC): threshold = value x --noise')
     p.add_argument('--noise', type=float, required=True, help='noise sigma (ENC), in the unit of the charges')
     p.add_argument('--signal-model', choices=['landau', 'gauss', 'table'], default='landau', dest='signal_model')
     p.add_argument('--spectrum', help='table: CSV with header charge,density or charge,count (charges increasing)')
@@ -1684,6 +1731,12 @@ def main():
     p.add_argument('--min-efficiency', type=float, dest='min_efficiency', help='efficiency target, e.g. 0.99')
     p.add_argument('--max-occupancy', type=float, dest='max_occupancy',
                    help='noise occupancy target per channel and window (or per sample without --window)')
+    p.add_argument('--simreco-channels', type=int, dest='simreco_channels',
+                   help='channels per side of a tracker plane: also print simreco_noise_digitization (threshold, '
+                        'efficiency, noise_hits_per_plane) for the Geant4 adapter\'s simreco; one threshold, '
+                        'needs --peaking and --window')
+    p.add_argument('--simreco-sides', type=int, dest='simreco_sides',
+                   help='sides a space point needs: 2 (strips in y and z, default) or 1 (pixels, or one coordinate)')
 
     p = sub.add_parser('waveform-toy', help='seeded synthetic sampled readout and its reconstruction')
     sampling_args(p)
@@ -1767,13 +1820,30 @@ def main():
                 if steps != int(steps) or not 2 <= steps <= 400 or high <= low:
                     raise ValueError('--scan needs LOW < HIGH and an integer STEPS from 2 to 400')
                 thresholds = [low + (high - low) * i / (int(steps) - 1) for i in range(int(steps))]
+            elif args.threshold_enc is not None:
+                if not args.threshold_enc > 0:  # nan too; an infinite threshold is refused by hit_efficiency
+                    raise ValueError('--threshold-enc must be > 0')
+                thresholds = [args.threshold_enc * args.noise]
             else:
                 thresholds = args.thresholds
+            if args.simreco_sides is not None and args.simreco_channels is None:
+                raise ValueError('--simreco-sides goes with --simreco-channels')
+            if args.simreco_channels is not None and args.signal_fraction != 1:
+                raise ValueError('--simreco-channels needs --signal-fraction 1: simreco shares the charge itself')
             spectrum = read_spectrum(args.spectrum) if args.spectrum is not None else None
             result = hit_efficiency(thresholds, args.noise, args.signal_model, args.mpv, args.xi, args.mean,
                                     args.sigma_signal, args.signal_fraction, args.threshold_dispersion, args.peaking,
                                     args.order, args.noise_type, args.series_fraction, args.window,
                                     args.min_efficiency, args.max_occupancy, spectrum)
+            if args.simreco_channels is not None:
+                if args.signal_model == 'landau':
+                    ref, name = args.mpv, 'landau most probable value'
+                elif args.signal_model == 'gauss':
+                    ref, name = args.mean, 'gauss mean'
+                else:
+                    ref, name = spectrum[1][max(range(len(spectrum[2])), key=spectrum[2].__getitem__)], 'table peak'
+                simreco_digitization(result, ref, name, args.simreco_channels,
+                                     2 if args.simreco_sides is None else args.simreco_sides)
         elif args.command == 'waveform-toy':
             rho, cov = _noise_args(args)
             result = waveform_toy(args.order, args.peaking, args.period, args.samples, args.first_offset,

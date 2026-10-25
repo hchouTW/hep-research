@@ -89,6 +89,18 @@ hep-detector front-end FE3: batch S-curve fits (VALIDATION FRONTEND-FE3).
   (`threshold-trim --spread` before trim, `hit-efficiency --threshold-dispersion` after). File errors exit 2.
 - Tests: `SCurveBatch` (6 tests, 60 Monte Carlo batches of 200 channels).
 
+hep-detector front-end FE4: `hit-efficiency` fills simreco's `noise-digitization` (VALIDATION FRONTEND-FE4;
+maintainer decision D-FE4: new options only).
+
+- `hit-efficiency --simreco-channels N [--simreco-sides 1|2]` (one threshold, with `--peaking` and `--window`, signal
+  fraction 1) also prints `simreco_noise_digitization` with the keys of the reco spec's tail source: `threshold` =
+  threshold / reference signal (Landau MPV, Gaussian mean or table peak), `efficiency` = channel efficiency ** sides,
+  `noise_hits_per_plane` = (occupancy upper bound x N) ** sides; and `simreco_derivation`. `--threshold-enc K` gives
+  the one threshold in noise sigmas (K x `--noise`). Without the new options the output is byte for byte unchanged;
+  the Geant4 adapter, simreco and its defaults, and the J15 and J16 records are not touched (adapter 0.5.0).
+- Front-end page and Geant4 study protocol: one sentence each. Tool contract: inputs `threshold_enc`,
+  `simreco_channels`, `simreco_sides`. Tests: `SimrecoBlock` (6 tests).
+
 ## 0.40.0 (2026-10-25)
 
 Minor release; contracts 3.13.0, `CORE_VERSION` 1.1.0 and geant4 adapter 0.5.0 unchanged. It ships the follow-ups

@@ -195,7 +195,11 @@ distribution, not only its width, and its spectrum when tails appear.
   the inefficiency below about 1 %, and the measured noise tail above about 6 sigma. For that
   low-side tail, give the measured spectrum as a table (`hit-efficiency --signal-model table
   --spectrum FILE`, CSV `charge,density` or `charge,count`); the table is normalized over its
-  range, so it must reach far enough up that the missing tail is negligible.
+  range, so it must reach far enough up that the missing tail is negligible. For the
+  `noise-digitization` tail source of the Geant4 adapter's `simreco`, `--simreco-channels N`
+  (channels per side of a plane; one threshold, also given as `--threshold-enc` in noise
+  sigmas) prints its `threshold` (the fraction of the most probable charge), `efficiency`
+  and `noise_hits_per_plane` (two sides: both powers of two); simreco's defaults stay.
 - **Zero suppression** with seed/neighbour thresholds keeps clusters but truncates
   their tails; cluster charge and centroid are then biased for low-`S/N` clusters, and
   the bias differs between data and simulation if the thresholds or noise differ.

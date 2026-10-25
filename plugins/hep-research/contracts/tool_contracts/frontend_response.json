@@ -1704,7 +1704,7 @@
   },
   {
    "operation_id": "hit-efficiency",
-   "summary": "Hit efficiency of a channel versus threshold for a Landau (most probable value, xi), Gaussian or tabulated (measured or simulated charge spectrum from a CSV file) signal with a charge-sharing fraction, noise and a channel-to-channel threshold spread, and the noise occupancy (probability above threshold at a sample, Rice up-crossings in a window for CR-(RC)^n), with the operating window that meets an efficiency and an occupancy target",
+   "summary": "Hit efficiency of a channel versus threshold for a Landau (most probable value, xi), Gaussian or tabulated (measured or simulated charge spectrum from a CSV file) signal with a charge-sharing fraction, noise and a channel-to-channel threshold spread, and the noise occupancy (probability above threshold at a sample, Rice up-crossings in a window for CR-(RC)^n), with the operating window that meets an efficiency and an occupancy target, and the noise-digitization numbers (threshold fraction, efficiency, noise hits per plane) of the Geant4 adapter's simreco for one threshold, which may be given in units of the noise",
    "invocation": {
     "kind": "cli",
     "output": "json-stdout",
@@ -1716,6 +1716,10 @@
      {
       "flag": "--scan",
       "input": "scan"
+     },
+     {
+      "flag": "--threshold-enc",
+      "input": "threshold_enc"
      },
      {
       "flag": "--noise",
@@ -1782,6 +1786,14 @@
       "input": "max_occupancy"
      },
      {
+      "flag": "--simreco-channels",
+      "input": "simreco_channels"
+     },
+     {
+      "flag": "--simreco-sides",
+      "input": "simreco_sides"
+     },
+     {
       "flag": "--status",
       "input": "status"
      }
@@ -1793,14 +1805,21 @@
      "kind": "charge",
      "unit": "{Q}",
      "required": false,
-     "constraint": "thresholds; exactly one of thresholds or scan"
+     "constraint": "thresholds; exactly one of thresholds, scan or threshold_enc"
     },
     {
      "name": "scan",
      "kind": "charge",
      "unit": "{Q}",
      "required": false,
-     "constraint": "LOW HIGH STEPS: STEPS (integer 2-400) thresholds from LOW to HIGH; exactly one of thresholds or scan"
+     "constraint": "LOW HIGH STEPS: STEPS (integer 2-400) thresholds from LOW to HIGH; exactly one of thresholds, scan or threshold_enc"
+    },
+    {
+     "name": "threshold_enc",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "one threshold in units of the noise sigma (ENC), > 0: threshold = threshold_enc x noise; exactly one of thresholds, scan or threshold_enc"
     },
     {
      "name": "noise",
@@ -1918,6 +1937,21 @@
      "unit": "1",
      "required": false,
      "constraint": "noise occupancy target per channel and window (per sample without window)"
+    },
+    {
+     "name": "simreco_channels",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "channels per side of a tracker plane, integer >= 1: also outputs simreco_noise_digitization (threshold fraction, efficiency, noise_hits_per_plane for the Geant4 adapter simreco) and simreco_derivation; one threshold, needs peaking and window, signal_fraction 1"
+    },
+    {
+     "name": "simreco_sides",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "sides a space point needs, 1 or 2; only with simreco_channels",
+     "default": 2
     },
     {
      "name": "status",

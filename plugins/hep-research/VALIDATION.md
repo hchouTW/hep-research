@@ -2756,6 +2756,26 @@ Contracts: the 13 new keys are core `convention_keys` and also `conditional_conv
 description change and the 8 Th14 cases (paid; pending approval). Pre-existing on main: 5 tests of
 `tests/contracts/test_simulated_dataset.py` fail under a whole-directory pytest run and pass alone (order dependent).
 
+## FRONTEND-FE4 (2026-10-25, E2: macOS 26.5 arm64, Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1, SymPy 1.14.0, mpmath 1.3.0; branch `worktree-frontend-fe4` in `.claude/worktrees/frontend-fe4`, unreleased)
+
+Stage FE4: `hit-efficiency` fills the `noise-digitization` tail source of the Geant4 adapter's simreco. Maintainer
+decision D-FE4 (2026-10-25): new options only (`feat:`). Stacked on FE3 (the §P.10.2 exception of FE1; the maintainer
+asked to start FE4 while FE0 is open). Worktree checks at the start: top level the worktree, branch
+`worktree-frontend-fe4`, status clean. The adapter is not changed (an adapter change needs an adapter version bump,
+out of scope), so simreco, its defaults (threshold 0.2, efficiency 1, no noise hits) and the J15/J16 records are
+unchanged by construction.
+
+| Check | Result |
+|---|---|
+| Block against the closed form (Gaussian signal 6000 +- 800 e, noise 1000 e, threshold 4500 e, 25 ns peaking, 50 ns window, 640 channels) | `threshold` = 4500/6000 (1e-14), `efficiency` = Phi((mu - T)/sqrt(ss^2 + sn^2))^2 (1e-12), `noise_hits_per_plane` = ((Phi(-T/sn) + nu0 exp(-T^2/2 sn^2) w) x 640)^2 (relative 1e-10); one side as negative control (efficiency differs by more than 0.05) |
+| `--threshold-enc` | 4.5 x 1000 e gives output equal to `--thresholds 4500`; 4 x 1200 e gives 4800 e; Landau reference is the MPV, table reference its peak |
+| Default output | without the new options the CLI output equals, byte for byte, the JSON of `hit_efficiency` with the same inputs; with them every other key is equal and one assumption is appended |
+| simreco spec | the block merged into `tail_sources.noise-digitization` passes `simreco_spec.check` against J15 and reaches the effective spec unchanged |
+| Bad inputs | two thresholds, no window, 0 channels, sides 3, sides without channels, signal fraction 0.5, threshold above the reference, `--threshold-enc` 0 or nan or with `--thresholds`: exit 2, `invalid-input`, no traceback |
+| Mutants | 17 local mutants, all killed (four needed sharper tests: a mutant string that matched another function, `--noise` 1000 hiding the ENC product, the derivation's `sides`; a finiteness check that `hit_efficiency` repeats was removed instead) |
+| Validation commands | unit tests (`SimrecoBlock`, 6 tests), tool contract pass, reference inventory pass, wiring `--since` pass, ruff 0.16.10 clean, `lint_task.py` 0 errors |
+| Full check at `cdcb3651` (before the rebase onto the amended FE3 record; same code) | 31 of 31 checks pass with the host CLIs; unittest 5598 run, 5445 pass, 153 skipped, 0 failures or errors |
+
 ## FRONTEND-FE3 (2026-10-25, E2: macOS 26.5 arm64, Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1, SymPy 1.14.0, mpmath 1.3.0; branch `worktree-frontend-fe3` in `.claude/worktrees/frontend-fe3`, unreleased)
 
 Stage FE3: batch S-curve fits from a scan file. Based on the FE2 branch head `42a4ccbc` (the §P.10.2 exception of

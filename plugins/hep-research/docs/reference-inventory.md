@@ -205,9 +205,9 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `detector-systems-overview.md` | hep-detector | 12.7 | no | 14 | hep-measurement | 9257d7b5 2026-10-15 |
 | `event-reconstruction.md` | hep-detector | 13.3 | no | 7 | - | 765bf693 2026-10-25 |
 | `extensive-air-showers.md` | hep-detector | 9.0 | yes | 11 | hep-citations | af7ad3bb 2026-10-21 |
-| `front-end-electronics-and-signal-processing.md` | hep-detector | 40.1 | yes | 15 | - | 6f156782 2026-10-25 |
+| `front-end-electronics-and-signal-processing.md` | hep-detector | 40.5 | yes | 16 | - | ba0a6f62 2026-10-25 |
 | `gaseous-and-specialized-tracking-technologies.md` | hep-detector | 15.8 | no | 8 | hep-citations | 9257d7b5 2026-10-15 |
-| `geant4-study-protocol.md` | hep-detector | 42.8 | no | 11 | hep-citations | bbeb133f 2026-10-25 |
+| `geant4-study-protocol.md` | hep-detector | 43.2 | no | 11 | hep-citations | bbeb133f 2026-10-25 |
 | `ground-based-detection-arrays.md` | hep-detector | 11.7 | no | 7 | - | 9257d7b5 2026-10-15 |
 | `imaging-atmospheric-cherenkov.md` | hep-detector | 11.4 | no | 10 | hep-citations, hep-ml, hep-statistics | ebb58136 2026-10-19 |
 | `multimessenger-analysis.md` | hep-detector | 6.9 | no | 2 | - | 9257d7b5 2026-10-15 |
