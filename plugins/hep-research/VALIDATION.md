@@ -2756,7 +2756,7 @@ Contracts: the 13 new keys are core `convention_keys` and also `conditional_conv
 description change and the 8 Th14 cases (paid; pending approval). Pre-existing on main: 5 tests of
 `tests/contracts/test_simulated_dataset.py` fail under a whole-directory pytest run and pass alone (order dependent).
 
-## FRONTEND-RECO-SIM (2026-10-25, Linux x86_64 container, Python 3.13.17, NumPy 2.5.3, SciPy 1.18.1 for the oracles, no SymPy or mpmath; branch `detector/frontend-reco-sim` from main `bc7b1c18`, unreleased)
+## FRONTEND-RECO-SIM (2026-10-25, Linux x86_64 container, Python 3.13.17, NumPy 2.5.3, SciPy 1.18.1 for the oracles, no SymPy or mpmath; branch `worktree-frontend-reco-sim` from main `bc7b1c18`, unreleased)
 
 hep-detector front-end electronics for reconstruction and simulation: `frontend_response.py` subcommands
 `optimal-filter`, `hit-efficiency`, `waveform-toy`, `s-curve`, `threshold-trim`; the reference additions and the new
@@ -2775,6 +2775,17 @@ hep-detector front-end electronics for reconstruction and simulation: `frontend_
 | Threshold trim | against a NumPy MC of 2e6 channels with rounded, clipped codes: 441.76 e and 18.28 % beyond the range for (1500 e, 4 bits, 250 e), tool 441.57 e and 18.24 %; 258.47 e for (800 e, 5 bits, 60 e), tool 258.73 e; wide-range limit D/sqrt(12) and the nonlinearity in quadrature exact |
 | Tool contract | `contracts/tool_contract.py`: pass, 15 operations; `FrontendResponseContractTests` with the five new operations |
 | Aggregate (`tools/run_all_checks.py --part all --no-cli --jobs 2`) | 27 of 31 checks pass, 2 skip (host CLIs); unittest 5549 run, 5237 pass, 294 skipped, 18 failures or errors, all outside hep-detector and all from this environment: SymPy and mpmath are not installed and PyPI is unreachable (16), and `test_paper_skeleton` and `test_ci_plan.RunnerRecord` fail identically on a clean checkout of main here; `ams_optional` fails on the same missing SymPy. Rerun in E2 before merging |
+
+**Independent review R720d9d2e80** of `docs/dev/frontend-electronics/frontend-reco-sim-calibration.md`
+(`skills/hep-authoring/scripts/review.py`, models opus and sonnet, `--lens-model design=opus --filter-model opus
+--expert-model opus --own-config`, isolation precondition `fork-denied`; advisory): round 1, 9 slots, the expert slot
+and the filter (36 findings, 26 kept). All findings disposed: 35 changed (each verified by the author against the plugin
+files or a tool run), 1 declined (the branch name it reported was in this file and had been fixed). Canary hit rate
+2/2. The facts lens slot S4 was rejected twice (it copied the document to run `lint_task.py`) and is escalated for a
+human; the review stays open until then. The substantive corrections: the FE1-1 criterion could not fail (thresholds
+far below the Landau peak), the threshold spread is routed pre-trim to `threshold-trim` and post-trim to
+`hit-efficiency`, the FE3 corrected spread is clipped at zero, the stage base follows P.10.2, the C4 guidance change is
+flagged for classification and has a second located source (arXiv:0912.2642, sec. 3.1.2).
 
 Software checks show contract consistency and agreement with the named oracles, not physical validity: the Landau
 model has no Bichsel broadening, and the toy is synthetic.

@@ -1922,7 +1922,7 @@
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "765bf693 2026-10-25"
+   "last_commit": "5fa57b0a 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/detector-principles-summary.md",
@@ -2060,7 +2060,7 @@
     "tests/skills/hep_detector/test_frontend_waveforms.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "3781073c 2026-10-25"
+   "last_commit": "5fa57b0a 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
@@ -2329,7 +2329,7 @@
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "3781073c 2026-10-25"
+   "last_commit": "5fa57b0a 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md",
