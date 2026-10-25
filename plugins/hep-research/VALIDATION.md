@@ -2756,6 +2756,27 @@ Contracts: the 13 new keys are core `convention_keys` and also `conditional_conv
 description change and the 8 Th14 cases (paid; pending approval). Pre-existing on main: 5 tests of
 `tests/contracts/test_simulated_dataset.py` fail under a whole-directory pytest run and pass alone (order dependent).
 
+## FRONTEND-FE2 (2026-10-25, E2: macOS 26.5 arm64, Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1, SymPy 1.14.0, mpmath 1.3.0; branch `worktree-frontend-fe2` in `.claude/worktrees/frontend-fe2`, unreleased)
+
+Stage FE2: a measured noise covariance for `optimal-filter` and `waveform-toy`. Based on the FE1 branch head
+`b97a3203` (the same §P.10.2 exception as FE1, and stacked so that FE1-FE3, which change the same files, merge in
+order without conflicts). Worktree checks at the start: top level the worktree, branch `worktree-frontend-fe2`, status
+clean.
+
+| Check | Result |
+|---|---|
+| FE2-1 rho^\|i-j\| matrix (rho 0.6, 7 samples) | `optimal-filter` sigmas and weights (plain, phase-constrained, with pileup and the joint fit) and `waveform-toy` `predicted_sigma` equal the `--rho 0.6` values to 1e-12; closure \|z\| < 4 (20 000 events). The toy draws are identical too: the Cholesky factor of rho^\|i-j\| is the AR(1) recursion |
+| FE2-2 rho^\|i-j\| + 0.3 common mode | sample covariance of 20 000 `correlated_noise` draws within 4 Gaussian standard errors of every element; AR(1) draws without the common mode differ by more than 4 (negative control); toy closure \|z\| < 4; the template variance rises by 0.3 (sum w)^2 exactly (1e-12) |
+| FE2-3 bad matrices | not positive definite, singular (all ones), not symmetric, wrong dimension, ragged, non-finite: ValueError from `measured_covariance`, the input unchanged (no repair); bad files (missing, does not parse, no key, not an object, not rows, empty, a string, a boolean, NaN and Infinity tokens, wrong dimension, not UTF-8) and `--rho` with `--noise-covariance`: exit 2, `invalid-input`, no traceback, for both subcommands |
+| FE2-4 | `noise_model` `ar1` / `measured`; `noise_covariance_sha256` equals the SHA-256 recomputed in the test and changes when one element changes by 1e-9 |
+| Mutants | 9 local mutants: 8 killed (measured base, L z, symmetry, semidefinite repair, ragged rows, hash separators, rho exclusion, number check); 1 equivalent (the non-finite check, which `cholesky` repeats). The repair mutant survived the first tests and got its own. The exit-code fix that FE2 first carried (serialization apart from the input checks) is now the FE0 commit `297169a3` with its tests |
+| Validation commands 1-6 | unit tests, tool contract pass, reference inventory pass, wiring pass, ruff 0.16.10 clean, static checks pass |
+| Full check (command 7) at `4734555f` | 31 of 31 checks pass with the host CLIs; unittest 5585 run, 5432 pass, 153 skipped, 0 failures or errors |
+
+**Rebased (2026-10-25)** onto the FE0 commit `297169a3` and the rebased FE1: the serialization split and its exit-1
+test, which `4734555f` carried, are now that FE0 commit, so this stage no longer changes `main()`'s error handling.
+The full check above ran before the rebase; the full check of the rebased stack is in FRONTEND-FE3.
+
 ## FRONTEND-FE1 (2026-10-25, E2: macOS 26.5 arm64, Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1, SymPy 1.14.0, mpmath 1.3.0; branch `worktree-frontend-fe1` in `.claude/worktrees/frontend-fe1`, unreleased)
 
 Stage FE1 of `docs/dev/frontend-electronics/frontend-reco-sim-calibration.md`: the table signal model of
