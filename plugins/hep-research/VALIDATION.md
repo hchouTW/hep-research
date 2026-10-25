@@ -3286,8 +3286,8 @@ for the multiple-scattering reference. `range` (its response depends on whether 
 | TOF plane overlap in `search` (`test_tof_planes_against_trackers_and_extents`) | a TOF plane on a tracking plane (0.5 m in cand-S) or inside a calorimeter (front 2.2 m) is an overlap; as the calorimeter's daughter it is not; planes between tracker planes are valid |
 | `test_proposals_are_flagged` | its TOF proposal moved between the tracker planes (0.125, 1.125 m): at the rule's default positions the first plane sat on cand-S's plane at 0 m and the design is now invalid |
 | J14, J15, J16 regenerated | only tool hashes change; J16 (rules 1.0.0, no TOF positions) unchanged |
-| `run_all_checks.py --no-cli --jobs 6`, E2 | RESULT_E2 |
-| Same with the CI lock | RESULT_CI |
+| `run_all_checks.py --no-cli --jobs 6`, E2 | 29 pass, 0 fail, 2 skipped; 5540 tests, 0 failures, 153 skipped |
+| Same with the CI lock | 29 pass, 0 fail, 2 skipped; 5540 tests, 0 failures, 245 skipped |
 
 ## DECLARED-SIZE-CONTROLS (2026-10-25, E2 and the CI lock; branch `feat/declared-size-controls` on `feat/search-roles-geometry`)
 
