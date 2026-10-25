@@ -152,7 +152,7 @@ def j15_search_spec(art: Path, free: list, slots: dict | None = None) -> dict:
             "design_spec": {"path": "design-spec.v1.json",
                             "sha256": hashlib.sha256((art / "design-spec.v1.json").read_bytes()).hexdigest()},
             "base_candidate": "j15-v1:cand-N6", "objectives": [{"requirement": "REQ-TRK-001"}],
-            "free_parameters": free, "slots": slots or {}, "rules_version": "1.0.0", "materials_version": "1.0.0",
+            "free_parameters": free, "slots": slots or {}, "rules_version": "1.1.0", "materials_version": "1.0.0",
             "budget": {"evaluations": 24, "geant4": 0},
             "optimizer": {"name": "nsga2", "population": 8, "generations": 2, "seed": 7},
             "finalists": {"max": 2, "distinct_topologies": True}}
@@ -161,18 +161,22 @@ def j15_search_spec(art: Path, free: list, slots: dict | None = None) -> dict:
 class DecodedSpecs(unittest.TestCase):
     """C2.9: an element_sim.spec/1 derived from a decoded candidate (evaluate_design.py geometry, then geant4_run.py
     from-geometry with J15's realization profile) passes geant4_run.py check-spec in a subprocess, for decoded
-    candidates that change each role: tracking (plane positions), bending (field), tof (time resolution, carried in
-    the geometry), calorimetry-em (the base's calorimeter carried through), rich (added; the geometry mapping has no
-    RICH, so it does not enter the spec). The role rules name a search-added TOF's or calorimeter's parameters for
-    the F1 tools (n_layers, path_m, depth_X0, z_front_m), not for the geometry mapping, so such a subsystem has no
-    Geant4 geometry: Geant4 search values vary only subsystems that carry mapping fields."""
+    candidates that change each role: tracking (plane positions), bending (field), tof (plane positions, thickness and
+    time resolution), calorimetry-em (depth and passive material: the sampling structure derived by role rules 1.1.0
+    passes from-geometry's depth check), rich (added; the geometry mapping has no RICH, so it does not enter the
+    spec). Role rules 1.1.0 name the TOF's and calorimeter's geometry in the mapping's parameters, so the search can
+    vary them in Geant4 (1.0.0 named them for the F1 tools only)."""
 
     CASES = {
         "tracking": ([{"ref": "DES-TRK-001.parameters.layer_positions_m", "kind": "positions", "n": [6, 6],
                        "range": [0.0, 0.8], "min_spacing_m": 0.05}], {}),
         "bending": ([{"ref": "DES-MAG-001.parameters.field_T", "range": [0.3, 0.7]}], {}),
-        "tof": ([{"ref": "DES-TOF-001.parameters.time_resolution_ps", "range": [60.0, 200.0]}], {}),
-        "calorimetry-em": ([{"ref": "DES-MAG-001.parameters.field_T", "range": [0.4, 0.6]}], {}),
+        "tof": ([{"ref": "DES-TOF-001.parameters.layer_positions_m", "kind": "positions", "n": [4, 4],
+                  "range": [-0.4, 1.1], "min_spacing_m": 0.02},
+                 {"ref": "DES-TOF-001.parameters.layer_thickness_m", "range": [0.005, 0.02]},
+                 {"ref": "DES-TOF-001.parameters.time_resolution_ps", "range": [60.0, 200.0]}], {}),
+        "calorimetry-em": ([{"ref": "DES-CAL-001.parameters.depth_x0", "range": [10.0, 25.0]},
+                            {"ref": "DES-CAL-001.parameters.passive_material", "choices": ["G4_Pb"]}], {}),
         "rich": ([], {"rich": [0, 1]}),
     }
 
@@ -185,7 +189,10 @@ class DecodedSpecs(unittest.TestCase):
                 art = j15_project(Path(tmp) / "proj")
                 space = space_for(art, j15_search_spec(art, free, slots))
                 prop = {"id": "P", "reason": "r", **({"enabled": {"rich": True}} if role == "rich" else {}),
-                        **({"parameters": {free[0]["ref"]: 0.55}} if role == "bending" else {})}
+                        **({"parameters": {free[0]["ref"]: 0.55}} if role == "bending" else {}),
+                        **({"parameters": {free[0]["ref"]: [-0.32, -0.3, 1.0, 1.02], free[1]["ref"]: 0.012}}
+                           if role == "tof" else {}),
+                        **({"parameters": {free[0]["ref"]: 20.0}} if role == "calorimetry-em" else {})}
                 g, _ = space.repair(space.proposal_genome(prop))
                 name = f"cand-{role}"
                 doc = EV.expanded_candidate(space, {"index": 0, "genome": space.genome_dict(g)}, name, [
@@ -209,10 +216,21 @@ class DecodedSpecs(unittest.TestCase):
                                    capture_output=True, text=True, timeout=120)
                 self.assertEqual(p.returncode, 0, p.stdout[-800:])
                 self.assertTrue(json.loads(p.stdout)["ok"])
+                eff = design.Project(art).effective(f"j15-v1:{name}")
                 if role == "tof":
-                    eff = design.Project(art).effective(f"j15-v1:{name}")
-                    self.assertEqual(fields["tof_time_resolution_ps"],
-                                     eff["DES-TOF-001"]["parameters"]["time_resolution_ps"]["value"])
+                    tof = eff["DES-TOF-001"]["parameters"]
+                    self.assertEqual(fields["tof_time_resolution_ps"], tof["time_resolution_ps"]["value"])
+                    self.assertEqual(fields["tof_layer_positions_m"], [-0.32, -0.3, 1.0, 1.02])
+                    self.assertEqual(fields["tof_layer_thickness_m"], 0.012)
+                    self.assertAlmostEqual(tof["path_m"]["value"], 1.34)  # derived: the F1 flight path
+                    derived_spec = json.loads(out_spec.read_text(encoding="utf-8"))
+                    tofs = [e for e in derived_spec["elements"] if e["role"] == "tof-layer"]
+                    self.assertEqual([min(e["half_mm"]) for e in tofs], [6.0] * 4)  # half of 12 mm on the stack axis
+                if role == "calorimetry-em":
+                    cal = eff["DES-CAL-001"]["parameters"]
+                    self.assertEqual(fields["calo_depth_x0"], 20.0)
+                    self.assertEqual(cal["sampling_layers"]["value"], 20)
+                    self.assertEqual(fields["calo_passive_thickness_mm"], cal["passive_thickness_mm"]["value"])
 
 
 class FakeValues:

@@ -63,7 +63,7 @@ def spec_a(art: Path, **over) -> dict:
                 {"ref": "DES-MAG-001.parameters.field_T", "range": [0.1, 1.0]}],
             "slots": {"tof": [0, 1]},
             "regenerate_budgets": ["DES-TRK-001", "DES-MAG-001"],
-            "rules_version": "1.0.0", "materials_version": "1.0.0",
+            "rules_version": "1.1.0", "materials_version": "1.0.0",
             "budget": {"evaluations": 240, "geant4": 0},
             "optimizer": {"name": "nsga2", "population": 24, "generations": 30, "seed": 12345},
             "stopping": {"hypervolume_window": 10, "min_improvement": 0.001, "reference_point": "auto"},
@@ -86,7 +86,7 @@ def write_spec(art: Path, spec: dict, name: str = "SEARCH-A") -> str:
 
 def space_for(art: Path, spec: dict, sid: str = "SEARCH-T") -> "EV.SearchSpace":
     proj = design.Project(art)
-    roles = json.loads((ASSETS / "roles.json").read_text(encoding="utf-8"))
+    roles, _ = EV.load_asset("roles.json", "rules_version", spec["rules_version"])  # as the tool loads them
     materials = json.loads((ASSETS / "materials.json").read_text(encoding="utf-8"))
     return EV.SearchSpace(proj, spec, roles, materials, sid)
 
@@ -400,8 +400,9 @@ class RolesAndDecoding(unittest.TestCase):
     def test_each_role_decodes_with_calibration_and_budget_rows(self):
         expect = {  # hand computation of each budget model at the role's new-subsystem values
             "tof": 2 * 1.0 * 1.0 * 0.01 * self.materials["G4_PLASTIC_SC_VINYLTOLUENE"]["density_g_cm3"] * 1000,
-            "calorimetry-em": 1.0 * 17.0 * self.materials["G4_Pb"]["radiation_length_cm"] * 0.01
-            * self.materials["G4_Pb"]["density_g_cm3"] * 1000,
+            "calorimetry-em": 1.0 * 20 * round(self.materials["G4_Pb"]["radiation_length_cm"] * 10 * (
+                17.0 / 20 - 5.0 / (self.materials["G4_PLASTIC_SC_VINYLTOLUENE"]["radiation_length_cm"] * 10)), 3)
+            * 1e-3 * self.materials["G4_Pb"]["density_g_cm3"] * 1000,
             "rich": 30.0, "bending": None, "tracking": None}
         for role in ("tof", "calorimetry-em", "rich"):
             with self.subTest(role=role):
@@ -410,9 +411,9 @@ class RolesAndDecoding(unittest.TestCase):
                 sub = ext["overrides"][sid]
                 rule = self.roles["roles"][role]
                 self.assertEqual(sub["role"], role)
-                self.assertEqual(set(sub["parameters"]), set(rule["parameters"]))
+                self.assertEqual(set(sub["parameters"]), set(rule["parameters"]) | set(rule.get("derived", {})))
                 for name, p in sub["parameters"].items():
-                    self.assertEqual(p["unit"], rule["parameters"][name]["unit"])
+                    self.assertEqual(p["unit"], (rule["parameters"].get(name) or rule["derived"][name])["unit"])
                     self.assertEqual((p["source"], p["status"]), ("search SEARCH-T point 0", "proposal"))
                 self.assertEqual(sub["calibration"], rule["calibration"])
                 rows = {q: ext["budgets"][q][sid] for q in ("mass", "power", "channel_count", "data_rate")}
@@ -422,6 +423,25 @@ class RolesAndDecoding(unittest.TestCase):
                     self.assertIn(rule["budget_model"]["name"], row["source"])
                     self.assertAlmostEqual(row["uncertainty"], 0.25 * row["estimate"])
                 self.write_and_check(ext, f"cand-{role}")
+
+    def test_earlier_rules_version_still_decodes(self):
+        """A recorded search names the rules it ran with: 1.0.0 is kept as roles-1.0.0.json (its TOF and calorimeter
+        in the F1 tools' names), so expand --search of such a search still finds the same bytes."""
+        doc, digest = EV.load_asset("roles.json", "rules_version", "1.0.0")
+        self.assertEqual(digest, sha(ASSETS / "roles-1.0.0.json"))
+        self.assertIn("n_layers", doc["roles"]["tof"]["parameters"])
+        space = space_for(self.art, spec_a(self.art, free_parameters=[], regenerate_budgets=[], rules_version="1.0.0",
+                                           slots={"tof": [0, 1], "calorimetry-em": [0, 1]}))
+        g, _ = space.repair(space.proposal_genome({"id": "P", "reason": "r", "enabled": {"tof": True,
+                                                                                     "calorimetry-em": True}}))
+        ext, _ = space.decode(g, "s", f"{NS_A}:x")
+        tof = ext["overrides"]["DES-TOF-S01"]
+        self.assertEqual(set(tof["parameters"]), {"n_layers", "time_resolution_ps", "scintillator_thickness_cm", "path_m"})
+        self.assertAlmostEqual(ext["budgets"]["mass"]["DES-TOF-S01"]["estimate"], 2 * 1.0 * 0.01 * self.materials[
+            "G4_PLASTIC_SC_VINYLTOLUENE"]["density_g_cm3"] * 1000)
+        self.assertIn("depth_X0", ext["overrides"]["DES-ECAL-S01"]["parameters"])
+        with self.assertRaises(EV.UsageError):
+            EV.load_asset("roles.json", "rules_version", "0.9.0")
 
     def test_tracking_x_over_x0_from_material_and_thickness(self):
         spec = spec_a(self.art, free_parameters=[
@@ -522,7 +542,8 @@ class Validity(unittest.TestCase):
                       regenerate_budgets=[])
         space = space_for(self.art, spec)
         prop = {"id": "P", "reason": "r", "enabled": {"calorimetry-em": True, "rich": True},
-                "parameters": {"DES-ECAL-S01.parameters.z_front_m": 2.0, "DES-RICH-S01.parameters.z_front_m": 2.1}}
+                "parameters": {"DES-ECAL-S01.parameters.front_position_m": 2.0,
+                               "DES-RICH-S01.parameters.z_front_m": 2.1}}
         g, _ = space.repair(space.proposal_genome(prop))
         _, facts = space.decode(g, "s", f"{NS_A}:x")
         v, why = space.violation(facts)
@@ -550,7 +571,7 @@ class Validity(unittest.TestCase):
         cand = json.loads((self.art / "candidates" / "cand-S.json").read_text(encoding="utf-8"))
         for new, sid, z in (("DES-ECAL-001", "DES-ECAL-S01", 2.9), ("DES-RICH-001", "DES-RICH-S01", 2.7)):
             sub = ext["overrides"][sid]
-            sub["parameters"]["z_front_m"]["value"] = z
+            sub["parameters"]["front_position_m" if new == "DES-ECAL-001" else "z_front_m"]["value"] = z
             cand["extension"]["subsystems"][new] = sub
             for q in ext["budgets"]:
                 cand["extension"]["budgets"][q][new] = ext["budgets"][q][sid]
@@ -566,9 +587,10 @@ class Validity(unittest.TestCase):
         return space.violation(facts)
 
     def expected_base_extent_violation(self, v: float, why: list[str]) -> None:
-        x0 = json.loads((ASSETS / "materials.json").read_text(encoding="utf-8"))["materials"]["G4_Pb"][
-            "radiation_length_cm"]
-        ecal = (2.9, 2.9 + 17.0 * x0 * 0.01 / 0.5)
+        mats = json.loads((ASSETS / "materials.json").read_text(encoding="utf-8"))["materials"]
+        x0p, x0a = (mats[m]["radiation_length_cm"] * 10 for m in ("G4_Pb", "G4_PLASTIC_SC_VINYLTOLUENE"))
+        tp = round(x0p * (17.0 / 20 - 5.0 / x0a), 3)  # the template's 20 layers with 5 mm of scintillator, 17 X0
+        ecal = (2.9, 2.9 + 20 * (tp + 5.0) * 1e-3)
         rich = (2.7, 2.7 + 0.03 + 0.3)
         expect = (ecal[1] - 3.0) / 3.0 + (rich[1] - 3.0) / 3.0 + (rich[1] - ecal[0]) / 3.0
         self.assertIn("envelope: DES-ECAL-001 extends outside [0, 3.0] m", why)
@@ -577,18 +599,19 @@ class Validity(unittest.TestCase):
         self.assertAlmostEqual(v, expect)
 
     def test_base_slot_with_only_the_front_free(self):
-        """A base calorimeter or RICH with only z_front_m free takes depth, absorber and radiator from the base."""
+        """A base calorimeter or RICH with only its front free takes the sampling structure and radiator from the
+        base."""
         v, why = self.base_extent_violation(
-            [("DES-ECAL-001", "z_front_m", [0.0, 20.0]), ("DES-RICH-001", "z_front_m", [0.0, 20.0])],
-            {"DES-ECAL-001.parameters.z_front_m": 2.9, "DES-RICH-001.parameters.z_front_m": 2.7})
+            [("DES-ECAL-001", "front_position_m", [0.0, 20.0]), ("DES-RICH-001", "z_front_m", [0.0, 20.0])],
+            {"DES-ECAL-001.parameters.front_position_m": 2.9, "DES-RICH-001.parameters.z_front_m": 2.7})
         self.expected_base_extent_violation(v, why)
 
     def test_base_slot_with_the_front_fixed(self):
-        """A base calorimeter or RICH with depth_X0 or radiator_length_cm free and z_front_m fixed is still checked
+        """A base calorimeter or RICH with depth_x0 or radiator_length_cm free and its front fixed is still checked
         for envelope and overlap, from the base front."""
         v, why = self.base_extent_violation(
-            [("DES-ECAL-001", "depth_X0", [5.0, 30.0]), ("DES-RICH-001", "radiator_length_cm", [1.0, 200.0])],
-            {"DES-ECAL-001.parameters.depth_X0": 17.0, "DES-RICH-001.parameters.radiator_length_cm": 3.0})
+            [("DES-ECAL-001", "depth_x0", [5.0, 30.0]), ("DES-RICH-001", "radiator_length_cm", [1.0, 200.0])],
+            {"DES-ECAL-001.parameters.depth_x0": 17.0, "DES-RICH-001.parameters.radiator_length_cm": 3.0})
         self.expected_base_extent_violation(v, why)
 
     def test_parent_reset_when_the_mother_is_disabled(self):
@@ -632,7 +655,7 @@ class Closure(unittest.TestCase):
                     "base_candidate": "spectrometer-demo:cand-S", "objectives": [{"requirement": "REQ-TRK-001"}],
                     "free_parameters": [{"ref": "DES-TRK-001.parameters.layer_positions_m", "kind": "positions",
                                          "n": [6, 6], "range": [0.0, 1.0], "min_spacing_m": 1 / 32}],
-                    "rules_version": "1.0.0", "materials_version": "1.0.0", "budget": {"evaluations": 5000},
+                    "rules_version": "1.1.0", "materials_version": "1.0.0", "budget": {"evaluations": 5000},
                     "optimizer": {"name": "nsga2", "population": 100, "generations": 49, "seed": 12345},
                     "finalists": {"max": 1}, "consistency_samples": 0}
             rel = write_spec(b.art, spec, "SEARCH-P")

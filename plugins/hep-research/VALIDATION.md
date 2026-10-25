@@ -3266,6 +3266,29 @@ Not done in this stage: the independent
 new-problem run by an agent that did not take part (C1.10, section A.8), the `review.py` Markdown review, the release
 manifest. The adequacy table is unchanged; search values remain F1 optimistic bounds and decide nothing.
 
+## SEARCH-ROLES-1.1.0 (2026-10-25, E2 and the CI lock; branch `feat/search-roles-geometry` from main `8b41af25`)
+
+Follow-up recorded at stage C2 (DESIGN-SEARCH-G4 limits): role rules 1.0.0 named a search-added TOF's and
+calorimeter's parameters for the F1 tools only, so such a subsystem had no Geant4 geometry. Role rules 1.1.0
+(`assets/design-search/roles.json`) name them in the design-geometry mapping's parameters: TOF `layer_positions_m`
+(2 to 4 plane centres, minimum spacing 0.02 m), `layer_thickness_m`, `time_resolution_ps`, with the F1 flight path
+`path_m` derived (last minus first plane); calorimetry-em `depth_x0` (the whole sampling structure), `passive_material`,
+`front_position_m`, with `sampling_layers`, `passive_thickness_mm` (whole micrometres), `active_material` and
+`active_thickness_mm` derived from the rule's template (20 layers of 5 mm polyvinyltoluene), the extent and budget from
+that structure. 1.0.0 is kept as `roles-1.0.0.json` (`load_asset` reads `<stem>-<version>.json`), so recorded searches
+(J16) expand unchanged.
+
+| Check | Result |
+|---|---|
+| `test_design_search.py` on rules 1.1.0 (31 tests; new `test_earlier_rules_version_still_decodes`) | pass; budget and extent expectations recomputed by hand from the template |
+| `test_design_search_g4.py` `DecodedSpecs`: TOF positions [-0.32, -0.30, 1.00, 1.02] m and 12 mm thickness, calorimeter depth 20 X0 on J15's base, through `geometry`, `from-geometry` (depth check within 1 %) and `check-spec` | pass (an unrounded passive thickness first gave sub-nanometre layer overlaps; rounding to 1 um fixed it) |
+| J16 (`test_design_search_j16.py`, recorded 1.0.0 searches) | pass, results unchanged |
+| `run_all_checks.py --no-cli --jobs 6`, E2 | 29 pass, 0 fail, 2 skipped; 5529 tests, 0 failures, 153 skipped |
+| Same with the CI lock | 29 pass, 0 fail, 2 skipped; 5529 tests, 0 failures, 245 skipped |
+
+Limits: the realization profile must still have the matching elements (`from-geometry` refuses a TOF plane count other
+than the profile's); TOF planes enter no overlap check with other subsystems.
+
 ## F4-REFUSED-STUDY (2026-10-25, E2 and the CI lock; branch `fix/f4-refused-study` from main `ec403217`)
 
 Follow-up recorded at stage C3 (J16 README review R0b7acaa370): `evaluate_design.py f4 --study` on a study record

@@ -1,0 +1,107 @@
+{
+ "schema": "design-search-roles/1",
+ "rules_version": "1.0.0",
+ "note": "Realization rules per role for evaluate_design.py search (geant4 program C1.2, section C.4.5): the parameters the search may change, their units, ranges and manufacturing tolerances, the parameters derived from them, the calibration template and the budget model of a subsystem the search adds. Generic, SYNTHETIC defaults: every budget input is an assumed model value, never an experiment's number; the budget rows a model writes are basis 'estimate' with a source that names the model. A new role or rule enters through a reviewed change of this file (a new rules_version).",
+ "budget_relative_uncertainty": 0.25,
+ "roles": {
+  "tracking": {
+   "code": "TRK",
+   "technology": "silicon microstrip planes (search template)",
+   "f1_tools": ["tracker-resolution", "multiple-scattering", "charge-confusion-rate", "design-estimates"],
+   "parameters": {
+    "layer_positions_m": {"kind": "positions", "unit": "m", "range": [0.0, 20.0], "n": [3, 16], "min_spacing_m": 0.005, "tolerance": 0.0001},
+    "point_resolution_um": {"kind": "continuous", "unit": "um", "range": [1.0, 200.0], "tolerance": 0.5},
+    "passive_x_over_x0": {"kind": "continuous", "unit": "1", "range": [0.0, 0.5], "tolerance": 0.002},
+    "sensor_material": {"kind": "categorical", "unit": "1", "choices": ["G4_Si"]},
+    "sensor_thickness_um": {"kind": "continuous", "unit": "um", "range": [50.0, 1000.0], "tolerance": 5.0}
+   },
+   "derived": {
+    "layer_x_over_x0": {"unit": "1", "model": "per-layer-x-over-x0", "from": ["sensor_material", "sensor_thickness_um", "layer_positions_m"], "note": "one value per plane: sensor_thickness / X0(sensor_material) from materials.json; support material belongs in passive_x_over_x0"}
+   },
+   "per_layer": ["layer_x_over_x0", "layer_aperture_radius_m", "layer_lateral_offset_m"],
+   "new_subsystem": {"layer_positions_m": [0.0, 0.5, 1.0, 1.5], "point_resolution_um": 10.0, "passive_x_over_x0": 0.02, "sensor_material": "G4_Si", "sensor_thickness_um": 300.0},
+   "calibration": {"method": "track-based alignment of the planes (search template)", "control_samples": ["high-momentum tracks", "cosmic-ray muons"]},
+   "budget_model": {
+    "name": "planes-density-volume",
+    "description": "mass = N x plane_area x sensor thickness x density x (1 + support_mass_factor); channels = N x readout_sides x sqrt(plane_area) / strip_pitch; power and data rate per channel",
+    "inputs": {"plane_area_m2": 1.0, "strip_pitch_um": 100.0, "readout_sides": 2, "support_mass_factor": 1.0, "power_per_channel_W": 0.001, "data_per_channel_Mbit_s": 2.5e-05, "default_sensor_material": "G4_Si", "default_sensor_thickness_um": 300.0}
+   }
+  },
+  "bending": {
+   "code": "MAG",
+   "technology": "dipole magnet (search template)",
+   "f1_tools": ["tracker-resolution", "multiple-scattering", "charge-confusion-rate"],
+   "parameters": {
+    "field_T": {"kind": "continuous", "unit": "T", "range": [0.05, 2.0], "tolerance": 0.001, "note": "uniform over the lever arm in the F1 tools; the magnet length is not a parameter (Example A's basis note: the planes outside the magnet see no field, which the F1 bound ignores)"}
+   },
+   "new_subsystem": {"field_T": 0.5},
+   "calibration": {"method": "field map with temperature monitoring (search template)", "control_samples": ["field map"]},
+   "budget_model": {
+    "name": "magnet-placeholder",
+    "description": "declared placeholder, not a magnet design: mass = mass_per_tesla x field_T, power = power_per_tesla x field_T, no channels or data",
+    "inputs": {"mass_per_tesla_kg": 14000.0, "power_per_tesla_W": 0.0}
+   }
+  },
+  "tof": {
+   "code": "TOF",
+   "technology": "plastic scintillator time-of-flight planes (search template)",
+   "f1_tools": ["pid-separation-power"],
+   "parameters": {
+    "n_layers": {"kind": "integer", "unit": "1", "range": [2, 4], "tolerance": 0},
+    "time_resolution_ps": {"kind": "continuous", "unit": "ps", "range": [20.0, 400.0], "tolerance": 5.0},
+    "scintillator_thickness_cm": {"kind": "continuous", "unit": "cm", "range": [0.5, 3.0], "tolerance": 0.05},
+    "path_m": {"kind": "continuous", "unit": "m", "range": [0.3, 5.0], "tolerance": 0.001}
+   },
+   "new_subsystem": {"n_layers": 2, "time_resolution_ps": 150.0, "scintillator_thickness_cm": 1.0, "path_m": 1.2},
+   "calibration": {"method": "time-offset and time-walk calibration with tracks (search template)", "control_samples": ["minimum-ionizing particles"]},
+   "budget_model": {
+    "name": "tof-planes",
+    "description": "mass = n_layers x plane_area x thickness x density(scintillator_material); channels = n_layers x paddles_per_layer x 2 ends; power and data rate per channel",
+    "inputs": {"plane_area_m2": 1.0, "paddles_per_layer": 8, "scintillator_material": "G4_PLASTIC_SC_VINYLTOLUENE", "power_per_channel_W": 1.0, "data_per_channel_Mbit_s": 0.01}
+   }
+  },
+  "calorimetry-em": {
+   "code": "ECAL",
+   "technology": "sampling electromagnetic calorimeter (search template)",
+   "f1_tools": ["calorimeter-resolution"],
+   "parameters": {
+    "stochastic_term": {"kind": "continuous", "unit": "GeV^0.5", "range": [0.02, 0.25], "tolerance": 0.002},
+    "constant_term": {"kind": "continuous", "unit": "1", "range": [0.002, 0.05], "tolerance": 0.0005},
+    "noise_term_GeV": {"kind": "continuous", "unit": "GeV", "range": [0.0, 0.5], "tolerance": 0.005},
+    "depth_X0": {"kind": "continuous", "unit": "1", "range": [5.0, 30.0], "tolerance": 0.1},
+    "absorber_material": {"kind": "categorical", "unit": "1", "choices": ["G4_Pb", "G4_W"]},
+    "z_front_m": {"kind": "continuous", "unit": "m", "range": [0.0, 20.0], "tolerance": 0.001}
+   },
+   "extent": {"front": "z_front_m", "depth_x0": "depth_X0", "material": "absorber_material", "absorber_fraction": 0.5, "note": "longitudinal extent = depth_X0 x X0(absorber) / absorber_fraction"},
+   "new_subsystem": {"stochastic_term": 0.1, "constant_term": 0.01, "noise_term_GeV": 0.05, "depth_X0": 17.0, "absorber_material": "G4_Pb", "z_front_m": 2.0},
+   "calibration": {"method": "energy-scale calibration (search template)", "control_samples": ["electrons of known momentum", "minimum-ionizing particles"]},
+   "budget_model": {
+    "name": "calorimeter-block",
+    "description": "mass = block_area x depth_X0 x X0(absorber) x density(absorber) (absorber only); channels = block_area / cell_size^2; power and data rate per channel",
+    "inputs": {"block_area_m2": 1.0, "cell_size_m": 0.02, "power_per_channel_W": 0.05, "data_per_channel_Mbit_s": 0.0001}
+   }
+  },
+  "rich": {
+   "code": "RICH",
+   "technology": "ring-imaging Cherenkov detector (search template)",
+   "f1_tools": ["cherenkov-angle"],
+   "parameters": {
+    "refractive_index": {"kind": "continuous", "unit": "1", "range": [1.0005, 1.06], "tolerance": 0.0001},
+    "radiator_length_cm": {"kind": "continuous", "unit": "cm", "range": [1.0, 200.0], "tolerance": 0.1},
+    "n0_per_cm": {"kind": "continuous", "unit": "1/cm", "range": [10.0, 150.0], "tolerance": 1.0},
+    "single_photon_resolution_mrad": {"kind": "continuous", "unit": "mrad", "range": [0.3, 15.0], "tolerance": 0.05},
+    "track_resolution_mrad": {"kind": "continuous", "unit": "mrad", "range": [0.05, 3.0], "tolerance": 0.01},
+    "z_front_m": {"kind": "continuous", "unit": "m", "range": [0.0, 20.0], "tolerance": 0.001}
+   },
+   "extent": {"front": "z_front_m", "length_cm": "radiator_length_cm", "expansion_m": 0.3, "note": "longitudinal extent = radiator_length + expansion_m"},
+   "new_subsystem": {"refractive_index": 1.03, "radiator_length_cm": 3.0, "n0_per_cm": 50.0, "single_photon_resolution_mrad": 4.0, "track_resolution_mrad": 0.5, "z_front_m": 2.0},
+   "calibration": {"method": "ring-radius and photon-detector gain calibration (search template)", "control_samples": ["rings of saturated high-momentum particles"]},
+   "budget_model": {
+    "name": "rich-block",
+    "description": "declared model: mass = block_area x areal_mass; channels = block_area / pixel_size^2; power and data rate per channel",
+    "inputs": {"block_area_m2": 1.0, "areal_mass_kg_m2": 30.0, "pixel_size_m": 0.003, "power_per_channel_W": 0.001, "data_per_channel_Mbit_s": 1e-05}
+   }
+  }
+ },
+ "mothers": ["bending", "calorimetry-em"]
+}
