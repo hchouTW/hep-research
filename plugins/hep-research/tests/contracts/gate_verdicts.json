@@ -1384,18 +1384,6 @@
   "ok": true,
   "strict_ok": true
  },
- "examples/design-minimal-spectrometer/output/artifacts/evaluations/SIM-N4-TRK100.json": {
-  "ok": true,
-  "strict_ok": true
- },
- "examples/design-minimal-spectrometer/output/artifacts/evaluations/SIM-N6-CAL10.json": {
-  "ok": true,
-  "strict_ok": true
- },
- "examples/design-minimal-spectrometer/output/artifacts/evaluations/SIM-N6-CC500.json": {
-  "ok": true,
-  "strict_ok": true
- },
  "examples/design-minimal-spectrometer/output/artifacts/evaluations/SIM-N6-TRK1-notails.json": {
   "ok": true,
   "strict_ok": true
@@ -1404,15 +1392,7 @@
   "ok": true,
   "strict_ok": true
  },
- "examples/design-minimal-spectrometer/output/artifacts/evaluations/SIM-N6-TRK100.json": {
-  "ok": true,
-  "strict_ok": true
- },
  "examples/design-minimal-spectrometer/output/artifacts/evaluations/SIM-N8-TRK1.json": {
-  "ok": true,
-  "strict_ok": true
- },
- "examples/design-minimal-spectrometer/output/artifacts/evaluations/SIM-N8-TRK100.json": {
   "ok": true,
   "strict_ok": true
  },

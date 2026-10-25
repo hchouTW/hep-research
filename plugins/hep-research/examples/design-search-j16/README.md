@@ -36,7 +36,7 @@ The values below are F1 search values (optimistic bounds), not performance claim
 
 | Finalist | Resolution (F1) | Other | Mass (F1) | Verdicts (`design.py`) |
 |---|---|---|---|---|
-| A `cand-F937`, 7 planes, 0.10 T | 0.260 | charge confusion 6e-5 | 1411 kg | `CON-MASS-001` pass; `REQ-TRK-001` inconclusive (`fidelity.insufficient`, see below); `REQ-CC-001` inconclusive (`bound.direction`) |
+| A `cand-F937`, 7 planes, 0.10 T | 0.260 | charge confusion 6e-5 | 1411 kg | `CON-MASS-001` pass; `REQ-TRK-001` inconclusive (`bound.direction`, no F4 evaluation: see below); `REQ-CC-001` inconclusive (`bound.direction`) |
 | A `cand-F961`, 9 planes, TOF | 0.062 | charge confusion < 1e-50 | 5089 kg | `CON-MASS-001` inconclusive (`margin.within_uncertainty`); resolution and charge confusion `bound.direction` |
 | A `cand-F1047`, 9 planes | 0.046 | charge confusion < 1e-50 | 6925 kg | `CON-MASS-001` fail (`estimate.decides`, limit 3000 kg); resolution and charge confusion `bound.direction` |
 | B `cand-F959`, 10 planes | 0.024 | ECAL 0.0070 | 34867 kg | `REQ-TRK-001` and `REQ-ECAL-001` inconclusive (`bound.direction`); `CON-MASS-001` inconclusive (`margin.within_uncertainty`: 39 % over the 25000 kg limit, within the F1 mass uncertainty) |
@@ -68,8 +68,8 @@ verification and reference runs use the fixed ids `j16a-F937-verification` and `
 Geant4 seed to reuse; the rule against search seeds (CV-C2) matters when the search has Geant4 search values, while CV-C2's
 seed_group clause (`design.seed_reuse`) already applies to these runs. `run.py` re-labels the
 study from `recorded/` (200 kB): it reruns `label --upgrade` and then `f4 --study` on the recorded run records and
-benchmark results (on the refused record `f4` still writes an F4 evaluation, which `design.py` treats as unqualified,
-`fidelity.insufficient`, and `search --diagnose` lists with fidelity F4 and `f4_qualified: false`); the benchmarks themselves are not recomputed offline, because the control crossings files are not recorded.
+benchmark results (`label` keeps the refusal in the record as `study.upgrade_refused`, and `f4` then writes no F4
+evaluation: it exits 3, `upgrade-refused`, as an evaluation of a refused study would decide nothing); the benchmarks themselves are not recomputed offline, because the control crossings files are not recorded.
 
 The upgrade was **refused**. At 1 TV the reference agrees with Lynch–Dahl to +0.4 %, and both ±13 % density
 controls are caught. But the −13 % control shifted the width by −8.0 %, beyond 1.1 times its detection limit of
@@ -77,8 +77,8 @@ controls are caught. But the −13 % control shifted the width by −8.0 %, beyo
 fixed control size, not one sized from the detection limit. The protocol records the miss and never reruns it; that rule is procedural: `live.py` deletes and rewrites
 `recorded/` when run again, and `confirmation_study_id` has no attempt input, so rerunning the same finalist under
 the same search reproduces the same seeds. A qualifying attempt needs a new search (a new id) or a changed design, with its control size declared
-before its runs. The F4 evaluation (core 0.313, against 0.260 at F1) is therefore unqualified: `REQ-TRK-001` for
-`cand-F937` is inconclusive with `fidelity.insufficient`. A qualified confirmation needs a new study whose control
+before its runs. The study's core (0.313, against 0.260 at F1) therefore gives no F4 evaluation: `REQ-TRK-001` for
+`cand-F937` stays inconclusive on its F1 bound (`bound.direction`). A qualified confirmation needs a new study whose control
 size is declared before its runs, a step a human checks. J15 met the same limit at 100 GV.
 
 ## Not provided, and limits

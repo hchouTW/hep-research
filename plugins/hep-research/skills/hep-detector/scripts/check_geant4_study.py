@@ -883,6 +883,8 @@ def cmd_label(args) -> tuple[str, dict]:
                                     "phase2_upgrade_eligible_scopes": eligible,
                                     "evidence_overlap": overlap, "evidence_overlap_version": 1,
                                     "highest_usable_label": doc["highest_usable_label"]}}}
+        if args.upgrade and not upgrade:  # kept in the record, so evaluate_design.py f4 refuses it later too
+            record["extension"]["study"]["upgrade_refused"] = refused
         if results is not None:  # B2.6: kept across the re-issue (label rebuilds the record from scratch)
             kept = results["results"]
             ref = qualification_reference(declared.get("observable_kind"), bench.get("benchmarks", [])) \

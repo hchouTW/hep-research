@@ -94,7 +94,8 @@ At 100 GV more planes resolve better. Shower containment has no tool below F4.
 ### The Geant4 studies (F4)
 
 The studies were run live by `live.py` and recorded in `recorded/`. `run.py` replays them offline: it re-runs
-`check_geant4_study.py label --upgrade` on the recorded inputs, then writes the F4 evaluation and the report.
+`check_geant4_study.py label --upgrade` on the recorded inputs, then writes the F4 evaluation of each upgraded study
+(`f4` refuses a study whose upgrade was refused) and the report.
 
 | Study | Result | Upgrade | Verdict |
 |---|---|---|---|
@@ -102,9 +103,9 @@ The studies were run live by `live.py` and recorded in `recorded/`. `run.py` rep
 | N6, 1 GV, all tail sources | 1.82 % | validated-in-scope | see below |
 | N6, 1 GV, tail sources off | 1.82 % (`optimistic`) | validated-in-scope | — |
 | N8, 1 GV | 2.08 % | validated-in-scope | `REQ-TRK-001` pass (row 16) |
-| N4, N6, N8, 100 GV | 11.3 %, 10.5 %, 9.8 % | refused (reference control) | `fidelity.insufficient` |
-| N6, 500 GV charge confusion | 3.4 % | refused (D0-b) | stays at F1 (`bound.direction`) |
-| N6, 10 GeV shower containment | 96.8 % | refused (no reference) | `fidelity.insufficient` |
+| N4, N6, N8, 100 GV | 11.3 %, 10.5 %, 9.8 % | refused (reference control) | no F4 evaluation (`f4`: `upgrade-refused`); `REQ-TRK-002` stays at F1/F2 |
+| N6, 500 GV charge confusion | 3.4 % | refused (D0-b) | no F4 evaluation; stays at F1 (`bound.direction`) |
+| N6, 10 GeV shower containment | 96.8 % | refused (no reference) | no F4 evaluation; no evaluation used |
 
 Notes on the table:
 

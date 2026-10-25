@@ -65,14 +65,17 @@ class J16Replay(unittest.TestCase):
         self.assertEqual(summ["seeds"]["geant4_search"], [])
         self.assertEqual(conf["candidate"], f"ams-like-v1:cand-F{summ['finalists'][0]['index']}")
         # recorded as it came out: the reference's -13 % control shifted beyond 1.1 DL, so the upgrade is refused,
-        # the study stays unvalidated and its F4 evaluation decides nothing (fidelity.insufficient)
+        # the study stays unvalidated with the refusal recorded, and f4 writes no evaluation (it would decide nothing)
         if conf["upgrade"] == "re-issued as validated-in-scope":
             self.assertEqual(study["status"], ["validated-in-scope"])
         else:
             self.assertIn("unvalidated", study["status"])
             self.assertTrue(conf["gaps"])
+            self.assertTrue(study["extension"]["study"]["upgrade_refused"])
+            self.assertEqual((conf["f4_exit"], conf["fidelity"]), (3, None))
+            self.assertFalse((art / "evaluations" / f"SIM-{conf['study']}.json").exists())
             row = self.r["A"]["rows"][f"REQ-TRK-001 {conf['candidate'].split(':')[1]}"]
-            self.assertIn("fidelity.insufficient", row["codes"])
+            self.assertEqual(row["result"], "inconclusive")
 
     def test_reply_facts(self):
         """C3.4: the reply states the search size and the confirmation status; the report carries screening, the

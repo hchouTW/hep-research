@@ -176,6 +176,7 @@
    "upgrade": "re-issued as validated-in-scope",
    "gaps": [],
    "value": 0.01819511530127913,
+   "f4_written": true,
    "uncertainty": {
     "coverage": 0.9,
     "distribution": "non-gaussian",
@@ -199,6 +200,7 @@
    "upgrade": "re-issued as validated-in-scope",
    "gaps": [],
    "value": 0.01818013528981194,
+   "f4_written": true,
    "uncertainty": {
     "coverage": 0.9,
     "distribution": "non-gaussian",
@@ -225,6 +227,7 @@
     "convergence gate not passed: physics.default_cut_mm incomplete"
    ],
    "value": 0.10520609938269829,
+   "f4_written": false,
    "uncertainty": {
     "coverage": 0.9,
     "distribution": "non-gaussian",
@@ -242,12 +245,13 @@
     "noise-digitization",
     "pattern-recognition"
    ],
-   "bound": "estimate"
+   "bound": null
   },
   "SIM-N4-TRK1": {
    "upgrade": "re-issued as validated-in-scope",
    "gaps": [],
    "value": 0.014786095715123845,
+   "f4_written": true,
    "uncertainty": {
     "coverage": 0.9,
     "distribution": "non-gaussian",
@@ -277,6 +281,7 @@
     "multiple-scattering-reference: a negative control's shift of the observable is not at the claimed detection limit 0.063 (|shift| <= 1.1 DL)"
    ],
    "value": 0.11338809278302535,
+   "f4_written": false,
    "uncertainty": {
     "coverage": 0.9,
     "distribution": "non-gaussian",
@@ -294,12 +299,13 @@
     "noise-digitization",
     "pattern-recognition"
    ],
-   "bound": "estimate"
+   "bound": null
   },
   "SIM-N8-TRK1": {
    "upgrade": "re-issued as validated-in-scope",
    "gaps": [],
    "value": 0.02080568447775748,
+   "f4_written": true,
    "uncertainty": {
     "coverage": 0.9,
     "distribution": "non-gaussian",
@@ -329,6 +335,7 @@
     "multiple-scattering-reference: a negative control's shift of the observable is not at the claimed detection limit 0.063 (|shift| <= 1.1 DL)"
    ],
    "value": 0.09752082231601225,
+   "f4_written": false,
    "uncertainty": {
     "coverage": 0.9,
     "distribution": "non-gaussian",
@@ -346,7 +353,7 @@
     "noise-digitization",
     "pattern-recognition"
    ],
-   "bound": "estimate"
+   "bound": null
   },
   "SIM-N6-CC500": {
    "upgrade": {
@@ -361,6 +368,7 @@
     "qualification (charge-confusion): ms-tail-reference: verdict 'not-applicable'; negative control not caught; not validation evidence; particle: the benchmark states none; material: the benchmark states none; thickness_x0: the benchmark states none; rigidity_GV: the benchmark states none"
    ],
    "value": 0.03360996112879524,
+   "f4_written": false,
    "uncertainty": {
     "coverage": 0.9,
     "distribution": "exact",
@@ -378,7 +386,7 @@
     "noise-digitization",
     "pattern-recognition"
    ],
-   "bound": "estimate"
+   "bound": null
   },
   "SIM-N6-CAL10": {
    "upgrade": {
@@ -392,6 +400,7 @@
     "no reference benchmark is validation evidence for this study (R5 not met)"
    ],
    "value": 0.9683039145355059,
+   "f4_written": false,
    "uncertainty": {
     "coverage": 0.9,
     "distribution": "non-gaussian",
@@ -404,7 +413,7 @@
     0.9683039145355059
    ],
    "tail_sources_simulated": [],
-   "bound": "estimate"
+   "bound": null
   }
  },
  "verdicts": {
@@ -502,9 +511,7 @@
   },
   "REQ-CAL-001 cand-N6": {
    "result": "inconclusive",
-   "codes": [
-    "fidelity.insufficient"
-   ],
+   "codes": [],
    "missing_evidence": [
     "shower-containment at F4 or above (compliance threshold)"
    ]

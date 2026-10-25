@@ -362,6 +362,10 @@
     "noise-digitization",
     "pattern-recognition"
    ],
+   "upgrade_refused": [
+    "the charge-confusion qualification path does not hold (B2.8: every condition passed and matched by its own scope keys, and a passed convergence gate)",
+    "3 gap(s) remain"
+   ],
    "variations": {
     "domain": "em",
     "envelope_relative": 0.002194721879409046,
@@ -413,7 +417,7 @@
   "tools": [
    {
     "name": "check_geant4_study.py",
-    "version": "401158b903e87ec5"
+    "version": "d50a985be6f6d422"
    },
    {
     "name": "geant4_benchmarks.py",

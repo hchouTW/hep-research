@@ -265,6 +265,10 @@
     "verdict": "pass"
    },
    "tail_sources_simulated": [],
+   "upgrade_refused": [
+    "no scope is eligible (a passed reference benchmark with its control caught, a passed convergence gate, the declared scope inside the benchmark scope)",
+    "2 gap(s) remain"
+   ],
    "variations": {
     "domain": "em",
     "envelope_relative": 0.0001077056083357897,
@@ -316,7 +320,7 @@
   "tools": [
    {
     "name": "check_geant4_study.py",
-    "version": "401158b903e87ec5"
+    "version": "d50a985be6f6d422"
    },
    {
     "name": "geant4_benchmarks.py",

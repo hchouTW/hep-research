@@ -3,6 +3,21 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+**Before you upgrade:** `evaluate_design.py f4 --study` on a study record whose `label --upgrade` was refused now
+exits 3 (`upgrade-refused`) and writes no F4 evaluation; until 0.39.0 it wrote one that decided nothing. A script that
+expected exit 0 there treats exit 3 like the `--label-spec` path's refusal.
+
+- `check_geant4_study.py label --upgrade` keeps the reasons of a refused upgrade in the record
+  (`extension.study.upgrade_refused`); a record labelled without `--upgrade` is unchanged.
+- `evaluate_design.py f4` refuses such a record the way it already refused a refusal it ran itself, with the reasons and
+  the record's gaps. An unvalidated study that was never labelled with `--upgrade` still gives a below-screening F4
+  evaluation (ART-31).
+- J15 and J16 regenerated: the refused 100 GV, charge-confusion and shower studies of J15 and the J16 confirmation
+  write no F4 evaluation (`results.json` records `f4_written` and the exit), with no verdict change except that the
+  rows lose the below-screening F4 entry; the J14, J15 and J16 study records name the new tool hash.
+
 ## 0.39.0 (2026-10-25)
 
 Minor release, contracts 3.13.0, `CORE_VERSION` 1.1.0, geant4 adapter 0.5.0. It ships the Geant4 program (spec
