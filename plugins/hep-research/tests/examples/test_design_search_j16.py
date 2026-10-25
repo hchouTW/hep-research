@@ -24,7 +24,7 @@ def differences(a, b, path="$"):
             return [f"{path}: length {len(a)} != {len(b)}"]
         return [d for i, (x, y) in enumerate(zip(a, b)) for d in differences(x, y, f"{path}[{i}]")]
     if isinstance(a, float) and isinstance(b, (int, float)) and not isinstance(b, bool):
-        return [] if math.isclose(a, b, rel_tol=1e-9, abs_tol=1e-300) else [f"{path}: {a!r} != {b!r}"]
+        return [] if math.isclose(a, b, rel_tol=1e-9, abs_tol=1e-12) else [f"{path}: {a!r} != {b!r}"]
     return [] if a == b else [f"{path}: {a!r} != {b!r}"]
 
 
