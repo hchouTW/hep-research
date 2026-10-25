@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 42,
-   "bytes": 589119,
+   "bytes": 587917,
    "uncited": 0
   },
   "hep-measurement": {
@@ -2054,8 +2054,8 @@
   {
    "path": "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
    "owner": "hep-detector",
-   "bytes": 24314,
-   "lines": 363,
+   "bytes": 23112,
+   "lines": 331,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",

@@ -213,10 +213,6 @@ distribution, not only its width, and its spectrum when tails appear.
   minimum-ionizing particles in thin sensors, single photoelectrons, and low-energy
   showers.
 
-## Amplitude and time from sampled waveforms (moved)
-
-Now in [front-end waveform processing](front-end-waveform-processing.md#amplitude-and-time-from-sampled-waveforms).
-
 ## Digitization: ADC and TDC
 
 - **Quantization** (*approximate*): `LSB/√12` is the rms error over a broad spread of
@@ -273,26 +269,6 @@ Now in [front-end waveform processing](front-end-waveform-processing.md#amplitud
 - The per-detector budgets (sensor, photostatistics, calibration, geometry, reference
   time) are in [timing detectors](timing-detectors.md).
 
-## Pileup of pulses, baseline, and rate (moved)
-
-Now in [front-end waveform processing](front-end-waveform-processing.md#pileup-of-pulses-baseline-and-rate).
-
-## Photosensor readout (moved)
-
-Now in [front-end waveform processing](front-end-waveform-processing.md#photosensor-readout).
-
-## LAr TPC signal processing (moved)
-
-Now in [front-end waveform processing](front-end-waveform-processing.md#lar-tpc-signal-processing).
-
-## Digital pulse processing for spectroscopy (moved)
-
-Now in [front-end waveform processing](front-end-waveform-processing.md#digital-pulse-processing-for-spectroscopy).
-
-## Pulse-shape discrimination (moved)
-
-Now in [front-end waveform processing](front-end-waveform-processing.md#pulse-shape-discrimination).
-
 ## Radiation and the electronics
 
 - **Single-event upsets** flip configuration or data bits: channels become noisy, dead,
@@ -303,14 +279,6 @@ Now in [front-end waveform processing](front-end-waveform-processing.md#pulse-sh
   itself; recalibrate thresholds and monitor S-curves versus dose.
 - **Sensor damage** raises leakage current (Noise above) and reduces collected charge;
   the signal-to-noise ratio falls from both sides.
-
-## Calibration of the electronics (moved)
-
-Now in [front-end calibration and simulation](front-end-calibration.md#calibration-of-the-electronics).
-
-## Simulation of the electronics (moved)
-
-Now in [front-end calibration and simulation](front-end-calibration.md#simulation-of-the-electronics).
 
 ## Common misconceptions and failure modes
 

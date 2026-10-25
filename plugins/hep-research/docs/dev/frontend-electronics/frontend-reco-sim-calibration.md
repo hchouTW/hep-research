@@ -472,7 +472,8 @@ Follows `docs/dev/geant4-architecture/geant4-program.md` §P.10 [C]; the only ex
 - *At FE5 [C]:* the front-end page went from 40,480 bytes (after FE1 and FE4) to 23,863 bytes in the `move:` commit
   and to about 24.2 KB with the sentence that names the two new pages, under the line. The "(moved)" pointers are
   sections of a live page, not pointer pages, so `check_wiring.py` does not expire them: their `pointers` entries
-  (keyed `page#anchor`, `remove_in` 0.42.0) say to remove them by hand. Links whose topic moved (Campbell pileup, SiPM
+  (keyed `page#anchor`, `remove_in` 0.42.0) say to remove them by hand. They were shipped in 0.41.0 and removed
+  after it (2026-10-26), for 0.42.0. Links whose topic moved (Campbell pileup, SiPM
   saturation, dead time, the sampled-waveform estimators) now point to the new pages.
 
 ## Deliverables
