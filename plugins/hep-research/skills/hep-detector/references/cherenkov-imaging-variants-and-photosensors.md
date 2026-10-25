@@ -97,7 +97,7 @@ number of secondaries per avalanche, `lambda = -ln(1 - P_ct)`, a primary gives m
 `1/(1-lambda)` cells, variance `lambda/(1-lambda)^3`); a dark count rate `DCR` contributes a mean
 `DCR * gate` *and* a variance, so pedestal subtraction removes only the mean;
 SiPM saturation `N_cells (1 - exp(-N_pe/N_cells))` makes the response nonlinear
-([front-end electronics](front-end-electronics-and-signal-processing.md));
+([front-end waveform processing](front-end-waveform-processing.md#photosensor-readout));
 timing has transit-time spread and jitter ([timing detectors](timing-detectors.md)).
 SiPM gain `G = (C_d + C_q)(V_bias - V_off)/e` (pixel and quench capacitances; the
 turn-off voltage `V_off` is usually within 1 V of the breakdown voltage, so

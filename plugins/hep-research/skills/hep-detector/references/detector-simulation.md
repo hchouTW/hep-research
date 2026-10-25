@@ -100,7 +100,8 @@ and zero suppression, time structure including any integration window that admit
 out-of-time signals, and the dead/noisy channel map for the period being simulated.
 The electronics relations it needs (noise correlations, pulse shape and phase,
 optimal-filter weights, quantization, gain switching) are in
-[front-end electronics and signal processing](front-end-electronics-and-signal-processing.md). The ordered
+[front-end electronics and signal processing](front-end-electronics-and-signal-processing.md) and
+[front-end waveform processing](front-end-waveform-processing.md). The ordered
 digitization recipe, the rules for overlay and premixing (no noise counted twice, the sum
 taken before saturation and zero suppression, overlay from the same period) and the
 closure checks that validate the digitization are in

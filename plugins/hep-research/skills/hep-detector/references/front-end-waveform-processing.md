@@ -145,7 +145,7 @@ The statistics (Poisson photoelectrons, excess noise factor) are in
   times removes the ballistic deficit and reduces the effect of charge trapping, which a
   sharply peaked shape of the same noise would not.
 - The rise (integration) time sets the series-parallel noise trade as the peaking time does
-  for an analog shaper (Shaping above); the flat top and rise time together set the dead
+  for an analog shaper ([shaping](front-end-electronics-and-signal-processing.md#shaping)); the flat top and rise time together set the dead
   time per pulse, so resolution trades against throughput. A fast parallel channel (short
   shaping) detects pileup and rejects or flags it; the rejected fraction is a rate-dependent
   live-time loss to be measured ([triggers luminosity pileup](triggers-luminosity-pileup.md)).

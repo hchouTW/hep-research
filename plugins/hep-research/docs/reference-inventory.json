@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 42,
-   "bytes": 588504,
+   "bytes": 589007,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1703,7 +1703,7 @@
   {
    "path": "skills/hep-detector/references/calorimetry-ecal-hcal.md",
    "owner": "hep-detector",
-   "bytes": 12998,
+   "bytes": 13005,
    "lines": 208,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -1743,7 +1743,7 @@
   {
    "path": "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
    "owner": "hep-detector",
-   "bytes": 11288,
+   "bytes": 11302,
    "lines": 162,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -1944,8 +1944,8 @@
   {
    "path": "skills/hep-detector/references/detector-simulation.md",
    "owner": "hep-detector",
-   "bytes": 14397,
-   "lines": 231,
+   "bytes": 14467,
+   "lines": 232,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
@@ -2011,7 +2011,7 @@
     "skills/hep-detector/references/timing-detectors.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "765bf693 2026-10-25"
+   "last_commit": "e4841301 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/extensive-air-showers.md",
@@ -2049,18 +2049,16 @@
     "tests/skills/hep_detector/test_frontend_waveforms.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "e4841301 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
    "owner": "hep-detector",
-   "bytes": 23863,
-   "lines": 358,
+   "bytes": 24202,
+   "lines": 362,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
-    "skills/hep-detector/references/calorimetry-ecal-hcal.md",
-    "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
     "skills/hep-detector/references/detector-measurement-framework.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
@@ -2073,25 +2071,29 @@
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-detector/references/timing-detectors.md",
     "skills/hep-detector/references/tracking-and-vertexing.md",
-    "skills/hep-detector/references/triggers-luminosity-pileup.md",
     "skills/hep-detector/scripts/frontend_response.py",
     "tests/skills/hep_detector/test_frontend_waveforms.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "cdcb3651 2026-10-25"
+   "last_commit": "e4841301 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/front-end-waveform-processing.md",
    "owner": "hep-detector",
-   "bytes": 12656,
+   "bytes": 12708,
    "lines": 172,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-detector/references/calorimetry-ecal-hcal.md",
+    "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
+    "skills/hep-detector/references/detector-simulation.md",
     "skills/hep-detector/references/event-reconstruction.md",
-    "skills/hep-detector/references/front-end-electronics-and-signal-processing.md"
+    "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
+    "skills/hep-detector/references/signal-formation-and-readout.md",
+    "skills/hep-detector/references/triggers-luminosity-pileup.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "e4841301 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
@@ -2361,7 +2363,7 @@
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "5fa57b0a 2026-10-25"
+   "last_commit": "e4841301 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md",
@@ -2417,7 +2419,7 @@
   {
    "path": "skills/hep-detector/references/signal-formation-and-readout.md",
    "owner": "hep-detector",
-   "bytes": 19259,
+   "bytes": 19273,
    "lines": 258,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -2537,7 +2539,7 @@
   {
    "path": "skills/hep-detector/references/triggers-luminosity-pileup.md",
    "owner": "hep-detector",
-   "bytes": 16505,
+   "bytes": 16512,
    "lines": 241,
    "linked_from_skill_md": true,
    "cited_by": [

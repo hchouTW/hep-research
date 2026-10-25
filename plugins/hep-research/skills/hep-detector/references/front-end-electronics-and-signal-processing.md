@@ -15,7 +15,11 @@ pileup noise, with phase and baseline constraints and the joint amplitude-time e
 occupancy, threshold by threshold (`hit-efficiency`), and a seeded synthetic sampled readout
 reconstructed by those estimators with closure against the analytic prediction
 (`waveform-toy`). For calibration it fits threshold scans and plans them (`s-curve`) and
-gives the threshold dispersion left by a trim DAC (`threshold-trim`).
+gives the threshold dispersion left by a trim DAC (`threshold-trim`). Reconstruction from
+sampled waveforms, pileup, photosensor and LAr TPC readout, digital pulse processing and
+pulse-shape discrimination are in [front-end waveform processing](front-end-waveform-processing.md);
+the calibration chain and the simulation of the electronics in
+[front-end calibration and simulation](front-end-calibration.md).
 
 **Scope.** This file models electronics *as part of the response*: what it does to the
 numbers an analysis sees, how to calibrate it, and how to simulate it. It does not cover

@@ -207,7 +207,7 @@ live*.
   paralyzable `m = n exp(-n tau_d)`. Bunched beams, spills, bursts, and trigger rules
   break the Poisson assumption, and several dead-time sources in series do not
   combine by a simple formula; measure rather than model when precision matters
-  ([front-end electronics and signal processing](front-end-electronics-and-signal-processing.md)).
+  ([front-end waveform processing](front-end-waveform-processing.md#pileup-of-pulses-baseline-and-rate)).
 - **Measurement**: count a free-running clock or random triggers gated and ungated by
   the busy signal, per luminosity block (or per second for a space instrument); the
   ratio is the live fraction for that block.

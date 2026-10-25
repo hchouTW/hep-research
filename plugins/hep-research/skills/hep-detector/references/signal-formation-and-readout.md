@@ -194,7 +194,7 @@ in the raw data but not used by the algorithm).
   and time from a waveform: peak, optimal filter (minimum variance when the noise
   autocorrelation, including pileup, and the phase are known), template fit (biased at
   low `S/N` with a free time). Details and numbers:
-  [front-end electronics and signal processing](front-end-electronics-and-signal-processing.md).
+  [front-end waveform processing](front-end-waveform-processing.md#amplitude-and-time-from-sampled-waveforms).
 - **Noise.** Equivalent noise charge (ENC, electrons) sets the threshold and the
   minimum measurable signal; signal-to-noise `S/N` of a minimum-ionizing particle in a
   thin sensor is the driver of both hit efficiency and position resolution. **Common-mode

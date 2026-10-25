@@ -108,11 +108,12 @@ D-FE5: two new pages).
   LAr TPC signal processing, digital pulse processing and pulse-shape discrimination to the new
   `skills/hep-detector/references/front-end-waveform-processing.md`; calibration and simulation of the electronics to
   the new `skills/hep-detector/references/front-end-calibration.md`. `front-end-electronics-and-signal-processing.md`
-  goes from 40.5 KB to 23.9 KB, under the 24 KB warning line, and keeps a "(moved)" pointer for each section until
+  goes from 40,480 to 24,202 bytes, under the 24,576-byte warning line, and keeps a "(moved)" pointer for each section until
   0.42.0 (recorded under `pointers` in `tools/wiring_known_gaps.json`); it is registered there as a hep-detector hub.
   Links into the moved sections, the `InjectionGainGuidance` test and the internal source of ledger entry
   FRONTEND-INJECTION-GAIN follow the move; the reference inventory is regenerated and the README counts forty-two
-  references.
+  references. After the move: the front-end page's introduction names the two pages, and links whose topic moved
+  (Campbell pileup, SiPM saturation, dead time, sampled-waveform estimators) point to the new page.
 
 ## 0.40.0 (2026-10-25)
 
