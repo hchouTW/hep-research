@@ -193,6 +193,11 @@ CONTRACTS_VERSION = "3.13.0"
 # orphan-run rule and refuses an evaluation that names one as its run (design.search_point_not_expanded). No
 # capability: a 3.12 reader sees an unknown optional object and misreads no field. The number is the stage's
 # placeholder (CV-C1); it is fixed at release in merge order with the other CV-* changes.
+# CV-C2 of the Geant4 program (Geant4 search values, F4 confirmation) shares the unreleased 3.13.0: the run-record
+# evidence role search and the optional extension.simulation.seed_group; contracts/design.py refuses an evaluation whose
+# run, study or study input reuses a search_summary's Geant4 search seed (design.contract_mismatch,
+# validate.SEARCH_SEED_RULE_FROM) and a logical-run seed repeated outside one declared seed_group or with equal spec
+# hashes within one (design.seed_reuse); check_geant4_study.py label refuses a search run as study evidence.
 KNOWN_CAPABILITIES = frozenset({"core:evidence-records", "core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})

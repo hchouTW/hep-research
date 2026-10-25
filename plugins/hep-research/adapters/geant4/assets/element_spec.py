@@ -26,7 +26,7 @@ from core.simulation.seeds import job_seeds  # noqa: E402
 
 SPEC_SCHEMA = ASSETS / "element_sim" / "spec.schema.json"
 REALIZATION_SCHEMA = ASSETS / "element_sim" / "realization.schema.json"
-ADAPTER_VERSION = "0.4.1"
+ADAPTER_VERSION = "0.5.0"
 VACUUM_DENSITY_G_CM3 = 1e-20  # as contracts/validate.py: G4_Galactic and anything thinner is vacuum
 MATTER_ROLES = ("tracker-plane", "tof-layer", "calorimeter-active", "calorimeter-passive")
 CALO_DAUGHTER_ROLES = ("calorimeter-active", "calorimeter-passive")

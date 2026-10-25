@@ -3,7 +3,8 @@ behind hep-detector's study scripts (convergence gate, statistical target, varia
 
 An observable declaration names its estimator: mean (block means of the selected values), proportion (block
 fractions count_if[threshold_index] / n), mode (the most probable value: mean of three-point block modes,
-core.stats.batch_means.mpv), quantile (histogram quantile per block) or gaussian-core (from contracts CV-B2, Geant4
+core.stats.batch_means.mpv), quantile (histogram quantile per block; empirical, Hyndman-Fan type 7, when the
+observable keeps per-block values, Geant4 program C2.1) or gaussian-core (from contracts CV-B2, Geant4
 program B2.3: the width of the iterative truncated Gaussian core per block). Each gives value, SE on K - 1 degrees of
 freedom and the full-sample value as a diagnostic. A proportion with an empty block or a merged count below
 LOW_COUNT_TOTAL has no SE: it gives the exact Clopper-Pearson intervals of the merged accumulators instead (90 % and
@@ -47,6 +48,14 @@ def estimate(summary: dict, decl: dict, tol_relative: float | None = None, low_c
         return {**r, "method": r.get("estimator", "block modes")}
     if est == "quantile":
         q = decl["quantile"]
+        if "values_max" in obs and not obs.get("values_omitted"):  # C2.1: empirical quantiles from the raw values
+            per = [M.empirical_quantile(v, q) for v in S.block_values(obs)]
+            if any(p["status"] != "ok" for p in per):
+                return {"value": None, "status": "incomplete",
+                        "reason": next(p["reason"] for p in per if p["status"] != "ok")}
+            r = M.batch_mean(p["value"] for p in per)
+            return {**r, "status": "ok", "method": f"batch means of block empirical {q}-quantiles",
+                    "quantile_method": obs["quantile_method"]}
         per = [M.hist_quantile(b["hist"], lo, width, q, b["underflow"], b["overflow"]) for b in obs["blocks"]]
         if any(p["status"] != "ok" for p in per):
             return {"value": None, "status": "incomplete", "reason": next(p["reason"] for p in per if p["status"] != "ok")}
@@ -67,6 +76,37 @@ def estimate(summary: dict, decl: dict, tol_relative: float | None = None, low_c
                 f"truncation, truncation-corrected)", "truncation_sigma": k,
                 "full_sample": full.get("sigma"), "full_sample_mean": full.get("mean"), "n": merged["n"]}
     raise S.SummaryError(f"observable {name}: unknown estimator {est!r} (known: {list(ESTIMATORS)})")
+
+
+def block_estimates(summary: dict, decl: dict) -> dict:
+    """The per-block estimates theta_b behind estimate() for the estimators mean, proportion, quantile and
+    gaussian-core (Geant4 program C2.1: paired comparisons of two runs of one seed_group difference these block by
+    block). {status: ok, thetas} or {status: incomplete, reason}; estimate()'s value is the mean of the thetas."""
+    obs = S.observable(summary, decl["name"])
+    est = decl.get("estimator", "mean")
+    lo, width = obs["bins"]["lo"], obs["bins"]["width"]
+    try:
+        if est == "mean":
+            return {"status": "ok", "thetas": S.block_means(obs)}
+        if est == "proportion":
+            return {"status": "ok", "thetas": S.block_proportions(obs, int(decl.get("threshold_index", 0)))}
+    except S.SummaryError as exc:
+        return {"status": "incomplete", "reason": str(exc)}
+    if est == "quantile":
+        q = decl["quantile"]
+        per = ([M.empirical_quantile(v, q) for v in S.block_values(obs)]
+               if "values_max" in obs and not obs.get("values_omitted") else
+               [M.hist_quantile(b["hist"], lo, width, q, b["underflow"], b["overflow"]) for b in obs["blocks"]])
+        bad = next((p for p in per if p["status"] != "ok"), None)
+        return {"status": "incomplete", "reason": bad["reason"]} if bad else {
+            "status": "ok", "thetas": [p["value"] for p in per]}
+    if est == "gaussian-core":
+        k = float(decl.get("core_truncation_sigma", 2.0))
+        per = [gaussian_core(b["hist"], lo, width, k) for b in obs["blocks"]]
+        bad = next((p for p in per if p["status"] != "ok"), None)
+        return {"status": "incomplete", "reason": bad["reason"]} if bad else {
+            "status": "ok", "thetas": [p["sigma"] for p in per]}
+    return {"status": "incomplete", "reason": f"estimator {est!r} has no per-block estimates for pairing"}
 
 
 def gaussian_core(hist, lo: float, width: float, k: float = 2.0, iterations: int = 50) -> dict:

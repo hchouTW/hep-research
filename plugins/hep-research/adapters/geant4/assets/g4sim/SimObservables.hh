@@ -37,6 +37,11 @@ inline std::vector<ObservableDecl> ParseObservables(const minijson::Value& arr, 
     d.width = b.at("width", where).number(where + ".bins.width");
     if (o.has("thresholds"))
       for (const auto& t : o.obj.at("thresholds").array(where + ".thresholds")) d.thresholds.push_back(t.number(where));
+    if (o.has("values")) d.values = o.obj.at("values").boolean(where + ".values");
+    if (o.has("values_max")) {
+      d.valuesMax = static_cast<long>(o.obj.at("values_max").number(where + ".values_max"));
+      if (d.valuesMax < 1) throw minijson::JsonError(where + ": values_max must be a positive integer");
+    }
     BinCount(d);  // throws SummaryError on a binning that is not a positive whole number of bins
     out.push_back(d);
   }

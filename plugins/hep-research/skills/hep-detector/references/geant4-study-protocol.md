@@ -389,6 +389,13 @@ execution layer. Its records are always `unvalidated`.
   calorimeter can cost far more per event than option 4 even at 1 GV (protons stopping in lead; J15's acceptance
   run measured about 2000 events in 16 min on 8 threads); plan its event count from a trial. Validate the whole artifacts_dir (`contracts/validate.py --strict <artifacts_dir>`), with
   derived specs and dumps kept outside it: paths in records are relative to that root.
+- From adapter 0.5.0 (Geant4 program C2): an observable declared with `values: true` keeps each block's raw values
+  (at most `values_max` per block, else `values_omitted`), so the quantile estimator is empirical (Hyndman-Fan type
+  7); `run --seed-group NAME` records the seed_group whose runs share S. Runs of one seed_group (Geant4 search values,
+  evidence role `search`) are compared in paired mode (`core/stats/decisions.py`: per-block differences); they are
+  never study evidence (`label` refuses them), and a confirmation study's runs use S = H(study_id, role, point_id)
+  with study_id from `core/simulation/seeds.py` `confirmation_study_id`, so no evaluation shares a search seed
+  (`design.contract_mismatch`); S repeats only within one declared seed_group (`design.seed_reuse`).
 
 The hep-detector side never imports the adapter: `scripts/check_geant4_study.py` (`spec`, `run`, `variations`,
 `label`) and `scripts/geant4_benchmarks.py` (`run`, `reference`, `scope-keys`) read the files it writes. A worked

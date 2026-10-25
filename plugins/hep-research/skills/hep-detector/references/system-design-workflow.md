@@ -143,10 +143,28 @@ how many planes, where they sit). It only proposes candidates; `contracts/design
 5. The best of many noisy or optimistic values is optimistic in expectation (winner's curse): never reselect among
    finalists after seeing official results, list every finalist, and add budget only as a new search (new id).
    A requirement change is a new design-spec version and a new search.
+6. Geant4 search values (S2, adapter 0.5.0): `budget.geant4 > 0` with a `geant4` block (`realization` profile,
+   `reco` simreco fields, `events`, `blocks`, `targets`: objective label -> simreco observable and beam particle,
+   `top_k`, `generations`, `offspring`, optional `paired_threshold`, `threads`), run with `--geant4-work DIR` and
+   `HEP_GEANT4_CONFIG`. The top_k designs of distinct topologies of the S1 front are refined on short element_sim and
+   simreco runs (tail sources off, so the values are optimistic): each generation re-evaluates the survivors with
+   mutated offspring (continuous genes) in one seed_group (S = H(search id, "search", gen-g)), so comparisons within a
+   generation are paired; gate G-C2a measures Var(independent) / Var(paired) on the first generation and switches to
+   independent seeds below the threshold (noted). One survivor per topology; the last survivors are the finalists
+   (`fixed_from: geant4`). The runs stay in the work folder; `search_summary.seeds.geant4_search` lists every S.
+   Only subsystems that carry geometry-mapping fields vary in Geant4: a TOF or calorimeter the search adds from the
+   role rules has F1 parameters only.
+7. F4 confirmation (C2.4): for each finalist and (figure of merit, denominator), `geometry`, then a Geant4 study whose
+   runs are seeded S = H(study_id, role, point_id) with study_id = `confirmation_study_id(search id, design digest,
+   figure of merit, denominator)` (`core/simulation/seeds.py`), `check_geant4_study.py label --upgrade` and `f4`.
+   An evaluation whose run or study reuses a search seed is `design.contract_mismatch`, a search run (evidence role
+   `search`) is never study evidence, and a seed repeated outside one seed_group is `design.seed_reuse` (CV-C2).
+   `search --diagnose RUN` writes `runs/DIAG-*.computational-run.json`: each expanded finalist's F1 and Geant4 search
+   values minus its official evaluation or F4 value (a diagnostic; it changes no verdict).
 
 You may not invent parameters outside the role rules, skip the validity checks, edit any output, or report search
-values or rank finalists yourself. The reply states the search size, that the search front is non-binding, which
-finalists have official evaluations, and that nothing is confirmed above F1 and no optimum is claimed.
+values or rank finalists yourself. The reply states the search size (and the Geant4 runs), that the search front is
+non-binding, which finalists have official evaluations and which an F4 confirmation, and that no optimum is claimed.
 
 ## D3 Convergence
 

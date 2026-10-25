@@ -28,7 +28,7 @@
   },
   {
    "ref": "studies/N6-CAL10/study.computational-run.json",
-   "sha256": "48b61fc2ca4f91f7612bc5d95612ac9f9acad7ccdc21fdc017fb8d9f836cc41a",
+   "sha256": "ad5d6307cf3e6ba54011e7ac1d20cc2f7d900b67f8a1b1623003299414529f76",
    "artifact_type": "computational-run",
    "artifact_id": "j15-N6-CAL10-study",
    "status": [

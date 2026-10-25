@@ -55,8 +55,9 @@ if __package__ in (None, ""):
 
 from contracts.release_manifest import canonical_sha256  # noqa: E402
 from contracts.schema import validate  # noqa: E402
-from contracts.validate import (SEARCH_SUMMARY_FROM, STICKY_STATUSES, _at_least, qualification_reference,  # noqa: E402
+from contracts.validate import (SEARCH_SEED_RULE_FROM, SEARCH_SUMMARY_FROM, STICKY_STATUSES, _at_least, qualification_reference,  # noqa: E402
                                 validate_artifact)
+from core.simulation.seeds import seed_uniqueness_problems  # noqa: E402
 
 PLUGIN_ROOT = Path(__file__).resolve().parents[1]
 CONTRACT_DIR = PLUGIN_ROOT / "contracts" / "tool_contracts"
@@ -1203,6 +1204,7 @@ def analyze_evaluations(proj: Project) -> None:
         dependency_rows(proj, ev)
         parameter_binding(proj, ev, bound_refs)
         check_contract(proj, ev)
+        search_seed_rule(proj, ev)
         ev.statuses = {s for s in ev.doc.get("status") or [] if s in STICKY_STATUSES}
         own = (ev.fom, ev.fidelity, ev.eid)
         ev.vector = [own] + [v for u in ev.upstreams for v in u.vector]
@@ -1709,6 +1711,86 @@ def is_search_run(run: dict) -> bool:
                                                                                    SEARCH_SUMMARY_FROM)
 
 
+def _seed_ints(value) -> set[int]:
+    """Every integer seed in a seeds value (an int, a list, or a dict of them; dict entries may name it 'seed')."""
+    if isinstance(value, bool):
+        return set()
+    if isinstance(value, int):
+        return {value}
+    if isinstance(value, dict):
+        return set().union(*(_seed_ints(v) for v in value.values())) if value else set()
+    if isinstance(value, list):
+        return set().union(*(_seed_ints(v) for v in value)) if value else set()
+    return set()
+
+
+def search_seeds(proj: Project) -> dict[int, str]:
+    """CV-C2: S of every Geant4 search run listed in a search_summary of the artifacts_dir -> the search run's path."""
+    out: dict[int, str] = {}
+    for path, doc in proj.docs.items():
+        if doc.get("artifact_type") == "computational-run" and is_search_run(doc):
+            for s in _seed_ints((doc["extension"]["search_summary"].get("seeds") or {}).get("geant4_search")):
+                out.setdefault(s, proj.rel(path))
+    return out
+
+
+def _run_seeds(run: dict) -> set[int]:
+    ext = run.get("extension") or {}
+    seeds = _seed_ints(ext.get("seeds"))
+    s = (ext.get("simulation") or {}).get("logical_run_seed")
+    return seeds | ({s} if isinstance(s, int) and not isinstance(s, bool) else set())
+
+
+def search_seed_rule(proj: Project, ev: Evaluation) -> None:
+    """CV-C2 (Geant4 program C2.6): an evaluation whose run, study or the study's input runs used a seed that a
+    search_summary lists among its Geant4 search seeds is design.contract_mismatch (search values are for selection
+    only; a confirmation runs on independent seeds)."""
+    if not _at_least(ev.doc.get("contract_version"), SEARCH_SEED_RULE_FROM):
+        return
+    found = search_seeds(proj)
+    if not found:
+        return
+    used: set[int] = set()
+    for key in ("run_ref", "study_ref"):
+        ref = ev.ext.get(key)
+        doc = proj.docs.get(proj.resolve(ref)) if ref else None
+        if not doc or doc.get("artifact_type") != "computational-run":
+            continue
+        used |= _run_seeds(doc)
+        if key == "study_ref":  # the study's run records: evidence_records refs and input_manifest paths
+            sext = doc.get("extension") or {}
+            refs = [i.get("ref") for i in sext.get("evidence_records") or [] if isinstance(i, dict)]
+            refs += [i.get("path") for i in sext.get("input_manifest") or [] if isinstance(i, dict)]
+            for ipath in refs:
+                inp = proj.docs.get(proj.resolve(ipath)) if ipath else None
+                if inp and inp.get("artifact_type") == "computational-run":
+                    used |= _run_seeds(inp)
+    for s in sorted(used & set(found)):
+        ev.err("design.contract_mismatch", f"seed {s} is a Geant4 search seed of {found[s]}: an evaluation runs on "
+               "seeds the search never used (CV-C2)")
+
+
+def check_seed_groups(proj: Project) -> None:
+    """CV-C2 (Geant4 program C2.1): over the simulation run records of the artifacts_dir (hash-v1 seeding, contract
+    SEARCH_SEED_RULE_FROM or later), (S, spec hash) is unique and S repeats only within one declared seed_group whose
+    runs have equal blocks, block size and seeding and pairwise different spec hashes (design.seed_reuse)."""
+    runs = []
+    for path, doc in sorted(proj.docs.items()):
+        ext = doc.get("extension") or {} if doc.get("artifact_type") == "computational-run" else {}
+        sim = ext.get("simulation") or {}
+        if sim.get("seed_scheme") != "hash-v1" or ext.get("reconstruction") or not isinstance(
+                sim.get("logical_run_seed"), int) or not _at_least(doc.get("contract_version"), SEARCH_SEED_RULE_FROM):
+            continue
+        kb: dict = sim["blocks"] if isinstance(sim.get("blocks"), dict) else {}
+        runs.append({"run_id": proj.rel(path), "seed": sim["logical_run_seed"], "spec_sha256": sim.get("spec_sha256"),
+                     "seed_group": sim.get("seed_group"), "blocks": kb.get("blocks"),
+                     "block_size": kb.get("block_size"),
+                     "seeding": (sim.get("seeding") or {}).get("mode") if isinstance(sim.get("seeding"), dict)
+                     else sim.get("seeding")})
+    for problem in seed_uniqueness_problems(runs):  # the one implementation, core/simulation/seeds.py
+        proj.error("design.seed_reuse", "runs", problem)
+
+
 def orphan_runs(proj: Project) -> tuple[list[dict], dict]:
     """AGG-08: design runs (their script has a contract with a design block) that no evaluation's run_ref names. Scan
     summaries (M4) and search summaries (CV-C1) are exempt: their points are not evaluations."""
@@ -1893,6 +1975,7 @@ def derive(artifacts: Path, decisions: Path | None = None, contract_dirs: list[P
             proj.error(code, e.rel, msg)
     check_budgets(proj)
     check_calibration(proj)
+    check_seed_groups(proj)
     current, change_flags = current_spec(proj, records)
     out: dict = {"design_id": design_id, "note": NOTE,
                  "adequacy": {"version": proj.adequacy.get("adequacy_version"), "state": proj.adequacy.get("state"),

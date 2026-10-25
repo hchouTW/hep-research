@@ -28,7 +28,7 @@
   },
   {
    "ref": "studies/N6-CC500/study.computational-run.json",
-   "sha256": "55cc2514752bfa3b3c2a18256346e10c12db78c45a15c5117779072d1af8d8e3",
+   "sha256": "505a4a0005717c56044b75228cdc1a45145816e272ba326438ccd5c204d2c567",
    "artifact_type": "computational-run",
    "artifact_id": "j15-N6-CC500-study",
    "status": [

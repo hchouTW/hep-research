@@ -2756,6 +2756,36 @@ Contracts: the 13 new keys are core `convention_keys` and also `conditional_conv
 description change and the 8 Th14 cases (paid; pending approval). Pre-existing on main: 5 tests of
 `tests/contracts/test_simulated_dataset.py` fail under a whole-directory pytest run and pass alone (order dependent).
 
+## DESIGN-SEARCH-G4 (2026-10-25, E2: macOS 26.5 arm64, Apple clang 21.0.0, Geant4 11.4.3 build A, Python 3.13; branch `worktree-geant4-c2` from main `98658064`, unreleased)
+
+Geant4 program stage C2 (spec section C.6): Geant4 search values and F4 confirmation, geant4 adapter 0.5.0, contracts
+CV-C2 (shares the unreleased 3.13.0), `CORE_VERSION` unchanged at the unreleased 1.1.0.
+
+| Check | Result |
+|---|---|
+| Paired mode (C2.1) | `core/stats/decisions.py` `paired_statistic`, `equivalence` and `change` with `pairing: paired` (absolute: per-block differences; relative: Fieller-type z_b per bound r; se target tol/4); toys with common random numbers (`tests/core/test_simulation_paired_values.py`): coverage of the nominal 90 % interval within 0.02 + 3 sigma_MC (4000 trials), the relative test rejects at most 0.05 + 3 sigma_MC at the bound, Var(independent) / Var(paired) above 2 for correlated blocks; default stays independent |
+| `values` accumulator | `core/simulation/summary.py` keeps per-block raw values in event order for `values: true` (`values_max`, default 10^4, else `values_omitted`), merge rule concat; empirical quantiles (Hyndman-Fan type 7) equal numpy's to 1e-12; `g4sim/SimSummary.hh` writes the same values as Python also when the work is split across accumulators (`tests/adapters/test_g4sim.py`); simreco writes them from its CSV (`tests/adapters/test_simreco.py`); old summaries without values read and validate; `estimates.block_estimates` for paired comparisons |
+| seed_group and contract rules (CV-C2) | `core/simulation/seeds.py` `search_group_seed`, `confirmation_study_id`, `seed_uniqueness_problems` (the one implementation `contracts/design.py` calls): a seed repeated outside one declared seed_group, equal spec hashes or unequal blocks within one are `design.seed_reuse`; an evaluation whose run, study or study input reuses a `search_summary` Geant4 search seed is `design.contract_mismatch`; `check_geant4_study.py label` refuses a run with evidence role `search`; records older than 3.13.0 are not constrained (`tests/skills/hep_detector/test_design_search_g4.py`) |
+| Decoded candidates to Geant4 | J15 candidates decoded for each role (tracking positions, bending field, TOF time resolution, the carried calorimeter, an added RICH) give a geometry file, an `element_sim` spec from `from-geometry`, and `check-spec` passes in a subprocess |
+| S2 offline (fake backend) | generations in one seed_group, survivors re-evaluated with new S, one survivor per topology, finalists `fixed_from: geant4`, budget stop, gate G-C2a switching to independent seeds without common random numbers, the search run validates and its finalist expands, `search --diagnose` writes a valid diagnostic run; winner's-curse toy (gate G-C2b): on designs of equal truth the survivors' values lie below their selection pool and an independent confirmation is unbiased |
+| Live acceptance (C2.9; `~/Workspace/hep-research-tasks/geant4-program/c2/c2_live.py`, work `~/Workspace/geant4-work/sim-c2/accept`) | J15 (SYNTHETIC), base `cand-N6`; free: plane count 4-8 and positions over 0.80 m, field 0.3-0.7 T; objectives REQ-TRK-001 (Geant4 target, 1 GV protons, Gaussian core) and CON-MASS-001 (F1). S0 brief with three seed topologies (4, 6, 8 planes). S1: 400 F1 evaluations, 331 distinct designs, 5 topologies, consistency against `run` 0.0. S2: 3 topologies x (1 + 3 offspring) x 3 generations, 30 Geant4 search runs of 12800 events (K = 16), 21 seeds; gate G-C2a variance ratio 1.58 < 2 on generation 0, so generations 1-2 used independent seeds (Geant4 designs consume different random numbers). Finalists, fixed before expansion: points 314 (5 planes), 326 (4), 329 (7), field about 0.62-0.69 T. S3: expanded, F1 run and budget evaluations. S4: one F4 study per finalist with study_id from `confirmation_study_id`; all three re-issued `validated-in-scope` (strict validation passes): F4 core 1.204 %, 1.018 %, 1.674 % (16944, 10192, 11376 events); `REQ-TRK-001` passes for all three (`estimate.decides`); REQ-TRK-002, REQ-CC-001, REQ-CAL-001 stay inconclusive (no evidence at 100 GV, 500 GV, showers); ranking refused (no expected-precision evaluation; the J15 base candidates lack F1 mass evaluations); `derive` reports no error (no evaluation shares a search seed) |
+| Diagnostic (`runs/DIAG-SEARCH-C2`) | Geant4 search value minus F4: -0.039, +0.001, -0.073 percentage points (-3.2 %, +0.1 %, -4.4 % relative: the expected small optimism of the selected); F1 minus F4: +0.67, +0.48, +0.76 points (F1 overestimates the 1 GV core by 45-56 %: the Highland term against the Geant4 Gaussian core; J15 saw the same) |
+
+Problems found and fixed during the stage:
+- S2 started from the S1 search front only; on this problem the front held one design (four planes dominate at 1 GV),
+  so one topology was refined. S2 now takes the first design of each topology from the whole population ranked by
+  constrained non-dominated sorting and crowding (a development run, set aside as `accept-dev1`, showed it).
+- Survivors beyond `finalists.max` were taken by point index; they are now ordered by rank and crowding on their last
+  Geant4 values.
+- 1600 events per search run (100 per block) is thin for the Gaussian-core estimator; the acceptance used 12800.
+
+Limits, recorded: the role rules name a search-added TOF's and calorimeter's parameters for the F1 tools (n_layers,
+path_m, depth_X0, z_front_m), not for the geometry mapping, so such a subsystem has no Geant4 geometry: Geant4 search
+values vary only subsystems that carry mapping fields. Pairing gave no gain here (ratio 1.58); the paired estimate
+stays valid but the search fell back to independent seeds, as the gate intends. G5: the C++ changes
+(`g4sim/SimSummary.hh`, `SimObservables.hh`) use only the C++ standard library and the adapter's own headers; no
+Geant4 example code; reviewer confirmation pending (the maintainer's).
+
 ## GEANT4-J15 (2026-10-24/25, E2: macOS 26.5 arm64, Apple clang 21.0.0, Geant4 11.4.3 build A, Python 3.13; branch `worktree-geant4-b3` from main `a97a40e2`)
 
 Geant4 program stage B3 (spec §B.7): journey J15, `examples/design-minimal-spectrometer`, geant4 adapter 0.4.1.

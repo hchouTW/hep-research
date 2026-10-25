@@ -1,5 +1,5 @@
 {
- "$comment": "simulation-summary/1 (contracts CV-A1, Geant4 program A1.5; owner contracts, content proposed by hep-detector): per-block accumulators of one logical simulation run (or one job of it), read and merged by core/simulation/summary.py. Optional fields may be added (C2: values).",
+ "$comment": "simulation-summary/1 (contracts CV-A1, Geant4 program A1.5; owner contracts, content proposed by hep-detector): per-block accumulators of one logical simulation run (or one job of it), read and merged by core/simulation/summary.py. Optional fields may be added. Geant4 program C2.1 (minor): an observable may keep per-block raw values (blocks[].values, values_max, quantile_method) or say why it does not (values_omitted); merge rule values: concat.",
  "type": "object",
  "required": [
   "summary_version",
@@ -170,9 +170,28 @@
           "number",
           "null"
          ]
+        },
+        "values": {
+         "type": "array",
+         "items": {
+          "type": "number"
+         }
         }
        }
       }
+     },
+     "values_max": {
+      "type": "integer",
+      "minimum": 1
+     },
+     "values_omitted": {
+      "type": "string",
+      "minLength": 1
+     },
+     "quantile_method": {
+      "enum": [
+       "hyndman-fan-7"
+      ]
      }
     }
    }

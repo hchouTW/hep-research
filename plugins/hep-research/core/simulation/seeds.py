@@ -36,6 +36,45 @@ def logical_run_seed(study_id: str, role: str, point_id: str) -> int:
     return H(study_id, role, point_id)
 
 
+def search_group_seed(search_id: str, seed_group: str) -> int:
+    """S shared by the Geant4 search runs of one seed_group (Geant4 program C2.1): H(search_id, "search", seed_group).
+    Runs of one seed_group are different designs on the same random numbers (common random numbers), so differences
+    between them are estimated in paired mode (core.stats.decisions)."""
+    return H(search_id, "search", seed_group)
+
+
+def confirmation_study_id(search_id: str, design_digest: str, figure_of_merit: str, denominator: dict) -> str:
+    """The study_id of the F4 confirmation study of one finalist and one (figure of merit, denominator) (C2.1): its
+    runs are seeded S = H(study_id, role, point_id), so they never share S with the search runs of search_id."""
+    den = ",".join(f"{k}={denominator[k]}" for k in sorted(denominator))
+    return f"confirm:{search_id}:{design_digest}:{figure_of_merit}:{den}"
+
+
+def seed_uniqueness_problems(runs) -> list[str]:
+    """The uniqueness rule of C2.1 over runs given as dicts {run_id, seed (S), spec_sha256, seed_group, blocks,
+    block_size, seeding}: (S, spec hash) is unique; S repeats only within one declared seed_group, whose runs have
+    equal blocks, block_size and seeding and pairwise different spec hashes."""
+    problems: list[str] = []
+    by_seed: dict[int, list[dict]] = {}
+    for r in runs:
+        by_seed.setdefault(r["seed"], []).append(r)
+    for s, group in sorted(by_seed.items()):
+        if len(group) < 2:
+            continue
+        ids = ", ".join(str(r.get("run_id")) for r in group)
+        groups = {r.get("seed_group") for r in group}
+        if None in groups or len(groups) != 1:
+            problems.append(f"S {s} repeats outside one declared seed_group ({ids})")
+            continue
+        specs = [r.get("spec_sha256") for r in group]
+        if len(set(specs)) != len(specs):
+            problems.append(f"seed_group {group[0]['seed_group']!r}: two runs with the same spec hash ({ids})")
+        for key in ("blocks", "block_size", "seeding"):
+            if len({r.get(key) for r in group}) != 1:
+                problems.append(f"seed_group {group[0]['seed_group']!r}: runs differ in {key} ({ids})")
+    return problems
+
+
 def job_seeds(s: int, first_event: int) -> tuple[int, int]:
     """The seed pair of the job of logical run s that starts at event first_event (also the event seeds of
     per-event seeding, with first_event the event number)."""

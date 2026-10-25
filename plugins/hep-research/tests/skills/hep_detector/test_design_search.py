@@ -314,7 +314,7 @@ class SpecRules(unittest.TestCase):
         self.refused(spec_a(a, slots={"trd": [0, 1]}), "no realization rule")
         self.refused(spec_a(a, slots={"not-a-role": [0, 1]}), "no realization rule")
         self.refused(spec_a(a, rules_version="9.9.9"), "a different version is a new search spec")
-        self.refused(spec_a(a, budget={"evaluations": 10, "geant4": 5}), "Geant4 search values arrive with C2")
+        self.refused(spec_a(a, budget={"evaluations": 10, "geant4": 5}), "the geant4 block go together")
         self.refused(spec_a(a, design_spec={"path": "design-spec.v1.json", "sha256": "0" * 64}), "new design-spec")
         self.refused(spec_a(a, regenerate_budgets=["DES-NOPE-001"]), "regenerate_budgets")
         self.refused(spec_a(a, proposals=[{"id": "P", "reason": "r", "parameters": {"DES-TRK-001.parameters.x": 1}}]),

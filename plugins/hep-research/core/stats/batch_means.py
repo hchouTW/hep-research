@@ -102,6 +102,18 @@ def hist_quantile(counts, lo: float, width: float, q: float, underflow: int = 0,
     return {"value": None, "status": "incomplete", "reason": "quantile-in-overflow"}
 
 
+def empirical_quantile(values, q: float) -> dict:
+    """The q-quantile of raw values by Hyndman and Fan's type 7 (linear interpolation between order statistics:
+    h = (n - 1) q, x_(floor h) + (h - floor h)(x_(floor h + 1) - x_(floor h)), 0-based), the default of R and numpy."""
+    xs = sorted(float(x) for x in values)
+    if not xs or not 0.0 <= q <= 1.0:
+        return {"value": None, "status": "incomplete", "reason": "no-values" if not xs else "bad-q"}
+    h = (len(xs) - 1) * q
+    j = math.floor(h)
+    hi = xs[min(j + 1, len(xs) - 1)]
+    return {"value": xs[j] + (h - j) * (hi - xs[j]), "status": "ok", "method": "hyndman-fan-7"}
+
+
 def block_mode(counts, lo: float, width: float) -> dict:
     """Mode of one block's histogram: the vertex of the parabola through the fullest bin (lowest index on ties) and
     its two neighbours, x0 + width (y- - y+) / (2 (y- - 2 y0 + y+)) with x0 the bin centre. When the fullest bin is
