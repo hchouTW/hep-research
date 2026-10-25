@@ -33,6 +33,22 @@ and `front_position_m` replace `depth_X0`, `absorber_material` and `z_front_m`. 
 - Tests: the search tests run on rules 1.1.0; `test_design_search_g4.py` decodes TOF plane positions and thickness and
   a calorimeter depth into an element_sim spec that passes `check-spec`; a 1.0.0 spec still decodes.
 
+Control rule `declared-size/1` for the multiple-scattering reference (decided 2026-10-25, for new studies; the factors
+1.25 and 1.5 are provisional). The default rule (`shift-window/1`: caught and |shift| <= 1.1 DL after the runs) and
+every recorded study are unchanged.
+
+- `geant4_benchmarks.py`: a benchmark's `control_rule` (validated; `declared-size/1` only for
+  multiple-scattering-reference). Under `declared-size/1` each control's expected shift comes from its
+  `injected_relative` through Lynch and Dahl's formula (`ms_expected_shift`); a control counts when caught and its
+  expected shift is at most 1.5 x the planned detection limit (from the nominal run alone); the benchmark claims the
+  largest detection limit a caught control demonstrated, max(DL, |shift|). New subcommand `plan-controls --config C`
+  prints the planned limit and the +- injections for an expected shift of 1.25 x it, to declare before the control
+  runs. The gap names an oversized or undeclared control.
+- The Geant4 study protocol says to use the rule for new studies and why (the window is narrow against the scatter of
+  a measured shift; a density change of DL moves the width only about DL/2). J15 at 100 GV and J16 at 1 TV keep the
+  window rule and stay refused.
+- Tests: `tests/skills/hep_detector/test_geant4_declared_size.py`.
+
 ## 0.39.0 (2026-10-25)
 
 Minor release, contracts 3.13.0, `CORE_VERSION` 1.1.0, geant4 adapter 0.5.0. It ships the Geant4 program (spec

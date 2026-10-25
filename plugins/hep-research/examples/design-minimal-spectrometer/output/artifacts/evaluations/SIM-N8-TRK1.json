@@ -38,7 +38,7 @@
   },
   {
    "ref": "studies/N8-TRK1/study.computational-run.json",
-   "sha256": "2a967eab11c1ecad671b195b9324237a7b40a3365fc73b3bd4d36906a0ab8fbe",
+   "sha256": "3f2a55cf67e4d346e1c21f3a432495a31b1fa382ebad9590d77285cc2b0bfcec",
    "artifact_type": "computational-run",
    "artifact_id": "j15-N8-TRK1-study-validated"
   }

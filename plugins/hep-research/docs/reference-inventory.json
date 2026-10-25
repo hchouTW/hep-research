@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 39,
-   "bytes": 556426,
+   "bytes": 557642,
    "uncited": 0
   },
   "hep-measurement": {
@@ -2081,8 +2081,8 @@
   {
    "path": "skills/hep-detector/references/geant4-study-protocol.md",
    "owner": "hep-detector",
-   "bytes": 41240,
-   "lines": 420,
+   "bytes": 42456,
+   "lines": 432,
    "linked_from_skill_md": false,
    "cited_by": [
     "examples/design-minimal-spectrometer/README.md",
@@ -2430,7 +2430,7 @@
     "skills/hep-detector/scripts/evaluate_design.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "736e16dc 2026-10-25"
+   "last_commit": "5066eab3 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/timing-detectors.md",

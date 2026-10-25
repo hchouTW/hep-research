@@ -261,6 +261,7 @@
   "tests.skills.hep_detector.test_frontend_response": 1.9,
   "tests.skills.hep_detector.test_geant4_b2_benchmarks": 32.8,
   "tests.skills.hep_detector.test_geant4_benchmarks": 5.2,
+  "tests.skills.hep_detector.test_geant4_declared_size": 1.0,
   "tests.skills.hep_detector.test_hep_detector_audit": 10.0,
   "tests.skills.hep_detector.test_mix_period_responses": 5.0,
   "tests.skills.hep_detector.test_multisample_pid": 7.8,
