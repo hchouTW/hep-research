@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 40,
-   "bytes": 585608,
+   "bytes": 586341,
    "uncited": 0
   },
   "hep-measurement": {
@@ -2039,8 +2039,8 @@
   {
    "path": "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
    "owner": "hep-detector",
-   "bytes": 40113,
-   "lines": 562,
+   "bytes": 40480,
+   "lines": 566,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
@@ -2051,6 +2051,7 @@
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/detector-simulation.md",
     "skills/hep-detector/references/event-reconstruction.md",
+    "skills/hep-detector/references/geant4-study-protocol.md",
     "skills/hep-detector/references/readout-digitization-and-overlay.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-detector/references/timing-detectors.md",
@@ -2060,7 +2061,7 @@
     "tests/skills/hep_detector/test_frontend_waveforms.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "6f156782 2026-10-25"
+   "last_commit": "ba0a6f62 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
@@ -2086,8 +2087,8 @@
   {
    "path": "skills/hep-detector/references/geant4-study-protocol.md",
    "owner": "hep-detector",
-   "bytes": 42846,
-   "lines": 435,
+   "bytes": 43212,
+   "lines": 439,
    "linked_from_skill_md": false,
    "cited_by": [
     "examples/design-minimal-spectrometer/README.md",

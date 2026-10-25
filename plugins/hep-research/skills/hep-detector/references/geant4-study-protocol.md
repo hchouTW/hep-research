@@ -397,6 +397,10 @@ execution layer. Its records are always `unvalidated`.
   better than tails off); shower containment is the calorimeter deposit over the incident energy. A design project
   taken from F1 to F4 with these programs:
   [examples/design-minimal-spectrometer](../../../examples/design-minimal-spectrometer/README.md) (J15).
+  The `noise-digitization` numbers `threshold`, `efficiency` and `noise_hits_per_plane` can come from the front-end
+  electronics: `frontend_response.py hit-efficiency --simreco-channels N`
+  ([thresholds and fake hits](front-end-electronics-and-signal-processing.md#thresholds-fake-hits-and-zero-suppression));
+  left out, they keep simreco's defaults (0.2, 1, 0).
   The detector benchmarks' config keys are listed in `geant4_benchmarks.py --help`. A reference's negative
   control is declared with the injection Geant4 realized (a NIST material resolves to Geant4's own density, so
   derive the control from it), before the runs; a control declared otherwise is not counted, and correcting the

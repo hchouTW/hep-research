@@ -21,6 +21,10 @@ Oracles, each independent of the code under test:
   spread (150 e) and against each batch's own true-threshold sd (Monte Carlo, 60 batches of 200 channels, hits
   drawn with erfc), the uncorrected sd as negative control; the MAD against sqrt(150^2 + mean fit error^2), the
   unscaled MAD as negative control; median and count recomputed from the per-channel results.
+- simreco block (FE4): the efficiency, occupancy and threshold fraction of a Gaussian signal in closed form, composed
+  by hand (eps ** sides, (occupancy x channels) ** sides, threshold / mean), one side as negative control; the
+  merged tail source against the simreco spec schema and checks (adapters/geant4/assets/simreco_spec.py); the default
+  output compared byte for byte with the output without the new options.
 Standard library only.
 """
 import contextlib
@@ -748,6 +752,120 @@ class ThresholdTrim(unittest.TestCase):
         self.assertFalse(r['validity'])
         n = fr.threshold_trim(1000, 10, 20, dac_nonlinearity=10)
         self.assertAlmostEqual(n['residual_dispersion'], math.hypot(20 / math.sqrt(12), 10), places=6)
+
+
+class SimrecoBlock(unittest.TestCase):
+    """FE4: hit-efficiency results as the noise-digitization numbers of the Geant4 adapter's simreco (new options
+    only; simreco and its defaults are unchanged)."""
+    GAUSS = ['--noise', '1000', '--signal-model', 'gauss', '--mean', '6000', '--sigma-signal', '800', '--peaking', '25',
+             '--window', '50']
+
+    def run_cli(self, args):
+        return subprocess.run([sys.executable, '-I', str(SCRIPT), 'hit-efficiency', *args], capture_output=True,
+                              text=True, timeout=120)
+
+    def block(self, args):
+        proc = self.run_cli(args)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        return json.loads(proc.stdout)
+
+    def test_block_composed_from_the_closed_form(self):
+        thr, sn, mu, ss, channels = 4500.0, 1000.0, 6000.0, 800.0, 640
+        out = self.block(['--thresholds', str(thr), *self.GAUSS, '--simreco-channels', str(channels)])
+        eps = fr._phi((mu - thr) / math.hypot(ss, sn))  # closed form
+        nu0 = out['nu0_hz']
+        occ = fr._phi(-thr / sn) + nu0 * math.exp(-thr * thr / (2 * sn * sn)) * 50e-9
+        b = out['simreco_noise_digitization']
+        self.assertEqual(set(b), {'threshold', 'efficiency', 'noise_hits_per_plane'})
+        self.assertAlmostEqual(b['threshold'], thr / mu, places=14)
+        self.assertAlmostEqual(b['efficiency'], eps ** 2, places=12)
+        self.assertAlmostEqual(b['noise_hits_per_plane'] / (occ * channels) ** 2, 1, places=10)
+        d = out['simreco_derivation']
+        self.assertEqual((d['sides'], d['channels_per_side'], d['reference']), (2, channels, 'gauss mean'))
+        # negative control: one side is not two (eps 0.93: the two differ by more than 5 %)
+        one = self.block(['--thresholds', str(thr), *self.GAUSS, '--simreco-channels', str(channels),
+                          '--simreco-sides', '1'])['simreco_noise_digitization']
+        self.assertAlmostEqual(one['efficiency'], eps, places=12)
+        self.assertGreater(one['efficiency'] - b['efficiency'], 0.05)
+        self.assertAlmostEqual(one['noise_hits_per_plane'] / (occ * channels), 1, places=10)
+        self.assertEqual(self.block(['--thresholds', str(thr), *self.GAUSS, '--simreco-channels', str(channels),
+                                     '--simreco-sides', '1'])['simreco_derivation']['sides'], 1)
+
+    def test_threshold_in_enc_units(self):
+        enc = self.block(['--threshold-enc', '4.5', *self.GAUSS, '--simreco-channels', '640'])
+        charge = self.block(['--thresholds', '4500', *self.GAUSS, '--simreco-channels', '640'])
+        self.assertEqual(enc, charge)
+        noisier = self.block(['--threshold-enc', '4', '--noise', '1200', *self.GAUSS[2:]])  # GAUSS[:2] is --noise
+        self.assertEqual(noisier['thresholds'][0]['threshold'], 4800.0)
+        landau = self.block(['--threshold-enc', '5', '--noise', '1000', '--mpv', '23000', '--xi', '1500',
+                             '--peaking', '25', '--window', '25', '--simreco-channels', '640'])
+        self.assertEqual(landau['thresholds'][0]['threshold'], 5000.0)
+        self.assertAlmostEqual(landau['simreco_noise_digitization']['threshold'], 5000 / 23000, places=14)
+        self.assertEqual(landau['simreco_derivation']['reference'], 'landau most probable value')
+
+    def test_table_reference_is_its_peak(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            path = Path(tmp) / 'spectrum.csv'
+            path.write_text('charge,count\n4000,1\n5000,8\n6000,30\n7000,12\n8000,2\n', encoding='utf-8')
+            out = self.block(['--thresholds', '3000', '--noise', '500', '--signal-model', 'table', '--spectrum',
+                              str(path), '--peaking', '25', '--window', '25', '--simreco-channels', '100'])
+        self.assertEqual(out['simreco_derivation']['reference_signal'], 6000.0)
+        self.assertAlmostEqual(out['simreco_noise_digitization']['threshold'], 0.5, places=14)
+
+    def test_default_output_is_unchanged(self):
+        """Without the new options the output is byte for byte what it was; with them every other key is the same."""
+        base = ['--thresholds', '4500', *self.GAUSS]
+        plain = self.run_cli(base)
+        r = fr.hit_efficiency([4500.0], 1000.0, 'gauss', mean=6000.0, sigma_signal=800.0, peaking_ns=25.0,
+                              window_ns=50.0)
+        want = json.dumps({'status': 'unvalidated', 'command': 'hit-efficiency', **r}, indent=2, allow_nan=False)
+        self.assertEqual(plain.stdout, want + '\n')
+        self.assertNotIn('simreco', plain.stdout)
+        with_block = json.loads(self.run_cli([*base, '--simreco-channels', '640']).stdout)
+        before = json.loads(plain.stdout)
+        added = with_block.pop('simreco_noise_digitization'), with_block.pop('simreco_derivation')
+        self.assertTrue(all(added))
+        self.assertEqual(with_block.pop('assumptions')[:-1], before.pop('assumptions'))
+        self.assertEqual(with_block, before)
+
+    def test_block_passes_the_simreco_spec_checks(self):
+        assets = PLUGIN / 'adapters' / 'geant4' / 'assets'
+        sys.path[:0] = [str(PLUGIN), str(assets)]
+        try:
+            import simreco_spec
+        finally:
+            del sys.path[:2]
+        j15 = json.loads((PLUGIN / 'tests/adapters/fixtures/geant4_b1/j15_nominal.spec.json').read_text('utf-8'))
+        block = self.block(['--threshold-enc', '5', '--noise', '1000', '--mpv', '23000', '--xi', '1500', '--peaking',
+                            '25', '--window', '25', '--simreco-channels', '640'])['simreco_noise_digitization']
+        spec = {'schema': 'simreco.spec/1', 'point_resolution_um': {'bending': 10.0, 'non_bending': 30.0},
+                'radiation_length_mm': {'G4_Si': 93.7}, 'tof': {'sigma_t_ps': 100.0},
+                'tail_sources': {'noise-digitization': {'on': True, 'pitch_y_um': 80, 'pitch_z_um': 200,
+                                                        'sharing_um': 2, **block}}}
+        self.assertEqual(simreco_spec.check(spec, j15), [])
+        eff = simreco_spec.effective(spec, j15, 0, {})
+        self.assertEqual({k: eff['reco']['tail_sources']['noise-digitization'][k] for k in block}, block)
+
+    def test_bad_simreco_inputs_exit_2(self):
+        bad = (
+            ['--thresholds', '4000', '5000', *self.GAUSS, '--simreco-channels', '10'],  # two thresholds
+            ['--thresholds', '4000', '--noise', '1000', '--signal-model', 'gauss', '--mean', '6000',
+             '--sigma-signal', '800', '--simreco-channels', '10'],  # no occupancy per window
+            ['--thresholds', '4000', *self.GAUSS, '--simreco-channels', '0'],
+            ['--thresholds', '4000', *self.GAUSS, '--simreco-channels', '10', '--simreco-sides', '3'],
+            ['--thresholds', '4000', *self.GAUSS, '--simreco-sides', '1'],  # sides without channels
+            ['--thresholds', '4000', *self.GAUSS, '--signal-fraction', '0.5', '--simreco-channels', '10'],
+            ['--thresholds', '7000', *self.GAUSS, '--simreco-channels', '10'],  # above the mean: fraction > 1
+            ['--threshold-enc', '0', *self.GAUSS],
+            ['--threshold-enc', 'nan', *self.GAUSS],
+            ['--threshold-enc', '4', '--thresholds', '4000', *self.GAUSS],
+        )
+        for args in bad:
+            with self.subTest(args=args):
+                proc = self.run_cli(args)
+                self.assertEqual(proc.returncode, 2, proc.stdout)
+                self.assertEqual(json.loads(proc.stdout)['error_kind'], 'invalid-input')
+                self.assertNotIn('Traceback', proc.stderr)
 
 
 class InjectionGainGuidance(unittest.TestCase):

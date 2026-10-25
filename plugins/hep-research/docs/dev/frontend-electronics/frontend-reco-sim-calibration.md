@@ -85,7 +85,7 @@ S3 (wrong guidance); by decision D-C4 it is its own `sci-fix:` commit (FE0).
 | S3 | No overlay/premixing rules | Five rules (citing the HSF white paper) |
 | S4 | No digitization closure | Pedestal, S-curve, amplitude, charge sharing, calibration closure |
 | S5 | No waveform-level sim→reco tool | `waveform-toy` |
-| S6 | simreco `noise-digitization` decoupled from the electronics | **FE4** (not done; maintainer decision D-FE4) |
+| S6 | simreco `noise-digitization` decoupled from the electronics | **FE4**: `hit-efficiency --simreco-channels` prints its numbers (D-FE4: new options only) |
 | C1 | Calibration has no order | Chain: pedestal → noise covariance → gain → thresholds and trim → timing → templates/weights → physics scale |
 | C2 | S-curve has no fit method or errors | `s-curve`: binomial ML, Fisher errors, deviance, design mode; multi-channel → **FE3** |
 | C3 | Dispersion after trim not quantified | `threshold-trim` |
@@ -449,6 +449,12 @@ Follows `docs/dev/geant4-architecture/geant4-program.md` §P.10 [C]; the only ex
   | Only new options; defaults unchanged | `feat:` | Existing outputs and the J15/J16 records unchanged; add a test that the default output is bit-for-bit unchanged |
   | Defaults or existing numbers change | `sci-fix:` | Follow the evidence levels of `docs/maintenance.md` and the gates of the Geant4 specification; re-record J15 (`examples/design-minimal-spectrometer/`) and J16 (`examples/design-search-j16/`), both of which go through the qualification path of fidelity F4 |
 
+- *At FE4 [C]:* D-FE4 chose the first case. The coupling is on the hep-detector side: `hit-efficiency
+  --simreco-channels N` prints the `noise-digitization` keys (`threshold` as the fraction of the reference signal,
+  `efficiency`, `noise_hits_per_plane`), and `--threshold-enc` is the threshold in ENC units. The adapter is not
+  changed: every adapter change needs an adapter version bump (`docs/maintenance.md`, "Adapter changes"), and version
+  numbers are out of scope here.
+
 #### §FE5 Shrinking the front-end reference page
 
 - **Prerequisite:** FE0 merged. **Gate:** D-FE5 — do not start before the maintainer decides.
@@ -472,7 +478,7 @@ Follows `docs/dev/geant4-architecture/geant4-program.md` §P.10 [C]; the only ex
 | FE1 | `table` signal model in `frontend_response.py`; contract, `FRONTEND_OPS`, `MISSING_FILE_ARGS` updated; tests; one sentence in the reference page; CHANGELOG and VALIDATION entries |
 | FE2 | `--noise-covariance` in `waveform-toy` and `optimal-filter`; contract; tests; CHANGELOG; VALIDATION |
 | FE3 | `--scan-file` batch mode; contract; tests; CHANGELOG; VALIDATION |
-| FE4 | As decided in D-FE4 (none at present) |
+| FE4 | `hit-efficiency --simreco-channels`, `--simreco-sides`, `--threshold-enc`; contract; tests; reference sentences; CHANGELOG; VALIDATION |
 | FE5 | As decided in D-FE5: new reference page, wiring (hub registration), moved pointer, regenerated reference inventory, README reference count |
 | Every stage | One branch; one or more commits with the trailer; `main` not pushed |
 
@@ -579,8 +585,8 @@ Test requirements:
   commits kept, merged by the maintainer; no version bump in FE0.
 - **[C] D-C4**: decided 2026-10-25 by the maintainer: split. C4 is its own `sci-fix:` commit (ledger
   FRONTEND-INJECTION-GAIN, both sources read in the full text, regression test `InjectionGainGuidance`).
-- **[U] D-FE4**: Do FE4? Only new options (`feat:`, records unchanged) or changed defaults (`sci-fix:`, re-record J15
-  and J16)? Blocks: FE4. Decided by: Maintainer. Type: Requires Confirmation.
+- **[C] D-FE4**: decided 2026-10-25 by the maintainer: do FE4, new options only (`feat:`); defaults and the J15/J16
+  records unchanged.
 - **[U] D-FE5**: Do FE5? Which sections move (photosensor and LAr TPC alone do not reach 24 KB)? Register the front-end
   page as a hub? Blocks: FE5. Decided by: Maintainer. Type: Requires Confirmation.
 - **[U] FE1 spectrum**: Is there a thin-silicon charge spectrum that may be placed publicly in `assets/`? If not, tests
