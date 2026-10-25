@@ -3,6 +3,14 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- hep-detector front-end page: the eight "(moved)" section pointers left by the 0.41.0 split are removed, as recorded
+  (`remove_in` 0.42.0). The sections are in `front-end-waveform-processing.md` (sampled waveforms, pileup,
+  photosensors, LAr TPC, digital pulse processing, pulse-shape discrimination) and `front-end-calibration.md`
+  (calibration and simulation of the electronics); the page's introduction links both. Their records are gone from
+  `pointers` in `tools/wiring_known_gaps.json`.
+
 ## 0.41.0 (2026-10-26)
 
 Minor release; contracts 3.13.0, `CORE_VERSION` 1.1.0 and geant4 adapter 0.5.0 unchanged. It ships the front-end
