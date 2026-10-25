@@ -242,6 +242,11 @@ distribution, not only its width, and its spectrum when tails appear.
   4 sigma): unconstrained sigma 1.38 with phase bias +1.9 % / −3.0 % at ∓2 ns and
   `sum w = 0.56`; with the phase constraint sigma 1.40 and −0.5 % at either sign (second
   order); with the baseline constraint sigma 1.49 and `sum w = 0`.
+  <!-- example: source citation -->
+  The ATLAS liquid-argon reconstruction computes its amplitude and time coefficients this
+  way, from the pulse shape, its derivative and the noise autocorrelation of pedestal runs
+  (M. Aharrouche et al., arXiv:0709.1094; read 2026-10-25).
+  <!-- /example -->
 - **Baseline gain.** A constant offset `b` on every sample biases any linear estimate by
   `b sum w`. For unipolar pulses `sum w` is of order one unless a baseline constraint or
   pre-samples are used, so a pedestal error or the Campbell mean of pileup (`nu <a> ∫ g dt`)

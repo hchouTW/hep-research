@@ -64,7 +64,11 @@ being simulated:
 
 Overlaying recorded zero-bias or random-trigger data brings in the real noise and pileup,
 including correlations and non-Gaussian tails, which independent Gaussian noise does not.
-The rules that make it correct:
+The HEP Software Foundation's detector-simulation white paper names the same difficulties:
+collecting samples without zero suppression, and nonlinear effects when electronic signals
+from different samples are added (J. Apostolakis et al., arXiv:1803.04165). Premixing
+(pileup digitized once into pileup-only events, then combined with the hard scatter) obeys
+the same rules. The rules that make it correct:
 
 - **No noise twice.** Overlaid channels already carry electronic noise and pileup; adding
   simulated noise or pileup to them counts it twice (for equal levels the noise grows by

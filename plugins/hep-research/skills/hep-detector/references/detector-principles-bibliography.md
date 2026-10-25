@@ -102,6 +102,16 @@ criteria as above.
   volume and pages read from the article's first page, University of Michigan Deep Blue
   copy, 2026-10-25; DOI not checked). Recursive trapezoidal and triangular digital shaping;
   flat tops against ballistic deficit and trapping.
+<!-- example: source citations (experiments named as the source of a general method) -->
+- M. Aharrouche et al., "Response uniformity of the ATLAS liquid argon electromagnetic
+  calorimeter", arXiv:0709.1094 (read 2026-10-25; journal reference not checked). Optimal
+  filtering coefficients from the pulse shape, its derivative and the pedestal-run noise
+  autocorrelation by Lagrange multipliers.
+<!-- /example -->
+- J. Apostolakis et al., "HEP Software Foundation Community White Paper Working Group -
+  Detector Simulation", arXiv:1803.04165 (read 2026-10-25). Zero-bias overlay against
+  premixing; non-zero-suppressed samples and nonlinear signal addition as the overlay's
+  difficulties.
 - J. P. Nolan, "Numerical calculation of stable densities and distribution functions",
   Commun. Statist. Stochastic Models 13 (1997) 759-774, DOI 10.1080/15326349708807450
   (matched against Crossref, 2026-10-25). The integral representation used for the Landau

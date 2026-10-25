@@ -408,6 +408,12 @@ hep-detector front-end electronics for reconstruction, simulation and calibratio
   `tracking-and-vertexing.md`; bibliography adds Jordanov and Knoll (1994) and Nolan (1997).
 - Tests: `tests/skills/hep_detector/test_frontend_waveforms.py` (31 tests); `FrontendResponseContractTests` cover
   the five new operations.
+- Sources: the constrained optimal filter cites the ATLAS liquid-argon paper arXiv:0709.1094,
+  the overlay rules the HSF detector-simulation white paper
+  arXiv:1803.04165 (bibliography entries added).
+- Developer document `docs/dev/frontend-electronics/frontend-reco-sim-calibration.md` (Traditional Chinese, task
+  format, passes `lint_task.py`): the evaluation, the completed work, and stages F0-F5 with isolated-worktree
+  execution, acceptance criteria and open decisions.
 
 ## 0.38.0 (2026-10-24)
 
