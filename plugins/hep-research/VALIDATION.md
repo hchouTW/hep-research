@@ -2887,8 +2887,11 @@ hep-detector front-end electronics for reconstruction and simulation: `frontend_
 --expert-model opus --own-config`, isolation precondition `fork-denied`; advisory): round 1, 9 slots, the expert slot
 and the filter (36 findings, 26 kept). All findings disposed: 35 changed (each verified by the author against the plugin
 files or a tool run), 1 declined (the branch name it reported was in this file and had been fixed). Canary hit rate
-2/2. The facts lens slot S4 was rejected twice (it copied the document to run `lint_task.py`) and is escalated for a
-human; the review stays open until then. The substantive corrections: the FE1-1 criterion could not fail (thresholds
+2/2. The facts lens slot S4 was rejected twice (it copied the document to run `lint_task.py`) and was escalated for a
+human. On 2026-10-26 the maintainer accepted it as missing (the human decision `accept-missing` for a slot; the
+shadow facts slot S3 was accepted with 4 claims supported, and S4's overlapping findings were checked by the author).
+The review's state stayed in the container it ran in, so the decision is recorded here, not through
+`review.py resolve`. The substantive corrections: the FE1-1 criterion could not fail (thresholds
 far below the Landau peak), the threshold spread is routed pre-trim to `threshold-trim` and post-trim to
 `hit-efficiency`, the FE3 corrected spread is clipped at zero, the stage base follows P.10.2, the C4 guidance change is
 flagged for classification and has a second located source (arXiv:0912.2642, sec. 3.1.2).
