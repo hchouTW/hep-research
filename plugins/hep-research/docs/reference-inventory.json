@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 40,
-   "bytes": 578539,
+   "bytes": 582389,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1922,7 +1922,7 @@
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "765bf693 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/detector-principles-summary.md",
@@ -1965,7 +1965,7 @@
     "hep-ml",
     "hep-theory"
    ],
-   "last_commit": "3f4f9985 2026-10-21"
+   "last_commit": "765bf693 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/detector-systems-overview.md",
@@ -2010,7 +2010,7 @@
     "skills/hep-detector/references/timing-detectors.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "765bf693 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/extensive-air-showers.md",
@@ -2039,8 +2039,8 @@
   {
    "path": "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
    "owner": "hep-detector",
-   "bytes": 35117,
-   "lines": 501,
+   "bytes": 38658,
+   "lines": 542,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
@@ -2060,7 +2060,7 @@
     "tests/skills/hep_detector/test_frontend_waveforms.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e03c0396 2026-10-22"
+   "last_commit": "765bf693 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
@@ -2321,15 +2321,15 @@
   {
    "path": "skills/hep-detector/references/readout-digitization-and-overlay.md",
    "owner": "hep-detector",
-   "bytes": 8931,
-   "lines": 135,
+   "bytes": 9240,
+   "lines": 138,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/detector-simulation.md",
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "765bf693 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md",
@@ -2500,7 +2500,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "54b9cd4b 2026-10-21"
+   "last_commit": "765bf693 2026-10-25"
   },
   {
    "path": "skills/hep-detector/references/triggers-luminosity-pileup.md",

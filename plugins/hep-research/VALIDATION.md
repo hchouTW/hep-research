@@ -2759,7 +2759,7 @@ description change and the 8 Th14 cases (paid; pending approval). Pre-existing o
 ## FRONTEND-RECO-SIM (2026-10-25, Linux x86_64 container, Python 3.13.17, NumPy 2.5.3, SciPy 1.18.1 for the oracles, no SymPy or mpmath; branch `detector/frontend-reco-sim` from main `bc7b1c18`, unreleased)
 
 hep-detector front-end electronics for reconstruction and simulation: `frontend_response.py` subcommands
-`optimal-filter`, `hit-efficiency`, `waveform-toy`; the reference additions and the new
+`optimal-filter`, `hit-efficiency`, `waveform-toy`, `s-curve`, `threshold-trim`; the reference additions and the new
 `readout-digitization-and-overlay.md`. No contracts, `core/` or adapter version change.
 
 | Check | Result |
@@ -2771,7 +2771,9 @@ hep-detector front-end electronics for reconstruction and simulation: `frontend_
 | Hit efficiency | Landau case against `scipy.integrate.quad` (0.98796331) and a 4e6-event MC (0.987947 +- 0.000055); Gaussian case closed form; threshold-spread averages of the Rice rate and of the per-sample tail against numerical averages over thresholds; the worked operating window of the page |
 | Waveform toy | closure |z| < 4 for bias and width of four estimators with correlated noise and exponential-amplitude pileup (several seeds and 200 000 events during development); the standard error of the width uses the fourth moment (the Gaussian formula overstated the z-scores for exponential pileup); the baseline constraint removes the pileup mean bias; jitter and saturation flagged |
 | Mutants | eight local mutants of the new code; six killed by the new tests (Landau MPV constant, threshold-spread factor, autocorrelation power, Gaussian width, phase sign, fourth-moment error); the endpoint constant of the Zolotarev integral is equivalent within the adaptive tolerance; the amplitude-time correlation sign got its own test afterwards |
-| Tool contract | `contracts/tool_contract.py`: pass, 13 operations; `FrontendResponseContractTests` with the three new operations |
+| S-curve | fit equal to `scipy.optimize.minimize` (Nelder-Mead) of the same likelihood to 1e-3 e; a NumPy MC of 2000 scans (T 3700 e, sigma 300 e, 8 charges every 200 e, 100 injections): sd 17.9 and 17.5 e against the design prediction 18.3 and 17.3 e, pulls 0.98 and 1.02 wide, mean noise pull -0.12 (maximum-likelihood bias); 1/sqrt(N) scaling exact; coarse and inconsistent scans flagged |
+| Threshold trim | against a NumPy MC of 2e6 channels with rounded, clipped codes: 441.76 e and 18.28 % beyond the range for (1500 e, 4 bits, 250 e), tool 441.57 e and 18.24 %; 258.47 e for (800 e, 5 bits, 60 e), tool 258.73 e; wide-range limit D/sqrt(12) and the nonlinearity in quadrature exact |
+| Tool contract | `contracts/tool_contract.py`: pass, 15 operations; `FrontendResponseContractTests` with the five new operations |
 | Aggregate (`tools/run_all_checks.py --part all --no-cli --jobs 2`) | 27 of 31 checks pass, 2 skip (host CLIs); unittest 5549 run, 5237 pass, 294 skipped, 18 failures or errors, all outside hep-detector and all from this environment: SymPy and mpmath are not installed and PyPI is unreachable (16), and `test_paper_skeleton` and `test_ci_plan.RunnerRecord` fail identically on a clean checkout of main here; `ams_optional` fails on the same missing SymPy. Rerun in E2 before merging |
 
 Software checks show contract consistency and agreement with the named oracles, not physical validity: the Landau

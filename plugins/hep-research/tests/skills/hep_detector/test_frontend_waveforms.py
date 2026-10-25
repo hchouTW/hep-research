@@ -273,6 +273,65 @@ class WaveformToy(unittest.TestCase):
         self.assertLess(r['estimators']['largest_sample']['relative_bias'], -0.3)
 
 
+class SCurve(unittest.TestCase):
+    CHARGES = [3000.0 + 200 * i for i in range(8)]
+    HITS = [1, 5, 18, 41, 66, 86, 96, 99]
+
+    def test_fit_matches_an_independent_minimizer(self):
+        # scipy.optimize.minimize (Nelder-Mead) of the same binomial likelihood: T 3676.70968, sigma 298.47143
+        r = fr.scurve_fit(self.CHARGES, self.HITS, [100])
+        self.assertAlmostEqual(r['threshold'], 3676.70968, delta=1e-3)
+        self.assertAlmostEqual(r['noise'], 298.47143, delta=1e-3)
+        self.assertTrue(r['converged'])
+        self.assertGreater(r['p_value'], 0.5)
+
+    def test_fit_is_a_maximum_and_errors_follow_fisher(self):
+        r = fr.scurve_fit(self.CHARGES, self.HITS, [100])
+
+        def ll(t, s):
+            return sum(k * math.log(fr._phi((q - t) / s)) + (100 - k) * math.log(1 - fr._phi((q - t) / s))
+                       for q, k in zip(self.CHARGES, self.HITS))
+        best = ll(r['threshold'], r['noise'])
+        for dt, ds in ((5, 0), (-5, 0), (0, 5), (0, -5)):
+            self.assertLess(ll(r['threshold'] + dt, r['noise'] + ds), best)
+        # a NumPy MC of 2000 scans (T 3700, sigma 300, 100 injections) gave sd(T) 17.9 and sd(sigma) 17.5,
+        # pulls 0.98 and 1.02 wide; the design mode predicts 18.3 and 17.3
+        d = fr.scurve_design(self.CHARGES, [100], 3700, 300)
+        self.assertAlmostEqual(d['expected_sigma_threshold'], 17.9, delta=0.9)
+        self.assertAlmostEqual(d['expected_sigma_noise'], 17.5, delta=0.9)
+
+    def test_scaling_and_flags(self):
+        a = fr.scurve_design(self.CHARGES, [100], 3700, 300)['expected_sigma_threshold']
+        b = fr.scurve_design(self.CHARGES, [400], 3700, 300)['expected_sigma_threshold']
+        self.assertAlmostEqual(a / b, 2.0, places=9)  # 1/sqrt(N)
+        coarse = fr.scurve_fit([2000, 3000, 4000, 5000], [0, 2, 98, 100], [100])
+        self.assertTrue(any('poorly constrained' in v for v in coarse['validity']))
+        bad = fr.scurve_fit(self.CHARGES, [1, 5, 60, 20, 66, 86, 96, 99], [100])
+        self.assertTrue(any('poor fit' in v for v in bad['validity']))
+        with self.assertRaises(ValueError):
+            fr.scurve_fit(self.CHARGES, [0] * 8, [100])  # never crosses 50 %
+        with self.assertRaises(ValueError):
+            fr.scurve_fit(self.CHARGES, self.HITS, [100, 100])
+
+
+class ThresholdTrim(unittest.TestCase):
+    def test_against_monte_carlo_of_trim_codes(self):
+        # NumPy MC, 2e6 channels with codes rounded and clipped to the DAC range: residual rms 441.76 and 18.28 %
+        # beyond the range for (1500, 4 bits, 250); 258.47 for (800, 5 bits, 60)
+        r = fr.threshold_trim(1500, 4, 250)
+        self.assertAlmostEqual(r['residual_dispersion'], 441.76, delta=1.0)
+        self.assertAlmostEqual(r['fraction_beyond_range'], 0.1828, delta=0.001)
+        self.assertTrue(r['validity'])
+        self.assertAlmostEqual(fr.threshold_trim(800, 5, 60)['residual_dispersion'], 258.47, delta=0.6)
+
+    def test_wide_range_limit_and_nonlinearity(self):
+        r = fr.threshold_trim(1000, 10, 20)  # range +-10 sigma
+        self.assertAlmostEqual(r['residual_dispersion'], 20 / math.sqrt(12), places=6)
+        self.assertFalse(r['validity'])
+        n = fr.threshold_trim(1000, 10, 20, dac_nonlinearity=10)
+        self.assertAlmostEqual(n['residual_dispersion'], math.hypot(20 / math.sqrt(12), 10), places=6)
+
+
 class CommandLine(unittest.TestCase):
     def run_cli(self, args):
         return subprocess.run([sys.executable, '-I', str(SCRIPT), *args], capture_output=True, text=True, timeout=120)

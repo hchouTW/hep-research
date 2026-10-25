@@ -12,7 +12,8 @@ sampled pulse (correlated and Campbell pileup noise, optional phase and baseline
 joint amplitude-time errors), hit efficiency of a Landau or Gaussian signal against noise
 occupancy versus threshold (the operating window), and a seeded synthetic sampled readout
 reconstructed by those estimators with closure against the analytic prediction (output
-labelled synthetic in status_label). Each result carries its assumptions and a validity
+labelled synthetic in status_label). For calibration: the binomial fit of a threshold scan (S-curve) or
+the expected errors of a scan design, and the threshold dispersion after per-channel trim. Each result carries its assumptions and a validity
 list; a non-empty validity list means the input is outside the range where the relation holds.
 
 Subcommands (all numbers on the command line; JSON on stdout):
@@ -31,6 +32,9 @@ Subcommands (all numbers on the command line; JSON on stdout):
   hit-efficiency  efficiency (Landau or Gaussian signal) and noise occupancy versus threshold; operating window
   waveform-toy    seeded synthetic sampled readout (noise, pileup, jitter, ADC) reconstructed by those
                   estimators, with closure against the analytic prediction
+  s-curve         binomial fit of a threshold scan (threshold, noise, errors, goodness of fit), or the
+                  expected errors of a scan design
+  threshold-trim  threshold dispersion after per-channel trim (trim range, step, DAC nonlinearity)
 
 Conventions: the shaper's response to a unit input charge is g(t) = (t/tau)^n exp(-t/tau),
 normalized to peak 1, with peaking time t_p = n tau. The bipolar shape of the pileup
@@ -57,6 +61,7 @@ from pathlib import Path
 sys.dont_write_bytecode = True  # importing core leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))  # the plugin root, also under python3 -I
 from core.stats._linalg import solve  # noqa: E402
+from core.stats.statistical_toys import chi2_sf  # noqa: E402
 
 STATUSES = ('failed', 'unvalidated', 'preliminary', 'synthetic', 'asimov', 'observed', 'user-supplied',
             'validated-in-scope', 'projection', 'outside-validated-range')  # contracts/vocab/core.json artifact_statuses
@@ -1047,6 +1052,199 @@ def waveform_toy(order, peaking_ns, period_ns, samples, first_offset_ns, amplitu
             'validity': validity}
 
 
+# ---------------------------------------------------------------- calibration: S-curves and threshold trim
+
+def _scurve_terms(q, t, s):
+    z = (q - t) / s
+    p = min(max(_phi(z), 1e-15), 1 - 1e-15)
+    dens = math.exp(-z * z / 2) / math.sqrt(2 * math.pi)
+    return p, (-dens / s, -dens * z / s)  # dp/dT, dp/ds
+
+
+def _scurve_fisher(charges, injections, t, s):
+    f = [[0.0, 0.0], [0.0, 0.0]]
+    for q, n in zip(charges, injections):
+        p, g = _scurve_terms(q, t, s)
+        w = n / (p * (1 - p))
+        for a in range(2):
+            for b in range(2):
+                f[a][b] += w * g[a] * g[b]
+    return f
+
+
+def _inv2(f):
+    det = f[0][0] * f[1][1] - f[0][1] * f[1][0]
+    if not det > 0:
+        return None
+    return [[f[1][1] / det, -f[0][1] / det], [-f[1][0] / det, f[0][0] / det]]
+
+
+def _check_scan(charges, injections):
+    if len(charges) < 3:
+        raise ValueError('an S-curve needs at least 3 injected charges')
+    if len(injections) != len(charges):
+        raise ValueError('give one injection count per charge, or a single count for all')
+    qs = [_num(q, 'injected charge', positive=False) for q in charges]
+    if any(b <= a for a, b in zip(qs, qs[1:])):
+        raise ValueError('injected charges must be strictly increasing')
+    ns = []
+    for n in injections:
+        if isinstance(n, bool) or not isinstance(n, int) or n < 1:
+            raise ValueError('injection counts must be positive integers')
+        ns.append(n)
+    return qs, ns
+
+
+def scurve_fit(charges, hits, injections):
+    """Binomial maximum-likelihood fit of an S-curve, hits ~ Bin(N, Phi((Q - T)/sigma)): threshold T, noise sigma,
+    their covariance (inverse Fisher matrix at the fit), and the deviance goodness of fit."""
+    if len(injections) == 1:
+        injections = list(injections) * len(charges)
+    qs, ns = _check_scan(charges, injections)
+    if len(hits) != len(qs):
+        raise ValueError('give one hit count per injected charge')
+    ks = []
+    for k, n in zip(hits, ns):
+        if isinstance(k, bool) or not isinstance(k, int) or not 0 <= k <= n:
+            raise ValueError('hit counts must be integers between 0 and the number of injections')
+        ks.append(k)
+    frac = [k / n for k, n in zip(ks, ns)]
+    if max(frac) < 0.5 or min(frac) > 0.5:
+        raise ValueError('the scan does not cross 50 %: extend the injected-charge range')
+    # start: linear interpolation of the 50 % point; width from the 16-84 % span, else a tenth of the range
+    t0 = next(qs[i] + (0.5 - frac[i]) * (qs[i + 1] - qs[i]) / (frac[i + 1] - frac[i])
+              for i in range(len(qs) - 1) if frac[i] <= 0.5 <= frac[i + 1] and frac[i + 1] > frac[i])
+    lo = [q for q, f in zip(qs, frac) if f <= 0.16]
+    hi = [q for q, f in zip(qs, frac) if f >= 0.84]
+    s0 = max((min(hi) - max(lo)) / 2 if lo and hi else (qs[-1] - qs[0]) / 10, (qs[-1] - qs[0]) * 1e-4)
+
+    def loglik(t, s):
+        total = 0.0
+        for q, k, n in zip(qs, ks, ns):
+            p = _scurve_terms(q, t, s)[0]
+            total += k * math.log(p) + (n - k) * math.log(1 - p)
+        return total
+
+    t, s = t0, s0
+    ll = loglik(t, s)
+    converged = False
+    for _ in range(200):
+        u = [0.0, 0.0]
+        for q, k, n in zip(qs, ks, ns):
+            p, g = _scurve_terms(q, t, s)
+            r = (k - n * p) / (p * (1 - p))
+            u[0] += r * g[0]
+            u[1] += r * g[1]
+        cov = _inv2(_scurve_fisher(qs, ns, t, s))
+        if cov is None:
+            break
+        dt = cov[0][0] * u[0] + cov[0][1] * u[1]
+        ds = cov[1][0] * u[0] + cov[1][1] * u[1]
+        step = 1.0
+        while step > 1e-6:
+            nt, ns_ = t + step * dt, s + step * ds
+            if ns_ > 0:
+                nll = loglik(nt, ns_)
+                if nll >= ll - 1e-12:
+                    break
+            step /= 2
+        else:
+            break
+        moved = abs(step * dt) + abs(step * ds)
+        t, s, ll = nt, ns_, nll
+        if moved < 1e-10 * (abs(t) + s):
+            converged = True
+            break
+    cov = _inv2(_scurve_fisher(qs, ns, t, s))
+    if cov is None:
+        raise ValueError('the S-curve fit has a singular information matrix (no points in the transition)')
+    deviance = 0.0
+    for q, k, n in zip(qs, ks, ns):
+        p = _scurve_terms(q, t, s)[0]
+        if k > 0:
+            deviance += 2 * k * math.log(k / (n * p))
+        if k < n:
+            deviance += 2 * (n - k) * math.log((n - k) / (n * (1 - p)))
+    ndf = len(qs) - 2
+    transition = sum(1 for f in frac if 0.05 < f < 0.95)
+    out = {'threshold': t, 'noise': s, 'sigma_threshold': math.sqrt(cov[0][0]), 'sigma_noise': math.sqrt(cov[1][1]),
+           'correlation': cov[0][1] / math.sqrt(cov[0][0] * cov[1][1]), 'converged': converged,
+           'deviance': deviance, 'ndf': ndf,
+           'p_value': chi2_sf(max(deviance, 0.0), ndf) if ndf > 0 else None,
+           'points_in_transition': transition,
+           'assumptions': ['hits binomial with a Gaussian-noise turn-on Phi((Q - T)/sigma); the fitted width is the '
+                           'quadrature sum of the channel noise, the injection-amplitude noise and any threshold '
+                           'jitter during the scan; the charge scale is that of the injection circuit (its '
+                           'capacitor and pulser uncertainty is common to every channel it serves); deviance '
+                           'approximately chi2(ndf) only when the expected counts are not small'],
+           'validity': []}
+    if not converged:
+        out['validity'].append('the fit did not converge to the requested precision: inspect the scan')
+    if transition < 2:
+        out['validity'].append('fewer than 2 points between 5 % and 95 %: the noise is poorly constrained; use a '
+                               'finer charge step (about sigma/2) around the threshold')
+    if ndf > 0 and out['p_value'] is not None and out['p_value'] < 1e-3:
+        out['validity'].append('poor fit (p < 1e-3): non-Gaussian noise, a drifting threshold, crosstalk or an '
+                               'injection nonlinearity; do not quote sigma as the ENC')
+    return out
+
+
+def scurve_design(charges, injections, threshold, noise):
+    """Expected errors of the S-curve fit for a scan design (Fisher information at an assumed threshold and noise)."""
+    if len(injections) == 1:
+        injections = list(injections) * len(charges)
+    qs, ns = _check_scan(charges, injections)
+    t = _num(threshold, 'assumed threshold', positive=False)
+    s = _num(noise, 'assumed noise')
+    cov = _inv2(_scurve_fisher(qs, ns, t, s))
+    if cov is None:
+        raise ValueError('the design has no information on the threshold and noise (no charges near threshold)')
+    transition = sum(1 for q in qs if abs(q - t) < 2 * s)
+    out = {'assumed_threshold': t, 'assumed_noise': s, 'expected_sigma_threshold': math.sqrt(cov[0][0]),
+           'expected_sigma_noise': math.sqrt(cov[1][1]), 'expected_relative_sigma_noise': math.sqrt(cov[1][1]) / s,
+           'charges_within_2_sigma': transition, 'total_injections': sum(ns),
+           'assumptions': ['asymptotic (Fisher) errors of the binomial S-curve fit at the assumed values'],
+           'validity': []}
+    if transition < 3:
+        out['validity'].append('fewer than 3 charges within 2 noise sigma of the threshold: errors are large and '
+                               'the asymptotic approximation is poor')
+    return out
+
+
+def threshold_trim(spread, trim_bits, trim_step, dac_nonlinearity=0.0):
+    """Threshold dispersion after per-channel trim: a Gaussian untrimmed spread, a trim DAC of 2^b codes of step D
+    centred on the target. Channels inside the range keep a uniform residual (rms D/sqrt(12)); channels beyond
+    it keep the excess. Exact for a Gaussian spread much wider than D (the residual is uniform over a code)."""
+    s0 = _num(spread, 'untrimmed threshold spread')
+    if isinstance(trim_bits, bool) or not isinstance(trim_bits, int) or not 1 <= trim_bits <= 16:
+        raise ValueError('trim bits must be an integer from 1 to 16')
+    step = _num(trim_step, 'trim step')
+    dnl = _num(dac_nonlinearity, 'trim DAC nonlinearity', allow_zero=True)
+    half = (2 ** trim_bits - 1) * step / 2  # the extreme codes correct offsets of +-half
+    edge = half + step / 2  # beyond it the residual exceeds half a step
+    a = edge / s0
+    tail = 2 * _phi(-a)  # fraction of channels beyond the trim range
+    dens = math.exp(-a * a / 2) / math.sqrt(2 * math.pi)
+    # beyond the edge the residual is |x| - half = (|x| - edge) + step/2; with u = |x|/s0 - a > 0:
+    # E[u^2] part (1 + a^2) Q(a) - a phi(a), E[u] part phi(a) - a Q(a), both per side
+    e2 = (1 + a * a) * _phi(-a) - a * dens
+    e1 = dens - a * _phi(-a)
+    excess2 = 2 * (s0 * s0 * e2 + step * s0 * e1 + step * step / 4 * _phi(-a))
+    resid2 = (1 - tail) * step * step / 12 + max(excess2, 0.0) + dnl * dnl
+    out = {'untrimmed_spread': s0, 'trim_range_half_width': half, 'fraction_beyond_range': tail,
+           'residual_dispersion': math.sqrt(resid2), 'quantization_part': step / math.sqrt(12),
+           'assumptions': ['Gaussian untrimmed spread centred on the target; ideal trim codes plus an rms DAC '
+                           'nonlinearity in quadrature; the residual of a trimmed channel uniform over one code'],
+           'validity': []}
+    if step > s0:
+        out['validity'].append('trim step larger than the untrimmed spread: the uniform-residual approximation '
+                               'fails; trimming may not help')
+    if tail > 1e-3:
+        out['validity'].append(f'{tail:.2%} of channels lie beyond the trim range: widen the range (more bits or a '
+                               'larger step) or mask them; they dominate the noise occupancy')
+    return out
+
+
 # ---------------------------------------------------------------- cli
 
 def _fail(message, kind='failed'):
@@ -1193,6 +1391,22 @@ def main():
     p.add_argument('--adc-bits', type=int, default=12, dest='adc_bits', help='ADC bits (default 12)')
     p.add_argument('--pedestal', type=float, default=5.0, help='pedestal in noise units (default 5)')
 
+    p = sub.add_parser('s-curve', help='S-curve fit of a threshold scan, or the errors of a scan design')
+    p.add_argument('--charges', type=float, nargs='+', required=True, help='injected charges, increasing')
+    p.add_argument('--injections', type=int, nargs='+', required=True,
+                   help='injections per charge (one value for all, or one per charge)')
+    p.add_argument('--hits', type=int, nargs='+', help='hits per charge (fit mode)')
+    p.add_argument('--design-threshold', type=float, dest='design_threshold',
+                   help='design mode: assumed threshold, same unit as the charges')
+    p.add_argument('--design-noise', type=float, dest='design_noise', help='design mode: assumed noise sigma')
+
+    p = sub.add_parser('threshold-trim', help='threshold dispersion after per-channel trim')
+    p.add_argument('--spread', type=float, required=True, help='untrimmed threshold spread (Gaussian sigma)')
+    p.add_argument('--trim-bits', type=int, required=True, dest='trim_bits', help='trim DAC bits')
+    p.add_argument('--trim-step', type=float, required=True, dest='trim_step', help='trim DAC step, same unit')
+    p.add_argument('--dac-nonlinearity', type=float, default=0.0, dest='dac_nonlinearity',
+                   help='rms trim DAC nonlinearity, same unit (default 0)')
+
     # one unwrapped usage line, so a reader of the first line (contracts/tool_contract.py) sees every subcommand
     parser.usage = '%(prog)s [-h] {' + ','.join(sub.choices) + '} ...'
     for p in sub.choices.values():
@@ -1252,6 +1466,20 @@ def main():
                                   args.amplitude, args.events, args.seed, args.rho, args.phase_jitter,
                                   args.pileup_rate, args.pileup_mean_amp, args.pileup_amplitudes, args.adc_lsb,
                                   args.adc_bits, args.pedestal, args.constraints)
+        elif args.command == 's-curve':
+            design = args.design_threshold is not None or args.design_noise is not None
+            if design == (args.hits is not None):
+                raise ValueError('give --hits (fit) or both --design-threshold and --design-noise (design)')
+            if design:
+                if args.design_threshold is None or args.design_noise is None:
+                    raise ValueError('design mode needs both --design-threshold and --design-noise')
+                result = scurve_design(args.charges, args.injections, args.design_threshold, args.design_noise)
+                result['mode'] = 'design'
+            else:
+                result = scurve_fit(args.charges, args.hits, args.injections)
+                result['mode'] = 'fit'
+        elif args.command == 'threshold-trim':
+            result = threshold_trim(args.spread, args.trim_bits, args.trim_step, args.dac_nonlinearity)
         else:
             result = cluster_noise(args.channels, args.sigma, args.rho)
         text = json.dumps({'status': args.status, 'command': args.command, **result}, indent=2, allow_nan=False)

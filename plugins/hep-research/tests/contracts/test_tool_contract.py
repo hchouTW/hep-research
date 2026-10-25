@@ -317,6 +317,10 @@ FRONTEND_OPS = {  # operation id -> (arguments that succeed, arguments that are 
                       "--phase-jitter", "1", "--adc-lsb", "0.5", "--constraints", "baseline"],
                      ["--peaking", "30", "--period", "10", "--samples", "6", "--first-offset", "-20", "--amplitude",
                       "20", "--events", "5"]),
+    "s-curve": (["--charges", "3000", "3400", "3800", "4200", "--injections", "100", "--hits", "2", "30", "70", "98"],
+                ["--charges", "3000", "3400", "3800", "--injections", "100"]),
+    "threshold-trim": (["--spread", "1500", "--trim-bits", "4", "--trim-step", "250", "--dac-nonlinearity", "20"],
+                       ["--spread", "1500", "--trim-bits", "40", "--trim-step", "250"]),
 }
 
 

@@ -14,7 +14,8 @@ pileup noise, with phase and baseline constraints and the joint amplitude-time e
 (`optimal-filter`), the hit efficiency of a Landau or Gaussian signal against the noise
 occupancy, threshold by threshold (`hit-efficiency`), and a seeded synthetic sampled readout
 reconstructed by those estimators with closure against the analytic prediction
-(`waveform-toy`).
+(`waveform-toy`). For calibration it fits threshold scans and plans them (`s-curve`) and
+gives the threshold dispersion left by a trim DAC (`threshold-trim`).
 
 **Scope.** This file models electronics *as part of the response*: what it does to the
 numbers an analysis sees, how to calibrate it, and how to simulate it. It does not cover
@@ -428,20 +429,56 @@ The statistics (Poisson photoelectrons, excess noise factor) are in
 
 ## Calibration of the electronics
 
-- **Pedestals and noise**: dedicated runs or random triggers; per channel, versus
-  temperature and time.
-- **Charge injection** (test pulse): gain and linearity per channel; the absolute scale
-  carries the uncertainty of the injection capacitor and the pulser amplitude, which
-  is common to all channels injected by the same circuit.
-- **Threshold scans** (S-curves): threshold, noise, and dispersion per channel; trim.
+Electronics calibration produces the per-channel constants that reconstruction applies and
+simulation must reproduce. Its order is part of its definition: pedestal and noise, then
+gain and linearity, then thresholds and trim, then timing and pulse templates; the
+absolute scale with physics signals (minimum-ionizing particles, sources, resonances) comes
+after, in [calibration and alignment](calibration-and-alignment.md). A constant derived
+before a step it depends on (a gain measured with a stale pedestal) carries that error into
+everything downstream.
+
+- **Pedestals and noise**: dedicated runs or random triggers, per channel, versus
+  temperature and time. Where signals can be present, use a robust estimate (median, or
+  iterative exclusion of hit channels, as for the common mode). Keep the noise as a
+  covariance (sample autocorrelation and channel correlations), not only a sigma: the
+  optimal filter and the digitization both need it.
+- **Charge injection** (test pulse): gain and linearity per channel, with the integral
+  nonlinearity from the residuals of the linear fit. The absolute scale carries the
+  uncertainty of the injection capacitor and the pulser amplitude, common to all channels
+  injected by the same circuit: a correlated scale systematic, not per-channel scatter.
+- **Threshold scans** (S-curves): fit hits out of `N` injections at each charge with a
+  binomial likelihood for `Phi((Q - T)/sigma)` (`frontend_response.py s-curve`), not a
+  least-squares fit to fractions, which mis-weights the points near 0 and 100 % and cannot
+  use a point at 0/N. The fitted width is the quadrature sum of the channel noise, the
+  injection-amplitude noise and any threshold drift during the scan. Steps of about
+  `sigma/2` across the turn-on make the errors scale as `1/sqrt(N)`: with 8 charges every
+  200 e, 100 injections each and `sigma = 300 e`, `sigma_T ≈ 18 e` and `sigma_sigma ≈ 17 e`
+  (6 %; a Monte Carlo of 2000 scans gives 17.9 and 17.5 e with pulls 0.98 and 1.02 wide, and
+  the maximum-likelihood sigma about 0.1 of its error low). A poor fit (non-Gaussian noise,
+  crosstalk, a drifting threshold) means the width is not the ENC.
+- **Threshold trim**: a trim DAC of `2^b` codes of step `D` leaves a uniform residual of
+  rms `D/sqrt(12)` for channels inside its range and the excess for those beyond it
+  (`threshold-trim`; *exact* for a Gaussian spread much wider than `D`). Example: an
+  untrimmed spread of 1500 e with 4 bits of 250 e leaves 18 % of channels beyond the range
+  and a residual dispersion of 442 e, not 72 e (a Monte Carlo of the trim codes agrees).
+  The residual is the `--threshold-dispersion` of `hit-efficiency`; it grows with dose, so
+  retrim on a schedule and keep the trim codes as conditions.
 - **Timing**: per-channel offsets, walk curves, TDC bin widths by code density, clock
   phase per board.
 - **Photosensors**: single-photoelectron spectra (gain), LED/laser linearity, dark rate
   and crosstalk versus temperature and dose.
-- **Pulse shape**: templates and optimal-filter weights per channel and gain, with the
-  pileup conditions they assume.
-- Store all of these as conditions with intervals of validity
-  ([calibration and alignment](calibration-and-alignment.md)).
+- **Pulse shape and filter weights**: templates per channel and gain from the average of
+  normalized, time-aligned data pulses (misalignment broadens the template and biases the
+  amplitude, so iterate the alignment), and optimal-filter weights recomputed when the
+  noise or pileup conditions change, stored with the conditions they assume.
+- **Calibration closure in simulation**: run the same calibration procedures on simulated
+  calibration data (pedestal runs, injection, S-curves) and check that they return the
+  constants the digitization was given; a mismatch (a gain defined at a different point of
+  the chain, a threshold in different units) is a digitization-calibration inconsistency
+  that no physics calibration removes.
+- **Monitoring**: track pedestals, noise, gains and thresholds over time
+  (`stability_monitor.py`) and store all constants as conditions with intervals of
+  validity ([calibration and alignment](calibration-and-alignment.md)).
 
 ## Simulation of the electronics
 
@@ -468,6 +505,8 @@ period, pileup counted once) and the closure checks that validate the digitizati
   dither; `LSB/√12` is an rms over inputs.
 - **"Pedestal subtraction removes dark counts."** It removes the mean, not the variance.
 - **"Bipolar shaping has no baseline shift."** Only in steady state.
+- **"Fit S-curve fractions by least squares."** Use the binomial likelihood.
+- **"Trim leaves D/sqrt(12)."** Only for channels within the trim range.
 - **"Five sigma means no fake hits."** Multiply by channels, window, and `nu` (not `nu_0`).
 - **"Noise is per channel and independent."** Coherent noise can dominate sums.
 - **"The dead-channel map is static."** Upsets, dose, and temperature change it.
@@ -494,7 +533,9 @@ period, pileup counted once) and the closure checks that validate the digitizati
 - Rate behaviour: pileup, baseline shifts, dead time, buffer losses, live fraction.
 - The operating window: efficiency and noise occupancy versus threshold for the charge on
   the channel (with sharing and radiation), and its evolution with dose.
-- The electronics calibration chain and its conditions, and how each element is
-  reproduced in simulation.
+- The electronics calibration chain in its order (pedestal, noise covariance, gain and
+  linearity, S-curve thresholds and trim, timing, templates and weights), the fit method and
+  errors of each constant, its conditions and intervals of validity, and the calibration
+  closure in simulation.
 - For simulation, the digitization, overlay and closure deliverables of
   [readout digitization and overlay](readout-digitization-and-overlay.md).

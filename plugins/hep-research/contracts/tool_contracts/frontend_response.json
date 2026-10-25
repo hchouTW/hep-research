@@ -2277,6 +2277,274 @@
     "network": false,
     "subprocess": false
    }
+  },
+  {
+   "operation_id": "s-curve",
+   "summary": "Binomial maximum-likelihood fit of a threshold scan (hits out of injections at increasing injected charge) to Phi((Q - T)/sigma): threshold, noise, their inverse-Fisher errors and correlation, deviance and its chi2 p-value; or, in design mode, the expected errors of a scan at an assumed threshold and noise",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--charges",
+      "input": "charges"
+     },
+     {
+      "flag": "--injections",
+      "input": "injections"
+     },
+     {
+      "flag": "--hits",
+      "input": "hits"
+     },
+     {
+      "flag": "--design-threshold",
+      "input": "design_threshold"
+     },
+     {
+      "flag": "--design-noise",
+      "input": "design_noise"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "charges",
+     "kind": "charge",
+     "unit": "{Q}",
+     "required": true,
+     "constraint": "injected charges, strictly increasing, at least 3"
+    },
+    {
+     "name": "injections",
+     "kind": "counts",
+     "unit": "1",
+     "required": true,
+     "constraint": "injections per charge, positive integers: one for all or one per charge"
+    },
+    {
+     "name": "hits",
+     "kind": "counts",
+     "unit": "1",
+     "required": false,
+     "constraint": "fit mode: hits per charge, integers in [0, injections]; the scan must cross 50 %"
+    },
+    {
+     "name": "design_threshold",
+     "kind": "charge",
+     "unit": "{Q}",
+     "required": false,
+     "constraint": "design mode (with design_noise): assumed threshold"
+    },
+    {
+     "name": "design_noise",
+     "kind": "charge",
+     "unit": "{Q}",
+     "required": false,
+     "constraint": "design mode (with design_threshold): assumed noise, > 0"
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "command",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "assumptions",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "validity",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "mode",
+     "kind": "label",
+     "unit": "n/a"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the result is not finite for these inputs (overflow or division by zero); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"failed\", \"error\": ...} and stderr one line"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range (including a relation the subcommand checks, such as R_p > 0 or rho within [-1/(N-1), 1]); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
+  },
+  {
+   "operation_id": "threshold-trim",
+   "summary": "Threshold dispersion after per-channel trim of a Gaussian untrimmed spread with a trim DAC of 2^b codes of a given step (uniform residual inside the range, the excess beyond it) and an rms DAC nonlinearity, with the fraction of channels beyond the trim range",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--spread",
+      "input": "spread"
+     },
+     {
+      "flag": "--trim-bits",
+      "input": "trim_bits"
+     },
+     {
+      "flag": "--trim-step",
+      "input": "trim_step"
+     },
+     {
+      "flag": "--dac-nonlinearity",
+      "input": "dac_nonlinearity"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "spread",
+     "kind": "charge",
+     "unit": "{Q}",
+     "required": true,
+     "constraint": "untrimmed threshold spread (Gaussian sigma), > 0"
+    },
+    {
+     "name": "trim_bits",
+     "kind": "counts",
+     "unit": "1",
+     "required": true,
+     "constraint": "trim DAC bits, integer 1-16"
+    },
+    {
+     "name": "trim_step",
+     "kind": "charge",
+     "unit": "{Q}",
+     "required": true,
+     "constraint": "trim DAC step, > 0"
+    },
+    {
+     "name": "dac_nonlinearity",
+     "kind": "charge",
+     "unit": "{Q}",
+     "required": false,
+     "constraint": "rms trim DAC nonlinearity, >= 0",
+     "default": 0.0
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "command",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "assumptions",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "validity",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "untrimmed_spread",
+     "kind": "charge",
+     "unit": "{Q}"
+    },
+    {
+     "name": "trim_range_half_width",
+     "kind": "charge",
+     "unit": "{Q}"
+    },
+    {
+     "name": "fraction_beyond_range",
+     "kind": "probability",
+     "unit": "1"
+    },
+    {
+     "name": "residual_dispersion",
+     "kind": "charge",
+     "unit": "{Q}"
+    },
+    {
+     "name": "quantization_part",
+     "kind": "charge",
+     "unit": "{Q}"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the result is not finite for these inputs (overflow or division by zero); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"failed\", \"error\": ...} and stderr one line"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed or out of range (including a relation the subcommand checks, such as R_p > 0 or rho within [-1/(N-1), 1]); stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr the usage and one error line"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
   }
  ]
 }
