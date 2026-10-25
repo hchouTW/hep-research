@@ -2756,6 +2756,28 @@ Contracts: the 13 new keys are core `convention_keys` and also `conditional_conv
 description change and the 8 Th14 cases (paid; pending approval). Pre-existing on main: 5 tests of
 `tests/contracts/test_simulated_dataset.py` fail under a whole-directory pytest run and pass alone (order dependent).
 
+## FRONTEND-FE3 (2026-10-25, E2: macOS 26.5 arm64, Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1, SymPy 1.14.0, mpmath 1.3.0; branch `worktree-frontend-fe3` in `.claude/worktrees/frontend-fe3`, unreleased)
+
+Stage FE3: batch S-curve fits from a scan file. Based on the FE2 branch head `42a4ccbc` (the §P.10.2 exception of
+FE1, stacked). Worktree checks at the start: top level the worktree, branch `worktree-frontend-fe3`, status clean.
+
+| Check | Result |
+|---|---|
+| FE3-1 | every key of each channel's batch result equals `scurve_fit` on that channel (200 channels) |
+| FE3-2 (60 batches of 200 channels; thresholds N(3700, 150^2) e, sigma 300 e, 8 charges every 200 e, 100 injections; seed 2) | mean `threshold_dispersion_corrected` within 3 MC standard errors of 150 e, and of each batch's own true-threshold sd (paired); the uncorrected sd is high by more than 3 standard errors (negative control). Prototype: the Fisher error of the threshold matches the actual fit error (18.48 against 18.49 e, 20 000 fits); with seed 1 the generated true thresholds themselves have sd 151.6 e over 200 batches (a 3-sigma excursion of the stream), which the corrected value follows (151.8 e), so the paired form is the seed-independent check |
+| FE3-3 | true spread 0 and 5 e, 8 batches each: exit-free, finite, >= 0; every batch with radicand <= 0 reports 0 with "dispersion not above the fit error" (at least one occurs), the output serializes without NaN |
+| FE3-4 | a channel that never crosses 50 % is in `failed_channels`, a converging one with p ~ 1e-12 in `excluded_channels` with the reason p < 1e-3; neither changes the summary; the > 5 % warning appears (2 of 22) |
+| FE3-5 | mean `threshold_mad_sigma` within 3 MC standard errors of sqrt(150^2 + mean sigma_T^2), the spread of the fitted thresholds the MAD estimates (the task document said "the true sigma"; the MAD is not corrected for the fit error); the unscaled MAD fails (negative control); median noise and the p < 1e-3 count (over all fitted channels; over the included ones it is always 0) recomputed from the per-channel results |
+| Files | missing, empty, header only, wrong header, three columns, not a number, nan charge, fractional injections, hits above injections, zero injections, empty channel, charges not increasing, not UTF-8; `--scan-file` with `--charges` or `--injections`; neither input: exit 2, `invalid-input`, no traceback |
+| Mutants | 11 local mutants all killed (fit-error subtraction, MAD factor, n - 1, the p rule, clipping, the 5 % rule, median over included, even-length median, increasing charges, integer counts, input exclusion) |
+| Validation commands 1-6 | unit tests, tool contract pass (the batch fields are mode-specific and, like the fit fields, not listed as outputs), reference inventory pass, wiring pass, ruff 0.16.10 clean, static checks pass |
+| Full check (command 7) at `49356c8c` | 31 of 31 checks pass with the host CLIs; unittest 5591 run, 5438 pass, 153 skipped, 0 failures or errors |
+
+**Rebased (2026-10-25)** with FE1 and FE2 onto the FE0 commit `297169a3` (the exit-code fix; no conflict in this
+stage). Full check of the rebased stack at FE3 head `96d8363c` (the same tree as this record's commit, without the
+rebase notes): `tools/run_all_checks.py --out <scratch>` with the host CLIs, 31 of 31 checks pass; unittest 5592 run,
+5439 pass, 153 skipped, 0 failures or errors (458 modules).
+
 ## FRONTEND-FE2 (2026-10-25, E2: macOS 26.5 arm64, Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1, SymPy 1.14.0, mpmath 1.3.0; branch `worktree-frontend-fe2` in `.claude/worktrees/frontend-fe2`, unreleased)
 
 Stage FE2: a measured noise covariance for `optimal-filter` and `waveform-toy`. Based on the FE1 branch head
