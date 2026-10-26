@@ -1,0 +1,66 @@
+{
+ "environment": {
+  "python": "3.13.2",
+  "implementation": "CPython",
+  "executable": "<VENV>/bin/python",
+  "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+  "machine": "arm64",
+  "system": {
+   "os": "Darwin",
+   "arch": "arm64",
+   "libc": "macOS 26.5",
+   "kernel": "25.5.0"
+  },
+  "origin": "venv",
+  "variables": {
+   "ROOTSYS": "/opt/homebrew/Cellar/root/6.38.04_1",
+   "CONDA_PREFIX": "<CONDA_HOME>",
+   "CONDA_DEFAULT_ENV": "base"
+  },
+  "packages": {
+   "numpy": "2.5.3",
+   "scipy": "1.18.1"
+  },
+  "project": {
+   "path": "<TOOL_HOME>/src",
+   "commit": "cd588707fe03c76f19bda1b8092e136dcbe3fe90",
+   "dirty": false
+  }
+ },
+ "tools": [
+  {
+   "name": "python",
+   "version": "3.13.2"
+  },
+  {
+   "name": "numpy",
+   "version": "2.5.3"
+  },
+  {
+   "name": "scipy",
+   "version": "1.18.1"
+  }
+ ],
+ "input_manifest": [
+  {
+   "path": "<TOOL_HOME>/install/bin/DRAGON",
+   "sha256": "d26dbb857a2c06182bd7b754ce963888670ceaa5932d0efa58b0ca202a9a6c34",
+   "size": 36504
+  },
+  {
+   "path": "<TOOL_HOME>/install/lib/libDRAGON.0.dylib",
+   "sha256": "13ed18076652c7bdf1b48021ac2a9f71b649bfe8f8301d862bd7c2835ae6c423",
+   "size": 819616
+  },
+  {
+   "path": "<TOOL_HOME>/install/lib/libTiXML.0.dylib",
+   "sha256": "d6b2039f2ec237462c1ee6c77414a7e5e77e42718258851ca86b29ed91d11875",
+   "size": 161600
+  },
+  {
+   "path": "<TOOL_HOME>/install/lib/libcparamlib.0.dylib",
+   "sha256": "ef72e74af976ff74fd29c13b7ccd7b9f03d4c3072fe1911c3990b18239cd8bef",
+   "size": 93880
+  }
+ ]
+}

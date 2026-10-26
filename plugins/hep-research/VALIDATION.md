@@ -23,6 +23,7 @@ earlier run's totals included them ("since removed") the totals are quoted as th
 | E2 | macOS workstation, macOS 26.5 (Darwin 25.5.0), arm64 Apple M3, Python 3.13.2 with numpy 2.5.3, scipy 1.18.1, matplotlib 3.11.2, sympy 1.14.0; Claude Code 2.1.288 to 2.1.289; Codex CLI 0.160.0 |
 | E3 | Linux (EL9) shared cluster node (AlmaLinux 9, Linux 5.14.0 x86_64), plugin tree on a network file system, Python 3.11.13 in a venv on local disk; system ROOT 6.40.04 (C++17, g++ 11.5.0; PyROOT through the system Python 3.9), cmake 3.31.8, Graphviz 2.44.0, HTCondor 25.0.14; Claude Code 2.1.287, Codex CLI 0.160.0 |
 | E4 | Linux cloud container (Claude Code cloud, Linux x86_64), Python 3.13.16 in `.venv-hep` with numpy 2.5.3, scipy 1.18.1, matplotlib 3.11.2, sympy 1.14.0, pyhf 0.7.6; no ROOT, PyTorch, Combine or Codex; Claude Code 2.1.292 |
+| E-crprop | The E2 host (macOS 26.5 arm64; Python 3.13.2 in the E2 venv with numpy 2.5.3, scipy 1.18.1) plus the external cosmic-ray propagation codes of the cr-propagation campaign: DRAGON2 (cosmicrays/DRAGON2-Beta_version commit cd588707, configure.ac DRAGON 3.1.0; serial build of 2026-10-15, binary sha256 d26dbb85…, data directory = the checkout's `data/`), built with Homebrew GCC 15.2.0_1 (g++-15, gfortran-15), GSL 2.8, CFITSIO 4.6.4, Autoconf 2.72, libtool 2.6.2; on the host also ROOT 6.38.04, cmake 4.3.2, Apple clang 21.0.0 (not used by DRAGON2). USINE V3.5 and GALPROP v57 absent (no source tarball, decisions D4, D5). No batch client: local `local_partition.py` only (D6). Located through `HEP_DRAGON2_BIN`, `HEP_DRAGON2_DATA`; records in `tests/adapters/fixtures/cr_propagation/env/` |
 
 Aggregate command: `python3 tools/run_all_checks.py --out <dir>` from the plugin root (`--help` runs nothing). Seeds
 and tolerances of every example are in its `results.json`.
@@ -5767,3 +5768,25 @@ loosening or deleting one waits for H1 (`workflow_check.py acceptance`).
 Derived entries (not in r3): ENV-1 to ENV-3 (from r4 §3) and C2U-1, C2U-2 (from r3 §C2's USINE case, split by r4 §6).
 ALL-2 is replaced by the P0 freeze. **Not verified here:** r3 Q10's formal independent review with `review.py` is not
 run at P0; it moves to before H1 (r4 Open Questions).
+
+## CRPROP-ENV — 2026-10-26 (environment E-crprop)
+
+Work package ENV of the cr-propagation r4 workflow (`docs/dev/cr-propagation/workflow-r4.md` §3): capability probe
+and external builds. **Environment field (r3 §0.3, base exception D10):** worktree `.claude/worktrees/crprop-env`,
+branch `worktree-crprop-env`, base = integration HEAD ef37d970 (not `main`; decision D10); toplevel checked, status
+clean at start, prerequisite P0 (ef37d970) an ancestor of HEAD. No plugin code changed.
+
+| Item | Result | Evidence |
+|---|---|---|
+| Capability file (ENV-1) | all 9 capabilities of `workflow.json`: `repo` present, `net-github` present (DRAGON2 HEAD cd588707), `net-sources` absent, `net-data` partial (HEPData HTTP 200; CRDB times out after 25 s), `pkg-install` present (Homebrew 7.0.8, venv creation), `batch` partial (local only, D6), `env-dragon2` present, `env-usine` absent, `env-galprop` absent | `$CRPROP_OUT/capabilities.json` (outside the repo) |
+| DRAGON2 build check | not rebuilt: source commit cd588707 (clean); sha256 of `install/bin/DRAGON` and the three libraries equal the 2026-10-15 build record | `tests/adapters/fixtures/cr_propagation/dragon2-build.computational-run.json` |
+| DRAGON2 live rerun | `HEP_DRAGON2_LIVE_TEST=1 python -m unittest tests.adapters.test_cr_propagation`: 22 tests OK in 100.1 s (E2 venv) and 100.3 s (miniconda Python 3.13.2, numpy 2.4.4); `LiveDragon2` ran, not skipped: X1 rerun equals the recorded output at relative 1e-6 | `$CRPROP_OUT/env/live/` |
+| Records (ENV-2) | computational-run `dragon2-verify.computational-run.json` (contracts 3.13.0, `validate.py` ok, no findings) and environment manifest `dragon2.environment.json` (`environment_manifest.py record`), de-identified (`<TOOL_HOME>`, `<VENV>`, `<RUN_DIR>`) | `tests/adapters/fixtures/cr_propagation/env/` |
+| Environment label (ENV-3) | E-crprop registered in the Environments table with compiler, ROOT, GSL, CFITSIO and DRAGON2 versions | this file |
+| Checks (ALL-3) | `run_all_checks.py`: exit 0. `check_relocation.py`: 31 pass, 1 fail, 1 skip; the failing check is two `tests.adapters.test_geant4` partition tests (`test_partition_summaries_merge_without_reading_a_csv`, `test_partition_merge_equals_a_single_run_and_refuses_nothing_twice`), whose worker command breaks on a plugin path with spaces (`can't open file '.../reloc'`); the same two tests fail identically from a copy of the base ef37d970 under a path with spaces, so the failure predates ENV and is not fixed here | `$CRPROP_OUT/env/reloc`, `$CRPROP_OUT/env/acceptance/ALL-3.spaces-path.*.log` |
+| USINE, GALPROP | absent: `$HOME/hep-work/crprop-sources/` is empty; nothing downloaded or built (D4, D5). Fallbacks of `workflow.json`: USINE absent is critical (B1, B3, C2U wait; F1 takes D8); GALPROP absent makes D2 unavailable | `capabilities.json` |
+
+**Not run:** the curl probes of `lpsc.in2p3.fr/usine`, `gitlab.in2p3.fr` and `galprop.stanford.edu` (outside the
+consented network hosts of the campaign's common assignment; decision D2 records that they time out from the
+sandbox). The DRAGON2 status is unvalidated: the live rerun shows reproducibility of the recorded X1 output, not
+physical validity.

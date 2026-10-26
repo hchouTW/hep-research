@@ -1,0 +1,147 @@
+{
+ "contract_version": "3.13.0",
+ "artifact_id": "crprop-env-dragon2-cd588707",
+ "artifact_type": "computational-run",
+ "objective": "ENV work package of cr-propagation r4: verify the existing DRAGON2 build (cosmicrays/DRAGON2-Beta_version, commit cd588707) for environment E-crprop and rerun the live X1 test through dragon2_run.py",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.42.0",
+  "contracts": "3.13.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-computing",
+  "created": "2026-10-26",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "status": [
+  "unvalidated"
+ ],
+ "extension": {
+  "input_manifest": [
+   {
+    "path": "<TOOL_HOME>/install/bin/DRAGON",
+    "sha256": "d26dbb857a2c06182bd7b754ce963888670ceaa5932d0efa58b0ca202a9a6c34"
+   },
+   {
+    "path": "<TOOL_HOME>/install/lib/libDRAGON.0.dylib",
+    "sha256": "13ed18076652c7bdf1b48021ac2a9f71b649bfe8f8301d862bd7c2835ae6c423"
+   },
+   {
+    "path": "<TOOL_HOME>/install/lib/libTiXML.0.dylib",
+    "sha256": "d6b2039f2ec237462c1ee6c77414a7e5e77e42718258851ca86b29ed91d11875"
+   },
+   {
+    "path": "<TOOL_HOME>/install/lib/libcparamlib.0.dylib",
+    "sha256": "ef72e74af976ff74fd29c13b7ccd7b9f03d4c3072fe1911c3990b18239cd8bef"
+   }
+  ],
+  "tools": [
+   {
+    "name": "DRAGON2",
+    "version": "DRAGON2-Beta_version git cd588707fe03c76f19bda1b8092e136dcbe3fe90 (configure.ac DRAGON 3.1.0); existing build of 2026-10-15 verified, not rebuilt",
+    "source": "https://github.com/cosmicrays/DRAGON2-Beta_version"
+   },
+   {
+    "name": "g++-15 / gcc-15 / gfortran-15",
+    "version": "Homebrew GCC 15.2.0_1"
+   },
+   {
+    "name": "Apple clang",
+    "version": "21.0.0 (clang-2100.0.123.102), not used by the DRAGON2 build"
+   },
+   {
+    "name": "ROOT",
+    "version": "6.38.04 (Homebrew 6.38.04_1), not linked by DRAGON2"
+   },
+   {
+    "name": "GSL",
+    "version": "2.8 (Homebrew)"
+   },
+   {
+    "name": "CFITSIO",
+    "version": "4.6.4 (Homebrew)"
+   },
+   {
+    "name": "cmake",
+    "version": "4.3.2"
+   },
+   {
+    "name": "GNU Autoconf",
+    "version": "2.72"
+   },
+   {
+    "name": "GNU libtool (glibtoolize)",
+    "version": "2.6.2"
+   },
+   {
+    "name": "python",
+    "version": "3.13.2"
+   },
+   {
+    "name": "numpy",
+    "version": "2.5.3"
+   },
+   {
+    "name": "scipy",
+    "version": "1.18.1"
+   }
+  ],
+  "commands": [
+   "git -C <TOOL_HOME>/src rev-parse HEAD  # cd588707fe03c76f19bda1b8092e136dcbe3fe90, clean",
+   "shasum -a 256 <TOOL_HOME>/install/bin/DRAGON  # d26dbb85..., equals output_hashes of ../dragon2-build.computational-run.json",
+   "python3 skills/hep-computing/scripts/environment_manifest.py record --packages numpy,scipy --project <TOOL_HOME>/src --inputs <TOOL_HOME>/install/bin/DRAGON <TOOL_HOME>/install/lib/libDRAGON.0.dylib <TOOL_HOME>/install/lib/libTiXML.0.dylib <TOOL_HOME>/install/lib/libcparamlib.0.dylib --out <RUN_DIR>/env/dragon2.environment.e2venv.raw.json",
+   "HEP_DRAGON2_LIVE_TEST=1 HEP_DRAGON2_BIN=<TOOL_HOME>/install/bin/DRAGON HEP_DRAGON2_DATA=<TOOL_HOME>/src/data <VENV>/bin/python -m unittest -v tests.adapters.test_cr_propagation  # 22 tests OK in 100.1 s, LiveDragon2 ran (not skipped)"
+  ],
+  "environment": {
+   "python": "3.13.2",
+   "implementation": "CPython",
+   "executable": "<VENV>/bin/python",
+   "platform": "macOS-26.5-arm64-arm-64bit-Mach-O",
+   "machine": "arm64",
+   "system": {
+    "os": "Darwin",
+    "arch": "arm64",
+    "libc": "macOS 26.5",
+    "kernel": "25.5.0"
+   },
+   "origin": "venv",
+   "variables": {
+    "ROOTSYS": "/opt/homebrew/Cellar/root/6.38.04_1",
+    "CONDA_PREFIX": "<CONDA_HOME>",
+    "CONDA_DEFAULT_ENV": "base"
+   },
+   "packages": {
+    "numpy": "2.5.3",
+    "scipy": "1.18.1"
+   },
+   "project": {
+    "path": "<TOOL_HOME>/src",
+    "commit": "cd588707fe03c76f19bda1b8092e136dcbe3fe90",
+    "dirty": false
+   },
+   "label": "E-crprop",
+   "build_notes": "Not rebuilt: binary and library hashes equal the 2026-10-15 build record; serial build (no OpenMP); ROOT, FFTW, DarkSUSY off. The *-diag builds in <TOOL_HOME> are a patched diagnostic build and were not used."
+  },
+  "seeds": {
+   "note": "not applicable: DRAGON2 X1 is deterministic"
+  },
+  "tolerances": {
+   "note": "live test compares X1 output with the recorded output at relative 1e-6"
+  },
+  "resources": {},
+  "exit_status": 0,
+  "output_hashes": {
+   "install/bin/DRAGON": "d26dbb857a2c06182bd7b754ce963888670ceaa5932d0efa58b0ca202a9a6c34",
+   "install/lib/libDRAGON.0.dylib": "13ed18076652c7bdf1b48021ac2a9f71b649bfe8f8301d862bd7c2835ae6c423",
+   "install/lib/libTiXML.0.dylib": "d6b2039f2ec237462c1ee6c77414a7e5e77e42718258851ca86b29ed91d11875",
+   "install/lib/libcparamlib.0.dylib": "ef72e74af976ff74fd29c13b7ccd7b9f03d4c3072fe1911c3990b18239cd8bef"
+  }
+ }
+}
