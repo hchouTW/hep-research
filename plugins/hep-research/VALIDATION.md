@@ -5789,3 +5789,22 @@ Acceptance criteria and tolerances, written before any implementation (R9; froze
 | A1-4 | With a break, or different smoothness conventions, the status is `approximate` or `not-convertible`; K0 <-> K10 with a break is never `exact` | status only |
 | A1-5 | V_A between thin disc and whole halo | status `approximate` only |
 | A1-6 | `harmonized-v1.json` carries every §5.5 row and the §5.4 `transport` structure; schema validation against `ext_theory_spec.transport` after A2 merges | every row present |
+
+Results (2026-10-26, E2, HEAD `0a406fd2` for the full checks; outputs under `$CRPROP_OUT/a1/`):
+
+| ID | Result | Evidence |
+|---|---|---|
+| A1-1 | pass: every pure power-law pair (eta 1: galprop, usine-k0, usine-k10, canonical; eta 0: dragon2 and the same; eta 0.7: usine and canonical) is `exact` and there-and-back within 1e-12 | `PowerLawRoundTrips` |
+| A1-2 | pass: 1 kpc^2/Myr = 3.01720e29 cm^2/s from the IAU parsec and Julian year, within 1e-4 of 3.0172e29; the page's 3.017e29 within half its last digit | `Units`, `ConventionTable.test_page_unit_line_matches_derived_unit` |
+| A1-3 | pass: the three table rows (plus K10 from "K10 = K0 10^delta") are parsed for eta, reference rigidity and unit and matched to the module; a row that does not parse fails (`test_parse_failure_fails`) | `ConventionTable` |
+| A1-4 | pass: with a low break, K0 <-> K10 and K0 -> GALPROP are `approximate` with a bound >= abs(f(R0') - 1); different or unknown smoothness conventions and non-low breaks are `not-convertible`; never `exact` | `Breaks` |
+| A1-5 | pass: V_A thin disc <-> whole halo is `approximate` (factor sqrt(L/h), no bound derived); same zone `exact` | `Reacceleration` |
+| A1-6 | pass (structure): every §5.5 row present, §5.4 keys at both levels; schema validation against `ext_theory_spec.transport` skipped until A2 merges (the test runs it automatically once the property exists) | `Harmonized` |
+
+Checks: `run_all_checks.py` 33 pass, 0 fail; `check_relocation.py` fails 2 tests in `tests.adapters.test_geant4`
+(`test_partition_summaries_merge_without_reading_a_csv`, `test_partition_merge_equals_a_single_run_and_refuses_nothing_twice`:
+a worker command split at the space of the relocated path), and the same 2 fail on the base `ef37d970` (exported with
+`git archive`), so they are not caused by A1; `check_naming.py` pass, baseline not grown; `check_layering.py`,
+`check_packaging.py`, `check_wiring.py --since ef37d970`, `reference_inventory.py --check` pass.
+Not verified: the break form of the `usine` smoothness convention was not re-read from Weinrich et al. 2020a, Eq. 1;
+the V_A zone scaling has no derived error bound.
