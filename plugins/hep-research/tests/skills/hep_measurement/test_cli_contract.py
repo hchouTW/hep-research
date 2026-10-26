@@ -48,6 +48,9 @@ ANI_EVENTS = 'ra_deg\n10.0\n200.0\n300.0\n'
 # '{g}'). 'json' reports the status label under status; 'run-json' (core/status.py, F-04) a run status under status
 # and the label under status_label.
 CASES = {
+    'extract_names.py': ((['--surface', 'N9', '--root', str(ROOT / 'skills' / 'hep-measurement' / 'assets'), '--out',
+                           'inv.json'], None), (['--surface', 'N99', '--root', '.', '--out', 'inv.json'], None), None,
+                         'run-json'),
     'anisotropy.py': ((['harmonic', '--events', '{f}'], ANI_EVENTS), (['harmonic', '--events', '{f}'], 'ra_deg\nnan\n'),
                       (['harmonic', '--events', '{f}'], 'ra_deg\n"x'), 'run-json'),
     'acceptance_from_generation.py': ((['--config', '{f}', '--events', '{g}'], {'{f}': AFG_CFG, '{g}': AFG_EVENTS}),

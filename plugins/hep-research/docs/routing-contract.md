@@ -53,7 +53,7 @@ Correlations: hep-measurement supplies the physical correlation evidence and a p
 | Claim-to-result links in a manuscript or a packaged result | hep-authoring | `claim-to-result links` | Claims linked to results, status preserved in text |
 | Writing a literature review or a related-work section from the sources | hep-authoring | `related-work and review sections` | — |
 | Independent review packets, review records and the review log | hep-authoring | `independent review`, `review packet` | — |
-| Semantic naming of identifiers, files and named objects: charter, engine, contract levels, change sets | hep-computing | `semantic naming` | Semantic naming governance (charter, engine, extractors N1 N2 N5 N16, plugin gate) |
+| Semantic naming of identifiers, files and named objects: charter, engine, contract levels, change sets | hep-computing | `semantic naming` | Semantic naming governance (charter, engine, extractors for all 17 surfaces, cross-surface names, plugin gate) |
 <!-- /ownership-table -->
 
 hep-measurement keeps the measurement-design view (which level to publish, which corrections the response carries) in

@@ -7,7 +7,8 @@ contracts/naming_check.py in gate mode: deterministic rules only, every name rep
 violated rule an error and every unverified or unsupported result a failure. Findings that existed when the gate came
 in are listed in tools/naming_known_gaps.json, keyed by rule and entity id without its line ("<rule_id>|<surface>:
 <file>#<container>/<name>", with a count for a name declared more than once); the file only shrinks. A finding not in
-it fails the gate; an entry nothing matches any more is reported as stale (delete it), never an error. A waiver is an
+it fails the gate (an unverified or unsupported result is never baselined); an entry nothing matches any more is
+reported as stale (delete it), never an error. A waiver is an
 explicit exception, visible in the PR, in the same file's "waivers" list (rule_id, entity_ids, reason, recorded_by).
 
 Usage: python3 tools/check_naming.py [--known-gaps FILE] [--root PLUGIN_ROOT] [--write-known-gaps]
@@ -59,6 +60,9 @@ def run(root: Path, known: dict) -> dict:
     unlisted, applied = [], 0
     for f in rep["findings"]:
         if f["severity"] not in ("error", "unresolved"):
+            continue
+        if f["severity"] == "unresolved":
+            unlisted.append(f)  # unverified and unsupported results are never baselined: they always fail (§8.5)
             continue
         k = gap_key(f)
         seen[k] += 1

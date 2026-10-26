@@ -144,7 +144,7 @@ class GeneralMethodLabel(unittest.TestCase):
 
 class DetectorScriptCount(unittest.TestCase):
     def test_script_count(self):
-        self.assertEqual(len(list((ROOT / "skills" / "hep-detector" / "scripts").glob("*.py"))), 23)
+        self.assertEqual(len(list((ROOT / "skills" / "hep-detector" / "scripts").glob("*.py"))), 24)
 
 
 if __name__ == "__main__":

@@ -18,7 +18,7 @@ import hashlib
 from pathlib import Path
 
 from core.naming import predicates as P
-from core.naming.model import max_level
+from core.naming.model import max_level, stable_key
 from core.naming.vocab import forbidden_table
 
 ENGINE_VERSION = "1.0.0"
@@ -26,8 +26,49 @@ RELATIONAL = ("uniqueness", "reference", "pairing", "declared-match", "similarit
 DEDUP_PREDICATES = ("uniqueness",)
 
 
+def _matches(t: dict, x: dict) -> bool:
+    return (x["surface"] == t["surface"] and x["name"] == t["name"] and x["change"] != "removed"
+            and (not t.get("entity_kind") or x["entity_kind"] == t["entity_kind"])
+            and (not t.get("file") or x["scope"]["file"] == t["file"])
+            and (not t.get("container") or x["scope"]["container"] == t["container"]))
+
+
+def link_targets(entities) -> dict[str, list]:
+    """Resolve each entity's targets (names it refers to on its own or another surface) against the supplied
+    entities: {entity_id: [(target, [matching entities])]}. A matching entity gains the reference {from: the
+    referring entity's id, kind: the target's kind} (once), so its level, reference checks and change sets see it."""
+    by_name: dict[tuple, list] = {}
+    for x in entities:
+        by_name.setdefault((x["surface"], x["name"]), []).append(x)
+    out: dict[str, list] = {}
+    for e in entities:
+        for t in e.get("targets") or []:
+            hits = [x for x in by_name.get((t["surface"], t["name"]), []) if _matches(t, x)]
+            out.setdefault(e["entity_id"], []).append((t, hits))
+            for x in hits:
+                if not any(r["from"] == e["entity_id"] for r in x["references"]):
+                    x["references"].append({"from": e["entity_id"], "kind": t.get("kind", "refers-to")})
+    return out
+
+
+def glossary_concepts(entities, vocab) -> None:
+    """meaning.concept_id from the glossary (source glossary) when a name holds a spelling of exactly one entry
+    that declares identifiers, and no review or extractor filled it."""
+    spellings = P.glossary_spellings(getattr(vocab, "glossary", None))
+    if not spellings:
+        return
+    for e in entities:
+        if e["meaning"].get("concept_id"):
+            continue
+        toks = tuple(t.lower() for t in e.get("tokens") or [])
+        hit = [entry["id"] for entry, idents, other in spellings if any(P._contains(toks, ph) >= 0 for ph in idents | other)]
+        if len(hit) == 1:
+            e["meaning"]["concept_id"] = f"term:{hit[0]}"
+            e["meaning"]["source"] = "glossary"
+
+
 class Context:
-    def __init__(self, entities, surfaces, vocab, declarations=None, annotations=None, inventories=()):
+    def __init__(self, entities, surfaces, vocab, declarations=None, annotations=None, inventories=(), targets=None):
         self.entities = entities
         self.surfaces = {s["surface_id"]: s for s in surfaces}
         self.vocab = vocab
@@ -35,6 +76,7 @@ class Context:
         self.annotations = annotations or {}
         self.inventories = set(inventories)
         self.forbidden = forbidden_table()
+        self.targets = targets if targets is not None else {}
         self.by_id = {e["entity_id"]: e for e in entities}
         self.by_name: dict[tuple, list] = {}
         self._by_surface: dict[str, list] = {}
@@ -74,8 +116,12 @@ def covers(coverage, surface: str, roots) -> bool:
 
 
 def references_status(e: dict, roots, registry: dict) -> str:
+    """complete only when the search covered the whole project for this surface and every surface that refers to it:
+    an inventory of a narrower --scope never proves that no file outside it uses the name (its status is partial)."""
     if not e["search_coverage"]:
         return "not_searched"
+    if "" not in {_root(r) for r in roots}:
+        return "partial"
     needed = {e["surface"]} | {s["surface"] for s in registry[e["surface"]]["referenced_by"]}
     return "complete" if all(covers(e["search_coverage"], s, roots) for s in needed) else "partial"
 
@@ -149,7 +195,9 @@ def merge_annotations(entities, annotations: dict) -> None:
 
 
 def _waived(waivers, rule, eid) -> bool:
-    return rule.get("waivable", False) and any(w.get("rule_id") == rule["rule_id"] and eid in (w.get("entity_ids") or [])
+    """An explicit entity id, with or without its @line (so an edit above the name does not drop the waiver)."""
+    ids = {eid, stable_key(eid)}
+    return rule.get("waivable", False) and any(w.get("rule_id") == rule["rule_id"] and ids & set(w.get("entity_ids") or [])
                                                for w in waivers or [])
 
 
@@ -162,9 +210,11 @@ def judge(inventories, rules, surfaces, *, vocab, state_for, declarations=None, 
     roots_of = {inv["surface"]: inv["scope_roots"] for inv in inventories}
     annotations = annotations or {}
     merge_annotations(entities, annotations)
+    targets = link_targets(entities)
     classify(entities, roots_of, surfaces, declarations, vocab)
+    glossary_concepts(entities, vocab)
     supplied = {inv["surface"] for inv in inventories}
-    ctx = Context(entities, surfaces, vocab, declarations, annotations, supplied)
+    ctx = Context(entities, surfaces, vocab, declarations, annotations, supplied, targets)
     active = [r for r in rules if r["lifecycle"] == "active"
               and not (deterministic_only and r["determinism"] != "deterministic")]
     results, not_run, notes = [], [], []
@@ -256,6 +306,10 @@ def file_sha256(path: Path) -> str | None:
         return None
 
 
+def _loc(x: dict) -> str:
+    return f"{x['scope']['file']}:{x['scope']['span'][0]}"
+
+
 def validate_change_set(cs: dict, entities, surfaces, project_root, supplied_surfaces, inventory_digests=()) -> dict:
     """The ordered checks of §8.4; stops at the first failure. Returns {status, exit_code, check, code, message}."""
     registry = {s["surface_id"]: s for s in surfaces}
@@ -268,31 +322,51 @@ def validate_change_set(cs: dict, entities, surfaces, project_root, supplied_sur
         return out("input-error", 2, 0, "naming.change_set_entity_unknown",
                    f"{cs['entity_id']} is in none of the supplied inventories")
     policy = rename_policy(e, registry)
+    if cs.get("contract_level") and cs["contract_level"] != e["contract_level"]:
+        return out("fail", 1, 1, "naming.change_set_level_mismatch",
+                   f"the change set records {cs['contract_level']}; the inventory gives {e['name']} "
+                   f"{e['contract_level']}: rebuild the change set from the inventory")
     if e["contract_level"] == "C4" or policy == "never":
         return out("fail", 1, 1, "naming.rename_forbidden",
                    f"{e['name']} is {e['contract_level']} with rename policy {policy}: never renamed; propose an alias")
     if policy == "dedup-only":
-        dups = [x for x in entities if x is not e and x["surface"] == e["surface"] and x["name"] == e["name"]
-                and x["change"] != "removed"]
-        if not dups:
+        cid = (e.get("meaning") or {}).get("concept_id")
+        dups = [x for x in entities if x is not e and x["surface"] == e["surface"] and x["change"] != "removed"
+                and (x["name"] == e["name"] or (cid and (x.get("meaning") or {}).get("concept_id") == cid))]
+        trigger = cs.get("trigger") or {}
+        if not dups or (trigger and trigger.get("predicate", "uniqueness") != "uniqueness"):
             return out("fail", 1, 1, "naming.rename_not_dedup",
-                       f"{e['surface']} renames only to remove a duplicate; {e['name']} has none")
+                       f"{e['surface']} renames only to remove a duplicate (the same name, or two names of one record); "
+                       f"{e['name']} has none" if not dups else f"the change set's trigger {trigger.get('rule_id')} is not "
+                       "a duplicate finding")
     if e["references_status"] != "complete":
         return out("incomplete", 3, 2, "naming.references_incomplete",
                    f"references of {e['name']} are {e['references_status']}: search them all before renaming")
-    needed = [s["surface"] for s in registry[e["surface"]]["referenced_by"]]
+    derived = [t for t in e.get("targets") or [] if t.get("derived")]
+    needed = list(dict.fromkeys([s["surface"] for s in registry[e["surface"]]["referenced_by"]] +
+                                [t["surface"] for t in derived]))
     lacking = [s for s in needed if s not in supplied_surfaces]
     if lacking:
         return out("incomplete", 3, 3, "naming.inventory_missing",
                    f"no inventory for {', '.join(lacking)}, which refer to {e['surface']} names")
     stale = [p for p, d in sorted(cs["source_sha256"].items()) if file_sha256(Path(project_root) / p) != d]
     stale_inv = [d for d in cs["inventory_digests"].values() if inventory_digests and d not in set(inventory_digests)]
+    if inventory_digests and not cs["inventory_digests"]:
+        return out("incomplete", 3, 4, "naming.change_set_digests_missing",
+                   "the change set records no inventory digests: record the sha256 of each inventory it was built from")
     if stale or stale_inv:
         what = ", ".join(stale) if stale else "the inventories"
         return out("incomplete", 3, 4, "naming.change_set_stale",
                    f"{what} changed since the change set was built: re-run the inventory")
     replaced = {r["location"] for r in cs["replacements"]}
-    unmatched = [r["from"] for r in e["references"] if r["from"] not in replaced]
+
+    def covered(ref_from: str) -> bool:
+        x = by_id.get(ref_from)
+        return ref_from in replaced or (x is not None and _loc(x) in replaced)
+    unmatched = [r["from"] for r in e["references"] if not covered(r["from"])]
+    for t in derived:  # a name derived from this one (Combine's <process>_<nuisance>Up) is renamed with it
+        hits = [x for x in entities if _matches(t, x)]
+        unmatched += [x["entity_id"] for x in hits if not covered(x["entity_id"])]
     if unmatched:
         return out("fail", 1, 5, "naming.replacement_missing",
                    f"{len(unmatched)} reference(s) have no replacement, e.g. {', '.join(unmatched[:3])}")
@@ -300,6 +374,10 @@ def validate_change_set(cs: dict, entities, surfaces, project_root, supplied_sur
         ap = cs.get("approval") or {}
         if not (ap.get("required") and ap.get("by") and ap.get("at")):
             return out("fail", 1, 6, "naming.approval_missing", f"{e['name']} is C3: record the user's approval first")
+        owner = registry[e["surface"]]["owner"]
+        if (cs.get("handoff") or {}).get("owner") != owner:
+            return out("fail", 1, 6, "naming.handoff_missing",
+                       f"{e['name']} is C3: the change set hands back to {owner}, the owner of {e['surface']}")
     if policy == "deprecate" and not (cs.get("deprecated_alias") or {}).get("old"):
         return out("fail", 1, 6, "naming.deprecated_alias_missing",
                    f"{e['surface']} {e['entity_kind']} renames keep the old name as a deprecated alias")

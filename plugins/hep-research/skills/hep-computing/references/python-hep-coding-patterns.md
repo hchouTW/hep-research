@@ -121,3 +121,23 @@ For regression validation, compare selected event counts, cutflow counts, histog
 integrals, maximum absolute/relative bin differences, and fit parameters/uncertainties
 against a reference — see [Validation](../../hep-measurement/references/analysis-validation.md) for the full regression
 checklist.
+
+<a id="naming-n4"></a>
+### Naming: branches and columns (N4)
+- **Extractor:** `extract_names.py --surface N4` (hep-computing; inputs: TTree branches as for N3, Parquet columns with pyarrow, and columns code defines with RDataFrame `Define`, `Redefine` or `Alias`; `--external PATH` marks official ntuples, whose names are C4)
+- **Entity kinds and level floors:** generated from `contracts/naming/surfaces.json`, not restated by hand:
+
+<!-- naming-kinds:N4: generated from contracts/naming/surfaces.json by contracts/naming_registry.py sections; do not edit -->
+
+| Kind | Level floor | Format | Rename policy |
+|---|---|---|---|
+| `project_column` | C2 | `^(?:[a-z][a-z0-9]*\|[A-Z][a-z0-9]*)(?:_[a-z0-9]+)*$` | matrix |
+
+<!-- /naming-kinds:N4 -->
+
+- **The name must say:** `<block>_<member>`: the object and the quantity, with the unit when it is not the ntuple's default (`mu_pt`, `jet_eta`, `rigidity_gv`)
+- **Rename policy:** matrix; external branches are never renamed: `Alias("mu_pt", "muPt")` maps them
+- **Rules:** see the registry for surface N4 (`naming.common.*`, `naming.n4.*`, `naming.cross.*`)
+- **Good / bad:** `mu_pt`, `Muon_pt_corr` / `muPt`, `var1`
+
+Procedure, levels and report: [semantic naming charter](semantic-naming.md).

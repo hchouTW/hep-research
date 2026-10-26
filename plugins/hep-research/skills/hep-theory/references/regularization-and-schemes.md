@@ -96,3 +96,24 @@ the derivation status.
 - T. van Ritbergen, J.A.M. Vermaseren, S.A. Larin, arXiv:hep-ph/9701390; Eqs. (4), (8), (11).
 - K.G. Chetyrkin, "Quark mass anomalous dimension to O(alpha_s^4)", arXiv:hep-ph/9703278; Eqs. (1), (4)-(9).
 - A. Djouadi, "The anatomy of electroweak symmetry breaking I", arXiv:hep-ph/0503172; Sec. 2.1.2, Eqs. (2.9)-(2.12).
+
+<a id="naming-n13"></a>
+### Naming: theory parameters and scheme labels (N13)
+- **Extractor:** `extract_names.py --surface N13` (hep-theory; inputs: theory-spec parameters and the scheme labels of its conventions and scales, prediction parameter points)
+- **Entity kinds and level floors:** generated from `contracts/naming/surfaces.json`, not restated by hand:
+
+<!-- naming-kinds:N13: generated from contracts/naming/surfaces.json by contracts/naming_registry.py sections; do not edit -->
+
+| Kind | Level floor | Format | Rename policy |
+|---|---|---|---|
+| `parameter` | C2 | — | matrix |
+| `scheme_label` | C2 | — | matrix |
+
+<!-- /naming-kinds:N13 -->
+
+- **The name must say:** the parameter with its scheme and unit (`m_top_msbar_gev`, `alpha_s_mz`); a scheme label is the standard name of the scheme (`MSbar`, `on-shell`)
+- **Rename policy:** matrix
+- **Rules:** see the registry for surface N13 (`naming.common.*`, `naming.n13.*`, `naming.cross.*`)
+- **Good / bad:** `alpha_s_mz`, `m_top_pole_gev` / `p1`, `param_new`
+
+Procedure, levels and report: [semantic naming charter](../../hep-computing/references/semantic-naming.md).

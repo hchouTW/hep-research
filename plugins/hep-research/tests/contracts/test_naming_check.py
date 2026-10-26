@@ -143,7 +143,21 @@ class CliTests(unittest.TestCase):
         code, out = self.run_cli("surfaces")
         self.assertEqual((code, out["total"]), (0, 17))
         implemented = {r["surface"] for r in out["surfaces"] if r["implemented"]}
-        self.assertEqual(implemented, {"N1", "N2", "N5", "N16"})
+        self.assertEqual(implemented, {f"N{k}" for k in range(1, 18)})
+
+
+    def test_expected_surface_without_inventory(self):
+        code, rep = self.run_cli("check", "--inventory", self.inventory(ent("selected_events")), "--expect", "N10")
+        self.assertEqual((code, rep["status"]), (3, "incomplete"))
+        self.assertTrue(any("N10" in c["check"] for c in rep["checks_not_run"]))
+
+    def test_without_change_marks_every_name_is_reported(self):
+        unchanged = ent("process_data")
+        unchanged["change"] = "unchanged"
+        code, rep = self.run_cli("check", "--inventory", self.inventory(unchanged))
+        self.assertEqual(code, 0)  # a style warning in a user project
+        self.assertTrue(any(f["current"] == "process_data" for f in rep["findings"]))
+        self.assertTrue(any("--changed" in n for n in rep["notes"]))
 
 
 class RegistryTests(unittest.TestCase):
@@ -174,6 +188,16 @@ class RegistryTests(unittest.TestCase):
         doc["rules"][0]["source_sha256"] = "0" * 64
         self.assertIn("naming_registry.rule_source_changed", self.codes(NR.check_rules(doc, self.surfaces)))
 
+    def test_two_active_versions_and_a_waived_code_on_a_non_waivable_rule(self):
+        doc = copy.deepcopy(self.rules)
+        second = copy.deepcopy(doc["rules"][0])
+        second["version"] = "1.1.0"
+        doc["rules"].append(second)
+        fixed = next(r for r in doc["rules"] if not r["waivable"])
+        fixed["outcome_contract"]["not_applicable"].append("naming.waived")
+        codes = self.codes(NR.check_rules(doc, self.surfaces))
+        self.assertLessEqual({"naming_registry.two_active_versions", "naming_registry.waived_not_waivable"}, codes)
+
     def test_mirror_mismatch(self):
         doc = copy.deepcopy(self.surfaces)
         n2 = next(s for s in doc["surfaces"] if s["surface_id"] == "N2")
@@ -183,7 +207,7 @@ class RegistryTests(unittest.TestCase):
     def test_implemented_surface_without_anchor(self):
         doc = copy.deepcopy(self.surfaces)
         n3 = next(s for s in doc["surfaces"] if s["surface_id"] == "N3")
-        n3["extractor"] = "skills/hep-computing/scripts/extract_names.py"
+        n3["doc"] = "skills/hep-computing/references/cmake-and-build.md#naming-n3"
         self.assertIn("naming_registry.anchor_missing", self.codes(NR.check_surfaces(doc)))
 
     def test_floor_cannot_be_lowered(self):

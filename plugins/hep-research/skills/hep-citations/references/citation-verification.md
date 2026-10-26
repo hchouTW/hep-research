@@ -96,3 +96,27 @@ items explicitly, including sources available only as abstracts.
 that a source exists, remains current, or supports a scientific claim.
 
 **Done when:** every audited citation has a recorded lookup (source, date, read level) and a verdict, and every mismatch has a proposed correction or is marked unverified.
+
+<a id="naming-n17"></a>
+### Naming: literature record ids (N17)
+- **Extractor:** `extract_names.py --surface N17` (hep-citations; inputs: literature-record artifacts: each source's ledger id and its DOI, arXiv, INSPIRE and ADS identifiers)
+- **Entity kinds and level floors:** generated from `contracts/naming/surfaces.json`, not restated by hand:
+
+<!-- naming-kinds:N17: generated from contracts/naming/surfaces.json by contracts/naming_registry.py sections; do not edit -->
+
+| Kind | Level floor | Format | Rename policy |
+|---|---|---|---|
+| `record_id` | C4 | — | never |
+| `doi` | C4 | `^10\.\d{4,9}/\S*[^\s.,;:]$` | never |
+| `arxiv_id` | C4 | `^(?:\d{4}\.\d{4,5}\|[a-z][a-z\-]*(?:\.[A-Z]{2})?/\d{7})(?:v\d+)?$` | never |
+| `inspire_id` | C4 | `^\d+$` | never |
+| `ads_bibcode` | C4 | `^\d{4}[A-Za-z&.]{5}[A-Za-z0-9.]{4}[A-Za-z.][0-9.]{4}[A-Z]$` | never |
+
+<!-- /naming-kinds:N17 -->
+
+- **The name must say:** nothing: these ids are decided outside the project and quoted exactly
+- **Rename policy:** never: a wrong identifier is corrected in the ledger by the procedure that verified it, never renamed (C4)
+- **Rules:** see the registry for surface N17 (`naming.common.*`, `naming.n17.*`, `naming.cross.*`)
+- **Good / bad:** `10.1103/PhysRevLett.114.171103`, `1503.04245` / a DOI with a trailing period
+
+Procedure, levels and report: [semantic naming charter](../../hep-computing/references/semantic-naming.md).

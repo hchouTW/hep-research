@@ -34,8 +34,41 @@ Software checks establish contract consistency only, not physical validity.
   - Context-resolution stanza item 6 (all eight `SKILL.md`): name what you add or change for what it holds, in the
     project's terms, per the charter; never rename an external (C4) name. The spec's longer wording put the
     hep-statistics quick load at 25,656 B, over the 25,600 B limit (spec Q2); the shorter sentence measures 25,597 B.
-  - Not yet: extractors for N3, N4, N6-N15 and N17 (a check that expects them reports `unsupported`); the
-    correlation-inventory declaration format is provisional (spec Q1).
+
+- Semantic naming phases P3 to P5: every surface N1-N17 now has an extractor and an owner section.
+  - New shared extractor module `core/naming/extract.py` (file walk, text and path mention indexes, coverage, git
+    change marking, read-only artifact reading, the common command line); hep-computing's extractor uses it.
+  - `skills/hep-computing/scripts/extract_names.py` adds N3 (objects inside ROOT files, uproot or else PyROOT; Up/Down
+    histograms are `shape_histogram`), N4 (TTree branches, RNTuple fields, Parquet columns with pyarrow, RDataFrame
+    `Define`/`Redefine`/`Alias` columns; `--external PATH` marks official ntuples) and N6 (Snakemake rules and logs,
+    Slurm and HTCondor job names and log patterns, `run_workflow.py` steps, partition chunks).
+  - New scripts `extract_names.py` in hep-measurement (N7 samples, datasets, run ranges; N8 selections and regions;
+    N9 variations), hep-statistics (N10 from Combine datacards, pyhf workspaces and statistical-result artifacts),
+    hep-detector (N11 conditions tags, external, and response outputs), hep-ml (N12 models, features, checkpoints),
+    hep-theory (N13 parameters and scheme labels), hep-authoring (N14 labels, label references, macros, figure and
+    table files; N15 BibTeX keys with their DOI or arXiv id) and hep-citations (N17 literature record ids, external).
+  - Owner sections with generated kinds tables (anchors `naming-n3`, `naming-n4`, `naming-n6` to `naming-n15`,
+    `naming-n17`) in `root-usage-patterns.md`, `python-hep-coding-patterns.md`, `batch-scheduling.md`,
+    `analysis-design.md`, `systematics.md`, `nuisance-modeling.md`, `calibration-and-alignment.md`,
+    `reproducibility.md`, `regularization-and-schemes.md`, `latex-mechanics-and-tooling.md`,
+    `citations-and-bibliography.md` and `citation-verification.md`; the charter's surface index links them all.
+  - Cross-surface names: an entity may list `targets` (names it refers to; `derived` when built from its own name).
+    A shape nuisance derives `<process>_<nuisance>Up`/`Down` on N3 through the datacard's shapes lines, and a process
+    its nominal template: `naming.n10.shape-pairing` finds a missing variation with the N3 inventory (unverified
+    without it), and `validate-change-set` needs the N3 inventory and a replacement for every derived histogram when
+    a nuisance is renamed. A `\ref` to a label no file declares, or an included file that does not exist, fails
+    `naming.common.reference`.
+  - Correlation inventory (spec Q1, provisional): `check --declaration` also takes a measurement-spec, read from its
+    systematics ledger (`correlation_key`, `era_correlation`, optional `nuisance_names`) by
+    `core/naming/declarations.py`; members may be bare names.
+  - Cross-surface vocabulary (P4): `naming.cross.glossary-identifier` checks every surface against the glossary's
+    `identifiers`; the engine fills `meaning.concept_id` from the glossary.
+  - Rules: 20 (new `naming.n4.block-member`, `naming.n10.name-format`, `naming.n10.shape-pairing`,
+    `naming.n14.label-prefix`, `naming.n15.duplicate-record` (one DOI under two keys, the only N15 rename),
+    `naming.n17.identifier-format`, `naming.cross.glossary-identifier`); the common rules cover the new surfaces.
+    Uniqueness compares declarations of one kind (a label and a reference to it are not duplicates).
+  - Schema `naming_inventory.json`: optional entity `targets`. `tools/optional_modules.json` runs the N3/N4 tests
+    in the uproot jobs; without uproot they skip.
 
 - hep-detector front-end page: the eight "(moved)" section pointers left by the 0.41.0 split are removed, as recorded
   (`remove_in` 0.42.0). The sections are in `front-end-waveform-processing.md` (sampled waveforms, pileup,

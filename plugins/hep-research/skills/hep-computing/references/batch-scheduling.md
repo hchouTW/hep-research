@@ -273,3 +273,25 @@ confirm it on a real run of the version you use before relying on it.
 | Event separator `...`; termination lines `(1) Normal termination (return value N)` / `(0) Abnormal termination (signal N)`; `Memory (MB)` usage line; held event `Code N Subcode M` | HTCondor poll | observed on HTCondor 24.12.16 (CERN, 2026-10-10): separator `...`; `005 Job terminated.` then `(1) Normal termination (return value 3)`; `012 Job was held.` with the reason line then `Code 12 Subcode 2`; `009 Job was aborted.` with `via condor_rm (by user ...)` or `Job removed by SYSTEM_PERIODIC_REMOVE due to wall time exceeded allowed max.`; `004 Job was evicted. Code 1008 Subcode 0` after `022`/`024` disconnect events; `Memory (MB)` appears in the `Partitionable Resources` table |
 | `condor_q` / `condor_history <cluster> -json -attributes ...`; JobStatus 1 idle, 2 running, 3 removing, 4 completed, 5 held, 6 transferring output (marked "not used"), 7 suspended (mapped to `unknown`); ExitCode, ExitBySignal, ExitSignal, HoldReason, HoldReasonCode, HoldReasonSubCode, NumJobStarts | HTCondor fallback | documented |
 | `condor_rm <cluster>.<proc>`; `condor_version` | HTCondor cancel; provenance | documented (condor_rm page 25.14.1) |
+
+<a id="naming-n6"></a>
+### Naming: batch jobs, workflow rules and chunks (N6)
+- **Extractor:** `extract_names.py --surface N6` (hep-computing; inputs: Snakemake rules and log patterns, Slurm `--job-name` and `--output`/`--error`, HTCondor `batch_name` and `log`/`output`/`error`, `run_workflow.py` step ids, partition chunk ids)
+- **Entity kinds and level floors:** generated from `contracts/naming/surfaces.json`, not restated by hand:
+
+<!-- naming-kinds:N6: generated from contracts/naming/surfaces.json by contracts/naming_registry.py sections; do not edit -->
+
+| Kind | Level floor | Format | Rename policy |
+|---|---|---|---|
+| `job` | C1 | — | matrix |
+| `log_pattern` | C3 | — | matrix |
+| `chunk` | C1 | — | matrix |
+
+<!-- /naming-kinds:N6 -->
+
+- **The name must say:** the step of the analysis the job runs (`skim_2018`, `fit_asimov`); a log pattern keeps the fields the recovery tools parse (cluster, process, attempt)
+- **Rename policy:** matrix; a log pattern is C3: `local_partition.py` and the scheduler adapters read it back
+- **Rules:** see the registry for surface N6 (`naming.common.*`, `naming.n6.*`, `naming.cross.*`)
+- **Good / bad:** `skim_dimuon_2018`, `logs/$(Cluster).$(Process).log` / `job1`, `test`
+
+Procedure, levels and report: [semantic naming charter](semantic-naming.md).

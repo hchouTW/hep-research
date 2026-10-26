@@ -76,12 +76,13 @@ def vocabulary(e, rule, ctx):
 
 
 def _container_key(e, within: str):
+    """Where two declarations of one name and one kind collide."""
     s = e["scope"]
     if within == "file":
-        return (e["surface"], s["file"])
+        return (e["surface"], e["entity_kind"], s["file"])
     if within == "surface":
-        return (e["surface"],)
-    return (e["surface"], s["file"], s["container"])
+        return (e["surface"], e["entity_kind"])
+    return (e["surface"], e["entity_kind"], s["file"], s["container"])
 
 
 def uniqueness(e, rule, ctx):
@@ -89,6 +90,17 @@ def uniqueness(e, rule, ctx):
         return "naming.removed", "", {}
     if e["references_status"] != "complete":
         return "naming.references_partial", "references were not fully searched", {}
+    if rule.get("params", {}).get("by") == "concept":
+        cid = (e.get("meaning") or {}).get("concept_id")
+        if not cid:
+            return "naming.unique", "", {}
+        same = [x for x in ctx.entities_in(e["surface"]) if x is not e and x["change"] != "removed"
+                and (x.get("meaning") or {}).get("concept_id") == cid and x["name"] != e["name"]]
+        if same:
+            return "naming.duplicate_record", f"{e['name']} and {', '.join(sorted({x['name'] for x in same}))} name one " \
+                f"record ({cid})", {"related": [x["entity_id"] for x in same],
+                                    "evidence": [f"{x['scope']['file']}:{x['scope']['span'][0]}" for x in same]}
+        return "naming.unique", "", {}
     within = rule.get("params", {}).get("within", "container")
     groups = ctx.__dict__.setdefault("_groups", {})
     if within not in groups:
@@ -111,6 +123,17 @@ def pairing(e, rule, ctx):
         if s not in ctx.inventories:
             return "naming.inventory_missing", f"the {s} inventory is needed and was not supplied", {}
     suffixes = params.get("suffixes", ["Up", "Down"])
+    if params.get("via") == "targets":
+        if e["change"] == "removed":
+            return "naming.not_paired", "", {}
+        derived = [(t, hits) for t, hits in ctx.targets.get(e["entity_id"], []) if t.get("derived")]
+        if not derived:
+            return "naming.not_paired", "", {}
+        missing = [f"{t['name']}" + (f" in {t['file']}" if t.get("file") else "") for t, hits in derived if not hits]
+        if missing:
+            return "naming.pair_missing", f"{e['name']} needs {', '.join(missing[:6])}, which the " \
+                f"{derived[0][0]['surface']} inventory does not hold", {"evidence": [f"{derived[0][0]['surface']} inventory"]}
+        return "naming.pair_complete", "", {}
     hit = next((s for s in suffixes if e["name"].endswith(s) and len(e["name"]) > len(s)), None)
     if hit is None or e["change"] == "removed":
         return "naming.not_paired", "", {}
@@ -131,6 +154,17 @@ def reference(e, rule, ctx):
             locs = [r["from"] for r in e["references"]]
             return "naming.reference_to_removed", f"{e['name']} was removed and is still referenced", \
                 {"locations": locs, "related": [r["from"] for r in e["references"] if r["from"] in ctx.by_id]}
+    if e["change"] != "removed":
+        for t, hits in ctx.targets.get(e["entity_id"], []):
+            if t.get("derived"):
+                continue  # a name derived from this one (a shape histogram) is the pairing rule's
+            if t["surface"] not in ctx.inventories:
+                return "naming.target_inventory_missing", \
+                    f"{e['name']} refers to {t['surface']} {t['name']}; no {t['surface']} inventory was supplied", {}
+            if not hits:
+                where = f" in {t['file']}" if t.get("file") else ""
+                return "naming.target_missing", f"{e['name']} refers to {t['surface']} {t['name']}{where}, which no " \
+                    f"{t['surface']} entity declares", {"evidence": [f"{t['surface']} inventory"]}
     if e["references_status"] != "complete":
         return "naming.references_partial", "references were not fully searched", {}
     return "naming.references_resolve", "", {}
@@ -146,11 +180,16 @@ def _members(decl) -> list[dict] | None:
 
 
 def _member_of(e, member: str) -> bool:
+    """A member is an entity id, "<container>/<name>" or a bare name (every entity of that name)."""
+    if "/" not in member and ":" not in member:
+        return e["name"] == member
     return member in (e["entity_id"], f"{e['scope']['container']}/{e['name']}")
 
 
 def declared_match(e, rule, ctx):
     name = rule.get("params", {}).get("declaration", "correlation-inventory")
+    if name == "glossary":
+        return _glossary_match(e, rule, ctx)
     decl = ctx.declarations.get(name)
     if decl is None:
         return "naming.declaration_missing", f"no {name} declaration was supplied", {}
@@ -177,7 +216,8 @@ def declared_match(e, rule, ctx):
                     "(declared correlated) but have different names", \
                     {"related": [x["entity_id"] for x in differ], "evidence": [f"{name}: source {s['id']}"]}
         else:
-            same = [x for x in others if x["name"] == e["name"]]
+            other_members = [x for m, f in zip(s["members"], found) if not _member_of(e, m) for x in f]
+            same = [x for x in other_members if x["name"] == e["name"]]
             if same:
                 return "naming.decorrelated_names_equal", \
                     f"{e['name']} is declared uncorrelated within source {s['id']} but the name is shared", \
@@ -191,6 +231,50 @@ def declared_match(e, rule, ctx):
                 f"{e['name']} names both source {mine[0]['id']} and source {s['id']}: the same name would correlate them", \
                 {"related": [x["entity_id"] for x in clash], "evidence": [f"{name}: sources {mine[0]['id']}, {s['id']}"]}
     return "naming.names_match_declaration", "", {}
+
+
+def _phrase(text: str) -> tuple[str, ...]:
+    return tuple(w for w in re.split(r"[\s_\-./]+", str(text).lower()) if w)
+
+
+def glossary_spellings(glossary) -> list[tuple[dict, set, set]]:
+    """(entry, identifier phrases, other spellings) for every glossary entry that declares identifiers."""
+    out = []
+    for entry in (glossary or {}).get("entries", []):
+        idents = {_phrase(i) for i in entry.get("identifiers") or [] if _phrase(i)}
+        if not idents:
+            continue
+        other = {_phrase(t) for t in (entry.get("preferred") or {}).values()}
+        other |= {_phrase(t) for terms in (entry.get("aliases") or {}).values() for t in terms or []}
+        other |= {_phrase(a) for a in entry.get("abbreviations") or []}
+        out.append((entry, idents, {o for o in other if o and o not in idents}))
+    return out
+
+
+def _contains(toks: tuple, phrase: tuple) -> int:
+    n = len(phrase)
+    return next((i for i in range(len(toks) - n + 1) if toks[i:i + n] == phrase), -1)
+
+
+def _glossary_match(e, rule, ctx):
+    spell = ctx.__dict__.get("_spellings")
+    if spell is None:
+        spell = ctx.__dict__["_spellings"] = glossary_spellings(getattr(ctx.vocab, "glossary", None))
+    if not spell:
+        return "naming.no_glossary_identifiers", "", {}
+    toks = tuple(t.lower() for t in entity_tokens(e, ctx))
+    for entry, idents, other in spell:
+        if any(_contains(toks, i) >= 0 for i in idents):
+            return "naming.concept_identifier_used", "", {}
+        for o in sorted(other, key=len, reverse=True):
+            at = _contains(toks, o)
+            if at >= 0:
+                ident = "_".join(sorted(idents, key=len)[0])
+                proposed = "_".join(toks[:at] + (ident,) + toks[at + len(o):])
+                return "naming.concept_identifier_differs", \
+                    f"{e['name']} spells {entry['id']} as {'_'.join(o)}; the glossary identifier is {ident}", \
+                    {"proposed": proposed, "evidence": [f"glossary entry {entry['id']} identifiers"]}
+    return "naming.no_declared_concept", "", {}
 
 
 def status_honesty(e, rule, ctx):
@@ -255,8 +339,8 @@ def similarity(e, rule, ctx):
     for x in near:
         if _declared_distinct(e, x, ctx, params.get("declaration")):
             codes.add("naming.declared_distinct")
-        elif _annotated_distinct(e, x, ctx):
-            codes.add("naming.annotated_distinct")
+        elif _annotated_distinct(e, x, ctx) and not ctx.surface(e["surface"])["requires_declarations"]:
+            codes.add("naming.annotated_distinct")  # where names are declared (N10), only the declaration decides
         else:
             open_.append(x)
     if open_:

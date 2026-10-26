@@ -71,6 +71,10 @@ def check_rules(doc, surfaces_doc=None) -> Report:
     for k in sorted({k for k in keys if keys.count(k) > 1}):
         rep.add("error", "$.rules", "naming_registry.duplicate_rule", f"rule {k[0]} version {k[1]} is listed twice")
     digests = predicate_digests()
+    active = [r["rule_id"] for r in doc["rules"] if r["lifecycle"] == "active"]
+    for rid in sorted({x for x in active if active.count(x) > 1}):
+        rep.add("error", "$.rules", "naming_registry.two_active_versions",
+                f"rule {rid} has more than one active version: retire the old one")
     for i, r in enumerate(doc["rules"]):
         where, oc, params = f"$.rules[{i}]", r["outcome_contract"], r.get("params", {})
         if known:
@@ -98,6 +102,9 @@ def check_rules(doc, surfaces_doc=None) -> Report:
                     ("not_applicable", "naming.kind_not_covered", "kinds" in params),
                     ("not_applicable", "naming.external_name", "sources" in params),
                     ("unsupported", "naming.no_inputs", r["predicate"] != "semantic")]
+        if not r["waivable"] and "naming.waived" in oc["not_applicable"]:
+            rep.add("error", f"{where}.outcome_contract.not_applicable", "naming_registry.waived_not_waivable",
+                    "a rule that is not waivable never gives naming.waived")
         for state, code, needed in required:
             if needed and code not in oc[state]:
                 rep.add("error", f"{where}.outcome_contract.{state}", "naming_registry.engine_code_missing",

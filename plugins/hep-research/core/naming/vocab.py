@@ -89,6 +89,7 @@ def glossary_identifiers(glossary: dict | None) -> set[str]:
 
 class Vocabulary:
     def __init__(self, glossary: dict | None = None, profile_terms=()):
+        self.glossary = glossary
         self.layers = {"glossary": glossary_words(glossary), "profile": {str(t).lower() for t in profile_terms},
                        "default": set(default_words())}
         self.glossary_protected = glossary_identifiers(glossary)

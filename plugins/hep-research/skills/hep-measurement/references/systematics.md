@@ -103,3 +103,23 @@ A zero nominal with a nonzero variation needs explicit treatment; do not define 
 Evaluate nuisance values at -1, 0, +1 and relevant extrapolation points. Check finite, valid expected rates and continuity within the designed parameter domain. Unbounded scanning of every nuisance is not required.
 
 Quantify sensitivity, shape, correlation, and POI consequences before pruning sources. A small postfit impact alone does not justify removal. Freezing groups is a diagnostic; uncertainty decompositions can depend on method and order. Correlated impacts are not independent errors to add in quadrature.
+
+<a id="naming-n9"></a>
+### Naming: systematic variations (N9)
+- **Extractor:** `extract_names.py --surface N9` (hep-measurement; inputs: measurement-spec systematics and the name column of systematics ledgers in the `assets/systematics.csv` form)
+- **Entity kinds and level floors:** generated from `contracts/naming/surfaces.json`, not restated by hand:
+
+<!-- naming-kinds:N9: generated from contracts/naming/surfaces.json by contracts/naming_registry.py sections; do not edit -->
+
+| Kind | Level floor | Format | Rename policy |
+|---|---|---|---|
+| `variation` | C3 | — | matrix |
+
+<!-- /naming-kinds:N9 -->
+
+- **The name must say:** the physical source and, when it is decorrelated, the scope it is decorrelated over (`jes_flavor`, `lumi_2018`); the name becomes the nuisance name, so it carries the correlation
+- **Rename policy:** matrix; C3: the name sets the correlation (rename only with the nuisances, through one change set)
+- **Rules:** see the registry for surface N9 (`naming.common.*`, `naming.n9.*`, `naming.cross.*`)
+- **Good / bad:** `jes_flavor_qcd`, `lumi_2018` / `syst1`, `new_unc`
+
+Procedure, levels and report: [semantic naming charter](../../hep-computing/references/semantic-naming.md).

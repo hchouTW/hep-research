@@ -101,3 +101,25 @@ Seed every trial from a base seed and its index, record every trial's config and
 why a trial was stopped early, and rerun the winner with another seed before reporting it. A single validation split
 reused across many configurations is overfit by the selection: use grouped (or nested) cross-validation
 ([ml-analysis-training-and-data.md](ml-analysis-training-and-data.md), "Hyperparameter search").
+
+<a id="naming-n12"></a>
+### Naming: models, checkpoints and features (N12)
+- **Extractor:** `extract_names.py --surface N12` (hep-ml; inputs: ml-artifact ids and features, checkpoint and exported model files)
+- **Entity kinds and level floors:** generated from `contracts/naming/surfaces.json`, not restated by hand:
+
+<!-- naming-kinds:N12: generated from contracts/naming/surfaces.json by contracts/naming_registry.py sections; do not edit -->
+
+| Kind | Level floor | Format | Rename policy |
+|---|---|---|---|
+| `model_artifact` | C2 | — | matrix |
+| `checkpoint` | C2 | — | matrix |
+| `feature` | C2 | — | matrix |
+
+<!-- /naming-kinds:N12 -->
+
+- **The name must say:** the task, the target and the training sample of a model; a feature is the column it reads (as N4); a checkpoint carries the epoch or step, not `best_final`
+- **Rename policy:** matrix
+- **Rules:** see the registry for surface N12 (`naming.common.*`, `naming.n12.*`, `naming.cross.*`)
+- **Good / bad:** `bdt_ttbar_vs_dy_2018`, `ckpt_epoch040.pt` / `model_final2`, `feat1`
+
+Procedure, levels and report: [semantic naming charter](../../hep-computing/references/semantic-naming.md).

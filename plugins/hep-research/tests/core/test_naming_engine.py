@@ -141,8 +141,21 @@ class DeclaredCorrelationTests(unittest.TestCase):
         self.assertEqual(result(j, "lumi2018", "naming.n10.near-duplicate")["reason_code"], "naming.declared_distinct")
         ann = {b["entity_id"]: {"entity_id": b["entity_id"], "confidence": "high", "evidence": [], "referrers_read": [],
                                 "intended_distinct": [a["entity_id"]], "recorded_by": "u"}}
-        j = judge(inv("N10", a, b), annotations=ann)
-        self.assertEqual(result(j, "lumi2018", "naming.n10.near-duplicate")["reason_code"], "naming.annotated_distinct")
+        j = judge(inv("N10", a, b), annotations=ann)  # N10 names are declared: an annotation alone does not decide
+        self.assertEqual(result(j, "lumi2018", "naming.n10.near-duplicate")["state"], "unverified")
+        ca, cb = ent("lumi_2018", "N1", "module_public", "<module>", file="a.py"), ent("lumi2018", "N1", "module_public",
+                                                                                       "<module>", file="b.py")
+        cann = {cb["entity_id"]: {**ann[b["entity_id"]], "entity_id": cb["entity_id"], "intended_distinct": [ca["entity_id"]]}}
+        rule = {"rule_id": "t.near", "version": "1.0.0", "surfaces": ["N1"], "predicate": "similarity",
+                "params": {"across": "surface"}, "determinism": "heuristic", "owner": "hep-computing", "waivable": False,
+                "lifecycle": "active", "outcome_contract": {"satisfied": ["naming.no_near_duplicates", "naming.declared_distinct",
+                                                                          "naming.annotated_distinct"], "violated": [],
+                                                            "not_applicable": ["naming.removed"],
+                                                            "unverified": ["naming.near_duplicate_needs_review"],
+                                                            "unsupported": ["naming.no_inputs"]}}
+        jj = E.judge([inv("N1", ca, cb)], [rule], SURFACES, vocab=Vocabulary(), state_for=state_for, annotations=cann,
+                     report_all=True)
+        self.assertEqual(result(jj, "lumi2018", "t.near")["reason_code"], "naming.annotated_distinct")
 
     def test_heuristic_rule_never_violates(self):
         rule = next(r for r in RULES if r["predicate"] == "similarity")
@@ -225,6 +238,17 @@ class LevelTests(unittest.TestCase):
         j = judge(inv("N1", e))
         r = result(j, "tmp", "naming.common.forbidden")
         self.assertEqual(E.action_for(r, j["entities"][0], REGISTRY, in_request=False)[0], "propose")
+
+
+class RenamePolicyTests(unittest.TestCase):
+    def test_plugin_core_api_deprecate(self):
+        api = ent("load_glossary", kind="plugin_core_api", container="<module>", refs=["b.py:1"], ref_kind="uses")
+        j = judge(inv("N1", ent("tmp", kind="plugin_core_api", container="<module>"), api))
+        self.assertEqual(E.rename_policy(api, REGISTRY), "deprecate")  # the kind's policy wins over the surface's matrix
+        r = result(j, "tmp", "naming.common.forbidden")
+        action, handoff = E.action_for(r, j["context"].by_id[r["entity_id"]], REGISTRY, in_request=True)
+        self.assertEqual((action, handoff["policy"]), ("propose-then-change-set-after-approval", "deprecate"))
+        self.assertEqual(E.rename_policy(ent("x", kind="module_public", container="<module>"), REGISTRY), "matrix")
 
 
 class IdentityAndScopeTests(unittest.TestCase):
@@ -311,10 +335,14 @@ class ChangeSetTests(unittest.TestCase):
         n = ent("lumi", surface="N10", kind="nuisance", container="a", file="a.py", refs=[], ref_kind="uses")
         ents = [n]
         E.classify(ents, {"N10": ["."]}, SURFACES)
-        cs = self.change_set(entity_id=n["entity_id"], replacements=[{"location": "a.py:1", "old": "lumi", "new": "lumi_2018"}])
+        cs = self.change_set(entity_id=n["entity_id"], contract_level="C3",
+                             replacements=[{"location": "a.py:1", "old": "lumi", "new": "lumi_2018"}])
         out = E.validate_change_set(cs, ents, SURFACES, self.root, {"N10", "N3"})
         self.assertEqual((out["exit_code"], out["code"]), (1, "naming.approval_missing"))
         cs["approval"] = {"required": True, "by": "user", "at": "2026-10-26"}
+        out = E.validate_change_set(cs, ents, SURFACES, self.root, {"N10", "N3"})
+        self.assertEqual((out["exit_code"], out["code"]), (1, "naming.handoff_missing"))
+        cs["handoff"] = {"owner": "hep-statistics", "rerun": ["fit"]}
         self.assertEqual(E.validate_change_set(cs, ents, SURFACES, self.root, {"N10", "N3"})["exit_code"], 0)
 
 

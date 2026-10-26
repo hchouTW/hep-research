@@ -12,7 +12,7 @@ Use when a request asks what a named experiment published, whether a paper exist
 |---|---|
 | `SKILL.md` | entry point |
 | `references/` | eleven references: the literature guide (routing, rules, latest-result procedure, evidence ledgers, reading workflow, index) routes to the rest (lookup recipes, citation verification, citation databases, primary sources, discovery, reading papers and figures, claim-evidence mapping, review, systematic screening) |
-| `scripts/` | two command-line tools and the skill-local package `literature_lib/` behind `manage_literature.py` |
+| `scripts/` | three command-line tools (one is `extract_names.py`, the naming extractor for literature record ids) and the skill-local package `literature_lib/` behind `manage_literature.py` |
 | `assets/` | reading-notes template and its JSON record, search-log template |
 | `examples/` | worked cases: the latest result with its date and query, a draft's citations checked against a record, a ledger that disagrees with a lookup |
 

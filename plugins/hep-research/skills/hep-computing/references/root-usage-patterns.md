@@ -67,3 +67,24 @@ the sections quoted below.
 
 ROOT 6.38 (release notes, 2025-11-27) requires Python 3.9 or newer; the plugin's floor is 3.13, so pick an
 interpreter with `scripts/find_python.py` and record it with `environment_manifest.py`.
+
+<a id="naming-n3"></a>
+### Naming: objects inside ROOT files (N3)
+- **Extractor:** `extract_names.py --surface N3` (hep-computing; inputs: every object in every folder of the ROOT files in scope, read with uproot or else PyROOT; without either, each file is listed as skipped and N3 is unsupported)
+- **Entity kinds and level floors:** generated from `contracts/naming/surfaces.json`, not restated by hand:
+
+<!-- naming-kinds:N3: generated from contracts/naming/surfaces.json by contracts/naming_registry.py sections; do not edit -->
+
+| Kind | Level floor | Format | Rename policy |
+|---|---|---|---|
+| `object` | C2 | — | matrix |
+| `shape_histogram` | C3 | `^[A-Za-z0-9_]+(Up\|Down)?$` | matrix |
+
+<!-- /naming-kinds:N3 -->
+
+- **The name must say:** the quantity, the selection or region and the sample; a shape variation is `<process>_<nuisance>Up`/`Down`, exactly as the datacard's shapes line builds it
+- **Rename policy:** matrix; a shape histogram is C3: its name is part of the statistical model (rename it only with the nuisance, through one change set)
+- **Rules:** see the registry for surface N3 (`naming.common.*`, `naming.n3.*`, `naming.cross.*`)
+- **Good / bad:** `dimuon_mass_sr`, `ttbar_jesUp` / `h1`, `hist_new`, `ttbar_jes_up`
+
+Procedure, levels and report: [semantic naming charter](semantic-naming.md).

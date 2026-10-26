@@ -136,3 +136,46 @@ Under applicable collaboration rules, record the frozen commit, model, diagnosti
 ## Completion criteria
 
 Definitions map to configuration or code; the input manifest is complete; units, triggers, luminosity, region overlaps, and masks are verifiable. Explain which conclusion each missing input prevents, rather than giving only generic caveats.
+
+<a id="naming-n7"></a>
+### Naming: samples, datasets and run ranges (N7)
+- **Extractor:** `extract_names.py --surface N7` (hep-measurement; inputs: the sample column of yield tables, measurement-spec eras, dataset-record ids; a dataset_id of a bound profile's dataset record is official, C4)
+- **Entity kinds and level floors:** generated from `contracts/naming/surfaces.json`, not restated by hand:
+
+<!-- naming-kinds:N7: generated from contracts/naming/surfaces.json by contracts/naming_registry.py sections; do not edit -->
+
+| Kind | Level floor | Format | Rename policy |
+|---|---|---|---|
+| `internal_alias` | C1 | — | matrix |
+| `run_range` | C1 | — | matrix |
+| `dataset` | C2 | — | matrix |
+
+<!-- /naming-kinds:N7 -->
+
+- **The name must say:** the physics process or data stream, the period and the selection stage (`ttbar_powheg_2018`, `data_2017B`); an official dataset name is used as written and aliased, never renamed
+- **Rename policy:** matrix; official dataset names are C4 (`source: external`)
+- **Rules:** see the registry for surface N7 (`naming.common.*`, `naming.n7.*`, `naming.cross.*`)
+- **Good / bad:** `dy_m50_2018`, `pass7_2011_2016` / `sample2`, `mc_new`
+
+Procedure, levels and report: [semantic naming charter](../../hep-computing/references/semantic-naming.md).
+
+<a id="naming-n8"></a>
+### Naming: selections, cutflows and regions (N8)
+- **Extractor:** `extract_names.py --surface N8` (hep-measurement; inputs: measurement-spec selections and background control regions, the region column of yield tables)
+- **Entity kinds and level floors:** generated from `contracts/naming/surfaces.json`, not restated by hand:
+
+<!-- naming-kinds:N8: generated from contracts/naming/surfaces.json by contracts/naming_registry.py sections; do not edit -->
+
+| Kind | Level floor | Format | Rename policy |
+|---|---|---|---|
+| `selection` | C2 | — | matrix |
+| `region` | C2 | — | matrix |
+
+<!-- /naming-kinds:N8 -->
+
+- **The name must say:** what the region selects and what it is for: signal, control or validation, and the defining cut (`sr_2mu_high_mass`, `cr_ttbar_emu`)
+- **Rename policy:** matrix
+- **Rules:** see the registry for surface N8 (`naming.common.*`, `naming.n8.*`, `naming.cross.*`)
+- **Good / bad:** `sr_dimuon_mass_gt_500`, `cr_ttbar_emu` / `region1`, `sel_final`
+
+Procedure, levels and report: [semantic naming charter](../../hep-computing/references/semantic-naming.md).

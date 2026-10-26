@@ -6,33 +6,39 @@ Surfaces:
   N1  code identifiers of Python files: functions, classes, module and class variables, instance attributes
       (self.x = ...), parameters and local variables. C++ and shell are not read yet (say so when they matter).
   N2  files and directories; a file whose path a JSON manifest in scope lists next to a sha256 is manifest_checksummed.
+  N3  objects inside ROOT files (every folder); a histogram named ...Up or ...Down is a shape_histogram. Read with
+      uproot, else PyROOT; without either each ROOT file is listed in skipped_inputs (zero inputs: unsupported).
+      References: text mentions in every text file in scope (code, datacards, LaTeX), so the search covers N10, N14.
+  N4  branches and columns: TTree branches of ROOT files (as N3), Parquet columns (with pyarrow), and columns code
+      defines (RDataFrame Define, Redefine, Alias in Python and C++); TTree branches and RNTuple fields alike.
+      --external PATH marks official ntuples.
   N5  argparse flags and environment variables read by Python code; keys of JSON, TOML and INI configuration files
       (YAML too when PyYAML is installed; otherwise each YAML file is listed in skipped_inputs and references stay
       partial). In the plugin itself, configuration files are contract definitions (N16) and are not read here.
   N16 the plugin's contract vocabulary: artifact types, vocabulary terms (contracts/vocab), effect, class and
       composition ids, skill, script and schema names. Only in the plugin; elsewhere it scans zero inputs.
+  N6  batch jobs, workflow rules and chunks: Snakemake rules and log patterns, Slurm job names and output patterns,
+      HTCondor batch names and log, output and error patterns, run_workflow.py step ids, partition chunk ids.
 The inventory holds every name of the surface within the scope folders, each with its references found by a search
 of every text file in scope (search_coverage says what was searched), its kind and its source (external: names an
 outside API or tool fixes, such as __init__, setUp, README.md). With --changed REV (a git revision) each name is
 marked added, modified (same name, other content) or unchanged, and names removed since REV are included with
 change removed; the inventory is never reduced to the changed names.
 
-Usage: python3 extract_names.py --surface N1|N2|N5|N16 --out INV.json [--root DIR] [--scope DIR ...] [--changed REV]
+Usage: python3 extract_names.py --surface N1|N2|N3|N4|N5|N6|N16 --out INV.json [--root DIR] [--scope DIR ...]
+       [--changed REV] [--external PATH ...]
 --root is the project (default: the working directory); --scope folders are relative to it (default: the root). The
 output is a working file of <project>/naming/, refused inside the project's artifacts_dir. Prints one JSON object
-with a status key. Exit 0 written, 2 bad input (unknown surface, scope outside the root, bad revision, unwritable
-output), 3 written but zero inputs scanned (the check reports the surface unsupported). Standard library only.
+with a status key. Exit codes: 0 written, 2 bad input (unknown surface, scope outside the root, bad revision, unwritable
+output), 3 written but zero inputs scanned (the check reports the surface unsupported). Standard library only; N3
+and N4 read ROOT files with uproot or PyROOT and Parquet with pyarrow when installed.
 """
 from __future__ import annotations
 
-import argparse
 import ast
 import configparser
-import datetime as _dt
-import hashlib
 import json
 import re
-import subprocess
 import sys
 import tomllib
 from pathlib import Path, PurePosixPath
@@ -42,153 +48,25 @@ PLUGIN = Path(__file__).resolve().parents[3]
 if str(PLUGIN) not in sys.path:
     sys.path.insert(0, str(PLUGIN))
 
+from core.naming.extract import (GIT_TIMEOUT_S, PathIndex, TextIndex, changed_files, coverage,  # noqa: E402,F401
+                                 file_digest, is_plugin, line_of, main as run_cli, mark_changed_by_file,
+                                 old_source, read_text, walk)
+from core.naming.extract import Builder  # noqa: E402
+from core.naming.extract import now as _now  # noqa: E402
 from core.naming.model import new_entity, new_inventory, sha256_text  # noqa: E402
 from core.naming.vocab import hook_methods  # noqa: E402
 from core.status import add_status_argument  # noqa: E402
 
-VERSION = "1.0.0"
-GIT_TIMEOUT_S = 120
+VERSION = "1.1.0"
 EXTRACTOR = {"id": "skills/hep-computing/scripts/extract_names.py", "version": VERSION}
-SURFACES = ("N1", "N2", "N5", "N16")
-SKIP_DIRS = {".git", "__pycache__", ".venv", "venv", "node_modules", ".mypy_cache", ".ruff_cache", ".pytest_cache",
-             ".tox", ".ipynb_checkpoints"}
-WORK_DIR = "naming"  # <project>/naming/: the naming working files, never scanned
-TEXT_SUFFIXES = {".py", ".md", ".txt", ".json", ".jsonl", ".toml", ".yaml", ".yml", ".ini", ".cfg", ".sh", ".tex",
-                 ".bib", ".c", ".cc", ".cxx", ".cpp", ".h", ".hh", ".hpp", ".C", ".csv", ".tsv", ".rst", ".html",
-                 ".xml", ".smk", ".cmake", ".in", ".sty", ".cls"}
-TEXT_NAMES = {"Makefile", "Snakefile", "CMakeLists.txt", "Dockerfile"}
-MAX_TEXT_BYTES = 2_000_000
 CONVENTIONAL_FILES = {"README.md", "LICENSE", "CHANGELOG.md", "Makefile", "CMakeLists.txt", "__init__.py", "__main__.py",
                       "setup.py", "setup.cfg", "pyproject.toml", "requirements.txt", ".gitignore", "SKILL.md",
                       "Snakefile", "conftest.py", "Dockerfile", "plugin.json", "OWNERS.json", "hep-research.project.json"}
 SKIP_DECORATORS = re.compile(r"(?:\.setter|\.getter|\.deleter|\.register|^overload|\.overload)$")
-WORD = re.compile(r"[A-Za-z0-9_][A-Za-z0-9_.\-]*")
-PATH = re.compile(r"[A-Za-z0-9_.\-]+(?:/[A-Za-z0-9_.\-]*)+")
 FLAG = re.compile(r"(?<![A-Za-z0-9_-])--?[A-Za-z0-9][A-Za-z0-9_-]*")
 CONFIG_NAME = re.compile(r"(?i)(config|settings|options)[^/]*\.json$|\.toml$|\.ini$|\.cfg$|\.ya?ml$")
 CORE_API_DIRS = ("core", "contracts")
 PLUGIN_SCRIPT_DIRS = ("skills", "tools", "contracts", "core", "adapters")
-
-
-def _now() -> str:
-    return _dt.datetime.now(_dt.UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
-
-
-def is_plugin(root: Path) -> bool:
-    try:
-        return json.loads((root / ".claude-plugin" / "plugin.json").read_text())["name"] == "hep-research"
-    except (OSError, ValueError, KeyError):
-        return False
-
-
-def walk(root: Path, scopes) -> list[str]:
-    """Project-relative posix paths of every file and directory under the scope folders, cache folders excluded."""
-    out: list[str] = []
-    root = root.resolve()
-    for s in scopes:
-        base = (root / s).resolve()
-        stack = [base]
-        while stack:
-            d = stack.pop()
-            try:
-                children = sorted(d.iterdir())
-            except OSError:
-                continue
-            for c in children:
-                if c.is_symlink():
-                    continue
-                if c.is_dir():
-                    if c.name in SKIP_DIRS or c.name.startswith(".") or (c.name == WORK_DIR and c.parent == root):
-                        continue
-                    out.append(c.relative_to(root).as_posix())
-                    stack.append(c)
-                elif c.is_file():
-                    out.append(c.relative_to(root).as_posix())
-    return sorted(dict.fromkeys(out))
-
-
-def is_text(rel: str) -> bool:
-    p = PurePosixPath(rel)
-    return p.suffix in TEXT_SUFFIXES or p.name in TEXT_NAMES
-
-
-def read_text(root: Path, rel: str) -> str | None:
-    p = root / rel
-    try:
-        if p.stat().st_size > MAX_TEXT_BYTES:
-            return None
-        return p.read_text(encoding="utf-8")
-    except (OSError, UnicodeDecodeError):
-        return None
-
-
-class TextIndex:
-    """token -> [(file, line)] over every text file in scope, for one token pattern."""
-
-    def __init__(self, root: Path, files, pattern=WORD):
-        self.hits: dict[str, list[tuple[str, int]]] = {}
-        self.files = 0
-        for rel in files:
-            if not is_text(rel):
-                continue
-            text = read_text(root, rel)
-            if text is None:
-                continue
-            self.files += 1
-            for n, line in enumerate(text.splitlines(), 1):
-                for m in pattern.finditer(line):
-                    tok = m.group(0).rstrip(".-")
-                    self.hits.setdefault(tok, []).append((rel, n))
-
-    def find(self, token: str, exclude=()) -> list[tuple[str, int]]:
-        ex = set(exclude)
-        return [h for h in dict.fromkeys(self.hits.get(token, [])) if h not in ex]
-
-
-class PathIndex:
-    """Path-like mentions (a/b/c.txt) resolved against the project root and against the mentioning file's folder:
-    resolved path or any of its parent folders -> [(file, line)]. A folder is referenced by mentions of a path inside
-    it; a file by mentions that resolve to it (bare file names are matched separately, by TextIndex)."""
-
-    def __init__(self, root: Path, files):
-        self.hits: dict[str, list[tuple[str, int]]] = {}
-        for rel in files:
-            if not is_text(rel):
-                continue
-            text = read_text(root, rel)
-            if text is None:
-                continue
-            here = PurePosixPath(rel).parent
-            for n, line in enumerate(text.splitlines(), 1):
-                for m in PATH.finditer(line):
-                    tok = m.group(0).rstrip(".-/")
-                    for cand in {_norm(tok), _norm((here / tok).as_posix())}:
-                        if cand is None:
-                            continue
-                        parts = cand.split("/")
-                        for i in range(1, len(parts) + 1):
-                            self.hits.setdefault("/".join(parts[:i]), []).append((rel, n))
-
-    def find(self, path: str) -> list[tuple[str, int]]:
-        return list(dict.fromkeys(self.hits.get(path, [])))
-
-
-def _norm(path: str) -> str | None:
-    out: list[str] = []
-    for part in path.split("/"):
-        if part in ("", "."):
-            continue
-        if part == "..":
-            if not out:
-                return None
-            out.pop()
-        else:
-            out.append(part)
-    return "/".join(out) or None
-
-
-def coverage(surfaces, scopes) -> list[str]:
-    return [f"{s}:{('' if sc in ('.', '') else sc.rstrip('/') + '/')}**" for s in surfaces for sc in scopes]
 
 
 # ---------------------------------------------------------------------------------------------------------------- N1
@@ -456,33 +334,6 @@ def _wide_refs(d: _Decl, rel: str, py: PyIndex) -> list[dict]:
     return list(refs.values())
 
 
-def _old_source(root: Path, rev: str, rel: str) -> str | None:
-    p = subprocess.run(["git", "-C", str(root), "show", f"{rev}:{rel}"], capture_output=True, text=True,
-                       timeout=GIT_TIMEOUT_S)
-    return p.stdout if p.returncode == 0 else None
-
-
-def _changed_files(root: Path, rev: str, scopes) -> tuple[set[str], set[str]]:
-    """(changed or added files, deleted files) since rev, project-relative."""
-    p = subprocess.run(["git", "-C", str(root), "diff", "--name-status", "--relative", rev, "--", *scopes],
-                       capture_output=True, text=True, timeout=GIT_TIMEOUT_S)
-    if p.returncode:
-        raise ValueError(f"git diff against {rev!r} failed: {p.stderr.strip()[:200]}")
-    changed, deleted = set(), set()
-    for line in p.stdout.splitlines():
-        parts = line.split("\t")
-        if parts[0].startswith("D"):
-            deleted.add(parts[1])
-        elif parts[0].startswith("R"):
-            deleted.add(parts[1])
-            changed.add(parts[2])
-        else:
-            changed.add(parts[-1])
-    untracked = subprocess.run(["git", "-C", str(root), "ls-files", "--others", "--exclude-standard", "--", *scopes],
-                               capture_output=True, text=True, timeout=GIT_TIMEOUT_S).stdout.split()
-    return changed | set(untracked), deleted
-
-
 def _keyed(decls) -> dict[tuple, _Decl]:
     out, count = {}, {}
     for d in decls:
@@ -492,7 +343,7 @@ def _keyed(decls) -> dict[tuple, _Decl]:
     return out
 
 
-def extract_n1(root: Path, scopes, changed: str | None = None) -> dict:
+def extract_n1(root: Path, scopes, changed: str | None = None, args=None) -> dict:
     root = Path(root).resolve()
     files = [f for f in walk(root, scopes) if f.endswith(".py") and (root / f).is_file()]
     plugin = is_plugin(root)
@@ -514,13 +365,13 @@ def extract_n1(root: Path, scopes, changed: str | None = None) -> dict:
         parsed[rel] = text
     py.finish()
     cov = coverage(["N1"], scopes) if not skipped else [f"N1:{f}" for f in parsed]
-    touched, deleted = (_changed_files(root, changed, scopes) if changed else (set(), set()))
+    touched, deleted = (changed_files(root, changed, scopes) if changed else (set(), set()))
     entities = []
     for rel, text in parsed.items():
         decls = python_declarations(text)
         old = None
         if changed and rel in touched:
-            src = _old_source(root, changed, rel)
+            src = old_source(root, changed, rel)
             try:
                 old = _keyed(python_declarations(src)) if src is not None else {}
             except SyntaxError:
@@ -544,7 +395,7 @@ def extract_n1(root: Path, scopes, changed: str | None = None) -> dict:
     for rel in sorted(deleted):
         if not rel.endswith(".py"):
             continue
-        src = _old_source(root, changed, rel)
+        src = old_source(root, changed, rel)
         try:
             for d in (python_declarations(src) if src else []):
                 entities.append(_removed_n1(d, rel, plugin, py, cov))
@@ -589,24 +440,14 @@ def _manifest_paths(root: Path, files) -> set[str]:
     return out
 
 
-def _file_digest(path: Path) -> str:
-    if path.is_dir():
-        return sha256_text("\n".join(sorted(c.name for c in path.iterdir())))
-    h = hashlib.sha256()
-    with open(path, "rb") as fh:
-        for block in iter(lambda: fh.read(1 << 20), b""):
-            h.update(block)
-    return h.hexdigest()
-
-
-def extract_n2(root: Path, scopes, changed: str | None = None) -> dict:
+def extract_n2(root: Path, scopes, changed: str | None = None, args=None) -> dict:
     root = Path(root).resolve()
     paths = walk(root, scopes)
     files = [p for p in paths if (root / p).is_file()]
     index, mentions = TextIndex(root, files), PathIndex(root, files)
     manifest = _manifest_paths(root, paths)
     cov = coverage(["N2", "N14"], scopes)
-    touched, deleted = (_changed_files(root, changed, scopes) if changed else (set(), set()))
+    touched, deleted = (changed_files(root, changed, scopes) if changed else (set(), set()))
     entities = []
     for rel in paths:
         p = PurePosixPath(rel)
@@ -620,9 +461,9 @@ def extract_n2(root: Path, scopes, changed: str | None = None) -> dict:
         kind = "manifest_checksummed" if rel in manifest else "output"
         change = "unchanged"
         if changed:
-            change = "added" if rel in touched and _old_source(root, changed, rel) is None and (root / rel).is_file() \
+            change = "added" if rel in touched and old_source(root, changed, rel) is None and (root / rel).is_file() \
                 else ("modified" if rel in touched else "unchanged")
-        content = _file_digest(root / rel)
+        content = file_digest(root / rel)
         ent = new_entity("N2", kind, name, rel, parent, (0, 0), source="external" if name in CONVENTIONAL_FILES else "project",
                          extractor=EXTRACTOR, references=refs, search_coverage=cov, change=change)
         ent["content_sha256"] = content
@@ -708,14 +549,7 @@ def _config_keys(text: str, suffix: str):
     return out
 
 
-def _line_of(text: str, needle: str) -> int:
-    for n, line in enumerate(text.splitlines(), 1):
-        if needle in line:
-            return n
-    return 1
-
-
-def extract_n5(root: Path, scopes, changed: str | None = None) -> dict:
+def extract_n5(root: Path, scopes, changed: str | None = None, args=None) -> dict:
     root = Path(root).resolve()
     paths = [p for p in walk(root, scopes) if (root / p).is_file()]
     plugin = is_plugin(root)
@@ -767,7 +601,7 @@ def extract_n5(root: Path, scopes, changed: str | None = None) -> dict:
                 continue
             scanned += 1
             for k, container in keys:
-                decls.append(("project_config_key", k, rel, container, _line_of(text, k), f"{container}:{k}"))
+                decls.append(("project_config_key", k, rel, container, line_of(text, k), f"{container}:{k}"))
     decls += list(env_first.values())
     cov = coverage(["N5", "N1"], scopes) if not skipped else [f"N5:{p}" for p in paths]
     for kind, name, rel, container, line, content in decls:
@@ -777,24 +611,14 @@ def extract_n5(root: Path, scopes, changed: str | None = None) -> dict:
         entities.append(new_entity("N5", kind, name, rel, container, (line, line), content=content,
                                    extractor=EXTRACTOR, references=refs, search_coverage=cov))
     if changed:
-        _mark_changed_by_file(root, changed, scopes, entities)
+        mark_changed_by_file(root, changed, scopes, entities)
     return new_inventory("N5", scopes, scanned, entities, _now(), changed_since=changed, skipped_inputs=skipped or None)
-
-
-def _mark_changed_by_file(root: Path, rev: str, scopes, entities) -> None:
-    """Names in files changed since rev: added when absent from the old file's text, else modified."""
-    touched, _ = _changed_files(root, rev, scopes)
-    for e in entities:
-        rel = e["scope"]["file"]
-        if rel in touched:
-            old = _old_source(root, rev, rel)
-            e["change"] = "added" if old is None or e["name"] not in old else "modified"
 
 
 # --------------------------------------------------------------------------------------------------------------- N16
 
 
-def extract_n16(root: Path, scopes, changed: str | None = None) -> dict:
+def extract_n16(root: Path, scopes, changed: str | None = None, args=None) -> dict:
     root = Path(root).resolve()
     if not is_plugin(root):
         return new_inventory("N16", scopes, 0, [], _now(), changed_since=changed)
@@ -809,19 +633,19 @@ def extract_n16(root: Path, scopes, changed: str | None = None) -> dict:
     if (root / env).is_file():
         scanned += 1
         for t in json.loads(text_of(env))["properties"]["artifact_type"]["enum"]:
-            decls.append(("contract_term", t, env, "artifact_type", _line_of(text_of(env), f'"{t}"')))
+            decls.append(("contract_term", t, env, "artifact_type", line_of(text_of(env), f'"{t}"')))
     for vf in sorted((root / "contracts" / "vocab").glob("*.json")):
         rel = vf.relative_to(root).as_posix()
         doc, text = json.loads(text_of(rel)), text_of(rel)
         scanned += 1
         for vname, terms in (doc.get("vocabularies") or {}).items():
-            decls.append(("contract_term", vname, rel, "vocabularies", _line_of(text, f'"{vname}"')))
+            decls.append(("contract_term", vname, rel, "vocabularies", line_of(text, f'"{vname}"')))
             for t in terms:
-                decls.append(("contract_term", t, rel, vname, _line_of(text, f'"{t}"')))
+                decls.append(("contract_term", t, rel, vname, line_of(text, f'"{t}"')))
         for key, field in (("classes", "class_id"), ("effects", "effect_id"), ("compositions", "composition_id")):
             for item in doc.get(key, []) or []:
                 if isinstance(item, dict) and item.get(field):
-                    decls.append(("contract_term", item[field], rel, key, _line_of(text, f'"{item[field]}"')))
+                    decls.append(("contract_term", item[field], rel, key, line_of(text, f'"{item[field]}"')))
     for sk in sorted((root / "skills").glob("*/SKILL.md")):
         scanned += 1
         decls.append(("skill_name", sk.parent.name, sk.relative_to(root).as_posix(), "skills", 1))
@@ -837,75 +661,276 @@ def extract_n16(root: Path, scopes, changed: str | None = None) -> dict:
         entities.append(new_entity("N16", kind, name, rel, container, (line, line), content=f"{container}:{name}",
                                    extractor=EXTRACTOR, references=refs, search_coverage=cov))
     if changed:
-        _mark_changed_by_file(root, changed, scopes, entities)
+        mark_changed_by_file(root, changed, scopes, entities)
     return new_inventory("N16", scopes, scanned, entities, _now(), changed_since=changed)
 
 
-EXTRACT = {"N1": extract_n1, "N2": extract_n2, "N5": extract_n5, "N16": extract_n16}
+# ----------------------------------------------------------------------------------------------------- N3 and N4
 
 
-def artifacts_dir(root: Path) -> Path | None:
-    cfg = root / "hep-research.project.json"
+def root_reader():
+    """The ROOT reader in use: uproot first, PyROOT second (F17), None without either."""
     try:
-        rel = json.loads(cfg.read_text(encoding="utf-8")).get("artifacts_dir", "./hep-research-artifacts/")
-    except (OSError, ValueError):
+        import uproot  # noqa: F401
+        return "uproot"
+    except ImportError:
+        pass
+    try:
+        import ROOT  # noqa: F401
+        return "pyroot"
+    except Exception:  # a broken PyROOT install raises more than ImportError
         return None
-    return (root / rel).resolve()
+
+
+def _hist_digest(stored, classname: str) -> str:
+    try:
+        return sha256_text(classname + ":" + stored.values(flow=True).tobytes().hex())
+    except Exception:
+        return sha256_text(classname)
+
+
+def root_objects(path: Path, reader: str) -> list[tuple[str, str, str, list[str]]]:
+    """(folder inside the file, object name, class name, content digest, branch or field names of a TTree or RNTuple)
+    for every object."""
+    out = []
+    if reader == "uproot":
+        import uproot
+        with uproot.open(path) as f:
+            for key, cls in f.classnames(recursive=True, cycle=False).items():
+                folder, _, name = key.rpartition("/")
+                stored = None
+                branches: list[str] = []
+                if cls.startswith(("TTree", "TNtuple", "ROOT::RNTuple")):
+                    stored = f[key]
+                    branches = list(stored.keys(recursive=True, full_paths=False) if cls.startswith("T")
+                                    else stored.keys())
+                    digest = sha256_text(cls + ":" + ",".join(branches) + f":{stored.num_entries}")
+                elif cls.startswith(("TH1", "TH2", "TH3", "TProfile")):
+                    stored = f[key]
+                    digest = _hist_digest(stored, cls)
+                else:
+                    digest = sha256_text(cls + ":" + key)
+                out.append((folder or "/", name, cls, digest, branches))
+        return out
+    import ROOT
+    f = ROOT.TFile.Open(str(path))
+    if not f or f.IsZombie():
+        raise OSError(f"cannot open {path}")
+
+    def visit(d, folder):
+        for k in d.GetListOfKeys():
+            cls, name = k.GetClassName(), k.GetName()
+            stored = k.ReadObj()
+            if stored.InheritsFrom("TDirectory"):
+                visit(stored, f"{folder}/{name}".lstrip("/"))
+                continue
+            branches = [b.GetName() for b in stored.GetListOfBranches()] if stored.InheritsFrom("TTree") else []
+            digest = sha256_text(f"{cls}:{name}:" + (",".join(branches) if branches else
+                                 (str([stored.GetBinContent(i) for i in range(stored.GetNcells())]) if stored.InheritsFrom("TH1") else "")))
+            out.append((folder or "/", name, cls, digest, branches))
+    visit(f, "")
+    f.Close()
+    return out
+
+
+def _external(rel: str, args) -> bool:
+    return any(rel == x or rel.startswith(x.rstrip("/") + "/") for x in (getattr(args, "external", None) or []))
+
+
+def _root_entities(surface: str, root: Path, rel: str, reader: str, path: Path, args) -> list[tuple]:
+    """(kind, name, container, content digest, source) for the N3 objects or the N4 branches of one ROOT file."""
+    source = "external" if _external(rel, args) else "project"
+    out = []
+    for folder, name, cls, digest, branches in root_objects(path, reader):
+        if surface == "N3":
+            kind = "shape_histogram" if cls.startswith(("TH1", "TH2", "TH3")) and re.search(r".(Up|Down)$", name) else "object"
+            out.append((kind, name, folder, digest, source))
+        else:
+            for b in branches:
+                out.append(("project_column", b, f"{folder.rstrip('/')}/{name}".lstrip("/"), sha256_text(f"{name}:{b}"), source))
+    return out
+
+
+DEFINE = re.compile(r"\.(?:Define|Redefine|Alias)\(\s*[\"']([A-Za-z_][A-Za-z0-9_]*)[\"']")
+CODE_SUFFIXES = (".py", ".C", ".cc", ".cxx", ".cpp", ".h", ".hh", ".hpp")
+
+
+def _extract_root(surface: str, root: Path, scopes, changed, args) -> dict:
+    root = Path(root).resolve()
+    paths = [p for p in walk(root, scopes) if (root / p).is_file()]
+    index = TextIndex(root, paths)
+    reader = root_reader()
+    skipped, scanned, rows = [], 0, []  # rows: (kind, name, file, container, line, digest, source)
+    root_files = [p for p in paths if p.endswith(".root")]
+
+    def read_file(rel: str, path: Path) -> list[tuple]:
+        return [(k, n, rel, c, 0, d, src) for k, n, c, d, src in _root_entities(surface, root, rel, reader, path, args)]
+    for rel in root_files:
+        if reader is None:
+            skipped.append({"path": rel, "reason": "no ROOT reader: install uproot (pip install uproot) or PyROOT"})
+            continue
+        try:
+            rows += read_file(rel, root / rel)
+            scanned += 1
+        except Exception as exc:  # an unreadable file is listed, never silently dropped
+            skipped.append({"path": rel, "reason": f"cannot read: {str(exc)[:120]}"})
+    if surface == "N4":
+        for rel in paths:
+            if rel.endswith(CODE_SUFFIXES):
+                text = read_text(root, rel)
+                if text is None:
+                    continue
+                scanned += 1
+                for n, line in enumerate(text.splitlines(), 1):
+                    for m in DEFINE.finditer(line):
+                        rows.append(("project_column", m.group(1), rel, "<defined-columns>", n, sha256_text(line.strip()),
+                                     "project"))
+            elif rel.endswith(".parquet"):
+                try:
+                    import pyarrow.parquet as pq
+                except ImportError:
+                    skipped.append({"path": rel, "reason": "Parquet needs pyarrow (pip install pyarrow), which is not installed"})
+                    continue
+                try:
+                    names = pq.read_schema(root / rel).names
+                except Exception as exc:
+                    skipped.append({"path": rel, "reason": f"cannot read: {str(exc)[:120]}"})
+                    continue
+                scanned += 1
+                src = "external" if _external(rel, args) else "project"
+                rows += [("project_column", c, rel, "<schema>", 0, sha256_text(f"{rel}:{c}"), src) for c in names]
+    reached = ["N3", "N10", "N14"] if surface == "N3" else ["N4"]
+    cov = coverage(reached, scopes) if not skipped else [f"{surface}:{p}" for p in paths if not any(p == x["path"] for x in skipped)]
+
+    def entity(row, change="unchanged"):
+        kind, name, rel, container, line, digest, src = row
+        refs = [r for r in index.refs(name, (rel, line)) if r["from"] != f"{rel}:{line}"]
+        e = new_entity(surface, kind, name, rel, container, (line, line), source=src, extractor=EXTRACTOR, references=refs,
+                       search_coverage=cov, change=change)
+        e["content_sha256"] = digest
+        return e
+    entities = [entity(r) for r in rows]
+    if changed:
+        import tempfile
+
+        def read_old(rel, raw):
+            if raw is None or not rel.endswith(".root") or reader is None:
+                return []
+            with tempfile.TemporaryDirectory() as scratch:
+                p = Path(scratch) / "old.root"
+                p.write_bytes(raw)
+                try:
+                    return [entity(r) for r in read_file(rel, p)]
+                except Exception:
+                    return []
+        from core.naming.extract import mark_changes
+        if surface == "N4":
+            mark_changed_by_file(root, changed, scopes, [e for e in entities if not e["scope"]["file"].endswith(".root")])
+            root_ents = [e for e in entities if e["scope"]["file"].endswith(".root")]
+        else:
+            root_ents = entities
+        entities += mark_changes(root, changed, scopes, root_ents, read_old)
+    return new_inventory(surface, scopes, scanned, entities, _now(), changed_since=changed, skipped_inputs=skipped or None)
+
+
+def extract_n3(root: Path, scopes, changed: str | None = None, args=None) -> dict:
+    return _extract_root("N3", root, scopes, changed, args)
+
+
+def extract_n4(root: Path, scopes, changed: str | None = None, args=None) -> dict:
+    return _extract_root("N4", root, scopes, changed, args)
+
+
+# ---------------------------------------------------------------------------------------------------------------- N6
+
+SNAKE_RULE = re.compile(r"^\s*rule\s+([A-Za-z_][A-Za-z0-9_]*)\s*:")
+SNAKE_LOG = re.compile(r"^\s*log\s*:\s*[\"']([^\"']+)[\"']")
+SBATCH = re.compile(r"^#SBATCH\s+(?:--job-name[= ]|-J\s+)(\S+)")
+SBATCH_LOG = re.compile(r"^#SBATCH\s+(?:--output|--error|-o|-e)[= ]\s*(\S+)")
+CONDOR = re.compile(r"^\s*(batch_name|JobBatchName|log|output|error)\s*=\s*(\S+)", re.I)
+SUBMIT_SUFFIXES = (".sub", ".jdl", ".condor", ".submit")
+
+
+def extract_n6(root: Path, scopes, changed: str | None = None, args=None) -> dict:
+    """Batch and workflow names: Snakemake rules and log patterns, Slurm job names and output patterns, HTCondor
+    batch names and log/output/error patterns, workflow-runner step ids (run_workflow.py JSON) and partition chunk ids
+    (local_partition.py manifests)."""
+    root = Path(root).resolve()
+    paths = [p for p in walk(root, scopes) if (root / p).is_file()]
+    index = TextIndex(root, paths)
+    b = Builder("N6", EXTRACTOR)
+    scanned = 0
+    for rel in paths:
+        name = PurePosixPath(rel).name
+        text = None
+        if name == "Snakefile" or rel.endswith(".smk"):
+            text = read_text(root, rel)
+            if text is None:
+                continue
+            scanned += 1
+            rule = "<workflow>"
+            for n, line in enumerate(text.splitlines(), 1):
+                m = SNAKE_RULE.match(line)
+                if m:
+                    rule = m.group(1)
+                    b.add("job", rule, rel, "<rules>", n, line.strip())
+                m = SNAKE_LOG.match(line)
+                if m:
+                    b.add("log_pattern", m.group(1), rel, rule, n, line.strip(), refs=[])
+        elif rel.endswith((".sh", ".slurm", ".sbatch")) or rel.endswith(SUBMIT_SUFFIXES):
+            text = read_text(root, rel)
+            if text is None or ("#SBATCH" not in text and not rel.endswith(SUBMIT_SUFFIXES)):
+                continue
+            scanned += 1
+            for n, line in enumerate(text.splitlines(), 1):
+                for pat, kind in ((SBATCH, "job"), (SBATCH_LOG, "log_pattern")):
+                    m = pat.match(line)
+                    if m:
+                        b.add(kind, m.group(1), rel, "<slurm>", n, line.strip(), refs=None if kind == "job" else [])
+                m = CONDOR.match(line) if rel.endswith(SUBMIT_SUFFIXES) else None
+                if m:
+                    kind = "job" if m.group(1).lower() in ("batch_name", "jobbatchname") else "log_pattern"
+                    b.add(kind, m.group(2).strip("\"'"), rel, "<condor>", n, line.strip(), refs=None if kind == "job" else [])
+        elif rel.endswith(".json"):
+            text = read_text(root, rel)
+            if text is None or ('"steps"' not in text and '"chunks"' not in text):
+                continue
+            try:
+                doc = json.loads(text)
+            except ValueError:
+                continue
+            if isinstance(doc, dict) and isinstance(doc.get("steps"), list) and "workflow" in doc:
+                scanned += 1
+                for st in doc["steps"]:
+                    if isinstance(st, dict) and isinstance(st.get("id"), str):
+                        b.add("job", st["id"], rel, str(doc.get("workflow")), line_of(text, f'"{st["id"]}"'),
+                              json.dumps(st, sort_keys=True))
+            elif isinstance(doc, dict) and isinstance(doc.get("chunks"), list):
+                scanned += 1
+                for ch in doc["chunks"]:
+                    cid = ch.get("chunk_id", ch.get("id")) if isinstance(ch, dict) else None
+                    if isinstance(cid, (str, int)):
+                        b.add("chunk", str(cid), rel, "<chunks>", line_of(text, str(cid)), json.dumps(ch, sort_keys=True),
+                              refs=[])
+    entities = b.build(index, coverage(["N6"], scopes))
+    if changed:
+        mark_changed_by_file(root, changed, scopes, entities)
+    return new_inventory("N6", scopes, scanned, entities, _now(), changed_since=changed)
+
+
+EXTRACT = {"N1": extract_n1, "N2": extract_n2, "N3": extract_n3, "N4": extract_n4, "N5": extract_n5, "N6": extract_n6,
+           "N16": extract_n16}
+
+
+def _options(ap) -> None:
+    ap.add_argument("--external", action="append", metavar="PATH",
+                    help="N3/N4: a file or folder (relative to the root) of inputs made outside the project, such as "
+                         "official ntuples; its names are source external (C4, never renamed)")
+    add_status_argument(ap)
 
 
 def main(argv=None) -> int:
-    ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0],
-                                 formatter_class=argparse.RawDescriptionHelpFormatter, epilog=__doc__.split("\n\n", 1)[1])
-    ap.add_argument("--surface", required=True, help="N1, N2, N5 or N16")
-    ap.add_argument("--out", type=Path, required=True, help="inventory file to write (never inside artifacts_dir)")
-    ap.add_argument("--root", type=Path, default=Path("."), help="project root (default: the working directory)")
-    ap.add_argument("--scope", action="append", help="folder relative to the root to scan (repeatable; default the root)")
-    ap.add_argument("--changed", metavar="REV", help="git revision to mark added, modified and removed names against")
-    add_status_argument(ap)
-    try:
-        args = ap.parse_args(argv)
-    except SystemExit as exc:
-        return 2 if exc.code else 0
-
-    def reject(msg: str) -> int:
-        print(json.dumps({"status": "rejected", "error": msg}))
-        return 2
-    if args.surface not in EXTRACT:
-        return reject(f"--surface {args.surface}: this extractor reads {', '.join(SURFACES)}; another surface's owner "
-                      "provides its extractor (contracts/naming_check.py surfaces)")
-    root = args.root.resolve()
-    if not root.is_dir():
-        return reject(f"--root {args.root} is not a directory")
-    scopes = []
-    for s in args.scope or ["."]:
-        p = (root / s).resolve()
-        if p != root and root not in p.parents:
-            return reject(f"--scope {s} lies outside the root")
-        if not p.is_dir():
-            return reject(f"--scope {s} is not a directory")
-        scopes.append(p.relative_to(root).as_posix() if p != root else ".")
-    art = artifacts_dir(root)
-    out = args.out.resolve()
-    if art is not None and (out == art or art in out.parents):
-        return reject(f"--out {args.out} is inside artifacts_dir: naming working files stay out of it; use <project>/naming/")
-    if not out.parent.is_dir():
-        return reject(f"--out directory {args.out.parent} does not exist")
-    try:
-        inv = EXTRACT[args.surface](root, scopes, args.changed)
-    except ValueError as exc:
-        return reject(str(exc))
-    except subprocess.TimeoutExpired:
-        return reject(f"git did not answer within {GIT_TIMEOUT_S} s while comparing against {args.changed}")
-    try:
-        out.write_text(json.dumps(inv, indent=1) + "\n", encoding="utf-8")
-    except OSError as exc:
-        return reject(f"cannot write {args.out}: {exc}")
-    status = "written" if inv["inputs_scanned"] else "incomplete"
-    print(json.dumps({"status": status, "status_label": args.status, "out": str(args.out), "surface": args.surface, "entities": len(inv["entities"]),
-                      "inputs_scanned": inv["inputs_scanned"], "skipped_inputs": len(inv.get("skipped_inputs", [])),
-                      **({"note": "zero inputs scanned: the check reports this surface unsupported"} if not inv["inputs_scanned"] else {})},
-                     indent=1))
-    return 0 if inv["inputs_scanned"] else 3
+    return run_cli(argv, doc=__doc__, readers={**EXTRACT, "__options__": _options}, extractor=EXTRACTOR)
 
 
 if __name__ == "__main__":
