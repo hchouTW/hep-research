@@ -5745,3 +5745,23 @@ follow-up of F-15. Each item's tests, run on the parent with the item's test fil
 Not run: live routing for the six new descriptions, the routing tables and the 18 new cases (gate G2; estimate
 $19.90 for all 259 cases, $1.36 for the 18 new ones, from the 2026-10-15 run's cost per turn), the communication
 behavioral evaluation, the slow tier, the CLI host checks. Skipped tests are unverified, not passed.
+
+## CRPROP-ACCEPTANCE (2026-10-26, E2; integration branch `worktree-crprop-integration` from `main` 8fcbb826, 0.42.0)
+
+P0 of the cr-propagation r4 workflow (`docs/dev/cr-propagation/workflow-r4.md` §5). The frozen acceptance list
+`docs/dev/cr-propagation/acceptance.json` (86 entries: ALL, A1–A4, B1–B3, providers folded into B1, D1, D2 and E2,
+C1, C2, C2U, D1–D3, E1–E2, F1, F3, ENV, WF) is generated from r3's Acceptance Criteria before any work package
+starts; this is R9's "criteria first" for the whole campaign. From here to H1, entries may only be added (stricter);
+loosening or deleting one waits for H1 (`workflow_check.py acceptance`).
+
+| Item | Result | Evidence |
+|---|---|---|
+| Frozen acceptance list | sha256 `f5b0dbe61aca360e364f0df52a41bc00f27f2cfaf0ad2808e43bc4f3480b813e` | `docs/dev/cr-propagation/acceptance.json` |
+| Workflow manifest (WF-1) | `workflow_check.py dag`: ok, 21 work packages, 9 capabilities, acyclic, waves ordered; derived at H0 (decision D0), sha256 `017bb108bf5dac1dc197675fdfdf665cbe32c952259f808611e6990b75f3e208` | `docs/dev/cr-propagation/workflow.json` |
+| Decision record | D0–D12 answered 2026-10-26 | `docs/dev/cr-propagation/decisions.md` |
+| Task documents | `lint_task.py`: 0 errors for `workflow-r4.md`, `workflow-r4.zh.md`, `cr-propagation-plan.md`, `cr-propagation-plan.zh.md` (planned paths give warnings) | P0 run |
+| Language versions | one difference reported (r4 §3, D2 vs D5), not chosen | `decisions.md` |
+
+Derived entries (not in r3): ENV-1 to ENV-3 (from r4 §3) and C2U-1, C2U-2 (from r3 §C2's USINE case, split by r4 §6).
+ALL-2 is replaced by the P0 freeze. **Not verified here:** r3 Q10's formal independent review with `review.py` is not
+run at P0; it moves to before H1 (r4 Open Questions).

@@ -1,0 +1,674 @@
+{
+ "schema": "crprop-workflow/1",
+ "workflow": "cr-propagation r4",
+ "baseline": {
+  "plugin": "0.42.0",
+  "contracts": "3.13.0",
+  "core": "1.1.0",
+  "main": "8fcbb826"
+ },
+ "provenance": "Derived by the orchestrator at P0 on 2026-10-26 from workflow-r4.md (Technical Approach 1-9) and cr-propagation-plan.md (r3 cards), because the companion crprop-workflow.json was not supplied (H0 decision D0 in decisions.md). Every work package and fallback names its source; 'derived' marks a value r4 and r3 do not state.",
+ "documents": {
+  "workflow": "docs/dev/cr-propagation/workflow-r4.md",
+  "technical_plan": "docs/dev/cr-propagation/cr-propagation-plan.md",
+  "decisions": "docs/dev/cr-propagation/decisions.md",
+  "acceptance": "docs/dev/cr-propagation/acceptance.json",
+  "status": "docs/dev/cr-propagation/status.json",
+  "escalations": "docs/dev/cr-propagation/escalations.md"
+ },
+ "capabilities": {
+  "repo": "the source git repo with plugins/hep-research/.claude-plugin/plugin.json (r3 0.1)",
+  "net-github": "git clone or fetch from github.com",
+  "net-sources": "download from the USINE and GALPROP source hosts (lpsc.in2p3.fr, gitlab.in2p3.fr, galprop.stanford.edu), or the source tarballs present in CRPROP_SOURCES",
+  "net-data": "read-only HEPData and CRDB queries (r3 0.6 exception, F1)",
+  "pkg-install": "install the build dependencies of an external program (Homebrew or pip in a venv)",
+  "batch": "a batch site or local_partition.py for E1 (D6)",
+  "env-dragon2": "DRAGON2 built and HEP_DRAGON2_BIN, HEP_DRAGON2_DATA set (ENV)",
+  "env-usine": "USINE built and HEP_USINE_BIN, HEP_USINE_DATA set (ENV)",
+  "env-galprop": "GALPROP built and HEP_GALPROP_BIN, HEP_GALPROP_DATA set (ENV, only when D5 includes GALPROP)"
+ },
+ "limits": {
+  "worker_fix_attempts_per_check": 3,
+  "rework_rounds": 2,
+  "dispatches_per_wp": 3,
+  "orchestrator_cycles": 200,
+  "concurrent_workers": 4,
+  "heartbeat_minutes": 30,
+  "compute_budget": "decisions.md D7",
+  "source": "r4 Technical Approach 4"
+ },
+ "checkpoints": {
+  "H0": "decision record answered once before P0 (r4 9)",
+  "H1": "human review, merge into main, push, contracts version, live routing approval (r4 10)"
+ },
+ "shared_files": {
+  "append_only": [
+   "CHANGELOG.md",
+   "VALIDATION.md"
+  ],
+  "generated": [
+   "README.md",
+   "docs/reference-inventory.json",
+   "docs/reference-inventory.md",
+   "docs/capability-matrix.md"
+  ],
+  "orchestrator_only": [
+   "docs/dev/cr-propagation/status.json",
+   "docs/dev/cr-propagation/escalations.md",
+   "docs/dev/cr-propagation/decisions.md",
+   "docs/dev/cr-propagation/acceptance.json",
+   "docs/dev/cr-propagation/workflow.json"
+  ],
+  "adapter_merge_order": [
+   "B1",
+   "D1",
+   "D2",
+   "E2"
+  ],
+  "source": "r3 0.5 with providers folded per r4 6"
+ },
+ "common_files": [
+  "CHANGELOG.md",
+  "VALIDATION.md",
+  "README.md",
+  "tests/skills/test_cli_robustness.py",
+  "docs/reference-inventory.json",
+  "docs/reference-inventory.md"
+ ],
+ "work_packages": [
+  {
+   "id": "P0",
+   "title": "Bootstrap: integration branch, manifest, decisions, frozen acceptance, status",
+   "wave": 0,
+   "card": "r4 Deliverables",
+   "deps": [],
+   "requires": [
+    "repo"
+   ],
+   "optional": false,
+   "critical": true,
+   "role": "orchestrator",
+   "files": [
+    "docs/dev/cr-propagation/**",
+    "VALIDATION.md"
+   ],
+   "acceptance": [
+    "WF-1",
+    "WF-2"
+   ],
+   "fallback": null,
+   "source": "r4 7"
+  },
+  {
+   "id": "ENV",
+   "title": "Capability probe and external builds",
+   "wave": 0,
+   "card": "r4 3",
+   "deps": [
+    "P0"
+   ],
+   "requires": [
+    "repo"
+   ],
+   "optional": false,
+   "critical": true,
+   "role": "env-worker",
+   "files": [
+    "VALIDATION.md",
+    "tests/adapters/fixtures/cr_propagation/env/**"
+   ],
+   "acceptance": [
+    "ENV-1",
+    "ENV-2",
+    "ENV-3"
+   ],
+   "fallback": "per capability: env-usine absent -> escalate (critical), B1/B3/C2U wait or skip, F1 takes the D8 fallback; env-galprop absent -> D2 unavailable; env-dragon2 absent -> A4 closed-form row only, D1 blocked",
+   "source": "r4 3"
+  },
+  {
+   "id": "A1",
+   "title": "Convention conversion and harmonized-v1",
+   "wave": 1,
+   "card": "r3 A1",
+   "deps": [
+    "P0"
+   ],
+   "requires": [
+    "repo"
+   ],
+   "optional": false,
+   "critical": false,
+   "files": [
+    "skills/hep-theory/scripts/transport_conventions.py",
+    "tests/skills/hep_theory/test_transport_conventions.py",
+    "tests/adapters/fixtures/cr_propagation/specs/harmonized-v1.json",
+    "skills/hep-theory/references/cosmic-ray-phenomenology.md"
+   ],
+   "acceptance_prefix": "A1",
+   "fallback": null,
+   "source": "r4 7, r3 A1"
+  },
+  {
+   "id": "A2",
+   "title": "transport block and object-form degeneracies (contracts CV-CRPROP)",
+   "wave": 1,
+   "card": "r3 A2",
+   "deps": [
+    "P0"
+   ],
+   "requires": [
+    "repo"
+   ],
+   "optional": false,
+   "critical": false,
+   "files": [
+    "contracts/schemas/ext_theory_spec.json",
+    "contracts/validate.py",
+    "contracts/__init__.py",
+    "contracts/fixtures/**",
+    "contracts/vocab/core.json",
+    "skills/hep-statistics/scripts/covariance_fit.py",
+    "tests/contracts/**"
+   ],
+   "acceptance_prefix": "A2",
+   "merge_before": [
+    "A3",
+    "C1"
+   ],
+   "fallback": null,
+   "source": "r4 2 and 7, r3 A2"
+  },
+  {
+   "id": "A3",
+   "title": "Two-level degeneracy diagnostics",
+   "wave": 1,
+   "card": "r3 A3",
+   "deps": [
+    "P0"
+   ],
+   "requires": [
+    "repo"
+   ],
+   "optional": false,
+   "critical": false,
+   "files": [
+    "skills/hep-statistics/scripts/degeneracy.py",
+    "skills/hep-statistics/scripts/covariance_fit.py",
+    "tests/skills/hep_statistics/**"
+   ],
+   "acceptance_prefix": "A3",
+   "merge_after": [
+    "A2"
+   ],
+   "fallback": null,
+   "source": "r4 7, r3 A3 (rebase after A2)"
+  },
+  {
+   "id": "C1",
+   "title": "Provider protocol (contracts CV-CRPROP, CORE_VERSION minor)",
+   "wave": 1,
+   "card": "r3 C1",
+   "deps": [
+    "P0"
+   ],
+   "requires": [
+    "repo"
+   ],
+   "optional": false,
+   "critical": true,
+   "files": [
+    "contracts/schemas/**",
+    "contracts/__init__.py",
+    "contracts/validate.py",
+    "contracts/vocab/core.json",
+    "contracts/tool_contracts/solar_modulation_force_field.json",
+    "core/provider/**",
+    "core/__init__.py",
+    "core/OWNERS.json",
+    "tools/provider_registry.py",
+    "profiles/theory/cr-secondary-ratio/scripts/provider.py",
+    "profiles/theory/cr-secondary-ratio/profile.json",
+    "profiles/theory/cr-secondary-ratio/tests/**",
+    "tests/adapters/test_adapter_declarations.py",
+    "docs/adapter-authoring.md",
+    "tests/core/**",
+    "tests/contracts/**",
+    "tests/tools/**"
+   ],
+   "acceptance_prefix": "C1",
+   "merge_after": [
+    "A2"
+   ],
+   "fallback": null,
+   "source": "r4 6 and 7, r3 C1"
+  },
+  {
+   "id": "B2",
+   "title": "Closed forms with convection and decay",
+   "wave": 1,
+   "card": "r3 B2",
+   "deps": [
+    "P0"
+   ],
+   "requires": [
+    "repo"
+   ],
+   "optional": false,
+   "critical": true,
+   "files": [
+    "profiles/theory/cr-secondary-ratio/**"
+   ],
+   "acceptance_prefix": "B2",
+   "fallback": null,
+   "source": "r4 7, r3 B2"
+  },
+  {
+   "id": "A4",
+   "title": "Cost benchmark",
+   "wave": 2,
+   "card": "r3 A4",
+   "deps": [
+    "A1",
+    "ENV"
+   ],
+   "requires": [
+    "env-dragon2"
+   ],
+   "optional": false,
+   "critical": false,
+   "files": [
+    "tests/adapters/fixtures/cr_propagation/cost/**"
+   ],
+   "acceptance_prefix": "A4",
+   "fallback": "without env-dragon2: closed-form row only, A4-2 recorded fail and escalated (derived)",
+   "source": "r4 6 and 7, r3 A4"
+  },
+  {
+   "id": "B1",
+   "title": "USINE tool with provider entrypoint",
+   "wave": 2,
+   "card": "r3 B1 + B1b",
+   "deps": [
+    "A1",
+    "C1",
+    "ENV"
+   ],
+   "requires": [
+    "env-usine"
+   ],
+   "optional": false,
+   "critical": true,
+   "files": [
+    "adapters/cr-propagation/assets/usine_translate.py",
+    "adapters/cr-propagation/assets/usine_to_prediction.py",
+    "adapters/cr-propagation/assets/usine_provider.py",
+    "adapters/cr-propagation/adapter.json",
+    "docs/capability-matrix.md",
+    "tests/adapters/test_cr_propagation.py",
+    "tests/adapters/fixtures/cr_propagation/usine/**",
+    "tests/adapters/fixtures/cr_propagation/cost/**"
+   ],
+   "acceptance_prefix": "B1",
+   "acceptance_extra": [
+    "B1-PRV-1",
+    "B1-PRV-2"
+   ],
+   "fallback": "none (critical): escalate; B3, C2U wait; F1 takes the D8 fallback target",
+   "source": "r4 3, 6 and 8"
+  },
+  {
+   "id": "D1",
+   "title": "DRAGON2 physics items with provider entrypoint",
+   "wave": 2,
+   "card": "r3 D1 + D1b",
+   "deps": [
+    "A1",
+    "C1",
+    "B2",
+    "ENV"
+   ],
+   "requires": [
+    "env-dragon2"
+   ],
+   "optional": false,
+   "critical": false,
+   "files": [
+    "adapters/cr-propagation/assets/dragon2_provider.py",
+    "adapters/cr-propagation/assets/dragon2_run.py",
+    "adapters/cr-propagation/assets/dragon2_to_prediction.py",
+    "adapters/cr-propagation/adapter.json",
+    "docs/capability-matrix.md",
+    "tests/adapters/test_cr_propagation.py",
+    "tests/adapters/fixtures/cr_propagation/**"
+   ],
+   "acceptance_prefix": "D1",
+   "acceptance_extra": [
+    "D1-PRV-1",
+    "D1-PRV-2"
+   ],
+   "merge_after": [
+    "B1"
+   ],
+   "fallback": "items without a closed form wait for B1; if B1 is blocked, compare only the B2 items and record the rest as open (derived)",
+   "source": "r4 6 and 7, r3 D1 + D1b"
+  },
+  {
+   "id": "D2",
+   "title": "GALPROP tool with provider entrypoint",
+   "wave": 2,
+   "card": "r3 D2 + D2b",
+   "deps": [
+    "A1",
+    "C1",
+    "ENV"
+   ],
+   "requires": [
+    "env-galprop"
+   ],
+   "optional": true,
+   "critical": false,
+   "files": [
+    "adapters/cr-propagation/assets/galprop_translate.py",
+    "adapters/cr-propagation/assets/galprop_to_prediction.py",
+    "adapters/cr-propagation/assets/galprop_provider.py",
+    "adapters/cr-propagation/adapter.json",
+    "docs/capability-matrix.md",
+    "tests/adapters/test_cr_propagation.py",
+    "tests/adapters/fixtures/cr_propagation/galprop/**",
+    "tests/adapters/fixtures/cr_propagation/cost/**",
+    "tools/optional_modules.json"
+   ],
+   "acceptance_prefix": "D2",
+   "acceptance_extra": [
+    "D2-PRV-1",
+    "D2-PRV-2"
+   ],
+   "merge_after": [
+    "B1",
+    "D1"
+   ],
+   "fallback": "env-galprop absent: D2 marked unavailable with the reason (D2-1), D3 compares DRAGON2 and USINE only",
+   "source": "r4 3"
+  },
+  {
+   "id": "C2",
+   "title": "Multi-dataset propagation fit (closed-form provider, synthetic data)",
+   "wave": 2,
+   "card": "r3 C2",
+   "deps": [
+    "A2",
+    "A3",
+    "C1"
+   ],
+   "requires": [
+    "repo"
+   ],
+   "optional": false,
+   "critical": true,
+   "files": [
+    "skills/hep-statistics/scripts/propagation_fit.py",
+    "skills/hep-statistics/references/core-stats-commands.md",
+    "tests/skills/hep_statistics/**",
+    "examples/**",
+    "contracts/tool_contracts/**"
+   ],
+   "acceptance_prefix": "C2",
+   "fallback": null,
+   "source": "r4 6 and 7"
+  },
+  {
+   "id": "B3",
+   "title": "Harmonized comparison and decomposition check",
+   "wave": 3,
+   "card": "r3 B3",
+   "deps": [
+    "B1",
+    "B2"
+   ],
+   "requires": [
+    "env-usine"
+   ],
+   "optional": false,
+   "critical": true,
+   "files": [
+    "tests/adapters/fixtures/cr_propagation/b3/**",
+    "tests/adapters/test_cr_propagation.py"
+   ],
+   "acceptance_prefix": "B3",
+   "fallback": "waits on B1; if B1 is blocked, blocked with B1 (derived)",
+   "source": "r4 7, r3 B3"
+  },
+  {
+   "id": "C2U",
+   "title": "Propagation fit with the USINE provider",
+   "wave": 3,
+   "card": "r3 C2 (USINE case)",
+   "deps": [
+    "C2",
+    "B1"
+   ],
+   "requires": [
+    "env-usine"
+   ],
+   "optional": false,
+   "critical": true,
+   "files": [
+    "skills/hep-statistics/scripts/propagation_fit.py",
+    "tests/skills/hep_statistics/**",
+    "tests/adapters/fixtures/cr_propagation/c2u/**"
+   ],
+   "acceptance": [
+    "C2U-1",
+    "C2U-2"
+   ],
+   "fallback": "waits on B1; if B1 is blocked, blocked with B1 (derived)",
+   "source": "r4 6"
+  },
+  {
+   "id": "D3",
+   "title": "Two-level cross-code comparison",
+   "wave": 3,
+   "card": "r3 D3",
+   "deps": [
+    "B1",
+    "D1"
+   ],
+   "soft_deps": [
+    "D2"
+   ],
+   "requires": [
+    "env-usine",
+    "env-dragon2"
+   ],
+   "optional": false,
+   "critical": false,
+   "files": [
+    "tests/adapters/fixtures/cr_propagation/d3/**",
+    "tests/adapters/test_cr_propagation.py"
+   ],
+   "acceptance_prefix": "D3",
+   "fallback": "D2 skipped: DRAGON2 and USINE only",
+   "source": "r4 7 (soft dep on D2 derived from r3 D3)"
+  },
+  {
+   "id": "E1",
+   "title": "Training set and bounded active addition (USINE)",
+   "wave": 3,
+   "card": "r3 E1",
+   "deps": [
+    "B1",
+    "C2",
+    "A4"
+   ],
+   "requires": [
+    "env-usine",
+    "batch"
+   ],
+   "optional": true,
+   "critical": false,
+   "files": [
+    "tests/adapters/fixtures/cr_propagation/e1/**"
+   ],
+   "acceptance_prefix": "E1",
+   "fallback": "skipped; E2, F2 skipped",
+   "source": "r4 6 and 7"
+  },
+  {
+   "id": "E2",
+   "title": "Emulator, valid domain and provider entrypoint",
+   "wave": 4,
+   "card": "r3 E2 + E2b",
+   "deps": [
+    "E1"
+   ],
+   "requires": [
+    "repo"
+   ],
+   "optional": true,
+   "critical": false,
+   "files": [
+    "skills/hep-ml/scripts/**",
+    "adapters/cr-propagation/assets/emulator_provider.py",
+    "adapters/cr-propagation/adapter.json",
+    "docs/capability-matrix.md",
+    "tests/adapters/test_cr_propagation.py",
+    "tests/skills/hep_ml/**",
+    "tests/adapters/fixtures/cr_propagation/e2/**"
+   ],
+   "acceptance_prefix": "E2",
+   "acceptance_extra": [
+    "E2-PRV-1",
+    "E2-PRV-2"
+   ],
+   "merge_after": [
+    "B1",
+    "D1",
+    "D2"
+   ],
+   "fallback": "skipped",
+   "source": "r4 6 and 7"
+  },
+  {
+   "id": "F1",
+   "title": "Reproduction of Genolini et al. 2019 with USINE",
+   "wave": 4,
+   "card": "r3 F1",
+   "deps": [
+    "C2U",
+    "B3"
+   ],
+   "requires": [
+    "env-usine",
+    "net-data"
+   ],
+   "optional": false,
+   "critical": true,
+   "files": [
+    "tests/adapters/fixtures/cr_propagation/f1/**",
+    "examples/**",
+    "profiles/experiments/ams-02/**"
+   ],
+   "acceptance_prefix": "F1",
+   "fallback": "D8: cross-code reproduction with DRAGON2, marked insufficient for v1 (F3 not enabled)",
+   "source": "r4 3, 8 and 9"
+  },
+  {
+   "id": "F2",
+   "title": "Cross-code extension of F1",
+   "wave": 5,
+   "card": "r3 F2",
+   "deps": [
+    "F1"
+   ],
+   "soft_deps": [
+    "E2",
+    "D3"
+   ],
+   "requires": [
+    "repo"
+   ],
+   "optional": true,
+   "critical": false,
+   "files": [
+    "tests/adapters/fixtures/cr_propagation/f2/**"
+   ],
+   "acceptance": [],
+   "fallback": "skipped",
+   "source": "r4 7"
+  },
+  {
+   "id": "F3",
+   "title": "Entry into v1 (prepared on integration only)",
+   "wave": 5,
+   "card": "r3 F3",
+   "deps": [
+    "F1"
+   ],
+   "requires": [
+    "repo"
+   ],
+   "optional": false,
+   "critical": false,
+   "condition": "F1 passed F1-1 with the D9 tolerance and D11 = yes",
+   "files": [
+    "contracts/stanzas/**",
+    "docs/capability-map.json",
+    "docs/capability-map.md",
+    "skills/*/SKILL.md",
+    "skills/*/references/*.md",
+    "skills/hep-statistics/README.md",
+    "skills/hep-theory/README.md",
+    "tests/routing/**"
+   ],
+   "acceptance_prefix": "F3",
+   "fallback": "condition false: skipped and listed for H1",
+   "source": "r4 6, 7 and 9"
+  },
+  {
+   "id": "RC",
+   "title": "Release candidate: rebase onto main, full checks, report, PR draft",
+   "wave": 6,
+   "card": "r4 10",
+   "deps": [
+    "F1"
+   ],
+   "soft_deps": [
+    "ENV",
+    "A1",
+    "A2",
+    "A3",
+    "C1",
+    "B2",
+    "A4",
+    "B1",
+    "D1",
+    "D2",
+    "C2",
+    "B3",
+    "C2U",
+    "D3",
+    "E1",
+    "E2",
+    "F2",
+    "F3"
+   ],
+   "requires": [
+    "repo"
+   ],
+   "optional": false,
+   "critical": true,
+   "role": "orchestrator",
+   "files": [
+    "docs/dev/cr-propagation/campaign-report.md",
+    "docs/dev/cr-propagation/pr-draft.md",
+    "CHANGELOG.md",
+    "VALIDATION.md"
+   ],
+   "acceptance": [
+    "WF-10"
+   ],
+   "fallback": null,
+   "source": "r4 10"
+  }
+ ]
+}
