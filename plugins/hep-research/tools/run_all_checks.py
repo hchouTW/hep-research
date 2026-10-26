@@ -330,6 +330,8 @@ STATIC_SCRIPTS = [  # (name, command after the interpreter): the static checks o
     ("host_manifests", ["tools/check_host_manifests.py"]),
     ("measure_entrypoints", ["tools/measure_entrypoints.py"]),
     ("rule_registry", ["contracts/rule_registry.py", "check"]),
+    ("naming_registry", ["contracts/naming_registry.py", "check"]),
+    ("naming", ["tools/check_naming.py"]),
 ]
 HOST_CHECKS = ["claude-plugin-validate", "codex-plugin-load"]
 

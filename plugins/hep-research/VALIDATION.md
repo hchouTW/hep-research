@@ -2756,6 +2756,21 @@ Contracts: the 13 new keys are core `convention_keys` and also `conditional_conv
 description change and the 8 Th14 cases (paid; pending approval). Pre-existing on main: 5 tests of
 `tests/contracts/test_simulated_dataset.py` fail under a whole-directory pytest run and pass alone (order dependent).
 
+## SEMANTIC-NAMING-P1-P2 (2026-10-26, macOS 26.5 arm64, miniconda Python 3.13.2; ruff 0.16.10 and mypy 2.4.0 from the CI venv; branch `feat/semantic-naming` from main `cfd9f547`, unreleased)
+
+Semantic naming spec v4.2, phases P1 (skeleton) and P2 (first extractors, the plugin's gate, stanza item 6). Software
+consistency only: the checks say the engine and the extractors behave as specified on synthetic inputs and on the
+plugin itself, not that any name is good.
+
+| Check | Result |
+|---|---|
+| Spec §12 cases | `tests/core/test_naming_engine.py` (34 tests): tokenizer cases; forbidden (whole name, generic-only, `data_obs` and `DataLoader` not, a glossary alias never overrides); waivers (explicit id, a pattern rejected by the schema, a non-waivable rule unaffected); N10 declared correlation both ways, decorrelated years, `lumi2018`/`lumi_2018` unverified without a proposal and resolved by a declaration or an annotation; Up without Down; status honesty; semantic confidence (low, medium, high, high without every referrer read); levels (loop index C0, unsearched `do_something` C2 and not `fix`, external C4, C3 handoff, out-of-request fix proposed); same-name ids and duplicates; a removed name referenced from an unchanged file reported; zero inputs and an expected surface unsupported; the six change-set checks |
+| CLI, registries, project settings | `tests/contracts/test_naming_check.py` (21): exit 3 when everything is unverified or nothing was scanned, 0 with style warnings only, 1 with `--strict` or a correctness error, 2 for a bad inventory or an `--out` inside `artifacts_dir`; the glossary digest changes with the glossary; the report validates against `naming_report.json`; registry mutations (duplicate rule, heuristic with a violated code, stale source digest, mirror mismatch, missing anchor, lowered floor) fail; `naming` block 1.3.0 passes, an unknown key or schema 1.2.0 fails |
+| Extractor | `tests/skills/hep_computing/test_extract_names.py` (11, 1 skipped when PyYAML is installed): N1 kinds, import-resolved and keyword references, duplicates; `--changed` against a git commit (modified body, added, removed and still referenced, which the check fails); N2 version in name, `\includegraphics` references, manifest-checksummed files; N5 flags, environment variables, duplicate JSON keys; N16 on the plugin; refusal inside `artifacts_dir` |
+| Plugin gate | `tests/tools/test_check_naming.py` (5); on the plugin: N1 93,601, N5 2,213, N16 440 names, 401,571 results satisfied, 1,042 violations all in `tools/naming_known_gaps.json` (none in files this branch adds: those were renamed), 22 s; a `do_something()` added on purpose in `core/naming/` fails it (exit 1) |
+| Budgets | `tools/measure_entrypoints.py`: the spec's stanza sentence gave hep-statistics a quick load of 25,656 B (> 25,600); the shipped shorter sentence gives 25,597 B; every SKILL.md within budget |
+| Aggregate | `tools/run_all_checks.py --no-cli`: 30 of 31 checks pass, 2 skip (host CLIs); unittest 5,672 run, 5 failures, all convention tests on the new files (no `--status`, bytecode, subprocess timeouts, a module timing, a SKILL.md path), fixed and their modules rerun green (103 tests); `--part static` afterwards 31 of 31 pass or skip; ruff and mypy clean on `core` and `contracts` |
+
 ## FRONTEND-FE5 (2026-10-25, E2: macOS 26.5 arm64, Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1, SymPy 1.14.0, mpmath 1.3.0; branch `worktree-frontend-fe5` in `.claude/worktrees/frontend-fe5`, unreleased)
 
 Stage FE5: the front-end reference page split in three. Maintainer decision D-FE5 (2026-10-25): two new pages, the

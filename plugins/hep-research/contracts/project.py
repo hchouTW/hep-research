@@ -32,8 +32,8 @@ from contracts.protected_use import guard_report  # noqa: E402
 from core.protected.guard import protected_main  # noqa: E402
 
 CONFIG_NAME = "hep-research.project.json"
-SCHEMA_VERSION = "1.2.0"  # the project-config schema this reader implements (1.1.0: agent_policy, closed blinding;
-# 1.2.0: agent_policy.protected_inputs)
+SCHEMA_VERSION = "1.3.0"  # the project-config schema this reader implements (1.1.0: agent_policy, closed blinding;
+# 1.2.0: agent_policy.protected_inputs; 1.3.0: naming)
 DEFAULT_ARTIFACTS_DIR = "./hep-research-artifacts/"
 
 
@@ -63,6 +63,7 @@ def load_project(path: Path, registry_path: Path | None = None, extra_local: lis
     check_schema_version(cfg, rep)
     check_blinding_block(cfg, rep)
     check_agent_policy(cfg, proj_dir, rep)
+    check_naming_block(cfg, proj_dir, rep)
     # protected mode (the project declares agent_policy): the protected inputs must be established (core.protected.guard)
     guard_report("contracts.project.load_project", rep, project=proj_dir)
     pv = cfg["plugin_version"]
@@ -136,6 +137,8 @@ def check_schema_version(cfg: dict, rep: Report) -> None:
     elif "protected_inputs" in (cfg.get("agent_policy") or {}) and have < (1, 2, 0):
         rep.add("error", "config.agent_policy.protected_inputs", "project.policy_needs_schema",
                 "agent_policy.protected_inputs needs schema_version 1.2.0 or later")
+    elif "naming" in cfg and have < (1, 3, 0):
+        rep.add("error", "config.naming", "project.naming_needs_schema", "naming needs schema_version 1.3.0 or later")
 
 
 BLINDING_KEYS = {"blinded", "allowed_outputs", "regions"}
@@ -186,6 +189,26 @@ def check_agent_policy(cfg: dict, proj_dir: Path, rep: Report) -> None:
             continue
         if digest != m["sha256"]:
             rep.add("error", where, "project.policy_manifest_mismatch", f"{m['ref']!r} has sha256 {digest}, the policy declares {m['sha256']}")
+
+
+def check_naming_block(cfg: dict, proj_dir: Path, rep: Report) -> None:
+    """The naming settings (schema 1.3.0): a glossary path inside the project that can be read. Severity settings only;
+    contracts/naming_check.py reads them (strict, glossary, waivers)."""
+    block = cfg.get("naming")
+    if not block or "glossary" not in block:
+        return
+    rel = block["glossary"]
+    if not _relative_inside(rel):
+        rep.add("error", "config.naming.glossary", "project.naming_bad_path", f"{rel!r}: the glossary path is relative, without '..'")
+    elif not (proj_dir / rel).is_file():
+        rep.add("error", "config.naming.glossary", "project.naming_glossary_missing", f"{rel!r} cannot be read")
+
+
+def naming_settings(p: Project) -> dict:
+    """The project's naming settings with their defaults (strict false, no glossary, no waivers)."""
+    block = p.config.get("naming") or {}
+    return {"strict": bool(block.get("strict", False)), "glossary": block.get("glossary"),
+            "waivers": list(block.get("waivers", []))}
 
 
 def load_blinding(path: Path) -> dict:
@@ -257,6 +280,8 @@ def main(argv=None) -> int:
            "note": "advisory check: a valid config, including agent_policy, does not enforce or authorize anything"}
     if want_preflight:
         out["preflight"] = preflight(p)
+        if p.report.ok and "naming" in p.config:
+            out["naming"] = naming_settings(p)
     print(json.dumps(out, indent=1))
     return 0 if p.report.ok else 1
 

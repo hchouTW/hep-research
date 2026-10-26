@@ -1,0 +1,165 @@
+{
+ "$comment": "contracts/naming/rules.json: the naming rule registry (spec \u00a76.3); its own schema, not rule_registry.json (no layer, suites or V cases).",
+ "type": "object",
+ "required": [
+  "registry_version",
+  "states",
+  "rules"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "registry_version": {
+   "const": "1.0.0"
+  },
+  "$comment": {
+   "type": "string"
+  },
+  "states": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  },
+  "rules": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "rule_id",
+     "version",
+     "surfaces",
+     "predicate",
+     "determinism",
+     "outcome_contract",
+     "rationale",
+     "owner",
+     "waivable",
+     "lifecycle"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "rule_id": {
+      "type": "string",
+      "pattern": "^naming\\.(?:common|cross|n(?:[1-9]|1[0-7]))\\.[a-z0-9-]+$"
+     },
+     "version": {
+      "$ref": "common.json#/$defs/version"
+     },
+     "surfaces": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+       "type": "string",
+       "pattern": "^N(?:[1-9]|1[0-7])$"
+      }
+     },
+     "predicate": {
+      "type": "string",
+      "enum": [
+       "forbidden",
+       "pattern",
+       "vocabulary",
+       "uniqueness",
+       "pairing",
+       "reference",
+       "declared-match",
+       "status-honesty",
+       "similarity",
+       "semantic"
+      ]
+     },
+     "params": {
+      "type": "object"
+     },
+     "determinism": {
+      "type": "string",
+      "enum": [
+       "deterministic",
+       "heuristic",
+       "review"
+      ]
+     },
+     "outcome_contract": {
+      "type": "object",
+      "required": [
+       "satisfied",
+       "violated",
+       "not_applicable",
+       "unverified",
+       "unsupported"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "satisfied": {
+        "type": "array",
+        "items": {
+         "type": "string",
+         "pattern": "^naming\\.[a-z0-9_]+$"
+        }
+       },
+       "violated": {
+        "type": "array",
+        "items": {
+         "type": "string",
+         "pattern": "^naming\\.[a-z0-9_]+$"
+        }
+       },
+       "not_applicable": {
+        "type": "array",
+        "items": {
+         "type": "string",
+         "pattern": "^naming\\.[a-z0-9_]+$"
+        }
+       },
+       "unverified": {
+        "type": "array",
+        "items": {
+         "type": "string",
+         "pattern": "^naming\\.[a-z0-9_]+$"
+        }
+       },
+       "unsupported": {
+        "type": "array",
+        "items": {
+         "type": "string",
+         "pattern": "^naming\\.[a-z0-9_]+$"
+        }
+       }
+      }
+     },
+     "rationale": {
+      "type": "string",
+      "minLength": 1
+     },
+     "owner": {
+      "type": "string",
+      "enum": [
+       "hep-measurement",
+       "hep-detector",
+       "hep-statistics",
+       "hep-theory",
+       "hep-computing",
+       "hep-ml",
+       "hep-citations",
+       "hep-authoring"
+      ]
+     },
+     "waivable": {
+      "type": "boolean"
+     },
+     "lifecycle": {
+      "type": "string",
+      "enum": [
+       "active",
+       "retired"
+      ]
+     },
+     "source_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+     }
+    }
+   }
+  }
+ }
+}

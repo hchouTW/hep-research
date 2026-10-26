@@ -1,0 +1,546 @@
+{
+ "registry_version": "1.0.0",
+ "states": [
+  "satisfied",
+  "violated",
+  "not_applicable",
+  "unverified",
+  "unsupported"
+ ],
+ "$comment": "Naming rule registry (spec \u00a76.3), checked by contracts/naming_registry.py check; keyed by (rule_id, version); source_sha256 is the digest of the predicate implementation (contracts/analysis_checks/source_digest.py): code that changes needs a new rule version.",
+ "rules": [
+  {
+   "rule_id": "naming.common.forbidden",
+   "version": "1.0.0",
+   "surfaces": [
+    "N1",
+    "N2",
+    "N3",
+    "N4",
+    "N5",
+    "N6",
+    "N7",
+    "N8",
+    "N9",
+    "N10",
+    "N11",
+    "N12",
+    "N13",
+    "N14",
+    "N15",
+    "N16"
+   ],
+   "predicate": "forbidden",
+   "determinism": "deterministic",
+   "outcome_contract": {
+    "satisfied": [
+     "naming.not_generic",
+     "naming.fixed_name"
+    ],
+    "violated": [
+     "naming.forbidden_whole_name",
+     "naming.generic_tokens_only"
+    ],
+    "not_applicable": [
+     "naming.waived"
+    ],
+    "unverified": [],
+    "unsupported": [
+     "naming.no_inputs"
+    ]
+   },
+   "rationale": "A generic name (data, tmp, process_data) says nothing about what it holds; principle P1. A glossary never overrides the table (I6).",
+   "owner": "hep-computing",
+   "waivable": true,
+   "lifecycle": "active",
+   "source_sha256": "1138b7515b437f24a99962a9bfc6728c0ea230cad0899d8f9e1be83a7f258df6"
+  },
+  {
+   "rule_id": "naming.common.vocabulary",
+   "version": "1.0.0",
+   "surfaces": [
+    "N1",
+    "N5",
+    "N16"
+   ],
+   "predicate": "vocabulary",
+   "params": {
+    "kinds": [
+     "module_public",
+     "plugin_core_api",
+     "project_config_key",
+     "project_cli_flag",
+     "plugin_cli_flag",
+     "env_var",
+     "contract_term",
+     "skill_name",
+     "script_name",
+     "schema_name"
+    ],
+    "sources": [
+     "project"
+    ]
+   },
+   "determinism": "deterministic",
+   "outcome_contract": {
+    "satisfied": [
+     "naming.tokens_resolve"
+    ],
+    "violated": [
+     "naming.token_unresolved"
+    ],
+    "not_applicable": [
+     "naming.waived",
+     "naming.kind_not_covered",
+     "naming.external_name"
+    ],
+    "unverified": [],
+    "unsupported": [
+     "naming.no_inputs"
+    ]
+   },
+   "rationale": "Names others read use words the vocabulary chain resolves: glossary, profile, standard HEP abbreviations, English (P2, P5). Local and private names may be short (P7).",
+   "owner": "hep-computing",
+   "waivable": true,
+   "lifecycle": "active",
+   "source_sha256": "ac486ad04872cf7cc106e47f8e6b0623df0d3cab42a23debbb1560d3e8e92c8e"
+  },
+  {
+   "rule_id": "naming.common.uniqueness",
+   "version": "1.0.0",
+   "surfaces": [
+    "N1",
+    "N5",
+    "N16"
+   ],
+   "predicate": "uniqueness",
+   "params": {
+    "within": "container",
+    "kinds": [
+     "local",
+     "private",
+     "module_public",
+     "plugin_core_api",
+     "project_config_key",
+     "env_var",
+     "contract_term",
+     "skill_name",
+     "script_name",
+     "schema_name"
+    ]
+   },
+   "determinism": "deterministic",
+   "outcome_contract": {
+    "satisfied": [
+     "naming.unique"
+    ],
+    "violated": [
+     "naming.duplicate_name"
+    ],
+    "not_applicable": [
+     "naming.removed",
+     "naming.waived",
+     "naming.kind_not_covered"
+    ],
+    "unverified": [
+     "naming.references_partial"
+    ],
+    "unsupported": [
+     "naming.no_inputs"
+    ]
+   },
+   "rationale": "Two declarations of one name in one container shadow each other; the entity ids differ by line so both are seen.",
+   "owner": "hep-computing",
+   "waivable": true,
+   "lifecycle": "active",
+   "source_sha256": "b96cb7bd50308ce56559c27b39c0ebcd427b86b1180c673df2c44bda200bf969"
+  },
+  {
+   "rule_id": "naming.common.reference",
+   "version": "1.0.0",
+   "surfaces": [
+    "N1",
+    "N2",
+    "N5",
+    "N16"
+   ],
+   "predicate": "reference",
+   "determinism": "deterministic",
+   "outcome_contract": {
+    "satisfied": [
+     "naming.references_resolve"
+    ],
+    "violated": [
+     "naming.reference_to_removed"
+    ],
+    "not_applicable": [
+     "naming.waived"
+    ],
+    "unverified": [
+     "naming.references_partial"
+    ],
+    "unsupported": [
+     "naming.no_inputs"
+    ]
+   },
+   "rationale": "A removed or renamed name that is still referenced breaks its referrers; references must be searched in full before a rename.",
+   "owner": "hep-computing",
+   "waivable": true,
+   "lifecycle": "active",
+   "source_sha256": "2c0a8f2dfeae0a8287bc174f71f7fc45d1946d90a43c98bc6879ad44a702cbd7"
+  },
+  {
+   "rule_id": "naming.common.status-honesty",
+   "version": "1.0.0",
+   "surfaces": [
+    "N2"
+   ],
+   "predicate": "status-honesty",
+   "params": {
+    "claim_tokens": [
+     "final",
+     "observed",
+     "approved"
+    ],
+    "weak_labels": [
+     "synthetic",
+     "asimov",
+     "preliminary"
+    ]
+   },
+   "determinism": "deterministic",
+   "outcome_contract": {
+    "satisfied": [
+     "naming.no_status_claim",
+     "naming.status_compatible"
+    ],
+    "violated": [
+     "naming.name_hides_status"
+    ],
+    "not_applicable": [],
+    "unverified": [
+     "naming.status_label_missing"
+    ],
+    "unsupported": [
+     "naming.no_inputs"
+    ]
+   },
+   "rationale": "A product's name must not hide its status label: a synthetic, asimov or preliminary product is not named final, observed or approved (P4).",
+   "owner": "hep-computing",
+   "waivable": false,
+   "lifecycle": "active",
+   "source_sha256": "69b7696a9fa195a641d7166fd362ead35ffd65bdfb3eca77eeaf6fddb0bbdefa"
+  },
+  {
+   "rule_id": "naming.common.semantic",
+   "version": "1.0.0",
+   "surfaces": [
+    "N1",
+    "N2",
+    "N3",
+    "N4",
+    "N5",
+    "N6",
+    "N7",
+    "N8",
+    "N9",
+    "N10",
+    "N11",
+    "N12",
+    "N13",
+    "N14",
+    "N15",
+    "N16"
+   ],
+   "predicate": "semantic",
+   "determinism": "review",
+   "outcome_contract": {
+    "satisfied": [
+     "naming.semantic_consistent"
+    ],
+    "violated": [
+     "naming.semantic_inconsistent"
+    ],
+    "not_applicable": [
+     "naming.unchanged"
+    ],
+    "unverified": [
+     "naming.not_reviewed",
+     "naming.confidence_insufficient",
+     "naming.confidence_unsupported"
+    ],
+    "unsupported": []
+   },
+   "rationale": "Whether a name says what the content holds or does is judged by reading the implementation and every referrer; only a high-confidence review decides (P3, \u00a77.8).",
+   "owner": "hep-computing",
+   "waivable": false,
+   "lifecycle": "active",
+   "source_sha256": "a29fb9187455894a659d963f135a6835f6c1b606a242db1091cc4877270756bc"
+  },
+  {
+   "rule_id": "naming.n1.pep8-shape",
+   "version": "1.0.0",
+   "surfaces": [
+    "N1"
+   ],
+   "predicate": "pattern",
+   "params": {
+    "sources": [
+     "project"
+    ]
+   },
+   "determinism": "deterministic",
+   "outcome_contract": {
+    "satisfied": [
+     "naming.format_ok"
+    ],
+    "violated": [
+     "naming.format_mismatch"
+    ],
+    "not_applicable": [
+     "naming.no_format",
+     "naming.waived",
+     "naming.external_name"
+    ],
+    "unverified": [],
+    "unsupported": [
+     "naming.no_inputs"
+    ]
+   },
+   "rationale": "Python names follow PEP 8 shapes (lower_snake_case functions and variables, CapWords classes, UPPER_CASE constants); mixed shapes such as camelCase are not used (P6).",
+   "owner": "hep-computing",
+   "waivable": true,
+   "lifecycle": "active",
+   "source_sha256": "74e3b2f1793c7f7bfb291609a87078ac2d21085b4c3ec4407a447bb728663d21"
+  },
+  {
+   "rule_id": "naming.n2.version-in-name",
+   "version": "1.0.0",
+   "surfaces": [
+    "N2"
+   ],
+   "predicate": "pattern",
+   "params": {
+    "on": "stem",
+    "violated_code": "naming.version_in_name",
+    "issue": "a version or state is written into the file name",
+    "must_not_match": "(?i)(?:^|[_\\-. ])(?:final\\d*|v\\d+(?:\\.\\d+)*|new|old|copy|bak|backup|latest|tmp)$|\\(\\d+\\)$|~$"
+   },
+   "determinism": "deterministic",
+   "outcome_contract": {
+    "satisfied": [
+     "naming.format_ok"
+    ],
+    "violated": [
+     "naming.version_in_name"
+    ],
+    "not_applicable": [
+     "naming.waived"
+    ],
+    "unverified": [],
+    "unsupported": [
+     "naming.no_inputs"
+    ]
+   },
+   "rationale": "A version or state written into a file name (final2, v3, new, old, copy) is overtaken by the next change; versions live in provenance (P3).",
+   "owner": "hep-computing",
+   "waivable": true,
+   "lifecycle": "active",
+   "source_sha256": "74e3b2f1793c7f7bfb291609a87078ac2d21085b4c3ec4407a447bb728663d21"
+  },
+  {
+   "rule_id": "naming.n5.flag-format",
+   "version": "1.0.0",
+   "surfaces": [
+    "N5"
+   ],
+   "predicate": "pattern",
+   "params": {
+    "sources": [
+     "project"
+    ]
+   },
+   "determinism": "deterministic",
+   "outcome_contract": {
+    "satisfied": [
+     "naming.format_ok"
+    ],
+    "violated": [
+     "naming.format_mismatch"
+    ],
+    "not_applicable": [
+     "naming.no_format",
+     "naming.waived",
+     "naming.external_name"
+    ],
+    "unverified": [],
+    "unsupported": [
+     "naming.no_inputs"
+    ]
+   },
+   "rationale": "Command-line flags are lower-case kebab, environment variables upper-case snake, configuration keys lower-case snake or kebab (P6).",
+   "owner": "hep-computing",
+   "waivable": true,
+   "lifecycle": "active",
+   "source_sha256": "74e3b2f1793c7f7bfb291609a87078ac2d21085b4c3ec4407a447bb728663d21"
+  },
+  {
+   "rule_id": "naming.n16.term-format",
+   "version": "1.0.0",
+   "surfaces": [
+    "N16"
+   ],
+   "predicate": "pattern",
+   "determinism": "deterministic",
+   "outcome_contract": {
+    "satisfied": [
+     "naming.format_ok"
+    ],
+    "violated": [
+     "naming.format_mismatch"
+    ],
+    "not_applicable": [
+     "naming.no_format",
+     "naming.waived"
+    ],
+    "unverified": [],
+    "unsupported": [
+     "naming.no_inputs"
+    ]
+   },
+   "rationale": "Plugin vocabulary terms, skill, script and schema names keep their established shapes; renames go through deprecation (P6, P8).",
+   "owner": "hep-computing",
+   "waivable": true,
+   "lifecycle": "active",
+   "source_sha256": "74e3b2f1793c7f7bfb291609a87078ac2d21085b4c3ec4407a447bb728663d21"
+  },
+  {
+   "rule_id": "naming.n3.shape-pairing",
+   "version": "1.0.0",
+   "surfaces": [
+    "N3"
+   ],
+   "predicate": "pairing",
+   "params": {
+    "kinds": [
+     "shape_histogram"
+    ],
+    "suffixes": [
+     "Up",
+     "Down"
+    ]
+   },
+   "determinism": "deterministic",
+   "outcome_contract": {
+    "satisfied": [
+     "naming.pair_complete"
+    ],
+    "violated": [
+     "naming.pair_missing"
+    ],
+    "not_applicable": [
+     "naming.not_paired",
+     "naming.kind_not_covered"
+    ],
+    "unverified": [
+     "naming.inventory_missing"
+    ],
+    "unsupported": [
+     "naming.no_inputs"
+    ]
+   },
+   "rationale": "Combine reads a shape variation as <process>_<nuisance>Up and Down: one without the other is not a variation (F18).",
+   "owner": "hep-statistics",
+   "waivable": false,
+   "lifecycle": "active",
+   "source_sha256": "edce389eea4ab823cdad75b4c179afc92d78c8787f7a20d1a9d874431773e1c7"
+  },
+  {
+   "rule_id": "naming.n10.declared-correlation",
+   "version": "1.0.0",
+   "surfaces": [
+    "N10"
+   ],
+   "predicate": "declared-match",
+   "params": {
+    "declaration": "correlation-inventory",
+    "relation": "same-source-same-name",
+    "kinds": [
+     "nuisance"
+    ]
+   },
+   "determinism": "deterministic",
+   "outcome_contract": {
+    "satisfied": [
+     "naming.names_match_declaration"
+    ],
+    "violated": [
+     "naming.correlated_names_differ",
+     "naming.decorrelated_names_equal"
+    ],
+    "not_applicable": [
+     "naming.no_shared_sources",
+     "naming.kind_not_covered"
+    ],
+    "unverified": [
+     "naming.declaration_missing",
+     "naming.workspace_partial"
+    ],
+    "unsupported": [
+     "naming.declaration_format_unknown",
+     "naming.no_inputs"
+    ]
+   },
+   "rationale": "Same name means correlated; whether two should be correlated is declared in the correlation inventory, not inferred from spelling",
+   "owner": "hep-statistics",
+   "waivable": false,
+   "lifecycle": "active",
+   "source_sha256": "992653ae2be7c115e83869cce9f85ed81f83010d87a786c173d572d77779b85f"
+  },
+  {
+   "rule_id": "naming.n10.near-duplicate",
+   "version": "1.0.0",
+   "surfaces": [
+    "N10"
+   ],
+   "predicate": "similarity",
+   "params": {
+    "normalize": [
+     "case",
+     "separators"
+    ],
+    "across": "channel",
+    "declaration": "correlation-inventory",
+    "kinds": [
+     "nuisance"
+    ]
+   },
+   "determinism": "heuristic",
+   "outcome_contract": {
+    "satisfied": [
+     "naming.no_near_duplicates",
+     "naming.declared_distinct",
+     "naming.annotated_distinct"
+    ],
+    "violated": [],
+    "not_applicable": [
+     "naming.single_channel",
+     "naming.removed",
+     "naming.waived",
+     "naming.kind_not_covered"
+    ],
+    "unverified": [
+     "naming.near_duplicate_needs_review"
+    ],
+    "unsupported": [
+     "naming.no_inputs"
+    ]
+   },
+   "rationale": "lumi2018 and lumi_2018 may be a typo or a deliberate decorrelation; only raise the question",
+   "owner": "hep-statistics",
+   "waivable": true,
+   "lifecycle": "active",
+   "source_sha256": "21eb84364b48cbac27e6b97ab6e2e7bf861e76d84c7c7a6e50de23aa894402fc"
+  }
+ ]
+}

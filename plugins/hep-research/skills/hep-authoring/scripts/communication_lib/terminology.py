@@ -9,13 +9,13 @@ and the meaning of prose or equations are the reader's semantic review; nothing 
 """
 from __future__ import annotations
 
-import json
 import re
 from pathlib import Path
 
 from contracts import audit_report as R
 from communication_lib.documents import markdown_headings, normalize, strip_tex_comments, tex_sections
 from contracts.communication import format_of
+from core.terminology.glossary import load_glossary  # noqa: F401  (moved to core; re-exported for its callers)
 
 QUOTE_RE = re.compile(r"[\"“「『][^\"”」』]*[\"”」』]|so-called\s+\S+")
 ABBR_DEF_HEAD = r"([A-Za-z\u4e00-\u9fff][A-Za-z\-\u4e00-\u9fff ]{1,80}?)\s*[\(\uff08]("
@@ -23,22 +23,6 @@ CJK_RE = re.compile(r"[\u4e00-\u9fff]")
 ABBR_DEF_TAIL = r")[\)\uff09]"
 NOTE = ("deterministic detection limited to glossary rules, explicit definitions and declared scopes; ambiguous usage and the "
         "meaning of prose or equations are the reader's semantic review; nothing is replaced or translated")
-
-
-def load_glossary(path) -> dict:
-    g = json.loads(Path(path).read_text(encoding="utf-8"))
-    if not isinstance(g, dict) or "glossary_version" not in g or not isinstance(g.get("entries"), list):
-        raise ValueError(f"{path}: a glossary needs glossary_version and an entries array")
-    for e in g["entries"]:
-        if not isinstance(e, dict) or not {"id", "concept", "preferred", "definition"} <= set(e) or not isinstance(e["preferred"], dict):
-            raise ValueError(f"{path}: every entry needs id, concept, preferred (per language), definition")
-        e.setdefault("disallowed", [])
-        e.setdefault("aliases", {})
-        e.setdefault("abbreviations", [])
-    for n in g.get("notation", []) or []:
-        if not isinstance(n, dict) or not {"symbol", "definition", "scope"} <= set(n):
-            raise ValueError(f"{path}: every notation entry needs symbol, definition, scope")
-    return g
 
 
 def _sections(text: str, fmt: str) -> list[tuple[int, str]]:

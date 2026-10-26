@@ -165,6 +165,39 @@
     "physical"
    ],
    "source": "CODATA 2022 (NIST), PDG 2026 subset (CC BY 4.0, via pdg 2026.0), AME2020 and NUBASE2020 subsets (AMDC), read 2026-10-17; data in core/constants/data; standard library only"
+  },
+  "naming": {
+   "steward": "hep-computing",
+   "status": "implemented",
+   "purpose": "Semantic naming engine (charter skills/hep-computing/references/semantic-naming.md): named-entity model, tokenizer, vocabulary chain, the ten predicates, contract levels, reporting scope, disposition and change-set validation; default vocabulary and forbidden table in core/naming/data (no experiment names)",
+   "files": [
+    "model",
+    "tokens",
+    "vocab",
+    "predicates",
+    "engine"
+   ],
+   "consumers": [
+    "contracts/naming_check.py",
+    "contracts/naming_registry.py",
+    "skills/hep-computing/scripts/extract_names.py",
+    "tools/check_naming.py"
+   ],
+   "source": "new in this plugin (semantic naming spec v4.2, P1, 2026-10-26)"
+  },
+  "terminology": {
+   "steward": "hep-authoring",
+   "status": "implemented",
+   "purpose": "Project glossary loading (load_glossary), shared by the terminology check and the naming vocabulary chain",
+   "files": [
+    "glossary"
+   ],
+   "consumers": [
+    "skills/hep-authoring/scripts/communication_lib/terminology.py",
+    "core/naming/vocab.py",
+    "contracts/naming_check.py"
+   ],
+   "source": "moved unchanged from skills/hep-authoring/scripts/communication_lib/terminology.py (semantic naming spec v4.2, F6/F7)"
   }
  }
 }

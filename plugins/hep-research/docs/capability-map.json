@@ -375,6 +375,17 @@
    "v1": true
   },
   {
+   "id": "semantic-naming",
+   "capability": "Semantic naming governance: one data model, rule registry, engine, disposition and report for every naming surface; extractors for code identifiers, files, configuration and flags, plugin vocabulary; the plugin's own naming gate",
+   "owner": "hep-computing",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "NAMING-P1",
+    "NAMING-P2"
+   ]
+  },
+  {
    "id": "ml-training",
    "capability": "Grouped splits, training, inference domain flags, calibration and ML artifacts",
    "owner": "hep-ml",

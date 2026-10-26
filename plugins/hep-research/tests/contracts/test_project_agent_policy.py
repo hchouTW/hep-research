@@ -62,7 +62,7 @@ class AgentPolicyTests(unittest.TestCase):
 
     def test_schema_version_is_checked(self):
         self.assertIn("project.policy_needs_schema", self.codes(self.edited(lambda c: c.update(schema_version="1.0.0"))))
-        for v in ("1.3.0", "2.0.0"):
+        for v in ("1.4.0", "2.0.0"):
             self.assertIn("project.unsupported_schema", self.codes(self.edited(lambda c: c.update(schema_version=v))))
 
     def test_old_reader_contract_is_unchanged_without_policy(self):

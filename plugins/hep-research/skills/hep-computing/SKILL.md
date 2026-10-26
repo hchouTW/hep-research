@@ -5,7 +5,7 @@ description: "Use when the deliverable is working, reproducible scientific softw
 
 # hep-computing: scientific software and execution
 
-**Owns:** scientific software, symbolic and numerical execution, builds, I/O, debugging, performance, manifests, partition/merge/recovery, reproducibility, advisory blinding checks of outputs, logs and caches (enforcement lies outside the agent), research-task authoring; stewardship of `core/blinding` and `core/partition`.
+**Owns:** scientific software, symbolic and numerical execution, builds, I/O, debugging, performance, manifests, partition/merge/recovery, reproducibility, advisory blinding checks of outputs, logs and caches (enforcement lies outside the agent), research-task authoring, semantic naming of identifiers, files and named objects (charter and engine); stewardship of `core/blinding`, `core/partition` and `core/naming`.
 **Typical artifacts:** code, `computational-run` (inputs with checksums, tool versions, commands, environment, seeds, tolerances, exit status, output hashes), output audits.
 **Never:** treat a successful run as scientific validity; install software system-wide or fetch from the network without the user's approval or beyond the session's egress policy (queries never carry protected content).
 
@@ -36,7 +36,7 @@ description: "Use when the deliverable is working, reproducible scientific softw
 3. Local profiles live in the project (`local_profile_paths`), never in the plugin; `--preflight` checks them. A bound profile in neither place, or at a local path known to be a companion's, is used only via the installed `<plugin>:profile` skill that names it, after its preflight, from its folder; never scan for companions. If none is installed, the preflight fails, or a non-public profile lacks `agent_policy` approval for this host (none has it yet), say it is unavailable, do other work; never answer its topics from memory.
 4. No profile needed: use general methods. Domain without a validated profile (for example lattice QCD, EFT global fits, global cosmic-ray propagation fits): say so, then apply this skill's general discipline.
 5. Durable results and handoffs are files in the project's `artifacts_dir` (default ./hep-research-artifacts/), never the plugin, and pass `python3 "<plugin root>/contracts/validate.py" <artifacts_dir>`; no scratch. Keep every status label (`synthetic`, `asimov`, `observed`, `preliminary`, `failed`, `unvalidated`, `user-supplied`) on everything derived from it, except a Geant4 study record that passes the 3.1.0 upgrade rule.
-6. Answer in the user's language; keep artifact fields, identifiers and file names in English.
+6. Answer in the user's language; keep artifact fields, identifiers and file names in English. Name what you add or change for what it holds, in the project's terms, per `<plugin root>/skills/hep-computing/references/semantic-naming.md`; never rename an external (C4) name.
 <!-- END context-resolution -->
 
 ## Resources
@@ -59,6 +59,7 @@ description: "Use when the deliverable is working, reproducible scientific softw
 | CERN EOS storage | [CERN EOS](references/storage-cern-eos.md) |
 | Analysis preservation: what to archive, rehearse a rerun | [preservation checklist](references/preservation-checklist.md) |
 | Blinding checks of outputs, logs, caches | `audit_blinded_outputs.py` (synthetic sentinels only) |
+| Naming, renames, naming review (any surface: charter, levels, change sets, report table) | [semantic naming](references/semantic-naming.md); `extract_names.py`, `<plugin root>/contracts/naming_check.py` |
 | Implementation-ready research task | [tasks](references/task-authoring-guide.md); `lint_task.py` |
 | Agile delivery, definition of done | [agile](references/agile-development-guide.md), [done](references/validation-and-done.md) |
 

@@ -37,5 +37,13 @@
   "private_evidence": {"type": "array", "items": {"type": "string"}},
   "overrides": {"type": "array", "items": {"type": "object", "required": ["target", "value", "provenance"], "properties": {
      "target": {"type": "string"}, "provenance": {"type": "string", "minLength": 1}, "variant_of": {"type": "string"}}}},
-  "artifacts_dir": {"type": "string"}
+  "artifacts_dir": {"type": "string"},
+  "naming": {"$comment": "schema 1.3.0 (semantic naming charter, skills/hep-computing/references/semantic-naming.md): severity settings only; they never decide whether a name may be renamed. waivers name explicit entity ids (no patterns) and apply only to waivable rules",
+     "type": "object", "additionalProperties": false, "properties": {
+     "strict": {"type": "boolean"},
+     "glossary": {"type": "string", "minLength": 1},
+     "waivers": {"type": "array", "items": {"type": "object", "required": ["rule_id", "entity_ids", "reason", "recorded_by"], "additionalProperties": false, "properties": {
+        "rule_id": {"type": "string", "pattern": "^naming\\.[a-z0-9.-]+$"},
+        "entity_ids": {"type": "array", "minItems": 1, "items": {"type": "string", "pattern": "^N(?:[1-9]|1[0-7]):[^*?\\[\\]]*#[^*?\\[\\]]*@[0-9]+$"}},
+        "reason": {"type": "string", "minLength": 1}, "recorded_by": {"type": "string", "minLength": 1}}}}}}
  }}

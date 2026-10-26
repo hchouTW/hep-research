@@ -54,3 +54,27 @@ test that the result depends on and compare within its declared tolerance before
 - Floating tags (`latest`, `LCG_dev3`, nightly views) are not pins.
 - Thread counts and BLAS libraries change floating-point results at the last digits; compare with tolerances, not
   bytes, unless the run was built to be bit-reproducible.
+
+
+<a id="naming-n5"></a>
+### Naming: configuration keys, environment variables, CLI flags (N5)
+- **Extractor:** `extract_names.py --surface N5` (inputs: argparse flags and environment variables read by Python code; keys of JSON, TOML, INI and, with PyYAML, YAML configuration files)
+- **Entity kinds and level floors:** generated from `contracts/naming/surfaces.json`, not restated by hand:
+
+<!-- naming-kinds:N5: generated from contracts/naming/surfaces.json by contracts/naming_registry.py sections; do not edit -->
+
+| Kind | Level floor | Format | Rename policy |
+|---|---|---|---|
+| `project_config_key` | C2 | `^[a-z][a-z0-9]*(?:[_-][a-z0-9]+)*$` | matrix |
+| `project_cli_flag` | C2 | `^--?[a-z0-9][a-z0-9]*(?:-[a-z0-9]+)*$` | matrix |
+| `plugin_cli_flag` | C3 | `^--?[a-z0-9][a-z0-9]*(?:-[a-z0-9]+)*$` | deprecate |
+| `env_var` | C2 | `^[A-Z][A-Z0-9]*(?:_[A-Z0-9]+)*$` | matrix |
+
+<!-- /naming-kinds:N5 -->
+
+- **The name must say:** the setting it controls and its unit; flags in lower-case kebab, environment variables in upper-case snake
+- **Rename policy:** matrix; `deprecate` for the plugin's own flags
+- **Rules:** see the registry for surface N5 (`naming.common.*`, `naming.n5.*`, `naming.cross.*`)
+- **Good / bad:** `--livetime-s`, `HEP_RESEARCH_PYTHON` / `--x`, `--doIt`
+
+Procedure, levels and report: [semantic naming charter](semantic-naming.md).

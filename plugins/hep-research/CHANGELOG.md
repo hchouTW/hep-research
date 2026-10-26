@@ -5,6 +5,38 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- Semantic naming governance, phases P1 and P2 of the semantic naming spec v4.2 (phases one release later than the
+  spec, since 0.41.0 shipped without it). Every naming surface (N1-N17) shares one data model, rule registry, engine,
+  disposition rule, procedure and report; a surface brings an extractor and its rule data.
+  - New charter page `skills/hep-computing/references/semantic-naming.md` (precedence, principles, contract levels
+    C0-C4, the ten predicates, tokenizer, vocabulary chain, waivers, disposition and severity, the nine-step
+    procedure, the naming table and change sets, surface index). hep-computing's **Owns:** line adds semantic naming;
+    a Resources row and a `docs/routing-contract.md` ownership row (`semantic naming`) route to it.
+  - New `core/naming/` (steward hep-computing): model, tokenizer, vocabulary chain, predicates, engine; default
+    vocabulary and forbidden table in `core/naming/data/`. New `core/terminology/` (steward hep-authoring) holds
+    `load_glossary`, moved unchanged; `communication_lib/terminology.py` re-exports it and `check_terminology` is
+    unchanged.
+  - New `contracts/naming_check.py` (`check`, `annotate-template`, `validate`, `validate-change-set`, `surfaces`) with
+    the `audit_report` outer shape and exit codes 0/1/3/2; new `contracts/naming_registry.py` (`check`, `sections`);
+    registries `contracts/naming/surfaces.json` (17 surfaces) and `contracts/naming/rules.json` (13 rules); schemas
+    `naming_inventory.json`, `naming_annotations.json`, `naming_report.json`, `naming_change_set.json`,
+    `naming_rule_registry.json`, `naming_surfaces.json`.
+  - New script `skills/hep-computing/scripts/extract_names.py` for N1 (Python identifiers), N2 (files and folders),
+    N5 (CLI flags, environment variables, configuration keys) and N16 (plugin vocabulary), with owner sections
+    (anchors `naming-n1`, `naming-n2`, `naming-n5`, `naming-n16`) in `python-balanced-design-guidelines.md`,
+    `analysis-data-pipelines.md`, `environments-and-containers.md` and `engineering-playbook.md`; their kinds tables
+    are generated from the registry.
+  - The plugin's own gate `tools/check_naming.py` (N1, N5, N16, deterministic rules) runs in `run_all_checks` with
+    `contracts/naming_registry.py check`; the 1042 findings that predate it are listed in
+    `tools/naming_known_gaps.json`, which only shrinks.
+  - Project config schema 1.3.0: an optional `naming` block (`strict`, `glossary`, `waivers` with explicit entity ids);
+    `contracts/project.py --preflight` prints it. A 1.3.0 config needs this plugin version.
+  - Context-resolution stanza item 6 (all eight `SKILL.md`): name what you add or change for what it holds, in the
+    project's terms, per the charter; never rename an external (C4) name. The spec's longer wording put the
+    hep-statistics quick load at 25,656 B, over the 25,600 B limit (spec Q2); the shorter sentence measures 25,597 B.
+  - Not yet: extractors for N3, N4, N6-N15 and N17 (a check that expects them reports `unsupported`); the
+    correlation-inventory declaration format is provisional (spec Q1).
+
 - hep-detector front-end page: the eight "(moved)" section pointers left by the 0.41.0 split are removed, as recorded
   (`remove_in` 0.42.0). The sections are in `front-end-waveform-processing.md` (sampled waveforms, pileup,
   photosensors, LAr TPC, digital pulse processing, pulse-shape discrimination) and `front-end-calibration.md`

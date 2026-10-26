@@ -53,6 +53,7 @@ Correlations: hep-measurement supplies the physical correlation evidence and a p
 | Claim-to-result links in a manuscript or a packaged result | hep-authoring | `claim-to-result links` | Claims linked to results, status preserved in text |
 | Writing a literature review or a related-work section from the sources | hep-authoring | `related-work and review sections` | — |
 | Independent review packets, review records and the review log | hep-authoring | `independent review`, `review packet` | — |
+| Semantic naming of identifiers, files and named objects: charter, engine, contract levels, change sets | hep-computing | `semantic naming` | Semantic naming governance (charter, engine, extractors N1 N2 N5 N16, plugin gate) |
 <!-- /ownership-table -->
 
 hep-measurement keeps the measurement-design view (which level to publish, which corrections the response carries) in
@@ -92,7 +93,7 @@ In v1 (capability IDs of the map, by owner; the state of each is in the map):
 - hep-detector: response-folding, resolution-efficiency, fast-spectrometer-simulation, scale-distortion, response-construction, species-migration, multisample-pid, stability-monitoring, detector-design, geomagnetic-backtracing, full-detector-simulation
 - hep-statistics: fits-and-limits, covariance-and-combinations, unfolding, bayesian, time-series, split-consistency, roofit-status, pdf-reweighting-and-profiling, global-pdf-fits
 - hep-theory: theory-predictions, recasting, physical-data, relativistic-kinematics, cosmic-ray-propagation, nuclear-physics-entry, neutrino-oscillations, dark-matter-phenomenology, dis-structure-functions, drell-yan, nuclear-parton-effects, polarized-dis, sidis-and-tmd, small-x-saturation, exclusive-and-gpd
-- hep-computing: partition-and-batch, root-and-columnar-io, reproducibility, task-authoring
+- hep-computing: partition-and-batch, root-and-columnar-io, reproducibility, task-authoring, semantic-naming
 - hep-ml: ml-training, bdt-pipeline, ml-eras
 - hep-citations: literature-verification
 - hep-authoring: claims-to-results, terminology, papers-and-numbers
