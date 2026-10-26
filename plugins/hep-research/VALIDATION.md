@@ -5765,3 +5765,27 @@ loosening or deleting one waits for H1 (`workflow_check.py acceptance`).
 Derived entries (not in r3): ENV-1 to ENV-3 (from r4 §3) and C2U-1, C2U-2 (from r3 §C2's USINE case, split by r4 §6).
 ALL-2 is replaced by the P0 freeze. **Not verified here:** r3 Q10's formal independent review with `review.py` is not
 run at P0; it moves to before H1 (r4 Open Questions).
+
+## CRPROP-A2 — 2026-10-26 (environment E2)
+
+Work package A2 of the cr-propagation r4 campaign (r3 §A2, §5.4): the optional theory-spec `transport` block and
+object-form `degenerate_directions` entries, contracts `CV-CRPROP` = 3.14.0 (unreleased minor) gated by
+`validate.CRPROP_FROM`.
+
+Environment: E2 (macOS arm64, Python 3.13.2). Base exception D10: base is the integration HEAD `ef37d970` (P0), not
+`main`. r3 §0.3 checks at start: `git rev-parse --show-toplevel` = `.claude/worktrees/crprop-a2` (this worktree);
+`git branch --show-current` = `worktree-crprop-a2`; `git status` clean; prerequisite P0 `ef37d970` is an ancestor of
+HEAD (`git merge-base --is-ancestor` ok); `origin/main` is still 8fcbb826 (0.42.0), so no new CHANGELOG entries to
+recheck; the cited lines were rechecked on the base (`_blank` at `contracts/validate.py` 1239, the string-only
+degeneracy reader at `covariance_fit.py` 1110, the grid-only gate at 1025).
+
+Acceptance criteria (frozen in `docs/dev/cr-propagation/acceptance.json`, written here before the change; no
+numerical tolerance applies to A2):
+
+| ID | Criterion | Pass condition |
+|---|---|---|
+| A2-1 | Every existing theory-spec in `contracts/fixtures` and `examples/` validates with the same result before and after | identical `ok` flag and identical sorted findings (severity, path, code, message), default and `--strict`, for every file |
+| A2-2 | Each of the three new error codes is triggered by one negative fixture | `theory.degeneracy_evidence_missing`, `theory.degeneracy_range_missing`, `theory.degeneracy_evidence_unknown` each in `contracts/fixtures/artifacts/invalid/` |
+| A2-3 | A list holding only objects does not trigger `theory.degeneracy_missing` | unit test in `tests/contracts` |
+| A2-4 | `tabulated-grid` gives the same result for an object entry as for the equivalent string | identical fit output (apart from the echoed spec) in `tests.skills.hep_statistics.test_grid_fit` |
+| A2-5 | The new rules apply from `CRPROP_FROM` only | a 3.13.0 artifact gets none of the three codes (default mode); a 3.14.0 artifact gets them |
