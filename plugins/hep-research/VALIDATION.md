@@ -6041,3 +6041,8 @@ the Skill scripts section of `skills/hep-statistics/references/core-stats-guide.
 (workflow.json `files` and `common_files`); the one-line entry is left to the orchestrator. `check_naming.py`,
 `check_wiring.py --since b83881c6`, `check_layering.py` and `workflow_check.py` diff, acceptance and gaps pass. The A3-1
 hashes were checked again on the committed tree: all 161 identical.
+
+Follow-up (orchestrator added `core-stats-guide.md` to A3's file list): `degeneracy.py` is listed in its Skill
+scripts section with the marker "(needs NumPy and SciPy)". The hep-statistics quick load (SKILL.md plus the guide)
+had 8 B of headroom under its 25,600 B budget, so four phrases in the guide were shortened with no change in content
+(`measure_entrypoints.py --no-cli`: no warnings), and `docs/reference-inventory.*` were regenerated.
