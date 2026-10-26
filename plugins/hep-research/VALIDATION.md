@@ -6014,7 +6014,7 @@ propagation code is made.
 Work package A3 (two-level degeneracy diagnostics) of the cr-propagation r4 workflow, r3 card §A3, principle P7.
 
 Environment: E2 (macOS arm64 workstation), Python 3.13.2 (miniconda), NumPy 2.4.4, SciPy 1.17.1. r3 §0.3 checks:
-toplevel `/Users/hchou/hep-research/.claude/worktrees/crprop-a3`, branch `worktree-crprop-a3`, status clean at start;
+toplevel `<repo>/.claude/worktrees/crprop-a3`, branch `worktree-crprop-a3`, status clean at start;
 base exception (decision D10): base is the integration HEAD `b83881c6`, not `main`; prerequisite P0 (its rework
 commits up to `34e2edeb`) is an ancestor of HEAD.
 
@@ -6033,3 +6033,11 @@ and above 6 kpc a spectral tilt b(L) = 0.05 ((L - 6 kpc) / 2 kpc)^2 changes the 
 normalization) cannot absorb. The data therefore exclude the valley at 8 kpc (profiled delta 19.4), not only the model
 declaration. The numbers are SYNTHETIC. The Fisher screen at the best fit (L = 4 kpc) sees only the local exponent;
 the profile scan finds where it holds. The A3 tests use only synthetic models; no propagation code was run.
+
+Checks on `f71cd8bb`: `run_all_checks.py` and `check_relocation.py` fail on two findings, both from this WP. The
+packaging scan (and `test_batch_privacy`) flagged a home path in this section; it is removed in the next commit and
+`check_packaging.py` passes. `test_core_stats_guide.DependencyMarkers` fails because `degeneracy.py` is not listed in
+the Skill scripts section of `skills/hep-statistics/references/core-stats-guide.md`, which is outside A3's file list
+(workflow.json `files` and `common_files`); the one-line entry is left to the orchestrator. `check_naming.py`,
+`check_wiring.py --since b83881c6`, `check_layering.py` and `workflow_check.py` diff, acceptance and gaps pass. The A3-1
+hashes were checked again on the committed tree: all 161 identical.
