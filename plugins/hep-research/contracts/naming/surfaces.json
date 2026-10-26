@@ -258,7 +258,8 @@
    "references_to": [
     {
      "surface": "N3",
-     "kind": "shape-histogram"
+     "kind": "shape-histogram",
+     "derived": true
     }
    ],
    "referenced_by": [],

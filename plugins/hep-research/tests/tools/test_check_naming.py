@@ -67,6 +67,32 @@ class GateTests(unittest.TestCase):
         self.assertEqual(json.loads(self.gaps.read_text())["gaps"], {})
         self.assertEqual(self.gate()[0], 1)
 
+    def test_baseline_may_grow_only_for_a_new_rule(self):
+        import shutil
+        import subprocess
+        if shutil.which("git") is None:
+            self.skipTest("git is not installed")
+
+        def git(*args):
+            subprocess.run(["git", "-C", str(self.root), *args], check=True, capture_output=True, timeout=60,
+                           env={"GIT_AUTHOR_NAME": "t", "GIT_AUTHOR_EMAIL": "t@example.invalid", "GIT_COMMITTER_NAME": "t",
+                                "GIT_COMMITTER_EMAIL": "t@example.invalid", "PATH": "/usr/bin:/bin:/usr/local/bin:/opt/homebrew/bin"})
+        (self.root / "contracts" / "naming").mkdir(parents=True)
+        (self.root / "contracts" / "naming" / "rules.json").write_text(json.dumps({"rules": [{"rule_id": "naming.common.forbidden"}]}))
+        (self.root / "core" / "helpers.py").write_text("def do_something():\n    pass\n")
+        self.gate("--write-known-gaps")
+        git("init", "-q", "-b", "main")
+        git("add", ".")
+        git("commit", "-qm", "base")
+        (self.root / "core" / "more.py").write_text("def do_something():\n    pass\n")  # a second forbidden name
+        self.gate("--write-known-gaps")  # the PR rewrites the baseline to hide it
+        code, out = self.gate("--base", "main")
+        self.assertEqual(code, 1)
+        self.assertTrue(out["baseline_grown"][0].startswith("naming.common.forbidden|"))
+        code, out = self.gate("--base", "no-such-rev")
+        self.assertEqual(code, 0)
+        self.assertIn("not compared", out["baseline_note"])
+
     def test_shipped_baseline_is_well_formed(self):
         doc = json.loads((ROOT / "tools" / "naming_known_gaps.json").read_text())
         self.assertEqual(doc["known_gaps_version"], "1.0.0")

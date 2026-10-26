@@ -15,6 +15,7 @@ core imports only core; the report shape and the severities live in contracts/na
 from __future__ import annotations
 
 import hashlib
+import re
 from pathlib import Path
 
 from core.naming import predicates as P
@@ -68,7 +69,8 @@ def glossary_concepts(entities, vocab) -> None:
 
 
 class Context:
-    def __init__(self, entities, surfaces, vocab, declarations=None, annotations=None, inventories=(), targets=None):
+    def __init__(self, entities, surfaces, vocab, declarations=None, annotations=None, inventories=(), targets=None,
+                 untrusted_changes=()):
         self.entities = entities
         self.surfaces = {s["surface_id"]: s for s in surfaces}
         self.vocab = vocab
@@ -77,6 +79,7 @@ class Context:
         self.inventories = set(inventories)
         self.forbidden = forbidden_table()
         self.targets = targets if targets is not None else {}
+        self.untrusted_changes = set(untrusted_changes)  # surfaces whose "unchanged" marks prove nothing (semantic)
         self.by_id = {e["entity_id"]: e for e in entities}
         self.by_name: dict[tuple, list] = {}
         self._by_surface: dict[str, list] = {}
@@ -194,15 +197,16 @@ def merge_annotations(entities, annotations: dict) -> None:
             e["meaning"]["source"] = "annotation"
 
 
-def _waived(waivers, rule, eid) -> bool:
-    """An explicit entity id, with or without its @line (so an edit above the name does not drop the waiver)."""
-    ids = {eid, stable_key(eid)}
+def _waived(waivers, rule, eid, keys=None) -> bool:
+    """An explicit entity id, or the id without its @line (so an edit above the name does not drop the waiver) when
+    that key names one declaration only: a second same-name declaration added later is never waived with it."""
+    ids = {eid} | ({stable_key(eid)} if keys is None or keys.get(stable_key(eid), 0) == 1 else set())
     return rule.get("waivable", False) and any(w.get("rule_id") == rule["rule_id"] and ids & set(w.get("entity_ids") or [])
                                                for w in waivers or [])
 
 
 def judge(inventories, rules, surfaces, *, vocab, state_for, declarations=None, annotations=None, waivers=(),
-          expect=(), report_all=False, deterministic_only=False) -> dict:
+          expect=(), report_all=False, deterministic_only=False, untrusted_changes=()) -> dict:
     """Judge the inventories. Returns {"entities", "results", "reported", "not_run", "notes"}: results hold one entry per
     (entity, rule) (entity_id None for a surface-level unsupported result); reported is the subset in the reporting
     scope (§7.7)."""
@@ -214,22 +218,28 @@ def judge(inventories, rules, surfaces, *, vocab, state_for, declarations=None, 
     classify(entities, roots_of, surfaces, declarations, vocab)
     glossary_concepts(entities, vocab)
     supplied = {inv["surface"] for inv in inventories}
-    ctx = Context(entities, surfaces, vocab, declarations, annotations, supplied, targets)
+    ctx = Context(entities, surfaces, vocab, declarations, annotations, supplied, targets, untrusted_changes)
     active = [r for r in rules if r["lifecycle"] == "active"
               and not (deterministic_only and r["determinism"] != "deterministic")]
     results, not_run, notes = [], [], []
     if vocab.shadowed:
         notes.append(f"vocabulary shadowing: {'; '.join(vocab.shadowed[:20])}")
     empty = {inv["surface"] for inv in inventories if inv["inputs_scanned"] == 0}
+    skipped = {inv["surface"]: len(inv.get("skipped_inputs") or []) for inv in inventories
+               if inv.get("skipped_inputs") and inv["inputs_scanned"]}
     missing = [s for s in dict.fromkeys(expect) if s not in supplied]
-    for sid in sorted(empty) + missing:
+    for sid in sorted(empty) + sorted(skipped) + missing:
         why = (f"the {sid} extractor scanned zero inputs" if sid in empty else
+               f"the {sid} extractor could not read {skipped[sid]} input(s) (skipped_inputs)" if sid in skipped else
                f"no {sid} inventory was supplied" + ("" if ctx.surfaces[sid]["extractor"] else
                                                      " (its extractor is not implemented yet)"))
         for r in active:
             if sid in r["surfaces"] and r["predicate"] != "semantic":
                 results.append(_result(None, sid, r, "naming.no_inputs", why, {}, state_for))
                 not_run.append({"check": f"{r['rule_id']}@{r['version']} on {sid}", "reason": why, "required": True})
+    stable_counts: dict[str, int] = {}
+    for e in entities:
+        stable_counts[stable_key(e["entity_id"])] = stable_counts.get(stable_key(e["entity_id"]), 0) + 1
     for e in entities:
         for r in active:
             if e["surface"] not in r["surfaces"] or e["surface"] in empty:
@@ -242,7 +252,7 @@ def judge(inventories, rules, surfaces, *, vocab, state_for, declarations=None, 
             if sources and e["source"] not in sources:
                 results.append(_result(e, e["surface"], r, "naming.external_name", "", {}, None))
                 continue
-            if _waived(waivers, r, e["entity_id"]):
+            if _waived(waivers, r, e["entity_id"], stable_counts):
                 results.append(_result(e, e["surface"], r, "naming.waived", "", {}, None))
                 continue
             code, issue, extra = P.PREDICATES[r["predicate"]](e, r, ctx)
@@ -306,6 +316,32 @@ def file_sha256(path: Path) -> str | None:
         return None
 
 
+def _proposed_problem(proposed, e: dict, entities, registry: dict, policy: str):
+    """(code, message) when the new name may not be used: a forbidden whole name, a name off the kind's format, or a
+    name another live entity of the same kind already has (on N10 anywhere: one name is one correlated parameter, so a
+    rename onto it would merge two sources). On a dedup-only surface the new name must be the duplicate's."""
+    if not proposed or proposed == e["name"]:
+        return ("naming.proposed_invalid", "the change set proposes no new name")
+    if proposed in forbidden_table()["whole_names"]:
+        return ("naming.proposed_invalid", f"{proposed} is in the forbidden table")
+    fmt = registry[e["surface"]]["kinds"].get(e["entity_kind"], {}).get("format")
+    if fmt and e["source"] == "project" and not re.fullmatch(fmt, proposed):
+        return ("naming.proposed_invalid", f"{proposed} does not match the {e['entity_kind']} format {fmt}")
+    same = [x for x in entities if x is not e and x["surface"] == e["surface"] and x["change"] != "removed"
+            and x["entity_kind"] == e["entity_kind"] and x["name"] == proposed]
+    if policy == "dedup-only":
+        return None if same else ("naming.proposed_invalid",
+                                  f"{e['surface']} renames only onto the duplicate's name; no {proposed} exists")
+    wide = registry[e["surface"]]["requires_declarations"]
+    clash = [x for x in same if wide or (x["scope"]["file"], x["scope"]["container"]) ==
+             (e["scope"]["file"], e["scope"]["container"])]
+    if clash:
+        where = f"{clash[0]['scope']['file']}:{clash[0]['scope']['span'][0]}"
+        why = " (on this surface one name is one correlated parameter: declare it first)" if wide else ""
+        return ("naming.proposed_collides", f"{proposed} already names {clash[0]['entity_kind']} at {where}{why}")
+    return None
+
+
 def _loc(x: dict) -> str:
     return f"{x['scope']['file']}:{x['scope']['span'][0]}"
 
@@ -334,16 +370,20 @@ def validate_change_set(cs: dict, entities, surfaces, project_root, supplied_sur
         dups = [x for x in entities if x is not e and x["surface"] == e["surface"] and x["change"] != "removed"
                 and (x["name"] == e["name"] or (cid and (x.get("meaning") or {}).get("concept_id") == cid))]
         trigger = cs.get("trigger") or {}
-        if not dups or (trigger and trigger.get("predicate", "uniqueness") != "uniqueness"):
+        if not dups or trigger.get("predicate") != "uniqueness":
             return out("fail", 1, 1, "naming.rename_not_dedup",
                        f"{e['surface']} renames only to remove a duplicate (the same name, or two names of one record); "
-                       f"{e['name']} has none" if not dups else f"the change set's trigger {trigger.get('rule_id')} is not "
-                       "a duplicate finding")
+                       f"{e['name']} has none" if not dups else f"the change set's trigger ({trigger.get('rule_id') or 'none'}) is "
+                       "not a uniqueness finding: name the duplicate finding in trigger")
+    bad = _proposed_problem(cs.get("proposed"), e, entities, registry, policy)
+    if bad:
+        return out("fail", 1, 1, bad[0], bad[1])
     if e["references_status"] != "complete":
         return out("incomplete", 3, 2, "naming.references_incomplete",
                    f"references of {e['name']} are {e['references_status']}: search them all before renaming")
     derived = [t for t in e.get("targets") or [] if t.get("derived")]
     needed = list(dict.fromkeys([s["surface"] for s in registry[e["surface"]]["referenced_by"]] +
+                                [s["surface"] for s in registry[e["surface"]]["references_to"] if s.get("derived")] +
                                 [t["surface"] for t in derived]))
     lacking = [s for s in needed if s not in supplied_surfaces]
     if lacking:
@@ -374,6 +414,9 @@ def validate_change_set(cs: dict, entities, surfaces, project_root, supplied_sur
         ap = cs.get("approval") or {}
         if not (ap.get("required") and ap.get("by") and ap.get("at")):
             return out("fail", 1, 6, "naming.approval_missing", f"{e['name']} is C3: record the user's approval first")
+        if ap.get("proposed") not in (None, cs["proposed"]):
+            return out("fail", 1, 6, "naming.approval_other_name",
+                       f"the approval is for {ap['proposed']}, the change set proposes {cs['proposed']}: ask again")
         owner = registry[e["surface"]]["owner"]
         if (cs.get("handoff") or {}).get("owner") != owner:
             return out("fail", 1, 6, "naming.handoff_missing",

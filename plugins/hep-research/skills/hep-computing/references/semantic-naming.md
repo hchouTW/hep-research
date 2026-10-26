@@ -118,8 +118,9 @@ the bound profile's namespace vocabulary (experiment abbreviations live only the
 vowel-less token must be listed. Shadowing between layers is noted in the report.
 
 **Waivers** sit in the optional `naming` block of `hep-research.project.json` (schema 1.3.0): `{rule_id, entity_ids,
-reason, recorded_by}` with explicit ids, no patterns, for waivable rules only. A waived result is `not_applicable`
-with `naming.waived`.
+reason, recorded_by}` with explicit ids (the `@line` may be left out when the name is declared once), no patterns, for
+waivable rules only: style rules, never a correctness rule (declared-match, reference, pairing, uniqueness,
+status-honesty), whose violations stay errors. A waived result is `not_applicable` with `naming.waived`.
 
 ## 6. Disposition and severity
 
@@ -146,8 +147,11 @@ name.
 
 Every step's files live in `<project>/naming/`, never in `artifacts_dir` (they are working files, not artifacts).
 
-1. **Inventory.** Run the extractor of each surface involved (`--changed REV` to mark changes) and pass
-   `--expect N<k>` for each to the check, so an inventory left out is `unsupported`, not silent. A surface whose
+1. **Inventory.** Run the extractor of each surface involved with `--root` at the project root (narrow with
+   `--scope`; a subfolder root is refused) and `--changed` (alone: the merge base of `HEAD` and the main branch).
+   A revision that already holds commits of this branch would show their names unchanged: the check then reports
+   every name and cannot pass without their review. Pass `--expect N<k>` for each surface to the check, so an
+   inventory left out is `unsupported`, not silent. A surface whose
    inputs cannot be read (N3 and N4 without uproot or PyROOT) or that scans zero inputs is `unsupported`; continue
    with the others.
 2. **Classify** and 3. **resolve the vocabulary**: done by the engine.
@@ -171,12 +175,18 @@ Attach to every reply that adds, changes or deletes a name (`naming_check.py che
 | Surface | Level | Rule | Predicate | State | Current | Proposed | Issue | Evidence | Confidence | Action |
 |---|---|---|---|---|---|---|---|---|---|---|
 
-When no name was added, changed or deleted, write the single line "No names added, changed or deleted."
+When no name was added, changed or deleted, write the single line "No names added, changed or deleted." The table
+names the revision compared against; without change marks an unchanged name may be new, so the line is never written
+for an inventory made without `--changed`.
 
 A change set (`naming_change_set.json`) holds the entity, the current and proposed names, the level and policy, every
 replacement `{location, old, new}`, the digests of the inventories and of every affected file, the checks to run after
-applying it, and for C3 the approval `{required, by, at}` and the handoff `{owner, rerun}`; for `deprecate`, the alias
-kept and the version that removes it. `validate-change-set` stops at the first failing check: renaming allowed (exit 1),
+applying it, and for C3 the approval `{required, by, at, proposed}` (for the name proposed, not another) and the handoff
+`{owner, rerun}` to the surface's owner; for `deprecate`, the alias kept and the version that removes it; on a
+`dedup-only` surface the `trigger` names the uniqueness finding. `validate-change-set` stops at the first failing check:
+renaming allowed, with the level recomputed from the inventory and the new name judged (not forbidden, in the kind's
+format, not already another entity's name: on N10 anywhere, since one name is one parameter; on N15 the duplicate's
+name) (exit 1),
 references complete (exit 3), inventories of every referring surface and of every surface holding a derived name
 supplied (exit 3), files unchanged since the inventory (exit 3), every reference and every derived name replaced
 (exit 1), approval or alias recorded (exit 1). A reference from another surface is matched by that entity's id or its
@@ -208,4 +218,5 @@ supplied (exit 3), files unchanged since the inventory (exit 3), every reference
 | N17 | Literature record IDs | hep-citations | `never` | [citation verification](../../hep-citations/references/citation-verification.md#naming-n17) |
 
 The plugin checks its own names with `tools/check_naming.py` (N1, N5, N16; deterministic rules only; the names that
-predate the gate are listed in `tools/naming_known_gaps.json`, which only shrinks).
+predate the gate are listed in `tools/naming_known_gaps.json`, which only shrinks: an entry that grew since
+`origin/main` for a rule that existed there fails, and unverified or unsupported results are never listed).

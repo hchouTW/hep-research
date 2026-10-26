@@ -40,10 +40,10 @@ class TargetTests(unittest.TestCase):
         self.assertEqual((r["state"], r["reason_code"]), ("violated", "naming.pair_missing"))
         self.assertIn("ttbar_jesDown", r["issue"])
 
-    def test_without_the_n3_inventory_the_pairing_is_unverified(self):
+    def test_without_the_n3_inventory_the_pairing_is_unsupported(self):
         jes = nuisance("jes", "ch_a", targets=[derived("ttbar_jesUp"), derived("ttbar_jesDown")])
         r = result(judge(inv("N10", jes)), "jes", "naming.n10.shape-pairing")
-        self.assertEqual((r["state"], r["reason_code"]), ("unverified", "naming.inventory_missing"))
+        self.assertEqual((r["state"], r["reason_code"]), ("unsupported", "naming.inventory_missing"))
 
     def test_complete_pair_links_the_histograms_to_the_nuisance(self):
         jes = nuisance("jes", "ch_a", targets=[derived("ttbar_jesUp"), derived("ttbar_jesDown")])
@@ -63,7 +63,7 @@ class TargetTests(unittest.TestCase):
         fig = ent("figs/spectrum", "N14", "figure_file", "paper/main.tex", 2, file="paper/main.tex")
         fig["targets"] = [{"surface": "N2", "name": "spectrum.pdf", "kind": "includes"}]
         r = result(judge(inv("N14", fig)), "figs/spectrum", "naming.common.reference")
-        self.assertEqual((r["state"], r["reason_code"]), ("unverified", "naming.target_inventory_missing"))
+        self.assertEqual((r["state"], r["reason_code"]), ("unsupported", "naming.target_inventory_missing"))
 
 
 SPEC = {"artifact_type": "measurement-spec", "artifact_id": "ms1", "extension": {"systematics": [
@@ -183,6 +183,105 @@ class ReviewRoundThreeTests(unittest.TestCase):
                   "reason": "r", "recorded_by": "u"}
         r = result(judge(inv("N1", e), waivers=[waiver]), "tmp", "naming.common.forbidden")
         self.assertEqual(r["reason_code"], "naming.waived")
+
+
+class ReviewRoundFourTests(unittest.TestCase):
+    """The re-review round of the spec's third review (R869ec87b88, round 2), closed in the engine."""
+
+    def setUp(self):
+        self.workdir = tempfile.TemporaryDirectory()
+        self.root = Path(self.workdir.name)
+        (self.root / "cards").mkdir()
+        (self.root / "cards/a.txt").write_text("x\n")
+        self.sha = {"cards/a.txt": hashlib.sha256(b"x\n").hexdigest()}
+
+    def tearDown(self):
+        self.workdir.cleanup()
+
+    def change_set(self, e, proposed, **kw):
+        cs = {"change_set_id": "c", "entity_id": e["entity_id"], "current": e["name"], "proposed": proposed,
+              "contract_level": e["contract_level"], "rename_policy": "matrix", "replacements": [],
+              "inventory_digests": {}, "source_sha256": self.sha, "verify": ["check"],
+              "approval": {"required": True, "by": "user", "at": "now", "proposed": proposed},
+              "handoff": {"owner": "hep-statistics", "rerun": ["fit"]}}
+        cs.update(kw)
+        return cs
+
+    def nuisances(self):
+        a, b = nuisance("lumi_2017", "ch_a"), nuisance("lumi_2018", "ch_b", line=11, file="cards/b.txt")
+        E.classify([a, b], {"N10": ["."]}, SURFACES)
+        return a, b
+
+    def test_rename_onto_another_channel_nuisance_merges_correlations(self):
+        a, b = self.nuisances()
+        out = E.validate_change_set(self.change_set(a, "lumi_2018"), [a, b], SURFACES, self.root, {"N10", "N3"})
+        self.assertEqual((out["exit_code"], out["code"]), (1, "naming.proposed_collides"))
+
+    def test_forbidden_or_off_format_proposed_name(self):
+        a, b = self.nuisances()
+        for bad in ("tmp", "lumi-2017"):
+            out = E.validate_change_set(self.change_set(a, bad), [a, b], SURFACES, self.root, {"N10", "N3"})
+            self.assertEqual((out["exit_code"], out["code"]), (1, "naming.proposed_invalid"), bad)
+
+    def test_nuisance_rename_needs_n3_even_without_targets(self):
+        a, b = self.nuisances()
+        out = E.validate_change_set(self.change_set(a, "lumi_y2017"), [a, b], SURFACES, self.root, {"N10"})
+        self.assertEqual((out["exit_code"], out["code"]), (3, "naming.inventory_missing"))
+
+    def test_approval_is_for_the_proposed_name(self):
+        a, b = self.nuisances()
+        cs = self.change_set(a, "lumi_y2017")
+        cs["approval"]["proposed"] = "lumi_2017_old"
+        out = E.validate_change_set(cs, [a, b], SURFACES, self.root, {"N10", "N3"})
+        self.assertEqual((out["exit_code"], out["code"]), (1, "naming.approval_other_name"))
+        self.assertEqual(E.validate_change_set(self.change_set(a, "lumi_y2017"), [a, b], SURFACES, self.root,
+                                               {"N10", "N3"})["exit_code"], 0)
+
+    def test_dedup_rename_needs_a_uniqueness_trigger(self):
+        a = ent("A2015", "N15", "bib_key", "refs.bib", 1, file="refs.bib")
+        b = ent("B2015", "N15", "bib_key", "refs.bib", 5, file="refs.bib")
+        a["meaning"]["concept_id"] = b["meaning"]["concept_id"] = "doi:10.1/x"
+        E.classify([a, b], {"N15": ["."]}, SURFACES)
+        cs = self.change_set(b, "A2015", rename_policy="dedup-only", approval=None, handoff=None)
+        out = E.validate_change_set(cs, [a, b], SURFACES, self.root, {"N15", "N14"})
+        self.assertEqual((out["exit_code"], out["code"]), (1, "naming.rename_not_dedup"))
+
+    def test_line_free_waiver_does_not_cover_a_second_declaration(self):
+        one, two = ent("tmp", "N1", "local", "f", 3), ent("tmp", "N1", "local", "f", 9)
+        waiver = {"rule_id": "naming.common.forbidden", "entity_ids": [one["entity_id"].rsplit("@", 1)[0]],
+                  "reason": "r", "recorded_by": "u"}
+        j = judge(inv("N1", one, two), waivers=[waiver])
+        self.assertEqual({result(j, "tmp", "naming.common.forbidden", i)["state"] for i in (0, 1)}, {"violated"})
+
+    def test_unreadable_inputs_make_the_surface_unsupported(self):
+        i = inv("N3", shape("ttbar_jesUp"), shape("ttbar_jesDown"))
+        i["skipped_inputs"] = [{"path": "other.root", "reason": "no ROOT reader"}]
+        j = judge(i)
+        self.assertTrue(any(r["entity_id"] is None and r["state"] == "unsupported" for r in j["results"]))
+
+    def test_low_confidence_annotation_does_not_resolve_similarity(self):
+        ca, cb = ent("lumi_2018", "N1", "module_public", "<module>", file="a.py"), \
+            ent("lumi2018", "N1", "module_public", "<module>", file="b.py")
+        ann = {cb["entity_id"]: {"entity_id": cb["entity_id"], "confidence": "low", "evidence": [], "referrers_read": [],
+                                 "intended_distinct": [ca["entity_id"]], "recorded_by": "agent"}}
+        rule = {"rule_id": "t.near", "version": "1.0.0", "surfaces": ["N1"], "predicate": "similarity",
+                "params": {"across": "surface"}, "determinism": "heuristic", "owner": "hep-computing", "waivable": False,
+                "lifecycle": "active", "outcome_contract": {
+                    "satisfied": ["naming.no_near_duplicates", "naming.declared_distinct", "naming.annotated_distinct"],
+                    "violated": [], "not_applicable": ["naming.removed"],
+                    "unverified": ["naming.near_duplicate_needs_review"], "unsupported": ["naming.no_inputs"]}}
+        from contracts.rule_registry import state_for
+        from core.naming.vocab import Vocabulary
+        j = E.judge([inv("N1", ca, cb)], [rule], SURFACES, vocab=Vocabulary(), state_for=state_for, annotations=ann,
+                    report_all=True)
+        self.assertEqual(result(j, "lumi2018", "t.near")["state"], "unverified")
+
+    def test_glossary_shadowing_is_noted(self):
+        gloss = {"glossary_version": "1.0.0", "entries": [
+            {"id": "pt", "concept": "transverse momentum", "preferred": {"en": "transverse momentum"},
+             "aliases": {}, "abbreviations": ["pt"], "definition": "d"}]}
+        j = judge(inv("N1", ent("mu_pt", "N1", "module_public", "<module>")), glossary=gloss)
+        self.assertTrue(any("pt: glossary shadows default" in n for n in j["notes"]), j["notes"])
 
 
 class CrossSurfaceChangeSetTests(unittest.TestCase):
