@@ -30,7 +30,7 @@
    "verifier_report": "round 0 REWORK (5); round 1 REWORK (README scope, checker holes, sources, language differences); round 2 dispatched (last allowed)",
    "missing_capabilities": [],
    "notes": [
-    "orchestrator WP; verifier dispatched"
+    "round-2 verifier stopped without verdict; re-dispatch (last round)"
    ]
   },
   "ENV": {
@@ -40,11 +40,13 @@
    "branch": "worktree-crprop-env",
    "base": "ef37d970",
    "head": "548fc0b8",
-   "merge_commit": null,
+   "merge_commit": "7d5c6934",
    "worker_report": "DONE: env-dragon2 present (cd588707 verified, live rerun ok); env-usine/env-galprop absent (no tarballs); net-data partial (CRDB timeout); source-host probes not run (outside D3)",
-   "verifier_report": null,
+   "verifier_report": "PASS (2026-10-27)",
    "missing_capabilities": [],
-   "notes": []
+   "notes": [
+    "merged as 7d5c6934; post-merge static check interrupted by the stop: rerun before marking merged"
+   ]
   },
   "A1": {
    "state": "verifying",
@@ -57,7 +59,9 @@
    "worker_report": "DONE: A1-1..A1-5 pass, A1-6 structure only until A2 merges; open: USINE smooth-break form is the module reading (not re-read from Weinrich 2020a Eq. 1); harmonized-v1 source spatial distribution left open by r3 5.5; output/network fields beside transport",
    "verifier_report": null,
    "missing_capabilities": [],
-   "notes": []
+   "notes": [
+    "verifier stopped without verdict; re-dispatch"
+   ]
   },
   "A2": {
    "state": "verifying",
@@ -70,7 +74,9 @@
    "worker_report": "all A2 entries pass; 3.14.0 bump commit 26a0f3fc fast-forwarded into the WP branch by the orchestrator after A2 files were extended to version-pin regeneration (188 files) and test_grid_fit.py",
    "verifier_report": null,
    "missing_capabilities": [],
-   "notes": []
+   "notes": [
+    "verifier stopped without verdict; re-dispatch"
+   ]
   },
   "A3": {
    "state": "dispatched",
@@ -78,13 +84,13 @@
    "rework_rounds": 0,
    "branch": "worktree-crprop-a3",
    "base": "b83881c6",
-   "head": "a3994ba4",
+   "head": "eca5da37",
    "merge_commit": null,
    "worker_report": "PARTIAL: A3-1..A3-4 pass; core-stats-guide.md entry outside files (manifest widened); full run_all_checks not rerun after home-path fix; rebase onto A2 pending",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "waiting for a worker slot (limit 4)"
+    "guide entry committed; worker stopped before rerunning full checks"
    ]
   },
   "C1": {
@@ -93,12 +99,14 @@
    "rework_rounds": 1,
    "branch": "worktree-crprop-c1",
    "base": "ef37d970",
-   "head": "d66d4085",
+   "head": "2d984725",
    "merge_commit": null,
    "worker_report": "PARTIAL: all deliverables; CONTRACTS_VERSION bump left to A2 (13 fixture/example pins outside C1 files). Open: closed-form provider gives bin-averaged ratio, not ratio of bin integrals (P2) -> C2 must handle; profile README/index not updated",
    "verifier_report": "round 0 REWORK: conformance mixin cache inherited by subclasses (false PASS); advisory: cache key ignores theory_spec_ref. Notes for C2: closed-form provider is bin-averaged (bin_semantics), check before fitting data",
    "missing_capabilities": [],
-   "notes": []
+   "notes": [
+    "rework round 1 committed (96a1a40e, dcc87566, 2d984725); worker stopped before reporting; re-verify"
+   ]
   },
   "B2": {
    "state": "dispatched",
@@ -106,13 +114,13 @@
    "rework_rounds": 0,
    "branch": "worktree-crprop-b2",
    "base": "6a0c2ae6",
-   "head": null,
+   "head": "236a374a",
    "merge_commit": null,
    "worker_report": null,
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "waiting for a worker slot (limit 4)"
+    "code committed; worker stopped during its check run; no report"
    ]
   },
   "A4": {
@@ -357,10 +365,20 @@
    "cycle": 3,
    "date": "2026-10-27",
    "event": "A3 PARTIAL; manifest: core-stats-guide.md for A3, C2, C2U; A3 asked to finish (same dispatch)"
+  },
+  {
+   "cycle": 3,
+   "date": "2026-10-27",
+   "event": "campaign stopped at the maintainer's request: all agents stopped, WP worktrees clean, verifier worktrees and merged ENV worktree removed; resume from TODO.md"
   }
  ],
  "env": {
   "HEP_DRAGON2_BIN": "$HOME/hep-work/dragon2/install/bin/DRAGON",
   "HEP_DRAGON2_DATA": "$HOME/hep-work/dragon2/src/data"
+ },
+ "stopped": {
+  "date": "2026-10-27",
+  "by": "maintainer request (stable stop)",
+  "todo": "$HOME/hep-work/crprop-out/orchestrator/TODO.md"
  }
 }
