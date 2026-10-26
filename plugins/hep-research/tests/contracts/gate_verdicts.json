@@ -620,6 +620,22 @@
   "ok": false,
   "strict_ok": false
  },
+ "contracts/fixtures/artifacts/invalid/theory_crprop_degeneracy_evidence_missing.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/theory_crprop_degeneracy_evidence_unknown.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/theory_crprop_degeneracy_range_missing.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/theory_crprop_transport_noncanonical_name.json": {
+  "ok": false,
+  "strict_ok": false
+ },
  "contracts/fixtures/artifacts/invalid/theory_experiment_binding.json": {
   "ok": false,
   "strict_ok": false
@@ -926,6 +942,14 @@
   "strict_ok": true
  },
  "contracts/fixtures/artifacts/valid/theory_spec.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/theory_spec_crprop_mixed_degeneracy.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/theory_spec_crprop_object_degeneracy.json": {
   "ok": true,
   "strict_ok": true
  },
