@@ -61,6 +61,12 @@ class GateTests(unittest.TestCase):
         self.assertEqual(code, 1)
         self.assertEqual({f["state"] for f in out["new_findings"]}, {"unsupported"})
 
+    def test_unsupported_results_are_never_baselined(self):
+        (self.root / "skills" / "hep-demo" / "SKILL.md").unlink()
+        self.gate("--write-known-gaps")
+        self.assertEqual(json.loads(self.gaps.read_text())["gaps"], {})
+        self.assertEqual(self.gate()[0], 1)
+
     def test_shipped_baseline_is_well_formed(self):
         doc = json.loads((ROOT / "tools" / "naming_known_gaps.json").read_text())
         self.assertEqual(doc["known_gaps_version"], "1.0.0")

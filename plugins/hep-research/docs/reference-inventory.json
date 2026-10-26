@@ -35,7 +35,7 @@
   },
   "hep-statistics": {
    "references": 14,
-   "bytes": 200234,
+   "bytes": 200228,
    "uncited": 0
   },
   "hep-theory": {
@@ -2809,7 +2809,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "cf16c262 2026-10-23"
+   "last_commit": "e3f794ab 2026-10-26"
   },
   {
    "path": "skills/hep-measurement/references/histograms-efficiencies.md",
@@ -3760,7 +3760,7 @@
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 14801,
+   "bytes": 14795,
    "lines": 149,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -3780,7 +3780,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "e7692a77 2026-10-24"
+   "last_commit": "e3f794ab 2026-10-26"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",

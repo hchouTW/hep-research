@@ -126,7 +126,7 @@ def extract_n15(root: Path, scopes, changed: str | None = None, args=None) -> di
             line = text.count("\n", 0, pos) + 1
             b.add("bib_key", m.group(2), rel, rel, line, body.strip(), refs=list(cites.get(m.group(2), [])),
                   meaning={"concept_id": concept}, end=line + body.count("\n"))
-    entities = b.build(None, coverage(["N15"], scopes))
+    entities = b.build(None, coverage(["N15", "N14"], scopes))  # the citations are searched in the .tex files
     if changed:
         mark_changed_by_file(root, changed, scopes, entities)
     return new_inventory("N15", scopes, len(bibs), entities, now(), changed_since=changed)

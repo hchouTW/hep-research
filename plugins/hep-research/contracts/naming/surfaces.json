@@ -363,6 +363,10 @@
     {
      "surface": "N14",
      "kind": "label"
+    },
+    {
+     "surface": "N15",
+     "kind": "cite"
     }
    ],
    "referenced_by": [
@@ -386,7 +390,12 @@
    },
    "rename_policy": "dedup-only",
    "references_to": [],
-   "referenced_by": [],
+   "referenced_by": [
+    {
+     "surface": "N14",
+     "kind": "cite"
+    }
+   ],
    "requires_declarations": [],
    "doc": "skills/hep-authoring/references/citations-and-bibliography.md#naming-n15"
   },

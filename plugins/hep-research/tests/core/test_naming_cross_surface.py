@@ -170,9 +170,11 @@ class ReviewRoundThreeTests(unittest.TestCase):
                   "contract_level": "C2", "rename_policy": "dedup-only", "replacements": [], "inventory_digests": {},
                   "source_sha256": {"refs.bib": hashlib.sha256((root / "refs.bib").read_bytes()).hexdigest()},
                   "verify": ["check"], "trigger": {"rule_id": "naming.n15.duplicate-record", "predicate": "uniqueness"}}
-            self.assertEqual(E.validate_change_set(cs, [a, b], SURFACES, root, {"N15"})["exit_code"], 0)
+            out = E.validate_change_set(cs, [a, b], SURFACES, root, {"N15"})  # the \\cite uses are on N14
+            self.assertEqual((out["exit_code"], out["code"]), (3, "naming.inventory_missing"))
+            self.assertEqual(E.validate_change_set(cs, [a, b], SURFACES, root, {"N15", "N14"})["exit_code"], 0)
             cs["trigger"] = {"rule_id": "naming.common.forbidden", "predicate": "forbidden"}
-            out = E.validate_change_set(cs, [a, b], SURFACES, root, {"N15"})
+            out = E.validate_change_set(cs, [a, b], SURFACES, root, {"N15", "N14"})
             self.assertEqual((out["exit_code"], out["code"]), (1, "naming.rename_not_dedup"))
 
     def test_waiver_without_the_line_survives_an_edit_above(self):
