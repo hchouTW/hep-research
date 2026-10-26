@@ -5789,3 +5789,63 @@ numerical tolerance applies to A2):
 | A2-3 | A list holding only objects does not trigger `theory.degeneracy_missing` | unit test in `tests/contracts` |
 | A2-4 | `tabulated-grid` gives the same result for an object entry as for the equivalent string | identical fit output (apart from the echoed spec) in `tests.skills.hep_statistics.test_grid_fit` |
 | A2-5 | The new rules apply from `CRPROP_FROM` only | a 3.13.0 artifact gets none of the three codes (default mode); a 3.14.0 artifact gets them |
+
+Results (after the change; raw output in `$CRPROP_OUT/a2/`, `CRPROP_OUT` = the campaign's run-output folder):
+
+A2-1, every theory-spec under `contracts/fixtures`, `examples/` and `profiles/` (23 files) validated before the
+change (base `ef37d970`) and after it, default and `--strict` (`a2_baseline.py`, `theory_specs_before.json`,
+`theory_specs_after.json`): ok flag and sorted findings (severity, path, code, message) identical for all 23. On
+`worktree-crprop-a2-bump` (contracts 3.14.0) the findings are identical too; only the `contract_version` of the
+qed-prediction example and the six profile theory-specs changes (`theory_specs_after_bump.json`).
+
+| File | contract_version | default / strict | default codes | after |
+|---|---|---|---|---|
+| `contracts/fixtures/artifacts/invalid/envelope_missing_status.json` | 1.0.0 | errors / errors | schema.required | identical |
+| `contracts/fixtures/artifacts/invalid/theory_experiment_binding.json` | 1.0.0 | errors / errors | theory.experiment_binding | identical |
+| `contracts/fixtures/artifacts/invalid/theory_experiment_field.json` | 1.0.0 | errors / errors | schema.additional, theory.experiment_field | identical |
+| `contracts/fixtures/artifacts/invalid/theory_v26_check_result_vocab.json` | 2.6.0 | errors / errors | theory.check_result_vocab | identical |
+| `contracts/fixtures/artifacts/invalid/theory_v26_limit_missing.json` | 2.6.0 | errors / errors | theory.limit_missing | identical |
+| `contracts/fixtures/artifacts/invalid/theory_v26_order_missing.json` | 2.6.0 | errors / errors | theory.order_missing | identical |
+| `contracts/fixtures/artifacts/invalid/theory_v26_propagation_no_degeneracy.json` | 2.6.0 | errors / errors | theory.degeneracy_missing | identical |
+| `contracts/fixtures/artifacts/invalid/theory_v26_unchecked_formal_proof.json` | 2.6.0 | errors / errors | theory.unchecked_strong_status | identical |
+| `contracts/fixtures/artifacts/invalid/theory_v26_validity_empty.json` | 2.6.0 | errors / errors | theory.validity_empty | identical |
+| `contracts/fixtures/artifacts/valid/theory_spec.json` | 1.0.0 | ok / ok | - | identical |
+| `contracts/fixtures/artifacts/valid/theory_spec_v26.json` | 2.6.0 | ok / ok | - | identical |
+| `contracts/fixtures/artifacts/valid/theory_spec_v26_analytic_checked.json` | 2.6.0 | ok / ok | - | identical |
+| `contracts/fixtures/artifacts/valid/theory_spec_v26_asymptotic.json` | 2.6.0 | ok / ok | - | identical |
+| `contracts/fixtures/artifacts/valid/theory_spec_v26_inapplicable_listed.json` | 2.6.0 | ok / ok | - | identical |
+| `contracts/fixtures/artifacts/valid/theory_spec_v26_propagation.json` | 2.6.0 | ok / ok | - | identical |
+| `contracts/fixtures/artifacts/warning/theory_v26_conventions_incomplete.json` | 2.6.0 | ok / ok | theory.conventions_incomplete | identical |
+| `examples/qed-prediction/output/artifacts/theory_spec.json` | 3.13.0 | ok / ok | - | identical |
+| `profiles/theory/cr-secondary-antiprotons/derivations/theory-spec.json` | 3.13.0 | ok / ok | - | identical |
+| `profiles/theory/cr-secondary-ratio/derivations/theory-spec.json` | 3.13.0 | ok / ok | - | identical |
+| `profiles/theory/dis-parton-model/derivations/theory-spec.json` | 3.13.0 | ok / ok | - | identical |
+| `profiles/theory/drell-yan-lo/derivations/theory-spec.json` | 3.13.0 | ok / ok | - | identical |
+| `profiles/theory/heliospheric-modulation/derivations/theory-spec.json` | 3.13.0 | ok / ok | - | identical |
+| `profiles/theory/tmd-gaussian-lo/derivations/theory-spec.json` | 3.13.0 | ok / ok | - | identical |
+
+| ID | Result | Evidence |
+|---|---|---|
+| A2-1 | pass | table above; `python3 -m unittest discover -s tests/contracts -t .`: 1213 tests OK (3 skipped); `test_crprop_degeneracy.CommittedSpecsUnchanged` |
+| A2-2 | pass | `contracts/fixtures/artifacts/invalid/theory_crprop_degeneracy_{evidence_missing,range_missing,evidence_unknown}.json`, each giving exactly its code (`NegativeFixtures`) |
+| A2-3 | pass | `ObjectEntries.test_object_only_list_is_not_blank` (at 3.14.0 and 2.6.0); fixture `valid/theory_spec_crprop_object_degeneracy.json` |
+| A2-4 | pass | `python3 -m unittest tests.skills.hep_statistics.test_grid_fit`: 18 tests OK; `test_object_entry_gives_the_result_of_the_equivalent_string` (identical JSON output, with and without `combinations`) |
+| A2-5 | pass | `Gating`: at 3.13.0, 3.0.0 and 2.6.0 none of the three codes by default, all under `--strict`; native at `CRPROP_FROM` = 3.14.0 |
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --out $CRPROP_OUT/a2/checks` | 33 pass, 0 fail, 0 skip; unittest 5745 run, 0 failures, 206 skipped |
+| `check_relocation.py` | fails 2 tests, `tests.adapters.test_geant4` partition tests (worker path with spaces is split: `can't open file '.../hep'`); the same 2 fail on the base `ef37d970` in a copy under a path with spaces (`reloc-base-geant4.txt`): not caused by A2 |
+| `check_naming.py`; `workflow_check.py gaps` | pass; no new known gap |
+| `check_wiring.py --since ef37d970`; `check_layering.py`; `check_packaging.py` | pass |
+| `workflow_check.py acceptance` | ok, frozen sha256 unchanged |
+| `workflow_check.py diff --work-package A2` | fail on one path: `tests/skills/hep_statistics/test_grid_fit.py`, where the frozen A2-4 command and the assignment place the A2-4 test; workflow.json's A2 `files` omit it |
+
+Version bump: `CONTRACTS_VERSION` stays 3.13.0 on `worktree-crprop-a2`; `CRPROP_FROM` = 3.14.0, so a 3.14.0 artifact
+reads with the newer-minor warning until the bump. The bump follows the 3.13.0 precedent (`ac3950b4`) and is one
+commit on `worktree-crprop-a2-bump` (on top of this branch). Besides the in-scope files (`contracts/__init__.py`,
+`vocab/core.json`, fixtures, pinned tests) it regenerates 166 example outputs, 19 theory-profile files (artifacts
+and `make_artifacts.py` constants) and 3 skill templates, all outside A2's workflow.json list. Examples were regenerated
+with the E2 venv. `bc-propagation-fit` and `unfolding-coverage` carry no contract version; their numpy/scipy drift
+was reverted. On an export of the bump branch: `tests/contracts` 1213 tests OK (3 skipped), `tests/examples` 176 tests OK (22
+skipped); the full `run_all_checks` was not run on the bump branch.
