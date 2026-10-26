@@ -11,9 +11,10 @@ Order of the checks (each refusal is a failed response or result with its reason
 3. wanted items, decomposability, observables, axes and bin ranges (request_refusal); 4. each point against the declared
 domain: out-of-domain is refused unless allow_outside, then the result is labelled outside-validated-range;
 5. the cache: a point whose result is cached under the caller-given cache folder, keyed by the point hash
-(core.provider.hashing.point_hash) and the hash of the requested observables, wanted items and seed, is answered
-from the cache without calling the provider (only for deterministic providers or a fixed seed; only ok results are
-stored); 6. the remaining points go to the provider in one batch: single-shot ('ENTRY --request R --response S' in a
+(core.provider.hashing.point_hash, which covers the transport block) and the hash of the requested observables, wanted
+items, seed and theory_spec_ref, is answered from the cache without calling the provider (only for deterministic
+providers or a fixed seed; only ok results are stored; a request with a theory_spec_ref but no transport block is never
+cached, because nothing in it identifies the theory-spec's content); 6. the remaining points go to the provider in one batch: single-shot ('ENTRY --request R --response S' in a
 fresh temporary folder) or one long-lived '--serve' session; 7. the provider's response is checked against the
 protocol (invalid-response), a crash, a missing response or an unexpected exit code fails every point it was sent
 (provider-failed, with the exit code and the end of stderr), a timeout gives provider-timeout. A user-supplied
@@ -195,9 +196,12 @@ class ProviderRunner:
     def _cache_path(self, request: dict, point: dict, entry: RegistryEntry) -> Path | None:
         if self.cache_dir is None or not (entry.declaration["deterministic"] or request.get("seed") is not None):
             return None
+        if request.get("transport") is None and request.get("theory_spec_ref"):
+            return None  # the theory-spec's content is not in the request: no key can identify it, so no cache
         key = point_hash(request.get("transport"), request["provider"], request["provider_version"], point)
         shape = canonical_sha256({"observables": request["observables"], "want": sorted(request["want"]),
-                                  "seed": request.get("seed"), "allow_outside": self.allow_outside})
+                                  "seed": request.get("seed"), "allow_outside": self.allow_outside,
+                                  "theory_spec_ref": request.get("theory_spec_ref")})
         return self.cache_dir / key / f"{shape}.json"
 
     @staticmethod

@@ -226,6 +226,36 @@ class Cache(ProviderTestCase):
         self.assertEqual(self.toys.calls(), 4)
 
 
+class CacheAndTheorySpec(ProviderTestCase):
+    """The cache never mixes theory-specs: with a transport block the point hash covers it and theory_spec_ref is part
+    of the key; a request naming a theory_spec_ref without a transport block is never cached."""
+
+    def test_theory_spec_ref_without_transport_is_not_cached(self):
+        reg = self.toys.registry(self.toys.make())
+        cache = Path(self._workdir.name) / "cache"
+        with ProviderRunner(reg, cache_dir=cache) as runner:
+            for ref in ("spec-a.json", "spec-b.json", "spec-a.json"):
+                runner.evaluate(dict(request(), theory_spec_ref=ref, transport=None))
+            self.assertEqual(runner.stats["cache_hits"], 0)
+        self.assertEqual(self.toys.calls(), 6)
+        self.assertFalse(cache.exists() and any(cache.iterdir()))
+
+    def test_theory_spec_ref_is_part_of_the_key(self):
+        reg = self.toys.registry(self.toys.make())
+        cache = Path(self._workdir.name) / "cache"
+        transport = {"geometry": {"kind": "cylinder-2d", "radius_kpc": 20.0}}
+        with ProviderRunner(reg, cache_dir=cache) as runner:
+            runner.evaluate(dict(request(), theory_spec_ref="spec-a.json", transport=transport))
+            runner.evaluate(dict(request(), theory_spec_ref="spec-b.json", transport=transport))
+            self.assertEqual(runner.stats["cache_hits"], 0)
+            runner.evaluate(dict(request(), theory_spec_ref="spec-a.json", transport=transport))
+            self.assertEqual(runner.stats["cache_hits"], 2)
+            runner.evaluate(dict(request(), theory_spec_ref="spec-a.json",
+                                 transport={"geometry": {"kind": "cylinder-2d", "radius_kpc": 15.0}}))
+            self.assertEqual(runner.stats["cache_hits"], 2)  # another transport block is another point hash
+        self.assertEqual(self.toys.calls(), 6)
+
+
 class Failures(ProviderTestCase):
     """C1-4: a forced provider crash is reported as failed with the reason (R4)."""
 
