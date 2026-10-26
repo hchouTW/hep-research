@@ -395,5 +395,37 @@ class Contract110Tests(unittest.TestCase):
                     self.assertEqual(tc.uses_1_1(doc), [])
 
 
+class ForceFieldContractTests(unittest.TestCase):
+    """cr-propagation C1 (r3 Q4): the force-field modulation script has a tool contract, called per isotope as a
+    subprocess; the contract passes the checker with the help comparison, and the tool behaves as declared."""
+
+    PATH = ROOT / "contracts" / "tool_contracts" / "solar_modulation_force_field.json"
+
+    def test_contract_passes(self):
+        doc = json.loads(self.PATH.read_text(encoding="utf-8"))
+        result = tc.check(doc)
+        self.assertEqual(result["status"], "pass", result["findings"])
+
+    def test_declared_outputs_and_exits(self):
+        doc = json.loads(self.PATH.read_text(encoding="utf-8"))
+        op = doc["operations"][0]
+        cases = (["--modulate", "--energy", "2.0", "--energy-kind", "Ek_per_nucleon", "--mass-number", "12", "--mass",
+                  "11.1749", "--charge", "6", "--phi", "0.6", "--lis-normalization", "1e4", "--lis-index", "2.7"],
+                 ["--demodulate", "--energy", "5.0", "--energy-kind", "rigidity", "--mass", "0.938272", "--charge",
+                  "1", "--phi", "600", "--phi-unit", "MV", "--toa-flux", "12.5"])
+        for args in cases:
+            with self.subTest(mode=args[0]):
+                p = run_tool(doc["entry"], args)
+                self.assertEqual(p.returncode, 0, p.stderr)
+                out = json.loads(p.stdout)
+                for o in op["outputs"]:
+                    self.assertIn(o["name"], out)
+        p = run_tool(doc["entry"], ["--modulate", "--energy", "nan", "--mass", "1", "--charge", "1", "--phi", "0.5",
+                                    "--lis-normalization", "1", "--lis-index", "2"])
+        self.assertIn(p.returncode, {f["exit_code"] for f in op["failure_states"]})
+        self.assertEqual(p.returncode, 2)
+        self.assertEqual(json.loads(p.stdout)["error_kind"], "invalid-input")
+
+
 if __name__ == "__main__":
     unittest.main()

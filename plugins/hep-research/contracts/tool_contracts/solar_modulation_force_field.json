@@ -1,0 +1,272 @@
+{
+ "contract_version": "1.0.0",
+ "tool_id": "solar-modulation-force-field",
+ "entry": "skills/hep-measurement/scripts/solar_modulation_force_field.py",
+ "operations": [
+  {
+   "operation_id": "force-field",
+   "summary": "Force-field solar modulation (Gleeson and Axford 1968) of one point of one isotope: E_LIS = E_TOA + |Z| phi in total kinetic energy, J_TOA = (2mE + E^2)/(2mE' + E'^2) J_LIS times dE/dx at TOA over LIS for a flux per unit of the chosen variable. --modulate: a LIS power law or table to the TOA flux; --demodulate: one measured TOA flux to the LIS energy and flux. Called per isotope (its Z, A and mass) as a subprocess by propagation fits (cr-propagation plan Q4); a one-parameter effective model without drifts, latitude dependence or transients. With --phi-uncertainty the output adds phi_uncertainty_gv and sigma_flux_toa_from_phi (modulate) or sigma_flux_lis_from_phi (demodulate); with a power law it echoes lis_normalization and lis_index, with a table lis_table",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--modulate",
+      "input": "modulate"
+     },
+     {
+      "flag": "--demodulate",
+      "input": "demodulate"
+     },
+     {
+      "flag": "--energy",
+      "input": "energy"
+     },
+     {
+      "flag": "--energy-kind",
+      "input": "energy_kind"
+     },
+     {
+      "flag": "--mass",
+      "input": "mass"
+     },
+     {
+      "flag": "--charge",
+      "input": "charge"
+     },
+     {
+      "flag": "--mass-number",
+      "input": "mass_number"
+     },
+     {
+      "flag": "--phi",
+      "input": "phi"
+     },
+     {
+      "flag": "--phi-unit",
+      "input": "phi_unit"
+     },
+     {
+      "flag": "--phi-uncertainty",
+      "input": "phi_uncertainty"
+     },
+     {
+      "flag": "--lis-normalization",
+      "input": "lis_normalization"
+     },
+     {
+      "flag": "--lis-index",
+      "input": "lis_index"
+     },
+     {
+      "flag": "--lis-table",
+      "input": "lis_table"
+     },
+     {
+      "flag": "--toa-flux",
+      "input": "toa_flux"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "modulate",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "flag; exactly one of modulate and demodulate: forward model, a LIS (power law or table) to the predicted TOA flux"
+    },
+    {
+     "name": "demodulate",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "flag; exactly one of modulate and demodulate: one measured TOA flux point inverted to the LIS energy and flux"
+    },
+    {
+     "name": "energy",
+     "kind": "energy",
+     "unit": "{E}",
+     "required": true,
+     "constraint": "finite, > 0; the TOA value of the energy variable chosen by energy_kind ({E} = GeV, GeV/n or GV)"
+    },
+    {
+     "name": "energy_kind",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "Ek_total (GeV), Ek_per_nucleon (GeV/n, needs mass_number) or rigidity (GV); fluxes are per unit of this variable",
+     "default": "Ek_total"
+    },
+    {
+     "name": "mass",
+     "kind": "mass",
+     "unit": "GeV",
+     "required": true,
+     "constraint": "finite, > 0; rest mass of the whole nucleus"
+    },
+    {
+     "name": "charge",
+     "kind": "parameter",
+     "unit": "1",
+     "required": true,
+     "constraint": "absolute charge |Z|, a positive integer"
+    },
+    {
+     "name": "mass_number",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "positive integer >= charge; needed for Ek_per_nucleon (the shift is then (|Z|/A) phi per nucleon)"
+    },
+    {
+     "name": "phi",
+     "kind": "modulation_potential",
+     "unit": "{P}",
+     "required": true,
+     "constraint": "finite, >= 0; one effective force-field potential in phi_unit; applied per isotope (Z, A), never to a ratio"
+    },
+    {
+     "name": "phi_unit",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "GV or MV; the unit {P} of phi and phi_uncertainty",
+     "default": "GV"
+    },
+    {
+     "name": "phi_uncertainty",
+     "kind": "modulation_potential",
+     "unit": "{P}",
+     "required": false,
+     "constraint": "finite, >= 0; 1-sigma, propagated to the derived flux by a central difference"
+    },
+    {
+     "name": "lis_normalization",
+     "kind": "differential_flux",
+     "unit": "{F}",
+     "required": false,
+     "constraint": "(modulate, power law) finite, > 0: A in J_LIS(x) = A x^-gamma, x in energy_kind units; with lis_index, not with lis_table"
+    },
+    {
+     "name": "lis_index",
+     "kind": "parameter",
+     "unit": "1",
+     "required": false,
+     "constraint": "(modulate, power law) finite: gamma"
+    },
+    {
+     "name": "lis_table",
+     "kind": "path",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "(modulate) JSON {\"variable\": <energy_kind>, \"points\": [[x, flux], ...]} with at least two distinct x, log-log interpolated, no extrapolation; not with the power-law inputs"
+    },
+    {
+     "name": "toa_flux",
+     "kind": "differential_flux",
+     "unit": "{F}",
+     "required": false,
+     "constraint": "(demodulate, required there) finite, > 0: the measured flux at the TOA energy"
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "method",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "energy_kind",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "energy_toa",
+     "kind": "energy",
+     "unit": "{E}"
+    },
+    {
+     "name": "energy_lis",
+     "kind": "energy",
+     "unit": "{E}"
+    },
+    {
+     "name": "kinetic_energy_toa_gev",
+     "kind": "energy",
+     "unit": "GeV"
+    },
+    {
+     "name": "kinetic_energy_lis_gev",
+     "kind": "energy",
+     "unit": "GeV"
+    },
+    {
+     "name": "jacobian",
+     "kind": "factor",
+     "unit": "1"
+    },
+    {
+     "name": "flux_factor",
+     "kind": "factor",
+     "unit": "1"
+    },
+    {
+     "name": "flux_lis",
+     "kind": "differential_flux",
+     "unit": "{F}"
+    },
+    {
+     "name": "flux_toa",
+     "kind": "differential_flux",
+     "unit": "{F}"
+    },
+    {
+     "name": "phi_gv",
+     "kind": "modulation_potential",
+     "unit": "GV"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "an unexpected internal error (not reached for valid or invalid input): a traceback on stderr, nothing on stdout"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing, malformed, non-finite or out of range (including both or neither of --modulate and --demodulate, a missing LIS or --toa-flux, an LIS table that is unreadable or would be extrapolated, or a non-finite result); one JSON object with status failed and error_kind invalid-input on stdout, the usage on stderr"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": false,
+    "network": false,
+    "subprocess": false
+   }
+  }
+ ]
+}
