@@ -5783,3 +5783,29 @@ with the reason; C1-5 out of domain gives `failed` with `reason: out-of-domain`,
 `contracts/recipe_semantics.py` `canonical_sha256` on 10 random objects (exact equality of the hex digest);
 C1-7 `contracts/tool_contract.py` passes and `core/provider/` holds no path string (`check_layering.py`); ALL-1..ALL-7.
 Tolerances: none numerical except C1-2 and C1-6, which are exact (byte-identical hashes).
+
+**Results (E2, 2026-10-26).** Evidence under `$CRPROP_OUT/c1/acceptance/` (outside the repository).
+
+| Entry | Result | Evidence |
+|---|---|---|
+| C1-1 | pass | `tests.core.test_provider.RegistryRefusal`: unregistered id refused (`unregistered-provider`, provider never started), registered version required |
+| C1-2 | pass | `SingleShotAndServe`: sha256 of single-shot and `--serve` responses equal after removing `elapsed_s`; also the closed-form provider (profile `tests/test_provider.py`) |
+| C1-3 | pass | `Cache`: second request answered from the cache with 0 provider calls; cache folders named by the point hash |
+| C1-4 | pass | `Failures`: exit-7 crash gives `failed`, reason `provider-failed`, stderr in `detail`, in single-shot and `--serve`; exception, invalid response and timeout too |
+| C1-5 | pass | `Domain`: `out-of-domain` without prediction; with `--allow-outside-validated-range` a prediction labelled `outside-validated-range` |
+| C1-6 | pass | `Hash`: `core.provider.hashing.canonical_sha256` equals `contracts/recipe_semantics.py` `canonical_sha256` on 10 random objects (seed 20261026); point hash equals it on the r3 §5.2 object |
+| C1-7 | pass | `contracts/tool_contract.py` pass (16 contracts, incl. `solar_modulation_force_field.json` with the help check); `check_layering.py` ok |
+| PRV-1/PRV-2 (closed form) | pass | `core/provider/conformance.py`: 9 of 9 checks; values equal `predict.py bin_averaged` and the committed benchmark prediction exactly; components add to the prediction within 1e-12; 8- vs 32-node quadrature within the declared 1e-6 |
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --out $CRPROP_OUT/c1/checks` | pass; 5772 tests, 0 failures, 0 errors, 155 skipped |
+| `check_relocation.py --out $CRPROP_OUT/c1/reloc` | fail: 2 tests, `tests.adapters.test_geant4` (`RunAndPartition.test_partition_merge_equals_a_single_run_and_refuses_nothing_twice`, `BoundaryArtifacts.test_partition_summaries_merge_without_reading_a_csv`), a `--cmd` path split at the space of the relocated folder; both fail identically on the base `ef37d970` in a folder with a space (`$CRPROP_OUT/c1/reloc-base/`); not touched by C1 |
+| `check_naming.py`, `workflow_check.py gaps/diff/acceptance` (integration copy, `--plugin-root`), `check_wiring.py --since ef37d970`, `check_packaging.py` | pass / ok |
+| ruff 0.16.10 and mypy 2.4.0 on `core` and `contracts` | pass |
+
+Not done in C1: the `CONTRACTS_VERSION` line (3.13.0 → 3.14.0). The bump makes 13 tests fail until the fixtures under
+`contracts/fixtures/`, the 0.42.0 examples and the measurement template are regenerated, and those files are outside
+C1's file list; A2 (merged first, `contracts/fixtures/**` in its list) sets the shared version and `CRPROP_FROM`.
+C1 gates no rule by version: its schema changes are optional and additive. The closed-form provider's values are the
+profile's ln(E/n) bin average of the ratio (`crsr:bin_average`), not the r3 P2 ratio of bin integrals.
