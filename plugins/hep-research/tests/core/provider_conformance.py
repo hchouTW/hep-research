@@ -71,13 +71,20 @@ class ProviderConformance:
         reason = self.unavailable_reason()
         if reason:
             self.skipTest(reason)
-        cached = getattr(type(self), "_conformance_report", None)
-        if cached is None:
+        # one report per concrete class, read from the class's own __dict__ only: a subclass never inherits its
+        # parent's report, and the key names everything the report depends on
+        key = json.dumps([self.PROVIDER_ID, self.REQUEST, self.OUTSIDE_POINT, [str(p) for p in self.USER_PROVIDERS]],
+                         sort_keys=True)
+        reports = type(self).__dict__.get("_conformance_reports")
+        if reports is None:
+            reports = {}
+            type.__setattr__(type(self), "_conformance_reports", reports)
+        if key not in reports:
             with tempfile.TemporaryDirectory() as workdir:
                 registry = write_registry(Path(workdir), self.USER_PROVIDERS)
-                cached = run_conformance(registry, self.PROVIDER_ID, self.REQUEST, self.OUTSIDE_POINT, self.TIMEOUT_S)
-            type(self)._conformance_report = cached
-        return cached
+                reports[key] = run_conformance(registry, self.PROVIDER_ID, self.REQUEST, self.OUTSIDE_POINT,
+                                               self.TIMEOUT_S)
+        return reports[key]
 
     def test_provider_request_follows_the_schema(self):
         rep = validate(self.REQUEST, REQUEST_SCHEMA, Vocabulary())
