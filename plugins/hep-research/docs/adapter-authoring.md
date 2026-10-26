@@ -24,6 +24,40 @@ adapters/<name>/
 | `environment` | where the tests ran (OS, Python, tool builds), or "none declared" |
 | `assets`, `tests` | relative paths; every listed file must exist |
 | `owner_skill` | the core skill that owns the method the adapter executes |
+| `provider` | optional (contracts 3.14.0): one cr-provider/1 declaration or a list (schema `contracts/schemas/cr_provider.json#/$defs/declaration`): `id`, `entrypoint` (relative to the adapter folder), `protocol` `cr-provider/1`, `domain` (canonical parameter names, each `{min, max}`), optional `axis_ranges`, `observables`, `axes` (`rigidity`, `ekn`), `decomposable`, `deterministic`, `output_units`, optional `version` (default: the adapter's). A `profile.json` takes the same field. `tools/provider_registry.py` builds the registry from these fields; the declaration test checks them |
+
+## Provider entrypoints (cr-provider/1)
+
+A propagation provider (a closed form, an external code, an emulator) answers requests of the protocol
+`cr-provider/1`: parameter points in the canonical parameter names, observables with bins on the `rigidity` (GV) or
+`ekn` (GeV/n) axis, and `want` limited to `lis` and `components` (providers never modulate). The entrypoint is a
+Python script that declares itself and calls `core.provider.entrypoint.provider_main(declaration, evaluate_point)`;
+that gives it `--request R --response S`, `--serve` (JSON Lines) and `--allow-outside-validated-range`, and applies
+the protocol's refusals (out-of-domain, unsupported-want, ...) before `evaluate_point` runs. Callers never search for
+providers: they pass the registry written by `python3 tools/provider_registry.py --write "$CRPROP_OUT/registry.json"`
+(not committed) to `core.provider.runner.ProviderRunner` or `python3 core/provider/runner.py --provider-registry`;
+only listed entrypoints run, a cache under a caller-given folder is keyed by the point hash, and a crash is reported
+as `failed` with the reason. The closed-form provider of the `cr-secondary-ratio` theory profile
+(`scripts/provider.py`) is the worked example.
+
+Conformance (PRV-1, PRV-2) is the same for every provider. An adapter's test module adds one class:
+
+```python
+from tests.core.provider_conformance import ProviderConformance
+
+class UsineProviderConformance(ProviderConformance, unittest.TestCase):
+    PROVIDER_ID = "usine"            # the id in the adapter.json provider field
+    REQUEST = {...}                  # one small in-domain request at the registered provider_version
+    def unavailable_reason(self):    # skip, with the reason, when the external code is not installed
+        return None if os.environ.get("HEP_USINE_BIN") else "HEP_USINE_BIN unset"
+```
+
+It writes a fresh registry, runs `core/provider/conformance.py` (direct single-shot and `--serve` calls, the
+unsupported-want, out-of-domain and outside-validated-range cases, the unregistered refusal and the runner) and
+validates every response against the contract schema. The same checks run from the command line:
+`python3 core/provider/conformance.py --provider-registry R --provider ID --request REQUEST.json` (exit 0 pass,
+1 a check failed). A profile's tests may not import the plugin's `tests` package, so they call
+`core.provider.conformance.run_conformance` and the schema directly (see that profile's `tests/test_provider.py`).
 
 ## Honesty rules
 

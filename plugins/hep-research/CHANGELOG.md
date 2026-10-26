@@ -3,6 +3,28 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- crprop c1: provider protocol `cr-provider/1` (cosmic-ray propagation plan r3 §C1, §5.2). New contract schema
+  `contracts/schemas/cr_provider.json` (provider declaration, request, response, components; not an artifact type;
+  `want` only `lis` and `components`; no new vocabulary) and the optional `provider` field of `profile.json`
+  (`contracts/schemas/profile.json`) and `adapter.json`, part of the campaign's unreleased contracts minor
+  (CV-CRPROP, 3.14.0, whose version line A2 sets). New core module `core/provider/` (`CORE_VERSION` 1.1.0 → 1.2.0,
+  steward hep-computing): `protocol`, `hashing` (point hash, equal to `contracts/recipe_semantics.py`
+  `canonical_sha256`), `registry` (the caller passes `--provider-registry`; core never searches), `entrypoint` (every
+  provider's `--request/--response`, `--serve` JSON Lines and `--allow-outside-validated-range`), `runner` (subprocess
+  calls in batches, cache keyed by the point hash under a caller-given folder, refusals with reasons: out-of-domain,
+  unregistered-provider, provider-failed on a crash, ...; user-supplied providers labelled `user-supplied`) and
+  `conformance` (PRV-1/PRV-2 checks, also a command line). New `tools/provider_registry.py --write PATH` builds the
+  registry from the `provider` fields (never committed). First provider: `scripts/provider.py` of the
+  `cr-secondary-ratio` theory profile, the closed-form thin-disc B/C with one component per production channel
+  (values bin-averaged in ln(E/n) as in the profile, not P2 bin integrals). New tool contract
+  `contracts/tool_contracts/solar_modulation_force_field.json` for the force-field script. Tests:
+  `tests/core/test_provider.py`, the reusable helper `tests/core/provider_conformance.py` for provider work packages,
+  `tests/tools/test_provider_registry.py`, the profile's `tests/test_provider.py`, the `provider` check in
+  `tests/adapters/test_adapter_declarations.py` and a force-field contract test; `docs/adapter-authoring.md` gains
+  the field row and a provider section.
+
 ## 0.42.0 (2026-10-26)
 
 Minor release; contracts 3.13.0, `CORE_VERSION` 1.1.0 and geant4 adapter 0.5.0 unchanged. It ships semantic naming
