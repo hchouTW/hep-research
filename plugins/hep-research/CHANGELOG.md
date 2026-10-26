@@ -14,13 +14,15 @@ Software checks establish contract consistency only, not physical validity.
   `canonical_sha256`), `registry` (the caller passes `--provider-registry`; core never searches), `entrypoint` (every
   provider's `--request/--response`, `--serve` JSON Lines and `--allow-outside-validated-range`), `runner` (subprocess
   calls in batches, cache keyed by the point hash under a caller-given folder, refusals with reasons: out-of-domain,
-  unregistered-provider, provider-failed on a crash, ...; user-supplied providers labelled `user-supplied`) and
+  unregistered-provider, provider-failed on a crash, ...; a request with a `theory_spec_ref` but no transport block is
+  not cached; user-supplied providers labelled `user-supplied`) and
   `conformance` (PRV-1/PRV-2 checks, also a command line). New `tools/provider_registry.py --write PATH` builds the
   registry from the `provider` fields (never committed). First provider: `scripts/provider.py` of the
   `cr-secondary-ratio` theory profile, the closed-form thin-disc B/C with one component per production channel
   (values bin-averaged in ln(E/n) as in the profile, not P2 bin integrals). New tool contract
   `contracts/tool_contracts/solar_modulation_force_field.json` for the force-field script. Tests:
-  `tests/core/test_provider.py`, the reusable helper `tests/core/provider_conformance.py` for provider work packages,
+  `tests/core/test_provider.py`, the reusable helper `tests/core/provider_conformance.py` for provider work packages
+  (its own test `tests/core/test_provider_conformance_mixin.py`),
   `tests/tools/test_provider_registry.py`, the profile's `tests/test_provider.py`, the `provider` check in
   `tests/adapters/test_adapter_declarations.py` and a force-field contract test; `docs/adapter-authoring.md` gains
   the field row and a provider section.

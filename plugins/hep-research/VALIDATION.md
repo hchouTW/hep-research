@@ -5809,3 +5809,12 @@ Not done in C1: the `CONTRACTS_VERSION` line (3.13.0 → 3.14.0). The bump makes
 C1's file list; A2 (merged first, `contracts/fixtures/**` in its list) sets the shared version and `CRPROP_FROM`.
 C1 gates no rule by version: its schema changes are optional and additive. The closed-form provider's values are the
 profile's ln(E/n) bin average of the ratio (`crsr:bin_average`), not the r3 P2 ratio of bin integrals.
+
+**Rework round 1 (2026-10-27, independent verifier).** (1) Blocking: the shared conformance mixin cached its report on
+`type(self)`, so a subclass inherited its parent's verdict (a missing provider passed after a good one). The report
+is now kept in the class's own `__dict__`, keyed by provider id, request, outside point and user declarations;
+`tests/core/test_provider_conformance_mixin.py` runs the mixin on a good provider, a missing one, a broken
+user-supplied one, a subclass of a subclass, in both run orders (pass/fail as expected), and the verifier's
+reproduction now fails the broken subclass (3 failures). (2) Advisory: the runner cache key now includes
+`theory_spec_ref`, and a request with a `theory_spec_ref` but no transport block is never cached
+(`tests.core.test_provider.CacheAndTheorySpec`).
