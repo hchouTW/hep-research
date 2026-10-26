@@ -217,14 +217,16 @@
    "files": [
     "skills/hep-statistics/scripts/degeneracy.py",
     "skills/hep-statistics/scripts/covariance_fit.py",
-    "tests/skills/hep_statistics/**"
+    "tests/skills/hep_statistics/**",
+    "skills/hep-statistics/references/core-stats-guide.md"
    ],
    "acceptance_prefix": "A3",
    "merge_after": [
     "A2"
    ],
    "fallback": null,
-   "source": "r4 7, r3 A3 (rebase after A2)"
+   "source": "r4 7, r3 A3 (rebase after A2)",
+   "files_source": "core-stats-guide.md 'Skill scripts' section added (derived at A3, cycle 3: test_core_stats_guide requires every hep-statistics script to be listed with its dependency markers)"
   },
   {
    "id": "C1",
@@ -436,11 +438,13 @@
     "skills/hep-statistics/scripts/propagation_fit.py",
     "skills/hep-statistics/references/core-stats-commands.md",
     "tests/skills/hep_statistics/**",
-    "examples/**"
+    "examples/**",
+    "skills/hep-statistics/references/core-stats-guide.md"
    ],
    "acceptance_prefix": "C2",
    "fallback": null,
-   "source": "r4 6 and 7"
+   "source": "r4 6 and 7",
+   "files_source": "core-stats-guide.md 'Skill scripts' section added (derived at A3, cycle 3: test_core_stats_guide requires every hep-statistics script to be listed with its dependency markers)"
   },
   {
    "id": "B3",
@@ -481,14 +485,16 @@
    "files": [
     "skills/hep-statistics/scripts/propagation_fit.py",
     "tests/skills/hep_statistics/**",
-    "tests/adapters/fixtures/cr_propagation/c2u/**"
+    "tests/adapters/fixtures/cr_propagation/c2u/**",
+    "skills/hep-statistics/references/core-stats-guide.md"
    ],
    "acceptance": [
     "C2U-1",
     "C2U-2"
    ],
    "fallback": "waits on B1; if B1 is blocked, blocked with B1 (derived)",
-   "source": "r4 6"
+   "source": "r4 6",
+   "files_source": "core-stats-guide.md 'Skill scripts' section added (derived at A3, cycle 3: test_core_stats_guide requires every hep-statistics script to be listed with its dependency markers)"
   },
   {
    "id": "D3",
