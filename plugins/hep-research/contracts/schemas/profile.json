@@ -17,6 +17,7 @@
   "depends_on": {"type": "array", "items": {"$ref": "common.json#/$defs/profile_id"}},
   "evidence_namespace": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
   "maintainer": {"type": "string", "minLength": 1},
+  "provider": {"$ref": "cr_provider.json#/$defs/declarations", "$comment": "optional (contracts 3.14.0): the profile's cr-provider/1 entrypoints; tools/provider_registry.py collects them"},
   "capabilities": {"type": "array", "items": {"type": "object", "required": ["name", "status", "scope"], "properties": {
      "name": {"type": "string"}, "status": {"type": "string", "x-vocab": "capability_statuses"}, "scope": {"type": "string"},
      "tests": {"type": "array", "items": {"type": "string"}}}}}
