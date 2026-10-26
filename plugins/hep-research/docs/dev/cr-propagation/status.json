@@ -60,14 +60,14 @@
    "notes": []
   },
   "A2": {
-   "state": "dispatched",
+   "state": "verifying",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-a2",
    "base": "ef37d970",
-   "head": null,
+   "head": "26a0f3fc",
    "merge_commit": null,
-   "worker_report": null,
+   "worker_report": "all A2 entries pass; 3.14.0 bump commit 26a0f3fc fast-forwarded into the WP branch by the orchestrator after A2 files were extended to version-pin regeneration (188 files) and test_grid_fit.py",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": []
@@ -347,6 +347,11 @@
    "cycle": 3,
    "date": "2026-10-27",
    "event": "C1 verifier REWORK (1 blocking); returned to worker, round 1"
+  },
+  {
+   "cycle": 3,
+   "date": "2026-10-27",
+   "event": "A2 reported; manifest: A2 version_pin_files + test_grid_fit.py; bump commit fast-forwarded; verifier dispatched"
   }
  ],
  "env": {

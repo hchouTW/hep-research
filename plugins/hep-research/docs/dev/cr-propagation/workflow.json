@@ -172,7 +172,15 @@
     "contracts/fixtures/**",
     "contracts/vocab/core.json",
     "skills/hep-statistics/scripts/covariance_fit.py",
-    "tests/contracts/**"
+    "tests/contracts/**",
+    "tests/skills/hep_statistics/test_grid_fit.py",
+    "examples/*/output/**",
+    "profiles/theory/*/derivations/**",
+    "profiles/theory/*/predictions/**",
+    "profiles/theory/*/benchmarks/**",
+    "profiles/theory/*/evidence/**",
+    "profiles/theory/*/scripts/make_artifacts.py",
+    "skills/*/assets/*.json"
    ],
    "acceptance_prefix": "A2",
    "merge_before": [
@@ -180,7 +188,18 @@
     "C1"
    ],
    "fallback": null,
-   "source": "r4 2 and 7, r3 A2"
+   "source": "r4 2 and 7, r3 A2",
+   "version_pin_files": [
+    "examples/*/output/**",
+    "profiles/theory/*/derivations/**",
+    "profiles/theory/*/predictions/**",
+    "profiles/theory/*/benchmarks/**",
+    "profiles/theory/*/evidence/**",
+    "profiles/theory/*/scripts/make_artifacts.py",
+    "skills/*/assets/*.json"
+   ],
+   "version_pin_source": "derived at A2 report (cycle 3): the CV-CRPROP = 3.14.0 bump granted by D3 must regenerate committed artifacts that pin the contracts version (precedent: the 3.13.0 bump ac3950b4). In these paths only contracts-version strings, CONTRACTS constants and the hashes that cover them may change; the verifier checks that",
+   "files_source": "r3 A2 card; test_grid_fit.py is where the frozen A2-4 command puts the test (manifest gap found at A2)"
   },
   {
    "id": "A3",
