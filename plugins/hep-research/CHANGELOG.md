@@ -3,6 +3,12 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- crprop env: capability probe of the cr-propagation campaign and environment E-crprop registered in VALIDATION.md
+  (E2 plus DRAGON2 cd588707 verified by a live rerun); DRAGON2 computational-run and environment manifest under
+  `tests/adapters/fixtures/cr_propagation/env/`. USINE and GALPROP absent (no source tarball). No behavior change.
+
 ## 0.42.0 (2026-10-26)
 
 Minor release; contracts 3.13.0, `CORE_VERSION` 1.1.0 and geant4 adapter 0.5.0 unchanged. It ships semantic naming
