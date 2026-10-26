@@ -21,13 +21,13 @@
   "P0": {
    "state": "verifying",
    "dispatches": 0,
-   "rework_rounds": 1,
+   "rework_rounds": 2,
    "branch": null,
    "base": null,
-   "head": "59e24365",
+   "head": "34e2edeb",
    "merge_commit": null,
    "worker_report": null,
-   "verifier_report": "round 0: REWORK (5 problems: D3 F1 consent, language differences, untrusted checker, waivers, manifest gaps); round 1 dispatched",
+   "verifier_report": "round 0 REWORK (5); round 1 REWORK (README scope, checker holes, sources, language differences); round 2 dispatched (last allowed)",
    "missing_capabilities": [],
    "notes": [
     "orchestrator WP; verifier dispatched"
@@ -313,6 +313,11 @@
    "cycle": 1,
    "date": "2026-10-26",
    "event": "P0 verifier REWORK; fixed in 59e24365; re-verification dispatched"
+  },
+  {
+   "cycle": 1,
+   "date": "2026-10-26",
+   "event": "P0 round-1 REWORK fixed in 34e2edeb; A1 and C1 told of common_files change; round-2 verifier dispatched"
   }
  ]
 }
