@@ -224,6 +224,18 @@ class GridDegeneracy(unittest.TestCase):
         self.assertIsNotNone(combo["sigma_ln"])
         self.assertTrue(all(p["error_coordinate"] is None and not p["constrained"] for p in f["parameters"]))
 
+    def test_object_entry_gives_the_result_of_the_equivalent_string(self):
+        """CRPROP-A2-4 (contracts 3.14.0): an object-form entry contributes its combination; the fit is identical."""
+        entry = {"combination": "D0/L", "form": "power", "exponents": {"D0": 1, "L": -1},
+                 "valid_range": {"L": {"min": 2, "max": 20}}, "evidence": "profile-scan"}
+        for combos in (None, ["D0/L"]):
+            with self.subTest(combinations=combos):
+                as_string, as_object = self.fit(["D0/L"], combos), self.fit([entry], combos)
+                self.assertEqual(json.dumps(as_object, sort_keys=True), json.dumps(as_string, sort_keys=True))
+                self.assertEqual(as_object["fits"][0]["degenerate_directions"][0]["matches_theory_spec"], "D0/L")
+        mixed = self.fit([dict(entry, combination="D0*L"), "D0/L"])
+        self.assertEqual(mixed["theory_spec_degenerate_directions"], ["D0*L", "D0/L"])
+
     def test_mismatch_is_a_warning(self):
         out = self.fit([])                          # spec lists no degenerate direction
         self.assertTrue(any("theory spec lists none" in w for w in out["warnings"]), out["warnings"])

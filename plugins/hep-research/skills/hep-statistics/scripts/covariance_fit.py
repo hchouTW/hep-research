@@ -66,7 +66,8 @@ Input (fit, "model": "tabulated-grid"): a fit of parameters tabulated on a grid 
    "model_set": {"alternative_key": "xs_set", "prescription": {"kind": "min-max", "owner": "hep-theory",
           "justification": "..."}} (optional: the parameter_point key that names a cross-section set; each set is a full
           grid, fitted separately; contracts/comparison/model_set.py model_set() and envelope() give the spread),
-   "theory_spec": "spec.json" | {theory-spec} (optional; its degenerate_directions are compared with the fit),
+   "theory_spec": "spec.json" | {theory-spec} (optional; its degenerate_directions are compared with the fit; an
+          object entry contributes its "combination", contracts 3.14.0),
    "combinations": ["D0/L"] (optional monomials of grid parameters to report, e.g. "D0/L", "D0*L^2"),
    "start": {"D0": 3.0, "L": 4.0} (optional, inside the grid)}
   Every prediction is gated (contracts/comparison/gate.py check()) against the measurement first; one that is not
@@ -1107,7 +1108,9 @@ def grid_fit(doc: dict, base: Path | str = ".") -> dict:
     declared = []
     if doc.get("theory_spec") is not None:
         spec = _load_json(doc["theory_spec"], base, "theory_spec")
-        declared = [d for d in ((spec.get("extension") or {}).get("degenerate_directions") or []) if isinstance(d, str)]
+        # a string entry is the combination; an object entry (contracts 3.14.0) contributes its 'combination'
+        entries = (spec.get("extension") or {}).get("degenerate_directions") or []
+        declared = [c for c in (d.get("combination") if isinstance(d, dict) else d for d in entries) if isinstance(c, str)]
     else:
         warnings.append("no theory spec given: degenerate directions are reported but not compared")
     wanted = list(dict.fromkeys(declared + [c for c in (doc.get("combinations") or []) if isinstance(c, str)]))
