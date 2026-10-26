@@ -9,8 +9,8 @@ interpretations, and how to state them without overclaiming, in [cosmic-ray new 
 Conventions of nuclear cross sections are in [nuclear cross sections](nuclear-cross-sections.md); halo, J factor and
 annihilation conventions in [dark matter](dark-matter-phenomenology.md).
 
-Status: guidance (Th13), sources read in full text on 2026-10-23 (see "Sources read"); the only executable piece is
-`bartels_rotation.py`. Running a propagation code in
+Status: guidance (Th13), sources read in full text on 2026-10-23 (see "Sources read"); the executable pieces are
+`bartels_rotation.py` and `transport_conventions.py`. Running a propagation code in
 a global fit stays outside v1; choosing which model explains an excess stays limited-support. Experiment facts (bins, periods, published numbers)
 come from the bound experiment profile or a dataset record, never from this page.
 
@@ -51,6 +51,14 @@ come from the bound experiment profile or a dataset record, never from this page
 1 kpc^2/Myr = 3.017e29 cm^2/s (Julian Myr, IAU parsec; unit arithmetic). A D0 quoted at 4 GV and one quoted at 1 GV
 differ by 4^delta before any physics; the beta^eta factor, the break shape and the halo height L change the meaning
 of D0 further. A comparison of transport parameters across papers states all of them or compares predictions instead.
+
+**Converting.** `transport_conventions.py diffusion --input SPEC.json` (keys
+`from`, `to`, `diffusion`) converts among the rows above (`galprop`, `usine-k0`, `usine-k10`, `dragon2`) and the
+canonical names (`canonical`: `D0_cm2_s`, `R0_gv`, `delta`, `eta`, `breaks`). A result is `exact` (pure power law, same
+eta), `approximate` with an error bound (smooth breaks; K0 <-> K10 with a break is never exact) or `not-convertible`
+(other eta or smoothness, momentum p0; exit 1: compare predictions). `reacceleration` scales V_A between
+thin disc and whole halo by sqrt(L/h) (approximate); `energy` converts per-nucleon and total kinetic energy and
+fluxes; `names` maps legacy keys (`D0`, `L`). Its tests parse the table above row by row.
 
 **Parameters and what pins them.** Normalization D0 (or K0) and slope delta; eta; low- and high-rigidity breaks;
 Alfven speed V_A (reacceleration); convective speed V_c and its gradient; halo height L; injection indices and their

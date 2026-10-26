@@ -3,6 +3,16 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- crprop a1: new `skills/hep-theory/scripts/transport_conventions.py` converts cosmic-ray diffusion parameters among
+  the GALPROP, USINE (K0, K10) and DRAGON2 conventions and the canonical names (`D0_cm2_s`, `R0_gv`, `delta`, `eta`),
+  marking each result `exact`, `approximate` with a relative-error bound, or `not-convertible`; it also moves V_A
+  between thin-disc and whole-halo reacceleration (approximate), converts per-nucleon and total kinetic energy, and
+  maps the legacy names `D0` and `L`. Units from the IAU parsec and Julian year (1 kpc^2/Myr = 3.0172e29 cm^2/s). New
+  fixture `tests/adapters/fixtures/cr_propagation/specs/harmonized-v1.json` (r3 §5.5 in the §5.4 transport format);
+  usage paragraph in `cosmic-ray-phenomenology.md`. Contracts unchanged.
+
 ## 0.42.0 (2026-10-26)
 
 Minor release; contracts 3.13.0, `CORE_VERSION` 1.1.0 and geant4 adapter 0.5.0 unchanged. It ships semantic naming
