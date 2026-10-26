@@ -13,7 +13,8 @@ r_j = N_j / N_C are observed parent ratios (inputs); R_s is the secondary's rigi
 ## Assumptions
 
 - Steady state; free escape at |z| = L; observer at the mid-plane; thin disc (h << L) holding gas and sources.
-- Pure diffusion: no convection, reacceleration, energy losses or radioactive decay.
+- Pure diffusion (the two models above): no convection, reacceleration, energy losses or radioactive decay; the
+  closed forms with convection and decay are the section below.
 - E/n conserved in fragmentation; masses A u, so every species has the same velocity at fixed E/n.
 - Parents are pure primaries; one effective stable secondary; hydrogen target only.
 - Cross sections are inputs (effective cumulative production, inelastic), energy independent.
@@ -38,8 +39,21 @@ The models are exact for their own assumptions; they are not claimed to describe
 poor description at low energy, where reacceleration, convection, losses and solar modulation act; the prediction
 artifact covers 1-1000 GeV/n as a numerical range only. The ratio is local interstellar, before solar modulation.
 
+## Convection and radioactive decay (closed forms, B2)
+
+`scripts/convection_decay.py` (derivation `../derivations/convection-decay-record.md`) extends `diffusion-1d` with a
+constant convective speed V_c (`V_c_kms`, conservative form, adiabatic energy change neglected) and with the decay
+of unstable secondaries at rate 1/(gamma tau_0), half-lives from `core.constants.physical` (NUBASE2020), keeping
+the daughter's gain (10Be -> 10B). At the mid-plane N_s(0) = 2 h q_s / (K_s + 2 h n_H v sigma_s) with
+K = V_c + D S coth(S L/2), S = sqrt(V_c^2/D^2 + 4 Gamma/D); K = 2D/L recovers pure diffusion. Fully stripped 7Be
+is propagated as stable (recorded `stable_assumption`). Settings: `../benchmarks/convection-decay-benchmark.json`
+with the ILLUSTRATIVE isotopic set `xs-illustrative-decay.json`; observables are isotope sums at equal E/n (B/C,
+Be/B, 10Be/9Be). With V_c or decay the ratio no longer depends on D0/L alone (the escape term is not a function of
+D/L), so the D0/L degeneracy of pure diffusion is broken only through these terms; this profile does not quantify
+it (work package A3). Reacceleration has no closed form and is excluded.
+
 ## Excluded
 
-See `profile.json` `exclusions`: convection, reacceleration, losses, decay (10Be), energy-dependent or published
+See `profile.json` `exclusions`: reacceleration, losses, energy-dependent or published
 cross sections, ghost networks and tertiaries, helium in the gas, solar modulation, ratios of bin-averaged fluxes in
 rigidity bins, 2D geometry, any comparison with data, any propagation code.
