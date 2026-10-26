@@ -335,7 +335,8 @@ class ChangeSetTests(unittest.TestCase):
         n = ent("lumi", surface="N10", kind="nuisance", container="a", file="a.py", refs=[], ref_kind="uses")
         ents = [n]
         E.classify(ents, {"N10": ["."]}, SURFACES)
-        cs = self.change_set(entity_id=n["entity_id"], replacements=[{"location": "a.py:1", "old": "lumi", "new": "lumi_2018"}])
+        cs = self.change_set(entity_id=n["entity_id"], contract_level="C3",
+                             replacements=[{"location": "a.py:1", "old": "lumi", "new": "lumi_2018"}])
         out = E.validate_change_set(cs, ents, SURFACES, self.root, {"N10", "N3"})
         self.assertEqual((out["exit_code"], out["code"]), (1, "naming.approval_missing"))
         cs["approval"] = {"required": True, "by": "user", "at": "2026-10-26"}

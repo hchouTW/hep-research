@@ -17,7 +17,7 @@ near-duplicate rule compares names across channels. References: text mentions in
 
 Usage: python3 extract_names.py --surface N10 --out INV.json [--root DIR] [--scope DIR ...] [--changed REV]
 --root is the project (default: the working directory); --scope folders are relative to it. The output is a working
-file of <project>/naming/, refused inside artifacts_dir. Prints one JSON object with a status key. Exit 0 written,
+file of <project>/naming/, refused inside artifacts_dir. Prints one JSON object with a status key. Exit codes: 0 written,
 2 bad input, 3 written but zero inputs scanned (the check reports N10 unsupported). Standard library only.
 """
 from __future__ import annotations
@@ -36,6 +36,7 @@ from core.naming.extract import (Builder, TextIndex, artifacts, coverage, files_
                                  mark_changed_by_file, norm_path, now, read_text)
 from core.naming.extract import main as run_cli  # noqa: E402
 from core.naming.model import new_inventory  # noqa: E402
+from core.status import add_status_argument  # noqa: E402
 
 VERSION = "1.0.0"
 EXTRACTOR = {"id": "skills/hep-statistics/scripts/extract_names.py", "version": VERSION}
@@ -209,8 +210,12 @@ def extract_n10(root: Path, scopes, changed: str | None = None, args=None) -> di
 EXTRACT = {"N10": extract_n10}
 
 
+def _options(ap) -> None:
+    add_status_argument(ap)
+
+
 def main(argv=None) -> int:
-    return run_cli(argv, doc=__doc__, readers=EXTRACT, extractor=EXTRACTOR)
+    return run_cli(argv, doc=__doc__, readers={**EXTRACT, "__options__": _options}, extractor=EXTRACTOR)
 
 
 if __name__ == "__main__":

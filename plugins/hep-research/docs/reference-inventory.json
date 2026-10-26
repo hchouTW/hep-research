@@ -25,7 +25,7 @@
   },
   "hep-measurement": {
    "references": 12,
-   "bytes": 122715,
+   "bytes": 122936,
    "uncited": 0
   },
   "hep-ml": {
@@ -35,7 +35,7 @@
   },
   "hep-statistics": {
    "references": 14,
-   "bytes": 200233,
+   "bytes": 200234,
    "uncited": 0
   },
   "hep-theory": {
@@ -156,7 +156,7 @@
     "hep-citations",
     "hep-computing"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "16214af1 2026-10-26"
   },
   {
    "path": "skills/hep-authoring/references/code-review-report.md",
@@ -442,7 +442,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "16214af1 2026-10-26"
   },
   {
    "path": "skills/hep-authoring/references/latex-venue-setup.md",
@@ -926,7 +926,7 @@
     "hep-computing",
     "hep-theory"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "16214af1 2026-10-26"
   },
   {
    "path": "skills/hep-citations/references/claim-evidence-mapping.md",
@@ -1217,7 +1217,7 @@
     "tools/check_instruction_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "16214af1 2026-10-26"
   },
   {
    "path": "skills/hep-computing/references/batch-site-cern-htcondor.md",
@@ -1510,7 +1510,7 @@
     "skills/hep-computing/references/storage-cern-eos.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "56a5a6c9 2026-10-23"
+   "last_commit": "16214af1 2026-10-26"
   },
   {
    "path": "skills/hep-computing/references/risk-and-quality.md",
@@ -1579,7 +1579,7 @@
    "cited_by_other_skills": [
     "hep-ml"
    ],
-   "last_commit": "3b3dca7d 2026-10-17"
+   "last_commit": "16214af1 2026-10-26"
   },
   {
    "path": "skills/hep-computing/references/semantic-naming.md",
@@ -1616,6 +1616,7 @@
     "skills/hep-detector/scripts/extract_names.py",
     "skills/hep-measurement/SKILL.md",
     "skills/hep-measurement/references/analysis-design.md",
+    "skills/hep-measurement/references/hep-measurement-guide.md",
     "skills/hep-measurement/references/systematics.md",
     "skills/hep-measurement/scripts/extract_names.py",
     "skills/hep-ml/SKILL.md",
@@ -1637,7 +1638,7 @@
     "hep-statistics",
     "hep-theory"
    ],
-   "last_commit": "5dbb8c4d 2026-10-26"
+   "last_commit": "16214af1 2026-10-26"
   },
   {
    "path": "skills/hep-computing/references/software-architecture.md",
@@ -1785,7 +1786,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "e03c0396 2026-10-22"
+   "last_commit": "16214af1 2026-10-26"
   },
   {
    "path": "skills/hep-detector/references/calorimetry-ecal-hcal.md",
@@ -2681,7 +2682,7 @@
     "hep-computing",
     "hep-detector"
    ],
-   "last_commit": "e03c0396 2026-10-22"
+   "last_commit": "16214af1 2026-10-26"
   },
   {
    "path": "skills/hep-measurement/references/analysis-validation.md",
@@ -2790,8 +2791,8 @@
   {
    "path": "skills/hep-measurement/references/hep-measurement-guide.md",
    "owner": "hep-measurement",
-   "bytes": 15458,
-   "lines": 112,
+   "bytes": 15679,
+   "lines": 113,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/data-mc-validation-and-detector-systematics.md",
@@ -2947,7 +2948,7 @@
     "hep-statistics",
     "hep-theory"
    ],
-   "last_commit": "7cd0b7ec 2026-10-17"
+   "last_commit": "16214af1 2026-10-26"
   },
   {
    "path": "skills/hep-measurement/references/weights-normalization.md",
@@ -3490,7 +3491,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "485e96cb 2026-10-17"
+   "last_commit": "16214af1 2026-10-26"
   },
   {
    "path": "skills/hep-ml/references/robustness-and-distribution-shift.md",
@@ -3759,8 +3760,8 @@
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 14800,
-   "lines": 148,
+   "bytes": 14801,
+   "lines": 149,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/inference-and-unfolding.md",
@@ -3877,7 +3878,7 @@
     "hep-computing",
     "hep-measurement"
    ],
-   "last_commit": "d8ab97cb 2026-10-23"
+   "last_commit": "16214af1 2026-10-26"
   },
   {
    "path": "skills/hep-statistics/references/pdf-fit-statistics.md",
@@ -4488,7 +4489,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "6c22fd52 2026-10-13"
+   "last_commit": "16214af1 2026-10-26"
   },
   {
    "path": "skills/hep-theory/references/selection-rules.md",

@@ -97,6 +97,7 @@ Scripts in `<plugin root>/skills/hep-measurement/scripts/`; each takes `--status
 
 - `check_systematic_variations.py`: Up/Down present with the nominal binning; effect classified as normalization, shape or mixed (`--independent` only for variations not made from the same events); same-direction shifts flagged, direction taken from payloads, not integrals.
 - `make_yield_table.py`, `systematics_table_tex.py`: Markdown yield and booktabs systematics tables, labelled with their status.
+- `extract_names.py`: the naming inventories of samples and run ranges (N7), selections and regions (N8) and systematic variations (N9) for the naming check ([charter](../../hep-computing/references/semantic-naming.md)).
 - `counting_reference.py`: exact Poisson tails and a flat-prior Bayesian bound for one bin, known background; **not** CLs.
 - `particle_ratio_with_uncertainty.py`: ratio or fraction of two yields (delta method, optional correlation).
 - `mask_blinded_bins.py`: mask blinded bins and data/reference ratios; synthetic data and tests only.

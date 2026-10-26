@@ -29,7 +29,7 @@ Usage: python3 extract_names.py --surface N1|N2|N3|N4|N5|N6|N16 --out INV.json [
        [--changed REV] [--external PATH ...]
 --root is the project (default: the working directory); --scope folders are relative to it (default: the root). The
 output is a working file of <project>/naming/, refused inside the project's artifacts_dir. Prints one JSON object
-with a status key. Exit 0 written, 2 bad input (unknown surface, scope outside the root, bad revision, unwritable
+with a status key. Exit codes: 0 written, 2 bad input (unknown surface, scope outside the root, bad revision, unwritable
 output), 3 written but zero inputs scanned (the check reports the surface unsupported). Standard library only; N3
 and N4 read ROOT files with uproot or PyROOT and Parquet with pyarrow when installed.
 """
@@ -55,6 +55,7 @@ from core.naming.extract import Builder  # noqa: E402
 from core.naming.extract import now as _now  # noqa: E402
 from core.naming.model import new_entity, new_inventory, sha256_text  # noqa: E402
 from core.naming.vocab import hook_methods  # noqa: E402
+from core.status import add_status_argument  # noqa: E402
 
 VERSION = "1.1.0"
 EXTRACTOR = {"id": "skills/hep-computing/scripts/extract_names.py", "version": VERSION}
@@ -925,6 +926,7 @@ def _options(ap) -> None:
     ap.add_argument("--external", action="append", metavar="PATH",
                     help="N3/N4: a file or folder (relative to the root) of inputs made outside the project, such as "
                          "official ntuples; its names are source external (C4, never renamed)")
+    add_status_argument(ap)
 
 
 def main(argv=None) -> int:

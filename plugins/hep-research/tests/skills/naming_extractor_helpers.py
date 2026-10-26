@@ -30,13 +30,13 @@ class ProjectCase(unittest.TestCase):
     SKILL = ""
 
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.root = Path(self.tmp.name)
+        self.workdir = tempfile.TemporaryDirectory()
+        self.root = Path(self.workdir.name)
         (self.root / "naming").mkdir()
         self.mod = load(self.SKILL)
 
     def tearDown(self):
-        self.tmp.cleanup()
+        self.workdir.cleanup()
 
     def write(self, rel: str, text) -> Path:
         p = self.root / rel

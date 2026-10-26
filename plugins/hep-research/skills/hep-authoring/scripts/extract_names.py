@@ -16,7 +16,7 @@ Comments (% to the end of a line) are left out.
 
 Usage: python3 extract_names.py --surface N14|N15 --out INV.json [--root DIR] [--scope DIR ...] [--changed REV]
 --root is the project (default: the working directory); --scope folders are relative to it. The output is a working
-file of <project>/naming/, refused inside artifacts_dir. Prints one JSON object with a status key. Exit 0 written,
+file of <project>/naming/, refused inside artifacts_dir. Prints one JSON object with a status key. Exit codes: 0 written,
 2 bad input, 3 written but zero inputs scanned (the check reports the surface unsupported). Standard library only.
 """
 from __future__ import annotations
@@ -33,6 +33,7 @@ if str(PLUGIN) not in sys.path:
 from core.naming.extract import Builder, coverage, files_of, mark_changed_by_file, norm_path, now, read_text  # noqa: E402
 from core.naming.extract import main as run_cli  # noqa: E402
 from core.naming.model import new_inventory  # noqa: E402
+from core.status import add_status_argument  # noqa: E402
 
 VERSION = "1.0.0"
 EXTRACTOR = {"id": "skills/hep-authoring/scripts/extract_names.py", "version": VERSION}
@@ -134,8 +135,12 @@ def extract_n15(root: Path, scopes, changed: str | None = None, args=None) -> di
 EXTRACT = {"N14": extract_n14, "N15": extract_n15}
 
 
+def _options(ap) -> None:
+    add_status_argument(ap)
+
+
 def main(argv=None) -> int:
-    return run_cli(argv, doc=__doc__, readers=EXTRACT, extractor=EXTRACTOR)
+    return run_cli(argv, doc=__doc__, readers={**EXTRACT, "__options__": _options}, extractor=EXTRACTOR)
 
 
 if __name__ == "__main__":

@@ -489,6 +489,7 @@ class EdgeCaseCliTests(_TempFiles, unittest.TestCase):
             ('evaluate_design.py', 'run', '--artifacts', self.tmp, '--candidate', 'x:y', '--figure-of-merit', 'nope'),
             ('geant4_benchmarks.py', 'reference', '--study-spec', ASSETS / 'geant4-study-spec.example.json',
              '--material', 'Si_study', '--particle', 'mu-', '--energy-mev', '1e308', '--thickness-mm', '1e308'),
+            ('extract_names.py', '--surface', 'N99', '--root', self.tmp, '--out', self.tmp / 'o.json'),
         ]
 
     def test_all_scripts_emit_strict_json_and_no_traceback(self):

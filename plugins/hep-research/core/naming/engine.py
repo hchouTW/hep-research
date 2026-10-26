@@ -322,6 +322,10 @@ def validate_change_set(cs: dict, entities, surfaces, project_root, supplied_sur
         return out("input-error", 2, 0, "naming.change_set_entity_unknown",
                    f"{cs['entity_id']} is in none of the supplied inventories")
     policy = rename_policy(e, registry)
+    if cs.get("contract_level") and cs["contract_level"] != e["contract_level"]:
+        return out("fail", 1, 1, "naming.change_set_level_mismatch",
+                   f"the change set records {cs['contract_level']}; the inventory gives {e['name']} "
+                   f"{e['contract_level']}: rebuild the change set from the inventory")
     if e["contract_level"] == "C4" or policy == "never":
         return out("fail", 1, 1, "naming.rename_forbidden",
                    f"{e['name']} is {e['contract_level']} with rename policy {policy}: never renamed; propose an alias")
@@ -347,6 +351,9 @@ def validate_change_set(cs: dict, entities, surfaces, project_root, supplied_sur
                    f"no inventory for {', '.join(lacking)}, which refer to {e['surface']} names")
     stale = [p for p, d in sorted(cs["source_sha256"].items()) if file_sha256(Path(project_root) / p) != d]
     stale_inv = [d for d in cs["inventory_digests"].values() if inventory_digests and d not in set(inventory_digests)]
+    if inventory_digests and not cs["inventory_digests"]:
+        return out("incomplete", 3, 4, "naming.change_set_digests_missing",
+                   "the change set records no inventory digests: record the sha256 of each inventory it was built from")
     if stale or stale_inv:
         what = ", ".join(stale) if stale else "the inventories"
         return out("incomplete", 3, 4, "naming.change_set_stale",

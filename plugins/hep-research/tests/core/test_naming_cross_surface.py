@@ -185,8 +185,8 @@ class ReviewRoundThreeTests(unittest.TestCase):
 
 class CrossSurfaceChangeSetTests(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.root = Path(self.tmp.name)
+        self.workdir = tempfile.TemporaryDirectory()
+        self.root = Path(self.workdir.name)
         (self.root / "cards").mkdir()
         (self.root / "cards/a.txt").write_text("jes shape 1\n")
         self.sha = hashlib.sha256((self.root / "cards/a.txt").read_bytes()).hexdigest()
@@ -194,7 +194,7 @@ class CrossSurfaceChangeSetTests(unittest.TestCase):
         self.up, self.down = shape("ttbar_jesUp"), shape("ttbar_jesDown")
 
     def tearDown(self):
-        self.tmp.cleanup()
+        self.workdir.cleanup()
 
     def validate(self, replacements, supplied=("N10", "N3")):
         entities = [self.jes] + ([self.up, self.down] if "N3" in supplied else [])
@@ -213,6 +213,20 @@ class CrossSurfaceChangeSetTests(unittest.TestCase):
     def test_derived_histograms_must_be_renamed_with_the_nuisance(self):
         out = self.validate([{"location": self.up["entity_id"], "old": "ttbar_jesUp", "new": "ttbar_jes_flavorUp"}])
         self.assertEqual((out["exit_code"], out["code"]), (1, "naming.replacement_missing"))
+
+    def test_recorded_level_must_match_the_inventory(self):
+        reps = [{"location": x["entity_id"], "old": x["name"], "new": x["name"] + "2"} for x in (self.up, self.down)]
+        entities = [self.jes, self.up, self.down]
+        E.link_targets(entities)
+        E.classify(entities, {"N10": ["."], "N3": ["."]}, SURFACES)
+        cs = {"change_set_id": "c", "entity_id": self.jes["entity_id"], "current": "jes", "proposed": "jes2",
+              "contract_level": "C0", "rename_policy": "matrix", "replacements": reps, "inventory_digests": {},
+              "source_sha256": {"cards/a.txt": self.sha}, "verify": ["check"]}
+        out = E.validate_change_set(cs, entities, SURFACES, self.root, {"N10", "N3"})
+        self.assertEqual((out["exit_code"], out["code"]), (1, "naming.change_set_level_mismatch"))
+        cs["contract_level"] = "C3"
+        out = E.validate_change_set(cs, entities, SURFACES, self.root, {"N10", "N3"}, inventory_digests=["abc"])
+        self.assertEqual((out["exit_code"], out["code"]), (3, "naming.change_set_digests_missing"))
 
     def test_complete_cross_surface_change_set_passes(self):
         reps = [{"location": x["entity_id"], "old": x["name"], "new": x["name"].replace("jes", "jes_flavor")}

@@ -105,8 +105,8 @@ subcommands, inputs and outputs, validation tools outside `core/stats`, publicat
 
 ## Skill scripts
 
-Command-line helpers in `skills/hep-statistics/scripts/` (read `--help` first); they call the modules above and never
-replace them. The rule "run, do not hand-compute" applies.
+Helpers in `skills/hep-statistics/scripts/` (read `--help` first); they call the modules above, never replace
+them: run them, do not hand-compute.
 
 Dependencies are marked per script: unmarked scripts use the standard library only; marked ones refuse to run
 without NumPy (and SciPy) with exit 2 and a JSON message, and every script prints `--help` without them.
@@ -116,9 +116,10 @@ without NumPy (and SciPy) with exit 2 and a JSON message, and every script print
 - `global_significance.py` (needs NumPy): toy-calibrated global significance for a recorded scan.
 - `sensitivity_and_gof.py` (needs NumPy): Asimov discovery sensitivity (standard library) and toy-calibrated goodness of fit (NumPy).
 - `bayes_diagnostics.py` (needs NumPy): R-hat, ESS and MCSE of supplied chains, prior reweighting; `bayes_calibration.py` (needs NumPy and SciPy): quantile and SBC calibration checks.
-- `combine_measurements.py` (needs NumPy): GLS combination once the combination plan accepts the inputs (example: `skills/hep-statistics/assets/combine.example.json`); `combine_asymmetric.py`: Barlow's asymmetric errors; `split_consistency.py`: do split samples agree, shared blocks subtracted, said when undeclared; `build_covariance.py`: a `[Proposal]` covariance from declared correlation models and a length scan. Both import NumPy (and SciPy) at run time.
+- `combine_measurements.py` (needs NumPy): GLS combination once the combination plan accepts the inputs (example: `skills/hep-statistics/assets/combine.example.json`); `combine_asymmetric.py`: Barlow's asymmetric errors; `split_consistency.py`: do split samples agree, shared blocks subtracted, said when undeclared; `build_covariance.py`: a `[Proposal]` covariance from declared correlation models and a length scan. Both: NumPy (and SciPy) at run time.
 - `covariance_fit.py` (needs NumPy and SciPy): fits to published points with their covariance (Peelle diagnostics; built-in, plug-in and `tabulated-grid` models; per-dataset scale nuisance); `break-scan`: toy-calibrated break; `discrete_profile.py` (needs NumPy and SciPy): discrete profiling; `eft_scan.py` (needs NumPy and SciPy): EFT scans; `pcl_efficiency_ratio.py` (needs NumPy and SciPy), `ratio_estimation.py` (needs NumPy): ratio and efficiency intervals; `sweighted_fit.py` (needs NumPy and SciPy): sWeighted fits.
-- `result_artifact.py`: a `statistical-result` artifact from a tool's output, with its status label.
+- `result_artifact.py`: a `statistical-result` artifact from a tool's output, with its status label; `extract_names.py`: N10
+  naming inventory.
 - `pdf_reweighting.py`: Bayesian reweighting of a PDF replica set (NNPDF and Giele-Keller weights, N_eff);
   `hessian_profiling.py`: linear Hessian profiling of a Hessian set with new data; [PDF fits](pdf-fit-statistics.md).
   NumPy at run time.
@@ -126,7 +127,7 @@ without NumPy (and SciPy) with exit 2 and a JSON message, and every script print
 - `project_uncertainty.py`: an uncertainty budget and Asimov significance at k times the exposure (M5 scaling
   classes) and the reach; outputs are labeled `projection` and fail the publication gate.
 - `tail_extrapolation.py`: a control-region tail fitted by several model families and extrapolated into the signal
-  region, validated on a cut of the control region; envelope kept apart; NumPy and SciPy are imported at run time.
+  region, validated on a cut of the control region; envelope kept apart; NumPy and SciPy at run time.
 - `periodicity_scan.py`: generalized Lomb-Scargle with a surrogate global p (white, AR(1), OU);
   `time_structure.py`: change points (toy-calibrated false alarms) and lags with surrogates. NumPy at run time.
 - Inference scripts of hep-measurement, the pyhf and Combine starting points and the unbinned fit: [command

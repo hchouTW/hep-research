@@ -734,6 +734,7 @@ F04_CASES = {
     'evaluate_design.py': ['plan', '--artifacts', PLUGIN / 'contracts' / 'fixtures' / 'design' / 'spectrometer' / 'artifacts'],
     'geant4_benchmarks.py': ['reference', '--study-spec', ASSETS / 'geant4-study-spec.example.json', '--material',
                              'Si_study', '--particle', 'mu-', '--energy-mev', '10000', '--thickness-mm', '0.3'],
+    'extract_names.py': ['--surface', 'N11', '--root', ASSETS, '--out', OUTDIR / 'naming-n11.json'],
 }
 
 

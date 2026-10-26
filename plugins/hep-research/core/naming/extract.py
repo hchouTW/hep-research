@@ -6,7 +6,7 @@ out); TextIndex and PathIndex find the text mentions of a name and of a path in 
 writes the search_coverage strings; the git helpers mark names added, modified or removed against a revision
 (mark_changes compares the names a reader finds now with those it finds in the old content of the same files);
 artifacts() yields the JSON artifacts in scope (read only: an extractor never writes into artifacts_dir, I9). main()
-is the common command line: --surface, --out, --root, --scope, --changed, --status; exit 0 written, 2 bad input,
+is the common command line: --surface, --out, --root, --scope, --changed (the script adds --status); exit 0 written, 2 bad input,
 3 written with zero inputs scanned. core imports only core; standard library only.
 """
 from __future__ import annotations
@@ -20,7 +20,6 @@ import subprocess
 from pathlib import Path, PurePosixPath
 
 from core.naming.model import new_entity, sha256_text
-from core.status import add_status_argument
 
 GIT_TIMEOUT_S = 120
 SKIP_DIRS = {".git", "__pycache__", ".venv", "venv", "node_modules", ".mypy_cache", ".ruff_cache", ".pytest_cache",
@@ -354,7 +353,7 @@ class Builder:
 
 def main(argv, *, doc: str, readers: dict, extractor: dict) -> int:
     """The common command line of every extract_names.py. readers maps a surface to f(root, scopes, changed, args)
-    returning an inventory; extra options a reader needs are declared in readers["__options__"](parser)."""
+    returning an inventory; readers["__options__"](parser) adds the script's own options, --status included."""
     import sys
     ap = argparse.ArgumentParser(description=doc.split("\n\n")[0], formatter_class=argparse.RawDescriptionHelpFormatter,
                                  epilog=doc.split("\n\n", 1)[1] if "\n\n" in doc else None)
@@ -364,9 +363,7 @@ def main(argv, *, doc: str, readers: dict, extractor: dict) -> int:
     ap.add_argument("--root", type=Path, default=Path("."), help="project root (default: the working directory)")
     ap.add_argument("--scope", action="append", help="folder relative to the root to scan (repeatable; default the root)")
     ap.add_argument("--changed", metavar="REV", help="git revision to mark added, modified and removed names against")
-    if "__options__" in readers:
-        readers["__options__"](ap)
-    add_status_argument(ap)
+    readers["__options__"](ap)  # the script's own options, --status (core.status.add_status_argument) among them
     try:
         args = ap.parse_args(argv)
     except SystemExit as exc:
