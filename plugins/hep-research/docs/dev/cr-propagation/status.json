@@ -1,7 +1,7 @@
 {
  "schema": "crprop-status/1",
  "writer": "orchestrator only (r4 4)",
- "cycle": 1,
+ "cycle": 2,
  "updated": "2026-10-26",
  "integration_branch": "worktree-crprop-integration",
  "integration_base": "8fcbb826",
@@ -88,24 +88,24 @@
    ]
   },
   "C1": {
-   "state": "dispatched",
+   "state": "verifying",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-c1",
    "base": "ef37d970",
-   "head": null,
+   "head": "d66d4085",
    "merge_commit": null,
-   "worker_report": null,
+   "worker_report": "PARTIAL: all deliverables; CONTRACTS_VERSION bump left to A2 (13 fixture/example pins outside C1 files). Open: closed-form provider gives bin-averaged ratio, not ratio of bin integrals (P2) -> C2 must handle; profile README/index not updated",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": []
   },
   "B2": {
-   "state": "ready",
-   "dispatches": 0,
+   "state": "dispatched",
+   "dispatches": 1,
    "rework_rounds": 0,
-   "branch": null,
-   "base": null,
+   "branch": "worktree-crprop-b2",
+   "base": "6a0c2ae6",
    "head": null,
    "merge_commit": null,
    "worker_report": null,
@@ -318,6 +318,11 @@
    "cycle": 1,
    "date": "2026-10-26",
    "event": "P0 round-1 REWORK fixed in 34e2edeb; A1 and C1 told of common_files change; round-2 verifier dispatched"
+  },
+  {
+   "cycle": 2,
+   "date": "2026-10-26",
+   "event": "C1 reported PARTIAL, verifier dispatched; B2 dispatched; all agents resumed after API rate limit"
   }
  ]
 }
