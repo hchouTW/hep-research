@@ -58,6 +58,15 @@ Software checks establish contract consistency only, not physical validity.
   checks), ILLUSTRATIVE isotopic set `models/xs-illustrative-decay.json`, tests `tests/test_convection_decay.py`;
   the profile's tests directory is now a package so it is discoverable from the plugin root. Reacceleration stays
   excluded. Profile version unchanged (0.1.0): the minor bump needs `profiles/registry.json` and the example pins.
+- crprop a3: two-level degeneracy diagnostics. New `skills/hep-statistics/scripts/degeneracy.py`: the Fisher screen
+  (eigen-decomposition and flat-direction rule moved unchanged from `covariance_fit.py`, which now calls it) and
+  profile-likelihood scans along one parameter, a direction (or each Fisher flat direction) or over a plane, with
+  object-form degeneracy entries (`combination`, `form`, `exponents`, `evidence`: `fisher-screen` without `valid_range`,
+  `profile-scan` with the `valid_range` where the profile stays within the threshold). `covariance_fit.py fit`
+  (tabulated-grid) accepts an optional `degeneracy_scan` block and then adds `degeneracies` and `profile_scans` to each
+  fit; without it every output is byte-identical to the base (A3-1 baseline hashes). `degeneracy.py synthetic-curved`
+  is a built-in SYNTHETIC study (D0_cm2_s proportional to L_kpc^1.2, exact to 6 kpc, broken above by a spectral tilt):
+  the profile scan gives `valid_range.L_kpc` = [2, 6.95]. Tests: `tests/skills/hep_statistics/test_degeneracy.py`.
 
 ## 0.42.0 (2026-10-26)
 

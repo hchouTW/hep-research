@@ -6008,3 +6008,28 @@ pass; B2-3 58 tests ok (from the plugin root and from `tests/`). Checks: `run_al
 `236a374a`; static part, naming, layering, packaging, wiring and `workflow_check.py` diff/gaps/acceptance pass.
 Software and numerical-consistency checks only; the inputs are ILLUSTRATIVE and no comparison with data or with a
 propagation code is made.
+
+## CRPROP-A3 — 2026-10-26 (environment E2)
+
+Work package A3 (two-level degeneracy diagnostics) of the cr-propagation r4 workflow, r3 card §A3, principle P7.
+
+Environment: E2 (macOS arm64 workstation), Python 3.13.2 (miniconda), NumPy 2.4.4, SciPy 1.17.1. r3 §0.3 checks:
+toplevel `/Users/hchou/hep-research/.claude/worktrees/crprop-a3`, branch `worktree-crprop-a3`, status clean at start;
+base exception (decision D10): base is the integration HEAD `b83881c6`, not `main`; prerequisite P0 (its rework
+commits up to `34e2edeb`) is an ancestor of HEAD.
+
+| Item | Result | Evidence |
+|---|---|---|
+| A3-1 baseline, recorded before any change | 161 tabulated-grid outputs hashed on the base (every in-process `grid_fit` result and every `covariance_fit.py fit` stdout on a tabulated-grid input, from `test_grid_fit`, `test_bc_propagation_fit`, `test_cr_propagation` (2 live DRAGON2 tests skipped), and `examples/bc-propagation-fit/run.py --toys 20` with its `results.json` and `report.md`); two base runs identical | `$CRPROP_OUT/a3/baseline.txt`, harness `$CRPROP_OUT/a3/baseline_harness.py` |
+| A3-1 after the change | all 161 sha256 identical to the baseline | `$CRPROP_OUT/a3/after.txt` |
+| A3-2 built-in study (`degeneracy.py synthetic-curved`, analytic, Asimov) | Fisher screen: `D0_cm2_s/L_kpc^1.2`, exponent of L_kpc -1.2000, `fisher-screen`, no `valid_range`; profile scan over L_kpc (41 points, D0_cm2_s profiled, threshold 1): `profile-scan`, `valid_range.L_kpc` = [2 (scan edge), 6.947 (threshold)], exponent -1.20003; profiled delta -2 ln L 1.6e-13 at 6 kpc, 19.4 at 8 kpc | `$CRPROP_OUT/a3/acceptance/` |
+| A3-2 through `covariance_fit.py` (tabulated grid 25 x 17 nodes of the same model, `degeneracy_scan` {parameter L_kpc}) | Fisher exponent -1.2008, no `valid_range`; profile scan `valid_range.L_kpc` = [2, 6.851], exponent -1.2002 | `tests/skills/hep_statistics/test_degeneracy.py` |
+| A3-3 | `degeneracy.py --help` exit 0; module in `NO_INPUT_FILE` | `tests/skills/test_cli_robustness.py` |
+| A3-4 | `check_wiring.py --since b83881c6`: pass | |
+
+How the synthetic break is made genuine: the prediction is y_i ∝ (R_i/10 GV)^-0.45 · (u_true/u) · (1 + b(L) h_i) with
+u = D0_cm2_s / L_kpc^1.2, so for L <= 6 kpc every point with the same u predicts exactly the truth (exact degeneracy),
+and above 6 kpc a spectral tilt b(L) = 0.05 ((L - 6 kpc) / 2 kpc)^2 changes the energy dependence, which u (a pure
+normalization) cannot absorb. The data therefore exclude the valley at 8 kpc (profiled delta 19.4), not only the model
+declaration. The numbers are SYNTHETIC. The Fisher screen at the best fit (L = 4 kpc) sees only the local exponent;
+the profile scan finds where it holds. The A3 tests use only synthetic models; no propagation code was run.

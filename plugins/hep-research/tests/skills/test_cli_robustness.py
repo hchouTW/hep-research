@@ -219,6 +219,7 @@ NO_INPUT_FILE = {  # script: why the missing-file check does not apply
     "skills/hep-computing/scripts/create_story_card.py": "text on the command line",
     "skills/hep-computing/scripts/find_python.py": "interpreter paths and package names on the command line",
     "skills/hep-computing/scripts/make_synthetic_nanoaod.py": "writes a file, reads none",
+    "skills/hep-statistics/scripts/degeneracy.py": "a built-in synthetic study (scan points and threshold on the command line)",
     "skills/hep-statistics/scripts/discrete_profile.py": "a built-in synthetic study (toys and seed on the command line)",
     "skills/hep-statistics/scripts/li_ma_significance.py": "counts on the command line",
     "skills/hep-statistics/scripts/pcl_efficiency_ratio.py": "numbers on the command line",
