@@ -3,7 +3,22 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.42.0 (2026-10-26)
+
+Minor release; contracts 3.13.0, `CORE_VERSION` 1.1.0 and geant4 adapter 0.5.0 unchanged. It ships semantic naming
+governance (#303-#306): one data model, rule registry, engine, disposition rule, procedure and report for every
+naming surface N1-N17, with an extractor for each surface in its owner skill, cross-surface checks (shape histograms
+a nuisance derives, label references, BibTeX citations), glossary identifiers, and the plugin's own naming gate.
+
+**Before you upgrade** (details in each entry below):
+- Stanza item 6 in every `SKILL.md` now asks agents to name what they add or change for what it holds, per the
+  semantic naming charter (`skills/hep-computing/references/semantic-naming.md`), and never to rename an external
+  (C4) name.
+- `hep-research.project.json` schema 1.3.0 adds an optional `naming` block (`strict`, `glossary`, `waivers`); a
+  config that declares 1.3.0 needs this plugin version.
+- The eight "(moved)" pointers of the hep-detector front-end page are gone: links to their old anchors now need the
+  new pages `front-end-waveform-processing.md` and `front-end-calibration.md`.
+- `run_all_checks` runs two new checks, `naming_registry` and the naming gate `naming`.
 
 - Semantic naming governance, phases P1 and P2 of the semantic naming spec v4.2 (phases one release later than the
   spec, since 0.41.0 shipped without it). Every naming surface (N1-N17) shares one data model, rule registry, engine,

@@ -3482,6 +3482,23 @@ Not done in this stage: the independent
 new-problem run by an agent that did not take part (C1.10, section A.8), the `review.py` Markdown review, the release
 manifest. The adequacy table is unchanged; search values remain F1 optimistic bounds and decide nothing.
 
+## 0.42.0 release check (2026-10-26, E2 and the CI lock)
+
+Release branch `release/0.42.0` from main `848c5eb4`. It ships #302-#306 (semantic naming P1-P5 and the fixes of the
+spec's third review round, SEMANTIC-NAMING-P1-P2 and SEMANTIC-NAMING-P3-P5; the removal of the front-end "(moved)"
+pointers); contracts 3.13.0, `CORE_VERSION` 1.1.0 and geant4 adapter 0.5.0 unchanged. No sci-fix ledger entry. The
+ams02-research companion needs no change (it requires hep-research >= 0.11.0).
+
+What changed in the release branch: version 0.42.0 in both manifests, `pyproject.toml`, the README, two assets and the
+theory-profile scripts (profile artifacts carry the new version); CHANGELOG `Unreleased` is now `0.42.0`; examples
+regenerated with E2 (`bc-propagation-fit` with the CI lock): only version strings and the hashes that cover them change
+(`unfolding-coverage` restored); reference inventory regenerated.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 6`, E2 (Python 3.13.2, NumPy 2.5.3) | 31 pass, 0 fail, 2 skipped (CLI host checks); 5730 tests in 471 modules, 5576 pass, 0 failures, 154 skipped |
+| Same with the CI lock (Python 3.13.2, NumPy 2.4.6, SciPy 1.17.1, no torch) | 31 pass, 0 fail, 2 skipped; 5730 tests, 5481 pass, 0 failures, 249 skipped |
+
 ## 0.41.0 release check (2026-10-26, E2 and the CI lock)
 
 Release branch `release/0.41.0` from main `b50db9b4` (main CI green). It ships #294-#300 (FRONTEND-RECO-SIM with the
