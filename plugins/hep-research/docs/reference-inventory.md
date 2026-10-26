@@ -184,7 +184,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `root-balanced-design-guidelines.md` | hep-computing | 37.3 | yes | 10 | - | 56a5a6c9 2026-10-23 |
 | `root-debugging.md` | hep-computing | 3.6 | yes | 4 | - | 9257d7b5 2026-10-15 |
 | `root-usage-patterns.md` | hep-computing | 7.0 | yes | 6 | hep-ml | 16214af1 2026-10-26 |
-| `semantic-naming.md` | hep-computing | 17.5 | yes | 40 | hep-authoring, hep-citations, hep-detector, hep-measurement, hep-ml, hep-statistics, hep-theory | 16214af1 2026-10-26 |
+| `semantic-naming.md` | hep-computing | 17.5 | yes | 40 | hep-authoring, hep-citations, hep-detector, hep-measurement, hep-ml, hep-statistics, hep-theory | 7be56d2b 2026-10-26 |
 | `software-architecture.md` | hep-computing | 7.8 | no | 4 | - | 351029c0 2026-10-07 |
 | `status-updates-and-completion.md` | hep-computing | 2.0 | no | 2 | - | 351029c0 2026-10-07 |
 | `storage-cern-eos.md` | hep-computing | 13.4 | yes | 4 | - | 50decbd0 2026-10-17 |
