@@ -5765,3 +5765,27 @@ loosening or deleting one waits for H1 (`workflow_check.py acceptance`).
 Derived entries (not in r3): ENV-1 to ENV-3 (from r4 §3) and C2U-1, C2U-2 (from r3 §C2's USINE case, split by r4 §6).
 ALL-2 is replaced by the P0 freeze. **Not verified here:** r3 Q10's formal independent review with `review.py` is not
 run at P0; it moves to before H1 (r4 Open Questions).
+
+## CRPROP-A1 — 2026-10-26 (environment E2)
+
+Work package A1 of the cr-propagation r4 campaign (r3 §A1, §5.5): convention conversion
+(`skills/hep-theory/scripts/transport_conventions.py`) and the harmonized configuration `harmonized-v1`.
+
+Environment: E2, macOS 26.5 arm64, Python 3.13.2, standard library only. r3 §0.3 checks, run 2026-10-26 before the
+first edit: `git rev-parse --show-toplevel` = `.claude/worktrees/crprop-a1` (this worktree); `git branch
+--show-current` = `worktree-crprop-a1`; `git status` clean; prerequisite P0 `ef37d970` is an ancestor of HEAD
+(`git merge-base --is-ancestor` exit 0). Base exception (decision D10): the base is the integration HEAD `ef37d970`,
+not `origin/main`; the line numbers r3 cites for A1 were rechecked on this base (the convention table of
+`cosmic-ray-phenomenology.md` is at lines 45-49, three rows).
+
+Acceptance criteria and tolerances, written before any implementation (R9; frozen in
+`docs/dev/cr-propagation/acceptance.json`, never loosened):
+
+| ID | Criterion | Tolerance |
+|---|---|---|
+| A1-1 | Pure power-law round trips (every pair of conventions, there and back) | relative error < 1e-12 |
+| A1-2 | 1 kpc^2/Myr in cm^2/s, from the IAU parsec (648000/pi au, au = 149597870700 m) and the Julian year (365.25 d) | 3.0172e29 within relative 1e-4 |
+| A1-3 | The tests parse the convention table of `cosmic-ray-phenomenology.md` row by row; a parse failure fails the test; no value copied by hand | parse of every row |
+| A1-4 | With a break, or different smoothness conventions, the status is `approximate` or `not-convertible`; K0 <-> K10 with a break is never `exact` | status only |
+| A1-5 | V_A between thin disc and whole halo | status `approximate` only |
+| A1-6 | `harmonized-v1.json` carries every §5.5 row and the §5.4 `transport` structure; schema validation against `ext_theory_spec.transport` after A2 merges | every row present |
