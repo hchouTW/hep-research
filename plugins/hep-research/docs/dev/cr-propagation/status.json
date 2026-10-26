@@ -24,19 +24,21 @@
    "rework_rounds": 0,
    "branch": null,
    "base": null,
-   "head": null,
+   "head": "ef37d970",
    "merge_commit": null,
    "worker_report": null,
    "verifier_report": null,
    "missing_capabilities": [],
-   "notes": []
+   "notes": [
+    "orchestrator WP; verifier dispatched"
+   ]
   },
   "ENV": {
-   "state": "pending",
-   "dispatches": 0,
+   "state": "dispatched",
+   "dispatches": 1,
    "rework_rounds": 0,
-   "branch": null,
-   "base": null,
+   "branch": "worktree-crprop-env",
+   "base": "ef37d970",
    "head": null,
    "merge_commit": null,
    "worker_report": null,
@@ -45,11 +47,11 @@
    "notes": []
   },
   "A1": {
-   "state": "pending",
-   "dispatches": 0,
+   "state": "dispatched",
+   "dispatches": 1,
    "rework_rounds": 0,
-   "branch": null,
-   "base": null,
+   "branch": "worktree-crprop-a1",
+   "base": "ef37d970",
    "head": null,
    "merge_commit": null,
    "worker_report": null,
@@ -58,11 +60,11 @@
    "notes": []
   },
   "A2": {
-   "state": "pending",
-   "dispatches": 0,
+   "state": "dispatched",
+   "dispatches": 1,
    "rework_rounds": 0,
-   "branch": null,
-   "base": null,
+   "branch": "worktree-crprop-a2",
+   "base": "ef37d970",
    "head": null,
    "merge_commit": null,
    "worker_report": null,
@@ -71,7 +73,7 @@
    "notes": []
   },
   "A3": {
-   "state": "pending",
+   "state": "ready",
    "dispatches": 0,
    "rework_rounds": 0,
    "branch": null,
@@ -81,14 +83,16 @@
    "worker_report": null,
    "verifier_report": null,
    "missing_capabilities": [],
-   "notes": []
+   "notes": [
+    "waiting for a worker slot (limit 4)"
+   ]
   },
   "C1": {
-   "state": "pending",
-   "dispatches": 0,
+   "state": "dispatched",
+   "dispatches": 1,
    "rework_rounds": 0,
-   "branch": null,
-   "base": null,
+   "branch": "worktree-crprop-c1",
+   "base": "ef37d970",
    "head": null,
    "merge_commit": null,
    "worker_report": null,
@@ -97,7 +101,7 @@
    "notes": []
   },
   "B2": {
-   "state": "pending",
+   "state": "ready",
    "dispatches": 0,
    "rework_rounds": 0,
    "branch": null,
@@ -107,7 +111,9 @@
    "worker_report": null,
    "verifier_report": null,
    "missing_capabilities": [],
-   "notes": []
+   "notes": [
+    "waiting for a worker slot (limit 4)"
+   ]
   },
   "A4": {
    "state": "pending",
@@ -297,6 +303,11 @@
    "cycle": 1,
    "date": "2026-10-26",
    "event": "P0 bootstrap committed"
+  },
+  {
+   "cycle": 1,
+   "date": "2026-10-26",
+   "event": "dispatched ENV, A1, A2, C1 workers and the P0 verifier"
   }
  ]
 }
