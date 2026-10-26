@@ -21,13 +21,13 @@
   "P0": {
    "state": "verifying",
    "dispatches": 0,
-   "rework_rounds": 0,
+   "rework_rounds": 1,
    "branch": null,
    "base": null,
-   "head": "ef37d970",
+   "head": "59e24365",
    "merge_commit": null,
    "worker_report": null,
-   "verifier_report": null,
+   "verifier_report": "round 0: REWORK (5 problems: D3 F1 consent, language differences, untrusted checker, waivers, manifest gaps); round 1 dispatched",
    "missing_capabilities": [],
    "notes": [
     "orchestrator WP; verifier dispatched"
@@ -308,6 +308,11 @@
    "cycle": 1,
    "date": "2026-10-26",
    "event": "dispatched ENV, A1, A2, C1 workers and the P0 verifier"
+  },
+  {
+   "cycle": 1,
+   "date": "2026-10-26",
+   "event": "P0 verifier REWORK; fixed in 59e24365; re-verification dispatched"
   }
  ]
 }
