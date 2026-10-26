@@ -5765,3 +5765,21 @@ loosening or deleting one waits for H1 (`workflow_check.py acceptance`).
 Derived entries (not in r3): ENV-1 to ENV-3 (from r4 §3) and C2U-1, C2U-2 (from r3 §C2's USINE case, split by r4 §6).
 ALL-2 is replaced by the P0 freeze. **Not verified here:** r3 Q10's formal independent review with `review.py` is not
 run at P0; it moves to before H1 (r4 Open Questions).
+
+## CRPROP-C1 — 2026-10-26 (environment E2)
+
+Provider protocol `cr-provider/1` (r3 §C1, §5.2; r4 §6: wave 1, providers folded into the tool work packages).
+
+**Environment.** E2 (macOS arm64 workstation), Python 3.13.2 from `~/.venvs/hep-research-e2`. Base exception D10:
+the base is the integration HEAD `ef37d970` (P0), not `main`. r3 §0.3 checks at the start:
+`git rev-parse --show-toplevel` = `.claude/worktrees/crprop-c1`; `git branch --show-current` = `worktree-crprop-c1`;
+`git status` clean; `git merge-base --is-ancestor ef37d970 HEAD` succeeds (P0, the only prerequisite).
+
+**Acceptance criteria (frozen in `acceptance.json`, written here before the work).** C1-1 a provider not in the
+registry is refused; C1-2 single-shot and `--serve` responses have the same sha256 after removing `elapsed_s` and
+timestamps (PRV-2); C1-3 a cache hit does not call the provider; C1-4 a forced provider crash is reported as `failed`
+with the reason; C1-5 out of domain gives `failed` with `reason: out-of-domain`, and with
+`--allow-outside-validated-range` a prediction labelled `outside-validated-range`; C1-6 the core hash equals
+`contracts/recipe_semantics.py` `canonical_sha256` on 10 random objects (exact equality of the hex digest);
+C1-7 `contracts/tool_contract.py` passes and `core/provider/` holds no path string (`check_layering.py`); ALL-1..ALL-7.
+Tolerances: none numerical except C1-2 and C1-6, which are exact (byte-identical hashes).
