@@ -2756,6 +2756,23 @@ Contracts: the 13 new keys are core `convention_keys` and also `conditional_conv
 description change and the 8 Th14 cases (paid; pending approval). Pre-existing on main: 5 tests of
 `tests/contracts/test_simulated_dataset.py` fail under a whole-directory pytest run and pass alone (order dependent).
 
+## SEMANTIC-NAMING-P3-P5 (2026-10-26, E2: macOS 26.5 arm64, Python 3.13.2, uproot 5.7.6; ruff 0.16.10 and mypy 2.4.0 from the CI venv; PR #304, merged into main `467648ea`, unreleased)
+
+Semantic naming spec, phases P3 to P5 (an extractor for every surface N1-N17, cross-surface names, glossary
+identifiers) and the code fixes of the spec's third review round (R869ec87b88, kept outside the repository with the
+v4.3 spec). Software consistency only: the checks say the extractors and the engine behave as specified on synthetic
+inputs and on the plugin itself, not that any name is good.
+
+| Check | Result |
+|---|---|
+| Cross-surface engine | `tests/core/test_naming_cross_surface.py` (22): a shape nuisance's derived `Up`/`Down` histograms (missing `Down` violated with the N3 inventory, unverified without it, linked into the histograms' references); a dangling `\ref`; a figure target without the N2 inventory unverified; the correlation inventory read from a measurement-spec (era-decorrelated names satisfied, one source with two names violated, `partial` left out); glossary identifiers on two surfaces; one DOI under two BibTeX keys (a deduplication change set needs the N14 inventory, a non-uniqueness trigger is refused); a narrowed scope gives partial references and C2; a waiver without its line; cross-surface change sets (no N3 inventory exit 3, an unreplaced derived histogram exit 1, a lower recorded level or missing digests refused, a complete set passes) |
+| Engine, CLI, registries | `tests/core/test_naming_engine.py` (35), `tests/contracts/test_naming_check.py` (24): the P1-P2 cases plus the per-kind `deprecate` policy, the C3 handoff owner, N10 near-duplicates resolved only by a declaration, an expected surface without inventory (exit 3), every name reported when no inventory carries change marks, two active rule versions and `naming.waived` on a non-waivable rule refused |
+| Extractors | `tests/skills/hep_computing/test_extract_names_root.py` (5; N3/N4 skip without uproot): ROOT objects and shape histograms, no reader gives unsupported, TTree and RNTuple fields, defined columns, `--external`, the datacard-to-ROOT hand-off through the check (exit 1); N6 Snakemake, Slurm, HTCondor and workflow names. One module per owner skill: hep-statistics (3: datacard with derived shapes, pyhf workspace, statistical-result), hep-measurement (3: yield tables, official dataset ids of a bound profile, ledger and spec), hep-authoring (2: labels, references, macros, figure and table targets, comments ignored; BibTeX keys with DOI and arXiv ids and their citations), hep-detector, hep-ml, hep-theory, hep-citations (1 each; a mistyped DOI gives `propose-alias`) |
+| Plugin gate | `tests/tools/test_check_naming.py` (6; unsupported results never baselined); on the plugin: N1 95,441, N5 2,214, N16 447 names, 409,820 results satisfied, 1,042 violations all in `tools/naming_known_gaps.json`; the generic names it flagged in this branch's own code were renamed |
+| Registry and docs | `contracts/naming_registry.py check` passes (17 surfaces, 20 rules, every surface with an extractor, owner anchor and current kinds block); `check_wiring`, `check_ownership`, `capability_map --check`, `reference_inventory --check` pass; hep-statistics quick load 25,592 B (B-03 limit 25,600) |
+| Aggregate | `tools/run_all_checks.py --no-cli` on `e3f794ab`: 5,715 unittest run, 3 failures (the reference inventory stale after a late edit, which also failed the soft-budget test; a module-timeout test that passes alone, a timing flake under load); fixed and rerun green in `c6f1b1a9`. CI on the PR after updating from main (`b25957cd`): every required and optional job passed, 2 skipped by design; ruff and mypy clean on `core` and `contracts` |
+| Open | the re-review (round 2) has slot S4 escalated for a human decision and its findings not yet disposed, among them `--changed` given a revision that already holds the new names (listed in PR #304) |
+
 ## SEMANTIC-NAMING-P1-P2 (2026-10-26, macOS 26.5 arm64, miniconda Python 3.13.2; ruff 0.16.10 and mypy 2.4.0 from the CI venv; branch `feat/semantic-naming` from main `cfd9f547`, unreleased)
 
 Semantic naming spec v4.2, phases P1 (skeleton) and P2 (first extractors, the plugin's gate, stanza item 6). Software
