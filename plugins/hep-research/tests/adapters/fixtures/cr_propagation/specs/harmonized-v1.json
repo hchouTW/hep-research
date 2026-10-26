@@ -1,0 +1,28 @@
+{
+ "name": "harmonized-v1",
+ "description": "Harmonized configuration for cross-code comparison (cr-propagation r3 5.5), in the transport format of r3 5.4. A code that cannot express an item records the difference and its substitute; it never falls back to a default silently. D1 adds harmonized-v1-<item>.json per item it turns on.",
+ "status": "synthetic",
+ "transport": {
+  "geometry": {"kind": "cylinder-2d", "L_kpc": 4.0, "radius_kpc": 20.0, "disc_halfwidth_pc": 100},
+  "diffusion": {"form": "beta^eta (R/R0)^delta with smooth breaks",
+                "D0_cm2_s": 3.0e28, "R0_gv": 1.0, "eta": 1.0, "delta": 0.5,
+                "breaks": []},
+  "reacceleration": {"V_A_kms": 0.0, "zone": "thin-disc", "relation": "Seo-Ptuskin 1994", "w": 1.0},
+  "convection": {"V_c_kms": 0.0, "dVc_dz_kms_per_kpc": 0.0},
+  "losses": [],
+  "decay": {"enabled": false, "lorentz_dilation": true, "ec_treatment": "fully-stripped"},
+  "gas": {"model": "uniform, n_H = 1 cm^-3", "He_to_H_number": 0.1},
+  "sources": {"spatial": "not fixed by harmonized-v1; each code records its choice",
+              "injection": [{"species_group": "all primaries", "gamma": 2.3, "breaks": []}],
+              "abundances": "fixed by the parent list of theory:cr-secondary-ratio"},
+  "cross_sections": {"production_set": "theory:cr-secondary-ratio models/xs-illustrative-A.json (ILLUSTRATIVE)",
+                     "inelastic_set": "theory:cr-secondary-ratio models/xs-illustrative-A.json (ILLUSTRATIVE)",
+                     "ghost_threshold": "off: ghost nuclei and tertiary chains off on both sides"},
+  "species": {"network_top": "O-16", "isotopic": false},
+  "family": "SLIM",
+  "free": []
+ },
+ "network": {"parents": ["C", "O"], "secondaries": ["B"], "tertiary_chains": false, "ghost_nuclei": false},
+ "output": {"quantity": "unmodulated LIS", "axis": "ekn", "unit": "GeV/n", "min": 1.0, "max": 1000.0,
+            "points_per_decade": 20}
+}
