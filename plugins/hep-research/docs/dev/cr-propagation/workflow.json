@@ -57,7 +57,8 @@
    "docs/dev/cr-propagation/escalations.md",
    "docs/dev/cr-propagation/decisions.md",
    "docs/dev/cr-propagation/acceptance.json",
-   "docs/dev/cr-propagation/workflow.json"
+   "docs/dev/cr-propagation/workflow.json",
+   "docs/dev/cr-propagation/workflow_check.py"
   ],
   "adapter_merge_order": [
    "B1",
@@ -123,7 +124,7 @@
     "ENV-3"
    ],
    "fallback": "per capability: env-usine absent -> escalate (critical), B1/B3/C2U wait or skip, F1 takes the D8 fallback; env-galprop absent -> D2 unavailable; env-dragon2 absent -> A4 closed-form row only, D1 blocked",
-   "source": "r4 3"
+   "source": "r4 3; critical flag derived (criticality_source)"
   },
   {
    "id": "A1",
@@ -215,7 +216,7 @@
     "repo"
    ],
    "optional": false,
-   "critical": true,
+   "critical": false,
    "files": [
     "contracts/schemas/**",
     "contracts/__init__.py",
@@ -254,7 +255,7 @@
     "repo"
    ],
    "optional": false,
-   "critical": true,
+   "critical": false,
    "files": [
     "profiles/theory/cr-secondary-ratio/**"
    ],
@@ -404,7 +405,7 @@
     "repo"
    ],
    "optional": false,
-   "critical": true,
+   "critical": false,
    "files": [
     "skills/hep-statistics/scripts/propagation_fit.py",
     "skills/hep-statistics/references/core-stats-commands.md",
@@ -429,7 +430,7 @@
     "env-usine"
    ],
    "optional": false,
-   "critical": true,
+   "critical": false,
    "files": [
     "tests/adapters/fixtures/cr_propagation/b3/**",
     "tests/adapters/test_cr_propagation.py"
@@ -451,7 +452,7 @@
     "env-usine"
    ],
    "optional": false,
-   "critical": true,
+   "critical": false,
    "files": [
     "skills/hep-statistics/scripts/propagation_fit.py",
     "tests/skills/hep_statistics/**",
@@ -510,8 +511,8 @@
     "tests/adapters/fixtures/cr_propagation/e1/**"
    ],
    "acceptance_prefix": "E1",
-   "fallback": "skipped; E2, F2 skipped",
-   "source": "r4 6 and 7"
+   "fallback": "skipped; E2 skipped (E2 depends on E1)",
+   "source": "r4 6 and 7; fallback derived from the deps"
   },
   {
    "id": "E2",
@@ -570,7 +571,21 @@
    ],
    "acceptance_prefix": "F1",
    "fallback": "D8: cross-code reproduction with DRAGON2, marked insufficient for v1 (F3 not enabled)",
-   "source": "r4 3, 8 and 9"
+   "source": "r4 3, 8 and 9",
+   "fallback_mode": {
+    "when": "env-usine confirmed unobtainable (B1 blocked or skipped after escalation)",
+    "target": "D8: cross-code reproduction of the same target with the DRAGON2 provider, marked insufficient for v1; F3 condition false",
+    "deps": [
+     "C2",
+     "D1"
+    ],
+    "requires": [
+     "env-dragon2",
+     "net-data"
+    ],
+    "acceptance": "F1-1 and F1-2 evaluated as written; F1-1 recorded as not enabling F3",
+    "source": "r4 3, 8 and 9 (D8); deps and requires of the fallback derived"
+   }
   },
   {
    "id": "F2",
@@ -581,8 +596,7 @@
     "F1"
    ],
    "soft_deps": [
-    "E2",
-    "D3"
+    "E2"
    ],
    "requires": [
     "repo"
@@ -594,7 +608,7 @@
    ],
    "acceptance": [],
    "fallback": "skipped",
-   "source": "r4 7"
+   "source": "r4 7 (F1 -> F2); soft dep on E2 from r3 F2 'F1 and Gate E'"
   },
   {
    "id": "F3",
@@ -665,10 +679,19 @@
     "VALIDATION.md"
    ],
    "acceptance": [
+    "WF-2",
+    "WF-3",
+    "WF-4",
+    "WF-5",
+    "WF-6",
+    "WF-7",
+    "WF-8",
+    "WF-9",
     "WF-10"
    ],
    "fallback": null,
-   "source": "r4 10"
+   "source": "r4 10; soft_deps derived: RC waits until every other WP is merged, skipped or blocked (r4 Objective, definition of done 1); WF-2..WF-10 are checked by RC's verifier (derived)"
   }
- ]
+ ],
+ "criticality_source": "r4 8 names B1 and F1 as critical; P0, ENV and RC are marked critical because the campaign cannot proceed or finish without them (derived)"
 }

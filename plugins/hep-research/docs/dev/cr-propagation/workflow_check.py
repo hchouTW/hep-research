@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Machine checks of the cr-propagation r4 workflow (orchestrator and verifier use; not a plugin tool).
 
-Subcommands (run from the plugin root):
+Subcommands. The checker and workflow.json are trusted only from the integration branch: a verifier runs the
+integration copy with --plugin-root pointing at the plugin root of the branch under test (default: this file's root).
   dag                     WF-1: workflow.json dependencies and capabilities defined, DAG acyclic, waves ordered.
   acceptance              WF-2 / ALL-2: acceptance.json still holds every entry frozen at P0, unchanged
                           (only new entries may be added); its frozen sha256 is the one in VALIDATION.md.
   diff --work-package ID --base REV ALL-5: every path changed since REV is in the WP's `files` or `common_files`,
                           and no orchestrator-only file changed (WF-5).
-  gaps --base REV         ALL-4: tools/naming_known_gaps.json has no entry that REV lacks.
+  gaps --base REV         ALL-4: tools/naming_known_gaps.json has no gap or waiver that REV lacks.
 
 Prints one JSON object with a `status` key. Exit 0 ok, 1 check failed, 2 bad input. Standard library only.
 """
@@ -24,6 +25,7 @@ from pathlib import Path
 
 PLUGIN_ROOT = Path(__file__).resolve().parents[3]
 WORKFLOW_DIR = Path(__file__).resolve().parent
+BRANCH_DOCS = "docs/dev/cr-propagation"
 PLUGIN_PREFIX = "plugins/hep-research/"
 TERMINAL_STATES = {"merged", "skipped", "blocked"}
 
@@ -88,7 +90,7 @@ def check_acceptance() -> tuple[list[str], dict]:
     if not section or frozen_sha not in section.group(0):
         problems.append(f"frozen sha256 {frozen_sha} not recorded in the CRPROP-ACCEPTANCE section of VALIDATION.md")
     frozen = {entry["id"]: entry for entry in json.loads(frozen_text)["entries"]}
-    current = {entry["id"]: entry for entry in load_json(WORKFLOW_DIR / "acceptance.json")["entries"]}
+    current = {entry["id"]: entry for entry in load_json(PLUGIN_ROOT / BRANCH_DOCS / "acceptance.json")["entries"]}
     for entry_id, entry in frozen.items():
         if entry_id not in current:
             problems.append(f"{entry_id}: deleted")
@@ -120,8 +122,10 @@ def check_gaps(base: str) -> list[str]:
     after = load_json(PLUGIN_ROOT / "tools/naming_known_gaps.json")
 
     def entries(document) -> set[str]:
-        items = document.get("gaps", document) if isinstance(document, dict) else document
-        return {json.dumps(item, sort_keys=True) for item in (items.items() if isinstance(items, dict) else items)}
+        gaps = document.get("gaps", {})
+        waivers = document.get("waivers", [])
+        return ({"gap " + json.dumps(item, sort_keys=True) for item in (gaps.items() if isinstance(gaps, dict) else gaps)}
+                | {"waiver " + json.dumps(item, sort_keys=True) for item in waivers})
 
     grown = entries(after) - entries(before)
     return [f"new known-gap entry: {item}" for item in sorted(grown)]
@@ -132,7 +136,11 @@ def main() -> int:
     parser.add_argument("check", choices=["dag", "acceptance", "diff", "gaps"])
     parser.add_argument("--work-package", help="work-package id (diff)")
     parser.add_argument("--base", help="git revision the work package branched from (diff, gaps)")
+    parser.add_argument("--plugin-root", type=Path, help="plugin root of the branch under test (default: this file's)")
     args = parser.parse_args()
+    global PLUGIN_ROOT
+    if args.plugin_root:
+        PLUGIN_ROOT = args.plugin_root.resolve()
     try:
         workflow = load_json(WORKFLOW_DIR / "workflow.json")
         details: dict = {}

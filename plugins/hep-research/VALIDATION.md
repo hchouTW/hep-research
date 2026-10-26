@@ -5760,7 +5760,8 @@ loosening or deleting one waits for H1 (`workflow_check.py acceptance`).
 | Workflow manifest (WF-1) | `workflow_check.py dag`: ok, 21 work packages, 9 capabilities, acyclic, waves ordered; derived at H0 (decision D0), sha256 `017bb108bf5dac1dc197675fdfdf665cbe32c952259f808611e6990b75f3e208` | `docs/dev/cr-propagation/workflow.json` |
 | Decision record | D0–D12 answered 2026-10-26 | `docs/dev/cr-propagation/decisions.md` |
 | Task documents | `lint_task.py`: 0 errors for `workflow-r4.md`, `workflow-r4.zh.md`, `cr-propagation-plan.md`, `cr-propagation-plan.zh.md` (planned paths give warnings) | P0 run |
-| Language versions | one difference reported (r4 §3, D2 vs D5), not chosen | `decisions.md` |
+| Language versions | three differences reported (r4 §3 D2 vs D5; r3 line 64 §0.4 vs §0.5; r3 line 257 status string), not chosen | `decisions.md` |
+| P0 rework, round 1 (verifier REWORK, 5 problems) | `workflow.json` sha256 `73c6c8a3e6d5e1f23c6fe501973c158fb78f7d77bd65d0a741390c77d93c1d51` (RC owns WF-2..WF-10, criticality per r4 §8, F1 fallback mode, F2/E1/RC sources; checker and manifest orchestrator-only); `workflow_check.py` counts waivers and takes `--plugin-root`; D3 adds F1's HEPData/CRDB queries; two more language differences recorded; `acceptance.json` unchanged | `decisions.md`, `workflow.json` |
 
 Derived entries (not in r3): ENV-1 to ENV-3 (from r4 §3) and C2U-1, C2U-2 (from r3 §C2's USINE case, split by r4 §6).
 ALL-2 is replaced by the P0 freeze. **Not verified here:** r3 Q10's formal independent review with `review.py` is not

@@ -8,7 +8,7 @@ on this record; anything it does not cover goes to `escalations.md`, never to a 
 | D0 | The companion manifest `crprop-workflow.json` was not supplied | The orchestrator derives `workflow.json` from r4 §6–§7 and the r3 cards; every value r4 and r3 do not state is marked `derived` in its `source` field | maintainer, H0 |
 | D1 | Location of the source repo | The maintainer's checkout of the `hep-research` repo on the E2 host (`$HOME/hep-research`); integration worktree `.claude/worktrees/crprop-integration`, branch `worktree-crprop-integration` from `origin/main` 8fcbb826 (0.42.0) | maintainer, H0 |
 | D2 | Execution host | Environment E2 (the macOS arm64 workstation of `VALIDATION.md`) through Claude Code. Probed at H0: ROOT 6.38.04, GSL 2.8, CFITSIO 4.6.4, gfortran, cmake, Homebrew, the DRAGON2 cd588707 build from WP13; no Slurm or HTCondor client; github.com and pypi.org reachable from the agent sandbox; `lpsc.in2p3.fr`, `gitlab.in2p3.fr`, `galprop.stanford.edu` time out from the sandbox | maintainer, H0 |
-| D3 | Standing grant | Granted, limited to: installing build dependencies with Homebrew or into a venv outside the repo; cloning DRAGON2 from github.com; building and running DRAGON2, USINE and GALPROP outside the repo (builds under `$HOME/hep-work/crprop-build/`, run outputs under `CRPROP_OUT` = `$HOME/hep-work/crprop-out/`); commits and merges on the integration branch and `worktree-crprop-*` branches; the unreleased contracts minor bump `CV-CRPROP` and the `CORE_VERSION` minor bump of C1. Not granted: push, pull requests, any `gh` write, any change to `main`, `--force`, a paid live routing run, any change to the v1 scope outside F3's conditional preparation (D11) | suggested default |
+| D3 | Standing grant | Granted, limited to: installing build dependencies with Homebrew or into a venv outside the repo; cloning DRAGON2 from github.com; the read-only `adapters/hepdata` and `adapters/crdb` queries of F1 (r3 §0.6, §F1); building and running DRAGON2, USINE and GALPROP outside the repo (builds under `$HOME/hep-work/crprop-build/`, run outputs under `CRPROP_OUT` = `$HOME/hep-work/crprop-out/`); commits and merges on the integration branch and `worktree-crprop-*` branches; the unreleased contracts minor bump `CV-CRPROP` and the `CORE_VERSION` minor bump of C1. Not granted: push, pull requests, any `gh` write, any change to `main`, `--force`, a paid live routing run, any change to the v1 scope outside F3's conditional preparation (D11) | suggested default |
 | D4 | USINE source and version | V3.5, from a tarball the maintainer places in `CRPROP_SOURCES` = `$HOME/hep-work/crprop-sources/`. Until it is there, `net-sources` and `env-usine` are `absent`, and B1, B3, C2U and F1 wait (`waiting-capability`) | maintainer, H0 |
 | D5 | GALPROP | Included, v57, from a tarball in `CRPROP_SOURCES`; if the licence is unclear, no fixtures are committed. Without the tarball D2 takes its fallback (`unavailable`) | suggested default |
 | D6 | Batch site and consent per round | No batch client on E2: E1 runs through `skills/hep-computing/scripts/local_partition.py` on E2; every E1 round within the D7 caps counts as consented | maintainer, H0 |
@@ -29,5 +29,21 @@ Q9 N₀ = 10 × number of free parameters rounded up to a power of 2, k = N₀/1
 - `workflow-r4.zh.md` §3, item 2: "GALPROP（D2 為 yes 時）"; `workflow-r4.md` §3: "GALPROP (when D5 is yes)". D5 is the
   GALPROP decision and D2 the execution host, so the English reading is the consistent one; the orchestrator follows
   D5 and leaves the wording to the maintainer at H1.
-- No other difference in identifiers, numbers or paths between `workflow-r4.md` and `workflow-r4.zh.md`, or between
-  `cr-propagation-plan.md` and `cr-propagation-plan.zh.md` (token comparison at P0).
+- `cr-propagation-plan.md` line 64 places the placeholders `CV-A2`/`CV-C1` in "(Technical Approach §0.4)";
+  `cr-propagation-plan.zh.md` line 64 says §0.5. The rule is in §0.5 (line 243), so the Chinese reference is the
+  consistent one.
+- `cr-propagation-plan.md` line 257 has the code-span status `BLOCKED: environment E2 required`;
+  `cr-propagation-plan.zh.md` line 257 has `BLOCKED: 需要環境 E2`. An identifier in a code span differs; workers emit
+  the English form (the plan's stated rule keeps identifiers unchanged across languages).
+- Found by the P0 verifier (a token comparison at P0 had missed the last two). No other difference was found.
+
+## Orchestrator notes recorded at P0 (for H1)
+
+- r3 Q10 / r4 Open Questions, formal independent review with `skills/hep-authoring/scripts/review.py`: not run at P0.
+  The isolation precondition of `docs/dev/independent-review-spec.md` §A7 (`CLAUDE_CODE_FORK_SUBAGENT=0` in settings
+  with a host restart, or `Agent(fork)` in `permissions.deny`) is a host-settings change outside the D3 grant, so the
+  review moves to before H1 as r4 allows.
+- D7's 6-week wall-time cap is below r4 §7's 13–15-week estimate; reaching it is a `budget` escalation, not a stop
+  of unaffected work packages.
+- The checker `workflow_check.py` and `workflow.json` are trusted only from the integration branch; verifiers run the
+  integration copy with `--plugin-root` set to the branch under test (P0 rework).
