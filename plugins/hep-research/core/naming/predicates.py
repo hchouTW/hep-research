@@ -339,7 +339,9 @@ def similarity(e, rule, ctx):
     for x in near:
         if _declared_distinct(e, x, ctx, params.get("declaration")):
             codes.add("naming.declared_distinct")
-        elif _annotated_distinct(e, x, ctx) and not ctx.surface(e["surface"])["requires_declarations"]:
+        elif (_annotated_distinct(e, x, ctx) and not ctx.surface(e["surface"])["requires_declarations"]
+              and all((ctx.annotations.get(y["entity_id"]) or {}).get("confidence") == "high" for y in (e, x)
+                      if y["entity_id"] in ctx.annotations)):
             codes.add("naming.annotated_distinct")  # where names are declared (N10), only the declaration decides
         else:
             open_.append(x)
@@ -351,6 +353,9 @@ def similarity(e, rule, ctx):
 
 
 def semantic(e, rule, ctx):
+    if e["change"] == "unchanged" and e["surface"] in ctx.untrusted_changes:
+        return "naming.change_marks_untrusted", f"{e['name']} is marked unchanged, but its inventory has no change " \
+            "marks or was compared against a revision that hides this branch's commits: it may be new", {}
     if e["change"] not in ("added", "modified"):
         return "naming.unchanged", "", {}
     ann = ctx.annotations.get(e["entity_id"])

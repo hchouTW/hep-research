@@ -157,7 +157,6 @@
     ],
     "not_applicable": [
      "naming.removed",
-     "naming.waived",
      "naming.kind_not_covered"
     ],
     "unverified": [
@@ -169,7 +168,7 @@
    },
    "rationale": "Two declarations of one name in one container shadow each other; the entity ids differ by line so both are seen.",
    "owner": "hep-computing",
-   "waivable": true,
+   "waivable": false,
    "lifecycle": "active",
    "source_sha256": "0642d0f33eb507c71e37e1f239ddecf1943256117427d808e2da7730c481e622"
   },
@@ -204,20 +203,18 @@
      "naming.reference_to_removed",
      "naming.target_missing"
     ],
-    "not_applicable": [
-     "naming.waived"
-    ],
+    "not_applicable": [],
     "unverified": [
-     "naming.references_partial",
-     "naming.target_inventory_missing"
+     "naming.references_partial"
     ],
     "unsupported": [
+     "naming.target_inventory_missing",
      "naming.no_inputs"
     ]
    },
    "rationale": "A removed or renamed name that is still referenced breaks its referrers, and a name that refers to another (a \\ref to a label, an included figure, a nominal template) must find it; references must be searched in full before a rename.",
    "owner": "hep-computing",
-   "waivable": true,
+   "waivable": false,
    "lifecycle": "active",
    "source_sha256": "36ed26048516ecf60a3b571f97ebdd1f2b0ff4099dff61310a295d10336a9223"
   },
@@ -307,7 +304,8 @@
     "unverified": [
      "naming.not_reviewed",
      "naming.confidence_insufficient",
-     "naming.confidence_unsupported"
+     "naming.confidence_unsupported",
+     "naming.change_marks_untrusted"
     ],
     "unsupported": []
    },
@@ -315,7 +313,7 @@
    "owner": "hep-computing",
    "waivable": false,
    "lifecycle": "active",
-   "source_sha256": "a29fb9187455894a659d963f135a6835f6c1b606a242db1091cc4877270756bc"
+   "source_sha256": "392a81ce100f4a1bef97229ad0a4927ab73fcd76a837962ab13a0438e24c54a9"
   },
   {
    "rule_id": "naming.n1.pep8-shape",
@@ -482,10 +480,9 @@
      "naming.not_paired",
      "naming.kind_not_covered"
     ],
-    "unverified": [
-     "naming.inventory_missing"
-    ],
+    "unverified": [],
     "unsupported": [
+     "naming.inventory_missing",
      "naming.no_inputs"
     ]
    },
@@ -580,7 +577,7 @@
    "owner": "hep-statistics",
    "waivable": true,
    "lifecycle": "active",
-   "source_sha256": "8df8dfaa07d6158cf05ed301c6c1f5c179432a14afeeeb1295923e31e30a5217"
+   "source_sha256": "6e2295b741f63c0f29a6c8fca5ce6e391ca3661e35490979dd2fb9329ba71e2c"
   },
   {
    "rule_id": "naming.n4.block-member",
@@ -683,10 +680,9 @@
      "naming.not_paired",
      "naming.kind_not_covered"
     ],
-    "unverified": [
-     "naming.inventory_missing"
-    ],
+    "unverified": [],
     "unsupported": [
+     "naming.inventory_missing",
      "naming.no_inputs"
     ]
    },
@@ -755,7 +751,6 @@
     ],
     "not_applicable": [
      "naming.removed",
-     "naming.waived",
      "naming.kind_not_covered"
     ],
     "unverified": [
@@ -767,7 +762,7 @@
    },
    "rationale": "One record (one DOI or arXiv id) under two BibTeX keys cites the same work twice; deduplication is the only reason to rename a key (F15).",
    "owner": "hep-authoring",
-   "waivable": true,
+   "waivable": false,
    "lifecycle": "active",
    "source_sha256": "0642d0f33eb507c71e37e1f239ddecf1943256117427d808e2da7730c481e622"
   },
@@ -848,7 +843,6 @@
     "not_applicable": [
      "naming.no_glossary_identifiers",
      "naming.no_declared_concept",
-     "naming.waived",
      "naming.external_name"
     ],
     "unverified": [],
@@ -858,7 +852,7 @@
    },
    "rationale": "When the project glossary declares the identifier for a concept (identifiers), every surface spells that concept with it: pt in the code, the columns, the nuisances and the labels, not pt here and transverse_momentum there (P2).",
    "owner": "hep-computing",
-   "waivable": true,
+   "waivable": false,
    "lifecycle": "active",
    "source_sha256": "18c4baf844b2a766dd4d76c1d8267b28b58084cf7087bad78dec9687330afc92"
   }

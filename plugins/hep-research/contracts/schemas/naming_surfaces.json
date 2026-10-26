@@ -1,5 +1,5 @@
 {
- "$comment": "contracts/naming/surfaces.json: the surface registry (spec \u00a76.2): one owner per surface, kinds with level floors, the rename policy, cross-surface references (mirrored), declarations the rules need and the owner section.",
+ "$comment": "contracts/naming/surfaces.json: the surface registry (spec §6.2): one owner per surface, kinds with level floors, the rename policy, cross-surface references (mirrored), declarations the rules need and the owner section.",
  "type": "object",
  "required": [
   "surfaces_version",
@@ -128,6 +128,10 @@
         "kind": {
          "type": "string",
          "minLength": 1
+        },
+        "derived": {
+         "type": "boolean",
+         "$comment": "the target's names are built from this surface's names (Combine's <process>_<nuisance>Up): a rename here needs the target surface's inventory and renames them too"
         }
        }
       }

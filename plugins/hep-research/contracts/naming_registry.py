@@ -40,6 +40,7 @@ ROOT = Path(__file__).resolve().parents[1]
 RULES = ROOT / "contracts" / "naming" / "rules.json"
 SURFACES = ROOT / "contracts" / "naming" / "surfaces.json"
 DETERMINISM = {"similarity": "heuristic", "semantic": "review"}
+CORRECTNESS_PREDICATES = ("declared-match", "reference", "pairing", "uniqueness", "status-honesty")
 LEVELS = ("C0", "C1", "C2", "C3", "C4")
 # level floors of the spec's surface catalogue (§10): a registry may rename or add kinds, never lower these
 SPEC_FLOORS = {"N1": {"local": "C0", "private": "C1", "module_public": "C2", "plugin_core_api": "C3"},
@@ -102,6 +103,10 @@ def check_rules(doc, surfaces_doc=None) -> Report:
                     ("not_applicable", "naming.kind_not_covered", "kinds" in params),
                     ("not_applicable", "naming.external_name", "sources" in params),
                     ("unsupported", "naming.no_inputs", r["predicate"] != "semantic")]
+        if r["waivable"] and r["predicate"] in CORRECTNESS_PREDICATES:
+            rep.add("error", f"{where}.waivable", "naming_registry.correctness_waivable",
+                    f"{r['rule_id']} uses {r['predicate']}, a correctness predicate: its violations are always errors (A6), "
+                    "so it is never waivable")
         if not r["waivable"] and "naming.waived" in oc["not_applicable"]:
             rep.add("error", f"{where}.outcome_contract.not_applicable", "naming_registry.waived_not_waivable",
                     "a rule that is not waivable never gives naming.waived")
@@ -152,12 +157,12 @@ def check_surfaces(doc, root: Path = ROOT) -> Report:
             rep.add("error", f"{where}.owner", "naming_registry.owner", f"{s['owner']} is not a skill")
         for t in s["references_to"]:
             other = reg.get(t["surface"])
-            if other is None or {"surface": sid, "kind": t["kind"]} not in other["referenced_by"]:
+            if other is None or (sid, t["kind"]) not in {(x["surface"], x["kind"]) for x in other["referenced_by"]}:
                 rep.add("error", f"{where}.references_to", "naming_registry.mirror",
                         f"{sid} references {t['surface']} ({t['kind']}) but {t['surface']}.referenced_by does not list {sid}")
         for t in s["referenced_by"]:
             other = reg.get(t["surface"])
-            if other is None or {"surface": sid, "kind": t["kind"]} not in other["references_to"]:
+            if other is None or (sid, t["kind"]) not in {(x["surface"], x["kind"]) for x in other["references_to"]}:
                 rep.add("error", f"{where}.referenced_by", "naming_registry.mirror",
                         f"{sid} is referenced by {t['surface']} ({t['kind']}) but {t['surface']}.references_to does not list {sid}")
         for k, v in s["kinds"].items():

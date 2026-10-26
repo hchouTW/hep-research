@@ -11,10 +11,12 @@ it fails the gate (an unverified or unsupported result is never baselined); an e
 reported as stale (delete it), never an error. A waiver is an
 explicit exception, visible in the PR, in the same file's "waivers" list (rule_id, entity_ids, reason, recorded_by).
 
-Usage: python3 tools/check_naming.py [--known-gaps FILE] [--root PLUGIN_ROOT] [--write-known-gaps]
+Usage: python3 tools/check_naming.py [--known-gaps FILE] [--root PLUGIN_ROOT] [--write-known-gaps] [--base REV]
 --write-known-gaps rewrites the file from the current findings (only to record the baseline when a rule comes in, or
-after fixing gaps; review its diff). Exit 0 no new finding, 1 a new finding, 2 unusable input. Output: one JSON object
-with a status key. Standard library only.
+after fixing gaps; review its diff). The baseline only shrinks: an entry that grew since --base (default
+origin/main) for a rule the base registry already had fails the gate; a rule new since then may bring entries. Without
+the base revision (a shallow clone) the comparison is skipped and baseline_note says so. Exit 0 no new finding, 1 a
+new finding or a grown baseline, 2 unusable input. Output: one JSON object with a status key. Standard library only.
 """
 from __future__ import annotations
 
@@ -75,12 +77,37 @@ def run(root: Path, known: dict) -> dict:
             "entities": {inv["surface"]: len(inv["entities"]) for inv in inventories}}
 
 
+def baseline_growth(root: Path, known_gaps: Path, gaps: dict, base: str) -> tuple[list[str], str | None]:
+    """Keys of the baseline that grew since the base revision for a rule the base registry already had (a rule that
+    is new may bring its own entries). (grown keys, note): the note says why nothing could be compared."""
+    import subprocess
+
+    def show(path: Path):
+        try:
+            top = subprocess.run(["git", "-C", str(root), "rev-parse", "--show-toplevel"], capture_output=True,
+                                 text=True, timeout=60).stdout.strip()
+            relp = path.resolve().relative_to(Path(top).resolve()).as_posix()
+            p = subprocess.run(["git", "-C", str(root), "show", f"{base}:{relp}"], capture_output=True, text=True,
+                               timeout=60)
+        except (OSError, ValueError, subprocess.TimeoutExpired):
+            return None
+        return json.loads(p.stdout) if p.returncode == 0 else None
+    old_gaps, old_rules = show(known_gaps), show(root / "contracts" / "naming" / "rules.json")
+    if old_gaps is None or old_rules is None:
+        return [], f"baseline not compared: {base} or its files are not available (a shallow clone)"
+    known_rules = {r["rule_id"] for r in old_rules.get("rules", [])}
+    grown = sorted(k for k, n in gaps.items() if n > old_gaps.get("gaps", {}).get(k, 0) and k.split("|", 1)[0] in known_rules)
+    return grown, None
+
+
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0],
                                  formatter_class=argparse.RawDescriptionHelpFormatter, epilog=__doc__.split("\n\n", 1)[1])
     ap.add_argument("--known-gaps", type=Path, default=KNOWN_GAPS)
     ap.add_argument("--root", type=Path, default=ROOT)
     ap.add_argument("--write-known-gaps", action="store_true")
+    ap.add_argument("--base", default="origin/main",
+                    help="git revision the baseline may only shrink against (default origin/main; skipped when absent)")
     try:
         args = ap.parse_args(argv)
     except SystemExit as exc:
@@ -99,13 +126,16 @@ def main(argv=None) -> int:
                "waivers": known.get("waivers", []), "gaps": dict(sorted(out["seen"].items()))}
         args.known_gaps.write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8")
     rep = out["report"]
-    status = "pass" if not out["new"] or args.write_known_gaps else "fail"
+    grown, base_note = ([], None) if args.write_known_gaps else baseline_growth(
+        args.root.resolve(), args.known_gaps, known.get("gaps", {}), args.base)
+    status = "pass" if (not out["new"] and not grown) or args.write_known_gaps else "fail"
     by_rule = Counter(f["rule_id"] for f in out["new"])
     print(json.dumps({"status": status, "entities": out["entities"], "counts": rep["naming"]["counts"],
                       "known_gaps_applied": out["applied"], "known_gaps_stale": out["stale"][:50],
                       "stale_count": len(out["stale"]), "new_by_rule": dict(by_rule),
                       "new_findings": [{k: f.get(k) for k in ("rule_id", "location", "current", "state", "message", "action")}
                                        for f in out["new"][:50]],
+                      "baseline_grown": grown[:50], "baseline_note": base_note,
                       "written": str(args.known_gaps) if args.write_known_gaps else None}, indent=1))
     return 0 if status == "pass" else 1
 

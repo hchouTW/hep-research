@@ -69,6 +69,10 @@
     "at": {
      "type": "string",
      "minLength": 1
+    },
+    "proposed": {
+     "type": "string",
+     "$comment": "the name the user approved; must equal the change set's proposed, so an approval is not reused for another name"
     }
    }
   },

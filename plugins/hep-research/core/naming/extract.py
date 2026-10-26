@@ -266,6 +266,50 @@ def mark_changes(root: Path, rev: str, scopes, entities: list, read_old) -> list
     return removed
 
 
+def _git(root: Path, *args) -> str | None:
+    p = subprocess.run(["git", "-C", str(root), *args], capture_output=True, text=True, timeout=GIT_TIMEOUT_S)
+    return p.stdout.strip() if p.returncode == 0 else None
+
+
+def change_base(root: Path, rev: str) -> dict:
+    """What --changed compares against. "auto" is the merge base of HEAD and the main branch (origin/HEAD, main,
+    master, origin/main, origin/master, the first that exists). For an explicit revision, hidden_commits counts the
+    commits of this branch (after the merge base) that the revision already contains: their names would look
+    unchanged, so the check reports every name instead."""
+    main = next((b for b in ("origin/HEAD", "main", "master", "origin/main", "origin/master")
+                 if _git(root, "rev-parse", "--verify", "--quiet", f"{b}^{{commit}}")), None)
+    base = _git(root, "merge-base", "HEAD", main) if main else None
+    if rev == "auto":
+        if base is None:
+            head = _git(root, "rev-parse", "HEAD")
+            if head is None:
+                raise ValueError("--changed auto needs a git repository with at least one commit")
+            return {"rev": "auto", "sha": head, "merge_base": None, "hidden_commits": 0,
+                    "note": "no main branch found: compared against HEAD, so only uncommitted changes are marked"}
+        return {"rev": "auto", "sha": base, "merge_base": base, "hidden_commits": 0}
+    sha = _git(root, "rev-parse", "--verify", "--quiet", f"{rev}^{{commit}}")
+    if sha is None:
+        raise ValueError(f"--changed {rev}: not a git revision of {root}")
+    hidden = 0
+    if base and _git(root, "merge-base", "--is-ancestor", base, sha) is not None:
+        hidden = int(_git(root, "rev-list", "--count", f"{base}..{sha}") or 0)
+    return {"rev": rev, "sha": sha, "merge_base": base, "hidden_commits": hidden}
+
+
+def enclosing_project(root: Path) -> Path | None:
+    """A folder above root that is a project (hep-research.project.json or a git checkout), unless root lies inside
+    the hep-research plugin itself: an inventory of a subfolder never stands for the whole project."""
+    root = Path(root).resolve()
+    if (root / "hep-research.project.json").is_file() or (root / ".git").exists():
+        return None
+    for up in root.parents:
+        if is_plugin(up):
+            return None
+        if (up / "hep-research.project.json").is_file() or (up / ".git").exists():
+            return up
+    return None
+
+
 # ------------------------------------------------------------------------------------------------------ artifacts
 
 
@@ -362,7 +406,9 @@ def main(argv, *, doc: str, readers: dict, extractor: dict) -> int:
     ap.add_argument("--out", type=Path, required=True, help="inventory file to write (never inside artifacts_dir)")
     ap.add_argument("--root", type=Path, default=Path("."), help="project root (default: the working directory)")
     ap.add_argument("--scope", action="append", help="folder relative to the root to scan (repeatable; default the root)")
-    ap.add_argument("--changed", metavar="REV", help="git revision to mark added, modified and removed names against")
+    ap.add_argument("--changed", metavar="REV", nargs="?", const="auto",
+                    help="git revision to mark added, modified and removed names against (alone or auto: the merge "
+                         "base of HEAD and the main branch)")
     readers["__options__"](ap)  # the script's own options, --status (core.status.add_status_argument) among them
     try:
         args = ap.parse_args(argv)
@@ -378,6 +424,10 @@ def main(argv, *, doc: str, readers: dict, extractor: dict) -> int:
     root = args.root.resolve()
     if not root.is_dir():
         return reject(f"--root {args.root} is not a directory")
+    above = enclosing_project(root)
+    if above is not None:
+        return reject(f"--root {args.root} lies inside the project {above}: give the project root as --root and narrow "
+                      "with --scope (references are then searched in the whole project, or reported partial)")
     scopes = []
     for s in args.scope or ["."]:
         p = (root / s).resolve()
@@ -393,7 +443,11 @@ def main(argv, *, doc: str, readers: dict, extractor: dict) -> int:
     if not out.parent.is_dir():
         return reject(f"--out directory {args.out.parent} does not exist")
     try:
-        inv = readers[args.surface](root, scopes, args.changed, args)
+        base = change_base(root, args.changed) if args.changed else None
+        inv = readers[args.surface](root, scopes, base["sha"] if base else None, args)
+        if base:
+            inv["changed_since"] = base["rev"] if base["rev"] != "auto" else base["sha"]
+            inv["change_base"] = base
     except ValueError as exc:
         return reject(str(exc))
     except subprocess.TimeoutExpired:

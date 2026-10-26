@@ -118,6 +118,49 @@ class ProjectTests(unittest.TestCase):
         self.assertEqual([f["current"] for f in hits], ["process_data"])
         self.assertEqual(rep["exit_code"], 1)
 
+    def cli(self, *args):
+        res = subprocess.run([sys.executable, "-I", str(SCRIPT), "--surface", "N1", *args], capture_output=True, text=True,
+                             timeout=120)
+        return res.returncode, json.loads(res.stdout)
+
+    def test_changed_alone_uses_the_merge_base_and_a_later_revision_reports_every_name(self):
+        if shutil.which("git") is None:
+            self.skipTest("git is not installed")
+        git(self.root, "init", "-q", "-b", "main")
+        git(self.root, "add", ".")
+        git(self.root, "commit", "-qm", "base")
+        git(self.root, "checkout", "-qb", "work")
+        (self.root / "helpers.py").write_text("def do_something():\n    pass\n")
+        git(self.root, "add", ".")
+        git(self.root, "commit", "-qm", "work")
+        out = self.root / "inv.json"
+        code, _ = self.cli("--root", str(self.root), "--changed", "--out", str(out))
+        inv = json.loads(out.read_text())
+        self.assertEqual((code, self.by(inv, "do_something")[0]["change"]), (0, "added"))
+        self.assertEqual(inv["change_base"]["hidden_commits"], 0)
+        code, _ = self.cli("--root", str(self.root), "--changed", "HEAD", "--out", str(out))
+        inv = json.loads(out.read_text())
+        self.assertEqual((self.by(inv, "do_something")[0]["change"], inv["change_base"]["hidden_commits"]), ("unchanged", 1))
+        from contracts.naming_check import main as check
+        import io
+        from contextlib import redirect_stdout
+        with redirect_stdout(io.StringIO()) as buf:
+            code = check(["check", "--inventory", str(out)])
+        rep = json.loads(buf.getvalue())
+        self.assertNotEqual(code, 0)  # never a pass: the revision hides this branch's work (the fixture's duplicate fit fails)
+        self.assertTrue(any("hides work of this branch" in n for n in rep["notes"]))
+        self.assertIn("do_something", {f["current"] for f in rep["findings"]})
+
+    def test_a_subfolder_root_is_refused(self):
+        if shutil.which("git") is None:
+            self.skipTest("git is not installed")
+        git(self.root, "init", "-q")
+        (self.root / "sub").mkdir()
+        (self.root / "sub" / "a.py").write_text("def f():\n    pass\n")
+        code, status = self.cli("--root", str(self.root / "sub"), "--out", str(self.root / "inv.json"))
+        self.assertEqual((code, status["status"]), (2, "rejected"))
+        self.assertIn("--scope", status["error"])
+
     def test_bad_revision_is_rejected(self):
         res = subprocess.run([sys.executable, "-I", str(SCRIPT), "--surface", "N1", "--root", str(self.root), "--changed",
                               "no-such-rev", "--out", str(self.root / "inv.json")], capture_output=True, text=True, timeout=120)

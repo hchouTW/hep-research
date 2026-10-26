@@ -17,7 +17,9 @@ style rule (forbidden, pattern, vocabulary) or semantic rule is a warning in a u
 naming.strict; every unverified or unsupported result is unresolved, so a check without evidence never exits 0.
 Severity never changes an action (I8). By default findings cover the names added, modified or removed and the names
 whose relational judgement involves them; --all reports every name, and so does a check whose inventories carry no
-change marks (made without --changed). Relational rules always see the whole inventory.
+change marks (made without --changed) or were compared against a revision that already holds commits of this branch
+(their names would look unchanged). The table names the revision compared against. Relational rules always see the
+whole inventory.
 
 --project DIR reads the optional naming block of hep-research.project.json (strict, glossary, waivers) and refuses an
 --out inside its artifacts_dir: naming working files (inventories, annotations, reports, change sets) are never
@@ -45,7 +47,7 @@ from contracts.schema import validate  # noqa: E402
 from core.naming import engine as E  # noqa: E402
 from core.naming.declarations import correlation_inventory  # noqa: E402
 from core.naming.model import STATES  # noqa: E402
-from core.naming.vocab import Vocabulary, data_versions  # noqa: E402
+from core.naming.vocab import DATA_DIR, Vocabulary, data_versions  # noqa: E402
 from core.terminology.glossary import load_glossary  # noqa: E402
 
 TOOL = "naming_check"
@@ -150,11 +152,11 @@ def render_table(rows: list[dict]) -> str:
 
 def run_check(inventories: list[dict], *, rules: dict, surfaces: dict, glossary=None, profile_terms=(), declarations=None,
               annotations=None, waivers=(), expect=(), strict=False, report_all=False, mode="project",
-              inputs=None, scope=None, extra_notes=()) -> dict:
+              inputs=None, scope=None, extra_notes=(), untrusted_changes=()) -> dict:
     vocab = Vocabulary(glossary, profile_terms)
     judged = E.judge(inventories, rules["rules"], surfaces["surfaces"], vocab=vocab, state_for=state_for,
                      declarations=declarations, annotations=annotations, waivers=waivers, expect=expect,
-                     report_all=report_all, deterministic_only=(mode == "gate"))
+                     report_all=report_all, deterministic_only=(mode == "gate"), untrusted_changes=untrusted_changes)
     findings = build_findings(judged, surfaces, mode, strict)
     counts = {s: sum(1 for r in judged["reported"] if r["state"] == s) for s in STATES}
     ran = sorted({f"{r['rule_id']}@{r['rule_version']}" for r in judged["results"] if r["entity_id"]})
@@ -189,7 +191,8 @@ def cmd_check(args) -> int:
         rules, surfaces = registries()
         proj, settings = _project(args.project)
         inventories, inputs = [], {"rules": _sha(RULES), "surfaces": _sha(SURFACES), "engine": E.ENGINE_VERSION,
-                                   "vocabulary_data": data_versions()}
+                                   "vocabulary_data": data_versions(),
+                                   **{f"data:{f.name}": _sha(f) for f in sorted(DATA_DIR.glob("*.json"))}}
         for p in args.inventory or []:
             inv = _load(p)
             errs = _schema_errors(inv, "naming_inventory.json")
@@ -245,14 +248,26 @@ def cmd_check(args) -> int:
     if args.out is not None and proj is not None and proj.artifacts_dir and E.is_inside(args.out, proj.artifacts_dir):
         return fail(f"--out {args.out} is inside artifacts_dir: naming working files stay out of it (I9); use <project>/naming/")
     marked = any(inv.get("changed_since") for inv in inventories)
-    notes = [] if marked or args.all else ["no inventory was made with --changed: every name is reported (as --all), "
-                                           "since without change marks nothing would be in the reporting scope"]
+    hidden = [f"{inv['surface']}: {inv['change_base']['rev']} holds {inv['change_base']['hidden_commits']} commit(s) of "
+              "this branch" for inv in inventories if (inv.get("change_base") or {}).get("hidden_commits")]
+    notes = [] if (marked and not hidden) or args.all else (
+        ["no inventory was made with --changed: every name is reported (as --all), since without change marks "
+         "nothing would be in the reporting scope"] if not marked else
+        [f"--changed hides work of this branch ({'; '.join(hidden)}): every name is reported (as --all); use "
+         "--changed alone (the merge base) to mark this branch's changes"])
+    compared = sorted({f"{inv['change_base']['rev']} ({inv['change_base']['sha'][:12]})" for inv in inventories
+                       if inv.get("change_base")})
+    notes += [f"names compared against {', '.join(compared)}"] if compared else []
     rep = run_check(inventories, rules=rules, surfaces=surfaces, glossary=glossary, profile_terms=profile_terms,
                     declarations=declarations, annotations=annotations, waivers=waivers, expect=args.expect or (),
-                    strict=strict, report_all=args.all or not marked, inputs=inputs, extra_notes=notes,
+                    strict=strict, report_all=args.all or not marked or bool(hidden), inputs=inputs, extra_notes=notes,
+                    untrusted_changes={inv["surface"] for inv in inventories if not inv.get("changed_since")
+                                       or (inv.get("change_base") or {}).get("hidden_commits")},
                     scope={"surfaces": seen, "expect": list(args.expect or []), "all": bool(args.all)})
     rep.pop("_judged")
     if args.format == "table":
+        if compared:
+            print(f"Names compared against {', '.join(compared)}.\n")
         print(render_table(rep["naming"]["table"]) if rep["naming"]["table"] or any(
             e["change"] != "unchanged" for inv in inventories for e in inv["entities"]) else "No names added, changed or deleted.")
         return rep["exit_code"]

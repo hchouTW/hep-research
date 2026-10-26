@@ -70,6 +70,24 @@ Software checks establish contract consistency only, not physical validity.
   - Schema `naming_inventory.json`: optional entity `targets`. `tools/optional_modules.json` runs the N3/N4 tests
     in the uproot jobs; without uproot they skip.
 
+- Semantic naming, fixes from the re-review of the spec's third round (R869ec87b88, round 2):
+  - `extract_names.py --changed` alone compares against the merge base of `HEAD` and the main branch; an explicit
+    revision that already holds commits of this branch (their names would look unchanged) makes the check report
+    every name, and an inventory without change marks (or with such a revision) leaves its unchanged names'
+    `semantic` review unverified, so the check cannot pass on a hidden change. The table names the revision compared
+    against. A `--root` below a project root is refused (narrow with `--scope`).
+  - Change sets: the proposed name is judged (not forbidden, in the kind's format, not another entity's name: on N10
+    anywhere, on N15 only the duplicate's); a `dedup-only` change set needs a uniqueness `trigger`; a C3 approval
+    names the approved `proposed`; an N10 rename needs the N3 inventory from the registry (`references_to` with
+    `derived`), even when the inventory lists no targets.
+  - Correctness rules (uniqueness, reference, the N15 duplicate, the glossary identifier) are never waivable, and the
+    registry checker refuses a waivable one; a waiver without `@line` covers a name declared once only; an
+    annotation resolves a near-duplicate only at high confidence; a missing inventory a rule needs is `unsupported`
+    (it was `unverified`); unreadable inputs (`skipped_inputs`) make the surface `unsupported`; `naming.inputs`
+    records the sha256 of every `core/naming/data` file.
+  - `tools/check_naming.py`: the baseline may grow only for a rule new since `--base` (default `origin/main`;
+    skipped with a note when absent, as in a shallow clone).
+
 - hep-detector front-end page: the eight "(moved)" section pointers left by the 0.41.0 split are removed, as recorded
   (`remove_in` 0.42.0). The sections are in `front-end-waveform-processing.md` (sampled waveforms, pileup,
   photosensors, LAr TPC, digital pulse processing, pulse-shape discrimination) and `front-end-calibration.md`

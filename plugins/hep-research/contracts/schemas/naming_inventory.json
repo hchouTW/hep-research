@@ -35,7 +35,7 @@
   },
   "changed_since": {
    "type": "string",
-   "$comment": "the git revision --changed compared against"
+   "$comment": "the git revision --changed compared against (set whenever --changed was given; its absence means no change marks were computed)"
   },
   "skipped_inputs": {
    "type": "array",
@@ -62,6 +62,37 @@
    "type": "array",
    "items": {
     "$ref": "#/$defs/entity"
+   }
+  },
+  "change_base": {
+   "type": "object",
+   "$comment": "what --changed resolved to; hidden_commits > 0: the revision already holds commits of this branch, whose names would look unchanged, so the check reports every name",
+   "required": [
+    "rev",
+    "sha",
+    "hidden_commits"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "rev": {
+     "type": "string"
+    },
+    "sha": {
+     "type": "string"
+    },
+    "merge_base": {
+     "type": [
+      "string",
+      "null"
+     ]
+    },
+    "hidden_commits": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "note": {
+     "type": "string"
+    }
    }
   }
  },

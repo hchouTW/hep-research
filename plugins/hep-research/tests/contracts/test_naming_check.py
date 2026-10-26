@@ -38,8 +38,8 @@ class CliTests(unittest.TestCase):
         p.write_text(json.dumps(doc))
         return p
 
-    def inventory(self, *entities, scanned=1, surface="N1", name="inv.json") -> Path:
-        return self.write(name, new_inventory(surface, ["."], scanned, list(entities), "2026-10-26T00:00:00Z"))
+    def inventory(self, *entities, scanned=1, surface="N1", name="inv.json", **extra) -> Path:
+        return self.write(name, new_inventory(surface, ["."], scanned, list(entities), "2026-10-26T00:00:00Z", **extra))
 
     def run_cli(self, *argv):
         out, err = io.StringIO(), io.StringIO()
@@ -88,8 +88,13 @@ class CliTests(unittest.TestCase):
         self.assertNotEqual(r1["naming"]["inputs"]["glossary"], r2["naming"]["inputs"]["glossary"])
 
     def test_table_and_no_change_line(self):
+        marked = {"changed_since": "main", "change_base": {"rev": "main", "sha": "0" * 40, "hidden_commits": 0}}
+        code, text = self.run_cli("check", "--inventory", self.inventory(ent("x", change="unchanged"), **marked),
+                                  "--format", "table")
+        self.assertEqual(text.strip().splitlines()[-1], "No names added, changed or deleted.")
+        self.assertIn("Names compared against main (000000000000).", text)
         code, text = self.run_cli("check", "--inventory", self.inventory(ent("x", change="unchanged")), "--format", "table")
-        self.assertEqual(text.strip(), "No names added, changed or deleted.")
+        self.assertNotIn("No names added", text)  # without change marks an unchanged name may be new
         code, text = self.run_cli("check", "--inventory", self.inventory(ent("tmp")), "--format", "table")
         self.assertTrue(text.startswith("| Surface | Level | Rule | Predicate | State | Current | Proposed | Issue | Evidence"))
 
@@ -146,6 +151,16 @@ class CliTests(unittest.TestCase):
         self.assertEqual(implemented, {f"N{k}" for k in range(1, 18)})
 
 
+    def test_a_revision_that_hides_branch_commits_reports_every_name(self):
+        unchanged = ent("process_data")
+        unchanged["change"] = "unchanged"
+        base = {"rev": "HEAD", "sha": "1" * 40, "merge_base": "0" * 40, "hidden_commits": 2}
+        code, rep = self.run_cli("check", "--inventory", self.inventory(unchanged, changed_since="HEAD", change_base=base))
+        self.assertEqual(code, 3)
+        self.assertTrue(any(f["current"] == "process_data" and f["rule_id"] == "naming.common.forbidden"
+                            for f in rep["findings"]))
+        self.assertTrue(any("hides work of this branch" in n for n in rep["notes"]))
+
     def test_expected_surface_without_inventory(self):
         code, rep = self.run_cli("check", "--inventory", self.inventory(ent("selected_events")), "--expect", "N10")
         self.assertEqual((code, rep["status"]), (3, "incomplete"))
@@ -155,7 +170,8 @@ class CliTests(unittest.TestCase):
         unchanged = ent("process_data")
         unchanged["change"] = "unchanged"
         code, rep = self.run_cli("check", "--inventory", self.inventory(unchanged))
-        self.assertEqual(code, 0)  # a style warning in a user project
+        self.assertEqual(code, 3)  # its review is missing: an unmarked name may be new
+        self.assertTrue(any(f["reason_code"] == "naming.change_marks_untrusted" for f in rep["findings"]))
         self.assertTrue(any(f["current"] == "process_data" for f in rep["findings"]))
         self.assertTrue(any("--changed" in n for n in rep["notes"]))
 
@@ -197,6 +213,13 @@ class RegistryTests(unittest.TestCase):
         fixed["outcome_contract"]["not_applicable"].append("naming.waived")
         codes = self.codes(NR.check_rules(doc, self.surfaces))
         self.assertLessEqual({"naming_registry.two_active_versions", "naming_registry.waived_not_waivable"}, codes)
+
+    def test_correctness_rules_are_never_waivable(self):
+        doc = copy.deepcopy(self.rules)
+        uniq = next(r for r in doc["rules"] if r["rule_id"] == "naming.common.uniqueness")
+        uniq["waivable"] = True
+        uniq["outcome_contract"]["not_applicable"].append("naming.waived")
+        self.assertIn("naming_registry.correctness_waivable", self.codes(NR.check_rules(doc, self.surfaces)))
 
     def test_mirror_mismatch(self):
         doc = copy.deepcopy(self.surfaces)
