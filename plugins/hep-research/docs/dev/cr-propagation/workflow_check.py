@@ -34,8 +34,10 @@ def load_json(path: Path) -> dict:
     return json.loads(path.read_text(encoding="utf-8"))
 
 
-def git(*args: str) -> str:
-    return subprocess.run(["git", "-C", str(PLUGIN_ROOT), *args], check=True, capture_output=True, text=True).stdout
+def git(*args: str, trusted: bool = False) -> str:
+    """Run git in the branch under test, or in the checker's own (integration) worktree when trusted."""
+    root = WORKFLOW_DIR if trusted else PLUGIN_ROOT
+    return subprocess.run(["git", "-C", str(root), *args], check=True, capture_output=True, text=True).stdout
 
 
 def check_dag(workflow: dict) -> list[str]:
@@ -45,12 +47,16 @@ def check_dag(workflow: dict) -> list[str]:
         problems.append("duplicate work-package id")
     capabilities = set(workflow["capabilities"])
     for wp in packages.values():
-        for dep in wp.get("deps", []) + wp.get("soft_deps", []) + wp.get("merge_after", []) + wp.get("merge_before", []):
+        fallback_mode = wp.get("fallback_mode") or {}
+        for dep in wp.get("deps", []) + wp.get("soft_deps", []) + fallback_mode.get("deps", []):
             if dep not in packages:
                 problems.append(f"{wp['id']}: unknown work package {dep}")
-            elif dep in wp.get("deps", []) and packages[dep]["wave"] > wp["wave"]:
+            elif packages[dep]["wave"] > wp["wave"]:
                 problems.append(f"{wp['id']}: dependency {dep} is in a later wave")
-        for capability in wp.get("requires", []):
+        for dep in wp.get("merge_after", []) + wp.get("merge_before", []):
+            if dep not in packages:
+                problems.append(f"{wp['id']}: unknown work package {dep}")
+        for capability in wp.get("requires", []) + fallback_mode.get("requires", []):
             if capability not in capabilities:
                 problems.append(f"{wp['id']}: undefined capability {capability}")
     visiting, done = set(), set()
@@ -62,7 +68,8 @@ def check_dag(workflow: dict) -> list[str]:
             problems.append("cycle: " + " -> ".join(path + [node]))
             return
         visiting.add(node)
-        for dep in packages[node].get("deps", []) + packages[node].get("soft_deps", []):
+        fallback_mode = packages[node].get("fallback_mode") or {}
+        for dep in packages[node].get("deps", []) + packages[node].get("soft_deps", []) + fallback_mode.get("deps", []):
             visit(dep, path + [node])
         visiting.discard(node)
         done.add(node)
@@ -74,11 +81,11 @@ def check_dag(workflow: dict) -> list[str]:
 
 def frozen_acceptance_text() -> str:
     """acceptance.json as committed by P0 (the first commit that added it)."""
-    relative = "docs/dev/cr-propagation/acceptance.json"
-    first = git("log", "--diff-filter=A", "--format=%H", "--", relative).split()
+    relative = "acceptance.json"
+    first = git("log", "--diff-filter=A", "--format=%H", "--", relative, trusted=True).split()
     if not first:
         raise ValueError("acceptance.json has no commit yet")
-    return git("show", f"{first[-1]}:./{relative}")
+    return git("show", f"{first[-1]}:./{relative}", trusted=True)
 
 
 def check_acceptance() -> tuple[list[str], dict]:
@@ -90,7 +97,11 @@ def check_acceptance() -> tuple[list[str], dict]:
     if not section or frozen_sha not in section.group(0):
         problems.append(f"frozen sha256 {frozen_sha} not recorded in the CRPROP-ACCEPTANCE section of VALIDATION.md")
     frozen = {entry["id"]: entry for entry in json.loads(frozen_text)["entries"]}
-    current = {entry["id"]: entry for entry in load_json(PLUGIN_ROOT / BRANCH_DOCS / "acceptance.json")["entries"]}
+    current_entries = load_json(PLUGIN_ROOT / BRANCH_DOCS / "acceptance.json")["entries"]
+    current_ids = [entry["id"] for entry in current_entries]
+    for entry_id in sorted({entry_id for entry_id in current_ids if current_ids.count(entry_id) > 1}):
+        problems.append(f"{entry_id}: duplicate id")
+    current = {entry["id"]: entry for entry in current_entries}
     for entry_id, entry in frozen.items():
         if entry_id not in current:
             problems.append(f"{entry_id}: deleted")

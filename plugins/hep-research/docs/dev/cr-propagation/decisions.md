@@ -35,7 +35,17 @@ Q9 N₀ = 10 × number of free parameters rounded up to a power of 2, k = N₀/1
 - `cr-propagation-plan.md` line 257 has the code-span status `BLOCKED: environment E2 required`;
   `cr-propagation-plan.zh.md` line 257 has `BLOCKED: 需要環境 E2`. An identifier in a code span differs; workers emit
   the English form (the plan's stated rule keeps identifiers unchanged across languages).
-- Found by the P0 verifier (a token comparison at P0 had missed the last two). No other difference was found.
+- `workflow-r4.md` Deliverables (line 242): this document is committed as `workflow-r4.md` "together with its Chinese
+  original"; `workflow-r4.zh.md` (line 241) says the (Chinese) document is committed as `workflow-r4.md` and does not
+  mention the English version. The orchestrator follows the English: `workflow-r4.md` (English) and
+  `workflow-r4.zh.md` (Chinese), as for the r3 pair.
+- `workflow-r4.md` Open Questions (line 281) instructs running `review.py` "during P0"; `workflow-r4.zh.md` line 280
+  says it is "suggested" (建議) at P0. Either way it is deferred (see Orchestrator notes).
+- `cr-propagation-plan.zh.md` line 7 (Language row) names the English file `hep-research-cr-propagation-plan.en.md`
+  (not its committed name `cr-propagation-plan.md`) and adds a sentence on the headings and `lint_task.py`; the English
+  row has neither.
+- Found by the two P0 verifiers; the second compared r4 zh in full and r3 by tokens (code spans, numbers, §
+  references, identifiers). Wording-only variants are not listed. The maintainer resolves the texts at H1.
 
 ## Orchestrator notes recorded at P0 (for H1)
 
