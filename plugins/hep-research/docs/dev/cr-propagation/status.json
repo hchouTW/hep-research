@@ -275,17 +275,19 @@
    ]
   },
   "F1": {
-   "state": "pending",
-   "dispatches": 0,
+   "state": "dispatched",
+   "dispatches": 1,
    "rework_rounds": 0,
-   "branch": null,
+   "branch": "worktree-crprop-f1",
    "base": null,
    "head": null,
    "merge_commit": null,
    "worker_report": null,
    "verifier_report": null,
    "missing_capabilities": [],
-   "notes": []
+   "notes": [
+    "files widened (USINE provider/reader/translator, propagation_fit.py, their tests) for modulation and low-break fitting; USINE cap 2000"
+   ]
   },
   "F2": {
    "state": "pending",
@@ -357,10 +359,10 @@
    ]
   },
   "C2UF": {
-   "state": "pending",
-   "dispatches": 0,
+   "state": "dispatched",
+   "dispatches": 1,
    "rework_rounds": 0,
-   "branch": null,
+   "branch": "worktree-crprop-c2uf",
    "base": null,
    "head": null,
    "merge_commit": null,
@@ -368,7 +370,7 @@
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "added per A1.12; dispatch after C2U merges; USINE cap 600"
+    "USINE cap 600; shares propagation_fit.py with F1 (merge order: whichever passes first; the other rebases)"
    ]
   }
  },
@@ -737,6 +739,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "C2U merged (886bb316); post-merge static ok"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "F1 (files widened for modulation and low break) and C2UF dispatched from integration after C2U merge"
   }
  ],
  "env": {
