@@ -199,18 +199,19 @@
    ]
   },
   "B3": {
-   "state": "dispatched",
+   "state": "verifying",
    "dispatches": 1,
    "rework_rounds": 1,
    "branch": "worktree-crprop-b3",
-   "base": "2d451e87",
-   "head": "5cb31aa5",
+   "base": "f1d695cc",
+   "head": "0ec57897",
    "merge_commit": null,
    "worker_report": "DONE: B3-1 on matched 1D geometry (B/C 9e-5, 10Be/9Be 4.1e-4); harmonized-v1 2D B/C misses 2% (to 2.47% above 45 GV), attributed to radial escape (Fourier-Bessel reproduces USINE 2D to 0.21%); B3-2 max 8.9e-6; B3-3 22 rows; 192 USINE runs (D7)",
    "verifier_report": "round 0 REWORK (Opus): B3-1 must be judged under harmonized-v1 (card plan:420, geometry plan:379); 2D B/C misses 2% (2.47%, 8 bins above 44.7 GV), attribution sound; B3-2, B3-3 pass",
    "missing_capabilities": [],
    "notes": [
-    "A1.10: B3-1 superseded by B3-1a/b/c; rework round 1 sent to the worker 2026-10-28 (relabel, add B3-1c test, data-line hashes)"
+    "A1.10: B3-1 superseded by B3-1a/b/c",
+    "rework round 1 DONE 0ec57897 (relabelled; B3-1a 9e-5, B3-1c 0.21%/0.16%, data-line hashes); Opus verifier dispatched"
    ]
   },
   "C2U": {
@@ -612,6 +613,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "B3 verifier REWORK (B3-1 under harmonized-v1); A1.10: B3-1a/b/c added, B3-1 superseded for B3; rework round 1"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "B3 rework round 1 DONE (0ec57897); Opus verifier dispatched (last round)"
   }
  ],
  "env": {
