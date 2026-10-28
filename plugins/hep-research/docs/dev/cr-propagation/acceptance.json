@@ -1107,6 +1107,17 @@
    "tolerance": "0.5%",
    "evidence_path": "$CRPROP_OUT/b3/acceptance",
    "source": "decisions.md A1.10 (added 2026-10-28; additions only, r4 5)"
+  },
+  {
+   "id": "C2U-3",
+   "wp": "C2U",
+   "kind": "command",
+   "criterion": "Stricter than C2-3 (added on the C2 verifier's advisory): with the USINE provider, which can express both families after B1X, BIG and SLIM are fitted to synthetic Asimov data generated from one of them; each is listed with its toy-calibrated delta chi2 (toys may run on a response model whose error is added to the covariance, P10, validated against the provider), and the generating family survives at the declared alpha.",
+   "command": "python3 -m unittest tests.skills.hep_statistics.test_propagation_fit",
+   "expect": "ok; the USINE family comparison runs from recorded results (live part gated)",
+   "tolerance": null,
+   "evidence_path": "$CRPROP_OUT/c2u/acceptance",
+   "source": "orchestrator, 2026-10-28 (C2 verifier advisory 1; additions only, r4 5)"
   }
  ]
 }

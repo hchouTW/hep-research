@@ -564,7 +564,8 @@
    ],
    "acceptance": [
     "C2U-1",
-    "C2U-2"
+    "C2U-2",
+    "C2U-3"
    ],
    "fallback": "waits on B1; if B1 is blocked, blocked with B1 (derived)",
    "source": "r4 6",
