@@ -35,7 +35,8 @@ Deltabreak kept when delta moves (usine_provider.py). Start points: the publishe
 
 Stages (--stages): data (dataset-record, covariance, CRDB cross-check marked secondary), start (chi2 of the published
 best fits with this covariance and with USINE's own covariance file), fit (one propagation_fit run per family),
-compare (the D9 table of VALIDATION.md CRPROP-F1). Criteria: VALIDATION.md, section CRPROP-F1 (written before any fit).
+compare (the D9 table of VALIDATION.md CRPROP-F1), attribution (linear response of delta and K10 to configuration
+differences from the paper that one provider run shows, with the Jacobian from the cached Fisher points). Criteria: VALIDATION.md, section CRPROP-F1 (written before any fit).
 
 Usage (from the plugin root, with HEP_USINE_BIN and HEP_USINE_DATA set):
   python3 examples/bc-usine-reproduction/run.py --out DIR [--stages data,start,fit,compare] [--families BIG,SLIM,QUAINT]
@@ -463,6 +464,96 @@ def k10(d0_cm2_s: float, delta: float) -> float:
     return d0_cm2_s / KPC2_PER_MYR_CM2_S * 10 ** delta
 
 
+def provider_domain() -> dict:
+    adapter = json.loads((PLUGIN / "adapters" / "cr-propagation" / "adapter.json").read_text())
+    decls = adapter["provider"] if isinstance(adapter["provider"], list) else [adapter["provider"]]
+    return next(d for d in decls if d["id"] == PROVIDER)["domain"]
+
+
+def _evaluate_many(reg: Path, cache: Path, family: str, points, edges, transport_block=None) -> list:
+    from core.provider.runner import ProviderRunner
+    out = []
+    with ProviderRunner(str(reg), cache_dir=str(cache), session="serve") as runner:
+        for pt in points:
+            req = {"protocol": "cr-provider/1", "provider": PROVIDER, "provider_version": PROVIDER_VERSION,
+                   "points": [pt], "observables": [{"id": "B/C", "axis": "rigidity", "unit": "GV",
+                                                    "bins": [[a, b] for a, b in zip(edges, edges[1:])]}],
+                   "want": ["lis"], "seed": None, "transport": transport_block or transport(family)}
+            res = runner.evaluate(req)["results"][0]
+            if res["status"] != "ok":
+                raise SystemExit(f"provider failed ({family}): {res.get('reason')} {res.get('detail')}")
+            out.append(res["predictions"][0]["values"]["values"])
+        sent = int(runner.stats.get("points_sent", 0))
+    return out, sent
+
+
+def variants(family: str, best: dict) -> dict:
+    """Configuration differences from the paper that one provider run can show: name -> (point, transport)."""
+    out = {}
+    t = transport(family)
+    si = json.loads(json.dumps(t))
+    si["species"]["network_top"] = "Si-30"
+    si["sources"]["abundances"] = ("data-normalised usine:crdata_crdb20170523.dat H,He:PAMELA@20;"
+                                   "C,N,O,F,Ne,Na,Mg,Al,Si:HEAO@10.6 pure:13C,15N,17O,18O")
+    out["network to Si-30 (the SLIM and QUAINT initialisation files)"] = (best, si)
+    if family == "SLIM":
+        out["V_A 6 km/s, V_c 0.1 km/s (the SLIM initialisation file's fixed values)"] = (
+            dict(best, V_A_kms=6.0, V_c_kms=0.1), t)
+    return out
+
+
+def stage_attribution(out: Path, families, reg: Path, cache: Path) -> dict:
+    """Linear response of the best fit to each configuration difference: dtheta = (J^T W J + P)^-1 J^T W dmu, with J
+    from the cached evaluations at the best fit +- the stated steps (the Fisher matrix's points: no new run), W the
+    inverse data covariance and P the prior Fisher term; dmu = the variant's prediction minus the best fit's."""
+    import numpy as np
+    rec = json.loads((out / "data" / "bc-observed.json").read_text())
+    edges = rec["extension"]["data"]["edges"]
+    stat = np.diag(np.asarray(rec["extension"]["data"]["uncertainties"][0]["values"]) ** 2)
+    cov = stat + np.asarray(json.loads((out / "data" / "covariance-systematic.json").read_text())["matrix"])
+    w = np.linalg.inv(cov)
+    rows, sent = {}, 0
+    for fam in families:
+        path = out / f"fit-{fam}" / "out" / "result.json"
+        if not path.is_file():
+            continue
+        fit = json.loads(path.read_text())["fits"][0]
+        names = [q["name"] for q in fit["parameters"]]
+        scales = [q["scale"] for q in fit["parameters"]]
+        t_hat = [q["best_fit_coordinate"] for q in fit["parameters"]]
+        nat = lambda t, sc: math.exp(t) if sc == "log" else float(t)   # noqa: E731
+        best = dict(fit["fixed"], **{n: nat(x, sc) for n, x, sc in zip(names, t_hat, scales)})
+        domain = provider_domain()
+        pts, spans = [best], []
+        for i, n in enumerate(names):   # the Fisher matrix's points: t +- step, one-sided at a domain bound
+            lo, hi = (math.log(domain[n][e]) if scales[i] == "log" else domain[n][e] for e in ("min", "max"))
+            tp, tm = min(t_hat[i] + STEPS[n], hi), max(t_hat[i] - STEPS[n], lo)
+            pts += [dict(best, **{n: nat(tp, scales[i])}), dict(best, **{n: nat(tm, scales[i])})]
+            spans.append(tp - tm)
+        mus, k = _evaluate_many(reg, cache, fam, pts, edges)
+        sent += k
+        mu0 = np.asarray(mus[0])
+        jac = np.array([(np.asarray(mus[1 + 2 * i]) - np.asarray(mus[2 + 2 * i])) / spans[i]
+                        for i in range(len(names))]).T
+        prior = np.diag([(1.0 / NUISANCES[n][1]) ** 2 if n in NUISANCES else 0.0 for n in names])
+        fisher = jac.T @ w @ jac + prior
+        gain = np.linalg.solve(fisher, jac.T @ w)
+        i_d, i_k = names.index("delta"), names.index("D0_cm2_s")
+        fam_rows = {}
+        for label, (pt, tr) in variants(fam, best).items():
+            (mu_v,), k = _evaluate_many(reg, cache, fam, [pt], edges, tr)
+            sent += k
+            dtheta = gain @ (np.asarray(mu_v) - mu0)
+            # K10 = D0 10^delta: d log10 K10 = d ln D0 / ln 10 + d delta
+            fam_rows[label] = {"max_rel_change_of_BC": float(np.max(np.abs(np.asarray(mu_v) / mu0 - 1))),
+                               "d_delta": float(dtheta[i_d]),
+                               "d_log10_K10": float(dtheta[i_k] / math.log(10) + dtheta[i_d])}
+        rows[fam] = {"jacobian_points": len(pts), "variants": fam_rows,
+                     "linear_sigma": {"delta": float(math.sqrt(np.linalg.inv(fisher)[i_d, i_d]))}}
+    (out / "attribution.json").write_text(json.dumps(rows, indent=1) + "\n")
+    return {"families": rows, "points_sent": sent}
+
+
 def stage_compare(out: Path, families) -> dict:
     table, ok = {}, True
     for fam in families:
@@ -527,6 +618,8 @@ def main(argv=None) -> int:
         summary["fit"] = {f: p.wait() for f, p in procs.items()}
     if "compare" in stages:
         summary["compare"] = stage_compare(out, families)
+    if "attribution" in stages:
+        summary["attribution"] = stage_attribution(out, families, reg or registry(out), cache)
     (out / "summary.json").write_text(json.dumps(summary, indent=1, default=str) + "\n")
     print(json.dumps(summary, indent=1, default=str)[:4000])
     failed = any(v for v in summary.get("fit", {}).values()) or ("compare" in summary

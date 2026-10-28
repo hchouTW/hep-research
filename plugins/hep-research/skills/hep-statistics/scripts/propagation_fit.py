@@ -98,7 +98,8 @@ Input (fit --input CONFIG.json; relative paths are read from the config's folder
   "nuisances": [{"name", "kind": "production-norm" | "parent-abundance", "channel": "C->B" | "parent": "O",
                  "prior_sigma": 0.1 | null, "aux": 1.0}],
   "families": [{"name", "free": [...], "fixed": {...}}]   (default: one family, every parameter free),
-  "optimizer": {"max_iterations": 100, "max_restarts": 5, "seed": 0},
+  "optimizer": {"max_iterations": 100, "max_restarts": 5, "seed": 0, "polish_steps": 0 (F1: Newton steps before the
+                verdict)},
   "degeneracy_scan": {"family", <degeneracy.py scan keys>}, "theory_spec": "base-theory-spec.json",
   "intervals": [names]   (profile delta chi2 = 1 intervals with the provider; an end on a domain bound is kind "bound"),
   "covariance_alternatives": {"family", "dataset", "model": {build_covariance sources}, "source", "lengths": [...]},
@@ -654,6 +655,10 @@ def _verdict(nll_abs, x_abs, bounds_abs, held, steps=None, polish=0):
     step / 1e-4, so the Hessian's difference step is the stated step and boundary_kkt's is 1e-2 of it.
     With polish > 0, newton_fit first takes up to that many damped Newton steps in the interior coordinates (kept
     inside the bounds) and the verdict is on the point it reaches, returned as "x"."""
+
+    With polish > 0 (optimizer.polish_steps, F1) up to that many damped Newton steps with these central differences
+    are taken on the judged coordinates before the verdict (removing the bias a forward-difference Jacobian leaves in
+    the least-squares minimum of a noisy provider); the polished point is returned as x_abs."""
     from core.stats.fit_diagnostics import boundary_kkt, newton_fit
     x0 = [float(v) for v in x_abs]
     unit = [1.0 if steps is None or steps[i] is None else steps[i] / 1e-4 for i in range(len(x0))]
@@ -704,12 +709,21 @@ def _verdict(nll_abs, x_abs, bounds_abs, held, steps=None, polish=0):
             x[i] = v
     else:
         res = newton_fit(reduced, [x[i] for i in judged], max_iter=0)
+
+    res = newton_fit(reduced, [x[i] for i in judged], max_iter=int(polish) if judged else 0)
     ok = res.ok and all(k["ok"] for k in kkt)
     reasons = list(res.reasons) + [f"kkt_{k['bound']}_{k['index']}" for k in kkt if not k["ok"]]
     out = {"status": "converged" if ok else "failed", "reasons": reasons, "edm": _r(res.edm),
            "judged": judged, "held": sorted(held), "at_bound": at_bound, "kkt": kkt}
     if polish:
         out["x"] = [a + b * u for a, b, u in zip(x0, x, unit)]
+
+    if polish and judged:
+        d = list(x)
+        for i, v in zip(judged, res.x):
+            d[i] = v
+        out["x_abs"] = [a + b * u for a, b, u in zip(x0, d, unit)]
+        out["polish"] = {"max_steps": int(polish), "steps_taken": res.iterations, "stop": res.stop}
     return out
 
 
@@ -867,10 +881,14 @@ def fit_family(model, family, opt, fixed_global, start=None, ys=None, aux=None):
         if names:
             cond, eig, degenerate, keep = fisher_screen(F, names, span)
             held = _exactly_flat(F)
-        verdict = _verdict(nll, t_hat, bounds, held, steps) if names else {"status": "converged", "reasons": [],
+        verdict = _verdict(nll, t_hat, bounds, held, steps, opt.get("polish_steps", 0)) if names else {
+            "status": "converged", "reasons": [],
                                                                     "judged": [], "held": [], "at_bound": [], "kkt": []}
+        if "x_abs" in verdict and nll(verdict["x_abs"]) <= nll(t_hat):
+            t_hat = np.clip(np.asarray(verdict.pop("x_abs"), dtype=float), lo, hi)
+        verdict.pop("x_abs", None)
         attempts.append({"attempt": attempt, "status": verdict["status"], "reasons": verdict["reasons"],
-                         "optimizer": stop})
+                         "optimizer": stop, **({"polish": verdict["polish"]} if "polish" in verdict else {})})
         if best is None or nll(t_hat) < best[1]:
             best = (t_hat, nll(t_hat), verdict, F, degenerate)
         if verdict["status"] == "converged":
@@ -1917,10 +1935,11 @@ def statistical_result_artifact(result: dict, labels) -> dict:
 
 # --------------------------------------------------------------------------- driver
 def _opt_cfg(cfg) -> dict:
-    o = _keys(cfg.get("optimizer") or {}, {"max_iterations", "max_restarts", "seed"}, "optimizer")
+    o = _keys(cfg.get("optimizer") or {}, {"max_iterations", "max_restarts", "seed", "polish_steps"}, "optimizer")
     return {"max_iterations": _int(o.get("max_iterations", 100), "optimizer.max_iterations", 1, 10000),
             "max_restarts": _int(o.get("max_restarts", MAX_RESTARTS), "optimizer.max_restarts", 0, MAX_RESTARTS),
-            "seed": _int(o.get("seed", 0), "optimizer.seed", 0, 2 ** 31)}
+            "seed": _int(o.get("seed", 0), "optimizer.seed", 0, 2 ** 31),
+            "polish_steps": _int(o.get("polish_steps", 0), "optimizer.polish_steps", 0, 5)}
 
 
 def _rm_cfg(cfg) -> dict:

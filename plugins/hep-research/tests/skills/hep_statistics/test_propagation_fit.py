@@ -265,6 +265,21 @@ class PropagationFit(unittest.TestCase):
         code, out = self.cli(toys)
         self.assertEqual((code, out["reason"]), (1, "parameter-priors-not-supported"))
 
+    def test_polish_steps_before_the_verdict(self):
+        """F1: optimizer.polish_steps takes Newton steps with the verdict's central differences before judging; the
+        polished fit still recovers the Asimov truth and records the steps."""
+        cfg = self.config(optimizer={"max_iterations": 100, "max_restarts": 0, "seed": 0, "polish_steps": 1})
+        cfg["parameters"]["D0_cm2_s"]["step"] = 0.01
+        cfg["parameters"]["delta"]["step"] = 0.002
+        fit = self.fit(cfg)["fits"][0]
+        self.assertEqual(fit["status"], "converged")
+        self.assertIn("polish", fit["attempts"][0])
+        for q in fit["parameters"]:
+            truth = math.log(TRUTH[q["name"]]) if q["scale"] == "log" else TRUTH[q["name"]]
+            self.assertLessEqual(abs(q["best_fit_coordinate"] - truth) / q["sigma_coordinate"], 0.1, q)
+        bad = self.config(optimizer={"polish_steps": 9})
+        self.assertEqual(self.cli(bad)[0], 2)
+
     def test_unregistered_provider_and_refused_nuisances(self):
         cfg = self.config(provider={"id": "not-registered", "version": "1"})
         self.assertEqual(self.cli(cfg)[1]["reason"], "unregistered-provider")
