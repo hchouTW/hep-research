@@ -279,7 +279,7 @@
   "F1": {
    "state": "merged",
    "dispatches": 2,
-   "rework_rounds": 0,
+   "rework_rounds": 1,
    "branch": "worktree-crprop-f1",
    "base": "3547f9a0",
    "head": "fd2ae511",
@@ -368,7 +368,7 @@
   "C2UF": {
    "state": "merged",
    "dispatches": 2,
-   "rework_rounds": 0,
+   "rework_rounds": 1,
    "branch": "worktree-crprop-c2uf",
    "base": "c858ef97",
    "head": "856fc53a",
@@ -836,6 +836,16 @@
    "cycle": 4,
    "date": "2026-10-29",
    "event": "A1.19: open escalations decided; D2 unavailable; RC dispatched from 6f377150"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "record gap filled from orchestrator/merge-*-static.log (all exit 0): post-merge static ok for A1R 18b43b34, D1 e44377f4, E2 fix bc6f314f, D3 fix 310bb517, F1 3ccaa643"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "wave 6 (6f377150) full run FAIL: routing-table budget hep-statistics SKILL.md + core-stats-guide.md 25688 > 25600 (C2UF 7d997d02); test_cr_propagation.py:2269 subprocess without timeout (F1); relocation same two; fix branches as rework round 1"
   }
  ],
  "env": {
