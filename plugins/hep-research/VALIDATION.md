@@ -7446,3 +7446,25 @@ the orchestrator: retrain the C2UF emulator with a nugget floor that bounds the 
 | `test_cr_propagation`, `test_propagation_fit`, `test_train_emulator`, `test_adapter_missing_dependency`, `test_cli_robustness` | E2 and CI-lock venv: 172 tests OK (15 skipped), pinned E2 responses and C2UF tests included |
 | `run_all_checks.py --part static --jobs 4` | exit 0, 31 pass, 0 fail |
 | `check_naming.py` | pass |
+
+**Rework round 3 (2026-10-29, base 600c313a, decision A1.21).** The C2UF emulator fixture is platform-bound (A1.21):
+its tests skip on the provider's self-check refusal and on nothing else; the follow-up is retraining it with a nugget
+floor in `train_emulator.py`. The round-2 criterion is kept. Skip points:
+- `EmulatorPerModelDeclaration.setUpClass` raises `unittest.SkipTest` only when `--declaration` returns status failed
+  with "does not reproduce its self-check predictions". The skip reason names A1.21 and carries the provider's
+  deviation message. Any other failure (another error, bad JSON, a missing key) still fails.
+- `test_propagation_fit` `test_live_emulator_matches_fresh_usine_runs` (live only: HEP_USINE_LIVE_TEST) loads the C2UF
+  emulator through the provider via `emulator_registry`. It skips on the same refusal only.
+- No other test loads the C2UF emulator. The E2 tests (`EmulatorPinnedResponses`, `EmulatorProviderConformance`,
+  `EmulatorProviderRefusals`, `EmulatorArtifact`, `EmulatorValidation`) are never skipped.
+
+Skip path exercised locally with the self-check bound forced negative (not committed): `setUpClass` skipped with the
+A1.21 reason and the deviation message, and `EmulatorPinnedResponses` failed (the E2 model refused, not skipped), as
+intended. That run exposed a defect: the deviation message's worst-point search divided by a zero bound. It now picks
+the point furthest beyond its bound (NaN counts as worst).
+
+| Check (round 3) | Result |
+|---|---|
+| `test_cr_propagation`, `test_propagation_fit`, `test_train_emulator`, `test_adapter_missing_dependency`, `test_cli_robustness` | E2 and CI-lock venv: 172 tests OK (15 skipped); on macOS the C2UF declaration tests run and pass (not skipped) |
+| `run_all_checks.py --part static --jobs 4` | exit 0, 31 pass, 0 fail |
+| `check_naming.py` | pass (the skip constants named `SELF_CHECK_REFUSAL`, `TWO_DATASET_EMULATOR_NOT_PORTABLE`) |

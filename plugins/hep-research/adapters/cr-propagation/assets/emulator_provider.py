@@ -123,11 +123,14 @@ def _self_check_problem(mean, sigma, ref_mean, ref_sigma) -> str | None:
     for name, got, ref in (("ln mean", mean, ref_mean), ("ln sigma", sigma, ref_sigma)):
         dev = np.abs(got - ref)
         failed = failed or bool((~(dev <= bound)).any())
-        worst = np.unravel_index(int(np.nanargmax(dev / bound)), dev.shape)
+        excess = np.where(np.isnan(dev), np.inf, dev - bound)    # the worst point: furthest beyond its bound
+        worst = np.unravel_index(int(np.argmax(excess)), dev.shape)
         i, j = (int(v) for v in worst)
+        with np.errstate(divide="ignore", invalid="ignore"):
+            over_sigma, relative = (dev / ref_sigma).max(), (dev / np.abs(ref)).max()
         parts.append(f"{name}: worst at check point {i} output {j}, deviation {dev.max():.3e} absolute, "
-                     f"{(dev / ref_sigma).max():.3e} x sigma, {(dev / np.maximum(np.abs(ref), 1e-300)).max():.3e} "
-                     f"relative; at the worst point {dev[i, j]:.3e} against the bound {bound[i, j]:.3e}")
+                     f"{over_sigma:.3e} x sigma, {relative:.3e} relative; at the worst point {dev[i, j]:.3e} "
+                     f"against the bound {bound[i, j]:.3e}")
     return "; ".join(parts) if failed else None
 
 
