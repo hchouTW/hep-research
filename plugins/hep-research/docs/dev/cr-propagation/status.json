@@ -260,18 +260,18 @@
    ]
   },
   "E2": {
-   "state": "dispatched",
+   "state": "verifying",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-e2",
-   "base": "e5ecbd64",
-   "head": "3311241a",
+   "base": "b0d0016d",
+   "head": "0f3ebfab",
    "merge_commit": null,
    "worker_report": "DONE: E2-1 0.0045, E2-2 0.063 sigma, E2-3 0.002 sigma; PRV-1/2 pass offline; 177 USINE runs; needs one entry in test_adapter_missing_dependency.py (files widened)",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "files widened (test_adapter_missing_dependency.py); asked to rebase onto integration (D1, B1X merged) and apply the entry"
+    "rebased; missing-dependency entry applied; USINE inputs byte-identical under merged B1X (no retrain); Opus verifier dispatched"
    ]
   },
   "F1": {
@@ -687,6 +687,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "wave-3 full run on a4211583: 2 failures attributed (A1R: Th13 phrase test; E1: subprocess timeouts); fixes as rework round 1 on fix branches instead of reverting (later merges depend on both; orchestrator departure from A1.5 recorded for H1); relocation adds nothing new"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "E2 rebased (0f3ebfab); Opus verifier dispatched"
   }
  ],
  "env": {
