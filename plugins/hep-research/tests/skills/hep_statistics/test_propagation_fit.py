@@ -83,7 +83,8 @@ class PropagationFit(unittest.TestCase):
                "fixed": {"R0_gv": 1.0, "disc_halfwidth_pc": 100.0},
                "nuisances": [{"name": "xs-C-B", "kind": "production-norm", "channel": "C->B", "prior_sigma": 0.1}],
                "families": [{"name": "diffusion", "free": ["D0_cm2_s", "delta"], "fixed": {"L_kpc": 4.0}}],
-               "response_model": {"nodes": 5, "validation_points": 4}}
+               "response_model": {"nodes": 5, "validation_points": 4},
+               "gate_plan": {"measurement_conditions": {"cross_section_set": "models/xs-illustrative-A.json"}}}
         cfg.update(extra)
         return cfg
 
@@ -168,6 +169,13 @@ class PropagationFit(unittest.TestCase):
         code, out = self.cli(self.config(record=rec))
         self.assertEqual((code, out["reason"]), (1, "bin-semantics-mismatch"))
         self.assertIn("P2", out["detail"])
+
+    def test_unstated_condition_is_not_gated(self):
+        cfg = self.config()
+        cfg.pop("gate_plan")
+        code, out = self.cli(cfg)
+        self.assertEqual((code, out["reason"]), (1, "not-comparable"))
+        self.assertIn("cross_section_set", out["detail"])
 
     def test_missing_binning_convention_is_refused(self):
         rec = copy.deepcopy(self.record)

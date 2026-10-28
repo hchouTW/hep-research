@@ -53,6 +53,7 @@ SPEC = PLUGIN / "profiles" / "theory" / "cr-secondary-ratio" / "derivations" / "
 TRUTH = {"D0_cm2_s": 3.0e28, "delta": 0.5}
 FIXED = {"L_kpc": 4.0, "R0_gv": 1.0, "disc_halfwidth_pc": 100.0}
 BOUNDARY_DELTA = 0.2
+XS_SET = "models/xs-illustrative-A.json"   # the provider's nominal cross-section set: a stated condition of the data
 STAGES = ("asimov-interior", "asimov-boundary", "degeneracy", "families", "coverage")
 NORMS = [{"name": "xs-C-B", "kind": "production-norm", "channel": "C->B", "prior_sigma": 0.1},
          {"name": "xs-O-B", "kind": "production-norm", "channel": "O->B", "prior_sigma": 0.1}]
@@ -151,7 +152,8 @@ def config(records, tag, families, **extra):
     cfg = {"provider": {"id": PROVIDER, "version": "0.1.0"},
            "datasets": [{"name": n, "measurement": records[(tag, n)], "observable": "B/C"} for n in DATASETS],
            "parameters": PARAMS, "fixed": {"R0_gv": FIXED["R0_gv"], "disc_halfwidth_pc": FIXED["disc_halfwidth_pc"]},
-           "nuisances": NORMS, "families": families}
+           "nuisances": NORMS, "families": families,
+           "gate_plan": {"measurement_conditions": {"cross_section_set": XS_SET}}}
     cfg.update(extra)
     return cfg
 

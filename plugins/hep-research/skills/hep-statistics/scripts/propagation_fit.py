@@ -6,7 +6,9 @@ in the registry the caller passes in (core/provider; --provider-registry), evalu
 never computes a propagation itself. Every dataset is a dataset-record artifact: its values, bins and uncertainty
 components are read from it, its covariance is assembled from the components (covariance_fit.data_covariance; a
 dataset without one stops the fit with status incomplete, exit 3, never a diagonal matrix, R7), and the provider's
-prediction at the start point is gated against it (contracts/comparison/gate.py) before anything is fitted (R5).
+prediction at the start point is gated against it (contracts/comparison/gate.py) before anything is fitted (R5);
+the parameters sent to the provider are passed to the gate as conditions, and every other parameter_point key (for
+example a cross-section set) must be stated in gate_plan.measurement_conditions.
 
 Bin semantics are checked first, explicitly: the prediction's bin_semantics and its binning conventions must be the
 data's. A provider that returns bin averages (for example a ratio averaged in ln(E/n) under a profile convention) is
@@ -312,7 +314,7 @@ class Evaluator:
         return out
 
 
-def _gate(ds: Dataset, pred: dict, labels, plan: dict, registry_entry) -> dict:
+def _gate(ds: Dataset, pred: dict, labels, plan: dict, registry_entry, point_keys) -> dict:
     """Explicit bin-semantics check (P2), then contracts/comparison/gate.py, on the provider's prediction."""
     from contracts import CONTRACTS_VERSION
     from contracts.comparison.gate import check as gate_check
@@ -340,7 +342,12 @@ def _gate(ds: Dataset, pred: dict, labels, plan: dict, registry_entry) -> dict:
            "inputs": [], "outputs": [], "status": list(labels), "unresolved_inputs": [], "extension": pred}
     pp = pred.get("parameter_point") or {}
     cond = dict((plan or {}).get("measurement_conditions") or {})
-    cond.update(pp)  # fitted and fixed values vary with the point; what is gated is the structure
+    # the parameters sent to the provider (and its echo of them in its own units) are what is fitted or fixed, so they
+    # are passed as conditions equal to the point's values; every other parameter_point key (for example a
+    # cross-section set) must be stated in gate_plan.measurement_conditions and match
+    for key in set(point_keys) | {"model_parameters"}:
+        if key in pp:
+            cond[key] = pp[key]
     res = gate_check(doc, ds.record, dict(plan or {}, measurement_conditions=cond))
     if not res.get("comparable"):
         raise FitRefused("not-comparable", f"dataset {ds.name}: the comparison gate refused the prediction: " + json.dumps(
@@ -1481,7 +1488,9 @@ def run(cfg: dict, base: Path, registry, cache_dir=None, max_evaluations=2000, a
         start_fixed = dict(f0.get("fixed") or {})
         ev.components({**start_fixed, **start_vals})
         model.bind_channels(ev.channels)
-        gates = [_gate(ds, *ev.first_predictions[ds.name], cfg.get("gate_plan") or {}, entry) for ds in datasets]
+        point_keys = ev.point({**start_fixed, **start_vals})
+        gates = [_gate(ds, *ev.first_predictions[ds.name], cfg.get("gate_plan") or {}, entry, point_keys)
+                 for ds in datasets]
         fits = []
         for fam in families:
             fits.append(fit_family(model, fam, opt, fixed_global))

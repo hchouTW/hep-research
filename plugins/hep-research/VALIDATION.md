@@ -6124,7 +6124,7 @@ semantics, and data declared `bin-integrated` are refused. All inputs are ILLUST
 | D7 | provider point evaluations counted by the runner (`points_sent`) and reported; the provider cache lives under `$CRPROP_OUT/c2/cache` |
 
 Results (`examples/propagation-fit/run.py --toys 1000 --family-toys 200`, seed 20261028, on the WP head; outputs in
-`$CRPROP_OUT/c2/acceptance/`; tests in `tests/skills/hep_statistics/test_propagation_fit.py`, 15 tests):
+`$CRPROP_OUT/c2/acceptance/`; tests in `tests/skills/hep_statistics/test_propagation_fit.py`, 16 tests):
 
 | Item | Result | Evidence |
 |---|---|---|
@@ -6133,16 +6133,16 @@ Results (`examples/propagation-fit/run.py --toys 1000 --family-toys 200`, seed 2
 | C2-2 | 1000 plug-in toys, 0 failed; response model error 3.2e-7 of the data sigma (12 provider points); Fisher eigenvalue ratio 4.2e-4, flattest direction (0.726, -0.038, 0.686) in (ln D0, delta, C->B norm); coverage `D0_cm2_s` 0.686, `delta` 0.671, flattest 0.696; Bonferroni band (m = 3, z = 3.32) +-0.0489: pass for all three (also within the uncorrected 3-sigma band +-0.0442) | `example/coverage/result.json` |
 | C2-3 | BIG (missing `V_A_kms`, `V_c_kms`, `R_break_gv`, `delta_below`, `s`) and SLIM (`R_break_gv`, `delta_below`, `s`) listed as not expressible by the closed form; delta chi2 with 200 toys each, 0 failed: `diffusion` 0 (p = 1.0, surviving), `iroshnikov-kraichnan` 0.195 (p = 0.61, surviving), `kolmogorov` 478.2 (0 of 200 toys, p < 0.015 at 95%, excluded) | `example/families/result.json` |
 | C2-4 | fit-derived theory-spec: one object `D0_cm2_s/L_kpc` (exponent of L_kpc -1.00000002, evidence `profile-scan`, `valid_range` L_kpc [1, 20] at the scan edges, D0_cm2_s [7.40e27, 1.48e29]); the Fisher screen gave the same combination (exponent -0.9999994, no valid_range, not written to the spec); `contracts/validate.py` on the theory-spec and the statistical-result: ok, no finding | `C2-4.validate.txt`, `example/degeneracy/` |
-| C2-5 | missing covariance: exit 3 `incomplete` (dataset named); start `D0_cm2_s` = 5e30: exit 1 `out-of-domain`; truth `delta` = 0.95: exit 1 `out-of-domain`; dataset declared `bin-integrated`: exit 1 `bin-semantics-mismatch`; binning convention missing: exit 1; dataset with a period: exit 1 `modulation-needs-isotopic-lis` | `test_propagation_fit.txt` |
+| C2-5 | missing covariance: exit 3 `incomplete` (dataset named); start `D0_cm2_s` = 5e30: exit 1 `out-of-domain`; truth `delta` = 0.95: exit 1 `out-of-domain`; dataset declared `bin-integrated`: exit 1 `bin-semantics-mismatch`; binning convention missing: exit 1; cross-section set not stated in the gate plan: exit 1 `not-comparable`; dataset with a period: exit 1 `modulation-needs-isotopic-lis` | `test_propagation_fit.txt` |
 | C2-6 | `optimizer.max_iterations` 1: 6 attempts, `restart-cap`, status failed; toys with `max_iterations` 1: stopped after 2 failed of 2 generated (above 2% of 50), `toy-failure-threshold`, no coverage; posterior `steps` 200001: exit 1 `chain-step-cap`; 2 chains of 200 steps: `unvalidated`, ESS below 400, no interval | `test_propagation_fit.txt` |
 | P9 | covariance alternatives of set A, correlation length 0.5 / 1.5 / 4: chi2 10.72 / 11.22 / 11.72, `delta` 0.49625 / 0.49609 / 0.49658, `D0_cm2_s` 2.968e28 / 2.969e28 / 2.948e28 (fitted one by one) | `example/degeneracy/result.json` |
 | Posterior | `diffusion` on the pseudo-data, 4 chains x 20000 steps (half burn-in) on the family response model: R-hat 1.0026, ESS 2524, acceptance 0.30, 23 of 80000 proposals outside the box; 68% intervals reported | `example/families/result.json` |
 
 Provider point evaluations (D7; one request per dataset, so a two-dataset parameter point counts twice): a cold run of
 the example costs about 2800, 1730 of them in the `degeneracy` stage (the L-BFGS-B profile scan of `degeneracy.py`,
-7 points); the test module about 190 per run. C2 used about 6200 in total during development and acceptance (3328
-cached under `$CRPROP_OUT/c2/cache`, about 2100 uncached scratch measurements, about 750 in test runs), at about 4 ms
-each. If D7's cap of 5000 evaluations counts closed-form provider evaluations, C2 alone exceeds it: reported as a
+7 points); the test module about 190 per run. C2 used about 6600 in total during development and acceptance (3328
+cached under `$CRPROP_OUT/c2/cache`, about 2100 uncached scratch measurements, about 1150 in six test runs), at
+about 4 ms each. If D7's cap of 5000 evaluations counts closed-form provider evaluations, C2 alone exceeds it: reported as a
 budget item.
 
 Not done in C2: the force-field modulation path (no provider with isotopic LIS exists yet; a dataset with a period is

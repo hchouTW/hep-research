@@ -443,7 +443,9 @@ python3 skills/hep-statistics/scripts/propagation_fit.py fit --input config.json
 ```
 
 - **Datasets** are `dataset-record` artifacts; the covariance comes from their uncertainty components as in
-  `tabulated-grid` (missing: exit 3, `incomplete`). The provider's prediction at the start is gated first; its
+  `tabulated-grid` (missing: exit 3, `incomplete`). The provider's prediction at the start is gated first (the
+  parameters sent to the provider are passed as conditions; any other `parameter_point` key, such as a cross-section
+  set, must be stated in `gate_plan.measurement_conditions`); its
   `bin_semantics` and binning conventions must be the data's: a bin-averaged ratio is never fitted to data declared
   as a ratio of bin integrals (refused, exit 1). Datasets with a `period` need `phi_<period>_gv` applied per isotope
   (P4 of the propagation plan); a provider that returns only ratios is refused (`modulation-needs-isotopic-lis`).
