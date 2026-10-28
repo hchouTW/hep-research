@@ -105,24 +105,24 @@
    "note": "USINE EPS_ITERCONV 1e-6, EPS_INTEGR 1e-4, EPS_NORMDATA 1e-10 (written into the initialisation file); outputs printed with 6 significant digits"
   },
   "resources": {
-   "wall_seconds": 12.75
+   "wall_seconds": 7.16
   },
   "exit_status": 0,
   "usine_exit_status": 1,
   "exit_status_note": "exit_status is the run's outcome as judged by usine_translate.py (0: every expected output written, no USINE error or crash in the log); USINE V3.5 itself returns 1 on every path (usine_exit_status)",
   "output_hashes": {
-   "out/local_fluxes_7BE_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "449714a3cfec98d8889786bf9bc1829fe2d2450ed896b5c68367d2d2d12bbb7c",
-   "out/local_fluxes_9BE_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "46dd01da6519b761b83fbf14149714827108d4f74825a43dc7a3ed9dbf4910ea",
-   "out/local_fluxes_10BE_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "240674475be9a31fe392a5deaa0784ab0685c40b4f8db31e6e5e20b040a20b21",
-   "out/local_fluxes_10B_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "1822382b3721fd0678e2774344a66ffff6c66c1cf81abbdbd8d2ab091e8bd4dc",
-   "out/local_fluxes_11B_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "86a091619c69ac04bf34f829e7d76f1aae3c07c19d1db204578326bd792f8c27",
-   "out/local_fluxes_12C_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "8600865c211bd7aa2c5624c22f766acc6ef9da2d23695dbdf7ad28bd1d46bff2",
-   "out/local_fluxes_13C_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "faa7f02cee2a0ee6c59146425f448fa8292fc1d96556e4e397f0ef287e461864",
-   "out/local_fluxes_14C_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "a3d20b55fa3affb171139b29de4239c706cb21e06e9a7a88302edd47b7d99f34",
-   "out/local_fluxes_BC_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "bf28a45787b956357d1598e0997275b4c181188b6b3b0812c5bf37e67e087171",
-   "out/local_fluxes_10BE9BE_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "b7b52bc99481de5a82ffa3f8531a4ff30a0b674ff40b9808a516857f249ebd65",
-   "out/local_fluxes_BC_R_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "bbdad35ba5116a48bc6e80e146adbd726a2bf8ca852d4a7b25a9e6285b0bdbb0",
-   "out/local_fluxes_10BE9BE_R_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "3c76cae0e887e87b5e65e7e26614c2e3fe2bec9e32b4ea5966887efff455bd7d"
+   "out/local_fluxes_7BE_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "cfe796ac911d43003bed779394d85da3f9cf55749be0549791f35d4cb62cb67c",
+   "out/local_fluxes_9BE_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "6e8887c08f491c48887a4a14e09e40b94016d78ef00d6e6d218d11e0963f3c42",
+   "out/local_fluxes_10BE_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "1403e3c54a27a843fc79019964a8e32dc59de1c43cd16c5744610d9c00b6df08",
+   "out/local_fluxes_10B_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "4a7af157b49b3d7101d625dcd51b017d309946cc494d8526603abf2ace8facbb",
+   "out/local_fluxes_11B_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "9945555e9c10eec8b513d2ee49e0cd258c6a2b0454d773746f1c8ca858a823ea",
+   "out/local_fluxes_12C_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "ef0b7511b54200f8abc893faa67a83018b46f7177eadb2c51d85b680029454de",
+   "out/local_fluxes_13C_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "e93c7aab7cfe468b6bcaf03b39ac212dcd6c34ebc9ecc72bf9c691320cfaefb0",
+   "out/local_fluxes_14C_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "65023e7bde437119ff9df64b893fb16368e3030dd72caebf28964e23a54401bf",
+   "out/local_fluxes_BC_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "d27dc8df85e22dc69d23c31812f4ef115bc6cc903de99a961dfaaf818a2152d4",
+   "out/local_fluxes_10BE9BE_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "e6c5bc8260a16f6bdfdcaa99232359d3b3198c5e8a56b6b4b57817461cb69534",
+   "out/local_fluxes_BC_R_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "3cdb594ce73b197672ad850f8140abc11f40cbfbd252163afc77764495f39788",
+   "out/local_fluxes_10BE9BE_R_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "aa62ee72b0194f758478c9179f8b8314ec27ab24bf3c4c958ec5b74fc5896867"
   },
   "notes": [
    "10Be half-life: USINE chart 1.387 Myr, NUBASE2020 1.387 My (core.constants.physical)",
@@ -130,6 +130,7 @@
    "local bubble of radius 0.203802 kpc (USINE rhole): USINE damps BETA-unstable fluxes in the disc only (valid at z = 0)",
    "diffusion.form 'beta^eta (R/R0)^delta with smooth breaks': not parsed; K = beta^eta K0 (Rig/R0)^delta times the break factors is fixed by the canonical fields",
    "high break form (1 + (Rig/R_break)^((delta - delta_above)/s))^(-s): USINE V3.5's shipped K formula (inputs/init.TEST.par line 133) with Deltabreak = delta - delta_above",
+   "reacceleration.relation 'Seo-Ptuskin 1994': momentum diffusion Kpp of USINE's shipped files (Seo-Ptuskin form)",
    "electron-capture decay on at the laboratory half-life of USINE's chart, rate ln 2 / (gamma t_1/2) (USINE V3.5 src/TUAxesCrE.cc GammaRadEC_perMyr); electron attachment and stripping are not modelled (r3 P6)",
    "cross_sections.ghost_threshold 'USINE chart crcharts_Zmax30_ghost97 (ghosts folded into cumulative cross sections)': not parsed; ghost nuclei are not loaded (IsLoadGhosts false; the cumulative cross sections of USINE's chart crcharts_Zmax30_ghost97.dat) and tertiary chains are off",
    "sources.injection species_group ['all primaries']: one slope for every primary of the network",
