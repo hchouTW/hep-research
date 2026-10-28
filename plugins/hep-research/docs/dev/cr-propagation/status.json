@@ -258,17 +258,19 @@
    ]
   },
   "E2": {
-   "state": "pending",
-   "dispatches": 0,
+   "state": "dispatched",
+   "dispatches": 1,
    "rework_rounds": 0,
-   "branch": null,
-   "base": null,
+   "branch": "worktree-crprop-e2",
+   "base": "e5ecbd64",
    "head": null,
    "merge_commit": null,
    "worker_report": null,
    "verifier_report": null,
    "missing_capabilities": [],
-   "notes": []
+   "notes": [
+    "optional; E2 USINE evaluations capped at 500 by orchestrator within D7"
+   ]
   },
   "F1": {
    "state": "pending",
@@ -643,6 +645,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "A1R merged (18b43b34); escalation 10 (P1 wording, translators); B1X rebase + zone-factor switch requested; D1 dispatch 2"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "E2 dispatched from e5ecbd64 (optional; USINE cap 500)"
   }
  ],
  "env": {
