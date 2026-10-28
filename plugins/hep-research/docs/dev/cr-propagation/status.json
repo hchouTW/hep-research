@@ -411,14 +411,14 @@
    ]
   },
   "K3": {
-   "state": "dispatched",
+   "state": "rework",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-k3",
    "base": "f778b9d3",
-   "head": null,
+   "head": "3386a103",
    "merge_commit": null,
-   "worker_report": null,
+   "worker_report": "DONE: adapter.json dragon2 differences (description; schema has no field), translator gaps closed with 6 tests, P1 wording, Ptuskin note, B3 erratum (+1.3% confirmed), adapter-authoring wording; open: dragon2_run.py CLI bypasses source checks (file added to card)",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
@@ -426,15 +426,15 @@
    ]
   },
   "K4": {
-   "state": "verifying",
+   "state": "merged",
    "dispatches": 1,
-   "rework_rounds": 0,
+   "rework_rounds": 1,
    "branch": "worktree-crprop-k4",
    "base": "94ba34d1",
-   "head": "4bb5b3ba",
-   "merge_commit": null,
+   "head": "805faab1",
+   "merge_commit": "2616f45b",
    "worker_report": "PARTIAL: K4-1 met (--max-condition 1e10, E2 opt-out); retrained C2UF emulator holdout 0.0032 sigma, drift margin >3000, k=4 confirmation 0.0226 sigma; C2UF-1 not met on it (SLIM toys 5/37 failed, threshold 2%); model not committed, A1.21 skip kept; 40 USINE runs",
-   "verifier_report": null,
+   "verifier_report": "Opus PASS r1 (r0 REWORK: VALIDATION wording): cond bound exact, --max-condition 0 byte-identical, E2 unchanged, drift margin >4000, bound committed before retrain; K4-2 not met per B1.2",
    "missing_capabilities": [],
    "notes": [
     "B1.1",
@@ -962,6 +962,11 @@
    "cycle": 4,
    "date": "2026-10-29",
    "event": "K2 merged (a1a85cb1), Opus PASS; post-merge static see log"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "K4 merged (2616f45b; appended conflicts resolved mechanically; static ok); K3 DONE (3386a103), sent back to rebase onto K2+K4 and delegate dragon2_run.py"
   }
  ],
  "env": {

@@ -934,7 +934,8 @@
     "tests/skills/hep_theory/**",
     "skills/hep-theory/references/cosmic-ray-phenomenology.md",
     "docs/capability-matrix.md",
-    "docs/adapter-authoring.md"
+    "docs/adapter-authoring.md",
+    "adapters/cr-propagation/assets/dragon2_run.py"
    ],
    "acceptance": [
     "K3-1",
@@ -952,7 +953,7 @@
    "critical": false,
    "fallback": "none: escalate",
    "source": "decisions.md B1.1 (maintainer 2026-10-29)",
-   "files_source": "docs/adapter-authoring.md added by the orchestrator 2026-10-29 (K2 open question 1: the \"providers never modulate\" wording there)"
+   "files_source": "docs/adapter-authoring.md added by the orchestrator 2026-10-29 (K2 open question 1: the \"providers never modulate\" wording there); adapters/cr-propagation/assets/dragon2_run.py added 2026-10-29 (the DRAGON2 translator lives there; its --from-transport CLI must use the K3 source checks)"
   },
   {
    "id": "K4",
