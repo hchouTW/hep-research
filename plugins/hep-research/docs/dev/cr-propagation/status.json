@@ -759,6 +759,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "E2 rework round 1 merged (bc6f314f); CLI contract passes"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "maintainer 2026-10-28: pause after F1 and C2UF merge; do not start RC until the maintainer resumes"
   }
  ],
  "env": {
