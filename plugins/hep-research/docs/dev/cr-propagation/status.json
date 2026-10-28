@@ -247,7 +247,7 @@
   "E1": {
    "state": "merged",
    "dispatches": 1,
-   "rework_rounds": 0,
+   "rework_rounds": 1,
    "branch": "worktree-crprop-e1",
    "base": "4a58be50",
    "head": "9ac54c51",
@@ -256,7 +256,7 @@
    "verifier_report": "PASS (2026-10-28, Sonnet): 111 records present, 12 validated with output hashes recomputed; Sobol design regenerated exactly; no training values committed; tally 114; advisories: forced-test best-emulator label, cosmetic cumulative tally",
    "missing_capabilities": [],
    "notes": [
-    "Sonnet verifier dispatched 2026-10-28"
+    "wave-3 full run: test_subprocess_timeouts fails (e1/active_addition.py:214, :233 without timeout=); fix as rework round 1 on worktree-crprop-e1fix (no revert: E2 builds on E1)"
    ]
   },
   "E2": {
@@ -344,7 +344,7 @@
   "A1R": {
    "state": "merged",
    "dispatches": 1,
-   "rework_rounds": 0,
+   "rework_rounds": 1,
    "branch": "worktree-crprop-a1r",
    "base": null,
    "head": "b20ab46b",
@@ -353,7 +353,7 @@
    "verifier_report": "PASS (2026-10-28, Opus): DRAGON2 form checked in source; zone factor sqrt(L/(3h)) re-derived analytically and numerically (a_halo/a_disc = 3h/L), second-order (1+lam)/5; Ptuskin94 = 3/4 USINE D_pp; advisories: bound exact only for energy-independent lam; finite disc O(h/L)",
    "missing_capabilities": [],
    "notes": [
-    "Opus verifier dispatched with independent re-derivation; B1X told to hold the zone factor until A1R merges"
+    "wave-3 full run (a4211583): test_cosmic_ray_phenomenology_th13 fails (phrase D_pp D_xx removed from the reference page); fix as rework round 1 on worktree-crprop-a1rfix (no revert: B1X and D1 depend on A1R)"
    ]
   }
  },
@@ -682,6 +682,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "D1 merged (e44377f4); escalation 11 wording corrected; E2 DONE, files widened, rebase requested; D3-3 added; D3 dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "wave-3 full run on a4211583: 2 failures attributed (A1R: Th13 phrase test; E1: subprocess timeouts); fixes as rework round 1 on fix branches instead of reverting (later merges depend on both; orchestrator departure from A1.5 recorded for H1); relocation adds nothing new"
   }
  ],
  "env": {
