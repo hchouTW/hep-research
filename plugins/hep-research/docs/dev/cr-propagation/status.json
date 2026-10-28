@@ -154,7 +154,7 @@
    ]
   },
   "D1": {
-   "state": "blocked",
+   "state": "verifying",
    "dispatches": 2,
    "rework_rounds": 0,
    "branch": "worktree-crprop-d1",
@@ -165,7 +165,7 @@
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "blocked 2026-10-28 after dispatch 2: escalation 11; branch kept for H1"
+    "A1.11 (maintainer): accept D1 with attributed D1-1a misses; Opus verifier dispatched 2026-10-28"
    ]
   },
   "D2": {
@@ -660,6 +660,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "D1 dispatch 2 PARTIAL (D1-1a convection only; losses cause found and fixed); D1 blocked again; escalation 11; D3 waits for H1"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A1.11: D1 accepted with attributed D1-1a misses; verifier dispatched; escalation 11 decided"
   }
  ],
  "env": {
