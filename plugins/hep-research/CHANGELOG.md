@@ -89,6 +89,20 @@ Software checks establish contract consistency only, not physical validity.
   USINE `tested-in-declared-environment`, adapter still `proposed` (GALPROP). USINE is GPL-2.0 and runs as a separate
   program; no USINE file is committed. The USINE row of the CRPROP-COST table is filled. README package size
   statement updated (about 3800 files, 56.6 MB).
+- crprop c2: multi-dataset propagation fit through a `cr-provider/1` provider (cosmic-ray propagation plan r3 §C2,
+  closed-form provider and SYNTHETIC data only; the USINE case is C2U). New
+  `skills/hep-statistics/scripts/propagation_fit.py fit`: datasets as dataset-records (covariance from their
+  components, missing: exit 3), the provider's prediction gated and its bin semantics checked first (a bin-averaged
+  ratio is never fitted to data declared as P2 bin integrals; refused, exit 1); component multipliers for production
+  norms (P15) and parent abundances (P14), profiled exactly; inelastic and slope nuisances refused without provider
+  support; modulation refused for a provider without isotopic LIS; declarative families (those outside the provider
+  domain listed as not expressible); `fit_diagnostics` verdicts with `boundary_kkt`, at most 5 restarts; Fisher screen
+  and profile scans of `degeneracy.py`, a fit-derived theory-spec with object-form `degenerate_directions`; profile
+  intervals; covariance alternatives from `build_covariance.py` lengths (P9); toys (`toy_ensemble`), toy-calibrated
+  family delta chi2 and a Metropolis posterior (`bayes_diagnostics`, no interval above R-hat 1.01 or below ESS 400) on
+  a validated response model of the provider; loop limits (restart cap, 2% toy failures, 2e5 steps per chain) and
+  `--max-evaluations`. New example `examples/propagation-fit/` and section of `core-stats-commands.md`. Tests:
+  `tests/skills/hep_statistics/test_propagation_fit.py`.
 
 ## 0.42.0 (2026-10-26)
 

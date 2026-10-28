@@ -106,6 +106,7 @@ MISSING_FILE_ARGS = {
     "skills/hep-statistics/scripts/roofit_fit_check.py": ["result", "--file", M, "--name", "r", "--edm-max", "1e-3"],
     "skills/hep-statistics/scripts/bayes_diagnostics.py": ["diagnose", "--input", M],
     "skills/hep-statistics/scripts/covariance_fit.py": ["fit", "--input", M],
+    "skills/hep-statistics/scripts/propagation_fit.py": ["fit", "--input", M, "--provider-registry", M],
     "skills/hep-statistics/scripts/eft_scan.py": ["scan", "--input", M],
     "skills/hep-statistics/scripts/global_significance.py": ["run", "--input", M, "--seed", "1"],
     "skills/hep-statistics/scripts/sweighted_fit.py": ["fit", "--input", M],

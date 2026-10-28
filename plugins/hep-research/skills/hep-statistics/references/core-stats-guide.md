@@ -40,7 +40,7 @@ subcommands, inputs and outputs, validation tools outside `core/stats`, publicat
 
 - **Caps.** Each module refuses inputs beyond its own range (exit 2), and the ranges differ by subcommand; there is
   no single limit. A limit that cannot be bracketed below the Poisson mean cap is reported `failed`, never clipped.
-  This table is checked against the code by `tests/skills/hep_statistics/test_core_stats_guide.py` (`CapsTable`):
+  This table is checked against the code by `test_core_stats_guide.py` (`CapsTable`):
 
 | Where | Cap | Beyond it |
 |---|---|---|
@@ -112,12 +112,12 @@ Unmarked scripts use the standard library only; marked ones refuse to run withou
 SciPy) with exit 2 and a JSON message, and every script prints `--help` without them.
 
 - `li_ma_significance.py`: ON/OFF significance, with toy or exact conditional p-values at low counts.
-- `look_elsewhere.py` (needs NumPy): global significance of a one-dimensional scan (brute-force toys or upcrossings).
+- `look_elsewhere.py` (needs NumPy): global significance of a 1-D scan (brute-force toys or upcrossings).
 - `global_significance.py` (needs NumPy): toy-calibrated global significance for a recorded scan.
 - `sensitivity_and_gof.py` (needs NumPy): Asimov discovery sensitivity (standard library) and toy-calibrated goodness of fit (NumPy).
 - `bayes_diagnostics.py` (needs NumPy): R-hat, ESS and MCSE of supplied chains, prior reweighting; `bayes_calibration.py` (needs NumPy and SciPy): quantile and SBC calibration checks.
-- `combine_measurements.py` (needs NumPy): GLS combination once the combination plan accepts the inputs (example: `skills/hep-statistics/assets/combine.example.json`); `combine_asymmetric.py`: Barlow's asymmetric errors; `split_consistency.py`: do split samples agree, shared blocks subtracted, said when undeclared; `build_covariance.py`: a `[Proposal]` covariance from declared correlation models and a length scan. Both: NumPy (and SciPy) at run time.
-- `covariance_fit.py` (needs NumPy and SciPy): fits to published points with covariance (Peelle diagnostics; built-in, plug-in and `tabulated-grid` models; per-dataset scale nuisance); `break-scan`: toy-calibrated break; `degeneracy.py` (needs NumPy and SciPy): Fisher screen, profile scans; `discrete_profile.py` (needs NumPy and SciPy): discrete profiling; `eft_scan.py` (needs NumPy and SciPy): EFT scans; `pcl_efficiency_ratio.py` (needs NumPy and SciPy), `ratio_estimation.py` (needs NumPy): ratio and efficiency intervals; `sweighted_fit.py` (needs NumPy and SciPy): sWeighted fits.
+- `combine_measurements.py` (needs NumPy): GLS combination once the combination plan accepts the inputs (example: `assets/combine.example.json`); `combine_asymmetric.py`: Barlow's asymmetric errors; `split_consistency.py`: do split samples agree, shared blocks subtracted, said when undeclared; `build_covariance.py`: a `[Proposal]` covariance from declared correlation models and a length scan. Both: NumPy (and SciPy) at run time.
+- `covariance_fit.py` (needs NumPy and SciPy): fits to published points with covariance (Peelle diagnostics; built-in, plug-in and `tabulated-grid` models; per-dataset scale nuisance); `break-scan`: toy-calibrated break; `degeneracy.py` (needs NumPy and SciPy): Fisher screen, profile scans; `propagation_fit.py` (needs NumPy and SciPy): provider fits; `discrete_profile.py` (needs NumPy and SciPy): discrete profiling; `eft_scan.py` (needs NumPy and SciPy): EFT scans; `pcl_efficiency_ratio.py` (needs NumPy and SciPy), `ratio_estimation.py` (needs NumPy): ratio and efficiency intervals; `sweighted_fit.py` (needs NumPy and SciPy): sWeighted fits.
 - `result_artifact.py`: a `statistical-result` artifact from a tool's output, with its status label; `extract_names.py`: N10
   naming inventory.
 - `pdf_reweighting.py`: Bayesian reweighting of a PDF replica set (NNPDF and Giele-Keller weights, N_eff);
