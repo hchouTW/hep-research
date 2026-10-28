@@ -103,6 +103,12 @@ Software checks establish contract consistency only, not physical validity.
   a validated response model of the provider; loop limits (restart cap, 2% toy failures, 2e5 steps per chain) and
   `--max-evaluations`. New example `examples/propagation-fit/` and section of `core-stats-commands.md`. Tests:
   `tests/skills/hep_statistics/test_propagation_fit.py`.
+- crprop e1: training design and bounded active addition with USINE (r3 §E1; optional WP). New
+  `tests/adapters/fixtures/cr_propagation/e1/active_addition.py`: Sobol design (N0 = 64, k = 6 for 5 free
+  parameters, decision Q9), one USINE computational-run per point through `local_partition.py` and the provider
+  runner with cache, and the active-addition loop with its limits (5 rounds, E2 termination criteria, error-plateau
+  and min-distance early stops, evaluation cap) on a placeholder emulator that E2 replaces. Committed: design file,
+  summaries with per-point hashes and run references; training data stay under `$CRPROP_OUT/e1/`. No behavior change.
 
 ## 0.42.0 (2026-10-26)
 

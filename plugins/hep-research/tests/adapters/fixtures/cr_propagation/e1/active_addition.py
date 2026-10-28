@@ -44,7 +44,7 @@ loop limits stay.
 
 Usage (from the plugin root; NumPy and SciPy needed):
   python3 tests/adapters/fixtures/cr_propagation/e1/active_addition.py run --work-dir "$CRPROP_OUT/e1"
-      --registry REGISTRY.json [--summary FILE] [--max-rounds 5] [--max-evaluations 1500] [--jobs 4]
+      --registry REGISTRY.json [--summary FILE] [--design FILE] [--max-rounds 5] [--max-evaluations 1500] [--jobs 4]
       [--forced-max-rounds-test]
   python3 .../active_addition.py evaluate --points POINTS.json --registry REGISTRY.json --cache-dir DIR
       --start I --stop J --out OUT.json        (the local_partition chunk command)
@@ -60,6 +60,7 @@ import math
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 try:
@@ -186,6 +187,7 @@ class BatchRunner:
         self.request = base_request(provider_version)
         self.max_evaluations, self.jobs = max_evaluations, max(1, min(MAX_JOBS, jobs))
         self.tally_path = work_dir / "tally.json"
+        self.invocation = time.strftime("%Y%m%dT%H%M%S") + f"-{os.getpid()}"
         self.tally = json.loads(self.tally_path.read_text()) if self.tally_path.is_file() else \
             {"provider_evaluations": 0, "cache_hits": 0, "batches": []}
 
@@ -194,7 +196,9 @@ class BatchRunner:
         if self.tally["provider_evaluations"] + len(points) > self.max_evaluations:
             raise RuntimeError(f"cost-cap: {self.tally['provider_evaluations']} + {len(points)} > "
                                f"{self.max_evaluations} provider evaluations")
-        bdir = self.work_dir / "batches" / name
+        bdir = self.work_dir / "batches" / self.invocation / name  # fresh partition state per invocation: the
+        # evaluation tally counts only chunks run now (a reused state would replay old outputs); points already run
+        # are answered by the provider cache and counted as cache hits
         bdir.mkdir(parents=True, exist_ok=True)
         (bdir / "points.json").write_text(json.dumps({"request": self.request, "points": points}), encoding="utf-8")
         env = dict(os.environ, HEP_USINE_RUN_DIR=str(self.work_dir / "runs"), PYTHONDONTWRITEBYTECODE="1")
@@ -242,8 +246,8 @@ class BatchRunner:
             hits += int(total["cache_hits"])
         self.tally["provider_evaluations"] += sent
         self.tally["cache_hits"] += hits
-        self.tally["batches"].append({"batch": name, "points": len(points), "provider_evaluations": sent,
-                                      "cache_hits": hits, "problems": problems})
+        self.tally["batches"].append({"invocation": self.invocation, "batch": name, "points": len(points),
+                                      "provider_evaluations": sent, "cache_hits": hits, "problems": problems})
         self.tally_path.write_text(json.dumps(self.tally, indent=1) + "\n", encoding="utf-8")
         if problems or any(r is None for r in records):
             raise RuntimeError("incomplete-batch: " + "; ".join(problems or ["a chunk gave no record"]))
@@ -251,8 +255,9 @@ class BatchRunner:
 
 
 # ---------------------------------------------------------------------------------------------- placeholder emulator
-class JackknifeRbfEmulator:
-    """RBF interpolation of ln(B/C) per bin; error estimate = jackknife spread over N_FOLDS leave-one-fold-out models."""
+class JackknifeInterpolationEmulator:
+    """Radial-basis interpolation of ln(B/C) per bin; error estimate = jackknife spread over N_FOLDS models, each
+    trained without one fold."""
 
     def __init__(self, unit_points, values):
         x, y = np.asarray(unit_points, float), np.log(np.asarray(values, float))
@@ -396,7 +401,7 @@ def run_loop(args) -> int:
     chol_inv = np.linalg.inv(np.linalg.cholesky(cov))
     candidates = qmc.Sobol(d=n_free, scramble=True, seed=CANDIDATE_SEED).random(N_CANDIDATES)
 
-    emulator = JackknifeRbfEmulator(train_x, train_y)
+    emulator = JackknifeInterpolationEmulator(train_x, train_y)
     best_x, best_c, inside = fit_and_region(emulator, observed, chol_inv, candidates, CANDIDATE_SEED)
     rng = np.random.default_rng(HOLDOUT_SEED)
     summary["holdout_region_candidates"] = int(len(inside))
@@ -433,8 +438,11 @@ def run_loop(args) -> int:
             if not forced and (not picks or bool((dist_to_train < d_min).all())):
                 info["added"] = []
                 summary["rounds"].append(info)
+                last = summary["rounds"][-2]
                 return finish("early-stop-min-distance", f"round {rnd}: every pick lies closer than d_min "
-                              f"{d_min:.4f} to a training point", 0)
+                              f"{d_min:.4f} to a training point (picks not run); best emulator = after round "
+                              f"{rnd - 1} (E2-1 met: {last['e2_1_met']}, E2-2 met: {last['e2_2_met']}), failing bins "
+                              f"{last['failing_bins']}", 0)
             try:
                 recs = runner.run(f"round{rnd}", [to_physical(p) for p in picks])
             except RuntimeError as exc:
@@ -445,7 +453,7 @@ def run_loop(args) -> int:
                 if r["status"] == "ok":
                     train_x.append(to_unit(r["point"]))
                     train_y.append(r["values"])
-            emulator = JackknifeRbfEmulator(train_x, train_y)
+            emulator = JackknifeInterpolationEmulator(train_x, train_y)
         else:
             info = {"round": 0, "fit_unit": [float(v) for v in best_x], "fit_point": to_physical(best_x),
                     "fit_chi2": best_c, "region_candidates": int(len(inside)), "added": []}
