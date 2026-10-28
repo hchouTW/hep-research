@@ -19,19 +19,18 @@
  },
  "work_packages": {
   "P0": {
-   "state": "verifying",
+   "state": "merged",
    "dispatches": 1,
    "rework_rounds": 3,
    "branch": "worktree-crprop-p0fix",
    "base": null,
    "head": "e51ceb1b",
-   "merge_commit": null,
+   "merge_commit": "21e18305",
    "worker_report": "round 3 DONE: --no-renames in check_diff; regression test (3 tests: fails 2/3 without fix, 3/3 with); other git calls have no rename hole; static ok",
-   "verifier_report": "round 0 REWORK (5); round 1 REWORK (README scope, checker holes, sources, language differences); round 2 REWORK (2026-10-28): check_diff misses renames (no --no-renames); all else pass",
+   "verifier_report": "round 3 PASS (2026-10-28, Sonnet): scope = 4 files; hole reproduced and closed in scratch clone; test 2/3 without fix, 3/3 with",
    "missing_capabilities": [],
    "notes": [
-    "blocked at the rework limit; escalation 4",
-    "A1.6 round 3: worker DONE e51ceb1b; Sonnet verifier dispatched 2026-10-28"
+    "A1.6 round 3 merged 21e18305; post-merge static ok, test OK, acceptance ok; escalation 4 closed"
    ]
   },
   "ENV": {
@@ -81,18 +80,18 @@
    ]
   },
   "A3": {
-   "state": "dispatched",
+   "state": "verifying",
    "dispatches": 2,
    "rework_rounds": 0,
    "branch": "worktree-crprop-a3",
-   "base": "b83881c6",
-   "head": "cef2836a",
+   "base": "f747fbe7",
+   "head": "5ce9495d",
    "merge_commit": null,
    "worker_report": "DONE (dispatch 2): A3-1..A3-4 pass; full run on eca5da37 caught 2 documented-claim failures (guide sentence), fixed in cef2836a, full 33/33; relocation only the 2 known geant4 failures; quick load 25590/25600 B",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "asked to rebase onto integration f747fbe7 (merge_after A2) before verification"
+    "rebased onto f747fbe7 (only appended-section conflicts); A3-1 results.json hash change reproduced on integration base itself; Sonnet verifier dispatched"
    ]
   },
   "C1": {
@@ -159,13 +158,13 @@
    "rework_rounds": 0,
    "branch": "worktree-crprop-d1",
    "base": "566bfd1e",
-   "head": null,
+   "head": "131ae000",
    "merge_commit": null,
-   "worker_report": null,
+   "worker_report": "PARTIAL: provider + translator + 5 item runs; D1-1 fails 3% for closed-form items (He target, thick gas attributed); reacceleration/losses wait for B1; D1-2, PRV-1 (live), PRV-2 pass",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "USINE-dependent items wait for B1; merge_after B1"
+    "escalations 5 (tolerance-miss) and 6 (dragon2 convention row); verification held until the B1 items are done (merge_after B1)"
    ]
   },
   "D2": {
@@ -464,6 +463,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "P0 round 3 worker DONE (e51ceb1b); verifier dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "P0 merged (21e18305), escalation 4 closed; A3 rebased (5ce9495d), verifier dispatched; D1 PARTIAL: escalations 5 and 6, verification held until B1"
   }
  ],
  "env": {
