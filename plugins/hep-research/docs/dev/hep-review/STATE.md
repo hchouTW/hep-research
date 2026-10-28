@@ -30,10 +30,10 @@ environment:
   store_persistence: pending-next-session
 host_profile_ref: docs/dev/hep-review/host-profile.md
 tasks:
-  T00: {status: in_progress, deps: [], steps_done: [1, 2, 3, 4, 5, 6, 7, 8, 9], sessions: 1, notes: "step 10 baseline running in background"}
+  T00: {status: done, deps: [], steps_done: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], sessions: 1, notes: "clean baseline at 42f5bad1: 31 pass, 0 fail, 2 host-CLI skips; N01 n/a-with-basis, N02/N04/N40 confirmed (discovery.md section 7)"}
   T0S: {status: done, deps: [T00], go_no_go: go, notes: "protocol 9044c6af before first dispatch 22:38:01Z; C01 4/4, C02 FA 1/4, C03 3/4, C04 4/4, 16/16 digest-bound; 3 instance construction errors caught by reviewers; H5/H6 pending-next-session"}
-  T01: {status: in_progress, deps: [T0S], steps_done: []}
-  T02: {status: pending, deps: [T01]}
+  T01: {status: done, deps: [T0S], steps_done: [1, 2, 3, 4, 5, 6, 7, 8], notes: "62/62 owned cases pass; independent review: 1 blocker, 6 major, 8 minor, all dispositioned (12 adopted, 3 partly), fixed with tests first (3f075184); blocker awaits user confirmation (task file 4.2)"}
+  T02: {status: done, deps: [T01], steps_done: [1, 2, 3, 4, 5, 6, 7], notes: "30/30 owned cases pass; interruption, two-process CAS, foreign commit, export->import with checkpoint all tested"}
   T03: {status: pending, deps: [T01]}
   U1:  {status: pending, deps: [T02, T03], kind: user-gate}
   T04: {status: pending, deps: [U1]}
@@ -42,14 +42,25 @@ tasks:
   T07: {status: skipped}
   T08: {status: skipped}
 gates: {G1: pending, G2: pending, G3: pending}
-cases: {}
+cases:
+  T00: {N01: not-applicable-with-basis (worktree created; failure path is the hard stop), N02: pass, N04: pass (no existing hep-review in source or cache), N40: pass}
+  T01: "all 62 pass (tests/contracts/test_hep_review_{json,decision_table,kernel,review_fixes}.py)"
+  T02: "all 30 pass (tests/skills/hep_review/test_{materials,store,continuity_export}.py)"
 decisions:
   - {when: 2026-10-29T06:25+08:00, task: T00, decision: "Worktree created with the Git fallback (git worktree add -b hep-review-v9-impl) at the repo's host-tool location .claude/worktrees/ (ignored by .gitignore), then entered with the host tool (EnterWorktree path=...)", reason: "The host worktree tool cannot name the branch; the task fixes branch_name=hep-review-v9-impl", reversible: true}
   - {when: 2026-10-29T06:30+08:00, task: T00, decision: "Store location ~/.local/state/hep-research/hep-review ($XDG_STATE_HOME/hep-research/hep-review when set)", reason: "Spec 11.1 lets T00 fix the path per repository convention; the existing authoring review keeps private state under $XDG_STATE_HOME/hep-research (review_lib/store.py default_private_root). The path is on local APFS, outside ~/Library/CloudStorage and ~/Library/Mobile Documents", reversible: true}
   - {when: 2026-10-29T06:40+08:00, task: T0S, decision: "Raw spike run kept byte for byte in ~/.local/state/hep-research/hep-review/spike-run1 (outside the repo); committed spike/run1-summary.json carries every raw SHA-256", reason: "packets and drop files contain private absolute paths that tools/check_packaging.py forbids in tracked files", reversible: true}
   - {when: 2026-10-29T06:33+08:00, task: T00, decision: "All run documents live under docs/dev/hep-review/ (state, discovery, baseline, host profile, spike, reviews); spike code under docs/dev/hep-review/spike/", reason: "docs/dev is the repo's place for development specs; a new top-level folder would change the shipped layout. Spike code is never imported by product code", reversible: true}
-blockers: []
-next_action: "T01 step 2 strict ingestion + encoder (test first); T00 step 10 baseline when the background run ends"
+  - {when: 2026-10-29T07:20+08:00, task: T01, decision: "Review findings F6, F7, F14 partly adopted: trusted evaluation checkpoint and capability fingerprint come from the committed plan; schemas are applied at commit by the store, not inside the pure kernel; project() keeps the two-step API and recomputes validate(bundle)", reason: "layer 1 must be a pure function of the bundle and the kernel may do no I/O (spec 3.1, 7.6)", reversible: true}
+review_inputs_t01:
+  commit: 5e4ef528
+  report_sha256: 5820722fe2b86f0d0a8feed944f4662a95a6452da5fe56b3caae43e23b855228
+  contracts/hep_review.py: 04bcef51582cb16d26cc6494707b90e060fa13efbab87746f843bc70aa755d6d
+  tests/contracts/test_hep_review_decision_table.py: 2adf79e1410a09a6e41a824977c5d0e4304df0da44eae4f39cf80559283b8822
+  tests/contracts/test_hep_review_kernel.py: a70bf1c3b1d5c521a305fa389e5f1253c20eedb55ce4a4cc5908c1b4b619c265
+blockers:
+  - {when: 2026-10-29T07:15+08:00, task: T01, description: "independent T01 review returned blocker F1 (layer 1 not byte-reproducible across processes); fixed with a multi-seed test in 3f075184; task file 7.6/4.2 requires asking the user with the report and disposition before continuing", needs: user}
+next_action: "Wait for the user's answer on the T01 review dispositions; then T03 (skill, registration, R0 path, dispatch, host adapter, domain cards, pilot design), then G1 review and report"
 ```
 
 ## Log
@@ -66,4 +77,13 @@ next_action: "T01 step 2 strict ingestion + encoder (test first); T00 step 10 ba
 2026-10-29 06:42 | T0S | 5 | H1 readable, H2 writable, H3 parallel, H4 yes/yes, H5/H6 pending-next-session | a8f46b69
 2026-10-29 06:44 | T0S | 6 | observations.md: go | a8f46b69
 2026-10-29 06:47 | T0S | fix | packaging-clean wording of private path patterns | a5f9322c
+2026-10-29 06:52 | T01 | 2 | strict ingestion + encoder; gold byte vectors written by hand (one typo caught by a hex/text cross-check) | c36e1751
+2026-10-29 07:05 | T01 | 1,3-8 | schemas, validator, closures, projection, tiers, decision-table generator (table, rule model and kernel agree on every row); layering, ruff, mypy pass | 5e4ef528
+2026-10-29 07:08 | T01 | review | independent reviewer dispatched (fresh context, non-author, same model, shared filesystem) | none
+2026-10-29 07:10 | T02 | 1-2 | controlled reading, snapshots, drop ingestion | 6b2dbac5
+2026-10-29 07:14 | T02 | 3-4,7 | store location checks, SQLite commit log, CAS/idempotency, current-validator check | 757cc686
+2026-10-29 07:25 | T01 | review fixes | F1-F15 dispositioned; regression tests first (23 F + 3 E before) | 3f075184
+2026-10-29 07:27 | T00 | 10 | clean baseline from git archive of 42f5bad1 | 0b7e49f1
+2026-10-29 07:33 | T02 | 5-6 | continuity, checkpoints, fork/migration, export/verify/import | 283e47a3
+2026-10-29 07:34 | stop | 4.2 | independent review blocker -> ask the user; full branch check running in background | none
 ```
