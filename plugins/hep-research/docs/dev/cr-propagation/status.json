@@ -110,18 +110,18 @@
    ]
   },
   "B2": {
-   "state": "verifying",
+   "state": "merged",
    "dispatches": 2,
    "rework_rounds": 0,
    "branch": "worktree-crprop-b2",
    "base": "6a0c2ae6",
    "head": "b2cdcf49",
-   "merge_commit": null,
+   "merge_commit": "81cb2ce0",
    "worker_report": "DONE (dispatch 2): B2-1..B2-3 pass; closed forms re-derived, no code change; full run 33/33 on 236a374a; relocation not run (A1.4/A1.5); open: R0_GV/h_kpc kept beside canonical V_c_kms; profile version not bumped",
    "verifier_report": "PASS (2026-10-28, Opus): B2-1..B2-3 pass; independent derivation + own finite-volume solver agree to 2e-8; advisories: stale function name in derive script :164, resonant case refused, R0_GV/h_kpc kept (allowed), profile version not bumped",
    "missing_capabilities": [],
    "notes": [
-    "verifier dispatched 2026-10-28 (Opus, A1.5 brief)"
+    "merged 81cb2ce0; profile.json auto-merged with C1 provider field; post-merge static exit 0, acceptance ok, profile tests OK"
    ]
   },
   "A4": {
@@ -431,6 +431,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "C1 merged (099d1d22); B2 verifier PASS"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "B2 merged (81cb2ce0)"
   }
  ],
  "env": {
