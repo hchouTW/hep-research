@@ -1,5 +1,5 @@
 {
- "contract_version": "3.14.0",
+ "contract_version": "3.15.0",
  "artifact_id": "synthetic-response-example",
  "artifact_type": "response",
  "objective": "SYNTHETIC response built from assets/response-events.example.csv",
@@ -9,7 +9,7 @@
  },
  "versions": {
   "plugin": "0.43.0",
-  "contracts": "3.14.0",
+  "contracts": "3.15.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"

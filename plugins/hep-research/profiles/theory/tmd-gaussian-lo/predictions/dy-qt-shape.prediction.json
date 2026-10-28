@@ -1,5 +1,5 @@
 {
- "contract_version": "3.14.0",
+ "contract_version": "3.15.0",
  "artifact_id": "tmdg-prediction-dy-qt-shape",
  "artifact_type": "prediction",
  "objective": "Normalized Drell-Yan q_T shape from two Gaussian TMD PDFs (synthetic widths)",
@@ -14,7 +14,7 @@
  },
  "versions": {
   "plugin": "0.43.0",
-  "contracts": "3.14.0",
+  "contracts": "3.15.0",
   "profiles": {
    "theory:tmd-gaussian-lo": "0.1.0"
   }

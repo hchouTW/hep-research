@@ -23,6 +23,7 @@
   "ml_v28_reweighting.json",
   "ml_v28_unsupervised_anomaly.json",
   "prediction.json",
+  "prediction_modulated_once.json",
   "prediction_v26.json",
   "prediction_v26_binned_envelope.json",
   "prediction_v26_derivation_status.json",
@@ -227,6 +228,9 @@
   ],
   "theory_crprop_break_kind_unknown.json": [
    "theory.transport_break_kind_unknown"
+  ],
+  "prediction_modulated_twice.json": [
+   "prediction.modulated_twice"
   ],
   "measurement_v26_estimand_missing.json": [
    "measurement.estimand_missing"

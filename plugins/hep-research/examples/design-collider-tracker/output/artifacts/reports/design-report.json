@@ -1,11 +1,11 @@
 {
- "contract_version": "3.14.0",
+ "contract_version": "3.15.0",
  "artifact_id": "collider-tracker-v1-design-report",
  "artifact_type": "communication",
  "objective": "detector system design: communication written by evaluate_design.py",
  "versions": {
   "plugin": "0.43.0",
-  "contracts": "3.14.0",
+  "contracts": "3.15.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "design-spec.v1.json",
-   "sha256": "36083f96fc05f334ceecb5710bd85cc8325885bda68194490b555fe389bd2c61",
+   "sha256": "d57c8831a40e2cdab93a3fe1a42b2ed378a2b8be5d39cbbeba7ea52d325c94e8",
    "artifact_type": "design-spec",
    "artifact_id": "collider-tracker-v1-spec-v1",
    "status": [
@@ -27,7 +27,7 @@
   },
   {
    "ref": "evaluations/CALC-ECAL-A.json",
-   "sha256": "d2fd8a05dec14891ddf3f061cdfb7f3107e6ad9c4878178e54c2b7c61f8f4a36",
+   "sha256": "3a278e51efd25b47e1c158cb21fb65d09ee13b360c54d6cc77c202f1ab2dce66",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-ECAL-A",
    "status": [
@@ -36,7 +36,7 @@
   },
   {
    "ref": "evaluations/CALC-ECAL-B.json",
-   "sha256": "5ccc02f442caf0f749405e4ed55880e6ac5b1aeec6c608d2cf9aabbb40cfc0e0",
+   "sha256": "c30000e1c17e606e92b4661594d2ddcd04c5b16309c4cd794dde2e31ba0b8121",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-ECAL-B",
    "status": [
@@ -45,7 +45,7 @@
   },
   {
    "ref": "evaluations/CALC-ECAL-P.json",
-   "sha256": "4e3a0bb1e1f282b913425e0d8b425c282a2624cce26b712e63fc67f9669b1f8d",
+   "sha256": "61ff0da1918c7128f24b960607c1f0817da1cb675af209a1d066bbbdf31d2449",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-ECAL-P",
    "status": [
@@ -54,7 +54,7 @@
   },
   {
    "ref": "evaluations/CALC-MASS-A.json",
-   "sha256": "fd63a5878741600b561a06d25e8f7fc740b63ce3c8a9348c2333ee4aaaed3a87",
+   "sha256": "78fca8807af7c23e6b7c4042104013e219253b826fee25202ef0134d59448cba",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-MASS-A",
    "status": [
@@ -63,7 +63,7 @@
   },
   {
    "ref": "evaluations/CALC-MASS-B.json",
-   "sha256": "f3945f6bc99db0de3b1d10c4c54a1169ba8bc9944299f627e958624781c007c9",
+   "sha256": "2eb43ee4af0faea86ed91c30bcd62d3be00950b2537bec88ab2812d809fb23e4",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-MASS-B",
    "status": [
@@ -72,7 +72,7 @@
   },
   {
    "ref": "evaluations/CALC-MASS-P.json",
-   "sha256": "7ed91508748589e6a224f01ca9591bca88ff50980cfb62dabcdd4475e67b3bd4",
+   "sha256": "c8dcc035fa08b543ba4b02a9021230efa52ae0b906cee99f88946c2a079eda64",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-MASS-P",
    "status": [
@@ -81,7 +81,7 @@
   },
   {
    "ref": "evaluations/CALC-TRK-A.json",
-   "sha256": "6c5b8a86e883247445f33950e2f8633ccbd4df7925a7bdc651a024c8ad4f9033",
+   "sha256": "b68c387d51a18a8e875ff55a31de94031cc6cd27aaee5c977116afb3863a4f63",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-TRK-A",
    "status": [
@@ -90,7 +90,7 @@
   },
   {
    "ref": "evaluations/CALC-TRK-B.json",
-   "sha256": "ef2bd76f83febb03a96bfc28f36193adf76822fe32c85df3a45d2969f5263b8b",
+   "sha256": "0977058b91814eedd29a1c4ca781f80baf6134160b28a90a92321a799b10af1c",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-TRK-B",
    "status": [
@@ -99,7 +99,7 @@
   },
   {
    "ref": "evaluations/CALC-TRK-P.json",
-   "sha256": "63f6b36257cf32d8986302f731c33e990fc5eb3e2757503167d08e864a9e896f",
+   "sha256": "59941d48e8fb9da1f163ebb810c41710052c009808770fdd558fe49076bd1e2f",
    "artifact_type": "design-evaluation",
    "artifact_id": "collider-tracker-v1-CALC-TRK-P",
    "status": [
