@@ -103,6 +103,12 @@ Software checks establish contract consistency only, not physical validity.
   a validated response model of the provider; loop limits (restart cap, 2% toy failures, 2e5 steps per chain) and
   `--max-evaluations`. New example `examples/propagation-fit/` and section of `core-stats-commands.md`. Tests:
   `tests/skills/hep_statistics/test_propagation_fit.py`.
+- crprop b3: USINE V3.5 against the closed forms of `theory:cr-secondary-ratio` under harmonized-v1, with the same
+  parents, cross sections, tertiary and ghost settings. Like-for-like (1D) B/C and 10Be/9Be agree within 4e-4; in the
+  harmonized-v1 2D geometry B/C differs by up to 2.5%, attributed to the radial boundary (Fourier-Bessel check within
+  0.2%). Level-by-level norm reweighting at +-20% matches full reruns within 9e-6 for all 22 channel cases; slope
+  changes need energy-basis responses when energies couple. Channel list with `must_rerun` flags; specifications, nominal
+  tables, records, run index and offline tests under `tests/adapters/fixtures/cr_propagation/b3/`. No behavior change.
 
 ## 0.42.0 (2026-10-26)
 

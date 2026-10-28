@@ -6354,3 +6354,55 @@ was compared; none of this replaces or widens a frozen entry):
   (not linear, r3 P5).
 - Budget (D7): each USINE run is counted; the B3 total is reported.
 
+**Environment (r3 §0.3, base exception D10).** E-crprop = E2 (macOS 27.2 arm64), Python 3.13.2 (miniconda, numpy and
+scipy for the closed forms), USINE V3.5 (git tag V3.5, commit fb53006d, Apple clang 21.0.0, ROOT 6.38.04; the ENV
+build) through `HEP_USINE_BIN` and `HEP_USINE_DATA`. `git rev-parse --show-toplevel` = `.claude/worktrees/crprop-b3`;
+`git branch --show-current` = `worktree-crprop-b3`; `git status` clean at start; base `2d451e87` = integration HEAD
+(decision D10, not `origin/main`); prerequisites B1 (merge 3ed1e89e), B2 (merge 81cb2ce0), ENV dispatch 2 (cbb7907f),
+A1 (5d5fd918), A2 (a3c880f8), C1 (099d1d22) are ancestors of HEAD (`git merge-base --is-ancestor`). r3 line numbers
+rechecked on this base (§B3 at line 418, §5.5 at line 375, B3 criteria at line 550).
+
+**Runs.** 181 USINE runs of the final study (`b3_study.py run`, 4 at a time, 433 s of USINE wall time in total, about
+0.12 core-hours), plus 11 exploratory nominal runs of the same specifications before it (overwritten): 192 USINE runs
+toward D7, none through a provider. Specifications `tests/adapters/fixtures/cr_propagation/b3/specs/` (every field
+explicit; `check_used` confirmed each value in the generated USINE file and the translation, and no run reported a
+problem); nominal tables and computational-run records committed in `b3/outputs/` and `b3/runs/`; every run with
+the sha256 of its isotope tables in `b3/b3-run-index.json`; results `b3/b3-results.json`, channel list
+`b3/b3-channels.json` (also `$CRPROP_OUT/b3/`). The production table of a varied run is written by `b3_study.py`
+on a log grid of 10 nodes per decade (USINE interpolates it linearly in the value against ln E_k/n,
+`TUMath::Interpolate` kLOGLIN_INFNULL_SUPCST, so responses superpose exactly); USINE's own cross-section files are
+not used (escalation 8, WP B1X).
+
+**Results (2026-10-28).**
+
+| ID | Result | Evidence |
+|---|---|---|
+| B3-1 | passed (like-for-like geometry, USINE Model1DKisoVc): B/C max 9e-5 over the 16 rigidity bins (1e-4 at nodes); ¹⁰Be/⁹Be max 4.1e-4 over the 12 E_k/n bins (4.1e-4 at nodes); tolerance 2% | `b3-results.json` `b3_1.h1-1d`, `b3_1.dec-1d`; `$CRPROP_OUT/b3/acceptance/B3-1.txt` |
+| B3-1, harmonized-v1 geometry (2D, R = 20 kpc), reported separately | B/C misses 2%: closed form / USINE 2D = 1.009 (2-2.9 GV) rising to 1.0247 (678-1000 GV), above 1.02 in the 8 bins from 44.7 GV up; ¹⁰Be/⁹Be passes (0.987-0.995, max 1.3%) | `b3_1.h1-2d`, `b3_1.dec-2d` |
+| B3-2 | passed: level-by-level norm reweighting at ±20% against full reruns, all 22 channel × configuration cases (h1-2d 2, dec-2d 10, all-2d 10): max 8.9e-6 over B/C, ¹⁰Be/⁹Be, Be/B bins and every secondary isotope node (tolerance 0.5%); closure of the single-channel responses on the nominal run max 5.7e-6 | `b3_2`; `$CRPROP_OUT/b3/acceptance/B3-2.txt` |
+| B3-3 | written: 22 rows, all main (share of the numerator 0.6-70%); norm `must_rerun: false` for every row (none beyond 0.5%); inelastic `must_rerun: true` for every row (not tested, P5); slope: C→¹¹B and C→¹⁰Be in dec-2d (post-propagation weight, 8.6e-6) and all-2d (energy-basis responses, 9.4e-6) `must_rerun: false` with the method named, the other 18 rows `must_rerun: true` (no energy-basis responses computed) | `$CRPROP_OUT/b3/b3-channels.json` |
+
+Attribution of the 2D miss (the closed form cannot express the radial boundary). USINE 2D / USINE 1D: B/C up to
+-2.4%, ¹⁰Be/⁹Be up to -1.3%, growing with energy as destruction gives way to escape; a Fourier-Bessel thin-disc
+solution written like the closed form (free escape at r = 20 kpc and z = ±L, sources uniform in r, observer at
+8.3 kpc, same parents) reproduces USINE 2D within 0.21% for B/C (2000 terms; 100 terms as USINE: 0.21%) and 0.16% for
+¹⁰Be/⁹Be; with the radial boundary at 40 kpc (80 kpc) the 1D closed form agrees with USINE 2D within 0.02% (0.06%).
+The 2D-1D difference is therefore the radial escape of harmonized-v1's geometry, not a translation or transport
+error; it is consistent with P7 (DRAGON2, R = 20 kpc: D0/L within 2% for L = 2-4 kpc). Not loosened: the 2D comparison
+fails 2% as frozen; whether B3-1 is to be judged on the like-for-like geometry (as fixed above before the runs) or
+the closed-form reference given the radial boundary is for the orchestrator (the same question as escalation 5).
+
+Findings. (1) Same parents matter: USINE's propagated O/C runs from 0.849 to 0.922 over the grid (0.9 at the
+10 GeV/n normalization), against the constant 0.9 of the profile's benchmark; O→B is about 30% of B. (2) Level by level
+is needed: reweighting a ¹⁰Be channel without updating its ¹⁰B decay daughter errs by up to 2.1% (C→¹⁰Be) and 0.9%
+(O→¹⁰Be). (3) Without energy coupling (dec-2d) an energy-dependent slope is applied exactly after propagation; with
+reacceleration, convection and losses (all-2d) the post-propagation weight errs by 4.4% (C→¹¹B, ¹¹B nodes; 2.4% on
+Be/B) and 1.5% (C→¹⁰Be, 1.2% on ¹⁰Be/⁹Be), while 26 energy-basis responses per channel reproduce the rerun within
+1e-5. (4) In all-2d a response to a single table node undershoots below zero by up to 4% of its peak (USINE's energy
+scheme); the values are used as written and still superpose. Limits: the ILLUSTRATIVE network has one parent level
+(C, O primaries) plus ¹⁰Be→¹⁰B, so multi-level chains (O→C→B, P5) are not exercised; helium target and ghost nuclei off
+on both sides; no low break used (the unverified "usine" low-break form does not enter); USINE's losses here are
+ionization and adiabatic (neutral gas, Coulomb zero). Software and numerical-consistency checks only: every input is
+ILLUSTRATIVE and no comparison with data is made. Checks: static part of `run_all_checks.py`, the impacted tests,
+naming, wiring, `workflow_check.py` diff and acceptance on the final HEAD (report); ALL-3 deferred to the wave run
+(A1.5).
