@@ -104,9 +104,10 @@ Software checks establish contract consistency only, not physical validity.
   `--max-evaluations`. New example `examples/propagation-fit/` and section of `core-stats-commands.md`. Tests:
   `tests/skills/hep_statistics/test_propagation_fit.py`.
 - crprop b3: USINE V3.5 against the closed forms of `theory:cr-secondary-ratio` under harmonized-v1, with the same
-  parents, cross sections, tertiary and ghost settings. Like-for-like (1D) B/C and 10Be/9Be agree within 4e-4; in the
-  harmonized-v1 2D geometry B/C differs by up to 2.5%, attributed to the radial boundary (Fourier-Bessel check within
-  0.2%). Level-by-level norm reweighting at +-20% matches full reruns within 9e-6 for all 22 channel cases; slope
+  parents, cross sections, tertiary and ghost settings. B3-1 as frozen fails under harmonized-v1 (2D: B/C up to 2.5%
+  off, attributed to radial escape at R = 20 kpc) and is superseded for B3's verdict by B3-1a/b/c (decisions A1.10):
+  matched 1D geometry within 4e-4 (B3-1a), the 2D offset reported per bin and attributed (B3-1b), USINE 2D against the
+  Fourier-Bessel thin-disc solution within 0.21% (B3-1c, tolerance 0.5%). Level-by-level norm reweighting at +-20% matches full reruns within 9e-6 for all 22 channel cases; slope
   changes need energy-basis responses when energies couple. Channel list with `must_rerun` flags; specifications, nominal
   tables, records, run index and offline tests under `tests/adapters/fixtures/cr_propagation/b3/`. No behavior change.
 

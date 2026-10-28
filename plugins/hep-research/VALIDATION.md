@@ -6354,6 +6354,16 @@ was compared; none of this replaces or widens a frozen entry):
   (not linear, r3 P5).
 - Budget (D7): each USINE run is counted; the B3 total is reported.
 
+*Note of 2026-10-28 (rework round 1; the paragraph above is unchanged, R9).* The B3 verifier ruled that B3-1 as
+frozen is judged under harmonized-v1 (cylinder-2d, R = 20 kpc; r3 §B3 and §5.5), not on the matched 1D geometry
+chosen above. The maintainer's decision A1.10 (decisions.md) keeps B3-1 unchanged in acceptance.json and supersedes it
+for B3's verdict by three added entries: B3-1a (USINE in a 1D geometry matched to the thin-disc closed form, same
+parents, cross sections, tertiary/ghost and loss settings: B/C over 2-1000 GV and ¹⁰Be/⁹Be over 0.05-10 GeV/n within
+2%, evaluated with the metric above, bins and nodes), B3-1b (the harmonized-v1 2D offset reported per bin and
+attributed, including the hydrogen-only target against He_to_H_number 0.1; no tolerance) and B3-1c (stricter: USINE
+harmonized-v1 2D against the Fourier-Bessel thin-disc solution with the same inputs within 0.5% on the same bins;
+B/C of `h1-2d`, ¹⁰Be/⁹Be of `dec-2d`, 2000 terms). The tolerances above are not changed.
+
 **Environment (r3 §0.3, base exception D10).** E-crprop = E2 (macOS 27.2 arm64), Python 3.13.2 (miniconda, numpy and
 scipy for the closed forms), USINE V3.5 (git tag V3.5, commit fb53006d, Apple clang 21.0.0, ROOT 6.38.04; the ENV
 build) through `HEP_USINE_BIN` and `HEP_USINE_DATA`. `git rev-parse --show-toplevel` = `.claude/worktrees/crprop-b3`;
@@ -6367,7 +6377,8 @@ rechecked on this base (§B3 at line 418, §5.5 at line 375, B3 criteria at line
 toward D7, none through a provider. Specifications `tests/adapters/fixtures/cr_propagation/b3/specs/` (every field
 explicit; `check_used` confirmed each value in the generated USINE file and the translation, and no run reported a
 problem); nominal tables and computational-run records committed in `b3/outputs/` and `b3/runs/`; every run with
-the sha256 of its isotope tables in `b3/b3-run-index.json`; results `b3/b3-results.json`, channel list
+the sha256 of the data lines of its isotope tables in `b3/b3-run-index.json` (header with the run date left out, so a
+rerun compares; rework round 1); results `b3/b3-results.json`, channel list
 `b3/b3-channels.json` (also `$CRPROP_OUT/b3/`). The production table of a varied run is written by `b3_study.py`
 on a log grid of 10 nodes per decade (USINE interpolates it linearly in the value against ln E_k/n,
 `TUMath::Interpolate` kLOGLIN_INFNULL_SUPCST, so responses superpose exactly); USINE's own cross-section files are
@@ -6377,20 +6388,26 @@ not used (escalation 8, WP B1X).
 
 | ID | Result | Evidence |
 |---|---|---|
-| B3-1 | passed (like-for-like geometry, USINE Model1DKisoVc): B/C max 9e-5 over the 16 rigidity bins (1e-4 at nodes); ¹⁰Be/⁹Be max 4.1e-4 over the 12 E_k/n bins (4.1e-4 at nodes); tolerance 2% | `b3-results.json` `b3_1.h1-1d`, `b3_1.dec-1d`; `$CRPROP_OUT/b3/acceptance/B3-1.txt` |
-| B3-1, harmonized-v1 geometry (2D, R = 20 kpc), reported separately | B/C misses 2%: closed form / USINE 2D = 1.009 (2-2.9 GV) rising to 1.0247 (678-1000 GV), above 1.02 in the 8 bins from 44.7 GV up; ¹⁰Be/⁹Be passes (0.987-0.995, max 1.3%) | `b3_1.h1-2d`, `b3_1.dec-2d` |
+| B3-1 (frozen) | failed under harmonized-v1 (2D, R = 20 kpc): B/C closed form / USINE 2D = 1.009 (2-2.9 GV) rising to 1.0247 (678-1000 GV), above 1.02 in the 8 bins from 44.7 GV up (max 2.47%); ¹⁰Be/⁹Be within 2% (0.987-0.995, max 1.3%). Attributed to radial escape (below); superseded for B3's verdict by B3-1a/b/c (A1.10) | `b3_1.h1-2d`, `b3_1.dec-2d`; `test_b3_1_fails_under_harmonized_v1` |
+| B3-1a | passed (USINE Model1DKisoVc, matched to the 1D thin-disc closed form): B/C max 9e-5 over the 16 rigidity bins (1e-4 at nodes); ¹⁰Be/⁹Be max 4.1e-4 over the 12 E_k/n bins (4.1e-4 at nodes); tolerance 2% | `b3_1.h1-1d`, `b3_1.dec-1d`; `test_b3_1a_matched_1d_geometry`; `$CRPROP_OUT/b3/acceptance/B3-1.txt` |
+| B3-1b | reported and attributed (no tolerance): per-bin closed form / USINE 2D and USINE 2D / USINE 1D for B/C (h1-2d, dec-2d) and ¹⁰Be/⁹Be (dec-2d); the product of the two is 1 within 1e-3 in every bin, so radial escape accounts for the whole offset; target hydrogen-only on both sides (below) | `b3-results.json` `b3_1b`; `test_b3_1b_offset_reported_and_attributed` |
+| B3-1c | passed: USINE harmonized-v1 2D against the Fourier-Bessel thin-disc solution (same inputs, 2000 terms): B/C (h1-2d) max 0.21%, ¹⁰Be/⁹Be (dec-2d) max 0.16%; tolerance 0.5% | `b3_1c`; `test_b3_1c_fourier_bessel` (recomputed offline from the committed outputs) |
 | B3-2 | passed: level-by-level norm reweighting at ±20% against full reruns, all 22 channel × configuration cases (h1-2d 2, dec-2d 10, all-2d 10): max 8.9e-6 over B/C, ¹⁰Be/⁹Be, Be/B bins and every secondary isotope node (tolerance 0.5%); closure of the single-channel responses on the nominal run max 5.7e-6 | `b3_2`; `$CRPROP_OUT/b3/acceptance/B3-2.txt` |
 | B3-3 | written: 22 rows, all main (share of the numerator 0.6-70%); norm `must_rerun: false` for every row (none beyond 0.5%); inelastic `must_rerun: true` for every row (not tested, P5); slope: C→¹¹B and C→¹⁰Be in dec-2d (post-propagation weight, 8.6e-6) and all-2d (energy-basis responses, 9.4e-6) `must_rerun: false` with the method named, the other 18 rows `must_rerun: true` (no energy-basis responses computed) | `$CRPROP_OUT/b3/b3-channels.json` |
 
-Attribution of the 2D miss (the closed form cannot express the radial boundary). USINE 2D / USINE 1D: B/C up to
+Attribution of the B3-1 miss under harmonized-v1 (B3-1b; the closed form cannot express the radial boundary). USINE 2D / USINE 1D: B/C up to
 -2.4%, ¹⁰Be/⁹Be up to -1.3%, growing with energy as destruction gives way to escape; a Fourier-Bessel thin-disc
 solution written like the closed form (free escape at r = 20 kpc and z = ±L, sources uniform in r, observer at
 8.3 kpc, same parents) reproduces USINE 2D within 0.21% for B/C (2000 terms; 100 terms as USINE: 0.21%) and 0.16% for
 ¹⁰Be/⁹Be; with the radial boundary at 40 kpc (80 kpc) the 1D closed form agrees with USINE 2D within 0.02% (0.06%).
 The 2D-1D difference is therefore the radial escape of harmonized-v1's geometry, not a translation or transport
-error; it is consistent with P7 (DRAGON2, R = 20 kpc: D0/L within 2% for L = 2-4 kpc). Not loosened: the 2D comparison
-fails 2% as frozen; whether B3-1 is to be judged on the like-for-like geometry (as fixed above before the runs) or
-the closed-form reference given the radial boundary is for the orchestrator (the same question as escalation 5).
+error; it is consistent with P7 (DRAGON2, R = 20 kpc: D0/L within 2% for L = 2-4 kpc). Target: harmonized-v1 sets
+He_to_H_number 0.1, but both sides use hydrogen only (the ILLUSTRATIVE sets have no helium cross section; the
+translator records the substitute), so the helium target does not enter the offset; it is a departure of both sides
+from harmonized-v1 that would raise production and destruction alike (for scale: DRAGON2's fixed helium target
+factor 1.143, P11) and is not tested here. Unattributed: the residual of USINE 2D against the Fourier-Bessel solution
+(0.21% / 0.16%, within B3-1c), likely USINE's radial source integration (NIntegrR 1000); not investigated further.
+Not loosened: B3-1 fails under harmonized-v1 as frozen; A1.10 supersedes it for B3's verdict.
 
 Findings. (1) Same parents matter: USINE's propagated O/C runs from 0.849 to 0.922 over the grid (0.9 at the
 10 GeV/n normalization), against the constant 0.9 of the profile's benchmark; O→B is about 30% of B. (2) Level by level
