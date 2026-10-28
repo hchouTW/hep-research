@@ -6732,3 +6732,45 @@ The losses item was rerun on Galprop gas together with its item-off run `D1_loss
 DRAGON2 runs of D1 (D7, A1.8): dispatch 1: 19 (5 items, 2 convergence, 5 conformance mixin, 5 conformance CLI,
 2 diagnostics); dispatch 2: 11 (3 diagnostics, 3 item runs, 5 conformance mixin); total 30, all on E-crprop, at most
 4 at once.
+
+## CRPROP-E2 — 2026-10-28 (environment E2)
+
+Work package E2 of the cr-propagation r4 campaign (r3 §E2 with §E2b folded in, r4 §6; optional): the hep-ml emulator
+of USINE B/C with its `ml-artifact`, its valid domain, and the cr-provider/1 entrypoint `emulator`.
+
+**Environment (r3 §0.3, base exception D10).** E2 (macOS arm64 workstation), Python 3.13.2; USINE V3.5 (commit
+fb53006d, ENV build) through `HEP_USINE_BIN`, `HEP_USINE_DATA`, `USINE`. `git rev-parse --show-toplevel` =
+`.claude/worktrees/crprop-e2`; branch `worktree-crprop-e2`; status clean at start; base `e5ecbd64` = integration HEAD
+(decision D10, not `origin/main`); the prerequisite E1 (merge `a4ad05d3`) and B1 (merge `3ed1e89e`), C1 (merge
+`099d1d22`) are ancestors of HEAD (`git merge-base --is-ancestor`).
+
+**Criteria and tolerances, fixed before any comparison (R9; frozen entries E2-1, E2-2, E2-3, E2-PRV-1, E2-PRV-2 of
+`acceptance.json`, nothing loosened).** Set-up as E1 (VALIDATION CRPROP-E1): free parameters `D0_cm2_s` 1e28–1e29
+(log axis), `delta` 0.3–0.8, `eta` −1.5–1.5, `V_A_kms` 0–100, `V_c_kms` 0–30; every other transport field the USINE
+provider's `DEFAULT_TRANSPORT` (provider version 0.2.0); observable B/C on the 20 log rigidity bins 2–1000 GV;
+synthetic data the USINE B/C at the truth point (`D0_cm2_s` 3e28, `delta` 0.5, `eta` 1, `V_A_kms` 30, `V_c_kms` 5;
+Asimov, labelled synthetic); C = the full ILLUSTRATIVE data covariance of E1 (statistical 1.5% (R/10 GV)^0.4
+uncorrelated plus systematic 2% with Gaussian correlation length 0.3 in log10 R); σ_i^stat its statistical part. b is
+emulator minus USINE (provider `usine`) at the same point, per bin. Posterior: flat prior on the unit cube of the free
+parameters (log D0), Gaussian likelihood with C, evaluated through the emulator provider (points it refuses have zero
+posterior).
+- Hold-out: 32 points drawn (seeded, weighted resampling without replacement) from the posterior through the first E2
+  emulator (trained on E1's USINE points only), run with USINE, never trained on, fixed for every round. A second,
+  confirmation hold-out of 32 points is drawn the same way from the posterior through the final emulator after it is
+  frozen and evaluated once. E2-1 and E2-2 must hold on both sets (the second set is an addition, not a substitute).
+- E2-1: on every hold-out point Δχ² = bᵀC⁻¹b ≤ 1.
+- E2-2: on every hold-out point and in every bin |b_i| ≤ 0.2 σ_i^stat.
+- E2-3: the same synthetic least-squares fit (unit-cube coordinates, box bounds, start at the box centre) once through
+  the emulator provider and once through the USINE provider (at most 300 USINE evaluations for this fit). σ_j and the
+  interval of each parameter j: the Laplace (Gauss–Newton) 68.27% interval at each best fit, half-width
+  σ_j = sqrt[(JᵀC⁻¹J)⁻¹]_jj with J the central finite-difference Jacobian (step 0.01 in unit-cube coordinates), the same
+  method for both providers; a boundary is not treated specially (stated in the result). Pass when for every j
+  |θ̂_j(emulator) − θ̂_j(USINE)| ≤ 0.2 σ_j(USINE) and |σ_j(emulator)/σ_j(USINE) − 1| ≤ 0.10.
+- E2-PRV-1: `tests.core.provider_conformance.ProviderConformance` (C1) passes for provider `emulator`.
+- E2-PRV-2: single-shot and `--serve` responses have the same sha256 after removing `elapsed_s` and time stamps.
+- Domain (r3 §E2, P10): `DomainModel` of `check_surrogate_domain.py` fitted on the training points (unit-cube
+  coordinates); `outside` or `sparse` is out of domain and refused (`failed`, `out-of-domain`), evaluated only with
+  `--allow-outside-validated-range` and then labelled `outside-validated-range`; the emulator error enters every
+  prediction as an uncertainty component.
+- Limits: at most 5 active-addition rounds after the first emulator; at most 500 USINE evaluations for E2 (tally kept;
+  E1's 111 runs reused from its cache are not new evaluations); at most 4 USINE runs at once.
