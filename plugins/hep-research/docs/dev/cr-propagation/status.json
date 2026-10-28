@@ -34,8 +34,8 @@
    ]
   },
   "ENV": {
-   "state": "dispatched",
-   "dispatches": 2,
+   "state": "ready",
+   "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-env",
    "base": "ef37d970",
@@ -46,7 +46,7 @@
    "missing_capabilities": [],
    "notes": [
     "dispatch 1 merged as 7d5c6934; post-merge static + acceptance passed 2026-10-28",
-    "dispatch 2 (2026-10-28, decision A1.1): clone USINE V3.5 from gitlab.com, licence, build with ROOT 6.38.04, record env-usine"
+    "dispatch 2 (USINE clone + build) held: the host permission check refused dispatching an agent to clone and build external code; awaiting maintainer approval in this session"
    ]
   },
   "A1": {
@@ -386,6 +386,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "ENV dispatch 1 post-merge checks pass (static exit 0, acceptance ok): merge 7d5c6934 kept; ENV re-dispatched for USINE (A1.1)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "ENV dispatch 2 held: host permission check refused the USINE clone/build dispatch; maintainer asked"
   }
  ],
  "env": {
