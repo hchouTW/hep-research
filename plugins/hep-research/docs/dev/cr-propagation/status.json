@@ -230,18 +230,18 @@
    ]
   },
   "D3": {
-   "state": "dispatched",
+   "state": "verifying",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-d3",
-   "base": null,
-   "head": null,
+   "base": "b0d0016d",
+   "head": "f4ffaa59",
    "merge_commit": null,
-   "worker_report": null,
+   "worker_report": "PARTIAL: D3-2 pass (residual 0.42%); D3-1 38-41% (decomposed, product tested); D3-3 matched settings 0.59-0.67% for 4 configs, reacceleration 17% (within A1R bound), Galprop-gas 17.7% (2D gas; scaled 1.9-3.3%); 2 DRAGON2 + 37 USINE runs; findings on D1 translator (escalation 12)",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "D3-3 added (A1.9 planned level-1 matched comparison)"
+    "A1.13: accepted with attributed misses; Opus verifier dispatched"
    ]
   },
   "E1": {
@@ -722,6 +722,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "C2U PARTIAL (C2U-1/2 pass, C2U-3 not met); A1.12: C2U-3 moved to new WP C2UF (C2UF-1), RC depends on C2UF; C2U verifier dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "D3 PARTIAL; A1.13: accept with attributed misses (verifier required); escalation 12 (translator follow-ups for H1)"
   }
  ],
  "env": {
