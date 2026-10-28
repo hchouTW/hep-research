@@ -199,18 +199,18 @@
    ]
   },
   "B3": {
-   "state": "verifying",
+   "state": "dispatched",
    "dispatches": 1,
-   "rework_rounds": 0,
+   "rework_rounds": 1,
    "branch": "worktree-crprop-b3",
    "base": "2d451e87",
    "head": "5cb31aa5",
    "merge_commit": null,
    "worker_report": "DONE: B3-1 on matched 1D geometry (B/C 9e-5, 10Be/9Be 4.1e-4); harmonized-v1 2D B/C misses 2% (to 2.47% above 45 GV), attributed to radial escape (Fourier-Bessel reproduces USINE 2D to 0.21%); B3-2 max 8.9e-6; B3-3 22 rows; 192 USINE runs (D7)",
-   "verifier_report": null,
+   "verifier_report": "round 0 REWORK (Opus): B3-1 must be judged under harmonized-v1 (card plan:420, geometry plan:379); 2D B/C misses 2% (2.47%, 8 bins above 44.7 GV), attribution sound; B3-2, B3-3 pass",
    "missing_capabilities": [],
    "notes": [
-    "Opus verifier dispatched 2026-10-28 with the B3-1 geometry question left to its judgment"
+    "A1.10: B3-1 superseded by B3-1a/b/c; rework round 1 sent to the worker 2026-10-28 (relabel, add B3-1c test, data-line hashes)"
    ]
   },
   "C2U": {
@@ -607,6 +607,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "wave-2 full run on 2d451e87 (P0 fix, ENV 2, A3, A4, B1, timings): run_all_checks pass (exit 0); check_relocation only the 2 known geant4 path-with-spaces failures (identical on main). ALL-3 holds for P0 r3, ENV 2, A3, A4, B1. C2 (merged after 2d451e87) goes to wave 3"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "B3 verifier REWORK (B3-1 under harmonized-v1); A1.10: B3-1a/b/c added, B3-1 superseded for B3; rework round 1"
   }
  ],
  "env": {

@@ -536,7 +536,10 @@
    ],
    "acceptance_prefix": "B3",
    "fallback": "waits on B1; if B1 is blocked, blocked with B1 (derived)",
-   "source": "r4 7, r3 B3"
+   "source": "r4 7, r3 B3",
+   "acceptance_superseded": {
+    "B3-1": "decisions.md A1.10: superseded for B3's verdict by B3-1a, B3-1b and B3-1c; B3-1 kept unchanged in acceptance.json"
+   }
   },
   {
    "id": "C2U",

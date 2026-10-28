@@ -1074,6 +1074,39 @@
    "tolerance": "rel 1e-12",
    "evidence_path": "$CRPROP_OUT/a1r/acceptance",
    "source": "decisions.md A1.9 (added 2026-10-28; additions only, r4 5)"
+  },
+  {
+   "id": "B3-1a",
+   "wp": "B3",
+   "kind": "command",
+   "criterion": "Supersedes B3-1 for B3's verdict (A1.10). USINE in a 1D geometry matched to the B2 thin-disc closed form, with the same parents (closed-form parent ratios set to USINE's propagated ones per node), the same cross-section table, tertiaries and ghosts off on both sides and the same loss settings: B/C over 2-1000 GV and 10Be/9Be over 0.05-10 GeV/n agree within 2%.",
+   "command": "python3 -m unittest tests.adapters.test_cr_propagation",
+   "expect": "ok",
+   "tolerance": "2%",
+   "evidence_path": "$CRPROP_OUT/b3/acceptance",
+   "source": "decisions.md A1.10 (added 2026-10-28; additions only, r4 5)"
+  },
+  {
+   "id": "B3-1b",
+   "wp": "B3",
+   "kind": "artifact",
+   "criterion": "Under harmonized-v1 (cylinder-2d, radius 20 kpc) the offset of USINE's B/C and 10Be/9Be from the closed form is reported per bin in b3-results.json and VALIDATION.md with its attribution (radial escape; the hydrogen-only target against harmonized-v1's He_to_H_number 0.1); any unattributed part is stated as such. No tolerance.",
+   "command": null,
+   "expect": "verifier reads the offsets and attributions",
+   "tolerance": null,
+   "evidence_path": null,
+   "source": "decisions.md A1.10 (added 2026-10-28; additions only, r4 5)"
+  },
+  {
+   "id": "B3-1c",
+   "wp": "B3",
+   "kind": "command",
+   "criterion": "Under harmonized-v1 (cylinder-2d, radius 20 kpc), USINE's B/C over 2-1000 GV and 10Be/9Be over 0.05-10 GeV/n agree within 0.5% with the Fourier-Bessel thin-disc solution computed from the same inputs (same parents, cross sections, tertiary/ghost and loss settings).",
+   "command": "python3 -m unittest tests.adapters.test_cr_propagation",
+   "expect": "ok; the Fourier-Bessel comparison test runs against the committed outputs",
+   "tolerance": "0.5%",
+   "evidence_path": "$CRPROP_OUT/b3/acceptance",
+   "source": "decisions.md A1.10 (added 2026-10-28; additions only, r4 5)"
   }
  ]
 }
