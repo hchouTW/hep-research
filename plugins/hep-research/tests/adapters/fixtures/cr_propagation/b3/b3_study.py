@@ -18,7 +18,7 @@ for the norm check in h1-2d, dec-2d, all-2d and the slope check of SLOPE_CHANNEL
 
 Usage:
   python3 b3_study.py run --out DIR [--jobs 4] [--only NAME_SUBSTRING]   # needs HEP_USINE_BIN, HEP_USINE_DATA
-  python3 b3_study.py analyze --out DIR --results RESULTS.json --channels CHANNELS.json
+  python3 b3_study.py analyze --out DIR --results RESULTS.json --channels CHANNELS.json [--index INDEX.json]
   python3 b3_study.py compare --run-dir RUNDIR --spec SPEC.json            # B3-1 numbers of one run (offline)
 Output: JSON on stdout. Exit 0 ok, 1 a USINE run failed, 2 bad input, 3 USINE missing.
 """
@@ -27,6 +27,7 @@ from __future__ import annotations
 import argparse
 import concurrent.futures
 import copy
+import hashlib
 import json
 import math
 import os
@@ -438,6 +439,64 @@ def table_weight(e: float) -> float:
     raise ValueError(f"{e} outside the table")
 
 
+B31C_TOL = 0.005  # B3-1c (acceptance.json, decisions.md A1.10)
+B31C_CASES = (("h1-2d", "B/C"), ("dec-2d", "10Be/9Be"))  # B/C of harmonized-v1; 10Be/9Be of harmonized-v1-decay
+
+
+def harmonized_2d(out: Path) -> tuple[dict, dict]:
+    """B3-1b: per-bin offsets of the 1D closed form from USINE under harmonized-v1 (2D, R = 20 kpc) with their
+    attribution (USINE 2D / USINE 1D: radial escape; Fourier-Bessel / USINE 2D: what the radial boundary does not
+    explain). B3-1c: USINE 2D against the Fourier-Bessel thin-disc solution (2000 terms) on B3's bins."""
+    offsets, fb = {}, {}
+    for cfg, obs in (("h1-2d", "B/C"), ("dec-2d", "B/C"), ("dec-2d", "10Be/9Be")):
+        doc = load_spec(cfg)
+        t2, t1 = read(out, f"{cfg}-nom"), read(out, f"{cfg.replace('2d', '1d')}-nom")
+        cmp2 = compare_b31(t2, doc["transport"])["bins"][obs]
+        o2, o1 = observables(t2)[obs], observables(t1)[obs]
+        row = {"edges": BORON_CARBON_EDGES if obs == "B/C" else BERYLLIUM_EDGES,
+               "closed_over_usine_2d": cmp2["ratio"], "usine_2d_over_usine_1d": [a / b for a, b in zip(o2, o1)]}
+        if (cfg, obs) in B31C_CASES:
+            bes = observables(bessel_2d_tables(t2, doc["transport"], BESSEL_TERMS[-1]))[obs]
+            row["fourier_bessel_over_usine_2d"] = [float(b / u) for b, u in zip(bes, o2)]
+            fb[f"{cfg} {obs}"] = {"max_dev": float(max_dev(bes, o2)), "tolerance": B31C_TOL, "n_terms": BESSEL_TERMS[-1],
+                                  "passed": bool(max_dev(bes, o2) <= B31C_TOL)}
+        offsets[f"{cfg} {obs}"] = row
+    offsets["attribution"] = (
+        "radial escape at radius_kpc = 20 kpc, which the 1D closed form cannot express (usine_2d_over_usine_1d; the "
+        "Fourier-Bessel solution with the same inputs reproduces USINE 2D, b3_1c). Target: both sides hydrogen-only "
+        "(He_to_H_number 0.1 of harmonized-v1 used by neither, the ILLUSTRATIVE sets have no helium cross section), so "
+        "the helium target does not enter this offset; it is a common departure of both sides from harmonized-v1. "
+        "Unattributed: the residual of USINE 2D against the Fourier-Bessel solution (b3_1c max_dev).")
+    return offsets, fb
+
+
+def data_sha256(path: Path) -> str:
+    """sha256 of the data lines of a USINE table (its '#' header carries the run's date and is left out)."""
+    lines = [ln for ln in Path(path).read_text(encoding="utf-8").splitlines() if ln.strip() and not ln.startswith("#")]
+    return hashlib.sha256(("\n".join(lines) + "\n").encode("utf-8")).hexdigest()
+
+
+def run_index(out: Path) -> dict:
+    """Every run of the plan with the data-line sha256 of its isotope tables (from $CRPROP_OUT/b3/runs/)."""
+    plan = {i["name"]: i for i in run_plan()}
+    done = {r["name"]: r for r in json.loads((out / "run-index.json").read_text(encoding="utf-8"))}
+    rows = []
+    for name, item in plan.items():
+        spec = json.loads((out / "runs" / name / "translation.json").read_text(encoding="utf-8"))
+        row = {"name": name, "config": item["config"], "kind": item["kind"], "ok": done[name]["ok"],
+               "wall_seconds": done[name]["seconds"],
+               "isotope_table_data_sha256": {s: data_sha256(out / "runs" / name / "out" / rd.table_name(s, spec["model"]))
+                                             for s in spec["species"]}}
+        row.update({k: item[k] for k in ("channel", "epsilon", "node") if k in item})
+        rows.append(row)
+    return {"description": "cr-propagation B3: every USINE V3.5 run of the B3 study (b3_study.py run, 2026-10-28, "
+                           "environment E2), with the sha256 of the data lines of its isotope tables (data_sha256: the "
+                           "'#' header with the run date left out, so a rerun can be compared); tables kept under "
+                           "$CRPROP_OUT/b3/runs/, those of the nominal runs committed in outputs/",
+            "status": "synthetic", "n_runs": len(rows),
+            "wall_seconds_sum": round(sum(r["wall_seconds"] for r in rows), 1), "runs": rows}
+
+
 def analyze(out: Path) -> tuple[dict, dict]:
     results = {"b3_1": {}, "b3_2": {}, "slope": {}, "fractions": {}}
     for cfg in CLOSED_FORM_CONFIGS:
@@ -449,6 +508,7 @@ def analyze(out: Path) -> tuple[dict, dict]:
     results["b3_1"]["usine_2d_over_1d"] = {
         k: max_dev(observables(read(out, f"{a}-nom"))[k], observables(read(out, f"{b}-nom"))[k])
         for a, b, k in (("h1-2d", "h1-1d", "B/C"), ("dec-2d", "dec-1d", "10Be/9Be"))}
+    results["b3_1b"], results["b3_1c"] = harmonized_2d(out)
     channels = []
     for cfg in NORM_CONFIGS:
         nom = read(out, f"{cfg}-nom")
@@ -552,6 +612,7 @@ def main(argv=None) -> int:
     p.add_argument("--out", required=True, type=Path)
     p.add_argument("--results", required=True, type=Path)
     p.add_argument("--channels", required=True, type=Path)
+    p.add_argument("--index", type=Path, help="also write the run index (data-line sha256 of every run's tables)")
     p = sub.add_parser("compare")
     p.add_argument("--run-dir", required=True, type=Path)
     p.add_argument("--spec", required=True, type=Path)
@@ -567,6 +628,8 @@ def main(argv=None) -> int:
             results, chans = analyze(args.out)
             args.results.write_text(json.dumps(results, indent=1) + "\n", encoding="utf-8")
             args.channels.write_text(json.dumps(chans, indent=1) + "\n", encoding="utf-8")
+            if args.index:
+                args.index.write_text(json.dumps(run_index(args.out), indent=0) + "\n", encoding="utf-8")
             print(json.dumps({"status": "ok", "results": str(args.results), "channels": str(args.channels)}))
             return 0
     except (OSError, ValueError, KeyError) as exc:
