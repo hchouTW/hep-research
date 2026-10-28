@@ -107,6 +107,55 @@ class TrainEmulator(unittest.TestCase):
             self.assertAlmostEqual(grad[i], num, delta=1e-4 * max(1.0, abs(num)))
 
 
+class KernelConditionBound(unittest.TestCase):
+    """K4: --max-condition bounds every kernel matrix's condition number through a nugget floor of n x signal /
+    (C - 1) (default MAX_CONDITION 1e10); 0 trains as before the bound (E2's committed model) and records nothing."""
+
+    def test_default_bound_holds_and_is_recorded(self):
+        doc = training_set(70, 1)
+        model = te.train(doc, restarts=1, seed=0)
+        self.assertEqual(model["training"]["max_condition"], te.MAX_CONDITION)
+        self.assertEqual(model["training"]["relative_nugget_floor"], te.relative_nugget_floor(70, te.MAX_CONDITION))
+        x = np.asarray(model["training_unit"])
+        for comp in model["components"]:
+            self.assertGreaterEqual(comp["nugget"], comp["signal"] * te.relative_nugget_floor(70, te.MAX_CONDITION)
+                                    * (1 - 1e-9))
+            eig = np.linalg.eigvalsh(te.matern52(x, x, np.asarray(comp["lengths"]), comp["signal"])
+                                     + comp["nugget"] * np.eye(len(x)))
+            self.assertLessEqual(eig[-1] / eig[0], te.MAX_CONDITION * (1 + 1e-6))
+            self.assertTrue(math.isclose(comp["condition_number"], eig[-1] / eig[0], rel_tol=1e-6))
+
+    def test_a_tighter_bound_raises_the_nugget(self):
+        doc = training_set(70, 1)
+        tight = te.train(doc, restarts=1, seed=0, max_condition=1e6)
+        self.assertTrue(all(c["condition_number"] <= 1e6 * (1 + 1e-6) for c in tight["components"]))
+        emu = te.GaussianProcessEmulator(tight)
+        held = design(40, seed=7)
+        values = np.array([p["values"] for p in emu.predict(held)])
+        truth = np.array([simulator(p) for p in held])
+        self.assertLess(np.abs(values / truth - 1.0).max(), 1e-2)
+
+    def test_zero_switches_the_bound_off(self):
+        doc = training_set(70, 1)
+        model = te.train(doc, restarts=1, seed=0, max_condition=0)
+        self.assertNotIn("max_condition", model["training"])
+        self.assertTrue(all("condition_number" not in c for c in model["components"]))
+        with self.assertRaises(ValueError):
+            te.train(doc, restarts=1, seed=0, max_condition=0.5)
+
+    def test_gradient_in_the_relative_nugget_coordinates(self):
+        rng = np.random.default_rng(5)
+        x, y = rng.uniform(size=(25, 3)), rng.normal(size=25)
+        phi = np.r_[np.log([0.4, 0.7, 1.3]), 0.2, math.log(1e-4)]
+        _, grad = te._neg_log_marginal_relative(phi, x, y)
+        for i in range(len(phi)):
+            step = np.zeros_like(phi)
+            step[i] = 1e-6
+            num = (te._neg_log_marginal_relative(phi + step, x, y)[0]
+                   - te._neg_log_marginal_relative(phi - step, x, y)[0]) / 2e-6
+            self.assertAlmostEqual(grad[i], num, delta=1e-4 * max(1.0, abs(num)))
+
+
 class TrainEmulatorCli(unittest.TestCase):
     def run_cli(self, *args, cwd=None):
         return subprocess.run([sys.executable, str(SCRIPTS / "train_emulator.py"), *map(str, args)],

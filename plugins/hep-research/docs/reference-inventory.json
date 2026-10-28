@@ -30,7 +30,7 @@
   },
   "hep-ml": {
    "references": 42,
-   "bytes": 195039,
+   "bytes": 195454,
    "uncited": 0
   },
   "hep-statistics": {
@@ -3533,8 +3533,8 @@
   {
    "path": "skills/hep-ml/references/scientific-machine-learning.md",
    "owner": "hep-ml",
-   "bytes": 3086,
-   "lines": 43,
+   "bytes": 3501,
+   "lines": 47,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-ml/SKILL.md",
@@ -3548,7 +3548,7 @@
    "cited_by_other_skills": [
     "hep-statistics"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "fc8606a1 2026-10-29"
   },
   {
    "path": "skills/hep-ml/references/sequence-models.md",

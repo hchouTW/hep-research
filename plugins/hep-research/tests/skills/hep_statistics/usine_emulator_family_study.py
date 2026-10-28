@@ -14,7 +14,10 @@ Steps (each writes into --work; USINE runs go through the provider cache, so a r
   usine     the training design and the held-out validation runs (--round 0 or 1)
   train     training set from every cached run inside the box, minus the validation points; model and ml-artifact
   validate  the emulator against the held-out runs; the regression_validation block; the emulator error component
+  confirm   the emulator against fresh USINE runs over its whole box, the domain the toy fits use (K4)
   fit       propagation_fit with the emulator provider; the recorded study to --record
+--max-condition is passed to the trainer: 0 (default) reproduces the committed A1.14 model (trained before the bound);
+K4 (decision B1.1) retrained with 1e10, which bounds each kernel's condition number (VALIDATION CRPROP-K4).
 Usage:
   python3 usine_emulator_family_study.py STEP --registry REGISTRY.json --cache-dir DIR --work DIR [--round 0]
       [--record FILE] [--family-toys 200]
@@ -59,6 +62,7 @@ TOY_BOX = {"D0_cm2_s": (math.exp(65.191), math.exp(65.772)), "delta": (0.4133, 0
            "V_c_kms": (0.0, 7.108)}
 DESIGN = {0: {"box": 200, "vc0": 40, "va0": 30, "slice": 30}, 1: {"box": 60}}
 VALIDATION_SEED = {0: 20261029, 1: 20261030}
+CONFIRMATION_SEED = 20261031
 SIGMA_REL = {"bc-asimov": math.hypot(0.04, 0.02), "be-asimov": math.hypot(0.06, 0.03)}
 TOLERANCE = 0.05
 TRAIN_SEED = 20261028
@@ -99,6 +103,17 @@ def validation_points(rnd: int) -> list[dict]:
     pts = [{n: float(v) for n, v in _from_unit(rng.uniform(0, 1, 4), NAMES, TOY_BOX).items()} for _ in range(30)]
     for _ in range(10):
         p = _from_unit(rng.uniform(0, 1, 2), NAMES[:2], TOY_BOX)
+        pts.append({**{n: float(v) for n, v in p.items()}, "V_A_kms": 0.0, "V_c_kms": 0.0})
+    return pts
+
+
+def confirmation_points() -> list[dict]:
+    """30 uniform in the model's whole box (k = 4, the toy fits' domain) and 10 uniform on its SLIM slice."""
+    import numpy as np
+    rng = np.random.default_rng(CONFIRMATION_SEED)
+    pts = [{n: float(v) for n, v in _from_unit(rng.uniform(0, 1, 4), NAMES, BOX).items()} for _ in range(30)]
+    for _ in range(10):
+        p = _from_unit(rng.uniform(0, 1, 2), NAMES[:2], BOX)
         pts.append({**{n: float(v) for n, v in p.items()}, "V_A_kms": 0.0, "V_c_kms": 0.0})
     return pts
 
@@ -253,7 +268,7 @@ def step_usine(args) -> int:
 
 
 def step_train(args) -> int:
-    held = {_key(p) for p in validation_points(args.round)}
+    held = {_key(p) for p in validation_points(args.round) + confirmation_points()}
     runs, seen = [], set()
     for r in cached_runs(args.cache_dir):    # held-out points never; points equal to 1e-9 in the unit cube once
         unit = tuple(round(_unit(r[0], n), 9) for n in NAMES)
@@ -264,7 +279,8 @@ def step_train(args) -> int:
     folder.mkdir(parents=True, exist_ok=True)
     (folder / "training-set.json").write_text(json.dumps(training_doc(runs)), encoding="utf-8")
     trained = run_json([TRAINER, "train", "--training-set", "training-set.json", "--out-dir", ".", "--seed",
-                        str(TRAIN_SEED), "--pca-tolerance", "1e-4", "--restarts", "4", "--status", "synthetic"],
+                        str(TRAIN_SEED), "--pca-tolerance", "1e-4", "--restarts", "4", "--max-condition",
+                        repr(args.max_condition), "--status", "synthetic"],
                        cwd=folder)
     art = write_artifact(folder)
     print(json.dumps({"status": "ok", "training_points": len(runs), "trained": {k: trained.get(k) for k in
@@ -272,13 +288,8 @@ def step_train(args) -> int:
     return 0
 
 
-def step_validate(args) -> int:
-    folder = args.work / f"model-{args.round}"
-    artifact = folder / "emulator.ml-artifact.json"
-    pts = validation_points(args.round)
-    usine, _ = usine_values(args.registry, args.cache_dir, pts)   # cached by the usine step
-    registry = emulator_registry(args.registry, artifact, folder / "registry.json")
-    emu = emulator_values(registry, artifact, pts)
+def compare(pts, usine, emu):
+    """(rows, worst error over the data sigma (inf if a point is refused), largest abs error per bin)."""
     nbc = len(c2u.edges()) - 1
     rows, worst, err = [], 0.0, [0.0] * len(usine[0])
     for p, u, e in zip(pts, usine, emu):
@@ -294,6 +305,18 @@ def step_validate(args) -> int:
         worst = max(worst, max(pulls))
         rows.append({"point": p, "status": "ok", "max_error_over_sigma": max(pulls),
                      "max_relative_error": max(abs(a / b - 1) for a, b in zip(e["values"], u))})
+    return rows, worst, err
+
+
+def step_validate(args) -> int:
+    folder = args.work / f"model-{args.round}"
+    artifact = folder / "emulator.ml-artifact.json"
+    pts = validation_points(args.round)
+    usine, _ = usine_values(args.registry, args.cache_dir, pts)   # cached by the usine step
+    registry = emulator_registry(args.registry, artifact, folder / "registry.json")
+    emu = emulator_values(registry, artifact, pts)
+    nbc = len(c2u.edges()) - 1
+    rows, worst, err = compare(pts, usine, emu)
     passed = worst <= TOLERANCE
     ok_rows = [r for r in rows if r["status"] == "ok"]
     regression = {"holdout": {"points": len(pts), "round": args.round, "seed": VALIDATION_SEED[args.round],
@@ -310,6 +333,32 @@ def step_validate(args) -> int:
     (folder / "validation.json").write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8")
     print(json.dumps({k: doc[k] for k in ("round", "passed", "max_error_over_sigma")}))
     return 0 if passed else 1
+
+
+def step_confirm(args) -> int:
+    """K4: fresh USINE runs over the whole box; pass when every point the DomainModel accepts is within TOLERANCE."""
+    folder = args.work / f"model-{args.round}"
+    artifact = folder / "emulator.ml-artifact.json"
+    pts = confirmation_points()
+    usine, sent = usine_values(args.registry, args.cache_dir, pts)
+    registry = emulator_registry(args.registry, artifact, folder / "registry.json")
+    emu = emulator_values(registry, artifact, pts)
+    nbc = len(c2u.edges()) - 1
+    rows, _, err = compare(pts, usine, emu)
+    ok_rows = [r for r in rows if r["status"] == "ok"]
+    worst = max((r["max_error_over_sigma"] for r in ok_rows), default=None)
+    outside = sum(1 for p in pts if not all(TOY_BOX[n][0] <= p[n] <= TOY_BOX[n][1] for n in NAMES))
+    doc = {"seed": CONFIRMATION_SEED, "points": len(pts), "usine_runs_sent": sent,
+           "drawn_from": "30 uniform in the model box (k = 4), 10 uniform on its SLIM slice V_A = V_c = 0",
+           "outside_toy_box": outside, "passed": worst is not None and worst <= TOLERANCE,
+           "max_error_over_sigma": worst, "tolerance": TOLERANCE,
+           "refused_by_domain_model": len(rows) - len(ok_rows), "rows": rows,
+           "max_error_per_bin": {"bc-asimov": err[:nbc], "be-asimov": err[nbc:]},
+           "model_sha256": hashlib.sha256((folder / "emulator-model.json").read_bytes()).hexdigest()}
+    (folder / "confirmation.json").write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8")
+    print(json.dumps({k: doc[k] for k in ("passed", "max_error_over_sigma", "refused_by_domain_model",
+                                          "outside_toy_box", "usine_runs_sent")}))
+    return 0 if doc["passed"] else 1
 
 
 def step_fit(args) -> int:
@@ -355,12 +404,20 @@ def step_fit(args) -> int:
            "truth": two["truth"], "generating_family": "BIG", "config": cfg, "emulator": {
                "ml_artifact": "emulator.ml-artifact.json", "model": "emulator-model.json",
                "model_sha256": val["model_sha256"], "round": args.round,
+               "max_condition": json.loads((folder / "emulator-model.json").read_text(
+                   encoding="utf-8"))["training"].get("max_condition", 0.0),
                "validation": {k: val[k] for k in ("passed", "max_error_over_sigma", "tolerance", "rows",
                                                   "error_component")}},
            "usine_fits": {f["family"]: {"chi2": f["chi2"], "best_fit": {p["name"]: p["best_fit"]
                                                                         for p in f["parameters"]}}
                           for f in two["result"]["fits"]},
            "result": res}
+    confirmation = folder / "confirmation.json"
+    if confirmation.exists():
+        conf = json.loads(confirmation.read_text(encoding="utf-8"))
+        if conf["model_sha256"] != val["model_sha256"]:
+            raise SystemExit("confirmation.json belongs to another model")
+        doc["emulator"]["confirmation"] = {k: v for k, v in conf.items() if k != "usine_runs_sent"}
     args.record.parent.mkdir(parents=True, exist_ok=True)
     args.record.write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8")
     for name in ("emulator-model.json", "emulator.ml-artifact.json"):
@@ -372,21 +429,25 @@ def step_fit(args) -> int:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("step", choices=["usine", "train", "validate", "fit"])
+    ap.add_argument("step", choices=["usine", "train", "validate", "confirm", "fit"])
     ap.add_argument("--registry", required=True, help="provider registry (tools/provider_registry.py --write)")
     ap.add_argument("--cache-dir", required=True, help="USINE provider cache (outside the repository)")
     ap.add_argument("--work", required=True, type=Path, help="work folder (outside the repository)")
     ap.add_argument("--round", type=int, default=0, choices=[0, 1], help="design and validation round")
     ap.add_argument("--record", type=Path, default=RECORD, help="recorded study (fit step)")
     ap.add_argument("--family-toys", type=int, default=200, help="toys per family")
+    ap.add_argument("--max-condition", type=float, default=0.0,
+                    help="train step: the trainer's kernel condition bound (0, the default, reproduces the committed "
+                         "A1.14 model; K4 used 1e10)")
     args = ap.parse_args(argv)
-    if args.step in ("usine", "validate") and not (os.environ.get("HEP_USINE_BIN") and os.environ.get("HEP_USINE_DATA")
+    if args.step in ("usine", "validate", "confirm") and not (os.environ.get("HEP_USINE_BIN") and os.environ.get("HEP_USINE_DATA")
                                                    and os.environ.get("HEP_USINE_RUN_DIR")):
         print(json.dumps({"status": "rejected", "error": "set HEP_USINE_BIN, HEP_USINE_DATA and HEP_USINE_RUN_DIR"}))
         return 2
     args.work = args.work.resolve()
     args.work.mkdir(parents=True, exist_ok=True)
-    return {"usine": step_usine, "train": step_train, "validate": step_validate, "fit": step_fit}[args.step](args)
+    return {"usine": step_usine, "train": step_train, "validate": step_validate, "confirm": step_confirm,
+            "fit": step_fit}[args.step](args)
 
 
 if __name__ == "__main__":
