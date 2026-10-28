@@ -110,6 +110,12 @@ Software checks establish contract consistency only, not physical validity.
   Fourier-Bessel thin-disc solution within 0.21% (B3-1c, tolerance 0.5%). Level-by-level norm reweighting at +-20% matches full reruns within 9e-6 for all 22 channel cases; slope
   changes need energy-basis responses when energies couple. Channel list with `must_rerun` flags; specifications, nominal
   tables, records, run index and offline tests under `tests/adapters/fixtures/cr_propagation/b3/`. No behavior change.
+- crprop e1: training design and bounded active addition with USINE (r3 §E1; optional WP). New
+  `tests/adapters/fixtures/cr_propagation/e1/active_addition.py`: Sobol design (N0 = 64, k = 6 for 5 free
+  parameters, decision Q9), one USINE computational-run per point through `local_partition.py` and the provider
+  runner with cache, and the active-addition loop with its limits (5 rounds, E2 termination criteria, error-plateau
+  and min-distance early stops, evaluation cap) on a placeholder emulator that E2 replaces. Committed: design file,
+  summaries with per-point hashes and run references; training data stay under `$CRPROP_OUT/e1/`. No behavior change.
 
 ## 0.42.0 (2026-10-26)
 

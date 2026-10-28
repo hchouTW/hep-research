@@ -1,0 +1,1638 @@
+{
+ "work_package": "E1",
+ "mode": "standard",
+ "provider": {
+  "id": "usine",
+  "version": "0.2.0"
+ },
+ "labels": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "free_parameters": [
+  {
+   "name": "D0_cm2_s",
+   "min": 1e+28,
+   "max": 1e+29,
+   "scale": "log"
+  },
+  {
+   "name": "delta",
+   "min": 0.3,
+   "max": 0.8,
+   "scale": "linear"
+  },
+  {
+   "name": "eta",
+   "min": -1.5,
+   "max": 1.5,
+   "scale": "linear"
+  },
+  {
+   "name": "V_A_kms",
+   "min": 0.0,
+   "max": 100.0,
+   "scale": "linear"
+  },
+  {
+   "name": "V_c_kms",
+   "min": 0.0,
+   "max": 30.0,
+   "scale": "linear"
+  }
+ ],
+ "sizes": {
+  "N0": 64,
+  "k": 6,
+  "d_min_unit_cube": 0.2231384596810626,
+  "holdout": 16,
+  "candidates": 8192,
+  "folds": 8
+ },
+ "limits": {
+  "max_rounds": 5,
+  "termination": {
+   "dchi2_max": 1.0,
+   "bin_sigma_stat_max": 0.2
+  },
+  "early_stop": {
+   "plateau_fraction": 0.1,
+   "plateau_rounds": 2,
+   "min_distance": "every pick closer than d_min to a training point"
+  },
+  "max_evaluations": 1500
+ },
+ "synthetic_data": {
+  "truth": {
+   "D0_cm2_s": 3e+28,
+   "delta": 0.5,
+   "eta": 1.0,
+   "V_A_kms": 30.0,
+   "V_c_kms": 5.0
+  },
+  "bins": {
+   "axis": "rigidity",
+   "unit": "GV",
+   "lo": 2.0,
+   "hi": 1000.0,
+   "n": 20
+  },
+  "stat_rel": 0.015,
+  "stat_slope": 0.4,
+  "syst_rel": 0.02,
+  "syst_corr_len_log10": 0.3,
+  "note": "Asimov B/C at the truth point with an ILLUSTRATIVE covariance"
+ },
+ "rounds": [
+  {
+   "round": 0,
+   "fit_unit": [
+    0.4554400380057525,
+    0.41624534821622644,
+    0.7410174163360479,
+    0.08093331398089451,
+    2.023294122915435e-18
+   ],
+   "fit_point": {
+    "D0_cm2_s": 2.8539084543097044e+28,
+    "delta": 0.5081226741081132,
+    "eta": 0.7230522490081439,
+    "V_A_kms": 8.09333139808945,
+    "V_c_kms": 6.069882368746305e-17
+   },
+   "fit_chi2": 0.22220545255667976,
+   "region_candidates": 2591,
+   "added": [],
+   "training_points": 64,
+   "holdout_dchi2_max": 7.69237988576143,
+   "holdout_dchi2_median": 2.91046638740329,
+   "holdout_pull_max": 3.580172838457619,
+   "holdout_pull_max_per_bin": [
+    3.439531542476334,
+    3.1252978051605718,
+    3.1639592301845063,
+    3.580172838457619,
+    3.2509622207092232,
+    2.6572394779558968,
+    2.1130304084031937,
+    1.695051983507731,
+    1.3721637611103912,
+    1.1150209315772799,
+    0.9069979018847092,
+    0.7372934222263274,
+    0.5981917062703506,
+    0.48401038507769273,
+    0.3904390415883013,
+    0.3138705856123087,
+    0.25144005963317423,
+    0.20064294106049027,
+    0.15954869987945658,
+    0.12642176391914384
+   ],
+   "e2_1_met": false,
+   "e2_2_met": false,
+   "failing_bins": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
+    16,
+    17
+   ]
+  },
+  {
+   "round": 1,
+   "fit_unit": [
+    0.4554400380057525,
+    0.41624534821622644,
+    0.7410174163360479,
+    0.08093331398089451,
+    2.023294122915435e-18
+   ],
+   "fit_point": {
+    "D0_cm2_s": 2.8539084543097044e+28,
+    "delta": 0.5081226741081132,
+    "eta": 0.7230522490081439,
+    "V_A_kms": 8.09333139808945,
+    "V_c_kms": 6.069882368746305e-17
+   },
+   "fit_chi2": 0.22220545255667976,
+   "region_candidates": 2644,
+   "picks_estimated_error_max": 4.5878472029904716,
+   "picks_min_distance_to_training": [
+    0.19324462360509742,
+    0.2761479914056455,
+    0.31779366262072206,
+    0.24842560106571215,
+    0.417141362244808,
+    0.28686439574770983
+   ],
+   "added": [
+    {
+     "point": {
+      "D0_cm2_s": 2.5177917133203283e+28,
+      "V_A_kms": 3.891119912771569,
+      "V_c_kms": 18.01600439451371,
+      "delta": 0.5242366095821022,
+      "eta": 1.446209689883628
+     },
+     "status": "ok",
+     "point_hash": "159fc0ae0086c2a3729ae176ee9d479fcd5452fe8b51841ffbbf9bafb52a67ad",
+     "values_sha256": "8fd4e9c113b87a734d43aa669acf36f6e2eca79c19689e5fff53178a3c93c48e",
+     "computational_run_ref": "usine-run-p159fc0ae0086c2a3",
+     "role": "round1"
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.8396689193458345e+28,
+      "V_A_kms": 27.561665442051126,
+      "V_c_kms": 16.37476000514928,
+      "delta": 0.504472108183003,
+      "eta": 1.4372260759437312
+     },
+     "status": "ok",
+     "point_hash": "c80dfde09d0db3698b6bd3a03c3008ca22694ef71d2cb8f02a8d88dd0a28f784",
+     "values_sha256": "ea860d312f5ea7e977380305e7479c922927e6874b99c95d1df821392862e4eb",
+     "computational_run_ref": "usine-run-pc80dfde09d0db369",
+     "role": "round1"
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.700520910130374e+28,
+      "V_A_kms": 3.2396767064125864,
+      "V_c_kms": 9.517082685654938,
+      "delta": 0.5061093160327439,
+      "eta": 1.3983161569788032
+     },
+     "status": "ok",
+     "point_hash": "854f19ac98f8908e6041e1157249ac4c432cf23fac65f553d56e968ced15e999",
+     "values_sha256": "6f880e79565c7acfd183bfc4a7d802d08457879eca025c0f6a26caf64c6bc087",
+     "computational_run_ref": "usine-run-p854f19ac98f8908e",
+     "role": "round1"
+    },
+    {
+     "point": {
+      "D0_cm2_s": 3.3691688491991474e+28,
+      "V_A_kms": 29.447675374633974,
+      "V_c_kms": 0.02101154637939503,
+      "delta": 0.4681227988563249,
+      "eta": 0.9537529896022043
+     },
+     "status": "ok",
+     "point_hash": "98b5600c9a741fed54b69cd3804ba6212416816964e251de1b3b1e880a3c4b81",
+     "values_sha256": "2f5efac023e6614fe42f70e4d8aa087e1e0df5785505321904f191422e91dc39",
+     "computational_run_ref": "usine-run-p98b5600c9a741fed",
+     "role": "round1"
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.972943428370678e+28,
+      "V_A_kms": 13.258318991686178,
+      "V_c_kms": 1.791607604698966,
+      "delta": 0.4987651040143841,
+      "eta": 0.5742156106955116
+     },
+     "status": "ok",
+     "point_hash": "dd5c3036bb338aad6d9467a2d5ca58cefb0b1f956cc2486d50c2ce0572f01c78",
+     "values_sha256": "91e9a58b9c975f2f8f44c8865cdc35098b68a6f9baf7e473ce547551a213b979",
+     "computational_run_ref": "usine-run-pdd5c3036bb338aad",
+     "role": "round1"
+    },
+    {
+     "point": {
+      "D0_cm2_s": 3.0775796162153906e+28,
+      "V_A_kms": 29.899896562259,
+      "V_c_kms": 6.616697829429425,
+      "delta": 0.4887451786162733,
+      "eta": 0.7843950163164259
+     },
+     "status": "ok",
+     "point_hash": "9fbc434d4cfbae025246ab5f87a08e6dbc594b1b6100e7dc48c5ed9b924ef033",
+     "values_sha256": "e823437ebb35c75f262a60433ef2d5c34cfef64e0c5850489ba403b5a6619bc8",
+     "computational_run_ref": "usine-run-p9fbc434d4cfbae02",
+     "role": "round1"
+    }
+   ],
+   "training_points": 70,
+   "holdout_dchi2_max": 0.7919383117229466,
+   "holdout_dchi2_median": 0.11161009541326976,
+   "holdout_pull_max": 1.3560072434059707,
+   "holdout_pull_max_per_bin": [
+    1.3560072434059707,
+    1.0329570954270282,
+    0.7543527782901923,
+    0.559797486441725,
+    0.5837529981759279,
+    0.477708701342278,
+    0.36998368296352635,
+    0.29567582416153204,
+    0.2422934241006942,
+    0.20027391336307268,
+    0.16571393295027212,
+    0.13682475977608757,
+    0.11256349740307019,
+    0.09219495582878759,
+    0.07505227211867721,
+    0.060774871894792123,
+    0.04900849978531807,
+    0.03928186473745106,
+    0.031346507746606966,
+    0.024821183006778984
+   ],
+   "e2_1_met": true,
+   "e2_2_met": false,
+   "failing_bins": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
+   ]
+  },
+  {
+   "round": 2,
+   "fit_unit": [
+    0.47495368604288035,
+    0.40184011178873935,
+    0.8747723142758442,
+    0.1808074843841729,
+    0.17356762173152945
+   ],
+   "fit_point": {
+    "D0_cm2_s": 2.9850642692354025e+28,
+    "delta": 0.5009200558943696,
+    "eta": 1.1243169428275328,
+    "V_A_kms": 18.08074843841729,
+    "V_c_kms": 5.207028651945883
+   },
+   "fit_chi2": 0.006413514664162146,
+   "region_candidates": 3082,
+   "picks_estimated_error_max": 3.9699758519577237,
+   "picks_min_distance_to_training": [
+    0.21481292343681607,
+    0.24424489781498673,
+    0.06865330056165271,
+    0.026483811376482036,
+    0.19065094684765815,
+    0.2646938867992043
+   ],
+   "added": [
+    {
+     "point": {
+      "D0_cm2_s": 2.3869677487599876e+28,
+      "V_A_kms": 29.92745637083113,
+      "V_c_kms": 21.981845181823626,
+      "delta": 0.538235339742605,
+      "eta": 1.4975290580873373
+     },
+     "status": "ok",
+     "point_hash": "be05473372213d13d75bd30c5a993b9082e514764918e6268abc084ab778d515",
+     "values_sha256": "5a9932aeeea36f0443166826082e077c98856361ed6b8c7dc2a01fc4e02d49b9",
+     "computational_run_ref": "usine-run-pbe05473372213d13",
+     "role": "round2"
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.7772835073312054e+28,
+      "V_A_kms": 51.30276426892358,
+      "V_c_kms": 18.06481091855284,
+      "delta": 0.5069635645524744,
+      "eta": 1.4365317603196663
+     },
+     "status": "ok",
+     "point_hash": "3c3d16e28f12135613cc1f49c78e0df8e02faabff3614b121f43b2fe599e6425",
+     "values_sha256": "f488eeec30358b6e057a13f7bdc79961497a7e0eda2a021b87efc8e492ca4584",
+     "computational_run_ref": "usine-run-p3c3d16e28f121356",
+     "role": "round2"
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.855077211081942e+28,
+      "V_A_kms": 31.282353215519077,
+      "V_c_kms": 14.731023146003173,
+      "delta": 0.5004784321982663,
+      "eta": 1.4853687573847756
+     },
+     "status": "ok",
+     "point_hash": "ecfb7c74233c6bc6d799e27876cbda74635dc2711e78f1563b4f38df25ba971d",
+     "values_sha256": "5a80ecb868e0737a4a257ea71505986d811adcdd40c9182d16aec0c2dc35c3aa",
+     "computational_run_ref": "usine-run-pecfb7c74233c6bc6",
+     "role": "round2"
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.464364965771905e+28,
+      "V_A_kms": 3.743300609354522,
+      "V_c_kms": 18.439038992591023,
+      "delta": 0.5296889677353114,
+      "eta": 1.4977090253386836
+     },
+     "status": "ok",
+     "point_hash": "2296a86591e8f9b61185a026a93ef5bd4649e651574d0de4dda464130a4763a5",
+     "values_sha256": "1abeedc5b39810a21f825df66ed3b6cd4a33429037befd565fc717018d503f11",
+     "computational_run_ref": "usine-run-p2296a86591e8f9b6",
+     "role": "round2"
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.9367584271713817e+28,
+      "V_A_kms": 49.65391158000346,
+      "V_c_kms": 11.604130797617827,
+      "delta": 0.5047274803549342,
+      "eta": 1.2430728129703343
+     },
+     "status": "ok",
+     "point_hash": "b7b0ed177d65a49c7f37364fef64d45e10e24fda5c90cd6cda02881fae14693c",
+     "values_sha256": "ae62f5c3742536d229d9bdd529b3596bf93191db2e9feb6b1cb798b1cbf49d2e",
+     "computational_run_ref": "usine-run-pb7b0ed177d65a49c",
+     "role": "round2"
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.9471466739078256e+28,
+      "V_A_kms": 2.8399169720905615,
+      "V_c_kms": 0.4102949099499703,
+      "delta": 0.5067341865755672,
+      "eta": 1.2893250361491102
+     },
+     "status": "ok",
+     "point_hash": "ffbae2741bd3e4c76d1d4ff9a305a98375a5c308419d193221204fcc7098339e",
+     "values_sha256": "fab0b103f79d59a161e7e53db90a7a703521f2151b0fbf98e8de1b82e38eec5d",
+     "computational_run_ref": "usine-run-pffbae2741bd3e4c7",
+     "role": "round2"
+    }
+   ],
+   "training_points": 76,
+   "holdout_dchi2_max": 0.22458398533981516,
+   "holdout_dchi2_median": 0.040540843599394,
+   "holdout_pull_max": 1.1816144626745786,
+   "holdout_pull_max_per_bin": [
+    1.1816144626745786,
+    0.803412484206521,
+    0.49679640346189674,
+    0.3763860201324222,
+    0.2752342022658342,
+    0.18277483072689213,
+    0.15418471322843497,
+    0.12377056928078634,
+    0.09745582491328413,
+    0.07678711048001496,
+    0.06076384458840675,
+    0.054078935849793446,
+    0.04815833573128444,
+    0.041972277202250156,
+    0.03605937015924306,
+    0.03047838770620796,
+    0.02651795904586685,
+    0.023508874656689542,
+    0.020651848926925946,
+    0.018079743973522803
+   ],
+   "e2_1_met": true,
+   "e2_2_met": false,
+   "failing_bins": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ]
+  },
+  {
+   "round": 3,
+   "fit_unit": [
+    0.4741876823865186,
+    0.40243049067116865,
+    0.8758647478804089,
+    0.21635656132026246,
+    0.20063217742865475
+   ],
+   "fit_point": {
+    "D0_cm2_s": 2.979803887370618e+28,
+    "delta": 0.5012152453355843,
+    "eta": 1.1275942436412265,
+    "V_A_kms": 21.635656132026245,
+    "V_c_kms": 6.018965322859643
+   },
+   "fit_chi2": 0.004109490169899003,
+   "region_candidates": 3139,
+   "picks_estimated_error_max": 2.373518909576962,
+   "picks_min_distance_to_training": [
+    0.08065261570056109,
+    0.037926214267064086,
+    0.10031989056951775,
+    0.20427323154598914,
+    0.04342570365525481,
+    0.11699385838743881
+   ],
+   "added": []
+  }
+ ],
+ "status": "early-stop-min-distance",
+ "reason": "round 3: every pick lies closer than d_min 0.2231 to a training point (picks not run); best emulator = after round 2 (E2-1 met: True, E2-2 met: False), failing bins [0, 1, 2, 3, 4]",
+ "design": [
+  {
+   "point": {
+    "D0_cm2_s": 4.050656739579517e+28,
+    "V_A_kms": 1.1445693671703339,
+    "V_c_kms": 22.58303658105433,
+    "delta": 0.5743543577380479,
+    "eta": -0.6747359940782189
+   },
+   "status": "ok",
+   "point_hash": "bc8dbd4abec6ac0cef25a90898c96194bc6160cb6e54a897eca130945920e9b4",
+   "values_sha256": "e48c1cbae80ce1c1bb30dde1410e1614ba92a736c298275cffb2baa563234728",
+   "computational_run_ref": "usine-run-pbc8dbd4abec6ac0c",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 1.6809604445495095e+28,
+    "V_A_kms": 84.52409477904439,
+    "V_c_kms": 2.1152387280017138,
+    "delta": 0.4736383340321481,
+    "eta": 0.026356810703873634
+   },
+   "status": "ok",
+   "point_hash": "90fa8a3431dfc6e22fe7cccfe02538d208b0ff56fc81ac4bdecf150372b18871",
+   "values_sha256": "73ef71b8ebeca43627d9c2a4e6af443cca495052a2228ace05a85b82f341e631",
+   "computational_run_ref": "usine-run-p90fa8a3431dfc6e2",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 1.9173870977288359e+28,
+    "V_A_kms": 40.75640710070729,
+    "V_c_kms": 13.311275253072381,
+    "delta": 0.7578487249091268,
+    "eta": -1.2173734735697508
+   },
+   "status": "ok",
+   "point_hash": "0af0eb933fb9cc92e8b2b6a9441ae8c876b3654562b07813e874b9ff60a68f1e",
+   "values_sha256": "bbb6d1b0348c47122804151a77f16988d648fe1bb000d327073af2c99603df88",
+   "computational_run_ref": "usine-run-p0af0eb933fb9cc92",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 8.234514203899236e+28,
+    "V_A_kms": 69.86342296004295,
+    "V_c_kms": 19.12320432253182,
+    "delta": 0.4229560039937496,
+    "eta": 1.0816950565204024
+   },
+   "status": "ok",
+   "point_hash": "3cd55b604419c0d258413c7bb53827f86a9aba21f66c0411feacbbc21655f385",
+   "values_sha256": "f55ac224c2c5afb8e2c82a47cb9dd6b3eaadda5b86adc0a10ec78e535df669da",
+   "computational_run_ref": "usine-run-p3cd55b604419c0d2",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 6.1432623460097145e+28,
+    "V_A_kms": 56.50753593072295,
+    "V_c_kms": 15.73837528936565,
+    "delta": 0.717665864340961,
+    "eta": 0.5636548502370715
+   },
+   "status": "ok",
+   "point_hash": "6f2c97389af5621d085a1b5a1e84cebdabfeded510a440594ba774710c23808f",
+   "values_sha256": "479eb3b87109f04840f89aca4950824827245c10c8eb22cd251b1c398bf9b0b3",
+   "computational_run_ref": "usine-run-p6f2c97389af5621d",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 2.639832557154615e+28,
+    "V_A_kms": 28.96638084203005,
+    "V_c_kms": 9.955750470981002,
+    "delta": 0.3024986211210489,
+    "eta": -0.1371994111686945
+   },
+   "status": "ok",
+   "point_hash": "e5c41db2dbe3e2e91215b61e938c49c80360f5a58d04f6862825db4ba29cd13e",
+   "values_sha256": "a1bcf76b1212e7f5b1589b7952b84f6ffea9ec69b986f7dea5b018fbec2b2b41",
+   "computational_run_ref": "usine-run-pe5c41db2dbe3e2e9",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 1.2640803259267258e+28,
+    "V_A_kms": 97.681831009686,
+    "V_c_kms": 6.4959108363837,
+    "delta": 0.6511602156795562,
+    "eta": 1.2939610462635756
+   },
+   "status": "ok",
+   "point_hash": "790346f5afaa513abce394dd38c8c2cb534cc5fa39b3043096ee3280c2cf6b81",
+   "values_sha256": "19e7f1e33a102945aa5c67e83ad21286e9973dbcc100e2c40f084c305ada39ae",
+   "computational_run_ref": "usine-run-p790346f5afaa513a",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 5.242754091974867e+28,
+    "V_A_kms": 12.743263598531485,
+    "V_c_kms": 26.934419190511107,
+    "delta": 0.501816278975457,
+    "eta": -1.0052065523341298
+   },
+   "status": "ok",
+   "point_hash": "13690930a5a17e70aca2f8ec987dbee5a4a35815f8ff2d76c89f7617bb6b88e9",
+   "values_sha256": "c33ec3739fc36b2850cf29f4315f6800c5e4cd79e34cb0b6cc9d8b303f4b062d",
+   "computational_run_ref": "usine-run-p13690930a5a17e70",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 4.793883472045451e+28,
+    "V_A_kms": 37.15514903888106,
+    "V_c_kms": 0.6053241714835167,
+    "delta": 0.7838127056136728,
+    "eta": 1.4553359728306532
+   },
+   "status": "ok",
+   "point_hash": "3d834e8f5b98422fb662eee879e66de01cc3f61bf36614ce8acc3980ee84c20f",
+   "values_sha256": "797509c65eb8508b75ba25b47cb60f361ea9a42858c3f0a2f0fab0fabb77c025",
+   "computational_run_ref": "usine-run-p3d834e8f5b98422f",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 1.1187350628140366e+28,
+    "V_A_kms": 52.17638332396746,
+    "V_c_kms": 25.26303917169571,
+    "delta": 0.36867597997188567,
+    "eta": -0.8391889007762074
+   },
+   "status": "ok",
+   "point_hash": "0067df9fb986b2c6b918f7bc1dbe7b211753df6b47a085c3c7658136cf5be3ca",
+   "values_sha256": "4c3bfcb1159a89b9a247e048c8600962167310e3a72e0f557975d3bd4423c8d9",
+   "computational_run_ref": "usine-run-p0067df9fb986b2c6",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 3.094671423354068e+28,
+    "V_A_kms": 20.956391282379627,
+    "V_c_kms": 21.098241917788982,
+    "delta": 0.5844640542753041,
+    "eta": 0.40147955249994993
+   },
+   "status": "ok",
+   "point_hash": "43872ca52313ac2a2fc4aa3e5cde0ce64dea8ff3058b1836c9e7f43b35ebd867",
+   "values_sha256": "770eb0ead82447513aa27985d4cdefc89503f339808c0df414f85d08be8ad0cc",
+   "computational_run_ref": "usine-run-p43872ca52313ac2a",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 7.47369277311296e+28,
+    "V_A_kms": 93.42396324500442,
+    "V_c_kms": 12.033910006284714,
+    "delta": 0.4352116703055799,
+    "eta": -0.3038815353065729
+   },
+   "status": "ok",
+   "point_hash": "d98612952e4198243eb0cb62e3034ca104929be33a1327fc6954ef77fe1a7cb4",
+   "values_sha256": "a97921a2bbebb5401cdd52664e9e7f220b7f8621ef5392d7f95937426551b695",
+   "computational_run_ref": "usine-run-pd98612952e419824",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 9.653317741997853e+28,
+    "V_A_kms": 80.21718338131905,
+    "V_c_kms": 7.94780345633626,
+    "delta": 0.6400129363872111,
+    "eta": -1.3796374630182981
+   },
+   "status": "ok",
+   "point_hash": "e5295644be4e97df25feae66a7cad36ec2eb9bc150f373633748497e71fead1a",
+   "values_sha256": "fd36f60d81c6e06814441071306f20c02ddac6adc0387d702382400773f968cb",
+   "computational_run_ref": "usine-run-pe5295644be4e97df",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 2.332633180272963e+28,
+    "V_A_kms": 9.30870296433568,
+    "V_c_kms": 17.041439171880484,
+    "delta": 0.5393274302594364,
+    "eta": 0.9151016240939498
+   },
+   "status": "ok",
+   "point_hash": "5c6f37c8d5fadc2e0aa8f5d622bb63aee340763857ce6d22159d2264736b153a",
+   "values_sha256": "bcbdda1fe3cc5a1dd98143a64a6e6ca43a3399069c32238456be4b7fb2ff3f46",
+   "computational_run_ref": "usine-run-p5c6f37c8d5fadc2e",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 1.5370428620850144e+28,
+    "V_A_kms": 65.58098020032048,
+    "V_c_kms": 28.470018077641726,
+    "delta": 0.6906642710790039,
+    "eta": -0.5130892703309655
+   },
+   "status": "ok",
+   "point_hash": "dfba5cd129474e5311cc09e9ebb17b47163a039af32223c0a222f5ef1aa3a48c",
+   "values_sha256": "a2a5df66c7509b150ff22659dc7fe1667b86b0a63c2b1683f040eb8acb551344",
+   "computational_run_ref": "usine-run-pdfba5cd129474e53",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 3.584912036293754e+28,
+    "V_A_kms": 48.99374023079872,
+    "V_c_kms": 3.783013131469488,
+    "delta": 0.35586310289800166,
+    "eta": 0.19210266508162022
+   },
+   "status": "ok",
+   "point_hash": "3be5f5e6caf78622c303bca6b3f7121cc81af140efb272d29f73af785ab7fc80",
+   "values_sha256": "300489b0c729ac6656228995aae5dc1847b077b063452606743c94e46401a1f3",
+   "computational_run_ref": "usine-run-p3be5f5e6caf78622",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 3.253348844701935e+28,
+    "V_A_kms": 93.93727639690042,
+    "V_c_kms": 19.867435125634074,
+    "delta": 0.6779778829775751,
+    "eta": -0.8956238524988294
+   },
+   "status": "ok",
+   "point_hash": "339149043a07f70a0b8135da6aba0057744e101a69798a35de0f23a734403dff",
+   "values_sha256": "dafac3d8e05b419b22ada8431ab3fbf5f8531028e7ab83c913cadd3bd811780c",
+   "computational_run_ref": "usine-run-p339149043a07f70a",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 1.3463713730460091e+28,
+    "V_A_kms": 16.78021438419819,
+    "V_c_kms": 14.436366548761725,
+    "delta": 0.3412092846818268,
+    "eta": 1.403372397646308
+   },
+   "status": "ok",
+   "point_hash": "9947af59e58e06367d050ecfc85f019dcb7b4c4a41fdc03389ce31cf0e29c0df",
+   "values_sha256": "89ffae04b1c897ae9d5d43012fb307954f42ebe1f3c3558a740fc65c6ad18a9e",
+   "computational_run_ref": "usine-run-p9947af59e58e0636",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 2.071022010043664e+28,
+    "V_A_kms": 60.45341081917286,
+    "V_c_kms": 2.890596566721797,
+    "delta": 0.6273112885653973,
+    "eta": -0.21235859580338
+   },
+   "status": "ok",
+   "point_hash": "8bd0c8cbeeace873d4d358b77c687b96d9d61d1c081cfca3c59941a4c03ff7b7",
+   "values_sha256": "863ac5b30033016b0e1579eda183c9a50ddb6c5d99ab0a2389d08dad9e905c31",
+   "computational_run_ref": "usine-run-p8bd0c8cbeeace873",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 8.879491711635902e+28,
+    "V_A_kms": 25.117589626461267,
+    "V_c_kms": 23.68065937422216,
+    "delta": 0.5246888699010015,
+    "eta": 0.4886676399037242
+   },
+   "status": "ok",
+   "point_hash": "6e39f8cc11c2c4884fa1e4db3e8a156051783e6690f55eb39b9df0a11a3bde02",
+   "values_sha256": "60817bb1ac1fb7b38cf79c283dc61af4f3452eadbe58ef968805a977e3b90308",
+   "computational_run_ref": "usine-run-p6e39f8cc11c2c488",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 6.580712484300505e+28,
+    "V_A_kms": 38.37341349571943,
+    "V_c_kms": 28.059752667322755,
+    "delta": 0.5971663866192103,
+    "eta": 0.8192075779661536
+   },
+   "status": "ok",
+   "point_hash": "03d42d258da30176ba58b9af5b806846c2eef565cb265c73feacfd255e836bee",
+   "values_sha256": "a60e2b36981990487e73df7f7823bc9bc9bde9a0fdbd4b8adf27b6e4aeeb43c7",
+   "computational_run_ref": "usine-run-p03d42d258da30176",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 2.819922438868517e+28,
+    "V_A_kms": 72.14933289214969,
+    "V_c_kms": 7.240386055782437,
+    "delta": 0.44984900783747434,
+    "eta": -1.4800322111696005
+   },
+   "status": "ok",
+   "point_hash": "ff004cf08c26a5e20b316e0cf6dcff5a4158b2d6b16c2630aa750f1ba8024131",
+   "values_sha256": "968b7d70790a8224551a420b3e582d19d0f6242ada2b189165b096897903800c",
+   "computational_run_ref": "usine-run-pff004cf08c26a5e2",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 1.024007160403895e+28,
+    "V_A_kms": 3.327005635946989,
+    "V_c_kms": 11.053617233410478,
+    "delta": 0.796499780099839,
+    "eta": 0.3232677150517702
+   },
+   "status": "ok",
+   "point_hash": "70aad748014350be47b71340470ec9d6866d8a8cb0234d683116d0b95628404a",
+   "values_sha256": "80d0e398938877a1d65d39133d06dbd197e05964525824ba848b6f5377030615",
+   "computational_run_ref": "usine-run-p70aad748014350be",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 4.240121230004508e+28,
+    "V_A_kms": 82.04926233738661,
+    "V_c_kms": 16.51397575624287,
+    "delta": 0.3833285772241652,
+    "eta": -0.377653026022017
+   },
+   "status": "ok",
+   "point_hash": "de258eb6a27bc4d8678b313f2ab2312a96e8bba7f7e38ce0660a110eb00bc36e",
+   "values_sha256": "b8e39a0072de40a21113b85deaad4112fd9a3de6353ce00262b25727a8fb0814",
+   "computational_run_ref": "usine-run-pde258eb6a27bc4d8",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 5.183100715827247e+28,
+    "V_A_kms": 67.78773497790098,
+    "V_c_kms": 12.666406128555536,
+    "delta": 0.663832026720047,
+    "eta": 0.11492909677326679
+   },
+   "status": "ok",
+   "point_hash": "8bc30312a60145c040b6c7d5d4bec586f5c34692580fce366515cc482a1e3ba3",
+   "values_sha256": "4efbd13c0898b4bc237aeb754239aaee4e2990c1754cec56b55dbb72781f0b90",
+   "computational_run_ref": "usine-run-p8bc30312a60145c0",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 1.2061917470965286e+28,
+    "V_A_kms": 46.49497075006366,
+    "V_c_kms": 22.34597308561206,
+    "delta": 0.5164841303601861,
+    "eta": -0.5904569858685136
+   },
+   "status": "ok",
+   "point_hash": "c1e2b7caea83fcae4fcf838b015f444279d37093dabf2097a216d8fc061c8fcb",
+   "values_sha256": "199c9cdb192276301c54ab11148cf1ee1290ad67ec3848540b61bbfbd8dee21f",
+   "computational_run_ref": "usine-run-pc1e2b7caea83fcae",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 2.4851847864826305e+28,
+    "V_A_kms": 77.80968053266406,
+    "V_c_kms": 25.922996643930674,
+    "delta": 0.730383452679962,
+    "eta": 1.028163461945951
+   },
+   "status": "ok",
+   "point_hash": "3120cc9c49bae0c761ac3a8a6425212ebb7015190a9ac874f09812e76f599526",
+   "values_sha256": "aa584d6dbf3d285e6d2c2714cb57a49b2ece93220b277d6f9e36ad07926bc5ac",
+   "computational_run_ref": "usine-run-p3120cc9c49bae0c7",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 5.991972992119866e+28,
+    "V_A_kms": 11.619503609836102,
+    "V_c_kms": 1.8219211511313915,
+    "delta": 0.31712069706991314,
+    "eta": -1.2663806732743979
+   },
+   "status": "ok",
+   "point_hash": "81312eaf800de5e7dddc043ddc3734be76cdb8f115dc83e0fb0580c5f9632856",
+   "values_sha256": "c96085290cfa7aed20d09a65d4d522d640abc9539ac39766a56d0bf8af4336c5",
+   "computational_run_ref": "usine-run-p81312eaf800de5e7",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 7.825464281115854e+28,
+    "V_A_kms": 24.926012847572565,
+    "V_c_kms": 5.030958093702793,
+    "delta": 0.7451318229548634,
+    "eta": -0.0031251925975084305
+   },
+   "status": "ok",
+   "point_hash": "59f5430f068995c6f719afabdce940fffadb8adeead88756fef4634a00e0ac06",
+   "values_sha256": "ab3afa16fa7c34316d0c379317dd0fbabd5ec7e8de9ff80b6c7b0a2b8df6d519",
+   "computational_run_ref": "usine-run-p59f5430f068995c6",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 1.8857414366116886e+28,
+    "V_A_kms": 89.55104388296604,
+    "V_c_kms": 29.102729335427284,
+    "delta": 0.40833270708099006,
+    "eta": 0.7020416585728526
+   },
+   "status": "ok",
+   "point_hash": "6f24602463af3b4daa19c2ea61b57b0b21efe3422cac5ff356e4ec45c3969687",
+   "values_sha256": "7f4f1adcd7fc084b8d04b000f90b3ec8558f2bc190718d040966375bfb6b85a7",
+   "computational_run_ref": "usine-run-p6f24602463af3b4d",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 1.6457986909138077e+28,
+    "V_A_kms": 33.385512605309486,
+    "V_c_kms": 18.25825173407793,
+    "delta": 0.5616832312196494,
+    "eta": -1.104056884534657
+   },
+   "status": "ok",
+   "point_hash": "2bf2b8f9cb24f4af1a4949244d19c06e24220d64c800e8a533b0d2059fd4cb17",
+   "values_sha256": "c62fa5876ee8692490a2d453d14da2c659e1dc52b9a509fa8b21e975bef456c3",
+   "computational_run_ref": "usine-run-p2bf2b8f9cb24f4af",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 3.8321671812939033e+28,
+    "V_A_kms": 56.2380344606936,
+    "V_c_kms": 8.607974275946617,
+    "delta": 0.4589692598208785,
+    "eta": 1.1906628515571356
+   },
+   "status": "ok",
+   "point_hash": "fc1455ff7babd3213b9994e8562eae930ce2115d175de98b42d4368579f08777",
+   "values_sha256": "bff2b59f9abb77703dedf3a7ccb2631a92e98523370b3ddc84b8171970e17ec7",
+   "computational_run_ref": "usine-run-pfc1455ff7babd321",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 3.731447976260765e+28,
+    "V_A_kms": 83.82649794220924,
+    "V_c_kms": 26.28753743134439,
+    "delta": 0.7634766033850611,
+    "eta": 0.44112261570990086
+   },
+   "status": "ok",
+   "point_hash": "cd5c543cc187ad63f11228acb5f2fce260392421ed407eec7a19bb0adda504df",
+   "values_sha256": "db8e3846871a7c0cd26b1442e4f8a09a8870264421a0dc6a3f665776b7557f6f",
+   "computational_run_ref": "usine-run-pcd5c543cc187ad63",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 1.5450423801942306e+28,
+    "V_A_kms": 4.72283186390996,
+    "V_c_kms": 5.967253698036075,
+    "delta": 0.4129454714246094,
+    "eta": -0.35194742772728205
+   },
+   "status": "ok",
+   "point_hash": "69df074b043716372522982c0c98424ac4b20733656da2d2dab6049fb9f774e1",
+   "values_sha256": "3e2b54c8e3b5734cee4a027298402c5691e9e676723355c54b77af784ecfab7e",
+   "computational_run_ref": "usine-run-p69df074b04371637",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 1.806486712476039e+28,
+    "V_A_kms": 73.4871638007462,
+    "V_c_kms": 9.544161027297378,
+    "delta": 0.5722151093184948,
+    "eta": 1.4512139623984694
+   },
+   "status": "ok",
+   "point_hash": "96607b7f0237873329886e71c31520b372e3efdb16e3fcfdcf5630ede0a6cdda",
+   "values_sha256": "2db28b706482e2675e78c5e3a69932af9666596e8853338e3e6e7d1f0be6eeff",
+   "computational_run_ref": "usine-run-p96607b7f02378733",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 7.740679998624189e+28,
+    "V_A_kms": 40.110988169908524,
+    "V_c_kms": 15.443179411813617,
+    "delta": 0.48701900262385606,
+    "eta": -0.7555990945547819
+   },
+   "status": "ok",
+   "point_hash": "59c689adfc49a99a74d2d3bab67e54489f8c0a077557958a3007c6ffc577eaad",
+   "values_sha256": "8d7c2ecfbf2fbf73688d1d9deb70a61279975b8f1a1346bd5bf3a8638e47181e",
+   "computational_run_ref": "usine-run-p59c689adfc49a99a",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 5.6338468514157695e+28,
+    "V_A_kms": 26.901752408593893,
+    "V_c_kms": 19.53112450428307,
+    "delta": 0.6533682320266962,
+    "eta": -0.5177577529102564
+   },
+   "status": "ok",
+   "point_hash": "5b0b20805de368d2d28f8c74eb32a01d254ed4291035618a9beda298cc094d2a",
+   "values_sha256": "7295ed58bbffb13ab12c1939bedf36ac0a59dc96e3dcc8d0e27b3a65d6f8348d",
+   "computational_run_ref": "usine-run-p5b0b20805de368d2",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 2.4154500107300813e+28,
+    "V_A_kms": 61.84383649379015,
+    "V_c_kms": 13.602816173806787,
+    "delta": 0.48838206958025693,
+    "eta": 0.2755064768716693
+   },
+   "status": "ok",
+   "point_hash": "03e8bb701187583693e39e1aed3c280bed338c5fd3942e83bfa5e538f69b6c67",
+   "values_sha256": "d584a69ac11eb7b70e5a0c0fdde27f37ead28ad7c29d0c48e0fe622c05800a92",
+   "computational_run_ref": "usine-run-p03e8bb7011875836",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 1.196312563133387e+28,
+    "V_A_kms": 18.124875612556934,
+    "V_c_kms": 2.7584512252360582,
+    "delta": 0.7121067258529366,
+    "eta": -1.3401803942397237
+   },
+   "status": "ok",
+   "point_hash": "464fd6a93c09e3fd5e721c3afc117820ea4b5e40f99a490b74fb87328bb85e8d",
+   "values_sha256": "abb3a5b4dedd84787d0d97e2c1c96325a4dfa6bbdd7c55572929df15d6bdfbf5",
+   "computational_run_ref": "usine-run-p464fd6a93c09e3fd",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 4.950634848251872e+28,
+    "V_A_kms": 95.66954737529159,
+    "V_c_kms": 23.10803876258433,
+    "delta": 0.3124555849470198,
+    "eta": 0.8664892595261335
+   },
+   "status": "ok",
+   "point_hash": "c9d98adce68e2816a354b79a8341ec3959e67bd1f3a76ba4dfb23272f286e2fa",
+   "values_sha256": "8cf28663b7b8018036b47288109fc017d5b0dd8394ab64d74db458989cca572f",
+   "computational_run_ref": "usine-run-pc9d98adce68e2816",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 4.516612182787216e+28,
+    "V_A_kms": 54.46079885587096,
+    "V_c_kms": 4.429887738078833,
+    "delta": 0.593965756893158,
+    "eta": -1.1253608437255025
+   },
+   "status": "ok",
+   "point_hash": "258e458d819b9db73380336dc2b1d27a4e7a255c465ca19a1b67653367177d1b",
+   "values_sha256": "4e470f68e87f0e84b885fe71739f8331593feed3bce5c3c675b71000281d71d7",
+   "computational_run_ref": "usine-run-p258e458d819b9db7",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 1.0516422437328182e+28,
+    "V_A_kms": 31.989686377346516,
+    "V_c_kms": 28.998682368546724,
+    "delta": 0.4291321823373437,
+    "eta": 1.0742771308869123
+   },
+   "status": "ok",
+   "point_hash": "1e6e8b17d2bec9ebee92a44c4bd7776a45b0f18bfb01b58893e1aa45a7b250b9",
+   "values_sha256": "a57bba6df9eb2974efbc3682d43f18391a6c56a26ea098ab716daff7f7fbdebe",
+   "computational_run_ref": "usine-run-p1e6e8b17d2bec9eb",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 2.850797535455667e+28,
+    "V_A_kms": 88.21321297436953,
+    "V_c_kms": 17.453021463006735,
+    "delta": 0.7698612480424345,
+    "eta": -0.7319571767002344
+   },
+   "status": "ok",
+   "point_hash": "434abf78050814de47f3b237fd6183c68c77474cd5d73cd09dde6f752e3d3083",
+   "values_sha256": "9a88b45835253a80ed616d24e62914ea4500c64829cd29bf86417b137fccf5cf",
+   "computational_run_ref": "usine-run-p434abf78050814de",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 6.869391411339109e+28,
+    "V_A_kms": 23.188438173383474,
+    "V_c_kms": 8.243006486445665,
+    "delta": 0.37042373018339275,
+    "eta": 0.06856332253664732
+   },
+   "status": "ok",
+   "point_hash": "a749d266f40fb4b47ab36f90b3b37186e9c588c8ba8ea193f3fbecabbcb36280",
+   "values_sha256": "c7ddb60a95edc6a2dbb8d40219cd75b320ef2ac4fa2161adafca1a996a658c58",
+   "computational_run_ref": "usine-run-pa749d266f40fb4b4",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 9.13580772008348e+28,
+    "V_A_kms": 9.835340827703476,
+    "V_c_kms": 11.62598267197609,
+    "delta": 0.7045624281279743,
+    "eta": 1.2369258468970656
+   },
+   "status": "ok",
+   "point_hash": "eb35904b5f8e392bc93b228a07b3b94c6afd63f358764f43a82610d5c7854933",
+   "values_sha256": "c14d146caa036e4f827a3db136b9aa71212b30558fb26a557fc286b9d80231a3",
+   "computational_run_ref": "usine-run-peb35904b5f8e392b",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 2.202660166476366e+28,
+    "V_A_kms": 76.41925485804677,
+    "V_c_kms": 20.80670814961195,
+    "delta": 0.35418388405814766,
+    "eta": -0.9624535571783781
+   },
+   "status": "ok",
+   "point_hash": "57bef90c667e43f38639b7d7050f529dbeacbc39a82a385c19bcbda45c6b15cd",
+   "values_sha256": "4bcf7fc53184551d499ab5545b5ae46b64594b46e6d8ac6c18f4939382a24bb7",
+   "computational_run_ref": "usine-run-p57bef90c667e43f3",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 1.4095868325957894e+28,
+    "V_A_kms": 45.15030952170491,
+    "V_c_kms": 24.61981952190399,
+    "delta": 0.6304579015821219,
+    "eta": 0.6562139634042978
+   },
+   "status": "ok",
+   "point_hash": "e261230b6efd41a87b4bb920a288d119286904e8f127185acbf8b64d351dd378",
+   "values_sha256": "41574273cc8959f00ed23c5cd6766b93df8c95a71f241f59904ec2b9e4decd1d",
+   "computational_run_ref": "usine-run-pe261230b6efd41a8",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 3.280199787640709e+28,
+    "V_A_kms": 66.05546399950981,
+    "V_c_kms": 0.08032914251089096,
+    "delta": 0.5454754179343582,
+    "eta": -0.14443135354667902
+   },
+   "status": "ok",
+   "point_hash": "17d315456253e7e1615377007c298908c6f2ffe30c8c4fa88a5e723669d16cdd",
+   "values_sha256": "68230b30e9e966792da831005f1434e95607523de7db6bf17d2413a6355fc793",
+   "computational_run_ref": "usine-run-p17d315456253e7e1",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 3.484334955786232e+28,
+    "V_A_kms": 14.081057999283075,
+    "V_c_kms": 16.105252699926496,
+    "delta": 0.6138633859343827,
+    "eta": 0.9416482653468847
+   },
+   "status": "ok",
+   "point_hash": "af9165f9f90c5027968c242af84b8a3bc6094f5f430da0be2431939fec6fcef6",
+   "values_sha256": "7eb6e4dcfba3c6fb3b1f9e35d563f252893a916f98a5c40bb1e2f268f6ec4646",
+   "computational_run_ref": "usine-run-paf9165f9f90c5027",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 1.44518337357231e+28,
+    "V_A_kms": 99.41944219172001,
+    "V_c_kms": 10.76287561096251,
+    "delta": 0.5269096574746073,
+    "eta": -1.2651926474645734
+   },
+   "status": "ok",
+   "point_hash": "1e0c06607b9aca5f831479b6acee4fba07d9a57a3fdaf92d0065c3519e647ca9",
+   "values_sha256": "99631321aa9ca11ebfab3f0b4af6ba129c94eb4dc018e5910d805208bf55ab67",
+   "computational_run_ref": "usine-run-p1e0c06607b9aca5f",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 2.228020822126529e+28,
+    "V_A_kms": 30.74367679655552,
+    "V_c_kms": 6.598205314949155,
+    "delta": 0.6879526527598501,
+    "eta": 0.16592324059456587
+   },
+   "status": "ok",
+   "point_hash": "e9fcb640ea3108f32e413f942d4a959c63d19ae6b4208b075585f77850aebaf7",
+   "values_sha256": "875b5e305ecfc021ff81b61bf7b987c631e1493d11330e4bee6c721b06ad51a0",
+   "computational_run_ref": "usine-run-pe9fcb640ea3108f3",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 9.574303212514143e+28,
+    "V_A_kms": 57.90330180898309,
+    "V_c_kms": 27.53372230567038,
+    "delta": 0.3356333814561367,
+    "eta": -0.6271689254790545
+   },
+   "status": "ok",
+   "point_hash": "841afcdf410d336d8968ca11339ad12daefec150dc63b8136f8906f71c5c4a8e",
+   "values_sha256": "38f8402fe6b230d58b2e669d296cc0979514c242a86a5400933480f45d4e178a",
+   "computational_run_ref": "usine-run-p841afcdf410d336d",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 7.016183703213988e+28,
+    "V_A_kms": 71.20812069624662,
+    "V_c_kms": 24.326509376987815,
+    "delta": 0.7864717675372959,
+    "eta": -1.0525105353444815
+   },
+   "status": "ok",
+   "point_hash": "92b09f45fda71637858b9cccfce0ea95d6798bbee3606f5a03569e3ee37efc20",
+   "values_sha256": "a6b4284c923f9a5e51d9cb5c45672e2f537a3d4a09f26df55753c6f3a84c6246",
+   "computational_run_ref": "usine-run-p92b09f45fda71637",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 3.0133479097114325e+28,
+    "V_A_kms": 42.48864157125354,
+    "V_c_kms": 3.420281885191798,
+    "delta": 0.388973069563508,
+    "eta": 1.1541311731562018
+   },
+   "status": "ok",
+   "point_hash": "5743086a6e104d9eca9cef4493ca99600d032163bd1dcdf636ccea2ba9db1ef9",
+   "values_sha256": "e3f013fa577c0aeb560350b13bfb2cfe6482534b84dfc7f3f97d38e965b13a97",
+   "computational_run_ref": "usine-run-p5743086a6e104d9e",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 1.1066181781249984e+28,
+    "V_A_kms": 86.30819721147418,
+    "V_c_kms": 14.848758867010474,
+    "delta": 0.6105610185302794,
+    "eta": -0.08946012798696756
+   },
+   "status": "ok",
+   "point_hash": "4ea015c5e8e62344ff3623e63a4f748a9a24832abc5c4dfba32fa50bcec6cff0",
+   "values_sha256": "f8aaa9b3c0da6f23f075cc1057c774aa6c76b4b9807ecc0518ca7c0deab8aacf",
+   "computational_run_ref": "usine-run-p4ea015c5e8e62344",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 4.5924280976968835e+28,
+    "V_A_kms": 2.5350553914904594,
+    "V_c_kms": 20.16183170489967,
+    "delta": 0.447696781437844,
+    "eta": 0.7037818897515535
+   },
+   "status": "ok",
+   "point_hash": "a0c1c51c8f761e81cd8783e5f78b9efa9dcc49902de3c900cda2454a4d4b5554",
+   "values_sha256": "eda7fb76872a6617b4eb39f8eac2ecebccc0211f7ce481543935f5132d30bd4b",
+   "computational_run_ref": "usine-run-pa0c1c51c8f761e81",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 5.576022742155324e+28,
+    "V_A_kms": 47.65594583004713,
+    "V_c_kms": 9.016704484820366,
+    "delta": 0.7286867240443826,
+    "eta": -0.25749337021261454
+   },
+   "status": "ok",
+   "point_hash": "aed6c9c9de5ac913f7f73ed7d23e071af9580a9a6498e70feda1a13e397a594c",
+   "values_sha256": "8f7b14fbad3de4d873ec6d2239c22c2c2a921964f33e86299cbf663ffb79bb11",
+   "computational_run_ref": "usine-run-paed6c9c9de5ac913",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 1.3005739950432807e+28,
+    "V_A_kms": 63.84336901828647,
+    "V_c_kms": 18.548986203968525,
+    "delta": 0.3310354381799698,
+    "eta": 0.5429577101022005
+   },
+   "status": "ok",
+   "point_hash": "4bd0ba4345282d747f6b113df0bd507ce1e117f3073aa366d89aaae858f4c2bd",
+   "values_sha256": "5293e5cb21ce8dd5eb6b6607753f4744a2b95a198cb900230811af5ab74f5c10",
+   "computational_run_ref": "usine-run-p4bd0ba4345282d74",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 2.6616309100596995e+28,
+    "V_A_kms": 7.531407009810209,
+    "V_c_kms": 29.74491722881794,
+    "delta": 0.6699940075166524,
+    "eta": -0.8852805253118277
+   },
+   "status": "ok",
+   "point_hash": "4ac6473cf20da67aef9b1cad2d7759d843be58baba3c1f152a670763d0a59ff8",
+   "values_sha256": "6bf7d68477a9e3cb04cba88346291876b6e0efc608a9ef5db1568123e36c247e",
+   "computational_run_ref": "usine-run-p4ac6473cf20da67a",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 6.43173369057692e+28,
+    "V_A_kms": 78.82141750305891,
+    "V_c_kms": 5.556981302797794,
+    "delta": 0.506916147377342,
+    "eta": 1.314293741248548
+   },
+   "status": "ok",
+   "point_hash": "d9bda8b2d7a80466cdca31b628bb7511fcb8fa7f2d940c635da254875b7aa0f4",
+   "values_sha256": "b0b6feb57a4dbb3feb5f539a4b37e41517687047f5ae1ced3e898dda301cdeda",
+   "computational_run_ref": "usine-run-pd9bda8b2d7a80466",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 8.456784768391834e+28,
+    "V_A_kms": 92.07926550880075,
+    "V_c_kms": 1.176078300923109,
+    "delta": 0.555590079817921,
+    "eta": 0.3334307698532939
+   },
+   "status": "ok",
+   "point_hash": "d3fad6e3e6051c8cd5f088dfcb78377c989aeca0f183eb6a40af580d7ad188d7",
+   "values_sha256": "44da2b0a09d81ea1dfe776710ff038dc4c88364684d0618b0a505a3ece326b6f",
+   "computational_run_ref": "usine-run-pd3fad6e3e6051c8c",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 2.042423873605567e+28,
+    "V_A_kms": 19.22415681183338,
+    "V_c_kms": 25.3933041729033,
+    "delta": 0.46848376346752046,
+    "eta": -0.4672838766127825
+   },
+   "status": "ok",
+   "point_hash": "103ffe4e165c5ea8770a7d2d489e587b6ace026970341bf7c95cdac72da32223",
+   "values_sha256": "8feb267946c8157879ec6671b7e9b8cb9d00d20f4b0c7317fb79f75b04da8bf0",
+   "computational_run_ref": "usine-run-p103ffe4e165c5ea8",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 1.7547070795018268e+28,
+    "V_A_kms": 50.392280891537666,
+    "V_c_kms": 21.933587919920683,
+    "delta": 0.7468973493203521,
+    "eta": 0.7735206093639135
+   },
+   "status": "ok",
+   "point_hash": "b4ef5fb3912437b192b5efc826b8a64b1f77562f28d3a673cc1cce4b03d80a1b",
+   "values_sha256": "83d1c65684fbd81a87bb6ce111e53c53082d409f152b70e1d74997caa6271041",
+   "computational_run_ref": "usine-run-pb4ef5fb3912437b1",
+   "role": "design"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 4.095026152478326e+28,
+    "V_A_kms": 35.76466301456094,
+    "V_c_kms": 12.372002396732569,
+    "delta": 0.39436445496976374,
+    "eta": -1.4259224133566022
+   },
+   "status": "ok",
+   "point_hash": "ca3eacaca50e990425b32fb57cc68d9e9b0a400268d5700f942f74f8881992e8",
+   "values_sha256": "5db1f1622223cdbe2bf7c85a6c3fbea9e51971119287a05450584b0b8d2fb870",
+   "computational_run_ref": "usine-run-pca3eacaca50e9904",
+   "role": "design"
+  }
+ ],
+ "design_failures": {
+  "count": 0,
+  "fraction": 0.0,
+  "limit": 0.05
+ },
+ "truth": {
+  "point": {
+   "D0_cm2_s": 3e+28,
+   "V_A_kms": 30.0,
+   "V_c_kms": 5.0,
+   "delta": 0.5,
+   "eta": 1.0
+  },
+  "status": "ok",
+  "point_hash": "bb512e6ce0763ef3f937acc6fc91620423c4f9606a1e437a76bbc4b7779b139c",
+  "values_sha256": "ca9df0917fefd17ef403a32478f959f085ec4fddb4bd40c72ff96c0163d9d532",
+  "computational_run_ref": "usine-run-pbb512e6ce0763ef3",
+  "role": "truth"
+ },
+ "holdout_region_candidates": 2591,
+ "holdout": [
+  {
+   "point": {
+    "D0_cm2_s": 3.0746645598181887e+28,
+    "V_A_kms": 38.79237030158883,
+    "V_c_kms": 0.9694154476630766,
+    "delta": 0.4926485942313982,
+    "eta": 0.5861996196042556
+   },
+   "status": "ok",
+   "point_hash": "c5e1d69b5884e7f731b5c21002166bc985ae517a664786e67e383eab48fcfaa6",
+   "values_sha256": "9cb7d67b7c17bade68adf355c1aa009824207c7da2906f6977be2d3be7c2b2cc",
+   "computational_run_ref": "usine-run-pc5e1d69b5884e7f7",
+   "role": "holdout"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 2.770598965490537e+28,
+    "V_A_kms": 28.82201156972676,
+    "V_c_kms": 7.388092722513109,
+    "delta": 0.5181418133491152,
+    "eta": 0.6501166273516779
+   },
+   "status": "ok",
+   "point_hash": "18e5dbfcb94ef0cef9dc05f523ad2a006b2e2c4b2b81fd92bff6cdf34b6bd415",
+   "values_sha256": "83d49e48e872cae68760b75656373b141971beeb5f3fcce1765868ed77a33a2c",
+   "computational_run_ref": "usine-run-p18e5dbfcb94ef0ce",
+   "role": "holdout"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 2.83241364553021e+28,
+    "V_A_kms": 33.29569172135888,
+    "V_c_kms": 10.979769104809076,
+    "delta": 0.5075997419816914,
+    "eta": 1.0107242387563815
+   },
+   "status": "ok",
+   "point_hash": "0485896e1db0473c49542a36707727ac53f1b45c6594fb5862b44e6438a06a4b",
+   "values_sha256": "c2645a706ee5f26322d9abbdc0363cbb1682821c4464388d1d5ef66097c8f53e",
+   "computational_run_ref": "usine-run-p0485896e1db0473c",
+   "role": "holdout"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 3.005899259595965e+28,
+    "V_A_kms": 14.873925427379254,
+    "V_c_kms": 2.8030085635276127,
+    "delta": 0.4999103422717194,
+    "eta": 0.8203556413625162
+   },
+   "status": "ok",
+   "point_hash": "7f785c313f20cbe08f55565b2d938455bd4b6eefa4f6d2d1633ecf4cdde01348",
+   "values_sha256": "f0fd8cae15fdfdf704363544f1b8c3a9aa10e514d5a114c82549e2efa8d3b8fe",
+   "computational_run_ref": "usine-run-p7f785c313f20cbe0",
+   "role": "holdout"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 2.714332043770688e+28,
+    "V_A_kms": 5.957967275174561,
+    "V_c_kms": 13.994120383382649,
+    "delta": 0.5098472511169929,
+    "eta": 1.2520118650109464
+   },
+   "status": "ok",
+   "point_hash": "cea9adfa5697a8faf2639d52bfa31718dc2ace08836c4e65a9d6a3263e68e566",
+   "values_sha256": "bc6b868b11dd1f4c57e0a9d5a80c8e4a80b8aab301a4d8c37f3f22398c6ff7a5",
+   "computational_run_ref": "usine-run-pcea9adfa5697a8fa",
+   "role": "holdout"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 2.899282691910375e+28,
+    "V_A_kms": 29.29420516004349,
+    "V_c_kms": 6.488227879783657,
+    "delta": 0.5075324730423905,
+    "eta": 0.7049073032985866
+   },
+   "status": "ok",
+   "point_hash": "6b0d8b20ca77de813e1b3bddf093e3be3f6975f3b08dd5402bd5e147ca9732ec",
+   "values_sha256": "39c8d997cb925a38355953cf264c5d5649e13b3b026cd368d11c996c14d71f29",
+   "computational_run_ref": "usine-run-p6b0d8b20ca77de81",
+   "role": "holdout"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 2.648938483400691e+28,
+    "V_A_kms": 26.898003116333356,
+    "V_c_kms": 8.209298627741031,
+    "delta": 0.5209189369491677,
+    "eta": 0.6422006499399786
+   },
+   "status": "ok",
+   "point_hash": "1fa9e1f9837245d61d30884ff428342812faf9d013a8163e0c454b1bb5fe85bb",
+   "values_sha256": "935e1eaaed8c6939de2d5a3f4d31db8cc05cca7f470aa46c7ec9060ec3da9751",
+   "computational_run_ref": "usine-run-p1fa9e1f9837245d6",
+   "role": "holdout"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 3.208518875090099e+28,
+    "V_A_kms": 28.145251471245135,
+    "V_c_kms": 2.6394838434581014,
+    "delta": 0.4843852400157058,
+    "eta": 0.8127097944674704
+   },
+   "status": "ok",
+   "point_hash": "8e10687c8dd471df862a0eb7b283dbf4315deeaa223f1b183641cbb030f88e25",
+   "values_sha256": "8ecc7b6f0c592143b05df432b95897e8b9989eb2426d7f8bfdb8a4597b89eadd",
+   "computational_run_ref": "usine-run-p8e10687c8dd471df",
+   "role": "holdout"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 2.738467620139722e+28,
+    "V_A_kms": 1.3151882387403737,
+    "V_c_kms": 6.570718422022966,
+    "delta": 0.5217362611766369,
+    "eta": 1.1584277175667967
+   },
+   "status": "ok",
+   "point_hash": "60563e73f71442e8c9ab76934dc5a7673c372f686788d749eb62eb9871856e09",
+   "values_sha256": "9298bba8f0475e4c5c3ad81a43e1b0b5c87b024656dd2c1e7f00412b791d3506",
+   "computational_run_ref": "usine-run-p60563e73f71442e8",
+   "role": "holdout"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 3.0210653061515908e+28,
+    "V_A_kms": 46.745932459977446,
+    "V_c_kms": 12.019923674011578,
+    "delta": 0.5009816307105796,
+    "eta": 1.1192576276193638
+   },
+   "status": "ok",
+   "point_hash": "66a9f6397b5719b4b3af8fdd872364c41d5ad182c4bd9803d5e27ff0325ac7bb",
+   "values_sha256": "30463b46c7e79a4629ec1b15df3930af749f32b3d87fe94444052c75d7cd9888",
+   "computational_run_ref": "usine-run-p66a9f6397b5719b4",
+   "role": "holdout"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 2.824205312896937e+28,
+    "V_A_kms": 28.153926583968737,
+    "V_c_kms": 6.408979243453167,
+    "delta": 0.5126350319069114,
+    "eta": 0.8923518045889365
+   },
+   "status": "ok",
+   "point_hash": "8bc89db4815cd6d13aead7fba5c387eeb646cf39c1adede41469a36887720c1c",
+   "values_sha256": "eef96f44eee32c46dc3ec4a147258ccc7980783bac5a79932251c11ff6c12f78",
+   "computational_run_ref": "usine-run-p8bc89db4815cd6d1",
+   "role": "holdout"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 3.31642995519006e+28,
+    "V_A_kms": 39.152021051263276,
+    "V_c_kms": 5.72990921635889,
+    "delta": 0.47636272512858885,
+    "eta": 1.0142338714561463
+   },
+   "status": "ok",
+   "point_hash": "ffecc552fa6be1846691779c391d4f472071fb385b4dcc68c428812068b3f2ae",
+   "values_sha256": "cd3cdedbc6ff65da3af27ec161c144f85efb8b93aaeb57071d4e3ec748e96c0e",
+   "computational_run_ref": "usine-run-pffecc552fa6be184",
+   "role": "holdout"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 2.500326909104366e+28,
+    "V_A_kms": 1.5675536375504313,
+    "V_c_kms": 6.7681276372744525,
+    "delta": 0.5404370587996233,
+    "eta": 0.797350770312224
+   },
+   "status": "ok",
+   "point_hash": "f2161ba7e102c85613a4bc82aa6048f793ad01b1c60b9496ff76176e1336f5ef",
+   "values_sha256": "b2d6f400898e4370ecd987b45b754c138182c3bc0b9a0f9548bf0576164f3435",
+   "computational_run_ref": "usine-run-pf2161ba7e102c856",
+   "role": "holdout"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 2.908801449172104e+28,
+    "V_A_kms": 10.946000390529273,
+    "V_c_kms": 4.807272085230205,
+    "delta": 0.49825834423946247,
+    "eta": 0.6448147028661317
+   },
+   "status": "ok",
+   "point_hash": "23f9286c714e6424116ba46c8ea63d9e420d65e5b4ceacf40d6442f119ebf99f",
+   "values_sha256": "8dc209bc5e0098ef49b2fe2002f1cb4584d89a629a0522c159aabedf82899f5f",
+   "computational_run_ref": "usine-run-p23f9286c714e6424",
+   "role": "holdout"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 2.540779716240302e+28,
+    "V_A_kms": 1.844133439573166,
+    "V_c_kms": 13.837011493593511,
+    "delta": 0.530289905977263,
+    "eta": 1.2378408771447957
+   },
+   "status": "ok",
+   "point_hash": "e33d838752edf03fecbe554b1790716c7ba494988cce7e6f103620d6407b02ba",
+   "values_sha256": "80987cac69746055f1b8dc85eacd04c2ab9ae1343ead0874eaf1674c79dc672a",
+   "computational_run_ref": "usine-run-pe33d838752edf03f",
+   "role": "holdout"
+  },
+  {
+   "point": {
+    "D0_cm2_s": 3.1186330115589255e+28,
+    "V_A_kms": 26.15075651255367,
+    "V_c_kms": 1.4684626817866595,
+    "delta": 0.4858422562371164,
+    "eta": 0.8236866830231042
+   },
+   "status": "ok",
+   "point_hash": "d61b24ede854ae8079d7607681a559dbe45dcfb5c2b883f4f3b0f4639bf303d7",
+   "values_sha256": "65ce697f668e7eafc9960b1c236557cfd6e446ace45a068eee23bcebbfb50e11",
+   "computational_run_ref": "usine-run-pd61b24ede854ae80",
+   "role": "holdout"
+  }
+ ],
+ "evaluation_tally": {
+  "provider_evaluations_cumulative": 111,
+  "cache_hits_cumulative": 279
+ }
+}

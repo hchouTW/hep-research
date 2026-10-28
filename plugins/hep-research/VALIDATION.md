@@ -6423,3 +6423,67 @@ ionization and adiabatic (neutral gas, Coulomb zero). Software and numerical-con
 ILLUSTRATIVE and no comparison with data is made. Checks: static part of `run_all_checks.py`, the impacted tests,
 naming, wiring, `workflow_check.py` diff and acceptance on the final HEAD (report); ALL-3 deferred to the wave run
 (A1.5).
+
+## CRPROP-E1 — 2026-10-28 (environment E2)
+
+Training set and bounded active addition with USINE (r3 §E1, r4 §6; optional WP). Driver and committed records under
+`tests/adapters/fixtures/cr_propagation/e1/` (`active_addition.py`, `design.json`, `summary.json`,
+`forced-test.json`); training data, run folders, cache and partition state stay under `$CRPROP_OUT/e1/` (E1-3).
+
+**Environment (r3 §0.3, base exception D10).** E2: macOS 27.2 arm64, Python 3.13.2 in the E2 venv (numpy 2.5.3, scipy
+1.18.1); USINE V3.5 fb53006d (`HEP_USINE_BIN`, `HEP_USINE_DATA` of the ENV build), provider `usine` 0.2.0 (adapter
+cr-propagation). `git rev-parse --show-toplevel` = `.claude/worktrees/crprop-e1`; `git branch --show-current` =
+`worktree-crprop-e1`; `git status` clean at start; base `4a58be50` = integration HEAD (decision D10, not
+`origin/main`); prerequisites B1 (merge 3ed1e89e), C2 (merge 9f17775c), A4 (merge 0ee4c914) and C1 (merge 099d1d22)
+are ancestors of HEAD (`git merge-base --is-ancestor`). No batch client: runs go through
+`skills/hep-computing/scripts/local_partition.py` on E2 (decision D6), at most 4 USINE processes at once.
+
+**Set-up and criteria, fixed before any loop run (R9).** Free parameters 5 (`D0_cm2_s` 1e28–1e29 on a log axis,
+`delta` 0.3–0.8, `eta` −1.5–1.5, `V_A_kms` 0–100, `V_c_kms` 0–30; `L_kpc` 4 and every other transport field fixed at
+the provider's `DEFAULT_TRANSPORT`, harmonized-v1 with the isotopic ILLUSTRATIVE cross sections, sent in full in
+every request). Q9: N₀ = 10 × 5 = 50 → 64 (power of 2), k = 64/10 → 6. Sobol design scrambled, seed 20261028;
+d_min = smallest pairwise distance of the design in the unit cube. Observable B/C, 20 log rigidity bins 2–1000 GV.
+Synthetic data: the provider's B/C at the truth point (`D0_cm2_s` 3e28, `delta` 0.5, `eta` 1, `V_A_kms` 30,
+`V_c_kms` 5; Asimov, labelled synthetic) with an ILLUSTRATIVE covariance (statistical 1.5% (R/10 GV)^0.4,
+uncorrelated; systematic 2% with Gaussian correlation length 0.3 in log10 R). Hold-out: 16 points of the round-0
+approximate 95% posterior region, never trained on.
+- E1-1: every design point has a computational-run record (USINE run folder under `$CRPROP_OUT/e1/runs/`, its id in
+  `design.json`); failures are recorded with their reason; more than 5% failed design points stops the WP.
+- E1-2: with `--forced-max-rounds-test` (both termination thresholds 0, early stops off) the loop ends with status
+  `max-rounds` after exactly 5 rounds and its reason names the unmet criteria and the failing bins.
+- E1-3: `python3 tools/check_packaging.py` exits 0 and only the driver, the design file, the summaries (per-point
+  hashes, computational-run references, no training values) are committed, each ≤ 2 MiB.
+- Termination (r3 §E1 with E2's criteria, placeholder emulator): on every hold-out point Δχ² = bᵀC⁻¹b ≤ 1 (E2-1) and
+  |b_i| ≤ 0.2 σ_i^stat in every bin (E2-2). Limits: 5 rounds; early stop when the largest hold-out |b_i|/σ_i^stat
+  falls by less than 10% in 2 consecutive rounds, or every pick lies closer than d_min to a training point; cost cap
+  1500 USINE evaluations for E1 (orchestrator), checked before every batch.
+
+**Results (2026-10-28).** Standard run: status `early-stop-min-distance` at round 3 (all 6 picks within d_min =
+0.2231 of a training point, not run); best emulator after round 2 meets E2-1 (largest hold-out Δχ² 0.225) but not
+E2-2 (largest |b_i|/σ_i^stat 1.18, failing bins 0–4, 2–7 GV). Placeholder emulator per round (training points,
+largest hold-out Δχ², largest |b|/σ^stat): round 0 (64) 7.69, 3.58; round 1 (70) 0.79, 1.36; round 2 (76) 0.225,
+1.18. Emulator best fit after round 2 (before round 3's picks): `D0_cm2_s` 2.98e28, `delta` 0.501, `eta` 1.13,
+`V_A_kms` 21.6, `V_c_kms` 6.0 (truth 3e28, 0.5, 1, 30, 5; χ² 0.004; the V_A–V_c–eta direction is weakly constrained
+by B/C alone, as expected). The forced test (E1-2) ran the full 5 rounds: rounds 3–5 add 18 points and the largest
+|b|/σ^stat stays at 1.27, 1.22, 1.22 — the plateau confirms the early stop and shows the placeholder (radial-basis
+interpolation with jackknife error) does not reach 0.2 σ^stat in the low-rigidity bins of this posterior.
+
+| ID | Result | Evidence |
+|---|---|---|
+| E1-1 | passed: 64/64 design points ok (0 failures, limit 5%); every one of the 111 USINE evaluations (design 64, truth 1, hold-out 16, additions 30) has a computational-run record that `contracts/validate.py` accepts; ids and point/output hashes in `design.json`, `summary.json`, `forced-test.json` | `$CRPROP_OUT/e1/acceptance/E1-1.txt` |
+| E1-2 | passed: `--forced-max-rounds-test` ends with status `max-rounds` after 5 rounds, reason "maximum of 5 rounds reached without both E2 criteria (E2-1 met: False, E2-2 met: False; termination thresholds dchi2 <= 0.0, …) best emulator = after round 5, failing bins […]"; no limit exceeded | `forced-test.json`, `$CRPROP_OUT/e1/acceptance/forced-test.txt` |
+| E1-3 | passed: `tools/check_packaging.py` exit 0; committed only the driver, `design.json` (38 kB), `summary.json` (51 kB), `forced-test.json` (64 kB), no training values | `$CRPROP_OUT/e1/acceptance/E1-3.txt` |
+
+**Budget (D7, A1.8).** 114 USINE evaluations in E1: 111 in the loop runs (tally `$CRPROP_OUT/e1/tally.json`; reruns
+of the standard and forced runs are answered from the provider cache) plus 1 probe and 2 smoke runs; well under the
+orchestrator's E1 cap of 1500. CPU about 0.1 core-hours (about 1–3 s per USINE run, 4 processes at once).
+
+**What E2 must replace.** The placeholder emulator (`JackknifeInterpolationEmulator`: scipy radial-basis
+interpolation of ln(B/C), jackknife spread as its error) by the hep-ml emulator with an `ml-artifact`
+(`training_domain`, `extrapolation_policy`, `regression_validation`, domain by `DomainModel`); the candidate-cloud
+approximation of the 95% posterior region (global Sobol cloud plus a Laplace-shaped local cloud, Δχ² ≤ χ²₀.₉₅(5)) by a
+posterior through the E2b emulator provider; the termination hold-out and the ILLUSTRATIVE synthetic covariance by
+E2's hold-out and the data covariance. Observed for E2: the design's d_min (0.22 in the unit cube) is large compared
+with the posterior region, so the min-distance early stop fires after two rounds of posterior-focused additions; a
+better emulator, not more points of this placeholder, is what the low-rigidity bins need. Labels: synthetic,
+unvalidated (ILLUSTRATIVE cross sections; USINE translator limits of B1, fixed by B1X in parallel).
