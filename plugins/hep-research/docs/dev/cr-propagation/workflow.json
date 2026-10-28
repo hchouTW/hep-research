@@ -153,6 +153,31 @@
    "source": "r4 7, r3 A1"
   },
   {
+   "id": "A1R",
+   "title": "DRAGON2 convention row and reacceleration conventions",
+   "wave": 2,
+   "card": "decisions.md A1.9 (escalations 6, 9); extends r3 A1",
+   "deps": [
+    "A1",
+    "ENV"
+   ],
+   "requires": [
+    "env-dragon2",
+    "env-usine"
+   ],
+   "optional": false,
+   "critical": false,
+   "files": [
+    "skills/hep-theory/scripts/transport_conventions.py",
+    "tests/skills/hep_theory/test_transport_conventions.py",
+    "tests/adapters/fixtures/cr_propagation/specs/harmonized-v1.json",
+    "skills/hep-theory/references/cosmic-ray-phenomenology.md"
+   ],
+   "fallback": "none: D1 and D3 wait",
+   "source": "decisions.md A1.9 (maintainer 2026-10-28)",
+   "acceptance_prefix": "A1R"
+  },
+  {
    "id": "A2",
    "title": "transport block and object-form degeneracies (contracts CV-CRPROP)",
    "wave": 1,
@@ -391,7 +416,8 @@
     "A1",
     "C1",
     "B2",
-    "ENV"
+    "ENV",
+    "A1R"
    ],
    "requires": [
     "env-dragon2"
@@ -420,7 +446,10 @@
    ],
    "fallback": "items without a closed form wait for B1; if B1 is blocked, compare only the B2 items and record the rest as open (derived)",
    "source": "r4 6 and 7, r3 D1 + D1b",
-   "files_source": "r3 D1 (harmonized-v1-<item>.json per item) and the existing DRAGON2 fixture folders runs/ and outputs/; dragon2/ for new records (derived)"
+   "files_source": "r3 D1 (harmonized-v1-<item>.json per item) and the existing DRAGON2 fixture folders runs/ and outputs/; dragon2/ for new records (derived)",
+   "acceptance_superseded": {
+    "D1-1": "decisions.md A1.9: superseded for D1's verdict by D1-1a and D1-1b (D1-L added); D1-1 kept unchanged in acceptance.json"
+   }
   },
   {
    "id": "D2",
