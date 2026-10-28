@@ -7326,3 +7326,25 @@ bound check, 200 paper-covariance refit; at most 4 USINE processes at once). Reb
 carries only its own datasets' periods, also with C2UF's per-point requests) and C2UF's response model kind "provider"
 and per-point requests coexist; the hep_statistics tests, `test_cr_propagation` offline and C2UF's UsineEmulatorFamilies
 pass.
+
+## CRPROP-RC — 2026-10-29 (environment E2)
+
+Work package RC of the cr-propagation r4 campaign (`workflow-r4.md` §10): campaign report
+`docs/dev/cr-propagation/campaign-report.md` and pull-request draft `docs/dev/cr-propagation/pr-draft.md`;
+documentation only, no code or acceptance entry changed. **Environment field (r3 §0.3, base exception D10):**
+`git rev-parse --show-toplevel` = `.claude/worktrees/crprop-rc`; branch `worktree-crprop-rc`; status clean at start;
+base 47b004b4 = integration HEAD (not `main`; decision D10), rebased in rework round 1 onto 9b121eae
+(status.json commits only); the merges of the RC prerequisites F1 (3ccaa643) and C2UF
+(dee1179b) are ancestors of HEAD; `main` 8fcbb826 is an ancestor of HEAD (main has not moved, no rebase needed).
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --part static --jobs 4` | exit 0, 31 checks pass, 0 fail (rework round 1, on the rebased branch) |
+| `check_naming.py` | pass, no new findings, `naming_known_gaps.json` not grown |
+| `check_wiring.py --since 47b004b4` | pass |
+| `workflow_check.py diff --work-package RC --base 9b121eae`, `acceptance` | both ok; changed files only the 4 RC files; frozen sha256 f5b0dbe6…, 86 frozen entries, 17 added |
+| Full `run_all_checks.py` and `check_relocation.py` (WF-10, wave 6, orchestrator) | WAVE6-RESULT: <pending> |
+
+RC has no acceptance entries of its own beyond WF-2 to WF-10, which its verifier checks against section 9 of the
+report. Every number in the report is taken from `status.json`, `decisions.md`, `escalations.md`, `acceptance.json`
+and the CRPROP sections above.
