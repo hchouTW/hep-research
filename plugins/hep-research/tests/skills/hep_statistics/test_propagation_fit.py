@@ -300,6 +300,76 @@ class PropagationFit(unittest.TestCase):
         bad = self.config(optimizer={"polish_steps": 9})
         self.assertEqual(self.cli(bad)[0], 2)
 
+    # ---------------------------------------------------------------- K1: noise-aware convergence (opt-in)
+    def test_noise_free_fit_is_unchanged_without_optimizer_noise(self):
+        """K1-1: without optimizer.noise nothing is added and the threshold is fit_diagnostics' 1e-5; a noise-free
+        provider with a measured noise floor keeps that threshold (0.5 x its tiny floor is below 1e-5) and its
+        verdict and numbers."""
+        import propagation_fit as pf
+        from core.stats.fit_diagnostics import EDM_TOL
+        self.assertEqual(pf.EDM_TOL_BASE, EDM_TOL)
+        self.assertNotIn("noise", pf._opt_cfg({}))
+        plain = self.fit(self.config())["fits"][0]
+        self.assertNotIn("noise", plain)
+        self.assertNotIn("edm_threshold", plain["convergence"])
+        measured = self.fit(self.config(optimizer={"noise": {"mode": "measure"}}))["fits"][0]
+        noise = measured["noise"]
+        self.assertEqual((noise["mode"], noise["evaluations"], noise["dof"]), ("measure", 8, 4))
+        self.assertLess(noise["sigma_m2lnl"], 2e-5)
+        self.assertEqual(measured["convergence"]["edm_threshold"], EDM_TOL)
+        self.assertEqual(measured["status"], plain["status"])
+        for a, b in zip(plain["parameters"], measured["parameters"]):
+            self.assertLessEqual(abs(a["best_fit_coordinate"] - b["best_fit_coordinate"]),
+                                 1e-9 * max(1.0, abs(a["best_fit_coordinate"])))
+        self.assertLessEqual(abs(plain["chi2"] - measured["chi2"]), 1e-9 * max(1.0, plain["chi2"]))
+
+    def test_declared_noise_sets_the_threshold_and_is_validated(self):
+        fit = self.fit(self.config(optimizer={"noise": {"mode": "declared", "sigma_m2lnl": 0.004}}))["fits"][0]
+        self.assertEqual(fit["noise"]["mode"], "declared")
+        self.assertLessEqual(abs(fit["convergence"]["edm_threshold"] - 0.002), 1e-12)
+        self.assertEqual(fit["status"], "converged")
+        self.assertEqual(len(fit["noise"]["steps"]), 2)
+        for bad in ({"mode": "declared", "sigma_m2lnl": 0.0}, {"mode": "guess"}, {"mode": "measure", "k": 1}):
+            self.assertEqual(self.cli(self.config(optimizer={"noise": bad}))[0], 2, bad)
+
+    def test_rejected_polish_judges_the_returned_point(self):
+        """K1 polish fix: a polished point with a higher -ln L than the optimizer's is discarded, and the verdict
+        is then on the point actually returned (judged again without polish)."""
+        from unittest import mock
+
+        import propagation_fit as pf
+        real = pf._verdict
+        calls = []
+
+        def worse(nll, x, bounds, held, steps=None, polish=0, **kw):
+            out = real(nll, x, bounds, held, steps, polish, **kw)
+            calls.append(polish)
+            if polish:   # pretend the Newton step went uphill by a quarter of the box
+                out["x"] = [v + 0.25 * (b - a) for v, (a, b) in zip(x, bounds)]
+                out["status"], out["reasons"] = "failed", ["gradient_not_small"]
+            return out
+        cfg = self.config(optimizer={"max_iterations": 100, "max_restarts": 0, "seed": 0, "polish_steps": 1})
+        plain = self.fit(self.config(optimizer={"max_iterations": 100, "max_restarts": 0, "seed": 0}))["fits"][0]
+        with mock.patch.object(pf, "_verdict", worse):
+            fit = self.fit(cfg)["fits"][0]
+        self.assertEqual(calls, [1, 0])
+        self.assertIn("rejected", fit["convergence"]["polish"])
+        self.assertEqual(fit["status"], "converged")
+        self.assertEqual(fit["convergence"]["edm"], plain["convergence"]["edm"])
+        self.assertEqual(fit["best_fit_coordinates"], plain["best_fit_coordinates"])
+
+    def test_unconverged_fit_reports_not_converged(self):
+        """K1: an unconverged fit without restarts has reason not-converged (not restart-cap), and the CLI with --out
+        reports it and writes no statistical-result instead of exiting with artifact-invalid."""
+        cfg = self.config(optimizer={"max_iterations": 1, "max_restarts": 0})
+        with tempfile.TemporaryDirectory() as out:
+            code, doc = self.cli(cfg, "--out", out)
+            self.assertEqual((code, doc["status"], doc["reason"]), (1, "failed", "not-converged"))
+            self.assertEqual(doc["fits"][0]["reason"], "not-converged")
+            self.assertFalse((Path(out) / "statistical-result.json").exists())
+            self.assertTrue((Path(out) / "result.json").is_file())
+            self.assertIn("no fit converged: statistical-result.json is not written", doc["warnings"])
+
     def test_unregistered_provider_and_refused_nuisances(self):
         cfg = self.config(provider={"id": "not-registered", "version": "1"})
         self.assertEqual(self.cli(cfg)[1]["reason"], "unregistered-provider")
@@ -485,6 +555,105 @@ class PropagationFit(unittest.TestCase):
         with self.assertRaises(pf.FitInputError):
             pf._per_point_requests({"provider_requests": "per-point"}, sets, True)
         self.assertFalse(pf._per_point_requests({}, sets, False))
+
+
+def _noisy_quadratic(sigma_f, curvature, center, seed):
+    """-ln L = (t - c)^T A (t - c) / 2 plus deterministic noise of standard deviation sigma_f, uncorrelated between
+    distinct points (a hash of the point, like the rounding of a deterministic provider's printed tables)."""
+    import hashlib
+    from statistics import NormalDist
+
+    import numpy as np
+    A, c = np.asarray(curvature, dtype=float), np.asarray(center, dtype=float)
+
+    def f(t):
+        key = repr((seed,) + tuple(float(v) for v in t)).encode()
+        u = (int(hashlib.sha256(key).hexdigest()[:13], 16) + 0.5) / 16 ** 13
+        d = np.asarray(t, dtype=float) - c
+        return 0.5 * float(d @ A @ d) + sigma_f * NormalDist().inv_cdf(u)
+    return f
+
+
+@unittest.skipUnless(HAVE, "needs numpy and scipy")
+class NoiseAwareConvergence(unittest.TestCase):
+    """K1-1 on a synthetic noisy objective with known noise (VALIDATION.md CRPROP-K1): the stencil measures the noise,
+    the noise-sized steps keep the noise part of EDM below sigma_f / 16 on average, and the verdict flips correctly
+    (a true minimum converges under the rule and fails fit_diagnostics' 1e-5; a point 20 sigma_f in EDM away fails)."""
+    SIGMA_F = 5e-4   # noise of -ln L; sigma of -2 ln L = 1e-3
+    A = [[4.0, 1.2, 0.0, 0.3], [1.2, 1.0, 0.2, 0.0], [0.0, 0.2, 2.0, 0.5], [0.3, 0.0, 0.5, 0.5]]
+    CENTER = [1.0, -0.5, 0.2, 3.0]
+    BOUNDS = [(-10.0, 10.0)] * 4
+
+    def setUp(self):
+        import numpy as np
+
+        import propagation_fit as pf
+        self.np, self.pf = np, pf
+        self.F = np.asarray(self.A)
+
+    def test_stencil_measures_the_known_noise(self):
+        np, pf = self.np, self.pf
+        ratios = []
+        for seed in range(30):
+            f = _noisy_quadratic(self.SIGMA_F, self.A, self.CENTER, seed)
+            rec = pf._noise_floor(f, self.CENTER, self.F, set(), self.BOUNDS, {"mode": "measure", "max_evaluations": 40})
+            self.assertEqual((rec["evaluations"], rec["dof"]), (16, 8))
+            ratios.append((rec["sigma_m2lnl"] / (2 * self.SIGMA_F)) ** 2)
+        # 240 degrees of freedom in all: the mean variance ratio has a relative standard error of 9%
+        self.assertLess(abs(float(np.mean(ratios)) - 1.0), 0.3)
+        small = pf._noise_floor(_noisy_quadratic(self.SIGMA_F, self.A, self.CENTER, 0), self.CENTER, self.F, set(),
+                                self.BOUNDS, {"mode": "measure", "max_evaluations": 9})
+        self.assertEqual((small["evaluations"], len(small["coordinates"])), (8, 2))
+        held = pf._noise_floor(_noisy_quadratic(self.SIGMA_F, self.A, self.CENTER, 0), self.CENTER, self.F,
+                               {0, 1, 2, 3}, self.BOUNDS, {"mode": "measure", "max_evaluations": 40})
+        self.assertIsNone(held["sigma_m2lnl"])   # nothing measurable: the fit keeps the 1e-5 threshold
+
+    def test_steps_follow_the_noise_and_the_curvature(self):
+        np, pf = self.np, self.pf
+        s = 2 * self.SIGMA_F
+        st = pf._noise_steps(s, self.F, self.CENTER, self.BOUNDS, set(), None)
+        V = float(np.sum(np.diag(self.F) * np.diag(np.linalg.inv(self.F))))
+        a = min(max(2 * math.sqrt(self.SIGMA_F * V), 0.1), 1.0)
+        self.assertLessEqual(abs(st["step_factor"] - a), 1e-12 * a)
+        for h, fii in zip(st["steps"], np.diag(self.F)):
+            self.assertLessEqual(abs(h - a / math.sqrt(fii)), 5e-3 * h)   # 3 significant digits
+        self.assertEqual(pf._noise_steps(1e-12, self.F, self.CENTER, self.BOUNDS, set(), None)["step_factor"], 0.1)
+        self.assertEqual(pf._noise_steps(10.0, self.F, self.CENTER, self.BOUNDS, set(), None)["step_factor"], 1.0)
+        near = [(-10.0, 1.001), (-10.0, 10.0), (-10.0, 10.0), (-10.0, 10.0)]   # half the room to a bound at most
+        self.assertLessEqual(pf._noise_steps(s, self.F, self.CENTER, near, set(), None)["steps"][0], 0.0005 + 1e-12)
+
+    def _judge(self, f, t, noise_aware):
+        pf = self.pf
+        if noise_aware:
+            st = pf._noise_steps(2 * self.SIGMA_F, self.F, t, self.BOUNDS, set(), None)["steps"]
+            return pf._verdict(f, t, self.BOUNDS, set(), st, edm_tol=max(pf.EDM_TOL_BASE, pf.NOISE_EDM_FACTOR
+                                                                          * 2 * self.SIGMA_F), grid=True)
+        small = [1e-3 / math.sqrt(x) for x in self.np.diag(self.F)]   # steps that ignore the noise
+        return pf._verdict(f, t, self.BOUNDS, set(), small)
+
+    def test_verdict_flips_with_the_rule(self):
+        np = self.np
+        edm_noise = []
+        for seed in range(20):
+            f = _noisy_quadratic(self.SIGMA_F, self.A, self.CENTER, seed)
+            ruled = self._judge(f, self.CENTER, True)
+            self.assertEqual(ruled["status"], "converged", (seed, ruled))
+            self.assertLessEqual(abs(ruled["edm_threshold"] - self.SIGMA_F), 1e-12)
+            edm_noise.append(ruled["edm"])
+            plain = self._judge(f, self.CENTER, False)
+            self.assertEqual(plain["status"], "failed")
+            self.assertNotIn("edm_threshold", plain)
+        # the step rule: mean noise part of EDM <= sigma_f / 16 (allowance 1.5 for 20 samples)
+        self.assertLess(float(np.mean(edm_noise)), 1.5 * self.SIGMA_F / 16)
+        # a point whose true EDM is 20 sigma_f fails under the rule, with its EDM measured to about 30%
+        d = np.linalg.solve(self.F, np.ones(4))
+        d *= math.sqrt(2 * 20 * self.SIGMA_F / float(d @ self.F @ d))
+        off = (np.asarray(self.CENTER) + d).tolist()
+        for seed in range(5):
+            v = self._judge(_noisy_quadratic(self.SIGMA_F, self.A, self.CENTER, seed), off, True)
+            self.assertEqual(v["status"], "failed")
+            self.assertIn("gradient_not_small", v["reasons"])
+            self.assertLess(abs(v["edm"] / (20 * self.SIGMA_F) - 1.0), 0.3)
 
 
 def _usine_record():
