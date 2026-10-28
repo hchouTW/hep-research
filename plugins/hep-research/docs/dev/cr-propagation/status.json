@@ -323,15 +323,15 @@
    ]
   },
   "RC": {
-   "state": "verifying",
+   "state": "merged",
    "dispatches": 1,
-   "rework_rounds": 1,
+   "rework_rounds": 2,
    "branch": "worktree-crprop-rc",
    "base": "9b121eae",
-   "head": "21d96f61",
-   "merge_commit": null,
+   "head": "331345b0",
+   "merge_commit": "976851ad",
    "worker_report": "DONE: campaign-report.md, pr-draft.md, CHANGELOG crprop RC entry, VALIDATION CRPROP-RC; WAVE6-RESULT placeholder for the final confirmation run",
-   "verifier_report": "round 0 Opus REWORK: WF-4 record gap (5 merges), 4th-worker note, WF-6/7/9 wording, wave-5 confirmation claim, known issues incomplete (accepted misses, adapter.json A1.11 note, B3 sign), fix-forward reasons",
+   "verifier_report": "Opus PASS round 2 (rounds 0-1 REWORK: factual fixes); WF-10 pending confirmation run",
    "missing_capabilities": [],
    "notes": []
   },
@@ -851,6 +851,11 @@
    "cycle": 4,
    "date": "2026-10-29",
    "event": "RC rework round 1 (21d96f61); Opus re-verify"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "merged: F1 wave-6 fix cdb5fe12 (Sonnet PASS), RC 976851ad (Opus PASS r2), C2UF wave-6 fix (Sonnet PASS); confirmation full run next"
   }
  ],
  "env": {
