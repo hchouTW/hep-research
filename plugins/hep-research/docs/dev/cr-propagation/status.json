@@ -199,15 +199,15 @@
    ]
   },
   "B3": {
-   "state": "verifying",
+   "state": "merged",
    "dispatches": 1,
    "rework_rounds": 1,
    "branch": "worktree-crprop-b3",
    "base": "f1d695cc",
    "head": "0ec57897",
-   "merge_commit": null,
+   "merge_commit": "c1b5967d",
    "worker_report": "DONE: B3-1 on matched 1D geometry (B/C 9e-5, 10Be/9Be 4.1e-4); harmonized-v1 2D B/C misses 2% (to 2.47% above 45 GV), attributed to radial escape (Fourier-Bessel reproduces USINE 2D to 0.21%); B3-2 max 8.9e-6; B3-3 22 rows; 192 USINE runs (D7)",
-   "verifier_report": "round 0 REWORK (Opus): B3-1 must be judged under harmonized-v1 (card plan:420, geometry plan:379); 2D B/C misses 2% (2.47%, 8 bins above 44.7 GV), attribution sound; B3-2, B3-3 pass",
+   "verifier_report": "round 0 REWORK (B3-1 under harmonized-v1); round 1 PASS (Opus): B3-1 recorded failed + superseded (A1.10); B3-1a 9e-5, B3-1b attributed, B3-1c 0.21% (converged in terms, independent Fourier-Bessel), B3-2 8.9e-6, results regenerate byte-for-byte; advisory: sign of USINE 2D/1D 10Be/9Be in VALIDATION prose is +1.3% not -1.3%",
    "missing_capabilities": [],
    "notes": [
     "A1.10: B3-1 superseded by B3-1a/b/c",
@@ -628,6 +628,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "A1R DONE (b20ab46b): sqrt(3) zone-factor finding and DRAGON2 Ptuskin94 3/4 finding; Opus verifier dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "B3 merged (c1b5967d); post-merge static ok"
   }
  ],
  "env": {
