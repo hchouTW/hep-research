@@ -504,6 +504,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "B1 DONE (2887380a); rebase onto d04cb47a + cost row into CRPROP-COST requested; escalation 8 (high break, USINE XS files for C2U/F1)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A1.7: WP B1X (high-break field + USINE XS files) planned after B1 merges, before C2U/F1; escalation 8 decided"
   }
  ],
  "env": {
