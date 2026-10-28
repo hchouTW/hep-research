@@ -577,9 +577,10 @@ def validate(bundle: dict, validator_version: str, *, rules: dict | None = None)
     if any(not is_int(o.get("revision")) for _, o in entries if o.get("record_kind") == "plan"):
         raise BundleError("bundle.plan_revision: a plan revision is not an integer")
     intents = [o for _, o in entries if o.get("record_kind") == "intent"]
-    plans = {o["revision"]: (s, o) for s, o in entries if o.get("record_kind") == "plan"}
+    # creation order is the position in the log (commit, then place within the commit), not the commit number alone
+    plans = {o["revision"]: (i, o) for i, (_, o) in enumerate(entries) if o.get("record_kind") == "plan"}
     manifests = {o["id"]: o for _, o in entries if o.get("record_kind") == "manifest"}
-    assignments = {o["id"]: (s, o) for s, o in entries if o.get("record_kind") == "assignment"}
+    assignments = {o["id"]: (i, o) for i, (_, o) in enumerate(entries) if o.get("record_kind") == "assignment"}
     input_error = None
     if not intents:
         input_error = {"code": "input.no_intent", "message": "no intent"}
@@ -597,11 +598,11 @@ def validate(bundle: dict, validator_version: str, *, rules: dict | None = None)
             if not set(intents[-1]["material_scope"]) <= have:
                 input_error = {"code": "input.scope_not_captured", "message": "scope materials are not in the manifest"}
     known_items: dict[str, tuple[str, str, dict]] = {}  # item id -> (record id, group, item)
-    for seq, o in entries:
+    for position, (_, o) in enumerate(entries):
         if o.get("record_kind") != "record":
             continue
         rid = str(o.get("id"))
-        reason = _record_binding(o, seq, plans, assignments, manifests, known_items, bundle)
+        reason = _record_binding(o, position, plans, assignments, manifests, known_items, bundle)
         if reason:
             qrec[rid] = reason
             continue
@@ -658,11 +659,11 @@ def _order_diagnostics(entries: list[tuple[int, dict]]) -> list[dict]:
     intent precede it; a metadata ref names an earlier object."""
     first: dict[str, int] = {}
     digest_seq: dict[str, int] = {}
-    for seq, o in entries:
+    for seq, (_, o) in enumerate(entries):
         first.setdefault(str(o.get("id")), seq)
         digest_seq.setdefault(metadata_digest(o), seq)
     out = []
-    for seq, o in entries:
+    for seq, (_, o) in enumerate(entries):
         names = []
         if o.get("record_kind") == "plan":
             names = [o.get("manifest_id"), o.get("intent_id")]

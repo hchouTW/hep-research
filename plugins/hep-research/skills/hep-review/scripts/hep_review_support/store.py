@@ -362,6 +362,38 @@ class Store:
             raise
         return AppendResult("committed", {"segment_id": segment_id, "seq": seq, "commit_digest": digest})
 
+    def insert_verbatim(self, context_id: str, segment_id: str, commits: list[dict], origin: dict | None) -> None:
+        """Rebuild a context from a verified export: the same commit headers, digests and object bytes, in one
+        transaction (used only by export.import_export after verify_export passed)."""
+        c = self.conn
+        c.execute("BEGIN IMMEDIATE")
+        try:
+            if self.head(context_id) is not None:
+                raise ValueError(f"context {context_id} already exists")
+            for x in commits:
+                header, digest = x["commit"], x["digest"]
+                if H.metadata_digest(header) != digest:
+                    raise ValueError(f"commit {header.get('seq')} digest does not match")
+                for pos, o in enumerate(x["objects"]):
+                    c.execute("INSERT INTO objects VALUES(?,?,?,?,?,?)", (context_id, segment_id, o["record_kind"],
+                                                                         o["id"], H.metadata_digest(o), H.encode(o)))
+                    c.execute("INSERT INTO commit_objects VALUES(?,?,?,?,?)",
+                              (digest, pos, o["record_kind"], o["id"], H.metadata_digest(o)))
+                c.execute("INSERT INTO commits VALUES(?,?,?,?,?,?,?)",
+                          (context_id, segment_id, header["seq"], digest, header["operation_id"],
+                           header["payload_digest"], H.encode(header)))
+                if header["seq"] == 1:
+                    c.execute("INSERT INTO segments VALUES(?,?,?,?)", (context_id, segment_id, digest,
+                                                                       json.dumps(origin) if origin else None))
+            last = commits[-1]
+            c.execute("INSERT INTO heads VALUES(?,?,?,?)", (context_id, segment_id, last["commit"]["seq"],
+                                                            last["digest"]))
+            c.execute("COMMIT")
+        except BaseException:
+            if c.in_transaction:
+                c.execute("ROLLBACK")
+            raise
+
     def load_bundle(self, context_id: str, as_of_seq: int | None = None, *, segment_id: str | None = None,
                     mode: str = "recorded") -> dict:
         """As-of read (spec 11.5): one short read transaction for the head, the commits with seq <= N and their small
