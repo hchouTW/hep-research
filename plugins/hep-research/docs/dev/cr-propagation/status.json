@@ -323,15 +323,15 @@
    ]
   },
   "RC": {
-   "state": "dispatched",
-   "dispatches": 0,
-   "rework_rounds": 0,
+   "state": "verifying",
+   "dispatches": 1,
+   "rework_rounds": 1,
    "branch": "worktree-crprop-rc",
-   "base": "6f377150",
-   "head": null,
+   "base": "9b121eae",
+   "head": "21d96f61",
    "merge_commit": null,
-   "worker_report": null,
-   "verifier_report": null,
+   "worker_report": "DONE: campaign-report.md, pr-draft.md, CHANGELOG crprop RC entry, VALIDATION CRPROP-RC; WAVE6-RESULT placeholder for the final confirmation run",
+   "verifier_report": "round 0 Opus REWORK: WF-4 record gap (5 merges), 4th-worker note, WF-6/7/9 wording, wave-5 confirmation claim, known issues incomplete (accepted misses, adapter.json A1.11 note, B3 sign), fix-forward reasons",
    "missing_capabilities": [],
    "notes": []
   },
@@ -846,6 +846,11 @@
    "cycle": 4,
    "date": "2026-10-29",
    "event": "wave 6 (6f377150) full run FAIL: routing-table budget hep-statistics SKILL.md + core-stats-guide.md 25688 > 25600 (C2UF 7d997d02); test_cr_propagation.py:2269 subprocess without timeout (F1); relocation same two; fix branches as rework round 1"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "RC rework round 1 (21d96f61); Opus re-verify"
   }
  ],
  "env": {
