@@ -6940,9 +6940,9 @@ replaces or widens a frozen entry):
 **Runs (D7, A1.8).** DRAGON2: 2 propagation runs (`D3_harmonized_v1`: harmonized-v1 set A, 212 s; `D3_l2_dragon2`:
 level 2 with DRAGON2's shipped production table and abundances, 313 s), plus 13 calls of a 20-line driver linking
 DRAGON2's own `libDRAGON.a` (`sighad`, CROSEC option 2) to tabulate DRAGON2's inelastic cross sections
-(`d3/dragon2-inelastic.json`; no propagation, a few ms each). USINE: 37 runs (26 in the final plan of
-`d3_study.py usine_plan`, 9 reruns after fixing the study script or adding the injection setting, 1 aborted by a
-misparsed gas string, 1 live test), each 2-20 s. Reused, not rerun: D1's six DRAGON2 item runs and B1's seven USINE
+(`d3/dragon2-inelastic.json`; no propagation, a few ms each). USINE: 37 runs (20 in the final plan of
+`d3_study.py usine_plan`, 15 superseded: reruns after fixing the study script's record step or adding the injection
+setting, 1 aborted by a misparsed gas string, 1 live test), each 2-20 s. Reused, not rerun: D1's six DRAGON2 item runs and B1's seven USINE
 runs. Tally against the D3 caps: DRAGON2 2/60, USINE 37/300.
 
 **What USINE was given (D3-3, matched level 1)**, all from DRAGON2 cd588707's code: He/H 0.11 of the hydrogen nucleon
