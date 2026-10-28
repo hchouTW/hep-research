@@ -154,19 +154,18 @@
    ]
   },
   "D1": {
-   "state": "dispatched",
+   "state": "blocked",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-d1",
-   "base": "566bfd1e",
-   "head": "131ae000",
+   "base": "3d5a6295",
+   "head": "5348266d",
    "merge_commit": null,
-   "worker_report": "PARTIAL: provider + translator + 5 item runs; D1-1 fails 3% for closed-form items (He target, thick gas attributed); reacceleration/losses wait for B1; D1-2, PRV-1 (live), PRV-2 pass",
+   "worker_report": "PARTIAL (dispatch 1, resumed): D1-1 passes 1/8 (10Be/9Be convection); attributed misses: DRAGON2 He target/gas/XS offset, reacceleration convention, unphysical DRAGON2 losses; D1-2, PRV-1, PRV-2 pass",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "escalations 5 and 6",
-    "resumed 2026-10-28 (same dispatch): rebase onto 2d451e87 (B1 merged), finish reacceleration/losses items against B1 USINE runs"
+    "blocked 2026-10-28: tolerance misses outside D1 files; escalations 5, 6, 9; branch worktree-crprop-d1 kept for H1"
    ]
   },
   "D2": {
@@ -226,7 +225,7 @@
    "notes": []
   },
   "D3": {
-   "state": "pending",
+   "state": "waiting",
    "dispatches": 0,
    "rework_rounds": 0,
    "branch": null,
@@ -236,7 +235,9 @@
    "worker_report": null,
    "verifier_report": null,
    "missing_capabilities": [],
-   "notes": []
+   "notes": [
+    "deps D1 blocked (escalation 9)"
+   ]
   },
   "E1": {
    "state": "pending",
@@ -557,6 +558,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "B1X added to workflow.json (deps A2, B1; C2U and F1 now depend on it) with acceptance B1X-1..B1X-5; dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "D1 blocked (D1-1 1/8 within 3%, all misses attributed outside D1 files); escalation 9; D3 waits on it; critical path (B1X -> C2U, B3 -> F1) unaffected"
   }
  ],
  "env": {
