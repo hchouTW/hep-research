@@ -6732,3 +6732,11 @@ The losses item was rerun on Galprop gas together with its item-off run `D1_loss
 DRAGON2 runs of D1 (D7, A1.8): dispatch 1: 19 (5 items, 2 convergence, 5 conformance mixin, 5 conformance CLI,
 2 diagnostics); dispatch 2: 11 (3 diagnostics, 3 item runs, 5 conformance mixin); total 30, all on E-crprop, at most
 4 at once.
+
+Rework round 1 (wave-3 finding): `tests.tools.test_subprocess_timeouts` failed on the two unbounded `subprocess.run`
+calls (partition `plan` and `merge`) in `tests/adapters/fixtures/cr_propagation/e1/active_addition.py`. Both now carry
+`timeout=SMALL_STEP_TIMEOUT` (600 s; each handles one shard manifest, milliseconds in practice, so a legitimate run
+cannot be cut short). A `subprocess.TimeoutExpired` is recorded in the batch `problems` list (shard marked failed, then
+`incomplete-batch` is raised as for any failed shard), not ignored. No design, record or result changed; no USINE run.
+Checks on the fix: test_subprocess_timeouts + test_cr_propagation OK (83 tests, 10 skipped); `--part static --jobs 4`
+passed; check_naming, workflow_check diff (base b0d0016d) and acceptance ok; `active_addition.py --help` works.

@@ -92,6 +92,7 @@ FAILURE_LIMIT = 0.05                          # E1-1
 MAX_JOBS = 4
 PASSTHROUGH = ("HEP_USINE_BIN", "HEP_USINE_DATA", "HEP_USINE_RUN_DIR", "USINE", "ROOT_INCLUDE_PATH", "ROOTSYS",
                "DYLD_LIBRARY_PATH", "PYTHONDONTWRITEBYTECODE")
+SMALL_STEP_TIMEOUT = 600  # s; partition plan/merge handle one shard manifest (milliseconds in practice)
 PARTITION = PLUGIN / "skills" / "hep-computing" / "scripts" / "local_partition.py"
 
 
@@ -205,15 +206,21 @@ class BatchRunner:
         (self.work_dir / "runs").mkdir(parents=True, exist_ok=True)
         shards = [s for s in np.array_split(np.arange(len(points)), self.jobs) if len(s)]
         procs = []
+        problems = []
         for j, shard in enumerate(shards):
             sdir = bdir / f"shard{j}"
             sdir.mkdir(exist_ok=True)
             # shard j covers points [first, last]; local_partition items are offsets inside the shard
             first = int(shard[0])
             manifest = sdir / "manifest.json"
-            subprocess.run([sys.executable, str(PARTITION), "plan", "--job", f"e1-{name}-s{j}", "--items",
-                            str(len(shard)), "--chunk-size", "1", "--seed", str(j), "--out", str(manifest)],
-                           check=True, capture_output=True, text=True, env=env)
+            try:  # planning and merging only write small JSON files; the bound is far above any legitimate time and
+                # exists so a hung child fails the shard with a reason instead of stalling the campaign
+                subprocess.run([sys.executable, str(PARTITION), "plan", "--job", f"e1-{name}-s{j}", "--items",
+                                str(len(shard)), "--chunk-size", "1", "--seed", str(j), "--out", str(manifest)],
+                               check=True, capture_output=True, text=True, env=env, timeout=SMALL_STEP_TIMEOUT)
+            except subprocess.TimeoutExpired:
+                problems.append(f"shard{j}: plan timed out after {SMALL_STEP_TIMEOUT} s")
+                continue
             shard_points = sdir / "points.json"
             shard_points.write_text(json.dumps({"request": self.request,
                                                 "points": points[first:first + len(shard)]}), encoding="utf-8")
@@ -226,13 +233,16 @@ class BatchRunner:
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env)))
         records: list[dict | None] = [None] * len(points)
         sent = hits = 0
-        problems = []
         for first, sdir, manifest, proc in procs:
             out, err = proc.communicate()
             (sdir / "run.json").write_text(out + err, encoding="utf-8")
-            merged = subprocess.run([sys.executable, str(PARTITION), "merge", "--manifest", str(manifest), "--state",
-                                     str(sdir / "state"), "--rule", "records=concat"], capture_output=True, text=True,
-                                    env=env)
+            try:
+                merged = subprocess.run([sys.executable, str(PARTITION), "merge", "--manifest", str(manifest),
+                                         "--state", str(sdir / "state"), "--rule", "records=concat"],
+                                        capture_output=True, text=True, env=env, timeout=SMALL_STEP_TIMEOUT)
+            except subprocess.TimeoutExpired:
+                problems.append(f"{sdir.name}: merge timed out after {SMALL_STEP_TIMEOUT} s")
+                continue
             doc = json.loads(merged.stdout or "{}")
             (sdir / "merge.json").write_text(merged.stdout, encoding="utf-8")
             if proc.returncode != 0 or doc.get("status") != "complete":
