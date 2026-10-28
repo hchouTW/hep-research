@@ -34,18 +34,18 @@
    ]
   },
   "ENV": {
-   "state": "verifying",
+   "state": "merged",
    "dispatches": 2,
    "rework_rounds": 0,
    "branch": "worktree-crprop-env",
    "base": "71ae4a07",
    "head": "b2dd78c9",
-   "merge_commit": "7d5c6934",
+   "merge_commit": "cbb7907f",
    "worker_report": "dispatch 2 DONE: USINE V3.5 (fb53006d, GPL-2.0) built with ROOT 6.38.04 (cmake policy flag, root-config shim, C++17; ROOT_INCLUDE_PATH unset for build); smoke run ok; tUSINE 42/46 (4 = timezone/labels/last digits); env-usine present; no USINE source/inputs/output committed",
-   "verifier_report": "PASS (2026-10-27)",
+   "verifier_report": "dispatch 1 PASS (2026-10-27); dispatch 2 PASS (2026-10-28, Sonnet): clone/tag/licence/capabilities/records checked on host; tUSINE 4 diffs text/last-digit only",
    "missing_capabilities": [],
    "notes": [
-    "dispatch 2 verifier dispatched 2026-10-28 (Sonnet)"
+    "dispatch 2 merged cbb7907f; post-merge static ok, acceptance ok, test_cr_propagation OK"
    ]
   },
   "A1": {
@@ -79,18 +79,18 @@
    ]
   },
   "A3": {
-   "state": "verifying",
+   "state": "merged",
    "dispatches": 2,
    "rework_rounds": 0,
    "branch": "worktree-crprop-a3",
    "base": "f747fbe7",
    "head": "5ce9495d",
-   "merge_commit": null,
+   "merge_commit": "f62f70e8",
    "worker_report": "DONE (dispatch 2): A3-1..A3-4 pass; full run on eca5da37 caught 2 documented-claim failures (guide sentence), fixed in cef2836a, full 33/33; relocation only the 2 known geant4 failures; quick load 25590/25600 B",
-   "verifier_report": null,
+   "verifier_report": "PASS (2026-10-28, Sonnet): A3-1 results.json hash change reproduced on base f747fbe7 (from A2), 166 tests OK; quick load 25590/25600 B",
    "missing_capabilities": [],
    "notes": [
-    "rebased onto f747fbe7 (only appended-section conflicts); A3-1 results.json hash change reproduced on integration base itself; Sonnet verifier dispatched"
+    "merged f62f70e8; post-merge static ok, acceptance ok, grid_fit/degeneracy/crprop_degeneracy/documented_claims OK"
    ]
   },
   "C1": {
@@ -472,6 +472,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "env-usine present (ENV dispatch 2 DONE, b2dd78c9); ENV verifier and B1 worker dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "ENV dispatch 2 merged (cbb7907f); A3 merged (f62f70e8); wave-1 full run on 566bfd1e: 1 failure, tests.tools.test_run_all_checks timing coverage (49 modules without timing > limit 47; cumulative from new campaign test modules, no single WP); relocation adds only the 2 known geant4 failures; fix: measure timings for missing modules on f62f70e8 and add them to tools/module_timings.json (generated file, r4 \u00a72)"
   }
  ],
  "env": {
