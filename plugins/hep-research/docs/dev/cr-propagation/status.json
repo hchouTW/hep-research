@@ -124,17 +124,19 @@
    ]
   },
   "A4": {
-   "state": "dispatched",
+   "state": "verifying",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-a4",
    "base": "566bfd1e",
-   "head": null,
+   "head": "d7d8a33a",
    "merge_commit": null,
-   "worker_report": null,
+   "worker_report": "DONE: cost table from 13 validated records; closed form 0.14 s/1pt, 9.4 ms/extra pt; DRAGON2 base median 249 s wall / 221 CPU-s (127 s least loaded), grid convergence <= 1.95e-3; USINE/GALPROP rows not measured (absent at dispatch); loaded-host caveat",
    "verifier_report": null,
    "missing_capabilities": [],
-   "notes": []
+   "notes": [
+    "Sonnet verifier dispatched 2026-10-28; escalation 7 (D7 budget for E1)"
+   ]
   },
   "B1": {
    "state": "dispatched",
@@ -482,6 +484,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "C2 dispatched from 699c3b5c (A2, A3, C1 merged)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A4 DONE (d7d8a33a), verifier dispatched; escalation 7 (D7 budget vs DRAGON2 cost)"
   }
  ],
  "env": {
