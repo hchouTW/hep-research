@@ -34,8 +34,8 @@
    ]
   },
   "ENV": {
-   "state": "verifying",
-   "dispatches": 1,
+   "state": "dispatched",
+   "dispatches": 2,
    "rework_rounds": 0,
    "branch": "worktree-crprop-env",
    "base": "ef37d970",
@@ -45,7 +45,8 @@
    "verifier_report": "PASS (2026-10-27)",
    "missing_capabilities": [],
    "notes": [
-    "merged as 7d5c6934; post-merge static check interrupted by the stop: rerun before marking merged"
+    "dispatch 1 merged as 7d5c6934; post-merge static + acceptance passed 2026-10-28",
+    "dispatch 2 (2026-10-28, decision A1.1): clone USINE V3.5 from gitlab.com, licence, build with ROOT 6.38.04, record env-usine"
    ]
   },
   "A1": {
@@ -380,6 +381,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "cycle 4: verifiers P0 (r2), A1, A2, C1 (r1) dispatched; workers A3, B2 re-dispatched (dispatch 2); full checks gated by full_check_slot.py (2 slots)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "ENV dispatch 1 post-merge checks pass (static exit 0, acceptance ok): merge 7d5c6934 kept; ENV re-dispatched for USINE (A1.1)"
   }
  ],
  "env": {
