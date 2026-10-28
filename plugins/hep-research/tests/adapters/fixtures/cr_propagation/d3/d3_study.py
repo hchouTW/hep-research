@@ -282,7 +282,10 @@ def build_inelastic_driver(build_dir: Path, binary: Path, data_dir: Path) -> Pat
     if not link.exists():
         link.symlink_to(Path(data_dir).resolve() / "galprop_barpol.dat")
     (build_dir / "inel.c").write_text(DRIVER_SOURCE, encoding="utf-8")
-    subprocess.run(["gfortran", "-O2", "-o", "inel", "inel.c", str(library)], cwd=build_dir, check=True)
+    # One-file gfortran compile and link takes seconds; 600 s is a generous bound. subprocess.TimeoutExpired
+    # propagates to the caller (raised, like check=True failures), never swallowed.
+    subprocess.run(["gfortran", "-O2", "-o", "inel", "inel.c", str(library)], cwd=build_dir, check=True,
+                   timeout=600)
     return build_dir / "inel"
 
 
@@ -293,7 +296,8 @@ def dragon2_inelastic(build_dir: Path, binary: Path, data_dir: Path) -> dict:
     for nuc in INELASTIC_NUCLIDES:
         z, a = ut.charge_and_mass(nuc)
         out = subprocess.run([str(exe), str(z), str(a)] + [f"{e:.9e}" for e in nodes], cwd=build_dir,
-                             capture_output=True, text=True, check=True).stdout.split()
+                             capture_output=True, text=True, check=True,
+                             timeout=600).stdout.split()  # per-nuclide table lookup, milliseconds; raises on timeout
         sigma[nuc] = [float(v) for v in out[1::2]]
     return {"label": "DRAGON2-INELASTIC: inelastic cross sections (mb) of nuclei on hydrogen as DRAGON2 cd588707 "
                      "computes them for SpallationXSec DRAGON2 (CROSEC, nucleon_cs option 2: Barashenkov-Polanski "
