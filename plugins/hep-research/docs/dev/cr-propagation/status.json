@@ -110,18 +110,18 @@
    ]
   },
   "B2": {
-   "state": "dispatched",
+   "state": "verifying",
    "dispatches": 2,
    "rework_rounds": 0,
    "branch": "worktree-crprop-b2",
    "base": "6a0c2ae6",
-   "head": "236a374a",
+   "head": "b2cdcf49",
    "merge_commit": null,
-   "worker_report": null,
+   "worker_report": "DONE (dispatch 2): B2-1..B2-3 pass; closed forms re-derived, no code change; full run 33/33 on 236a374a; relocation not run (A1.4/A1.5); open: R0_GV/h_kpc kept beside canonical V_c_kms; profile version not bumped",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "dispatch 2 (2026-10-28): review committed work, finish checks, report"
+    "verifier dispatched 2026-10-28 (Opus, A1.5 brief)"
    ]
   },
   "A4": {
@@ -411,6 +411,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "A1.5 (supersedes A1.4): ALL-3 run once per wave by the orchestrator on integration; agents run static + impacted only; briefs updated"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "B2 DONE (dispatch 2, HEAD b2cdcf49); Opus verifier dispatched"
   }
  ],
  "env": {
