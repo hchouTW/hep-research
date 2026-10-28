@@ -866,6 +866,11 @@
    "cycle": 4,
    "date": "2026-10-29",
    "event": "PR #308 opened (release/0.43.0); required CI failed on Linux: float pins (8 failures) and emulator declaration; A1.20 cross-WP fix branch"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "PR #308 CI run 2 (6d4ce8a2): all float pins fixed; only EmulatorPerModelDeclaration fails on Linux (C2UF model self-check, amplified libm drift); A1.20 rework round 2 dispatched (self-check bound from the emulator's own sigma)"
   }
  ],
  "env": {
