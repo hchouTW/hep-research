@@ -6518,3 +6518,27 @@ the D_pp), and B1's whole-halo branch uses sqrt(L/h). Neither translator is in A
 
 Not done in A1R: convection, a radial boundary and energy losses in the zone factor (the conversion says so); the
 operator form beyond the D_pp coefficient was not re-derived; the translators of B1 and D1 were not changed.
+
+## CRPROP-D1 — 2026-10-28 (environment E-crprop)
+
+Work package D1 of the cr-propagation r4 campaign (r3 §D1 and §D1b folded together, r4 §6): DRAGON2 physics items,
+one at a time, each with its `harmonized-v1-<item>.json`, and the cr-provider/1 entrypoint `dragon2_provider.py`.
+
+**Environment (r3 §0.3, base exception D10).** E-crprop (E2 host, macOS 27.2 arm64, Python 3.13.2; DRAGON2 cd588707,
+the serial build of 2026-10-15, located through `HEP_DRAGON2_BIN` and `HEP_DRAGON2_DATA`). Checked before the first
+edit: `git rev-parse --show-toplevel` = `.claude/worktrees/crprop-d1`; `git branch --show-current` =
+`worktree-crprop-d1`; `git status` clean; base = integration HEAD `566bfd1e` (not `origin/main`, decision D10);
+prerequisite merge commits A1 `5d5fd918`, A2 `a3c880f8`, C1 `099d1d22`, B2 `81cb2ce0` are ancestors of HEAD
+(`git merge-base --is-ancestor`, exit 0). `env-usine` is absent: B1 has not run.
+
+**Criteria and tolerances, written before any DRAGON2 run of this work package (R9; frozen in `acceptance.json`, never
+loosened).**
+
+| ID | Criterion | Tolerance |
+|---|---|---|
+| D1-1 | For each item with a closed form (convection: V_c = 10 km/s constant, dV_c/dz = 0; decay: ¹⁰Be → ¹⁰B with the NUBASE2020 half-life), the DRAGON2 run with that item on is compared with the B2 closed form (`profiles/theory/cr-secondary-ratio/scripts/convection_decay.py`) with the same item on, fed with the same run's ¹²C and ¹⁶O fluxes per E/n as parents, the same D0, δ, η, R0, L and the same isotopic ILLUSTRATIVE production cross sections, and h n_H = half of DRAGON2's gas column at the observer (h = 0.1 kpc). Quantities: B/C = (¹⁰B + ¹¹B)/(¹²C + ¹³C + ¹⁴C) in 16 log-uniform rigidity bins over 2–1000 GV (isotopes summed at equal rigidity, P3; ratio of bin integrals, P2) and ¹⁰Be/⁹Be in 12 log-uniform E/n bins over 0.05–10 GeV/n (ratio of bin integrals). Verdict per item and observable: max over bins of abs(DRAGON2 / reference − 1) | 0.03 (3%) |
+| D1-1 (items without a closed form) | Reacceleration and energy losses: the reference is USINE under the same item file (r3 §D1); not compared until B1 is merged (fallback of `workflow.json`) | 0.03 when compared |
+| D1-1 diagnostic (no verdict, no tolerance) | The item effect, [DRAGON2(item on) / DRAGON2(item off)] / [closed form(item on) / closed form(item off)], per bin, with the item-off run `harmonized-v1-isotopic`; it separates the item from the fixed differences of the baseline (helium target, inelastic cross sections, 2D gas and boundary) | reported only |
+| D1-2 | Every item (convection, decay, reacceleration, losses) and the item-off baseline has a recorded run: run spec, computational-run record (input and output SHA-256, command, environment) and output under `tests/adapters/fixtures/cr_propagation/dragon2/` | all five present |
+| D1-PRV-1 | `dragon2_provider.py` passes C1's conformance mixin (`tests/core/provider_conformance.py`), live on E-crprop (skipped where DRAGON2 is not installed) | all checks pass |
+| D1-PRV-2 | Single-shot and `--serve` responses have the same sha256 after removing `elapsed_s` and time stamps | equal sha256 |
