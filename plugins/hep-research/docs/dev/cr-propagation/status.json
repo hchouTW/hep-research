@@ -532,6 +532,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "C2 DONE (a2e8f9b1), Opus verifier dispatched; escalation 7 extended (C2 closed-form evaluation count)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A1.8: D7 evaluation cap counts external codes only; core-hours count all CPU; escalation 7 decided"
   }
  ],
  "env": {
