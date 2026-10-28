@@ -2,7 +2,7 @@
  "id": "adapter:cr-propagation",
  "version": "0.2.0",
  "status": "proposed",
- "purpose": "Run a cosmic-ray propagation code from a JSON run spec in a recorded environment and turn each run into one grid-node prediction (representation grid, the node in parameter_point) that the comparison gate and covariance_fit.py model tabulated-grid consume unchanged; translate a transport block (contracts ext_theory_spec.transport) into a USINE V3.5 run with every inexpressible item recorded, read USINE's local-flux tables into ratios of bin integrals, and serve USINE as the cr-provider/1 provider 'usine'; translate a transport block into a DRAGON2 run with every inexpressible item recorded and serve DRAGON2 as the cr-provider/1 provider 'dragon2' (ratios of bin integrals on ekn or rigidity bins); optional, required by no skill",
+ "purpose": "Run a cosmic-ray propagation code from a JSON run spec in a recorded environment and turn each run into one grid-node prediction (representation grid, the node in parameter_point) that the comparison gate and covariance_fit.py model tabulated-grid consume unchanged; translate a transport block (contracts ext_theory_spec.transport) into a USINE V3.5 run with every inexpressible item recorded, read USINE's local-flux tables into ratios of bin integrals, and serve USINE as the cr-provider/1 provider 'usine'; translate a transport block into a DRAGON2 run with every inexpressible item recorded and serve DRAGON2 as the cr-provider/1 provider 'dragon2' (ratios of bin integrals on ekn or rigidity bins); serve the hep-ml Gaussian-process emulator of USINE B/C (E2) as provider 'emulator', refusing points outside its training domain; optional, required by no skill",
  "tools": [
   {
    "name": "DRAGON2 (https://github.com/cosmicrays/DRAGON2-Beta_version): run spec to XML and data directory, local-spectrum ASCII output to bin-averaged ratio predictions and to ratios of bin integrals (provider dragon2)",
@@ -32,7 +32,8 @@
   "assets/usine_translate.py",
   "assets/usine_to_prediction.py",
   "assets/usine_provider.py",
-  "assets/dragon2_provider.py"
+  "assets/dragon2_provider.py",
+  "assets/emulator_provider.py"
  ],
  "tests": [
   "../../tests/adapters/test_cr_propagation.py"
@@ -147,6 +148,53 @@
    "output_units": {
     "ratio": "1",
     "energy": "GeV/n (axis ekn) or GV (axis rigidity)"
+   }
+  },
+  {
+   "id": "emulator",
+   "entrypoint": "assets/emulator_provider.py",
+   "protocol": "cr-provider/1",
+   "version": "1.0.0",
+   "description": "Gaussian-process emulator of USINE B/C (hep-ml train_emulator.py, ml-artifact task surrogate, tests/adapters/fixtures/cr_propagation/e2) on the 20 rigidity bins 2-1000 GV of its training runs, transport fixed to the USINE provider's DEFAULT_TRANSPORT (L 4 kpc); points the stored DomainModel calls sparse or outside are refused (out-of-domain); emulator error as numerical uncertainty components; not decomposable; numpy and scipy only",
+   "domain": {
+    "D0_cm2_s": {
+     "min": 1e+28,
+     "max": 1e+29
+    },
+    "delta": {
+     "min": 0.3,
+     "max": 0.8
+    },
+    "eta": {
+     "min": -1.5,
+     "max": 1.5
+    },
+    "V_A_kms": {
+     "min": 0.0,
+     "max": 100.0
+    },
+    "V_c_kms": {
+     "min": 0.0,
+     "max": 30.0
+    }
+   },
+   "axis_ranges": {
+    "rigidity": {
+     "min": 2.0,
+     "max": 1000.0
+    }
+   },
+   "observables": [
+    "B/C"
+   ],
+   "axes": [
+    "rigidity"
+   ],
+   "decomposable": false,
+   "deterministic": true,
+   "output_units": {
+    "ratio": "1",
+    "energy": "GV (axis rigidity)"
    }
   }
  ]

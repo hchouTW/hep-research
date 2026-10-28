@@ -1,0 +1,284 @@
+{
+ "contract_version": "3.14.0",
+ "artifact_id": "ml-emulator-usine-bc-e2",
+ "artifact_type": "ml-artifact",
+ "objective": "Gaussian-process emulator of USINE B/C (20 rigidity bins, 2-1000 GV) in the five transport parameters of cr-propagation E2, served as cr-provider/1 provider emulator",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.42.0",
+  "contracts": "3.14.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  },
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-ml",
+  "code_paths": [
+   "contracts/__init__.py",
+   "contracts/identity.py",
+   "contracts/protected_use.py",
+   "contracts/schema.py",
+   "contracts/semver.py",
+   "contracts/skill_names.py",
+   "contracts/trace.py",
+   "contracts/validate.py",
+   "contracts/vocab.py",
+   "core/__init__.py",
+   "core/protected/__init__.py",
+   "core/protected/guard.py",
+   "core/protected/identity.py",
+   "core/protected/revocation_log.py",
+   "core/protected/trusted_input.py",
+   "core/trace.py",
+   "skills/hep-ml/scripts/write_ml_artifact.py"
+  ],
+  "code_tags": [],
+  "created": "2026-10-28",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [
+  {
+   "ref": "emulator-model.json",
+   "kind": "checkpoint"
+  }
+ ],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "task": "surrogate",
+  "labels": [
+   "B/C rigidity bin 0 [2, 2.72884] GV",
+   "B/C rigidity bin 1 [2.72884, 3.72329] GV",
+   "B/C rigidity bin 2 [3.72329, 5.08014] GV",
+   "B/C rigidity bin 3 [5.08014, 6.93145] GV",
+   "B/C rigidity bin 4 [6.93145, 9.45742] GV",
+   "B/C rigidity bin 5 [9.45742, 12.9039] GV",
+   "B/C rigidity bin 6 [12.9039, 17.6064] GV",
+   "B/C rigidity bin 7 [17.6064, 24.0225] GV",
+   "B/C rigidity bin 8 [24.0225, 32.7768] GV",
+   "B/C rigidity bin 9 [32.7768, 44.7214] GV",
+   "B/C rigidity bin 10 [44.7214, 61.0188] GV",
+   "B/C rigidity bin 11 [61.0188, 83.2553] GV",
+   "B/C rigidity bin 12 [83.2553, 113.595] GV",
+   "B/C rigidity bin 13 [113.595, 154.992] GV",
+   "B/C rigidity bin 14 [154.992, 211.474] GV",
+   "B/C rigidity bin 15 [211.474, 288.54] GV",
+   "B/C rigidity bin 16 [288.54, 393.69] GV",
+   "B/C rigidity bin 17 [393.69, 537.159] GV",
+   "B/C rigidity bin 18 [537.159, 732.911] GV",
+   "B/C rigidity bin 19 [732.911, 1000] GV"
+  ],
+  "features": [
+   "D0_cm2_s",
+   "delta",
+   "eta",
+   "V_A_kms",
+   "V_c_kms"
+  ],
+  "splits": {
+   "grouping_key": "parameter point (one simulator run per point)",
+   "manifest": "split-manifest.json",
+   "overlap_check": {
+    "tool": "check_split_integrity.py",
+    "result": "pass",
+    "report": "split-report.json"
+   },
+   "test_groups_disjoint": true
+  },
+  "training_domain": {
+   "D0_cm2_s": [
+    1e+28,
+    1e+29
+   ],
+   "delta": [
+    0.3,
+    0.8
+   ],
+   "eta": [
+    -1.5,
+    1.5
+   ],
+   "V_A_kms": [
+    0.0,
+    100.0
+   ],
+   "V_c_kms": [
+    0.0,
+    30.0
+   ]
+  },
+  "preprocessing": [
+   {
+    "step": "unit-cube scaling of each input (log axis for scale log)",
+    "fit_on": "training"
+   },
+   {
+    "step": "output transform log, centring and principal components (13 kept, residual <= 1e-05)",
+    "fit_on": "training"
+   }
+  ],
+  "model_hash": "sha256:31f5ba51bc434a4febcdad0d3ed031d4bd81aed3dceef2d709e5068ffdd747c1",
+  "units": {},
+  "environment": {
+   "framework": "numpy 2.5.3, scipy 1.18.1",
+   "device": "cpu",
+   "precision": "fp64",
+   "seeds": {
+    "hyperparameter_starts": 0,
+    "domain_split": 0
+   }
+  },
+  "metrics": {
+   "training_points": 110,
+   "loo_residual_rms_per_component": [
+    0.00995085736204791,
+    0.04481308566544836,
+    0.0944406469146692,
+    0.24523735168350966,
+    0.6220171062338792,
+    0.7486259014459636,
+    0.7849820250731405,
+    0.7251088416324957,
+    0.7209794203845005,
+    0.9137530333783108,
+    1.0855490533552292,
+    0.9130923145088207,
+    0.8453722806041283
+   ],
+   "pca_training_residual_max": 2.3336726893696813e-06
+  },
+  "regression_validation": {
+   "holdout": {
+    "points": 32,
+    "drawn_from": "posterior through the round-0 emulator",
+    "dchi2_max": 0.00446213399050212,
+    "pull_max": 0.06308419112702082,
+    "relative_error_max": 0.0006136734606017047
+   },
+   "confirmation": {
+    "points": 32,
+    "drawn_from": "posterior through the final emulator",
+    "dchi2_max": 0.0022227711125969375,
+    "pull_max": 0.04541669791051682,
+    "relative_error_max": 0.00038867029337796843
+   },
+   "criteria": "E2-1 dchi2 = b^T C^-1 b <= 1 (C the full ILLUSTRATIVE data covariance); E2-2 |b_i| <= 0.2 sigma_stat_i in every bin; b = emulator - USINE",
+   "max_relative_error": 0.0006136734606017047,
+   "validated_region": "the posterior of the synthetic B/C fit (truth D0 3e28, delta 0.5, eta 1, V_A 30, V_c 5); elsewhere in the box the emulator's own error estimate is the only guide"
+  },
+  "extrapolation_policy": {
+   "action": "reject",
+   "consumer": "adapters/cr-propagation/assets/emulator_provider.py: a point the stored DomainModel calls sparse or outside (or outside the box) fails with out-of-domain; --allow-outside-validated-range evaluates it labelled outside-validated-range",
+   "method": "DomainModel of skills/hep-ml/scripts/check_surrogate_domain.py on the unit-cube training points (quantile 0.99, k 5)"
+  },
+  "output_semantics": "regression-value",
+  "downstream_validation": [
+   {
+    "metric": "bias",
+    "quantity_affected": "best fit of D0_cm2_s (synthetic B/C fit), emulator minus USINE in units of the USINE Laplace sigma",
+    "value": 0.0007951480874949463,
+    "criterion": "abs <= 0.2",
+    "passed": true,
+    "ref": "summary.json e2_3"
+   },
+   {
+    "metric": "bias",
+    "quantity_affected": "best fit of delta (synthetic B/C fit), emulator minus USINE in units of the USINE Laplace sigma",
+    "value": 0.0008416502003796156,
+    "criterion": "abs <= 0.2",
+    "passed": true,
+    "ref": "summary.json e2_3"
+   },
+   {
+    "metric": "bias",
+    "quantity_affected": "best fit of eta (synthetic B/C fit), emulator minus USINE in units of the USINE Laplace sigma",
+    "value": 0.00036447063478175996,
+    "criterion": "abs <= 0.2",
+    "passed": true,
+    "ref": "summary.json e2_3"
+   },
+   {
+    "metric": "bias",
+    "quantity_affected": "best fit of V_A_kms (synthetic B/C fit), emulator minus USINE in units of the USINE Laplace sigma",
+    "value": 0.0019712928850987473,
+    "criterion": "abs <= 0.2",
+    "passed": true,
+    "ref": "summary.json e2_3"
+   },
+   {
+    "metric": "bias",
+    "quantity_affected": "best fit of V_c_kms (synthetic B/C fit), emulator minus USINE in units of the USINE Laplace sigma",
+    "value": 0.00027604845789767733,
+    "criterion": "abs <= 0.2",
+    "passed": true,
+    "ref": "summary.json e2_3"
+   },
+   {
+    "metric": "expected-uncertainty",
+    "quantity_affected": "Laplace 68.27% half-width of D0_cm2_s, emulator over USINE minus 1",
+    "value": -0.0010461713562697206,
+    "criterion": "abs <= 0.1",
+    "passed": true,
+    "ref": "summary.json e2_3"
+   },
+   {
+    "metric": "expected-uncertainty",
+    "quantity_affected": "Laplace 68.27% half-width of delta, emulator over USINE minus 1",
+    "value": 0.00014772984077326967,
+    "criterion": "abs <= 0.1",
+    "passed": true,
+    "ref": "summary.json e2_3"
+   },
+   {
+    "metric": "expected-uncertainty",
+    "quantity_affected": "Laplace 68.27% half-width of eta, emulator over USINE minus 1",
+    "value": 0.00481401937403958,
+    "criterion": "abs <= 0.1",
+    "passed": true,
+    "ref": "summary.json e2_3"
+   },
+   {
+    "metric": "expected-uncertainty",
+    "quantity_affected": "Laplace 68.27% half-width of V_A_kms, emulator over USINE minus 1",
+    "value": -0.011575885086133053,
+    "criterion": "abs <= 0.1",
+    "passed": true,
+    "ref": "summary.json e2_3"
+   },
+   {
+    "metric": "expected-uncertainty",
+    "quantity_affected": "Laplace 68.27% half-width of V_c_kms, emulator over USINE minus 1",
+    "value": -0.004327330781130012,
+    "criterion": "abs <= 0.1",
+    "passed": true,
+    "ref": "summary.json e2_3"
+   }
+  ],
+  "source_files": [
+   {
+    "ref": "run_summary.json",
+    "sha256": "afa26723c899d7fc544bfcc60298e5b439161fb93f8670950eddeee0aa55403e",
+    "role": "run-summary"
+   },
+   {
+    "ref": "split-report.json",
+    "sha256": "0b15b5762c600c6fa3a5ba00f37f8a8fb47246dad89e65f951dc66cf3f3794c2",
+    "role": "split-report"
+   },
+   {
+    "ref": "downstream.json",
+    "sha256": "6c8ee6ff1ad74b8f51cfae533c6b1f93fc28405b00cd41c4d9f0c30bbae0018a",
+    "role": "downstream-validation"
+   }
+  ]
+ }
+}

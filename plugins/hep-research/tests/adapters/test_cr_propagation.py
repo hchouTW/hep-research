@@ -1762,5 +1762,200 @@ class LiveUsineB1X(unittest.TestCase):
         self.assertEqual([f.code for f in validate_artifact(rec).errors], [])
 
 
+# ------------------------------------------------------------------ E2 (cr-propagation r4): emulator and its provider
+
+import emulator_provider  # noqa: E402
+
+E2_FIX = FIX / "e2"
+EMULATOR_PROVIDER = ADAPTER / "assets" / "emulator_provider.py"
+E2_SUMMARY = json.loads((E2_FIX / "summary.json").read_text(encoding="utf-8"))
+E2_HOLDOUT = json.loads((E2_FIX / "holdout.json").read_text(encoding="utf-8"))
+E2_EDGES = E2_HOLDOUT["observable"]["bins"]
+EMULATOR_REQUEST = {
+    "protocol": "cr-provider/1", "provider": "emulator", "provider_version": "1.0.0",
+    "points": [dict(E2_HOLDOUT["truth"]["point"]), dict(E2_HOLDOUT["holdout"][0]["point"])],
+    "observables": [{"id": "B/C", "axis": "rigidity", "unit": "GV", "bins": E2_EDGES[2:9]}],
+    "want": ["lis"], "seed": None}
+
+
+def hep_ml_scripts():
+    path = str(ROOT / "skills" / "hep-ml" / "scripts")
+    if path not in sys.path:
+        sys.path.insert(0, path)
+
+
+def e2_call(request, env=None, allow_outside=False):
+    with tempfile.TemporaryDirectory() as td:
+        req, resp = Path(td) / "req.json", Path(td) / "resp.json"
+        req.write_text(json.dumps(request))
+        argv = [sys.executable, str(EMULATOR_PROVIDER), "--request", str(req), "--response", str(resp)]
+        proc = subprocess.run(argv + (["--allow-outside-validated-range"] if allow_outside else []),
+                              capture_output=True, text=True, timeout=300,
+                              env=env or dict(os.environ, PYTHONDONTWRITEBYTECODE="1"))
+        return proc, json.loads(resp.read_text())
+
+
+class EmulatorProviderConformance(ProviderConformance, unittest.TestCase):
+    """E2-PRV-1 and E2-PRV-2: C1's conformance mixin on the emulator provider (the committed model; no USINE)."""
+    PROVIDER_ID = "emulator"
+    REQUEST = EMULATOR_REQUEST
+    VOCAB_PROFILES = (PROFILE / "profile.json",)
+
+    def unavailable_reason(self):
+        return "HEP_EMULATOR_ML_ARTIFACT is set (the conformance test uses the committed model)" if os.environ.get(
+            emulator_provider.ARTIFACT_ENV) else None
+
+
+class EmulatorArtifact(unittest.TestCase):
+    """The committed emulator: its ml-artifact validates and names the model by hash, the provider's declaration is the
+    model's training box, the model was trained for the USINE provider's DEFAULT_TRANSPORT, and the provider's
+    Gaussian-process and DomainModel arithmetic equals hep-ml's own classes."""
+
+    @classmethod
+    def setUpClass(cls):
+        hep_ml_scripts()
+        import check_surrogate_domain
+        import train_emulator
+        cls.csd, cls.te = check_surrogate_domain, train_emulator
+        cls.emu = emulator_provider.Emulator(E2_FIX / "emulator.ml-artifact.json")
+        cls.model = json.loads((E2_FIX / "emulator-model.json").read_text(encoding="utf-8"))
+
+    def test_artifact_validates_and_names_the_model(self):
+        art = json.loads((E2_FIX / "emulator.ml-artifact.json").read_text(encoding="utf-8"))
+        rep = validate_artifact(art)
+        self.assertTrue(rep.ok, [f.as_dict() for f in rep.errors])
+        ext = art["extension"]
+        self.assertEqual(ext["task"], "surrogate")
+        self.assertEqual(ext["extrapolation_policy"]["action"], "reject")
+        self.assertEqual(ext["model_hash"], "sha256:" + hashlib.sha256((E2_FIX / "emulator-model.json").read_bytes())
+                         .hexdigest())
+        self.assertEqual(ext["model_hash"], "sha256:" + E2_SUMMARY["final_model_sha256"])
+        self.assertEqual(ext["splits"]["overlap_check"]["result"], "pass")
+        self.assertEqual(set(art["status"]), {"synthetic", "unvalidated"})
+        self.assertEqual(ext["training_domain"], {f["name"]: [f["min"], f["max"]] for f in self.model["features"]})
+
+    def test_declaration_is_the_training_box_and_transport(self):
+        decl = emulator_provider.declaration()
+        self.assertEqual(decl["version"], "1.0.0")
+        self.assertEqual(decl["domain"], {f["name"]: {"min": f["min"], "max": f["max"]} for f in self.model["features"]})
+        self.assertEqual(self.model["context"]["transport"], usine_provider.DEFAULT_TRANSPORT)
+        self.assertEqual(self.model["context"]["provider_version"], usine_provider.declaration()["version"])
+        self.assertEqual(self.emu.edges, [E2_EDGES[0][0]] + [b for _, b in E2_EDGES])
+
+    def test_prediction_equals_hep_ml(self):
+        ref = self.te.GaussianProcessEmulator(self.model)
+        u = np.random.default_rng(11).uniform(0.0, 1.0, size=(300, 5))
+        mine, sig, parts = self.emu.predict_unit(u)
+        theirs, their_sig = ref.predict_unit(u)
+        np.testing.assert_allclose(mine, theirs, rtol=0, atol=1e-12)
+        np.testing.assert_allclose(sig, their_sig, rtol=0, atol=1e-12)
+        # the uncertainty components add in quadrature to the emulator's variance (P10)
+        quad = sum(p ** 2 for p in parts) + self.emu.residual_var[None, :]
+        np.testing.assert_allclose(np.sqrt(quad), sig, rtol=1e-12, atol=0)
+
+    def test_domain_status_equals_hep_ml(self):
+        dm = self.csd.DomainModel.from_dict(self.model["domain_model"])
+        u = np.vstack([np.random.default_rng(12).uniform(-0.1, 1.1, size=(1500, 5)),
+                       np.asarray(self.model["training_unit"])])
+        theirs = dm.classify(u)[0]
+        mine = [self.emu.domain_status(row)[0] for row in u]
+        self.assertEqual(mine, theirs)
+        self.assertGreater(theirs.count("sparse") + theirs.count("outside"), 0)
+
+
+class EmulatorValidation(unittest.TestCase):
+    """E2-1 and E2-2 recomputed offline from the committed hold-out sets (USINE values) with the committed provider,
+    equal to the recorded numbers (criteria of VALIDATION CRPROP-E2, fixed before the runs)."""
+
+    def test_holdout_criteria(self):
+        sys.path.insert(0, str(FIX / "e1"))
+        import active_addition as e1
+        emu = emulator_provider.Emulator(E2_FIX / "emulator.ml-artifact.json")
+        observed = np.asarray(E2_HOLDOUT["truth"]["values"])
+        sigma_stat, cov = e1.synthetic_covariance(observed)
+        cov_inv = np.linalg.inv(cov)
+        last = E2_SUMMARY["rounds"][E2_SUMMARY["final_round"]]["holdout"]
+        for key, recorded in (("holdout", last), ("confirmation", E2_SUMMARY["confirmation"])):
+            with self.subTest(set=key):
+                recs = E2_HOLDOUT[key]
+                self.assertEqual(len(recs), 32)
+                # point by point in the provider's own unit coordinates, as the provider evaluates them (the GP mean
+                # carries rounding noise of about 1e-10 in ln B/C, so a batched product would differ in the 8th digit)
+                u = np.array([emu.unit(r["point"]) for r in recs])
+                pred = np.exp(np.vstack([emu.predict_unit(row)[0] for row in u]))
+                b = pred - np.asarray([r["values"] for r in recs])
+                dchi2 = np.einsum("ij,jk,ik->i", b, cov_inv, b)
+                pull = np.abs(b) / sigma_stat[None, :]
+                self.assertAlmostEqual(float(dchi2.max()), recorded["dchi2_max"], delta=1e-9)
+                self.assertAlmostEqual(float(pull.max()), recorded["pull_max"], delta=1e-9)
+                self.assertTrue((dchi2 <= 1.0).all())          # E2-1
+                self.assertTrue((pull <= 0.2).all())           # E2-2
+                self.assertEqual([emu.domain_status(row)[0] for row in u], ["inside"] * len(u))
+        hashes = {r["point_hash"] for r in E2_SUMMARY["training_points"]}
+        self.assertFalse(hashes & {r["point_hash"] for r in E2_HOLDOUT["holdout"] + E2_HOLDOUT["confirmation"]})
+
+    def test_synthetic_fit_comparison(self):
+        e23 = E2_SUMMARY["e2_3"]
+        self.assertTrue(e23["passed"])
+        self.assertTrue(all(s <= 0.2 for s in e23["shift_in_sigma_usine"]))          # E2-3 best fit
+        self.assertTrue(all(abs(w) <= 0.10 for w in e23["width_ratio_minus_one"]))   # E2-3 widths
+        self.assertLessEqual(e23["usine"]["evaluations"], 300)
+        self.assertLessEqual(E2_SUMMARY["usine_evaluations"], 500)
+
+
+class EmulatorProviderRefusals(unittest.TestCase):
+    """The emulator's own refusals: another transport (out-of-domain), bins that are not training bins
+    (unsupported-observable), a point the DomainModel calls sparse or outside (out-of-domain; evaluated and labelled
+    with --allow-outside-validated-range), a tampered model (provider-error), and the version of another model."""
+
+    def test_transport_and_bins(self):
+        other = json.loads(json.dumps(usine_provider.DEFAULT_TRANSPORT))
+        other["geometry"]["L_kpc"] = 6.0
+        proc, doc = e2_call(dict(EMULATOR_REQUEST, transport=other))
+        self.assertEqual((proc.returncode, doc["status"], doc["reason"]), (1, "failed", "out-of-domain"))
+        proc, doc = e2_call(dict(EMULATOR_REQUEST, transport=usine_provider.DEFAULT_TRANSPORT))
+        self.assertEqual(proc.returncode, 0, doc)
+        bad = dict(EMULATOR_REQUEST, observables=[{"id": "B/C", "axis": "rigidity", "unit": "GV",
+                                                    "bins": [[2.0, 3.0], [3.0, 4.0]]}])
+        proc, doc = e2_call(bad)
+        self.assertEqual((proc.returncode, doc["reason"]), (1, "unsupported-observable"))
+
+    def test_domain_model_refusal(self):
+        corner = {"D0_cm2_s": 1.0e28, "delta": 0.8, "eta": 1.5, "V_A_kms": 100.0, "V_c_kms": 30.0}
+        emu = emulator_provider.Emulator(E2_FIX / "emulator.ml-artifact.json")
+        status, _ = emu.domain_status(emu.unit(corner))
+        self.assertIn(status, ("sparse", "outside"))
+        req = dict(EMULATOR_REQUEST, points=[EMULATOR_REQUEST["points"][0], corner])
+        proc, doc = e2_call(req)
+        self.assertEqual(proc.returncode, 3)
+        self.assertEqual(doc["status"], "incomplete")
+        self.assertEqual(doc["results"][0]["status"], "ok")
+        self.assertEqual(doc["results"][1]["reason"], "out-of-domain")
+        self.assertIn("DomainModel status", doc["results"][1]["detail"])
+        self.assertNotIn("predictions", doc["results"][1])
+        proc, doc = e2_call(req, allow_outside=True)
+        self.assertEqual(proc.returncode, 0)
+        self.assertIn("outside-validated-range", doc["results"][1]["labels"])
+        self.assertNotIn("outside-validated-range", doc["results"][0]["labels"])
+
+    def test_tampered_or_other_model(self):
+        with tempfile.TemporaryDirectory() as td:
+            td = Path(td)
+            shutil.copyfile(E2_FIX / "emulator.ml-artifact.json", td / "emulator.ml-artifact.json")
+            model = json.loads((E2_FIX / "emulator-model.json").read_text(encoding="utf-8"))
+            model["components"][0]["alpha"][0] *= 1.001
+            (td / "emulator-model.json").write_text(json.dumps(model))
+            env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1", HEP_EMULATOR_ML_ARTIFACT=str(td / "emulator.ml-artifact.json"))
+            proc, doc = e2_call(EMULATOR_REQUEST, env=env)
+            self.assertEqual((proc.returncode, doc["reason"]), (1, "provider-error"))
+            self.assertIn("model_hash", doc["detail"])
+            shutil.copyfile(E2_FIX / "emulator-model.json", td / "emulator-model.json")
+            proc, doc = e2_call(EMULATOR_REQUEST, env=env)
+            self.assertEqual(doc["reason"], "provider-version-mismatch")
+            sha = E2_SUMMARY["final_model_sha256"][:12]
+            proc, doc = e2_call(dict(EMULATOR_REQUEST, provider_version=f"1.0.0+model.{sha}"), env=env)
+            self.assertEqual(proc.returncode, 0, doc)
+
+
 if __name__ == "__main__":
     unittest.main()
