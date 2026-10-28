@@ -415,7 +415,7 @@
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-k3",
-   "base": null,
+   "base": "f778b9d3",
    "head": null,
    "merge_commit": null,
    "worker_report": null,
@@ -946,6 +946,11 @@
    "cycle": 4,
    "date": "2026-10-29",
    "event": "K2 DONE (8e3e87ed), Opus verifier; K3 dispatched; adapter-authoring.md added to K3 files"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "K3 base f778b9d3"
   }
  ],
  "env": {
