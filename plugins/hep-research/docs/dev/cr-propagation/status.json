@@ -30,7 +30,7 @@
    "verifier_report": "round 0 REWORK (5); round 1 REWORK (README scope, checker holes, sources, language differences); round 2 dispatched (last allowed)",
    "missing_capabilities": [],
    "notes": [
-    "round-2 verifier stopped without verdict; re-dispatch (last round)"
+    "round-2 verifier re-dispatched 2026-10-28 (Sonnet, last round)"
    ]
   },
   "ENV": {
@@ -60,7 +60,7 @@
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "verifier stopped without verdict; re-dispatch"
+    "verifier re-dispatched 2026-10-28 (Opus)"
    ]
   },
   "A2": {
@@ -75,12 +75,12 @@
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "verifier stopped without verdict; re-dispatch"
+    "verifier re-dispatched 2026-10-28 (Sonnet, full run_all_checks)"
    ]
   },
   "A3": {
    "state": "dispatched",
-   "dispatches": 1,
+   "dispatches": 2,
    "rework_rounds": 0,
    "branch": "worktree-crprop-a3",
    "base": "b83881c6",
@@ -90,11 +90,11 @@
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "guide entry committed; worker stopped before rerunning full checks"
+    "dispatch 2 (2026-10-28): rerun full checks on eca5da37 and report"
    ]
   },
   "C1": {
-   "state": "dispatched",
+   "state": "verifying",
    "dispatches": 1,
    "rework_rounds": 1,
    "branch": "worktree-crprop-c1",
@@ -105,12 +105,12 @@
    "verifier_report": "round 0 REWORK: conformance mixin cache inherited by subclasses (false PASS); advisory: cache key ignores theory_spec_ref. Notes for C2: closed-form provider is bin-averaged (bin_semantics), check before fitting data",
    "missing_capabilities": [],
    "notes": [
-    "rework round 1 committed (96a1a40e, dcc87566, 2d984725); worker stopped before reporting; re-verify"
+    "rework round 1 verifier dispatched 2026-10-28 (Sonnet)"
    ]
   },
   "B2": {
    "state": "dispatched",
-   "dispatches": 1,
+   "dispatches": 2,
    "rework_rounds": 0,
    "branch": "worktree-crprop-b2",
    "base": "6a0c2ae6",
@@ -120,7 +120,7 @@
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "code committed; worker stopped during its check run; no report"
+    "dispatch 2 (2026-10-28): review committed work, finish checks, report"
    ]
   },
   "A4": {
@@ -375,6 +375,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "resumed 2026-10-28 (resumption check ok: 6 worktrees, HEADs as recorded); A1.3 confirmed: <=3 workers, <=2 full run_all_checks (--jobs 4), Sonnet verifiers for mechanical WPs, Opus for physics WPs"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "cycle 4: verifiers P0 (r2), A1, A2, C1 (r1) dispatched; workers A3, B2 re-dispatched (dispatch 2); full checks gated by full_check_slot.py (2 slots)"
   }
  ],
  "env": {
