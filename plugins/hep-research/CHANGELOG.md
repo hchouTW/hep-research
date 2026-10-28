@@ -79,6 +79,16 @@ Software checks establish contract consistency only, not physical validity.
   `tests/adapters/fixtures/cr_propagation/cost/`. USINE and GALPROP rows not measured (capability absent). No
   behavior change.
 
+- crprop b1: USINE V3.5 in `adapters/cr-propagation` (adapter 0.2.0): `usine_translate.py` writes a USINE run from
+  a transport block (Model2DKisoVc for `cylinder-2d`, Model1DKisoVc for `slab-1d`; diffusion with low breaks,
+  thin-disc reacceleration, constant convection, losses, decay; the ILLUSTRATIVE cross sections of
+  `theory:cr-secondary-ratio` only), records every item USINE expresses only approximately and refuses the rest, runs
+  USINE and records the run; `usine_to_prediction.py` turns USINE's local-flux tables into ratios of bin integrals
+  (isotopes summed on the data's axis); `usine_provider.py` serves it as the cr-provider/1 provider `usine` (B/C,
+  10Be/9Be, Be/B on E_k/n or rigidity). Seven recorded runs replayed offline, live rerun with `HEP_USINE_LIVE_TEST=1`;
+  USINE `tested-in-declared-environment`, adapter still `proposed` (GALPROP). USINE is GPL-2.0 and runs as a separate
+  program; no USINE file is committed. README package size statement updated (56.4 MB).
+
 ## 0.42.0 (2026-10-26)
 
 Minor release; contracts 3.13.0, `CORE_VERSION` 1.1.0 and geant4 adapter 0.5.0 unchanged. It ships semantic naming
