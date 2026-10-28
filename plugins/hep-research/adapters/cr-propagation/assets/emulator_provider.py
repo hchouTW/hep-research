@@ -343,7 +343,7 @@ def emulator_respond(request, decl: dict, emulator: Emulator, allow_outside: boo
 
     response = respond(request, decl, evaluate_point, allow_outside)
     if refused and response.get("results"):
-        for k, res in enumerate(response["results"]):
+        for k in range(len(response["results"])):
             point = request["points"][k]
             if id(point) in refused:
                 response["results"][k] = failed_result(k, point, "out-of-domain", refused[id(point)])
