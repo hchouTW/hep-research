@@ -2204,14 +2204,14 @@ class UsineF1Offline(unittest.TestCase):
             usine_translate.translate(usine_spec("d1-isotopic")["transport"], "f1-m", (0.5, 100.0),
                                       production_modifiers=[mod])
         # the scaled table, from a stand-in production file in USINE's format (made-up numbers, not USINE's)
-        with tempfile.TemporaryDirectory() as tmp:
-            xs = Path(tmp) / "XS_NUCLEI"
+        with tempfile.TemporaryDirectory() as scratch:
+            xs = Path(scratch) / "XS_NUCLEI"
             xs.mkdir()
             rows = "\n".join(f"{10.0 + i:.6e}\t{20.0 + i:.6e}" for i in range(5))
             (xs / "sigProdGALPROP17_OPT12.dat").write_text(
                 "# stand-in\n sigma    mb      H,He\n\n1.000000e-01      1.000000e+03    5\n\n16O -> 11B\n" + rows
                 + "\n\n12C -> 11B\n" + rows + "\n", encoding="utf-8")
-            text = usine_translate.modified_production_table(t, Path(tmp))
+            text = usine_translate.modified_production_table(t, Path(scratch))
         lines = text.splitlines()
         block = [ln.split() for ln in lines[lines.index("12C -> 11B") + 1:][:5]]
         self.assertNotIn("16O -> 11B", text)
@@ -2239,12 +2239,12 @@ class UsineF1Offline(unittest.TestCase):
         self.assertLess(tables["11B"][1][14], lis["11B"][1][14])   # modulation lowers the flux at 1 GeV/n
         with self.assertRaises(usine_reader.ReadError):
             usine_reader.read_run(out, "Model1DKisoVc", ["11B"], 0.75)   # header phi 0.731 GV
-        with tempfile.TemporaryDirectory() as tmp:
+        with tempfile.TemporaryDirectory() as scratch:
             for name in ("phi0_731GV", "phi0_800GV"):
                 shutil.copy(out / "local_fluxes_11B_Ekn_Model1DKisoVc_SolMod0DFF_phi0_731GV.out",
-                            Path(tmp) / f"local_fluxes_11B_Ekn_Model1DKisoVc_SolMod0DFF_{name}.out")
+                            Path(scratch) / f"local_fluxes_11B_Ekn_Model1DKisoVc_SolMod0DFF_{name}.out")
             with self.assertRaises(usine_reader.ReadError):   # two modulated tables: ambiguous
-                usine_reader.modulated_table(Path(tmp), "11B", "Model1DKisoVc")
+                usine_reader.modulated_table(Path(scratch), "11B", "Model1DKisoVc")
 
     def test_usine_force_field_agrees_with_the_tool_contract(self):
         """USINE's SolMod0DFF on its own LIS table equals the plugin's force-field tool (subprocess, the tool
@@ -2253,9 +2253,9 @@ class UsineF1Offline(unittest.TestCase):
         out = F1_FIX / "force-field"
         lis = usine_reader.read_run(out, "Model1DKisoVc", ["11B", "12C"], 0.0)
         toa = usine_reader.read_run(out, "Model1DKisoVc", ["11B", "12C"], 0.7312345)
-        with tempfile.TemporaryDirectory() as tmp:
+        with tempfile.TemporaryDirectory() as scratch:
             for nuc, (z, a) in (("11B", (5, 11)), ("12C", (6, 12))):
-                table = Path(tmp) / f"{nuc}.json"
+                table = Path(scratch) / f"{nuc}.json"
                 table.write_text(json.dumps({"variable": "Ek_per_nucleon",
                                              "points": [[x, y] for x, y in zip(*lis[nuc])]}), encoding="utf-8")
                 for k in (2, 8, 20, 40, 60, 75):

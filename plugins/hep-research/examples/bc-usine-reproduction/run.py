@@ -65,7 +65,7 @@ PERIOD = "2011_2016"
 PHI = f"phi_{PERIOD}_gv"
 ERRORS_FILE = "CRDATA_COVARIANCE/ERRORS/AMS02_BC_R__PRL117_231102_2016.txt"
 COV_FILE = "CRDATA_COVARIANCE/cov_AMS02_201105201605__BC_R.dat"
-CRDB_FILE = "crdata_crdb20170523.dat"
+DATABASE_EXPORT_FILE = "crdata_crdb20170523.dat"
 SOURCES = ("stat", "back", "acc", "unf", "scale")
 KPC_CM = 648000.0 / math.pi * 1.495978707e13 * 1e3          # IAU parsec (r3 P1)
 KPC2_PER_MYR_CM2_S = KPC_CM ** 2 / (1e6 * 365.25 * 86400.0)  # Julian year
@@ -256,21 +256,21 @@ def stage_data(out: Path) -> dict:
                       "conditions": "data period 2011-05/2016-05 (one force-field potential)"}}
     (work / "bc-observed.json").write_text(json.dumps(record, indent=1) + "\n")
     val = subprocess.run([sys.executable, str(VALIDATE), str(work / "bc-observed.json")], capture_output=True, text=True)
-    crdb = crdb_crosscheck(data_dir, edges, values, cols, syst_total)
+    crdb = database_crosscheck(data_dir, edges, values, cols, syst_total)
     (work / "crdb-crosscheck.json").write_text(json.dumps(crdb, indent=1) + "\n")
     return {"record": str(work / "bc-observed.json"), "validate_exit": val.returncode, "validate": val.stdout[-400:],
             "covariance_model": cov_model, "crdb": {k: crdb[k] for k in ("rows", "matched", "max_rel_value",
                                                                           "max_rel_stat", "max_rel_syst")}}
 
 
-def crdb_crosscheck(data_dir: Path, edges, values, cols, syst_total) -> dict:
+def database_crosscheck(data_dir: Path, edges, values, cols, syst_total) -> dict:
     """The AMS02 B/C rows of the CRDB export shipped with USINE (CRDB 2017/05/23), each marked secondary, against the
     table used here."""
     rows = []
-    for ln in (data_dir / CRDB_FILE).read_text(encoding="utf-8", errors="replace").splitlines():
+    for ln in (data_dir / DATABASE_EXPORT_FILE).read_text(encoding="utf-8", errors="replace").splitlines():
         p = ln.split()
         if len(p) > 11 and p[0] == "B/C" and p[1].startswith("AMS02(2011/05-2016/05)") and p[2] == "R":
-            rows.append({"role": "secondary", "source": f"CRDB export {CRDB_FILE} (USINE V3.5 inputs), {p[1]}",
+            rows.append({"role": "secondary", "source": f"CRDB export {DATABASE_EXPORT_FILE} (USINE V3.5 inputs), {p[1]}",
                          "e_low": float(p[4]), "e_high": float(p[5]), "value": float(p[6]), "stat": float(p[8]),
                          "syst": float(p[10])})
     matched, dv, ds, dy = 0, 0.0, 0.0, 0.0
@@ -411,12 +411,12 @@ def chi2_of(np, y, mu, cov) -> float:
 
 def stage_start(out: Path, families, reg: Path, cache: Path) -> dict:
     import numpy as np
-    data = out / "data"
-    rec = json.loads((data / "bc-observed.json").read_text())
+    data_dir = out / "data"
+    rec = json.loads((data_dir / "bc-observed.json").read_text())
     y, edges = rec["extension"]["data"]["values"], rec["extension"]["data"]["edges"]
     stat = np.diag(np.asarray(rec["extension"]["data"]["uncertainties"][0]["values"]) ** 2)
-    cov_nom = stat + np.asarray(json.loads((data / "covariance-systematic.json").read_text())["matrix"])
-    cov_usine_data = np.asarray(json.loads((data / "covariance-usine-unf-matrix.json").read_text())["matrix"])
+    cov_nom = stat + np.asarray(json.loads((data_dir / "covariance-systematic.json").read_text())["matrix"])
+    cov_usine_data = np.asarray(json.loads((data_dir / "covariance-usine-unf-matrix.json").read_text())["matrix"])
     shipped = read_usine_covariance(usine_data())
     rel_total = sum(np.asarray(shipped[k]) for k in SOURCES)
     rows, sent = {}, 0
