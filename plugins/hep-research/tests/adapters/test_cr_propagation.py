@@ -2269,7 +2269,7 @@ class UsineF1Offline(unittest.TestCase):
                     proc = subprocess.run([sys.executable, str(FORCE_FIELD), "--modulate", "--energy", repr(ekn),
                                            "--energy-kind", "Ek_per_nucleon", "--mass", repr(nuclear_mass_gev(z, a)),
                                            "--charge", str(z), "--mass-number", str(a), "--phi", "0.7312345",
-                                           "--lis-table", str(table)], capture_output=True, text=True)
+                                           "--lis-table", str(table)], capture_output=True, text=True, timeout=120)
                     self.assertEqual(proc.returncode, 0, proc.stdout)
                     with self.subTest(nuclide=nuc, ekn=ekn):
                         self.assertLess(abs(json.loads(proc.stdout)["flux_toa"] / flux - 1.0), 1e-3)
