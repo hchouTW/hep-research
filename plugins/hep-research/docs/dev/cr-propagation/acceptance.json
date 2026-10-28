@@ -1008,6 +1008,72 @@
    "tolerance": null,
    "evidence_path": null,
    "source": "decisions.md A1.7 (added 2026-10-28; additions only, r4 5)"
+  },
+  {
+   "id": "D1-1a",
+   "wp": "D1",
+   "kind": "command",
+   "criterion": "Supersedes D1-1 for D1's verdict (A1.9). For each item (convection, decay, reacceleration; losses only if D1-L finds DRAGON2's losses physical), the item effect, ratio with the item divided by ratio without it, of B/C over 2-1000 GV and 10Be/9Be over 0.05-10 GeV/n agrees with the reference within 3%: the B2 closed form for convection and decay, USINE (B1) for every item, with reacceleration set up under the convention fixed by A1R.",
+   "command": "python3 -m unittest tests.adapters.test_cr_propagation",
+   "expect": "ok; the item-effect comparison test runs against the recorded results",
+   "tolerance": "3%",
+   "evidence_path": "$CRPROP_OUT/d1/acceptance",
+   "source": "decisions.md A1.9 (added 2026-10-28; additions only, r4 5)"
+  },
+  {
+   "id": "D1-1b",
+   "wp": "D1",
+   "kind": "artifact",
+   "criterion": "The absolute offset of each item's B/C and 10Be/9Be against each reference is reported in d1-item-results.json and VALIDATION.md with its attribution (He target, gas column, cross sections, geometry); any unattributed part is stated as unattributed. No tolerance.",
+   "command": null,
+   "expect": "verifier reads the offsets and attributions",
+   "tolerance": null,
+   "evidence_path": null,
+   "source": "decisions.md A1.9 (added 2026-10-28; additions only, r4 5)"
+  },
+  {
+   "id": "D1-L",
+   "wp": "D1",
+   "kind": "judgment",
+   "criterion": "DRAGON2 cd588707 energy losses: either a diagnosis of at most 6 DRAGON2 runs shows the unphysical suppression comes from the spec or configuration and it is fixed, or the dragon2 provider refuses requests with losses enabled (with a test), adapter.json records the limitation, and an upstream issue draft exists under $CRPROP_OUT/d1/ (not posted).",
+   "command": null,
+   "expect": "verifier cites file:line of the refusal and its test, or the diagnosis",
+   "tolerance": null,
+   "evidence_path": null,
+   "source": "decisions.md A1.9 (added 2026-10-28; additions only, r4 5)"
+  },
+  {
+   "id": "A1R-1",
+   "wp": "A1R",
+   "kind": "command",
+   "criterion": "The dragon2 convention in transport_conventions.py and the DRAGON2 row of cosmic-ray-phenomenology.md match DRAGON2 cd588707: D0 beta^etaT (rho/DiffRefRig)^delta in rigidity, cited by file:line of the DRAGON2 source; converting the repo spec D_X1_R60_UG.json (etaT = 1) from dragon2 succeeds; a test pins this.",
+   "command": "python3 -m unittest tests.skills.hep_theory.test_transport_conventions",
+   "expect": "ok",
+   "tolerance": null,
+   "evidence_path": "$CRPROP_OUT/a1r/acceptance",
+   "source": "decisions.md A1.9 (added 2026-10-28; additions only, r4 5)"
+  },
+  {
+   "id": "A1R-2",
+   "wp": "A1R",
+   "kind": "judgment",
+   "criterion": "The module and the reference page state (a) the conversion of the Alfven speed between a thin-disc and a whole-halo reacceleration zone and (b) the momentum-diffusion coefficient normalisations used by DRAGON2 cd588707 and USINE V3.5, each from the code (file:line) or from a paper equation read in full text; each conversion is marked exact or approximate with a stated bound; nothing is taken from memory.",
+   "command": null,
+   "expect": "verifier checks each formula against the cited source",
+   "tolerance": null,
+   "evidence_path": null,
+   "source": "decisions.md A1.9 (added 2026-10-28; additions only, r4 5)"
+  },
+  {
+   "id": "A1R-3",
+   "wp": "A1R",
+   "kind": "command",
+   "criterion": "Round trips of the reacceleration parameters between the dragon2 and usine conventions reproduce the input within 1e-12 relative where the conversion is exact, and an approximate conversion returns its bound.",
+   "command": "python3 -m unittest tests.skills.hep_theory.test_transport_conventions",
+   "expect": "ok",
+   "tolerance": "rel 1e-12",
+   "evidence_path": "$CRPROP_OUT/a1r/acceptance",
+   "source": "decisions.md A1.9 (added 2026-10-28; additions only, r4 5)"
   }
  ]
 }

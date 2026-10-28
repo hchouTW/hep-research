@@ -154,7 +154,7 @@
    ]
   },
   "D1": {
-   "state": "blocked",
+   "state": "waiting",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-d1",
@@ -165,7 +165,7 @@
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "blocked 2026-10-28: tolerance misses outside D1 files; escalations 5, 6, 9; branch worktree-crprop-d1 kept for H1"
+    "A1.9: waits for A1R; then dispatch 2 (D1-1a, D1-1b, D1-L); branch worktree-crprop-d1 5348266d kept"
    ]
   },
   "D2": {
@@ -184,15 +184,15 @@
    "notes": []
   },
   "C2": {
-   "state": "verifying",
+   "state": "merged",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-c2",
    "base": "699c3b5c",
    "head": "a2e8f9b1",
-   "merge_commit": null,
+   "merge_commit": "9f17775c",
    "worker_report": "DONE: C2-1..C2-6 pass (C2-3 mechanism; BIG/SLIM need USINE = C2U); coverage 0.686/0.671/0.696 in Bonferroni band; response-model shortcut with model error in covariance; ~6600 closed-form evaluations (escalation 7); open: modulation refused, duplicate-observable protocol issue, costly profile scans",
-   "verifier_report": null,
+   "verifier_report": "PASS (2026-10-28, Opus): C2-1..C2-6 pass; band recomputed; independent 200-toy rerun 0.690/0.680/0.675; surrogate error 4.2e-7 sigma, toy dq vs exact provider 6e-7; advisories: add a stricter C2U entry for BIG vs SLIM with USINE; stats.seed_missing; unbounded lstsq norms on provider fits; quick load 11 B headroom",
    "missing_capabilities": [],
    "notes": [
     "Opus verifier dispatched 2026-10-28"
@@ -330,6 +330,21 @@
    "missing_capabilities": [],
    "notes": [
     "added per A1.7; acceptance B1X-1..5 added (r4 5)"
+   ]
+  },
+  "A1R": {
+   "state": "dispatched",
+   "dispatches": 1,
+   "rework_rounds": 0,
+   "branch": "worktree-crprop-a1r",
+   "base": null,
+   "head": null,
+   "merge_commit": null,
+   "worker_report": null,
+   "verifier_report": null,
+   "missing_capabilities": [],
+   "notes": [
+    "added per A1.9"
    ]
   }
  },
@@ -563,6 +578,16 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "D1 blocked (D1-1 1/8 within 3%, all misses attributed outside D1 files); escalation 9; D3 waits on it; critical path (B1X -> C2U, B3 -> F1) unaffected"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "C2 merged (9f17775c); post-merge static ok"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A1.9: D1-1a/b and D1-L added (D1-1 superseded for D1, kept frozen); WP A1R added (D1 depends on it) and dispatched; escalations 5, 6, 9 decided"
   }
  ],
  "env": {
