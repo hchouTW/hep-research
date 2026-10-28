@@ -9,8 +9,8 @@ interpretations, and how to state them without overclaiming, in [cosmic-ray new 
 Conventions of nuclear cross sections are in [nuclear cross sections](nuclear-cross-sections.md); halo, J factor and
 annihilation conventions in [dark matter](dark-matter-phenomenology.md).
 
-Status: guidance (Th13), sources read in full text on 2026-10-23 (see "Sources read"); the only executable piece is
-`bartels_rotation.py`. Running a propagation code in
+Status: guidance (Th13), sources read in full text on 2026-10-23 (see "Sources read"); the executable pieces are
+`bartels_rotation.py` and `transport_conventions.py`. Running a propagation code in
 a global fit stays outside v1; choosing which model explains an excess stays limited-support. Experiment facts (bins, periods, published numbers)
 come from the bound experiment profile or a dataset record, never from this page.
 
@@ -34,8 +34,8 @@ come from the bound experiment profile or a dataset record, never from this page
   datasets (abstract).
 - *DRAGON2.* Numerical solver whose diffusion may depend on position, momentum and direction (a diffusion tensor along
   and across the regular field), with advection, reacceleration and losses, checked against analytic solutions (Evoli
-  et al. 2017, abstract, Eqs. 2.1-2.2). One build runs in the plugin through the optional adapter; see the tool status
-  in the first propagation page.
+  et al. 2017, abstract, Eqs. 2.1-2.2). The optional adapter runs one build (tool status: first propagation
+  page).
 - *USINE.* Semi-analytic leaky-box and two-zone 1D and 2D diffusion models for nuclei, antiprotons and antideuterons,
   fast enough for statistical scans, with nuisance parameters for modulation, cross sections and data systematics
   built in (Maurin 2020, abstract).
@@ -46,25 +46,33 @@ come from the bound experiment profile or a dataset record, never from this page
 |---|---|---|
 | GALPROP v57 (Tables 1-2) | D proportional to beta rho^delta | D0 at rho0 = 4 GV, in 10^28 cm^2/s |
 | USINE analyses (Weinrich et al. 2020a, Eq. 1) | K = beta^eta K0 (R/R0)^delta, with smooth low (R_l) and high (R_h) breaks | K0 at R0 = 1 GV, in kpc^2/Myr; K10 = K0 10^delta |
-| DRAGON2 examples (Evoli et al. 2017, Sec. 5) | D proportional to (p/p0)^delta | D0 at 1 GV (or p0 = 1 GeV) in cm^2/s |
+| DRAGON2 cd588707 (src/diffusion.cc:150, src/crevolutor.cc:121-122) | D = D0 beta^etaT (rho/rho0)^delta, rho the rigidity | D0 at rho0 = DiffRefRig (free), in 10^28 cm^2/s |
 
 1 kpc^2/Myr = 3.017e29 cm^2/s (Julian Myr, IAU parsec; unit arithmetic). A D0 quoted at 4 GV and one quoted at 1 GV
 differ by 4^delta before any physics; the beta^eta factor, the break shape and the halo height L change the meaning
 of D0 further. A comparison of transport parameters across papers states all of them or compares predictions instead.
 
+**Converting.** `transport_conventions.py diffusion --input SPEC.json` (keys
+`from`, `to`, `diffusion`) converts among the rows above (`galprop`, `usine-k0`, `usine-k10`, `dragon2`) and the
+canonical names (`canonical`: `D0_cm2_s`, `R0_gv`, `delta`, `eta`, `breaks`). A result is `exact` (pure power law, same
+eta), `approximate` with an error bound (smooth breaks; K0 <-> K10 with a break is never exact) or `not-convertible`
+(other eta or smoothness, momentum p0; exit 1: compare predictions). `reacceleration` converts V_A between
+codes and zones (below); `energy` converts per-nucleon and total kinetic energy and fluxes; `names` maps legacy keys
+(`D0`, `L`). Its tests parse the table above row by row.
+
 **Parameters and what pins them.** Normalization D0 (or K0) and slope delta; eta; low- and high-rigidity breaks;
 Alfven speed V_A (reacceleration); convective speed V_c and its gradient; halo height L; injection indices and their
 breaks; the modulation parameters of the data periods.
 
-- **Reacceleration ties momentum diffusion to spatial diffusion:** D_pp D_xx = 4 p^2 V_A^2 / (3 delta (4 - delta^2)
-  (4 - delta) w), w the ratio of wave to magnetic energy density, taken as 1; only V_A^2 / w enters (Strong and Moskalenko
-  1998, Sec. 2, Eq. 1, after Seo and Ptuskin 1994). GALPROP v57 cites the same relation without writing it
-  (Porter et al. 2022, Sec. 2); DRAGON2's Alfvenic option uses the same prefactor with the direction-averaged spatial
-  coefficient and w (the turbulence level) about 1 (Evoli et al. 2017, App. C.9, Eq. C.27; a magnetosonic option is
-  Eq. C.28), and its one-zone form of D, which the other forms build on, carries beta^eta: D0 beta^eta
-  (rho/rho0)^delta (App. C.8, Eq. C.23). A V_A from one code is comparable with another's
-  only when both use this relation and the same w.
-
+- **Reacceleration (D_pp to D_xx):** D_pp D_xx = c V_A^2 p^2 / (delta (4 - delta) (4 - delta^2) w), w (wave/field
+  energy) ~1; c = 4/3 in Strong and Moskalenko 1998 (Sec. 2, Eq. 1, after Seo and Ptuskin 1994), cited
+  by GALPROP v57 (Porter et al. 2022, Sec. 2) and Evoli et al. 2017 (App. C.9, Eq. C.27). In code:
+  DRAGON2 cd588707 type `Ptuskin94` has c = 1 and no w, `Ptuskin03` c = 4/3 (src/galaxy.cc:279-284;
+  src/include/constants.h:146-149), whole halo (src/galaxy.cc:308, 324); USINE V3.5 c = 4/3
+  (inputs/init.Model1D.par:90), thin disc only (src/TUModel1DKisoVc.cc:400-416).
+- **Thin disc vs whole halo** (derived in `transport_conventions.py`; 1D slab, no convection): equal
+  first-order effect needs c V_A,disc^2 h = c V_A,halo^2 L / 3, not sqrt(L/h); beyond it the terms differ by
+  (1 + lam)/5, lam = h Gamma L / D.
 - Above about 5 GV convection and reacceleration are degenerate and poorly constrained one by one (Korsmeier and
   Cuoco 2016, abstract, from p, He and antiprotons).
 - With cross-section uncertainties as nuisances, both "low-rigidity diffusion break, no reacceleration" and

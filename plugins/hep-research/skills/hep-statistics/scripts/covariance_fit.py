@@ -66,9 +66,14 @@ Input (fit, "model": "tabulated-grid"): a fit of parameters tabulated on a grid 
    "model_set": {"alternative_key": "xs_set", "prescription": {"kind": "min-max", "owner": "hep-theory",
           "justification": "..."}} (optional: the parameter_point key that names a cross-section set; each set is a full
           grid, fitted separately; contracts/comparison/model_set.py model_set() and envelope() give the spread),
-   "theory_spec": "spec.json" | {theory-spec} (optional; its degenerate_directions are compared with the fit),
+   "theory_spec": "spec.json" | {theory-spec} (optional; its degenerate_directions are compared with the fit; an
+          object entry contributes its "combination", contracts 3.14.0),
    "combinations": ["D0/L"] (optional monomials of grid parameters to report, e.g. "D0/L", "D0*L^2"),
-   "start": {"D0": 3.0, "L": 4.0} (optional, inside the grid)}
+   "start": {"D0": 3.0, "L": 4.0} (optional, inside the grid),
+   "degeneracy_scan": {"parameter": "L"} | {"direction": "fisher" | {"D0": 1, "L": 1}} | {"plane": ["D0", "L"]}, with
+          optional "values", "points", "threshold" (default 1), "broken_by" (optional: profile-likelihood scans by
+          degeneracy.py, which also does the Fisher screen; adds "degeneracies" (object form, evidence fisher-screen
+          without valid_range, then profile-scan with valid_range) and "profile_scans" to each fit)}
   Every prediction is gated (contracts/comparison/gate.py check()) against the measurement first; one that is not
   comparable, or a fit without a measurement to gate against, is refused (exit 1). The grid parameters (and the
   alternative key) are what is fitted, so the gate is given them as measurement conditions equal to the node's own
@@ -78,9 +83,9 @@ Input (fit, "model": "tabulated-grid"): a fit of parameters tabulated on a grid 
   no components, the dataset's covariance ref (status "present"). A component with correlation "unknown" or an
   unreadable ref, or no covariance at all, is recorded under "missing" with status "incomplete" (exit 3): a diagonal
   matrix is never assumed.
-  Degenerate directions: eigen-decomposition of the Fisher matrix J^T C^-1 J in the fit coordinates (nuisance
-  profiled), J by central differences; a direction is degenerate when its 1-sigma half-width exceeds half the grid
-  chord along it or its eigenvalue is below 1e-10 of the largest. Each is reported with its eigenvector and the
+  Degenerate directions (degeneracy.py, Fisher screen): eigen-decomposition of the Fisher matrix J^T C^-1 J in the fit
+  coordinates (nuisance profiled), J by central differences; a direction is degenerate when its 1-sigma half-width
+  exceeds half the grid chord along it or its eigenvalue is below 1e-10 of the largest. Each is reported with its eigenvector and the
   condition number and compared with the theory spec's degenerate_directions (a monomial such as "D0/L" predicts a flat
   direction along which it is constant); a mismatch is a warning. Parameters along a degenerate direction get no error;
   combinations orthogonal to it get one (pseudo-inverse over the constrained directions).
@@ -115,6 +120,9 @@ except ImportError:  # pragma: no cover
 sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parents[3]))  # the plugin root
 from core.stats import broken_power_law as _bpl  # noqa: E402
+
+sys.path.insert(0, str(Path(__file__).resolve().parent))
+import degeneracy as _deg  # noqa: E402  (same skill: Fisher screen and profile scans, cr-propagation A3)
 
 LABEL = "[General method]"
 COND_WARN = 1e10
@@ -672,7 +680,7 @@ class CovFitIncomplete(CovFitError):
 
 
 GRID_EDGE_SLOPE = 1e-3     # chi2 rise per grid cell, moving inward from an edge, above which the minimum is outside
-DEGENERATE_EIG = 1e-10     # eigenvalue / largest eigenvalue below which a direction is degenerate regardless of sigma
+DEGENERATE_EIG = _deg.DEGENERATE_EIG     # eigenvalue / largest eigenvalue below which a direction is degenerate
 MATCH_COS = 0.1            # |g . v| / (|g| |v|) below which a flat direction v keeps the monomial with gradient g constant
 
 
@@ -808,7 +816,7 @@ class _Grid:
         return float(a[i + 1] - a[i])
 
 
-def _grid_one(grid: _Grid, names, scales, y, cov, u, start, monomials, declared):
+def _grid_one(grid: _Grid, names, scales, y, cov, u, start, monomials, declared, scan=None):
     """Fit one grid (one cross-section set): best fit, Fisher matrix, degenerate directions, combinations."""
     k, n = len(names), len(y)
     _, info = subspace(cov, None)                 # refuses a singular covariance, reports its condition number
@@ -910,20 +918,7 @@ def _grid_one(grid: _Grid, names, scales, y, cov, u, start, monomials, declared)
         edm = float(0.25 * g @ np.linalg.pinv(fisher, rcond=1e-12) @ g) if np.all(np.isfinite(g)) else float("inf")
         convergence.update(edm=edm, edm_max=EDM_MAX)
         convergence["converged_by"] = "edm" if edm <= EDM_MAX else None
-    ev, evec = np.linalg.eigh(0.5 * (fk + fk.T))
-    lam_max = max(float(ev[-1]), 1e-300)
-    cond = float(lam_max / ev[0]) if ev[0] > 0 else None
-    span = grid.hi - grid.lo
-    eig, degenerate, keep = [], [], []
-    for lam, v in zip(ev, evec.T):
-        v = v * (1 if v[np.argmax(np.abs(v))] > 0 else -1)
-        sigma = float(1 / math.sqrt(lam)) if lam > 0 else None
-        chord = float(min(span[i] / abs(v[i]) for i in range(k) if abs(v[i]) > 1e-12))
-        flat = lam <= DEGENERATE_EIG * lam_max or sigma is None or sigma > chord / 2
-        entry = {"eigenvalue": float(lam), "eigenvector": dict(zip(names, map(float, v))), "sigma": sigma,
-                 "grid_chord": chord, "degenerate": bool(flat)}
-        eig.append(entry)
-        (degenerate if flat else keep).append((entry, v, lam))
+    cond, eig, degenerate, keep = _deg.fisher_screen(fk, names, grid.hi - grid.lo, DEGENERATE_EIG)
     warnings = []
     g_of = {}
     for text, mono in monomials.items():
@@ -984,6 +979,10 @@ def _grid_one(grid: _Grid, names, scales, y, cov, u, start, monomials, declared)
            "optimizer_message": str(res.message), "convergence": convergence}
     if nz:
         out["normalization_nuisance"] = float(p[k])
+    if scan is not None:    # level 2 (degeneracy.py): only on request, so the outputs without a scan are unchanged
+        level2, out["profile_scans"], scan_warn = _deg.profile_scan(m2ll, p, bounds, names, scales, scan, chi2, degenerate)
+        out["degeneracies"] = _deg.screen_objects(degenerate, names, scales) + level2
+        warnings += scan_warn
     return out
 
 
@@ -1107,7 +1106,9 @@ def grid_fit(doc: dict, base: Path | str = ".") -> dict:
     declared = []
     if doc.get("theory_spec") is not None:
         spec = _load_json(doc["theory_spec"], base, "theory_spec")
-        declared = [d for d in ((spec.get("extension") or {}).get("degenerate_directions") or []) if isinstance(d, str)]
+        # a string entry is the combination; an object entry (contracts 3.14.0) contributes its 'combination'
+        entries = (spec.get("extension") or {}).get("degenerate_directions") or []
+        declared = [c for c in (d.get("combination") if isinstance(d, dict) else d for d in entries) if isinstance(c, str)]
     else:
         warnings.append("no theory spec given: degenerate directions are reported but not compared")
     wanted = list(dict.fromkeys(declared + [c for c in (doc.get("combinations") or []) if isinstance(c, str)]))
@@ -1129,12 +1130,15 @@ def grid_fit(doc: dict, base: Path | str = ".") -> dict:
             raise CovFitInputError("start values must be finite numbers (> 0 on a log axis)")
         t0 = np.array([math.log(start[nm]) if sc == "log" else float(start[nm]) for nm, sc in zip(names, scales)])
 
+    scan = _deg.parse_scan(doc["degeneracy_scan"], names) if doc.get("degeneracy_scan") is not None else None
+
     # 6. fit each cross-section set
     fits = []
     for alt, (grid, _) in grids.items():
         if t0 is not None and not grid.inside(t0):
             raise CovFitError(f"start {start} lies outside the grid: nothing is extrapolated")
-        r = _grid_one(grid, names, scales, y, cov, u, t0, monomials, [t for t in declared if monomials.get(t) and len(monomials[t]) >= 2])
+        r = _grid_one(grid, names, scales, y, cov, u, t0, monomials, [t for t in declared if monomials.get(t) and len(monomials[t]) >= 2],
+                      scan)
         r["alternative"] = json.loads(alt)
         r["covariance"].update(cov_info)
         found = [e for e in r["degenerate_directions"]]
@@ -1223,7 +1227,7 @@ def main(argv=None) -> int:
     except KeyError as exc:
         print(json.dumps({"status": "rejected", "error": f"missing {exc}"}))
         return 2
-    except CovFitInputError as exc:
+    except (CovFitInputError, _deg.ScanInputError) as exc:
         print(json.dumps({"status": "rejected", "error": str(exc)}))
         return 2
     except CovFitIncomplete as exc:

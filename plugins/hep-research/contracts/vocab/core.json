@@ -1,5 +1,5 @@
 {
- "contracts_version": "3.13.0",
+ "contracts_version": "3.14.0",
  "note": "Core vocabularies. Profiles extend them only with namespaced terms '<namespace>:<term>' declared in profile.json vocabulary_extensions. Unknown un-namespaced terms are rejected.",
  "vocabularies": {
   "levels": {
@@ -182,6 +182,11 @@
    "pass": "The check was run and passed at its stated tolerance",
    "fail": "The check was run and failed",
    "inconclusive": "The check was run and neither passed nor failed (state why)"
+  },
+  "degeneracy_evidence": {
+   "fisher-screen": "Flat direction of the Fisher matrix at the best fit: a local linear screen, not a conclusion (contracts 3.14.0)",
+   "profile-scan": "Profile-likelihood scan along the direction or over the plane, within the recorded range (contracts 3.14.0)",
+   "posterior": "Posterior samples showing the direction unconstrained within the recorded range (contracts 3.14.0)"
   },
   "ml_downstream_metrics": {
    "expected-limit": "Expected limit (or its change) of the analysis that uses the model",

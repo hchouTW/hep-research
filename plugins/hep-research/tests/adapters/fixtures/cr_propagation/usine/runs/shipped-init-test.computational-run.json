@@ -1,0 +1,106 @@
+{
+ "contract_version": "3.14.0",
+ "artifact_id": "usine-run-shipped-init-test",
+ "artifact_type": "computational-run",
+ "objective": "USINE V3.5's shipped example inputs/init.TEST.par run in place with 'usine -l' (USINE's own inputs, unmodulated B/C): the reference of acceptance B1X-2 and B1X-3",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.42.0",
+  "contracts": "3.14.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-computing",
+  "created": "2026-10-28",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "status": [
+  "unvalidated"
+ ],
+ "extension": {
+  "input_manifest": [
+   {
+    "path": "<TOOL_HOME>/inputs/init.TEST.par",
+    "sha256": "d24929a595bc531cfccc906e2b4589374a71a50bcb345c251ccd255f8a849b74",
+    "read_in_place": true
+   }
+  ],
+  "input_manifest_note": "USINE's shipped file (GPL-2.0), hashed where it lies and never copied; it reads its other inputs through $USINE/inputs/",
+  "tools": [
+   {
+    "name": "USINE",
+    "version": "V3.5 (git tag V3.5, commit fb53006db41d1a640bf1b5af1a4b0f899ca59673; built with Apple clang 21.0.0 against ROOT 6.38.04)",
+    "binary": "<TOOL_HOME>/bin/usine",
+    "binary_sha256": "1d444720afec6ebd2efde8d275d5d950f39edee4f53e7c3756fba8ce05a62d25"
+   },
+   {
+    "name": "python",
+    "version": "3.13.2"
+   },
+   {
+    "name": "numpy",
+    "version": "2.4.4"
+   },
+   {
+    "name": "scipy",
+    "version": "1.17.1"
+   }
+  ],
+  "commands": [
+   "USINE=<TOOL_HOME> <TOOL_HOME>/bin/usine -l <TOOL_HOME>/inputs/init.TEST.par <RUN_DIR>/out 'B/C:KEKN:0.;B/C:kR:0.' 0 1 1 0"
+  ],
+  "environment": {
+   "python": "3.13.2",
+   "implementation": "CPython",
+   "executable": "<CONDA_HOME>/bin/python3",
+   "platform": "macOS-27.2-arm64-arm-64bit-Mach-O",
+   "machine": "arm64",
+   "system": {
+    "os": "Darwin",
+    "arch": "arm64",
+    "libc": "macOS 27.2",
+    "kernel": "27.2.0"
+   },
+   "origin": "conda",
+   "variables": {
+    "ROOTSYS": "/opt/homebrew/Cellar/root/6.38.04_1",
+    "CONDA_PREFIX": "<CONDA_HOME>",
+    "CONDA_DEFAULT_ENV": "base"
+   },
+   "packages": {
+    "numpy": "2.4.4",
+    "scipy": "1.17.1"
+   },
+   "project": {
+    "path": "<TOOL_HOME>",
+    "commit": "fb53006db41d1a640bf1b5af1a4b0f899ca59673",
+    "dirty": true
+   }
+  },
+  "seeds": {
+   "note": "USINE's local-flux calculation is deterministic: no random numbers are drawn"
+  },
+  "tolerances": {
+   "note": "those of init.TEST.par (EPS_ITERCONV 1e-6, EPS_INTEGR 1e-4, EPS_NORMDATA 1e-10); outputs printed with 6 significant digits"
+  },
+  "resources": {
+   "wall_seconds": 21.24
+  },
+  "exit_status": 0,
+  "usine_exit_status": 1,
+  "exit_status_note": "exit_status 0: both B/C tables written, no USINE error or crash in the log; USINE V3.5 itself returns 1 on every path (usine_exit_status)",
+  "output_hashes": {
+   "out/local_fluxes_BC_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "3094cd03d14baf3ef405da0c6675b7478465ae92af5ee9a42b4a694eb5181e92",
+   "out/local_fluxes_BC_R_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "583d395f89e9d807f8cd48ddb6ce31463c2443baefe3c0ef7c6454df784f34de"
+  },
+  "notes": [
+   "only the two B/C tables are kept; phi = 0 (unmodulated) is asked on the command line"
+  ]
+ }
+}

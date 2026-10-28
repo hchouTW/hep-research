@@ -15,6 +15,7 @@ and transport values are ILLUSTRATIVE.
 | Cross-section sets (inputs, model alternatives) | `models/xs-illustrative-A.json`, `models/xs-illustrative-B.json` |
 | References and what is attributed to them (read level per source) | `evidence/sources.json`, `evidence/claims.json` |
 | External benchmark (B1): open; search record and reasons | `benchmarks/external-benchmark-search.json` |
+| Thin disc with convection (V_c) and radioactive decay (10Be, 10Be -> 10B gain): closed forms, limits, units | `derivations/convection-decay-record.md` (run `scripts/derive_convection_decay.py`); `scripts/convection_decay.py --help`, `--benchmark`; settings `benchmarks/convection-decay-benchmark.json` |
 
 Conventions: `conventions.json`. The level `crsr:local-interstellar` is this profile's vocabulary: validate its
 artifacts with `contracts/validate.py <artifact> --profiles-from <project config binding theory:cr-secondary-ratio>`.

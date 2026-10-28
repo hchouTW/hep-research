@@ -14,6 +14,14 @@ nodes in ln(E/n) on a piecewise-linear interpolation of ln(ratio) in ln(E/n) bet
 outside DRAGON2's energy range are refused (no extrapolation). With --points instead of --edges the ratio is written at
 DRAGON2's own nodes inside the range ("point" semantics). A zero or negative ratio at a node used is refused.
 
+Ratio of bin integrals (r3 P2, P3; functions ratio_of_bin_integrals and flux_integral, used by dragon2_provider.py):
+each column times A is the flux per E/n; between two energy nodes it is a power law in E/n (log-log interpolation,
+integrated exactly; linear where a node value is not positive). On the axis ekn every isotope is integrated over the
+bin; on the axis rigidity each isotope is integrated over the E/n interval its own Z/A maps the rigidity bin onto
+(flux per R dR = flux per E/n dE/n), so elements are summed at equal rigidity. The ratio is the summed numerator
+integral over the summed denominator integral. Kinematics per nucleon use DRAGON2's nucleon mass 0.938 GeV
+(constants.h mp). A bin that leaves the energy range of the run is refused.
+
 Usage:
   python3 dragon2_to_prediction.py --txt RUN/output/NAME.txt --numerator NUC_5010,NUC_5011
       --denominator NUC_6012,NUC_6013,NUC_6014 (--edges 10,30,100 | --points 10,1000) --level LEVEL
@@ -119,6 +127,81 @@ def bin_average(energies: list[float], values: list[float], edges: list[float]) 
         vals = [_interp_log(energies, values, min(max(math.exp(p), lo), hi)) for p in pts]
         out.append(float(0.5 * sum(wi * v for wi, v in zip(w, vals))))
     return out
+
+
+DRAGON2_NUCLEON_MASS_GEV = 0.938  # DRAGON2 constants.h mp: its per-nucleon kinematics (grid.cc)
+
+
+def charge_and_mass(column: str) -> tuple[int, int]:
+    """(Z, A) of an output column NUC_<1000 Z + A>; Pri_p and Sec_p are (1, 1)."""
+    if column in ("Pri_p", "Sec_p"):
+        return 1, 1
+    a = mass_number(column)
+    return int(column[4:]) // 1000, a
+
+
+def ekn_from_rigidity(rigidity_gv: float, z: int, a: int, mass_gev: float = DRAGON2_NUCLEON_MASS_GEV) -> float:
+    """Kinetic energy per nucleon (GeV/n) of a nucleus (Z, A) at rigidity R (GV): p/n = R Z / A."""
+    p_n = rigidity_gv * abs(z) / a
+    return math.sqrt(p_n * p_n + mass_gev * mass_gev) - mass_gev
+
+
+def flux_integral(energies: list[float], flux: list[float], lo: float, hi: float) -> float:
+    """Integral of the flux per E/n over [lo, hi] (GeV/n): exact on each segment of the log-log interpolation
+    between nodes (linear where a node value is not positive). Refuses limits outside the node range."""
+    import bisect
+    e_lo, e_hi = energies[0], energies[-1]
+    if lo < e_lo * (1 - 1e-12) or hi > e_hi * (1 + 1e-12) or not lo < hi:
+        raise ConvertError(f"integration range [{lo:g}, {hi:g}] GeV/n leaves the run's energy range "
+                           f"[{e_lo:g}, {e_hi:g}] GeV/n")
+    lo, hi = max(lo, e_lo), min(hi, e_hi)
+    total = 0.0
+    j = max(bisect.bisect_right(energies, lo) - 1, 0)
+    while j < len(energies) - 1 and energies[j] < hi:
+        e0, e1, f0, f1 = energies[j], energies[j + 1], flux[j], flux[j + 1]
+        a, b = max(lo, e0), min(hi, e1)
+        if b > a:
+            if f0 > 0 and f1 > 0:
+                k = math.log(f1 / f0) / math.log(e1 / e0)
+                if abs(k + 1.0) < 1e-12:
+                    total += f0 * e0 * math.log(b / a)
+                else:
+                    total += f0 / e0 ** k * (b ** (k + 1) - a ** (k + 1)) / (k + 1)
+            else:
+                slope = (f1 - f0) / (e1 - e0)
+                total += (f0 - slope * e0) * (b - a) + 0.5 * slope * (b * b - a * a)
+        j += 1
+    return total
+
+
+def isotope_bin_integrals(energies: list[float], cols: dict, columns: list[str], edges: list[float],
+                          axis: str) -> list[float]:
+    """Per bin, the summed integral of the listed isotopes (flux per E/n = A times the column) over the bin of the
+    axis 'ekn' (GeV/n) or 'rigidity' (GV, each isotope over its own E/n interval)."""
+    if axis not in ("ekn", "rigidity"):
+        raise ConvertError(f"axis {axis!r}: ekn or rigidity")
+    if len(edges) < 2 or any(b <= a for a, b in zip(edges, edges[1:])):
+        raise ConvertError("edges must be at least two strictly increasing values")
+    out = [0.0] * (len(edges) - 1)
+    for c in columns:
+        if c not in cols:
+            raise ConvertError(f"column {c!r} not in the output (have: {', '.join(sorted(cols))})")
+        z, a = charge_and_mass(c)
+        flux = [a * x for x in cols[c]]
+        lims = edges if axis == "ekn" else [ekn_from_rigidity(r, z, a) for r in edges]
+        for k, (lo, hi) in enumerate(zip(lims, lims[1:])):
+            out[k] += flux_integral(energies, flux, lo, hi)
+    return out
+
+
+def ratio_of_bin_integrals(energies: list[float], cols: dict, numerator: list[str], denominator: list[str],
+                           edges: list[float], axis: str) -> list[float]:
+    """The ratio of the bin-integrated summed numerator and denominator (r3 P2), isotopes summed on the axis (P3)."""
+    num = isotope_bin_integrals(energies, cols, numerator, edges, axis)
+    den = isotope_bin_integrals(energies, cols, denominator, edges, axis)
+    if not all(d > 0 for d in den):
+        raise ConvertError("the denominator's bin integral is not positive in every bin")
+    return [n / d for n, d in zip(num, den)]
 
 
 def parse_param(items: list[str]) -> dict:

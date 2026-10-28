@@ -1,0 +1,108 @@
+{
+ "contract_version": "3.14.0",
+ "artifact_id": "usine-run-u-l2-gas",
+ "artifact_type": "computational-run",
+ "objective": "USINE run 'u-l2-gas' of cr-propagation D3 (level2): translated from a transport block by usine_translate.py, then the D3 settings of d3_study.py applied",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.42.0",
+  "contracts": "3.14.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-computing",
+  "created": "2026-10-28",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "status": [
+  "unvalidated"
+ ],
+ "extension": {
+  "input_manifest": [
+   {
+    "path": "usine.init.par",
+    "sha256": "f236890dab4c4fb4062d2951274e8db79159141859c858f586cee2772694968a",
+    "committed_form_sha256": "81504cea1a96afb301658214f938e42feb0ee9a16343f3ce46670ebb181e122c"
+   },
+   {
+    "path": "xs_inelastic.dat",
+    "sha256": "0a5ab1630eddb87d7828fa76d377907a3bae41ab0294c80eae4bbab83455f97a",
+    "committed_form_sha256": "0a5ab1630eddb87d7828fa76d377907a3bae41ab0294c80eae4bbab83455f97a"
+   },
+   {
+    "path": "xs_production.dat",
+    "sha256": "cb1705ef83747e4c81d49653b66169665ffc00d203375b58ac4b563244126926",
+    "committed_form_sha256": "cb1705ef83747e4c81d49653b66169665ffc00d203375b58ac4b563244126926"
+   },
+   {
+    "path": "<TOOL_HOME>/inputs/crdata_crdb20170523.dat",
+    "sha256": "07012738f20c4320d2aa081998f93d643d8804daf208b8e90f00cce99cf71896",
+    "read_in_place": true
+   }
+  ],
+  "input_manifest_note": "sha256 is of each file as run, with the absolute paths of the run directory and of USINE's inputs folder written into usine.init.par; committed_form_sha256 is of the same file written with the placeholders <TOOL_HOME>/inputs and <RUN_DIR> (the form committed under tests/adapters/fixtures/cr_propagation/usine/inputs/), equal to sha256 for the files that hold no path; entries with read_in_place are USINE's own files (GPL-2.0), hashed where they lie and never copied",
+  "tools": [
+   {
+    "name": "USINE",
+    "version": "V3.5 (git tag V3.5, commit fb53006db41d1a640bf1b5af1a4b0f899ca59673; built with Apple clang 21.0.0 against ROOT 6.38.04)",
+    "binary": "<TOOL_HOME>/bin/usine",
+    "binary_sha256": "1d444720afec6ebd2efde8d275d5d950f39edee4f53e7c3756fba8ce05a62d25"
+   }
+  ],
+  "commands": [
+   "<TOOL_HOME>/bin/usine -l <RUN_DIR>/usine.init.par <RUN_DIR>/out '7BE,9BE,10BE,10B,11B,12C,13C,14C,B/C,10BE/9BE:KEKN:0.;B/C,10BE/9BE:kR:0.' 0 1 1 0"
+  ],
+  "environment": {},
+  "seeds": {
+   "note": "USINE's local-flux calculation is deterministic: no random numbers are drawn"
+  },
+  "tolerances": {
+   "note": "USINE EPS_ITERCONV 1e-6, EPS_INTEGR 1e-4, EPS_NORMDATA 1e-10 (written into the initialisation file); outputs printed with 6 significant digits"
+  },
+  "resources": {
+   "wall_seconds": 21.74
+  },
+  "exit_status": 0,
+  "usine_exit_status": 1,
+  "exit_status_note": "exit_status is the run's outcome as judged by usine_translate.py (0: every expected output written, no USINE error or crash in the log); USINE V3.5 itself returns 1 on every path (usine_exit_status)",
+  "output_hashes": {
+   "out/local_fluxes_7BE_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "43cb6d7ed423b5b830cb1ef7205193b0846cb114af6003145a3d63b3bad8f26c",
+   "out/local_fluxes_9BE_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "ee279e7c079483c1e8a0a99c770b0cd0ec8c0bcba88bcd4789eb17e5cdc988f7",
+   "out/local_fluxes_10BE_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "90f60ac6530e882d5cb6d56dbcbcb90bc05a6b29b8b7e9d3200e716a87418bca",
+   "out/local_fluxes_10B_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "22ca018f1107add84a427a0c7a52ccacf6c87cb75550acbed0c61a774ba82d78",
+   "out/local_fluxes_11B_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "b0ec7cd040abc43363a6354527843a21b4533cedd251c5182defa0ab1db7d2b6",
+   "out/local_fluxes_12C_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "894171b88d0d38bbe5a6ae39cfcca17a5a53bcac429c41b6492e21c8bfb2f4e4",
+   "out/local_fluxes_13C_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "7d99fbc32e08e8cc97cdbfb6aae774f32817145f6b61530732016a27ce976856",
+   "out/local_fluxes_14C_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "dcc3d3d3e178c992bd83b8f37a9355edc71ba50b87fa7ca11e1d3fa11009b0d1",
+   "out/local_fluxes_BC_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "dce789211d94b883f816c0850158a4cdab2753a68148c65e8823e7cccd07ab29",
+   "out/local_fluxes_10BE9BE_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "f34b5bcc3a3714856110b56d99e4b6d43eb4c672bb6aaa47c1dc374a2587abda",
+   "out/local_fluxes_BC_R_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "dfcaa5665300f097cd1a151bb2163a7048904b88eba41fee53841f7d7ee8db52",
+   "out/local_fluxes_10BE9BE_R_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "545c7be1494f8c5cfbe45e99fac8bb9e95b4b39a20582b68805127b89a47b7c8"
+  },
+  "notes": [
+   "observer at r = 8.3 kpc, z = 0 (not fixed by the transport block); no central hole",
+   "diffusion.form 'beta^eta (R/R0)^delta with smooth breaks': not parsed; K = beta^eta K0 (Rig/R0)^delta times the break factors is fixed by the canonical fields",
+   "reacceleration off (V_A = 0): zone 'thin-disc', relation 'Seo-Ptuskin 1994' not used",
+   "decay off: lorentz_dilation True, ec_treatment 'fully-stripped' not used",
+   "cross_sections.ghost_threshold 'off: ghost nuclei and tertiary chains off (IsLoadGhosts false)': not parsed; ghost nuclei are not loaded (IsLoadGhosts false; the cumulative cross sections of USINE's chart crcharts_Zmax30_ghost97.dat) and tertiary chains are off",
+   "sources.injection species_group ['all primaries']: one slope for every primary of the network",
+   "sources.spatial 'not fixed by harmonized-v1; each code records its choice': not parsed; uniform in r up to radius_kpc in the thin disc (template CST)",
+   "gas 'n_H = 1.089763419 cm^-3 (DRAGON2 BronfFerr nucleon column at the observer / 2 h)': HI = 1.08976, HII = 0, H2 = 0 cm^-3, He = He_to_H_number x (HI + HII + 2 H2) = 0.119874 cm^-3 in the thin disc; targets H, He",
+   "cross sections: USINE's own files XS_NUCLEI/sigProdGALPROP17_OPT12.dat (production) and XS_NUCLEI/sigInelTripathi99+Coste12.dat (inelastic), read in place from HEP_USINE_DATA (GPL-2.0, never copied)",
+   "source spectrum dQ/dE_k/n = q Rig^-2.3 (USINE POWERLAW, eta_s = 0), uniform in r up to radius_kpc in the thin disc (template CST)",
+   "source abundances: solar-system isotopic fractions and abundances with the FIP bias (USINE kSSISOTFRAC, kSSISOTABUND, kFIPBIAS, solarsystem_abundances2003.dat), then each element normalised to data of USINE's crdata_crdb20170523.dat: H,He to PAMELA at 20 GeV/n; C,N,O to HEAO at 10.6 GeV/n; pure secondaries Li,Be,B",
+   "network: every nucleus of USINE's chart crcharts_Zmax30_ghost97.dat from 1H to 16O; no antinuclei; tertiary chains, ghost nuclei and exotic primaries off",
+   "family 'SLIM': a label of the model family, not read by the translator",
+   "free []: one run fixes every parameter; a fit varies the free ones",
+   "not given in the transport block, the translator's value used: geometry.local_bubble_radius_kpc = 0.0 kpc (no local bubble)",
+   "D3 level 2 run: {\"gas\": \"dragon2\", \"inelastic\": \"dragon2\", \"production\": \"dragon2\"}",
+   "D3 run kind level2, config isotopic"
+  ]
+ }
+}

@@ -1,0 +1,2054 @@
+{
+ "protocol": "cr-provider/1",
+ "provider": "cr-secondary-ratio-closed-form",
+ "provider_version": "0.1.0",
+ "theory_spec_ref": "derivations/theory-spec.json",
+ "transport": null,
+ "points": [
+  {
+   "D0_cm2_s": 1e+28,
+   "L_kpc": 2.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1e+28,
+   "L_kpc": 2.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1e+28,
+   "L_kpc": 2.8,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1e+28,
+   "L_kpc": 3.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1e+28,
+   "L_kpc": 3.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1e+28,
+   "L_kpc": 4.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1e+28,
+   "L_kpc": 4.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1e+28,
+   "L_kpc": 4.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1e+28,
+   "L_kpc": 5.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1e+28,
+   "L_kpc": 5.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1e+28,
+   "L_kpc": 6.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1e+28,
+   "L_kpc": 6.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1e+28,
+   "L_kpc": 6.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1e+28,
+   "L_kpc": 7.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1e+28,
+   "L_kpc": 7.6000000000000005,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1e+28,
+   "L_kpc": 8.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.25e+28,
+   "L_kpc": 2.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.25e+28,
+   "L_kpc": 2.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.25e+28,
+   "L_kpc": 2.8,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.25e+28,
+   "L_kpc": 3.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.25e+28,
+   "L_kpc": 3.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.25e+28,
+   "L_kpc": 4.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.25e+28,
+   "L_kpc": 4.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.25e+28,
+   "L_kpc": 4.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.25e+28,
+   "L_kpc": 5.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.25e+28,
+   "L_kpc": 5.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.25e+28,
+   "L_kpc": 6.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.25e+28,
+   "L_kpc": 6.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.25e+28,
+   "L_kpc": 6.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.25e+28,
+   "L_kpc": 7.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.25e+28,
+   "L_kpc": 7.6000000000000005,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.25e+28,
+   "L_kpc": 8.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.5e+28,
+   "L_kpc": 2.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.5e+28,
+   "L_kpc": 2.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.5e+28,
+   "L_kpc": 2.8,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.5e+28,
+   "L_kpc": 3.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.5e+28,
+   "L_kpc": 3.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.5e+28,
+   "L_kpc": 4.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.5e+28,
+   "L_kpc": 4.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.5e+28,
+   "L_kpc": 4.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.5e+28,
+   "L_kpc": 5.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.5e+28,
+   "L_kpc": 5.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.5e+28,
+   "L_kpc": 6.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.5e+28,
+   "L_kpc": 6.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.5e+28,
+   "L_kpc": 6.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.5e+28,
+   "L_kpc": 7.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.5e+28,
+   "L_kpc": 7.6000000000000005,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.5e+28,
+   "L_kpc": 8.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.75e+28,
+   "L_kpc": 2.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.75e+28,
+   "L_kpc": 2.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.75e+28,
+   "L_kpc": 2.8,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.75e+28,
+   "L_kpc": 3.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.75e+28,
+   "L_kpc": 3.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.75e+28,
+   "L_kpc": 4.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.75e+28,
+   "L_kpc": 4.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.75e+28,
+   "L_kpc": 4.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.75e+28,
+   "L_kpc": 5.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.75e+28,
+   "L_kpc": 5.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.75e+28,
+   "L_kpc": 6.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.75e+28,
+   "L_kpc": 6.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.75e+28,
+   "L_kpc": 6.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.75e+28,
+   "L_kpc": 7.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.75e+28,
+   "L_kpc": 7.6000000000000005,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 1.75e+28,
+   "L_kpc": 8.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2e+28,
+   "L_kpc": 2.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2e+28,
+   "L_kpc": 2.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2e+28,
+   "L_kpc": 2.8,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2e+28,
+   "L_kpc": 3.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2e+28,
+   "L_kpc": 3.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2e+28,
+   "L_kpc": 4.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2e+28,
+   "L_kpc": 4.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2e+28,
+   "L_kpc": 4.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2e+28,
+   "L_kpc": 5.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2e+28,
+   "L_kpc": 5.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2e+28,
+   "L_kpc": 6.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2e+28,
+   "L_kpc": 6.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2e+28,
+   "L_kpc": 6.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2e+28,
+   "L_kpc": 7.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2e+28,
+   "L_kpc": 7.6000000000000005,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2e+28,
+   "L_kpc": 8.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.25e+28,
+   "L_kpc": 2.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.25e+28,
+   "L_kpc": 2.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.25e+28,
+   "L_kpc": 2.8,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.25e+28,
+   "L_kpc": 3.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.25e+28,
+   "L_kpc": 3.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.25e+28,
+   "L_kpc": 4.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.25e+28,
+   "L_kpc": 4.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.25e+28,
+   "L_kpc": 4.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.25e+28,
+   "L_kpc": 5.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.25e+28,
+   "L_kpc": 5.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.25e+28,
+   "L_kpc": 6.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.25e+28,
+   "L_kpc": 6.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.25e+28,
+   "L_kpc": 6.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.25e+28,
+   "L_kpc": 7.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.25e+28,
+   "L_kpc": 7.6000000000000005,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.25e+28,
+   "L_kpc": 8.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.5e+28,
+   "L_kpc": 2.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.5e+28,
+   "L_kpc": 2.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.5e+28,
+   "L_kpc": 2.8,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.5e+28,
+   "L_kpc": 3.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.5e+28,
+   "L_kpc": 3.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.5e+28,
+   "L_kpc": 4.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.5e+28,
+   "L_kpc": 4.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.5e+28,
+   "L_kpc": 4.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.5e+28,
+   "L_kpc": 5.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.5e+28,
+   "L_kpc": 5.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.5e+28,
+   "L_kpc": 6.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.5e+28,
+   "L_kpc": 6.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.5e+28,
+   "L_kpc": 6.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.5e+28,
+   "L_kpc": 7.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.5e+28,
+   "L_kpc": 7.6000000000000005,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.5e+28,
+   "L_kpc": 8.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.7499999999999997e+28,
+   "L_kpc": 2.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.7499999999999997e+28,
+   "L_kpc": 2.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.7499999999999997e+28,
+   "L_kpc": 2.8,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.7499999999999997e+28,
+   "L_kpc": 3.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.7499999999999997e+28,
+   "L_kpc": 3.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.7499999999999997e+28,
+   "L_kpc": 4.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.7499999999999997e+28,
+   "L_kpc": 4.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.7499999999999997e+28,
+   "L_kpc": 4.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.7499999999999997e+28,
+   "L_kpc": 5.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.7499999999999997e+28,
+   "L_kpc": 5.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.7499999999999997e+28,
+   "L_kpc": 6.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.7499999999999997e+28,
+   "L_kpc": 6.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.7499999999999997e+28,
+   "L_kpc": 6.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.7499999999999997e+28,
+   "L_kpc": 7.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.7499999999999997e+28,
+   "L_kpc": 7.6000000000000005,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 2.7499999999999997e+28,
+   "L_kpc": 8.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3e+28,
+   "L_kpc": 2.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3e+28,
+   "L_kpc": 2.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3e+28,
+   "L_kpc": 2.8,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3e+28,
+   "L_kpc": 3.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3e+28,
+   "L_kpc": 3.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3e+28,
+   "L_kpc": 4.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3e+28,
+   "L_kpc": 4.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3e+28,
+   "L_kpc": 4.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3e+28,
+   "L_kpc": 5.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3e+28,
+   "L_kpc": 5.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3e+28,
+   "L_kpc": 6.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3e+28,
+   "L_kpc": 6.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3e+28,
+   "L_kpc": 6.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3e+28,
+   "L_kpc": 7.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3e+28,
+   "L_kpc": 7.6000000000000005,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3e+28,
+   "L_kpc": 8.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.25e+28,
+   "L_kpc": 2.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.25e+28,
+   "L_kpc": 2.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.25e+28,
+   "L_kpc": 2.8,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.25e+28,
+   "L_kpc": 3.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.25e+28,
+   "L_kpc": 3.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.25e+28,
+   "L_kpc": 4.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.25e+28,
+   "L_kpc": 4.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.25e+28,
+   "L_kpc": 4.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.25e+28,
+   "L_kpc": 5.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.25e+28,
+   "L_kpc": 5.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.25e+28,
+   "L_kpc": 6.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.25e+28,
+   "L_kpc": 6.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.25e+28,
+   "L_kpc": 6.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.25e+28,
+   "L_kpc": 7.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.25e+28,
+   "L_kpc": 7.6000000000000005,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.25e+28,
+   "L_kpc": 8.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.5e+28,
+   "L_kpc": 2.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.5e+28,
+   "L_kpc": 2.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.5e+28,
+   "L_kpc": 2.8,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.5e+28,
+   "L_kpc": 3.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.5e+28,
+   "L_kpc": 3.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.5e+28,
+   "L_kpc": 4.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.5e+28,
+   "L_kpc": 4.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.5e+28,
+   "L_kpc": 4.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.5e+28,
+   "L_kpc": 5.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.5e+28,
+   "L_kpc": 5.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.5e+28,
+   "L_kpc": 6.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.5e+28,
+   "L_kpc": 6.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.5e+28,
+   "L_kpc": 6.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.5e+28,
+   "L_kpc": 7.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.5e+28,
+   "L_kpc": 7.6000000000000005,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.5e+28,
+   "L_kpc": 8.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.75e+28,
+   "L_kpc": 2.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.75e+28,
+   "L_kpc": 2.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.75e+28,
+   "L_kpc": 2.8,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.75e+28,
+   "L_kpc": 3.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.75e+28,
+   "L_kpc": 3.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.75e+28,
+   "L_kpc": 4.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.75e+28,
+   "L_kpc": 4.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.75e+28,
+   "L_kpc": 4.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.75e+28,
+   "L_kpc": 5.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.75e+28,
+   "L_kpc": 5.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.75e+28,
+   "L_kpc": 6.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.75e+28,
+   "L_kpc": 6.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.75e+28,
+   "L_kpc": 6.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.75e+28,
+   "L_kpc": 7.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.75e+28,
+   "L_kpc": 7.6000000000000005,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 3.75e+28,
+   "L_kpc": 8.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4e+28,
+   "L_kpc": 2.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4e+28,
+   "L_kpc": 2.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4e+28,
+   "L_kpc": 2.8,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4e+28,
+   "L_kpc": 3.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4e+28,
+   "L_kpc": 3.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4e+28,
+   "L_kpc": 4.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4e+28,
+   "L_kpc": 4.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4e+28,
+   "L_kpc": 4.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4e+28,
+   "L_kpc": 5.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4e+28,
+   "L_kpc": 5.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4e+28,
+   "L_kpc": 6.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4e+28,
+   "L_kpc": 6.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4e+28,
+   "L_kpc": 6.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4e+28,
+   "L_kpc": 7.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4e+28,
+   "L_kpc": 7.6000000000000005,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4e+28,
+   "L_kpc": 8.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.25e+28,
+   "L_kpc": 2.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.25e+28,
+   "L_kpc": 2.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.25e+28,
+   "L_kpc": 2.8,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.25e+28,
+   "L_kpc": 3.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.25e+28,
+   "L_kpc": 3.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.25e+28,
+   "L_kpc": 4.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.25e+28,
+   "L_kpc": 4.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.25e+28,
+   "L_kpc": 4.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.25e+28,
+   "L_kpc": 5.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.25e+28,
+   "L_kpc": 5.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.25e+28,
+   "L_kpc": 6.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.25e+28,
+   "L_kpc": 6.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.25e+28,
+   "L_kpc": 6.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.25e+28,
+   "L_kpc": 7.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.25e+28,
+   "L_kpc": 7.6000000000000005,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.25e+28,
+   "L_kpc": 8.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.5e+28,
+   "L_kpc": 2.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.5e+28,
+   "L_kpc": 2.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.5e+28,
+   "L_kpc": 2.8,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.5e+28,
+   "L_kpc": 3.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.5e+28,
+   "L_kpc": 3.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.5e+28,
+   "L_kpc": 4.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.5e+28,
+   "L_kpc": 4.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.5e+28,
+   "L_kpc": 4.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.5e+28,
+   "L_kpc": 5.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.5e+28,
+   "L_kpc": 5.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.5e+28,
+   "L_kpc": 6.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.5e+28,
+   "L_kpc": 6.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.5e+28,
+   "L_kpc": 6.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.5e+28,
+   "L_kpc": 7.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.5e+28,
+   "L_kpc": 7.6000000000000005,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.5e+28,
+   "L_kpc": 8.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.75e+28,
+   "L_kpc": 2.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.75e+28,
+   "L_kpc": 2.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.75e+28,
+   "L_kpc": 2.8,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.75e+28,
+   "L_kpc": 3.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.75e+28,
+   "L_kpc": 3.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.75e+28,
+   "L_kpc": 4.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.75e+28,
+   "L_kpc": 4.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.75e+28,
+   "L_kpc": 4.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.75e+28,
+   "L_kpc": 5.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.75e+28,
+   "L_kpc": 5.6,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.75e+28,
+   "L_kpc": 6.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.75e+28,
+   "L_kpc": 6.4,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.75e+28,
+   "L_kpc": 6.800000000000001,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.75e+28,
+   "L_kpc": 7.2,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.75e+28,
+   "L_kpc": 7.6000000000000005,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  },
+  {
+   "D0_cm2_s": 4.75e+28,
+   "L_kpc": 8.0,
+   "delta": 0.5,
+   "R0_gv": 1.0,
+   "disc_halfwidth_pc": 100.0
+  }
+ ],
+ "observables": [
+  {
+   "id": "B/C",
+   "axis": "ekn",
+   "unit": "GeV/n",
+   "bins": [
+    [
+     1.0,
+     1.1220184543019633
+    ],
+    [
+     1.1220184543019633,
+     1.2589254117941673
+    ],
+    [
+     1.2589254117941673,
+     1.4125375446227544
+    ],
+    [
+     1.4125375446227544,
+     1.5848931924611136
+    ],
+    [
+     1.5848931924611136,
+     1.7782794100389228
+    ],
+    [
+     1.7782794100389228,
+     1.9952623149688795
+    ],
+    [
+     1.9952623149688795,
+     2.2387211385683394
+    ],
+    [
+     2.2387211385683394,
+     2.51188643150958
+    ],
+    [
+     2.51188643150958,
+     2.8183829312644537
+    ],
+    [
+     2.8183829312644537,
+     3.1622776601683795
+    ],
+    [
+     3.1622776601683795,
+     3.548133892335755
+    ],
+    [
+     3.548133892335755,
+     3.9810717055349722
+    ],
+    [
+     3.9810717055349722,
+     4.466835921509632
+    ],
+    [
+     4.466835921509632,
+     5.011872336272722
+    ],
+    [
+     5.011872336272722,
+     5.623413251903491
+    ],
+    [
+     5.623413251903491,
+     6.309573444801933
+    ],
+    [
+     6.309573444801933,
+     7.079457843841379
+    ],
+    [
+     7.079457843841379,
+     7.943282347242816
+    ],
+    [
+     7.943282347242816,
+     8.912509381337454
+    ],
+    [
+     8.912509381337454,
+     10.0
+    ],
+    [
+     10.0,
+     11.220184543019636
+    ],
+    [
+     11.220184543019636,
+     12.589254117941675
+    ],
+    [
+     12.589254117941675,
+     14.12537544622754
+    ],
+    [
+     14.12537544622754,
+     15.848931924611133
+    ],
+    [
+     15.848931924611133,
+     17.78279410038923
+    ],
+    [
+     17.78279410038923,
+     19.952623149688797
+    ],
+    [
+     19.952623149688797,
+     22.3872113856834
+    ],
+    [
+     22.3872113856834,
+     25.118864315095795
+    ],
+    [
+     25.118864315095795,
+     28.183829312644534
+    ],
+    [
+     28.183829312644534,
+     31.622776601683793
+    ],
+    [
+     31.622776601683793,
+     35.48133892335755
+    ],
+    [
+     35.48133892335755,
+     39.810717055349734
+    ],
+    [
+     39.810717055349734,
+     44.6683592150963
+    ],
+    [
+     44.6683592150963,
+     50.11872336272722
+    ],
+    [
+     50.11872336272722,
+     56.23413251903491
+    ],
+    [
+     56.23413251903491,
+     63.09573444801933
+    ],
+    [
+     63.09573444801933,
+     70.79457843841381
+    ],
+    [
+     70.79457843841381,
+     79.43282347242814
+    ],
+    [
+     79.43282347242814,
+     89.12509381337455
+    ],
+    [
+     89.12509381337455,
+     100.0
+    ],
+    [
+     100.0,
+     112.2018454301963
+    ],
+    [
+     112.2018454301963,
+     125.89254117941675
+    ],
+    [
+     125.89254117941675,
+     141.2537544622754
+    ],
+    [
+     141.2537544622754,
+     158.48931924611142
+    ],
+    [
+     158.48931924611142,
+     177.82794100389228
+    ],
+    [
+     177.82794100389228,
+     199.52623149688787
+    ],
+    [
+     199.52623149688787,
+     223.872113856834
+    ],
+    [
+     223.872113856834,
+     251.18864315095797
+    ],
+    [
+     251.18864315095797,
+     281.8382931264455
+    ],
+    [
+     281.8382931264455,
+     316.22776601683796
+    ],
+    [
+     316.22776601683796,
+     354.8133892335753
+    ],
+    [
+     354.8133892335753,
+     398.1071705534973
+    ],
+    [
+     398.1071705534973,
+     446.683592150963
+    ],
+    [
+     446.683592150963,
+     501.18723362727246
+    ],
+    [
+     501.18723362727246,
+     562.341325190349
+    ],
+    [
+     562.341325190349,
+     630.957344480193
+    ],
+    [
+     630.957344480193,
+     707.945784384138
+    ],
+    [
+     707.945784384138,
+     794.3282347242813
+    ],
+    [
+     794.3282347242813,
+     891.2509381337459
+    ],
+    [
+     891.2509381337459,
+     1000.0
+    ]
+   ]
+  }
+ ],
+ "want": [
+  "lis"
+ ],
+ "seed": null
+}

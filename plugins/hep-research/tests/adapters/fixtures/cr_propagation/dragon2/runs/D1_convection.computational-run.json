@@ -1,0 +1,110 @@
+{
+ "contract_version": "3.14.0",
+ "artifact_id": "dragon2-run-D1_convection",
+ "artifact_type": "computational-run",
+ "objective": "DRAGON2 run 'D1_convection' from a run spec (adapters/cr-propagation/assets/dragon2_run.py)",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.42.0",
+  "contracts": "3.14.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-computing",
+  "created": "2026-10-28",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "status": [
+  "unvalidated"
+ ],
+ "extension": {
+  "input_manifest": [
+   {
+    "path": "D1_convection.xml",
+    "sha256": "9e9bee854d673a5e230eeb3e98fb63b7ae257056a7eb6d4dc1c6714009ea8b4d"
+   },
+   {
+    "path": "D1_convection.source.param",
+    "sha256": "21e4d88ab763c5627ad34c5b525c1fe72977744a7dea363681c2f7c6e1b3eb75"
+   },
+   {
+    "path": "data/crxsecs_fragmentation_Evoli2019_cumulative_modified.dat",
+    "sha256": "af8d47e21d8a9328a6be489e2e8c7872239743ef2171eb0748907399901ab22e"
+   },
+   {
+    "path": "data/isotope_list.dat",
+    "sha256": "335c7897a2ad9de0305e66e65ad03be0d74597a6f61b04dca8d7fa506bb95b7a"
+   }
+  ],
+  "tools": [
+   {
+    "name": "DRAGON2",
+    "version": "DRAGON2-Beta_version git cd588707fe03c76f19bda1b8092e136dcbe3fe90 (configure.ac DRAGON 3.1.0)",
+    "binary": "<TOOL_HOME>/install/bin/DRAGON",
+    "binary_sha256": "d26dbb857a2c06182bd7b754ce963888670ceaa5932d0efa58b0ca202a9a6c34"
+   },
+   {
+    "name": "python",
+    "version": "3.13.2"
+   },
+   {
+    "name": "numpy",
+    "version": "2.4.4"
+   },
+   {
+    "name": "scipy",
+    "version": "1.17.1"
+   }
+  ],
+  "commands": [
+   "<TOOL_HOME>/install/bin/DRAGON D1_convection.xml"
+  ],
+  "environment": {
+   "python": "3.13.2",
+   "implementation": "CPython",
+   "executable": "<CONDA_HOME>/bin/python3",
+   "platform": "macOS-27.2-arm64-arm-64bit-Mach-O",
+   "machine": "arm64",
+   "system": {
+    "os": "Darwin",
+    "arch": "arm64",
+    "libc": "macOS 27.2",
+    "kernel": "27.2.0"
+   },
+   "origin": "conda",
+   "variables": {
+    "ROOTSYS": "/opt/homebrew/Cellar/root/6.38.04_1",
+    "CONDA_PREFIX": "<CONDA_HOME>",
+    "CONDA_DEFAULT_ENV": "base"
+   },
+   "packages": {
+    "numpy": "2.4.4",
+    "scipy": "1.17.1"
+   },
+   "project": {
+    "path": "<TOOL_HOME>/src",
+    "commit": "cd588707fe03c76f19bda1b8092e136dcbe3fe90",
+    "dirty": false
+   }
+  },
+  "seeds": {
+   "note": "DRAGON2 is deterministic: no random numbers are drawn"
+  },
+  "tolerances": {
+   "note": "none applied by the run; DRAGON2 time-step schedule Dtmax 64 Myr to Dtmin 0.001 Myr, factor 0.25, 30 steps per level (written into the XML)"
+  },
+  "resources": {
+   "wall_seconds": 595.4
+  },
+  "exit_status": 0,
+  "output_hashes": {
+   "output/D1_convection.txt": "c9656d9cfc243a945e0f2c68b3a3cbb7df6671cd874f9a05da692d71174e5c0a"
+  }
+ }
+}

@@ -1,0 +1,3 @@
+# normalisation points written by usine_translate.py: parent ratios of theory:cr-secondary-ratio at one E_k/n, phi = 0 (not data)
+C   NORM   EKN   1.000000e+01 9.000000e+00 1.100000e+01   1.000000e+00 -1.000000e-02 1.000000e-02 -0.000000e+00 0.000000e+00   none   0.000000e+00   1   2000/01/01-000000:2000/01/02-000000 0
+O   NORM   EKN   1.000000e+01 9.000000e+00 1.100000e+01   9.000000e-01 -9.000000e-03 9.000000e-03 -0.000000e+00 0.000000e+00   none   0.000000e+00   1   2000/01/01-000000:2000/01/02-000000 0

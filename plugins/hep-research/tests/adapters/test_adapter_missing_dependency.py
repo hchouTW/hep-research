@@ -23,6 +23,8 @@ HIDE = ("import runpy, sys; [sys.modules.__setitem__(m, None) for m in sys.argv[
 UNFOLD_IN = {"response": [[0.8, 0.1], [0.1, 0.8]], "data": [10.0, 12.0]}
 # adapter -> (arguments with @TMP for a scratch folder, {file name under @TMP: content}); the hidden module varies
 ARGS = {
+    "adapters/cr-propagation/assets/emulator_provider.py": (
+        ["--request", "@TMP/request.json", "--response", "@TMP/response.json"], {}),
     "adapters/cr-propagation/assets/dragon2_to_prediction.py": (
         ["--txt", "@TMP/run.txt", "--numerator", "B", "--denominator", "C", "--edges", "1,2", "--out", "@TMP/out"], {}),
     "adapters/hepdata/assets/hepdata_export.py": (

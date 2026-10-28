@@ -415,6 +415,69 @@ only gives one flat direction along (1, 1)/sqrt(2), matched to `D0/L`, with D0/L
 grids from a real propagation code, more than a few parameters (the start scans every node), and interval coverage
 along a near-flat direction.
 
+## Propagation fits through a provider (`propagation_fit.py`)
+
+`skills/hep-statistics/scripts/propagation_fit.py fit` fits transport parameters to several datasets at once with
+predictions from a `cr-provider/1` provider (core/provider: only an entrypoint in the registry the caller passes in
+runs, as a subprocess, with a cache). Use it instead of `tabulated-grid` when the parameters are more than two or
+three, or when the provider gives cross-section components; the grid path stays for 2-3 grid parameters and never
+takes provider output.
+
+```bash
+python3 tools/provider_registry.py --write "$WORK/registry.json"
+python3 skills/hep-statistics/scripts/propagation_fit.py fit --input config.json \
+    --provider-registry "$WORK/registry.json" --cache-dir "$WORK/cache" --out "$WORK/fit" --max-evaluations 2000
+```
+
+```json
+{"provider": {"id": "<provider id>", "version": "<version>"},
+ "datasets": [{"name": "set-a", "measurement": "set-a.json", "observable": "B/C"}],
+ "parameters": {"D0_cm2_s": {"start": 2.5e28, "scale": "log"}, "delta": {"start": 0.45}},
+ "fixed": {"R0_gv": 1.0}, "nuisances": [{"name": "xs-C-B", "kind": "production-norm", "channel": "C->B",
+                                         "prior_sigma": 0.1}],
+ "families": [{"name": "diffusion", "free": ["D0_cm2_s", "delta"], "fixed": {"L_kpc": 4.0}}],
+ "intervals": ["delta"],
+ "toys": {"family": "diffusion", "n": 1000, "seed": 1, "truth": {"D0_cm2_s": 3e28, "delta": 0.5},
+          "test": ["D0_cm2_s", "delta", "flattest"]},
+ "family_toys": {"n": 200, "seed": 2, "alpha": 0.05}, "posterior": {"family": "diffusion", "steps": 20000}}
+```
+
+- **Datasets** are `dataset-record` artifacts; the covariance comes from their uncertainty components as in
+  `tabulated-grid` (missing: exit 3, `incomplete`). The provider's prediction at the start is gated first (the
+  parameters sent to the provider are passed as conditions; any other `parameter_point` key, such as a cross-section
+  set, must be stated in `gate_plan.measurement_conditions`); its
+  `bin_semantics` and binning conventions must be the data's: a bin-averaged ratio is never fitted to data declared
+  as a ratio of bin integrals (refused, exit 1). Datasets with a `period` need `phi_<period>_gv` applied per isotope
+  (P4 of the propagation plan); a provider that returns only ratios is refused (`modulation-needs-isotopic-lis`).
+- **Model:** the prediction is the sum of the provider's components, each times at most one multiplier: a
+  production norm (prior ~10%) or a parent abundance (free or with a prior). They enter linearly and are profiled
+  exactly. Inelastic changes and production slopes need a provider parameter or energy-basis components and are
+  refused otherwise. Everything stays inside the provider domain; a start or truth outside it is refused
+  (`out-of-domain`).
+- **Families** are declared, never inferred. One whose parameters the provider lacks (for example BIG or SLIM with
+  `V_A_kms`, `R_break_gv` for a closed form without them) is listed under `families_not_expressible` with the names.
+- **Convergence:** `fit_diagnostics.newton_fit` verdict in offsets from the best fit; a coordinate on a domain
+  bound gets `boundary_kkt`; an exactly flat direction (Fisher eigenvalue below 1e-8 of the largest) is held, and its
+  parameters get no error. At most 5 restarts (`restart-cap`).
+- **Degeneracies:** the Fisher screen and profile scans of `degeneracy.py` in object form; with `theory_spec` (a base
+  theory-spec) and `--out`, a `theory-spec.json` carrying only the profile-scan entries (with `valid_range`) is written
+  and validated, next to `statistical-result.json`.
+- **Toys, family calibration, posterior** run on a response model (tensor Chebyshev interpolation of the components
+  on a box of +-5 sigma, built from provider evaluations and refused unless its error at random provider points is
+  below 0.02 of the data sigma; the error is added to the covariance). Coverage: profile delta chi2 <= 1 at the truth;
+  a bound uses the toys' 68.27% quantile; tolerance z_m sqrt(p(1-p)/n) with Bonferroni over m quantities.
+  More than 2% failed toys stop the study. Families: delta chi2 to the best family, its p-value from toys generated
+  at that family's fit (no Wilks). Posterior: random-walk Metropolis, at most 2e5 steps per chain, `bayes_diagnostics`;
+  no interval when R-hat > 1.01 or ESS < 400 (`unvalidated`).
+- **Covariance alternatives** (`covariance_alternatives`: a `build_covariance.py` source model with `lengths`) are
+  fitted one by one and reported side by side, never combined.
+
+Measured with the closed-form B/C provider on SYNTHETIC data (`examples/propagation-fit/run.py`, criteria in
+`VALIDATION.md` section CRPROP-C2): Asimov recovery within 0.1 sigma, also at a domain bound (one-sided width);
+1000 toys cover `D0_cm2_s`, `delta` and the nearly flat (ln D0, C->B norm) direction within the Bonferroni band;
+an exact D0/L degeneracy found by the screen and by a profile scan over L. Not validated: real data, a provider
+with isotopic fluxes (modulation), more than three transport coordinates in a response model.
+
 
 ## Conventions in detail
 

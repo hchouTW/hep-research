@@ -1,0 +1,596 @@
+{
+ "description": "cr-propagation B3: production channels of the ILLUSTRATIVE sets in the B3 USINE configurations, their share of the observable numerator, and whether reweighting may replace a rerun (r3 B3 steps 2-3, P5; criteria VALIDATION.md CRPROP-B3)",
+ "status": "synthetic",
+ "labels": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "tolerance": 0.005,
+ "main_fraction": 0.01,
+ "channels": [
+  {
+   "channel": "12C->11B",
+   "config": "h1-2d",
+   "main": true,
+   "fraction_of_numerator": {
+    "observable": "B/C",
+    "min": 0.6852214840959381,
+    "max": 0.6964908894800188
+   },
+   "norm": {
+    "method": "single-channel response, level by level (r3 P5)",
+    "max_dev": 8.23739008826152e-06,
+    "tolerance": 0.005,
+    "must_rerun": false
+   },
+   "inelastic": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "inelastic cross sections are not linear (r3 P5); always rerun"
+   },
+   "slope": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "no energy-basis responses computed for this channel and configuration; an energy-dependent change needs them or a rerun (r3 P5)"
+   }
+  },
+  {
+   "channel": "16O->11B",
+   "config": "h1-2d",
+   "main": true,
+   "fraction_of_numerator": {
+    "observable": "B/C",
+    "min": 0.3035094009359449,
+    "max": 0.3147787554423848
+   },
+   "norm": {
+    "method": "single-channel response, level by level (r3 P5)",
+    "max_dev": 7.376157022287444e-06,
+    "tolerance": 0.005,
+    "must_rerun": false
+   },
+   "inelastic": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "inelastic cross sections are not linear (r3 P5); always rerun"
+   },
+   "slope": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "no energy-basis responses computed for this channel and configuration; an energy-dependent change needs them or a rerun (r3 P5)"
+   }
+  },
+  {
+   "channel": "12C->7Be",
+   "config": "dec-2d",
+   "main": true,
+   "fraction_of_numerator": {
+    "observable": "Be/B",
+    "min": 0.3155995211321133,
+    "max": 0.3517413344044327
+   },
+   "norm": {
+    "method": "single-channel response, level by level (r3 P5)",
+    "max_dev": 7.826667939192511e-06,
+    "tolerance": 0.005,
+    "must_rerun": false
+   },
+   "inelastic": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "inelastic cross sections are not linear (r3 P5); always rerun"
+   },
+   "slope": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "no energy-basis responses computed for this channel and configuration; an energy-dependent change needs them or a rerun (r3 P5)"
+   }
+  },
+  {
+   "channel": "12C->9Be",
+   "config": "dec-2d",
+   "main": true,
+   "fraction_of_numerator": {
+    "observable": "Be/B",
+    "min": 0.1683982506427759,
+    "max": 0.1910091518786325
+   },
+   "norm": {
+    "method": "single-channel response, level by level (r3 P5)",
+    "max_dev": 8.223684210495463e-06,
+    "tolerance": 0.005,
+    "must_rerun": false
+   },
+   "inelastic": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "inelastic cross sections are not linear (r3 P5); always rerun"
+   },
+   "slope": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "no energy-basis responses computed for this channel and configuration; an energy-dependent change needs them or a rerun (r3 P5)"
+   }
+  },
+  {
+   "channel": "12C->10Be",
+   "config": "dec-2d",
+   "main": true,
+   "fraction_of_numerator": {
+    "observable": "Be/B",
+    "min": 0.01448370723754154,
+    "max": 0.07355270757357282
+   },
+   "norm": {
+    "method": "single-channel response, level by level (r3 P5)",
+    "max_dev": 6.499485457167609e-06,
+    "tolerance": 0.005,
+    "must_rerun": false
+   },
+   "inelastic": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "inelastic cross sections are not linear (r3 P5); always rerun"
+   },
+   "slope": {
+    "form": "sigma (E/10 GeV/n)^0.1 below 10 GeV/n",
+    "post_propagation_weight_max_dev": 8.358298692501265e-06,
+    "energy_basis_max_dev": 8.356216779525916e-06,
+    "n_basis_runs": 26,
+    "method": "post-propagation weight",
+    "must_rerun": false
+   }
+  },
+  {
+   "channel": "12C->10B",
+   "config": "dec-2d",
+   "main": true,
+   "fraction_of_numerator": {
+    "observable": "B/C",
+    "min": 0.1730484739754291,
+    "max": 0.17795907911890252
+   },
+   "norm": {
+    "method": "single-channel response, level by level (r3 P5)",
+    "max_dev": 7.03454744410692e-06,
+    "tolerance": 0.005,
+    "must_rerun": false
+   },
+   "inelastic": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "inelastic cross sections are not linear (r3 P5); always rerun"
+   },
+   "slope": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "no energy-basis responses computed for this channel and configuration; an energy-dependent change needs them or a rerun (r3 P5)"
+   }
+  },
+  {
+   "channel": "12C->11B",
+   "config": "dec-2d",
+   "main": true,
+   "fraction_of_numerator": {
+    "observable": "B/C",
+    "min": 0.4910439821302631,
+    "max": 0.51221040448169
+   },
+   "norm": {
+    "method": "single-channel response, level by level (r3 P5)",
+    "max_dev": 6.091136573127542e-06,
+    "tolerance": 0.005,
+    "must_rerun": false
+   },
+   "inelastic": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "inelastic cross sections are not linear (r3 P5); always rerun"
+   },
+   "slope": {
+    "form": "sigma (E/10 GeV/n)^0.1 below 10 GeV/n",
+    "post_propagation_weight_max_dev": 8.56966429907402e-06,
+    "energy_basis_max_dev": 8.515415316656672e-06,
+    "n_basis_runs": 26,
+    "method": "post-propagation weight",
+    "must_rerun": false
+   }
+  },
+  {
+   "channel": "16O->7Be",
+   "config": "dec-2d",
+   "main": true,
+   "fraction_of_numerator": {
+    "observable": "Be/B",
+    "min": 0.28340740291442695,
+    "max": 0.3006236438957513
+   },
+   "norm": {
+    "method": "single-channel response, level by level (r3 P5)",
+    "max_dev": 7.211786118954677e-06,
+    "tolerance": 0.005,
+    "must_rerun": false
+   },
+   "inelastic": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "inelastic cross sections are not linear (r3 P5); always rerun"
+   },
+   "slope": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "no energy-basis responses computed for this channel and configuration; an energy-dependent change needs them or a rerun (r3 P5)"
+   }
+  },
+  {
+   "channel": "16O->9Be",
+   "config": "dec-2d",
+   "main": true,
+   "fraction_of_numerator": {
+    "observable": "Be/B",
+    "min": 0.12601786963769251,
+    "max": 0.13601517461754026
+   },
+   "norm": {
+    "method": "single-channel response, level by level (r3 P5)",
+    "max_dev": 6.646568708856826e-06,
+    "tolerance": 0.005,
+    "must_rerun": false
+   },
+   "inelastic": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "inelastic cross sections are not linear (r3 P5); always rerun"
+   },
+   "slope": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "no energy-basis responses computed for this channel and configuration; an energy-dependent change needs them or a rerun (r3 P5)"
+   }
+  },
+  {
+   "channel": "16O->10Be",
+   "config": "dec-2d",
+   "main": true,
+   "fraction_of_numerator": {
+    "observable": "Be/B",
+    "min": 0.0061866999238489075,
+    "max": 0.033023339737810825
+   },
+   "norm": {
+    "method": "single-channel response, level by level (r3 P5)",
+    "max_dev": 8.012471586216208e-06,
+    "tolerance": 0.005,
+    "must_rerun": false
+   },
+   "inelastic": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "inelastic cross sections are not linear (r3 P5); always rerun"
+   },
+   "slope": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "no energy-basis responses computed for this channel and configuration; an energy-dependent change needs them or a rerun (r3 P5)"
+   }
+  },
+  {
+   "channel": "16O->10B",
+   "config": "dec-2d",
+   "main": true,
+   "fraction_of_numerator": {
+    "observable": "B/C",
+    "min": 0.07697872152419478,
+    "max": 0.07951418311841185
+   },
+   "norm": {
+    "method": "single-channel response, level by level (r3 P5)",
+    "max_dev": 8.49093014276825e-06,
+    "tolerance": 0.005,
+    "must_rerun": false
+   },
+   "inelastic": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "inelastic cross sections are not linear (r3 P5); always rerun"
+   },
+   "slope": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "no energy-basis responses computed for this channel and configuration; an energy-dependent change needs them or a rerun (r3 P5)"
+   }
+  },
+  {
+   "channel": "16O->11B",
+   "config": "dec-2d",
+   "main": true,
+   "fraction_of_numerator": {
+    "observable": "B/C",
+    "min": 0.2139819023772439,
+    "max": 0.2352483895843021
+   },
+   "norm": {
+    "method": "single-channel response, level by level (r3 P5)",
+    "max_dev": 6.8247157080092435e-06,
+    "tolerance": 0.005,
+    "must_rerun": false
+   },
+   "inelastic": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "inelastic cross sections are not linear (r3 P5); always rerun"
+   },
+   "slope": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "no energy-basis responses computed for this channel and configuration; an energy-dependent change needs them or a rerun (r3 P5)"
+   }
+  },
+  {
+   "channel": "12C->7Be",
+   "config": "all-2d",
+   "main": true,
+   "fraction_of_numerator": {
+    "observable": "Be/B",
+    "min": 0.3128629597004201,
+    "max": 0.33795133799115296
+   },
+   "norm": {
+    "method": "single-channel response, level by level (r3 P5)",
+    "max_dev": 5.496174373398333e-06,
+    "tolerance": 0.005,
+    "must_rerun": false
+   },
+   "inelastic": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "inelastic cross sections are not linear (r3 P5); always rerun"
+   },
+   "slope": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "no energy-basis responses computed for this channel and configuration; an energy-dependent change needs them or a rerun (r3 P5)"
+   }
+  },
+  {
+   "channel": "12C->9Be",
+   "config": "all-2d",
+   "main": true,
+   "fraction_of_numerator": {
+    "observable": "Be/B",
+    "min": 0.16886595978955252,
+    "max": 0.211952013812434
+   },
+   "norm": {
+    "method": "single-channel response, level by level (r3 P5)",
+    "max_dev": 8.88625592398995e-06,
+    "tolerance": 0.005,
+    "must_rerun": false
+   },
+   "inelastic": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "inelastic cross sections are not linear (r3 P5); always rerun"
+   },
+   "slope": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "no energy-basis responses computed for this channel and configuration; an energy-dependent change needs them or a rerun (r3 P5)"
+   }
+  },
+  {
+   "channel": "12C->10Be",
+   "config": "all-2d",
+   "main": true,
+   "fraction_of_numerator": {
+    "observable": "Be/B",
+    "min": 0.030708551065264406,
+    "max": 0.07647866506128399
+   },
+   "norm": {
+    "method": "single-channel response, level by level (r3 P5)",
+    "max_dev": 8.292312849489392e-06,
+    "tolerance": 0.005,
+    "must_rerun": false
+   },
+   "inelastic": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "inelastic cross sections are not linear (r3 P5); always rerun"
+   },
+   "slope": {
+    "form": "sigma (E/10 GeV/n)^0.1 below 10 GeV/n",
+    "post_propagation_weight_max_dev": 0.014805430782632523,
+    "energy_basis_max_dev": 6.95430472019698e-06,
+    "n_basis_runs": 26,
+    "method": "energy-basis responses",
+    "must_rerun": false
+   }
+  },
+  {
+   "channel": "12C->10B",
+   "config": "all-2d",
+   "main": true,
+   "fraction_of_numerator": {
+    "observable": "B/C",
+    "min": 0.1731846449212107,
+    "max": 0.18378482391672352
+   },
+   "norm": {
+    "method": "single-channel response, level by level (r3 P5)",
+    "max_dev": 6.789603758772245e-06,
+    "tolerance": 0.005,
+    "must_rerun": false
+   },
+   "inelastic": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "inelastic cross sections are not linear (r3 P5); always rerun"
+   },
+   "slope": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "no energy-basis responses computed for this channel and configuration; an energy-dependent change needs them or a rerun (r3 P5)"
+   }
+  },
+  {
+   "channel": "12C->11B",
+   "config": "all-2d",
+   "main": true,
+   "fraction_of_numerator": {
+    "observable": "B/C",
+    "min": 0.4886060664838546,
+    "max": 0.512216418160148
+   },
+   "norm": {
+    "method": "single-channel response, level by level (r3 P5)",
+    "max_dev": 5.6498812075478355e-06,
+    "tolerance": 0.005,
+    "must_rerun": false
+   },
+   "inelastic": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "inelastic cross sections are not linear (r3 P5); always rerun"
+   },
+   "slope": {
+    "form": "sigma (E/10 GeV/n)^0.1 below 10 GeV/n",
+    "post_propagation_weight_max_dev": 0.04425288094737878,
+    "energy_basis_max_dev": 9.4466688711492e-06,
+    "n_basis_runs": 26,
+    "method": "energy-basis responses",
+    "must_rerun": false
+   }
+  },
+  {
+   "channel": "16O->7Be",
+   "config": "all-2d",
+   "main": true,
+   "fraction_of_numerator": {
+    "observable": "Be/B",
+    "min": 0.2658633378713566,
+    "max": 0.29186117302047787
+   },
+   "norm": {
+    "method": "single-channel response, level by level (r3 P5)",
+    "max_dev": 7.4181355750324585e-06,
+    "tolerance": 0.005,
+    "must_rerun": false
+   },
+   "inelastic": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "inelastic cross sections are not linear (r3 P5); always rerun"
+   },
+   "slope": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "no energy-basis responses computed for this channel and configuration; an energy-dependent change needs them or a rerun (r3 P5)"
+   }
+  },
+  {
+   "channel": "16O->9Be",
+   "config": "all-2d",
+   "main": true,
+   "fraction_of_numerator": {
+    "observable": "Be/B",
+    "min": 0.1264054048982897,
+    "max": 0.13999660835498456
+   },
+   "norm": {
+    "method": "single-channel response, level by level (r3 P5)",
+    "max_dev": 6.588653193251304e-06,
+    "tolerance": 0.005,
+    "must_rerun": false
+   },
+   "inelastic": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "inelastic cross sections are not linear (r3 P5); always rerun"
+   },
+   "slope": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "no energy-basis responses computed for this channel and configuration; an energy-dependent change needs them or a rerun (r3 P5)"
+   }
+  },
+  {
+   "channel": "16O->10Be",
+   "config": "all-2d",
+   "main": true,
+   "fraction_of_numerator": {
+    "observable": "Be/B",
+    "min": 0.012587605014899975,
+    "max": 0.03434482702812193
+   },
+   "norm": {
+    "method": "single-channel response, level by level (r3 P5)",
+    "max_dev": 7.78769025766568e-06,
+    "tolerance": 0.005,
+    "must_rerun": false
+   },
+   "inelastic": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "inelastic cross sections are not linear (r3 P5); always rerun"
+   },
+   "slope": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "no energy-basis responses computed for this channel and configuration; an energy-dependent change needs them or a rerun (r3 P5)"
+   }
+  },
+  {
+   "channel": "16O->10B",
+   "config": "all-2d",
+   "main": true,
+   "fraction_of_numerator": {
+    "observable": "B/C",
+    "min": 0.07753171083418905,
+    "max": 0.07950270512247433
+   },
+   "norm": {
+    "method": "single-channel response, level by level (r3 P5)",
+    "max_dev": 6.622516556364921e-06,
+    "tolerance": 0.005,
+    "must_rerun": false
+   },
+   "inelastic": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "inelastic cross sections are not linear (r3 P5); always rerun"
+   },
+   "slope": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "no energy-basis responses computed for this channel and configuration; an energy-dependent change needs them or a rerun (r3 P5)"
+   }
+  },
+  {
+   "channel": "16O->11B",
+   "config": "all-2d",
+   "main": true,
+   "fraction_of_numerator": {
+    "observable": "B/C",
+    "min": 0.21030025858384283,
+    "max": 0.23506079449056977
+   },
+   "norm": {
+    "method": "single-channel response, level by level (r3 P5)",
+    "max_dev": 7.731573814506731e-06,
+    "tolerance": 0.005,
+    "must_rerun": false
+   },
+   "inelastic": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "inelastic cross sections are not linear (r3 P5); always rerun"
+   },
+   "slope": {
+    "must_rerun": true,
+    "tested": false,
+    "reason": "no energy-basis responses computed for this channel and configuration; an energy-dependent change needs them or a rerun (r3 P5)"
+   }
+  }
+ ]
+}

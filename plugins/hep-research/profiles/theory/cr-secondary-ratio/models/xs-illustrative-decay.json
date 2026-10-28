@@ -1,0 +1,14 @@
+{
+ "label": "ILLUSTRATIVE isotopic cross-section set for the convection-decay closed forms of theory:cr-secondary-ratio: round placeholder values, not taken from any measurement or parametrization",
+ "illustrative": true,
+ "status": "synthetic",
+ "unit": "mb",
+ "target": "hydrogen (1H) at rest",
+ "energy_dependence": "none (energy-independent placeholders; real cross sections vary with energy)",
+ "meaning": "production_mb: effective cumulative production cross section of each propagated isotope from each parent (short-lived ghost nuclei assumed included; 10Be is propagated explicitly, so its decay is not in the 10B value); inelastic_mb: total inelastic (destruction) cross section of each species",
+ "production_mb": {
+  "C->7Be": 10.0, "C->9Be": 6.0, "C->10Be": 4.0, "C->10B": 20.0, "C->11B": 50.0,
+  "O->7Be": 10.0, "O->9Be": 5.0, "O->10Be": 2.0, "O->10B": 10.0, "O->11B": 25.0
+ },
+ "inelastic_mb": {"7Be": 200.0, "9Be": 215.0, "10Be": 220.0, "10B": 240.0, "11B": 250.0, "C": 270.0, "O": 310.0}
+}

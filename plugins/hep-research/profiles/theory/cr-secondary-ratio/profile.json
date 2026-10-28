@@ -2,9 +2,9 @@
  "id": "theory:cr-secondary-ratio",
  "kind": "theory-domain",
  "version": "0.1.0",
- "scope": "First narrow cosmic-ray propagation domain: the stable secondary-to-primary ratio B/C (from C and O) in a weighted-slab (leaky-box) model and in a 1D diffusion-halo model with a thin disc and no convection, with the closed forms derived and checked in SymPy, their equivalence lambda_esc = n_H m_H h v L / D (so the ratio constrains only D0/L), a benchmark against the profile's own numerical solutions (slab ODEs averaged over the path-length distribution; finite-thickness disc solved exactly and by finite volumes), a theory-spec with degenerate_directions [D0/L], and a prediction callable at any parameter point for grids. Cross-section sets are inputs and model alternatives; the shipped sets and transport values are ILLUSTRATIVE.",
+ "scope": "First narrow cosmic-ray propagation domain: the stable secondary-to-primary ratio B/C (from C and O) in a weighted-slab (leaky-box) model and in a 1D diffusion-halo model with a thin disc (pure diffusion, plus closed forms with constant convection and with radioactive decay of 10Be including the 10Be->10B gain), with the closed forms derived and checked in SymPy, their equivalence lambda_esc = n_H m_H h v L / D (so in pure diffusion the ratio constrains only D0/L), a benchmark against the profile's own numerical solutions (slab ODEs averaged over the path-length distribution; finite-thickness disc solved exactly and by finite volumes), a theory-spec with degenerate_directions [D0/L], and a prediction callable at any parameter point for grids. Cross-section sets are inputs and model alternatives; the shipped sets and transport values are ILLUSTRATIVE.",
  "exclusions": [
-  "Convection, reacceleration, energy losses, radioactive decay and unstable secondaries (10Be clocks)",
+  "Reacceleration (no closed form), energy losses and the adiabatic term of the wind, a convective gradient, decay inside the disc, electron-capture nuclei and clocks other than 10Be (fully stripped 7Be is treated as stable)",
   "Energy-dependent or published cross-section parametrizations; ghost-nucleus networks and tertiaries; helium in the gas",
   "Solar modulation, rigidity-binned ratios of bin-averaged fluxes, and 2D (radial) geometry",
   "Any experiment, detector, data or blinding field; no comparison with measured B/C; no propagation code (GALPROP, DRAGON, USINE) run",
@@ -78,6 +78,60 @@
     "tests/test_artifacts.py",
     "tests/test_convention_mismatch.py"
    ]
+  },
+  {
+   "name": "secondary-ratio-convection-decay",
+   "status": "demonstrated-on-synthetic-data",
+   "scope": "closed forms of the 1D thin disc with constant convection V_c and radioactive decay (rate 1/(gamma tau_0), NUBASE2020 half-lives, 10Be->10B gain), SymPy-checked with dimension checks and pure-diffusion limits (analytic derivation), and against scipy solve_bvp on ILLUSTRATIVE inputs (1e-6)",
+   "tests": [
+    "tests/test_convection_decay.py"
+   ]
   }
- ]
+ ],
+ "provider": {
+  "id": "cr-secondary-ratio-closed-form",
+  "entrypoint": "scripts/provider.py",
+  "protocol": "cr-provider/1",
+  "description": "closed-form B/C of the 1D thin-disc diffusion model (ILLUSTRATIVE inputs), bin-averaged in ln(E/n) (crsr:bin_average), with one component per production channel",
+  "domain": {
+   "D0_cm2_s": {
+    "min": 1e+27,
+    "max": 1e+30
+   },
+   "L_kpc": {
+    "min": 1.0,
+    "max": 20.0
+   },
+   "delta": {
+    "min": 0.2,
+    "max": 0.9
+   },
+   "R0_gv": {
+    "min": 0.5,
+    "max": 20.0
+   },
+   "disc_halfwidth_pc": {
+    "min": 10.0,
+    "max": 500.0
+   }
+  },
+  "axis_ranges": {
+   "ekn": {
+    "min": 1.0,
+    "max": 1000.0
+   }
+  },
+  "observables": [
+   "B/C"
+  ],
+  "axes": [
+   "ekn"
+  ],
+  "decomposable": true,
+  "deterministic": true,
+  "output_units": {
+   "ratio": "1",
+   "energy": "GeV/n"
+  }
+ }
 }

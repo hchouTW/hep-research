@@ -152,8 +152,8 @@ class Builder:
     def envelope(atype, aid, ext, producer="hep-detector", inputs=(), outputs=(), status=("synthetic",)) -> dict:
         sticky = {s for i in inputs for s in i.get("status", [])}  # a consumer carries its inputs' sticky statuses
         status = list(dict.fromkeys(list(status) + sorted(sticky - set(status))))
-        return {"contract_version": "3.13.0", "artifact_id": aid, "artifact_type": atype, "objective": SYN,
-                "versions": {"plugin": "0.36.0", "contracts": "3.13.0",
+        return {"contract_version": "3.14.0", "artifact_id": aid, "artifact_type": atype, "objective": SYN,
+                "versions": {"plugin": "0.36.0", "contracts": "3.14.0",
                              "plugin_release": {"release": "unreleased", "digest": "unknown"}},
                 "provenance": {"producer_skill": producer, "created": CREATED},
                 "inputs": list(inputs), "outputs": list(outputs), "status": list(status), "unresolved_inputs": [],

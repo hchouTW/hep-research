@@ -1,5 +1,5 @@
 {
- "contract_version": "3.13.0",
+ "contract_version": "3.14.0",
  "artifact_id": "tmdg-theory-spec-gaussian-tmd-lo",
  "artifact_type": "theory-spec",
  "objective": "Theory spec of Gaussian-ansatz TMDs at leading order without evolution (SIDIS F_UU,T, Cahn, Sivers, Drell-Yan q_T, Sivers sign change) in theory:tmd-gaussian-lo",
@@ -13,8 +13,8 @@
   ]
  },
  "versions": {
-  "plugin": "0.42.0",
-  "contracts": "3.13.0",
+  "plugin": "0.43.0",
+  "contracts": "3.14.0",
   "profiles": {
    "theory:tmd-gaussian-lo": "0.1.0"
   }

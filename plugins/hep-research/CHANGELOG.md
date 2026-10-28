@@ -3,6 +3,259 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## 0.43.0 (2026-10-29)
+
+Minor release; contracts 3.14.0 (one minor, the `CV-CRPROP` of the cr-propagation campaign, new rules gated by
+`contracts/validate.py` `CRPROP_FROM`), `CORE_VERSION` 1.2.0 (new `core/provider/`), adapter `cr-propagation` 0.2.0.
+It ships the cr-propagation r4 campaign (20 of 24 work packages; report in
+`docs/dev/cr-propagation/campaign-report.md`): propagation predictions from USINE V3.5, DRAGON2 cd588707 and the
+closed-form thin-disc model through one subprocess provider protocol `cr-provider/1`, multi-dataset propagation fits
+with object-form degeneracies, toy-calibrated family comparison, and a Gaussian-process emulator provider. The
+reproduction of Génolini et al. 2019 is partial, so the capability map is unchanged (propagation global fits stay
+outside v1).
+
+**Before you upgrade** (details in each entry below):
+- A theory-spec that declares contracts 3.14.0 or later is checked natively by the object-form
+  `degenerate_directions` and `transport.diffusion.breaks` rules (new errors `theory.degeneracy_evidence_missing`,
+  `theory.degeneracy_range_missing`, `theory.degeneracy_evidence_unknown` and the transport errors); older artifacts
+  only under `--strict`. Every committed artifact keeps its outcome.
+- Profiles and adapters may declare a `provider` field; `tools/provider_registry.py` lists them. External codes are
+  found only through `HEP_USINE_BIN`/`HEP_USINE_DATA` and `HEP_DRAGON2_BIN`/`HEP_DRAGON2_DATA`; USINE (GPL-2.0) is
+  never vendored.
+
+**Known issues** (campaign report §8): no F1 fit converges at USINE's 6-digit output noise floor (delta and K10 are
+inside the paper's 1-sigma windows; -2 ln L about 83-90 against about 62, attributed); the USINE provider applies solar
+modulation itself, against `cr_provider.json`'s "providers never modulate" (recorded in every modulated prediction);
+accepted, attributed DRAGON2/USINE differences D1-1a, D3-1 and D3-3, not yet recorded in `adapter.json`; C2UF toy fits
+bounded by the emulator's k = 4 domain while validation covered k = 3; `propagation_fit.py` reports unconverged fits as
+"artifact-invalid"; translator gaps (escalation 12) and the r3 P1 zone-conversion wording with a likely DRAGON2
+Ptuskin94/03 enum issue (escalation 10); `train_emulator.py` lets the GP nugget reach its 1e-12 floor, which gives
+near-singular models (the provider now factorizes them with a bounded jitter), and the C2UF emulator fixture is refused
+off macOS (its self-check does not reproduce under another libm; its tests skip, A1.21) until it is retrained; GALPROP
+unavailable; F2, F3 and the live routing run not done.
+
+- crprop ci: the campaign's regression pins compare platform-robustly (PR #308 CI on Linux, decision A1.20): recomputed
+  closed-form, USINE-reader and DRAGON2-port values against committed numbers within relative 1e-12, the E2 emulator's
+  pinned responses and hold-out numbers within relative 1e-4 (GP linear algebra); E2-1, E2-2 and every acceptance
+  tolerance unchanged. `emulator_provider.py`: a kernel matrix that does not factorize as stored (the C2UF model's is
+  near-singular and failed on Linux, so `--declaration` refused) is factorized with a jitter of 1e-14, else 1e-13,
+  times its mean diagonal; the self-check accepts ln mean and ln sigma each within max(1e-9, 1e-4 x the stored ln
+  sigma) and a refusal names the worst deviations and where. The C2UF model stays refused on platforms whose libm
+  differs (simulated drift up to 2.5e-2 x sigma: not portable); the E2 model drifts at most 9e-7 x sigma.
+  The C2UF fixture is platform-bound (A1.21): its tests skip on that refusal only; the follow-up is retraining
+  with a nugget floor in `train_emulator.py`.
+- crprop env: capability probe of the cr-propagation campaign and environment E-crprop registered in VALIDATION.md
+  (E2 plus DRAGON2 cd588707 verified by a live rerun); DRAGON2 computational-run and environment manifest under
+  `tests/adapters/fixtures/cr_propagation/env/`. USINE and GALPROP absent (no source tarball). No behavior change.
+- crprop a2: theory-spec contract extension for cosmic-ray propagation (cr-propagation plan r3 §A2, §5.4; contracts
+  `CV-CRPROP` = 3.14.0, unreleased, gated by `contracts/validate.py` `CRPROP_FROM`). New optional
+  `extension.transport` block (geometry, diffusion with breaks, reacceleration, convection, losses, decay, gas,
+  sources, cross sections, species, family, free) in the canonical parameter names (`D0_cm2_s`, `R0_gv`, `L_kpc`,
+  `V_A_kms`, ...); its parameter blocks refuse any other key. `degenerate_directions` items are now a string or an
+  object (`combination`, `form`, `exponents`, `valid_range`, `broken_by`, `evidence`); new core vocabulary
+  `degeneracy_evidence` (`fisher-screen`, `profile-scan`, `posterior`). An object entry with a combination now counts
+  for `theory.degeneracy_missing`; from `CRPROP_FROM` (older artifacts only under `--strict`) an object entry needs its
+  evidence and the range where it holds: new errors `theory.degeneracy_evidence_missing`,
+  `theory.degeneracy_range_missing`, `theory.degeneracy_evidence_unknown`. String entries keep their meaning, and
+  every committed theory-spec keeps its outcome. `covariance_fit.py` `tabulated-grid` reads an object entry as its
+  `combination` (same fit as the equivalent string). Fixtures: two positive, four negative. The `CONTRACTS_VERSION`
+  bump with its regenerated fixtures, templates, profile artifacts and examples is the separate commit on branch
+  `worktree-crprop-a2-bump`.
+- crprop a1: new `skills/hep-theory/scripts/transport_conventions.py` converts cosmic-ray diffusion parameters among
+  the GALPROP, USINE (K0, K10) and DRAGON2 conventions and the canonical names (`D0_cm2_s`, `R0_gv`, `delta`, `eta`),
+  marking each result `exact`, `approximate` with a relative-error bound, or `not-convertible`; it also moves V_A
+  between thin-disc and whole-halo reacceleration (approximate), converts per-nucleon and total kinetic energy, and
+  maps the legacy names `D0` and `L`. Units from the IAU parsec and Julian year (1 kpc^2/Myr = 3.0172e29 cm^2/s). New
+  fixture `tests/adapters/fixtures/cr_propagation/specs/harmonized-v1.json` (r3 §5.5 in the §5.4 transport format);
+  usage paragraph in `cosmic-ray-phenomenology.md`. Contracts unchanged.
+- crprop c1: provider protocol `cr-provider/1` (cosmic-ray propagation plan r3 §C1, §5.2). New contract schema
+  `contracts/schemas/cr_provider.json` (provider declaration, request, response, components; not an artifact type;
+  `want` only `lis` and `components`; no new vocabulary) and the optional `provider` field of `profile.json`
+  (`contracts/schemas/profile.json`) and `adapter.json`, part of the campaign's unreleased contracts minor
+  (CV-CRPROP, 3.14.0, whose version line A2 sets). New core module `core/provider/` (`CORE_VERSION` 1.1.0 → 1.2.0,
+  steward hep-computing): `protocol`, `hashing` (point hash, equal to `contracts/recipe_semantics.py`
+  `canonical_sha256`), `registry` (the caller passes `--provider-registry`; core never searches), `entrypoint` (every
+  provider's `--request/--response`, `--serve` JSON Lines and `--allow-outside-validated-range`), `runner` (subprocess
+  calls in batches, cache keyed by the point hash under a caller-given folder, refusals with reasons: out-of-domain,
+  unregistered-provider, provider-failed on a crash, ...; a request with a `theory_spec_ref` but no transport block is
+  not cached; user-supplied providers labelled `user-supplied`) and
+  `conformance` (PRV-1/PRV-2 checks, also a command line). New `tools/provider_registry.py --write PATH` builds the
+  registry from the `provider` fields (never committed). First provider: `scripts/provider.py` of the
+  `cr-secondary-ratio` theory profile, the closed-form thin-disc B/C with one component per production channel
+  (values bin-averaged in ln(E/n) as in the profile, not P2 bin integrals). New tool contract
+  `contracts/tool_contracts/solar_modulation_force_field.json` for the force-field script. Tests:
+  `tests/core/test_provider.py`, the reusable helper `tests/core/provider_conformance.py` for provider work packages
+  (its own test `tests/core/test_provider_conformance_mixin.py`),
+  `tests/tools/test_provider_registry.py`, the profile's `tests/test_provider.py`, the `provider` check in
+  `tests/adapters/test_adapter_declarations.py` and a force-field contract test; `docs/adapter-authoring.md` gains
+  the field row and a provider section.
+- crprop b2: `theory:cr-secondary-ratio` gains closed forms of the 1D thin-disc model with constant convection
+  (`V_c_kms`) and radioactive decay of secondaries (rate 1/(gamma tau_0), half-lives from `core.constants`
+  NUBASE2020, 10Be -> 10B gain kept, fully stripped 7Be stable by a recorded assumption):
+  `scripts/convection_decay.py` (with a `solve_bvp` benchmark), SymPy derivation `scripts/derive_convection_decay.py`
+  recorded in `derivations/convection-decay-record.md` (`analytic-derivation`; pure-diffusion limits and dimension
+  checks), ILLUSTRATIVE isotopic set `models/xs-illustrative-decay.json`, tests `tests/test_convection_decay.py`;
+  the profile's tests directory is now a package so it is discoverable from the plugin root. Reacceleration stays
+  excluded. Profile version unchanged (0.1.0): the minor bump needs `profiles/registry.json` and the example pins.
+- crprop p0: `workflow_check.py diff` lists changed paths with `--no-renames` so a rename cannot hide its source path; regression test added in `docs/dev/cr-propagation/`
+- crprop env: USINE V3.5 (gitlab.com/dmaurin/USINE, commit fb53006d, GPL-2.0; decision A1.1) built against ROOT 6.38.04
+  and smoke-run for environment E-crprop (`usine -tUSINE`: 42 of 46 reference tests pass, the other 4 differ only in
+  time zone, labels or last digits); USINE computational-run and environment manifest under
+  `tests/adapters/fixtures/cr_propagation/env/`. No behavior change.
+- crprop a3: two-level degeneracy diagnostics. New `skills/hep-statistics/scripts/degeneracy.py`: the Fisher screen
+  (eigen-decomposition and flat-direction rule moved unchanged from `covariance_fit.py`, which now calls it) and
+  profile-likelihood scans along one parameter, a direction (or each Fisher flat direction) or over a plane, with
+  object-form degeneracy entries (`combination`, `form`, `exponents`, `evidence`: `fisher-screen` without `valid_range`,
+  `profile-scan` with the `valid_range` where the profile stays within the threshold). `covariance_fit.py fit`
+  (tabulated-grid) accepts an optional `degeneracy_scan` block and then adds `degeneracies` and `profile_scans` to each
+  fit; without it every output is byte-identical to the base (A3-1 baseline hashes). `degeneracy.py synthetic-curved`
+  is a built-in SYNTHETIC study (D0_cm2_s proportional to L_kpc^1.2, exact to 6 kpc, broken above by a spectral tilt):
+  the profile scan gives `valid_range.L_kpc` = [2, 6.95]. Tests: `tests/skills/hep_statistics/test_degeneracy.py`.
+- crprop a4: cost benchmark of the cr-propagation campaign (r3 §A4): wall time and peak RSS (median of three runs)
+  of the closed-form provider of `cr-secondary-ratio` and of DRAGON2 under `harmonized-v1`, and the grid convergence
+  of DRAGON2's B/C over 2–1000 GV (spatial and energy grids doubled once; reported, no threshold), in the
+  `CRPROP-COST` section of VALIDATION.md. Run records, run specs, provider requests and the convergence script under
+  `tests/adapters/fixtures/cr_propagation/cost/`. USINE and GALPROP rows not measured (capability absent). No
+  behavior change.
+
+- crprop b1: USINE V3.5 in `adapters/cr-propagation` (adapter 0.2.0): `usine_translate.py` writes a USINE run from
+  a transport block (Model2DKisoVc for `cylinder-2d`, Model1DKisoVc for `slab-1d`; diffusion with low breaks,
+  thin-disc reacceleration, constant convection, losses, decay; the ILLUSTRATIVE cross sections of
+  `theory:cr-secondary-ratio` only), records every item USINE expresses only approximately and refuses the rest, runs
+  USINE and records the run; `usine_to_prediction.py` turns USINE's local-flux tables into ratios of bin integrals
+  (isotopes summed on the data's axis); `usine_provider.py` serves it as the cr-provider/1 provider `usine` (B/C,
+  10Be/9Be, Be/B on E_k/n or rigidity). Seven recorded runs replayed offline, live rerun with `HEP_USINE_LIVE_TEST=1`;
+  USINE `tested-in-declared-environment`, adapter still `proposed` (GALPROP). USINE is GPL-2.0 and runs as a separate
+  program; no USINE file is committed. The USINE row of the CRPROP-COST table is filled. README package size
+  statement updated (about 3800 files, 56.6 MB).
+- crprop c2: multi-dataset propagation fit through a `cr-provider/1` provider (cosmic-ray propagation plan r3 §C2,
+  closed-form provider and SYNTHETIC data only; the USINE case is C2U). New
+  `skills/hep-statistics/scripts/propagation_fit.py fit`: datasets as dataset-records (covariance from their
+  components, missing: exit 3), the provider's prediction gated and its bin semantics checked first (a bin-averaged
+  ratio is never fitted to data declared as P2 bin integrals; refused, exit 1); component multipliers for production
+  norms (P15) and parent abundances (P14), profiled exactly; inelastic and slope nuisances refused without provider
+  support; modulation refused for a provider without isotopic LIS; declarative families (those outside the provider
+  domain listed as not expressible); `fit_diagnostics` verdicts with `boundary_kkt`, at most 5 restarts; Fisher screen
+  and profile scans of `degeneracy.py`, a fit-derived theory-spec with object-form `degenerate_directions`; profile
+  intervals; covariance alternatives from `build_covariance.py` lengths (P9); toys (`toy_ensemble`), toy-calibrated
+  family delta chi2 and a Metropolis posterior (`bayes_diagnostics`, no interval above R-hat 1.01 or below ESS 400) on
+  a validated response model of the provider; loop limits (restart cap, 2% toy failures, 2e5 steps per chain) and
+  `--max-evaluations`. New example `examples/propagation-fit/` and section of `core-stats-commands.md`. Tests:
+  `tests/skills/hep_statistics/test_propagation_fit.py`.
+- crprop b3: USINE V3.5 against the closed forms of `theory:cr-secondary-ratio` under harmonized-v1, with the same
+  parents, cross sections, tertiary and ghost settings. B3-1 as frozen fails under harmonized-v1 (2D: B/C up to 2.5%
+  off, attributed to radial escape at R = 20 kpc) and is superseded for B3's verdict by B3-1a/b/c (decisions A1.10):
+  matched 1D geometry within 4e-4 (B3-1a), the 2D offset reported per bin and attributed (B3-1b), USINE 2D against the
+  Fourier-Bessel thin-disc solution within 0.21% (B3-1c, tolerance 0.5%). Level-by-level norm reweighting at +-20% matches full reruns within 9e-6 for all 22 channel cases; slope
+  changes need energy-basis responses when energies couple. Channel list with `must_rerun` flags; specifications, nominal
+  tables, records, run index and offline tests under `tests/adapters/fixtures/cr_propagation/b3/`. No behavior change.
+- crprop e1: training design and bounded active addition with USINE (r3 §E1; optional WP). New
+  `tests/adapters/fixtures/cr_propagation/e1/active_addition.py`: Sobol design (N0 = 64, k = 6 for 5 free
+  parameters, decision Q9), one USINE computational-run per point through `local_partition.py` and the provider
+  runner with cache, and the active-addition loop with its limits (5 rounds, E2 termination criteria, error-plateau
+  and min-distance early stops, evaluation cap) on a placeholder emulator that E2 replaces. Committed: design file,
+  summaries with per-point hashes and run references; training data stay under `$CRPROP_OUT/e1/`. No behavior change.
+- crprop a1r: `transport_conventions.py` corrected and extended from the codes' sources (decision A1.9). The
+  `dragon2` diffusion convention is now D0 beta^etaT (rho/DiffRefRig)^delta in rigidity with `D0_1e28` in 1e28 cm^2/s
+  and etaT, DiffRefRig free (DRAGON2 cd588707 src/diffusion.cc:150, src/crevolutor.cc:121-122); it was D0 (p/p0)^delta
+  with eta = 0. The DRAGON2 row of the convention table in `cosmic-ray-phenomenology.md` follows. New reacceleration
+  conversion among `thin-disc`, `whole-halo`, `dragon2-ptuskin94`, `dragon2-ptuskin03` and `usine`: the D_pp
+  constants read from the code (DRAGON2 cd588707 Ptuskin94 c = 1 without the 4/3, which its enum gives to Ptuskin03;
+  USINE V3.5 c = 4/3) convert exactly; the thin-disc/whole-halo change uses the first-order equivalence
+  V_A,disc^2 h = V_A,halo^2 L / 3 derived in the module (not sqrt(L/h)), approximate with the bound (1 + lam)/5 on the
+  second-order term, lam = h Gamma L / D, now a required input (`--destruction-escape-ratio`). The `reacceleration`
+  subcommand takes `--from`/`--to` (the old `--from-zone`/`--to-zone` still work). Tests: an independent
+  finite-difference oracle of the zone weights, round trips within 1e-12.
+- crprop b1x: high break and USINE's own inputs (decision A1.7; still the unreleased contracts 3.14.0 with
+  `CRPROP_FROM`, no new gate). `extension.transport` gains a high break (`{"kind": "high", "R_break_gv",
+  "delta_above", "s"}`), `geometry.local_bubble_radius_kpc` and the source beta exponent `eta` of an injection item;
+  from `CRPROP_FROM` (older artifacts only under `--strict`) a half-specified break is refused
+  (`theory.transport_break_incomplete`) and a break kind other than low or high too
+  (`theory.transport_break_kind_unknown`); every committed theory-spec keeps its outcome (one positive and two
+  negative fixtures added). `transport_conventions.py` evaluates the high break (USINE V3.5's shipped K formula).
+  `usine_translate.py` translates the high break, the local bubble, the source eta, HII and H2 densities,
+  electron-capture decay (`ec_treatment` `laboratory-half-life`) and an explicit energy grid (`--ekn-grid`), and can
+  use USINE's own cross-section files and data-normalised abundances (`usine:<path>` names, read in place from
+  `HEP_USINE_DATA`, never copied; refused with exit 3 when it is unset); a transport block matching USINE's shipped
+  `init.TEST.par` reproduces that example's B/C exactly (recorded run `b1x-init-test`, live test). The translator now
+  refuses unknown keys and records every default and every field it does not use; records also hash the committed
+  form of their inputs (`committed_form_sha256`, added to the seven B1 records without a rerun). The reader counts
+  14C in carbon. A whole-halo V_A is converted with `transport_conventions.py reacceleration` (A1R: sqrt(L/(3h)),
+  approximate, bound recorded at the run's largest lam); `b1-slab-all-items` rerun and its results updated.
+- crprop d1: DRAGON2 physics items and the provider `dragon2` (cr-propagation r3 §D1, §D1b, folded by r4 §6).
+  `adapters/cr-propagation` 0.2.0: `dragon2_run.py` gains a translator from a `transport` block (`--from-transport`,
+  `spec_from_transport`) that records every item DRAGON2 cannot express (gas, helium, disc thickness, source
+  distribution, inelastic cross sections, V_A zone) and refuses breaks; optional Convection and Reacceleration blocks,
+  NUBASE2020 half-lives written into a copy of `isotope_list.dat` (DRAGON2 ships 10Be at 1.51 Myr) and a single
+  injection slope. `dragon2_to_prediction.py` gains ratios of bin integrals on ekn or rigidity bins (r3 P2, P3). New
+  `dragon2_provider.py` (cr-provider/1, declared in `adapter.json`; not decomposable; runs kept under
+  `HEP_DRAGON2_RUN_DIR` when set). Six runs from new `harmonized-v1-<item>.json` files recorded under
+  `tests/adapters/fixtures/cr_propagation/dragon2/`. The translator converts V_A with hep-theory's
+  `transport_conventions.py reacceleration` (A1R; subprocess) and runs energy losses on Galprop gas, refusing them on
+  gas without HII (DRAGON2 cd588707's nuclear Coulomb loss diverges at n_HII = 0). D1-1 (absolute, frozen) fails and is
+  superseded by D1-1a/D1-1b (decision A1.9): item effects pass for convection and fail for 10Be/9Be with decay,
+  reacceleration and losses (13%, 5.7%, 6.1%), with attribution (VALIDATION CRPROP-D1).
+- crprop e2: emulator of USINE B/C with its valid domain and provider (r3 §E2, §E2b; optional WP). New
+  `skills/hep-ml/scripts/train_emulator.py`: Gaussian-process emulator of a vector simulator output on a box of
+  inputs (principal components, Matern-5/2 GP each, error per prediction, `DomainModel` in the model file, run summary
+  for the writer with task surrogate). `write_ml_artifact.py` now copies the task's validation block
+  (`extrapolation_policy`, `generative_validation`, `sbi_validation`, `anomaly_validation`, `reweighting_validation`,
+  `parameters`, `supervision`), so a surrogate artifact can be written. New cr-provider/1 provider `emulator`
+  (`adapters/cr-propagation/assets/emulator_provider.py`, declared in `adapter.json`): reads only the ml-artifact and
+  model file, refuses points the `DomainModel` calls sparse or outside, gives the emulator error as uncertainty
+  components; `HEP_EMULATOR_ML_ARTIFACT` names another model. Committed model, ml-artifact, hold-out sets and summary
+  under `tests/adapters/fixtures/cr_propagation/e2/` (with the driver `emulator_campaign.py`): E2-1, E2-2 and E2-3 met
+  on synthetic data (177 USINE evaluations). Tests: `tests/skills/hep_ml/test_train_emulator.py`, E2 classes in
+  `tests/adapters/test_cr_propagation.py`.
+
+- crprop c2u: `propagation_fit.py` with the USINE provider (r3 §C2, USINE case). A provider that is not decomposable
+  is fitted through one `total` component (multipliers refused); a `transport` block is sent with every request;
+  `parameters.<name>.step` sets the difference steps of the Jacobian, Fisher matrix and verdict for a noisy provider
+  (a coordinate within one step of a bound is set on it and judged by `boundary_kkt`); response model kind
+  `polynomial` (total-degree Chebyshev on a Sobol design, 1 to 6 coordinates); the bin-semantics guard recognises P2
+  ratios declared `bin-integrated` or `bin-averaged` with the P2 statement and checks binning conventions on both
+  sides; `run_record_keys` (parameter_point keys that record a run, not compared); every evaluation's record and,
+  with `computational_runs`, its computational-run resolved with the tool versions; toy seeds in the
+  statistical-result, per-toy rows kept, multipliers bounded; a failed family calibration is recorded instead of
+  aborting the run. Recorded USINE study and tests (C2U-1, C2U-2 met; C2U-3 not met: response model above tolerance,
+  VALIDATION CRPROP-C2U).
+- crprop d3: two-level cross-code comparison of DRAGON2 cd588707 and USINE V3.5 (cr-propagation r3 §D3; GALPROP
+  unavailable, A1.2). New `tests/adapters/fixtures/cr_propagation/d3/` (study script `d3_study.py`, DRAGON2's own
+  inelastic cross sections tabulated with its compiled code, 2 DRAGON2 and 20 USINE recorded runs, `d3-results.json`)
+  and `D3CrossCode` / `LiveUsineD3` in `tests/adapters/test_cr_propagation.py`. D3-1 (level 1, 5%) fails at 38-77% and
+  is decomposed (gas column, helium target, inelastic cross sections, parent ratio O/C, injection convention); D3-3
+  (USINE given DRAGON2's fixed settings) passes within 0.7% on BronfFerr gas and fails for reacceleration (17%,
+  first-order zone conversion) and losses on Galprop gas (17.7%, gas geometry), both attributed; D3-2 (level 2, each
+  code's defaults) passes with every difference registered as a model alternative (residual 0.4%) (VALIDATION
+  CRPROP-D3).
+- crprop c2uf: propagation_fit.py sends every dataset's observable in one provider request per point
+  (`provider_requests` "per-point", one USINE run per point) and adds response-model layouts "joint" and
+  "per-center" for the family calibration; the two-dataset USINE study (B/C and 10Be/9Be with decay on) and its
+  record under tests/adapters/fixtures/cr_propagation/c2uf/ (polynomial response models refused). Dispatch 2
+  (decision A1.14): emulator_provider.py takes a per-model declaration (observables with output slices, axes, bins,
+  the domain from the model's box; `--declaration`), the committed E2 model answered exactly as before (pinned
+  responses); propagation_fit.py response_model kind "provider" (toys on the provider itself) and toy fits that use
+  the stated steps, bound snapping and a Newton finish; a Gaussian-process emulator of USINE B/C and 10Be/9Be
+  (decay on) validated on 40 held-out USINE runs at 0.0038 sigma; C2UF-1 met: BIG survives (p 1.0), SLIM excluded
+  (delta chi2 23.9, p < 0.015) with 200 toys each (VALIDATION CRPROP-C2UF).
+
+- crprop f1: reproduction of Génolini et al. 2019 (BIG, SLIM, QUAINT) with USINE on AMS-02 B/C. The USINE provider
+  takes the low break (`R_break_gv`, `delta_below`), a data period's force-field potential (`phi_2011_2016_gv`,
+  USINE's SolMod0DFF per isotope; recorded departure from "providers never modulate") and a production channel's
+  norm, low-energy slope and threshold (`xs_norm_12C_H_11B`, ...; USINE's fit-mode transformation on a run-time copy
+  of the channel, never committed); a point that moves `delta` keeps each high break's Deltabreak. The translator adds
+  `--phi`, `--production-modifiers` and `pure:<isotopes>` in data-normalised abundances; the reader reads modulated
+  tables with a phi check. `propagation_fit.py`: parameter priors, periods accepted when the provider's domain has
+  `phi_<period>_gv`, optional Newton polish before the verdict. New example `examples/bc-usine-reproduction`. Outcome
+  (VALIDATION CRPROP-F1): F1-1 not met on convergence only (delta and K10 in window for BIG, SLIM and the declared
+  variant QUAINT-Vc0, V_c on its bound by boundary_kkt; no fit_diagnostics verdict at USINE's 6-digit noise floor),
+  F1-2 met. `usine_translate.py --usine-tolerance` sets USINE's EPS_ITERCONV, EPS_INTEGR, EPS_NORMDATA (defaults
+  unchanged; tighter values change no output digit). `adapters/cr-propagation/adapter.json` provider domain widened
+  (decision A1.16).
+- crprop RC: campaign summary in `docs/dev/cr-propagation/campaign-report.md` (20 of 24 work packages merged with a
+  verifier PASS; D2 unavailable, F2 and F3 skipped; F1 a partial reproduction, so no v1 change; known issues listed
+  there) and the pull-request draft `docs/dev/cr-propagation/pr-draft.md`. Documentation only.
+
 ## 0.42.0 (2026-10-26)
 
 Minor release; contracts 3.13.0, `CORE_VERSION` 1.1.0 and geant4 adapter 0.5.0 unchanged. It ships semantic naming

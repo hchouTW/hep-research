@@ -210,7 +210,9 @@ class FixtureTests(unittest.TestCase):
     RULES = {"prediction.status_upgraded", "theory.conventions_incomplete", "theory.order_missing", "theory.limit_missing",
              "theory.unchecked_strong_status", "theory.check_result_vocab", "theory.validity_empty",
              "prediction.spec_unlinked", "prediction.envelope_prescription", "prediction.truncation_method",
-             "theory.degeneracy_missing"}
+             "theory.degeneracy_missing", "theory.degeneracy_evidence_missing", "theory.degeneracy_range_missing",
+             "theory.degeneracy_evidence_unknown", "theory.transport_break_incomplete",
+             "theory.transport_break_kind_unknown"}
 
     def test_warning_fixtures_are_valid_and_warn(self):
         self.assertTrue(self.CASES["warning"])

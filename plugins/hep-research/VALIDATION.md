@@ -23,6 +23,7 @@ earlier run's totals included them ("since removed") the totals are quoted as th
 | E2 | macOS workstation, macOS 26.5 (Darwin 25.5.0), arm64 Apple M3, Python 3.13.2 with numpy 2.5.3, scipy 1.18.1, matplotlib 3.11.2, sympy 1.14.0; Claude Code 2.1.288 to 2.1.289; Codex CLI 0.160.0 |
 | E3 | Linux (EL9) shared cluster node (AlmaLinux 9, Linux 5.14.0 x86_64), plugin tree on a network file system, Python 3.11.13 in a venv on local disk; system ROOT 6.40.04 (C++17, g++ 11.5.0; PyROOT through the system Python 3.9), cmake 3.31.8, Graphviz 2.44.0, HTCondor 25.0.14; Claude Code 2.1.287, Codex CLI 0.160.0 |
 | E4 | Linux cloud container (Claude Code cloud, Linux x86_64), Python 3.13.16 in `.venv-hep` with numpy 2.5.3, scipy 1.18.1, matplotlib 3.11.2, sympy 1.14.0, pyhf 0.7.6; no ROOT, PyTorch, Combine or Codex; Claude Code 2.1.292 |
+| E-crprop | The E2 host (macOS 26.5 arm64; Python 3.13.2 in the E2 venv with numpy 2.5.3, scipy 1.18.1) plus the external cosmic-ray propagation codes of the cr-propagation campaign: DRAGON2 (cosmicrays/DRAGON2-Beta_version commit cd588707, configure.ac DRAGON 3.1.0; serial build of 2026-10-15, binary sha256 d26dbb85…, data directory = the checkout's `data/`), built with Homebrew GCC 15.2.0_1 (g++-15, gfortran-15), GSL 2.8, CFITSIO 4.6.4, Autoconf 2.72, libtool 2.6.2; on the host also ROOT 6.38.04, cmake 4.3.2, Apple clang 21.0.0 (not used by DRAGON2). From 2026-10-28 (host now macOS 27.2, Darwin 27.2.0): USINE V3.5 (gitlab.com/dmaurin/USINE tag V3.5, tag object 7197ddc1, commit fb53006d; GPL-2.0; decision A1.1), built with cmake 4.3.2 and Apple clang 21.0.0 (`-O0`, C++17) against Homebrew ROOT 6.38.04 (GSL 2.8 through ROOT MathMore; CFITSIO not used), binary sha256 1d444720…, data directory = the checkout's `inputs/` (run with `USINE` set to the checkout). GALPROP v57 absent (no source, D5, A1.2). No batch client: local `local_partition.py` only (D6). Located through `HEP_DRAGON2_BIN`, `HEP_DRAGON2_DATA`, `HEP_USINE_BIN`, `HEP_USINE_DATA`; records in `tests/adapters/fixtures/cr_propagation/env/` |
 
 Aggregate command: `python3 tools/run_all_checks.py --out <dir>` from the plugin root (`--help` runs nothing). Seeds
 and tolerances of every example are in its `results.json`.
@@ -3482,6 +3483,29 @@ Not done in this stage: the independent
 new-problem run by an agent that did not take part (C1.10, section A.8), the `review.py` Markdown review, the release
 manifest. The adequacy table is unchanged; search values remain F1 optimistic bounds and decide nothing.
 
+## 0.43.0 release check (2026-10-29, E2 and the CI lock)
+
+Release commit `790ef3e7` on the cr-propagation integration branch, based on main `8fcbb826` (main has not moved since
+0.42.0, so no rebase). It ships the cr-propagation r4 campaign (CRPROP-* sections above; report in
+`docs/dev/cr-propagation/campaign-report.md`); contracts 3.14.0 and `CORE_VERSION` 1.2.0 become official (decision
+A1.15), adapter `cr-propagation` 0.2.0. No sci-fix ledger entry. The ams02-research companion needs no change (it
+requires hep-research >= 0.11.0).
+
+What changed in the release commit: version 0.43.0 in both manifests, `pyproject.toml`, the README, two assets, the
+theory-profile scripts and artifacts, `usine_translate.py` and `examples/bc-usine-reproduction/run.py` (run records
+stamp the plugin version; committed campaign run records keep the version that produced them); CHANGELOG `Unreleased`
+is now `0.43.0`; examples regenerated with E2: only version strings, the hashes that cover them and the platform
+string change. ruff 0.16.10 and mypy 2.4.0 (the CI pins) pass on `core/` and `contracts/`.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 4`, E2 (Python 3.13.2, NumPy 2.5.3) | 31 pass, 0 fail, 2 skipped (CLI host checks); 6000 tests in 480 modules, 5832 pass, 0 failures, 168 skipped |
+| Same with the CI lock (no torch) | 31 pass, 0 fail, 2 skipped; 6000 tests, 5737 pass, 0 failures, 263 skipped |
+| `check_relocation.py` | only the 2 known geant4 path-with-spaces failures (`test_geant4` partition merges), identical on main |
+
+After the release commit, PR #308's Linux CI failed on 8 float comparisons pinned on macOS and on the C2UF emulator's
+near-singular kernel; fixed under decision A1.20 (section CRPROP-CIFIX), verified, and the release manifest regenerated.
+
 ## 0.42.0 release check (2026-10-26, E2 and the CI lock)
 
 Release branch `release/0.42.0` from main `848c5eb4`. It ships #302-#306 (semantic naming P1-P5 and the fixes of the
@@ -5745,3 +5769,1702 @@ follow-up of F-15. Each item's tests, run on the parent with the item's test fil
 Not run: live routing for the six new descriptions, the routing tables and the 18 new cases (gate G2; estimate
 $19.90 for all 259 cases, $1.36 for the 18 new ones, from the 2026-10-15 run's cost per turn), the communication
 behavioral evaluation, the slow tier, the CLI host checks. Skipped tests are unverified, not passed.
+
+## CRPROP-ACCEPTANCE (2026-10-26, E2; integration branch `worktree-crprop-integration` from `main` 8fcbb826, 0.42.0)
+
+P0 of the cr-propagation r4 workflow (`docs/dev/cr-propagation/workflow-r4.md` §5). The frozen acceptance list
+`docs/dev/cr-propagation/acceptance.json` (86 entries: ALL, A1–A4, B1–B3, providers folded into B1, D1, D2 and E2,
+C1, C2, C2U, D1–D3, E1–E2, F1, F3, ENV, WF) is generated from r3's Acceptance Criteria before any work package
+starts; this is R9's "criteria first" for the whole campaign. From here to H1, entries may only be added (stricter);
+loosening or deleting one waits for H1 (`workflow_check.py acceptance`).
+
+| Item | Result | Evidence |
+|---|---|---|
+| Frozen acceptance list | sha256 `f5b0dbe61aca360e364f0df52a41bc00f27f2cfaf0ad2808e43bc4f3480b813e` | `docs/dev/cr-propagation/acceptance.json` |
+| Workflow manifest (WF-1) | `workflow_check.py dag`: ok, 21 work packages, 9 capabilities, acyclic, waves ordered; derived at H0 (decision D0), sha256 `017bb108bf5dac1dc197675fdfdf665cbe32c952259f808611e6990b75f3e208` | `docs/dev/cr-propagation/workflow.json` |
+| Decision record | D0–D12 answered 2026-10-26 | `docs/dev/cr-propagation/decisions.md` |
+| Task documents | `lint_task.py`: 0 errors for `workflow-r4.md`, `workflow-r4.zh.md`, `cr-propagation-plan.md`, `cr-propagation-plan.zh.md` (planned paths give warnings) | P0 run |
+| Language versions | six differences reported (r4 §3 D2 vs D5; r4 Deliverables; r4 Open Questions on review.py; r3 line 7; r3 line 64 §0.4 vs §0.5; r3 line 257 status string), not chosen | `decisions.md` |
+| P0 rework, round 1 (verifier REWORK, 5 problems) | `workflow.json` sha256 `73c6c8a3e6d5e1f23c6fe501973c158fb78f7d77bd65d0a741390c77d93c1d51` (RC owns WF-2..WF-10, criticality per r4 §8, F1 fallback mode, F2/E1/RC sources; checker and manifest orchestrator-only); `workflow_check.py` counts waivers and takes `--plugin-root`; D3 adds F1's HEPData/CRDB queries; two more language differences recorded; `acceptance.json` unchanged | `decisions.md`, `workflow.json` |
+| P0 rework, round 2 (verifier REWORK) | `workflow.json` sha256 `c18ae1bf834d4760af6327a38f451a571894e22c033b33966b74b30d36851dcb`, `workflow_check.py dag` ok (21 work packages, 9 capabilities): `common_files` adds the skill and adapter README counts and SKILL.md Resources rows that `check_wiring.py` requires (r3 §0.5); narrower D1 and C2 file lists; F2 hard-depends on E2 (r3 Gate E); every non-r3/r4 value carries a source. Checker: duplicate acceptance ids rejected, frozen list read from the trusted integration history, `fallback_mode` deps and capabilities and soft-dependency waves checked. Three more language differences recorded. `acceptance.json` unchanged |  `decisions.md`, `workflow.json`, `workflow_check.py` |
+
+Derived entries (not in r3): ENV-1 to ENV-3 (from r4 §3) and C2U-1, C2U-2 (from r3 §C2's USINE case, split by r4 §6).
+ALL-2 is replaced by the P0 freeze. **Not verified here:** r3 Q10's formal independent review with `review.py` is not
+run at P0; it moves to before H1 (r4 Open Questions).
+
+## CRPROP-ENV — 2026-10-26 (environment E-crprop)
+
+Work package ENV of the cr-propagation r4 workflow (`docs/dev/cr-propagation/workflow-r4.md` §3): capability probe
+and external builds. **Environment field (r3 §0.3, base exception D10):** worktree `.claude/worktrees/crprop-env`,
+branch `worktree-crprop-env`, base = integration HEAD ef37d970 (not `main`; decision D10); toplevel checked, status
+clean at start, prerequisite P0 (ef37d970) an ancestor of HEAD. No plugin code changed.
+
+| Item | Result | Evidence |
+|---|---|---|
+| Capability file (ENV-1) | all 9 capabilities of `workflow.json`: `repo` present, `net-github` present (DRAGON2 HEAD cd588707), `net-sources` absent, `net-data` partial (HEPData HTTP 200; CRDB times out after 25 s), `pkg-install` present (Homebrew 7.0.8, venv creation), `batch` partial (local only, D6), `env-dragon2` present, `env-usine` absent, `env-galprop` absent | `$CRPROP_OUT/capabilities.json` (outside the repo) |
+| DRAGON2 build check | not rebuilt: source commit cd588707 (clean); sha256 of `install/bin/DRAGON` and the three libraries equal the 2026-10-15 build record | `tests/adapters/fixtures/cr_propagation/dragon2-build.computational-run.json` |
+| DRAGON2 live rerun | `HEP_DRAGON2_LIVE_TEST=1 python -m unittest tests.adapters.test_cr_propagation`: 22 tests OK in 100.1 s (E2 venv) and 100.3 s (miniconda Python 3.13.2, numpy 2.4.4); `LiveDragon2` ran, not skipped: X1 rerun equals the recorded output at relative 1e-6 | `$CRPROP_OUT/env/live/` |
+| Records (ENV-2) | computational-run `dragon2-verify.computational-run.json` (contracts 3.13.0, `validate.py` ok, no findings) and environment manifest `dragon2.environment.json` (`environment_manifest.py record`), de-identified (`<TOOL_HOME>`, `<VENV>`, `<RUN_DIR>`) | `tests/adapters/fixtures/cr_propagation/env/` |
+| Environment label (ENV-3) | E-crprop registered in the Environments table with compiler, ROOT, GSL, CFITSIO and DRAGON2 versions | this file |
+| Checks (ALL-3) | `run_all_checks.py`: exit 0. `check_relocation.py`: 31 pass, 1 fail, 1 skip; the failing check is two `tests.adapters.test_geant4` partition tests (`test_partition_summaries_merge_without_reading_a_csv`, `test_partition_merge_equals_a_single_run_and_refuses_nothing_twice`), whose worker command breaks on a plugin path with spaces (`can't open file '.../reloc'`); the same two tests fail identically from a copy of the base ef37d970 under a path with spaces, so the failure predates ENV and is not fixed here | `$CRPROP_OUT/env/reloc`, `$CRPROP_OUT/env/acceptance/ALL-3.spaces-path.*.log` |
+| USINE, GALPROP | absent: `$HOME/hep-work/crprop-sources/` is empty; nothing downloaded or built (D4, D5). Fallbacks of `workflow.json`: USINE absent is critical (B1, B3, C2U wait; F1 takes D8); GALPROP absent makes D2 unavailable | `capabilities.json` |
+
+**Not run:** the curl probes of `lpsc.in2p3.fr/usine`, `gitlab.in2p3.fr` and `galprop.stanford.edu` (outside the
+consented network hosts of the campaign's common assignment; decision D2 records that they time out from the
+sandbox). The DRAGON2 status is unvalidated: the live rerun shows reproducibility of the recorded X1 output, not
+physical validity.
+
+## CRPROP-A2 — 2026-10-26 (environment E2)
+
+Work package A2 of the cr-propagation r4 campaign (r3 §A2, §5.4): the optional theory-spec `transport` block and
+object-form `degenerate_directions` entries, contracts `CV-CRPROP` = 3.14.0 (unreleased minor) gated by
+`validate.CRPROP_FROM`.
+
+Environment: E2 (macOS arm64, Python 3.13.2). Base exception D10: base is the integration HEAD `ef37d970` (P0), not
+`main`. r3 §0.3 checks at start: `git rev-parse --show-toplevel` = `.claude/worktrees/crprop-a2` (this worktree);
+`git branch --show-current` = `worktree-crprop-a2`; `git status` clean; prerequisite P0 `ef37d970` is an ancestor of
+HEAD (`git merge-base --is-ancestor` ok); `origin/main` is still 8fcbb826 (0.42.0), so no new CHANGELOG entries to
+recheck; the cited lines were rechecked on the base (`_blank` at `contracts/validate.py` 1239, the string-only
+degeneracy reader at `covariance_fit.py` 1110, the grid-only gate at 1025).
+
+Acceptance criteria (frozen in `docs/dev/cr-propagation/acceptance.json`, written here before the change; no
+numerical tolerance applies to A2):
+
+| ID | Criterion | Pass condition |
+|---|---|---|
+| A2-1 | Every existing theory-spec in `contracts/fixtures` and `examples/` validates with the same result before and after | identical `ok` flag and identical sorted findings (severity, path, code, message), default and `--strict`, for every file |
+| A2-2 | Each of the three new error codes is triggered by one negative fixture | `theory.degeneracy_evidence_missing`, `theory.degeneracy_range_missing`, `theory.degeneracy_evidence_unknown` each in `contracts/fixtures/artifacts/invalid/` |
+| A2-3 | A list holding only objects does not trigger `theory.degeneracy_missing` | unit test in `tests/contracts` |
+| A2-4 | `tabulated-grid` gives the same result for an object entry as for the equivalent string | identical fit output (apart from the echoed spec) in `tests.skills.hep_statistics.test_grid_fit` |
+| A2-5 | The new rules apply from `CRPROP_FROM` only | a 3.13.0 artifact gets none of the three codes (default mode); a 3.14.0 artifact gets them |
+
+Results (after the change; raw output in `$CRPROP_OUT/a2/`, `CRPROP_OUT` = the campaign's run-output folder):
+
+A2-1, every theory-spec under `contracts/fixtures`, `examples/` and `profiles/` (23 files) validated before the
+change (base `ef37d970`) and after it, default and `--strict` (`a2_baseline.py`, `theory_specs_before.json`,
+`theory_specs_after.json`): ok flag and sorted findings (severity, path, code, message) identical for all 23. On
+`worktree-crprop-a2-bump` (contracts 3.14.0) the findings are identical too; only the `contract_version` of the
+qed-prediction example and the six profile theory-specs changes (`theory_specs_after_bump.json`).
+
+| File | contract_version | default / strict | default codes | after |
+|---|---|---|---|---|
+| `contracts/fixtures/artifacts/invalid/envelope_missing_status.json` | 1.0.0 | errors / errors | schema.required | identical |
+| `contracts/fixtures/artifacts/invalid/theory_experiment_binding.json` | 1.0.0 | errors / errors | theory.experiment_binding | identical |
+| `contracts/fixtures/artifacts/invalid/theory_experiment_field.json` | 1.0.0 | errors / errors | schema.additional, theory.experiment_field | identical |
+| `contracts/fixtures/artifacts/invalid/theory_v26_check_result_vocab.json` | 2.6.0 | errors / errors | theory.check_result_vocab | identical |
+| `contracts/fixtures/artifacts/invalid/theory_v26_limit_missing.json` | 2.6.0 | errors / errors | theory.limit_missing | identical |
+| `contracts/fixtures/artifacts/invalid/theory_v26_order_missing.json` | 2.6.0 | errors / errors | theory.order_missing | identical |
+| `contracts/fixtures/artifacts/invalid/theory_v26_propagation_no_degeneracy.json` | 2.6.0 | errors / errors | theory.degeneracy_missing | identical |
+| `contracts/fixtures/artifacts/invalid/theory_v26_unchecked_formal_proof.json` | 2.6.0 | errors / errors | theory.unchecked_strong_status | identical |
+| `contracts/fixtures/artifacts/invalid/theory_v26_validity_empty.json` | 2.6.0 | errors / errors | theory.validity_empty | identical |
+| `contracts/fixtures/artifacts/valid/theory_spec.json` | 1.0.0 | ok / ok | - | identical |
+| `contracts/fixtures/artifacts/valid/theory_spec_v26.json` | 2.6.0 | ok / ok | - | identical |
+| `contracts/fixtures/artifacts/valid/theory_spec_v26_analytic_checked.json` | 2.6.0 | ok / ok | - | identical |
+| `contracts/fixtures/artifacts/valid/theory_spec_v26_asymptotic.json` | 2.6.0 | ok / ok | - | identical |
+| `contracts/fixtures/artifacts/valid/theory_spec_v26_inapplicable_listed.json` | 2.6.0 | ok / ok | - | identical |
+| `contracts/fixtures/artifacts/valid/theory_spec_v26_propagation.json` | 2.6.0 | ok / ok | - | identical |
+| `contracts/fixtures/artifacts/warning/theory_v26_conventions_incomplete.json` | 2.6.0 | ok / ok | theory.conventions_incomplete | identical |
+| `examples/qed-prediction/output/artifacts/theory_spec.json` | 3.13.0 | ok / ok | - | identical |
+| `profiles/theory/cr-secondary-antiprotons/derivations/theory-spec.json` | 3.13.0 | ok / ok | - | identical |
+| `profiles/theory/cr-secondary-ratio/derivations/theory-spec.json` | 3.13.0 | ok / ok | - | identical |
+| `profiles/theory/dis-parton-model/derivations/theory-spec.json` | 3.13.0 | ok / ok | - | identical |
+| `profiles/theory/drell-yan-lo/derivations/theory-spec.json` | 3.13.0 | ok / ok | - | identical |
+| `profiles/theory/heliospheric-modulation/derivations/theory-spec.json` | 3.13.0 | ok / ok | - | identical |
+| `profiles/theory/tmd-gaussian-lo/derivations/theory-spec.json` | 3.13.0 | ok / ok | - | identical |
+
+| ID | Result | Evidence |
+|---|---|---|
+| A2-1 | pass | table above; `python3 -m unittest discover -s tests/contracts -t .`: 1213 tests OK (3 skipped); `test_crprop_degeneracy.CommittedSpecsUnchanged` |
+| A2-2 | pass | `contracts/fixtures/artifacts/invalid/theory_crprop_degeneracy_{evidence_missing,range_missing,evidence_unknown}.json`, each giving exactly its code (`NegativeFixtures`) |
+| A2-3 | pass | `ObjectEntries.test_object_only_list_is_not_blank` (at 3.14.0 and 2.6.0); fixture `valid/theory_spec_crprop_object_degeneracy.json` |
+| A2-4 | pass | `python3 -m unittest tests.skills.hep_statistics.test_grid_fit`: 18 tests OK; `test_object_entry_gives_the_result_of_the_equivalent_string` (identical JSON output, with and without `combinations`) |
+| A2-5 | pass | `Gating`: at 3.13.0, 3.0.0 and 2.6.0 none of the three codes by default, all under `--strict`; native at `CRPROP_FROM` = 3.14.0 |
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --out $CRPROP_OUT/a2/checks` | 33 pass, 0 fail, 0 skip; unittest 5745 run, 0 failures, 206 skipped |
+| `check_relocation.py` | fails 2 tests, `tests.adapters.test_geant4` partition tests (worker path with spaces is split: `can't open file '.../hep'`); the same 2 fail on the base `ef37d970` in a copy under a path with spaces (`reloc-base-geant4.txt`): not caused by A2 |
+| `check_naming.py`; `workflow_check.py gaps` | pass; no new known gap |
+| `check_wiring.py --since ef37d970`; `check_layering.py`; `check_packaging.py` | pass |
+| `workflow_check.py acceptance` | ok, frozen sha256 unchanged |
+| `workflow_check.py diff --work-package A2` | fail on one path: `tests/skills/hep_statistics/test_grid_fit.py`, where the frozen A2-4 command and the assignment place the A2-4 test; workflow.json's A2 `files` omit it |
+
+Version bump: `CONTRACTS_VERSION` stays 3.13.0 on `worktree-crprop-a2`; `CRPROP_FROM` = 3.14.0, so a 3.14.0 artifact
+reads with the newer-minor warning until the bump. The bump follows the 3.13.0 precedent (`ac3950b4`) and is one
+commit on `worktree-crprop-a2-bump` (on top of this branch). Besides the in-scope files (`contracts/__init__.py`,
+`vocab/core.json`, fixtures, pinned tests) it regenerates 166 example outputs, 19 theory-profile files (artifacts
+and `make_artifacts.py` constants) and 3 skill templates, all outside A2's workflow.json list. Examples were regenerated
+with the E2 venv. `bc-propagation-fit` and `unfolding-coverage` carry no contract version; their numpy/scipy drift
+was reverted. On an export of the bump branch: `tests/contracts` 1213 tests OK (3 skipped), `tests/examples` 176 tests OK (22
+skipped); the full `run_all_checks` was not run on the bump branch.
+
+## CRPROP-A1 — 2026-10-26 (environment E2)
+
+Work package A1 of the cr-propagation r4 campaign (r3 §A1, §5.5): convention conversion
+(`skills/hep-theory/scripts/transport_conventions.py`) and the harmonized configuration `harmonized-v1`.
+
+Environment: E2, macOS 26.5 arm64, Python 3.13.2, standard library only. r3 §0.3 checks, run 2026-10-26 before the
+first edit: `git rev-parse --show-toplevel` = `.claude/worktrees/crprop-a1` (this worktree); `git branch
+--show-current` = `worktree-crprop-a1`; `git status` clean; prerequisite P0 `ef37d970` is an ancestor of HEAD
+(`git merge-base --is-ancestor` exit 0). Base exception (decision D10): the base is the integration HEAD `ef37d970`,
+not `origin/main`; the line numbers r3 cites for A1 were rechecked on this base (the convention table of
+`cosmic-ray-phenomenology.md` is at lines 45-49, three rows).
+
+Acceptance criteria and tolerances, written before any implementation (R9; frozen in
+`docs/dev/cr-propagation/acceptance.json`, never loosened):
+
+| ID | Criterion | Tolerance |
+|---|---|---|
+| A1-1 | Pure power-law round trips (every pair of conventions, there and back) | relative error < 1e-12 |
+| A1-2 | 1 kpc^2/Myr in cm^2/s, from the IAU parsec (648000/pi au, au = 149597870700 m) and the Julian year (365.25 d) | 3.0172e29 within relative 1e-4 |
+| A1-3 | The tests parse the convention table of `cosmic-ray-phenomenology.md` row by row; a parse failure fails the test; no value copied by hand | parse of every row |
+| A1-4 | With a break, or different smoothness conventions, the status is `approximate` or `not-convertible`; K0 <-> K10 with a break is never `exact` | status only |
+| A1-5 | V_A between thin disc and whole halo | status `approximate` only |
+| A1-6 | `harmonized-v1.json` carries every §5.5 row and the §5.4 `transport` structure; schema validation against `ext_theory_spec.transport` after A2 merges | every row present |
+
+Results (2026-10-26, E2, HEAD `0a406fd2` for the full checks; outputs under `$CRPROP_OUT/a1/`):
+
+| ID | Result | Evidence |
+|---|---|---|
+| A1-1 | pass: every pure power-law pair (eta 1: galprop, usine-k0, usine-k10, canonical; eta 0: dragon2 and the same; eta 0.7: usine and canonical) is `exact` and there-and-back within 1e-12 | `PowerLawRoundTrips` |
+| A1-2 | pass: 1 kpc^2/Myr = 3.01720e29 cm^2/s from the IAU parsec and Julian year, within 1e-4 of 3.0172e29; the page's 3.017e29 within half its last digit | `Units`, `ConventionTable.test_page_unit_line_matches_derived_unit` |
+| A1-3 | pass: the three table rows (plus K10 from "K10 = K0 10^delta") are parsed for eta, reference rigidity and unit and matched to the module; a row that does not parse fails (`test_parse_failure_fails`) | `ConventionTable` |
+| A1-4 | pass: with a low break, K0 <-> K10 and K0 -> GALPROP are `approximate` with a bound >= abs(f(R0') - 1); different or unknown smoothness conventions and non-low breaks are `not-convertible`; never `exact` | `Breaks` |
+| A1-5 | pass: V_A thin disc <-> whole halo is `approximate` (factor sqrt(L/h), no bound derived); same zone `exact` | `Reacceleration` |
+| A1-6 | pass (structure): every §5.5 row present, §5.4 keys at both levels; schema validation against `ext_theory_spec.transport` skipped until A2 merges (the test runs it automatically once the property exists) | `Harmonized` |
+
+Checks: `run_all_checks.py` 33 pass, 0 fail; `check_relocation.py` fails 2 tests in `tests.adapters.test_geant4`
+(`test_partition_summaries_merge_without_reading_a_csv`, `test_partition_merge_equals_a_single_run_and_refuses_nothing_twice`:
+a worker command split at the space of the relocated path), and the same 2 fail on the base `ef37d970` (exported with
+`git archive`), so they are not caused by A1; `check_naming.py` pass, baseline not grown; `check_layering.py`,
+`check_packaging.py`, `check_wiring.py --since ef37d970`, `reference_inventory.py --check` pass.
+Not verified: the break form of the `usine` smoothness convention was not re-read from Weinrich et al. 2020a, Eq. 1;
+the V_A zone scaling has no derived error bound.
+
+## CRPROP-C1 — 2026-10-26 (environment E2)
+
+Provider protocol `cr-provider/1` (r3 §C1, §5.2; r4 §6: wave 1, providers folded into the tool work packages).
+
+**Environment.** E2 (macOS arm64 workstation), Python 3.13.2 from `~/.venvs/hep-research-e2`. Base exception D10:
+the base is the integration HEAD `ef37d970` (P0), not `main`. r3 §0.3 checks at the start:
+`git rev-parse --show-toplevel` = `.claude/worktrees/crprop-c1`; `git branch --show-current` = `worktree-crprop-c1`;
+`git status` clean; `git merge-base --is-ancestor ef37d970 HEAD` succeeds (P0, the only prerequisite).
+
+**Acceptance criteria (frozen in `acceptance.json`, written here before the work).** C1-1 a provider not in the
+registry is refused; C1-2 single-shot and `--serve` responses have the same sha256 after removing `elapsed_s` and
+timestamps (PRV-2); C1-3 a cache hit does not call the provider; C1-4 a forced provider crash is reported as `failed`
+with the reason; C1-5 out of domain gives `failed` with `reason: out-of-domain`, and with
+`--allow-outside-validated-range` a prediction labelled `outside-validated-range`; C1-6 the core hash equals
+`contracts/recipe_semantics.py` `canonical_sha256` on 10 random objects (exact equality of the hex digest);
+C1-7 `contracts/tool_contract.py` passes and `core/provider/` holds no path string (`check_layering.py`); ALL-1..ALL-7.
+Tolerances: none numerical except C1-2 and C1-6, which are exact (byte-identical hashes).
+
+**Results (E2, 2026-10-26).** Evidence under `$CRPROP_OUT/c1/acceptance/` (outside the repository).
+
+| Entry | Result | Evidence |
+|---|---|---|
+| C1-1 | pass | `tests.core.test_provider.RegistryRefusal`: unregistered id refused (`unregistered-provider`, provider never started), registered version required |
+| C1-2 | pass | `SingleShotAndServe`: sha256 of single-shot and `--serve` responses equal after removing `elapsed_s`; also the closed-form provider (profile `tests/test_provider.py`) |
+| C1-3 | pass | `Cache`: second request answered from the cache with 0 provider calls; cache folders named by the point hash |
+| C1-4 | pass | `Failures`: exit-7 crash gives `failed`, reason `provider-failed`, stderr in `detail`, in single-shot and `--serve`; exception, invalid response and timeout too |
+| C1-5 | pass | `Domain`: `out-of-domain` without prediction; with `--allow-outside-validated-range` a prediction labelled `outside-validated-range` |
+| C1-6 | pass | `Hash`: `core.provider.hashing.canonical_sha256` equals `contracts/recipe_semantics.py` `canonical_sha256` on 10 random objects (seed 20261026); point hash equals it on the r3 §5.2 object |
+| C1-7 | pass | `contracts/tool_contract.py` pass (16 contracts, incl. `solar_modulation_force_field.json` with the help check); `check_layering.py` ok |
+| PRV-1/PRV-2 (closed form) | pass | `core/provider/conformance.py`: 9 of 9 checks; values equal `predict.py bin_averaged` and the committed benchmark prediction exactly; components add to the prediction within 1e-12; 8- vs 32-node quadrature within the declared 1e-6 |
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --out $CRPROP_OUT/c1/checks` | pass; 5772 tests, 0 failures, 0 errors, 155 skipped |
+| `check_relocation.py --out $CRPROP_OUT/c1/reloc` | fail: 2 tests, `tests.adapters.test_geant4` (`RunAndPartition.test_partition_merge_equals_a_single_run_and_refuses_nothing_twice`, `BoundaryArtifacts.test_partition_summaries_merge_without_reading_a_csv`), a `--cmd` path split at the space of the relocated folder; both fail identically on the base `ef37d970` in a folder with a space (`$CRPROP_OUT/c1/reloc-base/`); not touched by C1 |
+| `check_naming.py`, `workflow_check.py gaps/diff/acceptance` (integration copy, `--plugin-root`), `check_wiring.py --since ef37d970`, `check_packaging.py` | pass / ok |
+| ruff 0.16.10 and mypy 2.4.0 on `core` and `contracts` | pass |
+
+Not done in C1: the `CONTRACTS_VERSION` line (3.13.0 → 3.14.0). The bump makes 13 tests fail until the fixtures under
+`contracts/fixtures/`, the 0.42.0 examples and the measurement template are regenerated, and those files are outside
+C1's file list; A2 (merged first, `contracts/fixtures/**` in its list) sets the shared version and `CRPROP_FROM`.
+C1 gates no rule by version: its schema changes are optional and additive. The closed-form provider's values are the
+profile's ln(E/n) bin average of the ratio (`crsr:bin_average`), not the r3 P2 ratio of bin integrals.
+
+**Rework round 1 (2026-10-27, independent verifier).** (1) Blocking: the shared conformance mixin cached its report on
+`type(self)`, so a subclass inherited its parent's verdict (a missing provider passed after a good one). The report
+is now kept in the class's own `__dict__`, keyed by provider id, request, outside point and user declarations;
+`tests/core/test_provider_conformance_mixin.py` runs the mixin on a good provider, a missing one, a broken
+user-supplied one, a subclass of a subclass, in both run orders (pass/fail as expected), and the verifier's
+reproduction now fails the broken subclass (3 failures). (2) Advisory: the runner cache key now includes
+`theory_spec_ref`, and a request with a `theory_spec_ref` but no transport block is never cached
+(`tests.core.test_provider.CacheAndTheorySpec`).
+
+## CRPROP-B2 — 2026-10-26 (environment E2)
+
+Work package B2 of the cr-propagation r4 campaign (r3 §B2): closed forms of the 1D thin-disc model with constant
+convection V_c and with radioactive decay of secondaries (¹⁰Be, rate 1/(γτ₀), ¹⁰Be→¹⁰B gain), in
+`profiles/theory/cr-secondary-ratio/`.
+
+**Environment (r3 §0.3, base exception D10).** E2: macOS 26.5 arm64 (Darwin 25.5.0), Python 3.13.2 (miniconda,
+returned by `find_python.py`), SymPy 1.14.0, NumPy 2.4.4, SciPy 1.17.1. `git rev-parse --show-toplevel` =
+`.claude/worktrees/crprop-b2`; `git branch --show-current` = `worktree-crprop-b2`; `git status` clean at start; base
+`6a0c2ae6` = integration HEAD (decision D10, not `origin/main`); prerequisite P0: `git merge-base --is-ancestor
+6a0c2ae6 HEAD` succeeds. r3 line numbers rechecked on this base (§B2 at line 414, P6 at line 162).
+
+**Criteria and tolerances, fixed before any result (R9).**
+
+| ID | Criterion | Tolerance |
+|---|---|---|
+| B2-1 (symbolic) | SymPy: the escape term K(V_c, Γ_d) = V_c + D S coth(S L/2), S = sqrt(V_c²/D² + 4Γ_d/D), tends to 2D/L for V_c → 0 and Γ_d → 0 (Γ_d = 1/(γτ₀), τ → ∞); the convective-decay ratio tends to the existing thin-disc ratio; the ¹⁰Be→¹⁰B gain tends to 0 | exact (`sp.limit`, `sp.simplify` equal to 0) |
+| B2-1 (numerical) | at V_c = 0 and no decay the new code equals `predict.thin_disc_ratio` at every benchmark energy | relative 1e-12 |
+| B2-1 (numerical, approach) | for V_c = 1, 1e-1, …, 1e-4 km/s and τ₀ scaled by 1, 1e2, …, 1e8 the deviation from pure diffusion falls monotonically and is below 1e-4 at the smallest | monotonic; 1e-4 |
+| B2-num | closed forms (stable secondary, ¹⁰Be, ¹⁰B with decay gain) against an independent `scipy.integrate.solve_bvp` solution of the same 1D boundary-value problem | relative 1e-6 |
+| B2-cons | decay conserves number: with ¹⁰Be and ¹⁰B given the same D and inelastic cross section, N(¹⁰Be) + N(¹⁰B) at z = 0 does not depend on τ₀ | relative 1e-10 |
+| B2-2 | dimension checks recorded: [K] = velocity, [S L] = [V_c L / D] = [Γ_d t] = 1, K/(2 h n v) has the dimension of a cross section, every ratio dimensionless; unit conversions (km/s → cm/s, half-life → s, kpc → cm) checked | all pass |
+| B2-3 | `python3 -m unittest discover -s profiles/theory/cr-secondary-ratio/tests -t .` | ok |
+
+**Results (dispatch 2, 2026-10-28, on HEAD `236a374a`).** Environment E2 now macOS 27.2 arm64 (Darwin 27.2.0), same
+Python 3.13.2, SymPy 1.14.0, NumPy 2.4.4, SciPy 1.17.1; §0.3 checks repeated (toplevel, branch, clean status, base
+`6a0c2ae6` ancestor of HEAD). The closed forms were re-derived by hand against r3 P1/P6 and the record (escape term,
+the 2 V_c N(0) sweep term of the conservative form, the daughter's particular and homogeneous parts, Γ = 1/(γτ₀) with
+τ₀ = t½/ln 2 from `half_life_seconds`, NUBASE year). All criteria above pass within tolerance: B2-1 symbolic (SymPy
+limits, both orders; 39 checks in `derivations/convection-decay-derivation.json`, rerun output identical to the stored
+record); B2-1 numerical, max relative deviation from `predict.thin_disc_ratio` 2.2e-16 (tolerance 1e-12); approach
+0.26, 4.1e-3, 7.2e-5, 4.0e-6, 4.0e-7 (monotonic; last < 1e-4); B2-num, closed forms vs `solve_bvp` 9.8e-15
+(tolerance 1e-6); B2-cons spread < 1e-15 (tolerance 1e-10); B2-2 13 dimension checks and the unit-conversion check
+pass; B2-3 58 tests ok (from the plugin root and from `tests/`). Checks: `run_all_checks.py` full (33/33 pass) on
+`236a374a`; static part, naming, layering, packaging, wiring and `workflow_check.py` diff/gaps/acceptance pass.
+Software and numerical-consistency checks only; the inputs are ILLUSTRATIVE and no comparison with data or with a
+propagation code is made.
+
+## CRPROP-P0 round 3 — 2026-10-28 (environment E2)
+
+Extra P0 round authorized as decision A1.6 (escalation 4). Base `f747fbe7` (integration HEAD). `workflow_check.py`
+`check_diff` now lists changed paths with `git diff --name-only --no-renames <base>...HEAD`, so a renamed or moved
+file reports its source path as well as its destination. The other git calls in the file do not have the hole
+(`git log --diff-filter=A -- acceptance.json` is path-limited, `git show` reads one revision) and are unchanged.
+Regression test `docs/dev/cr-propagation/test_workflow_check.py` (unittest, throwaway repo with `diff.renames=true`):
+moving an out-of-scope file and moving an orchestrator-only file (`status.json`) into an allowed path of WP A1 must
+fail `diff`, and an in-scope-only change must pass. Without the fix 2 of 3 tests fail (the moves pass `diff`); with the
+fix all 3 pass.
+
+## CRPROP-ENV — 2026-10-28 (environment E2)
+
+Work package ENV, dispatch 2 (decision A1.1: USINE V3.5 from `gitlab.com/dmaurin/USINE`). This extends environment
+E-crprop with USINE. **Environment field (r3 §0.3, base exception D10):** worktree `.claude/worktrees/crprop-env`,
+branch `worktree-crprop-env`, base = integration HEAD 71ae4a07 (not `main`; decision D10). `git rev-parse
+--show-toplevel` = this worktree, `git branch --show-current` = `worktree-crprop-env`, status clean at start,
+prerequisite P0 an ancestor of HEAD. Host E2 is now macOS 27.2 (Darwin 27.2.0) arm64, Python 3.13.2. No plugin code
+changed.
+
+| Item | Result | Evidence |
+|---|---|---|
+| Source (A1.1) | `git clone --depth 1 --branch V3.5 https://gitlab.com/dmaurin/USINE.git` into `$HOME/hep-work/crprop-build/usine/`: HEAD fb53006d, `refs/tags/V3.5` = 7197ddc1 (an annotated tag); both equal the values in A1.1. No other new network host was contacted | `capabilities.json` `env-usine` |
+| Licence | GNU GPL version 2 (`LICENSE`). The plugin is Apache-2.0, so no USINE source or shipped input file (`inputs/`) is committed. Computed USINE output is not covered by the GPL (GPL-2.0 §0), so later work packages may commit output fixtures that hold only computed numbers. ENV commits none: only hashes | `LICENSE` in the checkout |
+| Build | USINE's own steps (`mkdir build; cd build; cmake ../; make -jN`, here `make -j4`; 59 s). Products: `bin/usine`, `bin/usine_pbar`, `lib/libTUsine.dylib`, `lib/libfparser.dylib`. Apple clang 21.0.0 with USINE's flags (`-O0`) plus C++17, against Homebrew ROOT 6.38.04. No source file changed. Three host adaptations: `-DCMAKE_POLICY_VERSION_MINIMUM=3.5`, needed because cmake 4.3.2 no longer accepts `cmake_minimum_required(2.8)`; a `root-config` shim outside the source tree that prints `6.38/04`, because `FindROOT.cmake` parses only that form; `-DCMAKE_CXX_STANDARD=17`, because USINE adds `-std=c++14` and ROOT 6.38 needs C++17. `make` runs with `ROOT_INCLUDE_PATH` unset. The host shell points it at the Xcode 26.4 libc++ headers, and those clash with the CommandLineTools 26.2 SDK compiled into libCling. The first `make` failed on this at `rootcling` (exit 139); the second `make`, with it unset, succeeded | `usine-build.computational-run.json`; `$CRPROP_OUT/env/usine/build-logs/` |
+| Smoke run | The shipped example `usine -l inputs/init.TEST.par <out> "B/C,B,C,O:KEKN:0.,0.5,1.;B/C:kR:0.79" 2.8 1 1 0` (Model1DKisoVc, force field), 41 s: 14 local-flux tables, `results.root` and 7 plot macros (B/C = 9.36511e-02 at 0.05 GeV/n, φ = 0). Exit status is 1 because `usine` returns 1 on every path. The run with the host `ROOT_INCLUDE_PATH` and the run without it give identical tables (the timestamp line excluded). Without it the ROOT interpreter prints 13 `gCling unresolved` warnings, so runs keep the host value | `$CRPROP_OUT/env/usine/smoke-l*/`, content hashes in the run record |
+| Installation test | `usine -tUSINE` (17 min 51 s): 42 of 46 reference tests pass. 4 differ without a changed result: `class_TUDatime` (printed in the local time zone); `usine_i_options` (axis-label text, last digit); `usine_e_options` (values below 1e-12 differ by ≤ 6.5e-14; one tail point at 1.2e-10, about 1e-9 of the peak, differs by 2 %); `propag_minimisation` (same χ²_min and best fit, covariance entries within 1.5e-5 relative; the reference run also stops at the Minuit2 call limit). `doc/install.rst` says last digits differ on macOS | `$CRPROP_OUT/env/usine/tUSINE.stdout.log`, `tUSINE.failed-diff-summary.txt` |
+| Capability file (ENV-1) | `env-usine` present (`HEP_USINE_BIN` = `<TOOL_HOME>/bin/usine`, `HEP_USINE_DATA` = `<TOOL_HOME>/inputs`; init files read `$USINE/inputs/…`, so runs export `USINE` = `<TOOL_HOME>`); `net-sources` absent → partial (USINE host reachable; GALPROP hosts not probed); `env-galprop` stays absent (A1.2); the other capabilities are unchanged | `$CRPROP_OUT/capabilities.json` |
+| Records (ENV-2) | computational-run `usine-build.computational-run.json` (contracts 3.14.0, `validate.py` ok, no findings) and environment manifest `usine.environment.json` (`environment_manifest.py record`, E2 venv), de-identified (`<TOOL_HOME>`, `<BUILD_ROOT>`, `<VENV>`, `<CONDA_HOME>`, `<RUN_DIR>`) | `tests/adapters/fixtures/cr_propagation/env/` |
+| Environment label (ENV-3) | E-crprop row extended with USINE V3.5, compiler, cmake, ROOT, GSL and CFITSIO (not used) | Environments table of this file |
+| Checks | `run_all_checks.py --part static --jobs 4`: 31 pass, 0 fail; impacted tests (`tests.tools.test_check_instruction_text`, `tests.adapters.test_cr_propagation`): 25 OK, 1 skipped; `check_naming.py`, `check_wiring.py --since 71ae4a07`, `check_layering.py`, `check_packaging.py`, `workflow_check.py diff --work-package ENV`, `acceptance` and `gaps`: pass; ALL-3 (full `run_all_checks`, `check_relocation`) deferred to the orchestrator's wave run (A1.5) | `$CRPROP_OUT/env/acceptance/` |
+
+USINE status is unvalidated. The smoke run and the installation test show that the build runs and reproduces
+USINE's own reference outputs to the last digits; they say nothing about physical validity. The `-O0` build is
+USINE's default. An optimised build is not part of ENV and would need its own record.
+
+## CRPROP-A3 — 2026-10-26 (environment E2)
+
+Work package A3 (two-level degeneracy diagnostics) of the cr-propagation r4 workflow, r3 card §A3, principle P7.
+
+Environment: E2 (macOS arm64 workstation), Python 3.13.2 (miniconda), NumPy 2.4.4, SciPy 1.17.1. r3 §0.3 checks:
+toplevel `<repo>/.claude/worktrees/crprop-a3`, branch `worktree-crprop-a3`, status clean at start;
+base exception (decision D10): base is the integration HEAD `b83881c6`, not `main`; prerequisite P0 (its rework
+commits up to `34e2edeb`) is an ancestor of HEAD.
+
+| Item | Result | Evidence |
+|---|---|---|
+| A3-1 baseline, recorded before any change | 161 tabulated-grid outputs hashed on the base (every in-process `grid_fit` result and every `covariance_fit.py fit` stdout on a tabulated-grid input, from `test_grid_fit`, `test_bc_propagation_fit`, `test_cr_propagation` (2 live DRAGON2 tests skipped), and `examples/bc-propagation-fit/run.py --toys 20` with its `results.json` and `report.md`); two base runs identical | `$CRPROP_OUT/a3/baseline.txt`, harness `$CRPROP_OUT/a3/baseline_harness.py` |
+| A3-1 after the change | all 161 sha256 identical to the baseline | `$CRPROP_OUT/a3/after.txt` |
+| A3-2 built-in study (`degeneracy.py synthetic-curved`, analytic, Asimov) | Fisher screen: `D0_cm2_s/L_kpc^1.2`, exponent of L_kpc -1.2000, `fisher-screen`, no `valid_range`; profile scan over L_kpc (41 points, D0_cm2_s profiled, threshold 1): `profile-scan`, `valid_range.L_kpc` = [2 (scan edge), 6.947 (threshold)], exponent -1.20003; profiled delta -2 ln L 1.6e-13 at 6 kpc, 19.4 at 8 kpc | `$CRPROP_OUT/a3/acceptance/` |
+| A3-2 through `covariance_fit.py` (tabulated grid 25 x 17 nodes of the same model, `degeneracy_scan` {parameter L_kpc}) | Fisher exponent -1.2008, no `valid_range`; profile scan `valid_range.L_kpc` = [2, 6.851], exponent -1.2002 | `tests/skills/hep_statistics/test_degeneracy.py` |
+| A3-3 | `degeneracy.py --help` exit 0; module in `NO_INPUT_FILE` | `tests/skills/test_cli_robustness.py` |
+| A3-4 | `check_wiring.py --since b83881c6`: pass | |
+
+How the synthetic break is made genuine: the prediction is y_i ∝ (R_i/10 GV)^-0.45 · (u_true/u) · (1 + b(L) h_i) with
+u = D0_cm2_s / L_kpc^1.2, so for L <= 6 kpc every point with the same u predicts exactly the truth (exact degeneracy),
+and above 6 kpc a spectral tilt b(L) = 0.05 ((L - 6 kpc) / 2 kpc)^2 changes the energy dependence, which u (a pure
+normalization) cannot absorb. The data therefore exclude the valley at 8 kpc (profiled delta 19.4), not only the model
+declaration. The numbers are SYNTHETIC. The Fisher screen at the best fit (L = 4 kpc) sees only the local exponent;
+the profile scan finds where it holds. The A3 tests use only synthetic models; no propagation code was run.
+
+Checks on `f71cd8bb`: `run_all_checks.py` and `check_relocation.py` fail on two findings, both from this WP. The
+packaging scan (and `test_batch_privacy`) flagged a home path in this section; it is removed in the next commit and
+`check_packaging.py` passes. `test_core_stats_guide.DependencyMarkers` fails because `degeneracy.py` is not listed in
+the Skill scripts section of `skills/hep-statistics/references/core-stats-guide.md`, which is outside A3's file list
+(workflow.json `files` and `common_files`); the one-line entry is left to the orchestrator. `check_naming.py`,
+`check_wiring.py --since b83881c6`, `check_layering.py` and `workflow_check.py` diff, acceptance and gaps pass. The A3-1
+hashes were checked again on the committed tree: all 161 identical.
+
+Follow-up (orchestrator added `core-stats-guide.md` to A3's file list): `degeneracy.py` is listed in its Skill
+scripts section with the marker "(needs NumPy and SciPy)". The hep-statistics quick load (SKILL.md plus the guide)
+had 8 B of headroom under its 25,600 B budget, so four phrases in the guide were shortened with no change in content
+(`measure_entrypoints.py --no-cli`: no warnings), and `docs/reference-inventory.*` were regenerated.
+
+Dispatch 2 (2026-10-28, from `eca5da37`): the full `run_all_checks.py --jobs 4` on `eca5da37` failed only in
+`tests.skills.test_documented_output_claims` (2 failures): the shortened dependency sentence of the guide had dropped
+the two registered quotes "marked ones refuse to run without NumPy (and SciPy) with exit 2 and a JSON message" and
+"every script prints `--help` without them". The sentence now carries both quotes again; its lead-in "Dependencies
+are marked per script:" is dropped to stay in budget (quick load 25,590 B of 25,600 B, `measure_entrypoints.py
+--no-cli`: no warnings) and `docs/reference-inventory.*` are regenerated. On `eca5da37` the other gates passed:
+A3-1 (161/161 sha256 equal to the baseline), A3-2 (`valid_range.L_kpc.max` 6.947), A3-3, A3-4, `check_naming.py`,
+`check_layering.py`, `check_packaging.py`, `workflow_check.py` acceptance and gaps, and `workflow_check.py diff`
+with the integration branch's `workflow.json` (the branch copy predates the orchestrator's addition of
+`core-stats-guide.md` to A3's files). The full checks and `check_relocation.py` are rerun on the fix commit
+(`$CRPROP_OUT/a3/checks`, `$CRPROP_OUT/a3/reloc`).
+
+## CRPROP-A4 — 2026-10-28 (environment E2)
+
+Work package A4 of the cr-propagation r4 campaign (r3 §A4, r4 §6): cost benchmark of the closed form and DRAGON2
+under `harmonized-v1`, and grid convergence of DRAGON2's B/C. The table is the next section, `CRPROP-COST`.
+
+**Environment (r3 §0.3, base exception D10).** E2: macOS 27.2 arm64 (Darwin 27.2.0), 8 cores, 16 GiB; Python 3.13.2
+in the E2 venv (numpy 2.5.3, scipy 1.18.1); DRAGON2 runs in E-crprop (the ENV build, `install/bin/DRAGON` sha256
+d26dbb85…, source commit cd588707 clean, rechecked before the runs). `git rev-parse --show-toplevel` =
+`.claude/worktrees/crprop-a4`; `git branch --show-current` = `worktree-crprop-a4`; `git status` clean at start; base
+`566bfd1e` = integration HEAD (decision D10, not `origin/main`); prerequisites A1 (merge 5d5fd918) and ENV (merge
+7d5c6934) are ancestors of HEAD (`git merge-base --is-ancestor`). Capabilities: `env-dragon2` present;
+`env-usine` and `env-galprop` absent.
+
+**Criteria, fixed before any measurement (R9).** A4-1: every cost number comes from a run record in
+`tests/adapters/fixtures/cr_propagation/cost/`, none from the literature; a tool without its capability gets a row
+marked "not measured (capability absent)", never an estimate. A4-2: the cost table has closed-form and DRAGON2 rows.
+Method (r3 §A4): wall time and peak RSS (`/usr/bin/time -l`, "maximum resident set size", which includes the
+DRAGON2 child of the adapter) of three identical runs each, the median reported; grid convergence = largest
+|ΔB/C|/(B/C) over 2–1000 GV when the spatial grid (DimR 41 → 81, dz 0.02 → 0.01 kpc) and the energy grid
+(Ekfactor 10^(1/20) → 10^(1/40)) are doubled once, each alone and both together; reported, no threshold.
+
+**Results (2026-10-28, records under `tests/adapters/fixtures/cr_propagation/cost/`).** A4-1: every number in
+`CRPROP-COST` is read from a computational-run record of this work package (13 records, each `contracts/validate.py`
+ok; summary `cost-table.json`); none comes from the literature; USINE and GALPROP are marked not measured. A4-2: the
+table has closed-form and DRAGON2 rows. The three DRAGON2 base runs give byte-identical output (sha256 cbfbc3c1…).
+Expressing `harmonized-v1` in DRAGON2 (each difference and its substitute, none silent):
+
+| Item | harmonized-v1 | DRAGON2 run | Reason |
+|---|---|---|---|
+| Diffusion | β¹ (R/1 GV)^0.5, `D0_cm2_s` = 3e28 | `D0_1e28` 3, `DiffRefRig` 1, `Delta` 0.5, `etaT` 1 (DRAGON2 `diffusion.cc`: D0 β^etaT (R/R_ref)^δ) | `transport_conventions.py diffusion` canonical → dragon2 returns `not-convertible` (its dragon2 convention fixes eta = 0); the adapter's `etaT` expresses β¹ directly, so the run spec is written by hand (A1 verifier advisory; not a blocker for the cost rows) |
+| Gas | uniform n_H = 1 cm⁻³, He/H 0.1 | `BronfFerr` (adapter default); DRAGON2 helium term with its fixed He abundance 0.11 | `Uniform` is parsed by this DRAGON2 build but `gas.cc` has no density for it (default branch, −1); He/H is a compiled constant |
+| Geometry | L 4 kpc, R 20 kpc, h 100 pc | L 4, Rmax 20; no disc half-thickness parameter | h only matters for reacceleration, which is off |
+| Sources | all primaries R^−2.3, no break | `OneRing` 0–20 kpc; source.param with every slope 2.3 (breaks inert); DRAGON2 base abundances | the spatial source distribution is open in harmonized-v1 |
+| Cross sections | ILLUSTRATIVE set A (C→B 70 mb, O→B 35 mb; inelastic B 250, C 270, O 310 mb) | production table C→¹¹B 70 mb, O→¹¹B 35 mb, O→C 0 mb; DRAGON2's own inelastic cross sections and He-target term | no data file replaces DRAGON2's inelastic cross sections (adapter docstring) |
+| Network | parents C, O; tertiary and ghosts off | Z 5–8 (B, C, N, O), only the listed channels | — |
+| Output | LIS 1–10³ GeV/n, 20 per decade | E/n grid 0.3–2000 GeV/n, Ekfactor 10^(1/20) | 0.3 GeV/n reaches 2 GV for ¹¹B (a first base run with 0.5 GeV/n was aborted for this) |
+
+The closed form runs its own fixed inputs (hydrogen target, n_H = 1 cm⁻³, C:O = 1:0.9 observed); its point equals
+harmonized-v1's transport values.
+
+**Budget (D7).** DRAGON2: 6 completed runs plus the aborted one, 4257 CPU-s for the completed runs (about 1.2
+core-hours in total); at most 3 DRAGON2 processes at once. Closed form: 771 point evaluations in 6 runs (about 7
+CPU-s). Whether benchmark evaluations count toward D7's 5000 provider evaluations is not stated in D7; reported for
+the orchestrator.
+
+Software and timing measurements only; the DRAGON2 and closed-form outputs are not compared with each other or with
+data here (that is B3/D3), and the inputs are ILLUSTRATIVE.
+
+## CRPROP-COST — 2026-10-28 (environment E-crprop)
+
+Cost table of the cr-propagation campaign (r3 §A4), feeding E1's budget (r4 §6). Configuration `harmonized-v1`;
+`/usr/bin/time -l`; median of three identical runs; records in `tests/adapters/fixtures/cr_propagation/cost/runs/`,
+summary `cost/cost-table.json`.
+
+| Tool | Wall time (median) | CPU user (median) | Peak RSS (median) | Runs | Grid convergence of B/C, 2–1000 GV |
+|---|---|---|---|---|---|
+| Closed form (`cr-secondary-ratio` provider, 1 point × 60 bins, one process) | 0.14 s | 0.11 s | 41 MB | `closed-form-1pt-{1,2,3}` | no spatial or energy grid (analytic point values); bin-average quadrature 8 → 16 nodes: 4.4e-16 |
+| Closed form (256 points × 60 bins in one request) | 2.55 s (marginal 9.4 ms per point) | 2.33 s | 44 MB | `closed-form-256pt-{1,2,3}` | as above |
+| DRAGON2 cd588707 (DimR 41, DimZ 401, Ekfactor 10^(1/20), 0.3–2000 GeV/n, Z 5–8, serial) | 249 s (127 s in the least-loaded run) | 221 s (125 s) | 475 MB (728 MB) | `dragon2-base-{1,2,3}` | spatial doubled: 1.35e-3; energy doubled: 1.82e-3; both: 1.95e-3 (largest at 3.2 GV; `grid-convergence`) |
+| DRAGON2, spatial grid doubled (DimR 81, DimZ 801) | 1931 s (one run) | 1131 s | 1.49 GB | `dragon2-x2s` | — |
+| DRAGON2, energy grid doubled (Ekfactor 10^(1/40)) | 990 s (one run) | 503 s | 835 MB | `dragon2-x2e` | — |
+| DRAGON2, both doubled | 3252 s (one run) | 2030 s | 2.23 GB | `dragon2-x2se` | — |
+| USINE V3.5 fb53006d (Model2DKisoVc, 100 Fourier-Bessel terms, 20 E_k/n nodes per decade, 1–1000 GeV/n, adapter command end to end; added by B1) | 1.49 s | 0.92 s | 299 MB (285 MiB) | `cost/usine-harmonized-v1.computational-run.json` (three timed runs and the convergence runs in one record) | Bessel terms doubled: 1.1e-4; energy doubled: 7.1e-5; both: 6.7e-5 |
+| GALPROP v57 | not measured (capability absent: `env-galprop`) | | | | |
+
+Caveat: the host was shared with other campaign workers (load average 7.6 before the first DRAGON2 base run, 26–62
+during the second and third, swap nearly full), so DRAGON2 wall time varies ×4 and peak RSS ×1.7 between identical
+runs with identical output; the doubled-grid runs ran three at a time. The least-loaded base run (127 s, 125 CPU-s)
+is the best estimate of the uncontended cost; the medians are the conservative figure. For E1 at the median CPU
+time, D7's 200 core-hours cover about 3300 DRAGON2 evaluations at this grid (about 5700 at 125 CPU-s), fewer than
+D7's 5000 evaluations; E1's USINE cost is in the USINE row (B1). Grid convergence is reported without a threshold; the
+energy-doubling figure includes the change of the log-log interpolation between DRAGON2 nodes.
+
+## CRPROP-B1 — 2026-10-28 (environment E2)
+
+Work package B1 of the cr-propagation r4 campaign (r3 §B1 and §B1b folded together, r4 §6): USINE V3.5 translator
+(`transport` block to a USINE initialisation file), reader (USINE local-flux tables to ratios of bin integrals, r3
+P2, P3, P11), recorded runs replayed offline, the USINE row of the cost table and the cr-provider/1 entrypoint
+`usine_provider.py`.
+
+**Criteria and tolerances, fixed before any comparison (R9).** Frozen entries (acceptance.json): B1-1 offline replay
+tests pass with `HEP_USINE_BIN` and `HEP_USINE_DATA` unset; B1-2 a live rerun (`HEP_USINE_LIVE_TEST=1`) of every
+recorded run reproduces the recorded USINE outputs within relative 1e-6, value by value, with the live test not
+skipped; B1-3 `tested_versions` of the USINE tool names the USINE version and commit, the compiler and the ROOT
+version, and the adapter status follows R3 (the lowest tool status); B1-4 the cost table has a USINE row (wall time
+and peak RSS, median of three identical runs, `/usr/bin/time -l`; grid convergence reported without a threshold, as
+A4 does); B1-PRV-1 C1's conformance mixin passes for provider `usine`; B1-PRV-2 single-shot and `--serve` responses
+have the same sha256 after removing `elapsed_s` and time stamps. Added by this work package (stricter checks only,
+none replaces a frozen entry): the reader's element ratio from the isotope tables agrees with USINE's own element-ratio
+output at USINE's grid points within relative 1e-4 on the axis ekn (same nodes; only the 6-digit rounding of the
+tables differs) and within relative 2e-3 on the axis rigidity (log-log interpolation between nodes); a transport item
+USINE cannot express is either recorded as a substitute in the translation or refused (never a silent default); no
+USINE source, shipped input file or file copied from them is committed (GPL-2.0), only numbers computed by USINE runs
+and this work package's own specifications and records.
+
+**Environment (r3 §0.3, base exception D10).** E-crprop = E2 (macOS 27.2 arm64, Darwin 27.2.0), Python 3.13.2
+(miniconda; the adapter needs the standard library and core only), USINE V3.5 built by ENV dispatch 2 (git tag V3.5,
+tag object 7197ddc1, commit fb53006d, Apple clang 21.0.0, Homebrew ROOT 6.38.04, cmake 4.3.2; `bin/usine` sha256
+1d444720…), located through `HEP_USINE_BIN` and `HEP_USINE_DATA`, with `USINE` set to its folder for each run.
+`git rev-parse --show-toplevel` = `.claude/worktrees/crprop-b1`; `git branch --show-current` = `worktree-crprop-b1`;
+`git status` clean at start; base `0be5a5de` = integration HEAD (decision D10, not `origin/main`); prerequisites A1
+(merge 5d5fd918), C1 (merge 099d1d22) and ENV dispatch 1 (merge 7d5c6934) are ancestors of HEAD (`git merge-base
+--is-ancestor`); ENV dispatch 2 (the USINE build record, branch `worktree-crprop-env`) is not merged into the base and
+was used through its build only. Rebased on 2026-10-28 onto integration HEAD `d04cb47a` (A4 merged; orchestrator request): the translator, reader and provider are unchanged by the rebase, so the live runs were not repeated; the checks of the report were rerun on the rebased HEAD. r3 line numbers rechecked on this base (§B1 at line 406, §5.2 at line 300).
+
+**Translation choices (recorded in every run's `substitutes`).** `cylinder-2d` → Model2DKisoVc (thin disc, observer
+at r = 8.3 kpc as in the DRAGON2 adapter, no central hole, 100 Fourier-Bessel terms), `slab-1d` → Model1DKisoVc. Gas:
+n_H read from `gas.model`, all neutral in the thin disc, so USINE's Coulomb term (on HII) is zero;
+`He_to_H_number` not used, because the ILLUSTRATIVE sets are on hydrogen only. Sources: dQ/dE_k/n = q R^-γ,
+uniform in r up to `radius_kpc` (template CST); parent abundances fixed by USINE's NormList on generated points (not
+data) so that the unmodulated local O/C is 0.9 at 10 GeV/n (the parent list of `theory:cr-secondary-ratio`). Set A
+(element-level) is placed on 12C, 16O and 11B. Low breaks use the plugin's "usine" convention
+(transport_conventions.py; known issue 2: not re-read from Weinrich et al. 2020a, and USINE V3.5's shipped inputs
+carry only a high-break formula, `inputs/init.TEST.par` Model1DKisoVc K); a high break is refused. Momentum
+diffusion: the Kpp form of USINE's shipped initialisation files (Seo-Ptuskin, w = 1, here divided by w). The 10Be
+half-life of USINE's chart (1.387 Myr) is checked against NUBASE2020 (core) at each decay run. Two USINE behaviours
+found on the way: with `IsUseNormList false` USINE V3.5 crashes (segmentation violation in
+`TUValsTXYZECr::OrphanVals`), hence the generated normalisation points; and USINE needs every reaction from a
+heavier list member filled, hence the zero channels.
+
+**Results (2026-10-28, on the final HEAD).**
+
+| ID | Result | Evidence |
+|---|---|---|
+| B1-1 | passed: 43 tests, 5 skipped (the live USINE, conformance and DRAGON2 classes), with `HEP_USINE_BIN`/`HEP_USINE_DATA` unset | `$CRPROP_OUT/b1/acceptance/B1-1-offline.txt` |
+| B1-2 | passed: the seven recorded runs rerun live reproduce every table (nodes identical, values within 1e-6; in fact identical apart from the time-stamp line); live test not skipped (only `LiveDragon2` skipped) | `$CRPROP_OUT/b1/acceptance/B1-2-live.txt` |
+| B1-3 | `tested_versions` names V3.5, commit fb53006d, Apple clang 21.0.0 and ROOT 6.38.04; USINE `tested-in-declared-environment`, adapter stays `proposed` (GALPROP `proposed`, R3) | `adapters/cr-propagation/adapter.json` |
+| B1-4 | USINE row in `CRPROP-COST` (record `tests/adapters/fixtures/cr_propagation/cost/usine-harmonized-v1.computational-run.json`) | `CRPROP-COST` table, `cost/cost-table.json` |
+| B1-PRV-1 | passed: all nine checks of `core/provider/conformance.py` (declared, single-shot, serve, prv-2, unsupported-want, out-of-domain, outside-allowed, unregistered, runner-agrees) and the schema checks of the mixin, live | `$CRPROP_OUT/b1/acceptance/B1-PRV-conformance.json`, B1-2 log |
+| B1-PRV-2 | passed: single-shot and `--serve` responses have equal sha256 after removing `elapsed_s` (check prv-2) | as above |
+| reader (added) | passed: the reader's B/C and 10Be/9Be from the isotope tables against USINE's own ratio tables, every run: at most 8e-6 on E_k/n (tolerance 1e-4), 2.8e-4 on rigidity (tolerance 2e-3) | `UsineReader.test_reader_matches_usine_element_ratios` |
+
+**Recorded runs** (`tests/adapters/fixtures/cr_propagation/usine/`: `specs/`, `inputs/` as written by the translator
+with `<TOOL_HOME>`/`<RUN_DIR>`, `outputs/` USINE's tables, `runs/` computational-run records, `usine-results.json`):
+harmonized-v1, d1-isotopic, d1-convection, d1-decay, d1-reacceleration, d1-losses (the transport blocks of D1's
+`harmonized-v1-<item>.json`, branch `worktree-crprop-d1` 131ae000, copied unchanged) and b1-slab-all-items (1D, low
+break, η = -0.5, whole-halo V_A, V_c, all losses, decay). Each run takes 0.7-2.7 s. For D1-1 (reacceleration and
+losses items, USINE as reference): `usine-results.json` holds B/C on D1's 16 rigidity bins 2-1000 GV and 10Be/9Be on
+its 12 E_k/n bins 0.05-10 GeV/n for every item (e.g. B/C in the first bin 0.2322 with reacceleration, 0.1437 with
+losses, 0.1656 item off); D1 can also recompute them with `usine_to_prediction.ratio_of_bin_integrals` from
+`outputs/<run>/`. Numbers only; no USINE file is committed.
+
+**Cost row.** The USINE row (median wall 1.49 s, peak RSS 285 MiB, grid convergence 1.1e-4 / 7.1e-5 / 6.7e-5) is in the `CRPROP-COST` table above and in `cost/cost-table.json`; record `tests/adapters/fixtures/cr_propagation/cost/usine-harmonized-v1.computational-run.json` (moved there after the rebase onto A4, base d04cb47a).
+
+Provider tolerance: with reacceleration on, B/C and 10Be/9Be bins change by at most 2.0e-3 between the default grid
+and 80 nodes per decade with 200 Bessel terms (with losses, convection and decay all on 5.3e-4), so the provider
+declares `numerical_tolerance` 0.005 (a rounded-up numerical bound, not a physics uncertainty). Checks: static part of
+`run_all_checks.py`, naming, wiring, `workflow_check.py` diff and acceptance on the final HEAD (report); ALL-3
+deferred to the wave run (A1.5). Software and numerical-consistency checks only: every input is ILLUSTRATIVE and no
+comparison with data is made.
+
+## CRPROP-C2 — 2026-10-28 (environment E2)
+
+Work package C2 (multi-dataset propagation fit, closed-form provider, SYNTHETIC data only) of the cr-propagation r4
+workflow, r3 card §C2 as split by r4 §6 (the USINE case is C2U).
+
+Environment: E2 (macOS arm64 workstation), Python 3.13.2 (miniconda), NumPy 2.4.4, SciPy 1.17.1. r3 §0.3 checks:
+toplevel `<repo>/.claude/worktrees/crprop-c2`, branch `worktree-crprop-c2`, status clean at start; base exception
+(decision D10): base is the integration HEAD `699c3b5c`, not `main`; prerequisites A2 (`a3c880f8`), A3 (`f62f70e8`),
+C1 (`099d1d22`) and B2 (`81cb2ce0`) are ancestors of HEAD.
+
+Criteria and tolerances, written before any fit was run (R9; frozen entries C2-1 to C2-6 of `acceptance.json`, the
+r3 suggested defaults adopted at H0). Provider: `cr-secondary-ratio-closed-form` 0.1.0 (B/C, axis ekn), whose values
+are bin-averaged in ln(E/n) (`crsr:bin_average`), not P2 bin integrals; synthetic data are generated with the same
+semantics, and data declared `bin-integrated` are refused. All inputs are ILLUSTRATIVE.
+
+| Item | Pre-declared setting or criterion |
+|---|---|
+| Datasets | two SYNTHETIC B/C sets from the provider at the truth: A, 12 bins 1-1000 GeV/n (3% uncorrelated + 2% with correlation exp(-\|d ln E\|/1.5)); B, 8 bins 10^0.5-10^2.5 GeV/n (5% uncorrelated + 3% fully correlated) |
+| Truth (interior) | `D0_cm2_s` = 3e28, `delta` = 0.5, `L_kpc` = 4 (fixed unless free), `R0_gv` = 1; production norms of C->B and O->B = 1 with Gaussian priors of 10% (P15) |
+| C2-1 | Asimov fit with the provider (no response model): every free parameter within 0.1 sigma of its true value, sigma from the inverse Fisher matrix at the best fit; boundary case `delta` = 0.2 (lower edge of the provider domain, standing in for a physical boundary the closed form cannot express): the minimum on the boundary passes `boundary_kkt` and lies within 0.1 sigma_one-sided, sigma_one-sided = distance from the boundary to the profile delta chi2 = 1 crossing on the allowed side |
+| C2-2 | 1000 plug-in toys at the interior truth (family: `D0_cm2_s`, `delta` free, C->B norm with its auxiliary value redrawn per toy); tested: `D0_cm2_s`, `delta` and the Fisher eigen-direction with the smallest eigenvalue in (ln D0, delta, C->B norm) (the nearly flat direction; eigenvalue ratio reported); covered when the profile delta chi2 at the true value is <= 1; pass when \|coverage - 0.6827\| <= z_m sqrt(0.6827 x 0.3173 / n) for each of the m = 3 quantities, z_m = Phi^-1(1 - 0.0027 / (2 m)) (Bonferroni over m at the familywise 3-sigma level; z_3 = 3.32); the uncorrected 3-sigma verdict is also reported |
+| Response model (toys, posterior) | the toys and the posterior use a tensor Chebyshev interpolation of the provider components, built from provider evaluations in a box of +-5 sigma around the expansion point; refused unless its maximum error at 12 random provider points in the box is <= 0.02 of the data sigma in every bin; its error enters the toy covariance as an uncorrelated component (P10); a toy fit outside the box is a failed toy |
+| C2-3 | BIG and SLIM declared in their literature parameters (V_A, V_c, low-energy break) are listed as not expressible by the closed form, with the reason; the expressible families are listed with their delta chi2 calibrated by 200 toys each, surviving when the toy p-value is >= 0.05 |
+| C2-4 | the fit-derived theory-spec carries only object-form `degenerate_directions` (evidence `profile-scan` with `valid_range`) and passes `contracts/validate.py`; so does the statistical-result |
+| C2-5 | a dataset without a covariance exits 3 (`incomplete`); a start point outside the provider domain is refused (exit 1, reason out-of-domain); a dataset declared `bin-integrated` is refused (exit 1) |
+| C2-6 | a forced non-convergence (optimizer limited to 1 iteration) stops after 5 restarts with reason restart-cap; forced toy failures stop the study once more than 2% of the toys failed; a chain longer than 2e5 steps is refused; a posterior interval is withheld (`unvalidated`) when R-hat > 1.01 or ESS < 400 |
+| D7 | provider point evaluations counted by the runner (`points_sent`) and reported; the provider cache lives under `$CRPROP_OUT/c2/cache` |
+
+Results (`examples/propagation-fit/run.py --toys 1000 --family-toys 200`, seed 20261028, on the WP head; outputs in
+`$CRPROP_OUT/c2/acceptance/`; tests in `tests/skills/hep_statistics/test_propagation_fit.py`, 16 tests):
+
+| Item | Result | Evidence |
+|---|---|---|
+| C2-1 interior | converged (EDM below 1e-5, no restart); pulls of `D0_cm2_s` (sigma_ln 0.110), `delta` (sigma 0.0084), C->B and O->B norms (sigma 0.097, 0.099) all below 1e-10 sigma | `example/asimov-interior/result.json` |
+| C2-1 boundary | `delta` = 0.2 on the lower domain bound, `boundary_kkt` derivative +0.092 (ok); profile interval lower end `bound`, upper crossing at 0.20605: sigma_one-sided = 0.00605, pull 4e-13; `D0_cm2_s` and the norms within 1e-10 sigma | `example/asimov-boundary/result.json` |
+| C2-2 | 1000 plug-in toys, 0 failed; response model error 3.2e-7 of the data sigma (12 provider points); Fisher eigenvalue ratio 4.2e-4, flattest direction (0.726, -0.038, 0.686) in (ln D0, delta, C->B norm); coverage `D0_cm2_s` 0.686, `delta` 0.671, flattest 0.696; Bonferroni band (m = 3, z = 3.32) +-0.0489: pass for all three (also within the uncorrected 3-sigma band +-0.0442) | `example/coverage/result.json` |
+| C2-3 | BIG (missing `V_A_kms`, `V_c_kms`, `R_break_gv`, `delta_below`, `s`) and SLIM (`R_break_gv`, `delta_below`, `s`) listed as not expressible by the closed form; delta chi2 with 200 toys each, 0 failed: `diffusion` 0 (p = 1.0, surviving), `iroshnikov-kraichnan` 0.195 (p = 0.61, surviving), `kolmogorov` 478.2 (0 of 200 toys, p < 0.015 at 95%, excluded) | `example/families/result.json` |
+| C2-4 | fit-derived theory-spec: one object `D0_cm2_s/L_kpc` (exponent of L_kpc -1.00000002, evidence `profile-scan`, `valid_range` L_kpc [1, 20] at the scan edges, D0_cm2_s [7.40e27, 1.48e29]); the Fisher screen gave the same combination (exponent -0.9999994, no valid_range, not written to the spec); `contracts/validate.py` on the theory-spec and the statistical-result: ok, no finding | `C2-4.validate.txt`, `example/degeneracy/` |
+| C2-5 | missing covariance: exit 3 `incomplete` (dataset named); start `D0_cm2_s` = 5e30: exit 1 `out-of-domain`; truth `delta` = 0.95: exit 1 `out-of-domain`; dataset declared `bin-integrated`: exit 1 `bin-semantics-mismatch`; binning convention missing: exit 1; cross-section set not stated in the gate plan: exit 1 `not-comparable`; dataset with a period: exit 1 `modulation-needs-isotopic-lis` | `test_propagation_fit.txt` |
+| C2-6 | `optimizer.max_iterations` 1: 6 attempts, `restart-cap`, status failed; toys with `max_iterations` 1: stopped after 2 failed of 2 generated (above 2% of 50), `toy-failure-threshold`, no coverage; posterior `steps` 200001: exit 1 `chain-step-cap`; 2 chains of 200 steps: `unvalidated`, ESS below 400, no interval | `test_propagation_fit.txt` |
+| P9 | covariance alternatives of set A, correlation length 0.5 / 1.5 / 4: chi2 10.72 / 11.22 / 11.72, `delta` 0.49625 / 0.49609 / 0.49658, `D0_cm2_s` 2.968e28 / 2.969e28 / 2.948e28 (fitted one by one) | `example/degeneracy/result.json` |
+| Posterior | `diffusion` on the pseudo-data, 4 chains x 20000 steps (half burn-in) on the family response model: R-hat 1.0026, ESS 2524, acceptance 0.30, 23 of 80000 proposals outside the box; 68% intervals reported | `example/families/result.json` |
+
+Provider point evaluations (D7; one request per dataset, so a two-dataset parameter point counts twice): a cold run of
+the example costs about 2800, 1730 of them in the `degeneracy` stage (the L-BFGS-B profile scan of `degeneracy.py`,
+7 points); the test module about 190 per run. C2 used about 6600 in total during development and acceptance (3328
+cached under `$CRPROP_OUT/c2/cache`, about 2100 uncached scratch measurements, about 1150 in six test runs), at
+about 4 ms each. If D7's cap of 5000 evaluations counts closed-form provider evaluations, C2 alone exceeds it: reported as a
+budget item.
+
+Not done in C2: the force-field modulation path (no provider with isotopic LIS exists yet; a dataset with a period is
+refused), the USINE case (C2U), real data. Observed in the protocol: two observables with the same id in one request
+make the provider's components ambiguous (the runner rejects the response as invalid), so the fit sends one request
+per dataset.
+
+## CRPROP-B3 — 2026-10-28 (environment E2)
+
+Work package B3 of the cr-propagation r4 campaign (r3 §B3): USINE V3.5 against the closed forms of
+`theory:cr-secondary-ratio` under `harmonized-v1`, the main production channels, and the check of level-by-level
+cross-section reweighting (r3 P5, §5.3) against full USINE reruns.
+
+**Criteria and tolerances, fixed before any comparison (R9).** Frozen entries (acceptance.json, D-defaults): B3-1
+2%, B3-2 0.5%, B3-3 artifact `$CRPROP_OUT/b3/b3-channels.json`. How they are evaluated (written here before any B3 run
+was compared; none of this replaces or widens a frozen entry):
+
+- Common settings, both sides. Transport of `harmonized-v1` (L = 4 kpc, h = 100 pc, n_H = 1 cm^-3 in the thin disc,
+  K = β K0 (R/1 GV)^0.5 with D0 = 3e28 cm²/s, V_A = V_c = 0, losses off, all primaries R^-2.3). Cross sections: the
+  ILLUSTRATIVE sets of the profile (set A for B/C; `xs-illustrative-decay` with decay on for ¹⁰Be/⁹Be, D1's
+  `harmonized-v1-decay` transport), on hydrogen only on both sides: `He_to_H_number` is used by neither side (the
+  sets have no helium cross section; harmonized-v1 and xs-illustrative-A differ on the helium target, and the
+  comparison uses the hydrogen-only reading). Tertiary chains and ghost nuclei off on both sides. Same losses on both
+  sides (none). Every field of each transport block is set explicitly, and the translation's `substitutes` and
+  generated USINE file are checked to carry the value set (the translator defaults geometry and diffusion fields and
+  ignores `species` and `family` silently; B1 verifier).
+- Same parents. USINE propagates C and O from R^-2.3 sources, normalized so that O/C = 0.9 at 10 GeV/n; the closed
+  form is evaluated at each USINE E_k/n node with its parent ratio O/C set to USINE's propagated O/C at that node.
+- Source spatial distribution (not fixed by harmonized-v1): uniform in r up to radius_kpc = 20 kpc, observer at
+  r = 8.3 kpc, z = 0 (as D1 and B1) in the 2D model; none in the 1D model.
+- Geometry. The closed form is the 1D thin-disc solution and cannot express the radial boundary of harmonized-v1
+  (§5.5: the side that cannot express an item records the difference). B3-1 is evaluated on USINE Model1DKisoVc
+  (`slab-1d`, same L and h; the like-for-like comparison) and B3-1 passes only if that comparison meets 2%. The same
+  comparison against USINE Model2DKisoVc (harmonized-v1 geometry as frozen) is reported with the same 2% and its
+  verdict stated separately; a 2D miss is recorded with its attribution and reported, never absorbed.
+- B3-1 metric: the largest |r_closed / r_USINE - 1| over B/C on the 16 log-uniform rigidity bins 2-1000 GV and over
+  ¹⁰Be/⁹Be on the 12 log-uniform E_k/n bins 0.05-10 GeV/n of B1 and D1, both ratios of bin integrals (r3 P2, P3;
+  `usine_to_prediction.ratio_of_bin_integrals`); the closed-form isotope fluxes on USINE's nodes are the closed-form
+  mid-plane density relative to ¹²C times USINE's ¹²C flux. Stricter, also required: the same at every USINE node in
+  the two ranges (point ratios at equal E_k/n and at equal rigidity).
+- B3-2 configurations (all USINE Model2DKisoVc): `h1` (harmonized-v1, set A), `dec` (harmonized-v1-decay), and `all`
+  (`dec` plus V_A = 10 km/s in the thin disc, V_c = 10 km/s, losses ionization, coulomb and adiabatic; the gas is
+  neutral, so USINE's Coulomb term is zero and the losses are ionization and adiabatic only), which couples energies.
+  Reweighting of channel c by 1 + ε, ε = ±0.2: F_s = F_s(nominal) + ε F_s(c), with F(c) a USINE run in which only
+  channel c is non-zero (same parents, which no channel feeds), applied level by level from heavy to light: the
+  response of a ¹⁰Be channel carries its ¹⁰B decay daughter. It is compared with a full USINE rerun with σ_c × (1 + ε).
+  Metric: the largest relative deviation over B/C (16 rigidity bins), ¹⁰Be/⁹Be and Be/B (12 E_k/n bins 0.05-10 GeV/n)
+  and every secondary isotope flux at every USINE node in 0.05-1000 GeV/n; tolerance 0.5%. Reported, same tolerance:
+  closure of the sum of single-channel responses on the nominal run, and the error of skipping the daughter update.
+- Main channels (B3 step 2): a channel whose response is at least 1% of its observable's numerator (B for B/C, Be for
+  Be/B) in at least one bin of `h1` or `dec`; the others are listed as minor and tested in the same way.
+- B3-3: in `b3-channels.json` every channel and configuration carries `must_rerun: true` for norm reweighting if its
+  B3-2 deviation exceeds 0.5%. Slope-type variation (P15, illustrative): σ_c(E) = σ_c (E/E_thr)^s below
+  E_thr = 10 GeV/n, s = 0.1, for C→¹¹B and C→¹⁰Be in `dec` and `all`, compared with a rerun by (i) a post-propagation
+  weight on the channel response at the output E_k/n and (ii) energy-basis responses (one USINE run per node of the
+  cross-section table below E_thr, plus one for the rest); a method within 0.5% may be used (`must_rerun: false`, with
+  the method named), otherwise `must_rerun: true`. Inelastic cross-section changes: `must_rerun: true` without a test
+  (not linear, r3 P5).
+- Budget (D7): each USINE run is counted; the B3 total is reported.
+
+*Note of 2026-10-28 (rework round 1; the paragraph above is unchanged, R9).* The B3 verifier ruled that B3-1 as
+frozen is judged under harmonized-v1 (cylinder-2d, R = 20 kpc; r3 §B3 and §5.5), not on the matched 1D geometry
+chosen above. The maintainer's decision A1.10 (decisions.md) keeps B3-1 unchanged in acceptance.json and supersedes it
+for B3's verdict by three added entries: B3-1a (USINE in a 1D geometry matched to the thin-disc closed form, same
+parents, cross sections, tertiary/ghost and loss settings: B/C over 2-1000 GV and ¹⁰Be/⁹Be over 0.05-10 GeV/n within
+2%, evaluated with the metric above, bins and nodes), B3-1b (the harmonized-v1 2D offset reported per bin and
+attributed, including the hydrogen-only target against He_to_H_number 0.1; no tolerance) and B3-1c (stricter: USINE
+harmonized-v1 2D against the Fourier-Bessel thin-disc solution with the same inputs within 0.5% on the same bins;
+B/C of `h1-2d`, ¹⁰Be/⁹Be of `dec-2d`, 2000 terms). The tolerances above are not changed.
+
+**Environment (r3 §0.3, base exception D10).** E-crprop = E2 (macOS 27.2 arm64), Python 3.13.2 (miniconda, numpy and
+scipy for the closed forms), USINE V3.5 (git tag V3.5, commit fb53006d, Apple clang 21.0.0, ROOT 6.38.04; the ENV
+build) through `HEP_USINE_BIN` and `HEP_USINE_DATA`. `git rev-parse --show-toplevel` = `.claude/worktrees/crprop-b3`;
+`git branch --show-current` = `worktree-crprop-b3`; `git status` clean at start; base `2d451e87` = integration HEAD
+(decision D10, not `origin/main`); prerequisites B1 (merge 3ed1e89e), B2 (merge 81cb2ce0), ENV dispatch 2 (cbb7907f),
+A1 (5d5fd918), A2 (a3c880f8), C1 (099d1d22) are ancestors of HEAD (`git merge-base --is-ancestor`). r3 line numbers
+rechecked on this base (§B3 at line 418, §5.5 at line 375, B3 criteria at line 550).
+
+**Runs.** 181 USINE runs of the final study (`b3_study.py run`, 4 at a time, 433 s of USINE wall time in total, about
+0.12 core-hours), plus 11 exploratory nominal runs of the same specifications before it (overwritten): 192 USINE runs
+toward D7, none through a provider. Specifications `tests/adapters/fixtures/cr_propagation/b3/specs/` (every field
+explicit; `check_used` confirmed each value in the generated USINE file and the translation, and no run reported a
+problem); nominal tables and computational-run records committed in `b3/outputs/` and `b3/runs/`; every run with
+the sha256 of the data lines of its isotope tables in `b3/b3-run-index.json` (header with the run date left out, so a
+rerun compares; rework round 1); results `b3/b3-results.json`, channel list
+`b3/b3-channels.json` (also `$CRPROP_OUT/b3/`). The production table of a varied run is written by `b3_study.py`
+on a log grid of 10 nodes per decade (USINE interpolates it linearly in the value against ln E_k/n,
+`TUMath::Interpolate` kLOGLIN_INFNULL_SUPCST, so responses superpose exactly); USINE's own cross-section files are
+not used (escalation 8, WP B1X).
+
+**Results (2026-10-28).**
+
+| ID | Result | Evidence |
+|---|---|---|
+| B3-1 (frozen) | failed under harmonized-v1 (2D, R = 20 kpc): B/C closed form / USINE 2D = 1.009 (2-2.9 GV) rising to 1.0247 (678-1000 GV), above 1.02 in the 8 bins from 44.7 GV up (max 2.47%); ¹⁰Be/⁹Be within 2% (0.987-0.995, max 1.3%). Attributed to radial escape (below); superseded for B3's verdict by B3-1a/b/c (A1.10) | `b3_1.h1-2d`, `b3_1.dec-2d`; `test_b3_1_fails_under_harmonized_v1` |
+| B3-1a | passed (USINE Model1DKisoVc, matched to the 1D thin-disc closed form): B/C max 9e-5 over the 16 rigidity bins (1e-4 at nodes); ¹⁰Be/⁹Be max 4.1e-4 over the 12 E_k/n bins (4.1e-4 at nodes); tolerance 2% | `b3_1.h1-1d`, `b3_1.dec-1d`; `test_b3_1a_matched_1d_geometry`; `$CRPROP_OUT/b3/acceptance/B3-1.txt` |
+| B3-1b | reported and attributed (no tolerance): per-bin closed form / USINE 2D and USINE 2D / USINE 1D for B/C (h1-2d, dec-2d) and ¹⁰Be/⁹Be (dec-2d); the product of the two is 1 within 1e-3 in every bin, so radial escape accounts for the whole offset; target hydrogen-only on both sides (below) | `b3-results.json` `b3_1b`; `test_b3_1b_offset_reported_and_attributed` |
+| B3-1c | passed: USINE harmonized-v1 2D against the Fourier-Bessel thin-disc solution (same inputs, 2000 terms): B/C (h1-2d) max 0.21%, ¹⁰Be/⁹Be (dec-2d) max 0.16%; tolerance 0.5% | `b3_1c`; `test_b3_1c_fourier_bessel` (recomputed offline from the committed outputs) |
+| B3-2 | passed: level-by-level norm reweighting at ±20% against full reruns, all 22 channel × configuration cases (h1-2d 2, dec-2d 10, all-2d 10): max 8.9e-6 over B/C, ¹⁰Be/⁹Be, Be/B bins and every secondary isotope node (tolerance 0.5%); closure of the single-channel responses on the nominal run max 5.7e-6 | `b3_2`; `$CRPROP_OUT/b3/acceptance/B3-2.txt` |
+| B3-3 | written: 22 rows, all main (share of the numerator 0.6-70%); norm `must_rerun: false` for every row (none beyond 0.5%); inelastic `must_rerun: true` for every row (not tested, P5); slope: C→¹¹B and C→¹⁰Be in dec-2d (post-propagation weight, 8.6e-6) and all-2d (energy-basis responses, 9.4e-6) `must_rerun: false` with the method named, the other 18 rows `must_rerun: true` (no energy-basis responses computed) | `$CRPROP_OUT/b3/b3-channels.json` |
+
+Attribution of the B3-1 miss under harmonized-v1 (B3-1b; the closed form cannot express the radial boundary). USINE 2D / USINE 1D: B/C up to
+-2.4%, ¹⁰Be/⁹Be up to -1.3%, growing with energy as destruction gives way to escape; a Fourier-Bessel thin-disc
+solution written like the closed form (free escape at r = 20 kpc and z = ±L, sources uniform in r, observer at
+8.3 kpc, same parents) reproduces USINE 2D within 0.21% for B/C (2000 terms; 100 terms as USINE: 0.21%) and 0.16% for
+¹⁰Be/⁹Be; with the radial boundary at 40 kpc (80 kpc) the 1D closed form agrees with USINE 2D within 0.02% (0.06%).
+The 2D-1D difference is therefore the radial escape of harmonized-v1's geometry, not a translation or transport
+error; it is consistent with P7 (DRAGON2, R = 20 kpc: D0/L within 2% for L = 2-4 kpc). Target: harmonized-v1 sets
+He_to_H_number 0.1, but both sides use hydrogen only (the ILLUSTRATIVE sets have no helium cross section; the
+translator records the substitute), so the helium target does not enter the offset; it is a departure of both sides
+from harmonized-v1 that would raise production and destruction alike (for scale: DRAGON2's fixed helium target
+factor 1.143, P11) and is not tested here. Unattributed: the residual of USINE 2D against the Fourier-Bessel solution
+(0.21% / 0.16%, within B3-1c), likely USINE's radial source integration (NIntegrR 1000); not investigated further.
+Not loosened: B3-1 fails under harmonized-v1 as frozen; A1.10 supersedes it for B3's verdict.
+
+Findings. (1) Same parents matter: USINE's propagated O/C runs from 0.849 to 0.922 over the grid (0.9 at the
+10 GeV/n normalization), against the constant 0.9 of the profile's benchmark; O→B is about 30% of B. (2) Level by level
+is needed: reweighting a ¹⁰Be channel without updating its ¹⁰B decay daughter errs by up to 2.1% (C→¹⁰Be) and 0.9%
+(O→¹⁰Be). (3) Without energy coupling (dec-2d) an energy-dependent slope is applied exactly after propagation; with
+reacceleration, convection and losses (all-2d) the post-propagation weight errs by 4.4% (C→¹¹B, ¹¹B nodes; 2.4% on
+Be/B) and 1.5% (C→¹⁰Be, 1.2% on ¹⁰Be/⁹Be), while 26 energy-basis responses per channel reproduce the rerun within
+1e-5. (4) In all-2d a response to a single table node undershoots below zero by up to 4% of its peak (USINE's energy
+scheme); the values are used as written and still superpose. Limits: the ILLUSTRATIVE network has one parent level
+(C, O primaries) plus ¹⁰Be→¹⁰B, so multi-level chains (O→C→B, P5) are not exercised; helium target and ghost nuclei off
+on both sides; no low break used (the unverified "usine" low-break form does not enter); USINE's losses here are
+ionization and adiabatic (neutral gas, Coulomb zero). Software and numerical-consistency checks only: every input is
+ILLUSTRATIVE and no comparison with data is made. Checks: static part of `run_all_checks.py`, the impacted tests,
+naming, wiring, `workflow_check.py` diff and acceptance on the final HEAD (report); ALL-3 deferred to the wave run
+(A1.5).
+
+## CRPROP-E1 — 2026-10-28 (environment E2)
+
+Training set and bounded active addition with USINE (r3 §E1, r4 §6; optional WP). Driver and committed records under
+`tests/adapters/fixtures/cr_propagation/e1/` (`active_addition.py`, `design.json`, `summary.json`,
+`forced-test.json`); training data, run folders, cache and partition state stay under `$CRPROP_OUT/e1/` (E1-3).
+
+**Environment (r3 §0.3, base exception D10).** E2: macOS 27.2 arm64, Python 3.13.2 in the E2 venv (numpy 2.5.3, scipy
+1.18.1); USINE V3.5 fb53006d (`HEP_USINE_BIN`, `HEP_USINE_DATA` of the ENV build), provider `usine` 0.2.0 (adapter
+cr-propagation). `git rev-parse --show-toplevel` = `.claude/worktrees/crprop-e1`; `git branch --show-current` =
+`worktree-crprop-e1`; `git status` clean at start; base `4a58be50` = integration HEAD (decision D10, not
+`origin/main`); prerequisites B1 (merge 3ed1e89e), C2 (merge 9f17775c), A4 (merge 0ee4c914) and C1 (merge 099d1d22)
+are ancestors of HEAD (`git merge-base --is-ancestor`). No batch client: runs go through
+`skills/hep-computing/scripts/local_partition.py` on E2 (decision D6), at most 4 USINE processes at once.
+
+**Set-up and criteria, fixed before any loop run (R9).** Free parameters 5 (`D0_cm2_s` 1e28–1e29 on a log axis,
+`delta` 0.3–0.8, `eta` −1.5–1.5, `V_A_kms` 0–100, `V_c_kms` 0–30; `L_kpc` 4 and every other transport field fixed at
+the provider's `DEFAULT_TRANSPORT`, harmonized-v1 with the isotopic ILLUSTRATIVE cross sections, sent in full in
+every request). Q9: N₀ = 10 × 5 = 50 → 64 (power of 2), k = 64/10 → 6. Sobol design scrambled, seed 20261028;
+d_min = smallest pairwise distance of the design in the unit cube. Observable B/C, 20 log rigidity bins 2–1000 GV.
+Synthetic data: the provider's B/C at the truth point (`D0_cm2_s` 3e28, `delta` 0.5, `eta` 1, `V_A_kms` 30,
+`V_c_kms` 5; Asimov, labelled synthetic) with an ILLUSTRATIVE covariance (statistical 1.5% (R/10 GV)^0.4,
+uncorrelated; systematic 2% with Gaussian correlation length 0.3 in log10 R). Hold-out: 16 points of the round-0
+approximate 95% posterior region, never trained on.
+- E1-1: every design point has a computational-run record (USINE run folder under `$CRPROP_OUT/e1/runs/`, its id in
+  `design.json`); failures are recorded with their reason; more than 5% failed design points stops the WP.
+- E1-2: with `--forced-max-rounds-test` (both termination thresholds 0, early stops off) the loop ends with status
+  `max-rounds` after exactly 5 rounds and its reason names the unmet criteria and the failing bins.
+- E1-3: `python3 tools/check_packaging.py` exits 0 and only the driver, the design file, the summaries (per-point
+  hashes, computational-run references, no training values) are committed, each ≤ 2 MiB.
+- Termination (r3 §E1 with E2's criteria, placeholder emulator): on every hold-out point Δχ² = bᵀC⁻¹b ≤ 1 (E2-1) and
+  |b_i| ≤ 0.2 σ_i^stat in every bin (E2-2). Limits: 5 rounds; early stop when the largest hold-out |b_i|/σ_i^stat
+  falls by less than 10% in 2 consecutive rounds, or every pick lies closer than d_min to a training point; cost cap
+  1500 USINE evaluations for E1 (orchestrator), checked before every batch.
+
+**Results (2026-10-28).** Standard run: status `early-stop-min-distance` at round 3 (all 6 picks within d_min =
+0.2231 of a training point, not run); best emulator after round 2 meets E2-1 (largest hold-out Δχ² 0.225) but not
+E2-2 (largest |b_i|/σ_i^stat 1.18, failing bins 0–4, 2–7 GV). Placeholder emulator per round (training points,
+largest hold-out Δχ², largest |b|/σ^stat): round 0 (64) 7.69, 3.58; round 1 (70) 0.79, 1.36; round 2 (76) 0.225,
+1.18. Emulator best fit after round 2 (before round 3's picks): `D0_cm2_s` 2.98e28, `delta` 0.501, `eta` 1.13,
+`V_A_kms` 21.6, `V_c_kms` 6.0 (truth 3e28, 0.5, 1, 30, 5; χ² 0.004; the V_A–V_c–eta direction is weakly constrained
+by B/C alone, as expected). The forced test (E1-2) ran the full 5 rounds: rounds 3–5 add 18 points and the largest
+|b|/σ^stat stays at 1.27, 1.22, 1.22 — the plateau confirms the early stop and shows the placeholder (radial-basis
+interpolation with jackknife error) does not reach 0.2 σ^stat in the low-rigidity bins of this posterior.
+
+| ID | Result | Evidence |
+|---|---|---|
+| E1-1 | passed: 64/64 design points ok (0 failures, limit 5%); every one of the 111 USINE evaluations (design 64, truth 1, hold-out 16, additions 30) has a computational-run record that `contracts/validate.py` accepts; ids and point/output hashes in `design.json`, `summary.json`, `forced-test.json` | `$CRPROP_OUT/e1/acceptance/E1-1.txt` |
+| E1-2 | passed: `--forced-max-rounds-test` ends with status `max-rounds` after 5 rounds, reason "maximum of 5 rounds reached without both E2 criteria (E2-1 met: False, E2-2 met: False; termination thresholds dchi2 <= 0.0, …) best emulator = after round 5, failing bins […]"; no limit exceeded | `forced-test.json`, `$CRPROP_OUT/e1/acceptance/forced-test.txt` |
+| E1-3 | passed: `tools/check_packaging.py` exit 0; committed only the driver, `design.json` (38 kB), `summary.json` (51 kB), `forced-test.json` (64 kB), no training values | `$CRPROP_OUT/e1/acceptance/E1-3.txt` |
+
+**Budget (D7, A1.8).** 114 USINE evaluations in E1: 111 in the loop runs (tally `$CRPROP_OUT/e1/tally.json`; reruns
+of the standard and forced runs are answered from the provider cache) plus 1 probe and 2 smoke runs; well under the
+orchestrator's E1 cap of 1500. CPU about 0.1 core-hours (about 1–3 s per USINE run, 4 processes at once).
+
+**What E2 must replace.** The placeholder emulator (`JackknifeInterpolationEmulator`: scipy radial-basis
+interpolation of ln(B/C), jackknife spread as its error) by the hep-ml emulator with an `ml-artifact`
+(`training_domain`, `extrapolation_policy`, `regression_validation`, domain by `DomainModel`); the candidate-cloud
+approximation of the 95% posterior region (global Sobol cloud plus a Laplace-shaped local cloud, Δχ² ≤ χ²₀.₉₅(5)) by a
+posterior through the E2b emulator provider; the termination hold-out and the ILLUSTRATIVE synthetic covariance by
+E2's hold-out and the data covariance. Observed for E2: the design's d_min (0.22 in the unit cube) is large compared
+with the posterior region, so the min-distance early stop fires after two rounds of posterior-focused additions; a
+better emulator, not more points of this placeholder, is what the low-rigidity bins need. Labels: synthetic,
+unvalidated (ILLUSTRATIVE cross sections; USINE translator limits of B1, fixed by B1X in parallel).
+
+## CRPROP-A1R — 2026-10-28 (environment E2)
+
+Work package A1R (DRAGON2 convention row and reacceleration conventions; decision A1.9, escalations 6 and 9) of the
+cr-propagation r4 workflow; extends r3 §A1.
+
+Environment: E2 (macOS arm64 workstation), Python 3.13.2 (miniconda) for the module and tests (standard library);
+the scratch derivation checks used the E2 venv (Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1). r3 §0.3 checks: toplevel
+`<repo>/.claude/worktrees/crprop-a1r`, branch `worktree-crprop-a1r`, status clean at start; base exception (decision
+D10): base is the integration HEAD `6bfd1117`, not `main`; prerequisites A1 (`5d5fd918`) and ENV (`7d5c6934`, dispatch
+2 `cbb7907f`) are ancestors of HEAD. Sources read (not run): DRAGON2 at `<TOOL_HOME>/src`, commit cd588707 (clean);
+USINE V3.5 at `<TOOL_HOME>` (gitlab, commit fb53006d, tag V3.5). No DRAGON2 or USINE run was made (A1.8 tally: 0).
+
+Criteria (frozen entries A1R-1 to A1R-3 of `acceptance.json`, written before the work): A1R-1 the dragon2 convention
+and the page row match cd588707 with file:line, the repo spec D_X1_R60_UG (etaT = 1) converts, a test pins it; A1R-2
+the zone conversion and the D_pp normalisations of both codes stated from the code, each exact or approximate with a
+bound; A1R-3 reacceleration round trips within 1e-12 relative, an approximate conversion returns its bound.
+
+| Item | Result | Evidence |
+|---|---|---|
+| A1R-1 | `dragon2` = D0 beta^etaT (rho/DiffRefRig)^delta, `D0_1e28` in 1e28 cm^2/s, etaT and DiffRefRig free and required (src/diffusion.cc:150; src/grid.cc:108-110 per-nucleon momentum; src/crevolutor.cc:121-122 the (A/\|Z\|)^delta factor; src/input.cc:444-461, missing value -1 at src/input.cc:55-59); D_X1_R60_UG converts `exact` to canonical (3e28 cm^2/s at 1 GV, eta 1) and to galprop (3 x 4^0.5 at 4 GV) | `Dragon2Convention` (5 tests), page row parsed by `ConventionTable` |
+| A1R-2 (b) | D_pp D = c V_A^2 p^2 / (delta (4 - delta) (4 - delta^2) w): DRAGON2 cd588707 Ptuskin94 c = 1, no w; Ptuskin03 c = 4/3 (src/galaxy.cc:279-284; enum src/include/constants.h:146-149 gives Ptuskin94 = 0, and the 4/3 is applied for value 1; the comment of src/include/input.h:156 says otherwise); whole halo (src/galaxy.cc:308, 324). USINE V3.5 c = 4/3 (inputs/init.Model1D.par:90, init.Model2D.par:97), energy terms in the thin disc only (src/TUModel1DKisoVc.cc:400-416, src/TUModel2DKisoVc.cc:445-463). Constant ratio exact (3/4 for Ptuskin94 vs USINE). Papers cited in the code not re-read | `test_momentum_diffusion_constants` |
+| A1R-2 (a) | derived (1D slab, D independent of z, no convection, disc source and destruction): first-order disc-flux weights h L (thin disc) and L^2/3 (whole halo), so V_A,disc = V_A,halo sqrt(L/(3h)) at equal c and w; P1's "about sqrt(L/h)" gives a third of the first-order effect. Approximate: second-order terms differ by (1 + lam)/5, lam = h Gamma L / D (the returned bound) | independent oracle `slab_coefficients` (L/3 within 4e-7; mismatch 0.2/0.3/0.6/2.2 at lam 0/0.5/2/10); scratch 2D (z, p) solve: at a 1% effect the converted halo run matches the disc run within 1e-4, with sqrt(h/L) it gives a third (`$CRPROP_OUT/a1r/derivation/`) |
+| A1R-3 | 4 V_A x 20 ordered pairs of the 5 conventions round trip within 1e-12; same zone `exact` (bound 0), across zones `approximate` with bound (1 + lam)/5; a zone change without lam is rejected | `test_round_trips`, `test_cli` |
+
+Effect on the campaign: with USINE V_A,disc = 50 km/s (L = 4 kpc, h = 100 pc), DRAGON2 Ptuskin94 needs V_A,halo =
+50 sqrt(4h/L) = 15.8 km/s for the same first-order effect; D1's translator used 50 sqrt(h/L) = 7.9 km/s (a quarter of
+the D_pp), and B1's whole-halo branch uses sqrt(L/h). Neither translator is in A1R's files.
+
+Not done in A1R: convection, a radial boundary and energy losses in the zone factor (the conversion says so); the
+operator form beyond the D_pp coefficient was not re-derived; the translators of B1 and D1 were not changed.
+
+Rework round 1 (wave-3 finding): `tests.skills.hep_theory.test_cosmic_ray_phenomenology_th13` requires the phrase
+`D_pp D_xx` in the propagation-codes section; A1R had written `D_pp D`. The reacceleration bullet of
+`cosmic-ray-phenomenology.md` now reads `D_pp D_xx = c V_A^2 p^2 / (...)` (content otherwise unchanged); the page is
+24574 B (limit 24576 B; heading and `about 1` shortened to make room), `docs/reference-inventory.*` regenerated. Passing:
+the Th13, transport_conventions, routing_tables and documented_output_claims tests, reference_inventory --check.
+
+## CRPROP-B1X — 2026-10-28 (environment E2)
+
+Work package B1X of the cr-propagation r4 campaign (decision A1.7, escalation 8): a high break in
+`extension.transport`, and USINE's own cross-section files with data-normalised abundances in `usine_translate.py`.
+
+**Criteria and tolerances, fixed before any comparison (R9).** The frozen entries B1X-1 to B1X-5 (acceptance.json,
+added by the orchestrator on dispatch): B1X-1 a high break validates, a half-specified one is refused with a named
+error, every committed theory-spec keeps its outcome default and `--strict` (the A2-1 comparison); B1X-2 and B1X-3 a
+transport block matching USINE's shipped `inputs/init.TEST.par` (Model1DKisoVc), run through the translator, reproduces
+the B/C table of that example run in place within relative 1e-6 on the common nodes, the live tests not skipped; B1X-4
+no transport field silently ignored or defaulted; B1X-5 no USINE file or copy committed. Nothing was loosened.
+
+**Environment (r3 §0.3, base exception D10).** E2 = E-crprop (macOS 27.2 arm64), Python 3.13.2 (miniconda), USINE V3.5
+(commit fb53006d, Apple clang 21.0.0, ROOT 6.38.04; `bin/usine` sha256 1d444720…) through `HEP_USINE_BIN`,
+`HEP_USINE_DATA`, `USINE`. `git rev-parse --show-toplevel` = `.claude/worktrees/crprop-b1x`; branch
+`worktree-crprop-b1x`; status clean at start; base `e97680cf` = integration HEAD (decision D10, not `origin/main`);
+prerequisites A2 and B1 are ancestors of the base (`git merge-base --is-ancestor`); env-usine is the ENV build above.
+
+**Contracts (still CV-CRPROP 3.14.0, gate `CRPROP_FROM`, no bump, no new gate).** New fields: break `delta_above`
+(slope above a high break; the canonical table's `delta_below` mirrored), `geometry.local_bubble_radius_kpc` (USINE's
+`rhole`: changing it from 0.2038 to 0 kpc moves the shipped example's B/C by up to 3.9e-4, so it cannot be left to the
+translator) and an injection item's `eta` (source beta exponent; USINE's `eta_s`, -1 in the example). All pass
+`tools/check_naming.py` with `naming_known_gaps.json` unchanged (N13 has no extractor in this repository:
+`extract_names.py` reads N1-N6, N16). New rules from `CRPROP_FROM` (else `--strict`): `theory.transport_break_incomplete`
+(a low break needs `R_break_gv`, `delta_below`, `s`; a high break `R_break_gv`, `delta_above`, `s`; the other kind's
+slope is refused) and `theory.transport_break_kind_unknown`. Fixtures from `tests/contracts/make_fixtures.py`: one
+positive, two negative; `gate_verdicts.json` regenerated with only those three rows added. A2-1 rerun: all 29 committed
+theory-specs (contracts/fixtures, examples, profiles, tests) have identical findings, default and strict, under the base
+and the new validator; only the three new fixtures differ (`$CRPROP_OUT/b1x/acceptance/a21-*.json`).
+`transport_conventions.py` evaluates the high break (K0 <-> K10 approximate with a bound, a half-specified break
+not-convertible).
+
+**High-break form, from USINE's own files.** USINE reads K as a formula from its initialisation file; its C++ source
+fixes no break form. The shipped files carry one: `inputs/init.TEST.par` line 133 (also `init.Model1D.par` line 89,
+`init.Model2D.par` line 96, `doc/tutorial_update_models.rst` line 99):
+`beta^eta_t*K0*Rig^delta*(1+(Rig/Rbreak)^(Deltabreak/sbreak))^(-sbreak)`, so `delta_above` = delta - Deltabreak. No
+shipped file or source line has a low break, so USINE does not settle the "usine" low-break form of
+`transport_conventions.py` against Weinrich et al. 2020a (known issue stays open).
+
+**Translator (`usine_translate.py`).** High break: `*(1+(Rig/Rh<i>)^((delta-dh<i>)/sh<i>))^(-sh<i>)`. USINE's own inputs:
+`production_set`/`inelastic_set` `usine:<path>` and `sources.abundances` `data-normalised usine:<data file>
+<elements>:<experiment>@<E_k/n>[;...]`, read in place from `HEP_USINE_DATA` (refused with exit 3 and a message naming
+`HEP_USINE_DATA` and the files when it is unset); network 1H to `species.network_top`; NormList on the data file;
+targets H and He with He = `He_to_H_number` (HI + HII + 2 H2); HII and H2 from `gas.model`; electron-capture decay
+with `ec_treatment` `laboratory-half-life`; `--ekn-grid` for an explicit grid. With USINE's own inputs the Kpp line uses
+the factor written in USINE's shipped Kpp (1.022712e-3, init.TEST.par line 134), 1.6e-7 below the IAU/Julian value:
+with the derived factor one of 33 B/C nodes flipped its sixth digit (4.7e-6 relative); with USINE's factor all nodes
+agree (recorded as a substitute; the ILLUSTRATIVE runs keep the derived factor). Every chart BETA half-life in the
+network is compared with NUBASE2020 (14C differs by +0.5%, recorded; 10Be still refused above 1e-3). B1X-4: unknown
+keys refused; every default (geometry kind, h, R, rhole, eta, R0, breaks, V_A, w, zone, relation, V_c, gradient,
+losses, decay items, inelastic set, species) and every unused field (family, free, sources.spatial, diffusion.form,
+ghost_threshold, ILLUSTRATIVE abundances and set names, zone/relation with V_A = 0, decay items with decay off) is
+recorded in `substitutes`; `species.network_top` and `species.isotopic` must match an ILLUSTRATIVE set (Ni-64 refused)
+and set the network with USINE's files. Test `test_no_field_silently_ignored` changes and removes every field of four
+recorded specs and requires a changed input file, a changed record or a refusal. The whole-halo V_A factor stays
+sqrt(L/h) at first, then replaced after A1R (addendum below). The reader counts 14C in carbon.
+
+**Records.** `input_manifest` now holds `committed_form_sha256` (the placeholder form committed under `inputs/`) next
+to the as-run `sha256`, and USINE's own files read in place (hashed, never copied). The seven B1 records gained
+`committed_form_sha256` and `input_manifest_note` without a rerun: their generated inputs are unchanged (offline render
+test, and the live B1-2 rerun passes), their `notes` keep B1's substitutes.
+
+**Results (final HEAD).**
+
+| ID | Result | Evidence |
+|---|---|---|
+| B1X-1 | passed: 23 tests (9 B1X), positive and both negative fixtures exercised, gating native from CRPROP_FROM | `$CRPROP_OUT/b1x/acceptance/B1X-1-contracts.txt`, `a21-*.json` |
+| B1X-2 | passed: translator run of `specs/b1x-init-test.json` vs `usine -l inputs/init.TEST.par` run in place: B/C on 33/33 common nodes, max relative deviation 0 on E_k/n and on rigidity (identical tables); live test not skipped | `B1X-2-3-live.txt`, `runs/b1x-init-test`, `runs/shipped-init-test` |
+| B1X-3 | passed: the same run reads `XS_NUCLEI/sigProdGALPROP17_OPT12.dat`, `XS_NUCLEI/sigInelTripathi99+Coste12.dat`, `crdata_crdb20170523.dat` in place; no run or committed file has the sha256 of any USINE input; refused without `HEP_USINE_DATA` | as above, `UsineB1XOffline.test_missing_usine_data_is_refused` |
+| B1X-4 | for the verifier: field-by-field test above; file:line in the report | `test_no_field_silently_ignored`, `test_defaults_are_recorded` |
+| B1X-5 | committed: specs, the translator's own `usine.init.par` (placeholders; regenerates byte-identically, test), USINE output tables and records; no USINE source or input file | `test_renders_to_the_recorded_inputs`, live hash scan |
+| B1-2 | still passed: the seven B1 runs rerun live reproduce their outputs | `B1X-2-3-live.txt` |
+
+Not translated, since they do not affect B/C: the example's antinuclei and tertiaries, the hydrogen slope 2.3 (one
+shared slope 2.268922), `crdata_dummy.dat`, NormList elements above Si and the display settings. USINE runs:
+about 37 (6 development and probe runs, 1 rerecord, two live acceptance invocations of about 15 each).
+Checks: static part of `run_all_checks.py`, naming, wiring, layering, packaging, `workflow_check.py` diff, gaps and
+acceptance on the final HEAD; ruff and mypy (CI pins) on `contracts/`; ALL-3 deferred to the wave run (A1.5).
+Software and numerical-consistency checks; no comparison with data.
+
+**Addendum (2026-10-28, rebase onto integration 2ae3063b, which contains A1R e5ecbd64).** Orchestrator decisions:
+keep the mode-dependent Kpp factor (USINE's literal 1.022712e-3 only with USINE's own inputs, the IAU/Julian value
+with the ILLUSTRATIVE sets, no rerun of the B1 runs). Whole-halo V_A is now converted by
+`transport_conventions.py reacceleration --from whole-halo --to thin-disc` (same c and w; called as a subprocess, R1),
+V_A,disc = V_A,halo sqrt(L/(3h)) at first order, `approximate` with `relative_error_bound` (1 + lam)/5 on the
+second-order term; the translator computes lam = h Gamma L / D at every species and node of the run's grid (Gamma =
+n_gas sigma_inel beta c with the set's inelastic cross sections, D from the K formula, atomic-mass-unit kinematics)
+and passes the largest, recorded with the nuclide and E_k/n; with USINE's own cross sections a whole-halo V_A is
+refused (their inelastic files are not read). Committed runs with whole-halo V_A: only B1's `b1-slab-all-items`
+(none of B1X's, B3's under `b3/` or E1's under `e1/`, which uses the provider's thin-disc DEFAULT_TRANSPORT). Its
+thin-disc V_A changes from 35.35533906 to 20.41241452 km/s (lam_max 0.561 at 16O, 1.995 GeV/n; bound 0.312; convection
+on, recorded as outside the conversion's assumptions): rerun live, `inputs/`, `outputs/`, record and its
+`usine-results.json` entry regenerated (B/C bins change by at most 0.63%, 10Be/9Be by at most 0.47%; first B/C bin
+0.07760 -> 0.07776); the other six B1 runs and both B1X runs are unchanged. Checks rerun on the rebased HEAD (report).
+
+## CRPROP-D1 — 2026-10-28 (environment E-crprop)
+
+Work package D1 of the cr-propagation r4 campaign (r3 §D1 and §D1b folded together, r4 §6): DRAGON2 physics items,
+one at a time, each with its `harmonized-v1-<item>.json`, and the cr-provider/1 entrypoint `dragon2_provider.py`.
+
+**Environment (r3 §0.3, base exception D10).** E-crprop (E2 host, macOS 27.2 arm64, Python 3.13.2; DRAGON2 cd588707,
+the serial build of 2026-10-15, located through `HEP_DRAGON2_BIN` and `HEP_DRAGON2_DATA`). Checked before the first
+edit: `git rev-parse --show-toplevel` = `.claude/worktrees/crprop-d1`; `git branch --show-current` =
+`worktree-crprop-d1`; `git status` clean; base = integration HEAD `566bfd1e` (not `origin/main`, decision D10);
+prerequisite merge commits A1 `5d5fd918`, A2 `a3c880f8`, C1 `099d1d22`, B2 `81cb2ce0` are ancestors of HEAD
+(`git merge-base --is-ancestor`, exit 0). `env-usine` is absent: B1 has not run.
+
+**Criteria and tolerances, written before any DRAGON2 run of this work package (R9; frozen in `acceptance.json`, never
+loosened).**
+
+| ID | Criterion | Tolerance |
+|---|---|---|
+| D1-1 | For each item with a closed form (convection: V_c = 10 km/s constant, dV_c/dz = 0; decay: ¹⁰Be → ¹⁰B with the NUBASE2020 half-life), the DRAGON2 run with that item on is compared with the B2 closed form (`profiles/theory/cr-secondary-ratio/scripts/convection_decay.py`) with the same item on, fed with the same run's ¹²C and ¹⁶O fluxes per E/n as parents, the same D0, δ, η, R0, L and the same isotopic ILLUSTRATIVE production cross sections, and h n_H = half of DRAGON2's gas column at the observer (h = 0.1 kpc). Quantities: B/C = (¹⁰B + ¹¹B)/(¹²C + ¹³C + ¹⁴C) in 16 log-uniform rigidity bins over 2–1000 GV (isotopes summed at equal rigidity, P3; ratio of bin integrals, P2) and ¹⁰Be/⁹Be in 12 log-uniform E/n bins over 0.05–10 GeV/n (ratio of bin integrals). Verdict per item and observable: max over bins of abs(DRAGON2 / reference − 1) | 0.03 (3%) |
+| D1-1 (items without a closed form) | Reacceleration and energy losses: the reference is USINE under the same item file (r3 §D1); not compared until B1 is merged (fallback of `workflow.json`) | 0.03 when compared |
+| D1-1 diagnostic (no verdict, no tolerance) | The item effect, [DRAGON2(item on) / DRAGON2(item off)] / [closed form(item on) / closed form(item off)], per bin, with the item-off run `harmonized-v1-isotopic`; it separates the item from the fixed differences of the baseline (helium target, inelastic cross sections, 2D gas and boundary) | reported only |
+| D1-2 | Every item (convection, decay, reacceleration, losses) and the item-off baseline has a recorded run: run spec, computational-run record (input and output SHA-256, command, environment) and output under `tests/adapters/fixtures/cr_propagation/dragon2/` | all five present |
+| D1-PRV-1 | `dragon2_provider.py` passes C1's conformance mixin (`tests/core/provider_conformance.py`), live on E-crprop (skipped where DRAGON2 is not installed) | all checks pass |
+| D1-PRV-2 | Single-shot and `--serve` responses have the same sha256 after removing `elapsed_s` and time stamps | equal sha256 |
+
+**Results (2026-10-28, E-crprop; DRAGON2 runs under `$CRPROP_OUT/d1/`, outside the repository; host load 30-60 from
+other workers, so wall times are not cost numbers).** Runs: five item runs translated by `dragon2_run.py
+--from-transport` from `tests/adapters/fixtures/cr_propagation/specs/harmonized-v1-{isotopic,convection,decay,
+reacceleration,losses}.json` (2D, radius 20 kpc, dR 0.5 kpc, dz 0.02 kpc, Z 4-8, 0.04-2000 GeV/n with factor 1.2,
+injection R^-2.3 for every species, production table = the profile's isotopic ILLUSTRATIVE set for ¹²C and ¹⁶O),
+575-710 s each, four at a time; specs, de-identified computational-run records and outputs in
+`tests/adapters/fixtures/cr_propagation/dragon2/`. Substitutes recorded in every spec (§5.5): BronfFerr gas instead
+of uniform n_H = 1 cm⁻³ (DRAGON2 cd588707's `Uniform` gas is not implemented: gas.cc writes -1), DRAGON2's fixed
+helium (He/H 0.11 with its He_to_H_CS_ratio scaling) instead of 0.1, no thin-disc parameter, DRAGON2's own inelastic
+cross sections, sources OneRing 0-20 kpc (the source distribution D1 chose), V_A thin disc 50 km/s run as whole-halo
+50 sqrt(0.1/4) = 7.9 km/s (approximate, P1), ionization and Coulomb losses switched together; decay uses the
+NUBASE2020 half-lives of ¹⁰Be and ¹⁴C written into a copy of `isotope_list.dat` (DRAGON2 ships ¹⁰Be at 1.51 Myr; the
+run log confirms 1.38697 Myr).
+
+| ID | Result | Evidence |
+|---|---|---|
+| D1-1 convection | **fail** for B/C: max abs(DRAGON2/reference − 1) = 0.148 (1.076-1.148 over 2-1000 GV); **pass** for ¹⁰Be/⁹Be: 0.022 | `dragon2/d1-item-results.json`; `D1Items.test_closed_form_comparison_matches_the_record` |
+| D1-1 decay | **fail** for B/C: 0.144 (1.069-1.144); **fail** for ¹⁰Be/⁹Be: 0.152 (0.848-1.006, below 1 GeV/n) | same |
+| D1-1 attribution (B/C) | the item-off run already gives 1.069-1.143: DRAGON2's helium target multiplies the production cross sections by 1.144-1.174 at these energies; with it divided out DRAGON2 / closed form at equal E/n is 0.93-1.01 (helium on destruction, DRAGON2's inelastic cross sections and the 2D geometry not separated; as in CR-PROPAGATION-DRAGON2-UNITS). Item effect (diagnostic): convection 1.001-1.007, decay 1.000-1.001 | `$CRPROP_OUT/d1/helium_attribution.txt`; `d1-item-results.json` `attribution` |
+| D1-1 attribution (¹⁰Be/⁹Be, decay) | the reference is a thin disc, while DRAGON2's gas layer (H2 59 pc, HI 115 pc) is comparable with the ¹⁰Be decay length of about 0.3 kpc at 0.1 GeV/n. A 1D finite-difference diagnostic (source on DRAGON2's gas profile at 8.3 kpc against the same column in a thin disc) gives surviving-fraction ratios 0.843, 0.868, 0.889, 0.909 in bins 2-5 against the DRAGON2 item effects 0.873, 0.867, 0.888, 0.918; not attributed: bin 1 (0.05-0.078 GeV/n: DRAGON2 0.969, diagnostic 0.816) and a +1% residual above 1 GeV/n. The failure belongs to the thin-disc reference's validity (B2 excludes decay inside the disc), not to a defect shown in DRAGON2 | `$CRPROP_OUT/d1/thick_gas_decay.py`, `.json`; `d1-item-results.json` |
+| D1-1 reacceleration, losses | **not run**: no closed form; the reference is USINE, waiting for B1 (`env-usine` absent). Their runs are recorded | `D1_reacceleration`, `D1_losses` fixtures |
+| D1-2 | **pass**: five runs, each with spec, record (validates; exit 0; output and XML SHA-256 match; DRAGON2 commit in tools; no home path) and output; the specs are re-derived from the item files by the translator in the test | `D1Items.test_runs_are_recorded_and_translated_from_the_item_files` |
+| D1-PRV-1 | **pass** live (`HEP_DRAGON2_LIVE_TEST=1`): mixin checks declared, single-shot, serve, prv-2, unsupported-want, out-of-domain, outside-allowed, unregistered, runner-agrees; responses valid against `cr_provider.json` with the `theory:cr-secondary-ratio` vocabulary; 4 tests in 353 s | `$CRPROP_OUT/d1/acceptance/D1-PRV-1.unittest.log`, `D1-PRV-conformance.json` |
+| D1-PRV-2 | **pass**: single-shot and `--serve` responses equal in sha256 after removing `elapsed_s` (check prv-2) | same |
+| Numerical tolerance of the provider | 2.2e-3: largest relative change of five B/C bins (ekn 10-100 GeV/n, rigidity 2-1000 GV) when dz is halved and the energy factor goes 1.2 → 1.1; declared 0.01 | `$CRPROP_OUT/d1/convergence/convergence.json` |
+
+Open issues. (1) `transport_conventions.py` gives DRAGON2 the form D0 (p/p0)^δ with η = 0, but DRAGON2 cd588707
+(`diffusion.cc`, type Constant) computes D0 β^etaT (ρ/DiffRefRig)^δ in rigidity, so a canonical spec with η = 1 maps
+one to one (D1's translator does this and does not call the convention table); the convention table row in
+`cosmic-ray-phenomenology.md` and the module need a hep-theory fix (outside D1's files). (2) DRAGON2's `Uniform` gas
+is not implemented in this commit, so harmonized-v1's uniform gas cannot be run without a code change. (3) The
+B/C absolute comparison cannot meet 3% with DRAGON2's fixed helium target and own inelastic cross sections unless the
+reference includes them; the frozen tolerance is not changed. Checks: `run_all_checks.py --part static --jobs 4`
+31/31 pass; impacted tests (`tests.adapters.test_cr_propagation`, `tests.skills.test_cli_robustness`,
+`tests.adapters.test_adapter_declarations`, `tests.tools.test_provider_registry`, `tests.core.test_provider`,
+`tests.core.test_provider_conformance_mixin`) pass; `check_naming.py`, `check_wiring.py --since 566bfd1e` pass;
+ALL-3 (full `run_all_checks.py`, `check_relocation.py`) deferred to the wave run (decision A1.5).
+
+**Addendum: items without a closed form (2026-10-28, after B1 merged; rebased onto integration HEAD `3d5a6295`, which
+contains B1 `2d451e87`).** The rebase left the translator and reader unchanged apart from the provider reading its
+entry from the `provider` list of `adapter.json`, so no DRAGON2 run was repeated. Reference: B1's
+`usine/usine-results.json` (USINE V3.5 Model2DKisoVc, the same `harmonized-v1-<item>.json` on the same 16 rigidity and
+12 E_k/n bins; thin disc, uniform neutral gas n_H = 1 cm⁻³ with h = 0.1 kpc, no helium, ILLUSTRATIVE energy-independent
+inelastic cross sections, V_A 50 km/s in the thin disc). Like with like for losses: USINE's reference has ionization
+only (its Coulomb term acts on HII, zero here), and DRAGON2's Coulomb term acts on BronfFerr's HII, also zero.
+
+| ID | Result | Evidence |
+|---|---|---|
+| D1-1 reacceleration | **fail**: B/C max abs(DRAGON2/USINE − 1) = 0.381; ¹⁰Be/⁹Be 0.041. Item effect on B/C in the lowest bin: DRAGON2 1.072 against USINE 1.402 (DRAGON2 ran the r3 P1 whole-halo equivalent 50 sqrt(0.1/4) = 7.9 km/s with its Ptuskin94 D_pp; the zone conversion is approximate without a bound, and the D_pp normalizations are not separated) | `dragon2/d1-item-results.json` `usine_items`; `D1Items.test_usine_comparison_matches_the_record` |
+| D1-1 losses | **fail**, not a physics comparison: DRAGON2 with eloss_flag 1 suppresses even primary ¹²C by 1e-4 (0.04 GeV/n) to 9e-3 (1.6 TeV/n) and B/C by about 1e-3 at every energy (max deviation 0.999); the same with dz = 0.1 kpc (diagnostic runs `$CRPROP_OUT/d1/diag-losses/`). USINE's ionization changes B/C by at most 13% at 2 GV. Cause in DRAGON2 cd588707's nuclear energy-loss path not located: open issue; the recorded run stays as evidence of the behaviour | same |
+| D1-1 offsets against USINE (item-off) | B/C 1.27-1.39, ¹⁰Be/⁹Be 0.95-0.98: DRAGON2's helium target (×1.14-1.17 on production), its gas column at 8.3 kpc (9% above USINE's 2 h n_H) and its own inelastic cross sections; not separated further. For comparison, the convection and decay items against USINE give item effects within 0.9% (convection) and, for ¹⁰Be/⁹Be with decay, up to 11% (both 2D codes against each other: thin disc in USINE, DRAGON2's gas layer) | same |
+
+D1-1 summary over the four items: pass only for ¹⁰Be/⁹Be with convection; fail for all others (tolerance 3%, frozen;
+escalation 5 open for the closed-form items). New open issue (4): DRAGON2's energy-loss run.
+
+**Dispatch 2 (2026-10-28; decisions A1.9, A1.10; rebased onto integration HEAD `2ae3063b`, which contains `e5ecbd64`
+with A1R, B3, C2, E1).** D1-1 stays frozen and is recorded as **failed and superseded** for D1's verdict by D1-1a
+(item effect, ratio with the item over ratio without it, within 3%) and D1-1b (absolute offsets reported and
+attributed, no tolerance). USINE reference: `usine/usine-results.json` as committed in `9274db92` (B1), unchanged on
+`2ae3063b`.
+
+*Reacceleration.* The translator now calls hep-theory's `transport_conventions.py reacceleration` as a subprocess
+(an adapter imports no skill, R1): a thin-disc V_A is USINE's Seo-Ptuskin convention (D_pp constant 4/3), DRAGON2 runs
+Ptuskin94 (constant 1, whole halo; Ptuskin03 not used), so 50 km/s becomes 50 sqrt(4 h / L) = 15.81 km/s at
+L = 4 kpc, h = 100 pc, status approximate, relative error bound 0.517 on the second-order term (destruction/escape
+ratio 1.586 at 0.04 GeV/n, `escape_ratio_estimate`: n_H 1 cm⁻³, 310 mb). The item was rerun live.
+
+*D1-L (losses), diagnosis in 5 DRAGON2 runs (limit 6; `$CRPROP_OUT/d1/diag-losses/`).* (1-2) dispatch 1: the
+suppression is unchanged with dz = 0.1 kpc. (3-4) the same configuration with DRAGON2's `Galprop` gas (HII > 0),
+losses on and off: physical (¹²C −74% and B/C −58% at 0.1 GeV/n, both < 0.1% above 50 GeV/n). (5) protons added
+(Zmin 1): DRAGON2 crashes at start (exit −11), not pursued. Cause: BronfFerr writes n_HII = 0 (gas.cc), and the
+nuclear branch of `TCoulombLoss` (eloss.cc:118-120, `coullog = -log(... n_HII ...)/2`, gas.back() = HII by
+galaxy.cc:521-523) diverges there (the lepton branch guards n > 0). So it comes from the configuration and is fixed in
+D1's files: the translator runs losses on Galprop gas and refuses losses on gas without HII
+(`D1Items.test_translator_records_what_dragon2_cannot_express`, `Dragon2ProviderOffline.test_losses_run_on_gas_with_
+ionized_hydrogen`); the provider inherits it. Upstream issue draft (not posted, two items: this divergence and the
+Ptuskin94/Ptuskin03 enum, galaxy.cc:279-284 vs constants.h:146-149): `$CRPROP_OUT/d1/dragon2-upstream-issue-draft.md`.
+The losses item was rerun on Galprop gas together with its item-off run `D1_losses_off` (isotopic item on Galprop gas).
+
+| ID | Result | Evidence |
+|---|---|---|
+| D1-1 | **failed, superseded (A1.9)**: absolute deviations 14-15% (B/C against the closed form), 38-77% (B/C against USINE), up to 16% (¹⁰Be/⁹Be) | `dragon2/d1-item-results.json` `verdicts_D1_1_superseded` |
+| D1-1a convection | **pass**: item effect within 0.73% / 0.44% (B/C / ¹⁰Be/⁹Be) against the closed form, 0.85% / 0.60% against USINE | `verdicts_D1_1a`; `D1Items.test_closed_form_comparison_matches_the_record`, `test_usine_comparison_matches_the_record` |
+| D1-1a decay | **fail**: B/C passes (0.13% closed form, 0.02% USINE); ¹⁰Be/⁹Be fails (13.3% closed form, 11.3% USINE) below 1 GeV/n: DRAGON2's gas layer (59/115 pc) against the thin disc of both references; a 1D thick-gas diagnostic reproduces the DRAGON2 effect within about 1% in bins 2-5; lowest bin and a +1% residual above 1 GeV/n unattributed | same |
+| D1-1a reacceleration | **fail**: B/C effect 1.322 (DRAGON2) vs 1.402 (USINE) in 2-2.95 GV and 1.183 vs 1.122 in the next bin (max 5.7%); ¹⁰Be/⁹Be up to 4.4%. Within the approximate first-order conversion (bound 0.517 on the second-order term) and the whole-halo vs thin-disc spatial difference; not separated | same |
+| D1-1a losses | **fail**: B/C effect 0.815 vs 0.867 in the lowest bin (max 6.1%); ¹⁰Be/⁹Be passes (1.7%). Likely causes, not quantified: DRAGON2's Coulomb loss on Galprop's HII (USINE's reference is ionization only) and Galprop's neutral column differing from USINE's 2 h n_H | same |
+| D1-1b | offsets reported for every item and reference in `d1-item-results.json` (`dragon2_over_closed`, `dragon2_over_usine`) with attributions: item-off B/C 1.07-1.14 vs the closed form (helium target ×1.144-1.174; residual 0.93-1.01 unattributed: helium on destruction, inelastic cross sections, 2D gas); item-off B/C 1.28-1.39 and ¹⁰Be/⁹Be 0.95-0.98 vs USINE (helium, gas column +9%, inelastic cross sections; split unattributed); losses runs on Galprop gas B/C 1.50-1.77 vs USINE (gas model, plus the above; unattributed beyond these causes) | `attribution` |
+| D1-L | **fixed in the configuration** (see above); losses kept in D1-1a | file:line above |
+| D1-2 | pass: six runs recorded, specs re-derived by the translator in the test | `test_runs_are_recorded_and_translated_from_the_item_files` |
+| D1-PRV-1, D1-PRV-2 | pass, rerun live after the translator change (4 tests in 135 s) | `$CRPROP_OUT/d1/acceptance3/D1-PRV-1.unittest.log` |
+
+DRAGON2 runs of D1 (D7, A1.8): dispatch 1: 19 (5 items, 2 convergence, 5 conformance mixin, 5 conformance CLI,
+2 diagnostics); dispatch 2: 11 (3 diagnostics, 3 item runs, 5 conformance mixin); total 30, all on E-crprop, at most
+4 at once.
+
+## CRPROP-E2 — 2026-10-28 (environment E2)
+
+Work package E2 of the cr-propagation r4 campaign (r3 §E2 with §E2b folded in, r4 §6; optional): the hep-ml emulator
+of USINE B/C with its `ml-artifact`, its valid domain, and the cr-provider/1 entrypoint `emulator`.
+
+**Environment (r3 §0.3, base exception D10).** E2 (macOS arm64 workstation), Python 3.13.2; USINE V3.5 (commit
+fb53006d, ENV build) through `HEP_USINE_BIN`, `HEP_USINE_DATA`, `USINE`. `git rev-parse --show-toplevel` =
+`.claude/worktrees/crprop-e2`; branch `worktree-crprop-e2`; status clean at start; base `e5ecbd64` = integration HEAD
+(decision D10, not `origin/main`); the prerequisite E1 (merge `a4ad05d3`) and B1 (merge `3ed1e89e`), C1 (merge
+`099d1d22`) are ancestors of HEAD (`git merge-base --is-ancestor`).
+
+**Criteria and tolerances, fixed before any comparison (R9; frozen entries E2-1, E2-2, E2-3, E2-PRV-1, E2-PRV-2 of
+`acceptance.json`, nothing loosened).** Set-up as E1 (VALIDATION CRPROP-E1): free parameters `D0_cm2_s` 1e28–1e29
+(log axis), `delta` 0.3–0.8, `eta` −1.5–1.5, `V_A_kms` 0–100, `V_c_kms` 0–30; every other transport field the USINE
+provider's `DEFAULT_TRANSPORT` (provider version 0.2.0); observable B/C on the 20 log rigidity bins 2–1000 GV;
+synthetic data the USINE B/C at the truth point (`D0_cm2_s` 3e28, `delta` 0.5, `eta` 1, `V_A_kms` 30, `V_c_kms` 5;
+Asimov, labelled synthetic); C = the full ILLUSTRATIVE data covariance of E1 (statistical 1.5% (R/10 GV)^0.4
+uncorrelated plus systematic 2% with Gaussian correlation length 0.3 in log10 R); σ_i^stat its statistical part. b is
+emulator minus USINE (provider `usine`) at the same point, per bin. Posterior: flat prior on the unit cube of the free
+parameters (log D0), Gaussian likelihood with C, evaluated through the emulator provider (points it refuses have zero
+posterior).
+- Hold-out: 32 points drawn (seeded, weighted resampling without replacement) from the posterior through the first E2
+  emulator (trained on E1's USINE points only), run with USINE, never trained on, fixed for every round. A second,
+  confirmation hold-out of 32 points is drawn the same way from the posterior through the final emulator after it is
+  frozen and evaluated once. E2-1 and E2-2 must hold on both sets (the second set is an addition, not a substitute).
+- E2-1: on every hold-out point Δχ² = bᵀC⁻¹b ≤ 1.
+- E2-2: on every hold-out point and in every bin |b_i| ≤ 0.2 σ_i^stat.
+- E2-3: the same synthetic least-squares fit (unit-cube coordinates, box bounds, start at the box centre) once through
+  the emulator provider and once through the USINE provider (at most 300 USINE evaluations for this fit). σ_j and the
+  interval of each parameter j: the Laplace (Gauss–Newton) 68.27% interval at each best fit, half-width
+  σ_j = sqrt[(JᵀC⁻¹J)⁻¹]_jj with J the central finite-difference Jacobian (step 0.01 in unit-cube coordinates), the same
+  method for both providers; a boundary is not treated specially (stated in the result). Pass when for every j
+  |θ̂_j(emulator) − θ̂_j(USINE)| ≤ 0.2 σ_j(USINE) and |σ_j(emulator)/σ_j(USINE) − 1| ≤ 0.10.
+- E2-PRV-1: `tests.core.provider_conformance.ProviderConformance` (C1) passes for provider `emulator`.
+- E2-PRV-2: single-shot and `--serve` responses have the same sha256 after removing `elapsed_s` and time stamps.
+- Domain (r3 §E2, P10): `DomainModel` of `check_surrogate_domain.py` fitted on the training points (unit-cube
+  coordinates); `outside` or `sparse` is out of domain and refused (`failed`, `out-of-domain`), evaluated only with
+  `--allow-outside-validated-range` and then labelled `outside-validated-range`; the emulator error enters every
+  prediction as an uncertainty component.
+- Limits: at most 5 active-addition rounds after the first emulator; at most 500 USINE evaluations for E2 (tally kept;
+  E1's 111 runs reused from its cache are not new evaluations); at most 4 USINE runs at once.
+
+**Results (2026-10-28; run outputs `$CRPROP_OUT/e2/`, driver `tests/adapters/fixtures/cr_propagation/e2/emulator_campaign.py`,
+E2 venv Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1).** Emulator: `skills/hep-ml/scripts/train_emulator.py`, a
+Gaussian process (Matérn-5/2, one length scale per parameter, maximum marginal likelihood with an analytic gradient)
+on each of 13 principal components of ln B/C (training reconstruction residual 2.3e-6), trained on E1's 110 USINE
+points (design, E1 hold-out and every E1 addition; the truth point, which carries the synthetic data, left out);
+`DomainModel` (quantile 0.99, k 5) stored in the model file; ml-artifact by `write_ml_artifact.py` (task surrogate,
+`extrapolation_policy` reject, split check passed with test groups disjoint), valid without findings. The first
+emulator already met both criteria on the hold-out, so no active-addition round was needed (the round machinery did
+not run live).
+
+| ID | Result | Evidence |
+|---|---|---|
+| E2-1 | passed: largest Δχ² 0.0045 on the 32 hold-out points (posterior of the first emulator) and 0.0022 on the 32 confirmation points (posterior of the final emulator, the same model); tolerance ≤ 1 | `e2/summary.json` rounds[0].holdout, confirmation; recomputed offline by `EmulatorValidation.test_holdout_criteria` from `e2/holdout.json` |
+| E2-2 | passed: largest abs(b_i)/σ_i^stat 0.063 (hold-out, bin 0 at 2–2.7 GV) and 0.045 (confirmation); tolerance 0.2; largest relative error 6.1e-4 | same |
+| E2-3 | passed: best fits (start at the box centre) emulator vs USINE differ by at most 0.0020 σ (V_A_kms; D0 0.0008, delta 0.0008, eta 0.0004, V_c 0.0003); Laplace half-widths differ by −0.10%, +0.01%, +0.48%, −1.16%, −0.43% (D0, delta, eta, V_A, V_c); tolerances 0.2 σ and 10%. USINE fit: 23 function evaluations, 113 USINE evaluations (cap 300), χ² 2.7e-11 at the truth; emulator fit χ² 4.9e-6. The Laplace 1σ intervals of eta, V_A_kms and V_c_kms cross the box edges (σ in the unit cube 0.34, 0.33, 0.96: B/C alone leaves V_c almost free, as E1 saw); the criterion compares the same Laplace method for both providers, boundaries not treated | `e2/summary.json` e2_3; ml-artifact `downstream_validation` |
+| E2-PRV-1 | passed: `EmulatorProviderConformance` (C1 mixin) all checks, offline (no USINE) | `tests/adapters/test_cr_propagation.py` |
+| E2-PRV-2 | passed: single-shot and `--serve` responses have equal sha256 without `elapsed_s` (check prv-2), and the runner's response equals the direct one | same |
+
+Domain and posterior: the provider refuses a point the `DomainModel` calls sparse or outside (out-of-domain, with its
+reasons), the box by the protocol, another transport block (out-of-domain) and bins that are not training bins
+(unsupported-observable); a tampered model fails with provider-error, another model (`HEP_EMULATOR_ML_ARTIFACT`)
+gets version `1.0.0+model.<sha12>`. Its GP and domain arithmetic equal hep-ml's `GaussianProcessEmulator` and
+`DomainModel` (1e-12; 1,610 points). The posterior through the provider (importance sampling, 16,384 proposal draws,
+6,469 in the box) refused 1,058 draws (16%), ESS 495: the stored `DomainModel` reports an estimated in-distribution
+false-positive rate of 0.18 (22 held-out training points of a Sobol design, which the method's note says to read as a
+guide), so the domain is conservative and the posterior is conditional on it. Every hold-out and confirmation point is
+`inside`. Emulator error per prediction (P10): 13 fully correlated components (one per principal component) plus one
+uncorrelated component, adding in quadrature to the GP variance. The GP mean carries rounding noise of about 1e-10 in
+ln B/C (six components have the nugget at its 1e-12 floor), far below the 6e-4 error.
+
+**Budget (D7, A1.8).** 177 USINE evaluations for E2 (hold-out 32, confirmation 32, E2-3 fit 113; E1's 110 points and
+the truth were cache hits), cap 500; at most 4 USINE runs at once; each has a computational-run record under
+`$CRPROP_OUT/e2/runs/`. CPU about 0.2 core-hours. B1X check: for the truth point and three hold-out points the USINE
+input files rendered by the B1X translator (`worktree-crprop-b1x` at ce60dbaf, exported read-only) are byte-identical
+to those of this base, and the ILLUSTRATIVE network has no 13C or 14C (B1X's reader change), so E1's and E2's USINE
+values do not depend on B1X as it stands.
+
+Labels: synthetic, unvalidated (ILLUSTRATIVE cross sections, synthetic data); the emulator is validated only in the
+posterior of this synthetic fit, and its training transport is the USINE provider's `DEFAULT_TRANSPORT` (L_kpc 4).
+Not done: an active-addition round with this emulator (not needed); a profile-likelihood or posterior interval
+comparison with USINE (E2-3 uses Laplace intervals, as fixed above).
+
+Rework round 1 (wave-3 finding): `tests.tools.test_subprocess_timeouts` failed on the two unbounded `subprocess.run`
+calls (partition `plan` and `merge`) in `tests/adapters/fixtures/cr_propagation/e1/active_addition.py`. Both now carry
+`timeout=SMALL_STEP_TIMEOUT` (600 s; each handles one shard manifest, milliseconds in practice, so a legitimate run
+cannot be cut short). A `subprocess.TimeoutExpired` is recorded in the batch `problems` list (shard marked failed, then
+`incomplete-batch` is raised as for any failed shard), not ignored. No design, record or result changed; no USINE run.
+Checks on the fix: test_subprocess_timeouts + test_cr_propagation OK (83 tests, 10 skipped); `--part static --jobs 4`
+passed; check_naming, workflow_check diff (base b0d0016d) and acceptance ok; `active_addition.py --help` works.
+
+## CRPROP-C2U — 2026-10-28 (environment E2)
+
+Work package C2U (propagation fit with the USINE provider) of the cr-propagation r4 workflow, r3 card §C2 (USINE case,
+split by r4 §6). SYNTHETIC data only; every input ILLUSTRATIVE.
+
+Environment: E2 (macOS arm64 workstation), Python 3.13.2 (miniconda), NumPy 2.4.4, SciPy 1.17.1; USINE V3.5 (tag V3.5,
+commit fb53006d) located through HEP_USINE_BIN and HEP_USINE_DATA, runs kept under HEP_USINE_RUN_DIR =
+`$CRPROP_OUT/c2u/runs`, provider cache `$CRPROP_OUT/c2u/cache`. r3 §0.3 checks: toplevel
+`<repo>/.claude/worktrees/crprop-c2u`, branch `worktree-crprop-c2u`, status clean at start; base exception (decision
+D10): base is the integration HEAD `651e4af9`, not `main`; prerequisites C2 (`9f17775c`), B1 (`3ed1e89e`), B1X
+(`2360c294`), A1R (`18b43b34`), B3 (`c1b5967d`) and E1 (`a4ad05d3`) are ancestors of HEAD.
+
+Criteria and settings, written before any fit with USINE was run (R9; frozen entries C2U-1 to C2U-3 of
+`acceptance.json`). Provider `usine` 0.2.0 (adapter cr-propagation), not decomposable, values P2 ratios of bin
+integrals (declared `bin-averaged` with the convention "ratio of the bin-integrated fluxes (r3 P2)").
+
+| Item | Pre-declared setting or criterion |
+|---|---|
+| Transport | the provider's harmonized-v1 default (2D, L = 4 kpc, R0 = 1 GV, eta = 1, isotopic network to 16O, isotopic ILLUSTRATIVE cross sections, thin-disc V_A) with one ILLUSTRATIVE low diffusion break (R_break_gv 5, delta_below 0, s 0.05, 'usine' convention), the same for both families; the break is held fixed because the provider's domain has no break parameters (a difference from the literature SLIM, whose break is fitted) |
+| Dataset | one SYNTHETIC Asimov B/C set from the provider at the truth: 15 bins equal in ln(E_k/n) from 0.3 to 300 GeV/n, 4% uncorrelated + 2% fully correlated; its observable block copied from the prediction |
+| Truth (generating family BIG) | `D0_cm2_s` 3e28, `delta` 0.45, `V_A_kms` 70 (interior), `V_c_kms` 0 (on its physical lower bound, P8); `L_kpc` 4 and `eta` 1 fixed. Amended before the BIG fit: `V_A_kms` was first 30, but a SLIM smoke fit to that Asimov set gave chi2 0.09 (thin-disc reacceleration at 30 km/s is nearly absorbed by D0 and delta), so the truth was raised to 70 to make the family comparison discriminate; no criterion changed |
+| Families | BIG: `D0_cm2_s`, `delta`, `V_A_kms`, `V_c_kms` free; SLIM: `D0_cm2_s`, `delta` free, `V_A_kms` = `V_c_kms` = 0 |
+| Difference steps | USINE prints 6 significant digits (noise about 1e-6 relative, measured on 9 probe runs): stated steps 0.003 in ln D0, 0.001 in delta, 0.3 km/s in V_A and V_c for the Jacobian, the Fisher matrix and the convergence verdict |
+| C2U-1 | BIG fitted with the provider (no response model): `D0_cm2_s`, `delta`, `V_A_kms` (interior true points) within 0.1 sigma of the truth, sigma from the inverse Fisher matrix at the best fit; `V_c_kms` on the boundary: the minimum passes `boundary_kkt` and lies within 0.1 sigma_one-sided of 0, sigma_one-sided = distance from the bound to the profile delta chi2 = 1 crossing on the allowed side |
+| C2U-2 | every evaluation the fit used is recorded with provider `usine`, version 0.2.0 and a computational-run reference that resolves in the run folder, whose tool is USINE V3.5 commit fb53006d; a start point outside the domain (`V_A_kms` 200), a toy truth outside it and a point sent outside it to the provider are refused (out-of-domain) without a USINE run |
+| C2U-3 | BIG and SLIM fitted to the Asimov data from BIG; each listed with its delta chi2 calibrated by 200 toys per family on a total-degree-3 polynomial response model in (ln D0, delta, V_A, V_c) from 96 Sobol design points (amended before the BIG calibration from degree 4 and 160 points, to stay within the USINE budget after the first run spent 873 evaluations; the 2D SLIM-only box of that run had a largest error of 6.2e-5 sigma at degree 4), refused unless its largest error at 20 random provider points is <= 0.05 of the data sigma in every bin; its error enters the toy covariance (P10); a family survives at alpha = 0.05 (toy p-value >= alpha); pass when BIG (the generator) survives |
+| Bin semantics | the guard accepts the provider for data declared P2 (`bin-integrated`, or `bin-averaged` with the P2 statement) and refuses data with another binning convention (`crsr:bin_average`) or `point` values |
+| D7 | USINE evaluations counted by the runner (`points_sent`); C2U cap 1500 with a running tally; at most 4 USINE processes at once (the fit runs one) |
+
+Results (`tests/skills/hep_statistics/usine_family_study.py`, recorded in
+`tests/adapters/fixtures/cr_propagation/c2u/usine-family-study.json`; outputs in `$CRPROP_OUT/c2u/acceptance/`; tests in
+`tests/skills/hep_statistics/test_propagation_fit.py`, class `UsineProvider`, offline from the record, one live test
+gated by HEP_USINE_LIVE_TEST=1):
+
+| Item | Result | Evidence |
+|---|---|---|
+| C2U-1 interior | BIG converged (no restart, EDM 7.6e-7); pulls `D0_cm2_s` 4e-5 sigma (sigma_ln 0.139), `delta` 4e-5 sigma (sigma 0.0244), `V_A_kms` 6e-6 sigma (sigma 27.8 km/s: B/C alone constrains thin-disc reacceleration weakly) | `record.json` fits BIG |
+| C2U-1 boundary | `V_c_kms` = 0 on the lower bound (snapped from 5.7e-5, within one difference step), `boundary_kkt` derivative +58.9 (ok); profile interval lower end `bound`, upper crossing at 7.129 km/s: sigma_one-sided 7.129, pull 0 | `record.json` profile_intervals |
+| C2U-2 | provider `usine` 0.2.0 (not decomposable, one `total` component); 565 evaluation records (one per point, cache hits included), each with a computational-run reference, all 565 resolved in the run folder; one tool: USINE V3.5 (git tag V3.5, commit fb53006db41d...); start `V_A_kms` 200 refused (out-of-domain) before any run; a point with `V_A_kms` 200 sent to the provider refused by the entrypoint (out-of-domain) with USINE unset; multipliers with a non-decomposable provider refused (not-decomposable) | tests `test_c2u2_*` |
+| C2U-3 | NOT MET. BIG and SLIM both fitted with the provider and listed: chi2 0 (BIG, dof 11) and 1.32 (SLIM, dof 13), delta chi2 1.32 for SLIM; the toy calibration did not run: the 4D polynomial response model's largest error was 2.81 of the data sigma at 20 validation points, above the pre-declared 0.05, so the fit refused it (response-model-above-tolerance) and no toy-calibrated delta chi2 exists. Cause: the box is +-5 sigma of BIG, and sigma(V_A) = 27.8 km/s makes it span the whole V_A domain [0, 150] km/s (and V_c [0, 38]); B/C over that box is not a degree-3 or -4 polynomial (offline cross-validation on the 1336 cached runs: largest held-out error 1-2.5 sigma at degree 3-4, worse above). A redesign (smaller data errors or a second dataset such as 10Be/9Be to constrain V_A, then refits, about 420 more runs) does not fit in the 160 runs left of C2U's 1500 cap | `record.json` family_calibration |
+| Bin semantics | USINE's prediction is classified P2; data declared `bin-integrated` (P2) pass the guard and the comparison gate (the prediction's label aligned to the data's and recorded as `bin_semantics_aligned`); data with `point` values, with a `crsr:bin_average` convention, or `bin-averaged` without the P2 statement are refused (bin-semantics-mismatch); the closed-form refusals of C2 are unchanged | `test_bin_semantics_guard_accepts_p2_and_refuses_mismatches` |
+| Live rerun | SLIM refitted live with USINE (32 runs, fresh cache and run folder): best fit equal to the record within 1e-6 relative, every record resolved, tool USINE V3.5 fb53006d | `test_live_slim_refit_matches_the_record` |
+
+USINE evaluations (D7, distinct runs): 9 noise probes, 28 in a SLIM smoke fit at the first truth (V_A 30), 1 truth run,
+873 in the first study (BIG stopped strictly inside the V_c bound, its verdict differences straddled the bound and
+failed, so 5 restarts; fixed by snapping to a bound within one step), 6 in an aborted start, 423 in the second study
+(BIG, SLIM, the V_c profile interval, 116 response-model runs), 0 in the recorded third study (all cached), 32 in the
+live test: about 1372 of C2U's 1500. Each run took about 3 s (1 USINE process at a time).
+
+Advisories of C2's verifier handled here: the toy seeds are in `extension.seeds` and `coverage.seed` of the
+statistical-result; per-toy rows are kept in the coverage toys and in each family's calibration; the multipliers are
+solved within NU_BOUNDS (bounded least squares when the unbounded solution leaves them). Recorded, not changed (C1
+protocol, not C2U's files): two observables with the same id in one request make the components ambiguous, so the fit
+still sends one request per dataset (a two-dataset point costs two USINE runs).
+
+Not done in C2U: the toy-calibrated family comparison (C2U-3, above); the low break is fixed, not fitted (the provider's
+domain has no break parameters); modulation (datasets with a period are refused) and real data (F1).
+
+## CRPROP-D3 — 2026-10-28 (environment E-crprop)
+
+Work package D3 of the cr-propagation r4 campaign (r3 §D3): two-level cross-code comparison of DRAGON2 and USINE.
+GALPROP is `unavailable` (decisions A1.2; escalation 2), so the comparison is DRAGON2 vs USINE only (workflow.json
+fallback of D3: "D2 skipped: DRAGON2 and USINE only").
+
+**Environment (r3 §0.3, base exception D10).** Toplevel `.claude/worktrees/crprop-d3`; branch `worktree-crprop-d3`;
+status clean at start; base = integration HEAD b0d0016d (not `main`, decision D10). Prerequisites are ancestors of
+HEAD (`git merge-base --is-ancestor`): B1 3ed1e89e, B1X 2360c294, D1 e44377f4, A1R 18b43b34, B3 c1b5967d, A4
+0ee4c914. External codes: DRAGON2 cd588707 (the D1 build, `HEP_DRAGON2_BIN`, `HEP_DRAGON2_DATA`) and USINE V3.5
+(the B1 build, `HEP_USINE_BIN`, `HEP_USINE_DATA`) on E-crprop (macOS 27.2 arm64), at most 4 external processes at once.
+
+**Criteria and tolerances, fixed before any D3 comparison (R9).** Frozen entries (acceptance.json): D3-1 5%, D3-2
+judgment, D3-3 5% (added per A1.9). How they are evaluated (written here before any D3 run was compared; none of this
+replaces or widens a frozen entry):
+
+- Metric for D3-1 and D3-3: the largest |r_DRAGON2 / r_USINE - 1| of B/C on the 16 log-uniform rigidity bins
+  2-1000 GV of B1 and D1, ratios of bin integrals (r3 P2, P3; `dragon2_to_prediction.ratio_of_bin_integrals` and
+  `usine_to_prediction.ratio_of_bin_integrals`). ¹⁰Be/⁹Be on the 12 E_k/n bins 0.05-10 GeV/n is reported alongside
+  with the same metric and no verdict of its own (the frozen entries name 2-1000 GV, i.e. B/C).
+- D3-1 (level 1): each configuration that both codes ran from the same transport block: `harmonized-v1` (set A) and
+  D1's `harmonized-v1-<item>` blocks (isotopic item-off, convection, decay, reacceleration; losses with its Galprop-gas
+  item-off run on the DRAGON2 side). USINE as translated by B1/B1X from the block, DRAGON2 as translated by D1. A
+  configuration passes only if its B/C metric is ≤ 5%; D3-1 passes only if every configuration passes. Recorded runs
+  of B1 and D1 are reused where the configuration matches; DRAGON2 `harmonized-v1` (set A) is run once.
+- D3-3 (level 1, matched): the same configurations with USINE given DRAGON2 cd588707's fixed settings where USINE can
+  express them: helium target with He/H = 0.11 (constants.h `He_abundance`) of the hydrogen nucleon density, with
+  DRAGON2's helium production factor 1 + 0.11 r(E) (GALPROP's `He_to_H_CS_ratio`, xsec.cc) on the same ILLUSTRATIVE
+  production cross sections; DRAGON2's own inelastic cross sections (CROSEC/Barashenkov-Polanski `sighad`, option 2,
+  times 1 + 0.11 · 2.10 / A^0.055 for helium) on hydrogen and helium, evaluated with DRAGON2's own code outside the
+  repo; the thin-disc densities set to DRAGON2's gas columns at the observer (BronfFerr; Galprop's HI, HII and H2 for
+  the losses item, D1-L); the parent ratio O/C at the normalisation energy set to DRAGON2's propagated O/C. Each
+  setting that cannot be matched is recorded with its estimated effect on B/C. Pass if every configuration's B/C
+  metric is ≤ 5%.
+- Attribution ladder (evidence for D3-2 and D3-3): USINE runs that switch the matched settings on one at a time
+  (gas column, helium target, inelastic cross sections, parent ratio), each step's effect recorded as a ratio of the
+  B/C of consecutive runs.
+- D3-2 (level 2): each code with its own default inputs at the same transport (harmonized-v1-isotopic): DRAGON2 with
+  its shipped production table (Evoli 2019, cumulative), its BaseModel source abundances, BronfFerr gas, helium and
+  inelastic cross sections; USINE with its own files (`sigProdGALPROP17_OPT12`, `sigInelTripathi99+Coste12`, as in
+  B1X), data-normalised abundances and its gas and helium settings; same network top (O-16) on both sides. Every
+  difference between the two is listed as a `model-alternative` with its attribution: an effect measured by a USINE
+  run that swaps that one input for DRAGON2's (production table, inelastic cross sections, gas and helium,
+  abundances), or, where no run can isolate it, an estimate with its method. D3-2 passes if no listed difference is
+  without an attribution and the product of the attributed effects leaves a residual no larger than the D3-3 residual
+  plus the stated uncertainty of the estimates; an unexplained residual is itself listed as unattributed (fail).
+- Budget (A1.8): at most 60 DRAGON2 and 300 USINE runs in D3, tallied in this section.
+
+**Runs (D7, A1.8).** DRAGON2: 2 propagation runs (`D3_harmonized_v1`: harmonized-v1 set A, 212 s; `D3_l2_dragon2`:
+level 2 with DRAGON2's shipped production table and abundances, 313 s), plus 13 calls of a 20-line driver linking
+DRAGON2's own `libDRAGON.a` (`sighad`, CROSEC option 2) to tabulate DRAGON2's inelastic cross sections
+(`d3/dragon2-inelastic.json`; no propagation, a few ms each). USINE: 37 runs (20 in the final plan of
+`d3_study.py usine_plan`, 15 superseded: reruns after fixing the study script's record step or adding the injection
+setting, 1 aborted by a misparsed gas string, 1 live test), each 2-20 s. Reused, not rerun: D1's six DRAGON2 item runs and B1's seven USINE
+runs. Tally against the D3 caps: DRAGON2 2/60, USINE 37/300.
+
+**What USINE was given (D3-3, matched level 1)**, all from DRAGON2 cd588707's code: He/H 0.11 of the hydrogen nucleon
+density (constants.h, galaxy.cc), production on He = σ_H × `He_to_H_CS_ratio` (xsec.cc 145, 2364-2410), inelastic on H
+from DRAGON2's own `sighad` and on He × 2.10/A^0.055 (xsec.cc 2310-2317, xsec.h 465); thin-disc densities = DRAGON2's
+gas columns at r = 8.3 kpc on its z grid / 2h (BronfFerr: HI 0.1396, H2 0.0392 molecules, nucleons 0.2180 kpc cm⁻³;
+Galprop: HI 0.2054, HII 0.0419, H2 0.0498, nucleons 0.3469); O/C at 10 GeV/n = DRAGON2's propagated value (1.194-1.211;
+the profile's parent list gives 0.9, and D1's translator keeps DRAGON2's BaseModel abundances without recording it);
+injection β⁻¹ Rig^-2.3 (USINE `eta_s` = -1): DRAGON2's C and O spectra are 1.75 times USINE's at 0.2 GeV/n relative to
+10 GeV/n (≈ 1/β, a rigidity power law per unit momentum), and agree within 0.6% at 0.05-1000 GeV/n once USINE has
+`eta_s` = -1. Not expressible in USINE's KisoVc models, recorded with estimated effects on B/C (high-energy limits):
+DRAGON2's radial gas profile (BronfFerr ×1.0076, Galprop ×0.888; Fourier-Bessel, uniform sources), the vertical extent
+of its gas and of its source box |z| ≤ 0.2 kpc (BronfFerr ×0.980, Galprop ×0.913; slab Green's function), together
+0.987 and 0.811 (`geometry_factor`); reacceleration in the whole halo (A1R first-order conversion, relative error bound
+0.517 on the second-order term); finite gas layer for ¹⁰Be decay (D1's thick-gas factor); numerics (DRAGON2 grid 0.22%,
+D1; USINE 100 Bessel terms 0.5%, B3-1c).
+
+**Results** (`d3/d3-results.json`, recomputed offline by `D3CrossCode`; B/C max |r_DRAGON2/r_USINE − 1| on 2-1000 GV):
+
+| Configuration | Level 1 (D3-1) | Matched (D3-3) | ¹⁰Be/⁹Be matched |
+|---|---|---|---|
+| harmonized-v1 (set A) | 1.270-1.408, 40.8% | 0.993-1.000, **0.67%** | — |
+| isotopic (item-off) | 1.270-1.387, 38.7% | 0.993-1.000, **0.67%** | 0.13% |
+| convection | 1.279-1.395, 39.5% | 0.994-1.000, **0.59%** | 0.17% |
+| decay | 1.270-1.387, 38.7% | 0.993-1.000, **0.65%** | 18.3% (gas layer; matched / D1 thick-gas factor within 0.41% in all 12 bins) |
+| reacceleration | 1.281-1.382, 38.2% | 0.830-1.003, **17.0%** (lowest bin) | 2.7% |
+| losses-off (Galprop gas) | 1.510-1.770, 77.0% | 0.823-0.916, **17.7%** | 0.18% |
+| losses (Galprop gas) | 1.499-1.770, 77.0% | 0.823-0.943, **17.7%** | 0.22% |
+
+Attribution of the level-1 offset (isotopic, USINE ladder, effect of each step on B/C): gas column 1.054-1.087, helium
+target 1.073-1.136, inelastic cross sections 1.003-1.077, parent ratio O/C 1.104-1.110, injection convention
+1.000-1.031; their product times the matched residual equals the level-1 offset (test). Failing matched configurations:
+reacceleration — item effect DRAGON2/USINE 0.834 in 2-2.95 GV, 1.007 in the next bin, within the A1R bound times
+USINE's item effect (0.302, 0.090) in every bin (`reacceleration_check`); losses pair — the matched run with the gas
+scaled by the Galprop geometry factor 0.811 (`a-losses-off-geometry`, `a-losses-geometry`) agrees within 1.9% and 3.3%,
+and the high-energy offset 0.823 is the factor 0.811 within 1.5%; with like-for-like gas (HII in USINE) the losses
+item effects agree within 3.0% (D1-1a found 6.1% against an ionization-only reference).
+
+Level 2 (DRAGON2/USINE defaults 1.181-1.234), USINE swapping DRAGON2's inputs in one at a time: production table
+(Evoli 2019 vs GALPROP17 OPT12) 0.971-1.041, inelastic (CROSEC vs Tripathi99+Coste12) 1.003-1.011, gas and helium
+1.128-1.204, abundances 1.013-1.015, injection convention 1.000-1.029; residual 0.996-1.003 (0.42%). Estimated, not
+isolated by a run: gas and source geometry 0.987-1.000, ¹³C/¹⁴C in the C denominator (solar fractions in USINE)
+1.0085-1.0089, network edges (¹⁷O, ¹⁸O) ±0.05%, numerics ±0.5%. Every difference is registered as a
+`model-alternative` in `level2_differences`.
+
+| ID | Result | Evidence |
+|---|---|---|
+| D3-1 | **failed**: 38-77% at level 1 for every configuration (frozen 5%; reported, not loosened); fully decomposed by the ladder | `verdicts.D3-1`, `ladder`; `D3CrossCode.test_d3_1_level_one_fails_and_is_reported` |
+| D3-3 | **failed overall**: passes within 0.59-0.67% for harmonized-v1, isotopic, convection and decay; fails for reacceleration (17.0%, attributed: first-order zone conversion, within its bound) and the losses pair (17.7%, attributed: Galprop gas geometry that a uniform thin disc cannot express; geometry check within 3.3%) | `verdicts.D3-3`, `reacceleration_check`, `geometry_checks`; `test_d3_3_matched_level_one` |
+| D3-2 | **passed**: every level-2 difference measured or estimated; residual 0.42% ≤ allowed 2.46% (D3-3 isotopic residual 0.67% + BronfFerr geometry 1.29% + numerics 0.5%) | `level2_differences`, `verdicts.D3-2`; `test_d3_2_every_level_two_difference_is_attributed` |
+| D3-3 command | `python3 -m unittest tests.adapters.test_cr_propagation`: ok | `$CRPROP_OUT/d3/acceptance/` |
+| ALL-1 | environment field above | this section |
+
+Open issues found (outside D3's files, for the orchestrator): (1) `dragon2_run.spec_from_transport` neither translates
+`sources.abundances` nor records it as a substitute (DRAGON2's BaseModel O/C 1.21 vs the profile's 0.9: ×1.10 on B/C,
+the part of D1-1b's USINE offset D1 left unnamed); (2) harmonized-v1's "all primaries R^-2.3" does not fix the measure
+(per momentum in DRAGON2, per E_k/n in USINE: up to 3% on B/C at 2-3 GV, ×1.75 on primaries at 0.2 GeV/n), and neither
+translator records it; (3) `usine_translate._gas` drops a density term written without `cm^-3` to 0 with only a
+substitute note (found when a D3 run aborted); (4) D1's thick-gas attribution of the ¹⁰Be/⁹Be decay gap now holds in
+every bin against a like-for-like USINE run, including the lowest bin D1 left unattributed.
+
+Note (D3 verifier advisory, added at the rebase on 6a227a76): the level-2 swaps above, and the matched-level-1 ladder,
+are cumulative (each USINE run keeps every earlier swap and adds one more; `L2_STEPS` and `LADDER` in
+`d3_study.py`); "one at a time" means one more input per step, and each effect is relative to the previous step.
+
+### CRPROP-E2 rework round 1 (wave-4 finding, 2026-10-28)
+Base: integration HEAD 65cbaa56 (branch fast-forwarded from a6929c4d). Finding: `tests.skills.test_cli_contract`
+CliContract.test_scoped_tools_take_status failed because `skills/hep-ml/scripts/train_emulator.py` had no `--status`.
+Fix: `add_status_argument` (core/status.py) on both subcommands (train, predict), echoed as `status_label` in every
+stdout JSON object like train_bdt.py; no exemption added; model, run summary and exit codes unchanged. Checks:
+test_cli_contract, test_train_emulator, tests/skills/hep_ml (422 tests, 38 skipped), test_cli_robustness,
+test_cr_propagation OK; measure_entrypoints hep-ml within budget; `--part static --jobs 4`, check_naming,
+workflow_check diff and acceptance ok.
+
+### CRPROP-D3 rework round 1 (wave-5 finding, 2026-10-28)
+`tests.tools.test_subprocess_timeouts` failed on d3_study.py:285 and :295 (gfortran build of the inelastic driver and
+the per-nuclide driver call, no `timeout=`). Both now carry `timeout=600` (seconds-scale and millisecond-scale runs;
+generous bound, commented); `subprocess.TimeoutExpired` propagates like the existing `check=True` failures (raised,
+never swallowed). The USINE run already had `timeout=900`. Results, fixtures and test assertions unchanged;
+`d3_study.py --help` works. Checks: test_subprocess_timeouts and test_cr_propagation OK, `--part static --jobs 4`,
+check_naming, check_wiring, workflow_check diff and acceptance (see report).
+
+## CRPROP-C2UF — 2026-10-28 (environment E2)
+
+Work package C2UF (toy-calibrated BIG vs SLIM with USINE; C2U-3 moved here by decision A1.12) of the cr-propagation r4
+workflow, r3 card §C2 (C2-3, USINE case). SYNTHETIC data only; every input ILLUSTRATIVE.
+
+Environment: E2 (macOS arm64 workstation), Python 3.13.2 (miniconda), NumPy 2.4.4, SciPy 1.17.1; USINE V3.5 (tag V3.5,
+commit fb53006d) located through HEP_USINE_BIN and HEP_USINE_DATA, runs kept under HEP_USINE_RUN_DIR =
+`$CRPROP_OUT/c2uf/runs`, provider cache `$CRPROP_OUT/c2uf/cache` (a copy of C2U's; C2U's left unchanged). r3 §0.3
+checks: toplevel `<repo>/.claude/worktrees/crprop-c2uf`, branch `worktree-crprop-c2uf`, status clean at start; base
+exception (decision D10): base is the integration HEAD `6a227a76`, not `main`; prerequisites C2U (merge `886bb316`)
+and B1X (merge `2360c294`) are ancestors of HEAD.
+
+### Design probes (before any fit; 33 USINE runs, `$CRPROP_OUT/c2uf/probe/`)
+
+| Probe | Runs | Finding |
+|---|---|---|
+| Forward-difference Fisher at the C2U truth with C2U's transport, B/C, 10Be/9Be and Be/B from 0.3 GeV/n in one request | 5 | sigma(V_A) 26.8 km/s with B/C alone, 26.8 with 10Be/9Be added, 26.7 with Be/B too: no gain. Cause: the provider's default transport has `decay.enabled` false, so 10Be/9Be is the production ratio (0.55, flat) and insensitive to D0 (d ln / d ln D0 about 0.004) |
+| Two 9-point V_A slices (Chebyshev nodes) at union-box corners (ln D0 65.03, delta 0.377, V_c 0, V_A 0-150; ln D0 65.18, delta 0.40, V_A 0-110) | 18 | along V_A alone, ln(B/C) needs degree 6 at the first corner and degree 5 at the second for 0.05 of the 4.47% sigma (degree 4: 0.23 and 0.057): a box that spans V_A from 0 (SLIM) to beyond the BIG truth reaches low-diffusion, high-V_A corners where no low-degree polynomial is good enough. B/C as a function of V_A^2 is no better |
+| Fisher with bins from 0.05 GeV/n (decay still off) | 5 | B/C extended to 0.05 GeV/n alone gives sigma(V_A) 7.3 km/s (10Be/9Be still flat) |
+| Fisher with 10Be decay on (beta decay and fed daughter, rate ln 2 / (gamma t_1/2), 7Be fully stripped, r3 P6), B/C 0.05-300 and 10Be/9Be 0.05-10 GeV/n | 5 | 10Be/9Be 0.072-0.34 (decaying); sigma with C2U's B/C (0.3-300) plus 10Be/9Be 0.05-10 GeV/n (6% + 3%): ln D0 0.070, delta 0.0129, V_A 8.1 km/s, V_c 2.35 km/s (B/C alone: V_A 58); 10Be/9Be only from 0.3 GeV/n: V_A 40 |
+
+So the plan of A1.12 works only with decay switched on and 10Be/9Be extending below 0.3 GeV/n (10Be/9Be fixes D0 at the
+fixed L; B/C then fixes V_A). A union response box still spans V_A from 0 (SLIM's fixed value) to beyond the BIG truth
+and holds the low-diffusion corners above; separate boxes around each family's best fit avoid them.
+
+### Criteria and settings (written before any fit; R9; frozen entry C2UF-1, same text as C2U-3)
+
+| Item | Pre-declared setting or criterion |
+|---|---|
+| Transport | C2U's (the provider's harmonized-v1 default with the ILLUSTRATIVE low break R_break_gv 5, delta_below 0, s 0.05, 'usine' convention, held fixed) with `decay` = {enabled true, lorentz_dilation true, ec_treatment fully-stripped}; the same block for both families |
+| Datasets | SYNTHETIC Asimov from ONE USINE run at the truth (one request naming both observables): B/C, C2U's 15 bins equal in ln(E_k/n) from 0.3 to 300 GeV/n, 4% uncorrelated + 2% fully correlated; 10Be/9Be, 12 bins equal in ln(E_k/n) from 0.05 to 10 GeV/n, 6% uncorrelated + 3% fully correlated; observable blocks copied from the predictions (P2, `bin-averaged` with the P2 statement) |
+| Truth (generating family BIG), starts, steps, families | as C2U: `D0_cm2_s` 3e28, `delta` 0.45, `V_A_kms` 70, `V_c_kms` 0; `L_kpc` 4, `eta` 1 fixed; starts 2.4e28, 0.48, 60, 2; steps 0.003 (ln D0), 0.001, 0.3, 0.3 km/s; BIG all four free, SLIM D0 and delta free with V_A = V_c = 0 |
+| Provider requests | `provider_requests` "per-point" (new in propagation_fit.py): one request and one USINE run per point for both datasets (distinct observable ids; provider not decomposable); the C1 protocol is unchanged |
+| Response models | polynomial, total degree 3 (35 terms) in (ln D0, delta, V_A, V_c), 80 scrambled Sobol design points each, layout "per-center" (new): one model per family's best fit on best fit +- 5 x (largest sigma of either family per coordinate), clipped to the provider domain; each refused unless its largest error at 20 uniform random provider points in its box is <= 0.05 of the data sigma in every bin of both datasets (C2U's tolerance, not loosened); each family's fits to a null family's toys use the model whose box holds that family's fit to the null with a margin of 5 sigma (up to 2% of the half-width, MARGIN_TOL); the largest error of the models per bin enters the toy covariance (P10) |
+| Contingency (declared now) | if a model is refused at degree 3, one rerun of the calibration at degree 4 (70 terms) with 150 design points per model, the fits answered from the provider cache; the tolerance stays 0.05 |
+| Toys | 200 per family, seed 20261028, a toy whose fit fails or leaves its box is failed, the study stops above 2% failed (C2 loop limit) |
+| C2UF-1 | pass when: BIG and SLIM both converge with the provider; the family calibration is `ok` with every response model validated (<= 0.05 sigma); each family is listed with its delta chi2 and its toy p-value (fraction of its own toys with delta chi2 >= the observed one); BIG (the generator) survives at alpha = 0.05 (toy p-value >= 0.05). SLIM's verdict is reported, not required |
+| Test | `test_propagation_fit.py` class `UsineTwoDatasetFamilies` asserts the above from the recorded study (no skip); C2U's `test_c2u3` asserts C2U's recorded refusal (no skip); a live part gated by HEP_USINE_LIVE_TEST=1 |
+| D7 / A1.8 | C2UF cap 600 USINE runs (running tally in `$CRPROP_OUT/c2uf/tally.json`, counted as runner `points_sent`, since run folders are named by point hash and a rerun of a point with other observables reuses its folder); the fit run capped at 540 (`--max-evaluations`); one USINE process at a time |
+
+### First calibration (study 1, as declared) and amendment (written before the second calibration)
+
+Study 1 (`$CRPROP_OUT/c2uf/study1/`, 298 USINE runs: 1 truth, 197 for the fits, 100 for one response model): BIG
+converged with no restart (chi2 0.0, dof 23; pulls below 1e-4 sigma; sigma ln D0 0.0670, delta 0.0122, V_A 8.19 km/s,
+V_c 2.37 km/s one-sided, V_c on its bound) and SLIM converged after one restart (chi2 23.93, dof 25; D0 2.509e28,
+delta 0.4839): delta chi2 of SLIM 23.93. The family calibration was refused: the first per-center model (BIG's box,
+V_A 29-111 km/s, ln D0 +-0.335) had a largest error of 0.883 of the data sigma (worst in the lowest B/C bin at low
+D0 and high V_A), so the declared contingency was not run as declared. Offline from the cached runs: degree 3 misses
+by up to 0.47 sigma in-sample in that box, degree 4 by 0.11. A 9-point V_c slice in the box (9 runs, `probe/vc-slice.json`)
+is smooth (degree 3 within 1e-4 sigma), so the misses come from V_A at low D0, as in the corner slices above.
+
+Two further findings make the declared design unworkable: (1) the declared contingency (degree 4, 150 design points
+for both models) needs about 320 runs, more than the 260 left of the 600 cap; (2) under SLIM's null, B/C depends on
+V_A only through V_A^2, so BIG's fits to SLIM's toys spread to V_A of about 34 km/s at one sigma and 59 at three
+(from sigma(V_A) 8.2 at 70 km/s: one sigma in V_A^2 is 2 x 70 x 8.2 = 1148 km^2/s^2), far beyond the per-center box
+around SLIM (V_A 0-41): those toys would leave the box and fail. One box holding both best fits is needed after all.
+
+Amendment (the criteria, the 0.05 tolerance, the 20 validation points per model, the toys and alpha are unchanged):
+layout "joint" (new: one polynomial model on the box spanning both best fits +- k times the largest sigma of either
+family, so the fit of each family to the other's null has its margin without a rebuild; a margin short by up to 2% of
+the half-width holds), k = 3 (half_width_sigma; box ln D0 65.19-65.77, delta 0.413-0.521, V_A 0-94.6 km/s, V_c
+0-7.1 km/s), total degree 4 (70 terms) with 150 Sobol design points; the fits answered from the provider cache; the
+run capped at 255 USINE evaluations (340 spent so far). Expected toy failures at k = 3 (a fit beyond 3 sigma on four
+one-sided edges, about 1 per 200 toys) stay below the 2% limit. Offline, degree 4 in this box reproduces every cached
+run within 1e-4 sigma (230 runs, most near the two fits, so not a validation). If this model is refused, the cap
+leaves no further attempt and C2UF-1 is reported not met.
+
+### Results (study 2, recorded in `tests/adapters/fixtures/cr_propagation/c2uf/usine-two-dataset-family-study.json`)
+
+| Item | Result | Evidence |
+|---|---|---|
+| Fits (both datasets, one USINE run per point) | BIG and SLIM equal to study 1 (every fit evaluation answered from the provider cache): BIG returns the truth (pulls < 1e-4 sigma), sigma(V_A) 8.19 km/s (C2U, B/C alone: 27.8); SLIM chi2 23.93 (dof 25), delta chi2 23.93; every evaluation record names both datasets and a computational-run reference that resolves, tool USINE V3.5 fb53006d | `test_two_datasets_both_families_fitted_with_the_provider` |
+| Response model (joint, k = 3, degree 4, 150 design points) | REFUSED: largest error 0.452 of the data sigma at 20 validation points (tolerance 0.05, not loosened); no toy ran. Offline from the 170 runs: degree 3 misses by 0.58, degree 4 by 0.55, degree 5 (126 terms on 150 points) by 0.44 at the same validation point (ln D0 65.71, delta 0.507, V_A 1.9, V_c 2.86, the high-D0, low-V_A corner), while in-sample misses fall to 0.03: the global polynomial spends its terms on the strongly curved low-D0, high-V_A region and misses elsewhere. A 9-point V_A slice 0-20 km/s at that point (9 runs, `probe/va-slice-low.json`) is smooth and continuous at V_A = 0 (no switch artifact) | `test_two_datasets_recorded_calibration_refusal` |
+| C2UF-1 | NOT MET. BIG and SLIM are fitted with the provider and listed with their delta chi2 (0 and 23.93), but not toy-calibrated: no response model reached 0.05 sigma within the 600-run cap (study 1: 0.883 at degree 3, per-center; study 2: 0.452 at degree 4, joint, k = 3). The criterion runs from the record as an expected failure (`test_two_datasets_toy_calibrated_delta_chi2_and_generator_survives`, `@unittest.expectedFailure`; an unexpected success fails the suite) | test module |
+| Live | the truth point rerun with USINE (fresh cache, 1 run) equals the recorded predictions of both datasets within 1e-6 relative; tool USINE V3.5 fb53006d | `test_live_truth_rerun_matches_the_record`, `$CRPROP_OUT/c2uf/acceptance/live-truth-rerun.txt` |
+
+USINE runs (A1.8 tally, `$CRPROP_OUT/c2uf/tally.json`, counted as runner `points_sent`): probes 33 + 9 + 9, study 1 298
+(truth 1, fits 197, response model 100), study 2 170 (response model; fits from the cache), live test 1: 520 of 600.
+One USINE process at a time throughout.
+
+Diagnosis and options for the maintainer (not done here: each needs more runs than the 80 left, or a decision):
+- Cause: any box that holds BIG (V_A 70) and SLIM (V_A 0), plus BIG's fits to SLIM's toys (V_A up to about 60 km/s at
+  three sigma, since V_A enters only as V_A^2 near 0), spans V_A from 0 to about 95 km/s at k = 3 and reaches the
+  low-D0, high-V_A corner where B/C responds strongly to reacceleration (V_A^2 / K); a global total-degree polynomial
+  in (ln D0, delta, V_A, V_c) does not reach 0.05 sigma there at degree 3-5 with the affordable designs.
+- Options: (a) a local or adaptive response model (piecewise boxes covering the toy spread, or a sparse-grid /
+  Gaussian-process emulator such as the E2 route) validated the same way; (b) coordinates adapted to reacceleration
+  (V_A^2 / K at low rigidity); (c) a lower BIG truth for V_A, shrinking the box but weakening the SLIM test;
+  (d) a larger budget: a degree-5 joint model needs at least 252 design points plus 20 validation points per attempt,
+  with no guarantee (degree 5 missed by 0.44 offline).
+- Findings for other work packages: the USINE provider's default transport has decay off, so its 10Be/9Be is the
+  production ratio (flat, insensitive to D0); a 10Be/9Be dataset needs `decay.enabled` true and bins below 0.3 GeV/n
+  to constrain D0 (and through B/C, V_A) at fixed L.
+
+Not done in C2UF: the toy-calibrated family comparison (C2UF-1, above); modulation and real data (F1).
+
+### Dispatch 2 (decision A1.14): Gaussian-process emulator of USINE (criteria written before any emulator run; R9)
+
+C2UF's files were widened by the orchestrator to E2's emulator provider and trainer (A1.14 follow-up). Changes made
+before any run here: `emulator_provider.py` accepts a per-model declaration (observables with their output slices,
+axes, bins, the training runs' observable block and the domain taken from the model's feature boxes; the version then
+always carries `+model.<hash>`; `--declaration` prints it for a registry entry); a model without it (the committed E2
+model) is answered exactly as before, pinned by `EmulatorPinnedResponses` (8 responses recorded with the provider
+before the change, equal to the last bit on E2); `train_emulator.py` unchanged (it copies the outputs block into the
+model). `propagation_fit.py` gains response_model kind "provider": the toys evaluate the provider itself.
+
+| Item | Pre-declared setting or criterion |
+|---|---|
+| Emulator | `train_emulator.py train` (subprocess; Matern-5/2 GP per principal component of ln values, `--pca-tolerance 1e-4`, `--restarts 4`, `--seed 20261028`), features ln D0 (log, 1.9e28-4.0e28), delta (0.40-0.535), V_A (0-105 km/s), V_c (0-9.5 km/s): the joint box at k = 4 around study 2's two fits, rounded outward, so the toy box (k = 3) lies one sigma inside it; outputs ln B/C (15 bins, ekn 0.3-300 GeV/n) then ln 10Be/9Be (12 bins, ekn 0.05-10 GeV/n), one vector of 27; transport = the study's (decay on); ml-artifact by `write_ml_artifact.py` (task surrogate, extrapolation_policy reject, regression-value) |
+| Training runs | every cached USINE run of the study (same transport and request) inside the box (448), plus new USINE runs: 200 scrambled Sobol points in the box, 40 on the V_c = 0 face, 30 on the V_A = 0 face and 30 on the SLIM slice V_A = V_c = 0 (where BIG's boundary values and every SLIM evaluation lie): 300 runs |
+| Validation (held out, never trained on) | 40 new USINE runs: 30 uniform random points in the toy box (ln D0 65.191-65.772, delta 0.4133-0.5206, V_A 0-94.56, V_c 0-7.108) and 10 uniform on the SLIM slice in the same ln D0 and delta ranges (seed 20261029); each answered through `emulator_provider.py` (the per-model declaration, via core/provider); pass when at every validation point, in every bin of both datasets, abs(emulator - USINE) <= 0.05 of the data sigma (B/C sqrt(0.04^2 + 0.02^2), 10Be/9Be sqrt(0.06^2 + 0.03^2) of the value), the tolerance pre-declared in C2U, not loosened; a point the DomainModel refuses fails the validation |
+| P10 | the per-bin largest abs(emulator - USINE) over the validation points enters each dataset's covariance as an uncorrelated component named `emulator` |
+| One refinement (declared now) | if the validation fails: the 40 validation runs join the training set with 60 new Sobol points in the box, the emulator is retrained, and 40 fresh validation points (seed 20261030, same mix) decide; no other change; if it fails again C2UF-1 is reported not met |
+| Fit and toys | propagation_fit with provider `emulator` (registry entry from `--declaration`), the study's datasets (USINE Asimov at the truth, the recorded fixture values) with the `emulator` component, families BIG and SLIM, same starts and steps, response_model kind "provider", layout joint, half_width_sigma 3, 200 toys per family, seed 20261028, alpha 0.05, the 2% toy-failure limit (a toy fit the DomainModel refuses fails) |
+| C2UF-1 | pass when: the emulator passes its validation; BIG and SLIM converge with the emulator provider; each is listed with its delta chi2 and toy p-value from 200 toys with at most 2% failed; BIG (the generator) survives at alpha 0.05 |
+| D7 / A1.8 | 480 USINE runs left of 1000; the plan uses 340 (+140 for the refinement): within the cap; emulator evaluations are not USINE runs |
+
+Emulator results and amendments (written before the recorded fit run):
+- Validation round 0 PASSED: 738 training runs (448 cached + 300 new, 10 duplicates to 1e-9 dropped), 19 principal
+  components; at the 40 held-out USINE runs the largest error is 0.0038 of the data sigma (tolerance 0.05), largest
+  relative error 2.1e-4, no point refused by the DomainModel. No refinement round was needed (no further USINE run).
+- First calibration with the emulator (not recorded as the result; `$CRPROP_OUT/c2uf/emu/record-first.json`): fits equal to USINE's (SLIM chi2 23.9272 vs 23.9273), but the toy study stopped at the 2% limit: the toy
+  fits did not pass the convergence verdict. Diagnosed on the same toys (emulator only, no USINE run): (1) scipy's
+  default relative difference steps (1e-8) sit below the emulator's rounding noise, so the Jacobian was noise; (2) fits
+  stopping within one step of V_c = 0 had verdict differences straddling the bound; (3) BIG's fits to SLIM's toys have
+  V_A nearly unidentifiable near 0 (B/C depends on V_A^2), so the optimizer stopped short (EDM 1e-4 to 5e-3);
+  (4) BIG's fits to SLIM's toys spread in V_c beyond BIG's own 3-sigma box (V_c up to the 7.1 km/s edge: 8 of 200).
+- Amendments to propagation_fit.py's toy fits (no criterion, tolerance, toy count or alpha changed): with stated
+  difference steps, the fits on a response model or provider use them (central differences, `x_scale` "jac", dogbox
+  for bounded fits), snap a coordinate within one step of a domain bound onto it as fit_family does, shrink a verdict
+  step that would straddle a nearby bound, and finish a fit the verdict finds short of the minimum with up to 30
+  damped Newton steps (core newton_fit) before judging it; kind "provider" bounds the toy fits by the provider's
+  domain (no approximation, so no response box; a point the DomainModel refuses fails that toy). On 200 toys per
+  family (diagnostic, same seeds) BIG had 0 and SLIM 3 failed toys (2 refused by the DomainModel, 1 not converged),
+  below the 2% limit (4).
+
+Results of dispatch 2 (recorded in `tests/adapters/fixtures/cr_propagation/c2uf/usine-emulator-family-study.json`,
+with the model `emulator-model.json` and its ml-artifact `emulator.ml-artifact.json`):
+
+| Item | Result | Evidence |
+|---|---|---|
+| E2 unchanged | the committed E2 model's 8 pinned responses reproduced (numbers equal within 1e-12, on E2 bit-identical apart from the timing field); every existing E2 test passes unchanged | `EmulatorPinnedResponses`, test_cr_propagation, test_train_emulator |
+| Per-model declaration | the C2UF model declares B/C and 10Be/9Be on ekn, its box as the domain and version `1.0.0+model.<sha12>`; sub-ranges answered by slice; rigidity refused | `EmulatorPerModelDeclaration` |
+| Emulator validation | PASSED: 40 held-out USINE runs (30 in the toy box, 10 on the SLIM slice), largest error 0.0038 of the data sigma (tolerance 0.05), none refused by the DomainModel; error component (largest held-out error per bin) added to both datasets' covariance | `test_emulator_validated_against_usine_and_its_error_in_the_covariance` |
+| Fits (emulator provider) | BIG converged, chi2 0.0 (dof 23); SLIM converged, chi2 23.927 (dof 25); both equal to the USINE fits of study 2 within 1e-4 in chi2 | record |
+| C2UF-1 | MET. BIG: delta chi2 0, toy p-value 1.0 (200 toys, 0 failed), survives at alpha 0.05. SLIM: delta chi2 23.93, no toy of 197 reached it, p < 0.0151 (95% upper bound), excluded at alpha 0.05 (200 toys, 3 failed: 2 refused by the DomainModel, 1 not converged; limit 4). The generator survives | `test_emulator_toy_calibrated_delta_chi2_and_generator_survives` |
+| Live | two validation points rerun with USINE (fresh cache, 2 runs): the emulator within 0.05 sigma in every bin | `test_live_emulator_matches_fresh_usine_runs`, `$CRPROP_OUT/c2uf/acceptance/live-emulator-vs-usine.txt` |
+
+USINE runs (A1.8 tally, cap 1000 after A1.14): 520 in dispatch 1, 340 for the emulator (300 training, 40 validation)
+and 2 in the live test: 862 of 1000. Emulator evaluations (tens of thousands in the toys) are not USINE runs. The
+refinement round was not needed.
+
+## CRPROP-F1 — 2026-10-28 (environment E2)
+
+Work package F1 of the cr-propagation r4 campaign (r3 card §F1, line 462; decisions D8, D9, A1.7-A1.12): reproduction
+of Génolini et al. 2019 (arXiv:1904.08917, PRD 99 123028) Table II with USINE through the plugin's USINE provider and
+`propagation_fit.py`.
+
+**Criteria and tolerances, fixed before any comparison (R9; this paragraph is the work package's first commit).**
+Frozen entries (acceptance.json): F1-1 reproduction within the H0 tolerance D9, every difference attributed
+(cross sections, modulation, covariance, numerics, USINE version), a partial reproduction recorded with full
+attribution but not enabling F3; F1-2 the data carry `observed`, the covariance its `model-supplied` label, CRDB rows
+`secondary`. D9 made operational here (nothing loosened; a miss is recorded and attributed, never re-toleranced):
+
+| Family | delta: published (card), pass window | K10 (kpc^2/Myr): published (card), pass window |
+|---|---|---|
+| BIG | 0.48 +0.04/-0.03, [0.45, 0.52] | 0.30, [0.266, 0.338] |
+| SLIM | 0.51 ± 0.02, [0.49, 0.53] | 0.28, [0.258, 0.304] |
+| QUAINT | 0.45 +0.05/-0.02, [0.43, 0.50] | 0.33, [0.297, 0.367] |
+
+- delta windows: the card's central values and 1-sigma errors (Table II as transcribed in r3 §F1), closed intervals.
+- K10 = K0 10^delta, K at R = 10 GV with beta = 1 and both break factors set to 1 (their effect at 10 GV is below 1e-6
+  for every published best fit), in kpc^2/Myr (1 kpc^2/Myr = 3.0857e21^2 cm^2 / 3.15576e13 s, IAU parsec and Julian
+  year, r3 P1); D0_cm2_s of the fit is K0 at R0_gv = 1 GV. The card gives no K10 error; the window is the card's
+  central value times 10^(±s), with s the 1-sigma of log10 K10 propagated linearly from the authors' own fit
+  covariance of (delta, log10 K0) (`fit_covmatrix.out` of BIG, SLIM and QUAINT in USINE V3.5's
+  `doc/DocFiles/2019-Génolini-benchmarks-BC.tar.gz`, the paper's published fit outputs): s = 0.0520 (BIG), 0.0352
+  (SLIM), 0.0463 (QUAINT). Table II's own K10 errors could not be read (arXiv is outside the network consent); if they
+  differ, the windows above stand and the difference is reported.
+- A family passes D9 when both its best-fit delta and K10 lie in their windows and the fit converged (fit_diagnostics
+  verdict, boundary_kkt at a bound); a family that does not converge fails. F1-1 passes when all three families pass.
+- F1-2 passes when the dataset-record carries `observed`, the covariance block carries `model-supplied`, and every CRDB
+  row used as a cross-check carries `secondary`, all visible in the committed records.
+
+**Environment (r3 §0.3, base exception D10).** E2 (macOS arm64), Python 3.13.2 (miniconda; NumPy, SciPy), USINE V3.5
+(tag V3.5, commit fb53006d, Apple clang 21.0.0, ROOT 6.38.04) through HEP_USINE_BIN, HEP_USINE_DATA and USINE; runs
+under HEP_USINE_RUN_DIR = `$CRPROP_OUT/f1/runs`, provider cache `$CRPROP_OUT/f1/repro/cache`. `git rev-parse
+--show-toplevel` = `.claude/worktrees/crprop-f1`; branch `worktree-crprop-f1`; status clean at start; base `6a227a76` =
+integration HEAD (decision D10, not `main`); prerequisites C2U (merge 886bb316), B3 (c1b5967d), B1X (2360c294) and B1
+(3ed1e89e) are ancestors of HEAD. r3 line numbers rechecked on this base (§F1 at line 462).
+
+**Settings (from the paper's own files, numbers only).** USINE V3.5 ships the paper's initialisation files, fit
+outputs and fit covariances (`doc/DocFiles/2019-Génolini-benchmarks-BC.tar.gz`, read in a scratch folder, never
+committed) and the covariance its fits name (`inputs/CRDATA_COVARIANCE/cov_AMS02_201105201605__BC_R.dat`, "a toy-model
+for the covariance of AMS02 B/C(R) data ... courtesy of L. Derome"). From them: Model1DKisoVc, L = 10 kpc, h = 0.1 kpc,
+rhole = 0; K = beta^eta K0 R^delta (1+(Rlow/R)^((deltalow+delta)/0.05))^0.05 (1+(R/Rb)^(Delta/s))^-s, so the plugin's
+'usine' low-break form holds with delta_below = -deltalow (this settles known issue 2 of transport_conventions.py for
+these files); Kpp of USINE's files; HI 0.867, HII 0.033, He 0.1 cm^-3 (He_to_H_number 0.1/0.9), Te 1e4 K; ionization,
+Coulomb, adiabatic losses; BETA decay on, EC off (decay is set explicitly, so the provider default noted by C2UF does
+not apply; B/C only); GALPROP opt12 production and Tripathi99+Coste12 inelastic files; ghost97 chart; source q beta^-1
+R^-alpha with alpha fixed at the paper's 2.348466 (BIG), 2.33381 (SLIM), 2.360299 (QUAINT); 13C, 15N, 17O, 18O pure
+secondaries; network 1H-58Fe. Families: BIG (D0, delta, V_A, V_c, R_break, delta_below free; eta = 1), SLIM (D0,
+delta, R_break, delta_below; V_A = V_c = 0), QUAINT (D0, delta, V_A, V_c, eta; no low break). Nuisances as provider
+parameters with the Gaussian priors of the fit outputs' "initial setting" (USINE's chi2_nuis is (val - init)^2/sigma^2,
+src/TURunPropagation.cc 106-145): phi 0.73 ± 0.10 GV (USINE's force field per isotope), 12C+H->11B norm 1.10 ± 0.12 and
+low-energy slope 0.03 ± 0.15 below 8 GeV/n (USINE's fit-mode transformation, src/TUXSections.cc 3912-3921, applied to
+the table's nodes). The high break is fixed at each family's published best fit, Deltabreak kept when delta moves:
+the shipped files do not determine its priors (the published chi2_nuis is not reproduced by any reading of their
+"initial setting"). Starts at the published best fits. Data: the AMS-02 B/C table with per-source errors that USINE
+ships (`inputs/CRDATA_COVARIANCE/ERRORS/AMS02_BC_R__PRL117_231102_2016.txt`, PRL 117 231102, 67 bins 1.92-2600 GV;
+labelled `observed`); the card's "PRL 120, 021101" is not what the paper's 67-point fit and Derome's covariance
+describe, and the profile's dataset record is PRL 117 (boron-to-carbon-2016), so PRL 117 is used (open question below).
+HEPData answered HTTP 403 (browser challenge) and the CRDB REST URL redirected to a non-HTTPS dialog page: neither used.
+Covariance (model-supplied): build_covariance.py, stat uncorrelated, background, acceptance and scale fully correlated
+(as in the shipped matrix; its diagonals equal the table's relative errors within 1e-12), unfolding exp(-|ln R_i - ln
+R_j|/0.8169) (length fitted to the shipped unfolding block, rms residual 0.06).
+
+**Results (final HEAD; record `tests/adapters/fixtures/cr_propagation/f1/f1-reproduction.json`, outputs
+`$CRPROP_OUT/f1/repro/`).**
+
+| Family | delta (window) | K10 kpc^2/Myr (window) | -2 ln L (paper's chi2_min) | Verdict | D9 |
+|---|---|---|---|---|---|
+| BIG | 0.500 ([0.45, 0.52]) in | 0.286 ([0.266, 0.338]) in | 83.3 (61.7) | not reported: the fit reached its 550-evaluation cap; lowest cached point | missed (not converged) |
+| SLIM | 0.516 ([0.49, 0.53]) in | 0.289 ([0.258, 0.304]) in | 90.3 (61.8) | failed: EDM 0.0020 after a restart from the best fit with steps of 0.3 conditional sigma (0.013 in the first pass) | missed (not converged) |
+| QUAINT | 0.483 ([0.43, 0.50]) in | 0.293 ([0.297, 0.367]) out, 1.3% low | 83.8 (62.1) | failed: Hessian not positive definite | missed |
+
+F1-1: NOT MET (D9 not loosened). Best-fit delta lies in the window for all three families and K10 for BIG and SLIM;
+QUAINT's K10 is 1.3% below its window; no family has a converged verdict. F1-2: met (record: data `observed`,
+covariance note `model-supplied`, all 67 CRDB rows role `secondary`; test UsineF1Record). USINE's force field agrees
+with the plugin's force-field tool contract within 3e-5 (11B, 12C, 0.5-1000 GeV/n; test
+`test_usine_force_field_agrees_with_the_tool_contract`).
+
+**Attribution** (linear response at each best fit with the cached Jacobian; d log10 K10 = d ln D0/ln 10 + d delta):
+
+| Difference from the paper | Effect |
+|---|---|
+| Numerics: provider grid (20/decade) vs the paper's 200 bins 1e-3-5e3 GeV/n | B/C within 1.2e-3 (SLIM published point, 3 runs) |
+| Network 1H-30Si (SLIM/QUAINT init files) vs 1H-58Fe | B/C up to 0.75%; SLIM d delta -0.0027, d log10 K10 +0.0040; QUAINT +0.0006, -0.0013 |
+| SLIM V_A 6, V_c 0.1 km/s (its init file) vs 0 | B/C 0.18%; d delta -0.0007, d log10 K10 +0.0012 |
+| Covariance: USINE's relative covariance scaled with the model (the paper's choice) | chi2 at our best fit 107.6 (SLIM), 92.9 (QUAINT); SLIM d delta -0.0083, d log10 K10 +0.0018; QUAINT -0.016, +0.013 (moves QUAINT's K10 to 0.302, inside) |
+| Covariance: USINE's unfolding correlation, data-scaled | SLIM -0.0013, -0.0001; QUAINT +0.0099, -0.017 |
+| Covariance (P9): unfolding length x0.5 / x2 | SLIM -0.0021, -0.0001 / +0.0019, +0.0035; QUAINT -0.012, +0.021 / +0.0009, +0.0024 |
+| Data: the paper's file `AMS02_published_newBCgeo_rigidity.USINE` is not shipped; PRL 117 values used | not testable; the published best fits give chi2 136-233 with every covariance tried (167.3, 236.1, 134.9 with the paper's own), so the excess is not the covariance; our fits prefer a flatter low break (delta_below -0.21 BIG, -0.45 SLIM vs the paper's -0.69, -0.87), i.e. the difference sits in the lowest-rigidity bins |
+| Source normalisation: C, N, O to HEAO-3 at 10.6 GeV/n (USINE's shipped CRDB export has no AMS-02 C, N, O) vs AMS-02 at 50 GV | not tested (no data file); enters as an O/C normalisation of B production |
+| High break fixed at the published nuisance values | conditions the fit on them; their correlation with delta in the published covariance is 0.07 (BIG) |
+| USINE V3.5 vs V3.4 | not testable here |
+| Convergence | USINE's -2 ln L changes by ±0.003 for a 1e-7 change of delta (6-digit tables, EPS_INTEGR 1e-4), and the first pass's steps (a quarter of the published sigma) were 2.6 conditional sigma for delta (parabola residuals ±0.11 over ±2 steps): the forward-difference least-squares minimum kept EDM 0.013; with steps of 0.3 conditional sigma EDM is 0.002, at the noise floor and far above fit_diagnostics' 1e-5. QUAINT's V_c (3.2 ± 5.8 km/s near its bound) makes the noisy Hessian indefinite. BIG's first pass stopped on its cap |
+
+**USINE runs (A1.8 tally):** 1693 of F1's 2000 (13 probes and checks, 3 published points, 2 smoke, about 1540 in the
+three first-pass fits, 12 + 114 in the SLIM passes, 6 noise and smoothness probes, 3 attribution variants); at most 4
+USINE processes at once. Checks: static part of `run_all_checks.py`, naming, wiring, layering, `workflow_check.py`
+diff and acceptance, impacted tests (report); ALL-3 deferred to the wave run (A1.5).
+
+**Dispatch 2 (decision A1.16; written before any dispatch-2 refit, R9).** Rebased onto integration `8544d7ca`
+(adapter.json now in F1's files; F1's USINE cap 2600). Nothing above is loosened. Declared before the refits:
+- Noise (step 1): `usine_translate.py` gains `--usine-tolerance NAME=VALUE` (EPS_ITERCONV, EPS_INTEGR, EPS_NORMDATA;
+  defaults 1e-6, 1e-4, 1e-10 render byte-identically). Measured at BIG's lowest cached point, delta + 0 / 1e-7 / 2e-7:
+  -2 ln L = 82.13506 / 82.13462 / 82.13511 with the defaults and the same three numbers, digit for digit, with
+  EPS_ITERCONV 1e-9 and EPS_INTEGR 1e-7 (6 runs, 7.8-8.9 s each, no cost difference). The tolerances do not set the
+  noise (in Model1DKisoVc EPS_INTEGR enters only SecondaryProduction, src/TUModel1DKisoVc.cc 210-217, and the
+  iteration had converged); the floor is USINE's 6-significant-digit tables (B/C changes of 2-4e-6 for a 1e-7 change of
+  delta): about ±0.0005 (BIG here) to ±0.003 (SLIM) in -2 ln L. The provider is therefore run with its defaults.
+- Restarts (step 2): each family from its lowest cached point with difference steps of 0.3 conditional sigma (SLIM,
+  QUAINT: from their first-pass Fisher matrices; BIG: from the precision matrix of the paper's BIG fit covariance,
+  `BIG_RESTART_STEPS`), polish off, no restart after a failed verdict. SLIM's pass 2 (above, EDM 0.0020) already is this
+  restart and is not repeated.
+- QUAINT V_c: refitted as the declared variant QUAINT-Vc0, V_c fixed at its lower bound 0 (the paper's QUAINT best fit
+  lies on its own lower bound, 0.1 km/s; ours is 3.2 ± 5.8 km/s; its flat direction makes the noisy Hessian indefinite).
+  The bound is accepted when boundary_kkt holds there: -2 ln L at V_c = 0.5 km/s minus at V_c = 0, at the variant's best
+  fit, is >= 0 (one run). D9 is judged for QUAINT on the variant if the bound is accepted, else on the free fit.
+- Paper's covariance choice (step 4, if budget remains): QUAINT-Vc0 refitted with USINE's shipped relative covariance
+  (all five error types) times the QUAINT-Vc0 best-fit prediction, held fixed during the fit; a model alternative (P9),
+  reported next to D9, never replacing the nominal verdict.
+- The convergence criterion stays the fit_diagnostics verdict (EDM <= 1e-5, positive-definite Hessian, boundary_kkt);
+  if it is not reached at the noise floor, it is reported with the measured noise and the work stops.
+
+**Dispatch 2 results (record `tests/adapters/fixtures/cr_propagation/f1/f1-reproduction.json`, regenerated).**
+
+| Fit | delta (window) | K10 (window) | -2 ln L | Verdict | Runs |
+|---|---|---|---|---|---|
+| BIG, restart from its lowest cached point | 0.500 in | 0.286 in | 83.34 | failed: EDM 0.046 (V_A held as exactly flat); least_squares stopped at the start (xtol) | 212 |
+| SLIM, pass 2 (dispatch 1) | 0.516 in | 0.289 in | 90.31 | failed: EDM 0.0020 | 114 |
+| QUAINT free (dispatch 1) | 0.483 in | 0.293 out | 83.78 | failed: Hessian not positive definite | 540 |
+| QUAINT-Vc0 (V_c = 0, declared variant) | 0.459 in | 0.323 in | 84.02 | failed: EDM 0.00050, Hessian positive definite | 234 |
+| QUAINT-Vc0, the paper's covariance choice (model alternative) | 0.453 in | 0.319 in | 91.75 | stopped on its 200-evaluation cap; lowest cached point | 200 |
+
+QUAINT V_c bound: -2 ln L rises by 5.08 from V_c = 0 to 0.5 km/s at the variant's best fit, so boundary_kkt holds and
+QUAINT is judged on QUAINT-Vc0 (delta chi2 0.24 against the free fit). F1-1 stays NOT MET, only on the convergence
+criterion: every judged family (BIG, SLIM, QUAINT-Vc0) has delta and K10 in their windows, and none reaches the
+fit_diagnostics verdict. The verdict is unreachable at USINE's noise floor: tighter USINE tolerances change no output
+digit (step 1), the remaining noise is the 6-significant-digit tables (±0.0005 to ±0.003 in -2 ln L), and the EDM
+reached at steps of 0.3 conditional sigma (5e-4 to 5e-2) stays above 1e-5. Reported as a known issue; the criterion is
+not loosened. Data stay PRL 117: the paper's 67 points and Derome's covariance describe the 2011-05/2016-05 B/C of PRL
+117 (231102), which is also the profile's dataset record (boron-to-carbon-2016); the card's PRL 120 (021101) is not the
+set the target fits used. USINE runs: 2347 of F1's 2600 (dispatch 2: 6 noise probes, 212 BIG, 234 QUAINT-Vc0, 1 V_c
+bound check, 200 paper-covariance refit; at most 4 USINE processes at once). Rebased onto integration `3547f9a0`
+(C2UF): `propagation_fit.py` keeps C2UF's step-based polish in `_verdict` (it returns the polished point as "x") and F1's
+`optimizer.polish_steps` now uses that path for provider fits; F1's priors, provider-side modulation (each request
+carries only its own datasets' periods, also with C2UF's per-point requests) and C2UF's response model kind "provider"
+and per-point requests coexist; the hep_statistics tests, `test_cr_propagation` offline and C2UF's UsineEmulatorFamilies
+pass.
+
+## CRPROP-RC — 2026-10-29 (environment E2)
+
+Work package RC of the cr-propagation r4 campaign (`workflow-r4.md` §10): campaign report
+`docs/dev/cr-propagation/campaign-report.md` and pull-request draft `docs/dev/cr-propagation/pr-draft.md`;
+documentation only, no code or acceptance entry changed. **Environment field (r3 §0.3, base exception D10):**
+`git rev-parse --show-toplevel` = `.claude/worktrees/crprop-rc`; branch `worktree-crprop-rc`; status clean at start;
+base 47b004b4 = integration HEAD (not `main`; decision D10), rebased in rework round 1 onto 9b121eae
+(status.json commits only); the merges of the RC prerequisites F1 (3ccaa643) and C2UF
+(dee1179b) are ancestors of HEAD; `main` 8fcbb826 is an ancestor of HEAD (main has not moved, no rebase needed).
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --part static --jobs 4` | exit 0, 31 checks pass, 0 fail (rework round 1, on the rebased branch) |
+| `check_naming.py` | pass, no new findings, `naming_known_gaps.json` not grown |
+| `check_wiring.py --since 47b004b4` | pass |
+| `workflow_check.py diff --work-package RC --base 9b121eae`, `acceptance` | both ok; changed files only the 4 RC files; frozen sha256 f5b0dbe6…, 86 frozen entries, 17 added |
+| Full `run_all_checks.py` and `check_relocation.py` (WF-10, wave 6, orchestrator) | final confirmation run on the release commit 790ef3e7 (after the wave-6 fixes and the 0.43.0 bump): full `run_all_checks.py --no-cli --jobs 4` passes in E2 (31 pass, 0 fail, 2 skipped CLI host checks; 6000 tests in 480 modules, 0 failures, 168 skipped) and with the CI lock (31 pass, 0 fail, 2 skipped; 6000 tests, 0 failures, 263 skipped); `check_relocation.py` shows only the 2 known geant4 path-with-spaces failures, identical on `main` |
+
+RC has no acceptance entries of its own beyond WF-2 to WF-10, which its verifier checks against section 9 of the
+report. Every number in the report is taken from `status.json`, `decisions.md`, `escalations.md`, `acceptance.json`
+and the CRPROP sections above.
+
+## CRPROP-CIFIX — 2026-10-29 (environment E2)
+
+Cross-WP fix of the PR #308 CI failures on Linux (decision A1.20; rework round 1 of the B1, B2, D1, D3, E2 and C2UF
+tests). **Environment field (r3 §0.3, base exception D10):** `git rev-parse --show-toplevel` =
+`.claude/worktrees/crprop-cifix`; branch `worktree-crprop-cifix`; status clean at start; base 26222205 = integration
+HEAD (not `main`). Linux was not available: the fixes are checked on macOS in E2 and in the CI-lock venv.
+
+Cause of the C2UF `--declaration` KeyError: the C2UF emulator model's first kernel matrix (738 points, nugget 1.1e-12,
+condition about 3e19) is numerically singular. On macOS its Cholesky factorization happens to succeed; with the
+kernel entries perturbed by one or two units in the last place (as another libm/BLAS gives) it fails in 41 of 50
+trials, so the provider refused the model ("kernel matrix cannot be factorized") and `--declaration` printed
+`{"status": "failed", ...}`. Even when it factorizes, the self-check ln sigma moves by about 2e-7 under such
+perturbations, above the provider's 1e-9. Fix in `emulator_provider.py`: if the matrix as stored does not factorize,
+a jitter of 1e-14, else 1e-13, times its mean diagonal (perturbed: 0/40 failures at 1e-14); the self-check compares
+ln sigma within 2e-6 (a 1e-13 jitter moves it by 1e-6), ln mean still within 1e-9 (the mean uses the stored alpha,
+not the factor). On macOS the factorization succeeds as before, so the E2 and C2UF responses there are unchanged
+(the pinned E2 responses still agree).
+
+Test tolerances added (no acceptance entry, VALIDATION tolerance or criterion changed; no fixture regenerated):
+
+| Test | Comparison | Tolerance | Reason |
+|---|---|---|---|
+| profile `test_provider` `test_values_are_the_closed_form` | provider values against the committed benchmark prediction | relative 1e-12 | libm last digits (Linux drift 1 ulp) |
+| `UsineReader.test_results_file_is_recomputed` | recomputed ratios against `usine-results.json` | relative 1e-12 | libm last digits (Linux drift 4e-16) |
+| `D3CrossCode.test_ports_of_dragon2_code_and_inelastic_table` | `table_nodes()` against the committed inelastic table grid | relative 1e-12 | libm `pow` last digits |
+| `D3CrossCode.test_dragon2_runs_are_recorded_and_translated` (passed on Linux, hardened) | rebuilt DRAGON2 specs against the committed specs | relative 1e-12 on floats | libm last digits |
+| `EmulatorValidation.test_holdout_criteria` | recomputed `dchi2_max`, `pull_max` against the recorded numbers | relative 1e-4 (was absolute 1e-9) | GP linear algebra (Linux drift 3e-7 relative); E2-1 and E2-2 checked unchanged |
+| `EmulatorPinnedResponses.test_e2_responses_are_unchanged` | E2 responses against the macOS-pinned ones | relative 1e-4 (was 1e-12) | GP sigma of an ill-conditioned kernel (Linux drift 6e-6 relative) |
+
+`EmulatorPerModelDeclaration.setUpClass` now fails with the provider's exit code, stdout and stderr if
+`--declaration` gives no declaration.
+
+| Check | Result |
+|---|---|
+| `tests.adapters.test_cr_propagation`, `tests.skills.hep_statistics.test_propagation_fit`, `tests.skills.hep_ml.test_train_emulator` | E2 and CI-lock venv: 164 tests OK (15 skipped) |
+| profile tests theory:cr-secondary-ratio | E2 and CI-lock venv: 70 tests OK |
+| impacted tests (`rule_registry.py impact`) | 200 tests OK |
+| `check_naming.py` | pass |
+| `run_all_checks.py --part static --jobs 4` | exit 0, 31 checks pass, 0 fail (includes the profile tests) |
+| Full `run_all_checks.py`, `check_relocation.py`, `workflow_check.py diff` | deferred to the orchestrator (A1.5; cross-WP branch) |
+
+**Rework round 2 (2026-10-29, base 12bdcc5b).** PR #308 CI run 2: everything passes except
+`EmulatorPerModelDeclaration.setUpClass`. On Linux the C2UF kernel now factorizes, but `--declaration` refuses with
+"the model does not reproduce its self-check predictions". Cause: with a near-singular kernel the stored alpha weights
+are huge, so 1-ulp libm differences in the kernel evaluations k(x*, X) are amplified in the ln mean, not only in
+sigma.
+
+Drift simulation (macOS, E2 venv; scratch script outside the repository). Every kernel evaluation, both K(X, X) and
+k(x*, X), was multiplied entry by entry by 1 + n eps/2 with n drawn from {-2, -1, 1, 2} (K kept symmetric). The model
+was loaded through the provider and its self-check points predicted again. 120 trials per model (2 seeds x 60).
+Deviations are the maximum over the self-check points and outputs, against the stored values:
+
+| Model | max abs ln-mean deviation | max ln-mean deviation / sigma | max abs ln-sigma deviation | max ln-sigma deviation / sigma | stored ln sigma |
+|---|---|---|---|---|---|
+| E2 (`e2/emulator-model.json`) | 2.0e-9 (median 9e-10) | 9.1e-7 (median 4.4e-7) | 1.8e-9 | 8.8e-7 | 1.4e-3 to 7.8e-3 |
+| C2UF (`c2uf/emulator-model.json`) | 7.4e-7 (median 4.3e-7) | 2.5e-2 (median 1.1e-2) | 8.7e-8 | 4.4e-3 | 1.9e-5 to 1.2e-4 |
+
+Even E2 exceeded the old absolute 1e-9 on ln mean in a large fraction of the trials (median 9e-10, max 2.0e-9), so it passed CI by chance. New
+self-check criterion (`emulator_provider.py`): ln mean and ln sigma each within max(1e-9, 1e-4 x the stored ln sigma)
+at every check point and output. That is a drift far below the emulator's own uncertainty. The factor 1e-4, below the
+proposed 1e-3, leaves E2 a margin of about 110, and E2 is accepted in 120 of 120 trials. The C2UF model's mean drift
+reaches 2.5e-2 x sigma, 25 times even the 1e-3 bound, and it is refused in 120 of 120 trials. **The C2UF model is not
+portable across libm implementations; it stays refused there.** No further loosening (A1.20 instruction). A refusal
+now reports, for ln mean and ln sigma, the worst deviation (absolute, x sigma, relative) and the check point and output
+where it occurs. On macOS both models reproduce their self-checks exactly (deviation 0), so the responses there are
+unchanged. `EmulatorPerModelDeclaration` and the C2UF-dependent CI result therefore still fail on Linux. Options for
+the orchestrator: retrain the C2UF emulator with a nugget floor that bounds the kernel's condition number (hep-ml
+`train_emulator.py`, NUGGET_BOUNDS lower edge 1e-12), or mark that test as platform-bound.
+
+| Check (round 2) | Result |
+|---|---|
+| `test_cr_propagation`, `test_propagation_fit`, `test_train_emulator`, `test_adapter_missing_dependency`, `test_cli_robustness` | E2 and CI-lock venv: 172 tests OK (15 skipped), pinned E2 responses and C2UF tests included |
+| `run_all_checks.py --part static --jobs 4` | exit 0, 31 pass, 0 fail |
+| `check_naming.py` | pass |
+
+**Rework round 3 (2026-10-29, base 600c313a, decision A1.21).** The C2UF emulator fixture is platform-bound (A1.21):
+its tests skip on the provider's self-check refusal and on nothing else; the follow-up is retraining it with a nugget
+floor in `train_emulator.py`. The round-2 criterion is kept. Skip points:
+- `EmulatorPerModelDeclaration.setUpClass` raises `unittest.SkipTest` only when `--declaration` returns status failed
+  with "does not reproduce its self-check predictions". The skip reason names A1.21 and carries the provider's
+  deviation message. Any other failure (another error, bad JSON, a missing key) still fails.
+- `test_propagation_fit` `test_live_emulator_matches_fresh_usine_runs` (live only: HEP_USINE_LIVE_TEST) loads the C2UF
+  emulator through the provider via `emulator_registry`. It skips on the same refusal only.
+- No other test loads the C2UF emulator. The E2 tests (`EmulatorPinnedResponses`, `EmulatorProviderConformance`,
+  `EmulatorProviderRefusals`, `EmulatorArtifact`, `EmulatorValidation`) are never skipped.
+
+Skip path exercised locally with the self-check bound forced negative (not committed): `setUpClass` skipped with the
+A1.21 reason and the deviation message, and `EmulatorPinnedResponses` failed (the E2 model refused, not skipped), as
+intended. That run exposed a defect: the deviation message's worst-point search divided by a zero bound. It now picks
+the point furthest beyond its bound (NaN counts as worst).
+
+| Check (round 3) | Result |
+|---|---|
+| `test_cr_propagation`, `test_propagation_fit`, `test_train_emulator`, `test_adapter_missing_dependency`, `test_cli_robustness` | E2 and CI-lock venv: 172 tests OK (15 skipped); on macOS the C2UF declaration tests run and pass (not skipped) |
+| `run_all_checks.py --part static --jobs 4` | exit 0, 31 pass, 0 fail |
+| `check_naming.py` | pass (the skip constants named `SELF_CHECK_REFUSAL`, `TWO_DATASET_EMULATOR_NOT_PORTABLE`) |

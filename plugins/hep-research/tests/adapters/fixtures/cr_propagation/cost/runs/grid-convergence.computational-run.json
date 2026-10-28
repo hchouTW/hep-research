@@ -1,0 +1,166 @@
+{
+ "contract_version": "3.14.0",
+ "artifact_id": "crprop-a4-grid-convergence",
+ "artifact_type": "computational-run",
+ "objective": "A4 grid convergence: largest relative change of DRAGON2 B/C over 2-1000 GV with the spatial and energy grids doubled once (reported, no threshold); closed-form quadrature doubled",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.42.0",
+  "contracts": "3.14.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-computing",
+  "created": "2026-10-28",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "status": [
+  "unvalidated"
+ ],
+ "extension": {
+  "input_manifest": [
+   {
+    "path": "tests/adapters/fixtures/cr_propagation/cost/grid_convergence.py",
+    "sha256": "d2396dcbeea326256d2341ffd2b94ec8a9ed5663d7b6fc89ad3ff81a001e7493"
+   },
+   {
+    "path": "<RUN_DIR>/runs/base-1/output/hv1_base.txt",
+    "sha256": "cbfbc3c1169c169b63d158598bd3c0dae0c8d0d94d3b89a584be3a123d01d314"
+   },
+   {
+    "path": "<RUN_DIR>/runs/x2s/output/hv1_x2s.txt",
+    "sha256": "f4f2af22a64b5de19eb2b8ff9897e83956a36d4aade8438a3d1ca19d1e98c2e2"
+   },
+   {
+    "path": "<RUN_DIR>/runs/x2e/output/hv1_x2e.txt",
+    "sha256": "6625c51838d0f4207efdc2a14f8d6cf865193ab7a623fa74c808699680274f35"
+   },
+   {
+    "path": "<RUN_DIR>/runs/x2se/output/hv1_x2se.txt",
+    "sha256": "02727ac3b041708b8549343d78053b1245d7d63b9437e88bcc9f1c2d8302c2ef"
+   },
+   {
+    "path": "profiles/theory/cr-secondary-ratio/scripts/predict.py",
+    "sha256": "fe7acb0117feff12e7107b1a625f4dae3fca188d08675a9ab43624ff9f3b183d"
+   },
+   {
+    "path": "tests/adapters/fixtures/cr_propagation/cost/runs/dragon2-base-1.computational-run.json",
+    "sha256": "b0768673be9b2c1ed4b22f14230508e78b82a0e91e0d920db4b7308a0e5333b6"
+   },
+   {
+    "path": "tests/adapters/fixtures/cr_propagation/cost/runs/dragon2-x2s.computational-run.json",
+    "sha256": "05bcafd783d9fde77823716086a86e251367e9875efc0a5b7d6a45c483a8229f"
+   },
+   {
+    "path": "tests/adapters/fixtures/cr_propagation/cost/runs/dragon2-x2e.computational-run.json",
+    "sha256": "e941962f41c1576e2432caca5324349f0155acb9d22edf19bd6c1671644edd89"
+   },
+   {
+    "path": "tests/adapters/fixtures/cr_propagation/cost/runs/dragon2-x2se.computational-run.json",
+    "sha256": "d2cfe893d87e84ee5075a046f37b6b37ac237c4958eb5ba63fa23c71bd939b0c"
+   }
+  ],
+  "tools": [
+   {
+    "name": "grid_convergence.py",
+    "version": "tests/adapters/fixtures/cr_propagation/cost (A4)"
+   },
+   {
+    "name": "python",
+    "version": "3.13.2"
+   }
+  ],
+  "commands": [
+   "PYTHONDONTWRITEBYTECODE=1 <VENV>/bin/python tests/adapters/fixtures/cr_propagation/cost/grid_convergence.py --reference <RUN_DIR>/runs/base-1/output/hv1_base.txt --variant x2s=<RUN_DIR>/runs/x2s/output/hv1_x2s.txt --variant x2e=<RUN_DIR>/runs/x2e/output/hv1_x2e.txt --variant x2se=<RUN_DIR>/runs/x2se/output/hv1_x2se.txt --out <RUN_DIR>/analysis/grid-convergence.json"
+  ],
+  "environment": {
+   "python": "3.13.2",
+   "implementation": "CPython",
+   "executable": "<VENV>/bin/python",
+   "platform": "macOS-27.2-arm64-arm-64bit-Mach-O",
+   "machine": "arm64",
+   "system": {
+    "os": "Darwin",
+    "arch": "arm64",
+    "libc": "macOS 27.2",
+    "kernel": "27.2.0"
+   },
+   "origin": "venv",
+   "variables": {
+    "ROOTSYS": "/opt/homebrew/Cellar/root/6.38.04_1",
+    "CONDA_PREFIX": "<CONDA_HOME>",
+    "CONDA_DEFAULT_ENV": "base"
+   },
+   "packages": {
+    "numpy": "2.5.3",
+    "scipy": "1.18.1"
+   },
+   "project": {
+    "path": "<TOOL_HOME>/src",
+    "commit": "cd588707fe03c76f19bda1b8092e136dcbe3fe90",
+    "dirty": false
+   },
+   "label": "E-crprop (E2 host plus the ENV DRAGON2 build)"
+  },
+  "seeds": {
+   "note": "not applicable"
+  },
+  "tolerances": {
+   "note": "reported, no threshold (r3 A4 step 2)"
+  },
+  "resources": {
+   "result": {
+    "rigidity_gv": [
+     2.0,
+     1000.0
+    ],
+    "n_rigidities": 200,
+    "reference_bc_at": {
+     "2": 0.25674685895879057,
+     "10": 0.1386637544381585,
+     "100": 0.055573597323631395,
+     "1000": 0.019106990370850438
+    },
+    "variants": {
+     "x2s": {
+      "max_abs_relative_change": 0.0013489689749768274,
+      "signed_change_at_max": -0.0013489689749768274,
+      "at_rigidity_gv": 1000.0
+     },
+     "x2e": {
+      "max_abs_relative_change": 0.0018201175277254844,
+      "signed_change_at_max": -0.0018201175277254844,
+      "at_rigidity_gv": 3.1949932556622214
+     },
+     "x2se": {
+      "max_abs_relative_change": 0.001950074068294283,
+      "signed_change_at_max": -0.001950074068294283,
+      "at_rigidity_gv": 3.1949932556622214
+     }
+    },
+    "closed_form_quadrature": {
+     "bins_used": 53,
+     "ekn_range_gev_per_n": [
+      1.0,
+      446.683592150963
+     ],
+     "max_relative_change": 4.440892098500626e-16,
+     "nodes": [
+      8,
+      16
+     ]
+    }
+   }
+  },
+  "exit_status": 0,
+  "output_hashes": {
+   "<RUN_DIR>/analysis/grid-convergence.json": "7a2514d5f5ee99d2bf067833ffc93afe53f03b716621fab8e206f83c351857d3"
+  }
+ }
+}

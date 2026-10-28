@@ -1,0 +1,144 @@
+{
+ "contract_version": "3.14.0",
+ "artifact_id": "usine-run-d1-isotopic",
+ "artifact_type": "computational-run",
+ "objective": "USINE run 'd1-isotopic' translated from a transport block (adapters/cr-propagation/assets/usine_translate.py)",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.42.0",
+  "contracts": "3.14.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-computing",
+  "created": "2026-10-28",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "status": [
+  "unvalidated"
+ ],
+ "extension": {
+  "input_manifest": [
+   {
+    "path": "norm_points.dat",
+    "sha256": "6e882bf9d33839dc463f8d583ae16f8f7c6f7bfd2e18ccefbb91621cea93e717",
+    "committed_form_sha256": "6e882bf9d33839dc463f8d583ae16f8f7c6f7bfd2e18ccefbb91621cea93e717"
+   },
+   {
+    "path": "usine.init.par",
+    "sha256": "540e3b5d587ea01578749f56c1716742b5db61a4297d5f8ed8f3642b23e5c343",
+    "committed_form_sha256": "1b47a9fbda75df221c1b37e646eda2ad87c23767de4d60f8558738197513a8a0"
+   },
+   {
+    "path": "xs_inelastic.dat",
+    "sha256": "8bfbfaa50ab00fb72a8a4c59145d79ecbb71ef6a2fc96758f796eb2793f5d271",
+    "committed_form_sha256": "8bfbfaa50ab00fb72a8a4c59145d79ecbb71ef6a2fc96758f796eb2793f5d271"
+   },
+   {
+    "path": "xs_production.dat",
+    "sha256": "d1d1e7e7dfeba821f04e5d55f2a50438d843fd8ec65661a85f29d0d39fc20aa5",
+    "committed_form_sha256": "d1d1e7e7dfeba821f04e5d55f2a50438d843fd8ec65661a85f29d0d39fc20aa5"
+   }
+  ],
+  "input_manifest_note": "sha256 is of each file as run, with the absolute paths of the run directory and of USINE's inputs folder written into usine.init.par; committed_form_sha256 is of the same file written with the placeholders <TOOL_HOME>/inputs and <RUN_DIR> (the form committed under tests/adapters/fixtures/cr_propagation/usine/inputs/), equal to sha256 for the files that hold no path; entries with read_in_place are USINE's own files (GPL-2.0), hashed where they lie and never copied (committed_form_sha256 and this note added by work package B1X on 2026-10-28 without rerunning USINE)",
+  "tools": [
+   {
+    "name": "USINE",
+    "version": "V3.5 (git tag V3.5, commit fb53006db41d1a640bf1b5af1a4b0f899ca59673; built with Apple clang 21.0.0 against ROOT 6.38.04)",
+    "binary": "<TOOL_HOME>/bin/usine",
+    "binary_sha256": "1d444720afec6ebd2efde8d275d5d950f39edee4f53e7c3756fba8ce05a62d25"
+   },
+   {
+    "name": "python",
+    "version": "3.13.2"
+   },
+   {
+    "name": "numpy",
+    "version": "2.4.4"
+   },
+   {
+    "name": "scipy",
+    "version": "1.17.1"
+   },
+   {
+    "name": "Apple clang",
+    "version": "21.0.0 (clang-2100.0.123.102), the USINE build compiler"
+   },
+   {
+    "name": "ROOT",
+    "version": "6.38.04 (Homebrew 6.38.04_1), linked by USINE"
+   }
+  ],
+  "commands": [
+   "<TOOL_HOME>/bin/usine -l <RUN_DIR>/usine.init.par <RUN_DIR>/out '7BE,9BE,10BE,10B,11B,12C,16O,B/C,10BE/9BE:KEKN:0.;B/C,10BE/9BE:kR:0.' 0 1 1 0"
+  ],
+  "environment": {
+   "python": "3.13.2",
+   "implementation": "CPython",
+   "executable": "<CONDA_HOME>/bin/python3",
+   "platform": "macOS-27.2-arm64-arm-64bit-Mach-O",
+   "machine": "arm64",
+   "system": {
+    "os": "Darwin",
+    "arch": "arm64",
+    "libc": "macOS 27.2",
+    "kernel": "27.2.0"
+   },
+   "origin": "conda",
+   "variables": {
+    "ROOTSYS": "/opt/homebrew/Cellar/root/6.38.04_1",
+    "CONDA_PREFIX": "<CONDA_HOME>",
+    "CONDA_DEFAULT_ENV": "base"
+   },
+   "packages": {
+    "numpy": "2.4.4",
+    "scipy": "1.17.1"
+   },
+   "project": {
+    "path": "<TOOL_HOME>",
+    "commit": "fb53006db41d1a640bf1b5af1a4b0f899ca59673",
+    "dirty": true
+   }
+  },
+  "seeds": {
+   "note": "USINE's local-flux calculation is deterministic: no random numbers are drawn"
+  },
+  "tolerances": {
+   "note": "USINE EPS_ITERCONV 1e-6, EPS_INTEGR 1e-4, EPS_NORMDATA 1e-10 (written into the initialisation file); outputs printed with 6 significant digits"
+  },
+  "resources": {
+   "wall_seconds": 1.45
+  },
+  "exit_status": 0,
+  "usine_exit_status": 1,
+  "exit_status_note": "exit_status is the run's outcome as judged by usine_translate.py (0: every expected output written, no USINE error or crash in the log); USINE V3.5 itself returns 1 on every path (usine_exit_status)",
+  "output_hashes": {
+   "out/local_fluxes_7BE_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "a0c7df4bceccbc5908b1a511b3183c8ad2e91ef5d4d9721bf50debbf1b4ff070",
+   "out/local_fluxes_9BE_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "c27e592ddfed9b8af234115974fdf2690d43a826fd058d4b3f2ca1d68ccb9f36",
+   "out/local_fluxes_10BE_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "9bb3d0a49e83c70e3285435ea9c62256a6f349ae632cd846a4b71c2606d0be75",
+   "out/local_fluxes_10B_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "11b216248b2997645254b3f35ed3a3608c4aab7c236136203fab910e4d1a6745",
+   "out/local_fluxes_11B_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "45d8c28f54e384d27a993b292e13e01dc34f14c1bda3edd10738098e068784c0",
+   "out/local_fluxes_12C_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "d3985a5efed80f498da89903ff02c82975215cc60c11cd090f7898e2f518201a",
+   "out/local_fluxes_16O_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "3feeb9c62332a17c9d0903d2cca1057afc288c8bc8b98d2a6a8e96b77061fe0f",
+   "out/local_fluxes_BC_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "10b80df0efd4eb6db002ec4cda31f040595d5acce61595f156b8a7f2a862e0ee",
+   "out/local_fluxes_10BE9BE_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "e990c90099d2061d2176ea1ead283d3fa260f6c1c023a392957d60bde3906ae4",
+   "out/local_fluxes_BC_R_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "4c937780c16961a246560423eef0fb600821bc68496db55d9b7093c889788b85",
+   "out/local_fluxes_10BE9BE_R_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "21d265d4ebda2391c5fa064ab2da4743e522b93cffbf5c0f38080498d25ee00e"
+  },
+  "notes": [
+   "observer at r = 8.3 kpc, z = 0 (not fixed by the transport block); no central hole",
+   "gas 'uniform, n_H = 1 cm^-3': HI = 1 cm^-3, HII = H2 = 0 in the thin disc of half-thickness h; USINE's Coulomb loss acts on HII and is therefore zero",
+   "gas He_to_H_number 0.1: not used; the ILLUSTRATIVE cross sections are on hydrogen only and no helium cross section is invented (He density 0, target H)",
+   "production channels not in the set are zero (USINE needs every pair of the network)",
+   "source spectrum dQ/dE_k/n = q Rig^-2.3 (USINE POWERLAW, eta_s = 0), uniform in r up to radius_kpc in the thin disc (template CST)",
+   "parent abundances: each parent source scaled until its unmodulated local flux at E_k/n = 10 GeV/n is in the ratio C 1, O 0.9 (theory:cr-secondary-ratio parent list); USINE NormList with generated points, not data",
+   "tertiary chains, ghost nuclei and exotic primaries off"
+  ]
+ }
+}

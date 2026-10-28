@@ -1,0 +1,884 @@
+{
+ "schema": "crprop-status/1",
+ "writer": "orchestrator only (r4 4)",
+ "cycle": 4,
+ "updated": "2026-10-29",
+ "integration_branch": "worktree-crprop-integration",
+ "integration_base": "8fcbb826",
+ "crprop_out": "$HOME/hep-work/crprop-out",
+ "capabilities": {
+  "repo": "present",
+  "net-github": "present",
+  "net-sources": "partial",
+  "net-data": "partial",
+  "pkg-install": "present",
+  "batch": "partial",
+  "env-dragon2": "present",
+  "env-usine": "present",
+  "env-galprop": "absent"
+ },
+ "work_packages": {
+  "P0": {
+   "state": "merged",
+   "dispatches": 1,
+   "rework_rounds": 3,
+   "branch": "worktree-crprop-p0fix",
+   "base": null,
+   "head": "e51ceb1b",
+   "merge_commit": "21e18305",
+   "worker_report": "round 3 DONE: --no-renames in check_diff; regression test (3 tests: fails 2/3 without fix, 3/3 with); other git calls have no rename hole; static ok",
+   "verifier_report": "round 3 PASS (2026-10-28, Sonnet): scope = 4 files; hole reproduced and closed in scratch clone; test 2/3 without fix, 3/3 with",
+   "missing_capabilities": [],
+   "notes": [
+    "A1.6 round 3 merged 21e18305; post-merge static ok, test OK, acceptance ok; escalation 4 closed"
+   ]
+  },
+  "ENV": {
+   "state": "merged",
+   "dispatches": 2,
+   "rework_rounds": 0,
+   "branch": "worktree-crprop-env",
+   "base": "71ae4a07",
+   "head": "b2dd78c9",
+   "merge_commit": "cbb7907f",
+   "worker_report": "dispatch 2 DONE: USINE V3.5 (fb53006d, GPL-2.0) built with ROOT 6.38.04 (cmake policy flag, root-config shim, C++17; ROOT_INCLUDE_PATH unset for build); smoke run ok; tUSINE 42/46 (4 = timezone/labels/last digits); env-usine present; no USINE source/inputs/output committed",
+   "verifier_report": "dispatch 1 PASS (2026-10-27); dispatch 2 PASS (2026-10-28, Sonnet): clone/tag/licence/capabilities/records checked on host; tUSINE 4 diffs text/last-digit only",
+   "missing_capabilities": [],
+   "notes": [
+    "dispatch 2 merged cbb7907f; post-merge static ok, acceptance ok, test_cr_propagation OK"
+   ]
+  },
+  "A1": {
+   "state": "merged",
+   "dispatches": 1,
+   "rework_rounds": 0,
+   "branch": "worktree-crprop-a1",
+   "base": "ef37d970",
+   "head": "d58b6d0f",
+   "merge_commit": "5d5fd918",
+   "worker_report": "DONE: A1-1..A1-5 pass, A1-6 structure only until A2 merges; open: USINE smooth-break form is the module reading (not re-read from Weinrich 2020a Eq. 1); harmonized-v1 source spatial distribution left open by r3 5.5; output/network fields beside transport",
+   "verifier_report": "PASS (2026-10-28, Opus): A1-1..A1-5 pass, A1-6 structure + informal schema check ok; advisories: USINE smooth-break form unverified vs Weinrich 2020a; dragon2 eta fixed 0 vs adapter etaT; n_H only as text; source spatial distribution open (decision before D3); He-target/ghost treatment vs xs-illustrative-A",
+   "missing_capabilities": [],
+   "notes": [
+    "merged 5d5fd918; post-merge static exit 0, acceptance ok; A1-6 schema test now runs against merged A2 schema: 29 tests OK, 0 skipped"
+   ]
+  },
+  "A2": {
+   "state": "merged",
+   "dispatches": 1,
+   "rework_rounds": 0,
+   "branch": "worktree-crprop-a2",
+   "base": "ef37d970",
+   "head": "26a0f3fc",
+   "merge_commit": "a3c880f8",
+   "worker_report": "all A2 entries pass; 3.14.0 bump commit 26a0f3fc fast-forwarded into the WP branch by the orchestrator after A2 files were extended to version-pin regeneration (188 files) and test_grid_fit.py",
+   "verifier_report": "PASS (2026-10-28, Sonnet): all A2 entries pass; pins version/hash-only (187/188 + 1 derived hash); A1 transport validates; full run 33/33 on 26a0f3fc (extra); ALL-3 deferred to wave run",
+   "missing_capabilities": [],
+   "notes": [
+    "merged a3c880f8 (CHANGELOG/VALIDATION appended-section conflicts resolved, both kept); post-merge static exit 0, acceptance ok"
+   ]
+  },
+  "A3": {
+   "state": "merged",
+   "dispatches": 2,
+   "rework_rounds": 0,
+   "branch": "worktree-crprop-a3",
+   "base": "f747fbe7",
+   "head": "5ce9495d",
+   "merge_commit": "f62f70e8",
+   "worker_report": "DONE (dispatch 2): A3-1..A3-4 pass; full run on eca5da37 caught 2 documented-claim failures (guide sentence), fixed in cef2836a, full 33/33; relocation only the 2 known geant4 failures; quick load 25590/25600 B",
+   "verifier_report": "PASS (2026-10-28, Sonnet): A3-1 results.json hash change reproduced on base f747fbe7 (from A2), 166 tests OK; quick load 25590/25600 B",
+   "missing_capabilities": [],
+   "notes": [
+    "merged f62f70e8; post-merge static ok, acceptance ok, grid_fit/degeneracy/crprop_degeneracy/documented_claims OK"
+   ]
+  },
+  "C1": {
+   "state": "merged",
+   "dispatches": 1,
+   "rework_rounds": 1,
+   "branch": "worktree-crprop-c1",
+   "base": "ef37d970",
+   "head": "2d984725",
+   "merge_commit": "099d1d22",
+   "worker_report": "PARTIAL: all deliverables; CONTRACTS_VERSION bump left to A2 (13 fixture/example pins outside C1 files). Open: closed-form provider gives bin-averaged ratio, not ratio of bin integrals (P2) -> C2 must handle; profile README/index not updated",
+   "verifier_report": "round 0 REWORK (inherited conformance cache); round 1 PASS (2026-10-28, Sonnet): cache per class + both-order tests, theory_spec_ref in runner key; ALL-3 full 33/33, relocation only the 2 known geant4 path-with-spaces failures; ALL-7 not-run",
+   "missing_capabilities": [],
+   "notes": [
+    "merged 099d1d22 after A2; post-merge static exit 0, acceptance ok, provider/mixin/degeneracy/grid_fit tests 69 OK; CONTRACTS 3.14.0 (A2), CORE 1.2.0 (C1)"
+   ]
+  },
+  "B2": {
+   "state": "merged",
+   "dispatches": 2,
+   "rework_rounds": 0,
+   "branch": "worktree-crprop-b2",
+   "base": "6a0c2ae6",
+   "head": "b2cdcf49",
+   "merge_commit": "81cb2ce0",
+   "worker_report": "DONE (dispatch 2): B2-1..B2-3 pass; closed forms re-derived, no code change; full run 33/33 on 236a374a; relocation not run (A1.4/A1.5); open: R0_GV/h_kpc kept beside canonical V_c_kms; profile version not bumped",
+   "verifier_report": "PASS (2026-10-28, Opus): B2-1..B2-3 pass; independent derivation + own finite-volume solver agree to 2e-8; advisories: stale function name in derive script :164, resonant case refused, R0_GV/h_kpc kept (allowed), profile version not bumped",
+   "missing_capabilities": [],
+   "notes": [
+    "merged 81cb2ce0; profile.json auto-merged with C1 provider field; post-merge static exit 0, acceptance ok, profile tests OK"
+   ]
+  },
+  "A4": {
+   "state": "merged",
+   "dispatches": 1,
+   "rework_rounds": 0,
+   "branch": "worktree-crprop-a4",
+   "base": "566bfd1e",
+   "head": "d7d8a33a",
+   "merge_commit": "0ee4c914",
+   "worker_report": "DONE: cost table from 13 validated records; closed form 0.14 s/1pt, 9.4 ms/extra pt; DRAGON2 base median 249 s wall / 221 CPU-s (127 s least loaded), grid convergence <= 1.95e-3; USINE/GALPROP rows not measured (absent at dispatch); loaded-host caveat",
+   "verifier_report": "PASS (2026-10-28, Sonnet): every cost number traced to 13 validated records; medians recomputed; R9 order ok; advisories: spatial max at 1000 GV not stated, D7 benchmark counting open (escalation 7)",
+   "missing_capabilities": [],
+   "notes": [
+    "Sonnet verifier dispatched 2026-10-28; escalation 7 (D7 budget for E1)"
+   ]
+  },
+  "B1": {
+   "state": "merged",
+   "dispatches": 1,
+   "rework_rounds": 0,
+   "branch": "worktree-crprop-b1",
+   "base": "3ff9f72a",
+   "head": "633ffdfc",
+   "merge_commit": "3ed1e89e",
+   "worker_report": "DONE: usine_translate/to_prediction/provider; B1-1..B1-4, PRV-1 (live, 9/9), PRV-2 pass; reader vs USINE tables <= 8e-6 (ekn); USINE runs for all 5 D1 items recorded (usine-results.json); open: ILLUSTRATIVE XS only, no high-break field (escalation 8)",
+   "verifier_report": "PASS (2026-10-28, Opus): all B1 entries pass live; licence ok (28 inputs regenerated byte-identical, no USINE data copied); reader vs USINE tables <= 7.8e-6 ekn; advisories for B1X: silently ignored species/family fields and silent defaults (usine_translate.py:235-258), init.par hash is of the as-run file, d1-losses USINE ref is ionization only",
+   "missing_capabilities": [],
+   "notes": [
+    "rebased onto 3ff9f72a; USINE cost row moved into CRPROP-COST and cost-table.json; Opus verifier dispatched 2026-10-28"
+   ]
+  },
+  "D1": {
+   "state": "merged",
+   "dispatches": 2,
+   "rework_rounds": 0,
+   "branch": "worktree-crprop-d1",
+   "base": "2ae3063b",
+   "head": "1962ca37",
+   "merge_commit": "e44377f4",
+   "worker_report": "dispatch 2 PARTIAL: D1-1a convection pass; decay 10Be/9Be 11-13% (thick gas), reacceleration 5.7% (first-order bound), losses 6.1% (Coulomb on HII); D1-L fixed (n_HII = 0 divergence, refusal + tests); D1-1b, D1-2, PRV pass; 30 DRAGON2 runs",
+   "verifier_report": "PASS under A1.11 (2026-10-28, Opus): item effects recomputed with own reader; attributions checked (decay thick gas, reacceleration first-order conversion, losses Coulomb/neutral column); D1-L divergence confirmed in source; PRV live; advisories: decay attribution wording overstated (escalation 11 corrected), reacceleration second order not estimated, losses not quantified, adapter.json does not list the 3 differences, --spec path does not refuse BronfFerr losses",
+   "missing_capabilities": [],
+   "notes": [
+    "A1.11 (maintainer): accept D1 with attributed D1-1a misses; Opus verifier dispatched 2026-10-28"
+   ]
+  },
+  "D2": {
+   "state": "unavailable",
+   "dispatches": 0,
+   "rework_rounds": 0,
+   "branch": null,
+   "base": null,
+   "head": null,
+   "merge_commit": null,
+   "worker_report": null,
+   "verifier_report": null,
+   "missing_capabilities": [
+    "env-galprop"
+   ],
+   "notes": [
+    "A1.19: fallback, no GALPROP v57 source"
+   ]
+  },
+  "C2": {
+   "state": "merged",
+   "dispatches": 1,
+   "rework_rounds": 0,
+   "branch": "worktree-crprop-c2",
+   "base": "699c3b5c",
+   "head": "a2e8f9b1",
+   "merge_commit": "9f17775c",
+   "worker_report": "DONE: C2-1..C2-6 pass (C2-3 mechanism; BIG/SLIM need USINE = C2U); coverage 0.686/0.671/0.696 in Bonferroni band; response-model shortcut with model error in covariance; ~6600 closed-form evaluations (escalation 7); open: modulation refused, duplicate-observable protocol issue, costly profile scans",
+   "verifier_report": "PASS (2026-10-28, Opus): C2-1..C2-6 pass; band recomputed; independent 200-toy rerun 0.690/0.680/0.675; surrogate error 4.2e-7 sigma, toy dq vs exact provider 6e-7; advisories: add a stricter C2U entry for BIG vs SLIM with USINE; stats.seed_missing; unbounded lstsq norms on provider fits; quick load 11 B headroom",
+   "missing_capabilities": [],
+   "notes": [
+    "Opus verifier dispatched 2026-10-28"
+   ]
+  },
+  "B3": {
+   "state": "merged",
+   "dispatches": 1,
+   "rework_rounds": 1,
+   "branch": "worktree-crprop-b3",
+   "base": "f1d695cc",
+   "head": "0ec57897",
+   "merge_commit": "c1b5967d",
+   "worker_report": "DONE: B3-1 on matched 1D geometry (B/C 9e-5, 10Be/9Be 4.1e-4); harmonized-v1 2D B/C misses 2% (to 2.47% above 45 GV), attributed to radial escape (Fourier-Bessel reproduces USINE 2D to 0.21%); B3-2 max 8.9e-6; B3-3 22 rows; 192 USINE runs (D7)",
+   "verifier_report": "round 0 REWORK (B3-1 under harmonized-v1); round 1 PASS (Opus): B3-1 recorded failed + superseded (A1.10); B3-1a 9e-5, B3-1b attributed, B3-1c 0.21% (converged in terms, independent Fourier-Bessel), B3-2 8.9e-6, results regenerate byte-for-byte; advisory: sign of USINE 2D/1D 10Be/9Be in VALIDATION prose is +1.3% not -1.3%",
+   "missing_capabilities": [],
+   "notes": [
+    "A1.10: B3-1 superseded by B3-1a/b/c",
+    "rework round 1 DONE 0ec57897 (relabelled; B3-1a 9e-5, B3-1c 0.21%/0.16%, data-line hashes); Opus verifier dispatched"
+   ]
+  },
+  "C2U": {
+   "state": "merged",
+   "dispatches": 1,
+   "rework_rounds": 0,
+   "branch": "worktree-crprop-c2u",
+   "base": null,
+   "head": "8ec0d094",
+   "merge_commit": "886bb316",
+   "worker_report": "PARTIAL: C2U-1 pass (pulls ~4e-5 sigma, V_c on bound with KKT + profile), C2U-2 pass (565 records resolved); C2U-3 not met (response model 2.81 sigma off: V_A weakly constrained by B/C alone); ~1372 USINE runs; fit code extended (non-decomposable, steps, polynomial RM, two-sided bin semantics); C2 advisories fixed",
+   "verifier_report": "PASS (2026-10-28, Opus) on C2U-1/2 (C2U-3 moved, A1.12): pulls recomputed, 565 records resolved, fits rerun bit-identical from cache, 4 live points rel diff 0; advisories: P2 statement found by regex (negation would pass), transport_substitutes exempted from gate (state as conditions for F1), kkt docstring, budget checked before cache",
+   "missing_capabilities": [],
+   "notes": [
+    "A1.12: C2U-3 moved to C2UF-1; Opus verifier dispatched on C2U-1/2"
+   ]
+  },
+  "D3": {
+   "state": "merged",
+   "dispatches": 1,
+   "rework_rounds": 1,
+   "branch": "worktree-crprop-d3",
+   "base": "b0d0016d",
+   "head": "3aae8369",
+   "merge_commit": "6a332c90",
+   "worker_report": "PARTIAL: D3-2 pass (residual 0.42%); D3-1 38-41% (decomposed, product tested); D3-3 matched settings 0.59-0.67% for 4 configs, reacceleration 17% (within A1R bound), Galprop-gas 17.7% (2D gas; scaled 1.9-3.3%); 2 DRAGON2 + 37 USINE runs; findings on D1 translator (escalation 12)",
+   "verifier_report": "PASS under A1.13 (Opus); rework round 1 (wave-5 subprocess timeouts) PASS (Sonnet), merged 310bb517",
+   "missing_capabilities": [],
+   "notes": [
+    "wave-5 full run (03cfca5d): test_subprocess_timeouts fails on d3/d3_study.py:285; fix as rework round 1 on worktree-crprop-d3fix"
+   ]
+  },
+  "E1": {
+   "state": "merged",
+   "dispatches": 1,
+   "rework_rounds": 1,
+   "branch": "worktree-crprop-e1",
+   "base": "4a58be50",
+   "head": "9ac54c51",
+   "merge_commit": "a4ad05d3",
+   "worker_report": "DONE: E1-1 64/64 ok, 111 loop evaluations with records; E1-2 forced test stops at 5 rounds; E1-3 no training data; 114 USINE evaluations; placeholder RBF emulator for E2 to replace; standard run early-stop-min-distance at round 3 (E2-1 met, E2-2 not)",
+   "verifier_report": "PASS (Sonnet); rework round 1 (wave-3 subprocess timeouts) PASS (Sonnet), merged",
+   "missing_capabilities": [],
+   "notes": [
+    "wave-3 full run: test_subprocess_timeouts fails (e1/active_addition.py:214, :233 without timeout=); fix as rework round 1 on worktree-crprop-e1fix (no revert: E2 builds on E1)"
+   ]
+  },
+  "E2": {
+   "state": "merged",
+   "dispatches": 1,
+   "rework_rounds": 1,
+   "branch": "worktree-crprop-e2",
+   "base": "b0d0016d",
+   "head": "0f3ebfab",
+   "merge_commit": "c28d960c",
+   "worker_report": "DONE: E2-1 0.0045, E2-2 0.063 sigma, E2-3 0.002 sigma; PRV-1/2 pass offline; 177 USINE runs; needs one entry in test_adapter_missing_dependency.py (files widened)",
+   "verifier_report": "PASS (Opus); rework round 1 (wave-4 --status) PASS (Sonnet): outputs identical bar status_label, model sha equal; merged bc6f314f",
+   "missing_capabilities": [],
+   "notes": [
+    "wave-4 full run (6ecc1ffa): tests.skills.test_cli_contract test_scoped_tools_take_status fails (skills/hep-ml/scripts/train_emulator.py lacks --status); fix as rework round 1 on worktree-crprop-e2fix (same handling as the wave-3 fixes)"
+   ]
+  },
+  "F1": {
+   "state": "merged",
+   "dispatches": 2,
+   "rework_rounds": 1,
+   "branch": "worktree-crprop-f1",
+   "base": "3547f9a0",
+   "head": "fd2ae511",
+   "merge_commit": "3ccaa643",
+   "worker_report": "dispatch 2 PARTIAL: delta and K10 in 1-sigma windows for BIG, SLIM, QUAINT-Vc0 (QUAINT free K10 out); no fit converged (EDM unreachable at USINE 6-digit output noise; tolerances do not change output); chi2 83-90 vs 62 attributed; F1-2 pass; provider modulates (protocol departure); 2347/2600 USINE runs",
+   "verifier_report": "Opus PASS under A1.17: windows recomputed in (BIG, SLIM, QUAINT-Vc0), declaration precedes results, verdict code unchanged, single polish path; F1-2 pass; ALL-7 checked by orchestrator; modulation departure recorded in all 2328 cached predictions; follow-ups: artifact-invalid reason for unconverged fits, polish keeps t_hat while verdict describes polished point",
+   "missing_capabilities": [],
+   "notes": [
+    "A1.16: eval cap 6000, F1 +600 runs, adapter.json in files; dispatch 2",
+    "A1.17: accepted as attributed partial reproduction if verifier confirms"
+   ]
+  },
+  "F2": {
+   "state": "skipped",
+   "dispatches": 0,
+   "rework_rounds": 0,
+   "branch": null,
+   "base": null,
+   "head": null,
+   "merge_commit": null,
+   "worker_report": null,
+   "verifier_report": null,
+   "missing_capabilities": [],
+   "notes": [
+    "A1.18: optional; F1 partial, eval cap near"
+   ]
+  },
+  "F3": {
+   "state": "skipped",
+   "dispatches": 0,
+   "rework_rounds": 0,
+   "branch": null,
+   "base": null,
+   "head": null,
+   "merge_commit": null,
+   "worker_report": null,
+   "verifier_report": null,
+   "missing_capabilities": [],
+   "notes": [
+    "A1.18: condition false (F1-1 not passed)"
+   ]
+  },
+  "RC": {
+   "state": "merged",
+   "dispatches": 1,
+   "rework_rounds": 2,
+   "branch": "worktree-crprop-rc",
+   "base": "9b121eae",
+   "head": "331345b0",
+   "merge_commit": "976851ad",
+   "worker_report": "DONE: campaign-report.md, pr-draft.md, CHANGELOG crprop RC entry, VALIDATION CRPROP-RC; WAVE6-RESULT placeholder for the final confirmation run",
+   "verifier_report": "Opus PASS round 2 (rounds 0-1 REWORK: factual fixes); WF-10 pending confirmation run",
+   "missing_capabilities": [],
+   "notes": []
+  },
+  "B1X": {
+   "state": "merged",
+   "dispatches": 1,
+   "rework_rounds": 0,
+   "branch": "worktree-crprop-b1x",
+   "base": "2ae3063b",
+   "head": "b4280760",
+   "merge_commit": "2360c294",
+   "worker_report": "DONE: high break (delta_above) + local_bubble_radius_kpc + injection eta in contracts; B1X-1..3 pass (init.TEST.par reproduced exactly, 33/33 nodes); B1X-4 field map; no silent fields; USINE XS read in place; ~37 USINE runs; Kpp factor mode-dependent (orchestrator keeps it: no rerun of B1 runs)",
+   "verifier_report": "PASS (2026-10-28, Opus): B1X-1..5 pass; A2-1 comparison identical on 29 specs; init.TEST.par reproduced 33/33 nodes exactly; field-by-field map confirmed; 545 USINE files hashed, no match in repo; zone conversion and lam recomputed; advisories: nested break/injection fields not in the field loop, canonical table lacks the new names (H1)",
+   "missing_capabilities": [],
+   "notes": [
+    "rebased; zone factor via transport_conventions (A1R); b1-slab-all-items rerun (B/C <= 0.63%); ~53 USINE runs; Opus verifier dispatched"
+   ]
+  },
+  "A1R": {
+   "state": "merged",
+   "dispatches": 1,
+   "rework_rounds": 1,
+   "branch": "worktree-crprop-a1r",
+   "base": null,
+   "head": "b20ab46b",
+   "merge_commit": "18b43b34",
+   "worker_report": "DONE: dragon2 = D0 beta^etaT (rho/DiffRefRig)^delta (cd588707 diffusion.cc:150); zone factor sqrt(L/(3h)) at first order (not sqrt(L/h)), bound (1+lam)/5; DRAGON2 Ptuskin94 = 3/4 of USINE D_pp (4/3 lands on Ptuskin03: likely upstream bug); B1/D1 translators use sqrt(L/h); r3 P1 wording conflict",
+   "verifier_report": "PASS (Opus); rework round 1 (wave-3 Th13 phrase) PASS (Sonnet), merged",
+   "missing_capabilities": [],
+   "notes": [
+    "wave-3 full run (a4211583): test_cosmic_ray_phenomenology_th13 fails (phrase D_pp D_xx removed from the reference page); fix as rework round 1 on worktree-crprop-a1rfix (no revert: B1X and D1 depend on A1R)"
+   ]
+  },
+  "C2UF": {
+   "state": "merged",
+   "dispatches": 2,
+   "rework_rounds": 1,
+   "branch": "worktree-crprop-c2uf",
+   "base": "c858ef97",
+   "head": "856fc53a",
+   "merge_commit": "dee1179b",
+   "worker_report": "dispatch 2 DONE: C2UF-1 met (BIG p 1.0 survives, SLIM dchi2 23.93 p < 0.0151 excluded); GP emulator on 738 USINE runs, validated 0.0038 sigma on 40 held-out; E2 responses pinned bit-identical; toy-fit changes when steps are stated; 862/1000 USINE",
+   "verifier_report": "PASS (2026-10-29, Opus): validation 0.0038 sigma recomputed (held-out disjoint, covers toy box and SLIM slice); fits equal USINE; toys recomputed, SLIM p <= 0.0151 (excluded), BIG survives; P10 applied; E2 base-vs-HEAD identical; toy-fit changes inactive without stated steps; advisories: toy fits bounded by k=4 domain vs k=3 validation (shell point 0.0187 sigma), amendments tuned on same seeds",
+   "missing_capabilities": [],
+   "notes": [
+    "Opus verifier dispatched"
+   ]
+  }
+ },
+ "log": [
+  {
+   "cycle": 1,
+   "date": "2026-10-26",
+   "event": "P0 bootstrap committed"
+  },
+  {
+   "cycle": 1,
+   "date": "2026-10-26",
+   "event": "dispatched ENV, A1, A2, C1 workers and the P0 verifier"
+  },
+  {
+   "cycle": 1,
+   "date": "2026-10-26",
+   "event": "P0 verifier REWORK; fixed in 59e24365; re-verification dispatched"
+  },
+  {
+   "cycle": 1,
+   "date": "2026-10-26",
+   "event": "P0 round-1 REWORK fixed in 34e2edeb; A1 and C1 told of common_files change; round-2 verifier dispatched"
+  },
+  {
+   "cycle": 2,
+   "date": "2026-10-26",
+   "event": "C1 reported PARTIAL, verifier dispatched; B2 dispatched; all agents resumed after API rate limit"
+  },
+  {
+   "cycle": 2,
+   "date": "2026-10-26",
+   "event": "ENV reported DONE, verifier dispatched; escalations 1-3 queued; A3 dispatched"
+  },
+  {
+   "cycle": 2,
+   "date": "2026-10-26",
+   "event": "A3 base corrected to b83881c6; ENV verifier dispatched"
+  },
+  {
+   "cycle": 3,
+   "date": "2026-10-27",
+   "event": "A1 DONE, verifier dispatched; all agents resumed after second API rate limit (2026-10-27)"
+  },
+  {
+   "cycle": 3,
+   "date": "2026-10-27",
+   "event": "C1 verifier REWORK (1 blocking); returned to worker, round 1"
+  },
+  {
+   "cycle": 3,
+   "date": "2026-10-27",
+   "event": "A2 reported; manifest: A2 version_pin_files + test_grid_fit.py; bump commit fast-forwarded; verifier dispatched"
+  },
+  {
+   "cycle": 3,
+   "date": "2026-10-27",
+   "event": "A3 PARTIAL; manifest: core-stats-guide.md for A3, C2, C2U; A3 asked to finish (same dispatch)"
+  },
+  {
+   "cycle": 3,
+   "date": "2026-10-27",
+   "event": "campaign stopped at the maintainer's request: all agents stopped, WP worktrees clean, verifier worktrees and merged ENV worktree removed; resume from TODO.md"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "resumed 2026-10-28 (resumption check ok: 6 worktrees, HEADs as recorded); A1.3 confirmed: <=3 workers, <=2 full run_all_checks (--jobs 4), Sonnet verifiers for mechanical WPs, Opus for physics WPs"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "cycle 4: verifiers P0 (r2), A1, A2, C1 (r1) dispatched; workers A3, B2 re-dispatched (dispatch 2); full checks gated by full_check_slot.py (2 slots)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "ENV dispatch 1 post-merge checks pass (static exit 0, acceptance ok): merge 7d5c6934 kept; ENV re-dispatched for USINE (A1.1)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "ENV dispatch 2 held: host permission check refused the USINE clone/build dispatch; maintainer asked"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "P0 round-2 verifier REWORK (rename hole in check_diff) -> P0 blocked at the rework limit; escalation 4; verifier brief mitigation added"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A1.4: workers no longer run full checks; verifier alone runs ALL-3 (briefs updated)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "C1 round-1 verifier PASS; merge waits for A2"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A1.5 (supersedes A1.4): ALL-3 run once per wave by the orchestrator on integration; agents run static + impacted only; briefs updated"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "B2 DONE (dispatch 2, HEAD b2cdcf49); Opus verifier dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A2 merged (a3c880f8), post-merge static ok; A1 verifier PASS"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A1 merged (5d5fd918); A1-6 schema test passes after A2"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "C1 merged (099d1d22); B2 verifier PASS"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "B2 merged (81cb2ce0)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A4 and D1 dispatched from 566bfd1e (deps merged, env-dragon2 present); wave-1 full run (A1.5) started on 566bfd1e for A2, A1, C1, B2"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "ENV dispatch 2 (USINE V3.5 clone + build) after maintainer approval; 4th worker while A3 finishes its check run"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A1.6: P0 extra round authorized (--no-renames fix); escalation 4 decided"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A3 DONE (cef2836a); rebase onto integration f747fbe7 requested before verification; stale B2 slot lock cleared (wave-1 run had queued behind it)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "P0 round 3 worker DONE (e51ceb1b); verifier dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "P0 merged (21e18305), escalation 4 closed; A3 rebased (5ce9495d), verifier dispatched; D1 PARTIAL: escalations 5 and 6, verification held until B1"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "env-usine present (ENV dispatch 2 DONE, b2dd78c9); ENV verifier and B1 worker dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "ENV dispatch 2 merged (cbb7907f); A3 merged (f62f70e8); wave-1 full run on 566bfd1e: 1 failure, tests.tools.test_run_all_checks timing coverage (49 modules without timing > limit 47; cumulative from new campaign test modules, no single WP); relocation adds only the 2 known geant4 failures; fix: measure timings for missing modules on f62f70e8 and add them to tools/module_timings.json (generated file, r4 \u00a72)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "C2 dispatched from 699c3b5c (A2, A3, C1 merged)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A4 DONE (d7d8a33a), verifier dispatched; escalation 7 (D7 budget vs DRAGON2 cost)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "wave-1 fix: tools/module_timings.json +6 campaign modules (measured on f62f70e8); timing test OK, static ok. Wave-1 ALL-3 for A2, A1, C1, B2 holds apart from this cumulative generated-file gap and the 2 known geant4 relocation failures"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A4 merged; post-merge static ok"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "B1 DONE (2887380a); rebase onto d04cb47a + cost row into CRPROP-COST requested; escalation 8 (high break, USINE XS files for C2U/F1)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A1.7: WP B1X (high-break field + USINE XS files) planned after B1 merges, before C2U/F1; escalation 8 decided"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "B1 rebased (633ffdfc); Opus verifier dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "B1 merged (3ed1e89e); post-merge static ok"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "D1 resumed to rebase and finish B1-dependent items; B3 dispatched from 2d451e87; wave-2 full run started on 2d451e87 (P0 fix, ENV 2, A3, A4, B1, timings)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "C2 DONE (a2e8f9b1), Opus verifier dispatched; escalation 7 extended (C2 closed-form evaluation count)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A1.8: D7 evaluation cap counts external codes only; core-hours count all CPU; escalation 7 decided"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "B1X added to workflow.json (deps A2, B1; C2U and F1 now depend on it) with acceptance B1X-1..B1X-5; dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "D1 blocked (D1-1 1/8 within 3%, all misses attributed outside D1 files); escalation 9; D3 waits on it; critical path (B1X -> C2U, B3 -> F1) unaffected"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "C2 merged (9f17775c); post-merge static ok"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A1.9: D1-1a/b and D1-L added (D1-1 superseded for D1, kept frozen); WP A1R added (D1 depends on it) and dispatched; escalations 5, 6, 9 decided"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "B3 DONE (5cb31aa5); Opus verifier dispatched (B3-1 geometry: matched 1D vs harmonized-v1 2D, verifier to judge)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "E1 dispatched from 4a58be50 (optional; D6 local_partition; E1 USINE evaluations capped at 1500 within D7)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "wave-2 full run on 2d451e87 (P0 fix, ENV 2, A3, A4, B1, timings): run_all_checks pass (exit 0); check_relocation only the 2 known geant4 path-with-spaces failures (identical on main). ALL-3 holds for P0 r3, ENV 2, A3, A4, B1. C2 (merged after 2d451e87) goes to wave 3"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "B3 verifier REWORK (B3-1 under harmonized-v1); A1.10: B3-1a/b/c added, B3-1 superseded for B3; rework round 1"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "B3 rework round 1 DONE (0ec57897); Opus verifier dispatched (last round)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "E1 DONE (9ac54c51, 114 USINE evaluations); Sonnet verifier dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A1R DONE (b20ab46b): sqrt(3) zone-factor finding and DRAGON2 Ptuskin94 3/4 finding; Opus verifier dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "B3 merged (c1b5967d); post-merge static ok"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "E1 merged (a4ad05d3); post-merge static ok"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A1R merged (18b43b34); escalation 10 (P1 wording, translators); B1X rebase + zone-factor switch requested; D1 dispatch 2"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "E2 dispatched from e5ecbd64 (optional; USINE cap 500)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "B1X rebased (b4280760) with the A1R zone conversion; Opus verifier dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "D1 dispatch 2 PARTIAL (D1-1a convection only; losses cause found and fixed); D1 blocked again; escalation 11; D3 waits for H1"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A1.11: D1 accepted with attributed D1-1a misses; verifier dispatched; escalation 11 decided"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "B1X merged (2360c294); post-merge static ok"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "C2U-3 added (toy-calibrated BIG vs SLIM with USINE); C2U dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "D1 merged (e44377f4); escalation 11 wording corrected; E2 DONE, files widened, rebase requested; D3-3 added; D3 dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "wave-3 full run on a4211583: 2 failures attributed (A1R: Th13 phrase test; E1: subprocess timeouts); fixes as rework round 1 on fix branches instead of reverting (later merges depend on both; orchestrator departure from A1.5 recorded for H1); relocation adds nothing new"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "E2 rebased (0f3ebfab); Opus verifier dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "E2 merged (c28d960c); post-merge static ok"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "wave-3 fixes merged (A1R r1, E1 r1; HEAD 63e7c1b2): Th13 and subprocess-timeout tests pass; post-merge static ok"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "C2U PARTIAL (C2U-1/2 pass, C2U-3 not met); A1.12: C2U-3 moved to new WP C2UF (C2UF-1), RC depends on C2UF; C2U verifier dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "D3 PARTIAL; A1.13: accept with attributed misses (verifier required); escalation 12 (translator follow-ups for H1)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "wave-4 full run on 6ecc1ffa (B1X, D1, E2, wave-3 fixes): wave-3 fixes confirmed (Th13, subprocess timeouts pass); 1 new failure attributed to E2 (train_emulator.py --status, CLI contract); relocation only the 2 known geant4 failures; E2 fix branch"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "C2U merged (886bb316); post-merge static ok"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "F1 (files widened for modulation and low break) and C2UF dispatched from integration after C2U merge"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "D3 verifier PASS; merge aborted (test_cr_propagation.py conflict); D3 rebase requested"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "D3 merged (6a332c90) after rebase (content unchanged); post-merge static ok"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "E2 rework round 1 merged (bc6f314f); CLI contract passes"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "maintainer 2026-10-28: pause after F1 and C2UF merge; do not start RC until the maintainer resumes"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "wave-5 full run on 03cfca5d (C2U, D3, E2 fix): E2 CLI contract fixed; 1 new failure attributed to D3 (d3_study.py:285 subprocess without timeout); relocation only known geant4; D3 fix branch"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "C2UF dispatch 1 PARTIAL (no response model at 0.05 sigma); A1.14: dispatch 2 via E2 GP emulator, cap +400; F1 warned about USINE default decay off"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "C2UF dispatch 2 blocked on E2 emulator provider limits; orchestrator widened C2UF files (E2 behaviour must stay unchanged); C2UF continues"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "D3 rework round 1 merged (310bb517); subprocess-timeout test passes"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "maintainer 2026-10-29: pause cancelled; continue to RC after F1 and C2UF (RC: rebase onto main, full checks, campaign report, PR draft; no push, no PR, main untouched until H1)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "A1.15: maintainer delegates H1 (push, PR, merge after required CI, release 0.43.0) to the orchestrator; open escalations decided on recommendation and listed as known issues"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "F1 dispatch 1 PARTIAL; A1.16: D7 evaluation cap 5000 -> 6000 (core-hours cap binds, ~8 used), F1 +600 runs, adapter.json added; F1 dispatch 2"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "C2UF dispatch 2 DONE (C2UF-1 met); Opus verifier dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "C2UF merged (dee1179b); post-merge static ok"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "F1 dispatch 2 PARTIAL (fd2ae511); A1.17 recorded; Opus verifier dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "A1.18: F2 and F3 skipped"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "F1 merged (3ccaa643), Opus verifier PASS (A1.17); wave-6 full run next"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "A1.19: open escalations decided; D2 unavailable; RC dispatched from 6f377150"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "record gap filled from orchestrator/merge-*-static.log (all exit 0): post-merge static ok for A1R 18b43b34, D1 e44377f4, E2 fix bc6f314f, D3 fix 310bb517, F1 3ccaa643"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "wave 6 (6f377150) full run FAIL: routing-table budget hep-statistics SKILL.md + core-stats-guide.md 25688 > 25600 (C2UF 7d997d02); test_cr_propagation.py:2269 subprocess without timeout (F1); relocation same two; fix branches as rework round 1"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "RC rework round 1 (21d96f61); Opus re-verify"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "merged: F1 wave-6 fix cdb5fe12 (Sonnet PASS), RC 976851ad (Opus PASS r2), C2UF wave-6 fix (Sonnet PASS); confirmation full run next"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "final confirmation on release commit 790ef3e7: full run E2 and CI lock 31 pass / 0 fail, 6000 tests 0 failures; relocation only the 2 known geant4 failures; WF-10 pass; release 0.43.0 next (A1.15)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "PR #308 opened (release/0.43.0); required CI failed on Linux: float pins (8 failures) and emulator declaration; A1.20 cross-WP fix branch"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "PR #308 CI run 2 (6d4ce8a2): all float pins fixed; only EmulatorPerModelDeclaration fails on Linux (C2UF model self-check, amplified libm drift); A1.20 rework round 2 dispatched (self-check bound from the emulator's own sigma)"
+  }
+ ],
+ "env": {
+  "HEP_DRAGON2_BIN": "$HOME/hep-work/dragon2/install/bin/DRAGON",
+  "HEP_DRAGON2_DATA": "$HOME/hep-work/dragon2/src/data",
+  "HEP_USINE_BIN": "$HOME/hep-work/crprop-build/usine/bin/usine",
+  "HEP_USINE_DATA": "$HOME/hep-work/crprop-build/usine/inputs",
+  "USINE": "$HOME/hep-work/crprop-build/usine"
+ },
+ "stopped": null
+}
