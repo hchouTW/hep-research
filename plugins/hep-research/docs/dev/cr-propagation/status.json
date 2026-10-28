@@ -1,8 +1,8 @@
 {
  "schema": "crprop-status/1",
  "writer": "orchestrator only (r4 4)",
- "cycle": 3,
- "updated": "2026-10-27",
+ "cycle": 4,
+ "updated": "2026-10-28",
  "integration_branch": "worktree-crprop-integration",
  "integration_base": "8fcbb826",
  "crprop_out": "$HOME/hep-work/crprop-out",
@@ -370,15 +370,16 @@
    "cycle": 3,
    "date": "2026-10-27",
    "event": "campaign stopped at the maintainer's request: all agents stopped, WP worktrees clean, verifier worktrees and merged ENV worktree removed; resume from TODO.md"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "resumed 2026-10-28 (resumption check ok: 6 worktrees, HEADs as recorded); A1.3 confirmed: <=3 workers, <=2 full run_all_checks (--jobs 4), Sonnet verifiers for mechanical WPs, Opus for physics WPs"
   }
  ],
  "env": {
   "HEP_DRAGON2_BIN": "$HOME/hep-work/dragon2/install/bin/DRAGON",
   "HEP_DRAGON2_DATA": "$HOME/hep-work/dragon2/src/data"
  },
- "stopped": {
-  "date": "2026-10-27",
-  "by": "maintainer request (stable stop)",
-  "todo": "$HOME/hep-work/crprop-out/orchestrator/TODO.md"
- }
+ "stopped": null
 }
