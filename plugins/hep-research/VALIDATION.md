@@ -5791,3 +5791,17 @@ returned by `find_python.py`), SymPy 1.14.0, NumPy 2.4.4, SciPy 1.17.1. `git rev
 | B2-cons | decay conserves number: with ¹⁰Be and ¹⁰B given the same D and inelastic cross section, N(¹⁰Be) + N(¹⁰B) at z = 0 does not depend on τ₀ | relative 1e-10 |
 | B2-2 | dimension checks recorded: [K] = velocity, [S L] = [V_c L / D] = [Γ_d t] = 1, K/(2 h n v) has the dimension of a cross section, every ratio dimensionless; unit conversions (km/s → cm/s, half-life → s, kpc → cm) checked | all pass |
 | B2-3 | `python3 -m unittest discover -s profiles/theory/cr-secondary-ratio/tests -t .` | ok |
+
+**Results (dispatch 2, 2026-10-28, on HEAD `236a374a`).** Environment E2 now macOS 27.2 arm64 (Darwin 27.2.0), same
+Python 3.13.2, SymPy 1.14.0, NumPy 2.4.4, SciPy 1.17.1; §0.3 checks repeated (toplevel, branch, clean status, base
+`6a0c2ae6` ancestor of HEAD). The closed forms were re-derived by hand against r3 P1/P6 and the record (escape term,
+the 2 V_c N(0) sweep term of the conservative form, the daughter's particular and homogeneous parts, Γ = 1/(γτ₀) with
+τ₀ = t½/ln 2 from `half_life_seconds`, NUBASE year). All criteria above pass within tolerance: B2-1 symbolic (SymPy
+limits, both orders; 39 checks in `derivations/convection-decay-derivation.json`, rerun output identical to the stored
+record); B2-1 numerical, max relative deviation from `predict.thin_disc_ratio` 2.2e-16 (tolerance 1e-12); approach
+0.26, 4.1e-3, 7.2e-5, 4.0e-6, 4.0e-7 (monotonic; last < 1e-4); B2-num, closed forms vs `solve_bvp` 9.8e-15
+(tolerance 1e-6); B2-cons spread < 1e-15 (tolerance 1e-10); B2-2 13 dimension checks and the unit-conversion check
+pass; B2-3 58 tests ok (from the plugin root and from `tests/`). Checks: `run_all_checks.py` full (33/33 pass) on
+`236a374a`; static part, naming, layering, packaging, wiring and `workflow_check.py` diff/gaps/acceptance pass.
+Software and numerical-consistency checks only; the inputs are ILLUSTRATIVE and no comparison with data or with a
+propagation code is made.
