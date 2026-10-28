@@ -34,19 +34,19 @@
    ]
   },
   "ENV": {
-   "state": "ready",
-   "dispatches": 1,
+   "state": "dispatched",
+   "dispatches": 2,
    "rework_rounds": 0,
    "branch": "worktree-crprop-env",
-   "base": "ef37d970",
-   "head": "548fc0b8",
+   "base": "71ae4a07",
+   "head": null,
    "merge_commit": "7d5c6934",
    "worker_report": "DONE: env-dragon2 present (cd588707 verified, live rerun ok); env-usine/env-galprop absent (no tarballs); net-data partial (CRDB timeout); source-host probes not run (outside D3)",
    "verifier_report": "PASS (2026-10-27)",
    "missing_capabilities": [],
    "notes": [
     "dispatch 1 merged as 7d5c6934; post-merge static + acceptance passed 2026-10-28",
-    "dispatch 2 (USINE clone + build) held: the host permission check refused dispatching an agent to clone and build external code; awaiting maintainer approval in this session"
+    "dispatch 2 (2026-10-28): maintainer approved the USINE clone/build in session (A1.1); worktree recreated from 71ae4a07; 4 workers briefly (A3 only finishing its check run)"
    ]
   },
   "A1": {
@@ -443,6 +443,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "A4 and D1 dispatched from 566bfd1e (deps merged, env-dragon2 present); wave-1 full run (A1.5) started on 566bfd1e for A2, A1, C1, B2"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "ENV dispatch 2 (USINE V3.5 clone + build) after maintainer approval; 4th worker while A3 finishes its check run"
   }
  ],
  "env": {
