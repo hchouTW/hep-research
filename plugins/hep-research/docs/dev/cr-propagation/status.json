@@ -169,7 +169,7 @@
    ]
   },
   "D2": {
-   "state": "waiting-capability",
+   "state": "unavailable",
    "dispatches": 0,
    "rework_rounds": 0,
    "branch": null,
@@ -181,7 +181,9 @@
    "missing_capabilities": [
     "env-galprop"
    ],
-   "notes": []
+   "notes": [
+    "A1.19: fallback, no GALPROP v57 source"
+   ]
   },
   "C2": {
    "state": "merged",
@@ -321,11 +323,11 @@
    ]
   },
   "RC": {
-   "state": "pending",
+   "state": "dispatched",
    "dispatches": 0,
    "rework_rounds": 0,
-   "branch": null,
-   "base": null,
+   "branch": "worktree-crprop-rc",
+   "base": "6f377150",
    "head": null,
    "merge_commit": null,
    "worker_report": null,
@@ -829,6 +831,11 @@
    "cycle": 4,
    "date": "2026-10-29",
    "event": "F1 merged (3ccaa643), Opus verifier PASS (A1.17); wave-6 full run next"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "A1.19: open escalations decided; D2 unavailable; RC dispatched from 6f377150"
   }
  ],
  "env": {
