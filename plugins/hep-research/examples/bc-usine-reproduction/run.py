@@ -94,6 +94,14 @@ PAPER_FITS = {
 FREE = {"BIG": ["D0_cm2_s", "delta", "V_A_kms", "V_c_kms", "R_break_gv", "delta_below"],
         "SLIM": ["D0_cm2_s", "delta", "R_break_gv", "delta_below"],
         "QUAINT": ["D0_cm2_s", "delta", "V_A_kms", "V_c_kms", "eta"]}
+# declared variants (VALIDATION CRPROP-F1, dispatch 2): name -> (paper family, parameters fixed in addition)
+VARIANTS = {"QUAINT-Vc0": ("QUAINT", {"V_c_kms": 0.0})}
+# 0.3 x the conditional sigma (1/sqrt of the precision matrix diagonal) of the paper's BIG fit covariance
+# (fit_covmatrix.out), in this fit's coordinates (ln D0, delta_below = -deltalow): restart steps for BIG, which has no
+# Fisher matrix of its own (its first pass stopped on the budget)
+BIG_RESTART_STEPS = {"delta": 0.00143, "D0_cm2_s": 0.00595, "V_A_kms": 1.88, "V_c_kms": 0.0485, "R_break_gv": 0.0854,
+                     "delta_below": 0.108, "phi_2011_2016_gv": 0.0239, "xs_norm_12C_H_11B": 0.0122,
+                     "xs_slope_12C_H_11B": 0.0112}
 NUISANCES = {PHI: (0.73, 0.10), "xs_norm_12C_H_11B": (1.10, 0.12), "xs_slope_12C_H_11B": (0.03, 0.15)}
 XS_THRESHOLD = 8.0
 # difference steps in the fit coordinate: about a quarter of each published sigma, far above USINE's 6-digit noise
@@ -289,7 +297,16 @@ def database_crosscheck(data_dir: Path, edges, values, cols, syst_total) -> dict
             "max_rel_value": dv, "max_rel_stat": ds, "max_rel_syst": dy, "table": rows}
 
 
+def base_family(family: str) -> str:
+    return VARIANTS[family][0] if family in VARIANTS else family
+
+
+def free_of(family: str) -> list:
+    return [n for n in FREE[base_family(family)] if n not in VARIANTS.get(family, ("", {}))[1]]
+
+
 def transport(family: str) -> dict:
+    family = base_family(family)
     f = PAPER_FITS[family]
     log10_rb, d_break, s_break = f["high"]
     breaks = []
@@ -321,6 +338,8 @@ def transport(family: str) -> dict:
 
 
 def paper_point(family: str) -> dict:
+    extra = VARIANTS.get(family, ("", {}))[1]
+    family = base_family(family)
     f = PAPER_FITS[family]
     pt = {"D0_cm2_s": 10 ** f["log10_K0"] * KPC2_PER_MYR_CM2_S, "delta": f["delta"], "L_kpc": 10.0,
           PHI: f["phi"], "xs_norm_12C_H_11B": f["norm"], "xs_slope_12C_H_11B": f["slope"],
@@ -333,7 +352,7 @@ def paper_point(family: str) -> dict:
         pt["eta"] = f["eta"]
     else:
         pt.update(eta=1.0, R_break_gv=f["R_break_gv"], delta_below=-f["deltalow"])
-    return pt
+    return dict(pt, **extra)
 
 
 def restart_from(path: Path, fraction: float) -> tuple[dict, dict]:
@@ -350,7 +369,7 @@ def restart_from(path: Path, fraction: float) -> tuple[dict, dict]:
 
 def config(family: str, record: dict, conditions: dict, cov_alt: bool, restart: tuple | None = None) -> dict:
     pt = paper_point(family)
-    free = FREE[family] + list(NUISANCES)
+    free = free_of(family) + list(NUISANCES)
     starts, steps = restart if restart else ({}, {})
     params = {}
     for n in free:
@@ -455,11 +474,11 @@ def stage_start(out: Path, families, reg: Path, cache: Path) -> dict:
 
 
 def run_fit(out: Path, family: str, reg: Path, cache: Path, max_eval: int, cov_alt: bool,
-            restart: tuple | None = None) -> subprocess.Popen:
+            restart: tuple | None = None, covariance: str = "nominal", tag: str = "") -> subprocess.Popen:
     start = json.loads((out / "start.json").read_text())
-    work = out / f"fit-{family}"
+    work = out / f"fit-{family}{tag}"
     work.mkdir(parents=True, exist_ok=True)
-    conditions = {"transport_substitutes": start[family]["substitutes"]}
+    conditions = {"transport_substitutes": start.get(family, start[base_family(family)])["substitutes"]}
     if restart:   # the gate sees the start point, whose substitutes name its own values: take them from that point
         point = dict(paper_point(family), **restart[0])
         edges = json.loads((out / "data" / "bc-observed.json").read_text())["extension"]["data"]["edges"]
@@ -471,12 +490,52 @@ def run_fit(out: Path, family: str, reg: Path, cache: Path, max_eval: int, cov_a
         if comp.get("covariance_ref"):
             comp["covariance_ref"] = str(out / "data" / comp["covariance_ref"])
     record["extension"]["covariance"]["ref"] = str(out / "data" / record["extension"]["covariance"]["ref"])
+    if covariance.startswith("model-scaled:"):
+        record = model_scaled_record(out, record, covariance.split(":", 1)[1], reg, cache, work)
     cfg = config(family, record, conditions, cov_alt, restart)
     (work / "config.json").write_text(json.dumps(cfg, indent=1) + "\n")
     cmd = [sys.executable, str(FIT), "fit", "--input", str(work / "config.json"), "--provider-registry", str(reg),
            "--cache-dir", str(cache), "--out", str(work / "out"), "--max-evaluations", str(max_eval)]
     log = open(work / "fit.log", "w")
     return subprocess.Popen(cmd, stdout=open(work / "result.stdout.json", "w"), stderr=log)
+
+
+def model_scaled_record(out: Path, record: dict, ref_family: str, reg: Path, cache: Path, work: Path) -> dict:
+    """The paper's covariance choice as a declared model alternative: USINE's shipped relative covariance (all five
+    error types) times the prediction of ref_family's best fit (USINE's IsModelOrDataForRelCov true), held fixed
+    during the fit (one step of the paper's model-dependent scaling)."""
+    import numpy as np
+    shipped = read_usine_covariance(usine_data())
+    rel = sum(np.asarray(shipped[k]) for k in SOURCES)
+    edges = record["extension"]["data"]["edges"]
+    fit = json.loads((out / f"fit-{ref_family}" / "out" / "result.json").read_text())["fits"][0]
+    point = dict(fit["fixed"], **{q["name"]: q["best_fit"] for q in fit["parameters"]})
+    mu = np.asarray(evaluate(reg, cache, ref_family, point, edges)["prediction"]["values"]["values"])
+    path = work / "covariance-model-scaled.json"
+    path.write_text(json.dumps({"labels": [f"bin {i}" for i in range(len(mu))], "matrix": (rel * np.outer(mu, mu)).tolist(),
+                                "kind": "absolute", "units": "1",
+                                "origin": f"model-supplied: USINE's shipped relative covariance scaled with the {ref_family} "
+                                          "best-fit prediction (the paper's choice), a model alternative (P9)"}) + "\n")
+    rec = json.loads(json.dumps(record))
+    rec["extension"]["data"]["uncertainties"] = [{"name": "total, USINE relative covariance x model (model-supplied)",
+                                                  "kind": "systematic", "correlation": "covariance",
+                                                  "covariance_ref": str(path)}]
+    rec["extension"]["covariance"] = {"status": "present", "ref": str(path),
+                                      "note": "model-supplied: USINE's relative covariance scaled with the model "
+                                              f"({ref_family} best fit); a model alternative (P9)"}
+    return rec
+
+
+def restart_cached(out: Path, family: str, pass1: Path | None, fraction: float) -> tuple[dict, dict]:
+    """(start, steps) for a restart from the lowest cached point of the family (variant parameters set to their
+    fixed values), with steps of fraction x the conditional sigma from the earlier pass's Fisher matrix, or for BIG
+    (no reported first pass) BIG_RESTART_STEPS."""
+    best = best_cached(out, base_family(family))["point"]
+    free = free_of(family) + list(NUISANCES)
+    starts = {n: best[n] for n in free}
+    earlier = (pass1 / f"fit-{base_family(family)}" / "out" / "result.json") if pass1 else None
+    steps = restart_from(earlier, fraction)[1] if earlier and earlier.is_file() else dict(BIG_RESTART_STEPS)
+    return starts, {n: steps[n] for n in free}
 
 
 def k10(d0_cm2_s: float, delta: float) -> float:
@@ -724,6 +783,10 @@ def main(argv=None) -> int:
     ap.add_argument("--restart-from", type=Path, help="folder holding fit-<family>/out/result.json of an earlier pass: "
                     "start at its best fits with steps of --step-fraction of each conditional sigma")
     ap.add_argument("--step-fraction", type=float, default=0.3)
+    ap.add_argument("--restart-cached", action="store_true", help="start each family at its lowest cached point "
+                    "(steps from --restart-from's Fisher matrices, or BIG_RESTART_STEPS)")
+    ap.add_argument("--covariance", default="nominal", help="nominal, or model-scaled:<family> (the paper's choice)")
+    ap.add_argument("--tag", default="", help="suffix of the fit folders (fit-<family><tag>)")
     ap.add_argument("--record", type=Path, help="stage record: the JSON record to write (numbers only)")
     ap.add_argument("--usine-runs", type=int, default=0, help="stage record: the USINE run tally to record")
     a = ap.parse_args(argv)
@@ -751,8 +814,9 @@ def main(argv=None) -> int:
     if "fit" in stages:
         alts = set(a.covariance_alternatives.split(",")) - {""}
         procs = {f: run_fit(out, f, reg, cache, a.max_evaluations, f in alts,
+                            restart_cached(out, f, a.restart_from, a.step_fraction) if a.restart_cached else
                             restart_from(a.restart_from / f"fit-{f}" / "out" / "result.json", a.step_fraction)
-                            if a.restart_from else None) for f in families}
+                            if a.restart_from else None, a.covariance, a.tag) for f in families}
         summary["fit"] = {f: p.wait() for f, p in procs.items()}
     if "compare" in stages:
         summary["compare"] = stage_compare(out, families)

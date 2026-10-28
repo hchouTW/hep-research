@@ -443,7 +443,8 @@ def thin_disc_alfven_speed(v_a_halo: float, l_kpc: float, h_kpc: float, w: float
 
 
 def translate(transport: dict, name: str, ekn_range_gev, points_per_decade: int = POINTS_PER_DECADE,
-              grid: dict | None = None, phi_gv: float = 0.0, production_modifiers: list | None = None) -> dict:
+              grid: dict | None = None, phi_gv: float = 0.0, production_modifiers: list | None = None,
+              tolerances: dict | None = None) -> dict:
     """The run spec of one USINE run (pure data, no path). Items USINE expresses only approximately, and defaults the
     transport block leaves to the translator, are listed in 'substitutes'; items it cannot express raise SpecError.
     grid ({'n_points', 'ekn_min_gev', 'ekn_max_gev'}) replaces the derived energy grid. phi_gv > 0 asks USINE for the
@@ -668,6 +669,7 @@ def translate(transport: dict, name: str, ekn_range_gev, points_per_decade: int 
     if "free" in transport:
         subs.append(f"free {transport['free']}: one run fixes every parameter; a fit varies the free ones")
     spec["solar_modulation"] = solar_modulation(phi_gv, subs)
+    spec["usine_tolerances"] = usine_tolerances(tolerances, subs)
     spec["production_modifiers"] = [production_modifier(m, spec) for m in (production_modifiers or [])]
     for mod in spec["production_modifiers"]:
         subs.append(f"production cross section {mod['channel']} of {spec['usine_inputs']['production']} times "
@@ -682,6 +684,26 @@ def translate(transport: dict, name: str, ekn_range_gev, points_per_decade: int 
                     f"{spec['energy_grid']['ekn_min_gev']:g} to {spec['energy_grid']['ekn_max_gev']:g} GeV/n")
     spec.update(substitutes=subs, transport=copy.deepcopy(transport))
     return spec
+
+
+DEFAULT_TOLERANCES = {"EPS_ITERCONV": 1e-6, "EPS_INTEGR": 1e-4, "EPS_NORMDATA": 1e-10}
+
+
+def usine_tolerances(given, subs: list[str]) -> dict:
+    """USINE's numerical tolerances of the run (UsineRun @ Calculation); the defaults unless given (work package F1,
+    dispatch 2: tighter tolerances to lower the noise of -2 ln L); a change is recorded."""
+    out = dict(DEFAULT_TOLERANCES)
+    for key, value in (given or {}).items():
+        if key not in out:
+            raise SpecError(f"USINE tolerance {key!r}: one of {sorted(out)}")
+        v = float(value)
+        if not (math.isfinite(v) and 0 < v < 1):
+            raise SpecError(f"USINE tolerance {key} = {value!r}: a number in (0, 1)")
+        out[key] = v
+    if out != DEFAULT_TOLERANCES:
+        subs.append("USINE tolerances " + ", ".join(f"{k} {v:g}" for k, v in out.items()) + " (defaults "
+                    + ", ".join(f"{k} {v:g}" for k, v in DEFAULT_TOLERANCES.items()) + ")")
+    return out
 
 
 FORCE_FIELD_RIG0_GV = 0.2  # USINE SolMod0DFF Rig0 (as in USINE's shipped initialisation files)
@@ -863,6 +885,13 @@ def _usine_inputs(transport, xs_block, prod_name, inel_name, species_block, src,
             "_late_notes": late}
 
 
+def _eps(x: float) -> str:
+    """A tolerance as USINE's shipped files write it ('1.e-6'), so default runs render byte-identically."""
+    mant, exp = f"{float(x):.10e}".split("e")
+    mant = mant.rstrip("0").rstrip(".")
+    return f"{mant if mant != '1' else '1.'}e{int(exp)}"
+
+
 def _fmt(x: float) -> str:
     return f"{float(x):.10g}"
 
@@ -980,9 +1009,8 @@ def render(spec: dict, data_dir: str, run_dir: str) -> dict[str, str]:
               "UsineRun @ Calculation @ BC_LEPTON_HE @ M=0 @ kNOCURRENT",
               "UsineRun @ Calculation @ BC_NUC_LE @ M=0 @ kD2NDLNEKN2_ZERO",
               "UsineRun @ Calculation @ BC_NUC_HE @ M=0 @ kNOCHANGE",
-              "UsineRun @ Calculation @ EPS_ITERCONV @ M=0 @ 1.e-6",
-              "UsineRun @ Calculation @ EPS_INTEGR @ M=0 @ 1.e-4",
-              "UsineRun @ Calculation @ EPS_NORMDATA @ M=0 @ 1.e-10",
+              *[f"UsineRun @ Calculation @ {k} @ M=0 @ {_eps(v)}" for k, v in
+                (spec.get("usine_tolerances") or DEFAULT_TOLERANCES).items()],
               "UsineRun @ Calculation @ IsUseNormList @ M=0 @ true",
               "UsineRun @ Display @ QtiesExpsEType @ M=0 @ ALL",
               "UsineRun @ Display @ ErrType @ M=0 @ kERRSTAT",
@@ -1274,6 +1302,8 @@ def main(argv=None) -> int:
                        help="USINE's inputs folder (default $HEP_USINE_DATA)")
         p.add_argument("--phi", type=float, default=0.0,
                        help="force-field modulation potential in GV: USINE also writes the modulated isotope tables")
+        p.add_argument("--usine-tolerance", action="append", default=[],
+                       help="NAME=VALUE, one of EPS_ITERCONV, EPS_INTEGR, EPS_NORMDATA (default 1e-6, 1e-4, 1e-10)")
         p.add_argument("--production-modifiers", type=Path,
                        help="JSON list of {channel, norm, slope_le, threshold_ekn_gev} (USINE's own cross sections)")
         if name == "run":
@@ -1292,7 +1322,8 @@ def main(argv=None) -> int:
         mods = (json.loads(args.production_modifiers.read_text(encoding="utf-8"))
                 if args.production_modifiers else None)
         spec = translate(load_transport(args.transport), args.name, (lo, hi), args.points_per_decade, grid,
-                         phi_gv=args.phi, production_modifiers=mods)
+                         phi_gv=args.phi, production_modifiers=mods,
+                         tolerances=dict(t.split("=", 1) for t in args.usine_tolerance))
         env = json.loads(args.environment.read_text(encoding="utf-8")) if getattr(args, "environment", None) else None
     except (OSError, ValueError) as exc:  # SpecError is a ValueError
         print(json.dumps({"status": "error", "error": str(exc)}))

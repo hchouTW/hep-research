@@ -7277,3 +7277,26 @@ with the plugin's force-field tool contract within 3e-5 (11B, 12C, 0.5-1000 GeV/
 three first-pass fits, 12 + 114 in the SLIM passes, 6 noise and smoothness probes, 3 attribution variants); at most 4
 USINE processes at once. Checks: static part of `run_all_checks.py`, naming, wiring, layering, `workflow_check.py`
 diff and acceptance, impacted tests (report); ALL-3 deferred to the wave run (A1.5).
+
+**Dispatch 2 (decision A1.16; written before any dispatch-2 refit, R9).** Rebased onto integration `8544d7ca`
+(adapter.json now in F1's files; F1's USINE cap 2600). Nothing above is loosened. Declared before the refits:
+- Noise (step 1): `usine_translate.py` gains `--usine-tolerance NAME=VALUE` (EPS_ITERCONV, EPS_INTEGR, EPS_NORMDATA;
+  defaults 1e-6, 1e-4, 1e-10 render byte-identically). Measured at BIG's lowest cached point, delta + 0 / 1e-7 / 2e-7:
+  -2 ln L = 82.13506 / 82.13462 / 82.13511 with the defaults and the same three numbers, digit for digit, with
+  EPS_ITERCONV 1e-9 and EPS_INTEGR 1e-7 (6 runs, 7.8-8.9 s each, no cost difference). The tolerances do not set the
+  noise (in Model1DKisoVc EPS_INTEGR enters only SecondaryProduction, src/TUModel1DKisoVc.cc 210-217, and the
+  iteration had converged); the floor is USINE's 6-significant-digit tables (B/C changes of 2-4e-6 for a 1e-7 change of
+  delta): about ±0.0005 (BIG here) to ±0.003 (SLIM) in -2 ln L. The provider is therefore run with its defaults.
+- Restarts (step 2): each family from its lowest cached point with difference steps of 0.3 conditional sigma (SLIM,
+  QUAINT: from their first-pass Fisher matrices; BIG: from the precision matrix of the paper's BIG fit covariance,
+  `BIG_RESTART_STEPS`), polish off, no restart after a failed verdict. SLIM's pass 2 (above, EDM 0.0020) already is this
+  restart and is not repeated.
+- QUAINT V_c: refitted as the declared variant QUAINT-Vc0, V_c fixed at its lower bound 0 (the paper's QUAINT best fit
+  lies on its own lower bound, 0.1 km/s; ours is 3.2 ± 5.8 km/s; its flat direction makes the noisy Hessian indefinite).
+  The bound is accepted when boundary_kkt holds there: -2 ln L at V_c = 0.5 km/s minus at V_c = 0, at the variant's best
+  fit, is >= 0 (one run). D9 is judged for QUAINT on the variant if the bound is accepted, else on the free fit.
+- Paper's covariance choice (step 4, if budget remains): QUAINT-Vc0 refitted with USINE's shipped relative covariance
+  (all five error types) times the QUAINT-Vc0 best-fit prediction, held fixed during the fit; a model alternative (P9),
+  reported next to D9, never replacing the nominal verdict.
+- The convergence criterion stays the fit_diagnostics verdict (EDM <= 1e-5, positive-definite Hessian, boundary_kkt);
+  if it is not reached at the noise floor, it is reported with the measured noise and the work stops.
