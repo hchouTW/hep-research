@@ -6830,3 +6830,12 @@ cannot be cut short). A `subprocess.TimeoutExpired` is recorded in the batch `pr
 `incomplete-batch` is raised as for any failed shard), not ignored. No design, record or result changed; no USINE run.
 Checks on the fix: test_subprocess_timeouts + test_cr_propagation OK (83 tests, 10 skipped); `--part static --jobs 4`
 passed; check_naming, workflow_check diff (base b0d0016d) and acceptance ok; `active_addition.py --help` works.
+
+### CRPROP-E2 rework round 1 (wave-4 finding, 2026-10-28)
+Base: integration HEAD 65cbaa56 (branch fast-forwarded from a6929c4d). Finding: `tests.skills.test_cli_contract`
+CliContract.test_scoped_tools_take_status failed because `skills/hep-ml/scripts/train_emulator.py` had no `--status`.
+Fix: `add_status_argument` (core/status.py) on both subcommands (train, predict), echoed as `status_label` in every
+stdout JSON object like train_bdt.py; no exemption added; model, run summary and exit codes unchanged. Checks:
+test_cli_contract, test_train_emulator, tests/skills/hep_ml (422 tests, 38 skipped), test_cli_robustness,
+test_cr_propagation OK; measure_entrypoints hep-ml within budget; `--part static --jobs 4`, check_naming,
+workflow_check diff and acceptance ok.
