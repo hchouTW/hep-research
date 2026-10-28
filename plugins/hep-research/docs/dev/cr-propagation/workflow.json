@@ -719,7 +719,8 @@
     "adapters/cr-propagation/assets/usine_translate.py",
     "skills/hep-statistics/scripts/propagation_fit.py",
     "tests/skills/hep_statistics/test_propagation_fit.py",
-    "tests/adapters/test_cr_propagation.py"
+    "tests/adapters/test_cr_propagation.py",
+    "adapters/cr-propagation/adapter.json"
    ],
    "acceptance_prefix": "F1",
    "fallback": "D8: cross-code reproduction with DRAGON2, marked insufficient for v1 (F3 not enabled)",
@@ -738,7 +739,7 @@
     "acceptance": "F1-1 and F1-2 evaluated as written; F1-1 recorded as not enabling F3",
     "source": "r4 3, 8 and 9 (D8); deps and requires of the fallback derived"
    },
-   "files_source": "derived: examples/** for a reproduction example (r3 F1: the experiment name appears only in profile, example or example-block text, R1); profiles/experiments/ams-02/** for a public dataset record of the B/C data (r3 F1: data of the experiment profile experiment:ams-02); widened by the orchestrator 2026-10-28 before dispatch: solar modulation (force-field, phi per period) and a fittable low break in the USINE provider/reader and in propagation_fit.py are needed for the Genolini 2019 families (C2U report: periods refused, provider domain without break parameters)"
+   "files_source": "derived: examples/** for a reproduction example (r3 F1: the experiment name appears only in profile, example or example-block text, R1); profiles/experiments/ams-02/** for a public dataset record of the B/C data (r3 F1: data of the experiment profile experiment:ams-02); widened by the orchestrator 2026-10-28 before dispatch: solar modulation (force-field, phi per period) and a fittable low break in the USINE provider/reader and in propagation_fit.py are needed for the Genolini 2019 families (C2U report: periods refused, provider domain without break parameters); adapter.json added 2026-10-29 (A1.16: break and modulation parameters belong in the provider domain)"
   },
   {
    "id": "F2",
