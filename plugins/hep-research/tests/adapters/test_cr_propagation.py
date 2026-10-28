@@ -2153,5 +2153,44 @@ class LiveUsineD3(unittest.TestCase):
                     self.assertTrue(math.isclose(a, b, rel_tol=USINE_LIVE_RTOL, abs_tol=1e-300), (f.name, a, b))
 
 
+# ---------------------------------------------------------------------------------------------- C2UF (appended)
+C2UF_FIX = FIX / "c2uf"
+
+
+def _same_document(test, a, b, where="response"):
+    """Equal JSON documents; numbers equal within relative 1e-12 (the platform's last digits), all else exactly."""
+    if isinstance(a, bool) or isinstance(b, bool) or not isinstance(a, (int, float)) or not isinstance(b, (int, float)):
+        test.assertEqual(type(a), type(b), where)
+    if isinstance(a, dict):
+        test.assertEqual(sorted(a), sorted(b), where)
+        for k in a:
+            _same_document(test, a[k], b[k], f"{where}/{k}")
+    elif isinstance(a, list):
+        test.assertEqual(len(a), len(b), where)
+        for i, (x, y) in enumerate(zip(a, b)):
+            _same_document(test, x, y, f"{where}[{i}]")
+    elif isinstance(a, (int, float)) and not isinstance(a, bool):
+        test.assertTrue(math.isclose(a, b, rel_tol=1e-12, abs_tol=0.0), (where, a, b))
+    else:
+        test.assertEqual(a, b, where)
+
+
+@unittest.skipUnless(HAVE_NUMPY, "needs numpy and scipy")
+class EmulatorPinnedResponses(unittest.TestCase):
+    """C2UF: the per-model declaration leaves the committed E2 model's answers unchanged (responses recorded with the
+    provider before the change; on the recording machine they agree to the last bit)."""
+
+    def test_e2_responses_are_unchanged(self):
+        pinned = json.loads((C2UF_FIX / "e2-pinned-responses.json").read_text(encoding="utf-8"))
+        env = {k: v for k, v in os.environ.items() if k != "HEP_EMULATOR_ML_ARTIFACT"}
+        env["PYTHONDONTWRITEBYTECODE"] = "1"
+        for case in pinned["cases"]:
+            proc, doc = e2_call(case["request"], env=env, allow_outside=case["allow_outside"])
+            self.assertEqual(proc.returncode, case["exit"], case["name"])
+            for res in doc.get("results") or []:
+                (res.get("evaluation") or {}).pop("elapsed_s", None)
+            _same_document(self, case["response"], doc, case["name"])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -1,0 +1,3369 @@
+{
+ "note": "responses of the E2 emulator provider (integration HEAD before C2UF's per-model declaration, committed E2 model), evaluation.elapsed_s removed; C2UF must reproduce them",
+ "cases": [
+  {
+   "name": "subrange",
+   "allow_outside": false,
+   "request": {
+    "protocol": "cr-provider/1",
+    "provider": "emulator",
+    "provider_version": "1.0.0",
+    "points": [
+     {
+      "D0_cm2_s": 3e+28,
+      "V_A_kms": 30.0,
+      "V_c_kms": 5.0,
+      "delta": 0.5,
+      "eta": 1.0
+     },
+     {
+      "D0_cm2_s": 2.849305008390949e+28,
+      "V_A_kms": 5.66563033277587,
+      "V_c_kms": 7.477593688983244,
+      "delta": 0.5098894116281263,
+      "eta": 1.4638296961221888
+     }
+    ],
+    "observables": [
+     {
+      "id": "B/C",
+      "axis": "rigidity",
+      "unit": "GV",
+      "bins": [
+       [
+        3.723291133272139,
+        5.080137841233113
+       ],
+       [
+        5.080137841233113,
+        6.931448431551464
+       ],
+       [
+        6.931448431551464,
+        9.457416090031758
+       ],
+       [
+        9.457416090031758,
+        12.903900242964319
+       ],
+       [
+        12.903900242964319,
+        17.60635673584025
+       ],
+       [
+        17.60635673584025,
+        24.022488679628626
+       ],
+       [
+        24.022488679628626,
+        32.77679596189011
+       ]
+      ]
+     }
+    ],
+    "want": [
+     "lis"
+    ],
+    "seed": null
+   },
+   "exit": 0,
+   "response": {
+    "protocol": "cr-provider/1",
+    "provider": "emulator",
+    "provider_version": "1.0.0",
+    "results": [
+     {
+      "evaluation": {
+       "computational_run_ref": null,
+       "input_hash": "9aea4d42183a552f601fe8ea6f55e54e59fe799e2f24f68ede741b34381aa765",
+       "numerical_tolerance": 0.0006136734606017047
+      },
+      "labels": [
+       "synthetic",
+       "unvalidated"
+      ],
+      "point": {
+       "D0_cm2_s": 3e+28,
+       "V_A_kms": 30.0,
+       "V_c_kms": 5.0,
+       "delta": 0.5,
+       "eta": 1.0
+      },
+      "point_index": 0,
+      "predictions": [
+       {
+        "allowed_transformations": [
+         "solar modulation per isotope is not possible: the emulator gives element ratios only",
+         "sub-range of the training bins"
+        ],
+        "derivation_status": "numerical-evidence",
+        "observable": {
+         "bin_semantics": "bin-averaged",
+         "conventions": {
+          "energy_variable": "rigidity in GV: the ratio of the bin-integrated fluxes of the training runs (r3 P2), isotopes summed at equal rigidity (P3)",
+          "frame": "Galactic rest frame (interstellar gas at rest)"
+         },
+         "level": "crsr:local-interstellar",
+         "normalization": {
+          "convention": "ratio of two bin-integrated fluxes; the normalization cancels",
+          "kind": "exposure",
+          "value": "not-applicable"
+         },
+         "phase_space": {
+          "definition": "local interstellar flux at the observer of the training runs, before solar modulation",
+          "fiducial": false
+         },
+         "process": "unmodulated local interstellar B/C emulated from USINE V3.5 runs (Gaussian-process emulator ml-emulator-usine-bc-e2): ratio of bin integrals of 10B+11B over 12C as in the training runs",
+         "quantity": "ratio",
+         "species": [
+          {
+           "name": "boron"
+          },
+          {
+           "name": "carbon"
+          }
+         ],
+         "unit": "1",
+         "validity_range": {
+          "max": 32.77679596189011,
+          "min": 3.723291133272139,
+          "unit": "GV",
+          "variable": "rigidity"
+         },
+         "variables": [
+          {
+           "edges": [
+            3.723291133272139,
+            5.080137841233113,
+            6.931448431551464,
+            9.457416090031758,
+            12.903900242964319,
+            17.60635673584025,
+            24.022488679628626,
+            32.77679596189011
+           ],
+           "name": "rigidity",
+           "unit": "GV"
+          }
+         ]
+        },
+        "parameter_point": {
+         "D0_cm2_s": 3e+28,
+         "V_A_kms": 30.0,
+         "V_c_kms": 5.0,
+         "delta": 0.5,
+         "domain_status": "inside",
+         "emulator_model": "sha256:31f5ba51bc434a4febcdad0d3ed031d4bd81aed3dceef2d709e5068ffdd747c1",
+         "eta": 1.0,
+         "ml_artifact": "ml-emulator-usine-bc-e2",
+         "training_provider": "usine 0.2.0"
+        },
+        "representation": "numerical",
+        "uncertainties": [
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc1",
+          "values": [
+           5.126853776449858e-06,
+           4.993952042208874e-06,
+           4.802583973248964e-06,
+           4.572126952066078e-06,
+           4.322979514209587e-06,
+           4.064201807047503e-06,
+           3.7983648226856516e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc2",
+          "values": [
+           -2.1133421991052625e-05,
+           -1.7045526047234104e-05,
+           -1.326119262076913e-05,
+           -9.949736613462818e-06,
+           -7.302338944867372e-06,
+           -5.23916098728305e-06,
+           -3.583661094061922e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc3",
+          "values": [
+           -3.693674794517294e-06,
+           6.862271404869957e-06,
+           1.0897915441074922e-05,
+           1.1309461607527753e-05,
+           1.0090217612927698e-05,
+           8.338585123743124e-06,
+           6.550285468204171e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc4",
+          "values": [
+           -1.1706665357331638e-05,
+           -1.2323848343571808e-05,
+           -7.438810642891533e-06,
+           -1.4305555588327694e-06,
+           2.2324609338316257e-06,
+           3.4701964663557796e-06,
+           3.5324095067416436e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc5",
+          "values": [
+           -1.3565021839485513e-05,
+           1.8019989466232374e-06,
+           9.493271532989253e-06,
+           9.03329066034984e-06,
+           5.5170068576448255e-06,
+           2.0731114676426057e-06,
+           -2.9632083464612695e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc6",
+          "values": [
+           4.4725633072366236e-07,
+           -3.237950500946905e-06,
+           -2.027831902564871e-06,
+           1.1694853237435065e-06,
+           2.388383523568804e-06,
+           1.7198975876348134e-06,
+           7.057676964114946e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc7",
+          "values": [
+           -1.0702350366444923e-05,
+           -2.1043826015142464e-06,
+           5.641617376078948e-06,
+           3.1757433589306998e-06,
+           -4.653783301194024e-07,
+           -1.7882360020341596e-06,
+           -1.7071811818644962e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc8",
+          "values": [
+           -9.948646062979988e-07,
+           5.056737259441507e-07,
+           6.187602761682887e-07,
+           -5.92166022550153e-07,
+           -7.443095450733893e-07,
+           -7.304185196721982e-08,
+           4.002611640108994e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc9",
+          "values": [
+           1.6903026360225496e-07,
+           -2.0740127508491996e-07,
+           -3.880425837229352e-08,
+           2.4879884903133933e-07,
+           8.329326328491196e-08,
+           -1.6960506674905063e-07,
+           -1.7478293846943013e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc10",
+          "values": [
+           6.118908207690266e-07,
+           -9.811388605729008e-07,
+           6.921727393322859e-07,
+           7.27290213642241e-08,
+           -3.576090867683966e-07,
+           3.437573486173428e-09,
+           1.329921641880029e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc11",
+          "values": [
+           -1.1200571886868494e-08,
+           4.622067801796989e-09,
+           3.897368240048213e-08,
+           -6.564032935774823e-08,
+           -1.639365120068848e-08,
+           8.324082766966853e-08,
+           1.7907912639643666e-08
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc12",
+          "values": [
+           3.804651964916273e-09,
+           -1.4721830335381168e-08,
+           3.838555878034884e-08,
+           -5.818109433625653e-08,
+           3.868092931753571e-08,
+           1.4346814873244385e-08,
+           -2.5525605284479787e-08
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc13",
+          "values": [
+           -2.517732841199561e-09,
+           8.147284895998591e-09,
+           -1.9851454472843337e-08,
+           3.3889695434093804e-08,
+           -3.96122215699512e-08,
+           2.7664637372646497e-08,
+           2.321665773231923e-09
+          ]
+         },
+         {
+          "correlation": "uncorrelated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-dropped-components",
+          "values": [
+           2.411070923947929e-10,
+           1.1110913945485635e-09,
+           3.845491803326833e-09,
+           1.0363205599019435e-08,
+           2.3576268926687835e-08,
+           4.175421258756886e-08,
+           4.386734725261418e-08
+          ]
+         }
+        ],
+        "values": {
+         "edges": [
+          3.723291133272139,
+          5.080137841233113,
+          6.931448431551464,
+          9.457416090031758,
+          12.903900242964319,
+          17.60635673584025,
+          24.022488679628626,
+          32.77679596189011
+         ],
+         "unit": "1",
+         "values": [
+          0.13691594858767403,
+          0.12344126812191335,
+          0.11065666216864091,
+          0.09865702426915975,
+          0.08753179082764423,
+          0.07733096114747613,
+          0.06806140123667201
+         ]
+        }
+       }
+      ],
+      "status": "ok"
+     },
+     {
+      "evaluation": {
+       "computational_run_ref": null,
+       "input_hash": "152d58e961fa26f4fe4d13660f5340cb3cc65d16367dd8fed0540357206256fa",
+       "numerical_tolerance": 0.0006136734606017047
+      },
+      "labels": [
+       "synthetic",
+       "unvalidated"
+      ],
+      "point": {
+       "D0_cm2_s": 2.849305008390949e+28,
+       "V_A_kms": 5.66563033277587,
+       "V_c_kms": 7.477593688983244,
+       "delta": 0.5098894116281263,
+       "eta": 1.4638296961221888
+      },
+      "point_index": 1,
+      "predictions": [
+       {
+        "allowed_transformations": [
+         "solar modulation per isotope is not possible: the emulator gives element ratios only",
+         "sub-range of the training bins"
+        ],
+        "derivation_status": "numerical-evidence",
+        "observable": {
+         "bin_semantics": "bin-averaged",
+         "conventions": {
+          "energy_variable": "rigidity in GV: the ratio of the bin-integrated fluxes of the training runs (r3 P2), isotopes summed at equal rigidity (P3)",
+          "frame": "Galactic rest frame (interstellar gas at rest)"
+         },
+         "level": "crsr:local-interstellar",
+         "normalization": {
+          "convention": "ratio of two bin-integrated fluxes; the normalization cancels",
+          "kind": "exposure",
+          "value": "not-applicable"
+         },
+         "phase_space": {
+          "definition": "local interstellar flux at the observer of the training runs, before solar modulation",
+          "fiducial": false
+         },
+         "process": "unmodulated local interstellar B/C emulated from USINE V3.5 runs (Gaussian-process emulator ml-emulator-usine-bc-e2): ratio of bin integrals of 10B+11B over 12C as in the training runs",
+         "quantity": "ratio",
+         "species": [
+          {
+           "name": "boron"
+          },
+          {
+           "name": "carbon"
+          }
+         ],
+         "unit": "1",
+         "validity_range": {
+          "max": 32.77679596189011,
+          "min": 3.723291133272139,
+          "unit": "GV",
+          "variable": "rigidity"
+         },
+         "variables": [
+          {
+           "edges": [
+            3.723291133272139,
+            5.080137841233113,
+            6.931448431551464,
+            9.457416090031758,
+            12.903900242964319,
+            17.60635673584025,
+            24.022488679628626,
+            32.77679596189011
+           ],
+           "name": "rigidity",
+           "unit": "GV"
+          }
+         ]
+        },
+        "parameter_point": {
+         "D0_cm2_s": 2.849305008390949e+28,
+         "V_A_kms": 5.66563033277587,
+         "V_c_kms": 7.477593688983244,
+         "delta": 0.5098894116281263,
+         "domain_status": "inside",
+         "emulator_model": "sha256:31f5ba51bc434a4febcdad0d3ed031d4bd81aed3dceef2d709e5068ffdd747c1",
+         "eta": 1.4638296961221888,
+         "ml_artifact": "ml-emulator-usine-bc-e2",
+         "training_provider": "usine 0.2.0"
+        },
+        "representation": "numerical",
+        "uncertainties": [
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc1",
+          "values": [
+           1.1704050681790789e-05,
+           1.1347640233757279e-05,
+           1.0876851095401494e-05,
+           1.0334781952362962e-05,
+           9.760737681769293e-06,
+           9.169403574241027e-06,
+           8.563305824422114e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc2",
+          "values": [
+           -5.4881710519366994e-05,
+           -4.405996528595265e-05,
+           -3.416515143678995e-05,
+           -2.5583924969031895e-05,
+           -1.875573129043632e-05,
+           -1.3446217058899442e-05,
+           -9.19060840420842e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc3",
+          "values": [
+           -8.434317347068638e-06,
+           1.559678554529791e-05,
+           2.4687531593484634e-05,
+           2.5570015255429526e-05,
+           2.278798975894023e-05,
+           1.8817598972134024e-05,
+           1.47710383509937e-05
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc4",
+          "values": [
+           -3.332339957548564e-05,
+           -3.4917116375920685e-05,
+           -2.100692832568701e-05,
+           -4.0319821497154905e-06,
+           6.2851285646012935e-06,
+           9.762267876234882e-06,
+           9.929940773687945e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc5",
+          "values": [
+           -2.938082037311164e-05,
+           3.884846664657649e-06,
+           2.039868994721142e-05,
+           1.9372567375528403e-05,
+           1.181846696674584e-05,
+           4.437584492859173e-06,
+           -6.338188126276378e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc6",
+          "values": [
+           1.2969214313720956e-06,
+           -9.345516402925251e-06,
+           -5.833538585076492e-06,
+           3.357760541290145e-06,
+           6.849761309168155e-06,
+           4.9287900411771535e-06,
+           2.0210565404575777e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc7",
+          "values": [
+           -1.779188377916904e-05,
+           -3.4821173198544266e-06,
+           9.304420936507494e-06,
+           5.227402506419601e-06,
+           -7.651791481215735e-07,
+           -2.93797545472889e-06,
+           -2.8027341156549247e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc8",
+          "values": [
+           -2.0437641539669916e-06,
+           1.0339823238095927e-06,
+           1.26104961809549e-06,
+           -1.2045034731521899e-06,
+           -1.512288281182711e-06,
+           -1.4829248191546293e-07,
+           8.120256872445156e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc9",
+          "values": [
+           3.7376095724007186e-07,
+           -4.5647480842021276e-07,
+           -8.51239573333918e-08,
+           5.447228661221391e-07,
+           1.8216022041192852e-07,
+           -3.706370642943941e-07,
+           -3.81669993595474e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc10",
+          "values": [
+           1.1811903478543442e-06,
+           -1.8851779743557256e-06,
+           1.3255722240585356e-06,
+           1.3901173690391557e-07,
+           -6.827609877057136e-07,
+           6.558107068882929e-09,
+           2.5353126370225707e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc11",
+          "values": [
+           -2.299258777239452e-08,
+           9.444085180919409e-09,
+           7.937103620756666e-08,
+           -1.3341853927895607e-07,
+           -3.32841558613036e-08,
+           1.6887470586197437e-07,
+           3.630380442271133e-08
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc12",
+          "values": [
+           6.2964909132895225e-09,
+           -2.425053824451551e-08,
+           6.302233150285002e-08,
+           -9.533740047722115e-08,
+           6.331327026639377e-08,
+           2.3464953639665935e-08,
+           -4.171758998415066e-08
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc13",
+          "values": [
+           -3.32755941138764e-09,
+           1.0717784112045188e-08,
+           -2.602863891281664e-08,
+           4.434877354037317e-08,
+           -5.177970527705149e-08,
+           3.613447221996656e-08,
+           3.030228571977675e-09
+          ]
+         },
+         {
+          "correlation": "uncorrelated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-dropped-components",
+          "values": [
+           2.456220530914734e-10,
+           1.1266345975834447e-09,
+           3.886442212608743e-09,
+           1.0453200017419784e-08,
+           2.3754541339232135e-08,
+           4.203763064480263e-08,
+           4.413247262549684e-08
+          ]
+         }
+        ],
+        "values": {
+         "edges": [
+          3.723291133272139,
+          5.080137841233113,
+          6.931448431551464,
+          9.457416090031758,
+          12.903900242964319,
+          17.60635673584025,
+          24.022488679628626,
+          32.77679596189011
+         ],
+         "unit": "1",
+         "values": [
+          0.1394798305559816,
+          0.1251681041884294,
+          0.11183503826130496,
+          0.09951376511400532,
+          0.08819366415347414,
+          0.07785586604722661,
+          0.0684727505776266
+         ]
+        }
+       }
+      ],
+      "status": "ok"
+     }
+    ],
+    "status": "ok"
+   }
+  },
+  {
+   "name": "subrange",
+   "allow_outside": true,
+   "request": {
+    "protocol": "cr-provider/1",
+    "provider": "emulator",
+    "provider_version": "1.0.0",
+    "points": [
+     {
+      "D0_cm2_s": 3e+28,
+      "V_A_kms": 30.0,
+      "V_c_kms": 5.0,
+      "delta": 0.5,
+      "eta": 1.0
+     },
+     {
+      "D0_cm2_s": 2.849305008390949e+28,
+      "V_A_kms": 5.66563033277587,
+      "V_c_kms": 7.477593688983244,
+      "delta": 0.5098894116281263,
+      "eta": 1.4638296961221888
+     }
+    ],
+    "observables": [
+     {
+      "id": "B/C",
+      "axis": "rigidity",
+      "unit": "GV",
+      "bins": [
+       [
+        3.723291133272139,
+        5.080137841233113
+       ],
+       [
+        5.080137841233113,
+        6.931448431551464
+       ],
+       [
+        6.931448431551464,
+        9.457416090031758
+       ],
+       [
+        9.457416090031758,
+        12.903900242964319
+       ],
+       [
+        12.903900242964319,
+        17.60635673584025
+       ],
+       [
+        17.60635673584025,
+        24.022488679628626
+       ],
+       [
+        24.022488679628626,
+        32.77679596189011
+       ]
+      ]
+     }
+    ],
+    "want": [
+     "lis"
+    ],
+    "seed": null
+   },
+   "exit": 0,
+   "response": {
+    "protocol": "cr-provider/1",
+    "provider": "emulator",
+    "provider_version": "1.0.0",
+    "results": [
+     {
+      "evaluation": {
+       "computational_run_ref": null,
+       "input_hash": "9aea4d42183a552f601fe8ea6f55e54e59fe799e2f24f68ede741b34381aa765",
+       "numerical_tolerance": 0.0006136734606017047
+      },
+      "labels": [
+       "synthetic",
+       "unvalidated"
+      ],
+      "point": {
+       "D0_cm2_s": 3e+28,
+       "V_A_kms": 30.0,
+       "V_c_kms": 5.0,
+       "delta": 0.5,
+       "eta": 1.0
+      },
+      "point_index": 0,
+      "predictions": [
+       {
+        "allowed_transformations": [
+         "solar modulation per isotope is not possible: the emulator gives element ratios only",
+         "sub-range of the training bins"
+        ],
+        "derivation_status": "numerical-evidence",
+        "observable": {
+         "bin_semantics": "bin-averaged",
+         "conventions": {
+          "energy_variable": "rigidity in GV: the ratio of the bin-integrated fluxes of the training runs (r3 P2), isotopes summed at equal rigidity (P3)",
+          "frame": "Galactic rest frame (interstellar gas at rest)"
+         },
+         "level": "crsr:local-interstellar",
+         "normalization": {
+          "convention": "ratio of two bin-integrated fluxes; the normalization cancels",
+          "kind": "exposure",
+          "value": "not-applicable"
+         },
+         "phase_space": {
+          "definition": "local interstellar flux at the observer of the training runs, before solar modulation",
+          "fiducial": false
+         },
+         "process": "unmodulated local interstellar B/C emulated from USINE V3.5 runs (Gaussian-process emulator ml-emulator-usine-bc-e2): ratio of bin integrals of 10B+11B over 12C as in the training runs",
+         "quantity": "ratio",
+         "species": [
+          {
+           "name": "boron"
+          },
+          {
+           "name": "carbon"
+          }
+         ],
+         "unit": "1",
+         "validity_range": {
+          "max": 32.77679596189011,
+          "min": 3.723291133272139,
+          "unit": "GV",
+          "variable": "rigidity"
+         },
+         "variables": [
+          {
+           "edges": [
+            3.723291133272139,
+            5.080137841233113,
+            6.931448431551464,
+            9.457416090031758,
+            12.903900242964319,
+            17.60635673584025,
+            24.022488679628626,
+            32.77679596189011
+           ],
+           "name": "rigidity",
+           "unit": "GV"
+          }
+         ]
+        },
+        "parameter_point": {
+         "D0_cm2_s": 3e+28,
+         "V_A_kms": 30.0,
+         "V_c_kms": 5.0,
+         "delta": 0.5,
+         "domain_status": "inside",
+         "emulator_model": "sha256:31f5ba51bc434a4febcdad0d3ed031d4bd81aed3dceef2d709e5068ffdd747c1",
+         "eta": 1.0,
+         "ml_artifact": "ml-emulator-usine-bc-e2",
+         "training_provider": "usine 0.2.0"
+        },
+        "representation": "numerical",
+        "uncertainties": [
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc1",
+          "values": [
+           5.126853776449858e-06,
+           4.993952042208874e-06,
+           4.802583973248964e-06,
+           4.572126952066078e-06,
+           4.322979514209587e-06,
+           4.064201807047503e-06,
+           3.7983648226856516e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc2",
+          "values": [
+           -2.1133421991052625e-05,
+           -1.7045526047234104e-05,
+           -1.326119262076913e-05,
+           -9.949736613462818e-06,
+           -7.302338944867372e-06,
+           -5.23916098728305e-06,
+           -3.583661094061922e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc3",
+          "values": [
+           -3.693674794517294e-06,
+           6.862271404869957e-06,
+           1.0897915441074922e-05,
+           1.1309461607527753e-05,
+           1.0090217612927698e-05,
+           8.338585123743124e-06,
+           6.550285468204171e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc4",
+          "values": [
+           -1.1706665357331638e-05,
+           -1.2323848343571808e-05,
+           -7.438810642891533e-06,
+           -1.4305555588327694e-06,
+           2.2324609338316257e-06,
+           3.4701964663557796e-06,
+           3.5324095067416436e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc5",
+          "values": [
+           -1.3565021839485513e-05,
+           1.8019989466232374e-06,
+           9.493271532989253e-06,
+           9.03329066034984e-06,
+           5.5170068576448255e-06,
+           2.0731114676426057e-06,
+           -2.9632083464612695e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc6",
+          "values": [
+           4.4725633072366236e-07,
+           -3.237950500946905e-06,
+           -2.027831902564871e-06,
+           1.1694853237435065e-06,
+           2.388383523568804e-06,
+           1.7198975876348134e-06,
+           7.057676964114946e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc7",
+          "values": [
+           -1.0702350366444923e-05,
+           -2.1043826015142464e-06,
+           5.641617376078948e-06,
+           3.1757433589306998e-06,
+           -4.653783301194024e-07,
+           -1.7882360020341596e-06,
+           -1.7071811818644962e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc8",
+          "values": [
+           -9.948646062979988e-07,
+           5.056737259441507e-07,
+           6.187602761682887e-07,
+           -5.92166022550153e-07,
+           -7.443095450733893e-07,
+           -7.304185196721982e-08,
+           4.002611640108994e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc9",
+          "values": [
+           1.6903026360225496e-07,
+           -2.0740127508491996e-07,
+           -3.880425837229352e-08,
+           2.4879884903133933e-07,
+           8.329326328491196e-08,
+           -1.6960506674905063e-07,
+           -1.7478293846943013e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc10",
+          "values": [
+           6.118908207690266e-07,
+           -9.811388605729008e-07,
+           6.921727393322859e-07,
+           7.27290213642241e-08,
+           -3.576090867683966e-07,
+           3.437573486173428e-09,
+           1.329921641880029e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc11",
+          "values": [
+           -1.1200571886868494e-08,
+           4.622067801796989e-09,
+           3.897368240048213e-08,
+           -6.564032935774823e-08,
+           -1.639365120068848e-08,
+           8.324082766966853e-08,
+           1.7907912639643666e-08
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc12",
+          "values": [
+           3.804651964916273e-09,
+           -1.4721830335381168e-08,
+           3.838555878034884e-08,
+           -5.818109433625653e-08,
+           3.868092931753571e-08,
+           1.4346814873244385e-08,
+           -2.5525605284479787e-08
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc13",
+          "values": [
+           -2.517732841199561e-09,
+           8.147284895998591e-09,
+           -1.9851454472843337e-08,
+           3.3889695434093804e-08,
+           -3.96122215699512e-08,
+           2.7664637372646497e-08,
+           2.321665773231923e-09
+          ]
+         },
+         {
+          "correlation": "uncorrelated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-dropped-components",
+          "values": [
+           2.411070923947929e-10,
+           1.1110913945485635e-09,
+           3.845491803326833e-09,
+           1.0363205599019435e-08,
+           2.3576268926687835e-08,
+           4.175421258756886e-08,
+           4.386734725261418e-08
+          ]
+         }
+        ],
+        "values": {
+         "edges": [
+          3.723291133272139,
+          5.080137841233113,
+          6.931448431551464,
+          9.457416090031758,
+          12.903900242964319,
+          17.60635673584025,
+          24.022488679628626,
+          32.77679596189011
+         ],
+         "unit": "1",
+         "values": [
+          0.13691594858767403,
+          0.12344126812191335,
+          0.11065666216864091,
+          0.09865702426915975,
+          0.08753179082764423,
+          0.07733096114747613,
+          0.06806140123667201
+         ]
+        }
+       }
+      ],
+      "status": "ok"
+     },
+     {
+      "evaluation": {
+       "computational_run_ref": null,
+       "input_hash": "152d58e961fa26f4fe4d13660f5340cb3cc65d16367dd8fed0540357206256fa",
+       "numerical_tolerance": 0.0006136734606017047
+      },
+      "labels": [
+       "synthetic",
+       "unvalidated"
+      ],
+      "point": {
+       "D0_cm2_s": 2.849305008390949e+28,
+       "V_A_kms": 5.66563033277587,
+       "V_c_kms": 7.477593688983244,
+       "delta": 0.5098894116281263,
+       "eta": 1.4638296961221888
+      },
+      "point_index": 1,
+      "predictions": [
+       {
+        "allowed_transformations": [
+         "solar modulation per isotope is not possible: the emulator gives element ratios only",
+         "sub-range of the training bins"
+        ],
+        "derivation_status": "numerical-evidence",
+        "observable": {
+         "bin_semantics": "bin-averaged",
+         "conventions": {
+          "energy_variable": "rigidity in GV: the ratio of the bin-integrated fluxes of the training runs (r3 P2), isotopes summed at equal rigidity (P3)",
+          "frame": "Galactic rest frame (interstellar gas at rest)"
+         },
+         "level": "crsr:local-interstellar",
+         "normalization": {
+          "convention": "ratio of two bin-integrated fluxes; the normalization cancels",
+          "kind": "exposure",
+          "value": "not-applicable"
+         },
+         "phase_space": {
+          "definition": "local interstellar flux at the observer of the training runs, before solar modulation",
+          "fiducial": false
+         },
+         "process": "unmodulated local interstellar B/C emulated from USINE V3.5 runs (Gaussian-process emulator ml-emulator-usine-bc-e2): ratio of bin integrals of 10B+11B over 12C as in the training runs",
+         "quantity": "ratio",
+         "species": [
+          {
+           "name": "boron"
+          },
+          {
+           "name": "carbon"
+          }
+         ],
+         "unit": "1",
+         "validity_range": {
+          "max": 32.77679596189011,
+          "min": 3.723291133272139,
+          "unit": "GV",
+          "variable": "rigidity"
+         },
+         "variables": [
+          {
+           "edges": [
+            3.723291133272139,
+            5.080137841233113,
+            6.931448431551464,
+            9.457416090031758,
+            12.903900242964319,
+            17.60635673584025,
+            24.022488679628626,
+            32.77679596189011
+           ],
+           "name": "rigidity",
+           "unit": "GV"
+          }
+         ]
+        },
+        "parameter_point": {
+         "D0_cm2_s": 2.849305008390949e+28,
+         "V_A_kms": 5.66563033277587,
+         "V_c_kms": 7.477593688983244,
+         "delta": 0.5098894116281263,
+         "domain_status": "inside",
+         "emulator_model": "sha256:31f5ba51bc434a4febcdad0d3ed031d4bd81aed3dceef2d709e5068ffdd747c1",
+         "eta": 1.4638296961221888,
+         "ml_artifact": "ml-emulator-usine-bc-e2",
+         "training_provider": "usine 0.2.0"
+        },
+        "representation": "numerical",
+        "uncertainties": [
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc1",
+          "values": [
+           1.1704050681790789e-05,
+           1.1347640233757279e-05,
+           1.0876851095401494e-05,
+           1.0334781952362962e-05,
+           9.760737681769293e-06,
+           9.169403574241027e-06,
+           8.563305824422114e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc2",
+          "values": [
+           -5.4881710519366994e-05,
+           -4.405996528595265e-05,
+           -3.416515143678995e-05,
+           -2.5583924969031895e-05,
+           -1.875573129043632e-05,
+           -1.3446217058899442e-05,
+           -9.19060840420842e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc3",
+          "values": [
+           -8.434317347068638e-06,
+           1.559678554529791e-05,
+           2.4687531593484634e-05,
+           2.5570015255429526e-05,
+           2.278798975894023e-05,
+           1.8817598972134024e-05,
+           1.47710383509937e-05
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc4",
+          "values": [
+           -3.332339957548564e-05,
+           -3.4917116375920685e-05,
+           -2.100692832568701e-05,
+           -4.0319821497154905e-06,
+           6.2851285646012935e-06,
+           9.762267876234882e-06,
+           9.929940773687945e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc5",
+          "values": [
+           -2.938082037311164e-05,
+           3.884846664657649e-06,
+           2.039868994721142e-05,
+           1.9372567375528403e-05,
+           1.181846696674584e-05,
+           4.437584492859173e-06,
+           -6.338188126276378e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc6",
+          "values": [
+           1.2969214313720956e-06,
+           -9.345516402925251e-06,
+           -5.833538585076492e-06,
+           3.357760541290145e-06,
+           6.849761309168155e-06,
+           4.9287900411771535e-06,
+           2.0210565404575777e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc7",
+          "values": [
+           -1.779188377916904e-05,
+           -3.4821173198544266e-06,
+           9.304420936507494e-06,
+           5.227402506419601e-06,
+           -7.651791481215735e-07,
+           -2.93797545472889e-06,
+           -2.8027341156549247e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc8",
+          "values": [
+           -2.0437641539669916e-06,
+           1.0339823238095927e-06,
+           1.26104961809549e-06,
+           -1.2045034731521899e-06,
+           -1.512288281182711e-06,
+           -1.4829248191546293e-07,
+           8.120256872445156e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc9",
+          "values": [
+           3.7376095724007186e-07,
+           -4.5647480842021276e-07,
+           -8.51239573333918e-08,
+           5.447228661221391e-07,
+           1.8216022041192852e-07,
+           -3.706370642943941e-07,
+           -3.81669993595474e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc10",
+          "values": [
+           1.1811903478543442e-06,
+           -1.8851779743557256e-06,
+           1.3255722240585356e-06,
+           1.3901173690391557e-07,
+           -6.827609877057136e-07,
+           6.558107068882929e-09,
+           2.5353126370225707e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc11",
+          "values": [
+           -2.299258777239452e-08,
+           9.444085180919409e-09,
+           7.937103620756666e-08,
+           -1.3341853927895607e-07,
+           -3.32841558613036e-08,
+           1.6887470586197437e-07,
+           3.630380442271133e-08
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc12",
+          "values": [
+           6.2964909132895225e-09,
+           -2.425053824451551e-08,
+           6.302233150285002e-08,
+           -9.533740047722115e-08,
+           6.331327026639377e-08,
+           2.3464953639665935e-08,
+           -4.171758998415066e-08
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc13",
+          "values": [
+           -3.32755941138764e-09,
+           1.0717784112045188e-08,
+           -2.602863891281664e-08,
+           4.434877354037317e-08,
+           -5.177970527705149e-08,
+           3.613447221996656e-08,
+           3.030228571977675e-09
+          ]
+         },
+         {
+          "correlation": "uncorrelated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-dropped-components",
+          "values": [
+           2.456220530914734e-10,
+           1.1266345975834447e-09,
+           3.886442212608743e-09,
+           1.0453200017419784e-08,
+           2.3754541339232135e-08,
+           4.203763064480263e-08,
+           4.413247262549684e-08
+          ]
+         }
+        ],
+        "values": {
+         "edges": [
+          3.723291133272139,
+          5.080137841233113,
+          6.931448431551464,
+          9.457416090031758,
+          12.903900242964319,
+          17.60635673584025,
+          24.022488679628626,
+          32.77679596189011
+         ],
+         "unit": "1",
+         "values": [
+          0.1394798305559816,
+          0.1251681041884294,
+          0.11183503826130496,
+          0.09951376511400532,
+          0.08819366415347414,
+          0.07785586604722661,
+          0.0684727505776266
+         ]
+        }
+       }
+      ],
+      "status": "ok"
+     }
+    ],
+    "status": "ok"
+   }
+  },
+  {
+   "name": "full",
+   "allow_outside": false,
+   "request": {
+    "protocol": "cr-provider/1",
+    "provider": "emulator",
+    "provider_version": "1.0.0",
+    "points": [
+     {
+      "D0_cm2_s": 2.980531242617149e+28,
+      "V_A_kms": 31.84338911609444,
+      "V_c_kms": 13.567804484268862,
+      "delta": 0.4982708254750602,
+      "eta": 1.3708170769938182
+     }
+    ],
+    "observables": [
+     {
+      "id": "B/C",
+      "axis": "rigidity",
+      "unit": "GV",
+      "bins": [
+       [
+        2.0,
+        2.728842660642837
+       ],
+       [
+        2.728842660642837,
+        3.723291133272139
+       ],
+       [
+        3.723291133272139,
+        5.080137841233113
+       ],
+       [
+        5.080137841233113,
+        6.931448431551464
+       ],
+       [
+        6.931448431551464,
+        9.457416090031758
+       ],
+       [
+        9.457416090031758,
+        12.903900242964319
+       ],
+       [
+        12.903900242964319,
+        17.60635673584025
+       ],
+       [
+        17.60635673584025,
+        24.022488679628626
+       ],
+       [
+        24.022488679628626,
+        32.77679596189011
+       ],
+       [
+        32.77679596189011,
+        44.721359549995796
+       ],
+       [
+        44.721359549995796,
+        61.01877689098775
+       ],
+       [
+        61.01877689098775,
+        83.2553207401873
+       ],
+       [
+        83.2553207401873,
+        113.59533548066277
+       ],
+       [
+        113.59533548066277,
+        154.99189875483367
+       ],
+       [
+        154.99189875483367,
+        211.4742526881128
+       ],
+       [
+        211.4742526881128,
+        288.5399811814428
+       ],
+       [
+        288.5399811814428,
+        393.6901049745011
+       ],
+       [
+        393.6901049745011,
+        537.1591767636878
+       ],
+       [
+        537.1591767636878,
+        732.9114385542686
+       ],
+       [
+        732.9114385542686,
+        1000.0
+       ]
+      ]
+     }
+    ],
+    "want": [
+     "lis"
+    ],
+    "seed": null
+   },
+   "exit": 0,
+   "response": {
+    "protocol": "cr-provider/1",
+    "provider": "emulator",
+    "provider_version": "1.0.0",
+    "results": [
+     {
+      "evaluation": {
+       "computational_run_ref": null,
+       "input_hash": "e74ba90f7309b951b3efa61a0d1cf06c4856beaf12546e57a8edd236b739af73",
+       "numerical_tolerance": 0.0006136734606017047
+      },
+      "labels": [
+       "synthetic",
+       "unvalidated"
+      ],
+      "point": {
+       "D0_cm2_s": 2.980531242617149e+28,
+       "V_A_kms": 31.84338911609444,
+       "V_c_kms": 13.567804484268862,
+       "delta": 0.4982708254750602,
+       "eta": 1.3708170769938182
+      },
+      "point_index": 0,
+      "predictions": [
+       {
+        "allowed_transformations": [
+         "solar modulation per isotope is not possible: the emulator gives element ratios only",
+         "sub-range of the training bins"
+        ],
+        "derivation_status": "numerical-evidence",
+        "observable": {
+         "bin_semantics": "bin-averaged",
+         "conventions": {
+          "energy_variable": "rigidity in GV: the ratio of the bin-integrated fluxes of the training runs (r3 P2), isotopes summed at equal rigidity (P3)",
+          "frame": "Galactic rest frame (interstellar gas at rest)"
+         },
+         "level": "crsr:local-interstellar",
+         "normalization": {
+          "convention": "ratio of two bin-integrated fluxes; the normalization cancels",
+          "kind": "exposure",
+          "value": "not-applicable"
+         },
+         "phase_space": {
+          "definition": "local interstellar flux at the observer of the training runs, before solar modulation",
+          "fiducial": false
+         },
+         "process": "unmodulated local interstellar B/C emulated from USINE V3.5 runs (Gaussian-process emulator ml-emulator-usine-bc-e2): ratio of bin integrals of 10B+11B over 12C as in the training runs",
+         "quantity": "ratio",
+         "species": [
+          {
+           "name": "boron"
+          },
+          {
+           "name": "carbon"
+          }
+         ],
+         "unit": "1",
+         "validity_range": {
+          "max": 1000.0,
+          "min": 2.0,
+          "unit": "GV",
+          "variable": "rigidity"
+         },
+         "variables": [
+          {
+           "edges": [
+            2.0,
+            2.728842660642837,
+            3.723291133272139,
+            5.080137841233113,
+            6.931448431551464,
+            9.457416090031758,
+            12.903900242964319,
+            17.60635673584025,
+            24.022488679628626,
+            32.77679596189011,
+            44.721359549995796,
+            61.01877689098775,
+            83.2553207401873,
+            113.59533548066277,
+            154.99189875483367,
+            211.4742526881128,
+            288.5399811814428,
+            393.6901049745011,
+            537.1591767636878,
+            732.9114385542686,
+            1000.0
+           ],
+           "name": "rigidity",
+           "unit": "GV"
+          }
+         ]
+        },
+        "parameter_point": {
+         "D0_cm2_s": 2.980531242617149e+28,
+         "V_A_kms": 31.84338911609444,
+         "V_c_kms": 13.567804484268862,
+         "delta": 0.4982708254750602,
+         "domain_status": "inside",
+         "emulator_model": "sha256:31f5ba51bc434a4febcdad0d3ed031d4bd81aed3dceef2d709e5068ffdd747c1",
+         "eta": 1.3708170769938182,
+         "ml_artifact": "ml-emulator-usine-bc-e2",
+         "training_provider": "usine 0.2.0"
+        },
+        "representation": "numerical",
+        "uncertainties": [
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc1",
+          "values": [
+           6.565675670563102e-06,
+           6.604136098477518e-06,
+           6.4872233147464715e-06,
+           6.310003265793612e-06,
+           6.074022942814927e-06,
+           5.797353492884316e-06,
+           5.500224059503863e-06,
+           5.190589424314536e-06,
+           4.86985118498897e-06,
+           4.540895735283385e-06,
+           4.2083222333369545e-06,
+           3.877311930066546e-06,
+           3.5527859205831736e-06,
+           3.2389956721586605e-06,
+           2.9393701887937254e-06,
+           2.6563196443024395e-06,
+           2.3914931286222714e-06,
+           2.145774853869456e-06,
+           1.9194755196060506e-06,
+           1.712357281765721e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc2",
+          "values": [
+           -3.5785519102614975e-05,
+           -3.0063569580225876e-05,
+           -2.469648835481181e-05,
+           -1.989083832383496e-05,
+           -1.5489646487409054e-05,
+           -1.165146535079637e-05,
+           -8.580580169924576e-06,
+           -6.179603615226352e-06,
+           -4.24329678984668e-06,
+           -2.655467020872155e-06,
+           -1.3598712060634686e-06,
+           -3.187951453796097e-07,
+           5.001315673805024e-07,
+           1.1269844552355448e-06,
+           1.5901204035627295e-06,
+           1.91596570002367e-06,
+           2.1286289018697817e-06,
+           2.2496426990095867e-06,
+           2.2979486197735244e-06,
+           2.289794878486969e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc3",
+          "values": [
+           -6.588314923007616e-05,
+           -2.9127440365589728e-05,
+           -4.4744919913411725e-06,
+           8.30099723534656e-06,
+           1.319538471352779e-05,
+           1.3728737279256037e-05,
+           1.2290651336681068e-05,
+           1.0195556638933306e-05,
+           8.040006583084898e-06,
+           6.05621975606294e-06,
+           4.320523150732632e-06,
+           2.847880625603522e-06,
+           1.628259818311983e-06,
+           6.404359166056943e-07,
+           -1.4143774863465403e-07,
+           -7.446887816838047e-07,
+           -1.195804610671317e-06,
+           -1.519556439870071e-06,
+           -1.7384758255481684e-06,
+           -1.8724556956970314e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc4",
+          "values": [
+           1.6261200183385136e-05,
+           -3.517477108452318e-06,
+           -1.4042625433157799e-05,
+           -1.4761780814510697e-05,
+           -8.918917674303177e-06,
+           -1.7195841026040102e-06,
+           2.692701811414904e-06,
+           4.201483543645602e-06,
+           4.2933594529782326e-06,
+           3.82557950312056e-06,
+           3.1398386799453546e-06,
+           2.395564852004698e-06,
+           1.6779064272536107e-06,
+           1.0316666498738755e-06,
+           4.770892776465373e-07,
+           1.9241311264083257e-08,
+           -3.453475754566196e-07,
+           -6.249663567533733e-07,
+           -8.302764906527688e-07,
+           -9.72560316350456e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc5",
+          "values": [
+           1.8346275594588586e-05,
+           -2.0524178373788303e-05,
+           -1.4574598797982705e-05,
+           1.933338695742553e-06,
+           1.0194960744210536e-05,
+           9.725807738897911e-06,
+           5.960311009040117e-06,
+           2.2481861136767986e-06,
+           -3.225888833400389e-07,
+           -1.7398015610686682e-06,
+           -2.308793736258849e-06,
+           -2.3333272429465505e-06,
+           -2.0394223370362737e-06,
+           -1.5825505064976062e-06,
+           -1.0658094526002772e-06,
+           -5.535734125622012e-07,
+           -8.440472278593387e-08,
+           3.213605527937169e-07,
+           6.557662007845682e-07,
+           9.189068924426587e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc6",
+          "values": [
+           -3.326544446708224e-06,
+           5.893679064979643e-06,
+           5.500074564422892e-07,
+           -3.976120937998012e-06,
+           -2.4925138231899104e-06,
+           1.4411541646339155e-06,
+           2.9532855061012025e-06,
+           2.1347556113709647e-06,
+           8.793969495887696e-07,
+           -3.6346073807200634e-08,
+           -5.529810427721182e-07,
+           -7.677869900595822e-07,
+           -7.809322546306493e-07,
+           -6.714606710762958e-07,
+           -4.970587245369453e-07,
+           -2.972729143561309e-07,
+           -9.835170230567477e-08,
+           8.39775580400908e-08,
+           2.4103380593956205e-07,
+           3.6958817751718357e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc7",
+          "values": [
+           -4.684781332902069e-06,
+           1.551487390851909e-05,
+           -1.5161172503032582e-05,
+           -2.9768409174370492e-06,
+           7.988234335474098e-06,
+           4.508194112599174e-06,
+           -6.62901601674667e-07,
+           -2.556889469521191e-06,
+           -2.450441490124491e-06,
+           -1.6291815720662764e-06,
+           -7.028740417186612e-07,
+           5.246221784898468e-08,
+           5.419684446406148e-07,
+           7.68249520061951e-07,
+           7.778152284468491e-07,
+           6.301105273638142e-07,
+           3.827909891294287e-07,
+           8.550623984884534e-08,
+           -2.2389435494351796e-07,
+           -5.189587954163784e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc8",
+          "values": [
+           -1.642897927343581e-07,
+           6.208990580855349e-07,
+           -9.55235724177062e-07,
+           4.848353348880847e-07,
+           5.938305599084638e-07,
+           -5.697622147034182e-07,
+           -7.186037027690978e-07,
+           -7.078672948294225e-08,
+           3.8940464450403515e-07,
+           4.703370503141705e-07,
+           3.374874655576583e-07,
+           1.4443009886312844e-07,
+           -2.483948355319896e-08,
+           -1.3630779550285543e-07,
+           -1.8409452035127532e-07,
+           -1.7626686200929584e-07,
+           -1.2634193266192618e-07,
+           -4.915762191880368e-08,
+           4.210680557288631e-08,
+           1.3701408840835052e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc9",
+          "values": [
+           8.713253823964254e-09,
+           -7.116955239865411e-08,
+           2.1222004132824207e-07,
+           -2.6002233114152397e-07,
+           -4.8696175866333725e-08,
+           3.1302129026609297e-07,
+           1.051528601887266e-07,
+           -2.1492861688442904e-07,
+           -2.2234740242079014e-07,
+           -6.297096574904891e-08,
+           7.399976501438216e-08,
+           1.268771836155876e-07,
+           1.0897752841414284e-07,
+           5.468298612402862e-08,
+           -4.998047998743523e-09,
+           -4.8368844831323654e-08,
+           -6.433657448029187e-08,
+           -5.0260715748846034e-08,
+           -9.252719234597636e-09,
+           5.273910737929433e-08
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc10",
+          "values": [
+           3.7456379324177554e-08,
+           -2.617248236187149e-07,
+           8.187456152631458e-07,
+           -1.310940032372888e-06,
+           9.257273257519156e-07,
+           9.751835731676151e-08,
+           -4.811415703660918e-07,
+           4.6425921817201916e-09,
+           1.803068391055633e-07,
+           8.198192720177595e-08,
+           -1.1546841777470795e-08,
+           -4.693874373146249e-08,
+           -4.35066323100593e-08,
+           -2.428497368957134e-08,
+           -2.696798243360331e-09,
+           1.2354934823855308e-08,
+           1.8627209275085304e-08,
+           1.5346883366141096e-08,
+           3.8249381440001725e-09,
+           -1.4181672287196274e-08
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc11",
+          "values": [
+           -8.356390289197337e-10,
+           5.7879980823393354e-09,
+           -1.6053746947814345e-08,
+           6.615304304388917e-09,
+           5.5834316047821254e-08,
+           -9.427804127991204e-08,
+           -2.3626598034885894e-08,
+           1.2042207346703863e-07,
+           2.6007121103112495e-08,
+           -6.510422665986414e-08,
+           -5.853232271671595e-08,
+           -1.19251773497343e-08,
+           2.4004853858963673e-08,
+           3.383410052644507e-08,
+           2.2806500374263255e-08,
+           3.0941055142365104e-09,
+           -1.3399034209875768e-08,
+           -1.8986368022500405e-08,
+           -1.0077211651908682e-08,
+           1.4384041273893882e-08
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc12",
+          "values": [
+           9.207470735988207e-11,
+           -1.034257633542836e-09,
+           5.121522201521052e-09,
+           -1.9788971912821722e-08,
+           5.1647051742857456e-08,
+           -7.848191551745318e-08,
+           5.2356464337832214e-08,
+           1.9492750071487047e-08,
+           -3.481539054448443e-08,
+           -1.8364287004760868e-08,
+           1.1891937826327182e-08,
+           1.863669073477691e-08,
+           7.790756558603098e-09,
+           -4.9704593621639225e-09,
+           -9.491217041904945e-09,
+           -7.025329240192317e-09,
+           2.65538766161834e-10,
+           5.529835720612738e-09,
+           5.2435484670781005e-09,
+           -4.1026151897695495e-09
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc13",
+          "values": [
+           -7.796948323330921e-11,
+           6.015128678336306e-10,
+           -2.5195775916677776e-09,
+           8.141572504771021e-09,
+           -1.985655796956774e-08,
+           3.398516184910696e-08,
+           -3.985993431902088e-08,
+           2.7943227718304186e-08,
+           2.354121582424307e-09,
+           -1.9804240964411127e-08,
+           -3.102934016390476e-09,
+           1.1951781997560148e-08,
+           8.989757904232286e-09,
+           -9.553183531817518e-11,
+           -7.0600117328733855e-09,
+           -6.285172349040086e-09,
+           -7.512742987564774e-10,
+           4.010981000417654e-09,
+           4.80998037717956e-09,
+           -3.3782934215195153e-09
+          ]
+         },
+         {
+          "correlation": "uncorrelated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-dropped-components",
+          "values": [
+           5.766192042438689e-12,
+           4.4223380195443214e-11,
+           2.339039290003685e-10,
+           1.0763527247510519e-09,
+           3.72883326886287e-09,
+           1.0074540099768194e-08,
+           2.2998096644955307e-08,
+           4.088474797411855e-08,
+           4.312012402877949e-08,
+           3.084920691930009e-08,
+           3.682414781653735e-08,
+           2.8015373368202485e-08,
+           2.291226741120762e-08,
+           2.65191972876492e-08,
+           1.7218832229903164e-08,
+           2.076038006209588e-08,
+           1.528729297757508e-08,
+           1.2504761828739952e-08,
+           1.3175994323719419e-08,
+           4.767862165550255e-09
+          ]
+         }
+        ],
+        "values": {
+         "edges": [
+          2.0,
+          2.728842660642837,
+          3.723291133272139,
+          5.080137841233113,
+          6.931448431551464,
+          9.457416090031758,
+          12.903900242964319,
+          17.60635673584025,
+          24.022488679628626,
+          32.77679596189011,
+          44.721359549995796,
+          61.01877689098775,
+          83.2553207401873,
+          113.59533548066277,
+          154.99189875483367,
+          211.4742526881128,
+          288.5399811814428,
+          393.6901049745011,
+          537.1591767636878,
+          732.9114385542686,
+          1000.0
+         ],
+         "unit": "1",
+         "values": [
+          0.161356569443822,
+          0.14730156347022652,
+          0.13282553407856967,
+          0.11958183272918803,
+          0.1072997328869039,
+          0.09590894802062973,
+          0.0853852062520982,
+          0.0757206677165841,
+          0.0669020637604871,
+          0.058906713322033406,
+          0.05170144880352389,
+          0.0452454312678145,
+          0.03949128228592947,
+          0.0343874740695732,
+          0.029880662885683435,
+          0.025915950078921647,
+          0.022440371346555632,
+          0.019402758967937507,
+          0.016755287708377208,
+          0.014453013116372655
+         ]
+        }
+       }
+      ],
+      "status": "ok"
+     }
+    ],
+    "status": "ok"
+   }
+  },
+  {
+   "name": "full",
+   "allow_outside": true,
+   "request": {
+    "protocol": "cr-provider/1",
+    "provider": "emulator",
+    "provider_version": "1.0.0",
+    "points": [
+     {
+      "D0_cm2_s": 2.980531242617149e+28,
+      "V_A_kms": 31.84338911609444,
+      "V_c_kms": 13.567804484268862,
+      "delta": 0.4982708254750602,
+      "eta": 1.3708170769938182
+     }
+    ],
+    "observables": [
+     {
+      "id": "B/C",
+      "axis": "rigidity",
+      "unit": "GV",
+      "bins": [
+       [
+        2.0,
+        2.728842660642837
+       ],
+       [
+        2.728842660642837,
+        3.723291133272139
+       ],
+       [
+        3.723291133272139,
+        5.080137841233113
+       ],
+       [
+        5.080137841233113,
+        6.931448431551464
+       ],
+       [
+        6.931448431551464,
+        9.457416090031758
+       ],
+       [
+        9.457416090031758,
+        12.903900242964319
+       ],
+       [
+        12.903900242964319,
+        17.60635673584025
+       ],
+       [
+        17.60635673584025,
+        24.022488679628626
+       ],
+       [
+        24.022488679628626,
+        32.77679596189011
+       ],
+       [
+        32.77679596189011,
+        44.721359549995796
+       ],
+       [
+        44.721359549995796,
+        61.01877689098775
+       ],
+       [
+        61.01877689098775,
+        83.2553207401873
+       ],
+       [
+        83.2553207401873,
+        113.59533548066277
+       ],
+       [
+        113.59533548066277,
+        154.99189875483367
+       ],
+       [
+        154.99189875483367,
+        211.4742526881128
+       ],
+       [
+        211.4742526881128,
+        288.5399811814428
+       ],
+       [
+        288.5399811814428,
+        393.6901049745011
+       ],
+       [
+        393.6901049745011,
+        537.1591767636878
+       ],
+       [
+        537.1591767636878,
+        732.9114385542686
+       ],
+       [
+        732.9114385542686,
+        1000.0
+       ]
+      ]
+     }
+    ],
+    "want": [
+     "lis"
+    ],
+    "seed": null
+   },
+   "exit": 0,
+   "response": {
+    "protocol": "cr-provider/1",
+    "provider": "emulator",
+    "provider_version": "1.0.0",
+    "results": [
+     {
+      "evaluation": {
+       "computational_run_ref": null,
+       "input_hash": "e74ba90f7309b951b3efa61a0d1cf06c4856beaf12546e57a8edd236b739af73",
+       "numerical_tolerance": 0.0006136734606017047
+      },
+      "labels": [
+       "synthetic",
+       "unvalidated"
+      ],
+      "point": {
+       "D0_cm2_s": 2.980531242617149e+28,
+       "V_A_kms": 31.84338911609444,
+       "V_c_kms": 13.567804484268862,
+       "delta": 0.4982708254750602,
+       "eta": 1.3708170769938182
+      },
+      "point_index": 0,
+      "predictions": [
+       {
+        "allowed_transformations": [
+         "solar modulation per isotope is not possible: the emulator gives element ratios only",
+         "sub-range of the training bins"
+        ],
+        "derivation_status": "numerical-evidence",
+        "observable": {
+         "bin_semantics": "bin-averaged",
+         "conventions": {
+          "energy_variable": "rigidity in GV: the ratio of the bin-integrated fluxes of the training runs (r3 P2), isotopes summed at equal rigidity (P3)",
+          "frame": "Galactic rest frame (interstellar gas at rest)"
+         },
+         "level": "crsr:local-interstellar",
+         "normalization": {
+          "convention": "ratio of two bin-integrated fluxes; the normalization cancels",
+          "kind": "exposure",
+          "value": "not-applicable"
+         },
+         "phase_space": {
+          "definition": "local interstellar flux at the observer of the training runs, before solar modulation",
+          "fiducial": false
+         },
+         "process": "unmodulated local interstellar B/C emulated from USINE V3.5 runs (Gaussian-process emulator ml-emulator-usine-bc-e2): ratio of bin integrals of 10B+11B over 12C as in the training runs",
+         "quantity": "ratio",
+         "species": [
+          {
+           "name": "boron"
+          },
+          {
+           "name": "carbon"
+          }
+         ],
+         "unit": "1",
+         "validity_range": {
+          "max": 1000.0,
+          "min": 2.0,
+          "unit": "GV",
+          "variable": "rigidity"
+         },
+         "variables": [
+          {
+           "edges": [
+            2.0,
+            2.728842660642837,
+            3.723291133272139,
+            5.080137841233113,
+            6.931448431551464,
+            9.457416090031758,
+            12.903900242964319,
+            17.60635673584025,
+            24.022488679628626,
+            32.77679596189011,
+            44.721359549995796,
+            61.01877689098775,
+            83.2553207401873,
+            113.59533548066277,
+            154.99189875483367,
+            211.4742526881128,
+            288.5399811814428,
+            393.6901049745011,
+            537.1591767636878,
+            732.9114385542686,
+            1000.0
+           ],
+           "name": "rigidity",
+           "unit": "GV"
+          }
+         ]
+        },
+        "parameter_point": {
+         "D0_cm2_s": 2.980531242617149e+28,
+         "V_A_kms": 31.84338911609444,
+         "V_c_kms": 13.567804484268862,
+         "delta": 0.4982708254750602,
+         "domain_status": "inside",
+         "emulator_model": "sha256:31f5ba51bc434a4febcdad0d3ed031d4bd81aed3dceef2d709e5068ffdd747c1",
+         "eta": 1.3708170769938182,
+         "ml_artifact": "ml-emulator-usine-bc-e2",
+         "training_provider": "usine 0.2.0"
+        },
+        "representation": "numerical",
+        "uncertainties": [
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc1",
+          "values": [
+           6.565675670563102e-06,
+           6.604136098477518e-06,
+           6.4872233147464715e-06,
+           6.310003265793612e-06,
+           6.074022942814927e-06,
+           5.797353492884316e-06,
+           5.500224059503863e-06,
+           5.190589424314536e-06,
+           4.86985118498897e-06,
+           4.540895735283385e-06,
+           4.2083222333369545e-06,
+           3.877311930066546e-06,
+           3.5527859205831736e-06,
+           3.2389956721586605e-06,
+           2.9393701887937254e-06,
+           2.6563196443024395e-06,
+           2.3914931286222714e-06,
+           2.145774853869456e-06,
+           1.9194755196060506e-06,
+           1.712357281765721e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc2",
+          "values": [
+           -3.5785519102614975e-05,
+           -3.0063569580225876e-05,
+           -2.469648835481181e-05,
+           -1.989083832383496e-05,
+           -1.5489646487409054e-05,
+           -1.165146535079637e-05,
+           -8.580580169924576e-06,
+           -6.179603615226352e-06,
+           -4.24329678984668e-06,
+           -2.655467020872155e-06,
+           -1.3598712060634686e-06,
+           -3.187951453796097e-07,
+           5.001315673805024e-07,
+           1.1269844552355448e-06,
+           1.5901204035627295e-06,
+           1.91596570002367e-06,
+           2.1286289018697817e-06,
+           2.2496426990095867e-06,
+           2.2979486197735244e-06,
+           2.289794878486969e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc3",
+          "values": [
+           -6.588314923007616e-05,
+           -2.9127440365589728e-05,
+           -4.4744919913411725e-06,
+           8.30099723534656e-06,
+           1.319538471352779e-05,
+           1.3728737279256037e-05,
+           1.2290651336681068e-05,
+           1.0195556638933306e-05,
+           8.040006583084898e-06,
+           6.05621975606294e-06,
+           4.320523150732632e-06,
+           2.847880625603522e-06,
+           1.628259818311983e-06,
+           6.404359166056943e-07,
+           -1.4143774863465403e-07,
+           -7.446887816838047e-07,
+           -1.195804610671317e-06,
+           -1.519556439870071e-06,
+           -1.7384758255481684e-06,
+           -1.8724556956970314e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc4",
+          "values": [
+           1.6261200183385136e-05,
+           -3.517477108452318e-06,
+           -1.4042625433157799e-05,
+           -1.4761780814510697e-05,
+           -8.918917674303177e-06,
+           -1.7195841026040102e-06,
+           2.692701811414904e-06,
+           4.201483543645602e-06,
+           4.2933594529782326e-06,
+           3.82557950312056e-06,
+           3.1398386799453546e-06,
+           2.395564852004698e-06,
+           1.6779064272536107e-06,
+           1.0316666498738755e-06,
+           4.770892776465373e-07,
+           1.9241311264083257e-08,
+           -3.453475754566196e-07,
+           -6.249663567533733e-07,
+           -8.302764906527688e-07,
+           -9.72560316350456e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc5",
+          "values": [
+           1.8346275594588586e-05,
+           -2.0524178373788303e-05,
+           -1.4574598797982705e-05,
+           1.933338695742553e-06,
+           1.0194960744210536e-05,
+           9.725807738897911e-06,
+           5.960311009040117e-06,
+           2.2481861136767986e-06,
+           -3.225888833400389e-07,
+           -1.7398015610686682e-06,
+           -2.308793736258849e-06,
+           -2.3333272429465505e-06,
+           -2.0394223370362737e-06,
+           -1.5825505064976062e-06,
+           -1.0658094526002772e-06,
+           -5.535734125622012e-07,
+           -8.440472278593387e-08,
+           3.213605527937169e-07,
+           6.557662007845682e-07,
+           9.189068924426587e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc6",
+          "values": [
+           -3.326544446708224e-06,
+           5.893679064979643e-06,
+           5.500074564422892e-07,
+           -3.976120937998012e-06,
+           -2.4925138231899104e-06,
+           1.4411541646339155e-06,
+           2.9532855061012025e-06,
+           2.1347556113709647e-06,
+           8.793969495887696e-07,
+           -3.6346073807200634e-08,
+           -5.529810427721182e-07,
+           -7.677869900595822e-07,
+           -7.809322546306493e-07,
+           -6.714606710762958e-07,
+           -4.970587245369453e-07,
+           -2.972729143561309e-07,
+           -9.835170230567477e-08,
+           8.39775580400908e-08,
+           2.4103380593956205e-07,
+           3.6958817751718357e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc7",
+          "values": [
+           -4.684781332902069e-06,
+           1.551487390851909e-05,
+           -1.5161172503032582e-05,
+           -2.9768409174370492e-06,
+           7.988234335474098e-06,
+           4.508194112599174e-06,
+           -6.62901601674667e-07,
+           -2.556889469521191e-06,
+           -2.450441490124491e-06,
+           -1.6291815720662764e-06,
+           -7.028740417186612e-07,
+           5.246221784898468e-08,
+           5.419684446406148e-07,
+           7.68249520061951e-07,
+           7.778152284468491e-07,
+           6.301105273638142e-07,
+           3.827909891294287e-07,
+           8.550623984884534e-08,
+           -2.2389435494351796e-07,
+           -5.189587954163784e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc8",
+          "values": [
+           -1.642897927343581e-07,
+           6.208990580855349e-07,
+           -9.55235724177062e-07,
+           4.848353348880847e-07,
+           5.938305599084638e-07,
+           -5.697622147034182e-07,
+           -7.186037027690978e-07,
+           -7.078672948294225e-08,
+           3.8940464450403515e-07,
+           4.703370503141705e-07,
+           3.374874655576583e-07,
+           1.4443009886312844e-07,
+           -2.483948355319896e-08,
+           -1.3630779550285543e-07,
+           -1.8409452035127532e-07,
+           -1.7626686200929584e-07,
+           -1.2634193266192618e-07,
+           -4.915762191880368e-08,
+           4.210680557288631e-08,
+           1.3701408840835052e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc9",
+          "values": [
+           8.713253823964254e-09,
+           -7.116955239865411e-08,
+           2.1222004132824207e-07,
+           -2.6002233114152397e-07,
+           -4.8696175866333725e-08,
+           3.1302129026609297e-07,
+           1.051528601887266e-07,
+           -2.1492861688442904e-07,
+           -2.2234740242079014e-07,
+           -6.297096574904891e-08,
+           7.399976501438216e-08,
+           1.268771836155876e-07,
+           1.0897752841414284e-07,
+           5.468298612402862e-08,
+           -4.998047998743523e-09,
+           -4.8368844831323654e-08,
+           -6.433657448029187e-08,
+           -5.0260715748846034e-08,
+           -9.252719234597636e-09,
+           5.273910737929433e-08
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc10",
+          "values": [
+           3.7456379324177554e-08,
+           -2.617248236187149e-07,
+           8.187456152631458e-07,
+           -1.310940032372888e-06,
+           9.257273257519156e-07,
+           9.751835731676151e-08,
+           -4.811415703660918e-07,
+           4.6425921817201916e-09,
+           1.803068391055633e-07,
+           8.198192720177595e-08,
+           -1.1546841777470795e-08,
+           -4.693874373146249e-08,
+           -4.35066323100593e-08,
+           -2.428497368957134e-08,
+           -2.696798243360331e-09,
+           1.2354934823855308e-08,
+           1.8627209275085304e-08,
+           1.5346883366141096e-08,
+           3.8249381440001725e-09,
+           -1.4181672287196274e-08
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc11",
+          "values": [
+           -8.356390289197337e-10,
+           5.7879980823393354e-09,
+           -1.6053746947814345e-08,
+           6.615304304388917e-09,
+           5.5834316047821254e-08,
+           -9.427804127991204e-08,
+           -2.3626598034885894e-08,
+           1.2042207346703863e-07,
+           2.6007121103112495e-08,
+           -6.510422665986414e-08,
+           -5.853232271671595e-08,
+           -1.19251773497343e-08,
+           2.4004853858963673e-08,
+           3.383410052644507e-08,
+           2.2806500374263255e-08,
+           3.0941055142365104e-09,
+           -1.3399034209875768e-08,
+           -1.8986368022500405e-08,
+           -1.0077211651908682e-08,
+           1.4384041273893882e-08
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc12",
+          "values": [
+           9.207470735988207e-11,
+           -1.034257633542836e-09,
+           5.121522201521052e-09,
+           -1.9788971912821722e-08,
+           5.1647051742857456e-08,
+           -7.848191551745318e-08,
+           5.2356464337832214e-08,
+           1.9492750071487047e-08,
+           -3.481539054448443e-08,
+           -1.8364287004760868e-08,
+           1.1891937826327182e-08,
+           1.863669073477691e-08,
+           7.790756558603098e-09,
+           -4.9704593621639225e-09,
+           -9.491217041904945e-09,
+           -7.025329240192317e-09,
+           2.65538766161834e-10,
+           5.529835720612738e-09,
+           5.2435484670781005e-09,
+           -4.1026151897695495e-09
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc13",
+          "values": [
+           -7.796948323330921e-11,
+           6.015128678336306e-10,
+           -2.5195775916677776e-09,
+           8.141572504771021e-09,
+           -1.985655796956774e-08,
+           3.398516184910696e-08,
+           -3.985993431902088e-08,
+           2.7943227718304186e-08,
+           2.354121582424307e-09,
+           -1.9804240964411127e-08,
+           -3.102934016390476e-09,
+           1.1951781997560148e-08,
+           8.989757904232286e-09,
+           -9.553183531817518e-11,
+           -7.0600117328733855e-09,
+           -6.285172349040086e-09,
+           -7.512742987564774e-10,
+           4.010981000417654e-09,
+           4.80998037717956e-09,
+           -3.3782934215195153e-09
+          ]
+         },
+         {
+          "correlation": "uncorrelated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-dropped-components",
+          "values": [
+           5.766192042438689e-12,
+           4.4223380195443214e-11,
+           2.339039290003685e-10,
+           1.0763527247510519e-09,
+           3.72883326886287e-09,
+           1.0074540099768194e-08,
+           2.2998096644955307e-08,
+           4.088474797411855e-08,
+           4.312012402877949e-08,
+           3.084920691930009e-08,
+           3.682414781653735e-08,
+           2.8015373368202485e-08,
+           2.291226741120762e-08,
+           2.65191972876492e-08,
+           1.7218832229903164e-08,
+           2.076038006209588e-08,
+           1.528729297757508e-08,
+           1.2504761828739952e-08,
+           1.3175994323719419e-08,
+           4.767862165550255e-09
+          ]
+         }
+        ],
+        "values": {
+         "edges": [
+          2.0,
+          2.728842660642837,
+          3.723291133272139,
+          5.080137841233113,
+          6.931448431551464,
+          9.457416090031758,
+          12.903900242964319,
+          17.60635673584025,
+          24.022488679628626,
+          32.77679596189011,
+          44.721359549995796,
+          61.01877689098775,
+          83.2553207401873,
+          113.59533548066277,
+          154.99189875483367,
+          211.4742526881128,
+          288.5399811814428,
+          393.6901049745011,
+          537.1591767636878,
+          732.9114385542686,
+          1000.0
+         ],
+         "unit": "1",
+         "values": [
+          0.161356569443822,
+          0.14730156347022652,
+          0.13282553407856967,
+          0.11958183272918803,
+          0.1072997328869039,
+          0.09590894802062973,
+          0.0853852062520982,
+          0.0757206677165841,
+          0.0669020637604871,
+          0.058906713322033406,
+          0.05170144880352389,
+          0.0452454312678145,
+          0.03949128228592947,
+          0.0343874740695732,
+          0.029880662885683435,
+          0.025915950078921647,
+          0.022440371346555632,
+          0.019402758967937507,
+          0.016755287708377208,
+          0.014453013116372655
+         ]
+        }
+       }
+      ],
+      "status": "ok"
+     }
+    ],
+    "status": "ok"
+   }
+  },
+  {
+   "name": "unsupported-bins",
+   "allow_outside": false,
+   "request": {
+    "protocol": "cr-provider/1",
+    "provider": "emulator",
+    "provider_version": "1.0.0",
+    "points": [
+     {
+      "D0_cm2_s": 3e+28,
+      "V_A_kms": 30.0,
+      "V_c_kms": 5.0,
+      "delta": 0.5,
+      "eta": 1.0
+     },
+     {
+      "D0_cm2_s": 2.849305008390949e+28,
+      "V_A_kms": 5.66563033277587,
+      "V_c_kms": 7.477593688983244,
+      "delta": 0.5098894116281263,
+      "eta": 1.4638296961221888
+     }
+    ],
+    "observables": [
+     {
+      "id": "B/C",
+      "axis": "rigidity",
+      "unit": "GV",
+      "bins": [
+       [
+        2.1,
+        3.0
+       ]
+      ]
+     }
+    ],
+    "want": [
+     "lis"
+    ],
+    "seed": null
+   },
+   "exit": 1,
+   "response": {
+    "detail": "B/C bins must be a contiguous run of the training bins (edges 2 ... 1000 GV, 20 bins)",
+    "protocol": "cr-provider/1",
+    "provider": "emulator",
+    "provider_version": "1.0.0",
+    "reason": "unsupported-observable",
+    "results": [],
+    "status": "failed"
+   }
+  },
+  {
+   "name": "corner",
+   "allow_outside": false,
+   "request": {
+    "protocol": "cr-provider/1",
+    "provider": "emulator",
+    "provider_version": "1.0.0",
+    "points": [
+     {
+      "D0_cm2_s": 1e+28,
+      "delta": 0.8,
+      "eta": 1.5,
+      "V_A_kms": 100.0,
+      "V_c_kms": 30.0
+     }
+    ],
+    "observables": [
+     {
+      "id": "B/C",
+      "axis": "rigidity",
+      "unit": "GV",
+      "bins": [
+       [
+        3.723291133272139,
+        5.080137841233113
+       ],
+       [
+        5.080137841233113,
+        6.931448431551464
+       ],
+       [
+        6.931448431551464,
+        9.457416090031758
+       ],
+       [
+        9.457416090031758,
+        12.903900242964319
+       ],
+       [
+        12.903900242964319,
+        17.60635673584025
+       ],
+       [
+        17.60635673584025,
+        24.022488679628626
+       ],
+       [
+        24.022488679628626,
+        32.77679596189011
+       ]
+      ]
+     }
+    ],
+    "want": [
+     "lis"
+    ],
+    "seed": null
+   },
+   "exit": 1,
+   "response": {
+    "protocol": "cr-provider/1",
+    "provider": "emulator",
+    "provider_version": "1.0.0",
+    "results": [
+     {
+      "detail": "DomainModel status outside: Mahalanobis distance above threshold (far from the training cloud)",
+      "labels": [
+       "failed"
+      ],
+      "point": {
+       "D0_cm2_s": 1e+28,
+       "V_A_kms": 100.0,
+       "V_c_kms": 30.0,
+       "delta": 0.8,
+       "eta": 1.5
+      },
+      "point_index": 0,
+      "reason": "out-of-domain",
+      "status": "failed"
+     }
+    ],
+    "status": "failed"
+   }
+  },
+  {
+   "name": "corner",
+   "allow_outside": true,
+   "request": {
+    "protocol": "cr-provider/1",
+    "provider": "emulator",
+    "provider_version": "1.0.0",
+    "points": [
+     {
+      "D0_cm2_s": 1e+28,
+      "delta": 0.8,
+      "eta": 1.5,
+      "V_A_kms": 100.0,
+      "V_c_kms": 30.0
+     }
+    ],
+    "observables": [
+     {
+      "id": "B/C",
+      "axis": "rigidity",
+      "unit": "GV",
+      "bins": [
+       [
+        3.723291133272139,
+        5.080137841233113
+       ],
+       [
+        5.080137841233113,
+        6.931448431551464
+       ],
+       [
+        6.931448431551464,
+        9.457416090031758
+       ],
+       [
+        9.457416090031758,
+        12.903900242964319
+       ],
+       [
+        12.903900242964319,
+        17.60635673584025
+       ],
+       [
+        17.60635673584025,
+        24.022488679628626
+       ],
+       [
+        24.022488679628626,
+        32.77679596189011
+       ]
+      ]
+     }
+    ],
+    "want": [
+     "lis"
+    ],
+    "seed": null
+   },
+   "exit": 0,
+   "response": {
+    "protocol": "cr-provider/1",
+    "provider": "emulator",
+    "provider_version": "1.0.0",
+    "results": [
+     {
+      "evaluation": {
+       "computational_run_ref": null,
+       "input_hash": "0e5cc37af1603fcb0876bb592cfcf749b215898d6d812aa4caea0177987af55b",
+       "numerical_tolerance": 0.0006136734606017047
+      },
+      "labels": [
+       "outside-validated-range",
+       "synthetic",
+       "unvalidated"
+      ],
+      "point": {
+       "D0_cm2_s": 1e+28,
+       "V_A_kms": 100.0,
+       "V_c_kms": 30.0,
+       "delta": 0.8,
+       "eta": 1.5
+      },
+      "point_index": 0,
+      "predictions": [
+       {
+        "allowed_transformations": [
+         "solar modulation per isotope is not possible: the emulator gives element ratios only",
+         "sub-range of the training bins"
+        ],
+        "derivation_status": "numerical-evidence",
+        "observable": {
+         "bin_semantics": "bin-averaged",
+         "conventions": {
+          "energy_variable": "rigidity in GV: the ratio of the bin-integrated fluxes of the training runs (r3 P2), isotopes summed at equal rigidity (P3)",
+          "frame": "Galactic rest frame (interstellar gas at rest)"
+         },
+         "level": "crsr:local-interstellar",
+         "normalization": {
+          "convention": "ratio of two bin-integrated fluxes; the normalization cancels",
+          "kind": "exposure",
+          "value": "not-applicable"
+         },
+         "phase_space": {
+          "definition": "local interstellar flux at the observer of the training runs, before solar modulation",
+          "fiducial": false
+         },
+         "process": "unmodulated local interstellar B/C emulated from USINE V3.5 runs (Gaussian-process emulator ml-emulator-usine-bc-e2): ratio of bin integrals of 10B+11B over 12C as in the training runs",
+         "quantity": "ratio",
+         "species": [
+          {
+           "name": "boron"
+          },
+          {
+           "name": "carbon"
+          }
+         ],
+         "unit": "1",
+         "validity_range": {
+          "max": 32.77679596189011,
+          "min": 3.723291133272139,
+          "unit": "GV",
+          "variable": "rigidity"
+         },
+         "variables": [
+          {
+           "edges": [
+            3.723291133272139,
+            5.080137841233113,
+            6.931448431551464,
+            9.457416090031758,
+            12.903900242964319,
+            17.60635673584025,
+            24.022488679628626,
+            32.77679596189011
+           ],
+           "name": "rigidity",
+           "unit": "GV"
+          }
+         ]
+        },
+        "parameter_point": {
+         "D0_cm2_s": 1e+28,
+         "V_A_kms": 100.0,
+         "V_c_kms": 30.0,
+         "delta": 0.8,
+         "domain_status": "outside",
+         "emulator_model": "sha256:31f5ba51bc434a4febcdad0d3ed031d4bd81aed3dceef2d709e5068ffdd747c1",
+         "eta": 1.5,
+         "ml_artifact": "ml-emulator-usine-bc-e2",
+         "training_provider": "usine 0.2.0"
+        },
+        "representation": "numerical",
+        "uncertainties": [
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc1",
+          "values": [
+           0.0034533645469331333,
+           0.0036484535678113213,
+           0.003116031315116675,
+           0.0023479797789879983,
+           0.0018301540373258267,
+           0.0015313962002241682,
+           0.001317987410757691
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc2",
+          "values": [
+           -0.007541754955823998,
+           -0.006597599702685401,
+           -0.004558484965540906,
+           -0.0027070654325411065,
+           -0.0016378629210313039,
+           -0.0010458879063581503,
+           -0.0006587985213443881
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc3",
+          "values": [
+           -0.0009563419044851123,
+           0.0019270606425809186,
+           0.0027178990078447454,
+           0.0022324463835943246,
+           0.001641980648240649,
+           0.0012077240150385822,
+           0.0008736507400788769
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc4",
+          "values": [
+           -0.0035562617871840387,
+           -0.004060502905680559,
+           -0.0021767039945407066,
+           -0.0003313216573501734,
+           0.0004262430971108827,
+           0.0005897057846679443,
+           0.0005527829711547259
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc5",
+          "values": [
+           -0.0023251495621469265,
+           0.00033501009195579026,
+           0.001567406525460239,
+           0.001180486316618162,
+           0.0005943563290560604,
+           0.00019878053526634106,
+           -2.616469497696813e-05
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc6",
+          "values": [
+           0.00011810785115108127,
+           -0.0009273964687801466,
+           -0.0005158097819911724,
+           0.0002354515881667241,
+           0.000396405169708077,
+           0.000254065481807158,
+           9.600793741458194e-05
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc7",
+          "values": [
+           -0.0005445695228238591,
+           -0.00011613732834231697,
+           0.0002765114674841694,
+           0.00012319813765101763,
+           -1.4883096449727355e-05,
+           -5.0900237323870026e-05,
+           -4.474833433026263e-05
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc8",
+          "values": [
+           -0.0002553187065821676,
+           0.00014075440820493742,
+           0.00015295949145022582,
+           -0.00011586351946745951,
+           -0.00012005637202008175,
+           -1.0486033402845942e-05,
+           5.291577983843847e-05
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc9",
+          "values": [
+           1.6422771591987084e-05,
+           -2.1855782854063242e-05,
+           -3.6315892582570058e-06,
+           1.8429558338475998e-05,
+           5.086333505431913e-06,
+           -9.218104170901628e-06,
+           -8.747906089528616e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc10",
+          "values": [
+           1.533312999223666e-05,
+           -2.6666150007341464e-05,
+           1.6707317334125436e-05,
+           1.3894700811878291e-06,
+           -5.632204258673666e-06,
+           4.818697634285372e-08,
+           1.7167459219149007e-06
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc11",
+          "values": [
+           -7.835772741054779e-07,
+           3.507122269146271e-07,
+           2.6263247534852547e-06,
+           -3.5010391087467167e-06,
+           -7.208257562393665e-07,
+           3.2576080482426456e-06,
+           6.453713662542329e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc12",
+          "values": [
+           1.3764955787034774e-07,
+           -5.776897406256566e-07,
+           1.3377134809116333e-06,
+           -1.6048200726985346e-06,
+           8.795686804833724e-07,
+           2.9035959722683143e-07,
+           -4.757283427034594e-07
+          ]
+         },
+         {
+          "correlation": "fully-correlated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-pc13",
+          "values": [
+           -5.740929225840815e-08,
+           2.0149228047353978e-07,
+           -4.3601379628763614e-07,
+           5.891485193235554e-07,
+           -5.676945427037171e-07,
+           3.5287292341028066e-07,
+           2.7270640525143014e-08
+          ]
+         },
+         {
+          "correlation": "uncorrelated",
+          "gaussian": true,
+          "kind": "numerical",
+          "name": "emulator-dropped-components",
+          "values": [
+           4.901997036602881e-10,
+           2.450111245649946e-09,
+           7.530959288210931e-09,
+           1.606355814283242e-08,
+           3.012666838289782e-08,
+           4.7488030934087815e-08,
+           4.5943864541510685e-08
+          ]
+         }
+        ],
+        "values": {
+         "edges": [
+          3.723291133272139,
+          5.080137841233113,
+          6.931448431551464,
+          9.457416090031758,
+          12.903900242964319,
+          17.60635673584025,
+          24.022488679628626,
+          32.77679596189011
+         ],
+         "unit": "1",
+         "values": [
+          0.2783665829047779,
+          0.27220518553802087,
+          0.21670851490058887,
+          0.15292399927841138,
+          0.11185150811715336,
+          0.08795028926560124,
+          0.07128317518075405
+         ]
+        }
+       }
+      ],
+      "status": "ok"
+     }
+    ],
+    "status": "ok"
+   }
+  },
+  {
+   "name": "other-observable",
+   "allow_outside": false,
+   "request": {
+    "protocol": "cr-provider/1",
+    "provider": "emulator",
+    "provider_version": "1.0.0",
+    "points": [
+     {
+      "D0_cm2_s": 3e+28,
+      "V_A_kms": 30.0,
+      "V_c_kms": 5.0,
+      "delta": 0.5,
+      "eta": 1.0
+     },
+     {
+      "D0_cm2_s": 2.849305008390949e+28,
+      "V_A_kms": 5.66563033277587,
+      "V_c_kms": 7.477593688983244,
+      "delta": 0.5098894116281263,
+      "eta": 1.4638296961221888
+     }
+    ],
+    "observables": [
+     {
+      "id": "10Be/9Be",
+      "axis": "ekn",
+      "unit": "GeV/n",
+      "bins": [
+       [
+        1.0,
+        2.0
+       ]
+      ]
+     }
+    ],
+    "want": [
+     "lis"
+    ],
+    "seed": null
+   },
+   "exit": 1,
+   "response": {
+    "detail": "'10Be/9Be' is not among ['B/C']",
+    "protocol": "cr-provider/1",
+    "provider": "emulator",
+    "provider_version": "1.0.0",
+    "reason": "unsupported-observable",
+    "results": [],
+    "status": "failed"
+   }
+  }
+ ]
+}
