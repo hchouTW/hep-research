@@ -1,0 +1,177 @@
+{
+ "contract_version": "3.14.0",
+ "artifact_id": "fixture-synthetic-theory-spec-crprop",
+ "artifact_type": "theory-spec",
+ "objective": "SYNTHETIC structural fixture; values are placeholders, not physics",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.42.0",
+  "contracts": "3.14.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-theory",
+  "created": "2026-10-02",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "status": [
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "model": {
+   "id": "synthetic-diffusion-model",
+   "description": "structural fixture",
+   "family": "cosmic-ray-propagation"
+  },
+  "assumptions": [
+   "placeholder assumption"
+  ],
+  "conventions": {
+   "unit_system": "natural units (synthetic)",
+   "hbar_c_one": true,
+   "metric_signature": "+---",
+   "coupling_normalization": "not-applicable",
+   "renormalization_scheme": "not-applicable",
+   "scales": "not-applicable",
+   "energy_variable": "sqrt_s",
+   "frame": "center-of-mass",
+   "angle_definition": "not-applicable",
+   "spin_treatment": "not-applicable",
+   "mass_approximation": "not-applicable"
+  },
+  "order": "tree-level (synthetic)",
+  "parameters": {
+   "p": "placeholder"
+  },
+  "scales": "not-applicable",
+  "derivation_status": "perturbative-argument",
+  "validity_domain": {
+   "sqrt_s": "placeholder range"
+  },
+  "checks_run": [
+   {
+    "name": "units",
+    "result": "pass",
+    "tolerance": "exact"
+   }
+  ],
+  "checks_not_run": [
+   "all (fixture)"
+  ],
+  "neglected": [
+   "placeholder higher orders"
+  ],
+  "transport": {
+   "geometry": {
+    "kind": "cylinder-2d",
+    "L_kpc": 5.0,
+    "radius_kpc": 20.0,
+    "disc_halfwidth_pc": 100,
+    "local_bubble_radius_kpc": 0.1
+   },
+   "diffusion": {
+    "form": "beta^eta (R/R0)^delta with smooth breaks",
+    "D0_cm2_s": 3e+28,
+    "R0_gv": 1.0,
+    "eta": 1.0,
+    "delta": 0.45,
+    "breaks": [
+     {
+      "kind": "low",
+      "R_break_gv": 5.0,
+      "delta_below": 0.15,
+      "s": 0.05,
+      "s_convention": "usine"
+     },
+     {
+      "kind": "middle",
+      "R_break_gv": 300.0,
+      "delta_above": 0.3,
+      "s": 0.05,
+      "s_convention": "usine"
+     }
+    ]
+   },
+   "reacceleration": {
+    "V_A_kms": 0.0,
+    "zone": "thin-disc",
+    "relation": "Seo-Ptuskin 1994",
+    "w": 1.0
+   },
+   "convection": {
+    "V_c_kms": 0.0,
+    "dVc_dz_kms_per_kpc": 0.0
+   },
+   "losses": [
+    "ionization",
+    "coulomb",
+    "adiabatic"
+   ],
+   "decay": {
+    "enabled": true,
+    "lorentz_dilation": true,
+    "ec_treatment": "fully-stripped"
+   },
+   "gas": {
+    "model": "synthetic-uniform",
+    "He_to_H_number": 0.1
+   },
+   "sources": {
+    "spatial": "synthetic-uniform",
+    "injection": [
+     {
+      "species_group": "Z>2",
+      "gamma": 2.3,
+      "breaks": [],
+      "eta": -1.0
+     }
+    ],
+    "abundances": "fitted"
+   },
+   "cross_sections": {
+    "production_set": "synthetic-set",
+    "inelastic_set": "synthetic-set",
+    "ghost_threshold": "synthetic lifetime cut"
+   },
+   "species": {
+    "network_top": "Ni-64",
+    "isotopic": true
+   },
+   "family": "BIG",
+   "free": [
+    "D0_cm2_s",
+    "delta",
+    "L_kpc",
+    "V_A_kms",
+    "V_c_kms"
+   ]
+  },
+  "degenerate_directions": [
+   {
+    "combination": "D0_cm2_s/L_kpc",
+    "form": "power",
+    "exponents": {
+     "D0_cm2_s": 1,
+     "L_kpc": -1
+    },
+    "valid_range": {
+     "L_kpc": {
+      "min": 2,
+      "max": 6
+     }
+    },
+    "broken_by": [
+     "10Be/9Be",
+     "Be/B"
+    ],
+    "evidence": "profile-scan"
+   }
+  ]
+ }
+}

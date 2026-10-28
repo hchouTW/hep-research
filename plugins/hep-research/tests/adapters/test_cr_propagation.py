@@ -668,7 +668,16 @@ class UsineTranslator(unittest.TestCase):
             self.assertTrue(any(needle in x for x in t["substitutes"]), needle)
         slab = usine_translation("b1-slab-all-items")
         self.assertEqual(slab["model"], "Model1DKisoVc")
-        self.assertAlmostEqual(slab["transport_pars"]["Va"], 5.0 * math.sqrt(5.0 / 0.1), places=6)
+        # whole-halo V_A by transport_conventions' zone conversion (A1R): sqrt(L/(3h)) at first order (B1X rerun)
+        self.assertAlmostEqual(slab["transport_pars"]["Va"], 5.0 * math.sqrt(5.0 / (3 * 0.1)), places=6)
+        conv = slab["reacceleration_conversion"]
+        self.assertEqual(conv["conversion_status"], "approximate")
+        self.assertAlmostEqual(conv["relative_error_bound"], (1 + conv["lam_max"]) / 5, places=12)
+        self.assertTrue(any("sqrt(L/(3h))" in x and "relative_error_bound" in x for x in slab["substitutes"]))
+        own = usine_spec("b1x-init-test")["transport"]
+        with self.assertRaisesRegex(usine_translate.SpecError, "whole-halo"):
+            usine_translate.translate(dict(own, reacceleration=dict(own["reacceleration"], zone="whole-halo")), "x",
+                                      (1.0, 10.0))
         self.assertTrue(slab["switches"]["IsELossAdiabatic"] and slab["switches"]["IsDecayBETA"])
         self.assertFalse(slab["switches"]["IsDecayEC"])
         self.assertIn("(1+(Rl1/Rig)^((delta-dl1)/sl1))^sl1", slab["K_formula"])
@@ -1103,6 +1112,315 @@ class B3HarmonizedComparison(unittest.TestCase):
         block = text.split("12C -> 11B\n")[1].split("\n\n")[0].split("\n")
         self.assertEqual([float(x) for x in block], [float(i) for i in range(91)])
         self.assertIn("12C -> 10Be\n4.000000000e+00", text)
+
+
+# ------------------------------------------------------------------ B1X (cr-propagation r4, decision A1.7): high break,
+# USINE's own cross-section files and data-normalised abundances, no transport field silently ignored
+
+B1X_RUN, SHIPPED_RUN = "b1x-init-test", "shipped-init-test"
+B1X_RTOL = 1e-6  # B1X-2, B1X-3, frozen in acceptance.json and VALIDATION CRPROP-B1X before the runs
+BORON_CARBON_TABLES = {axis: f"local_fluxes_BC_{axis}_Model1DKisoVc_SolMod0DFF_phi0_00GV.out" for axis in ("Ekn", "R")}
+SHIPPED_QUANTITIES = "B/C:KEKN:0.;B/C:kR:0."
+
+
+def b1x_translation():
+    s = usine_spec(B1X_RUN)
+    return usine_translate.translate(s["transport"], B1X_RUN, s["ekn_range_gev"], grid=s["ekn_grid"])
+
+
+def ratio_table_deviation(table_a, table_b):
+    """(number of common nodes, largest relative deviation on them) of two USINE tables."""
+    xa, ya, _ = usine_reader.read_table(table_a)
+    xb, yb, _ = usine_reader.read_table(table_b)
+    a, b = dict(zip(xa, ya)), dict(zip(xb, yb))
+    common = sorted(set(a) & set(b))
+    return len(common), max(abs(b[x] / a[x] - 1.0) for x in common)
+
+
+def usine_init_k_factor(rig, delta, r_break, delta_break, s_break):
+    """The break factor of USINE V3.5's shipped K line (inputs/init.TEST.par line 133)."""
+    return (1 + (rig / r_break) ** (delta_break / s_break)) ** (-s_break)
+
+
+class UsineB1XOffline(unittest.TestCase):
+    """B1X offline: the high break and USINE's own inputs are translated as recorded, the recorded run reproduces the
+    recorded shipped example, the records hash their committed inputs, a missing HEP_USINE_DATA is refused, and no
+    transport field is silently ignored (B1X-4)."""
+
+    def test_high_break_is_usine_formula(self):
+        t = b1x_translation()
+        self.assertTrue(t["K_formula"].endswith("*(1+(Rig/Rh1)^((delta-dh1)/sh1))^(-sh1)"), t["K_formula"])
+        p = t["transport_pars"]
+        brk = usine_spec(B1X_RUN)["transport"]["diffusion"]["breaks"][0]
+        self.assertEqual((p["Rh1"], p["dh1"], p["sh1"]), (brk["R_break_gv"], brk["delta_above"], brk["s"]))
+        # init.TEST.par Model1DKisoVc: delta 6.141924e-01, Rbreak 125.89254, Deltabreak 2.281522e-01, sbreak 0.010023191
+        for rig in (1.0, 50.0, 125.89254, 300.0, 1e4):
+            ours = (1 + (rig / p["Rh1"]) ** ((p["delta"] - p["dh1"]) / p["sh1"])) ** (-p["sh1"])
+            self.assertAlmostEqual(ours / usine_init_k_factor(rig, 6.141924e-01, 125.89254, 2.281522e-01,
+                                                              0.010023191), 1.0, places=12)
+        self.assertTrue(math.isclose(p["K0"], 0.035859151, rel_tol=1e-12))
+        self.assertTrue(any("high break form" in x for x in t["substitutes"]))
+        low_and_high = dict(usine_spec("b1-slab-all-items")["transport"])
+        low_and_high["diffusion"] = dict(low_and_high["diffusion"], breaks=low_and_high["diffusion"]["breaks"] + [
+            {"kind": "high", "R_break_gv": 300.0, "delta_above": 0.3, "s": 0.05, "s_convention": "usine"}])
+        t2 = usine_translate.translate(low_and_high, "x", (1.0, 10.0))
+        self.assertIn("(1+(Rl1/Rig)^((delta-dl1)/sl1))^sl1*(1+(Rig/Rh2)^((delta-dh2)/sh2))^(-sh2)", t2["K_formula"])
+
+    def test_half_specified_high_break_refused(self):
+        base = usine_spec(B1X_RUN)["transport"]
+        for brk in ({"kind": "high", "R_break_gv": 300.0, "s": 0.05}, {"kind": "high", "R_break_gv": 300.0,
+                                                                       "delta_above": 0.3},
+                    {"kind": "high", "R_break_gv": 300.0, "delta_below": 0.3, "s": 0.05}):
+            with self.subTest(brk=brk), self.assertRaises(usine_translate.SpecError):
+                usine_translate.translate(dict(base, diffusion=dict(base["diffusion"], breaks=[brk])), "x", (1.0, 10.0))
+
+    def test_renders_to_the_recorded_inputs(self):
+        files = usine_translate.render(b1x_translation(), "<TOOL_HOME>/inputs", "<RUN_DIR>")
+        self.assertEqual(sorted(files), ["usine.init.par"])  # nothing written from USINE's files
+        recorded = sorted(p.name for p in (USINE_FIX / "inputs" / B1X_RUN).iterdir())
+        self.assertEqual(recorded, ["usine.init.par"])
+        text = files["usine.init.par"]
+        self.assertEqual(text, (USINE_FIX / "inputs" / B1X_RUN / "usine.init.par").read_text(encoding="utf-8"))
+        for needle in ("fProd @ M=1 @ <TOOL_HOME>/inputs/XS_NUCLEI/sigProdGALPROP17_OPT12.dat",
+                       "fTotInelAnn @ M=1 @ <TOOL_HOME>/inputs/XS_NUCLEI/sigInelTripathi99+Coste12.dat",
+                       "fCRData @ M=1 @ <TOOL_HOME>/inputs/crdata_crdb20170523.dat",
+                       "NormList @ M=0 @ H,He:PAMELA|20|kEkn;C,N,O,F,Ne,Na,Mg,Al,Si:HEAO|10.6|kEkn",
+                       "ListOfCRs @ M=0 @ [1H,30Si]", "PureSecondaries @ M=0 @ Li,Be,B", "Targets @ M=0 @ H,He",
+                       "ParVals @ M=0 @ 8,0.1,0.2038018", "He:FORMULA|0.1", "HII:FORMULA|0.033",
+                       "kSSISOTFRAC,kSSISOTABUND,kFIPBIAS", "eta_s[SHARED:-1]", "Va*1.022712e-3*beta",
+                       "IsDecayEC @ M=0 @ true", "NBins @ M=0 @ 33"):
+            self.assertIn(needle, text)
+        self.assertNotIn("<RUN_DIR>", text)
+
+    def test_records_validate_and_hash(self):
+        for name in (B1X_RUN, SHIPPED_RUN):
+            with self.subTest(run=name):
+                rec = json.loads((USINE_FIX / "runs" / f"{name}.computational-run.json").read_text(encoding="utf-8"))
+                self.assertEqual([f.code for f in validate_artifact(rec).errors], [])
+                self.assertEqual(rec["status"], ["unvalidated"])
+                outputs = {f"out/{p.name}": hashlib.sha256(p.read_bytes()).hexdigest()
+                           for p in sorted((USINE_FIX / "outputs" / name).iterdir())}
+                self.assertEqual(rec["extension"]["output_hashes"], outputs)
+                self.assertFalse(mentions_path(json.dumps(rec), Path.home()), name)
+        rec = json.loads((USINE_FIX / "runs" / f"{B1X_RUN}.computational-run.json").read_text(encoding="utf-8"))
+        self.assertEqual(sorted(rec["extension"]["output_hashes"]),
+                         sorted(f"out/{f}" for f in usine_translate.expected_outputs(b1x_translation())))
+        in_place = sorted(i["path"] for i in rec["extension"]["input_manifest"] if i.get("read_in_place"))
+        self.assertEqual(in_place, ["<TOOL_HOME>/inputs/XS_NUCLEI/sigInelTripathi99+Coste12.dat",
+                                    "<TOOL_HOME>/inputs/XS_NUCLEI/sigProdGALPROP17_OPT12.dat",
+                                    "<TOOL_HOME>/inputs/crdata_crdb20170523.dat"])
+
+    def test_committed_form_hashes(self):
+        """B1 verifier note: sha256 in input_manifest is of the file as run; committed_form_sha256 is of the committed
+        placeholder form, for the seven B1 runs and the B1X run."""
+        for name in USINE_RUNS + (B1X_RUN,):
+            with self.subTest(run=name):
+                ext = json.loads((USINE_FIX / "runs" / f"{name}.computational-run.json").read_text(encoding="utf-8"))[
+                    "extension"]
+                self.assertIn("committed_form_sha256", ext["input_manifest_note"])
+                for item in ext["input_manifest"]:
+                    if item.get("read_in_place"):
+                        continue
+                    committed = hashlib.sha256((USINE_FIX / "inputs" / name / item["path"]).read_bytes()).hexdigest()
+                    self.assertEqual(item["committed_form_sha256"], committed, item["path"])
+                    if item["path"] != "usine.init.par":  # no path inside: as run equals committed
+                        self.assertEqual(item["sha256"], committed, item["path"])
+
+    def test_recorded_run_reproduces_the_shipped_example(self):
+        """B1X-2 and B1X-3 on the recorded tables (the live class reruns both)."""
+        for axis, fname in BORON_CARBON_TABLES.items():
+            with self.subTest(axis=axis):
+                n, dev = ratio_table_deviation(USINE_FIX / "outputs" / SHIPPED_RUN / fname,
+                                               USINE_FIX / "outputs" / B1X_RUN / fname)
+                self.assertEqual(n, 33)
+                self.assertLessEqual(dev, B1X_RTOL)
+
+    def test_missing_usine_data_is_refused(self):
+        spec = b1x_translation()
+        for data_dir in (None, "", "/nonexistent-usine-inputs"):
+            with self.subTest(data_dir=data_dir), self.assertRaisesRegex(usine_translate.UsineDataMissing,
+                                                                         "HEP_USINE_DATA"):
+                usine_translate.usine_input_paths(spec, data_dir)
+        with tempfile.TemporaryDirectory() as td:
+            with self.assertRaisesRegex(usine_translate.UsineDataMissing, "sigProdGALPROP17_OPT12"):
+                usine_translate.usine_input_paths(spec, td)
+            env = {k: v for k, v in os.environ.items() if k not in ("HEP_USINE_BIN", "HEP_USINE_DATA")}
+            proc = subprocess.run([sys.executable, "-I", str(ADAPTER / "assets" / "usine_translate.py"), "translate",
+                                   "--transport", str(USINE_FIX / "specs" / f"{B1X_RUN}.json"), "--name", B1X_RUN,
+                                   "--out", str(Path(td) / "run"), "--ekn-range", "0.05,5000",
+                                   "--ekn-grid", "33,0.05,5000"], capture_output=True, text=True, timeout=120, env=env)
+        self.assertEqual(proc.returncode, 3, proc.stdout + proc.stderr)
+        out = json.loads(proc.stdout)
+        self.assertEqual(out["status"], "missing-dependency")
+        self.assertIn("HEP_USINE_DATA", out["error"])
+        self.assertIn("usine:XS_NUCLEI/sigProdGALPROP17_OPT12.dat", out["error"])
+        self.assertEqual(usine_translate.usine_input_paths(usine_translation("d1-decay"), None), {})
+
+    def test_usine_file_names(self):
+        base = usine_spec(B1X_RUN)["transport"]
+        for bad in ("usine:../secret.dat", "usine:/abs/x.dat", "usine:XS_NUCLEI/x.txt", "usine:"):
+            with self.subTest(bad=bad), self.assertRaises(usine_translate.SpecError):
+                usine_translate.translate(dict(base, cross_sections=dict(base["cross_sections"], production_set=bad)),
+                                          "x", (1.0, 10.0))
+        for abund in ("fitted", "data-normalised usine:x.dat C,N:HEAO", "data-normalised usine:x.dat Fe:HEAO@10",
+                      "data-normalised usine:x.dat C:HEAO@10;C:PAMELA@20"):
+            with self.subTest(abund=abund), self.assertRaises(usine_translate.SpecError):
+                usine_translate.translate(dict(base, sources=dict(base["sources"], abundances=abund)), "x", (1.0, 10.0))
+
+    def test_network_top_and_isotopic_are_used_or_refused(self):
+        """B1X-4 example: network_top Ni-64 with the ILLUSTRATIVE set (network ends at 16O) is refused, never
+        dropped; with USINE's own files it sets the network."""
+        base = usine_spec("d1-isotopic")["transport"]
+        for species in ({"network_top": "Ni-64", "isotopic": True}, {"network_top": "O-16", "isotopic": False}):
+            with self.subTest(species=species), self.assertRaises(usine_translate.SpecError):
+                usine_translate.translate(dict(base, species=species), "x", (1.0, 10.0))
+        own = usine_spec(B1X_RUN)["transport"]
+        t = usine_translate.translate(dict(own, species={"network_top": "Ni-64", "isotopic": True}), "x", (1.0, 10.0))
+        self.assertEqual(t["network_range"], "[1H,64Ni]")
+        with self.assertRaises(usine_translate.SpecError):
+            usine_translate.translate(dict(own, species={"network_top": "Ni-64", "isotopic": False}), "x", (1.0, 10.0))
+
+    def test_no_field_silently_ignored(self):
+        """B1X-4: every field of the transport blocks of the recorded specs, changed or removed, changes the generated
+        files or the recorded substitutes, or is refused; an unknown key is refused."""
+        def outcome(tr, grid):
+            try:
+                t = usine_translate.translate(tr, "x", (0.05, 5000.0), grid=grid)
+            except usine_translate.SpecError:
+                return "refused"
+            return (usine_translate.render(t, "<TOOL_HOME>/inputs", "<RUN_DIR>"), t["substitutes"])
+
+        def changed(value):
+            if isinstance(value, bool):
+                return not value
+            if isinstance(value, (int, float)):
+                return value * 1.1 + 0.1
+            if isinstance(value, str):
+                return value + " (changed)"
+            if isinstance(value, list):
+                return value[:-1] if value else ["changed"]
+            return {}
+
+        checked = 0
+        for name in (B1X_RUN, "b1-slab-all-items", "d1-decay", "harmonized-v1"):
+            spec = usine_spec(name)
+            grid = spec.get("ekn_grid")
+            base = outcome(spec["transport"], grid)
+            self.assertNotEqual(base, "refused", name)
+            for block, value in spec["transport"].items():
+                keys = list(value) if isinstance(value, dict) else [None]
+                for key in keys:
+                    for how in ("change", "remove"):
+                        tr = json.loads(json.dumps(spec["transport"]))
+                        if key is None:
+                            if how == "remove":
+                                tr.pop(block)
+                            else:
+                                tr[block] = changed(tr[block])
+                        elif how == "remove":
+                            tr[block].pop(key)
+                        else:
+                            tr[block][key] = changed(tr[block][key])
+                        with self.subTest(run=name, field=f"{block}.{key}" if key else block, how=how):
+                            self.assertNotEqual(outcome(tr, grid), base)
+                            checked += 1
+            for block in ("geometry", "diffusion", "gas", "species"):
+                tr = json.loads(json.dumps(spec["transport"]))
+                tr[block]["unknown_key"] = 1.0
+                with self.subTest(run=name, unknown=block):
+                    self.assertEqual(outcome(tr, grid), "refused")
+            with self.subTest(run=name, unknown="top"):
+                self.assertEqual(outcome(dict(spec["transport"], halo={}), grid), "refused")
+        self.assertGreater(checked, 100)
+
+    def test_defaults_are_recorded(self):
+        minimal = {"geometry": {"L_kpc": 4.0}, "diffusion": {"D0_cm2_s": 3e28, "delta": 0.5},
+                   "gas": {"model": "n_H = 1 cm^-3"},
+                   "sources": {"injection": [{"gamma": 2.3}]},
+                   "cross_sections": {"production_set": "xs-illustrative-A"}}
+        t = usine_translate.translate(minimal, "x", (1.0, 10.0))
+        note = next(x for x in t["substitutes"] if x.startswith("not given in the transport block"))
+        for needle in ("geometry.kind = cylinder-2d", "geometry.disc_halfwidth_pc = 100.0 pc",
+                       "geometry.radius_kpc = 20.0 kpc", "geometry.local_bubble_radius_kpc = 0.0 kpc",
+                       "diffusion.eta = 1.0", "diffusion.R0_gv = 1.0 GV", "reacceleration.V_A_kms = 0.0 km/s",
+                       "convection.V_c_kms = 0.0 km/s", "transport.losses = []", "decay.enabled = False",
+                       "cross_sections.inelastic_set = xs-illustrative-A"):
+            self.assertIn(needle, note)
+        self.assertIn("species.network_top = 16O (the network of xs-illustrative-A)", note)
+        self.assertTrue(any("eta_s = 0" in x for x in t["substitutes"]))
+
+
+@unittest.skipUnless(os.environ.get("HEP_USINE_LIVE_TEST") == "1", "live USINE runs: set HEP_USINE_LIVE_TEST=1, "
+                     "HEP_USINE_BIN and HEP_USINE_DATA")
+class LiveUsineB1X(unittest.TestCase):
+    """B1X-2 and B1X-3: USINE's shipped example inputs/init.TEST.par is run in place ('usine -l', USINE's own inputs),
+    and the transport block written to match it (high break on the K line, USINE's cross-section files and NormList)
+    is run through the translator; their B/C tables must agree within relative 1e-6 on the common nodes, and the
+    translator's run must reproduce the recorded one. Two USINE runs of about 15-25 s each. With HEP_USINE_LIVE_TEST=1
+    but no USINE installed, the tests fail instead of skipping."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.reason = live_usine_reason()
+        if cls.reason:
+            return
+        cls.tmp = tempfile.TemporaryDirectory()
+        cls.binary, cls.data_dir = Path(os.environ["HEP_USINE_BIN"]), Path(os.environ["HEP_USINE_DATA"])
+        shipped = Path(cls.tmp.name) / SHIPPED_RUN
+        shipped.mkdir()
+        env = dict(os.environ, USINE=str(usine_translate.tool_home(cls.binary)))
+        cls.shipped_proc = subprocess.run([str(cls.binary), "-l", str(cls.data_dir / "init.TEST.par"),
+                                           str(shipped / "out"), SHIPPED_QUANTITIES, "0", "1", "1", "0"], cwd=shipped,
+                                          capture_output=True, text=True, timeout=3600, env=env)
+        cls.shipped_out = shipped / "out"
+        cls.spec = b1x_translation()
+        cls.run_dir = Path(cls.tmp.name) / B1X_RUN
+        cls.result = usine_translate.run_usine(cls.spec, cls.run_dir, cls.binary, cls.data_dir)
+
+    @classmethod
+    def tearDownClass(cls):
+        if getattr(cls, "tmp", None):
+            cls.tmp.cleanup()
+
+    def setUp(self):
+        self.assertIsNone(self.reason)
+
+    def _compare_with_shipped(self):
+        for axis, fname in BORON_CARBON_TABLES.items():
+            with self.subTest(axis=axis):
+                self.assertTrue((self.shipped_out / fname).is_file(), self.shipped_proc.stdout[-800:])
+                n, dev = ratio_table_deviation(self.shipped_out / fname, self.run_dir / "out" / fname)
+                self.assertGreaterEqual(n, 30)
+                self.assertLessEqual(dev, B1X_RTOL)
+
+    def test_high_break_reproduces_the_shipped_example(self):
+        """B1X-2."""
+        self.assertTrue(self.result["ok"], self.result["log_tail"])
+        init = (self.run_dir / "usine.init.par").read_text(encoding="utf-8")
+        self.assertIn("K00:FORMULA|beta^eta_t*K0*(Rig/R0)^delta*(1+(Rig/Rh1)^((delta-dh1)/sh1))^(-sh1)", init)
+        self._compare_with_shipped()
+
+    def test_usine_cross_sections_reproduce_the_shipped_example(self):
+        """B1X-3: USINE's files are read in place (named by their path in HEP_USINE_DATA, never copied) and the run
+        reproduces the shipped example and the recorded run; B1X-5: no committed fixture equals a USINE input file."""
+        self.assertTrue(self.result["ok"], self.result["log_tail"])
+        init = (self.run_dir / "usine.init.par").read_text(encoding="utf-8")
+        for rel in self.spec["usine_inputs"].values():
+            self.assertIn(f"@ {self.data_dir.resolve() / rel}", init)
+        usine_hashes = {hashlib.sha256(p.read_bytes()).hexdigest() for p in self.data_dir.rglob("*") if p.is_file()}
+        run_files = [p for p in self.run_dir.rglob("*") if p.is_file()]
+        self.assertFalse({hashlib.sha256(p.read_bytes()).hexdigest() for p in run_files} & usine_hashes)
+        committed = [p for p in FIX.rglob("*") if p.is_file()]
+        self.assertFalse({hashlib.sha256(p.read_bytes()).hexdigest() for p in committed} & usine_hashes)
+        self._compare_with_shipped()
+        for fname in usine_translate.expected_outputs(self.spec):
+            rerun = usine_reader.read_table(self.run_dir / "out" / fname)
+            recorded = usine_reader.read_table(USINE_FIX / "outputs" / B1X_RUN / fname)
+            self.assertEqual(rerun[0], recorded[0], fname)
+            for a, b in zip(rerun[1], recorded[1]):
+                self.assertTrue(math.isclose(a, b, rel_tol=B1X_RTOL, abs_tol=1e-300), (fname, a, b))
+        rec = usine_translate.record(self.spec, self.result, self.binary)
+        self.assertEqual([f.code for f in validate_artifact(rec).errors], [])
 
 
 if __name__ == "__main__":

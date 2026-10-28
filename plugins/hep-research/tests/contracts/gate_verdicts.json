@@ -620,6 +620,10 @@
   "ok": false,
   "strict_ok": false
  },
+ "contracts/fixtures/artifacts/invalid/theory_crprop_break_kind_unknown.json": {
+  "ok": false,
+  "strict_ok": false
+ },
  "contracts/fixtures/artifacts/invalid/theory_crprop_degeneracy_evidence_missing.json": {
   "ok": false,
   "strict_ok": false
@@ -629,6 +633,10 @@
   "strict_ok": false
  },
  "contracts/fixtures/artifacts/invalid/theory_crprop_degeneracy_range_missing.json": {
+  "ok": false,
+  "strict_ok": false
+ },
+ "contracts/fixtures/artifacts/invalid/theory_crprop_high_break_incomplete.json": {
   "ok": false,
   "strict_ok": false
  },
@@ -942,6 +950,10 @@
   "strict_ok": true
  },
  "contracts/fixtures/artifacts/valid/theory_spec.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/theory_spec_crprop_high_break.json": {
   "ok": true,
   "strict_ok": true
  },

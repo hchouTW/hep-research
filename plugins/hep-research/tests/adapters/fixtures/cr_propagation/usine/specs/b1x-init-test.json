@@ -1,0 +1,84 @@
+{
+ "name": "b1x-init-test",
+ "source": "written by work package B1X to match USINE V3.5's shipped example inputs/init.TEST.par (Model1DKisoVc, run with 'usine -l', USINE's own inputs read in place): its K line with a high break (Rbreak, Deltabreak, sbreak; delta_above = delta - Deltabreak), Va, Vc, geometry with rhole, ISM densities, losses, decay with electron capture, its cross-section files and its NormList (data file crdata_crdb20170523.dat), source slope alpha and eta_s. Not translated, because they do not change B/C: antinuclei and their tertiaries, the hydrogen slope alpha_H = 2.3 (one shared slope here), the second data file crdata_dummy.dat, the NormList elements above Si (outside the network [1H,30Si]) and the display settings. Numbers copied from the shipped file as parameters, no file content.",
+ "ekn_range_gev": [
+  0.05,
+  5000.0
+ ],
+ "ekn_grid": {
+  "n_points": 33,
+  "ekn_min_gev": 0.05,
+  "ekn_max_gev": 5000.0
+ },
+ "transport": {
+  "geometry": {
+   "kind": "slab-1d",
+   "L_kpc": 8.0,
+   "disc_halfwidth_pc": 100.0,
+   "local_bubble_radius_kpc": 0.2038018
+  },
+  "diffusion": {
+   "form": "beta^eta (R/R0)^delta with smooth breaks",
+   "D0_cm2_s": 1.0819249258374657e+28,
+   "R0_gv": 1.0,
+   "eta": -0.05972996,
+   "delta": 0.6141924,
+   "breaks": [
+    {
+     "kind": "high",
+     "R_break_gv": 125.89254,
+     "delta_above": 0.3860402,
+     "s": 0.010023191,
+     "s_convention": "usine"
+    }
+   ]
+  },
+  "reacceleration": {
+   "V_A_kms": 85.48451,
+   "zone": "thin-disc",
+   "relation": "Seo-Ptuskin 1994",
+   "w": 1.0
+  },
+  "convection": {
+   "V_c_kms": 19.54918,
+   "dVc_dz_kms_per_kpc": 0.0
+  },
+  "losses": [
+   "ionization",
+   "coulomb",
+   "adiabatic"
+  ],
+  "decay": {
+   "enabled": true,
+   "lorentz_dilation": true,
+   "ec_treatment": "laboratory-half-life"
+  },
+  "gas": {
+   "model": "uniform in the thin disc, n_HI = 0.867 cm^-3, n_HII = 0.033 cm^-3, n_H2 = 0 cm^-3",
+   "He_to_H_number": 0.11111111111111112
+  },
+  "sources": {
+   "spatial": "thin disc (1D model)",
+   "injection": [
+    {
+     "species_group": "all primaries",
+     "gamma": 2.268922,
+     "eta": -1.0,
+     "breaks": []
+    }
+   ],
+   "abundances": "data-normalised usine:crdata_crdb20170523.dat H,He:PAMELA@20;C,N,O,F,Ne,Na,Mg,Al,Si:HEAO@10.6"
+  },
+  "cross_sections": {
+   "production_set": "usine:XS_NUCLEI/sigProdGALPROP17_OPT12.dat",
+   "inelastic_set": "usine:XS_NUCLEI/sigInelTripathi99+Coste12.dat",
+   "ghost_threshold": "USINE chart crcharts_Zmax30_ghost97 (ghosts folded into cumulative cross sections)"
+  },
+  "species": {
+   "network_top": "Si-30",
+   "isotopic": true
+  },
+  "family": "BIG (USINE's shipped example, a high break only)",
+  "free": []
+ }
+}

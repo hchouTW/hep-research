@@ -159,6 +159,22 @@ CRPROP_DEGENERACY = {"combination": "D0_cm2_s/L_kpc", "form": "power", "exponent
                      "evidence": "profile-scan"}
 
 
+# cr-propagation B1X (decision A1.7, still contracts 3.14.0): a high break (slope above it), the local bubble radius and
+# the source beta exponent (SYNTHETIC values)
+CRPROP_HIGH_BREAK = {"kind": "high", "R_break_gv": 300.0, "delta_above": 0.3, "s": 0.05, "s_convention": "usine"}
+
+
+def theory_crprop_breaks(*extra_breaks):
+    """theory_crprop() with the low break of CRPROP_TRANSPORT followed by extra_breaks, a local bubble and a source
+    beta exponent."""
+    doc = theory_crprop()
+    tr = doc["extension"]["transport"]
+    tr["diffusion"]["breaks"] += [dict(b) for b in extra_breaks]
+    tr["geometry"]["local_bubble_radius_kpc"] = 0.1
+    tr["sources"]["injection"][0]["eta"] = -1.0
+    return doc
+
+
 def theory_crprop(**entry):
     """theory-spec of a cosmic-ray-propagation model at CRPROP_FROM: the transport block and one object-form degenerate
     direction; entry keys replace those of the object (None removes one)."""
@@ -442,6 +458,7 @@ VALID = {
     "theory_spec_crprop_object_degeneracy.json": theory_crprop(),
     "theory_spec_crprop_mixed_degeneracy.json": dict(theory_crprop(), extension=dict(
         theory_crprop()["extension"], degenerate_directions=["D0/L (synthetic)", CRPROP_DEGENERACY])),
+    "theory_spec_crprop_high_break.json": theory_crprop_breaks(CRPROP_HIGH_BREAK),
     "prediction_v26.json": prediction_v26(),
     "prediction_v26_validated_linked.json": _v26(dict(prediction_v26(), status=["validated-in-scope", "synthetic"],
                                                       inputs=LINKED_SPEC)),
@@ -525,6 +542,12 @@ bad["theory_crprop_degeneracy_evidence_unknown.json"] = (theory_crprop(evidence=
                                                          ["theory.degeneracy_evidence_unknown"])
 d = theory_crprop(); d["extension"]["transport"]["geometry"]["L"] = d["extension"]["transport"]["geometry"].pop("L_kpc")
 bad["theory_crprop_transport_noncanonical_name.json"] = (d, ["schema.additional"])
+# cr-propagation B1X: a half-specified high break and a break of unknown kind
+bad["theory_crprop_high_break_incomplete.json"] = (
+    theory_crprop_breaks({k: x for k, x in CRPROP_HIGH_BREAK.items() if k != "delta_above"}),
+    ["theory.transport_break_incomplete"])
+bad["theory_crprop_break_kind_unknown.json"] = (theory_crprop_breaks(dict(CRPROP_HIGH_BREAK, kind="middle")),
+                                                ["theory.transport_break_kind_unknown"])
 
 WARNING = {"theory_v26_conventions_incomplete.json": (theory_v26(conventions={"hbar_c_one": True}), ["theory.conventions_incomplete"]),
            "prediction_v26_truncation_no_method.json": (prediction_v26(uncertainties=[

@@ -28,7 +28,12 @@ Every result is marked exact, approximate (with a relative-error bound) or not-c
   momentum depends on the species). Compare predictions instead of parameters.
 The low break evaluated here (convention label "usine"): f(R) = (1 + (R_break/R)^((delta - delta_below)/s))^s, slope
 delta_below well below R_break and delta well above. The form is this module's reading of the label; it was not
-re-read from Weinrich et al. 2020a, Eq. 1 in work package A1.
+re-read from Weinrich et al. 2020a, Eq. 1 in work package A1, and USINE V3.5 does not settle it: USINE takes K as a
+formula from its initialisation file, and its shipped files carry only a high break (work package B1X).
+The high break (same label, work package B1X): f(R) = (1 + (R/R_break)^((delta - delta_above)/s))^(-s), slope delta
+well below R_break and delta_above well above; this is the K formula of USINE V3.5's shipped initialisation files
+(inputs/init.TEST.par line 133, inputs/init.Model1D.par line 89, inputs/init.Model2D.par line 96: beta^eta_t K0
+Rig^delta (1 + (Rig/Rbreak)^(Deltabreak/sbreak))^(-sbreak)) with Deltabreak = delta - delta_above.
 Reacceleration (cr-propagation A1R). Both codes tie the momentum diffusion to the spatial one as
 D_pp D = c V_A^2 p^2 / (delta (4 - delta) (4 - delta^2) w), with the code's own D (so beta^eta and the rigidity
 dependence enter through D) and p^2/D_pp the same per nucleon or per nucleus. The constant c, read from the codes:
@@ -122,6 +127,8 @@ CODE_CONVENTIONS = {
                   "d0_unit": "cm^2/s", "normalization_name": "D0_cm2_s", "source": "r3 canonical parameter names"},
 }
 BREAK_CONVENTIONS = ("usine",)
+# break kind -> the fields that fix it (the contract rule theory.transport_break_incomplete checks the same)
+BREAK_FIELDS = {"low": ("R_break_gv", "delta_below", "s"), "high": ("R_break_gv", "delta_above", "s")}
 ZONES = ("thin-disc", "whole-halo")
 
 # Reacceleration conventions: zone and the constant c of D_pp D = c V_A^2 p^2 / (delta (4 - delta) (4 - delta^2) w)
@@ -151,7 +158,7 @@ LEGACY_NAMES = {
 }
 LENGTH_UNIT_KPC = {"kpc": 1.0, "pc": 1e-3}
 CANONICAL_NAMES = ("D0_cm2_s", "R0_gv", "delta", "eta", "L_kpc", "radius_kpc", "disc_halfwidth_pc", "R_break_gv",
-                   "delta_below", "s", "V_A_kms", "V_c_kms", "dVc_dz_kms_per_kpc", "He_to_H_number")
+                   "delta_below", "delta_above", "s", "V_A_kms", "V_c_kms", "dVc_dz_kms_per_kpc", "He_to_H_number")
 
 
 class ConventionError(ValueError):
@@ -176,12 +183,18 @@ def _log_softplus(t: float) -> float:
 
 
 def break_factor(rigidity_gv: float, delta: float, breaks: list[dict]) -> float:
-    """The product of the low-break factors f(R) of the "usine" smoothness convention."""
+    """The product of the break factors f(R) of the "usine" smoothness convention: a low break (kind 'low', or no
+    kind) (1 + (R_break/R)^((delta - delta_below)/s))^s, a high break (kind 'high')
+    (1 + (R/R_break)^((delta - delta_above)/s))^(-s)."""
     log_f = 0.0
     for item in breaks:
         s = item["s"]
-        t = (delta - item["delta_below"]) / s * math.log(item["R_break_gv"] / rigidity_gv)
-        log_f += s * _log_softplus(t)
+        if item.get("kind") == "high":
+            t = (delta - item["delta_above"]) / s * math.log(rigidity_gv / item["R_break_gv"])
+            log_f -= s * _log_softplus(t)
+        else:
+            t = (delta - item["delta_below"]) / s * math.log(item["R_break_gv"] / rigidity_gv)
+            log_f += s * _log_softplus(t)
     return math.exp(log_f)
 
 
@@ -195,7 +208,7 @@ def _read_breaks(raw) -> list[dict]:
         if not isinstance(item, dict):
             raise ConventionError(f"breaks[{i}] must be an object")
         brk = {"kind": item.get("kind"), "s_convention": item.get("s_convention")}
-        for key in ("R_break_gv", "delta_below", "s"):
+        for key in ("R_break_gv", "delta_below", "delta_above", "s"):
             if key in item:
                 brk[key] = _number(item[key], f"breaks[{i}].{key}")
         if brk.get("R_break_gv", 1.0) <= 0 or brk.get("s", 1.0) <= 0:
@@ -261,11 +274,12 @@ def convert_diffusion(params: dict, source: str, target: str, target_s_conventio
     if breaks:
         conventions_in = {b["s_convention"] for b in breaks}
         conventions_out = {target_s_convention} if target_s_convention else conventions_in
-        unknown = [b for b in breaks if b["kind"] != "low" or not {"R_break_gv", "delta_below", "s"} <= set(b)]
+        unknown = [b for b in breaks if b["kind"] not in BREAK_FIELDS or not set(BREAK_FIELDS[b["kind"]]) <= set(b)
+                   or ({"delta_below", "delta_above"} - set(BREAK_FIELDS[b["kind"]])) & set(b)]
         if unknown:
             return {"conversion_status": NOT_CONVERTIBLE, "relative_error_bound": None, "canonical": canon,
-                    "reason": "a break that is not a low break with R_break_gv, delta_below and s is not evaluated "
-                              "here; compare predictions"}
+                    "reason": "only a low break with R_break_gv, delta_below and s or a high break with R_break_gv, "
+                              "delta_above and s is evaluated here; compare predictions"}
         if conventions_in != conventions_out or not conventions_in <= set(BREAK_CONVENTIONS):
             return {"conversion_status": NOT_CONVERTIBLE, "relative_error_bound": None, "canonical": canon,
                     "reason": f"smoothness conventions differ or are unknown (input {sorted(map(str, conventions_in))}, "

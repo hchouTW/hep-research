@@ -20,7 +20,7 @@
    "name": "USINE (https://gitlab.com/dmaurin/USINE, GPL-2.0, run as a separate program): transport block to initialisation file and cross-section tables, local-flux tables to ratios of bin integrals (provider usine)",
    "status": "tested-in-declared-environment",
    "tested_versions": [
-    "USINE V3.5 (git tag V3.5, tag object 7197ddc1, commit fb53006db41d1a640bf1b5af1a4b0f899ca59673), built 2026-10-28 on E-crprop (macOS 27.2 arm64) with Apple clang 21.0.0 (clang-2100.0.123.102) against Homebrew ROOT 6.38.04 (C++17), cmake 4.3.2: seven runs translated from transport blocks (harmonized-v1 and the D1 items isotopic, convection, decay, reacceleration, losses, and a 1D run with a low break) recorded and replayed offline; a live rerun (HEP_USINE_LIVE_TEST=1) reproduces every recorded output within relative 1e-6; the provider passes C1's conformance checks live (VALIDATION CRPROP-B1)"
+    "USINE V3.5 (git tag V3.5, tag object 7197ddc1, commit fb53006db41d1a640bf1b5af1a4b0f899ca59673), built 2026-10-28 on E-crprop (macOS 27.2 arm64) with Apple clang 21.0.0 (clang-2100.0.123.102) against Homebrew ROOT 6.38.04 (C++17), cmake 4.3.2: seven runs translated from transport blocks (harmonized-v1 and the D1 items isotopic, convection, decay, reacceleration, losses, and a 1D run with a low break) recorded and replayed offline; a live rerun (HEP_USINE_LIVE_TEST=1) reproduces every recorded output within relative 1e-6; the provider passes C1's conformance checks live (VALIDATION CRPROP-B1); a transport block matching USINE's shipped example inputs/init.TEST.par (high break, USINE's own cross-section files and data-normalised abundances read in place) reproduces that example's B/C run in place within relative 1e-6 (identical tables), recorded and rerun live (VALIDATION CRPROP-B1X)"
    ]
   }
  ],
@@ -42,7 +42,7 @@
    "id": "usine",
    "entrypoint": "assets/usine_provider.py",
    "protocol": "cr-provider/1",
-   "description": "one USINE V3.5 run per point (translator of the transport block, ILLUSTRATIVE cross sections of theory:cr-secondary-ratio), read into ratios of bin integrals of B/C, 10Be/9Be or Be/B on ekn or rigidity bins (r3 P2, P3); not decomposable; needs HEP_USINE_BIN and HEP_USINE_DATA",
+   "description": "one USINE V3.5 run per point (translator of the transport block; ILLUSTRATIVE cross sections of theory:cr-secondary-ratio, or USINE's own cross-section files and data-normalised abundances read in place from HEP_USINE_DATA), read into ratios of bin integrals of B/C, 10Be/9Be or Be/B on ekn or rigidity bins (r3 P2, P3); not decomposable; needs HEP_USINE_BIN and HEP_USINE_DATA",
    "domain": {
     "D0_cm2_s": {
      "min": 1e+27,
