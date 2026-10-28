@@ -18,7 +18,9 @@ with the adapter.json declaration. --declaration prints the effective declaratio
 Checks at start (any failure fails every request with provider-error, R4): the model file's sha256 equals the
 artifact's model_hash; the artifact is a surrogate whose extrapolation_policy action is reject; the model's feature
 boxes equal the declared domain (the model's own box for a per-model declaration); the model reproduces its stored
-self-check predictions within 1e-9.
+self-check predictions (ln mean within 1e-9, ln sigma within 2e-6: the sigma of an ill-conditioned kernel matrix
+carries platform rounding). A kernel matrix that does not factorize as stored (near-singular: it can factorize on one
+platform and not on another) is factorized with a jitter of 1e-14, else 1e-13, times its mean diagonal.
 Request: transport null or equal to the training transport (the model's context; else the request is refused with
 out-of-domain: the emulator knows no other transport); observable B/C on axis rigidity with bins that are a contiguous
 run of the training bins (edges equal within relative 1e-9; else unsupported-observable); want lis only (not
@@ -72,7 +74,14 @@ ARTIFACT_ENV = "HEP_EMULATOR_ML_ARTIFACT"
 DEFAULT_ARTIFACT = PLUGIN_ROOT / "tests" / "adapters" / "fixtures" / "cr_propagation" / "e2" / "emulator.ml-artifact.json"
 MODEL_FORMAT = "gp-pca-emulator/1"
 EDGE_RTOL = 1e-9
-SELF_CHECK_ATOL = 1e-9
+SELF_CHECK_ATOL = 1e-9         # the self-check mean (ln value): the GP mean uses the stored alpha, not the factor
+# The self-check sigma (ln sigma): the latent variance comes from the Cholesky factor of a kernel matrix that can be
+# ill-conditioned (condition ~1e19 for the C2UF model), where LAPACK/BLAS rounding differs across platforms by about
+# 2e-7 and a jitter of 1e-13 moves it by 1e-6; 2e-6 covers both and still catches a misread model.
+SELF_CHECK_SIGMA_ATOL = 2e-6
+# Cholesky jitter (times the mean diagonal), tried in turn only when the kernel matrix as stored does not factorize:
+# a near-singular matrix can factorize on one platform and fail by one rounding on another.
+CHOLESKY_JITTER = (1e-14, 1e-13)
 SQRT5 = math.sqrt(5.0)
 
 
@@ -85,6 +94,25 @@ class DomainRefusal(Exception):
 
 
 # ---------------------------------------------------------------------------------------------- model
+def _cholesky(k):
+    """The lower Cholesky factor of k; if k does not factorize as stored, of k plus the smallest CHOLESKY_JITTER
+    step (times its mean diagonal) that does. Only the emulator sigma uses the factor."""
+    import numpy as np
+
+    try:
+        return np.linalg.cholesky(k)
+    except np.linalg.LinAlgError as exc:
+        first = exc
+    scale = float(np.mean(np.diag(k)))
+    for step in CHOLESKY_JITTER:
+        try:
+            return np.linalg.cholesky(k + step * scale * np.eye(len(k)))
+        except np.linalg.LinAlgError:
+            continue
+    raise ModelError(f"the model's kernel matrix cannot be factorized, even with a jitter of {CHOLESKY_JITTER[-1]} "
+                     f"times its mean diagonal: {first}")
+
+
 def _matern52(xa, xb, lengths, signal):
     import numpy as np
 
@@ -132,10 +160,7 @@ class Emulator:
         self.components = []
         for comp in model["components"]:
             lengths, signal, nugget = np.asarray(comp["lengths"], float), float(comp["signal"]), float(comp["nugget"])
-            try:
-                chol = np.linalg.cholesky(_matern52(self.x, self.x, lengths, signal) + nugget * np.eye(len(self.x)))
-            except np.linalg.LinAlgError as exc:
-                raise ModelError(f"the model's kernel matrix cannot be factorized: {exc}") from None
+            chol = _cholesky(_matern52(self.x, self.x, lengths, signal) + nugget * np.eye(len(self.x)))
             self.components.append((lengths, signal, float(comp["scale"]), np.asarray(comp["alpha"], float), chol))
         self.domain = model.get("domain_model")
         if self.domain is None:
@@ -144,7 +169,7 @@ class Emulator:
         check = model.get("self_check") or {}
         mean, sigma, _ = self.predict_unit(np.asarray(check.get("unit"), float))
         if not (np.allclose(mean, check["transformed_mean"], rtol=0.0, atol=SELF_CHECK_ATOL)
-                and np.allclose(sigma, check["transformed_sigma"], rtol=0.0, atol=SELF_CHECK_ATOL)):
+                and np.allclose(sigma, check["transformed_sigma"], rtol=0.0, atol=SELF_CHECK_SIGMA_ATOL)):
             raise ModelError("the model does not reproduce its self-check predictions")
         context = model.get("context") or {}
         self.transport = context.get("transport")

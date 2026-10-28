@@ -7368,3 +7368,44 @@ base 47b004b4 = integration HEAD (not `main`; decision D10), rebased in rework r
 RC has no acceptance entries of its own beyond WF-2 to WF-10, which its verifier checks against section 9 of the
 report. Every number in the report is taken from `status.json`, `decisions.md`, `escalations.md`, `acceptance.json`
 and the CRPROP sections above.
+
+## CRPROP-CIFIX — 2026-10-29 (environment E2)
+
+Cross-WP fix of the PR #308 CI failures on Linux (decision A1.20; rework round 1 of the B1, B2, D1, D3, E2 and C2UF
+tests). **Environment field (r3 §0.3, base exception D10):** `git rev-parse --show-toplevel` =
+`.claude/worktrees/crprop-cifix`; branch `worktree-crprop-cifix`; status clean at start; base 26222205 = integration
+HEAD (not `main`). Linux was not available: the fixes are checked on macOS in E2 and in the CI-lock venv.
+
+Cause of the C2UF `--declaration` KeyError: the C2UF emulator model's first kernel matrix (738 points, nugget 1.1e-12,
+condition about 3e19) is numerically singular. On macOS its Cholesky factorization happens to succeed; with the
+kernel entries perturbed by one or two units in the last place (as another libm/BLAS gives) it fails in 41 of 50
+trials, so the provider refused the model ("kernel matrix cannot be factorized") and `--declaration` printed
+`{"status": "failed", ...}`. Even when it factorizes, the self-check ln sigma moves by about 2e-7 under such
+perturbations, above the provider's 1e-9. Fix in `emulator_provider.py`: if the matrix as stored does not factorize,
+a jitter of 1e-14, else 1e-13, times its mean diagonal (perturbed: 0/40 failures at 1e-14); the self-check compares
+ln sigma within 2e-6 (a 1e-13 jitter moves it by 1e-6), ln mean still within 1e-9 (the mean uses the stored alpha,
+not the factor). On macOS the factorization succeeds as before, so the E2 and C2UF responses there are unchanged
+(the pinned E2 responses still agree).
+
+Test tolerances added (no acceptance entry, VALIDATION tolerance or criterion changed; no fixture regenerated):
+
+| Test | Comparison | Tolerance | Reason |
+|---|---|---|---|
+| profile `test_provider` `test_values_are_the_closed_form` | provider values against the committed benchmark prediction | relative 1e-12 | libm last digits (Linux drift 1 ulp) |
+| `UsineReader.test_results_file_is_recomputed` | recomputed ratios against `usine-results.json` | relative 1e-12 | libm last digits (Linux drift 4e-16) |
+| `D3CrossCode.test_ports_of_dragon2_code_and_inelastic_table` | `table_nodes()` against the committed inelastic table grid | relative 1e-12 | libm `pow` last digits |
+| `D3CrossCode.test_dragon2_runs_are_recorded_and_translated` (passed on Linux, hardened) | rebuilt DRAGON2 specs against the committed specs | relative 1e-12 on floats | libm last digits |
+| `EmulatorValidation.test_holdout_criteria` | recomputed `dchi2_max`, `pull_max` against the recorded numbers | relative 1e-4 (was absolute 1e-9) | GP linear algebra (Linux drift 3e-7 relative); E2-1 and E2-2 checked unchanged |
+| `EmulatorPinnedResponses.test_e2_responses_are_unchanged` | E2 responses against the macOS-pinned ones | relative 1e-4 (was 1e-12) | GP sigma of an ill-conditioned kernel (Linux drift 6e-6 relative) |
+
+`EmulatorPerModelDeclaration.setUpClass` now fails with the provider's exit code, stdout and stderr if
+`--declaration` gives no declaration.
+
+| Check | Result |
+|---|---|
+| `tests.adapters.test_cr_propagation`, `tests.skills.hep_statistics.test_propagation_fit`, `tests.skills.hep_ml.test_train_emulator` | E2 and CI-lock venv: 164 tests OK (15 skipped) |
+| profile tests theory:cr-secondary-ratio | E2 and CI-lock venv: 70 tests OK |
+| impacted tests (`rule_registry.py impact`) | 200 tests OK |
+| `check_naming.py` | pass |
+| `run_all_checks.py --part static --jobs 4` | exit 0, 31 checks pass, 0 fail (includes the profile tests) |
+| Full `run_all_checks.py`, `check_relocation.py`, `workflow_check.py diff` | deferred to the orchestrator (A1.5; cross-WP branch) |

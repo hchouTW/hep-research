@@ -1105,11 +1105,12 @@ class UsineReader(unittest.TestCase):
         for name in USINE_RUNS:
             tables = usine_tables(name)
             with self.subTest(run=name):
+                # relative 1e-12 against the recorded numbers: libm differs across platforms in the last digits
                 got = usine_reader.ratio_of_bin_integrals(tables, "B/C", res["bc_rigidity_edges_gv"], "rigidity")
-                self.assertEqual(got, res["runs"][name]["B/C"])
+                assert_close_tree(self, got, res["runs"][name]["B/C"], "B/C", rel=1e-12)
                 if "10Be/9Be" in res["runs"][name]:
                     got = usine_reader.ratio_of_bin_integrals(tables, "10Be/9Be", res["be_ekn_edges_gev"], "ekn")
-                    self.assertEqual(got, res["runs"][name]["10Be/9Be"])
+                    assert_close_tree(self, got, res["runs"][name]["10Be/9Be"], "10Be/9Be", rel=1e-12)
 
     def test_ratio_of_bin_integrals_power_law(self):
         e = [0.01 * 1.25 ** i for i in range(90)]
@@ -1890,8 +1891,10 @@ class EmulatorValidation(unittest.TestCase):
                 b = pred - np.asarray([r["values"] for r in recs])
                 dchi2 = np.einsum("ij,jk,ik->i", b, cov_inv, b)
                 pull = np.abs(b) / sigma_stat[None, :]
-                self.assertAlmostEqual(float(dchi2.max()), recorded["dchi2_max"], delta=1e-9)
-                self.assertAlmostEqual(float(pull.max()), recorded["pull_max"], delta=1e-9)
+                # relative 1e-4 against the recorded numbers: the GP's scipy/numpy linear algebra differs across
+                # platforms (Linux drift about 3e-7 relative); E2-1 and E2-2 below are checked unchanged
+                self.assertAlmostEqual(float(dchi2.max()), recorded["dchi2_max"], delta=1e-4 * recorded["dchi2_max"])
+                self.assertAlmostEqual(float(pull.max()), recorded["pull_max"], delta=1e-4 * recorded["pull_max"])
                 self.assertTrue((dchi2 <= 1.0).all())          # E2-1
                 self.assertTrue((pull <= 0.2).all())           # E2-2
                 self.assertEqual([emu.domain_status(row)[0] for row in u], ["inside"] * len(u))
@@ -2077,7 +2080,9 @@ class D3CrossCode(unittest.TestCase):
         specs = self.d3.dragon2_specs()
         for name, s in specs.items():
             with self.subTest(run=name):
-                self.assertEqual(s, json.loads((D3_FIX / "dragon2" / "specs" / f"{name}.json").read_text(encoding="utf-8")))
+                # relative 1e-12 against the committed spec: libm differs across platforms in the last digits
+                assert_close_tree(self, s, json.loads((D3_FIX / "dragon2" / "specs" / f"{name}.json")
+                                                      .read_text(encoding="utf-8")), name, rel=1e-12)
                 rec = json.loads((D3_FIX / "dragon2" / "runs" / f"{name}.computational-run.json").read_text(encoding="utf-8"))
                 self.assertEqual([f.code for f in validate_artifact(rec).errors], [])
                 ext = rec["extension"]
@@ -2125,7 +2130,8 @@ class D3CrossCode(unittest.TestCase):
         self.assertAlmostEqual(self.d3.gas_columns("BronfFerr", 8.3, 4.0, 0.02)["nucleons"],
                                bronf_ferr_column(8.3, 4.0), places=12)
         inel = self.d3.load_inelastic()
-        self.assertEqual(inel["ekn_gev"], self.d3.table_nodes())
+        # relative 1e-12 against the committed table: libm (pow) differs across platforms in the last digits
+        assert_close_tree(self, self.d3.table_nodes(), inel["ekn_gev"], "ekn_gev", rel=1e-12)
         self.assertEqual(sorted(inel["sigma_h_mb"]), sorted(self.d3.INELASTIC_NUCLIDES))
         for nuc, vals in inel["sigma_h_mb"].items():
             a = usine_translate.charge_and_mass(nuc)[1]
@@ -2304,20 +2310,21 @@ class UsineF1Offline(unittest.TestCase):
 TWO_DATASET_FIX = FIX / "c2uf"
 
 
-def _same_document(case, a, b, where="response"):
-    """Equal JSON documents; numbers equal within relative 1e-12 (the platform's last digits), all else exactly."""
+def _same_document(case, a, b, where="response", rel=1e-12):
+    """Equal JSON documents; numbers equal within relative rel (default 1e-12, the platform's last digits), all
+    else exactly."""
     if isinstance(a, bool) or isinstance(b, bool) or not isinstance(a, (int, float)) or not isinstance(b, (int, float)):
         case.assertEqual(type(a), type(b), where)
     if isinstance(a, dict):
         case.assertEqual(sorted(a), sorted(b), where)
         for k in a:
-            _same_document(case, a[k], b[k], f"{where}/{k}")
+            _same_document(case, a[k], b[k], f"{where}/{k}", rel)
     elif isinstance(a, list):
         case.assertEqual(len(a), len(b), where)
         for i, (x, y) in enumerate(zip(a, b)):
-            _same_document(case, x, y, f"{where}[{i}]")
+            _same_document(case, x, y, f"{where}[{i}]", rel)
     elif isinstance(a, (int, float)) and not isinstance(a, bool):
-        case.assertTrue(math.isclose(a, b, rel_tol=1e-12, abs_tol=0.0), (where, a, b))
+        case.assertTrue(math.isclose(a, b, rel_tol=rel, abs_tol=0.0), (where, a, b))
     else:
         case.assertEqual(a, b, where)
 
@@ -2336,7 +2343,9 @@ class EmulatorPinnedResponses(unittest.TestCase):
             self.assertEqual(proc.returncode, case["exit"], case["name"])
             for res in doc.get("results") or []:
                 (res.get("evaluation") or {}).pop("elapsed_s", None)
-            _same_document(self, case["response"], doc, case["name"])
+            # relative 1e-4: the GP's scipy/numpy linear algebra differs across platforms (the emulator sigma of
+            # the ill-conditioned kernel drifted 6e-6 relative on Linux); recorded on macOS
+            _same_document(self, case["response"], doc, case["name"], rel=1e-4)
 
 
 @unittest.skipUnless(HAVE_NUMPY, "needs numpy and scipy")
@@ -2350,7 +2359,11 @@ class EmulatorPerModelDeclaration(unittest.TestCase):
         cls.env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1", HEP_EMULATOR_ML_ARTIFACT=str(cls.artifact))
         proc = subprocess.run([sys.executable, str(EMULATOR_PROVIDER), "--declaration"], capture_output=True,
                               text=True, timeout=300, env=cls.env)
-        cls.decl = json.loads(proc.stdout)["declaration"]
+        try:
+            cls.decl = json.loads(proc.stdout)["declaration"]
+        except (ValueError, KeyError):
+            raise AssertionError(f"--declaration failed (exit {proc.returncode}): stdout {proc.stdout!r} "
+                                 f"stderr {proc.stderr[-2000:]!r}") from None
         cls.model = json.loads((TWO_DATASET_FIX / "emulator-model.json").read_text(encoding="utf-8"))
 
     def test_declaration_comes_from_the_model(self):
