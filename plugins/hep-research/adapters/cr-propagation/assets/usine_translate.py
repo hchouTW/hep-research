@@ -358,6 +358,13 @@ def explicit_grid(grid: dict) -> dict:
     return {"n_points": n, "ekn_min_gev": lo, "ekn_max_gev": hi, "points_per_decade": None}
 
 
+def thin_disc_alfven_speed(v_a_halo: float, l_kpc: float, h_kpc: float) -> float:
+    """Whole-halo V_A to USINE's thin-disc V_A: V_A sqrt(L/h) (r3 P1, approximate). The one place of this factor:
+    work package A1R derives sqrt(L/(3h)) in transport_conventions.py; once A1R is merged this becomes a call to that
+    conversion (orchestrator note to B1X, 2026-10-28)."""
+    return v_a_halo * math.sqrt(l_kpc / h_kpc)
+
+
 def translate(transport: dict, name: str, ekn_range_gev, points_per_decade: int = POINTS_PER_DECADE,
               grid: dict | None = None) -> dict:
     """The run spec of one USINE run (pure data, no path). Items USINE expresses only approximately, and defaults the
@@ -450,7 +457,7 @@ def translate(transport: dict, name: str, ekn_range_gev, points_per_decade: int 
     if v_a > 0:
         zone = _given(reacc, "zone", "reacceleration", "thin-disc", defaults)
         if zone == "whole-halo":
-            disc = v_a * math.sqrt(big_l / h_kpc)
+            disc = thin_disc_alfven_speed(v_a, big_l, h_kpc)
             subs.append(f"reacceleration V_A_kms {v_a:g} in the whole halo: thin-disc V_A = V_A sqrt(L/h) = {disc:.6g} "
                         "km/s (r3 P1; approximate, no bound)")
             v_a = disc
