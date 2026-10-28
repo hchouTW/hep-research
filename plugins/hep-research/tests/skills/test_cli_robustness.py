@@ -254,6 +254,8 @@ NO_INPUT_FILE = {  # script: why the missing-file check does not apply
     "adapters/geant4/assets/g4common.py": "shared helpers of the geant4 adapter scripts; only --help",
     "adapters/geant4/assets/element_spec.py": "element_sim spec rules imported by geant4_run.py; only --help",
     "adapters/geant4/assets/simreco_spec.py": "simreco spec rules imported by geant4_run.py; only --help",
+    "adapters/cr-propagation/assets/dragon2_translate.py": "source-item rules imported by dragon2_provider.py and the D3 "
+                                                           "study; only --help",
 }
 def argv_sets(entry) -> list[list[str]]:
     """The argv sets of a MISSING_FILE_ARGS entry: one list, or a list of lists (Geant4 program B1.6)."""

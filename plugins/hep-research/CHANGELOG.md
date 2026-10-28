@@ -28,6 +28,27 @@ Software checks establish contract consistency only, not physical validity.
   and passes the provider self-check under simulated libm drift (margin over 3000). C2UF-1 on that model stopped at
   the 2% toy-failure limit, so it is not committed, and the A1.21 skip stays (VALIDATION CRPROP-K4).
 
+- crprop k3: the DRAGON2 provider entry of `adapters/cr-propagation/adapter.json` records DRAGON2 as tested with its
+  accepted, attributed differences against USINE (decisions A1.11, A1.13): D1-1a item effects (10Be/9Be with decay 13.3%
+  / 11.3%, finite gas layer; reacceleration 5.7%, first-order zone conversion; losses 6.1%, Coulomb on HII vs
+  ionization-only), D3-1 38-77% at level 1 (decomposed into gas column, helium target, inelastic cross sections, parent
+  O/C and injection convention), D3-3 17.0% / 17.7%, the escalation-11 caveats, and the DRAGON2 cd588707
+  Ptuskin94/Ptuskin03 enum note (escalation 10; not reported upstream). Translators (escalation 12): harmonized-v1
+  states the injection variable (`sources.injection[].spectrum_variable` = `kinetic_energy_per_nucleon`). The USINE
+  translator handles `rigidity` (eta_s = eta - 1), `total_energy` and `kinetic_energy_per_nucleon` exactly and records
+  the default when the variable is not given. It refuses `sources.abundances` other than the parent list (or
+  data-normalised with USINE's own files), where it used to record "not parsed", and refuses a gas density term without
+  `cm^-3`, which it used to read as 0. The new `dragon2_translate.py` (used by the provider and the D3 study) refuses a
+  per-energy injection, an eta other than 0 and abundances other than DRAGON2's own
+  (`dragon2:BaseModel_DRAGONxsec.source.param`). So the `dragon2` provider now refuses a harmonized-v1 transport with
+  the reason (provider-error): behaviour change, the dragon2 provider refuses harmonized-v1 transports with sources it
+  cannot express; its built-in transport states DRAGON2's own sources, and `dragon2_run.py --from-transport` applies the
+  same checks (exit 2). Committed runs keep their outputs: every USINE rendering is unchanged, and the D1 and D3 DRAGON2
+  specs were regenerated (sources stated, two notes added; XML and source.param unchanged). The V_A zone wording (r3
+  P1's "about sqrt(L/h)" puts V_A off by sqrt(3); V_A,disc = V_A,halo sqrt(L/(3h)), bound (1+lam)/5) is corrected in
+  `transport_conventions.py` and `cosmic-ray-phenomenology.md`. VALIDATION has an appended erratum for the CRPROP-B3
+  10Be/9Be sign (+1.3%, not -1.3%), and `docs/adapter-authoring.md` has K2's modulation exception. No version bump.
+
 ## 0.43.0 (2026-10-29)
 
 Minor release; contracts 3.14.0 (one minor, the `CV-CRPROP` of the cr-propagation campaign, new rules gated by

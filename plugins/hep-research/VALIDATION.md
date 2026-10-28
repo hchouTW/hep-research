@@ -7650,3 +7650,68 @@ fragile case in C2UF (dispatch 2, diagnosis 3). Options for the orchestrator: (a
 fits (K1's noise-aware verdict) and then a rerun of this exact model (no retraining); (b) a different declared bound
 (for example 1e12, if its drift margin stays >= 10) with a fresh declaration; (c) mark C2UF-1 on the retrained emulator
 as an escalation and keep the A1.21 skip.
+
+## CRPROP-K3 — 2026-10-29 (environment E2)
+
+Work package K3 of the cr-propagation follow-up wave 7 (decision B1.1, release 0.44.0): DRAGON2's known differences
+in `adapter.json` (A1.11, A1.13), the escalation-12 translator gaps, the escalation-10 wording and enum note, and the
+B3 erratum.
+
+**Environment (r3 §0.3, base exception D10).** E2 host (macOS 27.2 arm64), Python 3.13.2 (miniconda; numpy and scipy
+present). Checked before the first edit: `git rev-parse --show-toplevel` = `.claude/worktrees/crprop-k3`;
+`git branch --show-current` = `worktree-crprop-k3`; `git status` clean; base = integration HEAD `f778b9d3` (not
+`main`, decision D10). K3 has no dependencies (workflow.json `deps: []`); the follow-up card `94ba34d1` and the 0.43.0
+merge `42f5bad1` are ancestors of HEAD. External codes: DRAGON2 cd588707 (`HEP_DRAGON2_BIN`, `HEP_DRAGON2_DATA`, the D1
+build) for one live check; USINE V3.5 not run.
+
+**Criteria (frozen entries K3-1 to K3-3 and ALL-*, acceptance.json).** K3-1 adapter.json records DRAGON2 as tested
+with the A1.11 and A1.13 differences, their sizes and attributions; K3-2 escalation-12 gaps closed, each with a test,
+committed runs keep their outputs or the change is recorded; K3-3 P1 wording corrected where the plugin states it, the
+Ptuskin94/03 enum documented, the B3 sign corrected by an appended erratum.
+
+| ID | Result | Evidence |
+|---|---|---|
+| K3-1 | **done**: the `cr-provider/1` declaration has no free field (`additionalProperties: false`, schema unchanged), so the `dragon2` provider entry's `description` holds them: tested in the declared environment (D1, D3) with D1-1a item effects (decay ¹⁰Be/⁹Be 13.3% closed form / 11.3% USINE, finite gas layer; reacceleration B/C 5.7%, ¹⁰Be/⁹Be 4.4%, first-order zone conversion with bound 0.517; losses B/C 6.1%, Coulomb on Galprop's HII vs ionization-only USINE, 3.0% with HII in USINE), D3-1 (38.2-40.8%, 77.0% for the losses pair; ladder gas column ×1.054-1.087, helium ×1.073-1.136, inelastic ×1.003-1.077, O/C ×1.104-1.110, injection ×1.000-1.031), D3-3 (0.59-0.67% passing; reacceleration 17.0%, losses pair 17.7% with the 0.811 geometry check within 1.9%/3.3%) and the escalation-11 caveats (second-order term not estimated, losses attribution not quantified, thick-gas agreement within ~1% only in bins 3-5 in D1). Numbers from VALIDATION CRPROP-D1, CRPROP-D3 and escalations.md item 11 | `adapters/cr-propagation/adapter.json`; `tests.adapters.test_adapter_declarations` OK |
+| K3-2 abundances | **done**: USINE (ILLUSTRATIVE sets) translates `fixed by the parent list of theory:cr-secondary-ratio` (O/C 0.9) or none (recorded), and refuses any other text, which it used to record as "not parsed" (USINE's own files: `data-normalised ...` only, unchanged). DRAGON2 (`dragon2_translate.py`, new; the provider and the D3 study translate through it) translates `dragon2:BaseModel_DRAGONxsec.source.param` or none (recorded) and refuses the rest with the reason (source.param fixes source abundances; a propagated ratio is known only after a run; BaseModel O/C 1.19-1.21, ×1.10 on B/C) | `TranslatorSourceItems.test_usine_abundances_translated_or_refused`, `test_dragon2_refuses_what_its_source_cannot_express`, `test_dragon2_translates_its_own_sources_and_records_defaults` |
+| K3-2 injection variable | **done**: `sources.injection[].spectrum_variable` (dQ/dX = q β^η R^-γ) is stated in every harmonized-v1 file as `kinetic_energy_per_nucleon` (B1's USINE runs; the harmonized-v1 description says so). USINE: `kinetic_energy_per_nucleon` and `total_energy` give η_s = η, `rigidity` η_s = η − 1 (dR/dE_k/n = (A/\|Z\|)/β, constants absorbed by the normalisation; exact); not given: E_k/n, recorded. DRAGON2: `rigidity` with η = 0 translated (R^-γ per unit momentum, D3's 1/β evidence); per-energy variables and η ≠ 0 refused (they need a β factor source.param cannot carry; up to 3% on B/C at 2-3 GV); not given: rigidity, recorded | `test_harmonized_v1_states_the_injection_variable`, `test_usine_injection_variable`, the two DRAGON2 tests |
+| K3-2 gas term | **done**: a density term `n_<H\|HI\|HII\|H2> = <number>` without `cm^-3` (or with another unit) is refused, not read as 0; a term not written at all stays 0 with its note | `test_usine_gas_term_without_unit_is_refused` (D3's aborted string included) |
+| K3-2 committed runs | **outputs unchanged**: every committed transport (46 blocks; the 36 the old translator accepted) translated before and after K3 by the USINE translator renders identical USINE input files, except the 8 DRAGON2 specs, which now state DRAGON2's abundances and are not USINE inputs; the D1 (6) and D3 (2) DRAGON2 specs were regenerated through `dragon2_translate` with DRAGON2's own sources stated: only `transport.sources` (spectrum_variable `rigidity`, abundances `dragon2:...`) and two substitutes notes changed; the rendered XML and the injection slope (source.param) are identical, so every record's input hashes still match | `$CRPROP_OUT/k3/regen/regen-record.json`, `usine-scan.json`; `D1Items.test_runs_are_recorded_and_translated_from_the_item_files`, `D3CrossCode.test_dragon2_runs_are_recorded_and_translated`, `UsineTranslator.test_specs_render_to_the_recorded_inputs` |
+| K3-2 provider behaviour | the `dragon2` provider now refuses a harmonized-v1 transport (provider-error with the reason); its `DEFAULT_TRANSPORT` is harmonized-v1-isotopic with DRAGON2's sources stated (`with_dragon2_sources`, tested). Live: C1's conformance mixin passes on the new default (4 tests, 231 s; the kept run specs carry the two notes) | `$CRPROP_OUT/k3/acceptance/D1-PRV-1.unittest.log` |
+| K3-3 P1 wording | **done**: `transport_conventions.py` (module docstring and the reacceleration `reason`) and `cosmic-ray-phenomenology.md` state V_A,disc = V_A,halo sqrt(L/(3h)) at first order with bound (1+λ)/5 and say that r3 P1's "about sqrt(L/h)" puts V_A off by sqrt(3); the page stays under 24576 B (24573 B), inventory regenerated; the r3 plan files are not edited | `tests.skills.hep_theory` OK, `reference_inventory.py --check` pass |
+| K3-3 enum note | **done** in the `dragon2` description of `adapter.json`, with the file:line evidence of A1R (galaxy.cc:279-284, constants.h:146-149, input.h:156; Ptuskin94 has 3/4 of USINE's D_pp), the translator's handling (Ptuskin94 with constant 1) and that a fixing commit is a new test; nothing posted upstream | `adapter.json` |
+| K3-3 B3 erratum | **done**, below | `$CRPROP_OUT/k3/b3-sign/b3-sign.json` |
+| ALL-1 | environment field above | this section |
+
+### Erratum to CRPROP-B3 (appended by K3; the B3 section is not edited)
+
+The B3-1b attribution paragraph of CRPROP-B3 reads "USINE 2D / USINE 1D: B/C up to -2.4%, ¹⁰Be/⁹Be up to -1.3%".
+The ¹⁰Be/⁹Be sign is wrong: USINE 2D / USINE 1D for ¹⁰Be/⁹Be (dec-2d over dec-1d, the 12 E_k/n bins 0.05-10 GeV/n)
+is **+0.57% to +1.34%**, positive in every bin, largest at 2.7-4.1 GeV/n. Recomputed by K3 from the committed B3
+output tables (`b3/outputs/dec-2d-nom`, `dec-1d-nom`, read with `usine_to_prediction` as the B3 test does; script and
+result `$CRPROP_OUT/k3/b3-sign/`), equal to `b3-results.json` `b3_1b["dec-2d 10Be/9Be"].usine_2d_over_usine_1d`
+(1.00565-1.01341), as the B3 verifier said. The B/C sign (-0.9% to -2.4%) is right. Radial escape lowers ¹⁰B and ¹¹B
+relative to C but raises ¹⁰Be/⁹Be (plausibly because the decaying ¹⁰Be samples a smaller volume than ⁹Be and loses
+less to the radial boundary; not checked further). The attribution (radial escape, B3-1b product within 1e-3 of 1) is unchanged.
+
+**Runs (budget ≤ 40).** DRAGON2: the conformance mixin of D1-PRV-1, live once (the same mixin recorded 5 runs in D1;
+two point directories kept under `$CRPROP_OUT/k3/live-dragon2/runs/`). USINE: none (every USINE input rendering is
+unchanged; η_s = −1 was already run by D3).
+
+**Not done in K3.** `dragon2_run.py` is not in K3's files (the card names a `dragon2_translate.py`, now added), so its
+own `--from-transport` command line still calls the D1 translator without the source checks; the provider and the
+D3 study go through `dragon2_translate.py`. A one-line delegation in `dragon2_run.py` would close it in a later
+package. The USINE translator's `usine_provider.DEFAULT_TRANSPORT` and B1's `usine/specs/d1-*.json` do not state
+`spectrum_variable` (the default, E_k/n, is recorded). They stay unchanged because the emulator fixtures hash that
+transport (K4's files).
+
+### CRPROP-K3 continuation (same dispatch, 2026-10-29; rebased onto integration 42f41893 with K2 and K4)
+
+`adapters/cr-propagation/assets/dragon2_run.py` was added to K3's card (workflow.json on 42f41893). Its
+`--from-transport` command line now translates through `dragon2_translate.spec_from_transport`, the same source checks
+as the provider: a harmonized-v1 transport is refused (exit 2, status error, the reason; no spec written), and one
+with DRAGON2's own sources is translated and its written spec carries the two source notes. The open item "not done"
+above is closed. Test: `TranslatorSourceItems.test_dragon2_command_line_applies_the_same_source_checks` (no DRAGON2
+run; the translated case stops at the missing data directory, exit 3). Rebase: CHANGELOG and VALIDATION keep the
+integration blocks first and K3's after; `docs/reference-inventory.*` regenerated; the phenomenology page is 24573 B.
+The adapter version is not bumped (the orchestrator sets versions at release); the CHANGELOG entry names the
+behaviour change of the dragon2 provider.

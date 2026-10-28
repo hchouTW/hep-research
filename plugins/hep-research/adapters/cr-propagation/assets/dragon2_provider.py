@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 """cr-provider/1 entrypoint of DRAGON2: one DRAGON2 run per parameter point, read into ratios of bin integrals.
 
-It wraps this adapter's translator and reader (dragon2_run.py spec_from_transport and prepare, dragon2_to_prediction.py
-ratio_of_bin_integrals; no second implementation) behind the provider protocol of core/provider: a request names
+It wraps this adapter's translator and reader (dragon2_translate.py spec_from_transport over dragon2_run.py
+spec_from_transport and prepare, dragon2_to_prediction.py ratio_of_bin_integrals; no second implementation) behind the provider protocol of core/provider: a request names
 parameter points in the canonical names and bins of B/C or 10Be/9Be on the axis ekn (GeV/n) or rigidity (GV); each
 point is one DRAGON2 run and gets one prediction per observable.
 
 Transport: the request's 'transport' block (contracts ext_theory_spec.transport, r3 5.4) if given, else the
-built-in DEFAULT_TRANSPORT (equal to harmonized-v1-isotopic, tests/adapters/fixtures/cr_propagation/specs/, checked by
-the adapter tests). A point overrides D0_cm2_s and delta (diffusion), L_kpc (geometry), V_c_kms (convection) and
+built-in DEFAULT_TRANSPORT (harmonized-v1-isotopic, tests/adapters/fixtures/cr_propagation/specs/, with DRAGON2's own
+sources stated by dragon2_translate.with_dragon2_sources: injection per rigidity, BaseModel abundances; checked by the
+adapter tests). Source items DRAGON2 cannot express are refused (provider-error), never replaced: an injection
+spectrum per kinetic energy per nucleon or total energy (harmonized-v1 states kinetic_energy_per_nucleon) and source
+abundances other than DRAGON2's own (dragon2_translate.py; escalation 12). A point overrides D0_cm2_s and delta (diffusion), L_kpc (geometry), V_c_kms (convection) and
 V_A_kms (reacceleration, in the transport's zone). Production cross sections: only the ILLUSTRATIVE isotopic set
 (ILLUSTRATIVE_CHANNELS_MB, equal to theory:cr-secondary-ratio models/xs-illustrative-decay.json for 12C and 16O,
 checked by the tests); a transport naming another production set is refused (provider-error), never replaced. What
@@ -61,6 +64,7 @@ from core.provider.hashing import point_hash  # noqa: E402
 
 import dragon2_run  # noqa: E402
 import dragon2_to_prediction as reader  # noqa: E402
+import dragon2_translate  # noqa: E402
 
 NUMERICAL_TOLERANCE = 0.01
 RUN_TIMEOUT_S = 3600.0
@@ -90,8 +94,9 @@ DEFAULT_TRANSPORT = {
     "decay": {"enabled": False, "lorentz_dilation": True, "ec_treatment": "fully-stripped"},
     "gas": {"model": "uniform, n_H = 1 cm^-3", "He_to_H_number": 0.1},
     "sources": {"spatial": "not fixed by harmonized-v1; each code records its choice",
-                "injection": [{"species_group": "all primaries", "gamma": 2.3, "breaks": []}],
-                "abundances": "fixed by the parent list of theory:cr-secondary-ratio"},
+                "injection": [{"species_group": "all primaries", "gamma": 2.3, "breaks": [],
+                               "spectrum_variable": "rigidity"}],
+                "abundances": "dragon2:BaseModel_DRAGONxsec.source.param"},
     "cross_sections": {
         "production_set": "theory:cr-secondary-ratio models/xs-illustrative-decay.json (ILLUSTRATIVE, isotopic)",
         "inelastic_set": "theory:cr-secondary-ratio models/xs-illustrative-decay.json (ILLUSTRATIVE, isotopic)",
@@ -206,8 +211,8 @@ def evaluate_point(request: dict, point: dict, context: dict) -> dict:
     transport = transport_for(request, point)
     z_range, ekn_range = run_ranges(request["observables"])
     name = "p" + point_hash(request.get("transport"), request["provider"], request["provider_version"], point)[:16]
-    spec = dragon2_run.spec_from_transport(transport, name, ILLUSTRATIVE_CHANNELS_MB, z_range=z_range,
-                                           ekn_range_gev=ekn_range)
+    spec = dragon2_translate.spec_from_transport(transport, name, ILLUSTRATIVE_CHANNELS_MB, z_range=z_range,
+                                                 ekn_range_gev=ekn_range)
     keep = os.environ.get("HEP_DRAGON2_RUN_DIR")
     with tempfile.TemporaryDirectory(prefix="dragon2-provider-") as scratch:
         run_dir = Path(keep) / name if keep else Path(scratch) / name
