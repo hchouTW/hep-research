@@ -3,7 +3,7 @@
  "writer": "orchestrator only (r4 4)",
  "cycle": 4,
  "updated": "2026-10-29",
- "integration_branch": "worktree-crprop-integration",
+ "integration_branch": "worktree-crprop-k",
  "integration_base": "8fcbb826",
  "crprop_out": "$HOME/hep-work/crprop-out",
  "capabilities": {
@@ -378,6 +378,66 @@
    "missing_capabilities": [],
    "notes": [
     "Opus verifier dispatched"
+   ]
+  },
+  "K1": {
+   "state": "pending",
+   "dispatches": 0,
+   "rework_rounds": 0,
+   "branch": null,
+   "base": null,
+   "head": null,
+   "merge_commit": null,
+   "worker_report": null,
+   "verifier_report": null,
+   "missing_capabilities": [],
+   "notes": [
+    "B1.1"
+   ]
+  },
+  "K2": {
+   "state": "pending",
+   "dispatches": 0,
+   "rework_rounds": 0,
+   "branch": null,
+   "base": null,
+   "head": null,
+   "merge_commit": null,
+   "worker_report": null,
+   "verifier_report": null,
+   "missing_capabilities": [],
+   "notes": [
+    "B1.1"
+   ]
+  },
+  "K3": {
+   "state": "pending",
+   "dispatches": 0,
+   "rework_rounds": 0,
+   "branch": null,
+   "base": null,
+   "head": null,
+   "merge_commit": null,
+   "worker_report": null,
+   "verifier_report": null,
+   "missing_capabilities": [],
+   "notes": [
+    "B1.1"
+   ]
+  },
+  "K4": {
+   "state": "pending",
+   "dispatches": 0,
+   "rework_rounds": 0,
+   "branch": null,
+   "base": null,
+   "head": null,
+   "merge_commit": null,
+   "worker_report": null,
+   "verifier_report": null,
+   "missing_capabilities": [],
+   "notes": [
+    "B1.1"
    ]
   }
  },
@@ -871,6 +931,11 @@
    "cycle": 4,
    "date": "2026-10-29",
    "event": "PR #308 CI run 2 (6d4ce8a2): all float pins fixed; only EmulatorPerModelDeclaration fails on Linux (C2UF model self-check, amplified libm drift); A1.20 rework round 2 dispatched (self-check bound from the emulator's own sigma)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "B1.1: follow-up K1-K4 for 0.44.0 from main 42f5bad1 (integration branch worktree-crprop-k)"
   }
  ],
  "env": {
