@@ -11,8 +11,8 @@ Campaign window: H0 2026-10-26 to RC 2026-10-29 (integration branch `worktree-cr
 
 WAVE6-RESULT: <pending>
 
-This line is for the final confirmation run after the wave-6 fixes. The wave-6 run itself (on 6f377150) failed
-twice; see §2 and §6.
+This line is for the final confirmation run after the wave-6 fixes. The wave-6 run itself (on 6f377150) was one
+run with two failures; see §2 and §6.
 
 ## 1. Summary
 
@@ -61,13 +61,13 @@ wave-run fix branches (§6).
 | C1 | merged | 099d1d22 | 1 | 1 | round 0 (not stated): REWORK; round 1 (Sonnet): PASS |
 | C2 | merged | 9f17775c | 1 | 0 | Opus: PASS |
 | C2U | merged | 886bb316 | 1 | 0 | Opus: PASS on C2U-1/2 (C2U-3 moved, A1.12) |
-| C2UF | merged | dee1179b | 2 | 0 | Opus: PASS |
+| C2UF | merged | dee1179b | 2 | 1 | Opus: PASS; wave-6 fix: in progress |
 | D1 | merged | e44377f4 | 2 | 0 | Opus: PASS under A1.11 |
 | D2 | unavailable | — | 0 | 0 | — (missing `env-galprop`) |
 | D3 | merged | 6a332c90; fix 310bb517 | 1 | 1 | Opus: PASS under A1.13; wave-5 fix (Sonnet): PASS |
 | E1 | merged | a4ad05d3; fix 63e7c1b2 | 1 | 1 | Sonnet: PASS; wave-3 fix (Sonnet): PASS |
 | E2 | merged | c28d960c; fix bc6f314f | 1 | 1 | Opus: PASS; wave-4 fix (Sonnet): PASS |
-| F1 | merged | 3ccaa643 | 2 | 0 | Opus: PASS under A1.17 |
+| F1 | merged | 3ccaa643 | 2 | 1 | Opus: PASS under A1.17; wave-6 fix: in progress |
 | F2 | skipped | — | 0 | 0 | — (A1.18) |
 | F3 | skipped | — | 0 | 0 | — (A1.18, condition false) |
 | RC | dispatched | — | — | — | this work package |
@@ -337,11 +337,11 @@ F1, so the campaign total is not stated in the record. It is above 8 and, at the
 | WF-3 | holds | every merged WP has a verifier PASS in `status.json`; verifiers were separate agents from the workers |
 | WF-4 | static clause holds; revert clause missed (fixed forward, §6) | all 25 merges have a post-merge static result (exit 0); 5 of them (A1R, D1, E2 fix, D3 fix, F1) were taken from the orchestrator's merge logs and added to the record later (§2); wave-run failures fixed forward instead of reverted |
 | WF-5 | holds | `status.json` and the other orchestrator-only files are checked by `workflow_check.py diff` on every WP branch |
-| WF-6 | missed, accepted (A1.6: P0 rework round 3) | P0 hit the rework limit (escalation 4) and got one authorized extra round; D1, at its limits, was escalated (9, 11); no WP used more than 2 dispatches |
+| WF-6 | missed, accepted (A1.6: P0 rework round 3) | P0 hit the rework limit (escalation 4) and got one authorized extra round; D1 blocked, escalated (9, 11); no WP used more than 2 dispatches |
 | WF-7 | person clause missed | maintainer decisions A1.1-A1.15, the USINE clone approval and the pause and its cancellation were asked during the run (§6); nothing pushed, `main` unchanged, no pull request |
 | WF-8 | holds (natural test) | the campaign stopped on 2026-10-27 with WPs dispatched and resumed on 2026-10-28 ("resumption check ok: 6 worktrees, HEADs as recorded"); each was merged once |
 | WF-9 | capability clause holds; fallback clause missed, accepted (A1.18: F2 skipped by decision) | no WP was dispatched without its capabilities (B1, B3, C2U waited for `env-usine`; D2 never dispatched); F2's manifest fallback did not apply (§6) |
-| WF-10 | pending | wave 6 failed twice (§2), fixes in progress; final confirmation run: WAVE6-RESULT above; `main` has not moved, so no rebase was needed |
+| WF-10 | pending | wave 6 was one run with two failures (§2), fixes in progress; final confirmation run: WAVE6-RESULT above; `main` has not moved, so no rebase was needed |
 
 ## 10. For H1 (delegated to the orchestrator, A1.15)
 

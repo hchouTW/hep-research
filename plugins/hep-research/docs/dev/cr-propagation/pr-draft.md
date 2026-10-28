@@ -71,7 +71,7 @@ Full report: `plugins/hep-research/docs/dev/cr-propagation/campaign-report.md`
   branch, and the fixes of waves 1-4 were confirmed by later full runs. The wave-5 D3 fix was confirmed by wave 6's
   subprocess-timeout test, which listed only the F1 line. `check_relocation.py` otherwise shows only the 2 known
   geant4 path-with-spaces failures, identical on `main`.
-- Wave 6 (6f377150) failed twice: the hep-statistics routing size budget, 25688 > 25600 B (C2UF), and a subprocess
+- Wave 6 (6f377150) was one run with two failures: the hep-statistics routing size budget, 25688 > 25600 B (C2UF), and a subprocess
   call without a timeout in `test_cr_propagation.py:2269` (F1). Both are being fixed on fix branches (rework round 1).
 - Final confirmation run after the wave-6 fixes: WAVE6-RESULT: <pending>
 - Required CI jobs: <pending>
