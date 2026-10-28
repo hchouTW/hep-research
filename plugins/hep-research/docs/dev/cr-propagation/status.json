@@ -19,19 +19,19 @@
  },
  "work_packages": {
   "P0": {
-   "state": "dispatched",
+   "state": "verifying",
    "dispatches": 1,
    "rework_rounds": 3,
    "branch": "worktree-crprop-p0fix",
    "base": null,
-   "head": "34e2edeb",
+   "head": "e51ceb1b",
    "merge_commit": null,
-   "worker_report": null,
+   "worker_report": "round 3 DONE: --no-renames in check_diff; regression test (3 tests: fails 2/3 without fix, 3/3 with); other git calls have no rename hole; static ok",
    "verifier_report": "round 0 REWORK (5); round 1 REWORK (README scope, checker holes, sources, language differences); round 2 REWORK (2026-10-28): check_diff misses renames (no --no-renames); all else pass",
    "missing_capabilities": [],
    "notes": [
     "blocked at the rework limit; escalation 4",
-    "A1.6 (maintainer 2026-10-28): extra round 3 limited to --no-renames + regression test; worker in crprop-p0fix"
+    "A1.6 round 3: worker DONE e51ceb1b; Sonnet verifier dispatched 2026-10-28"
    ]
   },
   "ENV": {
@@ -459,6 +459,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "A3 DONE (cef2836a); rebase onto integration f747fbe7 requested before verification; stale B2 slot lock cleared (wave-1 run had queued behind it)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "P0 round 3 worker DONE (e51ceb1b); verifier dispatched"
   }
  ],
  "env": {
