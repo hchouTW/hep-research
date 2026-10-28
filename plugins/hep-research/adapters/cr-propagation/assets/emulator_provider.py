@@ -28,7 +28,9 @@ hold-out error recorded in the artifact's regression_validation (max_relative_er
 Usage:
   python3 emulator_provider.py --request REQUEST.json --response RESPONSE.json [--allow-outside-validated-range]
   python3 emulator_provider.py --serve [--allow-outside-validated-range]
-Exit codes: 0 ok, 1 refused or every point failed, 3 some points failed, 2 unreadable request or unwritable response.
+Exit codes: 0 ok, 1 refused or every point failed, 3 some points failed, or NumPy/SciPy missing (status
+missing-dependency on stdout, a failed response with provider-error written), 2 unreadable request or unwritable
+response.
 """
 from __future__ import annotations
 
@@ -377,6 +379,19 @@ def main(argv=None) -> int:
     parser.add_argument(OUTSIDE_OPTION, action="store_true", dest="allow_outside",
                         help=f"evaluate points outside the domain; their results are labelled {OUTSIDE_LABEL}")
     args = parser.parse_args(argv)
+    try:
+        import numpy  # noqa: F401
+        import scipy.linalg  # noqa: F401
+        import scipy.spatial  # noqa: F401
+    except ImportError as exc:  # the hep-computing script contract: exit 3, status missing-dependency
+        missing = f"NumPy and SciPy are needed: {exc}"
+        if args.response and not args.serve:
+            try:
+                write_json_atomic(args.response, failed_response(None, "provider-error", missing))
+            except OSError:
+                pass
+        print(json.dumps({"status": "missing-dependency", "error": missing}))
+        return 3
     emulator, problem = load_emulator()
     if args.serve:
         if args.request or args.response:
