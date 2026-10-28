@@ -1,10 +1,14 @@
-"""transport_conventions.py (cr-propagation A1): diffusion conventions of GALPROP, USINE (K0, K10) and DRAGON2, the
-reacceleration zone, per-nucleon and total kinetic energy, legacy names, and the harmonized-v1 configuration.
+"""transport_conventions.py (cr-propagation A1, A1R): diffusion conventions of GALPROP, USINE (K0, K10) and DRAGON2,
+the reacceleration conventions (zone, D_pp constant), per-nucleon and total kinetic energy, legacy names, and the
+harmonized-v1 configuration.
 
 Oracles: the convention table of skills/hep-theory/references/cosmic-ray-phenomenology.md, parsed row by row here (a
 row that does not parse fails the test, A1-3; no value of it is typed in); the IAU parsec and Julian year (A1-2:
 1 kpc^2/Myr = 3.0172e29 cm^2/s within 1e-4); exact round trips of pure power laws (A1-1); statuses with breaks (A1-4)
-and between reacceleration zones (A1-5); r3 5.4 and 5.5 for harmonized-v1 (A1-6). Inputs are SYNTHETIC."""
+and between reacceleration zones (A1-5); r3 5.4 and 5.5 for harmonized-v1 (A1-6). A1R: the DRAGON2 row read from
+the page (A1R-1); the first-order zone weights h L and L^2/3 and the second-order mismatch (1 + lam)/5 recomputed
+here by an independent finite-difference Green's function in z (A1R-2); reacceleration round trips within 1e-12
+(A1R-3). Inputs are SYNTHETIC."""
 import itertools
 import json
 import math
@@ -53,10 +57,11 @@ def parse_convention_table(text: str) -> list[dict]:
             eta = 1.0
         else:
             eta = 0.0
-        ref = re.search(r"at (?:rho0|R0) = (\d+(?:\.\d+)?) GV|at (\d+(?:\.\d+)?) GV", norm)
+        ref = re.search(r"at (?:rho0|R0) = (\d+(?:\.\d+)?) GV|at (\d+(?:\.\d+)?) GV|at rho0 = \w+ \((free)\)", norm)
         unit = re.search(r"in (10\^28 cm\^2/s|kpc\^2/Myr|cm\^2/s)", norm)
         assert ref and unit, f"normalization not parsed: {norm}"
-        row = {"code": code, "eta": eta, "reference_gv": float(ref.group(1) or ref.group(2)), "unit": unit.group(1),
+        reference = None if ref.group(3) else float(ref.group(1) or ref.group(2))
+        row = {"code": code, "eta": eta, "reference_gv": reference, "unit": unit.group(1),
                "momentum": "(p/p0)" in form, "breaks": "break" in form, "line": line}
         rows.append(row)
         k = re.search(r"K(\d+) = K0 (\d+)\^delta", norm)
@@ -123,9 +128,9 @@ class PowerLawRoundTrips(unittest.TestCase):
     """A1-1: pure power laws convert exactly; there and back within 1e-12."""
 
     def test_all_pairs(self):
-        groups = {1.0: ["galprop", "usine-k0", "usine-k10", "canonical"],
+        groups = {1.0: ["galprop", "usine-k0", "usine-k10", "dragon2", "canonical"],
                   0.0: ["dragon2", "usine-k0", "usine-k10", "canonical"],
-                  0.7: ["usine-k0", "usine-k10", "canonical"]}
+                  0.7: ["usine-k0", "usine-k10", "dragon2", "canonical"]}
         for eta, names in groups.items():
             for delta, d0 in ((0.3, 1.2e28), (0.45, 3.0e28), (0.7, 8.5e28)):
                 start = {"D0_cm2_s": d0, "R0_gv": 1.0, "delta": delta, "eta": eta}
@@ -138,7 +143,7 @@ class PowerLawRoundTrips(unittest.TestCase):
                         back = tc.convert_diffusion(mid["result"], b, a)
                         # canonical keeps its input's R0, so compare D at 1 GV of the canonical forms
                         self.assertLess(abs(at_1gv(back) / at_1gv(there) - 1), 1e-12)
-                        if a != "canonical":
+                        if tc.CODE_CONVENTIONS[a]["reference_gv"] is not None:  # fixed reference (not dragon2)
                             name = tc.CODE_CONVENTIONS[a]["normalization_name"]
                             self.assertLess(abs(back["result"][name] / there["result"][name] - 1), 1e-12)
                         home = tc.convert_diffusion(back["result"], a, "canonical")
@@ -154,7 +159,7 @@ class PowerLawRoundTrips(unittest.TestCase):
         self.assertLess(abs(out["result"]["D0"] - 3.0 * 4 ** 0.5), 1e-12)
 
     def test_eta_mismatch_not_convertible(self):
-        out = tc.convert_diffusion({"D0": 3.0, "delta": 0.5}, "galprop", "dragon2")
+        out = tc.convert_diffusion({"D0_1e28": 3.0, "R0_gv": 1.0, "delta": 0.5, "eta": 0.7}, "dragon2", "galprop")
         self.assertEqual(out["conversion_status"], "not-convertible")
         self.assertIn("eta", out["reason"])
 
@@ -216,24 +221,188 @@ class Breaks(unittest.TestCase):
         self.assertEqual(out["conversion_status"], "approximate")
 
 
+class Dragon2Convention(unittest.TestCase):
+    """A1R-1: DRAGON2 cd588707 computes D0 beta^etaT (rho/DiffRefRig)^delta in rigidity, D0_1e28 in 1e28 cm^2/s."""
+
+    def test_convention_entry(self):
+        conv = tc.CODE_CONVENTIONS["dragon2"]
+        self.assertIsNone(conv["eta"])            # etaT is an input
+        self.assertIsNone(conv["reference_gv"])   # DiffRefRig is an input
+        self.assertEqual((conv["normalization_name"], conv["d0_unit"]), ("D0_1e28", "1e28 cm^2/s"))
+        self.assertIn("beta^etaT", conv["form"])
+        self.assertNotIn("(p/p0)", conv["form"])
+        self.assertIn("src/diffusion.cc:150", conv["source"])
+        self.assertIn("cd588707", conv["source"])
+
+    def test_page_row_cites_source(self):
+        row = next(r for r in parse_convention_table(REFERENCE.read_text(encoding="utf-8")) if r["code"] == "DRAGON2")
+        self.assertIn("cd588707", row["line"])
+        self.assertRegex(row["line"], r"src/diffusion\.cc:\d+")
+        self.assertIsNone(row["eta"])
+        self.assertFalse(row["momentum"])
+
+    def test_repo_spec_converts(self):
+        spec = json.loads(DRAGON2_SPEC.read_text(encoding="utf-8"))
+        self.assertEqual(spec["diffusion"]["etaT"], 1.0)
+        out = tc.convert_diffusion(spec["diffusion"], "dragon2", "canonical")
+        self.assertEqual(out["conversion_status"], "exact")
+        self.assertEqual((out["result"]["eta"], out["result"]["R0_gv"], out["result"]["delta"]), (1.0, 1.0, 0.5))
+        self.assertLess(abs(out["result"]["D0_cm2_s"] / 3.0e28 - 1), 1e-15)
+        # eta = 1 at 1 GV is GALPROP's form: D0 there is 3 x 4^0.5 in 1e28 cm^2/s at 4 GV
+        out = tc.convert_diffusion(spec["diffusion"], "dragon2", "galprop")
+        self.assertEqual(out["conversion_status"], "exact")
+        self.assertLess(abs(out["result"]["D0"] / (3.0 * 4 ** 0.5) - 1), 1e-12)
+        back = tc.convert_diffusion(dict(out["result"]), "galprop", "dragon2")  # DiffRefRig stays at 4 GV
+        self.assertEqual(back["result"]["R0_gv"], 4.0)
+        self.assertLess(abs(at_1gv(back) / 3.0e28 - 1), 1e-12)
+
+    def test_missing_etat_or_reference_rejected(self):
+        for key in ("etaT", "DiffRefRig_GV"):
+            spec = {"D0_1e28": 3.0, "DiffRefRig_GV": 1.0, "delta": 0.5, "etaT": 1.0}
+            del spec[key]
+            with self.subTest(missing=key), self.assertRaises(tc.ConventionError):
+                tc.convert_diffusion(spec, "dragon2", "canonical")
+
+    def test_cli_from_repo_spec(self):
+        spec = json.loads(DRAGON2_SPEC.read_text(encoding="utf-8"))
+        with tempfile.TemporaryDirectory() as work_dir:
+            f = Path(work_dir) / "d.json"
+            f.write_text(json.dumps({"from": "dragon2", "to": "usine-k0", "diffusion": spec["diffusion"]}))
+            code, out = run("diffusion", "--input", str(f))
+        self.assertEqual((code, out["conversion"]["conversion_status"]), (0, "exact"))
+        self.assertLess(abs(out["conversion"]["result"]["K0"] * tc.KPC2_PER_MYR_CM2_S / 3.0e28 - 1), 1e-12)
+
+
+def _solve_tridiagonal(lower, diag, upper, rhs):
+    """Thomas algorithm (stdlib)."""
+    n = len(diag)
+    c, d = [0.0] * n, [0.0] * n
+    c[0], d[0] = upper[0] / diag[0], rhs[0] / diag[0]
+    for i in range(1, n):
+        m = diag[i] - lower[i] * c[i - 1]
+        c[i] = upper[i] / m if i < n - 1 else 0.0
+        d[i] = (rhs[i] - lower[i] * d[i - 1]) / m
+    x = [0.0] * n
+    x[-1] = d[-1]
+    for i in range(n - 2, -1, -1):
+        x[i] = d[i] - c[i] * x[i + 1]
+    return x
+
+
+def slab_coefficients(lam: float, n: int = 2000) -> dict:
+    """Independent oracle for the zone derivation: -f'' = s on z in [0, L = 1], f(1) = 0, symmetric at z = 0 with disc
+    destruction 2 lam (units D = 1, L = 1; lam = h Gamma L / D). Disc terms act at z = 0 with weight 2h; halo terms
+    everywhere. Returns the first- and second-order responses at z = 0 per unit coefficient (h = 1 for the disc)."""
+    dz = 1.0 / n
+    lower = [0.0] + [-1.0 / dz ** 2] * (n - 1)
+    # half cell at z = 0: the disc destruction 2 h Gamma over dz / 2 per side, h Gamma = lam (D = L = 1)
+    diag = [2.0 / dz ** 2 + 2.0 * lam / dz] + [2.0 / dz ** 2] * (n - 1)
+    upper = [-2.0 / dz ** 2] + [-1.0 / dz ** 2] * (n - 1)
+
+    def solve(source):
+        return _solve_tridiagonal(lower, diag, upper, source)
+
+    def disc(values):  # a disc term of weight 2 (2h, h = 1) acting on values[0], spread over the half cell
+        return [2.0 * values[0] * 2.0 / dz] + [0.0] * (n - 1)
+
+    phi = solve([2.0 * 2.0 / dz] + [0.0] * (n - 1))
+    phi = [x / phi[0] for x in phi]          # zeroth-order profile, 1 - z
+    psi_d, psi_h = solve(disc(phi)), solve(phi)
+    c1d, c1h = psi_d[0] / 2.0, psi_h[0]   # per unit 2h -> per unit h: the disc weight is h (module: h L, L^2/3)
+    c2d, c2h = solve(disc(psi_d))[0] / 4.0, solve(psi_h)[0]
+    return {"c1_disc": c1d, "c1_halo": c1h, "c2_over_c1sq_disc": c2d / c1d ** 2, "c2_over_c1sq_halo": c2h / c1h ** 2}
+
+
 class Reacceleration(unittest.TestCase):
-    """A1-5: thin disc <-> whole halo is only approximate."""
+    """A1-5: thin disc <-> whole halo is only approximate. A1R-2/3: the zone weights, the D_pp constants of
+    DRAGON2 cd588707 and USINE V3.5, round trips within 1e-12, and the bound of the approximate conversion."""
+
+    CONVENTIONS = ("thin-disc", "whole-halo", "dragon2-ptuskin94", "dragon2-ptuskin03", "usine")
 
     def test_zones(self):
         for a, b in (("thin-disc", "whole-halo"), ("whole-halo", "thin-disc")):
-            out = tc.convert_alfven_speed(10.0, a, b, 4.0, 100.0)
+            out = tc.convert_alfven_speed(10.0, a, b, 4.0, 100.0, destruction_escape_ratio=0.0)
             self.assertEqual(out["conversion_status"], "approximate")
-            self.assertIsNone(out["relative_error_bound"])
-        out = tc.convert_alfven_speed(10.0, "whole-halo", "thin-disc", 4.0, 100.0)
-        self.assertAlmostEqual(out["result"]["V_A_kms"], 10.0 * math.sqrt(4.0 / 0.1), places=12)
+            self.assertEqual(out["relative_error_bound"], 0.2)
+            self.assertIn("second-order", out["bound_applies_to"])
+        out = tc.convert_alfven_speed(10.0, "whole-halo", "thin-disc", 4.0, 100.0, destruction_escape_ratio=1.0)
+        self.assertLess(abs(out["result"]["V_A_kms"] / (10.0 * math.sqrt(4.0 / (3 * 0.1))) - 1), 1e-14)
+        self.assertEqual(out["relative_error_bound"], 0.4)
         self.assertEqual(tc.convert_alfven_speed(10.0, "thin-disc", "thin-disc", 4.0, 100.0)["conversion_status"],
                          "exact")
 
+    def test_zone_change_needs_lambda(self):
+        with self.assertRaises(tc.ConventionError):
+            tc.convert_alfven_speed(10.0, "thin-disc", "whole-halo", 4.0, 100.0)
+        with self.assertRaises(tc.ConventionError):
+            tc.convert_reacceleration(10.0, "usine", "dragon2-ptuskin94", 4.0, 100.0, destruction_escape_ratio=-1.0)
+
+    def test_zone_weights_against_slab_oracle(self):
+        """A1R-2(a): first-order weights h L and L^2/3 (any lam); second-order mismatch (6 + lam)/5 - 1 = (1+lam)/5."""
+        for lam in (0.0, 0.5, 2.0, 10.0):
+            with self.subTest(lam=lam):
+                c = slab_coefficients(lam)
+                self.assertLess(abs(c["c1_halo"] / c["c1_disc"] / (tc.zone_weight("whole-halo", 1.0, 0.1)
+                                                                  / tc.zone_weight("thin-disc", 1.0, 0.1) * 0.1)
+                                    - 1), 1e-3)
+                self.assertLess(abs(c["c1_halo"] / c["c1_disc"] - 1.0 / 3.0), 1e-3)
+                self.assertLess(abs(c["c2_over_c1sq_disc"] - 1.0), 1e-3)
+                mismatch = c["c2_over_c1sq_halo"] / c["c2_over_c1sq_disc"] - 1.0
+                out = tc.convert_reacceleration(30.0, "thin-disc", "whole-halo", 4.0, 100.0, lam)
+                self.assertLess(abs(mismatch - out["relative_error_bound"]), 2e-3)
+
+    def test_momentum_diffusion_constants(self):
+        """A1R-2(b): DRAGON2 Ptuskin94 c = 1 (no 4/3, enum value 0), Ptuskin03 and USINE c = 4/3."""
+        r = tc.REACCELERATION_CONVENTIONS
+        key = "momentum_diffusion_constant"
+        self.assertEqual((r["dragon2-ptuskin94"][key], r["dragon2-ptuskin03"][key], r["usine"][key]),
+                         (1.0, 4.0 / 3.0, 4.0 / 3.0))
+        self.assertEqual((r["dragon2-ptuskin94"]["zone"], r["usine"]["zone"]), ("whole-halo", "thin-disc"))
+        self.assertIn("galaxy.cc:279", r["dragon2-ptuskin94"]["source"])
+        self.assertIn("init.Model1D.par:90", r["usine"]["source"])
+        out = tc.convert_reacceleration(20.0, "dragon2-ptuskin94", "dragon2-ptuskin03", 4.0, 100.0)
+        self.assertEqual((out["conversion_status"], out["relative_error_bound"]), ("exact", 0.0))
+        self.assertLess(abs(out["result"]["V_A_kms"] / (20.0 * math.sqrt(3.0 / 4.0)) - 1), 1e-15)
+
+    def test_usine_to_dragon2(self):
+        """USINE V_A 50 km/s, L = 4 kpc, h = 100 pc -> DRAGON2 Ptuskin94 50 sqrt(4h/L) (= sqrt(4/3) sqrt(3h/L))."""
+        out = tc.convert_reacceleration(50.0, "usine", "dragon2-ptuskin94", 4.0, 100.0, 1.0)
+        self.assertEqual(out["conversion_status"], "approximate")
+        self.assertLess(abs(out["result"]["V_A_kms"] / (50.0 * math.sqrt(4 * 0.1 / 4.0)) - 1), 1e-14)
+        self.assertEqual(out["factors"]["momentum_diffusion_constant_status"], "exact")
+        self.assertEqual(out["relative_error_bound"], 0.4)
+        with self.assertRaises(tc.ConventionError):  # DRAGON2 has no w
+            tc.convert_reacceleration(50.0, "usine", "dragon2-ptuskin94", 4.0, 100.0, 1.0, w_target=2.0)
+        w2 = tc.convert_reacceleration(50.0, "usine", "dragon2-ptuskin94", 4.0, 100.0, 1.0, w_source=2.0)
+        self.assertLess(abs(w2["result"]["V_A_kms"] / out["result"]["V_A_kms"] - 1 / math.sqrt(2.0)), 1e-14)
+
+    def test_round_trips(self):
+        """A1R-3: there and back within 1e-12 for every pair; same-zone pairs exact, cross-zone with the bound."""
+        for va in (0.0, 7.3, 30.0, 120.0):
+            for a, b in itertools.permutations(self.CONVENTIONS, 2):
+                with self.subTest(va=va, pair=(a, b)):
+                    there = tc.convert_reacceleration(va, a, b, 5.0, 120.0, 0.7)
+                    back = tc.convert_reacceleration(there["result"]["V_A_kms"], b, a, 5.0, 120.0, 0.7)
+                    if va == 0.0:
+                        self.assertEqual(back["result"]["V_A_kms"], 0.0)
+                    else:
+                        self.assertLess(abs(back["result"]["V_A_kms"] / va - 1), 1e-12)
+                    same = tc.REACCELERATION_CONVENTIONS[a]["zone"] == tc.REACCELERATION_CONVENTIONS[b]["zone"]
+                    self.assertEqual(there["conversion_status"], "exact" if same else "approximate")
+                    self.assertEqual(there["relative_error_bound"], 0.0 if same else (1 + 0.7) / 5)
+
     def test_cli(self):
         code, out = run("reacceleration", "--alfven-speed-km-s", "10", "--from-zone", "whole-halo", "--to-zone",
-                        "thin-disc", "--l-kpc", "4", "--disc-halfwidth-pc", "100")
+                        "thin-disc", "--l-kpc", "4", "--disc-halfwidth-pc", "100", "--destruction-escape-ratio", "0.5")
         self.assertEqual(code, 0)
         self.assertEqual(out["conversion"]["conversion_status"], "approximate")
+        self.assertEqual(out["conversion"]["relative_error_bound"], 0.3)
+        code, out = run("reacceleration", "--alfven-speed-km-s", "50", "--from", "usine", "--to", "dragon2-ptuskin94",
+                        "--l-kpc", "4", "--disc-halfwidth-pc", "100")
+        self.assertEqual((code, out["status"]), (2, "rejected"))
+        code, out = run("reacceleration", "--alfven-speed-km-s", "50", "--from", "dragon2-ptuskin03", "--to",
+                        "dragon2-ptuskin94", "--l-kpc", "4", "--disc-halfwidth-pc", "100")
+        self.assertEqual((code, out["conversion"]["conversion_status"]), (0, "exact"))
 
 
 class EnergyAndNames(unittest.TestCase):
@@ -348,7 +517,8 @@ class Cli(unittest.TestCase):
             code, out = run("diffusion", "--input", str(good))
             self.assertEqual((code, out["status"], out["conversion"]["conversion_status"]), (0, "ok", "exact"))
             bad = Path(work_dir) / "bad.json"
-            bad.write_text(json.dumps({"from": "galprop", "to": "dragon2", "diffusion": {"D0": 3.0, "delta": 0.5}}))
+            bad.write_text(json.dumps({"from": "usine-k0", "to": "galprop",
+                                       "diffusion": {"K0": 0.1, "delta": 0.5, "eta": 0.7}}))
             code, out = run("diffusion", "--input", str(bad))
             self.assertEqual((code, out["status"]), (1, "refused"))
             code, out = run("diffusion", "--input", str(Path(work_dir) / "missing.json"))

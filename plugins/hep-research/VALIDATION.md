@@ -6487,3 +6487,34 @@ E2's hold-out and the data covariance. Observed for E2: the design's d_min (0.22
 with the posterior region, so the min-distance early stop fires after two rounds of posterior-focused additions; a
 better emulator, not more points of this placeholder, is what the low-rigidity bins need. Labels: synthetic,
 unvalidated (ILLUSTRATIVE cross sections; USINE translator limits of B1, fixed by B1X in parallel).
+
+## CRPROP-A1R — 2026-10-28 (environment E2)
+
+Work package A1R (DRAGON2 convention row and reacceleration conventions; decision A1.9, escalations 6 and 9) of the
+cr-propagation r4 workflow; extends r3 §A1.
+
+Environment: E2 (macOS arm64 workstation), Python 3.13.2 (miniconda) for the module and tests (standard library);
+the scratch derivation checks used the E2 venv (Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1). r3 §0.3 checks: toplevel
+`<repo>/.claude/worktrees/crprop-a1r`, branch `worktree-crprop-a1r`, status clean at start; base exception (decision
+D10): base is the integration HEAD `6bfd1117`, not `main`; prerequisites A1 (`5d5fd918`) and ENV (`7d5c6934`, dispatch
+2 `cbb7907f`) are ancestors of HEAD. Sources read (not run): DRAGON2 at `<TOOL_HOME>/src`, commit cd588707 (clean);
+USINE V3.5 at `<TOOL_HOME>` (gitlab, commit fb53006d, tag V3.5). No DRAGON2 or USINE run was made (A1.8 tally: 0).
+
+Criteria (frozen entries A1R-1 to A1R-3 of `acceptance.json`, written before the work): A1R-1 the dragon2 convention
+and the page row match cd588707 with file:line, the repo spec D_X1_R60_UG (etaT = 1) converts, a test pins it; A1R-2
+the zone conversion and the D_pp normalisations of both codes stated from the code, each exact or approximate with a
+bound; A1R-3 reacceleration round trips within 1e-12 relative, an approximate conversion returns its bound.
+
+| Item | Result | Evidence |
+|---|---|---|
+| A1R-1 | `dragon2` = D0 beta^etaT (rho/DiffRefRig)^delta, `D0_1e28` in 1e28 cm^2/s, etaT and DiffRefRig free and required (src/diffusion.cc:150; src/grid.cc:108-110 per-nucleon momentum; src/crevolutor.cc:121-122 the (A/\|Z\|)^delta factor; src/input.cc:444-461, missing value -1 at src/input.cc:55-59); D_X1_R60_UG converts `exact` to canonical (3e28 cm^2/s at 1 GV, eta 1) and to galprop (3 x 4^0.5 at 4 GV) | `Dragon2Convention` (5 tests), page row parsed by `ConventionTable` |
+| A1R-2 (b) | D_pp D = c V_A^2 p^2 / (delta (4 - delta) (4 - delta^2) w): DRAGON2 cd588707 Ptuskin94 c = 1, no w; Ptuskin03 c = 4/3 (src/galaxy.cc:279-284; enum src/include/constants.h:146-149 gives Ptuskin94 = 0, and the 4/3 is applied for value 1; the comment of src/include/input.h:156 says otherwise); whole halo (src/galaxy.cc:308, 324). USINE V3.5 c = 4/3 (inputs/init.Model1D.par:90, init.Model2D.par:97), energy terms in the thin disc only (src/TUModel1DKisoVc.cc:400-416, src/TUModel2DKisoVc.cc:445-463). Constant ratio exact (3/4 for Ptuskin94 vs USINE). Papers cited in the code not re-read | `test_momentum_diffusion_constants` |
+| A1R-2 (a) | derived (1D slab, D independent of z, no convection, disc source and destruction): first-order disc-flux weights h L (thin disc) and L^2/3 (whole halo), so V_A,disc = V_A,halo sqrt(L/(3h)) at equal c and w; P1's "about sqrt(L/h)" gives a third of the first-order effect. Approximate: second-order terms differ by (1 + lam)/5, lam = h Gamma L / D (the returned bound) | independent oracle `slab_coefficients` (L/3 within 4e-7; mismatch 0.2/0.3/0.6/2.2 at lam 0/0.5/2/10); scratch 2D (z, p) solve: at a 1% effect the converted halo run matches the disc run within 1e-4, with sqrt(h/L) it gives a third (`$CRPROP_OUT/a1r/derivation/`) |
+| A1R-3 | 4 V_A x 20 ordered pairs of the 5 conventions round trip within 1e-12; same zone `exact` (bound 0), across zones `approximate` with bound (1 + lam)/5; a zone change without lam is rejected | `test_round_trips`, `test_cli` |
+
+Effect on the campaign: with USINE V_A,disc = 50 km/s (L = 4 kpc, h = 100 pc), DRAGON2 Ptuskin94 needs V_A,halo =
+50 sqrt(4h/L) = 15.8 km/s for the same first-order effect; D1's translator used 50 sqrt(h/L) = 7.9 km/s (a quarter of
+the D_pp), and B1's whole-halo branch uses sqrt(L/h). Neither translator is in A1R's files.
+
+Not done in A1R: convection, a radial boundary and energy losses in the zone factor (the conversion says so); the
+operator form beyond the D_pp coefficient was not re-derived; the translators of B1 and D1 were not changed.

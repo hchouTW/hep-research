@@ -116,6 +116,17 @@ Software checks establish contract consistency only, not physical validity.
   runner with cache, and the active-addition loop with its limits (5 rounds, E2 termination criteria, error-plateau
   and min-distance early stops, evaluation cap) on a placeholder emulator that E2 replaces. Committed: design file,
   summaries with per-point hashes and run references; training data stay under `$CRPROP_OUT/e1/`. No behavior change.
+- crprop a1r: `transport_conventions.py` corrected and extended from the codes' sources (decision A1.9). The
+  `dragon2` diffusion convention is now D0 beta^etaT (rho/DiffRefRig)^delta in rigidity with `D0_1e28` in 1e28 cm^2/s
+  and etaT, DiffRefRig free (DRAGON2 cd588707 src/diffusion.cc:150, src/crevolutor.cc:121-122); it was D0 (p/p0)^delta
+  with eta = 0. The DRAGON2 row of the convention table in `cosmic-ray-phenomenology.md` follows. New reacceleration
+  conversion among `thin-disc`, `whole-halo`, `dragon2-ptuskin94`, `dragon2-ptuskin03` and `usine`: the D_pp
+  constants read from the code (DRAGON2 cd588707 Ptuskin94 c = 1 without the 4/3, which its enum gives to Ptuskin03;
+  USINE V3.5 c = 4/3) convert exactly; the thin-disc/whole-halo change uses the first-order equivalence
+  V_A,disc^2 h = V_A,halo^2 L / 3 derived in the module (not sqrt(L/h)), approximate with the bound (1 + lam)/5 on the
+  second-order term, lam = h Gamma L / D, now a required input (`--destruction-escape-ratio`). The `reacceleration`
+  subcommand takes `--from`/`--to` (the old `--from-zone`/`--to-zone` still work). Tests: an independent
+  finite-difference oracle of the zone weights, round trips within 1e-12.
 
 ## 0.42.0 (2026-10-26)
 
