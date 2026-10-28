@@ -325,18 +325,18 @@
    "notes": []
   },
   "B1X": {
-   "state": "dispatched",
+   "state": "verifying",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-b1x",
-   "base": null,
-   "head": "f57ae0e3",
+   "base": "2ae3063b",
+   "head": "b4280760",
    "merge_commit": null,
    "worker_report": "DONE: high break (delta_above) + local_bubble_radius_kpc + injection eta in contracts; B1X-1..3 pass (init.TEST.par reproduced exactly, 33/33 nodes); B1X-4 field map; no silent fields; USINE XS read in place; ~37 USINE runs; Kpp factor mode-dependent (orchestrator keeps it: no rerun of B1 runs)",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "asked to rebase onto integration (A1R merged) and replace thin_disc_alfven_speed by transport_conventions.convert_reacceleration before verification"
+    "rebased; zone factor via transport_conventions (A1R); b1-slab-all-items rerun (B/C <= 0.63%); ~53 USINE runs; Opus verifier dispatched"
    ]
   },
   "A1R": {
@@ -650,6 +650,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "E2 dispatched from e5ecbd64 (optional; USINE cap 500)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "B1X rebased (b4280760) with the A1R zone conversion; Opus verifier dispatched"
   }
  ],
  "env": {
