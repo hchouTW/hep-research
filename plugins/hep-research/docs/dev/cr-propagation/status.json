@@ -338,18 +338,18 @@
    ]
   },
   "A1R": {
-   "state": "dispatched",
+   "state": "verifying",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-a1r",
    "base": null,
-   "head": null,
+   "head": "b20ab46b",
    "merge_commit": null,
-   "worker_report": null,
+   "worker_report": "DONE: dragon2 = D0 beta^etaT (rho/DiffRefRig)^delta (cd588707 diffusion.cc:150); zone factor sqrt(L/(3h)) at first order (not sqrt(L/h)), bound (1+lam)/5; DRAGON2 Ptuskin94 = 3/4 of USINE D_pp (4/3 lands on Ptuskin03: likely upstream bug); B1/D1 translators use sqrt(L/h); r3 P1 wording conflict",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "added per A1.9"
+    "Opus verifier dispatched with independent re-derivation; B1X told to hold the zone factor until A1R merges"
    ]
   }
  },
@@ -623,6 +623,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "E1 DONE (9ac54c51, 114 USINE evaluations); Sonnet verifier dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A1R DONE (b20ab46b): sqrt(3) zone-factor finding and DRAGON2 Ptuskin94 3/4 finding; Opus verifier dispatched"
   }
  ],
  "env": {
