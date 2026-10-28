@@ -242,17 +242,19 @@
    ]
   },
   "E1": {
-   "state": "pending",
-   "dispatches": 0,
+   "state": "dispatched",
+   "dispatches": 1,
    "rework_rounds": 0,
-   "branch": null,
-   "base": null,
+   "branch": "worktree-crprop-e1",
+   "base": "4a58be50",
    "head": null,
    "merge_commit": null,
    "worker_report": null,
    "verifier_report": null,
    "missing_capabilities": [],
-   "notes": []
+   "notes": [
+    "batch capability partial; dispatched under D6 (local_partition on E2); E1 USINE cap 1500 set by orchestrator within D7/A1.8"
+   ]
   },
   "E2": {
    "state": "pending",
@@ -595,6 +597,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "B3 DONE (5cb31aa5); Opus verifier dispatched (B3-1 geometry: matched 1D vs harmonized-v1 2D, verifier to judge)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "E1 dispatched from 4a58be50 (optional; D6 local_partition; E1 USINE evaluations capped at 1500 within D7)"
   }
  ],
  "env": {
