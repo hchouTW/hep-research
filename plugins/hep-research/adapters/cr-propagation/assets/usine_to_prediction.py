@@ -275,7 +275,10 @@ def prediction(observable: str, axis: str, edges: list[float], values: list[floa
         "representation": "numerical",
         "values": {"edges": edges, "values": values, "unit": "1"},
         "uncertainties": [],
-        "allowed_transformations": (["rebin (recompute the bin integrals from the run's tables; never merge ratios)"]
+        "allowed_transformations": (["level-identification",
+                                     "level-identification: top-of-atmosphere to top-of-instrument for an instrument "
+                                     "in space (no atmosphere to cross)",
+                                     "rebin (recompute the bin integrals from the run's tables; never merge ratios)"]
                                     if mod else
                                     ["solar modulation per isotope (outside this reader)",
                                      "rebin (recompute the bin integrals from the run's tables; never merge ratios)"]),

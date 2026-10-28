@@ -221,8 +221,10 @@ def stage_data(out: Path) -> dict:
         "quantity": "ratio", "process": "boron to carbon flux ratio of primary and secondary cosmic rays near Earth",
         "species": [{"name": "boron"}, {"name": "carbon"}],
         "variables": [{"name": "rigidity", "unit": "GV", "edges": edges}],
-        "phase_space": {"definition": "cosmic rays at the instrument in low Earth orbit, rigidity above the "
-                                      "geomagnetic cutoff, as defined in the source paper", "fiducial": True},
+        "phase_space": {"definition": "cosmic rays at the instrument in low Earth orbit; the published fluxes are "
+                                      "corrected for acceptance and for the geomagnetic cutoff, so no fiducial "
+                                      "restriction remains (the flux near Earth outside the magnetosphere)",
+                        "fiducial": False},
         "level": "top-of-instrument",
         "normalization": {"kind": "exposure", "value": "not-applicable",
                           "convention": "ratio of exposure-normalized fluxes; the normalization cancels"},
@@ -333,7 +335,7 @@ def paper_point(family: str) -> dict:
     return pt
 
 
-def config(family: str, record: Path, conditions: dict, cov_alt: bool) -> dict:
+def config(family: str, record: dict, conditions: dict, cov_alt: bool) -> dict:
     pt = paper_point(family)
     free = FREE[family] + list(NUISANCES)
     params = {}
@@ -343,10 +345,22 @@ def config(family: str, record: Path, conditions: dict, cov_alt: bool) -> dict:
             params[n]["prior"] = {"mean": NUISANCES[n][0], "sigma": NUISANCES[n][1]}
     fixed = {k: v for k, v in pt.items() if k not in free}
     cfg = {"provider": {"id": PROVIDER, "version": PROVIDER_VERSION},
-           "datasets": [{"name": "bc", "measurement": str(record), "observable": "B/C", "period": PERIOD}],
+           "datasets": [{"name": "bc", "measurement": record, "observable": "B/C", "period": PERIOD}],
            "gate_plan": {"measurement_conditions": conditions,
-                         "transformations": [{"kind": "level-identification", "from": "top-of-atmosphere",
-                                              "to": "top-of-instrument",
+                         "mappings": [{"key": "energy_variable", "action": "equivalent",
+                                       "justification": "both are rigidity bins in GV with the ratio of the "
+                                                        "bin-integrated boron and carbon fluxes (r3 P2); the provider "
+                                                        "sums isotopes at equal rigidity (P3)"},
+                                      {"field": "process", "action": "equivalent",
+                                       "justification": "both are the boron to carbon flux ratio near Earth: the "
+                                                        "prediction is USINE's force-field modulated B/C, the data "
+                                                        "the measured B/C"},
+                                      {"field": "phase_space", "action": "equivalent",
+                                       "justification": "the published ratio is corrected for acceptance and "
+                                                        "geomagnetic cutoff, i.e. the flux near Earth outside the "
+                                                        "magnetosphere, which the force-field flux describes"}],
+                         "transformations": [{"kind": "level-identification", "owner": "hep-statistics (F1)",
+                                              "from": "top-of-atmosphere", "to": "top-of-instrument",
                                               "justification": "a space instrument has no atmosphere above it: the "
                                                                "force-field flux near Earth is the flux at the "
                                                                "instrument (geomagnetic effects are corrected in the "
@@ -431,7 +445,13 @@ def run_fit(out: Path, family: str, reg: Path, cache: Path, max_eval: int, cov_a
     work = out / f"fit-{family}"
     work.mkdir(parents=True, exist_ok=True)
     conditions = {"transport_substitutes": start[family]["substitutes"]}
-    cfg = config(family, out / "data" / "bc-observed.json", conditions, cov_alt)
+    # the dataset-record with its covariance file named by absolute path (references resolve from the config folder)
+    record = json.loads((out / "data" / "bc-observed.json").read_text())
+    for comp in record["extension"]["data"]["uncertainties"]:
+        if comp.get("covariance_ref"):
+            comp["covariance_ref"] = str(out / "data" / comp["covariance_ref"])
+    record["extension"]["covariance"]["ref"] = str(out / "data" / record["extension"]["covariance"]["ref"])
+    cfg = config(family, record, conditions, cov_alt)
     (work / "config.json").write_text(json.dumps(cfg, indent=1) + "\n")
     cmd = [sys.executable, str(FIT), "fit", "--input", str(work / "config.json"), "--provider-registry", str(reg),
            "--cache-dir", str(cache), "--out", str(work / "out"), "--max-evaluations", str(max_eval)]

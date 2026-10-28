@@ -213,6 +213,58 @@ class PropagationFit(unittest.TestCase):
         self.assertEqual((code, out["reason"]), (1, "modulation-needs-isotopic-lis"))
         self.assertIn("phi_p1_gv", out["detail"])
 
+    def test_provider_side_modulation_needs_the_phi_in_the_provider_domain(self):
+        """F1: a period is accepted when the provider's domain declares phi_<period>_gv (the provider modulates);
+        the phi must then be fitted or fixed, and each dataset's requests carry only its own period's phi."""
+        import propagation_fit as pf
+        reg = json.loads(self.registry.read_text())
+        for item in reg["providers"]:
+            if item["declaration"]["id"] == PROVIDER:
+                item["declaration"]["domain"]["phi_p1_gv"] = {"min": 0.0, "max": 2.0}
+        cfg = self.config()
+        cfg["datasets"][0]["period"] = "p1"
+        with self.assertRaises(pf.FitInputError) as ctx:   # phi neither fitted nor fixed
+            pf.run(cfg, self.work, reg, cache_dir=self.cache)
+        self.assertIn("phi_p1_gv", str(ctx.exception))
+        cfg["fixed"]["phi_p1_gv"] = 0.5
+        with self.assertRaises(pf.FitRefused) as ctx:   # passes the period check; the closed form refuses the phi
+            pf.run(cfg, self.work, reg, cache_dir=self.cache)
+        self.assertNotEqual(ctx.exception.reason, "modulation-needs-isotopic-lis")
+
+        class Ds:
+            def __init__(self, name, period):
+                self.name, self.period = name, period
+        ev = pf.Evaluator(None, PROVIDER, "0.1.0", [Ds("a", "p1"), Ds("b", "p2"), Ds("c", None)], {}, 10)
+        pt = {"delta": 0.5, "phi_p1_gv": 0.4, "phi_p2_gv": 0.6}
+        self.assertEqual(ev.dataset_point(pt, ev.datasets[0]), {"delta": 0.5, "phi_p1_gv": 0.4})
+        self.assertEqual(ev.dataset_point(pt, ev.datasets[1]), {"delta": 0.5, "phi_p2_gv": 0.6})
+        self.assertEqual(ev.dataset_point(pt, ev.datasets[2]), {"delta": 0.5})
+
+    def test_parameter_priors(self):
+        """F1: parameters.<name>.prior adds ((p - mean)/sigma)^2; a tight prior holds the parameter at its mean, a
+        wide one leaves the Asimov recovery; it counts in the dof; response-model studies refuse it."""
+        tight = self.config()
+        tight["parameters"]["delta"]["prior"] = {"mean": 0.45, "sigma": 1e-4}
+        fit = self.fit(tight)["fits"][0]
+        p = {q["name"]: q for q in fit["parameters"]}
+        self.assertAlmostEqual(p["delta"]["best_fit"], 0.45, delta=2e-4)
+        self.assertGreater(fit["chi2"], fit["chi2_parameter_priors"])
+        self.assertLess(abs(p["delta"]["prior"]["pull"]), 2.0)
+        self.assertLess(p["delta"]["sigma_coordinate"], 2e-4)   # the prior enters the Fisher matrix
+        wide = self.config()
+        wide["parameters"]["delta"]["prior"] = {"mean": 0.5, "sigma": 10.0}
+        base = self.fit(self.config())["fits"][0]
+        fit = self.fit(wide)["fits"][0]
+        self.assertEqual(fit["dof"], base["dof"] + 1)
+        self.assertAlmostEqual({q["name"]: q for q in fit["parameters"]}["delta"]["best_fit"], 0.5, delta=1e-3)
+        bad = self.config()
+        bad["parameters"]["delta"]["prior"] = {"mean": 0.5, "sigma": 0.0}
+        self.assertEqual(self.cli(bad)[0], 2)
+        toys = self.config(toys={"n": 10, "seed": 1, "test": ["delta"]})
+        toys["parameters"]["delta"]["prior"] = {"mean": 0.5, "sigma": 0.1}
+        code, out = self.cli(toys)
+        self.assertEqual((code, out["reason"]), (1, "parameter-priors-not-supported"))
+
     def test_unregistered_provider_and_refused_nuisances(self):
         cfg = self.config(provider={"id": "not-registered", "version": "1"})
         self.assertEqual(self.cli(cfg)[1]["reason"], "unregistered-provider")
