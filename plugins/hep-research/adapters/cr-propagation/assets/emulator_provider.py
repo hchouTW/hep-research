@@ -18,8 +18,8 @@ with the adapter.json declaration. --declaration prints the effective declaratio
 Checks at start (any failure fails every request with provider-error, R4): the model file's sha256 equals the
 artifact's model_hash; the artifact is a surrogate whose extrapolation_policy action is reject; the model's feature
 boxes equal the declared domain (the model's own box for a per-model declaration); the model reproduces its stored
-self-check predictions (ln mean within 1e-9, ln sigma within 2e-6: the sigma of an ill-conditioned kernel matrix
-carries platform rounding). A kernel matrix that does not factorize as stored (near-singular: it can factorize on one
+self-check predictions: ln mean and ln sigma each within max(1e-9, 1e-4 x the stored ln sigma) at every check point
+and output (platform rounding far below the emulator's own uncertainty is harmless; a misread model is not). A kernel matrix that does not factorize as stored (near-singular: it can factorize on one
 platform and not on another) is factorized with a jitter of 1e-14, else 1e-13, times its mean diagonal.
 Request: transport null or equal to the training transport (the model's context; else the request is refused with
 out-of-domain: the emulator knows no other transport); observable B/C on axis rigidity with bins that are a contiguous
@@ -74,11 +74,11 @@ ARTIFACT_ENV = "HEP_EMULATOR_ML_ARTIFACT"
 DEFAULT_ARTIFACT = PLUGIN_ROOT / "tests" / "adapters" / "fixtures" / "cr_propagation" / "e2" / "emulator.ml-artifact.json"
 MODEL_FORMAT = "gp-pca-emulator/1"
 EDGE_RTOL = 1e-9
-SELF_CHECK_ATOL = 1e-9         # the self-check mean (ln value): the GP mean uses the stored alpha, not the factor
-# The self-check sigma (ln sigma): the latent variance comes from the Cholesky factor of a kernel matrix that can be
-# ill-conditioned (condition ~1e19 for the C2UF model), where LAPACK/BLAS rounding differs across platforms by about
-# 2e-7 and a jitter of 1e-13 moves it by 1e-6; 2e-6 covers both and still catches a misread model.
-SELF_CHECK_SIGMA_ATOL = 2e-6
+# Self-check: ln mean and ln sigma each within max(SELF_CHECK_ATOL, SELF_CHECK_SIGMA_FRACTION x stored ln sigma).
+# libm/BLAS differ across platforms; simulated 1-2 ulp kernel drift moves the E2 model by at most 9e-7 x sigma
+# (VALIDATION CRPROP-CIFIX), so 1e-4 x sigma leaves a margin of about 100 and stays far below the emulator's error.
+SELF_CHECK_ATOL = 1e-9
+SELF_CHECK_SIGMA_FRACTION = 1e-4
 # Cholesky jitter (times the mean diagonal), tried in turn only when the kernel matrix as stored does not factorize:
 # a near-singular matrix can factorize on one platform and fail by one rounding on another.
 CHOLESKY_JITTER = (1e-14, 1e-13)
@@ -111,6 +111,24 @@ def _cholesky(k):
             continue
     raise ModelError(f"the model's kernel matrix cannot be factorized, even with a jitter of {CHOLESKY_JITTER[-1]} "
                      f"times its mean diagonal: {first}")
+
+
+def _self_check_problem(mean, sigma, ref_mean, ref_sigma) -> str | None:
+    """None if ln mean and ln sigma are each within max(SELF_CHECK_ATOL, SELF_CHECK_SIGMA_FRACTION x ref_sigma) of
+    the stored self-check; else the worst deviations (absolute, over ref_sigma, over |ref|) and where they occur."""
+    import numpy as np
+
+    bound = np.maximum(SELF_CHECK_ATOL, SELF_CHECK_SIGMA_FRACTION * ref_sigma)
+    parts, failed = [], False
+    for name, got, ref in (("ln mean", mean, ref_mean), ("ln sigma", sigma, ref_sigma)):
+        dev = np.abs(got - ref)
+        failed = failed or bool((~(dev <= bound)).any())
+        worst = np.unravel_index(int(np.nanargmax(dev / bound)), dev.shape)
+        i, j = (int(v) for v in worst)
+        parts.append(f"{name}: worst at check point {i} output {j}, deviation {dev.max():.3e} absolute, "
+                     f"{(dev / ref_sigma).max():.3e} x sigma, {(dev / np.maximum(np.abs(ref), 1e-300)).max():.3e} "
+                     f"relative; at the worst point {dev[i, j]:.3e} against the bound {bound[i, j]:.3e}")
+    return "; ".join(parts) if failed else None
 
 
 def _matern52(xa, xb, lengths, signal):
@@ -168,9 +186,10 @@ class Emulator:
         self._tree = None
         check = model.get("self_check") or {}
         mean, sigma, _ = self.predict_unit(np.asarray(check.get("unit"), float))
-        if not (np.allclose(mean, check["transformed_mean"], rtol=0.0, atol=SELF_CHECK_ATOL)
-                and np.allclose(sigma, check["transformed_sigma"], rtol=0.0, atol=SELF_CHECK_SIGMA_ATOL)):
-            raise ModelError("the model does not reproduce its self-check predictions")
+        problem = _self_check_problem(mean, sigma, np.asarray(check["transformed_mean"], float),
+                                      np.asarray(check["transformed_sigma"], float))
+        if problem:
+            raise ModelError(f"the model does not reproduce its self-check predictions ({problem})")
         context = model.get("context") or {}
         self.transport = context.get("transport")
         declared = model["outputs"].get("observables")

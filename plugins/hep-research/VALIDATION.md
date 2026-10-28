@@ -7412,3 +7412,37 @@ Test tolerances added (no acceptance entry, VALIDATION tolerance or criterion ch
 | `check_naming.py` | pass |
 | `run_all_checks.py --part static --jobs 4` | exit 0, 31 checks pass, 0 fail (includes the profile tests) |
 | Full `run_all_checks.py`, `check_relocation.py`, `workflow_check.py diff` | deferred to the orchestrator (A1.5; cross-WP branch) |
+
+**Rework round 2 (2026-10-29, base 12bdcc5b).** PR #308 CI run 2: everything passes except
+`EmulatorPerModelDeclaration.setUpClass`. On Linux the C2UF kernel now factorizes, but `--declaration` refuses with
+"the model does not reproduce its self-check predictions". Cause: with a near-singular kernel the stored alpha weights
+are huge, so 1-ulp libm differences in the kernel evaluations k(x*, X) are amplified in the ln mean, not only in
+sigma.
+
+Drift simulation (macOS, E2 venv; scratch script outside the repository). Every kernel evaluation, both K(X, X) and
+k(x*, X), was multiplied entry by entry by 1 + n eps/2 with n drawn from {-2, -1, 1, 2} (K kept symmetric). The model
+was loaded through the provider and its self-check points predicted again. 120 trials per model (2 seeds x 60).
+Deviations are the maximum over the self-check points and outputs, against the stored values:
+
+| Model | max abs ln-mean deviation | max ln-mean deviation / sigma | max abs ln-sigma deviation | max ln-sigma deviation / sigma | stored ln sigma |
+|---|---|---|---|---|---|
+| E2 (`e2/emulator-model.json`) | 2.0e-9 (median 9e-10) | 9.1e-7 (median 4.4e-7) | 1.8e-9 | 8.8e-7 | 1.4e-3 to 7.8e-3 |
+| C2UF (`c2uf/emulator-model.json`) | 7.4e-7 (median 4.3e-7) | 2.5e-2 (median 1.1e-2) | 8.7e-8 | 4.4e-3 | 1.9e-5 to 1.2e-4 |
+
+Even E2 exceeded the old absolute 1e-9 on ln mean in a large fraction of the trials (median 9e-10, max 2.0e-9), so it passed CI by chance. New
+self-check criterion (`emulator_provider.py`): ln mean and ln sigma each within max(1e-9, 1e-4 x the stored ln sigma)
+at every check point and output. That is a drift far below the emulator's own uncertainty. The factor 1e-4, below the
+proposed 1e-3, leaves E2 a margin of about 110, and E2 is accepted in 120 of 120 trials. The C2UF model's mean drift
+reaches 2.5e-2 x sigma, 25 times even the 1e-3 bound, and it is refused in 120 of 120 trials. **The C2UF model is not
+portable across libm implementations; it stays refused there.** No further loosening (A1.20 instruction). A refusal
+now reports, for ln mean and ln sigma, the worst deviation (absolute, x sigma, relative) and the check point and output
+where it occurs. On macOS both models reproduce their self-checks exactly (deviation 0), so the responses there are
+unchanged. `EmulatorPerModelDeclaration` and the C2UF-dependent CI result therefore still fail on Linux. Options for
+the orchestrator: retrain the C2UF emulator with a nugget floor that bounds the kernel's condition number (hep-ml
+`train_emulator.py`, NUGGET_BOUNDS lower edge 1e-12), or mark that test as platform-bound.
+
+| Check (round 2) | Result |
+|---|---|
+| `test_cr_propagation`, `test_propagation_fit`, `test_train_emulator`, `test_adapter_missing_dependency`, `test_cli_robustness` | E2 and CI-lock venv: 172 tests OK (15 skipped), pinned E2 responses and C2UF tests included |
+| `run_all_checks.py --part static --jobs 4` | exit 0, 31 pass, 0 fail |
+| `check_naming.py` | pass |

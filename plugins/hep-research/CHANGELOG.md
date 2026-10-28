@@ -38,7 +38,9 @@ F3 and the live routing run not done.
   pinned responses and hold-out numbers within relative 1e-4 (GP linear algebra); E2-1, E2-2 and every acceptance
   tolerance unchanged. `emulator_provider.py`: a kernel matrix that does not factorize as stored (the C2UF model's is
   near-singular and failed on Linux, so `--declaration` refused) is factorized with a jitter of 1e-14, else 1e-13,
-  times its mean diagonal, and the self-check compares ln sigma within 2e-6 (ln mean still within 1e-9).
+  times its mean diagonal; the self-check accepts ln mean and ln sigma each within max(1e-9, 1e-4 x the stored ln
+  sigma) and a refusal names the worst deviations and where. The C2UF model stays refused on platforms whose libm
+  differs (simulated drift up to 2.5e-2 x sigma: not portable); the E2 model drifts at most 9e-7 x sigma.
 - crprop env: capability probe of the cr-propagation campaign and environment E-crprop registered in VALIDATION.md
   (E2 plus DRAGON2 cd588707 verified by a live rerun); DRAGON2 computational-run and environment manifest under
   `tests/adapters/fixtures/cr_propagation/env/`. USINE and GALPROP absent (no source tarball). No behavior change.
