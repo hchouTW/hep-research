@@ -253,7 +253,7 @@
    "head": "9ac54c51",
    "merge_commit": "a4ad05d3",
    "worker_report": "DONE: E1-1 64/64 ok, 111 loop evaluations with records; E1-2 forced test stops at 5 rounds; E1-3 no training data; 114 USINE evaluations; placeholder RBF emulator for E2 to replace; standard run early-stop-min-distance at round 3 (E2-1 met, E2-2 not)",
-   "verifier_report": "PASS (2026-10-28, Sonnet): 111 records present, 12 validated with output hashes recomputed; Sobol design regenerated exactly; no training values committed; tally 114; advisories: forced-test best-emulator label, cosmetic cumulative tally",
+   "verifier_report": "PASS (Sonnet); rework round 1 (wave-3 subprocess timeouts) PASS (Sonnet), merged",
    "missing_capabilities": [],
    "notes": [
     "wave-3 full run: test_subprocess_timeouts fails (e1/active_addition.py:214, :233 without timeout=); fix as rework round 1 on worktree-crprop-e1fix (no revert: E2 builds on E1)"
@@ -350,7 +350,7 @@
    "head": "b20ab46b",
    "merge_commit": "18b43b34",
    "worker_report": "DONE: dragon2 = D0 beta^etaT (rho/DiffRefRig)^delta (cd588707 diffusion.cc:150); zone factor sqrt(L/(3h)) at first order (not sqrt(L/h)), bound (1+lam)/5; DRAGON2 Ptuskin94 = 3/4 of USINE D_pp (4/3 lands on Ptuskin03: likely upstream bug); B1/D1 translators use sqrt(L/h); r3 P1 wording conflict",
-   "verifier_report": "PASS (2026-10-28, Opus): DRAGON2 form checked in source; zone factor sqrt(L/(3h)) re-derived analytically and numerically (a_halo/a_disc = 3h/L), second-order (1+lam)/5; Ptuskin94 = 3/4 USINE D_pp; advisories: bound exact only for energy-independent lam; finite disc O(h/L)",
+   "verifier_report": "PASS (Opus); rework round 1 (wave-3 Th13 phrase) PASS (Sonnet), merged",
    "missing_capabilities": [],
    "notes": [
     "wave-3 full run (a4211583): test_cosmic_ray_phenomenology_th13 fails (phrase D_pp D_xx removed from the reference page); fix as rework round 1 on worktree-crprop-a1rfix (no revert: B1X and D1 depend on A1R)"
@@ -697,6 +697,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "E2 merged (c28d960c); post-merge static ok"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "wave-3 fixes merged (A1R r1, E1 r1; HEAD 63e7c1b2): Th13 and subprocess-timeout tests pass; post-merge static ok"
   }
  ],
  "env": {
