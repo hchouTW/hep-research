@@ -7703,3 +7703,15 @@ D3 study go through `dragon2_translate.py`. A one-line delegation in `dragon2_ru
 package. The USINE translator's `usine_provider.DEFAULT_TRANSPORT` and B1's `usine/specs/d1-*.json` do not state
 `spectrum_variable` (the default, E_k/n, is recorded). They stay unchanged because the emulator fixtures hash that
 transport (K4's files).
+
+### CRPROP-K3 continuation (same dispatch, 2026-10-29; rebased onto integration 42f41893 with K2 and K4)
+
+`adapters/cr-propagation/assets/dragon2_run.py` was added to K3's card (workflow.json on 42f41893). Its
+`--from-transport` command line now translates through `dragon2_translate.spec_from_transport`, the same source checks
+as the provider: a harmonized-v1 transport is refused (exit 2, status error, the reason; no spec written), and one
+with DRAGON2's own sources is translated and its written spec carries the two source notes. The open item "not done"
+above is closed. Test: `TranslatorSourceItems.test_dragon2_command_line_applies_the_same_source_checks` (no DRAGON2
+run; the translated case stops at the missing data directory, exit 3). Rebase: CHANGELOG and VALIDATION keep the
+integration blocks first and K3's after; `docs/reference-inventory.*` regenerated; the phenomenology page is 24573 B.
+The adapter version is not bumped (the orchestrator sets versions at release); the CHANGELOG entry names the
+behaviour change of the dragon2 provider.

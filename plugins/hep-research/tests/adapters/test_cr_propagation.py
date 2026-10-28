@@ -2221,6 +2221,32 @@ class TranslatorSourceItems(unittest.TestCase):
                                                   dragon2_provider.ILLUSTRATIVE_CHANNELS_MB, z_range=(4, 8),
                                                   ekn_range_gev=(0.05, 100.0))
 
+    def test_dragon2_command_line_applies_the_same_source_checks(self):
+        """dragon2_run.py --from-transport goes through dragon2_translate: harmonized-v1's sources are refused (exit 2,
+        no spec written), DRAGON2's own are translated and the written spec carries the source notes."""
+        channels = D1_FIX / "channels-illustrative-decay.json"
+        with tempfile.TemporaryDirectory() as td:
+            for label, transport, code in (("harmonized-v1", self.harmonized(), 2),
+                                           ("dragon2 sources", dragon2_translate.with_dragon2_sources(self.harmonized()),
+                                            None)):
+                with self.subTest(transport=label):
+                    item, out = Path(td) / f"{code}.json", Path(td) / f"out-{code}"
+                    item.write_text(json.dumps({"transport": transport}), encoding="utf-8")
+                    proc = subprocess.run([sys.executable, "-I", str(RUN), "--from-transport", str(item), "--channels",
+                                           str(channels), "--name", "cli", "--out", str(out), "--data-dir",
+                                           str(Path(td) / "no-data")], capture_output=True, text=True, timeout=300)
+                    doc = json.loads(proc.stdout)
+                    if code == 2:
+                        self.assertEqual(proc.returncode, 2, proc.stdout)
+                        self.assertEqual(doc["status"], "error")
+                        self.assertRegex(doc["error"], "spectrum_variable|sources.abundances")
+                        self.assertFalse((out / "cli.spec.json").exists())
+                    else:  # translated; stops later at the missing data directory (exit 3)
+                        self.assertEqual((proc.returncode, doc["status"]), (3, "missing-dependency"), proc.stdout)
+                        spec = json.loads((out / "cli.spec.json").read_text(encoding="utf-8"))
+                        self.assertTrue(any("spectrum_variable 'rigidity'" in x for x in spec["substitutes"]))
+                        self.assertTrue(any(dragon2_translate.DRAGON2_OWN_ABUNDANCES in x for x in spec["substitutes"]))
+
     def test_usine_injection_variable(self):
         t = usine_spec("harmonized-v1")["transport"]
         base = usine_translate.translate(t, "x", (0.04, 2000.0))
