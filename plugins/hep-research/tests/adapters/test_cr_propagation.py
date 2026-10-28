@@ -1190,11 +1190,15 @@ class UsineProviderOffline(unittest.TestCase):
         self.assertEqual(decl["id"], "usine")
         self.assertEqual(decl["version"], json.loads((ADAPTER / "adapter.json").read_text())["version"])
         self.assertEqual(set(decl["observables"]), set(usine_reader.OBSERVABLES))
-        self.assertEqual(set(decl["domain"]), set(usine_provider.POINT_TARGETS))
+        read = set(usine_provider.POINT_TARGETS) | set(usine_provider.LOW_BREAK_TARGETS)
+        patterned = {n for n in decl["domain"] if usine_provider.PHI_NAME.fullmatch(n) or usine_provider.XS_NAME.fullmatch(n)}
+        self.assertEqual(set(decl["domain"]), read | patterned)
+        self.assertTrue(read <= set(decl["domain"]))
         lo, hi = usine_provider.ekn_range(USINE_REQUEST["observables"], ["9Be", "10Be", "10B", "11B", "12C"])
         self.assertEqual(lo, 0.1)
         self.assertEqual(hi, max(usine_reader.ekn_from_rigidity(200.0, z, a) for z, a in ((5, 10), (5, 11), (6, 12))))
-        t = usine_provider.transport_for({}, {"V_c_kms": 5.0, "L_kpc": 6.0, "eta": -0.5})
+        t, notes = usine_provider.transport_for({}, {"V_c_kms": 5.0, "L_kpc": 6.0, "eta": -0.5})
+        self.assertEqual(notes, [])
         self.assertEqual((t["convection"]["V_c_kms"], t["geometry"]["L_kpc"], t["diffusion"]["eta"]), (5.0, 6.0, -0.5))
 
     def _call(self, request, env):
