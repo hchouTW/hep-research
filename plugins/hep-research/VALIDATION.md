@@ -7786,3 +7786,39 @@ noise-sized steps, about 2n^2 + 2n + 12 new runs), in the order SLIM, QUAINT-Vc0
 it. K1 cap: 600 USINE runs (B1.1), at most 4 USINE processes at once. A family passes D9 when its verdict under this
 rule is converged and delta and K10 lie in the CRPROP-F1 windows (unchanged); a family that still fails is attributed
 with its numbers (EDM against the threshold, Hessian eigenvalues, noise). D9 and the 1e-5 base are not loosened.
+
+**Results (record `tests/adapters/fixtures/cr_propagation/f1/f1-reproduction.json`, regenerated through
+`examples/bc-usine-reproduction/run.py --rejudge-from`; outputs `$CRPROP_OUT/k1/repro/`, stage-1 copies in
+`$CRPROP_OUT/k1/repro/stage1/`).** Stage 1 restarted each family from F1's reported fit with F1's own configuration
+(least-squares path replayed from the cache) and the rule above; every verdict failed on the EDM alone (Hessian
+positive definite, no bound), so stage 2 polished SLIM, then QUAINT-Vc0; BIG's polish (about 2n^2 + 2n + 12 = 156
+runs) no longer fitted the remaining budget (52) and was not run.
+
+| Fit | sigma_noise (-2 ln L), dof | step factor a, V | EDM (threshold max(1e-5, 0.5 sigma_noise)) | Verdict | delta (window) | K10 (window) | -2 ln L | D9 |
+|---|---|---|---|---|---|---|---|---|
+| BIG (stage 1) | 0.00345, 16 | 1 (capped), 1575 | 0.0103 (0.00172) | failed: gradient_not_small | 0.500 in | 0.286 in | 83.344 | missed (not converged) |
+| SLIM (polish 1) | 0.00480, 14 | 1 (capped), 176 | 0.0147 (0.00240) | failed: gradient_not_small, line_search_stalled | 0.516 in | 0.289 in | 90.308 | missed (not converged) |
+| QUAINT-Vc0 (polish 1) | 0.00684, 14 | 1 (capped), 333 | 0.0113 (0.00342) | failed: gradient_not_small | 0.459 in | 0.323 in | 84.015 | missed (not converged) |
+
+K1-2: every fit is re-judged and recorded with its noise floor and EDM; best-fit delta and K10 stay inside the D9
+windows for all three; none converges under the rule, so F1-1 stays NOT MET on convergence only (D9 and the 1e-5 base
+not loosened).
+
+Attribution (evidence in `$CRPROP_OUT/k1/repro/`). The measured floors (0.0034 to 0.0068 in -2 ln L) are 1.6 to 7 times
+F1's three-point probes. The EDMs at steps of one conditional sigma are 4.3 to 6.1 times the threshold, but they do not
+describe a reachable improvement: SLIM's polish (one damped Newton step from that gradient and Hessian) found no lower
+-ln L in 12 trials; its full Newton step raised -2 ln L by +0.019 (90.3265 against 90.3078) where the EDM predicted a
+fall of 0.029, about 4 sigma_noise the wrong way. QUAINT-Vc0's polish accepted only a step of about 1e-7 sigma
+(-2 ln L lower by 8e-5, far inside the noise) and judged EDM 0.0113 there, unchanged. With the measured floors the
+expected noise part of EDM at these steps is sigma_f^2 V / 4 = 1.1e-4 (BIG), 2.5e-4 (SLIM), 9.7e-4 (QUAINT-Vc0); the
+observed EDMs are 10 to 90 times larger. So the verdict's central differences over one conditional sigma carry an
+error well above the white-noise floor the stencil sees: a component of USINE's output error that is smooth over the
+0.04-sigma stencil and absorbed by its quadratic (the case the rule noted as making the estimate err low), or
+truncation of the differences in these strongly correlated fits (variance inflation 176 to 1575), or both; the K1
+budget left no runs to separate them (for example a stencil over +-1 sigma). The points remain F1's best fits; the
+rule's verdict, not the fit, is what cannot be reached at USINE's 6-digit output.
+
+**USINE runs (K1 tally):** 548 of 600 (1 published-point evaluation of QUAINT-Vc0 by the start stage; stage 1 about
+414 in all, of which a first batch whose runs were cached was interrupted before writing results and resumed from the
+cache; SLIM polish 12; QUAINT-Vc0 polish 121 including an evaluation-budget stop at 110 resumed from the cache); at most
+3 USINE processes at once.
