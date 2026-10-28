@@ -11,7 +11,8 @@ the outputs (natural log for transform "log", identity for "identity"), centres 
 components until the largest training reconstruction residual is at most --pca-tolerance; fits one Gaussian process per
 component (zero mean on the standardized coefficient, Matern-5/2 kernel with one length scale per input, signal
 variance and a small nugget for numerical jitter) by maximizing the log marginal likelihood (L-BFGS-B, analytic
-gradient, --restarts seeded starts); fits a DomainModel on the training points in unit-cube coordinates; writes the
+gradient, --restarts seeded starts), the nugget bounded below by n x signal / (C - 1) so that each kernel matrix's
+condition number stays <= C = --max-condition (default 1e10; 0 = no bound, as before; see MAX_CONDITION); fits a DomainModel on the training points in unit-cube coordinates; writes the
 model file (format gp-pca-emulator/1: plain numbers, readable without this script) with self-check predictions at
 reference points, and a run summary for write_ml_artifact.py (task surrogate). Leave-one-out residuals of each
 component GP are reported (closed form). Prediction (predict, or the importable GaussianProcessEmulator) gives the

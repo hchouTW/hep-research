@@ -7519,3 +7519,39 @@ reproduces the training as before (no new field in the model, same optimizer coo
 | Drift (portability) | the CIFIX drift simulation (`$CRPROP_OUT/k4/scripts/drift.py`, kernel entries x (1 + n eps/2), n in {-2, -1, 1, 2}, K kept symmetric), 2 seeds x 60 trials: accepted by the provider's self-check in every trial with max deviation <= 1e-5 x sigma (margin >= 10 against 1e-4) |
 | C2UF-1 rerun | `usine_emulator_family_study.py fit` unchanged (emulator provider with the new per-model declaration, the holdout error component in both covariances, families BIG and SLIM, starts, steps, 200 toys per family, seed 20261028, alpha 0.05, the 2% toy-failure limit); pass as declared in C2UF (BIG and SLIM converge; each listed with delta chi2 and toy p-value; at most 2% failed toys; BIG survives at alpha 0.05). If it does not pass: reported PARTIAL with the numbers, nothing tuned |
 | D7 / B1.1 | K4 cap 100 USINE runs; planned 40 (confirmation) + 2 (live test); tally in `$CRPROP_OUT/k4/tally.json` (ProviderRunner `points_sent`); one USINE process at a time |
+
+### Results (K4-2 retraining and the C2UF-1 rerun)
+
+Every number below is from `$CRPROP_OUT/k4/` (outside the repository; the attempt's record, model and ml-artifact are
+in `$CRPROP_OUT/k4/k4-attempt/`).
+
+| Item | C2UF (A1.14, committed) | K4 retraining (`--max-condition 1e10`) |
+|---|---|---|
+| Training set | 738 cached USINE runs | identical document (the same 738 points and values) |
+| Model | `1.0.0+model.0a8dc86fdf16`, 19 components | `1.0.0+model.9b95e7465422`, 19 components; the nugget floor is active in all 19 (nugget/signal = 7.38e-8 = 738 / (1e10 - 1)) |
+| Largest kernel condition number | singular (computed eigenvalues below 0 in components 0-4; 5e16 in component 5) | 9.7e9 (every component <= 1e10) |
+| Holdout (40 cached runs, 0.05 sigma, not loosened) | passed, largest error 0.0038 sigma, largest relative 2.07e-4 | passed, largest error 0.0032 sigma, largest relative 1.89e-4; none refused. Per bin, the largest error is 0.74-3.7 times C2UF's (worst in the B/C bins 12-14) and stays below 0.0033 sigma in every bin |
+| Confirmation over the model box (k = 4; 40 new USINE runs, seed 20261031) | not run | passed: largest error 0.0226 sigma (point ln D0 = ln 2.41e28, delta 0.469, V_A 103.8, V_c 4.33: the high-V_A edge); 15 points inside the toy box, worst 0.0025; 25 outside it, worst 0.0226; none refused. The largest error per bin is above the holdout's in all 27 bins (1.6 to 19 times). As declared, the covariance keeps the holdout component |
+| Self-check drift (2 seeds x 60 trials) | refused in 120 of 120; max 2.5e-2 x sigma | accepted in 120 of 120; max ln-mean deviation 3.1e-8 x sigma (2.0e-12 absolute), ln-sigma 4.7e-9 x sigma; margin 3217 (seed 1) and 3831 (seed 2) against 1e-4 x sigma, so the >= 10 criterion holds |
+| Fits (emulator provider) | BIG chi2 1.3e-8, SLIM chi2 23.9272 | BIG chi2 1.1e-8 (D0 3.000003e28, delta 0.4500, V_A 70.00002, V_c 0), SLIM chi2 23.9274 (D0 2.50899e28, delta 0.48392); both converged, equal to the USINE fits of study 2 within 1e-3 in chi2 |
+| BIG's toys (200) | 0 failed, p 1.0 (200/200), survives | 0 failed, p 1.0 (200/200), survives |
+| SLIM's toys | 200 run, 3 failed (2 out of domain, 1 restart cap), p < 0.0151 (0/197), excluded | **stopped at the 2% limit after 37 toys**: 5 failed (BIG's fits to SLIM's toys 3, 5, 31, 36 at the restart cap; toy 10 out of the provider domain), 32 ok; family calibration `failed`, reason `toy-failure-threshold` |
+| C2UF-1 | MET | **NOT MET with the retrained emulator** (the calibration fails before SLIM's p-value is computed) |
+
+USINE runs (B1.1 cap 100 for K4, `$CRPROP_OUT/k4/tally.json`): 0 for training and the holdout (all cached), 40 for the
+confirmation: 40 of 100. The live test was not run (the committed fixture is unchanged).
+
+Per the assignment (stop rather than tune), the retrained model was **not committed**. The C2UF fixtures
+(`usine-emulator-family-study.json`, `emulator-model.json`, `emulator.ml-artifact.json`), their tests and the A1.21 skips
+in `EmulatorPerModelDeclaration.setUpClass` and `test_live_emulator_matches_fresh_usine_runs` are left as on the base.
+The A1.21 skip stays until a portable model also passes C2UF-1. What is committed: the bound in `train_emulator.py` (K4-1)
+and its tests; `--max-condition 0` in E2's campaign; in `usine_emulator_family_study.py`, a `--max-condition` option
+(default 0 reproduces the committed A1.14 model: rerun of the train step from the K4 cache gave the same training set and a model byte-identical to the fixture, sha256 0a8dc86f...; K4 used 1e10) and a `confirm` step (the k = 4 confirmation above, kept
+in the record when present). These are tooling only and change no committed result. Not diagnosed here, since diagnosing
+would mean trying variants: why BIG's fits to SLIM's toys reach the restart cap more often with the regularized emulator
+(4 of 37 against 1 of 200 before). The bound makes the GP mean a non-interpolating smoother with a nugget of 7.4e-8 x
+signal (its holdout accuracy is unchanged), and the toy fits near V_A = 0, where B/C depends on V_A^2, were already the
+fragile case in C2UF (dispatch 2, diagnosis 3). Options for the orchestrator: (a) a convergence-rule change for provider
+fits (K1's noise-aware verdict) and then a rerun of this exact model (no retraining); (b) a different declared bound
+(for example 1e12, if its drift margin stays >= 10) with a fresh declaration; (c) mark C2UF-1 on the retrained emulator
+as an escalation and keep the A1.21 skip.

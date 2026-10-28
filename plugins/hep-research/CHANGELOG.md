@@ -3,6 +3,15 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- crprop k4: `train_emulator.py` bounds every kernel matrix's condition number through a nugget floor of n x signal /
+  (C - 1), `--max-condition C` (default 1e10; 0 = no bound, as before), and records the bound and each component's
+  condition number in the model. E2's committed model is unchanged, and its campaign passes `--max-condition 0`. A
+  C2UF emulator retrained with the bound passes its holdout (0.0032 sigma) and a new k = 4 confirmation (0.0226 sigma),
+  and passes the provider self-check under simulated libm drift (margin over 3000). C2UF-1 on that model stopped at
+  the 2% toy-failure limit, so it is not committed, and the A1.21 skip stays (VALIDATION CRPROP-K4).
+
 ## 0.43.0 (2026-10-29)
 
 Minor release; contracts 3.14.0 (one minor, the `CV-CRPROP` of the cr-propagation campaign, new rules gated by

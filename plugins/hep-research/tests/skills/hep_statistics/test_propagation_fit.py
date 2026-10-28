@@ -846,7 +846,13 @@ class UsineEmulatorFamilies(unittest.TestCase):
                     os.environ["HEP_USINE_RUN_DIR"] = old
             self.assertEqual(sent, 2)
             artifact = TWO_DATASET_RECORD.parent / self.doc["emulator"]["ml_artifact"]
-            emu_reg = study.emulator_registry(str(registry), artifact, work / "emulator-registry.json")
+            try:
+                emu_reg = study.emulator_registry(str(registry), artifact, work / "emulator-registry.json")
+            except SystemExit as exc:   # decision A1.21: skip on the provider's self-check refusal only
+                if "does not reproduce its self-check predictions" not in str(exc):
+                    raise
+                self.skipTest("decision A1.21: the C2UF emulator fixture is not portable off its training platform "
+                              f"(macOS); the provider refused it: {exc}")
             emu = study.emulator_values(emu_reg, artifact, [r["point"] for r in rows])
             nbc = 15
             for u, e in zip(usine, emu):
