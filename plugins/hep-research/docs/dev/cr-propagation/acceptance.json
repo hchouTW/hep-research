@@ -1118,6 +1118,17 @@
    "tolerance": null,
    "evidence_path": "$CRPROP_OUT/c2u/acceptance",
    "source": "orchestrator, 2026-10-28 (C2 verifier advisory 1; additions only, r4 5)"
+  },
+  {
+   "id": "D3-3",
+   "wp": "D3",
+   "kind": "command",
+   "criterion": "Added per A1.9 (additions only, r4 5): a level-1 comparison in which USINE is configured to DRAGON2's fixed settings where USINE can express them (helium target He/H as compiled in DRAGON2 cd588707, the neutral gas column at the observer, the same cross-section set where both codes can read it); DRAGON2 and USINE B/C agree within 5% over 2-1000 GV, and every setting that cannot be matched is recorded with its estimated effect. The DRAGON2 losses item runs only on gas with ionized hydrogen (D1-L).",
+   "command": "python3 -m unittest tests.adapters.test_cr_propagation",
+   "expect": "ok; the matched level-1 comparison runs from recorded results",
+   "tolerance": "5%",
+   "evidence_path": "$CRPROP_OUT/d3/acceptance",
+   "source": "decisions.md A1.9 (planned addition, added 2026-10-28)"
   }
  ]
 }

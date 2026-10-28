@@ -640,7 +640,8 @@
     "docs/capability-matrix.md",
     "tests/adapters/test_cr_propagation.py",
     "tests/skills/hep_ml/**",
-    "tests/adapters/fixtures/cr_propagation/e2/**"
+    "tests/adapters/fixtures/cr_propagation/e2/**",
+    "tests/adapters/test_adapter_missing_dependency.py"
    ],
    "acceptance_prefix": "E2",
    "acceptance_extra": [
@@ -653,7 +654,8 @@
     "D2"
    ],
    "fallback": "skipped",
-   "source": "r4 6 and 7"
+   "source": "r4 6 and 7",
+   "files_source": "test_adapter_missing_dependency.py added by the orchestrator 2026-10-28 (E2's provider imports NumPy/SciPy; that test lists every adapter tool with a third-party import)"
   },
   {
    "id": "F1",

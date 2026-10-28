@@ -154,15 +154,15 @@
    ]
   },
   "D1": {
-   "state": "verifying",
+   "state": "merged",
    "dispatches": 2,
    "rework_rounds": 0,
    "branch": "worktree-crprop-d1",
    "base": "2ae3063b",
    "head": "1962ca37",
-   "merge_commit": null,
+   "merge_commit": "e44377f4",
    "worker_report": "dispatch 2 PARTIAL: D1-1a convection pass; decay 10Be/9Be 11-13% (thick gas), reacceleration 5.7% (first-order bound), losses 6.1% (Coulomb on HII); D1-L fixed (n_HII = 0 divergence, refusal + tests); D1-1b, D1-2, PRV pass; 30 DRAGON2 runs",
-   "verifier_report": null,
+   "verifier_report": "PASS under A1.11 (2026-10-28, Opus): item effects recomputed with own reader; attributions checked (decay thick gas, reacceleration first-order conversion, losses Coulomb/neutral column); D1-L divergence confirmed in source; PRV live; advisories: decay attribution wording overstated (escalation 11 corrected), reacceleration second order not estimated, losses not quantified, adapter.json does not list the 3 differences, --spec path does not refuse BronfFerr losses",
    "missing_capabilities": [],
    "notes": [
     "A1.11 (maintainer): accept D1 with attributed D1-1a misses; Opus verifier dispatched 2026-10-28"
@@ -230,10 +230,10 @@
    ]
   },
   "D3": {
-   "state": "waiting",
-   "dispatches": 0,
+   "state": "dispatched",
+   "dispatches": 1,
    "rework_rounds": 0,
-   "branch": null,
+   "branch": "worktree-crprop-d3",
    "base": null,
    "head": null,
    "merge_commit": null,
@@ -241,7 +241,7 @@
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "deps D1 blocked (escalation 9)"
+    "D3-3 added (A1.9 planned level-1 matched comparison)"
    ]
   },
   "E1": {
@@ -265,13 +265,13 @@
    "rework_rounds": 0,
    "branch": "worktree-crprop-e2",
    "base": "e5ecbd64",
-   "head": null,
+   "head": "3311241a",
    "merge_commit": null,
-   "worker_report": null,
+   "worker_report": "DONE: E2-1 0.0045, E2-2 0.063 sigma, E2-3 0.002 sigma; PRV-1/2 pass offline; 177 USINE runs; needs one entry in test_adapter_missing_dependency.py (files widened)",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "optional; E2 USINE evaluations capped at 500 by orchestrator within D7"
+    "files widened (test_adapter_missing_dependency.py); asked to rebase onto integration (D1, B1X merged) and apply the entry"
    ]
   },
   "F1": {
@@ -677,6 +677,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "C2U-3 added (toy-calibrated BIG vs SLIM with USINE); C2U dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "D1 merged (e44377f4); escalation 11 wording corrected; E2 DONE, files widened, rebase requested; D3-3 added; D3 dispatched"
   }
  ],
  "env": {
