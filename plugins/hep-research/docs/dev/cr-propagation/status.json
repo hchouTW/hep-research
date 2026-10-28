@@ -19,10 +19,10 @@
  },
  "work_packages": {
   "P0": {
-   "state": "blocked",
-   "dispatches": 0,
-   "rework_rounds": 2,
-   "branch": null,
+   "state": "dispatched",
+   "dispatches": 1,
+   "rework_rounds": 3,
+   "branch": "worktree-crprop-p0fix",
    "base": null,
    "head": "34e2edeb",
    "merge_commit": null,
@@ -30,7 +30,8 @@
    "verifier_report": "round 0 REWORK (5); round 1 REWORK (README scope, checker holes, sources, language differences); round 2 REWORK (2026-10-28): check_diff misses renames (no --no-renames); all else pass",
    "missing_capabilities": [],
    "notes": [
-    "blocked at the rework limit; escalation 4; verifier mitigation in verifier-common.md"
+    "blocked at the rework limit; escalation 4",
+    "A1.6 (maintainer 2026-10-28): extra round 3 limited to --no-renames + regression test; worker in crprop-p0fix"
    ]
   },
   "ENV": {
@@ -448,6 +449,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "ENV dispatch 2 (USINE V3.5 clone + build) after maintainer approval; 4th worker while A3 finishes its check run"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A1.6: P0 extra round authorized (--no-renames fix); escalation 4 decided"
   }
  ],
  "env": {
