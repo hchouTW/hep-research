@@ -1,0 +1,12 @@
+{
+ "id": "x01c",
+ "type": "C01",
+ "defective_obligation": "O-stat",
+ "element": "uncertainty of an inverse-variance weighted mean must be 1/sqrt(sum 1/sigma_i^2) = 0.1469, not sqrt(sum sigma^2)/N",
+ "keywords": [
+  "1/sqrt",
+  "inverse",
+  "sum 1/sigma"
+ ],
+ "compute_reproducible": true
+}

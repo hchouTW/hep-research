@@ -1,0 +1,19 @@
+{
+ "unit": "ps",
+ "values": [
+  5.1,
+  4.8,
+  5.3,
+  4.9
+ ],
+ "sigma": [
+  0.4,
+  0.3,
+  0.5,
+  0.2
+ ],
+ "stated_results": {
+  "weighted_mean": 4.9375,
+  "uncertainty": 0.1837
+ }
+}

@@ -1,0 +1,15 @@
+{
+ "id": "intent-x04b",
+ "purpose": "Review of: Linear fit of a drift measurement",
+ "target_tier": "R2",
+ "minimum_requirements": [
+  {
+   "id": "REQ-1",
+   "text": "The combined/derived result and its uncertainty are statistically sound and reproducible from the supplied inputs."
+  },
+  {
+   "id": "REQ-2",
+   "text": "The choice of fit range is justified and its effect on the slope is quantified."
+  }
+ ]
+}

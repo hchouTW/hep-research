@@ -1,0 +1,11 @@
+{
+ "id": "x03d",
+ "type": "C03",
+ "missing_input": "sigma_b (sideband fit result not supplied)",
+ "gap_obligation": "O-stat",
+ "keywords": [
+  "sigma_b",
+  "sideband",
+  "missing"
+ ]
+}

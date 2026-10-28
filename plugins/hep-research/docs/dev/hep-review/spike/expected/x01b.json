@@ -1,0 +1,12 @@
+{
+ "id": "x01b",
+ "type": "C01",
+ "defective_obligation": "O-stat",
+ "element": "ndf = 12 ignores the 3 fitted parameters; should be 9 (p-value wrong)",
+ "keywords": [
+  "ndf",
+  "degrees of freedom",
+  "9"
+ ],
+ "compute_reproducible": true
+}

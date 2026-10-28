@@ -1,0 +1,381 @@
+[
+ {
+  "assignment": "asg-664615d5",
+  "bytes": 3670,
+  "fidelity": "digest-bound",
+  "flags": {
+   "defects": true,
+   "met": true,
+   "open": false
+  },
+  "instance": "x01a",
+  "n_findings": {
+   "O-compute": 2,
+   "O-stat": 2
+  },
+  "outcomes": {
+   "O-compute": "violated",
+   "O-stat": "violated"
+  },
+  "planning_gaps": [],
+  "raw_sha256": "59683c06a0cd7d2cfff518cc16ac2c18f88693274cebc2b63d0d68cb83887c03",
+  "suggested_obligations": []
+ },
+ {
+  "assignment": "asg-0ad5996e",
+  "bytes": 2380,
+  "fidelity": "digest-bound",
+  "flags": {
+   "defects": true,
+   "met": true,
+   "open": false
+  },
+  "instance": "x01b",
+  "n_findings": {
+   "O-compute": 0,
+   "O-stat": 2
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "violated"
+  },
+  "planning_gaps": [],
+  "raw_sha256": "d9d4f7abe519f8e84cd37e22bd2f2e08ff5ba52bf96f9c2706890595933e5105",
+  "suggested_obligations": []
+ },
+ {
+  "assignment": "asg-c0fa5e57",
+  "bytes": 2390,
+  "fidelity": "digest-bound",
+  "flags": {
+   "defects": true,
+   "met": true,
+   "open": false
+  },
+  "instance": "x01c",
+  "n_findings": {
+   "O-compute": 0,
+   "O-stat": 1
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "violated"
+  },
+  "planning_gaps": [],
+  "raw_sha256": "b48332ad60c5ae7cd75cae4d6d157ec749235094d8644232b3c64d698613f3ad",
+  "suggested_obligations": []
+ },
+ {
+  "assignment": "asg-e0632a3a",
+  "bytes": 2590,
+  "fidelity": "digest-bound",
+  "flags": {
+   "defects": true,
+   "met": true,
+   "open": false
+  },
+  "instance": "x01d",
+  "n_findings": {
+   "O-compute": 0,
+   "O-stat": 1
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "violated"
+  },
+  "planning_gaps": [],
+  "raw_sha256": "2975efb0e227c8368deebc5108a75364c47ec8729848ea792041c1b849d7a0a2",
+  "suggested_obligations": []
+ },
+ {
+  "assignment": "asg-27ca2753",
+  "bytes": 2058,
+  "fidelity": "digest-bound",
+  "flags": {
+   "defects": false,
+   "met": true,
+   "open": false
+  },
+  "instance": "x02a",
+  "n_findings": {
+   "O-compute": 0,
+   "O-stat": 0
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [],
+  "raw_sha256": "fb02491f63d21e3652bfec8b58e2a5aca8cca7862a7830c1ccd619ad9b2adbbb",
+  "suggested_obligations": [
+   "Whether the reported result includes a consistency check of the inputs (chi2/dof or p-value of the combination). Recomputed here as chi2 = 1.38 for 1 dof, but the analysis does not state it.",
+   "Whether the assumed systematic correlation coefficient 0.5 is justified, and how sensitive the result is to it."
+  ]
+ },
+ {
+  "assignment": "asg-dec6314c",
+  "bytes": 1795,
+  "fidelity": "digest-bound",
+  "flags": {
+   "defects": false,
+   "met": true,
+   "open": false
+  },
+  "instance": "x02b",
+  "n_findings": {
+   "O-compute": 0,
+   "O-stat": 0
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [],
+  "raw_sha256": "3e14045a399a7fb4ec9c4184476a7153cdd248be9d67030968b75ed891ba7d31",
+  "suggested_obligations": []
+ },
+ {
+  "assignment": "asg-6bdb3a10",
+  "bytes": 2697,
+  "fidelity": "digest-bound",
+  "flags": {
+   "defects": true,
+   "met": true,
+   "open": false
+  },
+  "instance": "x02c",
+  "n_findings": {
+   "O-compute": 1,
+   "O-stat": 0
+  },
+  "outcomes": {
+   "O-compute": "violated",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [],
+  "raw_sha256": "bf7f3b638d388806e728aa48dc89c8d36df8f5578adc6e79a9f2190f4fca6dd3",
+  "suggested_obligations": []
+ },
+ {
+  "assignment": "asg-f2782e1d",
+  "bytes": 2041,
+  "fidelity": "digest-bound",
+  "flags": {
+   "defects": false,
+   "met": true,
+   "open": false
+  },
+  "instance": "x02d",
+  "n_findings": {
+   "O-compute": 0,
+   "O-stat": 0
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [],
+  "raw_sha256": "cd9559522ba8c9a09e94e5258cc8217f5d8685091660e3fe7409c7c817140129",
+  "suggested_obligations": [
+   "Provenance and evidence for the correlation coefficient rho = 0.6 (how the sample overlap was turned into rho), and whether sigma_A and sigma_B include systematic components with their own correlation; REQ-1's 'statistically sound' depends on rho being justified, which no obligation covers."
+  ]
+ },
+ {
+  "assignment": "asg-8c29a547",
+  "bytes": 4644,
+  "fidelity": "digest-bound",
+  "flags": {
+   "defects": true,
+   "met": true,
+   "open": false
+  },
+  "instance": "x03a",
+  "n_findings": {
+   "O-compute": 2,
+   "O-stat": 2
+  },
+  "outcomes": {
+   "O-compute": "violated",
+   "O-stat": "violated"
+  },
+  "planning_gaps": [],
+  "raw_sha256": "79fdaceba1e3c12df6806adc95f398f7dca19ab54617eec05fc570adbb1ee7b8",
+  "suggested_obligations": [
+   "Check that the correlation value from the internal note is supplied and documented, and that the combination's chi2/compatibility of M1 and M2 (difference 0.55 GeV vs ~0.89 GeV uncertainty) is reported."
+  ]
+ },
+ {
+  "assignment": "asg-c3746a93",
+  "bytes": 2371,
+  "fidelity": "digest-bound",
+  "flags": {
+   "defects": false,
+   "met": false,
+   "open": true
+  },
+  "instance": "x03b",
+  "n_findings": {
+   "O-compute": 0,
+   "O-stat": 0
+  },
+  "outcomes": {
+   "O-compute": "undetermined",
+   "O-stat": "undetermined"
+  },
+  "planning_gaps": [],
+  "raw_sha256": "6f7386b9b97f337678582dcf6eac32617fbf1c67515d652ea35fe94d804d75ff",
+  "suggested_obligations": []
+ },
+ {
+  "assignment": "asg-670863ff",
+  "bytes": 3231,
+  "fidelity": "digest-bound",
+  "flags": {
+   "defects": false,
+   "met": false,
+   "open": true
+  },
+  "instance": "x03c",
+  "n_findings": {
+   "O-compute": 1,
+   "O-stat": 0
+  },
+  "outcomes": {
+   "O-compute": "undetermined",
+   "O-stat": "undetermined"
+  },
+  "planning_gaps": [],
+  "raw_sha256": "5cf2b111cf377c08cf852263fea7febb30eb9e2ec871bb3e8e70b484357ad1bd",
+  "suggested_obligations": []
+ },
+ {
+  "assignment": "asg-ba3b37cb",
+  "bytes": 2391,
+  "fidelity": "digest-bound",
+  "flags": {
+   "defects": false,
+   "met": false,
+   "open": true
+  },
+  "instance": "x03d",
+  "n_findings": {
+   "O-compute": 0,
+   "O-stat": 0
+  },
+  "outcomes": {
+   "O-compute": "undetermined",
+   "O-stat": "undetermined"
+  },
+  "planning_gaps": [],
+  "raw_sha256": "cc295f07694f52f71e4d2702e651a4da98087d7e44eecd307faf36a8582fe76e",
+  "suggested_obligations": [
+   "Check that the input file records every number the stated result depends on (here sigma_b), so the result is reproducible from the supplied inputs as REQ-1 requires."
+  ]
+ },
+ {
+  "assignment": "asg-6c956dcb",
+  "bytes": 2538,
+  "fidelity": "digest-bound",
+  "flags": {
+   "defects": false,
+   "met": false,
+   "open": true
+  },
+  "instance": "x04a",
+  "n_findings": {
+   "O-compute": 0,
+   "O-stat": 0
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [
+   "REQ-2"
+  ],
+  "raw_sha256": "f631cccc68cbd727aaad7ac1e59fb3867885ae52cc3db08511ce8cf0f9965906",
+  "suggested_obligations": [
+   "REQ-2 is not covered by any obligation: check that the analysis computes and reports the chi2 compatibility of the two inputs (chi2/ndf, p-value) before combining. My computation gives chi2 = 1.39 for 1 dof (p = 0.24), but analysis.md does not show any such check.",
+   "Justification of the systematic correlation value 0.3 for the common momentum scale (sensitivity of the result to rho)."
+  ]
+ },
+ {
+  "assignment": "asg-faa0ccf6",
+  "bytes": 4303,
+  "fidelity": "digest-bound",
+  "flags": {
+   "defects": true,
+   "met": false,
+   "open": true
+  },
+  "instance": "x04b",
+  "n_findings": {
+   "O-compute": 0,
+   "O-stat": 2
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "violated"
+  },
+  "planning_gaps": [
+   "REQ-2"
+  ],
+  "raw_sha256": "37534a4dca6e7a969e4236bc62482e8dd4515547e99c68a8f45cce858c7a5f75",
+  "suggested_obligations": [
+   "REQ-2 is not covered by any obligation: the choice of fit range (x = 0..9) is not justified, and its effect on the slope is not quantified. A quick check: dropping x = 0 moves b from -0.1903 to -0.1687, and fitting x = 1..8 gives b = -0.1947. These shifts are comparable to or larger than the statistical sigma_b = 0.011, so an obligation on fit-range justification and slope stability should be added.",
+   "Model adequacy (linear vs higher order) is a natural separate check under REQ-1."
+  ]
+ },
+ {
+  "assignment": "asg-3cf98718",
+  "bytes": 2561,
+  "fidelity": "digest-bound",
+  "flags": {
+   "defects": false,
+   "met": false,
+   "open": true
+  },
+  "instance": "x04c",
+  "n_findings": {
+   "O-compute": 0,
+   "O-stat": 0
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [
+   "REQ-2"
+  ],
+  "raw_sha256": "9d837c8a92855ce9751b644d24307b9b7dbb775cfe26daebe167caa5070a7da6",
+  "suggested_obligations": [
+   "REQ-2 is not covered by any obligation: check that the analysis itself reports an outlier/consistency test (chi2/ndf, pulls) and states the PDG scale-factor decision. analysis.md reports neither; my own check gives chi2 = 2.51/3, S = 0.91, so no scaling would be needed, but the write-up does not show it."
+  ]
+ },
+ {
+  "assignment": "asg-0683b853",
+  "bytes": 1941,
+  "fidelity": "digest-bound",
+  "flags": {
+   "defects": false,
+   "met": false,
+   "open": true
+  },
+  "instance": "x04d",
+  "n_findings": {
+   "O-compute": 0,
+   "O-stat": 0
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [
+   "REQ-2"
+  ],
+  "raw_sha256": "af5ac476675069a314447ab2299d784eee9fe3aa9700ec4548b86230ddea3385",
+  "suggested_obligations": [
+   "REQ-2 is not covered by any obligation: check that A and B have the same units and normalisation (for example the same exposure, luminosity or efficiency correction), so that R is dimensionless as stated. Neither analysis.md nor data.json gives units or normalisation for A and B."
+  ]
+ }
+]

@@ -1,0 +1,15 @@
+{
+ "id": "intent-x04d",
+ "purpose": "Review of: Ratio of two independent yields",
+ "target_tier": "R2",
+ "minimum_requirements": [
+  {
+   "id": "REQ-1",
+   "text": "The combined/derived result and its uncertainty are statistically sound and reproducible from the supplied inputs."
+  },
+  {
+   "id": "REQ-2",
+   "text": "Units and normalisation of A and B are shown to be the same, so the ratio is dimensionless as stated."
+  }
+ ]
+}

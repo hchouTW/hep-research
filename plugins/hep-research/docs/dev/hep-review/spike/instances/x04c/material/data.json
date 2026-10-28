@@ -1,0 +1,19 @@
+{
+ "unit": "dimensionless",
+ "values": [
+  1.02,
+  1.035,
+  1.028,
+  1.031
+ ],
+ "sigma": [
+  0.006,
+  0.009,
+  0.005,
+  0.007
+ ],
+ "stated_results": {
+  "weighted_mean": 1.0273,
+  "uncertainty": 0.0032
+ }
+}
