@@ -39,8 +39,8 @@ Solar modulation: a dataset with a "period" asks for phi_<period>_gv, applied pe
 contract before ratios are formed (P4); a provider that returns only ratios cannot be modulated, so such a dataset is
 refused (exit 1, reason modulation-needs-isotopic-lis), unless the provider's domain declares phi_<period>_gv itself
 (a provider that modulates each isotope in its own run, as the USINE provider does with USINE's force field; F1):
-then phi_<period>_gv is fitted or fixed like any provider parameter, each dataset's requests carry only its own
-period's phi, and the result records the modulation as provider-side ("modulation").
+then phi_<period>_gv is fitted or fixed like any provider parameter, each request carries only the phi of the periods
+of its datasets, and the result records the modulation as provider-side ("modulation").
 Parameter priors (F1): parameters.<name>.prior {"mean", "sigma"} adds ((p - mean) / sigma)^2 in the parameter's own
 units to -2 ln L of the provider fits and profile intervals (for example a modulation potential or a provider
 cross-section parameter with an external constraint); the Fisher matrix and the dof count them. Response-model
@@ -98,8 +98,8 @@ Input (fit --input CONFIG.json; relative paths are read from the config's folder
   "nuisances": [{"name", "kind": "production-norm" | "parent-abundance", "channel": "C->B" | "parent": "O",
                  "prior_sigma": 0.1 | null, "aux": 1.0}],
   "families": [{"name", "free": [...], "fixed": {...}}]   (default: one family, every parameter free),
-  "optimizer": {"max_iterations": 100, "max_restarts": 5, "seed": 0, "polish_steps": 0 (F1: Newton steps before the
-                verdict)},
+  "optimizer": {"max_iterations": 100, "max_restarts": 5, "seed": 0, "polish_steps": 0 (F1: Newton steps of the
+                verdict before judging the provider fit)},
   "degeneracy_scan": {"family", <degeneracy.py scan keys>}, "theory_spec": "base-theory-spec.json",
   "intervals": [names]   (profile delta chi2 = 1 intervals with the provider; an end on a domain bound is kind "bound"),
   "covariance_alternatives": {"family", "dataset", "model": {build_covariance sources}, "source", "lengths": [...]},
@@ -320,10 +320,12 @@ class Evaluator:
         out.update({k: float(v) for k, v in values.items()})
         return out
 
-    def dataset_point(self, pt: dict, ds) -> dict:
-        """The point sent for one dataset: without the modulation potentials of the other datasets' periods (a
-        provider that modulates reads one period per request)."""
-        others = {f"phi_{d.period}_gv" for d in self.datasets if d.period and d.period != ds.period}
+    def group_point(self, pt: dict, group) -> dict:
+        """The point sent for a group of datasets: without the modulation potentials of periods none of them has (a
+        provider that modulates reads one period per request; F1)."""
+        mine = {getattr(ds, "period", None) for ds in group} - {None}
+        others = {f"phi_{getattr(d, 'period', None)}_gv" for d in self.datasets
+                  if getattr(d, "period", None) and getattr(d, "period", None) not in mine}
         return {k: v for k, v in pt.items() if k not in others}
 
     def components(self, values: dict) -> dict:
@@ -334,16 +336,12 @@ class Evaluator:
             return self.memo[key]
         out = {}
         for group in self.groups:
-
-        for ds in self.datasets:
-            ds_pt = self.dataset_point(pt, ds)
+            g_pt = self.group_point(pt, group)
             if self.points_sent >= self.max_evaluations:
                 raise FitRefused("evaluation-budget", f"the run reached --max-evaluations {self.max_evaluations} "
                                  "provider point evaluations (decision D7 budget); nothing more is evaluated")
             req = {"protocol": "cr-provider/1", "provider": self.provider_id, "provider_version": self.version,
-                   "points": [pt], "observables": [ds.observable_request() for ds in group],
-
-                   "points": [ds_pt], "observables": [ds.observable_request()],
+                   "points": [g_pt], "observables": [ds.observable_request() for ds in group],
                    "want": ["lis", "components"] if self.decomposable else ["lis"], "seed": None}
             if self.transport is not None:
                 req["transport"] = self.transport
@@ -352,7 +350,7 @@ class Evaluator:
             if resp.get("status") != "ok" or not isinstance(res_all, dict) or res_all.get("status") != "ok":
                 reason = (res_all or {}).get("reason") or resp.get("reason") or "provider-failed"
                 detail = (res_all or {}).get("detail") or resp.get("detail") or ""
-                raise FitRefused(reason, f"provider {self.provider_id} at {pt}: {reason} {detail}".strip())
+                raise FitRefused(reason, f"provider {self.provider_id} at {g_pt}: {reason} {detail}".strip())
             preds = res_all.get("predictions") or []
             if len(preds) != len(group) or any(
                     not np.allclose(p["values"].get("edges", ds.edges), ds.edges, rtol=1e-9, atol=0)
@@ -363,16 +361,7 @@ class Evaluator:
             evaluation = res_all.get("evaluation") or {}
             self.records.append({**({"dataset": group[0].name} if len(group) == 1 else
                                     {"datasets": [ds.name for ds in group]}),
-                                 "point": dict(pt), "input_hash": evaluation.get("input_hash"),
-
-            res = (resp.get("results") or [None])[0]
-            if resp.get("status") != "ok" or not isinstance(res, dict) or res.get("status") != "ok":
-                reason = (res or {}).get("reason") or resp.get("reason") or "provider-failed"
-                detail = (res or {}).get("detail") or resp.get("detail") or ""
-                raise FitRefused(reason, f"provider {self.provider_id} at {ds_pt}: {reason} {detail}".strip())
-            self.labels.update(res.get("labels") or [])
-            evaluation = res.get("evaluation") or {}
-            self.records.append({"dataset": ds.name, "point": dict(ds_pt), "input_hash": evaluation.get("input_hash"),
+                                 "point": dict(g_pt), "input_hash": evaluation.get("input_hash"),
                                  "computational_run_ref": evaluation.get("computational_run_ref"),
                                  "labels": sorted(res_all.get("labels") or [])})
             for ds, pred in zip(group, preds):
@@ -655,10 +644,6 @@ def _verdict(nll_abs, x_abs, bounds_abs, held, steps=None, polish=0):
     step / 1e-4, so the Hessian's difference step is the stated step and boundary_kkt's is 1e-2 of it.
     With polish > 0, newton_fit first takes up to that many damped Newton steps in the interior coordinates (kept
     inside the bounds) and the verdict is on the point it reaches, returned as "x"."""
-
-    With polish > 0 (optimizer.polish_steps, F1) up to that many damped Newton steps with these central differences
-    are taken on the judged coordinates before the verdict (removing the bias a forward-difference Jacobian leaves in
-    the least-squares minimum of a noisy provider); the polished point is returned as x_abs."""
     from core.stats.fit_diagnostics import boundary_kkt, newton_fit
     x0 = [float(v) for v in x_abs]
     unit = [1.0 if steps is None or steps[i] is None else steps[i] / 1e-4 for i in range(len(x0))]
@@ -709,21 +694,12 @@ def _verdict(nll_abs, x_abs, bounds_abs, held, steps=None, polish=0):
             x[i] = v
     else:
         res = newton_fit(reduced, [x[i] for i in judged], max_iter=0)
-
-    res = newton_fit(reduced, [x[i] for i in judged], max_iter=int(polish) if judged else 0)
     ok = res.ok and all(k["ok"] for k in kkt)
     reasons = list(res.reasons) + [f"kkt_{k['bound']}_{k['index']}" for k in kkt if not k["ok"]]
     out = {"status": "converged" if ok else "failed", "reasons": reasons, "edm": _r(res.edm),
            "judged": judged, "held": sorted(held), "at_bound": at_bound, "kkt": kkt}
     if polish:
         out["x"] = [a + b * u for a, b, u in zip(x0, x, unit)]
-
-    if polish and judged:
-        d = list(x)
-        for i, v in zip(judged, res.x):
-            d[i] = v
-        out["x_abs"] = [a + b * u for a, b, u in zip(x0, d, unit)]
-        out["polish"] = {"max_steps": int(polish), "steps_taken": res.iterations, "stop": res.stop}
     return out
 
 
@@ -881,14 +857,15 @@ def fit_family(model, family, opt, fixed_global, start=None, ys=None, aux=None):
         if names:
             cond, eig, degenerate, keep = fisher_screen(F, names, span)
             held = _exactly_flat(F)
-        verdict = _verdict(nll, t_hat, bounds, held, steps, opt.get("polish_steps", 0)) if names else {
-            "status": "converged", "reasons": [],
-                                                                    "judged": [], "held": [], "at_bound": [], "kkt": []}
-        if "x_abs" in verdict and nll(verdict["x_abs"]) <= nll(t_hat):
-            t_hat = np.clip(np.asarray(verdict.pop("x_abs"), dtype=float), lo, hi)
-        verdict.pop("x_abs", None)
+        polish = opt.get("polish_steps", 0)
+        verdict = _verdict(nll, t_hat, bounds, held, steps, polish) if names else {
+            "status": "converged", "reasons": [], "judged": [], "held": [], "at_bound": [], "kkt": []}
+        if polish and "x" in verdict:   # optimizer.polish_steps (F1): the verdict judged the polished point
+            moved = np.clip(np.asarray(verdict.pop("x"), dtype=float), lo, hi)
+            if nll(moved) <= nll(t_hat):
+                t_hat = moved
         attempts.append({"attempt": attempt, "status": verdict["status"], "reasons": verdict["reasons"],
-                         "optimizer": stop, **({"polish": verdict["polish"]} if "polish" in verdict else {})})
+                         "optimizer": stop, **({"polish_steps": polish} if polish else {})})
         if best is None or nll(t_hat) < best[1]:
             best = (t_hat, nll(t_hat), verdict, F, degenerate)
         if verdict["status"] == "converged":
@@ -982,7 +959,7 @@ def profile_interval(model, fit, name, opt):
             r = res.fun
         else:
             r = resid(np.zeros(0))
-        return float(r @ r) - chi2_min   # chi2_min includes the parameter priors, as r does
+        return float(r @ r) - chi2_min
     sig = fit["parameters"][i]["sigma_coordinate"] or 0.05 * (bounds[i][1] - bounds[i][0])
     ends = {}
     for side, key in ((-1, "lower"), (1, "upper")):
@@ -1420,8 +1397,8 @@ def _refuse_priors(model, what):
 
 def run_toys(model, family, truth, tcfg, rm_cfg, opt, fixed_global):
     """Plug-in coverage toys at a true point (module docstring)."""
-    from core.stats.toy_ensemble import EnsembleSpec, coverage, toy_seed
     _refuse_priors(model, "the toy study")
+    from core.stats.toy_ensemble import EnsembleSpec, coverage, toy_seed
     names, scales, bounds = model.coords(family["free"])
     fixed = dict(fixed_global)
     fixed.update(family.get("fixed") or {})
@@ -1561,9 +1538,9 @@ def classify_families(cfg_families, model, domain):
 
 def calibrate_families(model, fits, fam_cfg, rm_cfg, opt, fixed_global):
     """Toy-calibrated delta chi2 of every converged family (module docstring)."""
+    _refuse_priors(model, "the family calibration")
     from core.stats.tail_estimation import toy_tail
     from core.stats.toy_ensemble import toy_seed
-    _refuse_priors(model, "the family calibration")
     usable = [f for f in fits if f["status"] == "converged"]
     if not usable:
         return {"status": "failed", "reason": "no converged family"}
@@ -1795,8 +1772,8 @@ def _covers(rm, names, fixed, t_hat, sig, k_sigma, bounds) -> bool:
 
 
 def run_posterior(model, fit, pcfg, rm_cfg, opt, rm=None):
-    from bayes_diagnostics import diagnose
     _refuse_priors(model, "the posterior")
+    from bayes_diagnostics import diagnose
     fi = fit["_internal"]
     names, scales, bounds = fi["names"], fi["scales"], fi["bounds"]
     if _exactly_flat(fi["Ffull"]):
@@ -2055,7 +2032,7 @@ def run(cfg: dict, base: Path, registry, cache_dir=None, max_evaluations=2000, a
             modulation = {"by": "provider", "provider": entry.provider_id,
                           "parameters": {ds.name: f"phi_{ds.period}_gv" for ds in datasets if ds.period},
                           "note": "the provider applies the force field to each isotope in its own run before forming "
-                                  "ratios (P4); each dataset's requests carry only its own period's phi"}
+                                  "ratios (P4); each request carries only the phi of its datasets' periods"}
         if model.nuisances and not decomposable:
             raise FitRefused("not-decomposable", f"provider {entry.provider_id} declares decomposable: false, so its "
                              "predictions have no channel components for the multipliers "

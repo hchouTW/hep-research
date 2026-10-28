@@ -236,9 +236,10 @@ class PropagationFit(unittest.TestCase):
                 self.name, self.period = name, period
         ev = pf.Evaluator(None, PROVIDER, "0.1.0", [Ds("a", "p1"), Ds("b", "p2"), Ds("c", None)], {}, 10)
         pt = {"delta": 0.5, "phi_p1_gv": 0.4, "phi_p2_gv": 0.6}
-        self.assertEqual(ev.dataset_point(pt, ev.datasets[0]), {"delta": 0.5, "phi_p1_gv": 0.4})
-        self.assertEqual(ev.dataset_point(pt, ev.datasets[1]), {"delta": 0.5, "phi_p2_gv": 0.6})
-        self.assertEqual(ev.dataset_point(pt, ev.datasets[2]), {"delta": 0.5})
+        self.assertEqual(ev.group_point(pt, [ev.datasets[0]]), {"delta": 0.5, "phi_p1_gv": 0.4})
+        self.assertEqual(ev.group_point(pt, [ev.datasets[1]]), {"delta": 0.5, "phi_p2_gv": 0.6})
+        self.assertEqual(ev.group_point(pt, [ev.datasets[2]]), {"delta": 0.5})
+        self.assertEqual(ev.group_point(pt, ev.datasets), pt)   # per-point: every period of the group kept
 
     def test_parameter_priors(self):
         """F1: parameters.<name>.prior adds ((p - mean)/sigma)^2; a tight prior holds the parameter at its mean, a
@@ -273,7 +274,7 @@ class PropagationFit(unittest.TestCase):
         cfg["parameters"]["delta"]["step"] = 0.002
         fit = self.fit(cfg)["fits"][0]
         self.assertEqual(fit["status"], "converged")
-        self.assertIn("polish", fit["attempts"][0])
+        self.assertEqual(fit["attempts"][0]["polish_steps"], 1)
         for q in fit["parameters"]:
             truth = math.log(TRUTH[q["name"]]) if q["scale"] == "log" else TRUTH[q["name"]]
             self.assertLessEqual(abs(q["best_fit_coordinate"] - truth) / q["sigma_coordinate"], 0.1, q)

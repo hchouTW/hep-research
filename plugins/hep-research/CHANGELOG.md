@@ -208,9 +208,11 @@ Software checks establish contract consistency only, not physical validity.
   `--phi`, `--production-modifiers` and `pure:<isotopes>` in data-normalised abundances; the reader reads modulated
   tables with a phi check. `propagation_fit.py`: parameter priors, periods accepted when the provider's domain has
   `phi_<period>_gv`, optional Newton polish before the verdict. New example `examples/bc-usine-reproduction`. Outcome
-  (VALIDATION CRPROP-F1): F1-1 not met (delta in window for all three, K10 for BIG and SLIM; no converged verdict at
-  USINE's noise floor; QUAINT K10 1.3% low), F1-2 met. `adapters/cr-propagation/adapter.json` provider domain widened
-  (outside F1's file list; reported).
+  (VALIDATION CRPROP-F1): F1-1 not met on convergence only (delta and K10 in window for BIG, SLIM and the declared
+  variant QUAINT-Vc0, V_c on its bound by boundary_kkt; no fit_diagnostics verdict at USINE's 6-digit noise floor),
+  F1-2 met. `usine_translate.py --usine-tolerance` sets USINE's EPS_ITERCONV, EPS_INTEGR, EPS_NORMDATA (defaults
+  unchanged; tighter values change no output digit). `adapters/cr-propagation/adapter.json` provider domain widened
+  (decision A1.16).
 
 ## 0.42.0 (2026-10-26)
 

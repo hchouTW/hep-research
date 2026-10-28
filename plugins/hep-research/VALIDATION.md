@@ -7300,3 +7300,29 @@ diff and acceptance, impacted tests (report); ALL-3 deferred to the wave run (A1
   reported next to D9, never replacing the nominal verdict.
 - The convergence criterion stays the fit_diagnostics verdict (EDM <= 1e-5, positive-definite Hessian, boundary_kkt);
   if it is not reached at the noise floor, it is reported with the measured noise and the work stops.
+
+**Dispatch 2 results (record `tests/adapters/fixtures/cr_propagation/f1/f1-reproduction.json`, regenerated).**
+
+| Fit | delta (window) | K10 (window) | -2 ln L | Verdict | Runs |
+|---|---|---|---|---|---|
+| BIG, restart from its lowest cached point | 0.500 in | 0.286 in | 83.34 | failed: EDM 0.046 (V_A held as exactly flat); least_squares stopped at the start (xtol) | 212 |
+| SLIM, pass 2 (dispatch 1) | 0.516 in | 0.289 in | 90.31 | failed: EDM 0.0020 | 114 |
+| QUAINT free (dispatch 1) | 0.483 in | 0.293 out | 83.78 | failed: Hessian not positive definite | 540 |
+| QUAINT-Vc0 (V_c = 0, declared variant) | 0.459 in | 0.323 in | 84.02 | failed: EDM 0.00050, Hessian positive definite | 234 |
+| QUAINT-Vc0, the paper's covariance choice (model alternative) | 0.453 in | 0.319 in | 91.75 | stopped on its 200-evaluation cap; lowest cached point | 200 |
+
+QUAINT V_c bound: -2 ln L rises by 5.08 from V_c = 0 to 0.5 km/s at the variant's best fit, so boundary_kkt holds and
+QUAINT is judged on QUAINT-Vc0 (delta chi2 0.24 against the free fit). F1-1 stays NOT MET, only on the convergence
+criterion: every judged family (BIG, SLIM, QUAINT-Vc0) has delta and K10 in their windows, and none reaches the
+fit_diagnostics verdict. The verdict is unreachable at USINE's noise floor: tighter USINE tolerances change no output
+digit (step 1), the remaining noise is the 6-significant-digit tables (±0.0005 to ±0.003 in -2 ln L), and the EDM
+reached at steps of 0.3 conditional sigma (5e-4 to 5e-2) stays above 1e-5. Reported as a known issue; the criterion is
+not loosened. Data stay PRL 117: the paper's 67 points and Derome's covariance describe the 2011-05/2016-05 B/C of PRL
+117 (231102), which is also the profile's dataset record (boron-to-carbon-2016); the card's PRL 120 (021101) is not the
+set the target fits used. USINE runs: 2347 of F1's 2600 (dispatch 2: 6 noise probes, 212 BIG, 234 QUAINT-Vc0, 1 V_c
+bound check, 200 paper-covariance refit; at most 4 USINE processes at once). Rebased onto integration `3547f9a0`
+(C2UF): `propagation_fit.py` keeps C2UF's step-based polish in `_verdict` (it returns the polished point as "x") and F1's
+`optimizer.polish_steps` now uses that path for provider fits; F1's priors, provider-side modulation (each request
+carries only its own datasets' periods, also with C2UF's per-point requests) and C2UF's response model kind "provider"
+and per-point requests coexist; the hep_statistics tests, `test_cr_propagation` offline and C2UF's UsineEmulatorFamilies
+pass.
