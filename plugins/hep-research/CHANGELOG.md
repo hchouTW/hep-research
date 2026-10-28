@@ -180,6 +180,15 @@ Software checks establish contract consistency only, not physical validity.
   statistical-result, per-toy rows kept, multipliers bounded; a failed family calibration is recorded instead of
   aborting the run. Recorded USINE study and tests (C2U-1, C2U-2 met; C2U-3 not met: response model above tolerance,
   VALIDATION CRPROP-C2U).
+- crprop d3: two-level cross-code comparison of DRAGON2 cd588707 and USINE V3.5 (cr-propagation r3 §D3; GALPROP
+  unavailable, A1.2). New `tests/adapters/fixtures/cr_propagation/d3/` (study script `d3_study.py`, DRAGON2's own
+  inelastic cross sections tabulated with its compiled code, 2 DRAGON2 and 26 USINE recorded runs, `d3-results.json`)
+  and `D3CrossCode` / `LiveUsineD3` in `tests/adapters/test_cr_propagation.py`. D3-1 (level 1, 5%) fails at 38-77% and
+  is decomposed (gas column, helium target, inelastic cross sections, parent ratio O/C, injection convention); D3-3
+  (USINE given DRAGON2's fixed settings) passes within 0.7% on BronfFerr gas and fails for reacceleration (17%,
+  first-order zone conversion) and losses on Galprop gas (17.7%, gas geometry), both attributed; D3-2 (level 2, each
+  code's defaults) passes with every difference registered as a model alternative (residual 0.4%) (VALIDATION
+  CRPROP-D3).
 
 ## 0.42.0 (2026-10-26)
 

@@ -6936,3 +6936,70 @@ replaces or widens a frozen entry):
   without an attribution and the product of the attributed effects leaves a residual no larger than the D3-3 residual
   plus the stated uncertainty of the estimates; an unexplained residual is itself listed as unattributed (fail).
 - Budget (A1.8): at most 60 DRAGON2 and 300 USINE runs in D3, tallied in this section.
+
+**Runs (D7, A1.8).** DRAGON2: 2 propagation runs (`D3_harmonized_v1`: harmonized-v1 set A, 212 s; `D3_l2_dragon2`:
+level 2 with DRAGON2's shipped production table and abundances, 313 s), plus 13 calls of a 20-line driver linking
+DRAGON2's own `libDRAGON.a` (`sighad`, CROSEC option 2) to tabulate DRAGON2's inelastic cross sections
+(`d3/dragon2-inelastic.json`; no propagation, a few ms each). USINE: 37 runs (26 in the final plan of
+`d3_study.py usine_plan`, 9 reruns after fixing the study script or adding the injection setting, 1 aborted by a
+misparsed gas string, 1 live test), each 2-20 s. Reused, not rerun: D1's six DRAGON2 item runs and B1's seven USINE
+runs. Tally against the D3 caps: DRAGON2 2/60, USINE 37/300.
+
+**What USINE was given (D3-3, matched level 1)**, all from DRAGON2 cd588707's code: He/H 0.11 of the hydrogen nucleon
+density (constants.h, galaxy.cc), production on He = σ_H × `He_to_H_CS_ratio` (xsec.cc 145, 2364-2410), inelastic on H
+from DRAGON2's own `sighad` and on He × 2.10/A^0.055 (xsec.cc 2310-2317, xsec.h 465); thin-disc densities = DRAGON2's
+gas columns at r = 8.3 kpc on its z grid / 2h (BronfFerr: HI 0.1396, H2 0.0392 molecules, nucleons 0.2180 kpc cm⁻³;
+Galprop: HI 0.2054, HII 0.0419, H2 0.0498, nucleons 0.3469); O/C at 10 GeV/n = DRAGON2's propagated value (1.194-1.211;
+the profile's parent list gives 0.9, and D1's translator keeps DRAGON2's BaseModel abundances without recording it);
+injection β⁻¹ Rig^-2.3 (USINE `eta_s` = -1): DRAGON2's C and O spectra are 1.75 times USINE's at 0.2 GeV/n relative to
+10 GeV/n (≈ 1/β, a rigidity power law per unit momentum), and agree within 0.6% at 0.05-1000 GeV/n once USINE has
+`eta_s` = -1. Not expressible in USINE's KisoVc models, recorded with estimated effects on B/C (high-energy limits):
+DRAGON2's radial gas profile (BronfFerr ×1.0076, Galprop ×0.888; Fourier-Bessel, uniform sources), the vertical extent
+of its gas and of its source box |z| ≤ 0.2 kpc (BronfFerr ×0.980, Galprop ×0.913; slab Green's function), together
+0.987 and 0.811 (`geometry_factor`); reacceleration in the whole halo (A1R first-order conversion, relative error bound
+0.517 on the second-order term); finite gas layer for ¹⁰Be decay (D1's thick-gas factor); numerics (DRAGON2 grid 0.22%,
+D1; USINE 100 Bessel terms 0.5%, B3-1c).
+
+**Results** (`d3/d3-results.json`, recomputed offline by `D3CrossCode`; B/C max |r_DRAGON2/r_USINE − 1| on 2-1000 GV):
+
+| Configuration | Level 1 (D3-1) | Matched (D3-3) | ¹⁰Be/⁹Be matched |
+|---|---|---|---|
+| harmonized-v1 (set A) | 1.270-1.408, 40.8% | 0.993-1.000, **0.67%** | — |
+| isotopic (item-off) | 1.270-1.387, 38.7% | 0.993-1.000, **0.67%** | 0.13% |
+| convection | 1.279-1.395, 39.5% | 0.994-1.000, **0.59%** | 0.17% |
+| decay | 1.270-1.387, 38.7% | 0.993-1.000, **0.65%** | 18.3% (gas layer; matched / D1 thick-gas factor within 0.41% in all 12 bins) |
+| reacceleration | 1.281-1.382, 38.2% | 0.830-1.003, **17.0%** (lowest bin) | 2.7% |
+| losses-off (Galprop gas) | 1.510-1.770, 77.0% | 0.823-0.916, **17.7%** | 0.18% |
+| losses (Galprop gas) | 1.499-1.770, 77.0% | 0.823-0.943, **17.7%** | 0.22% |
+
+Attribution of the level-1 offset (isotopic, USINE ladder, effect of each step on B/C): gas column 1.054-1.087, helium
+target 1.073-1.136, inelastic cross sections 1.003-1.077, parent ratio O/C 1.104-1.110, injection convention
+1.000-1.031; their product times the matched residual equals the level-1 offset (test). Failing matched configurations:
+reacceleration — item effect DRAGON2/USINE 0.834 in 2-2.95 GV, 1.007 in the next bin, within the A1R bound times
+USINE's item effect (0.302, 0.090) in every bin (`reacceleration_check`); losses pair — the matched run with the gas
+scaled by the Galprop geometry factor 0.811 (`a-losses-off-geometry`, `a-losses-geometry`) agrees within 1.9% and 3.3%,
+and the high-energy offset 0.823 is the factor 0.811 within 1.5%; with like-for-like gas (HII in USINE) the losses
+item effects agree within 3.0% (D1-1a found 6.1% against an ionization-only reference).
+
+Level 2 (DRAGON2/USINE defaults 1.181-1.234), USINE swapping DRAGON2's inputs in one at a time: production table
+(Evoli 2019 vs GALPROP17 OPT12) 0.971-1.041, inelastic (CROSEC vs Tripathi99+Coste12) 1.003-1.011, gas and helium
+1.128-1.204, abundances 1.013-1.015, injection convention 1.000-1.029; residual 0.996-1.003 (0.42%). Estimated, not
+isolated by a run: gas and source geometry 0.987-1.000, ¹³C/¹⁴C in the C denominator (solar fractions in USINE)
+1.0085-1.0089, network edges (¹⁷O, ¹⁸O) ±0.05%, numerics ±0.5%. Every difference is registered as a
+`model-alternative` in `level2_differences`.
+
+| ID | Result | Evidence |
+|---|---|---|
+| D3-1 | **failed**: 38-77% at level 1 for every configuration (frozen 5%; reported, not loosened); fully decomposed by the ladder | `verdicts.D3-1`, `ladder`; `D3CrossCode.test_d3_1_level_one_fails_and_is_reported` |
+| D3-3 | **failed overall**: passes within 0.59-0.67% for harmonized-v1, isotopic, convection and decay; fails for reacceleration (17.0%, attributed: first-order zone conversion, within its bound) and the losses pair (17.7%, attributed: Galprop gas geometry that a uniform thin disc cannot express; geometry check within 3.3%) | `verdicts.D3-3`, `reacceleration_check`, `geometry_checks`; `test_d3_3_matched_level_one` |
+| D3-2 | **passed**: every level-2 difference measured or estimated; residual 0.42% ≤ allowed 2.46% (D3-3 isotopic residual 0.67% + BronfFerr geometry 1.29% + numerics 0.5%) | `level2_differences`, `verdicts.D3-2`; `test_d3_2_every_level_two_difference_is_attributed` |
+| D3-3 command | `python3 -m unittest tests.adapters.test_cr_propagation`: ok | `$CRPROP_OUT/d3/acceptance/` |
+| ALL-1 | environment field above | this section |
+
+Open issues found (outside D3's files, for the orchestrator): (1) `dragon2_run.spec_from_transport` neither translates
+`sources.abundances` nor records it as a substitute (DRAGON2's BaseModel O/C 1.21 vs the profile's 0.9: ×1.10 on B/C,
+the part of D1-1b's USINE offset D1 left unnamed); (2) harmonized-v1's "all primaries R^-2.3" does not fix the measure
+(per momentum in DRAGON2, per E_k/n in USINE: up to 3% on B/C at 2-3 GV, ×1.75 on primaries at 0.2 GeV/n), and neither
+translator records it; (3) `usine_translate._gas` drops a density term written without `cm^-3` to 0 with only a
+substitute note (found when a D3 run aborted); (4) D1's thick-gas attribution of the ¹⁰Be/⁹Be decay gap now holds in
+every bin against a like-for-like USINE run, including the lowest bin D1 left unattributed.
