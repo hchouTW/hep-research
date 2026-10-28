@@ -1,0 +1,89 @@
+{
+ "contract_version": "3.14.0",
+ "artifact_id": "usine-run-h1-2d-r40-nom",
+ "artifact_type": "computational-run",
+ "objective": "USINE run 'h1-2d-r40-nom' translated from a transport block (adapters/cr-propagation/assets/usine_translate.py)",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.42.0",
+  "contracts": "3.14.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-computing",
+  "created": "2026-10-28",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "status": [
+  "unvalidated"
+ ],
+ "extension": {
+  "input_manifest": [
+   {
+    "path": "norm_points.dat",
+    "sha256": "6e882bf9d33839dc463f8d583ae16f8f7c6f7bfd2e18ccefbb91621cea93e717"
+   },
+   {
+    "path": "usine.init.par",
+    "sha256": "15ff891bfeb72615d2d5786fd2f8a7b6f6e26b614512560d99aab575b7d2e844"
+   },
+   {
+    "path": "xs_inelastic.dat",
+    "sha256": "d5f659beb164b0769a48e6bb86164e2edad5904352b3ef702acd72b0c3d758ea"
+   },
+   {
+    "path": "xs_production.dat",
+    "sha256": "102f7acfea181506c3b88164bf07c3fe04051f133ad7f679bb8e9db3f21be9a6"
+   }
+  ],
+  "tools": [
+   {
+    "name": "USINE",
+    "version": "V3.5 (git tag V3.5, commit fb53006db41d1a640bf1b5af1a4b0f899ca59673; built with Apple clang 21.0.0 against ROOT 6.38.04)",
+    "binary": "<TOOL_HOME>/bin/usine",
+    "binary_sha256": "1d444720afec6ebd2efde8d275d5d950f39edee4f53e7c3756fba8ce05a62d25"
+   }
+  ],
+  "commands": [
+   "<TOOL_HOME>/bin/usine -l <RUN_DIR>/usine.init.par <RUN_DIR>/out '10B,11B,12C,16O,B/C:KEKN:0.;B/C:kR:0.' 0 1 1 0"
+  ],
+  "environment": {},
+  "seeds": {
+   "note": "USINE's local-flux calculation is deterministic: no random numbers are drawn"
+  },
+  "tolerances": {
+   "note": "USINE EPS_ITERCONV 1e-6, EPS_INTEGR 1e-4, EPS_NORMDATA 1e-10 (written into the initialisation file); outputs printed with 6 significant digits"
+  },
+  "resources": {
+   "wall_seconds": 2.36
+  },
+  "exit_status": 0,
+  "usine_exit_status": 1,
+  "exit_status_note": "exit_status is the run's outcome as judged by usine_translate.py (0: every expected output written, no USINE error or crash in the log); USINE V3.5 itself returns 1 on every path (usine_exit_status)",
+  "output_hashes": {
+   "out/local_fluxes_10B_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "88323e84823eadec682877115174c08e4920f3f90d18e8eae2b48302abc964df",
+   "out/local_fluxes_11B_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "86d3a058954ca2e136023e1dd602fd443ac7a8a349b82808fa92a4b9ba480cfb",
+   "out/local_fluxes_12C_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "31a61f4a7401b8054a4652b05cffa3e900cd544279e0c5a6215963ad3309ad55",
+   "out/local_fluxes_16O_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "21f7a0257d0bb2486500136a6a09a3a2c6ceecd206c5af38e60dcfacb241e467",
+   "out/local_fluxes_BC_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "e2d89c8db48731f6a601af1b97fe05c831463826f1364e80bc27f4db709c1d50",
+   "out/local_fluxes_BC_R_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "7e3cc02bcced4244818da26fe4824d1f47fb7ebb7d2f2d13b239460df8f3c817"
+  },
+  "notes": [
+   "observer at r = 8.3 kpc, z = 0 (not fixed by the transport block); no central hole",
+   "gas 'uniform, n_H = 1 cm^-3': HI = 1 cm^-3, HII = H2 = 0 in the thin disc of half-thickness h; USINE's Coulomb loss acts on HII and is therefore zero",
+   "gas He_to_H_number 0.1: not used; the ILLUSTRATIVE cross sections are on hydrogen only and no helium cross section is invented (He density 0, target H)",
+   "element-level set xs-illustrative-A: C, O and B on 12C, 16O and 11B (10B without production, with B's inelastic cross section)",
+   "production channels not in the set are zero (USINE needs every pair of the network)",
+   "source spectrum dQ/dE_k/n = q Rig^-2.3 (USINE POWERLAW, eta_s = 0), uniform in r up to radius_kpc in the thin disc (template CST)",
+   "parent abundances: each parent source scaled until its unmodulated local flux at E_k/n = 10 GeV/n is in the ratio C 1, O 0.9 (theory:cr-secondary-ratio parent list); USINE NormList with generated points, not data",
+   "tertiary chains, ghost nuclei and exotic primaries off",
+   "B3 run kind nominal"
+  ]
+ }
+}
