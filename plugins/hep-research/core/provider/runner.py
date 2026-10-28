@@ -16,7 +16,8 @@ items, seed and theory_spec_ref, is answered from the cache without calling the 
 providers or a fixed seed; only ok results are stored; a request with a theory_spec_ref but no transport block is never
 cached, because nothing in it identifies the theory-spec's content); 6. the remaining points go to the provider in one batch: single-shot ('ENTRY --request R --response S' in a
 fresh temporary folder) or one long-lived '--serve' session; 7. the provider's response is checked against the
-protocol (invalid-response), a crash, a missing response or an unexpected exit code fails every point it was sent
+protocol and the declared modulation (core.provider.protocol.check_modulation: a top-of-atmosphere prediction needs a
+modulation block and a point with a modulation parameter; invalid-response, also for a cached result), a crash, a missing response or an unexpected exit code fails every point it was sent
 (provider-failed, with the exit code and the end of stderr), a timeout gives provider-timeout. A user-supplied
 provider's results carry the label user-supplied. `stats` counts provider calls, points sent and cache hits.
 
@@ -49,6 +50,7 @@ from core.provider.protocol import (  # noqa: E402
     OUTSIDE_LABEL,
     OUTSIDE_OPTION,
     USER_LABEL,
+    check_modulation,
     check_request,
     check_response,
     failed_response,
@@ -268,7 +270,10 @@ class ProviderRunner:
             cached = self._cache_read(cache_path)
             if cached is not None:
                 self.stats["cache_hits"] += 1
-                results[index] = dict(cached, point_index=index, point=dict(point))
+                hit = dict(cached, point_index=index, point=dict(point))
+                problems = check_modulation(hit, entry.declaration)
+                results[index] = (failed_result(index, point, "invalid-response", "; ".join(problems), extra_labels)
+                                  if problems else hit)
             else:
                 pending.append((index, cache_path, outside or bins_outside))
         if pending:
@@ -276,6 +281,9 @@ class ProviderRunner:
             try:
                 answer = self._call(entry, batch)
                 problems = check_response(answer, batch)
+                if not problems:
+                    for res in answer["results"]:
+                        problems += check_modulation(res, entry.declaration)
                 if problems:
                     raise ProviderCallError("invalid-response", "; ".join(problems[:5]))
                 if not answer["results"]:  # the provider refused the whole batch

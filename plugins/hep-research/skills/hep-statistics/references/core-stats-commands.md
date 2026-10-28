@@ -448,7 +448,14 @@ python3 skills/hep-statistics/scripts/propagation_fit.py fit --input config.json
   set, must be stated in `gate_plan.measurement_conditions`); its
   `bin_semantics` and binning conventions must be the data's: a bin-averaged ratio is never fitted to data declared
   as a ratio of bin integrals (refused, exit 1). Datasets with a `period` need `phi_<period>_gv` applied per isotope
-  (P4 of the propagation plan); a provider that returns only ratios is refused (`modulation-needs-isotopic-lis`).
+  (P4 of the propagation plan). The fit-side isotopic path is the documented default and is not implemented yet, so a
+  provider that returns only ratios is refused (`modulation-needs-isotopic-lis`), unless its declaration carries a
+  `modulation` block listing `phi_<period>_gv` (contracts 3.15.0: model `force-field`, the implementation, and a
+  passing result of the conformance gate `tools/provider_registry.py --conformance`, which compares the provider's
+  modulated output with the plugin's force-field tool applied to its own isotopic LIS within at most 1e-3). The
+  declaration decides, not a `phi` in the domain; the result's `modulation` records `by: provider` with the declared
+  model and implementation. A top-of-atmosphere prediction for a dataset the fit did not ask the provider to modulate
+  is refused (`double-modulation`): the fit never applies a second force field.
 - **Model:** the prediction is the sum of the provider's components, each times at most one multiplier: a
   production norm (prior ~10%) or a parent abundance (free or with a prior). They enter linearly and are profiled
   exactly. Inelastic changes and production slopes need a provider parameter or energy-basis components and are

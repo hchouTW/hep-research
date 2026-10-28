@@ -6,6 +6,7 @@ Given the registry, the provider id and one in-domain request, it calls the prov
 through the runner, so the provider's own refusals are tested) and through the runner:
   declared           the provider is in the registry with a valid declaration
   single-shot        'ENTRY --request R --response S' answers with a protocol-valid response whose points are all ok
+                     and whose prediction levels agree with the declared modulation (protocol.check_modulation)
   serve              one '--serve' session answers the same request twice with protocol-valid responses
   prv-2              single-shot and --serve responses have the same sha256 after removing elapsed_s and time stamps
                      (and the two --serve answers too, for a deterministic provider)
@@ -41,6 +42,7 @@ from core.provider.protocol import (  # noqa: E402
     OUTSIDE_LABEL,
     USER_LABEL,
     check_declaration,
+    check_modulation,
     check_request,
     check_response,
     strip_volatile,
@@ -109,6 +111,8 @@ def run_conformance(registry, provider_id: str, request: dict, outside_point: di
     single = direct(request)
     if single is not None:
         problems = check_response(single, request)
+        if not problems:
+            problems = [p for r in single["results"] for p in check_modulation(r, entry.declaration)]
         bad = [r["point_index"] for r in single.get("results", []) if r.get("status") != "ok"] if not problems else []
         record("single-shot", not problems and not bad and single["status"] == "ok",
                "; ".join(problems) or (f"points {bad} failed: {single['results'][bad[0]].get('reason')} "

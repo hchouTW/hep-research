@@ -213,16 +213,28 @@ class PropagationFit(unittest.TestCase):
         self.assertEqual((code, out["reason"]), (1, "modulation-needs-isotopic-lis"))
         self.assertIn("phi_p1_gv", out["detail"])
 
-    def test_provider_side_modulation_needs_the_phi_in_the_provider_domain(self):
-        """F1: a period is accepted when the provider's domain declares phi_<period>_gv (the provider modulates);
-        the phi must then be fitted or fixed, and each dataset's requests carry only its own period's phi."""
+    def test_provider_side_modulation_needs_the_declared_modulation_block(self):
+        """F1, K2 (contracts 3.15.0): a period is accepted when the provider's declaration carries a modulation block
+        listing phi_<period>_gv (phi in the domain alone is refused by the registry); the phi must then be fitted or
+        fixed, and each dataset's requests carry only its own period's phi."""
         import propagation_fit as pf
         reg = json.loads(self.registry.read_text())
-        for item in reg["providers"]:
-            if item["declaration"]["id"] == PROVIDER:
-                item["declaration"]["domain"]["phi_p1_gv"] = {"min": 0.0, "max": 2.0}
+        decl = next(i["declaration"] for i in reg["providers"] if i["declaration"]["id"] == PROVIDER)
+        decl["domain"]["phi_p1_gv"] = {"min": 0.0, "max": 2.0}
         cfg = self.config()
         cfg["datasets"][0]["period"] = "p1"
+        with self.assertRaises(pf.FitInputError) as ctx:   # phi in the domain without a modulation block
+            pf.run(cfg, self.work, reg, cache_dir=self.cache)
+        self.assertIn("modulation block", str(ctx.exception))
+        decl["modulation"] = {"model": "force-field", "implementation": "SYNTHETIC force field per isotope",
+                              "parameters": ["phi_p1_gv"],
+                              "conformance": {"reference_point": {"delta": 0.5, "phi_p1_gv": 0.5},
+                                              "observables": [{"id": "B/C", "axis": "ekn", "unit": "GeV/n",
+                                                               "bins": [[1.0, 10.0]]}],
+                                              "tolerance": 1e-3,
+                                              "result": {"status": "passed", "max_relative_deviation": 1e-5,
+                                                         "nodes_compared": 10, "isotopes": ["11B", "12C"],
+                                                         "tool": "SYNTHETIC"}}}
         with self.assertRaises(pf.FitInputError) as ctx:   # phi neither fitted nor fixed
             pf.run(cfg, self.work, reg, cache_dir=self.cache)
         self.assertIn("phi_p1_gv", str(ctx.exception))
@@ -234,6 +246,13 @@ class PropagationFit(unittest.TestCase):
         class Ds:
             def __init__(self, name, period):
                 self.name, self.period = name, period
+        toa = ({"observable": {"level": "top-of-atmosphere"}},)
+        lis = ({"observable": {"level": "crsr:local-interstellar"}},)
+        pf._refuse_double_modulation([Ds("a", "p1"), Ds("c", None)], {"a": toa, "c": lis}, True, PROVIDER)
+        for dsets, first, modulates in (([Ds("c", None)], {"c": toa}, True), ([Ds("a", "p1")], {"a": toa}, False)):
+            with self.assertRaises(pf.FitRefused) as ctx:   # a modulated value the fit did not ask for
+                pf._refuse_double_modulation(dsets, first, modulates, PROVIDER)
+            self.assertEqual(ctx.exception.reason, "double-modulation")
         ev = pf.Evaluator(None, PROVIDER, "0.1.0", [Ds("a", "p1"), Ds("b", "p2"), Ds("c", None)], {}, 10)
         pt = {"delta": 0.5, "phi_p1_gv": 0.4, "phi_p2_gv": 0.6}
         self.assertEqual(ev.group_point(pt, [ev.datasets[0]]), {"delta": 0.5, "phi_p1_gv": 0.4})

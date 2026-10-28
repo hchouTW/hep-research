@@ -45,7 +45,7 @@
    "id": "usine",
    "entrypoint": "assets/usine_provider.py",
    "protocol": "cr-provider/1",
-   "description": "one USINE V3.5 run per point (translator of the transport block; ILLUSTRATIVE cross sections of theory:cr-secondary-ratio, or USINE's own cross-section files and data-normalised abundances read in place from HEP_USINE_DATA), read into ratios of bin integrals of B/C, 10Be/9Be or Be/B on ekn or rigidity bins (r3 P2, P3); not decomposable; needs HEP_USINE_BIN and HEP_USINE_DATA; F1: a point may also set the one low break (R_break_gv, delta_below), the force-field potential of the data period 2011-05/2016-05 (phi_2011_2016_gv, USINE SolMod0DFF per isotope; top-of-atmosphere values, a departure from 'providers never modulate' recorded in each prediction) and the production channel 12C+H->11B (xs_norm, xs_slope, xs_threshold, USINE's fit-mode Norm, SlopeLE, EThresh)",
+   "description": "one USINE V3.5 run per point (translator of the transport block; ILLUSTRATIVE cross sections of theory:cr-secondary-ratio, or USINE's own cross-section files and data-normalised abundances read in place from HEP_USINE_DATA), read into ratios of bin integrals of B/C, 10Be/9Be or Be/B on ekn or rigidity bins (r3 P2, P3); not decomposable; needs HEP_USINE_BIN and HEP_USINE_DATA; F1: a point may also set the one low break (R_break_gv, delta_below), the force-field potential of the data period 2011-05/2016-05 (phi_2011_2016_gv, USINE SolMod0DFF per isotope; top-of-atmosphere values: the declared modulation below, contracts 3.15.0, which passed the conformance gate of tools/provider_registry.py --conformance; recorded in each prediction) and the production channel 12C+H->11B (xs_norm, xs_slope, xs_threshold, USINE's fit-mode Norm, SlopeLE, EThresh)",
    "domain": {
     "D0_cm2_s": {
      "min": 1e+27,
@@ -120,6 +120,75 @@
    "output_units": {
     "ratio": "1",
     "energy": "GeV/n (axis ekn) or GV (axis rigidity)"
+   },
+   "modulation": {
+    "model": "force-field",
+    "implementation": "USINE V3.5 SolMod0DFF: force field per isotope (Phi = |Z| phi / A) in USINE's own run, before the reader forms ratios (r3 P4)",
+    "parameters": [
+     "phi_2011_2016_gv"
+    ],
+    "conformance": {
+     "observables": [
+      {
+       "axis": "rigidity",
+       "bins": [
+        [
+         2.0,
+         5.0
+        ],
+        [
+         5.0,
+         20.0
+        ],
+        [
+         20.0,
+         100.0
+        ],
+        [
+         100.0,
+         1000.0
+        ]
+       ],
+       "id": "B/C",
+       "unit": "GV"
+      },
+      {
+       "axis": "ekn",
+       "bins": [
+        [
+         0.1,
+         1.0
+        ],
+        [
+         1.0,
+         10.0
+        ]
+       ],
+       "id": "10Be/9Be",
+       "unit": "GeV/n"
+      }
+     ],
+     "reference_point": {
+      "D0_cm2_s": 3e+28,
+      "L_kpc": 4.0,
+      "delta": 0.5,
+      "phi_2011_2016_gv": 0.7312345
+     },
+     "result": {
+      "isotopes": [
+       "10B",
+       "10Be",
+       "11B",
+       "12C",
+       "9Be"
+      ],
+      "max_relative_deviation": 4.27721405739101e-05,
+      "nodes_compared": 390,
+      "status": "passed",
+      "tool": "skills/hep-measurement/scripts/solar_modulation_force_field.py"
+     },
+     "tolerance": 0.001
+    }
    }
   },
   {
