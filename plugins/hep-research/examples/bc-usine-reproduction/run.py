@@ -298,7 +298,9 @@ def database_crosscheck(data_dir: Path, edges, values, cols, syst_total) -> dict
 
 
 def base_family(family: str) -> str:
-    return VARIANTS[family][0] if family in VARIANTS else family
+    """The paper family of a family, a declared variant or a tagged fit folder name ('QUAINT-Vc0-papercov')."""
+    hits = [v for v in VARIANTS if family == v or family.startswith(v + "-")]
+    return VARIANTS[max(hits, key=len)][0] if hits else family.split("-")[0]
 
 
 def free_of(family: str) -> list:
@@ -679,7 +681,7 @@ def stage_compare(out: Path, families) -> dict:
         p = {q["name"]: q for q in fit["parameters"]}
         delta, d0 = p["delta"]["best_fit"], p["D0_cm2_s"]["best_fit"]
         kk = k10(d0, delta)
-        pub = PUBLISHED[fam]
+        pub = PUBLISHED[base_family(fam)]
         c, lo, hi = pub["delta"]
         d_win = (round(c - lo, 6), round(c + hi, 6))
         k_win = (pub["K10"] * 10 ** -pub["s_log10_K10"], pub["K10"] * 10 ** pub["s_log10_K10"])
@@ -692,7 +694,7 @@ def stage_compare(out: Path, families) -> dict:
                       "chi2": fit["chi2"], "dof": fit["dof"], "D9": "passed" if passed else "missed",
                       "best_fit": {n: q["best_fit"] for n, q in p.items()},
                       "sigma_coordinate": {n: q["sigma_coordinate"] for n, q in p.items()},
-                      "paper": PAPER_FITS[fam]}
+                      "paper": PAPER_FITS[base_family(fam)]}
     (out / "compare.json").write_text(json.dumps(table, indent=1) + "\n")
     return {"families": table, "D9_all": ok}
 
@@ -733,11 +735,11 @@ def stage_record(out: Path, families, record_path: Path, usine_runs: int) -> dic
         row = dict(compare.get(fam) or {})
         row.pop("paper", None)
         if row.get("status") in (None, "not-run"):
-            cached = best_cached(out, fam)
+            cached = best_cached(out, base_family(fam))
             if cached:
                 pt = cached["point"]
                 kk = k10(pt["D0_cm2_s"], pt["delta"])
-                pub = PUBLISHED[fam]
+                pub = PUBLISHED[base_family(fam)]
                 c, lo, hi = pub["delta"]
                 row = {"status": "not-reported", "note": "the fit stopped on its evaluation budget before reporting; "
                        "the lowest -2 ln L among its cached provider results", "delta": pt["delta"], "K10": kk,
@@ -751,7 +753,7 @@ def stage_record(out: Path, families, record_path: Path, usine_runs: int) -> dic
         attr = out / f"attribution-{fam}.json"
         if attr.is_file():
             row["attribution"] = json.loads(attr.read_text()).get(fam)
-        row["published_point_chi2"] = {k: start[fam][k] for k in ("chi2_nominal",
+        row["published_point_chi2"] = {k: start[base_family(fam)][k] for k in ("chi2_nominal",
                                                                   "chi2_usine_unf_correlation_data_scaled",
                                                                   "chi2_usine_covariance_model_scaled",
                                                                   "paper_chi2_min_including_nuisances", "paper_dof")}
@@ -765,8 +767,26 @@ def stage_record(out: Path, families, record_path: Path, usine_runs: int) -> dic
            "crdb_crosscheck": {k: crdb[k] for k in ("label", "rows", "matched", "max_rel_value", "max_rel_stat",
                                                      "max_rel_syst")} | {"row_roles": sorted({r["role"] for r in
                                                                                              crdb["table"]})},
-           "families": fams, "usine_runs": usine_runs,
-           "D9_all": all(r.get("D9") == "passed" for r in fams.values())}
+           "families": fams, "usine_runs": usine_runs}
+    # D9 is judged on BIG, SLIM and QUAINT, or the declared variant QUAINT-Vc0 when boundary_kkt accepts V_c = 0
+    # (VALIDATION CRPROP-F1, dispatch 2); model alternatives (tagged folders) are reported, never judged
+    kkt_path = out / "quaint-vc-kkt.json"
+    kkt = json.loads(kkt_path.read_text()) if kkt_path.is_file() else None
+    quaint = "QUAINT-Vc0" if kkt and kkt["kkt_ok"] and "QUAINT-Vc0" in fams else "QUAINT"
+    if kkt:
+        doc["quaint_vc_boundary_kkt"] = kkt
+    alt_path = out / "quaint-vc0-papercov-best.json"
+    if alt_path.is_file():   # model alternative (P9): the paper's covariance choice, reported next to D9
+        alt = json.loads(alt_path.read_text())
+        pub = PUBLISHED["QUAINT"]
+        c, lo, hi = pub["delta"]
+        doc["model_alternatives"] = {"QUAINT-Vc0, USINE relative covariance x model (the paper's choice)": {
+            "status": "not-reported", "note": alt["note"], "chi2": alt["chi2"], "delta": alt["delta"], "K10": alt["K10"],
+            "delta_in_window": c - lo <= alt["delta"] <= c + hi,
+            "K10_in_window": pub["K10"] * 10 ** -pub["s_log10_K10"] <= alt["K10"] <= pub["K10"] * 10 ** pub["s_log10_K10"],
+            "computational_run_ref": alt["computational_run_ref"]}}
+    doc["judged_for_D9"] = [f for f in ("BIG", "SLIM", quaint) if f in fams]
+    doc["D9_all"] = all(fams[f].get("D9") == "passed" for f in doc["judged_for_D9"])
     record_path.parent.mkdir(parents=True, exist_ok=True)
     record_path.write_text(json.dumps(doc, indent=1, default=list) + "\n")
     return {"record": str(record_path), "D9_all": doc["D9_all"]}

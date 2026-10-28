@@ -2406,7 +2406,8 @@ class UsineF1Record(unittest.TestCase):
 
     def test_d9_recomputed(self):
         kpc2_myr = (648000.0 / math.pi * 1.495978707e13 * 1e3) ** 2 / (1e6 * 365.25 * 86400.0)
-        for fam, ((d_lo, d_hi), (k_lo, k_hi)) in F1_WINDOWS.items():
+        for fam in self.rec["families"]:
+            (d_lo, d_hi), (k_lo, k_hi) = F1_WINDOWS[fam.split("-")[0]]
             row = self.rec["families"][fam]
             with self.subTest(family=fam):
                 pt = row["best_fit"]
@@ -2420,10 +2421,14 @@ class UsineF1Record(unittest.TestCase):
                 self.assertEqual(row["K10_in_window"], row["K10_window"][0] <= k10 <= row["K10_window"][1])
                 passed = row["status"] == "converged" and row["delta_in_window"] and row["K10_in_window"]
                 self.assertEqual(row["D9"].startswith("passed"), passed)
-        self.assertEqual(self.rec["D9_all"], all(r["D9"] == "passed" for r in self.rec["families"].values()))
+        judged = self.rec["judged_for_D9"]
+        self.assertEqual(judged[:2], ["BIG", "SLIM"])
+        self.assertEqual(judged[2], "QUAINT-Vc0" if (self.rec.get("quaint_vc_boundary_kkt") or {}).get("kkt_ok")
+                         else "QUAINT")
+        self.assertEqual(self.rec["D9_all"], all(self.rec["families"][f]["D9"] == "passed" for f in judged))
 
     def test_budget_and_no_data_values(self):
-        self.assertLessEqual(self.rec["usine_runs"], 2000)   # A1.8: F1 cap
+        self.assertLessEqual(self.rec["usine_runs"], 2600)   # A1.8 cap of F1 raised to 2600 by A1.16
         text = (F1_FIX / "f1-reproduction.json").read_text(encoding="utf-8")
         self.assertNotIn('"values"', text)
         self.assertNotIn('"edges"', text)
