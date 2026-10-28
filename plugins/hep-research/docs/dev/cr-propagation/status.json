@@ -232,7 +232,7 @@
   "D3": {
    "state": "merged",
    "dispatches": 1,
-   "rework_rounds": 0,
+   "rework_rounds": 1,
    "branch": "worktree-crprop-d3",
    "base": "b0d0016d",
    "head": "3aae8369",
@@ -241,7 +241,7 @@
    "verifier_report": "PASS under A1.13 (2026-10-28, Opus): offsets and ladder recomputed bin by bin with own reader; level-2 residual 0.43%; D3-3 matched 0.60-0.68% (own libDRAGON driver reproduces inelastic XS); attributions confirmed; licence scan clean",
    "missing_capabilities": [],
    "notes": [
-    "A1.13 accepted; verifier PASS on f4ffaa59; rebased onto 6a227a76 (fixtures and D3 test classes byte-identical, checked by the orchestrator); merged"
+    "wave-5 full run (03cfca5d): test_subprocess_timeouts fails on d3/d3_study.py:285; fix as rework round 1 on worktree-crprop-d3fix"
    ]
   },
   "E1": {
@@ -764,6 +764,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "maintainer 2026-10-28: pause after F1 and C2UF merge; do not start RC until the maintainer resumes"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "wave-5 full run on 03cfca5d (C2U, D3, E2 fix): E2 CLI contract fixed; 1 new failure attributed to D3 (d3_study.py:285 subprocess without timeout); relocation only known geant4; D3 fix branch"
   }
  ],
  "env": {
