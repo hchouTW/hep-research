@@ -40,7 +40,7 @@
   },
   "hep-theory": {
    "references": 31,
-   "bytes": 243622,
+   "bytes": 243627,
    "uncited": 0
   }
  },
@@ -3755,7 +3755,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "3c78f071 2026-10-28"
+   "last_commit": "a2e8f9b1 2026-10-28"
   },
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
@@ -4076,7 +4076,7 @@
   {
    "path": "skills/hep-theory/references/cosmic-ray-phenomenology.md",
    "owner": "hep-theory",
-   "bytes": 24571,
+   "bytes": 24576,
    "lines": 291,
    "linked_from_skill_md": true,
    "cited_by": [
