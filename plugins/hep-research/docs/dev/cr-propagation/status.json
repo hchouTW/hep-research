@@ -125,11 +125,11 @@
    ]
   },
   "A4": {
-   "state": "pending",
-   "dispatches": 0,
+   "state": "dispatched",
+   "dispatches": 1,
    "rework_rounds": 0,
-   "branch": null,
-   "base": null,
+   "branch": "worktree-crprop-a4",
+   "base": "566bfd1e",
    "head": null,
    "merge_commit": null,
    "worker_report": null,
@@ -153,17 +153,19 @@
    "notes": []
   },
   "D1": {
-   "state": "pending",
-   "dispatches": 0,
+   "state": "dispatched",
+   "dispatches": 1,
    "rework_rounds": 0,
-   "branch": null,
-   "base": null,
+   "branch": "worktree-crprop-d1",
+   "base": "566bfd1e",
    "head": null,
    "merge_commit": null,
    "worker_report": null,
    "verifier_report": null,
    "missing_capabilities": [],
-   "notes": []
+   "notes": [
+    "USINE-dependent items wait for B1; merge_after B1"
+   ]
   },
   "D2": {
    "state": "waiting-capability",
@@ -436,6 +438,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "B2 merged (81cb2ce0)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A4 and D1 dispatched from 566bfd1e (deps merged, env-dragon2 present); wave-1 full run (A1.5) started on 566bfd1e for A2, A1, C1, B2"
   }
  ],
  "env": {
