@@ -50,18 +50,18 @@
    ]
   },
   "A1": {
-   "state": "verifying",
+   "state": "merged",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-a1",
    "base": "ef37d970",
    "head": "d58b6d0f",
-   "merge_commit": null,
+   "merge_commit": "5d5fd918",
    "worker_report": "DONE: A1-1..A1-5 pass, A1-6 structure only until A2 merges; open: USINE smooth-break form is the module reading (not re-read from Weinrich 2020a Eq. 1); harmonized-v1 source spatial distribution left open by r3 5.5; output/network fields beside transport",
    "verifier_report": "PASS (2026-10-28, Opus): A1-1..A1-5 pass, A1-6 structure + informal schema check ok; advisories: USINE smooth-break form unverified vs Weinrich 2020a; dragon2 eta fixed 0 vs adapter etaT; n_H only as text; source spatial distribution open (decision before D3); He-target/ghost treatment vs xs-illustrative-A",
    "missing_capabilities": [],
    "notes": [
-    "verifier re-dispatched 2026-10-28 (Opus)"
+    "merged 5d5fd918; post-merge static exit 0, acceptance ok; A1-6 schema test now runs against merged A2 schema: 29 tests OK, 0 skipped"
    ]
   },
   "A2": {
@@ -421,6 +421,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "A2 merged (a3c880f8), post-merge static ok; A1 verifier PASS"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A1 merged (5d5fd918); A1-6 schema test passes after A2"
   }
  ],
  "env": {
