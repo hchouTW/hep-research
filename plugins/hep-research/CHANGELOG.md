@@ -136,9 +136,10 @@ Software checks establish contract consistency only, not physical validity.
   injection slope. `dragon2_to_prediction.py` gains ratios of bin integrals on ekn or rigidity bins (r3 P2, P3). New
   `dragon2_provider.py` (cr-provider/1, declared in `adapter.json`; not decomposable; runs kept under
   `HEP_DRAGON2_RUN_DIR` when set). Five item runs from new `harmonized-v1-<item>.json` files recorded under
-  `tests/adapters/fixtures/cr_propagation/dragon2/`; convection and decay compared with the B2 closed form: D1-1 fails
-  for B/C (offset already in the item-off run) and for 10Be/9Be with decay, passes for 10Be/9Be with convection
-  (VALIDATION CRPROP-D1); reacceleration and losses wait for USINE (B1).
+  `tests/adapters/fixtures/cr_propagation/dragon2/`; convection and decay compared with the B2 closed form,
+  reacceleration and losses with USINE (B1): D1-1 passes only for 10Be/9Be with convection and fails elsewhere, with
+  attribution (B/C offsets already in the item-off run; thin-disc reference for decay; V_A zone and D_pp conventions;
+  DRAGON2's energy-loss run unphysical, an open issue) (VALIDATION CRPROP-D1).
 
 ## 0.42.0 (2026-10-26)
 

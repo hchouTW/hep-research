@@ -9,7 +9,7 @@
    "status": "tested-in-declared-environment",
    "tested_versions": [
     "DRAGON2-Beta_version git cd588707fe03c76f19bda1b8092e136dcbe3fe90 (2021-09-30; configure.ac DRAGON 3.1.0), built 2026-10-15 on E2 with Homebrew GCC 15.2.0, GSL 2.8, CFITSIO 4.6.4 (autoconf 2.72, libtool 2.6.2): six runs recorded (B/C with convection, reacceleration, energy losses and decay off; illustrative production cross sections) and replayed offline (VALIDATION CR-PROPAGATION-DRAGON2)",
-    "the same build on E-crprop (macOS 27.2 arm64), 2026-10-28: five cr-propagation D1 item runs translated from harmonized-v1-<item>.json (item-off, convection, decay with NUBASE2020 half-lives, reacceleration, energy losses) recorded and replayed offline, convection and decay compared with the B2 closed form (VALIDATION CRPROP-D1); the provider passes C1's conformance checks live (HEP_DRAGON2_LIVE_TEST=1)"
+    "the same build on E-crprop (macOS 27.2 arm64), 2026-10-28: five cr-propagation D1 item runs translated from harmonized-v1-<item>.json (item-off, convection, decay with NUBASE2020 half-lives, reacceleration, energy losses) recorded and replayed offline, convection and decay compared with the B2 closed form, reacceleration and losses with USINE V3.5 (VALIDATION CRPROP-D1; D1-1 fails its 3% tolerance, with attribution; the energy-loss run is unphysical, an open issue); the provider passes C1's conformance checks live (HEP_DRAGON2_LIVE_TEST=1)"
    ]
   },
   {

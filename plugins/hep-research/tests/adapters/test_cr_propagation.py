@@ -549,7 +549,8 @@ class GridFit(unittest.TestCase):
 
 D1_FIX = FIX / "dragon2"
 D1_ITEMS = ("isotopic", "convection", "decay", "reacceleration", "losses")
-D1_CLOSED_FORM_ITEMS = ("convection", "decay")  # items with a B2 closed form; reacceleration and losses wait for B1
+D1_CLOSED_FORM_ITEMS = ("convection", "decay")  # items with a B2 closed form
+D1_USINE_ITEMS = ("reacceleration", "losses")  # no closed form: the reference is USINE (B1, usine/usine-results.json)
 D1_TOLERANCE = 0.03  # D1-1, frozen in acceptance.json and VALIDATION CRPROP-D1 before the runs
 BORON_CARBON_RIGIDITY_EDGES = [2.0 * 500.0 ** (k / 16) for k in range(17)]  # 16 log-uniform bins, 2-1000 GV
 BERYLLIUM_EKN_EDGES = [0.05 * 200.0 ** (k / 12) for k in range(13)]  # 12 log-uniform bins, 0.05-10 GeV/n
@@ -639,6 +640,27 @@ def d1_comparison():
     return out
 
 
+def d1_usine_comparison():
+    """D1-1 for the items without a closed form: DRAGON2 / USINE per bin (USINE's numbers from B1's
+    usine/usine-results.json, computed from the same harmonized-v1-<item>.json on the same bins) and the item effect
+    against each code's item-off run."""
+    u = json.loads((FIX / "usine" / "usine-results.json").read_text(encoding="utf-8"))
+    dragon = {i: d1_ratios(*conv.read_output(d1_output(i))) for i in ("isotopic",) + D1_USINE_ITEMS}
+    out = {}
+    for item in ("isotopic",) + D1_USINE_ITEMS:
+        rows = {}
+        for obs in D1_OBSERVABLES:
+            ref, ref0 = u["runs"][f"d1-{item}"][obs], u["runs"]["d1-isotopic"][obs]
+            ratio = [d / r for d, r in zip(dragon[item][obs], ref)]
+            effect = [(d / d0) / (r / r0) for d, d0, r, r0 in zip(dragon[item][obs], dragon["isotopic"][obs], ref, ref0)]
+            dev = max(abs(x - 1) for x in ratio)
+            rows[obs] = {"dragon2": dragon[item][obs], "usine": ref, "dragon2_over_usine": ratio,
+                         "max_abs_deviation": dev, "passed": dev <= D1_TOLERANCE, "item_effect_ratio": effect,
+                         "item_effect_max_abs_deviation": max(abs(x - 1) for x in effect)}
+        out[item] = rows
+    return out
+
+
 class D1Items(unittest.TestCase):
     """cr-propagation D1: every item has its harmonized-v1-<item>.json, a translated run spec and a recorded run (D1-2);
     the closed-form items are compared with B2 (D1-1, recomputed offline from the recorded outputs and checked against
@@ -713,6 +735,22 @@ class D1Items(unittest.TestCase):
                             self.assertTrue(math.isclose(a, b, rel_tol=1e-9), (key, a, b))
                     self.assertEqual(row["passed"], want["passed"])
                     self.assertEqual(row["passed"], row["max_abs_deviation"] <= D1_TOLERANCE)
+
+    @unittest.skipUnless(HAVE_NUMPY, "numpy and scipy are needed")
+    def test_usine_comparison_matches_the_record(self):  # D1-1, reacceleration and losses
+        u = json.loads((FIX / "usine" / "usine-results.json").read_text(encoding="utf-8"))
+        self.assertEqual(u["bc_rigidity_edges_gv"], BORON_CARBON_RIGIDITY_EDGES)
+        self.assertEqual(u["be_ekn_edges_gev"], BERYLLIUM_EKN_EDGES)
+        got = d1_usine_comparison()
+        rec = json.loads((D1_FIX / "d1-item-results.json").read_text(encoding="utf-8"))["usine_items"]
+        for item, rows in got.items():
+            for obs, row in rows.items():
+                with self.subTest(item=item, observable=obs):
+                    want = rec[item][obs]
+                    for key in ("dragon2", "usine", "dragon2_over_usine", "item_effect_ratio"):
+                        for a, b in zip(row[key], want[key]):
+                            self.assertTrue(math.isclose(a, b, rel_tol=1e-9), (key, a, b))
+                    self.assertEqual(row["passed"], want["passed"])
 
     def test_ratio_of_bin_integrals(self):
         """P2: a ratio of bin integrals, not the bin average of the ratio; P3: isotopes at equal rigidity."""
@@ -842,7 +880,6 @@ import hashlib  # noqa: E402
 import usine_provider  # noqa: E402
 import usine_to_prediction as usine_reader  # noqa: E402
 import usine_translate  # noqa: E402
-from tests.core.provider_conformance import ProviderConformance  # noqa: E402
 
 USINE_FIX = FIX / "usine"
 USINE_RUNS = ("harmonized-v1", "d1-isotopic", "d1-convection", "d1-decay", "d1-reacceleration", "d1-losses",

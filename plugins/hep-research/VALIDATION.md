@@ -6580,3 +6580,20 @@ reference includes them; the frozen tolerance is not changed. Checks: `run_all_c
 `tests.adapters.test_adapter_declarations`, `tests.tools.test_provider_registry`, `tests.core.test_provider`,
 `tests.core.test_provider_conformance_mixin`) pass; `check_naming.py`, `check_wiring.py --since 566bfd1e` pass;
 ALL-3 (full `run_all_checks.py`, `check_relocation.py`) deferred to the wave run (decision A1.5).
+
+**Addendum: items without a closed form (2026-10-28, after B1 merged; rebased onto integration HEAD `3d5a6295`, which
+contains B1 `2d451e87`).** The rebase left the translator and reader unchanged apart from the provider reading its
+entry from the `provider` list of `adapter.json`, so no DRAGON2 run was repeated. Reference: B1's
+`usine/usine-results.json` (USINE V3.5 Model2DKisoVc, the same `harmonized-v1-<item>.json` on the same 16 rigidity and
+12 E_k/n bins; thin disc, uniform neutral gas n_H = 1 cm⁻³ with h = 0.1 kpc, no helium, ILLUSTRATIVE energy-independent
+inelastic cross sections, V_A 50 km/s in the thin disc). Like with like for losses: USINE's reference has ionization
+only (its Coulomb term acts on HII, zero here), and DRAGON2's Coulomb term acts on BronfFerr's HII, also zero.
+
+| ID | Result | Evidence |
+|---|---|---|
+| D1-1 reacceleration | **fail**: B/C max abs(DRAGON2/USINE − 1) = 0.381; ¹⁰Be/⁹Be 0.041. Item effect on B/C in the lowest bin: DRAGON2 1.072 against USINE 1.402 (DRAGON2 ran the r3 P1 whole-halo equivalent 50 sqrt(0.1/4) = 7.9 km/s with its Ptuskin94 D_pp; the zone conversion is approximate without a bound, and the D_pp normalizations are not separated) | `dragon2/d1-item-results.json` `usine_items`; `D1Items.test_usine_comparison_matches_the_record` |
+| D1-1 losses | **fail**, not a physics comparison: DRAGON2 with eloss_flag 1 suppresses even primary ¹²C by 1e-4 (0.04 GeV/n) to 9e-3 (1.6 TeV/n) and B/C by about 1e-3 at every energy (max deviation 0.999); the same with dz = 0.1 kpc (diagnostic runs `$CRPROP_OUT/d1/diag-losses/`). USINE's ionization changes B/C by at most 13% at 2 GV. Cause in DRAGON2 cd588707's nuclear energy-loss path not located: open issue; the recorded run stays as evidence of the behaviour | same |
+| D1-1 offsets against USINE (item-off) | B/C 1.27-1.39, ¹⁰Be/⁹Be 0.95-0.98: DRAGON2's helium target (×1.14-1.17 on production), its gas column at 8.3 kpc (9% above USINE's 2 h n_H) and its own inelastic cross sections; not separated further. For comparison, the convection and decay items against USINE give item effects within 0.9% (convection) and, for ¹⁰Be/⁹Be with decay, up to 11% (both 2D codes against each other: thin disc in USINE, DRAGON2's gas layer) | same |
+
+D1-1 summary over the four items: pass only for ¹⁰Be/⁹Be with convection; fail for all others (tolerance 3%, frozen;
+escalation 5 open for the closed-form items). New open issue (4): DRAGON2's energy-loss run.
