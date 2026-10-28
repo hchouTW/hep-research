@@ -545,6 +545,273 @@ class GridFit(unittest.TestCase):
         self.assertAlmostEqual(par["best_fit"], rec["D0_fit"], delta=1e-6 * rec["D0_fit"])
         self.assertEqual(abs(math.log(par["best_fit"] / 3.6e28)) <= 0.05, rec["passed"])
 
+# ------------------------------------------------------------------ D1 (cr-propagation r4): DRAGON2 physics items
+
+D1_FIX = FIX / "dragon2"
+D1_ITEMS = ("isotopic", "convection", "decay", "reacceleration", "losses")
+D1_CLOSED_FORM_ITEMS = ("convection", "decay")  # items with a B2 closed form; reacceleration and losses wait for B1
+D1_TOLERANCE = 0.03  # D1-1, frozen in acceptance.json and VALIDATION CRPROP-D1 before the runs
+BORON_CARBON_RIGIDITY_EDGES = [2.0 * 500.0 ** (k / 16) for k in range(17)]  # 16 log-uniform bins, 2-1000 GV
+BERYLLIUM_EKN_EDGES = [0.05 * 200.0 ** (k / 12) for k in range(13)]  # 12 log-uniform bins, 0.05-10 GeV/n
+D1_OBSERVABLES = {"B/C": (NUM, DEN, BORON_CARBON_RIGIDITY_EDGES, "rigidity"),
+                  "10Be/9Be": (["NUC_4010"], ["NUC_4009"], BERYLLIUM_EKN_EDGES, "ekn")}
+D1_SECONDARIES = {"7Be": 4007, "9Be": 4009, "10Be": 4010, "10B": 5010, "11B": 5011}
+
+
+def d1_spec(item):
+    return json.loads((D1_FIX / "specs" / f"D1_{item}.json").read_text(encoding="utf-8"))
+
+
+def d1_output(item):
+    return D1_FIX / "outputs" / f"D1_{item}.txt"
+
+
+def d1_record(item):
+    return D1_FIX / "runs" / f"D1_{item}.computational-run.json"
+
+
+def d1_closed_form_columns(item):
+    """The run's columns with every secondary replaced by the B2 closed form (convection_decay.network_mid_plane) at
+    each DRAGON2 energy node: parents 12C and 16O from the same run (per E/n), the run's D0, delta, R0, L, V_c, decay
+    switch, the isotopic ILLUSTRATIVE set, h = 0.1 kpc and n_H = DRAGON2's BronfFerr column at the observer / (2 h).
+    Values go back to DRAGON2's per-total-kinetic-energy unit (divided by A), so the same reader applies."""
+    sys.path.insert(0, str(PROFILE / "scripts"))
+    import convection_decay as cd
+    import predict
+    s = d1_spec(item)
+    t = s["transport"]
+    energies, cols = conv.read_output(d1_output(item))
+    h = 0.1
+    n_h = bronf_ferr_column(s["grid"]["observer_kpc"][0], s["grid"]["L_kpc"], dz=s["grid"]["dz_kpc"]) / (2 * h)
+    decay_on = bool(t["decay"]["enabled"])
+    secondaries = [
+        {"name": "7Be", "Z": 4, "A": 7, "stable_assumption": "fully stripped 7Be (r3 P6); DRAGON2 keeps naked "
+                                                             "electron-capture nuclei stable"},
+        {"name": "9Be", "Z": 4, "A": 9},
+        dict({"name": "10Be", "Z": 4, "A": 10}, **({"decay": {"mode": "beta-", "daughter": "10B"}} if decay_on else
+                                                   {"stable_assumption": "decay off in this item"})),
+        {"name": "10B", "Z": 5, "A": 10},
+        {"name": "11B", "Z": 5, "A": 11},
+    ]
+    cfg = {"parents": [{"name": "C", "Z": 6, "A": 12, "observed_ratio_to_reference": 1.0},
+                       {"name": "O", "Z": 8, "A": 16, "observed_ratio_to_reference": 1.0}],
+           "secondaries": secondaries,
+           "transport": {"D0_cm2_s": t["diffusion"]["D0_cm2_s"], "R0_GV": t["diffusion"]["R0_gv"],
+                         "delta": t["diffusion"]["delta"], "L_kpc": t["geometry"]["L_kpc"], "h_kpc": h,
+                         "n_H_cm3": n_h, "V_c_kms": t["convection"]["V_c_kms"]},
+           "cross_section_set": "models/xs-illustrative-decay.json"}
+    xs = predict.load_cross_sections(cfg)
+    params = cd.model_parameters(cfg)
+    out = {k: list(v) for k, v in cols.items()}
+    for i, e_n in enumerate(energies):
+        c12, o16 = 12.0 * cols["NUC_6012"][i], 16.0 * cols["NUC_8016"][i]
+        cfg_i = dict(cfg, parents=[dict(cfg["parents"][0]), dict(cfg["parents"][1], observed_ratio_to_reference=o16 / c12)])
+        dens = cd.network_mid_plane(params, e_n, cfg_i, xs)["density"]
+        for name, uid in D1_SECONDARIES.items():
+            out[f"NUC_{uid}"][i] = dens[name] * c12 / (uid % 1000)
+    return energies, out
+
+
+def d1_ratios(energies, cols):
+    return {obs: conv.ratio_of_bin_integrals(energies, cols, num, den, edges, axis)
+            for obs, (num, den, edges, axis) in D1_OBSERVABLES.items()}
+
+
+def d1_comparison():
+    """D1-1 per closed-form item: DRAGON2 / closed form per bin and the item-effect diagnostic against the item-off
+    run (harmonized-v1-isotopic), for B/C (rigidity) and 10Be/9Be (ekn)."""
+    dragon = {i: d1_ratios(*conv.read_output(d1_output(i))) for i in ("isotopic",) + D1_CLOSED_FORM_ITEMS}
+    closed = {i: d1_ratios(*d1_closed_form_columns(i)) for i in ("isotopic",) + D1_CLOSED_FORM_ITEMS}
+    out = {}
+    for item in ("isotopic",) + D1_CLOSED_FORM_ITEMS:
+        rows = {}
+        for obs in D1_OBSERVABLES:
+            ratio = [d / c for d, c in zip(dragon[item][obs], closed[item][obs])]
+            effect = [(d / d0) / (c / c0) for d, d0, c, c0 in zip(dragon[item][obs], dragon["isotopic"][obs],
+                                                                   closed[item][obs], closed["isotopic"][obs])]
+            dev = max(abs(r - 1) for r in ratio)
+            rows[obs] = {"dragon2": dragon[item][obs], "closed_form": closed[item][obs], "dragon2_over_closed": ratio,
+                         "max_abs_deviation": dev, "passed": dev <= D1_TOLERANCE,
+                         "item_effect_dragon2": [d / d0 for d, d0 in zip(dragon[item][obs], dragon["isotopic"][obs])],
+                         "item_effect_closed": [c / c0 for c, c0 in zip(closed[item][obs], closed["isotopic"][obs])],
+                         "item_effect_ratio": effect, "item_effect_max_abs_deviation": max(abs(r - 1) for r in effect)}
+        out[item] = rows
+    return out
+
+
+class D1Items(unittest.TestCase):
+    """cr-propagation D1: every item has its harmonized-v1-<item>.json, a translated run spec and a recorded run (D1-2);
+    the closed-form items are compared with B2 (D1-1, recomputed offline from the recorded outputs and checked against
+    d1-item-results.json; the verdict is whatever the recorded numbers give, never a widened tolerance)."""
+
+    def test_item_files_are_transport_blocks(self):
+        from contracts.schema import validate
+        sch = json.loads((ROOT / "contracts" / "schemas" / "ext_theory_spec.json").read_text(encoding="utf-8"))
+        base = json.loads((FIX / "specs" / "harmonized-v1-isotopic.json").read_text(encoding="utf-8"))["transport"]
+        for item in D1_ITEMS:
+            with self.subTest(item=item):
+                doc = json.loads((FIX / "specs" / f"harmonized-v1-{item}.json").read_text(encoding="utf-8"))
+                rep = validate(doc["transport"], sch["properties"]["transport"], Vocabulary())
+                self.assertTrue(rep.ok, [e.as_dict() for e in rep.errors][:3])
+                changed = sorted(k for k in base if base[k] != doc["transport"][k])
+                self.assertEqual(changed, {"isotopic": [], "convection": ["convection"], "decay": ["decay"],
+                                           "reacceleration": ["reacceleration"], "losses": ["losses"]}[item])
+
+    def test_runs_are_recorded_and_translated_from_the_item_files(self):  # D1-2
+        import hashlib
+        channels = json.loads((D1_FIX / "channels-illustrative-decay.json").read_text(encoding="utf-8"))
+        for item in D1_ITEMS:
+            with self.subTest(item=item):
+                s = d1_spec(item)
+                doc = json.loads((FIX / "specs" / f"harmonized-v1-{item}.json").read_text(encoding="utf-8"))
+                again = dragon2_run.spec_from_transport(doc["transport"], s["name"], channels, z_range=(4, 8),
+                                                        ekn_range_gev=(0.04, 2000.0))
+                self.assertEqual(again, s)
+                rec = json.loads(d1_record(item).read_text(encoding="utf-8"))
+                self.assertEqual([f.code for f in validate_artifact(rec).errors], [])
+                ext = rec["extension"]
+                self.assertEqual(ext["exit_status"], 0)
+                self.assertEqual(ext["output_hashes"],
+                                 {f"output/D1_{item}.txt": hashlib.sha256(d1_output(item).read_bytes()).hexdigest()})
+                xml = dragon2_run.render_xml(dragon2_run.check_spec(s))
+                self.assertIn(hashlib.sha256(xml.encode()).hexdigest(),
+                              [i["sha256"] for i in ext["input_manifest"] if i["path"] == f"D1_{item}.xml"])
+                self.assertTrue(any("cd588707fe03c76f19bda1b8092e136dcbe3fe90" in t["version"] for t in ext["tools"]
+                                    if t["name"] == "DRAGON2"))
+                self.assertFalse(mentions_path(json.dumps(rec), Path.home()), item)
+
+    def test_translator_records_what_dragon2_cannot_express(self):
+        s = d1_spec("reacceleration")
+        self.assertEqual(s["flags"]["reacc_flag"], 1)
+        self.assertAlmostEqual(s["reacceleration"]["vA_kms"], 50.0 * math.sqrt(0.1 / 4.0), places=5)
+        self.assertTrue(any("thin disc" in x for x in s["substitutes"]))
+        self.assertEqual(d1_spec("losses")["flags"]["eloss_flag"], 1)
+        self.assertEqual(d1_spec("convection")["convection"], {"v0_kms": 10.0, "dvdz_kmskpc": 0.0})
+        for item in D1_ITEMS:
+            self.assertTrue(any("BronfFerr" in x for x in d1_spec(item)["substitutes"]))
+        with self.assertRaises(dragon2_run.SpecError):
+            t = json.loads((FIX / "specs" / "harmonized-v1-isotopic.json").read_text(encoding="utf-8"))["transport"]
+            t = dict(t, diffusion=dict(t["diffusion"], breaks=[{"kind": "low", "R_break_gv": 5.0}]))
+            dragon2_run.spec_from_transport(t, "x", {"6012->5011": 1.0}, z_range=(4, 8), ekn_range_gev=(0.1, 10.0))
+
+    def test_decay_half_life_is_nubase(self):
+        from core.constants.physical import half_life_seconds
+        self.assertEqual(d1_spec("decay")["half_lives_s"]["4010"], half_life_seconds("Be-10")["value"])
+        self.assertNotIn("half_lives_s", d1_spec("isotopic"))
+
+    @unittest.skipUnless(HAVE_NUMPY, "numpy and scipy are needed")
+    def test_closed_form_comparison_matches_the_record(self):  # D1-1
+        got = d1_comparison()
+        rec = json.loads((D1_FIX / "d1-item-results.json").read_text(encoding="utf-8"))
+        self.assertEqual(rec["tolerance"], D1_TOLERANCE)
+        for item, rows in got.items():
+            for obs, row in rows.items():
+                with self.subTest(item=item, observable=obs):
+                    want = rec["items"][item][obs]
+                    for key in ("dragon2", "closed_form", "dragon2_over_closed", "item_effect_ratio"):
+                        for a, b in zip(row[key], want[key]):
+                            self.assertTrue(math.isclose(a, b, rel_tol=1e-9), (key, a, b))
+                    self.assertEqual(row["passed"], want["passed"])
+                    self.assertEqual(row["passed"], row["max_abs_deviation"] <= D1_TOLERANCE)
+
+    def test_ratio_of_bin_integrals(self):
+        """P2: a ratio of bin integrals, not the bin average of the ratio; P3: isotopes at equal rigidity."""
+        e = [0.05 * 1.2 ** i for i in range(80)]
+        cols = {"NUC_6012": [x ** -2.7 / 12 for x in e], "NUC_5011": [0.3 * x ** -3.2 / 11 for x in e]}
+        got = conv.ratio_of_bin_integrals(e, cols, ["NUC_5011"], ["NUC_6012"], [1.0, 10.0], "ekn")[0]
+        want = (0.3 * (1.0 ** -2.2 - 10.0 ** -2.2) / 2.2) / ((1.0 ** -1.7 - 10.0 ** -1.7) / 1.7)
+        self.assertAlmostEqual(got / want, 1.0, places=12)
+        r = conv.ratio_of_bin_integrals(e, cols, ["NUC_5011"], ["NUC_6012"], [2.0, 20.0], "rigidity")[0]
+        lo_b, hi_b = conv.ekn_from_rigidity(2.0, 5, 11), conv.ekn_from_rigidity(20.0, 5, 11)
+        lo_c, hi_c = conv.ekn_from_rigidity(2.0, 6, 12), conv.ekn_from_rigidity(20.0, 6, 12)
+        num = 0.3 * (lo_b ** -2.2 - hi_b ** -2.2) / 2.2
+        den = (lo_c ** -1.7 - hi_c ** -1.7) / 1.7
+        self.assertAlmostEqual(r / (num / den), 1.0, places=12)
+        with self.assertRaises(conv.ConvertError):
+            conv.ratio_of_bin_integrals(e, cols, ["NUC_5011"], ["NUC_6012"], [0.01, 1.0], "ekn")
+
+
+# ------------------------------------------------------------------ D1 provider entrypoint (cr-provider/1)
+
+import dragon2_provider  # noqa: E402
+from tests.core.provider_conformance import ProviderConformance  # noqa: E402
+
+PROVIDER = ADAPTER / "assets" / "dragon2_provider.py"
+PROVIDER_REQUEST = {
+    "protocol": "cr-provider/1", "provider": "dragon2", "provider_version": dragon2_provider.declaration()["version"],
+    "points": [{"D0_cm2_s": 3.0e28, "delta": 0.5, "L_kpc": 4.0}],
+    "observables": [{"id": "B/C", "axis": "ekn", "unit": "GeV/n", "bins": [[10.0, 31.6227766017], [31.6227766017, 100.0]]}],
+    "want": ["lis"], "seed": None}
+
+
+def live_dragon2_reason():
+    if os.environ.get("HEP_DRAGON2_LIVE_TEST") != "1":
+        return "live DRAGON2 runs: set HEP_DRAGON2_LIVE_TEST=1, HEP_DRAGON2_BIN and HEP_DRAGON2_DATA"
+    if not (os.environ.get("HEP_DRAGON2_BIN") and Path(os.environ["HEP_DRAGON2_BIN"]).is_file()
+            and os.environ.get("HEP_DRAGON2_DATA") and Path(os.environ["HEP_DRAGON2_DATA"]).is_dir()):
+        return "DRAGON2 not installed (HEP_DRAGON2_BIN or HEP_DRAGON2_DATA unset or missing)"
+    return None
+
+
+class Dragon2ProviderConformance(ProviderConformance, unittest.TestCase):
+    """D1-PRV-1 and D1-PRV-2: C1's conformance mixin on the DRAGON2 provider (about five DRAGON2 runs of under a
+    minute each on E2; skipped unless the live test is asked for and DRAGON2 is installed)."""
+    PROVIDER_ID = "dragon2"
+    REQUEST = PROVIDER_REQUEST
+    VOCAB_PROFILES = (PROFILE / "profile.json",)
+    TIMEOUT_S = 3600.0
+
+    def unavailable_reason(self):
+        return live_dragon2_reason()
+
+
+class Dragon2ProviderOffline(unittest.TestCase):
+    """The provider's parts that need no DRAGON2: its built-in transport and cross sections equal the fixtures they
+    stand for, the run ranges cover every bin, a point is written into its block, a missing DRAGON2 fails the point
+    with provider-error (R4) and another production set is refused."""
+
+    def test_defaults_equal_their_sources(self):
+        iso = json.loads((FIX / "specs" / "harmonized-v1-isotopic.json").read_text(encoding="utf-8"))
+        self.assertEqual(dragon2_provider.DEFAULT_TRANSPORT, iso["transport"])
+        self.assertEqual(dragon2_provider.ILLUSTRATIVE_CHANNELS_MB,
+                         json.loads((D1_FIX / "channels-illustrative-decay.json").read_text(encoding="utf-8")))
+        xs = json.loads((PROFILE / "models" / "xs-illustrative-decay.json").read_text(encoding="utf-8"))
+        uid = {"C": 6012, "O": 8016, **{k: v for k, v in D1_SECONDARIES.items()}}
+        self.assertEqual({f"{uid[a]}->{uid[b]}": v for k, v in xs["production_mb"].items() for a, b in [k.split("->")]},
+                         dragon2_provider.ILLUSTRATIVE_CHANNELS_MB)
+
+    def test_declaration_and_ranges(self):
+        decl = dragon2_provider.declaration()
+        self.assertEqual(decl["id"], "dragon2")
+        self.assertEqual(decl["version"], json.loads((ADAPTER / "adapter.json").read_text())["version"])
+        self.assertEqual(set(decl["observables"]), set(dragon2_provider.OBSERVABLES))
+        self.assertEqual(set(decl["domain"]), set(dragon2_provider.POINT_TARGETS))
+        zr, er = dragon2_provider.run_ranges([{"id": "B/C", "axis": "rigidity", "unit": "GV", "bins": [[2.0, 1000.0]]},
+                                              {"id": "10Be/9Be", "axis": "ekn", "unit": "GeV/n", "bins": [[0.05, 10.0]]}])
+        self.assertEqual(zr, (4, 8))
+        self.assertLessEqual(er[0], 0.05)
+        self.assertGreaterEqual(er[1], conv.ekn_from_rigidity(1000.0, 6, 12))
+        t = dragon2_provider.transport_for({}, {"V_c_kms": 5.0, "L_kpc": 6.0})
+        self.assertEqual((t["convection"]["V_c_kms"], t["geometry"]["L_kpc"]), (5.0, 6.0))
+        with self.assertRaisesRegex(ValueError, "ILLUSTRATIVE isotopic"):
+            other = dict(dragon2_provider.DEFAULT_TRANSPORT, cross_sections={"production_set": "Evoli2019"})
+            dragon2_provider.transport_for({"transport": other}, {})
+
+    def test_missing_dragon2_is_a_failed_point(self):
+        env = {k: v for k, v in os.environ.items() if k not in ("HEP_DRAGON2_BIN", "HEP_DRAGON2_DATA")}
+        env["PYTHONDONTWRITEBYTECODE"] = "1"
+        with tempfile.TemporaryDirectory() as td:
+            req, resp = Path(td) / "req.json", Path(td) / "resp.json"
+            req.write_text(json.dumps(PROVIDER_REQUEST))
+            proc = subprocess.run([sys.executable, str(PROVIDER), "--request", str(req), "--response", str(resp)],
+                                  capture_output=True, text=True, timeout=120, env=env)
+            self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
+            doc = json.loads(resp.read_text())
+            self.assertEqual(doc["status"], "failed")
+            self.assertEqual(doc["results"][0]["reason"], "provider-error")
+            self.assertIn("HEP_DRAGON2_BIN", doc["results"][0]["detail"])
+            self.assertNotIn("predictions", doc["results"][0])
+
 
 @unittest.skipUnless(os.environ.get("HEP_DRAGON2_LIVE_TEST") == "1", "live DRAGON2 run: set HEP_DRAGON2_LIVE_TEST=1, "
                      "HEP_DRAGON2_BIN and HEP_DRAGON2_DATA")

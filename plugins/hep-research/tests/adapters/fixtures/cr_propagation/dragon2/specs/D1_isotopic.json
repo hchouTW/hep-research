@@ -1,0 +1,122 @@
+{
+ "name": "D1_isotopic",
+ "grid": {
+  "Rmax_kpc": 20.0,
+  "DimR": 41,
+  "L_kpc": 4.0,
+  "dz_kpc": 0.02,
+  "observer_kpc": [
+   8.3,
+   0.0,
+   0.0
+  ],
+  "Ekmin_GeV": 0.04,
+  "Ekmax_GeV": 2000.0,
+  "Ekfactor": 1.2,
+  "Zmin": 4,
+  "Zmax": 8
+ },
+ "diffusion": {
+  "D0_1e28": 3.0,
+  "DiffRefRig_GV": 1.0,
+  "delta": 0.5,
+  "etaT": 1.0
+ },
+ "galaxy": {
+  "gas": "BronfFerr",
+  "sources": {
+   "type": "OneRing",
+   "RingMin": 0,
+   "RingMax": 20.0
+  }
+ },
+ "flags": {
+  "diff_flag": 1,
+  "conv_flag": 0,
+  "reacc_flag": 0,
+  "eloss_flag": 0,
+  "decay_flag": 0,
+  "spall_flag": 1
+ },
+ "production_table": {
+  "channels_mb": {
+   "6012->4007": 10.0,
+   "6012->4009": 6.0,
+   "6012->4010": 4.0,
+   "6012->5010": 20.0,
+   "6012->5011": 50.0,
+   "8016->4007": 10.0,
+   "8016->4009": 5.0,
+   "8016->4010": 2.0,
+   "8016->5010": 10.0,
+   "8016->5011": 25.0
+  },
+  "grid_channel": "8016->6012"
+ },
+ "injection_gamma": 2.3,
+ "substitutes": [
+  "geometry.disc_halfwidth_pc 100: DRAGON2 has no thin-disc parameter; its gas has its own scale heights (BronfFerr: H2 59 pc, HI 115 pc at the observer)",
+  "gas 'uniform, n_H = 1 cm^-3': BronfFerr (analytic HI and H2, HII 0); DRAGON2's 'Uniform' gas is not implemented in cd588707 (gas.cc writes -1)",
+  "gas He_to_H_number 0.1: DRAGON2's fixed helium (He/H 0.11, constants.h) with its He_to_H_CS_ratio scaling of every production cross section",
+  "sources.spatial: OneRing, uniform in R from 0 to the radial boundary (DRAGON2's z profile of the ring)",
+  "inelastic cross sections: DRAGON2's own parametrization (not replaceable through its data files)"
+ ],
+ "transport": {
+  "geometry": {
+   "kind": "cylinder-2d",
+   "L_kpc": 4.0,
+   "radius_kpc": 20.0,
+   "disc_halfwidth_pc": 100
+  },
+  "diffusion": {
+   "form": "beta^eta (R/R0)^delta with smooth breaks",
+   "D0_cm2_s": 3e+28,
+   "R0_gv": 1.0,
+   "eta": 1.0,
+   "delta": 0.5,
+   "breaks": []
+  },
+  "reacceleration": {
+   "V_A_kms": 0.0,
+   "zone": "thin-disc",
+   "relation": "Seo-Ptuskin 1994",
+   "w": 1.0
+  },
+  "convection": {
+   "V_c_kms": 0.0,
+   "dVc_dz_kms_per_kpc": 0.0
+  },
+  "losses": [],
+  "decay": {
+   "enabled": false,
+   "lorentz_dilation": true,
+   "ec_treatment": "fully-stripped"
+  },
+  "gas": {
+   "model": "uniform, n_H = 1 cm^-3",
+   "He_to_H_number": 0.1
+  },
+  "sources": {
+   "spatial": "not fixed by harmonized-v1; each code records its choice",
+   "injection": [
+    {
+     "species_group": "all primaries",
+     "gamma": 2.3,
+     "breaks": []
+    }
+   ],
+   "abundances": "fixed by the parent list of theory:cr-secondary-ratio"
+  },
+  "cross_sections": {
+   "production_set": "theory:cr-secondary-ratio models/xs-illustrative-decay.json (ILLUSTRATIVE, isotopic)",
+   "inelastic_set": "theory:cr-secondary-ratio models/xs-illustrative-decay.json (ILLUSTRATIVE, isotopic)",
+   "ghost_threshold": "off: ghost nuclei and tertiary chains off on both sides"
+  },
+  "species": {
+   "network_top": "O-16",
+   "isotopic": true
+  },
+  "family": "SLIM",
+  "free": []
+ }
+}
