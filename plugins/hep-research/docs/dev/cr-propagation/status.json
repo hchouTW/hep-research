@@ -95,18 +95,18 @@
    ]
   },
   "C1": {
-   "state": "verifying",
+   "state": "merged",
    "dispatches": 1,
    "rework_rounds": 1,
    "branch": "worktree-crprop-c1",
    "base": "ef37d970",
    "head": "2d984725",
-   "merge_commit": null,
+   "merge_commit": "099d1d22",
    "worker_report": "PARTIAL: all deliverables; CONTRACTS_VERSION bump left to A2 (13 fixture/example pins outside C1 files). Open: closed-form provider gives bin-averaged ratio, not ratio of bin integrals (P2) -> C2 must handle; profile README/index not updated",
    "verifier_report": "round 0 REWORK (inherited conformance cache); round 1 PASS (2026-10-28, Sonnet): cache per class + both-order tests, theory_spec_ref in runner key; ALL-3 full 33/33, relocation only the 2 known geant4 path-with-spaces failures; ALL-7 not-run",
    "missing_capabilities": [],
    "notes": [
-    "PASS; merge held until A2 merges (merge_after A2)"
+    "merged 099d1d22 after A2; post-merge static exit 0, acceptance ok, provider/mixin/degeneracy/grid_fit tests 69 OK; CONTRACTS 3.14.0 (A2), CORE 1.2.0 (C1)"
    ]
   },
   "B2": {
@@ -118,7 +118,7 @@
    "head": "b2cdcf49",
    "merge_commit": null,
    "worker_report": "DONE (dispatch 2): B2-1..B2-3 pass; closed forms re-derived, no code change; full run 33/33 on 236a374a; relocation not run (A1.4/A1.5); open: R0_GV/h_kpc kept beside canonical V_c_kms; profile version not bumped",
-   "verifier_report": null,
+   "verifier_report": "PASS (2026-10-28, Opus): B2-1..B2-3 pass; independent derivation + own finite-volume solver agree to 2e-8; advisories: stale function name in derive script :164, resonant case refused, R0_GV/h_kpc kept (allowed), profile version not bumped",
    "missing_capabilities": [],
    "notes": [
     "verifier dispatched 2026-10-28 (Opus, A1.5 brief)"
@@ -426,6 +426,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "A1 merged (5d5fd918); A1-6 schema test passes after A2"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "C1 merged (099d1d22); B2 verifier PASS"
   }
  ],
  "env": {
