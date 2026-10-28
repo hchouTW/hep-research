@@ -56,7 +56,9 @@ it is positive) on a box of +-k sigma around the expansion point, built from pro
 scrambled Sobol design points (1 to 6 coordinates, at least twice as many points as terms), and refused unless its largest error at random provider points in the box is below tolerance_sigma of the data sigma in
 every bin. Its per-bin error enters the toy and posterior covariance as an uncorrelated component (P10); a fit that
 leaves the box is a failed toy, a chain step outside it is rejected and counted. The reported fits never use it.
-For the family calibration, layout "union" (default) builds one model on the box spanning every family's best fit
+Kind "provider" uses no response model: toys and families evaluate the provider itself (meant for a provider that is
+already a validated emulator, whose error the caller adds to the data covariance, P10); a point it refuses as out of
+its domain fails that toy. For the family calibration, layout "union" (default) builds one model on the box spanning every family's best fit
 +- k sigma; layout "joint" the same box with k times the largest sigma of any family around every best fit (so a
 family's fit to another's null, which sits near that family's best fit, has its margin without a rebuild); layout
 "per-center" builds one model per best fit (+- k times the largest sigma), each validated on its own, and fits each
@@ -92,7 +94,7 @@ Input (fit --input CONFIG.json; relative paths are read from the config's folder
   "degeneracy_scan": {"family", <degeneracy.py scan keys>}, "theory_spec": "base-theory-spec.json",
   "intervals": [names]   (profile delta chi2 = 1 intervals with the provider; an end on a domain bound is kind "bound"),
   "covariance_alternatives": {"family", "dataset", "model": {build_covariance sources}, "source", "lengths": [...]},
-  "response_model": {"kind": "tensor" | "polynomial", "nodes": 7, "degree": 4, "design_points": 128,
+  "response_model": {"kind": "tensor" | "polynomial" | "provider", "nodes": 7, "degree": 4, "design_points": 128,
                      "half_width_sigma": 5, "validation_points": 12, "tolerance_sigma": 0.02,
                      "layout": "union" | "joint" | "per-center"},
   "provider_requests": "per-dataset" (default) | "per-point" (one request and one provider run per point for every
@@ -1060,6 +1062,34 @@ class PolynomialResponseModel(ResponseModel):
         return rec
 
 
+class ProviderResponse(ResponseModel):
+    """kind "provider": no response model; the toys and families evaluate the provider itself (for a provider that is
+    already a validated emulator, whose error enters the data covariance outside this script, P10). The box only
+    bounds the toy fits; the error component is zero because nothing is approximated here."""
+
+    def __init__(self, model, names, scales, lo, hi, fixed):
+        self.model, self.names, self.scales, self.fixed = model, list(names), list(scales), dict(fixed)
+        self.lo, self.hi, self.nodes = np.asarray(lo, dtype=float), np.asarray(hi, dtype=float), None
+        self.evaluations = 0
+        self.error = {ds.name: np.zeros(len(ds.y)) for ds in model.datasets}
+        self.validation: dict = {}
+
+    def components(self, t) -> dict:
+        return self.model.ev.components(self.model.values(self.names, self.scales, np.asarray(t, dtype=float),
+                                                          self.fixed))
+
+    def validate(self, n_points, tolerance, seed) -> dict:
+        self.validation = {"points": 0, "seed": seed, "max_error_over_sigma": 0.0, "tolerance": tolerance,
+                           "passed": True, "note": "no response model: the provider itself is evaluated"}
+        return self.validation
+
+    def record(self) -> dict:
+        rec = super().record()
+        rec.pop("nodes_per_axis", None)
+        rec["kind"] = "provider (no response model)"
+        return rec
+
+
 def build_response_model(model, names, scales, centers, sigmas, fixed, rm_cfg, bounds, seed):
     """Box = union over centers of +-k sigma, clipped to the provider domain; validated; FitRefused above tolerance."""
     k = rm_cfg["half_width_sigma"]
@@ -1067,7 +1097,9 @@ def build_response_model(model, names, scales, centers, sigmas, fixed, rm_cfg, b
     hi = np.max([c + k * s for c, s in zip(centers, sigmas)], axis=0)
     lo = np.maximum(lo, [b[0] for b in bounds])
     hi = np.minimum(hi, [b[1] for b in bounds])
-    if rm_cfg["kind"] == "polynomial":
+    if rm_cfg["kind"] == "provider":
+        rm = ProviderResponse(model, names, scales, lo, hi, fixed)
+    elif rm_cfg["kind"] == "polynomial":
         rm = PolynomialResponseModel(model, names, scales, lo, hi, fixed, rm_cfg["degree"], rm_cfg["design_points"],
                                      seed + 1)
     else:
@@ -1116,7 +1148,16 @@ class SurrogateFit:
         return float(r @ r)
 
     def fit(self, ys, aux, start, opt, constraint=None):
-        """Minimize; constraint = ("index", i, value) or ("direction", v, z_ref). Returns (chi2, z, ok, reason)."""
+        """Minimize; constraint = ("index", i, value) or ("direction", v, z_ref). Returns (chi2, z, ok, reason).
+        A provider evaluated directly (kind "provider") that refuses a point out of its domain fails the fit."""
+        try:
+            return self._fit(ys, aux, start, opt, constraint)
+        except FitRefused as exc:
+            if exc.reason != "out-of-domain":
+                raise
+            return float("nan"), np.asarray(start, dtype=float), False, "provider-out-of-domain"
+
+    def _fit(self, ys, aux, start, opt, constraint=None):
         start = np.clip(np.asarray(start, dtype=float), self.lo, self.hi)
         to_z, w0, lo, hi = _constrained_map(constraint, start, self.lo, self.hi)
         rng = np.random.default_rng(opt["seed"])
@@ -1738,8 +1779,8 @@ def _rm_cfg(cfg) -> dict:
     if r.get("layout", "union") not in ("union", "joint", "per-center"):
         raise FitInputError("response_model.layout must be 'union', 'joint' or 'per-center'")
     kind = r.get("kind", "tensor")
-    if kind not in ("tensor", "polynomial"):
-        raise FitInputError("response_model.kind must be 'tensor' or 'polynomial'")
+    if kind not in ("tensor", "polynomial", "provider"):
+        raise FitInputError("response_model.kind must be 'tensor', 'polynomial' or 'provider'")
     return {"kind": kind, "degree": _int(r.get("degree", 4), "response_model.degree", 1, 8),
             "design_points": _int(r.get("design_points", 128), "response_model.design_points", 4, 4096),
             "nodes": _int(r.get("nodes", 7), "response_model.nodes", 3, 15),

@@ -340,6 +340,21 @@ class PropagationFit(unittest.TestCase):
         self.assertEqual((cal["response_model"]["layout"], len(cal["response_model"]["box_passes"])), ("joint", 1))
         self.assertTrue(cal["response_model"]["validation"]["passed"])
 
+    def test_provider_kind_evaluates_the_provider_in_the_toys(self):
+        fams = [{"name": "diffusion", "free": ["D0_cm2_s", "delta"], "fixed": {"L_kpc": 4.0}},
+                {"name": "stiff", "free": ["D0_cm2_s"], "fixed": {"L_kpc": 4.0, "delta": 0.45}}]
+        cfg = self.config(families=fams, response_model={"kind": "provider", "layout": "joint",
+                                                         "half_width_sigma": 4},
+                          family_toys={"n": 20, "seed": 6, "alpha": 0.05})
+        res = self.fit(cfg, max_evaluations=100000)
+        cal = res["family_calibration"]
+        self.assertEqual(cal["status"], "ok", cal.get("detail"))
+        rm = cal["response_model"]
+        self.assertEqual((rm["kind"], rm["provider_evaluations"]), ("provider (no response model)", 0))
+        self.assertEqual(rm["validation"]["max_error_over_sigma"], 0.0)
+        self.assertTrue(all(len(e["rows"]) == 20 for e in cal["families"]))
+        self.assertGreater(res["provider_evaluations"]["points_sent"], 100)   # the toys called the provider
+
     def test_per_point_requests_send_one_request_for_every_dataset(self):
         import numpy as np
 
