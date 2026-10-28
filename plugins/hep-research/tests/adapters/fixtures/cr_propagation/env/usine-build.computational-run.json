@@ -1,0 +1,160 @@
+{
+ "contract_version": "3.14.0",
+ "artifact_id": "crprop-env-usine-v3.5-fb53006d",
+ "artifact_type": "computational-run",
+ "objective": "ENV work package of cr-propagation r4 (dispatch 2, decision A1.1): clone USINE V3.5 (gitlab.com/dmaurin/USINE, tag object 7197ddc1, commit fb53006d), build it against Homebrew ROOT 6.38.04 for environment E-crprop, and smoke-run the shipped init.TEST.par local-flux example",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.42.0",
+  "contracts": "3.14.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-computing",
+  "created": "2026-10-28",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "status": [
+  "unvalidated"
+ ],
+ "extension": {
+  "input_manifest": [
+   {
+    "path": "<TOOL_HOME>/bin/usine",
+    "sha256": "1d444720afec6ebd2efde8d275d5d950f39edee4f53e7c3756fba8ce05a62d25"
+   },
+   {
+    "path": "<TOOL_HOME>/bin/usine_pbar",
+    "sha256": "a350254c694990f074a13a261764e591c0b331deb1b86f710a27f979e08a658c"
+   },
+   {
+    "path": "<TOOL_HOME>/lib/libTUsine.dylib",
+    "sha256": "09fedcbba3ebb1fa649096a3647233f4197145510719fbde0d62163643149dc4"
+   },
+   {
+    "path": "<TOOL_HOME>/lib/libfparser.dylib",
+    "sha256": "5c05532574cdcbe9deff6ba20e4d029805c2692233a28d89d4cf4f6e423f9fb5"
+   }
+  ],
+  "tools": [
+   {
+    "name": "USINE",
+    "version": "V3.5 (git tag V3.5, tag object 7197ddc10ce5a3ccb332b1832f6e3c3fff7dcd06, commit fb53006db41d1a640bf1b5af1a4b0f899ca59673; banner 'V3.5, git_ID=V3.5'); licence GPL-2.0",
+    "source": "https://gitlab.com/dmaurin/USINE.git"
+   },
+   {
+    "name": "fparser",
+    "version": "shipped in USINE FunctionParser/ (built as libfparser)"
+   },
+   {
+    "name": "Apple clang (/usr/bin/c++)",
+    "version": "21.0.0 (clang-2100.0.123.102), Xcode SDK; flags -std=c++0x -O0 -std=c++14 -std=gnu++17"
+   },
+   {
+    "name": "ROOT",
+    "version": "6.38.04 (Homebrew 6.38.04_1; C++17, runtime_cxxmodules, mathmore, minuit2 via libMathCore)"
+   },
+   {
+    "name": "cmake",
+    "version": "4.3.2"
+   },
+   {
+    "name": "GSL",
+    "version": "2.8 (Homebrew; used by ROOT MathMore, not linked by USINE directly)"
+   },
+   {
+    "name": "macOS",
+    "version": "27.2 (26B123), Darwin 27.2.0, arm64"
+   },
+   {
+    "name": "python",
+    "version": "3.13.2"
+   },
+   {
+    "name": "numpy",
+    "version": "2.5.3"
+   },
+   {
+    "name": "scipy",
+    "version": "1.18.1"
+   }
+  ],
+  "commands": [
+   "git clone --depth 1 --branch V3.5 https://gitlab.com/dmaurin/USINE.git <TOOL_HOME>  # HEAD fb53006d, refs/tags/V3.5 = 7197ddc1 (type tag)",
+   "cd <TOOL_HOME>/build && ROOTSYS=<BUILD_ROOT>/usine-shim cmake ../ -DCMAKE_POLICY_VERSION_MINIMUM=3.5 -DCMAKE_CXX_STANDARD=17 -Wno-dev  # exit 0",
+   "env -u ROOT_INCLUDE_PATH make -j4  # first attempt with ROOT_INCLUDE_PATH set: rootcling exit 139; second: exit 0 in 59 s",
+   "USINE=<TOOL_HOME> <TOOL_HOME>/bin/usine -l inputs/init.TEST.par <RUN_DIR>/env/usine/smoke-l \"B/C,B,C,O:KEKN:0.,0.5,1.;B/C:kR:0.79\" 2.8 1 1 0  # 14 .out files, results.root, 7 plot macros; exit 1 (usine always returns 1)",
+   "same command with ROOT_INCLUDE_PATH unset -> <RUN_DIR>/env/usine/smoke-l: identical .out content (timestamp line excluded)",
+   "USINE=<TOOL_HOME> <TOOL_HOME>/bin/usine -tUSINE  # USINE's installation test against usine.tests/*.ref",
+   "python3 skills/hep-computing/scripts/environment_manifest.py record --packages numpy,scipy --project <TOOL_HOME> --inputs <TOOL_HOME>/bin/usine <TOOL_HOME>/bin/usine_pbar <TOOL_HOME>/lib/libTUsine.dylib <TOOL_HOME>/lib/libfparser.dylib --out <RUN_DIR>/env/usine/usine.environment.e2venv.raw.json"
+  ],
+  "environment": {
+   "python": "3.13.2",
+   "implementation": "CPython",
+   "executable": "<VENV>/bin/python",
+   "platform": "macOS-27.2-arm64-arm-64bit-Mach-O",
+   "machine": "arm64",
+   "system": {
+    "os": "Darwin",
+    "arch": "arm64",
+    "libc": "macOS 27.2",
+    "kernel": "27.2.0"
+   },
+   "origin": "venv",
+   "variables": {
+    "ROOTSYS": "/opt/homebrew/Cellar/root/6.38.04_1",
+    "CONDA_PREFIX": "<CONDA_HOME>",
+    "CONDA_DEFAULT_ENV": "base"
+   },
+   "packages": {
+    "numpy": "2.5.3",
+    "scipy": "1.18.1"
+   },
+   "project": {
+    "path": "<TOOL_HOME>",
+    "commit": "fb53006db41d1a640bf1b5af1a4b0f899ca59673",
+    "dirty": true
+   },
+   "label": "E-crprop",
+   "build_notes": "Built per USINE's README/doc/install.rst (out-of-source cmake in <TOOL_HOME>/build, make -j4; products go to <TOOL_HOME>/bin and <TOOL_HOME>/lib) with no source change. Three host adaptations, none in the source tree: (1) CMakeLists.txt requires cmake 2.8, so -DCMAKE_POLICY_VERSION_MINIMUM=3.5 for cmake 4.3.2; (2) FindROOT.cmake parses only the old 'X.YY/ZZ' version form, so ROOTSYS points to a root-config shim (<BUILD_ROOT>/usine-shim/bin/root-config, sha256 6b94a4dea679162554582ed46a6b21ec4f7557d91fcee7a07ea392cbc2b1a0af) that prints 6.38/04 for --version and passes every other option to the Homebrew root-config; (3) -DCMAKE_CXX_STANDARD=17 adds -std=gnu++17 after USINE's -std=c++14 (ROOT 6.38 needs C++17). The host shell sets ROOT_INCLUDE_PATH to the Xcode 26.4 SDK libc++ directory; with it rootcling (dictionary step) mixes those headers with the CommandLineTools MacOSX26.sdk (26.2) compiled into libCling and segfaults (make-1.log, exit 139), so the build runs with ROOT_INCLUDE_PATH unset. At run time keep the host ROOT_INCLUDE_PATH: without it the ROOT interpreter started by TApplication cannot load the std module ('__configuration/experimental.h' not found) and prints 13 'cling::runtime::gCling unresolved' warnings; the smoke outputs are identical either way. -O0 (USINE's default flags). usine main() returns 1 on every path, so exit status 1 is normal. dirty=true: untracked USINE test outputs (usine.tests/*.fail); build/, bin/, lib/, src/usine_Dict.* are git-ignored by USINE."
+  },
+  "seeds": {
+   "note": "not applicable: the -l local-flux run of init.TEST.par is deterministic (two runs give identical outputs)"
+  },
+  "tolerances": {
+   "note": "smoke run: existence and run-to-run identity of the outputs only; installation test: usine -tUSINE (17 min 51 s, -O0 build): 42 of 46 reference tests pass; 4 differ from usine.tests/*.ref without changing a result: class_TUDatime (local time zone UTC+8 in printed dates), usine_i_options (label text of two plot axes and last-digit differences), usine_e_options (last-digit and roundoff differences: values below 1e-12 differ by at most 6.5e-14, and one tail point at 1.2e-10, about 1e-9 of the peak, by 2 percent), propag_minimisation (same chi2_min and best fit; covariance entries differ by at most 1.5e-5 relative; the reference run also stops at Minuit2's call limit). doc/install.rst states that last digits differ on macOS"
+  },
+  "resources": {
+   "build_wall_s": 59,
+   "smoke_wall_s": 41,
+   "parallel_jobs": 4
+  },
+  "exit_status": 0,
+  "output_hashes": {
+   "bin/usine": "1d444720afec6ebd2efde8d275d5d950f39edee4f53e7c3756fba8ce05a62d25",
+   "bin/usine_pbar": "a350254c694990f074a13a261764e591c0b331deb1b86f710a27f979e08a658c",
+   "lib/libTUsine.dylib": "09fedcbba3ebb1fa649096a3647233f4197145510719fbde0d62163643149dc4",
+   "lib/libfparser.dylib": "5c05532574cdcbe9deff6ba20e4d029805c2692233a28d89d4cf4f6e423f9fb5",
+   "smoke-l/local_fluxes_B_Ekn_2_800_Model1DKisoVc_SolMod0DFF_phi0_00GV.out (without '# File generated' line)": "04ea4c24333c9462644f42f9652c7cb19cdacbfb80311bc6efe40f5b7b46b03a",
+   "smoke-l/local_fluxes_B_Ekn_2_800_Model1DKisoVc_SolMod0DFF_phi0_500GV.out (without '# File generated' line)": "7e1269f159ff24a12efe8a89a2ffdb86b23881a86cd2475f613e1aedb0e3e004",
+   "smoke-l/local_fluxes_B_Ekn_2_800_Model1DKisoVc_SolMod0DFF_phi1_00GV.out (without '# File generated' line)": "4fc2c1959280e64b324af6869dfd3b0c8fb89c2630d076bf547980cda047ce5c",
+   "smoke-l/local_fluxes_BC_Ekn_2_800_Model1DKisoVc_SolMod0DFF_phi0_00GV.out (without '# File generated' line)": "6aac9ff11d6422a5a3e8763de83a5038fd61227852e75253c2f36910051056b7",
+   "smoke-l/local_fluxes_BC_Ekn_2_800_Model1DKisoVc_SolMod0DFF_phi0_500GV.out (without '# File generated' line)": "24e64d9c615d8b7b554f5aa5aaca26135af4c6879e6a272e210e3363ac820169",
+   "smoke-l/local_fluxes_BC_Ekn_2_800_Model1DKisoVc_SolMod0DFF_phi1_00GV.out (without '# File generated' line)": "d74a285b7fa58710d141947922cb7bebb461a62b205bec801a7ab6f753c2bd2c",
+   "smoke-l/local_fluxes_BC_R_2_800_Model1DKisoVc_SolMod0DFF_phi0_790GV.out (without '# File generated' line)": "1cde4da7e31dd65ee90b4df9ad48f7a17b882811224ceaf1caceaa3a07039739",
+   "smoke-l/local_fluxes_C_Ekn_2_800_Model1DKisoVc_SolMod0DFF_phi0_00GV.out (without '# File generated' line)": "5ab42e223b6e6b1914abc7407a9a9a35207fa6f71bd91be99468bb4b14870ed5",
+   "smoke-l/local_fluxes_C_Ekn_2_800_Model1DKisoVc_SolMod0DFF_phi0_500GV.out (without '# File generated' line)": "43392c77602631655c64dda59745e7521aa9ddab6761c0e27975d6f8df0faf27",
+   "smoke-l/local_fluxes_C_Ekn_2_800_Model1DKisoVc_SolMod0DFF_phi1_00GV.out (without '# File generated' line)": "4b3e6aa9e25b68d7e57d7f83073a7ee92bd504bae9a326f1773b4c9ff3f97f23",
+   "smoke-l/local_fluxes_O_Ekn_2_800_Model1DKisoVc_SolMod0DFF_phi0_00GV.out (without '# File generated' line)": "0743618485baa0261b3fc2cfbcb2c4f799b657db6eaf8e0bb78f985c3871fcb2",
+   "smoke-l/local_fluxes_O_Ekn_2_800_Model1DKisoVc_SolMod0DFF_phi0_500GV.out (without '# File generated' line)": "faff6393806e410cfbb810cb7352c1389a81c88dd9e965746685b2f7b0f1484c",
+   "smoke-l/local_fluxes_O_Ekn_2_800_Model1DKisoVc_SolMod0DFF_phi1_00GV.out (without '# File generated' line)": "ced50ec76bb069a24324f2899e381d5dc9e2065cf257392e37d1b2ccf5f98469",
+   "smoke-l/model_vals_pars.out (without '# File generated' line)": "8451690bc36c5d41016abbd350b3e325cb6f70d556e5829f6acc30048a42be07"
+  }
+ }
+}
