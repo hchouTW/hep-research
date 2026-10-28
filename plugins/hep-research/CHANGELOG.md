@@ -135,11 +135,12 @@ Software checks establish contract consistency only, not physical validity.
   NUBASE2020 half-lives written into a copy of `isotope_list.dat` (DRAGON2 ships 10Be at 1.51 Myr) and a single
   injection slope. `dragon2_to_prediction.py` gains ratios of bin integrals on ekn or rigidity bins (r3 P2, P3). New
   `dragon2_provider.py` (cr-provider/1, declared in `adapter.json`; not decomposable; runs kept under
-  `HEP_DRAGON2_RUN_DIR` when set). Five item runs from new `harmonized-v1-<item>.json` files recorded under
-  `tests/adapters/fixtures/cr_propagation/dragon2/`; convection and decay compared with the B2 closed form,
-  reacceleration and losses with USINE (B1): D1-1 passes only for 10Be/9Be with convection and fails elsewhere, with
-  attribution (B/C offsets already in the item-off run; thin-disc reference for decay; V_A zone and D_pp conventions;
-  DRAGON2's energy-loss run unphysical, an open issue) (VALIDATION CRPROP-D1).
+  `HEP_DRAGON2_RUN_DIR` when set). Six runs from new `harmonized-v1-<item>.json` files recorded under
+  `tests/adapters/fixtures/cr_propagation/dragon2/`. The translator converts V_A with hep-theory's
+  `transport_conventions.py reacceleration` (A1R; subprocess) and runs energy losses on Galprop gas, refusing them on
+  gas without HII (DRAGON2 cd588707's nuclear Coulomb loss diverges at n_HII = 0). D1-1 (absolute, frozen) fails and is
+  superseded by D1-1a/D1-1b (decision A1.9): item effects pass for convection and fail for 10Be/9Be with decay,
+  reacceleration and losses (13%, 5.7%, 6.1%), with attribution (VALIDATION CRPROP-D1).
 
 ## 0.42.0 (2026-10-26)
 

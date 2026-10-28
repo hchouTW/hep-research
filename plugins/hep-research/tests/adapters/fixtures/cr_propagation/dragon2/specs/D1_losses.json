@@ -23,7 +23,7 @@
   "etaT": 1.0
  },
  "galaxy": {
-  "gas": "BronfFerr",
+  "gas": "Galprop",
   "sources": {
    "type": "OneRing",
    "RingMin": 0,
@@ -56,10 +56,10 @@
  "injection_gamma": 2.3,
  "substitutes": [
   "geometry.disc_halfwidth_pc 100: DRAGON2 has no thin-disc parameter; its gas has its own scale heights (BronfFerr: H2 59 pc, HI 115 pc at the observer)",
-  "gas 'uniform, n_H = 1 cm^-3': BronfFerr (analytic HI and H2, HII 0); DRAGON2's 'Uniform' gas is not implemented in cd588707 (gas.cc writes -1)",
+  "gas 'uniform, n_H = 1 cm^-3': Galprop (DRAGON2's analytic GALPROP-like H2, HI and HII (TGas nH2_av, nHI_av, nHII_av)); DRAGON2's 'Uniform' gas is not implemented in cd588707 (gas.cc writes -1)",
   "gas He_to_H_number 0.1: DRAGON2's fixed helium (He/H 0.11, constants.h) with its He_to_H_CS_ratio scaling of every production cross section",
   "sources.spatial: OneRing, uniform in R from 0 to the radial boundary (DRAGON2's z profile of the ring)",
-  "losses ['coulomb', 'ionization']: eloss_flag 1 switches DRAGON2's ionization and Coulomb losses together (the adiabatic term follows dvdz only)",
+  "losses ['coulomb', 'ionization']: eloss_flag 1 switches DRAGON2's ionization (neutral gas) and Coulomb (HII) losses together (the adiabatic term follows dvdz only); the run uses Galprop gas because DRAGON2's nuclear Coulomb loss diverges where n_HII = 0 (BronfFerr; VALIDATION CRPROP-D1)",
   "inelastic cross sections: DRAGON2's own parametrization (not replaceable through its data files)"
  ],
  "transport": {

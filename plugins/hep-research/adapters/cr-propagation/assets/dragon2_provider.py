@@ -12,7 +12,10 @@ the adapter tests). A point overrides D0_cm2_s and delta (diffusion), L_kpc (geo
 V_A_kms (reacceleration, in the transport's zone). Production cross sections: only the ILLUSTRATIVE isotopic set
 (ILLUSTRATIVE_CHANNELS_MB, equal to theory:cr-secondary-ratio models/xs-illustrative-decay.json for 12C and 16O,
 checked by the tests); a transport naming another production set is refused (provider-error), never replaced. What
-DRAGON2 cannot express is listed under the prediction's parameter_point.transport_substitutes (dragon2_run.py).
+DRAGON2 cannot express is listed under the prediction's parameter_point.transport_substitutes (dragon2_run.py):
+among them, V_A converted to DRAGON2's Ptuskin94 whole-halo convention by hep-theory's transport_conventions.py, and
+Galprop gas instead of BronfFerr when losses are on (DRAGON2 cd588707's nuclear Coulomb loss diverges where the HII
+density is 0).
 Grid: the translator's (radial step 0.5 kpc, vertical step about 0.02 kpc, energy factor 1.2), charges from the
 lightest observed isotope to Z = 8 (network top O-16), E/n from 0.8 times the lowest to 1.25 times the highest E/n the
 bins need (at least 0.01 GeV/n). The DRAGON2 run is located through HEP_DRAGON2_BIN and HEP_DRAGON2_DATA; without

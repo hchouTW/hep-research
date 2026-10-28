@@ -55,7 +55,7 @@
  },
  "reacceleration": {
   "type": "Ptuskin94",
-  "vA_kms": 7.905694
+  "vA_kms": 15.811388
  },
  "injection_gamma": 2.3,
  "substitutes": [
@@ -63,8 +63,7 @@
   "gas 'uniform, n_H = 1 cm^-3': BronfFerr (analytic HI and H2, HII 0); DRAGON2's 'Uniform' gas is not implemented in cd588707 (gas.cc writes -1)",
   "gas He_to_H_number 0.1: DRAGON2's fixed helium (He/H 0.11, constants.h) with its He_to_H_CS_ratio scaling of every production cross section",
   "sources.spatial: OneRing, uniform in R from 0 to the radial boundary (DRAGON2's z profile of the ring)",
-  "reacceleration V_A_kms 50 in the thin disc: whole-halo V_A = V_A sqrt(h/L) = 7.90569 km/s (r3 P1; approximate, no bound)",
-  "reacceleration relation 'Seo-Ptuskin 1994': DRAGON2 Ptuskin94",
+  "reacceleration V_A_kms 50 (thin-disc, relation 'Seo-Ptuskin 1994', convention usine) -> DRAGON2 Ptuskin94 whole-halo V_A 15.8114 km/s by transport_conventions.py reacceleration (factor 0.316228, approximate, relative error bound 0.51712 with destruction/escape ratio 1.586)",
   "inelastic cross sections: DRAGON2's own parametrization (not replaceable through its data files)"
  ],
  "transport": {

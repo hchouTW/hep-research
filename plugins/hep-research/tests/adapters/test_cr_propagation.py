@@ -550,7 +550,12 @@ class GridFit(unittest.TestCase):
 D1_FIX = FIX / "dragon2"
 D1_ITEMS = ("isotopic", "convection", "decay", "reacceleration", "losses")
 D1_CLOSED_FORM_ITEMS = ("convection", "decay")  # items with a B2 closed form
-D1_USINE_ITEMS = ("reacceleration", "losses")  # no closed form: the reference is USINE (B1, usine/usine-results.json)
+D1_USINE_ITEMS = ("convection", "decay", "reacceleration", "losses")  # D1-1a: every item against USINE (B1)
+# recorded runs: name -> (item file, gas override); losses run on Galprop gas (BronfFerr's n_HII = 0 makes DRAGON2's
+# nuclear Coulomb loss diverge), so its item-off run is the isotopic item on Galprop gas
+D1_RUNS = {"isotopic": ("isotopic", None), "convection": ("convection", None), "decay": ("decay", None),
+           "reacceleration": ("reacceleration", None), "losses": ("losses", None), "losses_off": ("isotopic", "Galprop")}
+D1_ITEM_OFF = {"losses": "losses_off"}  # every other item's item-off run is "isotopic"
 D1_TOLERANCE = 0.03  # D1-1, frozen in acceptance.json and VALIDATION CRPROP-D1 before the runs
 BORON_CARBON_RIGIDITY_EDGES = [2.0 * 500.0 ** (k / 16) for k in range(17)]  # 16 log-uniform bins, 2-1000 GV
 BERYLLIUM_EKN_EDGES = [0.05 * 200.0 ** (k / 12) for k in range(13)]  # 12 log-uniform bins, 0.05-10 GeV/n
@@ -631,8 +636,10 @@ def d1_comparison():
             effect = [(d / d0) / (c / c0) for d, d0, c, c0 in zip(dragon[item][obs], dragon["isotopic"][obs],
                                                                    closed[item][obs], closed["isotopic"][obs])]
             dev = max(abs(r - 1) for r in ratio)
+            eff_dev = max(abs(r - 1) for r in effect)
             rows[obs] = {"dragon2": dragon[item][obs], "closed_form": closed[item][obs], "dragon2_over_closed": ratio,
                          "max_abs_deviation": dev, "passed": dev <= D1_TOLERANCE,
+                         "item_effect_passed": eff_dev <= D1_TOLERANCE,
                          "item_effect_dragon2": [d / d0 for d, d0 in zip(dragon[item][obs], dragon["isotopic"][obs])],
                          "item_effect_closed": [c / c0 for c, c0 in zip(closed[item][obs], closed["isotopic"][obs])],
                          "item_effect_ratio": effect, "item_effect_max_abs_deviation": max(abs(r - 1) for r in effect)}
@@ -641,25 +648,29 @@ def d1_comparison():
 
 
 def d1_usine_comparison():
-    """D1-1 for the items without a closed form: DRAGON2 / USINE per bin (USINE's numbers from B1's
-    usine/usine-results.json, computed from the same harmonized-v1-<item>.json on the same bins) and the item effect
-    against each code's item-off run."""
+    """D1-1a (item effects) and D1-1b (offsets) against USINE: DRAGON2 / USINE per bin (USINE's numbers from B1's
+    usine/usine-results.json, computed from the same harmonized-v1-<item>.json on the same bins) and the item effect,
+    each code's ratio with the item over its ratio without it (DRAGON2's losses item against its Galprop-gas item-off
+    run, USINE's against d1-isotopic)."""
     u = json.loads((FIX / "usine" / "usine-results.json").read_text(encoding="utf-8"))
-    dragon = {i: d1_ratios(*conv.read_output(d1_output(i))) for i in ("isotopic",) + D1_USINE_ITEMS}
+    dragon = {r: d1_ratios(*conv.read_output(d1_output(r))) for r in D1_RUNS}
     out = {}
     for item in ("isotopic",) + D1_USINE_ITEMS:
+        off = D1_ITEM_OFF.get(item, "isotopic")
         rows = {}
         for obs in D1_OBSERVABLES:
             ref, ref0 = u["runs"][f"d1-{item}"][obs], u["runs"]["d1-isotopic"][obs]
             ratio = [d / r for d, r in zip(dragon[item][obs], ref)]
-            effect = [(d / d0) / (r / r0) for d, d0, r, r0 in zip(dragon[item][obs], dragon["isotopic"][obs], ref, ref0)]
-            dev = max(abs(x - 1) for x in ratio)
+            effect = [(d / d0) / (r / r0) for d, d0, r, r0 in zip(dragon[item][obs], dragon[off][obs], ref, ref0)]
+            dev, eff_dev = max(abs(x - 1) for x in ratio), max(abs(x - 1) for x in effect)
             rows[obs] = {"dragon2": dragon[item][obs], "usine": ref, "dragon2_over_usine": ratio,
-                         "max_abs_deviation": dev, "passed": dev <= D1_TOLERANCE, "item_effect_ratio": effect,
-                         "item_effect_max_abs_deviation": max(abs(x - 1) for x in effect)}
+                         "dragon2_item_off_run": off, "max_abs_deviation": dev, "passed": dev <= D1_TOLERANCE,
+                         "item_effect_dragon2": [d / d0 for d, d0 in zip(dragon[item][obs], dragon[off][obs])],
+                         "item_effect_usine": [r / r0 for r, r0 in zip(ref, ref0)],
+                         "item_effect_ratio": effect, "item_effect_max_abs_deviation": eff_dev,
+                         "item_effect_passed": eff_dev <= D1_TOLERANCE}
         out[item] = rows
     return out
-
 
 class D1Items(unittest.TestCase):
     """cr-propagation D1: every item has its harmonized-v1-<item>.json, a translated run spec and a recorded run (D1-2);
@@ -682,12 +693,12 @@ class D1Items(unittest.TestCase):
     def test_runs_are_recorded_and_translated_from_the_item_files(self):  # D1-2
         import hashlib
         channels = json.loads((D1_FIX / "channels-illustrative-decay.json").read_text(encoding="utf-8"))
-        for item in D1_ITEMS:
+        for item, (source, gas) in D1_RUNS.items():
             with self.subTest(item=item):
                 s = d1_spec(item)
-                doc = json.loads((FIX / "specs" / f"harmonized-v1-{item}.json").read_text(encoding="utf-8"))
+                doc = json.loads((FIX / "specs" / f"harmonized-v1-{source}.json").read_text(encoding="utf-8"))
                 again = dragon2_run.spec_from_transport(doc["transport"], s["name"], channels, z_range=(4, 8),
-                                                        ekn_range_gev=(0.04, 2000.0))
+                                                        ekn_range_gev=(0.04, 2000.0), gas_model=gas)
                 self.assertEqual(again, s)
                 rec = json.loads(d1_record(item).read_text(encoding="utf-8"))
                 self.assertEqual([f.code for f in validate_artifact(rec).errors], [])
@@ -705,12 +716,20 @@ class D1Items(unittest.TestCase):
     def test_translator_records_what_dragon2_cannot_express(self):
         s = d1_spec("reacceleration")
         self.assertEqual(s["flags"]["reacc_flag"], 1)
-        self.assertAlmostEqual(s["reacceleration"]["vA_kms"], 50.0 * math.sqrt(0.1 / 4.0), places=5)
-        self.assertTrue(any("thin disc" in x for x in s["substitutes"]))
+        # A1R convention: USINE thin disc (D_pp constant 4/3) -> DRAGON2 Ptuskin94 whole halo (1): V_A sqrt(4 h / L)
+        self.assertAlmostEqual(s["reacceleration"]["vA_kms"], 50.0 * math.sqrt(4 * 0.1 / 4.0), places=5)
+        self.assertTrue(any("transport_conventions.py reacceleration" in x and "relative error bound" in x
+                            for x in s["substitutes"]))
         self.assertEqual(d1_spec("losses")["flags"]["eloss_flag"], 1)
         self.assertEqual(d1_spec("convection")["convection"], {"v0_kms": 10.0, "dvdz_kmskpc": 0.0})
-        for item in D1_ITEMS:
-            self.assertTrue(any("BronfFerr" in x for x in d1_spec(item)["substitutes"]))
+        for item in D1_RUNS:
+            gas = "Galprop" if item.startswith("losses") else "BronfFerr"
+            self.assertEqual(d1_spec(item)["galaxy"]["gas"], gas)
+            self.assertTrue(any(f": {gas} (" in x for x in d1_spec(item)["substitutes"]))
+        t = json.loads((FIX / "specs" / "harmonized-v1-losses.json").read_text(encoding="utf-8"))["transport"]
+        with self.assertRaisesRegex(dragon2_run.SpecError, "diverges"):  # D1-L: losses on HII-free gas refused
+            dragon2_run.spec_from_transport(t, "x", {"6012->5011": 1.0}, z_range=(4, 8), ekn_range_gev=(0.1, 10.0),
+                                            gas_model="BronfFerr")
         with self.assertRaises(dragon2_run.SpecError):
             t = json.loads((FIX / "specs" / "harmonized-v1-isotopic.json").read_text(encoding="utf-8"))["transport"]
             t = dict(t, diffusion=dict(t["diffusion"], breaks=[{"kind": "low", "R_break_gv": 5.0}]))
@@ -735,6 +754,7 @@ class D1Items(unittest.TestCase):
                             self.assertTrue(math.isclose(a, b, rel_tol=1e-9), (key, a, b))
                     self.assertEqual(row["passed"], want["passed"])
                     self.assertEqual(row["passed"], row["max_abs_deviation"] <= D1_TOLERANCE)
+                    self.assertEqual(row["item_effect_passed"], want["item_effect_passed"])
 
     @unittest.skipUnless(HAVE_NUMPY, "numpy and scipy are needed")
     def test_usine_comparison_matches_the_record(self):  # D1-1, reacceleration and losses
@@ -751,6 +771,8 @@ class D1Items(unittest.TestCase):
                         for a, b in zip(row[key], want[key]):
                             self.assertTrue(math.isclose(a, b, rel_tol=1e-9), (key, a, b))
                     self.assertEqual(row["passed"], want["passed"])
+                    self.assertEqual(row["item_effect_passed"], want["item_effect_passed"])
+                    self.assertEqual(row["item_effect_passed"], row["item_effect_max_abs_deviation"] <= D1_TOLERANCE)
 
     def test_ratio_of_bin_integrals(self):
         """P2: a ratio of bin integrals, not the bin average of the ratio; P3: isotopes at equal rigidity."""
@@ -834,6 +856,19 @@ class Dragon2ProviderOffline(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "ILLUSTRATIVE isotopic"):
             other = dict(dragon2_provider.DEFAULT_TRANSPORT, cross_sections={"production_set": "Evoli2019"})
             dragon2_provider.transport_for({"transport": other}, {})
+
+    def test_losses_run_on_gas_with_ionized_hydrogen(self):
+        """D1-L: with losses on, the provider's run uses Galprop gas (DRAGON2's nuclear Coulomb loss diverges where
+        n_HII = 0), and the reacceleration speed goes through transport_conventions (A1R)."""
+        t = dict(dragon2_provider.DEFAULT_TRANSPORT, losses=["ionization", "coulomb"])
+        spec_l = dragon2_run.spec_from_transport(dragon2_provider.transport_for({"transport": t}, {}), "x",
+                                                 dragon2_provider.ILLUSTRATIVE_CHANNELS_MB, z_range=(5, 8),
+                                                 ekn_range_gev=(1.0, 100.0))
+        self.assertEqual((spec_l["galaxy"]["gas"], spec_l["flags"]["eloss_flag"]), ("Galprop", 1))
+        spec_r = dragon2_run.spec_from_transport(dragon2_provider.transport_for({}, {"V_A_kms": 30.0}), "y",
+                                                 dragon2_provider.ILLUSTRATIVE_CHANNELS_MB, z_range=(5, 8),
+                                                 ekn_range_gev=(1.0, 100.0))
+        self.assertAlmostEqual(spec_r["reacceleration"]["vA_kms"], 30.0 * math.sqrt(4 * 0.1 / 4.0), places=5)
 
     def test_missing_dragon2_is_a_failed_point(self):
         env = {k: v for k, v in os.environ.items() if k not in ("HEP_DRAGON2_BIN", "HEP_DRAGON2_DATA")}

@@ -39,11 +39,15 @@ Translator (spec_from_transport, also --from-transport): a transport block (cont
 5.4, the format of tests/adapters/fixtures/cr_propagation/specs/harmonized-v1*.json) becomes a run spec, with every
 item DRAGON2 cannot express recorded under "substitutes" (never dropped silently): diffusion D0_cm2_s, R0_gv, eta,
 delta map one to one to D0_1e28, DiffRefRig_GV, etaT, Delta (DRAGON2 cd588707 diffusion.cc, type Constant: D0
-beta^etaT (rho/DiffRefRig)^Delta); breaks are refused; V_A in the thin disc becomes the whole-halo speed V_A sqrt(h/L)
-(r3 P1, approximate); losses switch eloss_flag (ionization and Coulomb together); decay switches decay_flag with
+beta^etaT (rho/DiffRefRig)^Delta); breaks are refused; V_A (thin disc: USINE's Seo-Ptuskin D_pp; whole halo:
+constant 1) becomes DRAGON2's Ptuskin94 whole-halo V_A through hep-theory's transport_conventions.py reacceleration
+(run as a subprocess; thin disc -> whole halo is V_A sqrt(4 h / L) to first order, approximate with the returned
+bound, the destruction/escape ratio from escape_ratio_estimate unless given); losses switch eloss_flag and the gas to
+Galprop (DRAGON2 cd588707's nuclear Coulomb loss diverges where n_HII = 0, as in BronfFerr: eloss.cc:118-120; losses
+with BronfFerr are refused); decay switches decay_flag with
 NUBASE2020 half-lives (core.constants.physical) for 10Be, 14C, 26Al, 36Cl, 54Mn in the charge range; the gas is
-BronfFerr (DRAGON2's "Uniform" gas is not implemented in this commit) with DRAGON2's fixed helium (He/H 0.11) and
-its own inelastic cross sections; the sources are OneRing from 0 to the radial boundary.
+BronfFerr, or Galprop with losses (DRAGON2's "Uniform" gas is not implemented in this commit), with DRAGON2's fixed
+helium (He/H 0.11) and its own inelastic cross sections; the sources are OneRing from 0 to the radial boundary.
 
 Usage:
   python3 dragon2_run.py --spec SPEC.json --out RUNDIR [--dragon BIN] [--data-dir DIR] [--source-param FILE]
@@ -84,6 +88,17 @@ TABLE_NAME = "crxsecs_fragmentation_Evoli2019_cumulative_modified.dat"
 ISOTOPE_LIST = "isotope_list.dat"
 # long-lived radioactive secondaries propagated explicitly (r3 P6); their NUBASE2020 half-lives replace DRAGON2's
 EXPLICIT_DECAYS = {4010: "Be-10", 6014: "C-14", 13026: "Al-26", 17036: "Cl-36", 25054: "Mn-54"}
+# reacceleration conventions of hep-theory's transport_conventions.py (A1R): a transport block's thin-disc V_A is
+# USINE's Seo-Ptuskin D_pp (constant 4/3, w); DRAGON2 runs Ptuskin94 (constant 1) in the whole halo
+CONVENTIONS = PLUGIN / "skills" / "hep-theory" / "scripts" / "transport_conventions.py"
+REACCELERATION_SOURCE = {"thin-disc": "usine", "whole-halo": "whole-halo"}
+REACCELERATION_TARGET = "dragon2-ptuskin94"
+# DRAGON2 gas models the translator writes -> whether their HII density is positive (gas.cc: BronfFerr and NS write 0)
+GAS_MODELS = {"BronfFerr": False, "Galprop": True}
+GAS_NOTES = {"BronfFerr": "analytic HI and H2, HII 0",
+             "Galprop": "DRAGON2's analytic GALPROP-like H2, HI and HII (TGas nH2_av, nHI_av, nHII_av)"}
+ESCAPE_RATIO_N_H_CM3 = 1.0
+ESCAPE_RATIO_SIGMA_MB = 310.0
 # grid choices of the translator (recorded in the spec): radial step 0.5 kpc, vertical step 0.02 kpc, observer 8.3 kpc
 TRANSLATOR_GRID = {"dR_kpc": 0.5, "dz_kpc": 0.02, "observer_kpc": [8.3, 0.0, 0.0], "Ekfactor": 1.2}
 GRID_KEYS = ("Rmax_kpc", "DimR", "L_kpc", "dz_kpc", "observer_kpc", "Ekmin_GeV", "Ekmax_GeV", "Ekfactor", "Zmin", "Zmax")
@@ -360,8 +375,42 @@ def _tnum(block: dict, key: str, where: str, default: float | None = None) -> fl
     return float(val)
 
 
+def escape_ratio_estimate(diffusion: dict, big_l: float, h_pc: float, ekn_gev: float) -> float:
+    """lam = h Gamma L / D (destruction over escape) for the bound of transport_conventions' zone conversion: at the
+    lowest E/n of the run, A/Z = 2, Gamma = n_H v sigma with n_H = ESCAPE_RATIO_N_H_CM3 (harmonized-v1's uniform gas)
+    and sigma = ESCAPE_RATIO_SIGMA_MB (the largest inelastic cross section of the ILLUSTRATIVE sets), D = D0 beta^eta
+    (R/R0)^delta. The largest lam over the run's energies, so the returned bound is conservative."""
+    import math
+    m = 0.938
+    beta = math.sqrt(1.0 - (m / (ekn_gev + m)) ** 2)
+    rig = 2.0 * math.sqrt(ekn_gev * (ekn_gev + 2 * m))
+    d0 = float(diffusion["D0_cm2_s"])
+    diff = d0 * beta ** float(diffusion.get("eta", 1.0)) * (rig / float(diffusion.get("R0_gv", 1.0))) ** float(
+        diffusion["delta"])
+    kpc_cm = 3.0856775814913673e21
+    gamma = ESCAPE_RATIO_N_H_CM3 * beta * 2.99792458e10 * ESCAPE_RATIO_SIGMA_MB * 1e-27
+    return h_pc * 1e-3 * kpc_cm * gamma * big_l * kpc_cm / diff
+
+
+def convert_reacceleration(v_a: float, source: str, target: str, big_l: float, h_pc: float, lam: float) -> dict:
+    """hep-theory's transport_conventions.py reacceleration, run as a subprocess (an adapter imports no skill, R1);
+    its 'conversion' object."""
+    cmd = [sys.executable, str(CONVENTIONS), "reacceleration", "--alfven-speed-km-s", repr(float(v_a)), "--from",
+           source, "--to", target, "--l-kpc", repr(float(big_l)), "--disc-halfwidth-pc", repr(float(h_pc)),
+           "--destruction-escape-ratio", repr(float(lam))]
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=120)
+    try:
+        doc = json.loads(proc.stdout)
+    except ValueError as exc:
+        raise SpecError(f"transport_conventions.py reacceleration failed: {proc.stdout}{proc.stderr}") from exc
+    if proc.returncode != 0 or "conversion" not in doc:
+        raise SpecError(f"transport_conventions.py reacceleration refused: {doc}")
+    return doc["conversion"]
+
+
 def spec_from_transport(transport: dict, name: str, channels_mb: dict, *, z_range: tuple[int, int],
-                        ekn_range_gev: tuple[float, float], grid_channel: str = "8016->6012") -> dict:
+                        ekn_range_gev: tuple[float, float], grid_channel: str = "8016->6012",
+                        destruction_escape_ratio: float | None = None, gas_model: str | None = None) -> dict:
     """A run spec from a transport block (r3 5.4 canonical names). Items DRAGON2 cannot express exactly are recorded
     in 'substitutes'; items it cannot express at all raise SpecError (never a silent default)."""
     if not isinstance(transport, dict):
@@ -395,14 +444,23 @@ def spec_from_transport(transport: dict, name: str, channels_mb: dict, *, z_rang
         "diffusion": {"D0_1e28": _tnum(dif, "D0_cm2_s", "diffusion") / 1e28,
                       "DiffRefRig_GV": _tnum(dif, "R0_gv", "diffusion", 1.0),
                       "delta": _tnum(dif, "delta", "diffusion"), "etaT": _tnum(dif, "eta", "diffusion", 1.0)},
-        "galaxy": {"gas": "BronfFerr", "sources": {"type": "OneRing", "RingMin": 0, "RingMax": radius}},
+        "galaxy": {"gas": "", "sources": {"type": "OneRing", "RingMin": 0, "RingMax": radius}},
         "flags": flags,
         "production_table": {"channels_mb": dict(channels_mb), "grid_channel": grid_channel},
     }
     subs.append(f"geometry.disc_halfwidth_pc {h_pc:g}: DRAGON2 has no thin-disc parameter; its gas has its own "
                 "scale heights (BronfFerr: H2 59 pc, HI 115 pc at the observer)")
     gas = _block(transport, "gas")
-    subs.append(f"gas {gas.get('model', 'unspecified')!r}: BronfFerr (analytic HI and H2, HII 0); DRAGON2's 'Uniform' "
+    losses = transport.get("losses") or []
+    if gas_model is None:
+        gas_model = "Galprop" if losses else "BronfFerr"
+    if gas_model not in GAS_MODELS:
+        raise SpecError(f"gas_model {gas_model!r}: one of {sorted(GAS_MODELS)}")
+    if losses and not GAS_MODELS[gas_model]:
+        raise SpecError(f"losses with gas {gas_model}: its HII density is 0, and DRAGON2 cd588707's nuclear Coulomb "
+                        "loss (eloss.cc:118-120, coullog = -log(... n_HII ...)/2) diverges there; use Galprop")
+    spec["galaxy"]["gas"] = gas_model
+    subs.append(f"gas {gas.get('model', 'unspecified')!r}: {gas_model} ({GAS_NOTES[gas_model]}); DRAGON2's 'Uniform' "
                 "gas is not implemented in cd588707 (gas.cc writes -1)")
     subs.append(f"gas He_to_H_number {gas.get('He_to_H_number', 'unspecified')}: DRAGON2's fixed helium (He/H 0.11, "
                 "constants.h) with its He_to_H_CS_ratio scaling of every production cross section")
@@ -411,17 +469,21 @@ def spec_from_transport(transport: dict, name: str, channels_mb: dict, *, z_rang
     v_a = _tnum(reacc, "V_A_kms", "reacceleration", 0.0)
     if v_a > 0:
         zone = reacc.get("zone", "whole-halo")
-        if zone == "thin-disc":
-            v_halo = v_a * (h_pc / 1000.0 / big_l) ** 0.5
-            subs.append(f"reacceleration V_A_kms {v_a:g} in the thin disc: whole-halo V_A = V_A sqrt(h/L) = "
-                        f"{v_halo:.6g} km/s (r3 P1; approximate, no bound)")
-        elif zone == "whole-halo":
-            v_halo = v_a
-        else:
+        if zone not in ("thin-disc", "whole-halo"):
             raise SpecError(f"reacceleration.zone {zone!r}: thin-disc or whole-halo")
         if float(reacc.get("w", 1.0)) != 1.0:
             raise SpecError("reacceleration.w other than 1 is not expressible in DRAGON2's Ptuskin94 form")
-        subs.append(f"reacceleration relation {reacc.get('relation', 'unspecified')!r}: DRAGON2 Ptuskin94")
+        lam = destruction_escape_ratio
+        if lam is None:
+            lam = escape_ratio_estimate(dif, big_l, h_pc, lo)
+        conv_va = convert_reacceleration(v_a, REACCELERATION_SOURCE[zone], REACCELERATION_TARGET, big_l, h_pc, lam)
+        v_halo = conv_va["result"]["V_A_kms"]
+        bound = conv_va.get("relative_error_bound")
+        subs.append(f"reacceleration V_A_kms {v_a:g} ({zone}, relation {reacc.get('relation', 'unspecified')!r}, "
+                    f"convention {REACCELERATION_SOURCE[zone]}) -> DRAGON2 Ptuskin94 whole-halo V_A "
+                    f"{v_halo:.6g} km/s by transport_conventions.py reacceleration (factor "
+                    f"{conv_va['result']['factor']:.6g}, {conv_va['conversion_status']}, relative error bound "
+                    f"{bound if bound is None else round(bound, 6)} with destruction/escape ratio {lam:.4g})")
         spec["reacceleration"] = {"type": "Ptuskin94", "vA_kms": round(v_halo, 6)}
         flags["reacc_flag"] = 1
     conv = _block(transport, "convection")
@@ -434,13 +496,13 @@ def spec_from_transport(transport: dict, name: str, channels_mb: dict, *, z_rang
         flags["conv_flag"] = 1
         subs.append("convection: DRAGON2 Constant profile, V_c = v0 + dvdz (abs(z) - 0.1 kpc) above 0.1 kpc and v0 "
                     "below (f_b = 1)")
-    losses = transport.get("losses") or []
     if losses:
         if not set(losses) <= {"ionization", "coulomb", "adiabatic"}:
             raise SpecError(f"losses {losses}: only ionization, coulomb and adiabatic are translated")
         flags["eloss_flag"] = 1
-        subs.append(f"losses {sorted(losses)}: eloss_flag 1 switches DRAGON2's ionization and Coulomb losses together "
-                    "(the adiabatic term follows dvdz only)")
+        subs.append(f"losses {sorted(losses)}: eloss_flag 1 switches DRAGON2's ionization (neutral gas) and Coulomb "
+                    "(HII) losses together (the adiabatic term follows dvdz only); the run uses Galprop gas because "
+                    "DRAGON2's nuclear Coulomb loss diverges where n_HII = 0 (BronfFerr; VALIDATION CRPROP-D1)")
     decay = _block(transport, "decay")
     if decay.get("enabled"):
         flags["decay_flag"] = 1

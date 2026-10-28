@@ -27,7 +27,7 @@
   "input_manifest": [
    {
     "path": "D1_losses.xml",
-    "sha256": "5e3e4d611e17e74164eb4a7f7df620168846532c7f540fe4951f34aa20e95c19"
+    "sha256": "aa8bbcfc16a9ed6cacdd0f12e4db2027e950a5b4ab31dc17e85cf5061b18a036"
    },
    {
     "path": "D1_losses.source.param",
@@ -100,11 +100,11 @@
    "note": "none applied by the run; DRAGON2 time-step schedule Dtmax 64 Myr to Dtmin 0.001 Myr, factor 0.25, 30 steps per level (written into the XML)"
   },
   "resources": {
-   "wall_seconds": 709.8
+   "wall_seconds": 318.7
   },
   "exit_status": 0,
   "output_hashes": {
-   "output/D1_losses.txt": "fd29b86a3a4f5e72268e236e6de60ce2b5f0fa51b0ffce8988971f65ea9478f1"
+   "output/D1_losses.txt": "2bee585d67e543ff5bf14b877e4be00843c052d65d2ac928cfef67fa63ef6d45"
   }
  }
 }

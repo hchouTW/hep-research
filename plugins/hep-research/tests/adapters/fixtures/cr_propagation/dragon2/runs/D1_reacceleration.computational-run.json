@@ -27,7 +27,7 @@
   "input_manifest": [
    {
     "path": "D1_reacceleration.xml",
-    "sha256": "e07adc310d1cc83b9b6fa3d327d5972a44e9eead4b6d43d34c6cc07ebbc7454c"
+    "sha256": "16c7e56d0d08f6567d93baa915f4472b4018f0c4ec55bd6cc1ec74b678d41fd4"
    },
    {
     "path": "D1_reacceleration.source.param",
@@ -100,11 +100,11 @@
    "note": "none applied by the run; DRAGON2 time-step schedule Dtmax 64 Myr to Dtmin 0.001 Myr, factor 0.25, 30 steps per level (written into the XML)"
   },
   "resources": {
-   "wall_seconds": 575.4
+   "wall_seconds": 318.7
   },
   "exit_status": 0,
   "output_hashes": {
-   "output/D1_reacceleration.txt": "b2c037ba124f1f46b20da833e7ff57ecda1e9953d4cb61f04edaf48b79653cad"
+   "output/D1_reacceleration.txt": "d3d17ea52ae1c602b636821ec0398194198861e7995946e5c4e352603f04524c"
   }
  }
 }
