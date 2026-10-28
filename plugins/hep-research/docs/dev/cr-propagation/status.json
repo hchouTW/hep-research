@@ -215,15 +215,15 @@
    ]
   },
   "C2U": {
-   "state": "verifying",
+   "state": "merged",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-c2u",
    "base": null,
    "head": "8ec0d094",
-   "merge_commit": null,
+   "merge_commit": "886bb316",
    "worker_report": "PARTIAL: C2U-1 pass (pulls ~4e-5 sigma, V_c on bound with KKT + profile), C2U-2 pass (565 records resolved); C2U-3 not met (response model 2.81 sigma off: V_A weakly constrained by B/C alone); ~1372 USINE runs; fit code extended (non-decomposable, steps, polynomial RM, two-sided bin semantics); C2 advisories fixed",
-   "verifier_report": null,
+   "verifier_report": "PASS (2026-10-28, Opus) on C2U-1/2 (C2U-3 moved, A1.12): pulls recomputed, 565 records resolved, fits rerun bit-identical from cache, 4 live points rel diff 0; advisories: P2 statement found by regex (negation would pass), transport_substitutes exempted from gate (state as conditions for F1), kkt docstring, budget checked before cache",
    "missing_capabilities": [],
    "notes": [
     "A1.12: C2U-3 moved to C2UF-1; Opus verifier dispatched on C2U-1/2"
@@ -732,6 +732,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "wave-4 full run on 6ecc1ffa (B1X, D1, E2, wave-3 fixes): wave-3 fixes confirmed (Th13, subprocess timeouts pass); 1 new failure attributed to E2 (train_emulator.py --status, CLI contract); relocation only the 2 known geant4 failures; E2 fix branch"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "C2U merged (886bb316); post-merge static ok"
   }
  ],
  "env": {
