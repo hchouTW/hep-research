@@ -6518,3 +6518,83 @@ the D_pp), and B1's whole-halo branch uses sqrt(L/h). Neither translator is in A
 
 Not done in A1R: convection, a radial boundary and energy losses in the zone factor (the conversion says so); the
 operator form beyond the D_pp coefficient was not re-derived; the translators of B1 and D1 were not changed.
+
+## CRPROP-B1X — 2026-10-28 (environment E2)
+
+Work package B1X of the cr-propagation r4 campaign (decision A1.7, escalation 8): a high break in
+`extension.transport`, and USINE's own cross-section files with data-normalised abundances in `usine_translate.py`.
+
+**Criteria and tolerances, fixed before any comparison (R9).** The frozen entries B1X-1 to B1X-5 (acceptance.json,
+added by the orchestrator on dispatch): B1X-1 a high break validates, a half-specified one is refused with a named
+error, every committed theory-spec keeps its outcome default and `--strict` (the A2-1 comparison); B1X-2 and B1X-3 a
+transport block matching USINE's shipped `inputs/init.TEST.par` (Model1DKisoVc), run through the translator, reproduces
+the B/C table of that example run in place within relative 1e-6 on the common nodes, the live tests not skipped; B1X-4
+no transport field silently ignored or defaulted; B1X-5 no USINE file or copy committed. Nothing was loosened.
+
+**Environment (r3 §0.3, base exception D10).** E2 = E-crprop (macOS 27.2 arm64), Python 3.13.2 (miniconda), USINE V3.5
+(commit fb53006d, Apple clang 21.0.0, ROOT 6.38.04; `bin/usine` sha256 1d444720…) through `HEP_USINE_BIN`,
+`HEP_USINE_DATA`, `USINE`. `git rev-parse --show-toplevel` = `.claude/worktrees/crprop-b1x`; branch
+`worktree-crprop-b1x`; status clean at start; base `e97680cf` = integration HEAD (decision D10, not `origin/main`);
+prerequisites A2 and B1 are ancestors of the base (`git merge-base --is-ancestor`); env-usine is the ENV build above.
+
+**Contracts (still CV-CRPROP 3.14.0, gate `CRPROP_FROM`, no bump, no new gate).** New fields: break `delta_above`
+(slope above a high break; the canonical table's `delta_below` mirrored), `geometry.local_bubble_radius_kpc` (USINE's
+`rhole`: changing it from 0.2038 to 0 kpc moves the shipped example's B/C by up to 3.9e-4, so it cannot be left to the
+translator) and an injection item's `eta` (source beta exponent; USINE's `eta_s`, -1 in the example). All pass
+`tools/check_naming.py` with `naming_known_gaps.json` unchanged (N13 has no extractor in this repository:
+`extract_names.py` reads N1-N6, N16). New rules from `CRPROP_FROM` (else `--strict`): `theory.transport_break_incomplete`
+(a low break needs `R_break_gv`, `delta_below`, `s`; a high break `R_break_gv`, `delta_above`, `s`; the other kind's
+slope is refused) and `theory.transport_break_kind_unknown`. Fixtures from `tests/contracts/make_fixtures.py`: one
+positive, two negative; `gate_verdicts.json` regenerated with only those three rows added. A2-1 rerun: all 29 committed
+theory-specs (contracts/fixtures, examples, profiles, tests) have identical findings, default and strict, under the base
+and the new validator; only the three new fixtures differ (`$CRPROP_OUT/b1x/acceptance/a21-*.json`).
+`transport_conventions.py` evaluates the high break (K0 <-> K10 approximate with a bound, a half-specified break
+not-convertible).
+
+**High-break form, from USINE's own files.** USINE reads K as a formula from its initialisation file; its C++ source
+fixes no break form. The shipped files carry one: `inputs/init.TEST.par` line 133 (also `init.Model1D.par` line 89,
+`init.Model2D.par` line 96, `doc/tutorial_update_models.rst` line 99):
+`beta^eta_t*K0*Rig^delta*(1+(Rig/Rbreak)^(Deltabreak/sbreak))^(-sbreak)`, so `delta_above` = delta - Deltabreak. No
+shipped file or source line has a low break, so USINE does not settle the "usine" low-break form of
+`transport_conventions.py` against Weinrich et al. 2020a (known issue stays open).
+
+**Translator (`usine_translate.py`).** High break: `*(1+(Rig/Rh<i>)^((delta-dh<i>)/sh<i>))^(-sh<i>)`. USINE's own inputs:
+`production_set`/`inelastic_set` `usine:<path>` and `sources.abundances` `data-normalised usine:<data file>
+<elements>:<experiment>@<E_k/n>[;...]`, read in place from `HEP_USINE_DATA` (refused with exit 3 and a message naming
+`HEP_USINE_DATA` and the files when it is unset); network 1H to `species.network_top`; NormList on the data file;
+targets H and He with He = `He_to_H_number` (HI + HII + 2 H2); HII and H2 from `gas.model`; electron-capture decay
+with `ec_treatment` `laboratory-half-life`; `--ekn-grid` for an explicit grid. With USINE's own inputs the Kpp line uses
+the factor written in USINE's shipped Kpp (1.022712e-3, init.TEST.par line 134), 1.6e-7 below the IAU/Julian value:
+with the derived factor one of 33 B/C nodes flipped its sixth digit (4.7e-6 relative); with USINE's factor all nodes
+agree (recorded as a substitute; the ILLUSTRATIVE runs keep the derived factor). Every chart BETA half-life in the
+network is compared with NUBASE2020 (14C differs by +0.5%, recorded; 10Be still refused above 1e-3). B1X-4: unknown
+keys refused; every default (geometry kind, h, R, rhole, eta, R0, breaks, V_A, w, zone, relation, V_c, gradient,
+losses, decay items, inelastic set, species) and every unused field (family, free, sources.spatial, diffusion.form,
+ghost_threshold, ILLUSTRATIVE abundances and set names, zone/relation with V_A = 0, decay items with decay off) is
+recorded in `substitutes`; `species.network_top` and `species.isotopic` must match an ILLUSTRATIVE set (Ni-64 refused)
+and set the network with USINE's files. Test `test_no_field_silently_ignored` changes and removes every field of four
+recorded specs and requires a changed input file, a changed record or a refusal. The whole-halo V_A factor stays
+sqrt(L/h), isolated in `thin_disc_alfven_speed` for A1R. The reader counts 14C in carbon.
+
+**Records.** `input_manifest` now holds `committed_form_sha256` (the placeholder form committed under `inputs/`) next
+to the as-run `sha256`, and USINE's own files read in place (hashed, never copied). The seven B1 records gained
+`committed_form_sha256` and `input_manifest_note` without a rerun: their generated inputs are unchanged (offline render
+test, and the live B1-2 rerun passes), their `notes` keep B1's substitutes.
+
+**Results (final HEAD).**
+
+| ID | Result | Evidence |
+|---|---|---|
+| B1X-1 | passed: 23 tests (9 B1X), positive and both negative fixtures exercised, gating native from CRPROP_FROM | `$CRPROP_OUT/b1x/acceptance/B1X-1-contracts.txt`, `a21-*.json` |
+| B1X-2 | passed: translator run of `specs/b1x-init-test.json` vs `usine -l inputs/init.TEST.par` run in place: B/C on 33/33 common nodes, max relative deviation 0 on E_k/n and on rigidity (identical tables); live test not skipped | `B1X-2-3-live.txt`, `runs/b1x-init-test`, `runs/shipped-init-test` |
+| B1X-3 | passed: the same run reads `XS_NUCLEI/sigProdGALPROP17_OPT12.dat`, `XS_NUCLEI/sigInelTripathi99+Coste12.dat`, `crdata_crdb20170523.dat` in place; no run or committed file has the sha256 of any USINE input; refused without `HEP_USINE_DATA` | as above, `UsineB1XOffline.test_missing_usine_data_is_refused` |
+| B1X-4 | for the verifier: field-by-field test above; file:line in the report | `test_no_field_silently_ignored`, `test_defaults_are_recorded` |
+| B1X-5 | committed: specs, the translator's own `usine.init.par` (placeholders; regenerates byte-identically, test), USINE output tables and records; no USINE source or input file | `test_renders_to_the_recorded_inputs`, live hash scan |
+| B1-2 | still passed: the seven B1 runs rerun live reproduce their outputs | `B1X-2-3-live.txt` |
+
+Not translated, since they do not affect B/C: the example's antinuclei and tertiaries, the hydrogen slope 2.3 (one
+shared slope 2.268922), `crdata_dummy.dat`, NormList elements above Si and the display settings. USINE runs:
+about 37 (6 development and probe runs, 1 rerecord, two live acceptance invocations of about 15 each).
+Checks: static part of `run_all_checks.py`, naming, wiring, layering, packaging, `workflow_check.py` diff, gaps and
+acceptance on the final HEAD; ruff and mypy (CI pins) on `contracts/`; ALL-3 deferred to the wave run (A1.5).
+Software and numerical-consistency checks; no comparison with data.
