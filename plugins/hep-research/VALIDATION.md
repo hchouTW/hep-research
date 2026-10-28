@@ -3503,6 +3503,9 @@ string change. ruff 0.16.10 and mypy 2.4.0 (the CI pins) pass on `core/` and `co
 | Same with the CI lock (no torch) | 31 pass, 0 fail, 2 skipped; 6000 tests, 5737 pass, 0 failures, 263 skipped |
 | `check_relocation.py` | only the 2 known geant4 path-with-spaces failures (`test_geant4` partition merges), identical on main |
 
+After the release commit, PR #308's Linux CI failed on 8 float comparisons pinned on macOS and on the C2UF emulator's
+near-singular kernel; fixed under decision A1.20 (section CRPROP-CIFIX), verified, and the release manifest regenerated.
+
 ## 0.42.0 release check (2026-10-26, E2 and the CI lock)
 
 Release branch `release/0.42.0` from main `848c5eb4`. It ships #302-#306 (semantic naming P1-P5 and the fixes of the

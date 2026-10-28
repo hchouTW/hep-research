@@ -3,15 +3,6 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
-
-- crprop ci: the campaign's regression pins compare platform-robustly (PR #308 CI on Linux, decision A1.20): recomputed
-  closed-form, USINE-reader and DRAGON2-port values against committed numbers within relative 1e-12, the E2 emulator's
-  pinned responses and hold-out numbers within relative 1e-4 (GP linear algebra); E2-1, E2-2 and every acceptance
-  tolerance unchanged. `emulator_provider.py`: a kernel matrix that does not factorize as stored (the C2UF model's is
-  near-singular and failed on Linux, so `--declaration` refused) is factorized with a jitter of 1e-14, else 1e-13,
-  times its mean diagonal, and the self-check compares ln sigma within 2e-6 (ln mean still within 1e-9).
-
 ## 0.43.0 (2026-10-29)
 
 Minor release; contracts 3.14.0 (one minor, the `CV-CRPROP` of the cr-propagation campaign, new rules gated by
@@ -38,8 +29,16 @@ solar modulation itself, against `cr_provider.json`'s "providers never modulate"
 prediction); accepted, attributed DRAGON2/USINE differences D1-1a, D3-1 and D3-3, not yet recorded in `adapter.json`;
 C2UF toy fits bounded by the emulator's k = 4 domain while validation covered k = 3; `propagation_fit.py` reports
 unconverged fits as "artifact-invalid"; translator gaps (escalation 12) and the r3 P1 zone-conversion wording with a
-likely DRAGON2 Ptuskin94/03 enum issue (escalation 10); GALPROP unavailable; F2, F3 and the live routing run not done.
+likely DRAGON2 Ptuskin94/03 enum issue (escalation 10); `train_emulator.py` lets the GP nugget reach its 1e-12 floor,
+which gives near-singular models (the provider now factorizes them with a bounded jitter); GALPROP unavailable; F2,
+F3 and the live routing run not done.
 
+- crprop ci: the campaign's regression pins compare platform-robustly (PR #308 CI on Linux, decision A1.20): recomputed
+  closed-form, USINE-reader and DRAGON2-port values against committed numbers within relative 1e-12, the E2 emulator's
+  pinned responses and hold-out numbers within relative 1e-4 (GP linear algebra); E2-1, E2-2 and every acceptance
+  tolerance unchanged. `emulator_provider.py`: a kernel matrix that does not factorize as stored (the C2UF model's is
+  near-singular and failed on Linux, so `--declaration` refused) is factorized with a jitter of 1e-14, else 1e-13,
+  times its mean diagonal, and the self-check compares ln sigma within 2e-6 (ln mean still within 1e-9).
 - crprop env: capability probe of the cr-propagation campaign and environment E-crprop registered in VALIDATION.md
   (E2 plus DRAGON2 cd588707 verified by a live rerun); DRAGON2 computational-run and environment manifest under
   `tests/adapters/fixtures/cr_propagation/env/`. USINE and GALPROP absent (no source tarball). No behavior change.
