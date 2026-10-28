@@ -213,6 +213,9 @@ Software checks establish contract consistency only, not physical validity.
   F1-2 met. `usine_translate.py --usine-tolerance` sets USINE's EPS_ITERCONV, EPS_INTEGR, EPS_NORMDATA (defaults
   unchanged; tighter values change no output digit). `adapters/cr-propagation/adapter.json` provider domain widened
   (decision A1.16).
+- crprop RC: campaign summary in `docs/dev/cr-propagation/campaign-report.md` (20 of 24 work packages merged with a
+  verifier PASS; D2 unavailable, F2 and F3 skipped; F1 a partial reproduction, so no v1 change; known issues listed
+  there) and the pull-request draft `docs/dev/cr-propagation/pr-draft.md`. Documentation only.
 
 ## 0.42.0 (2026-10-26)
 
