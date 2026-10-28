@@ -87,7 +87,8 @@ Software checks establish contract consistency only, not physical validity.
   (isotopes summed on the data's axis); `usine_provider.py` serves it as the cr-provider/1 provider `usine` (B/C,
   10Be/9Be, Be/B on E_k/n or rigidity). Seven recorded runs replayed offline, live rerun with `HEP_USINE_LIVE_TEST=1`;
   USINE `tested-in-declared-environment`, adapter still `proposed` (GALPROP). USINE is GPL-2.0 and runs as a separate
-  program; no USINE file is committed. README package size statement updated (56.4 MB).
+  program; no USINE file is committed. The USINE row of the CRPROP-COST table is filled. README package size
+  statement updated (about 3800 files, 56.6 MB).
 
 ## 0.42.0 (2026-10-26)
 
