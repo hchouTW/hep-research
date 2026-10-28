@@ -9,7 +9,7 @@ sections of `VALIDATION.md`. Where those files give no number, the report says s
 Campaign window: H0 2026-10-26 to RC 2026-10-29 (integration branch `worktree-crprop-integration` from `main`
 8fcbb826, release 0.42.0; `main` has not moved since).
 
-WAVE6-RESULT: <pending>
+WAVE6-RESULT: final confirmation run on the release commit 790ef3e7 (after the wave-6 fixes and the 0.43.0 bump): full `run_all_checks.py --no-cli --jobs 4` passes in E2 (31 pass, 0 fail, 2 skipped CLI host checks; 6000 tests in 480 modules, 0 failures, 168 skipped) and with the CI lock (31 pass, 0 fail, 2 skipped; 6000 tests, 0 failures, 263 skipped); `check_relocation.py` shows only the 2 known geant4 path-with-spaces failures, identical on `main`.
 
 This line is for the final confirmation run after the wave-6 fixes. The wave-6 run itself (on 6f377150) was one
 run with two failures; see §2 and §6.
@@ -61,13 +61,13 @@ wave-run fix branches (§6).
 | C1 | merged | 099d1d22 | 1 | 1 | round 0 (not stated): REWORK; round 1 (Sonnet): PASS |
 | C2 | merged | 9f17775c | 1 | 0 | Opus: PASS |
 | C2U | merged | 886bb316 | 1 | 0 | Opus: PASS on C2U-1/2 (C2U-3 moved, A1.12) |
-| C2UF | merged | dee1179b | 2 | 1 | Opus: PASS; wave-6 fix: in progress |
+| C2UF | merged | dee1179b | 2 | 1 | Opus: PASS; wave-6 fix: Sonnet PASS, merged ac9d0a08 |
 | D1 | merged | e44377f4 | 2 | 0 | Opus: PASS under A1.11 |
 | D2 | unavailable | — | 0 | 0 | — (missing `env-galprop`) |
 | D3 | merged | 6a332c90; fix 310bb517 | 1 | 1 | Opus: PASS under A1.13; wave-5 fix (Sonnet): PASS |
 | E1 | merged | a4ad05d3; fix 63e7c1b2 | 1 | 1 | Sonnet: PASS; wave-3 fix (Sonnet): PASS |
 | E2 | merged | c28d960c; fix bc6f314f | 1 | 1 | Opus: PASS; wave-4 fix (Sonnet): PASS |
-| F1 | merged | 3ccaa643 | 2 | 1 | Opus: PASS under A1.17; wave-6 fix: in progress |
+| F1 | merged | 3ccaa643 | 2 | 1 | Opus: PASS under A1.17; wave-6 fix: Sonnet PASS, merged cdb5fe12 |
 | F2 | skipped | — | 0 | 0 | — (A1.18) |
 | F3 | skipped | — | 0 | 0 | — (A1.18, condition false) |
 | RC | dispatched | — | — | — | this work package |
@@ -228,7 +228,7 @@ of a frozen entry; the frozen entry stays in the file with its failed verdict.
   - wave 4 (E2): "same handling as the wave-3 fixes" (E2 note);
   - wave 5 (D3): the record gives no dependency reason; the handling was consistent with waves 3 and 4;
   - wave 6 (C2UF: hep-statistics routing size budget 25688 > 25600 B; F1: `test_cr_propagation.py:2269` subprocess
-    without timeout): the same handling, fix branches as rework round 1, in progress at the time of this report.
+    without timeout): the same handling, fix branches as rework round 1, both Sonnet PASS and merged (F1 fix cdb5fe12, C2UF fix ac9d0a08), confirmed by the final run.
 - **Limits.** P0 got a third rework round beyond the limit of 2 (A1.6). Concurrency was capped at 3 workers and 2
   full check runs (A1.3) instead of the manifest's 4 workers. `status.json` log[26] (2026-10-28) records a 4th
   worker (ENV dispatch 2) while A3 finished its check run: above A1.3's cap of 3, within r4 §4's limit of 4.
@@ -341,7 +341,7 @@ F1, so the campaign total is not stated in the record. It is above 8 and, at the
 | WF-7 | person clause missed | maintainer decisions A1.1-A1.15, the USINE clone approval and the pause and its cancellation were asked during the run (§6); nothing pushed, `main` unchanged, no pull request |
 | WF-8 | holds (natural test) | the campaign stopped on 2026-10-27 with WPs dispatched and resumed on 2026-10-28 ("resumption check ok: 6 worktrees, HEADs as recorded"); each was merged once |
 | WF-9 | capability clause holds; fallback clause missed, accepted (A1.18: F2 skipped by decision) | no WP was dispatched without its capabilities (B1, B3, C2U waited for `env-usine`; D2 never dispatched); F2's manifest fallback did not apply (§6) |
-| WF-10 | pending | wave 6 was one run with two failures (§2), fixes in progress; final confirmation run: WAVE6-RESULT above; `main` has not moved, so no rebase was needed |
+| WF-10 | pass | wave 6 was one run with two failures (§2), both fixed (cdb5fe12, ac9d0a08); final confirmation run: WAVE6-RESULT above; `main` has not moved, so no rebase was needed |
 
 ## 10. For H1 (delegated to the orchestrator, A1.15)
 

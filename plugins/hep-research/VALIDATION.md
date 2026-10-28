@@ -3483,6 +3483,26 @@ Not done in this stage: the independent
 new-problem run by an agent that did not take part (C1.10, section A.8), the `review.py` Markdown review, the release
 manifest. The adequacy table is unchanged; search values remain F1 optimistic bounds and decide nothing.
 
+## 0.43.0 release check (2026-10-29, E2 and the CI lock)
+
+Release commit `790ef3e7` on the cr-propagation integration branch, based on main `8fcbb826` (main has not moved since
+0.42.0, so no rebase). It ships the cr-propagation r4 campaign (CRPROP-* sections above; report in
+`docs/dev/cr-propagation/campaign-report.md`); contracts 3.14.0 and `CORE_VERSION` 1.2.0 become official (decision
+A1.15), adapter `cr-propagation` 0.2.0. No sci-fix ledger entry. The ams02-research companion needs no change (it
+requires hep-research >= 0.11.0).
+
+What changed in the release commit: version 0.43.0 in both manifests, `pyproject.toml`, the README, two assets, the
+theory-profile scripts and artifacts, `usine_translate.py` and `examples/bc-usine-reproduction/run.py` (run records
+stamp the plugin version; committed campaign run records keep the version that produced them); CHANGELOG `Unreleased`
+is now `0.43.0`; examples regenerated with E2: only version strings, the hashes that cover them and the platform
+string change. ruff 0.16.10 and mypy 2.4.0 (the CI pins) pass on `core/` and `contracts/`.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 4`, E2 (Python 3.13.2, NumPy 2.5.3) | 31 pass, 0 fail, 2 skipped (CLI host checks); 6000 tests in 480 modules, 5832 pass, 0 failures, 168 skipped |
+| Same with the CI lock (no torch) | 31 pass, 0 fail, 2 skipped; 6000 tests, 5737 pass, 0 failures, 263 skipped |
+| `check_relocation.py` | only the 2 known geant4 path-with-spaces failures (`test_geant4` partition merges), identical on main |
+
 ## 0.42.0 release check (2026-10-26, E2 and the CI lock)
 
 Release branch `release/0.42.0` from main `848c5eb4`. It ships #302-#306 (semantic naming P1-P5 and the fixes of the
@@ -7343,7 +7363,7 @@ base 47b004b4 = integration HEAD (not `main`; decision D10), rebased in rework r
 | `check_naming.py` | pass, no new findings, `naming_known_gaps.json` not grown |
 | `check_wiring.py --since 47b004b4` | pass |
 | `workflow_check.py diff --work-package RC --base 9b121eae`, `acceptance` | both ok; changed files only the 4 RC files; frozen sha256 f5b0dbe6…, 86 frozen entries, 17 added |
-| Full `run_all_checks.py` and `check_relocation.py` (WF-10, wave 6, orchestrator) | WAVE6-RESULT: <pending> |
+| Full `run_all_checks.py` and `check_relocation.py` (WF-10, wave 6, orchestrator) | final confirmation run on the release commit 790ef3e7 (after the wave-6 fixes and the 0.43.0 bump): full `run_all_checks.py --no-cli --jobs 4` passes in E2 (31 pass, 0 fail, 2 skipped CLI host checks; 6000 tests in 480 modules, 0 failures, 168 skipped) and with the CI lock (31 pass, 0 fail, 2 skipped; 6000 tests, 0 failures, 263 skipped); `check_relocation.py` shows only the 2 known geant4 path-with-spaces failures, identical on `main` |
 
 RC has no acceptance entries of its own beyond WF-2 to WF-10, which its verifier checks against section 9 of the
 report. Every number in the report is taken from `status.json`, `decisions.md`, `escalations.md`, `acceptance.json`

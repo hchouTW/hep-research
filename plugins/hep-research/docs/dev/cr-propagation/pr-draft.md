@@ -72,8 +72,8 @@ Full report: `plugins/hep-research/docs/dev/cr-propagation/campaign-report.md`
   subprocess-timeout test, which listed only the F1 line. `check_relocation.py` otherwise shows only the 2 known
   geant4 path-with-spaces failures, identical on `main`.
 - Wave 6 (6f377150) was one run with two failures: the hep-statistics routing size budget, 25688 > 25600 B (C2UF), and a subprocess
-  call without a timeout in `test_cr_propagation.py:2269` (F1). Both are being fixed on fix branches (rework round 1).
-- Final confirmation run after the wave-6 fixes: WAVE6-RESULT: <pending>
+  call without a timeout in `test_cr_propagation.py:2269` (F1). Both were fixed on fix branches (rework round 1, Sonnet PASS, merged).
+- Final confirmation run after the wave-6 fixes: final confirmation run on the release commit 790ef3e7 (after the wave-6 fixes and the 0.43.0 bump): full `run_all_checks.py --no-cli --jobs 4` passes in E2 (31 pass, 0 fail, 2 skipped CLI host checks; 6000 tests in 480 modules, 0 failures, 168 skipped) and with the CI lock (31 pass, 0 fail, 2 skipped; 6000 tests, 0 failures, 263 skipped); `check_relocation.py` shows only the 2 known geant4 path-with-spaces failures, identical on `main`.
 - Required CI jobs: <pending>
 
 ### Known issues

@@ -856,6 +856,11 @@
    "cycle": 4,
    "date": "2026-10-29",
    "event": "merged: F1 wave-6 fix cdb5fe12 (Sonnet PASS), RC 976851ad (Opus PASS r2), C2UF wave-6 fix (Sonnet PASS); confirmation full run next"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "final confirmation on release commit 790ef3e7: full run E2 and CI lock 31 pass / 0 fail, 6000 tests 0 failures; relocation only the 2 known geant4 failures; WF-10 pass; release 0.43.0 next (A1.15)"
   }
  ],
  "env": {
