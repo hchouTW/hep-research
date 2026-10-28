@@ -6774,3 +6774,45 @@ posterior).
   prediction as an uncertainty component.
 - Limits: at most 5 active-addition rounds after the first emulator; at most 500 USINE evaluations for E2 (tally kept;
   E1's 111 runs reused from its cache are not new evaluations); at most 4 USINE runs at once.
+
+**Results (2026-10-28; run outputs `$CRPROP_OUT/e2/`, driver `tests/adapters/fixtures/cr_propagation/e2/emulator_campaign.py`,
+E2 venv Python 3.13.2, NumPy 2.5.3, SciPy 1.18.1).** Emulator: `skills/hep-ml/scripts/train_emulator.py`, a
+Gaussian process (Matérn-5/2, one length scale per parameter, maximum marginal likelihood with an analytic gradient)
+on each of 13 principal components of ln B/C (training reconstruction residual 2.3e-6), trained on E1's 110 USINE
+points (design, E1 hold-out and every E1 addition; the truth point, which carries the synthetic data, left out);
+`DomainModel` (quantile 0.99, k 5) stored in the model file; ml-artifact by `write_ml_artifact.py` (task surrogate,
+`extrapolation_policy` reject, split check passed with test groups disjoint), valid without findings. The first
+emulator already met both criteria on the hold-out, so no active-addition round was needed (the round machinery did
+not run live).
+
+| ID | Result | Evidence |
+|---|---|---|
+| E2-1 | passed: largest Δχ² 0.0045 on the 32 hold-out points (posterior of the first emulator) and 0.0022 on the 32 confirmation points (posterior of the final emulator, the same model); tolerance ≤ 1 | `e2/summary.json` rounds[0].holdout, confirmation; recomputed offline by `EmulatorValidation.test_holdout_criteria` from `e2/holdout.json` |
+| E2-2 | passed: largest abs(b_i)/σ_i^stat 0.063 (hold-out, bin 0 at 2–2.7 GV) and 0.045 (confirmation); tolerance 0.2; largest relative error 6.1e-4 | same |
+| E2-3 | passed: best fits (start at the box centre) emulator vs USINE differ by at most 0.0020 σ (V_A_kms; D0 0.0008, delta 0.0008, eta 0.0004, V_c 0.0003); Laplace half-widths differ by −0.10%, +0.01%, +0.48%, −1.16%, −0.43% (D0, delta, eta, V_A, V_c); tolerances 0.2 σ and 10%. USINE fit: 23 function evaluations, 113 USINE evaluations (cap 300), χ² 2.7e-11 at the truth; emulator fit χ² 4.9e-6. The Laplace 1σ intervals of eta, V_A_kms and V_c_kms cross the box edges (σ in the unit cube 0.34, 0.33, 0.96: B/C alone leaves V_c almost free, as E1 saw); the criterion compares the same Laplace method for both providers, boundaries not treated | `e2/summary.json` e2_3; ml-artifact `downstream_validation` |
+| E2-PRV-1 | passed: `EmulatorProviderConformance` (C1 mixin) all checks, offline (no USINE) | `tests/adapters/test_cr_propagation.py` |
+| E2-PRV-2 | passed: single-shot and `--serve` responses have equal sha256 without `elapsed_s` (check prv-2), and the runner's response equals the direct one | same |
+
+Domain and posterior: the provider refuses a point the `DomainModel` calls sparse or outside (out-of-domain, with its
+reasons), the box by the protocol, another transport block (out-of-domain) and bins that are not training bins
+(unsupported-observable); a tampered model fails with provider-error, another model (`HEP_EMULATOR_ML_ARTIFACT`)
+gets version `1.0.0+model.<sha12>`. Its GP and domain arithmetic equal hep-ml's `GaussianProcessEmulator` and
+`DomainModel` (1e-12; 1,610 points). The posterior through the provider (importance sampling, 16,384 proposal draws,
+6,469 in the box) refused 1,058 draws (16%), ESS 495: the stored `DomainModel` reports an estimated in-distribution
+false-positive rate of 0.18 (22 held-out training points of a Sobol design, which the method's note says to read as a
+guide), so the domain is conservative and the posterior is conditional on it. Every hold-out and confirmation point is
+`inside`. Emulator error per prediction (P10): 13 fully correlated components (one per principal component) plus one
+uncorrelated component, adding in quadrature to the GP variance. The GP mean carries rounding noise of about 1e-10 in
+ln B/C (six components have the nugget at its 1e-12 floor), far below the 6e-4 error.
+
+**Budget (D7, A1.8).** 177 USINE evaluations for E2 (hold-out 32, confirmation 32, E2-3 fit 113; E1's 110 points and
+the truth were cache hits), cap 500; at most 4 USINE runs at once; each has a computational-run record under
+`$CRPROP_OUT/e2/runs/`. CPU about 0.2 core-hours. B1X check: for the truth point and three hold-out points the USINE
+input files rendered by the B1X translator (`worktree-crprop-b1x` at ce60dbaf, exported read-only) are byte-identical
+to those of this base, and the ILLUSTRATIVE network has no 13C or 14C (B1X's reader change), so E1's and E2's USINE
+values do not depend on B1X as it stands.
+
+Labels: synthetic, unvalidated (ILLUSTRATIVE cross sections, synthetic data); the emulator is validated only in the
+posterior of this synthetic fit, and its training transport is the USINE provider's `DEFAULT_TRANSPORT` (L_kpc 4).
+Not done: an active-addition round with this emulator (not needed); a profile-likelihood or posterior interval
+comparison with USINE (E2-3 uses Laplace intervals, as fixed above).

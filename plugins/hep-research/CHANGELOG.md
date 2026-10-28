@@ -127,6 +127,18 @@ Software checks establish contract consistency only, not physical validity.
   second-order term, lam = h Gamma L / D, now a required input (`--destruction-escape-ratio`). The `reacceleration`
   subcommand takes `--from`/`--to` (the old `--from-zone`/`--to-zone` still work). Tests: an independent
   finite-difference oracle of the zone weights, round trips within 1e-12.
+- crprop e2: emulator of USINE B/C with its valid domain and provider (r3 §E2, §E2b; optional WP). New
+  `skills/hep-ml/scripts/train_emulator.py`: Gaussian-process emulator of a vector simulator output on a box of
+  inputs (principal components, Matern-5/2 GP each, error per prediction, `DomainModel` in the model file, run summary
+  for the writer with task surrogate). `write_ml_artifact.py` now copies the task's validation block
+  (`extrapolation_policy`, `generative_validation`, `sbi_validation`, `anomaly_validation`, `reweighting_validation`,
+  `parameters`, `supervision`), so a surrogate artifact can be written. New cr-provider/1 provider `emulator`
+  (`adapters/cr-propagation/assets/emulator_provider.py`, declared in `adapter.json`): reads only the ml-artifact and
+  model file, refuses points the `DomainModel` calls sparse or outside, gives the emulator error as uncertainty
+  components; `HEP_EMULATOR_ML_ARTIFACT` names another model. Committed model, ml-artifact, hold-out sets and summary
+  under `tests/adapters/fixtures/cr_propagation/e2/` (with the driver `emulator_campaign.py`): E2-1, E2-2 and E2-3 met
+  on synthetic data (177 USINE evaluations). Tests: `tests/skills/hep_ml/test_train_emulator.py`, E2 classes in
+  `tests/adapters/test_cr_propagation.py`.
 
 - crprop b1x: high break and USINE's own inputs (decision A1.7; still the unreleased contracts 3.14.0 with
   `CRPROP_FROM`, no new gate). `extension.transport` gains a high break (`{"kind": "high", "R_break_gv",
