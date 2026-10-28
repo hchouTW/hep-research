@@ -291,7 +291,7 @@
    ]
   },
   "F2": {
-   "state": "pending",
+   "state": "skipped",
    "dispatches": 0,
    "rework_rounds": 0,
    "branch": null,
@@ -301,10 +301,12 @@
    "worker_report": null,
    "verifier_report": null,
    "missing_capabilities": [],
-   "notes": []
+   "notes": [
+    "A1.18: optional; F1 partial, eval cap near"
+   ]
   },
   "F3": {
-   "state": "pending",
+   "state": "skipped",
    "dispatches": 0,
    "rework_rounds": 0,
    "branch": null,
@@ -314,7 +316,9 @@
    "worker_report": null,
    "verifier_report": null,
    "missing_capabilities": [],
-   "notes": []
+   "notes": [
+    "A1.18: condition false (F1-1 not passed)"
+   ]
   },
   "RC": {
    "state": "pending",
@@ -815,6 +819,11 @@
    "cycle": 4,
    "date": "2026-10-29",
    "event": "F1 dispatch 2 PARTIAL (fd2ae511); A1.17 recorded; Opus verifier dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "A1.18: F2 and F3 skipped"
   }
  ],
  "env": {
