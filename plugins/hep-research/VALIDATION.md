@@ -6519,6 +6519,12 @@ the D_pp), and B1's whole-halo branch uses sqrt(L/h). Neither translator is in A
 Not done in A1R: convection, a radial boundary and energy losses in the zone factor (the conversion says so); the
 operator form beyond the D_pp coefficient was not re-derived; the translators of B1 and D1 were not changed.
 
+Rework round 1 (wave-3 finding): `tests.skills.hep_theory.test_cosmic_ray_phenomenology_th13` requires the phrase
+`D_pp D_xx` in the propagation-codes section; A1R had written `D_pp D`. The reacceleration bullet of
+`cosmic-ray-phenomenology.md` now reads `D_pp D_xx = c V_A^2 p^2 / (...)` (content otherwise unchanged); the page is
+24574 B (limit 24576 B; heading and `about 1` shortened to make room), `docs/reference-inventory.*` regenerated. Passing:
+the Th13, transport_conventions, routing_tables and documented_output_claims tests, reference_inventory --check.
+
 ## CRPROP-B1X — 2026-10-28 (environment E2)
 
 Work package B1X of the cr-propagation r4 campaign (decision A1.7, escalation 8): a high break in

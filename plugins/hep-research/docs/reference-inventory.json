@@ -40,7 +40,7 @@
   },
   "hep-theory": {
    "references": 31,
-   "bytes": 243627,
+   "bytes": 243625,
    "uncited": 0
   }
  },
@@ -4076,7 +4076,7 @@
   {
    "path": "skills/hep-theory/references/cosmic-ray-phenomenology.md",
    "owner": "hep-theory",
-   "bytes": 24576,
+   "bytes": 24574,
    "lines": 291,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -4090,7 +4090,7 @@
     "tests/skills/hep_theory/test_transport_conventions.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "089af7f8 2026-10-26"
+   "last_commit": "8eb2efa3 2026-10-28"
   },
   {
    "path": "skills/hep-theory/references/cosmic-ray-propagation.md",

@@ -64,8 +64,8 @@ codes and zones (below); `energy` converts per-nucleon and total kinetic energy 
 Alfven speed V_A (reacceleration); convective speed V_c and its gradient; halo height L; injection indices and their
 breaks; the modulation parameters of the data periods.
 
-- **Reacceleration ties D_pp to D:** D_pp D = c V_A^2 p^2 / (delta (4 - delta) (4 - delta^2) w), w (wave/field
-  energy) about 1; c = 4/3 in Strong and Moskalenko 1998 (Sec. 2, Eq. 1, after Seo and Ptuskin 1994), cited
+- **Reacceleration (D_pp to D_xx):** D_pp D_xx = c V_A^2 p^2 / (delta (4 - delta) (4 - delta^2) w), w (wave/field
+  energy) ~1; c = 4/3 in Strong and Moskalenko 1998 (Sec. 2, Eq. 1, after Seo and Ptuskin 1994), cited
   by GALPROP v57 (Porter et al. 2022, Sec. 2) and Evoli et al. 2017 (App. C.9, Eq. C.27). In code:
   DRAGON2 cd588707 type `Ptuskin94` has c = 1 and no w, `Ptuskin03` c = 4/3 (src/galaxy.cc:279-284;
   src/include/constants.h:146-149), whole halo (src/galaxy.cc:308, 324); USINE V3.5 c = 4/3
