@@ -185,17 +185,19 @@
    "notes": []
   },
   "C2": {
-   "state": "dispatched",
+   "state": "verifying",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-c2",
    "base": "699c3b5c",
-   "head": null,
+   "head": "a2e8f9b1",
    "merge_commit": null,
-   "worker_report": null,
+   "worker_report": "DONE: C2-1..C2-6 pass (C2-3 mechanism; BIG/SLIM need USINE = C2U); coverage 0.686/0.671/0.696 in Bonferroni band; response-model shortcut with model error in covariance; ~6600 closed-form evaluations (escalation 7); open: modulation refused, duplicate-observable protocol issue, costly profile scans",
    "verifier_report": null,
    "missing_capabilities": [],
-   "notes": []
+   "notes": [
+    "Opus verifier dispatched 2026-10-28"
+   ]
   },
   "B3": {
    "state": "dispatched",
@@ -525,6 +527,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "D1 resumed to rebase and finish B1-dependent items; B3 dispatched from 2d451e87; wave-2 full run started on 2d451e87 (P0 fix, ENV 2, A3, A4, B1, timings)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "C2 DONE (a2e8f9b1), Opus verifier dispatched; escalation 7 extended (C2 closed-form evaluation count)"
   }
  ],
  "env": {
