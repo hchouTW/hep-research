@@ -58,25 +58,25 @@
    "head": "d58b6d0f",
    "merge_commit": null,
    "worker_report": "DONE: A1-1..A1-5 pass, A1-6 structure only until A2 merges; open: USINE smooth-break form is the module reading (not re-read from Weinrich 2020a Eq. 1); harmonized-v1 source spatial distribution left open by r3 5.5; output/network fields beside transport",
-   "verifier_report": null,
+   "verifier_report": "PASS (2026-10-28, Opus): A1-1..A1-5 pass, A1-6 structure + informal schema check ok; advisories: USINE smooth-break form unverified vs Weinrich 2020a; dragon2 eta fixed 0 vs adapter etaT; n_H only as text; source spatial distribution open (decision before D3); He-target/ghost treatment vs xs-illustrative-A",
    "missing_capabilities": [],
    "notes": [
     "verifier re-dispatched 2026-10-28 (Opus)"
    ]
   },
   "A2": {
-   "state": "verifying",
+   "state": "merged",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-a2",
    "base": "ef37d970",
    "head": "26a0f3fc",
-   "merge_commit": null,
+   "merge_commit": "a3c880f8",
    "worker_report": "all A2 entries pass; 3.14.0 bump commit 26a0f3fc fast-forwarded into the WP branch by the orchestrator after A2 files were extended to version-pin regeneration (188 files) and test_grid_fit.py",
-   "verifier_report": null,
+   "verifier_report": "PASS (2026-10-28, Sonnet): all A2 entries pass; pins version/hash-only (187/188 + 1 derived hash); A1 transport validates; full run 33/33 on 26a0f3fc (extra); ALL-3 deferred to wave run",
    "missing_capabilities": [],
    "notes": [
-    "verifier re-dispatched 2026-10-28 (Sonnet, full run_all_checks)"
+    "merged a3c880f8 (CHANGELOG/VALIDATION appended-section conflicts resolved, both kept); post-merge static exit 0, acceptance ok"
    ]
   },
   "A3": {
@@ -416,6 +416,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "B2 DONE (dispatch 2, HEAD b2cdcf49); Opus verifier dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A2 merged (a3c880f8), post-merge static ok; A1 verifier PASS"
   }
  ],
  "env": {
