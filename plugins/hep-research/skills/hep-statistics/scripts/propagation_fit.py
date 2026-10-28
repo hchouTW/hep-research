@@ -702,6 +702,30 @@ def _difference_jacobian(fun, steps, lo, hi):
     return jac
 
 
+def _central_jacobian(fun, steps, lo, hi):
+    """Central-difference Jacobian with the stated steps (one-sided where a step would leave the box), for the fits on
+    a response model or an emulator, whose evaluations are cheap: no O(step) bias in the minimum, so the verdict
+    (central differences, EDM <= 1e-5) judges the point the optimizer found."""
+    lo, hi = np.asarray(lo, dtype=float), np.asarray(hi, dtype=float)
+
+    def jac(t):
+        t = np.asarray(t, dtype=float)
+        f0 = None
+        cols = []
+        for i, h in enumerate(steps):
+            h = h if h is not None else 1e-4 * max(1.0, abs(t[i]))
+            up, down = t.copy(), t.copy()
+            up[i] += h
+            down[i] -= h
+            if up[i] <= hi[i] and down[i] >= lo[i]:
+                cols.append((fun(up) - fun(down)) / (2 * h))
+                continue
+            f0 = fun(t) if f0 is None else f0
+            cols.append((fun(up) - f0) / h if up[i] <= hi[i] else (f0 - fun(down)) / h)
+        return np.array(cols).T
+    return jac
+
+
 def _snap_to_bounds(nll, t, steps, lo, hi):
     """A bounded optimizer stops strictly inside the box; a coordinate within one stated difference step of a bound
     would make the verdict's differences straddle the bound. Such a coordinate is set on the bound when that does not
@@ -1173,11 +1197,14 @@ class SurrogateFit:
                                              max_nfev=opt["max_iterations"] * (len(w0) + 1) * 4, xtol=1e-12,
                                              ftol=1e-12, gtol=1e-10)
             else:
-                res = optimize.least_squares(lambda w: self.resid(to_z(w), ys, aux), w0, bounds=(lo, hi),
-                                             method="trf", max_nfev=opt["max_iterations"],
-                                             xtol=1e-12, ftol=1e-12, gtol=1e-10)
+                def fun_b(w):
+                    return self.resid(to_z(w), ys, aux)
+                steps_w = self._w_steps(len(w0))
+                jac = _central_jacobian(fun_b, steps_w, lo, hi) if steps_w is not None else "2-point"
+                res = optimize.least_squares(fun_b, w0, jac=jac, bounds=(lo, hi), method="trf",
+                                             max_nfev=opt["max_iterations"], xtol=1e-12, ftol=1e-12, gtol=1e-10)
             z = to_z(res.x)
-            ok, reason = self._judge(z, res, ys, aux, to_z, lo, hi)
+            ok, reason, z = self._judge(z, res, ys, aux, to_z, lo, hi)
             last = (self.chi2(np.clip(z, self.lo, self.hi), ys, aux), z, ok, reason)
             if ok:
                 return last
@@ -1190,20 +1217,41 @@ class SurrogateFit:
         return last[0], last[1], False, "restart-cap"
 
     def _judge(self, z, res, ys, aux, to_z, lo, hi):
+        """(ok, reason, z). Without a constraint, a coordinate within one stated difference step of a domain bound
+        is set on it first when that does not raise -ln L (as in fit_family), so boundary_kkt judges it."""
         if res.status <= 0:
-            return False, "not-converged"
+            return False, "not-converged", z
         for j in range(self.k):
             span = self.hi[j] - self.lo[j]
             if z[j] <= self.lo[j] + 1e-7 * span and not self.domain_edge[j][0]:
-                return False, "left-response-box"
+                return False, "left-response-box", z
             if z[j] >= self.hi[j] - 1e-7 * span and not self.domain_edge[j][1]:
-                return False, "left-response-box"
+                return False, "left-response-box", z
         if not np.all(np.isfinite(z)):
-            return False, "not-converged"
+            return False, "not-converged", z
         w = res.x
+
+        def nll(q):
+            return 0.5 * float(np.sum(res_fun(self, to_z, q, ys, aux) ** 2))
+        steps = self._w_steps(len(w)) if lo is not None else None
+        if steps is not None:
+            edge_lo = [lo[j] if j < self.k and self.domain_edge[j][0] else -np.inf for j in range(len(w))]
+            edge_hi = [hi[j] if j < self.k and self.domain_edge[j][1] else np.inf for j in range(len(w))]
+            w = _snap_to_bounds(nll, w, steps, edge_lo, edge_hi)
+            z = to_z(w)
         bounds = list(zip(lo, hi)) if lo is not None else [(-np.inf, np.inf)] * len(w)
-        v = _verdict(lambda q: 0.5 * float(np.sum(res_fun(self, to_z, q, ys, aux) ** 2)), w, bounds, set())
-        return v["status"] == "converged", ("ok" if v["status"] == "converged" else "not-converged")
+        v = _verdict(nll, w, bounds, set(), steps)
+        return v["status"] == "converged", ("ok" if v["status"] == "converged" else "not-converged"), z
+
+    def _w_steps(self, n_w):
+        """The stated difference steps (parameters.<name>.step) of the free coordinates when the fit is not
+        constrained (n_w = all coordinates), the multipliers with none; else None. With them, the toy fits use the
+        same Jacobian steps, bound snapping and verdict steps as fit_family: a provider evaluated directly
+        (an emulator) has rounding noise far above scipy's default relative steps of 1e-8."""
+        stated = self.model.steps(self.names)
+        if stated is None or n_w != len(self.lo):
+            return None
+        return list(stated) + [None] * (n_w - self.k)
 
 
 def _constrained_map(constraint, start, lo_all, hi_all):

@@ -306,7 +306,8 @@ def request_problem(request, emulator: Emulator):
 
 
 def _declared_observable(emulator: Emulator, slot: dict, edges: list[float]) -> dict:
-    """A per-model observable block: the training runs' block with this request's bins and validity range."""
+    """A per-model observable block: the training runs' block with this request's bins and validity range (process,
+    species and conventions unchanged: the emulated quantity is the training runs' quantity)."""
     import copy
 
     block = copy.deepcopy(slot.get("observable") or {})
@@ -314,9 +315,7 @@ def _declared_observable(emulator: Emulator, slot: dict, edges: list[float]) -> 
     block["variables"] = [dict(variables[0], edges=edges)]
     if isinstance(block.get("validity_range"), dict):
         block["validity_range"] = dict(block["validity_range"], min=edges[0], max=edges[-1])
-    block["process"] = (f"{block.get('process', slot['id'])}; emulated by the Gaussian-process emulator "
-                        f"{emulator.artifact.get('artifact_id')}")
-    return block
+    return block   # the same quantity as the training runs'; the emulator is named in parameter_point
 
 
 def prediction(emulator: Emulator, obs: dict, point: dict, values, comps, residual, status: str) -> dict:
