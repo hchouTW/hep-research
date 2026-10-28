@@ -58,6 +58,12 @@ Software checks establish contract consistency only, not physical validity.
   checks), ILLUSTRATIVE isotopic set `models/xs-illustrative-decay.json`, tests `tests/test_convection_decay.py`;
   the profile's tests directory is now a package so it is discoverable from the plugin root. Reacceleration stays
   excluded. Profile version unchanged (0.1.0): the minor bump needs `profiles/registry.json` and the example pins.
+- crprop a4: cost benchmark of the cr-propagation campaign (r3 §A4): wall time and peak RSS (median of three runs)
+  of the closed-form provider of `cr-secondary-ratio` and of DRAGON2 under `harmonized-v1`, and the grid convergence
+  of DRAGON2's B/C over 2–1000 GV (spatial and energy grids doubled once; reported, no threshold), in the
+  `CRPROP-COST` section of VALIDATION.md. Run records, run specs, provider requests and the convergence script under
+  `tests/adapters/fixtures/cr_propagation/cost/`. USINE and GALPROP rows not measured (capability absent). No
+  behavior change.
 
 ## 0.42.0 (2026-10-26)
 

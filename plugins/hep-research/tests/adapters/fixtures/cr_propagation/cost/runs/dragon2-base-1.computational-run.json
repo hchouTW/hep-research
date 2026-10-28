@@ -1,0 +1,153 @@
+{
+ "contract_version": "3.14.0",
+ "artifact_id": "crprop-a4-dragon2-base-1",
+ "artifact_type": "computational-run",
+ "objective": "A4 cost benchmark: DRAGON2 under harmonized-v1 (hv1_base, run base-1); wall time, peak RSS and B/C output for grid convergence",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.42.0",
+  "contracts": "3.14.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-computing",
+  "created": "2026-10-28",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "status": [
+  "unvalidated"
+ ],
+ "extension": {
+  "input_manifest": [
+   {
+    "path": "tests/adapters/fixtures/cr_propagation/cost/specs/hv1_base.json",
+    "sha256": "f574291fce2eab920cd59b0c3f21880e742c5e53d227b4bf4ec736896c627325"
+   },
+   {
+    "path": "<RUN_DIR>/inputs/harmonized-v1.source.param",
+    "sha256": "21e4d88ab763c5627ad34c5b525c1fe72977744a7dea363681c2f7c6e1b3eb75"
+   },
+   {
+    "path": "<TOOL_HOME>/src/examples/BaseModel_DRAGONxsec.source.param",
+    "sha256": "c391c8bf7f2627f562269f4c5b6c2c9404124f530c4ef1e62117431f3f09373f"
+   },
+   {
+    "path": "<TOOL_HOME>/install/bin/DRAGON",
+    "sha256": "d26dbb857a2c06182bd7b754ce963888670ceaa5932d0efa58b0ca202a9a6c34"
+   },
+   {
+    "path": "<RUN_DIR>/runs/base-1/hv1_base.xml",
+    "sha256": "9ace9455c032e231b8ebbed27daaf024ffad1b8ef087ba267eba3cd54e25dc98"
+   },
+   {
+    "path": "<RUN_DIR>/runs/base-1/hv1_base.source.param",
+    "sha256": "21e4d88ab763c5627ad34c5b525c1fe72977744a7dea363681c2f7c6e1b3eb75"
+   },
+   {
+    "path": "<RUN_DIR>/runs/base-1/data/crxsecs_fragmentation_Evoli2019_cumulative_modified.dat",
+    "sha256": "a0f56932d3fc04203b866c656aa62e424b4e16825153d2cde90816b6deb81faa"
+   }
+  ],
+  "tools": [
+   {
+    "name": "DRAGON2",
+    "version": "DRAGON2-Beta_version git cd588707fe03c76f19bda1b8092e136dcbe3fe90 (configure.ac DRAGON 3.1.0), serial build of 2026-10-15 (ENV), not rebuilt",
+    "source": "https://github.com/cosmicrays/DRAGON2-Beta_version",
+    "binary": "<TOOL_HOME>/install/bin/DRAGON",
+    "binary_sha256": "d26dbb857a2c06182bd7b754ce963888670ceaa5932d0efa58b0ca202a9a6c34"
+   },
+   {
+    "name": "dragon2_run.py",
+    "version": "plugin 0.42.0 + crprop integration 566bfd1e",
+    "path": "adapters/cr-propagation/assets/dragon2_run.py"
+   },
+   {
+    "name": "/usr/bin/time -l",
+    "version": "macOS 27.2 BSD time; peak RSS = 'maximum resident set size' of the wait4 rusage, which includes the DRAGON2 grandchild (checked with a test child)"
+   },
+   {
+    "name": "python",
+    "version": "3.13.2"
+   },
+   {
+    "name": "numpy",
+    "version": "2.5.3"
+   },
+   {
+    "name": "scipy",
+    "version": "1.18.1"
+   }
+  ],
+  "commands": [
+   "python3 skills/hep-computing/scripts/environment_manifest.py record --packages numpy,scipy --project <TOOL_HOME>/src --inputs <TOOL_HOME>/install/bin/DRAGON --out <RUN_DIR>/env/e2.environment.raw.json",
+   "awk 'BEGIN{OFS=\"\\t\"} NF>=7 {$3=\"2.3\";$5=\"2.3\";$7=\"2.3\"} {print}' <TOOL_HOME>/src/examples/BaseModel_DRAGONxsec.source.param > <RUN_DIR>/inputs/harmonized-v1.source.param  # every injection slope 2.3, breaks inert (harmonized-v1: all primaries R^-2.3, no break)",
+   "HEP_DRAGON2_BIN=<TOOL_HOME>/install/bin/DRAGON HEP_DRAGON2_DATA=<TOOL_HOME>/src/data /usr/bin/time -l <VENV>/bin/python adapters/cr-propagation/assets/dragon2_run.py --spec tests/adapters/fixtures/cr_propagation/cost/specs/hv1_base.json --out <RUN_DIR>/runs/base-1 --source-param <RUN_DIR>/inputs/harmonized-v1.source.param --environment tests/adapters/fixtures/cr_propagation/env/dragon2.environment.json --record <RUN_DIR>/runs/base-1/run.computational-run.json --timeout 43200",
+   "<TOOL_HOME>/install/bin/DRAGON hv1_base.xml  # run by dragon2_run.py in <RUN_DIR>/runs/base-1"
+  ],
+  "environment": {
+   "python": "3.13.2",
+   "implementation": "CPython",
+   "executable": "<VENV>/bin/python",
+   "platform": "macOS-27.2-arm64-arm-64bit-Mach-O",
+   "machine": "arm64",
+   "system": {
+    "os": "Darwin",
+    "arch": "arm64",
+    "libc": "macOS 27.2",
+    "kernel": "27.2.0"
+   },
+   "origin": "venv",
+   "variables": {
+    "ROOTSYS": "/opt/homebrew/Cellar/root/6.38.04_1",
+    "CONDA_PREFIX": "<CONDA_HOME>",
+    "CONDA_DEFAULT_ENV": "base"
+   },
+   "packages": {
+    "numpy": "2.5.3",
+    "scipy": "1.18.1"
+   },
+   "project": {
+    "path": "<TOOL_HOME>/src",
+    "commit": "cd588707fe03c76f19bda1b8092e136dcbe3fe90",
+    "dirty": false
+   },
+   "label": "E-crprop (E2 host plus the ENV DRAGON2 build)"
+  },
+  "seeds": {
+   "note": "not applicable: DRAGON2 is deterministic"
+  },
+  "tolerances": {
+   "note": "none applied; DRAGON2 time-step schedule Dtmax 64 Myr to Dtmin 0.001 Myr, factor 0.25, 30 steps per level (dragon2_run.py XML)"
+  },
+  "resources": {
+   "wall_seconds": 127.18,
+   "user_seconds": 125.44,
+   "sys_seconds": 0.34,
+   "peak_rss_bytes": 727826432,
+   "adapter_wall_seconds": 127.1,
+   "processes": 1,
+   "threads": "1 (serial build, no OpenMP)",
+   "grid": {
+    "DimR": 41,
+    "DimZ": 401,
+    "Ekfactor": 1.1220184543,
+    "energy_nodes": 78,
+    "Zmin": 5,
+    "Zmax": 8
+   },
+   "host_load_before": "2026-10-28T09:42:28Z | load averages 7.60 8.42 12.01",
+   "host_load_after": "2026-10-28T09:44:35Z | load averages 7.30 7.84 11.27",
+   "concurrency": "serial timing series: no other A4 DRAGON2 run at the same time"
+  },
+  "exit_status": 0,
+  "output_hashes": {
+   "<RUN_DIR>/runs/base-1/output/hv1_base.txt": "cbfbc3c1169c169b63d158598bd3c0dae0c8d0d94d3b89a584be3a123d01d314"
+  }
+ }
+}

@@ -6029,3 +6029,55 @@ Method (r3 §A4): wall time and peak RSS (`/usr/bin/time -l`, "maximum resident 
 DRAGON2 child of the adapter) of three identical runs each, the median reported; grid convergence = largest
 |ΔB/C|/(B/C) over 2–1000 GV when the spatial grid (DimR 41 → 81, dz 0.02 → 0.01 kpc) and the energy grid
 (Ekfactor 10^(1/20) → 10^(1/40)) are doubled once, each alone and both together; reported, no threshold.
+
+**Results (2026-10-28, records under `tests/adapters/fixtures/cr_propagation/cost/`).** A4-1: every number in
+`CRPROP-COST` is read from a computational-run record of this work package (13 records, each `contracts/validate.py`
+ok; summary `cost-table.json`); none comes from the literature; USINE and GALPROP are marked not measured. A4-2: the
+table has closed-form and DRAGON2 rows. The three DRAGON2 base runs give byte-identical output (sha256 cbfbc3c1…).
+Expressing `harmonized-v1` in DRAGON2 (each difference and its substitute, none silent):
+
+| Item | harmonized-v1 | DRAGON2 run | Reason |
+|---|---|---|---|
+| Diffusion | β¹ (R/1 GV)^0.5, `D0_cm2_s` = 3e28 | `D0_1e28` 3, `DiffRefRig` 1, `Delta` 0.5, `etaT` 1 (DRAGON2 `diffusion.cc`: D0 β^etaT (R/R_ref)^δ) | `transport_conventions.py diffusion` canonical → dragon2 returns `not-convertible` (its dragon2 convention fixes eta = 0); the adapter's `etaT` expresses β¹ directly, so the run spec is written by hand (A1 verifier advisory; not a blocker for the cost rows) |
+| Gas | uniform n_H = 1 cm⁻³, He/H 0.1 | `BronfFerr` (adapter default); DRAGON2 helium term with its fixed He abundance 0.11 | `Uniform` is parsed by this DRAGON2 build but `gas.cc` has no density for it (default branch, −1); He/H is a compiled constant |
+| Geometry | L 4 kpc, R 20 kpc, h 100 pc | L 4, Rmax 20; no disc half-thickness parameter | h only matters for reacceleration, which is off |
+| Sources | all primaries R^−2.3, no break | `OneRing` 0–20 kpc; source.param with every slope 2.3 (breaks inert); DRAGON2 base abundances | the spatial source distribution is open in harmonized-v1 |
+| Cross sections | ILLUSTRATIVE set A (C→B 70 mb, O→B 35 mb; inelastic B 250, C 270, O 310 mb) | production table C→¹¹B 70 mb, O→¹¹B 35 mb, O→C 0 mb; DRAGON2's own inelastic cross sections and He-target term | no data file replaces DRAGON2's inelastic cross sections (adapter docstring) |
+| Network | parents C, O; tertiary and ghosts off | Z 5–8 (B, C, N, O), only the listed channels | — |
+| Output | LIS 1–10³ GeV/n, 20 per decade | E/n grid 0.3–2000 GeV/n, Ekfactor 10^(1/20) | 0.3 GeV/n reaches 2 GV for ¹¹B (a first base run with 0.5 GeV/n was aborted for this) |
+
+The closed form runs its own fixed inputs (hydrogen target, n_H = 1 cm⁻³, C:O = 1:0.9 observed); its point equals
+harmonized-v1's transport values.
+
+**Budget (D7).** DRAGON2: 6 completed runs plus the aborted one, 4257 CPU-s for the completed runs (about 1.2
+core-hours in total); at most 3 DRAGON2 processes at once. Closed form: 771 point evaluations in 6 runs (about 7
+CPU-s). Whether benchmark evaluations count toward D7's 5000 provider evaluations is not stated in D7; reported for
+the orchestrator.
+
+Software and timing measurements only; the DRAGON2 and closed-form outputs are not compared with each other or with
+data here (that is B3/D3), and the inputs are ILLUSTRATIVE.
+
+## CRPROP-COST — 2026-10-28 (environment E-crprop)
+
+Cost table of the cr-propagation campaign (r3 §A4), feeding E1's budget (r4 §6). Configuration `harmonized-v1`;
+`/usr/bin/time -l`; median of three identical runs; records in `tests/adapters/fixtures/cr_propagation/cost/runs/`,
+summary `cost/cost-table.json`.
+
+| Tool | Wall time (median) | CPU user (median) | Peak RSS (median) | Runs | Grid convergence of B/C, 2–1000 GV |
+|---|---|---|---|---|---|
+| Closed form (`cr-secondary-ratio` provider, 1 point × 60 bins, one process) | 0.14 s | 0.11 s | 41 MB | `closed-form-1pt-{1,2,3}` | no spatial or energy grid (analytic point values); bin-average quadrature 8 → 16 nodes: 4.4e-16 |
+| Closed form (256 points × 60 bins in one request) | 2.55 s (marginal 9.4 ms per point) | 2.33 s | 44 MB | `closed-form-256pt-{1,2,3}` | as above |
+| DRAGON2 cd588707 (DimR 41, DimZ 401, Ekfactor 10^(1/20), 0.3–2000 GeV/n, Z 5–8, serial) | 249 s (127 s in the least-loaded run) | 221 s (125 s) | 475 MB (728 MB) | `dragon2-base-{1,2,3}` | spatial doubled: 1.35e-3; energy doubled: 1.82e-3; both: 1.95e-3 (largest at 3.2 GV; `grid-convergence`) |
+| DRAGON2, spatial grid doubled (DimR 81, DimZ 801) | 1931 s (one run) | 1131 s | 1.49 GB | `dragon2-x2s` | — |
+| DRAGON2, energy grid doubled (Ekfactor 10^(1/40)) | 990 s (one run) | 503 s | 835 MB | `dragon2-x2e` | — |
+| DRAGON2, both doubled | 3252 s (one run) | 2030 s | 2.23 GB | `dragon2-x2se` | — |
+| USINE V3.5 | not measured (capability absent: `env-usine`) | | | | |
+| GALPROP v57 | not measured (capability absent: `env-galprop`) | | | | |
+
+Caveat: the host was shared with other campaign workers (load average 7.6 before the first DRAGON2 base run, 26–62
+during the second and third, swap nearly full), so DRAGON2 wall time varies ×4 and peak RSS ×1.7 between identical
+runs with identical output; the doubled-grid runs ran three at a time. The least-loaded base run (127 s, 125 CPU-s)
+is the best estimate of the uncontended cost; the medians are the conservative figure. For E1 at the median CPU
+time, D7's 200 core-hours cover about 3300 DRAGON2 evaluations at this grid (about 5700 at 125 CPU-s), fewer than
+D7's 5000 evaluations; E1's USINE cost is not measured here. Grid convergence is reported without a threshold; the
+energy-doubling figure includes the change of the log-log interpolation between DRAGON2 nodes.
