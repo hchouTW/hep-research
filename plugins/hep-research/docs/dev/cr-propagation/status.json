@@ -260,15 +260,15 @@
    ]
   },
   "E2": {
-   "state": "verifying",
+   "state": "merged",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-e2",
    "base": "b0d0016d",
    "head": "0f3ebfab",
-   "merge_commit": null,
+   "merge_commit": "c28d960c",
    "worker_report": "DONE: E2-1 0.0045, E2-2 0.063 sigma, E2-3 0.002 sigma; PRV-1/2 pass offline; 177 USINE runs; needs one entry in test_adapter_missing_dependency.py (files widened)",
-   "verifier_report": null,
+   "verifier_report": "PASS (2026-10-28, Opus): E2-1/E2-2 recomputed with own covariance (0.00446/0.0631); hold-out never trained on; no training values committed; provider matches hep-ml to 1e-12; advisories: E2-3 Laplace intervals for eta/V_A/V_c box-cut (not interval validation); domain smaller than box not stated in ml-artifact/adapter.json; GP model allows reconstructing training ln(B/C)",
    "missing_capabilities": [],
    "notes": [
     "rebased; missing-dependency entry applied; USINE inputs byte-identical under merged B1X (no retrain); Opus verifier dispatched"
@@ -692,6 +692,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "E2 rebased (0f3ebfab); Opus verifier dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "E2 merged (c28d960c); post-merge static ok"
   }
  ],
  "env": {
