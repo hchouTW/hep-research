@@ -55,6 +55,8 @@ for entry in (str(PLUGIN), str(HERE)):
     if entry not in sys.path:
         sys.path.insert(0, entry)
 
+from core.status import add_status_argument  # noqa: E402
+
 MODEL_FORMAT = "gp-pca-emulator/1"
 KERNEL = "matern52-ard"
 SCALES = ("linear", "log")
@@ -407,15 +409,18 @@ def main(argv=None) -> int:
     t.add_argument("--seed", type=int, default=0)
     t.add_argument("--domain-quantile", type=float, default=0.99, help="DomainModel quantile (default 0.99)")
     t.add_argument("--domain-k", type=int, default=5, help="DomainModel neighbour rank (default 5)")
+    add_status_argument(t)
     p = sub.add_parser("predict", help="predict at points with a trained model")
     p.add_argument("--model", required=True, type=Path)
     p.add_argument("--points", required=True, type=Path, help="JSON list of points (name -> value)")
+    add_status_argument(p)
     args = ap.parse_args(argv)
+    head = {"status_label": args.status}
     try:
         import numpy  # noqa: F401
         import scipy  # noqa: F401
     except ImportError as exc:
-        print(json.dumps({"status": "missing-dependency", "error": f"NumPy and SciPy are needed: {exc}"}))
+        print(json.dumps({"status": "missing-dependency", **head, "error": f"NumPy and SciPy are needed: {exc}"}))
         return 3
     try:
         if args.cmd == "predict":
@@ -423,7 +428,7 @@ def main(argv=None) -> int:
             points = json.loads(args.points.read_text(encoding="utf-8"))
             if not isinstance(points, list):
                 raise ValueError("--points must hold a JSON list of points")
-            print(json.dumps({"status": "ok", "model_sha256": model_sha256(args.model),
+            print(json.dumps({"status": "ok", **head, "model_sha256": model_sha256(args.model),
                               "predictions": GaussianProcessEmulator(model).predict(points)}, indent=1))
             return 0
         if args.restarts < 0 or not 0 < args.pca_tolerance:
@@ -436,12 +441,12 @@ def main(argv=None) -> int:
         summary = run_summary(model, model_path, args.training_set)
         (args.out_dir / "run_summary.json").write_text(json.dumps(summary, indent=1) + "\n", encoding="utf-8")
     except NumericalFailure as exc:
-        print(json.dumps({"status": "incomplete", "error": f"numerical failure: {exc}"}))
+        print(json.dumps({"status": "incomplete", **head, "error": f"numerical failure: {exc}"}))
         return 3
     except (OSError, ValueError, KeyError, TypeError) as exc:
-        print(json.dumps({"status": "rejected", "error": f"{type(exc).__name__}: {exc}"}))
+        print(json.dumps({"status": "rejected", **head, "error": f"{type(exc).__name__}: {exc}"}))
         return 2
-    print(json.dumps({"status": "written", "model": str(model_path), "model_hash": summary["model_hash"],
+    print(json.dumps({"status": "written", **head, "model": str(model_path), "model_hash": summary["model_hash"],
                       "components": model["pca"]["components"], "training_points": model["n_training"],
                       "domain": "DomainModel" if model["domain_model"] else "box-only",
                       "hyperparameters_at_bound": {c: comp["hyperparameters_at_bound"]

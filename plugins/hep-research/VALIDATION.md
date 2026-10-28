@@ -7007,3 +7007,12 @@ every bin against a like-for-like USINE run, including the lowest bin D1 left un
 Note (D3 verifier advisory, added at the rebase on 6a227a76): the level-2 swaps above, and the matched-level-1 ladder,
 are cumulative (each USINE run keeps every earlier swap and adds one more; `L2_STEPS` and `LADDER` in
 `d3_study.py`); "one at a time" means one more input per step, and each effect is relative to the previous step.
+
+### CRPROP-E2 rework round 1 (wave-4 finding, 2026-10-28)
+Base: integration HEAD 65cbaa56 (branch fast-forwarded from a6929c4d). Finding: `tests.skills.test_cli_contract`
+CliContract.test_scoped_tools_take_status failed because `skills/hep-ml/scripts/train_emulator.py` had no `--status`.
+Fix: `add_status_argument` (core/status.py) on both subcommands (train, predict), echoed as `status_label` in every
+stdout JSON object like train_bdt.py; no exemption added; model, run summary and exit codes unchanged. Checks:
+test_cli_contract, test_train_emulator, tests/skills/hep_ml (422 tests, 38 skipped), test_cli_robustness,
+test_cr_propagation OK; measure_entrypoints hep-ml within budget; `--part static --jobs 4`, check_naming,
+workflow_check diff and acceptance ok.
