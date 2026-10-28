@@ -491,7 +491,7 @@ class UsineProvider(unittest.TestCase):
         self.assertEqual(ctx.exception.reason, "not-decomposable")
 
     # ---------------------------------------------------------------- C2U-3 (moved to C2UF-1, decision A1.12)
-    def test_c2u3_recorded_refusal_is_asserted_and_moved_to_c2uf(self):
+    def test_c2u3_recorded_refusal_is_asserted_and_moved(self):
         self.assertEqual(self.res["families"]["expressible"], ["BIG", "SLIM"])
         self.assertEqual(self.res["families"]["not_expressible"], [])
         for name in ("BIG", "SLIM"):                      # both fitted with the provider itself
@@ -590,7 +590,7 @@ class UsineTwoDatasetFamilies(unittest.TestCase):
         cls.fits = {f["family"]: f for f in cls.res["fits"]}
         cls.cal = cls.res["family_calibration"]
 
-    def test_c2uf_both_families_fitted_with_the_provider_on_two_datasets(self):
+    def test_two_datasets_both_families_fitted_with_the_provider(self):
         self.assertEqual(self.res["families"]["expressible"], ["BIG", "SLIM"])
         self.assertEqual(self.res["families"]["not_expressible"], [])
         for name in ("BIG", "SLIM"):
@@ -616,7 +616,7 @@ class UsineTwoDatasetFamilies(unittest.TestCase):
         self.assertLessEqual(self.doc["usine_evaluations"]["fit"], 255)
         self.assertIn("synthetic", self.res["status_label"])
 
-    def test_c2uf_recorded_calibration_refusal(self):
+    def test_two_datasets_recorded_calibration_refusal(self):
         # the recorded study (VALIDATION CRPROP-C2UF, study 2): the joint degree-4 model was refused, so no toy ran
         declared = self.doc["config"]["response_model"]
         self.assertEqual((declared["layout"], declared["degree"], declared["design_points"],
@@ -628,7 +628,7 @@ class UsineTwoDatasetFamilies(unittest.TestCase):
         self.assertEqual(self.res["status"], "failed")
 
     @unittest.expectedFailure   # C2UF-1 NOT MET in the recorded study; remove when a recorded study meets it
-    def test_c2uf1_toy_calibrated_delta_chi2_and_the_generator_survives(self):
+    def test_two_datasets_toy_calibrated_delta_chi2_and_generator_survives(self):
         self.assertEqual(self.cal["status"], "ok", self.cal.get("detail"))
         rm = self.cal["response_model"]
         self.assertTrue(rm["validation"]["passed"])
@@ -657,7 +657,7 @@ class UsineTwoDatasetFamilies(unittest.TestCase):
         self.assertGreaterEqual(entries[gen]["p_toys"]["estimate"], alpha)
         self.assertIn(gen, self.cal["surviving"])
 
-    def test_c2uf_statistical_result_validates(self):
+    def test_two_datasets_statistical_result_validates(self):
         import propagation_fit as pf
         from contracts.validate import validate_artifact
         sr = pf.statistical_result_artifact(self.res, self.res["status_label"])
@@ -669,8 +669,8 @@ class UsineTwoDatasetFamilies(unittest.TestCase):
     def test_live_truth_rerun_matches_the_record(self):
         sys.path.insert(0, str(PLUGIN / "tests" / "skills" / "hep_statistics"))
         import usine_two_dataset_family_study as study
-        with tempfile.TemporaryDirectory() as tmp:
-            work = Path(tmp)
+        with tempfile.TemporaryDirectory() as scratch_dir:
+            work = Path(scratch_dir)
             registry = work / "registry.json"
             proc = subprocess.run([sys.executable, str(PLUGIN / "tools" / "provider_registry.py"), "--write",
                                    str(registry)], capture_output=True, text=True, timeout=300)
