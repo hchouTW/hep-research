@@ -5,7 +5,7 @@
  "hash_algorithm": "sha256",
  "path_order": "UTF-8 bytes, ascending",
  "file_count": 4016,
- "digest": "885aaa9f71545bdf729e27a5d8f1cec65536c364ed60fa28c01e4578fd9873c9",
+ "digest": "5c725e67f127d2a92d71dbcb8b624d37f7defc0f4e4585ec36c053ca48f09642",
  "files": [
   {
    "path": ".claude-plugin/plugin.json",
@@ -27,8 +27,8 @@
   },
   {
    "path": "CHANGELOG.md",
-   "sha256": "0da9d5fe957bf72d0ceeba01936d196cc037fd6af8dd501de97a07f9dae7c5d6",
-   "size": 466750,
+   "sha256": "f3b0b6e063a0a13ffe6fe422cf7e1a2c3c6e562e6a601a4b0a6ab1f52a0ec7b8",
+   "size": 467288,
    "mode": "100644"
   },
   {
@@ -45,8 +45,8 @@
   },
   {
    "path": "VALIDATION.md",
-   "sha256": "f6509a7b75dfeb441415f824374f0dd2b936db0f4203275ee638521cda9d34ce",
-   "size": 820301,
+   "sha256": "30b044bf213cad6fecacbed480b048274a1f5214e8420e6bb94961e3c6488e67",
+   "size": 825197,
    "mode": "100644"
   },
   {
@@ -123,8 +123,8 @@
   },
   {
    "path": "adapters/cr-propagation/assets/emulator_provider.py",
-   "sha256": "eee300e8169114628dcdce479970acdd0b36c5c52757d1f63e009cb239c8d6d5",
-   "size": 29526,
+   "sha256": "2d6e76a33e53793985b5bb1b59b0f8d1892455d3a700d62fb03087e1078237fa",
+   "size": 30853,
    "mode": "100644"
   },
   {
@@ -5085,8 +5085,8 @@
   },
   {
    "path": "docs/dev/cr-propagation/decisions.md",
-   "sha256": "78f3890133e0f2e31723d6435e938c182ada57d417bf1b18f3c1c45da376398c",
-   "size": 20021,
+   "sha256": "02825a92ea42a2b57c5eefabfd3a4af647fc2f1402d15dacedeaa3d75ccfbfcc",
+   "size": 20955,
    "mode": "100644"
   },
   {
@@ -5103,8 +5103,8 @@
   },
   {
    "path": "docs/dev/cr-propagation/status.json",
-   "sha256": "f65170a0ebcef70cf69c9d8e5a9b3dfd3f591065ae8cc81183c26652e18687fc",
-   "size": 36943,
+   "sha256": "bc418c750c6299d85408003a4e93632ff39b78cbc0d9414837ad39264cb32277",
+   "size": 37233,
    "mode": "100644"
   },
   {
@@ -20829,8 +20829,8 @@
   },
   {
    "path": "tests/adapters/test_cr_propagation.py",
-   "sha256": "cd9f433649dac60e7aeb582e2f630bd66f5c86688dcca46e6a47928a7b70da15",
-   "size": 152640,
+   "sha256": "630f1a52f10f51f84eb7eefe24c2dffd49f711ca78260a5a81b90a67836137f7",
+   "size": 153450,
    "mode": "100644"
   },
   {
@@ -23301,8 +23301,8 @@
   },
   {
    "path": "tests/skills/hep_statistics/test_propagation_fit.py",
-   "sha256": "1c7e18cca0669833e0039b76036b075585899147ea11e36b71f6e6b918608f77",
-   "size": 50530,
+   "sha256": "3c53cb5725337d49556226a5b78f0857b443200ccd85da50ce3c2bb931ba2098",
+   "size": 50957,
    "mode": "100644"
   },
   {
