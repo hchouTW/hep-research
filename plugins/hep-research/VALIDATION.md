@@ -7016,3 +7016,43 @@ stdout JSON object like train_bdt.py; no exemption added; model, run summary and
 test_cli_contract, test_train_emulator, tests/skills/hep_ml (422 tests, 38 skipped), test_cli_robustness,
 test_cr_propagation OK; measure_entrypoints hep-ml within budget; `--part static --jobs 4`, check_naming,
 workflow_check diff and acceptance ok.
+
+## CRPROP-C2UF — 2026-10-28 (environment E2)
+
+Work package C2UF (toy-calibrated BIG vs SLIM with USINE; C2U-3 moved here by decision A1.12) of the cr-propagation r4
+workflow, r3 card §C2 (C2-3, USINE case). SYNTHETIC data only; every input ILLUSTRATIVE.
+
+Environment: E2 (macOS arm64 workstation), Python 3.13.2 (miniconda), NumPy 2.4.4, SciPy 1.17.1; USINE V3.5 (tag V3.5,
+commit fb53006d) located through HEP_USINE_BIN and HEP_USINE_DATA, runs kept under HEP_USINE_RUN_DIR =
+`$CRPROP_OUT/c2uf/runs`, provider cache `$CRPROP_OUT/c2uf/cache` (a copy of C2U's; C2U's left unchanged). r3 §0.3
+checks: toplevel `<repo>/.claude/worktrees/crprop-c2uf`, branch `worktree-crprop-c2uf`, status clean at start; base
+exception (decision D10): base is the integration HEAD `6a227a76`, not `main`; prerequisites C2U (merge `886bb316`)
+and B1X (merge `2360c294`) are ancestors of HEAD.
+
+### Design probes (before any fit; 33 USINE runs, `$CRPROP_OUT/c2uf/probe/`)
+
+| Probe | Runs | Finding |
+|---|---|---|
+| Forward-difference Fisher at the C2U truth with C2U's transport, B/C, 10Be/9Be and Be/B from 0.3 GeV/n in one request | 5 | sigma(V_A) 26.8 km/s with B/C alone, 26.8 with 10Be/9Be added, 26.7 with Be/B too: no gain. Cause: the provider's default transport has `decay.enabled` false, so 10Be/9Be is the production ratio (0.55, flat) and insensitive to D0 (d ln / d ln D0 about 0.004) |
+| Two 9-point V_A slices (Chebyshev nodes) at union-box corners (ln D0 65.03, delta 0.377, V_c 0, V_A 0-150; ln D0 65.18, delta 0.40, V_A 0-110) | 18 | along V_A alone, ln(B/C) needs degree 6 at the first corner and degree 5 at the second for 0.05 of the 4.47% sigma (degree 4: 0.23 and 0.057): a box that spans V_A from 0 (SLIM) to beyond the BIG truth reaches low-diffusion, high-V_A corners where no low-degree polynomial is good enough. B/C as a function of V_A^2 is no better |
+| Fisher with bins from 0.05 GeV/n (decay still off) | 5 | B/C extended to 0.05 GeV/n alone gives sigma(V_A) 7.3 km/s (10Be/9Be still flat) |
+| Fisher with 10Be decay on (beta decay and fed daughter, rate ln 2 / (gamma t_1/2), 7Be fully stripped, r3 P6), B/C 0.05-300 and 10Be/9Be 0.05-10 GeV/n | 5 | 10Be/9Be 0.072-0.34 (decaying); sigma with C2U's B/C (0.3-300) plus 10Be/9Be 0.05-10 GeV/n (6% + 3%): ln D0 0.070, delta 0.0129, V_A 8.1 km/s, V_c 2.35 km/s (B/C alone: V_A 58); 10Be/9Be only from 0.3 GeV/n: V_A 40 |
+
+So the plan of A1.12 works only with decay switched on and 10Be/9Be extending below 0.3 GeV/n (10Be/9Be fixes D0 at the
+fixed L; B/C then fixes V_A). A union response box still spans V_A from 0 (SLIM's fixed value) to beyond the BIG truth
+and holds the low-diffusion corners above; separate boxes around each family's best fit avoid them.
+
+### Criteria and settings (written before any fit; R9; frozen entry C2UF-1, same text as C2U-3)
+
+| Item | Pre-declared setting or criterion |
+|---|---|
+| Transport | C2U's (the provider's harmonized-v1 default with the ILLUSTRATIVE low break R_break_gv 5, delta_below 0, s 0.05, 'usine' convention, held fixed) with `decay` = {enabled true, lorentz_dilation true, ec_treatment fully-stripped}; the same block for both families |
+| Datasets | SYNTHETIC Asimov from ONE USINE run at the truth (one request naming both observables): B/C, C2U's 15 bins equal in ln(E_k/n) from 0.3 to 300 GeV/n, 4% uncorrelated + 2% fully correlated; 10Be/9Be, 12 bins equal in ln(E_k/n) from 0.05 to 10 GeV/n, 6% uncorrelated + 3% fully correlated; observable blocks copied from the predictions (P2, `bin-averaged` with the P2 statement) |
+| Truth (generating family BIG), starts, steps, families | as C2U: `D0_cm2_s` 3e28, `delta` 0.45, `V_A_kms` 70, `V_c_kms` 0; `L_kpc` 4, `eta` 1 fixed; starts 2.4e28, 0.48, 60, 2; steps 0.003 (ln D0), 0.001, 0.3, 0.3 km/s; BIG all four free, SLIM D0 and delta free with V_A = V_c = 0 |
+| Provider requests | `provider_requests` "per-point" (new in propagation_fit.py): one request and one USINE run per point for both datasets (distinct observable ids; provider not decomposable); the C1 protocol is unchanged |
+| Response models | polynomial, total degree 3 (35 terms) in (ln D0, delta, V_A, V_c), 80 scrambled Sobol design points each, layout "per-center" (new): one model per family's best fit on best fit +- 5 x (largest sigma of either family per coordinate), clipped to the provider domain; each refused unless its largest error at 20 uniform random provider points in its box is <= 0.05 of the data sigma in every bin of both datasets (C2U's tolerance, not loosened); each family's fits to a null family's toys use the model whose box holds that family's fit to the null with a margin of 5 sigma (up to 2% of the half-width, MARGIN_TOL); the largest error of the models per bin enters the toy covariance (P10) |
+| Contingency (declared now) | if a model is refused at degree 3, one rerun of the calibration at degree 4 (70 terms) with 150 design points per model, the fits answered from the provider cache; the tolerance stays 0.05 |
+| Toys | 200 per family, seed 20261028, a toy whose fit fails or leaves its box is failed, the study stops above 2% failed (C2 loop limit) |
+| C2UF-1 | pass when: BIG and SLIM both converge with the provider; the family calibration is `ok` with every response model validated (<= 0.05 sigma); each family is listed with its delta chi2 and its toy p-value (fraction of its own toys with delta chi2 >= the observed one); BIG (the generator) survives at alpha = 0.05 (toy p-value >= 0.05). SLIM's verdict is reported, not required |
+| Test | `test_propagation_fit.py` class `UsineTwoDatasetFamilies` asserts the above from the recorded study (no skip); C2U's `test_c2u3` asserts C2U's recorded refusal (no skip); a live part gated by HEP_USINE_LIVE_TEST=1 |
+| D7 / A1.8 | C2UF cap 600 USINE runs (running tally in `$CRPROP_OUT/c2uf/tally.json`, counted as runner `points_sent`, since run folders are named by point hash and a rerun of a point with other observables reuses its folder); the fit run capped at 540 (`--max-evaluations`); one USINE process at a time |
