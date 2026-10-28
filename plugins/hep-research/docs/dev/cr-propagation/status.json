@@ -489,6 +489,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "A4 DONE (d7d8a33a), verifier dispatched; escalation 7 (D7 budget vs DRAGON2 cost)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "wave-1 fix: tools/module_timings.json +6 campaign modules (measured on f62f70e8); timing test OK, static ok. Wave-1 ALL-3 for A2, A1, C1, B2 holds apart from this cumulative generated-file gap and the 2 known geant4 relocation failures"
   }
  ],
  "env": {
