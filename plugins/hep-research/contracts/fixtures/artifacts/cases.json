@@ -39,6 +39,7 @@
   "statres_v26_bayesian.json",
   "statres_v28_observable_source_linked.json",
   "theory_spec.json",
+  "theory_spec_crprop_high_break.json",
   "theory_spec_crprop_mixed_degeneracy.json",
   "theory_spec_crprop_object_degeneracy.json",
   "theory_spec_v26.json",
@@ -220,6 +221,12 @@
   ],
   "theory_crprop_transport_noncanonical_name.json": [
    "schema.additional"
+  ],
+  "theory_crprop_high_break_incomplete.json": [
+   "theory.transport_break_incomplete"
+  ],
+  "theory_crprop_break_kind_unknown.json": [
+   "theory.transport_break_kind_unknown"
   ],
   "measurement_v26_estimand_missing.json": [
    "measurement.estimand_missing"

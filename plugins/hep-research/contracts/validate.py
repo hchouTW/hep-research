@@ -1733,7 +1733,8 @@ def _theory_semantics(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, crpr
     per bin for a binned envelope); unresolved when neither theory_spec_ref nor derivation_status links the
     prediction to its derivation; a warning for a truncation without a truncation_methods term.
     With crprop_rules (contracts 3.14.0, CRPROP_FROM, or --strict): errors for an object-form degenerate direction
-    without evidence, with evidence outside degeneracy_evidence, or without the range where it holds."""
+    without evidence, with evidence outside degeneracy_evidence, or without the range where it holds, and for a
+    transport diffusion break that is half-specified or of an unknown kind (CRPROP-B1X)."""
     if doc.get("artifact_type") == "theory-spec":
         _theory_spec_rules(ext, vocab, rep, crprop_rules)
     else:
@@ -1781,6 +1782,7 @@ def _theory_spec_rules(ext: dict, vocab: Vocabulary, rep: Report, crprop_rules: 
                 "(degenerate_directions, e.g. 'D0/L')")
     if crprop_rules:
         _degeneracy_entries(ext, vocab, rep)
+        _transport_breaks(ext, rep)
 
 
 def _degeneracy_entries(ext: dict, vocab: Vocabulary, rep: Report) -> None:
@@ -1807,6 +1809,39 @@ def _degeneracy_entries(ext: dict, vocab: Vocabulary, rep: Report) -> None:
             rep.add("error", f"{p}.valid_range", "theory.degeneracy_range_missing",
                     f"degenerate direction {d.get('combination')!r} records the parameter range where it holds "
                     "(valid_range, e.g. {'L_kpc': {'min': 2, 'max': 6}})")
+
+
+# Diffusion breaks of the transport block (contracts 3.14.0, CRPROP_FROM; cr-propagation decision A1.7, work package
+# B1X): kind -> the fields that fix the break (rigidity, slope on the far side of the break, smoothness).
+TRANSPORT_BREAK_FIELDS = {"low": ("R_break_gv", "delta_below", "s"), "high": ("R_break_gv", "delta_above", "s")}
+
+
+def _transport_breaks(ext: dict, rep: Report) -> None:
+    """transport.diffusion.breaks (contracts 3.14.0, CRPROP_FROM): a low break states R_break_gv, delta_below and s, a
+    high break R_break_gv, delta_above and s; a break with only some of them, or with the slope of the other kind, is
+    half-specified and refused (theory.transport_break_incomplete), and a kind other than low or high is refused
+    (theory.transport_break_kind_unknown). The schema cannot make a field depend on kind, hence this rule."""
+    transport = ext.get("transport")
+    diffusion = transport.get("diffusion") if isinstance(transport, dict) else None
+    breaks = diffusion.get("breaks") if isinstance(diffusion, dict) else None
+    for i, brk in enumerate(breaks if isinstance(breaks, list) else []):
+        if not isinstance(brk, dict):
+            continue
+        p = f"$.extension.transport.diffusion.breaks[{i}]"
+        kind = brk.get("kind")
+        if kind not in TRANSPORT_BREAK_FIELDS:
+            rep.add("error", f"{p}.kind", "theory.transport_break_kind_unknown",
+                    f"break kind {kind!r} is not one of {sorted(TRANSPORT_BREAK_FIELDS)}")
+            continue
+        missing = [k for k in TRANSPORT_BREAK_FIELDS[kind] if not isinstance(brk.get(k), (int, float))
+                   or isinstance(brk.get(k), bool)]
+        other = {f for fields in TRANSPORT_BREAK_FIELDS.values() for f in fields} - set(TRANSPORT_BREAK_FIELDS[kind])
+        foreign = sorted(k for k in other if k in brk)
+        if missing or foreign:
+            rep.add("error", p, "theory.transport_break_incomplete",
+                    f"a {kind} break is fixed by {list(TRANSPORT_BREAK_FIELDS[kind])}"
+                    + (f"; missing {missing}" if missing else "")
+                    + (f"; {foreign} belong to the other kind of break" if foreign else ""))
 
 
 def _prediction_rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:

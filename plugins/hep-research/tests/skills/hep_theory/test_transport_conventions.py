@@ -537,5 +537,50 @@ class Cli(unittest.TestCase):
         self.assertEqual(code, 2)
 
 
+class HighBreak(unittest.TestCase):
+    """CRPROP-B1X: the high break of USINE V3.5's shipped initialisation files (inputs/init.TEST.par line 133),
+    beta^eta_t K0 Rig^delta (1 + (Rig/Rbreak)^(Deltabreak/sbreak))^(-sbreak), with delta_above = delta - Deltabreak."""
+
+    # the K line of init.TEST.par (Model1DKisoVc): delta, Rbreak, Deltabreak, sbreak
+    DELTA, R_B, DELTA_B, S_B = 6.141924e-01, 125.89254, 2.281522e-01, 0.010023191
+    HIGH = {"kind": "high", "R_break_gv": R_B, "delta_above": DELTA - DELTA_B, "s": S_B, "s_convention": "usine"}
+
+    def test_equals_usine_formula(self):
+        for rig in (1.0, 10.0, 100.0, 125.89254, 200.0, 1000.0, 1e4):
+            with self.subTest(rig=rig):
+                usine = (1 + (rig / self.R_B) ** (self.DELTA_B / self.S_B)) ** (-self.S_B)
+                self.assertAlmostEqual(tc.break_factor(rig, self.DELTA, [self.HIGH]) / usine, 1.0, places=12)
+
+    def test_slopes(self):
+        brk = [dict(self.HIGH, s=0.05)]
+        lo = tc.break_factor(1.0, self.DELTA, brk)
+        self.assertLess(abs(lo - 1.0), 1e-6)
+        hi1, hi2 = tc.break_factor(1e5, self.DELTA, brk), tc.break_factor(1e6, self.DELTA, brk)
+        self.assertLess(abs(self.DELTA + math.log10(hi2 / hi1) - self.HIGH["delta_above"]), 1e-6)
+
+    def test_low_and_high_together(self):
+        low = {"kind": "low", "R_break_gv": 5.0, "delta_below": 0.15, "s": 0.05, "s_convention": "usine"}
+        both = tc.break_factor(50.0, self.DELTA, [low, self.HIGH])
+        self.assertAlmostEqual(both, tc.break_factor(50.0, self.DELTA, [low])
+                               * tc.break_factor(50.0, self.DELTA, [self.HIGH]), places=14)
+
+    def test_k10_to_k0_is_approximate(self):
+        out = tc.convert_diffusion({"K10": 0.2, "delta": self.DELTA, "eta": 1.0, "breaks": [self.HIGH]},
+                                   "usine-k10", "usine-k0")
+        self.assertEqual(out["conversion_status"], "approximate")
+        f1, f10 = (tc.break_factor(r, self.DELTA, [self.HIGH]) for r in (1.0, 10.0))
+        self.assertGreaterEqual(out["relative_error_bound"], abs(f1 / f10 - 1) * (1 - 1e-12))
+        self.assertAlmostEqual(out["result"]["K0"], 0.2 * 10.0 ** -self.DELTA, places=14)
+
+    def test_half_specified_high_break_not_convertible(self):
+        for brk in ({k: x for k, x in self.HIGH.items() if k != "delta_above"},
+                    dict({k: x for k, x in self.HIGH.items() if k != "delta_above"}, delta_below=0.3),
+                    dict(self.HIGH, delta_below=0.3), dict(self.HIGH, kind="middle")):
+            with self.subTest(brk=brk):
+                out = tc.convert_diffusion({"K0": 0.05, "delta": self.DELTA, "eta": 1.0, "breaks": [brk]},
+                                           "usine-k0", "usine-k10")
+                self.assertEqual(out["conversion_status"], "not-convertible")
+
+
 if __name__ == "__main__":
     unittest.main()
