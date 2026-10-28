@@ -396,6 +396,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "P0 round-2 verifier REWORK (rename hole in check_diff) -> P0 blocked at the rework limit; escalation 4; verifier brief mitigation added"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A1.4: workers no longer run full checks; verifier alone runs ALL-3 (briefs updated)"
   }
  ],
  "env": {
