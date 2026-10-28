@@ -266,7 +266,7 @@ class RecordedEvidence(unittest.TestCase):
         doc = json.loads((ADAPTER / "adapter.json").read_text())
         tools = {t["name"].split(" ")[0]: t["status"] for t in doc["tools"]}
         self.assertEqual(tools, {"DRAGON2": "tested-in-declared-environment", "GALPROP": "proposed",
-                                 "USINE": "proposed"})
+                                 "USINE": "tested-in-declared-environment"})  # USINE since cr-propagation B1
         self.assertEqual(doc["owner_skill"], "hep-computing")
         self.assertEqual(doc["status"], "proposed")
 
@@ -566,6 +566,369 @@ class LiveDragon2(unittest.TestCase):
                     self.assertTrue(math.isclose(a, b, rel_tol=1e-6, abs_tol=1e-300), (col, a, b))
             self.assertEqual([f.code for f in validate_artifact(json.loads((Path(td) / "X1.run.json").read_text())).errors], [])
             shutil.rmtree(out, ignore_errors=True)
+
+
+# ------------------------------------------------------------------ B1 (cr-propagation r4): USINE tool and provider
+
+import hashlib  # noqa: E402
+
+import usine_provider  # noqa: E402
+import usine_to_prediction as usine_reader  # noqa: E402
+import usine_translate  # noqa: E402
+from tests.core.provider_conformance import ProviderConformance  # noqa: E402
+
+USINE_FIX = FIX / "usine"
+USINE_RUNS = ("harmonized-v1", "d1-isotopic", "d1-convection", "d1-decay", "d1-reacceleration", "d1-losses",
+              "b1-slab-all-items")
+USINE_PROVIDER = ADAPTER / "assets" / "usine_provider.py"
+USINE_READER = ADAPTER / "assets" / "usine_to_prediction.py"
+USINE_LIVE_RTOL = 1e-6  # B1-2, frozen in acceptance.json and VALIDATION CRPROP-B1 before the runs
+USINE_READER_RTOL = {"Ekn": 1e-4, "R": 2e-3}  # CRPROP-B1 reader check, fixed before the comparison
+
+
+def usine_spec(name):
+    return json.loads((USINE_FIX / "specs" / f"{name}.json").read_text(encoding="utf-8"))
+
+
+def usine_translation(name):
+    s = usine_spec(name)
+    return usine_translate.translate(s["transport"], name, s["ekn_range_gev"])
+
+
+def usine_tables(name):
+    t = usine_translation(name)
+    return usine_reader.read_run(USINE_FIX / "outputs" / name, t["model"], t["species"])
+
+
+def live_usine_reason():
+    if os.environ.get("HEP_USINE_LIVE_TEST") != "1":
+        return "live USINE runs: set HEP_USINE_LIVE_TEST=1, HEP_USINE_BIN and HEP_USINE_DATA"
+    if not (os.environ.get("HEP_USINE_BIN") and Path(os.environ["HEP_USINE_BIN"]).is_file()
+            and os.environ.get("HEP_USINE_DATA") and Path(os.environ["HEP_USINE_DATA"]).is_dir()):
+        return "USINE not installed (HEP_USINE_BIN or HEP_USINE_DATA unset or missing)"
+    return None
+
+
+class UsineTranslator(unittest.TestCase):
+    """B1 translator, offline: the built-in ILLUSTRATIVE sets and parent ratios equal their profile sources, every
+    recorded run's inputs are what the translator writes today from its spec, the records validate and hash the
+    committed outputs, and what USINE cannot express is recorded or refused."""
+
+    def test_illustrative_sets_equal_the_profile(self):
+        for key, xs in usine_translate.ILLUSTRATIVE_SETS.items():
+            with self.subTest(set=key):
+                src = json.loads((PROFILE / "models" / f"{key}.json").read_text(encoding="utf-8"))
+                self.assertEqual(xs["production_mb"], src["production_mb"])
+                self.assertEqual(xs["inelastic_mb"], src["inelastic_mb"])
+                self.assertEqual(src["target"].split()[0], "hydrogen")
+        bench = json.loads((PROFILE / "benchmarks" / "bc-benchmark.json").read_text(encoding="utf-8"))
+        self.assertEqual({p["name"]: p["observed_ratio_to_reference"] for p in bench["parents"]},
+                         usine_translate.PARENT_RATIOS)
+
+    def test_unit_constants(self):
+        self.assertTrue(math.isclose(usine_translate.KPC2_PER_MYR_CM2_S, 3.0172e29, rel_tol=1e-4))
+        # USINE's own km/s -> kpc/Myr factor in its shipped Kpp formulae is 1.022712e-3
+        self.assertTrue(math.isclose(usine_translate.KPC_PER_MYR_PER_KM_S, 1.022712e-3, rel_tol=1e-6))
+
+    def test_specs_render_to_the_recorded_inputs(self):
+        hv1 = json.loads((FIX / "specs" / "harmonized-v1.json").read_text(encoding="utf-8"))
+        self.assertEqual(usine_spec("harmonized-v1")["transport"], hv1["transport"])
+        for name in USINE_RUNS:
+            with self.subTest(run=name):
+                files = usine_translate.render(usine_translation(name), "<TOOL_HOME>/inputs", "<RUN_DIR>")
+                for fname, text in files.items():
+                    self.assertEqual(text, (USINE_FIX / "inputs" / name / fname).read_text(encoding="utf-8"), fname)
+
+    def test_records_validate_and_hash_the_outputs(self):
+        for name in USINE_RUNS:
+            with self.subTest(run=name):
+                rec = json.loads((USINE_FIX / "runs" / f"{name}.computational-run.json").read_text(encoding="utf-8"))
+                self.assertEqual([f.code for f in validate_artifact(rec).errors], [])
+                self.assertEqual(rec["status"], ["unvalidated"])
+                ext = rec["extension"]
+                outputs = {f"out/{p.name}": hashlib.sha256(p.read_bytes()).hexdigest()
+                           for p in sorted((USINE_FIX / "outputs" / name).iterdir())}
+                self.assertEqual(ext["output_hashes"], outputs)
+                self.assertEqual(sorted(outputs), sorted(f"out/{f}" for f in
+                                                         usine_translate.expected_outputs(usine_translation(name))))
+                self.assertEqual(sorted(i["path"] for i in ext["input_manifest"]),
+                                 sorted(usine_translate.render(usine_translation(name), "", "")))
+                self.assertTrue(any("fb53006db41d1a640bf1b5af1a4b0f899ca59673" in t["version"] for t in ext["tools"]
+                                    if t["name"] == "USINE"))
+                self.assertFalse(mentions_path(json.dumps(rec), Path.home()), name)
+
+    def test_translator_records_what_usine_cannot_express(self):
+        t = usine_translation("harmonized-v1")
+        self.assertEqual(t["model"], "Model2DKisoVc")
+        self.assertEqual((t["geometry"]["L"], t["geometry"]["h"], t["geometry"]["R"]), (4.0, 0.1, 20.0))
+        self.assertEqual(t["gas_cm3"], {"HI": 1.0, "HII": 0.0, "H2": 0.0, "He": 0.0})
+        self.assertEqual(t["production_mb"], {"12C->11B": 70.0, "16O->11B": 35.0})
+        for needle in ("observer at r = 8.3 kpc", "He_to_H_number 0.1: not used", "on 12C, 16O and 11B",
+                       "uniform in r up to radius_kpc"):
+            self.assertTrue(any(needle in x for x in t["substitutes"]), needle)
+        slab = usine_translation("b1-slab-all-items")
+        self.assertEqual(slab["model"], "Model1DKisoVc")
+        self.assertAlmostEqual(slab["transport_pars"]["Va"], 5.0 * math.sqrt(5.0 / 0.1), places=6)
+        self.assertTrue(slab["switches"]["IsELossAdiabatic"] and slab["switches"]["IsDecayBETA"])
+        self.assertFalse(slab["switches"]["IsDecayEC"])
+        self.assertIn("(1+(Rl1/Rig)^((delta-dl1)/sl1))^sl1", slab["K_formula"])
+        self.assertEqual(slab["beta_unstable"], ["10Be"])
+        self.assertTrue(math.isclose(slab["transport_pars"]["K0"] * usine_translate.KPC2_PER_MYR_CM2_S, 3.0e28,
+                                     rel_tol=1e-14))
+        base = usine_spec("d1-isotopic")["transport"]
+        refused = {
+            "gradient": dict(base, convection={"V_c_kms": 5.0, "dVc_dz_kms_per_kpc": 1.0}),
+            "high break": dict(base, diffusion=dict(base["diffusion"], breaks=[{"kind": "high", "R_break_gv": 300.0,
+                                                                              "delta_below": 0.5, "s": 0.1}])),
+            "other set": dict(base, cross_sections={"production_set": "GALPROP opt12"}),
+            "unknown loss": dict(base, losses=["synchrotron"]),
+            "kind": dict(base, geometry={"kind": "sphere", "L_kpc": 4.0}),
+            "gas": dict(base, gas={"model": "BronfFerr"}),
+            "two slopes": dict(base, sources=dict(base["sources"], injection=[{"gamma": 2.3}, {"gamma": 2.4}])),
+            "zone": dict(base, reacceleration=dict(base["reacceleration"], V_A_kms=10.0, zone="halo-only")),
+        }
+        for why, tr in refused.items():
+            with self.subTest(refused=why), self.assertRaises(usine_translate.SpecError):
+                usine_translate.translate(tr, "x", (1.0, 10.0))
+
+    def test_cost_record(self):  # B1-4: the USINE row of CRPROP-COST comes from this record
+        rec = json.loads((FIX / "cost" / "usine-harmonized-v1.computational-run.json").read_text(encoding="utf-8"))
+        self.assertEqual([f.code for f in validate_artifact(rec).errors], [])
+        res = rec["extension"]["resources"]
+        self.assertEqual(len(res["runs"]), 3)
+        self.assertEqual(res["median_wall_s"], sorted(r["wall_s"] for r in res["runs"])[1])
+        self.assertEqual(res["median_peak_rss_bytes"], sorted(r["peak_rss_bytes"] for r in res["runs"])[1])
+        conv = res["grid_convergence"]
+        for key in ("energy_grid_doubled", "spatial_doubled", "both_doubled"):
+            self.assertGreaterEqual(conv[key], 0.0)
+        self.assertFalse(mentions_path(json.dumps(rec), Path.home()))
+
+    def test_energy_grid(self):
+        g = usine_translate.energy_grid((0.04, 2000.0))
+        n = g["points_per_decade"]
+        self.assertLessEqual(g["ekn_min_gev"], 0.8 * 0.04)
+        self.assertGreaterEqual(g["ekn_max_gev"], 1.25 * 2000.0)
+        self.assertAlmostEqual((g["n_points"] - 1) / n, math.log10(g["ekn_max_gev"] / g["ekn_min_gev"]), places=9)
+        g = usine_translate.energy_grid((50.0, 100.0))
+        self.assertLessEqual(g["ekn_min_gev"], usine_translate.NORM_EKN_GEV)
+
+    def test_half_life_check(self):
+        spec = usine_translation("d1-decay")
+        with tempfile.TemporaryDirectory() as td:
+            chart = Path(td) / usine_translate.CHART_FILE
+            line = " 10.01   4  10  10Be        BETA  2.500  ||  {hl} 0.012 Myr   10B   |   0.  0.  XXX  ---  ||  0  |\n"
+            chart.write_text("# test chart (written here)\n" + line.format(hl="1.387"), encoding="utf-8")
+            self.assertIn("NUBASE2020", usine_translate.check_half_lives(spec, Path(td))[0])
+            chart.write_text(line.format(hl="1.51"), encoding="utf-8")
+            with self.assertRaisesRegex(usine_translate.SpecError, "differs from NUBASE2020"):
+                usine_translate.check_half_lives(spec, Path(td))
+        self.assertEqual(usine_translate.check_half_lives(usine_translation("d1-isotopic"), Path("/nonexistent")), [])
+
+
+class UsineReader(unittest.TestCase):
+    """B1 reader, offline: ratios of bin integrals (r3 P2), isotopes on the data's axis (P3), units read and checked
+    (P11); checked against USINE's own element-ratio tables of every recorded run."""
+
+    def test_reader_matches_usine_element_ratios(self):
+        for name in USINE_RUNS:
+            t = usine_translation(name)
+            tables = usine_tables(name)
+            for quantity, obs in (("B/C", "B/C"), ("10BE/9BE", "10Be/9Be")):
+                if obs == "10Be/9Be" and "10Be" not in t["species"]:
+                    continue
+                for axis, kind in (("Ekn", "ekn"), ("R", "rigidity")):
+                    with self.subTest(run=name, ratio=obs, axis=axis):
+                        xs, ys, meta = usine_reader.read_table(USINE_FIX / "outputs" / name /
+                                                               usine_reader.table_name(quantity, t["model"], axis))
+                        lo, hi = tables["12C" if obs == "B/C" else "9Be"][0][0], tables["10B" if obs == "B/C"
+                                                                                       else "10Be"][0][-1]
+                        dev = []
+                        for x, y in zip(xs, ys):
+                            try:
+                                dev.append(abs(usine_reader.point_ratio(tables, obs, x, kind) / y - 1.0))
+                            except usine_reader.ReadError:  # a rigidity node outside one isotope's table
+                                pass
+                        self.assertGreater(len(dev), 0.8 * len(xs), (lo, hi))
+                        self.assertLessEqual(max(dev), USINE_READER_RTOL[axis])
+
+    def test_results_file_is_recomputed(self):
+        res = json.loads((USINE_FIX / "usine-results.json").read_text(encoding="utf-8"))
+        self.assertEqual(sorted(res["runs"]), sorted(USINE_RUNS))
+        for name in USINE_RUNS:
+            tables = usine_tables(name)
+            with self.subTest(run=name):
+                got = usine_reader.ratio_of_bin_integrals(tables, "B/C", res["bc_rigidity_edges_gv"], "rigidity")
+                self.assertEqual(got, res["runs"][name]["B/C"])
+                if "10Be/9Be" in res["runs"][name]:
+                    got = usine_reader.ratio_of_bin_integrals(tables, "10Be/9Be", res["be_ekn_edges_gev"], "ekn")
+                    self.assertEqual(got, res["runs"][name]["10Be/9Be"])
+
+    def test_ratio_of_bin_integrals_power_law(self):
+        e = [0.01 * 1.25 ** i for i in range(90)]
+        tables = {"12C": (e, [x ** -2.7 for x in e]), "11B": (e, [0.3 * x ** -3.2 for x in e]), "10B": (e, [0.0] * 90)}
+        got = usine_reader.ratio_of_bin_integrals(tables, "B/C", [1.0, 10.0], "ekn")[0]
+        want = (0.3 * (1.0 ** -2.2 - 10.0 ** -2.2) / 2.2) / ((1.0 ** -1.7 - 10.0 ** -1.7) / 1.7)
+        self.assertAlmostEqual(got / want, 1.0, places=12)
+        got = usine_reader.ratio_of_bin_integrals(tables, "B/C", [2.0, 20.0], "rigidity")[0]
+        lo_b, hi_b = (usine_reader.ekn_from_rigidity(r, 5, 11) for r in (2.0, 20.0))
+        lo_c, hi_c = (usine_reader.ekn_from_rigidity(r, 6, 12) for r in (2.0, 20.0))
+        want = (0.3 * (lo_b ** -2.2 - hi_b ** -2.2) / 2.2) / ((lo_c ** -1.7 - hi_c ** -1.7) / 1.7)
+        self.assertAlmostEqual(got / want, 1.0, places=12)
+        self.assertAlmostEqual(usine_reader.rigidity_from_ekn(usine_reader.ekn_from_rigidity(7.0, 6, 12), 6, 12), 7.0,
+                               places=12)
+        with self.assertRaises(usine_reader.ReadError):
+            usine_reader.ratio_of_bin_integrals(tables, "B/C", [0.001, 1.0], "ekn")
+        with self.assertRaises(usine_reader.ReadError):  # no beryllium in this network
+            usine_reader.ratio_of_bin_integrals(tables, "Be/B", [1.0, 10.0], "ekn")
+
+    def test_read_table_refuses_other_units_and_modulation(self):
+        good = USINE_FIX / "outputs" / "d1-isotopic" / usine_reader.table_name("12C", "Model2DKisoVc")
+        text = good.read_text(encoding="utf-8")
+        with tempfile.TemporaryDirectory() as td:
+            for why, bad in (("unit", text.replace("[GeV/n m^{2} s sr]^{-1}", "[GeV m^{2} s sr]^{-1}")),
+                             ("modulated", text.replace("phi0.00GV", "phi0.50GV")),
+                             ("columns", text.replace("e-0", "e-0 1", 1).replace("# Ekn", "# Ekn", 1))):
+                with self.subTest(refused=why):
+                    path = Path(td) / good.name
+                    path.write_text(bad, encoding="utf-8")
+                    with self.assertRaises(usine_reader.ReadError):
+                        usine_reader.read_isotope(Path(td), "12C", "Model2DKisoVc")
+
+    def test_reader_cli_writes_a_prediction(self):
+        with tempfile.TemporaryDirectory() as td:
+            run = Path(td) / "run"
+            shutil.copytree(USINE_FIX / "outputs" / "d1-decay", run / "out")
+            (run / "translation.json").write_text(json.dumps(usine_translation("d1-decay")), encoding="utf-8")
+            proc = subprocess.run([sys.executable, "-I", str(USINE_READER), "--run-dir", str(run), "--observable",
+                                   "10Be/9Be", "--axis", "ekn", "--edges", "0.1,1,10", "--param", "D0_cm2_s=3e28",
+                                   "--out", str(Path(td) / "p.json")], capture_output=True, text=True, timeout=120)
+            self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+            pred = json.loads((Path(td) / "p.json").read_text(encoding="utf-8"))
+        want = usine_reader.ratio_of_bin_integrals(usine_tables("d1-decay"), "10Be/9Be", [0.1, 1.0, 10.0], "ekn")
+        self.assertEqual(pred["values"]["values"], want)
+        self.assertEqual(pred["representation"], "numerical")
+        self.assertEqual(pred["parameter_point"]["usine_run"], "d1-decay")
+
+
+USINE_REQUEST = {
+    "protocol": "cr-provider/1", "provider": "usine", "provider_version": usine_provider.declaration()["version"],
+    "points": [{"D0_cm2_s": 3.0e28, "delta": 0.5, "L_kpc": 4.0}],
+    "observables": [{"id": "B/C", "axis": "rigidity", "unit": "GV", "bins": [[2.0, 20.0], [20.0, 200.0]]},
+                    {"id": "10Be/9Be", "axis": "ekn", "unit": "GeV/n", "bins": [[0.1, 1.0], [1.0, 10.0]]}],
+    "want": ["lis"], "seed": None}
+FAKE_USINE = """#!{python}
+# Offline stand-in for the usine executable (adapter tests only): copies the recorded tables of one run into the
+# output folder named on the command line; it computes nothing and ignores the initialisation file.
+import shutil, sys
+from pathlib import Path
+src = Path({src!r})
+out = Path(sys.argv[3])
+out.mkdir(parents=True, exist_ok=True)
+for path in src.iterdir():
+    shutil.copyfile(path, out / path.name)
+sys.exit(1)
+"""
+
+
+class UsineProviderOffline(unittest.TestCase):
+    """The provider's parts that need no USINE: its built-in transport equals the fixture it stands for, the run range
+    covers every bin, a point is written into its block, a missing USINE fails the point with provider-error (R4),
+    another cross-section set is refused, and with a stand-in executable replaying the d1-isotopic tables its
+    predictions are the reader's ratios of those tables."""
+
+    def test_defaults_and_declaration(self):
+        self.assertEqual(usine_provider.DEFAULT_TRANSPORT, usine_spec("d1-isotopic")["transport"])
+        decl = usine_provider.declaration()
+        self.assertEqual(decl["id"], "usine")
+        self.assertEqual(decl["version"], json.loads((ADAPTER / "adapter.json").read_text())["version"])
+        self.assertEqual(set(decl["observables"]), set(usine_reader.OBSERVABLES))
+        self.assertEqual(set(decl["domain"]), set(usine_provider.POINT_TARGETS))
+        lo, hi = usine_provider.ekn_range(USINE_REQUEST["observables"], ["9Be", "10Be", "10B", "11B", "12C"])
+        self.assertEqual(lo, 0.1)
+        self.assertEqual(hi, max(usine_reader.ekn_from_rigidity(200.0, z, a) for z, a in ((5, 10), (5, 11), (6, 12))))
+        t = usine_provider.transport_for({}, {"V_c_kms": 5.0, "L_kpc": 6.0, "eta": -0.5})
+        self.assertEqual((t["convection"]["V_c_kms"], t["geometry"]["L_kpc"], t["diffusion"]["eta"]), (5.0, 6.0, -0.5))
+
+    def _call(self, request, env):
+        with tempfile.TemporaryDirectory() as td:
+            req, resp = Path(td) / "req.json", Path(td) / "resp.json"
+            req.write_text(json.dumps(request))
+            proc = subprocess.run([sys.executable, str(USINE_PROVIDER), "--request", str(req), "--response", str(resp)],
+                                  capture_output=True, text=True, timeout=300, env=env)
+            return proc, json.loads(resp.read_text())
+
+    def test_missing_usine_is_a_failed_point(self):
+        env = {k: v for k, v in os.environ.items() if k not in ("HEP_USINE_BIN", "HEP_USINE_DATA")}
+        env["PYTHONDONTWRITEBYTECODE"] = "1"
+        proc, doc = self._call(USINE_REQUEST, env)
+        self.assertEqual(proc.returncode, 1, proc.stdout + proc.stderr)
+        self.assertEqual(doc["status"], "failed")
+        self.assertEqual(doc["results"][0]["reason"], "provider-error")
+        self.assertIn("HEP_USINE_BIN", doc["results"][0]["detail"])
+        self.assertNotIn("predictions", doc["results"][0])
+
+    def test_replayed_tables_give_the_reader_ratios(self):
+        with tempfile.TemporaryDirectory() as td:
+            fake = Path(td) / "bin" / "usine"
+            fake.parent.mkdir()
+            fake.write_text(FAKE_USINE.format(python=sys.executable, src=str(USINE_FIX / "outputs" / "d1-isotopic")))
+            fake.chmod(0o755)
+            env = dict(os.environ, HEP_USINE_BIN=str(fake), HEP_USINE_DATA=td, PYTHONDONTWRITEBYTECODE="1")
+            env.pop("HEP_USINE_RUN_DIR", None)
+            proc, doc = self._call(USINE_REQUEST, env)
+            self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+            other = dict(usine_provider.DEFAULT_TRANSPORT, cross_sections={"production_set": "GALPROP opt12"})
+            proc2, refused = self._call(dict(USINE_REQUEST, transport=other), env)
+        res = doc["results"][0]
+        tables = usine_tables("d1-isotopic")
+        for pred, obs in zip(res["predictions"], USINE_REQUEST["observables"]):
+            edges = [obs["bins"][0][0]] + [b for _, b in obs["bins"]]
+            self.assertEqual(pred["values"]["values"],
+                             usine_reader.ratio_of_bin_integrals(tables, obs["id"], edges, obs["axis"]))
+        self.assertEqual(res["labels"], ["synthetic", "unvalidated"])
+        self.assertEqual(res["evaluation"]["numerical_tolerance"], usine_provider.NUMERICAL_TOLERANCE)
+        self.assertEqual(proc2.returncode, 1)
+        self.assertEqual(refused["results"][0]["reason"], "provider-error")
+        self.assertIn("ILLUSTRATIVE", refused["results"][0]["detail"])
+
+
+class UsineProviderConformance(ProviderConformance, unittest.TestCase):
+    """B1-PRV-1 and B1-PRV-2: C1's conformance mixin on the USINE provider (about six USINE runs of a few seconds each
+    on E2; skipped unless the live test is asked for and USINE is installed)."""
+    PROVIDER_ID = "usine"
+    REQUEST = USINE_REQUEST
+    VOCAB_PROFILES = (PROFILE / "profile.json",)
+    TIMEOUT_S = 3600.0
+
+    def unavailable_reason(self):
+        return live_usine_reason()
+
+
+@unittest.skipUnless(os.environ.get("HEP_USINE_LIVE_TEST") == "1", "live USINE runs: set HEP_USINE_LIVE_TEST=1, "
+                     "HEP_USINE_BIN and HEP_USINE_DATA")
+class LiveUsine(unittest.TestCase):
+    """B1-2: every recorded run is translated again from its spec, run with the installed USINE, and each table must
+    reproduce the recorded one within relative 1e-6 (USINE is deterministic; the tables have 6 significant digits).
+    With HEP_USINE_LIVE_TEST=1 but no USINE installed, the test fails instead of skipping."""
+
+    def test_reruns_reproduce_the_recorded_outputs(self):
+        self.assertIsNone(live_usine_reason())
+        binary, data_dir = Path(os.environ["HEP_USINE_BIN"]), Path(os.environ["HEP_USINE_DATA"])
+        with tempfile.TemporaryDirectory() as td:
+            for name in USINE_RUNS:
+                with self.subTest(run=name):
+                    spec = usine_translation(name)
+                    res = usine_translate.run_usine(spec, Path(td) / name, binary, data_dir)
+                    self.assertTrue(res["ok"], res["log_tail"])
+                    rec = usine_translate.record(spec, res, binary)
+                    self.assertEqual([f.code for f in validate_artifact(rec).errors], [])
+                    for fname in usine_translate.expected_outputs(spec):
+                        rerun = usine_reader.read_table(Path(td) / name / "out" / fname)
+                        recorded = usine_reader.read_table(USINE_FIX / "outputs" / name / fname)
+                        self.assertEqual(rerun[0], recorded[0], fname)
+                        for a, b in zip(rerun[1], recorded[1]):
+                            self.assertTrue(math.isclose(a, b, rel_tol=USINE_LIVE_RTOL, abs_tol=1e-300),
+                                            (fname, a, b))
 
 
 if __name__ == "__main__":

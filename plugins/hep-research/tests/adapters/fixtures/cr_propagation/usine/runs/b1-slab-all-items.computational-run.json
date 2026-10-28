@@ -1,0 +1,142 @@
+{
+ "contract_version": "3.14.0",
+ "artifact_id": "usine-run-b1-slab-all-items",
+ "artifact_type": "computational-run",
+ "objective": "USINE run 'b1-slab-all-items' translated from a transport block (adapters/cr-propagation/assets/usine_translate.py)",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.42.0",
+  "contracts": "3.14.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-computing",
+  "created": "2026-10-28",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "status": [
+  "unvalidated"
+ ],
+ "extension": {
+  "input_manifest": [
+   {
+    "path": "norm_points.dat",
+    "sha256": "6e882bf9d33839dc463f8d583ae16f8f7c6f7bfd2e18ccefbb91621cea93e717"
+   },
+   {
+    "path": "usine.init.par",
+    "sha256": "e7715fed4b9e4b5b1b58887fe2e6a5de9b97c24db34dac3091bf449b9214f23c"
+   },
+   {
+    "path": "xs_inelastic.dat",
+    "sha256": "8bfbfaa50ab00fb72a8a4c59145d79ecbb71ef6a2fc96758f796eb2793f5d271"
+   },
+   {
+    "path": "xs_production.dat",
+    "sha256": "d1d1e7e7dfeba821f04e5d55f2a50438d843fd8ec65661a85f29d0d39fc20aa5"
+   }
+  ],
+  "tools": [
+   {
+    "name": "USINE",
+    "version": "V3.5 (git tag V3.5, commit fb53006db41d1a640bf1b5af1a4b0f899ca59673; built with Apple clang 21.0.0 against ROOT 6.38.04)",
+    "binary": "<TOOL_HOME>/bin/usine",
+    "binary_sha256": "1d444720afec6ebd2efde8d275d5d950f39edee4f53e7c3756fba8ce05a62d25"
+   },
+   {
+    "name": "python",
+    "version": "3.13.2"
+   },
+   {
+    "name": "numpy",
+    "version": "2.4.4"
+   },
+   {
+    "name": "scipy",
+    "version": "1.17.1"
+   },
+   {
+    "name": "Apple clang",
+    "version": "21.0.0 (clang-2100.0.123.102), the USINE build compiler"
+   },
+   {
+    "name": "ROOT",
+    "version": "6.38.04 (Homebrew 6.38.04_1), linked by USINE"
+   }
+  ],
+  "commands": [
+   "<TOOL_HOME>/bin/usine -l <RUN_DIR>/usine.init.par <RUN_DIR>/out '7BE,9BE,10BE,10B,11B,12C,16O,B/C,10BE/9BE:KEKN:0.;B/C,10BE/9BE:kR:0.' 0 1 1 0"
+  ],
+  "environment": {
+   "python": "3.13.2",
+   "implementation": "CPython",
+   "executable": "<CONDA_HOME>/bin/python3",
+   "platform": "macOS-27.2-arm64-arm-64bit-Mach-O",
+   "machine": "arm64",
+   "system": {
+    "os": "Darwin",
+    "arch": "arm64",
+    "libc": "macOS 27.2",
+    "kernel": "27.2.0"
+   },
+   "origin": "conda",
+   "variables": {
+    "ROOTSYS": "/opt/homebrew/Cellar/root/6.38.04_1",
+    "CONDA_PREFIX": "<CONDA_HOME>",
+    "CONDA_DEFAULT_ENV": "base"
+   },
+   "packages": {
+    "numpy": "2.4.4",
+    "scipy": "1.17.1"
+   },
+   "project": {
+    "path": "<TOOL_HOME>",
+    "commit": "fb53006db41d1a640bf1b5af1a4b0f899ca59673",
+    "dirty": true
+   }
+  },
+  "seeds": {
+   "note": "USINE's local-flux calculation is deterministic: no random numbers are drawn"
+  },
+  "tolerances": {
+   "note": "USINE EPS_ITERCONV 1e-6, EPS_INTEGR 1e-4, EPS_NORMDATA 1e-10 (written into the initialisation file); outputs printed with 6 significant digits"
+  },
+  "resources": {
+   "wall_seconds": 0.71
+  },
+  "exit_status": 0,
+  "usine_exit_status": 1,
+  "exit_status_note": "exit_status is the run's outcome as judged by usine_translate.py (0: every expected output written, no USINE error or crash in the log); USINE V3.5 itself returns 1 on every path (usine_exit_status)",
+  "output_hashes": {
+   "out/local_fluxes_7BE_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "3157746ac6ea15b1aa88ff8d5a63ff8546b35859692fe4343d01fd2267d4852e",
+   "out/local_fluxes_9BE_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "0b7df3f83735c4dd3a763af1f8b8185f4303000bf36350d182cc6b71b6fe63fc",
+   "out/local_fluxes_10BE_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "3b7a850a86ebba599d60ea92e6b2546bcd27253faba8abe9f5f0ea53c02745f2",
+   "out/local_fluxes_10B_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "4fb27b0e8722359f5c2cb5c59ec243fec1e532149d3c74b52ca0506aaded9517",
+   "out/local_fluxes_11B_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "dadce6c4775f9d58cb8691edc6cb480f93f14c8fe79efde053665186b70f3d68",
+   "out/local_fluxes_12C_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "c4a633b51868ce2ca5b66caec699b84fcf840643387bbb657e0fc163e219a71c",
+   "out/local_fluxes_16O_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "fe96155a7a04066cc01bf5012d152be80ebe82c6ca27dce7785c18c946c17ead",
+   "out/local_fluxes_BC_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "43bbdf03c7d3943f5aa1c11b939e0aae4b04a0ba914f4709ad629aaae6a4b1a7",
+   "out/local_fluxes_10BE9BE_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "0534245db71e5ea3678c002b6b4b373f3e3974004ea0432bc49a6a74fbd601be",
+   "out/local_fluxes_BC_R_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "70294b37db63fad77d7e3a04cf35a1a2738fb5f69309c32cfee942a210162389",
+   "out/local_fluxes_10BE9BE_R_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "68d1c9635f5dad1bd6e2661dd31d53ff4ee53e4d971da0b99e8c36eab7298d5b"
+  },
+  "notes": [
+   "10Be half-life: USINE chart 1.387 Myr, NUBASE2020 1.387 My (core.constants.physical)",
+   "low break form (1 + (R_break/Rig)^((delta - delta_below)/s))^s of the plugin's 'usine' convention (transport_conventions.py; not re-read from Weinrich et al. 2020a)",
+   "reacceleration V_A_kms 5 in the whole halo: thin-disc V_A = V_A sqrt(L/h) = 35.3553 km/s (r3 P1; approximate, no bound)",
+   "electron-capture decay off: fully stripped nuclei (7Be) are stable (r3 P6)",
+   "gas 'uniform, n_H = 1 cm^-3': HI = 1 cm^-3, HII = H2 = 0 in the thin disc of half-thickness h; USINE's Coulomb loss acts on HII and is therefore zero",
+   "gas He_to_H_number 0.1: not used; the ILLUSTRATIVE cross sections are on hydrogen only and no helium cross section is invented (He density 0, target H)",
+   "production channels not in the set are zero (USINE needs every pair of the network)",
+   "source spectrum dQ/dE_k/n = q Rig^-2.3 (USINE POWERLAW, eta_s = 0)",
+   "parent abundances: each parent source scaled until its unmodulated local flux at E_k/n = 10 GeV/n is in the ratio C 1, O 0.9 (theory:cr-secondary-ratio parent list); USINE NormList with generated points, not data",
+   "tertiary chains, ghost nuclei and exotic primaries off"
+  ]
+ }
+}
