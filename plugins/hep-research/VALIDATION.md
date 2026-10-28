@@ -6613,3 +6613,122 @@ thin-disc V_A changes from 35.35533906 to 20.41241452 km/s (lam_max 0.561 at 16O
 on, recorded as outside the conversion's assumptions): rerun live, `inputs/`, `outputs/`, record and its
 `usine-results.json` entry regenerated (B/C bins change by at most 0.63%, 10Be/9Be by at most 0.47%; first B/C bin
 0.07760 -> 0.07776); the other six B1 runs and both B1X runs are unchanged. Checks rerun on the rebased HEAD (report).
+
+## CRPROP-D1 — 2026-10-28 (environment E-crprop)
+
+Work package D1 of the cr-propagation r4 campaign (r3 §D1 and §D1b folded together, r4 §6): DRAGON2 physics items,
+one at a time, each with its `harmonized-v1-<item>.json`, and the cr-provider/1 entrypoint `dragon2_provider.py`.
+
+**Environment (r3 §0.3, base exception D10).** E-crprop (E2 host, macOS 27.2 arm64, Python 3.13.2; DRAGON2 cd588707,
+the serial build of 2026-10-15, located through `HEP_DRAGON2_BIN` and `HEP_DRAGON2_DATA`). Checked before the first
+edit: `git rev-parse --show-toplevel` = `.claude/worktrees/crprop-d1`; `git branch --show-current` =
+`worktree-crprop-d1`; `git status` clean; base = integration HEAD `566bfd1e` (not `origin/main`, decision D10);
+prerequisite merge commits A1 `5d5fd918`, A2 `a3c880f8`, C1 `099d1d22`, B2 `81cb2ce0` are ancestors of HEAD
+(`git merge-base --is-ancestor`, exit 0). `env-usine` is absent: B1 has not run.
+
+**Criteria and tolerances, written before any DRAGON2 run of this work package (R9; frozen in `acceptance.json`, never
+loosened).**
+
+| ID | Criterion | Tolerance |
+|---|---|---|
+| D1-1 | For each item with a closed form (convection: V_c = 10 km/s constant, dV_c/dz = 0; decay: ¹⁰Be → ¹⁰B with the NUBASE2020 half-life), the DRAGON2 run with that item on is compared with the B2 closed form (`profiles/theory/cr-secondary-ratio/scripts/convection_decay.py`) with the same item on, fed with the same run's ¹²C and ¹⁶O fluxes per E/n as parents, the same D0, δ, η, R0, L and the same isotopic ILLUSTRATIVE production cross sections, and h n_H = half of DRAGON2's gas column at the observer (h = 0.1 kpc). Quantities: B/C = (¹⁰B + ¹¹B)/(¹²C + ¹³C + ¹⁴C) in 16 log-uniform rigidity bins over 2–1000 GV (isotopes summed at equal rigidity, P3; ratio of bin integrals, P2) and ¹⁰Be/⁹Be in 12 log-uniform E/n bins over 0.05–10 GeV/n (ratio of bin integrals). Verdict per item and observable: max over bins of abs(DRAGON2 / reference − 1) | 0.03 (3%) |
+| D1-1 (items without a closed form) | Reacceleration and energy losses: the reference is USINE under the same item file (r3 §D1); not compared until B1 is merged (fallback of `workflow.json`) | 0.03 when compared |
+| D1-1 diagnostic (no verdict, no tolerance) | The item effect, [DRAGON2(item on) / DRAGON2(item off)] / [closed form(item on) / closed form(item off)], per bin, with the item-off run `harmonized-v1-isotopic`; it separates the item from the fixed differences of the baseline (helium target, inelastic cross sections, 2D gas and boundary) | reported only |
+| D1-2 | Every item (convection, decay, reacceleration, losses) and the item-off baseline has a recorded run: run spec, computational-run record (input and output SHA-256, command, environment) and output under `tests/adapters/fixtures/cr_propagation/dragon2/` | all five present |
+| D1-PRV-1 | `dragon2_provider.py` passes C1's conformance mixin (`tests/core/provider_conformance.py`), live on E-crprop (skipped where DRAGON2 is not installed) | all checks pass |
+| D1-PRV-2 | Single-shot and `--serve` responses have the same sha256 after removing `elapsed_s` and time stamps | equal sha256 |
+
+**Results (2026-10-28, E-crprop; DRAGON2 runs under `$CRPROP_OUT/d1/`, outside the repository; host load 30-60 from
+other workers, so wall times are not cost numbers).** Runs: five item runs translated by `dragon2_run.py
+--from-transport` from `tests/adapters/fixtures/cr_propagation/specs/harmonized-v1-{isotopic,convection,decay,
+reacceleration,losses}.json` (2D, radius 20 kpc, dR 0.5 kpc, dz 0.02 kpc, Z 4-8, 0.04-2000 GeV/n with factor 1.2,
+injection R^-2.3 for every species, production table = the profile's isotopic ILLUSTRATIVE set for ¹²C and ¹⁶O),
+575-710 s each, four at a time; specs, de-identified computational-run records and outputs in
+`tests/adapters/fixtures/cr_propagation/dragon2/`. Substitutes recorded in every spec (§5.5): BronfFerr gas instead
+of uniform n_H = 1 cm⁻³ (DRAGON2 cd588707's `Uniform` gas is not implemented: gas.cc writes -1), DRAGON2's fixed
+helium (He/H 0.11 with its He_to_H_CS_ratio scaling) instead of 0.1, no thin-disc parameter, DRAGON2's own inelastic
+cross sections, sources OneRing 0-20 kpc (the source distribution D1 chose), V_A thin disc 50 km/s run as whole-halo
+50 sqrt(0.1/4) = 7.9 km/s (approximate, P1), ionization and Coulomb losses switched together; decay uses the
+NUBASE2020 half-lives of ¹⁰Be and ¹⁴C written into a copy of `isotope_list.dat` (DRAGON2 ships ¹⁰Be at 1.51 Myr; the
+run log confirms 1.38697 Myr).
+
+| ID | Result | Evidence |
+|---|---|---|
+| D1-1 convection | **fail** for B/C: max abs(DRAGON2/reference − 1) = 0.148 (1.076-1.148 over 2-1000 GV); **pass** for ¹⁰Be/⁹Be: 0.022 | `dragon2/d1-item-results.json`; `D1Items.test_closed_form_comparison_matches_the_record` |
+| D1-1 decay | **fail** for B/C: 0.144 (1.069-1.144); **fail** for ¹⁰Be/⁹Be: 0.152 (0.848-1.006, below 1 GeV/n) | same |
+| D1-1 attribution (B/C) | the item-off run already gives 1.069-1.143: DRAGON2's helium target multiplies the production cross sections by 1.144-1.174 at these energies; with it divided out DRAGON2 / closed form at equal E/n is 0.93-1.01 (helium on destruction, DRAGON2's inelastic cross sections and the 2D geometry not separated; as in CR-PROPAGATION-DRAGON2-UNITS). Item effect (diagnostic): convection 1.001-1.007, decay 1.000-1.001 | `$CRPROP_OUT/d1/helium_attribution.txt`; `d1-item-results.json` `attribution` |
+| D1-1 attribution (¹⁰Be/⁹Be, decay) | the reference is a thin disc, while DRAGON2's gas layer (H2 59 pc, HI 115 pc) is comparable with the ¹⁰Be decay length of about 0.3 kpc at 0.1 GeV/n. A 1D finite-difference diagnostic (source on DRAGON2's gas profile at 8.3 kpc against the same column in a thin disc) gives surviving-fraction ratios 0.843, 0.868, 0.889, 0.909 in bins 2-5 against the DRAGON2 item effects 0.873, 0.867, 0.888, 0.918; not attributed: bin 1 (0.05-0.078 GeV/n: DRAGON2 0.969, diagnostic 0.816) and a +1% residual above 1 GeV/n. The failure belongs to the thin-disc reference's validity (B2 excludes decay inside the disc), not to a defect shown in DRAGON2 | `$CRPROP_OUT/d1/thick_gas_decay.py`, `.json`; `d1-item-results.json` |
+| D1-1 reacceleration, losses | **not run**: no closed form; the reference is USINE, waiting for B1 (`env-usine` absent). Their runs are recorded | `D1_reacceleration`, `D1_losses` fixtures |
+| D1-2 | **pass**: five runs, each with spec, record (validates; exit 0; output and XML SHA-256 match; DRAGON2 commit in tools; no home path) and output; the specs are re-derived from the item files by the translator in the test | `D1Items.test_runs_are_recorded_and_translated_from_the_item_files` |
+| D1-PRV-1 | **pass** live (`HEP_DRAGON2_LIVE_TEST=1`): mixin checks declared, single-shot, serve, prv-2, unsupported-want, out-of-domain, outside-allowed, unregistered, runner-agrees; responses valid against `cr_provider.json` with the `theory:cr-secondary-ratio` vocabulary; 4 tests in 353 s | `$CRPROP_OUT/d1/acceptance/D1-PRV-1.unittest.log`, `D1-PRV-conformance.json` |
+| D1-PRV-2 | **pass**: single-shot and `--serve` responses equal in sha256 after removing `elapsed_s` (check prv-2) | same |
+| Numerical tolerance of the provider | 2.2e-3: largest relative change of five B/C bins (ekn 10-100 GeV/n, rigidity 2-1000 GV) when dz is halved and the energy factor goes 1.2 → 1.1; declared 0.01 | `$CRPROP_OUT/d1/convergence/convergence.json` |
+
+Open issues. (1) `transport_conventions.py` gives DRAGON2 the form D0 (p/p0)^δ with η = 0, but DRAGON2 cd588707
+(`diffusion.cc`, type Constant) computes D0 β^etaT (ρ/DiffRefRig)^δ in rigidity, so a canonical spec with η = 1 maps
+one to one (D1's translator does this and does not call the convention table); the convention table row in
+`cosmic-ray-phenomenology.md` and the module need a hep-theory fix (outside D1's files). (2) DRAGON2's `Uniform` gas
+is not implemented in this commit, so harmonized-v1's uniform gas cannot be run without a code change. (3) The
+B/C absolute comparison cannot meet 3% with DRAGON2's fixed helium target and own inelastic cross sections unless the
+reference includes them; the frozen tolerance is not changed. Checks: `run_all_checks.py --part static --jobs 4`
+31/31 pass; impacted tests (`tests.adapters.test_cr_propagation`, `tests.skills.test_cli_robustness`,
+`tests.adapters.test_adapter_declarations`, `tests.tools.test_provider_registry`, `tests.core.test_provider`,
+`tests.core.test_provider_conformance_mixin`) pass; `check_naming.py`, `check_wiring.py --since 566bfd1e` pass;
+ALL-3 (full `run_all_checks.py`, `check_relocation.py`) deferred to the wave run (decision A1.5).
+
+**Addendum: items without a closed form (2026-10-28, after B1 merged; rebased onto integration HEAD `3d5a6295`, which
+contains B1 `2d451e87`).** The rebase left the translator and reader unchanged apart from the provider reading its
+entry from the `provider` list of `adapter.json`, so no DRAGON2 run was repeated. Reference: B1's
+`usine/usine-results.json` (USINE V3.5 Model2DKisoVc, the same `harmonized-v1-<item>.json` on the same 16 rigidity and
+12 E_k/n bins; thin disc, uniform neutral gas n_H = 1 cm⁻³ with h = 0.1 kpc, no helium, ILLUSTRATIVE energy-independent
+inelastic cross sections, V_A 50 km/s in the thin disc). Like with like for losses: USINE's reference has ionization
+only (its Coulomb term acts on HII, zero here), and DRAGON2's Coulomb term acts on BronfFerr's HII, also zero.
+
+| ID | Result | Evidence |
+|---|---|---|
+| D1-1 reacceleration | **fail**: B/C max abs(DRAGON2/USINE − 1) = 0.381; ¹⁰Be/⁹Be 0.041. Item effect on B/C in the lowest bin: DRAGON2 1.072 against USINE 1.402 (DRAGON2 ran the r3 P1 whole-halo equivalent 50 sqrt(0.1/4) = 7.9 km/s with its Ptuskin94 D_pp; the zone conversion is approximate without a bound, and the D_pp normalizations are not separated) | `dragon2/d1-item-results.json` `usine_items`; `D1Items.test_usine_comparison_matches_the_record` |
+| D1-1 losses | **fail**, not a physics comparison: DRAGON2 with eloss_flag 1 suppresses even primary ¹²C by 1e-4 (0.04 GeV/n) to 9e-3 (1.6 TeV/n) and B/C by about 1e-3 at every energy (max deviation 0.999); the same with dz = 0.1 kpc (diagnostic runs `$CRPROP_OUT/d1/diag-losses/`). USINE's ionization changes B/C by at most 13% at 2 GV. Cause in DRAGON2 cd588707's nuclear energy-loss path not located: open issue; the recorded run stays as evidence of the behaviour | same |
+| D1-1 offsets against USINE (item-off) | B/C 1.27-1.39, ¹⁰Be/⁹Be 0.95-0.98: DRAGON2's helium target (×1.14-1.17 on production), its gas column at 8.3 kpc (9% above USINE's 2 h n_H) and its own inelastic cross sections; not separated further. For comparison, the convection and decay items against USINE give item effects within 0.9% (convection) and, for ¹⁰Be/⁹Be with decay, up to 11% (both 2D codes against each other: thin disc in USINE, DRAGON2's gas layer) | same |
+
+D1-1 summary over the four items: pass only for ¹⁰Be/⁹Be with convection; fail for all others (tolerance 3%, frozen;
+escalation 5 open for the closed-form items). New open issue (4): DRAGON2's energy-loss run.
+
+**Dispatch 2 (2026-10-28; decisions A1.9, A1.10; rebased onto integration HEAD `2ae3063b`, which contains `e5ecbd64`
+with A1R, B3, C2, E1).** D1-1 stays frozen and is recorded as **failed and superseded** for D1's verdict by D1-1a
+(item effect, ratio with the item over ratio without it, within 3%) and D1-1b (absolute offsets reported and
+attributed, no tolerance). USINE reference: `usine/usine-results.json` as committed in `9274db92` (B1), unchanged on
+`2ae3063b`.
+
+*Reacceleration.* The translator now calls hep-theory's `transport_conventions.py reacceleration` as a subprocess
+(an adapter imports no skill, R1): a thin-disc V_A is USINE's Seo-Ptuskin convention (D_pp constant 4/3), DRAGON2 runs
+Ptuskin94 (constant 1, whole halo; Ptuskin03 not used), so 50 km/s becomes 50 sqrt(4 h / L) = 15.81 km/s at
+L = 4 kpc, h = 100 pc, status approximate, relative error bound 0.517 on the second-order term (destruction/escape
+ratio 1.586 at 0.04 GeV/n, `escape_ratio_estimate`: n_H 1 cm⁻³, 310 mb). The item was rerun live.
+
+*D1-L (losses), diagnosis in 5 DRAGON2 runs (limit 6; `$CRPROP_OUT/d1/diag-losses/`).* (1-2) dispatch 1: the
+suppression is unchanged with dz = 0.1 kpc. (3-4) the same configuration with DRAGON2's `Galprop` gas (HII > 0),
+losses on and off: physical (¹²C −74% and B/C −58% at 0.1 GeV/n, both < 0.1% above 50 GeV/n). (5) protons added
+(Zmin 1): DRAGON2 crashes at start (exit −11), not pursued. Cause: BronfFerr writes n_HII = 0 (gas.cc), and the
+nuclear branch of `TCoulombLoss` (eloss.cc:118-120, `coullog = -log(... n_HII ...)/2`, gas.back() = HII by
+galaxy.cc:521-523) diverges there (the lepton branch guards n > 0). So it comes from the configuration and is fixed in
+D1's files: the translator runs losses on Galprop gas and refuses losses on gas without HII
+(`D1Items.test_translator_records_what_dragon2_cannot_express`, `Dragon2ProviderOffline.test_losses_run_on_gas_with_
+ionized_hydrogen`); the provider inherits it. Upstream issue draft (not posted, two items: this divergence and the
+Ptuskin94/Ptuskin03 enum, galaxy.cc:279-284 vs constants.h:146-149): `$CRPROP_OUT/d1/dragon2-upstream-issue-draft.md`.
+The losses item was rerun on Galprop gas together with its item-off run `D1_losses_off` (isotopic item on Galprop gas).
+
+| ID | Result | Evidence |
+|---|---|---|
+| D1-1 | **failed, superseded (A1.9)**: absolute deviations 14-15% (B/C against the closed form), 38-77% (B/C against USINE), up to 16% (¹⁰Be/⁹Be) | `dragon2/d1-item-results.json` `verdicts_D1_1_superseded` |
+| D1-1a convection | **pass**: item effect within 0.73% / 0.44% (B/C / ¹⁰Be/⁹Be) against the closed form, 0.85% / 0.60% against USINE | `verdicts_D1_1a`; `D1Items.test_closed_form_comparison_matches_the_record`, `test_usine_comparison_matches_the_record` |
+| D1-1a decay | **fail**: B/C passes (0.13% closed form, 0.02% USINE); ¹⁰Be/⁹Be fails (13.3% closed form, 11.3% USINE) below 1 GeV/n: DRAGON2's gas layer (59/115 pc) against the thin disc of both references; a 1D thick-gas diagnostic reproduces the DRAGON2 effect within about 1% in bins 2-5; lowest bin and a +1% residual above 1 GeV/n unattributed | same |
+| D1-1a reacceleration | **fail**: B/C effect 1.322 (DRAGON2) vs 1.402 (USINE) in 2-2.95 GV and 1.183 vs 1.122 in the next bin (max 5.7%); ¹⁰Be/⁹Be up to 4.4%. Within the approximate first-order conversion (bound 0.517 on the second-order term) and the whole-halo vs thin-disc spatial difference; not separated | same |
+| D1-1a losses | **fail**: B/C effect 0.815 vs 0.867 in the lowest bin (max 6.1%); ¹⁰Be/⁹Be passes (1.7%). Likely causes, not quantified: DRAGON2's Coulomb loss on Galprop's HII (USINE's reference is ionization only) and Galprop's neutral column differing from USINE's 2 h n_H | same |
+| D1-1b | offsets reported for every item and reference in `d1-item-results.json` (`dragon2_over_closed`, `dragon2_over_usine`) with attributions: item-off B/C 1.07-1.14 vs the closed form (helium target ×1.144-1.174; residual 0.93-1.01 unattributed: helium on destruction, inelastic cross sections, 2D gas); item-off B/C 1.28-1.39 and ¹⁰Be/⁹Be 0.95-0.98 vs USINE (helium, gas column +9%, inelastic cross sections; split unattributed); losses runs on Galprop gas B/C 1.50-1.77 vs USINE (gas model, plus the above; unattributed beyond these causes) | `attribution` |
+| D1-L | **fixed in the configuration** (see above); losses kept in D1-1a | file:line above |
+| D1-2 | pass: six runs recorded, specs re-derived by the translator in the test | `test_runs_are_recorded_and_translated_from_the_item_files` |
+| D1-PRV-1, D1-PRV-2 | pass, rerun live after the translator change (4 tests in 135 s) | `$CRPROP_OUT/d1/acceptance3/D1-PRV-1.unittest.log` |
+
+DRAGON2 runs of D1 (D7, A1.8): dispatch 1: 19 (5 items, 2 convergence, 5 conformance mixin, 5 conformance CLI,
+2 diagnostics); dispatch 2: 11 (3 diagnostics, 3 item runs, 5 conformance mixin); total 30, all on E-crprop, at most
+4 at once.

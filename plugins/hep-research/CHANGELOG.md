@@ -144,6 +144,19 @@ Software checks establish contract consistency only, not physical validity.
   form of their inputs (`committed_form_sha256`, added to the seven B1 records without a rerun). The reader counts
   14C in carbon. A whole-halo V_A is converted with `transport_conventions.py reacceleration` (A1R: sqrt(L/(3h)),
   approximate, bound recorded at the run's largest lam); `b1-slab-all-items` rerun and its results updated.
+- crprop d1: DRAGON2 physics items and the provider `dragon2` (cr-propagation r3 §D1, §D1b, folded by r4 §6).
+  `adapters/cr-propagation` 0.2.0: `dragon2_run.py` gains a translator from a `transport` block (`--from-transport`,
+  `spec_from_transport`) that records every item DRAGON2 cannot express (gas, helium, disc thickness, source
+  distribution, inelastic cross sections, V_A zone) and refuses breaks; optional Convection and Reacceleration blocks,
+  NUBASE2020 half-lives written into a copy of `isotope_list.dat` (DRAGON2 ships 10Be at 1.51 Myr) and a single
+  injection slope. `dragon2_to_prediction.py` gains ratios of bin integrals on ekn or rigidity bins (r3 P2, P3). New
+  `dragon2_provider.py` (cr-provider/1, declared in `adapter.json`; not decomposable; runs kept under
+  `HEP_DRAGON2_RUN_DIR` when set). Six runs from new `harmonized-v1-<item>.json` files recorded under
+  `tests/adapters/fixtures/cr_propagation/dragon2/`. The translator converts V_A with hep-theory's
+  `transport_conventions.py reacceleration` (A1R; subprocess) and runs energy losses on Galprop gas, refusing them on
+  gas without HII (DRAGON2 cd588707's nuclear Coulomb loss diverges at n_HII = 0). D1-1 (absolute, frozen) fails and is
+  superseded by D1-1a/D1-1b (decision A1.9): item effects pass for convection and fail for 10Be/9Be with decay,
+  reacceleration and losses (13%, 5.7%, 6.1%), with attribution (VALIDATION CRPROP-D1).
 
 ## 0.42.0 (2026-10-26)
 
