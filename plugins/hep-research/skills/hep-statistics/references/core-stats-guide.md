@@ -94,7 +94,7 @@ subcommands, inputs and outputs, validation tools outside `core/stats`, publicat
 |---|---|---|
 | Limit or interval for a count with a **known** background | `poisson_diagnostics.py upper-limit`, `fc-interval`, `cls-limit` | `interval` for a mean with no background; `coverage` to check a construction |
 | Same with an **uncertain** background | `likelihood_limits.py profile-limit`, `profile-cls`, `profile-fc` | compare with the marginalized `--sigma-b` result; `neyman-limit` when coverage over the nuisance matters |
-| Discovery significance of a count | `likelihood_limits.py profile-significance` (uncertain b), `statistical_toys.py boundary` (known b), `shape-significance` (several bins, nuisances) | ON/OFF counting: `<plugin root>/skills/hep-statistics/scripts/li_ma_significance.py` |
+| Discovery significance of a count | `likelihood_limits.py profile-significance` (uncertain b), `statistical_toys.py boundary` (known b), `shape-significance` (several bins, nuisances) | ON/OFF counting: skill script `li_ma_significance.py` |
 | N hypotheses, no scan data | Bonferroni or Šidák bound (conservative), worked by hand and labeled | with scan data: `look_elsewhere.py` |
 | Several bins sharing one signal strength | `likelihood_limits.py multibin-limit` | `shape-limit` when shapes and several nuisances matter; the pyhf adapter beyond that |
 | Finite Monte Carlo statistics in templates | `statistical_toys.py template-stat`, then `template-bb` | `template_fit.py bb-fit`/`bb-toys` for several templates, `wbb-fit`/`wbb-toys` for weighted MC and nuisances |
@@ -108,8 +108,8 @@ subcommands, inputs and outputs, validation tools outside `core/stats`, publicat
 Helpers in `skills/hep-statistics/scripts/` (read `--help` first); they call the modules above, never replace
 them: run them, do not hand-compute.
 
-Dependencies are marked per script: unmarked scripts use the standard library only; marked ones refuse to run
-without NumPy (and SciPy) with exit 2 and a JSON message, and every script prints `--help` without them.
+Unmarked scripts use the standard library only; marked ones refuse to run without NumPy (and
+SciPy) with exit 2 and a JSON message, and every script prints `--help` without them.
 
 - `li_ma_significance.py`: ON/OFF significance, with toy or exact conditional p-values at low counts.
 - `look_elsewhere.py` (needs NumPy): global significance of a one-dimensional scan (brute-force toys or upcrossings).
@@ -117,7 +117,7 @@ without NumPy (and SciPy) with exit 2 and a JSON message, and every script print
 - `sensitivity_and_gof.py` (needs NumPy): Asimov discovery sensitivity (standard library) and toy-calibrated goodness of fit (NumPy).
 - `bayes_diagnostics.py` (needs NumPy): R-hat, ESS and MCSE of supplied chains, prior reweighting; `bayes_calibration.py` (needs NumPy and SciPy): quantile and SBC calibration checks.
 - `combine_measurements.py` (needs NumPy): GLS combination once the combination plan accepts the inputs (example: `skills/hep-statistics/assets/combine.example.json`); `combine_asymmetric.py`: Barlow's asymmetric errors; `split_consistency.py`: do split samples agree, shared blocks subtracted, said when undeclared; `build_covariance.py`: a `[Proposal]` covariance from declared correlation models and a length scan. Both: NumPy (and SciPy) at run time.
-- `covariance_fit.py` (needs NumPy and SciPy): fits to published points with their covariance (Peelle diagnostics; built-in, plug-in and `tabulated-grid` models; per-dataset scale nuisance); `break-scan`: toy-calibrated break; `discrete_profile.py` (needs NumPy and SciPy): discrete profiling; `eft_scan.py` (needs NumPy and SciPy): EFT scans; `pcl_efficiency_ratio.py` (needs NumPy and SciPy), `ratio_estimation.py` (needs NumPy): ratio and efficiency intervals; `sweighted_fit.py` (needs NumPy and SciPy): sWeighted fits.
+- `covariance_fit.py` (needs NumPy and SciPy): fits to published points with covariance (Peelle diagnostics; built-in, plug-in and `tabulated-grid` models; per-dataset scale nuisance); `break-scan`: toy-calibrated break; `degeneracy.py` (needs NumPy and SciPy): Fisher screen, profile scans; `discrete_profile.py` (needs NumPy and SciPy): discrete profiling; `eft_scan.py` (needs NumPy and SciPy): EFT scans; `pcl_efficiency_ratio.py` (needs NumPy and SciPy), `ratio_estimation.py` (needs NumPy): ratio and efficiency intervals; `sweighted_fit.py` (needs NumPy and SciPy): sWeighted fits.
 - `result_artifact.py`: a `statistical-result` artifact from a tool's output, with its status label; `extract_names.py`: N10
   naming inventory.
 - `pdf_reweighting.py`: Bayesian reweighting of a PDF replica set (NNPDF and Giele-Keller weights, N_eff);

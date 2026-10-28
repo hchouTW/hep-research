@@ -63,6 +63,15 @@ Software checks establish contract consistency only, not physical validity.
   and smoke-run for environment E-crprop (`usine -tUSINE`: 42 of 46 reference tests pass, the other 4 differ only in
   time zone, labels or last digits); USINE computational-run and environment manifest under
   `tests/adapters/fixtures/cr_propagation/env/`. No behavior change.
+- crprop a3: two-level degeneracy diagnostics. New `skills/hep-statistics/scripts/degeneracy.py`: the Fisher screen
+  (eigen-decomposition and flat-direction rule moved unchanged from `covariance_fit.py`, which now calls it) and
+  profile-likelihood scans along one parameter, a direction (or each Fisher flat direction) or over a plane, with
+  object-form degeneracy entries (`combination`, `form`, `exponents`, `evidence`: `fisher-screen` without `valid_range`,
+  `profile-scan` with the `valid_range` where the profile stays within the threshold). `covariance_fit.py fit`
+  (tabulated-grid) accepts an optional `degeneracy_scan` block and then adds `degeneracies` and `profile_scans` to each
+  fit; without it every output is byte-identical to the base (A3-1 baseline hashes). `degeneracy.py synthetic-curved`
+  is a built-in SYNTHETIC study (D0_cm2_s proportional to L_kpc^1.2, exact to 6 kpc, broken above by a spectral tilt):
+  the profile scan gives `valid_range.L_kpc` = [2, 6.95]. Tests: `tests/skills/hep_statistics/test_degeneracy.py`.
 
 ## 0.42.0 (2026-10-26)
 

@@ -6044,3 +6044,53 @@ changed.
 USINE status is unvalidated. The smoke run and the installation test show that the build runs and reproduces
 USINE's own reference outputs to the last digits; they say nothing about physical validity. The `-O0` build is
 USINE's default. An optimised build is not part of ENV and would need its own record.
+
+## CRPROP-A3 — 2026-10-26 (environment E2)
+
+Work package A3 (two-level degeneracy diagnostics) of the cr-propagation r4 workflow, r3 card §A3, principle P7.
+
+Environment: E2 (macOS arm64 workstation), Python 3.13.2 (miniconda), NumPy 2.4.4, SciPy 1.17.1. r3 §0.3 checks:
+toplevel `<repo>/.claude/worktrees/crprop-a3`, branch `worktree-crprop-a3`, status clean at start;
+base exception (decision D10): base is the integration HEAD `b83881c6`, not `main`; prerequisite P0 (its rework
+commits up to `34e2edeb`) is an ancestor of HEAD.
+
+| Item | Result | Evidence |
+|---|---|---|
+| A3-1 baseline, recorded before any change | 161 tabulated-grid outputs hashed on the base (every in-process `grid_fit` result and every `covariance_fit.py fit` stdout on a tabulated-grid input, from `test_grid_fit`, `test_bc_propagation_fit`, `test_cr_propagation` (2 live DRAGON2 tests skipped), and `examples/bc-propagation-fit/run.py --toys 20` with its `results.json` and `report.md`); two base runs identical | `$CRPROP_OUT/a3/baseline.txt`, harness `$CRPROP_OUT/a3/baseline_harness.py` |
+| A3-1 after the change | all 161 sha256 identical to the baseline | `$CRPROP_OUT/a3/after.txt` |
+| A3-2 built-in study (`degeneracy.py synthetic-curved`, analytic, Asimov) | Fisher screen: `D0_cm2_s/L_kpc^1.2`, exponent of L_kpc -1.2000, `fisher-screen`, no `valid_range`; profile scan over L_kpc (41 points, D0_cm2_s profiled, threshold 1): `profile-scan`, `valid_range.L_kpc` = [2 (scan edge), 6.947 (threshold)], exponent -1.20003; profiled delta -2 ln L 1.6e-13 at 6 kpc, 19.4 at 8 kpc | `$CRPROP_OUT/a3/acceptance/` |
+| A3-2 through `covariance_fit.py` (tabulated grid 25 x 17 nodes of the same model, `degeneracy_scan` {parameter L_kpc}) | Fisher exponent -1.2008, no `valid_range`; profile scan `valid_range.L_kpc` = [2, 6.851], exponent -1.2002 | `tests/skills/hep_statistics/test_degeneracy.py` |
+| A3-3 | `degeneracy.py --help` exit 0; module in `NO_INPUT_FILE` | `tests/skills/test_cli_robustness.py` |
+| A3-4 | `check_wiring.py --since b83881c6`: pass | |
+
+How the synthetic break is made genuine: the prediction is y_i ∝ (R_i/10 GV)^-0.45 · (u_true/u) · (1 + b(L) h_i) with
+u = D0_cm2_s / L_kpc^1.2, so for L <= 6 kpc every point with the same u predicts exactly the truth (exact degeneracy),
+and above 6 kpc a spectral tilt b(L) = 0.05 ((L - 6 kpc) / 2 kpc)^2 changes the energy dependence, which u (a pure
+normalization) cannot absorb. The data therefore exclude the valley at 8 kpc (profiled delta 19.4), not only the model
+declaration. The numbers are SYNTHETIC. The Fisher screen at the best fit (L = 4 kpc) sees only the local exponent;
+the profile scan finds where it holds. The A3 tests use only synthetic models; no propagation code was run.
+
+Checks on `f71cd8bb`: `run_all_checks.py` and `check_relocation.py` fail on two findings, both from this WP. The
+packaging scan (and `test_batch_privacy`) flagged a home path in this section; it is removed in the next commit and
+`check_packaging.py` passes. `test_core_stats_guide.DependencyMarkers` fails because `degeneracy.py` is not listed in
+the Skill scripts section of `skills/hep-statistics/references/core-stats-guide.md`, which is outside A3's file list
+(workflow.json `files` and `common_files`); the one-line entry is left to the orchestrator. `check_naming.py`,
+`check_wiring.py --since b83881c6`, `check_layering.py` and `workflow_check.py` diff, acceptance and gaps pass. The A3-1
+hashes were checked again on the committed tree: all 161 identical.
+
+Follow-up (orchestrator added `core-stats-guide.md` to A3's file list): `degeneracy.py` is listed in its Skill
+scripts section with the marker "(needs NumPy and SciPy)". The hep-statistics quick load (SKILL.md plus the guide)
+had 8 B of headroom under its 25,600 B budget, so four phrases in the guide were shortened with no change in content
+(`measure_entrypoints.py --no-cli`: no warnings), and `docs/reference-inventory.*` were regenerated.
+
+Dispatch 2 (2026-10-28, from `eca5da37`): the full `run_all_checks.py --jobs 4` on `eca5da37` failed only in
+`tests.skills.test_documented_output_claims` (2 failures): the shortened dependency sentence of the guide had dropped
+the two registered quotes "marked ones refuse to run without NumPy (and SciPy) with exit 2 and a JSON message" and
+"every script prints `--help` without them". The sentence now carries both quotes again; its lead-in "Dependencies
+are marked per script:" is dropped to stay in budget (quick load 25,590 B of 25,600 B, `measure_entrypoints.py
+--no-cli`: no warnings) and `docs/reference-inventory.*` are regenerated. On `eca5da37` the other gates passed:
+A3-1 (161/161 sha256 equal to the baseline), A3-2 (`valid_range.L_kpc.max` 6.947), A3-3, A3-4, `check_naming.py`,
+`check_layering.py`, `check_packaging.py`, `workflow_check.py` acceptance and gaps, and `workflow_check.py diff`
+with the integration branch's `workflow.json` (the branch copy predates the orchestrator's addition of
+`core-stats-guide.md` to A3's files). The full checks and `check_relocation.py` are rerun on the fix commit
+(`$CRPROP_OUT/a3/checks`, `$CRPROP_OUT/a3/reloc`).
