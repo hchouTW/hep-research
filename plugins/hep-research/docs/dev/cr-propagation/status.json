@@ -360,17 +360,17 @@
   },
   "C2UF": {
    "state": "dispatched",
-   "dispatches": 1,
+   "dispatches": 2,
    "rework_rounds": 0,
    "branch": "worktree-crprop-c2uf",
    "base": null,
-   "head": null,
+   "head": "d83b1cef",
    "merge_commit": null,
-   "worker_report": null,
+   "worker_report": "dispatch 1 PARTIAL: BIG/SLIM fitted on B/C + 10Be/9Be with decay on (SLIM dchi2 23.93); polynomial response models refused (0.883, 0.452 sigma vs 0.05); 520/600 USINE; per-point provider requests; finding: USINE provider default decay off",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "USINE cap 600; shares propagation_fit.py with F1 (merge order: whichever passes first; the other rebases)"
+    "A1.14: dispatch 2 via GP emulator route; USINE cap +400 (1000 total)"
    ]
   }
  },
@@ -769,6 +769,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "wave-5 full run on 03cfca5d (C2U, D3, E2 fix): E2 CLI contract fixed; 1 new failure attributed to D3 (d3_study.py:285 subprocess without timeout); relocation only known geant4; D3 fix branch"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "C2UF dispatch 1 PARTIAL (no response model at 0.05 sigma); A1.14: dispatch 2 via E2 GP emulator, cap +400; F1 warned about USINE default decay off"
   }
  ],
  "env": {
