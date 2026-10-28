@@ -1,0 +1,130 @@
+{
+ "contract_version": "3.14.0",
+ "artifact_id": "crprop-a4-closed-form-1pt-2",
+ "artifact_type": "computational-run",
+ "objective": "A4 cost benchmark: closed-form provider under harmonized-v1, 1 point(s) x 60 bins, run 2",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.42.0",
+  "contracts": "3.14.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-theory",
+  "created": "2026-10-28",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "extension": {
+  "input_manifest": [
+   {
+    "path": "tests/adapters/fixtures/cr_propagation/cost/closed-form/hv1-request.json",
+    "sha256": "39370e3910219ae5553165f206b02208fe42e3eb1012454039b030ea0e09c6ed"
+   },
+   {
+    "path": "profiles/theory/cr-secondary-ratio/scripts/provider.py",
+    "sha256": "4b45a24fe9ab4fe52db67f80e7e4ee69a266f77747a53ad251dbc49808f090de"
+   },
+   {
+    "path": "profiles/theory/cr-secondary-ratio/scripts/predict.py",
+    "sha256": "fe7acb0117feff12e7107b1a625f4dae3fca188d08675a9ab43624ff9f3b183d"
+   },
+   {
+    "path": "profiles/theory/cr-secondary-ratio/benchmarks/bc-benchmark.json",
+    "sha256": "67ff9d7b1c0df343bdb060982c67f2f2ffe01dada257a0939e5a44d8872b390c"
+   },
+   {
+    "path": "profiles/theory/cr-secondary-ratio/models/xs-illustrative-A.json",
+    "sha256": "dc6a18a336c4d5f06ff586684d1f1001f05ba2f5ed98c776aedb201ff022c219"
+   }
+  ],
+  "tools": [
+   {
+    "name": "theory:cr-secondary-ratio provider (cr-provider/1)",
+    "version": "profile 0.1.0 at crprop integration 566bfd1e",
+    "path": "profiles/theory/cr-secondary-ratio/scripts/provider.py"
+   },
+   {
+    "name": "/usr/bin/time -l",
+    "version": "macOS 27.2 BSD time"
+   },
+   {
+    "name": "python",
+    "version": "3.13.2"
+   },
+   {
+    "name": "numpy",
+    "version": "2.5.3"
+   },
+   {
+    "name": "scipy",
+    "version": "1.18.1"
+   }
+  ],
+  "commands": [
+   "PYTHONDONTWRITEBYTECODE=1 /usr/bin/time -l <VENV>/bin/python profiles/theory/cr-secondary-ratio/scripts/provider.py --request tests/adapters/fixtures/cr_propagation/cost/closed-form/hv1-request.json --response <RUN_DIR>/closed-form/hv1-response-2.json"
+  ],
+  "environment": {
+   "python": "3.13.2",
+   "implementation": "CPython",
+   "executable": "<VENV>/bin/python",
+   "platform": "macOS-27.2-arm64-arm-64bit-Mach-O",
+   "machine": "arm64",
+   "system": {
+    "os": "Darwin",
+    "arch": "arm64",
+    "libc": "macOS 27.2",
+    "kernel": "27.2.0"
+   },
+   "origin": "venv",
+   "variables": {
+    "ROOTSYS": "/opt/homebrew/Cellar/root/6.38.04_1",
+    "CONDA_PREFIX": "<CONDA_HOME>",
+    "CONDA_DEFAULT_ENV": "base"
+   },
+   "packages": {
+    "numpy": "2.5.3",
+    "scipy": "1.18.1"
+   },
+   "project": {
+    "path": "<TOOL_HOME>/src",
+    "commit": "cd588707fe03c76f19bda1b8092e136dcbe3fe90",
+    "dirty": false
+   },
+   "label": "E-crprop (E2 host plus the ENV DRAGON2 build)"
+  },
+  "seeds": {
+   "note": "not applicable: deterministic closed form"
+  },
+  "tolerances": {
+   "note": "provider numerical_tolerance 1e-6 (8-node quadrature against 32 nodes, profile test)"
+  },
+  "resources": {
+   "wall_seconds": 0.14,
+   "user_seconds": 0.11,
+   "sys_seconds": 0.02,
+   "peak_rss_bytes": 42172416,
+   "points": 1,
+   "bins_per_point": 60,
+   "provider_elapsed_s": [
+    0.068474
+   ],
+   "processes": 1,
+   "host_load_before": "2026-10-28T09:40:22Z | load averages 9.18 8.41 12.55",
+   "concurrency": "run while the serial DRAGON2 base timing series was running (one core)"
+  },
+  "exit_status": 0,
+  "output_hashes": {
+   "<RUN_DIR>/closed-form/hv1-response-2.json": "c98a6fdb8cdead22fe22c94e161c5d4e3d12f21a1b4309397d07276a3c606510"
+  }
+ }
+}

@@ -1,0 +1,91 @@
+{
+ "name": "crprop-a4-cost-table",
+ "date": "2026-10-28",
+ "environment": "E-crprop (E2 host)",
+ "configuration": "tests/adapters/fixtures/cr_propagation/specs/harmonized-v1.json",
+ "method": "/usr/bin/time -l, median of three identical runs; grid convergence reported, no threshold",
+ "caveat": "host shared with other campaign workers (load average 7 to 62 during the DRAGON2 series, swap nearly full): wall time and peak RSS of DRAGON2 vary by x4 and x1.7 between identical runs with identical output",
+ "rows": [
+  {
+   "tool": "closed form (theory:cr-secondary-ratio provider, 1 point x 60 bins)",
+   "status": "measured",
+   "wall_seconds_median": 0.14,
+   "cpu_user_seconds_median": 0.11,
+   "peak_rss_bytes_median": 40763392,
+   "runs": [
+    "tests/adapters/fixtures/cr_propagation/cost/runs/closed-form-1pt-1.computational-run.json",
+    "tests/adapters/fixtures/cr_propagation/cost/runs/closed-form-1pt-2.computational-run.json",
+    "tests/adapters/fixtures/cr_propagation/cost/runs/closed-form-1pt-3.computational-run.json"
+   ]
+  },
+  {
+   "tool": "closed form (same provider, 256 points x 60 bins in one request)",
+   "status": "measured",
+   "wall_seconds_median": 2.55,
+   "cpu_user_seconds_median": 2.33,
+   "peak_rss_bytes_median": 43925504,
+   "marginal_seconds_per_point": 0.00945,
+   "runs": [
+    "tests/adapters/fixtures/cr_propagation/cost/runs/closed-form-256pt-1.computational-run.json",
+    "tests/adapters/fixtures/cr_propagation/cost/runs/closed-form-256pt-2.computational-run.json",
+    "tests/adapters/fixtures/cr_propagation/cost/runs/closed-form-256pt-3.computational-run.json"
+   ]
+  },
+  {
+   "tool": "DRAGON2 cd588707 (harmonized-v1, DimR 41, DimZ 401, Ekfactor 10^(1/20), Z 5-8)",
+   "status": "measured",
+   "wall_seconds_median": 249.26,
+   "cpu_user_seconds_median": 220.86,
+   "peak_rss_bytes_median": 474578944,
+   "least_loaded_run": {
+    "run": "tests/adapters/fixtures/cr_propagation/cost/runs/dragon2-base-1.computational-run.json",
+    "wall_seconds": 127.18,
+    "peak_rss_bytes": 727826432,
+    "host_load_before": "2026-10-28T09:42:28Z | load averages 7.60 8.42 12.01"
+   },
+   "runs": [
+    "tests/adapters/fixtures/cr_propagation/cost/runs/dragon2-base-1.computational-run.json",
+    "tests/adapters/fixtures/cr_propagation/cost/runs/dragon2-base-2.computational-run.json",
+    "tests/adapters/fixtures/cr_propagation/cost/runs/dragon2-base-3.computational-run.json"
+   ],
+   "grid_convergence_max_relative_change_bc_2_1000_gv": {
+    "x2s": 0.0013489689749768274,
+    "x2e": 0.0018201175277254844,
+    "x2se": 0.001950074068294283
+   },
+   "doubled_grid_runs": {
+    "x2s": {
+     "wall_seconds": 1930.97,
+     "cpu_user_seconds": 1131.28,
+     "peak_rss_bytes": 1485832192,
+     "run": "tests/adapters/fixtures/cr_propagation/cost/runs/dragon2-x2s.computational-run.json"
+    },
+    "x2e": {
+     "wall_seconds": 990.45,
+     "cpu_user_seconds": 502.58,
+     "peak_rss_bytes": 835158016,
+     "run": "tests/adapters/fixtures/cr_propagation/cost/runs/dragon2-x2e.computational-run.json"
+    },
+    "x2se": {
+     "wall_seconds": 3251.66,
+     "cpu_user_seconds": 2030.4,
+     "peak_rss_bytes": 2229207040,
+     "run": "tests/adapters/fixtures/cr_propagation/cost/runs/dragon2-x2se.computational-run.json"
+    }
+   }
+  },
+  {
+   "tool": "USINE V3.5",
+   "status": "not measured (capability absent: env-usine)"
+  },
+  {
+   "tool": "GALPROP v57",
+   "status": "not measured (capability absent: env-galprop)"
+  }
+ ],
+ "analysis": {
+  "ref": "tests/adapters/fixtures/cr_propagation/cost/runs/grid-convergence.computational-run.json",
+  "sha256": "c4903a14f5decf43e09df1097542e9ba9353e30d79639abe168c1518aaed70cc",
+  "artifact_id": "crprop-a4-grid-convergence"
+ }
+}

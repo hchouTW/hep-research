@@ -72,6 +72,12 @@ Software checks establish contract consistency only, not physical validity.
   fit; without it every output is byte-identical to the base (A3-1 baseline hashes). `degeneracy.py synthetic-curved`
   is a built-in SYNTHETIC study (D0_cm2_s proportional to L_kpc^1.2, exact to 6 kpc, broken above by a spectral tilt):
   the profile scan gives `valid_range.L_kpc` = [2, 6.95]. Tests: `tests/skills/hep_statistics/test_degeneracy.py`.
+- crprop a4: cost benchmark of the cr-propagation campaign (r3 §A4): wall time and peak RSS (median of three runs)
+  of the closed-form provider of `cr-secondary-ratio` and of DRAGON2 under `harmonized-v1`, and the grid convergence
+  of DRAGON2's B/C over 2–1000 GV (spatial and energy grids doubled once; reported, no threshold), in the
+  `CRPROP-COST` section of VALIDATION.md. Run records, run specs, provider requests and the convergence script under
+  `tests/adapters/fixtures/cr_propagation/cost/`. USINE and GALPROP rows not measured (capability absent). No
+  behavior change.
 
 ## 0.42.0 (2026-10-26)
 
