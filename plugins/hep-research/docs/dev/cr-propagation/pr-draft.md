@@ -67,10 +67,14 @@ Full report: `plugins/hep-research/docs/dev/cr-propagation/campaign-report.md`
 
 ### Check results
 
-- Wave-6 full `run_all_checks.py` and `check_relocation.py` on the integration HEAD: <pending>
+- Waves 1-5 (full `run_all_checks.py` and `check_relocation.py` once per wave): each failure was fixed on a fix
+  branch, and the fixes of waves 1-4 were confirmed by later full runs. The wave-5 D3 fix was confirmed by wave 6's
+  subprocess-timeout test, which listed only the F1 line. `check_relocation.py` otherwise shows only the 2 known
+  geant4 path-with-spaces failures, identical on `main`.
+- Wave 6 (6f377150) failed twice: the hep-statistics routing size budget, 25688 > 25600 B (C2UF), and a subprocess
+  call without a timeout in `test_cr_propagation.py:2269` (F1). Both are being fixed on fix branches (rework round 1).
+- Final confirmation run after the wave-6 fixes: WAVE6-RESULT: <pending>
 - Required CI jobs: <pending>
-- Earlier wave runs: waves 1-5 passed after fixes; `check_relocation.py` shows only the 2 known geant4
-  path-with-spaces failures, identical on `main`.
 
 ### Known issues
 
@@ -80,6 +84,13 @@ Full report: `plugins/hep-research/docs/dev/cr-propagation/campaign-report.md`
   loosened.
 - The USINE provider applies solar modulation itself, against `cr_provider.json`'s "providers never modulate"; the
   departure is recorded in every modulated prediction.
+- Accepted, attributed DRAGON2/USINE differences: D1-1a item effects (10Be/9Be with decay 11-13%, gas layer;
+  reacceleration 5.7%; losses 6.1%), D3-1 (38-77% at level 1), D3-3 (reacceleration 17.0%, losses on Galprop gas
+  17.7%). The second-order reacceleration term was not estimated and the losses attribution was not quantified.
+- `adapter.json` does not yet record the DRAGON2 provider as tested with these known differences, as A1.11 asked
+  (follow-up).
+- VALIDATION CRPROP-B3 gives the USINE 2D/1D 10Be/9Be offset as "-1.3%"; per the B3 verifier it is +1.3%. The
+  history is append-only, so the section is not edited.
 - C2UF's toy fits are bounded by the emulator's k = 4 domain while validation covered k = 3.
 - `propagation_fit.py` reports unconverged fits with reason "artifact-invalid"; with polish enabled it keeps `t_hat`
   while the verdict describes the polished point (polish is off by default).
@@ -89,6 +100,8 @@ Full report: `plugins/hep-research/docs/dev/cr-propagation/campaign-report.md`
 - GALPROP is not available (D2 unavailable); the adapter stays `proposed`.
 - Not done: F2 (cross-code redo of F1), F3 (v1 change) and the paid live routing run, which was never consented.
 - The DRAGON2 upstream issue draft is kept outside the repository and was not posted.
+
+- Other verifier advisories (C2U, B1X, A1, C1, B2, D1) are listed in the campaign report, §8.
 
 ### Unfinished items
 

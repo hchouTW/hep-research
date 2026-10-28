@@ -1,7 +1,7 @@
 # cr-propagation r4: campaign report (RC)
 
 Work package RC of the cr-propagation r4 campaign (`workflow-r4.md` §10). For the maintainer, and as the source of the
-0.43.0 release notes. Every number below comes from the state of record on the integration branch at 47b004b4:
+0.43.0 release notes. Every number below comes from the state of record on the integration branch at 9b121eae:
 `status.json` (work-package states, merge commits, dispatches, rework rounds, worker and verifier reports, log),
 `decisions.md` (H0 D0-D12, amendment A1.1-A1.19), `escalations.md` (items 1-12), `acceptance.json` and the `CRPROP-*`
 sections of `VALIDATION.md`. Where those files give no number, the report says so.
@@ -10,6 +10,9 @@ Campaign window: H0 2026-10-26 to RC 2026-10-29 (integration branch `worktree-cr
 8fcbb826, release 0.42.0; `main` has not moved since).
 
 WAVE6-RESULT: <pending>
+
+This line is for the final confirmation run after the wave-6 fixes. The wave-6 run itself (on 6f377150) failed
+twice; see §2 and §6.
 
 ## 1. Summary
 
@@ -35,7 +38,7 @@ F1. Not merged:
 
 **r4 definition of done** (`workflow-r4.md` line 48): item 1 holds (every non-optional WP merged, F3 skipped through
 its fallback); item 2 is the wave-6 and RC check run (placeholder above); items 3 and 4 are this report and
-`pr-draft.md`; item 5 did not hold strictly: the maintainer decided A1.1-A1.14 during the run (see §6).
+`pr-draft.md`; item 5 did not hold strictly: the maintainer decided A1.1-A1.15 during the run (see §6).
 
 ## 2. Work packages
 
@@ -44,7 +47,7 @@ wave-run fix branches (§6).
 
 | WP | State | Merge commit | Dispatches | Rework rounds | Verifier (model): verdict |
 |---|---|---|---|---|---|
-| P0 | merged | 21e18305 (round 3) | 1 | 3 | rounds 1-2 REWORK (not stated); round 3 (Sonnet): PASS |
+| P0 | merged | 21e18305 (round 3) | 1 | 3 | rounds 0-2 REWORK (not stated); round 3 (Sonnet): PASS |
 | ENV | merged | 7d5c6934 (dispatch 1), cbb7907f (dispatch 2) | 2 | 0 | dispatch 1 (not stated): PASS; dispatch 2 (Sonnet): PASS |
 | A1 | merged | 5d5fd918 | 1 | 0 | Opus: PASS |
 | A1R | merged | 18b43b34; fix a634e747 | 1 | 1 | Opus: PASS; wave-3 fix (Sonnet): PASS |
@@ -69,18 +72,21 @@ wave-run fix branches (§6).
 | F3 | skipped | — | 0 | 0 | — (A1.18, condition false) |
 | RC | dispatched | — | — | — | this work package |
 
-Every merge was followed by the static part of `run_all_checks.py` and `workflow_check.py acceptance` (log entries
-"post-merge static ok"). ALL-3 (full `run_all_checks.py` and `check_relocation.py`) ran once per wave on the
+All 25 merges have a post-merge static result (static part of `run_all_checks.py`, with `workflow_check.py
+acceptance`) in the record. For 20 of them the log said "post-merge static ok" at merge time. For A1R 18b43b34, D1
+e44377f4, E2 fix bc6f314f, D3 fix 310bb517 and F1 3ccaa643, the log entry at merge time did not give it; the results
+(all exit 0) were taken from the orchestrator's merge logs and added to the record later (log entry "record gap
+filled ...", 2026-10-29). ALL-3 (full `run_all_checks.py` and `check_relocation.py`) ran once per wave on the
 integration HEAD (A1.5):
 
 | Wave run | WPs covered | Result |
 |---|---|---|
-| 1, on 566bfd1e | ENV 1, A2, A1, C1, B2 | 1 failure: `tests.tools.test_run_all_checks` timing coverage (49 modules without timing, limit 47), cumulative from new campaign test modules; fixed by adding 6 measured modules to `tools/module_timings.json`. Relocation: only the 2 known geant4 path-with-spaces failures |
+| 1, on 566bfd1e | ENV 1, A2, A1, C1, B2 | 1 failure (later full runs passed this test): `tests.tools.test_run_all_checks` timing coverage (49 modules without timing, limit 47), cumulative from new campaign test modules; fixed by adding 6 measured modules to `tools/module_timings.json`. Relocation: only the 2 known geant4 path-with-spaces failures |
 | 2, on 2d451e87 | P0 r3, ENV 2, A3, A4, B1 | pass; relocation only the 2 known geant4 failures (identical on `main`) |
-| 3, on a4211583 | C2, B3, E1, A1R | 2 failures: A1R (Th13 phrase test), E1 (subprocess calls without timeout); fixed on fix branches |
-| 4, on 6ecc1ffa | B1X, D1, E2, wave-3 fixes | wave-3 fixes confirmed; 1 failure: E2 (`train_emulator.py` lacked `--status`, CLI contract); fixed |
-| 5, on 03cfca5d | C2U, D3, E2 fix | E2 fix confirmed; 1 failure: D3 (`d3_study.py:285` subprocess without timeout); fixed |
-| 6 | D3 fix, C2UF, F1 | see WAVE6-RESULT above |
+| 3, on a4211583 | C2, B3, E1, A1R | 2 failures: A1R (Th13 phrase test), E1 (subprocess calls without timeout); fixed on fix branches, confirmed by wave 4 |
+| 4, on 6ecc1ffa | B1X, D1, E2, wave-3 fixes | wave-3 fixes confirmed; 1 failure: E2 (`train_emulator.py` lacked `--status`, CLI contract); fixed, confirmed by wave 5 |
+| 5, on 03cfca5d | C2U, D3, E2 fix | E2 fix confirmed; 1 failure: D3 (`d3_study.py:285` subprocess without timeout); fixed, confirmed by wave 6 (its subprocess-timeout test listed only the F1 line) |
+| 6, on 6f377150 | D3 fix, C2UF, F1 | FAIL, 2 failures: routing-table budget, hep-statistics `SKILL.md` + `core-stats-guide.md` 25688 > 25600 B (C2UF, 7d997d02); `test_cr_propagation.py:2269` subprocess without timeout (F1). Relocation: the same two. Both being fixed on fix branches (rework round 1); final confirmation run: WAVE6-RESULT above |
 
 ## 3. Acceptance results per merged WP
 
@@ -208,19 +214,24 @@ of a frozen entry; the frozen entry stays in the file with its failed verdict.
 
 ## 6. Process departures
 
-- **Mid-run decisions.** r4 asks for no person between H0 and H1. The maintainer answered amendment A1.1-A1.14 during
-  the run, approved the USINE clone and build after the host permission check held ENV's second dispatch,
-  stopped the campaign on 2026-10-27 (resumed 2026-10-28) and paused and unpaused it before RC. A1.15 delegated H1
-  (push, PR, merge after the required CI jobs, release 0.43.0) to the orchestrator; A1.16-A1.19 are orchestrator
-  decisions under that delegation.
+- **Mid-run decisions.** r4 asks for no person between H0 and H1. The maintainer decided A1.1-A1.15 during the run, approved the USINE clone and build after the host permission check held ENV's second dispatch,
+  stopped the campaign on 2026-10-27 (resumed 2026-10-28) and paused and unpaused it before RC. A1.15 (itself a mid-run
+  decision) delegated H1 (push, PR, merge after the required CI jobs, release 0.43.0) to the orchestrator;
+  A1.16-A1.19 are orchestrator decisions under that delegation.
 - **Check execution (A1.4, then A1.5).** Workers stopped running the full checks (A1.4: the verifier ran ALL-3);
   A1.5 then moved ALL-3 to one orchestrator run per wave on the integration HEAD, with workers and verifiers running
   the static part plus impacted tests. WF-4 (static after every merge) and WF-10 (full run at RC) were unchanged.
-- **Wave-run failures fixed forward.** A1.5 says a wave-run failure reverts the responsible merge. In waves 3, 4 and 5
-  the failures (A1R, E1; E2; D3) were fixed on fix branches counted as rework round 1, verified and merged, because
-  later merges depended on the failing WPs (B1X and D1 on A1R, E2 on E1, C2UF on E2). Recorded in the log for H1.
+- **Wave-run failures fixed forward.** A1.5 says a wave-run failure reverts the responsible merge. Instead, the
+  failures were fixed on fix branches counted as rework round 1, verified and merged. Reasons as recorded:
+  - wave 3 (A1R, E1): later merges depended on both WPs (`status.json` log[65]; the A1R note names B1X and D1, the
+    E1 note says E2 builds on E1); recorded as an orchestrator departure from A1.5 for H1;
+  - wave 4 (E2): "same handling as the wave-3 fixes" (E2 note);
+  - wave 5 (D3): the record gives no dependency reason; the handling was consistent with waves 3 and 4;
+  - wave 6 (C2UF: hep-statistics routing size budget 25688 > 25600 B; F1: `test_cr_propagation.py:2269` subprocess
+    without timeout): the same handling, fix branches as rework round 1, in progress at the time of this report.
 - **Limits.** P0 got a third rework round beyond the limit of 2 (A1.6). Concurrency was capped at 3 workers and 2
-  full check runs (A1.3) instead of the manifest's 4 workers.
+  full check runs (A1.3) instead of the manifest's 4 workers. `status.json` log[26] (2026-10-28) records a 4th
+  worker (ENV dispatch 2) while A3 finished its check run: above A1.3's cap of 3, within r4 §4's limit of 4.
 - **Budget.** The external-code evaluation cap was raised from 5000 to 6000 (A1.16); per-WP USINE caps were raised for
   C2UF (A1.14, +400) and F1 (A1.16, +600).
 - **Scope widening by the orchestrator.** WP file lists were widened during the run, each recorded in the log: A2
@@ -249,16 +260,16 @@ core-hours, 6 weeks of wall time.
 | E2 | — | 177 (about 0.2 core-hours) | CRPROP-E2 |
 | C2U | — | about 1372 | CRPROP-C2U |
 | C2UF | — | 862 | CRPROP-C2UF |
-| F1 | — | 2347 (1693 in dispatch 1, 654 in dispatch 2) | CRPROP-F1 |
+| F1 | — | 2347 (1693 in dispatch 1; dispatch 2: 2347 - 1693 = 654, of which VALIDATION itemises 653) | CRPROP-F1 |
 | **Total** | **about 39** | **about 5284** | sum of the rows |
 
 External-code evaluations: **about 5320 of 6000**. Not tallied anywhere: ENV's DRAGON2 live rerun, USINE smoke run and
 `usine -tUSINE`, and the verifiers' reruns. C2 used about 6600 closed-form evaluations, which do not count (A1.8).
 
-Core-hours: A1.16 records **about 8 core-hours** used when F1's dispatch 2 was decided. F1's 654 dispatch-2 runs came
-after that estimate (its noise probes took 7.8-8.9 s per run); no WP gives a core-hour total for C2U, C2UF, D1, D3 or
+Core-hours: A1.16 records **about 8 core-hours** used when F1's dispatch 2 was decided. F1's dispatch-2 runs (654 by difference, 653
+itemised) came after that estimate (its noise probes took 7.8-8.9 s per run); no WP gives a core-hour total for C2U, C2UF, D1, D3 or
 F1, so the campaign total is not stated in the record. It is above 8 and, at the per-run times reported (USINE about
-3-9 s, DRAGON2 about 125-221 CPU-s at the A4 grid), far below 200. Wall time: 4 days of 6 weeks.
+1-20 s per run: E1 about 1-3 s, B3 about 2.4 s, D3 2-20 s, F1 probes 7.8-8.9 s; DRAGON2 about 125-221 CPU-s at the A4 grid), far below 200. Wall time: 4 days of 6 weeks.
 
 ## 8. Known issues and future work (for the release notes)
 
@@ -291,10 +302,32 @@ F1, so the campaign total is not stated in the record. It is above 8 and, at the
     unposted (A1.15, A1.19).
 12. **Release.** Plugin 0.43.0 makes contracts 3.14.0 and core 1.2.0 official (A1.15); until the release they are the
     campaign's unreleased bumps.
-13. **Open texts for the maintainer.** The en/zh differences of r3 and r4 listed in `decisions.md` are not resolved;
-    r3 Q10's independent review has not run (§6). Verifier advisories recorded but not re-checked at RC, among them:
-    the canonical parameter table lacks B1X's new names; D1's `--spec` path does not refuse BronfFerr losses; the
-    USINE smooth-break form of A1 was not re-read from Weinrich 2020a.
+13. **Accepted DRAGON2/USINE misses.** D1-1a item effects (A1.11): 10Be/9Be with decay 11-13% below 1 GeV/n
+    (DRAGON2's finite gas layer vs thin-disc references), reacceleration 5.7% on B/C (within the first-order zone
+    conversion bound), losses 6.1% on B/C (DRAGON2 Coulomb loss on HII vs USINE's ionization-only reference). D3-1:
+    38-77% at level 1 (decomposed). D3-3: reacceleration 17.0%, losses pair on Galprop gas 17.7% (A1.13). Caveats of
+    escalation 11 (D1 verifier): the second-order reacceleration term was not estimated, and the losses attribution
+    was not quantified (the neutral column likely contributes as much as Coulomb on HII); the thick-gas diagnostic
+    agrees within about 1% only in bins 3-5.
+14. **adapter.json and A1.11.** A1.11 asked that `adapter.json` record the DRAGON2 provider as tested with these known
+    differences; it does not (the D1 verifier also noted this). Open, for follow-up; not edited in this campaign.
+15. **B3 sign error in VALIDATION.** The B3-1b attribution paragraph of VALIDATION CRPROP-B3 gives USINE 2D / USINE 1D
+    for 10Be/9Be as "up to -1.3%"; per the B3 verifier it is +1.3%. VALIDATION is append-only, so B3's section is
+    not edited.
+16. **Other verifier advisories** (recorded, not re-checked at RC):
+    - C2U: the P2 statement is found by regex (a negation would pass); `transport_substitutes` exempted from the gate
+      (to be stated as conditions for F1); `kkt` docstring; budget checked before the cache.
+    - B1X: nested break and injection fields are not in the field loop; the canonical parameter table lacks the new
+      names.
+    - A1: USINE smooth-break form not re-read from Weinrich 2020a; n_H only as text; source spatial distribution left
+      open; He-target and ghost treatment vs `xs-illustrative-A`.
+    - C1 (worker's open items; the verifier recorded ALL-7 not-run): the closed-form provider gives bin-averaged
+      ratios, not P2 bin integrals; profile README and index not updated.
+    - B2: stale function name in the derivation script (line 164); resonant case refused; `R0_GV`/`h_kpc` kept
+      beside canonical `V_c_kms`; profile version not bumped.
+    - D1: `--spec` path does not refuse BronfFerr losses.
+17. **Open texts for the maintainer.** The en/zh differences of r3 and r4 listed in `decisions.md` are not resolved;
+    r3 Q10's independent review has not run (§6).
 
 ## 9. Workflow criteria (RC's entries)
 
@@ -302,13 +335,13 @@ F1, so the campaign total is not stated in the record. It is above 8 and, at the
 |---|---|---|
 | WF-2 | holds | `workflow_check.py acceptance` ok, frozen sha256 f5b0dbe6…, 86 frozen entries, 17 added |
 | WF-3 | holds | every merged WP has a verifier PASS in `status.json`; verifiers were separate agents from the workers |
-| WF-4 | holds with a departure | post-merge static checks ok after every merge (log); wave-run failures fixed forward instead of reverted (§6) |
+| WF-4 | static clause holds; revert clause missed (fixed forward, §6) | all 25 merges have a post-merge static result (exit 0); 5 of them (A1R, D1, E2 fix, D3 fix, F1) were taken from the orchestrator's merge logs and added to the record later (§2); wave-run failures fixed forward instead of reverted |
 | WF-5 | holds | `status.json` and the other orchestrator-only files are checked by `workflow_check.py diff` on every WP branch |
-| WF-6 | holds with a departure | P0 hit the rework limit (escalation 4) and got one authorized extra round (A1.6); D1 blocked twice (escalations 9, 11); no WP used more than 2 dispatches |
-| WF-7 | partly | nothing pushed, `main` unchanged, no pull request; persons were asked outside the H0 record (§6) |
+| WF-6 | missed, accepted (A1.6: P0 rework round 3) | P0 hit the rework limit (escalation 4) and got one authorized extra round; D1, at its limits, was escalated (9, 11); no WP used more than 2 dispatches |
+| WF-7 | person clause missed | maintainer decisions A1.1-A1.15, the USINE clone approval and the pause and its cancellation were asked during the run (§6); nothing pushed, `main` unchanged, no pull request |
 | WF-8 | holds (natural test) | the campaign stopped on 2026-10-27 with WPs dispatched and resumed on 2026-10-28 ("resumption check ok: 6 worktrees, HEADs as recorded"); each was merged once |
-| WF-9 | holds with a departure | no WP was dispatched without its capabilities (B1, B3, C2U waited for `env-usine`; D2 never dispatched); F2 skipped by decision, not by its fallback (§6) |
-| WF-10 | pending | WAVE6-RESULT above; `main` has not moved, so no rebase was needed |
+| WF-9 | capability clause holds; fallback clause missed, accepted (A1.18: F2 skipped by decision) | no WP was dispatched without its capabilities (B1, B3, C2U waited for `env-usine`; D2 never dispatched); F2's manifest fallback did not apply (§6) |
+| WF-10 | pending | wave 6 failed twice (§2), fixes in progress; final confirmation run: WAVE6-RESULT above; `main` has not moved, so no rebase was needed |
 
 ## 10. For H1 (delegated to the orchestrator, A1.15)
 
