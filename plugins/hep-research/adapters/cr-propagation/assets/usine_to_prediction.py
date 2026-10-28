@@ -41,7 +41,7 @@ FLUX_UNIT = "[GeV/n m^{2} s sr]^{-1}"
 ELEMENTS = {1: "H", 2: "He", 3: "Li", 4: "Be", 5: "B", 6: "C", 7: "N", 8: "O"}
 # observable -> (numerator isotopes, denominator isotopes, species names for the prediction)
 OBSERVABLES = {
-    "B/C": (["10B", "11B"], ["12C", "13C"], ["boron", "carbon"]),
+    "B/C": (["10B", "11B"], ["12C", "13C", "14C"], ["boron", "carbon"]),  # 14C: in USINE's own network (B1X)
     "10Be/9Be": (["10Be"], ["9Be"], ["beryllium-10", "beryllium-9"]),
     "Be/B": (["7Be", "9Be", "10Be"], ["10B", "11B"], ["beryllium", "boron"]),
 }

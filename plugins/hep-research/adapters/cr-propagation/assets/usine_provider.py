@@ -10,9 +10,10 @@ Transport: the request's 'transport' block (contracts ext_theory_spec.transport,
 DEFAULT_TRANSPORT (harmonized-v1 with the isotopic network and the isotopic ILLUSTRATIVE cross sections, equal to the
 fixture tests/adapters/fixtures/cr_propagation/usine/specs/d1-isotopic.json, checked by the adapter tests). A point
 overrides D0_cm2_s, delta and eta (diffusion), L_kpc (geometry), V_c_kms (convection) and V_A_kms (reacceleration, in
-the transport's zone). Cross sections: only the ILLUSTRATIVE sets of theory:cr-secondary-ratio
-(usine_translate.ILLUSTRATIVE_SETS); a transport naming another set fails the point with provider-error, never
-replaced. What USINE cannot express exactly is listed in each prediction's parameter_point.transport_substitutes;
+the transport's zone). Cross sections: the ILLUSTRATIVE sets of theory:cr-secondary-ratio
+(usine_translate.ILLUSTRATIVE_SETS), or USINE's own cross-section files with data-normalised source abundances
+('usine:<file>' names, read in place from HEP_USINE_DATA, never copied; work package B1X); a transport naming another
+set fails the point with provider-error, never replaced. What USINE cannot express exactly is listed in each prediction's parameter_point.transport_substitutes;
 what it cannot express at all fails the point. An observable whose isotopes are not in the network (Be/B or 10Be/9Be
 with the element-level set) fails the point.
 Grid: the translator's (20 E_k/n nodes per decade from below 0.8 times the lowest to above 1.25 times the highest E_k/n
@@ -21,7 +22,8 @@ HEP_USINE_DATA; without them a point fails with provider-error (R4), nothing fal
 
 Values: the ratio of the bin-integrated summed numerator and denominator (r3 P2), isotopes summed at equal rigidity
 on the axis rigidity and at equal E/n on the axis ekn (P3); fluxes per E_k/n from USINE's tables (P11). Never
-modulated (phi = 0). Not decomposable. Labels: synthetic and unvalidated (ILLUSTRATIVE cross sections).
+modulated (phi = 0). Not decomposable. Labels: synthetic and unvalidated with the ILLUSTRATIVE cross sections,
+unvalidated with USINE's own inputs.
 numerical_tolerance NUMERICAL_TOLERANCE (0.005): a rounded-up bound on the largest relative change of B/C (2-1000 GV)
 and 10Be/9Be (0.05-10 GeV/n) bins between this grid and one with 80 nodes per decade and 200 Bessel terms (2.0e-3,
 with reacceleration; VALIDATION CRPROP-B1); not a physics uncertainty.
@@ -146,7 +148,8 @@ def evaluate_point(request: dict, point: dict, context: dict) -> dict:
             edges = [float(obs["bins"][0][0])] + [float(b) for _, b in obs["bins"]]
             values = reader.ratio_of_bin_integrals(tables, obs["id"], edges, obs["axis"])
             predictions.append(reader.prediction(obs["id"], obs["axis"], edges, values, point, spec))
-    out = {"labels": ["synthetic", "unvalidated"], "numerical_tolerance": NUMERICAL_TOLERANCE,
+    labels = ["unvalidated"] if spec.get("mode") == "usine-inputs" else ["synthetic", "unvalidated"]
+    out = {"labels": labels, "numerical_tolerance": NUMERICAL_TOLERANCE,
            "computational_run_ref": rec["artifact_id"] if keep else None}
     if "lis" in context["want"]:
         out["predictions"] = predictions

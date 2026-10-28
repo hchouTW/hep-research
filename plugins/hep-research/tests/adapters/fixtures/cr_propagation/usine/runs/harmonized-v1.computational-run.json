@@ -27,21 +27,26 @@
   "input_manifest": [
    {
     "path": "norm_points.dat",
-    "sha256": "6e882bf9d33839dc463f8d583ae16f8f7c6f7bfd2e18ccefbb91621cea93e717"
+    "sha256": "6e882bf9d33839dc463f8d583ae16f8f7c6f7bfd2e18ccefbb91621cea93e717",
+    "committed_form_sha256": "6e882bf9d33839dc463f8d583ae16f8f7c6f7bfd2e18ccefbb91621cea93e717"
    },
    {
     "path": "usine.init.par",
-    "sha256": "7ecae3027c5e0bed8fb03fd02067de07563a65da19d1191fce705f86ffc7b02d"
+    "sha256": "7ecae3027c5e0bed8fb03fd02067de07563a65da19d1191fce705f86ffc7b02d",
+    "committed_form_sha256": "3fb7fd791d104f3c0c94771ae66969a48c4c1631859ae58e368415c8cbd563ef"
    },
    {
     "path": "xs_inelastic.dat",
-    "sha256": "d5f659beb164b0769a48e6bb86164e2edad5904352b3ef702acd72b0c3d758ea"
+    "sha256": "d5f659beb164b0769a48e6bb86164e2edad5904352b3ef702acd72b0c3d758ea",
+    "committed_form_sha256": "d5f659beb164b0769a48e6bb86164e2edad5904352b3ef702acd72b0c3d758ea"
    },
    {
     "path": "xs_production.dat",
-    "sha256": "102f7acfea181506c3b88164bf07c3fe04051f133ad7f679bb8e9db3f21be9a6"
+    "sha256": "102f7acfea181506c3b88164bf07c3fe04051f133ad7f679bb8e9db3f21be9a6",
+    "committed_form_sha256": "102f7acfea181506c3b88164bf07c3fe04051f133ad7f679bb8e9db3f21be9a6"
    }
   ],
+  "input_manifest_note": "sha256 is of each file as run, with the absolute paths of the run directory and of USINE's inputs folder written into usine.init.par; committed_form_sha256 is of the same file written with the placeholders <TOOL_HOME>/inputs and <RUN_DIR> (the form committed under tests/adapters/fixtures/cr_propagation/usine/inputs/), equal to sha256 for the files that hold no path; entries with read_in_place are USINE's own files (GPL-2.0), hashed where they lie and never copied (committed_form_sha256 and this note added by work package B1X on 2026-10-28 without rerunning USINE)",
   "tools": [
    {
     "name": "USINE",
