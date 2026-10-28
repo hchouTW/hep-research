@@ -36,11 +36,16 @@ A provider with numerical noise (for example tables printed with 6 significant d
 above it: parameters.<name>.step is the step in the fit coordinate used for the Jacobian, the Fisher matrix and the
 convergence verdict (default: the optimizer's own steps and 1e-4 x max(1, |t|)).
 Solar modulation: a dataset with a "period" asks for phi_<period>_gv, applied per isotope through the force-field tool
-contract before ratios are formed (P4); a provider that returns only ratios cannot be modulated, so such a dataset is
-refused (exit 1, reason modulation-needs-isotopic-lis), unless the provider's domain declares phi_<period>_gv itself
-(a provider that modulates each isotope in its own run, as the USINE provider does with USINE's force field; F1):
-then phi_<period>_gv is fitted or fixed like any provider parameter, each request carries only the phi of the periods
-of its datasets, and the result records the modulation as provider-side ("modulation").
+contract before ratios are formed (P4). This fit-side isotopic path is the documented default but is not implemented
+yet: a provider that returns only ratios cannot be modulated, so such a dataset is refused (exit 1, reason
+modulation-needs-isotopic-lis), unless the provider's declaration carries a modulation block listing phi_<period>_gv
+(contracts 3.15.0: the declared, checked exception to "providers never modulate", for a provider that modulates each
+isotope in its own run and passed the conformance gate of tools/provider_registry.py --conformance, as the USINE
+provider does with USINE's SolMod0DFF; F1, K2). The declaration decides, not the presence of phi in the domain. Then
+phi_<period>_gv is fitted or fixed like any provider parameter, each request carries only the phi of the periods of
+its datasets, and the result records the modulation as provider-side with the declared model and implementation
+("modulation"). The fit never modulates a provider-modulated prediction again: a top-of-atmosphere prediction for a
+dataset the fit did not ask the provider to modulate is refused (exit 1, reason double-modulation).
 Parameter priors (F1): parameters.<name>.prior {"mean", "sigma"} adds ((p - mean) / sigma)^2 in the parameter's own
 units to -2 ln L of the provider fits and profile intervals (for example a modulation potential or a provider
 cross-section parameter with an external constraint); the Fisher matrix and the dof count them. Response-model
@@ -125,7 +130,7 @@ Usage:
 The registry comes from tools/provider_registry.py --write; the cache (core/provider) keeps provider results between
 runs; --max-evaluations caps the provider point evaluations of the run (status failed, reason evaluation-budget).
 Exit codes: 0 done; 1 refused or failed (gate, bin semantics, out-of-domain start, restart cap, toy-failure threshold,
-response model above tolerance, evaluation budget, modulation without isotopic LIS); 2 bad input or NumPy/SciPy
+response model above tolerance, evaluation budget, modulation without isotopic LIS, double modulation); 2 bad input or NumPy/SciPy
 missing; 3 incomplete (a dataset covariance is missing). Output JSON labelled [General method].
 """
 from __future__ import annotations
@@ -406,6 +411,19 @@ def binning_meaning(observable: dict):
             sem == "bin-integrated" or (sem == "bin-averaged" and stated)):
         return "ratio of bin integrals (P2)", {}
     return sem, own
+
+
+def _refuse_double_modulation(datasets, first_predictions: dict, provider_modulates: bool, provider_id: str) -> None:
+    """The fit never modulates twice (contracts 3.15.0, K2): a top-of-atmosphere prediction is accepted only for a
+    dataset with a period whose phi_<period>_gv the provider's declared modulation applies; any other modulated
+    prediction would be modulated again by the fit-side path (P4), which is not implemented, so it is refused."""
+    for ds in datasets:
+        pred = (first_predictions.get(ds.name) or ({},))[0]
+        level = (pred.get("observable") or {}).get("level") if isinstance(pred, dict) else None
+        if level == "top-of-atmosphere" and not (provider_modulates and ds.period):
+            raise FitRefused("double-modulation", f"provider {provider_id} returned a top-of-atmosphere prediction for "
+                             f"dataset {ds.name}, which the fit did not ask it to modulate; the fit never applies a "
+                             "second force field to modulated values (the fit-side isotopic path is not implemented)")
 
 
 def _gate(ds: Dataset, pred: dict, labels, plan: dict, registry_entry, point_keys, run_record_keys=()) -> dict:
@@ -1963,6 +1981,7 @@ def _family(fams, name, what):
 
 def run(cfg: dict, base: Path, registry, cache_dir=None, max_evaluations=2000, allow_outside=False,
         out_dir: Path | None = None, cfg_ref="config") -> dict:
+    from core.provider.protocol import modulation_parameters
     from core.provider.registry import RegistryError, load_registry, parse_registry
     from core.provider.runner import ProviderRunner
     _keys(cfg, CONFIG_KEYS, "the configuration")
@@ -1996,12 +2015,17 @@ def run(cfg: dict, base: Path, registry, cache_dir=None, max_evaluations=2000, a
     if len({ds.name for ds in datasets}) != len(datasets):
         raise FitInputError("dataset names must be unique")
     periods = sorted({ds.period for ds in datasets if ds.period})
-    provider_modulates = bool(periods) and all(f"phi_{p}_gv" in domain for p in periods)
+    declared = entry.declaration.get("modulation") if isinstance(entry.declaration.get("modulation"), dict) else None
+    declared_phi = modulation_parameters(entry.declaration)
+    provider_modulates = bool(periods) and all(f"phi_{p}_gv" in declared_phi for p in periods)
     if periods and not provider_modulates:
         raise FitRefused("modulation-needs-isotopic-lis",
                          f"datasets with periods {periods} need phi_<period>_gv ({[f'phi_{p}_gv' for p in periods]}) "
                          "applied per isotope before ratios are formed (P4); provider "
-                         f"{entry.provider_id} returns only {entry.declaration['observables']}, no isotopic LIS")
+                         f"{entry.provider_id} returns only {entry.declaration['observables']}, no isotopic LIS, and "
+                         + (f"its declared modulation covers only {declared_phi}" if declared else
+                            "declares no modulation block (contracts 3.15.0)")
+                         + "; the fit-side isotopic path is not implemented")
     fixed_global = {k: _num(v, f"fixed.{k}") for k, v in _keys(cfg.get("fixed") or {}, list(domain), "fixed").items()}
     transport = None
     if cfg.get("transport") is not None:
@@ -2029,7 +2053,8 @@ def run(cfg: dict, base: Path, registry, cache_dir=None, max_evaluations=2000, a
             if unstated:
                 raise FitInputError(f"datasets with periods need {unstated} fitted or fixed (the provider modulates; "
                                     "nothing is left at a default)")
-            modulation = {"by": "provider", "provider": entry.provider_id,
+            modulation = {"by": "provider", "provider": entry.provider_id, "model": (declared or {}).get("model"),
+                          "implementation": (declared or {}).get("implementation"),
                           "parameters": {ds.name: f"phi_{ds.period}_gv" for ds in datasets if ds.period},
                           "note": "the provider applies the force field to each isotope in its own run before forming "
                                   "ratios (P4); each request carries only the phi of its datasets' periods"}
@@ -2064,6 +2089,7 @@ def run(cfg: dict, base: Path, registry, cache_dir=None, max_evaluations=2000, a
                                  f"[{domain[n]['min']:.6g}, {domain[n]['max']:.6g}]; the fit starts only inside it")
         start_fixed = dict(f0.get("fixed") or {})
         ev.components({**start_fixed, **start_vals})
+        _refuse_double_modulation(datasets, ev.first_predictions, provider_modulates, entry.provider_id)
         model.bind_channels(ev.channels)
         point_keys = ev.point({**start_fixed, **start_vals})
         run_ids = cfg.get("run_record_keys") or []

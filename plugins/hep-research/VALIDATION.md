@@ -7468,3 +7468,96 @@ the point furthest beyond its bound (NaN counts as worst).
 | `test_cr_propagation`, `test_propagation_fit`, `test_train_emulator`, `test_adapter_missing_dependency`, `test_cli_robustness` | E2 and CI-lock venv: 172 tests OK (15 skipped); on macOS the C2UF declaration tests run and pass (not skipped) |
 | `run_all_checks.py --part static --jobs 4` | exit 0, 31 pass, 0 fail |
 | `check_naming.py` | pass (the skip constants named `SELF_CHECK_REFUSAL`, `TWO_DATASET_EMULATOR_NOT_PORTABLE`) |
+
+## CRPROP-K2 — 2026-10-29 (environment E2)
+
+Work package K2 of follow-up wave 7 (decision B1.1, issue 2 of the 0.43.0 known issues): provider-side modulation
+becomes a declared, checked exception to "providers never modulate". Contracts 3.15.0 (one minor, gating constant
+`validate.MODULATION_FROM`), `CORE_VERSION` 1.3.0 (core/provider behaviour changes).
+
+Environment: E2 (macOS arm64, Python 3.13.2; examples and fixtures regenerated with the E2 venv). Base exception D10:
+base is the integration HEAD `94ba34d1` (worktree-crprop-k), not `main`. r3 §0.3 checks at start:
+`git rev-parse --show-toplevel` = `.claude/worktrees/crprop-k2`; `git branch --show-current` = `worktree-crprop-k2`;
+`git status` clean; base `94ba34d1` is an ancestor of HEAD; no prerequisite work package (K2 `deps` empty; requires
+`env-usine`: USINE V3.5 through `HEP_USINE_BIN`, `HEP_USINE_DATA`). `origin/main` is `42f5bad1` (0.43.0).
+
+Acceptance entries (frozen in `docs/dev/cr-propagation/acceptance.json`): K2-1, K2-2 (tolerance 1e-3) and ALL-*.
+
+What changed:
+- `contracts/schemas/cr_provider.json`: optional declaration block `modulation` {model `force-field` (const),
+  implementation, parameters [`phi_<period>_gv`], conformance {reference_point, observables, tolerance <= 1e-3,
+  result {status `passed` (const), max_relative_deviation, nodes_compared, isotopes, tool}}}; the "never modulate"
+  wording now says "unless the declaration carries a modulation block".
+- `core/provider/protocol.py`: `check_declaration` refuses a `phi_<period>_gv` in the domain without the block, a
+  block parameter outside the domain, an unlisted phi of the domain, a reference point that does not set exactly one
+  modulation parameter or leaves the domain, an undeclared observable, a tolerance outside (0, 1e-3], a result that is
+  not `passed` or whose deviation exceeds the tolerance (the registry, `parse_registry`, uses it, so such a
+  declaration is refused). `point_refusal`: two modulation parameters in one point give `invalid-request` (runner and
+  provider side). `check_modulation`: a top-of-atmosphere prediction without the block, a top-of-atmosphere prediction
+  for a point without a modulation parameter, or another level for a point with one, is an invalid response; the
+  runner applies it to fresh and cached results, the PRV conformance check to its single-shot response. A phi sent to
+  a provider without the block stays `unknown-parameter` (it cannot be in the domain).
+- `contracts/validate.py`: `MODULATION_FROM = "3.15.0"`; rule `prediction.modulated_twice` (more than one nonzero
+  `phi_<period>_gv` in a prediction's parameter point), native from 3.15.0, else `--strict`; fixtures
+  `valid/prediction_modulated_once.json`, `invalid/prediction_modulated_twice.json`.
+- `tools/provider_registry.py --conformance PROVIDER [--reference-point] [--observables] [--tolerance] --out`:
+  `modulation_conformance()` loads the entrypoint module's hook `isotope_tables(request, point)`, asks it for the
+  isotopic LIS (the point without its modulation parameter: a run without modulation) and the modulated per-isotope
+  output, applies the plugin's force-field tool (`solar_modulation_force_field.py --modulate --lis-table`, one call
+  per node, the tool contract) to the LIS at every top-of-atmosphere node whose LIS energy lies inside the LIS table,
+  and passes when every relative deviation is within the tolerance. `usine_provider.py` gains the hook.
+- `adapters/cr-propagation/adapter.json`: the USINE declaration carries the block with its result (dragon2 and
+  emulator entries untouched).
+- `propagation_fit.py`: provider-side modulation is decided from the declared block (`modulation_parameters`), not
+  from a phi in the domain; the result's `modulation` adds the declared `model` and `implementation`; a
+  top-of-atmosphere first prediction for a dataset the fit did not ask the provider to modulate is refused
+  (`double-modulation`). The fit-side isotopic path stays the documented default, not implemented (refusal
+  `modulation-needs-isotopic-lis`, detail extended). Docstring and `core-stats-commands.md` updated; the hep-theory
+  `cosmic-ray-phenomenology.md` does not state the provider rule (unchanged).
+
+Conformance gate run (`$CRPROP_OUT/k2/conformance/`, two USINE runs of the 20 allowed): reference point
+D0_cm2_s 3e28, delta 0.5, L_kpc 4, phi_2011_2016_gv 0.7312345 GV on the provider's DEFAULT_TRANSPORT (ILLUSTRATIVE
+isotopic cross sections, network to O-16); observables B/C (rigidity 2-1000 GV, 4 bins) and 10Be/9Be (ekn 0.1-10
+GeV/n, 2 bins); tolerance 1e-3. Result: passed, largest relative deviation 4.28e-5 over 390 nodes of 10B, 10Be, 11B,
+12C, 9Be (13C is not in that network). Runs in temporary folders (no computational-run record kept).
+
+| ID | Result | Evidence |
+|---|---|---|
+| K2-1 | pass | contracts 3.15.0 with `MODULATION_FROM`; schema/core agreement `tests.core.test_provider.DeclaredModulation` (8 tests: 9 bad blocks refused by both, 6 cross-field rules core-only and named so, registry refusal of a non-passing result, top-of-atmosphere without the block `invalid-response`, levels with the block, two potentials `invalid-request` before the provider runs and on the provider side, phi without the block `unknown-parameter`, a cached top-of-atmosphere result refused); every committed artifact keeps its outcome (below); ruff 0.16.10 and mypy 2.4.0 clean on `core/` and `contracts/` |
+| K2-2 | pass | gate run above (4.28e-5 <= 1e-3, tolerance 1e-3, no looser than F1's); offline replay on USINE's recorded F1 tables (`tests.tools.test_provider_registry.ModulationConformance`: passes below 1e-4 on 11B and 12C; a provider off by 0.2% fails; refusals); `propagation_fit` uses the declaration (`test_provider_side_modulation_needs_the_declared_modulation_block`); F1 unchanged (below) |
+| ALL-1 | pass | this section |
+| ALL-2 | pass | `workflow_check.py acceptance` exit 0 |
+| ALL-3 | deferred to the wave run (A1.5) | |
+| ALL-4 | pass | `check_naming.py`, `workflow_check.py gaps --base 94ba34d1` |
+| ALL-5 | pass | `check_layering.py`, `workflow_check.py diff --work-package K2 --base 94ba34d1` |
+| ALL-6 | pass | `check_packaging.py` |
+| ALL-7 | pass | worker report |
+
+F1 unchanged, no new fit and no USINE run (`$CRPROP_OUT/k2/f1-verify/verify_f1.py`, `verify_f1.json`): for BIG, SLIM,
+QUAINT and QUAINT-Vc0 of the committed `f1-reproduction.json`, the best-fit point (with the family's fixed values)
+was evaluated through the K2 runner and registry from F1's provider cache with `HEP_USINE_BIN` unset: 0 points sent,
+each prediction identical to the cached raw result (level top-of-atmosphere, accepted by `check_modulation`), and
+-2 ln L recomputed from it (data covariance plus the F1 priors) equals the record's chi2 within relative 2.3e-16
+(criterion 1e-9). The fit's decision is unchanged: provider-side for period 2011_2016 under the old rule (phi in the
+domain) and the new one (phi in the declared block); the double-modulation guard accepts these predictions.
+`tests.adapters.test_cr_propagation` (F1 record and force-field tests) passes.
+
+Every committed artifact keeps its outcome (`$CRPROP_OUT/k2/outcome/`): all 696 committed JSON artifacts of the base
+tree (`git archive 94ba34d1`) validated with the base and the K2 validator, default and `--strict`: ok flag and sorted
+findings (severity, path, code) identical for all 696, the restamped ones included. The bump changed only version
+strings and the hashes that cover them (fixtures, design fixtures, three skill templates, 13 theory-profile artifacts,
+14 examples); `bc-propagation-fit` and `unfolding-coverage` were not rerun.
+
+| Check | Result |
+|---|---|
+| Impacted tests (`rule_registry.py impact`: 35 modules, plus `test_cr_propagation`, `test_adapter_declarations`, `test_provider_conformance_mixin`) | 706 tests OK (17 skipped) |
+| `tests/examples` | 176 tests OK (22 skipped) |
+| theory-profile tests (9 profiles) | all pass |
+| `run_all_checks.py --part static --jobs 4` | exit 0 after `tools/reference_inventory.py` was rerun (`core-stats-commands.md` grew) |
+| `check_naming.py`, `check_wiring.py --since 94ba34d1`, `check_layering.py`, `check_packaging.py`, `workflow_check.py diff/gaps/acceptance` | pass / ok |
+| ruff 0.16.10 and mypy 2.4.0 on `core/` and `contracts/` | clean |
+
+Open: `docs/adapter-authoring.md` still says "providers never modulate" without the exception; it is outside K2's file
+list (for the orchestrator). The USINE provider's conformance result was obtained at provider version 0.2.0; the
+gate is rerun when the modulation implementation changes (the registry does not compare versions). Not run: ALL-3
+(deferred to the wave run, A1.5), any new fit, a live routing run.

@@ -1,11 +1,11 @@
 {
- "contract_version": "3.14.0",
+ "contract_version": "3.15.0",
  "artifact_id": "collider-tracker-v1-CALC-TRK-A",
  "artifact_type": "design-evaluation",
  "objective": "detector system design: design-evaluation written by evaluate_design.py",
  "versions": {
   "plugin": "0.43.0",
-  "contracts": "3.14.0",
+  "contracts": "3.15.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-A.json",
-   "sha256": "16d690c24afd874d241bf073eb5bcfca3d6c61ff86cb51a6499031061d54eacf",
+   "sha256": "22bb1daf97fd88c8825270d9785257ab90406acc7395cc4afe4f81d410899e90",
    "artifact_type": "design-candidate",
    "artifact_id": "collider-tracker-v1-cand-A",
    "status": [
@@ -28,7 +28,7 @@
   },
   {
    "ref": "runs/CALC-TRK-A.computational-run.json",
-   "sha256": "be89bae4b5fb31a6f211d7cae26704b1dafbd34bb0a8528f7ced9c12e0250c10",
+   "sha256": "87ee9cf525b307c98f3144b6757822ec74e56dcd40ef18d1bf4db8d319750ae1",
    "artifact_type": "computational-run",
    "artifact_id": "collider-tracker-v1-CALC-TRK-A-run",
    "status": [

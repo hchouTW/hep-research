@@ -3,6 +3,25 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- crprop k2: provider-side modulation is a declared, checked exception to "providers never modulate" (decision B1.1;
+  contracts 3.15.0 with the gating constant `validate.MODULATION_FROM`, `CORE_VERSION` 1.3.0). The cr-provider/1
+  declaration may carry an optional `modulation` block (model `force-field` only, the implementation, the
+  `phi_<period>_gv` parameters, each in the domain, and a passing conformance result within a tolerance no looser
+  than 1e-3). core/provider refuses a declaration with a `phi_<period>_gv` in its domain but no block, and a block
+  without a passing result. The runner refuses a top-of-atmosphere prediction from a provider without the block
+  (`invalid-response`, also for a cached result) and a point with two modulation parameters (`invalid-request`).
+  New prediction rule `prediction.modulated_twice` (native from 3.15.0, else `--strict`). The conformance gate
+  `tools/provider_registry.py --conformance PROVIDER` takes the provider's isotopic LIS and its modulated output from
+  the entrypoint hook `isotope_tables`, applies the plugin's force-field tool to the LIS isotope by isotope and
+  compares the two. The USINE provider declares the block and passes the gate (largest relative deviation 4.3e-5
+  over 390 nodes of 10B, 11B, 12C, 9Be and 10Be, two USINE runs). `propagation_fit.py` takes provider-side modulation
+  from the declared block, not from a phi in the domain. It records the declared model and implementation and
+  refuses double modulation (`double-modulation`). The fit-side isotopic path stays the documented default; its code
+  is deferred. F1's recorded predictions and results are unchanged (checked against the F1 provider cache). Every
+  committed artifact keeps its outcome.
+
 ## 0.43.0 (2026-10-29)
 
 Minor release; contracts 3.14.0 (one minor, the `CV-CRPROP` of the cr-propagation campaign, new rules gated by

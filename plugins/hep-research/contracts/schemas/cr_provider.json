@@ -1,5 +1,5 @@
 {
- "$comment": "Provider protocol cr-provider/1 (contracts 3.14.0, CV-CRPROP; cosmic-ray propagation plan r3 5.2): how a caller asks a propagation provider (a closed form, an external code, an emulator) for unmodulated predictions at parameter points. Not an artifact type: the declaration is the optional 'provider' field of adapter.json and profile.json; the request and the response are files or JSON Lines exchanged with the provider entrypoint ('--request FILE --response FILE', or '--serve'). Parameter names are the canonical theory parameter names (D0_cm2_s, L_kpc, delta, ...). 'want' holds only lis and components: providers never modulate. Each prediction is the extension of a prediction artifact (ext_prediction.json); components are defined here, never as undeclared prediction fields. A failed result carries a reason (out-of-domain, provider-failed, ...) and no prediction. The core runner (core/provider) checks the same rules without reading this file; tests keep the two in agreement.",
+ "$comment": "Provider protocol cr-provider/1 (contracts 3.14.0, CV-CRPROP; the modulation block contracts 3.15.0; cosmic-ray propagation plan r3 5.2): how a caller asks a propagation provider (a closed form, an external code, an emulator) for unmodulated predictions at parameter points. Not an artifact type: the declaration is the optional 'provider' field of adapter.json and profile.json; the request and the response are files or JSON Lines exchanged with the provider entrypoint ('--request FILE --response FILE', or '--serve'). Parameter names are the canonical theory parameter names (D0_cm2_s, L_kpc, delta, ...). 'want' holds only lis and components: providers never modulate unless the declaration carries a modulation block (contracts 3.15.0, validate.MODULATION_FROM): the force-field model, the implementation, the phi_<period>_gv parameters it reads (each in the domain; a phi_<period>_gv in the domain needs the block) and a passing conformance result (at a reference point the provider's modulated output equals the plugin's force-field tool applied to its own isotopic LIS within a tolerance no looser than 1e-3; tools/provider_registry.py --conformance). Without the block a top-of-atmosphere prediction is an invalid response; with it a point carrying two modulation parameters is refused (it would be modulated twice). Each prediction is the extension of a prediction artifact (ext_prediction.json); components are defined here, never as undeclared prediction fields. A failed result carries a reason (out-of-domain, provider-failed, ...) and no prediction. The core runner (core/provider) checks the same rules without reading this file; tests keep the two in agreement.",
  "$defs": {
   "protocol": {"type": "string", "const": "cr-provider/1"},
   "provider_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"},
@@ -31,7 +31,44 @@
     "axes": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/axis"}},
     "decomposable": {"type": "boolean"},
     "deterministic": {"type": "boolean"},
-    "output_units": {"type": "object", "additionalProperties": {"type": "string"}}
+    "output_units": {"type": "object", "additionalProperties": {"type": "string"}},
+    "modulation": {"$ref": "#/$defs/modulation"}
+   }
+  },
+  "modulation_parameter": {"type": "string", "pattern": "^phi_[A-Za-z0-9]+(_[A-Za-z0-9]+)*_gv$",
+                           "$comment": "the force-field potential of one data period, in GV"},
+  "modulation": {
+   "type": "object",
+   "required": ["model", "implementation", "parameters", "conformance"],
+   "additionalProperties": false,
+   "$comment": "optional (contracts 3.15.0): the declared exception to 'providers never modulate'. The core runner checks what the schema subset cannot state: each parameter is in the domain and every phi_<period>_gv of the domain is listed, the reference point lies in the domain and sets exactly one modulation parameter, the observables are declared ones, and max_relative_deviation <= tolerance",
+   "properties": {
+    "model": {"type": "string", "const": "force-field"},
+    "implementation": {"type": "string", "minLength": 1, "$comment": "the code that modulates, for example USINE V3.5 SolMod0DFF per isotope"},
+    "parameters": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/modulation_parameter"}},
+    "conformance": {
+     "type": "object",
+     "required": ["reference_point", "observables", "tolerance", "result"],
+     "additionalProperties": false,
+     "$comment": "the conformance gate (tools/provider_registry.py --conformance): at reference_point the provider's isotopic LIS (a run without modulation) and its modulated output for the isotopes of the observables are compared with the plugin's force-field tool applied to that LIS, isotope by isotope",
+     "properties": {
+      "reference_point": {"$ref": "#/$defs/point"},
+      "observables": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/observable_request"}},
+      "tolerance": {"type": "number", "exclusiveMinimum": 0, "maximum": 0.001, "$comment": "relative; no looser than 1e-3"},
+      "result": {
+       "type": "object",
+       "required": ["status", "max_relative_deviation", "nodes_compared", "isotopes", "tool"],
+       "additionalProperties": false,
+       "properties": {
+        "status": {"type": "string", "const": "passed", "$comment": "a declaration without a passing result is refused"},
+        "max_relative_deviation": {"type": "number", "minimum": 0},
+        "nodes_compared": {"type": "integer", "minimum": 1},
+        "isotopes": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+        "tool": {"type": "string", "minLength": 1}
+       }
+      }
+     }
+    }
    }
   },
   "declarations": {"anyOf": [{"$ref": "#/$defs/declaration"},

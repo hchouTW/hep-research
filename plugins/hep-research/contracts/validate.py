@@ -257,6 +257,8 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, strict: bool = 
                     f"a {rp} prediction needs '{need}' (numbers kept elsewhere: reference them and use a metadata record)")
         if strict or _at_least(doc.get("contract_version"), THEORY_SEMANTICS_FROM):
             _theory_semantics(doc, ext, vocab, rep)
+        if strict or _at_least(doc.get("contract_version"), MODULATION_FROM):
+            _modulation_rules(ext, rep)
     elif t == "dataset-record":
         if isinstance(ext.get("data"), dict):
             check_binned(ext["data"], rep, "$.extension.data", ext.get("observable"))
@@ -1717,6 +1719,11 @@ THEORY_SEMANTICS_FROM = "2.6.0"  # theory-spec and prediction rules apply native
 # degenerate_directions rules (_degeneracy_entries) apply natively from this unreleased contract version, an older
 # artifact gets them only under --strict. The number is fixed at release.
 CRPROP_FROM = "3.14.0"
+# Provider-side modulation (contracts 3.15.0, cr-propagation decision B1.1, work package K2): the cr-provider/1
+# declaration's optional modulation block (schema cr_provider.json; checked by core/provider) and the prediction rule
+# _modulation_rules apply natively from this version; an older prediction gets the rule only under --strict.
+MODULATION_FROM = "3.15.0"
+MODULATION_PARAMETER = re.compile(r"^phi_[A-Za-z0-9]+(?:_[A-Za-z0-9]+)*_gv$")
 STRONG_STATUSES = {"formal-proof", "analytic-derivation"}
 
 
@@ -1885,6 +1892,23 @@ def _prediction_rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> N
             rep.add("warning", f"{path}.method", "prediction.truncation_method",
                     f"a truncation estimate names its method, one of "
                     f"{sorted(vocab.core('truncation_methods'))}; got {u.get('method')!r}")
+
+
+def _modulation_rules(ext: dict, rep: Report) -> None:
+    """A prediction is modulated once, at the force-field potential of one period (contracts 3.15.0, MODULATION_FROM):
+    an error when its parameter_point carries more than one nonzero phi_<period>_gv (modulated twice, or a mixture of
+    periods that no single potential describes)."""
+    point = ext.get("parameter_point")
+    if not isinstance(point, dict):
+        return
+    phis = sorted(k for k, v in point.items() if isinstance(k, str) and MODULATION_PARAMETER.match(k)
+                  and isinstance(v, (int, float)) and not isinstance(v, bool) and v != 0)
+    if len(phis) > 1:
+        rep.add("error", "$.extension.parameter_point", "prediction.modulated_twice",
+                f"the parameter point carries the force-field potentials {phis}: a prediction is modulated once, at "
+                "the potential of one data period")
+
+
 MEASUREMENT_SEMANTICS_FROM = "2.6.0"  # measurement-spec semantic rules apply natively from this contract version
 MISSING_MARKERS = ("unknown", "not-provided")  # 'not-applicable' is a statement, not an open input
 NORMALIZATION_CORRECTIONS = {"luminosity": "integrated-luminosity", "exposure": "exposure", "livetime": "live-time"}

@@ -1,5 +1,5 @@
 {
- "contract_version": "3.14.0",
+ "contract_version": "3.15.0",
  "artifact_id": "j14-response-mpv",
  "artifact_type": "response",
  "objective": "deposit response to the primary energy loss, 10 GeV mu- in 300 um Si (Geant4, unvalidated)",
@@ -9,7 +9,7 @@
  },
  "versions": {
   "plugin": "0.43.0",
-  "contracts": "3.14.0",
+  "contracts": "3.15.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"

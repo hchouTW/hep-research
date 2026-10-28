@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "3.14.0"
+CONTRACTS_VERSION = "3.15.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -207,6 +207,15 @@ CONTRACTS_VERSION = "3.14.0"
 # theory.degeneracy_missing. A string entry keeps its meaning. No capability: a 3.13 reader refuses the new block and
 # an object entry (additionalProperties, schema type) instead of misreading them, and every 3.13 artifact keeps its
 # outcome. The number is the campaign's placeholder, fixed at release.
+# 3.15.0 (minor, unreleased; cr-propagation decision B1.1, work package K2, one gating constant
+# validate.MODULATION_FROM): provider-side modulation becomes a declared, checked exception to "providers never
+# modulate". The cr-provider/1 declaration (cr_provider.json, not an artifact) gains the optional block modulation
+# (model force-field only, implementation, parameters phi_<period>_gv, conformance with a passing result within a
+# tolerance no looser than 1e-3), checked by core/provider (CORE_VERSION 1.3.0): a phi_<period>_gv in the domain needs
+# the block, a top-of-atmosphere prediction without it is an invalid response, a point with two modulation parameters
+# is refused. Prediction rule prediction.modulated_twice (more than one nonzero phi_<period>_gv in the parameter point;
+# native from MODULATION_FROM, else --strict). No capability: a 3.14 reader refuses the new declaration block
+# (additionalProperties) instead of misreading it, and every 3.14 artifact keeps its outcome.
 KNOWN_CAPABILITIES = frozenset({"core:evidence-records", "core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})
