@@ -359,15 +359,15 @@
    ]
   },
   "C2UF": {
-   "state": "verifying",
+   "state": "merged",
    "dispatches": 2,
    "rework_rounds": 0,
    "branch": "worktree-crprop-c2uf",
    "base": "c858ef97",
    "head": "856fc53a",
-   "merge_commit": null,
+   "merge_commit": "dee1179b",
    "worker_report": "dispatch 2 DONE: C2UF-1 met (BIG p 1.0 survives, SLIM dchi2 23.93 p < 0.0151 excluded); GP emulator on 738 USINE runs, validated 0.0038 sigma on 40 held-out; E2 responses pinned bit-identical; toy-fit changes when steps are stated; 862/1000 USINE",
-   "verifier_report": null,
+   "verifier_report": "PASS (2026-10-29, Opus): validation 0.0038 sigma recomputed (held-out disjoint, covers toy box and SLIM slice); fits equal USINE; toys recomputed, SLIM p <= 0.0151 (excluded), BIG survives; P10 applied; E2 base-vs-HEAD identical; toy-fit changes inactive without stated steps; advisories: toy fits bounded by k=4 domain vs k=3 validation (shell point 0.0187 sigma), amendments tuned on same seeds",
    "missing_capabilities": [],
    "notes": [
     "Opus verifier dispatched"
@@ -804,6 +804,11 @@
    "cycle": 4,
    "date": "2026-10-29",
    "event": "C2UF dispatch 2 DONE (C2UF-1 met); Opus verifier dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "C2UF merged (dee1179b); post-merge static ok"
   }
  ],
  "env": {
