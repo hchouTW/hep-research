@@ -7471,8 +7471,10 @@ the point furthest beyond its bound (NaN counts as worst).
 
 ## CRPROP-K4 — 2026-10-29 (environment E2)
 
-Work package K4 (decision B1.1, follow-up wave 7: emulator nugget floor; the C2UF emulator retrained and portable; the
-A1.21 skip removed). SYNTHETIC data only; every input ILLUSTRATIVE.
+Work package K4 (decision B1.1, follow-up wave 7). Goal: an emulator nugget floor that bounds the kernel condition
+number (K4-1); the C2UF emulator retrained with it, made portable and C2UF-1 re-run, with the A1.21 skip removed (K4-2).
+Outcome (B1.2): K4-1 met; C2UF-1 not met on the retrained emulator, so the committed C2UF emulator and the A1.21 skip
+are kept. SYNTHETIC data only; every input ILLUSTRATIVE.
 
 **Environment field (r3 §0.3, base exception D10):** E2 (macOS arm64 workstation), Python 3.13.2 (miniconda), NumPy
 2.4.4, SciPy 1.17.1; USINE V3.5 (tag V3.5, commit fb53006d) through HEP_USINE_BIN and HEP_USINE_DATA, runs under
@@ -7493,8 +7495,8 @@ Diagnosis of the committed models (eigenvalues of each component's kernel matrix
 Bound: `train_emulator.py --max-condition C` (default `MAX_CONDITION` = 1e10; 0 = no bound). Every Matern entry is at
 most the signal variance s, so the largest eigenvalue of the noise-free n x n kernel is at most n s (Gershgorin) and the
 smallest is >= 0; a nugget of at least n s / (C - 1) therefore keeps cond(K) <= C for any length scales. The optimizer
-then works in log(nugget / s) with that lower bound (the absolute NUGGET_BOUNDS floor 1e-12 stays, the upper edge
-becomes 0.1 s); the starts are the same absolute values moved inside the bounds. The trained model records
+then works in log(nugget / s) with that lower bound (the lower bound on nugget / s is max(n / (C - 1), 1e-12), that is
+NUGGET_BOUNDS' 1e-12 applied to the ratio; the upper edge becomes 0.1 s); the starts are the same absolute values moved inside the bounds. The trained model records
 `training.max_condition`, `training.relative_nugget_floor` and per component `condition_number` (computed); a model
 trained with `--max-condition 0` records none of them and is byte-identical to one trained before K4.
 Why 1e10: a reader on another libm/BLAS sees the kernel entries change by a few ulp (eps = 2.2e-16); the GP weights
@@ -7528,7 +7530,7 @@ in `$CRPROP_OUT/k4/k4-attempt/`).
 | Item | C2UF (A1.14, committed) | K4 retraining (`--max-condition 1e10`) |
 |---|---|---|
 | Training set | 738 cached USINE runs | identical document (the same 738 points and values) |
-| Model | `1.0.0+model.0a8dc86fdf16`, 19 components | `1.0.0+model.9b95e7465422`, 19 components; the nugget floor is active in all 19 (nugget/signal = 7.38e-8 = 738 / (1e10 - 1)) |
+| Model | `1.0.0+model.0a8dc86fdf16`, 19 components | `1.0.0+model.9b95e7465422`, 19 components; the nugget floor is active in 16 of 19 (nugget/signal = 7.38e-8 = 738 / (1e10 - 1)); components 15, 16 and 17 sit above it (nugget/signal 8.9e-8, 4.3e-7, 1.2e-6) |
 | Largest kernel condition number | singular (computed eigenvalues below 0 in components 0-4; 5e16 in component 5) | 9.7e9 (every component <= 1e10) |
 | Holdout (40 cached runs, 0.05 sigma, not loosened) | passed, largest error 0.0038 sigma, largest relative 2.07e-4 | passed, largest error 0.0032 sigma, largest relative 1.89e-4; none refused. Per bin, the largest error is 0.74-3.7 times C2UF's (worst in the B/C bins 12-14) and stays below 0.0033 sigma in every bin |
 | Confirmation over the model box (k = 4; 40 new USINE runs, seed 20261031) | not run | passed: largest error 0.0226 sigma (point ln D0 = ln 2.41e28, delta 0.469, V_A 103.8, V_c 4.33: the high-V_A edge); 15 points inside the toy box, worst 0.0025; 25 outside it, worst 0.0226; none refused. The largest error per bin is above the holdout's in all 27 bins (1.6 to 19 times). As declared, the covariance keeps the holdout component |
