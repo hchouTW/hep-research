@@ -351,11 +351,12 @@ class Reacceleration(unittest.TestCase):
                 out = tc.convert_reacceleration(30.0, "thin-disc", "whole-halo", 4.0, 100.0, lam)
                 self.assertLess(abs(mismatch - out["relative_error_bound"]), 2e-3)
 
-    def test_kpp_constants(self):
+    def test_momentum_diffusion_constants(self):
         """A1R-2(b): DRAGON2 Ptuskin94 c = 1 (no 4/3, enum value 0), Ptuskin03 and USINE c = 4/3."""
         r = tc.REACCELERATION_CONVENTIONS
-        self.assertEqual((r["dragon2-ptuskin94"]["kpp_constant"], r["dragon2-ptuskin03"]["kpp_constant"],
-                          r["usine"]["kpp_constant"]), (1.0, 4.0 / 3.0, 4.0 / 3.0))
+        key = "momentum_diffusion_constant"
+        self.assertEqual((r["dragon2-ptuskin94"][key], r["dragon2-ptuskin03"][key], r["usine"][key]),
+                         (1.0, 4.0 / 3.0, 4.0 / 3.0))
         self.assertEqual((r["dragon2-ptuskin94"]["zone"], r["usine"]["zone"]), ("whole-halo", "thin-disc"))
         self.assertIn("galaxy.cc:279", r["dragon2-ptuskin94"]["source"])
         self.assertIn("init.Model1D.par:90", r["usine"]["source"])
@@ -368,7 +369,7 @@ class Reacceleration(unittest.TestCase):
         out = tc.convert_reacceleration(50.0, "usine", "dragon2-ptuskin94", 4.0, 100.0, 1.0)
         self.assertEqual(out["conversion_status"], "approximate")
         self.assertLess(abs(out["result"]["V_A_kms"] / (50.0 * math.sqrt(4 * 0.1 / 4.0)) - 1), 1e-14)
-        self.assertEqual(out["factors"]["kpp_constant_status"], "exact")
+        self.assertEqual(out["factors"]["momentum_diffusion_constant_status"], "exact")
         self.assertEqual(out["relative_error_bound"], 0.4)
         with self.assertRaises(tc.ConventionError):  # DRAGON2 has no w
             tc.convert_reacceleration(50.0, "usine", "dragon2-ptuskin94", 4.0, 100.0, 1.0, w_target=2.0)

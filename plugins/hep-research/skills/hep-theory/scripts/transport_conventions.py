@@ -33,10 +33,11 @@ Reacceleration (cr-propagation A1R). Both codes tie the momentum diffusion to th
 D_pp D = c V_A^2 p^2 / (delta (4 - delta) (4 - delta^2) w), with the code's own D (so beta^eta and the rigidity
 dependence enter through D) and p^2/D_pp the same per nucleon or per nucleus. The constant c, read from the codes:
 - DRAGON2 cd588707, type "Ptuskin94": c = 1, no w (src/galaxy.cc:279-284: Dpp_constant = 1/(a(4-a)(4-a^2)), times
-  4/3 only "if (in->diff_reacc == 1)" (line 280; line 279 comments the base form "Ptuskin-2003"); the enum in src/include/constants.h:146-149 gives Ptuskin94 = 0 and
-  Ptuskin03 = 1, so the 4/3 commented "Seo & Ptuskin" goes to Ptuskin03, against the comment of
-  src/include/input.h:156). Type "Ptuskin03": c = 4/3. The coefficient acts in the whole halo: its spatial factor is
-  1/D at every grid point (src/galaxy.cc:308, 324), and V_A is read in km/s (src/input.cc:470-483).
+  4/3 only "if (in->diff_reacc == 1)" (line 280; line 279 comments the base form "Ptuskin-2003"); the enum in
+  src/include/constants.h:146-149 gives Ptuskin94 = 0 and Ptuskin03 = 1, so the 4/3 commented "Seo & Ptuskin" goes
+  to Ptuskin03, against the comment of src/include/input.h:156). Type "Ptuskin03": c = 4/3. The coefficient acts in
+  the whole halo: its spatial factor is 1/D at every grid point (src/galaxy.cc:308, 324), and V_A is read in km/s
+  (src/input.cc:470-483).
 - USINE V3.5, the Kpp formula of its shipped initialisation files: (4./3.)*(Va*1.022712e-3*beta*Etot)^2/
   (delta*(4-delta^2)*(4-delta)*K00), so c = 4/3 (inputs/init.Model1D.par:90, inputs/init.Model2D.par:97); the B1
   translator writes the same formula with a factor 1/w. The energy terms act only in the thin disc of half-thickness
@@ -126,13 +127,13 @@ ZONES = ("thin-disc", "whole-halo")
 # Reacceleration conventions: zone and the constant c of D_pp D = c V_A^2 p^2 / (delta (4 - delta) (4 - delta^2) w)
 # (module docstring, "Reacceleration"). The plain zone names keep c = 1 on both sides (a change of zone only).
 REACCELERATION_CONVENTIONS = {
-    "thin-disc": {"zone": "thin-disc", "kpp_constant": 1.0, "uses_w": True, "source": "zone only"},
-    "whole-halo": {"zone": "whole-halo", "kpp_constant": 1.0, "uses_w": True, "source": "zone only"},
-    "dragon2-ptuskin94": {"zone": "whole-halo", "kpp_constant": 1.0, "uses_w": False,
+    "thin-disc": {"zone": "thin-disc", "momentum_diffusion_constant": 1.0, "uses_w": True, "source": "zone only"},
+    "whole-halo": {"zone": "whole-halo", "momentum_diffusion_constant": 1.0, "uses_w": True, "source": "zone only"},
+    "dragon2-ptuskin94": {"zone": "whole-halo", "momentum_diffusion_constant": 1.0, "uses_w": False,
                           "source": "DRAGON2 cd588707 src/galaxy.cc:279-284, src/include/constants.h:146-149"},
-    "dragon2-ptuskin03": {"zone": "whole-halo", "kpp_constant": 4.0 / 3.0, "uses_w": False,
+    "dragon2-ptuskin03": {"zone": "whole-halo", "momentum_diffusion_constant": 4.0 / 3.0, "uses_w": False,
                           "source": "DRAGON2 cd588707 src/galaxy.cc:279-284, src/include/constants.h:146-149"},
-    "usine": {"zone": "thin-disc", "kpp_constant": 4.0 / 3.0, "uses_w": True,
+    "usine": {"zone": "thin-disc", "momentum_diffusion_constant": 4.0 / 3.0, "uses_w": True,
               "source": "USINE V3.5 inputs/init.Model1D.par:90, inputs/init.Model2D.par:97; thin disc "
                         "src/TUModel1DKisoVc.cc:400-416, src/TUModel2DKisoVc.cc:445-463"},
 }
@@ -291,8 +292,8 @@ def convert_reacceleration(va_kms: float, source: str, target: str, l_kpc: float
                            destruction_escape_ratio: float | None = None, w_source: float = 1.0,
                            w_target: float = 1.0) -> dict:
     """V_A between reacceleration conventions (zone and D_pp constant); exact within a zone, approximate across."""
-    for value, what in ((va_kms, "--alfven-speed-km-s"), (l_kpc, "--l-kpc"), (disc_halfwidth_pc, "--disc-halfwidth-pc"),
-                        (w_source, "--w-from"), (w_target, "--w-to")):
+    for value, what in ((va_kms, "--alfven-speed-km-s"), (l_kpc, "--l-kpc"),
+                        (disc_halfwidth_pc, "--disc-halfwidth-pc"), (w_source, "--w-from"), (w_target, "--w-to")):
         _number(value, what)
     if va_kms < 0 or l_kpc <= 0 or disc_halfwidth_pc <= 0 or w_source <= 0 or w_target <= 0:
         raise ConventionError("V_A must be >= 0 and L, h, w positive")
@@ -307,13 +308,15 @@ def convert_reacceleration(va_kms: float, source: str, target: str, l_kpc: float
     h_kpc = disc_halfwidth_pc * 1e-3
     if h_kpc >= l_kpc:
         raise ConventionError("the disc half-thickness must be below the halo half-height")
-    constant_ratio = (conv_in["kpp_constant"] / w_source) / (conv_out["kpp_constant"] / w_target)
+    constant_ratio = ((conv_in["momentum_diffusion_constant"] / w_source)
+                      / (conv_out["momentum_diffusion_constant"] / w_target))
     same_zone = conv_in["zone"] == conv_out["zone"]
     zone_ratio = 1.0 if same_zone else (zone_weight(conv_in["zone"], l_kpc, h_kpc)
                                          / zone_weight(conv_out["zone"], l_kpc, h_kpc))
     factor = math.sqrt(constant_ratio * zone_ratio)
     out = {"result": {"V_A_kms": va_kms * factor, "convention": target, "zone": conv_out["zone"], "factor": factor},
-           "factors": {"kpp_constant_ratio": constant_ratio, "kpp_constant_status": EXACT, "zone_ratio": zone_ratio},
+           "factors": {"momentum_diffusion_constant_ratio": constant_ratio,
+                       "momentum_diffusion_constant_status": EXACT, "zone_ratio": zone_ratio},
            "canonical": {"V_A_kms": va_kms, "convention": source, "zone": conv_in["zone"], "L_kpc": l_kpc,
                          "disc_halfwidth_pc": disc_halfwidth_pc},
            "sources": {source: conv_in["source"], target: conv_out["source"]}}
