@@ -57,9 +57,13 @@ scrambled Sobol design points (1 to 6 coordinates, at least twice as many points
 every bin. Its per-bin error enters the toy and posterior covariance as an uncorrelated component (P10); a fit that
 leaves the box is a failed toy, a chain step outside it is rejected and counted. The reported fits never use it.
 For the family calibration, layout "union" (default) builds one model on the box spanning every family's best fit
-+- k sigma; layout "per-center" builds one model per best fit (+- k times the largest sigma of any family), each
-validated on its own, and fits each family to a null family's toys with the model whose box holds that family's fit to
-the null; the error component recorded is the largest of the models'.
++- k sigma; layout "joint" the same box with k times the largest sigma of any family around every best fit (so a
+family's fit to another's null, which sits near that family's best fit, has its margin without a rebuild); layout
+"per-center" builds one model per best fit (+- k times the largest sigma), each validated on its own, and fits each
+family to a null family's toys with the model whose box holds that family's fit to the null (the error component
+recorded is the largest of the models'). Per-center boxes suit families whose fits to each other's toys stay near
+their best fits; a parameter that is not identifiable under another family's null (V_A near 0 under SLIM toys) spreads
+those fits beyond the box, which then fail as toys.
 - toys: declared with core/stats/toy_ensemble.py (EnsembleSpec, toy_seed, coverage); plug-in at a true point, the
   auxiliary values of the priors redrawn per toy; covered when the profile delta chi2 at the true value is <= 1
   (Wilks); for a parameter on a bound the critical value is calibrated with the toys (its 68.27% quantile), as in
@@ -90,7 +94,7 @@ Input (fit --input CONFIG.json; relative paths are read from the config's folder
   "covariance_alternatives": {"family", "dataset", "model": {build_covariance sources}, "source", "lengths": [...]},
   "response_model": {"kind": "tensor" | "polynomial", "nodes": 7, "degree": 4, "design_points": 128,
                      "half_width_sigma": 5, "validation_points": 12, "tolerance_sigma": 0.02,
-                     "layout": "union" | "per-center"},
+                     "layout": "union" | "joint" | "per-center"},
   "provider_requests": "per-dataset" (default) | "per-point" (one request and one provider run per point for every
                        dataset; distinct observable ids, a provider that is not decomposable),
   "transport": {transport block} | "transport.json", "run_record_keys": [parameter_point keys],
@@ -144,7 +148,7 @@ TOY_FAILURE_LIMIT = 0.02    # stop a toy study once more than this fraction of i
 MAX_CHAIN_STEPS = 200_000   # steps per chain
 RHAT_MAX, ESS_MIN = 1.01, 400
 MAX_OUTSIDE_FRACTION = 1e-3  # proposals outside the response box above which a posterior is not reported
-MARGIN_TOL = 0.02           # per-center layout: a margin short by up to this fraction of a box half-width still holds
+MARGIN_TOL = 0.02           # joint and per-center layouts: a margin short by this fraction of a half-width still holds
 FAMILYWISE_ALPHA = 0.0027   # two-sided 3-sigma
 NOMINAL = 0.6827
 EXACT_FLAT = 1e-8           # eigenvalue ratio of an exactly flat direction (held for the convergence verdict)
@@ -1391,8 +1395,11 @@ def calibrate_families(model, fits, fam_cfg, rm_cfg, opt, fixed_global):
         sfs_by_null, rm_record, rm = _per_center_models(model, usable, names, scales, bounds, centers, width,
                                                         common_fixed, rm_cfg, fam_cfg, opt, nulls, starts)
     else:
-        sfs, rm_record, rm = _union_model(model, usable, names, scales, bounds, centers, sigmas, width, common_fixed,
-                                          rm_cfg, fam_cfg, opt, nulls, starts)
+        joint = rm_cfg["layout"] == "joint"
+        sfs, rm_record, rm = _union_model(model, usable, names, scales, bounds, centers,
+                                          [width] * len(centers) if joint else sigmas, width, common_fixed, rm_cfg,
+                                          fam_cfg, opt, nulls, starts, MARGIN_TOL if joint else 1e-9)
+        rm_record["layout"] = rm_cfg["layout"]
         sfs_by_null = {f["family"]: sfs for f in usable}
     chi2_obs = {f["family"]: f["chi2"] for f in usable}
     best = min(chi2_obs.values())
@@ -1450,10 +1457,12 @@ def calibrate_families(model, fits, fam_cfg, rm_cfg, opt, fixed_global):
 
 
 def _union_model(model, usable, names, scales, bounds, centers, sigmas, width, common_fixed, rm_cfg, fam_cfg, opt,
-                 nulls, starts):
-    """layout "union": one response model on the box spanning every center +- k sigma. The box must also hold each
-    family's fit to every other family's null prediction: grow it (at most 3 passes) where such a fit stops on a box
-    edge that is not a domain edge. Returns ({family: SurrogateFit}, record, model)."""
+                 nulls, starts, margin_tol=1e-9):
+    """layout "union": one response model on the box spanning every center +- k sigma (layout "joint": +- k times the
+    largest sigma of any family, every center). The box must also hold each family's fit to every other family's
+    null prediction: grow it (at most 3 passes) where such a fit stops on a box edge that is not a domain edge, or
+    where its margin of k width is short by more than margin_tol of the box half-width. Returns
+    ({family: SurrogateFit}, record, model)."""
     passes = []
     for _ in range(3):
         rm = build_response_model(model, names, scales, centers, sigmas, common_fixed, rm_cfg, bounds,
@@ -1479,7 +1488,8 @@ def _union_model(model, usable, names, scales, bounds, centers, sigmas, width, c
                 else:
                     k_w = rm_cfg["half_width_sigma"] * width
                     lo_d, hi_d = [b[0] for b in bounds], [b[1] for b in bounds]
-                    if not (rm.inside(np.maximum(t - k_w, lo_d)) and rm.inside(np.minimum(t + k_w, hi_d))):
+                    if not (rm.inside(np.maximum(t - k_w, lo_d), margin_tol)
+                            and rm.inside(np.minimum(t + k_w, hi_d), margin_tol)):
                         inner.append(t)
         passes.append({"box": rm.record()["box"], "fits_on_box_edge": len(grow), "centers_added": len(grow) + len(inner)})
         if not grow and not inner:
@@ -1725,8 +1735,8 @@ def _opt_cfg(cfg) -> dict:
 def _rm_cfg(cfg) -> dict:
     r = _keys(cfg.get("response_model") or {}, {"kind", "nodes", "degree", "design_points", "half_width_sigma",
                                                  "validation_points", "tolerance_sigma", "layout"}, "response_model")
-    if r.get("layout", "union") not in ("union", "per-center"):
-        raise FitInputError("response_model.layout must be 'union' or 'per-center'")
+    if r.get("layout", "union") not in ("union", "joint", "per-center"):
+        raise FitInputError("response_model.layout must be 'union', 'joint' or 'per-center'")
     kind = r.get("kind", "tensor")
     if kind not in ("tensor", "polynomial"):
         raise FitInputError("response_model.kind must be 'tensor' or 'polynomial'")

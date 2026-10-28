@@ -14,7 +14,12 @@ SYNTHETIC Asimov B/C data from BIG, Asimov recovery with a boundary parameter (C
 records and out-of-domain refusals (C2U-2), toy-calibrated delta chi2 of both families on a response model validated
 against the provider (C2U-3), and the bin-semantics guard for USINE's P2 values. These run offline; with
 HEP_USINE_LIVE_TEST=1 (and HEP_USINE_BIN, HEP_USINE_DATA) one live test refits SLIM with USINE (about 30 runs) and
-compares it with the record.
+compares it with the record. C2U's family calibration was refused (recorded, asserted as such); C2U-3 moved to C2UF-1
+(decision A1.12), checked from the study recorded by usine_two_dataset_family_study.py (fixture
+tests/adapters/fixtures/cr_propagation/c2uf/usine-two-dataset-family-study.json): B/C and 10Be/9Be from one USINE run
+per point, BIG and SLIM fitted with the provider, toy-calibrated delta chi2 of both on per-center response models
+validated against the provider, the generator surviving. With HEP_USINE_LIVE_TEST=1 one live test reruns the truth
+point (one USINE run) and compares it with the record.
 """
 import copy
 import json
@@ -40,6 +45,8 @@ except ImportError:  # pragma: no cover
 
 PROVIDER = "cr-secondary-ratio-closed-form"
 USINE_RECORD = PLUGIN / "tests" / "adapters" / "fixtures" / "cr_propagation" / "c2u" / "usine-family-study.json"
+TWO_DATASET_RECORD = (PLUGIN / "tests" / "adapters" / "fixtures" / "cr_propagation" / "c2uf"
+                      / "usine-two-dataset-family-study.json")
 LIVE = os.environ.get("HEP_USINE_LIVE_TEST") == "1"
 TRUTH = {"D0_cm2_s": 3.0e28, "delta": 0.5, "L_kpc": 4.0, "R0_gv": 1.0, "disc_halfwidth_pc": 100.0}
 
@@ -327,6 +334,11 @@ class PropagationFit(unittest.TestCase):
         self.assertTrue(all(len(e["rows"]) == 20 for e in cal["families"]))
         cfg["response_model"]["layout"] = "nested"
         self.assertEqual(self.cli(cfg)[0], 2)
+        cfg["response_model"]["layout"] = "joint"            # one box: every best fit +- k x the largest sigma
+        cal = self.fit(cfg)["family_calibration"]
+        self.assertEqual(cal["status"], "ok", cal.get("detail"))
+        self.assertEqual((cal["response_model"]["layout"], len(cal["response_model"]["box_passes"])), ("joint", 1))
+        self.assertTrue(cal["response_model"]["validation"]["passed"])
 
     def test_per_point_requests_send_one_request_for_every_dataset(self):
         import numpy as np
@@ -478,37 +490,18 @@ class UsineProvider(unittest.TestCase):
             pf.run(cfg, self.work, str(self.registry), cache_dir=self.work / "cache")
         self.assertEqual(ctx.exception.reason, "not-decomposable")
 
-    # ---------------------------------------------------------------- C2U-3
-    def test_c2u3_big_and_slim_with_toy_calibrated_delta_chi2(self):
+    # ---------------------------------------------------------------- C2U-3 (moved to C2UF-1, decision A1.12)
+    def test_c2u3_recorded_refusal_is_asserted_and_moved_to_c2uf(self):
         self.assertEqual(self.res["families"]["expressible"], ["BIG", "SLIM"])
         self.assertEqual(self.res["families"]["not_expressible"], [])
         for name in ("BIG", "SLIM"):                      # both fitted with the provider itself
             self.assertEqual(self.fits[name]["status"], "converged")
+        # C2U's study recorded the calibration as refused (VALIDATION CRPROP-C2U: the union box spanned the whole V_A
+        # domain); the criterion is asserted from the C2UF study in UsineTwoDatasetFamilies, never skipped here
         cal = self.res["family_calibration"]
-        if cal["status"] != "ok":
-            # recorded as it happened (VALIDATION CRPROP-C2U): not hidden, not counted as a pass
-            self.assertTrue(cal.get("reason") and cal.get("detail"))
-            self.skipTest(f"C2U-3 not met in the recorded study: family calibration {cal['status']} "
-                          f"({cal['reason']}: {cal['detail']})")
-        entries = {e["family"]: e for e in cal["families"]}
-        self.assertEqual(set(entries), {"BIG", "SLIM"})
-        n = self.doc["config"]["family_toys"]["n"]
-        for e in entries.values():
-            self.assertEqual(e["status"], "ok")
-            self.assertEqual(e["toys"], n)
-            self.assertLessEqual(e["failed"], 0.02 * n)
-            self.assertIsNotNone(e["delta_chi2"])
-            self.assertIn("p_toys", e)
-            self.assertEqual(len(e["rows"]), n)
-        gen = self.doc["generating_family"]
-        self.assertEqual(entries[gen]["delta_chi2"], 0.0)
-        self.assertTrue(entries[gen]["surviving"])
-        self.assertIn(gen, cal["surviving"])
-        rm = cal["response_model"]
-        self.assertEqual(rm["kind"], "total-degree polynomial")
-        self.assertTrue(rm["validation"]["passed"])
-        self.assertLessEqual(rm["validation"]["max_error_over_sigma"], rm["validation"]["tolerance"])
-        self.assertEqual(len(rm["error_component"]["bc-asimov"]), len(self.doc["truth_prediction"]["values"]["values"]))
+        self.assertEqual((cal["status"], cal["reason"]), ("failed", "response-model-above-tolerance"))
+        self.assertIn("above the tolerance 0.05", cal["detail"])
+        self.assertTrue(TWO_DATASET_RECORD.is_file())
 
     def test_statistical_result_of_the_study_validates(self):
         import propagation_fit as pf
@@ -577,3 +570,117 @@ class UsineProvider(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+def _two_dataset_record():
+    return json.loads(TWO_DATASET_RECORD.read_text(encoding="utf-8"))
+
+
+@unittest.skipUnless(HAVE, "needs numpy and scipy")
+class UsineTwoDatasetFamilies(unittest.TestCase):
+    """C2UF-1 (C2U-3 moved by A1.12) from the recorded two-dataset USINE study, plus one live check gated by
+    HEP_USINE_LIVE_TEST=1. Hard assertions: nothing here skips when the calibration is not ok."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.doc = _two_dataset_record()
+        cls.res = cls.doc["result"]
+        cls.fits = {f["family"]: f for f in cls.res["fits"]}
+        cls.cal = cls.res["family_calibration"]
+
+    def test_c2uf1_both_families_fitted_with_the_provider_on_two_datasets(self):
+        self.assertEqual(self.res["families"]["expressible"], ["BIG", "SLIM"])
+        self.assertEqual(self.res["families"]["not_expressible"], [])
+        for name in ("BIG", "SLIM"):
+            self.assertEqual(self.fits[name]["status"], "converged")
+        self.assertEqual([d["observable"] for d in self.res["datasets"]], ["B/C", "10Be/9Be"])
+        self.assertTrue(all(g["comparable"] for g in self.res["gate"]))
+        self.assertEqual(self.doc["config"]["transport"]["decay"]["enabled"], True)
+        self.assertEqual(self.doc["config"]["provider_requests"], "per-point")
+        pe = self.res["provider_evaluations"]
+        self.assertTrue(pe["records"])
+        for r in pe["records"]:                       # one USINE run serves both datasets
+            self.assertEqual(r["datasets"], ["bc-asimov", "be-asimov"])
+            self.assertTrue(r["computational_run_ref"] and r["computational_run_resolved"])
+        self.assertEqual(pe["computational_runs"]["unresolved_refs"], [])
+        self.assertEqual([t["name"] for t in pe["computational_runs"]["tools"]], ["USINE"])
+        self.assertIn("fb53006d", pe["computational_runs"]["tools"][0]["version"])
+        self.assertLessEqual(self.doc["usine_evaluations"]["truth"] + self.doc["usine_evaluations"]["fit"], 600)
+        self.assertIn("synthetic", self.res["status_label"])
+
+    def test_c2uf1_validated_response_models_with_their_error_in_the_covariance(self):
+        self.assertEqual(self.cal["status"], "ok", self.cal.get("detail"))
+        rm = self.cal["response_model"]
+        declared = self.doc["config"]["response_model"]
+        self.assertEqual((rm["layout"], declared["tolerance_sigma"]), ("per-center", 0.05))
+        self.assertEqual([m["center_of"] for m in rm["sub_models"][:2]], ["BIG", "SLIM"])
+        for m in rm["sub_models"]:
+            self.assertEqual(m["kind"], "total-degree polynomial")
+            self.assertEqual(m["validation"]["points"], declared["validation_points"])
+            self.assertTrue(m["validation"]["passed"])
+            self.assertLessEqual(m["validation"]["max_error_over_sigma"], 0.05)
+        self.assertTrue(rm["validation"]["passed"])
+        for name, pred in self.doc["truth_predictions"].items():   # P10: a per-bin error for every dataset
+            self.assertEqual(len(rm["error_component"][name]), len(pred["values"]["values"]))
+        self.assertEqual(len(rm["assignment"]), 4)
+
+    def test_c2uf1_toy_calibrated_delta_chi2_and_the_generator_survives(self):
+        entries = {e["family"]: e for e in self.cal["families"]}
+        self.assertEqual(set(entries), {"BIG", "SLIM"})
+        n = self.doc["config"]["family_toys"]["n"]
+        alpha = self.doc["config"]["family_toys"]["alpha"]
+        self.assertEqual((n, alpha), (200, 0.05))
+        best = min(f["chi2"] for f in self.fits.values())
+        for name, e in entries.items():
+            self.assertEqual(e["status"], "ok")
+            self.assertEqual(e["toys"], n)
+            self.assertLessEqual(e["failed"], 0.02 * n)
+            self.assertAlmostEqual(e["delta_chi2"], self.fits[name]["chi2"] - best, places=12)
+            ok_rows = [r for r in e["rows"] if r["outcome"] == "ok"]
+            exceed = sum(1 for r in ok_rows if r["delta_chi2"] >= e["delta_chi2"] - 1e-12)
+            self.assertEqual((e["p_toys"]["k"], e["p_toys"]["n"]), (exceed, len(ok_rows)))
+            if e["p_toys"]["estimate"] is not None:
+                self.assertAlmostEqual(e["p_toys"]["estimate"], exceed / len(ok_rows), places=12)
+        gen = self.doc["generating_family"]
+        self.assertEqual(gen, "BIG")
+        self.assertEqual(entries[gen]["delta_chi2"], 0.0)
+        self.assertTrue(entries[gen]["surviving"])
+        self.assertGreaterEqual(entries[gen]["p_toys"]["estimate"], alpha)
+        self.assertIn(gen, self.cal["surviving"])
+        self.assertEqual(self.res["families"]["surviving"], self.cal["surviving"])
+
+    def test_c2uf_statistical_result_validates(self):
+        import propagation_fit as pf
+        from contracts.validate import validate_artifact
+        sr = pf.statistical_result_artifact(self.res, self.res["status_label"])
+        rep = validate_artifact(sr)
+        self.assertTrue(rep.ok, rep.as_dict())
+        self.assertEqual(sr["extension"]["seeds"]["family_toys"], self.doc["config"]["family_toys"]["seed"])
+
+    @unittest.skipUnless(LIVE, "live USINE run: set HEP_USINE_LIVE_TEST=1, HEP_USINE_BIN and HEP_USINE_DATA")
+    def test_live_truth_rerun_matches_the_record(self):
+        sys.path.insert(0, str(PLUGIN / "tests" / "skills" / "hep_statistics"))
+        import usine_two_dataset_family_study as study
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp)
+            registry = work / "registry.json"
+            proc = subprocess.run([sys.executable, str(PLUGIN / "tools" / "provider_registry.py"), "--write",
+                                   str(registry)], capture_output=True, text=True, timeout=300)
+            self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+            old = os.environ.get("HEP_USINE_RUN_DIR")
+            os.environ["HEP_USINE_RUN_DIR"] = str(work / "runs")
+            (work / "runs").mkdir()
+            try:
+                res, gen = study.generate(str(registry), str(work / "cache"))   # one USINE run, fresh cache
+            finally:
+                if old is None:
+                    os.environ.pop("HEP_USINE_RUN_DIR")
+                else:
+                    os.environ["HEP_USINE_RUN_DIR"] = old
+            self.assertEqual(gen["points_sent"], 1)
+            for (name, *_), pred in zip(study.DATASETS, res["predictions"]):
+                rec = self.doc["truth_predictions"][name]["values"]["values"]
+                for a, b in zip(pred["values"]["values"], rec):
+                    self.assertLessEqual(abs(a / b - 1.0), 1e-6, name)
+            run = json.loads(next((work / "runs").rglob("*.computational-run.json")).read_text())
+            self.assertIn("fb53006d", json.dumps(run["extension"]["tools"]))

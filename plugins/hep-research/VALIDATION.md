@@ -7056,3 +7056,30 @@ and holds the low-diffusion corners above; separate boxes around each family's b
 | C2UF-1 | pass when: BIG and SLIM both converge with the provider; the family calibration is `ok` with every response model validated (<= 0.05 sigma); each family is listed with its delta chi2 and its toy p-value (fraction of its own toys with delta chi2 >= the observed one); BIG (the generator) survives at alpha = 0.05 (toy p-value >= 0.05). SLIM's verdict is reported, not required |
 | Test | `test_propagation_fit.py` class `UsineTwoDatasetFamilies` asserts the above from the recorded study (no skip); C2U's `test_c2u3` asserts C2U's recorded refusal (no skip); a live part gated by HEP_USINE_LIVE_TEST=1 |
 | D7 / A1.8 | C2UF cap 600 USINE runs (running tally in `$CRPROP_OUT/c2uf/tally.json`, counted as runner `points_sent`, since run folders are named by point hash and a rerun of a point with other observables reuses its folder); the fit run capped at 540 (`--max-evaluations`); one USINE process at a time |
+
+### First calibration (study 1, as declared) and amendment (written before the second calibration)
+
+Study 1 (`$CRPROP_OUT/c2uf/study1/`, 298 USINE runs: 1 truth, 197 for the fits, 100 for one response model): BIG
+converged with no restart (chi2 0.0, dof 23; pulls below 1e-4 sigma; sigma ln D0 0.0670, delta 0.0122, V_A 8.19 km/s,
+V_c 2.37 km/s one-sided, V_c on its bound) and SLIM converged after one restart (chi2 23.93, dof 25; D0 2.509e28,
+delta 0.4839): delta chi2 of SLIM 23.93. The family calibration was refused: the first per-center model (BIG's box,
+V_A 29-111 km/s, ln D0 +-0.335) had a largest error of 0.883 of the data sigma (worst in the lowest B/C bin at low
+D0 and high V_A), so the declared contingency was not run as declared. Offline from the cached runs: degree 3 misses
+by up to 0.47 sigma in-sample in that box, degree 4 by 0.11. A 9-point V_c slice in the box (9 runs, `probe/vc-slice.json`)
+is smooth (degree 3 within 1e-4 sigma), so the misses come from V_A at low D0, as in the corner slices above.
+
+Two further findings make the declared design unworkable: (1) the declared contingency (degree 4, 150 design points
+for both models) needs about 320 runs, more than the 258 left of the 600 cap; (2) under SLIM's null, B/C depends on
+V_A only through V_A^2, so BIG's fits to SLIM's toys spread to V_A of about 34 km/s at one sigma and 59 at three
+(from sigma(V_A) 8.2 at 70 km/s: one sigma in V_A^2 is 2 x 70 x 8.2 = 1148 km^2/s^2), far beyond the per-center box
+around SLIM (V_A 0-41): those toys would leave the box and fail. One box holding both best fits is needed after all.
+
+Amendment (the criteria, the 0.05 tolerance, the 20 validation points per model, the toys and alpha are unchanged):
+layout "joint" (new: one polynomial model on the box spanning both best fits +- k times the largest sigma of either
+family, so the fit of each family to the other's null has its margin without a rebuild; a margin short by up to 2% of
+the half-width holds), k = 3 (half_width_sigma; box ln D0 65.19-65.77, delta 0.413-0.521, V_A 0-94.6 km/s, V_c
+0-7.1 km/s), total degree 4 (70 terms) with 150 Sobol design points; the fits answered from the provider cache; the
+run capped at 255 USINE evaluations (342 spent so far). Expected toy failures at k = 3 (a fit beyond 3 sigma on four
+one-sided edges, about 1 per 200 toys) stay below the 2% limit. Offline, degree 4 in this box reproduces every cached
+run within 1e-4 sigma (230 runs, most near the two fits, so not a validation). If this model is refused, the cap
+leaves no further attempt and C2UF-1 is reported not met.

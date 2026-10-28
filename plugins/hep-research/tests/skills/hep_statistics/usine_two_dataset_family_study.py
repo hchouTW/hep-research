@@ -8,8 +8,9 @@ box spanned the whole V_A domain and its polynomial response model was refused. 
 USINE run at the same BIG truth; it fixes D0 for the fixed L, so B/C then constrains V_A. propagation_fit.py fits the
 families BIG (D0, delta, V_A, V_c free) and SLIM (D0, delta free, V_A = V_c = 0) with the provider (one request and one
 USINE run per point for both datasets, provider_requests "per-point"), and calibrates the delta chi2 of both families
-with toys on polynomial response models, one per family's best fit (layout "per-center"), each validated against the
-provider, their error added to the toy covariance (P10). Both families share one transport block: the provider's
+with toys on a polynomial response model on the box spanning both best fits +- 3 times the largest sigma (layout
+"joint"; the first run's per-center layout is kept as an option), validated against the provider, its error added to
+the toy covariance (P10). Both families share one transport block: the provider's
 harmonized-v1 default with decay on and the ILLUSTRATIVE low-rigidity break of C2U, held fixed. Every input is
 ILLUSTRATIVE; nothing is fitted to real data.
 
@@ -19,7 +20,8 @@ the USINE predictions at the truth) to --record, from which test_propagation_fit
 
 Usage:
   python3 usine_two_dataset_family_study.py --registry REGISTRY.json --cache-dir DIR --out DIR [--record FILE]
-      [--max-evaluations 540] [--family-toys 200] [--degree 3] [--design-points 80]
+      [--max-evaluations 255] [--family-toys 200] [--degree 4] [--design-points 150] [--layout joint]
+      [--half-width 3]
 Exit codes: 0 written; 1 the fit failed; 2 bad input or USINE not configured.
 """
 from __future__ import annotations
@@ -81,8 +83,9 @@ def asimov_record(name, prediction: dict, labels, unc: float, cor: float) -> dic
     return rec
 
 
-def config(records: dict, family_toys: int, degree: int, design_points: int, runs_ref=None) -> dict:
-    """The fit configuration (C2U's, with the second dataset, per-point requests and per-center response models)."""
+def config(records: dict, family_toys: int, degree: int, design_points: int, runs_ref=None, layout="joint",
+           half_width=3.0) -> dict:
+    """The fit configuration (C2U's, with the second dataset, per-point requests and the response model layout)."""
     cfg = c2u.config(records["bc-asimov"], family_toys, runs_ref)
     cfg["transport"] = transport()
     cfg["datasets"] = [{"name": name, "measurement": records[name], "observable": obs}
@@ -90,8 +93,8 @@ def config(records: dict, family_toys: int, degree: int, design_points: int, run
     cfg["provider_requests"] = "per-point"
     cfg.pop("intervals", None)
     cfg["response_model"] = {"kind": "polynomial", "degree": degree, "design_points": design_points,
-                             "validation_points": 20, "tolerance_sigma": 0.05, "half_width_sigma": 5.0,
-                             "layout": "per-center"}
+                             "validation_points": 20, "tolerance_sigma": 0.05, "half_width_sigma": half_width,
+                             "layout": layout}
     cfg["family_toys"] = {"n": family_toys, "seed": SEED, "alpha": 0.05}
     return cfg
 
@@ -116,10 +119,13 @@ def main(argv=None) -> int:
     ap.add_argument("--cache-dir", required=True, help="provider cache folder (outside the repository)")
     ap.add_argument("--out", required=True, type=Path, help="folder for the fit outputs (outside the repository)")
     ap.add_argument("--record", type=Path, default=RECORD, help="recorded study to write (default: the test fixture)")
-    ap.add_argument("--max-evaluations", type=int, default=540, help="cap on USINE evaluations of the fit")
+    ap.add_argument("--max-evaluations", type=int, default=255, help="cap on USINE evaluations of the fit")
     ap.add_argument("--family-toys", type=int, default=200, help="toys per family for the delta chi2 calibration")
-    ap.add_argument("--degree", type=int, default=3, help="total degree of each polynomial response model")
-    ap.add_argument("--design-points", type=int, default=80, help="Sobol design points of each response model")
+    ap.add_argument("--degree", type=int, default=4, help="total degree of each polynomial response model")
+    ap.add_argument("--design-points", type=int, default=150, help="Sobol design points of each response model")
+    ap.add_argument("--layout", default="joint", choices=["union", "joint", "per-center"],
+                    help="response model layout of the family calibration")
+    ap.add_argument("--half-width", type=float, default=3.0, help="response box half-width in sigma")
     args = ap.parse_args(argv)
     runs = os.environ.get("HEP_USINE_RUN_DIR")
     if not (os.environ.get("HEP_USINE_BIN") and os.environ.get("HEP_USINE_DATA") and runs):
@@ -130,7 +136,7 @@ def main(argv=None) -> int:
     labels = truth_res.get("labels") or []
     records = {name: asimov_record(name, pred, labels, unc, cor)
                for (name, _, _, unc, cor), pred in zip(DATASETS, truth_res["predictions"])}
-    cfg = config(records, args.family_toys, args.degree, args.design_points, runs)
+    cfg = config(records, args.family_toys, args.degree, args.design_points, runs, args.layout, args.half_width)
     args.out.mkdir(parents=True, exist_ok=True)
     (args.out / "config.json").write_text(json.dumps(cfg, indent=1) + "\n", encoding="utf-8")
     try:
