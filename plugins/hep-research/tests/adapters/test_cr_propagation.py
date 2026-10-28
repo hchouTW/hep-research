@@ -2157,6 +2157,12 @@ class LiveUsineD3(unittest.TestCase):
                     self.assertTrue(math.isclose(a, b, rel_tol=USINE_LIVE_RTOL, abs_tol=1e-300), (f.name, a, b))
 
 F1_FIX = FIX / "f1"
+try:
+    import numpy  # noqa: F401
+    import scipy  # noqa: F401
+    HAVE_NUMPY_SCIPY_F1 = True
+except ImportError:  # pragma: no cover
+    HAVE_NUMPY_SCIPY_F1 = False
 FORCE_FIELD = ROOT / "skills" / "hep-measurement" / "scripts" / "solar_modulation_force_field.py"
 
 
@@ -2377,6 +2383,61 @@ class EmulatorPerModelDeclaration(unittest.TestCase):
         bad = dict(req, observables=[{"id": "B/C", "axis": "rigidity", "unit": "GV", "bins": [[2.0, 3.0]]}])
         proc, doc = e2_call(bad, env=self.env)
         self.assertEqual(doc["status"], "failed")
+
+F1_WINDOWS = {"BIG": ((0.45, 0.52), (0.266, 0.338)), "SLIM": ((0.49, 0.53), (0.258, 0.304)),
+              "QUAINT": ((0.43, 0.50), (0.297, 0.367))}   # VALIDATION.md CRPROP-F1, fixed before any fit (D9)
+
+
+class UsineF1Record(unittest.TestCase):
+    """F1 record (tests/adapters/fixtures/cr_propagation/f1/f1-reproduction.json, written by
+    examples/bc-usine-reproduction/run.py stage record): F1-2 labels, the D9 verdict recomputed from the recorded best
+    fits against the windows of VALIDATION.md, the USINE run tally within the A1.8 cap, no data value committed. With
+    HEP_USINE_DATA set, the data stage is rerun and its dataset-record validates with the same labels."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.rec = json.loads((F1_FIX / "f1-reproduction.json").read_text(encoding="utf-8"))
+
+    def test_f1_2_labels(self):
+        self.assertEqual(self.rec["data"]["status"], ["observed"])
+        self.assertTrue(self.rec["data"]["covariance_note"].startswith("model-supplied"))
+        self.assertEqual(self.rec["crdb_crosscheck"]["row_roles"], ["secondary"])
+        self.assertTrue(self.rec["crdb_crosscheck"]["label"].startswith("secondary"))
+
+    def test_d9_recomputed(self):
+        kpc2_myr = (648000.0 / math.pi * 1.495978707e13 * 1e3) ** 2 / (1e6 * 365.25 * 86400.0)
+        for fam, ((d_lo, d_hi), (k_lo, k_hi)) in F1_WINDOWS.items():
+            row = self.rec["families"][fam]
+            with self.subTest(family=fam):
+                pt = row["best_fit"]
+                k10 = pt["D0_cm2_s"] / kpc2_myr * 10 ** pt["delta"]
+                self.assertAlmostEqual(k10, row["K10"], places=9)
+                self.assertAlmostEqual(row["delta_window"][0], d_lo, places=6)
+                self.assertAlmostEqual(row["delta_window"][1], d_hi, places=6)
+                self.assertAlmostEqual(row["K10_window"][0], k_lo, delta=5e-4)
+                self.assertAlmostEqual(row["K10_window"][1], k_hi, delta=5e-4)
+                self.assertEqual(row["delta_in_window"], d_lo <= pt["delta"] <= d_hi)
+                self.assertEqual(row["K10_in_window"], row["K10_window"][0] <= k10 <= row["K10_window"][1])
+                passed = row["status"] == "converged" and row["delta_in_window"] and row["K10_in_window"]
+                self.assertEqual(row["D9"].startswith("passed"), passed)
+        self.assertEqual(self.rec["D9_all"], all(r["D9"] == "passed" for r in self.rec["families"].values()))
+
+    def test_budget_and_no_data_values(self):
+        self.assertLessEqual(self.rec["usine_runs"], 2000)   # A1.8: F1 cap
+        text = (F1_FIX / "f1-reproduction.json").read_text(encoding="utf-8")
+        self.assertNotIn('"values"', text)
+        self.assertNotIn('"edges"', text)
+
+    @unittest.skipUnless(os.environ.get("HEP_USINE_DATA") and HAVE_NUMPY_SCIPY_F1, "needs HEP_USINE_DATA, numpy, scipy")
+    def test_data_stage_rebuilds_the_labelled_record(self):
+        with tempfile.TemporaryDirectory() as scratch:
+            proc = subprocess.run([sys.executable, str(ROOT / "examples" / "bc-usine-reproduction" / "run.py"),
+                                   "--out", scratch, "--stages", "data"], capture_output=True, text=True, timeout=600)
+            self.assertEqual(proc.returncode, 0, proc.stdout[-800:] + proc.stderr[-800:])
+            doc = json.loads((Path(scratch) / "data" / "bc-observed.json").read_text(encoding="utf-8"))
+            self.assertEqual(doc["status"], self.rec["data"]["status"])
+            self.assertTrue(validate_artifact(doc).ok)
+            self.assertEqual(doc["extension"]["covariance"]["note"], self.rec["data"]["covariance_note"])
 
 
 if __name__ == "__main__":

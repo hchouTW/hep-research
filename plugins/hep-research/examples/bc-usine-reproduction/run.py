@@ -336,12 +336,25 @@ def paper_point(family: str) -> dict:
     return pt
 
 
-def config(family: str, record: dict, conditions: dict, cov_alt: bool) -> dict:
+def restart_from(path: Path, fraction: float) -> tuple[dict, dict]:
+    """(start values, difference steps) from an earlier fit of the same family: its best fit, and steps of
+    fraction / sqrt(F_ii) in the fit coordinates (a fraction of the conditional sigma, so that the verdict's second
+    differences stay in the quadratic region; F the earlier fit's Fisher matrix with priors)."""
+    fit = json.loads(path.read_text())["fits"][0]
+    names = [q["name"] for q in fit["parameters"]]
+    fisher = fit["fisher_full"]["matrix"]
+    starts = {q["name"]: q["best_fit"] for q in fit["parameters"]}
+    steps = {n: float(f"{fraction / math.sqrt(fisher[i][i]):.3g}") for i, n in enumerate(names)}
+    return starts, steps
+
+
+def config(family: str, record: dict, conditions: dict, cov_alt: bool, restart: tuple | None = None) -> dict:
     pt = paper_point(family)
     free = FREE[family] + list(NUISANCES)
+    starts, steps = restart if restart else ({}, {})
     params = {}
     for n in free:
-        params[n] = {"start": pt[n], "scale": SCALES.get(n, "linear"), "step": STEPS[n]}
+        params[n] = {"start": starts.get(n, pt[n]), "scale": SCALES.get(n, "linear"), "step": steps.get(n, STEPS[n])}
         if n in NUISANCES:
             params[n]["prior"] = {"mean": NUISANCES[n][0], "sigma": NUISANCES[n][1]}
     fixed = {k: v for k, v in pt.items() if k not in free}
@@ -368,7 +381,7 @@ def config(family: str, record: dict, conditions: dict, cov_alt: bool) -> dict:
                                                                "published ratio)"}]},
            "parameters": params, "fixed": fixed,
            "families": [{"name": family, "free": free, "fixed": {}}],
-           "optimizer": {"max_iterations": 60, "max_restarts": 1, "seed": 0},
+           "optimizer": {"max_iterations": 60, "max_restarts": 0, "seed": 0, "polish_steps": 0},
            "transport": transport(family), "run_record_keys": ["usine_run"]}
     if cov_alt:
         data_dir = usine_data()
@@ -441,18 +454,24 @@ def stage_start(out: Path, families, reg: Path, cache: Path) -> dict:
             "points_sent": sent}
 
 
-def run_fit(out: Path, family: str, reg: Path, cache: Path, max_eval: int, cov_alt: bool) -> subprocess.Popen:
+def run_fit(out: Path, family: str, reg: Path, cache: Path, max_eval: int, cov_alt: bool,
+            restart: tuple | None = None) -> subprocess.Popen:
     start = json.loads((out / "start.json").read_text())
     work = out / f"fit-{family}"
     work.mkdir(parents=True, exist_ok=True)
     conditions = {"transport_substitutes": start[family]["substitutes"]}
+    if restart:   # the gate sees the start point, whose substitutes name its own values: take them from that point
+        point = dict(paper_point(family), **restart[0])
+        edges = json.loads((out / "data" / "bc-observed.json").read_text())["extension"]["data"]["edges"]
+        conditions = {"transport_substitutes": evaluate(reg, cache, family, point, edges)["prediction"][
+            "parameter_point"]["transport_substitutes"]}
     # the dataset-record with its covariance file named by absolute path (references resolve from the config folder)
     record = json.loads((out / "data" / "bc-observed.json").read_text())
     for comp in record["extension"]["data"]["uncertainties"]:
         if comp.get("covariance_ref"):
             comp["covariance_ref"] = str(out / "data" / comp["covariance_ref"])
     record["extension"]["covariance"]["ref"] = str(out / "data" / record["extension"]["covariance"]["ref"])
-    cfg = config(family, record, conditions, cov_alt)
+    cfg = config(family, record, conditions, cov_alt, restart)
     (work / "config.json").write_text(json.dumps(cfg, indent=1) + "\n")
     cmd = [sys.executable, str(FIT), "fit", "--input", str(work / "config.json"), "--provider-registry", str(reg),
            "--cache-dir", str(cache), "--out", str(work / "out"), "--max-evaluations", str(max_eval)]
@@ -502,6 +521,28 @@ def variants(family: str, best: dict) -> dict:
     return out
 
 
+def covariance_variants(out: Path, mu0) -> dict:
+    """Alternative data covariances (label -> matrix): USINE's shipped unfolding correlation scaled with the data,
+    USINE's shipped relative covariance scaled with the model (the paper's IsModelOrDataForRelCov true), and the
+    unfolding correlation length halved and doubled (r3 P9)."""
+    import numpy as np
+    data_dir = out / "data"
+    shipped = read_usine_covariance(usine_data())
+    edges, values, cols, _ = read_breakdown(usine_data())
+    centers = [math.sqrt(a * b) for a, b in zip(edges, edges[1:])]
+    length = json.loads((data_dir / "covariance-model.json").read_text())["unf_length_ln_r"]
+    alts = {"USINE unfolding correlation, data-scaled":
+            np.asarray(json.loads((data_dir / "covariance-usine-unf-matrix.json").read_text())["matrix"]),
+            "USINE relative covariance, model-scaled (the paper's choice)":
+            sum(np.asarray(shipped[k]) for k in SOURCES) * np.outer(mu0, mu0)}
+    for factor in (0.5, 2.0):
+        path = build_cov(data_dir, f"unf-length-x{factor:g}", values, centers,
+                         covariance_sources(values, cols, {"model": "length", "length": round(length * factor, 4)}))
+        alts[f"unfolding correlation length x{factor:g} ({length * factor:.3f} in ln R)"] = np.asarray(
+            json.loads(path.read_text())["matrix"])
+    return alts
+
+
 def stage_attribution(out: Path, families, reg: Path, cache: Path) -> dict:
     """Linear response of the best fit to each configuration difference: dtheta = (J^T W J + P)^-1 J^T W dmu, with J
     from the cached evaluations at the best fit +- the stated steps (the Fisher matrix's points: no new run), W the
@@ -548,7 +589,19 @@ def stage_attribution(out: Path, families, reg: Path, cache: Path) -> dict:
             fam_rows[label] = {"max_rel_change_of_BC": float(np.max(np.abs(np.asarray(mu_v) / mu0 - 1))),
                                "d_delta": float(dtheta[i_d]),
                                "d_log10_K10": float(dtheta[i_k] / math.log(10) + dtheta[i_d])}
-        rows[fam] = {"jacobian_points": len(pts), "variants": fam_rows,
+        # covariance alternatives (P9 and the paper's choice): chi2 at this best fit and one Gauss-Newton step under
+        # each covariance, with the same Jacobian (no run)
+        cov_rows = {}
+        for label, cov_alt in covariance_variants(out, mu0).items():
+            w_alt = np.linalg.inv(cov_alt)
+            r0 = np.asarray(rec["extension"]["data"]["values"]) - mu0
+            f_alt = jac.T @ w_alt @ jac + prior
+            prior_grad = np.array([-(best[n] - NUISANCES[n][0]) / NUISANCES[n][1] ** 2 if n in NUISANCES else 0.0
+                                   for n in names])
+            step = np.linalg.solve(f_alt, jac.T @ w_alt @ r0 + prior_grad)
+            cov_rows[label] = {"chi2_at_this_best_fit": float(r0 @ w_alt @ r0), "d_delta": float(step[i_d]),
+                               "d_log10_K10": float(step[i_k] / math.log(10) + step[i_d])}
+        rows[fam] = {"jacobian_points": len(pts), "variants": fam_rows, "covariance_alternatives": cov_rows,
                      "linear_sigma": {"delta": float(math.sqrt(np.linalg.inv(fisher)[i_d, i_d]))}}
     (out / "attribution.json").write_text(json.dumps(rows, indent=1) + "\n")
     return {"families": rows, "points_sent": sent}
@@ -574,12 +627,90 @@ def stage_compare(out: Path, families) -> dict:
         passed = (fit["status"] == "converged" and d_win[0] <= delta <= d_win[1] and k_win[0] <= kk <= k_win[1])
         ok &= passed
         table[fam] = {"status": fit["status"], "delta": delta, "delta_window": d_win, "K10": kk, "K10_window": k_win,
+                      "delta_in_window": d_win[0] <= delta <= d_win[1], "K10_in_window": k_win[0] <= kk <= k_win[1],
+                      "convergence": {k: fit["convergence"].get(k) for k in ("status", "reasons", "edm")},
+                      "points_sent": res["provider_evaluations"]["points_sent"],
                       "chi2": fit["chi2"], "dof": fit["dof"], "D9": "passed" if passed else "missed",
                       "best_fit": {n: q["best_fit"] for n, q in p.items()},
                       "sigma_coordinate": {n: q["sigma_coordinate"] for n, q in p.items()},
                       "paper": PAPER_FITS[fam]}
     (out / "compare.json").write_text(json.dumps(table, indent=1) + "\n")
     return {"families": table, "D9_all": ok}
+
+
+def best_cached(out: Path, family: str) -> dict | None:
+    """The lowest -2 ln L (data + priors) among the cached provider results of a family (for a fit that stopped
+    before reporting, e.g. on the evaluation budget): its point, chi2 and computational-run reference."""
+    import numpy as np
+    rec = json.loads((out / "data" / "bc-observed.json").read_text())
+    y = np.asarray(rec["extension"]["data"]["values"])
+    cov = (np.diag(np.asarray(rec["extension"]["data"]["uncertainties"][0]["values"]) ** 2)
+           + np.asarray(json.loads((out / "data" / "covariance-systematic.json").read_text())["matrix"]))
+    w = np.linalg.inv(cov)
+    best = None
+    for path in (out / "cache").glob("*/*.json"):
+        res = json.loads(path.read_text()).get("result") or {}
+        pt = res.get("point") or {}
+        if res.get("status") != "ok" or not pt:
+            continue
+        fam = "QUAINT" if "R_break_gv" not in pt else ("SLIM" if pt.get("V_A_kms", 0.0) == 0.0 else "BIG")
+        if fam != family:
+            continue
+        r = y - np.asarray(res["predictions"][0]["values"]["values"])
+        chi2 = float(r @ w @ r) + sum(((pt[n] - m) / sd) ** 2 for n, (m, sd) in NUISANCES.items() if n in pt)
+        if best is None or chi2 < best["chi2"]:
+            best = {"chi2": chi2, "point": pt, "computational_run_ref": res["evaluation"]["computational_run_ref"]}
+    return best
+
+
+def stage_record(out: Path, families, record_path: Path, usine_runs: int) -> dict:
+    """The committed record of the reproduction: numbers only (no data value, no USINE file content)."""
+    start = json.loads((out / "start.json").read_text())
+    compare = json.loads((out / "compare.json").read_text()) if (out / "compare.json").is_file() else {}
+    data = json.loads((out / "data" / "bc-observed.json").read_text())
+    crdb = json.loads((out / "data" / "crdb-crosscheck.json").read_text())
+    fams = {}
+    for fam in families:
+        row = dict(compare.get(fam) or {})
+        row.pop("paper", None)
+        if row.get("status") in (None, "not-run"):
+            cached = best_cached(out, fam)
+            if cached:
+                pt = cached["point"]
+                kk = k10(pt["D0_cm2_s"], pt["delta"])
+                pub = PUBLISHED[fam]
+                c, lo, hi = pub["delta"]
+                row = {"status": "not-reported", "note": "the fit stopped on its evaluation budget before reporting; "
+                       "the lowest -2 ln L among its cached provider results", "delta": pt["delta"], "K10": kk,
+                       "delta_window": (round(c - lo, 6), round(c + hi, 6)),
+                       "K10_window": (pub["K10"] * 10 ** -pub["s_log10_K10"], pub["K10"] * 10 ** pub["s_log10_K10"]),
+                       "delta_in_window": c - lo <= pt["delta"] <= c + hi,
+                       "K10_in_window": (pub["K10"] * 10 ** -pub["s_log10_K10"] <= kk
+                                         <= pub["K10"] * 10 ** pub["s_log10_K10"]),
+                       "chi2": cached["chi2"], "best_fit": pt, "computational_run_ref": cached["computational_run_ref"],
+                       "D9": "missed (not converged)"}
+        attr = out / f"attribution-{fam}.json"
+        if attr.is_file():
+            row["attribution"] = json.loads(attr.read_text()).get(fam)
+        row["published_point_chi2"] = {k: start[fam][k] for k in ("chi2_nominal",
+                                                                  "chi2_usine_unf_correlation_data_scaled",
+                                                                  "chi2_usine_covariance_model_scaled",
+                                                                  "paper_chi2_min_including_nuisances", "paper_dof")}
+        fams[fam] = row
+    doc = {"work_package": "F1", "target": "Genolini et al. 2019 (arXiv:1904.08917) Table II, BIG/SLIM/QUAINT",
+           "criteria": "VALIDATION.md CRPROP-F1 (D9)", "provider": {"id": PROVIDER, "version": PROVIDER_VERSION},
+           "data": {"artifact_id": data["artifact_id"], "status": data["status"], "bins": len(data["extension"]["data"]
+                                                                                              ["values"]),
+                    "covariance_note": data["extension"]["covariance"]["note"],
+                    "covariance_model": json.loads((out / "data" / "covariance-model.json").read_text())},
+           "crdb_crosscheck": {k: crdb[k] for k in ("label", "rows", "matched", "max_rel_value", "max_rel_stat",
+                                                     "max_rel_syst")} | {"row_roles": sorted({r["role"] for r in
+                                                                                             crdb["table"]})},
+           "families": fams, "usine_runs": usine_runs,
+           "D9_all": all(r.get("D9") == "passed" for r in fams.values())}
+    record_path.parent.mkdir(parents=True, exist_ok=True)
+    record_path.write_text(json.dumps(doc, indent=1, default=list) + "\n")
+    return {"record": str(record_path), "D9_all": doc["D9_all"]}
 
 
 def main(argv=None) -> int:
@@ -590,6 +721,11 @@ def main(argv=None) -> int:
     ap.add_argument("--cache-dir", type=Path)
     ap.add_argument("--max-evaluations", type=int, default=600)
     ap.add_argument("--covariance-alternatives", default="", help="families that also fit the P9 alternatives")
+    ap.add_argument("--restart-from", type=Path, help="folder holding fit-<family>/out/result.json of an earlier pass: "
+                    "start at its best fits with steps of --step-fraction of each conditional sigma")
+    ap.add_argument("--step-fraction", type=float, default=0.3)
+    ap.add_argument("--record", type=Path, help="stage record: the JSON record to write (numbers only)")
+    ap.add_argument("--usine-runs", type=int, default=0, help="stage record: the USINE run tally to record")
     a = ap.parse_args(argv)
     try:
         import numpy  # noqa: F401
@@ -614,10 +750,14 @@ def main(argv=None) -> int:
         summary["start"] = stage_start(out, families, reg, cache)
     if "fit" in stages:
         alts = set(a.covariance_alternatives.split(",")) - {""}
-        procs = {f: run_fit(out, f, reg, cache, a.max_evaluations, f in alts) for f in families}
+        procs = {f: run_fit(out, f, reg, cache, a.max_evaluations, f in alts,
+                            restart_from(a.restart_from / f"fit-{f}" / "out" / "result.json", a.step_fraction)
+                            if a.restart_from else None) for f in families}
         summary["fit"] = {f: p.wait() for f, p in procs.items()}
     if "compare" in stages:
         summary["compare"] = stage_compare(out, families)
+    if "record" in stages:
+        summary["record"] = stage_record(out, families, a.record or out / "f1-reproduction.json", a.usine_runs)
     if "attribution" in stages:
         summary["attribution"] = stage_attribution(out, families, reg or registry(out), cache)
     (out / "summary.json").write_text(json.dumps(summary, indent=1, default=str) + "\n")
