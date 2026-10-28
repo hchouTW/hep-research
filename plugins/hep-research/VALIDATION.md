@@ -7024,3 +7024,155 @@ generous bound, commented); `subprocess.TimeoutExpired` propagates like the exis
 never swallowed). The USINE run already had `timeout=900`. Results, fixtures and test assertions unchanged;
 `d3_study.py --help` works. Checks: test_subprocess_timeouts and test_cr_propagation OK, `--part static --jobs 4`,
 check_naming, check_wiring, workflow_check diff and acceptance (see report).
+
+## CRPROP-C2UF — 2026-10-28 (environment E2)
+
+Work package C2UF (toy-calibrated BIG vs SLIM with USINE; C2U-3 moved here by decision A1.12) of the cr-propagation r4
+workflow, r3 card §C2 (C2-3, USINE case). SYNTHETIC data only; every input ILLUSTRATIVE.
+
+Environment: E2 (macOS arm64 workstation), Python 3.13.2 (miniconda), NumPy 2.4.4, SciPy 1.17.1; USINE V3.5 (tag V3.5,
+commit fb53006d) located through HEP_USINE_BIN and HEP_USINE_DATA, runs kept under HEP_USINE_RUN_DIR =
+`$CRPROP_OUT/c2uf/runs`, provider cache `$CRPROP_OUT/c2uf/cache` (a copy of C2U's; C2U's left unchanged). r3 §0.3
+checks: toplevel `<repo>/.claude/worktrees/crprop-c2uf`, branch `worktree-crprop-c2uf`, status clean at start; base
+exception (decision D10): base is the integration HEAD `6a227a76`, not `main`; prerequisites C2U (merge `886bb316`)
+and B1X (merge `2360c294`) are ancestors of HEAD.
+
+### Design probes (before any fit; 33 USINE runs, `$CRPROP_OUT/c2uf/probe/`)
+
+| Probe | Runs | Finding |
+|---|---|---|
+| Forward-difference Fisher at the C2U truth with C2U's transport, B/C, 10Be/9Be and Be/B from 0.3 GeV/n in one request | 5 | sigma(V_A) 26.8 km/s with B/C alone, 26.8 with 10Be/9Be added, 26.7 with Be/B too: no gain. Cause: the provider's default transport has `decay.enabled` false, so 10Be/9Be is the production ratio (0.55, flat) and insensitive to D0 (d ln / d ln D0 about 0.004) |
+| Two 9-point V_A slices (Chebyshev nodes) at union-box corners (ln D0 65.03, delta 0.377, V_c 0, V_A 0-150; ln D0 65.18, delta 0.40, V_A 0-110) | 18 | along V_A alone, ln(B/C) needs degree 6 at the first corner and degree 5 at the second for 0.05 of the 4.47% sigma (degree 4: 0.23 and 0.057): a box that spans V_A from 0 (SLIM) to beyond the BIG truth reaches low-diffusion, high-V_A corners where no low-degree polynomial is good enough. B/C as a function of V_A^2 is no better |
+| Fisher with bins from 0.05 GeV/n (decay still off) | 5 | B/C extended to 0.05 GeV/n alone gives sigma(V_A) 7.3 km/s (10Be/9Be still flat) |
+| Fisher with 10Be decay on (beta decay and fed daughter, rate ln 2 / (gamma t_1/2), 7Be fully stripped, r3 P6), B/C 0.05-300 and 10Be/9Be 0.05-10 GeV/n | 5 | 10Be/9Be 0.072-0.34 (decaying); sigma with C2U's B/C (0.3-300) plus 10Be/9Be 0.05-10 GeV/n (6% + 3%): ln D0 0.070, delta 0.0129, V_A 8.1 km/s, V_c 2.35 km/s (B/C alone: V_A 58); 10Be/9Be only from 0.3 GeV/n: V_A 40 |
+
+So the plan of A1.12 works only with decay switched on and 10Be/9Be extending below 0.3 GeV/n (10Be/9Be fixes D0 at the
+fixed L; B/C then fixes V_A). A union response box still spans V_A from 0 (SLIM's fixed value) to beyond the BIG truth
+and holds the low-diffusion corners above; separate boxes around each family's best fit avoid them.
+
+### Criteria and settings (written before any fit; R9; frozen entry C2UF-1, same text as C2U-3)
+
+| Item | Pre-declared setting or criterion |
+|---|---|
+| Transport | C2U's (the provider's harmonized-v1 default with the ILLUSTRATIVE low break R_break_gv 5, delta_below 0, s 0.05, 'usine' convention, held fixed) with `decay` = {enabled true, lorentz_dilation true, ec_treatment fully-stripped}; the same block for both families |
+| Datasets | SYNTHETIC Asimov from ONE USINE run at the truth (one request naming both observables): B/C, C2U's 15 bins equal in ln(E_k/n) from 0.3 to 300 GeV/n, 4% uncorrelated + 2% fully correlated; 10Be/9Be, 12 bins equal in ln(E_k/n) from 0.05 to 10 GeV/n, 6% uncorrelated + 3% fully correlated; observable blocks copied from the predictions (P2, `bin-averaged` with the P2 statement) |
+| Truth (generating family BIG), starts, steps, families | as C2U: `D0_cm2_s` 3e28, `delta` 0.45, `V_A_kms` 70, `V_c_kms` 0; `L_kpc` 4, `eta` 1 fixed; starts 2.4e28, 0.48, 60, 2; steps 0.003 (ln D0), 0.001, 0.3, 0.3 km/s; BIG all four free, SLIM D0 and delta free with V_A = V_c = 0 |
+| Provider requests | `provider_requests` "per-point" (new in propagation_fit.py): one request and one USINE run per point for both datasets (distinct observable ids; provider not decomposable); the C1 protocol is unchanged |
+| Response models | polynomial, total degree 3 (35 terms) in (ln D0, delta, V_A, V_c), 80 scrambled Sobol design points each, layout "per-center" (new): one model per family's best fit on best fit +- 5 x (largest sigma of either family per coordinate), clipped to the provider domain; each refused unless its largest error at 20 uniform random provider points in its box is <= 0.05 of the data sigma in every bin of both datasets (C2U's tolerance, not loosened); each family's fits to a null family's toys use the model whose box holds that family's fit to the null with a margin of 5 sigma (up to 2% of the half-width, MARGIN_TOL); the largest error of the models per bin enters the toy covariance (P10) |
+| Contingency (declared now) | if a model is refused at degree 3, one rerun of the calibration at degree 4 (70 terms) with 150 design points per model, the fits answered from the provider cache; the tolerance stays 0.05 |
+| Toys | 200 per family, seed 20261028, a toy whose fit fails or leaves its box is failed, the study stops above 2% failed (C2 loop limit) |
+| C2UF-1 | pass when: BIG and SLIM both converge with the provider; the family calibration is `ok` with every response model validated (<= 0.05 sigma); each family is listed with its delta chi2 and its toy p-value (fraction of its own toys with delta chi2 >= the observed one); BIG (the generator) survives at alpha = 0.05 (toy p-value >= 0.05). SLIM's verdict is reported, not required |
+| Test | `test_propagation_fit.py` class `UsineTwoDatasetFamilies` asserts the above from the recorded study (no skip); C2U's `test_c2u3` asserts C2U's recorded refusal (no skip); a live part gated by HEP_USINE_LIVE_TEST=1 |
+| D7 / A1.8 | C2UF cap 600 USINE runs (running tally in `$CRPROP_OUT/c2uf/tally.json`, counted as runner `points_sent`, since run folders are named by point hash and a rerun of a point with other observables reuses its folder); the fit run capped at 540 (`--max-evaluations`); one USINE process at a time |
+
+### First calibration (study 1, as declared) and amendment (written before the second calibration)
+
+Study 1 (`$CRPROP_OUT/c2uf/study1/`, 298 USINE runs: 1 truth, 197 for the fits, 100 for one response model): BIG
+converged with no restart (chi2 0.0, dof 23; pulls below 1e-4 sigma; sigma ln D0 0.0670, delta 0.0122, V_A 8.19 km/s,
+V_c 2.37 km/s one-sided, V_c on its bound) and SLIM converged after one restart (chi2 23.93, dof 25; D0 2.509e28,
+delta 0.4839): delta chi2 of SLIM 23.93. The family calibration was refused: the first per-center model (BIG's box,
+V_A 29-111 km/s, ln D0 +-0.335) had a largest error of 0.883 of the data sigma (worst in the lowest B/C bin at low
+D0 and high V_A), so the declared contingency was not run as declared. Offline from the cached runs: degree 3 misses
+by up to 0.47 sigma in-sample in that box, degree 4 by 0.11. A 9-point V_c slice in the box (9 runs, `probe/vc-slice.json`)
+is smooth (degree 3 within 1e-4 sigma), so the misses come from V_A at low D0, as in the corner slices above.
+
+Two further findings make the declared design unworkable: (1) the declared contingency (degree 4, 150 design points
+for both models) needs about 320 runs, more than the 260 left of the 600 cap; (2) under SLIM's null, B/C depends on
+V_A only through V_A^2, so BIG's fits to SLIM's toys spread to V_A of about 34 km/s at one sigma and 59 at three
+(from sigma(V_A) 8.2 at 70 km/s: one sigma in V_A^2 is 2 x 70 x 8.2 = 1148 km^2/s^2), far beyond the per-center box
+around SLIM (V_A 0-41): those toys would leave the box and fail. One box holding both best fits is needed after all.
+
+Amendment (the criteria, the 0.05 tolerance, the 20 validation points per model, the toys and alpha are unchanged):
+layout "joint" (new: one polynomial model on the box spanning both best fits +- k times the largest sigma of either
+family, so the fit of each family to the other's null has its margin without a rebuild; a margin short by up to 2% of
+the half-width holds), k = 3 (half_width_sigma; box ln D0 65.19-65.77, delta 0.413-0.521, V_A 0-94.6 km/s, V_c
+0-7.1 km/s), total degree 4 (70 terms) with 150 Sobol design points; the fits answered from the provider cache; the
+run capped at 255 USINE evaluations (340 spent so far). Expected toy failures at k = 3 (a fit beyond 3 sigma on four
+one-sided edges, about 1 per 200 toys) stay below the 2% limit. Offline, degree 4 in this box reproduces every cached
+run within 1e-4 sigma (230 runs, most near the two fits, so not a validation). If this model is refused, the cap
+leaves no further attempt and C2UF-1 is reported not met.
+
+### Results (study 2, recorded in `tests/adapters/fixtures/cr_propagation/c2uf/usine-two-dataset-family-study.json`)
+
+| Item | Result | Evidence |
+|---|---|---|
+| Fits (both datasets, one USINE run per point) | BIG and SLIM equal to study 1 (every fit evaluation answered from the provider cache): BIG returns the truth (pulls < 1e-4 sigma), sigma(V_A) 8.19 km/s (C2U, B/C alone: 27.8); SLIM chi2 23.93 (dof 25), delta chi2 23.93; every evaluation record names both datasets and a computational-run reference that resolves, tool USINE V3.5 fb53006d | `test_two_datasets_both_families_fitted_with_the_provider` |
+| Response model (joint, k = 3, degree 4, 150 design points) | REFUSED: largest error 0.452 of the data sigma at 20 validation points (tolerance 0.05, not loosened); no toy ran. Offline from the 170 runs: degree 3 misses by 0.58, degree 4 by 0.55, degree 5 (126 terms on 150 points) by 0.44 at the same validation point (ln D0 65.71, delta 0.507, V_A 1.9, V_c 2.86, the high-D0, low-V_A corner), while in-sample misses fall to 0.03: the global polynomial spends its terms on the strongly curved low-D0, high-V_A region and misses elsewhere. A 9-point V_A slice 0-20 km/s at that point (9 runs, `probe/va-slice-low.json`) is smooth and continuous at V_A = 0 (no switch artifact) | `test_two_datasets_recorded_calibration_refusal` |
+| C2UF-1 | NOT MET. BIG and SLIM are fitted with the provider and listed with their delta chi2 (0 and 23.93), but not toy-calibrated: no response model reached 0.05 sigma within the 600-run cap (study 1: 0.883 at degree 3, per-center; study 2: 0.452 at degree 4, joint, k = 3). The criterion runs from the record as an expected failure (`test_two_datasets_toy_calibrated_delta_chi2_and_generator_survives`, `@unittest.expectedFailure`; an unexpected success fails the suite) | test module |
+| Live | the truth point rerun with USINE (fresh cache, 1 run) equals the recorded predictions of both datasets within 1e-6 relative; tool USINE V3.5 fb53006d | `test_live_truth_rerun_matches_the_record`, `$CRPROP_OUT/c2uf/acceptance/live-truth-rerun.txt` |
+
+USINE runs (A1.8 tally, `$CRPROP_OUT/c2uf/tally.json`, counted as runner `points_sent`): probes 33 + 9 + 9, study 1 298
+(truth 1, fits 197, response model 100), study 2 170 (response model; fits from the cache), live test 1: 520 of 600.
+One USINE process at a time throughout.
+
+Diagnosis and options for the maintainer (not done here: each needs more runs than the 80 left, or a decision):
+- Cause: any box that holds BIG (V_A 70) and SLIM (V_A 0), plus BIG's fits to SLIM's toys (V_A up to about 60 km/s at
+  three sigma, since V_A enters only as V_A^2 near 0), spans V_A from 0 to about 95 km/s at k = 3 and reaches the
+  low-D0, high-V_A corner where B/C responds strongly to reacceleration (V_A^2 / K); a global total-degree polynomial
+  in (ln D0, delta, V_A, V_c) does not reach 0.05 sigma there at degree 3-5 with the affordable designs.
+- Options: (a) a local or adaptive response model (piecewise boxes covering the toy spread, or a sparse-grid /
+  Gaussian-process emulator such as the E2 route) validated the same way; (b) coordinates adapted to reacceleration
+  (V_A^2 / K at low rigidity); (c) a lower BIG truth for V_A, shrinking the box but weakening the SLIM test;
+  (d) a larger budget: a degree-5 joint model needs at least 252 design points plus 20 validation points per attempt,
+  with no guarantee (degree 5 missed by 0.44 offline).
+- Findings for other work packages: the USINE provider's default transport has decay off, so its 10Be/9Be is the
+  production ratio (flat, insensitive to D0); a 10Be/9Be dataset needs `decay.enabled` true and bins below 0.3 GeV/n
+  to constrain D0 (and through B/C, V_A) at fixed L.
+
+Not done in C2UF: the toy-calibrated family comparison (C2UF-1, above); modulation and real data (F1).
+
+### Dispatch 2 (decision A1.14): Gaussian-process emulator of USINE (criteria written before any emulator run; R9)
+
+C2UF's files were widened by the orchestrator to E2's emulator provider and trainer (A1.14 follow-up). Changes made
+before any run here: `emulator_provider.py` accepts a per-model declaration (observables with their output slices,
+axes, bins, the training runs' observable block and the domain taken from the model's feature boxes; the version then
+always carries `+model.<hash>`; `--declaration` prints it for a registry entry); a model without it (the committed E2
+model) is answered exactly as before, pinned by `EmulatorPinnedResponses` (8 responses recorded with the provider
+before the change, equal to the last bit on E2); `train_emulator.py` unchanged (it copies the outputs block into the
+model). `propagation_fit.py` gains response_model kind "provider": the toys evaluate the provider itself.
+
+| Item | Pre-declared setting or criterion |
+|---|---|
+| Emulator | `train_emulator.py train` (subprocess; Matern-5/2 GP per principal component of ln values, `--pca-tolerance 1e-4`, `--restarts 4`, `--seed 20261028`), features ln D0 (log, 1.9e28-4.0e28), delta (0.40-0.535), V_A (0-105 km/s), V_c (0-9.5 km/s): the joint box at k = 4 around study 2's two fits, rounded outward, so the toy box (k = 3) lies one sigma inside it; outputs ln B/C (15 bins, ekn 0.3-300 GeV/n) then ln 10Be/9Be (12 bins, ekn 0.05-10 GeV/n), one vector of 27; transport = the study's (decay on); ml-artifact by `write_ml_artifact.py` (task surrogate, extrapolation_policy reject, regression-value) |
+| Training runs | every cached USINE run of the study (same transport and request) inside the box (448), plus new USINE runs: 200 scrambled Sobol points in the box, 40 on the V_c = 0 face, 30 on the V_A = 0 face and 30 on the SLIM slice V_A = V_c = 0 (where BIG's boundary values and every SLIM evaluation lie): 300 runs |
+| Validation (held out, never trained on) | 40 new USINE runs: 30 uniform random points in the toy box (ln D0 65.191-65.772, delta 0.4133-0.5206, V_A 0-94.56, V_c 0-7.108) and 10 uniform on the SLIM slice in the same ln D0 and delta ranges (seed 20261029); each answered through `emulator_provider.py` (the per-model declaration, via core/provider); pass when at every validation point, in every bin of both datasets, abs(emulator - USINE) <= 0.05 of the data sigma (B/C sqrt(0.04^2 + 0.02^2), 10Be/9Be sqrt(0.06^2 + 0.03^2) of the value), the tolerance pre-declared in C2U, not loosened; a point the DomainModel refuses fails the validation |
+| P10 | the per-bin largest abs(emulator - USINE) over the validation points enters each dataset's covariance as an uncorrelated component named `emulator` |
+| One refinement (declared now) | if the validation fails: the 40 validation runs join the training set with 60 new Sobol points in the box, the emulator is retrained, and 40 fresh validation points (seed 20261030, same mix) decide; no other change; if it fails again C2UF-1 is reported not met |
+| Fit and toys | propagation_fit with provider `emulator` (registry entry from `--declaration`), the study's datasets (USINE Asimov at the truth, the recorded fixture values) with the `emulator` component, families BIG and SLIM, same starts and steps, response_model kind "provider", layout joint, half_width_sigma 3, 200 toys per family, seed 20261028, alpha 0.05, the 2% toy-failure limit (a toy fit the DomainModel refuses fails) |
+| C2UF-1 | pass when: the emulator passes its validation; BIG and SLIM converge with the emulator provider; each is listed with its delta chi2 and toy p-value from 200 toys with at most 2% failed; BIG (the generator) survives at alpha 0.05 |
+| D7 / A1.8 | 480 USINE runs left of 1000; the plan uses 340 (+140 for the refinement): within the cap; emulator evaluations are not USINE runs |
+
+Emulator results and amendments (written before the recorded fit run):
+- Validation round 0 PASSED: 738 training runs (448 cached + 300 new, 10 duplicates to 1e-9 dropped), 19 principal
+  components; at the 40 held-out USINE runs the largest error is 0.0038 of the data sigma (tolerance 0.05), largest
+  relative error 2.1e-4, no point refused by the DomainModel. No refinement round was needed (no further USINE run).
+- First calibration with the emulator (not recorded as the result; `$CRPROP_OUT/c2uf/emu/record-first.json`): fits equal to USINE's (SLIM chi2 23.9272 vs 23.9273), but the toy study stopped at the 2% limit: the toy
+  fits did not pass the convergence verdict. Diagnosed on the same toys (emulator only, no USINE run): (1) scipy's
+  default relative difference steps (1e-8) sit below the emulator's rounding noise, so the Jacobian was noise; (2) fits
+  stopping within one step of V_c = 0 had verdict differences straddling the bound; (3) BIG's fits to SLIM's toys have
+  V_A nearly unidentifiable near 0 (B/C depends on V_A^2), so the optimizer stopped short (EDM 1e-4 to 5e-3);
+  (4) BIG's fits to SLIM's toys spread in V_c beyond BIG's own 3-sigma box (V_c up to the 7.1 km/s edge: 8 of 200).
+- Amendments to propagation_fit.py's toy fits (no criterion, tolerance, toy count or alpha changed): with stated
+  difference steps, the fits on a response model or provider use them (central differences, `x_scale` "jac", dogbox
+  for bounded fits), snap a coordinate within one step of a domain bound onto it as fit_family does, shrink a verdict
+  step that would straddle a nearby bound, and finish a fit the verdict finds short of the minimum with up to 30
+  damped Newton steps (core newton_fit) before judging it; kind "provider" bounds the toy fits by the provider's
+  domain (no approximation, so no response box; a point the DomainModel refuses fails that toy). On 200 toys per
+  family (diagnostic, same seeds) BIG had 0 and SLIM 3 failed toys (2 refused by the DomainModel, 1 not converged),
+  below the 2% limit (4).
+
+Results of dispatch 2 (recorded in `tests/adapters/fixtures/cr_propagation/c2uf/usine-emulator-family-study.json`,
+with the model `emulator-model.json` and its ml-artifact `emulator.ml-artifact.json`):
+
+| Item | Result | Evidence |
+|---|---|---|
+| E2 unchanged | the committed E2 model's 8 pinned responses reproduced (numbers equal within 1e-12, on E2 bit-identical apart from the timing field); every existing E2 test passes unchanged | `EmulatorPinnedResponses`, test_cr_propagation, test_train_emulator |
+| Per-model declaration | the C2UF model declares B/C and 10Be/9Be on ekn, its box as the domain and version `1.0.0+model.<sha12>`; sub-ranges answered by slice; rigidity refused | `EmulatorPerModelDeclaration` |
+| Emulator validation | PASSED: 40 held-out USINE runs (30 in the toy box, 10 on the SLIM slice), largest error 0.0038 of the data sigma (tolerance 0.05), none refused by the DomainModel; error component (largest held-out error per bin) added to both datasets' covariance | `test_emulator_validated_against_usine_and_its_error_in_the_covariance` |
+| Fits (emulator provider) | BIG converged, chi2 0.0 (dof 23); SLIM converged, chi2 23.927 (dof 25); both equal to the USINE fits of study 2 within 1e-4 in chi2 | record |
+| C2UF-1 | MET. BIG: delta chi2 0, toy p-value 1.0 (200 toys, 0 failed), survives at alpha 0.05. SLIM: delta chi2 23.93, no toy of 197 reached it, p < 0.0151 (95% upper bound), excluded at alpha 0.05 (200 toys, 3 failed: 2 refused by the DomainModel, 1 not converged; limit 4). The generator survives | `test_emulator_toy_calibrated_delta_chi2_and_generator_survives` |
+| Live | two validation points rerun with USINE (fresh cache, 2 runs): the emulator within 0.05 sigma in every bin | `test_live_emulator_matches_fresh_usine_runs`, `$CRPROP_OUT/c2uf/acceptance/live-emulator-vs-usine.txt` |
+
+USINE runs (A1.8 tally, cap 1000 after A1.14): 520 in dispatch 1, 340 for the emulator (300 training, 40 validation)
+and 2 in the live test: 862 of 1000. Emulator evaluations (tens of thousands in the toys) are not USINE runs. The
+refinement round was not needed.

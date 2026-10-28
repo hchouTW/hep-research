@@ -9,9 +9,16 @@ tests/adapters/fixtures/cr_propagation/e2/emulator.ml-artifact.json; HEP_EMULATO
 the provider version is the declared version + '+model.' + the first 12 hex digits of the model's sha256, so a
 registry entry or cache made for the committed model never answers for it).
 
+Per-model declaration: a model whose outputs list "observables" (each {id, axis, unit, edges, start, observable}:
+a slice of the output vector, its bins and the observable block of the training runs' predictions) declares its own
+observables, axes, axis ranges and domain (its feature boxes); the provider version then always carries
+'+model.<hash>'. A model without that list (the committed E2 model) is answered exactly as before: B/C on rigidity
+with the adapter.json declaration. --declaration prints the effective declaration, for a registry entry.
+
 Checks at start (any failure fails every request with provider-error, R4): the model file's sha256 equals the
 artifact's model_hash; the artifact is a surrogate whose extrapolation_policy action is reject; the model's feature
-boxes equal the declared domain; the model reproduces its stored self-check predictions within 1e-9.
+boxes equal the declared domain (the model's own box for a per-model declaration); the model reproduces its stored
+self-check predictions within 1e-9.
 Request: transport null or equal to the training transport (the model's context; else the request is refused with
 out-of-domain: the emulator knows no other transport); observable B/C on axis rigidity with bins that are a contiguous
 run of the training bins (edges equal within relative 1e-9; else unsupported-observable); want lis only (not
@@ -28,6 +35,7 @@ hold-out error recorded in the artifact's regression_validation (max_relative_er
 Usage:
   python3 emulator_provider.py --request REQUEST.json --response RESPONSE.json [--allow-outside-validated-range]
   python3 emulator_provider.py --serve [--allow-outside-validated-range]
+  python3 emulator_provider.py --declaration
 Exit codes: 0 ok, 1 refused or every point failed, 3 some points failed, or NumPy/SciPy missing (status
 missing-dependency on stdout, a failed response with provider-error written), 2 unreadable request or unwritable
 response.
@@ -140,7 +148,16 @@ class Emulator:
             raise ModelError("the model does not reproduce its self-check predictions")
         context = model.get("context") or {}
         self.transport = context.get("transport")
-        self.edges = [float(e) for e in model["outputs"]["edges"]]
+        declared = model["outputs"].get("observables")
+        self.per_model = isinstance(declared, list)
+        if self.per_model:
+            self.observables = [dict(o, edges=[float(e) for e in o["edges"]], start=int(o["start"]))
+                                for o in declared]
+            if sum(len(o["edges"]) - 1 for o in self.observables) != int(model["outputs"]["count"]):
+                raise ModelError("the observables' bins do not add up to the model's output count")
+        else:   # the E2 format: one B/C vector on rigidity
+            self.edges = [float(e) for e in model["outputs"]["edges"]]
+            self.observables = [{"id": "B/C", "axis": "rigidity", "unit": "GV", "edges": self.edges, "start": 0}]
 
     def unit(self, point: dict):
         import numpy as np
@@ -232,9 +249,25 @@ def declaration(emulator: Emulator | None = None) -> dict:
     decls = adapter["provider"] if isinstance(adapter["provider"], list) else [adapter["provider"]]
     decl = dict(next(d for d in decls if d["id"] == PROVIDER_ID))
     decl.setdefault("version", adapter["version"])
-    if os.environ.get(ARTIFACT_ENV) and emulator is not None:
+    if emulator is not None and (os.environ.get(ARTIFACT_ENV) or emulator.per_model):
         decl["version"] = f"{decl['version']}+model.{emulator.model_sha256[:12]}"
+    if emulator is not None and emulator.per_model:
+        obs = emulator.observables
+        decl["domain"] = {f["name"]: {"min": f["min"], "max": f["max"]} for f in emulator.features}
+        decl["observables"] = sorted({o["id"] for o in obs})
+        decl["axes"] = sorted({o["axis"] for o in obs})
+        decl["axis_ranges"] = {a: {"min": min(o["edges"][0] for o in obs if o["axis"] == a),
+                                   "max": max(o["edges"][-1] for o in obs if o["axis"] == a)} for a in decl["axes"]}
+        decl["output_units"] = {"ratio": "1", "energy": ", ".join(sorted({f"{o['unit']} (axis {o['axis']})"
+                                                                          for o in obs}))}
+        decl["description"] = (f"Gaussian-process emulator {emulator.artifact.get('artifact_id')} (per-model "
+                               f"declaration): {', '.join(o['id'] + ' on ' + o['axis'] for o in obs)}")
     return decl
+
+
+def _observable_slot(emulator: Emulator, obs: dict):
+    """The model's observable entry for a requested (id, axis), or None."""
+    return next((o for o in emulator.observables if o["id"] == obs.get("id") and o["axis"] == obs.get("axis")), None)
 
 
 def _bin_slice(edges: list[float], wanted: list[float]) -> slice | None:
@@ -257,17 +290,32 @@ def request_problem(request, emulator: Emulator):
         return ("out-of-domain", "the emulator was trained for one transport block (sha256 "
                 f"{canonical_sha256(emulator.transport)[:12]}...); a request naming another cannot be emulated")
     for obs in request["observables"]:
-        if not isinstance(obs, dict) or obs.get("id") != "B/C" or obs.get("axis") != "rigidity":
+        slot = _observable_slot(emulator, obs) if isinstance(obs, dict) else None
+        if slot is None:
             continue  # undeclared observables and axes are refused by respond()
         bins = obs.get("bins")
         try:
             wanted = [float(bins[0][0])] + [float(b[1]) for b in bins]
         except (TypeError, IndexError, ValueError):
             return None
-        if _bin_slice(emulator.edges, wanted) is None:
-            return ("unsupported-observable", f"B/C bins must be a contiguous run of the training bins "
-                    f"(edges {emulator.edges[0]:g} ... {emulator.edges[-1]:g} GV, {len(emulator.edges) - 1} bins)")
+        edges = slot["edges"]
+        if _bin_slice(edges, wanted) is None:
+            return ("unsupported-observable", f"{slot['id']} bins must be a contiguous run of the training bins "
+                    f"(edges {edges[0]:g} ... {edges[-1]:g} {slot['unit']}, {len(edges) - 1} bins)")
     return None
+
+
+def _declared_observable(emulator: Emulator, slot: dict, edges: list[float]) -> dict:
+    """A per-model observable block: the training runs' block with this request's bins and validity range (process,
+    species and conventions unchanged: the emulated quantity is the training runs' quantity)."""
+    import copy
+
+    block = copy.deepcopy(slot.get("observable") or {})
+    variables = block.get("variables") or [{"name": slot["axis"], "unit": slot["unit"]}]
+    block["variables"] = [dict(variables[0], edges=edges)]
+    if isinstance(block.get("validity_range"), dict):
+        block["validity_range"] = dict(block["validity_range"], min=edges[0], max=edges[-1])
+    return block   # the same quantity as the training runs'; the emulator is named in parameter_point
 
 
 def prediction(emulator: Emulator, obs: dict, point: dict, values, comps, residual, status: str) -> dict:
@@ -277,6 +325,18 @@ def prediction(emulator: Emulator, obs: dict, point: dict, values, comps, residu
                       "gaussian": True, "values": [float(v) for v in part]} for c, part in enumerate(comps)]
     uncertainties.append({"name": "emulator-dropped-components", "kind": "numerical", "correlation": "uncorrelated",
                           "gaussian": True, "values": [float(v) for v in residual]})
+    if emulator.per_model:
+        return {"observable": _declared_observable(emulator, _observable_slot(emulator, obs), edges),
+                "derivation_status": "numerical-evidence",
+                "parameter_point": {**{k: float(v) for k, v in point.items()},
+                                    "emulator_model": "sha256:" + emulator.model_sha256,
+                                    "ml_artifact": emulator.artifact.get("artifact_id"), "domain_status": status,
+                                    "training_provider": f"{ctx.get('provider')} {ctx.get('provider_version')}"},
+                "representation": "numerical",
+                "values": {"edges": edges, "values": [float(v) for v in values], "unit": "1"},
+                "uncertainties": uncertainties,
+                "allowed_transformations": ["solar modulation per isotope is not possible: the emulator gives element "
+                                            "ratios only", "sub-range of the training bins"]}
     return {
         "observable": {
             "quantity": "ratio",
@@ -331,7 +391,9 @@ def emulator_respond(request, decl: dict, emulator: Emulator, allow_outside: boo
         preds = []
         for obs in req["observables"]:
             wanted = [float(obs["bins"][0][0])] + [float(b[1]) for b in obs["bins"]]
-            sl = _bin_slice(emulator.edges, wanted)
+            slot = _observable_slot(emulator, obs)
+            local = _bin_slice(slot["edges"], wanted)
+            sl = slice(slot["start"] + local.start, slot["start"] + local.stop)
             vals = values[sl]
             comps = [[p[0][i] * values[i] for i in range(sl.start, sl.stop)] for p in parts]
             residual = [math.sqrt(emulator.residual_var[i]) * values[i] for i in range(sl.start, sl.stop)]
@@ -376,6 +438,8 @@ def main(argv=None) -> int:
     parser.add_argument("--request", type=Path, help="request file (with --response)")
     parser.add_argument("--response", type=Path, help="response file to write (with --request)")
     parser.add_argument("--serve", action="store_true", help="JSON Lines session on stdin/stdout")
+    parser.add_argument("--declaration", action="store_true",
+                        help="print the effective declaration of the configured model (for a registry entry)")
     parser.add_argument(OUTSIDE_OPTION, action="store_true", dest="allow_outside",
                         help=f"evaluate points outside the domain; their results are labelled {OUTSIDE_LABEL}")
     args = parser.parse_args(argv)
@@ -393,6 +457,12 @@ def main(argv=None) -> int:
         print(json.dumps({"status": "missing-dependency", "error": missing}))
         return 3
     emulator, problem = load_emulator()
+    if args.declaration:
+        if emulator is None:
+            print(json.dumps({"status": "failed", "error": f"the emulator cannot be loaded ({problem})"}))
+            return 1
+        print(json.dumps({"status": "ok", "declaration": declaration(emulator)}, sort_keys=True))
+        return 0
     if args.serve:
         if args.request or args.response:
             parser.error("--serve takes no --request or --response")

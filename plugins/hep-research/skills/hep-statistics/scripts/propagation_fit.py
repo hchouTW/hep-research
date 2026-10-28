@@ -56,6 +56,16 @@ it is positive) on a box of +-k sigma around the expansion point, built from pro
 scrambled Sobol design points (1 to 6 coordinates, at least twice as many points as terms), and refused unless its largest error at random provider points in the box is below tolerance_sigma of the data sigma in
 every bin. Its per-bin error enters the toy and posterior covariance as an uncorrelated component (P10); a fit that
 leaves the box is a failed toy, a chain step outside it is rejected and counted. The reported fits never use it.
+Kind "provider" uses no response model: toys and families evaluate the provider itself (meant for a provider that is
+already a validated emulator, whose error the caller adds to the data covariance, P10); a point it refuses as out of
+its domain fails that toy. For the family calibration, layout "union" (default) builds one model on the box spanning every family's best fit
++- k sigma; layout "joint" the same box with k times the largest sigma of any family around every best fit (so a
+family's fit to another's null, which sits near that family's best fit, has its margin without a rebuild); layout
+"per-center" builds one model per best fit (+- k times the largest sigma), each validated on its own, and fits each
+family to a null family's toys with the model whose box holds that family's fit to the null (the error component
+recorded is the largest of the models'). Per-center boxes suit families whose fits to each other's toys stay near
+their best fits; a parameter that is not identifiable under another family's null (V_A near 0 under SLIM toys) spreads
+those fits beyond the box, which then fail as toys.
 - toys: declared with core/stats/toy_ensemble.py (EnsembleSpec, toy_seed, coverage); plug-in at a true point, the
   auxiliary values of the priors redrawn per toy; covered when the profile delta chi2 at the true value is <= 1
   (Wilks); for a parameter on a bound the critical value is calibrated with the toys (its 68.27% quantile), as in
@@ -84,8 +94,11 @@ Input (fit --input CONFIG.json; relative paths are read from the config's folder
   "degeneracy_scan": {"family", <degeneracy.py scan keys>}, "theory_spec": "base-theory-spec.json",
   "intervals": [names]   (profile delta chi2 = 1 intervals with the provider; an end on a domain bound is kind "bound"),
   "covariance_alternatives": {"family", "dataset", "model": {build_covariance sources}, "source", "lengths": [...]},
-  "response_model": {"kind": "tensor" | "polynomial", "nodes": 7, "degree": 4, "design_points": 128,
-                     "half_width_sigma": 5, "validation_points": 12, "tolerance_sigma": 0.02},
+  "response_model": {"kind": "tensor" | "polynomial" | "provider", "nodes": 7, "degree": 4, "design_points": 128,
+                     "half_width_sigma": 5, "validation_points": 12, "tolerance_sigma": 0.02,
+                     "layout": "union" | "joint" | "per-center"},
+  "provider_requests": "per-dataset" (default) | "per-point" (one request and one provider run per point for every
+                       dataset; distinct observable ids, a provider that is not decomposable),
   "transport": {transport block} | "transport.json", "run_record_keys": [parameter_point keys],
   "computational_runs": "folder holding the provider's computational-run artifacts" (optional),
   "toys": {"family", "n", "seed", "truth": {name: value}, "test": [names | "flattest"]},
@@ -137,6 +150,7 @@ TOY_FAILURE_LIMIT = 0.02    # stop a toy study once more than this fraction of i
 MAX_CHAIN_STEPS = 200_000   # steps per chain
 RHAT_MAX, ESS_MIN = 1.01, 400
 MAX_OUTSIDE_FRACTION = 1e-3  # proposals outside the response box above which a posterior is not reported
+MARGIN_TOL = 0.02           # joint and per-center layouts: a margin short by this fraction of a half-width still holds
 FAMILYWISE_ALPHA = 0.0027   # two-sided 3-sigma
 NOMINAL = 0.6827
 EXACT_FLAT = 1e-8           # eigenvalue ratio of an exactly flat direction (held for the convergence verdict)
@@ -149,7 +163,7 @@ REFUSED_NUISANCES = {"inelastic-norm": "an inelastic cross-section change needs 
                                          "new propagation (P5)"}
 CONFIG_KEYS = {"provider", "datasets", "gate_plan", "parameters", "fixed", "nuisances", "families", "optimizer",
                "degeneracy_scan", "theory_spec", "covariance_alternatives", "response_model", "toys", "family_toys",
-               "posterior", "intervals", "transport", "computational_runs", "run_record_keys"}
+               "posterior", "intervals", "transport", "computational_runs", "run_record_keys", "provider_requests"}
 TOTAL_COMPONENT = "total"   # the one pseudo-component of a provider that is not decomposable
 # a ratio declared bin-averaged whose conventions state the ratio of bin-integrated fluxes is the P2 quantity
 P2_STATEMENT = re.compile(r"ratio of (the )?bin-integrated", re.IGNORECASE)
@@ -276,10 +290,12 @@ class Evaluator:
     """Components per dataset at one transport point, through core/provider (memo plus the runner's disk cache)."""
 
     def __init__(self, runner, provider_id, version, datasets, fixed, max_evaluations, decomposable=True,
-                 transport=None):
+                 transport=None, per_point=False):
         self.runner, self.provider_id, self.version = runner, provider_id, version
         self.datasets, self.fixed, self.max_evaluations = datasets, dict(fixed), int(max_evaluations)
         self.decomposable, self.transport = bool(decomposable), transport
+        # provider_requests "per-point": one request names every dataset's observable (distinct ids), one run per point
+        self.groups = [list(datasets)] if per_point else [[ds] for ds in datasets]
         self.memo: dict = {}
         self.labels: set = set()
         self.channels: list[str] | None = None
@@ -302,48 +318,60 @@ class Evaluator:
         if key in self.memo:
             return self.memo[key]
         out = {}
-        for ds in self.datasets:
+        for group in self.groups:
             if self.points_sent >= self.max_evaluations:
                 raise FitRefused("evaluation-budget", f"the run reached --max-evaluations {self.max_evaluations} "
                                  "provider point evaluations (decision D7 budget); nothing more is evaluated")
             req = {"protocol": "cr-provider/1", "provider": self.provider_id, "provider_version": self.version,
-                   "points": [pt], "observables": [ds.observable_request()],
+                   "points": [pt], "observables": [ds.observable_request() for ds in group],
                    "want": ["lis", "components"] if self.decomposable else ["lis"], "seed": None}
             if self.transport is not None:
                 req["transport"] = self.transport
             resp = self.runner.evaluate(req)
-            res = (resp.get("results") or [None])[0]
-            if resp.get("status") != "ok" or not isinstance(res, dict) or res.get("status") != "ok":
-                reason = (res or {}).get("reason") or resp.get("reason") or "provider-failed"
-                detail = (res or {}).get("detail") or resp.get("detail") or ""
+            res_all = (resp.get("results") or [None])[0]
+            if resp.get("status") != "ok" or not isinstance(res_all, dict) or res_all.get("status") != "ok":
+                reason = (res_all or {}).get("reason") or resp.get("reason") or "provider-failed"
+                detail = (res_all or {}).get("detail") or resp.get("detail") or ""
                 raise FitRefused(reason, f"provider {self.provider_id} at {pt}: {reason} {detail}".strip())
-            self.labels.update(res.get("labels") or [])
-            evaluation = res.get("evaluation") or {}
-            self.records.append({"dataset": ds.name, "point": dict(pt), "input_hash": evaluation.get("input_hash"),
+            preds = res_all.get("predictions") or []
+            if len(preds) != len(group) or any(
+                    not np.allclose(p["values"].get("edges", ds.edges), ds.edges, rtol=1e-9, atol=0)
+                    for p, ds in zip(preds, group)):
+                raise FitRefused("invalid-response", f"provider {self.provider_id} at {pt}: the predictions do not "
+                                 f"match the requested observables {[ds.observable for ds in group]} in order")
+            self.labels.update(res_all.get("labels") or [])
+            evaluation = res_all.get("evaluation") or {}
+            self.records.append({**({"dataset": group[0].name} if len(group) == 1 else
+                                    {"datasets": [ds.name for ds in group]}),
+                                 "point": dict(pt), "input_hash": evaluation.get("input_hash"),
                                  "computational_run_ref": evaluation.get("computational_run_ref"),
-                                 "labels": sorted(res.get("labels") or [])})
-            pred = res["predictions"][0]
-            if not self.decomposable:   # one pseudo-component, the prediction itself; it carries no multiplier
-                res = dict(res, components=[{"id": TOTAL_COMPONENT, "values": pred["values"]["values"]}])
-            comps = sorted(res.get("components") or [], key=lambda c: c["id"])
-            names = [c["id"] for c in comps]
-            if not names:
-                raise FitRefused("not-decomposable", f"provider {self.provider_id} returned no components")
-            if self.channels is None:
-                self.channels = names
-            elif names != self.channels:
-                raise FitRefused("invalid-response", f"components changed between points: {names} vs {self.channels}")
-            arr = np.array([c["values"] for c in comps], dtype=float)
-            total = np.asarray(pred["values"]["values"], dtype=float)
-            tol = 10 * float(res["evaluation"].get("numerical_tolerance") or 1e-9) + 1e-12
-            if not np.allclose(arr.sum(axis=0), total, rtol=tol, atol=0):
-                raise FitRefused("components-do-not-add-up", f"dataset {ds.name}: the components do not add up to the "
-                                 "prediction; they cannot carry the cross-section multipliers")
-            if ds.name not in self.first_predictions:
-                self.first_predictions[ds.name] = (pred, sorted(res.get("labels") or []))
-            out[ds.name] = arr
+                                 "labels": sorted(res_all.get("labels") or [])})
+            for ds, pred in zip(group, preds):
+                out[ds.name] = self._components_of(ds, res_all, pred)
         self.memo[key] = out
         return out
+
+    def _components_of(self, ds, res, pred):
+        """(channels x bins) of one dataset's prediction; FitRefused when they cannot carry the multipliers."""
+        if not self.decomposable:   # one pseudo-component, the prediction itself; it carries no multiplier
+            res = dict(res, components=[{"id": TOTAL_COMPONENT, "values": pred["values"]["values"]}])
+        comps = sorted(res.get("components") or [], key=lambda c: c["id"])
+        names = [c["id"] for c in comps]
+        if not names:
+            raise FitRefused("not-decomposable", f"provider {self.provider_id} returned no components")
+        if self.channels is None:
+            self.channels = names
+        elif names != self.channels:
+            raise FitRefused("invalid-response", f"components changed between points: {names} vs {self.channels}")
+        arr = np.array([c["values"] for c in comps], dtype=float)
+        total = np.asarray(pred["values"]["values"], dtype=float)
+        tol = 10 * float(res["evaluation"].get("numerical_tolerance") or 1e-9) + 1e-12
+        if not np.allclose(arr.sum(axis=0), total, rtol=tol, atol=0):
+            raise FitRefused("components-do-not-add-up", f"dataset {ds.name}: the components do not add up to the "
+                             "prediction; they cannot carry the cross-section multipliers")
+        if ds.name not in self.first_predictions:
+            self.first_predictions[ds.name] = (pred, sorted(res.get("labels") or []))
+        return arr
 
 
 def binning_meaning(observable: dict):
@@ -567,12 +595,14 @@ class Model:
 
 
 # --------------------------------------------------------------------------- one fit
-def _verdict(nll_abs, x_abs, bounds_abs, held, steps=None):
+def _verdict(nll_abs, x_abs, bounds_abs, held, steps=None, polish=0):
     """fit_diagnostics verdict on the interior, non-held coordinates; boundary_kkt on the coordinates at a bound.
     Judged in offsets from the best fit, so the verdict's difference steps are 1e-4 in every fit coordinate whatever
     its value (newton_fit steps 1e-4 x max(1, |x|), which for ln D0 ~ 66 would be a sizeable fraction of sigma).
     With steps (a provider with numerical noise, parameters.<name>.step) the offsets are measured in units of
-    step / 1e-4, so the Hessian's difference step is the stated step and boundary_kkt's is 1e-2 of it."""
+    step / 1e-4, so the Hessian's difference step is the stated step and boundary_kkt's is 1e-2 of it.
+    With polish > 0, newton_fit first takes up to that many damped Newton steps in the interior coordinates (kept
+    inside the bounds) and the verdict is on the point it reaches, returned as "x"."""
     from core.stats.fit_diagnostics import boundary_kkt, newton_fit
     x0 = [float(v) for v in x_abs]
     unit = [1.0 if steps is None or steps[i] is None else steps[i] / 1e-4 for i in range(len(x0))]
@@ -608,11 +638,28 @@ def _verdict(nll_abs, x_abs, bounds_abs, held, steps=None):
         for i, v in zip(judged, z):
             w[i] = v
         return nll(w)
-    res = newton_fit(reduced, [x[i] for i in judged], max_iter=0)
+    if polish:
+        def clipped(z):
+            return reduced([min(max(v, bounds[i][0]), bounds[i][1]) for i, v in zip(judged, z)])
+        start = [x[i] for i in judged]
+        res = newton_fit(clipped, start, max_iter=polish)
+        moved = [min(max(v, bounds[i][0]), bounds[i][1]) for i, v in zip(judged, res.x)]
+        if all(math.isfinite(v) for v in moved) and moved != list(res.x):
+            res = newton_fit(reduced, moved, max_iter=0)    # judged where it was clipped back
+        elif not all(math.isfinite(v) for v in moved):
+            moved = start
+            res = newton_fit(reduced, moved, max_iter=0)
+        for i, v in zip(judged, moved):
+            x[i] = v
+    else:
+        res = newton_fit(reduced, [x[i] for i in judged], max_iter=0)
     ok = res.ok and all(k["ok"] for k in kkt)
     reasons = list(res.reasons) + [f"kkt_{k['bound']}_{k['index']}" for k in kkt if not k["ok"]]
-    return {"status": "converged" if ok else "failed", "reasons": reasons, "edm": _r(res.edm),
-            "judged": judged, "held": sorted(held), "at_bound": at_bound, "kkt": kkt}
+    out = {"status": "converged" if ok else "failed", "reasons": reasons, "edm": _r(res.edm),
+           "judged": judged, "held": sorted(held), "at_bound": at_bound, "kkt": kkt}
+    if polish:
+        out["x"] = [a + b * u for a, b, u in zip(x0, x, unit)]
+    return out
 
 
 def _fisher_full(model, names, scales, t, fixed, nu, step=1e-4, bounds=None):
@@ -670,6 +717,30 @@ def _difference_jacobian(fun, steps, lo, hi):
             tp = t.copy()
             tp[i] += h
             cols.append((fun(tp) - f0) / h)
+        return np.array(cols).T
+    return jac
+
+
+def _central_jacobian(fun, steps, lo, hi):
+    """Central-difference Jacobian with the stated steps (one-sided where a step would leave the box), for the fits on
+    a response model or an emulator, whose evaluations are cheap: no O(step) bias in the minimum, so the verdict
+    (central differences, EDM <= 1e-5) judges the point the optimizer found."""
+    lo, hi = np.asarray(lo, dtype=float), np.asarray(hi, dtype=float)
+
+    def jac(t):
+        t = np.asarray(t, dtype=float)
+        f0 = None
+        cols = []
+        for i, h in enumerate(steps):
+            h = h if h is not None else 1e-4 * max(1.0, abs(t[i]))
+            up, down = t.copy(), t.copy()
+            up[i] += h
+            down[i] -= h
+            if up[i] <= hi[i] and down[i] >= lo[i]:
+                cols.append((fun(up) - fun(down)) / (2 * h))
+                continue
+            f0 = fun(t) if f0 is None else f0
+            cols.append((fun(up) - f0) / h if up[i] <= hi[i] else (f0 - fun(down)) / h)
         return np.array(cols).T
     return jac
 
@@ -1034,6 +1105,34 @@ class PolynomialResponseModel(ResponseModel):
         return rec
 
 
+class ProviderResponse(ResponseModel):
+    """kind "provider": no response model; the toys and families evaluate the provider itself (for a provider that is
+    already a validated emulator, whose error enters the data covariance outside this script, P10). The box only
+    bounds the toy fits; the error component is zero because nothing is approximated here."""
+
+    def __init__(self, model, names, scales, lo, hi, fixed):
+        self.model, self.names, self.scales, self.fixed = model, list(names), list(scales), dict(fixed)
+        self.lo, self.hi, self.nodes = np.asarray(lo, dtype=float), np.asarray(hi, dtype=float), None
+        self.evaluations = 0
+        self.error = {ds.name: np.zeros(len(ds.y)) for ds in model.datasets}
+        self.validation: dict = {}
+
+    def components(self, t) -> dict:
+        return self.model.ev.components(self.model.values(self.names, self.scales, np.asarray(t, dtype=float),
+                                                          self.fixed))
+
+    def validate(self, n_points, tolerance, seed) -> dict:
+        self.validation = {"points": 0, "seed": seed, "max_error_over_sigma": 0.0, "tolerance": tolerance,
+                           "passed": True, "note": "no response model: the provider itself is evaluated"}
+        return self.validation
+
+    def record(self) -> dict:
+        rec = super().record()
+        rec.pop("nodes_per_axis", None)
+        rec["kind"] = "provider (no response model)"
+        return rec
+
+
 def build_response_model(model, names, scales, centers, sigmas, fixed, rm_cfg, bounds, seed):
     """Box = union over centers of +-k sigma, clipped to the provider domain; validated; FitRefused above tolerance."""
     k = rm_cfg["half_width_sigma"]
@@ -1041,7 +1140,9 @@ def build_response_model(model, names, scales, centers, sigmas, fixed, rm_cfg, b
     hi = np.max([c + k * s for c, s in zip(centers, sigmas)], axis=0)
     lo = np.maximum(lo, [b[0] for b in bounds])
     hi = np.minimum(hi, [b[1] for b in bounds])
-    if rm_cfg["kind"] == "polynomial":
+    if rm_cfg["kind"] == "provider":   # no approximation, so no response box: the provider's domain bounds the fits
+        rm = ProviderResponse(model, names, scales, [b[0] for b in bounds], [b[1] for b in bounds], fixed)
+    elif rm_cfg["kind"] == "polynomial":
         rm = PolynomialResponseModel(model, names, scales, lo, hi, fixed, rm_cfg["degree"], rm_cfg["design_points"],
                                      seed + 1)
     else:
@@ -1090,7 +1191,16 @@ class SurrogateFit:
         return float(r @ r)
 
     def fit(self, ys, aux, start, opt, constraint=None):
-        """Minimize; constraint = ("index", i, value) or ("direction", v, z_ref). Returns (chi2, z, ok, reason)."""
+        """Minimize; constraint = ("index", i, value) or ("direction", v, z_ref). Returns (chi2, z, ok, reason).
+        A provider evaluated directly (kind "provider") that refuses a point out of its domain fails the fit."""
+        try:
+            return self._fit(ys, aux, start, opt, constraint)
+        except FitRefused as exc:
+            if exc.reason != "out-of-domain":
+                raise
+            return float("nan"), np.asarray(start, dtype=float), False, "provider-out-of-domain"
+
+    def _fit(self, ys, aux, start, opt, constraint=None):
         start = np.clip(np.asarray(start, dtype=float), self.lo, self.hi)
         to_z, w0, lo, hi = _constrained_map(constraint, start, self.lo, self.hi)
         rng = np.random.default_rng(opt["seed"])
@@ -1106,11 +1216,16 @@ class SurrogateFit:
                                              max_nfev=opt["max_iterations"] * (len(w0) + 1) * 4, xtol=1e-12,
                                              ftol=1e-12, gtol=1e-10)
             else:
-                res = optimize.least_squares(lambda w: self.resid(to_z(w), ys, aux), w0, bounds=(lo, hi),
-                                             method="trf", max_nfev=opt["max_iterations"],
-                                             xtol=1e-12, ftol=1e-12, gtol=1e-10)
+                def fun_b(w):
+                    return self.resid(to_z(w), ys, aux)
+                steps_w = self._w_steps(len(w0))
+                jac = _central_jacobian(fun_b, steps_w, lo, hi) if steps_w is not None else "2-point"
+                res = optimize.least_squares(fun_b, w0, jac=jac, bounds=(lo, hi),
+                                             method="dogbox" if steps_w is not None else "trf",
+                                             x_scale="jac" if steps_w is not None else 1.0,
+                                             max_nfev=opt["max_iterations"], xtol=1e-12, ftol=1e-12, gtol=1e-10)
             z = to_z(res.x)
-            ok, reason = self._judge(z, res, ys, aux, to_z, lo, hi)
+            ok, reason, z = self._judge(z, res, ys, aux, to_z, lo, hi)
             last = (self.chi2(np.clip(z, self.lo, self.hi), ys, aux), z, ok, reason)
             if ok:
                 return last
@@ -1123,20 +1238,51 @@ class SurrogateFit:
         return last[0], last[1], False, "restart-cap"
 
     def _judge(self, z, res, ys, aux, to_z, lo, hi):
+        """(ok, reason, z). Without a constraint, a coordinate within one stated difference step of a domain bound
+        is set on it first when that does not raise -ln L (as in fit_family), so boundary_kkt judges it."""
         if res.status <= 0:
-            return False, "not-converged"
+            return False, "not-converged", z
         for j in range(self.k):
             span = self.hi[j] - self.lo[j]
             if z[j] <= self.lo[j] + 1e-7 * span and not self.domain_edge[j][0]:
-                return False, "left-response-box"
+                return False, "left-response-box", z
             if z[j] >= self.hi[j] - 1e-7 * span and not self.domain_edge[j][1]:
-                return False, "left-response-box"
+                return False, "left-response-box", z
         if not np.all(np.isfinite(z)):
-            return False, "not-converged"
+            return False, "not-converged", z
         w = res.x
+
+        def nll(q):
+            return 0.5 * float(np.sum(res_fun(self, to_z, q, ys, aux) ** 2))
+        steps = self._w_steps(len(w)) if lo is not None else None
+        if steps is not None:
+            edge_lo = [lo[j] if j < self.k and self.domain_edge[j][0] else -np.inf for j in range(len(w))]
+            edge_hi = [hi[j] if j < self.k and self.domain_edge[j][1] else np.inf for j in range(len(w))]
+            w = _snap_to_bounds(nll, w, steps, edge_lo, edge_hi)
+            z = to_z(w)
         bounds = list(zip(lo, hi)) if lo is not None else [(-np.inf, np.inf)] * len(w)
-        v = _verdict(lambda q: 0.5 * float(np.sum(res_fun(self, to_z, q, ys, aux) ** 2)), w, bounds, set())
-        return v["status"] == "converged", ("ok" if v["status"] == "converged" else "not-converged")
+        if steps is not None:   # a difference step never straddles a bound the point is close to but not on
+            steps = [None if h is None else (h if min(x - a, b - x) <= 0 else min(h, 0.5 * min(x - a, b - x)))
+                     for h, x, (a, b) in zip(steps, w, bounds)]
+        v = _verdict(nll, w, bounds, set(), steps)
+        if steps is not None and v["status"] != "converged" and set(v["reasons"]) <= {"gradient_not_small",
+                                                                                       "max_iterations"}:
+            # a nearly flat direction (a parameter not identifiable under the toy's null, e.g. V_A near 0) leaves
+            # the optimizer short of the minimum: a few damped Newton steps finish it before the verdict
+            v = _verdict(nll, w, bounds, set(), steps, polish=30)
+            w = np.asarray(v["x"], dtype=float)
+            z = to_z(w)
+        return v["status"] == "converged", ("ok" if v["status"] == "converged" else "not-converged"), z
+
+    def _w_steps(self, n_w):
+        """The stated difference steps (parameters.<name>.step) of the free coordinates when the fit is not
+        constrained (n_w = all coordinates), the multipliers with none; else None. With them, the toy fits use the
+        same Jacobian steps, bound snapping and verdict steps as fit_family: a provider evaluated directly
+        (an emulator) has rounding noise far above scipy's default relative steps of 1e-8."""
+        stated = self.model.steps(self.names)
+        if stated is None or n_w != len(self.lo):
+            return None
+        return list(stated) + [None] * (n_w - self.k)
 
 
 def _constrained_map(constraint, start, lo_all, hi_all):
@@ -1364,46 +1510,23 @@ def calibrate_families(model, fits, fam_cfg, rm_cfg, opt, fixed_global):
         fi = f["_internal"]
         nulls[f["family"]] = (_mu_exact(model, fi["names"], fi["scales"], list(fi["t_hat"]), fi["fixed"], fi["nu"]),
                               list(fi["nu"]))
-    # the box must also hold each family's fit to every other family's null prediction: grow it (at most 3 passes)
-    # where such a fit stops on a box edge that is not a domain edge
     width = np.max(sigmas, axis=0)
-    passes = []
-    for _ in range(3):
-        rm = build_response_model(model, names, scales, centers, sigmas, common_fixed, rm_cfg, bounds,
-                                  fam_cfg["seed"] + 11)
-        sfs = {}
-        for f in usable:
-            fixed_t = {n: _to_fit(f["fixed"][n], sc) for n, sc in zip(names, scales) if n not in f["free"]}
-            f_names = [n for n in names if n in f["free"]]
-            f_scales = [model.params[n]["scale"] for n in f_names]
-            sfs[f["family"]] = SurrogateFit(model, rm, f_names, f_scales, fixed_t, (names, bounds))
-        grow, inner = [], []
-        for null, (mu, nu) in nulls.items():
-            for g, sf in sfs.items():
-                if g == null:
-                    continue
-                _, z, ok, reason = sf.fit(mu, nu, starts[g], opt)
-                t = sf.full_t(z[:sf.k])
-                if reason == "left-response-box":
-                    half = 0.5 * (rm.hi - rm.lo)
-                    push = np.where(t <= rm.lo + 1e-7 * (rm.hi - rm.lo), -half,
-                                    np.where(t >= rm.hi - 1e-7 * (rm.hi - rm.lo), half, 0.0))
-                    grow.append(t + push)
-                else:
-                    k_w = rm_cfg["half_width_sigma"] * width
-                    lo_d, hi_d = [b[0] for b in bounds], [b[1] for b in bounds]
-                    if not (rm.inside(np.maximum(t - k_w, lo_d)) and rm.inside(np.minimum(t + k_w, hi_d))):
-                        inner.append(t)
-        passes.append({"box": rm.record()["box"], "fits_on_box_edge": len(grow), "centers_added": len(grow) + len(inner)})
-        if not grow and not inner:
-            break
-        centers = centers + grow + inner
-        sigmas = sigmas + [width] * (len(grow) + len(inner))
+    if rm_cfg["layout"] == "per-center":
+        sfs_by_null, rm_record, rm = _per_center_models(model, usable, names, scales, bounds, centers, width,
+                                                        common_fixed, rm_cfg, fam_cfg, opt, nulls, starts)
+    else:
+        joint = rm_cfg["layout"] == "joint"
+        sfs, rm_record, rm = _union_model(model, usable, names, scales, bounds, centers,
+                                          [width] * len(centers) if joint else sigmas, width, common_fixed, rm_cfg,
+                                          fam_cfg, opt, nulls, starts, MARGIN_TOL if joint else 1e-9)
+        rm_record["layout"] = rm_cfg["layout"]
+        sfs_by_null = {f["family"]: sfs for f in usable}
     chi2_obs = {f["family"]: f["chi2"] for f in usable}
     best = min(chi2_obs.values())
     out = {"status": "ok", "alpha": fam_cfg["alpha"], "n_toys": fam_cfg["n"], "seed": fam_cfg["seed"],
-           "response_model": dict(rm.record(), box_passes=passes), "families": [], "_rm": rm}
+           "response_model": rm_record, "families": [], "_rm": rm}
     for f in usable:
+        sfs = sfs_by_null[f["family"]]
         d_obs = chi2_obs[f["family"]] - best
         fi = f["_internal"]
         mu = _mu_exact(model, fi["names"], fi["scales"], list(fi["t_hat"]), fi["fixed"], fi["nu"])
@@ -1451,6 +1574,125 @@ def calibrate_families(model, fits, fam_cfg, rm_cfg, opt, fixed_global):
         out["status"] = "failed"
         out["reason"] = "toy-failure-threshold"
     return out
+
+
+def _union_model(model, usable, names, scales, bounds, centers, sigmas, width, common_fixed, rm_cfg, fam_cfg, opt,
+                 nulls, starts, margin_tol=1e-9):
+    """layout "union": one response model on the box spanning every center +- k sigma (layout "joint": +- k times the
+    largest sigma of any family, every center). The box must also hold each family's fit to every other family's
+    null prediction: grow it (at most 3 passes) where such a fit stops on a box edge that is not a domain edge, or
+    where its margin of k width is short by more than margin_tol of the box half-width. Returns
+    ({family: SurrogateFit}, record, model)."""
+    passes = []
+    for _ in range(3):
+        rm = build_response_model(model, names, scales, centers, sigmas, common_fixed, rm_cfg, bounds,
+                                  fam_cfg["seed"] + 11)
+        sfs = {}
+        for f in usable:
+            fixed_t = {n: _to_fit(f["fixed"][n], sc) for n, sc in zip(names, scales) if n not in f["free"]}
+            f_names = [n for n in names if n in f["free"]]
+            f_scales = [model.params[n]["scale"] for n in f_names]
+            sfs[f["family"]] = SurrogateFit(model, rm, f_names, f_scales, fixed_t, (names, bounds))
+        grow, inner = [], []
+        for null, (mu, nu) in nulls.items():
+            for g, sf in sfs.items():
+                if g == null:
+                    continue
+                _, z, ok, reason = sf.fit(mu, nu, starts[g], opt)
+                t = sf.full_t(z[:sf.k])
+                if reason == "left-response-box":
+                    half = 0.5 * (rm.hi - rm.lo)
+                    push = np.where(t <= rm.lo + 1e-7 * (rm.hi - rm.lo), -half,
+                                    np.where(t >= rm.hi - 1e-7 * (rm.hi - rm.lo), half, 0.0))
+                    grow.append(t + push)
+                else:
+                    k_w = rm_cfg["half_width_sigma"] * width
+                    lo_d, hi_d = [b[0] for b in bounds], [b[1] for b in bounds]
+                    if not (rm.inside(np.maximum(t - k_w, lo_d), margin_tol)
+                            and rm.inside(np.minimum(t + k_w, hi_d), margin_tol)):
+                        inner.append(t)
+        passes.append({"box": rm.record()["box"], "fits_on_box_edge": len(grow), "centers_added": len(grow) + len(inner)})
+        if not grow and not inner:
+            break
+        centers = centers + grow + inner
+        sigmas = sigmas + [width] * (len(grow) + len(inner))
+    return sfs, dict(rm.record(), box_passes=passes), rm
+
+
+def _per_center_models(model, usable, names, scales, bounds, centers, width, common_fixed, rm_cfg, fam_cfg, opt,
+                       nulls, starts):
+    """layout "per-center": one response model per center, on center +- k width (width: the largest sigma of any
+    family in each coordinate), each validated on its own; the fits to the toys of a null family use the model whose
+    box holds the fitted family's fit to that null with a margin of k width (up to MARGIN_TOL of the half-width). A
+    union box spanning distant centers holds corners that no fit visits and where the provider is least polynomial
+    (strong reacceleration at low diffusion); separate boxes avoid them. A fit to a null that no box holds adds a
+    center there (at most 3 passes). Returns ({null: {family: SurrogateFit}}, record, None)."""
+    k = rm_cfg["half_width_sigma"]
+    lo_d, hi_d = np.array([b[0] for b in bounds]), np.array([b[1] for b in bounds])
+    subs, owners = [], []
+
+    def add(center, owner):
+        rm = build_response_model(model, names, scales, [center], [width], common_fixed, rm_cfg, bounds,
+                                  fam_cfg["seed"] + 11 + 101 * len(subs))
+        subs.append(rm)
+        owners.append(owner)
+
+    def surrogate(rm, f):
+        fixed_t = {n: _to_fit(f["fixed"][n], sc) for n, sc in zip(names, scales) if n not in f["free"]}
+        f_names = [n for n in names if n in f["free"]]
+        return SurrogateFit(model, rm, f_names, [model.params[n]["scale"] for n in f_names], fixed_t, (names, bounds))
+
+    def holds(rm, t):
+        return (rm.inside(np.maximum(t - k * width, lo_d), MARGIN_TOL)
+                and rm.inside(np.minimum(t + k * width, hi_d), MARGIN_TOL))
+    for f, c in zip(usable, centers):
+        add(c, f["family"])
+    assignment, passes = {}, []
+    for _ in range(3):
+        missing = []
+        for null, (mu, nu) in nulls.items():
+            for g in usable:
+                key = (null, g["family"])
+                if key in assignment:
+                    continue
+                if g["family"] == null:
+                    assignment[key] = owners.index(null)
+                    continue
+                landed = None
+                for j, rm in enumerate(subs):
+                    sf = surrogate(rm, g)
+                    _, z, ok, reason = sf.fit(mu, nu, starts[g["family"]], opt)
+                    t = sf.full_t(z[:sf.k])
+                    if ok and holds(rm, t):
+                        assignment[key] = j
+                        break
+                    if landed is None and reason in ("ok", "left-response-box"):
+                        landed = t
+                if key not in assignment and landed is not None:
+                    missing.append((key, landed))
+        passes.append({"sub_models": len(subs), "fits_without_a_box": len(missing)})
+        if not missing:
+            break
+        for key, t in missing:
+            add(np.clip(t, lo_d, hi_d), f"{key[1]} fitted to the null of {key[0]}")
+    for null in nulls:
+        for g in usable:
+            assignment.setdefault((null, g["family"]), owners.index(g["family"]))
+    by_name = {f["family"]: f for f in usable}
+    sfs_by_null = {null: {g: surrogate(subs[assignment[(null, g)]], by_name[g]) for g in by_name} for null in nulls}
+    records = [dict(rm.record(), center_of=owner) for rm, owner in zip(subs, owners)]
+    error = {name: [float(max(r["error_component"][name][i] for r in records))
+                    for i in range(len(records[0]["error_component"][name]))] for name in records[0]["error_component"]}
+    record = {"layout": "per-center", "kind": records[0]["kind"], "half_width_sigma": k,
+              "sub_models": records, "box_passes": passes,
+              "assignment": [{"null": n, "family": g, "sub_model": j} for (n, g), j in sorted(assignment.items())],
+              "provider_evaluations": sum(r["provider_evaluations"] for r in records),
+              "validation": {"points": sum(r["validation"]["points"] for r in records),
+                             "max_error_over_sigma": max(r["validation"]["max_error_over_sigma"] for r in records),
+                             "tolerance": records[0]["validation"]["tolerance"],
+                             "passed": all(r["validation"]["passed"] for r in records)},
+              "error_component": error}
+    return sfs_by_null, record, None
 
 
 # --------------------------------------------------------------------------- posterior
@@ -1612,16 +1854,37 @@ def _opt_cfg(cfg) -> dict:
 
 def _rm_cfg(cfg) -> dict:
     r = _keys(cfg.get("response_model") or {}, {"kind", "nodes", "degree", "design_points", "half_width_sigma",
-                                                 "validation_points", "tolerance_sigma"}, "response_model")
+                                                 "validation_points", "tolerance_sigma", "layout"}, "response_model")
+    if r.get("layout", "union") not in ("union", "joint", "per-center"):
+        raise FitInputError("response_model.layout must be 'union', 'joint' or 'per-center'")
     kind = r.get("kind", "tensor")
-    if kind not in ("tensor", "polynomial"):
-        raise FitInputError("response_model.kind must be 'tensor' or 'polynomial'")
+    if kind not in ("tensor", "polynomial", "provider"):
+        raise FitInputError("response_model.kind must be 'tensor', 'polynomial' or 'provider'")
     return {"kind": kind, "degree": _int(r.get("degree", 4), "response_model.degree", 1, 8),
             "design_points": _int(r.get("design_points", 128), "response_model.design_points", 4, 4096),
             "nodes": _int(r.get("nodes", 7), "response_model.nodes", 3, 15),
             "half_width_sigma": _num(r.get("half_width_sigma", 5.0), "response_model.half_width_sigma"),
             "validation_points": _int(r.get("validation_points", 12), "response_model.validation_points", 4, 1000),
-            "tolerance_sigma": _num(r.get("tolerance_sigma", 0.02), "response_model.tolerance_sigma")}
+            "tolerance_sigma": _num(r.get("tolerance_sigma", 0.02), "response_model.tolerance_sigma"),
+            "layout": r.get("layout", "union")}
+
+
+def _per_point_requests(cfg, datasets, decomposable) -> bool:
+    """provider_requests: "per-dataset" (default; one request per point and dataset) or "per-point" (one request per
+    point naming every dataset's observable, so one provider run serves all datasets; the observable ids must differ,
+    and only a provider that is not decomposable is supported, since its prediction is the one component)."""
+    mode = cfg.get("provider_requests", "per-dataset")
+    if mode not in ("per-dataset", "per-point"):
+        raise FitInputError("provider_requests must be 'per-dataset' or 'per-point'")
+    if mode == "per-point":
+        ids = [ds.observable for ds in datasets]
+        if len(set(ids)) != len(ids):
+            raise FitInputError(f"provider_requests 'per-point' needs distinct observable ids, got {ids}: two "
+                                "observables with the same id in one request make the predictions ambiguous")
+        if decomposable:
+            raise FitInputError("provider_requests 'per-point' is supported only for a provider that is not "
+                                "decomposable (its components per observable are not defined in one request)")
+    return mode == "per-point"
 
 
 def _family(fams, name, what):
@@ -1686,7 +1949,8 @@ def run(cfg: dict, base: Path, registry, cache_dir=None, max_evaluations=2000, a
     with ProviderRunner(registry, cache_dir=cache_dir, allow_outside=allow_outside, session="serve") as runner:
         decomposable = bool(entry.declaration.get("decomposable"))
         ev = Evaluator(runner, entry.provider_id, entry.version, datasets, fixed_global, max_evaluations,
-                       decomposable=decomposable, transport=transport)
+                       decomposable=decomposable, transport=transport,
+                       per_point=_per_point_requests(cfg, datasets, decomposable))
         model = Model(cfg, datasets, ev, domain)
         if model.nuisances and not decomposable:
             raise FitRefused("not-decomposable", f"provider {entry.provider_id} declares decomposable: false, so its "

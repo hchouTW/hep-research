@@ -2153,5 +2153,90 @@ class LiveUsineD3(unittest.TestCase):
                     self.assertTrue(math.isclose(a, b, rel_tol=USINE_LIVE_RTOL, abs_tol=1e-300), (f.name, a, b))
 
 
+# ---------------------------------------------------------------------------------------------- C2UF (appended)
+TWO_DATASET_FIX = FIX / "c2uf"
+
+
+def _same_document(case, a, b, where="response"):
+    """Equal JSON documents; numbers equal within relative 1e-12 (the platform's last digits), all else exactly."""
+    if isinstance(a, bool) or isinstance(b, bool) or not isinstance(a, (int, float)) or not isinstance(b, (int, float)):
+        case.assertEqual(type(a), type(b), where)
+    if isinstance(a, dict):
+        case.assertEqual(sorted(a), sorted(b), where)
+        for k in a:
+            _same_document(case, a[k], b[k], f"{where}/{k}")
+    elif isinstance(a, list):
+        case.assertEqual(len(a), len(b), where)
+        for i, (x, y) in enumerate(zip(a, b)):
+            _same_document(case, x, y, f"{where}[{i}]")
+    elif isinstance(a, (int, float)) and not isinstance(a, bool):
+        case.assertTrue(math.isclose(a, b, rel_tol=1e-12, abs_tol=0.0), (where, a, b))
+    else:
+        case.assertEqual(a, b, where)
+
+
+@unittest.skipUnless(HAVE_NUMPY, "needs numpy and scipy")
+class EmulatorPinnedResponses(unittest.TestCase):
+    """C2UF: the per-model declaration leaves the committed E2 model's answers unchanged (responses recorded with the
+    provider before the change; on the recording machine they agree to the last bit)."""
+
+    def test_e2_responses_are_unchanged(self):
+        pinned = json.loads((TWO_DATASET_FIX / "e2-pinned-responses.json").read_text(encoding="utf-8"))
+        env = {k: v for k, v in os.environ.items() if k != "HEP_EMULATOR_ML_ARTIFACT"}
+        env["PYTHONDONTWRITEBYTECODE"] = "1"
+        for case in pinned["cases"]:
+            proc, doc = e2_call(case["request"], env=env, allow_outside=case["allow_outside"])
+            self.assertEqual(proc.returncode, case["exit"], case["name"])
+            for res in doc.get("results") or []:
+                (res.get("evaluation") or {}).pop("elapsed_s", None)
+            _same_document(self, case["response"], doc, case["name"])
+
+
+@unittest.skipUnless(HAVE_NUMPY, "needs numpy and scipy")
+class EmulatorPerModelDeclaration(unittest.TestCase):
+    """C2UF: a model that lists its observables declares them (B/C and 10Be/9Be on ekn), its box as the domain and a
+    '+model.<hash>' version; requests are answered per observable slice; an undeclared axis is refused."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.artifact = TWO_DATASET_FIX / "emulator.ml-artifact.json"
+        cls.env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1", HEP_EMULATOR_ML_ARTIFACT=str(cls.artifact))
+        proc = subprocess.run([sys.executable, str(EMULATOR_PROVIDER), "--declaration"], capture_output=True,
+                              text=True, timeout=300, env=cls.env)
+        cls.decl = json.loads(proc.stdout)["declaration"]
+        cls.model = json.loads((TWO_DATASET_FIX / "emulator-model.json").read_text(encoding="utf-8"))
+
+    def test_declaration_comes_from_the_model(self):
+        sha = hashlib.sha256((TWO_DATASET_FIX / "emulator-model.json").read_bytes()).hexdigest()
+        self.assertEqual(self.decl["id"], "emulator")
+        self.assertEqual(self.decl["version"], f"1.0.0+model.{sha[:12]}")
+        self.assertEqual(self.decl["observables"], ["10Be/9Be", "B/C"])
+        self.assertEqual(self.decl["axes"], ["ekn"])
+        self.assertEqual(self.decl["domain"], {f["name"]: {"min": f["min"], "max": f["max"]}
+                                               for f in self.model["features"]})
+        self.assertEqual(self.decl["axis_ranges"]["ekn"]["min"], 0.05)
+
+    def test_both_observables_are_answered_and_rigidity_is_refused(self):
+        obs = self.model["outputs"]["observables"]
+        point = {"D0_cm2_s": 3.0e28, "delta": 0.45, "V_A_kms": 70.0, "V_c_kms": 1.0}
+        req = {"protocol": "cr-provider/1", "provider": "emulator", "provider_version": self.decl["version"],
+               "transport": self.model["context"]["transport"], "points": [point],
+               "observables": [{"id": o["id"], "axis": "ekn", "unit": "GeV/n",
+                                "bins": [[a, b] for a, b in zip(o["edges"], o["edges"][1:])]} for o in obs],
+               "want": ["lis"], "seed": None}
+        proc, doc = e2_call(req, env=self.env)
+        self.assertEqual(doc["status"], "ok", doc)
+        preds = doc["results"][0]["predictions"]
+        self.assertEqual([len(p["values"]["values"]) for p in preds], [len(o["edges"]) - 1 for o in obs])
+        self.assertEqual(preds[1]["observable"]["process"], obs[1]["observable"]["process"])
+        self.assertEqual(preds[0]["parameter_point"]["ml_artifact"], "ml-emulator-usine-c2uf")
+        sub = dict(req, observables=[dict(req["observables"][1], bins=req["observables"][1]["bins"][2:5])])
+        proc, doc = e2_call(sub, env=self.env)
+        self.assertEqual(doc["results"][0]["predictions"][0]["values"]["values"], preds[1]["values"]["values"][2:5])
+        bad = dict(req, observables=[{"id": "B/C", "axis": "rigidity", "unit": "GV", "bins": [[2.0, 3.0]]}])
+        proc, doc = e2_call(bad, env=self.env)
+        self.assertEqual(doc["status"], "failed")
+
+
 if __name__ == "__main__":
     unittest.main()

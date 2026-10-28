@@ -1,0 +1,188 @@
+{
+ "contract_version": "3.14.0",
+ "artifact_id": "ml-emulator-usine-c2uf",
+ "artifact_type": "ml-artifact",
+ "objective": "Gaussian-process emulator of USINE B/C and 10Be/9Be (ekn, decay on) on the C2UF toy box, served by the cr-propagation emulator provider (per-model declaration)",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.42.0",
+  "contracts": "3.14.0",
+  "plugin_release": {
+   "release": "unreleased",
+   "digest": "unknown"
+  },
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-ml",
+  "code_paths": [
+   "contracts/__init__.py",
+   "contracts/identity.py",
+   "contracts/protected_use.py",
+   "contracts/schema.py",
+   "contracts/semver.py",
+   "contracts/skill_names.py",
+   "contracts/trace.py",
+   "contracts/validate.py",
+   "contracts/vocab.py",
+   "core/__init__.py",
+   "core/protected/__init__.py",
+   "core/protected/guard.py",
+   "core/protected/identity.py",
+   "core/protected/revocation_log.py",
+   "core/protected/trusted_input.py",
+   "core/trace.py",
+   "skills/hep-ml/scripts/write_ml_artifact.py"
+  ],
+  "code_tags": [],
+  "created": "2026-10-28",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [
+  {
+   "ref": "emulator-model.json",
+   "kind": "checkpoint"
+  }
+ ],
+ "status": [
+  "synthetic",
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "extension": {
+  "task": "surrogate",
+  "labels": [
+   "B/C bin 0",
+   "B/C bin 1",
+   "B/C bin 2",
+   "B/C bin 3",
+   "B/C bin 4",
+   "B/C bin 5",
+   "B/C bin 6",
+   "B/C bin 7",
+   "B/C bin 8",
+   "B/C bin 9",
+   "B/C bin 10",
+   "B/C bin 11",
+   "B/C bin 12",
+   "B/C bin 13",
+   "B/C bin 14",
+   "10Be/9Be bin 0",
+   "10Be/9Be bin 1",
+   "10Be/9Be bin 2",
+   "10Be/9Be bin 3",
+   "10Be/9Be bin 4",
+   "10Be/9Be bin 5",
+   "10Be/9Be bin 6",
+   "10Be/9Be bin 7",
+   "10Be/9Be bin 8",
+   "10Be/9Be bin 9",
+   "10Be/9Be bin 10",
+   "10Be/9Be bin 11"
+  ],
+  "features": [
+   "D0_cm2_s",
+   "delta",
+   "V_A_kms",
+   "V_c_kms"
+  ],
+  "splits": {
+   "grouping_key": "parameter point (one simulator run per point)"
+  },
+  "training_domain": {
+   "D0_cm2_s": [
+    1.9e+28,
+    4e+28
+   ],
+   "delta": [
+    0.4,
+    0.535
+   ],
+   "V_A_kms": [
+    0.0,
+    105.0
+   ],
+   "V_c_kms": [
+    0.0,
+    9.5
+   ]
+  },
+  "preprocessing": [
+   {
+    "step": "unit-cube scaling of each input (log axis for scale log)",
+    "fit_on": "training"
+   },
+   {
+    "step": "output transform log, centring and principal components (19 kept, residual <= 0.0001)",
+    "fit_on": "training"
+   }
+  ],
+  "model_hash": "sha256:0a8dc86fdf1668555a95af020b9ed9376b5768faf7afd4eeafaab889b96bf4f5",
+  "units": {},
+  "environment": {
+   "framework": "numpy 2.4.4, scipy 1.17.1",
+   "device": "cpu",
+   "precision": "fp64",
+   "seeds": {
+    "hyperparameter_starts": 20261028,
+    "domain_split": 20261028
+   }
+  },
+  "metrics": {
+   "training_points": 738,
+   "loo_residual_rms_per_component": [
+    0.00014303710997060217,
+    0.0009100901803989523,
+    0.0024115841421361753,
+    0.0019821164813823974,
+    0.00806402473316139,
+    0.021014336024279708,
+    0.043299936085861926,
+    0.03618520123707113,
+    0.06723100239481873,
+    0.09294514549402455,
+    0.19036254378844966,
+    0.15259828774923967,
+    0.21828019488558584,
+    0.07226162683193127,
+    0.19289833230016973,
+    0.11951726495620857,
+    0.23866736042367917,
+    0.17876811966296258,
+    0.3779921526991535
+   ],
+   "pca_training_residual_max": 7.622968090587046e-05
+  },
+  "regression_validation": {
+   "holdout": {
+    "points": 40,
+    "round": 0,
+    "seed": 20261029,
+    "drawn_from": "30 uniform in the toy box, 10 uniform on the SLIM slice V_A = V_c = 0",
+    "max_error_over_data_sigma": 0.0038191054833226724,
+    "tolerance_over_data_sigma": 0.05,
+    "passed": true,
+    "refused_by_domain_model": 0
+   },
+   "max_relative_error": 0.00020665300348921
+  },
+  "extrapolation_policy": {
+   "action": "reject",
+   "consumer": "adapters/cr-propagation/assets/emulator_provider.py (per-model declaration): a point the stored DomainModel calls sparse or outside fails with out-of-domain",
+   "method": "DomainModel of skills/hep-ml/scripts/check_surrogate_domain.py on the unit-cube training points"
+  },
+  "output_semantics": "regression-value",
+  "downstream_validation": [],
+  "source_files": [
+   {
+    "ref": "run_summary.json",
+    "sha256": "aca2b5c560475381baf7f1691360831bc37714d7cba24178a554f7610c4b606f",
+    "role": "run-summary"
+   }
+  ]
+ }
+}
