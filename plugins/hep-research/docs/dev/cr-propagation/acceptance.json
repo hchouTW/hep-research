@@ -953,6 +953,61 @@
    "tolerance": null,
    "evidence_path": null,
    "source": "r4 Acceptance Criteria"
+  },
+  {
+   "id": "B1X-1",
+   "wp": "B1X",
+   "kind": "command",
+   "criterion": "extension.transport can express a high break (break rigidity, slope above it, smoothness) in canonical names that pass tools/check_naming.py; a block with the high break validates, a half-specified high break is refused with a named error, and every committed theory-spec keeps its validation outcome (same comparison as A2-1, default and --strict).",
+   "command": "python3 -m unittest discover -s tests/contracts -p 'test_crprop*'",
+   "expect": "ok; the high-break positive and negative fixtures are exercised",
+   "tolerance": null,
+   "evidence_path": "$CRPROP_OUT/b1x/acceptance",
+   "source": "decisions.md A1.7 (added 2026-10-28; additions only, r4 5)"
+  },
+  {
+   "id": "B1X-2",
+   "wp": "B1X",
+   "kind": "command",
+   "criterion": "usine_translate.py maps the high break to USINE V3.5; a transport block written to match the K line of USINE's shipped init.TEST.par (Model1DKisoVc), run through the translator, reproduces the B/C table of the shipped example run (USINE's own inputs, run in place) within 1e-6 relative on the common nodes.",
+   "command": "HEP_USINE_LIVE_TEST=1 python3 -m unittest tests.adapters.test_cr_propagation",
+   "expect": "ok, the high-break reproduction test runs (not skipped)",
+   "tolerance": "rel 1e-6",
+   "evidence_path": "$CRPROP_OUT/b1x/acceptance",
+   "source": "decisions.md A1.7 (added 2026-10-28; additions only, r4 5)"
+  },
+  {
+   "id": "B1X-3",
+   "wp": "B1X",
+   "kind": "command",
+   "criterion": "usine_translate.py can use USINE's own cross-section files and data-normalised abundances, read in place from HEP_USINE_DATA (never copied into the repository); a run so configured reproduces the shipped example's B/C within 1e-6 relative; with HEP_USINE_DATA unset that path is refused with a clear message.",
+   "command": "HEP_USINE_LIVE_TEST=1 python3 -m unittest tests.adapters.test_cr_propagation",
+   "expect": "ok, the USINE-XS reproduction test runs (not skipped)",
+   "tolerance": "rel 1e-6",
+   "evidence_path": "$CRPROP_OUT/b1x/acceptance",
+   "source": "decisions.md A1.7 (added 2026-10-28; additions only, r4 5)"
+  },
+  {
+   "id": "B1X-4",
+   "wp": "B1X",
+   "kind": "judgment",
+   "criterion": "Every field of extension.transport is either used by usine_translate.py, recorded under `substitutes`, or refused; no field is silently ignored and no default is filled silently (B1 verifier advisory: species.network_top, species.isotopic, family, geometry and diffusion defaults). A test shows e.g. network_top = Ni-64 is refused or recorded.",
+   "command": null,
+   "expect": "verifier cites file:line for each transport field",
+   "tolerance": null,
+   "evidence_path": null,
+   "source": "decisions.md A1.7 (added 2026-10-28; additions only, r4 5)"
+  },
+  {
+   "id": "B1X-5",
+   "wp": "B1X",
+   "kind": "artifact",
+   "criterion": "GPL-2.0 boundary: no USINE source file and no file from USINE's inputs/ (or a copy of one) is committed; committed fixtures hold only numbers computed by USINE runs and the translator's own generated files, which regenerate byte-identically from the committed specs.",
+   "command": null,
+   "expect": "verifier regenerates the committed generated inputs and compares with USINE's shipped files",
+   "tolerance": null,
+   "evidence_path": null,
+   "source": "decisions.md A1.7 (added 2026-10-28; additions only, r4 5)"
   }
  ]
 }

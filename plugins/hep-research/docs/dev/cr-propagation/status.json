@@ -315,6 +315,21 @@
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": []
+  },
+  "B1X": {
+   "state": "dispatched",
+   "dispatches": 1,
+   "rework_rounds": 0,
+   "branch": "worktree-crprop-b1x",
+   "base": null,
+   "head": null,
+   "merge_commit": null,
+   "worker_report": null,
+   "verifier_report": null,
+   "missing_capabilities": [],
+   "notes": [
+    "added per A1.7; acceptance B1X-1..5 added (r4 5)"
+   ]
   }
  },
  "log": [
@@ -537,6 +552,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "A1.8: D7 evaluation cap counts external codes only; core-hours count all CPU; escalation 7 decided"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "B1X added to workflow.json (deps A2, B1; C2U and F1 now depend on it) with acceptance B1X-1..B1X-5; dispatched"
   }
  ],
  "env": {

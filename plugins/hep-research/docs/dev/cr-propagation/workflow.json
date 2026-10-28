@@ -342,6 +342,47 @@
    "source": "r4 3, 6 and 8"
   },
   {
+   "id": "B1X",
+   "title": "High-break transport field and USINE cross-section files",
+   "wave": 3,
+   "card": "decisions.md A1.7 (escalation 8); extends r3 A2 and B1",
+   "deps": [
+    "A2",
+    "B1"
+   ],
+   "requires": [
+    "env-usine"
+   ],
+   "optional": false,
+   "critical": true,
+   "files": [
+    "contracts/schemas/ext_theory_spec.json",
+    "contracts/validate.py",
+    "contracts/vocab/core.json",
+    "contracts/fixtures/**",
+    "tests/contracts/**",
+    "skills/hep-theory/scripts/transport_conventions.py",
+    "tests/skills/hep_theory/test_transport_conventions.py",
+    "skills/hep-theory/references/cosmic-ray-phenomenology.md",
+    "adapters/cr-propagation/assets/usine_translate.py",
+    "adapters/cr-propagation/assets/usine_to_prediction.py",
+    "adapters/cr-propagation/assets/usine_provider.py",
+    "adapters/cr-propagation/adapter.json",
+    "tests/adapters/test_cr_propagation.py",
+    "tests/adapters/fixtures/cr_propagation/usine/**"
+   ],
+   "acceptance": [
+    "B1X-1",
+    "B1X-2",
+    "B1X-3",
+    "B1X-4",
+    "B1X-5"
+   ],
+   "fallback": "none (critical for F1): escalate; C2U and F1 wait",
+   "source": "decisions.md A1.7 (maintainer 2026-10-28)",
+   "acceptance_prefix": "B1X"
+  },
+  {
    "id": "D1",
    "title": "DRAGON2 physics items with provider entrypoint",
    "wave": 2,
@@ -475,7 +516,8 @@
    "card": "r3 C2 (USINE case)",
    "deps": [
     "C2",
-    "B1"
+    "B1",
+    "B1X"
    ],
    "requires": [
     "env-usine"
@@ -587,7 +629,8 @@
    "card": "r3 F1",
    "deps": [
     "C2U",
-    "B3"
+    "B3",
+    "B1X"
    ],
    "requires": [
     "env-usine",
