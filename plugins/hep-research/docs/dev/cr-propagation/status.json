@@ -275,18 +275,19 @@
    ]
   },
   "F1": {
-   "state": "dispatched",
+   "state": "verifying",
    "dispatches": 2,
    "rework_rounds": 0,
    "branch": "worktree-crprop-f1",
-   "base": null,
-   "head": "d0e5a477",
+   "base": "3547f9a0",
+   "head": "fd2ae511",
    "merge_commit": null,
-   "worker_report": "dispatch 1 PARTIAL: delta in window for BIG/SLIM/QUAINT, K10 in for BIG/SLIM, QUAINT K10 1.3% below; no converged verdict (USINE -2lnL noise +-0.003; BIG at eval cap; QUAINT Hessian indefinite); chi2 83-90 vs paper 62 (data file/USINE version/CNO norm untested); F1-2 pass; adapter.json outside files; 1693 USINE runs",
+   "worker_report": "dispatch 2 PARTIAL: delta and K10 in 1-sigma windows for BIG, SLIM, QUAINT-Vc0 (QUAINT free K10 out); no fit converged (EDM unreachable at USINE 6-digit output noise; tolerances do not change output); chi2 83-90 vs 62 attributed; F1-2 pass; provider modulates (protocol departure); 2347/2600 USINE runs",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "A1.16: eval cap 6000, F1 +600 runs, adapter.json in files; dispatch 2"
+    "A1.16: eval cap 6000, F1 +600 runs, adapter.json in files; dispatch 2",
+    "A1.17: accepted as attributed partial reproduction if verifier confirms"
    ]
   },
   "F2": {
@@ -809,6 +810,11 @@
    "cycle": 4,
    "date": "2026-10-29",
    "event": "C2UF merged (dee1179b); post-merge static ok"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "F1 dispatch 2 PARTIAL (fd2ae511); A1.17 recorded; Opus verifier dispatched"
   }
  ],
  "env": {
