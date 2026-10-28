@@ -6574,7 +6574,7 @@ ghost_threshold, ILLUSTRATIVE abundances and set names, zone/relation with V_A =
 recorded in `substitutes`; `species.network_top` and `species.isotopic` must match an ILLUSTRATIVE set (Ni-64 refused)
 and set the network with USINE's files. Test `test_no_field_silently_ignored` changes and removes every field of four
 recorded specs and requires a changed input file, a changed record or a refusal. The whole-halo V_A factor stays
-sqrt(L/h), isolated in `thin_disc_alfven_speed` for A1R. The reader counts 14C in carbon.
+sqrt(L/h) at first, then replaced after A1R (addendum below). The reader counts 14C in carbon.
 
 **Records.** `input_manifest` now holds `committed_form_sha256` (the placeholder form committed under `inputs/`) next
 to the as-run `sha256`, and USINE's own files read in place (hashed, never copied). The seven B1 records gained
@@ -6598,3 +6598,18 @@ about 37 (6 development and probe runs, 1 rerecord, two live acceptance invocati
 Checks: static part of `run_all_checks.py`, naming, wiring, layering, packaging, `workflow_check.py` diff, gaps and
 acceptance on the final HEAD; ruff and mypy (CI pins) on `contracts/`; ALL-3 deferred to the wave run (A1.5).
 Software and numerical-consistency checks; no comparison with data.
+
+**Addendum (2026-10-28, rebase onto integration 2ae3063b, which contains A1R e5ecbd64).** Orchestrator decisions:
+keep the mode-dependent Kpp factor (USINE's literal 1.022712e-3 only with USINE's own inputs, the IAU/Julian value
+with the ILLUSTRATIVE sets, no rerun of the B1 runs). Whole-halo V_A is now converted by
+`transport_conventions.py reacceleration --from whole-halo --to thin-disc` (same c and w; called as a subprocess, R1),
+V_A,disc = V_A,halo sqrt(L/(3h)) at first order, `approximate` with `relative_error_bound` (1 + lam)/5 on the
+second-order term; the translator computes lam = h Gamma L / D at every species and node of the run's grid (Gamma =
+n_gas sigma_inel beta c with the set's inelastic cross sections, D from the K formula, atomic-mass-unit kinematics)
+and passes the largest, recorded with the nuclide and E_k/n; with USINE's own cross sections a whole-halo V_A is
+refused (their inelastic files are not read). Committed runs with whole-halo V_A: only B1's `b1-slab-all-items`
+(none of B1X's, B3's under `b3/` or E1's under `e1/`, which uses the provider's thin-disc DEFAULT_TRANSPORT). Its
+thin-disc V_A changes from 35.35533906 to 20.41241452 km/s (lam_max 0.561 at 16O, 1.995 GeV/n; bound 0.312; convection
+on, recorded as outside the conversion's assumptions): rerun live, `inputs/`, `outputs/`, record and its
+`usine-results.json` entry regenerated (B/C bins change by at most 0.63%, 10Be/9Be by at most 0.47%; first B/C bin
+0.07760 -> 0.07776); the other six B1 runs and both B1X runs are unchanged. Checks rerun on the rebased HEAD (report).

@@ -142,7 +142,8 @@ Software checks establish contract consistency only, not physical validity.
   `init.TEST.par` reproduces that example's B/C exactly (recorded run `b1x-init-test`, live test). The translator now
   refuses unknown keys and records every default and every field it does not use; records also hash the committed
   form of their inputs (`committed_form_sha256`, added to the seven B1 records without a rerun). The reader counts
-  14C in carbon.
+  14C in carbon. A whole-halo V_A is converted with `transport_conventions.py reacceleration` (A1R: sqrt(L/(3h)),
+  approximate, bound recorded at the run's largest lam); `b1-slab-all-items` rerun and its results updated.
 
 ## 0.42.0 (2026-10-26)
 
