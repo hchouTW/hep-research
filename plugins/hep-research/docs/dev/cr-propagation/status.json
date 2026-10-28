@@ -861,6 +861,11 @@
    "cycle": 4,
    "date": "2026-10-29",
    "event": "final confirmation on release commit 790ef3e7: full run E2 and CI lock 31 pass / 0 fail, 6000 tests 0 failures; relocation only the 2 known geant4 failures; WF-10 pass; release 0.43.0 next (A1.15)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "PR #308 opened (release/0.43.0); required CI failed on Linux: float pins (8 failures) and emulator declaration; A1.20 cross-WP fix branch"
   }
  ],
  "env": {
