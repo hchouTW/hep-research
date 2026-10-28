@@ -359,18 +359,18 @@
    ]
   },
   "C2UF": {
-   "state": "dispatched",
+   "state": "verifying",
    "dispatches": 2,
    "rework_rounds": 0,
    "branch": "worktree-crprop-c2uf",
-   "base": null,
-   "head": "da0414b0",
+   "base": "c858ef97",
+   "head": "856fc53a",
    "merge_commit": null,
-   "worker_report": "dispatch 1 PARTIAL: BIG/SLIM fitted on B/C + 10Be/9Be with decay on (SLIM dchi2 23.93); polynomial response models refused (0.883, 0.452 sigma vs 0.05); 520/600 USINE; per-point provider requests; finding: USINE provider default decay off",
+   "worker_report": "dispatch 2 DONE: C2UF-1 met (BIG p 1.0 survives, SLIM dchi2 23.93 p < 0.0151 excluded); GP emulator on 738 USINE runs, validated 0.0038 sigma on 40 held-out; E2 responses pinned bit-identical; toy-fit changes when steps are stated; 862/1000 USINE",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "A1.14 dispatch 2: blocked on emulator provider limits (B/C rigidity only, fixed domain, one observable); files widened to emulator_provider.py, adapter.json, capability-matrix, test_cr_propagation.py, train_emulator.py and its test, with E2 behaviour unchanged as condition; worker continues dispatch 2"
+    "Opus verifier dispatched"
    ]
   }
  },
@@ -799,6 +799,11 @@
    "cycle": 4,
    "date": "2026-10-29",
    "event": "F1 dispatch 1 PARTIAL; A1.16: D7 evaluation cap 5000 -> 6000 (core-hours cap binds, ~8 used), F1 +600 runs, adapter.json added; F1 dispatch 2"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "C2UF dispatch 2 DONE (C2UF-1 met); Opus verifier dispatched"
   }
  ],
  "env": {
