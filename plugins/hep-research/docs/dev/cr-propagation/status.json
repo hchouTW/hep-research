@@ -238,10 +238,10 @@
    "head": "f4ffaa59",
    "merge_commit": null,
    "worker_report": "PARTIAL: D3-2 pass (residual 0.42%); D3-1 38-41% (decomposed, product tested); D3-3 matched settings 0.59-0.67% for 4 configs, reacceleration 17% (within A1R bound), Galprop-gas 17.7% (2D gas; scaled 1.9-3.3%); 2 DRAGON2 + 37 USINE runs; findings on D1 translator (escalation 12)",
-   "verifier_report": null,
+   "verifier_report": "PASS under A1.13 (2026-10-28, Opus): offsets and ladder recomputed bin by bin with own reader; level-2 residual 0.43%; D3-3 matched 0.60-0.68% (own libDRAGON driver reproduces inelastic XS); attributions confirmed; licence scan clean",
    "missing_capabilities": [],
    "notes": [
-    "A1.13: accepted with attributed misses; Opus verifier dispatched"
+    "A1.13 accepted; verifier PASS; merge aborted on a test_cr_propagation.py conflict (not mechanical, r4 2); worker asked to rebase onto 6a227a76"
    ]
   },
   "E1": {
@@ -744,6 +744,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "F1 (files widened for modulation and low break) and C2UF dispatched from integration after C2U merge"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "D3 verifier PASS; merge aborted (test_cr_propagation.py conflict); D3 rebase requested"
   }
  ],
  "env": {
