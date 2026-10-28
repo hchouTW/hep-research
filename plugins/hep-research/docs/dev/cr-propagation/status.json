@@ -124,15 +124,15 @@
    ]
   },
   "A4": {
-   "state": "verifying",
+   "state": "merged",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-a4",
    "base": "566bfd1e",
    "head": "d7d8a33a",
-   "merge_commit": null,
+   "merge_commit": "0ee4c914",
    "worker_report": "DONE: cost table from 13 validated records; closed form 0.14 s/1pt, 9.4 ms/extra pt; DRAGON2 base median 249 s wall / 221 CPU-s (127 s least loaded), grid convergence <= 1.95e-3; USINE/GALPROP rows not measured (absent at dispatch); loaded-host caveat",
-   "verifier_report": null,
+   "verifier_report": "PASS (2026-10-28, Sonnet): every cost number traced to 13 validated records; medians recomputed; R9 order ok; advisories: spatial max at 1000 GV not stated, D7 benchmark counting open (escalation 7)",
    "missing_capabilities": [],
    "notes": [
     "Sonnet verifier dispatched 2026-10-28; escalation 7 (D7 budget for E1)"
@@ -494,6 +494,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "wave-1 fix: tools/module_timings.json +6 campaign modules (measured on f62f70e8); timing test OK, static ok. Wave-1 ALL-3 for A2, A1, C1, B2 holds apart from this cumulative generated-file gap and the 2 known geant4 relocation failures"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A4 merged; post-merge static ok"
   }
  ],
  "env": {
