@@ -238,7 +238,7 @@
    "head": "3aae8369",
    "merge_commit": "6a332c90",
    "worker_report": "PARTIAL: D3-2 pass (residual 0.42%); D3-1 38-41% (decomposed, product tested); D3-3 matched settings 0.59-0.67% for 4 configs, reacceleration 17% (within A1R bound), Galprop-gas 17.7% (2D gas; scaled 1.9-3.3%); 2 DRAGON2 + 37 USINE runs; findings on D1 translator (escalation 12)",
-   "verifier_report": "PASS under A1.13 (2026-10-28, Opus): offsets and ladder recomputed bin by bin with own reader; level-2 residual 0.43%; D3-3 matched 0.60-0.68% (own libDRAGON driver reproduces inelastic XS); attributions confirmed; licence scan clean",
+   "verifier_report": "PASS under A1.13 (Opus); rework round 1 (wave-5 subprocess timeouts) PASS (Sonnet), merged 310bb517",
    "missing_capabilities": [],
    "notes": [
     "wave-5 full run (03cfca5d): test_subprocess_timeouts fails on d3/d3_study.py:285; fix as rework round 1 on worktree-crprop-d3fix"
@@ -779,6 +779,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "C2UF dispatch 2 blocked on E2 emulator provider limits; orchestrator widened C2UF files (E2 behaviour must stay unchanged); C2UF continues"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "D3 rework round 1 merged (310bb517); subprocess-timeout test passes"
   }
  ],
  "env": {
