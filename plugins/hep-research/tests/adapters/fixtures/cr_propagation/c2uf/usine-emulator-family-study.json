@@ -1,0 +1,5366 @@
+{
+ "study": "C2UF BIG and SLIM, toys on a Gaussian-process emulator of USINE (B/C and 10Be/9Be, SYNTHETIC Asimov, ILLUSTRATIVE inputs; decision A1.14)",
+ "truth": {
+  "D0_cm2_s": 3e+28,
+  "delta": 0.45,
+  "V_A_kms": 70.0,
+  "V_c_kms": 0.0,
+  "L_kpc": 4.0,
+  "eta": 1.0
+ },
+ "generating_family": "BIG",
+ "config": {
+  "provider": {
+   "id": "emulator",
+   "version": "1.0.0+model.0a8dc86fdf16"
+  },
+  "transport": {
+   "geometry": {
+    "kind": "cylinder-2d",
+    "L_kpc": 4.0,
+    "radius_kpc": 20.0,
+    "disc_halfwidth_pc": 100
+   },
+   "diffusion": {
+    "form": "beta^eta (R/R0)^delta with smooth breaks",
+    "D0_cm2_s": 3e+28,
+    "R0_gv": 1.0,
+    "eta": 1.0,
+    "delta": 0.5,
+    "breaks": [
+     {
+      "kind": "low",
+      "R_break_gv": 5.0,
+      "delta_below": 0.0,
+      "s": 0.05,
+      "s_convention": "usine"
+     }
+    ]
+   },
+   "reacceleration": {
+    "V_A_kms": 0.0,
+    "zone": "thin-disc",
+    "relation": "Seo-Ptuskin 1994",
+    "w": 1.0
+   },
+   "convection": {
+    "V_c_kms": 0.0,
+    "dVc_dz_kms_per_kpc": 0.0
+   },
+   "losses": [],
+   "decay": {
+    "enabled": true,
+    "lorentz_dilation": true,
+    "ec_treatment": "fully-stripped"
+   },
+   "gas": {
+    "model": "uniform, n_H = 1 cm^-3",
+    "He_to_H_number": 0.1
+   },
+   "sources": {
+    "spatial": "not fixed by harmonized-v1; each code records its choice",
+    "injection": [
+     {
+      "species_group": "all primaries",
+      "gamma": 2.3,
+      "breaks": []
+     }
+    ],
+    "abundances": "fixed by the parent list of theory:cr-secondary-ratio"
+   },
+   "cross_sections": {
+    "production_set": "theory:cr-secondary-ratio models/xs-illustrative-decay.json (ILLUSTRATIVE, isotopic)",
+    "inelastic_set": "theory:cr-secondary-ratio models/xs-illustrative-decay.json (ILLUSTRATIVE, isotopic)",
+    "ghost_threshold": "off: ghost nuclei and tertiary chains off on both sides"
+   },
+   "species": {
+    "network_top": "O-16",
+    "isotopic": true
+   },
+   "family": "BIG",
+   "free": [
+    "D0_cm2_s",
+    "delta",
+    "V_A_kms",
+    "V_c_kms"
+   ]
+  },
+  "datasets": [
+   {
+    "name": "bc-asimov",
+    "measurement": {
+     "contract_version": "3.14.0",
+     "artifact_id": "c2uf-usine-bc-asimov",
+     "artifact_type": "dataset-record",
+     "objective": "SYNTHETIC Asimov unmodulated local interstellar B/C points from the USINE provider at an ILLUSTRATIVE BIG point (C2UF)",
+     "bindings": {
+      "experiments": [],
+      "theory": []
+     },
+     "versions": {
+      "plugin": "",
+      "contracts": "3.14.0",
+      "profiles": {}
+     },
+     "provenance": {
+      "producer_skill": "hep-statistics",
+      "created": "2026-10-28",
+      "evidence_ids": []
+     },
+     "inputs": [],
+     "outputs": [],
+     "status": [
+      "asimov",
+      "synthetic",
+      "unvalidated"
+     ],
+     "unresolved_inputs": [],
+     "extension": {
+      "dataset_id": "synthetic:c2uf-usine-bc-asimov",
+      "source_evidence_ids": [],
+      "observable": {
+       "bin_semantics": "bin-averaged",
+       "conventions": {
+        "energy_variable": "kinetic_energy_per_nucleon in GeV/n: the ratio of the bin-integrated fluxes (r3 P2; equal to the ratio of their bin averages), isotopes summed at equal E/n (P3)",
+        "frame": "Galactic rest frame (interstellar gas at rest)",
+        "mass_approximation": "bare-nucleus masses of AME2020 (core.constants.physical) for the rigidity mapping; USINE's own kinematics inside the run"
+       },
+       "level": "crsr:local-interstellar",
+       "normalization": {
+        "convention": "ratio of two bin-integrated fluxes; the normalization cancels",
+        "kind": "exposure",
+        "value": "not-applicable"
+       },
+       "phase_space": {
+        "definition": "USINE local interstellar flux at the observer (r = 8.3 kpc, z = 0), before solar modulation",
+        "fiducial": false
+       },
+       "process": "unmodulated local interstellar B/C from a USINE V3.5 run (Model2DKisoVc): ratio of bin integrals of 10B+11B over 12C (13C, 14C not in the network)",
+       "quantity": "ratio",
+       "species": [
+        {
+         "name": "boron"
+        },
+        {
+         "name": "carbon"
+        }
+       ],
+       "unit": "1",
+       "validity_range": {
+        "max": 300.0,
+        "min": 0.3,
+        "unit": "GeV/n",
+        "variable": "kinetic_energy_per_nucleon"
+       },
+       "variables": [
+        {
+         "edges": [
+          0.3,
+          0.475468,
+          0.753566,
+          1.19432,
+          1.89287,
+          3.0,
+          4.75468,
+          7.53566,
+          11.9432,
+          18.9287,
+          30.0,
+          47.5468,
+          75.3566,
+          119.432,
+          189.287,
+          300.0
+         ],
+         "name": "kinetic_energy_per_nucleon",
+         "unit": "GeV/n"
+        }
+       ]
+      },
+      "data": {
+       "edges": [
+        0.3,
+        0.475468,
+        0.753566,
+        1.19432,
+        1.89287,
+        3.0,
+        4.75468,
+        7.53566,
+        11.9432,
+        18.9287,
+        30.0,
+        47.5468,
+        75.3566,
+        119.432,
+        189.287,
+        300.0
+       ],
+       "values": [
+        0.15644330365227796,
+        0.14836898657856468,
+        0.14243985523436797,
+        0.1372657027748653,
+        0.12716063089480426,
+        0.1115592027872646,
+        0.09538472329057608,
+        0.08078156260149516,
+        0.06795038899805414,
+        0.0568495398964182,
+        0.04735688078937472,
+        0.039304160571296376,
+        0.03251479213690186,
+        0.026821314578220935,
+        0.022069765757000787
+       ],
+       "unit": "1",
+       "uncertainties": [
+        {
+         "name": "statistical",
+         "kind": "statistical",
+         "correlation": "uncorrelated",
+         "values": [
+          0.006257732146091119,
+          0.005934759463142587,
+          0.005697594209374719,
+          0.005490628110994612,
+          0.00508642523579217,
+          0.004462368111490584,
+          0.0038153889316230433,
+          0.0032312625040598064,
+          0.0027180155599221658,
+          0.002273981595856728,
+          0.001894275231574989,
+          0.0015721664228518552,
+          0.0013005916854760744,
+          0.0010728525831288375,
+          0.0008827906302800315
+         ]
+        },
+        {
+         "name": "normalization",
+         "kind": "systematic",
+         "correlation": "fully-correlated",
+         "values": [
+          0.0031288660730455593,
+          0.0029673797315712936,
+          0.0028487971046873596,
+          0.002745314055497306,
+          0.002543212617896085,
+          0.002231184055745292,
+          0.0019076944658115217,
+          0.0016156312520299032,
+          0.0013590077799610829,
+          0.001136990797928364,
+          0.0009471376157874945,
+          0.0007860832114259276,
+          0.0006502958427380372,
+          0.0005364262915644188,
+          0.0004413953151400157
+         ]
+        },
+        {
+         "name": "emulator",
+         "kind": "systematic",
+         "correlation": "uncorrelated",
+         "values": [
+          7.5311918308618164e-06,
+          2.240448929038963e-05,
+          2.504340904777025e-05,
+          1.1701224897631146e-05,
+          1.2254899145719422e-05,
+          1.2486433779990147e-05,
+          7.189419159489563e-06,
+          2.6049868868116555e-06,
+          2.1872935966338325e-06,
+          1.6525150139251599e-06,
+          1.0864875198690616e-06,
+          6.035754952990469e-07,
+          4.985702886234344e-07,
+          3.6635408350027543e-07,
+          5.827871216480818e-07
+         ]
+        }
+       ]
+      },
+      "covariance": {
+       "status": "present"
+      },
+      "status": "synthetic"
+     }
+    },
+    "observable": "B/C"
+   },
+   {
+    "name": "be-asimov",
+    "measurement": {
+     "contract_version": "3.14.0",
+     "artifact_id": "c2uf-usine-be-asimov",
+     "artifact_type": "dataset-record",
+     "objective": "SYNTHETIC Asimov unmodulated local interstellar 10Be/9Be points from the USINE provider at an ILLUSTRATIVE BIG point (C2UF)",
+     "bindings": {
+      "experiments": [],
+      "theory": []
+     },
+     "versions": {
+      "plugin": "",
+      "contracts": "3.14.0",
+      "profiles": {}
+     },
+     "provenance": {
+      "producer_skill": "hep-statistics",
+      "created": "2026-10-28",
+      "evidence_ids": []
+     },
+     "inputs": [],
+     "outputs": [],
+     "status": [
+      "asimov",
+      "synthetic",
+      "unvalidated"
+     ],
+     "unresolved_inputs": [],
+     "extension": {
+      "dataset_id": "synthetic:c2uf-usine-be-asimov",
+      "source_evidence_ids": [],
+      "observable": {
+       "bin_semantics": "bin-averaged",
+       "conventions": {
+        "energy_variable": "kinetic_energy_per_nucleon in GeV/n: the ratio of the bin-integrated fluxes (r3 P2; equal to the ratio of their bin averages), isotopes summed at equal E/n (P3)",
+        "frame": "Galactic rest frame (interstellar gas at rest)",
+        "mass_approximation": "bare-nucleus masses of AME2020 (core.constants.physical) for the rigidity mapping; USINE's own kinematics inside the run"
+       },
+       "level": "crsr:local-interstellar",
+       "normalization": {
+        "convention": "ratio of two bin-integrated fluxes; the normalization cancels",
+        "kind": "exposure",
+        "value": "not-applicable"
+       },
+       "phase_space": {
+        "definition": "USINE local interstellar flux at the observer (r = 8.3 kpc, z = 0), before solar modulation",
+        "fiducial": false
+       },
+       "process": "unmodulated local interstellar 10Be/9Be from a USINE V3.5 run (Model2DKisoVc): ratio of bin integrals of 10Be over 9Be",
+       "quantity": "ratio",
+       "species": [
+        {
+         "name": "beryllium-10"
+        },
+        {
+         "name": "beryllium-9"
+        }
+       ],
+       "unit": "1",
+       "validity_range": {
+        "max": 10.0,
+        "min": 0.05,
+        "unit": "GeV/n",
+        "variable": "kinetic_energy_per_nucleon"
+       },
+       "variables": [
+        {
+         "edges": [
+          0.05,
+          0.077754,
+          0.120914,
+          0.18803,
+          0.292402,
+          0.454708,
+          0.707107,
+          1.09961,
+          1.70998,
+          2.65915,
+          4.13519,
+          6.43054,
+          10.0
+         ],
+         "name": "kinetic_energy_per_nucleon",
+         "unit": "GeV/n"
+        }
+       ]
+      },
+      "data": {
+       "edges": [
+        0.05,
+        0.077754,
+        0.120914,
+        0.18803,
+        0.292402,
+        0.454708,
+        0.707107,
+        1.09961,
+        1.70998,
+        2.65915,
+        4.13519,
+        6.43054,
+        10.0
+       ],
+       "values": [
+        0.07242005465478489,
+        0.07376157478800925,
+        0.07736698846416745,
+        0.0853527540538181,
+        0.09887437941894096,
+        0.11713354198792944,
+        0.13823333709958852,
+        0.16120105521859682,
+        0.18989924826459012,
+        0.23165441751684446,
+        0.2853231389075862,
+        0.34425939598066113
+       ],
+       "unit": "1",
+       "uncertainties": [
+        {
+         "name": "statistical",
+         "kind": "statistical",
+         "correlation": "uncorrelated",
+         "values": [
+          0.004345203279287093,
+          0.004425694487280555,
+          0.004642019307850047,
+          0.005121165243229086,
+          0.005932462765136458,
+          0.007028012519275766,
+          0.00829400022597531,
+          0.00967206331311581,
+          0.011393954895875406,
+          0.013899265051010667,
+          0.01711938833445517,
+          0.020655563758839666
+         ]
+        },
+        {
+         "name": "normalization",
+         "kind": "systematic",
+         "correlation": "fully-correlated",
+         "values": [
+          0.0021726016396435466,
+          0.0022128472436402776,
+          0.0023210096539250237,
+          0.002560582621614543,
+          0.002966231382568229,
+          0.003514006259637883,
+          0.004147000112987655,
+          0.004836031656557905,
+          0.005696977447937703,
+          0.0069496325255053336,
+          0.008559694167227586,
+          0.010327781879419833
+         ]
+        },
+        {
+         "name": "emulator",
+         "kind": "systematic",
+         "correlation": "uncorrelated",
+         "values": [
+          4.528650840579518e-06,
+          1.1837900996944373e-05,
+          7.015953864569768e-06,
+          9.563003452853214e-06,
+          6.615154055047978e-06,
+          1.2888054689672024e-05,
+          2.7887723477421078e-05,
+          1.6219930478650335e-05,
+          1.1501795934343306e-05,
+          1.9256117608446033e-05,
+          1.9191958283593102e-05,
+          1.1070541329261108e-05
+         ]
+        }
+       ]
+      },
+      "covariance": {
+       "status": "present"
+      },
+      "status": "synthetic"
+     }
+    },
+    "observable": "10Be/9Be"
+   }
+  ],
+  "parameters": {
+   "D0_cm2_s": {
+    "start": 2.4e+28,
+    "scale": "log",
+    "step": 0.003
+   },
+   "delta": {
+    "start": 0.48,
+    "scale": "linear",
+    "step": 0.001
+   },
+   "V_A_kms": {
+    "start": 60.0,
+    "scale": "linear",
+    "step": 0.3
+   },
+   "V_c_kms": {
+    "start": 2.0,
+    "scale": "linear",
+    "step": 0.3
+   }
+  },
+  "fixed": {},
+  "families": [
+   {
+    "name": "BIG",
+    "free": [
+     "D0_cm2_s",
+     "delta",
+     "V_A_kms",
+     "V_c_kms"
+    ],
+    "fixed": {}
+   },
+   {
+    "name": "SLIM",
+    "free": [
+     "D0_cm2_s",
+     "delta"
+    ],
+    "fixed": {
+     "V_A_kms": 0.0,
+     "V_c_kms": 0.0
+    }
+   }
+  ],
+  "response_model": {
+   "kind": "provider",
+   "layout": "joint",
+   "half_width_sigma": 3.0,
+   "tolerance_sigma": 0.05
+  },
+  "family_toys": {
+   "n": 200,
+   "seed": 20261028,
+   "alpha": 0.05
+  },
+  "gate_plan": {
+   "measurement_conditions": {}
+  },
+  "run_record_keys": [
+   "emulator_model",
+   "ml_artifact",
+   "domain_status",
+   "training_provider"
+  ],
+  "provider_requests": "per-point"
+ },
+ "emulator": {
+  "ml_artifact": "emulator.ml-artifact.json",
+  "model": "emulator-model.json",
+  "model_sha256": "0a8dc86fdf1668555a95af020b9ed9376b5768faf7afd4eeafaab889b96bf4f5",
+  "round": 0,
+  "validation": {
+   "passed": true,
+   "max_error_over_sigma": 0.0038191054833226724,
+   "tolerance": 0.05,
+   "rows": [
+    {
+     "point": {
+      "D0_cm2_s": 2.627013666551226e+28,
+      "delta": 0.5163763576612611,
+      "V_A_kms": 92.47481541999865,
+      "V_c_kms": 6.126104506851517
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.0038191054833226724,
+     "max_relative_error": 0.00020665300348921
+    },
+    {
+     "point": {
+      "D0_cm2_s": 3.2724100562779497e+28,
+      "delta": 0.46631570365394437,
+      "V_A_kms": 17.87306523632068,
+      "V_c_kms": 5.496184773792374
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.0002693434973403327,
+     "max_relative_error": 1.8068111080404847e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.503956616467719e+28,
+      "delta": 0.45979768991779074,
+      "V_A_kms": 51.432961347762806,
+      "V_c_kms": 0.07127259687360318
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.0004089495122512216,
+     "max_relative_error": 2.268610946720706e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 3.2722571860499058e+28,
+      "delta": 0.4699086171242007,
+      "V_A_kms": 92.9055685770787,
+      "V_c_kms": 4.22282618244636
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.00037056663735435675,
+     "max_relative_error": 1.9525187520352816e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.1470809074555487e+28,
+      "delta": 0.47828960277789045,
+      "V_A_kms": 25.497981360965184,
+      "V_c_kms": 1.122506743220945
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.0023952991808929456,
+     "max_relative_error": 0.0001606815538477413
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.702759597992822e+28,
+      "delta": 0.4736294450147551,
+      "V_A_kms": 69.8585210591741,
+      "V_c_kms": 3.486481029890514
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.0004173634361359003,
+     "max_relative_error": 1.8665060290468105e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 3.2062519569627334e+28,
+      "delta": 0.46020204981368645,
+      "V_A_kms": 11.937684588816714,
+      "V_c_kms": 0.062307992698398686
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.0003827416315332988,
+     "max_relative_error": 2.5675089177834565e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 3.411988482791425e+28,
+      "delta": 0.4327664544725093,
+      "V_A_kms": 88.8942607321907,
+      "V_c_kms": 2.948460283328361
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.0007141403689343496,
+     "max_relative_error": 4.212502232192605e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.8003181488403735e+28,
+      "delta": 0.4346240318478651,
+      "V_A_kms": 13.250362674613402,
+      "V_c_kms": 0.9282959566166977
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.001455529419792548,
+     "max_relative_error": 9.763988177724503e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.722131178516172e+28,
+      "delta": 0.5098311288498135,
+      "V_A_kms": 30.683568359408476,
+      "V_c_kms": 1.5796253899527652
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.00015319474255426032,
+     "max_relative_error": 1.0276615744375661e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.239220323863463e+28,
+      "delta": 0.4970389732160321,
+      "V_A_kms": 87.29995886782692,
+      "V_c_kms": 3.394045192854529
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.002732161988932407,
+     "max_relative_error": 0.00012486440658188158
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.08041424696547e+28,
+      "delta": 0.4607776419189976,
+      "V_A_kms": 80.84540799627685,
+      "V_c_kms": 4.1119314996079295
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.002735249637477965,
+     "max_relative_error": 0.00013033718379773518
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.117682035185953e+28,
+      "delta": 0.4786579233314298,
+      "V_A_kms": 25.246631201258488,
+      "V_c_kms": 1.8178044958712722
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.0020239865829059967,
+     "max_relative_error": 0.0001357731475477575
+    },
+    {
+     "point": {
+      "D0_cm2_s": 3.309135529538055e+28,
+      "delta": 0.49895558726581357,
+      "V_A_kms": 35.98921051386753,
+      "V_c_kms": 1.5572909651022786
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.0001678790616962256,
+     "max_relative_error": 1.1261669818574127e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 3.2196081527574643e+28,
+      "delta": 0.5015393215480766,
+      "V_A_kms": 58.47532930533893,
+      "V_c_kms": 0.62213398399006
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.0002697494170243163,
+     "max_relative_error": 1.375289274119229e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.1663863686652943e+28,
+      "delta": 0.48756944578961453,
+      "V_A_kms": 14.170801523675946,
+      "V_c_kms": 3.684026853374819
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.0004756629125107679,
+     "max_relative_error": 3.1908438202554734e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 3.622029252603586e+28,
+      "delta": 0.4308857419456738,
+      "V_A_kms": 67.94363621138729,
+      "V_c_kms": 6.350677577395967
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.0012119383930821032,
+     "max_relative_error": 6.456930458320631e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.620806725778587e+28,
+      "delta": 0.4375534433186126,
+      "V_A_kms": 82.53968104738313,
+      "V_c_kms": 4.760641123082294
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.0010633215346267386,
+     "max_relative_error": 4.755318466731495e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 3.077412456851462e+28,
+      "delta": 0.4456559543406975,
+      "V_A_kms": 6.138574856486609,
+      "V_c_kms": 4.239332680527525
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.0007836161714621115,
+     "max_relative_error": 5.256657082974847e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.1257351671595976e+28,
+      "delta": 0.5194609676257673,
+      "V_A_kms": 20.12836452779558,
+      "V_c_kms": 6.513988233323792
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.001160358208770138,
+     "max_relative_error": 5.726182433041238e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.1946895621366696e+28,
+      "delta": 0.4269917846525815,
+      "V_A_kms": 12.63365630659209,
+      "V_c_kms": 3.9188353151206345
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.0012957714729130755,
+     "max_relative_error": 8.692299290213867e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.1043731008567213e+28,
+      "delta": 0.486321172637529,
+      "V_A_kms": 16.01990378935898,
+      "V_c_kms": 5.640972761560556
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.0008396526846755681,
+     "max_relative_error": 5.6325614412822134e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.2163460089196042e+28,
+      "delta": 0.5108020665854649,
+      "V_A_kms": 0.21224811573375754,
+      "V_c_kms": 1.9254182105504183
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.00022412693554348228,
+     "max_relative_error": 1.5034891903908942e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.843830720336709e+28,
+      "delta": 0.47724446288158334,
+      "V_A_kms": 6.19347822679328,
+      "V_c_kms": 1.2746308025216424
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.0003718047753290799,
+     "max_relative_error": 2.4941422559932036e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.4678411128490886e+28,
+      "delta": 0.4660649757163255,
+      "V_A_kms": 11.426243667948837,
+      "V_c_kms": 5.536041407334308
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.0014755194104193125,
+     "max_relative_error": 9.898085111459398e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 3.50712969118033e+28,
+      "delta": 0.43581718856581486,
+      "V_A_kms": 80.60371177732162,
+      "V_c_kms": 0.6882343501991193
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.0003447969355069781,
+     "max_relative_error": 1.5419787724457734e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 3.137785044001625e+28,
+      "delta": 0.4352148324675774,
+      "V_A_kms": 12.244866249782572,
+      "V_c_kms": 0.09245827635224253
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.001284027636694829,
+     "max_relative_error": 8.613519241917889e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.821966076931997e+28,
+      "delta": 0.49471811945633004,
+      "V_A_kms": 35.77415490863905,
+      "V_c_kms": 2.6327264975018134
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.00036570155485918834,
+     "max_relative_error": 2.4532006084321267e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 3.356678972976788e+28,
+      "delta": 0.49966150148601174,
+      "V_A_kms": 21.233181483473917,
+      "V_c_kms": 0.490848875678365
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.00025959294728675593,
+     "max_relative_error": 1.7414024298334496e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.2099277287974792e+28,
+      "delta": 0.4392145367811659,
+      "V_A_kms": 27.661673367810554,
+      "V_c_kms": 4.9491691512324945
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.0015892523267972295,
+     "max_relative_error": 0.00010661028708358611
+    },
+    {
+     "point": {
+      "D0_cm2_s": 3.150351155558861e+28,
+      "delta": 0.45071921961731054,
+      "V_A_kms": 0.0,
+      "V_c_kms": 0.0
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.00019514844999875692,
+     "max_relative_error": 9.115893824906962e-06
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.463176204909868e+28,
+      "delta": 0.45098301648264333,
+      "V_A_kms": 0.0,
+      "V_c_kms": 0.0
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.00033431671512990107,
+     "max_relative_error": 1.495109802085448e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.6740421437432213e+28,
+      "delta": 0.45142181153838296,
+      "V_A_kms": 0.0,
+      "V_c_kms": 0.0
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.00018513667170768543,
+     "max_relative_error": 8.27956366133975e-06
+    },
+    {
+     "point": {
+      "D0_cm2_s": 3.497948636501038e+28,
+      "delta": 0.44624323573202557,
+      "V_A_kms": 0.0,
+      "V_c_kms": 0.0
+     },
+     "status": "ok",
+     "max_error_over_sigma": 8.595932548936462e-05,
+     "max_relative_error": 4.624629052818463e-06
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.436742461179774e+28,
+      "delta": 0.4584370200611812,
+      "V_A_kms": 0.0,
+      "V_c_kms": 0.0
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.00030316601219130624,
+     "max_relative_error": 1.3557996234592196e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.9838923412612764e+28,
+      "delta": 0.5138330607169507,
+      "V_A_kms": 0.0,
+      "V_c_kms": 0.0
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.00012058622206096028,
+     "max_relative_error": 7.546080272202715e-06
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.6911593964888533e+28,
+      "delta": 0.43789532671482617,
+      "V_A_kms": 0.0,
+      "V_c_kms": 0.0
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.0003556233384434604,
+     "max_relative_error": 1.723903418704431e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.665196273620343e+28,
+      "delta": 0.5087395672458876,
+      "V_A_kms": 0.0,
+      "V_c_kms": 0.0
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.0001925029495954143,
+     "max_relative_error": 1.2913490434973696e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 2.1844571402658727e+28,
+      "delta": 0.42036129483636414,
+      "V_A_kms": 0.0,
+      "V_c_kms": 0.0
+     },
+     "status": "ok",
+     "max_error_over_sigma": 0.0004570203322149155,
+     "max_relative_error": 2.0438570598635408e-05
+    },
+    {
+     "point": {
+      "D0_cm2_s": 3.30507198339315e+28,
+      "delta": 0.45114478640019684,
+      "V_A_kms": 0.0,
+      "V_c_kms": 0.0
+     },
+     "status": "ok",
+     "max_error_over_sigma": 6.454492548359446e-05,
+     "max_relative_error": 4.062535526205835e-06
+    }
+   ],
+   "error_component": {
+    "bc-asimov": [
+     7.5311918308618164e-06,
+     2.240448929038963e-05,
+     2.504340904777025e-05,
+     1.1701224897631146e-05,
+     1.2254899145719422e-05,
+     1.2486433779990147e-05,
+     7.189419159489563e-06,
+     2.6049868868116555e-06,
+     2.1872935966338325e-06,
+     1.6525150139251599e-06,
+     1.0864875198690616e-06,
+     6.035754952990469e-07,
+     4.985702886234344e-07,
+     3.6635408350027543e-07,
+     5.827871216480818e-07
+    ],
+    "be-asimov": [
+     4.528650840579518e-06,
+     1.1837900996944373e-05,
+     7.015953864569768e-06,
+     9.563003452853214e-06,
+     6.615154055047978e-06,
+     1.2888054689672024e-05,
+     2.7887723477421078e-05,
+     1.6219930478650335e-05,
+     1.1501795934343306e-05,
+     1.9256117608446033e-05,
+     1.9191958283593102e-05,
+     1.1070541329261108e-05
+    ]
+   }
+  }
+ },
+ "usine_fits": {
+  "BIG": {
+   "chi2": 2.4248815918591325e-09,
+   "best_fit": {
+    "D0_cm2_s": 2.9999989982642576e+28,
+    "delta": 0.45000004687643524,
+    "V_A_kms": 69.99997911430978,
+    "V_c_kms": 0.0
+   }
+  },
+  "SLIM": {
+   "chi2": 23.92727215817741,
+   "best_fit": {
+    "D0_cm2_s": 2.5086621861022587e+28,
+    "delta": 0.4839410037820528
+   }
+  }
+ },
+ "result": {
+  "label": "[General method]",
+  "provider": {
+   "id": "emulator",
+   "version": "1.0.0+model.0a8dc86fdf16",
+   "component": "adapter:cr-propagation",
+   "user_supplied": false,
+   "decomposable": false,
+   "transport": {
+    "geometry": {
+     "kind": "cylinder-2d",
+     "L_kpc": 4.0,
+     "radius_kpc": 20.0,
+     "disc_halfwidth_pc": 100
+    },
+    "diffusion": {
+     "form": "beta^eta (R/R0)^delta with smooth breaks",
+     "D0_cm2_s": 3e+28,
+     "R0_gv": 1.0,
+     "eta": 1.0,
+     "delta": 0.5,
+     "breaks": [
+      {
+       "kind": "low",
+       "R_break_gv": 5.0,
+       "delta_below": 0.0,
+       "s": 0.05,
+       "s_convention": "usine"
+      }
+     ]
+    },
+    "reacceleration": {
+     "V_A_kms": 0.0,
+     "zone": "thin-disc",
+     "relation": "Seo-Ptuskin 1994",
+     "w": 1.0
+    },
+    "convection": {
+     "V_c_kms": 0.0,
+     "dVc_dz_kms_per_kpc": 0.0
+    },
+    "losses": [],
+    "decay": {
+     "enabled": true,
+     "lorentz_dilation": true,
+     "ec_treatment": "fully-stripped"
+    },
+    "gas": {
+     "model": "uniform, n_H = 1 cm^-3",
+     "He_to_H_number": 0.1
+    },
+    "sources": {
+     "spatial": "not fixed by harmonized-v1; each code records its choice",
+     "injection": [
+      {
+       "species_group": "all primaries",
+       "gamma": 2.3,
+       "breaks": []
+      }
+     ],
+     "abundances": "fixed by the parent list of theory:cr-secondary-ratio"
+    },
+    "cross_sections": {
+     "production_set": "theory:cr-secondary-ratio models/xs-illustrative-decay.json (ILLUSTRATIVE, isotopic)",
+     "inelastic_set": "theory:cr-secondary-ratio models/xs-illustrative-decay.json (ILLUSTRATIVE, isotopic)",
+     "ghost_threshold": "off: ghost nuclei and tertiary chains off on both sides"
+    },
+    "species": {
+     "network_top": "O-16",
+     "isotopic": true
+    },
+    "family": "BIG",
+    "free": [
+     "D0_cm2_s",
+     "delta",
+     "V_A_kms",
+     "V_c_kms"
+    ]
+   }
+  },
+  "datasets": [
+   {
+    "name": "bc-asimov",
+    "observable": "B/C",
+    "axis": "ekn",
+    "bins": 15,
+    "bin_semantics": "bin-averaged",
+    "covariance": {
+     "source": "uncertainty components",
+     "components": [
+      {
+       "component": "statistical",
+       "correlation": "uncorrelated"
+      },
+      {
+       "component": "normalization",
+       "correlation": "fully-correlated"
+      },
+      {
+       "component": "emulator",
+       "correlation": "uncorrelated"
+      }
+     ],
+     "dataset_covariance_status": "present"
+    }
+   },
+   {
+    "name": "be-asimov",
+    "observable": "10Be/9Be",
+    "axis": "ekn",
+    "bins": 12,
+    "bin_semantics": "bin-averaged",
+    "covariance": {
+     "source": "uncertainty components",
+     "components": [
+      {
+       "component": "statistical",
+       "correlation": "uncorrelated"
+      },
+      {
+       "component": "normalization",
+       "correlation": "fully-correlated"
+      },
+      {
+       "component": "emulator",
+       "correlation": "uncorrelated"
+      }
+     ],
+     "dataset_covariance_status": "present"
+    }
+   }
+  ],
+  "gate": [
+   {
+    "dataset": "bc-asimov",
+    "comparable": true,
+    "status": "comparable",
+    "carried_statuses": [
+     "asimov",
+     "synthetic",
+     "unvalidated"
+    ],
+    "run_record_not_compared": {
+     "emulator_model": "sha256:0a8dc86fdf1668555a95af020b9ed9376b5768faf7afd4eeafaab889b96bf4f5",
+     "ml_artifact": "ml-emulator-usine-c2uf",
+     "domain_status": "inside",
+     "training_provider": "usine 0.2.0"
+    }
+   },
+   {
+    "dataset": "be-asimov",
+    "comparable": true,
+    "status": "comparable",
+    "carried_statuses": [
+     "asimov",
+     "synthetic",
+     "unvalidated"
+    ],
+    "run_record_not_compared": {
+     "emulator_model": "sha256:0a8dc86fdf1668555a95af020b9ed9376b5768faf7afd4eeafaab889b96bf4f5",
+     "ml_artifact": "ml-emulator-usine-c2uf",
+     "domain_status": "inside",
+     "training_provider": "usine 0.2.0"
+    }
+   }
+  ],
+  "channels": [
+   "total"
+  ],
+  "families_not_expressible": [],
+  "fits": [
+   {
+    "family": "BIG",
+    "free": [
+     "D0_cm2_s",
+     "delta",
+     "V_A_kms",
+     "V_c_kms"
+    ],
+    "fixed": {},
+    "status": "converged",
+    "restarts": 0,
+    "attempts": [
+     {
+      "attempt": 0,
+      "status": "converged",
+      "reasons": [],
+      "optimizer": "`xtol` termination condition is satisfied."
+     }
+    ],
+    "convergence": {
+     "status": "converged",
+     "reasons": [],
+     "edm": 3.74338085e-07,
+     "judged": [
+      0,
+      1,
+      2
+     ],
+     "held": [],
+     "at_bound": [
+      3
+     ],
+     "kkt": [
+      {
+       "index": 3,
+       "bound": "lower",
+       "ok": true,
+       "derivative": 169.5381877
+      }
+     ]
+    },
+    "chi2": 1.3364468661081687e-08,
+    "best_fit_coordinates": [
+     65.57099445837325,
+     0.4500001077371005,
+     70.00003062101975,
+     0.0
+    ],
+    "dof": 23,
+    "p_value": 1.0,
+    "parameters": [
+     {
+      "name": "D0_cm2_s",
+      "scale": "log",
+      "fit_coordinate": "ln(D0_cm2_s)",
+      "best_fit": 2.9999986976158643e+28,
+      "best_fit_coordinate": 65.57099445837325,
+      "sigma_coordinate": 0.0669494757841664,
+      "constrained": true,
+      "at_bound": false
+     },
+     {
+      "name": "delta",
+      "scale": "linear",
+      "fit_coordinate": "delta",
+      "best_fit": 0.4500001077371005,
+      "best_fit_coordinate": 0.4500001077371005,
+      "sigma_coordinate": 0.012229320435939673,
+      "constrained": true,
+      "at_bound": false
+     },
+     {
+      "name": "V_A_kms",
+      "scale": "linear",
+      "fit_coordinate": "V_A_kms",
+      "best_fit": 70.00003062101975,
+      "best_fit_coordinate": 70.00003062101975,
+      "sigma_coordinate": 8.185799853629476,
+      "constrained": true,
+      "at_bound": false
+     },
+     {
+      "name": "V_c_kms",
+      "scale": "linear",
+      "fit_coordinate": "V_c_kms",
+      "best_fit": 0.0,
+      "best_fit_coordinate": 0.0,
+      "sigma_coordinate": 2.3691593921191827,
+      "constrained": true,
+      "at_bound": true
+     }
+    ],
+    "nuisances": [],
+    "fisher": {
+     "coordinates": [
+      "ln(D0_cm2_s)",
+      "delta",
+      "V_A_kms",
+      "V_c_kms"
+     ],
+     "matrix": [
+      [
+       1799.088672084135,
+       6214.462193625184,
+       -4.113839090796455,
+       12.046442252800249
+      ],
+      [
+       6214.462193625184,
+       39471.358496136774,
+       3.6250979518509734,
+       -4.3592577756935
+      ],
+      [
+       -4.113839090796455,
+       3.6250979518509734,
+       0.04209671385354562,
+       -0.0764561605516479
+      ],
+      [
+       12.046442252800249,
+       -4.3592577756935,
+       -0.0764561605516479,
+       0.3768390628598379
+      ]
+     ],
+     "condition_number": 2706463.552769051,
+     "eigen": [
+      {
+       "eigenvalue": 0.014953103520165567,
+       "eigenvector": {
+        "D0_cm2_s": 0.005387769416396268,
+        "delta": -0.0009378109120317921,
+        "V_A_kms": 0.9997732750515564,
+        "V_c_kms": 0.020578895599464183
+       },
+       "sigma": 8.17775942102047,
+       "grid_chord": 105.02381151825182,
+       "degenerate": false
+      },
+      {
+       "eigenvalue": 0.17883185013995684,
+       "eigenvector": {
+        "D0_cm2_s": -0.015630360552374264,
+        "delta": 0.0025731776803099536,
+        "V_A_kms": -0.020490012252929863,
+        "V_c_kms": 0.9996645587313292
+       },
+       "sigma": 2.364708242561332,
+       "grid_chord": 9.503187761359086,
+       "degenerate": false
+      },
+      {
+       "eigenvalue": 800.6426409332432,
+       "eigenvector": {
+        "D0_cm2_s": 0.9871939859734226,
+        "delta": -0.15864175307740658,
+        "V_A_kms": -0.005792465931165358,
+        "V_c_kms": 0.015724998469616367
+       },
+       "sigma": 0.03534114711650327,
+       "grid_chord": 0.7540974575664985,
+       "degenerate": false
+      },
+      {
+       "eigenvalue": 40470.0296781107,
+       "eigenvector": {
+        "D0_cm2_s": 0.15866536429739328,
+        "delta": 0.9873324128417166,
+        "V_A_kms": 7.23117951054754e-05,
+        "V_c_kms": -5.912303936840338e-05
+       },
+       "sigma": 0.004970879535571651,
+       "grid_chord": 0.13673206535521937,
+       "degenerate": false
+      }
+     ],
+     "method": "J^T C^-1 J of the residuals with the multipliers profiled (least_squares Jacobian)"
+    },
+    "degenerate_directions": [],
+    "fisher_full": {
+     "coordinates": [
+      "ln(D0_cm2_s)",
+      "delta",
+      "V_A_kms",
+      "V_c_kms"
+     ],
+     "matrix": [
+      [
+       1803.5209353170162,
+       6232.115740375179,
+       -4.1149052168582445,
+       12.05497857765575
+      ],
+      [
+       6232.115740375179,
+       39658.757614552334,
+       3.603383063005117,
+       -4.44022337173462
+      ],
+      [
+       -4.1149052168582445,
+       3.603383063005117,
+       0.04191108993890982,
+       -0.07643111439964115
+      ],
+      [
+       12.05497857765575,
+       -4.44022337173462,
+       -0.07643111439964115,
+       0.37684462859294937
+      ]
+     ]
+    }
+   },
+   {
+    "family": "SLIM",
+    "free": [
+     "D0_cm2_s",
+     "delta"
+    ],
+    "fixed": {
+     "V_A_kms": 0.0,
+     "V_c_kms": 0.0
+    },
+    "status": "converged",
+    "restarts": 0,
+    "attempts": [
+     {
+      "attempt": 0,
+      "status": "converged",
+      "reasons": [],
+      "optimizer": "`xtol` termination condition is satisfied."
+     }
+    ],
+    "convergence": {
+     "status": "converged",
+     "reasons": [],
+     "edm": 1.528748471e-06,
+     "judged": [
+      0,
+      1
+     ],
+     "held": [],
+     "at_bound": [],
+     "kkt": []
+    },
+    "chi2": 23.92716501336814,
+    "best_fit_coordinates": [
+     65.39230117372442,
+     0.4839069768430188
+    ],
+    "dof": 25,
+    "p_value": 0.5235852836888726,
+    "parameters": [
+     {
+      "name": "D0_cm2_s",
+      "scale": "log",
+      "fit_coordinate": "ln(D0_cm2_s)",
+      "best_fit": 2.5090860664658387e+28,
+      "best_fit_coordinate": 65.39230117372442,
+      "sigma_coordinate": 0.04433325935120893,
+      "constrained": true,
+      "at_bound": false
+     },
+     {
+      "name": "delta",
+      "scale": "linear",
+      "fit_coordinate": "delta",
+      "best_fit": 0.4839069768430188,
+      "best_fit_coordinate": 0.4839069768430188,
+      "sigma_coordinate": 0.008365081292004679,
+      "constrained": true,
+      "at_bound": false
+     }
+    ],
+    "nuisances": [],
+    "fisher": {
+     "coordinates": [
+      "ln(D0_cm2_s)",
+      "delta"
+     ],
+     "matrix": [
+      [
+       1447.9444074202247,
+       6176.340166473518
+      ],
+      [
+       6176.340166473518,
+       40552.023749566055
+      ]
+     ],
+     "condition_number": 83.7443087600055,
+     "eigen": [
+      {
+       "eigenvalue": 495.60812721866085,
+       "eigenvector": {
+        "D0_cm2_s": 0.988320415150143,
+        "delta": -0.1523901473109363
+       },
+       "sigma": 0.04491907353134184,
+       "grid_chord": 0.753237981868868,
+       "degenerate": false
+      },
+      {
+       "eigenvalue": 41504.36002976762,
+       "eigenvector": {
+        "D0_cm2_s": 0.1523901473109363,
+        "delta": 0.988320415150143
+       },
+       "sigma": 0.004908549095074467,
+       "grid_chord": 0.136595377299265,
+       "degenerate": false
+      }
+     ],
+     "method": "J^T C^-1 J of the residuals with the multipliers profiled (least_squares Jacobian)"
+    },
+    "degenerate_directions": [],
+    "fisher_full": {
+     "coordinates": [
+      "ln(D0_cm2_s)",
+      "delta"
+     ],
+     "matrix": [
+      [
+       1450.6547981557649,
+       6194.913518781651
+      ],
+      [
+       6194.913518781651,
+       40745.82074376385
+      ]
+     ]
+    }
+   }
+  ],
+  "warnings": [],
+  "loop_limits": {
+   "max_restarts": 5,
+   "toy_failure_limit": 0.02,
+   "max_chain_steps": 200000,
+   "rhat_max": 1.01,
+   "ess_min": 400
+  },
+  "degeneracies": [],
+  "profile_scans": [],
+  "family_calibration": {
+   "status": "ok",
+   "alpha": 0.05,
+   "n_toys": 200,
+   "seed": 20261028,
+   "response_model": {
+    "kind": "provider (no response model)",
+    "coordinates": [
+     "ln(D0_cm2_s)",
+     "delta",
+     "V_A_kms",
+     "V_c_kms"
+    ],
+    "box": [
+     [
+      1.9000000000000125e+28,
+      4.000000000000025e+28
+     ],
+     [
+      0.4,
+      0.535
+     ],
+     [
+      0.0,
+      105.0
+     ],
+     [
+      0.0,
+      9.5
+     ]
+    ],
+    "fixed": {},
+    "provider_evaluations": 0,
+    "validation": {
+     "points": 0,
+     "seed": 20261039,
+     "max_error_over_sigma": 0.0,
+     "tolerance": 0.05,
+     "passed": true,
+     "note": "no response model: the provider itself is evaluated"
+    },
+    "error_component": {
+     "bc-asimov": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ],
+     "be-asimov": [
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      0.0
+     ]
+    },
+    "box_passes": [
+     {
+      "box": [
+       [
+        1.9000000000000125e+28,
+        4.000000000000025e+28
+       ],
+       [
+        0.4,
+        0.535
+       ],
+       [
+        0.0,
+        105.0
+       ],
+       [
+        0.0,
+        9.5
+       ]
+      ],
+      "fits_on_box_edge": 0,
+      "centers_added": 0
+     }
+    ],
+    "layout": "joint"
+   },
+   "families": [
+    {
+     "family": "BIG",
+     "chi2": 1.3364468661081687e-08,
+     "delta_chi2": 0.0,
+     "toys": 200,
+     "failed": 0,
+     "failure_reasons": {},
+     "toy_seed": 20261028,
+     "rows": [
+      {
+       "toy": 0,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 29.236939950954977,
+        "SLIM": 56.31579561653477
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 1,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 40.164035685373456,
+        "SLIM": 65.07844358408624
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 2,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 26.521595894502696,
+        "SLIM": 54.40941069271208
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 3,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 29.268298597820657,
+        "SLIM": 50.43214823179747
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 4,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.464554876214578,
+        "SLIM": 35.328187530610336
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 5,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 12.819388642961512,
+        "SLIM": 39.17830497513563
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 6,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 14.973015933607439,
+        "SLIM": 38.382759210081524
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 7,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 26.04205596835357,
+        "SLIM": 58.519174321466984
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 8,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 17.902259524004734,
+        "SLIM": 38.75685222662623
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 9,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 11.348133628520205,
+        "SLIM": 42.02941663663945
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 10,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 38.83740173671267,
+        "SLIM": 54.375437347150736
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 11,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 25.471347027836558,
+        "SLIM": 50.779993900693256
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 12,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 34.0467423848442,
+        "SLIM": 61.11366002277967
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 13,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 19.183341804016454,
+        "SLIM": 33.997692827174504
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 14,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 21.895689447167587,
+        "SLIM": 53.66978057352913
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 15,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 24.337495042515343,
+        "SLIM": 59.70205998587626
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 16,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 24.20057191727805,
+        "SLIM": 54.30185006313688
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 17,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 40.93045869464901,
+        "SLIM": 68.62693564190647
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 18,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 26.390460844146975,
+        "SLIM": 65.88072949721199
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 19,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 15.693062711174795,
+        "SLIM": 57.46682418888647
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 20,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 15.526983484417116,
+        "SLIM": 36.0763055032557
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 21,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.848005261610986,
+        "SLIM": 47.93566852650544
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 22,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 19.341839173099793,
+        "SLIM": 40.33384080036717
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 23,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 17.37897186794687,
+        "SLIM": 34.38438575542147
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 24,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 22.313143191809043,
+        "SLIM": 25.08871998841021
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 25,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 17.427097460604184,
+        "SLIM": 42.36491512904902
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 26,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 20.455291434147348,
+        "SLIM": 43.763756824478186
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 27,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 26.49497690526365,
+        "SLIM": 52.20310723025163
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 28,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 17.188150380019927,
+        "SLIM": 47.385388459111375
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 29,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 17.5814424260597,
+        "SLIM": 54.168081432906455
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 30,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 25.955977210324413,
+        "SLIM": 37.90711978352569
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 31,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 16.8501159609604,
+        "SLIM": 43.75650560065363
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 32,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.51988400686158,
+        "SLIM": 58.533807816284025
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 33,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 22.773057140782544,
+        "SLIM": 33.92123619877843
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 34,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.71922113117612,
+        "SLIM": 48.134857232527686
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 35,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 24.104297806433795,
+        "SLIM": 34.2565229779799
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 36,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 19.729238925933224,
+        "SLIM": 37.32296786817249
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 37,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 24.778725400040667,
+        "SLIM": 48.106563761408154
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 38,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.4136005153171,
+        "SLIM": 48.62578454851927
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 39,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 27.860671683625267,
+        "SLIM": 53.83332015819939
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 40,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 22.330292634287122,
+        "SLIM": 49.71335296459989
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 41,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 16.740793511927606,
+        "SLIM": 36.65601073500957
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 42,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.256007433407436,
+        "SLIM": 56.14185239130421
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 43,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 30.17537478756598,
+        "SLIM": 57.390377851308074
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 44,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 12.773028794600185,
+        "SLIM": 47.7645201770067
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 45,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.296339073738903,
+        "SLIM": 60.938719256488874
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 46,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 22.974401156001726,
+        "SLIM": 53.27036440213114
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 47,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.70752460298263,
+        "SLIM": 47.23989053873429
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 48,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 24.139047230485787,
+        "SLIM": 42.655238928119324
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 49,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 16.012512641193414,
+        "SLIM": 40.58860107353072
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 50,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 16.10365869881911,
+        "SLIM": 43.36847696082503
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 51,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 15.639030999158026,
+        "SLIM": 28.16232612739012
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 52,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 21.54982004015495,
+        "SLIM": 44.71720213061796
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 53,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 13.80261071883388,
+        "SLIM": 22.416144138487176
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 54,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 19.89695531126722,
+        "SLIM": 40.83921013842002
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 55,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 27.925747399514385,
+        "SLIM": 52.21802200471812
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 56,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 47.62233028202489,
+        "SLIM": 89.73474400192582
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 57,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 22.60761479818686,
+        "SLIM": 42.40643328304539
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 58,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 25.466896016933113,
+        "SLIM": 53.453387269201585
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 59,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 47.0351779725802,
+        "SLIM": 77.51720276685275
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 60,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 21.824329336220448,
+        "SLIM": 45.478151555478675
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 61,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 13.585422848020034,
+        "SLIM": 42.49718073410194
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 62,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 25.781038558632282,
+        "SLIM": 55.89555256529043
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 63,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 22.296644152003804,
+        "SLIM": 53.53777613498935
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 64,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 27.120001251722037,
+        "SLIM": 46.35593220841121
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 65,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 25.82899924551685,
+        "SLIM": 48.37134594404988
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 66,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 20.235119237024676,
+        "SLIM": 35.67687892767735
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 67,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 34.65454143419601,
+        "SLIM": 71.93302356441797
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 68,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 13.715289127177382,
+        "SLIM": 40.685319575776035
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 69,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 27.377244106531723,
+        "SLIM": 42.82192277248619
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 70,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 20.075394645459493,
+        "SLIM": 31.96565997329973
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 71,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 28.66838413103843,
+        "SLIM": 59.07804664992959
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 72,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 19.807223220625023,
+        "SLIM": 41.914436049426534
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 73,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 29.62813914369022,
+        "SLIM": 59.36395161249396
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 74,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 27.260379103624402,
+        "SLIM": 54.06136947749069
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 75,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 24.414340421861247,
+        "SLIM": 48.623725166682476
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 76,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 22.898959592372734,
+        "SLIM": 53.0887392358605
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 77,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 31.387142274532856,
+        "SLIM": 48.52944290314176
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 78,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 26.125605591745384,
+        "SLIM": 53.86303734869413
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 79,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.23570329287415,
+        "SLIM": 43.29122597543742
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 80,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 19.311113211265223,
+        "SLIM": 40.410400557399505
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 81,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 17.535854997387283,
+        "SLIM": 35.801815789843815
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 82,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 16.790318616635346,
+        "SLIM": 52.65602097843941
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 83,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.890971020822754,
+        "SLIM": 39.70115121961631
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 84,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 29.86631003648455,
+        "SLIM": 45.007013787380004
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 85,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 21.709980213989887,
+        "SLIM": 51.10976763444856
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 86,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 34.450805716548444,
+        "SLIM": 67.0012360549236
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 87,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 36.02820061864996,
+        "SLIM": 56.42541289193156
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 88,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 26.657287487449867,
+        "SLIM": 71.5158993316274
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 89,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.103035679197994,
+        "SLIM": 54.63953619140744
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 90,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 21.012732222028042,
+        "SLIM": 49.19431570917423
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 91,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 21.366995950602316,
+        "SLIM": 39.30464434163158
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 92,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 31.77627772070611,
+        "SLIM": 67.48137809697235
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 93,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.91270995384937,
+        "SLIM": 49.958786299813816
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 94,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 16.320061757928663,
+        "SLIM": 31.065268187478864
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 95,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 19.51487419137385,
+        "SLIM": 43.13419467427514
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 96,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 25.13159589022858,
+        "SLIM": 45.566950357451
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 97,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 17.689983933869883,
+        "SLIM": 48.79698311107748
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 98,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 13.65020558204172,
+        "SLIM": 40.42234501272708
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 99,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 24.826897221153537,
+        "SLIM": 51.01440133253618
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 100,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 13.267270371961173,
+        "SLIM": 33.45477903566456
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 101,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 27.329682893498255,
+        "SLIM": 59.09405021778733
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 102,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 39.3056865798665,
+        "SLIM": 65.02814819286147
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 103,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 20.62985358092876,
+        "SLIM": 51.28242029401562
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 104,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.909124017589278,
+        "SLIM": 33.819009429711244
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 105,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 24.701754297962484,
+        "SLIM": 57.815484193269214
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 106,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 17.30483382543946,
+        "SLIM": 41.66272667979173
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 107,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 19.72673915406586,
+        "SLIM": 42.824780032666155
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 108,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 27.343299508027812,
+        "SLIM": 61.62628446520466
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 109,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 22.65691268594198,
+        "SLIM": 58.728318282164466
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 110,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 44.73674736164361,
+        "SLIM": 64.15919711776041
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 111,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 26.16983445447208,
+        "SLIM": 45.52336911082269
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 112,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 28.47581601002381,
+        "SLIM": 56.67231527048176
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 113,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 33.988871250953665,
+        "SLIM": 61.38304605194604
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 114,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 21.45921523751714,
+        "SLIM": 51.84661097276422
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 115,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 16.40731989114084,
+        "SLIM": 47.41801758565019
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 116,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 15.116047219412344,
+        "SLIM": 29.362655933443776
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 117,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 17.736129319599527,
+        "SLIM": 49.630859731482744
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 118,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 13.832314238839281,
+        "SLIM": 27.49844796605506
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 119,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.410607740538122,
+        "SLIM": 54.99470660987362
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 120,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 24.49405062812457,
+        "SLIM": 42.93095949520571
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 121,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 36.19691413762121,
+        "SLIM": 65.57781448910416
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 122,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 25.69019326176251,
+        "SLIM": 46.71647732930802
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 123,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 25.272087708123316,
+        "SLIM": 46.09602169095507
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 124,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 43.30844008005404,
+        "SLIM": 61.94394101822258
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 125,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.012238034256093,
+        "SLIM": 51.04330302776364
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 126,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 41.23017506134619,
+        "SLIM": 69.13462520939808
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 127,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 19.378671678645524,
+        "SLIM": 59.49490561601215
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 128,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 20.42031245488371,
+        "SLIM": 57.72965404880727
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 129,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 16.31745759279693,
+        "SLIM": 52.10698468532695
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 130,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 17.315052432120417,
+        "SLIM": 37.05929812024689
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 131,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.486469016799738,
+        "SLIM": 23.657875621103905
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 132,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.791832731958188,
+        "SLIM": 48.54986795145186
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 133,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 26.541650157370043,
+        "SLIM": 48.59752461445605
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 134,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 36.15361234416979,
+        "SLIM": 75.22566459428154
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 135,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 30.47329942028745,
+        "SLIM": 56.02829357284104
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 136,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 27.744405339711207,
+        "SLIM": 66.85009103478565
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 137,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 20.99895010995978,
+        "SLIM": 56.726935816347364
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 138,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 22.524848583096485,
+        "SLIM": 36.22597564737687
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 139,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 12.10931411063703,
+        "SLIM": 37.03371181411597
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 140,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.479822417930517,
+        "SLIM": 74.70089066412929
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 141,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 11.595791079309155,
+        "SLIM": 46.85490618355172
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 142,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 35.095626683825955,
+        "SLIM": 54.67662363769104
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 143,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 12.894699224189354,
+        "SLIM": 32.98836288979041
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 144,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 17.818244494857062,
+        "SLIM": 51.92970892091199
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 145,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 17.769159639361508,
+        "SLIM": 47.52901863908142
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 146,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 16.468204491087462,
+        "SLIM": 43.47113869462748
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 147,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 21.20587905182226,
+        "SLIM": 51.74759434482245
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 148,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.362244497955945,
+        "SLIM": 59.43875368313383
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 149,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 14.398153281693945,
+        "SLIM": 30.97244721601549
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 150,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 33.26115506723136,
+        "SLIM": 52.00203586120007
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 151,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 19.11243325199183,
+        "SLIM": 33.82178513701401
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 152,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 26.18537919854942,
+        "SLIM": 43.017395196860754
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 153,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 32.30628177670019,
+        "SLIM": 63.544775375424734
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 154,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 25.590745101070205,
+        "SLIM": 65.73177628095257
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 155,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 19.665900672190244,
+        "SLIM": 21.668940762333158
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 156,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.206955245903323,
+        "SLIM": 52.219628984519744
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 157,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.031113205143782,
+        "SLIM": 36.86289227314384
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 158,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 28.131712517406367,
+        "SLIM": 48.9898511377047
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 159,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 22.746268493037938,
+        "SLIM": 57.29453442164112
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 160,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.045380787261458,
+        "SLIM": 61.46652245498201
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 161,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 20.22496878355362,
+        "SLIM": 46.92140583701507
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 162,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 22.573749869560316,
+        "SLIM": 48.969937482839384
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 163,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.85421083418853,
+        "SLIM": 50.83056941476908
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 164,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 20.181656846857713,
+        "SLIM": 42.59405638866821
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 165,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 26.175057198882854,
+        "SLIM": 55.7073142721417
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 166,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 12.754115859132366,
+        "SLIM": 50.91649033479442
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 167,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 41.0144836398657,
+        "SLIM": 59.90157466612507
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 168,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 25.35954521931768,
+        "SLIM": 46.048244477468124
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 169,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.925876116870253,
+        "SLIM": 59.06769020145593
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 170,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 32.32820809039366,
+        "SLIM": 78.57581893057132
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 171,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 33.96362801142954,
+        "SLIM": 57.409562542730384
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 172,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 30.540920730386446,
+        "SLIM": 61.3353315832577
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 173,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 26.19083086762774,
+        "SLIM": 56.19905416227044
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 174,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 29.112006432784746,
+        "SLIM": 85.22783944283803
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 175,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 20.259756053880402,
+        "SLIM": 39.47620588926651
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 176,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.73622352873277,
+        "SLIM": 46.04810209009405
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 177,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 27.268708940797126,
+        "SLIM": 67.82554622178804
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 178,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 27.46691899199512,
+        "SLIM": 63.86596336093293
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 179,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.513426124367395,
+        "SLIM": 33.617068914260756
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 180,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 20.446071670815883,
+        "SLIM": 34.68931686391581
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 181,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.894996082897393,
+        "SLIM": 33.81846243179212
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 182,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 20.985872212450253,
+        "SLIM": 53.880518621055856
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 183,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 20.397174773482295,
+        "SLIM": 46.48744001353192
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 184,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.322398199614266,
+        "SLIM": 50.043157290088566
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 185,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.04605337138567,
+        "SLIM": 62.886552742173585
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 186,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 29.17967346533058,
+        "SLIM": 47.27183041268068
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 187,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 17.206536373247893,
+        "SLIM": 29.41427649641811
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 188,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.994115181125412,
+        "SLIM": 50.480117468367936
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 189,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 17.67512497248584,
+        "SLIM": 71.73622548640229
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 190,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.904649869146187,
+        "SLIM": 37.54197697237588
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 191,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.904910836966693,
+        "SLIM": 46.180537830704154
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 192,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 26.08746413971619,
+        "SLIM": 57.67815794970641
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 193,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 8.628979304651786,
+        "SLIM": 21.04414681859615
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 194,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 28.240402254503618,
+        "SLIM": 68.98703235355538
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 195,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 19.918365249349414,
+        "SLIM": 51.5700486288077
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 196,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 15.329729256708575,
+        "SLIM": 30.810960792190667
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 197,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.794313341881193,
+        "SLIM": 47.633574152473564
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 198,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 31.87873579732149,
+        "SLIM": 59.25729254526928
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 199,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 17.961862890041047,
+        "SLIM": 55.121866888151544
+       },
+       "delta_chi2": 0.0
+      }
+     ],
+     "p_toys": {
+      "k": 200,
+      "n": 200,
+      "convention": "clopper-pearson",
+      "estimate": 1.0,
+      "resolved": true,
+      "binomial_error": null,
+      "interval": [
+       0.99083696502213,
+       1.0
+      ],
+      "interval_cl": 0.6827,
+      "lower_bound": {
+       "value": 0.9851329607687279,
+       "cl": 0.95,
+       "sided": "one-sided"
+      }
+     },
+     "surviving": true,
+     "status": "ok"
+    },
+    {
+     "family": "SLIM",
+     "chi2": 23.92716501336814,
+     "delta_chi2": 23.92716500000367,
+     "toys": 200,
+     "failed": 3,
+     "failure_reasons": {
+      "BIG: provider-out-of-domain": 2,
+      "BIG: restart-cap": 1
+     },
+     "toy_seed": 20261028,
+     "rows": [
+      {
+       "toy": 0,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 34.558072357461114,
+        "SLIM": 38.97798162520975
+       },
+       "delta_chi2": 4.419909267748636
+      },
+      {
+       "toy": 1,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 40.26890985986141,
+        "SLIM": 40.25100668920403
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 2,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 26.329395686947258,
+        "SLIM": 26.624086890212368
+       },
+       "delta_chi2": 0.2946912032651099
+      },
+      {
+       "toy": 3,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 29.852832340792634,
+        "SLIM": 29.954290058273305
+       },
+       "delta_chi2": 0.10145771748067034
+      },
+      {
+       "toy": 4,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.623112488300897,
+        "SLIM": 24.61317809454289
+       },
+       "delta_chi2": 0.9900656062419912
+      },
+      {
+       "toy": 5,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 13.575199306191923,
+        "SLIM": 14.042609452640566
+       },
+       "delta_chi2": 0.46741014644864265
+      },
+      {
+       "toy": 6,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 16.13561954739067,
+        "SLIM": 16.272514385550366
+       },
+       "delta_chi2": 0.1368948381596944
+      },
+      {
+       "toy": 7,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.271224642081897,
+        "SLIM": 26.042516751811668
+       },
+       "delta_chi2": 2.771292109729771
+      },
+      {
+       "toy": 8,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.015502134826647,
+        "SLIM": 18.12648181323244
+       },
+       "delta_chi2": 0.11097967840579415
+      },
+      {
+       "toy": 9,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 12.545528492478432,
+        "SLIM": 12.555751178645263
+       },
+       "delta_chi2": 0.010222686166830641
+      },
+      {
+       "toy": 10,
+       "outcome": "fit_failed",
+       "family": "BIG",
+       "reason": "provider-out-of-domain"
+      },
+      {
+       "toy": 11,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 24.6395404768656,
+        "SLIM": 26.249956342530258
+       },
+       "delta_chi2": 1.610415865664656
+      },
+      {
+       "toy": 12,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 32.79087673603918,
+        "SLIM": 34.17206957946496
+       },
+       "delta_chi2": 1.3811928434257794
+      },
+      {
+       "toy": 13,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 19.02420039760006,
+        "SLIM": 21.675558431985777
+       },
+       "delta_chi2": 2.6513580343857157
+      },
+      {
+       "toy": 14,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 20.631068149039145,
+        "SLIM": 21.92706078844951
+       },
+       "delta_chi2": 1.2959926394103647
+      },
+      {
+       "toy": 15,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 22.208115566470322,
+        "SLIM": 24.64921933779201
+       },
+       "delta_chi2": 2.441103771321689
+      },
+      {
+       "toy": 16,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 22.255507167314533,
+        "SLIM": 24.26113206716733
+       },
+       "delta_chi2": 2.0056248998527977
+      },
+      {
+       "toy": 17,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 39.583708122508874,
+        "SLIM": 41.064283667371036
+       },
+       "delta_chi2": 1.4805755448621625
+      },
+      {
+       "toy": 18,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 25.266366756493184,
+        "SLIM": 28.14013601378094
+       },
+       "delta_chi2": 2.873769257287755
+      },
+      {
+       "toy": 19,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 14.059192931448761,
+        "SLIM": 16.86496000004812
+       },
+       "delta_chi2": 2.8057670685993603
+      },
+      {
+       "toy": 20,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 15.374294257610988,
+        "SLIM": 15.58473206019088
+       },
+       "delta_chi2": 0.21043780257989297
+      },
+      {
+       "toy": 21,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 17.156070760851428,
+        "SLIM": 18.352173478975047
+       },
+       "delta_chi2": 1.196102718123619
+      },
+      {
+       "toy": 22,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 19.40483347248498,
+        "SLIM": 19.406253595910755
+       },
+       "delta_chi2": 0.0014201234257740225
+      },
+      {
+       "toy": 23,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 17.63621266208472,
+        "SLIM": 18.25406710920528
+       },
+       "delta_chi2": 0.6178544471205605
+      },
+      {
+       "toy": 24,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 30.96396380057906,
+        "SLIM": 33.23484570835355
+       },
+       "delta_chi2": 2.2708819077744877
+      },
+      {
+       "toy": 25,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 17.67837727161928,
+        "SLIM": 17.703987348615495
+       },
+       "delta_chi2": 0.02561007699621598
+      },
+      {
+       "toy": 26,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 19.34609361567695,
+        "SLIM": 21.091347016537718
+       },
+       "delta_chi2": 1.7452534008607685
+      },
+      {
+       "toy": 27,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 26.42602932480129,
+        "SLIM": 26.599787891695637
+       },
+       "delta_chi2": 0.173758566894346
+      },
+      {
+       "toy": 28,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 17.947020090399594,
+        "SLIM": 17.95000500488775
+       },
+       "delta_chi2": 0.0029849144881559653
+      },
+      {
+       "toy": 29,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.27925923296428,
+        "SLIM": 18.74414077672766
+       },
+       "delta_chi2": 0.46488154376338287
+      },
+      {
+       "toy": 30,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 26.53051785713911,
+        "SLIM": 28.411123012432412
+       },
+       "delta_chi2": 1.8806051552933027
+      },
+      {
+       "toy": 31,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 20.731731998957088,
+        "SLIM": 20.731956393076544
+       },
+       "delta_chi2": 0.00022439411945640586
+      },
+      {
+       "toy": 32,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.69278320200747,
+        "SLIM": 23.898770722070097
+       },
+       "delta_chi2": 5.205987520062628
+      },
+      {
+       "toy": 33,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 22.64969789639741,
+        "SLIM": 26.32005918524325
+       },
+       "delta_chi2": 3.6703612888458395
+      },
+      {
+       "toy": 34,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 24.356128801938368,
+        "SLIM": 25.951595373113207
+       },
+       "delta_chi2": 1.595466571174839
+      },
+      {
+       "toy": 35,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 26.800824686055265,
+        "SLIM": 28.778277802198104
+       },
+       "delta_chi2": 1.97745311614284
+      },
+      {
+       "toy": 36,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 19.87232573903424,
+        "SLIM": 22.13307198530606
+       },
+       "delta_chi2": 2.2607462462718217
+      },
+      {
+       "toy": 37,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 25.901391242031195,
+        "SLIM": 27.93210092319317
+       },
+       "delta_chi2": 2.030709681161973
+      },
+      {
+       "toy": 38,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 21.171954503204958,
+        "SLIM": 25.404980235440156
+       },
+       "delta_chi2": 4.233025732235198
+      },
+      {
+       "toy": 39,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 27.474320881774087,
+        "SLIM": 27.960633616772526
+       },
+       "delta_chi2": 0.48631273499843886
+      },
+      {
+       "toy": 40,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.126929955140596,
+        "SLIM": 23.358600254770217
+       },
+       "delta_chi2": 0.23167029962962005
+      },
+      {
+       "toy": 41,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 16.876500831501847,
+        "SLIM": 17.15966321264703
+       },
+       "delta_chi2": 0.283162381145182
+      },
+      {
+       "toy": 42,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.037796236115117,
+        "SLIM": 18.960302876272277
+       },
+       "delta_chi2": 0.9225066401571596
+      },
+      {
+       "toy": 43,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 29.606248164457476,
+        "SLIM": 30.48746019518832
+       },
+       "delta_chi2": 0.8812120307308433
+      },
+      {
+       "toy": 44,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 14.744761111909986,
+        "SLIM": 15.443877937416936
+       },
+       "delta_chi2": 0.69911682550695
+      },
+      {
+       "toy": 45,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 14.541491778659978,
+        "SLIM": 18.88900258946665
+       },
+       "delta_chi2": 4.347510810806671
+      },
+      {
+       "toy": 46,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.47362131022447,
+        "SLIM": 23.517549140647755
+       },
+       "delta_chi2": 0.04392783042328574
+      },
+      {
+       "toy": 47,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 24.727861620239047,
+        "SLIM": 26.802992078186058
+       },
+       "delta_chi2": 2.0751304579470116
+      },
+      {
+       "toy": 48,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 24.901760726261262,
+        "SLIM": 24.988963361977902
+       },
+       "delta_chi2": 0.08720263571663978
+      },
+      {
+       "toy": 49,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 16.21333876434185,
+        "SLIM": 16.234784575449872
+       },
+       "delta_chi2": 0.02144581110802335
+      },
+      {
+       "toy": 50,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 15.311542198290912,
+        "SLIM": 17.022839083838313
+       },
+       "delta_chi2": 1.7112968855474016
+      },
+      {
+       "toy": 51,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 16.093608378594276,
+        "SLIM": 16.462306599089136
+       },
+       "delta_chi2": 0.3686982204948599
+      },
+      {
+       "toy": 52,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 22.591567748811727,
+        "SLIM": 25.144502261063842
+       },
+       "delta_chi2": 2.552934512252115
+      },
+      {
+       "toy": 53,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 14.410673268885525,
+        "SLIM": 17.16629554560923
+       },
+       "delta_chi2": 2.755622276723706
+      },
+      {
+       "toy": 54,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 19.70729634009146,
+        "SLIM": 19.92370806432701
+       },
+       "delta_chi2": 0.21641172423554877
+      },
+      {
+       "toy": 55,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 27.745020056808357,
+        "SLIM": 28.905210684454236
+       },
+       "delta_chi2": 1.1601906276458784
+      },
+      {
+       "toy": 56,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 49.935823890551745,
+        "SLIM": 50.29380318455691
+       },
+       "delta_chi2": 0.3579792940051618
+      },
+      {
+       "toy": 57,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 22.837905164121914,
+        "SLIM": 23.021643194546563
+       },
+       "delta_chi2": 0.18373803042464942
+      },
+      {
+       "toy": 58,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 22.21027807988382,
+        "SLIM": 27.114523634415765
+       },
+       "delta_chi2": 4.904245554531943
+      },
+      {
+       "toy": 59,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 45.46483944924547,
+        "SLIM": 48.04408288852434
+       },
+       "delta_chi2": 2.5792434392788763
+      },
+      {
+       "toy": 60,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 21.790903700821296,
+        "SLIM": 21.819837834788075
+       },
+       "delta_chi2": 0.028934133966778575
+      },
+      {
+       "toy": 61,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 13.79616015477055,
+        "SLIM": 14.669034349455671
+       },
+       "delta_chi2": 0.8728741946851208
+      },
+      {
+       "toy": 62,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 25.13303285433962,
+        "SLIM": 25.704678366441488
+       },
+       "delta_chi2": 0.5716455121018669
+      },
+      {
+       "toy": 63,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 22.77044017074073,
+        "SLIM": 22.69259303933662
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 64,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 28.882167288281284,
+        "SLIM": 30.246058189580623
+       },
+       "delta_chi2": 1.3638909012993388
+      },
+      {
+       "toy": 65,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 25.719903295114694,
+        "SLIM": 26.00522560492695
+       },
+       "delta_chi2": 0.2853223098122548
+      },
+      {
+       "toy": 66,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 20.236094447017848,
+        "SLIM": 23.532044373124883
+       },
+       "delta_chi2": 3.295949926107035
+      },
+      {
+       "toy": 67,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 29.542998564666654,
+        "SLIM": 34.98606345304463
+       },
+       "delta_chi2": 5.443064888377975
+      },
+      {
+       "toy": 68,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 13.71470161101176,
+        "SLIM": 13.804944856830664
+       },
+       "delta_chi2": 0.09024324581890397
+      },
+      {
+       "toy": 69,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 27.635663245217366,
+        "SLIM": 28.56989434105358
+       },
+       "delta_chi2": 0.9342310958362141
+      },
+      {
+       "toy": 70,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.10929650069332,
+        "SLIM": 24.08460964038329
+       },
+       "delta_chi2": 0.9753131396899732
+      },
+      {
+       "toy": 71,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 27.107155731898935,
+        "SLIM": 28.841461088156183
+       },
+       "delta_chi2": 1.7343053562572486
+      },
+      {
+       "toy": 72,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.536791751661852,
+        "SLIM": 27.06537170116855
+       },
+       "delta_chi2": 8.5285799495067
+      },
+      {
+       "toy": 73,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 34.325278536920095,
+        "SLIM": 35.59414333559692
+       },
+       "delta_chi2": 1.2688647986768231
+      },
+      {
+       "toy": 74,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 27.910311359404634,
+        "SLIM": 27.78290132823206
+       },
+       "delta_chi2": 0.0
+      },
+      {
+       "toy": 75,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 24.38173660819499,
+        "SLIM": 24.49791858500687
+       },
+       "delta_chi2": 0.11618197681188036
+      },
+      {
+       "toy": 76,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.427726889581038,
+        "SLIM": 23.59343689962577
+       },
+       "delta_chi2": 0.16571001004473374
+      },
+      {
+       "toy": 77,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 33.22636475252818,
+        "SLIM": 34.415096232319236
+       },
+       "delta_chi2": 1.188731479791059
+      },
+      {
+       "toy": 78,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 25.5726321225378,
+        "SLIM": 26.392013125335435
+       },
+       "delta_chi2": 0.819381002797634
+      },
+      {
+       "toy": 79,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.291935275067658,
+        "SLIM": 18.30170142477698
+       },
+       "delta_chi2": 0.009766149709321326
+      },
+      {
+       "toy": 80,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 19.439972658430836,
+        "SLIM": 20.09239390315914
+       },
+       "delta_chi2": 0.6524212447283055
+      },
+      {
+       "toy": 81,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 17.57954417077547,
+        "SLIM": 17.920036316168694
+       },
+       "delta_chi2": 0.3404921453932239
+      },
+      {
+       "toy": 82,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 16.98634825866578,
+        "SLIM": 17.50193594269404
+       },
+       "delta_chi2": 0.515587684028258
+      },
+      {
+       "toy": 83,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 28.104439365458667,
+        "SLIM": 28.861844758718583
+       },
+       "delta_chi2": 0.7574053932599156
+      },
+      {
+       "toy": 84,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 32.746531611124595,
+        "SLIM": 34.12103745827309
+       },
+       "delta_chi2": 1.374505847148498
+      },
+      {
+       "toy": 85,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 24.426762472177668,
+        "SLIM": 24.776528197551947
+       },
+       "delta_chi2": 0.3497657253742794
+      },
+      {
+       "toy": 86,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 35.17884338160583,
+        "SLIM": 35.23201621935007
+       },
+       "delta_chi2": 0.053172837744241974
+      },
+      {
+       "toy": 87,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 34.351593535631025,
+        "SLIM": 36.946108812438474
+       },
+       "delta_chi2": 2.5945152768074493
+      },
+      {
+       "toy": 88,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.362527326809854,
+        "SLIM": 26.694039095850982
+       },
+       "delta_chi2": 8.331511769041128
+      },
+      {
+       "toy": 89,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.32573811750727,
+        "SLIM": 23.467726018644463
+       },
+       "delta_chi2": 0.14198790113719184
+      },
+      {
+       "toy": 90,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 19.57588557861285,
+        "SLIM": 23.036321656395444
+       },
+       "delta_chi2": 3.4604360777825924
+      },
+      {
+       "toy": 91,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 22.144515816827823,
+        "SLIM": 24.140902956622206
+       },
+       "delta_chi2": 1.9963871397943826
+      },
+      {
+       "toy": 92,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 28.20329265470579,
+        "SLIM": 31.958957420377963
+       },
+       "delta_chi2": 3.7556647656721722
+      },
+      {
+       "toy": 93,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 20.82441648986589,
+        "SLIM": 24.9325414548819
+       },
+       "delta_chi2": 4.10812496501601
+      },
+      {
+       "toy": 94,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 19.572539867299238,
+        "SLIM": 20.262931887840626
+       },
+       "delta_chi2": 0.6903920205413883
+      },
+      {
+       "toy": 95,
+       "outcome": "fit_failed",
+       "family": "BIG",
+       "reason": "restart-cap"
+      },
+      {
+       "toy": 96,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 25.99247704724055,
+        "SLIM": 29.95239402552007
+       },
+       "delta_chi2": 3.959916978279523
+      },
+      {
+       "toy": 97,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 16.661889129615613,
+        "SLIM": 17.76771673926537
+       },
+       "delta_chi2": 1.105827609649758
+      },
+      {
+       "toy": 98,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 13.219554885125433,
+        "SLIM": 13.636676627628894
+       },
+       "delta_chi2": 0.41712174250346123
+      },
+      {
+       "toy": 99,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 24.384235051080253,
+        "SLIM": 24.806624937114357
+       },
+       "delta_chi2": 0.42238988603410377
+      },
+      {
+       "toy": 100,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 13.222009828854805,
+        "SLIM": 13.70820318215377
+       },
+       "delta_chi2": 0.4861933532989653
+      },
+      {
+       "toy": 101,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 26.10716730933268,
+        "SLIM": 27.40132350908297
+       },
+       "delta_chi2": 1.2941561997502902
+      },
+      {
+       "toy": 102,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 38.02409275945273,
+        "SLIM": 39.29042647587527
+       },
+       "delta_chi2": 1.2663337164225439
+      },
+      {
+       "toy": 103,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 20.762356347239297,
+        "SLIM": 20.930844206907878
+       },
+       "delta_chi2": 0.1684878596685806
+      },
+      {
+       "toy": 104,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 24.96869605436541,
+        "SLIM": 25.49609543033683
+       },
+       "delta_chi2": 0.5273993759714202
+      },
+      {
+       "toy": 105,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 24.500480738044335,
+        "SLIM": 25.34049983266418
+       },
+       "delta_chi2": 0.8400190946198443
+      },
+      {
+       "toy": 106,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 16.734267352672262,
+        "SLIM": 17.4313115644131
+       },
+       "delta_chi2": 0.6970442117408382
+      },
+      {
+       "toy": 107,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 20.13820657713069,
+        "SLIM": 20.218220602785635
+       },
+       "delta_chi2": 0.08001402565494686
+      },
+      {
+       "toy": 108,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 28.38416291841242,
+        "SLIM": 29.490839368136932
+       },
+       "delta_chi2": 1.1066764497245103
+      },
+      {
+       "toy": 109,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 21.94878865518147,
+        "SLIM": 23.22497412324623
+       },
+       "delta_chi2": 1.2761854680647602
+      },
+      {
+       "toy": 110,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 44.7594698723165,
+        "SLIM": 45.36465213737239
+       },
+       "delta_chi2": 0.6051822650558876
+      },
+      {
+       "toy": 111,
+       "outcome": "fit_failed",
+       "family": "BIG",
+       "reason": "provider-out-of-domain"
+      },
+      {
+       "toy": 112,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 27.22903447670427,
+        "SLIM": 28.48655821276735
+       },
+       "delta_chi2": 1.257523736063078
+      },
+      {
+       "toy": 113,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 31.76235021988787,
+        "SLIM": 34.045062624525244
+       },
+       "delta_chi2": 2.2827124046373726
+      },
+      {
+       "toy": 114,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 21.305421193492343,
+        "SLIM": 21.801369681022948
+       },
+       "delta_chi2": 0.4959484875306046
+      },
+      {
+       "toy": 115,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 14.854986986507198,
+        "SLIM": 16.4078672578267
+       },
+       "delta_chi2": 1.5528802713195038
+      },
+      {
+       "toy": 116,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 15.388815370555388,
+        "SLIM": 16.20646577852291
+       },
+       "delta_chi2": 0.8176504079675233
+      },
+      {
+       "toy": 117,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 20.074728651448613,
+        "SLIM": 20.074854519987444
+       },
+       "delta_chi2": 0.00012586853883078675
+      },
+      {
+       "toy": 118,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 14.216955594521501,
+        "SLIM": 14.907627580116486
+       },
+       "delta_chi2": 0.6906719855949852
+      },
+      {
+       "toy": 119,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 21.949767011371474,
+        "SLIM": 23.577335322602462
+       },
+       "delta_chi2": 1.6275683112309878
+      },
+      {
+       "toy": 120,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 25.210739759662044,
+        "SLIM": 25.598722750264788
+       },
+       "delta_chi2": 0.3879829906027439
+      },
+      {
+       "toy": 121,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 34.220645943339974,
+        "SLIM": 36.05586040417731
+       },
+       "delta_chi2": 1.835214460837335
+      },
+      {
+       "toy": 122,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 26.102872674341,
+        "SLIM": 26.49942604470529
+       },
+       "delta_chi2": 0.39655337036429117
+      },
+      {
+       "toy": 123,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 25.209416226020252,
+        "SLIM": 25.303746757494757
+       },
+       "delta_chi2": 0.09433053147450465
+      },
+      {
+       "toy": 124,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 43.43283241413184,
+        "SLIM": 43.5713338333785
+       },
+       "delta_chi2": 0.1385014192466656
+      },
+      {
+       "toy": 125,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 21.386269552141556,
+        "SLIM": 23.374233592499266
+       },
+       "delta_chi2": 1.98796404035771
+      },
+      {
+       "toy": 126,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 40.429011731480536,
+        "SLIM": 41.90512783651913
+       },
+       "delta_chi2": 1.4761161050385923
+      },
+      {
+       "toy": 127,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.11976380905665,
+        "SLIM": 20.269301784200866
+       },
+       "delta_chi2": 2.1495379751442165
+      },
+      {
+       "toy": 128,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 17.239631250646447,
+        "SLIM": 20.54950290950747
+       },
+       "delta_chi2": 3.3098716588610237
+      },
+      {
+       "toy": 129,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 16.643284095931797,
+        "SLIM": 16.924494646895372
+       },
+       "delta_chi2": 0.28121055096357495
+      },
+      {
+       "toy": 130,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 16.967434283901724,
+        "SLIM": 18.418292174500426
+       },
+       "delta_chi2": 1.4508578905987015
+      },
+      {
+       "toy": 131,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 19.17563322821563,
+        "SLIM": 23.25821236814142
+       },
+       "delta_chi2": 4.082579139925791
+      },
+      {
+       "toy": 132,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.744581358447938,
+        "SLIM": 24.133772546028997
+       },
+       "delta_chi2": 0.38919118758105853
+      },
+      {
+       "toy": 133,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 27.0816760451805,
+        "SLIM": 27.486790184642214
+       },
+       "delta_chi2": 0.4051141394617126
+      },
+      {
+       "toy": 134,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 37.36204454429972,
+        "SLIM": 37.651110888639806
+       },
+       "delta_chi2": 0.2890663443400854
+      },
+      {
+       "toy": 135,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 30.648267249779252,
+        "SLIM": 30.931023473536328
+       },
+       "delta_chi2": 0.282756223757076
+      },
+      {
+       "toy": 136,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 26.582474249110568,
+        "SLIM": 28.852551180143333
+       },
+       "delta_chi2": 2.270076931032765
+      },
+      {
+       "toy": 137,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.419444380385848,
+        "SLIM": 20.960618388488683
+       },
+       "delta_chi2": 2.5411740081028356
+      },
+      {
+       "toy": 138,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.321749456281935,
+        "SLIM": 23.879522425297928
+       },
+       "delta_chi2": 0.5577729690159927
+      },
+      {
+       "toy": 139,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 12.219960273810267,
+        "SLIM": 16.73810214151158
+       },
+       "delta_chi2": 4.518141867701312
+      },
+      {
+       "toy": 140,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 29.096833226087554,
+        "SLIM": 30.383996570487632
+       },
+       "delta_chi2": 1.2871633444000778
+      },
+      {
+       "toy": 141,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 9.320730018996933,
+        "SLIM": 11.73022244494041
+       },
+       "delta_chi2": 2.4094924259434762
+      },
+      {
+       "toy": 142,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 36.2248871649835,
+        "SLIM": 37.646155887224865
+       },
+       "delta_chi2": 1.421268722241365
+      },
+      {
+       "toy": 143,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 12.912014006546528,
+        "SLIM": 13.224526681735348
+       },
+       "delta_chi2": 0.3125126751888203
+      },
+      {
+       "toy": 144,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 20.379135712381938,
+        "SLIM": 20.379152445020196
+       },
+       "delta_chi2": 1.6732638258076804e-05
+      },
+      {
+       "toy": 145,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 16.544467240292537,
+        "SLIM": 17.814820018456896
+       },
+       "delta_chi2": 1.2703527781643587
+      },
+      {
+       "toy": 146,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 16.475461333500363,
+        "SLIM": 17.49693532795374
+       },
+       "delta_chi2": 1.0214739944533768
+      },
+      {
+       "toy": 147,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 20.252320074296644,
+        "SLIM": 21.205840705888583
+       },
+       "delta_chi2": 0.9535206315919389
+      },
+      {
+       "toy": 148,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 25.559508236007794,
+        "SLIM": 25.560444600945964
+       },
+       "delta_chi2": 0.0009363649381697314
+      },
+      {
+       "toy": 149,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 14.81666320903912,
+        "SLIM": 16.510232503352803
+       },
+       "delta_chi2": 1.6935692943136829
+      },
+      {
+       "toy": 150,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 33.004935518998025,
+        "SLIM": 34.60028786012038
+       },
+       "delta_chi2": 1.5953523411223571
+      },
+      {
+       "toy": 151,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 19.755345990321665,
+        "SLIM": 23.037861688873313
+       },
+       "delta_chi2": 3.2825156985516486
+      },
+      {
+       "toy": 152,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 26.640023505447274,
+        "SLIM": 26.82332863280532
+       },
+       "delta_chi2": 0.1833051273580466
+      },
+      {
+       "toy": 153,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 32.593167029074436,
+        "SLIM": 35.74967510424797
+       },
+       "delta_chi2": 3.1565080751735337
+      },
+      {
+       "toy": 154,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 22.46107213127361,
+        "SLIM": 25.90949693250033
+       },
+       "delta_chi2": 3.448424801226718
+      },
+      {
+       "toy": 155,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.99546950240802,
+        "SLIM": 28.090494591322575
+       },
+       "delta_chi2": 4.095025088914554
+      },
+      {
+       "toy": 156,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.005655544437108,
+        "SLIM": 18.811363102656628
+       },
+       "delta_chi2": 0.8057075582195203
+      },
+      {
+       "toy": 157,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.410625160585305,
+        "SLIM": 19.10242855390754
+       },
+       "delta_chi2": 0.6918033933222354
+      },
+      {
+       "toy": 158,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 26.505921157248792,
+        "SLIM": 29.794168285398733
+       },
+       "delta_chi2": 3.2882471281499406
+      },
+      {
+       "toy": 159,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.046150908580472,
+        "SLIM": 23.002555902707126
+       },
+       "delta_chi2": 4.956404994126654
+      },
+      {
+       "toy": 160,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 19.10966634017537,
+        "SLIM": 23.444536647120792
+       },
+       "delta_chi2": 4.334870306945422
+      },
+      {
+       "toy": 161,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 21.437712591966346,
+        "SLIM": 22.6142309393555
+       },
+       "delta_chi2": 1.1765183473891554
+      },
+      {
+       "toy": 162,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 21.74901750663227,
+        "SLIM": 22.815480346036864
+       },
+       "delta_chi2": 1.0664628394045934
+      },
+      {
+       "toy": 163,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 22.09020007906755,
+        "SLIM": 23.974155883930518
+       },
+       "delta_chi2": 1.8839558048629677
+      },
+      {
+       "toy": 164,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 20.31154622893107,
+        "SLIM": 20.771367604650127
+       },
+       "delta_chi2": 0.4598213757190557
+      },
+      {
+       "toy": 165,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 24.84297053521767,
+        "SLIM": 26.20133446319436
+       },
+       "delta_chi2": 1.35836392797669
+      },
+      {
+       "toy": 166,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 11.97955327581987,
+        "SLIM": 14.991677639495524
+       },
+       "delta_chi2": 3.012124363675655
+      },
+      {
+       "toy": 167,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 41.06679973987209,
+        "SLIM": 41.49740080537218
+       },
+       "delta_chi2": 0.4306010655000918
+      },
+      {
+       "toy": 168,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 24.44160639727308,
+        "SLIM": 28.585726122680768
+       },
+       "delta_chi2": 4.144119725407688
+      },
+      {
+       "toy": 169,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 16.672650718354145,
+        "SLIM": 22.553881112465536
+       },
+       "delta_chi2": 5.881230394111391
+      },
+      {
+       "toy": 170,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 24.292438854845514,
+        "SLIM": 38.97626285589702
+       },
+       "delta_chi2": 14.683824001051505
+      },
+      {
+       "toy": 171,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 33.95379670136716,
+        "SLIM": 34.82107675377789
+       },
+       "delta_chi2": 0.8672800524107274
+      },
+      {
+       "toy": 172,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 28.080697252118867,
+        "SLIM": 30.613728401856655
+       },
+       "delta_chi2": 2.5330311497377878
+      },
+      {
+       "toy": 173,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 25.78777698856129,
+        "SLIM": 26.62148765552454
+       },
+       "delta_chi2": 0.833710666963249
+      },
+      {
+       "toy": 174,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 21.470186049932934,
+        "SLIM": 31.47357236527671
+       },
+       "delta_chi2": 10.003386315343775
+      },
+      {
+       "toy": 175,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 19.94809441955907,
+        "SLIM": 21.02086349928109
+       },
+       "delta_chi2": 1.072769079722022
+      },
+      {
+       "toy": 176,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.83337121710499,
+        "SLIM": 19.300421604754323
+       },
+       "delta_chi2": 0.4670503876493335
+      },
+      {
+       "toy": 177,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 29.43486791567332,
+        "SLIM": 31.04231240192347
+       },
+       "delta_chi2": 1.6074444862501522
+      },
+      {
+       "toy": 178,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 22.645949958336317,
+        "SLIM": 27.65552840989033
+       },
+       "delta_chi2": 5.009578451554013
+      },
+      {
+       "toy": 179,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.82433460571069,
+        "SLIM": 21.563381884947184
+       },
+       "delta_chi2": 2.7390472792364946
+      },
+      {
+       "toy": 180,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 23.88367595926775,
+        "SLIM": 25.183610155233694
+       },
+       "delta_chi2": 1.2999341959659425
+      },
+      {
+       "toy": 181,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 21.03017918480014,
+        "SLIM": 21.77614848385305
+       },
+       "delta_chi2": 0.7459692990529092
+      },
+      {
+       "toy": 182,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.230494101228548,
+        "SLIM": 21.14068977119352
+       },
+       "delta_chi2": 2.910195669964974
+      },
+      {
+       "toy": 183,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.831958942691116,
+        "SLIM": 21.03133571748009
+       },
+       "delta_chi2": 2.1993767747889734
+      },
+      {
+       "toy": 184,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 17.615190659333162,
+        "SLIM": 18.35890419522483
+       },
+       "delta_chi2": 0.7437135358916684
+      },
+      {
+       "toy": 185,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 21.024650347270924,
+        "SLIM": 26.88035590145941
+       },
+       "delta_chi2": 5.855705554188486
+      },
+      {
+       "toy": 186,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 29.849156391178795,
+        "SLIM": 31.27515100244895
+       },
+       "delta_chi2": 1.4259946112701556
+      },
+      {
+       "toy": 187,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 22.33594047930747,
+        "SLIM": 23.617888112460818
+       },
+       "delta_chi2": 1.2819476331533473
+      },
+      {
+       "toy": 188,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 22.467487322959236,
+        "SLIM": 24.0834481762585
+       },
+       "delta_chi2": 1.6159608532992635
+      },
+      {
+       "toy": 189,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 13.67035833072222,
+        "SLIM": 20.64492754262106
+       },
+       "delta_chi2": 6.974569211898839
+      },
+      {
+       "toy": 190,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 25.62200072401545,
+        "SLIM": 26.51696938878201
+       },
+       "delta_chi2": 0.8949686647665587
+      },
+      {
+       "toy": 191,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 18.394419971661236,
+        "SLIM": 18.982951093723642
+       },
+       "delta_chi2": 0.5885311220624061
+      },
+      {
+       "toy": 192,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 29.775129525377466,
+        "SLIM": 30.272008009232973
+       },
+       "delta_chi2": 0.49687848385550737
+      },
+      {
+       "toy": 193,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 9.489933807427354,
+        "SLIM": 11.997412580987667
+       },
+       "delta_chi2": 2.5074787735603135
+      },
+      {
+       "toy": 194,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 22.978182665172326,
+        "SLIM": 28.394613402006613
+       },
+       "delta_chi2": 5.416430736834286
+      },
+      {
+       "toy": 195,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 20.029679466168716,
+        "SLIM": 20.060816952958678
+       },
+       "delta_chi2": 0.03113748678996231
+      },
+      {
+       "toy": 196,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 16.661657267901806,
+        "SLIM": 17.120026575406413
+       },
+       "delta_chi2": 0.4583693075046078
+      },
+      {
+       "toy": 197,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 24.056406456149897,
+        "SLIM": 24.299823315030135
+       },
+       "delta_chi2": 0.2434168588802379
+      },
+      {
+       "toy": 198,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 31.801547982839434,
+        "SLIM": 31.93881202914287
+       },
+       "delta_chi2": 0.1372640463034358
+      },
+      {
+       "toy": 199,
+       "outcome": "ok",
+       "chi2": {
+        "BIG": 16.476741178664497,
+        "SLIM": 18.30060951302047
+       },
+       "delta_chi2": 1.8238683343559714
+      }
+     ],
+     "p_toys": {
+      "k": 0,
+      "n": 197,
+      "convention": "clopper-pearson",
+      "estimate": null,
+      "resolved": false,
+      "binomial_error": null,
+      "interval": [
+       0.0,
+       0.009301922586418793
+      ],
+      "interval_cl": 0.6827,
+      "upper_bound": {
+       "value": 0.015091723853914272,
+       "cl": 0.95,
+       "sided": "one-sided"
+      },
+      "note": "no toy reached the observed value: the tail is below the bound, not zero; add toys to resolve it"
+     },
+     "surviving": false,
+     "status": "ok"
+    }
+   ],
+   "surviving": [
+    "BIG"
+   ]
+  },
+  "families": {
+   "declared": [
+    "BIG",
+    "SLIM"
+   ],
+   "expressible": [
+    "BIG",
+    "SLIM"
+   ],
+   "not_expressible": [],
+   "surviving": [
+    "BIG"
+   ]
+  },
+  "provider_evaluations": {
+   "provider_calls": 77706,
+   "points_sent": 77706,
+   "cache_hits": 0,
+   "max_evaluations": 2000000,
+   "records_with_computational_run": 0
+  },
+  "status": "ok",
+  "status_label": [
+   "asimov",
+   "synthetic",
+   "unvalidated"
+  ],
+  "written": {
+   "result": "result.json",
+   "statistical_result": "statistical-result.json"
+  }
+ }
+}

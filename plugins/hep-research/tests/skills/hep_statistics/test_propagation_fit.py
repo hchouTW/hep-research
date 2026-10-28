@@ -17,9 +17,12 @@ HEP_USINE_LIVE_TEST=1 (and HEP_USINE_BIN, HEP_USINE_DATA) one live test refits S
 compares it with the record. C2U's family calibration was refused (recorded, asserted as such); C2U-3 moved to C2UF-1
 (decision A1.12), checked from the study recorded by usine_two_dataset_family_study.py (fixture
 tests/adapters/fixtures/cr_propagation/c2uf/usine-two-dataset-family-study.json): B/C and 10Be/9Be from one USINE run
-per point, BIG and SLIM fitted with the provider; the recorded response model was refused (0.452 sigma > 0.05), so
-C2UF-1 is NOT met and its test is an expected failure (VALIDATION CRPROP-C2UF). With HEP_USINE_LIVE_TEST=1 one live
-test reruns the truth point (one USINE run) and compares it with the record.
+per point, BIG and SLIM fitted with the provider; the recorded polynomial response model was refused (0.452 sigma >
+0.05). C2UF-1 is met in the emulator study (usine_emulator_family_study.py, fixture usine-emulator-family-study.json,
+decision A1.14): a Gaussian-process emulator of USINE validated on 40 held-out USINE runs (largest error 0.0038 sigma),
+its error in the covariance, BIG and SLIM fitted with the emulator provider and calibrated with 200 toys each, BIG
+surviving. With HEP_USINE_LIVE_TEST=1 live tests rerun the truth point (one USINE run) and compare the emulator with
+two fresh USINE runs.
 """
 import copy
 import json
@@ -47,6 +50,7 @@ PROVIDER = "cr-secondary-ratio-closed-form"
 USINE_RECORD = PLUGIN / "tests" / "adapters" / "fixtures" / "cr_propagation" / "c2u" / "usine-family-study.json"
 TWO_DATASET_RECORD = (PLUGIN / "tests" / "adapters" / "fixtures" / "cr_propagation" / "c2uf"
                       / "usine-two-dataset-family-study.json")
+EMULATOR_RECORD = TWO_DATASET_RECORD.parent / "usine-emulator-family-study.json"
 LIVE = os.environ.get("HEP_USINE_LIVE_TEST") == "1"
 TRUTH = {"D0_cm2_s": 3.0e28, "delta": 0.5, "L_kpc": 4.0, "R0_gv": 1.0, "disc_halfwidth_pc": 100.0}
 
@@ -593,10 +597,9 @@ def _two_dataset_record():
 
 @unittest.skipUnless(HAVE, "needs numpy and scipy")
 class UsineTwoDatasetFamilies(unittest.TestCase):
-    """C2UF-1 (C2U-3 moved by A1.12) from the recorded two-dataset USINE study, plus one live check gated by
-    HEP_USINE_LIVE_TEST=1. Nothing here skips when the calibration is not ok: the recorded refusal is asserted as it
-    happened, and the criterion itself runs as an expected failure until a recorded study meets it (an unexpected
-    success then fails the suite, so the marker cannot outlive the miss)."""
+    """The two-dataset USINE study of C2UF dispatch 1 (polynomial response models), asserted as recorded: fits with
+    USINE, the response model refused (0.452 sigma). C2UF-1 itself is asserted from the emulator study
+    (UsineEmulatorFamilies, decision A1.14). One live check gated by HEP_USINE_LIVE_TEST=1."""
 
     @classmethod
     def setUpClass(cls):
@@ -642,36 +645,6 @@ class UsineTwoDatasetFamilies(unittest.TestCase):
         self.assertIsNone(self.res["families"]["surviving"])
         self.assertEqual(self.res["status"], "failed")
 
-    @unittest.expectedFailure   # C2UF-1 NOT MET in the recorded study; remove when a recorded study meets it
-    def test_two_datasets_toy_calibrated_delta_chi2_and_generator_survives(self):
-        self.assertEqual(self.cal["status"], "ok", self.cal.get("detail"))
-        rm = self.cal["response_model"]
-        self.assertTrue(rm["validation"]["passed"])
-        self.assertLessEqual(rm["validation"]["max_error_over_sigma"], 0.05)
-        self.assertEqual(rm["validation"]["points"], self.doc["config"]["response_model"]["validation_points"])
-        for name, pred in self.doc["truth_predictions"].items():   # P10: a per-bin error for every dataset
-            self.assertEqual(len(rm["error_component"][name]), len(pred["values"]["values"]))
-        entries = {e["family"]: e for e in self.cal["families"]}
-        self.assertEqual(set(entries), {"BIG", "SLIM"})
-        n = self.doc["config"]["family_toys"]["n"]
-        alpha = self.doc["config"]["family_toys"]["alpha"]
-        self.assertEqual((n, alpha), (200, 0.05))
-        best = min(f["chi2"] for f in self.fits.values())
-        for name, e in entries.items():
-            self.assertEqual(e["status"], "ok")
-            self.assertEqual(e["toys"], n)
-            self.assertLessEqual(e["failed"], 0.02 * n)
-            self.assertAlmostEqual(e["delta_chi2"], self.fits[name]["chi2"] - best, places=12)
-            ok_rows = [r for r in e["rows"] if r["outcome"] == "ok"]
-            exceed = sum(1 for r in ok_rows if r["delta_chi2"] >= e["delta_chi2"] - 1e-12)
-            self.assertEqual((e["p_toys"]["k"], e["p_toys"]["n"]), (exceed, len(ok_rows)))
-        gen = self.doc["generating_family"]
-        self.assertEqual(gen, "BIG")
-        self.assertEqual(entries[gen]["delta_chi2"], 0.0)
-        self.assertTrue(entries[gen]["surviving"])
-        self.assertGreaterEqual(entries[gen]["p_toys"]["estimate"], alpha)
-        self.assertIn(gen, self.cal["surviving"])
-
     def test_two_datasets_statistical_result_validates(self):
         import propagation_fit as pf
         from contracts.validate import validate_artifact
@@ -707,3 +680,109 @@ class UsineTwoDatasetFamilies(unittest.TestCase):
                     self.assertLessEqual(abs(a / b - 1.0), 1e-6, name)
             run = json.loads(next((work / "runs").rglob("*.computational-run.json")).read_text())
             self.assertIn("fb53006d", json.dumps(run["extension"]["tools"]))
+
+
+def _emulator_record():
+    return json.loads(EMULATOR_RECORD.read_text(encoding="utf-8"))
+
+
+@unittest.skipUnless(HAVE, "needs numpy and scipy")
+class UsineEmulatorFamilies(unittest.TestCase):
+    """C2UF-1 (decision A1.14) from the recorded emulator study (usine_emulator_family_study.py): a Gaussian-process
+    emulator of USINE (B/C and 10Be/9Be, decay on) validated on held-out USINE runs at 0.05 sigma, its error in the
+    covariance (P10), BIG and SLIM fitted with the emulator provider, toy-calibrated delta chi2 of both, the generator
+    surviving. Hard assertions; one live check gated by HEP_USINE_LIVE_TEST=1 (two USINE runs)."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.doc = _emulator_record()
+        cls.res = cls.doc["result"]
+        cls.fits = {f["family"]: f for f in cls.res["fits"]}
+        cls.cal = cls.res["family_calibration"]
+        cls.val = cls.doc["emulator"]["validation"]
+
+    def test_emulator_validated_against_usine_and_its_error_in_the_covariance(self):
+        import hashlib
+        self.assertEqual((self.val["passed"], self.val["tolerance"]), (True, 0.05))
+        self.assertLessEqual(self.val["max_error_over_sigma"], 0.05)
+        self.assertEqual(len(self.val["rows"]), 40)
+        self.assertTrue(all(r["status"] == "ok" and r["max_error_over_sigma"] <= 0.05 for r in self.val["rows"]))
+        self.assertEqual(sum(1 for r in self.val["rows"] if r["point"]["V_A_kms"] == 0.0), 10)   # the SLIM slice
+        model = TWO_DATASET_RECORD.parent / self.doc["emulator"]["model"]
+        self.assertEqual(hashlib.sha256(model.read_bytes()).hexdigest(), self.doc["emulator"]["model_sha256"])
+        self.assertEqual(self.res["provider"]["id"], "emulator")
+        self.assertTrue(self.res["provider"]["version"].endswith("+model." + self.doc["emulator"]["model_sha256"][:12]))
+        for ds in self.doc["config"]["datasets"]:      # P10: the largest held-out error per bin, uncorrelated
+            comp = [u for u in ds["measurement"]["extension"]["data"]["uncertainties"] if u["name"] == "emulator"]
+            self.assertEqual(len(comp), 1)
+            self.assertEqual(comp[0]["correlation"], "uncorrelated")
+            self.assertEqual(comp[0]["values"], self.val["error_component"][ds["name"]])
+
+    def test_c2uf1_toy_calibrated_delta_chi2_and_the_generator_survives(self):
+        self.assertEqual(self.res["status"], "ok")
+        self.assertEqual(self.res["families"]["expressible"], ["BIG", "SLIM"])
+        for name in ("BIG", "SLIM"):
+            self.assertEqual(self.fits[name]["status"], "converged")
+            usine = self.doc["usine_fits"][name]        # the emulator fit equals the USINE fit of study 2
+            self.assertLessEqual(abs(self.fits[name]["chi2"] - usine["chi2"]), 0.05)
+        self.assertEqual(self.cal["status"], "ok", self.cal.get("detail"))
+        self.assertEqual(self.cal["response_model"]["kind"], "provider (no response model)")
+        entries = {e["family"]: e for e in self.cal["families"]}
+        self.assertEqual(set(entries), {"BIG", "SLIM"})
+        n, alpha = self.doc["config"]["family_toys"]["n"], self.doc["config"]["family_toys"]["alpha"]
+        self.assertEqual((n, alpha), (200, 0.05))
+        best = min(f["chi2"] for f in self.fits.values())
+        for name, e in entries.items():
+            self.assertEqual(e["status"], "ok")
+            self.assertEqual(e["toys"], n)
+            self.assertLessEqual(e["failed"], 0.02 * n)
+            self.assertEqual(len(e["rows"]), n)
+            self.assertAlmostEqual(e["delta_chi2"], self.fits[name]["chi2"] - best, places=12)
+            ok_rows = [r for r in e["rows"] if r["outcome"] == "ok"]
+            exceed = sum(1 for r in ok_rows if r["delta_chi2"] >= e["delta_chi2"] - 1e-12)
+            self.assertEqual((e["p_toys"]["k"], e["p_toys"]["n"]), (exceed, len(ok_rows)))
+        gen = self.doc["generating_family"]
+        self.assertEqual((gen, entries[gen]["delta_chi2"]), ("BIG", 0.0))
+        self.assertTrue(entries[gen]["surviving"])
+        self.assertGreaterEqual(entries[gen]["p_toys"]["estimate"], alpha)
+        self.assertIn(gen, self.cal["surviving"])
+        self.assertEqual(self.res["families"]["surviving"], self.cal["surviving"])
+        self.assertGreater(entries["SLIM"]["delta_chi2"], 20.0)
+
+    def test_statistical_result_validates(self):
+        import propagation_fit as pf
+        from contracts.validate import validate_artifact
+        sr = pf.statistical_result_artifact(self.res, self.res["status_label"])
+        self.assertTrue(validate_artifact(sr).ok)
+        self.assertEqual(sr["extension"]["seeds"]["family_toys"], self.doc["config"]["family_toys"]["seed"])
+
+    @unittest.skipUnless(LIVE, "live USINE runs: set HEP_USINE_LIVE_TEST=1, HEP_USINE_BIN and HEP_USINE_DATA")
+    def test_live_emulator_matches_fresh_usine_runs(self):
+        sys.path.insert(0, str(PLUGIN / "tests" / "skills" / "hep_statistics"))
+        import usine_emulator_family_study as study
+        rows = [self.val["rows"][3], self.val["rows"][35]]
+        with tempfile.TemporaryDirectory() as scratch_dir:
+            work = Path(scratch_dir)
+            registry = work / "registry.json"
+            proc = subprocess.run([sys.executable, str(PLUGIN / "tools" / "provider_registry.py"), "--write",
+                                   str(registry)], capture_output=True, text=True, timeout=300)
+            self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
+            old = os.environ.get("HEP_USINE_RUN_DIR")
+            os.environ["HEP_USINE_RUN_DIR"] = str(work)
+            try:
+                usine, sent = study.usine_values(str(registry), str(work / "cache"), [r["point"] for r in rows])
+            finally:
+                if old is None:
+                    os.environ.pop("HEP_USINE_RUN_DIR")
+                else:
+                    os.environ["HEP_USINE_RUN_DIR"] = old
+            self.assertEqual(sent, 2)
+            artifact = TWO_DATASET_RECORD.parent / self.doc["emulator"]["ml_artifact"]
+            emu_reg = study.emulator_registry(str(registry), artifact, work / "emulator-registry.json")
+            emu = study.emulator_values(emu_reg, artifact, [r["point"] for r in rows])
+            nbc = 15
+            for u, e in zip(usine, emu):
+                self.assertEqual(e["status"], "ok")
+                for i, (a, b) in enumerate(zip(e["values"], u)):
+                    rel = study.SIGMA_REL["bc-asimov" if i < nbc else "be-asimov"]
+                    self.assertLessEqual(abs(a - b) / (rel * b), 0.05, i)

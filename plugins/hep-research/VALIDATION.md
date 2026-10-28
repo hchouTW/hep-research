@@ -7138,8 +7138,7 @@ Emulator results and amendments (written before the recorded fit run):
 - Validation round 0 PASSED: 738 training runs (448 cached + 300 new, 10 duplicates to 1e-9 dropped), 19 principal
   components; at the 40 held-out USINE runs the largest error is 0.0038 of the data sigma (tolerance 0.05), largest
   relative error 2.1e-4, no point refused by the DomainModel. No refinement round was needed (no further USINE run).
-- First calibration with the emulator (not recorded as the result; `$CRPROP_OUT/c2uf/emu/record.json` of 2026-10-29
-  00:xx): fits equal to USINE's (SLIM chi2 23.9272 vs 23.9273), but the toy study stopped at the 2% limit: the toy
+- First calibration with the emulator (not recorded as the result; `$CRPROP_OUT/c2uf/emu/record-first.json`): fits equal to USINE's (SLIM chi2 23.9272 vs 23.9273), but the toy study stopped at the 2% limit: the toy
   fits did not pass the convergence verdict. Diagnosed on the same toys (emulator only, no USINE run): (1) scipy's
   default relative difference steps (1e-8) sit below the emulator's rounding noise, so the Jacobian was noise; (2) fits
   stopping within one step of V_c = 0 had verdict differences straddling the bound; (3) BIG's fits to SLIM's toys have
@@ -7153,3 +7152,19 @@ Emulator results and amendments (written before the recorded fit run):
   domain (no approximation, so no response box; a point the DomainModel refuses fails that toy). On 200 toys per
   family (diagnostic, same seeds) BIG had 0 and SLIM 3 failed toys (2 refused by the DomainModel, 1 not converged),
   below the 2% limit (4).
+
+Results of dispatch 2 (recorded in `tests/adapters/fixtures/cr_propagation/c2uf/usine-emulator-family-study.json`,
+with the model `emulator-model.json` and its ml-artifact `emulator.ml-artifact.json`):
+
+| Item | Result | Evidence |
+|---|---|---|
+| E2 unchanged | the committed E2 model's 8 pinned responses reproduced (numbers equal within 1e-12, on E2 bit-identical apart from the timing field); every existing E2 test passes unchanged | `EmulatorPinnedResponses`, test_cr_propagation, test_train_emulator |
+| Per-model declaration | the C2UF model declares B/C and 10Be/9Be on ekn, its box as the domain and version `1.0.0+model.<sha12>`; sub-ranges answered by slice; rigidity refused | `EmulatorPerModelDeclaration` |
+| Emulator validation | PASSED: 40 held-out USINE runs (30 in the toy box, 10 on the SLIM slice), largest error 0.0038 of the data sigma (tolerance 0.05), none refused by the DomainModel; error component (largest held-out error per bin) added to both datasets' covariance | `test_emulator_validated_against_usine_and_its_error_in_the_covariance` |
+| Fits (emulator provider) | BIG converged, chi2 0.0 (dof 23); SLIM converged, chi2 23.927 (dof 25); both equal to the USINE fits of study 2 within 1e-4 in chi2 | record |
+| C2UF-1 | MET. BIG: delta chi2 0, toy p-value 1.0 (200 toys, 0 failed), survives at alpha 0.05. SLIM: delta chi2 23.93, no toy of 197 reached it, p < 0.0151 (95% upper bound), excluded at alpha 0.05 (200 toys, 3 failed: 2 refused by the DomainModel, 1 not converged; limit 4). The generator survives | `test_c2uf1_toy_calibrated_delta_chi2_and_the_generator_survives` |
+| Live | two validation points rerun with USINE (fresh cache, 2 runs): the emulator within 0.05 sigma in every bin | `test_live_emulator_matches_fresh_usine_runs`, `$CRPROP_OUT/c2uf/acceptance/live-emulator-vs-usine.txt` |
+
+USINE runs (A1.8 tally, cap 1000 after A1.14): 520 in dispatch 1, 340 for the emulator (300 training, 40 validation)
+and 2 in the live test: 862 of 1000. Emulator evaluations (tens of thousands in the toys) are not USINE runs. The
+refinement round was not needed.

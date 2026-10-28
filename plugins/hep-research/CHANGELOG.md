@@ -192,8 +192,13 @@ Software checks establish contract consistency only, not physical validity.
 - crprop c2uf: propagation_fit.py sends every dataset's observable in one provider request per point
   (`provider_requests` "per-point", one USINE run per point) and adds response-model layouts "joint" and
   "per-center" for the family calibration; the two-dataset USINE study (B/C and 10Be/9Be with decay on) and its
-  record under tests/adapters/fixtures/cr_propagation/c2uf/. C2UF-1 is NOT met: no response model reached the
-  0.05 sigma tolerance within the 600-run cap (VALIDATION CRPROP-C2UF); its test runs as an expected failure.
+  record under tests/adapters/fixtures/cr_propagation/c2uf/ (polynomial response models refused). Dispatch 2
+  (decision A1.14): emulator_provider.py takes a per-model declaration (observables with output slices, axes, bins,
+  the domain from the model's box; `--declaration`), the committed E2 model answered exactly as before (pinned
+  responses); propagation_fit.py response_model kind "provider" (toys on the provider itself) and toy fits that use
+  the stated steps, bound snapping and a Newton finish; a Gaussian-process emulator of USINE B/C and 10Be/9Be
+  (decay on) validated on 40 held-out USINE runs at 0.0038 sigma; C2UF-1 met: BIG survives (p 1.0), SLIM excluded
+  (delta chi2 23.9, p < 0.015) with 200 toys each (VALIDATION CRPROP-C2UF).
 
 ## 0.42.0 (2026-10-26)
 
