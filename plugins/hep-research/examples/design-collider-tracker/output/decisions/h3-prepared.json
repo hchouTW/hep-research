@@ -15,43 +15,43 @@
  "artifacts": [
   {
    "ref": "candidates/cand-A.json",
-   "sha256": "33964b7003c1f72a7bbd87f74f52844bafec7a8d15840dff85475be4833048be"
+   "sha256": "16d690c24afd874d241bf073eb5bcfca3d6c61ff86cb51a6499031061d54eacf"
   },
   {
    "ref": "candidates/cand-B.json",
-   "sha256": "38753658864cdc3925bdb7bec1eafa42e6025d501d90b43e49cbe84781008025"
+   "sha256": "dfb121579678af97ee7d773aa68575b6100833cadb927fb22d518b774b5d2fad"
   },
   {
    "ref": "evaluations/EST-HCAL-A.json",
-   "sha256": "160645d0255126afe79237fa139a57b8fdfdda5e44359cafa9d32cb57aef8c94"
+   "sha256": "2c21db791f31b4b4673acd64aaeb64a512abad35fdb1d387d98ed7f0d5ff951c"
   },
   {
    "ref": "evaluations/EST-TRG-A.json",
-   "sha256": "6ee0779fbab0106843cd3ed451a2e9e5ab9f4fd3656350520a6207c498a816be"
+   "sha256": "b44741e3e399e33acfe42cbfa92c30661e6327842062f6df7568713829b7c408"
   },
   {
    "ref": "evaluations/EST-PU-A.json",
-   "sha256": "48a15fad18a860fde37243a9873b3538abe9ac88a3a26051b6927cd6b7385a20"
+   "sha256": "d143d9324859a8e36640fe1d7c68566fe0cfd9988936227f45ce3acdd613d4d3"
   },
   {
    "ref": "evaluations/EST-CONT-A.json",
-   "sha256": "e22268ec626608730efd6b1422be7cd15f01d50e7340ba4c7baac1f996370e8f"
+   "sha256": "b4f6ad135257b6fa1b5b2308a2b60c99a45808f152ac80174c7d132db178a6fc"
   },
   {
    "ref": "evaluations/EST-HCAL-B.json",
-   "sha256": "c1b1982b5146501331ea0f5595b5e694d1a609c03d58444866e287e80613ddb3"
+   "sha256": "dc68421ba10364258b44e7afd1cd4810f936db9327537ebdfbc1a8422e08fa40"
   },
   {
    "ref": "evaluations/EST-TRG-B.json",
-   "sha256": "b35a43e2469f20ea9793da0983a8a3946282acc4e8b7bdf5dba924fe689f59ff"
+   "sha256": "2e461a4fb460b99960e93471b72e826a3f2eafc392676d8b08360ef09b317caf"
   },
   {
    "ref": "evaluations/EST-PU-B.json",
-   "sha256": "22183b809e88e020f109d6bad249448e9285c313537fb2b9f9d7ae360dd79cec"
+   "sha256": "7769bc7d6c187b432c9b8b0be020237655106721a77dfdeb864d52f2fe1ecac6"
   },
   {
    "ref": "evaluations/EST-CONT-B.json",
-   "sha256": "08f652f7aeacf4d7acb52caf9718aaa8ae977c2bd1b30eba860c1d8402c86466"
+   "sha256": "f448ed93a19b0d0fa319a9357a1623805bb11cf050e12ff0c7ca2142a0fb5c5d"
   }
  ]
 }

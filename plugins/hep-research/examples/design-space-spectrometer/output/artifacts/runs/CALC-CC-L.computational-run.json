@@ -4,7 +4,7 @@
  "artifact_type": "computational-run",
  "objective": "detector system design: computational-run written by evaluate_design.py",
  "versions": {
-  "plugin": "0.42.0",
+  "plugin": "0.43.0",
   "contracts": "3.14.0",
   "plugin_release": {
    "release": "unreleased",
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-L.json",
-   "sha256": "08191a41d42a608d89ee546a1397c0b7a8e3f41b394226bfe5963075c41fd0bb",
+   "sha256": "4dbe1ae584778e01f8b44ace100808a82683b9b92a5177f7fb17cc6f5315009b",
    "artifact_type": "design-candidate",
    "artifact_id": "ams-like-v1-cand-L",
    "status": [
@@ -28,7 +28,7 @@
   },
   {
    "ref": "evaluations/CALC-TRK-L.json",
-   "sha256": "fbb3a80be1c13d214980b64a6a5f153ae1fdcc3d9c8c61950136d7a2aab40ff6",
+   "sha256": "1a912ba3b69f4dd43e01c970f8bd460c1ac06889d0d5ba30e4964ed73b6b8179",
    "artifact_type": "design-evaluation",
    "artifact_id": "ams-like-v1-CALC-TRK-L",
    "status": [
@@ -49,13 +49,13 @@
   "input_manifest": [
    {
     "path": "candidates/cand-L.json",
-    "sha256": "08191a41d42a608d89ee546a1397c0b7a8e3f41b394226bfe5963075c41fd0bb"
+    "sha256": "4dbe1ae584778e01f8b44ace100808a82683b9b92a5177f7fb17cc6f5315009b"
    }
   ],
   "tools": [
    {
     "name": "charge-confusion-rate",
-    "version": "0.42.0"
+    "version": "0.43.0"
    }
   ],
   "commands": [
@@ -63,7 +63,7 @@
   ],
   "environment": {
    "python": "3.13.2",
-   "platform": "macOS-26.5"
+   "platform": "macOS-27.2"
   },
   "seeds": {},
   "tolerances": {},

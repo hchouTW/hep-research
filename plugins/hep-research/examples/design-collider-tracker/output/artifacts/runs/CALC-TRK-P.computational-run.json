@@ -4,7 +4,7 @@
  "artifact_type": "computational-run",
  "objective": "detector system design: computational-run written by evaluate_design.py",
  "versions": {
-  "plugin": "0.42.0",
+  "plugin": "0.43.0",
   "contracts": "3.14.0",
   "plugin_release": {
    "release": "unreleased",
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-P.json",
-   "sha256": "28a776d87350c878c61e6662e03b103f596362f908457f68813ef7f9a878a062",
+   "sha256": "d37a05c664ae0213d284131ee1d030149de6e55ee244f9ff7d6d741120558d92",
    "artifact_type": "design-candidate",
    "artifact_id": "collider-tracker-v1-cand-P",
    "status": [
@@ -40,13 +40,13 @@
   "input_manifest": [
    {
     "path": "candidates/cand-P.json",
-    "sha256": "28a776d87350c878c61e6662e03b103f596362f908457f68813ef7f9a878a062"
+    "sha256": "d37a05c664ae0213d284131ee1d030149de6e55ee244f9ff7d6d741120558d92"
    }
   ],
   "tools": [
    {
     "name": "tracker-resolution",
-    "version": "0.42.0"
+    "version": "0.43.0"
    }
   ],
   "commands": [
@@ -54,7 +54,7 @@
   ],
   "environment": {
    "python": "3.13.2",
-   "platform": "macOS-26.5"
+   "platform": "macOS-27.2"
   },
   "seeds": {},
   "tolerances": {},

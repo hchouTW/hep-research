@@ -3,7 +3,33 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.43.0 (2026-10-29)
+
+Minor release; contracts 3.14.0 (one minor, the `CV-CRPROP` of the cr-propagation campaign, new rules gated by
+`contracts/validate.py` `CRPROP_FROM`), `CORE_VERSION` 1.2.0 (new `core/provider/`), adapter `cr-propagation` 0.2.0.
+It ships the cr-propagation r4 campaign (20 of 24 work packages; report in
+`docs/dev/cr-propagation/campaign-report.md`): propagation predictions from USINE V3.5, DRAGON2 cd588707 and the
+closed-form thin-disc model through one subprocess provider protocol `cr-provider/1`, multi-dataset propagation fits
+with object-form degeneracies, toy-calibrated family comparison, and a Gaussian-process emulator provider. The
+reproduction of Génolini et al. 2019 is partial, so the capability map is unchanged (propagation global fits stay
+outside v1).
+
+**Before you upgrade** (details in each entry below):
+- A theory-spec that declares contracts 3.14.0 or later is checked natively by the object-form
+  `degenerate_directions` and `transport.diffusion.breaks` rules (new errors `theory.degeneracy_evidence_missing`,
+  `theory.degeneracy_range_missing`, `theory.degeneracy_evidence_unknown` and the transport errors); older artifacts
+  only under `--strict`. Every committed artifact keeps its outcome.
+- Profiles and adapters may declare a `provider` field; `tools/provider_registry.py` lists them. External codes are
+  found only through `HEP_USINE_BIN`/`HEP_USINE_DATA` and `HEP_DRAGON2_BIN`/`HEP_DRAGON2_DATA`; USINE (GPL-2.0) is
+  never vendored.
+
+**Known issues** (campaign report §8): no F1 fit converges at USINE's 6-digit output noise floor (delta and K10 are
+inside the paper's 1-sigma windows; -2 ln L about 83-90 against about 62, attributed); the USINE provider applies
+solar modulation itself, against `cr_provider.json`'s "providers never modulate" (recorded in every modulated
+prediction); accepted, attributed DRAGON2/USINE differences D1-1a, D3-1 and D3-3, not yet recorded in `adapter.json`;
+C2UF toy fits bounded by the emulator's k = 4 domain while validation covered k = 3; `propagation_fit.py` reports
+unconverged fits as "artifact-invalid"; translator gaps (escalation 12) and the r3 P1 zone-conversion wording with a
+likely DRAGON2 Ptuskin94/03 enum issue (escalation 10); GALPROP unavailable; F2, F3 and the live routing run not done.
 
 - crprop env: capability probe of the cr-propagation campaign and environment E-crprop registered in VALIDATION.md
   (E2 plus DRAGON2 cd588707 verified by a live rerun); DRAGON2 computational-run and environment manifest under

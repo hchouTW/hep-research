@@ -22,7 +22,7 @@ PROFILE = HERE.parent
 sys.path.insert(0, str(HERE))
 
 PROFILE_ID, PROFILE_VERSION = "theory:cr-secondary-ratio", "0.1.0"
-PLUGIN_VERSION, CONTRACTS = "0.42.0", "3.14.0"
+PLUGIN_VERSION, CONTRACTS = "0.43.0", "3.14.0"
 CREATED = "2026-10-15"
 SPEC_PATH = PROFILE / "derivations" / "theory-spec.json"
 PRED_PATH = PROFILE / "predictions" / "bc-benchmark.prediction.json"
