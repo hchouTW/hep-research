@@ -1110,7 +1110,7 @@ class B3HarmonizedComparison(unittest.TestCase):
 
 B1X_RUN, SHIPPED_RUN = "b1x-init-test", "shipped-init-test"
 B1X_RTOL = 1e-6  # B1X-2, B1X-3, frozen in acceptance.json and VALIDATION CRPROP-B1X before the runs
-BC_TABLES = {axis: f"local_fluxes_BC_{axis}_Model1DKisoVc_SolMod0DFF_phi0_00GV.out" for axis in ("Ekn", "R")}
+BORON_CARBON_TABLES = {axis: f"local_fluxes_BC_{axis}_Model1DKisoVc_SolMod0DFF_phi0_00GV.out" for axis in ("Ekn", "R")}
 SHIPPED_QUANTITIES = "B/C:KEKN:0.;B/C:kR:0."
 
 
@@ -1119,7 +1119,7 @@ def b1x_translation():
     return usine_translate.translate(s["transport"], B1X_RUN, s["ekn_range_gev"], grid=s["ekn_grid"])
 
 
-def bc_deviation(table_a, table_b):
+def ratio_table_deviation(table_a, table_b):
     """(number of common nodes, largest relative deviation on them) of two USINE tables."""
     xa, ya, _ = usine_reader.read_table(table_a)
     xb, yb, _ = usine_reader.read_table(table_b)
@@ -1219,9 +1219,10 @@ class UsineB1XOffline(unittest.TestCase):
 
     def test_recorded_run_reproduces_the_shipped_example(self):
         """B1X-2 and B1X-3 on the recorded tables (the live class reruns both)."""
-        for axis, fname in BC_TABLES.items():
+        for axis, fname in BORON_CARBON_TABLES.items():
             with self.subTest(axis=axis):
-                n, dev = bc_deviation(USINE_FIX / "outputs" / SHIPPED_RUN / fname, USINE_FIX / "outputs" / B1X_RUN / fname)
+                n, dev = ratio_table_deviation(USINE_FIX / "outputs" / SHIPPED_RUN / fname,
+                                               USINE_FIX / "outputs" / B1X_RUN / fname)
                 self.assertEqual(n, 33)
                 self.assertLessEqual(dev, B1X_RTOL)
 
@@ -1376,10 +1377,10 @@ class LiveUsineB1X(unittest.TestCase):
         self.assertIsNone(self.reason)
 
     def _compare_with_shipped(self):
-        for axis, fname in BC_TABLES.items():
+        for axis, fname in BORON_CARBON_TABLES.items():
             with self.subTest(axis=axis):
                 self.assertTrue((self.shipped_out / fname).is_file(), self.shipped_proc.stdout[-800:])
-                n, dev = bc_deviation(self.shipped_out / fname, self.run_dir / "out" / fname)
+                n, dev = ratio_table_deviation(self.shipped_out / fname, self.run_dir / "out" / fname)
                 self.assertGreaterEqual(n, 30)
                 self.assertLessEqual(dev, B1X_RTOL)
 

@@ -126,7 +126,8 @@ KPC_CM = 648000.0 / math.pi * 1.495978707e13 * 1e3
 MYR_S = 1e6 * 365.25 * 86400.0
 KPC2_PER_MYR_CM2_S = KPC_CM ** 2 / MYR_S
 KPC_PER_MYR_PER_KM_S = 1e5 * MYR_S / KPC_CM
-USINE_KPP_FACTOR = "1.022712e-3"  # USINE V3.5 inputs/init.TEST.par line 134 (Kpp of Model1DKisoVc), as written there
+# km/s -> kpc/Myr factor of USINE V3.5's shipped Kpp formula (inputs/init.TEST.par line 134, Model1DKisoVc), as written
+USINE_MOMENTUM_DIFFUSION_FACTOR = "1.022712e-3"
 
 OBSERVER_KPC = 8.3  # galactocentric radius of the observer in the 2D model (the DRAGON2 adapter's observer position)
 POINTS_PER_DECADE = 20
@@ -270,7 +271,7 @@ TOP_KEYS = set(TRANSPORT_KEYS) | {"losses", "family", "free"}
 BREAK_KEYS = {"low": {"kind", "R_break_gv", "delta_below", "s", "s_convention"},
               "high": {"kind", "R_break_gv", "delta_above", "s", "s_convention"}}
 INJECTION_KEYS = {"species_group", "gamma", "eta", "breaks"}
-EC_TREATMENTS = ("fully-stripped", "laboratory-half-life")
+ELECTRON_CAPTURE_TREATMENTS = ("fully-stripped", "laboratory-half-life")
 
 
 def _given(block: dict, key: str, where: str, default, defaults: list[str], unit: str = ""):
@@ -491,8 +492,8 @@ def translate(transport: dict, name: str, ekn_range_gev, points_per_decade: int 
         if _given(decay, "lorentz_dilation", "decay", True, defaults) is not True:
             raise SpecError("decay.lorentz_dilation false: USINE's decay rate is ln 2 / (gamma t_1/2)")
         ec = _given(decay, "ec_treatment", "decay", "fully-stripped", defaults)
-        if ec not in EC_TREATMENTS:
-            raise SpecError(f"decay.ec_treatment {ec!r}: only {list(EC_TREATMENTS)} are translated")
+        if ec not in ELECTRON_CAPTURE_TREATMENTS:
+            raise SpecError(f"decay.ec_treatment {ec!r}: only {list(ELECTRON_CAPTURE_TREATMENTS)} are translated")
         switches.update(IsDecayBETA=True, IsDecayFedBETA=True)
         if ec == "fully-stripped":
             subs.append("electron-capture decay off: fully stripped nuclei (7Be) are stable (r3 P6)")
@@ -550,12 +551,12 @@ def translate(transport: dict, name: str, ekn_range_gev, points_per_decade: int 
     spec = dict(common, **mode)
     # km/s -> kpc/Myr in Kpp: the derived IAU/Julian factor, or with USINE's own inputs the factor of USINE's shipped
     # Kpp formula (inputs/init.TEST.par line 134), so that USINE's own configuration is reproduced exactly
-    kpp_factor = f"{KPC_PER_MYR_PER_KM_S:.9e}" if not usine_xs else USINE_KPP_FACTOR
-    spec["Kpp_formula"] = f"(4./3.)*(Va*{kpp_factor}*beta*Etot)^2/(delta*(4-delta^2)*(4-delta)*w*K00)"
+    factor = USINE_MOMENTUM_DIFFUSION_FACTOR if usine_xs else f"{KPC_PER_MYR_PER_KM_S:.9e}"
+    spec["Kpp_formula"] = f"(4./3.)*(Va*{factor}*beta*Etot)^2/(delta*(4-delta^2)*(4-delta)*w*K00)"
     if usine_xs and v_a > 0:
-        subs.append(f"Kpp with USINE's shipped km/s -> kpc/Myr factor {USINE_KPP_FACTOR} (inputs/init.TEST.par line "
-                    f"134), {1 - float(USINE_KPP_FACTOR) / KPC_PER_MYR_PER_KM_S:.1e} below the IAU parsec and Julian "
-                    f"year value {KPC_PER_MYR_PER_KM_S:.9e} used with the ILLUSTRATIVE sets")
+        subs.append(f"Kpp with USINE's shipped km/s -> kpc/Myr factor {factor} (inputs/init.TEST.par line 134), "
+                    f"{1 - float(factor) / KPC_PER_MYR_PER_KM_S:.1e} below the IAU parsec and Julian year value "
+                    f"{KPC_PER_MYR_PER_KM_S:.9e} used with the ILLUSTRATIVE sets")
     spec["source"] = {"gamma": gamma, "eta_s": eta_s, "spatial": "CST" if model == "Model2DKisoVc" else None}
     subs.append(f"source spectrum dQ/dE_k/n = q Rig^-{gamma:g} (USINE POWERLAW, eta_s = {eta_s:g})"
                 + (", uniform in r up to radius_kpc in the thin disc (template CST)"
