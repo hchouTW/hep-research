@@ -6542,3 +6542,41 @@ loosened).**
 | D1-2 | Every item (convection, decay, reacceleration, losses) and the item-off baseline has a recorded run: run spec, computational-run record (input and output SHA-256, command, environment) and output under `tests/adapters/fixtures/cr_propagation/dragon2/` | all five present |
 | D1-PRV-1 | `dragon2_provider.py` passes C1's conformance mixin (`tests/core/provider_conformance.py`), live on E-crprop (skipped where DRAGON2 is not installed) | all checks pass |
 | D1-PRV-2 | Single-shot and `--serve` responses have the same sha256 after removing `elapsed_s` and time stamps | equal sha256 |
+
+**Results (2026-10-28, E-crprop; DRAGON2 runs under `$CRPROP_OUT/d1/`, outside the repository; host load 30-60 from
+other workers, so wall times are not cost numbers).** Runs: five item runs translated by `dragon2_run.py
+--from-transport` from `tests/adapters/fixtures/cr_propagation/specs/harmonized-v1-{isotopic,convection,decay,
+reacceleration,losses}.json` (2D, radius 20 kpc, dR 0.5 kpc, dz 0.02 kpc, Z 4-8, 0.04-2000 GeV/n with factor 1.2,
+injection R^-2.3 for every species, production table = the profile's isotopic ILLUSTRATIVE set for ¹²C and ¹⁶O),
+575-710 s each, four at a time; specs, de-identified computational-run records and outputs in
+`tests/adapters/fixtures/cr_propagation/dragon2/`. Substitutes recorded in every spec (§5.5): BronfFerr gas instead
+of uniform n_H = 1 cm⁻³ (DRAGON2 cd588707's `Uniform` gas is not implemented: gas.cc writes -1), DRAGON2's fixed
+helium (He/H 0.11 with its He_to_H_CS_ratio scaling) instead of 0.1, no thin-disc parameter, DRAGON2's own inelastic
+cross sections, sources OneRing 0-20 kpc (the source distribution D1 chose), V_A thin disc 50 km/s run as whole-halo
+50 sqrt(0.1/4) = 7.9 km/s (approximate, P1), ionization and Coulomb losses switched together; decay uses the
+NUBASE2020 half-lives of ¹⁰Be and ¹⁴C written into a copy of `isotope_list.dat` (DRAGON2 ships ¹⁰Be at 1.51 Myr; the
+run log confirms 1.38697 Myr).
+
+| ID | Result | Evidence |
+|---|---|---|
+| D1-1 convection | **fail** for B/C: max abs(DRAGON2/reference − 1) = 0.148 (1.076-1.148 over 2-1000 GV); **pass** for ¹⁰Be/⁹Be: 0.022 | `dragon2/d1-item-results.json`; `D1Items.test_closed_form_comparison_matches_the_record` |
+| D1-1 decay | **fail** for B/C: 0.144 (1.069-1.144); **fail** for ¹⁰Be/⁹Be: 0.152 (0.848-1.006, below 1 GeV/n) | same |
+| D1-1 attribution (B/C) | the item-off run already gives 1.069-1.143: DRAGON2's helium target multiplies the production cross sections by 1.144-1.174 at these energies; with it divided out DRAGON2 / closed form at equal E/n is 0.93-1.01 (helium on destruction, DRAGON2's inelastic cross sections and the 2D geometry not separated; as in CR-PROPAGATION-DRAGON2-UNITS). Item effect (diagnostic): convection 1.001-1.007, decay 1.000-1.001 | `$CRPROP_OUT/d1/helium_attribution.txt`; `d1-item-results.json` `attribution` |
+| D1-1 attribution (¹⁰Be/⁹Be, decay) | the reference is a thin disc, while DRAGON2's gas layer (H2 59 pc, HI 115 pc) is comparable with the ¹⁰Be decay length of about 0.3 kpc at 0.1 GeV/n. A 1D finite-difference diagnostic (source on DRAGON2's gas profile at 8.3 kpc against the same column in a thin disc) gives surviving-fraction ratios 0.843, 0.868, 0.889, 0.909 in bins 2-5 against the DRAGON2 item effects 0.873, 0.867, 0.888, 0.918; not attributed: bin 1 (0.05-0.078 GeV/n: DRAGON2 0.969, diagnostic 0.816) and a +1% residual above 1 GeV/n. The failure belongs to the thin-disc reference's validity (B2 excludes decay inside the disc), not to a defect shown in DRAGON2 | `$CRPROP_OUT/d1/thick_gas_decay.py`, `.json`; `d1-item-results.json` |
+| D1-1 reacceleration, losses | **not run**: no closed form; the reference is USINE, waiting for B1 (`env-usine` absent). Their runs are recorded | `D1_reacceleration`, `D1_losses` fixtures |
+| D1-2 | **pass**: five runs, each with spec, record (validates; exit 0; output and XML SHA-256 match; DRAGON2 commit in tools; no home path) and output; the specs are re-derived from the item files by the translator in the test | `D1Items.test_runs_are_recorded_and_translated_from_the_item_files` |
+| D1-PRV-1 | **pass** live (`HEP_DRAGON2_LIVE_TEST=1`): mixin checks declared, single-shot, serve, prv-2, unsupported-want, out-of-domain, outside-allowed, unregistered, runner-agrees; responses valid against `cr_provider.json` with the `theory:cr-secondary-ratio` vocabulary; 4 tests in 353 s | `$CRPROP_OUT/d1/acceptance/D1-PRV-1.unittest.log`, `D1-PRV-conformance.json` |
+| D1-PRV-2 | **pass**: single-shot and `--serve` responses equal in sha256 after removing `elapsed_s` (check prv-2) | same |
+| Numerical tolerance of the provider | 2.2e-3: largest relative change of five B/C bins (ekn 10-100 GeV/n, rigidity 2-1000 GV) when dz is halved and the energy factor goes 1.2 → 1.1; declared 0.01 | `$CRPROP_OUT/d1/convergence/convergence.json` |
+
+Open issues. (1) `transport_conventions.py` gives DRAGON2 the form D0 (p/p0)^δ with η = 0, but DRAGON2 cd588707
+(`diffusion.cc`, type Constant) computes D0 β^etaT (ρ/DiffRefRig)^δ in rigidity, so a canonical spec with η = 1 maps
+one to one (D1's translator does this and does not call the convention table); the convention table row in
+`cosmic-ray-phenomenology.md` and the module need a hep-theory fix (outside D1's files). (2) DRAGON2's `Uniform` gas
+is not implemented in this commit, so harmonized-v1's uniform gas cannot be run without a code change. (3) The
+B/C absolute comparison cannot meet 3% with DRAGON2's fixed helium target and own inelastic cross sections unless the
+reference includes them; the frozen tolerance is not changed. Checks: `run_all_checks.py --part static --jobs 4`
+31/31 pass; impacted tests (`tests.adapters.test_cr_propagation`, `tests.skills.test_cli_robustness`,
+`tests.adapters.test_adapter_declarations`, `tests.tools.test_provider_registry`, `tests.core.test_provider`,
+`tests.core.test_provider_conformance_mixin`) pass; `check_naming.py`, `check_wiring.py --since 566bfd1e` pass;
+ALL-3 (full `run_all_checks.py`, `check_relocation.py`) deferred to the wave run (decision A1.5).

@@ -128,6 +128,18 @@ Software checks establish contract consistency only, not physical validity.
   subcommand takes `--from`/`--to` (the old `--from-zone`/`--to-zone` still work). Tests: an independent
   finite-difference oracle of the zone weights, round trips within 1e-12.
 
+- crprop d1: DRAGON2 physics items and the provider `dragon2` (cr-propagation r3 §D1, §D1b, folded by r4 §6).
+  `adapters/cr-propagation` 0.2.0: `dragon2_run.py` gains a translator from a `transport` block (`--from-transport`,
+  `spec_from_transport`) that records every item DRAGON2 cannot express (gas, helium, disc thickness, source
+  distribution, inelastic cross sections, V_A zone) and refuses breaks; optional Convection and Reacceleration blocks,
+  NUBASE2020 half-lives written into a copy of `isotope_list.dat` (DRAGON2 ships 10Be at 1.51 Myr) and a single
+  injection slope. `dragon2_to_prediction.py` gains ratios of bin integrals on ekn or rigidity bins (r3 P2, P3). New
+  `dragon2_provider.py` (cr-provider/1, declared in `adapter.json`; not decomposable; runs kept under
+  `HEP_DRAGON2_RUN_DIR` when set). Five item runs from new `harmonized-v1-<item>.json` files recorded under
+  `tests/adapters/fixtures/cr_propagation/dragon2/`; convection and decay compared with the B2 closed form: D1-1 fails
+  for B/C (offset already in the item-off run) and for 10Be/9Be with decay, passes for 10Be/9Be with convection
+  (VALIDATION CRPROP-D1); reacceleration and losses wait for USINE (B1).
+
 ## 0.42.0 (2026-10-26)
 
 Minor release; contracts 3.13.0, `CORE_VERSION` 1.1.0 and geant4 adapter 0.5.0 unchanged. It ships semantic naming

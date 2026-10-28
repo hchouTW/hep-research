@@ -22,8 +22,9 @@ Values: the ratio of the bin-integrated summed numerator and denominator (r3 P2)
 on the axis rigidity and at equal E/n on the axis ekn (P3); fluxes per E/n are DRAGON2's columns times A (P11).
 bin_semantics bin-averaged (the ratio of the two bin averages). Unmodulated local interstellar ratios; never
 modulates. Not decomposable (a channel decomposition would need one run per channel). Labels synthetic and
-unvalidated (ILLUSTRATIVE cross sections). numerical_tolerance NUMERICAL_TOLERANCE: the largest relative change of
-the conformance request's values when the vertical step and the energy factor are refined (VALIDATION CRPROP-D1).
+unvalidated (ILLUSTRATIVE cross sections). numerical_tolerance NUMERICAL_TOLERANCE (0.01): a rounded-up bound on the
+largest relative change of B/C bins (2.2e-3 on E-crprop, ekn 10-100 GeV/n and rigidity 2-1000 GV) when the vertical
+step is halved and the energy factor goes from 1.2 to 1.1 (VALIDATION CRPROP-D1); not a physics uncertainty.
 Runs: each run directory (XML, source.param, data links, output, computational-run record) is kept under
 HEP_DRAGON2_RUN_DIR/<run name> when that folder is set, and its record id is the evaluation's computational_run_ref;
 otherwise the run lives in a temporary folder removed after reading and the reference is null. The run name is
