@@ -7016,3 +7016,11 @@ stdout JSON object like train_bdt.py; no exemption added; model, run summary and
 test_cli_contract, test_train_emulator, tests/skills/hep_ml (422 tests, 38 skipped), test_cli_robustness,
 test_cr_propagation OK; measure_entrypoints hep-ml within budget; `--part static --jobs 4`, check_naming,
 workflow_check diff and acceptance ok.
+
+### CRPROP-D3 rework round 1 (wave-5 finding, 2026-10-28)
+`tests.tools.test_subprocess_timeouts` failed on d3_study.py:285 and :295 (gfortran build of the inelastic driver and
+the per-nuclide driver call, no `timeout=`). Both now carry `timeout=600` (seconds-scale and millisecond-scale runs;
+generous bound, commented); `subprocess.TimeoutExpired` propagates like the existing `check=True` failures (raised,
+never swallowed). The USINE run already had `timeout=900`. Results, fixtures and test assertions unchanged;
+`d3_study.py --help` works. Checks: test_subprocess_timeouts and test_cr_propagation OK, `--part static --jobs 4`,
+check_naming, check_wiring, workflow_check diff and acceptance (see report).
