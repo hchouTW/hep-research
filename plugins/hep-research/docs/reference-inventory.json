@@ -35,7 +35,7 @@
   },
   "hep-statistics": {
    "references": 14,
-   "bytes": 205340,
+   "bytes": 206114,
    "uncited": 0
   },
   "hep-theory": {
@@ -3740,8 +3740,8 @@
   {
    "path": "skills/hep-statistics/references/core-stats-commands.md",
    "owner": "hep-statistics",
-   "bytes": 49473,
-   "lines": 542,
+   "bytes": 50247,
+   "lines": 549,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/response-and-forward-folding.md",
@@ -3755,7 +3755,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "a2e8f9b1 2026-10-28"
+   "last_commit": "3b554aeb 2026-10-29"
   },
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
