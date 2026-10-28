@@ -19,7 +19,7 @@
  },
  "work_packages": {
   "P0": {
-   "state": "verifying",
+   "state": "blocked",
    "dispatches": 0,
    "rework_rounds": 2,
    "branch": null,
@@ -27,10 +27,10 @@
    "head": "34e2edeb",
    "merge_commit": null,
    "worker_report": null,
-   "verifier_report": "round 0 REWORK (5); round 1 REWORK (README scope, checker holes, sources, language differences); round 2 dispatched (last allowed)",
+   "verifier_report": "round 0 REWORK (5); round 1 REWORK (README scope, checker holes, sources, language differences); round 2 REWORK (2026-10-28): check_diff misses renames (no --no-renames); all else pass",
    "missing_capabilities": [],
    "notes": [
-    "round-2 verifier re-dispatched 2026-10-28 (Sonnet, last round)"
+    "blocked at the rework limit; escalation 4; verifier mitigation in verifier-common.md"
    ]
   },
   "ENV": {
@@ -391,6 +391,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "ENV dispatch 2 held: host permission check refused the USINE clone/build dispatch; maintainer asked"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "P0 round-2 verifier REWORK (rename hole in check_diff) -> P0 blocked at the rework limit; escalation 4; verifier brief mitigation added"
   }
  ],
  "env": {
