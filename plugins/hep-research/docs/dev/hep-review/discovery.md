@@ -47,7 +47,7 @@ Difference table between the spec's §1.5 baseline (0.42.0, read-only inspection
   negative verdict (`refused`), 2 bad input (`rejected`), 3 missing dependency or incomplete. Scripts locate files
   from their own path and write only to given output paths. The hep-review CLI follows this.
 - **Packaging** (`tools/check_packaging.py`, scans every tracked file under the plugin root, `docs/dev` included):
-  no `/Users/...` or `/tmp/claude...` paths, no `*.jsonl`, no file name matching `rubric|answer[-_]?key|grading`,
+  no home-directory or session-temp absolute paths (its PRIVATE and RESTRICTED patterns), no `*.jsonl`, no file name matching `rubric|answer[-_]?key|grading`,
   no archive, nothing over 2 MiB, README package size within 10%. Consequences: run documents use `~`-relative paths;
   spike answer keys are named `expected-*.json`; the README size line may need refreshing when files are added.
 - **Tests**: unittest only (`python3 -m unittest <module>`); `tools/run_all_checks.py` runs each test module in its own
