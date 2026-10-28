@@ -165,7 +165,8 @@
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "escalations 5 (tolerance-miss) and 6 (dragon2 convention row); verification held until the B1 items are done (merge_after B1)"
+    "escalations 5 and 6",
+    "resumed 2026-10-28 (same dispatch): rebase onto 2d451e87 (B1 merged), finish reacceleration/losses items against B1 USINE runs"
    ]
   },
   "D2": {
@@ -197,11 +198,11 @@
    "notes": []
   },
   "B3": {
-   "state": "pending",
-   "dispatches": 0,
+   "state": "dispatched",
+   "dispatches": 1,
    "rework_rounds": 0,
-   "branch": null,
-   "base": null,
+   "branch": "worktree-crprop-b3",
+   "base": "2d451e87",
    "head": null,
    "merge_commit": null,
    "worker_report": null,
@@ -519,6 +520,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "B1 merged (3ed1e89e); post-merge static ok"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "D1 resumed to rebase and finish B1-dependent items; B3 dispatched from 2d451e87; wave-2 full run started on 2d451e87 (P0 fix, ENV 2, A3, A4, B1, timings)"
   }
  ],
  "env": {
