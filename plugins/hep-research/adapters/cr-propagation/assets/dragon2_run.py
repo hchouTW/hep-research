@@ -18,17 +18,40 @@ Run spec (JSON; every key required unless marked optional):
    "diffusion": {"D0_1e28": 3.0, "DiffRefRig_GV": 1.0, "delta": 0.5, "etaT": 1.0},
    "galaxy": {"gas": "BronfFerr", "sources": {"type": "OneRing", "RingMin": 0, "RingMax": 20}},
    "flags": {"diff_flag": 1, "conv_flag": 0, "reacc_flag": 0, "eloss_flag": 0, "decay_flag": 0, "spall_flag": 1},
-   "production_table": {"channels_mb": {"6012->5011": 70.0}, "grid_channel": "8016->6012"}   (optional)}
-DimZ is 2 L / dz + 1 (equidistant z). Reacceleration and convection blocks are not written: with their flags at 0
-they are off. "production_table" writes a DRAGON2-format table (parent and daughter as Z.AA, energy in MeV, sigma on
+   "production_table": {"channels_mb": {"6012->5011": 70.0}, "grid_channel": "8016->6012"}   (optional),
+   "convection": {"v0_kms": 10.0, "dvdz_kmskpc": 0.0}                                          (optional),
+   "reacceleration": {"type": "Ptuskin94", "vA_kms": 8.0}                                     (optional),
+   "half_lives_s": {"4010": 4.377e13}                                                         (optional),
+   "injection_gamma": 2.3                                                                     (optional),
+   "substitutes": [...], "transport": {...}                                                   (optional, recorded only)}
+DimZ is 2 L / dz + 1 (equidistant z). The Convection block (type Constant, f_b = 1, z_k 0.1 kpc: V_c = v0 + dvdz
+(abs(z) - z_k) above z_k, v0 below) and the Reacceleration block are written only when given, and a flag conv_flag or
+reacc_flag of 1 needs its block (DRAGON2 would otherwise read an unset speed); with the flags at 0 they are off.
+"half_lives_s" replaces the half-life of the listed nuclei (1000 Z + A; both of DRAGON2's columns, naked and
+H-like) in a copy of data/isotope_list.dat (DRAGON2 ships 10Be with 1.51 Myr). "injection_gamma" writes the
+source.param with every injection slope (alpha_0, alpha_1, alpha_2) set to that value, so the injection is a single
+power law in rigidity; the abundances are kept. "production_table" writes a DRAGON2-format table (parent and daughter as Z.AA, energy in MeV, sigma on
 hydrogen in mb) with each listed channel at a constant value on the energy grid of the original table's grid channel;
 that channel is written at 0 mb unless listed. Channels not listed are absent, so DRAGON2 sets them to zero. DRAGON2
 still adds its helium-target term and uses its own inelastic cross sections, which no data file replaces.
+
+Translator (spec_from_transport, also --from-transport): a transport block (contracts ext_theory_spec.transport, r3
+5.4, the format of tests/adapters/fixtures/cr_propagation/specs/harmonized-v1*.json) becomes a run spec, with every
+item DRAGON2 cannot express recorded under "substitutes" (never dropped silently): diffusion D0_cm2_s, R0_gv, eta,
+delta map one to one to D0_1e28, DiffRefRig_GV, etaT, Delta (DRAGON2 cd588707 diffusion.cc, type Constant: D0
+beta^etaT (rho/DiffRefRig)^Delta); breaks are refused; V_A in the thin disc becomes the whole-halo speed V_A sqrt(h/L)
+(r3 P1, approximate); losses switch eloss_flag (ionization and Coulomb together); decay switches decay_flag with
+NUBASE2020 half-lives (core.constants.physical) for 10Be, 14C, 26Al, 36Cl, 54Mn in the charge range; the gas is
+BronfFerr (DRAGON2's "Uniform" gas is not implemented in this commit) with DRAGON2's fixed helium (He/H 0.11) and
+its own inelastic cross sections; the sources are OneRing from 0 to the radial boundary.
 
 Usage:
   python3 dragon2_run.py --spec SPEC.json --out RUNDIR [--dragon BIN] [--data-dir DIR] [--source-param FILE]
                          [--environment ENV.json] [--record RUN.json] [--program-version TEXT]
                          [--prepare-only] [--timeout SECONDS]
+  python3 dragon2_run.py --from-transport ITEM.json --channels CHANNELS.json --name NAME --out RUNDIR [...]
+  --from-transport: a JSON object with a "transport" block (and optional "network"); CHANNELS.json maps
+      "ZAAA->ZAAA" to sigma in mb; the translated spec is written to RUNDIR/NAME.spec.json and then run like --spec.
   --dragon defaults to $HEP_DRAGON2_BIN, --data-dir to $HEP_DRAGON2_DATA, --source-param to
   <data-dir>/../examples/BaseModel_DRAGONxsec.source.param. --environment is a manifest written by
   skills/hep-computing/scripts/environment_manifest.py record; its "environment" and "tools" are copied into the record.
@@ -49,8 +72,20 @@ import sys
 import time
 from pathlib import Path
 
+sys.dont_write_bytecode = True  # importing core leaves no __pycache__ (F-10)
+PLUGIN = Path(__file__).resolve().parents[3]
+if str(PLUGIN) not in sys.path:
+    sys.path.insert(0, str(PLUGIN))
+from contracts import CONTRACTS_VERSION  # noqa: E402
+from core.constants.physical import half_life_seconds  # noqa: E402
+
 PROGRAM = "DRAGON2"
 TABLE_NAME = "crxsecs_fragmentation_Evoli2019_cumulative_modified.dat"
+ISOTOPE_LIST = "isotope_list.dat"
+# long-lived radioactive secondaries propagated explicitly (r3 P6); their NUBASE2020 half-lives replace DRAGON2's
+EXPLICIT_DECAYS = {4010: "Be-10", 6014: "C-14", 13026: "Al-26", 17036: "Cl-36", 25054: "Mn-54"}
+# grid choices of the translator (recorded in the spec): radial step 0.5 kpc, vertical step 0.02 kpc, observer 8.3 kpc
+TRANSLATOR_GRID = {"dR_kpc": 0.5, "dz_kpc": 0.02, "observer_kpc": [8.3, 0.0, 0.0], "Ekfactor": 1.2}
 GRID_KEYS = ("Rmax_kpc", "DimR", "L_kpc", "dz_kpc", "observer_kpc", "Ekmin_GeV", "Ekmax_GeV", "Ekfactor", "Zmin", "Zmax")
 DIFF_KEYS = ("D0_1e28", "DiffRefRig_GV", "delta", "etaT")
 FLAG_KEYS = ("diff_flag", "conv_flag", "reacc_flag", "eloss_flag", "decay_flag", "spall_flag")
@@ -113,6 +148,36 @@ def check_spec(spec: dict) -> dict:
             if isinstance(val, bool) or not isinstance(val, (int, float)) or val < 0:
                 raise SpecError(f"production_table.channels_mb[{key!r}] must be a number >= 0")
         _uid_pair(pt["grid_channel"])
+    f = spec["flags"]
+    conv = spec.get("convection")
+    if conv is not None:
+        if not isinstance(conv, dict):
+            raise SpecError("convection must be an object {'v0_kms', 'dvdz_kmskpc'}")
+        for k in ("v0_kms", "dvdz_kmskpc"):
+            if _num(conv, k, "convection") < 0:
+                raise SpecError(f"convection.{k} must be >= 0")
+    if int(f["conv_flag"]) and conv is None:
+        raise SpecError("conv_flag 1 needs a 'convection' block (DRAGON2 would read an unset speed)")
+    reacc = spec.get("reacceleration")
+    if reacc is not None:
+        if not isinstance(reacc, dict) or reacc.get("type") not in ("Ptuskin94", "Ptuskin03"):
+            raise SpecError("reacceleration needs 'type' (Ptuskin94 or Ptuskin03) and 'vA_kms'")
+        if _num(reacc, "vA_kms", "reacceleration") < 0:
+            raise SpecError("reacceleration.vA_kms must be >= 0")
+    if int(f["reacc_flag"]) and reacc is None:
+        raise SpecError("reacc_flag 1 needs a 'reacceleration' block (DRAGON2 would read an unset speed)")
+    hl = spec.get("half_lives_s")
+    if hl is not None:
+        if not isinstance(hl, dict) or not hl:
+            raise SpecError("half_lives_s must be a non-empty object {'1000 Z + A': seconds}")
+        for key, val in hl.items():
+            if not (isinstance(key, str) and key.isdigit() and int(key) > 1000):
+                raise SpecError(f"half_lives_s key {key!r} must be 1000 Z + A")
+            if isinstance(val, bool) or not isinstance(val, (int, float)) or not val > 0:
+                raise SpecError(f"half_lives_s[{key!r}] must be a number > 0 (seconds)")
+    gamma = spec.get("injection_gamma")
+    if gamma is not None and (isinstance(gamma, bool) or not isinstance(gamma, (int, float)) or not gamma > 0):
+        raise SpecError("injection_gamma must be a number > 0")
     return dict(spec, DimZ=int(round(nz)) + 1)
 
 
@@ -156,6 +221,60 @@ def write_table(original: Path, target: Path, pt: dict) -> int:
         rows += [f"    {p}     {d}\t{e:>12}\t{float(channels[key]):12.6f}\t0.0000\t\tuser-spec" for e in energies]
     target.write_text("\n".join(rows) + "\n", encoding="utf-8")
     return len(rows) - 1
+
+
+def write_isotope_list(original: Path, target: Path, half_lives: dict) -> list[str]:
+    """Copy DRAGON2's isotope list with the half-lives of `half_lives` ({'1000 Z + A': seconds}) in both columns
+    (naked and H-like); return the uids replaced. Every listed uid must be in the file."""
+    lines = original.read_text(encoding="utf-8").splitlines()
+    wanted = {int(k): float(v) for k, v in half_lives.items()}
+    done = []
+    out = [lines[0]]
+    for line in lines[1:]:
+        parts = line.split()
+        if len(parts) >= 5 and parts[0].isdigit() and parts[1].isdigit():
+            uid = 1000 * int(parts[1]) + int(parts[0])
+            if uid in wanted:
+                rest = " ".join(parts[4:])
+                line = f"{parts[0]}\t{parts[1]}\t{wanted[uid]:.6e}\t{wanted[uid]:.6e}\t{rest}"
+                done.append(str(uid))
+        out.append(line)
+    missing = sorted(set(map(str, wanted)) - set(done))
+    if missing:
+        raise SpecError(f"half_lives_s: {missing} not in {original.name}")
+    target.write_text("\n".join(out) + "\n", encoding="utf-8")
+    return sorted(done)
+
+
+def source_param_text(original: Path, gamma: float | None) -> str:
+    """The source.param text; with gamma, every injection slope (columns 3, 5, 7: alpha_0, alpha_1, alpha_2) set to
+    gamma and the abundances and break rigidities kept."""
+    text = original.read_text(encoding="utf-8")
+    if gamma is None:
+        return text
+    rows = []
+    for line in text.splitlines():
+        parts = line.split()
+        if len(parts) >= 7 and parts[0].isdigit():
+            parts[2] = parts[4] = parts[6] = f"{gamma:g}"
+            line = "\t".join(parts)
+        rows.append(line)
+    return "\n".join(rows) + "\n"
+
+
+def _transport_blocks(spec: dict) -> str:
+    """Convection and Reacceleration blocks of the Galaxy element (empty when the spec has neither)."""
+    out = ""
+    conv = spec.get("convection")
+    if conv is not None:
+        out += (f'\n  <Convection type="Constant">\n    <v0_kms value="{conv["v0_kms"]}" />\n'
+                f'    <dvdz_kmskpc value="{conv["dvdz_kmskpc"]}" />\n    <z_k_kpc value="0.1" />\n'
+                f'    <f_b value="1" />\n  </Convection>')
+    reacc = spec.get("reacceleration")
+    if reacc is not None:
+        out += (f'\n  <Reacceleration type="{reacc["type"]}">\n    <vA_kms value="{reacc["vA_kms"]}" />\n'
+                f'  </Reacceleration>')
+    return out
 
 
 def render_xml(spec: dict) -> str:
@@ -205,7 +324,7 @@ def render_xml(spec: dict) -> str:
     <DiffRefRig value="{d['DiffRefRig_GV']}" />
     <Delta value="{d['delta']}" />
     <etaT value="{d['etaT']}" />
-  </Diffusion>
+  </Diffusion>{_transport_blocks(spec)}
   <CrossSection type="DRAGON2" leptopt="Kamae" apopt="Winkler" ApCs="2" />
   <MagneticField type="Pshirkov">
     <B0disk value="2.e-06" />
@@ -227,6 +346,128 @@ def render_xml(spec: dict) -> str:
 """
 
 
+def _block(transport: dict, key: str) -> dict:
+    val = transport.get(key) or {}
+    if not isinstance(val, dict):
+        raise SpecError(f"transport.{key} must be an object")
+    return val
+
+
+def _tnum(block: dict, key: str, where: str, default: float | None = None) -> float:
+    val = block.get(key, default)
+    if isinstance(val, bool) or not isinstance(val, (int, float)):
+        raise SpecError(f"transport.{where}.{key} must be a number")
+    return float(val)
+
+
+def spec_from_transport(transport: dict, name: str, channels_mb: dict, *, z_range: tuple[int, int],
+                        ekn_range_gev: tuple[float, float], grid_channel: str = "8016->6012") -> dict:
+    """A run spec from a transport block (r3 5.4 canonical names). Items DRAGON2 cannot express exactly are recorded
+    in 'substitutes'; items it cannot express at all raise SpecError (never a silent default)."""
+    if not isinstance(transport, dict):
+        raise SpecError("transport must be an object")
+    subs: list[str] = []
+    geo, dif = _block(transport, "geometry"), _block(transport, "diffusion")
+    if geo.get("kind", "cylinder-2d") != "cylinder-2d":
+        raise SpecError(f"geometry.kind {geo.get('kind')!r}: the translator writes DRAGON2's 2D grid only")
+    big_l, radius = _tnum(geo, "L_kpc", "geometry"), _tnum(geo, "radius_kpc", "geometry", 20.0)
+    h_pc = _tnum(geo, "disc_halfwidth_pc", "geometry", 100.0)
+    if dif.get("breaks"):
+        raise SpecError("diffusion breaks: not translated (DRAGON2's single high break rho_b, Delta_h has another "
+                        "form); compare predictions with a break instead")
+    dr = TRANSLATOR_GRID["dR_kpc"]
+    dim_r = radius / dr
+    if abs(dim_r - round(dim_r)) > 1e-9:
+        raise SpecError(f"radius_kpc {radius:g} must be a multiple of {dr:g} kpc (the translator's radial step)")
+    if not big_l > 0:
+        raise SpecError("geometry.L_kpc must be > 0")
+    # the vertical step closest to the translator's that divides 2 L into whole cells
+    dz = round(2.0 * big_l / max(1, round(2.0 * big_l / TRANSLATOR_GRID["dz_kpc"])), 12)
+    lo, hi = ekn_range_gev
+    if not 0 < lo < hi:
+        raise SpecError("ekn_range_gev must be 0 < low < high")
+    flags = {"diff_flag": 1, "conv_flag": 0, "reacc_flag": 0, "eloss_flag": 0, "decay_flag": 0, "spall_flag": 1}
+    spec = {
+        "name": name,
+        "grid": {"Rmax_kpc": radius, "DimR": int(round(dim_r)) + 1, "L_kpc": big_l, "dz_kpc": dz,
+                 "observer_kpc": list(TRANSLATOR_GRID["observer_kpc"]), "Ekmin_GeV": lo, "Ekmax_GeV": hi,
+                 "Ekfactor": TRANSLATOR_GRID["Ekfactor"], "Zmin": int(z_range[0]), "Zmax": int(z_range[1])},
+        "diffusion": {"D0_1e28": _tnum(dif, "D0_cm2_s", "diffusion") / 1e28,
+                      "DiffRefRig_GV": _tnum(dif, "R0_gv", "diffusion", 1.0),
+                      "delta": _tnum(dif, "delta", "diffusion"), "etaT": _tnum(dif, "eta", "diffusion", 1.0)},
+        "galaxy": {"gas": "BronfFerr", "sources": {"type": "OneRing", "RingMin": 0, "RingMax": radius}},
+        "flags": flags,
+        "production_table": {"channels_mb": dict(channels_mb), "grid_channel": grid_channel},
+    }
+    subs.append(f"geometry.disc_halfwidth_pc {h_pc:g}: DRAGON2 has no thin-disc parameter; its gas has its own "
+                "scale heights (BronfFerr: H2 59 pc, HI 115 pc at the observer)")
+    gas = _block(transport, "gas")
+    subs.append(f"gas {gas.get('model', 'unspecified')!r}: BronfFerr (analytic HI and H2, HII 0); DRAGON2's 'Uniform' "
+                "gas is not implemented in cd588707 (gas.cc writes -1)")
+    subs.append(f"gas He_to_H_number {gas.get('He_to_H_number', 'unspecified')}: DRAGON2's fixed helium (He/H 0.11, "
+                "constants.h) with its He_to_H_CS_ratio scaling of every production cross section")
+    subs.append("sources.spatial: OneRing, uniform in R from 0 to the radial boundary (DRAGON2's z profile of the ring)")
+    reacc = _block(transport, "reacceleration")
+    v_a = _tnum(reacc, "V_A_kms", "reacceleration", 0.0)
+    if v_a > 0:
+        zone = reacc.get("zone", "whole-halo")
+        if zone == "thin-disc":
+            v_halo = v_a * (h_pc / 1000.0 / big_l) ** 0.5
+            subs.append(f"reacceleration V_A_kms {v_a:g} in the thin disc: whole-halo V_A = V_A sqrt(h/L) = "
+                        f"{v_halo:.6g} km/s (r3 P1; approximate, no bound)")
+        elif zone == "whole-halo":
+            v_halo = v_a
+        else:
+            raise SpecError(f"reacceleration.zone {zone!r}: thin-disc or whole-halo")
+        if float(reacc.get("w", 1.0)) != 1.0:
+            raise SpecError("reacceleration.w other than 1 is not expressible in DRAGON2's Ptuskin94 form")
+        subs.append(f"reacceleration relation {reacc.get('relation', 'unspecified')!r}: DRAGON2 Ptuskin94")
+        spec["reacceleration"] = {"type": "Ptuskin94", "vA_kms": round(v_halo, 6)}
+        flags["reacc_flag"] = 1
+    conv = _block(transport, "convection")
+    v_c = _tnum(conv, "V_c_kms", "convection", 0.0)
+    dvdz = _tnum(conv, "dVc_dz_kms_per_kpc", "convection", 0.0)
+    if v_c < 0 or dvdz < 0:
+        raise SpecError("convection speeds must be >= 0")
+    if v_c > 0 or dvdz > 0:
+        spec["convection"] = {"v0_kms": v_c, "dvdz_kmskpc": dvdz}
+        flags["conv_flag"] = 1
+        subs.append("convection: DRAGON2 Constant profile, V_c = v0 + dvdz (abs(z) - 0.1 kpc) above 0.1 kpc and v0 "
+                    "below (f_b = 1)")
+    losses = transport.get("losses") or []
+    if losses:
+        if not set(losses) <= {"ionization", "coulomb", "adiabatic"}:
+            raise SpecError(f"losses {losses}: only ionization, coulomb and adiabatic are translated")
+        flags["eloss_flag"] = 1
+        subs.append(f"losses {sorted(losses)}: eloss_flag 1 switches DRAGON2's ionization and Coulomb losses together "
+                    "(the adiabatic term follows dvdz only)")
+    decay = _block(transport, "decay")
+    if decay.get("enabled"):
+        flags["decay_flag"] = 1
+        if decay.get("lorentz_dilation", True) is not True:
+            raise SpecError("decay.lorentz_dilation false is not expressible (DRAGON2 dilates)")
+        if decay.get("ec_treatment", "fully-stripped") != "fully-stripped":
+            raise SpecError("decay.ec_treatment: DRAGON2 propagates fully stripped nuclei only")
+        half = {}
+        for uid, nuclide in EXPLICIT_DECAYS.items():
+            if z_range[0] <= uid // 1000 <= z_range[1]:
+                half[str(uid)] = half_life_seconds(nuclide)["value"]
+        if half:
+            spec["half_lives_s"] = half
+            subs.append(f"decay half-lives of {sorted(half)}: NUBASE2020 (core.constants.physical), replacing "
+                        "DRAGON2's isotope_list.dat values (10Be 1.51 Myr there)")
+    inj = (_block(transport, "sources").get("injection") or [])
+    gammas = {float(i["gamma"]) for i in inj if isinstance(i, dict) and "gamma" in i}
+    if len(gammas) == 1 and not any(i.get("breaks") for i in inj if isinstance(i, dict)):
+        spec["injection_gamma"] = gammas.pop()
+    elif inj:
+        raise SpecError("sources.injection: one slope without breaks is translated; give one gamma")
+    subs.append("inelastic cross sections: DRAGON2's own parametrization (not replaceable through its data files)")
+    spec["substitutes"] = subs
+    spec["transport"] = transport
+    return spec
+
+
 def prepare(spec: dict, out: Path, data_dir: Path, source_param: Path) -> dict:
     """Create the run directory; return the input files (path relative to out) that define the run."""
     out.mkdir(parents=True, exist_ok=True)
@@ -235,17 +476,29 @@ def prepare(spec: dict, out: Path, data_dir: Path, source_param: Path) -> dict:
     data.mkdir(exist_ok=True)
     name = spec["name"]
     (out / f"{name}.xml").write_text(render_xml(spec), encoding="utf-8")
-    (out / f"{name}.source.param").write_bytes(source_param.read_bytes())
+    (out / f"{name}.source.param").write_text(source_param_text(source_param, spec.get("injection_gamma")),
+                                               encoding="utf-8")
     for f in sorted(data_dir.iterdir()):
         link = data / f.name
         if link.is_symlink() or link.exists():
             link.unlink()
         if f.name == TABLE_NAME and spec.get("production_table"):
             write_table(f, link, spec["production_table"])
+        elif f.name == ISOTOPE_LIST and spec.get("half_lives_s"):
+            write_isotope_list(f, link, spec["half_lives_s"])
         else:
             link.symlink_to(f.resolve())
-    inputs = [f"{name}.xml", f"{name}.source.param", f"data/{TABLE_NAME}"]
+    if spec.get("half_lives_s") and not (data / ISOTOPE_LIST).is_file():
+        raise SpecError(f"half_lives_s given but {ISOTOPE_LIST} is not in the data directory")
+    inputs = [f"{name}.xml", f"{name}.source.param", f"data/{TABLE_NAME}", f"data/{ISOTOPE_LIST}"]
     return {p: sha256(out / p) for p in inputs if (out / p).exists()}
+
+
+def _plugin_version() -> str:
+    try:
+        return json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8"))["version"]
+    except (OSError, ValueError, KeyError):
+        return "unknown"
 
 
 def record(args, spec, out: Path, inputs: dict, command: list[str], rc: int, outputs: dict, env: dict | None,
@@ -258,10 +511,11 @@ def record(args, spec, out: Path, inputs: dict, command: list[str], rc: int, out
         tools += [t for t in env.get("tools", []) if t.get("name") != PROGRAM]
     failed = rc != 0 or not outputs
     return {
-        "contract_version": "2.9.0", "artifact_id": f"dragon2-run-{spec['name']}", "artifact_type": "computational-run",
+        "contract_version": CONTRACTS_VERSION, "artifact_id": f"dragon2-run-{spec['name']}",
+        "artifact_type": "computational-run",
         "objective": f"DRAGON2 run '{spec['name']}' from a run spec (adapters/cr-propagation/assets/dragon2_run.py)",
         "bindings": {"experiments": [], "theory": []},
-        "versions": {"plugin": "0.11.0", "contracts": "2.9.0", "profiles": {}},
+        "versions": {"plugin": _plugin_version(), "contracts": CONTRACTS_VERSION, "profiles": {}},
         "provenance": {"producer_skill": "hep-computing", "created": _dt.date.today().isoformat(), "evidence_ids": []},
         "inputs": [], "outputs": [], "unresolved_inputs": [],
         "status": ["failed"] if failed else ["unvalidated"],
@@ -282,7 +536,13 @@ def record(args, spec, out: Path, inputs: dict, command: list[str], rc: int, out
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n")[0])
-    ap.add_argument("--spec", required=True, type=Path)
+    src = ap.add_mutually_exclusive_group(required=True)
+    src.add_argument("--spec", type=Path)
+    src.add_argument("--from-transport", type=Path, help="JSON object with a 'transport' block (r3 5.4)")
+    ap.add_argument("--channels", type=Path, help="with --from-transport: production channels {'ZAAA->ZAAA': mb}")
+    ap.add_argument("--name", help="with --from-transport: the run name")
+    ap.add_argument("--z-range", default="4,8", help="with --from-transport: Zmin,Zmax (default 4,8)")
+    ap.add_argument("--ekn-range", default="0.04,2000", help="with --from-transport: Ekmin,Ekmax in GeV/n")
     ap.add_argument("--out", required=True, type=Path)
     ap.add_argument("--dragon", type=Path, default=os.environ.get("HEP_DRAGON2_BIN"))
     ap.add_argument("--data-dir", type=Path, default=os.environ.get("HEP_DRAGON2_DATA"))
@@ -296,7 +556,22 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
 
     try:
-        spec = check_spec(json.loads(args.spec.read_text(encoding="utf-8")))
+        if args.from_transport:
+            if not (args.channels and args.name):
+                raise SpecError("--from-transport needs --channels and --name")
+            item = json.loads(args.from_transport.read_text(encoding="utf-8"))
+            zr = tuple(int(x) for x in args.z_range.split(","))
+            er = tuple(float(x) for x in args.ekn_range.split(","))
+            if len(zr) != 2 or len(er) != 2:
+                raise SpecError("--z-range and --ekn-range take two values")
+            raw = spec_from_transport(item.get("transport") if isinstance(item, dict) else None, args.name,
+                                      json.loads(args.channels.read_text(encoding="utf-8")), z_range=zr,
+                                      ekn_range_gev=er)
+            args.out.mkdir(parents=True, exist_ok=True)
+            (args.out / f"{args.name}.spec.json").write_text(json.dumps(raw, indent=1) + "\n", encoding="utf-8")
+        else:
+            raw = json.loads(args.spec.read_text(encoding="utf-8"))
+        spec = check_spec(raw)
         env = json.loads(args.environment.read_text(encoding="utf-8")) if args.environment else None
     except (OSError, ValueError) as exc:
         print(json.dumps({"status": "error", "error": str(exc)}))

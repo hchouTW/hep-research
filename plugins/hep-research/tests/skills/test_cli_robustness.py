@@ -169,6 +169,7 @@ MISSING_FILE_ARGS = {
     "skills/hep-citations/scripts/manage_literature.py": ["import", M, "--project-root", "/tmp", "--out", OUT],
     "skills/hep-authoring/scripts/track_revision_impact.py": [M, M, "--project-root", "/tmp"],
     "adapters/cr-propagation/assets/dragon2_run.py": ["--spec", M, "--out", OUT, "--prepare-only"],
+    "adapters/cr-propagation/assets/dragon2_provider.py": ["--request", M, "--response", OUT],
     "adapters/cr-propagation/assets/dragon2_to_prediction.py": ["--txt", M, "--numerator", "NUC_5011", "--denominator",
                                                                 "NUC_6012", "--edges", "10,100", "--level", "x",
                                                                 "--param", "D0=1", "--out", OUT],

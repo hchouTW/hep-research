@@ -2,13 +2,14 @@
  "id": "adapter:cr-propagation",
  "version": "0.2.0",
  "status": "proposed",
- "purpose": "Run a cosmic-ray propagation code from a JSON run spec in a recorded environment and turn each run into one grid-node prediction (representation grid, the node in parameter_point) that the comparison gate and covariance_fit.py model tabulated-grid consume unchanged; translate a transport block (contracts ext_theory_spec.transport) into a USINE V3.5 run with every inexpressible item recorded, read USINE's local-flux tables into ratios of bin integrals, and serve USINE as the cr-provider/1 provider 'usine'; optional, required by no skill",
+ "purpose": "Run a cosmic-ray propagation code from a JSON run spec in a recorded environment and turn each run into one grid-node prediction (representation grid, the node in parameter_point) that the comparison gate and covariance_fit.py model tabulated-grid consume unchanged; translate a transport block (contracts ext_theory_spec.transport) into a USINE V3.5 run with every inexpressible item recorded, read USINE's local-flux tables into ratios of bin integrals, and serve USINE as the cr-provider/1 provider 'usine'; translate a transport block into a DRAGON2 run with every inexpressible item recorded and serve DRAGON2 as the cr-provider/1 provider 'dragon2' (ratios of bin integrals on ekn or rigidity bins); optional, required by no skill",
  "tools": [
   {
-   "name": "DRAGON2 (https://github.com/cosmicrays/DRAGON2-Beta_version): run spec to XML and data directory, local-spectrum ASCII output to bin-averaged ratio predictions",
+   "name": "DRAGON2 (https://github.com/cosmicrays/DRAGON2-Beta_version): run spec to XML and data directory, local-spectrum ASCII output to bin-averaged ratio predictions and to ratios of bin integrals (provider dragon2)",
    "status": "tested-in-declared-environment",
    "tested_versions": [
-    "DRAGON2-Beta_version git cd588707fe03c76f19bda1b8092e136dcbe3fe90 (2021-09-30; configure.ac DRAGON 3.1.0), built 2026-10-15 on E2 with Homebrew GCC 15.2.0, GSL 2.8, CFITSIO 4.6.4 (autoconf 2.72, libtool 2.6.2): six runs recorded (B/C with convection, reacceleration, energy losses and decay off; illustrative production cross sections) and replayed offline (VALIDATION CR-PROPAGATION-DRAGON2)"
+    "DRAGON2-Beta_version git cd588707fe03c76f19bda1b8092e136dcbe3fe90 (2021-09-30; configure.ac DRAGON 3.1.0), built 2026-10-15 on E2 with Homebrew GCC 15.2.0, GSL 2.8, CFITSIO 4.6.4 (autoconf 2.72, libtool 2.6.2): six runs recorded (B/C with convection, reacceleration, energy losses and decay off; illustrative production cross sections) and replayed offline (VALIDATION CR-PROPAGATION-DRAGON2)",
+    "the same build on E-crprop (macOS 27.2 arm64), 2026-10-28: five cr-propagation D1 item runs translated from harmonized-v1-<item>.json (item-off, convection, decay with NUBASE2020 half-lives, reacceleration, energy losses) recorded and replayed offline, convection and decay compared with the B2 closed form (VALIDATION CRPROP-D1); the provider passes C1's conformance checks live (HEP_DRAGON2_LIVE_TEST=1)"
    ]
   },
   {
@@ -24,13 +25,14 @@
    ]
   }
  ],
- "environment": "E2 (docs/capability-matrix.md): macOS 26.5 arm64, Python 3.13.2 with numpy 2.5.3 and scipy 1.18.1; DRAGON2 built from source in a user work directory (no system-wide installation) with Homebrew GCC 15.2.0 (g++, gcc, gfortran), GSL 2.8 and CFITSIO 4.6.4, serial (no OpenMP); the build and each run are recorded as computational-run artifacts under tests/adapters/fixtures/cr_propagation/. No network at run time; the source was cloned once from GitHub (user-approved). USINE V3.5 built from source (gitlab.com/dmaurin/USINE tag V3.5) in a user work directory with Apple clang 21.0.0 against Homebrew ROOT 6.38.04, located through HEP_USINE_BIN and HEP_USINE_DATA (its inputs folder), runs kept under HEP_USINE_RUN_DIR when set; no USINE source or shipped input is copied into the plugin (GPL-2.0), fixtures hold only numbers computed by USINE runs and this adapter's own files. GALPROP was not obtained or run",
+ "environment": "E2 (docs/capability-matrix.md): macOS 26.5 arm64, Python 3.13.2 with numpy 2.5.3 and scipy 1.18.1; DRAGON2 built from source in a user work directory (no system-wide installation) with Homebrew GCC 15.2.0 (g++, gcc, gfortran), GSL 2.8 and CFITSIO 4.6.4, serial (no OpenMP); the build and each run are recorded as computational-run artifacts under tests/adapters/fixtures/cr_propagation/. The provider dragon2 runs DRAGON2 located through HEP_DRAGON2_BIN and HEP_DRAGON2_DATA and keeps each run under HEP_DRAGON2_RUN_DIR when set. No network at run time; the source was cloned once from GitHub (user-approved). USINE V3.5 built from source (gitlab.com/dmaurin/USINE tag V3.5) in a user work directory with Apple clang 21.0.0 against Homebrew ROOT 6.38.04, located through HEP_USINE_BIN and HEP_USINE_DATA (its inputs folder), runs kept under HEP_USINE_RUN_DIR when set; no USINE source or shipped input is copied into the plugin (GPL-2.0), fixtures hold only numbers computed by USINE runs and this adapter's own files. GALPROP was not obtained or run",
  "assets": [
   "assets/dragon2_run.py",
   "assets/dragon2_to_prediction.py",
   "assets/usine_translate.py",
   "assets/usine_to_prediction.py",
-  "assets/usine_provider.py"
+  "assets/usine_provider.py",
+  "assets/dragon2_provider.py"
  ],
  "tests": [
   "../../tests/adapters/test_cr_propagation.py"
@@ -83,6 +85,58 @@
     "B/C",
     "10Be/9Be",
     "Be/B"
+   ],
+   "axes": [
+    "ekn",
+    "rigidity"
+   ],
+   "decomposable": false,
+   "deterministic": true,
+   "output_units": {
+    "ratio": "1",
+    "energy": "GeV/n (axis ekn) or GV (axis rigidity)"
+   }
+  },
+  {
+   "id": "dragon2",
+   "entrypoint": "assets/dragon2_provider.py",
+   "protocol": "cr-provider/1",
+   "description": "one DRAGON2 run per point (translator of the transport block, ILLUSTRATIVE isotopic cross sections), read into ratios of bin integrals of B/C or 10Be/9Be on ekn or rigidity bins (r3 P2, P3); not decomposable; needs HEP_DRAGON2_BIN and HEP_DRAGON2_DATA",
+   "domain": {
+    "D0_cm2_s": {
+     "min": 1e+28,
+     "max": 1e+29
+    },
+    "delta": {
+     "min": 0.3,
+     "max": 0.8
+    },
+    "L_kpc": {
+     "min": 2.0,
+     "max": 10.0
+    },
+    "V_c_kms": {
+     "min": 0.0,
+     "max": 30.0
+    },
+    "V_A_kms": {
+     "min": 0.0,
+     "max": 100.0
+    }
+   },
+   "axis_ranges": {
+    "ekn": {
+     "min": 0.05,
+     "max": 1000.0
+    },
+    "rigidity": {
+     "min": 1.0,
+     "max": 2000.0
+    }
+   },
+   "observables": [
+    "B/C",
+    "10Be/9Be"
    ],
    "axes": [
     "ekn",
