@@ -1,0 +1,66 @@
+{
+ "name": "h1-1d",
+ "description": "harmonized-v1 with geometry slab-1d (no radial boundary), the like-for-like geometry of the 1D thin-disc closed form; B3-1 B/C",
+ "status": "synthetic",
+ "ekn_range_gev": [
+  0.04,
+  2000.0
+ ],
+ "transport": {
+  "geometry": {
+   "kind": "slab-1d",
+   "L_kpc": 4.0,
+   "disc_halfwidth_pc": 100
+  },
+  "diffusion": {
+   "form": "beta^eta (R/R0)^delta with smooth breaks",
+   "D0_cm2_s": 3e+28,
+   "R0_gv": 1.0,
+   "eta": 1.0,
+   "delta": 0.5,
+   "breaks": []
+  },
+  "reacceleration": {
+   "V_A_kms": 0.0,
+   "zone": "thin-disc",
+   "relation": "Seo-Ptuskin 1994",
+   "w": 1.0
+  },
+  "convection": {
+   "V_c_kms": 0.0,
+   "dVc_dz_kms_per_kpc": 0.0
+  },
+  "losses": [],
+  "decay": {
+   "enabled": false,
+   "lorentz_dilation": true,
+   "ec_treatment": "fully-stripped"
+  },
+  "gas": {
+   "model": "uniform, n_H = 1 cm^-3",
+   "He_to_H_number": 0.1
+  },
+  "sources": {
+   "spatial": "none: the 1D model has no radial dimension (thin-disc source)",
+   "injection": [
+    {
+     "species_group": "all primaries",
+     "gamma": 2.3,
+     "breaks": []
+    }
+   ],
+   "abundances": "fixed by the parent list of theory:cr-secondary-ratio"
+  },
+  "cross_sections": {
+   "production_set": "theory:cr-secondary-ratio models/xs-illustrative-A.json (ILLUSTRATIVE)",
+   "inelastic_set": "theory:cr-secondary-ratio models/xs-illustrative-A.json (ILLUSTRATIVE)",
+   "ghost_threshold": "off: ghost nuclei and tertiary chains off on both sides"
+  },
+  "species": {
+   "network_top": "O-16",
+   "isotopic": false
+  },
+  "family": "SLIM",
+  "free": []
+ }
+}
