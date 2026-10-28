@@ -6300,3 +6300,37 @@ Not done in C2: the force-field modulation path (no provider with isotopic LIS e
 refused), the USINE case (C2U), real data. Observed in the protocol: two observables with the same id in one request
 make the provider's components ambiguous (the runner rejects the response as invalid), so the fit sends one request
 per dataset.
+
+## CRPROP-E1 — 2026-10-28 (environment E2)
+
+Training set and bounded active addition with USINE (r3 §E1, r4 §6; optional WP). Driver and committed records under
+`tests/adapters/fixtures/cr_propagation/e1/` (`active_addition.py`, `design.json`, `summary.json`,
+`forced-test.json`); training data, run folders, cache and partition state stay under `$CRPROP_OUT/e1/` (E1-3).
+
+**Environment (r3 §0.3, base exception D10).** E2: macOS 27.2 arm64, Python 3.13.2 in the E2 venv (numpy 2.5.3, scipy
+1.18.1); USINE V3.5 fb53006d (`HEP_USINE_BIN`, `HEP_USINE_DATA` of the ENV build), provider `usine` 0.2.0 (adapter
+cr-propagation). `git rev-parse --show-toplevel` = `.claude/worktrees/crprop-e1`; `git branch --show-current` =
+`worktree-crprop-e1`; `git status` clean at start; base `4a58be50` = integration HEAD (decision D10, not
+`origin/main`); prerequisites B1 (merge 3ed1e89e), C2 (merge 9f17775c), A4 (merge 0ee4c914) and C1 (merge 099d1d22)
+are ancestors of HEAD (`git merge-base --is-ancestor`). No batch client: runs go through
+`skills/hep-computing/scripts/local_partition.py` on E2 (decision D6), at most 4 USINE processes at once.
+
+**Set-up and criteria, fixed before any loop run (R9).** Free parameters 5 (`D0_cm2_s` 1e28–1e29 on a log axis,
+`delta` 0.3–0.8, `eta` −1.5–1.5, `V_A_kms` 0–100, `V_c_kms` 0–30; `L_kpc` 4 and every other transport field fixed at
+the provider's `DEFAULT_TRANSPORT`, harmonized-v1 with the isotopic ILLUSTRATIVE cross sections, sent in full in
+every request). Q9: N₀ = 10 × 5 = 50 → 64 (power of 2), k = 64/10 → 6. Sobol design scrambled, seed 20261028;
+d_min = smallest pairwise distance of the design in the unit cube. Observable B/C, 20 log rigidity bins 2–1000 GV.
+Synthetic data: the provider's B/C at the truth point (`D0_cm2_s` 3e28, `delta` 0.5, `eta` 1, `V_A_kms` 30,
+`V_c_kms` 5; Asimov, labelled synthetic) with an ILLUSTRATIVE covariance (statistical 1.5% (R/10 GV)^0.4,
+uncorrelated; systematic 2% with Gaussian correlation length 0.3 in log10 R). Hold-out: 16 points of the round-0
+approximate 95% posterior region, never trained on.
+- E1-1: every design point has a computational-run record (USINE run folder under `$CRPROP_OUT/e1/runs/`, its id in
+  `design.json`); failures are recorded with their reason; more than 5% failed design points stops the WP.
+- E1-2: with `--forced-max-rounds-test` (both termination thresholds 0, early stops off) the loop ends with status
+  `max-rounds` after exactly 5 rounds and its reason names the unmet criteria and the failing bins.
+- E1-3: `python3 tools/check_packaging.py` exits 0 and only the driver, the design file, the summaries (per-point
+  hashes, computational-run references, no training values) are committed, each ≤ 2 MiB.
+- Termination (r3 §E1 with E2's criteria, placeholder emulator): on every hold-out point Δχ² = bᵀC⁻¹b ≤ 1 (E2-1) and
+  |b_i| ≤ 0.2 σ_i^stat in every bin (E2-2). Limits: 5 rounds; early stop when the largest hold-out |b_i|/σ_i^stat
+  falls by less than 10% in 2 consecutive rounds, or every pick lies closer than d_min to a training point; cost cap
+  1500 USINE evaluations for E1 (orchestrator), checked before every batch.
