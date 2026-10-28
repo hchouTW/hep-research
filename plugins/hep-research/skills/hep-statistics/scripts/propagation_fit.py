@@ -9,7 +9,7 @@ dataset without one stops the fit with status incomplete, exit 3, never a diagon
 prediction at the start point is gated against it (contracts/comparison/gate.py) before anything is fitted (R5).
 
 Bin semantics are checked first, explicitly: the prediction's bin_semantics and its binning conventions must be the
-data's. A provider that returns bin averages (for example a ratio averaged in ln(E/n), convention crsr:bin_average) is
+data's. A provider that returns bin averages (for example a ratio averaged in ln(E/n) under a profile convention) is
 never fitted to data declared as P2 bin integrals (ratio of bin-integrated fluxes): it is refused (exit 1), because a
 ratio-only provider has no primary spectra to convert with.
 
@@ -749,10 +749,6 @@ def _pinv_kept(F):
     return cov, flat
 
 
-def public(fit: dict) -> dict:
-    return {k: v for k, v in fit.items() if not k.startswith("_")}
-
-
 # --------------------------------------------------------------------------- response model
 class ResponseModel:
     """Tensor Chebyshev interpolation of the provider components on a box in fit coordinates (module docstring)."""
@@ -889,28 +885,7 @@ class SurrogateFit:
     def fit(self, ys, aux, start, opt, constraint=None):
         """Minimize; constraint = ("index", i, value) or ("direction", v, z_ref). Returns (chi2, z, ok, reason)."""
         start = np.clip(np.asarray(start, dtype=float), self.lo, self.hi)
-        if constraint is None:
-            def to_z(w):
-                return w
-            w0, lo, hi = start, self.lo, self.hi
-        elif constraint[0] == "index":
-            i, val = constraint[1], constraint[2]
-            keep = [j for j in range(len(start)) if j != i]
-
-            def to_z(w, keep=keep, i=i, val=val):
-                z = np.empty(len(start))
-                z[keep] = w
-                z[i] = val
-                return z
-            w0, lo, hi = start[keep], self.lo[keep], self.hi[keep]
-        else:
-            v, z_ref = constraint[1], constraint[2]
-            comp = np.linalg.svd(v.reshape(1, -1))[2][1:].T
-
-            def to_z(w, comp=comp, z_ref=z_ref):
-                return z_ref + comp @ w
-            w0 = comp.T @ (start - z_ref)
-            lo, hi = None, None
+        to_z, w0, lo, hi = _constrained_map(constraint, start, self.lo, self.hi)
         rng = np.random.default_rng(opt["seed"])
         last = None
         for attempt in range(opt["max_restarts"] + 1):
@@ -957,6 +932,27 @@ class SurrogateFit:
         return v["status"] == "converged", ("ok" if v["status"] == "converged" else "not-converged")
 
 
+def _constrained_map(constraint, start, lo_all, hi_all):
+    """(map from free coordinates w to the full vector z, w at the start, bounds of w or None): no constraint; one
+    coordinate fixed ("index", i, value); or a fixed projection on a unit direction ("direction", v, z_ref), w then
+    spanning its orthogonal complement (unbounded; the caller keeps the box with a penalty)."""
+    if constraint is None:
+        return (lambda w: w), start, lo_all, hi_all
+    if constraint[0] == "index":
+        i, val = constraint[1], constraint[2]
+        keep = [j for j in range(len(start)) if j != i]
+
+        def insert(w):
+            z = np.empty(len(start))
+            z[keep] = w
+            z[i] = val
+            return z
+        return insert, start[keep], lo_all[keep], hi_all[keep]
+    v, z_ref = constraint[1], constraint[2]
+    comp = np.linalg.svd(v.reshape(1, -1))[2][1:].T
+    return (lambda w: z_ref + comp @ w), comp.T @ (start - z_ref), None, None
+
+
 def res_fun(sf, to_z, w, ys, aux):
     z = to_z(np.asarray(w, dtype=float))
     return sf.resid(np.clip(z, sf.lo, sf.hi), ys, aux)
@@ -983,7 +979,7 @@ def coverage_band(n, m):
     return z_m, se
 
 
-def run_toys(model, family, truth, tcfg, rm_cfg, opt, fixed_global, families_cfg=None):
+def run_toys(model, family, truth, tcfg, rm_cfg, opt, fixed_global):
     """Plug-in coverage toys at a true point (module docstring)."""
     from core.stats.toy_ensemble import EnsembleSpec, coverage, toy_seed
     names, scales, bounds = model.coords(family["free"])
@@ -1445,7 +1441,7 @@ def run(cfg: dict, base: Path, registry, cache_dir=None, max_evaluations=2000, a
     periods = sorted({ds.period for ds in datasets if ds.period})
     if periods:
         raise FitRefused("modulation-needs-isotopic-lis",
-                         f"datasets with periods {periods} need phi_<period>_gv ({['phi_%s_gv' % p for p in periods]}) "
+                         f"datasets with periods {periods} need phi_<period>_gv ({[f'phi_{p}_gv' for p in periods]}) "
                          "applied per isotope before ratios are formed (P4); provider "
                          f"{entry.provider_id} returns only {entry.declaration['observables']}, no isotopic LIS")
     fixed_global = {k: _num(v, f"fixed.{k}") for k, v in _keys(cfg.get("fixed") or {}, list(domain), "fixed").items()}
