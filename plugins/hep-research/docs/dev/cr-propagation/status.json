@@ -268,7 +268,7 @@
    "head": "0f3ebfab",
    "merge_commit": "c28d960c",
    "worker_report": "DONE: E2-1 0.0045, E2-2 0.063 sigma, E2-3 0.002 sigma; PRV-1/2 pass offline; 177 USINE runs; needs one entry in test_adapter_missing_dependency.py (files widened)",
-   "verifier_report": "PASS (2026-10-28, Opus): E2-1/E2-2 recomputed with own covariance (0.00446/0.0631); hold-out never trained on; no training values committed; provider matches hep-ml to 1e-12; advisories: E2-3 Laplace intervals for eta/V_A/V_c box-cut (not interval validation); domain smaller than box not stated in ml-artifact/adapter.json; GP model allows reconstructing training ln(B/C)",
+   "verifier_report": "PASS (Opus); rework round 1 (wave-4 --status) PASS (Sonnet): outputs identical bar status_label, model sha equal; merged bc6f314f",
    "missing_capabilities": [],
    "notes": [
     "wave-4 full run (6ecc1ffa): tests.skills.test_cli_contract test_scoped_tools_take_status fails (skills/hep-ml/scripts/train_emulator.py lacks --status); fix as rework round 1 on worktree-crprop-e2fix (same handling as the wave-3 fixes)"
@@ -754,6 +754,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "D3 merged (6a332c90) after rebase (content unchanged); post-merge static ok"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "E2 rework round 1 merged (bc6f314f); CLI contract passes"
   }
  ],
  "env": {
