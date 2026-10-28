@@ -243,18 +243,18 @@
    ]
   },
   "E1": {
-   "state": "dispatched",
+   "state": "verifying",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-e1",
    "base": "4a58be50",
-   "head": null,
+   "head": "9ac54c51",
    "merge_commit": null,
-   "worker_report": null,
+   "worker_report": "DONE: E1-1 64/64 ok, 111 loop evaluations with records; E1-2 forced test stops at 5 rounds; E1-3 no training data; 114 USINE evaluations; placeholder RBF emulator for E2 to replace; standard run early-stop-min-distance at round 3 (E2-1 met, E2-2 not)",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "batch capability partial; dispatched under D6 (local_partition on E2); E1 USINE cap 1500 set by orchestrator within D7/A1.8"
+    "Sonnet verifier dispatched 2026-10-28"
    ]
   },
   "E2": {
@@ -618,6 +618,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "B3 rework round 1 DONE (0ec57897); Opus verifier dispatched (last round)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "E1 DONE (9ac54c51, 114 USINE evaluations); Sonnet verifier dispatched"
   }
  ],
  "env": {
