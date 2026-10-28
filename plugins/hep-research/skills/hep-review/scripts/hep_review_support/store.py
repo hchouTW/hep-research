@@ -19,6 +19,8 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from contracts import hep_review as H
+from contracts.schema import SCHEMA_DIR as SCHEMAS
+from contracts.schema import validate as schema_validate
 
 UNSUPPORTED_FS = {"nfs", "nfs4", "cifs", "smbfs", "smb", "smb2", "smb3", "afpfs", "webdav", "9p", "virtiofs",
                   "osxfuse", "macfuse", "sshfs"}
@@ -134,7 +136,7 @@ def check_current_validator(version: str, approved: tuple[str, ...] = APPROVED_V
     return True
 
 
-DDL = """
+TABLE_DEFINITIONS = """
 CREATE TABLE IF NOT EXISTS objects(context_id TEXT NOT NULL, segment_id TEXT NOT NULL, kind TEXT NOT NULL,
   logical_id TEXT NOT NULL, digest TEXT NOT NULL, bytes BLOB NOT NULL,
   PRIMARY KEY(context_id, segment_id, kind, logical_id));
@@ -180,7 +182,7 @@ class Store:
         self.conn.execute("PRAGMA journal_mode=WAL")
         self.conn.execute("PRAGMA synchronous=FULL")
         self.conn.execute(f"PRAGMA busy_timeout={BUSY_TIMEOUT_MS}")
-        self.conn.executescript(DDL)
+        self.conn.executescript(TABLE_DEFINITIONS)
 
     def close(self) -> None:
         self.conn.close()
@@ -193,36 +195,36 @@ class Store:
                 "python": sys.version.split()[0], "location": self.location}
 
     # -- blobs -------------------------------------------------------------------------------------------------------
-    def put_blob(self, data: bytes) -> str:
+    def put_blob(self, content: bytes) -> str:
         """Write, sync and verify a blob outside any transaction; an unreferenced blob is an orphan, not committed."""
-        digest = hashlib.sha256(data).hexdigest()
+        digest = hashlib.sha256(content).hexdigest()
         target = self.dir / "blobs" / digest
         if not target.exists():
-            tmp = self.dir / "blobs" / f".{digest}.{os.getpid()}.tmp"
-            with open(tmp, "wb") as fh:
-                fh.write(data)
+            temp_path = self.dir / "blobs" / f".{digest}.{os.getpid()}.temp_path"
+            with open(temp_path, "wb") as fh:
+                fh.write(content)
                 fh.flush()
                 os.fsync(fh.fileno())
-            os.chmod(tmp, 0o444)
-            os.replace(tmp, target)
+            os.chmod(temp_path, 0o444)
+            os.replace(temp_path, target)
         if self.blob_status(digest) != "ok":
             raise OSError(f"blob {digest} did not verify after writing")
-        self.conn.execute("INSERT OR IGNORE INTO blobs(digest, size) VALUES(?, ?)", (digest, len(data)))
+        self.conn.execute("INSERT OR IGNORE INTO blobs(digest, size) VALUES(?, ?)", (digest, len(content)))
         return digest
 
     def blob_status(self, digest: str) -> str:
         p = self.dir / "blobs" / digest
         try:
-            data = p.read_bytes()
+            content = p.read_bytes()
         except OSError:
             return "missing"
-        return "ok" if hashlib.sha256(data).hexdigest() == digest else "changed"
+        return "ok" if hashlib.sha256(content).hexdigest() == digest else "changed"
 
     def read_blob(self, digest: str) -> bytes:
-        data = (self.dir / "blobs" / digest).read_bytes()
-        if hashlib.sha256(data).hexdigest() != digest:
+        content = (self.dir / "blobs" / digest).read_bytes()
+        if hashlib.sha256(content).hexdigest() != digest:
             raise OSError(f"blob {digest} changed after it was written")
-        return data
+        return content
 
     def orphan_blobs(self, context_id: str) -> list[str]:
         used: set[str] = set()
@@ -264,6 +266,11 @@ class Store:
         for o in objects:
             for e in H.check_object(o):
                 errs.append(e)
+            kind_name = str(o.get("record_kind", "")).replace("-", "_")
+            if (SCHEMAS / f"hep_review_{kind_name}.json").is_file():
+                rep = schema_validate(o, f"hep_review_{kind_name}.json")
+                errs.extend(_err("schema." + f.code.split(".", 1)[-1], f"{f.path}: {f.message}")
+                            for f in rep.errors)
             if o.get("context_id") != context_id:
                 errs.append(_err("object.context", f"{o.get('id')} belongs to another context"))
             key = (o.get("record_kind"), o.get("id"))

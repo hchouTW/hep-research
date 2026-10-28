@@ -37,12 +37,12 @@ MAC_HOME = "/" + "Users" + "/u"  # spelled in parts: tools/check_packaging.py fo
 
 
 class Location(unittest.TestCase):
-    def test_default_store_dir_follows_xdg_state_home(self):
+    def test_default_store_dir_follows_the_state_home_variable(self):
         self.assertEqual(S.default_store_dir({"XDG_STATE_HOME": "/x/state", "HOME": "/h"}),
                          Path("/x/state/hep-research/hep-review"))
         self.assertEqual(S.default_store_dir({"HOME": "/h"}), Path("/h/.local/state/hep-research/hep-review"))
 
-    def test_p12_n51_network_fuse_vm_mounts_refused(self):
+    def test_p12_n51_network_fuse_and_guest_mounts_refused(self):
         cases = {"/srv/state/x": ("ext4", True), "/mnt/nas/store": ("nfs4", False),
                  "/data/gdrive/store": ("fuse.rclone", False), "/media/host/s": ("virtiofs", False),
                  "/srv/plan9/s": ("9p", False)}
@@ -77,13 +77,13 @@ class Location(unittest.TestCase):
 
 class StoreCase(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.dir = Path(self.tmp.name) / "store"
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.dir = Path(self.temp_dir.name) / "store"
         self.s = S.Store(self.dir, location=F.TEMP_LOCATION)
 
     def tearDown(self):
         self.s.close()
-        self.tmp.cleanup()
+        self.temp_dir.cleanup()
 
 
 class CommitLog(StoreCase):
@@ -149,6 +149,19 @@ class CommitLog(StoreCase):
         with self.assertRaises(S.AdmissionRefused) as cm:
             self.s.append("ctx-1", [a], head, "op-c", writer_session_id="s")
         self.assertIn("object.id_reused", cm.exception.codes)
+
+    def test_schemas_are_applied_at_commit(self):
+        head = F.seed(self.s)
+        a = F.assignment("asg-2", "rev-2")
+        a["plan_revision"] = True  # a bool is not an integer (case N21 on the I/O path)
+        with self.assertRaises(S.AdmissionRefused) as cm:
+            self.s.append("ctx-1", [a], head, "op-s", writer_session_id="s")
+        self.assertIn("schema.type", cm.exception.codes)
+        rec = F.record(self.s, "rec-2", "asg-1", "rev-1")
+        rec["surprise"] = 1
+        with self.assertRaises(S.AdmissionRefused) as cm:
+            self.s.append("ctx-1", [rec], head, "op-t", writer_session_id="s")
+        self.assertIn("schema.additional", cm.exception.codes)
 
     def test_reports_are_never_committed(self):
         head = F.seed(self.s)

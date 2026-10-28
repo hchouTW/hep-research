@@ -65,7 +65,6 @@ class Case:
                                  "authors": ["author-a"], "authors_basis": "declared"}}
         self.plans: list[dict] = []
         self.manifest_rev = 0
-        self.extra_claim = None
         self.add(self.intent)
         self.new_manifest()
 
@@ -180,8 +179,5 @@ class Case:
             digest = H.metadata_digest(c)
             commits.append({"commit": c, "digest": digest, "objects": copy.deepcopy(objs)})
             prev = digest
-        b = {"context_id": "ctx-1", "segment_id": "seg-1", "mode": self.mode, "commits": commits,
-             "as_of_seq": len(commits), "as_of_commit_digest": prev, "blob_checks": dict(self.blob_checks)}
-        if self.extra_claim is not None:
-            b["claim_binding"] = self.extra_claim
-        return b
+        return {"context_id": "ctx-1", "segment_id": "seg-1", "mode": self.mode, "commits": commits,
+                "as_of_seq": len(commits), "as_of_commit_digest": prev, "blob_checks": dict(self.blob_checks)}

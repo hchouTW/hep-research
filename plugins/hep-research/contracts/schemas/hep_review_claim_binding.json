@@ -1,0 +1,25 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "hep_review_claim_binding.json",
+ "title": "hep-review claim-binding commit object (schema 0.1.0, experimental)",
+ "description": "Required to claim R3 (spec 15.6): the capability claim bytes and the evaluation-log chain segment from the trusted checkpoint the plan states (evaluation_checkpoint) to the commit holding the claim state. The case fingerprint that counts is the plan's capability_fingerprint; case_fingerprint here is only the binder's statement. Layer 2 re-checks that the claim's current state equals the bound state.",
+ "type": "object",
+ "$ref": "hep_review_definitions.json#/$defs/header",
+ "required": ["claim", "chain_segment", "case_fingerprint"],
+ "properties": {
+  "protocol": {}, "schema_version": {}, "record_kind": {"const": "claim-binding"}, "id": {}, "context_id": {},
+  "claim": {"type": "object", "required": ["id", "state", "fingerprint"],
+            "properties": {"id": {"type": "string"},
+                           "state": {"enum": ["experimental", "pilot-checked-scope", "evaluated-scope",
+                                              "needs-reassessment", "retired"]},
+                           "fingerprint": {"type": "string"}}},
+  "chain_segment": {"type": "array", "items": {"type": "object", "required": ["commit", "digest", "object_digests"],
+                                               "properties": {"commit": {"type": "object"},
+                                                              "digest": {"$ref": "hep_review_definitions.json#/$defs/digest"},
+                                                              "object_digests": {"type": "array", "items": {"$ref": "hep_review_definitions.json#/$defs/digest"}}},
+                                               "additionalProperties": false}},
+  "case_fingerprint": {"type": "string"},
+  "stated_checkpoint": {"type": "object"}
+ },
+ "additionalProperties": false
+}

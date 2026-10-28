@@ -95,6 +95,8 @@ def _pairs(pairs: list[tuple[str, Any]]) -> dict:
 def _int(token: str) -> int:
     if token == "-0":
         raise IngestError("json.minus_zero", "the integer -0 is not allowed")
+    if len(token.lstrip("-")) > 16:  # longer than 2^53-1 (16 digits); never hand int() a huge token
+        raise IngestError("json.int_range", f"integer token of {len(token)} characters is outside +-(2^53-1)")
     value = int(token)
     if not -SAFE_INT <= value <= SAFE_INT:
         raise IngestError("json.int_range", f"integer {token} is outside +-(2^53-1)")
@@ -208,9 +210,13 @@ FIDELITIES = ("digest-bound", "file-transfer", "host-transcript", "transcribed",
 FIDELITY_R2 = {"digest-bound", "file-transfer", "host-transcript"}
 RECORD_TYPES = {"submission": "reviewer", "verification": "verifier", "adjudication": "arbiter", "response": "author"}
 DISCHARGE_REFUSED = {"missing-data", "difficulty", "budget"}
+# The applicability reasons a discharge may give; anything else (including missing data, difficulty or budget under
+# another name) is refused (spec 7.1).
+DISCHARGE_REASONS = ("condition-absent", "out-of-scope-by-intent", "superseded-by-other-obligation")
+JUDGING_RECORD_TYPES = {"submission", "verification", "adjudication"}
 CLAIM_STATES_R3 = {"pilot-checked-scope", "evaluated-scope"}
 SCOPE_DONE = "performed-no-known-gaps"
-KIND_ORDER = ("intent", "manifest", "plan", "packet", "assignment", "record")
+KIND_ORDER = ("intent", "manifest", "plan", "packet", "assignment", "record", "claim-binding")
 QUALIFIER = {"R1": "R1 (non-independent recorded review)",
              "R2": "R2 (independent review under the recorded conditions)",
              "R3": "R3 (review within the evaluated scope)"}
@@ -218,8 +224,7 @@ NO_DEFECT = "no still-valid defect was observed within the scope of this check"
 ADVISORY_SENTENCE = ("The reviewer was instructed not to read other evaluations; this was neither observed nor "
                      "enforced.")
 R0_SENTENCE = "R0: unrecorded, non-independent preliminary opinion; no no-defect summary is given at R0."
-BUNDLE_KEYS = {"context_id", "segment_id", "mode", "commits", "as_of_seq", "as_of_commit_digest", "blob_checks",
-               "claim_binding"}
+BUNDLE_KEYS = {"context_id", "segment_id", "mode", "commits", "as_of_seq", "as_of_commit_digest", "blob_checks"}
 
 
 class BundleError(ValueError):
@@ -319,14 +324,25 @@ def check_object(committed: dict) -> list[dict]:
     return errs
 
 
-def rule_check_object(committed: dict) -> list[dict]:
+def rule_check_object(committed: dict, lookup: dict) -> list[dict]:
     return check_object(committed)
+
+
+def rule_check_plan(committed: dict, lookup: dict) -> list[dict]:
+    """Plan admission re-applied by the current validator: a committed plan it judges non-compliant (a downgrade, a
+    missing decision_required) enters the version-inconsistency list when the head plan references it (spec 7.3)."""
+    if committed.get("record_kind") != "plan" or lookup.get("intent") is None:
+        return []
+    parent = lookup.get("plans", {}).get(committed.get("revision", 0) - 1) if is_int(committed.get("revision")) else None
+    return [e for e in check_plan(committed, parent, lookup["intent"]) if not e["code"].startswith(("object.",
+                                                                                                   "order."))]
 
 
 # Validator versions: each maps to the object rules it applies. Historical checks use the rule set of their version
 # (old versions are kept as repository tags; this table holds the current line).
 LATEST_VALIDATOR = "0.1.0"
-VALIDATOR_RULES: dict[str, tuple[Callable[[dict], list[dict]], ...]] = {"0.1.0": (rule_check_object,)}
+VALIDATOR_RULES: dict[str, tuple[Callable[[dict, dict], list[dict]], ...]] = {
+    "0.1.0": (rule_check_object, rule_check_plan)}
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -386,6 +402,63 @@ def check_plan(plan: dict, parent: dict | None, intent: dict) -> list[dict]:
     return errs
 
 
+def _field_downgrades(oid: str, o: dict, n: dict, plan: dict, judged_ids: tuple[str, ...], p: str) -> list[dict]:
+    """The section 8.1 checks between one old required obligation and one obligation that replaces it (same id or a
+    1:1 rename through obligation_map)."""
+    errs: list[dict] = []
+    if n.get("required") is not True:
+        errs.append(_err("downgrade.required_to_optional", f"{oid} required -> optional", p))
+    if not set(o.get("required_methods", [])) <= set(n.get("required_methods", [])):
+        errs.append(_err("downgrade.method_removed", f"{oid} lost required methods", p))
+    if not set(o.get("evidence_requirements", [])) <= set(n.get("evidence_requirements", [])):
+        errs.append(_err("downgrade.evidence_removed", f"{oid} lost evidence requirements", p))
+    if not set(o.get("independence_requirements", [])) <= set(n.get("independence_requirements", [])):
+        errs.append(_err("downgrade.independence_removed", f"{oid} lost independence conditions", p))
+    if o.get("decision_required") is True and n.get("decision_required") is not True:
+        errs.append(_err("downgrade.decision_required_dropped", f"{oid} decision_required true -> false", p))
+    errs.extend(_tolerance_downgrades(oid, o, n, p))
+    if _adoption_loosened(o, n):
+        errs.append(_err("downgrade.adoption_loosened", f"{oid} adoption_policy loosened", p))
+    for field_, code in (("criterion", "downgrade.criterion_changed"),
+                         ("assumptions", "downgrade.assumptions_changed")):
+        if o.get(field_) != n.get(field_) and not any(_judged(plan, "equivalent_or_stronger", x) for x in judged_ids):
+            errs.append(_err(code, f"{oid} {field_} changed without an equivalent-or-stronger judgment", p))
+    return errs
+
+
+def _adoption_loosened(o: dict, n: dict) -> bool:
+    oa, na = o.get("adoption_policy", {}), n.get("adoption_policy", {})
+    return (any(oa.get(k) is True and na.get(k) is not True for k in ("second_method_required",
+                                                                       "verification_required"))
+            or not set(oa.get("qualifications", [])) <= set(na.get("qualifications", [])))
+
+
+def _split_downgrades(oid: str, o: dict, targets: list[dict], p: str) -> list[dict]:
+    """A split or merge: the required targets together keep every method, evidence requirement and independence
+    condition; each required target keeps decision_required, the tolerances it shares and the adoption policy.
+    Whether the new criteria cover the old one needs a scope judgment (a planning gap without it, spec 8.2.3)."""
+    errs: list[dict] = []
+    req = [t for t in targets if t.get("required") is True]
+    for key, code in (("required_methods", "downgrade.method_removed"),
+                      ("evidence_requirements", "downgrade.evidence_removed"),
+                      ("independence_requirements", "downgrade.independence_removed")):
+        if not set(o.get(key, [])) <= {x for t in req for x in t.get(key, [])}:
+            errs.append(_err(code, f"{oid}: the split lost {key}", p))
+    for t in req:
+        if o.get("decision_required") is True and t.get("decision_required") is not True:
+            errs.append(_err("downgrade.decision_required_dropped", f"{oid} -> {t['id']} drops decision_required", p))
+        if _adoption_loosened(o, t):
+            errs.append(_err("downgrade.adoption_loosened", f"{oid} -> {t['id']} loosens adoption_policy", p))
+        shared = dict(t, tolerances=[x for x in t.get("tolerances", [])])
+        old_shared = dict(o, tolerances=[x for x in o.get("tolerances", [])
+                                         if x.get("quantity") in {y.get("quantity") for y in t.get("tolerances", [])}])
+        errs.extend(_tolerance_downgrades(f"{oid}->{t['id']}", old_shared, shared, p))
+    covered = {x.get("quantity") for t in req for x in t.get("tolerances", [])}
+    if any(x.get("quantity") not in covered for x in o.get("tolerances", [])):
+        errs.append(_err("downgrade.tolerance_loosened", f"{oid}: the split dropped a tolerance", p))
+    return errs
+
+
 def _downgrades(parent: dict, plan: dict) -> list[dict]:
     errs: list[dict] = []
     if not _required_conditions(parent) <= _required_conditions(plan):
@@ -398,27 +471,7 @@ def _downgrades(parent: dict, plan: dict) -> list[dict]:
             continue
         p = f"$.obligations[{oid}]"
         if oid in revised:
-            n = revised[oid]
-            if n.get("required") is not True:
-                errs.append(_err("downgrade.required_to_optional", f"{oid} required -> optional", p))
-            if not set(o.get("required_methods", [])) <= set(n.get("required_methods", [])):
-                errs.append(_err("downgrade.method_removed", f"{oid} lost required methods", p))
-            if not set(o.get("evidence_requirements", [])) <= set(n.get("evidence_requirements", [])):
-                errs.append(_err("downgrade.evidence_removed", f"{oid} lost evidence requirements", p))
-            if not set(o.get("independence_requirements", [])) <= set(n.get("independence_requirements", [])):
-                errs.append(_err("downgrade.independence_removed", f"{oid} lost independence conditions", p))
-            if o.get("decision_required") is True and n.get("decision_required") is not True:
-                errs.append(_err("downgrade.decision_required_dropped", f"{oid} decision_required true -> false", p))
-            errs.extend(_tolerance_downgrades(oid, o, n, p))
-            oa, na = o.get("adoption_policy", {}), n.get("adoption_policy", {})
-            if (any(oa.get(k) is True and na.get(k) is not True
-                    for k in ("second_method_required", "verification_required"))
-                    or not set(oa.get("qualifications", [])) <= set(na.get("qualifications", []))):
-                errs.append(_err("downgrade.adoption_loosened", f"{oid} adoption_policy loosened", p))
-            for field_, code in (("criterion", "downgrade.criterion_changed"),
-                                 ("assumptions", "downgrade.assumptions_changed")):
-                if o.get(field_) != n.get(field_) and not _judged(plan, "equivalent_or_stronger", oid):
-                    errs.append(_err(code, f"{oid} {field_} changed without an equivalent-or-stronger judgment", p))
+            errs.extend(_field_downgrades(oid, o, revised[oid], plan, (oid,), p))
         elif oid in omap:
             targets = omap[oid].get("new_ids") or []
             if not targets:
@@ -427,6 +480,10 @@ def _downgrades(parent: dict, plan: dict) -> list[dict]:
                 errs.append(_err("plan.map_unknown_target", f"obligation_map of {oid} names unknown obligations", p))
             elif not any(revised[t].get("required") is True for t in targets):
                 errs.append(_err("downgrade.mapped_to_optional", f"required {oid} mapped only to optional", p))
+            elif len(targets) == 1:
+                errs.extend(_field_downgrades(oid, o, revised[targets[0]], plan, (oid, targets[0]), p))
+            else:
+                errs.extend(_split_downgrades(oid, o, [revised[t] for t in targets], p))
         else:
             errs.append(_err("downgrade.required_removed", f"required {oid} deleted", p))
     return errs
@@ -462,8 +519,8 @@ def _edges(group: str, it: dict) -> list[str]:
         deps += it.get("evidence_ids", []) + it.get("attempt_ids", []) + it.get("finding_ids", [])
     elif group == "findings":
         deps += it.get("evidence_ids", [])
-    elif group in ("judgments", "responses") and it.get("finding_id"):
-        deps.append(it["finding_id"])
+    elif group in ("judgments", "responses"):
+        deps += [it[k] for k in ("finding_id", "answer_id") if it.get(k)]
     return [d for d in deps if isinstance(d, str)]
 
 
@@ -471,7 +528,7 @@ def _check_chain(bundle: dict) -> None:
     prev = None
     for i, c in enumerate(bundle["commits"], 1):
         head = c.get("commit", {})
-        if head.get("seq") != i or head.get("prev_commit_digest") != prev:
+        if not is_int(head.get("seq")) or head.get("seq") != i or head.get("prev_commit_digest") != prev:
             raise BundleError(f"bundle.chain: commit {i} is out of sequence or not chained")
         if metadata_digest(head) != c.get("digest"):
             raise BundleError(f"bundle.chain: commit {i} digest does not match its content")
@@ -512,6 +569,13 @@ def validate(bundle: dict, validator_version: str, *, rules: dict | None = None)
     for _seq, o in entries:
         for e in check_object(o):
             diagnostics.append(dict(e, object=o.get("id")))
+        for field_name in ("revision", "plan_revision", "intent_revision"):
+            if field_name in o and not is_int(o[field_name]):
+                diagnostics.append(_err("object.integer", f"{o.get('id')}: {field_name} must be an integer", f"$.{field_name}")
+                                   | {"object": o.get("id")})
+    diagnostics.extend(_order_diagnostics(entries))
+    if any(not is_int(o.get("revision")) for _, o in entries if o.get("record_kind") == "plan"):
+        raise BundleError("bundle.plan_revision: a plan revision is not an integer")
     intents = [o for _, o in entries if o.get("record_kind") == "intent"]
     plans = {o["revision"]: (s, o) for s, o in entries if o.get("record_kind") == "plan"}
     manifests = {o["id"]: o for _, o in entries if o.get("record_kind") == "manifest"}
@@ -556,12 +620,17 @@ def validate(bundle: dict, validator_version: str, *, rules: dict | None = None)
             dis = it.get("discharge")
             if not isinstance(dis, dict):
                 qitem[iid] = {"code": "discharge.missing", "record_id": rid, "message": "not-applicable needs a discharge"}
-            elif dis.get("reason_category") in DISCHARGE_REFUSED:
+            elif dis.get("reason_category") not in DISCHARGE_REASONS:
                 qitem[iid] = {"code": "discharge.invalid_reason", "record_id": rid,
-                              "message": "not-applicable cannot be used for missing data, difficulty or budget"}
+                              "message": f"not-applicable needs one of {list(DISCHARGE_REASONS)}; never missing data, "
+                                         "difficulty or budget"}
             elif asg.get("role") == "author" or rec.get("actor") in authors:
                 qitem[iid] = {"code": "discharge.by_author", "record_id": rid,
                               "message": "an author cannot discharge an obligation"}
+            elif dis.get("basis") not in ("observed", "declared") or not _qualified(asg) \
+                    or rec.get("type") not in ("submission", "verification"):
+                qitem[iid] = {"code": "discharge.basis", "record_id": rid,
+                              "message": "a discharge needs an observed or declared basis from a qualified reviewer"}
     changed = True
     while changed:
         changed = False
@@ -575,13 +644,38 @@ def validate(bundle: dict, validator_version: str, *, rules: dict | None = None)
                 changed = True
     if bundle["mode"] == "R0":
         integrity = "not-checked"
-    elif qrec or qitem:
+    elif qrec or qitem or diagnostics:
         integrity = "partial-invalid"
     else:
         integrity = "valid"
     return {"bundle": bundle, "validator_version": validator_version, "entries": entries,
             "quarantined_records": qrec, "quarantined_items": qitem, "record_integrity": integrity,
             "input_error": input_error, "diagnostics": diagnostics}
+
+
+def _order_diagnostics(entries: list[tuple[int, dict]]) -> list[dict]:
+    """Creation order (spec 6.4): an object may reference only objects committed before it; a plan's manifest and
+    intent precede it; a metadata ref names an earlier object."""
+    first: dict[str, int] = {}
+    digest_seq: dict[str, int] = {}
+    for seq, o in entries:
+        first.setdefault(str(o.get("id")), seq)
+        digest_seq.setdefault(metadata_digest(o), seq)
+    out = []
+    for seq, o in entries:
+        names = []
+        if o.get("record_kind") == "plan":
+            names = [o.get("manifest_id"), o.get("intent_id")]
+        for n in names:
+            if n in first and first[n] >= seq:
+                out.append(_err("order.forward_reference", f"{o.get('id')} names {n}, committed later") |
+                           {"object": o.get("id")})
+        for r in _nested_refs(o):
+            if r.get("profile_id") == METADATA_PROFILE and r.get("digest") in digest_seq \
+                    and digest_seq[r["digest"]] >= seq:
+                out.append(_err("order.forward_reference", f"{o.get('id')} references an object committed later") |
+                           {"object": o.get("id")})
+    return out
 
 
 def _record(entries, rid):
@@ -616,14 +710,19 @@ def _record_binding(rec, seq, plans, assignments, manifests, known_items, bundle
     if RECORD_TYPES[rec["type"]] != a.get("role"):
         return q("binding.role", f"a {rec['type']} record needs a {RECORD_TYPES[rec['type']]} assignment")
     rev = rec.get("plan_revision")
+    if not is_int(rev) or not is_int(a.get("plan_revision")):
+        return q("envelope.invalid", "plan_revision must be an integer (a bool is not an integer)")
     if rev != a.get("plan_revision") or rev not in plans or plans[rev][0] >= seq:
         return q("binding.plan", "the record is not bound to the plan revision of its assignment")
+    if plans[rev][0] >= asg[0]:
+        return q("order.forward_reference", "the assignment was committed before the plan revision it names")
     plan = plans[rev][1]
     if a.get("spec_id") not in {s.get("id") for s in plan.get("assignment_specs", [])}:
         return q("binding.assignment_spec", "the assignment's spec is not in its plan revision")
     obligations = {o["id"] for o in plan.get("obligations", [])}
     man = manifests.get(plan.get("manifest_id"), {})
-    materials = {m.get("material_id") for m in man.get("materials", [])}
+    digests = {m.get("material_id"): m.get("raw_ref", {}).get("digest") for m in man.get("materials", [])}
+    materials = set(digests)
     local: set[str] = set()
     for _group, it in _items(rec):
         if not isinstance(it.get("id"), str) or it["id"] in local or it["id"] in known_items:
@@ -639,6 +738,8 @@ def _record_binding(rec, seq, plans, assignments, manifests, known_items, bundle
         loc = it.get("locator")
         if isinstance(loc, dict) and loc.get("material_id") not in materials:
             return q("binding.material", f"{it['id']} locates a material outside the manifest")
+        if isinstance(loc, dict) and loc.get("digest") != digests.get(loc.get("material_id")):
+            return q("binding.locator_digest", f"{it['id']} locates bytes that are not the manifest's snapshot")
         for mid in it.get("cited_materials", []):
             if mid not in materials:
                 return q("binding.material", f"{it['id']} cites a material outside the manifest")
@@ -692,6 +793,7 @@ class _Ctx:
         self.head = self.plans[self.H]
         self.manifests = {o["id"]: o for _, o in ent if o["record_kind"] == "manifest"}
         self.assignments = {o["id"]: o for _, o in ent if o["record_kind"] == "assignment"}
+        self.bindings = [o for _, o in ent if o["record_kind"] == "claim-binding"]
         self.records = [(s, o) for s, o in ent if o["record_kind"] == "record"
                         and o["id"] not in v["quarantined_records"]]
         self.items: dict[str, dict] = {}
@@ -768,7 +870,8 @@ class _Ctx:
             return None
         man = self.manifest(rev)
         mats = {m["material_id"]: m for m in man.get("materials", [])}
-        mids = sorted(set(ob.get("targets", [])) | set(it.get("cited_materials", [])))
+        located = [it["locator"]["material_id"]] if isinstance(it.get("locator"), dict) else []
+        mids = sorted(set(ob.get("targets", [])) | set(it.get("cited_materials", [])) | set(located))
         materials = [[m, mats.get(m, {}).get("raw_ref", {}).get("digest"), mats.get(m, {}).get("view_version")]
                      for m in mids]
         env = None
@@ -780,8 +883,7 @@ class _Ctx:
         for d in sorted(set(_edges(self.item_group[iid], it))):
             if d not in self.items:
                 return None
-            dob = ob
-            c = self.closure(d, rev, dob, own, seen | {iid})
+            c = self.closure(d, rev, ob, own, seen | {iid})
             if c is None:
                 return None
             upstream.append(c)
@@ -813,9 +915,26 @@ class _Ctx:
         return f.get("obligation_id") if f else None
 
 
-def _qualified(a: dict) -> bool:
+def _qualified(a: dict, ob: dict | None = None) -> bool:
+    """Qualified with an observed or declared basis, holding every qualification the obligation's adoption policy
+    names (spec 6.5, 7.2)."""
     q = a.get("qualified", {})
-    return q.get("satisfied") is True and q.get("basis") in ("observed", "declared")
+    need = set((ob or {}).get("adoption_policy", {}).get("qualifications", []))
+    return (q.get("satisfied") is True and q.get("basis") in ("observed", "declared")
+            and need <= set(a.get("qualifications", [])))
+
+
+def _target_authors(ctx: _Ctx, ob: dict) -> set[str]:
+    mats = {m["material_id"]: m for m in ctx.manifest(ctx.H).get("materials", [])}
+    return {a for t in ob.get("targets", []) for a in mats.get(t, {}).get("authors", [])}
+
+
+def _judge_counts(ctx: _Ctx, jrec: dict, ob: dict) -> bool:
+    """Only qualified, non-author judges in submission, verification or adjudication records can adopt, refute or
+    dispute; an author's disagreement is a response, never a ruling (spec 6.5, 7.2)."""
+    return (jrec["type"] in JUDGING_RECORD_TYPES and _qualified(ctx.assignments[jrec["assignment_id"]], ob)
+            and jrec["actor"] not in _target_authors(ctx, ob)
+            and ctx.assignments[jrec["assignment_id"]].get("role") != "author")
 
 
 def _finding_states(ctx: _Ctx, conflicted: set[str]) -> dict[str, dict]:
@@ -832,7 +951,7 @@ def _finding_states(ctx: _Ctx, conflicted: set[str]) -> dict[str, dict]:
         positive = negative = 0
         verified = second = False
         direct = (not pol.get("verification_required") and not pol.get("second_method_required")
-                  and rec["type"] == "submission" and _qualified(asg))
+                  and rec["type"] == "submission" and _qualified(asg, ob))
         if direct:
             positive += 1
         adjudications = []
@@ -840,8 +959,7 @@ def _finding_states(ctx: _Ctx, conflicted: set[str]) -> dict[str, dict]:
         for jrec, j in judg:
             if j.get("finding_id") != fid:
                 continue
-            jasg = ctx.assignments[jrec["assignment_id"]]
-            if not _qualified(jasg):
+            if not _judge_counts(ctx, jrec, ob):
                 continue
             if j.get("kind") == "finding_assessment":
                 if j.get("verdict") == "supported":
@@ -874,7 +992,7 @@ def _finding_states(ctx: _Ctx, conflicted: set[str]) -> dict[str, dict]:
             state = "retired-for-current"
         r = next((x for x in resp if x.get("finding_id") == fid), None)
         out[fid] = {"state": state, "response": r.get("response") if r else None,
-                    "fix_check": r.get("fix_check") if r else None}
+                    "fix_check": r.get("fix_check") if r else None, "adjudicated": bool(adjudications)}
     return out
 
 
@@ -888,8 +1006,7 @@ def _tier_of(ctx: _Ctx, ob: dict, recs: list[dict], floor_ok: bool) -> tuple[str
         reasons.append("independent-review floor not met by the plan's independence conditions")
     if not recs:
         reasons.append("no admitted submission supports this obligation's result")
-    mats = {m["material_id"]: m for m in ctx.manifest(ctx.H).get("materials", [])}
-    target_authors = {a for t in ob.get("targets", []) for a in mats.get(t, {}).get("authors", [])}
+    target_authors = _target_authors(ctx, ob)
     extra = (_required_conditions(ctx.head) - set(FLOOR)) | set(ob.get("independence_requirements", []))
     for r in recs:
         a = ctx.assignments[r["assignment_id"]]
@@ -904,7 +1021,7 @@ def _tier_of(ctx: _Ctx, ob: dict, recs: list[dict], floor_ok: bool) -> tuple[str
             reasons.append(f"{r['actor']} is an author of this obligation's material (non-author unmet)")
         if a.get("contamination"):
             reasons.append(f"{a['id']} saw other evaluations before submitting (no-other-evaluations-seen unmet)")
-        for c in extra:
+        for c in sorted(extra):  # sorted: layer 1 never depends on set iteration order
             x = cond.get(c, {})
             if x.get("satisfied") is not True or x.get("basis") not in EXTRA_CONDITION_BASES:
                 reasons.append(f"plan condition {c} not met for {a['id']}")
@@ -914,7 +1031,7 @@ def _tier_of(ctx: _Ctx, ob: dict, recs: list[dict], floor_ok: bool) -> tuple[str
     if reasons:
         return "R1", reasons, advisory
     req = ctx.head.get("required_restrictions") or []
-    ok, why = _claim_binding_ok(ctx.b.get("claim_binding"), ctx.head)
+    ok, why = _claim_binding_ok(ctx.bindings[-1] if ctx.bindings else None, ctx.head)
     r3 = bool(req) and ok
     for r in recs:
         a = ctx.assignments[r["assignment_id"]]
@@ -929,8 +1046,9 @@ def _tier_of(ctx: _Ctx, ob: dict, recs: list[dict], floor_ok: bool) -> tuple[str
 
 
 def _claim_binding_ok(binding: dict | None, plan: dict) -> tuple[bool, list[str]]:
-    """Spec 15.6: the claim bytes, the evaluation chain segment from a trusted checkpoint to the commit holding the
-    claim state, and a matching case fingerprint. Checked without reading the evaluation log's current state."""
+    """Spec 15.6: a committed claim-binding object with the claim bytes and the evaluation chain segment from the
+    trusted checkpoint the plan states to the commit holding the claim state, and the plan's capability fingerprint.
+    Checked without reading the evaluation log's current state (layer 2 re-checks the current state)."""
     if not binding:
         return False, ["no claim-binding commit"]
     chain = binding.get("chain_segment") or []
@@ -943,7 +1061,9 @@ def _claim_binding_ok(binding: dict | None, plan: dict) -> tuple[bool, list[str]
         if i and c["commit"].get("prev_commit_digest") != prev:
             return False, ["evaluation chain segment is not chained"]
         prev = c["digest"]
-    cp = binding.get("trusted_checkpoint") or {}
+    cp = plan.get("evaluation_checkpoint")  # stated by the coordinator under the user's authority, never the binding
+    if not isinstance(cp, dict):
+        return False, ["the plan names no trusted evaluation checkpoint"]
     if chain[0]["commit"].get("seq") != cp.get("seq") or chain[0].get("digest") != cp.get("digest"):
         return False, ["evaluation chain segment does not start at the trusted checkpoint"]
     claim = binding.get("claim") or {}
@@ -951,9 +1071,9 @@ def _claim_binding_ok(binding: dict | None, plan: dict) -> tuple[bool, list[str]
         return False, ["the claim is not in the last commit of the segment"]
     if claim.get("state") not in CLAIM_STATES_R3:
         return False, [f"claim state {claim.get('state')} is below pilot-checked-scope"]
-    fp = plan.get("capability_fingerprint", binding.get("case_fingerprint"))
-    if claim.get("fingerprint") != binding.get("case_fingerprint") or claim.get("fingerprint") != fp:
-        return False, ["claim fingerprint does not match this case"]
+    fp = plan.get("capability_fingerprint")  # this case's fingerprint comes from the case log, never the binding
+    if not fp or claim.get("fingerprint") != fp:
+        return False, ["claim fingerprint does not match this case's committed fingerprint"]
     return True, []
 
 
@@ -965,6 +1085,10 @@ def project(validated: dict, validator_version: str, *, rules: dict | None = Non
     if validated.get("validator_version") != validator_version:
         raise ValueError("the bundle was validated with another validator version")
     b = validated["bundle"]
+    again = validate(b, validator_version, rules=rules)  # disposition is never taken from the caller (spec 7.3)
+    if any(again[k] != validated.get(k) for k in ("quarantined_records", "quarantined_items", "record_integrity",
+                                                  "input_error", "entries", "diagnostics")):
+        raise ValueError("the validated input does not match validate(bundle): disposition cannot be supplied")
     base = {"protocol": PROTOCOL, "schema_version": SCHEMA_VERSION, "kind": "hep-review-layer1",
             "context_id": b["context_id"], "segment_id": b["segment_id"], "as_of_seq": b["as_of_seq"],
             "as_of_commit_digest": b["as_of_commit_digest"], "validator_version": validator_version,
@@ -977,8 +1101,16 @@ def project(validated: dict, validator_version: str, *, rules: dict | None = Non
     place = {iid: ctx.placement(iid) for iid in ctx.items}
     cur_answers: dict[str, list[dict]] = {o: [] for o in head_obs}
     for iid, (tg, cur) in place.items():
-        if ctx.item_group[iid] == "answers" and cur:
-            cur_answers[tg[0]].append(ctx.items[iid])
+        if ctx.item_group[iid] != "answers" or not cur:
+            continue
+        r = ctx.item_rec[iid]
+        if r["type"] in JUDGING_RECORD_TYPES and _qualified(ctx.assignments[r["assignment_id"]], head_obs[tg[0]]):
+            cur_answers[tg[0]].append(ctx.items[iid])  # an author's response or an unqualified answer never counts
+    assessed = {it.get("answer_id") for i, it in ctx.items.items()
+                if ctx.item_group[i] == "judgments" and it.get("kind") == "answer_assessment"
+                and it.get("verdict") == "supported" and ctx.item_rec[i]["type"] == "verification"
+                and it.get("answer_id") in place and place[it["answer_id"]][0]
+                and _judge_counts(ctx, ctx.item_rec[i], head_obs[place[it["answer_id"]][0][0]])}
     # mechanical conflicts and judged suspicions
     conflicted: set[str] = set()
     conflict_obs: set[str] = set()
@@ -1005,6 +1137,11 @@ def project(validated: dict, validator_version: str, *, rules: dict | None = Non
                 elif ctx.item_group.get(x) == "answers" and place.get(x, ((), False))[1]:
                     conflict_obs.add(place[x][0][0])
     states = _finding_states(ctx, conflicted)
+    for oid in sorted(conflict_obs):
+        violated = [a for a in cur_answers.get(oid, []) if a["verdict"] == "violated"]
+        if violated and all(a.get("finding_ids") and all(states.get(f, {}).get("adjudicated")
+                                                       for f in a["finding_ids"]) for a in violated):
+            conflict_obs.discard(oid)  # every opposing item was ruled on by an adjudication
     findings_out = []
     historical = []
     stale_followups = []
@@ -1038,7 +1175,8 @@ def project(validated: dict, validator_version: str, *, rules: dict | None = Non
         fstates = [states[f]["state"] for f in cur_find[oid]]
         stale_here = any(oid in s["mapped_to"] for s in stale_followups) or \
             any(oid in tg and not cur for tg, cur in place.values())
-        outcome, reasons = _outcome(ctx, ob, answers, fstates, oid in conflict_obs, bool(stale_here), place)
+        outcome, reasons = _outcome(ctx, ob, answers, fstates, oid in conflict_obs, bool(stale_here), place,
+                                    assessed)
         recs = []
         for a in answers:
             r = ctx.item_rec[a["id"]]
@@ -1077,6 +1215,7 @@ def project(validated: dict, validator_version: str, *, rules: dict | None = Non
     open_reasons += [{"kind": "planning_gap", "gap": g["kind"]} for g in gaps]
     open_reasons += [{"kind": "version_inconsistency", "object_id": x["object_id"]} for x in inconsistencies]
     open_reasons += [{"kind": "unjudged_conflict", "suspicion_id": u["suspicion_id"]} for u in unjudged]
+    open_reasons += [{"kind": "unverified_conflict", "obligation_id": o} for o in sorted(conflict_obs)]
     open_reasons += [{"kind": "dependency_gap", "obligation_id": o} for o in dep_gap_obs]
     met = (not gaps and all(o["outcome"] != "not-examined" for o in required)
            and all(not (o["decision_required"] and o["outcome"] in ("undetermined", "not-examined")) for o in required))
@@ -1085,7 +1224,7 @@ def project(validated: dict, validator_version: str, *, rules: dict | None = Non
     achieved = min(tiers, key=TIERS.index) if tiers else None
     uncovered: dict[str, list[str]] = {"not_examined": [], "undetermined": []}
     for o in obligations_out:
-        if o["required"] or o["outcome"] not in ("not-examined", "undetermined"):
+        if o["required"] or o["outcome"] not in ("not-examined", "undetermined") or o["id"] in conflict_obs:
             continue
         if any(f["current"] and f["state"] in ("candidate", "disputed") and o["id"] in f["mapped_to"]
                for f in findings_out):
@@ -1129,7 +1268,7 @@ def _q_obligation(validated: dict, iid: str) -> str | None:
 
 
 def _outcome(ctx: _Ctx, ob: dict, answers: list[dict], fstates: list[str], conflict: bool, stale: bool,
-             place: dict) -> tuple[str, list[str]]:
+             place: dict, assessed: set) -> tuple[str, list[str]]:
     if conflict or "disputed" in fstates:
         return "undetermined", ["substantive conflict between admitted judgments (not resolved by majority)"]
     if "supported" in fstates:
@@ -1147,7 +1286,10 @@ def _outcome(ctx: _Ctx, ob: dict, answers: list[dict], fstates: list[str], confl
         return "undetermined", ["violated was asserted without an adopted finding"]
     if "not-examined" in verdicts and len(verdicts) == 1:
         return "not-examined", ["the reviewer did not complete the check"]
+    pending = _adoption_pending(ctx, ob, answers, place, assessed)
     if verdicts == {"not-applicable"}:
+        if pending:
+            return "undetermined", [pending]
         return "not-applicable", ["valid applicability discharge"]
     attempts = [ctx.items[x] for a in answers for x in a.get("attempt_ids", [])
                 if x in ctx.items and place.get(x, ((), False))[1]]
@@ -1160,7 +1302,24 @@ def _outcome(ctx: _Ctx, ob: dict, answers: list[dict], fstates: list[str], confl
     if missing_m or missing_e:
         return "not-examined", [f"required method not completed: {m}" for m in missing_m] + \
             [f"required evidence missing: {e}" for e in missing_e]
+    if pending:
+        return "undetermined", [pending]
     return "supported", ["evidence supports the criterion under the stated conditions"]
+
+
+def _adoption_pending(ctx: _Ctx, ob: dict, answers: list[dict], place: dict, assessed: set) -> str | None:
+    """The adoption policy applies to positive results too (spec 7.2): a required verification or second method keeps
+    the result pending until it is current."""
+    pol = ob.get("adoption_policy", {})
+    positive = [a for a in answers if a["verdict"] in ("supported", "not-applicable")]
+    if pol.get("verification_required") and not any(a["id"] in assessed for a in positive):
+        return "a positive result awaits the verification its adoption policy requires"
+    if pol.get("second_method_required"):
+        methods = {ctx.items[x].get("method") for a in positive for x in a.get("attempt_ids", [])
+                   if x in ctx.items and place.get(x, ((), False))[1] and ctx.items[x].get("observation") == "completed"}
+        if len(methods) < 2:
+            return "a positive result awaits the second method its adoption policy requires"
+    return None
 
 
 def _facets(ctx: _Ctx, ob: dict, answers: list[dict], outcome: str, place: dict) -> dict:
@@ -1185,6 +1344,7 @@ def _version_inconsistencies(ctx: _Ctx, place: dict, version: str, rules: dict) 
     """Objects referenced by the head plan or by current result closures that the current validator judges
     non-compliant; superseded objects never enter the list (spec 7.3; cases D24, D30)."""
     refs = [ctx.intent, ctx.head, ctx.manifests.get(ctx.head.get("manifest_id"))]
+    lookup = {"intent": ctx.intent, "plans": ctx.plans}
     for iid, (_tg, cur) in place.items():
         if cur:
             r = ctx.item_rec[iid]
@@ -1197,7 +1357,7 @@ def _version_inconsistencies(ctx: _Ctx, place: dict, version: str, rules: dict) 
         if not o or (o["record_kind"], o["id"]) in seen:
             continue
         seen.add((o["record_kind"], o["id"]))
-        codes = sorted({e["code"] for rule in rules[version] for e in rule(o)})
+        codes = sorted({e["code"] for rule in rules[version] for e in rule(o, lookup)})
         if codes:
             out.append({"object_id": o["id"], "kind": o["record_kind"], "codes": codes})
     return out
@@ -1220,10 +1380,13 @@ def decide_summary(layer1: dict, attestation: dict) -> dict:
                 "disclosure": [f"input-error: {layer1['input_error']['message']}; no report is produced"]}
     achieved, target = layer1.get("achieved_tier"), layer1.get("target_tier")
     if achieved and target and TIERS.index(target) > TIERS.index(achieved):
-        why = sorted({r for o in layer1["obligations"] if o["required"] for r in o["tier_reasons"]})
+        why = sorted({r for o in layer1["obligations"] if o["required"]
+                      and TIERS.index(o["obligation_tier"]) < TIERS.index(target) for r in o["tier_reasons"]})
         disclosure.append(f"target {target}, achieved {achieved}: " + "; ".join(why))
     if layer1.get("independence_floor_not_met"):
         disclosure.append("independent-review floor not met")
+    if achieved in ("R2", "R3") and "no-other-evaluations-seen" in layer1.get("advisory_conditions", []):
+        disclosure.append(ADVISORY_SENTENCE)
     if cont == "unverified":
         disclosure.append("head continuity unverified: no trusted checkpoint anchors this session; provide the "
                           "last checkpoint (segment, seq, digest) to verify continuity")
@@ -1248,6 +1411,8 @@ def decide_summary(layer1: dict, attestation: dict) -> dict:
 
 
 PRESENTATION_KEYS = {"title", "summary_sentence", "language"}
+SUMMARY_UNIT = "{tier_qualifier}: " + NO_DEFECT
+UNQUALIFIED_PASS = re.compile(r"\b(correct|correctly|correctness|passed|pass|passes|verified|proven)\b", re.I)
 
 
 def render_report(layer1: bytes, attestation: dict, *, bundle: dict, validator_version: str,
@@ -1259,9 +1424,12 @@ def render_report(layer1: bytes, attestation: dict, *, bundle: dict, validator_v
     extra = set(presentation) - PRESENTATION_KEYS
     if extra:
         raise RenderError(f"presentation cannot set {sorted(extra)}")
-    sentence = presentation.get("summary_sentence", "{tier_qualifier}: " + NO_DEFECT + ".")
-    if "{tier_qualifier}" not in sentence or NO_DEFECT not in sentence:
-        raise RenderError("a no-defect summary sentence must carry {tier_qualifier} and the scope phrase")
+    sentence = presentation.get("summary_sentence", SUMMARY_UNIT + ".")
+    if SUMMARY_UNIT not in sentence:
+        raise RenderError("a no-defect summary must keep '{tier_qualifier}: " + NO_DEFECT + "' as one sentence")
+    for text in (presentation.get("title", ""), sentence.replace(SUMMARY_UNIT, "")):
+        if UNQUALIFIED_PASS.search(text):
+            raise RenderError(f"unqualified pass wording is not allowed: {text!r}")
     expected = encode(project(validate(bundle, validator_version, rules=rules), validator_version, rules=rules))
     if bytes(layer1) != expected:
         raise RenderError("layer 1 does not match the projection of the bundle")

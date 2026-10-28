@@ -19,16 +19,16 @@ from hep_review_support import materials as M  # noqa: E402
 
 class ControlledRead(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.root = Path(self.tmp.name) / "root"
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.root = Path(self.temp_dir.name) / "root"
         (self.root / "a" / "b").mkdir(parents=True)
         (self.root / "a" / "b" / "f.txt").write_bytes(b"hello")
-        self.outside = Path(self.tmp.name) / "outside"
+        self.outside = Path(self.temp_dir.name) / "outside"
         self.outside.mkdir()
         (self.outside / "secret.txt").write_bytes(b"secret")
 
     def tearDown(self):
-        self.tmp.cleanup()
+        self.temp_dir.cleanup()
 
     def refused(self, rel, code, **kw):
         with self.assertRaises(M.ReadRefused) as cm:
@@ -37,7 +37,7 @@ class ControlledRead(unittest.TestCase):
 
     def test_regular_file_is_read(self):
         r = M.read_controlled(self.root, "a/b/f.txt")
-        self.assertEqual(r.data, b"hello")
+        self.assertEqual(r.content, b"hello")
         self.assertEqual(r.sha256, hashlib.sha256(b"hello").hexdigest())
         self.assertEqual(r.limitations, [])
 
@@ -71,7 +71,7 @@ class ControlledRead(unittest.TestCase):
     def test_n42_hard_link_is_a_limitation_not_a_refusal(self):
         os.link(self.root / "a" / "b" / "f.txt", self.root / "hard.txt")
         r = M.read_controlled(self.root, "hard.txt")
-        self.assertEqual(r.data, b"hello")
+        self.assertEqual(r.content, b"hello")
         self.assertTrue(any("hard link" in x for x in r.limitations))
 
     def test_n26_platform_without_dir_fd_cannot_claim_root_bound_reading(self):
@@ -84,15 +84,15 @@ class ControlledRead(unittest.TestCase):
 
 class Snapshots(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.root = Path(self.tmp.name) / "src"
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.root = Path(self.temp_dir.name) / "src"
         self.root.mkdir()
         (self.root / "analysis.md").write_bytes(b"# analysis\n")
         (self.root / "data.json").write_bytes(b'{"x": 1}\n')
-        self.snapdir = Path(self.tmp.name) / "snap"
+        self.snapdir = Path(self.temp_dir.name) / "snap"
 
     def tearDown(self):
-        self.tmp.cleanup()
+        self.temp_dir.cleanup()
 
     def test_snapshot_hashes_the_saved_bytes_and_lists_gaps(self):
         os.symlink("/etc/hosts", self.root / "link.md")
@@ -135,14 +135,14 @@ class Snapshots(unittest.TestCase):
 
 class Submissions(unittest.TestCase):
     def setUp(self):
-        self.tmp = tempfile.TemporaryDirectory()
-        self.drops = Path(self.tmp.name) / "drops"
+        self.temp_dir = tempfile.TemporaryDirectory()
+        self.drops = Path(self.temp_dir.name) / "drops"
         (self.drops / "asg-1").mkdir(parents=True)
         self.body = b'{"assignment_id": "asg-1", "answers": []}'
         (self.drops / "asg-1" / "submission.json").write_bytes(self.body)
 
     def tearDown(self):
-        self.tmp.cleanup()
+        self.temp_dir.cleanup()
 
     def test_file_transfer_without_digest(self):
         s = M.ingest_submission(self.drops, "asg-1/submission.json")
@@ -160,7 +160,7 @@ class Submissions(unittest.TestCase):
         self.assertEqual(bad["declared_digest"], "0" * 64)
 
     def test_n67_drop_path_replaced_by_symlink_or_fifo_or_oversize(self):
-        outside = Path(self.tmp.name) / "outside.json"
+        outside = Path(self.temp_dir.name) / "outside.json"
         outside.write_bytes(b"{}")
         (self.drops / "asg-2").mkdir()
         os.symlink(outside, self.drops / "asg-2" / "submission.json")

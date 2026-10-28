@@ -328,7 +328,7 @@ class Findings(unittest.TestCase):
         self.assertEqual(next(x for x in p["findings"] if x["id"] == c._fid)["state"], "refuted")
         self.assertFalse(p["flags"]["has_disputed_findings"])
 
-    def test_n12_free_text_is_not_a_conflict_but_suspicion_stays_open(self):
+    def test_n12_free_text_alone_is_not_a_conflict(self):
         c = Case()
         c.plan([obligation("O1")])
         c.review("O1", "supported")
@@ -336,6 +336,12 @@ class Findings(unittest.TestCase):
         v, p, s = run(c)
         self.assertFalse(p["flags"]["has_disputed_findings"])
         self.assertTrue(s["output_summary"])
+
+    def test_n12_recorded_suspicion_without_judgment_stays_open(self):
+        from test_hep_review_decision_table import kernel
+        p, s, flags = kernel("D17")
+        self.assertEqual(flags, (False, False, True, True, False))
+        self.assertIn("unjudged_conflict", {r["kind"] for r in p["open_reasons"]})
 
 
 def _conflicting():
@@ -419,15 +425,18 @@ class Tiers(unittest.TestCase):
         self.assertEqual(outcome(p, "O2")["obligation_tier"], "R1")
 
     def test_n37_n63_r3_needs_claim_binding_with_chain_segment(self):
-        def r3_case(binding):
+        def r3_case(binding, fingerprint="fp-1"):
             c = Case(target_tier="R3")
-            c.plan([obligation("O1")], required_restrictions=["no-network"])
+            good = make_binding()
+            c.plan([obligation("O1")], required_restrictions=["no-network"], capability_fingerprint=fingerprint,
+                   evaluation_checkpoint={"seq": 1, "digest": good["chain_segment"][0]["digest"]})
             c.review("O1", "supported", conditions=None)
             for e in c.entries:
                 o = e["objects"][0]
                 if o["record_kind"] == "assignment":
                     o["restrictions"] = [{"id": "no-network", "status": "enforced", "basis": "observed"}]
-            c.extra_claim = binding
+            if binding is not None:
+                c.add(binding)
             return run(c)
         v, p, s = r3_case(None)
         self.assertEqual(p["achieved_tier"], "R2")
@@ -436,8 +445,8 @@ class Tiers(unittest.TestCase):
         self.assertEqual(p["achieved_tier"], "R3")
         no_chain = dict(good, chain_segment=[])
         self.assertEqual(r3_case(no_chain)[1]["achieved_tier"], "R2")
-        wrong_fp = dict(good, case_fingerprint="other")
-        self.assertEqual(r3_case(wrong_fp)[1]["achieved_tier"], "R2")
+        self.assertEqual(r3_case(good, fingerprint="other")[1]["achieved_tier"], "R2")
+        self.assertEqual(r3_case(good, fingerprint=None)[1]["achieved_tier"], "R2")
         broken = copy.deepcopy(good)
         broken["chain_segment"][1]["commit"]["prev_commit_digest"] = "00" * 32
         self.assertEqual(r3_case(broken)[1]["achieved_tier"], "R2")
@@ -459,8 +468,7 @@ def make_binding():
         d = H.metadata_digest(c)
         chain.append({"commit": c, "digest": d, "object_digests": [o["digest"] for o in objs]})
         prev = d
-    return {"claim": claim, "chain_segment": chain, "trusted_checkpoint": {"seq": 1, "digest": chain[0]["digest"]},
-            "case_fingerprint": "fp-1"}
+    return header("claim-binding", "binding-1") | {"claim": claim, "chain_segment": chain, "case_fingerprint": "fp-1"}
 
 
 class Facets(unittest.TestCase):

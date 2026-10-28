@@ -38,7 +38,7 @@ class ControlledReadUnavailable(Exception):
 
 @dataclass
 class ReadResult:
-    data: bytes
+    content: bytes
     sha256: str
     size: int
     mtime_ns: int
@@ -116,28 +116,28 @@ def read_controlled(root: Path | str, rel: str, *, max_bytes: int = DEFAULT_MAX_
         after = os.fstat(fd)
     finally:
         os.close(fd)
-    data = b"".join(chunks)
+    content = b"".join(chunks)
     if (before.st_size, before.st_mtime_ns, before.st_ctime_ns) != (after.st_size, after.st_mtime_ns,
-                                                                     after.st_ctime_ns) or len(data) != after.st_size:
+                                                                     after.st_ctime_ns) or len(content) != after.st_size:
         raise ReadRefused("capture.unstable", f"{rel} changed while it was read")
     lim = [HARD_LINK_LIMITATION] if after.st_nlink > 1 else []
-    return ReadResult(data, hashlib.sha256(data).hexdigest(), len(data), after.st_mtime_ns, after.st_ctime_ns,
+    return ReadResult(content, hashlib.sha256(content).hexdigest(), len(content), after.st_mtime_ns, after.st_ctime_ns,
                       after.st_nlink, lim)
 
 
-def _store_blob(snapdir: Path, data: bytes, digest: str) -> None:
+def _store_blob(snapdir: Path, content: bytes, digest: str) -> None:
     snapdir.mkdir(parents=True, exist_ok=True)
     target = snapdir / digest
     if target.exists():
         if hashlib.sha256(target.read_bytes()).hexdigest() != digest:
             raise ReadRefused("snapshot.digest_mismatch", f"existing snapshot {digest} does not match its name")
         return
-    tmp = snapdir / f".{digest}.tmp-{os.getpid()}"
-    with open(tmp, "wb") as fh:
-        fh.write(data)
+    temp_path = snapdir / f".{digest}.temp_path-{os.getpid()}"
+    with open(temp_path, "wb") as fh:
+        fh.write(content)
         fh.flush()
         os.fsync(fh.fileno())
-    os.replace(tmp, target)
+    os.replace(temp_path, target)
 
 
 def raw_ref(logical_id: str, digest: str) -> dict:
@@ -165,7 +165,7 @@ def snapshot(root: Path | str, rels: list[str], snapdir: Path | str, *, max_byte
                     break
         if result is None:
             continue
-        _store_blob(snapdir, result.data, result.sha256)
+        _store_blob(snapdir, result.content, result.sha256)
         materials.append({"material_id": rel, "raw_ref": raw_ref(rel, result.sha256), "view_version": "raw/1",
                           "authors": [], "authors_basis": "unknown", "source_category": "file",
                           "capture": {"size": result.size, "mtime_ns": result.mtime_ns, "ctime_ns": result.ctime_ns,
@@ -181,10 +181,10 @@ def snapshot(root: Path | str, rels: list[str], snapdir: Path | str, *, max_byte
 
 def read_snapshot(snapdir: Path | str, digest: str) -> bytes:
     """Reviewers and readers read only snapshots; the bytes are re-checked against their name."""
-    data = read_controlled(snapdir, digest).data
-    if hashlib.sha256(data).hexdigest() != digest:
+    content = read_controlled(snapdir, digest).content
+    if hashlib.sha256(content).hexdigest() != digest:
         raise ReadRefused("snapshot.digest_mismatch", f"snapshot {digest} was changed")
-    return data
+    return content
 
 
 def ingest_submission(drop_root: Path | str, rel: str, declared_digest: str | None = None, *,
@@ -199,13 +199,13 @@ def ingest_submission(drop_root: Path | str, rel: str, declared_digest: str | No
         fidelity = "digest-bound"
     else:
         fidelity = "mismatch"
-    return {"raw": r.data, "raw_ref": raw_ref(f"submission:{rel}", r.sha256), "submission_fidelity": fidelity,
+    return {"raw": r.content, "raw_ref": raw_ref(f"submission:{rel}", r.sha256), "submission_fidelity": fidelity,
             "declared_digest": declared_digest, "limitations": r.limitations}
 
 
 def transcribed_submission(text: str) -> dict:
     """The coordinator retyped the submission: affected obligations are at most R1 (spec 12.4, case N31)."""
-    data = text.encode("utf-8")
-    digest = hashlib.sha256(data).hexdigest()
-    return {"raw": data, "raw_ref": raw_ref("submission:transcribed", digest), "submission_fidelity": "transcribed",
+    content = text.encode("utf-8")
+    digest = hashlib.sha256(content).hexdigest()
+    return {"raw": content, "raw_ref": raw_ref("submission:transcribed", digest), "submission_fidelity": "transcribed",
             "declared_digest": None, "limitations": ["transcribed by the coordinator: may truncate or alter"]}

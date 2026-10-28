@@ -189,9 +189,10 @@ def b_d16():
 def b_d17():
     c = Case()
     c.plan([obligation("O1")])
-    r1 = c.review("O1", "supported")
-    c.review("O1", "supported", suspected_conflicts=[{"id": "S1", "between": [r1["answers"][0]["id"]],
-                                                      "note": "the reasoning texts look opposed"}])
+    r1 = c.review("O1", "supported", answer_extra={"reasoning": "the correlation is treated as stated"})
+    r2 = c.review("O1", "supported", answer_extra={"reasoning": "the stated correlation looks unjustified"})
+    c.judge([], suspected_conflicts=[{"id": "S1", "between": [r1["answers"][0]["id"], r2["answers"][0]["id"]],
+                                      "note": "the two reasoning texts look opposed; no judgment yet"}])
     return c
 
 
@@ -232,10 +233,12 @@ def b_d24():
 
 
 def b_d25():
+    # the admissible form: an optional old obligation carrying a violated finding is dropped from the map
     c = Case()
-    c.plan([obligation("O1")])
-    c.review("O1", "violated", finding=True)
-    c.plan([obligation("O1a"), obligation("O1b")], obligation_map=[])
+    c.plan([obligation("O1"), obligation("O9", required=False, decision_required=False)])
+    c.review("O1", "supported")
+    c.review("O9", "violated", finding=True)
+    c.plan([obligation("O1")], obligation_map=[])
     return c
 
 
@@ -276,7 +279,7 @@ def b_d30():
     return c
 
 
-def rule_plan_declares_restrictions(committed: dict) -> list:
+def rule_plan_declares_restrictions(committed: dict, lookup: dict) -> list:
     """A stricter rule a later validator could add (test only): every plan states its required_restrictions."""
     if committed.get("record_kind") == "plan" and "required_restrictions" not in committed:
         return [{"code": "plan.required_restrictions_missing", "path": "$", "message": "missing"}]
@@ -312,7 +315,7 @@ ROWS = {
     "D20": ((False, False, False, True, True), Row([ObligationRow(tier=1)]), b_d20),
     "D21": ((False, False, False, True, False), Row([ObligationRow()], continuity="unverified"), b_plain),
     "D24": ((False, False, True, True, False), Row([ObligationRow()], version_inconsistency=True), b_d24),
-    "D25": ((False, False, True, False, False), Row([ObligationRow(outcome="not-examined"), ObligationRow(outcome="not-examined")], planning_gap=True, stale_negative_followup=True), b_d25),
+    "D25": ((False, False, True, False, False), Row([ObligationRow()], planning_gap=True, stale_negative_followup=True), b_d25),
     "D26": ((False, False, False, True, True), Row([ObligationRow(tier=1)]), b_d26),
     "D27": ((False, False, False, True, True), Row([ObligationRow()]), lambda: _carry("regroup")),
     "D28": ((False, False, True, False, False), Row([ObligationRow(outcome="not-examined")], integrity="partial-invalid"), b_d28),
@@ -385,7 +388,7 @@ class DecisionTable(unittest.TestCase):
         p, s, _ = kernel("D16")
         self.assertEqual(len(p["unverified_historical_defects"]), 1)
         p, s, _ = kernel("D25")
-        self.assertIn("O1", [g["obligation_id"] for g in p["planning_gaps"] if g["kind"] == "unmapped_old_obligation"])
+        self.assertIn("O9", [g["obligation_id"] for g in p["planning_gaps"] if g["kind"] == "unmapped_old_obligation"])
         self.assertEqual(len(p["unverified_historical_defects"]), 1)
         p, s, _ = kernel("D29")
         self.assertIn("split_without_scope_judgment", {g["kind"] for g in p["planning_gaps"]})

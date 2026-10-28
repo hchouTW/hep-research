@@ -59,7 +59,11 @@
              "additionalProperties": false}
   },
   "required_restrictions": {"type": "array", "items": {"type": "string"}},
-  "capability_fingerprint": {"type": "string"},
+  "capability_fingerprint": {"type": ["string", "null"]},
+  "evaluation_checkpoint": {"type": "object", "required": ["seq", "digest"],
+                            "properties": {"seq": {"type": "integer", "minimum": 1},
+                                           "digest": {"$ref": "hep_review_definitions.json#/$defs/digest"}},
+                            "additionalProperties": false},
   "limits": {"type": "object"},
   "change_request": {"type": "object"},
   "target_tier": {"$ref": "hep_review_definitions.json#/$defs/tier"}

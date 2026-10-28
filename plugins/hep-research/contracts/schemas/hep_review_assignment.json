@@ -13,6 +13,7 @@
   "actor": {"type": "string", "minLength": 1},
   "role": {"enum": ["reviewer", "verifier", "arbiter", "author"]},
   "qualified": {"$ref": "hep_review_definitions.json#/$defs/condition"},
+  "qualifications": {"type": "array", "items": {"type": "string"}},
   "conditions": {"type": "object", "additionalProperties": {"$ref": "hep_review_definitions.json#/$defs/condition"}},
   "restrictions": {
    "type": "array",

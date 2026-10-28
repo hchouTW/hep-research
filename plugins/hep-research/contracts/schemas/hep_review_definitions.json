@@ -10,7 +10,7 @@
    "properties": {
     "protocol": {"const": "hep-review/0"},
     "schema_version": {"type": "string", "pattern": "^0\\.[0-9]+\\.[0-9]+$"},
-    "record_kind": {"enum": ["intent", "manifest", "plan", "packet", "assignment", "record"]},
+    "record_kind": {"enum": ["intent", "manifest", "plan", "packet", "assignment", "record", "claim-binding"]},
     "id": {"$ref": "#/$defs/id"},
     "context_id": {"$ref": "#/$defs/id"}
    }
