@@ -1,0 +1,35 @@
+# inelastic cross sections (mb) on H
+# ILLUSTRATIVE placeholders of theory:cr-secondary-ratio, written by usine_translate.py (not data; constant in energy)
+#  Type  Unit     Targets
+ sigma    mb      H
+
+# EknMIN[GeV/n]   EknMAX[GeV/n]   nEkn  (PROJECTILE GRID)
+1.000000e-03      1.000000e+06    2
+
+7Be
+2.000000e+02
+2.000000e+02
+
+9Be
+2.150000e+02
+2.150000e+02
+
+10Be
+2.200000e+02
+2.200000e+02
+
+10B
+2.400000e+02
+2.400000e+02
+
+11B
+2.500000e+02
+2.500000e+02
+
+12C
+2.700000e+02
+2.700000e+02
+
+16O
+3.100000e+02
+3.100000e+02

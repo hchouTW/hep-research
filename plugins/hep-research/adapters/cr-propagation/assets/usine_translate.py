@@ -1,0 +1,701 @@
+#!/usr/bin/env python3
+"""Translate a cosmic-ray transport block into a USINE V3.5 run, run USINE, and record the run.
+
+USINE (https://gitlab.com/dmaurin/USINE, GPL-2.0) is a separate program: this adapter never copies its source or its
+shipped input files. It writes its own run directory and points USINE at the installation through HEP_USINE_BIN (the
+'usine' executable) and HEP_USINE_DATA (USINE's 'inputs' folder: atomic properties, the nuclear chart, solar-system
+abundances). The run directory holds only files written here:
+
+  <run>/usine.init.par    USINE initialisation file (one 'group @ subgroup @ parameter @ M=0|1 @ value' per line)
+  <run>/xs_production.dat production cross sections on hydrogen, every pair of the network (zero where the set has
+                          no channel), USINE's straight-ahead table format, constant in energy
+  <run>/xs_inelastic.dat  inelastic cross sections on hydrogen of every species of the network, same format
+  <run>/norm_points.dat   normalisation points of the parents (not data; below)
+  <run>/out/              USINE's outputs: local_fluxes_<NAME>_Ekn_<model>_SolMod0DFF_phi0_00GV.out per species
+                          (unmodulated local interstellar flux per E_k/n, (GeV/n m^2 s sr)^-1) and the log
+  <run>/usine.log         stdout and stderr
+
+Transport block (contracts ext_theory_spec.transport, r3 5.4, canonical names) to USINE:
+- geometry.kind 'cylinder-2d' -> Model2DKisoVc (L = L_kpc, h = disc_halfwidth_pc / 1000, R = radius_kpc, no
+  central hole, observer at r = OBSERVER_KPC); 'slab-1d' -> Model1DKisoVc (L, h; no radial boundary). Any other
+  kind is refused.
+- diffusion: K = beta^eta K0 (Rig/R0)^delta times one factor (1 + (R_break/Rig)^((delta - delta_below)/s))^s per
+  low break (s_convention 'usine', the form of the plugin's convention table, transport_conventions.py), with
+  K0 = D0_cm2_s / KPC2_PER_MYR_CM2_S in kpc^2/Myr (IAU parsec, Julian year; r3 P1). Another break kind or
+  convention is refused (USINE's shipped examples carry only a high break, (1 + (Rig/R_b)^(Delta/s))^(-s), which the
+  transport block has no slope field for).
+- reacceleration: USINE reaccelerates in the thin disc only (r3 P1). zone 'thin-disc' passes V_A_kms unchanged;
+  'whole-halo' is converted to V_A sqrt(L/h) and recorded as an approximate substitute. The momentum diffusion is the
+  form of USINE V3.5's shipped initialisation files (inputs/init.TEST.par, Kpp of Model1DKisoVc and Model2DKisoVc),
+  Kpp = (4/3) (V_A beta E_tot)^2 / (delta (4 - delta^2) (4 - delta) w K), with V_A in kpc/Myr; the relation must
+  name Seo-Ptuskin.
+- convection: constant V_c_kms (Model1DKisoVc wind W0, Model2DKisoVc wind W1, vertical); a gradient
+  dVc_dz_kms_per_kpc other than 0 is refused (USINE's KisoVc models have a constant wind).
+- losses: 'ionization', 'coulomb', 'adiabatic' switch IsELossIon, IsELossCoulomb, IsELossAdiabatic; any other
+  name is refused.
+- decay.enabled: BETA decay and BETA-fed daughters on (rate ln 2 / (gamma t_1/2), USINE TUAxesCrE); ec_treatment
+  'fully-stripped' keeps electron-capture nuclei stable (7Be, r3 P6, recorded); the USINE chart's BETA half-lives of
+  the network are checked against NUBASE2020 (core.constants.physical) within HALF_LIFE_RTOL, never replaced.
+- gas: n_H read from gas.model ('n_H = <number> cm^-3', the only place the transport block holds it), all neutral
+  (HI = n_H, HII = H2 = 0) in the thin disc; He_to_H_number is recorded but not used, because the ILLUSTRATIVE sets give
+  cross sections on hydrogen only (no helium cross section is invented); USINE's Coulomb loss acts on HII and is then
+  zero.
+- sources: one injection slope without breaks, dQ/dE_k/n = q Rig^-gamma (USINE's POWERLAW template with eta_s = 0);
+  spatial distribution uniform in r up to radius_kpc (template CST) in the 2D model. Parent abundances: USINE scales
+  each parent's source until its unmodulated local flux at NORM_EKN_GEV equals the parent ratio of
+  theory:cr-secondary-ratio (PARENT_RATIOS, O/C = 0.9), through its NormList and the generated norm_points.dat.
+- cross sections: the ILLUSTRATIVE sets of theory:cr-secondary-ratio only (ILLUSTRATIVE_SETS, equal to the profile's
+  models/xs-illustrative-A.json and xs-illustrative-decay.json, checked by the adapter tests). Set A is element-level:
+  C, O and B are placed on 12C, 16O and 11B (10B is in the network without production; it carries B's inelastic cross
+  section). A transport naming another set is refused (SpecError), never replaced.
+- tertiary chains, ghost nuclei, exotic primaries: off.
+Every item USINE does not express exactly is listed in the translation's 'substitutes'.
+
+Energy grid: USINE's nuclear E_k/n grid is logarithmic with POINTS_PER_DECADE nodes per decade aligned on decades,
+from below 0.8 times the lowest to above 1.25 times the highest E_k/n asked for, and always containing NORM_EKN_GEV.
+
+Usage:
+  python3 usine_translate.py translate --transport SPEC.json --name NAME --out RUNDIR --ekn-range LOW,HIGH
+                                      [--data-dir DIR] [--points-per-decade N]
+  python3 usine_translate.py run --transport SPEC.json --name NAME --out RUNDIR --ekn-range LOW,HIGH
+                                [--usine BIN] [--data-dir DIR] [--record RUN.json] [--timeout SECONDS]
+  SPEC.json is a transport block, or an object with a 'transport' key (a harmonized-v1 file). --usine defaults to
+  $HEP_USINE_BIN and --data-dir to $HEP_USINE_DATA; USINE's own variable USINE is set to the installation folder (the
+  parent of the executable's folder) for the run. 'translate' writes the run directory and translation.json without
+  running; 'run' also runs USINE and writes a computational-run record (input and output hashes, version, command,
+  wall time; a failed run is recorded with status failed).
+Output: JSON with "status" ("prepared", "ok", "failed", "missing-dependency", "error").
+Exit codes: 0 ok (or prepared), 1 USINE failed or wrote no output, 2 bad input or a transport item USINE cannot
+express, 3 the USINE executable or data folder is missing. USINE itself returns exit status 1 on every path, so a run
+is judged by its outputs and its log, never by its exit status.
+"""
+from __future__ import annotations
+
+import argparse
+import copy
+import datetime as _dt
+import hashlib
+import json
+import math
+import os
+import re
+import subprocess
+import sys
+import time
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+PLUGIN_ROOT = HERE.parents[2]
+sys.dont_write_bytecode = True
+if str(PLUGIN_ROOT) not in sys.path:
+    sys.path.insert(0, str(PLUGIN_ROOT))
+from core.constants.physical import half_life  # noqa: E402
+
+PROGRAM = "USINE"
+PROGRAM_VERSION = ("V3.5 (git tag V3.5, commit fb53006db41d1a640bf1b5af1a4b0f899ca59673; built with Apple clang 21.0.0 "
+                   "against ROOT 6.38.04)")
+CONTRACT_VERSION = "3.14.0"
+PLUGIN_VERSION = "0.42.0"
+
+# units (r3 P1): IAU 2012 parsec = 648000/pi au, au = 149 597 870 700 m; Julian year of 365.25 d
+KPC_CM = 648000.0 / math.pi * 1.495978707e13 * 1e3
+MYR_S = 1e6 * 365.25 * 86400.0
+KPC2_PER_MYR_CM2_S = KPC_CM ** 2 / MYR_S
+KPC_PER_MYR_PER_KM_S = 1e5 * MYR_S / KPC_CM
+
+OBSERVER_KPC = 8.3  # galactocentric radius of the observer in the 2D model (the DRAGON2 adapter's observer position)
+POINTS_PER_DECADE = 20
+NORM_EKN_GEV = 10.0
+HALF_LIFE_RTOL = 1e-3
+N_BESSEL = 100  # Fourier-Bessel terms of Model2DKisoVc (USINE's shipped 2D example uses 9; see VALIDATION CRPROP-B1)
+XS_GRID_GEV = (1.0e-3, 1.0e6)  # E_k/n range of the generated constant cross-section tables
+CHART_FILE = "crcharts_Zmax30_ghost97.dat"
+ATOMIC_FILE = "atomic_properties.dat"
+SOLAR_FILE = "solarsystem_abundances2003.dat"
+MODELS = {"cylinder-2d": "Model2DKisoVc", "slab-1d": "Model1DKisoVc"}
+LOSS_SWITCHES = {"ionization": "IsELossIon", "coulomb": "IsELossCoulomb", "adiabatic": "IsELossAdiabatic"}
+ELEMENTS = {1: "H", 2: "He", 3: "Li", 4: "Be", 5: "B", 6: "C", 7: "N", 8: "O"}
+PARENT_RATIOS = {"C": 1.0, "O": 0.9}  # theory:cr-secondary-ratio benchmarks/bc-benchmark.json, observed ratio to C
+
+# The ILLUSTRATIVE cross-section sets of theory:cr-secondary-ratio (round placeholders, not data; mb on hydrogen),
+# written onto USINE isotopes. Set A is element-level: its element names are placed on the isotopes of ISOTOPE_OF.
+ILLUSTRATIVE_SETS = {
+    "xs-illustrative-A": {
+        "isotopic": False,
+        "production_mb": {"C->B": 70.0, "O->B": 35.0},
+        "inelastic_mb": {"B": 250.0, "C": 270.0, "O": 310.0},
+        "isotope_of": {"C": ["12C"], "O": ["16O"], "B": ["10B", "11B"]},
+        "secondary_isotope": {"B": "11B"},
+    },
+    "xs-illustrative-decay": {
+        "isotopic": True,
+        "production_mb": {"C->7Be": 10.0, "C->9Be": 6.0, "C->10Be": 4.0, "C->10B": 20.0, "C->11B": 50.0,
+                          "O->7Be": 10.0, "O->9Be": 5.0, "O->10Be": 2.0, "O->10B": 10.0, "O->11B": 25.0},
+        "inelastic_mb": {"7Be": 200.0, "9Be": 215.0, "10Be": 220.0, "10B": 240.0, "11B": 250.0, "C": 270.0,
+                         "O": 310.0},
+        "isotope_of": {"C": ["12C"], "O": ["16O"]},
+        "secondary_isotope": {},
+    },
+}
+NUCLIDE = re.compile(r"^(\d+)([A-Z][a-z]?)$")
+N_H = re.compile(r"n_H\s*=\s*([0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?)\s*cm\^?-3")
+
+
+class SpecError(ValueError):
+    """A transport block (or run request) that cannot be turned into a USINE run."""
+
+
+def sha256(path: Path) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as fh:
+        for block in iter(lambda: fh.read(1 << 20), b""):
+            h.update(block)
+    return h.hexdigest()
+
+
+def charge_and_mass(nuclide: str) -> tuple[int, int]:
+    """'10Be' -> (4, 10)."""
+    m = NUCLIDE.match(nuclide)
+    z = {v: k for k, v in ELEMENTS.items()}.get(m.group(2)) if m else None
+    if z is None:
+        raise SpecError(f"nuclide {nuclide!r}: expected '<A><element>' with Z <= 8, e.g. '10Be'")
+    return z, int(m.group(1))
+
+
+def usine_name(nuclide: str) -> str:
+    """USINE's spelling in output file names: upper case ('10Be' -> '10BE')."""
+    return nuclide.upper()
+
+
+def _block(transport: dict, key: str) -> dict:
+    val = transport.get(key) or {}
+    if not isinstance(val, dict):
+        raise SpecError(f"transport.{key} must be an object")
+    return val
+
+
+def _num(block: dict, key: str, where: str, default=None) -> float:
+    val = block.get(key, default)
+    if isinstance(val, bool) or not isinstance(val, (int, float)) or not math.isfinite(float(val)):
+        raise SpecError(f"transport.{where}.{key} must be a finite number")
+    return float(val)
+
+
+def illustrative_set(name: str) -> tuple[str, dict]:
+    for key, xs in ILLUSTRATIVE_SETS.items():
+        if re.search(rf"(^|[/ ]){re.escape(key)}(\.json)?($|[ (])", name or ""):
+            return key, xs
+    raise SpecError(f"cross-section set {name!r}: this translator writes only the ILLUSTRATIVE sets of "
+                    f"theory:cr-secondary-ratio ({', '.join(ILLUSTRATIVE_SETS)}); no other set is substituted")
+
+
+def network(xs: dict) -> tuple[list[str], dict, dict]:
+    """(isotopes from light to heavy, production channels 'P->C' -> mb, inelastic per isotope) on USINE isotopes."""
+    def isotopes(name: str) -> list[str]:
+        return xs["isotope_of"].get(name, [name])
+
+    prod: dict[str, float] = {}
+    for key, value in xs["production_mb"].items():
+        parent, child = key.split("->")
+        target = xs["secondary_isotope"].get(child, child)
+        for p in isotopes(parent):
+            prod[f"{p}->{target}"] = float(value)
+    inel = {iso: float(v) for name, v in xs["inelastic_mb"].items() for iso in isotopes(name)}
+    species = sorted({s for k in prod for s in k.split("->")} | set(inel),
+                     key=lambda n: (charge_and_mass(n)[0], charge_and_mass(n)[1]))
+    missing = [s for s in species if s not in inel]
+    if missing:
+        raise SpecError(f"no inelastic cross section for {missing} in the set")
+    return species, prod, inel
+
+
+def energy_grid(ekn_range_gev, points_per_decade: int = POINTS_PER_DECADE) -> dict:
+    lo, hi = (float(x) for x in ekn_range_gev)
+    if not 0 < lo < hi:
+        raise SpecError("the E_k/n range must be 0 < low < high")
+    n = int(points_per_decade)
+    if n < 2:
+        raise SpecError("points_per_decade must be at least 2")
+    norm_k = round(n * math.log10(NORM_EKN_GEV))
+    k_lo = min(math.floor(n * math.log10(0.8 * lo) + 1e-9), norm_k)
+    k_hi = max(math.ceil(n * math.log10(1.25 * hi) - 1e-9), norm_k)
+    return {"n_points": k_hi - k_lo + 1, "ekn_min_gev": 10.0 ** (k_lo / n), "ekn_max_gev": 10.0 ** (k_hi / n),
+            "points_per_decade": n}
+
+
+def translate(transport: dict, name: str, ekn_range_gev, points_per_decade: int = POINTS_PER_DECADE) -> dict:
+    """The run spec of one USINE run (pure data, no path). Items USINE expresses only approximately are listed in
+    'substitutes'; items it cannot express raise SpecError."""
+    if not isinstance(transport, dict):
+        raise SpecError("transport must be an object")
+    if not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,80}", name):
+        raise SpecError("name: 1-80 letters, digits, '-' or '_'")
+    subs: list[str] = []
+    geo, dif = _block(transport, "geometry"), _block(transport, "diffusion")
+    kind = geo.get("kind", "cylinder-2d")
+    if kind not in MODELS:
+        raise SpecError(f"geometry.kind {kind!r}: the translator writes {sorted(MODELS)} only")
+    model = MODELS[kind]
+    big_l = _num(geo, "L_kpc", "geometry")
+    h_pc = _num(geo, "disc_halfwidth_pc", "geometry", 100.0)
+    if big_l <= 0 or h_pc <= 0:
+        raise SpecError("geometry.L_kpc and geometry.disc_halfwidth_pc must be > 0")
+    h_kpc = h_pc / 1000.0
+    geometry = {"L": big_l, "h": h_kpc}
+    if model == "Model2DKisoVc":
+        radius = _num(geo, "radius_kpc", "geometry", 20.0)
+        if radius <= OBSERVER_KPC:
+            raise SpecError(f"geometry.radius_kpc must exceed the observer radius {OBSERVER_KPC} kpc")
+        geometry["R"] = radius
+        subs.append(f"observer at r = {OBSERVER_KPC} kpc, z = 0 (not fixed by the transport block); no central hole")
+    elif "radius_kpc" in geo:
+        subs.append(f"geometry.radius_kpc {geo['radius_kpc']}: not used, the 1D model has no radial boundary")
+
+    d0 = _num(dif, "D0_cm2_s", "diffusion")
+    if d0 <= 0:
+        raise SpecError("diffusion.D0_cm2_s must be > 0")
+    pars = {"Va": 0.0, "Vc": 0.0, "K0": d0 / KPC2_PER_MYR_CM2_S, "delta": _num(dif, "delta", "diffusion"),
+            "eta_t": _num(dif, "eta", "diffusion", 1.0), "R0": _num(dif, "R0_gv", "diffusion", 1.0)}
+    if pars["R0"] <= 0:
+        raise SpecError("diffusion.R0_gv must be > 0")
+    k_formula = "beta^eta_t*K0*(Rig/R0)^delta"
+    breaks = dif.get("breaks") or []
+    if not isinstance(breaks, list):
+        raise SpecError("diffusion.breaks must be a list")
+    for i, brk in enumerate(breaks, start=1):
+        if not isinstance(brk, dict) or brk.get("kind") != "low" or brk.get("s_convention", "usine") != "usine":
+            raise SpecError(f"diffusion.breaks[{i - 1}]: only kind 'low' with s_convention 'usine' is translated")
+        r_b, d_b, s_b = (_num(brk, k, f"diffusion.breaks[{i - 1}]") for k in ("R_break_gv", "delta_below", "s"))
+        if r_b <= 0 or s_b <= 0:
+            raise SpecError(f"diffusion.breaks[{i - 1}]: R_break_gv and s must be > 0")
+        pars.update({f"Rl{i}": r_b, f"dl{i}": d_b, f"sl{i}": s_b})
+        k_formula += f"*(1+(Rl{i}/Rig)^((delta-dl{i})/sl{i}))^sl{i}"
+    if breaks:
+        subs.append("low break form (1 + (R_break/Rig)^((delta - delta_below)/s))^s of the plugin's 'usine' convention "
+                    "(transport_conventions.py; not re-read from Weinrich et al. 2020a)")
+
+    reacc = _block(transport, "reacceleration")
+    v_a = _num(reacc, "V_A_kms", "reacceleration", 0.0)
+    w = _num(reacc, "w", "reacceleration", 1.0)
+    if v_a < 0 or w <= 0:
+        raise SpecError("reacceleration.V_A_kms must be >= 0 and w > 0")
+    if v_a > 0:
+        zone = reacc.get("zone", "thin-disc")
+        if zone == "whole-halo":
+            disc = v_a * math.sqrt(big_l / h_kpc)
+            subs.append(f"reacceleration V_A_kms {v_a:g} in the whole halo: thin-disc V_A = V_A sqrt(L/h) = {disc:.6g} "
+                        "km/s (r3 P1; approximate, no bound)")
+            v_a = disc
+        elif zone != "thin-disc":
+            raise SpecError(f"reacceleration.zone {zone!r}: thin-disc or whole-halo")
+        if "seo" not in str(reacc.get("relation", "Seo-Ptuskin 1994")).lower():
+            raise SpecError(f"reacceleration.relation {reacc.get('relation')!r}: only Seo-Ptuskin is translated")
+    pars["Va"] = round(v_a, 9)
+    pars["w"] = w
+    conv = _block(transport, "convection")
+    v_c = _num(conv, "V_c_kms", "convection", 0.0)
+    if v_c < 0:
+        raise SpecError("convection.V_c_kms must be >= 0")
+    if _num(conv, "dVc_dz_kms_per_kpc", "convection", 0.0) != 0.0:
+        raise SpecError("convection.dVc_dz_kms_per_kpc: USINE's KisoVc models have a constant wind; no gradient")
+    pars["Vc"] = v_c
+
+    switches = {"IsDecayBETA": False, "IsDecayFedBETA": False, "IsDecayEC": False, "IsDecayFedEC": False,
+                "IsDestruction": True, "IsELossAdiabatic": False, "IsELossBremss": False, "IsELossCoulomb": False,
+                "IsELossIC": False, "IsELossIon": False, "IsELossSynchrotron": False, "IsEReacc": v_a > 0,
+                "IsPrimExotic": False, "IsPrimStandard": True, "IsSecondaries": True, "IsTertiaries": False,
+                "IsWind": v_c > 0}
+    losses = transport.get("losses") or []
+    if not isinstance(losses, list) or not set(losses) <= set(LOSS_SWITCHES):
+        raise SpecError(f"losses {losses}: only {sorted(LOSS_SWITCHES)} are translated")
+    for loss in losses:
+        switches[LOSS_SWITCHES[loss]] = True
+    if "adiabatic" in losses and v_c == 0:
+        subs.append("adiabatic losses with V_c = 0: USINE's adiabatic term (proportional to V_c/h) vanishes")
+    decay = _block(transport, "decay")
+    if decay.get("enabled"):
+        if decay.get("lorentz_dilation", True) is not True:
+            raise SpecError("decay.lorentz_dilation false: USINE's decay rate is ln 2 / (gamma t_1/2)")
+        if decay.get("ec_treatment", "fully-stripped") != "fully-stripped":
+            raise SpecError("decay.ec_treatment: only fully-stripped is translated")
+        switches.update(IsDecayBETA=True, IsDecayFedBETA=True)
+        subs.append("electron-capture decay off: fully stripped nuclei (7Be) are stable (r3 P6)")
+
+    gas = _block(transport, "gas")
+    m = N_H.search(str(gas.get("model", "")))
+    if not m:
+        raise SpecError(f"gas.model {gas.get('model')!r}: give the density as 'n_H = <number> cm^-3'")
+    n_h = float(m.group(1))
+    subs.append(f"gas {gas.get('model')!r}: HI = {n_h:g} cm^-3, HII = H2 = 0 in the thin disc of half-thickness h; "
+                "USINE's Coulomb loss acts on HII and is therefore zero")
+    if gas.get("He_to_H_number"):
+        subs.append(f"gas He_to_H_number {gas['He_to_H_number']}: not used; the ILLUSTRATIVE cross sections are on "
+                    "hydrogen only and no helium cross section is invented (He density 0, target H)")
+
+    xs_block = _block(transport, "cross_sections")
+    prod_key, xs = illustrative_set(str(xs_block.get("production_set", "")))
+    inel_key, _ = illustrative_set(str(xs_block.get("inelastic_set", xs_block.get("production_set", ""))))
+    if inel_key != prod_key:
+        raise SpecError(f"production set {prod_key} and inelastic set {inel_key} differ; give one ILLUSTRATIVE set")
+    species, prod, inel = network(xs)
+    if not xs["isotopic"]:
+        subs.append(f"element-level set {prod_key}: C, O and B on 12C, 16O and 11B (10B without production, with B's "
+                    "inelastic cross section)")
+    subs.append("production channels not in the set are zero (USINE needs every pair of the network)")
+    parents = sorted({k.split("->")[0] for k in prod}, key=charge_and_mass)
+    parent_elements = sorted({ELEMENTS[charge_and_mass(p)[0]] for p in parents})
+    if not set(parent_elements) <= set(PARENT_RATIOS):
+        raise SpecError(f"parents {parent_elements}: abundances known only for {sorted(PARENT_RATIOS)}")
+
+    src = _block(transport, "sources")
+    inj = src.get("injection") or []
+    gammas = {float(i["gamma"]) for i in inj if isinstance(i, dict) and "gamma" in i}
+    if len(gammas) != 1 or any(i.get("breaks") for i in inj if isinstance(i, dict)):
+        raise SpecError("sources.injection: one slope without breaks is translated; give one gamma")
+    gamma = gammas.pop()
+    subs.append(f"source spectrum dQ/dE_k/n = q Rig^-{gamma:g} (USINE POWERLAW, eta_s = 0)"
+                + (", uniform in r up to radius_kpc in the thin disc (template CST)" if model == "Model2DKisoVc" else ""))
+    subs.append(f"parent abundances: each parent source scaled until its unmodulated local flux at E_k/n = "
+                f"{NORM_EKN_GEV:g} GeV/n is in the ratio {', '.join(f'{k} {v:g}' for k, v in PARENT_RATIOS.items() if k in parent_elements)}"
+                " (theory:cr-secondary-ratio parent list); USINE NormList with generated points, not data")
+    subs.append("tertiary chains, ghost nuclei and exotic primaries off")
+    unstable = [s for s in species if s == "10Be"] if switches["IsDecayBETA"] else []
+
+    return {
+        "name": name, "program": PROGRAM, "model": model, "geometry": geometry, "transport_pars": pars,
+        "K_formula": k_formula,
+        "Kpp_formula": f"(4./3.)*(Va*{KPC_PER_MYR_PER_KM_S:.9e}*beta*Etot)^2/(delta*(4-delta^2)*(4-delta)*w*K00)",
+        "gas_cm3": {"HI": n_h, "HII": 0.0, "H2": 0.0, "He": 0.0}, "targets": ["H"],
+        "species": species, "parents": parents, "production_mb": prod, "inelastic_mb": inel,
+        "cross_section_set": prod_key, "source": {"gamma": gamma, "eta_s": 0.0,
+                                                  "spatial": "CST" if model == "Model2DKisoVc" else None},
+        "norm_points": {e: PARENT_RATIOS[e] for e in parent_elements}, "norm_ekn_gev": NORM_EKN_GEV,
+        "energy_grid": energy_grid(ekn_range_gev, points_per_decade), "n_bessel": N_BESSEL,
+        "observer_kpc": OBSERVER_KPC if model == "Model2DKisoVc" else None, "switches": switches,
+        "beta_unstable": unstable, "substitutes": subs, "transport": copy.deepcopy(transport),
+    }
+
+
+def _fmt(x: float) -> str:
+    return f"{float(x):.10g}"
+
+
+def _xs_table(title: str, rows: list[tuple[str, float]]) -> str:
+    lo, hi = XS_GRID_GEV
+    lines = [f"# {title}", "# ILLUSTRATIVE placeholders of theory:cr-secondary-ratio, written by usine_translate.py "
+             "(not data; constant in energy)", "#  Type  Unit     Targets", " sigma    mb      H", "",
+             "# EknMIN[GeV/n]   EknMAX[GeV/n]   nEkn  (PROJECTILE GRID)", f"{lo:.6e}      {hi:.6e}    2", ""]
+    for label, value in rows:
+        lines += [label, f"{value:.6e}", f"{value:.6e}", ""]
+    return "\n".join(lines)
+
+
+def render(spec: dict, data_dir: str, run_dir: str) -> dict[str, str]:
+    """The files of the run directory (name -> text). data_dir and run_dir are written as given (absolute paths for
+    a run; placeholders such as <TOOL_HOME>/inputs and <RUN_DIR> for a fixture)."""
+    sp = spec["species"]
+    # every pair with a parent at least as heavy in mass number (USINE orders 10B before 10Be by mass and needs each
+    # reaction from a heavier list member filled)
+    prod_rows = [(f"{p} -> {c}", spec["production_mb"].get(f"{p}->{c}", 0.0)) for p in sp for c in sp
+                 if p != c and charge_and_mass(c)[1] <= charge_and_mass(p)[1]]
+    inel_rows = [(s, spec["inelastic_mb"][s]) for s in sp]
+    norm_rows = ["# normalisation points written by usine_translate.py: parent ratios of theory:cr-secondary-ratio "
+                 "at one E_k/n, phi = 0 (not data)"]
+    e = spec["norm_ekn_gev"]
+    for element, value in spec["norm_points"].items():
+        norm_rows.append(f"{element}   NORM   EKN   {e:.6e} {0.9 * e:.6e} {1.1 * e:.6e}   {value:.6e} {-1e-2 * value:.6e} "
+                         f"{1e-2 * value:.6e} -0.000000e+00 0.000000e+00   none   0.000000e+00   1   "
+                         "2000/01/01-000000:2000/01/02-000000 0")
+    m, g, p, grid = spec["model"], spec["geometry"], spec["transport_pars"], spec["energy_grid"]
+    par_names = ["Va", "Vc", "K0", "delta", "eta_t", "R0", "w"] + sorted(k for k in p if k[:2] in ("Rl", "dl", "sl"))
+    par_units = {"Va": "km/s", "Vc": "km/s", "K0": "kpc^2/Myr", "R0": "GV"}
+    src = spec["source"]
+    lines = [
+        f"# USINE initialisation file written by usine_translate.py (hep-research adapter cr-propagation), run {spec['name']}",
+        f"Base @ CRData @ fCRData @ M=1 @ {run_dir}/norm_points.dat",
+        f"Base @ CRData @ NormList @ M=0 @ {','.join(spec['norm_points'])}:NORM|{_fmt(e)}|kEkn",
+        f"Base @ EnergyGrid @ NBins @ M=0 @ {grid['n_points']}",
+        f"Base @ EnergyGrid @ NUC_EknRange @ M=0 @ [{grid['ekn_min_gev']:.10e},{grid['ekn_max_gev']:.10e}]",
+        f"Base @ EnergyGrid @ ANTINUC_EknRange @ M=0 @ [{grid['ekn_min_gev']:.10e},{grid['ekn_max_gev']:.10e}]",
+        f"Base @ EnergyGrid @ LEPTONS_EkRange @ M=0 @ [{grid['ekn_min_gev']:.10e},{grid['ekn_max_gev']:.10e}]",
+        f"Base @ ListOfCRs @ fAtomicProperties @ M=0 @ {data_dir}/{ATOMIC_FILE}",
+        f"Base @ ListOfCRs @ fChartsForCRs @ M=0 @ {data_dir}/{CHART_FILE}",
+        "Base @ ListOfCRs @ IsLoadGhosts @ M=0 @ false",
+        f"Base @ ListOfCRs @ ListOfCRs @ M=0 @ {','.join(sp)}",
+        "Base @ ListOfCRs @ ListOfParents @ M=0 @ -",
+        "Base @ ListOfCRs @ PureSecondaries @ M=0 @ "
+        + (",".join(sorted({ELEMENTS[charge_and_mass(s)[0]] for s in sp if s not in spec["parents"]},
+                           key=lambda x: list(ELEMENTS.values()).index(x))) or "-"),
+        f"Base @ ListOfCRs @ SSRelativeAbund @ M=0 @ {data_dir}/{SOLAR_FILE}",
+        "Base @ MediumCompo @ Targets @ M=0 @ " + ",".join(spec["targets"]),
+        "Base @ XSections @ Tertiaries @ M=0 @ -",
+        f"Base @ XSections @ fProd @ M=1 @ {run_dir}/xs_production.dat",
+        f"Base @ XSections @ fTotInelAnn @ M=1 @ {run_dir}/xs_inelastic.dat",
+    ]
+    if m == "Model2DKisoVc":
+        lines += [f"{m} @ Base @ NBessel @ M=0 @ {spec['n_bessel']}", f"{m} @ Base @ NIntegrR @ M=0 @ 1000",
+                  f"{m} @ Base @ NIntegrZ @ M=0 @ 200",
+                  f"{m} @ Geometry @ ParNames @ M=0 @ L,h,R,rhole", f"{m} @ Geometry @ ParUnits @ M=0 @ kpc,kpc,kpc,kpc",
+                  f"{m} @ Geometry @ ParVals @ M=0 @ {_fmt(g['L'])},{_fmt(g['h'])},{_fmt(g['R'])},0",
+                  f"{m} @ Geometry @ TAxis @ M=0 @ -", f"{m} @ Geometry @ XAxis @ M=0 @ r:[0,R],10,LIN",
+                  f"{m} @ Geometry @ YAxis @ M=0 @ z:[0,L],10,LIN", f"{m} @ Geometry @ ZAxis @ M=0 @ -",
+                  f"{m} @ Geometry @ XSun @ M=0 @ {_fmt(spec['observer_kpc'])}", f"{m} @ Geometry @ YSun @ M=0 @ 0",
+                  f"{m} @ Geometry @ ZSun @ M=0 @ -"]
+    else:
+        lines += [f"{m} @ Geometry @ ParNames @ M=0 @ L,h,rhole", f"{m} @ Geometry @ ParUnits @ M=0 @ kpc,kpc,kpc",
+                  f"{m} @ Geometry @ ParVals @ M=0 @ {_fmt(g['L'])},{_fmt(g['h'])},0",
+                  f"{m} @ Geometry @ TAxis @ M=0 @ -", f"{m} @ Geometry @ XAxis @ M=0 @ z:[0,L],10,LIN",
+                  f"{m} @ Geometry @ YAxis @ M=0 @ -", f"{m} @ Geometry @ ZAxis @ M=0 @ -",
+                  f"{m} @ Geometry @ XSun @ M=0 @ -", f"{m} @ Geometry @ YSun @ M=0 @ -",
+                  f"{m} @ Geometry @ ZSun @ M=0 @ -"]
+    gas = spec["gas_cm3"]
+    lines += [f"{m} @ ISM @ ParNames @ M=0 @ -", f"{m} @ ISM @ ParUnits @ M=0 @ -", f"{m} @ ISM @ ParVals @ M=0 @ -"]
+    lines += [f"{m} @ ISM @ Density @ M=1 @ {k}:FORMULA|{_fmt(gas[k])}" for k in ("HI", "HII", "H2", "He")]
+    lines += [f"{m} @ ISM @ Te @ M=0 @ FORMULA|1.e4"]
+    lines += [f"{m} @ SrcPointLike @ {k} @ M=1 @ -" for k in ("Species", "SpectAbundInit", "SpectTempl",
+                                                               "SpectValsPerCR", "SrcXPosition", "SrcYPosition",
+                                                               "SrcZPosition", "TStart", "TStop")]
+    qvals = ",".join(f"{q}=1.e-5" for q in spec["parents"])
+    lines += [f"{m} @ SrcSteadyState @ Species @ M=1 @ ASTRO_STD|{','.join(spec['parents'])}",
+              f"{m} @ SrcSteadyState @ SpectAbundInit @ M=1 @ ASTRO_STD|-",
+              f"{m} @ SrcSteadyState @ SpectTempl @ M=1 @ ASTRO_STD|POWERLAW|q",
+              f"{m} @ SrcSteadyState @ SpectValsPerCR @ M=1 @ ASTRO_STD|q[PERCR:DEFAULT=1.e-5,{qvals}];"
+              f"alpha[SHARED:{_fmt(src['gamma'])}];eta_s[SHARED:{_fmt(src['eta_s'])}]",
+              f"{m} @ SrcSteadyState @ SpatialTempl @ M=1 @ ASTRO_STD|{src['spatial'] or '-'}",
+              f"{m} @ SrcSteadyState @ SpatialValsPerCR @ M=1 @ ASTRO_STD|-",
+              f"{m} @ Transport @ ParNames @ M=0 @ {','.join(par_names)}",
+              f"{m} @ Transport @ ParUnits @ M=0 @ {','.join(par_units.get(n, '-') for n in par_names)}",
+              f"{m} @ Transport @ ParVals @ M=0 @ {','.join(_fmt(p[n]) for n in par_names)}"]
+    lines += ([f"{m} @ Transport @ Wind @ M=1 @ W0:FORMULA|0", f"{m} @ Transport @ Wind @ M=1 @ W1:FORMULA|Vc"]
+              if m == "Model2DKisoVc" else [f"{m} @ Transport @ Wind @ M=1 @ W0:FORMULA|Vc"])
+    lines += [f"{m} @ Transport @ VA @ M=0 @ FORMULA|Va", f"{m} @ Transport @ K @ M=1 @ K00:FORMULA|{spec['K_formula']}",
+              f"{m} @ Transport @ Kpp @ M=0 @ FORMULA|{spec['Kpp_formula']}",
+              "SolMod0DFF @ Base @ ParNames @ M=0 @ phi", "SolMod0DFF @ Base @ ParUnits @ M=0 @ GV",
+              "SolMod0DFF @ Base @ ParVals @ M=0 @ 0", "SolMod0DFF @ Base @ Rig0 @ M=0 @ 0.2",
+              "TemplSpectrum @ POWERLAW @ ParNames @ M=0 @ q,alpha,eta_s",
+              "TemplSpectrum @ POWERLAW @ ParUnits @ M=0 @ (/GeV/n/m3/Myr),-,-",
+              "TemplSpectrum @ POWERLAW @ Definition @ M=0 @ FORMULA|q*beta^(eta_s)*Rig^(-alpha)",
+              "TemplSpatialDist @ CST @ ParNames @ M=0 @ -", "TemplSpatialDist @ CST @ ParUnits @ M=0 @ -",
+              "TemplSpatialDist @ CST @ Definition @ M=0 @ FORMULA|1",
+              "UsineRun @ Calculation @ BC_ANTINUC_LE @ M=0 @ kD2NDLNEKN2_ZERO",
+              "UsineRun @ Calculation @ BC_ANTINUC_HE @ M=0 @ kNOCHANGE",
+              "UsineRun @ Calculation @ BC_LEPTON_LE @ M=0 @ kNOCURRENT",
+              "UsineRun @ Calculation @ BC_LEPTON_HE @ M=0 @ kNOCURRENT",
+              "UsineRun @ Calculation @ BC_NUC_LE @ M=0 @ kD2NDLNEKN2_ZERO",
+              "UsineRun @ Calculation @ BC_NUC_HE @ M=0 @ kNOCHANGE",
+              "UsineRun @ Calculation @ EPS_ITERCONV @ M=0 @ 1.e-6",
+              "UsineRun @ Calculation @ EPS_INTEGR @ M=0 @ 1.e-4",
+              "UsineRun @ Calculation @ EPS_NORMDATA @ M=0 @ 1.e-10",
+              "UsineRun @ Calculation @ IsUseNormList @ M=0 @ true",
+              "UsineRun @ Display @ QtiesExpsEType @ M=0 @ ALL",
+              "UsineRun @ Display @ ErrType @ M=0 @ kERRSTAT",
+              "UsineRun @ Display @ FluxPowIndex @ M=0 @ 0",
+              f"UsineRun @ Models @ Propagation @ M=1 @ {m}",
+              "UsineRun @ Models @ SolarModulation @ M=1 @ SolMod0DFF"]
+    lines += [f"UsineRun @ OnOff @ {k} @ M=0 @ {'true' if v else 'false'}" for k, v in spec["switches"].items()]
+    return {"usine.init.par": "\n".join(lines) + "\n",
+            "xs_production.dat": _xs_table("production cross sections (mb) on H, every pair of the network",
+                                           prod_rows),
+            "xs_inelastic.dat": _xs_table("inelastic cross sections (mb) on H", inel_rows),
+            "norm_points.dat": "\n".join(norm_rows) + "\n"}
+
+
+def _ratios(spec: dict) -> list[str]:
+    elements = {ELEMENTS[charge_and_mass(s)[0]] for s in spec["species"]}
+    return (["B/C"] if {"B", "C"} <= elements else []) + (["10BE/9BE"] if {"10Be", "9Be"} <= set(spec["species"])
+                                                          else [])
+
+
+def quantities(spec: dict) -> str:
+    """The quantity argument of 'usine -l': every species of the network and the element ratios it defines per
+    E_k/n, and the element ratios per rigidity (USINE's own ratios, read only to check the reader), unmodulated."""
+    names = [usine_name(s) for s in spec["species"]] + _ratios(spec)
+    return ",".join(names) + ":KEKN:0." + (";" + ",".join(_ratios(spec)) + ":kR:0." if _ratios(spec) else "")
+
+
+def output_file(spec: dict, quantity: str, axis: str = "Ekn") -> str:
+    """USINE's file name of one quantity ('10BE', 'B/C') of this run, per E_k/n ('Ekn') or rigidity ('R')."""
+    return f"local_fluxes_{quantity.replace('/', '')}_{axis}_{spec['model']}_SolMod0DFF_phi0_00GV.out"
+
+
+def expected_outputs(spec: dict) -> list[str]:
+    return ([output_file(spec, usine_name(s)) for s in spec["species"]] + [output_file(spec, q) for q in _ratios(spec)]
+            + [output_file(spec, q, "R") for q in _ratios(spec)])
+
+
+def check_half_lives(spec: dict, data_dir: Path) -> list[str]:
+    """The USINE chart's BETA half-lives of the network against NUBASE2020; notes for the record, SpecError if one
+    differs by more than HALF_LIFE_RTOL."""
+    notes = []
+    if not spec["beta_unstable"]:
+        return notes
+    chart = Path(data_dir) / CHART_FILE
+    lines = chart.read_text(encoding="utf-8", errors="replace").splitlines()
+    for nuc in spec["beta_unstable"]:
+        row = next((ln for ln in lines if not ln.lstrip().startswith("#") and len(ln.split()) > 4
+                    and ln.split()[3] == nuc), None)
+        if row is None:
+            raise SpecError(f"{nuc} not found in the USINE chart {CHART_FILE}")
+        fields = row.split("||")[1].split("|")[0].split()
+        value, unit = float(fields[0]), fields[2]
+        ref = half_life(f"{ELEMENTS[charge_and_mass(nuc)[0]]}-{charge_and_mass(nuc)[1]}")
+        if unit != "Myr" or ref.unit != "My":
+            raise SpecError(f"{nuc}: half-life units {unit!r} (chart) and {ref.unit!r} (NUBASE2020) not compared")
+        if abs(value / float(ref.value) - 1.0) > HALF_LIFE_RTOL:
+            raise SpecError(f"{nuc}: USINE chart half-life {value} Myr differs from NUBASE2020 {ref.value} My; the "
+                            "translator does not patch the chart")
+        notes.append(f"{nuc} half-life: USINE chart {value} Myr, NUBASE2020 {ref.value} My (core.constants.physical)")
+    return notes
+
+
+def prepare(spec: dict, run_dir: Path, data_dir: Path) -> dict:
+    """Write the run directory; the input files' sha256 (by name)."""
+    run_dir = Path(run_dir)
+    run_dir.mkdir(parents=True, exist_ok=True)
+    hashes = {}
+    for name, text in render(spec, str(Path(data_dir).resolve()), str(run_dir.resolve())).items():
+        (run_dir / name).write_text(text, encoding="utf-8")
+        hashes[name] = sha256(run_dir / name)
+    return hashes
+
+
+def tool_home(binary: Path) -> Path:
+    """USINE's installation folder (the value of USINE's variable USINE): the parent of bin/usine."""
+    return Path(binary).resolve().parent.parent
+
+
+def run_usine(spec: dict, run_dir: Path, binary: Path, data_dir: Path, timeout: float = 3600.0) -> dict:
+    """Prepare and run; {'ok', 'exit_status', 'seconds', 'inputs', 'outputs' (name -> sha256), 'command', 'notes',
+    'log_tail'}. The run is ok only if every expected output exists and the log has no USINE error or crash."""
+    notes = check_half_lives(spec, data_dir)
+    run_dir = Path(run_dir).resolve()
+    inputs = prepare(spec, run_dir, data_dir)
+    out = run_dir / "out"
+    command = [str(Path(binary).resolve()), "-l", str(run_dir / "usine.init.par"), str(out), quantities(spec),
+               "0", "1", "1", "0"]
+    env = dict(os.environ, USINE=str(tool_home(binary)))
+    started = time.monotonic()
+    try:
+        with open(run_dir / "usine.log", "w", encoding="utf-8") as log:
+            code = subprocess.run(command, cwd=run_dir, stdout=log, stderr=subprocess.STDOUT, timeout=timeout,
+                                  env=env).returncode
+    except subprocess.TimeoutExpired:
+        code = -1
+    seconds = time.monotonic() - started
+    log_text = (run_dir / "usine.log").read_text(encoding="utf-8", errors="replace")
+    crashed = any(s in log_text for s in ("--- ERROR ---", "--- ABORT ---", "segmentation violation"))
+    outputs = {}
+    for name in expected_outputs(spec):
+        if (out / name).is_file():
+            outputs[f"out/{name}"] = sha256(out / name)
+    ok = not crashed and code != -1 and len(outputs) == len(expected_outputs(spec))
+    return {"ok": ok, "exit_status": code, "seconds": seconds, "inputs": inputs, "outputs": outputs,
+            "command": command, "notes": notes, "log_tail": "" if ok else log_text[-800:]}
+
+
+def record(spec: dict, result: dict, binary: Path, environment: dict | None = None) -> dict:
+    """The computational-run artifact of one USINE run (paths shortened to file names; no home path)."""
+    tools = [{"name": PROGRAM, "version": PROGRAM_VERSION, "binary": "<TOOL_HOME>/bin/usine",
+              "binary_sha256": sha256(binary) if Path(binary).is_file() else None}]
+    if environment:
+        tools += [t for t in environment.get("tools", []) if t.get("name") != PROGRAM]
+    command = ["<TOOL_HOME>/bin/usine", "-l", "<RUN_DIR>/usine.init.par", "<RUN_DIR>/out"] + result["command"][4:]
+    return {
+        "contract_version": CONTRACT_VERSION, "artifact_id": f"usine-run-{spec['name']}",
+        "artifact_type": "computational-run",
+        "objective": f"USINE run '{spec['name']}' translated from a transport block "
+                     "(adapters/cr-propagation/assets/usine_translate.py)",
+        "bindings": {"experiments": [], "theory": []},
+        "versions": {"plugin": PLUGIN_VERSION, "contracts": CONTRACT_VERSION, "profiles": {}},
+        "provenance": {"producer_skill": "hep-computing", "created": _dt.date.today().isoformat(), "evidence_ids": []},
+        "inputs": [], "outputs": [], "unresolved_inputs": [],
+        "status": ["unvalidated"] if result["ok"] else ["failed"],
+        "extension": {
+            "input_manifest": [{"path": p, "sha256": h} for p, h in sorted(result["inputs"].items())],
+            "tools": tools,
+            "commands": [" ".join(command[:4]) + " '" + command[4] + "' " + " ".join(command[5:])],
+            "environment": (environment or {}).get("environment", {}),
+            "seeds": {"note": "USINE's local-flux calculation is deterministic: no random numbers are drawn"},
+            "tolerances": {"note": "USINE EPS_ITERCONV 1e-6, EPS_INTEGR 1e-4, EPS_NORMDATA 1e-10 (written into the "
+                                   "initialisation file); outputs printed with 6 significant digits"},
+            "resources": {"wall_seconds": round(result["seconds"], 2)},
+            "exit_status": 0 if result["ok"] else (result["exit_status"] or 1),
+            "usine_exit_status": result["exit_status"],
+            "exit_status_note": "exit_status is the run's outcome as judged by usine_translate.py (0: every expected "
+                                "output written, no USINE error or crash in the log); USINE V3.5 itself returns 1 on "
+                                "every path (usine_exit_status)",
+            "output_hashes": result["outputs"],
+            "notes": result["notes"] + spec["substitutes"],
+        },
+    }
+
+
+def load_transport(path: Path) -> dict:
+    doc = json.loads(Path(path).read_text(encoding="utf-8"))
+    return doc["transport"] if isinstance(doc, dict) and isinstance(doc.get("transport"), dict) else doc
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__.split("\n")[0],
+                                 epilog="Exit 0 ok or prepared, 1 USINE failed, 2 bad input, 3 USINE missing.")
+    sub = ap.add_subparsers(dest="command", required=True)
+    for name in ("translate", "run"):
+        p = sub.add_parser(name)
+        p.add_argument("--transport", required=True, type=Path, help="transport block or harmonized-v1 file")
+        p.add_argument("--name", required=True, help="run name (letters, digits, '-', '_')")
+        p.add_argument("--out", required=True, type=Path, help="run directory to write")
+        p.add_argument("--ekn-range", required=True, help="LOW,HIGH in GeV/n that the outputs must cover")
+        p.add_argument("--points-per-decade", type=int, default=POINTS_PER_DECADE)
+        p.add_argument("--data-dir", type=Path, default=os.environ.get("HEP_USINE_DATA"),
+                       help="USINE's inputs folder (default $HEP_USINE_DATA)")
+        if name == "run":
+            p.add_argument("--usine", type=Path, default=os.environ.get("HEP_USINE_BIN"),
+                           help="the usine executable (default $HEP_USINE_BIN)")
+            p.add_argument("--record", type=Path, help="computational-run record to write")
+            p.add_argument("--environment", type=Path, help="environment manifest (environment_manifest.py record)")
+            p.add_argument("--timeout", type=float, default=3600.0)
+    args = ap.parse_args(argv)
+    try:
+        lo, hi = (float(x) for x in args.ekn_range.split(","))
+        spec = translate(load_transport(args.transport), args.name, (lo, hi), args.points_per_decade)
+        env = json.loads(args.environment.read_text(encoding="utf-8")) if getattr(args, "environment", None) else None
+    except (OSError, ValueError) as exc:  # SpecError is a ValueError
+        print(json.dumps({"status": "error", "error": str(exc)}))
+        return 2
+    if args.data_dir is None or not Path(args.data_dir).is_dir():
+        print(json.dumps({"status": "missing-dependency",
+                          "error": "USINE inputs folder not found: pass --data-dir or set HEP_USINE_DATA"}))
+        return 3
+    if args.command == "translate":
+        try:
+            inputs = prepare(spec, args.out, args.data_dir)
+            notes = check_half_lives(spec, args.data_dir)
+        except (OSError, SpecError) as exc:
+            print(json.dumps({"status": "error", "error": str(exc)}))
+            return 2
+        (args.out / "translation.json").write_text(json.dumps(spec, indent=1) + "\n", encoding="utf-8")
+        print(json.dumps({"status": "prepared", "run_dir": str(args.out), "inputs": inputs, "notes": notes}))
+        return 0
+    if args.usine is None or not Path(args.usine).is_file() or not os.access(args.usine, os.X_OK):
+        print(json.dumps({"status": "missing-dependency",
+                          "error": "USINE executable not found: pass --usine or set HEP_USINE_BIN"}))
+        return 3
+    try:
+        result = run_usine(spec, args.out, args.usine, args.data_dir, args.timeout)
+    except (OSError, SpecError) as exc:
+        print(json.dumps({"status": "error", "error": str(exc)}))
+        return 2
+    (Path(args.out) / "translation.json").write_text(json.dumps(spec, indent=1) + "\n", encoding="utf-8")
+    rec = record(spec, result, args.usine, env)
+    if args.record:
+        args.record.parent.mkdir(parents=True, exist_ok=True)
+        args.record.write_text(json.dumps(rec, indent=1) + "\n", encoding="utf-8")
+    print(json.dumps({"status": "ok" if result["ok"] else "failed", "exit_status": result["exit_status"],
+                      "run_dir": str(args.out), "wall_seconds": round(result["seconds"], 2),
+                      "record": str(args.record) if args.record else None,
+                      **({} if result["ok"] else {"log_tail": result["log_tail"]})}))
+    return 0 if result["ok"] else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

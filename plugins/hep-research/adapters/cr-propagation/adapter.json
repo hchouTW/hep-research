@@ -1,8 +1,8 @@
 {
  "id": "adapter:cr-propagation",
- "version": "0.1.0",
+ "version": "0.2.0",
  "status": "proposed",
- "purpose": "Run a cosmic-ray propagation code from a JSON run spec in a recorded environment and turn each run into one grid-node prediction (representation grid, the node in parameter_point) that the comparison gate and covariance_fit.py model tabulated-grid consume unchanged; optional, required by no skill",
+ "purpose": "Run a cosmic-ray propagation code from a JSON run spec in a recorded environment and turn each run into one grid-node prediction (representation grid, the node in parameter_point) that the comparison gate and covariance_fit.py model tabulated-grid consume unchanged; translate a transport block (contracts ext_theory_spec.transport) into a USINE V3.5 run with every inexpressible item recorded, read USINE's local-flux tables into ratios of bin integrals, and serve USINE as the cr-provider/1 provider 'usine'; optional, required by no skill",
  "tools": [
   {
    "name": "DRAGON2 (https://github.com/cosmicrays/DRAGON2-Beta_version): run spec to XML and data directory, local-spectrum ASCII output to bin-averaged ratio predictions",
@@ -17,19 +17,83 @@
    "tested_versions": []
   },
   {
-   "name": "USINE",
-   "status": "proposed",
-   "tested_versions": []
+   "name": "USINE (https://gitlab.com/dmaurin/USINE, GPL-2.0, run as a separate program): transport block to initialisation file and cross-section tables, local-flux tables to ratios of bin integrals (provider usine)",
+   "status": "tested-in-declared-environment",
+   "tested_versions": [
+    "USINE V3.5 (git tag V3.5, tag object 7197ddc1, commit fb53006db41d1a640bf1b5af1a4b0f899ca59673), built 2026-10-28 on E-crprop (macOS 27.2 arm64) with Apple clang 21.0.0 (clang-2100.0.123.102) against Homebrew ROOT 6.38.04 (C++17), cmake 4.3.2: seven runs translated from transport blocks (harmonized-v1 and the D1 items isotopic, convection, decay, reacceleration, losses, and a 1D run with a low break) recorded and replayed offline; a live rerun (HEP_USINE_LIVE_TEST=1) reproduces every recorded output within relative 1e-6; the provider passes C1's conformance checks live (VALIDATION CRPROP-B1)"
+   ]
   }
  ],
- "environment": "E2 (docs/capability-matrix.md): macOS 26.5 arm64, Python 3.13.2 with numpy 2.5.3 and scipy 1.18.1; DRAGON2 built from source in a user work directory (no system-wide installation) with Homebrew GCC 15.2.0 (g++, gcc, gfortran), GSL 2.8 and CFITSIO 4.6.4, serial (no OpenMP); the build and each run are recorded as computational-run artifacts under tests/adapters/fixtures/cr_propagation/. No network at run time; the source was cloned once from GitHub (user-approved). GALPROP and USINE were not obtained or run",
+ "environment": "E2 (docs/capability-matrix.md): macOS 26.5 arm64, Python 3.13.2 with numpy 2.5.3 and scipy 1.18.1; DRAGON2 built from source in a user work directory (no system-wide installation) with Homebrew GCC 15.2.0 (g++, gcc, gfortran), GSL 2.8 and CFITSIO 4.6.4, serial (no OpenMP); the build and each run are recorded as computational-run artifacts under tests/adapters/fixtures/cr_propagation/. No network at run time; the source was cloned once from GitHub (user-approved). USINE V3.5 built from source (gitlab.com/dmaurin/USINE tag V3.5) in a user work directory with Apple clang 21.0.0 against Homebrew ROOT 6.38.04, located through HEP_USINE_BIN and HEP_USINE_DATA (its inputs folder), runs kept under HEP_USINE_RUN_DIR when set; no USINE source or shipped input is copied into the plugin (GPL-2.0), fixtures hold only numbers computed by USINE runs and this adapter's own files. GALPROP was not obtained or run",
  "assets": [
   "assets/dragon2_run.py",
-  "assets/dragon2_to_prediction.py"
+  "assets/dragon2_to_prediction.py",
+  "assets/usine_translate.py",
+  "assets/usine_to_prediction.py",
+  "assets/usine_provider.py"
  ],
  "tests": [
   "../../tests/adapters/test_cr_propagation.py"
  ],
  "owner_skill": "hep-computing",
- "status_rule": "the adapter status is the lowest of its tools' statuses, so it stays proposed while GALPROP and USINE are proposed; DRAGON2 stays tested-in-declared-environment only while its recorded runs and the live rerun (HEP_DRAGON2_LIVE_TEST=1) pass on the declared build; another DRAGON2 commit or build is a new test; a run that terminates is not a validated prediction, and the limit benchmark is a consistency check against a closed form, not a validation of the code"
+ "status_rule": "the adapter status is the lowest of its tools' statuses, so it stays proposed while GALPROP is proposed; DRAGON2 stays tested-in-declared-environment only while its recorded runs and the live rerun (HEP_DRAGON2_LIVE_TEST=1) pass on the declared build; another DRAGON2 commit or build is a new test; USINE stays tested-in-declared-environment only while its recorded runs and the live rerun (HEP_USINE_LIVE_TEST=1) pass on the declared V3.5 build, another commit or build is a new test; a run that terminates is not a validated prediction, and the limit benchmark is a consistency check against a closed form, not a validation of the code",
+ "provider": [
+  {
+   "id": "usine",
+   "entrypoint": "assets/usine_provider.py",
+   "protocol": "cr-provider/1",
+   "description": "one USINE V3.5 run per point (translator of the transport block, ILLUSTRATIVE cross sections of theory:cr-secondary-ratio), read into ratios of bin integrals of B/C, 10Be/9Be or Be/B on ekn or rigidity bins (r3 P2, P3); not decomposable; needs HEP_USINE_BIN and HEP_USINE_DATA",
+   "domain": {
+    "D0_cm2_s": {
+     "min": 1e+27,
+     "max": 1e+30
+    },
+    "delta": {
+     "min": 0.2,
+     "max": 0.9
+    },
+    "eta": {
+     "min": -2.0,
+     "max": 2.0
+    },
+    "L_kpc": {
+     "min": 1.0,
+     "max": 20.0
+    },
+    "V_c_kms": {
+     "min": 0.0,
+     "max": 100.0
+    },
+    "V_A_kms": {
+     "min": 0.0,
+     "max": 150.0
+    }
+   },
+   "axis_ranges": {
+    "ekn": {
+     "min": 0.02,
+     "max": 5000.0
+    },
+    "rigidity": {
+     "min": 0.5,
+     "max": 10000.0
+    }
+   },
+   "observables": [
+    "B/C",
+    "10Be/9Be",
+    "Be/B"
+   ],
+   "axes": [
+    "ekn",
+    "rigidity"
+   ],
+   "decomposable": false,
+   "deterministic": true,
+   "output_units": {
+    "ratio": "1",
+    "energy": "GeV/n (axis ekn) or GV (axis rigidity)"
+   }
+  }
+ ]
 }

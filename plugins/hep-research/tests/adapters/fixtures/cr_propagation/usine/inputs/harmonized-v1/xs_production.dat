@@ -1,0 +1,31 @@
+# production cross sections (mb) on H, every pair of the network
+# ILLUSTRATIVE placeholders of theory:cr-secondary-ratio, written by usine_translate.py (not data; constant in energy)
+#  Type  Unit     Targets
+ sigma    mb      H
+
+# EknMIN[GeV/n]   EknMAX[GeV/n]   nEkn  (PROJECTILE GRID)
+1.000000e-03      1.000000e+06    2
+
+11B -> 10B
+0.000000e+00
+0.000000e+00
+
+12C -> 10B
+0.000000e+00
+0.000000e+00
+
+12C -> 11B
+7.000000e+01
+7.000000e+01
+
+16O -> 10B
+0.000000e+00
+0.000000e+00
+
+16O -> 11B
+3.500000e+01
+3.500000e+01
+
+16O -> 12C
+0.000000e+00
+0.000000e+00

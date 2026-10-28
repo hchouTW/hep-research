@@ -1,0 +1,234 @@
+{
+ "contract_version": "3.14.0",
+ "artifact_id": "usine-cost-harmonized-v1",
+ "artifact_type": "computational-run",
+ "objective": "Cost of one USINE V3.5 run of harmonized-v1 through the adapter (cr-propagation B1, the USINE row of CRPROP-COST): wall time and peak RSS of three identical runs, and the grid convergence of B/C over 2-1000 GV",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.42.0",
+  "contracts": "3.14.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-computing",
+  "created": "2026-10-28",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "status": [
+  "unvalidated"
+ ],
+ "extension": {
+  "input_manifest": [
+   {
+    "path": "tests/adapters/fixtures/cr_propagation/specs/harmonized-v1.json",
+    "sha256": "5a1671abcbdf01f7ec95f49a47c9c8207d5d0f5392e97163e0871d94f7a6028d"
+   }
+  ],
+  "tools": [
+   {
+    "name": "USINE",
+    "version": "V3.5 (git tag V3.5, commit fb53006db41d1a640bf1b5af1a4b0f899ca59673; built with Apple clang 21.0.0 against ROOT 6.38.04)",
+    "binary": "<TOOL_HOME>/bin/usine",
+    "binary_sha256": "1d444720afec6ebd2efde8d275d5d950f39edee4f53e7c3756fba8ce05a62d25"
+   },
+   {
+    "name": "python",
+    "version": "3.13.2"
+   },
+   {
+    "name": "numpy",
+    "version": "2.4.4"
+   },
+   {
+    "name": "scipy",
+    "version": "1.17.1"
+   },
+   {
+    "name": "Apple clang",
+    "version": "21.0.0 (clang-2100.0.123.102), the USINE build compiler"
+   },
+   {
+    "name": "ROOT",
+    "version": "6.38.04 (Homebrew 6.38.04_1), linked by USINE"
+   },
+   {
+    "name": "/usr/bin/time",
+    "version": "macOS 27.2 (-l: maximum resident set size, includes the USINE child of the adapter)"
+   }
+  ],
+  "commands": [
+   "/usr/bin/time -l python3 -I adapters/cr-propagation/assets/usine_translate.py run --transport tests/adapters/fixtures/cr_propagation/specs/harmonized-v1.json --name harmonized-v1 --out <RUN_DIR>/run<i> --ekn-range 1,1000   # i = 1, 2, 3",
+   "grid convergence: usine_translate.translate(harmonized-v1 transport, ekn range 0.04-2000 GeV/n) with (points per decade, Fourier-Bessel terms) = (20, 100) base, (40, 100) energy grid doubled, (20, 200) spatial expansion doubled, (40, 200) both; usine_translate.run_usine; usine_to_prediction.ratio_of_bin_integrals B/C on 16 log-uniform rigidity bins 2-1000 GV"
+  ],
+  "environment": {
+   "python": "3.13.2",
+   "implementation": "CPython",
+   "executable": "<CONDA_HOME>/bin/python3",
+   "platform": "macOS-27.2-arm64-arm-64bit-Mach-O",
+   "machine": "arm64",
+   "system": {
+    "os": "Darwin",
+    "arch": "arm64",
+    "libc": "macOS 27.2",
+    "kernel": "27.2.0"
+   },
+   "origin": "conda",
+   "variables": {
+    "ROOTSYS": "/opt/homebrew/Cellar/root/6.38.04_1",
+    "CONDA_PREFIX": "<CONDA_HOME>",
+    "CONDA_DEFAULT_ENV": "base"
+   },
+   "packages": {
+    "numpy": "2.4.4",
+    "scipy": "1.17.1"
+   },
+   "project": {
+    "path": "<TOOL_HOME>",
+    "commit": "fb53006db41d1a640bf1b5af1a4b0f899ca59673",
+    "dirty": true
+   }
+  },
+  "seeds": {
+   "note": "deterministic: no random numbers are drawn"
+  },
+  "tolerances": {
+   "note": "none applied; the convergence is reported without a threshold (r3 A4 method)"
+  },
+  "resources": {
+   "runs": [
+    {
+     "wall_s": 1.91,
+     "peak_rss_bytes": 296386560
+    },
+    {
+     "wall_s": 1.33,
+     "peak_rss_bytes": 298549248
+    },
+    {
+     "wall_s": 1.49,
+     "peak_rss_bytes": 298844160
+    }
+   ],
+   "median_wall_s": 1.49,
+   "median_peak_rss_bytes": 298549248,
+   "grid": "harmonized-v1 output range 1-1000 GeV/n, 20 E_k/n nodes per decade (81 nodes from 0.79 to 1259 GeV/n), Model2DKisoVc with 100 Fourier-Bessel terms, network 10B, 11B, 12C, 16O",
+   "grid_convergence": {
+    "quantity": "largest |Delta(B/C)|/(B/C) over 16 rigidity bins 2-1000 GV against the base grid",
+    "energy_grid_doubled": 7.091702536143885e-05,
+    "spatial_doubled": 0.00010570837175472025,
+    "both_doubled": 6.65696545814054e-05,
+    "runs": {
+     "base": {
+      "points_per_decade": 20,
+      "n_bessel": 100,
+      "B/C": [
+       0.1701682386931963,
+       0.15311266407279567,
+       0.13588326184213356,
+       0.119056614389592,
+       0.10322912989584132,
+       0.08875849393363183,
+       0.07579737543828635,
+       0.06436027747349576,
+       0.054386994051541605,
+       0.045769974321173114,
+       0.038384319826203515,
+       0.03209422549551239,
+       0.02676786295778854,
+       0.022277941314635213,
+       0.018507965905729444,
+       0.015353066510614395
+      ],
+      "wall_seconds": 1.15
+     },
+     "energy-doubled": {
+      "points_per_decade": 40,
+      "n_bessel": 100,
+      "B/C": [
+       0.17017494618735127,
+       0.15311762293728964,
+       0.13588900555844563,
+       0.1190650575305341,
+       0.1032361804975277,
+       0.08876436335953018,
+       0.0758011442326161,
+       0.0643636603981284,
+       0.054388849579588,
+       0.045771589219161926,
+       0.03838512103038572,
+       0.032095050673085525,
+       0.026768214454351215,
+       0.02227825964841367,
+       0.018508194656263313,
+       0.015353166436626887
+      ],
+      "wall_seconds": 1.59
+     },
+     "spatial-doubled": {
+      "points_per_decade": 20,
+      "n_bessel": 200,
+      "B/C": [
+       0.17015025048575969,
+       0.15309773922324718,
+       0.1358705586200536,
+       0.1190460934597621,
+       0.10322053363804554,
+       0.08875142408174334,
+       0.07579139129170658,
+       0.06435523161679783,
+       0.054382845526799534,
+       0.04576650801250085,
+       0.038381598022084434,
+       0.03209201947196791,
+       0.026766052299014714,
+       0.02227636711487194,
+       0.018506669133864333,
+       0.015352034028338984
+      ],
+      "wall_seconds": 1.53
+     },
+     "both-doubled": {
+      "points_per_decade": 40,
+      "n_bessel": 200,
+      "B/C": [
+       0.17015691065232577,
+       0.15310266414084192,
+       0.1358761725813895,
+       0.11905464452174151,
+       0.10322748721976387,
+       0.08875723293965192,
+       0.07579519385263657,
+       0.06435873112846324,
+       0.05438476320442656,
+       0.04576816531527914,
+       0.038382375998442395,
+       0.03209281528423937,
+       0.026766364893822538,
+       0.02227672104811712,
+       0.01850691291592016,
+       0.015352143732992127
+      ],
+      "wall_seconds": 2.55
+     }
+    }
+   }
+  },
+  "exit_status": 0,
+  "output_hashes": {
+   "<RUN_DIR>/run1/out/local_fluxes_BC_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "69eb76986d8e9d8b94b0ff78007b7d32ab25c3fba3ec4dd6707d0c6363f179a7",
+   "<RUN_DIR>/run2/out/local_fluxes_BC_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "2b75df6799b4f09942814a3c4a66763c24b9e7f698839ded9cec1df68e08eded",
+   "<RUN_DIR>/run3/out/local_fluxes_BC_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "8701c093a6eb82b46f510a5d784827e380c253eb27fc9f79e8d023ed73830459"
+  },
+  "notes": [
+   "each timed run is the whole adapter command (Python start, translation, USINE); USINE's own exit status is 1 on every path and the runs were judged from their outputs (status ok)",
+   "the three B/C tables differ only in USINE's 'File generated' time-stamp line, hence three hashes",
+   "host: E-crprop (macOS 27.2 arm64, Darwin 27.2.0), other campaign work running at the same time, so the wall times are an upper bound for an idle host"
+  ]
+ }
+}

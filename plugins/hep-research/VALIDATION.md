@@ -6157,7 +6157,7 @@ summary `cost/cost-table.json`.
 | DRAGON2, spatial grid doubled (DimR 81, DimZ 801) | 1931 s (one run) | 1131 s | 1.49 GB | `dragon2-x2s` | — |
 | DRAGON2, energy grid doubled (Ekfactor 10^(1/40)) | 990 s (one run) | 503 s | 835 MB | `dragon2-x2e` | — |
 | DRAGON2, both doubled | 3252 s (one run) | 2030 s | 2.23 GB | `dragon2-x2se` | — |
-| USINE V3.5 | not measured (capability absent: `env-usine`) | | | | |
+| USINE V3.5 fb53006d (Model2DKisoVc, 100 Fourier-Bessel terms, 20 E_k/n nodes per decade, 1–1000 GeV/n, adapter command end to end; added by B1) | 1.49 s | 0.92 s | 299 MB (285 MiB) | `cost/usine-harmonized-v1.computational-run.json` (three timed runs and the convergence runs in one record) | Bessel terms doubled: 1.1e-4; energy doubled: 7.1e-5; both: 6.7e-5 |
 | GALPROP v57 | not measured (capability absent: `env-galprop`) | | | | |
 
 Caveat: the host was shared with other campaign workers (load average 7.6 before the first DRAGON2 base run, 26–62
@@ -6165,5 +6165,83 @@ during the second and third, swap nearly full), so DRAGON2 wall time varies ×4 
 runs with identical output; the doubled-grid runs ran three at a time. The least-loaded base run (127 s, 125 CPU-s)
 is the best estimate of the uncontended cost; the medians are the conservative figure. For E1 at the median CPU
 time, D7's 200 core-hours cover about 3300 DRAGON2 evaluations at this grid (about 5700 at 125 CPU-s), fewer than
-D7's 5000 evaluations; E1's USINE cost is not measured here. Grid convergence is reported without a threshold; the
+D7's 5000 evaluations; E1's USINE cost is in the USINE row (B1). Grid convergence is reported without a threshold; the
 energy-doubling figure includes the change of the log-log interpolation between DRAGON2 nodes.
+
+## CRPROP-B1 — 2026-10-28 (environment E2)
+
+Work package B1 of the cr-propagation r4 campaign (r3 §B1 and §B1b folded together, r4 §6): USINE V3.5 translator
+(`transport` block to a USINE initialisation file), reader (USINE local-flux tables to ratios of bin integrals, r3
+P2, P3, P11), recorded runs replayed offline, the USINE row of the cost table and the cr-provider/1 entrypoint
+`usine_provider.py`.
+
+**Criteria and tolerances, fixed before any comparison (R9).** Frozen entries (acceptance.json): B1-1 offline replay
+tests pass with `HEP_USINE_BIN` and `HEP_USINE_DATA` unset; B1-2 a live rerun (`HEP_USINE_LIVE_TEST=1`) of every
+recorded run reproduces the recorded USINE outputs within relative 1e-6, value by value, with the live test not
+skipped; B1-3 `tested_versions` of the USINE tool names the USINE version and commit, the compiler and the ROOT
+version, and the adapter status follows R3 (the lowest tool status); B1-4 the cost table has a USINE row (wall time
+and peak RSS, median of three identical runs, `/usr/bin/time -l`; grid convergence reported without a threshold, as
+A4 does); B1-PRV-1 C1's conformance mixin passes for provider `usine`; B1-PRV-2 single-shot and `--serve` responses
+have the same sha256 after removing `elapsed_s` and time stamps. Added by this work package (stricter checks only,
+none replaces a frozen entry): the reader's element ratio from the isotope tables agrees with USINE's own element-ratio
+output at USINE's grid points within relative 1e-4 on the axis ekn (same nodes; only the 6-digit rounding of the
+tables differs) and within relative 2e-3 on the axis rigidity (log-log interpolation between nodes); a transport item
+USINE cannot express is either recorded as a substitute in the translation or refused (never a silent default); no
+USINE source, shipped input file or file copied from them is committed (GPL-2.0), only numbers computed by USINE runs
+and this work package's own specifications and records.
+
+**Environment (r3 §0.3, base exception D10).** E-crprop = E2 (macOS 27.2 arm64, Darwin 27.2.0), Python 3.13.2
+(miniconda; the adapter needs the standard library and core only), USINE V3.5 built by ENV dispatch 2 (git tag V3.5,
+tag object 7197ddc1, commit fb53006d, Apple clang 21.0.0, Homebrew ROOT 6.38.04, cmake 4.3.2; `bin/usine` sha256
+1d444720…), located through `HEP_USINE_BIN` and `HEP_USINE_DATA`, with `USINE` set to its folder for each run.
+`git rev-parse --show-toplevel` = `.claude/worktrees/crprop-b1`; `git branch --show-current` = `worktree-crprop-b1`;
+`git status` clean at start; base `0be5a5de` = integration HEAD (decision D10, not `origin/main`); prerequisites A1
+(merge 5d5fd918), C1 (merge 099d1d22) and ENV dispatch 1 (merge 7d5c6934) are ancestors of HEAD (`git merge-base
+--is-ancestor`); ENV dispatch 2 (the USINE build record, branch `worktree-crprop-env`) is not merged into the base and
+was used through its build only. Rebased on 2026-10-28 onto integration HEAD `d04cb47a` (A4 merged; orchestrator request): the translator, reader and provider are unchanged by the rebase, so the live runs were not repeated; the checks of the report were rerun on the rebased HEAD. r3 line numbers rechecked on this base (§B1 at line 406, §5.2 at line 300).
+
+**Translation choices (recorded in every run's `substitutes`).** `cylinder-2d` → Model2DKisoVc (thin disc, observer
+at r = 8.3 kpc as in the DRAGON2 adapter, no central hole, 100 Fourier-Bessel terms), `slab-1d` → Model1DKisoVc. Gas:
+n_H read from `gas.model`, all neutral in the thin disc, so USINE's Coulomb term (on HII) is zero;
+`He_to_H_number` not used, because the ILLUSTRATIVE sets are on hydrogen only. Sources: dQ/dE_k/n = q R^-γ,
+uniform in r up to `radius_kpc` (template CST); parent abundances fixed by USINE's NormList on generated points (not
+data) so that the unmodulated local O/C is 0.9 at 10 GeV/n (the parent list of `theory:cr-secondary-ratio`). Set A
+(element-level) is placed on 12C, 16O and 11B. Low breaks use the plugin's "usine" convention
+(transport_conventions.py; known issue 2: not re-read from Weinrich et al. 2020a, and USINE V3.5's shipped inputs
+carry only a high-break formula, `inputs/init.TEST.par` Model1DKisoVc K); a high break is refused. Momentum
+diffusion: the Kpp form of USINE's shipped initialisation files (Seo-Ptuskin, w = 1, here divided by w). The 10Be
+half-life of USINE's chart (1.387 Myr) is checked against NUBASE2020 (core) at each decay run. Two USINE behaviours
+found on the way: with `IsUseNormList false` USINE V3.5 crashes (segmentation violation in
+`TUValsTXYZECr::OrphanVals`), hence the generated normalisation points; and USINE needs every reaction from a
+heavier list member filled, hence the zero channels.
+
+**Results (2026-10-28, on the final HEAD).**
+
+| ID | Result | Evidence |
+|---|---|---|
+| B1-1 | passed: 43 tests, 5 skipped (the live USINE, conformance and DRAGON2 classes), with `HEP_USINE_BIN`/`HEP_USINE_DATA` unset | `$CRPROP_OUT/b1/acceptance/B1-1-offline.txt` |
+| B1-2 | passed: the seven recorded runs rerun live reproduce every table (nodes identical, values within 1e-6; in fact identical apart from the time-stamp line); live test not skipped (only `LiveDragon2` skipped) | `$CRPROP_OUT/b1/acceptance/B1-2-live.txt` |
+| B1-3 | `tested_versions` names V3.5, commit fb53006d, Apple clang 21.0.0 and ROOT 6.38.04; USINE `tested-in-declared-environment`, adapter stays `proposed` (GALPROP `proposed`, R3) | `adapters/cr-propagation/adapter.json` |
+| B1-4 | USINE row in `CRPROP-COST` (record `tests/adapters/fixtures/cr_propagation/cost/usine-harmonized-v1.computational-run.json`) | `CRPROP-COST` table, `cost/cost-table.json` |
+| B1-PRV-1 | passed: all nine checks of `core/provider/conformance.py` (declared, single-shot, serve, prv-2, unsupported-want, out-of-domain, outside-allowed, unregistered, runner-agrees) and the schema checks of the mixin, live | `$CRPROP_OUT/b1/acceptance/B1-PRV-conformance.json`, B1-2 log |
+| B1-PRV-2 | passed: single-shot and `--serve` responses have equal sha256 after removing `elapsed_s` (check prv-2) | as above |
+| reader (added) | passed: the reader's B/C and 10Be/9Be from the isotope tables against USINE's own ratio tables, every run: at most 8e-6 on E_k/n (tolerance 1e-4), 2.8e-4 on rigidity (tolerance 2e-3) | `UsineReader.test_reader_matches_usine_element_ratios` |
+
+**Recorded runs** (`tests/adapters/fixtures/cr_propagation/usine/`: `specs/`, `inputs/` as written by the translator
+with `<TOOL_HOME>`/`<RUN_DIR>`, `outputs/` USINE's tables, `runs/` computational-run records, `usine-results.json`):
+harmonized-v1, d1-isotopic, d1-convection, d1-decay, d1-reacceleration, d1-losses (the transport blocks of D1's
+`harmonized-v1-<item>.json`, branch `worktree-crprop-d1` 131ae000, copied unchanged) and b1-slab-all-items (1D, low
+break, η = -0.5, whole-halo V_A, V_c, all losses, decay). Each run takes 0.7-2.7 s. For D1-1 (reacceleration and
+losses items, USINE as reference): `usine-results.json` holds B/C on D1's 16 rigidity bins 2-1000 GV and 10Be/9Be on
+its 12 E_k/n bins 0.05-10 GeV/n for every item (e.g. B/C in the first bin 0.2322 with reacceleration, 0.1437 with
+losses, 0.1656 item off); D1 can also recompute them with `usine_to_prediction.ratio_of_bin_integrals` from
+`outputs/<run>/`. Numbers only; no USINE file is committed.
+
+**Cost row.** The USINE row (median wall 1.49 s, peak RSS 285 MiB, grid convergence 1.1e-4 / 7.1e-5 / 6.7e-5) is in the `CRPROP-COST` table above and in `cost/cost-table.json`; record `tests/adapters/fixtures/cr_propagation/cost/usine-harmonized-v1.computational-run.json` (moved there after the rebase onto A4, base d04cb47a).
+
+Provider tolerance: with reacceleration on, B/C and 10Be/9Be bins change by at most 2.0e-3 between the default grid
+and 80 nodes per decade with 200 Bessel terms (with losses, convection and decay all on 5.3e-4), so the provider
+declares `numerical_tolerance` 0.005 (a rounded-up numerical bound, not a physics uncertainty). Checks: static part of
+`run_all_checks.py`, naming, wiring, `workflow_check.py` diff and acceptance on the final HEAD (report); ALL-3
+deferred to the wave run (A1.5). Software and numerical-consistency checks only: every input is ILLUSTRATIVE and no
+comparison with data is made.

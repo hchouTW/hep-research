@@ -75,8 +75,21 @@
    }
   },
   {
-   "tool": "USINE V3.5",
-   "status": "not measured (capability absent: env-usine)"
+   "tool": "USINE V3.5 fb53006d (harmonized-v1, Model2DKisoVc, 100 Fourier-Bessel terms, 20 E_k/n nodes per decade, 1-1000 GeV/n; adapter command end to end)",
+   "status": "measured",
+   "wall_seconds_median": 1.49,
+   "cpu_user_seconds_median": 0.92,
+   "peak_rss_bytes_median": 298549248,
+   "runs": [
+    "tests/adapters/fixtures/cr_propagation/cost/usine-harmonized-v1.computational-run.json"
+   ],
+   "runs_note": "one record holds the three timed runs (wall 1.91, 1.33, 1.49 s; CPU user 0.94, 0.85, 0.92 s) and the grid-convergence runs; work package B1",
+   "grid_convergence_max_relative_change_bc_2_1000_gv": {
+    "x2s": 0.00010570837175472025,
+    "x2e": 7.091702536143885e-05,
+    "x2se": 6.65696545814054e-05
+   },
+   "grid_convergence_note": "x2s doubles the Fourier-Bessel terms (100 -> 200), x2e the E_k/n nodes per decade (20 -> 40); 16 log-uniform rigidity bins 2-1000 GV, ratios of bin integrals"
   },
   {
    "tool": "GALPROP v57",
