@@ -933,7 +933,8 @@
     "skills/hep-theory/scripts/transport_conventions.py",
     "tests/skills/hep_theory/**",
     "skills/hep-theory/references/cosmic-ray-phenomenology.md",
-    "docs/capability-matrix.md"
+    "docs/capability-matrix.md",
+    "docs/adapter-authoring.md"
    ],
    "acceptance": [
     "K3-1",
@@ -950,7 +951,8 @@
    "optional": false,
    "critical": false,
    "fallback": "none: escalate",
-   "source": "decisions.md B1.1 (maintainer 2026-10-29)"
+   "source": "decisions.md B1.1 (maintainer 2026-10-29)",
+   "files_source": "docs/adapter-authoring.md added by the orchestrator 2026-10-29 (K2 open question 1: the \"providers never modulate\" wording there)"
   },
   {
    "id": "K4",

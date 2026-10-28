@@ -396,14 +396,14 @@
    ]
   },
   "K2": {
-   "state": "dispatched",
+   "state": "verifying",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-k2",
    "base": "94ba34d1",
-   "head": null,
+   "head": "8e3e87ed",
    "merge_commit": null,
-   "worker_report": null,
+   "worker_report": "DONE: contracts 3.15.0 (MODULATION_FROM, prediction.modulated_twice), CORE 1.3.0, declared modulation block + core checks, conformance gate (USINE 4.28e-5 <= 1e-3, 2 runs), fit uses declaration, F1 unchanged; open: adapter-authoring.md wording (to K3)",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
@@ -411,10 +411,10 @@
    ]
   },
   "K3": {
-   "state": "pending",
-   "dispatches": 0,
+   "state": "dispatched",
+   "dispatches": 1,
    "rework_rounds": 0,
-   "branch": null,
+   "branch": "worktree-crprop-k3",
    "base": null,
    "head": null,
    "merge_commit": null,
@@ -941,6 +941,11 @@
    "cycle": 4,
    "date": "2026-10-29",
    "event": "K1, K2, K4 dispatched from 94ba34d1 (K3 waits for a slot, A1.3)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "K2 DONE (8e3e87ed), Opus verifier; K3 dispatched; adapter-authoring.md added to K3 files"
   }
  ],
  "env": {
