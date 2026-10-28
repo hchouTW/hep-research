@@ -32,8 +32,8 @@
    },
    {
     "path": "usine.init.par",
-    "sha256": "e7715fed4b9e4b5b1b58887fe2e6a5de9b97c24db34dac3091bf449b9214f23c",
-    "committed_form_sha256": "8ccfe7d1e89d3e4b67d98f9b0a39819260b9c509c1a7d27983a5bacd3e78ce89"
+    "sha256": "b57bd3a0acc0e01a9337e7b1b1b9a274855f528954dd123bb599ba331395a145",
+    "committed_form_sha256": "16f0464556a2cfa2c0b786e805af401252320c72f6f971fa33ec59b1300f57bf"
    },
    {
     "path": "xs_inelastic.dat",
@@ -46,7 +46,7 @@
     "committed_form_sha256": "d1d1e7e7dfeba821f04e5d55f2a50438d843fd8ec65661a85f29d0d39fc20aa5"
    }
   ],
-  "input_manifest_note": "sha256 is of each file as run, with the absolute paths of the run directory and of USINE's inputs folder written into usine.init.par; committed_form_sha256 is of the same file written with the placeholders <TOOL_HOME>/inputs and <RUN_DIR> (the form committed under tests/adapters/fixtures/cr_propagation/usine/inputs/), equal to sha256 for the files that hold no path; entries with read_in_place are USINE's own files (GPL-2.0), hashed where they lie and never copied (committed_form_sha256 and this note added by work package B1X on 2026-10-28 without rerunning USINE)",
+  "input_manifest_note": "sha256 is of each file as run, with the absolute paths of the run directory and of USINE's inputs folder written into usine.init.par; committed_form_sha256 is of the same file written with the placeholders <TOOL_HOME>/inputs and <RUN_DIR> (the form committed under tests/adapters/fixtures/cr_propagation/usine/inputs/), equal to sha256 for the files that hold no path; entries with read_in_place are USINE's own files (GPL-2.0), hashed where they lie and never copied",
   "tools": [
    {
     "name": "USINE",
@@ -65,14 +65,6 @@
    {
     "name": "scipy",
     "version": "1.17.1"
-   },
-   {
-    "name": "Apple clang",
-    "version": "21.0.0 (clang-2100.0.123.102), the USINE build compiler"
-   },
-   {
-    "name": "ROOT",
-    "version": "6.38.04 (Homebrew 6.38.04_1), linked by USINE"
    }
   ],
   "commands": [
@@ -113,35 +105,45 @@
    "note": "USINE EPS_ITERCONV 1e-6, EPS_INTEGR 1e-4, EPS_NORMDATA 1e-10 (written into the initialisation file); outputs printed with 6 significant digits"
   },
   "resources": {
-   "wall_seconds": 0.71
+   "wall_seconds": 1.41
   },
   "exit_status": 0,
   "usine_exit_status": 1,
   "exit_status_note": "exit_status is the run's outcome as judged by usine_translate.py (0: every expected output written, no USINE error or crash in the log); USINE V3.5 itself returns 1 on every path (usine_exit_status)",
   "output_hashes": {
-   "out/local_fluxes_7BE_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "3157746ac6ea15b1aa88ff8d5a63ff8546b35859692fe4343d01fd2267d4852e",
-   "out/local_fluxes_9BE_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "0b7df3f83735c4dd3a763af1f8b8185f4303000bf36350d182cc6b71b6fe63fc",
-   "out/local_fluxes_10BE_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "3b7a850a86ebba599d60ea92e6b2546bcd27253faba8abe9f5f0ea53c02745f2",
-   "out/local_fluxes_10B_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "4fb27b0e8722359f5c2cb5c59ec243fec1e532149d3c74b52ca0506aaded9517",
-   "out/local_fluxes_11B_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "dadce6c4775f9d58cb8691edc6cb480f93f14c8fe79efde053665186b70f3d68",
-   "out/local_fluxes_12C_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "c4a633b51868ce2ca5b66caec699b84fcf840643387bbb657e0fc163e219a71c",
-   "out/local_fluxes_16O_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "fe96155a7a04066cc01bf5012d152be80ebe82c6ca27dce7785c18c946c17ead",
-   "out/local_fluxes_BC_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "43bbdf03c7d3943f5aa1c11b939e0aae4b04a0ba914f4709ad629aaae6a4b1a7",
-   "out/local_fluxes_10BE9BE_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "0534245db71e5ea3678c002b6b4b373f3e3974004ea0432bc49a6a74fbd601be",
-   "out/local_fluxes_BC_R_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "70294b37db63fad77d7e3a04cf35a1a2738fb5f69309c32cfee942a210162389",
-   "out/local_fluxes_10BE9BE_R_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "68d1c9635f5dad1bd6e2661dd31d53ff4ee53e4d971da0b99e8c36eab7298d5b"
+   "out/local_fluxes_7BE_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "bbbfdacf321444a2afca151b4b9f767437a59319af1a50785afe3b174b171e93",
+   "out/local_fluxes_9BE_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "514b55a0d4635df3e9493e29d839d50a98895f33afd8d92ad5909defe21d7523",
+   "out/local_fluxes_10BE_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "1c993c66991166e1676569c95493cc66d0c51b6bd6d7e9a809ca29a03c31c919",
+   "out/local_fluxes_10B_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "525a5daf3ebe73840a7dc4be76070069dbc62cd93a8e1df11c906a7b0d820ea1",
+   "out/local_fluxes_11B_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "741e56678bfb11dcd04a65bfdcb243bdf8d92e54106303ebf0ae4993571de9f2",
+   "out/local_fluxes_12C_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "3ab66763cd955bc6fe5ed9f2d8a58d7c7b00a2e28cbcc68608efc2e7ed2ad5c6",
+   "out/local_fluxes_16O_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "f5df0be73bd2822cea31689cbe326ebc391912803430e609f7d64793bd0feb4d",
+   "out/local_fluxes_BC_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "5c96772acd2be3c354d45d624c326ae70850cdf8f5c6d2b3607ced683758e961",
+   "out/local_fluxes_10BE9BE_Ekn_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "68da2bdb364ed19a5ac35b59ed809c2e471da30b7c43cc0c5e024af16eb8c2f5",
+   "out/local_fluxes_BC_R_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "522fcd95cb356cb171d63c7a11049d1af2b6b6b35d93da9be3313aa7109d963d",
+   "out/local_fluxes_10BE9BE_R_Model1DKisoVc_SolMod0DFF_phi0_00GV.out": "5cc1cba7856bf64dd34fb571a6874e3a25350df8ff4fb8c3d6dde34a4d05fd69"
   },
   "notes": [
    "10Be half-life: USINE chart 1.387 Myr, NUBASE2020 1.387 My (core.constants.physical)",
+   "diffusion.form 'beta^eta (R/R0)^delta with smooth breaks': not parsed; K = beta^eta K0 (Rig/R0)^delta times the break factors is fixed by the canonical fields",
    "low break form (1 + (R_break/Rig)^((delta - delta_below)/s))^s of the plugin's 'usine' convention (transport_conventions.py; not re-read from Weinrich et al. 2020a)",
-   "reacceleration V_A_kms 5 in the whole halo: thin-disc V_A = V_A sqrt(L/h) = 35.3553 km/s (r3 P1; approximate, no bound)",
+   "reacceleration.relation 'Seo-Ptuskin 1994': momentum diffusion Kpp of USINE's shipped files (Seo-Ptuskin form)",
    "electron-capture decay off: fully stripped nuclei (7Be) are stable (r3 P6)",
+   "cross_sections.ghost_threshold 'off: ghost nuclei and tertiary chains off on both sides': not parsed; ghost nuclei are not loaded (IsLoadGhosts false; the cumulative cross sections of USINE's chart crcharts_Zmax30_ghost97.dat) and tertiary chains are off",
+   "sources.injection species_group ['all primaries']: one slope for every primary of the network",
+   "sources.spatial 'not fixed by harmonized-v1; each code records its choice': not parsed; the 1D model's sources fill the thin disc",
    "gas 'uniform, n_H = 1 cm^-3': HI = 1 cm^-3, HII = H2 = 0 in the thin disc of half-thickness h; USINE's Coulomb loss acts on HII and is therefore zero",
    "gas He_to_H_number 0.1: not used; the ILLUSTRATIVE cross sections are on hydrogen only and no helium cross section is invented (He density 0, target H)",
+   "cross_sections.production_set 'theory:cr-secondary-ratio models/xs-illustrative-decay.json (ILLUSTRATIVE, isotopic)' and inelastic_set 'theory:cr-secondary-ratio models/xs-illustrative-decay.json (ILLUSTRATIVE, isotopic)': the ILLUSTRATIVE set xs-illustrative-decay",
    "production channels not in the set are zero (USINE needs every pair of the network)",
+   "reacceleration V_A_kms 5 in the whole halo: thin-disc V_A = 20.4124 km/s (factor 4.08248 = sqrt(L/(3h)), transport_conventions.py reacceleration, same c and w); approximate, relative_error_bound 0.3121 = (1 + lam)/5 on the second-order term in V_A^2 of the disc flux, with lam = h Gamma L / D = 0.5607, its largest value over the run's species and E_k/n grid (16O at 1.995 GeV/n); convection is on, outside the conversion's assumptions",
    "source spectrum dQ/dE_k/n = q Rig^-2.3 (USINE POWERLAW, eta_s = 0)",
    "parent abundances: each parent source scaled until its unmodulated local flux at E_k/n = 10 GeV/n is in the ratio C 1, O 0.9 (theory:cr-secondary-ratio parent list); USINE NormList with generated points, not data",
-   "tertiary chains, ghost nuclei and exotic primaries off"
+   "sources.abundances 'fixed by the parent list of theory:cr-secondary-ratio': not parsed; the parent ratios above are used",
+   "tertiary chains, ghost nuclei and exotic primaries off",
+   "family 'BIG-like test of the translator (ILLUSTRATIVE cross sections)': a label of the model family, not read by the translator",
+   "free []: one run fixes every parameter; a fit varies the free ones",
+   "not given in the transport block, the translator's value used: geometry.local_bubble_radius_kpc = 0.0 kpc (no local bubble)"
   ]
  }
 }

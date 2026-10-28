@@ -668,7 +668,16 @@ class UsineTranslator(unittest.TestCase):
             self.assertTrue(any(needle in x for x in t["substitutes"]), needle)
         slab = usine_translation("b1-slab-all-items")
         self.assertEqual(slab["model"], "Model1DKisoVc")
-        self.assertAlmostEqual(slab["transport_pars"]["Va"], 5.0 * math.sqrt(5.0 / 0.1), places=6)
+        # whole-halo V_A by transport_conventions' zone conversion (A1R): sqrt(L/(3h)) at first order (B1X rerun)
+        self.assertAlmostEqual(slab["transport_pars"]["Va"], 5.0 * math.sqrt(5.0 / (3 * 0.1)), places=6)
+        conv = slab["reacceleration_conversion"]
+        self.assertEqual(conv["conversion_status"], "approximate")
+        self.assertAlmostEqual(conv["relative_error_bound"], (1 + conv["lam_max"]) / 5, places=12)
+        self.assertTrue(any("sqrt(L/(3h))" in x and "relative_error_bound" in x for x in slab["substitutes"]))
+        own = usine_spec("b1x-init-test")["transport"]
+        with self.assertRaisesRegex(usine_translate.SpecError, "whole-halo"):
+            usine_translate.translate(dict(own, reacceleration=dict(own["reacceleration"], zone="whole-halo")), "x",
+                                      (1.0, 10.0))
         self.assertTrue(slab["switches"]["IsELossAdiabatic"] and slab["switches"]["IsDecayBETA"])
         self.assertFalse(slab["switches"]["IsDecayEC"])
         self.assertIn("(1+(Rl1/Rig)^((delta-dl1)/sl1))^sl1", slab["K_formula"])

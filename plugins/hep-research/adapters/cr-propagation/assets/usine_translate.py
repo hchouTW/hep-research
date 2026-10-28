@@ -28,7 +28,9 @@ Transport block (contracts ext_theory_spec.transport, r3 5.4, canonical names) t
   init.Model1D.par line 89, init.Model2D.par line 96: (1 + (Rig/Rbreak)^(Deltabreak/sbreak))^(-sbreak)) with
   Deltabreak = delta - delta_above.
 - reacceleration: USINE reaccelerates in the thin disc only (r3 P1). zone 'thin-disc' passes V_A_kms unchanged;
-  'whole-halo' is converted to V_A sqrt(L/h) and recorded as an approximate substitute. The momentum diffusion is the
+  'whole-halo' is converted by transport_conventions.py reacceleration (subprocess; V_A sqrt(L/(3h)) at first order,
+  approximate with the bound (1 + lam)/5 at the largest lam = h Gamma L / D over the run's species and energies,
+  recorded; refused with USINE's own cross sections, whose inelastic files are not read). The momentum diffusion is the
   form of USINE V3.5's shipped initialisation files (inputs/init.TEST.par, Kpp of Model1DKisoVc and Model2DKisoVc),
   Kpp = (4/3) (V_A beta E_tot)^2 / (delta (4 - delta^2) (4 - delta) w K), with V_A in kpc/Myr (the IAU/Julian
   factor; with USINE's own inputs the factor 1.022712e-3 written in USINE's shipped Kpp, init.TEST.par line 134,
@@ -358,11 +360,59 @@ def explicit_grid(grid: dict) -> dict:
     return {"n_points": n, "ekn_min_gev": lo, "ekn_max_gev": hi, "points_per_decade": None}
 
 
-def thin_disc_alfven_speed(v_a_halo: float, l_kpc: float, h_kpc: float) -> float:
-    """Whole-halo V_A to USINE's thin-disc V_A: V_A sqrt(L/h) (r3 P1, approximate). The one place of this factor:
-    work package A1R derives sqrt(L/(3h)) in transport_conventions.py; once A1R is merged this becomes a call to that
-    conversion (orchestrator note to B1X, 2026-10-28)."""
-    return v_a_halo * math.sqrt(l_kpc / h_kpc)
+CONVENTIONS_SCRIPT = PLUGIN_ROOT / "skills" / "hep-theory" / "scripts" / "transport_conventions.py"
+LIGHT_CM_S = 2.99792458e10
+NUCLEON_MASS_GEV = 0.9314941  # atomic mass unit in GeV: per-nucleon mass for the lam bound only
+MB_CM2 = 1e-27
+
+
+def destruction_escape_max(spec: dict, d0_cm2_s: float, h_kpc: float, l_kpc: float) -> tuple[float, str, float]:
+    """(largest lam, nuclide, E_k/n in GeV/n) of lam = h Gamma L / D over the run's species and energy grid
+    (transport_conventions.convert_reacceleration's destruction over escape): Gamma = n_gas sigma_inel beta c on the
+    run's gas (HI + HII + 2 H2) with the set's inelastic cross sections, D = D0 beta^eta (R/R0)^delta times the break
+    factors of the K formula. Masses per nucleon are the atomic mass unit (a bound, not a prediction)."""
+    p, g = spec["transport_pars"], spec["energy_grid"]
+    n_gas = spec["gas_cm3"]["HI"] + spec["gas_cm3"]["HII"] + 2.0 * spec["gas_cm3"]["H2"]
+    n = g["n_points"]
+    nodes = [g["ekn_min_gev"] * (g["ekn_max_gev"] / g["ekn_min_gev"]) ** (i / (n - 1)) for i in range(n)]
+    best = (0.0, "", 0.0)
+    for nuc in spec["species"]:
+        z, a = charge_and_mass(nuc)
+        for ekn in nodes:
+            gamma = 1.0 + ekn / NUCLEON_MASS_GEV
+            beta = math.sqrt(1.0 - 1.0 / gamma ** 2)
+            rig = a / z * math.sqrt(ekn * (ekn + 2.0 * NUCLEON_MASS_GEV))
+            diff = d0_cm2_s * beta ** p["eta_t"] * (rig / p["R0"]) ** p["delta"]
+            for key in sorted(k for k in p if k[:2] in ("Rl", "Rh")):
+                i = key[2:]
+                if key[:2] == "Rl":
+                    diff *= (1 + (p[key] / rig) ** ((p["delta"] - p[f"dl{i}"]) / p[f"sl{i}"])) ** p[f"sl{i}"]
+                else:
+                    diff *= (1 + (rig / p[key]) ** ((p["delta"] - p[f"dh{i}"]) / p[f"sh{i}"])) ** (-p[f"sh{i}"])
+            rate = n_gas * spec["inelastic_mb"][nuc] * MB_CM2 * beta * LIGHT_CM_S
+            lam = h_kpc * KPC_CM * rate * l_kpc * KPC_CM / diff
+            if lam > best[0]:
+                best = (lam, nuc, ekn)
+    return best
+
+
+def thin_disc_alfven_speed(v_a_halo: float, l_kpc: float, h_kpc: float, w: float, lam: float) -> dict:
+    """Whole-halo V_A to USINE's thin disc with the same D_pp constant and w, by the hep-theory conversion
+    (transport_conventions.py reacceleration, called as a subprocess, r3 R1; work package A1R): its 'conversion'
+    (V_A sqrt(L/(3h)) at first order, approximate with bound (1 + lam)/5 on the second-order term)."""
+    cmd = [sys.executable, str(CONVENTIONS_SCRIPT), "reacceleration", "--alfven-speed-km-s", repr(v_a_halo),
+           "--from", "whole-halo", "--to", "thin-disc", "--l-kpc", repr(l_kpc), "--disc-halfwidth-pc",
+           repr(h_kpc * 1000.0), "--destruction-escape-ratio", repr(lam), "--w-from", repr(w), "--w-to", repr(w)]
+    proc = subprocess.run(cmd, capture_output=True, text=True, timeout=120,
+                          env=dict(os.environ, PYTHONDONTWRITEBYTECODE="1"))
+    try:
+        out = json.loads(proc.stdout)["conversion"]
+    except (ValueError, KeyError):
+        raise SpecError(f"reacceleration zone conversion failed (transport_conventions.py exit {proc.returncode}): "
+                        f"{(proc.stdout + proc.stderr)[-300:]}") from None
+    if proc.returncode != 0 or out.get("conversion_status") not in ("exact", "approximate"):
+        raise SpecError(f"reacceleration zone conversion refused: {out.get('reason')}")
+    return out
 
 
 def translate(transport: dict, name: str, ekn_range_gev, points_per_decade: int = POINTS_PER_DECADE,
@@ -456,12 +506,7 @@ def translate(transport: dict, name: str, ekn_range_gev, points_per_decade: int 
         raise SpecError("reacceleration.V_A_kms must be >= 0 and w > 0")
     if v_a > 0:
         zone = _given(reacc, "zone", "reacceleration", "thin-disc", defaults)
-        if zone == "whole-halo":
-            disc = thin_disc_alfven_speed(v_a, big_l, h_kpc)
-            subs.append(f"reacceleration V_A_kms {v_a:g} in the whole halo: thin-disc V_A = V_A sqrt(L/h) = {disc:.6g} "
-                        "km/s (r3 P1; approximate, no bound)")
-            v_a = disc
-        elif zone != "thin-disc":
+        if zone not in ("thin-disc", "whole-halo"):
             raise SpecError(f"reacceleration.zone {zone!r}: thin-disc or whole-halo")
         relation = str(_given(reacc, "relation", "reacceleration", "Seo-Ptuskin 1994", defaults))
         if "seo" not in relation.lower():
@@ -556,6 +601,24 @@ def translate(transport: dict, name: str, ekn_range_gev, points_per_decade: int 
                              defaults)
     late = mode.pop("_late_notes")
     spec = dict(common, **mode)
+    if v_a > 0 and reacc.get("zone", "thin-disc") == "whole-halo":
+        if usine_xs:
+            raise SpecError("reacceleration.zone whole-halo with USINE's own cross sections: the zone conversion needs "
+                            "lam = h Gamma L / D, and the translator does not read USINE's inelastic files; give the "
+                            "thin-disc V_A")
+        lam, nuc, ekn = destruction_escape_max(spec, d0, h_kpc, big_l)
+        conv_out = thin_disc_alfven_speed(v_a, big_l, h_kpc, w, lam)
+        disc = conv_out["result"]["V_A_kms"]
+        subs.append(f"reacceleration V_A_kms {v_a:g} in the whole halo: thin-disc V_A = {disc:.6g} km/s (factor "
+                    f"{conv_out['result']['factor']:.6g} = sqrt(L/(3h)), transport_conventions.py reacceleration, same "
+                    f"c and w); {conv_out['conversion_status']}, relative_error_bound "
+                    f"{conv_out['relative_error_bound']:.4g} = (1 + lam)/5 on the second-order term in V_A^2 of the disc flux, with lam = h Gamma L / D = "
+                    f"{lam:.4g}, its largest value over the run's species and E_k/n grid ({nuc} at {ekn:.4g} GeV/n)"
+                    + ("; convection is on, outside the conversion's assumptions" if v_c > 0 else ""))
+        v_a = disc
+        spec["transport_pars"]["Va"] = round(v_a, 9)
+        spec["reacceleration_conversion"] = {k: conv_out[k] for k in ("conversion_status", "relative_error_bound",
+                                                                       "result")} | {"lam_max": lam}
     # km/s -> kpc/Myr in Kpp: the derived IAU/Julian factor, or with USINE's own inputs the factor of USINE's shipped
     # Kpp formula (inputs/init.TEST.par line 134), so that USINE's own configuration is reproduced exactly
     factor = USINE_MOMENTUM_DIFFUSION_FACTOR if usine_xs else f"{KPC_PER_MYR_PER_KM_S:.9e}"
