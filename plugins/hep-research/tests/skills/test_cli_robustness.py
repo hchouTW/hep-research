@@ -25,6 +25,7 @@ M = "/nonexistent/hep-research-cli-check/input.json"
 OUT = "/nonexistent/hep-research-cli-check/out"
 
 MISSING_FILE_ARGS = {
+    "skills/hep-theory/scripts/transport_conventions.py": ["diffusion", "--input", M],
     "skills/hep-theory/scripts/bartels_rotation.py": ["average", "--series", M, "--date-column", "date",
                                                       "--value-column", "v", "--rotation", "2426",
                                                       "--lag-days", "0", "--min-coverage", "0.5"],

@@ -5874,3 +5874,46 @@ and `make_artifacts.py` constants) and 3 skill templates, all outside A2's workf
 with the E2 venv. `bc-propagation-fit` and `unfolding-coverage` carry no contract version; their numpy/scipy drift
 was reverted. On an export of the bump branch: `tests/contracts` 1213 tests OK (3 skipped), `tests/examples` 176 tests OK (22
 skipped); the full `run_all_checks` was not run on the bump branch.
+
+## CRPROP-A1 — 2026-10-26 (environment E2)
+
+Work package A1 of the cr-propagation r4 campaign (r3 §A1, §5.5): convention conversion
+(`skills/hep-theory/scripts/transport_conventions.py`) and the harmonized configuration `harmonized-v1`.
+
+Environment: E2, macOS 26.5 arm64, Python 3.13.2, standard library only. r3 §0.3 checks, run 2026-10-26 before the
+first edit: `git rev-parse --show-toplevel` = `.claude/worktrees/crprop-a1` (this worktree); `git branch
+--show-current` = `worktree-crprop-a1`; `git status` clean; prerequisite P0 `ef37d970` is an ancestor of HEAD
+(`git merge-base --is-ancestor` exit 0). Base exception (decision D10): the base is the integration HEAD `ef37d970`,
+not `origin/main`; the line numbers r3 cites for A1 were rechecked on this base (the convention table of
+`cosmic-ray-phenomenology.md` is at lines 45-49, three rows).
+
+Acceptance criteria and tolerances, written before any implementation (R9; frozen in
+`docs/dev/cr-propagation/acceptance.json`, never loosened):
+
+| ID | Criterion | Tolerance |
+|---|---|---|
+| A1-1 | Pure power-law round trips (every pair of conventions, there and back) | relative error < 1e-12 |
+| A1-2 | 1 kpc^2/Myr in cm^2/s, from the IAU parsec (648000/pi au, au = 149597870700 m) and the Julian year (365.25 d) | 3.0172e29 within relative 1e-4 |
+| A1-3 | The tests parse the convention table of `cosmic-ray-phenomenology.md` row by row; a parse failure fails the test; no value copied by hand | parse of every row |
+| A1-4 | With a break, or different smoothness conventions, the status is `approximate` or `not-convertible`; K0 <-> K10 with a break is never `exact` | status only |
+| A1-5 | V_A between thin disc and whole halo | status `approximate` only |
+| A1-6 | `harmonized-v1.json` carries every §5.5 row and the §5.4 `transport` structure; schema validation against `ext_theory_spec.transport` after A2 merges | every row present |
+
+Results (2026-10-26, E2, HEAD `0a406fd2` for the full checks; outputs under `$CRPROP_OUT/a1/`):
+
+| ID | Result | Evidence |
+|---|---|---|
+| A1-1 | pass: every pure power-law pair (eta 1: galprop, usine-k0, usine-k10, canonical; eta 0: dragon2 and the same; eta 0.7: usine and canonical) is `exact` and there-and-back within 1e-12 | `PowerLawRoundTrips` |
+| A1-2 | pass: 1 kpc^2/Myr = 3.01720e29 cm^2/s from the IAU parsec and Julian year, within 1e-4 of 3.0172e29; the page's 3.017e29 within half its last digit | `Units`, `ConventionTable.test_page_unit_line_matches_derived_unit` |
+| A1-3 | pass: the three table rows (plus K10 from "K10 = K0 10^delta") are parsed for eta, reference rigidity and unit and matched to the module; a row that does not parse fails (`test_parse_failure_fails`) | `ConventionTable` |
+| A1-4 | pass: with a low break, K0 <-> K10 and K0 -> GALPROP are `approximate` with a bound >= abs(f(R0') - 1); different or unknown smoothness conventions and non-low breaks are `not-convertible`; never `exact` | `Breaks` |
+| A1-5 | pass: V_A thin disc <-> whole halo is `approximate` (factor sqrt(L/h), no bound derived); same zone `exact` | `Reacceleration` |
+| A1-6 | pass (structure): every §5.5 row present, §5.4 keys at both levels; schema validation against `ext_theory_spec.transport` skipped until A2 merges (the test runs it automatically once the property exists) | `Harmonized` |
+
+Checks: `run_all_checks.py` 33 pass, 0 fail; `check_relocation.py` fails 2 tests in `tests.adapters.test_geant4`
+(`test_partition_summaries_merge_without_reading_a_csv`, `test_partition_merge_equals_a_single_run_and_refuses_nothing_twice`:
+a worker command split at the space of the relocated path), and the same 2 fail on the base `ef37d970` (exported with
+`git archive`), so they are not caused by A1; `check_naming.py` pass, baseline not grown; `check_layering.py`,
+`check_packaging.py`, `check_wiring.py --since ef37d970`, `reference_inventory.py --check` pass.
+Not verified: the break form of the `usine` smoothness convention was not re-read from Weinrich et al. 2020a, Eq. 1;
+the V_A zone scaling has no derived error bound.
