@@ -667,7 +667,7 @@ def stage_record(out: Path, families, record_path: Path, usine_runs: int) -> dic
     """The committed record of the reproduction: numbers only (no data value, no USINE file content)."""
     start = json.loads((out / "start.json").read_text())
     compare = json.loads((out / "compare.json").read_text()) if (out / "compare.json").is_file() else {}
-    data = json.loads((out / "data" / "bc-observed.json").read_text())
+    observed = json.loads((out / "data" / "bc-observed.json").read_text())
     crdb = json.loads((out / "data" / "crdb-crosscheck.json").read_text())
     fams = {}
     for fam in families:
@@ -699,9 +699,9 @@ def stage_record(out: Path, families, record_path: Path, usine_runs: int) -> dic
         fams[fam] = row
     doc = {"work_package": "F1", "target": "Genolini et al. 2019 (arXiv:1904.08917) Table II, BIG/SLIM/QUAINT",
            "criteria": "VALIDATION.md CRPROP-F1 (D9)", "provider": {"id": PROVIDER, "version": PROVIDER_VERSION},
-           "data": {"artifact_id": data["artifact_id"], "status": data["status"], "bins": len(data["extension"]["data"]
+           "data": {"artifact_id": observed["artifact_id"], "status": observed["status"], "bins": len(observed["extension"]["data"]
                                                                                               ["values"]),
-                    "covariance_note": data["extension"]["covariance"]["note"],
+                    "covariance_note": observed["extension"]["covariance"]["note"],
                     "covariance_model": json.loads((out / "data" / "covariance-model.json").read_text())},
            "crdb_crosscheck": {k: crdb[k] for k in ("label", "rows", "matched", "max_rel_value", "max_rel_stat",
                                                      "max_rel_syst")} | {"row_roles": sorted({r["role"] for r in
