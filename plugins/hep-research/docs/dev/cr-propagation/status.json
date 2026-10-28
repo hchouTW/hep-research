@@ -86,13 +86,13 @@
    "rework_rounds": 0,
    "branch": "worktree-crprop-a3",
    "base": "b83881c6",
-   "head": "eca5da37",
+   "head": "cef2836a",
    "merge_commit": null,
-   "worker_report": "PARTIAL: A3-1..A3-4 pass; core-stats-guide.md entry outside files (manifest widened); full run_all_checks not rerun after home-path fix; rebase onto A2 pending",
+   "worker_report": "DONE (dispatch 2): A3-1..A3-4 pass; full run on eca5da37 caught 2 documented-claim failures (guide sentence), fixed in cef2836a, full 33/33; relocation only the 2 known geant4 failures; quick load 25590/25600 B",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "dispatch 2 (2026-10-28): rerun full checks on eca5da37 and report"
+    "asked to rebase onto integration f747fbe7 (merge_after A2) before verification"
    ]
   },
   "C1": {
@@ -454,6 +454,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "A1.6: P0 extra round authorized (--no-renames fix); escalation 4 decided"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A3 DONE (cef2836a); rebase onto integration f747fbe7 requested before verification; stale B2 slot lock cleared (wave-1 run had queued behind it)"
   }
  ],
  "env": {
