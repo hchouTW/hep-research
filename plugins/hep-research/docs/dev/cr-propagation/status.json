@@ -381,11 +381,11 @@
    ]
   },
   "K1": {
-   "state": "pending",
-   "dispatches": 0,
+   "state": "dispatched",
+   "dispatches": 1,
    "rework_rounds": 0,
-   "branch": null,
-   "base": null,
+   "branch": "worktree-crprop-k1",
+   "base": "94ba34d1",
    "head": null,
    "merge_commit": null,
    "worker_report": null,
@@ -396,11 +396,11 @@
    ]
   },
   "K2": {
-   "state": "pending",
-   "dispatches": 0,
+   "state": "dispatched",
+   "dispatches": 1,
    "rework_rounds": 0,
-   "branch": null,
-   "base": null,
+   "branch": "worktree-crprop-k2",
+   "base": "94ba34d1",
    "head": null,
    "merge_commit": null,
    "worker_report": null,
@@ -426,11 +426,11 @@
    ]
   },
   "K4": {
-   "state": "pending",
-   "dispatches": 0,
+   "state": "dispatched",
+   "dispatches": 1,
    "rework_rounds": 0,
-   "branch": null,
-   "base": null,
+   "branch": "worktree-crprop-k4",
+   "base": "94ba34d1",
    "head": null,
    "merge_commit": null,
    "worker_report": null,
@@ -936,6 +936,11 @@
    "cycle": 4,
    "date": "2026-10-29",
    "event": "B1.1: follow-up K1-K4 for 0.44.0 from main 42f5bad1 (integration branch worktree-crprop-k)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "K1, K2, K4 dispatched from 94ba34d1 (K3 waits for a slot, A1.3)"
   }
  ],
  "env": {
