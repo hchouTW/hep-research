@@ -275,15 +275,15 @@
    ]
   },
   "F1": {
-   "state": "verifying",
+   "state": "merged",
    "dispatches": 2,
    "rework_rounds": 0,
    "branch": "worktree-crprop-f1",
    "base": "3547f9a0",
    "head": "fd2ae511",
-   "merge_commit": null,
+   "merge_commit": "3ccaa643",
    "worker_report": "dispatch 2 PARTIAL: delta and K10 in 1-sigma windows for BIG, SLIM, QUAINT-Vc0 (QUAINT free K10 out); no fit converged (EDM unreachable at USINE 6-digit output noise; tolerances do not change output); chi2 83-90 vs 62 attributed; F1-2 pass; provider modulates (protocol departure); 2347/2600 USINE runs",
-   "verifier_report": null,
+   "verifier_report": "Opus PASS under A1.17: windows recomputed in (BIG, SLIM, QUAINT-Vc0), declaration precedes results, verdict code unchanged, single polish path; F1-2 pass; ALL-7 checked by orchestrator; modulation departure recorded in all 2328 cached predictions; follow-ups: artifact-invalid reason for unconverged fits, polish keeps t_hat while verdict describes polished point",
    "missing_capabilities": [],
    "notes": [
     "A1.16: eval cap 6000, F1 +600 runs, adapter.json in files; dispatch 2",
@@ -824,6 +824,11 @@
    "cycle": 4,
    "date": "2026-10-29",
    "event": "A1.18: F2 and F3 skipped"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "F1 merged (3ccaa643), Opus verifier PASS (A1.17); wave-6 full run next"
   }
  ],
  "env": {
