@@ -128,6 +128,22 @@ Software checks establish contract consistency only, not physical validity.
   subcommand takes `--from`/`--to` (the old `--from-zone`/`--to-zone` still work). Tests: an independent
   finite-difference oracle of the zone weights, round trips within 1e-12.
 
+- crprop b1x: high break and USINE's own inputs (decision A1.7; still the unreleased contracts 3.14.0 with
+  `CRPROP_FROM`, no new gate). `extension.transport` gains a high break (`{"kind": "high", "R_break_gv",
+  "delta_above", "s"}`), `geometry.local_bubble_radius_kpc` and the source beta exponent `eta` of an injection item;
+  from `CRPROP_FROM` (older artifacts only under `--strict`) a half-specified break is refused
+  (`theory.transport_break_incomplete`) and a break kind other than low or high too
+  (`theory.transport_break_kind_unknown`); every committed theory-spec keeps its outcome (one positive and two
+  negative fixtures added). `transport_conventions.py` evaluates the high break (USINE V3.5's shipped K formula).
+  `usine_translate.py` translates the high break, the local bubble, the source eta, HII and H2 densities,
+  electron-capture decay (`ec_treatment` `laboratory-half-life`) and an explicit energy grid (`--ekn-grid`), and can
+  use USINE's own cross-section files and data-normalised abundances (`usine:<path>` names, read in place from
+  `HEP_USINE_DATA`, never copied; refused with exit 3 when it is unset); a transport block matching USINE's shipped
+  `init.TEST.par` reproduces that example's B/C exactly (recorded run `b1x-init-test`, live test). The translator now
+  refuses unknown keys and records every default and every field it does not use; records also hash the committed
+  form of their inputs (`committed_form_sha256`, added to the seven B1 records without a rerun). The reader counts
+  14C in carbon.
+
 ## 0.42.0 (2026-10-26)
 
 Minor release; contracts 3.13.0, `CORE_VERSION` 1.1.0 and geant4 adapter 0.5.0 unchanged. It ships semantic naming
