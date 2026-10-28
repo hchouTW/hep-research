@@ -143,14 +143,14 @@
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-b1",
-   "base": null,
-   "head": null,
+   "base": "0be5a5de",
+   "head": "2887380a",
    "merge_commit": null,
-   "worker_report": null,
+   "worker_report": "DONE: usine_translate/to_prediction/provider; B1-1..B1-4, PRV-1 (live, 9/9), PRV-2 pass; reader vs USINE tables <= 8e-6 (ekn); USINE runs for all 5 D1 items recorded (usine-results.json); open: ILLUSTRATIVE XS only, no high-break field (escalation 8)",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "dispatched 2026-10-28 after env-usine present (ENV dispatch 2 in verification)"
+    "asked to rebase onto d04cb47a (A4 merged) and move its cost row into CRPROP-COST before verification"
    ]
   },
   "D1": {
@@ -499,6 +499,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "A4 merged; post-merge static ok"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "B1 DONE (2887380a); rebase onto d04cb47a + cost row into CRPROP-COST requested; escalation 8 (high break, USINE XS files for C2U/F1)"
   }
  ],
  "env": {
