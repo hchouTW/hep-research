@@ -6822,3 +6822,11 @@ Labels: synthetic, unvalidated (ILLUSTRATIVE cross sections, synthetic data); th
 posterior of this synthetic fit, and its training transport is the USINE provider's `DEFAULT_TRANSPORT` (L_kpc 4).
 Not done: an active-addition round with this emulator (not needed); a profile-likelihood or posterior interval
 comparison with USINE (E2-3 uses Laplace intervals, as fixed above).
+
+Rework round 1 (wave-3 finding): `tests.tools.test_subprocess_timeouts` failed on the two unbounded `subprocess.run`
+calls (partition `plan` and `merge`) in `tests/adapters/fixtures/cr_propagation/e1/active_addition.py`. Both now carry
+`timeout=SMALL_STEP_TIMEOUT` (600 s; each handles one shard manifest, milliseconds in practice, so a legitimate run
+cannot be cut short). A `subprocess.TimeoutExpired` is recorded in the batch `problems` list (shard marked failed, then
+`incomplete-batch` is raised as for any failed shard), not ignored. No design, record or result changed; no USINE run.
+Checks on the fix: test_subprocess_timeouts + test_cr_propagation OK (83 tests, 10 skipped); `--part static --jobs 4`
+passed; check_naming, workflow_check diff (base b0d0016d) and acceptance ok; `active_addition.py --help` works.
