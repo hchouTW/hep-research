@@ -145,6 +145,18 @@ Software checks establish contract consistency only, not physical validity.
   14C in carbon. A whole-halo V_A is converted with `transport_conventions.py reacceleration` (A1R: sqrt(L/(3h)),
   approximate, bound recorded at the run's largest lam); `b1-slab-all-items` rerun and its results updated.
 
+- crprop c2u: `propagation_fit.py` with the USINE provider (r3 §C2, USINE case). A provider that is not decomposable
+  is fitted through one `total` component (multipliers refused); a `transport` block is sent with every request;
+  `parameters.<name>.step` sets the difference steps of the Jacobian, Fisher matrix and verdict for a noisy provider
+  (a coordinate within one step of a bound is set on it and judged by `boundary_kkt`); response model kind
+  `polynomial` (total-degree Chebyshev on a Sobol design, 1 to 6 coordinates); the bin-semantics guard recognises P2
+  ratios declared `bin-integrated` or `bin-averaged` with the P2 statement and checks binning conventions on both
+  sides; `run_record_keys` (parameter_point keys that record a run, not compared); every evaluation's record and,
+  with `computational_runs`, its computational-run resolved with the tool versions; toy seeds in the
+  statistical-result, per-toy rows kept, multipliers bounded; a failed family calibration is recorded instead of
+  aborting the run. Recorded USINE study and tests (C2U-1, C2U-2 met; C2U-3 not met: response model above tolerance,
+  VALIDATION CRPROP-C2U).
+
 ## 0.42.0 (2026-10-26)
 
 Minor release; contracts 3.13.0, `CORE_VERSION` 1.1.0 and geant4 adapter 0.5.0 unchanged. It ships semantic naming

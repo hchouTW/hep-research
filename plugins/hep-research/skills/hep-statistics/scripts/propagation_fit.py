@@ -10,10 +10,14 @@ prediction at the start point is gated against it (contracts/comparison/gate.py)
 the parameters sent to the provider are passed to the gate as conditions, and every other parameter_point key (for
 example a cross-section set) must be stated in gate_plan.measurement_conditions.
 
-Bin semantics are checked first, explicitly: the prediction's bin_semantics and its binning conventions must be the
-data's. A provider that returns bin averages (for example a ratio averaged in ln(E/n) under a profile convention) is
-never fitted to data declared as P2 bin integrals (ratio of bin-integrated fluxes): it is refused (exit 1), because a
-ratio-only provider has no primary spectra to convert with.
+Bin semantics are checked first, explicitly, on both sides: a ratio is the P2 quantity (ratio of the bin-integrated
+numerator and denominator) when declared bin-integrated, or bin-averaged with a convention stating the ratio of
+bin-integrated fluxes (as the USINE provider does), and has no binning convention of its own; otherwise its
+bin_semantics and every binning convention (a convention key containing "bin") must be the same on both sides. A
+provider that returns bin averages of the ratio (for example averaged in ln(E/n) under a profile convention) is never
+fitted to P2 data, nor a P2 provider to such data: refused (exit 1), because a ratio-only provider has no primary
+spectra to convert with. Parameter_point keys that only record how the provider ran a point (run_record_keys, for
+example a run name and the code's substitutions) are kept in the gate record and not compared.
 
 Model (one shared LIS for all datasets; the provider's components carry the cross-section structure):
   mu_d(theta, nu) = sum_c m_c(nu) comp_{d,c}(theta),
@@ -24,7 +28,13 @@ abundance (P14, kind parent-abundance, free or with a prior). At most one multip
 degenerate). Norm-type changes are applied after propagation, as P5 allows; an inelastic norm or energy scale and a
 production slope need a provider parameter or energy-basis components and are refused for a provider without them.
 -2 ln L = sum_d r_d^T C_d^-1 r_d + sum_n ((nu_n - aux_n) / sigma_n)^2, r_d = y_d - mu_d. The multipliers enter
-linearly, so they are profiled exactly (linear least squares) at every theta.
+linearly, so they are profiled exactly (linear least squares, bounded to NU_BOUNDS) at every theta. A provider that
+is not decomposable (for example one USINE run per point) gives one pseudo-component, its prediction; multipliers are
+then refused (reason not-decomposable). A transport block (contracts ext_theory_spec transport) given under
+"transport" is sent with every request, so every family shares it.
+A provider with numerical noise (for example tables printed with 6 significant digits) needs difference steps well
+above it: parameters.<name>.step is the step in the fit coordinate used for the Jacobian, the Fisher matrix and the
+convergence verdict (default: the optimizer's own steps and 1e-4 x max(1, |t|)).
 Solar modulation: a dataset with a "period" asks for phi_<period>_gv, applied per isotope through the force-field tool
 contract before ratios are formed (P4); a provider that returns only ratios cannot be modulated, so such a dataset is
 refused (exit 1, reason modulation-needs-isotopic-lis).
@@ -41,8 +51,9 @@ valid_range and go to the fit-derived theory-spec).
 
 Toys, family calibration and posteriors would need far more provider evaluations than the campaign budget allows, so
 they use a response model: a tensor Chebyshev interpolation of the provider components (in ln of the component when
-it is positive) on a box of +-k sigma around the expansion point, built from provider evaluations at the nodes and
-refused unless its largest error at random provider points in the box is below tolerance_sigma of the data sigma in
+it is positive) on a box of +-k sigma around the expansion point, built from provider evaluations at the nodes (1 to
+3 coordinates), or with kind "polynomial" a total-degree Chebyshev polynomial fitted to provider evaluations at
+scrambled Sobol design points (1 to 6 coordinates, at least twice as many points as terms), and refused unless its largest error at random provider points in the box is below tolerance_sigma of the data sigma in
 every bin. Its per-bin error enters the toy and posterior covariance as an uncorrelated component (P10); a fit that
 leaves the box is a failed toy, a chain step outside it is rejected and counted. The reported fits never use it.
 - toys: declared with core/stats/toy_ensemble.py (EnsembleSpec, toy_seed, coverage); plug-in at a true point, the
@@ -65,7 +76,7 @@ Input (fit --input CONFIG.json; relative paths are read from the config's folder
  {"provider": {"id", "version"},
   "datasets": [{"name", "measurement": "record.json" | {dataset-record}, "observable": "B/C", "period": optional}],
   "gate_plan": {"measurement_conditions", "mappings", "transformations"} (optional, contracts/comparison/gate.py),
-  "parameters": {name: {"start": x, "scale": "log" | "linear"}}, "fixed": {name: value},
+  "parameters": {name: {"start": x, "scale": "log" | "linear", "step": optional}}, "fixed": {name: value},
   "nuisances": [{"name", "kind": "production-norm" | "parent-abundance", "channel": "C->B" | "parent": "O",
                  "prior_sigma": 0.1 | null, "aux": 1.0}],
   "families": [{"name", "free": [...], "fixed": {...}}]   (default: one family, every parameter free),
@@ -73,12 +84,17 @@ Input (fit --input CONFIG.json; relative paths are read from the config's folder
   "degeneracy_scan": {"family", <degeneracy.py scan keys>}, "theory_spec": "base-theory-spec.json",
   "intervals": [names]   (profile delta chi2 = 1 intervals with the provider; an end on a domain bound is kind "bound"),
   "covariance_alternatives": {"family", "dataset", "model": {build_covariance sources}, "source", "lengths": [...]},
-  "response_model": {"nodes": 7, "half_width_sigma": 5, "validation_points": 12, "tolerance_sigma": 0.02},
+  "response_model": {"kind": "tensor" | "polynomial", "nodes": 7, "degree": 4, "design_points": 128,
+                     "half_width_sigma": 5, "validation_points": 12, "tolerance_sigma": 0.02},
+  "transport": {transport block} | "transport.json", "run_record_keys": [parameter_point keys],
+  "computational_runs": "folder holding the provider's computational-run artifacts" (optional),
   "toys": {"family", "n", "seed", "truth": {name: value}, "test": [names | "flattest"]},
   "family_toys": {"n", "seed", "alpha": 0.05}, "posterior": {"family", "chains": 4, "steps", "seed"}}
-Output: one JSON object on stdout (status, fits, families, degeneracies, toys, posterior, provider_evaluations, ...);
+Output: one JSON object on stdout (status, fits, families, degeneracies, toys and family toys with their per-toy rows,
+posterior, provider_evaluations with the provider's evaluation record of every result used and, with
+computational_runs, each computational-run reference resolved with the tool versions it names, ...);
 with --out DIR also result.json, statistical-result.json and, when a base theory-spec is given, theory-spec.json (both
-validated with contracts/validate.py). Labels of the data and of the provider (synthetic, unvalidated, user-supplied,
+validated with contracts/validate.py; the toy seeds are in extension.seeds and coverage.seed). Labels of the data and of the provider (synthetic, unvalidated, user-supplied,
 outside-validated-range) carry to the result.
 
 Usage:
@@ -96,7 +112,9 @@ import argparse
 import copy
 import json
 import math
+import re
 import sys
+import warnings
 from datetime import date
 from pathlib import Path
 
@@ -131,7 +149,10 @@ REFUSED_NUISANCES = {"inelastic-norm": "an inelastic cross-section change needs 
                                          "new propagation (P5)"}
 CONFIG_KEYS = {"provider", "datasets", "gate_plan", "parameters", "fixed", "nuisances", "families", "optimizer",
                "degeneracy_scan", "theory_spec", "covariance_alternatives", "response_model", "toys", "family_toys",
-               "posterior", "intervals"}
+               "posterior", "intervals", "transport", "computational_runs", "run_record_keys"}
+TOTAL_COMPONENT = "total"   # the one pseudo-component of a provider that is not decomposable
+# a ratio declared bin-averaged whose conventions state the ratio of bin-integrated fluxes is the P2 quantity
+P2_STATEMENT = re.compile(r"ratio of (the )?bin-integrated", re.IGNORECASE)
 
 
 class FitInputError(ValueError):
@@ -254,13 +275,16 @@ class Dataset:
 class Evaluator:
     """Components per dataset at one transport point, through core/provider (memo plus the runner's disk cache)."""
 
-    def __init__(self, runner, provider_id, version, datasets, fixed, max_evaluations):
+    def __init__(self, runner, provider_id, version, datasets, fixed, max_evaluations, decomposable=True,
+                 transport=None):
         self.runner, self.provider_id, self.version = runner, provider_id, version
         self.datasets, self.fixed, self.max_evaluations = datasets, dict(fixed), int(max_evaluations)
+        self.decomposable, self.transport = bool(decomposable), transport
         self.memo: dict = {}
         self.labels: set = set()
         self.channels: list[str] | None = None
         self.first_predictions: dict = {}
+        self.records: list = []   # one per provider result (point x dataset): its evaluation record
 
     @property
     def points_sent(self) -> int:
@@ -283,8 +307,10 @@ class Evaluator:
                 raise FitRefused("evaluation-budget", f"the run reached --max-evaluations {self.max_evaluations} "
                                  "provider point evaluations (decision D7 budget); nothing more is evaluated")
             req = {"protocol": "cr-provider/1", "provider": self.provider_id, "provider_version": self.version,
-                   "points": [pt], "observables": [ds.observable_request()], "want": ["lis", "components"],
-                   "seed": None}
+                   "points": [pt], "observables": [ds.observable_request()],
+                   "want": ["lis", "components"] if self.decomposable else ["lis"], "seed": None}
+            if self.transport is not None:
+                req["transport"] = self.transport
             resp = self.runner.evaluate(req)
             res = (resp.get("results") or [None])[0]
             if resp.get("status") != "ok" or not isinstance(res, dict) or res.get("status") != "ok":
@@ -292,7 +318,13 @@ class Evaluator:
                 detail = (res or {}).get("detail") or resp.get("detail") or ""
                 raise FitRefused(reason, f"provider {self.provider_id} at {pt}: {reason} {detail}".strip())
             self.labels.update(res.get("labels") or [])
+            evaluation = res.get("evaluation") or {}
+            self.records.append({"dataset": ds.name, "point": dict(pt), "input_hash": evaluation.get("input_hash"),
+                                 "computational_run_ref": evaluation.get("computational_run_ref"),
+                                 "labels": sorted(res.get("labels") or [])})
             pred = res["predictions"][0]
+            if not self.decomposable:   # one pseudo-component, the prediction itself; it carries no multiplier
+                res = dict(res, components=[{"id": TOTAL_COMPONENT, "values": pred["values"]["values"]}])
             comps = sorted(res.get("components") or [], key=lambda c: c["id"])
             names = [c["id"] for c in comps]
             if not names:
@@ -314,22 +346,45 @@ class Evaluator:
         return out
 
 
-def _gate(ds: Dataset, pred: dict, labels, plan: dict, registry_entry, point_keys) -> dict:
+def binning_meaning(observable: dict):
+    """What a binned value means, for the bin-semantics guard. A ratio is the P2 quantity (ratio of the bin-integrated
+    numerator and denominator, equal to the ratio of their bin averages) when it is declared bin-integrated, or
+    bin-averaged with a convention that states the ratio of bin-integrated fluxes, and carries no binning convention
+    of its own (a convention key containing 'bin', such as a ratio averaged in ln(E/n)). Anything else is its
+    bin_semantics together with its binning conventions, matched exactly."""
+    sem = observable.get("bin_semantics")
+    conv = observable.get("conventions") or {}
+    own = {k: v for k, v in conv.items() if "bin" in k}
+    stated = any(isinstance(v, str) and P2_STATEMENT.search(v) for v in conv.values())
+    if observable.get("quantity") == "ratio" and not own and (
+            sem == "bin-integrated" or (sem == "bin-averaged" and stated)):
+        return "ratio of bin integrals (P2)", {}
+    return sem, own
+
+
+def _gate(ds: Dataset, pred: dict, labels, plan: dict, registry_entry, point_keys, run_record_keys=()) -> dict:
     """Explicit bin-semantics check (P2), then contracts/comparison/gate.py, on the provider's prediction."""
     from contracts import CONTRACTS_VERSION
     from contracts.comparison.gate import check as gate_check
     obs = pred.get("observable") or {}
-    sem = obs.get("bin_semantics")
-    if sem != ds.bin_semantics:
+    p_sem, p_own = binning_meaning(obs)
+    d_sem, d_own = binning_meaning(ds.record["extension"].get("observable") or {})
+    if p_sem != d_sem:
         raise FitRefused("bin-semantics-mismatch",
-                         f"dataset {ds.name} is declared {ds.bin_semantics!r}, provider {registry_entry.provider_id} "
-                         f"returns {sem!r} values; a ratio of bin integrals (P2) and a bin-averaged ratio are different "
-                         "quantities, and a ratio-only provider has no spectra to convert one into the other")
-    keys = [k for k in (obs.get("conventions") or {}) if "bin" in k]
-    missing = [k for k in keys if (ds.conventions or {}).get(k) != obs["conventions"][k]]
+                         f"dataset {ds.name} is declared {ds.bin_semantics!r} ({d_sem}), provider "
+                         f"{registry_entry.provider_id} returns {obs.get('bin_semantics')!r} values ({p_sem}); a ratio "
+                         "of bin integrals (P2) and a bin-averaged ratio are different quantities, and a ratio-only "
+                         "provider has no spectra to convert one into the other")
+    missing = sorted(k for k in set(p_own) | set(d_own) if p_own.get(k) != d_own.get(k))
     if missing:
-        raise FitRefused("bin-semantics-mismatch", f"dataset {ds.name} does not declare the provider's binning "
-                         f"convention(s) {missing} with the same meaning")
+        raise FitRefused("bin-semantics-mismatch", f"dataset {ds.name} and provider {registry_entry.provider_id} do "
+                         f"not declare the binning convention(s) {missing} with the same meaning")
+    aligned = None
+    if p_sem == "ratio of bin integrals (P2)" and obs.get("bin_semantics") != ds.bin_semantics:
+        # the same P2 quantity under two labels (bin-averaged fluxes or bin-integrated fluxes, the ratio is the same):
+        # the gate compares labels, so it sees the data's label; recorded in the gate record
+        aligned = {"from": obs.get("bin_semantics"), "to": ds.bin_semantics, "meaning": p_sem}
+        pred = dict(pred, observable=dict(obs, bin_semantics=ds.bin_semantics))
     comp = registry_entry.component
     bindings = {"experiments": [], "theory": []}
     if comp.startswith("theory:"):
@@ -348,12 +403,20 @@ def _gate(ds: Dataset, pred: dict, labels, plan: dict, registry_entry, point_key
     for key in set(point_keys) | {"model_parameters"}:
         if key in pp:
             cond[key] = pp[key]
+    # run_record_keys: parameter_point keys that record how the provider ran this point (a run name made from the
+    # point hash, the substitutions the code made for this point), not conditions of the measurement; their values
+    # are kept in the gate record, not compared
+    for key in run_record_keys:
+        if key in pp:
+            cond[key] = pp[key]
     res = gate_check(doc, ds.record, dict(plan or {}, measurement_conditions=cond))
     if not res.get("comparable"):
         raise FitRefused("not-comparable", f"dataset {ds.name}: the comparison gate refused the prediction: " + json.dumps(
             [{k: m.get(k) for k in ("field", "reason")} for m in res.get("mismatches", [])][:5] + res.get("findings", [])[:3]))
     return {"dataset": ds.name, "comparable": True, "status": res.get("status"),
-            "carried_statuses": res.get("carried_statuses") or []}
+            "carried_statuses": res.get("carried_statuses") or [],
+            "run_record_not_compared": {k: pp[k] for k in run_record_keys if k in pp},
+            **({"bin_semantics_aligned": aligned} if aligned else {})}
 
 
 # --------------------------------------------------------------------------- the model
@@ -367,14 +430,17 @@ class Model:
             raise FitInputError("parameters must name at least one transport parameter with its start value")
         self.params = {}
         for name, spec in params.items():
-            spec = _keys(spec, {"start", "scale"}, f"parameters.{name}")
+            spec = _keys(spec, {"start", "scale", "step"}, f"parameters.{name}")
             scale = spec.get("scale", "linear")
             if scale not in ("log", "linear"):
                 raise FitInputError(f"parameters.{name}.scale must be 'log' or 'linear'")
             start = _num(spec.get("start"), f"parameters.{name}.start")
             if scale == "log" and start <= 0:
                 raise FitInputError(f"parameters.{name}.start must be > 0 on a log axis")
-            self.params[name] = {"start": start, "scale": scale}
+            step = spec.get("step")
+            if step is not None and _num(step, f"parameters.{name}.step") <= 0:
+                raise FitInputError(f"parameters.{name}.step must be > 0 (a difference step in the fit coordinate)")
+            self.params[name] = {"start": start, "scale": scale, "step": None if step is None else float(step)}
         self.nuisances = []
         for k, n in enumerate(cfg.get("nuisances") or []):
             n = _keys(n, {"name", "kind", "channel", "parent", "prior_sigma", "aux"}, f"nuisances[{k}]")
@@ -432,6 +498,14 @@ class Model:
             bounds.append((_to_fit(lo, s), _to_fit(hi, s)))
         return names, scales, bounds
 
+    def steps(self, names):
+        """Difference steps in the fit coordinates of names, or None when no parameter states one (then the
+        optimizer's own steps and 1e-4 x max(1, |t|) are used, as for a provider without numerical noise)."""
+        given = [self.params[n]["step"] for n in names]
+        if all(g is None for g in given):
+            return None
+        return [g for g in given]
+
     def values(self, names, scales, t, fixed) -> dict:
         """Natural values at fit coordinates t; a value that leaves the domain only by the rounding of exp(ln p) is set
         to the domain edge (a point really outside is left for the provider to refuse)."""
@@ -479,6 +553,9 @@ class Model:
         if self.n_nu == 0:
             return b, np.zeros(0)
         nu, *_ = np.linalg.lstsq(A, b, rcond=None)
+        if np.any(nu < NU_BOUNDS[0]) or np.any(nu > NU_BOUNDS[1]):
+            # outside the multiplier bounds (a negative norm or abundance is unphysical): the bounded solution
+            nu = optimize.lsq_linear(A, b, bounds=NU_BOUNDS, method="bvls").x
         return b - A @ nu, nu
 
     def residual_at(self, comps_by_ds, nu, ys=None, aux=None, extra_cov=None):
@@ -490,24 +567,28 @@ class Model:
 
 
 # --------------------------------------------------------------------------- one fit
-def _verdict(nll_abs, x_abs, bounds_abs, held):
+def _verdict(nll_abs, x_abs, bounds_abs, held, steps=None):
     """fit_diagnostics verdict on the interior, non-held coordinates; boundary_kkt on the coordinates at a bound.
     Judged in offsets from the best fit, so the verdict's difference steps are 1e-4 in every fit coordinate whatever
-    its value (newton_fit steps 1e-4 x max(1, |x|), which for ln D0 ~ 66 would be a sizeable fraction of sigma)."""
+    its value (newton_fit steps 1e-4 x max(1, |x|), which for ln D0 ~ 66 would be a sizeable fraction of sigma).
+    With steps (a provider with numerical noise, parameters.<name>.step) the offsets are measured in units of
+    step / 1e-4, so the Hessian's difference step is the stated step and boundary_kkt's is 1e-2 of it."""
     from core.stats.fit_diagnostics import boundary_kkt, newton_fit
     x0 = [float(v) for v in x_abs]
+    unit = [1.0 if steps is None or steps[i] is None else steps[i] / 1e-4 for i in range(len(x0))]
+    kkt_scale = 1.0 if steps is None else 1e-2
 
     def nll(d):
-        return nll_abs([a + b for a, b in zip(x0, d)])
+        return nll_abs([a + b * u for a, b, u in zip(x0, d, unit)])
     x = [0.0] * len(x0)
-    bounds = [(lo - c, hi - c) for (lo, hi), c in zip(bounds_abs, x0)]
+    bounds = [((lo - c) / u, (hi - c) / u) for (lo, hi), c, u in zip(bounds_abs, x0, unit)]
     at_bound, kkt = [], []
     for i, (lo, hi) in enumerate(bounds):
         if i in held:
             continue
         span = hi - lo
         if x[i] <= lo + 1e-9 * span:
-            ok, d = boundary_kkt(nll, x, i, lo)
+            ok, d = boundary_kkt(nll, x, i, lo, scale=kkt_scale)
             at_bound.append(i)
             kkt.append({"index": i, "bound": "lower", "ok": bool(ok), "derivative": _r(d)})
         elif x[i] >= hi - 1e-9 * span:
@@ -517,7 +598,7 @@ def _verdict(nll_abs, x_abs, bounds_abs, held):
                 return nll(w)
             z = list(x)
             z[i] = -z[i]
-            ok, d = boundary_kkt(flipped, z, i, -hi)
+            ok, d = boundary_kkt(flipped, z, i, -hi, scale=kkt_scale)
             at_bound.append(i)
             kkt.append({"index": i, "bound": "upper", "ok": bool(ok), "derivative": _r(d)})
     judged = [i for i in range(len(x)) if i not in held and i not in at_bound]
@@ -537,14 +618,15 @@ def _verdict(nll_abs, x_abs, bounds_abs, held):
 def _fisher_full(model, names, scales, t, fixed, nu, step=1e-4, bounds=None):
     """Fisher matrix in (transport fit coordinates, multipliers) at (t, nu) with the multiplier priors, by central
     differences of the provider components (2 evaluations per transport coordinate; one-sided at a domain bound, so
-    the provider is never asked outside its domain)."""
+    the provider is never asked outside its domain). The difference step is parameters.<name>.step when stated."""
     k = len(names)
     bounds = bounds or model.coords(names)[2]
+    stated = model.steps(names) or [None] * k
     comps0 = model.ev.components(model.values(names, scales, t, fixed))
     mult = _multipliers(model, nu)
     cols = []
     for i in range(k):
-        h = step * max(1.0, abs(t[i]))
+        h = stated[i] if stated[i] is not None else step * max(1.0, abs(t[i]))
         tp, tm = list(t), list(t)
         tp[i] = min(t[i] + h, bounds[i][1])
         tm[i] = max(t[i] - h, bounds[i][0])
@@ -569,6 +651,48 @@ def _fisher_full(model, names, scales, t, fixed, nu, step=1e-4, bounds=None):
     return F
 
 
+def _difference_jacobian(fun, steps, lo, hi):
+    """Forward-difference Jacobian of fun with the stated steps (backward at an upper bound, so no point leaves the
+    box), for least_squares; "2-point" (scipy's own relative steps) when no step is stated. The point itself is
+    evaluated again, which the evaluator's memo answers without a provider call."""
+    if steps is None:
+        return "2-point"
+    lo, hi = np.asarray(lo, dtype=float), np.asarray(hi, dtype=float)
+
+    def jac(t):
+        t = np.asarray(t, dtype=float)
+        f0 = fun(t)
+        cols = []
+        for i, h in enumerate(steps):
+            h = h if h is not None else 1e-4 * max(1.0, abs(t[i]))
+            if t[i] + h > hi[i]:
+                h = -h
+            tp = t.copy()
+            tp[i] += h
+            cols.append((fun(tp) - f0) / h)
+        return np.array(cols).T
+    return jac
+
+
+def _snap_to_bounds(nll, t, steps, lo, hi):
+    """A bounded optimizer stops strictly inside the box; a coordinate within one stated difference step of a bound
+    would make the verdict's differences straddle the bound. Such a coordinate is set on the bound when that does not
+    raise -ln L by more than the noise allowance 1e-6, so the bound is judged by boundary_kkt instead."""
+    t = np.asarray(t, dtype=float).copy()
+    base = nll(t)
+    for i, h in enumerate(steps):
+        if h is None:
+            continue
+        for edge in (lo[i], hi[i]):
+            if 0 < abs(t[i] - edge) < h:
+                trial = t.copy()
+                trial[i] = edge
+                value = nll(trial)
+                if value <= base + 1e-6:
+                    t, base = trial, value
+    return t
+
+
 def _multipliers(model, nu):
     m = np.ones(len(model.channels))
     for c, j in model.mult_of_channel.items():
@@ -584,6 +708,7 @@ def fit_family(model, family, opt, fixed_global, start=None, ys=None, aux=None):
     fixed.update(family.get("fixed") or {})
     lo = np.array([b[0] for b in bounds])
     hi = np.array([b[1] for b in bounds])
+    steps = model.steps(names)
     t0 = np.array([_to_fit(model.params[n]["start"] if start is None else start[n], s) for n, s in zip(names, scales)])
     for n, s, v, a, b in zip(names, scales, t0, lo, hi):
         if not a <= v <= b:
@@ -605,10 +730,13 @@ def fit_family(model, family, opt, fixed_global, start=None, ys=None, aux=None):
             jac = np.zeros((len(resid(t0)), 0))
             stop = "no free parameter"
         else:
-            res = optimize.least_squares(resid, t_start, bounds=(lo, hi), method="trf", x_scale="jac",
+            res = optimize.least_squares(resid, t_start, jac=_difference_jacobian(resid, steps, lo, hi),
+                                         bounds=(lo, hi), method="trf", x_scale="jac",
                                          max_nfev=opt["max_iterations"], xtol=1e-12, ftol=1e-12,
                                          gtol=1e-10)
             t_hat, jac, stop = res.x, res.jac, str(res.message)
+            if steps is not None:
+                t_hat = _snap_to_bounds(nll, t_hat, steps, lo, hi)
         F = jac.T @ jac
         span = hi - lo
         held: set = set()
@@ -616,7 +744,7 @@ def fit_family(model, family, opt, fixed_global, start=None, ys=None, aux=None):
         if names:
             cond, eig, degenerate, keep = fisher_screen(F, names, span)
             held = _exactly_flat(F)
-        verdict = _verdict(nll, t_hat, bounds, held) if names else {"status": "converged", "reasons": [],
+        verdict = _verdict(nll, t_hat, bounds, held, steps) if names else {"status": "converged", "reasons": [],
                                                                     "judged": [], "held": [], "at_bound": [], "kkt": []}
         attempts.append({"attempt": attempt, "status": verdict["status"], "reasons": verdict["reasons"],
                          "optimizer": stop})
@@ -686,6 +814,8 @@ def profile_interval(model, fit, name, opt):
     lo = np.array([bounds[j][0] for j in others])
     hi = np.array([bounds[j][1] for j in others])
     chi2_min = fit["chi2"]
+    stated = model.steps(names)
+    steps = None if stated is None else [stated[j] for j in others]
 
     def delta(x):
         def resid(w):
@@ -695,6 +825,7 @@ def profile_interval(model, fit, name, opt):
             return model.profiled(model.ev.components(model.values(names, scales, t, fi["fixed"])))[0]
         if others:
             res = optimize.least_squares(resid, np.clip(t_hat[others], lo, hi), bounds=(lo, hi), method="trf",
+                                         jac=_difference_jacobian(resid, steps, lo, hi),
                                          x_scale="jac", max_nfev=opt["max_iterations"],
                                          xtol=1e-12, ftol=1e-12, gtol=1e-10)
             r = res.fun
@@ -722,7 +853,8 @@ def profile_interval(model, fit, name, opt):
             ends[key] = {"value": _natural(edge, scales[i]), "kind": "bound-without-crossing",
                          "width_coordinate": abs(edge - float(t_hat[i]))}
             continue
-        x = optimize.brentq(lambda z: delta(z) - 1.0, min(x_in, x_out), max(x_in, x_out), xtol=1e-6 * sig)
+        x = optimize.brentq(lambda z: delta(z) - 1.0, min(x_in, x_out), max(x_in, x_out),
+                            xtol=(1e-6 if stated is None else 1e-3) * sig)
         ends[key] = {"value": _natural(x, scales[i]), "kind": "crossing", "width_coordinate": abs(x - float(t_hat[i]))}
     return {"parameter": name, "coordinate": fit["parameters"][i]["fit_coordinate"], "threshold": 1.0, **ends}
 
@@ -831,11 +963,75 @@ class ResponseModel:
         return {ds.name: np.linalg.cholesky(ds.cov + np.diag(self.error[ds.name] ** 2)) for ds in self.model.datasets}
 
     def record(self) -> dict:
-        return {"coordinates": [f"ln({n})" if s == "log" else n for n, s in zip(self.names, self.scales)],
+        return {"kind": "tensor Chebyshev",
+                "coordinates": [f"ln({n})" if s == "log" else n for n, s in zip(self.names, self.scales)],
                 "box": [[_natural(a, s), _natural(b, s)] for a, b, s in zip(self.lo, self.hi, self.scales)],
                 "fixed": self.fixed, "nodes_per_axis": self.nodes, "provider_evaluations": self.evaluations,
                 "validation": self.validation,
                 "error_component": {k: [float(x) for x in v] for k, v in self.error.items()}}
+
+
+class PolynomialResponseModel(ResponseModel):
+    """Total-degree Chebyshev polynomial (in ln of the component when it is positive) fitted by least squares to
+    provider evaluations at the points of a scrambled Sobol design in the box: far fewer evaluations than a tensor
+    grid in 4 to 6 coordinates (a total degree p in d coordinates has C(d + p, p) terms). Validated like the tensor
+    model; its error enters the covariance the same way (P10)."""
+
+    def __init__(self, model, names, scales, lo, hi, fixed, degree, design_points, seed):
+        from itertools import product
+
+        from scipy.stats import qmc
+        self.model, self.names, self.scales, self.fixed = model, list(names), list(scales), dict(fixed)
+        self.lo, self.hi = np.asarray(lo, dtype=float), np.asarray(hi, dtype=float)
+        d = len(names)
+        if not 1 <= d <= 6:
+            raise FitRefused("response-model-dimension", f"a polynomial response model spans 1 to 6 transport "
+                             f"coordinates, got {d}")
+        self.degree, self.nodes = int(degree), None
+        self.terms = [m for m in product(range(self.degree + 1), repeat=d) if sum(m) <= self.degree]
+        if design_points < 2 * len(self.terms):
+            raise FitInputError(f"response_model.design_points {design_points} must be at least twice the "
+                                f"{len(self.terms)} terms of total degree {self.degree} in {d} coordinates")
+        with warnings.catch_warnings():   # a count that is not a power of 2 loses only Sobol's balance property
+            warnings.simplefilter("ignore", UserWarning)
+            u = 2.0 * qmc.Sobol(d, scramble=True, seed=int(seed)).random(int(design_points)) - 1.0
+        tables: dict = {}
+        for row in u:
+            comps = model.ev.components(model.values(self.names, self.scales, self._t(row), self.fixed))
+            for ds in model.datasets:
+                tables.setdefault(ds.name, []).append(comps[ds.name])
+        basis = self._basis(u)
+        self.coef, self.logged = {}, {}
+        for name, rows in tables.items():
+            arr = np.array(rows)                                   # points x channels x bins
+            logged = bool(np.all(arr > 0))
+            vals = (np.log(arr) if logged else arr).reshape(len(u), -1)
+            coef, *_ = np.linalg.lstsq(basis, vals, rcond=None)
+            self.coef[name], self.logged[name] = (coef, arr.shape[1:]), logged
+        self.evaluations = len(u) * len(model.datasets)
+        self.design = {"kind": "scrambled Sobol", "points": int(design_points), "seed": int(seed)}
+        self.error = {ds.name: np.zeros(len(ds.y)) for ds in model.datasets}
+        self.validation: dict = {}
+
+    def _basis(self, u):
+        u = np.atleast_2d(u)
+        cheb = [np.polynomial.chebyshev.chebvander(u[:, j], self.degree) for j in range(u.shape[1])]
+        return np.array([[np.prod([cheb[j][r, m[j]] for j in range(u.shape[1])]) for m in self.terms]
+                         for r in range(u.shape[0])])
+
+    def components(self, t) -> dict:
+        b = self._basis(np.clip(self._u(t), -1.0, 1.0))[0]
+        out = {}
+        for name, (coef, shape) in self.coef.items():
+            v = (b @ coef).reshape(shape)
+            out[name] = np.exp(v) if self.logged[name] else v
+        return out
+
+    def record(self) -> dict:
+        rec = super().record()
+        rec.pop("nodes_per_axis", None)
+        rec.update(kind="total-degree polynomial", degree=self.degree, terms=len(self.terms), design=self.design)
+        return rec
 
 
 def build_response_model(model, names, scales, centers, sigmas, fixed, rm_cfg, bounds, seed):
@@ -845,7 +1041,11 @@ def build_response_model(model, names, scales, centers, sigmas, fixed, rm_cfg, b
     hi = np.max([c + k * s for c, s in zip(centers, sigmas)], axis=0)
     lo = np.maximum(lo, [b[0] for b in bounds])
     hi = np.minimum(hi, [b[1] for b in bounds])
-    rm = ResponseModel(model, names, scales, lo, hi, fixed, rm_cfg["nodes"])
+    if rm_cfg["kind"] == "polynomial":
+        rm = PolynomialResponseModel(model, names, scales, lo, hi, fixed, rm_cfg["degree"], rm_cfg["design_points"],
+                                     seed + 1)
+    else:
+        rm = ResponseModel(model, names, scales, lo, hi, fixed, rm_cfg["nodes"])
     val = rm.validate(rm_cfg["validation_points"], rm_cfg["tolerance_sigma"], seed)
     if not val["passed"]:
         raise FitRefused("response-model-above-tolerance",
@@ -1068,7 +1268,8 @@ def run_toys(model, family, truth, tcfg, rm_cfg, opt, fixed_global):
     out = {"family": family["name"], "truth": truth, "ensemble": spec.record(), "generated": len(rows),
            "failed": failures, "failure_limit": TOY_FAILURE_LIMIT, "response_model": rm.record(),
            "fisher_eigenvalues": [float(x) for x in ev], "eigenvalue_ratio_min_max": float(ev[0] / ev[-1]),
-           "flattest_direction": {c: float(x) for c, x in zip(coords, flattest)}, "tests": {}}
+           "flattest_direction": {c: float(x) for c, x in zip(coords, flattest)}, "tests": {},
+           "rows": [{"toy": int(i), "outcome": o, "delta_chi2": q} for i, o, q in rows]}
     if stopped:
         out.update(status="failed", reason="toy-failure-threshold",
                    detail=f"{failures} of {len(rows)} toys failed, more than {TOY_FAILURE_LIMIT:.0%} of {spec.n_toys}: "
@@ -1208,6 +1409,7 @@ def calibrate_families(model, fits, fam_cfg, rm_cfg, opt, fixed_global):
         mu = _mu_exact(model, fi["names"], fi["scales"], list(fi["t_hat"]), fi["fixed"], fi["nu"])
         exceed, failed, done = 0, 0, 0
         why: dict = {}
+        toy_rows = []
         for i in range(fam_cfg["n"]):
             rng = np.random.default_rng(toy_seed(fam_cfg["seed"], i))
             ys, aux = _toy_data(model, mu, list(fi["nu"]), rng)
@@ -1216,10 +1418,14 @@ def calibrate_families(model, fits, fam_cfg, rm_cfg, opt, fixed_global):
                 c, _, ok, reason = sf.fit(ys, aux, starts[g], dict(opt, seed=i))
                 if not ok:
                     why[f"{g}: {reason}"] = why.get(f"{g}: {reason}", 0) + 1
+                    toy_rows.append({"toy": i, "outcome": "fit_failed", "family": g, "reason": reason})
                     vals = None
                     break
                 vals[g] = c
             done += 1
+            if vals is not None:
+                toy_rows.append({"toy": i, "outcome": "ok", "chi2": dict(vals),
+                                 "delta_chi2": vals[f["family"]] - min(vals.values())})
             if vals is None:
                 failed += 1
                 if failed > TOY_FAILURE_LIMIT * fam_cfg["n"]:
@@ -1228,7 +1434,7 @@ def calibrate_families(model, fits, fam_cfg, rm_cfg, opt, fixed_global):
             if vals[f["family"]] - min(vals.values()) >= d_obs - 1e-12:
                 exceed += 1
         entry = {"family": f["family"], "chi2": f["chi2"], "delta_chi2": d_obs, "toys": done, "failed": failed,
-                 "failure_reasons": why}
+                 "failure_reasons": why, "toy_seed": fam_cfg["seed"], "rows": toy_rows}
         if failed > TOY_FAILURE_LIMIT * fam_cfg["n"]:
             entry.update(status="failed", reason="toy-failure-threshold", surviving=None)
         else:
@@ -1359,10 +1565,18 @@ def statistical_result_artifact(result: dict, labels) -> dict:
                 results[f"sigma_{p['fit_coordinate']}_{f['family']}"] = p["sigma_coordinate"]
     toys = result.get("toys") or {}
     cov = {"check": "not-checked", "method": "not run"}
+    seeds = {}
+    if toys.get("ensemble"):
+        seeds["coverage_toys"] = toys["ensemble"]["seed"]
+    if (result.get("family_calibration") or {}).get("seed") is not None:
+        seeds["family_toys"] = result["family_calibration"]["seed"]
+    if (result.get("posterior") or {}).get("sampler"):
+        seeds["posterior"] = result["posterior"]["sampler"]["seed"]
     if toys.get("status") == "ok":
         first = next(iter(toys["tests"].values()))
         cov = {"check": "toys", "method": "plug-in toys at a true point; profile delta chi2 <= 1 at the true value",
-               "n_toys": toys["generated"], "coverage": first["coverage_wilks"]["headline"]["value"]}
+               "n_toys": toys["generated"], "coverage": first["coverage_wilks"]["headline"]["value"],
+               "seed": toys["ensemble"]["seed"]}
     status = result["status"]
     fit_status = {"ok": "converged", "failed": "failed"}.get(status, "converged-with-warnings")
     lab = sorted(set(labels) | ({"failed"} if status == "failed" else set()))
@@ -1384,7 +1598,8 @@ def statistical_result_artifact(result: dict, labels) -> dict:
                           "parameters_of_interest": [p["name"] for f in fits[:1] for p in f["parameters"]],
                           "nuisances": [n["name"] for f in fits[:1] for n in f["nuisances"]],
                           "fit_status": fit_status, "test_statistic": "profile delta chi2",
-                          "construction": "profile-likelihood-wilks", "coverage": cov, "results": results}}
+                          "construction": "profile-likelihood-wilks", "coverage": cov, "results": results,
+                          **({"seeds": seeds} if seeds else {})}}
 
 
 # --------------------------------------------------------------------------- driver
@@ -1396,9 +1611,14 @@ def _opt_cfg(cfg) -> dict:
 
 
 def _rm_cfg(cfg) -> dict:
-    r = _keys(cfg.get("response_model") or {}, {"nodes", "half_width_sigma", "validation_points", "tolerance_sigma"},
-              "response_model")
-    return {"nodes": _int(r.get("nodes", 7), "response_model.nodes", 3, 15),
+    r = _keys(cfg.get("response_model") or {}, {"kind", "nodes", "degree", "design_points", "half_width_sigma",
+                                                 "validation_points", "tolerance_sigma"}, "response_model")
+    kind = r.get("kind", "tensor")
+    if kind not in ("tensor", "polynomial"):
+        raise FitInputError("response_model.kind must be 'tensor' or 'polynomial'")
+    return {"kind": kind, "degree": _int(r.get("degree", 4), "response_model.degree", 1, 8),
+            "design_points": _int(r.get("design_points", 128), "response_model.design_points", 4, 4096),
+            "nodes": _int(r.get("nodes", 7), "response_model.nodes", 3, 15),
             "half_width_sigma": _num(r.get("half_width_sigma", 5.0), "response_model.half_width_sigma"),
             "validation_points": _int(r.get("validation_points", 12), "response_model.validation_points", 4, 1000),
             "tolerance_sigma": _num(r.get("tolerance_sigma", 0.02), "response_model.tolerance_sigma")}
@@ -1452,6 +1672,11 @@ def run(cfg: dict, base: Path, registry, cache_dir=None, max_evaluations=2000, a
                          "applied per isotope before ratios are formed (P4); provider "
                          f"{entry.provider_id} returns only {entry.declaration['observables']}, no isotopic LIS")
     fixed_global = {k: _num(v, f"fixed.{k}") for k, v in _keys(cfg.get("fixed") or {}, list(domain), "fixed").items()}
+    transport = None
+    if cfg.get("transport") is not None:
+        transport = _load(cfg["transport"], base, "transport")
+        if not isinstance(transport, dict):
+            raise FitInputError("transport must be a JSON object (contracts ext_theory_spec transport block) or a path")
     opt = _opt_cfg(cfg)
     rm_cfg = _rm_cfg(cfg)
     warnings = []
@@ -1459,8 +1684,15 @@ def run(cfg: dict, base: Path, registry, cache_dir=None, max_evaluations=2000, a
     for ds in datasets:
         labels.update(ds.labels)
     with ProviderRunner(registry, cache_dir=cache_dir, allow_outside=allow_outside, session="serve") as runner:
-        ev = Evaluator(runner, entry.provider_id, entry.version, datasets, fixed_global, max_evaluations)
+        decomposable = bool(entry.declaration.get("decomposable"))
+        ev = Evaluator(runner, entry.provider_id, entry.version, datasets, fixed_global, max_evaluations,
+                       decomposable=decomposable, transport=transport)
         model = Model(cfg, datasets, ev, domain)
+        if model.nuisances and not decomposable:
+            raise FitRefused("not-decomposable", f"provider {entry.provider_id} declares decomposable: false, so its "
+                             "predictions have no channel components for the multipliers "
+                             f"{[n['name'] for n in model.nuisances]}; a cross-section change needs a provider "
+                             "parameter or a separate run (a model alternative, R8)")
         bad = sorted(set(model.params) - set(domain))
         if bad:
             raise FitRefused("unknown-parameter", f"parameters {bad} are not in the domain of provider "
@@ -1489,7 +1721,10 @@ def run(cfg: dict, base: Path, registry, cache_dir=None, max_evaluations=2000, a
         ev.components({**start_fixed, **start_vals})
         model.bind_channels(ev.channels)
         point_keys = ev.point({**start_fixed, **start_vals})
-        gates = [_gate(ds, *ev.first_predictions[ds.name], cfg.get("gate_plan") or {}, entry, point_keys)
+        run_ids = cfg.get("run_record_keys") or []
+        if not isinstance(run_ids, list) or not all(isinstance(k, str) for k in run_ids):
+            raise FitInputError("run_record_keys must be a list of parameter_point keys")
+        gates = [_gate(ds, *ev.first_predictions[ds.name], cfg.get("gate_plan") or {}, entry, point_keys, run_ids)
                  for ds in datasets]
         fits = []
         for fam in families:
@@ -1504,7 +1739,8 @@ def run(cfg: dict, base: Path, registry, cache_dir=None, max_evaluations=2000, a
                 f["profile_intervals"] = [profile_interval(model, f, w, opt) for w in todo]
         status = "ok" if all(f["status"] == "converged" for f in fits) else "failed"
         result = {"label": LABEL, "provider": {"id": entry.provider_id, "version": entry.version,
-                                               "component": entry.component, "user_supplied": entry.user_supplied},
+                                               "component": entry.component, "user_supplied": entry.user_supplied,
+                                               "decomposable": decomposable, "transport": transport},
                   "datasets": [{"name": ds.name, "observable": ds.observable, "axis": ds.axis, "bins": len(ds.y),
                                 "bin_semantics": ds.bin_semantics, "covariance": ds.cov_info} for ds in datasets],
                   "gate": gates, "channels": ev.channels, "families_not_expressible": not_expressible,
@@ -1546,7 +1782,11 @@ def run(cfg: dict, base: Path, registry, cache_dir=None, max_evaluations=2000, a
             fcfg = {"n": _int(ft.get("n", 200), "family_toys.n", 20, 100000),
                     "seed": _int(ft.get("seed", 1), "family_toys.seed", 0, 2 ** 31),
                     "alpha": _num(ft.get("alpha", 0.05), "family_toys.alpha")}
-            result["family_calibration"] = calibrate_families(model, fits, fcfg, rm_cfg, opt, fixed_global)
+            try:
+                result["family_calibration"] = calibrate_families(model, fits, fcfg, rm_cfg, opt, fixed_global)
+            except FitRefused as exc:   # the fits stay reported; the calibration is failed with its reason
+                result["family_calibration"] = {"status": "failed", "reason": exc.reason, "detail": exc.detail,
+                                                "alpha": fcfg["alpha"], "n_toys": fcfg["n"], "seed": fcfg["seed"]}
             if result["family_calibration"].get("status") != "ok":
                 status = "failed"
         result["families"] = {"declared": [f["name"] for f in families] + [f["family"] for f in not_expressible],
@@ -1582,7 +1822,8 @@ def run(cfg: dict, base: Path, registry, cache_dir=None, max_evaluations=2000, a
                 labels.add("unvalidated")
         labels.update(ev.labels)
         result["provider_evaluations"] = dict(runner.stats, points_sent=ev.points_sent,
-                                              max_evaluations=max_evaluations)
+                                              max_evaluations=max_evaluations,
+                                              **evaluation_records(ev.records, cfg.get("computational_runs"), base))
     result["status"] = status
     if status == "failed":
         reasons = [f.get("reason") for f in fits if f.get("reason")]
@@ -1597,6 +1838,40 @@ def run(cfg: dict, base: Path, registry, cache_dir=None, max_evaluations=2000, a
     if out_dir is not None:
         write_outputs(result, cfg, base, out_dir, sorted(labels), cfg_ref)
     return result
+
+
+def evaluation_records(records, runs_ref, base: Path) -> dict:
+    """The provider's evaluation record of every result the fit used (one per point and dataset, cache hits included,
+    since a cached result keeps the record of the run that made it) and, when the configuration names the folder that
+    holds the provider's computational-run artifacts (computational_runs), each reference resolved there with the
+    tools and versions those artifacts name."""
+    out = {"records": records,
+           "records_with_computational_run": sum(1 for r in records if r.get("computational_run_ref"))}
+    if runs_ref is None:
+        return out
+    folder = Path(runs_ref) if Path(runs_ref).is_absolute() else base / runs_ref
+    if not folder.is_dir():
+        raise FitInputError(f"computational_runs: {folder} is not a folder")
+    wanted = {r["computational_run_ref"] for r in records if r.get("computational_run_ref")}
+    found: dict = {}
+    for path in folder.rglob("*.computational-run.json"):
+        try:
+            doc = json.loads(path.read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        if isinstance(doc, dict) and doc.get("artifact_id") in wanted and doc.get("artifact_type") == "computational-run":
+            found[doc["artifact_id"]] = doc
+    tools: dict = {}
+    for r in records:
+        doc = found.get(r.get("computational_run_ref"))
+        r["computational_run_resolved"] = doc is not None
+        for t in ((doc or {}).get("extension") or {}).get("tools") or []:
+            if isinstance(t, dict):
+                tools[(t.get("name"), t.get("version"))] = {"name": t.get("name"), "version": t.get("version")}
+    out["computational_runs"] = {"resolved": sum(1 for r in records if r["computational_run_resolved"]),
+                                 "unresolved_refs": sorted(wanted - set(found)),
+                                 "tools": sorted(tools.values(), key=lambda t: (str(t["name"]), str(t["version"])))}
+    return out
 
 
 def covariance_alternatives(model, families, alt, opt, fixed_global):
