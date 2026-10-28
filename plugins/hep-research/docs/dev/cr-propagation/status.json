@@ -2,7 +2,7 @@
  "schema": "crprop-status/1",
  "writer": "orchestrator only (r4 4)",
  "cycle": 4,
- "updated": "2026-10-28",
+ "updated": "2026-10-29",
  "integration_branch": "worktree-crprop-integration",
  "integration_base": "8fcbb826",
  "crprop_out": "$HOME/hep-work/crprop-out",
@@ -784,6 +784,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "D3 rework round 1 merged (310bb517); subprocess-timeout test passes"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "maintainer 2026-10-29: pause cancelled; continue to RC after F1 and C2UF (RC: rebase onto main, full checks, campaign report, PR draft; no push, no PR, main untouched until H1)"
   }
  ],
  "env": {
