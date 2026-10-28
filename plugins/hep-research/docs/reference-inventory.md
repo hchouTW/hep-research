@@ -305,7 +305,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `amplitudes-and-widths.md` | hep-theory | 8.3 | yes | 3 | - | 83ae4f6b 2026-10-13 |
 | `astroparticle-essentials.md` | hep-theory | 4.6 | yes | 4 | - | 4cedacd8 2026-10-17 |
 | `cosmic-ray-new-physics.md` | hep-theory | 7.8 | no | 4 | - | e70b1a84 2026-10-23 |
-| `cosmic-ray-phenomenology.md` | hep-theory | 24.6 | yes | 8 | - | 089af7f8 2026-10-26 |
+| `cosmic-ray-phenomenology.md` | hep-theory | 24.6 | yes | 8 | - | 8eb2efa3 2026-10-28 |
 | `cosmic-ray-propagation.md` | hep-theory | 21.1 | yes | 23 | hep-detector | 930ba0b2 2026-10-23 |
 | `dark-matter-phenomenology.md` | hep-theory | 5.1 | yes | 7 | - | 98460703 2026-10-17 |
 | `dis-kinematics.md` | hep-theory | 6.1 | yes | 6 | - | f046cc69 2026-10-23 |
