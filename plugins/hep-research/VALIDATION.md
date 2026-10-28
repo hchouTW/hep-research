@@ -7715,3 +7715,74 @@ run; the translated case stops at the missing data directory, exit 3). Rebase: C
 integration blocks first and K3's after; `docs/reference-inventory.*` regenerated; the phenomenology page is 24573 B.
 The adapter version is not bumped (the orchestrator sets versions at release); the CHANGELOG entry names the
 behaviour change of the dragon2 provider.
+
+## CRPROP-K1 — 2026-10-29 (environment E2)
+
+Work package K1 of the follow-up wave 7 (decision B1.1, release 0.44.0): a noise-aware convergence rule for provider
+fits in `propagation_fit.py` (K1-1), and F1's BIG, SLIM and QUAINT-Vc0 re-judged under it (K1-2).
+
+**Environment field (r3 §0.3, base exception D10).** E2 (macOS arm64), Python 3.13.2 (miniconda; NumPy, SciPy), USINE
+V3.5 (commit fb53006d) through HEP_USINE_BIN, HEP_USINE_DATA and USINE; runs under HEP_USINE_RUN_DIR =
+`$CRPROP_OUT/k1/runs`, provider cache `$CRPROP_OUT/k1/repro/cache` (a copy of F1's `$CRPROP_OUT/f1/repro/cache`, F1's
+folders left untouched). `git rev-parse --show-toplevel` = `.claude/worktrees/crprop-k1`; branch `worktree-crprop-k1`;
+status clean at start; base 94ba34d1 = integration HEAD `worktree-crprop-k` (not `main`; decision D10); `main` 42f5bad1
+(release 0.43.0) is an ancestor of HEAD; K1 has no prerequisite work package (workflow.json deps empty; requires
+env-usine, present).
+
+**Rule, fixed before any re-judging fit (R9; this paragraph is committed before the first K1 USINE run).** Opt-in:
+a fit uses it only when its configuration declares `optimizer.noise`, either `{"mode": "measure", "max_evaluations": B}`
+or `{"mode": "declared", "sigma_m2lnl": s}`. Without it nothing changes: closed-form and emulator fits give the 0.43.0
+numbers and verdicts (checked on `examples/propagation-fit` and the hep_statistics tests).
+
+1. Noise floor sigma_noise (standard deviation of one evaluation of -2 ln L, the fit's chi2 with priors, at the best
+   point t_hat). Method: polynomial residuals over a small stencil. For each judged coordinate i (interior, not held as
+   exactly flat, stencil inside the domain), -ln L is evaluated at t_hat + j s_i e_i, j = -2..2, with
+   s_i = 0.02 / sqrt(F_ii) (F = J^T J of the least-squares Jacobian, priors included; 1/sqrt(F_ii) is the conditional
+   sigma), and a quadratic in j is fitted by least squares. sigma_f^2 = sum_i RSS_i / (2 m) (2 residual degrees of
+   freedom per coordinate, m coordinates), sigma_noise = 2 sigma_f. Budget: 4 new evaluations per coordinate,
+   m = min(judged coordinates, floor(B / 4)); B = 40 per fit by default (F1: 32 for BIG, 28 for SLIM and QUAINT-Vc0).
+   Justification: USINE is deterministic, so repeats measure nothing; over +-0.04 conditional sigma the smooth part of
+   -ln L is a quadratic to within |f'''| (0.04 sigma)^3 / 6, about 1e-5 for |f'''| sigma^3 <= 1, far below the
+   expected 2.5e-4 to 1.5e-3, so the quadratic absorbs value, slope and curvature and the residual scatter is the
+   non-smooth part. A stencil step of 0.02 conditional sigma moves the predictions by about 1e-4 relative, about 100
+   units of the 6th printed digit, so the rounding errors at neighbouring points are uncorrelated (F1 measured -2 ln L
+   jumps of 5e-4 for a 5e-5 sigma change of delta). For uncorrelated noise E[RSS_i] = 2 sigma_f^2 exactly (linear
+   model); a noise component smooth on the stencil scale is partly absorbed, so the estimate errs low, i.e. strict.
+   With 14 to 16 degrees of freedom its relative standard error is about 19%.
+2. Difference steps, the h ~ (sigma_noise / |f''|)^(1/2) form: h_i = a / sqrt(F_ii) (f''_i = F_ii) with one factor
+   a = clip(2 sqrt(sigma_f V), 0.1, 1), V = sum_i F_ii (F^-1)_ii over the judged coordinates (sum of the variance
+   inflation factors; a = 1 if that block of F is singular), rounded to 3 significant digits and at most half the
+   distance to a domain bound. Derivation: the verdict's central-difference gradient has noise variance
+   sigma_f^2 / (2 h_i^2) per coordinate, so the expected noise contribution to EDM = g^T H^-1 g / 2 is
+   sigma_f^2 V / (4 a^2); the uncapped a makes it sigma_f / 16. The noise error falls as 1/a^2 while the truncation
+   error of the differences grows as a^2; the cap a <= 1 (one conditional sigma, where -ln L rises by 0.5 along the
+   coordinate) bounds the truncation: scaling F1's measured parabola residuals (+-0.11 over +-5.2 conditional sigma for
+   SLIM's delta) as a^3 gives a gradient bias whose EDM contribution is about 1e-4 at a = 1, the same order as the
+   noise term there (BIG: sigma_f^2 V / 4, about 2.5e-5). These steps are used for the verdict's gradient and Hessian,
+   the Newton polish, the reported Fisher matrix and the least-squares Jacobian of any later restart attempt.
+3. Acceptance: EDM <= max(1e-5, k sigma_noise) with **k = 0.5**, i.e. EDM <= max(1e-5, sigma_f): the EDM may not exceed
+   the noise of one -ln L evaluation. The other conditions are unchanged (finite value, positive-definite Hessian,
+   boundary_kkt at a bound). Justification: a minimum of a function with noise sigma_f cannot be located better than
+   where -ln L differs by about sigma_f; at that threshold the accepted point lies within sqrt(2 sigma_f) marginal sigma
+   of the minimum (0.055 sigma for the largest F1 floor, 0.003 in -2 ln L), small against the D9 one-sigma windows. At
+   a true minimum the noise part of EDM has mean at most sigma_f / 16 by step 2, so a false failure needs a 16-fold
+   fluctuation (P(chi2_1 > 16) = 6e-5 for one dominant direction; 0.2% if sigma_noise is estimated 2 standard errors
+   low). The base 1e-5 is not loosened: it still applies whenever k sigma_noise is below it.
+4. The result records `noise` (mode, sigma_m2lnl, method, stencil, coordinates, degrees of freedom, evaluations, budget,
+   step factor a, V, steps) and the verdict's `edm_threshold`.
+
+Also fixed (no criterion change): with polish, a polished point with a higher -ln L than t_hat is discarded and t_hat
+is judged again, so the verdict always describes the returned point; an unconverged fit is reported with reason
+`not-converged` (or `restart-cap` only when restarts were allowed and used up) and no statistical-result is written
+for a run without a converged fit, instead of exiting with "artifact-invalid".
+
+**Re-judging plan for F1 (declared before the refits).** Each family restarts from F1's reported fit with F1's own
+configuration (start, stated steps, priors, `max_restarts` 0), so the least-squares path replays from the cached runs
+(checked: 0 USINE runs for all three) and only the noise stencil and the verdict are new. Stage 1: `optimizer.noise`
+`{"mode": "measure", "max_evaluations": 40}`, polish 0; expected about 4n + 2n^2 + 2n runs (BIG n = 8 judged
+coordinates, V_A held: 176; SLIM and QUAINT-Vc0 n = 7: 140 each). Stage 2: a family whose stage-1 verdict fails only on
+the EDM (reasons gradient_not_small, max_iterations) is refitted with `polish_steps` 1 (one damped Newton step with the
+noise-sized steps, about 2n^2 + 2n + 12 new runs), in the order SLIM, QUAINT-Vc0, BIG while the remaining budget covers
+it. K1 cap: 600 USINE runs (B1.1), at most 4 USINE processes at once. A family passes D9 when its verdict under this
+rule is converged and delta and K10 lie in the CRPROP-F1 windows (unchanged); a family that still fails is attributed
+with its numbers (EDM against the threshold, Hessian eigenvalues, noise). D9 and the 1e-5 base are not loosened.
