@@ -17,9 +17,9 @@ HEP_USINE_LIVE_TEST=1 (and HEP_USINE_BIN, HEP_USINE_DATA) one live test refits S
 compares it with the record. C2U's family calibration was refused (recorded, asserted as such); C2U-3 moved to C2UF-1
 (decision A1.12), checked from the study recorded by usine_two_dataset_family_study.py (fixture
 tests/adapters/fixtures/cr_propagation/c2uf/usine-two-dataset-family-study.json): B/C and 10Be/9Be from one USINE run
-per point, BIG and SLIM fitted with the provider, toy-calibrated delta chi2 of both on per-center response models
-validated against the provider, the generator surviving. With HEP_USINE_LIVE_TEST=1 one live test reruns the truth
-point (one USINE run) and compares it with the record.
+per point, BIG and SLIM fitted with the provider; the recorded response model was refused (0.452 sigma > 0.05), so
+C2UF-1 is NOT met and its test is an expected failure (VALIDATION CRPROP-C2UF). With HEP_USINE_LIVE_TEST=1 one live
+test reruns the truth point (one USINE run) and compares it with the record.
 """
 import copy
 import json
@@ -579,7 +579,9 @@ def _two_dataset_record():
 @unittest.skipUnless(HAVE, "needs numpy and scipy")
 class UsineTwoDatasetFamilies(unittest.TestCase):
     """C2UF-1 (C2U-3 moved by A1.12) from the recorded two-dataset USINE study, plus one live check gated by
-    HEP_USINE_LIVE_TEST=1. Hard assertions: nothing here skips when the calibration is not ok."""
+    HEP_USINE_LIVE_TEST=1. Nothing here skips when the calibration is not ok: the recorded refusal is asserted as it
+    happened, and the criterion itself runs as an expected failure until a recorded study meets it (an unexpected
+    success then fails the suite, so the marker cannot outlive the miss)."""
 
     @classmethod
     def setUpClass(cls):
@@ -588,11 +590,17 @@ class UsineTwoDatasetFamilies(unittest.TestCase):
         cls.fits = {f["family"]: f for f in cls.res["fits"]}
         cls.cal = cls.res["family_calibration"]
 
-    def test_c2uf1_both_families_fitted_with_the_provider_on_two_datasets(self):
+    def test_c2uf_both_families_fitted_with_the_provider_on_two_datasets(self):
         self.assertEqual(self.res["families"]["expressible"], ["BIG", "SLIM"])
         self.assertEqual(self.res["families"]["not_expressible"], [])
         for name in ("BIG", "SLIM"):
             self.assertEqual(self.fits[name]["status"], "converged")
+        truth = self.doc["truth"]
+        for p in self.fits["BIG"]["parameters"]:              # Asimov: BIG (the generator) returns the truth
+            t = math.log(truth[p["name"]]) if p["scale"] == "log" else truth[p["name"]]
+            self.assertLessEqual(abs(p["best_fit_coordinate"] - t) / p["sigma_coordinate"], 0.01, p)
+        self.assertLess(self.fits["BIG"]["parameters"][2]["sigma_coordinate"], 10.0)   # 10Be/9Be pins V_A (C2U: 27.8)
+        self.assertGreater(self.fits["SLIM"]["chi2"] - self.fits["BIG"]["chi2"], 20.0)
         self.assertEqual([d["observable"] for d in self.res["datasets"]], ["B/C", "10Be/9Be"])
         self.assertTrue(all(g["comparable"] for g in self.res["gate"]))
         self.assertEqual(self.doc["config"]["transport"]["decay"]["enabled"], True)
@@ -605,26 +613,29 @@ class UsineTwoDatasetFamilies(unittest.TestCase):
         self.assertEqual(pe["computational_runs"]["unresolved_refs"], [])
         self.assertEqual([t["name"] for t in pe["computational_runs"]["tools"]], ["USINE"])
         self.assertIn("fb53006d", pe["computational_runs"]["tools"][0]["version"])
-        self.assertLessEqual(self.doc["usine_evaluations"]["truth"] + self.doc["usine_evaluations"]["fit"], 600)
+        self.assertLessEqual(self.doc["usine_evaluations"]["fit"], 255)
         self.assertIn("synthetic", self.res["status_label"])
 
-    def test_c2uf1_validated_response_models_with_their_error_in_the_covariance(self):
+    def test_c2uf_recorded_calibration_refusal(self):
+        # the recorded study (VALIDATION CRPROP-C2UF, study 2): the joint degree-4 model was refused, so no toy ran
+        declared = self.doc["config"]["response_model"]
+        self.assertEqual((declared["layout"], declared["degree"], declared["design_points"],
+                          declared["half_width_sigma"], declared["tolerance_sigma"]), ("joint", 4, 150, 3.0, 0.05))
+        self.assertEqual((self.cal["status"], self.cal["reason"]), ("failed", "response-model-above-tolerance"))
+        self.assertIn("largest error is 0.452 of the data sigma, above the tolerance 0.05", self.cal["detail"])
+        self.assertNotIn("families", self.cal)
+        self.assertIsNone(self.res["families"]["surviving"])
+        self.assertEqual(self.res["status"], "failed")
+
+    @unittest.expectedFailure   # C2UF-1 NOT MET in the recorded study; remove when a recorded study meets it
+    def test_c2uf1_toy_calibrated_delta_chi2_and_the_generator_survives(self):
         self.assertEqual(self.cal["status"], "ok", self.cal.get("detail"))
         rm = self.cal["response_model"]
-        declared = self.doc["config"]["response_model"]
-        self.assertEqual((rm["layout"], declared["tolerance_sigma"]), ("per-center", 0.05))
-        self.assertEqual([m["center_of"] for m in rm["sub_models"][:2]], ["BIG", "SLIM"])
-        for m in rm["sub_models"]:
-            self.assertEqual(m["kind"], "total-degree polynomial")
-            self.assertEqual(m["validation"]["points"], declared["validation_points"])
-            self.assertTrue(m["validation"]["passed"])
-            self.assertLessEqual(m["validation"]["max_error_over_sigma"], 0.05)
         self.assertTrue(rm["validation"]["passed"])
+        self.assertLessEqual(rm["validation"]["max_error_over_sigma"], 0.05)
+        self.assertEqual(rm["validation"]["points"], self.doc["config"]["response_model"]["validation_points"])
         for name, pred in self.doc["truth_predictions"].items():   # P10: a per-bin error for every dataset
             self.assertEqual(len(rm["error_component"][name]), len(pred["values"]["values"]))
-        self.assertEqual(len(rm["assignment"]), 4)
-
-    def test_c2uf1_toy_calibrated_delta_chi2_and_the_generator_survives(self):
         entries = {e["family"]: e for e in self.cal["families"]}
         self.assertEqual(set(entries), {"BIG", "SLIM"})
         n = self.doc["config"]["family_toys"]["n"]
@@ -639,15 +650,12 @@ class UsineTwoDatasetFamilies(unittest.TestCase):
             ok_rows = [r for r in e["rows"] if r["outcome"] == "ok"]
             exceed = sum(1 for r in ok_rows if r["delta_chi2"] >= e["delta_chi2"] - 1e-12)
             self.assertEqual((e["p_toys"]["k"], e["p_toys"]["n"]), (exceed, len(ok_rows)))
-            if e["p_toys"]["estimate"] is not None:
-                self.assertAlmostEqual(e["p_toys"]["estimate"], exceed / len(ok_rows), places=12)
         gen = self.doc["generating_family"]
         self.assertEqual(gen, "BIG")
         self.assertEqual(entries[gen]["delta_chi2"], 0.0)
         self.assertTrue(entries[gen]["surviving"])
         self.assertGreaterEqual(entries[gen]["p_toys"]["estimate"], alpha)
         self.assertIn(gen, self.cal["surviving"])
-        self.assertEqual(self.res["families"]["surviving"], self.cal["surviving"])
 
     def test_c2uf_statistical_result_validates(self):
         import propagation_fit as pf

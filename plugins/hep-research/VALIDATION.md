@@ -7083,3 +7083,32 @@ run capped at 255 USINE evaluations (340 spent so far). Expected toy failures at
 one-sided edges, about 1 per 200 toys) stay below the 2% limit. Offline, degree 4 in this box reproduces every cached
 run within 1e-4 sigma (230 runs, most near the two fits, so not a validation). If this model is refused, the cap
 leaves no further attempt and C2UF-1 is reported not met.
+
+### Results (study 2, recorded in `tests/adapters/fixtures/cr_propagation/c2uf/usine-two-dataset-family-study.json`)
+
+| Item | Result | Evidence |
+|---|---|---|
+| Fits (both datasets, one USINE run per point) | BIG and SLIM equal to study 1 (every fit evaluation answered from the provider cache): BIG returns the truth (pulls < 1e-4 sigma), sigma(V_A) 8.19 km/s (C2U, B/C alone: 27.8); SLIM chi2 23.93 (dof 25), delta chi2 23.93; every evaluation record names both datasets and a computational-run reference that resolves, tool USINE V3.5 fb53006d | `test_c2uf_both_families_fitted_with_the_provider_on_two_datasets` |
+| Response model (joint, k = 3, degree 4, 150 design points) | REFUSED: largest error 0.452 of the data sigma at 20 validation points (tolerance 0.05, not loosened); no toy ran. Offline from the 170 runs: degree 3 misses by 0.58, degree 4 by 0.55, degree 5 (126 terms on 150 points) by 0.44 at the same validation point (ln D0 65.71, delta 0.507, V_A 1.9, V_c 2.86, the high-D0, low-V_A corner), while in-sample misses fall to 0.03: the global polynomial spends its terms on the strongly curved low-D0, high-V_A region and misses elsewhere. A 9-point V_A slice 0-20 km/s at that point (9 runs, `probe/va-slice-low.json`) is smooth and continuous at V_A = 0 (no switch artifact) | `test_c2uf_recorded_calibration_refusal` |
+| C2UF-1 | NOT MET. BIG and SLIM are fitted with the provider and listed with their delta chi2 (0 and 23.93), but not toy-calibrated: no response model reached 0.05 sigma within the 600-run cap (study 1: 0.883 at degree 3, per-center; study 2: 0.452 at degree 4, joint, k = 3). The criterion runs from the record as an expected failure (`test_c2uf1_toy_calibrated_delta_chi2_and_the_generator_survives`, `@unittest.expectedFailure`; an unexpected success fails the suite) | test module |
+| Live | the truth point rerun with USINE (fresh cache, 1 run) equals the recorded predictions of both datasets within 1e-6 relative; tool USINE V3.5 fb53006d | `test_live_truth_rerun_matches_the_record`, `$CRPROP_OUT/c2uf/acceptance/live-truth-rerun.txt` |
+
+USINE runs (A1.8 tally, `$CRPROP_OUT/c2uf/tally.json`, counted as runner `points_sent`): probes 33 + 9 + 9, study 1 298
+(truth 1, fits 197, response model 100), study 2 170 (response model; fits from the cache), live test 1: 520 of 600.
+One USINE process at a time throughout.
+
+Diagnosis and options for the maintainer (not done here: each needs more runs than the 80 left, or a decision):
+- Cause: any box that holds BIG (V_A 70) and SLIM (V_A 0), plus BIG's fits to SLIM's toys (V_A up to about 60 km/s at
+  three sigma, since V_A enters only as V_A^2 near 0), spans V_A from 0 to about 95 km/s at k = 3 and reaches the
+  low-D0, high-V_A corner where B/C responds strongly to reacceleration (V_A^2 / K); a global total-degree polynomial
+  in (ln D0, delta, V_A, V_c) does not reach 0.05 sigma there at degree 3-5 with the affordable designs.
+- Options: (a) a local or adaptive response model (piecewise boxes covering the toy spread, or a sparse-grid /
+  Gaussian-process emulator such as the E2 route) validated the same way; (b) coordinates adapted to reacceleration
+  (V_A^2 / K at low rigidity); (c) a lower BIG truth for V_A, shrinking the box but weakening the SLIM test;
+  (d) a larger budget: a degree-5 joint model needs at least 252 design points plus 20 validation points per attempt,
+  with no guarantee (degree 5 missed by 0.44 offline).
+- Findings for other work packages: the USINE provider's default transport has decay off, so its 10Be/9Be is the
+  production ratio (flat, insensitive to D0); a 10Be/9Be dataset needs `decay.enabled` true and bins below 0.3 GeV/n
+  to constrain D0 (and through B/C, V_A) at fixed L.
+
+Not done in C2UF: the toy-calibrated family comparison (C2UF-1, above); modulation and real data (F1).

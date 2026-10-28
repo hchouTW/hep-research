@@ -189,6 +189,11 @@ Software checks establish contract consistency only, not physical validity.
   first-order zone conversion) and losses on Galprop gas (17.7%, gas geometry), both attributed; D3-2 (level 2, each
   code's defaults) passes with every difference registered as a model alternative (residual 0.4%) (VALIDATION
   CRPROP-D3).
+- crprop c2uf: propagation_fit.py sends every dataset's observable in one provider request per point
+  (`provider_requests` "per-point", one USINE run per point) and adds response-model layouts "joint" and
+  "per-center" for the family calibration; the two-dataset USINE study (B/C and 10Be/9Be with decay on) and its
+  record under tests/adapters/fixtures/cr_propagation/c2uf/. C2UF-1 is NOT met: no response model reached the
+  0.05 sigma tolerance within the 600-run cap (VALIDATION CRPROP-C2UF); its test runs as an expected failure.
 
 ## 0.42.0 (2026-10-26)
 
