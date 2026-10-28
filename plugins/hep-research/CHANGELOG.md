@@ -58,6 +58,7 @@ Software checks establish contract consistency only, not physical validity.
   checks), ILLUSTRATIVE isotopic set `models/xs-illustrative-decay.json`, tests `tests/test_convection_decay.py`;
   the profile's tests directory is now a package so it is discoverable from the plugin root. Reacceleration stays
   excluded. Profile version unchanged (0.1.0): the minor bump needs `profiles/registry.json` and the example pins.
+- crprop p0: `workflow_check.py diff` lists changed paths with `--no-renames` so a rename cannot hide its source path; regression test added in `docs/dev/cr-propagation/`
 
 ## 0.42.0 (2026-10-26)
 
