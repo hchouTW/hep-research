@@ -406,6 +406,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "C1 round-1 verifier PASS; merge waits for A2"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A1.5 (supersedes A1.4): ALL-3 run once per wave by the orchestrator on integration; agents run static + impacted only; briefs updated"
   }
  ],
  "env": {
