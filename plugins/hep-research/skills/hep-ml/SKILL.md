@@ -53,7 +53,7 @@ description: "Use when the deliverable is a machine-learning model or study for 
 | Grouped splits and leakage checks (composite keys, stratified by class or period) | `make_grouped_splits.py`, `check_split_integrity.py` |
 | Train, calibrate, infer | `assets/train_classifier.py`, `assets/calibration.py`, `assets/inference.py` |
 | Record the model for inference | `write_ml_artifact.py` |
-| Surrogate training domain | `check_surrogate_domain.py` |
+| Surrogate (Gaussian-process emulator) and its training domain | `train_emulator.py`, `check_surrogate_domain.py` |
 | PyTorch engineering (training, data, debugging, scaling, export) | [deep-learning-guide.md](references/deep-learning-guide.md), which routes to the rest |
 
 Pipeline (scripts in `<plugin root>/skills/hep-ml/scripts/`, assets in `assets/`; read `--help` first): `make_grouped_splits.py` → `check_split_integrity.py` → `assets/train_classifier.py --split-manifest` (refuses a leaky split; signed weights) → `assets/calibration.py` (fit on validation, evaluate on test) → `assets/inference.py` (flags out-of-domain inputs) → `write_ml_artifact.py` (validated `ml-artifact`). Worked example: `<plugin root>/examples/ml-classifier-to-inference/`. Also `assets/hep_metrics.py`, `assets/hep_losses.py`, `assets/set_classifier.py` (Deep Sets, ParT-lite), `check_surrogate_domain.py` (whitened Mahalanobis and kNN, calibrated threshold), debugging and budget scripts. Folder guide: [README.md](README.md).

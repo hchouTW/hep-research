@@ -7,12 +7,14 @@ without a calibration, a calibration evaluated on its fit sample, a training dom
 features. The artifact says what was checked; it does not make the model valid for an analysis.
 
 What it does: copies task, labels, features, units, grouping key, training domain, preprocessing, weights, model
-hash, environment and metrics from the run summary into the extension; takes the split-overlap result from
---split-report or else from the report file the summary's split_check names (the JSON of check_split_integrity.py
---json: passed -> pass, failed -> fail, incomplete -> not-run). The verdict is recomputed from the report body
-(overlaps, duplicates, group leakage, temporal violations, coverage); a "passed" status the body contradicts is
-refused. test_groups_disjoint comes from its group leakage when the group metadata was complete, with the test split
-named by the manifest's "roles": {"test": NAME} (default "test", case-insensitive). A summary split_check with no
+hash, environment, metrics and the task's validation block (regression_validation, extrapolation_policy,
+generative_validation, sbi_validation, anomaly_validation, reweighting_validation, contracts 2.8.0) from the run summary
+into the extension; takes the split-overlap result from --split-report or else from the report file the summary's
+split_check names (the JSON of check_split_integrity.py --json: passed -> pass, failed -> fail, incomplete ->
+not-run). The verdict is recomputed from the report body (overlaps, duplicates, group leakage, temporal violations,
+coverage); a "passed" status the body contradicts is refused. test_groups_disjoint comes from its group leakage when
+the group metadata was complete, with the test split named by the manifest's "roles": {"test": NAME} (default "test",
+case-insensitive). A summary split_check with no
 report behind it is recorded as not-run, never as pass; adds the calibration, domain-shift check and downstream
 validations when given; lists every file it read with its sha256 in extension.source_files (tool outputs, not
 artifacts, so not inputs[]) and the checkpoint (or train_bdt.py's per-fold "models") and score files as outputs;
@@ -177,7 +179,9 @@ def build(a: argparse.Namespace) -> dict:
     ext: dict = {"task": summary["task"], "labels": summary["labels"], "features": summary["features"],
                  "splits": splits, "training_domain": summary["training_domain"],
                  "preprocessing": summary.get("preprocessing") or [], "model_hash": summary["model_hash"]}
-    for key in ("units", "weights", "environment", "metrics", "regression_validation", "notes"):
+    for key in ("units", "weights", "environment", "metrics", "regression_validation", "notes", "parameters",
+                "supervision", "extrapolation_policy", "generative_validation", "sbi_validation", "anomaly_validation",
+                "reweighting_validation"):
         if summary.get(key) is not None:
             ext[key] = summary[key]
     semantics = a.output_semantics or summary.get("output_semantics")
