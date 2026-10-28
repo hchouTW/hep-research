@@ -9,12 +9,12 @@
  "capabilities": {
   "repo": "present",
   "net-github": "present",
-  "net-sources": "absent",
+  "net-sources": "partial",
   "net-data": "partial",
   "pkg-install": "present",
   "batch": "partial",
   "env-dragon2": "present",
-  "env-usine": "absent",
+  "env-usine": "present",
   "env-galprop": "absent"
  },
  "work_packages": {
@@ -34,19 +34,18 @@
    ]
   },
   "ENV": {
-   "state": "dispatched",
+   "state": "verifying",
    "dispatches": 2,
    "rework_rounds": 0,
    "branch": "worktree-crprop-env",
    "base": "71ae4a07",
-   "head": null,
+   "head": "b2dd78c9",
    "merge_commit": "7d5c6934",
-   "worker_report": "DONE: env-dragon2 present (cd588707 verified, live rerun ok); env-usine/env-galprop absent (no tarballs); net-data partial (CRDB timeout); source-host probes not run (outside D3)",
+   "worker_report": "dispatch 2 DONE: USINE V3.5 (fb53006d, GPL-2.0) built with ROOT 6.38.04 (cmake policy flag, root-config shim, C++17; ROOT_INCLUDE_PATH unset for build); smoke run ok; tUSINE 42/46 (4 = timezone/labels/last digits); env-usine present; no USINE source/inputs/output committed",
    "verifier_report": "PASS (2026-10-27)",
    "missing_capabilities": [],
    "notes": [
-    "dispatch 1 merged as 7d5c6934; post-merge static + acceptance passed 2026-10-28",
-    "dispatch 2 (2026-10-28): maintainer approved the USINE clone/build in session (A1.1); worktree recreated from 71ae4a07; 4 workers briefly (A3 only finishing its check run)"
+    "dispatch 2 verifier dispatched 2026-10-28 (Sonnet)"
    ]
   },
   "A1": {
@@ -138,19 +137,19 @@
    "notes": []
   },
   "B1": {
-   "state": "waiting-capability",
-   "dispatches": 0,
+   "state": "dispatched",
+   "dispatches": 1,
    "rework_rounds": 0,
-   "branch": null,
+   "branch": "worktree-crprop-b1",
    "base": null,
    "head": null,
    "merge_commit": null,
    "worker_report": null,
    "verifier_report": null,
-   "missing_capabilities": [
-    "env-usine"
-   ],
-   "notes": []
+   "missing_capabilities": [],
+   "notes": [
+    "dispatched 2026-10-28 after env-usine present (ENV dispatch 2 in verification)"
+   ]
   },
   "D1": {
    "state": "dispatched",
@@ -468,11 +467,19 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "P0 merged (21e18305), escalation 4 closed; A3 rebased (5ce9495d), verifier dispatched; D1 PARTIAL: escalations 5 and 6, verification held until B1"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "env-usine present (ENV dispatch 2 DONE, b2dd78c9); ENV verifier and B1 worker dispatched"
   }
  ],
  "env": {
   "HEP_DRAGON2_BIN": "$HOME/hep-work/dragon2/install/bin/DRAGON",
-  "HEP_DRAGON2_DATA": "$HOME/hep-work/dragon2/src/data"
+  "HEP_DRAGON2_DATA": "$HOME/hep-work/dragon2/src/data",
+  "HEP_USINE_BIN": "$HOME/hep-work/crprop-build/usine/bin/usine",
+  "HEP_USINE_DATA": "$HOME/hep-work/crprop-build/usine/inputs",
+  "USINE": "$HOME/hep-work/crprop-build/usine"
  },
  "stopped": null
 }
