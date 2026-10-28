@@ -7069,7 +7069,7 @@ by up to 0.47 sigma in-sample in that box, degree 4 by 0.11. A 9-point V_c slice
 is smooth (degree 3 within 1e-4 sigma), so the misses come from V_A at low D0, as in the corner slices above.
 
 Two further findings make the declared design unworkable: (1) the declared contingency (degree 4, 150 design points
-for both models) needs about 320 runs, more than the 258 left of the 600 cap; (2) under SLIM's null, B/C depends on
+for both models) needs about 320 runs, more than the 260 left of the 600 cap; (2) under SLIM's null, B/C depends on
 V_A only through V_A^2, so BIG's fits to SLIM's toys spread to V_A of about 34 km/s at one sigma and 59 at three
 (from sigma(V_A) 8.2 at 70 km/s: one sigma in V_A^2 is 2 x 70 x 8.2 = 1148 km^2/s^2), far beyond the per-center box
 around SLIM (V_A 0-41): those toys would leave the box and fail. One box holding both best fits is needed after all.
@@ -7079,7 +7079,7 @@ layout "joint" (new: one polynomial model on the box spanning both best fits +- 
 family, so the fit of each family to the other's null has its margin without a rebuild; a margin short by up to 2% of
 the half-width holds), k = 3 (half_width_sigma; box ln D0 65.19-65.77, delta 0.413-0.521, V_A 0-94.6 km/s, V_c
 0-7.1 km/s), total degree 4 (70 terms) with 150 Sobol design points; the fits answered from the provider cache; the
-run capped at 255 USINE evaluations (342 spent so far). Expected toy failures at k = 3 (a fit beyond 3 sigma on four
+run capped at 255 USINE evaluations (340 spent so far). Expected toy failures at k = 3 (a fit beyond 3 sigma on four
 one-sided edges, about 1 per 200 toys) stay below the 2% limit. Offline, degree 4 in this box reproduces every cached
 run within 1e-4 sigma (230 runs, most near the two fits, so not a validation). If this model is refused, the cap
 leaves no further attempt and C2UF-1 is reported not met.
