@@ -215,18 +215,18 @@
    ]
   },
   "C2U": {
-   "state": "dispatched",
+   "state": "verifying",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-c2u",
    "base": null,
-   "head": null,
+   "head": "8ec0d094",
    "merge_commit": null,
-   "worker_report": null,
+   "worker_report": "PARTIAL: C2U-1 pass (pulls ~4e-5 sigma, V_c on bound with KKT + profile), C2U-2 pass (565 records resolved); C2U-3 not met (response model 2.81 sigma off: V_A weakly constrained by B/C alone); ~1372 USINE runs; fit code extended (non-decomposable, steps, polynomial RM, two-sided bin semantics); C2 advisories fixed",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "C2U-3 added (stricter, C2 verifier advisory); USINE evaluations capped at 1500 by orchestrator within D7"
+    "A1.12: C2U-3 moved to C2UF-1; Opus verifier dispatched on C2U-1/2"
    ]
   },
   "D3": {
@@ -354,6 +354,21 @@
    "missing_capabilities": [],
    "notes": [
     "wave-3 full run (a4211583): test_cosmic_ray_phenomenology_th13 fails (phrase D_pp D_xx removed from the reference page); fix as rework round 1 on worktree-crprop-a1rfix (no revert: B1X and D1 depend on A1R)"
+   ]
+  },
+  "C2UF": {
+   "state": "pending",
+   "dispatches": 0,
+   "rework_rounds": 0,
+   "branch": null,
+   "base": null,
+   "head": null,
+   "merge_commit": null,
+   "worker_report": null,
+   "verifier_report": null,
+   "missing_capabilities": [],
+   "notes": [
+    "added per A1.12; dispatch after C2U merges; USINE cap 600"
    ]
   }
  },
@@ -702,6 +717,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "wave-3 fixes merged (A1R r1, E1 r1; HEAD 63e7c1b2): Th13 and subprocess-timeout tests pass; post-merge static ok"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "C2U PARTIAL (C2U-1/2 pass, C2U-3 not met); A1.12: C2U-3 moved to new WP C2UF (C2UF-1), RC depends on C2UF; C2U verifier dispatched"
   }
  ],
  "env": {

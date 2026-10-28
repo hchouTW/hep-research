@@ -569,7 +569,37 @@
    ],
    "fallback": "waits on B1; if B1 is blocked, blocked with B1 (derived)",
    "source": "r4 6",
-   "files_source": "core-stats-guide.md 'Skill scripts' section added (derived at A3, cycle 3: test_core_stats_guide requires every hep-statistics script to be listed with its dependency markers)"
+   "files_source": "core-stats-guide.md 'Skill scripts' section added (derived at A3, cycle 3: test_core_stats_guide requires every hep-statistics script to be listed with its dependency markers)",
+   "acceptance_superseded": {
+    "C2U-3": "decisions.md A1.12: moved to WP C2UF as C2UF-1; C2U-3 kept in acceptance.json"
+   }
+  },
+  {
+   "id": "C2UF",
+   "title": "Toy-calibrated BIG vs SLIM with USINE (C2U-3 split out)",
+   "wave": 4,
+   "card": "decisions.md A1.12; r3 C2 (C2-3) with the USINE provider",
+   "deps": [
+    "C2U",
+    "B1X"
+   ],
+   "requires": [
+    "env-usine"
+   ],
+   "optional": false,
+   "critical": false,
+   "files": [
+    "skills/hep-statistics/scripts/propagation_fit.py",
+    "tests/skills/hep_statistics/**",
+    "tests/adapters/fixtures/cr_propagation/c2u/**",
+    "skills/hep-statistics/references/core-stats-guide.md",
+    "tests/adapters/fixtures/cr_propagation/c2uf/**"
+   ],
+   "acceptance": [
+    "C2UF-1"
+   ],
+   "fallback": "none: escalate before RC",
+   "source": "decisions.md A1.12 (maintainer 2026-10-28)"
   },
   {
    "id": "D3",
@@ -753,7 +783,8 @@
    "wave": 6,
    "card": "r4 10",
    "deps": [
-    "F1"
+    "F1",
+    "C2UF"
    ],
    "soft_deps": [
     "ENV",
