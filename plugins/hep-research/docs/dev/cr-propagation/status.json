@@ -426,18 +426,19 @@
    ]
   },
   "K4": {
-   "state": "dispatched",
+   "state": "verifying",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-k4",
    "base": "94ba34d1",
-   "head": null,
+   "head": "4bb5b3ba",
    "merge_commit": null,
-   "worker_report": null,
+   "worker_report": "PARTIAL: K4-1 met (--max-condition 1e10, E2 opt-out); retrained C2UF emulator holdout 0.0032 sigma, drift margin >3000, k=4 confirmation 0.0226 sigma; C2UF-1 not met on it (SLIM toys 5/37 failed, threshold 2%); model not committed, A1.21 skip kept; 40 USINE runs",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "B1.1"
+    "B1.1",
+    "B1.2: accepted on K4-1, K4-2 recorded as known issue"
    ]
   }
  },
@@ -951,6 +952,11 @@
    "cycle": 4,
    "date": "2026-10-29",
    "event": "K3 base f778b9d3"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "K4 PARTIAL (4bb5b3ba); B1.2 accepted on K4-1; Opus verifier"
   }
  ],
  "env": {
