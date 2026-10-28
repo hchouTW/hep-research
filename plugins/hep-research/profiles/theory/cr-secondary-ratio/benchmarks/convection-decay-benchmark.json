@@ -1,0 +1,34 @@
+{
+ "label": "Benchmark settings for the convection-decay closed forms of theory:cr-secondary-ratio (ILLUSTRATIVE transport values and cross sections; theory only, no experiment resource)",
+ "illustrative": true,
+ "model": "diffusion-1d-convection-decay",
+ "reference_primary": "C",
+ "parents": [
+  {"name": "C", "Z": 6, "A": 12, "observed_ratio_to_reference": 1.0},
+  {"name": "O", "Z": 8, "A": 16, "observed_ratio_to_reference": 0.9}
+ ],
+ "secondaries": [
+  {"name": "7Be", "Z": 4, "A": 7, "stable_assumption": "fully stripped 7Be has no electron to capture; its electron-capture decay is suppressed and it is propagated as stable (r3 P6)"},
+  {"name": "9Be", "Z": 4, "A": 9},
+  {"name": "10Be", "Z": 4, "A": 10, "decay": {"mode": "beta-", "daughter": "10B"}},
+  {"name": "10B", "Z": 5, "A": 10},
+  {"name": "11B", "Z": 5, "A": 11}
+ ],
+ "transport": {
+  "D0_cm2_s": 3e+28,
+  "R0_GV": 1.0,
+  "delta": 0.5,
+  "L_kpc": 4.0,
+  "h_kpc": 0.1,
+  "n_H_cm3": 1.0,
+  "V_c_kms": 10.0
+ },
+ "observables": {
+  "B/C": {"numerator": ["10B", "11B"], "denominator": ["C"]},
+  "Be/B": {"numerator": ["7Be", "9Be", "10Be"], "denominator": ["10B", "11B"]},
+  "10Be/9Be": {"numerator": ["10Be"], "denominator": ["9Be"]}
+ },
+ "cross_section_set": "models/xs-illustrative-decay.json",
+ "pure_diffusion_reference": {"config": "benchmarks/bc-benchmark.json", "secondary_nuclide": "11B"},
+ "energies_gev_per_n": [0.1, 0.3, 1.0, 3.0, 10.0, 30.0, 100.0, 1000.0]
+}

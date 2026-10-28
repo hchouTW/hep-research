@@ -50,6 +50,14 @@ Software checks establish contract consistency only, not physical validity.
   `tests/tools/test_provider_registry.py`, the profile's `tests/test_provider.py`, the `provider` check in
   `tests/adapters/test_adapter_declarations.py` and a force-field contract test; `docs/adapter-authoring.md` gains
   the field row and a provider section.
+- crprop b2: `theory:cr-secondary-ratio` gains closed forms of the 1D thin-disc model with constant convection
+  (`V_c_kms`) and radioactive decay of secondaries (rate 1/(gamma tau_0), half-lives from `core.constants`
+  NUBASE2020, 10Be -> 10B gain kept, fully stripped 7Be stable by a recorded assumption):
+  `scripts/convection_decay.py` (with a `solve_bvp` benchmark), SymPy derivation `scripts/derive_convection_decay.py`
+  recorded in `derivations/convection-decay-record.md` (`analytic-derivation`; pure-diffusion limits and dimension
+  checks), ILLUSTRATIVE isotopic set `models/xs-illustrative-decay.json`, tests `tests/test_convection_decay.py`;
+  the profile's tests directory is now a package so it is discoverable from the plugin root. Reacceleration stays
+  excluded. Profile version unchanged (0.1.0): the minor bump needs `profiles/registry.json` and the example pins.
 
 ## 0.42.0 (2026-10-26)
 

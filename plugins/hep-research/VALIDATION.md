@@ -5970,3 +5970,41 @@ user-supplied one, a subclass of a subclass, in both run orders (pass/fail as ex
 reproduction now fails the broken subclass (3 failures). (2) Advisory: the runner cache key now includes
 `theory_spec_ref`, and a request with a `theory_spec_ref` but no transport block is never cached
 (`tests.core.test_provider.CacheAndTheorySpec`).
+
+## CRPROP-B2 — 2026-10-26 (environment E2)
+
+Work package B2 of the cr-propagation r4 campaign (r3 §B2): closed forms of the 1D thin-disc model with constant
+convection V_c and with radioactive decay of secondaries (¹⁰Be, rate 1/(γτ₀), ¹⁰Be→¹⁰B gain), in
+`profiles/theory/cr-secondary-ratio/`.
+
+**Environment (r3 §0.3, base exception D10).** E2: macOS 26.5 arm64 (Darwin 25.5.0), Python 3.13.2 (miniconda,
+returned by `find_python.py`), SymPy 1.14.0, NumPy 2.4.4, SciPy 1.17.1. `git rev-parse --show-toplevel` =
+`.claude/worktrees/crprop-b2`; `git branch --show-current` = `worktree-crprop-b2`; `git status` clean at start; base
+`6a0c2ae6` = integration HEAD (decision D10, not `origin/main`); prerequisite P0: `git merge-base --is-ancestor
+6a0c2ae6 HEAD` succeeds. r3 line numbers rechecked on this base (§B2 at line 414, P6 at line 162).
+
+**Criteria and tolerances, fixed before any result (R9).**
+
+| ID | Criterion | Tolerance |
+|---|---|---|
+| B2-1 (symbolic) | SymPy: the escape term K(V_c, Γ_d) = V_c + D S coth(S L/2), S = sqrt(V_c²/D² + 4Γ_d/D), tends to 2D/L for V_c → 0 and Γ_d → 0 (Γ_d = 1/(γτ₀), τ → ∞); the convective-decay ratio tends to the existing thin-disc ratio; the ¹⁰Be→¹⁰B gain tends to 0 | exact (`sp.limit`, `sp.simplify` equal to 0) |
+| B2-1 (numerical) | at V_c = 0 and no decay the new code equals `predict.thin_disc_ratio` at every benchmark energy | relative 1e-12 |
+| B2-1 (numerical, approach) | for V_c = 1, 1e-1, …, 1e-4 km/s and τ₀ scaled by 1, 1e2, …, 1e8 the deviation from pure diffusion falls monotonically and is below 1e-4 at the smallest | monotonic; 1e-4 |
+| B2-num | closed forms (stable secondary, ¹⁰Be, ¹⁰B with decay gain) against an independent `scipy.integrate.solve_bvp` solution of the same 1D boundary-value problem | relative 1e-6 |
+| B2-cons | decay conserves number: with ¹⁰Be and ¹⁰B given the same D and inelastic cross section, N(¹⁰Be) + N(¹⁰B) at z = 0 does not depend on τ₀ | relative 1e-10 |
+| B2-2 | dimension checks recorded: [K] = velocity, [S L] = [V_c L / D] = [Γ_d t] = 1, K/(2 h n v) has the dimension of a cross section, every ratio dimensionless; unit conversions (km/s → cm/s, half-life → s, kpc → cm) checked | all pass |
+| B2-3 | `python3 -m unittest discover -s profiles/theory/cr-secondary-ratio/tests -t .` | ok |
+
+**Results (dispatch 2, 2026-10-28, on HEAD `236a374a`).** Environment E2 now macOS 27.2 arm64 (Darwin 27.2.0), same
+Python 3.13.2, SymPy 1.14.0, NumPy 2.4.4, SciPy 1.17.1; §0.3 checks repeated (toplevel, branch, clean status, base
+`6a0c2ae6` ancestor of HEAD). The closed forms were re-derived by hand against r3 P1/P6 and the record (escape term,
+the 2 V_c N(0) sweep term of the conservative form, the daughter's particular and homogeneous parts, Γ = 1/(γτ₀) with
+τ₀ = t½/ln 2 from `half_life_seconds`, NUBASE year). All criteria above pass within tolerance: B2-1 symbolic (SymPy
+limits, both orders; 39 checks in `derivations/convection-decay-derivation.json`, rerun output identical to the stored
+record); B2-1 numerical, max relative deviation from `predict.thin_disc_ratio` 2.2e-16 (tolerance 1e-12); approach
+0.26, 4.1e-3, 7.2e-5, 4.0e-6, 4.0e-7 (monotonic; last < 1e-4); B2-num, closed forms vs `solve_bvp` 9.8e-15
+(tolerance 1e-6); B2-cons spread < 1e-15 (tolerance 1e-10); B2-2 13 dimension checks and the unit-conversion check
+pass; B2-3 58 tests ok (from the plugin root and from `tests/`). Checks: `run_all_checks.py` full (33/33 pass) on
+`236a374a`; static part, naming, layering, packaging, wiring and `workflow_check.py` diff/gaps/acceptance pass.
+Software and numerical-consistency checks only; the inputs are ILLUSTRATIVE and no comparison with data or with a
+propagation code is made.
