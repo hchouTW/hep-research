@@ -7112,3 +7112,24 @@ Diagnosis and options for the maintainer (not done here: each needs more runs th
   to constrain D0 (and through B/C, V_A) at fixed L.
 
 Not done in C2UF: the toy-calibrated family comparison (C2UF-1, above); modulation and real data (F1).
+
+### Dispatch 2 (decision A1.14): Gaussian-process emulator of USINE (criteria written before any emulator run; R9)
+
+C2UF's files were widened by the orchestrator to E2's emulator provider and trainer (A1.14 follow-up). Changes made
+before any run here: `emulator_provider.py` accepts a per-model declaration (observables with their output slices,
+axes, bins, the training runs' observable block and the domain taken from the model's feature boxes; the version then
+always carries `+model.<hash>`; `--declaration` prints it for a registry entry); a model without it (the committed E2
+model) is answered exactly as before, pinned by `EmulatorPinnedResponses` (8 responses recorded with the provider
+before the change, equal to the last bit on E2); `train_emulator.py` unchanged (it copies the outputs block into the
+model). `propagation_fit.py` gains response_model kind "provider": the toys evaluate the provider itself.
+
+| Item | Pre-declared setting or criterion |
+|---|---|
+| Emulator | `train_emulator.py train` (subprocess; Matern-5/2 GP per principal component of ln values, `--pca-tolerance 1e-4`, `--restarts 4`, `--seed 20261028`), features ln D0 (log, 1.9e28-4.0e28), delta (0.40-0.535), V_A (0-105 km/s), V_c (0-9.5 km/s): the joint box at k = 4 around study 2's two fits, rounded outward, so the toy box (k = 3) lies one sigma inside it; outputs ln B/C (15 bins, ekn 0.3-300 GeV/n) then ln 10Be/9Be (12 bins, ekn 0.05-10 GeV/n), one vector of 27; transport = the study's (decay on); ml-artifact by `write_ml_artifact.py` (task surrogate, extrapolation_policy reject, regression-value) |
+| Training runs | every cached USINE run of the study (same transport and request) inside the box (448), plus new USINE runs: 200 scrambled Sobol points in the box, 40 on the V_c = 0 face, 30 on the V_A = 0 face and 30 on the SLIM slice V_A = V_c = 0 (where BIG's boundary values and every SLIM evaluation lie): 300 runs |
+| Validation (held out, never trained on) | 40 new USINE runs: 30 uniform random points in the toy box (ln D0 65.191-65.772, delta 0.4133-0.5206, V_A 0-94.56, V_c 0-7.108) and 10 uniform on the SLIM slice in the same ln D0 and delta ranges (seed 20261029); each answered through `emulator_provider.py` (the per-model declaration, via core/provider); pass when at every validation point, in every bin of both datasets, abs(emulator - USINE) <= 0.05 of the data sigma (B/C sqrt(0.04^2 + 0.02^2), 10Be/9Be sqrt(0.06^2 + 0.03^2) of the value), the tolerance pre-declared in C2U, not loosened; a point the DomainModel refuses fails the validation |
+| P10 | the per-bin largest abs(emulator - USINE) over the validation points enters each dataset's covariance as an uncorrelated component named `emulator` |
+| One refinement (declared now) | if the validation fails: the 40 validation runs join the training set with 60 new Sobol points in the box, the emulator is retrained, and 40 fresh validation points (seed 20261030, same mix) decide; no other change; if it fails again C2UF-1 is reported not met |
+| Fit and toys | propagation_fit with provider `emulator` (registry entry from `--declaration`), the study's datasets (USINE Asimov at the truth, the recorded fixture values) with the `emulator` component, families BIG and SLIM, same starts and steps, response_model kind "provider", layout joint, half_width_sigma 3, 200 toys per family, seed 20261028, alpha 0.05, the 2% toy-failure limit (a toy fit the DomainModel refuses fails) |
+| C2UF-1 | pass when: the emulator passes its validation; BIG and SLIM converge with the emulator provider; each is listed with its delta chi2 and toy p-value from 200 toys with at most 2% failed; BIG (the generator) survives at alpha 0.05 |
+| D7 / A1.8 | 480 USINE runs left of 1000; the plan uses 340 (+140 for the refinement): within the cap; emulator evaluations are not USINE runs |
