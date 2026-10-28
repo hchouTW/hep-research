@@ -602,6 +602,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "E1 dispatched from 4a58be50 (optional; D6 local_partition; E1 USINE evaluations capped at 1500 within D7)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "wave-2 full run on 2d451e87 (P0 fix, ENV 2, A3, A4, B1, timings): run_all_checks pass (exit 0); check_relocation only the 2 known geant4 path-with-spaces failures (identical on main). ALL-3 holds for P0 r3, ENV 2, A3, A4, B1. C2 (merged after 2d451e87) goes to wave 3"
   }
  ],
  "env": {
