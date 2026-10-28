@@ -789,6 +789,11 @@
    "cycle": 4,
    "date": "2026-10-29",
    "event": "maintainer 2026-10-29: pause cancelled; continue to RC after F1 and C2UF (RC: rebase onto main, full checks, campaign report, PR draft; no push, no PR, main untouched until H1)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "A1.15: maintainer delegates H1 (push, PR, merge after required CI, release 0.43.0) to the orchestrator; open escalations decided on recommendation and listed as known issues"
   }
  ],
  "env": {
