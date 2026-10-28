@@ -6830,3 +6830,61 @@ cannot be cut short). A `subprocess.TimeoutExpired` is recorded in the batch `pr
 `incomplete-batch` is raised as for any failed shard), not ignored. No design, record or result changed; no USINE run.
 Checks on the fix: test_subprocess_timeouts + test_cr_propagation OK (83 tests, 10 skipped); `--part static --jobs 4`
 passed; check_naming, workflow_check diff (base b0d0016d) and acceptance ok; `active_addition.py --help` works.
+
+## CRPROP-C2U — 2026-10-28 (environment E2)
+
+Work package C2U (propagation fit with the USINE provider) of the cr-propagation r4 workflow, r3 card §C2 (USINE case,
+split by r4 §6). SYNTHETIC data only; every input ILLUSTRATIVE.
+
+Environment: E2 (macOS arm64 workstation), Python 3.13.2 (miniconda), NumPy 2.4.4, SciPy 1.17.1; USINE V3.5 (tag V3.5,
+commit fb53006d) located through HEP_USINE_BIN and HEP_USINE_DATA, runs kept under HEP_USINE_RUN_DIR =
+`$CRPROP_OUT/c2u/runs`, provider cache `$CRPROP_OUT/c2u/cache`. r3 §0.3 checks: toplevel
+`<repo>/.claude/worktrees/crprop-c2u`, branch `worktree-crprop-c2u`, status clean at start; base exception (decision
+D10): base is the integration HEAD `651e4af9`, not `main`; prerequisites C2 (`9f17775c`), B1 (`3ed1e89e`), B1X
+(`2360c294`), A1R (`18b43b34`), B3 (`c1b5967d`) and E1 (`a4ad05d3`) are ancestors of HEAD.
+
+Criteria and settings, written before any fit with USINE was run (R9; frozen entries C2U-1 to C2U-3 of
+`acceptance.json`). Provider `usine` 0.2.0 (adapter cr-propagation), not decomposable, values P2 ratios of bin
+integrals (declared `bin-averaged` with the convention "ratio of the bin-integrated fluxes (r3 P2)").
+
+| Item | Pre-declared setting or criterion |
+|---|---|
+| Transport | the provider's harmonized-v1 default (2D, L = 4 kpc, R0 = 1 GV, eta = 1, isotopic network to 16O, isotopic ILLUSTRATIVE cross sections, thin-disc V_A) with one ILLUSTRATIVE low diffusion break (R_break_gv 5, delta_below 0, s 0.05, 'usine' convention), the same for both families; the break is held fixed because the provider's domain has no break parameters (a difference from the literature SLIM, whose break is fitted) |
+| Dataset | one SYNTHETIC Asimov B/C set from the provider at the truth: 15 bins equal in ln(E_k/n) from 0.3 to 300 GeV/n, 4% uncorrelated + 2% fully correlated; its observable block copied from the prediction |
+| Truth (generating family BIG) | `D0_cm2_s` 3e28, `delta` 0.45, `V_A_kms` 70 (interior), `V_c_kms` 0 (on its physical lower bound, P8); `L_kpc` 4 and `eta` 1 fixed. Amended before the BIG fit: `V_A_kms` was first 30, but a SLIM smoke fit to that Asimov set gave chi2 0.09 (thin-disc reacceleration at 30 km/s is nearly absorbed by D0 and delta), so the truth was raised to 70 to make the family comparison discriminate; no criterion changed |
+| Families | BIG: `D0_cm2_s`, `delta`, `V_A_kms`, `V_c_kms` free; SLIM: `D0_cm2_s`, `delta` free, `V_A_kms` = `V_c_kms` = 0 |
+| Difference steps | USINE prints 6 significant digits (noise about 1e-6 relative, measured on 9 probe runs): stated steps 0.003 in ln D0, 0.001 in delta, 0.3 km/s in V_A and V_c for the Jacobian, the Fisher matrix and the convergence verdict |
+| C2U-1 | BIG fitted with the provider (no response model): `D0_cm2_s`, `delta`, `V_A_kms` (interior true points) within 0.1 sigma of the truth, sigma from the inverse Fisher matrix at the best fit; `V_c_kms` on the boundary: the minimum passes `boundary_kkt` and lies within 0.1 sigma_one-sided of 0, sigma_one-sided = distance from the bound to the profile delta chi2 = 1 crossing on the allowed side |
+| C2U-2 | every evaluation the fit used is recorded with provider `usine`, version 0.2.0 and a computational-run reference that resolves in the run folder, whose tool is USINE V3.5 commit fb53006d; a start point outside the domain (`V_A_kms` 200), a toy truth outside it and a point sent outside it to the provider are refused (out-of-domain) without a USINE run |
+| C2U-3 | BIG and SLIM fitted to the Asimov data from BIG; each listed with its delta chi2 calibrated by 200 toys per family on a total-degree-3 polynomial response model in (ln D0, delta, V_A, V_c) from 96 Sobol design points (amended before the BIG calibration from degree 4 and 160 points, to stay within the USINE budget after the first run spent 873 evaluations; the 2D SLIM-only box of that run had a largest error of 6.2e-5 sigma at degree 4), refused unless its largest error at 20 random provider points is <= 0.05 of the data sigma in every bin; its error enters the toy covariance (P10); a family survives at alpha = 0.05 (toy p-value >= alpha); pass when BIG (the generator) survives |
+| Bin semantics | the guard accepts the provider for data declared P2 (`bin-integrated`, or `bin-averaged` with the P2 statement) and refuses data with another binning convention (`crsr:bin_average`) or `point` values |
+| D7 | USINE evaluations counted by the runner (`points_sent`); C2U cap 1500 with a running tally; at most 4 USINE processes at once (the fit runs one) |
+
+Results (`tests/skills/hep_statistics/usine_family_study.py`, recorded in
+`tests/adapters/fixtures/cr_propagation/c2u/usine-family-study.json`; outputs in `$CRPROP_OUT/c2u/acceptance/`; tests in
+`tests/skills/hep_statistics/test_propagation_fit.py`, class `UsineProvider`, offline from the record, one live test
+gated by HEP_USINE_LIVE_TEST=1):
+
+| Item | Result | Evidence |
+|---|---|---|
+| C2U-1 interior | BIG converged (no restart, EDM 7.6e-7); pulls `D0_cm2_s` 4e-5 sigma (sigma_ln 0.139), `delta` 4e-5 sigma (sigma 0.0244), `V_A_kms` 6e-6 sigma (sigma 27.8 km/s: B/C alone constrains thin-disc reacceleration weakly) | `record.json` fits BIG |
+| C2U-1 boundary | `V_c_kms` = 0 on the lower bound (snapped from 5.7e-5, within one difference step), `boundary_kkt` derivative +58.9 (ok); profile interval lower end `bound`, upper crossing at 7.129 km/s: sigma_one-sided 7.129, pull 0 | `record.json` profile_intervals |
+| C2U-2 | provider `usine` 0.2.0 (not decomposable, one `total` component); 565 evaluation records (one per point, cache hits included), each with a computational-run reference, all 565 resolved in the run folder; one tool: USINE V3.5 (git tag V3.5, commit fb53006db41d...); start `V_A_kms` 200 refused (out-of-domain) before any run; a point with `V_A_kms` 200 sent to the provider refused by the entrypoint (out-of-domain) with USINE unset; multipliers with a non-decomposable provider refused (not-decomposable) | tests `test_c2u2_*` |
+| C2U-3 | NOT MET. BIG and SLIM both fitted with the provider and listed: chi2 0 (BIG, dof 11) and 1.32 (SLIM, dof 13), delta chi2 1.32 for SLIM; the toy calibration did not run: the 4D polynomial response model's largest error was 2.81 of the data sigma at 20 validation points, above the pre-declared 0.05, so the fit refused it (response-model-above-tolerance) and no toy-calibrated delta chi2 exists. Cause: the box is +-5 sigma of BIG, and sigma(V_A) = 27.8 km/s makes it span the whole V_A domain [0, 150] km/s (and V_c [0, 38]); B/C over that box is not a degree-3 or -4 polynomial (offline cross-validation on the 1336 cached runs: largest held-out error 1-2.5 sigma at degree 3-4, worse above). A redesign (smaller data errors or a second dataset such as 10Be/9Be to constrain V_A, then refits, about 420 more runs) does not fit in the 160 runs left of C2U's 1500 cap | `record.json` family_calibration |
+| Bin semantics | USINE's prediction is classified P2; data declared `bin-integrated` (P2) pass the guard and the comparison gate (the prediction's label aligned to the data's and recorded as `bin_semantics_aligned`); data with `point` values, with a `crsr:bin_average` convention, or `bin-averaged` without the P2 statement are refused (bin-semantics-mismatch); the closed-form refusals of C2 are unchanged | `test_bin_semantics_guard_accepts_p2_and_refuses_mismatches` |
+| Live rerun | SLIM refitted live with USINE (32 runs, fresh cache and run folder): best fit equal to the record within 1e-6 relative, every record resolved, tool USINE V3.5 fb53006d | `test_live_slim_refit_matches_the_record` |
+
+USINE evaluations (D7, distinct runs): 9 noise probes, 28 in a SLIM smoke fit at the first truth (V_A 30), 1 truth run,
+873 in the first study (BIG stopped strictly inside the V_c bound, its verdict differences straddled the bound and
+failed, so 5 restarts; fixed by snapping to a bound within one step), 6 in an aborted start, 423 in the second study
+(BIG, SLIM, the V_c profile interval, 116 response-model runs), 0 in the recorded third study (all cached), 32 in the
+live test: about 1372 of C2U's 1500. Each run took about 3 s (1 USINE process at a time).
+
+Advisories of C2's verifier handled here: the toy seeds are in `extension.seeds` and `coverage.seed` of the
+statistical-result; per-toy rows are kept in the coverage toys and in each family's calibration; the multipliers are
+solved within NU_BOUNDS (bounded least squares when the unbounded solution leaves them). Recorded, not changed (C1
+protocol, not C2U's files): two observables with the same id in one request make the components ambiguous, so the fit
+still sends one request per dataset (a two-dataset point costs two USINE runs).
+
+Not done in C2U: the toy-calibrated family comparison (C2U-3, above); the low break is fixed, not fitted (the provider's
+domain has no break parameters); modulation (datasets with a period are refused) and real data (F1).
