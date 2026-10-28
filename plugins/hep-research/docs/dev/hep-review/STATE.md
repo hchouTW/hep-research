@@ -30,9 +30,9 @@ environment:
   store_persistence: pending-next-session
 host_profile_ref: docs/dev/hep-review/host-profile.md
 tasks:
-  T00: {status: in_progress, deps: [], steps_done: [1, 2, 3, 4, 5, 8, 9], sessions: 1, notes: ""}
-  T0S: {status: pending, deps: [T00], go_no_go: null}
-  T01: {status: pending, deps: [T0S]}
+  T00: {status: in_progress, deps: [], steps_done: [1, 2, 3, 4, 5, 6, 7, 8, 9], sessions: 1, notes: "step 10 baseline running in background"}
+  T0S: {status: done, deps: [T00], go_no_go: go, notes: "protocol 9044c6af before first dispatch 22:38:01Z; C01 4/4, C02 FA 1/4, C03 3/4, C04 4/4, 16/16 digest-bound; 3 instance construction errors caught by reviewers; H5/H6 pending-next-session"}
+  T01: {status: in_progress, deps: [T0S], steps_done: []}
   T02: {status: pending, deps: [T01]}
   T03: {status: pending, deps: [T01]}
   U1:  {status: pending, deps: [T02, T03], kind: user-gate}
@@ -46,9 +46,10 @@ cases: {}
 decisions:
   - {when: 2026-10-29T06:25+08:00, task: T00, decision: "Worktree created with the Git fallback (git worktree add -b hep-review-v9-impl) at the repo's host-tool location .claude/worktrees/ (ignored by .gitignore), then entered with the host tool (EnterWorktree path=...)", reason: "The host worktree tool cannot name the branch; the task fixes branch_name=hep-review-v9-impl", reversible: true}
   - {when: 2026-10-29T06:30+08:00, task: T00, decision: "Store location ~/.local/state/hep-research/hep-review ($XDG_STATE_HOME/hep-research/hep-review when set)", reason: "Spec 11.1 lets T00 fix the path per repository convention; the existing authoring review keeps private state under $XDG_STATE_HOME/hep-research (review_lib/store.py default_private_root). The path is on local APFS, outside ~/Library/CloudStorage and ~/Library/Mobile Documents", reversible: true}
+  - {when: 2026-10-29T06:40+08:00, task: T0S, decision: "Raw spike run kept byte for byte in ~/.local/state/hep-research/hep-review/spike-run1 (outside the repo); committed spike/run1-summary.json carries every raw SHA-256", reason: "packets and drop files contain private absolute paths that tools/check_packaging.py forbids in tracked files", reversible: true}
   - {when: 2026-10-29T06:33+08:00, task: T00, decision: "All run documents live under docs/dev/hep-review/ (state, discovery, baseline, host profile, spike, reviews); spike code under docs/dev/hep-review/spike/", reason: "docs/dev is the repo's place for development specs; a new top-level folder would change the shipped layout. Spike code is never imported by product code", reversible: true}
 blockers: []
-next_action: "T00 step 6 commit, step 7 discovery, step 10 baseline (running)"
+next_action: "T01 step 2 strict ingestion + encoder (test first); T00 step 10 baseline when the background run ends"
 ```
 
 ## Log
@@ -60,4 +61,9 @@ next_action: "T00 step 6 commit, step 7 discovery, step 10 baseline (running)"
 2026-10-29 06:25 | T00 | 4,5 | worktree created; inside it rev-parse --path-format=absolute gives .git/worktrees/hep-review-v9 vs .git (different) and no superproject | none
 2026-10-29 06:31 | T00 | 8 | platform probe: all spec 1.5 premises reproduced on macOS (see discovery.md) | none
 2026-10-29 06:32 | T00 | 9 | store dir created, marker hep-review-persistence-marker = 2026-10-28T22:32:23Z | none
+2026-10-29 06:34 | T0S | 1 | protocol, time box 96 min, thresholds committed before any dispatch | 9044c6af
+2026-10-29 06:38 | T0S | 2-4 | spike.py, 16 exposed instances, 16 reviewers + 2 probes dispatched in one message; 16/16 digest-bound | a8f46b69
+2026-10-29 06:42 | T0S | 5 | H1 readable, H2 writable, H3 parallel, H4 yes/yes, H5/H6 pending-next-session | a8f46b69
+2026-10-29 06:44 | T0S | 6 | observations.md: go | a8f46b69
+2026-10-29 06:47 | T0S | fix | packaging-clean wording of private path patterns | a5f9322c
 ```
