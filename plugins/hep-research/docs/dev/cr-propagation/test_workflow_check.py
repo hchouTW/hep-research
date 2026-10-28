@@ -12,7 +12,7 @@ from pathlib import Path
 
 CHECKER = Path(__file__).resolve().parent / "workflow_check.py"
 PREFIX = "plugins/hep-research"
-WP = "A1"
+PACKAGE = "A1"
 ALLOWED = "skills/hep-theory/scripts/transport_conventions.py"  # in A1's files (workflow.json)
 OUTSIDE = "tools/check_layering.py"  # not in A1's files
 ORCHESTRATOR_ONLY = "docs/dev/cr-propagation/status.json"
@@ -24,9 +24,9 @@ def run(*args, cwd):
 
 class RenameHidingTest(unittest.TestCase):
     def setUp(self):
-        self._tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(self._tmp.cleanup)
-        self.repo = Path(self._tmp.name)
+        self._scratch = tempfile.TemporaryDirectory()
+        self.addCleanup(self._scratch.cleanup)
+        self.repo = Path(self._scratch.name)
         self.plugin = self.repo / PREFIX
         run("init", "-q", cwd=self.repo)
         run("config", "user.email", "t@example.invalid", cwd=self.repo)
@@ -43,7 +43,7 @@ class RenameHidingTest(unittest.TestCase):
 
     def diff(self):
         proc = subprocess.run(
-            [sys.executable, str(CHECKER), "diff", "--work-package", WP, "--base", self.base, "--plugin-root", str(self.plugin)],
+            [sys.executable, str(CHECKER), "diff", "--work-package", PACKAGE, "--base", self.base, "--plugin-root", str(self.plugin)],
             capture_output=True, text=True)
         return proc.returncode, json.loads(proc.stdout)
 
