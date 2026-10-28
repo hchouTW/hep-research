@@ -262,7 +262,7 @@
   "E2": {
    "state": "merged",
    "dispatches": 1,
-   "rework_rounds": 0,
+   "rework_rounds": 1,
    "branch": "worktree-crprop-e2",
    "base": "b0d0016d",
    "head": "0f3ebfab",
@@ -271,7 +271,7 @@
    "verifier_report": "PASS (2026-10-28, Opus): E2-1/E2-2 recomputed with own covariance (0.00446/0.0631); hold-out never trained on; no training values committed; provider matches hep-ml to 1e-12; advisories: E2-3 Laplace intervals for eta/V_A/V_c box-cut (not interval validation); domain smaller than box not stated in ml-artifact/adapter.json; GP model allows reconstructing training ln(B/C)",
    "missing_capabilities": [],
    "notes": [
-    "rebased; missing-dependency entry applied; USINE inputs byte-identical under merged B1X (no retrain); Opus verifier dispatched"
+    "wave-4 full run (6ecc1ffa): tests.skills.test_cli_contract test_scoped_tools_take_status fails (skills/hep-ml/scripts/train_emulator.py lacks --status); fix as rework round 1 on worktree-crprop-e2fix (same handling as the wave-3 fixes)"
    ]
   },
   "F1": {
@@ -727,6 +727,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "D3 PARTIAL; A1.13: accept with attributed misses (verifier required); escalation 12 (translator follow-ups for H1)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "wave-4 full run on 6ecc1ffa (B1X, D1, E2, wave-3 fixes): wave-3 fixes confirmed (Th13, subprocess timeouts pass); 1 new failure attributed to E2 (train_emulator.py --status, CLI contract); relocation only the 2 known geant4 failures; E2 fix branch"
   }
  ],
  "env": {
