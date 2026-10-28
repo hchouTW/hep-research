@@ -154,8 +154,8 @@
    ]
   },
   "D1": {
-   "state": "waiting",
-   "dispatches": 1,
+   "state": "dispatched",
+   "dispatches": 2,
    "rework_rounds": 0,
    "branch": "worktree-crprop-d1",
    "base": "3d5a6295",
@@ -165,7 +165,7 @@
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "A1.9: waits for A1R; then dispatch 2 (D1-1a, D1-1b, D1-L); branch worktree-crprop-d1 5348266d kept"
+    "A1.9 dispatch 2 after A1R merged: matched reacceleration via convert_reacceleration, D1-L losses diagnosis/refusal, D1-1a/b"
    ]
   },
   "D2": {
@@ -328,25 +328,25 @@
    "rework_rounds": 0,
    "branch": "worktree-crprop-b1x",
    "base": null,
-   "head": null,
+   "head": "f57ae0e3",
    "merge_commit": null,
-   "worker_report": null,
+   "worker_report": "DONE: high break (delta_above) + local_bubble_radius_kpc + injection eta in contracts; B1X-1..3 pass (init.TEST.par reproduced exactly, 33/33 nodes); B1X-4 field map; no silent fields; USINE XS read in place; ~37 USINE runs; Kpp factor mode-dependent (orchestrator keeps it: no rerun of B1 runs)",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "added per A1.7; acceptance B1X-1..5 added (r4 5)"
+    "asked to rebase onto integration (A1R merged) and replace thin_disc_alfven_speed by transport_conventions.convert_reacceleration before verification"
    ]
   },
   "A1R": {
-   "state": "verifying",
+   "state": "merged",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-a1r",
    "base": null,
    "head": "b20ab46b",
-   "merge_commit": null,
+   "merge_commit": "18b43b34",
    "worker_report": "DONE: dragon2 = D0 beta^etaT (rho/DiffRefRig)^delta (cd588707 diffusion.cc:150); zone factor sqrt(L/(3h)) at first order (not sqrt(L/h)), bound (1+lam)/5; DRAGON2 Ptuskin94 = 3/4 of USINE D_pp (4/3 lands on Ptuskin03: likely upstream bug); B1/D1 translators use sqrt(L/h); r3 P1 wording conflict",
-   "verifier_report": null,
+   "verifier_report": "PASS (2026-10-28, Opus): DRAGON2 form checked in source; zone factor sqrt(L/(3h)) re-derived analytically and numerically (a_halo/a_disc = 3h/L), second-order (1+lam)/5; Ptuskin94 = 3/4 USINE D_pp; advisories: bound exact only for energy-independent lam; finite disc O(h/L)",
    "missing_capabilities": [],
    "notes": [
     "Opus verifier dispatched with independent re-derivation; B1X told to hold the zone factor until A1R merges"
@@ -638,6 +638,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "E1 merged (a4ad05d3); post-merge static ok"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "A1R merged (18b43b34); escalation 10 (P1 wording, translators); B1X rebase + zone-factor switch requested; D1 dispatch 2"
   }
  ],
  "env": {
