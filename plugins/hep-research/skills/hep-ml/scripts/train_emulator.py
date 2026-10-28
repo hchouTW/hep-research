@@ -65,6 +65,13 @@ STATUSES = ("synthetic", "asimov", "observed", "preliminary", "unvalidated", "us
 LENGTH_BOUNDS = (1e-2, 1e2)      # length scales in unit-cube coordinates
 SIGNAL_BOUNDS = (1e-4, 1e4)      # signal variance of a standardized coefficient
 NUGGET_BOUNDS = (1e-12, 1e-1)    # nugget variance of a standardized coefficient (numerical jitter)
+# Kernel condition bound (--max-condition). Every Matern entry is at most the signal variance, so the largest eigenvalue
+# of the noise-free n x n kernel is at most n x signal (Gershgorin) and the smallest is >= 0: a nugget of at least
+# n x signal / (C - 1) keeps cond(K) <= C whatever the length scales. A reader on another libm/BLAS sees the kernel
+# entries change by a few ulp (eps ~ 2.2e-16); the solution alpha then moves by up to about cond x eps relative, so
+# C = 1e10 bounds that at ~2e-6 relative (the cr-propagation emulator provider's self-check wants the predictions
+# reproduced within 1e-4 of their sigma; VALIDATION CRPROP-K4). 0 switches the bound off (models trained before it).
+MAX_CONDITION = 1e10
 DOMAIN_MIN_POINTS = 50
 SELF_CHECK_POINTS = 4
 SQRT5 = math.sqrt(5.0)
@@ -168,8 +175,29 @@ def neg_log_marginal(theta, x, y):
     return nll, grad
 
 
-def fit_component(x, y, restarts: int, seed: int) -> dict:
-    """Hyperparameters of one GP by maximum marginal likelihood from `restarts` seeded starts (plus a default)."""
+def relative_nugget_floor(n: int, max_condition: float) -> float:
+    """Smallest nugget / signal ratio that keeps cond(K) <= max_condition for n points (see MAX_CONDITION)."""
+    return n / (max_condition - 1.0)
+
+
+def _neg_log_marginal_relative(phi, x, y):
+    """neg_log_marginal in phi = (log lengths..., log signal, log(nugget / signal)), with its gradient."""
+    import numpy as np
+
+    d = x.shape[1]
+    theta = np.array(phi, float)
+    theta[d + 1] = phi[d + 1] + phi[d]
+    nll, grad = neg_log_marginal(theta, x, y)
+    out = np.array(grad, float)
+    out[d] = grad[d] + grad[d + 1]
+    return nll, out
+
+
+def fit_component(x, y, restarts: int, seed: int, max_condition: float = 0.0) -> dict:
+    """Hyperparameters of one GP by maximum marginal likelihood from `restarts` seeded starts (plus a default).
+
+    max_condition > 1: the nugget is bounded below by relative_nugget_floor(n, max_condition) x signal (the optimizer
+    then works in log(nugget / signal)), so cond(K) <= max_condition; 0: no bound (NUGGET_BOUNDS only)."""
     import numpy as np
     from scipy.optimize import minimize
 
@@ -181,13 +209,25 @@ def fit_component(x, y, restarts: int, seed: int) -> dict:
     for _ in range(max(0, restarts)):
         starts.append(np.r_[rng.uniform(math.log(0.1), math.log(3.0), d), rng.uniform(-1.0, 1.0),
                             rng.uniform(math.log(1e-10), math.log(1e-5))])
+    objective = neg_log_marginal
+    if max_condition:
+        floor = relative_nugget_floor(len(x), max_condition)
+        if not floor < NUGGET_BOUNDS[1]:
+            raise ValueError(f"--max-condition {max_condition:g} needs a nugget above {NUGGET_BOUNDS[1]} x signal "
+                             f"for {len(x)} points")
+        bounds[d + 1] = (math.log(max(floor, NUGGET_BOUNDS[0])), math.log(NUGGET_BOUNDS[1]))
+        objective = _neg_log_marginal_relative
+        for start in starts:     # same absolute starts, as nugget / signal, moved inside the bounds
+            start[d + 1] = min(max(start[d + 1] - start[d], bounds[d + 1][0]), bounds[d + 1][1])
     best = None
     for start in starts:
-        sol = minimize(neg_log_marginal, start, args=(x, y), jac=True, method="L-BFGS-B", bounds=bounds,
+        sol = minimize(objective, start, args=(x, y), jac=True, method="L-BFGS-B", bounds=bounds,
                        options={"maxiter": 500})
         if best is None or sol.fun < best.fun:
             best = sol
-    theta = best.x
+    theta = np.array(best.x, float)
+    if max_condition:
+        theta[d + 1] = best.x[d + 1] + best.x[d]
     lengths, signal, nugget = np.exp(theta[:d]), math.exp(theta[d]), math.exp(theta[d + 1])
     k = matern52(x, x, lengths, signal) + nugget * np.eye(len(x))
     chol = _cholesky(k)
@@ -195,11 +235,15 @@ def fit_component(x, y, restarts: int, seed: int) -> dict:
     alpha = cho_solve((chol, True), y)
     kinv_diag = np.diag(cho_solve((chol, True), np.eye(len(x))))
     loo = alpha / kinv_diag  # closed-form leave-one-out residuals (y_i - mu_-i)
-    at_bound = [i for i in range(d + 2) if min(abs(theta[i] - bounds[i][0]), abs(theta[i] - bounds[i][1])) < 1e-6]
-    return {"lengths": [float(v) for v in lengths], "signal": signal, "nugget": nugget,
-            "alpha": [float(v) for v in alpha], "neg_log_marginal": float(best.fun),
-            "converged": bool(best.success), "hyperparameters_at_bound": at_bound,
-            "loo_residual_rms": float(np.sqrt(np.mean(loo ** 2))), "loo_residual_max": float(np.max(np.abs(loo)))}
+    at_bound = [i for i in range(d + 2) if min(abs(best.x[i] - bounds[i][0]), abs(best.x[i] - bounds[i][1])) < 1e-6]
+    out = {"lengths": [float(v) for v in lengths], "signal": signal, "nugget": nugget,
+           "alpha": [float(v) for v in alpha], "neg_log_marginal": float(best.fun),
+           "converged": bool(best.success), "hyperparameters_at_bound": at_bound,
+           "loo_residual_rms": float(np.sqrt(np.mean(loo ** 2))), "loo_residual_max": float(np.max(np.abs(loo)))}
+    if max_condition:
+        eig = np.linalg.eigvalsh(k)
+        out["condition_number"] = float(eig[-1] / eig[0]) if eig[0] > 0 else math.inf
+    return out
 
 
 class GaussianProcessEmulator:
@@ -311,10 +355,12 @@ def load_training_set(doc: dict):
 
 
 def train(doc: dict, pca_tolerance: float = 1e-5, restarts: int = 4, seed: int = 0, domain_quantile: float = 0.99,
-          domain_k: int = 5) -> dict:
-    """The model document trained on a training-set document."""
+          domain_k: int = 5, max_condition: float = MAX_CONDITION) -> dict:
+    """The model document trained on a training-set document (max_condition: see MAX_CONDITION; 0 = no bound)."""
     import numpy as np
 
+    if max_condition and not (math.isfinite(max_condition) and max_condition > 1):
+        raise ValueError("max_condition must be 0 (no bound) or a finite number > 1")
     features, outputs, unit, values, groups, status, context = load_training_set(doc)
     y = np.log(values) if outputs["transform"] == "log" else values
     mean = y.mean(axis=0)
@@ -333,7 +379,7 @@ def train(doc: dict, pca_tolerance: float = 1e-5, restarts: int = 4, seed: int =
     components = []
     for c in range(keep):
         scale = float(coeff[:, c].std()) or 1.0
-        comp = fit_component(unit, coeff[:, c] / scale, restarts, seed + c)
+        comp = fit_component(unit, coeff[:, c] / scale, restarts, seed + c, max_condition)
         comp["scale"] = scale
         comp["explained_singular_value"] = float(sing[c])
         components.append(comp)
@@ -352,6 +398,9 @@ def train(doc: dict, pca_tolerance: float = 1e-5, restarts: int = 4, seed: int =
              "components": components, "domain_model": domain, "context": context,
              "training": {"seed": seed, "restarts": restarts, "status": status,
                           "groups": [str(g) for g in groups] if groups else None}}
+    if max_condition:     # absent: trained without the bound (as before K4), so such models stay byte-reproducible
+        model["training"]["max_condition"] = float(max_condition)
+        model["training"]["relative_nugget_floor"] = relative_nugget_floor(len(unit), max_condition)
     emu = GaussianProcessEmulator(model)
     rng = np.random.default_rng(seed)
     ref_unit = rng.uniform(0.25, 0.75, size=(SELF_CHECK_POINTS, len(features)))
@@ -409,6 +458,9 @@ def main(argv=None) -> int:
     t.add_argument("--seed", type=int, default=0)
     t.add_argument("--domain-quantile", type=float, default=0.99, help="DomainModel quantile (default 0.99)")
     t.add_argument("--domain-k", type=int, default=5, help="DomainModel neighbour rank (default 5)")
+    t.add_argument("--max-condition", type=float, default=MAX_CONDITION,
+                   help=f"bound on each kernel matrix's condition number through a nugget floor of n x signal / "
+                        f"(C - 1) (default {MAX_CONDITION:g}); 0 = no bound (models trained before it)")
     add_status_argument(t)
     p = sub.add_parser("predict", help="predict at points with a trained model")
     p.add_argument("--model", required=True, type=Path)
@@ -434,7 +486,8 @@ def main(argv=None) -> int:
         if args.restarts < 0 or not 0 < args.pca_tolerance:
             raise ValueError("--restarts >= 0 and --pca-tolerance > 0")
         doc = json.loads(args.training_set.read_text(encoding="utf-8"))
-        model = train(doc, args.pca_tolerance, args.restarts, args.seed, args.domain_quantile, args.domain_k)
+        model = train(doc, args.pca_tolerance, args.restarts, args.seed, args.domain_quantile, args.domain_k,
+                      args.max_condition)
         args.out_dir.mkdir(parents=True, exist_ok=True)
         model_path = args.out_dir / "emulator-model.json"
         model_path.write_text(json.dumps(model, indent=None, separators=(",", ":")) + "\n", encoding="utf-8")

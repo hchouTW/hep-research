@@ -7468,3 +7468,54 @@ the point furthest beyond its bound (NaN counts as worst).
 | `test_cr_propagation`, `test_propagation_fit`, `test_train_emulator`, `test_adapter_missing_dependency`, `test_cli_robustness` | E2 and CI-lock venv: 172 tests OK (15 skipped); on macOS the C2UF declaration tests run and pass (not skipped) |
 | `run_all_checks.py --part static --jobs 4` | exit 0, 31 pass, 0 fail |
 | `check_naming.py` | pass (the skip constants named `SELF_CHECK_REFUSAL`, `TWO_DATASET_EMULATOR_NOT_PORTABLE`) |
+
+## CRPROP-K4 — 2026-10-29 (environment E2)
+
+Work package K4 (decision B1.1, follow-up wave 7: emulator nugget floor; the C2UF emulator retrained and portable; the
+A1.21 skip removed). SYNTHETIC data only; every input ILLUSTRATIVE.
+
+**Environment field (r3 §0.3, base exception D10):** E2 (macOS arm64 workstation), Python 3.13.2 (miniconda), NumPy
+2.4.4, SciPy 1.17.1; USINE V3.5 (tag V3.5, commit fb53006d) through HEP_USINE_BIN and HEP_USINE_DATA, runs under
+HEP_USINE_RUN_DIR = `$CRPROP_OUT/k4/runs`, provider cache `$CRPROP_OUT/k4/cache` (a copy of C2UF's; C2UF's left
+unchanged). `git rev-parse --show-toplevel` = `.claude/worktrees/crprop-k4`; branch `worktree-crprop-k4`; status clean
+at start; base 94ba34d1 = integration HEAD (`worktree-crprop-k`), not `main`; no prerequisite work package (deps []),
+C2UF and CIFIX (A1.20, A1.21) are ancestors of the base.
+
+### Kernel condition bound (K4-1; chosen before the C2UF retraining)
+
+Diagnosis of the committed models (eigenvalues of each component's kernel matrix K = K_f + nugget I, NumPy `eigvalsh`):
+
+| Model | Points | Largest cond(K) | Nugget at the NUGGET_BOUNDS floor 1e-12 | Self-check drift (CIFIX simulation, 120 trials) |
+|---|---|---|---|---|
+| E2 (`e2/emulator-model.json`) | 110 | 1.3e13 (component 0; 3.8e12, 2.7e11, 1.2e10 next) | 6 of 13 components | max 9.1e-7 x sigma: margin about 110 against 1e-4 x sigma |
+| C2UF (`c2uf/emulator-model.json`, A1.14) | 738 | numerically singular: components 0-4 have negative computed eigenvalues (-5e-11 to -2e-9 against largest 2e5 to 7e6), components 5-11 have 5e16 to 1e12 | nugget/signal 4e-15 to 2e-10 | max 2.5e-2 x sigma: refused in 120 of 120 |
+
+Bound: `train_emulator.py --max-condition C` (default `MAX_CONDITION` = 1e10; 0 = no bound). Every Matern entry is at
+most the signal variance s, so the largest eigenvalue of the noise-free n x n kernel is at most n s (Gershgorin) and the
+smallest is >= 0; a nugget of at least n s / (C - 1) therefore keeps cond(K) <= C for any length scales. The optimizer
+then works in log(nugget / s) with that lower bound (the absolute NUGGET_BOUNDS floor 1e-12 stays, the upper edge
+becomes 0.1 s); the starts are the same absolute values moved inside the bounds. The trained model records
+`training.max_condition`, `training.relative_nugget_floor` and per component `condition_number` (computed); a model
+trained with `--max-condition 0` records none of them and is byte-identical to one trained before K4.
+Why 1e10: a reader on another libm/BLAS sees the kernel entries change by a few ulp (eps = 2.2e-16); the GP weights
+alpha = K^-1 y then move by up to about cond x eps relative, so C = 1e10 bounds that at about 2e-6 relative, while the
+provider's self-check needs ln mean and ln sigma within 1e-4 x sigma (CIFIX round 2), and the C2UF emulator's sigma is
+tiny (2e-5 to 1e-4 in ln). An exploratory retraining (no USINE run; drift only, no validation number looked at) gave
+self-check drifts of at most 3.1e-8 x sigma at C = 1e10 (margin 3200 against 1e-4) and 6.8e-10 x sigma at C = 1e8.
+
+E2 is not retrained: its committed model and every E2 test are unchanged (the bound acts at training time only; the
+provider and the committed model files are untouched). Since E2's model has cond up to 1.3e13, a retraining at the new
+default would change it, so E2's campaign script (`e2/emulator_campaign.py`) now passes `--max-condition 0`, which
+reproduces the training as before (no new field in the model, same optimizer coordinates). The synthetic models of
+`test_train_emulator.py` train at the default and keep their accuracy assertions (held-out relative error < 1e-2).
+
+### C2UF emulator retraining (K4-2): settings written before the recorded training (R9)
+
+| Item | Pre-declared setting or criterion |
+|---|---|
+| Training | as C2UF dispatch 2 (A1.14), unchanged except the bound: `usine_emulator_family_study.py train --round 0` (every cached USINE run of the study inside the box BOX = ln D0 1.9e28-4.0e28 (log), delta 0.40-0.535, V_A 0-105, V_c 0-9.5 km/s, minus the held-out validation and confirmation points, duplicates to 1e-9 dropped: the same 738 points as C2UF), Matern-5/2 GP per principal component of ln values, `--pca-tolerance 1e-4`, `--restarts 4`, `--seed 20261028`, and `--max-condition 1e10` (stated explicitly in the script); outputs ln B/C (15 bins) then ln 10Be/9Be (12 bins); no new USINE run for training |
+| Validation (pre-declared in C2UF, not loosened) | the same 40 held-out USINE runs (30 uniform in the toy box, 10 on the SLIM slice, seed 20261029, all cached); pass when at every point, in every bin of both datasets, abs(emulator - USINE) <= 0.05 of the data sigma; a point the DomainModel refuses fails. If it fails: C2UF-1 is reported not met with the numbers (no refinement round, no tuning) |
+| Confirmation over the toys' domain (new; the C2UF advisory) | the toy fits of kind "provider" are bounded by the model's whole box (k = 4), while the validation covered the toy box (k = 3); the C2UF fit's 77704 emulator evaluations include 2320 outside the k = 3 box (V_c above 7.108 km/s: 2206, V_A above 94.56: 116, delta: 1). 40 new USINE runs: 30 uniform in BOX and 10 uniform on the SLIM slice V_A = V_c = 0 over BOX's ln D0 and delta ranges (seed 20261031). Pass when every point the DomainModel accepts is within 0.05 of the data sigma in every bin; a refused point is listed (in the fit it is a failed toy, counted against the 2% limit, not a wrong answer). Its largest error per bin does not enter the covariance (P10 keeps the holdout's) unless it exceeds the holdout's, in which case C2UF-1 is reported with that finding and not re-run |
+| Drift (portability) | the CIFIX drift simulation (`$CRPROP_OUT/k4/scripts/drift.py`, kernel entries x (1 + n eps/2), n in {-2, -1, 1, 2}, K kept symmetric), 2 seeds x 60 trials: accepted by the provider's self-check in every trial with max deviation <= 1e-5 x sigma (margin >= 10 against 1e-4) |
+| C2UF-1 rerun | `usine_emulator_family_study.py fit` unchanged (emulator provider with the new per-model declaration, the holdout error component in both covariances, families BIG and SLIM, starts, steps, 200 toys per family, seed 20261028, alpha 0.05, the 2% toy-failure limit); pass as declared in C2UF (BIG and SLIM converge; each listed with delta chi2 and toy p-value; at most 2% failed toys; BIG survives at alpha 0.05). If it does not pass: reported PARTIAL with the numbers, nothing tuned |
+| D7 / B1.1 | K4 cap 100 USINE runs; planned 40 (confirmation) + 2 (live test); tally in `$CRPROP_OUT/k4/tally.json` (ProviderRunner `points_sent`); one USINE process at a time |
