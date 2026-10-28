@@ -58,6 +58,10 @@ Software checks establish contract consistency only, not physical validity.
   checks), ILLUSTRATIVE isotopic set `models/xs-illustrative-decay.json`, tests `tests/test_convection_decay.py`;
   the profile's tests directory is now a package so it is discoverable from the plugin root. Reacceleration stays
   excluded. Profile version unchanged (0.1.0): the minor bump needs `profiles/registry.json` and the example pins.
+- crprop env: USINE V3.5 (gitlab.com/dmaurin/USINE, commit fb53006d, GPL-2.0; decision A1.1) built against ROOT 6.38.04
+  and smoke-run for environment E-crprop (`usine -tUSINE`: 42 of 46 reference tests pass, the other 4 differ only in
+  time zone, labels or last digits); USINE computational-run and environment manifest under
+  `tests/adapters/fixtures/cr_propagation/env/`. No behavior change.
 
 ## 0.42.0 (2026-10-26)
 

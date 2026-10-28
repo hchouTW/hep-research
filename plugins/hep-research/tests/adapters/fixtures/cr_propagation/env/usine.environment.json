@@ -1,0 +1,66 @@
+{
+ "environment": {
+  "python": "3.13.2",
+  "implementation": "CPython",
+  "executable": "<VENV>/bin/python",
+  "platform": "macOS-27.2-arm64-arm-64bit-Mach-O",
+  "machine": "arm64",
+  "system": {
+   "os": "Darwin",
+   "arch": "arm64",
+   "libc": "macOS 27.2",
+   "kernel": "27.2.0"
+  },
+  "origin": "venv",
+  "variables": {
+   "ROOTSYS": "/opt/homebrew/Cellar/root/6.38.04_1",
+   "CONDA_PREFIX": "<CONDA_HOME>",
+   "CONDA_DEFAULT_ENV": "base"
+  },
+  "packages": {
+   "numpy": "2.5.3",
+   "scipy": "1.18.1"
+  },
+  "project": {
+   "path": "<TOOL_HOME>",
+   "commit": "fb53006db41d1a640bf1b5af1a4b0f899ca59673",
+   "dirty": true
+  }
+ },
+ "tools": [
+  {
+   "name": "python",
+   "version": "3.13.2"
+  },
+  {
+   "name": "numpy",
+   "version": "2.5.3"
+  },
+  {
+   "name": "scipy",
+   "version": "1.18.1"
+  }
+ ],
+ "input_manifest": [
+  {
+   "path": "<TOOL_HOME>/bin/usine",
+   "sha256": "1d444720afec6ebd2efde8d275d5d950f39edee4f53e7c3756fba8ce05a62d25",
+   "size": 406120
+  },
+  {
+   "path": "<TOOL_HOME>/bin/usine_pbar",
+   "sha256": "a350254c694990f074a13a261764e591c0b331deb1b86f710a27f979e08a658c",
+   "size": 211128
+  },
+  {
+   "path": "<TOOL_HOME>/lib/libTUsine.dylib",
+   "sha256": "09fedcbba3ebb1fa649096a3647233f4197145510719fbde0d62163643149dc4",
+   "size": 4286528
+  },
+  {
+   "path": "<TOOL_HOME>/lib/libfparser.dylib",
+   "sha256": "5c05532574cdcbe9deff6ba20e4d029805c2692233a28d89d4cf4f6e423f9fb5",
+   "size": 373008
+  }
+ ]
+}
