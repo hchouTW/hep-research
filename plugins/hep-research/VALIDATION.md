@@ -7176,3 +7176,35 @@ with the model `emulator-model.json` and its ml-artifact `emulator.ml-artifact.j
 USINE runs (A1.8 tally, cap 1000 after A1.14): 520 in dispatch 1, 340 for the emulator (300 training, 40 validation)
 and 2 in the live test: 862 of 1000. Emulator evaluations (tens of thousands in the toys) are not USINE runs. The
 refinement round was not needed.
+
+## CRPROP-F1 — 2026-10-28 (environment E2)
+
+Work package F1 of the cr-propagation r4 campaign (r3 card §F1, line 462; decisions D8, D9, A1.7-A1.12): reproduction
+of Génolini et al. 2019 (arXiv:1904.08917, PRD 99 123028) Table II with USINE through the plugin's USINE provider and
+`propagation_fit.py`.
+
+**Criteria and tolerances, fixed before any comparison (R9; this paragraph is the work package's first commit).**
+Frozen entries (acceptance.json): F1-1 reproduction within the H0 tolerance D9, every difference attributed
+(cross sections, modulation, covariance, numerics, USINE version), a partial reproduction recorded with full
+attribution but not enabling F3; F1-2 the data carry `observed`, the covariance its `model-supplied` label, CRDB rows
+`secondary`. D9 made operational here (nothing loosened; a miss is recorded and attributed, never re-toleranced):
+
+| Family | delta: published (card), pass window | K10 (kpc^2/Myr): published (card), pass window |
+|---|---|---|
+| BIG | 0.48 +0.04/-0.03, [0.45, 0.52] | 0.30, [0.266, 0.338] |
+| SLIM | 0.51 ± 0.02, [0.49, 0.53] | 0.28, [0.258, 0.304] |
+| QUAINT | 0.45 +0.05/-0.02, [0.43, 0.50] | 0.33, [0.297, 0.367] |
+
+- delta windows: the card's central values and 1-sigma errors (Table II as transcribed in r3 §F1), closed intervals.
+- K10 = K0 10^delta, K at R = 10 GV with beta = 1 and both break factors set to 1 (their effect at 10 GV is below 1e-6
+  for every published best fit), in kpc^2/Myr (1 kpc^2/Myr = 3.0857e21^2 cm^2 / 3.15576e13 s, IAU parsec and Julian
+  year, r3 P1); D0_cm2_s of the fit is K0 at R0_gv = 1 GV. The card gives no K10 error; the window is the card's
+  central value times 10^(±s), with s the 1-sigma of log10 K10 propagated linearly from the authors' own fit
+  covariance of (delta, log10 K0) (`fit_covmatrix.out` of BIG, SLIM and QUAINT in USINE V3.5's
+  `doc/DocFiles/2019-Génolini-benchmarks-BC.tar.gz`, the paper's published fit outputs): s = 0.0520 (BIG), 0.0352
+  (SLIM), 0.0463 (QUAINT). Table II's own K10 errors could not be read (arXiv is outside the network consent); if they
+  differ, the windows above stand and the difference is reported.
+- A family passes D9 when both its best-fit delta and K10 lie in their windows and the fit converged (fit_diagnostics
+  verdict, boundary_kkt at a bound); a family that does not converge fails. F1-1 passes when all three families pass.
+- F1-2 passes when the dataset-record carries `observed`, the covariance block carries `model-supplied`, and every CRDB
+  row used as a cross-check carries `secondary`, all visible in the committed records.
