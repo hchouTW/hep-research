@@ -305,6 +305,69 @@ class PropagationFit(unittest.TestCase):
         self.assertAlmostEqual(J[1, 1], 3.0, places=6)
         self.assertEqual(pf._difference_jacobian(fun, None, [0], [1]), "2-point")
 
+    def test_per_center_response_models_for_the_family_calibration(self):
+        fams = [{"name": "diffusion", "free": ["D0_cm2_s", "delta"], "fixed": {"L_kpc": 4.0}},
+                {"name": "stiff", "free": ["D0_cm2_s"], "fixed": {"L_kpc": 4.0, "delta": 0.45}}]
+        cfg = self.config(families=fams, response_model={"kind": "polynomial", "degree": 3, "design_points": 24,
+                                                         "validation_points": 4, "layout": "per-center"},
+                          family_toys={"n": 20, "seed": 5, "alpha": 0.05})
+        res = self.fit(cfg)
+        cal = res["family_calibration"]
+        self.assertEqual(cal["status"], "ok", cal.get("detail"))
+        rm = cal["response_model"]
+        self.assertEqual((rm["layout"], len(rm["sub_models"])), ("per-center", 2))
+        self.assertEqual([m["center_of"] for m in rm["sub_models"]], ["diffusion", "stiff"])
+        self.assertTrue(rm["validation"]["passed"])
+        self.assertEqual(rm["validation"]["max_error_over_sigma"],
+                         max(m["validation"]["max_error_over_sigma"] for m in rm["sub_models"]))
+        pairs = {(a["null"], a["family"]): a["sub_model"] for a in rm["assignment"]}
+        self.assertEqual(len(pairs), 4)
+        self.assertEqual((pairs[("diffusion", "diffusion")], pairs[("stiff", "stiff")]), (0, 1))
+        self.assertEqual({e["family"] for e in cal["families"]}, {"diffusion", "stiff"})
+        self.assertTrue(all(len(e["rows"]) == 20 for e in cal["families"]))
+        cfg["response_model"]["layout"] = "nested"
+        self.assertEqual(self.cli(cfg)[0], 2)
+
+    def test_per_point_requests_send_one_request_for_every_dataset(self):
+        import numpy as np
+
+        import propagation_fit as pf
+
+        class Runner:
+            def __init__(self):
+                self.stats, self.requests = {"points_sent": 0}, []
+
+            def evaluate(self, req):
+                self.requests.append(req)
+                self.stats["points_sent"] += len(req["points"])
+                preds = [{"values": {"edges": [o["bins"][0][0]] + [b for _, b in o["bins"]],
+                                     "values": [float(k + 1) for k in range(len(o["bins"]))]}}
+                         for o in req["observables"]]
+                return {"status": "ok", "results": [{"status": "ok", "labels": ["synthetic"], "predictions": preds,
+                                                     "evaluation": {"input_hash": "h", "numerical_tolerance": 0.0}}]}
+
+        def ds(name, obs, edges):
+            d = object.__new__(pf.Dataset)
+            d.name, d.observable, d.axis, d.unit, d.edges = name, obs, "ekn", "GeV/n", edges
+            d.y = np.ones(len(edges) - 1)
+            return d
+        sets = [ds("bc", "B/C", [1.0, 2.0, 4.0]), ds("be", "10Be/9Be", [0.1, 1.0])]
+        runner = Runner()
+        ev = pf.Evaluator(runner, "p", "1", sets, {}, 10, decomposable=False, per_point=True)
+        out = ev.components({"delta": 0.5})
+        self.assertEqual(len(runner.requests), 1)
+        self.assertEqual([o["id"] for o in runner.requests[0]["observables"]], ["B/C", "10Be/9Be"])
+        self.assertEqual(out["bc"].tolist(), [[1.0, 2.0]])
+        self.assertEqual(out["be"].tolist(), [[1.0]])
+        self.assertEqual(ev.records[0]["datasets"], ["bc", "be"])
+        self.assertEqual(ev.points_sent, 1)
+        with self.assertRaises(pf.FitInputError):      # equal ids would make the predictions ambiguous
+            pf._per_point_requests({"provider_requests": "per-point"}, [sets[0], ds("bc2", "B/C", [1.0, 2.0])],
+                                   False)
+        with self.assertRaises(pf.FitInputError):
+            pf._per_point_requests({"provider_requests": "per-point"}, sets, True)
+        self.assertFalse(pf._per_point_requests({}, sets, False))
+
 
 def _usine_record():
     return json.loads(USINE_RECORD.read_text(encoding="utf-8"))
