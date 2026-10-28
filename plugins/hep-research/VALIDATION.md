@@ -6167,3 +6167,25 @@ is the best estimate of the uncontended cost; the medians are the conservative f
 time, D7's 200 core-hours cover about 3300 DRAGON2 evaluations at this grid (about 5700 at 125 CPU-s), fewer than
 D7's 5000 evaluations; E1's USINE cost is not measured here. Grid convergence is reported without a threshold; the
 energy-doubling figure includes the change of the log-log interpolation between DRAGON2 nodes.
+
+## CRPROP-B1 — 2026-10-28 (environment E2)
+
+Work package B1 of the cr-propagation r4 campaign (r3 §B1 and §B1b folded together, r4 §6): USINE V3.5 translator
+(`transport` block to a USINE initialisation file), reader (USINE local-flux tables to ratios of bin integrals, r3
+P2, P3, P11), recorded runs replayed offline, the USINE row of the cost table and the cr-provider/1 entrypoint
+`usine_provider.py`.
+
+**Criteria and tolerances, fixed before any comparison (R9).** Frozen entries (acceptance.json): B1-1 offline replay
+tests pass with `HEP_USINE_BIN` and `HEP_USINE_DATA` unset; B1-2 a live rerun (`HEP_USINE_LIVE_TEST=1`) of every
+recorded run reproduces the recorded USINE outputs within relative 1e-6, value by value, with the live test not
+skipped; B1-3 `tested_versions` of the USINE tool names the USINE version and commit, the compiler and the ROOT
+version, and the adapter status follows R3 (the lowest tool status); B1-4 the cost table has a USINE row (wall time
+and peak RSS, median of three identical runs, `/usr/bin/time -l`; grid convergence reported without a threshold, as
+A4 does); B1-PRV-1 C1's conformance mixin passes for provider `usine`; B1-PRV-2 single-shot and `--serve` responses
+have the same sha256 after removing `elapsed_s` and time stamps. Added by this work package (stricter checks only,
+none replaces a frozen entry): the reader's element ratio from the isotope tables agrees with USINE's own element-ratio
+output at USINE's grid points within relative 1e-4 on the axis ekn (same nodes; only the 6-digit rounding of the
+tables differs) and within relative 2e-3 on the axis rigidity (log-log interpolation between nodes); a transport item
+USINE cannot express is either recorded as a substitute in the translation or refused (never a silent default); no
+USINE source, shipped input file or file copied from them is committed (GPL-2.0), only numbers computed by USINE runs
+and this work package's own specifications and records.
