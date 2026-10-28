@@ -5,6 +5,11 @@ USINE V3.5 'usine -l' writes one table per quantity, local_fluxes_<NAME>_Ekn_<mo
 header lines (program, date, model, quantity, modulation, column titles) and two columns, E_k/n in GeV/n and the
 unmodulated local interstellar flux per E_k/n in (GeV/n m^2 s sr)^-1 (r3 P11: the unit is read from the header and
 checked). This reader uses the isotope tables only; USINE's own element-ratio tables are read only to check it.
+A run with solar modulation (usine_translate.py --phi, work package F1) also writes each isotope's force-field
+modulated table, local_fluxes_<NAME>_Ekn_<model>_SolMod0DFF_phi<phi>GV.out (phi with USINE's rounding in the name),
+whose first column is the top-of-atmosphere E_k/n; with phi > 0 the reader reads those tables, after checking that the
+header's 'SolMod0DFF_phi<value>GV' equals the requested phi within USINE's printed precision (5e-4 GV), so every
+isotope is modulated with its own Z and A before any ratio is formed (r3 P4).
 
 Values (r3 P2, P3): an element ratio X/Y in a bin is the bin integral of the summed numerator isotopes over the bin
 integral of the summed denominator isotopes, never the bin average of the ratio. On the axis ekn every isotope is
@@ -27,6 +32,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 import sys
 from pathlib import Path
 
@@ -61,13 +67,18 @@ def charge_and_mass(nuclide: str) -> tuple[int, int]:
     return z, int(digits)
 
 
+PHI_PRINT_TOLERANCE_GV = 5e-4  # USINE prints phi with 3 decimals in the table header
+MODULATION_HEADER = re.compile(r"SolMod0DFF_phi([0-9.]+)GV")
+
+
 def table_name(nuclide_or_ratio: str, model: str, axis: str = "Ekn") -> str:
     """USINE's table name of a quantity per E_k/n ('Ekn') or per rigidity ('R')."""
     return f"local_fluxes_{nuclide_or_ratio.upper().replace('/', '')}_{axis}_{model}_SolMod0DFF_phi0_00GV.out"
 
 
-def read_table(path: Path) -> tuple[list[float], list[float], dict]:
-    """(E_k/n nodes, values, header) of one USINE table; the header holds 'quantity', 'model', 'columns'."""
+def read_table(path: Path, phi_gv: float = 0.0) -> tuple[list[float], list[float], dict]:
+    """(E_k/n nodes, values, header) of one USINE table at modulation phi_gv (0: unmodulated); the header holds
+    'quantity', 'model', 'columns'."""
     header, xs, ys = [], [], []
     for line in Path(path).read_text(encoding="utf-8").splitlines():
         if line.startswith("#"):
@@ -88,13 +99,27 @@ def read_table(path: Path) -> tuple[list[float], list[float], dict]:
             "columns": header[5]}
     if not meta["columns"].startswith(("Ekn [GeV/n]", "R [GV]")):
         raise ReadError(f"{Path(path).name}: first column is neither E_k/n in GeV/n nor R in GV ({meta['columns']!r})")
-    if "phi0.00GV" not in meta["modulation"]:
-        raise ReadError(f"{Path(path).name}: modulated table ({meta['modulation']}); only phi = 0 is read")
+    m = MODULATION_HEADER.search(meta["modulation"])
+    if not m:
+        raise ReadError(f"{Path(path).name}: no force-field modulation in the header ({meta['modulation']!r})")
+    if abs(float(m.group(1)) - float(phi_gv)) > PHI_PRINT_TOLERANCE_GV:
+        raise ReadError(f"{Path(path).name}: table at phi = {m.group(1)} GV, {float(phi_gv):g} GV requested")
+    meta["phi_gv"] = float(m.group(1))
     return xs, ys, meta
 
 
-def read_isotope(out_dir: Path, nuclide: str, model: str) -> tuple[list[float], list[float]]:
-    xs, ys, meta = read_table(Path(out_dir) / table_name(nuclide, model))
+def modulated_table(out_dir: Path, nuclide: str, model: str) -> Path:
+    """The one force-field modulated table of an isotope in a run's output folder (phi > 0)."""
+    hits = [p for p in sorted(Path(out_dir).glob(f"local_fluxes_{nuclide.upper()}_Ekn_{model}_SolMod0DFF_phi*GV.out"))
+            if not p.name.endswith("_phi0_00GV.out")]
+    if len(hits) != 1:
+        raise ReadError(f"{nuclide}: {len(hits)} modulated tables in {Path(out_dir).name}, expected one")
+    return hits[0]
+
+
+def read_isotope(out_dir: Path, nuclide: str, model: str, phi_gv: float = 0.0) -> tuple[list[float], list[float]]:
+    path = modulated_table(out_dir, nuclide, model) if phi_gv else Path(out_dir) / table_name(nuclide, model)
+    xs, ys, meta = read_table(path, phi_gv)
     if not meta["columns"].startswith("Ekn [GeV/n]"):
         raise ReadError(f"table of {nuclide} is not per E_k/n")
     if meta["quantity"].upper() != nuclide.upper():
@@ -202,9 +227,9 @@ def point_ratio(tables: dict, observable: str, x: float, axis: str) -> float:
     return sum(flux(s) for s in num) / sum(flux(s) for s in den)
 
 
-def read_run(out_dir: Path, model: str, species) -> dict:
-    """nuclide -> (E_k/n nodes, flux) for every species of the run."""
-    return {s: read_isotope(out_dir, s, model) for s in species}
+def read_run(out_dir: Path, model: str, species, phi_gv: float = 0.0) -> dict:
+    """nuclide -> (E_k/n nodes, flux) for every species of the run, modulated at phi_gv (0: unmodulated)."""
+    return {s: read_isotope(out_dir, s, model, phi_gv) for s in species}
 
 
 def prediction(observable: str, axis: str, edges: list[float], values: list[float], point: dict, run: dict) -> dict:
@@ -213,18 +238,23 @@ def prediction(observable: str, axis: str, edges: list[float], values: list[floa
     num, den = present(observable, run["species"])
     species = OBSERVABLES[observable][2]
     absent = [s for s in OBSERVABLES[observable][0] + OBSERVABLES[observable][1] if s not in run["species"]]
+    mod = run.get("solar_modulation")
+    where = (f" (r = {run['observer_kpc']} kpc, z = 0)" if run.get("observer_kpc") else " (z = 0)")
     return {
         "observable": {
             "quantity": "ratio",
-            "process": f"unmodulated local interstellar {observable} from a USINE V3.5 run ({run['model']}): ratio of "
+            "process": (f"force-field modulated {observable} (USINE SolMod0DFF, phi = {mod['phi_gv']:.10g} GV, per "
+                        "isotope)" if mod else f"unmodulated local interstellar {observable}")
+                       + f" from a USINE V3.5 run ({run['model']}): ratio of "
                        f"bin integrals of {'+'.join(num)} over {'+'.join(den)}"
                        + (f" ({', '.join(absent)} not in the network)" if absent else ""),
             "species": [{"name": s} for s in species],
             "variables": [{"name": var_name, "unit": unit, "edges": edges}],
-            "phase_space": {"definition": "USINE local interstellar flux at the observer"
-                                          + (f" (r = {run['observer_kpc']} kpc, z = 0)" if run.get("observer_kpc")
-                                             else " (z = 0)") + ", before solar modulation", "fiducial": False},
-            "level": "crsr:local-interstellar",
+            "phase_space": {"definition": (f"USINE flux near Earth after force-field solar modulation of the local "
+                                           f"interstellar flux at the observer{where}" if mod else
+                                           f"USINE local interstellar flux at the observer{where}, before solar "
+                                           "modulation"), "fiducial": False},
+            "level": "top-of-atmosphere" if mod else "crsr:local-interstellar",
             "normalization": {"kind": "exposure", "value": "not-applicable",
                               "convention": "ratio of two bin-integrated fluxes; the normalization cancels"},
             "bin_semantics": "bin-averaged",
@@ -245,8 +275,10 @@ def prediction(observable: str, axis: str, edges: list[float], values: list[floa
         "representation": "numerical",
         "values": {"edges": edges, "values": values, "unit": "1"},
         "uncertainties": [],
-        "allowed_transformations": ["solar modulation per isotope (outside this reader)",
-                                    "rebin (recompute the bin integrals from the run's tables; never merge ratios)"],
+        "allowed_transformations": (["rebin (recompute the bin integrals from the run's tables; never merge ratios)"]
+                                    if mod else
+                                    ["solar modulation per isotope (outside this reader)",
+                                     "rebin (recompute the bin integrals from the run's tables; never merge ratios)"]),
     }
 
 
@@ -257,13 +289,18 @@ def main(argv=None) -> int:
     ap.add_argument("--axis", required=True, choices=sorted(VARIABLE))
     ap.add_argument("--edges", required=True, help="comma-separated bin edges (GeV/n or GV)")
     ap.add_argument("--param", action="append", default=[], help="NAME=VALUE written into parameter_point")
+    ap.add_argument("--phi", type=float, default=None,
+                    help="read the modulated tables at this phi in GV (default: the run's translation.json)")
     ap.add_argument("--out", type=Path, help="prediction JSON to write")
     args = ap.parse_args(argv)
     try:
         run = json.loads((args.run_dir / "translation.json").read_text(encoding="utf-8"))
         edges = [float(x) for x in args.edges.split(",")]
         point = {k: float(v) for k, v in (p.split("=", 1) for p in args.param)}
-        tables = read_run(args.run_dir / "out", run["model"], run["species"])
+        phi = args.phi if args.phi is not None else ((run.get("solar_modulation") or {}).get("phi_gv") or 0.0)
+        run = dict(run, solar_modulation=(dict(run.get("solar_modulation") or {"model": "SolMod0DFF"}, phi_gv=phi)
+                                          if phi else None))
+        tables = read_run(args.run_dir / "out", run["model"], run["species"], phi)
         values = ratio_of_bin_integrals(tables, args.observable, edges, args.axis)
         pred = prediction(args.observable, args.axis, edges, values, point, run)
     except (OSError, ValueError, KeyError) as exc:
