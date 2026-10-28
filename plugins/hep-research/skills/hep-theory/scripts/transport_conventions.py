@@ -55,8 +55,10 @@ independent of z, no convection) with the source and the destruction (rate Gamma
 h, the change of the disc flux at first order in V_A^2 is a_disc h L for thin-disc reacceleration and a_halo L^2/3 for
 whole-halo reacceleration, a = c V_A^2/w (zeroth-order profile 1 - |z|/L; Green's function at z = 0 proportional to
 L - |z|, unchanged by disc destruction). Equal first-order effect needs c_disc V_A,disc^2 h / w_disc =
-c_halo V_A,halo^2 L / (3 w_halo), so V_A,disc = V_A,halo sqrt(L/(3h)) for equal c and w (r3 P1 quotes "about
-sqrt(L/h)", the uniform-density estimate; the factor 3 is the observer-weighted profile). This is exact at first
+c_halo V_A,halo^2 L / (3 w_halo), so V_A,disc = V_A,halo sqrt(L/(3h)) for equal c and w. r3 P1's "about
+sqrt(L/h)" is not this conversion: used literally it puts V_A off by sqrt(3) (a third, or three times, the first-order
+effect; the factor 3 is the observer-weighted halo profile), so quantitative work takes V_A,disc = V_A,halo
+sqrt(L/(3h)) and its bound from here (escalation 10, VALIDATION CRPROP-A1R). This is exact at first
 order and approximate beyond it: with the first-order terms matched, the second-order terms differ by the relative
 amount (1 + lam)/5, lam = h Gamma L / D (destruction over escape), the returned bound, which applies to the
 second-order term of the disc flux, not to the whole flux. Convection, a radial boundary and energy losses are
@@ -349,7 +351,8 @@ def convert_reacceleration(va_kms: float, source: str, target: str, l_kpc: float
                bound_applies_to="the second-order term in V_A^2 of the disc flux; the first-order term is matched "
                                 "exactly", assumptions=list(ZONE_ASSUMPTIONS),
                reason="thin disc <-> whole halo: equal first-order disc-flux change, c V_A,disc^2 h / w = "
-                      "c V_A,halo^2 L / (3 w) (derived in this module; r3 P1 gives 'about sqrt(L/h)'); beyond first "
+                      "c V_A,halo^2 L / (3 w), V_A,disc = V_A,halo sqrt(L/(3h)) (derived in this module; r3 P1's "
+                      "'about sqrt(L/h)' puts V_A off by sqrt(3)); beyond first "
                       "order the terms differ by (1 + lam)/5; with convection or a large reacceleration effect "
                       "compare predictions")
     return out

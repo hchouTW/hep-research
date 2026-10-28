@@ -40,7 +40,7 @@
   },
   "hep-theory": {
    "references": 31,
-   "bytes": 243625,
+   "bytes": 243624,
    "uncited": 0
   }
  },
@@ -4076,7 +4076,7 @@
   {
    "path": "skills/hep-theory/references/cosmic-ray-phenomenology.md",
    "owner": "hep-theory",
-   "bytes": 24574,
+   "bytes": 24573,
    "lines": 291,
    "linked_from_skill_md": true,
    "cited_by": [

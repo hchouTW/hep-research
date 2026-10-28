@@ -47,12 +47,18 @@ Transport block (contracts ext_theory_spec.transport, r3 5.4, canonical names) t
   half-lives of the network are checked against NUBASE2020 (core.constants.physical), never replaced
   (check_half_lives).
 - gas: densities read from gas.model ('n_H = <number> cm^-3', or 'n_HI = .., n_HII = .., n_H2 = .. cm^-3'), in the
-  thin disc. With the ILLUSTRATIVE sets all neutral (HI = n_H; USINE's Coulomb loss, on HII, is then zero) and
+  thin disc; every density term needs its unit cm^-3 (a term without it is refused, never read as 0; a term not
+  written at all is 0, recorded). With the ILLUSTRATIVE sets all neutral (HI = n_H; USINE's Coulomb loss, on HII, is then zero) and
   He_to_H_number recorded but not used (cross sections on hydrogen only; no helium cross section is invented). With
   USINE's own files He = He_to_H_number (HI + HII + 2 H2) and the targets are H and He.
-- sources: one injection slope without breaks, dQ/dE_k/n = q beta^eta Rig^-gamma (USINE's POWERLAW template, eta_s =
-  the injection item's eta, 0 when not given, recorded); spatial distribution uniform in r up to radius_kpc
-  (template CST) in the 2D model.
+- sources: one injection slope without breaks, dQ/dX = q beta^eta Rig^-gamma with X the item's spectrum_variable
+  (harmonized-v1 states it; escalation 12): 'kinetic_energy_per_nucleon' or 'total_energy' give USINE's POWERLAW
+  template per E_k/n with eta_s = eta, 'rigidity' gives eta_s = eta - 1 (dRig/dE_k/n = (A/|Z|)/beta; the constant A,
+  A/|Z| is absorbed by the normalisation), exact; spectrum_variable not given: kinetic_energy_per_nucleon and eta 0
+  when not given, both recorded; spatial distribution uniform in r up to radius_kpc (template CST) in the 2D model.
+  sources.abundances: with the ILLUSTRATIVE sets only harmonized-v1's 'fixed by the parent list of
+  theory:cr-secondary-ratio' (or none, recorded) is translated, any other text is refused; with USINE's own files
+  only 'data-normalised ...' (below).
 - cross sections and abundances, one of:
   (a) the ILLUSTRATIVE sets of theory:cr-secondary-ratio (ILLUSTRATIVE_SETS, equal to the profile's
       models/xs-illustrative-A.json and xs-illustrative-decay.json, checked by the adapter tests). Set A is
@@ -184,6 +190,15 @@ ILLUSTRATIVE_SETS = {
 }
 NUCLIDE = re.compile(r"^(\d+)([A-Z][a-z]?)$")
 GAS_TERM = re.compile(r"n_(HII|HI|H2|H)\s*=\s*([0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?)\s*cm\^?-3")
+# any density term, with or without its unit: a term GAS_TERM does not match is refused, never set to 0 (escalation 12)
+GAS_TERM_ANY_UNIT = re.compile(r"n_(HII|HI|H2|H)\s*=\s*([-+0-9.eE]+)\s*([^\s,;)]*)")
+# sources.injection[].spectrum_variable X of dQ/dX = q beta^eta Rig^-gamma -> the beta exponent added to eta for
+# USINE's POWERLAW per E_k/n: dRig/dE_k/n = (A/|Z|)/beta and dE_tot/dE_k/n = A (constants per species, absorbed by the
+# normalisation), so rigidity gives eta_s = eta - 1 and the per-energy variables eta_s = eta, exactly (escalation 12)
+SPECTRUM_VARIABLE_ETA_SHIFT = {"kinetic_energy_per_nucleon": 0.0, "total_energy": 0.0, "rigidity": -1.0}
+DEFAULT_SPECTRUM_VARIABLE = "kinetic_energy_per_nucleon"
+# sources.abundances of the ILLUSTRATIVE sets: the parent list of theory:cr-secondary-ratio (harmonized-v1's text)
+PARENT_LIST_ABUNDANCES = "fixed by the parent list of theory:cr-secondary-ratio"
 # element symbols Z = 1..30 (USINE's charts stop at Zn) and USINE's own files named 'usine:<path>.dat'
 SYMBOLS = ("H", "He", "Li", "Be", "B", "C", "N", "O", "F", "Ne", "Na", "Mg", "Al", "Si", "P", "S", "Cl", "Ar", "K",
            "Ca", "Sc", "Ti", "V", "Cr", "Mn", "Fe", "Co", "Ni", "Cu", "Zn")
@@ -289,7 +304,7 @@ TRANSPORT_KEYS = {
 TOP_KEYS = set(TRANSPORT_KEYS) | {"losses", "family", "free"}
 BREAK_KEYS = {"low": {"kind", "R_break_gv", "delta_below", "s", "s_convention"},
               "high": {"kind", "R_break_gv", "delta_above", "s", "s_convention"}}
-INJECTION_KEYS = {"species_group", "gamma", "eta", "breaks"}
+INJECTION_KEYS = {"species_group", "gamma", "eta", "breaks", "spectrum_variable"}
 ELECTRON_CAPTURE_TREATMENTS = ("fully-stripped", "laboratory-half-life")
 
 
@@ -333,6 +348,11 @@ def usine_file(name: str, where: str) -> str:
 def _gas(gas: dict, subs: list[str]) -> dict:
     """{'HI', 'HII', 'H2'} in cm^-3 from gas.model ('n_H = x cm^-3', or any of 'n_HI = x', 'n_HII = y', 'n_H2 = z')."""
     text = str(gas.get("model", ""))
+    unitless = [f"n_{k} = {v}{(' ' + u) if u else ''}" for k, v, u in GAS_TERM_ANY_UNIT.findall(text)
+                if not re.fullmatch(r"cm\^?-3", u)]
+    if unitless:
+        raise SpecError(f"gas.model {text!r}: density term(s) {unitless} without the unit cm^-3; give every density "
+                        "as 'n_<H|HI|HII|H2> = <number> cm^-3' (a term without its unit is not read as 0)")
     parts = {k: float(v) for k, v in GAS_TERM.findall(text)}
     if set(parts) == {"H"}:
         return {"HI": parts["H"], "HII": 0.0, "H2": 0.0}
@@ -609,7 +629,15 @@ def translate(transport: dict, name: str, ekn_range_gev, points_per_decade: int 
         raise SpecError("sources.injection: one slope without breaks is translated; give one gamma (and at most one "
                         "eta)")
     gamma = gammas.pop()
-    eta_s = etas.pop() if etas else 0.0
+    eta = etas.pop() if etas else 0.0
+    variables = {i["spectrum_variable"] for i in inj if "spectrum_variable" in i}
+    if len(variables) > 1 or not variables <= set(SPECTRUM_VARIABLE_ETA_SHIFT):
+        raise SpecError(f"sources.injection spectrum_variable {sorted(map(str, variables))}: one of "
+                        f"{sorted(SPECTRUM_VARIABLE_ETA_SHIFT)} for every item")
+    variable = variables.pop() if variables else _given({}, "spectrum_variable", "sources.injection",
+                                                        DEFAULT_SPECTRUM_VARIABLE, defaults,
+                                                        " (USINE's POWERLAW is a density per E_k/n)")
+    eta_s = eta + SPECTRUM_VARIABLE_ETA_SHIFT[variable]
     groups = [str(i["species_group"]) for i in inj if "species_group" in i]
     if groups:
         subs.append(f"sources.injection species_group {groups}: one slope for every primary of the network")
@@ -660,7 +688,9 @@ def translate(transport: dict, name: str, ekn_range_gev, points_per_decade: int 
                     f"{1 - float(factor) / KPC_PER_MYR_PER_KM_S:.1e} below the IAU parsec and Julian year value "
                     f"{KPC_PER_MYR_PER_KM_S:.9e} used with the ILLUSTRATIVE sets")
     spec["source"] = {"gamma": gamma, "eta_s": eta_s, "spatial": "CST" if model == "Model2DKisoVc" else None}
-    subs.append(f"source spectrum dQ/dE_k/n = q Rig^-{gamma:g} (USINE POWERLAW, eta_s = {eta_s:g})"
+    subs.append(f"source spectrum dQ/dE_k/n = q beta^eta_s Rig^-{gamma:g} (USINE POWERLAW, eta_s = {eta_s:g}: "
+                f"spectrum_variable {variable!r} with eta {eta:g}"
+                + (", dRig/dE_k/n = (A/|Z|)/beta" if variable == "rigidity" else "") + ")"
                 + (", uniform in r up to radius_kpc in the thin disc (template CST)"
                    if model == "Model2DKisoVc" else ""))
     subs.extend(late)
@@ -827,8 +857,12 @@ def _illustrative(transport, xs_block, prod_name, inel_name, species_block, src,
             f"{NORM_EKN_GEV:g} GeV/n is in the ratio "
             f"{', '.join(f'{k} {v:g}' for k, v in PARENT_RATIOS.items() if k in parent_elements)}"
             " (theory:cr-secondary-ratio parent list); USINE NormList with generated points, not data"]
-    if abund:
-        late.append(f"sources.abundances {abund!r}: not parsed; the parent ratios above are used")
+    if not abund:
+        late.append(f"sources.abundances not given: {PARENT_LIST_ABUNDANCES!r} (the ILLUSTRATIVE sets' parent list)")
+    elif abund.strip() != PARENT_LIST_ABUNDANCES:
+        raise SpecError(f"sources.abundances {abund!r}: with the ILLUSTRATIVE sets only {PARENT_LIST_ABUNDANCES!r} is "
+                        "translated (the parent ratios above); data-normalised abundances need USINE's own cross "
+                        "sections; nothing else is replaced")
     late.append("tertiary chains, ghost nuclei and exotic primaries off")
     return {"mode": "illustrative", "gas_cm3": {"HI": n_h, "HII": 0.0, "H2": 0.0, "He": 0.0}, "targets": ["H"],
             "species": species, "parents": parents, "production_mb": prod, "inelastic_mb": inel,

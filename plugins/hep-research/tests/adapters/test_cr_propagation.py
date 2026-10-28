@@ -42,6 +42,7 @@ sys.path.insert(0, str(ADAPTER / "assets"))
 
 import dragon2_run  # noqa: E402
 import dragon2_to_prediction as conv  # noqa: E402
+import dragon2_translate  # noqa: E402
 from contracts.comparison.gate import check as gate_check  # noqa: E402
 from contracts.project import load_project  # noqa: E402
 from contracts.validate import validate_artifact  # noqa: E402
@@ -697,8 +698,10 @@ class D1Items(unittest.TestCase):
             with self.subTest(item=item):
                 s = d1_spec(item)
                 doc = json.loads((FIX / "specs" / f"harmonized-v1-{source}.json").read_text(encoding="utf-8"))
-                again = dragon2_run.spec_from_transport(doc["transport"], s["name"], channels, z_range=(4, 8),
-                                                        ekn_range_gev=(0.04, 2000.0), gas_model=gas)
+                # DRAGON2's own sources stated (K3): harmonized-v1's injection variable and abundances are refused
+                again = dragon2_translate.spec_from_transport(dragon2_translate.with_dragon2_sources(doc["transport"]),
+                                                              s["name"], channels, z_range=(4, 8),
+                                                              ekn_range_gev=(0.04, 2000.0), gas_model=gas)
                 self.assertEqual(again, s)
                 rec = json.loads(d1_record(item).read_text(encoding="utf-8"))
                 self.assertEqual([f.code for f in validate_artifact(rec).errors], [])
@@ -832,7 +835,7 @@ class Dragon2ProviderOffline(unittest.TestCase):
 
     def test_defaults_equal_their_sources(self):
         iso = json.loads((FIX / "specs" / "harmonized-v1-isotopic.json").read_text(encoding="utf-8"))
-        self.assertEqual(dragon2_provider.DEFAULT_TRANSPORT, iso["transport"])
+        self.assertEqual(dragon2_provider.DEFAULT_TRANSPORT, dragon2_translate.with_dragon2_sources(iso["transport"]))
         self.assertEqual(dragon2_provider.ILLUSTRATIVE_CHANNELS_MB,
                          json.loads((D1_FIX / "channels-illustrative-decay.json").read_text(encoding="utf-8")))
         xs = json.loads((PROFILE / "models" / "xs-illustrative-decay.json").read_text(encoding="utf-8"))
@@ -2140,6 +2143,137 @@ class D3CrossCode(unittest.TestCase):
             tail = [v for e, v in zip(inel["ekn_gev"], vals) if e >= 1000.0]
             self.assertEqual(len(set(tail)), 1, nuc)  # DRAGON2 clamps the energy at 1e6 MeV
         self.assertNotIn("Users", json.dumps(inel))
+
+
+class TranslatorSourceItems(unittest.TestCase):
+    """K3-2 (escalation 12): both translators translate sources.abundances or refuse it with a reason, handle the
+    injection spectrum_variable that harmonized-v1 states, and the USINE translator refuses a gas density term without
+    its unit instead of reading it as 0. Offline; nothing is run."""
+
+    HARMONIZED_FILES = ("harmonized-v1", "harmonized-v1-isotopic", "harmonized-v1-convection", "harmonized-v1-decay",
+                 "harmonized-v1-reacceleration", "harmonized-v1-losses")
+
+    @staticmethod
+    def harmonized(name="harmonized-v1-isotopic"):
+        return json.loads((FIX / "specs" / f"{name}.json").read_text(encoding="utf-8"))["transport"]
+
+    @staticmethod
+    def with_sources(t, **injection_and_abundances):
+        t = json.loads(json.dumps(t))
+        abund = injection_and_abundances.pop("abundances", t["sources"].get("abundances"))
+        t["sources"]["injection"] = [dict(i, **injection_and_abundances) for i in t["sources"]["injection"]]
+        if abund is None:
+            t["sources"].pop("abundances", None)
+        else:
+            t["sources"]["abundances"] = abund
+        for i in t["sources"]["injection"]:
+            for k in [k for k, v in i.items() if v is None]:
+                del i[k]
+        return t
+
+    def dragon2(self, t):
+        return dragon2_translate.spec_from_transport(t, "x", dragon2_provider.ILLUSTRATIVE_CHANNELS_MB, z_range=(4, 8),
+                                                     ekn_range_gev=(0.05, 100.0))
+
+    def test_harmonized_v1_states_the_injection_variable(self):
+        for name in self.HARMONIZED_FILES:
+            with self.subTest(file=name):
+                inj = self.harmonized(name)["sources"]["injection"]
+                self.assertEqual({i["spectrum_variable"] for i in inj}, {"kinetic_energy_per_nucleon"})
+        self.assertEqual(usine_spec("harmonized-v1")["transport"], self.harmonized("harmonized-v1"))
+
+    def test_dragon2_refuses_what_its_source_cannot_express(self):
+        t = self.harmonized()
+        with self.assertRaisesRegex(dragon2_run.SpecError, "factor beta"):  # harmonized-v1: per E_k/n
+            self.dragon2(t)
+        for variable in ("kinetic_energy_per_nucleon", "total_energy"):
+            with self.subTest(variable=variable), self.assertRaisesRegex(dragon2_run.SpecError, "spectrum_variable"):
+                self.dragon2(self.with_sources(t, spectrum_variable=variable,
+                                               abundances=dragon2_translate.DRAGON2_OWN_ABUNDANCES))
+        cases = {"parent list": (self.with_sources(t, spectrum_variable="rigidity"), "sources.abundances"),
+                 "other text": (self.with_sources(t, spectrum_variable="rigidity", abundances="fitted"),
+                                "sources.abundances"),
+                 "eta": (self.with_sources(dragon2_translate.with_dragon2_sources(t), eta=1.0), "beta factor"),
+                 "unknown variable": (self.with_sources(t, spectrum_variable="momentum"), "one of"),
+                 "unknown key": (self.with_sources(t, measure="rigidity"), "keys among")}
+        for why, (tr, pattern) in cases.items():
+            with self.subTest(refused=why), self.assertRaisesRegex(dragon2_run.SpecError, pattern):
+                self.dragon2(tr)
+
+    def test_dragon2_translates_its_own_sources_and_records_defaults(self):
+        t = self.harmonized()
+        own = self.dragon2(dragon2_translate.with_dragon2_sources(t))
+        raw = dragon2_run.spec_from_transport(t, "x", dragon2_provider.ILLUSTRATIVE_CHANNELS_MB, z_range=(4, 8),
+                                              ekn_range_gev=(0.05, 100.0))
+        # the run directory is the D1 translator's: same XML, same single injection slope; only notes are added
+        self.assertEqual(dragon2_run.render_xml(dragon2_run.check_spec(own)),
+                         dragon2_run.render_xml(dragon2_run.check_spec(raw)))
+        self.assertEqual(own["injection_gamma"], raw["injection_gamma"])
+        self.assertEqual(own["substitutes"][:len(raw["substitutes"])], raw["substitutes"])
+        self.assertTrue(any("spectrum_variable 'rigidity'" in x for x in own["substitutes"]))
+        self.assertTrue(any(dragon2_translate.DRAGON2_OWN_ABUNDANCES in x and "kept" in x for x in own["substitutes"]))
+        unstated = self.dragon2(self.with_sources(t, spectrum_variable=None, abundances=None))
+        self.assertTrue(any("spectrum_variable not stated: rigidity" in x for x in unstated["substitutes"]))
+        self.assertTrue(any("sources.abundances not given" in x for x in unstated["substitutes"]))
+        # the provider translates through this module, so a harmonized-v1 transport fails its point with the reason
+        with self.assertRaisesRegex(dragon2_run.SpecError, "sources.abundances|spectrum_variable"):
+            dragon2_translate.spec_from_transport(dragon2_provider.transport_for({"transport": t}, {}), "p",
+                                                  dragon2_provider.ILLUSTRATIVE_CHANNELS_MB, z_range=(4, 8),
+                                                  ekn_range_gev=(0.05, 100.0))
+
+    def test_usine_injection_variable(self):
+        t = usine_spec("harmonized-v1")["transport"]
+        base = usine_translate.translate(t, "x", (0.04, 2000.0))
+        self.assertEqual(base["source"]["eta_s"], 0.0)
+        self.assertTrue(any("spectrum_variable 'kinetic_energy_per_nucleon'" in x for x in base["substitutes"]))
+        cases = {("total_energy", None): 0.0, ("rigidity", None): -1.0, ("rigidity", 1.0): 0.0,
+                 ("kinetic_energy_per_nucleon", -1.0): -1.0}
+        for (variable, eta), want in cases.items():
+            with self.subTest(variable=variable, eta=eta):
+                got = usine_translate.translate(self.with_sources(t, spectrum_variable=variable, eta=eta), "x",
+                                                (0.04, 2000.0))
+                self.assertTrue(math.isclose(got["source"]["eta_s"], want, rel_tol=1e-12, abs_tol=1e-15))
+        rig = usine_translate.translate(self.with_sources(t, spectrum_variable="rigidity"), "x", (0.04, 2000.0))
+        init = usine_translate.render(rig, "<TOOL_HOME>/inputs", "<RUN_DIR>")["usine.init.par"]
+        self.assertIn("eta_s[SHARED:-1", init)
+        self.assertTrue(any("dRig/dE_k/n = (A/|Z|)/beta" in x for x in rig["substitutes"]))
+        # not stated (e.g. the B1 and F1 transports): E_k/n, recorded as a default; the committed runs keep eta_s 0
+        unstated = usine_translate.translate(self.with_sources(t, spectrum_variable=None), "x", (0.04, 2000.0))
+        self.assertEqual(unstated["source"]["eta_s"], 0.0)
+        self.assertTrue(any("sources.injection.spectrum_variable = kinetic_energy_per_nucleon" in x
+                            for x in unstated["substitutes"]))
+        for bad in ("momentum", "per-nucleon"):
+            with self.subTest(refused=bad), self.assertRaisesRegex(usine_translate.SpecError, "spectrum_variable"):
+                usine_translate.translate(self.with_sources(t, spectrum_variable=bad), "x", (0.04, 2000.0))
+
+    def test_usine_abundances_translated_or_refused(self):
+        t = usine_spec("harmonized-v1")["transport"]
+        got = usine_translate.translate(t, "x", (0.04, 2000.0))
+        self.assertEqual(got["norm_points"], {"C": 1.0, "O": 0.9})
+        self.assertFalse(any("sources.abundances" in x and "not parsed" in x for x in got["substitutes"]))
+        for text in ("fitted", "dragon2:BaseModel_DRAGONxsec.source.param", "solar"):
+            with self.subTest(refused=text), self.assertRaisesRegex(usine_translate.SpecError, "sources.abundances"):
+                usine_translate.translate(self.with_sources(t, abundances=text), "x", (0.04, 2000.0))
+        unstated = usine_translate.translate(self.with_sources(t, abundances=None), "x", (0.04, 2000.0))
+        self.assertEqual(unstated["norm_points"], got["norm_points"])
+        self.assertTrue(any("sources.abundances not given" in x for x in unstated["substitutes"]))
+
+    def test_usine_gas_term_without_unit_is_refused(self):
+        t = usine_spec("harmonized-v1")["transport"]
+        own = usine_spec("b1x-init-test")["transport"]
+        # the D3 string that aborted a run: n_HI without its unit was read as 0 before K3
+        for model in ("uniform in the thin disc, n_HI = 0.867, n_HII = 0.033 cm^-3, n_H2 = 0 cm^-3",
+                      "n_H = 1", "n_H = 1 m^-3"):
+            with self.subTest(model=model), self.assertRaisesRegex(usine_translate.SpecError, "without the unit"):
+                usine_translate.translate(dict(own, gas=dict(own["gas"], model=model)), "x", (1.0, 10.0))
+        with self.assertRaisesRegex(usine_translate.SpecError, "without the unit"):
+            usine_translate.translate(dict(t, gas=dict(t["gas"], model="uniform, n_H = 1")), "x", (1.0, 10.0))
+        ok = usine_translate.translate(dict(own, gas=dict(own["gas"], model="n_HI = 0.867 cm^-3, n_HII = 0.033 cm-3")),
+                                       "x", (1.0, 10.0))
+        self.assertTrue(math.isclose(ok["gas_cm3"]["HI"], 0.867, rel_tol=1e-12))
+        self.assertTrue(math.isclose(ok["gas_cm3"]["HII"], 0.033, rel_tol=1e-12))
+        self.assertEqual(ok["gas_cm3"]["H2"], 0.0)  # not written at all: 0, recorded
+        self.assertTrue(any("H2 not given, 0 cm^-3" in x for x in ok["substitutes"]))
 
 
 @unittest.skipUnless(os.environ.get("HEP_USINE_LIVE_TEST") == "1", "live USINE runs: set HEP_USINE_LIVE_TEST=1, "

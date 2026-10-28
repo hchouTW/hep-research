@@ -1,6 +1,6 @@
 {
  "name": "harmonized-v1",
- "description": "Harmonized configuration for cross-code comparison (cr-propagation r3 5.5), in the transport format of r3 5.4. A code that cannot express an item records the difference and its substitute; it never falls back to a default silently. D1 adds harmonized-v1-<item>.json per item it turns on.",
+ "description": "Harmonized configuration for cross-code comparison (cr-propagation r3 5.5), in the transport format of r3 5.4. A code that cannot express an item records the difference and its substitute; it never falls back to a default silently. D1 adds harmonized-v1-<item>.json per item it turns on. sources.injection spectrum_variable (K3, escalation 12): the source spectrum R^-gamma is a density per unit kinetic energy per nucleon, dQ/dE_k/n = q R^-2.3 (eta 0; USINE POWERLAW as run by B1); a code injecting per rigidity or momentum (DRAGON2) differs by a factor beta (up to 3% on B/C at 2-3 GV, VALIDATION CRPROP-D3). sources.abundances: the propagated parent ratios of the theory:cr-secondary-ratio parent list (O/C 0.9; the USINE translator normalises them at E_k/n = 10 GeV/n). DRAGON2 can express neither item: its translator (dragon2_translate.py) refuses both unless DRAGON2's own choices are stated.",
  "status": "synthetic",
  "transport": {
   "geometry": {"kind": "cylinder-2d", "L_kpc": 4.0, "radius_kpc": 20.0, "disc_halfwidth_pc": 100},
@@ -13,7 +13,8 @@
   "decay": {"enabled": false, "lorentz_dilation": true, "ec_treatment": "fully-stripped"},
   "gas": {"model": "uniform, n_H = 1 cm^-3", "He_to_H_number": 0.1},
   "sources": {"spatial": "not fixed by harmonized-v1; each code records its choice",
-              "injection": [{"species_group": "all primaries", "gamma": 2.3, "breaks": []}],
+              "injection": [{"species_group": "all primaries", "gamma": 2.3, "breaks": [],
+                             "spectrum_variable": "kinetic_energy_per_nucleon"}],
               "abundances": "fixed by the parent list of theory:cr-secondary-ratio"},
   "cross_sections": {"production_set": "theory:cr-secondary-ratio models/xs-illustrative-A.json (ILLUSTRATIVE)",
                      "inelastic_set": "theory:cr-secondary-ratio models/xs-illustrative-A.json (ILLUSTRATIVE)",
