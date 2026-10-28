@@ -3,6 +3,15 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- crprop ci: the campaign's regression pins compare platform-robustly (PR #308 CI on Linux, decision A1.20): recomputed
+  closed-form, USINE-reader and DRAGON2-port values against committed numbers within relative 1e-12, the E2 emulator's
+  pinned responses and hold-out numbers within relative 1e-4 (GP linear algebra); E2-1, E2-2 and every acceptance
+  tolerance unchanged. `emulator_provider.py`: a kernel matrix that does not factorize as stored (the C2UF model's is
+  near-singular and failed on Linux, so `--declaration` refused) is factorized with a jitter of 1e-14, else 1e-13,
+  times its mean diagonal, and the self-check compares ln sigma within 2e-6 (ln mean still within 1e-9).
+
 ## 0.43.0 (2026-10-29)
 
 Minor release; contracts 3.14.0 (one minor, the `CV-CRPROP` of the cr-propagation campaign, new rules gated by

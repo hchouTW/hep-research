@@ -4,6 +4,7 @@ degeneracy through the protocol, components that add up to the prediction, and t
 A profile test may not import the plugin's tests package (layering), so it runs the same checks as the shared helper
 tests/core/provider_conformance.py through core and contracts directly. Inputs are ILLUSTRATIVE."""
 import json
+import math
 import subprocess
 import sys
 import tempfile
@@ -90,7 +91,10 @@ class ClosedFormProviderTests(unittest.TestCase):
                 want = predict.bin_averaged(dict(CFG, model="diffusion-1d"), EDGES, provider.model_overrides(point))
                 self.assertEqual(out["predictions"][0]["values"]["values"], want)
         bench = json.loads((ROOT / "predictions" / "bc-benchmark.prediction.json").read_text(encoding="utf-8"))
-        self.assertEqual(res[0]["predictions"][0]["values"]["values"], bench["extension"]["values"]["values"])
+        got, pinned = res[0]["predictions"][0]["values"]["values"], bench["extension"]["values"]["values"]
+        self.assertEqual(len(got), len(pinned))
+        for a, b in zip(got, pinned):   # relative 1e-12: libm differs across platforms in the last digits
+            self.assertTrue(math.isclose(a, b, rel_tol=1e-12, abs_tol=0.0), (a, b))
 
     def test_components_add_up_to_the_prediction(self):
         for out in self.report["responses"]["single-shot"]["results"]:
