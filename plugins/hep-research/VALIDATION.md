@@ -7133,3 +7133,23 @@ model). `propagation_fit.py` gains response_model kind "provider": the toys eval
 | Fit and toys | propagation_fit with provider `emulator` (registry entry from `--declaration`), the study's datasets (USINE Asimov at the truth, the recorded fixture values) with the `emulator` component, families BIG and SLIM, same starts and steps, response_model kind "provider", layout joint, half_width_sigma 3, 200 toys per family, seed 20261028, alpha 0.05, the 2% toy-failure limit (a toy fit the DomainModel refuses fails) |
 | C2UF-1 | pass when: the emulator passes its validation; BIG and SLIM converge with the emulator provider; each is listed with its delta chi2 and toy p-value from 200 toys with at most 2% failed; BIG (the generator) survives at alpha 0.05 |
 | D7 / A1.8 | 480 USINE runs left of 1000; the plan uses 340 (+140 for the refinement): within the cap; emulator evaluations are not USINE runs |
+
+Emulator results and amendments (written before the recorded fit run):
+- Validation round 0 PASSED: 738 training runs (448 cached + 300 new, 10 duplicates to 1e-9 dropped), 19 principal
+  components; at the 40 held-out USINE runs the largest error is 0.0038 of the data sigma (tolerance 0.05), largest
+  relative error 2.1e-4, no point refused by the DomainModel. No refinement round was needed (no further USINE run).
+- First calibration with the emulator (not recorded as the result; `$CRPROP_OUT/c2uf/emu/record.json` of 2026-10-29
+  00:xx): fits equal to USINE's (SLIM chi2 23.9272 vs 23.9273), but the toy study stopped at the 2% limit: the toy
+  fits did not pass the convergence verdict. Diagnosed on the same toys (emulator only, no USINE run): (1) scipy's
+  default relative difference steps (1e-8) sit below the emulator's rounding noise, so the Jacobian was noise; (2) fits
+  stopping within one step of V_c = 0 had verdict differences straddling the bound; (3) BIG's fits to SLIM's toys have
+  V_A nearly unidentifiable near 0 (B/C depends on V_A^2), so the optimizer stopped short (EDM 1e-4 to 5e-3);
+  (4) BIG's fits to SLIM's toys spread in V_c beyond BIG's own 3-sigma box (V_c up to the 7.1 km/s edge: 8 of 200).
+- Amendments to propagation_fit.py's toy fits (no criterion, tolerance, toy count or alpha changed): with stated
+  difference steps, the fits on a response model or provider use them (central differences, `x_scale` "jac", dogbox
+  for bounded fits), snap a coordinate within one step of a domain bound onto it as fit_family does, shrink a verdict
+  step that would straddle a nearby bound, and finish a fit the verdict finds short of the minimum with up to 30
+  damped Newton steps (core newton_fit) before judging it; kind "provider" bounds the toy fits by the provider's
+  domain (no approximation, so no response box; a point the DomainModel refuses fails that toy). On 200 toys per
+  family (diagnostic, same seeds) BIG had 0 and SLIM 3 failed toys (2 refused by the DomainModel, 1 not converged),
+  below the 2% limit (4).

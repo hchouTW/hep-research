@@ -595,12 +595,14 @@ class Model:
 
 
 # --------------------------------------------------------------------------- one fit
-def _verdict(nll_abs, x_abs, bounds_abs, held, steps=None):
+def _verdict(nll_abs, x_abs, bounds_abs, held, steps=None, polish=0):
     """fit_diagnostics verdict on the interior, non-held coordinates; boundary_kkt on the coordinates at a bound.
     Judged in offsets from the best fit, so the verdict's difference steps are 1e-4 in every fit coordinate whatever
     its value (newton_fit steps 1e-4 x max(1, |x|), which for ln D0 ~ 66 would be a sizeable fraction of sigma).
     With steps (a provider with numerical noise, parameters.<name>.step) the offsets are measured in units of
-    step / 1e-4, so the Hessian's difference step is the stated step and boundary_kkt's is 1e-2 of it."""
+    step / 1e-4, so the Hessian's difference step is the stated step and boundary_kkt's is 1e-2 of it.
+    With polish > 0, newton_fit first takes up to that many damped Newton steps in the interior coordinates (kept
+    inside the bounds) and the verdict is on the point it reaches, returned as "x"."""
     from core.stats.fit_diagnostics import boundary_kkt, newton_fit
     x0 = [float(v) for v in x_abs]
     unit = [1.0 if steps is None or steps[i] is None else steps[i] / 1e-4 for i in range(len(x0))]
@@ -636,11 +638,28 @@ def _verdict(nll_abs, x_abs, bounds_abs, held, steps=None):
         for i, v in zip(judged, z):
             w[i] = v
         return nll(w)
-    res = newton_fit(reduced, [x[i] for i in judged], max_iter=0)
+    if polish:
+        def clipped(z):
+            return reduced([min(max(v, bounds[i][0]), bounds[i][1]) for i, v in zip(judged, z)])
+        start = [x[i] for i in judged]
+        res = newton_fit(clipped, start, max_iter=polish)
+        moved = [min(max(v, bounds[i][0]), bounds[i][1]) for i, v in zip(judged, res.x)]
+        if all(math.isfinite(v) for v in moved) and moved != list(res.x):
+            res = newton_fit(reduced, moved, max_iter=0)    # judged where it was clipped back
+        elif not all(math.isfinite(v) for v in moved):
+            moved = start
+            res = newton_fit(reduced, moved, max_iter=0)
+        for i, v in zip(judged, moved):
+            x[i] = v
+    else:
+        res = newton_fit(reduced, [x[i] for i in judged], max_iter=0)
     ok = res.ok and all(k["ok"] for k in kkt)
     reasons = list(res.reasons) + [f"kkt_{k['bound']}_{k['index']}" for k in kkt if not k["ok"]]
-    return {"status": "converged" if ok else "failed", "reasons": reasons, "edm": _r(res.edm),
-            "judged": judged, "held": sorted(held), "at_bound": at_bound, "kkt": kkt}
+    out = {"status": "converged" if ok else "failed", "reasons": reasons, "edm": _r(res.edm),
+           "judged": judged, "held": sorted(held), "at_bound": at_bound, "kkt": kkt}
+    if polish:
+        out["x"] = [a + b * u for a, b, u in zip(x0, x, unit)]
+    return out
 
 
 def _fisher_full(model, names, scales, t, fixed, nu, step=1e-4, bounds=None):
@@ -1121,8 +1140,8 @@ def build_response_model(model, names, scales, centers, sigmas, fixed, rm_cfg, b
     hi = np.max([c + k * s for c, s in zip(centers, sigmas)], axis=0)
     lo = np.maximum(lo, [b[0] for b in bounds])
     hi = np.minimum(hi, [b[1] for b in bounds])
-    if rm_cfg["kind"] == "provider":
-        rm = ProviderResponse(model, names, scales, lo, hi, fixed)
+    if rm_cfg["kind"] == "provider":   # no approximation, so no response box: the provider's domain bounds the fits
+        rm = ProviderResponse(model, names, scales, [b[0] for b in bounds], [b[1] for b in bounds], fixed)
     elif rm_cfg["kind"] == "polynomial":
         rm = PolynomialResponseModel(model, names, scales, lo, hi, fixed, rm_cfg["degree"], rm_cfg["design_points"],
                                      seed + 1)
@@ -1201,7 +1220,9 @@ class SurrogateFit:
                     return self.resid(to_z(w), ys, aux)
                 steps_w = self._w_steps(len(w0))
                 jac = _central_jacobian(fun_b, steps_w, lo, hi) if steps_w is not None else "2-point"
-                res = optimize.least_squares(fun_b, w0, jac=jac, bounds=(lo, hi), method="trf",
+                res = optimize.least_squares(fun_b, w0, jac=jac, bounds=(lo, hi),
+                                             method="dogbox" if steps_w is not None else "trf",
+                                             x_scale="jac" if steps_w is not None else 1.0,
                                              max_nfev=opt["max_iterations"], xtol=1e-12, ftol=1e-12, gtol=1e-10)
             z = to_z(res.x)
             ok, reason, z = self._judge(z, res, ys, aux, to_z, lo, hi)
@@ -1240,7 +1261,17 @@ class SurrogateFit:
             w = _snap_to_bounds(nll, w, steps, edge_lo, edge_hi)
             z = to_z(w)
         bounds = list(zip(lo, hi)) if lo is not None else [(-np.inf, np.inf)] * len(w)
+        if steps is not None:   # a difference step never straddles a bound the point is close to but not on
+            steps = [None if h is None else (h if min(x - a, b - x) <= 0 else min(h, 0.5 * min(x - a, b - x)))
+                     for h, x, (a, b) in zip(steps, w, bounds)]
         v = _verdict(nll, w, bounds, set(), steps)
+        if steps is not None and v["status"] != "converged" and set(v["reasons"]) <= {"gradient_not_small",
+                                                                                       "max_iterations"}:
+            # a nearly flat direction (a parameter not identifiable under the toy's null, e.g. V_A near 0) leaves
+            # the optimizer short of the minimum: a few damped Newton steps finish it before the verdict
+            v = _verdict(nll, w, bounds, set(), steps, polish=30)
+            w = np.asarray(v["x"], dtype=float)
+            z = to_z(w)
         return v["status"] == "converged", ("ok" if v["status"] == "converged" else "not-converged"), z
 
     def _w_steps(self, n_w):
