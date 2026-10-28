@@ -718,7 +718,7 @@ class UsineEmulatorFamilies(unittest.TestCase):
             self.assertEqual(comp[0]["correlation"], "uncorrelated")
             self.assertEqual(comp[0]["values"], self.val["error_component"][ds["name"]])
 
-    def test_c2uf1_toy_calibrated_delta_chi2_and_the_generator_survives(self):
+    def test_emulator_toy_calibrated_delta_chi2_and_generator_survives(self):
         self.assertEqual(self.res["status"], "ok")
         self.assertEqual(self.res["families"]["expressible"], ["BIG", "SLIM"])
         for name in ("BIG", "SLIM"):

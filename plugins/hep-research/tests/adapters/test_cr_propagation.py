@@ -2154,25 +2154,25 @@ class LiveUsineD3(unittest.TestCase):
 
 
 # ---------------------------------------------------------------------------------------------- C2UF (appended)
-C2UF_FIX = FIX / "c2uf"
+TWO_DATASET_FIX = FIX / "c2uf"
 
 
-def _same_document(test, a, b, where="response"):
+def _same_document(case, a, b, where="response"):
     """Equal JSON documents; numbers equal within relative 1e-12 (the platform's last digits), all else exactly."""
     if isinstance(a, bool) or isinstance(b, bool) or not isinstance(a, (int, float)) or not isinstance(b, (int, float)):
-        test.assertEqual(type(a), type(b), where)
+        case.assertEqual(type(a), type(b), where)
     if isinstance(a, dict):
-        test.assertEqual(sorted(a), sorted(b), where)
+        case.assertEqual(sorted(a), sorted(b), where)
         for k in a:
-            _same_document(test, a[k], b[k], f"{where}/{k}")
+            _same_document(case, a[k], b[k], f"{where}/{k}")
     elif isinstance(a, list):
-        test.assertEqual(len(a), len(b), where)
+        case.assertEqual(len(a), len(b), where)
         for i, (x, y) in enumerate(zip(a, b)):
-            _same_document(test, x, y, f"{where}[{i}]")
+            _same_document(case, x, y, f"{where}[{i}]")
     elif isinstance(a, (int, float)) and not isinstance(a, bool):
-        test.assertTrue(math.isclose(a, b, rel_tol=1e-12, abs_tol=0.0), (where, a, b))
+        case.assertTrue(math.isclose(a, b, rel_tol=1e-12, abs_tol=0.0), (where, a, b))
     else:
-        test.assertEqual(a, b, where)
+        case.assertEqual(a, b, where)
 
 
 @unittest.skipUnless(HAVE_NUMPY, "needs numpy and scipy")
@@ -2181,7 +2181,7 @@ class EmulatorPinnedResponses(unittest.TestCase):
     provider before the change; on the recording machine they agree to the last bit)."""
 
     def test_e2_responses_are_unchanged(self):
-        pinned = json.loads((C2UF_FIX / "e2-pinned-responses.json").read_text(encoding="utf-8"))
+        pinned = json.loads((TWO_DATASET_FIX / "e2-pinned-responses.json").read_text(encoding="utf-8"))
         env = {k: v for k, v in os.environ.items() if k != "HEP_EMULATOR_ML_ARTIFACT"}
         env["PYTHONDONTWRITEBYTECODE"] = "1"
         for case in pinned["cases"]:
@@ -2199,15 +2199,15 @@ class EmulatorPerModelDeclaration(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        cls.artifact = C2UF_FIX / "emulator.ml-artifact.json"
+        cls.artifact = TWO_DATASET_FIX / "emulator.ml-artifact.json"
         cls.env = dict(os.environ, PYTHONDONTWRITEBYTECODE="1", HEP_EMULATOR_ML_ARTIFACT=str(cls.artifact))
         proc = subprocess.run([sys.executable, str(EMULATOR_PROVIDER), "--declaration"], capture_output=True,
                               text=True, timeout=300, env=cls.env)
         cls.decl = json.loads(proc.stdout)["declaration"]
-        cls.model = json.loads((C2UF_FIX / "emulator-model.json").read_text(encoding="utf-8"))
+        cls.model = json.loads((TWO_DATASET_FIX / "emulator-model.json").read_text(encoding="utf-8"))
 
     def test_declaration_comes_from_the_model(self):
-        sha = hashlib.sha256((C2UF_FIX / "emulator-model.json").read_bytes()).hexdigest()
+        sha = hashlib.sha256((TWO_DATASET_FIX / "emulator-model.json").read_bytes()).hexdigest()
         self.assertEqual(self.decl["id"], "emulator")
         self.assertEqual(self.decl["version"], f"1.0.0+model.{sha[:12]}")
         self.assertEqual(self.decl["observables"], ["10Be/9Be", "B/C"])
