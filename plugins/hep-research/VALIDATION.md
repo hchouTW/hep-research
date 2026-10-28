@@ -7003,3 +7003,7 @@ the part of D1-1b's USINE offset D1 left unnamed); (2) harmonized-v1's "all prim
 translator records it; (3) `usine_translate._gas` drops a density term written without `cm^-3` to 0 with only a
 substitute note (found when a D3 run aborted); (4) D1's thick-gas attribution of the ¹⁰Be/⁹Be decay gap now holds in
 every bin against a like-for-like USINE run, including the lowest bin D1 left unattributed.
+
+Note (D3 verifier advisory, added at the rebase on 6a227a76): the level-2 swaps above, and the matched-level-1 ladder,
+are cumulative (each USINE run keeps every earlier swap and adds one more; `L2_STEPS` and `LADDER` in
+`d3_study.py`); "one at a time" means one more input per step, and each effect is relative to the previous step.
