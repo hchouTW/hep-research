@@ -139,18 +139,18 @@
    ]
   },
   "B1": {
-   "state": "dispatched",
+   "state": "verifying",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-b1",
-   "base": "0be5a5de",
-   "head": "2887380a",
+   "base": "3ff9f72a",
+   "head": "633ffdfc",
    "merge_commit": null,
    "worker_report": "DONE: usine_translate/to_prediction/provider; B1-1..B1-4, PRV-1 (live, 9/9), PRV-2 pass; reader vs USINE tables <= 8e-6 (ekn); USINE runs for all 5 D1 items recorded (usine-results.json); open: ILLUSTRATIVE XS only, no high-break field (escalation 8)",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "asked to rebase onto d04cb47a (A4 merged) and move its cost row into CRPROP-COST before verification"
+    "rebased onto 3ff9f72a; USINE cost row moved into CRPROP-COST and cost-table.json; Opus verifier dispatched 2026-10-28"
    ]
   },
   "D1": {
@@ -509,6 +509,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "A1.7: WP B1X (high-break field + USINE XS files) planned after B1 merges, before C2U/F1; escalation 8 decided"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "B1 rebased (633ffdfc); Opus verifier dispatched"
   }
  ],
  "env": {
