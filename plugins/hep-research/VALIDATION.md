@@ -6008,3 +6008,24 @@ pass; B2-3 58 tests ok (from the plugin root and from `tests/`). Checks: `run_al
 `236a374a`; static part, naming, layering, packaging, wiring and `workflow_check.py` diff/gaps/acceptance pass.
 Software and numerical-consistency checks only; the inputs are ILLUSTRATIVE and no comparison with data or with a
 propagation code is made.
+
+## CRPROP-A4 — 2026-10-28 (environment E2)
+
+Work package A4 of the cr-propagation r4 campaign (r3 §A4, r4 §6): cost benchmark of the closed form and DRAGON2
+under `harmonized-v1`, and grid convergence of DRAGON2's B/C. The table is the next section, `CRPROP-COST`.
+
+**Environment (r3 §0.3, base exception D10).** E2: macOS 27.2 arm64 (Darwin 27.2.0), 8 cores, 16 GiB; Python 3.13.2
+in the E2 venv (numpy 2.5.3, scipy 1.18.1); DRAGON2 runs in E-crprop (the ENV build, `install/bin/DRAGON` sha256
+d26dbb85…, source commit cd588707 clean, rechecked before the runs). `git rev-parse --show-toplevel` =
+`.claude/worktrees/crprop-a4`; `git branch --show-current` = `worktree-crprop-a4`; `git status` clean at start; base
+`566bfd1e` = integration HEAD (decision D10, not `origin/main`); prerequisites A1 (merge 5d5fd918) and ENV (merge
+7d5c6934) are ancestors of HEAD (`git merge-base --is-ancestor`). Capabilities: `env-dragon2` present;
+`env-usine` and `env-galprop` absent.
+
+**Criteria, fixed before any measurement (R9).** A4-1: every cost number comes from a run record in
+`tests/adapters/fixtures/cr_propagation/cost/`, none from the literature; a tool without its capability gets a row
+marked "not measured (capability absent)", never an estimate. A4-2: the cost table has closed-form and DRAGON2 rows.
+Method (r3 §A4): wall time and peak RSS (`/usr/bin/time -l`, "maximum resident set size", which includes the
+DRAGON2 child of the adapter) of three identical runs each, the median reported; grid convergence = largest
+|ΔB/C|/(B/C) over 2–1000 GV when the spatial grid (DimR 41 → 81, dz 0.02 → 0.01 kpc) and the energy grid
+(Ekfactor 10^(1/20) → 10^(1/40)) are doubled once, each alone and both together; reported, no threshold.
