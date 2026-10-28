@@ -198,6 +198,26 @@
     "contracts/naming_check.py"
    ],
    "source": "moved unchanged from skills/hep-authoring/scripts/communication_lib/terminology.py (semantic naming spec v4.2, F6/F7)"
+  },
+  "provider": {
+   "steward": "hep-computing",
+   "status": "implemented",
+   "purpose": "Provider protocol cr-provider/1 (cosmic-ray propagation plan r3 5.2): the rules of requests, responses and provider declarations (mirroring contracts/schemas/cr_provider.json), the point hash and its cache, the registry the caller passes in (never a search for providers), the runner that calls a provider as a subprocess (single shot or one --serve JSON Lines session, batches of points, refusals with reasons, out-of-domain unless --allow-outside-validated-range), the provider-side command line of every entrypoint, and the conformance checks PRV-1/PRV-2",
+   "files": [
+    "protocol",
+    "hashing",
+    "registry",
+    "entrypoint",
+    "runner",
+    "conformance"
+   ],
+   "consumers": [
+    "tools/provider_registry.py",
+    "theory-domain profile provider entrypoints (scripts/provider.py)",
+    "adapters/cr-propagation (provider entrypoints of B1, D1, D2, E2)",
+    "skills/hep-statistics/scripts (propagation fit, C2)"
+   ],
+   "source": "new in this plugin (cr-propagation campaign r4, work package C1, 2026-10-26); the adapter and hep-statistics consumers are the planned work packages that follow, the closed-form profile provider is the first"
   }
  }
 }

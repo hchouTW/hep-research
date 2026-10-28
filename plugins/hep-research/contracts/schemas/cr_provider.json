@@ -1,0 +1,126 @@
+{
+ "$comment": "Provider protocol cr-provider/1 (contracts 3.14.0, CV-CRPROP; cosmic-ray propagation plan r3 5.2): how a caller asks a propagation provider (a closed form, an external code, an emulator) for unmodulated predictions at parameter points. Not an artifact type: the declaration is the optional 'provider' field of adapter.json and profile.json; the request and the response are files or JSON Lines exchanged with the provider entrypoint ('--request FILE --response FILE', or '--serve'). Parameter names are the canonical theory parameter names (D0_cm2_s, L_kpc, delta, ...). 'want' holds only lis and components: providers never modulate. Each prediction is the extension of a prediction artifact (ext_prediction.json); components are defined here, never as undeclared prediction fields. A failed result carries a reason (out-of-domain, provider-failed, ...) and no prediction. The core runner (core/provider) checks the same rules without reading this file; tests keep the two in agreement.",
+ "$defs": {
+  "protocol": {"type": "string", "const": "cr-provider/1"},
+  "provider_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"},
+  "parameter_name": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_]{0,63}$"},
+  "axis": {"type": "string", "enum": ["rigidity", "ekn"], "$comment": "rigidity in GV; ekn: kinetic energy per nucleon in GeV/n"},
+  "range": {"type": "object", "required": ["min", "max"], "additionalProperties": false,
+            "properties": {"min": {"type": "number"}, "max": {"type": "number"}}},
+  "point": {"type": "object", "$comment": "canonical parameter name -> finite number",
+            "additionalProperties": {"type": "number"}},
+  "run_status": {"type": "string", "enum": ["ok", "failed", "incomplete"]},
+  "reason": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$",
+             "$comment": "a short reason code: out-of-domain, unknown-parameter, unregistered-provider, provider-version-mismatch, unsupported-want, not-decomposable, unsupported-observable, invalid-request, invalid-response, provider-failed, provider-timeout, provider-error"},
+  "declaration": {
+   "type": "object",
+   "required": ["id", "entrypoint", "protocol", "domain", "observables", "axes", "decomposable", "deterministic", "output_units"],
+   "additionalProperties": false,
+   "properties": {
+    "id": {"$ref": "#/$defs/provider_id"},
+    "entrypoint": {"type": "string", "pattern": "^(?!/)(?!.*(^|/)\\.\\.(/|$))(?!.*\\\\)[A-Za-z0-9_./-]+\\.py$",
+                   "$comment": "relative to the folder of the adapter.json or profile.json that declares it"},
+    "protocol": {"$ref": "#/$defs/protocol"},
+    "version": {"type": "string", "minLength": 1, "$comment": "the provider version requests name; default: the declaring adapter's or profile's version"},
+    "description": {"type": "string", "minLength": 1},
+    "domain": {"type": "object", "$comment": "canonical parameter name -> the declared range; a point outside it is refused (out-of-domain) unless the caller allows outside-validated-range",
+               "additionalProperties": {"$ref": "#/$defs/range"}},
+    "axis_ranges": {"type": "object", "$comment": "optional: axis -> the range the bins must lie in (GV or GeV/n)",
+                    "additionalProperties": {"$ref": "#/$defs/range"}},
+    "observables": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+    "axes": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/axis"}},
+    "decomposable": {"type": "boolean"},
+    "deterministic": {"type": "boolean"},
+    "output_units": {"type": "object", "additionalProperties": {"type": "string"}}
+   }
+  },
+  "declarations": {"anyOf": [{"$ref": "#/$defs/declaration"},
+                             {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/declaration"}}]},
+  "observable_request": {
+   "type": "object",
+   "required": ["id", "axis", "unit", "bins"],
+   "additionalProperties": false,
+   "properties": {
+    "id": {"type": "string", "minLength": 1},
+    "axis": {"$ref": "#/$defs/axis"},
+    "unit": {"type": "string", "enum": ["GV", "GeV/n"]},
+    "bins": {"type": "array", "minItems": 1,
+             "items": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}},
+             "$comment": "[low, high] per bin, increasing and contiguous (high of one bin = low of the next)"}
+   }
+  },
+  "request": {
+   "type": "object",
+   "required": ["protocol", "provider", "provider_version", "points", "observables", "want"],
+   "additionalProperties": false,
+   "properties": {
+    "protocol": {"$ref": "#/$defs/protocol"},
+    "provider": {"$ref": "#/$defs/provider_id"},
+    "provider_version": {"type": "string", "minLength": 1},
+    "theory_spec_ref": {"type": "string"},
+    "transport": {"type": ["object", "null"], "$comment": "the fixed transport settings in canonical units (theory-spec transport block); part of the point hash"},
+    "points": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/point"}},
+    "observables": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/observable_request"}},
+    "want": {"type": "array", "minItems": 1, "items": {"type": "string", "enum": ["lis", "components"]}},
+    "seed": {"type": ["integer", "null"]}
+   }
+  },
+  "component": {
+   "type": "object",
+   "required": ["observable", "id", "kind", "values", "unit"],
+   "additionalProperties": false,
+   "$comment": "one additive piece of an observable's prediction in the same bins: a primary term, a production channel parent -> daughter (norm-type reweighting multiplies it), or an energy-basis response of a channel for one source-energy bin (slope-type reweighting)",
+   "properties": {
+    "observable": {"type": "string", "minLength": 1},
+    "id": {"type": "string", "minLength": 1},
+    "kind": {"type": "string", "enum": ["primary", "channel", "energy-basis"]},
+    "parent": {"type": "string"},
+    "daughter": {"type": "string"},
+    "source_bin": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}},
+    "values": {"type": "array", "items": {"type": "number"}},
+    "unit": {"type": "string"}
+   }
+  },
+  "evaluation": {
+   "type": "object",
+   "required": ["computational_run_ref", "input_hash", "elapsed_s", "numerical_tolerance"],
+   "additionalProperties": false,
+   "properties": {
+    "computational_run_ref": {"type": ["string", "null"], "$comment": "the computational-run artifact of an external run; null for an in-process closed form"},
+    "input_hash": {"type": "string", "pattern": "^[0-9a-f]{64}$", "$comment": "sha256 of the point hash object (core.provider.hashing.point_hash)"},
+    "elapsed_s": {"type": "number", "minimum": 0},
+    "numerical_tolerance": {"type": ["number", "null"], "minimum": 0, "$comment": "relative numerical accuracy the provider states for its values"}
+   }
+  },
+  "result": {
+   "type": "object",
+   "required": ["point_index", "point", "status", "labels"],
+   "additionalProperties": false,
+   "properties": {
+    "point_index": {"type": "integer", "minimum": 0},
+    "point": {"$ref": "#/$defs/point"},
+    "status": {"type": "string", "enum": ["ok", "failed"]},
+    "reason": {"$ref": "#/$defs/reason"},
+    "detail": {"type": "string"},
+    "labels": {"type": "array", "items": {"type": "string", "x-vocab": "artifact_statuses"}},
+    "predictions": {"type": "array", "items": {"$ref": "ext_prediction.json"}},
+    "components": {"type": "array", "items": {"$ref": "#/$defs/component"}},
+    "evaluation": {"$ref": "#/$defs/evaluation"}
+   }
+  },
+  "response": {
+   "type": "object",
+   "required": ["protocol", "provider", "provider_version", "status", "results"],
+   "additionalProperties": false,
+   "properties": {
+    "protocol": {"$ref": "#/$defs/protocol"},
+    "provider": {"type": "string"},
+    "provider_version": {"type": "string"},
+    "status": {"$ref": "#/$defs/run_status"},
+    "reason": {"$ref": "#/$defs/reason"},
+    "detail": {"type": "string"},
+    "results": {"type": "array", "items": {"$ref": "#/$defs/result"}}
+   }
+  }
+ }
+}
