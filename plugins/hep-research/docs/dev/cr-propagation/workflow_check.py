@@ -117,7 +117,7 @@ def check_diff(workflow: dict, wp_id: str, base: str) -> tuple[list[str], list[s
     allowed = packages[wp_id].get("files", []) + workflow.get("common_files", [])
     orchestrator_only = set(workflow["shared_files"]["orchestrator_only"])
     changed = [line[len(PLUGIN_PREFIX):] if line.startswith(PLUGIN_PREFIX) else "../" + line
-               for line in git("diff", "--name-only", f"{base}...HEAD").splitlines() if line]
+               for line in git("diff", "--name-only", "--no-renames", f"{base}...HEAD").splitlines() if line]
     problems = []
     for path in changed:
         if path in orchestrator_only and packages[wp_id].get("role") != "orchestrator":

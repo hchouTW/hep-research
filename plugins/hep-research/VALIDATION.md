@@ -6008,3 +6008,14 @@ pass; B2-3 58 tests ok (from the plugin root and from `tests/`). Checks: `run_al
 `236a374a`; static part, naming, layering, packaging, wiring and `workflow_check.py` diff/gaps/acceptance pass.
 Software and numerical-consistency checks only; the inputs are ILLUSTRATIVE and no comparison with data or with a
 propagation code is made.
+
+## CRPROP-P0 round 3 — 2026-10-28 (environment E2)
+
+Extra P0 round authorized as decision A1.6 (escalation 4). Base `f747fbe7` (integration HEAD). `workflow_check.py`
+`check_diff` now lists changed paths with `git diff --name-only --no-renames <base>...HEAD`, so a renamed or moved
+file reports its source path as well as its destination. The other git calls in the file do not have the hole
+(`git log --diff-filter=A -- acceptance.json` is path-limited, `git show` reads one revision) and are unchanged.
+Regression test `docs/dev/cr-propagation/test_workflow_check.py` (unittest, throwaway repo with `diff.renames=true`):
+moving an out-of-scope file and moving an orchestrator-only file (`status.json`) into an allowed path of WP A1 must
+fail `diff`, and an in-scope-only change must pass. Without the fix 2 of 3 tests fail (the moves pass `diff`); with the
+fix all 3 pass.
