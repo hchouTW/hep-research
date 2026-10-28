@@ -154,18 +154,18 @@
    ]
   },
   "D1": {
-   "state": "dispatched",
+   "state": "blocked",
    "dispatches": 2,
    "rework_rounds": 0,
    "branch": "worktree-crprop-d1",
-   "base": "3d5a6295",
-   "head": "5348266d",
+   "base": "2ae3063b",
+   "head": "1962ca37",
    "merge_commit": null,
-   "worker_report": "PARTIAL (dispatch 1, resumed): D1-1 passes 1/8 (10Be/9Be convection); attributed misses: DRAGON2 He target/gas/XS offset, reacceleration convention, unphysical DRAGON2 losses; D1-2, PRV-1, PRV-2 pass",
+   "worker_report": "dispatch 2 PARTIAL: D1-1a convection pass; decay 10Be/9Be 11-13% (thick gas), reacceleration 5.7% (first-order bound), losses 6.1% (Coulomb on HII); D1-L fixed (n_HII = 0 divergence, refusal + tests); D1-1b, D1-2, PRV pass; 30 DRAGON2 runs",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "A1.9 dispatch 2 after A1R merged: matched reacceleration via convert_reacceleration, D1-L losses diagnosis/refusal, D1-1a/b"
+    "blocked 2026-10-28 after dispatch 2: escalation 11; branch kept for H1"
    ]
   },
   "D2": {
@@ -655,6 +655,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "B1X rebased (b4280760) with the A1R zone conversion; Opus verifier dispatched"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "D1 dispatch 2 PARTIAL (D1-1a convection only; losses cause found and fixed); D1 blocked again; escalation 11; D3 waits for H1"
   }
  ],
  "env": {
