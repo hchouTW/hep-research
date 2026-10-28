@@ -70,8 +70,8 @@ review as carefully as you would a real one.
 """
 
 
-def out(obj, code=0):
-    print(json.dumps(obj, indent=1, sort_keys=True))
+def out(payload, code=0):
+    print(json.dumps(payload, indent=1, sort_keys=True))
     return code
 
 

@@ -1,0 +1,32 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "hep_review_manifest.json",
+ "title": "hep-review material manifest (schema 0.1.0, experimental)",
+ "description": "Material ids bound to raw refs of the bytes actually saved (spec 9.3-9.4). An unknown source identity is not upgraded to verified by hashing.",
+ "type": "object",
+ "$ref": "hep_review_definitions.json#/$defs/header",
+ "required": ["materials"],
+ "properties": {
+  "protocol": {}, "schema_version": {}, "record_kind": {"const": "manifest"}, "id": {}, "context_id": {},
+  "materials": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": ["material_id", "raw_ref", "view_version", "authors", "authors_basis"],
+    "properties": {
+     "material_id": {"$ref": "hep_review_definitions.json#/$defs/id"},
+     "raw_ref": {"$ref": "hep_review_definitions.json#/$defs/content_ref"},
+     "view_version": {"type": "string", "minLength": 1},
+     "authors": {"type": "array", "items": {"type": "string"}},
+     "authors_basis": {"$ref": "hep_review_definitions.json#/$defs/basis"},
+     "source_category": {"type": "string"},
+     "capture": {"type": "object"},
+     "limitations": {"type": "array", "items": {"type": "string"}}
+    },
+    "additionalProperties": false
+   }
+  },
+  "limitations": {"type": "array", "items": {"type": "string"}}
+ },
+ "additionalProperties": false
+}

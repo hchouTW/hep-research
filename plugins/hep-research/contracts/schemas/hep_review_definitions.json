@@ -1,0 +1,94 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "hep_review_definitions.json",
+ "title": "hep-review shared definitions (protocol hep-review/0, schema 0.1.0, experimental)",
+ "description": "Only keywords contracts/schema.py implements are used. Uniqueness of ids, creation order, bindings, the downgrade list and every semantic rule are checked in Python by contracts/hep_review.py; this schema does not claim to check them.",
+ "$defs": {
+  "header": {
+   "type": "object",
+   "required": ["protocol", "schema_version", "record_kind", "id", "context_id"],
+   "properties": {
+    "protocol": {"const": "hep-review/0"},
+    "schema_version": {"type": "string", "pattern": "^0\\.[0-9]+\\.[0-9]+$"},
+    "record_kind": {"enum": ["intent", "manifest", "plan", "packet", "assignment", "record"]},
+    "id": {"$ref": "#/$defs/id"},
+    "context_id": {"$ref": "#/$defs/id"}
+   }
+  },
+  "id": {"type": "string", "minLength": 1, "pattern": "^[A-Za-z0-9][A-Za-z0-9_.:#-]*$"},
+  "ids": {"type": "array", "items": {"$ref": "#/$defs/id"}},
+  "text": {"type": "string", "minLength": 1},
+  "digest": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+  "basis": {"enum": ["observed", "declared", "self-reported", "advisory", "inferred", "unknown"]},
+  "tier": {"enum": ["R0", "R1", "R2", "R3"]},
+  "outcome": {"enum": ["supported", "violated", "undetermined", "not-examined", "not-applicable"]},
+  "decimal_string": {"type": "string", "pattern": "^[0-9]+(\\.[0-9]+)?([eE][-+]?[0-9]+)?$"},
+  "content_ref": {
+   "type": "object",
+   "required": ["logical_id", "algorithm", "hash_scope", "profile_id", "digest"],
+   "properties": {
+    "logical_id": {"$ref": "#/$defs/id"},
+    "algorithm": {"const": "sha256"},
+    "hash_scope": {"type": "string", "minLength": 1},
+    "profile_id": {"type": "string", "pattern": "^(raw-bytes/1|hep-review-metadata/1|legacy:[a-z0-9-]+/[0-9]+)$"},
+    "digest": {"$ref": "#/$defs/digest"},
+    "native": {"type": "object"},
+    "excluded_fields": {"type": "array", "items": {"type": "string"}}
+   },
+   "additionalProperties": false
+  },
+  "condition": {
+   "type": "object",
+   "required": ["satisfied", "basis"],
+   "properties": {"satisfied": {"type": ["boolean", "null"]}, "basis": {"$ref": "#/$defs/basis"}, "note": {"type": "string"}},
+   "additionalProperties": false
+  },
+  "tolerance": {
+   "type": "object",
+   "required": ["quantity", "value", "kind"],
+   "properties": {
+    "quantity": {"type": "string", "minLength": 1},
+    "value": {"$ref": "#/$defs/decimal_string"},
+    "kind": {"enum": ["relative", "absolute"]},
+    "unit": {"type": "string"},
+    "precision_rule": {"type": "string"}
+   },
+   "additionalProperties": false
+  },
+  "adoption_policy": {
+   "type": "object",
+   "required": ["second_method_required", "verification_required", "qualifications"],
+   "properties": {
+    "second_method_required": {"type": "boolean"},
+    "verification_required": {"type": "boolean"},
+    "qualifications": {"type": "array", "items": {"type": "string"}}
+   },
+   "additionalProperties": false
+  },
+  "obligation": {
+   "type": "object",
+   "required": ["id", "origin_requirement_ids", "question", "targets", "criterion", "assumptions", "tolerances",
+                "adoption_policy", "required_methods", "evidence_requirements", "independence_requirements",
+                "required"],
+   "properties": {
+    "id": {"$ref": "#/$defs/id"},
+    "origin_requirement_ids": {"$ref": "#/$defs/ids"},
+    "question": {"$ref": "#/$defs/text"},
+    "targets": {"type": "array", "minItems": 1, "items": {"$ref": "#/$defs/id"}},
+    "domain_refs": {"type": "array", "items": {"type": "string"}},
+    "applicability": {"type": "string"},
+    "criterion": {"$ref": "#/$defs/text"},
+    "assumptions": {"type": "array", "items": {"type": "string"}},
+    "tolerances": {"type": "array", "items": {"$ref": "#/$defs/tolerance"}},
+    "impact_priority": {"enum": ["high", "medium", "low"]},
+    "adoption_policy": {"$ref": "#/$defs/adoption_policy"},
+    "required_methods": {"type": "array", "items": {"type": "string"}},
+    "evidence_requirements": {"type": "array", "items": {"type": "string"}},
+    "independence_requirements": {"type": "array", "items": {"type": "string"}},
+    "required": {"type": "boolean"},
+    "decision_required": {"type": "boolean"}
+   },
+   "additionalProperties": false
+  }
+ }
+}
