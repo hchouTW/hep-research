@@ -8,6 +8,20 @@ Software checks establish contract consistency only, not physical validity.
 - crprop env: capability probe of the cr-propagation campaign and environment E-crprop registered in VALIDATION.md
   (E2 plus DRAGON2 cd588707 verified by a live rerun); DRAGON2 computational-run and environment manifest under
   `tests/adapters/fixtures/cr_propagation/env/`. USINE and GALPROP absent (no source tarball). No behavior change.
+- crprop a2: theory-spec contract extension for cosmic-ray propagation (cr-propagation plan r3 §A2, §5.4; contracts
+  `CV-CRPROP` = 3.14.0, unreleased, gated by `contracts/validate.py` `CRPROP_FROM`). New optional
+  `extension.transport` block (geometry, diffusion with breaks, reacceleration, convection, losses, decay, gas,
+  sources, cross sections, species, family, free) in the canonical parameter names (`D0_cm2_s`, `R0_gv`, `L_kpc`,
+  `V_A_kms`, ...); its parameter blocks refuse any other key. `degenerate_directions` items are now a string or an
+  object (`combination`, `form`, `exponents`, `valid_range`, `broken_by`, `evidence`); new core vocabulary
+  `degeneracy_evidence` (`fisher-screen`, `profile-scan`, `posterior`). An object entry with a combination now counts
+  for `theory.degeneracy_missing`; from `CRPROP_FROM` (older artifacts only under `--strict`) an object entry needs its
+  evidence and the range where it holds: new errors `theory.degeneracy_evidence_missing`,
+  `theory.degeneracy_range_missing`, `theory.degeneracy_evidence_unknown`. String entries keep their meaning, and
+  every committed theory-spec keeps its outcome. `covariance_fit.py` `tabulated-grid` reads an object entry as its
+  `combination` (same fit as the equivalent string). Fixtures: two positive, four negative. The `CONTRACTS_VERSION`
+  bump with its regenerated fixtures, templates, profile artifacts and examples is the separate commit on branch
+  `worktree-crprop-a2-bump`.
 
 ## 0.42.0 (2026-10-26)
 

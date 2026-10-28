@@ -39,6 +39,8 @@
   "statres_v26_bayesian.json",
   "statres_v28_observable_source_linked.json",
   "theory_spec.json",
+  "theory_spec_crprop_mixed_degeneracy.json",
+  "theory_spec_crprop_object_degeneracy.json",
   "theory_spec_v26.json",
   "theory_spec_v26_analytic_checked.json",
   "theory_spec_v26_asymptotic.json",
@@ -206,6 +208,18 @@
   ],
   "theory_v26_propagation_no_degeneracy.json": [
    "theory.degeneracy_missing"
+  ],
+  "theory_crprop_degeneracy_evidence_missing.json": [
+   "theory.degeneracy_evidence_missing"
+  ],
+  "theory_crprop_degeneracy_range_missing.json": [
+   "theory.degeneracy_range_missing"
+  ],
+  "theory_crprop_degeneracy_evidence_unknown.json": [
+   "theory.degeneracy_evidence_unknown"
+  ],
+  "theory_crprop_transport_noncanonical_name.json": [
+   "schema.additional"
   ],
   "measurement_v26_estimand_missing.json": [
    "measurement.estimand_missing"

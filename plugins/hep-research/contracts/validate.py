@@ -242,7 +242,7 @@ def _rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, strict: bool = 
         for bad in sorted(EXPERIMENT_ONLY_FIELDS & set(ext)):
             rep.add("error", f"$.extension.{bad}", "theory.experiment_field", f"experiment field '{bad}' in a theory spec")
         if strict or _at_least(doc.get("contract_version"), THEORY_SEMANTICS_FROM):
-            _theory_semantics(doc, ext, vocab, rep)
+            _theory_semantics(doc, ext, vocab, rep, strict or _at_least(doc.get("contract_version"), CRPROP_FROM))
     elif t == "prediction":
         for i, u in enumerate(ext.get("uncertainties", [])):
             if u.get("kind") in NON_GAUSSIAN_KINDS and u.get("gaussian") is True:
@@ -1236,7 +1236,11 @@ def _feature_names(features) -> set[str]:
     return out
 
 
-def _blank(v) -> bool:
+def _blank(v, *, entry_object: bool = False) -> bool:
+    """True unless v is a non-blank string. With entry_object (contracts 3.14.0, CRPROP-A2), an object entry such as an
+    object-form degenerate direction counts as non-blank when its 'combination' is a non-blank string."""
+    if entry_object and isinstance(v, dict):
+        return _blank(v.get("combination"))
     return not (isinstance(v, str) and v.strip())
 
 
@@ -1709,10 +1713,14 @@ def _ml_domain_shift_v2(ext: dict, rep: Report, native: bool) -> None:
 
 
 THEORY_SEMANTICS_FROM = "2.6.0"  # theory-spec and prediction rules apply natively from this contract version
+# CV-CRPROP (cr-propagation r4, one gating constant for the campaign; A2 sets it, C1 reuses it): the object-form
+# degenerate_directions rules (_degeneracy_entries) apply natively from this unreleased contract version, an older
+# artifact gets them only under --strict. The number is fixed at release.
+CRPROP_FROM = "3.14.0"
 STRONG_STATUSES = {"formal-proof", "analytic-derivation"}
 
 
-def _theory_semantics(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:
+def _theory_semantics(doc: dict, ext: dict, vocab: Vocabulary, rep: Report, crprop_rules: bool = False) -> None:
     """theory-spec and prediction rules of contracts 2.6.0 (hep-theory audit 2026-10-13). Native for artifacts of
     contract 2.6.0 or later; an older artifact gets them only in strict mode, at the same level, so its promised outcome
     is unchanged.
@@ -1723,9 +1731,11 @@ def _theory_semantics(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> N
     prediction: errors for 'observed', for 'validated-in-scope' without a linked theory-spec input that carries it,
     and for a scale envelope without an envelope_prescriptions term or with values that are not [min, max] (bounds
     per bin for a binned envelope); unresolved when neither theory_spec_ref nor derivation_status links the
-    prediction to its derivation; a warning for a truncation without a truncation_methods term."""
+    prediction to its derivation; a warning for a truncation without a truncation_methods term.
+    With crprop_rules (contracts 3.14.0, CRPROP_FROM, or --strict): errors for an object-form degenerate direction
+    without evidence, with evidence outside degeneracy_evidence, or without the range where it holds."""
     if doc.get("artifact_type") == "theory-spec":
-        _theory_spec_rules(ext, vocab, rep)
+        _theory_spec_rules(ext, vocab, rep, crprop_rules)
     else:
         _prediction_rules(doc, ext, vocab, rep)
 
@@ -1734,7 +1744,7 @@ def _term_ok(vocab: Vocabulary, name: str, term) -> bool:
     return isinstance(term, str) and (vocab.has(name, term) or bool(NAMESPACED.match(term)))
 
 
-def _theory_spec_rules(ext: dict, vocab: Vocabulary, rep: Report) -> None:
+def _theory_spec_rules(ext: dict, vocab: Vocabulary, rep: Report, crprop_rules: bool = False) -> None:
     conv: Any = ext.get("conventions") if isinstance(ext.get("conventions"), dict) else {}
     listed = set(ext.get("inapplicable") or [])
     # conditional keys (contracts 3.10.0) are required only by the module that names them, not by every derivation
@@ -1765,10 +1775,38 @@ def _theory_spec_rules(ext: dict, vocab: Vocabulary, rep: Report) -> None:
                 "the validity domain is empty: state where the result holds")
     model: Any = ext.get("model") if isinstance(ext.get("model"), dict) else {}
     if model.get("family") == "cosmic-ray-propagation" and not any(
-            not _blank(d) for d in ext.get("degenerate_directions") or []):
+            not _blank(d, entry_object=True) for d in ext.get("degenerate_directions") or []):
         rep.add("error", "$.extension.degenerate_directions", "theory.degeneracy_missing",
                 "a cosmic-ray propagation model lists the parameter combinations the data cannot separate "
                 "(degenerate_directions, e.g. 'D0/L')")
+    if crprop_rules:
+        _degeneracy_entries(ext, vocab, rep)
+
+
+def _degeneracy_entries(ext: dict, vocab: Vocabulary, rep: Report) -> None:
+    """Object-form degenerate directions (contracts 3.14.0, CRPROP_FROM; cr-propagation plan r3 section 5.4, rule P7):
+    each object records the evidence behind it, a core degeneracy_evidence term (a Fisher screen is a local linear
+    screen; a conclusion needs a profile scan or posterior samples), and the parameter range where it holds. A string
+    entry keeps its meaning and is not checked here."""
+    entries = ext.get("degenerate_directions")
+    for i, d in enumerate(entries if isinstance(entries, list) else []):
+        if not isinstance(d, dict):
+            continue
+        p = f"$.extension.degenerate_directions[{i}]"
+        evidence = d.get("evidence")
+        if _blank(evidence):
+            rep.add("error", f"{p}.evidence", "theory.degeneracy_evidence_missing",
+                    f"degenerate direction {d.get('combination')!r} states its evidence, one of "
+                    f"{sorted(vocab.core('degeneracy_evidence'))}")
+        elif evidence not in vocab.core("degeneracy_evidence"):  # core terms only: no profile extension
+            rep.add("error", f"{p}.evidence", "theory.degeneracy_evidence_unknown",
+                    f"evidence {evidence!r} is not one of {sorted(vocab.core('degeneracy_evidence'))}")
+        ranges = d.get("valid_range")
+        if not isinstance(ranges, dict) or not ranges or not all(
+                isinstance(r, dict) and ("min" in r or "max" in r) for r in ranges.values()):
+            rep.add("error", f"{p}.valid_range", "theory.degeneracy_range_missing",
+                    f"degenerate direction {d.get('combination')!r} records the parameter range where it holds "
+                    "(valid_range, e.g. {'L_kpc': {'min': 2, 'max': 6}})")
 
 
 def _prediction_rules(doc: dict, ext: dict, vocab: Vocabulary, rep: Report) -> None:

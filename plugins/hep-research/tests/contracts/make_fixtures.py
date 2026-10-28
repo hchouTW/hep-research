@@ -135,6 +135,44 @@ def envelope_unc(**kw):
     return [{k: x for k, x in u.items() if x is not None}]
 
 
+# cr-propagation A2 (contracts 3.14.0, validate.CRPROP_FROM): the transport block and object-form degenerate directions of
+# the cr-propagation plan r3 section 5.4, in canonical parameter names (SYNTHETIC values)
+CRPROP_TRANSPORT = {
+    "geometry": {"kind": "cylinder-2d", "L_kpc": 5.0, "radius_kpc": 20.0, "disc_halfwidth_pc": 100},
+    "diffusion": {"form": "beta^eta (R/R0)^delta with smooth breaks", "D0_cm2_s": 3.0e28, "R0_gv": 1.0, "eta": 1.0,
+                  "delta": 0.45, "breaks": [{"kind": "low", "R_break_gv": 5.0, "delta_below": 0.15, "s": 0.05,
+                                             "s_convention": "usine"}]},
+    "reacceleration": {"V_A_kms": 0.0, "zone": "thin-disc", "relation": "Seo-Ptuskin 1994", "w": 1.0},
+    "convection": {"V_c_kms": 0.0, "dVc_dz_kms_per_kpc": 0.0},
+    "losses": ["ionization", "coulomb", "adiabatic"],
+    "decay": {"enabled": True, "lorentz_dilation": True, "ec_treatment": "fully-stripped"},
+    "gas": {"model": "synthetic-uniform", "He_to_H_number": 0.1},
+    "sources": {"spatial": "synthetic-uniform", "injection": [{"species_group": "Z>2", "gamma": 2.3, "breaks": []}],
+                "abundances": "fitted"},
+    "cross_sections": {"production_set": "synthetic-set", "inelastic_set": "synthetic-set",
+                       "ghost_threshold": "synthetic lifetime cut"},
+    "species": {"network_top": "Ni-64", "isotopic": True},
+    "family": "BIG",
+    "free": ["D0_cm2_s", "delta", "L_kpc", "V_A_kms", "V_c_kms"]}
+CRPROP_DEGENERACY = {"combination": "D0_cm2_s/L_kpc", "form": "power", "exponents": {"D0_cm2_s": 1, "L_kpc": -1},
+                     "valid_range": {"L_kpc": {"min": 2, "max": 6}}, "broken_by": ["10Be/9Be", "Be/B"],
+                     "evidence": "profile-scan"}
+
+
+def theory_crprop(**entry):
+    """theory-spec of a cosmic-ray-propagation model at CRPROP_FROM: the transport block and one object-form degenerate
+    direction; entry keys replace those of the object (None removes one)."""
+    from contracts.validate import CRPROP_FROM
+    direction = {k: x for k, x in {**CRPROP_DEGENERACY, **entry}.items() if x is not None}
+    doc = theory_v26(model={"id": "synthetic-diffusion-model", "description": "structural fixture",
+                            "family": "cosmic-ray-propagation"},
+                     transport=json.loads(json.dumps(CRPROP_TRANSPORT)), degenerate_directions=[direction])
+    doc["artifact_id"] = "fixture-synthetic-theory-spec-crprop"
+    doc["contract_version"] = CRPROP_FROM
+    doc["versions"] = {"plugin": "0.42.0", "contracts": CRPROP_FROM, "profiles": {}}
+    return doc
+
+
 LINKED_SPEC = [{"ref": "artifacts/theory_spec.json", "artifact_type": "theory-spec", "status": ["validated-in-scope"]}]
 
 
@@ -401,6 +439,9 @@ VALID = {
     "theory_spec_v26_propagation.json": theory_v26(model={"id": "synthetic-diffusion-model", "description": "structural fixture",
                                                           "family": "cosmic-ray-propagation"},
                                                    degenerate_directions=["D0/L (synthetic)"]),
+    "theory_spec_crprop_object_degeneracy.json": theory_crprop(),
+    "theory_spec_crprop_mixed_degeneracy.json": dict(theory_crprop(), extension=dict(
+        theory_crprop()["extension"], degenerate_directions=["D0/L (synthetic)", CRPROP_DEGENERACY])),
     "prediction_v26.json": prediction_v26(),
     "prediction_v26_validated_linked.json": _v26(dict(prediction_v26(), status=["validated-in-scope", "synthetic"],
                                                       inputs=LINKED_SPEC)),
@@ -477,7 +518,14 @@ bad["theory_v26_propagation_no_degeneracy.json"] = (theory_v26(model={"id": "syn
                                                                        "family": "cosmic-ray-propagation"}),
                                                     ["theory.degeneracy_missing"])
 
-# Valid but reported with a warning (the rule is advisory): cases.json "warning".
+# cr-propagation A2 (contracts 3.14.0): object-form degenerate directions, one negative fixture per new rule
+bad["theory_crprop_degeneracy_evidence_missing.json"] = (theory_crprop(evidence=None), ["theory.degeneracy_evidence_missing"])
+bad["theory_crprop_degeneracy_range_missing.json"] = (theory_crprop(valid_range=None), ["theory.degeneracy_range_missing"])
+bad["theory_crprop_degeneracy_evidence_unknown.json"] = (theory_crprop(evidence="eyeballed"),
+                                                         ["theory.degeneracy_evidence_unknown"])
+d = theory_crprop(); d["extension"]["transport"]["geometry"]["L"] = d["extension"]["transport"]["geometry"].pop("L_kpc")
+bad["theory_crprop_transport_noncanonical_name.json"] = (d, ["schema.additional"])
+
 WARNING = {"theory_v26_conventions_incomplete.json": (theory_v26(conventions={"hbar_c_one": True}), ["theory.conventions_incomplete"]),
            "prediction_v26_truncation_no_method.json": (prediction_v26(uncertainties=[
                {"name": "missing higher orders", "kind": "truncation", "correlation": "unknown"}]), ["prediction.truncation_method"])}
