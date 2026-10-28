@@ -278,7 +278,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `reproducibility.md` | hep-ml | 6.3 | no | 8 | hep-computing | 16214af1 2026-10-26 |
 | `robustness-and-distribution-shift.md` | hep-ml | 4.4 | yes | 11 | - | 1a844ba0 2026-10-17 |
 | `sbi-training.md` | hep-ml | 4.9 | yes | 4 | - | 9257d7b5 2026-10-15 |
-| `scientific-machine-learning.md` | hep-ml | 3.1 | yes | 7 | hep-statistics | 9257d7b5 2026-10-15 |
+| `scientific-machine-learning.md` | hep-ml | 3.5 | yes | 7 | hep-statistics | fc8606a1 2026-10-29 |
 | `sequence-models.md` | hep-ml | 2.2 | no | 4 | - | 9257d7b5 2026-10-15 |
 | `serving-architecture.md` | hep-ml | 1.9 | no | 2 | - | 485e96cb 2026-10-17 |
 | `space-and-astroparticle-ml.md` | hep-ml | 9.6 | yes | 5 | hep-detector | f3e0ff6d 2026-10-17 |
