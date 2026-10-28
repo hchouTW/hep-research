@@ -934,8 +934,17 @@ class LiveUsine(unittest.TestCase):
 # ------------------------------------------------------------------ B3 (cr-propagation r4): harmonized comparison
 
 B3_FIX = FIX / "b3"
-sys.path.insert(0, str(B3_FIX))
-B3_TOL = {"B3-1": 0.02, "B3-2": 0.005}  # frozen in acceptance.json, evaluated as VALIDATION CRPROP-B3 (fixed first)
+# frozen in acceptance.json: B3-1 (superseded for B3's verdict by B3-1a/b/c, decisions.md A1.10), B3-1a, B3-1c, B3-2
+B3_TOL = {"B3-1": 0.02, "B3-1a": 0.02, "B3-1c": 0.005, "B3-2": 0.005}
+
+
+def load_b3_study():
+    """b3_study.py loaded from its file (no fixture folder added to sys.path)."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("b3_study", B3_FIX / "b3_study.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
 
 
 def b3_results():
@@ -946,13 +955,13 @@ def b3_results():
 class B3HarmonizedComparison(unittest.TestCase):
     """B3, offline: the closed forms of theory:cr-secondary-ratio against the recorded USINE V3.5 nominal runs
     (b3/outputs/), recomputed from the committed tables; the decomposition check (B3-2) and the channel flags (B3-3)
-    from the recorded results (the 170 response and rerun runs are indexed by sha256 in b3-run-index.json, their
-    tables kept outside the repository)."""
+    from the recorded results (the 170 response and rerun runs are indexed by the sha256 of their table data lines in
+    b3-run-index.json, their tables kept outside the repository). B3-1 is superseded for B3's verdict by B3-1a, B3-1b
+    and B3-1c (decisions.md A1.10)."""
 
     @classmethod
     def setUpClass(cls):
-        import b3_study
-        cls.b3 = b3_study
+        cls.b3 = load_b3_study()
         cls.res = b3_results()
 
     def tables(self, cfg):
@@ -993,7 +1002,7 @@ class B3HarmonizedComparison(unittest.TestCase):
         for a, b in zip(got, hv1["runs"]["harmonized-v1"]["B/C"]):
             self.assertTrue(math.isclose(a, b, rel_tol=1e-6), (a, b))
 
-    def test_b3_1_recomputed(self):
+    def test_b3_1_numbers_recomputed(self):
         for cfg in self.b3.CLOSED_FORM_CONFIGS:
             with self.subTest(config=cfg):
                 got = self.b3.compare_b31(self.tables(cfg), self.b3.load_spec(cfg)["transport"])
@@ -1001,17 +1010,53 @@ class B3HarmonizedComparison(unittest.TestCase):
                 for k, v in got["bins"].items():
                     self.assertTrue(math.isclose(v["max_dev"], rec["bins"][k]["max_dev"], rel_tol=1e-9))
                     self.assertTrue(math.isclose(got["nodes_max_dev"][k], rec["nodes_max_dev"][k], rel_tol=1e-9))
-        for cfg in ("h1-1d", "dec-1d"):  # B3-1 (like-for-like geometry): bins and nodes within 2%
-            for k, v in self.res["b3_1"][cfg]["bins"].items():
-                self.assertLessEqual(v["max_dev"], B3_TOL["B3-1"], (cfg, k))
-                self.assertLessEqual(self.res["b3_1"][cfg]["nodes_max_dev"][k], B3_TOL["B3-1"], (cfg, k))
-        # harmonized-v1 geometry (2D, R = 20 kpc): B/C misses 2% (reported in VALIDATION CRPROP-B3); what is
-        # established is the attribution: the Fourier-Bessel thin-disc solution reproduces USINE 2D, and moving the
-        # radial boundary to 40 kpc removes the difference
+
+    def test_b3_1_fails_under_harmonized_v1(self):
+        """B3-1 as frozen (harmonized-v1, 2D, R = 20 kpc): B/C misses 2%; superseded for B3's verdict (A1.10)."""
         self.assertGreater(self.res["b3_1"]["h1-2d"]["bins"]["B/C"]["max_dev"], B3_TOL["B3-1"])
         self.assertLessEqual(self.res["b3_1"]["dec-2d"]["bins"]["10Be/9Be"]["max_dev"], B3_TOL["B3-1"])
-        self.assertLess(self.res["b3_1"]["h1-2d"]["bessel_2d"]["2000"]["B/C"]["max_dev"], 0.005)
+
+    def test_b3_1a_matched_1d_geometry(self):
+        """B3-1a: USINE Model1DKisoVc against the 1D thin-disc closed form, bins and nodes within 2%."""
+        for cfg, keys in (("h1-1d", ("B/C",)), ("dec-1d", ("B/C", "10Be/9Be"))):
+            got = self.b3.compare_b31(self.tables(cfg), self.b3.load_spec(cfg)["transport"])
+            for k in keys:
+                with self.subTest(config=cfg, observable=k):
+                    self.assertLessEqual(got["bins"][k]["max_dev"], B3_TOL["B3-1a"])
+                    self.assertLessEqual(got["nodes_max_dev"][k], B3_TOL["B3-1a"])
+
+    def test_b3_1b_offset_reported_and_attributed(self):
+        """B3-1b (no tolerance): per-bin offsets under harmonized-v1 in b3-results.json, recomputed, with the
+        attribution: the 2D/1D USINE ratio accounts for the offset (radial escape) and moving the radial boundary to
+        40 kpc removes it; the target (hydrogen-only on both sides) is stated."""
+        b1b = self.res["b3_1b"]
+        for key in ("h1-2d B/C", "dec-2d B/C", "dec-2d 10Be/9Be"):
+            cfg, obs = key.split()
+            with self.subTest(case=key):
+                row = b1b[key]
+                got = self.b3.compare_b31(self.tables(cfg), self.b3.load_spec(cfg)["transport"])["bins"][obs]
+                for a, b in zip(got["ratio"], row["closed_over_usine_2d"]):
+                    self.assertTrue(math.isclose(a, b, rel_tol=1e-9))
+                o2 = self.b3.observables(self.tables(cfg))[obs]
+                o1 = self.b3.observables(self.tables(cfg.replace("2d", "1d")))[obs]
+                for a, b, c, d in zip(o2, o1, row["usine_2d_over_usine_1d"], row["closed_over_usine_2d"]):
+                    self.assertTrue(math.isclose(a / b, c, rel_tol=1e-9))
+                    self.assertLess(abs(c * d - 1.0), 1e-3)  # what radial escape leaves: the 1D agreement (B3-1a)
+        self.assertIn("hydrogen-only", b1b["attribution"])
+        self.assertIn("radial escape", b1b["attribution"])
         self.assertLess(self.res["b3_1"]["h1-2d-r40"]["bins"]["B/C"]["max_dev"], 0.001)
+
+    def test_b3_1c_fourier_bessel(self):
+        """B3-1c: USINE harmonized-v1 2D (committed outputs) against the Fourier-Bessel thin-disc solution with the
+        same inputs (2000 terms, computed here, offline), within 0.5% on B3's bins: B/C of h1-2d, 10Be/9Be of
+        dec-2d."""
+        for cfg, obs in self.b3.B31C_CASES:
+            with self.subTest(config=cfg, observable=obs):
+                tables = self.tables(cfg)
+                fb = self.b3.bessel_2d_tables(tables, self.b3.load_spec(cfg)["transport"], self.b3.BESSEL_TERMS[-1])
+                dev = self.b3.max_dev(self.b3.observables(fb)[obs], self.b3.observables(tables)[obs])
+                self.assertLessEqual(dev, B3_TOL["B3-1c"])
+                self.assertTrue(math.isclose(dev, self.res["b3_1c"][f"{cfg} {obs}"]["max_dev"], rel_tol=1e-9))
 
     def test_b3_2_and_b3_3(self):
         chans = json.loads((B3_FIX / "b3-channels.json").read_text(encoding="utf-8"))
@@ -1044,10 +1089,10 @@ class B3HarmonizedComparison(unittest.TestCase):
         self.assertTrue(all(r["ok"] for r in idx["runs"]))
         for r in idx["runs"]:
             if r["kind"] == "nominal":
-                for s, h in r["isotope_table_sha256"].items():
+                for s, h in r["isotope_table_data_sha256"].items():
                     model = "Model2DKisoVc" if "-2d" in r["config"] else "Model1DKisoVc"
                     path = B3_FIX / "outputs" / r["name"] / usine_reader.table_name(s, model)
-                    self.assertEqual(hashlib.sha256(path.read_bytes()).hexdigest(), h)
+                    self.assertEqual(self.b3.data_sha256(path), h)
 
     def test_production_table_is_linear_in_its_nodes(self):
         spec = usine_translate.translate(self.b3.load_spec("dec-2d")["transport"], "x", (0.04, 2000.0))
