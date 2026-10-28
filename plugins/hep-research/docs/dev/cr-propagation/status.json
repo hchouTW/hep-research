@@ -103,10 +103,10 @@
    "head": "2d984725",
    "merge_commit": null,
    "worker_report": "PARTIAL: all deliverables; CONTRACTS_VERSION bump left to A2 (13 fixture/example pins outside C1 files). Open: closed-form provider gives bin-averaged ratio, not ratio of bin integrals (P2) -> C2 must handle; profile README/index not updated",
-   "verifier_report": "round 0 REWORK: conformance mixin cache inherited by subclasses (false PASS); advisory: cache key ignores theory_spec_ref. Notes for C2: closed-form provider is bin-averaged (bin_semantics), check before fitting data",
+   "verifier_report": "round 0 REWORK (inherited conformance cache); round 1 PASS (2026-10-28, Sonnet): cache per class + both-order tests, theory_spec_ref in runner key; ALL-3 full 33/33, relocation only the 2 known geant4 path-with-spaces failures; ALL-7 not-run",
    "missing_capabilities": [],
    "notes": [
-    "rework round 1 verifier dispatched 2026-10-28 (Sonnet)"
+    "PASS; merge held until A2 merges (merge_after A2)"
    ]
   },
   "B2": {
@@ -401,6 +401,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "A1.4: workers no longer run full checks; verifier alone runs ALL-3 (briefs updated)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "C1 round-1 verifier PASS; merge waits for A2"
   }
  ],
  "env": {
