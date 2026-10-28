@@ -6094,3 +6094,31 @@ A3-1 (161/161 sha256 equal to the baseline), A3-2 (`valid_range.L_kpc.max` 6.947
 with the integration branch's `workflow.json` (the branch copy predates the orchestrator's addition of
 `core-stats-guide.md` to A3's files). The full checks and `check_relocation.py` are rerun on the fix commit
 (`$CRPROP_OUT/a3/checks`, `$CRPROP_OUT/a3/reloc`).
+
+## CRPROP-C2 — 2026-10-28 (environment E2)
+
+Work package C2 (multi-dataset propagation fit, closed-form provider, SYNTHETIC data only) of the cr-propagation r4
+workflow, r3 card §C2 as split by r4 §6 (the USINE case is C2U).
+
+Environment: E2 (macOS arm64 workstation), Python 3.13.2 (miniconda), NumPy 2.4.4, SciPy 1.17.1. r3 §0.3 checks:
+toplevel `<repo>/.claude/worktrees/crprop-c2`, branch `worktree-crprop-c2`, status clean at start; base exception
+(decision D10): base is the integration HEAD `699c3b5c`, not `main`; prerequisites A2 (`a3c880f8`), A3 (`f62f70e8`),
+C1 (`099d1d22`) and B2 (`81cb2ce0`) are ancestors of HEAD.
+
+Criteria and tolerances, written before any fit was run (R9; frozen entries C2-1 to C2-6 of `acceptance.json`, the
+r3 suggested defaults adopted at H0). Provider: `cr-secondary-ratio-closed-form` 0.1.0 (B/C, axis ekn), whose values
+are bin-averaged in ln(E/n) (`crsr:bin_average`), not P2 bin integrals; synthetic data are generated with the same
+semantics, and data declared `bin-integrated` are refused. All inputs are ILLUSTRATIVE.
+
+| Item | Pre-declared setting or criterion |
+|---|---|
+| Datasets | two SYNTHETIC B/C sets from the provider at the truth: A, 12 bins 1-1000 GeV/n (3% uncorrelated + 2% with correlation exp(-\|d ln E\|/1.5)); B, 8 bins 10^0.5-10^2.5 GeV/n (5% uncorrelated + 3% fully correlated) |
+| Truth (interior) | `D0_cm2_s` = 3e28, `delta` = 0.5, `L_kpc` = 4 (fixed unless free), `R0_gv` = 1; production norms of C->B and O->B = 1 with Gaussian priors of 10% (P15) |
+| C2-1 | Asimov fit with the provider (no response model): every free parameter within 0.1 sigma of its true value, sigma from the inverse Fisher matrix at the best fit; boundary case `delta` = 0.2 (lower edge of the provider domain, standing in for a physical boundary the closed form cannot express): the minimum on the boundary passes `boundary_kkt` and lies within 0.1 sigma_one-sided, sigma_one-sided = distance from the boundary to the profile delta chi2 = 1 crossing on the allowed side |
+| C2-2 | 1000 plug-in toys at the interior truth (family: `D0_cm2_s`, `delta` free, C->B norm with its auxiliary value redrawn per toy); tested: `D0_cm2_s`, `delta` and the Fisher eigen-direction with the smallest eigenvalue in (ln D0, delta, C->B norm) (the nearly flat direction; eigenvalue ratio reported); covered when the profile delta chi2 at the true value is <= 1; pass when \|coverage - 0.6827\| <= z_m sqrt(0.6827 x 0.3173 / n) for each of the m = 3 quantities, z_m = Phi^-1(1 - 0.0027 / (2 m)) (Bonferroni over m at the familywise 3-sigma level; z_3 = 3.32); the uncorrected 3-sigma verdict is also reported |
+| Response model (toys, posterior) | the toys and the posterior use a tensor Chebyshev interpolation of the provider components, built from provider evaluations in a box of +-5 sigma around the expansion point; refused unless its maximum error at 12 random provider points in the box is <= 0.02 of the data sigma in every bin; its error enters the toy covariance as an uncorrelated component (P10); a toy fit outside the box is a failed toy |
+| C2-3 | BIG and SLIM declared in their literature parameters (V_A, V_c, low-energy break) are listed as not expressible by the closed form, with the reason; the expressible families are listed with their delta chi2 calibrated by 200 toys each, surviving when the toy p-value is >= 0.05 |
+| C2-4 | the fit-derived theory-spec carries only object-form `degenerate_directions` (evidence `profile-scan` with `valid_range`) and passes `contracts/validate.py`; so does the statistical-result |
+| C2-5 | a dataset without a covariance exits 3 (`incomplete`); a start point outside the provider domain is refused (exit 1, reason out-of-domain); a dataset declared `bin-integrated` is refused (exit 1) |
+| C2-6 | a forced non-convergence (optimizer limited to 1 iteration) stops after 5 restarts with reason restart-cap; forced toy failures stop the study once more than 2% of the toys failed; a chain longer than 2e5 steps is refused; a posterior interval is withheld (`unvalidated`) when R-hat > 1.01 or ESS < 400 |
+| D7 | provider point evaluations counted by the runner (`points_sent`) and reported; the provider cache lives under `$CRPROP_OUT/c2/cache` |
