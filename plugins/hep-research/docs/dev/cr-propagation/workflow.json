@@ -593,13 +593,20 @@
     "tests/skills/hep_statistics/**",
     "tests/adapters/fixtures/cr_propagation/c2u/**",
     "skills/hep-statistics/references/core-stats-guide.md",
-    "tests/adapters/fixtures/cr_propagation/c2uf/**"
+    "tests/adapters/fixtures/cr_propagation/c2uf/**",
+    "adapters/cr-propagation/assets/emulator_provider.py",
+    "adapters/cr-propagation/adapter.json",
+    "docs/capability-matrix.md",
+    "tests/adapters/test_cr_propagation.py",
+    "skills/hep-ml/scripts/train_emulator.py",
+    "tests/skills/hep_ml/test_train_emulator.py"
    ],
    "acceptance": [
     "C2UF-1"
    ],
    "fallback": "none: escalate before RC",
-   "source": "decisions.md A1.12 (maintainer 2026-10-28)"
+   "source": "decisions.md A1.12 (maintainer 2026-10-28)",
+   "files_source": "widened by the orchestrator 2026-10-28 (A1.14 implementation): the emulator provider and trainer must declare observables, axes, bins and domain per model and hold several observables; condition: E2's existing model and every E2 test keep their behaviour unchanged"
   },
   {
    "id": "D3",

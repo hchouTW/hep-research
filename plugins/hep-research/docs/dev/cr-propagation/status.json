@@ -364,13 +364,13 @@
    "rework_rounds": 0,
    "branch": "worktree-crprop-c2uf",
    "base": null,
-   "head": "d83b1cef",
+   "head": "da0414b0",
    "merge_commit": null,
    "worker_report": "dispatch 1 PARTIAL: BIG/SLIM fitted on B/C + 10Be/9Be with decay on (SLIM dchi2 23.93); polynomial response models refused (0.883, 0.452 sigma vs 0.05); 520/600 USINE; per-point provider requests; finding: USINE provider default decay off",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
-    "A1.14: dispatch 2 via GP emulator route; USINE cap +400 (1000 total)"
+    "A1.14 dispatch 2: blocked on emulator provider limits (B/C rigidity only, fixed domain, one observable); files widened to emulator_provider.py, adapter.json, capability-matrix, test_cr_propagation.py, train_emulator.py and its test, with E2 behaviour unchanged as condition; worker continues dispatch 2"
    ]
   }
  },
@@ -774,6 +774,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "C2UF dispatch 1 PARTIAL (no response model at 0.05 sigma); A1.14: dispatch 2 via E2 GP emulator, cap +400; F1 warned about USINE default decay off"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "C2UF dispatch 2 blocked on E2 emulator provider limits; orchestrator widened C2UF files (E2 behaviour must stay unchanged); C2UF continues"
   }
  ],
  "env": {
