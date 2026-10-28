@@ -6888,3 +6888,51 @@ still sends one request per dataset (a two-dataset point costs two USINE runs).
 
 Not done in C2U: the toy-calibrated family comparison (C2U-3, above); the low break is fixed, not fitted (the provider's
 domain has no break parameters); modulation (datasets with a period are refused) and real data (F1).
+
+## CRPROP-D3 — 2026-10-28 (environment E-crprop)
+
+Work package D3 of the cr-propagation r4 campaign (r3 §D3): two-level cross-code comparison of DRAGON2 and USINE.
+GALPROP is `unavailable` (decisions A1.2; escalation 2), so the comparison is DRAGON2 vs USINE only (workflow.json
+fallback of D3: "D2 skipped: DRAGON2 and USINE only").
+
+**Environment (r3 §0.3, base exception D10).** Toplevel `.claude/worktrees/crprop-d3`; branch `worktree-crprop-d3`;
+status clean at start; base = integration HEAD b0d0016d (not `main`, decision D10). Prerequisites are ancestors of
+HEAD (`git merge-base --is-ancestor`): B1 3ed1e89e, B1X 2360c294, D1 e44377f4, A1R 18b43b34, B3 c1b5967d, A4
+0ee4c914. External codes: DRAGON2 cd588707 (the D1 build, `HEP_DRAGON2_BIN`, `HEP_DRAGON2_DATA`) and USINE V3.5
+(the B1 build, `HEP_USINE_BIN`, `HEP_USINE_DATA`) on E-crprop (macOS 27.2 arm64), at most 4 external processes at once.
+
+**Criteria and tolerances, fixed before any D3 comparison (R9).** Frozen entries (acceptance.json): D3-1 5%, D3-2
+judgment, D3-3 5% (added per A1.9). How they are evaluated (written here before any D3 run was compared; none of this
+replaces or widens a frozen entry):
+
+- Metric for D3-1 and D3-3: the largest |r_DRAGON2 / r_USINE - 1| of B/C on the 16 log-uniform rigidity bins
+  2-1000 GV of B1 and D1, ratios of bin integrals (r3 P2, P3; `dragon2_to_prediction.ratio_of_bin_integrals` and
+  `usine_to_prediction.ratio_of_bin_integrals`). ¹⁰Be/⁹Be on the 12 E_k/n bins 0.05-10 GeV/n is reported alongside
+  with the same metric and no verdict of its own (the frozen entries name 2-1000 GV, i.e. B/C).
+- D3-1 (level 1): each configuration that both codes ran from the same transport block: `harmonized-v1` (set A) and
+  D1's `harmonized-v1-<item>` blocks (isotopic item-off, convection, decay, reacceleration; losses with its Galprop-gas
+  item-off run on the DRAGON2 side). USINE as translated by B1/B1X from the block, DRAGON2 as translated by D1. A
+  configuration passes only if its B/C metric is ≤ 5%; D3-1 passes only if every configuration passes. Recorded runs
+  of B1 and D1 are reused where the configuration matches; DRAGON2 `harmonized-v1` (set A) is run once.
+- D3-3 (level 1, matched): the same configurations with USINE given DRAGON2 cd588707's fixed settings where USINE can
+  express them: helium target with He/H = 0.11 (constants.h `He_abundance`) of the hydrogen nucleon density, with
+  DRAGON2's helium production factor 1 + 0.11 r(E) (GALPROP's `He_to_H_CS_ratio`, xsec.cc) on the same ILLUSTRATIVE
+  production cross sections; DRAGON2's own inelastic cross sections (CROSEC/Barashenkov-Polanski `sighad`, option 2,
+  times 1 + 0.11 · 2.10 / A^0.055 for helium) on hydrogen and helium, evaluated with DRAGON2's own code outside the
+  repo; the thin-disc densities set to DRAGON2's gas columns at the observer (BronfFerr; Galprop's HI, HII and H2 for
+  the losses item, D1-L); the parent ratio O/C at the normalisation energy set to DRAGON2's propagated O/C. Each
+  setting that cannot be matched is recorded with its estimated effect on B/C. Pass if every configuration's B/C
+  metric is ≤ 5%.
+- Attribution ladder (evidence for D3-2 and D3-3): USINE runs that switch the matched settings on one at a time
+  (gas column, helium target, inelastic cross sections, parent ratio), each step's effect recorded as a ratio of the
+  B/C of consecutive runs.
+- D3-2 (level 2): each code with its own default inputs at the same transport (harmonized-v1-isotopic): DRAGON2 with
+  its shipped production table (Evoli 2019, cumulative), its BaseModel source abundances, BronfFerr gas, helium and
+  inelastic cross sections; USINE with its own files (`sigProdGALPROP17_OPT12`, `sigInelTripathi99+Coste12`, as in
+  B1X), data-normalised abundances and its gas and helium settings; same network top (O-16) on both sides. Every
+  difference between the two is listed as a `model-alternative` with its attribution: an effect measured by a USINE
+  run that swaps that one input for DRAGON2's (production table, inelastic cross sections, gas and helium,
+  abundances), or, where no run can isolate it, an estimate with its method. D3-2 passes if no listed difference is
+  without an attribution and the product of the attributed effects leaves a residual no larger than the D3-3 residual
+  plus the stated uncertainty of the estimates; an unexplained residual is itself listed as unattributed (fail).
+- Budget (A1.8): at most 60 DRAGON2 and 300 USINE runs in D3, tallied in this section.
