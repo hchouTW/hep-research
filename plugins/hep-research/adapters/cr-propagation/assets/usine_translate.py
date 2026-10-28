@@ -22,8 +22,10 @@ Transport block (contracts ext_theory_spec.transport, r3 5.4, canonical names) t
 - diffusion: K = beta^eta K0 (Rig/R0)^delta times one factor per break, with K0 = D0_cm2_s / KPC2_PER_MYR_CM2_S in
   kpc^2/Myr (IAU parsec, Julian year; r3 P1); s_convention 'usine' only. A low break (R_break_gv, delta_below, s)
   gives (1 + (R_break/Rig)^((delta - delta_below)/s))^s, the form of the plugin's convention table
-  (transport_conventions.py; USINE V3.5 does not settle it, since USINE reads K as a formula and its shipped files
-  carry no low break). A high break (R_break_gv, delta_above, s; work package B1X) gives
+  (transport_conventions.py). USINE's source fixes no form (K is a formula of the initialisation file) and its
+  inputs/ files carry no low break; the initialisation files of Génolini et al. 2019 shipped in USINE V3.5's
+  doc/DocFiles/2019-Génolini-benchmarks-BC.tar.gz (BIG, SLIM) write (1+(Rlow/Rig)^((deltalow+delta)/slow))^slow,
+  the same form with deltalow = -delta_below (work package F1). A high break (R_break_gv, delta_above, s; work package B1X) gives
   (1 + (Rig/R_break)^((delta - delta_above)/s))^(-s), USINE V3.5's shipped K formula (inputs/init.TEST.par line 133,
   init.Model1D.par line 89, init.Model2D.par line 96: (1 + (Rig/Rbreak)^(Deltabreak/sbreak))^(-sbreak)) with
   Deltabreak = delta - delta_above.
@@ -65,8 +67,21 @@ Transport block (contracts ext_theory_spec.transport, r3 5.4, canonical names) t
       chart from 1H to species.network_top (e.g. 'Si-30'); sources.abundances 'data-normalised usine:<data file>
       <elements>:<experiment>@<E_k/n>[;...]' becomes USINE's NormList on that data file (source isotopic fractions
       from solar-system abundances with the FIP bias, kSSISOTFRAC, kSSISOTABUND, kFIPBIAS); network elements in no
-      group are pure secondaries.
+      group are pure secondaries, and a trailing 'pure:<isotope>,...' (e.g. 'pure:13C,15N,17O,18O', as in the
+      initialisation files of Génolini et al. 2019 shipped with USINE) makes isotopes of normalised elements pure
+      secondaries too (work package F1).
   Any other set is refused (SpecError), never replaced.
+- production modifiers (work package F1; USINE's own files only; run option, not a transport field): a channel
+  '<A><el>+<H|He>-><A><el>' with norm, slope_le and threshold_ekn_gev is multiplied by norm and, below the threshold,
+  by (E_k/n / threshold)^slope_le, the transformation of USINE V3.5's fit-mode XS parameters Norm, SlopeLE and EThresh
+  (src/TUXSections.cc lines 3912-3921), here applied to the nodes of USINE's table and written to
+  <run>/xs_production_modified.dat (that channel only; USINE replaces a reaction read again from a second fProd file,
+  src/TUXSections.cc line 56). The file holds numbers computed from USINE's GPL-2.0 table: run directory only, never
+  rendered into a fixture, listed in the record with derived_from_usine_inputs.
+- solar modulation (work package F1; run option phi > 0): USINE's force field SolMod0DFF (Phi = |Z| phi / A per
+  nucleon, Rig0 = 0.2 GV) applied per isotope by USINE ('usine -l' quantities at phi); the modulated isotope tables
+  (local_fluxes_<NAME>_Ekn_<model>_SolMod0DFF_phi<phi>GV.out) are written next to the unmodulated ones (r3 P4: per
+  isotope, before any ratio).
 - tertiary chains, ghost nuclei, exotic primaries, antinuclei: off.
 Every item USINE does not express exactly, every transport field the translator does not use (family, free,
 sources.spatial, diffusion.form, ...) and every default it fills for a field left out is listed in the translation's
@@ -79,9 +94,11 @@ from below 0.8 times the lowest to above 1.25 times the highest E_k/n asked for,
 Usage:
   python3 usine_translate.py translate --transport SPEC.json --name NAME --out RUNDIR --ekn-range LOW,HIGH
                                       [--data-dir DIR] [--points-per-decade N | --ekn-grid N,LOW,HIGH]
+                                      [--phi GV] [--production-modifiers MODS.json]
   python3 usine_translate.py run --transport SPEC.json --name NAME --out RUNDIR --ekn-range LOW,HIGH
                                 [--usine BIN] [--data-dir DIR] [--record RUN.json] [--timeout SECONDS]
-                                [--points-per-decade N | --ekn-grid N,LOW,HIGH]
+                                [--points-per-decade N | --ekn-grid N,LOW,HIGH] [--phi GV]
+                                [--production-modifiers MODS.json]
   SPEC.json is a transport block, or an object with a 'transport' key (a harmonized-v1 file). --usine defaults to
   $HEP_USINE_BIN and --data-dir to $HEP_USINE_DATA; USINE's own variable USINE is set to the installation folder (the
   parent of the executable's folder) for the run. 'translate' writes the run directory and translation.json without
@@ -329,12 +346,15 @@ def _gas(gas: dict, subs: list[str]) -> dict:
                     "'n_HI = <x> cm^-3, n_HII = <y> cm^-3, n_H2 = <z> cm^-3'")
 
 
-def _abundances(text: str, elements: list[str]) -> tuple[str, list[tuple[list[str], str, float]]]:
-    """'data-normalised usine:<file>.dat C,N,O:HEAO@10.6;H,He:PAMELA@20' -> (file, [(elements, experiment, E_k/n)])."""
-    m = re.fullmatch(r"data-normalised\s+(usine:\S+)\s+(\S+)", (text or "").strip())
+def _abundances(text: str, elements: list[str]) -> tuple[str, list[tuple[list[str], str, float]], list[str]]:
+    """'data-normalised usine:<file>.dat C,N,O:HEAO@10.6;H,He:PAMELA@20 [pure:13C,15N]' -> (file, [(elements,
+    experiment, E_k/n)], [pure-secondary isotopes]). The optional 'pure:' list names isotopes of normalised elements
+    that get no source (USINE PureSecondaries, e.g. 13C as in Génolini et al. 2019's initialisation files)."""
+    m = re.fullmatch(r"data-normalised\s+(usine:\S+)\s+(\S+)(?:\s+pure:(\S+))?", (text or "").strip())
     if not m:
         raise SpecError(f"sources.abundances {text!r}: with USINE's own cross sections give "
-                        "'data-normalised usine:<data file>.dat <elements>:<experiment>@<E_k/n in GeV/n>[;...]'")
+                        "'data-normalised usine:<data file>.dat <elements>:<experiment>@<E_k/n in GeV/n>[;...] "
+                        "[pure:<isotope>,...]'")
     groups, seen = [], set()
     for item in m.group(2).split(";"):
         g = re.fullmatch(r"([A-Z][a-z]?(?:,[A-Z][a-z]?)*):([A-Za-z0-9_-]+)@([0-9]*\.?[0-9]+(?:[eE][-+]?[0-9]+)?)", item)
@@ -347,7 +367,14 @@ def _abundances(text: str, elements: list[str]) -> tuple[str, list[tuple[list[st
                             "listed twice")
         seen.update(names)
         groups.append((names, g.group(2), float(g.group(3))))
-    return usine_file(m.group(1), "sources.abundances"), groups
+    pure_isotopes = []
+    for iso in (m.group(3) or "").split(",") if m.group(3) else []:
+        z, a = _nuclide(iso, "sources.abundances pure")
+        if SYMBOLS[z - 1] not in seen:
+            raise SpecError(f"sources.abundances pure {iso!r}: its element is not normalised to data (an element in no "
+                            "group is already a pure secondary)")
+        pure_isotopes.append(f"{a}{SYMBOLS[z - 1]}")
+    return usine_file(m.group(1), "sources.abundances"), groups, pure_isotopes
 
 
 def explicit_grid(grid: dict) -> dict:
@@ -416,10 +443,13 @@ def thin_disc_alfven_speed(v_a_halo: float, l_kpc: float, h_kpc: float, w: float
 
 
 def translate(transport: dict, name: str, ekn_range_gev, points_per_decade: int = POINTS_PER_DECADE,
-              grid: dict | None = None) -> dict:
+              grid: dict | None = None, phi_gv: float = 0.0, production_modifiers: list | None = None,
+              tolerances: dict | None = None) -> dict:
     """The run spec of one USINE run (pure data, no path). Items USINE expresses only approximately, and defaults the
     transport block leaves to the translator, are listed in 'substitutes'; items it cannot express raise SpecError.
-    grid ({'n_points', 'ekn_min_gev', 'ekn_max_gev'}) replaces the derived energy grid."""
+    grid ({'n_points', 'ekn_min_gev', 'ekn_max_gev'}) replaces the derived energy grid. phi_gv > 0 asks USINE for the
+    force-field modulated isotope fluxes as well (solar_modulation); production_modifiers (USINE's own cross sections
+    only) rescale production channels as USINE's fit mode does (production_modifier)."""
     if not isinstance(transport, dict):
         raise SpecError("transport must be an object")
     if not isinstance(name, str) or not re.fullmatch(r"[A-Za-z0-9_-]{1,80}", name):
@@ -493,7 +523,9 @@ def translate(transport: dict, name: str, ekn_range_gev, points_per_decade: int 
         kinds.append(bkind)
     if "low" in kinds:
         subs.append("low break form (1 + (R_break/Rig)^((delta - delta_below)/s))^s of the plugin's 'usine' convention "
-                    "(transport_conventions.py; not re-read from Weinrich et al. 2020a)")
+                    "(transport_conventions.py), the K formula of the BIG and SLIM initialisation files of Génolini et "
+                    "al. 2019 shipped with USINE V3.5 (doc/DocFiles/2019-Génolini-benchmarks-BC.tar.gz: "
+                    "(1+(Rlow/Rig)^((deltalow+delta)/slow))^slow) with deltalow = -delta_below")
     if "high" in kinds:
         subs.append("high break form (1 + (Rig/R_break)^((delta - delta_above)/s))^(-s): USINE V3.5's shipped K "
                     "formula (inputs/init.TEST.par line 133) with Deltabreak = delta - delta_above")
@@ -636,6 +668,15 @@ def translate(transport: dict, name: str, ekn_range_gev, points_per_decade: int 
         subs.append(f"family {transport['family']!r}: a label of the model family, not read by the translator")
     if "free" in transport:
         subs.append(f"free {transport['free']}: one run fixes every parameter; a fit varies the free ones")
+    spec["solar_modulation"] = solar_modulation(phi_gv, subs)
+    spec["usine_tolerances"] = usine_tolerances(tolerances, subs)
+    spec["production_modifiers"] = [production_modifier(m, spec) for m in (production_modifiers or [])]
+    for mod in spec["production_modifiers"]:
+        subs.append(f"production cross section {mod['channel']} of {spec['usine_inputs']['production']} times "
+                    f"{mod['norm']:.10g}, and below {mod['threshold_ekn_gev']:.10g} GeV/n times (E_k/n / "
+                    f"{mod['threshold_ekn_gev']:.10g})^{mod['slope_le']:.10g} (USINE V3.5 fit-mode XS parameters Norm, "
+                    "SlopeLE, EThresh, src/TUXSections.cc lines 3912-3921), applied to the table's nodes and read by "
+                    "USINE as a second production file that replaces this channel only")
     if defaults:
         subs.append("not given in the transport block, the translator's value used: " + "; ".join(defaults))
     if spec["energy_grid"]["points_per_decade"] is None:
@@ -643,6 +684,103 @@ def translate(transport: dict, name: str, ekn_range_gev, points_per_decade: int 
                     f"{spec['energy_grid']['ekn_min_gev']:g} to {spec['energy_grid']['ekn_max_gev']:g} GeV/n")
     spec.update(substitutes=subs, transport=copy.deepcopy(transport))
     return spec
+
+
+DEFAULT_TOLERANCES = {"EPS_ITERCONV": 1e-6, "EPS_INTEGR": 1e-4, "EPS_NORMDATA": 1e-10}
+
+
+def usine_tolerances(given, subs: list[str]) -> dict:
+    """USINE's numerical tolerances of the run (UsineRun @ Calculation); the defaults unless given (work package F1,
+    dispatch 2: tighter tolerances to lower the noise of -2 ln L); a change is recorded."""
+    out = dict(DEFAULT_TOLERANCES)
+    for key, value in (given or {}).items():
+        if key not in out:
+            raise SpecError(f"USINE tolerance {key!r}: one of {sorted(out)}")
+        v = float(value)
+        if not (math.isfinite(v) and 0 < v < 1):
+            raise SpecError(f"USINE tolerance {key} = {value!r}: a number in (0, 1)")
+        out[key] = v
+    if out != DEFAULT_TOLERANCES:
+        subs.append("USINE tolerances " + ", ".join(f"{k} {v:g}" for k, v in out.items()) + " (defaults "
+                    + ", ".join(f"{k} {v:g}" for k, v in DEFAULT_TOLERANCES.items()) + ")")
+    return out
+
+
+FORCE_FIELD_RIG0_GV = 0.2  # USINE SolMod0DFF Rig0 (as in USINE's shipped initialisation files)
+CHANNEL = re.compile(r"(\d+)([A-Z][a-z]?)\+(H|He)->(\d+)([A-Z][a-z]?)")
+MODIFIED_PRODUCTION_FILE = "xs_production_modified.dat"
+
+
+def solar_modulation(phi_gv, subs: list[str]) -> dict | None:
+    """USINE's force-field modulation (SolMod0DFF) at phi_gv, or None for the unmodulated run (phi = 0)."""
+    try:
+        phi = float(phi_gv)
+    except (TypeError, ValueError):
+        raise SpecError(f"phi_gv {phi_gv!r}: a number in GV") from None
+    if not math.isfinite(phi) or phi < 0:
+        raise SpecError(f"phi_gv {phi_gv!r}: a finite number >= 0 GV")
+    if phi == 0:
+        return None
+    subs.append(f"solar modulation: USINE's force field SolMod0DFF (Gleeson and Axford; Phi = |Z| phi / A per nucleon, "
+                f"phi = {phi:.10g} GV, Rig0 = {FORCE_FIELD_RIG0_GV} GV) applied by USINE to each isotope before the "
+                "reader forms ratios (r3 P4); the unmodulated tables are written too")
+    return {"model": "SolMod0DFF", "phi_gv": phi, "rig0_gv": FORCE_FIELD_RIG0_GV}
+
+
+def production_modifier(mod, spec: dict) -> dict:
+    """One production-channel change {'channel': '12C+H->11B', 'norm', 'slope_le', 'threshold_ekn_gev'}: sigma times
+    norm, and below the threshold times (E_k/n / threshold)^slope_le (USINE's fit-mode XS parameters)."""
+    if spec.get("mode") != "usine-inputs":
+        raise SpecError("production modifiers act on USINE's own production file; the ILLUSTRATIVE sets have none")
+    if not isinstance(mod, dict) or set(mod) != {"channel", "norm", "slope_le", "threshold_ekn_gev"}:
+        raise SpecError("a production modifier is {'channel', 'norm', 'slope_le', 'threshold_ekn_gev'}")
+    m = CHANNEL.fullmatch(str(mod["channel"]))
+    if not m:
+        raise SpecError(f"production modifier channel {mod['channel']!r}: '<A><element>+<H|He>-><A><element>'")
+    proj, frag = (int(m.group(1)), m.group(2)), (int(m.group(4)), m.group(5))
+    for a, sym in (proj, frag):
+        if sym not in SYMBOLS or (SYMBOLS.index(sym) + 1, a) > tuple(spec["network_top"]):
+            raise SpecError(f"production modifier channel {mod['channel']!r}: {a}{sym} is not in the network")
+    if m.group(3) not in spec["targets"]:
+        raise SpecError(f"production modifier channel {mod['channel']!r}: target {m.group(3)} is not a target of the run")
+    norm, slope, thr = (float(mod[k]) for k in ("norm", "slope_le", "threshold_ekn_gev"))
+    if not (math.isfinite(norm) and norm > 0 and math.isfinite(slope) and math.isfinite(thr) and thr > 0):
+        raise SpecError(f"production modifier {mod['channel']}: norm > 0, finite slope_le, threshold_ekn_gev > 0")
+    return {"channel": mod["channel"], "projectile": f"{proj[0]}{proj[1]}", "target": m.group(3),
+            "fragment": f"{frag[0]}{frag[1]}", "norm": norm, "slope_le": slope, "threshold_ekn_gev": thr}
+
+
+def modified_production_table(spec: dict, data_dir: Path) -> str:
+    """USINE's production table restricted to the modified channels, each scaled as production_modifier says, in
+    USINE's file format (written into the run directory at run time, never committed: GPL-2.0 numbers)."""
+    lines = (Path(data_dir) / spec["usine_inputs"]["production"]).read_text(encoding="utf-8").splitlines()
+    body = [ln for ln in lines if ln.strip() and not ln.lstrip().startswith("#")]
+    kind, unit, targets = body[0].split()
+    e_min, e_max, n_e = float(body[1].split()[0]), float(body[1].split()[1]), int(body[1].split()[2])
+    target_list = targets.split(",")
+    out = ["# production cross sections of USINE's " + spec["usine_inputs"]["production"] + " for the modified "
+           "channels only, scaled by usine_translate.py (production_modifier); run-time file, not committed",
+           f" {kind}    {unit}      {targets}", "", f"{body[1]}", ""]
+    for mod in spec["production_modifiers"]:
+        label = f"{mod['projectile']} -> {mod['fragment']}"
+        try:
+            start = next(i for i, ln in enumerate(lines) if ln.strip() == label)
+        except StopIteration:
+            raise SpecError(f"production modifier: {label} not found in {spec['usine_inputs']['production']}") from None
+        rows = [ln.split() for ln in lines[start + 1:start + 1 + n_e]]
+        if len(rows) != n_e or any(len(r) != len(target_list) for r in rows):
+            raise SpecError(f"production modifier: the {label} block of {spec['usine_inputs']['production']} does not "
+                            f"have {n_e} rows of {len(target_list)} targets")
+        col = target_list.index(mod["target"])
+        out.append(label)
+        for i, row in enumerate(rows):
+            ekn = e_min * (e_max / e_min) ** (i / (n_e - 1))
+            vals = [float(v) for v in row]
+            bias = (ekn / mod["threshold_ekn_gev"]) ** mod["slope_le"] if ekn < mod["threshold_ekn_gev"] else 1.0
+            vals[col] *= mod["norm"] * bias
+            out.append("\t".join(f"{v:.6e}" for v in vals))
+        out.append("")
+    return "\n".join(out) + "\n"
 
 
 def _illustrative(transport, xs_block, prod_name, inel_name, species_block, src, dens, he_ratio, subs,
@@ -717,9 +855,9 @@ def _usine_inputs(transport, xs_block, prod_name, inel_name, species_block, src,
     if "isotopic" not in species_block:
         subs.append("species.isotopic not given: USINE's network is isotopic")
     elements = list(SYMBOLS[:z_top])
-    data_file, groups = _abundances(str(src.get("abundances", "")), elements)
+    data_file, groups, pure_isotopes = _abundances(str(src.get("abundances", "")), elements)
     normed = {e for g in groups for e in g[0]}
-    pure = [e for e in elements if e not in normed]
+    pure = [e for e in elements if e not in normed] + pure_isotopes
     n_h = dens["HI"] + dens["HII"] + 2.0 * dens["H2"]
     he = float(he_ratio) * n_h if he_ratio else 0.0
     targets = ["H", "He"] if he > 0 else ["H"]
@@ -731,7 +869,9 @@ def _usine_inputs(transport, xs_block, prod_name, inel_name, species_block, src,
     late = [f"source abundances: solar-system isotopic fractions and abundances with the FIP bias (USINE kSSISOTFRAC, "
             f"kSSISOTABUND, kFIPBIAS, {SOLAR_FILE}), then each element normalised to data of USINE's {data_file}: "
             + "; ".join(f"{','.join(n)} to {exp} at {e:g} GeV/n" for n, exp, e in groups)
-            + f"; pure secondaries {','.join(pure) or 'none'}",
+            + f"; pure secondaries {','.join(pure) or 'none'}"
+            + (f" (isotopes {','.join(pure_isotopes)} of normalised elements without a source)" if pure_isotopes
+               else ""),
             f"network: every nucleus of USINE's chart {CHART_FILE} from 1H to {a_top}{SYMBOLS[z_top - 1]}; no "
             "antinuclei; tertiary chains, ghost nuclei and exotic primaries off"]
     tabled = [s for s in TABLED_ISOTOPES if charge_and_mass(s)[0] <= z_top]
@@ -743,6 +883,13 @@ def _usine_inputs(transport, xs_block, prod_name, inel_name, species_block, src,
             "cross_section_set": f"usine:{prod_file} + usine:{inel_file}",
             "beta_unstable": "chart" if transport.get("decay", {}).get("enabled") else [],
             "_late_notes": late}
+
+
+def _eps(x: float) -> str:
+    """A tolerance as USINE's shipped files write it ('1.e-6'), so default runs render byte-identically."""
+    mant, exp = f"{float(x):.10e}".split("e")
+    mant = mant.rstrip("0").rstrip(".")
+    return f"{mant if mant != '1' else '1.'}e{int(exp)}"
 
 
 def _fmt(x: float) -> str:
@@ -778,6 +925,8 @@ def render(spec: dict, data_dir: str, run_dir: str) -> dict[str, str]:
         crs, parents_line, pure = spec["network_range"], "-", ",".join(spec["pure_secondaries"]) or "-"
         xs_lines = [f"Base @ XSections @ fProd @ M=1 @ {data_dir}/{ui['production']}",
                     f"Base @ XSections @ fTotInelAnn @ M=1 @ {data_dir}/{ui['inelastic']}"]
+        if spec.get("production_modifiers"):
+            xs_lines.insert(1, f"Base @ XSections @ fProd @ M=1 @ {run_dir}/{MODIFIED_PRODUCTION_FILE}")
     else:
         e = spec["norm_ekn_gev"]
         norm_lines = [f"Base @ CRData @ fCRData @ M=1 @ {run_dir}/norm_points.dat",
@@ -860,9 +1009,8 @@ def render(spec: dict, data_dir: str, run_dir: str) -> dict[str, str]:
               "UsineRun @ Calculation @ BC_LEPTON_HE @ M=0 @ kNOCURRENT",
               "UsineRun @ Calculation @ BC_NUC_LE @ M=0 @ kD2NDLNEKN2_ZERO",
               "UsineRun @ Calculation @ BC_NUC_HE @ M=0 @ kNOCHANGE",
-              "UsineRun @ Calculation @ EPS_ITERCONV @ M=0 @ 1.e-6",
-              "UsineRun @ Calculation @ EPS_INTEGR @ M=0 @ 1.e-4",
-              "UsineRun @ Calculation @ EPS_NORMDATA @ M=0 @ 1.e-10",
+              *[f"UsineRun @ Calculation @ {k} @ M=0 @ {_eps(v)}" for k, v in
+                (spec.get("usine_tolerances") or DEFAULT_TOLERANCES).items()],
               "UsineRun @ Calculation @ IsUseNormList @ M=0 @ true",
               "UsineRun @ Display @ QtiesExpsEType @ M=0 @ ALL",
               "UsineRun @ Display @ ErrType @ M=0 @ kERRSTAT",
@@ -898,9 +1046,13 @@ def _ratios(spec: dict) -> list[str]:
 
 def quantities(spec: dict) -> str:
     """The quantity argument of 'usine -l': every species of the network and the element ratios it defines per
-    E_k/n, and the element ratios per rigidity (USINE's own ratios, read only to check the reader), unmodulated."""
+    E_k/n, and the element ratios per rigidity (USINE's own ratios, read only to check the reader), unmodulated; with
+    solar modulation the E_k/n group is also written at phi."""
     names = [usine_name(s) for s in spec["species"]] + _ratios(spec)
-    return ",".join(names) + ":KEKN:0." + (";" + ",".join(_ratios(spec)) + ":kR:0." if _ratios(spec) else "")
+    mod = spec.get("solar_modulation")
+    phis = f"0.,{mod['phi_gv']!r}" if mod else "0."   # one group per E-type: USINE keeps one phi list per group
+    return (",".join(names) + f":KEKN:{phis}"
+            + (";" + ",".join(_ratios(spec)) + ":kR:0." if _ratios(spec) else ""))
 
 
 def output_file(spec: dict, quantity: str, axis: str = "Ekn") -> str:
@@ -911,6 +1063,21 @@ def output_file(spec: dict, quantity: str, axis: str = "Ekn") -> str:
 def expected_outputs(spec: dict) -> list[str]:
     return ([output_file(spec, usine_name(s)) for s in spec["species"]] + [output_file(spec, q) for q in _ratios(spec)]
             + [output_file(spec, q, "R") for q in _ratios(spec)])
+
+
+def modulated_outputs(spec: dict, out_dir: Path) -> dict[str, Path]:
+    """nuclide -> USINE's modulated table of the run (phi > 0), found by pattern since USINE writes phi in the file
+    name with its own rounding; the reader checks the phi of the header. Empty for an unmodulated run; a nuclide with
+    no table or more than one is left out (the run is then not ok)."""
+    if not spec.get("solar_modulation"):
+        return {}
+    found = {}
+    for s in spec["species"]:
+        hits = [p for p in sorted(Path(out_dir).glob(f"local_fluxes_{usine_name(s)}_Ekn_{spec['model']}_SolMod0DFF_phi"
+                                                     "*GV.out")) if not p.name.endswith("_phi0_00GV.out")]
+        if len(hits) == 1:
+            found[s] = hits[0]
+    return found
 
 
 HALF_LIFE_MYR = {"Myr": 1.0, "My": 1.0, "kyr": 1e-3, "ky": 1e-3, "yr": 1e-6, "y": 1e-6, "d": 1e-6 / 365.25,
@@ -1006,6 +1173,16 @@ def prepare(spec: dict, run_dir: Path, data_dir: Path) -> dict:
     return hashes
 
 
+def prepare_derived(spec: dict, run_dir: Path, data_dir: Path) -> dict:
+    """Run-time files computed from USINE's own inputs (the modified production table); name -> sha256. They hold
+    GPL-2.0 numbers, so they live only in the run directory and are never rendered into a fixture."""
+    if not spec.get("production_modifiers"):
+        return {}
+    path = Path(run_dir) / MODIFIED_PRODUCTION_FILE
+    path.write_text(modified_production_table(spec, data_dir), encoding="utf-8")
+    return {MODIFIED_PRODUCTION_FILE: sha256(path)}
+
+
 def tool_home(binary: Path) -> Path:
     """USINE's installation folder (the value of USINE's variable USINE): the parent of bin/usine."""
     return Path(binary).resolve().parent.parent
@@ -1020,6 +1197,7 @@ def run_usine(spec: dict, run_dir: Path, binary: Path, data_dir: Path, timeout: 
     notes = check_half_lives(spec, data_dir)
     run_dir = Path(run_dir).resolve()
     inputs = prepare(spec, run_dir, data_dir)
+    derived = prepare_derived(spec, run_dir, data_dir)
     out = run_dir / "out"
     command = [str(Path(binary).resolve()), "-l", str(run_dir / "usine.init.par"), str(out), quantities(spec),
                "0", "1", "1", "0"]
@@ -1038,10 +1216,14 @@ def run_usine(spec: dict, run_dir: Path, binary: Path, data_dir: Path, timeout: 
     for name in expected_outputs(spec):
         if (out / name).is_file():
             outputs[f"out/{name}"] = sha256(out / name)
-    ok = not crashed and code != -1 and len(outputs) == len(expected_outputs(spec))
+    modulated = modulated_outputs(spec, out)
+    for path in modulated.values():
+        outputs[f"out/{path.name}"] = sha256(path)
+    ok = (not crashed and code != -1 and len(outputs) == len(expected_outputs(spec)) + len(modulated)
+          and (not spec.get("solar_modulation") or len(modulated) == len(spec["species"])))
     return {"ok": ok, "exit_status": code, "seconds": seconds, "inputs": inputs, "outputs": outputs,
             "command": command, "notes": notes, "log_tail": "" if ok else log_text[-800:],
-            "usine_inputs": read_in_place}
+            "usine_inputs": read_in_place, "derived_inputs": derived}
 
 
 INPUT_MANIFEST_NOTE = ("sha256 is of each file as run, with the absolute paths of the run directory and of USINE's "
@@ -1049,7 +1231,8 @@ INPUT_MANIFEST_NOTE = ("sha256 is of each file as run, with the absolute paths o
                        "with the placeholders <TOOL_HOME>/inputs and <RUN_DIR> (the form committed under "
                        "tests/adapters/fixtures/cr_propagation/usine/inputs/), equal to sha256 for the files that hold "
                        "no path; entries with read_in_place are USINE's own files (GPL-2.0), hashed where they lie and "
-                       "never copied")
+                       "never copied; entries with derived_from_usine_inputs are run-time files computed from them (a "
+                       "modified production table), kept in the run directory only and never committed")
 
 
 def record(spec: dict, result: dict, binary: Path, environment: dict | None = None) -> dict:
@@ -1075,7 +1258,9 @@ def record(spec: dict, result: dict, binary: Path, environment: dict | None = No
             "input_manifest": [{"path": p, "sha256": h, "committed_form_sha256": committed[p]}
                                for p, h in sorted(result["inputs"].items())]
                               + [{"path": p, "sha256": h, "read_in_place": True}
-                                 for p, h in sorted(result.get("usine_inputs", {}).items())],
+                                 for p, h in sorted(result.get("usine_inputs", {}).items())]
+                              + [{"path": p, "sha256": h, "derived_from_usine_inputs": True}
+                                 for p, h in sorted(result.get("derived_inputs", {}).items())],
             "input_manifest_note": INPUT_MANIFEST_NOTE,
             "tools": tools,
             "commands": [" ".join(command[:4]) + " '" + command[4] + "' " + " ".join(command[5:])],
@@ -1115,6 +1300,12 @@ def main(argv=None) -> int:
                                           "LOW to HIGH GeV/n), replacing the derived one")
         p.add_argument("--data-dir", type=Path, default=os.environ.get("HEP_USINE_DATA"),
                        help="USINE's inputs folder (default $HEP_USINE_DATA)")
+        p.add_argument("--phi", type=float, default=0.0,
+                       help="force-field modulation potential in GV: USINE also writes the modulated isotope tables")
+        p.add_argument("--usine-tolerance", action="append", default=[],
+                       help="NAME=VALUE, one of EPS_ITERCONV, EPS_INTEGR, EPS_NORMDATA (default 1e-6, 1e-4, 1e-10)")
+        p.add_argument("--production-modifiers", type=Path,
+                       help="JSON list of {channel, norm, slope_le, threshold_ekn_gev} (USINE's own cross sections)")
         if name == "run":
             p.add_argument("--usine", type=Path, default=os.environ.get("HEP_USINE_BIN"),
                            help="the usine executable (default $HEP_USINE_BIN)")
@@ -1128,7 +1319,11 @@ def main(argv=None) -> int:
         if args.ekn_grid:
             n_points, g_lo, g_hi = args.ekn_grid.split(",")
             grid = {"n_points": int(n_points), "ekn_min_gev": float(g_lo), "ekn_max_gev": float(g_hi)}
-        spec = translate(load_transport(args.transport), args.name, (lo, hi), args.points_per_decade, grid)
+        mods = (json.loads(args.production_modifiers.read_text(encoding="utf-8"))
+                if args.production_modifiers else None)
+        spec = translate(load_transport(args.transport), args.name, (lo, hi), args.points_per_decade, grid,
+                         phi_gv=args.phi, production_modifiers=mods,
+                         tolerances=dict(t.split("=", 1) for t in args.usine_tolerance))
         env = json.loads(args.environment.read_text(encoding="utf-8")) if getattr(args, "environment", None) else None
     except (OSError, ValueError) as exc:  # SpecError is a ValueError
         print(json.dumps({"status": "error", "error": str(exc)}))
@@ -1145,6 +1340,7 @@ def main(argv=None) -> int:
     if args.command == "translate":
         try:
             inputs = prepare(spec, args.out, args.data_dir)
+            inputs.update(prepare_derived(spec, args.out, args.data_dir))
             notes = check_half_lives(spec, args.data_dir)
         except (OSError, SpecError) as exc:
             print(json.dumps({"status": "error", "error": str(exc)}))

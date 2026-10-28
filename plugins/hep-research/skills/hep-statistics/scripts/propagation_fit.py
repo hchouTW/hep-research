@@ -37,7 +37,14 @@ above it: parameters.<name>.step is the step in the fit coordinate used for the 
 convergence verdict (default: the optimizer's own steps and 1e-4 x max(1, |t|)).
 Solar modulation: a dataset with a "period" asks for phi_<period>_gv, applied per isotope through the force-field tool
 contract before ratios are formed (P4); a provider that returns only ratios cannot be modulated, so such a dataset is
-refused (exit 1, reason modulation-needs-isotopic-lis).
+refused (exit 1, reason modulation-needs-isotopic-lis), unless the provider's domain declares phi_<period>_gv itself
+(a provider that modulates each isotope in its own run, as the USINE provider does with USINE's force field; F1):
+then phi_<period>_gv is fitted or fixed like any provider parameter, each request carries only the phi of the periods
+of its datasets, and the result records the modulation as provider-side ("modulation").
+Parameter priors (F1): parameters.<name>.prior {"mean", "sigma"} adds ((p - mean) / sigma)^2 in the parameter's own
+units to -2 ln L of the provider fits and profile intervals (for example a modulation potential or a provider
+cross-section parameter with an external constraint); the Fisher matrix and the dof count them. Response-model
+studies (toys, family calibration, posterior) do not carry them and are refused (parameter-priors-not-supported).
 
 Model families are declarative: {"name", "free": [...], "fixed": {...}}. A family whose parameters are outside the
 provider's domain (for example BIG or SLIM with V_A_kms or R_break_gv for a closed form without them) is listed as not
@@ -86,11 +93,13 @@ Input (fit --input CONFIG.json; relative paths are read from the config's folder
  {"provider": {"id", "version"},
   "datasets": [{"name", "measurement": "record.json" | {dataset-record}, "observable": "B/C", "period": optional}],
   "gate_plan": {"measurement_conditions", "mappings", "transformations"} (optional, contracts/comparison/gate.py),
-  "parameters": {name: {"start": x, "scale": "log" | "linear", "step": optional}}, "fixed": {name: value},
+  "parameters": {name: {"start": x, "scale": "log" | "linear", "step": optional,
+                        "prior": {"mean": m, "sigma": s} optional}}, "fixed": {name: value},
   "nuisances": [{"name", "kind": "production-norm" | "parent-abundance", "channel": "C->B" | "parent": "O",
                  "prior_sigma": 0.1 | null, "aux": 1.0}],
   "families": [{"name", "free": [...], "fixed": {...}}]   (default: one family, every parameter free),
-  "optimizer": {"max_iterations": 100, "max_restarts": 5, "seed": 0},
+  "optimizer": {"max_iterations": 100, "max_restarts": 5, "seed": 0, "polish_steps": 0 (F1: Newton steps of the
+                verdict before judging the provider fit)},
   "degeneracy_scan": {"family", <degeneracy.py scan keys>}, "theory_spec": "base-theory-spec.json",
   "intervals": [names]   (profile delta chi2 = 1 intervals with the provider; an end on a domain bound is kind "bound"),
   "covariance_alternatives": {"family", "dataset", "model": {build_covariance sources}, "source", "lengths": [...]},
@@ -311,6 +320,14 @@ class Evaluator:
         out.update({k: float(v) for k, v in values.items()})
         return out
 
+    def group_point(self, pt: dict, group) -> dict:
+        """The point sent for a group of datasets: without the modulation potentials of periods none of them has (a
+        provider that modulates reads one period per request; F1)."""
+        mine = {getattr(ds, "period", None) for ds in group} - {None}
+        others = {f"phi_{getattr(d, 'period', None)}_gv" for d in self.datasets
+                  if getattr(d, "period", None) and getattr(d, "period", None) not in mine}
+        return {k: v for k, v in pt.items() if k not in others}
+
     def components(self, values: dict) -> dict:
         """{dataset name: array (channels x bins)} at the point fixed + values; FitRefused on any provider failure."""
         pt = self.point(values)
@@ -319,11 +336,12 @@ class Evaluator:
             return self.memo[key]
         out = {}
         for group in self.groups:
+            g_pt = self.group_point(pt, group)
             if self.points_sent >= self.max_evaluations:
                 raise FitRefused("evaluation-budget", f"the run reached --max-evaluations {self.max_evaluations} "
                                  "provider point evaluations (decision D7 budget); nothing more is evaluated")
             req = {"protocol": "cr-provider/1", "provider": self.provider_id, "provider_version": self.version,
-                   "points": [pt], "observables": [ds.observable_request() for ds in group],
+                   "points": [g_pt], "observables": [ds.observable_request() for ds in group],
                    "want": ["lis", "components"] if self.decomposable else ["lis"], "seed": None}
             if self.transport is not None:
                 req["transport"] = self.transport
@@ -332,7 +350,7 @@ class Evaluator:
             if resp.get("status") != "ok" or not isinstance(res_all, dict) or res_all.get("status") != "ok":
                 reason = (res_all or {}).get("reason") or resp.get("reason") or "provider-failed"
                 detail = (res_all or {}).get("detail") or resp.get("detail") or ""
-                raise FitRefused(reason, f"provider {self.provider_id} at {pt}: {reason} {detail}".strip())
+                raise FitRefused(reason, f"provider {self.provider_id} at {g_pt}: {reason} {detail}".strip())
             preds = res_all.get("predictions") or []
             if len(preds) != len(group) or any(
                     not np.allclose(p["values"].get("edges", ds.edges), ds.edges, rtol=1e-9, atol=0)
@@ -343,7 +361,7 @@ class Evaluator:
             evaluation = res_all.get("evaluation") or {}
             self.records.append({**({"dataset": group[0].name} if len(group) == 1 else
                                     {"datasets": [ds.name for ds in group]}),
-                                 "point": dict(pt), "input_hash": evaluation.get("input_hash"),
+                                 "point": dict(g_pt), "input_hash": evaluation.get("input_hash"),
                                  "computational_run_ref": evaluation.get("computational_run_ref"),
                                  "labels": sorted(res_all.get("labels") or [])})
             for ds, pred in zip(group, preds):
@@ -458,7 +476,7 @@ class Model:
             raise FitInputError("parameters must name at least one transport parameter with its start value")
         self.params = {}
         for name, spec in params.items():
-            spec = _keys(spec, {"start", "scale", "step"}, f"parameters.{name}")
+            spec = _keys(spec, {"start", "scale", "step", "prior"}, f"parameters.{name}")
             scale = spec.get("scale", "linear")
             if scale not in ("log", "linear"):
                 raise FitInputError(f"parameters.{name}.scale must be 'log' or 'linear'")
@@ -468,7 +486,15 @@ class Model:
             step = spec.get("step")
             if step is not None and _num(step, f"parameters.{name}.step") <= 0:
                 raise FitInputError(f"parameters.{name}.step must be > 0 (a difference step in the fit coordinate)")
-            self.params[name] = {"start": start, "scale": scale, "step": None if step is None else float(step)}
+            prior = None
+            if spec.get("prior") is not None:
+                pr = _keys(spec["prior"], {"mean", "sigma"}, f"parameters.{name}.prior")
+                prior = (_num(pr.get("mean"), f"parameters.{name}.prior.mean"),
+                         _num(pr.get("sigma"), f"parameters.{name}.prior.sigma"))
+                if prior[1] <= 0:
+                    raise FitInputError(f"parameters.{name}.prior.sigma must be > 0")
+            self.params[name] = {"start": start, "scale": scale, "step": None if step is None else float(step),
+                                 "prior": prior}
         self.nuisances = []
         for k, n in enumerate(cfg.get("nuisances") or []):
             n = _keys(n, {"name", "kind", "channel", "parent", "prior_sigma", "aux"}, f"nuisances[{k}]")
@@ -592,6 +618,21 @@ class Model:
 
     def n_points(self) -> int:
         return int(sum(len(ds.y) for ds in self.datasets))
+
+    # ---- parameter priors (F1)
+    def has_priors(self) -> bool:
+        return any(spec["prior"] is not None for spec in self.params.values())
+
+    def prior_residuals(self, names, scales, t):
+        """((p - mean) / sigma) of every free parameter with a prior, in its own units, at fit coordinates t."""
+        return np.array([(_natural(x, sc) - self.params[n]["prior"][0]) / self.params[n]["prior"][1]
+                         for n, sc, x in zip(names, scales, t) if self.params[n]["prior"] is not None])
+
+    def prior_fisher(self, names, scales, t):
+        """Diagonal Fisher term of the priors in the fit coordinates: (dp/dt / sigma)^2."""
+        diag = [((_natural(x, sc) if sc == "log" else 1.0) / self.params[n]["prior"][1]) ** 2
+                if self.params[n]["prior"] is not None else 0.0 for n, sc, x in zip(names, scales, t)]
+        return np.diag(diag) if diag else np.zeros((0, 0))
 
 
 # --------------------------------------------------------------------------- one fit
@@ -787,7 +828,8 @@ def fit_family(model, family, opt, fixed_global, start=None, ys=None, aux=None):
                              f"[{_natural(a, s):.6g}, {_natural(b, s):.6g}]; the fit starts only inside it")
 
     def resid(t):
-        return model.profiled(model.ev.components(model.values(names, scales, t, fixed)), ys, aux)[0]
+        data_part = model.profiled(model.ev.components(model.values(names, scales, t, fixed)), ys, aux)[0]
+        return np.concatenate([data_part, model.prior_residuals(names, scales, t)])
 
     def nll(t):
         t = np.clip(np.asarray(t, dtype=float), lo, hi)
@@ -815,10 +857,15 @@ def fit_family(model, family, opt, fixed_global, start=None, ys=None, aux=None):
         if names:
             cond, eig, degenerate, keep = fisher_screen(F, names, span)
             held = _exactly_flat(F)
-        verdict = _verdict(nll, t_hat, bounds, held, steps) if names else {"status": "converged", "reasons": [],
-                                                                    "judged": [], "held": [], "at_bound": [], "kkt": []}
+        polish = opt.get("polish_steps", 0)
+        verdict = _verdict(nll, t_hat, bounds, held, steps, polish) if names else {
+            "status": "converged", "reasons": [], "judged": [], "held": [], "at_bound": [], "kkt": []}
+        if polish and "x" in verdict:   # optimizer.polish_steps (F1): the verdict judged the polished point
+            moved = np.clip(np.asarray(verdict.pop("x"), dtype=float), lo, hi)
+            if nll(moved) <= nll(t_hat):
+                t_hat = moved
         attempts.append({"attempt": attempt, "status": verdict["status"], "reasons": verdict["reasons"],
-                         "optimizer": stop})
+                         "optimizer": stop, **({"polish_steps": polish} if polish else {})})
         if best is None or nll(t_hat) < best[1]:
             best = (t_hat, nll(t_hat), verdict, F, degenerate)
         if verdict["status"] == "converged":
@@ -830,18 +877,24 @@ def fit_family(model, family, opt, fixed_global, start=None, ys=None, aux=None):
     converged = verdict["status"] == "converged"
     comps = model.ev.components(model.values(names, scales, t_hat, fixed))
     r, nu = model.profiled(comps, ys, aux)
-    chi2 = float(r @ r)
+    r_prior = model.prior_residuals(names, scales, t_hat)
+    chi2 = float(r @ r) + float(r_prior @ r_prior)
     out = {"family": family["name"], "free": names, "fixed": fixed, "status": "converged" if converged else "failed",
            "restarts": len(attempts) - 1, "attempts": attempts, "convergence": verdict,
            "chi2": chi2, "best_fit_coordinates": [float(x) for x in t_hat]}
+    if len(r_prior):
+        out["chi2_parameter_priors"] = float(r_prior @ r_prior)
     if not converged:
         out["reason"] = "restart-cap" if len(attempts) - 1 >= opt["max_restarts"] else "not-converged"
     k = len(names)
     Ffull = _fisher_full(model, names, scales, list(t_hat), fixed, nu) if (k or model.n_nu) else np.zeros((0, 0))
+    if k and model.has_priors():
+        Ffull[:k, :k] += model.prior_fisher(names, scales, t_hat)
     cov_full, flat_mask = _pinv_kept(Ffull)
     n_free_nu = model.n_nu
     n_constrained = k + n_free_nu - int(flat_mask.sum())
-    dof = model.n_points() + sum(1 for n in model.nuisances if n["prior_sigma"] is not None) - n_constrained
+    dof = (model.n_points() + sum(1 for n in model.nuisances if n["prior_sigma"] is not None) + len(r_prior)
+           - n_constrained)
     out["dof"] = int(dof)
     out["p_value"] = float(chi2_dist.sf(chi2, dof)) if dof > 0 else None
     params = []
@@ -852,6 +905,9 @@ def fit_family(model, family, opt, fixed_global, start=None, ys=None, aux=None):
                        "best_fit": _natural(t_hat[i], s), "best_fit_coordinate": float(t_hat[i]),
                        "sigma_coordinate": sig, "constrained": constrained,
                        "at_bound": i in verdict["at_bound"]})
+        if model.params[n]["prior"] is not None:
+            mean, width = model.params[n]["prior"]
+            params[-1]["prior"] = {"mean": mean, "sigma": width, "pull": (_natural(t_hat[i], s) - mean) / width}
     out["parameters"] = params
     out["nuisances"] = [{"name": n["name"], "kind": n["kind"], "value": float(nu[j]),
                          "sigma": float(math.sqrt(max(cov_full[k + j, k + j], 0.0))),
@@ -893,7 +949,8 @@ def profile_interval(model, fit, name, opt):
             t = t_hat.copy()
             t[i] = x
             t[others] = w
-            return model.profiled(model.ev.components(model.values(names, scales, t, fi["fixed"])))[0]
+            data_part = model.profiled(model.ev.components(model.values(names, scales, t, fi["fixed"])))[0]
+            return np.concatenate([data_part, model.prior_residuals(names, scales, t)])
         if others:
             res = optimize.least_squares(resid, np.clip(t_hat[others], lo, hi), bounds=(lo, hi), method="trf",
                                          jac=_difference_jacobian(resid, steps, lo, hi),
@@ -1332,8 +1389,15 @@ def coverage_band(n, m):
     return z_m, se
 
 
+def _refuse_priors(model, what):
+    if model.has_priors():
+        raise FitRefused("parameter-priors-not-supported", f"{what} uses the response model, which does not carry the "
+                         "parameter priors; nothing is run")
+
+
 def run_toys(model, family, truth, tcfg, rm_cfg, opt, fixed_global):
     """Plug-in coverage toys at a true point (module docstring)."""
+    _refuse_priors(model, "the toy study")
     from core.stats.toy_ensemble import EnsembleSpec, coverage, toy_seed
     names, scales, bounds = model.coords(family["free"])
     fixed = dict(fixed_global)
@@ -1474,6 +1538,7 @@ def classify_families(cfg_families, model, domain):
 
 def calibrate_families(model, fits, fam_cfg, rm_cfg, opt, fixed_global):
     """Toy-calibrated delta chi2 of every converged family (module docstring)."""
+    _refuse_priors(model, "the family calibration")
     from core.stats.tail_estimation import toy_tail
     from core.stats.toy_ensemble import toy_seed
     usable = [f for f in fits if f["status"] == "converged"]
@@ -1707,6 +1772,7 @@ def _covers(rm, names, fixed, t_hat, sig, k_sigma, bounds) -> bool:
 
 
 def run_posterior(model, fit, pcfg, rm_cfg, opt, rm=None):
+    _refuse_priors(model, "the posterior")
     from bayes_diagnostics import diagnose
     fi = fit["_internal"]
     names, scales, bounds = fi["names"], fi["scales"], fi["bounds"]
@@ -1846,10 +1912,11 @@ def statistical_result_artifact(result: dict, labels) -> dict:
 
 # --------------------------------------------------------------------------- driver
 def _opt_cfg(cfg) -> dict:
-    o = _keys(cfg.get("optimizer") or {}, {"max_iterations", "max_restarts", "seed"}, "optimizer")
+    o = _keys(cfg.get("optimizer") or {}, {"max_iterations", "max_restarts", "seed", "polish_steps"}, "optimizer")
     return {"max_iterations": _int(o.get("max_iterations", 100), "optimizer.max_iterations", 1, 10000),
             "max_restarts": _int(o.get("max_restarts", MAX_RESTARTS), "optimizer.max_restarts", 0, MAX_RESTARTS),
-            "seed": _int(o.get("seed", 0), "optimizer.seed", 0, 2 ** 31)}
+            "seed": _int(o.get("seed", 0), "optimizer.seed", 0, 2 ** 31),
+            "polish_steps": _int(o.get("polish_steps", 0), "optimizer.polish_steps", 0, 5)}
 
 
 def _rm_cfg(cfg) -> dict:
@@ -1929,7 +1996,8 @@ def run(cfg: dict, base: Path, registry, cache_dir=None, max_evaluations=2000, a
     if len({ds.name for ds in datasets}) != len(datasets):
         raise FitInputError("dataset names must be unique")
     periods = sorted({ds.period for ds in datasets if ds.period})
-    if periods:
+    provider_modulates = bool(periods) and all(f"phi_{p}_gv" in domain for p in periods)
+    if periods and not provider_modulates:
         raise FitRefused("modulation-needs-isotopic-lis",
                          f"datasets with periods {periods} need phi_<period>_gv ({[f'phi_{p}_gv' for p in periods]}) "
                          "applied per isotope before ratios are formed (P4); provider "
@@ -1952,6 +2020,19 @@ def run(cfg: dict, base: Path, registry, cache_dir=None, max_evaluations=2000, a
                        decomposable=decomposable, transport=transport,
                        per_point=_per_point_requests(cfg, datasets, decomposable))
         model = Model(cfg, datasets, ev, domain)
+        modulation = None
+        if provider_modulates:
+            stated_phi = set(model.params) | set(fixed_global)
+            for f in cfg.get("families") or []:
+                stated_phi |= set((f or {}).get("fixed") or {}) if isinstance(f, dict) else set()
+            unstated = [f"phi_{p}_gv" for p in periods if f"phi_{p}_gv" not in stated_phi]
+            if unstated:
+                raise FitInputError(f"datasets with periods need {unstated} fitted or fixed (the provider modulates; "
+                                    "nothing is left at a default)")
+            modulation = {"by": "provider", "provider": entry.provider_id,
+                          "parameters": {ds.name: f"phi_{ds.period}_gv" for ds in datasets if ds.period},
+                          "note": "the provider applies the force field to each isotope in its own run before forming "
+                                  "ratios (P4); each request carries only the phi of its datasets' periods"}
         if model.nuisances and not decomposable:
             raise FitRefused("not-decomposable", f"provider {entry.provider_id} declares decomposable: false, so its "
                              "predictions have no channel components for the multipliers "
@@ -2008,6 +2089,7 @@ def run(cfg: dict, base: Path, registry, cache_dir=None, max_evaluations=2000, a
                   "datasets": [{"name": ds.name, "observable": ds.observable, "axis": ds.axis, "bins": len(ds.y),
                                 "bin_semantics": ds.bin_semantics, "covariance": ds.cov_info} for ds in datasets],
                   "gate": gates, "channels": ev.channels, "families_not_expressible": not_expressible,
+                  "modulation": modulation,
                   "fits": fits, "warnings": warnings,
                   "loop_limits": {"max_restarts": MAX_RESTARTS, "toy_failure_limit": TOY_FAILURE_LIMIT,
                                   "max_chain_steps": MAX_CHAIN_STEPS, "rhat_max": RHAT_MAX, "ess_min": ESS_MIN}}
@@ -2029,7 +2111,8 @@ def run(cfg: dict, base: Path, registry, cache_dir=None, max_evaluations=2000, a
             def m2ll(q, fi=fi):
                 comps = model.ev.components(model.values(fi["names"], fi["scales"], q, fi["fixed"]))
                 r, _ = model.profiled(comps)
-                return float(r @ r)
+                r_prior = model.prior_residuals(fi["names"], fi["scales"], q)
+                return float(r @ r) + float(r_prior @ r_prior)
             level2, scans, scan_warn = profile_scan(m2ll, np.asarray(fi["t_hat"]), fi["bounds"], fi["names"],
                                                     fi["scales"], scan, fit["chi2"], fi["degenerate"])
             degeneracies = level2

@@ -1,0 +1,364 @@
+{
+ "work_package": "F1",
+ "target": "Genolini et al. 2019 (arXiv:1904.08917) Table II, BIG/SLIM/QUAINT",
+ "criteria": "VALIDATION.md CRPROP-F1 (D9)",
+ "provider": {
+  "id": "usine",
+  "version": "0.2.0"
+ },
+ "data": {
+  "artifact_id": "f1-ams02-boron-to-carbon-2016-observed",
+  "status": [
+   "observed"
+  ],
+  "bins": 67,
+  "covariance_note": "model-supplied (no covariance is published): build_covariance.py, see covariance-model.json; correlation-length alternatives are model alternatives (r3 P9)",
+  "covariance_model": {
+   "unf_length_ln_r": 0.8169,
+   "unf_length_fit_rms": 0.060102740414423955,
+   "shipped_diagonal_vs_breakdown_max_abs": {
+    "stat": 9.223177777073488e-13,
+    "back": 1.5555612353779225e-13,
+    "acc": 6.827732823566635e-13,
+    "unf": 5.462783003729044e-13,
+    "scale": 1.307565167252278e-13
+   },
+   "shipped_correlation": {
+    "stat": "none",
+    "back": "full",
+    "acc": "full",
+    "unf": "partial",
+    "scale": "full"
+   },
+   "total_systematic_vs_quadrature_max_rel": 0.03567644480504728
+  }
+ },
+ "crdb_crosscheck": {
+  "label": "secondary: a cross-check only, never fitted",
+  "rows": 67,
+  "matched": 67,
+  "max_rel_value": 0.0,
+  "max_rel_stat": 0.0,
+  "max_rel_syst": 0.0,
+  "row_roles": [
+   "secondary"
+  ]
+ },
+ "families": {
+  "BIG": {
+   "status": "failed",
+   "delta": 0.49999945385034217,
+   "delta_window": [
+    0.45,
+    0.52
+   ],
+   "K10": 0.2859024146026325,
+   "K10_window": [
+    0.26614680361138826,
+    0.33815923685265314
+   ],
+   "delta_in_window": true,
+   "K10_in_window": true,
+   "convergence": {
+    "status": "failed",
+    "reasons": [
+     "gradient_not_small",
+     "max_iterations"
+    ],
+    "edm": 0.04646892328
+   },
+   "points_sent": 212,
+   "chi2": 83.34369981467616,
+   "dof": 61,
+   "D9": "missed",
+   "best_fit": {
+    "D0_cm2_s": 2.727818640108127e+28,
+    "delta": 0.49999945385034217,
+    "V_A_kms": 69.13808760138936,
+    "V_c_kms": 1.503621223312174,
+    "R_break_gv": 3.5840327345481824,
+    "delta_below": -0.2139668588545819,
+    "phi_2011_2016_gv": 0.7653319159679697,
+    "xs_norm_12C_H_11B": 1.1323027632136053,
+    "xs_slope_12C_H_11B": 0.18061430145029253
+   },
+   "sigma_coordinate": {
+    "D0_cm2_s": 0.26926468960764144,
+    "delta": 0.041532585622064806,
+    "V_A_kms": null,
+    "V_c_kms": 5.919135682472599,
+    "R_break_gv": 0.18811335646157432,
+    "delta_below": 0.36468942792267933,
+    "phi_2011_2016_gv": 0.09703362232366808,
+    "xs_norm_12C_H_11B": 0.11896136962350953,
+    "xs_slope_12C_H_11B": 0.06516632488542948
+   },
+   "published_point_chi2": {
+    "chi2_nominal": 167.9128677880019,
+    "chi2_usine_unf_correlation_data_scaled": 160.48933633088635,
+    "chi2_usine_covariance_model_scaled": 167.3253853458293,
+    "paper_chi2_min_including_nuisances": 61.71249,
+    "paper_dof": 61
+   }
+  },
+  "SLIM": {
+   "status": "failed",
+   "delta": 0.5159699711502207,
+   "delta_window": [
+    0.49,
+    0.53
+   ],
+   "K10": 0.28929944209574665,
+   "K10_window": [
+    0.258201066234794,
+    0.30363933481478084
+   ],
+   "delta_in_window": true,
+   "K10_in_window": true,
+   "convergence": {
+    "status": "failed",
+    "reasons": [
+     "gradient_not_small",
+     "max_iterations"
+    ],
+    "edm": 0.001988431638
+   },
+   "points_sent": 114,
+   "chi2": 90.30779091160946,
+   "dof": 63,
+   "D9": "missed",
+   "best_fit": {
+    "D0_cm2_s": 2.660570358814541e+28,
+    "delta": 0.5159699711502207,
+    "R_break_gv": 4.3731916036829075,
+    "delta_below": -0.4451563537619418,
+    "phi_2011_2016_gv": 0.7928892418586021,
+    "xs_norm_12C_H_11B": 1.188550145868923,
+    "xs_slope_12C_H_11B": 0.09564398910864155
+   },
+   "sigma_coordinate": {
+    "D0_cm2_s": 0.08723964096224397,
+    "delta": 0.010313459316117653,
+    "R_break_gv": 0.1092674935833874,
+    "delta_below": 0.09489381718986044,
+    "phi_2011_2016_gv": 0.09605473631993554,
+    "xs_norm_12C_H_11B": 0.11519988195602342,
+    "xs_slope_12C_H_11B": 0.03019194127416808
+   },
+   "attribution": {
+    "jacobian_points": 15,
+    "variants": {
+     "network to Si-30 (the SLIM and QUAINT initialisation files)": {
+      "max_rel_change_of_BC": 0.007357277072098878,
+      "d_delta": -0.002705870810225136,
+      "d_log10_K10": 0.00396034513807214
+     },
+     "V_A 6 km/s, V_c 0.1 km/s (the SLIM initialisation file's fixed values)": {
+      "max_rel_change_of_BC": 0.0018230105669538865,
+      "d_delta": -0.0007034304885065039,
+      "d_log10_K10": 0.0011830021317676387
+     }
+    },
+    "covariance_alternatives": {
+     "USINE unfolding correlation, data-scaled": {
+      "chi2_at_this_best_fit": 93.64420896672657,
+      "d_delta": -0.0013176170104534756,
+      "d_log10_K10": -6.224037815045873e-05
+     },
+     "USINE relative covariance, model-scaled (the paper's choice)": {
+      "chi2_at_this_best_fit": 107.61333829200753,
+      "d_delta": -0.008342674145939592,
+      "d_log10_K10": 0.0017598674846021935
+     },
+     "unfolding correlation length x0.5 (0.408 in ln R)": {
+      "chi2_at_this_best_fit": 83.69778490832672,
+      "d_delta": -0.002093146713660071,
+      "d_log10_K10": -0.0001472037383630925
+     },
+     "unfolding correlation length x2 (1.634 in ln R)": {
+      "chi2_at_this_best_fit": 95.08326183522337,
+      "d_delta": 0.00190246058196243,
+      "d_log10_K10": 0.0035292796529227
+     }
+    },
+    "linear_sigma": {
+     "delta": 0.010306441463015091
+    }
+   },
+   "published_point_chi2": {
+    "chi2_nominal": 233.21554879385565,
+    "chi2_usine_unf_correlation_data_scaled": 219.99399093809714,
+    "chi2_usine_covariance_model_scaled": 236.14748551735897,
+    "paper_chi2_min_including_nuisances": 61.79595,
+    "paper_dof": 63
+   }
+  },
+  "QUAINT": {
+   "status": "failed",
+   "delta": 0.48308587854977064,
+   "delta_window": [
+    0.43,
+    0.5
+   ],
+   "K10": 0.29332344620163486,
+   "K10_window": [
+    0.2966292269063996,
+    0.36712498338662714
+   ],
+   "delta_in_window": true,
+   "K10_in_window": false,
+   "convergence": {
+    "status": "failed",
+    "reasons": [
+     "hessian_not_positive_definite",
+     "max_iterations"
+    ],
+    "edm": null
+   },
+   "points_sent": 540,
+   "chi2": 83.77708350143502,
+   "dof": 62,
+   "D9": "missed",
+   "best_fit": {
+    "D0_cm2_s": 2.909765723115166e+28,
+    "delta": 0.48308587854977064,
+    "V_A_kms": 95.87094105681426,
+    "V_c_kms": 3.234673722936451,
+    "eta": 0.05617261008193924,
+    "phi_2011_2016_gv": 0.7835518233198244,
+    "xs_norm_12C_H_11B": 1.1106730972489531,
+    "xs_slope_12C_H_11B": 0.2205438541503425
+   },
+   "sigma_coordinate": {
+    "D0_cm2_s": 0.29311996807000806,
+    "delta": 0.046348325452600654,
+    "V_A_kms": 6.267028538560601,
+    "V_c_kms": 5.81549431059217,
+    "eta": 0.15733144536388197,
+    "phi_2011_2016_gv": 0.08707067079928306,
+    "xs_norm_12C_H_11B": 0.11922736662861531,
+    "xs_slope_12C_H_11B": 0.048550405120968955
+   },
+   "attribution": {
+    "jacobian_points": 17,
+    "variants": {
+     "network to Si-30 (the SLIM and QUAINT initialisation files)": {
+      "max_rel_change_of_BC": 0.007503961916528246,
+      "d_delta": 0.0006474583799369539,
+      "d_log10_K10": -0.0013498208549313235
+     }
+    },
+    "covariance_alternatives": {
+     "USINE unfolding correlation, data-scaled": {
+      "chi2_at_this_best_fit": 87.01395603723094,
+      "d_delta": 0.009922403147025386,
+      "d_log10_K10": -0.017241060575254458
+     },
+     "USINE relative covariance, model-scaled (the paper's choice)": {
+      "chi2_at_this_best_fit": 92.86984127813085,
+      "d_delta": -0.015927981381442358,
+      "d_log10_K10": 0.013338526395782174
+     },
+     "unfolding correlation length x0.5 (0.408 in ln R)": {
+      "chi2_at_this_best_fit": 76.64609567623224,
+      "d_delta": -0.011996957823461605,
+      "d_log10_K10": 0.02084836523559592
+     },
+     "unfolding correlation length x2 (1.634 in ln R)": {
+      "chi2_at_this_best_fit": 86.6133481986657,
+      "d_delta": 0.0009087509610878947,
+      "d_log10_K10": 0.0024360260407931605
+     }
+    },
+    "linear_sigma": {
+     "delta": 0.04634832545282331
+    }
+   },
+   "published_point_chi2": {
+    "chi2_nominal": 135.66737033284153,
+    "chi2_usine_unf_correlation_data_scaled": 131.1643809550231,
+    "chi2_usine_covariance_model_scaled": 134.85133235500192,
+    "paper_chi2_min_including_nuisances": 62.09285,
+    "paper_dof": 62
+   }
+  },
+  "QUAINT-Vc0": {
+   "status": "failed",
+   "delta": 0.4593350608386902,
+   "delta_window": [
+    0.43,
+    0.5
+   ],
+   "K10": 0.3233556888032998,
+   "K10_window": [
+    0.2966292269063996,
+    0.36712498338662714
+   ],
+   "delta_in_window": true,
+   "K10_in_window": true,
+   "convergence": {
+    "status": "failed",
+    "reasons": [
+     "gradient_not_small",
+     "max_iterations"
+    ],
+    "edm": 0.0004973922942
+   },
+   "points_sent": 234,
+   "chi2": 84.01520208377961,
+   "dof": 63,
+   "D9": "missed",
+   "best_fit": {
+    "D0_cm2_s": 3.3879934997988213e+28,
+    "delta": 0.4593350608386902,
+    "V_A_kms": 94.58534218232754,
+    "eta": 0.07987914721061784,
+    "phi_2011_2016_gv": 0.7831205202239168,
+    "xs_norm_12C_H_11B": 1.1067663128859593,
+    "xs_slope_12C_H_11B": 0.23333659351579736
+   },
+   "sigma_coordinate": {
+    "D0_cm2_s": 0.08852411921310187,
+    "delta": 0.010678447714659662,
+    "V_A_kms": 5.83584642357824,
+    "eta": 0.15045282268078097,
+    "phi_2011_2016_gv": 0.08576021414430583,
+    "xs_norm_12C_H_11B": 0.11744015575392014,
+    "xs_slope_12C_H_11B": 0.04224731667435921
+   },
+   "published_point_chi2": {
+    "chi2_nominal": 135.66737033284153,
+    "chi2_usine_unf_correlation_data_scaled": 131.1643809550231,
+    "chi2_usine_covariance_model_scaled": 134.85133235500192,
+    "paper_chi2_min_including_nuisances": 62.09285,
+    "paper_dof": 62
+   }
+  }
+ },
+ "usine_runs": 2347,
+ "quaint_vc_boundary_kkt": {
+  "chi2_Vc0": 81.89225395313392,
+  "chi2_Vc0p5": 86.97510374388824,
+  "difference": 5.082849790754324,
+  "kkt_ok": true,
+  "points_sent": 1
+ },
+ "model_alternatives": {
+  "QUAINT-Vc0, USINE relative covariance x model (the paper's choice)": {
+   "status": "not-reported",
+   "note": "fit stopped on its 200-evaluation cap; the lowest -2 ln L under the model-scaled covariance among the cached QUAINT points with V_c = 0",
+   "chi2": 91.74935957095605,
+   "delta": 0.4530386671824766,
+   "K10": 0.3186034129040513,
+   "delta_in_window": true,
+   "K10_in_window": true,
+   "computational_run_ref": "usine-run-p595be30ecf7599d0"
+  }
+ },
+ "judged_for_D9": [
+  "BIG",
+  "SLIM",
+  "QUAINT-Vc0"
+ ],
+ "D9_all": false
+}

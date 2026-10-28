@@ -200,6 +200,20 @@ Software checks establish contract consistency only, not physical validity.
   (decay on) validated on 40 held-out USINE runs at 0.0038 sigma; C2UF-1 met: BIG survives (p 1.0), SLIM excluded
   (delta chi2 23.9, p < 0.015) with 200 toys each (VALIDATION CRPROP-C2UF).
 
+- crprop f1: reproduction of Génolini et al. 2019 (BIG, SLIM, QUAINT) with USINE on AMS-02 B/C. The USINE provider
+  takes the low break (`R_break_gv`, `delta_below`), a data period's force-field potential (`phi_2011_2016_gv`,
+  USINE's SolMod0DFF per isotope; recorded departure from "providers never modulate") and a production channel's
+  norm, low-energy slope and threshold (`xs_norm_12C_H_11B`, ...; USINE's fit-mode transformation on a run-time copy
+  of the channel, never committed); a point that moves `delta` keeps each high break's Deltabreak. The translator adds
+  `--phi`, `--production-modifiers` and `pure:<isotopes>` in data-normalised abundances; the reader reads modulated
+  tables with a phi check. `propagation_fit.py`: parameter priors, periods accepted when the provider's domain has
+  `phi_<period>_gv`, optional Newton polish before the verdict. New example `examples/bc-usine-reproduction`. Outcome
+  (VALIDATION CRPROP-F1): F1-1 not met on convergence only (delta and K10 in window for BIG, SLIM and the declared
+  variant QUAINT-Vc0, V_c on its bound by boundary_kkt; no fit_diagnostics verdict at USINE's 6-digit noise floor),
+  F1-2 met. `usine_translate.py --usine-tolerance` sets USINE's EPS_ITERCONV, EPS_INTEGR, EPS_NORMDATA (defaults
+  unchanged; tighter values change no output digit). `adapters/cr-propagation/adapter.json` provider domain widened
+  (decision A1.16).
+
 ## 0.42.0 (2026-10-26)
 
 Minor release; contracts 3.13.0, `CORE_VERSION` 1.1.0 and geant4 adapter 0.5.0 unchanged. It ships semantic naming

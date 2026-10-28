@@ -7176,3 +7176,153 @@ with the model `emulator-model.json` and its ml-artifact `emulator.ml-artifact.j
 USINE runs (A1.8 tally, cap 1000 after A1.14): 520 in dispatch 1, 340 for the emulator (300 training, 40 validation)
 and 2 in the live test: 862 of 1000. Emulator evaluations (tens of thousands in the toys) are not USINE runs. The
 refinement round was not needed.
+
+## CRPROP-F1 — 2026-10-28 (environment E2)
+
+Work package F1 of the cr-propagation r4 campaign (r3 card §F1, line 462; decisions D8, D9, A1.7-A1.12): reproduction
+of Génolini et al. 2019 (arXiv:1904.08917, PRD 99 123028) Table II with USINE through the plugin's USINE provider and
+`propagation_fit.py`.
+
+**Criteria and tolerances, fixed before any comparison (R9; this paragraph is the work package's first commit).**
+Frozen entries (acceptance.json): F1-1 reproduction within the H0 tolerance D9, every difference attributed
+(cross sections, modulation, covariance, numerics, USINE version), a partial reproduction recorded with full
+attribution but not enabling F3; F1-2 the data carry `observed`, the covariance its `model-supplied` label, CRDB rows
+`secondary`. D9 made operational here (nothing loosened; a miss is recorded and attributed, never re-toleranced):
+
+| Family | delta: published (card), pass window | K10 (kpc^2/Myr): published (card), pass window |
+|---|---|---|
+| BIG | 0.48 +0.04/-0.03, [0.45, 0.52] | 0.30, [0.266, 0.338] |
+| SLIM | 0.51 ± 0.02, [0.49, 0.53] | 0.28, [0.258, 0.304] |
+| QUAINT | 0.45 +0.05/-0.02, [0.43, 0.50] | 0.33, [0.297, 0.367] |
+
+- delta windows: the card's central values and 1-sigma errors (Table II as transcribed in r3 §F1), closed intervals.
+- K10 = K0 10^delta, K at R = 10 GV with beta = 1 and both break factors set to 1 (their effect at 10 GV is below 1e-6
+  for every published best fit), in kpc^2/Myr (1 kpc^2/Myr = 3.0857e21^2 cm^2 / 3.15576e13 s, IAU parsec and Julian
+  year, r3 P1); D0_cm2_s of the fit is K0 at R0_gv = 1 GV. The card gives no K10 error; the window is the card's
+  central value times 10^(±s), with s the 1-sigma of log10 K10 propagated linearly from the authors' own fit
+  covariance of (delta, log10 K0) (`fit_covmatrix.out` of BIG, SLIM and QUAINT in USINE V3.5's
+  `doc/DocFiles/2019-Génolini-benchmarks-BC.tar.gz`, the paper's published fit outputs): s = 0.0520 (BIG), 0.0352
+  (SLIM), 0.0463 (QUAINT). Table II's own K10 errors could not be read (arXiv is outside the network consent); if they
+  differ, the windows above stand and the difference is reported.
+- A family passes D9 when both its best-fit delta and K10 lie in their windows and the fit converged (fit_diagnostics
+  verdict, boundary_kkt at a bound); a family that does not converge fails. F1-1 passes when all three families pass.
+- F1-2 passes when the dataset-record carries `observed`, the covariance block carries `model-supplied`, and every CRDB
+  row used as a cross-check carries `secondary`, all visible in the committed records.
+
+**Environment (r3 §0.3, base exception D10).** E2 (macOS arm64), Python 3.13.2 (miniconda; NumPy, SciPy), USINE V3.5
+(tag V3.5, commit fb53006d, Apple clang 21.0.0, ROOT 6.38.04) through HEP_USINE_BIN, HEP_USINE_DATA and USINE; runs
+under HEP_USINE_RUN_DIR = `$CRPROP_OUT/f1/runs`, provider cache `$CRPROP_OUT/f1/repro/cache`. `git rev-parse
+--show-toplevel` = `.claude/worktrees/crprop-f1`; branch `worktree-crprop-f1`; status clean at start; base `6a227a76` =
+integration HEAD (decision D10, not `main`); prerequisites C2U (merge 886bb316), B3 (c1b5967d), B1X (2360c294) and B1
+(3ed1e89e) are ancestors of HEAD. r3 line numbers rechecked on this base (§F1 at line 462).
+
+**Settings (from the paper's own files, numbers only).** USINE V3.5 ships the paper's initialisation files, fit
+outputs and fit covariances (`doc/DocFiles/2019-Génolini-benchmarks-BC.tar.gz`, read in a scratch folder, never
+committed) and the covariance its fits name (`inputs/CRDATA_COVARIANCE/cov_AMS02_201105201605__BC_R.dat`, "a toy-model
+for the covariance of AMS02 B/C(R) data ... courtesy of L. Derome"). From them: Model1DKisoVc, L = 10 kpc, h = 0.1 kpc,
+rhole = 0; K = beta^eta K0 R^delta (1+(Rlow/R)^((deltalow+delta)/0.05))^0.05 (1+(R/Rb)^(Delta/s))^-s, so the plugin's
+'usine' low-break form holds with delta_below = -deltalow (this settles known issue 2 of transport_conventions.py for
+these files); Kpp of USINE's files; HI 0.867, HII 0.033, He 0.1 cm^-3 (He_to_H_number 0.1/0.9), Te 1e4 K; ionization,
+Coulomb, adiabatic losses; BETA decay on, EC off (decay is set explicitly, so the provider default noted by C2UF does
+not apply; B/C only); GALPROP opt12 production and Tripathi99+Coste12 inelastic files; ghost97 chart; source q beta^-1
+R^-alpha with alpha fixed at the paper's 2.348466 (BIG), 2.33381 (SLIM), 2.360299 (QUAINT); 13C, 15N, 17O, 18O pure
+secondaries; network 1H-58Fe. Families: BIG (D0, delta, V_A, V_c, R_break, delta_below free; eta = 1), SLIM (D0,
+delta, R_break, delta_below; V_A = V_c = 0), QUAINT (D0, delta, V_A, V_c, eta; no low break). Nuisances as provider
+parameters with the Gaussian priors of the fit outputs' "initial setting" (USINE's chi2_nuis is (val - init)^2/sigma^2,
+src/TURunPropagation.cc 106-145): phi 0.73 ± 0.10 GV (USINE's force field per isotope), 12C+H->11B norm 1.10 ± 0.12 and
+low-energy slope 0.03 ± 0.15 below 8 GeV/n (USINE's fit-mode transformation, src/TUXSections.cc 3912-3921, applied to
+the table's nodes). The high break is fixed at each family's published best fit, Deltabreak kept when delta moves:
+the shipped files do not determine its priors (the published chi2_nuis is not reproduced by any reading of their
+"initial setting"). Starts at the published best fits. Data: the AMS-02 B/C table with per-source errors that USINE
+ships (`inputs/CRDATA_COVARIANCE/ERRORS/AMS02_BC_R__PRL117_231102_2016.txt`, PRL 117 231102, 67 bins 1.92-2600 GV;
+labelled `observed`); the card's "PRL 120, 021101" is not what the paper's 67-point fit and Derome's covariance
+describe, and the profile's dataset record is PRL 117 (boron-to-carbon-2016), so PRL 117 is used (open question below).
+HEPData answered HTTP 403 (browser challenge) and the CRDB REST URL redirected to a non-HTTPS dialog page: neither used.
+Covariance (model-supplied): build_covariance.py, stat uncorrelated, background, acceptance and scale fully correlated
+(as in the shipped matrix; its diagonals equal the table's relative errors within 1e-12), unfolding exp(-|ln R_i - ln
+R_j|/0.8169) (length fitted to the shipped unfolding block, rms residual 0.06).
+
+**Results (final HEAD; record `tests/adapters/fixtures/cr_propagation/f1/f1-reproduction.json`, outputs
+`$CRPROP_OUT/f1/repro/`).**
+
+| Family | delta (window) | K10 kpc^2/Myr (window) | -2 ln L (paper's chi2_min) | Verdict | D9 |
+|---|---|---|---|---|---|
+| BIG | 0.500 ([0.45, 0.52]) in | 0.286 ([0.266, 0.338]) in | 83.3 (61.7) | not reported: the fit reached its 550-evaluation cap; lowest cached point | missed (not converged) |
+| SLIM | 0.516 ([0.49, 0.53]) in | 0.289 ([0.258, 0.304]) in | 90.3 (61.8) | failed: EDM 0.0020 after a restart from the best fit with steps of 0.3 conditional sigma (0.013 in the first pass) | missed (not converged) |
+| QUAINT | 0.483 ([0.43, 0.50]) in | 0.293 ([0.297, 0.367]) out, 1.3% low | 83.8 (62.1) | failed: Hessian not positive definite | missed |
+
+F1-1: NOT MET (D9 not loosened). Best-fit delta lies in the window for all three families and K10 for BIG and SLIM;
+QUAINT's K10 is 1.3% below its window; no family has a converged verdict. F1-2: met (record: data `observed`,
+covariance note `model-supplied`, all 67 CRDB rows role `secondary`; test UsineF1Record). USINE's force field agrees
+with the plugin's force-field tool contract within 3e-5 (11B, 12C, 0.5-1000 GeV/n; test
+`test_usine_force_field_agrees_with_the_tool_contract`).
+
+**Attribution** (linear response at each best fit with the cached Jacobian; d log10 K10 = d ln D0/ln 10 + d delta):
+
+| Difference from the paper | Effect |
+|---|---|
+| Numerics: provider grid (20/decade) vs the paper's 200 bins 1e-3-5e3 GeV/n | B/C within 1.2e-3 (SLIM published point, 3 runs) |
+| Network 1H-30Si (SLIM/QUAINT init files) vs 1H-58Fe | B/C up to 0.75%; SLIM d delta -0.0027, d log10 K10 +0.0040; QUAINT +0.0006, -0.0013 |
+| SLIM V_A 6, V_c 0.1 km/s (its init file) vs 0 | B/C 0.18%; d delta -0.0007, d log10 K10 +0.0012 |
+| Covariance: USINE's relative covariance scaled with the model (the paper's choice) | chi2 at our best fit 107.6 (SLIM), 92.9 (QUAINT); SLIM d delta -0.0083, d log10 K10 +0.0018; QUAINT -0.016, +0.013 (moves QUAINT's K10 to 0.302, inside) |
+| Covariance: USINE's unfolding correlation, data-scaled | SLIM -0.0013, -0.0001; QUAINT +0.0099, -0.017 |
+| Covariance (P9): unfolding length x0.5 / x2 | SLIM -0.0021, -0.0001 / +0.0019, +0.0035; QUAINT -0.012, +0.021 / +0.0009, +0.0024 |
+| Data: the paper's file `AMS02_published_newBCgeo_rigidity.USINE` is not shipped; PRL 117 values used | not testable; the published best fits give chi2 136-233 with every covariance tried (167.3, 236.1, 134.9 with the paper's own), so the excess is not the covariance; our fits prefer a flatter low break (delta_below -0.21 BIG, -0.45 SLIM vs the paper's -0.69, -0.87), i.e. the difference sits in the lowest-rigidity bins |
+| Source normalisation: C, N, O to HEAO-3 at 10.6 GeV/n (USINE's shipped CRDB export has no AMS-02 C, N, O) vs AMS-02 at 50 GV | not tested (no data file); enters as an O/C normalisation of B production |
+| High break fixed at the published nuisance values | conditions the fit on them; their correlation with delta in the published covariance is 0.07 (BIG) |
+| USINE V3.5 vs V3.4 | not testable here |
+| Convergence | USINE's -2 ln L changes by ±0.003 for a 1e-7 change of delta (6-digit tables, EPS_INTEGR 1e-4), and the first pass's steps (a quarter of the published sigma) were 2.6 conditional sigma for delta (parabola residuals ±0.11 over ±2 steps): the forward-difference least-squares minimum kept EDM 0.013; with steps of 0.3 conditional sigma EDM is 0.002, at the noise floor and far above fit_diagnostics' 1e-5. QUAINT's V_c (3.2 ± 5.8 km/s near its bound) makes the noisy Hessian indefinite. BIG's first pass stopped on its cap |
+
+**USINE runs (A1.8 tally):** 1693 of F1's 2000 (13 probes and checks, 3 published points, 2 smoke, about 1540 in the
+three first-pass fits, 12 + 114 in the SLIM passes, 6 noise and smoothness probes, 3 attribution variants); at most 4
+USINE processes at once. Checks: static part of `run_all_checks.py`, naming, wiring, layering, `workflow_check.py`
+diff and acceptance, impacted tests (report); ALL-3 deferred to the wave run (A1.5).
+
+**Dispatch 2 (decision A1.16; written before any dispatch-2 refit, R9).** Rebased onto integration `8544d7ca`
+(adapter.json now in F1's files; F1's USINE cap 2600). Nothing above is loosened. Declared before the refits:
+- Noise (step 1): `usine_translate.py` gains `--usine-tolerance NAME=VALUE` (EPS_ITERCONV, EPS_INTEGR, EPS_NORMDATA;
+  defaults 1e-6, 1e-4, 1e-10 render byte-identically). Measured at BIG's lowest cached point, delta + 0 / 1e-7 / 2e-7:
+  -2 ln L = 82.13506 / 82.13462 / 82.13511 with the defaults and the same three numbers, digit for digit, with
+  EPS_ITERCONV 1e-9 and EPS_INTEGR 1e-7 (6 runs, 7.8-8.9 s each, no cost difference). The tolerances do not set the
+  noise (in Model1DKisoVc EPS_INTEGR enters only SecondaryProduction, src/TUModel1DKisoVc.cc 210-217, and the
+  iteration had converged); the floor is USINE's 6-significant-digit tables (B/C changes of 2-4e-6 for a 1e-7 change of
+  delta): about ±0.0005 (BIG here) to ±0.003 (SLIM) in -2 ln L. The provider is therefore run with its defaults.
+- Restarts (step 2): each family from its lowest cached point with difference steps of 0.3 conditional sigma (SLIM,
+  QUAINT: from their first-pass Fisher matrices; BIG: from the precision matrix of the paper's BIG fit covariance,
+  `BIG_RESTART_STEPS`), polish off, no restart after a failed verdict. SLIM's pass 2 (above, EDM 0.0020) already is this
+  restart and is not repeated.
+- QUAINT V_c: refitted as the declared variant QUAINT-Vc0, V_c fixed at its lower bound 0 (the paper's QUAINT best fit
+  lies on its own lower bound, 0.1 km/s; ours is 3.2 ± 5.8 km/s; its flat direction makes the noisy Hessian indefinite).
+  The bound is accepted when boundary_kkt holds there: -2 ln L at V_c = 0.5 km/s minus at V_c = 0, at the variant's best
+  fit, is >= 0 (one run). D9 is judged for QUAINT on the variant if the bound is accepted, else on the free fit.
+- Paper's covariance choice (step 4, if budget remains): QUAINT-Vc0 refitted with USINE's shipped relative covariance
+  (all five error types) times the QUAINT-Vc0 best-fit prediction, held fixed during the fit; a model alternative (P9),
+  reported next to D9, never replacing the nominal verdict.
+- The convergence criterion stays the fit_diagnostics verdict (EDM <= 1e-5, positive-definite Hessian, boundary_kkt);
+  if it is not reached at the noise floor, it is reported with the measured noise and the work stops.
+
+**Dispatch 2 results (record `tests/adapters/fixtures/cr_propagation/f1/f1-reproduction.json`, regenerated).**
+
+| Fit | delta (window) | K10 (window) | -2 ln L | Verdict | Runs |
+|---|---|---|---|---|---|
+| BIG, restart from its lowest cached point | 0.500 in | 0.286 in | 83.34 | failed: EDM 0.046 (V_A held as exactly flat); least_squares stopped at the start (xtol) | 212 |
+| SLIM, pass 2 (dispatch 1) | 0.516 in | 0.289 in | 90.31 | failed: EDM 0.0020 | 114 |
+| QUAINT free (dispatch 1) | 0.483 in | 0.293 out | 83.78 | failed: Hessian not positive definite | 540 |
+| QUAINT-Vc0 (V_c = 0, declared variant) | 0.459 in | 0.323 in | 84.02 | failed: EDM 0.00050, Hessian positive definite | 234 |
+| QUAINT-Vc0, the paper's covariance choice (model alternative) | 0.453 in | 0.319 in | 91.75 | stopped on its 200-evaluation cap; lowest cached point | 200 |
+
+QUAINT V_c bound: -2 ln L rises by 5.08 from V_c = 0 to 0.5 km/s at the variant's best fit, so boundary_kkt holds and
+QUAINT is judged on QUAINT-Vc0 (delta chi2 0.24 against the free fit). F1-1 stays NOT MET, only on the convergence
+criterion: every judged family (BIG, SLIM, QUAINT-Vc0) has delta and K10 in their windows, and none reaches the
+fit_diagnostics verdict. The verdict is unreachable at USINE's noise floor: tighter USINE tolerances change no output
+digit (step 1), the remaining noise is the 6-significant-digit tables (±0.0005 to ±0.003 in -2 ln L), and the EDM
+reached at steps of 0.3 conditional sigma (5e-4 to 5e-2) stays above 1e-5. Reported as a known issue; the criterion is
+not loosened. Data stay PRL 117: the paper's 67 points and Derome's covariance describe the 2011-05/2016-05 B/C of PRL
+117 (231102), which is also the profile's dataset record (boron-to-carbon-2016); the card's PRL 120 (021101) is not the
+set the target fits used. USINE runs: 2347 of F1's 2600 (dispatch 2: 6 noise probes, 212 BIG, 234 QUAINT-Vc0, 1 V_c
+bound check, 200 paper-covariance refit; at most 4 USINE processes at once). Rebased onto integration `3547f9a0`
+(C2UF): `propagation_fit.py` keeps C2UF's step-based polish in `_verdict` (it returns the polished point as "x") and F1's
+`optimizer.polish_steps` now uses that path for provider fits; F1's priors, provider-side modulation (each request
+carries only its own datasets' periods, also with C2UF's per-point requests) and C2UF's response model kind "provider"
+and per-point requests coexist; the hep_statistics tests, `test_cr_propagation` offline and C2UF's UsineEmulatorFamilies
+pass.

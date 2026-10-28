@@ -1190,11 +1190,15 @@ class UsineProviderOffline(unittest.TestCase):
         self.assertEqual(decl["id"], "usine")
         self.assertEqual(decl["version"], json.loads((ADAPTER / "adapter.json").read_text())["version"])
         self.assertEqual(set(decl["observables"]), set(usine_reader.OBSERVABLES))
-        self.assertEqual(set(decl["domain"]), set(usine_provider.POINT_TARGETS))
+        read = set(usine_provider.POINT_TARGETS) | set(usine_provider.LOW_BREAK_TARGETS)
+        patterned = {n for n in decl["domain"] if usine_provider.PHI_NAME.fullmatch(n) or usine_provider.XS_NAME.fullmatch(n)}
+        self.assertEqual(set(decl["domain"]), read | patterned)
+        self.assertTrue(read <= set(decl["domain"]))
         lo, hi = usine_provider.ekn_range(USINE_REQUEST["observables"], ["9Be", "10Be", "10B", "11B", "12C"])
         self.assertEqual(lo, 0.1)
         self.assertEqual(hi, max(usine_reader.ekn_from_rigidity(200.0, z, a) for z, a in ((5, 10), (5, 11), (6, 12))))
-        t = usine_provider.transport_for({}, {"V_c_kms": 5.0, "L_kpc": 6.0, "eta": -0.5})
+        t, notes = usine_provider.transport_for({}, {"V_c_kms": 5.0, "L_kpc": 6.0, "eta": -0.5})
+        self.assertEqual(notes, [])
         self.assertEqual((t["convection"]["V_c_kms"], t["geometry"]["L_kpc"], t["diffusion"]["eta"]), (5.0, 6.0, -0.5))
 
     def _call(self, request, env):
@@ -2152,6 +2156,149 @@ class LiveUsineD3(unittest.TestCase):
                 for a, b in zip(rerun[1], recorded[1]):
                     self.assertTrue(math.isclose(a, b, rel_tol=USINE_LIVE_RTOL, abs_tol=1e-300), (f.name, a, b))
 
+F1_FIX = FIX / "f1"
+try:
+    import numpy  # noqa: F401
+    import scipy  # noqa: F401
+    HAVE_NUMPY_SCIPY_F1 = True
+except ImportError:  # pragma: no cover
+    HAVE_NUMPY_SCIPY_F1 = False
+FORCE_FIELD = ROOT / "skills" / "hep-measurement" / "scripts" / "solar_modulation_force_field.py"
+
+
+def _f1_usine_spec(**changes):
+    """The B1X run spec (USINE's own inputs, network to Si-30) with the transport changed as given."""
+    t = json.loads(json.dumps(usine_spec("b1x-init-test")["transport"]))
+    for key, value in changes.items():
+        t[key] = value
+    return t
+
+
+class UsineF1Offline(unittest.TestCase):
+    """Work package F1, offline: force-field modulation by USINE (quantities at phi, the reader's modulated tables and
+    their phi check, agreement with the plugin's force-field tool contract on recorded USINE tables), production-channel
+    modifiers (validation, the scaled table, the second fProd line, never rendered into a fixture), pure-secondary
+    isotopes, and the provider's new point parameters (low break, high-break Deltabreak kept, one phi, xs triplets)."""
+
+    def test_modulation_quantities_and_record(self):
+        t = usine_translate.translate(_f1_usine_spec(), "f1-q", (0.5, 100.0), phi_gv=0.7312345)
+        self.assertEqual(t["solar_modulation"], {"model": "SolMod0DFF", "phi_gv": 0.7312345, "rig0_gv": 0.2})
+        self.assertIn(":KEKN:0.,0.7312345", usine_translate.quantities(t))
+        self.assertEqual(usine_translate.quantities(t).count("KEKN"), 1)   # one phi list per E-type group
+        self.assertTrue(any("SolMod0DFF" in sub for sub in t["substitutes"]))
+        plain = usine_translate.translate(_f1_usine_spec(), "f1-q", (0.5, 100.0))
+        self.assertIsNone(plain["solar_modulation"])
+        self.assertIn(":KEKN:0.;", usine_translate.quantities(plain))
+        for bad in (-0.1, float("nan"), "x"):
+            with self.assertRaises(usine_translate.SpecError):
+                usine_translate.translate(_f1_usine_spec(), "f1-q", (0.5, 100.0), phi_gv=bad)
+
+    def test_production_modifier_validation_and_table(self):
+        mod = {"channel": "12C+H->11B", "norm": 1.2, "slope_le": 0.5, "threshold_ekn_gev": 8.0}
+        t = usine_translate.translate(_f1_usine_spec(), "f1-m", (0.5, 100.0), production_modifiers=[mod])
+        self.assertEqual(t["production_modifiers"][0]["fragment"], "11B")
+        files = usine_translate.render(t, "<TOOL_HOME>/inputs", "<RUN_DIR>")
+        self.assertEqual(set(files), {"usine.init.par"})   # the scaled table is never rendered into a fixture
+        self.assertIn("fProd @ M=1 @ <RUN_DIR>/xs_production_modified.dat", files["usine.init.par"])
+        self.assertLess(files["usine.init.par"].index("sigProdGALPROP17_OPT12.dat"),
+                        files["usine.init.par"].index("xs_production_modified.dat"))
+        for bad in ({**mod, "channel": "12C->11B"}, {**mod, "channel": "56Fe+H->11B"}, {**mod, "norm": 0.0},
+                    {**mod, "extra": 1}, {k: v for k, v in mod.items() if k != "slope_le"}):
+            with self.assertRaises(usine_translate.SpecError):
+                usine_translate.translate(_f1_usine_spec(), "f1-m", (0.5, 100.0), production_modifiers=[bad])
+        with self.assertRaises(usine_translate.SpecError):   # the ILLUSTRATIVE sets have no production file
+            usine_translate.translate(usine_spec("d1-isotopic")["transport"], "f1-m", (0.5, 100.0),
+                                      production_modifiers=[mod])
+        # the scaled table, from a stand-in production file in USINE's format (made-up numbers, not USINE's)
+        with tempfile.TemporaryDirectory() as scratch:
+            xs = Path(scratch) / "XS_NUCLEI"
+            xs.mkdir()
+            rows = "\n".join(f"{10.0 + i:.6e}\t{20.0 + i:.6e}" for i in range(5))
+            (xs / "sigProdGALPROP17_OPT12.dat").write_text(
+                "# stand-in\n sigma    mb      H,He\n\n1.000000e-01      1.000000e+03    5\n\n16O -> 11B\n" + rows
+                + "\n\n12C -> 11B\n" + rows + "\n", encoding="utf-8")
+            text = usine_translate.modified_production_table(t, Path(scratch))
+        lines = text.splitlines()
+        block = [ln.split() for ln in lines[lines.index("12C -> 11B") + 1:][:5]]
+        self.assertNotIn("16O -> 11B", text)
+        for i, (h_val, he_val) in enumerate(block):
+            ekn = 0.1 * 10 ** i
+            bias = (ekn / 8.0) ** 0.5 if ekn < 8.0 else 1.0
+            self.assertAlmostEqual(float(h_val), 1.2 * bias * (10.0 + i), delta=1e-5 * (10.0 + i))
+            self.assertAlmostEqual(float(he_val), 20.0 + i, delta=1e-5)   # target He untouched
+
+    def test_pure_secondary_isotopes(self):
+        src = dict(_f1_usine_spec()["sources"])
+        src["abundances"] += " pure:13C,15N"
+        t = usine_translate.translate(_f1_usine_spec(sources=src), "f1-p", (0.5, 100.0))
+        self.assertEqual(t["pure_secondaries"][-2:], ["13C", "15N"])
+        self.assertIn("PureSecondaries @ M=0 @ " + ",".join(t["pure_secondaries"]),
+                      usine_translate.render(t, "<TOOL_HOME>/inputs", "<RUN_DIR>")["usine.init.par"])
+        src["abundances"] = src["abundances"].replace("pure:13C,15N", "pure:10B")   # B is not normalised
+        with self.assertRaises(usine_translate.SpecError):
+            usine_translate.translate(_f1_usine_spec(sources=src), "f1-p", (0.5, 100.0))
+
+    def test_reader_reads_modulated_tables_with_phi_check(self):
+        out = F1_FIX / "force-field"
+        tables = usine_reader.read_run(out, "Model1DKisoVc", ["11B", "12C"], 0.7312345)
+        lis = usine_reader.read_run(out, "Model1DKisoVc", ["11B", "12C"], 0.0)
+        self.assertLess(tables["11B"][1][14], lis["11B"][1][14])   # modulation lowers the flux at 1 GeV/n
+        with self.assertRaises(usine_reader.ReadError):
+            usine_reader.read_run(out, "Model1DKisoVc", ["11B"], 0.75)   # header phi 0.731 GV
+        with tempfile.TemporaryDirectory() as scratch:
+            for name in ("phi0_731GV", "phi0_800GV"):
+                shutil.copy(out / "local_fluxes_11B_Ekn_Model1DKisoVc_SolMod0DFF_phi0_731GV.out",
+                            Path(scratch) / f"local_fluxes_11B_Ekn_Model1DKisoVc_SolMod0DFF_{name}.out")
+            with self.assertRaises(usine_reader.ReadError):   # two modulated tables: ambiguous
+                usine_reader.modulated_table(Path(scratch), "11B", "Model1DKisoVc")
+
+    def test_usine_force_field_agrees_with_the_tool_contract(self):
+        """USINE's SolMod0DFF on its own LIS table equals the plugin's force-field tool (subprocess, the tool
+        contract solar_modulation_force_field) within 1e-3 (USINE's masses and 6-digit tables)."""
+        from core.constants.physical import nuclear_mass_gev
+        out = F1_FIX / "force-field"
+        lis = usine_reader.read_run(out, "Model1DKisoVc", ["11B", "12C"], 0.0)
+        toa = usine_reader.read_run(out, "Model1DKisoVc", ["11B", "12C"], 0.7312345)
+        with tempfile.TemporaryDirectory() as scratch:
+            for nuc, (z, a) in (("11B", (5, 11)), ("12C", (6, 12))):
+                table = Path(scratch) / f"{nuc}.json"
+                table.write_text(json.dumps({"variable": "Ek_per_nucleon",
+                                             "points": [[x, y] for x, y in zip(*lis[nuc])]}), encoding="utf-8")
+                for k in (2, 8, 20, 40, 60, 75):
+                    ekn, flux = toa[nuc][0][k], toa[nuc][1][k]
+                    proc = subprocess.run([sys.executable, str(FORCE_FIELD), "--modulate", "--energy", repr(ekn),
+                                           "--energy-kind", "Ek_per_nucleon", "--mass", repr(nuclear_mass_gev(z, a)),
+                                           "--charge", str(z), "--mass-number", str(a), "--phi", "0.7312345",
+                                           "--lis-table", str(table)], capture_output=True, text=True)
+                    self.assertEqual(proc.returncode, 0, proc.stdout)
+                    with self.subTest(nuclide=nuc, ekn=ekn):
+                        self.assertLess(abs(json.loads(proc.stdout)["flux_toa"] / flux - 1.0), 1e-3)
+
+    def test_provider_point_parameters(self):
+        base = _f1_usine_spec()
+        base["diffusion"]["breaks"] = [{"kind": "low", "R_break_gv": 4.0, "delta_below": -0.8, "s": 0.05},
+                                       base["diffusion"]["breaks"][0]]
+        change = base["diffusion"]["delta"] - base["diffusion"]["breaks"][1]["delta_above"]
+        t, notes = usine_provider.transport_for({"transport": base}, {"R_break_gv": 3.0, "delta_below": -0.5,
+                                                                     "delta": 0.5})
+        low, high = t["diffusion"]["breaks"]
+        self.assertEqual((low["R_break_gv"], low["delta_below"], low["s"]), (3.0, -0.5, 0.05))
+        self.assertAlmostEqual(0.5 - high["delta_above"], change, places=12)   # Deltabreak kept
+        self.assertEqual(len(notes), 1)
+        with self.assertRaises(usine_provider.PointError):   # no low break to set
+            usine_provider.transport_for({"transport": _f1_usine_spec()}, {"R_break_gv": 3.0})
+        with self.assertRaises(usine_provider.PointError):
+            usine_provider.transport_for({"transport": base}, {"unknown_kms": 1.0})
+        phi, mods = usine_provider.run_options({"phi_2011_2016_gv": 0.7, "xs_norm_12C_H_11B": 1.1,
+                                                "xs_slope_12C_H_11B": 0.1, "xs_threshold_12C_H_11B_gev": 8.0})
+        self.assertEqual(phi, 0.7)
+        self.assertEqual(mods, [{"channel": "12C+H->11B", "norm": 1.1, "slope_le": 0.1, "threshold_ekn_gev": 8.0}])
+        for bad in ({"phi_a_gv": 0.5, "phi_b_gv": 0.6}, {"xs_norm_12C_H_11B": 1.1},
+                    {"xs_threshold_12C_H_11B": 8.0, "xs_norm_12C_H_11B": 1.0, "xs_slope_12C_H_11B": 0.0}):
+            with self.assertRaises(usine_provider.PointError):
+                usine_provider.run_options(bad)
+        self.assertEqual(usine_provider.run_options({"delta": 0.5}), (0.0, []))
+
 
 # ---------------------------------------------------------------------------------------------- C2UF (appended)
 TWO_DATASET_FIX = FIX / "c2uf"
@@ -2236,6 +2383,66 @@ class EmulatorPerModelDeclaration(unittest.TestCase):
         bad = dict(req, observables=[{"id": "B/C", "axis": "rigidity", "unit": "GV", "bins": [[2.0, 3.0]]}])
         proc, doc = e2_call(bad, env=self.env)
         self.assertEqual(doc["status"], "failed")
+
+F1_WINDOWS = {"BIG": ((0.45, 0.52), (0.266, 0.338)), "SLIM": ((0.49, 0.53), (0.258, 0.304)),
+              "QUAINT": ((0.43, 0.50), (0.297, 0.367))}   # VALIDATION.md CRPROP-F1, fixed before any fit (D9)
+
+
+class UsineF1Record(unittest.TestCase):
+    """F1 record (tests/adapters/fixtures/cr_propagation/f1/f1-reproduction.json, written by
+    examples/bc-usine-reproduction/run.py stage record): F1-2 labels, the D9 verdict recomputed from the recorded best
+    fits against the windows of VALIDATION.md, the USINE run tally within the A1.8 cap, no data value committed. With
+    HEP_USINE_DATA set, the data stage is rerun and its dataset-record validates with the same labels."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.rec = json.loads((F1_FIX / "f1-reproduction.json").read_text(encoding="utf-8"))
+
+    def test_f1_2_labels(self):
+        self.assertEqual(self.rec["data"]["status"], ["observed"])
+        self.assertTrue(self.rec["data"]["covariance_note"].startswith("model-supplied"))
+        self.assertEqual(self.rec["crdb_crosscheck"]["row_roles"], ["secondary"])
+        self.assertTrue(self.rec["crdb_crosscheck"]["label"].startswith("secondary"))
+
+    def test_d9_recomputed(self):
+        kpc2_myr = (648000.0 / math.pi * 1.495978707e13 * 1e3) ** 2 / (1e6 * 365.25 * 86400.0)
+        for fam in self.rec["families"]:
+            (d_lo, d_hi), (k_lo, k_hi) = F1_WINDOWS[fam.split("-")[0]]
+            row = self.rec["families"][fam]
+            with self.subTest(family=fam):
+                pt = row["best_fit"]
+                k10 = pt["D0_cm2_s"] / kpc2_myr * 10 ** pt["delta"]
+                self.assertAlmostEqual(k10, row["K10"], places=9)
+                self.assertAlmostEqual(row["delta_window"][0], d_lo, places=6)
+                self.assertAlmostEqual(row["delta_window"][1], d_hi, places=6)
+                self.assertAlmostEqual(row["K10_window"][0], k_lo, delta=5e-4)
+                self.assertAlmostEqual(row["K10_window"][1], k_hi, delta=5e-4)
+                self.assertEqual(row["delta_in_window"], d_lo <= pt["delta"] <= d_hi)
+                self.assertEqual(row["K10_in_window"], row["K10_window"][0] <= k10 <= row["K10_window"][1])
+                passed = row["status"] == "converged" and row["delta_in_window"] and row["K10_in_window"]
+                self.assertEqual(row["D9"].startswith("passed"), passed)
+        judged = self.rec["judged_for_D9"]
+        self.assertEqual(judged[:2], ["BIG", "SLIM"])
+        self.assertEqual(judged[2], "QUAINT-Vc0" if (self.rec.get("quaint_vc_boundary_kkt") or {}).get("kkt_ok")
+                         else "QUAINT")
+        self.assertEqual(self.rec["D9_all"], all(self.rec["families"][f]["D9"] == "passed" for f in judged))
+
+    def test_budget_and_no_data_values(self):
+        self.assertLessEqual(self.rec["usine_runs"], 2600)   # A1.8 cap of F1 raised to 2600 by A1.16
+        text = (F1_FIX / "f1-reproduction.json").read_text(encoding="utf-8")
+        self.assertNotIn('"values"', text)
+        self.assertNotIn('"edges"', text)
+
+    @unittest.skipUnless(os.environ.get("HEP_USINE_DATA") and HAVE_NUMPY_SCIPY_F1, "needs HEP_USINE_DATA, numpy, scipy")
+    def test_data_stage_rebuilds_the_labelled_record(self):
+        with tempfile.TemporaryDirectory() as scratch:
+            proc = subprocess.run([sys.executable, str(ROOT / "examples" / "bc-usine-reproduction" / "run.py"),
+                                   "--out", scratch, "--stages", "data"], capture_output=True, text=True, timeout=600)
+            self.assertEqual(proc.returncode, 0, proc.stdout[-800:] + proc.stderr[-800:])
+            doc = json.loads((Path(scratch) / "data" / "bc-observed.json").read_text(encoding="utf-8"))
+            self.assertEqual(doc["status"], self.rec["data"]["status"])
+            self.assertTrue(validate_artifact(doc).ok)
+            self.assertEqual(doc["extension"]["covariance"]["note"], self.rec["data"]["covariance_note"])
 
 
 if __name__ == "__main__":
