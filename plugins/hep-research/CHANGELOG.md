@@ -24,21 +24,26 @@ outside v1).
   never vendored.
 
 **Known issues** (campaign report §8): no F1 fit converges at USINE's 6-digit output noise floor (delta and K10 are
-inside the paper's 1-sigma windows; -2 ln L about 83-90 against about 62, attributed); the USINE provider applies
-solar modulation itself, against `cr_provider.json`'s "providers never modulate" (recorded in every modulated
-prediction); accepted, attributed DRAGON2/USINE differences D1-1a, D3-1 and D3-3, not yet recorded in `adapter.json`;
-C2UF toy fits bounded by the emulator's k = 4 domain while validation covered k = 3; `propagation_fit.py` reports
-unconverged fits as "artifact-invalid"; translator gaps (escalation 12) and the r3 P1 zone-conversion wording with a
-likely DRAGON2 Ptuskin94/03 enum issue (escalation 10); `train_emulator.py` lets the GP nugget reach its 1e-12 floor,
-which gives near-singular models (the provider now factorizes them with a bounded jitter); GALPROP unavailable; F2,
-F3 and the live routing run not done.
+inside the paper's 1-sigma windows; -2 ln L about 83-90 against about 62, attributed); the USINE provider applies solar
+modulation itself, against `cr_provider.json`'s "providers never modulate" (recorded in every modulated prediction);
+accepted, attributed DRAGON2/USINE differences D1-1a, D3-1 and D3-3, not yet recorded in `adapter.json`; C2UF toy fits
+bounded by the emulator's k = 4 domain while validation covered k = 3; `propagation_fit.py` reports unconverged fits as
+"artifact-invalid"; translator gaps (escalation 12) and the r3 P1 zone-conversion wording with a likely DRAGON2
+Ptuskin94/03 enum issue (escalation 10); `train_emulator.py` lets the GP nugget reach its 1e-12 floor, which gives
+near-singular models (the provider now factorizes them with a bounded jitter), and the C2UF emulator fixture is refused
+off macOS (its self-check does not reproduce under another libm; its tests skip, A1.21) until it is retrained; GALPROP
+unavailable; F2, F3 and the live routing run not done.
 
 - crprop ci: the campaign's regression pins compare platform-robustly (PR #308 CI on Linux, decision A1.20): recomputed
   closed-form, USINE-reader and DRAGON2-port values against committed numbers within relative 1e-12, the E2 emulator's
   pinned responses and hold-out numbers within relative 1e-4 (GP linear algebra); E2-1, E2-2 and every acceptance
   tolerance unchanged. `emulator_provider.py`: a kernel matrix that does not factorize as stored (the C2UF model's is
   near-singular and failed on Linux, so `--declaration` refused) is factorized with a jitter of 1e-14, else 1e-13,
-  times its mean diagonal, and the self-check compares ln sigma within 2e-6 (ln mean still within 1e-9).
+  times its mean diagonal; the self-check accepts ln mean and ln sigma each within max(1e-9, 1e-4 x the stored ln
+  sigma) and a refusal names the worst deviations and where. The C2UF model stays refused on platforms whose libm
+  differs (simulated drift up to 2.5e-2 x sigma: not portable); the E2 model drifts at most 9e-7 x sigma.
+  The C2UF fixture is platform-bound (A1.21): its tests skip on that refusal only; the follow-up is retraining
+  with a nugget floor in `train_emulator.py`.
 - crprop env: capability probe of the cr-propagation campaign and environment E-crprop registered in VALIDATION.md
   (E2 plus DRAGON2 cd588707 verified by a live rerun); DRAGON2 computational-run and environment manifest under
   `tests/adapters/fixtures/cr_propagation/env/`. USINE and GALPROP absent (no source tarball). No behavior change.
