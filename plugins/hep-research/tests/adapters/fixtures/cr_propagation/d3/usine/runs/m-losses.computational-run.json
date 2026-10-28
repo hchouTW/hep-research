@@ -1,0 +1,110 @@
+{
+ "contract_version": "3.14.0",
+ "artifact_id": "usine-run-m-losses",
+ "artifact_type": "computational-run",
+ "objective": "USINE run 'm-losses' of cr-propagation D3 (matched): translated from a transport block by usine_translate.py, then the D3 settings of d3_study.py applied",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "versions": {
+  "plugin": "0.42.0",
+  "contracts": "3.14.0",
+  "profiles": {}
+ },
+ "provenance": {
+  "producer_skill": "hep-computing",
+  "created": "2026-10-28",
+  "evidence_ids": []
+ },
+ "inputs": [],
+ "outputs": [],
+ "unresolved_inputs": [],
+ "status": [
+  "unvalidated"
+ ],
+ "extension": {
+  "input_manifest": [
+   {
+    "path": "norm_points.dat",
+    "sha256": "e9d5bca71c39518e74c3018f78c334a89c3dc6e7adf0783fe3c538d4315b09fc",
+    "committed_form_sha256": "e9d5bca71c39518e74c3018f78c334a89c3dc6e7adf0783fe3c538d4315b09fc"
+   },
+   {
+    "path": "usine.init.par",
+    "sha256": "e9475a543f4bc748ac87f744ae0a14b04dc6a64fdcae29a7f7f7f9cd0044b7d0",
+    "committed_form_sha256": "7493065cdc0dfac33f0e92958fc9d1373de94f66490a8212c254b407cedecf12"
+   },
+   {
+    "path": "xs_inelastic.dat",
+    "sha256": "e47a886d934a3b9e9e6bf8dc87d0a47a5ce5745ecdbe27b52ce0452e02d85b26",
+    "committed_form_sha256": "e47a886d934a3b9e9e6bf8dc87d0a47a5ce5745ecdbe27b52ce0452e02d85b26"
+   },
+   {
+    "path": "xs_production.dat",
+    "sha256": "016ff2e715fb98f3c742470f4ccce233a827d324e62d98c0993cf0b632054988",
+    "committed_form_sha256": "016ff2e715fb98f3c742470f4ccce233a827d324e62d98c0993cf0b632054988"
+   }
+  ],
+  "input_manifest_note": "sha256 is of each file as run, with the absolute paths of the run directory and of USINE's inputs folder written into usine.init.par; committed_form_sha256 is of the same file written with the placeholders <TOOL_HOME>/inputs and <RUN_DIR> (the form committed under tests/adapters/fixtures/cr_propagation/usine/inputs/), equal to sha256 for the files that hold no path; entries with read_in_place are USINE's own files (GPL-2.0), hashed where they lie and never copied",
+  "tools": [
+   {
+    "name": "USINE",
+    "version": "V3.5 (git tag V3.5, commit fb53006db41d1a640bf1b5af1a4b0f899ca59673; built with Apple clang 21.0.0 against ROOT 6.38.04)",
+    "binary": "<TOOL_HOME>/bin/usine",
+    "binary_sha256": "1d444720afec6ebd2efde8d275d5d950f39edee4f53e7c3756fba8ce05a62d25"
+   }
+  ],
+  "commands": [
+   "<TOOL_HOME>/bin/usine -l <RUN_DIR>/usine.init.par <RUN_DIR>/out '7BE,9BE,10BE,10B,11B,12C,16O,B/C,10BE/9BE:KEKN:0.;B/C,10BE/9BE:kR:0.' 0 1 1 0"
+  ],
+  "environment": {},
+  "seeds": {
+   "note": "USINE's local-flux calculation is deterministic: no random numbers are drawn"
+  },
+  "tolerances": {
+   "note": "USINE EPS_ITERCONV 1e-6, EPS_INTEGR 1e-4, EPS_NORMDATA 1e-10 (written into the initialisation file); outputs printed with 6 significant digits"
+  },
+  "resources": {
+   "wall_seconds": 1.66
+  },
+  "exit_status": 0,
+  "usine_exit_status": 1,
+  "exit_status_note": "exit_status is the run's outcome as judged by usine_translate.py (0: every expected output written, no USINE error or crash in the log); USINE V3.5 itself returns 1 on every path (usine_exit_status)",
+  "output_hashes": {
+   "out/local_fluxes_7BE_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "7fcc404417f4489666333a6082626b61dae7c53beb34bb95d3b70dedcf5dc34d",
+   "out/local_fluxes_9BE_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "2095dd639f7afc3a6c7323fd6922e92026aaf4a2bca7135e78326769259df398",
+   "out/local_fluxes_10BE_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "e51113a249c3811258dafb53678d639a26fbfad9c857b7d1f73fb6e1e75ae1b6",
+   "out/local_fluxes_10B_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "2690991f762074f5d91946d0503942b95086b025e7cc1ff0adf422e361432991",
+   "out/local_fluxes_11B_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "b5872897696447c034541ce36d1b3697cc712701003d2e35a85ded87636786ee",
+   "out/local_fluxes_12C_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "11e307df333d5b0d2ffc02ff793e33f55e096d5f4a7a93043cfe5b7f68531190",
+   "out/local_fluxes_16O_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "20bac730f93a866e26ea1ba89747cb03794efe28ee169e808cae1b10037b326b",
+   "out/local_fluxes_BC_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "dc399d3da39f0897e92e1c584206c8cd8577b69fa3abdd7b79c8123a5843ecaf",
+   "out/local_fluxes_10BE9BE_Ekn_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "98433d9e93b6e22aa76ad860541685f4d4671818f8633404601ba7a1211d8748",
+   "out/local_fluxes_BC_R_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "2c9f3ec48e73672e2274930e842748dd59fd445f71468654eff457bde9ac55c3",
+   "out/local_fluxes_10BE9BE_R_Model2DKisoVc_SolMod0DFF_phi0_00GV.out": "52c225e49b026556729c127e3b78a095235111b64afb501365286658ad95eed1"
+  },
+  "notes": [
+   "observer at r = 8.3 kpc, z = 0 (not fixed by the transport block); no central hole",
+   "diffusion.form 'beta^eta (R/R0)^delta with smooth breaks': not parsed; K = beta^eta K0 (Rig/R0)^delta times the break factors is fixed by the canonical fields",
+   "reacceleration off (V_A = 0): zone 'thin-disc', relation 'Seo-Ptuskin 1994' not used",
+   "decay off: lorentz_dilation True, ec_treatment 'fully-stripped' not used",
+   "cross_sections.ghost_threshold 'off: ghost nuclei and tertiary chains off on both sides': not parsed; ghost nuclei are not loaded (IsLoadGhosts false; the cumulative cross sections of USINE's chart crcharts_Zmax30_ghost97.dat) and tertiary chains are off",
+   "sources.injection species_group ['all primaries']: one slope for every primary of the network",
+   "sources.spatial 'not fixed by harmonized-v1; each code records its choice': not parsed; uniform in r up to radius_kpc in the thin disc (template CST)",
+   "gas 'uniform, n_H = 1 cm^-3': HI = 1 cm^-3, HII = H2 = 0 in the thin disc of half-thickness h; USINE's Coulomb loss acts on HII and is therefore zero",
+   "gas He_to_H_number 0.1: not used; the ILLUSTRATIVE cross sections are on hydrogen only and no helium cross section is invented (He density 0, target H)",
+   "cross_sections.production_set 'theory:cr-secondary-ratio models/xs-illustrative-decay.json (ILLUSTRATIVE, isotopic)' and inelastic_set 'theory:cr-secondary-ratio models/xs-illustrative-decay.json (ILLUSTRATIVE, isotopic)': the ILLUSTRATIVE set xs-illustrative-decay",
+   "production channels not in the set are zero (USINE needs every pair of the network)",
+   "source spectrum dQ/dE_k/n = q Rig^-2.3 (USINE POWERLAW, eta_s = 0), uniform in r up to radius_kpc in the thin disc (template CST)",
+   "parent abundances: each parent source scaled until its unmodulated local flux at E_k/n = 10 GeV/n is in the ratio C 1, O 0.9 (theory:cr-secondary-ratio parent list); USINE NormList with generated points, not data",
+   "sources.abundances 'fixed by the parent list of theory:cr-secondary-ratio': not parsed; the parent ratios above are used",
+   "tertiary chains, ghost nuclei and exotic primaries off",
+   "family 'SLIM': a label of the model family, not read by the translator",
+   "free []: one run fixes every parameter; a fit varies the free ones",
+   "not given in the transport block, the translator's value used: geometry.local_bubble_radius_kpc = 0.0 kpc (no local bubble)",
+   "D3 matched run: {\"gas_cm3\": {\"H2\": 0.24906416814557616, \"HI\": 1.0270478823414892, \"HII\": 0.20956390908787179, \"He\": 0.19082141404925648}, \"gas_note\": \"DRAGON2 Galprop columns at r = 8.3 kpc on its z grid (L 4 kpc, dz 0.02) divided by 2 h = 0.2 kpc; He = 0.11 (HI + HII + 2 H2)\", \"helium\": true, \"inelastic\": \"dragon2\", \"norm_points\": {\"C\": 1.0, \"O\": 1.1938517516589608}, \"source_eta_s\": -1.0}",
+   "D3 run kind matched, config losses"
+  ]
+ }
+}

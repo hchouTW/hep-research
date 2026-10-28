@@ -1957,5 +1957,201 @@ class EmulatorProviderRefusals(unittest.TestCase):
             self.assertEqual(proc.returncode, 0, doc)
 
 
+# ------------------------------------------------------------------ D3 (cr-propagation r4): cross-code comparison
+
+D3_FIX = FIX / "d3"
+D3_TOLERANCE = 0.05  # D3-1 and D3-3, frozen in acceptance.json and VALIDATION CRPROP-D3 before the comparison
+D3_PASSING = ("harmonized-v1", "isotopic", "convection", "decay")  # D3-3 configurations within 5% (recorded verdict)
+
+
+def load_d3_study():
+    """d3_study.py loaded from its file (no fixture folder added to sys.path)."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("d3_study", D3_FIX / "d3_study.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def assert_close_tree(case, got, want, path="", rel=1e-9):
+    if isinstance(want, dict):
+        case.assertEqual(sorted(got), sorted(want), path)
+        for k in want:
+            assert_close_tree(case, got[k], want[k], f"{path}/{k}", rel)
+    elif isinstance(want, list):
+        case.assertEqual(len(got), len(want), path)
+        for i, (a, b) in enumerate(zip(got, want)):
+            assert_close_tree(case, a, b, f"{path}[{i}]", rel)
+    elif isinstance(want, float) and not isinstance(want, bool):
+        case.assertTrue(math.isclose(got, want, rel_tol=rel, abs_tol=1e-300), (path, got, want))
+    else:
+        case.assertEqual(got, want, path)
+
+
+@unittest.skipUnless(HAVE_NUMPY, "numpy and scipy are needed (USINE reader, Bessel zeros)")
+class D3CrossCode(unittest.TestCase):
+    """D3, offline: DRAGON2 cd588707 against USINE V3.5 (GALPROP unavailable, decisions A1.2), recomputed from the
+    recorded runs: D1's DRAGON2 outputs and B1's USINE numbers (level 1, reused), the two D3 DRAGON2 runs
+    (d3/dragon2/) and the D3 USINE runs (d3/usine/: matched level 1, attribution ladder, geometry checks, level 2).
+    D3-1 (5%, frozen) fails and is reported; D3-3 passes for the configurations on DRAGON2's BronfFerr gas and fails for
+    reacceleration (first-order zone conversion) and the losses pair (Galprop gas geometry), each attributed with
+    evidence; D3-2 passes: every level-2 difference is measured by a USINE run or estimated. The verdicts are whatever
+    the recorded numbers give, never a widened tolerance."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.d3 = load_d3_study()
+        cls.res = json.loads((D3_FIX / "d3-results.json").read_text(encoding="utf-8"))
+
+    def test_results_are_recomputed_from_the_recorded_runs(self):  # D3-1, D3-2, D3-3
+        got = self.d3.jsonable(self.d3.analyze(lambda name: D3_FIX / "usine" / "outputs" / name, None))
+        assert_close_tree(self, got, self.res)
+
+    def test_d3_1_level_one_fails_and_is_reported(self):
+        self.assertEqual(self.res["tolerance"], D3_TOLERANCE)
+        self.assertEqual(self.res["bc_rigidity_edges_gv"], BORON_CARBON_RIGIDITY_EDGES)
+        v = self.res["verdicts"]["D3-1"]
+        self.assertFalse(v["passed"])
+        for cfg, row in self.res["level1"].items():
+            with self.subTest(config=cfg):
+                self.assertEqual(row["B/C"]["passed"], row["B/C"]["max_abs_deviation"] <= D3_TOLERANCE)
+                self.assertGreater(row["B/C"]["max_abs_deviation"], 0.3)  # DRAGON2/USINE 1.28-1.77
+        # the level-1 offset equals the product of the matched settings' effects times the matched residual
+        lad = self.res["ladder"]
+        for a, b in zip(lad["product_of_steps_times_matched_residual"], lad["level1_offset"]):
+            self.assertAlmostEqual(a / b, 1.0, places=9)
+
+    def test_d3_3_matched_level_one(self):
+        v = self.res["verdicts"]["D3-3"]
+        self.assertFalse(v["passed"])
+        self.assertEqual(sorted(c for c, ok in v["configurations"].items() if ok), sorted(D3_PASSING))
+        for cfg, row in self.res["matched"].items():
+            with self.subTest(config=cfg):
+                self.assertEqual(row["B/C"]["passed"], row["B/C"]["max_abs_deviation"] <= D3_TOLERANCE)
+                s = row["settings"]
+                self.assertTrue(s["helium"])
+                self.assertEqual(s["inelastic"], "dragon2")
+                self.assertEqual(s["source_eta_s"], -1.0)
+                gas_model = self.d3.LEVEL1_CONFIGS[cfg][2]
+                col = self.d3.gas_columns(gas_model, 8.3, 4.0, 0.02)
+                self.assertAlmostEqual(s["gas_cm3"]["He"], 0.11 * col["nucleons"] / 0.2, places=12)
+                oc = row["O_over_C"]["10 GeV/n"]
+                self.assertAlmostEqual(oc["usine"] / oc["dragon2"], 1.0, places=5)  # parent ratio matched
+        # attributions of the failing configurations, with evidence
+        rc = self.res["reacceleration_check"]
+        self.assertTrue(rc["within_bound"])  # within transport_conventions' first-order bound (A1R) x item effect
+        for cfg in ("losses-off", "losses"):  # Galprop gas geometry: a uniform thin disc cannot express it
+            self.assertLessEqual(self.res["geometry_checks"][cfg]["B/C"]["max_abs_deviation"], D3_TOLERANCE)
+            self.assertLess(self.res["geometry_checks"][cfg]["B/C"]["max_abs_deviation"],
+                            self.res["matched"][cfg]["B/C"]["max_abs_deviation"])
+        g = self.res["geometry_estimates"]["Galprop"]["geometry_factor"]
+        self.assertAlmostEqual(self.res["matched"]["losses-off"]["B/C"]["dragon2_over_usine"][-1], g, delta=0.02)
+        # with like-for-like gas the losses item effects agree within 3% (D1-1a found 6.1% against ionization only)
+        self.assertLessEqual(self.res["losses_check"]["item_effect_max_abs_deviation"], 0.03)
+        # 10Be/9Be with decay: the matched gap is D1's thick-gas factor (finite gas layer), within 0.5% in every bin
+        self.assertLessEqual(self.res["decay_check"]["matched_over_F_max_abs_deviation"], 0.005)
+
+    def test_d3_2_every_level_two_difference_is_attributed(self):
+        v = self.res["verdicts"]["D3-2"]
+        self.assertTrue(v["passed"])
+        self.assertLessEqual(v["residual_max_abs_deviation"], v["allowed"])
+        diffs = self.res["level2_differences"]
+        self.assertTrue(all(d["kind"] == "model-alternative" and d["attribution"] in ("measured", "estimated")
+                            and d["evidence"] and len(d["effect_on_bc"]) == 2 for d in diffs))
+        steps = [n for n, st in self.res["level2"]["steps"].items() if st["effect"] is not None]
+        measured = {d["evidence"].split()[2] for d in diffs if d["attribution"] == "measured"}
+        self.assertEqual(measured, set(steps))  # every swap step is a registered difference
+        prod = [1.0] * 16
+        for n in steps:
+            prod = [p * e for p, e in zip(prod, self.res["level2"]["steps"][n]["effect"])]
+        for p, r, t in zip(prod, self.res["level2"]["residual_dragon2_over_last_step"],
+                           self.res["level2"]["dragon2_over_usine"]):
+            self.assertAlmostEqual(p * r / t, 1.0, places=9)
+
+    def test_dragon2_runs_are_recorded_and_translated(self):
+        import hashlib
+        specs = self.d3.dragon2_specs()
+        for name, s in specs.items():
+            with self.subTest(run=name):
+                self.assertEqual(s, json.loads((D3_FIX / "dragon2" / "specs" / f"{name}.json").read_text(encoding="utf-8")))
+                rec = json.loads((D3_FIX / "dragon2" / "runs" / f"{name}.computational-run.json").read_text(encoding="utf-8"))
+                self.assertEqual([f.code for f in validate_artifact(rec).errors], [])
+                ext = rec["extension"]
+                self.assertEqual(ext["exit_status"], 0)
+                out = D3_FIX / "dragon2" / "outputs" / f"{name}.txt"
+                self.assertEqual(ext["output_hashes"], {f"output/{name}.txt": hashlib.sha256(out.read_bytes()).hexdigest()})
+                xml = dragon2_run.render_xml(dragon2_run.check_spec(s))
+                self.assertIn(hashlib.sha256(xml.encode()).hexdigest(),
+                              [i["sha256"] for i in ext["input_manifest"] if i["path"] == f"{name}.xml"])
+                self.assertTrue(any("cd588707fe03c76f19bda1b8092e136dcbe3fe90" in t["version"] for t in ext["tools"]
+                                    if t["name"] == "DRAGON2"))
+                self.assertFalse(mentions_path(json.dumps(rec), Path.home()), name)
+        self.assertNotIn("production_table", specs["D3_l2_dragon2"])
+        self.assertEqual(specs["D3_harmonized_v1"]["production_table"]["channels_mb"],
+                         {"6012->5011": 70.0, "8016->5011": 35.0})
+
+    def test_usine_runs_are_recorded(self):
+        import hashlib
+        plan = self.d3.usine_plan()
+        self.assertEqual(sorted(p.name for p in (D3_FIX / "usine" / "runs").iterdir()),
+                         sorted(f"{i['name']}.computational-run.json" for i in plan))
+        for item in plan:
+            with self.subTest(run=item["name"]):
+                rec = json.loads((D3_FIX / "usine" / "runs" / f"{item['name']}.computational-run.json")
+                                 .read_text(encoding="utf-8"))
+                self.assertEqual([f.code for f in validate_artifact(rec).errors], [])
+                self.assertEqual(rec["extension"]["exit_status"], 0)
+                self.assertFalse(mentions_path(json.dumps(rec), Path.home()))
+                for f in (D3_FIX / "usine" / "outputs" / item["name"]).iterdir():
+                    self.assertEqual(rec["extension"]["output_hashes"][f"out/{f.name}"],
+                                     hashlib.sha256(f.read_bytes()).hexdigest(), f.name)
+                if item["kind"] == "level2" and not (os.environ.get("HEP_USINE_DATA")
+                                                     and os.environ.get("HEP_DRAGON2_DATA")):
+                    continue  # its tables are built from USINE's and DRAGON2's own files (not in the repository)
+                want = {e["path"]: e["committed_form_sha256"] for e in rec["extension"]["input_manifest"]
+                        if "committed_form_sha256" in e}
+                d2 = os.environ.get("HEP_DRAGON2_DATA")
+                got = self.d3.committed_hashes(item, Path(d2) if d2 else None, None)
+                self.assertEqual(got, want)
+
+    def test_ports_of_dragon2_code_and_inelastic_table(self):
+        for e in (0.05, 0.3, 0.43, 0.6, 1.0, 1.51, 3.0, 100.0):
+            for zi, ai, zf, af in ((6, 12, 5, 11), (8, 16, 5, 10), (8, 16, 4, 9), (6, 12, 4, 7)):
+                self.assertEqual(self.d3.helium_production_ratio(e, zi, ai, zf, af), he_to_h_ratio(e, zi, ai, zf, af))
+        self.assertAlmostEqual(self.d3.gas_columns("BronfFerr", 8.3, 4.0, 0.02)["nucleons"],
+                               bronf_ferr_column(8.3, 4.0), places=12)
+        inel = self.d3.load_inelastic()
+        self.assertEqual(inel["ekn_gev"], self.d3.table_nodes())
+        self.assertEqual(sorted(inel["sigma_h_mb"]), sorted(self.d3.INELASTIC_NUCLIDES))
+        for nuc, vals in inel["sigma_h_mb"].items():
+            a = usine_translate.charge_and_mass(nuc)[1]
+            self.assertAlmostEqual(inel["he_over_h"][nuc], 2.10 / a ** 0.055, places=12)
+            self.assertTrue(all(v > 0 for v in vals))
+            tail = [v for e, v in zip(inel["ekn_gev"], vals) if e >= 1000.0]
+            self.assertEqual(len(set(tail)), 1, nuc)  # DRAGON2 clamps the energy at 1e6 MeV
+        self.assertNotIn("Users", json.dumps(inel))
+
+
+@unittest.skipUnless(os.environ.get("HEP_USINE_LIVE_TEST") == "1", "live USINE runs: set HEP_USINE_LIVE_TEST=1, "
+                     "HEP_USINE_BIN and HEP_USINE_DATA")
+class LiveUsineD3(unittest.TestCase):
+    """D3: the matched run m-isotopic is built again by d3_study.py, run with the installed USINE and must reproduce
+    the recorded tables within relative 1e-6 (one USINE run of a few seconds)."""
+
+    def test_matched_run_reproduces_the_recorded_tables(self):
+        self.assertIsNone(live_usine_reason())
+        d3 = load_d3_study()
+        binary, data_dir = Path(os.environ["HEP_USINE_BIN"]), Path(os.environ["HEP_USINE_DATA"])
+        item = d3.plan_item("m-isotopic")
+        with tempfile.TemporaryDirectory() as td:
+            res = d3.execute(item, Path(td), binary, data_dir, None, None)
+            self.assertTrue(res["ok"], res["log_tail"])
+            for f in (D3_FIX / "usine" / "outputs" / "m-isotopic").iterdir():
+                rerun = usine_reader.read_table(Path(td) / "runs" / "m-isotopic" / "out" / f.name)
+                recorded = usine_reader.read_table(f)
+                for a, b in zip(rerun[1], recorded[1]):
+                    self.assertTrue(math.isclose(a, b, rel_tol=USINE_LIVE_RTOL, abs_tol=1e-300), (f.name, a, b))
+
+
 if __name__ == "__main__":
     unittest.main()
