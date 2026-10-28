@@ -108,8 +108,8 @@ subcommands, inputs and outputs, validation tools outside `core/stats`, publicat
 Helpers in `skills/hep-statistics/scripts/` (read `--help` first); they call the modules above, never replace
 them: run them, do not hand-compute.
 
-Dependencies are marked per script: unmarked ones use the standard library only; marked ones exit 2 with a JSON
-message without NumPy (and SciPy); all print `--help` without them.
+Unmarked scripts use the standard library only; marked ones refuse to run without NumPy (and
+SciPy) with exit 2 and a JSON message, and every script prints `--help` without them.
 
 - `li_ma_significance.py`: ON/OFF significance, with toy or exact conditional p-values at low counts.
 - `look_elsewhere.py` (needs NumPy): global significance of a one-dimensional scan (brute-force toys or upcrossings).

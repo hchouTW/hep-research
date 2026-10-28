@@ -6046,3 +6046,15 @@ Follow-up (orchestrator added `core-stats-guide.md` to A3's file list): `degener
 scripts section with the marker "(needs NumPy and SciPy)". The hep-statistics quick load (SKILL.md plus the guide)
 had 8 B of headroom under its 25,600 B budget, so four phrases in the guide were shortened with no change in content
 (`measure_entrypoints.py --no-cli`: no warnings), and `docs/reference-inventory.*` were regenerated.
+
+Dispatch 2 (2026-10-28, from `eca5da37`): the full `run_all_checks.py --jobs 4` on `eca5da37` failed only in
+`tests.skills.test_documented_output_claims` (2 failures): the shortened dependency sentence of the guide had dropped
+the two registered quotes "marked ones refuse to run without NumPy (and SciPy) with exit 2 and a JSON message" and
+"every script prints `--help` without them". The sentence now carries both quotes again; its lead-in "Dependencies
+are marked per script:" is dropped to stay in budget (quick load 25,590 B of 25,600 B, `measure_entrypoints.py
+--no-cli`: no warnings) and `docs/reference-inventory.*` are regenerated. On `eca5da37` the other gates passed:
+A3-1 (161/161 sha256 equal to the baseline), A3-2 (`valid_range.L_kpc.max` 6.947), A3-3, A3-4, `check_naming.py`,
+`check_layering.py`, `check_packaging.py`, `workflow_check.py` acceptance and gaps, and `workflow_check.py diff`
+with the integration branch's `workflow.json` (the branch copy predates the orchestrator's addition of
+`core-stats-guide.md` to A3's files). The full checks and `check_relocation.py` are rerun on the fix commit
+(`$CRPROP_OUT/a3/checks`, `$CRPROP_OUT/a3/reloc`).

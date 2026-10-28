@@ -291,7 +291,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `astroparticle-statistics.md` | hep-statistics | 12.4 | yes | 15 | hep-detector, hep-measurement | e03c0396 2026-10-22 |
 | `combinations.md` | hep-statistics | 4.6 | yes | 4 | - | 317c39a3 2026-10-14 |
 | `core-stats-commands.md` | hep-statistics | 44.4 | yes | 6 | hep-detector, hep-measurement | cf16c262 2026-10-23 |
-| `core-stats-guide.md` | hep-statistics | 14.8 | yes | 12 | hep-measurement | e3f794ab 2026-10-26 |
+| `core-stats-guide.md` | hep-statistics | 14.8 | yes | 12 | hep-measurement | eca5da37 2026-10-27 |
 | `inference-recipes.md` | hep-statistics | 21.6 | yes | 13 | hep-detector, hep-measurement | 2b221f92 2026-10-22 |
 | `likelihood-fitting.md` | hep-statistics | 7.1 | yes | 11 | hep-computing, hep-detector | 09237aee 2026-10-17 |
 | `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 8 | hep-ml | 9257d7b5 2026-10-15 |
