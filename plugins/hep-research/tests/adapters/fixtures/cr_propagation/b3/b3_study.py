@@ -56,12 +56,12 @@ NORM_CONFIGS = ("h1-2d", "dec-2d", "all-2d")
 SLOPE_CONFIGS = ("dec-2d", "all-2d")
 SLOPE_CHANNELS = ("12C->11B", "12C->10Be")
 EPSILONS = (0.2, -0.2)
-E_THR_GEV, SLOPE_S = 10.0, 0.1
-TABLE_PPD = 10  # nodes per decade of the energy-dependent production tables (log grid on XS_GRID_GEV, nodes 10^(k/10))
+ENERGY_THRESHOLD_GEV, SLOPE_S = 10.0, 0.1
+TABLE_NODES_PER_DECADE = 10  # nodes per decade of the energy-dependent production tables (log grid on XS_GRID_GEV, nodes 10^(k/10))
 TOL_B31, TOL_B32 = 0.02, 0.005
 MAIN_FRACTION = 0.01
-BC_EDGES = [2.0 * 500.0 ** (i / 16) for i in range(17)]  # 16 log-uniform rigidity bins 2-1000 GV (B1, D1)
-BE_EDGES = [0.05 * 200.0 ** (i / 12) for i in range(13)]  # 12 log-uniform E_k/n bins 0.05-10 GeV/n (B1, D1)
+BORON_CARBON_EDGES = [2.0 * 500.0 ** (i / 16) for i in range(17)]  # 16 log-uniform rigidity bins 2-1000 GV (B1, D1)
+BERYLLIUM_EDGES = [0.05 * 200.0 ** (i / 12) for i in range(13)]  # 12 log-uniform E_k/n bins 0.05-10 GeV/n (B1, D1)
 NODE_RANGE = (0.05, 1000.0)
 BORON, BERYLLIUM = ("10B", "11B"), ("7Be", "9Be", "10Be")
 
@@ -113,12 +113,12 @@ def check_used(spec: dict, transport: dict, init_text: str) -> list[str]:
 
 def table_nodes() -> list[float]:
     lo, hi = ut.XS_GRID_GEV
-    n = round(TABLE_PPD * math.log10(hi / lo)) + 1
+    n = round(TABLE_NODES_PER_DECADE * math.log10(hi / lo)) + 1
     return [lo * (hi / lo) ** (i / (n - 1)) for i in range(n)]
 
 
 def slope_weight(e: float) -> float:
-    return (e / E_THR_GEV) ** SLOPE_S if e < E_THR_GEV else 1.0
+    return (e / ENERGY_THRESHOLD_GEV) ** SLOPE_S if e < ENERGY_THRESHOLD_GEV else 1.0
 
 
 def production_table(spec: dict, tables: dict) -> str:
@@ -166,16 +166,16 @@ def run_plan() -> list[dict]:
             tag, sigma = chan.replace("->", "-"), base[chan]
             plan.append({"name": f"{cfg}-slope-{tag}", "config": cfg, "kind": "slope-rerun", "channel": chan,
                          "tables": {chan: [sigma * slope_weight(e) for e in nodes]}})
-            k_lo = round(TABLE_PPD * math.log10(0.0316 / ut.XS_GRID_GEV[0]))  # first node at or above USINE's grid
+            k_lo = round(TABLE_NODES_PER_DECADE * math.log10(0.0316 / ut.XS_GRID_GEV[0]))  # first node at or above USINE's grid
             for k, e in enumerate(nodes):
-                if k < k_lo or e >= E_THR_GEV * (1 - 1e-9):
+                if k < k_lo or e >= ENERGY_THRESHOLD_GEV * (1 - 1e-9):
                     continue
                 plan.append({"name": f"{cfg}-basis-{tag}-k{k}", "config": cfg, "kind": "basis", "channel": chan,
                              "node": k, "production_mb": zero,
                              "tables": {chan: [sigma if i == k else 0.0 for i in range(len(nodes))]}})
             plan.append({"name": f"{cfg}-basis-{tag}-rest", "config": cfg, "kind": "basis", "channel": chan,
                          "node": "rest", "production_mb": zero,
-                         "tables": {chan: [sigma if e >= E_THR_GEV * (1 - 1e-9) else 0.0 for e in nodes]}})
+                         "tables": {chan: [sigma if e >= ENERGY_THRESHOLD_GEV * (1 - 1e-9) else 0.0 for e in nodes]}})
     return plan
 
 
@@ -289,11 +289,11 @@ def closed_form_tables(tables: dict, transport: dict) -> dict:
 
 
 def observables(tables: dict) -> dict:
-    """Ratios of bin integrals: B/C on BC_EDGES (rigidity); 10Be/9Be and Be/B on BE_EDGES (E_k/n) where present."""
-    obs = {"B/C": rd.ratio_of_bin_integrals(tables, "B/C", BC_EDGES, "rigidity")}
+    """Ratios of bin integrals: B/C on BORON_CARBON_EDGES (rigidity); 10Be/9Be and Be/B on BERYLLIUM_EDGES (E_k/n) where present."""
+    obs = {"B/C": rd.ratio_of_bin_integrals(tables, "B/C", BORON_CARBON_EDGES, "rigidity")}
     if "10Be" in tables:
-        obs["10Be/9Be"] = rd.ratio_of_bin_integrals(tables, "10Be/9Be", BE_EDGES, "ekn")
-        obs["Be/B"] = rd.ratio_of_bin_integrals(tables, "Be/B", BE_EDGES, "ekn")
+        obs["10Be/9Be"] = rd.ratio_of_bin_integrals(tables, "10Be/9Be", BERYLLIUM_EDGES, "ekn")
+        obs["Be/B"] = rd.ratio_of_bin_integrals(tables, "Be/B", BERYLLIUM_EDGES, "ekn")
     return obs
 
 
@@ -302,10 +302,10 @@ def node_ratios(tables: dict) -> dict:
     2-1000 GV), 10Be/9Be at equal E_k/n (nodes in 0.05-10 GeV/n)."""
     xs = tables["12C"][0]
     rig = [rd.rigidity_from_ekn(e, 5, 11) for e in xs]
-    out = {"B/C": [rd.point_ratio(tables, "B/C", r, "rigidity") for r in rig if BC_EDGES[0] <= r <= BC_EDGES[-1]
+    out = {"B/C": [rd.point_ratio(tables, "B/C", r, "rigidity") for r in rig if BORON_CARBON_EDGES[0] <= r <= BORON_CARBON_EDGES[-1]
                    and rd.ekn_from_rigidity(r, 6, 12) >= xs[0]]}
     if "10Be" in tables:
-        out["10Be/9Be"] = [rd.point_ratio(tables, "10Be/9Be", e, "ekn") for e in xs if BE_EDGES[0] <= e <= BE_EDGES[-1]]
+        out["10Be/9Be"] = [rd.point_ratio(tables, "10Be/9Be", e, "ekn") for e in xs if BERYLLIUM_EDGES[0] <= e <= BERYLLIUM_EDGES[-1]]
     return out
 
 
@@ -463,7 +463,7 @@ def analyze(out: Path) -> tuple[dict, dict]:
             tag, prod = c.replace("->", "-"), c.split("->")[1]
             entry = {}
             # main-channel fraction: response over the nominal numerator of its observable, per bin
-            num, edges, axis = (BORON, BC_EDGES, "rigidity") if prod in BORON else (BERYLLIUM, BE_EDGES, "ekn")
+            num, edges, axis = (BORON, BORON_CARBON_EDGES, "rigidity") if prod in BORON else (BERYLLIUM, BERYLLIUM_EDGES, "ekn")
             frac = []
             for lo, hi in zip(edges, edges[1:]):
                 t = sum(rd.bin_integral(nom, s, lo, hi, axis) for s in num if s in nom)
@@ -519,7 +519,7 @@ def analyze(out: Path) -> tuple[dict, dict]:
             if sl:
                 post_ok = sl["post_propagation_weight"]["max"] <= TOL_B32
                 basis_ok = sl["energy_basis"]["max"] <= TOL_B32
-                row["slope"] = {"form": f"sigma (E/{E_THR_GEV:g} GeV/n)^{SLOPE_S:g} below {E_THR_GEV:g} GeV/n",
+                row["slope"] = {"form": f"sigma (E/{ENERGY_THRESHOLD_GEV:g} GeV/n)^{SLOPE_S:g} below {ENERGY_THRESHOLD_GEV:g} GeV/n",
                                 "post_propagation_weight_max_dev": sl["post_propagation_weight"]["max"],
                                 "energy_basis_max_dev": sl["energy_basis"]["max"],
                                 "n_basis_runs": sl["n_basis_runs"],
