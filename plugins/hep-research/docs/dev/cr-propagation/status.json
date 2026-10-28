@@ -243,15 +243,15 @@
    ]
   },
   "E1": {
-   "state": "verifying",
+   "state": "merged",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-e1",
    "base": "4a58be50",
    "head": "9ac54c51",
-   "merge_commit": null,
+   "merge_commit": "a4ad05d3",
    "worker_report": "DONE: E1-1 64/64 ok, 111 loop evaluations with records; E1-2 forced test stops at 5 rounds; E1-3 no training data; 114 USINE evaluations; placeholder RBF emulator for E2 to replace; standard run early-stop-min-distance at round 3 (E2-1 met, E2-2 not)",
-   "verifier_report": null,
+   "verifier_report": "PASS (2026-10-28, Sonnet): 111 records present, 12 validated with output hashes recomputed; Sobol design regenerated exactly; no training values committed; tally 114; advisories: forced-test best-emulator label, cosmetic cumulative tally",
    "missing_capabilities": [],
    "notes": [
     "Sonnet verifier dispatched 2026-10-28"
@@ -633,6 +633,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "B3 merged (c1b5967d); post-merge static ok"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "E1 merged (a4ad05d3); post-merge static ok"
   }
  ],
  "env": {
