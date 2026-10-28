@@ -199,17 +199,19 @@
    ]
   },
   "B3": {
-   "state": "dispatched",
+   "state": "verifying",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-b3",
    "base": "2d451e87",
-   "head": null,
+   "head": "5cb31aa5",
    "merge_commit": null,
-   "worker_report": null,
+   "worker_report": "DONE: B3-1 on matched 1D geometry (B/C 9e-5, 10Be/9Be 4.1e-4); harmonized-v1 2D B/C misses 2% (to 2.47% above 45 GV), attributed to radial escape (Fourier-Bessel reproduces USINE 2D to 0.21%); B3-2 max 8.9e-6; B3-3 22 rows; 192 USINE runs (D7)",
    "verifier_report": null,
    "missing_capabilities": [],
-   "notes": []
+   "notes": [
+    "Opus verifier dispatched 2026-10-28 with the B3-1 geometry question left to its judgment"
+   ]
   },
   "C2U": {
    "state": "pending",
@@ -588,6 +590,11 @@
    "cycle": 4,
    "date": "2026-10-28",
    "event": "A1.9: D1-1a/b and D1-L added (D1-1 superseded for D1, kept frozen); WP A1R added (D1 depends on it) and dispatched; escalations 5, 6, 9 decided"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-28",
+   "event": "B3 DONE (5cb31aa5); Opus verifier dispatched (B3-1 geometry: matched 1D vs harmonized-v1 2D, verifier to judge)"
   }
  ],
  "env": {
