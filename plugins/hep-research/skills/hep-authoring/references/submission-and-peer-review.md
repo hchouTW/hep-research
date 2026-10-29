@@ -193,9 +193,7 @@ Write each assertion from the state of the change in the revision ledger
 change completed and checked in the revised manuscript, with its locator; a rerun,
 regenerated figure or reassessment that has not happened yet stays explicit in the
 draft ("the fit is being rerun; the number in Sec. IV will be updated" or a
-`[VALUE NEEDED: ...]` slot), never "we performed". This holds for a fill-in template too: a draft
-for work not yet done is written in planned voice ("we will rerun ... [VALUE NEEDED: ...]"), not as
-"we have rerun ... [X]" for the author to complete later. A reasoned decision not to
+`[VALUE NEEDED: ...]` slot), never "we performed". A reasoned decision not to
 change the manuscript is a valid disposition and is stated as such. One referee
 comment may map to several changes and several comments to one; keep the links so
 the replies stay consistent with each other.
