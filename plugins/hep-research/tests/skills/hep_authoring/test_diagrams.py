@@ -311,7 +311,7 @@ class CoverageOutcomes(unittest.TestCase):
         validator = ROOT.parents[1] / "tools" / "validate_skill_example.py"
         for path in files:
             with self.subTest(path.name):
-                res = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True, check=False)
+                res = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True, check=False, timeout=60)
                 self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
                 self.assertIn(path.name, index)
                 self.assertIn("Illustrative example", path.read_text(encoding="utf-8"))
