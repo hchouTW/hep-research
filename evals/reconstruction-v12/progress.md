@@ -113,6 +113,7 @@ Materials: Parts I–IV saved as `v12-en-{0-core,1-methods,2-control,3-delivery}
 | 1 | `s0-reconstruction-v12` | original v12 text | R2 | violated (2 major, 3 minor) | violated (1 major, 10 minor) | violated (2 major, 4 minor) | violated (2 major, 5 minor) | violated (1 major, 4 minor) |
 | 2 | `s0-reconstruction-v12-r2` | spec copy after round 1 | R2 | violated (1 major, 2 minor) | violated (0 major, 7 minor) → **passes** with fixes | violated (1 major, 3 minor) | violated (0 major, 4 minor) → **passes** with fixes | violated (1 major, 5 minor) |
 | 3 | `s0-reconstruction-v12-r3` (N1, N3, N5) | spec copy after round 2 | R2 | violated (2 major) → **does not pass** (limit reached) | — | violated (0 major, 4 minor) → **passes** with fixes | — | violated (0 major, 2 minor) → **passes** with fixes |
+| 4 (user-approved, beyond the runbook limit) | `s0-reconstruction-v12-r4` (N1) | spec copy after round 3 (incl. the two unreviewed round-3 N1 fixes) | R2 | violated (3 major, 2 minor) → **does not pass** | — | — | — | — |
 
 **S0 result: N2, N3, N4, N5 pass; N1 does not pass after three rounds.** Stage gates (runbook 0.5.1): A1 (N2–N5) open;
 B1 (N2) open; A2 (N2, N3) open; B2 (N2) open; **C1 and C2 (N1) blocked**. Process note: in round 1 the N2 reviewer
@@ -137,6 +138,19 @@ only for MC-derived performance), and Core routing scope fixes.
 Items for a human (batched in the final report): DEC-06 re-confirmation; the “not started = failed, confirmed” rule
 (Control §7.2 (c)); N1's two round-3 fixes, which are in the copy but unreviewed; whether to run a further S0 round for
 N1 (beyond the runbook's limit, so a human decision).
+
+### Round 4 (N1 only), 2026-10-29
+
+The user asked for a fourth S0 round for N1. Same procedure as round 3: installed hep-review 0.49.1, scratch store,
+context `s0-reconstruction-v12-r4`, one fresh-context Agent-tool reviewer, packet with Control, Core and the reference
+model of the current spec copy (Control `626486be…`, Core `da9dafcd…`, model `45e3997a…`), submission ingested
+digest-bound (`a81d6729…`). Achieved R2; **N1 violated, 3 major and 2 minor; N1 still does not pass.** Report
+`s0/round4-report.txt`, checkpoint `s0/round4-checkpoint.txt`, export `s0/s0-reconstruction-v12-r4.export.json`
+(`verify-export`: checkpoint `matches`, internal consistency ok). The reviewer's attack script is kept as
+`s0/round4-attack.py`; the coordinator re-ran it against the unmodified spec-copy model (byte-identical) and every
+attack reproduced (A1, A1b, A2, A2b, A3, A4). Findings and their status: `spec/revision-log.md`, “N1 — round 4”.
+The three majors each need a design change to the control rules, so the spec copy is **not** changed: per runbook
+Part 0 the acceptance rules are not changed without a human. C1 and C2 stay blocked.
 
 ## A1 — methods and main-Agent resumption (documentation and skill wiring)
 
@@ -276,7 +290,8 @@ Tests (`TMPDIR` on local disk): `test_executor_b2` 13 (receipts 2, binding 6, ca
 
 ## C1, C2 — not started (blocked)
 
-Entry conditions require N1, which did not pass S0 after three rounds (runbook 0.5.2 item 7). Neither stage is
+Entry conditions require N1, which did not pass S0 after three rounds (runbook 0.5.2 item 7), nor in the
+user-approved fourth round (3 major findings). Neither stage is
 started; the control-layer rules (Control §1–§6) and the reference model are not written into skills or code.
 The Agent evaluation of Delivery §5.2 (C2 acceptance) is therefore not run.
 

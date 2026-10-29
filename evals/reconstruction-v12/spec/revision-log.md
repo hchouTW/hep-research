@@ -39,6 +39,19 @@ and are listed as open decisions in the final report.
 | N2-F10 | minor | Environment manifest produced or verified (`environment_manifest.py check`) in the same environment no earlier than the attempt registration; `plugin_release` digest `unknown` with plugin code imported → identity incomplete | Control §7.2 identity row |
 | N2-F11 | minor | Core §5.4 item 1: the attempt registration line stands in for the intent; the run record is the receipt content | Core §5.4 item 1 |
 
+## N1 — round 4 (open; spec copy not changed)
+
+Context `s0-reconstruction-v12-r4`, R2, N1 violated. Reproduced by the coordinator with `s0/round4-attack.py` against
+the unmodified model. None is fixed: the majors need design decisions by a human.
+
+| Id | Severity | Finding | Reproduction | Possible directions (reviewer's suggestions, not adopted) |
+|---|---|---|---|---|
+| N1-R4-F1 | major | Choosing among confirmed artifacts: confirm draw X1 on confirmation sample S1 and X2 on S2, then revert the program in a new contract. The revert is an automatic tightening, so X1 is bound again and published at T3C with no failures. This contradicts Control §4.2 (a binding change needs pin + human). | A1, A1b | a binding change caused by a content revert counts as a pin change; or after one confirmation result on a step, a further artifact of the step needs approval for T3C; or every confirmation result on the step enters history and publish |
+| N1-R4-F2 | major | Adding a deliverable is automatic, and the confirmation fields belong to the step. A T3C deliverable added later inherits “confirmation required = no” / “independent confirmation = no”: under M2 a human-approved T2-only first contract, plus an automatic T3C deliverable, publishes T3C with no confirmation-sample result. This defeats Control §1.1. | A2, A2b | tie the confirmation fields to the deliverable; or adding a T3C deliverable to a step with “no” values is not at least as strict |
+| N1-R4-F3 | major | The extra inputs a check may read (Control §5.2) are outside the check identity. No rule says who resolves or validates them; the model does not represent them and §8 gives no reason. An agent-staged comparison input can give a counted pass (for example a convergence check). | model l. 812–813, 1138–1144 | include declared extra inputs in the identity, resolved by C from bound versions; or state them as unmodelled with a reason |
+| N1-R4-F4 | minor | Freeze item 3 relies on the free-text `attempt` field of exposure facts; the agent can label an ad-hoc look with an existing check-attempt id (T3C with that label, T3E with an honest one). | A3 | exposures not written by C are never attributed to C-admitted attempts |
+| N1-R4-F5 | minor | The task-wide history (§4.5) counts only failures and failed draws, so selection among successful variants on an unchecked off-chain step stays invisible. | A4 | report the number of artifacts on off-chain steps that the chain reads from |
+
 ## N3 — statistics
 
 | Finding | Sev. | Change | Where |
