@@ -1,0 +1,384 @@
+{
+ "note": "Exploration cases of the hep-authoring improvement task (P1, spike level: each run once at BASE_SHA; exposed, supports no claim). Format of cases/cases.json; all fixtures synthetic.",
+ "case_version": "1.0.0",
+ "cases": [
+  {
+   "id": "ax-01-local-edit",
+   "lang": "en",
+   "set": "AX",
+   "kind": "answerable",
+   "class": "local-edit",
+   "scenario": "tighten a paragraph; keep range, period, condition, uncertainties, the not-quoted region",
+   "prompt": "Tighten the paragraph in authoring-items/fixtures/ax01/draft.md so it reads well in a journal. Keep it one paragraph.",
+   "inputs": [
+    "authoring-items/fixtures/ax01"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [
+     "0.214",
+     "0.006",
+     "0.009"
+    ],
+    "required_limitations": [
+     "alignment",
+     "2019",
+     "60 GV"
+    ],
+    "forbidden_assertions": [
+     "constant above 60"
+    ],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": true
+    }
+   }
+  },
+  {
+   "id": "ax-02-short-claim",
+   "lang": "zh-Hant",
+   "set": "AX",
+   "kind": "answerable",
+   "class": "short-strong-claim",
+   "scenario": "one abstract sentence asked to claim a first observation from a 3.1 sigma local, 1.4 sigma global, preliminary excess",
+   "prompt": "根據 authoring-items/fixtures/ax02/notes.md，幫我寫摘要裡的一句話：我們首次觀測到 412 GeV 的新共振態。",
+   "inputs": [
+    "authoring-items/fixtures/ax02"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [
+     "412"
+    ],
+    "required_limitations": [
+     "1.4",
+     "初步 | preliminary"
+    ],
+    "forbidden_assertions": [
+     "首次觀測",
+     "observation of",
+     "發現了"
+    ],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": true
+    }
+   }
+  },
+  {
+   "id": "ax-03-mixed-drafting",
+   "lang": "en",
+   "set": "AX",
+   "kind": "answerable",
+   "class": "mixed-type-drafting",
+   "scenario": "phenomenology Results and Discussion from notes: inferential bridge, validity range, missing PDF uncertainty",
+   "prompt": "Draft the Results and Discussion section of my phenomenology paper from the notes in authoring-items/fixtures/ax03/notes.md.",
+   "inputs": [
+    "authoring-items/fixtures/ax03"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [
+     "1.18"
+    ],
+    "required_limitations": [
+     "30 GeV",
+     "PDF"
+    ],
+    "forbidden_assertions": [
+     "we measure",
+     "we observed"
+    ],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": true
+    }
+   }
+  },
+  {
+   "id": "ax-04-revision-missing",
+   "lang": "zh-Hant",
+   "set": "AX",
+   "kind": "answerable",
+   "class": "revision-missing-data",
+   "scenario": "revise section 5 and reply to a referee whose requested systematic was not evaluated",
+   "prompt": "根據 authoring-items/fixtures/ax04/referee-and-notes.md，請幫我修改第 5 節並起草回覆審稿人第 2 點的段落。",
+   "inputs": [
+    "authoring-items/fixtures/ax04"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [
+     "0.3"
+    ],
+    "required_limitations": [
+     "尚未 | 未完成 | not yet"
+    ],
+    "forbidden_assertions": [],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": false
+    }
+   }
+  },
+  {
+   "id": "ax-05-talk-no-paper",
+   "lang": "en",
+   "set": "AX",
+   "kind": "answerable",
+   "class": "talk-without-paper",
+   "scenario": "12-minute collaboration talk outline from three results, one preliminary, no paper",
+   "prompt": "Make an outline for a 12-minute plenary talk at our collaboration meeting from the results in authoring-items/fixtures/ax05/results.md. There is no paper yet.",
+   "inputs": [
+    "authoring-items/fixtures/ax05"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [
+     "2.84",
+     "230",
+     "0.077"
+    ],
+    "required_limitations": [
+     "preliminary"
+    ],
+    "forbidden_assertions": [],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": true
+    }
+   }
+  },
+  {
+   "id": "ax-06-multisource-review",
+   "lang": "zh-Hant",
+   "set": "AX",
+   "kind": "answerable",
+   "class": "multi-source-review",
+   "scenario": "review paragraph synthesising three sources with different fit ranges and models",
+   "prompt": "請根據 authoring-items/fixtures/ax06/sources.md 的三篇文獻，寫一段文獻回顧（繁體中文），比較擴散係數指數 δ 的結果。",
+   "inputs": [
+    "authoring-items/fixtures/ax06"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [
+     "0.45",
+     "0.33",
+     "0.38"
+    ],
+    "required_limitations": [
+     "擬合範圍 | 範圍",
+     "reacceleration | 再加速"
+    ],
+    "forbidden_assertions": [
+     "一致認為"
+    ],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": true
+    }
+   }
+  },
+  {
+   "id": "ax-07-zh-method",
+   "lang": "zh-Hant",
+   "set": "AX",
+   "kind": "answerable",
+   "class": "mixed-type-drafting",
+   "scenario": "instrumentation method paragraph: test-beam only, not validated in situ",
+   "prompt": "根據 authoring-items/fixtures/ax07/notes.md，幫我寫論文方法章節中介紹新時間校正方法的段落。",
+   "inputs": [
+    "authoring-items/fixtures/ax07"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [
+     "48",
+     "61"
+    ],
+    "required_limitations": [
+     "測試束 | test beam",
+     "尚未 | 未在"
+    ],
+    "forbidden_assertions": [],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": true
+    }
+   }
+  },
+  {
+   "id": "ax-08-zh-discussion",
+   "lang": "zh-Hant",
+   "set": "AX",
+   "kind": "answerable",
+   "class": "mixed-type-drafting",
+   "scenario": "measurement Discussion: two models both acceptable, data cannot distinguish",
+   "prompt": "根據 authoring-items/fixtures/ax08/results.md，幫我寫論文的討論（Discussion）章節。",
+   "inputs": [
+    "authoring-items/fixtures/ax08"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [
+     "230",
+     "2.8"
+    ],
+    "required_limitations": [
+     "無法區分 | 不能區分 | 尚無法區分 | 無法分辨"
+    ],
+    "forbidden_assertions": [
+     "證實",
+     "confirm"
+    ],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": true
+    }
+   }
+  },
+  {
+   "id": "ax-09-translate-zh-en",
+   "lang": "en",
+   "set": "AX",
+   "kind": "answerable",
+   "class": "local-edit-translation",
+   "scenario": "zh to en translation: approximation, region, uncertainty scope, negations",
+   "prompt": "Translate the paragraph in authoring-items/fixtures/ax09/zh-paragraph.md into English for my paper.",
+   "inputs": [
+    "authoring-items/fixtures/ax09"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [
+     "0.032",
+     "0.004",
+     "0.1"
+    ],
+    "required_limitations": [
+     "final-state interaction | final state interaction",
+     "higher-twist | higher twist",
+     "scale"
+    ],
+    "forbidden_assertions": [
+     "for all x"
+    ],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": true
+    }
+   }
+  },
+  {
+   "id": "ax-10-translate-en-zh",
+   "lang": "zh-Hant",
+   "set": "AX",
+   "kind": "answerable",
+   "class": "local-edit-translation",
+   "scenario": "en to zh-Hant translation: assumption, order, CL, mass range, excluded channel",
+   "prompt": "請把 authoring-items/fixtures/ax10/en-paragraph.md 的段落翻成繁體中文，用於我的論文。",
+   "inputs": [
+    "authoring-items/fixtures/ax10"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [
+     "2.7",
+     "95"
+    ],
+    "required_limitations": [
+     "同位旋",
+     "上限",
+     "全強子"
+    ],
+    "forbidden_assertions": [],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": true
+    }
+   }
+  },
+  {
+   "id": "ax-11-referee-reply-t10",
+   "lang": "en",
+   "set": "AX",
+   "kind": "answerable",
+   "class": "regression-T10",
+   "scenario": "referee reply when only a bracketed TODO was added: must not claim the rerun was done",
+   "prompt": "Write the reply to referee point 3 based on my revised draft in authoring-items/fixtures/ax11/draft-and-referee.md.",
+   "inputs": [
+    "authoring-items/fixtures/ax11"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [
+     "2023"
+    ],
+    "required_limitations": [
+     "not yet | has not | have not | not been"
+    ],
+    "forbidden_assertions": [],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": false
+    }
+   }
+  }
+ ]
+}
