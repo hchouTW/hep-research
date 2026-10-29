@@ -12,7 +12,7 @@ changed rule has at least one reason code for each of the five states and no cod
 keep outcome_contract "pending", which evaluates as unverified); every rule names its prerequisites; a rule's V cases
 exist; a V part that is passing or an expected failure names the tests that run it, and each test exists in the
 checkout; every test module of the impact map exists. Registry 1.1.0 (P3, G18): every new or changed rule records the
-source digest of its implementation (contracts/analysis_checks/source_digest.py), the checker implements that
+source digest of its implementation (contracts/source_digest.py), the checker implements that
 (rule_id, version), and the digest is the current one: code that changed without a new version fails. Registry 1.2.0
 (release R2): a rule is keyed by (rule_id, version), so a fixed rule is a new entry beside its old version; a retired
 version stays listed, needs no implementation and is not digest-checked (it is reproduced with its own release).
@@ -134,22 +134,14 @@ def check(doc, root: Path = ROOT) -> Report:
 
 
 def _check_sources(doc: dict, rep: Report) -> None:
-    from contracts.analysis_checks.source_digest import rule_digests
-    current = rule_digests()
+    """The cross-artifact check that implemented the new and changed rules was retired (decision-retire.md): every
+    such rule is retired, and a live one cannot be implemented in this release."""
     for i, rule in enumerate(doc["rules"]):
         if rule["kind"] == "legacy" or rule["lifecycle"] == "retired":
             continue
-        where, key = f"$.rules[{i}]", (rule["rule_id"], rule["version"])
-        if key not in current:
-            rep.add("error", where, "registry.rule_not_implemented",
-                    f"the checker does not implement {rule['rule_id']} version {rule['version']}")
-        elif "source_sha256" not in rule:
-            rep.add("error", f"{where}.source_sha256", "registry.source_digest_missing",
-                    f"record the source digest of {rule['rule_id']} {rule['version']}: {current[key]}")
-        elif rule["source_sha256"] != current[key]:
-            rep.add("error", f"{where}.source_sha256", "registry.rule_source_changed",
-                    f"the code of {rule['rule_id']} {rule['version']} changed (now {current[key]}) without a new version: "
-                    "register the changed code as a new rule version (P3); old versions are reproduced by their release")
+        rep.add("error", f"$.rules[{i}]", "registry.rule_not_implemented",
+                f"no checker implements {rule['rule_id']} version {rule['version']}: the cross-artifact check was "
+                "retired; register the rule as retired")
 
 
 def state_for(rule: dict, code: str | None) -> str:

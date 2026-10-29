@@ -1,7 +1,8 @@
 """Function-level source digests of rule implementations (P3, G18): a rule's digest covers its own code and every
 plugin function, class and constant it reaches by name, so a change to a shared helper changes the digest of each
-rule that uses it. contracts/rule_registry.py compares the digest with the one the registry records: a rule whose
-code changed without a new version fails the registry check.
+rule that uses it. contracts/naming_registry.py compares the digest of each naming predicate with the one its registry
+records: a predicate whose code changed without a new version fails the registry check. (Moved from
+contracts/analysis_checks/ when the cross-artifact check was retired.)
 
 The digest is formatting-insensitive: comments, blank lines, line breaks inside brackets and docstrings are dropped,
 the remaining tokens are kept in order (indentation as INDENT/DEDENT markers). Constants are digested by their
@@ -42,8 +43,8 @@ def normalized(source: str) -> str:
     return " ".join(toks)
 
 
-def _ours(obj) -> bool:
-    return str(getattr(obj, "__module__", "") or "").startswith(PREFIXES)
+def _ours(target) -> bool:
+    return str(getattr(target, "__module__", "") or "").startswith(PREFIXES)
 
 
 def _constant(value) -> str | None:
@@ -82,17 +83,17 @@ def closure(fn) -> dict[str, str]:
     seen: dict[str, str] = {}
     todo = [(f"{fn.__module__}.{fn.__qualname__}", fn)]
     while todo:
-        name, obj = todo.pop()
+        name, target = todo.pop()
         if name in seen:
             continue
-        if inspect.isfunction(obj) or inspect.isclass(obj):
-            own = f"{obj.__module__}.{obj.__qualname__}"  # keyed where it is defined, not by the importing name
-            if not _ours(obj) or own in seen:
+        if inspect.isfunction(target) or inspect.isclass(target):
+            own = f"{target.__module__}.{target.__qualname__}"  # keyed where it is defined, not by the importing name
+            if not _ours(target) or own in seen:
                 continue
-            seen[own] = normalized(inspect.getsource(obj))
-            todo += _referenced(obj)
-        elif not isinstance(obj, types.ModuleType):
-            const = _constant(obj)
+            seen[own] = normalized(inspect.getsource(target))
+            todo += _referenced(target)
+        elif not isinstance(target, types.ModuleType):
+            const = _constant(target)
             if const is not None and name.startswith(PREFIXES):
                 seen[name] = const
     return seen
@@ -100,9 +101,3 @@ def closure(fn) -> dict[str, str]:
 
 def source_digest(fn) -> str:
     return hashlib.sha256(json.dumps(closure(fn), sort_keys=True).encode("utf-8")).hexdigest()
-
-
-def rule_digests() -> dict[tuple[str, str], str]:
-    """{(rule_id, version): digest} for every rule implementation the checker dispatches."""
-    from contracts.analysis_checks.rules import IMPLEMENTED
-    return {key: source_digest(fn) for key, fn in sorted(IMPLEMENTED.items())}

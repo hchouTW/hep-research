@@ -7,7 +7,7 @@ Rule checks beyond the schema (naming_rule_registry.json): the five states in th
 rule maps naming.waived to not_applicable, a rule with params.kinds maps naming.kind_not_covered, one with
 params.sources maps naming.external_name, and every rule but semantic maps naming.no_inputs to unsupported (the codes
 the engine itself gives); determinism matches the predicate (similarity heuristic, semantic review, the rest
-deterministic); an active rule records the source digest of its predicate (contracts/analysis_checks/source_digest.py)
+deterministic); an active rule records the source digest of its predicate (contracts/source_digest.py)
 and the digest is current: changed code needs a new rule version. The key, the five states, the reason-code
 convention, the digest and state_for are those of contracts/rule_registry.py; layer, suites, V cases and kind are not.
 
@@ -56,7 +56,7 @@ BLOCK_END = "<!-- /naming-kinds:{sid} -->"
 
 
 def predicate_digests() -> dict[str, str]:
-    from contracts.analysis_checks.source_digest import source_digest
+    from contracts.source_digest import source_digest
     from core.naming.predicates import PREDICATES
     return {name: source_digest(fn) for name, fn in PREDICATES.items()}
 
