@@ -1,5 +1,5 @@
 {
- "contract_version": "3.15.0",
+ "contract_version": "3.16.0",
  "artifact_id": "crsr-prediction-bc-benchmark",
  "artifact_type": "prediction",
  "objective": "B/C in the 1D thin-disc diffusion model at the ILLUSTRATIVE benchmark parameter point (synthetic cross sections; not a statement about the Galaxy)",
@@ -13,8 +13,8 @@
   ]
  },
  "versions": {
-  "plugin": "0.44.0",
-  "contracts": "3.15.0",
+  "plugin": "0.45.0",
+  "contracts": "3.16.0",
   "profiles": {
    "theory:cr-secondary-ratio": "0.1.0"
   }

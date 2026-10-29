@@ -3,7 +3,7 @@
  "writer": "orchestrator only (r4 4)",
  "cycle": 4,
  "updated": "2026-10-29",
- "integration_branch": "worktree-crprop-k",
+ "integration_branch": "worktree-crprop-l",
  "integration_base": "8fcbb826",
  "crprop_out": "$HOME/hep-work/crprop-out",
  "capabilities": {
@@ -439,6 +439,36 @@
    "notes": [
     "B1.1",
     "B1.2: accepted on K4-1, K4-2 recorded as known issue"
+   ]
+  },
+  "L1": {
+   "state": "merged",
+   "dispatches": 1,
+   "rework_rounds": 0,
+   "branch": "worktree-crprop-l1",
+   "base": "eeb62a4e",
+   "head": "ef04f284",
+   "merge_commit": "8d29a558",
+   "worker_report": "DONE: enters_squared retry in w=p^2 for failed toy/calibration fits (committed before reruns); C2UF-1 MET on both emulators (SLIM toys 0/200 failed, p<0.0149); K4 emulator swapped in (byte-identical retrain, holdout 0.0032, drift margin >3000); A1.21 skips removed; 2 USINE runs",
+   "verifier_report": "Opus PASS: R9 timing ok, diagnosis from base code, retry only in SurrogateFit unconstrained fits, verdict in w correct, examples unchanged, C2UF-1 numbers recomputed (SLIM 0/200, CP upper 0.014867 on both emulators), retrain byte-identical, drift margin 4000+, skips removed and forced refusal fails; note: SquaredParameterRetry stub test may be optimizer/platform-sensitive",
+   "missing_capabilities": [],
+   "notes": [
+    "B1.3"
+   ]
+  },
+  "L2": {
+   "state": "merged",
+   "dispatches": 1,
+   "rework_rounds": 1,
+   "branch": "worktree-crprop-l2",
+   "base": "f0f424da",
+   "head": "962a9447",
+   "merge_commit": "2ca279bc",
+   "worker_report": "DONE (ALL-5 card only): contracts 3.16.0 (CONFORMANCE_VERSION_FROM), CORE 1.4.0, conformance records provider_version, USINE gate rerun at 0.3.0 (4.277e-5); adapter 0.3.0, usine/dragon2 0.3.0, emulator 1.0.0; migration keep-as-history (565+367 hashes reproduce under 0.2.0, none under 0.3.0); spectrum_variable explicit, USINE renders identical; emulator refuses explicit form (out-of-domain); doc slips + erratum",
+   "verifier_report": "Opus PASS r1 (r0 REWORK: emulator transport normalisation): normalised comparison, distinct cache keys, no stored model change, C2UF driver works on L1's fixture, 698 artifacts keep outcome, lint clean",
+   "missing_capabilities": [],
+   "notes": [
+    "B1.3"
    ]
   }
  },
@@ -977,6 +1007,36 @@
    "cycle": 4,
    "date": "2026-10-29",
    "event": "K1 merged, Opus PASS; all K WPs merged"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "B1.3: L1, L2 dispatched for 0.45.0 from main 31f39ee8"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "L2 DONE (9ba6de3f); card widened for the contracts bump; Opus verifier"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "L2 round 0 REWORK (emulator transport normalisation)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "L1 DONE (ef04f284), Opus verifier"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "L1 merged (8d29a558), Opus PASS"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "L2 merged (2ca279bc); L1-L2 complete"
   }
  ],
  "env": {

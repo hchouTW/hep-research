@@ -3,7 +3,32 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.45.0 (2026-10-29)
+
+Minor release; contracts 3.16.0 (gating constant `contracts/validate.py` `CONFORMANCE_VERSION_FROM`), `CORE_VERSION`
+1.4.0, adapter `cr-propagation` 0.3.0 (providers usine and dragon2 0.3.0, emulator 1.0.0). It closes follow-ups 2-6
+of 0.44.0 (decision B1.3): C2UF-1 now passes on the well-conditioned C2UF emulator, which replaces the near-singular
+one, so the C2UF emulator is portable and its Linux test skip (A1.21) is gone; modulation conformance is tied to the
+provider version; provider versions are bumped with the old records kept as history; USINE's default transport states
+its injection variable. It also ships the new skill hep-review (#310, protocol hep-review/1, schema 1.0.0).
+
+**Before you upgrade** (details in each entry below):
+- The plugin now has nine skills: hep-review (recorded, tiered review of physics work) is new; manuscript review
+  stays with hep-authoring and measurement-design review with hep-measurement.
+- A `cr-provider/1` declaration's modulation conformance result must carry `provider_version`, equal to the
+  declaration's version; core 1.4.0 refuses a 3.15 declaration with a modulation block until its gate is rerun
+  (`tools/provider_registry.py --conformance`).
+- The usine and dragon2 providers are now 0.3.0, so provider caches filled at 0.2.0 no longer answer their requests
+  (a fresh run, never a stale hit); committed records keep 0.2.0 as the version that produced them.
+- `propagation_fit.py` accepts `parameters.<name>.enters_squared`: a failed toy or family-calibration fit retries in
+  w = p^2 on [0, max^2]; main fits, profile intervals and posteriors never use it.
+- The emulator compares transports with the documented default injection variable normalised, so USINE's explicit
+  `DEFAULT_TRANSPORT` is accepted again; any other `spectrum_variable` is refused.
+
+**Known issues**: no F1 fit converges under the noise-aware rule (0.44.0; follow-up 1 needs a decision: a wider-scale
+noise probe, a provider printing more digits, or a new pre-declared step rule), so F1-1 stays not met and F3 stays
+blocked; the fit-side isotopic modulation path is documented but not implemented; the likely DRAGON2 Ptuskin94/03
+enum issue is documented, not reported upstream; GALPROP unavailable; F2, F3 and the live routing run not done.
 
 - **New skill hep-review (protocol hep-review/1, schema 1.0.0; 0.x records labelled experimental).** Recorded, tiered review of physics
   work: review obligations, assurance tiers R0-R3 computed from the records (the R2 floor per obligation), an
@@ -20,6 +45,35 @@ Software checks establish contract consistency only, not physical validity.
   cross-family grading: 0 content misses in 141 trials; `docs/dev/hep-review/g2*-report.md`), after which the schema
   was frozen at 1.0.0 (validator `1.0.0`; 0.1.0 kept for historical data). The packet now asks reviewers for a
   separately computed SHA-256 or `SHA256: unavailable` (a fabricated digest quarantined a correct review in g2x).
+- crprop l1: `propagation_fit.py` gains `parameters.<name>.enters_squared` for a parameter the prediction depends on
+  only through its square (B/C on `V_A_kms`; linear axis, provider domain from 0): a toy or family-calibration fit
+  that fails in p (not converged, or its first attempt refused as out of the provider domain) spends its remaining
+  restarts in w = p^2, from the failed point; the verdict, the 2% toy-failure limit and every tolerance are unchanged,
+  fits that converge in p and the main fits keep their numbers, and toy rows record `square_retry`. The C2UF emulator
+  study declares it for `V_A_kms`; with it C2UF-1 passes on both the A1.14 and K4's well-conditioned emulator (0 of
+  200 failed toys per family, BIG survives, SLIM excluded at p < 0.015), so the C2UF emulator fixture is now K4's
+  retraining (`--max-condition 1e10`, the study's new default; self-check drift margin above 3000) and the A1.21 skips
+  are removed: a self-check refusal of that fixture fails the tests again (0.43.0/0.44.0 known issue closed). The study
+  driver sends the emulator its recorded training transport and asks for the registered USINE version. Diagnosis of
+  the K4 toy failures, the method and the numbers: VALIDATION.md CRPROP-L1.
+- crprop l2: a modulation conformance result holds only for the provider version it was obtained at (decision B1.3;
+  contracts 3.16.0 with the gating constant `validate.CONFORMANCE_VERSION_FROM`, `CORE_VERSION` 1.4.0). The
+  cr-provider/1 declaration's `modulation.conformance.result` gains the required `provider_version`;
+  `tools/provider_registry.py --conformance` writes it, and core/provider (`check_declaration`, the registry) refuses a
+  declaration whose result names another version than the provider's, with the instruction to rerun the gate. Adapter
+  `cr-propagation` 0.3.0; providers `usine` and `dragon2` take their own version 0.3.0 (they inherited the adapter's
+  0.2.0; both changed behaviour since: F1 point parameters and K2 modulation for usine, K3 source refusals for
+  dragon2); `emulator` stays 1.0.0 (the committed E2 model's answers are pinned unchanged). USINE's gate was rerun at
+  0.3.0 (2 USINE runs; passed, 4.28e-5 over 390 nodes, identical to the 0.2.0 result). Cache-key migration: the point
+  hash includes the provider version, so values cached under 0.2.0 are never served for 0.3.0; the committed C2U,
+  C2UF, F1, E1 and E2 records keep 0.2.0 as the record of what produced them (a test recomputes every committed C2U
+  and C2UF input hash under 0.2.0 and finds none under 0.3.0), and the F1 example and the C2U study driver now ask
+  the registered version. USINE's `DEFAULT_TRANSPORT` and B1's `d1-*` specs state
+  `sources.injection[].spectrum_variable` (`kinetic_energy_per_nucleon`, the translator's default): the rendered USINE
+  inputs are identical; the emulator models keep their recorded training transport (implicit form) byte for byte, and
+  the emulator compares a request's block after dropping a spectrum_variable equal to that default, so it accepts
+  both forms (each keeps its own cache key) and still refuses any other variable. Doc slips: the d3_study.py docstring names
+  `dragon2_translate.spec_from_transport`; VALIDATION erratum for the K3 block count and the K1 base.
 
 ## 0.44.0 (2026-10-29)
 

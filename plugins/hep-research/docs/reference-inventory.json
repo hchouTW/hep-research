@@ -40,7 +40,7 @@
   },
   "hep-statistics": {
    "references": 14,
-   "bytes": 207327,
+   "bytes": 208208,
    "uncited": 0
   },
   "hep-theory": {
@@ -3555,7 +3555,7 @@
    "cited_by_other_skills": [
     "hep-statistics"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "fc8606a1 2026-10-29"
   },
   {
    "path": "skills/hep-ml/references/sequence-models.md",
@@ -3711,7 +3711,7 @@
     "skills/hep-review/references/domains/index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "dbebc92c 2026-10-29"
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-review/references/domains/index.md",
@@ -3823,7 +3823,7 @@
     "hep-statistics",
     "hep-theory"
    ],
-   "last_commit": "dbebc92c 2026-10-29"
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-review/references/domains/statistics.md",
@@ -3863,7 +3863,7 @@
     "hep-statistics",
     "hep-theory"
    ],
-   "last_commit": "dbebc92c 2026-10-29"
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-review/references/evaluation-and-claims.md",
@@ -3875,7 +3875,7 @@
     "skills/hep-review/SKILL.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "f685e8dc 2026-10-29"
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-review/references/evidence-and-adjudication.md",
@@ -3887,7 +3887,7 @@
     "skills/hep-review/SKILL.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "dbebc92c 2026-10-29"
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-review/references/host-and-trust-boundaries.md",
@@ -3899,7 +3899,7 @@
     "skills/hep-review/SKILL.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "1dfb15fa 2026-10-29"
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-review/references/storage-continuity-and-export.md",
@@ -3911,7 +3911,7 @@
     "skills/hep-review/SKILL.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "dbebc92c 2026-10-29"
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-review/references/workflow-and-tiers.md",
@@ -3924,7 +3924,7 @@
     "tests/skills/hep_review/test_g1_review_fixes.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "b491ff9e 2026-10-29"
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-statistics/references/astroparticle-statistics.md",
@@ -3973,8 +3973,8 @@
   {
    "path": "skills/hep-statistics/references/core-stats-commands.md",
    "owner": "hep-statistics",
-   "bytes": 51460,
-   "lines": 561,
+   "bytes": 52341,
+   "lines": 569,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/response-and-forward-folding.md",
@@ -3988,7 +3988,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "a2e8f9b1 2026-10-28"
+   "last_commit": "f453828b 2026-10-29"
   },
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
@@ -4323,7 +4323,7 @@
     "tests/skills/hep_theory/test_transport_conventions.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "3b400e3f 2026-10-28"
+   "last_commit": "afebe106 2026-10-29"
   },
   {
    "path": "skills/hep-theory/references/cosmic-ray-propagation.md",

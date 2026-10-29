@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "3.15.0"
+CONTRACTS_VERSION = "3.16.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -216,6 +216,15 @@ CONTRACTS_VERSION = "3.15.0"
 # is refused. Prediction rule prediction.modulated_twice (more than one nonzero phi_<period>_gv in the parameter point;
 # native from MODULATION_FROM, else --strict). No capability: a 3.14 reader refuses the new declaration block
 # (additionalProperties) instead of misreading it, and every 3.14 artifact keeps its outcome.
+# 3.16.0 (minor, unreleased; cr-propagation decision B1.3, work package L2, one gating constant
+# validate.CONFORMANCE_VERSION_FROM): a modulation conformance result holds only for the provider version it was
+# obtained at. The cr-provider/1 declaration's modulation.conformance.result gains the required field provider_version
+# (cr_provider.json), and core/provider (CORE_VERSION 1.4.0) refuses a declaration whose result names another version
+# than the provider's (the declaration's version, else the declaring adapter's or profile's), so a provider version bump
+# declares modulation only after tools/provider_registry.py --conformance is rerun at it. The declaration is not an
+# artifact and carries no contract_version: a 3.15 declaration with a modulation block is refused by core 1.4.0 until
+# the gate is rerun (USINE's was, at usine 0.3.0). No artifact rule and no capability: every 3.15 artifact keeps its
+# outcome, and a 3.15 reader refuses the new result field (additionalProperties) instead of misreading it.
 KNOWN_CAPABILITIES = frozenset({"core:evidence-records", "core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})

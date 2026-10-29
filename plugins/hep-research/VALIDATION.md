@@ -3483,6 +3483,32 @@ Not done in this stage: the independent
 new-problem run by an agent that did not take part (C1.10, section A.8), the `review.py` Markdown review, the release
 manifest. The adequacy table is unchanged; search values remain F1 optimistic bounds and decide nothing.
 
+## 0.45.0 release check (2026-10-29, E2 and the CI lock)
+
+Release commit `c7105355` on the follow-up integration branch, based on main `31f39ee8`. It ships the cr-propagation
+follow-up L1-L2 (decision B1.3; sections CRPROP-L1 and CRPROP-L2 above): contracts 3.16.0 (gating constant
+`CONFORMANCE_VERSION_FROM`), `CORE_VERSION` 1.4.0, adapter `cr-propagation` 0.3.0 (usine and dragon2 0.3.0, emulator
+1.0.0). No sci-fix ledger entry. The ams02-research companion needs no change (it requires hep-research >= 0.11.0).
+
+What changed in the release commit: version 0.45.0 in both manifests, `pyproject.toml`, the README, two assets, the
+theory-profile scripts and artifacts, `usine_translate.py` and `examples/bc-usine-reproduction/run.py`; CHANGELOG
+`Unreleased` is now `0.45.0`; examples regenerated with E2 (only version strings and the hashes that cover them
+change). ruff 0.16.10 and mypy 2.4.0 (the CI pins) pass on `core/` and `contracts/`. The draft PR #311 ran Linux CI on
+the release commit first; every required job passed.
+
+While PR #311 was in CI, main gained PR #310 (the new skill hep-review, protocol hep-review/1). It was merged into
+the release branch (`fdd97d46`): CHANGELOG (hep-review's entry folded into 0.45.0), README (main's skill table and
+size line, version 0.45.0) and the regenerated reference inventory; the release manifest was regenerated after it.
+The table below is for `c7105355`; the merged tree was checked by the full E2 run and the PR #311 Linux CI listed
+after the table.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 4`, E2 (Python 3.13.2, NumPy 2.5.3) | 31 pass, 0 fail, 2 skipped (CLI host checks); 6043 tests in 480 modules, 5875 pass, 0 failures, 168 skipped |
+| Same with the CI lock (no torch) | 31 pass, 0 fail, 2 skipped; 6043 tests, 5780 pass, 0 failures, 263 skipped |
+| `check_relocation.py` | only the 2 known geant4 path-with-spaces failures (`test_geant4` partition merges), identical on main |
+| PR #311 Linux CI on `c7105355` | every required job passes |
+
 ## 0.44.0 release check (2026-10-29, E2 and the CI lock)
 
 Release commit `93614c71` on the follow-up integration branch, based on main `42f5bad1`. It ships the cr-propagation
@@ -7846,3 +7872,241 @@ rule's verdict, not the fit, is what cannot be reached at USINE's 6-digit output
 414 in all, of which a first batch whose runs were cached was interrupted before writing results and resumed from the
 cache; SLIM polish 12; QUAINT-Vc0 polish 121 including an evaluation-budget stop at 110 resumed from the cache); at most
 3 USINE processes at once.
+
+## CRPROP-L1 — 2026-10-29 (environment E2)
+
+Work package L1 of the follow-up wave 8 (decision B1.3, release 0.45.0): toy fits robust at the V_A = 0 boundary
+(L1-1), and C2UF-1 re-run on the committed (A1.14) and the K4 well-conditioned emulator (L1-2). SYNTHETIC data only;
+every input ILLUSTRATIVE.
+
+**Environment field (r3 §0.3, base exception D10):** E2 (macOS arm64 workstation), Python 3.13.2 (miniconda), NumPy
+2.4.4, SciPy 1.17.1; USINE V3.5 through HEP_USINE_BIN, HEP_USINE_DATA and USINE (validation only, cap 60 runs, B1.3).
+`git rev-parse --show-toplevel` = `.claude/worktrees/crprop-l1`; branch `worktree-crprop-l1`; status clean at start;
+base f0f424da = integration HEAD (`worktree-crprop-l`), not `main`; no prerequisite work package (deps []); the
+0.44.0 release merge 31f39ee8 (K1-K4) is an ancestor of HEAD. Outputs under `$CRPROP_OUT/l1/`.
+
+### Diagnosis of the K4 toy failures (L1-1; base code, before any method was chosen)
+
+The K4 record (`$CRPROP_OUT/k4/k4-attempt/usine-emulator-family-study.json`) keeps only each failed toy's reason, so
+its first 40 SLIM toys were replayed on the same model (`1.0.0+model.9b95e7465422`, emulator provider only, no USINE
+run) with the base `propagation_fit.py` and every SurrogateFit attempt, verdict and provider refusal logged (scratch
+script; the 2% stop disabled in that script only, so that every toy is seen; `$CRPROP_OUT/l1/diag-k4/diag-base.json`).
+The same five toys fail, all in BIG's fit to a SLIM toy:
+
+| Toy | Outcome | What the log shows |
+|---|---|---|
+| 3, 5, 31, 36 | restart-cap | all 6 attempts end with least_squares status 0 (max_nfev = 100 evaluations reached), so no verdict is ever reached; the attempts stop at V_A 0.43-4.0 km/s (toy 31 with V_c on its bound 0) with -ln L equal to 1e-3 between attempts: the optimizer creeps towards V_A = 0 |
+| 10 | provider-out-of-domain | in the first attempt, one dogbox step goes from (V_A 8.34, V_c 1.24) to the box corner (V_A 104.96, V_c 9.5, the upper bound), which the DomainModel calls sparse; the refusal ends the toy |
+
+Cause: B/C depends on V_A only through V_A^2, so near V_A = 0 the residuals are r(V_A) ~ r0 + J_w V_A^2 and their
+Jacobian column 2 J_w V_A vanishes at the bound. Gauss-Newton steps then shrink V_A by about a factor two per step
+when the minimum lies at or near V_A = 0 (linear convergence), which runs out of evaluations (toys 3, 5, 31, 36; 31
+of all logged attempts ended at max_nfev), and `x_scale="jac"` turns the small column into a long step in V_A (toy 10).
+The well-conditioned emulator is a smoother GP mean (nugget 7.4e-8 x signal), which changes where the slow path
+crosses the evaluation cap, not the mechanism; the committed emulator's one restart-cap toy in C2UF is the same case.
+
+### Method (L1-1; written and committed before any C2UF-1 rerun, R9)
+
+Chosen: **fit coordinate w = p^2 for a parameter declared to enter only through its square, used for the retries of a
+toy or family-calibration fit that fails in p.** Declaration: `parameters.<name>.enters_squared: true` (allowed only on
+a linear axis whose provider domain starts at 0; refused otherwise). In `SurrogateFit` (toys and family calibration,
+unconstrained fits only):
+1. The first attempt is unchanged (coordinate p, same start, steps, optimizer and verdict).
+2. If it does not converge, or the provider refuses one of its points as out of domain, the remaining attempts
+   (`max_restarts`, unchanged) run in w = p^2 on [0, max^2]: the first from the failed attempt's point mapped to w
+   (from the fit's start when the attempt was refused), the later ones perturbed as now. The difference step in w is
+   h_w = h x max (the stated step h in p is a step of 2 (max/2) h in w at the middle of the range); no step stated:
+   unchanged (scipy's own).
+3. The verdict is the same fit_diagnostics verdict in the w coordinate: EDM <= 1e-5, positive-definite Hessian, a
+   coordinate within one step of w = 0 set on it when -ln L does not rise by more than 1e-6, and boundary_kkt there.
+   A refusal in a w attempt fails the toy (provider-out-of-domain) as before. The reported chi2 and point are in p.
+4. Unchanged: the main fits (`fit_family`), profile intervals, the posterior, the constrained profile fits of the
+   coverage toys, every fit with no declared parameter, the 2% toy-failure threshold, EDM 1e-5 and every tolerance.
+
+Justification: in w the prediction is regular at the bound (Jacobian column J_w, not 0), the bound is a linear
+constraint, Gauss-Newton converges there as on any interior coordinate, and the first derivative that boundary_kkt
+tests carries the information. The alternatives were rejected: V_A = u^2 makes the dependence u^4, worse; a restart
+seeded on the bound in p starts where the gradient in p is exactly 0, so the optimizer cannot leave it and a KKT check
+at p = 0 passes even when the data prefer p > 0 (a saddle along p, a chi2 too high, a biased delta chi2); projecting
+an out-of-domain step back into the domain mends toy 10 only and keeps the cause. Retrying in w (rather than fitting
+every toy in w) keeps every fit that converges in p bit for bit, as L1-1 requires, and the minimum found is the same
+function's minimum, so toy and observed delta chi2 stay comparable (the observed fits are `fit_family`'s, unchanged;
+EDM is invariant to leading order under a smooth reparametrization at an interior minimum).
+
+### C2UF-1 rerun plan (L1-2; pre-declared)
+
+| Item | Setting |
+|---|---|
+| Configuration | `usine_emulator_family_study.py fit` as in C2UF/K4, with `V_A_kms` declared `enters_squared` (stated in the script; nothing else changed): emulator provider, holdout error component in both covariances, families BIG and SLIM, starts and steps, response_model kind "provider", 200 toys per family, seed 20261028, alpha 0.05, the 2% toy-failure limit |
+| Emulator A (committed, A1.14) | the fixture model `1.0.0+model.0a8dc86fdf16` with C2UF's `validation.json` |
+| Emulator B (K4) | retrained in L1 by `train --max-condition 1e10` from a copy of K4's cache (the same training document); it must be byte-identical to K4's model-0 (sha256 9b95e746...), else stop; `validate` and `confirm` from the cache must reproduce K4's numbers (0.0032 and 0.0226 sigma) |
+| Pass (as C2UF) | BIG and SLIM converge with the provider; each family's calibration has at most 4 of 200 failed toys and lists its delta chi2 and toy p-value; BIG survives at alpha 0.05 |
+| If B passes | B replaces the C2UF fixtures (model, ml-artifact, record); the A1.21 skips are removed; the drift simulation (`$CRPROP_OUT/k4/scripts/drift.py`, 2 seeds x 60 trials) must give margin >= 10 |
+| If B fails | nothing is swapped; numbers and attribution recorded; PARTIAL. Nothing is tuned after a rerun |
+| USINE | expected 0 runs (all points cached); cap 60 |
+
+### Results (L1-1 checks and the C2UF-1 rerun, L1-2)
+
+L1-1 checks (code at f453828b, method committed at 98cb29e6 before any rerun; SHAs after the rebase below): `examples/propagation-fit/run.py` on
+the base f0f424da and on L1, both exit 0; of its 25 JSON outputs 22 are identical and 3 differ only in absolute plugin
+paths, `report.md` identical (`$CRPROP_OUT/l1/examples/compare.txt`). hep_statistics tests: 354 run, OK (27 skipped,
+live or optional). New `SquaredParameterRetry` tests on a SYNTHETIC stub (prediction linear in a, b and v^2, v nearly
+degenerate with b): fits failing in v converge after the v^2 retries at the exact bounded minimum (lsq_linear,
+chi2 within 1e-6 relative), fits converging in v are bit-identical with and without the declaration, a first attempt
+refused out of domain is retried, and the declaration is refused off a linear axis from 0.
+
+C2UF-1 rerun (the pre-declared plan above; records `$CRPROP_OUT/l1/emu-a114/record/` and `$CRPROP_OUT/l1/emu-k4/record/`;
+emulator B retrained in L1 byte-identical to K4's model-0, sha256 9b95e746..., holdout 0.0032 and confirmation 0.0226
+sigma reproduced from the cache, 0 USINE runs):
+
+| Item | A old (C2UF, committed) | A new (L1) | B old (K4 attempt) | B new (L1) |
+|---|---|---|---|---|
+| Model | `+model.0a8dc86fdf16` | same | `+model.9b95e7465422` | same |
+| BIG fit | converged, chi2 1.3e-8 | identical (fit_family unchanged) | converged, chi2 1.1e-8 | identical |
+| SLIM fit | converged, chi2 23.9272 | identical | converged, chi2 23.9274 | identical |
+| BIG's toys | 200, 0 failed, p 1.0 (200/200), survives | 200, 0 failed, p 1.0 (200/200), survives; 3 toys used the V_A^2 retries | 200, 0 failed, p 1.0, survives | 200, 0 failed, p 1.0 (200/200), survives; 1 retried |
+| SLIM's toys | 200, 3 failed (2 out of domain, 1 restart cap), p < 0.0151 (0/197), excluded | 200, **0 failed**, p < 0.0149 (0/200, 95% upper bound), excluded; 11 retried | **stopped at the 2% limit after 37** (5 failed: 4 restart cap, 1 out of domain) | 200, **0 failed**, p < 0.0149 (0/200), excluded; 20 retried |
+| Largest toy delta chi2 under SLIM | 14.68 | 14.68 | - | 14.68 |
+| C2UF-1 | MET | MET | NOT MET | **MET** |
+
+Toy fits that converged in V_A are bit-identical to the old records (A: 197 of BIG's and 189 of SLIM's toy rows;
+B: 199 and all 31 comparable rows). Toys that converged before only after a random restart in V_A and now went through
+the V_A^2 retries changed chi2 by at most 6e-6 relative (A) and 2e-11 (B). Every previously failed toy now converges:
+A's toys 10, 95, 111 and B's toys 3, 5, 10, 31, 36 (BIG's fits; toy delta chi2 0.003 to 2.26, far below SLIM's 23.93).
+
+Swap (allowed by B1.3 since C2UF-1 passes on B): the C2UF fixtures `usine-emulator-family-study.json`,
+`emulator-model.json` and `emulator.ml-artifact.json` are B's (the study's `train` step now defaults to
+`--max-condition 1e10` and reproduces the committed model byte for byte from the cache: `$CRPROP_OUT/l1/emu-repro/`).
+The A1.21 skips in `EmulatorPerModelDeclaration.setUpClass` and `test_live_emulator_matches_fresh_usine_runs` are
+removed, so a self-check refusal fails again. Drift simulation (`$CRPROP_OUT/k4/scripts/drift.py`, 2 seeds x 60
+trials, on the committed artifact): accepted in 120 of 120, max ln-mean deviation 3.1e-8 x sigma, margin 3217 (seed 1)
+and 3831 (seed 2) against 1e-4 x sigma, so >= 10 holds (`$CRPROP_OUT/l1/drift/`). Live check (HEP_USINE_LIVE_TEST=1):
+two fresh USINE runs, the committed emulator within 0.05 sigma in every bin.
+
+Study driver: the emulator steps now send the transport recorded in the two-dataset study (the emulator's training
+transport) instead of rebuilding it from `usine_provider.DEFAULT_TRANSPORT`, and ask for the registered USINE version,
+so they keep working when L2 makes the default transport explicit and bumps the provider version (the transport is
+identical today; checked). USINE runs (B1.3 cap 60): 2 (the live check); every other point was cached.
+
+Rebase: before the report the branch was rebased onto the integration HEAD eeb62a4e (status.json and workflow.json
+only, orchestrator files); f0f424da stays the base of the comparisons above.
+
+## CRPROP-L2 — 2026-10-29 (environment E2)
+
+Work package L2 of follow-up wave 8 (decision B1.3, follow-ups 2-6 of the 0.44.0 release): the modulation conformance
+result tied to the provider version (L2-1), adapter and provider versions with a cache-key migration (L2-2), the USINE
+injection variable stated explicitly and the K3/K1 doc slips (L2-3). Contracts 3.16.0 (one minor, gating constant
+`validate.CONFORMANCE_VERSION_FROM`), `CORE_VERSION` 1.4.0 (core/provider refuses more declarations), adapter
+`cr-propagation` 0.3.0.
+
+**Environment field (r3 §0.3, base exception D10).** E2 (macOS arm64), Python 3.13.2; fixtures, theory-profile
+artifacts and examples regenerated with the E2 venv (`~/.venvs/hep-research-e2`); USINE V3.5 (commit fb53006d) through
+HEP_USINE_BIN, HEP_USINE_DATA and USINE, with the host ROOT_INCLUDE_PATH. `git rev-parse --show-toplevel` =
+`.claude/worktrees/crprop-l2`; branch `worktree-crprop-l2`; status clean at start; base f0f424da = integration HEAD
+`worktree-crprop-l` (not `main`; decision D10), which contains the 0.44.0 release merge 31f39ee8; L2 has no
+prerequisite work package (workflow.json deps empty; requires env-usine, present). DRAGON2 not run. Rework round 1
+(verifier): the emulator's normalised transport comparison (below). Rebased onto integration 009f8752 (L1 merged; card
+widened in eeb62a4e) with `git rebase`, so the new base is 009f8752; conflicts only in CHANGELOG and VALIDATION (L1's
+entries kept first). After the rebase the new tests run on L1's swapped C2UF fixture (the K4 model), and L1's tests
+pass under the usine 0.3.0 registry: L1's driver reads the registered version, its records keep 0.2.0, and no test
+replays an L1 cache expecting hits.
+
+What changed:
+- `contracts/schemas/cr_provider.json`: `modulation.conformance.result` requires `provider_version` (the provider
+  version the result was obtained at). The field is required, not optional, so the change is a minor bump (3.16.0)
+  with `validate.CONFORMANCE_VERSION_FROM`; declarations carry no contract_version, so the constant gates no artifact
+  rule. A 3.15 declaration with a modulation block is refused by core 1.4.0 until the gate is rerun.
+- `core/provider/protocol.py`: `check_declaration(declaration, version=None)` requires the field and refuses a result
+  whose `provider_version` differs from `version` (the caller's resolved provider version), else from the declaration's
+  own `version`; the message says to rerun `tools/provider_registry.py --conformance`. `registry.parse_registry` passes
+  each entry's version and `conformance.run_conformance` passes the entry's version. `CORE_VERSION` 1.4.0.
+- `tools/provider_registry.py`: `--conformance` writes `result.provider_version` (the version the gate ran at);
+  `collect` checks each declaration against its effective version (the declaration's, else the adapter's or profile's).
+- `adapters/cr-propagation/adapter.json`: version 0.3.0; `usine` and `dragon2` declare their own `version` 0.3.0 (they
+  inherited the adapter's 0.2.0); `emulator` stays 1.0.0; the USINE result records `provider_version` 0.3.0.
+- `usine_provider.DEFAULT_TRANSPORT` and `tests/adapters/fixtures/cr_propagation/usine/specs/d1-*.json` state
+  `sources.injection[].spectrum_variable` = `kinetic_energy_per_nucleon`.
+- Contracts bump as in K2: CONTRACTS_VERSION and comment, `vocab/core.json`, the two pinned tests, `make_fixtures.py`
+  and `design_fixtures.py` rerun, three skill templates, six theory-profile scripts rerun, 14 examples rerun; only
+  version strings and the hashes that cover them changed (diff checked line by line after masking 64-hex hashes). No
+  contract fixture was added, so `gate_verdicts.json` is unchanged.
+
+Conformance gate (L2-1; `$CRPROP_OUT/l2/conformance/usine-0.3.0.json`, 2 USINE runs of the 10 allowed):
+`tools/provider_registry.py --conformance usine` at provider version 0.3.0 with K2's reference point, observables and
+tolerance 1e-3: passed, largest relative deviation 4.27721405739101e-05 over 390 nodes of 10B, 10Be, 11B, 12C, 9Be,
+equal to the digit to K2's result at 0.2.0. Recorded in `adapter.json` with `provider_version` 0.3.0.
+
+Versions (L2-2). The point hash (`core/provider/hashing.point_hash`) and so the runner's cache key contain
+`provider_version`; usine and dragon2 inherited the adapter's 0.2.0, set at B1 (77d661c3). Since then usine gained the
+F1 point parameters (low break, phi, production channels) and the K2 modulation block and hook, and the K3 translator
+source checks; dragon2 refuses harmonized-v1 transports whose sources it cannot express (K3). Both go to 0.3.0, set
+explicitly so a later adapter bump does not move them. The emulator stays 1.0.0: its answers for the committed E2 model
+are pinned unchanged (`EmulatorPinnedResponses`), a per-model declaration already carries `+model.<sha12>` in its
+version, and its later changes only add refusals (a non-reproducing self-check), which produce no value to cache;
+bumping it would also rewrite `c2uf/e2-pinned-responses.json`, which L1 may be replacing.
+
+**Migration decision: keep, not re-key.** The committed records stay as records of what produced them, with usine 0.2.0
+(C2U `c2u/usine-family-study.json`, C2UF `c2uf/usine-two-dataset-family-study.json`, `c2uf/` and `e2/` emulator model
+contexts, E1/E2 summaries, F1 `f1-reproduction.json`). Re-keying would claim that 0.3.0 produced values it did not, and
+the emulator model files are hashed by their ml-artifacts and versions. No test replays them through the runner
+expecting a cache hit: the offline tests read their numbers; `ProviderVersionMigration.test_recorded_input_hashes_are_history`
+recomputes all 565 C2U and 367 C2UF input hashes from the recorded point, transport and usine 0.2.0 (all equal) and
+finds none of them among the hashes of the same points under 0.3.0, so a cache filled at 0.2.0 can never answer a
+0.3.0 request (no stale hit; a miss is a fresh run). Live callers now ask the registered version: the F1 example
+`examples/bc-usine-reproduction/run.py` and the C2U study driver read it from `adapter.json`, and the `UsineProvider`
+tests of `test_propagation_fit.py` send the registry's version instead of the record's (the record still asserts
+0.2.0). F1's record tests pass unchanged; no file under `c2uf/` or `e2/` was edited. The C2UF offline tests passed in
+the first round too, but they never send the study's transport: `usine_emulator_family_study.emulator_values` sends
+`st.transport()`, built from DEFAULT_TRANSPORT, and the C2UF emulator refused it after L2-3 (training transport sha256
+25ea7f409b88..., study transport 4754ca1f5064...), so every rerun of the C2UF emulator study, and the live test
+`test_live_emulator_matches_fresh_usine_runs`, would have failed (verifier, rework round 1). Fixed by the emulator's
+transport normalisation below; `EmulatorPerModelDeclaration.test_study_transport_is_accepted` now covers it offline.
+
+USINE inputs (L2-3; `$CRPROP_OUT/l2/render/before.json`, `after.json`): each of the five d1 specs and DEFAULT_TRANSPORT
+translated with the old (implicit) and new (explicit) injection by the translator (unchanged by L2, so old and new
+translator agree): all four rendered files identical, sha256 by sha256. The translation record changes (the default
+note for spectrum_variable disappears; the echoed transport has the field) and so does the canonical hash of
+DEFAULT_TRANSPORT (a4a7ec283011... implicit, d25f968e865d... explicit). Committed hashes over the transport object are
+kept unchanged: the E2 and C2UF emulator models record the implicit block as their training transport (hashed into
+their ml-artifacts), and the C2U/C2UF input hashes are history (above). Effect on the emulator, final state (rework
+round 1): `emulator_provider.request_problem` compares canonical_sha256(normalise_transport(request transport)) with
+canonical_sha256(normalise_transport(training transport)); `normalise_transport` drops an injection item's
+spectrum_variable equal to DEFAULT_SPECTRUM_VARIABLE (`kinetic_energy_per_nucleon`, inlined; a test pins it equal to
+`usine_translate.DEFAULT_SPECTRUM_VARIABLE`). So the emulator accepts null, its training transport and USINE's
+DEFAULT_TRANSPORT (and the C2UF study's transport built from it), and still refuses another spectrum_variable or any
+other block (`EmulatorProviderRefusals.test_transport_and_bins`, `test_normalised_transport`). The model files, the
+ml-artifacts and model_sha256 are byte-identical; the runner's point hash still covers the block as sent, so the two
+forms keep distinct cache keys that map to identical values (`test_study_transport_is_accepted` checks equal results
+and different input hashes). No previously answered request changes its answer, so the emulator stays 1.0.0.
+`EmulatorArtifact` checks that the training transport is DEFAULT_TRANSPORT minus the explicit default and renders the
+same USINE inputs.
+
+**Erratum (appended; the sections themselves are not edited).** CRPROP-K3, row K3-2: "46 blocks; the 36 the old
+translator accepted" should read 37 accepted blocks (the verifier's scan). CRPROP-K1, environment field: base
+94ba34d1 was the dispatch base; K1 was rebased onto 21ec114d before its merge. Also fixed: the docstring of
+`tests/adapters/fixtures/cr_propagation/d3/d3_study.py` named `dragon2_run.spec_from_transport` for D3_harmonized_v1;
+it is `dragon2_translate.spec_from_transport`.
+
+| ID | Result | Evidence |
+|---|---|---|
+| L2-1 | pass | schema requires `result.provider_version`; core and schema agree (`tests.core.test_provider.DeclaredModulation`: the missing and the empty field refused by both, a result of another version core-only, `test_conformance_holds_only_at_the_version_it_was_obtained_at` for the registry); `tests.tools.test_provider_registry` (the gate writes the version, `collect` refuses a bumped version with or without an explicit declaration version); USINE gate rerun at 0.3.0 (above) |
+| L2-2 | pass | adapter 0.3.0, usine and dragon2 0.3.0, emulator 1.0.0 (`ProviderVersionMigration.test_versions`); migration kept, not re-keyed, and checked (`test_recorded_input_hashes_are_history`); F1 record, C2U and E2 pinned tests pass unchanged; the C2UF study transport is accepted again (rework round 1) |
+| L2-3 | pass | spectrum_variable stated (`UsineProviderOffline.test_injection_spectrum_variable_is_stated`); rendered USINE inputs identical; effect on hashes recorded above; the emulator accepts both forms by normalised comparison, refuses other variables (rework round 1); erratum and docstring fix |
+| ALL-1 | pass | this section |
+| ALL-2 | pass | `workflow_check.py acceptance` exit 0 |
+| ALL-3 | deferred to the wave run (A1.5) | |
+| ALL-4 | pass | `check_naming.py`, `workflow_check.py gaps --base 009f8752` |
+| ALL-5 | pass | `check_layering.py`; `workflow_check.py diff --work-package L2 --base 009f8752` ok (after the rebase) against the card widened on integration (eeb62a4e: the contracts-bump set, `core/__init__.py`, `tests/skills/hep_statistics/**`); round 0 had listed those 353 paths as outside the card |
+| ALL-6 | pass | `check_packaging.py` |
+| ALL-7 | pass | worker report |
+
+| Check | Result |
+|---|---|
+| Impacted tests (`rule_registry.py impact`: 35 modules, plus `test_provider`, `test_adapter_declarations`, `test_gate_verdict_snapshot`, `test_provider_conformance_mixin`) | after the rebase onto 009f8752: 719 tests OK (17 skipped) in the E2 venv and in `~/.venvs/hep-research-ci` alike (impact set for the new base plus test_cr_propagation, test_propagation_fit with SquaredParameterRetry and UsineEmulatorFamilies, test_provider_registry, test_provider, test_gate_verdict_snapshot, test_adapter_declarations, test_provider_conformance_mixin); live `test_live_emulator_matches_fresh_usine_runs` (HEP_USINE_LIVE_TEST=1, 2 fresh USINE runs against the C2UF emulator through the 0.3.0 registry): OK |
+| `tests/examples` | 176 tests OK (22 skipped) |
+| theory-profile tests (9 profiles) | all pass |
+| `run_all_checks.py --part static --jobs 4` | exit 0 |
+| `check_naming.py`, `check_wiring.py --since f0f424da`, `check_layering.py`, `check_packaging.py`, `workflow_check.py gaps/acceptance` | pass / ok |
+| ruff 0.16.10 and mypy 2.4.0 on `core/` and `contracts/` | clean |
+
+USINE runs: 4 of 10 (the gate, 2; the live C2UF emulator test after the rebase, 2). DRAGON2 runs: 0. Not run: ALL-3 (deferred to the wave run, A1.5), a live routing run.

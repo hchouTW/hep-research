@@ -1723,6 +1723,11 @@ CRPROP_FROM = "3.14.0"
 # declaration's optional modulation block (schema cr_provider.json; checked by core/provider) and the prediction rule
 # _modulation_rules apply natively from this version; an older prediction gets the rule only under --strict.
 MODULATION_FROM = "3.15.0"
+# Conformance tied to the provider version (contracts 3.16.0, cr-propagation decision B1.3, work package L2): from this
+# version the cr-provider/1 declaration's modulation.conformance.result names the provider version it was obtained at
+# and core/provider refuses a declaration whose provider version differs. Declarations carry no contract_version, so the
+# constant gates no artifact rule; it records the version from which the field is required (cr_provider.json).
+CONFORMANCE_VERSION_FROM = "3.16.0"
 MODULATION_PARAMETER = re.compile(r"^phi_[A-Za-z0-9]+(?:_[A-Za-z0-9]+)*_gv$")
 STRONG_STATUSES = {"formal-proof", "analytic-derivation"}
 

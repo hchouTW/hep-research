@@ -1239,6 +1239,61 @@
    "tolerance": "0.05 sigma; margin 10",
    "evidence_path": null,
    "source": "decisions.md B1.1 (follow-up of the 0.43.0 known issues)"
+  },
+  {
+   "id": "L1-1",
+   "wp": "L1",
+   "kind": "judgment",
+   "criterion": "propagation_fit's toy fits handle a parameter whose prediction depends only on its square near a bound (V_A at 0) by a method stated in VALIDATION and committed before any rerun (for example fitting in V_A^2, or a boundary-aware restart); fits away from such a boundary and noise-free fits keep their numbers and verdicts; the 2% toy-failure threshold and every acceptance tolerance are unchanged.",
+   "command": null,
+   "expect": null,
+   "tolerance": null,
+   "evidence_path": null,
+   "source": "decisions.md B1.3 (follow-ups 2-6 of the 0.44.0 release)"
+  },
+  {
+   "id": "L1-2",
+   "wp": "L1",
+   "kind": "judgment",
+   "criterion": "C2UF-1 is re-run with the L1-1 method on both the committed (A1.14) emulator and the K4 well-conditioned emulator, old and new numbers side by side. If C2UF-1 passes on the well-conditioned emulator, it replaces the committed C2UF emulator fixture and the A1.21 skips are removed (a self-check refusal fails again); otherwise nothing is swapped and the result is recorded. No parameter or bound is chosen after seeing C2UF-1.",
+   "command": null,
+   "expect": null,
+   "tolerance": "2% toy failures; 0.05 sigma",
+   "evidence_path": null,
+   "source": "decisions.md B1.3 (follow-ups 2-6 of the 0.44.0 release)"
+  },
+  {
+   "id": "L2-1",
+   "wp": "L2",
+   "kind": "judgment",
+   "criterion": "A provider declaration's modulation conformance result records the provider version it was obtained at, and the registry refuses a declaration whose conformance version differs from its version; schema and core agree with tests; the USINE gate is rerun at the current provider version.",
+   "command": null,
+   "expect": null,
+   "tolerance": null,
+   "evidence_path": null,
+   "source": "decisions.md B1.3 (follow-ups 2-6 of the 0.44.0 release)"
+  },
+  {
+   "id": "L2-2",
+   "wp": "L2",
+   "kind": "judgment",
+   "criterion": "The cr-propagation adapter version is bumped (and the version of each provider whose behaviour changed since 0.2.0), with a cache-key migration: committed fixtures, run records and replay tests stay consistent (no silent cache misses or stale hits), and the migration is recorded; F1's and C2UF's committed records still reproduce.",
+   "command": null,
+   "expect": null,
+   "tolerance": null,
+   "evidence_path": null,
+   "source": "decisions.md B1.3 (follow-ups 2-6 of the 0.44.0 release)"
+  },
+  {
+   "id": "L2-3",
+   "wp": "L2",
+   "kind": "judgment",
+   "criterion": "USINE's DEFAULT_TRANSPORT and B1's usine d1 specs state sources.injection[].spectrum_variable explicitly; USINE inputs render identically or the change is recorded with its effect on any committed hash; the K3/K1 doc slips are fixed (d3_study.py docstring, VALIDATION erratum lines for the K3 block count and the K1 environment base, appended).",
+   "command": null,
+   "expect": null,
+   "tolerance": null,
+   "evidence_path": null,
+   "source": "decisions.md B1.3 (follow-ups 2-6 of the 0.44.0 release)"
   }
  ]
 }
