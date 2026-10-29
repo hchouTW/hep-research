@@ -89,6 +89,35 @@ class Manifest(Base):
         self.assertIn("adaptation.number_mismatch", self.codes(rep, "error"))
         self.assertEqual(rep["status"], "fail")
 
+    def test_review_talk_with_a_synthesis_claim_and_layout_numbers(self):
+        """audience-adaptation-templates.md, review talk: one claim per study and a synthesis claim as the central
+        claim pass; the slot length raises unmapped_number until its line is recorded as a context statement."""
+        self.doc["extension"]["claims"].append({
+            "id": "claim:S", "text": "The measured ratio and the synthetic illustration differ by 0.04 (synthetic fixture).",
+            "claim_type": "comparison", "scope": {"text": "synthetic fixture sample; statistical uncertainty only"},
+            "status": ["synthetic", "unvalidated"], "unresolved_inputs": [],
+            "evidence": [{"id": "ev:S-a", "target_kind": "artifact", "target": "artifacts/obs.json", "locator": "extension.results.ratio",
+                          "role": "supports", "usage": "used-in-claim"},
+                         {"id": "ev:S-b", "target_kind": "artifact", "target": "artifacts/syn.json", "locator": "extension.results.ratio",
+                          "role": "supports", "usage": "used-in-claim"}]})
+        heading = "Review talk (15 min): the ratio R in two studies"
+        lines = ["In a synthetic fixture sample, the ratio R is 1.02 +/- 0.05, statistical only.",
+                 "A synthetic illustration gives 0.98.",
+                 "The two differ by 0.04 in this synthetic fixture."]
+        draft = "\n".join([heading] + lines)
+        statements = [{"id": "st:1", "text": lines[0], "claim_ids": ["claim:C1"], "kind": "quantitative"},
+                      {"id": "st:2", "text": lines[1], "claim_ids": ["claim:C2"], "kind": "quantitative"},
+                      {"id": "st:3", "text": lines[2], "claim_ids": ["claim:S"], "kind": "conclusion"}]
+        fx.write(self.p["record"], self.doc)  # pin the manifest to the record with the synthesis claim
+        man = manifest(self.p["record"], statements=statements, central_claim="claim:S", format="talk-outline",
+                       indispensable_limitations=[{"text": "statistical uncertainty only", "as_written": "statistical only"}])
+        rep = self.check(draft=draft, man=man)
+        self.assertNotIn("error", {f["severity"] for f in rep["findings"]}, rep["findings"])
+        self.assertIn("adaptation.unmapped_number", self.codes(rep, "warning"))
+        man["statements"].append({"id": "st:ctx", "text": heading, "claim_ids": [], "kind": "context"})
+        rep = self.check(draft=draft, man=man)
+        self.assertEqual((rep["status"], rep["exit_code"]), ("pass", 0), rep["findings"])
+
     def test_unmapped_number_in_the_draft_is_flagged(self):
         draft = SUMMARY + " The sample held 12 345 events."
         rep = self.check(draft=draft)
