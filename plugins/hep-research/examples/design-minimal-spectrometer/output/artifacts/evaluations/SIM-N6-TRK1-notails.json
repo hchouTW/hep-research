@@ -1,11 +1,11 @@
 {
- "contract_version": "3.16.0",
+ "contract_version": "3.17.0",
  "artifact_id": "j15-v1-SIM-N6-TRK1-notails",
  "artifact_type": "design-evaluation",
  "objective": "detector system design: design-evaluation written by evaluate_design.py",
  "versions": {
   "plugin": "0.46.0",
-  "contracts": "3.16.0",
+  "contracts": "3.17.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-N6.json",
-   "sha256": "70c55fa2ba29d89f6215b9c79e4b6cdc037c0acf69a23a2c76557990b9260e22",
+   "sha256": "d64c340d95345b5b19b07c70701ad01b37e9fae8c872bc40af80f141d055e33b",
    "artifact_type": "design-candidate",
    "artifact_id": "j15-v1-cand-N6",
    "status": [
@@ -28,7 +28,7 @@
   },
   {
    "ref": "studies/N6-TRK1/study-notails.computational-run.json",
-   "sha256": "56050baf5953e3537e7ab0e9251e4a46c85c92bafc8cb0bfa7cdb53bf08e2d69",
+   "sha256": "d1b62aa2549d0cb6daf690fbc8e43b786a4eaa8aab77e6df6ed78ab2f05fb401",
    "artifact_type": "computational-run",
    "artifact_id": "j15-N6-TRK1-study-validated"
   }

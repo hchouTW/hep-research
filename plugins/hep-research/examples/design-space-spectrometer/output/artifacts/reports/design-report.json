@@ -1,11 +1,11 @@
 {
- "contract_version": "3.16.0",
+ "contract_version": "3.17.0",
  "artifact_id": "ams-like-v1-design-report",
  "artifact_type": "communication",
  "objective": "detector system design: communication written by evaluate_design.py",
  "versions": {
   "plugin": "0.46.0",
-  "contracts": "3.16.0",
+  "contracts": "3.17.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "design-spec.v1.json",
-   "sha256": "e1e7112ed084a5298c0acadf6fe890b88e3b756bfaffdc53c99f719fba6b15b9",
+   "sha256": "3f5ce8489c59fda5b7d47860dbe422c893c5e21d6e00b3597120dda368253ef9",
    "artifact_type": "design-spec",
    "artifact_id": "ams-like-v1-spec-v1",
    "status": [
@@ -27,7 +27,7 @@
   },
   {
    "ref": "evaluations/CALC-CC-L.json",
-   "sha256": "580652201053cdddfb2afcbf08c3e7260f7c82dc6bba4225cceb0377eb2891d9",
+   "sha256": "2c16a28dc5fadeb9c66ac1d5bd92f3d813b454c453d67af2bdeb924fad66876d",
    "artifact_type": "design-evaluation",
    "artifact_id": "ams-like-v1-CALC-CC-L",
    "status": [
@@ -36,7 +36,7 @@
   },
   {
    "ref": "evaluations/CALC-CC-P.json",
-   "sha256": "7fe6b671465f06b383d34607e78a1ddcdf4f0b18d79b585afbc5d4952c73623d",
+   "sha256": "4a3290dfcc64677589ef373f2ceeb5f0b93bdd9f8346f56b599719b8ad12b616",
    "artifact_type": "design-evaluation",
    "artifact_id": "ams-like-v1-CALC-CC-P",
    "status": [
@@ -45,7 +45,7 @@
   },
   {
    "ref": "evaluations/CALC-CC-S.json",
-   "sha256": "c23033a2bfff0ae89ddf578fb2e763fdfe538bdf1243c0815f5dc0e00341ad2f",
+   "sha256": "13ae6ef05311724c584a1d840213343b4b695edcbf0f0ab30e1786a9f6530bd8",
    "artifact_type": "design-evaluation",
    "artifact_id": "ams-like-v1-CALC-CC-S",
    "status": [
@@ -54,7 +54,7 @@
   },
   {
    "ref": "evaluations/CALC-MASS-L.json",
-   "sha256": "3c0ea2593d1c9a1e2cff43e493e1ce048344d5adb88f2ab9d833c4d9a840ee04",
+   "sha256": "650971d142d3bc752f0b76c857d50387828ea01efa1c43fe9ec75cb5f523fa31",
    "artifact_type": "design-evaluation",
    "artifact_id": "ams-like-v1-CALC-MASS-L",
    "status": [
@@ -63,7 +63,7 @@
   },
   {
    "ref": "evaluations/CALC-MASS-P.json",
-   "sha256": "f70130ecdb35e9b643efbe81a01079cd656ece1a1b21dae6f045356264428f1b",
+   "sha256": "9cb0b60ad3433ed514c7646d7519488cc901ac4aff855bab209cc4a05309e740",
    "artifact_type": "design-evaluation",
    "artifact_id": "ams-like-v1-CALC-MASS-P",
    "status": [
@@ -72,7 +72,7 @@
   },
   {
    "ref": "evaluations/CALC-MASS-S.json",
-   "sha256": "e6066f961f8258d6997b754bc9736b1bea38dd737bf19931a2001debd9f3779f",
+   "sha256": "ad2e0af81583db5563dac307ab3da22e9a567853828b6cb117693d46bfa8efcf",
    "artifact_type": "design-evaluation",
    "artifact_id": "ams-like-v1-CALC-MASS-S",
    "status": [
@@ -81,7 +81,7 @@
   },
   {
    "ref": "evaluations/CALC-TRK-L.json",
-   "sha256": "197f73ad795a2f8ee9de7232bc473d54889522af7530ed0b4c8cf22ec6422944",
+   "sha256": "be5dd6fe1f011c723984a83aea740a6348dc7a4f2954611d565b5cbe56a0d391",
    "artifact_type": "design-evaluation",
    "artifact_id": "ams-like-v1-CALC-TRK-L",
    "status": [
@@ -90,7 +90,7 @@
   },
   {
    "ref": "evaluations/CALC-TRK-P.json",
-   "sha256": "120840ca319cb9d825cae215cdff2e3aca2a47308330d137ca3baed91f624e22",
+   "sha256": "6b4cee08e8965bac0a55b7d8656fdd463bf22dd3a24af1ce98ff9ddb874f9ccd",
    "artifact_type": "design-evaluation",
    "artifact_id": "ams-like-v1-CALC-TRK-P",
    "status": [
@@ -99,7 +99,7 @@
   },
   {
    "ref": "evaluations/CALC-TRK-S.json",
-   "sha256": "f482083ba0602a3254a4d2d876465198183d69b3411be2b6c1a3ff54f01351c8",
+   "sha256": "027886816507aae62d296f9626392433413f6359da9d0815e6507ac30168c6d7",
    "artifact_type": "design-evaluation",
    "artifact_id": "ams-like-v1-CALC-TRK-S",
    "status": [

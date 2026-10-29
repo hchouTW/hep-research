@@ -1,11 +1,11 @@
 {
- "contract_version": "3.16.0",
+ "contract_version": "3.17.0",
  "artifact_id": "ams-like-v1-CALC-MASS-L",
  "artifact_type": "design-evaluation",
  "objective": "detector system design: design-evaluation written by evaluate_design.py",
  "versions": {
   "plugin": "0.46.0",
-  "contracts": "3.16.0",
+  "contracts": "3.17.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-L.json",
-   "sha256": "695a410c9a2b23d0a72e8bc0b884561c7a9259f55093a9c3869b44ebaf4c066c",
+   "sha256": "4b65991809f54483899c2e1b0e0442b0464ba04b02f6c5fbe8b38a5f49520a24",
    "artifact_type": "design-candidate",
    "artifact_id": "ams-like-v1-cand-L",
    "status": [
@@ -28,7 +28,7 @@
   },
   {
    "ref": "runs/CALC-MASS-L.computational-run.json",
-   "sha256": "538b4821d44b88e2167baa63c79052c4a00fbcc30ee92118b5a212ec07454038",
+   "sha256": "9ad4be741fd6098ad3d8e9588f2043e609a73da36dda1914ebfd8e8f02104f52",
    "artifact_type": "computational-run",
    "artifact_id": "ams-like-v1-CALC-MASS-L-run",
    "status": [

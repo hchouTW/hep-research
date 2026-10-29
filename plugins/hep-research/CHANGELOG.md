@@ -56,6 +56,10 @@ parallel full run and passes on its own and in CI. hep-review reviewers share th
     (`test_contract_baseline_gaps`, `test_profile_loading`, `test_custody`, `test_reader_refusal_blockers`,
     `test_rule_registry`, `test_effect_catalog`, `test_source_digest`, `test_correction_keys_capability`,
     `test_registry_keys_and_semver`, `test_catalog_version_and_retired_rules`); the checker's own tests are removed.
+  - **Contracts 3.17.0** (minor): the sidecar formats read only by the check (analysis bundle 2.0.0, check context,
+    check report, semantic lock, operator coverage) and the rule suites are removed. No artifact type, vocabulary
+    term, envelope field or capability changes, so every 3.16 artifact keeps its outcome; fixtures, theory-profile
+    artifacts and examples carry the new version (only version strings and the hashes that cover them changed).
 - **hep-review G3 (T08 evaluation): evaluated-scope for multi-step statistical reviews.** A held-out suite authored by
   Codex (20 instances of 800-2,000 words, two interacting defects each, numerical and convention defects included;
   the gold was held encrypted by the user) was reviewed in 60 R2 trials and graded by Claude and Codex together.

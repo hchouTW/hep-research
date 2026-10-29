@@ -1,11 +1,11 @@
 {
- "contract_version": "3.16.0",
+ "contract_version": "3.17.0",
  "artifact_id": "j15-v1-cand-N4",
  "artifact_type": "design-candidate",
  "objective": "SYNTHETIC design study (journey J15, minimal spectrometer; names no experiment)",
  "versions": {
   "plugin": "0.46.0",
-  "contracts": "3.16.0"
+  "contracts": "3.17.0"
  },
  "bindings": {
   "experiments": [],

@@ -26,7 +26,7 @@ PROFILE = HERE.parent
 sys.path.insert(0, str(HERE))
 
 PROFILE_ID, PROFILE_VERSION = "theory:drell-yan-lo", "0.1.0"
-PLUGIN_VERSION, CONTRACTS = "0.46.0", "3.16.0"
+PLUGIN_VERSION, CONTRACTS = "0.46.0", "3.17.0"
 CREATED = "2026-10-23"
 SPEC_PATH = PROFILE / "derivations" / "theory-spec.json"
 PRED_PATH = PROFILE / "predictions" / "angular-coefficients.prediction.json"

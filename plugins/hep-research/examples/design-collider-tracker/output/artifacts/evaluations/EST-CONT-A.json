@@ -1,11 +1,11 @@
 {
- "contract_version": "3.16.0",
+ "contract_version": "3.17.0",
  "artifact_id": "collider-tracker-v1-EST-CONT-A",
  "artifact_type": "design-evaluation",
  "objective": "detector system design: design-evaluation written by evaluate_design.py",
  "versions": {
   "plugin": "0.46.0",
-  "contracts": "3.16.0",
+  "contracts": "3.17.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-A.json",
-   "sha256": "57b7418d1e6b15b1cfe3021aed7f288cfe5a5ee581166ae1e277246c2cb0fe20",
+   "sha256": "b8dc643c9dfc5d0fd8dd67c16a1a2bf4589e901bacceddd8051dc3263c2a800f",
    "artifact_type": "design-candidate",
    "artifact_id": "collider-tracker-v1-cand-A",
    "status": [
