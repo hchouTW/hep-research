@@ -94,6 +94,21 @@ and position, in a follow-up); nothing already covered was restated.
   `skills/hep-computing/scripts/executor_capabilities.py`: G1-G6 qualification by fault injection (G1, G2 pass on
   Linux; G3-G6 unsupported), declarations citing the qualification record, and admission refusing any capability
   without a passing, current qualification. Tests: `tests/skills/hep_computing/test_executor_b2.py`.
+- **Control-layer helper** (reconstruction v12 stage C1; STATE-01, AUTH-01, ADM-01, CTRL-01, CAP-01, FLOW-01,
+  BUDGET-01 accounts; **the control rules did not pass the S0 spec review**, so the helper is not reviewed or
+  validated): new `skills/hep-computing/scripts/control_layer.py` (library in `control_layer_support/`) keeps the task
+  record as one append-only JSON-lines file with a digest chain, compare-and-set appends, whole-batch validation,
+  operation-id idempotency and full verification on every load (DEC-01/08/09/13 defaults, pending); validates the
+  closed contract format and applies the strictness order and effective contract (M2/M3 first contract waits for a
+  human); admits attempts (identity, consumed inputs and accounts computed by the helper; capabilities compared with
+  the mode, so M2/M3 are refused for lack of G5); turns `run_workflow.py` receipts and bound check results into
+  adapter facts (unconfirmed termination becomes unknown); writes human decisions only through a guard (refused in an
+  agent's shell, explicit confirmation; not an enforcement); derives labels, bound artifacts, achieved tiers and
+  histories; publishes per deliverable; and prints the status and the completion report, whose limitations paragraph
+  states that the rules did not pass S0. Tests: `tests/skills/hep_computing/test_control_layer_model.py` (the
+  reference model's 90 scenarios and 42 mutations against the helper; the same derivation as the model on every
+  scenario log and 300 random fact sequences; task-record round trip) and `test_control_layer.py` (task record,
+  CLI, adapter, decision guard, report).
 
 ## 0.49.1 (2026-10-30)
 

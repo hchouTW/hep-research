@@ -1,8 +1,8 @@
 # Research Workflow Control: Evidence Tiers, Triggers and the Task Record
 
 How a research request is carried to its deliverable with the evidence it needs: the evidence tier and execution mode
-of each deliverable, which rules to load, the task contract, the transition-period task record kept while no
-control-layer helper exists, human decisions and the completion report. This page is shared by every skill (a
+of each deliverable, which rules to load, the task contract, the transition-period task record, the control-layer
+helper (whose rules did not pass review), human decisions and the completion report. This page is shared by every skill (a
 reconstruction study, a fit, a training run or a numerical prediction use the same tiers and records); the
 reconstruction method content is in hep-detector ([event reconstruction](../../hep-detector/references/event-reconstruction.md),
 [calibration and alignment](../../hep-detector/references/calibration-and-alignment.md)).
@@ -11,9 +11,14 @@ reconstruction method content is in hep-detector ([event reconstruction](../../h
 > the source repository; Core, Methods, Delivery and the transition-period part of Control). S0 (recorded spec review,
 > hep-review R2) passed for the routing, transition, statistics and method obligations; **the control-layer
 > obligation (contract format, strictness order, derivation, admission; Control §1–§6 and the reference model) did not
-> pass**, so those rules are not written here and **no control-layer helper exists**: every derivation below is the
-> main Agent's own statement, not a mechanical guarantee. Placing this page in hep-computing (DEC-11) and the task-record
-> location (DEC-08/DEC-09) were approved by the maintainer on 2026-10-30.
+> pass**: it was violated in six recorded review rounds, and the last change (the single “overtaken” binding rule)
+> was not reviewed at all. A control-layer helper now exists (`control_layer.py`, stage C1, built by the user's
+> decision with the control rules stated as **not through S0**; section below). It implements the spec copy's Control
+> part and agrees with its reference model on the tested fact sequences, but it is **not reviewed or validated**: its
+> derivations are mechanical consequences of unreviewed rules, not established results, and it gives no autonomous
+> reconstruction capability. The transition-period procedure below remains the reviewed one. Placing this page in
+> hep-computing is the recommended default of DEC-11, pending maintainer approval; the task-record location is the
+> default of DEC-08/DEC-09, also pending.
 
 ## Always-on rules
 
@@ -94,14 +99,15 @@ Load a row only when its condition holds; when it does not, no fact log, manifes
   modules and execution scope (existing project documents may be cited, not copied). The closed contract format and
   its strictness order are specified in Control §1 of the spec copy, which **did not pass S0**: until it does, a
   change that only adds (a required check, a deliverable, a sample, a lower budget) may be applied, and **any other
-  change waits for a human**, listed in the report.
-- In M1 the first contract takes effect when it is listed in the first reply, where the user can correct it (DEC-12,
-  approved).
+  change waits for a human**, listed in the report. `control_layer.py contract --dry-run` says whether a contract
+  would take effect under that (unreviewed) order.
+- In M1 the first contract takes effect when it is listed in the first reply, where the user can correct it (DEC-12
+  default, pending approval).
 
 ## Transition period: running and recording without a control layer
 
-Until a control-layer helper exists, T2-numeric and T3 deliverables are completed as **transitional attested
-(declared inputs)**:
+While the control rules have not passed review, a task that keeps its record by hand (without the helper below)
+completes T2-numeric and T3 deliverables as **transitional attested (declared inputs)**:
 
 1. **Execution**: artifacts go through `run_workflow.py`, **one step per invocation**, each in a **fresh output
    directory** with its upstream outputs staged in as declared inputs. The attempt registration line (below) stands
@@ -153,6 +159,41 @@ mechanically; incomplete identities; transcribed decisions; the no-child-process
 runner cannot be detected (so neither the order of confirmation access nor the blinded region not being read is
 proven).
 
+## Control-layer helper (C1; control rules not through S0)
+
+`<plugin root>/skills/hep-computing/scripts/control_layer.py` keeps the task record and derives from it (DEC-02
+default: library + CLI, pending approval). It implements Control §1–§6 of the spec copy — closed contract format,
+strictness order, effective contract, execution state, artifact derivation and labels, achieved tier, admission,
+check attempts, reuse, per-deliverable publish — and is tested against the spec copy's reference model (its 90
+scenarios and 42 mutations run against the helper, and both give the same derivation on the scenario and random fact
+sequences). That agreement is with **rules that did not pass review**; it is not a validation.
+
+- **Record**: one append-only `task-log.jsonl` (default `hep-research-artifacts/<task>/task-log/task-log.jsonl`,
+  DEC-01/08/09 default, pending); each line carries sequence number, batch, kind, writer, fields and the previous
+  line's SHA-256; every load verifies the chain and replays the facts. Never edit the file: every fact goes through a
+  command, with `--expect-head` (compare-and-set) and optionally `--expect-digest`; `--op` makes a retry idempotent.
+  The chain cannot catch an edit of its last line: keep the `head_digest` a command prints outside the record.
+- **Writers**: the agent writes `contract`, `freeze`, `exposure`; the helper writes the session, intents, admission
+  rejections, reuse and publish; `receipt` turns a `run_workflow.py --receipt-dir` receipt (and a bound check result)
+  into adapter facts — run each admitted attempt as one step with `--attempt-prefix P` so that P plus the step id is
+  the admitted attempt id; an unconfirmed termination becomes **unknown**; `--not-started` records a step the runner
+  refused before starting it.
+- **Admission** (`admit`) computes the identity and the consumed inputs itself, applies the budget, read, unknown,
+  rerun and check-before-recompute rules, and compares the executor's qualified capabilities with the mode
+  (`executor_capabilities.py`): M2/M3 need G5, which is unsupported, so they are refused. A check attempt names only
+  check, criterion and target digests; declared check inputs are resolved by the helper.
+- **Human decisions**: `decide` is for humans only, in their own terminal. It refuses in a shell with an agent marker
+  (`CLAUDECODE` and similar) and requires `--confirm-human` — a guard, **not an enforcement**: the agent never runs
+  it, never works around it, and asks for the decision instead; the record cannot prove who wrote a decision.
+- **Reports**: `status` (resumption view) and `report` (completion report, paragraphs 1–7) derive at one head; the
+  limitations paragraph always says the control rules did not pass S0. Report the helper's results as “derived by
+  the control-layer helper at sequence N (control rules not through S0)”; its attested artifacts are “attested
+  (declared inputs)”, a statement about the mechanism (intent written by the helper, receipt from the runner, reads
+  not observable), not about the rules.
+- **Not provided**: resumption and reconciliation after a restart, lease locks (C2), reconcile and cancel commands,
+  M2/M3, conditions evidence (G6), typed-source checks of `contracts/dependencies.py` (PROV-02), partition scope
+  accounts (stage D).
+
 ## Checks: roles, types, results and the freeze record
 
 `<plugin root>/skills/hep-computing/scripts/check_definitions.py` applies the check definitions (statistical choices
@@ -183,7 +224,8 @@ are made with hep-statistics; the script only applies them):
 
 ## Human decisions
 
-No gate is needed for authorized local reading, fixing and verification, contract changes that only add or tighten,
+With the control-layer helper, decisions enter the record only through its `decide` command, run by the human
+(above). No gate is needed for authorized local reading, fixing and verification, contract changes that only add or tighten,
 or changing the method or code (which invalidates its artifacts). A human decides: approving a contract that is not
 at least as strict, identity continuation, producer attribution, unblinding, abandoning an unknown attempt, loosening
 a T2-code contract, changing the estimand or required claims, submission/installation/publication beyond
