@@ -170,10 +170,16 @@ class Submissions(unittest.TestCase):
 
     def test_declared_unavailable_is_no_declaration(self):
         # g2x: a reviewer that cannot hash says so; that is file-transfer, not a mismatch
-        for said in ("unavailable", " UNAVAILABLE ", ""):
+        for said in ("unavailable", " UNAVAILABLE ", "", "SHA256: unavailable", "sha256:unavailable"):
             s = M.ingest_submission(self.drops, "asg-1/submission.json", declared_digest=said)
             self.assertEqual(s["submission_fidelity"], "file-transfer", said)
             self.assertIsNone(s["declared_digest"])
+
+    def test_declared_line_with_its_label_is_read(self):
+        # review m5: the packet asks for "SHA256: <hex>"; the whole line may be passed on
+        good = hashlib.sha256(self.body).hexdigest()
+        s = M.ingest_submission(self.drops, "asg-1/submission.json", declared_digest=f"SHA256: {good.upper()}")
+        self.assertEqual(s["submission_fidelity"], "digest-bound")
 
     def test_n67_drop_path_replaced_by_symlink_or_fifo_or_oversize(self):
         outside = Path(self.temp_dir.name) / "outside.json"

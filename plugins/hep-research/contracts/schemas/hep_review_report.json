@@ -5,7 +5,7 @@
  "description": "Output of contracts/hep_review.py project(validated_bundle, validator_version); anyone can recompute it byte for byte from the export and the same validator version (spec 7.6). Layer 2 (attestation) is produced by the I/O layer and is not part of this object. Nobody hand-fills outcomes, facets, flags or tiers.",
  "type": "object",
  "required": ["protocol", "schema_version", "kind", "context_id", "segment_id", "as_of_seq", "as_of_commit_digest",
-              "validator_version", "record_integrity", "experimental", "summary_eligible", "achieved_tier"],
+              "validator_version", "record_integrity", "summary_eligible", "achieved_tier"],
  "properties": {
   "protocol": {"enum": ["hep-review/0", "hep-review/1"]},
   "schema_version": {"type": "string"},
@@ -16,7 +16,7 @@
   "as_of_commit_digest": {"$ref": "hep_review_definitions.json#/$defs/digest"},
   "validator_version": {"type": "string"},
   "record_integrity": {"enum": ["valid", "partial-invalid", "not-checked"]},
-  "experimental": {"type": "boolean"},
+  "experimental": {"type": "boolean", "description": "present under the current validator: true when any committed object is hep-review/0; a 0.x projection carries protocol hep-review/0 instead"},
   "input_error": {"type": "object", "required": ["code", "message"],
                   "properties": {"code": {"type": "string"}, "message": {"type": "string"}},
                   "additionalProperties": false},

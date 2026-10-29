@@ -13,7 +13,7 @@ import json
 import re
 from dataclasses import dataclass, field
 
-from hep_review_support.store import AppendResult, Store
+from hep_review_support.store import H, AppendResult, Store
 
 HOW_TO_VERIFY = ("give the last checkpoint line of the previous session (hep-review checkpoint: context=... "
                  "segment=... seq=... digest=...) when starting the next session")
@@ -184,8 +184,8 @@ def fork(store: Store, st: CoordinatorState, last_trusted_seq: int, operation_id
 
 
 def migrate(store: Store, st: CoordinatorState, transform, operation_id: str) -> AppendResult:
-    """An incompatible 0.x schema change: a new segment whose genesis records migrated_from; the old segment is never
-    touched. It anchors on its genesis when the source position is verified for this session."""
+    """An incompatible schema change: a new segment whose genesis records migrated_from; the old segment is never
+    touched. hep-review/0 objects are carried byte for byte, so their experimental label survives. It anchors on its genesis when the source position is verified for this session."""
     status = head_continuity(store, st)["status"]
     if status == "broken":
         raise ContinuityBroken("fork before migrating")
@@ -198,6 +198,11 @@ def migrate(store: Store, st: CoordinatorState, transform, operation_id: str) ->
                and (o["record_kind"], o["id"]) not in carried]
     if dropped:
         raise ValueError(f"a migration must carry every record, assignment and supplied material; dropped {dropped}")
+    after = {(o.get("record_kind"), o.get("id")): H.metadata_digest(o) for o in objects}
+    relabelled = [o["id"] for o in source if o.get("protocol") in H.EXPERIMENTAL_PROTOCOLS
+                  and after.get((o["record_kind"], o["id"])) not in (None, H.metadata_digest(o))]
+    if relabelled:
+        raise ValueError(f"0.x objects are carried unchanged after the schema freeze (spec 5.3); changed {relabelled}")
     origin = {"migrated_from": {"segment_id": head["segment_id"], "seq": head["seq"],
                                 "commit_digest": head["commit_digest"]}}
     return _open_segment(store, st, objects, origin, operation_id, status == "verified")

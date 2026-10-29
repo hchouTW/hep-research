@@ -9,6 +9,7 @@ import sqlite3
 import sys
 import tempfile
 import unittest
+from unittest import mock
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -146,6 +147,39 @@ class Continuity(Base):
         self.assertEqual(segs[-1]["origin"]["migrated_from"]["seq"], 5)
         self.assertEqual(self.s.load_bundle("ctx-1", segment_id="seg-1"), before)
         self.assertEqual(C.head_continuity(self.s, st)["status"], "verified")
+
+
+class FrozenSchema(Base):
+    """Review m1/m2: after the freeze no new 0.x objects are written, and a migration carries 0.x records unchanged."""
+
+    def as_0x(self, o):
+        return dict(o, protocol="hep-review/0", schema_version="0.1.0")
+
+    def pre_freeze_session(self):
+        st = C.start_session(self.s, "ctx-1", "s-old")
+        with mock.patch.object(H, "EXPERIMENTAL_PROTOCOLS", frozenset()):  # written as the 0.x line would
+            for i, make in enumerate([lambda: [F.intent()], lambda: [F.manifest(self.s)],
+                                      lambda: [F.plan(1, [F.obligation("O1")])]], 1):
+                C.append(self.s, st, [self.as_0x(o) for o in make()], f"op-old-{i}")
+        return st
+
+    def test_m1_new_0x_objects_are_refused(self):
+        st = C.start_session(self.s, "ctx-1", "s-1")
+        with self.assertRaises(S.AdmissionRefused):
+            C.append(self.s, st, [self.as_0x(F.intent())], "op-1")
+
+    def test_m2_migration_cannot_relabel_0x_records(self):
+        st = self.pre_freeze_session()
+
+        def relabel(objs):
+            return [dict(o, protocol=H.PROTOCOL, schema_version=H.SCHEMA_VERSION) for o in objs]
+        with self.assertRaises(ValueError):
+            C.migrate(self.s, st, relabel, "op-relabel")
+
+    def test_m2_migration_may_carry_0x_records_unchanged(self):
+        st = self.pre_freeze_session()
+        C.migrate(self.s, st, lambda objs: [dict(o) for o in objs], "op-carry")
+        self.assertIn("migrated_from", self.s.segments("ctx-1")[-1]["origin"])
 
 
 class Export(Base):

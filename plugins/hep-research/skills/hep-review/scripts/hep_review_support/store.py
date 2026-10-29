@@ -284,9 +284,18 @@ class Store:
         existing = self._segment_objects(context_id, segment_id)
         seen = {(o["record_kind"], o["id"]): H.metadata_digest(o) for o in existing}
         prior = list(existing)
+        carried: set[str] | None = None
         for o in objects:
             for e in H.check_object(o):
                 errs.append(e)
+            if isinstance(o.get("protocol"), str) and o["protocol"] in H.EXPERIMENTAL_PROTOCOLS:
+                # after the freeze (spec 5.3) a 0.x object is only ever carried unchanged into a new segment
+                if carried is None:
+                    carried = {H.metadata_digest(x) for s in self.segments(context_id)
+                               for x in self._segment_objects(context_id, s["segment_id"])}
+                if H.metadata_digest(o) not in carried:
+                    errs.append(_err("object.experimental_write", f"{o.get('id')}: new objects use {H.PROTOCOL}; "
+                                     "hep-review/0 objects are only carried unchanged"))
             kind_name = str(o.get("record_kind", "")).replace("-", "_")
             if (SCHEMAS / f"hep_review_{kind_name}.json").is_file():
                 rep = schema_validate(o, f"hep_review_{kind_name}.json")

@@ -1,0 +1,487 @@
+{
+ "cases": {
+  "intent-only": {
+   "bundle": {
+    "as_of_commit_digest": "1f9bcd03bff64e080ebd87fb9abf1d28df22e341f77908ccd3a38ecb480e9426",
+    "as_of_seq": 2,
+    "blob_checks": {},
+    "commits": [
+     {
+      "commit": {
+       "context_id": "ctx-1",
+       "operation_id": "op-1",
+       "payload_digest": "0cb03c36b5a0f6d41e5a053520cc4df8233e19249973e945ac15d9818eba1832",
+       "prev_commit_digest": null,
+       "protocol": "hep-review/1",
+       "segment_id": "seg-1",
+       "seq": 1,
+       "validator_version": "0.1.0",
+       "writer_session_id": "s-1"
+      },
+      "digest": "555a634224bc91885dd4f06f78aa4b7d696964fe3f9b07316228cd0b03c92db9",
+      "objects": [
+       {
+        "authorized_by": {
+         "actor": "user",
+         "basis": "declared"
+        },
+        "context_id": "ctx-1",
+        "id": "intent-1",
+        "material_scope": [
+         "M1",
+         "M2"
+        ],
+        "minimum_requirements": [
+         {
+          "id": "REQ-1",
+          "text": "Requirement REQ-1"
+         }
+        ],
+        "protocol": "hep-review/0",
+        "record_kind": "intent",
+        "revision": 1,
+        "schema_version": "0.1.0",
+        "target_tier": "R2"
+       }
+      ]
+     },
+     {
+      "commit": {
+       "context_id": "ctx-1",
+       "operation_id": "op-2",
+       "payload_digest": "1e68bdad0d52da2d2f29afc2672590aac50a3b424fcca2c31c259d73d626b485",
+       "prev_commit_digest": "555a634224bc91885dd4f06f78aa4b7d696964fe3f9b07316228cd0b03c92db9",
+       "protocol": "hep-review/1",
+       "segment_id": "seg-1",
+       "seq": 2,
+       "validator_version": "0.1.0",
+       "writer_session_id": "s-1"
+      },
+      "digest": "1f9bcd03bff64e080ebd87fb9abf1d28df22e341f77908ccd3a38ecb480e9426",
+      "objects": [
+       {
+        "context_id": "ctx-1",
+        "id": "manifest-1",
+        "materials": [
+         {
+          "authors": [
+           "author-a"
+          ],
+          "authors_basis": "declared",
+          "material_id": "M1",
+          "raw_ref": {
+           "algorithm": "sha256",
+           "digest": "cf7e79b7450be9e6576844854803cef710a88e4ef7363ffe8c5e66ff371498ef",
+           "hash_scope": "raw",
+           "logical_id": "M1",
+           "profile_id": "raw-bytes/1"
+          },
+          "view_version": "text/1"
+         },
+         {
+          "authors": [
+           "author-a"
+          ],
+          "authors_basis": "declared",
+          "material_id": "M2",
+          "raw_ref": {
+           "algorithm": "sha256",
+           "digest": "b66d90dd0d3544849bfc08e2d1f9346275aebedb75c8d4b3ce2832d0e3781e67",
+           "hash_scope": "raw",
+           "logical_id": "M2",
+           "profile_id": "raw-bytes/1"
+          },
+          "view_version": "text/1"
+         }
+        ],
+        "protocol": "hep-review/0",
+        "record_kind": "manifest",
+        "schema_version": "0.1.0"
+       }
+      ]
+     }
+    ],
+    "context_id": "ctx-1",
+    "mode": "recorded",
+    "segment_id": "seg-1"
+   },
+   "layer1": "{\"achieved_tier\":null,\"as_of_commit_digest\":\"1f9bcd03bff64e080ebd87fb9abf1d28df22e341f77908ccd3a38ecb480e9426\",\"as_of_seq\":2,\"context_id\":\"ctx-1\",\"input_error\":{\"code\":\"input.no_plan\",\"message\":\"no adopted plan\"},\"kind\":\"hep-review-layer1\",\"protocol\":\"hep-review/0\",\"record_integrity\":\"valid\",\"schema_version\":\"0.1.0\",\"segment_id\":\"seg-1\",\"summary_eligible\":false,\"validator_version\":\"0.1.0\"}"
+  },
+  "reviewed": {
+   "bundle": {
+    "as_of_commit_digest": "ae0119df12941e9f398d9186269e5297a8d3fe4b2a6a164aa28069842c3e3b4e",
+    "as_of_seq": 6,
+    "blob_checks": {
+     "3ed1d749bb630925cf40ff3cad88c159fdd7a84084bd125a91bf06f77a0a6fb8": "ok"
+    },
+    "commits": [
+     {
+      "commit": {
+       "context_id": "ctx-1",
+       "operation_id": "op-1",
+       "payload_digest": "0cb03c36b5a0f6d41e5a053520cc4df8233e19249973e945ac15d9818eba1832",
+       "prev_commit_digest": null,
+       "protocol": "hep-review/1",
+       "segment_id": "seg-1",
+       "seq": 1,
+       "validator_version": "0.1.0",
+       "writer_session_id": "s-1"
+      },
+      "digest": "555a634224bc91885dd4f06f78aa4b7d696964fe3f9b07316228cd0b03c92db9",
+      "objects": [
+       {
+        "authorized_by": {
+         "actor": "user",
+         "basis": "declared"
+        },
+        "context_id": "ctx-1",
+        "id": "intent-1",
+        "material_scope": [
+         "M1",
+         "M2"
+        ],
+        "minimum_requirements": [
+         {
+          "id": "REQ-1",
+          "text": "Requirement REQ-1"
+         }
+        ],
+        "protocol": "hep-review/0",
+        "record_kind": "intent",
+        "revision": 1,
+        "schema_version": "0.1.0",
+        "target_tier": "R2"
+       }
+      ]
+     },
+     {
+      "commit": {
+       "context_id": "ctx-1",
+       "operation_id": "op-2",
+       "payload_digest": "1e68bdad0d52da2d2f29afc2672590aac50a3b424fcca2c31c259d73d626b485",
+       "prev_commit_digest": "555a634224bc91885dd4f06f78aa4b7d696964fe3f9b07316228cd0b03c92db9",
+       "protocol": "hep-review/1",
+       "segment_id": "seg-1",
+       "seq": 2,
+       "validator_version": "0.1.0",
+       "writer_session_id": "s-1"
+      },
+      "digest": "1f9bcd03bff64e080ebd87fb9abf1d28df22e341f77908ccd3a38ecb480e9426",
+      "objects": [
+       {
+        "context_id": "ctx-1",
+        "id": "manifest-1",
+        "materials": [
+         {
+          "authors": [
+           "author-a"
+          ],
+          "authors_basis": "declared",
+          "material_id": "M1",
+          "raw_ref": {
+           "algorithm": "sha256",
+           "digest": "cf7e79b7450be9e6576844854803cef710a88e4ef7363ffe8c5e66ff371498ef",
+           "hash_scope": "raw",
+           "logical_id": "M1",
+           "profile_id": "raw-bytes/1"
+          },
+          "view_version": "text/1"
+         },
+         {
+          "authors": [
+           "author-a"
+          ],
+          "authors_basis": "declared",
+          "material_id": "M2",
+          "raw_ref": {
+           "algorithm": "sha256",
+           "digest": "b66d90dd0d3544849bfc08e2d1f9346275aebedb75c8d4b3ce2832d0e3781e67",
+           "hash_scope": "raw",
+           "logical_id": "M2",
+           "profile_id": "raw-bytes/1"
+          },
+          "view_version": "text/1"
+         }
+        ],
+        "protocol": "hep-review/0",
+        "record_kind": "manifest",
+        "schema_version": "0.1.0"
+       }
+      ]
+     },
+     {
+      "commit": {
+       "context_id": "ctx-1",
+       "operation_id": "op-3",
+       "payload_digest": "0abcd396b09712c81cefb068529c27b1cc421f62aba696b659e3069da2f6155f",
+       "prev_commit_digest": "1f9bcd03bff64e080ebd87fb9abf1d28df22e341f77908ccd3a38ecb480e9426",
+       "protocol": "hep-review/1",
+       "segment_id": "seg-1",
+       "seq": 3,
+       "validator_version": "0.1.0",
+       "writer_session_id": "s-1"
+      },
+      "digest": "e28c487d0e8fc9bbb752bb4ff6444aec3c3508d26aca91f8d19dec3445367417",
+      "objects": [
+       {
+        "assignment_specs": [
+         {
+          "deadline": "P1D",
+          "id": "spec-1",
+          "obligation_ids": [
+           "O1"
+          ],
+          "role": "reviewer"
+         }
+        ],
+        "context_id": "ctx-1",
+        "environment_observations": [],
+        "id": "plan-1",
+        "independence_requirements": [
+         {
+          "condition": "non-author",
+          "required": true
+         },
+         {
+          "condition": "fresh-context",
+          "required": true
+         },
+         {
+          "condition": "no-other-evaluations-seen",
+          "required": true
+         }
+        ],
+        "intent_id": "intent-1",
+        "intent_revision": 1,
+        "judgments": [],
+        "manifest_id": "manifest-1",
+        "obligations": [
+         {
+          "adoption_policy": {
+           "qualifications": [],
+           "second_method_required": false,
+           "verification_required": false
+          },
+          "assumptions": [],
+          "criterion": "Criterion of O1.",
+          "decision_required": true,
+          "evidence_requirements": [
+           "E"
+          ],
+          "id": "O1",
+          "independence_requirements": [],
+          "origin_requirement_ids": [
+           "REQ-1"
+          ],
+          "question": "Question of O1?",
+          "required": true,
+          "required_methods": [
+           "recompute"
+          ],
+          "targets": [
+           "M1"
+          ],
+          "tolerances": []
+         }
+        ],
+        "parent_revision": null,
+        "protocol": "hep-review/0",
+        "record_kind": "plan",
+        "revision": 1,
+        "schema_version": "0.1.0",
+        "scope_scan": "performed-no-known-gaps"
+       }
+      ]
+     },
+     {
+      "commit": {
+       "context_id": "ctx-1",
+       "operation_id": "op-4",
+       "payload_digest": "091e7a9879e47bce48e2791b9cdaf27276cdd04c791ab716966907936937c231",
+       "prev_commit_digest": "e28c487d0e8fc9bbb752bb4ff6444aec3c3508d26aca91f8d19dec3445367417",
+       "protocol": "hep-review/1",
+       "segment_id": "seg-1",
+       "seq": 4,
+       "validator_version": "0.1.0",
+       "writer_session_id": "s-1"
+      },
+      "digest": "932871021af4cb88ffb2aa30719b190d9b6c1cce9d6bf5aea335255e699e62f9",
+      "objects": [
+       {
+        "actor": "rev-1",
+        "conditions": {
+         "fresh-context": {
+          "basis": "observed",
+          "satisfied": true
+         },
+         "no-other-evaluations-seen": {
+          "basis": "advisory",
+          "satisfied": true
+         },
+         "non-author": {
+          "basis": "declared",
+          "satisfied": true
+         }
+        },
+        "context_id": "ctx-1",
+        "id": "asg-1",
+        "plan_revision": 1,
+        "protocol": "hep-review/0",
+        "qualified": {
+         "basis": "declared",
+         "satisfied": true
+        },
+        "record_kind": "assignment",
+        "restrictions": [],
+        "role": "reviewer",
+        "schema_version": "0.1.0",
+        "spec_id": "spec-1"
+       }
+      ]
+     },
+     {
+      "commit": {
+       "context_id": "ctx-1",
+       "operation_id": "op-5",
+       "payload_digest": "b7c2982703a765c63ce3c9441b9172e454beee400383ad181d53cbd0b5f83ca3",
+       "prev_commit_digest": "932871021af4cb88ffb2aa30719b190d9b6c1cce9d6bf5aea335255e699e62f9",
+       "protocol": "hep-review/1",
+       "segment_id": "seg-1",
+       "seq": 5,
+       "validator_version": "0.1.0",
+       "writer_session_id": "s-1"
+      },
+      "digest": "87bd79bf877f26329db132832b1c610a6d5871c9b635bb3a23171de86b72baba",
+      "objects": [
+       {
+        "actor": "rev-1",
+        "conditions": {
+         "fresh-context": {
+          "basis": "observed",
+          "satisfied": true
+         },
+         "no-other-evaluations-seen": {
+          "basis": "advisory",
+          "satisfied": true
+         },
+         "non-author": {
+          "basis": "declared",
+          "satisfied": true
+         }
+        },
+        "context_id": "ctx-1",
+        "id": "asg-2",
+        "plan_revision": 1,
+        "protocol": "hep-review/0",
+        "qualified": {
+         "basis": "declared",
+         "satisfied": true
+        },
+        "record_kind": "assignment",
+        "restrictions": [],
+        "role": "reviewer",
+        "schema_version": "0.1.0",
+        "spec_id": "spec-1"
+       }
+      ]
+     },
+     {
+      "commit": {
+       "context_id": "ctx-1",
+       "operation_id": "op-6",
+       "payload_digest": "0392f5ec015de0c84e73b4aafd1dc00857e2136ea14ca502de110e5c30381210",
+       "prev_commit_digest": "87bd79bf877f26329db132832b1c610a6d5871c9b635bb3a23171de86b72baba",
+       "protocol": "hep-review/1",
+       "segment_id": "seg-1",
+       "seq": 6,
+       "validator_version": "0.1.0",
+       "writer_session_id": "s-1"
+      },
+      "digest": "ae0119df12941e9f398d9186269e5297a8d3fe4b2a6a164aa28069842c3e3b4e",
+      "objects": [
+       {
+        "actor": "rev-1",
+        "answers": [
+         {
+          "attempt_ids": [
+           "A6"
+          ],
+          "cited_materials": [],
+          "depends_on": [
+           "E6"
+          ],
+          "evidence_ids": [
+           "E6"
+          ],
+          "finding_ids": [],
+          "id": "N6",
+          "missing_inputs": [],
+          "obligation_id": "O1",
+          "verdict": "supported"
+         }
+        ],
+        "assignment_id": "asg-2",
+        "attempts": [
+         {
+          "depends_on": [],
+          "environment_refs": [],
+          "executor": "exec-1",
+          "id": "A6",
+          "method": "recompute",
+          "obligation_id": "O1",
+          "observation": "completed",
+          "tools": [
+           "python3"
+          ]
+         }
+        ],
+        "context_id": "ctx-1",
+        "evidence": [
+         {
+          "content_ref": {
+           "algorithm": "sha256",
+           "digest": "3ed1d749bb630925cf40ff3cad88c159fdd7a84084bd125a91bf06f77a0a6fb8",
+           "hash_scope": "raw",
+           "logical_id": "E6",
+           "profile_id": "raw-bytes/1"
+          },
+          "depends_on": [
+           "A6"
+          ],
+          "id": "E6",
+          "obligation_id": "O1",
+          "requirement": "E"
+         }
+        ],
+        "findings": [],
+        "id": "rec-6",
+        "judgments": [],
+        "limitations": [],
+        "plan_revision": 1,
+        "protocol": "hep-review/0",
+        "raw_submission_ref": {
+         "algorithm": "sha256",
+         "digest": "ae2f4ee89808ce6c811cecaacc40eb314037883cb0f91e752a05eab254eb23f0",
+         "hash_scope": "raw",
+         "logical_id": "raw-rec-6",
+         "profile_id": "raw-bytes/1"
+        },
+        "record_kind": "record",
+        "responses": [],
+        "schema_version": "0.1.0",
+        "submission_fidelity": "file-transfer",
+        "suspected_conflicts": [],
+        "type": "submission"
+       }
+      ]
+     }
+    ],
+    "context_id": "ctx-1",
+    "mode": "recorded",
+    "segment_id": "seg-1"
+   },
+   "layer1": "{\"achieved_tier\":\"R2\",\"advisory_conditions\":[\"no-other-evaluations-seen\"],\"as_of_commit_digest\":\"ae0119df12941e9f398d9186269e5297a8d3fe4b2a6a164aa28069842c3e3b4e\",\"as_of_seq\":6,\"carried_over\":[],\"context_id\":\"ctx-1\",\"cost\":{\"status\":\"unavailable\"},\"coverage\":{\"discharged\":0,\"methods_not_run_by_discharge\":[],\"total_obligations\":1,\"total_required\":1},\"findings\":[],\"flags\":{\"has_disputed_findings\":false,\"has_open_questions\":false,\"has_supported_defects\":false,\"plan_requirements_met\":true},\"head_plan_revision\":1,\"independence_floor_not_met\":false,\"kind\":\"hep-review-layer1\",\"limitations\":[\"Outcomes are projections of committed records under the stated conditions, not proofs.\",\"Closed or mechanically valid does not mean scientifically passed.\"],\"obligations\":[{\"decision_required\":true,\"discharge\":null,\"facets\":{\"artifact_functional\":{\"attempts\":[],\"performed\":false},\"domain_assessment\":{\"outcome\":\"supported\"},\"independent_method_checked\":{\"attempts\":[],\"performed\":false},\"result_reproduced\":{\"attempts\":[],\"performed\":false}},\"id\":\"O1\",\"obligation_tier\":\"R2\",\"outcome\":\"supported\",\"reasons\":[\"evidence supports the criterion under the stated conditions\"],\"required\":true,\"tier_reasons\":[\"no claim-binding commit\",\"no required runtime restriction is stated, so R3 is not claimed\"]}],\"open_reasons\":[],\"planning_gaps\":[],\"protocol\":\"hep-review/0\",\"quarantined\":[],\"record_integrity\":\"valid\",\"schema_version\":\"0.1.0\",\"segment_id\":\"seg-1\",\"summary_eligible\":true,\"target_tier\":\"R2\",\"uncovered_optional\":{\"not_examined\":[],\"undetermined\":[]},\"unverified_historical_defects\":[],\"validator_version\":\"0.1.0\",\"version_inconsistencies\":[]}"
+  }
+ },
+ "note": "layer 1 written by the pre-freeze kernel (commit 1dfb15fa) under validator 0.1.0; the frozen kernel must reproduce these bytes exactly"
+}

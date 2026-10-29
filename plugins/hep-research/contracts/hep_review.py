@@ -28,10 +28,13 @@ from typing import Any
 
 PROTOCOL = "hep-review/1"
 SCHEMA_VERSION = "1.0.0"
-# Frozen after G2 (spec 5.3). The 0.x line stays readable under its own validator version and is labelled
-# experimental wherever it appears; each protocol admits only its own schema major version.
+# Frozen after G2 (spec 5.3). The 0.x line stays readable under its own validator version, whose rules and layer-1
+# header are kept exactly as they were (historical layer 1 must match byte for byte), and is labelled experimental
+# wherever it appears. Under the current line each protocol admits only full versions of its own schema line.
 EXPERIMENTAL_PROTOCOLS = frozenset({"hep-review/0"})
-SCHEMA_MAJOR = {"hep-review/1": "1.", "hep-review/0": "0."}
+EXPERIMENTAL_VALIDATORS = {"0.1.0": ("hep-review/0", "0.1.0")}  # validator -> its layer-1 protocol and schema
+SCHEMA_LINE = {"hep-review/1": re.compile(r"^1\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$"),
+               "hep-review/0": re.compile(r"^0\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)$")}
 METADATA_PROFILE = "hep-review-metadata/1"
 RAW_PROFILE = "raw-bytes/1"
 
@@ -293,7 +296,7 @@ def _nested_refs(value: Any):
             stack.extend(v)
 
 
-def check_object(committed: dict) -> list[dict]:
+def check_object(committed: dict, validator_version: str | None = None) -> list[dict]:
     """Version-independent object rules: header, creation order, no self-reference (spec 6.2, 6.4; cases A25, N05)."""
     errs: list[dict] = []
     kind = committed.get("record_kind")
@@ -305,11 +308,15 @@ def check_object(committed: dict) -> list[dict]:
         if not isinstance(committed.get(f), str) or not committed.get(f):
             errs.append(_err("object.header", f"missing header field {f}", f"$.{f}"))
     protocol = committed.get("protocol")
-    if protocol is not None and protocol not in SCHEMA_MAJOR:
-        errs.append(_err("object.protocol", f"protocol must be one of {sorted(SCHEMA_MAJOR)}", "$.protocol"))
+    line = EXPERIMENTAL_VALIDATORS.get(validator_version or LATEST_VALIDATOR)
+    if line is not None:  # the 0.x rule, unchanged: its own protocol only, no schema-version check
+        if protocol not in (None, line[0]):
+            errs.append(_err("object.protocol", f"protocol must be {line[0]}", "$.protocol"))
+    elif protocol is not None and not (isinstance(protocol, str) and protocol in SCHEMA_LINE):
+        errs.append(_err("object.protocol", f"protocol must be one of {sorted(SCHEMA_LINE)}", "$.protocol"))
     elif protocol is not None and isinstance(committed.get("schema_version"), str) \
-            and not committed["schema_version"].startswith(SCHEMA_MAJOR[protocol]):
-        errs.append(_err("object.schema_version", f"{protocol} admits schema {SCHEMA_MAJOR[protocol]}x only",
+            and not SCHEMA_LINE[protocol].match(committed["schema_version"]):
+        errs.append(_err("object.schema_version", f"{protocol} admits only full versions of its own schema line",
                          "$.schema_version"))
     for key in ("digest", "self_digest", "object_digest", "own_digest"):
         if key in committed:
@@ -334,7 +341,11 @@ def check_object(committed: dict) -> list[dict]:
 
 
 def rule_check_object(committed: dict, lookup: dict) -> list[dict]:
-    return check_object(committed)
+    return check_object(committed, LATEST_VALIDATOR)
+
+
+def rule_check_object_0x(committed: dict, lookup: dict) -> list[dict]:
+    return check_object(committed, "0.1.0")
 
 
 def rule_check_plan(committed: dict, lookup: dict) -> list[dict]:
@@ -352,7 +363,7 @@ def rule_check_plan(committed: dict, lookup: dict) -> list[dict]:
 LATEST_VALIDATOR = "1.0.0"
 VALIDATOR_RULES: dict[str, tuple[Callable[[dict, dict], list[dict]], ...]] = {
     "1.0.0": (rule_check_object, rule_check_plan),
-    "0.1.0": (rule_check_object, rule_check_plan)}
+    "0.1.0": (rule_check_object_0x, rule_check_plan)}
 
 
 # ---------------------------------------------------------------------------------------------------------------------
@@ -577,7 +588,7 @@ def validate(bundle: dict, validator_version: str, *, rules: dict | None = None)
     qitem: dict[str, dict] = {}
     diagnostics: list[dict] = []
     for _seq, o in entries:
-        for e in check_object(o):
+        for e in check_object(o, validator_version):
             diagnostics.append(dict(e, object=o.get("id")))
         for field_name in ("revision", "plan_revision", "intent_revision"):
             if field_name in o and not is_int(o[field_name]):
@@ -1102,12 +1113,14 @@ def project(validated: dict, validator_version: str, *, rules: dict | None = Non
     if any(again[k] != validated.get(k) for k in ("quarantined_records", "quarantined_items", "record_integrity",
                                                   "input_error", "entries", "diagnostics")):
         raise ValueError("the validated input does not match validate(bundle): disposition cannot be supplied")
-    base = {"protocol": PROTOCOL, "schema_version": SCHEMA_VERSION, "kind": "hep-review-layer1",
+    protocol, schema_version = EXPERIMENTAL_VALIDATORS.get(validator_version, (PROTOCOL, SCHEMA_VERSION))
+    base = {"protocol": protocol, "schema_version": schema_version, "kind": "hep-review-layer1",
             "context_id": b["context_id"], "segment_id": b["segment_id"], "as_of_seq": b["as_of_seq"],
             "as_of_commit_digest": b["as_of_commit_digest"], "validator_version": validator_version,
-            "record_integrity": validated["record_integrity"],
-            "experimental": any(o.get("protocol") in EXPERIMENTAL_PROTOCOLS for c in b["commits"]
-                                for o in c["objects"])}
+            "record_integrity": validated["record_integrity"]}
+    if validator_version not in EXPERIMENTAL_VALIDATORS:  # a 0.x projection keeps its historical header
+        base["experimental"] = any(isinstance(o.get("protocol"), str) and o["protocol"] in EXPERIMENTAL_PROTOCOLS
+                                   for c in b["commits"] for o in c["objects"])
     if validated["input_error"]:
         return base | {"input_error": validated["input_error"], "summary_eligible": False, "achieved_tier": None}
     ctx = _Ctx(validated)
@@ -1382,6 +1395,14 @@ def _version_inconsistencies(ctx: _Ctx, place: dict, version: str, rules: dict) 
 # Layer 2 combination rule, rendering, historical check (spec 4.4, 7.5, 7.6)
 # ---------------------------------------------------------------------------------------------------------------------
 
+EXPERIMENTAL_NOTE = "this report rests on hep-review/0 (schema 0.x) records or a 0.x validator (spec 5.3)"
+
+
+def is_experimental(layer1: dict) -> bool:
+    """0.x data is labelled experimental: a 0.x projection, or a current projection over 0.x records."""
+    return layer1.get("protocol") in EXPERIMENTAL_PROTOCOLS or layer1.get("experimental") is True
+
+
 def decide_summary(layer1: dict, attestation: dict) -> dict:
     """Whether the no-defect summary is output (spec 7.5 layer 2). The attestation values (report_mode, validator
     approval, head_continuity, R3 state check) are determined by the I/O layer with their basis; this only combines."""
@@ -1389,7 +1410,7 @@ def decide_summary(layer1: dict, attestation: dict) -> dict:
     integrity = layer1.get("record_integrity")
     if cont == "broken":
         integrity = "invalid-continuity-broken"
-    disclosure: list[str] = []
+    disclosure: list[str] = ["experimental: " + EXPERIMENTAL_NOTE] if is_experimental(layer1) else []
     if layer1.get("input_error"):
         return {"output_summary": False, "summary_text": None, "record_integrity": integrity,
                 "disclosure": [f"input-error: {layer1['input_error']['message']}; no report is produced"]}
@@ -1453,8 +1474,8 @@ def render_report(layer1: bytes, attestation: dict, *, bundle: dict, validator_v
     lines = [f"# {presentation.get('title', 'hep-review report')}",
              f"as of seq {p['as_of_seq']} ({p['as_of_commit_digest']}), validator {p['validator_version']}",
              f"layer 1 digest {raw_digest(expected)}"]
-    if p.get("experimental"):
-        lines.append("experimental: this context holds hep-review/0 (schema 0.x) records (spec 5.3)")
+    if is_experimental(p):
+        lines.append("experimental: " + EXPERIMENTAL_NOTE)
     if p.get("input_error"):
         return "\n".join(lines + [f"input-error: {p['input_error']['message']}"]) + "\n"
     lines.append(f"target {p['target_tier']}, achieved {p['achieved_tier']}")

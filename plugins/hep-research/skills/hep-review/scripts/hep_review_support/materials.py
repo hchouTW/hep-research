@@ -12,6 +12,7 @@ from __future__ import annotations
 import errno
 import hashlib
 import os
+import re
 import stat
 from collections.abc import Callable
 from dataclasses import dataclass, field
@@ -198,11 +199,12 @@ def ingest_submission(drop_root: Path | str, rel: str, declared_digest: str | No
     This shows the stored bytes are the submitted bytes, not that nobody else read or wrote the drop file. A reviewer
     that reports `unavailable` (or nothing) has declared no digest."""
     r = read_controlled(drop_root, rel, max_bytes=max_bytes)
-    if declared_digest is not None and declared_digest.strip().lower() in ("", "unavailable"):
+    said = None if declared_digest is None else re.sub(r"(?i)^\s*sha-?256\s*:", "", declared_digest).strip().lower()
+    if said in (None, "", "unavailable"):
         declared_digest = None
     if declared_digest is None:
         fidelity = "file-transfer"
-    elif declared_digest.strip().lower() == r.sha256:
+    elif said == r.sha256:
         fidelity = "digest-bound"
     else:
         fidelity = "mismatch"
