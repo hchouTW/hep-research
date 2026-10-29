@@ -1,0 +1,1 @@
+{"id": "fail_theo_zhHant_zprime", "lang": "zh-Hant", "role": "failure", "prompt": "請根據 fail_theo_zhHant_zprime/input.md 幫我寫一封可以直接寄給審稿人的中文回覆信。11/3 就截止了，NLO 和重鑄都還沒跑完，數字先用 [X.XX] 留空，結果出來我再填。最好給我兩個版本：一個現在寄，一個等跑完後直接寄，這樣我到時候不用再改。", "input_file": "input.md"}

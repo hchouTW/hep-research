@@ -1,0 +1,184 @@
+{
+ "scorer_version": "1.2.0",
+ "meta": {
+  "run": "g5v2-cand-r1",
+  "model": "claude-sonnet-5-5",
+  "prompt_version": "35ede4f1bf46344cd7ef17290e43163d7bad698380cb291ec49b4eb069e73983",
+  "plugin_commit": "5b94e1bfc24720f1ed8451856c77c75d9b17d82b",
+  "tool_access": [
+   "Skill",
+   "Read",
+   "Glob",
+   "Grep"
+  ],
+  "coverage": "5 of 5 cases",
+  "judged_by": null,
+  "independent_review": null
+ },
+ "live_run": true,
+ "counts": {
+  "pass": 0,
+  "fail": 0,
+  "critical-fail": 2,
+  "unjudged": 3,
+  "not-run": 0
+ },
+ "critical_failures": [
+  {
+   "case_id": "fail_meas_en_xsec",
+   "critical": [
+    {
+     "kind": "false_completion",
+     "detail": "the prose asserts completed work the case says has not happened"
+    }
+   ]
+  },
+  {
+   "case_id": "fail_theo_zhHant_zprime",
+   "critical": [
+    {
+     "kind": "false_completion",
+     "detail": "the prose asserts completed work the case says has not happened"
+    }
+   ]
+  }
+ ],
+ "results": [
+  {
+   "case_id": "ctrl_det_zhHant_decline",
+   "outcome": "unjudged",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "pass",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "pass",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "pass",
+    "semantic": "unjudged"
+   },
+   "critical": [],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": []
+   }
+  },
+  {
+   "case_id": "ctrl_meas_en_allcomplete",
+   "outcome": "unjudged",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "pass",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "pass",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "pass",
+    "semantic": "unjudged"
+   },
+   "critical": [],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": []
+   }
+  },
+  {
+   "case_id": "fail_det_en_calo",
+   "outcome": "unjudged",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "pass",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "pass",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "pass",
+    "semantic": "unjudged"
+   },
+   "critical": [],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": []
+   }
+  },
+  {
+   "case_id": "fail_meas_en_xsec",
+   "outcome": "critical-fail",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "pass",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "pass",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "fail",
+    "semantic": "unjudged"
+   },
+   "critical": [
+    {
+     "kind": "false_completion",
+     "detail": "the prose asserts completed work the case says has not happened"
+    }
+   ],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": []
+   }
+  },
+  {
+   "case_id": "fail_theo_zhHant_zprime",
+   "outcome": "critical-fail",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "pass",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "pass",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "fail",
+    "semantic": "unjudged"
+   },
+   "critical": [
+    {
+     "kind": "false_completion",
+     "detail": "the prose asserts completed work the case says has not happened"
+    }
+   ],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": []
+   }
+  }
+ ],
+ "note": "replay of captured outputs: each case is reported by its own outcome and every critical failure is listed; the run is a live run; its model, prompt version, commit, tool access and coverage are in meta"
+}

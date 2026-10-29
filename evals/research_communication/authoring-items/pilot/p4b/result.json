@@ -1,0 +1,181 @@
+{
+ "target": "P4b",
+ "baseline_commit": "3a63e986",
+ "candidate_commit": "6a7e5f8b",
+ "deviation": "candidate is main after the whole hep-authoring task (0.47.0 plus PR #317), not baseline plus one change; recorded in frozen-protocol.md before any run",
+ "model": "claude-sonnet-5-5",
+ "graders": "two fresh-context headless claude-opus-5-5 sessions (grader 2 reversed orders), no plugin, Read/Write only",
+ "calibration_passed": true,
+ "task_level": {
+  "cases": 5,
+  "runs_scheduled": 30,
+  "runs_completed": 30,
+  "plugin_loaded": 30,
+  "hep_authoring_loaded": 30
+ },
+ "gold_item_level_grader1": {
+  "failure_cases": {
+   "baseline": "106/108",
+   "candidate": "105/108"
+  },
+  "controls": {
+   "baseline": "69/72",
+   "candidate": "71/72"
+  }
+ },
+ "main_test_grader1": {
+  "table": {
+   "cond-theo-zh": {
+    "baseline": [
+     11,
+     11,
+     12
+    ],
+    "candidate": [
+     11,
+     11,
+     11
+    ]
+   },
+   "upd-det-timing-en": {
+    "baseline": [
+     12,
+     12,
+     12
+    ],
+    "candidate": [
+     12,
+     12,
+     12
+    ]
+   },
+   "upd-meas-xsec-en": {
+    "baseline": [
+     12,
+     12,
+     12
+    ],
+    "candidate": [
+     12,
+     12,
+     12
+    ]
+   }
+  },
+  "test": {
+   "T": -1,
+   "per_case": {
+    "cond-theo-zh": -1,
+    "upd-det-timing-en": 0,
+    "upd-meas-xsec-en": 0
+   },
+   "p_candidate_better": 1.0,
+   "p_baseline_better": 0.5,
+   "leave_one_out_up": {
+    "removed": "upd-det-timing-en",
+    "remaining_T": -1,
+    "positive": false
+   },
+   "leave_one_out_down": {
+    "removed": "cond-theo-zh",
+    "remaining_T": 0,
+    "negative": false
+   },
+   "n_assignments": 8000
+  }
+ },
+ "main_test_grader2": {
+  "table": {
+   "cond-theo-zh": {
+    "baseline": [
+     11,
+     11,
+     12
+    ],
+    "candidate": [
+     11,
+     11,
+     12
+    ]
+   },
+   "upd-det-timing-en": {
+    "baseline": [
+     12,
+     12,
+     12
+    ],
+    "candidate": [
+     12,
+     12,
+     12
+    ]
+   },
+   "upd-meas-xsec-en": {
+    "baseline": [
+     12,
+     12,
+     12
+    ],
+    "candidate": [
+     12,
+     12,
+     12
+    ]
+   }
+  },
+  "test": {
+   "T": 0,
+   "per_case": {
+    "cond-theo-zh": 0,
+    "upd-det-timing-en": 0,
+    "upd-meas-xsec-en": 0
+   },
+   "p_candidate_better": 0.8,
+   "p_baseline_better": 0.8,
+   "leave_one_out_up": {
+    "removed": "cond-theo-zh",
+    "remaining_T": 0,
+    "positive": false
+   },
+   "leave_one_out_down": {
+    "removed": "cond-theo-zh",
+    "remaining_T": 0,
+    "negative": false
+   },
+   "n_assignments": 8000
+  }
+ },
+ "confirmed_critical_runs": {
+  "cond-theo-zh|base": "0/3",
+  "cond-theo-zh|cand": "0/3",
+  "upd-det-timing-en|base": "0/3",
+  "upd-det-timing-en|cand": "0/3",
+  "upd-meas-xsec-en|base": "0/3",
+  "upd-meas-xsec-en|cand": "0/3",
+  "ctrl-cond-longlim-zh|base": "0/3",
+  "ctrl-cond-longlim-zh|cand": "0/3",
+  "ctrl-noeffect-en|base": "0/3",
+  "ctrl-noeffect-en|cand": "0/3"
+ },
+ "confirmed_major_runs": {
+  "cond-theo-zh|base": "0/3",
+  "cond-theo-zh|cand": "0/3",
+  "upd-det-timing-en|base": "0/3",
+  "upd-det-timing-en|cand": "1/3",
+  "upd-meas-xsec-en|base": "0/3",
+  "upd-meas-xsec-en|cand": "0/3",
+  "ctrl-cond-longlim-zh|base": "1/3",
+  "ctrl-cond-longlim-zh|cand": "1/3",
+  "ctrl-noeffect-en|base": "0/3",
+  "ctrl-noeffect-en|cand": "0/3"
+ },
+ "decision": "no difference: p(candidate better) = 1.0 (grader 1, T = -1) and 0.8 (grader 2, T = 0); both versions near the ceiling (failure-case items held 106/108 baseline, 105/108 candidate, grader 1); no critical-failure regression (0/9 confirmed critical runs on both sides); no correct-control regression (no new major false alarm in >= 2 of 3 candidate runs)",
+ "known_issues": [
+  "upd-det-timing-en candidate r3: one confirmed major failure (an uncertainty stated as statistical only without a source); baseline 0/3; the frozen rule has no regression trigger for a single major failure in a failure case, so it is recorded here and not adjudicated",
+  "ctrl-cond-longlim-zh: one confirmed major failure in 1 of 3 runs on both sides (unchanged)"
+ ],
+ "disposition": "no claim of improvement for talk revisions; the spike-level observation stands (both versions already propagate updates and condensations on this material)",
+ "grading_cost_usd": 3.93,
+ "pilot_run_cost_usd": 2.5237,
+ "note": "gold and nonces revealed after all planned runs were graded, verified 15/15 against commitments.json; per-output grades kept outside the repository"
+}

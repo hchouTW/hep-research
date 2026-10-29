@@ -1,0 +1,283 @@
+{
+ "scorer_version": "1.2.0",
+ "meta": {
+  "run": "p4b-base-r2",
+  "model": "claude-sonnet-5-5",
+  "prompt_version": "706ff77602e2f01ce3946af751b73f3c59e4308a87b06809bf2ff2ed7c593ea3",
+  "plugin_commit": "47eb0cfaaa78671136a52e6972dff9905be37990",
+  "tool_access": [
+   "Skill",
+   "Read",
+   "Glob",
+   "Grep"
+  ],
+  "coverage": "5 of 5 cases",
+  "judged_by": null,
+  "independent_review": null
+ },
+ "live_run": true,
+ "counts": {
+  "pass": 0,
+  "fail": 0,
+  "critical-fail": 4,
+  "unjudged": 1,
+  "not-run": 0
+ },
+ "critical_failures": [
+  {
+   "case_id": "cond-theo-zh",
+   "critical": [
+    {
+     "kind": "invented_number",
+     "detail": "1.5 appears in the prose but in no supplied fact"
+    }
+   ]
+  },
+  {
+   "case_id": "ctrl-cond-longlim-zh",
+   "critical": [
+    {
+     "kind": "invented_number",
+     "detail": "1.5 appears in the prose but in no supplied fact"
+    }
+   ]
+  },
+  {
+   "case_id": "upd-det-timing-en",
+   "critical": [
+    {
+     "kind": "invented_number",
+     "detail": "1.6 appears in the prose but in no supplied fact"
+    },
+    {
+     "kind": "invented_number",
+     "detail": "1.92 appears in the prose but in no supplied fact"
+    }
+   ]
+  },
+  {
+   "case_id": "upd-meas-xsec-en",
+   "critical": [
+    {
+     "kind": "invented_number",
+     "detail": "0.68 appears in the prose but in no supplied fact"
+    },
+    {
+     "kind": "invented_number",
+     "detail": "0.88 appears in the prose but in no supplied fact"
+    },
+    {
+     "kind": "invented_number",
+     "detail": "1.06 appears in the prose but in no supplied fact"
+    },
+    {
+     "kind": "invented_number",
+     "detail": "1.11 appears in the prose but in no supplied fact"
+    },
+    {
+     "kind": "invented_number",
+     "detail": "1.25 appears in the prose but in no supplied fact"
+    },
+    {
+     "kind": "invented_number",
+     "detail": "11.72 appears in the prose but in no supplied fact"
+    },
+    {
+     "kind": "invented_number",
+     "detail": "35.14 appears in the prose but in no supplied fact"
+    }
+   ]
+  }
+ ],
+ "results": [
+  {
+   "case_id": "cond-theo-zh",
+   "outcome": "critical-fail",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "fail",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "pass",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "pass",
+    "semantic": "unjudged"
+   },
+   "critical": [
+    {
+     "kind": "invented_number",
+     "detail": "1.5 appears in the prose but in no supplied fact"
+    }
+   ],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": [
+     "1.5"
+    ]
+   }
+  },
+  {
+   "case_id": "ctrl-cond-longlim-zh",
+   "outcome": "critical-fail",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "fail",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "pass",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "pass",
+    "semantic": "unjudged"
+   },
+   "critical": [
+    {
+     "kind": "invented_number",
+     "detail": "1.5 appears in the prose but in no supplied fact"
+    }
+   ],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": [
+     "1.5"
+    ]
+   }
+  },
+  {
+   "case_id": "ctrl-noeffect-en",
+   "outcome": "unjudged",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "pass",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "pass",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "pass",
+    "semantic": "unjudged"
+   },
+   "critical": [],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": []
+   }
+  },
+  {
+   "case_id": "upd-det-timing-en",
+   "outcome": "critical-fail",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "fail",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "pass",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "pass",
+    "semantic": "unjudged"
+   },
+   "critical": [
+    {
+     "kind": "invented_number",
+     "detail": "1.6 appears in the prose but in no supplied fact"
+    },
+    {
+     "kind": "invented_number",
+     "detail": "1.92 appears in the prose but in no supplied fact"
+    }
+   ],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": [
+     "1.6",
+     "1.92"
+    ]
+   }
+  },
+  {
+   "case_id": "upd-meas-xsec-en",
+   "outcome": "critical-fail",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "fail",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "pass",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "pass",
+    "semantic": "unjudged"
+   },
+   "critical": [
+    {
+     "kind": "invented_number",
+     "detail": "0.68 appears in the prose but in no supplied fact"
+    },
+    {
+     "kind": "invented_number",
+     "detail": "0.88 appears in the prose but in no supplied fact"
+    },
+    {
+     "kind": "invented_number",
+     "detail": "1.06 appears in the prose but in no supplied fact"
+    },
+    {
+     "kind": "invented_number",
+     "detail": "1.11 appears in the prose but in no supplied fact"
+    },
+    {
+     "kind": "invented_number",
+     "detail": "1.25 appears in the prose but in no supplied fact"
+    },
+    {
+     "kind": "invented_number",
+     "detail": "11.72 appears in the prose but in no supplied fact"
+    },
+    {
+     "kind": "invented_number",
+     "detail": "35.14 appears in the prose but in no supplied fact"
+    }
+   ],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": [
+     "0.68",
+     "0.88",
+     "1.06",
+     "1.11",
+     "1.25",
+     "11.72",
+     "35.14"
+    ]
+   }
+  }
+ ],
+ "note": "replay of captured outputs: each case is reported by its own outcome and every critical failure is listed; the run is a live run; its model, prompt version, commit, tool access and coverage are in meta"
+}

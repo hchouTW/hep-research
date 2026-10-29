@@ -5,6 +5,11 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Replies state what is true when written** (G5): a referee reply, response letter or summary of changes gives
+  completed changes in past tense with their locator and pending ones in planned voice with a `[VALUE NEEDED: ...]`
+  marker; it is written once, without a completed-voice template to fill in later (SKILL.md Workflow step 7,
+  `submission-and-peer-review.md`). Authoring pilot: confirmed critical failures 8/9 baseline runs vs 0/9 (VALIDATION
+  AUTHORING-FOLLOWUPS-2). Closes the 0.47.0 known issue.
 - **Retired cross-artifact check entry points removed** (`docs/dev/cross-artifact-check/decision-retire.md`, as
   decided for the release after 0.48.0): the refusing stub `contracts/analysis_check.py`, `permit.py check-report`
   (refusal `permit.check_report_retired`) and the hidden `review_measurement_spec.py --check-bundle` / `--check-root`

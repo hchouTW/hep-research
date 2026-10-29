@@ -5,7 +5,7 @@
  "by_skill": {
   "hep-authoring": {
    "references": 49,
-   "bytes": 358874,
+   "bytes": 359079,
    "uncited": 0
   },
   "hep-citations": {
@@ -15,7 +15,7 @@
   },
   "hep-computing": {
    "references": 36,
-   "bytes": 325265,
+   "bytes": 325269,
    "uncited": 0
   },
   "hep-detector": {
@@ -826,8 +826,8 @@
   {
    "path": "skills/hep-authoring/references/submission-and-peer-review.md",
    "owner": "hep-authoring",
-   "bytes": 16728,
-   "lines": 251,
+   "bytes": 16933,
+   "lines": 253,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-authoring/references/academic-papers-guide.md",
@@ -844,7 +844,7 @@
     "tests/skills/hep_authoring/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "5b94e1bf 2026-10-29"
   },
   {
    "path": "skills/hep-authoring/references/supplementary-material-planning.md",
@@ -1206,7 +1206,7 @@
   {
    "path": "skills/hep-computing/references/batch-scheduling.md",
    "owner": "hep-computing",
-   "bytes": 31678,
+   "bytes": 31682,
    "lines": 298,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -1228,7 +1228,7 @@
     "tools/check_instruction_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "16214af1 2026-10-26"
+   "last_commit": "0aebec94 2026-10-29"
   },
   {
    "path": "skills/hep-computing/references/batch-site-cern-htcondor.md",

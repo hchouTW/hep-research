@@ -8249,6 +8249,33 @@ Three follow-ups of AUTHORING-IMPROVE, requested by the maintainer after 0.47.0.
 | G8/P5: three Contrast-format prose examples in `skills/hep-authoring/examples/prose/` (SKILL.md 9606 -> 9739 B, quick load 23145 of 25600) | engineering: `validate_skill_example.py` on each, `test_diagrams.py::test_prose_examples_follow_the_contrast_format`; example 03 quotes real `check_adaptation.py` reports (good manifest exit 0, weak manifest exit 1: status dropped, invented average, condition dropped) | pass |
 | P5 transfer (spike, no claim): three new synthetic cases (a 2.6 sigma local excess, a review of three determinations, a review talk), 0.47.0 vs this branch, 2 runs each | live runs | no observable difference: both versions declined a consensus value and kept the preliminary label and the global significance; the examples were opened in 0 of 6 runs with them available. Kept as documentation by maintainer decision (2026-10-29); no model benefit is claimed |
 
+## AUTHORING-FOLLOWUPS-2 — 2026-10-29 (macOS, Claude Code 2.1.312, claude-sonnet-5-5; branch `authoring-followups-2-20261029` from `6a7e5f8b`)
+
+Four items requested by the maintainer after 0.48.0: the reply-template defect (G5-V2), P4b talk revisions at
+authoring-pilot level, the replay scorer fix and the Geant4 tests on paths with spaces. SKILL.md 9739 -> 10113 B
+(quick load 23519 of 25600). Spend: USD 14.34 (G5-V2: runs 2.54 over 30 runs, grading 3.74 over 10 sessions, gold
+writer 0.71; P4b: runs 2.52 over 30 runs, grading 3.93 over 10 sessions, gold writer 0.90).
+
+| Item | Evidence | Result |
+|---|---|---|
+| G5-V2 reply wording for pending work: SKILL.md Workflow step 7 (a reply, response letter or summary of changes states what is true when written; one version, no completed-voice template to fill in later; offer the final wording once the result exists) and the same sentence in `submission-and-peer-review.md` | authoring-pilot (`authoring-items/pilot/g5v2/`; frozen in `bb44fca0` before the change `5b94e1bf`; 3 failure cases, 2 correct controls, one F item per pending request, 3 runs per version; two calibrated fresh-context claude-opus-5-5 graders) | target improved: failure-case items held 77/108 baseline vs 108/108 candidate; p(candidate better) = 0.0005 for both graders (T = 31 and 30), leave-one-out remaining T = 13; confirmed critical failures 8/9 baseline runs vs 0/9 candidate; controls 70/72 vs 71/72; gold verified 15/15; delivered (claim: local improvement on the listed material and conditions) |
+| P4b talk revisions (result update and condensation reach every affected slide, caption and backup) | authoring-pilot (`authoring-items/pilot/p4b/`; frozen in `47eb0cfa` before any run; 3 failure cases, 2 correct controls, 3 runs per version); recorded deviation: baseline 0.46.0 `3a63e986`, candidate `6a7e5f8b` (the whole hep-authoring task), so the result concerns the task, not one change | no difference: items held 106/108 vs 105/108 (grader 1); p(candidate better) = 1.0 (T = -1) and 0.8 (T = 0); no confirmed critical failure on either side; no control regression; gold verified 15/15. One confirmed major failure in one candidate run of `upd-det-timing-en` (an uncertainty called statistical only without a source), recorded and not adjudicated; both versions already near the ceiling on this material |
+| Replay scorer 1.2.0 (`evals/research_communication/score_replay.py`) | engineering: `test_score_replay.py::test_completion_wording_seen_in_live_runs`; re-scoring the earlier runs | completion wording seen in live runs is caught ("We have repeated ...", "has been rerun", ...), and a CJK completion word negated earlier in the same clause ("不建議…暗示已完成") no longer counts; the ax-04 artefact is gone. Correction: the ax-11 reply template appears in 4 of 4 baseline runs (the G5-V protocol, frozen, says 3 of 4) |
+| Geant4 partition tests on a path with spaces (`0aebec94`) | `tests/adapters/test_geant4.py` quotes the fixed paths of its `local_partition.py` command templates (`shlex.quote`; the template is split before placeholders are filled); the `batch-scheduling.md` example quotes its paths the same way | the two tests that failed `check_relocation.py` since 0.45.0 pass from a copy under a path with a space, and in the full `check_relocation.py` run (6126 tests; the only 3 failures came from the stale reference inventory below, none in `test_geant4`) |
+
+The P5 transfer spike (AUTHORING-FOLLOWUPS) and this P4b pilot give no evidence that the prose examples or talk
+guidance change model output; the G5-V2 change is the only behaviour change of the task measured as an improvement.
+Limitations: developer-authored briefs; same-host gold (advisory); same model family for graders and gold writer;
+no held-out evaluation. Records: `evals/research_communication/authoring-items/pilot/{g5v2,p4b}/` (protocol,
+commitments, revealed gold, `result.json`) and the run outputs `evals/research_communication/{outputs,results}/g5v2-*`,
+`p4b-*` in the repository's top-level `evals/`.
+
+L3 (E2): `tools/run_all_checks.py --no-cli --jobs 4`: 29 pass, 2 fail, 2 skipped; 6126 tests, 3 failures, all from a
+stale reference inventory (SKILL.md and `batch-scheduling.md` changed; `test_reference_inventory`,
+`test_reference_soft_budget` and `test_run_all_checks` timeout test, which runs the inventory test). After
+`tools/reference_inventory.py` the three modules pass (22 tests). `tools/check_relocation.py`, run on the same stale
+inventory: the same 3 failures and nothing else.
+
 ## RETIRE-CROSS-ARTIFACT-CHECK — 2026-10-29 (environment E2)
 
 Retirement of the cross-artifact analysis check (task file "retire the cross-artifact check" v1; decision option A,
