@@ -15,43 +15,43 @@
  "artifacts": [
   {
    "ref": "candidates/cand-A.json",
-   "sha256": "d9dcc21cfc73a9759357befd7b78603fc72ab318f2348242e4d757bf60c5dc76"
+   "sha256": "37885466d36b0ba4bc85cfa3404844ceb5c1a5f6cdb7f28e027bc60a75180b48"
   },
   {
    "ref": "candidates/cand-B.json",
-   "sha256": "05ce35f7f5ba260fa46af3e38cf10c6769e13f94c49cf02bcf0a2dd2fa4622c1"
+   "sha256": "33b99780e6991c8d70bef568d36b3e0e80b7c8b584a1c91a5198f34b248df046"
   },
   {
    "ref": "evaluations/EST-HCAL-A.json",
-   "sha256": "85ee40e1596ef04e5f04bbb523aa831119e061ec3fcda53d4af548fe1330c39a"
+   "sha256": "4725a1a60ccdf1c9e7afd0e5c584ed468c254cef316d4590dbf69ffa2db3bd36"
   },
   {
    "ref": "evaluations/EST-TRG-A.json",
-   "sha256": "e60ebe67c09ddad6b9850622de4b88f210a15f917213b2e6a7ffed04953641fa"
+   "sha256": "01bfa64d506f242a9fc7e45606a28de34ccb5193cda33a2e38ef0eabb701d68a"
   },
   {
    "ref": "evaluations/EST-PU-A.json",
-   "sha256": "75335ac4cd657e289bbf75bccdc0bd5c19697f1776d7b0e0375c20d63153f052"
+   "sha256": "519826bd0c06482470f2e6ab03b4a3b146f09a3e9b7ff4b09493f68384b1d460"
   },
   {
    "ref": "evaluations/EST-CONT-A.json",
-   "sha256": "1515ee563dc4e349fc9844f9834bd5e821060e334e6a2f291a37a8df4659337b"
+   "sha256": "f945833082e94190fc672d9eef6aa257d50bc7b4d25e84dd91b7d25e9639d1d1"
   },
   {
    "ref": "evaluations/EST-HCAL-B.json",
-   "sha256": "6fa1c5da51a75531a62110d0b681694af5b06442e3000c88a1577ebf6d2bb70f"
+   "sha256": "f46f6bc05021986e1b47ce83de0a02f84f09f99806d144ee89b5c24c6209dad2"
   },
   {
    "ref": "evaluations/EST-TRG-B.json",
-   "sha256": "22d56f2fdc0b5691f8a12a8268dd5bf2ec7bb9eb8a5cf0e43ac9e48820b6eaf6"
+   "sha256": "c2026f2684949fd53f5ebab7dbb042eb72dd119c021d13cc58e1400596768c9b"
   },
   {
    "ref": "evaluations/EST-PU-B.json",
-   "sha256": "1d00b3177f729802f3cbcc64617110becc45a62ac9c0a3d4bfebc76f8dc0b54b"
+   "sha256": "93d9a99134326c5d7a55fa7956beabb0fc5ce95aed9a07cd65ec2e66ce1e2427"
   },
   {
    "ref": "evaluations/EST-CONT-B.json",
-   "sha256": "bd5f1ea8756e0434e9b764a59a4edfd8c32f11dfb8c3ec91e01b8146a158d367"
+   "sha256": "8ec9b117b9421ffb19505c046cdd9c684051ed346f8c9017eff29782851765f9"
   }
  ]
 }

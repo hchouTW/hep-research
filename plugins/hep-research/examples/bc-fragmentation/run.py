@@ -18,8 +18,6 @@ Chain (each step runs the plugin's tool, as a user would):
 5. Control: a fixed subtraction of the feed-down computed from a carbon model 15% below the truth (as an external,
    older carbon flux would be) biases B/C in every bin, with a combined significance above 5 sigma; the coupled fit
    does not.
-The advisory analysis check (counting-chain/v1) is not run here: until forward folding and the new catalog entries
-enter that suite it reports unsupported, and the example does not depend on it.
 
 Usage (from the plugin root): python3 examples/bc-fragmentation/run.py [--toys 400] [--seed 20261017] [--out DIR]
 Exit 0 when every pre-declared criterion passes, 1 otherwise. Requires numpy.
@@ -218,9 +216,7 @@ def main(argv=None) -> int:
                "bc_true": rnd(r_true), "pull_mean": rnd(mean, 4), "pull_width": rnd(width, 4),
                "fixed_subtraction_relative_bias": rnd(c_mean, 4), "fixed_subtraction_bias_error": rnd(c_err, 3),
                "fixed_subtraction_bias_combined_sigmas": rnd(z_comb, 3),
-               "criteria": CRITERIA, "pass": passed,
-               "advisory_analysis_check": "not run: counting-chain/v1 reports unsupported until forward folding and the "
-                                          "new catalog effects enter the suite"}
+               "criteria": CRITERIA, "pass": passed}
     (out / "results.json").write_text(json.dumps(results, indent=1) + "\n", encoding="utf-8")
     lines = [f"# B/C with fragmentation feed-down (E-1)\n\n{LABEL}.\n", "| Check | Result |", "|---|---|"]
     lines += [f"| {k} | {'pass' if v else 'FAIL'} |" for k, v in passed.items()]

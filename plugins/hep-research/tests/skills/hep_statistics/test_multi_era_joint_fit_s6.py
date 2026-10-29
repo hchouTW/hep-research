@@ -1,7 +1,7 @@
 """S6: the multi-era joint fit is documented in time-series-inference.md: the model with per-era response,
 acceptance and collection time, the era nuisances of the measurement spec (M3), split consistency (S1) before the
-joint fit, parametrized forward folding above the core caps, and the opt-in model-card diagnostic of
-contracts/analysis_check.py. The rule ids and the CLI options it names exist."""
+joint fit, and parametrized forward folding above the core caps; the model-card diagnostic of the retired
+cross-artifact check is no longer named (removed in 0.28.0). The rule ids and the CLI options it names exist."""
 import json
 import re
 import unittest

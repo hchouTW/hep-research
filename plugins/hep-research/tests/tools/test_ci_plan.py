@@ -39,14 +39,14 @@ def plan(*paths):
 
 class Planning(unittest.TestCase):
     def test_a_bounded_change_selects_its_modules_and_parts(self):
-        p = plan(P + "contracts/analysis_checks/rules.py", P + "CHANGELOG.md")
+        p = plan(P + "contracts/permit.py", P + "CHANGELOG.md")
         self.assertFalse(p["full"], p["reasons"])
-        self.assertIn("tests.contracts.test_analysis_check_chain_rules", p["modules"])
+        self.assertIn("tests.contracts.test_permits", p["modules"])
         self.assertLess(len(p["modules"]), len(EVERY))
         self.assertEqual(p["parts"], ["static", "ams-optional"])  # its contracts modules are in the AMS suites
 
     def test_the_ams_optional_check_runs_only_the_selected_modules_of_its_suites(self):
-        p = plan(P + "contracts/analysis_checks/rules.py")
+        p = plan(P + "contracts/permit.py")
         self.assertEqual(p["ams_optional_modules"], sorted(set(p["modules"]) & set(AMS)))
         self.assertTrue(0 < len(p["ams_optional_modules"]) < len(AMS))
         none = plan(P + "CHANGELOG.md")                                  # no selected module is in its suites
@@ -58,9 +58,9 @@ class Planning(unittest.TestCase):
         self.assertIn("tests.examples.test_qed_prediction", AMS)
 
     def test_a_changed_test_module_selects_itself(self):
-        p = plan(P + "tests/contracts/test_analysis_check_r2_rules.py")
+        p = plan(P + "tests/contracts/test_registry_keys_and_semver.py")
         self.assertFalse(p["full"], p["reasons"])
-        self.assertIn("tests.contracts.test_analysis_check_r2_rules", p["modules"])
+        self.assertIn("tests.contracts.test_registry_keys_and_semver", p["modules"])
 
     def test_what_cannot_be_bounded_is_the_full_run(self):
         cases = {"outside the plugin": [".github/workflows/tests.yml"], "outside the plugin ": ["evals/routing/run.py"],
@@ -76,11 +76,11 @@ class Planning(unittest.TestCase):
                 self.assertTrue(any(reason.strip() in r for r in p["reasons"]), p["reasons"])
 
     def test_a_changed_test_helper_selects_every_module_that_imports_it(self):
-        p = plan(P + "tests/contracts/analysis_check_cases.py")
+        p = plan(P + "tests/contracts/design_fixtures.py")
         self.assertFalse(p["full"], p["reasons"])
-        importers = PLAN.helper_importers("tests/contracts/analysis_check_cases.py", EVERY)
-        for m in ("tests.contracts.test_analysis_check_foundations", "tests.contracts.test_analysis_check_report_permit",
-                  "tests.contracts.test_analysis_check_shadow_and_refusal", "tests.contracts.test_cross_artifact_check_gap_probes"):
+        importers = PLAN.helper_importers("tests/contracts/design_fixtures.py", EVERY)
+        for m in ("tests.contracts.test_design_aggregation", "tests.contracts.test_design_contracts",
+                  "tests.contracts.test_design_verdicts"):
             self.assertIn(m, importers)
         self.assertLessEqual(set(importers), set(p["modules"]))
 
@@ -99,7 +99,7 @@ class Planning(unittest.TestCase):
             self.assertIn("no test module imports it", " ".join(p["reasons"]))
 
     def test_one_unbounded_path_makes_the_whole_plan_full(self):
-        self.assertTrue(plan(P + "contracts/analysis_checks/rules.py", P + "core/stats/poisson.py")["full"])
+        self.assertTrue(plan(P + "contracts/permit.py", P + "core/stats/poisson.py")["full"])
 
     def test_a_deleted_test_module_is_dropped_and_recorded(self):
         p = PLAN.plan_for([P + "tests/contracts/test_gone_module.py"], EVERY, REGISTRY)
@@ -107,7 +107,7 @@ class Planning(unittest.TestCase):
         self.assertEqual(p["dropped"], ["tests.contracts.test_gone_module"])
 
     def test_the_plan_is_deterministic_and_tamper_evident(self):
-        a, b = plan(P + "contracts/analysis_checks/rules.py"), plan(P + "contracts/analysis_checks/rules.py")
+        a, b = plan(P + "contracts/permit.py"), plan(P + "contracts/permit.py")
         self.assertEqual(a["plan_sha256"], b["plan_sha256"])
         with tempfile.TemporaryDirectory() as td:
             f = Path(td) / "plan.json"
@@ -118,7 +118,7 @@ class Planning(unittest.TestCase):
                 PLAN.load_plan(f)
 
     def test_selects(self):
-        p = plan(P + "contracts/analysis_checks/rules.py", P + "CHANGELOG.md")
+        p = plan(P + "contracts/permit.py", P + "CHANGELOG.md")
         self.assertTrue(PLAN.selects(p, "static"))
         self.assertTrue(PLAN.selects(p, "ams-optional"))
         self.assertFalse(PLAN.selects(plan(P + "CHANGELOG.md"), "ams-optional"))
@@ -144,7 +144,7 @@ class RunnerRecord(unittest.TestCase):
         runner = _load("run_all_checks")
         with tempfile.TemporaryDirectory() as td:
             f = Path(td) / "plan.json"
-            f.write_text(json.dumps(dict(plan(P + "contracts/analysis_checks/rules.py"), parts=["static", "ams-optional"])))
+            f.write_text(json.dumps(dict(plan(P + "contracts/permit.py"), parts=["static", "ams-optional"])))
             self.assertEqual(runner.main(["--no-cli", "--part", "ams-optional", "--plan", str(f)]), 2)
 
     def test_the_ams_optional_command_carries_the_plan(self):

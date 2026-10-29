@@ -1,11 +1,11 @@
 {
- "contract_version": "3.16.0",
+ "contract_version": "3.17.0",
  "artifact_id": "collider-tracker-v1-CALC-ECAL-B-run",
  "artifact_type": "computational-run",
  "objective": "detector system design: computational-run written by evaluate_design.py",
  "versions": {
-  "plugin": "0.47.0",
-  "contracts": "3.16.0",
+  "plugin": "0.48.0",
+  "contracts": "3.17.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-B.json",
-   "sha256": "05ce35f7f5ba260fa46af3e38cf10c6769e13f94c49cf02bcf0a2dd2fa4622c1",
+   "sha256": "33b99780e6991c8d70bef568d36b3e0e80b7c8b584a1c91a5198f34b248df046",
    "artifact_type": "design-candidate",
    "artifact_id": "collider-tracker-v1-cand-B",
    "status": [
@@ -40,13 +40,13 @@
   "input_manifest": [
    {
     "path": "candidates/cand-B.json",
-    "sha256": "05ce35f7f5ba260fa46af3e38cf10c6769e13f94c49cf02bcf0a2dd2fa4622c1"
+    "sha256": "33b99780e6991c8d70bef568d36b3e0e80b7c8b584a1c91a5198f34b248df046"
    }
   ],
   "tools": [
    {
     "name": "calorimeter-resolution",
-    "version": "0.47.0"
+    "version": "0.48.0"
    }
   ],
   "commands": [

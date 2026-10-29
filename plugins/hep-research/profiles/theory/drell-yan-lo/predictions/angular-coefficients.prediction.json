@@ -1,5 +1,5 @@
 {
- "contract_version": "3.16.0",
+ "contract_version": "3.17.0",
  "artifact_id": "dylo-prediction-angular-coefficients",
  "artifact_type": "prediction",
  "objective": "lambda, nu and 1 - lambda - 2 nu versus qT/Q at O(alpha_s) for the q qbar and q g channels and their mixtures (no data)",
@@ -13,8 +13,8 @@
   ]
  },
  "versions": {
-  "plugin": "0.47.0",
-  "contracts": "3.16.0",
+  "plugin": "0.48.0",
+  "contracts": "3.17.0",
   "profiles": {
    "theory:drell-yan-lo": "0.1.0"
   }

@@ -5,6 +5,29 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Retired cross-artifact check entry points removed** (`docs/dev/cross-artifact-check/decision-retire.md`, as
+  decided for the release after 0.48.0): the refusing stub `contracts/analysis_check.py`, `permit.py check-report`
+  (refusal `permit.check_report_retired`) and the hidden `review_measurement_spec.py --check-bundle` / `--check-root`
+  flags are gone; `check-report` and the two flags are now ordinary usage errors (exit 2). The `context-obligations`
+  CI impact group drops the stub's pattern. Reproduce old bundles and reports with 0.47.x.
+
+## 0.48.0 (2026-10-29)
+
+Minor release; contracts 3.17.0 (minor), `CORE_VERSION` 1.4.0 and the adapters are unchanged. It retires the
+cross-artifact check (PR #315; its rules become review questions that hep-review can take as obligations) and ships the
+hep-authoring follow-ups (PR #317: prose examples, a review-talk adaptation template, the drafting-order default).
+
+**Before you upgrade** (details in each entry below):
+- The cross-artifact check is gone: `contracts/analysis_check.py`, `permit.py check-report` and
+  `review_measurement_spec.py --check-bundle` / `--check-root` exit 2 and name `decision-retire.md`. To reproduce an
+  old analysis bundle or check report, use 0.47.x. These refusing entry points are removed in the next minor release.
+- Contracts 3.17.0 drops the check's sidecar formats (analysis bundle 2.0.0, check context, check report, semantic lock,
+  operator coverage). No artifact type, vocabulary term, envelope field or capability changes, so every 3.16 artifact
+  keeps its outcome.
+
+**Known issues**: carried over from 0.47.0 (cr-propagation F1 convergence, F2/F3, the live routing run, reply drafts
+for pending work written as completed-voice templates).
+
 - **hep-authoring prose examples** (G8): `skills/hep-authoring/examples/prose/` holds three weak-versus-better examples
   in the Contrast format: a results paragraph (hedges that state a real limitation, significance wording, status
   labels), a review synthesis with a referee handoff and a reply written from the change ledger, and a review talk
@@ -14,6 +37,27 @@ Software checks establish contract consistency only, not physical validity.
   `unmapped_number` warnings (a `context` statement); test in `test_adaptation.py`.
 - The papers guide's drafting order is the measurement-paper default; other paper types start from their backbone in
   `paper-genre-variants.md` (G4, document part).
+- **Cross-artifact check retired** (`docs/dev/cross-artifact-check/decision-retire.md`, decided
+  2026-10-29). Removed: `contracts/analysis_checks/` (the rules, context, lock and outcome modules),
+  `contracts/migrate.py`, the `counting-chain` and `ratio-subset` suites, the operator coverage contract, the schemas
+  of the v2 bundle, check context, check report, semantic lock and operator coverage, `permit.py check-report`'s
+  implementation and `tools/rename_analysis_check_ids.py`. `contracts/analysis_check.py`, `permit.py check-report` and
+  `review_measurement_spec.py --check-bundle` now refuse with the reason; reproduce old bundles and reports with 0.47.x.
+  - **Kept:** the rule registry (now every new or changed rule is retired) and its CI impact map; `source_digest.py`
+    (moved to `contracts/`); the effect catalog and its check; `custody.py`; `semver.py`; `resolve.py`;
+    `validation_record.json`; the capability `measurement:correction-keys-v1`; the v2 bundle digest in attestations.
+  - **Review questions:** the rules are kept as questions for reviewers: "Spec against implementation" in
+    hep-measurement's review and artifacts, "Ratios of two results" in hep-statistics' combinations; each row is a
+    hep-review obligation (`tests/skills/test_review_question_tables.py` checks this against hep-review's obligation
+    definition and method cards). hep-review itself is unchanged.
+  - **Tests:** the tests of shared code in the checker-named modules are kept under descriptive names
+    (`test_contract_baseline_gaps`, `test_profile_loading`, `test_custody`, `test_reader_refusal_blockers`,
+    `test_rule_registry`, `test_effect_catalog`, `test_source_digest`, `test_correction_keys_capability`,
+    `test_registry_keys_and_semver`, `test_catalog_version_and_retired_rules`); the checker's own tests are removed.
+  - **Contracts 3.17.0** (minor): the sidecar formats read only by the check (analysis bundle 2.0.0, check context,
+    check report, semantic lock, operator coverage) and the rule suites are removed. No artifact type, vocabulary
+    term, envelope field or capability changes, so every 3.16 artifact keeps its outcome; fixtures, theory-profile
+    artifacts and examples carry the new version (only version strings and the hashes that cover them changed).
 
 ## 0.47.0 (2026-10-29)
 

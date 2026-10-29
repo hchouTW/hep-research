@@ -53,6 +53,19 @@ non-Gaussian uncertainties, physical boundaries or low counts. Shared nuisances 
 term (the model card rule in `contracts/validate.py`); correlated but different nuisances need a stated correlation
 model. pyhf and Combine workspaces are combined through the adapters (`<plugin root>/adapters/pyhf-combine/`).
 
+## Ratios of two results
+
+A ratio inherits every shared factor of its operands. Before trusting a ratio's uncertainty, answer three questions;
+an input a question needs that is missing makes the answer undetermined, never a pass. In a recorded review
+(hep-review), each becomes one obligation with `domain_refs: ["hep-statistics"]` and the method "assumption and
+convention check".
+
+| ID | Question | Criterion | Missing input |
+|---|---|---|---|
+| S-RATIO-OPERANDS | Are numerator and denominator the same kind of quantity, in the same units, binning and scope the ratio defines? | equal edges and units, or a stated conversion; scopes differ only along the ratio's own axis (for example species) | which two results the ratio divides |
+| S-RATIO-CANCELLATION | Is each claimed cancellation exact? | exact only for the same factor instance, the same selection, the same evaluation point and the same power, with a nonzero factor; otherwise it is approximate and its residual is an uncertainty of the ratio | the factor instances on each side, or the size of the residual |
+| S-RATIO-CORRELATION | Does each independence or correlation claim between the operands rest on evidence? | a validation record that binds both operands (`<plugin root>/contracts/schemas/validation_record.json`, as written by hep-detector's `propagate_scale_distortion.py`) or a sourced, scoped statement; read every record, and one that contradicts the claim decides | the evidence for the claim |
+
 ## What to report
 
 The combined value with its uncertainty and its breakdown (with the method of the breakdown), the weights (BLUE) or

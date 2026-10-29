@@ -1,11 +1,11 @@
 {
- "contract_version": "3.16.0",
+ "contract_version": "3.17.0",
  "artifact_id": "ams-like-v1-CALC-CC-P-run",
  "artifact_type": "computational-run",
  "objective": "detector system design: computational-run written by evaluate_design.py",
  "versions": {
-  "plugin": "0.47.0",
-  "contracts": "3.16.0",
+  "plugin": "0.48.0",
+  "contracts": "3.17.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-P.json",
-   "sha256": "8bd1028cdf871b0136cbb25ebc86152101d6b73f9290f59f959d3a39165f2cce",
+   "sha256": "9d746c024864ca3ca00daf1539670afaf72f4d1dc19ed05020503e122b1da741",
    "artifact_type": "design-candidate",
    "artifact_id": "ams-like-v1-cand-P",
    "status": [
@@ -28,7 +28,7 @@
   },
   {
    "ref": "evaluations/CALC-TRK-P.json",
-   "sha256": "c796e53ac61e2b7682288dcf2dd73381e7975727d9191ad9197783301dd53ed0",
+   "sha256": "39e23b8e5a358f1919d60f3d590bcb5c2ce80153135f6b8e04a12036836f82ef",
    "artifact_type": "design-evaluation",
    "artifact_id": "ams-like-v1-CALC-TRK-P",
    "status": [
@@ -49,13 +49,13 @@
   "input_manifest": [
    {
     "path": "candidates/cand-P.json",
-    "sha256": "8bd1028cdf871b0136cbb25ebc86152101d6b73f9290f59f959d3a39165f2cce"
+    "sha256": "9d746c024864ca3ca00daf1539670afaf72f4d1dc19ed05020503e122b1da741"
    }
   ],
   "tools": [
    {
     "name": "charge-confusion-rate",
-    "version": "0.47.0"
+    "version": "0.48.0"
    }
   ],
   "commands": [

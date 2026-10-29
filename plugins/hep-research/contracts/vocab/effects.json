@@ -1,7 +1,7 @@
 {
  "catalog_version": "1.1.0",
  "owner": "core",
- "$comment": "Effect catalog (v6.3 D04, C8): which class an effect belongs to and how a parent factor is composed under stated conditions. Classification is not coverage: which members an operator handles is in the operator coverage contracts (contracts/semantics/coverage/). The legacy '<x>_efficiency' pattern and validate.IMPLIED_CORRECTIONS stay as legacy adapters; this catalog never replaces them for old entry points. Catalog 1.1.0 (release R3, DR-8): description_required says whether a recipe step that applies the effect needs a spec description (r-real.undescribed); every effect but bin_width does (maintainer decision 2026-10-23, decision-architecture.md).",
+ "$comment": "Effect catalog (v6.3 D04, C8): which class an effect belongs to and how a parent factor is composed under stated conditions. Classification is not coverage (the operator coverage contracts were retired with the cross-artifact check, docs/dev/cross-artifact-check/decision-retire.md). The legacy '<x>_efficiency' pattern and validate.IMPLIED_CORRECTIONS stay as legacy adapters; this catalog never replaces them for old entry points. Catalog 1.1.0 (release R3, DR-8): description_required says whether a recipe step that applies the effect needs a spec description (review question M-DESCRIBED in hep-measurement; formerly the retired rule r-real.undescribed); every effect but bin_width does (maintainer decision 2026-10-23, decision-architecture.md).",
  "classes": [
   {
    "class_id": "efficiency",

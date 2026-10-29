@@ -1,5 +1,5 @@
 {
- "contract_version": "3.16.0",
+ "contract_version": "3.17.0",
  "artifact_id": "dispm-theory-spec-fl-alpha-s",
  "artifact_type": "theory-spec",
  "objective": "Theory spec of LO F_2 and the O(alpha_s) longitudinal structure function F_L in theory:dis-parton-model (synthetic-only profile)",
@@ -13,8 +13,8 @@
   ]
  },
  "versions": {
-  "plugin": "0.47.0",
-  "contracts": "3.16.0",
+  "plugin": "0.48.0",
+  "contracts": "3.17.0",
   "profiles": {
    "theory:dis-parton-model": "0.1.0"
   }

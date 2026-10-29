@@ -15,17 +15,17 @@
   },
   "hep-computing": {
    "references": 36,
-   "bytes": 326167,
+   "bytes": 325265,
    "uncited": 0
   },
   "hep-detector": {
    "references": 42,
-   "bytes": 589256,
+   "bytes": 589139,
    "uncited": 0
   },
   "hep-measurement": {
    "references": 12,
-   "bytes": 122936,
+   "bytes": 125132,
    "uncited": 0
   },
   "hep-ml": {
@@ -40,7 +40,7 @@
   },
   "hep-statistics": {
    "references": 14,
-   "bytes": 208208,
+   "bytes": 209683,
    "uncited": 0
   },
   "hep-theory": {
@@ -1458,8 +1458,8 @@
   {
    "path": "skills/hep-computing/references/preservation-checklist.md",
    "owner": "hep-computing",
-   "bytes": 4746,
-   "lines": 74,
+   "bytes": 3844,
+   "lines": 61,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
@@ -1467,7 +1467,7 @@
     "tests/skills/hep_computing/test_preservation_checklist_c3.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "d8ab97cb 2026-10-23"
+   "last_commit": "c398d5e0 2026-10-29"
   },
   {
    "path": "skills/hep-computing/references/prompt-engineering-and-token-optimization.md",
@@ -2359,8 +2359,8 @@
   {
    "path": "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
    "owner": "hep-detector",
-   "bytes": 4280,
-   "lines": 58,
+   "bytes": 4163,
+   "lines": 57,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
@@ -2371,7 +2371,7 @@
    "cited_by_other_skills": [
     "hep-theory"
    ],
-   "last_commit": "c3afd32c 2026-10-17"
+   "last_commit": "c398d5e0 2026-10-29"
   },
   {
    "path": "skills/hep-detector/references/particle-identification.md",
@@ -2890,10 +2890,11 @@
   {
    "path": "skills/hep-measurement/references/review-and-artifacts.md",
    "owner": "hep-measurement",
-   "bytes": 7900,
-   "lines": 109,
+   "bytes": 10096,
+   "lines": 124,
    "linked_from_skill_md": true,
    "cited_by": [
+    "README.md",
     "examples/ams-flux-ratio/run.py",
     "examples/collider-angular/run.py",
     "profiles/experiments/ams-02/modules/methods/analysis-artifacts.md",
@@ -2902,10 +2903,11 @@
     "skills/hep-measurement/assets/review-example.synthetic.json",
     "skills/hep-measurement/references/hep-measurement-guide.md",
     "skills/hep-measurement/scripts/review_measurement_spec.py",
-    "tests/skills/hep_measurement/test_review_procedure.py"
+    "tests/skills/hep_measurement/test_review_procedure.py",
+    "tests/skills/test_review_question_tables.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "7d992293 2026-10-22"
+   "last_commit": "6a70f37e 2026-10-29"
   },
   {
    "path": "skills/hep-measurement/references/systematics.md",
@@ -3815,6 +3817,7 @@
     "tests/contracts/test_reference_profile_kind_d13.py",
     "tests/skills/hep_authoring/test_handoff_text.py",
     "tests/skills/test_reference_links.py",
+    "tests/skills/test_review_question_tables.py",
     "tests/tools/test_check_layering.py",
     "tests/tools/test_scifix_ledger.py",
     "tools/measure_entrypoints.py"
@@ -3978,17 +3981,19 @@
   {
    "path": "skills/hep-statistics/references/combinations.md",
    "owner": "hep-statistics",
-   "bytes": 4575,
-   "lines": 61,
+   "bytes": 6050,
+   "lines": 74,
    "linked_from_skill_md": true,
    "cited_by": [
+    "README.md",
     "skills/hep-statistics/SKILL.md",
     "skills/hep-statistics/references/core-stats-commands.md",
     "skills/hep-statistics/references/core-stats-guide.md",
-    "skills/hep-statistics/references/time-series-inference.md"
+    "skills/hep-statistics/references/time-series-inference.md",
+    "tests/skills/test_review_question_tables.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "317c39a3 2026-10-14"
+   "last_commit": "6a70f37e 2026-10-29"
   },
   {
    "path": "skills/hep-statistics/references/core-stats-commands.md",

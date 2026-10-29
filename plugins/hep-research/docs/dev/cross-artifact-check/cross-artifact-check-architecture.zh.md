@@ -770,3 +770,10 @@ O09、forward folding、per-sign ratio、eras、截面分析、完整的單位�
 8. **比較:** `python3 archive/evidence/rename/compare.py OUT_BEFORE OUT_AFTER`:把改名前的測試 ID 以工具的對照規則換成新名稱,再比較 check 狀態、失敗集合與計數。
 9. **單側失敗:** 只在一邊出現的失敗,在兩邊各重跑 5 次;兩邊都全部通過時記為不穩定(RN-6)。
 10. **lock 影響:** `python3 archive/evidence/rename/lockprobe.py BEFORE_TREE AFTER_TREE`(需以 `git archive` 匯出的乾淨樹):預期沒有 snapshot 時 13 項 `semantics_unreproducible`,有 snapshot 時 complete(RN-4)。
+
+## 有日期的附註（退場）
+
+本架構描述的是 2026-10-22（0.24.1）時的 checker。之後的發展：第 0 期在 0.25.0 發布；價值閘門兩次量測都是 I = 0／28；
+Shrink 在 0.28.0 移除了 `model-card` 與 `run-lineage`；`decision-retire.md` 提議讓其餘部分退場，規則改寫為
+hep-measurement 與 hep-statistics 中的審查問題，經由 hep-review 使用。用語：R0–R3 現在指 hep-review 的保證等級；
+本文所稱的 release R1–R3 即 0.25.0 與 0.26.0。本附註不改寫以上各節。

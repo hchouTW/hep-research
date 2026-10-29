@@ -4,12 +4,11 @@ A Claude Code and Codex plugin for experimental and theoretical high-energy and 
 has:
 - eight core skills;
 - a shared library (`core/`);
-- artifact contracts (`contracts/`), including an opt-in cross-artifact analysis check (see
-  [Cross-artifact analysis check](#cross-artifact-analysis-check-opt-in-advisory));
+- artifact contracts (`contracts/`);
 - optional experiment and theory-domain profiles, and the reference profile of the sourced detector atlas (`profiles/`);
 - tool adapters (`adapters/`).
 
-Version 0.47.0, licensed under Apache-2.0 (see [LICENSE](LICENSE)). Not endorsed by AMS or any collaboration. Example data shipped with the plugin is synthetic and is
+Version 0.48.0, licensed under Apache-2.0 (see [LICENSE](LICENSE)). Not endorsed by AMS or any collaboration. Example data shipped with the plugin is synthetic and is
 labeled synthetic in file names and metadata. What is and is not validated is listed in
 [docs/capability-matrix.md](docs/capability-matrix.md); test evidence is in [VALIDATION.md](VALIDATION.md).
 
@@ -273,69 +272,20 @@ egress policy allows may be reached, uncovered calls are denied, and queries nev
 internal names. Without network access, citations are marked unverified rather than guessed, and nothing is downloaded
 silently.
 
-## Cross-artifact analysis check (opt-in, advisory)
+## Profile custody inventory
 
-The skills and the old entry points never call this check; you run it when you want it.
-`contracts/analysis_check.py` freezes an analysis into a bundle with:
-- a context: roots, recipe instances and typed bindings;
-- a semantic lock.
+`python3 contracts/custody.py PROJECT_DIR [--local DIR ...]` lists where each profile a project sees comes from
+(plugin, project-local or controlled) and its custody status. A missing custody value is never read as public.
 
-It then checks a machine-generated list of obligations against two suites:
+## Cross-artifact analysis check (retired)
 
-| Suite | Checks |
-|---|---|
-| `counting-chain/1.1.0` | correction chains: listed effect members, realization, every applied correction described in the spec, stage, repetition, factor composition and values, response use |
-| `ratio-subset/1.1.0` | ratios of two results: operands, exact cancellation of bounded factors, evidence for correlation claims |
-| (custody) | `contracts/custody.py`: an inventory of where each profile comes from; a missing custody value is never read as public |
-
-**Removed in 0.28.0:** the `model-card` and `run-lineage` suites, model-only bundles (`--mode model`) and result
-bindings (`--results`, `--project`), after the value gate's Shrink decision. That decision keeps `counting-chain`
-(frozen: no new rules) and `ratio-subset` (`docs/dev/cross-artifact-check/decision-value-gate.md`). A context or
-bundle that names them is refused with that reason. Reproduce such reports with 0.27.x.
-
-The 1.1.0 suites are the default. They need check contexts in format 1.1.0 (no `required` on roots); a 1.0.0 context
-selects only 1.0.x suites. `contracts/migrate.py --convert check-context=context-1.0.0-to-1.1.0` converts a frozen
-context to the newest installed 1.1.0 suite. Each fix is a new rule version, and the 1.0.0 suites name the old ones,
-which this release no longer runs (`check.rule_not_run`). Reproduce 1.0.0 results with hep-research 0.25.x.
-- **Factor tables:** a factor table's own `tolerance` is not used. The relative tolerance is 1e-9, or
-  Σ|power| · ½·10^(1−d) when the table declares `"significant_digits": d` and every value has at most d significant
-  digits.
-- **Pre-release suites:** the `1.1.0-dev.N` suites remain installed for bundles frozen during development, and
-  `check-report` refuses them.
-
-```bash
-python3 contracts/analysis_check.py freeze --root <project> --analysis <name> --items items.json --context context.json --out bundle.json
-python3 contracts/analysis_check.py check bundle.json --root <project>
-python3 contracts/analysis_check.py summary report.json      # a bounded summary for the agent
-python3 contracts/analysis_check.py snapshots gc --root <project> [--apply]   # dry run unless --apply
-```
-
-`freeze` stores the definitions it pinned in `<project>/.hep-research/snapshots/` and lists the bundle in
-`<project>/.hep-research/bundles.json` (`--no-snapshots` turns this off); `check` reproduces a bundle whose
-definitions have changed since from that store. Rules run only at the version the suite names: an obligation of
-another rule version is unverified (`check.rule_not_run`). A report is `complete` only with exit code 0.
-
-**Where it stands: experimental.** This is the diagnostic plane of the architecture in
-`docs/dev/cross-artifact-check/cross-artifact-check-architecture.en.md`: no workflow, skill or example runs it. Its
-value gate (`decision-value-gate.md`, 2026-10-22) found that it caught none of 28 planted errors that closure tests
-and contract checks missed, and the owner chose to stop: the code is frozen, no suites are added, and the check
-stays available as an experimental diagnostic.
-
-**Reading a report.** Each obligation ends in one of five states: satisfied, violated, not applicable, unverified or
-unsupported. Coverage counts the decided obligations; it is never a pass rate.
-
-**What a report is and is not.**
-- An outcome that rests only on a declaration the agent wrote is flagged, and counts as unverified for formal use.
-- Reports carry digests and labels, never result values.
-- A report is a diagnostic: it establishes software consistency of declared contracts, not physical validity.
-- `contracts/permit.py check-report` reproduces the custodian's conditions as an advisory check. It never allows a
-  use (`formal_use_allowed` is always false).
-- **Every rule is in shadow mode.** No rule becomes an enforcing condition until a reviewer other than the author has
-  reviewed it (`docs/dev/cross-artifact-check/review-packet.md`), the custodian's gate has adopted
-  `docs/dev/cross-artifact-check/custodian-gate-requirement.md`, the value gate has passed, and the owner has decided
-  per purpose.
-
-Design and decision records are in [docs/dev/cross-artifact-check/](docs/dev/cross-artifact-check/README.md).
+The opt-in cross-artifact analysis check (`contracts/analysis_check.py`, the `counting-chain` and `ratio-subset`
+suites, `permit.py check-report` and `review_measurement_spec.py --check-bundle`) was retired in 0.48.0: its value gate
+found no error it caught that closure tests and contract checks missed. Its entry points were removed in 0.49.0;
+reproduce old bundles and reports with 0.47.x. The review questions its rules encoded are in the
+measurement review ([review and artifacts](skills/hep-measurement/references/review-and-artifacts.md)) and, for
+ratios, in [combinations](skills/hep-statistics/references/combinations.md); a recorded, tiered review uses them
+through hep-review. Records: [docs/dev/cross-artifact-check/](docs/dev/cross-artifact-check/README.md).
 
 ## Checks for maintainers
 

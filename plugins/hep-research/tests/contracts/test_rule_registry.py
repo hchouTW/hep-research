@@ -2,7 +2,8 @@
 codes for all five states is rejected while a legacy rule may stay 'pending' (and then evaluates as unverified);
 prerequisites and V-case references are checked; a V case claimed as running names an existing test; impact closure
 maps paths to existing checks and falls back to the full closure for unmatched paths, not-available checks and full
-groups. The checker runs in the static part of the gate."""
+groups. The checker runs in the static part of the gate. Since the cross-artifact check was retired, every new or
+changed rule is retired and a live one is reported as not implemented."""
 import contextlib
 import copy
 import io
@@ -11,7 +12,6 @@ import sys
 import tempfile
 import unittest
 from pathlib import Path
-from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
@@ -30,10 +30,6 @@ def new_rule(**kw):
             "lifecycle": "proposed"}
     rule.update(kw)
     return rule
-
-
-def _example_rule(ob, env):  # the implementation registry 1.1.0 requires of l3.example (P3, source digests)
-    return None
 
 
 def with_rule(rule):
@@ -67,15 +63,6 @@ class ShippedRegistry(unittest.TestCase):
         self.assertEqual({r["outcome_contract"] for r in r4.values()}, {"pending"})
         self.assertIn("semantics.repeated_correction", r4["l2.r4.repeat"]["legacy_codes"])
 
-    def test_suite_rules_are_registered_with_full_contracts(self):
-        # registry 1.2.0: keyed by (rule_id, version); a fixed version is kind changed beside its retired old version
-        registered = {(r["rule_id"], r["version"]): r for r in SHIPPED["rules"]}
-        for rule in [r for f in sorted((ROOT / "contracts" / "rules" / "suites").glob("*.json"))
-                     for r in json.loads(f.read_text())["rules"]]:
-            reg = registered[(rule["rule_id"], rule["version"])]
-            self.assertIn(reg["kind"], ("new", "changed"))
-            self.assertIsInstance(reg["outcome_contract"], dict)
-
     def test_split_cases_keep_their_slices(self):
         v11 = next(c for c in SHIPPED["v_cases"] if c["v_id"] == "V11")
         self.assertEqual([(p["slice"], p["suite"], p["work_packages"]) for p in v11["parts"]],
@@ -93,11 +80,10 @@ class ShippedRegistry(unittest.TestCase):
 
 
 class OutcomeContract(unittest.TestCase):
-    def test_complete_new_rule_is_accepted(self):
-        from contracts.analysis_checks import rules
-        from contracts.analysis_checks.source_digest import source_digest
-        with mock.patch.dict(rules.IMPLEMENTED, {("l3.example", "1.0.0"): _example_rule}):
-            self.assertTrue(rr.check(with_rule(new_rule(source_sha256=source_digest(_example_rule)))).ok)
+    def test_complete_new_rule_is_accepted_only_as_retired(self):
+        # the cross-artifact check that implemented new rules was retired: a live new rule cannot be implemented
+        self.assertIn("registry.rule_not_implemented", codes(rr.check(with_rule(new_rule()))))
+        self.assertTrue(rr.check(with_rule(new_rule(lifecycle="retired"))).ok)
 
     def test_new_or_changed_rule_without_a_state_is_rejected(self):
         for kind in ("new", "changed"):
@@ -150,9 +136,9 @@ class Prerequisites(unittest.TestCase):
         part = doc["v_cases"][33]["parts"][0]
         part["status"], part["tests"] = "passing", []
         self.assertIn("registry.v_case_without_test", codes(rr.check(doc)))
-        part["tests"] = ["tests.contracts.test_analysis_check_rule_registry.Prerequisites.test_absent"]
+        part["tests"] = ["tests.contracts.test_rule_registry.Prerequisites.test_absent"]
         self.assertIn("registry.test_missing", codes(rr.check(doc)))
-        part["tests"] = ["tests.contracts.test_analysis_check_rule_registry.Prerequisites.test_prerequisites_are_required"]
+        part["tests"] = ["tests.contracts.test_rule_registry.Prerequisites.test_prerequisites_are_required"]
         self.assertTrue(rr.check(doc).ok)
 
     def test_duplicates_and_gaps(self):
