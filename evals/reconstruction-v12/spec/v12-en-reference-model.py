@@ -43,6 +43,12 @@ values (confirmation and method-independent confirmation required) unless a huma
 declared further inputs are named in the contract, resolved by C at admission and part of the check attempt's identity; an
 input that is an upstream of the target must be the version the target consumed (S0r4-N1-F3). Only exposures written by C
 are attributed to a check attempt (S0r4-N1-F4); the task-wide history counts the artifacts of every step (S0r4-N1-F5).
+v12.1, round 5 (user-approved fixes; N1 did not pass the fifth S0 round): a revert is also recognised by its digest — an
+artifact whose representative producer has another identity than its first producer in the step (an output already seen,
+reproduced by a changed computation) is not bound without a human pin (S0r5-N1-F1). A check input that is not an upstream
+of the target's step resolves only to that step's bound version, and the result counts only while it is still the bound
+version; upstreams and check inputs together form an acyclic graph (S0r5-N1-F2). Admission keys the side effect of a
+check attempt on check x criterion x target (S0r5-N1-F3).
 
 Run: python3 -I hep-research-reconstruction-v12-en-reference-model.py
 """
@@ -447,7 +453,7 @@ def validate_contract(log: Log, spec: dict):
         if n in seen:
             return
         stack.add(n)
-        for u in steps[n].upstream:
+        for u in steps[n].upstream + tuple(sorted(x for _, x in steps[n].check_inputs)):   # r5 (S0r5-N1-F2)
             visit(u)
         stack.discard(n)
         seen.add(n)
@@ -790,13 +796,26 @@ def self_current(log: Log, digest: str) -> bool:
 
 
 @memo
+def reproduced(log: Log, digest: str) -> bool:
+    """r5 (S0r5-N1-F1): the artifact's representative producer has another identity than its first producer in the step:
+    an output already seen, produced again by a changed computation. Re-binding it is a choice among artifacts already
+    seen, so it binds only through a pin (human approval)."""
+    bp = best_producer(log, digest)
+    if bp is None:
+        return False
+    step = bp[1].get("step")
+    first = min((seq, it) for seq, it in producers(log, digest) if it.get("step") == step)[1]
+    return first.get("identity") != bp[1].get("identity")
+
+
+@memo
 def bound(log: Log, step: str):
     s = spec_of(log, step)
     if s.pin is not None:
         return s.pin if ok(log, s.pin) else None
     best = None
     for d in candidates_raw(log, step):
-        if step_of(log, d) == step and ok(log, d):
+        if step_of(log, d) == step and ok(log, d) and not reproduced(log, d):
             if best is None or bind_seq(log, d) > bind_seq(log, best):
                 best = d
     return best
@@ -858,11 +877,11 @@ def declared_check_inputs(log, target, chk) -> tuple:
 
 def check_inputs_for(log, target, chk):
     """At admission C resolves each declared input: an upstream of the target's step to the version the target consumed,
-    any other step to its bound version (or, without one, its latest current artifact). None if one cannot be resolved."""
+    any other step to its bound version (r5, S0r5-N1-F2: never a held or unbound one). None if one cannot be resolved."""
     consumed = inputs_of(best_producer(log, target)[1])
     out = {}
     for u in declared_check_inputs(log, target, chk):
-        d = consumed[u] if u in consumed else provisional_input(log, u)
+        d = consumed[u] if u in consumed else bound(log, u)
         if d is None:
             return None
         out["input:" + u] = d
@@ -876,12 +895,13 @@ def check_attempt_of(it, target, chk, crit) -> bool:
 
 
 def check_inputs_hold(log, it, target, chk) -> bool:
-    """The attempt read exactly the declared inputs of the effective contract; an upstream input is the consumed version."""
+    """The attempt read exactly the declared inputs of the effective contract; an upstream input is the consumed version,
+    any other input is still the bound version of its step (r5, S0r5-N1-F2)."""
     extra = {k: v for k, v in inputs_of(it).items() if k != "target"}
     if set(extra) != {"input:" + u for u in declared_check_inputs(log, target, chk)}:
         return False
     consumed = inputs_of(best_producer(log, target)[1])
-    return all(extra[k] == consumed[k[6:]] for k in extra if k[6:] in consumed)
+    return all(extra[k] == (consumed[k[6:]] if k[6:] in consumed else bound(log, k[6:])) for k in extra)
 
 
 def valid_check_attempt(log, r, target, chk, crit) -> bool:
@@ -1140,7 +1160,7 @@ def label(log, digest) -> str:
     if cs == "missing":
         return "unchecked"
     if bound(log, step) != digest:
-        return "superseded"
+        return "reproduced" if reproduced(log, digest) and spec_of(log, step).pin != digest else "superseded"
     return "ok"
 
 
@@ -1187,6 +1207,12 @@ def unchecked_artifacts(log, step) -> list:
     if not s.checked:
         return []
     return [d for d in step_artifacts(log, step) if not all(counted_result(log, d, c, k) for c, k in s.required)]
+
+
+def same_side_effect(f, step, check) -> bool:
+    """r5 (S0r5-N1-F3): check attempts have the same side effect when they check the same check x criterion x target,
+    whatever check inputs were resolved (Control §3)."""
+    return f.get("step") == step and check_attempt_of(f, check[2], check[0], check[1])
 
 
 def admit(log: Log, expect_head: int, attempt: str, step: str, cost: float = 1.0, reads: tuple = (),
@@ -1248,7 +1274,7 @@ def admit(log: Log, expect_head: int, attempt: str, step: str, cost: float = 1.0
                 reject("an earlier artifact of this checked step has no counted result for every required check; "
                        "check it before computing another")
     for f in log.of("intent"):
-        same = (f.get("identity") == identity) if step in SPECIAL_STEPS else (f.get("step") == step)
+        same = same_side_effect(f, step, check) if step in SPECIAL_STEPS else (f.get("step") == step)
         if same and exec_status(log, f.get("attempt")) == "unknown":
             reject("same side effect has an unknown attempt; reconcile or abandon first")
     items = [("intent", "C", dict(attempt=attempt, step=step, identity=identity,
@@ -1673,6 +1699,9 @@ def t24_multi_producer_same_digest():
     recontract(log, raw=StepSpec(program="pRaw_refactor"))
     assert label(log, "X1") == "invalidated"
     run(log, "a3", "raw", "R1")
+    # r5 (S0r5-N1-F1): a refactor that reproduces an already-seen output re-binds it only through a pin (human approval)
+    assert label(log, "R1") == "reproduced" and not accepted(log, "X1")
+    approve(log, recontract(log, raw=StepSpec(program="pRaw_refactor", pin="R1")))
     assert label(log, "R1") == "ok" and accepted(log, "X1")
 
 
@@ -1820,7 +1849,7 @@ def t36_random_invariants():
     import random
     rnd = random.Random(20261029)
     labels = {"iteration_internal", "superseded_by_iteration", "not_usable", "invalidated", "producer_conflict",
-              "blocked_upstream", "held", "unchecked", "superseded", "ok"}
+              "blocked_upstream", "held", "unchecked", "superseded", "reproduced", "ok"}
     for trial in range(250):
         tgt = rnd.choice(["T2", "T3C"])
         steps = base_steps(allow_rerun=True, na_allowed=C1 if rnd.random() < .3 else frozenset())
@@ -2692,6 +2721,76 @@ def t87_off_chain_artifacts_are_counted():
     assert p.get("chain_artifacts") == 2 and p.get("task_artifacts") == 7
 
 
+# ================================================================ counterexamples from the fifth S0 round (user-approved fixes, r5)
+
+def t88_reproduced_digest_needs_a_pin():
+    # S0r5-N1-F1: a cosmetic change that reproduces an already-seen digest does not re-bind it without a human
+    smp = {"S1": "confirmation", "S2": "confirmation"}
+    log = new_log(t3c_steps(), target="T3C", samples=smp)
+    log.append("freeze", "agent", step="reco", samples=("S1", "S2"), required=C1)
+    run(log, "a1", "raw", "R1"); run(log, "a2", "reco", "X1")
+    check(log, "X1", "chkA", "crit1", "pass", "c1", sample="S1")
+    recontract(log, reco=reco_spec(program="pReco_alt"))
+    run(log, "a3", "reco", "X2"); check(log, "X2", "chkA", "crit1", "pass", "c2", sample="S2")
+    cf = recontract(log, reco=reco_spec(program="pReco "))                  # cosmetic: a new identity, not a revert
+    assert contract_status(log, cf) == "effective" and label(log, "X2") == "invalidated"
+    run(log, "a4", "reco", "X1")                                            # reproduces the first, already-seen output
+    assert reproduced(log, "X1") and label(log, "X1") == "reproduced" and bound(log, "reco") is None
+    assert not deliverable_status(log, "D")["met"]
+    expect(Admission, publish, log, log.head, "D")
+    cf = recontract(log, reco=reco_spec(program="pReco ", pin="X1"))       # a human may take it, knowingly
+    assert contract_status(log, cf) == "pending_approval"
+    approve(log, cf)
+    assert bound(log, "reco") == "X1" and label(log, "X1") == "ok"
+    log = new_log(base_steps())                                             # through an unchecked upstream step
+    run(log, "a1", "raw", "R1"); run(log, "a2", "reco", "X1"); check(log, "X1", "chkA", "crit1", "pass", "c1")
+    recontract(log, raw=StepSpec(program="pRaw2")); run(log, "a3", "raw", "R2")
+    run(log, "a4", "reco", "X2"); check(log, "X2", "chkA", "crit1", "pass", "c2")
+    recontract(log, raw=StepSpec(program="pRaw "))
+    run(log, "a5", "raw", "R1")                                             # reproduces R1
+    assert bound(log, "raw") is None and label(log, "X1") == "blocked_upstream" and not accepted(log, "X1")
+    log = new_log(base_steps())                                             # a deterministic same-identity copy is not a reproduction
+    run(log, "a1", "raw", "R1")
+    admit(log, log.head, "r1", "raw", cost=0.0, reuse_source="R1")
+    assert not reproduced(log, "R1") and bound(log, "raw") == "R1"
+
+
+def t89_check_inputs_must_stay_bound():
+    # S0r5-N1-F2: a non-upstream check input resolves only to a bound version, and the result counts only while it is bound
+    st = base_steps()
+    st["ref"] = StepSpec(program="pRef", checked=True, required=frozenset({("refchk", "r")}))
+    st["reco"] = replace(st["reco"], check_inputs=frozenset({("chkA", "ref")}))
+    log = new_log(st)
+    run(log, "a1", "raw", "R1"); run(log, "a2", "reco", "X1"); run(log, "f1", "ref", "F1")
+    check(log, "F1", "refchk", "r", "fail", "k1")                           # the reference is held
+    expect(Admission, check, log, "X1", "chkA", "crit1", "pass", "c1")
+    recontract(log, ref=replace(st["ref"], program="pRef2"))
+    run(log, "f2", "ref", "F2"); check(log, "F2", "refchk", "r", "pass", "k2")
+    check(log, "X1", "chkA", "crit1", "pass", "c2")
+    assert inputs_of(intent_of(log, "c2"))["input:ref"] == "F2" and accepted(log, "X1")
+    recontract(log, ref=replace(st["ref"], program="pRef3"))                # the reference changes after the check
+    run(log, "f3", "ref", "F3"); check(log, "F3", "refchk", "r", "pass", "k3")
+    assert label(log, "X1") == "unchecked" and not accepted(log, "X1")      # the result no longer counts
+    check(log, "X1", "chkA", "crit1", "pass", "c3")
+    assert accepted(log, "X1")
+    st2 = dict(st)                                                          # a check input that depends on the target is a cycle
+    st2["down"] = StepSpec(program="pDown", upstream=("reco",))
+    st2["reco"] = replace(st["reco"], check_inputs=frozenset({("chkA", "down")}))
+    expect(Rejected, new_log, st2)
+
+
+def t90_check_side_effect_is_check_criterion_target():
+    # S0r5-N1-F3: while a check attempt of check x criterion x target is unknown, another one is rejected
+    st = base_steps()
+    st["ref"] = StepSpec(program="pRef")
+    st["reco"] = replace(st["reco"], check_inputs=frozenset({("chkA", "ref")}))
+    log = new_log(st)
+    run(log, "a1", "raw", "R1"); run(log, "a2", "reco", "X1"); run(log, "f1", "ref", "F1")
+    check(log, "X1", "chkA", "crit1", "pass", "c1", termination="unknown")
+    recontract(log, ref=StepSpec(program="pRef2")); run(log, "f2", "ref", "F2")
+    expect(Admission, check, log, "X1", "chkA", "crit1", "pass", "c2")
+
+
 # ================================================================ mutation tests: every mutation must be caught by some scenario
 
 def _mut_fail_only_from_computed(log, digest):
@@ -2783,6 +2882,11 @@ MUTATIONS = {
                                                     if k not in o["deliverables"] or o["deliverables"][k].target != "T3C"
                                                     else v for k, v in n["deliverables"].items()}}))),
     "check inputs not resolved by C": ("check_inputs_for", lambda orig: (lambda log, t, c: {})),
+    "reproduced digest binds without a human": ("reproduced", lambda orig: memo(lambda log, d: False)),
+    "check input need not stay bound": ("check_inputs_hold", lambda orig: (lambda log, it, t, c: set(
+        k for k in inputs_of(it) if k != "target") == {"input:" + u for u in declared_check_inputs(log, t, c)})),
+    "check side effect not recognised across check inputs": ("same_side_effect", lambda orig: (
+        lambda f, step, chk: orig(f, step, chk) and set(inputs_of(f)) == {"target"})),
     "agent exposure attributed to a check attempt": ("freeze_ok", lambda orig: memo(
         lambda log, d, *a: orig.__wrapped__(_NoWriterLog(log), d, *a))),
 }

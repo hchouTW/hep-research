@@ -57,15 +57,20 @@ A1 revert pending approval (X2 stays bound, `confirmation_results` = 2 in publis
 
 Also: Core §0.5 review-status row updated (counts, revision after round 4); Control §8 counts and lists.
 
-## N1 — round 5 (open; spec copy not changed)
+## N1 — round 5 (fixed after user approval; re-reviewed in round 6)
 
-Context `s0-reconstruction-v12-r5`, R2, N1 violated; reproduced by the coordinator with `s0/round5-attack.py`.
+Context `s0-reconstruction-v12-r5`, R2, N1 violated; reproduced by the coordinator with `s0/round5-attack.py`. The user
+approved both proposed directions (2026-10-29). Model after the changes: 89/89 scenarios, 42/42 mutations killed;
+replaying `round5-attack.py`: all five attacks fail (a1, a2 not met / not bound; a3 admission rejects; a4 check missing;
+a5 admission rejects).
 
-| Id | Severity | Finding | Reproduction | Possible directions (not adopted) |
+| Id | Severity | Finding | Change | Where |
 |---|---|---|---|---|
-| N1-R5-F1 | major | The revert rule (round-4 F1) tests identities, so a cosmetic content change that reproduces an earlier, already-seen digest takes effect automatically; the new producer re-binds the old digest with its old confirmation results (also through an unchecked upstream step, without recomputing the deliverable step) | a1, a2 | define a revert by the reproduced digest (a producer of a digest an earlier attempt of the step already produced under another identity does not re-bind it without a human), or keep the binding sequence number at the digest's earliest producer |
-| N1-R5-F2 | major | A non-upstream check input (round-4 F3) may be held, or invalidated later, and the check result still counts; the target is accepted | a3, a4 | a check result counts only while each non-upstream input is ok (or is the bound version), mirroring the upstream state of consumed inputs; resolve only to ok versions at admission |
-| N1-R5-F3 | minor | “Same side effect” for check attempts: Control §3 keys on check × criterion × target, the model on the full identity including check inputs, so a second check attempt is admitted while one is unknown | a5 | compare check × criterion × target in admission (model l. 1250–1253) |
+| N1-R5-F1 | major | A cosmetic change reproducing an already-seen digest re-binds it (also through an unchecked upstream) | New derived property **reproduced**: the representative producer's identity differs from the first producer's in the step. A reproduced artifact is not bound unless pinned (human approval); new label `reproduced`. Model: `reproduced`, `bound`, `label`; scenario t88; mutation “reproduced digest binds without a human”. **Behaviour change:** scenario t24 used to accept a refactor that reproduced R1 automatically; it now needs an approved pin (assertion updated, stricter) | Control §4.2, §4.6, §4.7; Delivery §5.2 C1 row |
+| N1-R5-F2 | major | A held or later-invalidated non-upstream check input still counts | A non-upstream check input resolves only to its step's bound version (admission rejects otherwise), and the result counts only while it is still bound. Upstreams and check inputs form an acyclic graph, so a check input never depends on the target's step; a check that needs data processed with the target does that processing inside the check attempt (the §5.2 mode-check example changed accordingly). Model: `check_inputs_for`, `check_inputs_hold`, `validate_contract` (cycle visit); scenario t89; mutation “check input need not stay bound” | Control §1.1, §4.3, §4.7, §5.2 |
+| N1-R5-F3 | minor | Same side effect of check attempts keyed on the full identity in the model | Admission compares check × criterion × target (`same_side_effect`), as Control §3 says; §3 text made explicit. Scenario t90; mutation “check side effect not recognised across check inputs” | model `admit`; Control §3 |
+
+Also: Core §0.5 and Control §8 counts and lists.
 
 ## N3 — statistics
 
