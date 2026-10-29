@@ -403,6 +403,10 @@
   "ok": false,
   "strict_ok": false
  },
+ "contracts/fixtures/artifacts/invalid/prediction_modulated_twice.json": {
+  "ok": false,
+  "strict_ok": false
+ },
  "contracts/fixtures/artifacts/invalid/prediction_v26_envelope_inverted.json": {
   "ok": false,
   "strict_ok": false
@@ -879,6 +883,10 @@
   "strict_ok": true
  },
  "contracts/fixtures/artifacts/valid/prediction.json": {
+  "ok": true,
+  "strict_ok": true
+ },
+ "contracts/fixtures/artifacts/valid/prediction_modulated_once.json": {
   "ok": true,
   "strict_ok": true
  },
