@@ -7,7 +7,7 @@ description: "Use when the deliverable is physics writing or its presentation, e
 
 **Owns:** writing and revising papers, theses, proposals and handover notes; related-work and review sections; figures, tables, diagrams and their rendering; talks and posters; referee reports and replies; packaging results with claim-to-result links; the `communication` extension and the shared audit report shape (`contracts/audit_report.py`); independent review of a draft by agents that did not write it (review packets, review records and the review log; `contracts/review.py`).
 **Typical artifacts:** `communication` (claims linked to results, sources with their read levels, figure inputs, limitations), manuscripts, figures with captions, diagram sources.
-**Never:** invent a result, a number or a citation; cite from memory; answer whether citations are verified yourself (load hep-citations, even mid-draft); upgrade a derivation or result status; describe synthetic or Asimov results as measurements.
+**Never:** invent a result, a number or a citation; cite from memory; answer whether citations are verified yourself (load hep-citations, even mid-draft); upgrade a derivation or result status; describe synthetic or Asimov results as measurements; write a reply or change summary that states pending work as done, even as a fill-in template (pending work stays in planned voice: `submission-and-peer-review.md`).
 
 ## Invariants
 
