@@ -59,7 +59,9 @@
   "gas 'uniform, n_H = 1 cm^-3': Galprop (DRAGON2's analytic GALPROP-like H2, HI and HII (TGas nH2_av, nHI_av, nHII_av)); DRAGON2's 'Uniform' gas is not implemented in cd588707 (gas.cc writes -1)",
   "gas He_to_H_number 0.1: DRAGON2's fixed helium (He/H 0.11, constants.h) with its He_to_H_CS_ratio scaling of every production cross section",
   "sources.spatial: OneRing, uniform in R from 0 to the radial boundary (DRAGON2's z profile of the ring)",
-  "inelastic cross sections: DRAGON2's own parametrization (not replaceable through its data files)"
+  "inelastic cross sections: DRAGON2's own parametrization (not replaceable through its data files)",
+  "sources.injection spectrum_variable 'rigidity': DRAGON2's own measure (R^-gamma per unit momentum, gamma 2.3, eta 0), translated exactly",
+  "sources.abundances 'dragon2:BaseModel_DRAGONxsec.source.param': the source abundances of DRAGON2's BaseModel_DRAGONxsec.source.param, kept (propagated O/C 1.19-1.21 at 10 GeV/n, VALIDATION CRPROP-D3)"
  ],
  "transport": {
   "geometry": {
@@ -102,10 +104,11 @@
     {
      "species_group": "all primaries",
      "gamma": 2.3,
-     "breaks": []
+     "breaks": [],
+     "spectrum_variable": "rigidity"
     }
    ],
-   "abundances": "fixed by the parent list of theory:cr-secondary-ratio"
+   "abundances": "dragon2:BaseModel_DRAGONxsec.source.param"
   },
   "cross_sections": {
    "production_set": "theory:cr-secondary-ratio models/xs-illustrative-decay.json (ILLUSTRATIVE, isotopic)",

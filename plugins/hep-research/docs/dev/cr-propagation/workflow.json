@@ -846,6 +846,142 @@
    "fallback": null,
    "source": "r4 10; soft_deps derived: RC waits until every other WP is merged, skipped or blocked (r4 Objective, definition of done 1); WF-2..WF-10 are checked by RC's verifier (derived)",
    "files_source": "r4 10 names 'a pull-request draft'; its path docs/dev/cr-propagation/pr-draft.md is derived"
+  },
+  {
+   "id": "K1",
+   "title": "Noise-aware convergence for provider fits; F1 re-judged",
+   "files": [
+    "skills/hep-statistics/scripts/propagation_fit.py",
+    "tests/skills/hep_statistics/**",
+    "examples/bc-usine-reproduction/**",
+    "tests/adapters/fixtures/cr_propagation/f1/**",
+    "tests/adapters/test_cr_propagation.py",
+    "skills/hep-statistics/references/core-stats-commands.md",
+    "skills/hep-statistics/references/core-stats-guide.md"
+   ],
+   "acceptance": [
+    "K1-1",
+    "K1-2"
+   ],
+   "requires": [
+    "env-usine"
+   ],
+   "wave": 7,
+   "card": "decisions.md B1.1",
+   "deps": [],
+   "optional": false,
+   "critical": false,
+   "fallback": "none: escalate",
+   "source": "decisions.md B1.1 (maintainer 2026-10-29)"
+  },
+  {
+   "id": "K2",
+   "title": "Declared, checked provider-side modulation (contracts 3.15.0)",
+   "files": [
+    "contracts/schemas/cr_provider.json",
+    "contracts/__init__.py",
+    "contracts/validate.py",
+    "contracts/vocab/core.json",
+    "contracts/fixtures/**",
+    "tests/contracts/**",
+    "core/provider/**",
+    "core/__init__.py",
+    "tests/core/**",
+    "adapters/cr-propagation/adapter.json",
+    "adapters/cr-propagation/assets/usine_provider.py",
+    "adapters/cr-propagation/assets/usine_translate.py",
+    "skills/hep-statistics/scripts/propagation_fit.py",
+    "tests/skills/hep_statistics/**",
+    "tests/adapters/test_cr_propagation.py",
+    "tools/provider_registry.py",
+    "tests/tools/**",
+    "profiles/**",
+    "examples/**",
+    "skills/*/assets/*.json",
+    "skills/hep-statistics/references/core-stats-commands.md",
+    "skills/hep-theory/references/cosmic-ray-phenomenology.md"
+   ],
+   "acceptance": [
+    "K2-1",
+    "K2-2"
+   ],
+   "requires": [
+    "env-usine"
+   ],
+   "wave": 7,
+   "card": "decisions.md B1.1",
+   "deps": [],
+   "optional": false,
+   "critical": false,
+   "fallback": "none: escalate",
+   "source": "decisions.md B1.1 (maintainer 2026-10-29)"
+  },
+  {
+   "id": "K3",
+   "title": "DRAGON2 known differences in adapter.json, translator gaps (escalation 12), P1 wording and DRAGON2 enum note (escalation 10), B3 erratum",
+   "files": [
+    "adapters/cr-propagation/adapter.json",
+    "adapters/cr-propagation/assets/dragon2_translate.py",
+    "adapters/cr-propagation/assets/usine_translate.py",
+    "adapters/cr-propagation/assets/dragon2_provider.py",
+    "adapters/cr-propagation/assets/usine_provider.py",
+    "tests/adapters/fixtures/cr_propagation/specs/**",
+    "tests/adapters/fixtures/cr_propagation/dragon2/**",
+    "tests/adapters/fixtures/cr_propagation/usine/**",
+    "tests/adapters/fixtures/cr_propagation/d3/**",
+    "tests/adapters/test_cr_propagation.py",
+    "skills/hep-theory/scripts/transport_conventions.py",
+    "tests/skills/hep_theory/**",
+    "skills/hep-theory/references/cosmic-ray-phenomenology.md",
+    "docs/capability-matrix.md",
+    "docs/adapter-authoring.md",
+    "adapters/cr-propagation/assets/dragon2_run.py"
+   ],
+   "acceptance": [
+    "K3-1",
+    "K3-2",
+    "K3-3"
+   ],
+   "requires": [
+    "env-usine",
+    "env-dragon2"
+   ],
+   "wave": 7,
+   "card": "decisions.md B1.1",
+   "deps": [],
+   "optional": false,
+   "critical": false,
+   "fallback": "none: escalate",
+   "source": "decisions.md B1.1 (maintainer 2026-10-29)",
+   "files_source": "docs/adapter-authoring.md added by the orchestrator 2026-10-29 (K2 open question 1: the \"providers never modulate\" wording there); adapters/cr-propagation/assets/dragon2_run.py added 2026-10-29 (the DRAGON2 translator lives there; its --from-transport CLI must use the K3 source checks)"
+  },
+  {
+   "id": "K4",
+   "title": "Emulator nugget floor; C2UF emulator retrained and portable; A1.21 skip removed",
+   "files": [
+    "skills/hep-ml/scripts/train_emulator.py",
+    "tests/skills/hep_ml/**",
+    "adapters/cr-propagation/assets/emulator_provider.py",
+    "tests/adapters/fixtures/cr_propagation/c2uf/**",
+    "tests/adapters/fixtures/cr_propagation/e2/**",
+    "tests/adapters/test_cr_propagation.py",
+    "tests/skills/hep_statistics/**",
+    "skills/hep-ml/references/*.md"
+   ],
+   "acceptance": [
+    "K4-1",
+    "K4-2"
+   ],
+   "requires": [
+    "env-usine"
+   ],
+   "wave": 7,
+   "card": "decisions.md B1.1",
+   "deps": [],
+   "optional": false,
+   "critical": false,
+   "fallback": "none: escalate",
+   "source": "decisions.md B1.1 (maintainer 2026-10-29)"
   }
  ],
  "criticality_source": "r4 8 names B1 and F1 as critical; P0, ENV and RC are marked critical because the campaign cannot proceed or finish without them (derived)",

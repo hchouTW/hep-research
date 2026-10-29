@@ -1,5 +1,5 @@
 {
- "contract_version": "3.14.0",
+ "contract_version": "3.15.0",
  "artifact_id": "tmdg-prediction-sidis-fuut",
  "artifact_type": "prediction",
  "objective": "SIDIS F_UU,T and Cahn ratio versus P_hT in the Gaussian ansatz (synthetic collinear inputs)",
@@ -13,8 +13,8 @@
   ]
  },
  "versions": {
-  "plugin": "0.43.0",
-  "contracts": "3.14.0",
+  "plugin": "0.44.0",
+  "contracts": "3.15.0",
   "profiles": {
    "theory:tmd-gaussian-lo": "0.1.0"
   }

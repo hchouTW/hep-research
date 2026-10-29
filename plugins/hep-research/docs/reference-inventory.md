@@ -14,7 +14,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-detector | 42 | 589 | 0 |
 | hep-measurement | 12 | 123 | 0 |
 | hep-ml | 42 | 195 | 0 |
-| hep-statistics | 14 | 205 | 0 |
+| hep-statistics | 14 | 207 | 0 |
 | hep-theory | 31 | 244 | 0 |
 
 ## Overlapping pairs
@@ -278,7 +278,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `reproducibility.md` | hep-ml | 6.3 | no | 8 | hep-computing | 16214af1 2026-10-26 |
 | `robustness-and-distribution-shift.md` | hep-ml | 4.4 | yes | 11 | - | 1a844ba0 2026-10-17 |
 | `sbi-training.md` | hep-ml | 4.9 | yes | 4 | - | 9257d7b5 2026-10-15 |
-| `scientific-machine-learning.md` | hep-ml | 3.1 | yes | 7 | hep-statistics | 9257d7b5 2026-10-15 |
+| `scientific-machine-learning.md` | hep-ml | 3.5 | yes | 7 | hep-statistics | fc8606a1 2026-10-29 |
 | `sequence-models.md` | hep-ml | 2.2 | no | 4 | - | 9257d7b5 2026-10-15 |
 | `serving-architecture.md` | hep-ml | 1.9 | no | 2 | - | 485e96cb 2026-10-17 |
 | `space-and-astroparticle-ml.md` | hep-ml | 9.6 | yes | 5 | hep-detector | f3e0ff6d 2026-10-17 |
@@ -290,8 +290,8 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `uncertainty-and-calibration.md` | hep-ml | 6.9 | yes | 10 | hep-statistics | 485e96cb 2026-10-17 |
 | `astroparticle-statistics.md` | hep-statistics | 12.4 | yes | 15 | hep-detector, hep-measurement | e03c0396 2026-10-22 |
 | `combinations.md` | hep-statistics | 4.6 | yes | 4 | - | 317c39a3 2026-10-14 |
-| `core-stats-commands.md` | hep-statistics | 49.5 | yes | 6 | hep-detector, hep-measurement | a2e8f9b1 2026-10-28 |
-| `core-stats-guide.md` | hep-statistics | 14.8 | yes | 12 | hep-measurement | 1f9b0087 2026-10-29 |
+| `core-stats-commands.md` | hep-statistics | 51.5 | yes | 6 | hep-detector, hep-measurement | 473ef786 2026-10-29 |
+| `core-stats-guide.md` | hep-statistics | 14.8 | yes | 12 | hep-measurement | 3400a945 2026-10-29 |
 | `inference-recipes.md` | hep-statistics | 21.6 | yes | 13 | hep-detector, hep-measurement | 2b221f92 2026-10-22 |
 | `likelihood-fitting.md` | hep-statistics | 7.1 | yes | 11 | hep-computing, hep-detector | 09237aee 2026-10-17 |
 | `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 8 | hep-ml | 9257d7b5 2026-10-15 |
@@ -305,7 +305,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `amplitudes-and-widths.md` | hep-theory | 8.3 | yes | 3 | - | 83ae4f6b 2026-10-13 |
 | `astroparticle-essentials.md` | hep-theory | 4.6 | yes | 4 | - | 4cedacd8 2026-10-17 |
 | `cosmic-ray-new-physics.md` | hep-theory | 7.8 | no | 4 | - | e70b1a84 2026-10-23 |
-| `cosmic-ray-phenomenology.md` | hep-theory | 24.6 | yes | 8 | - | 3b400e3f 2026-10-28 |
+| `cosmic-ray-phenomenology.md` | hep-theory | 24.6 | yes | 8 | - | afebe106 2026-10-29 |
 | `cosmic-ray-propagation.md` | hep-theory | 21.1 | yes | 23 | hep-detector | 930ba0b2 2026-10-23 |
 | `dark-matter-phenomenology.md` | hep-theory | 5.1 | yes | 7 | - | 98460703 2026-10-17 |
 | `dis-kinematics.md` | hep-theory | 6.1 | yes | 6 | - | f046cc69 2026-10-23 |

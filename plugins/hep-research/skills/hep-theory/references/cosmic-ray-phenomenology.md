@@ -70,8 +70,8 @@ breaks; the modulation parameters of the data periods.
   DRAGON2 cd588707 type `Ptuskin94` has c = 1 and no w, `Ptuskin03` c = 4/3 (src/galaxy.cc:279-284;
   src/include/constants.h:146-149), whole halo (src/galaxy.cc:308, 324); USINE V3.5 c = 4/3
   (inputs/init.Model1D.par:90), thin disc only (src/TUModel1DKisoVc.cc:400-416).
-- **Thin disc vs whole halo** (derived in `transport_conventions.py`; 1D slab, no convection): equal
-  first-order effect needs c V_A,disc^2 h = c V_A,halo^2 L / 3, not sqrt(L/h); beyond it the terms differ by
+- **Thin disc vs whole halo** (derived in `transport_conventions.py`; 1D slab, no convection): first order
+  V_A,disc = V_A,halo sqrt(L/(3h)) at equal c, w (r3 P1's "about sqrt(L/h)" is off by sqrt(3)); bound
   (1 + lam)/5, lam = h Gamma L / D.
 - Above about 5 GV convection and reacceleration are degenerate and poorly constrained one by one (Korsmeier and
   Cuoco 2016, abstract, from p, He and antiprotons).

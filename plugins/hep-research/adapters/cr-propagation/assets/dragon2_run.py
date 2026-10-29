@@ -35,8 +35,10 @@ hydrogen in mb) with each listed channel at a constant value on the energy grid 
 that channel is written at 0 mb unless listed. Channels not listed are absent, so DRAGON2 sets them to zero. DRAGON2
 still adds its helium-target term and uses its own inelastic cross sections, which no data file replaces.
 
-Translator (spec_from_transport, also --from-transport): a transport block (contracts ext_theory_spec.transport, r3
-5.4, the format of tests/adapters/fixtures/cr_propagation/specs/harmonized-v1*.json) becomes a run spec, with every
+Translator (spec_from_transport; --from-transport goes through dragon2_translate.spec_from_transport, which first
+translates or refuses sources.abundances and the injection spectrum_variable, K3): a transport block (contracts
+ext_theory_spec.transport, r3 5.4, the format of tests/adapters/fixtures/cr_propagation/specs/harmonized-v1*.json)
+becomes a run spec, with every
 item DRAGON2 cannot express recorded under "substitutes" (never dropped silently): diffusion D0_cm2_s, R0_gv, eta,
 delta map one to one to D0_1e28, DiffRefRig_GV, etaT, Delta (DRAGON2 cd588707 diffusion.cc, type Constant: D0
 beta^etaT (rho/DiffRefRig)^Delta); breaks are refused; V_A (thin disc: USINE's Seo-Ptuskin D_pp; whole halo:
@@ -626,9 +628,13 @@ def main(argv=None) -> int:
             er = tuple(float(x) for x in args.ekn_range.split(","))
             if len(zr) != 2 or len(er) != 2:
                 raise SpecError("--z-range and --ekn-range take two values")
-            raw = spec_from_transport(item.get("transport") if isinstance(item, dict) else None, args.name,
-                                      json.loads(args.channels.read_text(encoding="utf-8")), z_range=zr,
-                                      ekn_range_gev=er)
+            # through dragon2_translate's source checks (K3, escalation 12), as the provider: sources it cannot
+            # express (injection per energy, abundances other than DRAGON2's own) are refused, never dropped
+            sys.path.insert(0, str(Path(__file__).resolve().parent))
+            import dragon2_translate
+            channels = json.loads(args.channels.read_text(encoding="utf-8"))
+            raw = dragon2_translate.spec_from_transport(item.get("transport") if isinstance(item, dict) else None,
+                                                        args.name, channels, z_range=zr, ekn_range_gev=er)
             args.out.mkdir(parents=True, exist_ok=True)
             (args.out / f"{args.name}.spec.json").write_text(json.dumps(raw, indent=1) + "\n", encoding="utf-8")
         else:

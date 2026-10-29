@@ -56,6 +56,7 @@ for p in (PLUGIN_ROOT, ASSETS):
         sys.path.insert(0, str(p))
 import dragon2_run as dr  # noqa: E402
 import dragon2_to_prediction as dconv  # noqa: E402
+import dragon2_translate as dt  # noqa: E402
 import usine_to_prediction as rd  # noqa: E402
 import usine_translate as ut  # noqa: E402
 
@@ -490,13 +491,14 @@ def dragon2_specs() -> dict:
                       .read_text(encoding="utf-8"))
     if {"6012->5011": xs_a["production_mb"]["C->B"], "8016->5011": xs_a["production_mb"]["O->B"]} != channels_a:
         raise ValueError("set A changed in the profile")
-    h1 = dr.spec_from_transport(_load("harmonized-v1")["transport"], "D3_harmonized_v1", channels_a, z_range=Z_RANGE,
-                                ekn_range_gev=EKN_RANGE)
+    # DRAGON2's own sources stated (K3, escalation 12): the runs were made with them; harmonized-v1's are refused
+    h1 = dt.spec_from_transport(dt.with_dragon2_sources(_load("harmonized-v1")["transport"]), "D3_harmonized_v1",
+                                channels_a, z_range=Z_RANGE, ekn_range_gev=EKN_RANGE)
     h1["substitutes"].append("D3: element-level ILLUSTRATIVE set A placed on 12C -> 11B and 16O -> 11B (as USINE's "
                              "translation of the same block)")
     channels = json.loads((D1_FIX / "channels-illustrative-decay.json").read_text(encoding="utf-8"))
-    l2 = dr.spec_from_transport(_load("harmonized-v1-isotopic")["transport"], "D3_l2_dragon2", channels,
-                                z_range=Z_RANGE, ekn_range_gev=EKN_RANGE)
+    l2 = dt.spec_from_transport(dt.with_dragon2_sources(_load("harmonized-v1-isotopic")["transport"]), "D3_l2_dragon2",
+                                channels, z_range=Z_RANGE, ekn_range_gev=EKN_RANGE)
     del l2["production_table"]
     l2["substitutes"].append("D3 level 2: no production_table; DRAGON2's shipped production table "
                              f"{dr.TABLE_NAME} (Evoli 2019, cumulative, helium by He_to_H_CS_ratio) and the source "

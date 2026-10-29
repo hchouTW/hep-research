@@ -30,17 +30,17 @@
   },
   "hep-ml": {
    "references": 42,
-   "bytes": 195039,
+   "bytes": 195454,
    "uncited": 0
   },
   "hep-statistics": {
    "references": 14,
-   "bytes": 205340,
+   "bytes": 207327,
    "uncited": 0
   },
   "hep-theory": {
    "references": 31,
-   "bytes": 243625,
+   "bytes": 243624,
    "uncited": 0
   }
  },
@@ -3533,8 +3533,8 @@
   {
    "path": "skills/hep-ml/references/scientific-machine-learning.md",
    "owner": "hep-ml",
-   "bytes": 3086,
-   "lines": 43,
+   "bytes": 3501,
+   "lines": 47,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-ml/SKILL.md",
@@ -3548,7 +3548,7 @@
    "cited_by_other_skills": [
     "hep-statistics"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "fc8606a1 2026-10-29"
   },
   {
    "path": "skills/hep-ml/references/sequence-models.md",
@@ -3740,8 +3740,8 @@
   {
    "path": "skills/hep-statistics/references/core-stats-commands.md",
    "owner": "hep-statistics",
-   "bytes": 49473,
-   "lines": 542,
+   "bytes": 51460,
+   "lines": 561,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/response-and-forward-folding.md",
@@ -3755,7 +3755,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "a2e8f9b1 2026-10-28"
+   "last_commit": "473ef786 2026-10-29"
   },
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
@@ -3780,7 +3780,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "1f9b0087 2026-10-29"
+   "last_commit": "3400a945 2026-10-29"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
@@ -4076,7 +4076,7 @@
   {
    "path": "skills/hep-theory/references/cosmic-ray-phenomenology.md",
    "owner": "hep-theory",
-   "bytes": 24574,
+   "bytes": 24573,
    "lines": 291,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -4090,7 +4090,7 @@
     "tests/skills/hep_theory/test_transport_conventions.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "3b400e3f 2026-10-28"
+   "last_commit": "afebe106 2026-10-29"
   },
   {
    "path": "skills/hep-theory/references/cosmic-ray-propagation.md",

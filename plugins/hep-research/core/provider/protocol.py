@@ -4,7 +4,15 @@ rules; core does not read it (tests keep the two in agreement).
 A request names the provider, its version, parameter points (canonical parameter names -> numbers), observables with
 an axis (rigidity in GV or ekn in GeV/n) and contiguous bins, and what it wants: only "lis" (unmodulated predictions,
 one per observable, in request order) and "components" (additive pieces of each prediction; only from a decomposable
-provider). Providers never modulate; any other wanted item fails the request with reason unsupported-want.
+provider). Providers never modulate unless the declaration carries a modulation block (contracts 3.15.0): the
+force-field model, the implementation, the modulation parameters phi_<period>_gv (each in the domain; a phi_<period>_gv
+in the domain needs the block) and a passing conformance result (the provider's modulated output equals the plugin's
+force-field tool applied to its own isotopic LIS within a tolerance no looser than MODULATION_TOLERANCE_MAX;
+tools/provider_registry.py --conformance). Without the block a phi parameter is an unknown parameter and a
+top-of-atmosphere prediction is an invalid response (check_modulation); with it a point carrying two modulation
+parameters would be modulated twice and is refused (invalid-request), and a prediction is top-of-atmosphere exactly
+when its point carries a nonzero modulation parameter. Any other wanted item fails the request with reason
+unsupported-want.
 
 A response holds one result per point, in request order. A result is "ok" with predictions (and components) and an
 evaluation record, or "failed" with a reason code and no prediction. Out of the declared domain the default is
@@ -47,8 +55,16 @@ SHA256 = re.compile(r"^[0-9a-f]{64}$")
 REQUEST_KEYS = {"protocol", "provider", "provider_version", "theory_spec_ref", "transport", "points", "observables",
                 "want", "seed"}
 DECLARATION_KEYS = {"id", "entrypoint", "protocol", "version", "description", "domain", "axis_ranges", "observables",
-                    "axes", "decomposable", "deterministic", "output_units"}
-DECLARATION_REQUIRED = DECLARATION_KEYS - {"version", "description", "axis_ranges"}
+                    "axes", "decomposable", "deterministic", "output_units", "modulation"}
+DECLARATION_REQUIRED = DECLARATION_KEYS - {"version", "description", "axis_ranges", "modulation"}
+# provider-side modulation (contracts 3.15.0): the declared exception to "providers never modulate"
+MODULATION_PARAMETER = re.compile(r"^phi_[A-Za-z0-9]+(?:_[A-Za-z0-9]+)*_gv$")
+MODULATION_MODELS = ("force-field",)
+MODULATION_KEYS = {"model", "implementation", "parameters", "conformance"}
+CONFORMANCE_KEYS = {"reference_point", "observables", "tolerance", "result"}
+CONFORMANCE_RESULT_KEYS = {"status", "max_relative_deviation", "nodes_compared", "isotopes", "tool"}
+MODULATION_TOLERANCE_MAX = 1e-3  # the conformance tolerance is no looser than this (F1's force-field agreement)
+MODULATED_LEVEL = "top-of-atmosphere"
 
 
 def _number(value) -> bool:
@@ -101,6 +117,104 @@ def check_declaration(declaration) -> list[str]:
     units = declaration["output_units"]
     if not isinstance(units, dict) or not all(isinstance(v, str) for v in units.values()):
         problems.append("output_units: name -> unit string")
+    if isinstance(domain, dict):
+        problems += _modulation_problems(declaration.get("modulation"), domain, declaration)
+    return problems
+
+
+def modulation_parameters(declaration: dict) -> list[str]:
+    """The declared modulation parameters (phi_<period>_gv) of a provider; [] without a modulation block."""
+    block = declaration.get("modulation")
+    return list(block.get("parameters") or []) if isinstance(block, dict) else []
+
+
+def _modulation_problems(block, domain: dict, declaration: dict) -> list[str]:
+    """The modulation block (optional): force-field only, the implementation, the parameters (each in the domain, and
+    every phi_<period>_gv of the domain listed) and a passing conformance result within its tolerance."""
+    in_domain = sorted(n for n in domain if MODULATION_PARAMETER.match(n))
+    if block is None:
+        return [f"domain: {in_domain} are modulation parameters; a provider that modulates declares a modulation "
+                "block (providers never modulate otherwise)"] if in_domain else []
+    if not isinstance(block, dict):
+        return ["modulation: an object"]
+    problems = [f"modulation: missing field '{k}'" for k in sorted(MODULATION_KEYS - set(block))]
+    problems += [f"modulation: unknown field '{k}'" for k in sorted(set(block) - MODULATION_KEYS)]
+    if problems:
+        return problems
+    if block["model"] not in MODULATION_MODELS:
+        problems.append(f"modulation.model must be one of {list(MODULATION_MODELS)}")
+    if not isinstance(block["implementation"], str) or not block["implementation"].strip():
+        problems.append("modulation.implementation: a non-empty string naming the code that modulates")
+    params = block["parameters"]
+    if not isinstance(params, list) or not params or not all(isinstance(p, str) for p in params) \
+            or len(set(params)) != len(params):
+        problems.append("modulation.parameters: a non-empty list of distinct phi_<period>_gv names")
+        params = []
+    for name in params:
+        if not MODULATION_PARAMETER.match(name):
+            problems.append(f"modulation.parameters: '{name}' is not a phi_<period>_gv name")
+        elif name not in domain:
+            problems.append(f"modulation.parameters: '{name}' is not in the declared domain")
+    unlisted = [n for n in in_domain if n not in params]
+    if unlisted:
+        problems.append(f"domain: modulation parameters {unlisted} are not listed in modulation.parameters")
+    return problems + _conformance_problems(block["conformance"], params, domain, declaration)
+
+
+def _conformance_problems(conf, params: list, domain: dict, declaration: dict) -> list[str]:
+    where = "modulation.conformance"
+    if not isinstance(conf, dict):
+        return [f"{where}: an object (a provider declares modulation only after the conformance gate passes)"]
+    problems = [f"{where}: missing field '{k}'" for k in sorted(CONFORMANCE_KEYS - set(conf))]
+    problems += [f"{where}: unknown field '{k}'" for k in sorted(set(conf) - CONFORMANCE_KEYS)]
+    if problems:
+        return problems
+    point = conf["reference_point"]
+    if not isinstance(point, dict) or not all(isinstance(k, str) and _number(v) for k, v in point.items()):
+        problems.append(f"{where}.reference_point: canonical parameter name -> finite number")
+    else:
+        used = [n for n in params if point.get(n)]
+        if len(used) != 1:
+            problems.append(f"{where}.reference_point: exactly one modulation parameter {params} with a nonzero value")
+        problems += [f"{where}.reference_point: '{n}' is not in the declared domain" for n in sorted(point)
+                     if n not in domain]
+        problems += [f"{where}.reference_point: {n}={point[n]!r} is outside the declared domain" for n in sorted(point)
+                     if n in domain and not _range_problems(n, domain[n])
+                     and not domain[n]["min"] <= point[n] <= domain[n]["max"]]
+    observables = conf["observables"]
+    if not isinstance(observables, list) or not observables:
+        problems.append(f"{where}.observables: a non-empty list of observable requests (id, axis, unit, bins)")
+    else:
+        for i, obs in enumerate(observables):
+            if not isinstance(obs, dict) or set(obs) != {"id", "axis", "unit", "bins"} \
+                    or obs["id"] not in (declaration.get("observables") or []) \
+                    or obs["axis"] not in AXIS_UNITS or obs["unit"] != AXIS_UNITS[obs["axis"]] \
+                    or bin_edges(obs["bins"]) is None:
+                problems.append(f"{where}.observables[{i}]: a declared observable with id, axis, unit and "
+                                "increasing contiguous bins")
+    tol = conf["tolerance"]
+    if not _number(tol) or not 0 < tol <= MODULATION_TOLERANCE_MAX:
+        problems.append(f"{where}.tolerance: a relative tolerance in (0, {MODULATION_TOLERANCE_MAX:g}]")
+        tol = None
+    result = conf["result"]
+    if not isinstance(result, dict) or set(result) != CONFORMANCE_RESULT_KEYS:
+        return problems + [f"{where}.result: exactly {sorted(CONFORMANCE_RESULT_KEYS)}"]
+    if result["status"] != "passed":
+        problems.append(f"{where}.result.status must be 'passed': a provider without a passing conformance result "
+                        "does not modulate")
+    dev = result["max_relative_deviation"]
+    if not _number(dev) or dev < 0:
+        problems.append(f"{where}.result.max_relative_deviation: a number >= 0")
+    elif tol is not None and dev > tol:
+        problems.append(f"{where}.result.max_relative_deviation {dev:g} exceeds the tolerance {tol:g}")
+    nodes = result["nodes_compared"]
+    if isinstance(nodes, bool) or not isinstance(nodes, int) or nodes < 1:
+        problems.append(f"{where}.result.nodes_compared: an integer >= 1")
+    isotopes = result["isotopes"]
+    if not isinstance(isotopes, list) or not isotopes or not all(isinstance(x, str) and x for x in isotopes):
+        problems.append(f"{where}.result.isotopes: a non-empty list of nuclide names")
+    if not isinstance(result["tool"], str) or not result["tool"]:
+        problems.append(f"{where}.result.tool: the force-field tool the provider was compared with")
     return problems
 
 
@@ -212,11 +326,16 @@ def request_refusal(request: dict, declaration: dict, allow_outside: bool = Fals
 
 def point_refusal(point: dict, declaration: dict, allow_outside: bool = False):
     """(reason, detail, outside) for one point: unknown-parameter for a name outside the declared domain,
-    out-of-domain for a value outside its range (unless allow_outside), else (None, '', outside)."""
+    invalid-request for two modulation parameters (the prediction would be modulated twice), out-of-domain for a
+    value outside its range (unless allow_outside), else (None, '', outside)."""
     domain = declaration["domain"]
     unknown = sorted(set(point) - set(domain))
     if unknown:
         return "unknown-parameter", f"parameters {unknown} are not in the declared domain {sorted(domain)}", False
+    twice = sorted(set(point) & set(modulation_parameters(declaration)))
+    if len(twice) > 1:
+        return ("invalid-request", f"the point carries the modulation parameters {twice}: one prediction is modulated "
+                "once, at the potential of one period", False)
     beyond = [f"{name}={point[name]!r} not in [{domain[name]['min']!r}, {domain[name]['max']!r}]"
               for name in sorted(point) if not domain[name]["min"] <= point[name] <= domain[name]["max"]]
     if beyond and not allow_outside:
@@ -320,6 +439,34 @@ def check_response(response, request: dict) -> list[str]:
             problems += _component_problems(where, res.get("components"), request["observables"], edges)
         elif "components" in res:
             problems.append(f"{where}: components were not wanted")
+    return problems
+
+
+def check_modulation(result: dict, declaration: dict) -> list[str]:
+    """Problems of one ok result against the declared modulation (contracts 3.15.0): a top-of-atmosphere prediction
+    from a provider without a modulation block; with the block, a top-of-atmosphere prediction for a point without a
+    nonzero modulation parameter, or a prediction of another level for a point with one (the provider ignored it)."""
+    if not isinstance(result, dict) or result.get("status") != "ok":
+        return []
+    params = modulation_parameters(declaration)
+    point = result.get("point")
+    if not isinstance(point, dict):
+        point = {}
+    modulated = any(point.get(n) for n in params)
+    problems = []
+    for k, pred in enumerate(result.get("predictions") or []):
+        obs = pred.get("observable") if isinstance(pred, dict) else None
+        level = obs.get("level") if isinstance(obs, dict) else None
+        where = f"predictions[{k}]"
+        if level == MODULATED_LEVEL and not params:
+            problems.append(f"{where}: a {MODULATED_LEVEL} prediction from provider {declaration.get('id')!r}, whose "
+                            "declaration has no modulation block (providers never modulate otherwise)")
+        elif level == MODULATED_LEVEL and not modulated:
+            problems.append(f"{where}: a {MODULATED_LEVEL} prediction for a point without a modulation parameter "
+                            f"{params}")
+        elif modulated and level != MODULATED_LEVEL:
+            problems.append(f"{where}: level {level!r} for a point carrying a modulation parameter {params}: the "
+                            f"declared modulation gives {MODULATED_LEVEL} values")
     return problems
 
 

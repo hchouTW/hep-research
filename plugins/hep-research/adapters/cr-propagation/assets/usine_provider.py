@@ -18,10 +18,12 @@ the transport's zone), and (work package F1):
   delta minus that change; recorded in transport_substitutes.
 - phi_<period>_gv: the force-field modulation potential of the observable's data period; USINE modulates each isotope
   (SolMod0DFF, Phi = |Z| phi / A, before the reader forms ratios, r3 P4) and the predictions are top-of-atmosphere
-  values. At most one phi per point (one period per request); without it the values are unmodulated. This departs from
-  the protocol's "providers never modulate" (contracts/schemas/cr_provider.json, r3 5.2): the per-isotope modulation
-  is USINE's own, the code of the reproduced analysis, and is checked against the plugin's force-field tool contract
-  (adapter test); recorded in every modulated prediction.
+  values. At most one phi per point (one period per request); without it the values are unmodulated. This is the
+  declared exception to the protocol's "providers never modulate" (contracts 3.15.0: the declaration's modulation
+  block in adapter.json, contracts/schemas/cr_provider.json): the per-isotope modulation is USINE's own, the code of
+  the reproduced analysis, and passed the conformance gate (tools/provider_registry.py --conformance usine, through
+  isotope_tables below: USINE's SolMod0DFF output equals the plugin's force-field tool applied to USINE's own isotopic
+  LIS within the declared tolerance); recorded in every modulated prediction.
 - xs_norm_<proj>_<target>_<frag>, xs_slope_<proj>_<target>_<frag>, xs_threshold_<proj>_<target>_<frag>_gev (for
   example xs_norm_12C_H_11B): one production channel of USINE's own cross sections times norm, and below the threshold
   (E_k/n in GeV/n) times (E_k/n / threshold)^slope (USINE's fit-mode Norm, SlopeLE and EThresh; usine_translate.py
@@ -229,6 +231,27 @@ def evaluate_point(request: dict, point: dict, context: dict) -> dict:
     if "lis" in context["want"]:
         out["predictions"] = predictions
     return out
+
+
+def isotope_tables(request: dict, point: dict) -> dict:
+    """Conformance hook of the declared modulation (contracts 3.15.0; tools/provider_registry.py --conformance): one
+    USINE run at the point, as evaluate_point makes it, and the per-isotope tables of the requested observables:
+    {"phi_gv": phi (0 without a phi_<period>_gv), "isotopes": {nuclide: {"charge", "mass_number", "ekn", "flux"}},
+    "substitutes": [...]}. With a phi the tables are USINE's SolMod0DFF output (first column the top-of-atmosphere
+    E_k/n), without one the local interstellar fluxes. The run lives in a temporary folder."""
+    transport, notes = transport_for(request, point)
+    phi_gv, modifiers = run_options(point)
+    name = "c" + point_hash(request.get("transport"), request["provider"], request["provider_version"], point)[:16]
+    with tempfile.TemporaryDirectory(prefix="usine-conformance-") as scratch:
+        spec, _, tables = run_point(transport, name, request["observables"], Path(scratch) / name, phi_gv, modifiers)
+    isotopes = {}
+    for obs in request["observables"]:
+        num, den = reader.present(obs["id"], spec["species"])
+        for nuclide in num + den:
+            z, a = reader.charge_and_mass(nuclide)
+            isotopes[nuclide] = {"charge": z, "mass_number": a, "ekn": list(tables[nuclide][0]),
+                                 "flux": list(tables[nuclide][1])}
+    return {"phi_gv": phi_gv, "isotopes": isotopes, "substitutes": notes + list(spec["substitutes"])}
 
 
 def main(argv=None) -> int:
