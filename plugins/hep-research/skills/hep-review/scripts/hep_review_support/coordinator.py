@@ -27,6 +27,8 @@ You are a reviewer working in a fresh context. Rules:
 - `violated` needs a finding naming the defective element and its evidence. Do not raise findings on correct work.
 - Read only the files named here. You have not been shown, and must not look for, any other evaluation, expected
   answer, gold or rubric.
+- Name each attempt with one of the obligation's `required_methods` and each evidence entry with one of its
+  `evidence_requirements` (exact strings); a check you did not do is not listed.
 
 ## Obligations
 ```json
