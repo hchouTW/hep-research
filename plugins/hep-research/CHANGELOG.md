@@ -44,7 +44,7 @@ parallel full run and passes on its own and in CI. hep-review reviewers share th
   `contracts/migrate.py`, the `counting-chain` and `ratio-subset` suites, the operator coverage contract, the schemas
   of the v2 bundle, check context, check report, semantic lock and operator coverage, `permit.py check-report`'s
   implementation and `tools/rename_analysis_check_ids.py`. `contracts/analysis_check.py`, `permit.py check-report` and
-  `review_measurement_spec.py --check-bundle` now refuse with the reason; reproduce old bundles and reports with 0.45.x.
+  `review_measurement_spec.py --check-bundle` now refuse with the reason; reproduce old bundles and reports with 0.47.x.
   - **Kept:** the rule registry (now every new or changed rule is retired) and its CI impact map; `source_digest.py`
     (moved to `contracts/`); the effect catalog and its check; `custody.py`; `semver.py`; `resolve.py`;
     `validation_record.json`; the capability `measurement:correction-keys-v1`; the v2 bundle digest in attestations.

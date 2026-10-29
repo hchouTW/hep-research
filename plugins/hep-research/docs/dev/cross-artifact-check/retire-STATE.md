@@ -62,6 +62,7 @@ stops: []
 2026-10-29 | T7 | full check after: same statuses, 6122 tests, 0 failed, no one-sided failure | none
 2026-10-29 | T8 | hep-review hashes identical, claims check [], protected areas unchanged | none
 2026-10-29 | T9 | six grouped commits, then this state commit | 84b4318e..15fd76da
+2026-10-29 | follow-up | merged origin/main a2852507 (PR #314, clean); CHANGELOG 0.45.x -> 0.47.x; checks rerun | see git log
 ```
 
 ## Report
@@ -111,5 +112,5 @@ while the stub exists.
 
 **Open for the maintainer (section 8.3).** Fill in the Decision of `decision-retire.md`; bump `CONTRACTS_VERSION`
 (sidecar formats removed) with a version-history note; add a `VALIDATION.md` entry with the changed assertions above;
-replace "reproduce ... with 0.45.x" in CHANGELOG with the last release that has the check (0.46.x, since this branch
-is based on 0.46.0); remove the stub, the two hidden flags and the `check-report` subcommand in the next minor.
+confirm "reproduce ... with 0.47.x" in CHANGELOG names the last release that has the check (set to 0.47.x
+after the follow-up below, since 0.47.0 is cut from a main without this branch); remove the stub, the two hidden flags and the `check-report` subcommand in the next minor.
