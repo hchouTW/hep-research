@@ -1,0 +1,39 @@
+{
+  "id": "ga2467e91",
+  "type": "C01",
+  "defects": [
+    {
+      "defect_id": "D1",
+      "statement": "Multiplying recorded luminosity by the live fraction applies a correction already contained in the recorded exposure a second time.",
+      "affected_results": [
+        "cross_section",
+        "cross_section_error"
+      ],
+      "tags": [
+        "convention",
+        "interacting"
+      ],
+      "corrected_values": {
+        "cross_section": 69.68434600013548,
+        "cross_section_error": 2.6641151396315577
+      }
+    },
+    {
+      "defect_id": "D2",
+      "statement": "Dividing a charge-summed yield by two converts it to a single-charge cross section despite the explicitly charge-summed target.",
+      "affected_results": [
+        "cross_section",
+        "cross_section_error"
+      ],
+      "tags": [
+        "convention",
+        "interacting"
+      ],
+      "corrected_values": {
+        "cross_section": 69.68434600013548,
+        "cross_section_error": 2.6641151396315577
+      }
+    }
+  ],
+  "notes": "Synthetic study. All displayed numbers reproduce the written release method. Gold corrections are joint, with single interventions audited separately."
+}

@@ -11,13 +11,15 @@ from types import SimpleNamespace
 
 ROOT = Path(__file__).resolve().parents[3]
 DEV = ROOT / "docs" / "dev" / "hep-review"
-for p in (ROOT, ROOT / "skills" / "hep-review" / "scripts", DEV / "pilot", DEV / "pilot" / "g2h", DEV / "pilot" / "g2x"):
+for p in (ROOT, ROOT / "skills" / "hep-review" / "scripts", DEV / "pilot", DEV / "pilot" / "g2h", DEV / "pilot" / "g2x",
+          DEV / "g3"):
     sys.path.insert(0, str(p))
 sys.dont_write_bytecode = True
 
 import run_pilot  # noqa: E402
 import run_g2h  # noqa: E402
 import run_g2x  # noqa: E402
+import run_g3  # noqa: E402
 
 
 def committed(path: Path) -> dict:
@@ -46,6 +48,19 @@ class PilotScores(unittest.TestCase):
         out = run_g2x.cmd_score(SimpleNamespace(run=str(e), gold=str(e / "published" / "gold"),
                                                 combined=str(e / "grader-runs" / "combined.json")))
         self.assertEqual(roundtrip(out), committed(e / "score.json"))
+
+    def test_g3_score_reproduces(self):
+        e = DEV / "g3" / "evidence"
+        out = run_g3.cmd_score(SimpleNamespace(run=str(e), gold=str(e / "published" / "gold"),
+                                               combined=str(e / "grader-runs" / "combined.json")))
+        self.assertEqual(roundtrip(out), committed(e / "score.json"))
+
+    def test_g3_measured_rates_are_what_the_report_says(self):
+        g3 = committed(DEV / "g3" / "evidence" / "score.json")
+        detection = g3["measured"]["defect_detection"]["all"]
+        self.assertEqual((detection["k"], detection["n"], detection["ci95"]), (71, 72, [0.925, 0.9996]))
+        self.assertEqual(g3["measured"]["c02_false_alarm"]["k"], 0)
+        self.assertEqual(g3["claim_decision"]["state"], "evaluated-scope")
 
     def test_published_gates_are_what_the_reports_say(self):
         g2 = committed(DEV / "pilot" / "g2" / "score.json")

@@ -1,0 +1,1102 @@
+{
+ "claim_decision": {
+  "reason": "engineering gate passed and graders calibrated",
+  "state": "evaluated-scope",
+  "usage_warnings": []
+ },
+ "defect_rows": [
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "g192291b8",
+   "trial": "g192291b8-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "g192291b8",
+   "trial": "g192291b8-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "g192291b8",
+   "trial": "g192291b8-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "g192291b8",
+   "trial": "g192291b8-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "g192291b8",
+   "trial": "g192291b8-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "g192291b8",
+   "trial": "g192291b8-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "g3b5d0b40",
+   "trial": "g3b5d0b40-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "g3b5d0b40",
+   "trial": "g3b5d0b40-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "g3b5d0b40",
+   "trial": "g3b5d0b40-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "g3b5d0b40",
+   "trial": "g3b5d0b40-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "g3b5d0b40",
+   "trial": "g3b5d0b40-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "g3b5d0b40",
+   "trial": "g3b5d0b40-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "g3dd81149",
+   "trial": "g3dd81149-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "g3dd81149",
+   "trial": "g3dd81149-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "g3dd81149",
+   "trial": "g3dd81149-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": false,
+   "instance": "g3dd81149",
+   "trial": "g3dd81149-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "g3dd81149",
+   "trial": "g3dd81149-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "g3dd81149",
+   "trial": "g3dd81149-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "g48ebe90a",
+   "trial": "g48ebe90a-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "g48ebe90a",
+   "trial": "g48ebe90a-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "g48ebe90a",
+   "trial": "g48ebe90a-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "g48ebe90a",
+   "trial": "g48ebe90a-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "g48ebe90a",
+   "trial": "g48ebe90a-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "g48ebe90a",
+   "trial": "g48ebe90a-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "g62cf1e30",
+   "trial": "g62cf1e30-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "g62cf1e30",
+   "trial": "g62cf1e30-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "g62cf1e30",
+   "trial": "g62cf1e30-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "g62cf1e30",
+   "trial": "g62cf1e30-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "g62cf1e30",
+   "trial": "g62cf1e30-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "g62cf1e30",
+   "trial": "g62cf1e30-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "g6bcd18f0",
+   "trial": "g6bcd18f0-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "g6bcd18f0",
+   "trial": "g6bcd18f0-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "g6bcd18f0",
+   "trial": "g6bcd18f0-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "g6bcd18f0",
+   "trial": "g6bcd18f0-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "g6bcd18f0",
+   "trial": "g6bcd18f0-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "g6bcd18f0",
+   "trial": "g6bcd18f0-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "g91002406",
+   "trial": "g91002406-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "g91002406",
+   "trial": "g91002406-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "g91002406",
+   "trial": "g91002406-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "g91002406",
+   "trial": "g91002406-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "g91002406",
+   "trial": "g91002406-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "g91002406",
+   "trial": "g91002406-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "g9fc0e784",
+   "trial": "g9fc0e784-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "g9fc0e784",
+   "trial": "g9fc0e784-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "g9fc0e784",
+   "trial": "g9fc0e784-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "g9fc0e784",
+   "trial": "g9fc0e784-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "g9fc0e784",
+   "trial": "g9fc0e784-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "g9fc0e784",
+   "trial": "g9fc0e784-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "ga2467e91",
+   "trial": "ga2467e91-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "ga2467e91",
+   "trial": "ga2467e91-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "ga2467e91",
+   "trial": "ga2467e91-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "ga2467e91",
+   "trial": "ga2467e91-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "ga2467e91",
+   "trial": "ga2467e91-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "ga2467e91",
+   "trial": "ga2467e91-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "ga50ce70b",
+   "trial": "ga50ce70b-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "ga50ce70b",
+   "trial": "ga50ce70b-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "ga50ce70b",
+   "trial": "ga50ce70b-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "ga50ce70b",
+   "trial": "ga50ce70b-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "ga50ce70b",
+   "trial": "ga50ce70b-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "ga50ce70b",
+   "trial": "ga50ce70b-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "gb22f6deb",
+   "trial": "gb22f6deb-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "gb22f6deb",
+   "trial": "gb22f6deb-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "gb22f6deb",
+   "trial": "gb22f6deb-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "gb22f6deb",
+   "trial": "gb22f6deb-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "gb22f6deb",
+   "trial": "gb22f6deb-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "gb22f6deb",
+   "trial": "gb22f6deb-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "geac9572a",
+   "trial": "geac9572a-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "geac9572a",
+   "trial": "geac9572a-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "geac9572a",
+   "trial": "geac9572a-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "geac9572a",
+   "trial": "geac9572a-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "geac9572a",
+   "trial": "geac9572a-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "geac9572a",
+   "trial": "geac9572a-t3",
+   "unadjudicated": false
+  }
+ ],
+ "engineering_gate": {
+  "completed": 60,
+  "continuity_verified": 60,
+  "export_recomputes": 60,
+  "fidelity_ok": 60,
+  "pass": true,
+  "trials": 60,
+  "unplanned_quarantine": 0
+ },
+ "known_defect_level": {
+  "defect_trials": 72,
+  "identified_with_valid_reason": 71,
+  "unadjudicated": 0
+ },
+ "measured": {
+  "c02_false_alarm": {
+   "ci95": [
+    0.0,
+    0.218
+   ],
+   "k": 0,
+   "n": 15,
+   "rate": 0.0
+  },
+  "c03_gap_kept": {
+   "ci95": [
+    0.5407,
+    1.0
+   ],
+   "k": 6,
+   "n": 6,
+   "rate": 1.0
+  },
+  "c04_planning_gap": {
+   "ci95": [
+    0.2924,
+    1.0
+   ],
+   "k": 3,
+   "n": 3,
+   "rate": 1.0
+  },
+  "defect_detection": {
+   "all": {
+    "ci95": [
+     0.925,
+     0.9996
+    ],
+    "k": 71,
+    "n": 72,
+    "rate": 0.9861
+   },
+   "convention": {
+    "ci95": [
+     0.8147,
+     1.0
+    ],
+    "k": 18,
+    "n": 18,
+    "rate": 1.0
+   },
+   "interacting": {
+    "ci95": [
+     0.925,
+     0.9996
+    ],
+    "k": 71,
+    "n": 72,
+    "rate": 0.9861
+   },
+   "numerical": {
+    "ci95": [
+     0.8103,
+     0.9991
+    ],
+    "k": 26,
+    "n": 27,
+    "rate": 0.963
+   },
+   "untagged": {
+    "ci95": [
+     0.0,
+     1.0
+    ],
+    "k": 0,
+    "n": 0,
+    "rate": null
+   }
+  }
+ },
+ "per_type_instances": {
+  "C01": {
+   "all_scheduled": 11,
+   "at_least_once": 12,
+   "first_attempt": 12,
+   "instances": 12
+  },
+  "C02": {
+   "all_scheduled": 5,
+   "at_least_once": 5,
+   "first_attempt": 5,
+   "instances": 5
+  },
+  "C03": {
+   "all_scheduled": 2,
+   "at_least_once": 2,
+   "first_attempt": 2,
+   "instances": 2
+  },
+  "C04": {
+   "all_scheduled": 1,
+   "at_least_once": 1,
+   "first_attempt": 1,
+   "instances": 1
+  }
+ },
+ "predicted_finding_level": {
+  "C01_findings": 94,
+  "grader_disagreement_unadjudicated": 4,
+  "matched_a_gold_defect": 71,
+  "outside_gold_unadjudicated": 19
+ },
+ "rows": {
+  "g192291b8-t1": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "g192291b8",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "g192291b8-t2": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "g192291b8",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "g192291b8-t3": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "g192291b8",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "g19d6b014-t1": {
+   "false_alarm": false,
+   "instance": "g19d6b014",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "g19d6b014-t2": {
+   "false_alarm": false,
+   "instance": "g19d6b014",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "g19d6b014-t3": {
+   "false_alarm": false,
+   "instance": "g19d6b014",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "g3b5d0b40-t1": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "g3b5d0b40",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "g3b5d0b40-t2": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "g3b5d0b40",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "g3b5d0b40-t3": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "g3b5d0b40",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "g3dd81149-t1": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "g3dd81149",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "g3dd81149-t2": {
+   "defects": 2,
+   "detected": 1,
+   "instance": "g3dd81149",
+   "state": "completed",
+   "success": false,
+   "type": "C01"
+  },
+  "g3dd81149-t3": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "g3dd81149",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "g48ebe90a-t1": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "g48ebe90a",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "g48ebe90a-t2": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "g48ebe90a",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "g48ebe90a-t3": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "g48ebe90a",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "g4d2a7736-t1": {
+   "gap_kept": true,
+   "instance": "g4d2a7736",
+   "state": "completed",
+   "success": true,
+   "type": "C03"
+  },
+  "g4d2a7736-t2": {
+   "gap_kept": true,
+   "instance": "g4d2a7736",
+   "state": "completed",
+   "success": true,
+   "type": "C03"
+  },
+  "g4d2a7736-t3": {
+   "gap_kept": true,
+   "instance": "g4d2a7736",
+   "state": "completed",
+   "success": true,
+   "type": "C03"
+  },
+  "g62cf1e30-t1": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "g62cf1e30",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "g62cf1e30-t2": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "g62cf1e30",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "g62cf1e30-t3": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "g62cf1e30",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "g6bcd18f0-t1": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "g6bcd18f0",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "g6bcd18f0-t2": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "g6bcd18f0",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "g6bcd18f0-t3": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "g6bcd18f0",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "g7cd4ff2a-t1": {
+   "false_alarm": false,
+   "instance": "g7cd4ff2a",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "g7cd4ff2a-t2": {
+   "false_alarm": false,
+   "instance": "g7cd4ff2a",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "g7cd4ff2a-t3": {
+   "false_alarm": false,
+   "instance": "g7cd4ff2a",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "g814f15fa-t1": {
+   "false_alarm": false,
+   "instance": "g814f15fa",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "g814f15fa-t2": {
+   "false_alarm": false,
+   "instance": "g814f15fa",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "g814f15fa-t3": {
+   "false_alarm": false,
+   "instance": "g814f15fa",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "g87a93b02-t1": {
+   "gap_kept": true,
+   "instance": "g87a93b02",
+   "state": "completed",
+   "success": true,
+   "type": "C03"
+  },
+  "g87a93b02-t2": {
+   "gap_kept": true,
+   "instance": "g87a93b02",
+   "state": "completed",
+   "success": true,
+   "type": "C03"
+  },
+  "g87a93b02-t3": {
+   "gap_kept": true,
+   "instance": "g87a93b02",
+   "state": "completed",
+   "success": true,
+   "type": "C03"
+  },
+  "g91002406-t1": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "g91002406",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "g91002406-t2": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "g91002406",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "g91002406-t3": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "g91002406",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "g9fc0e784-t1": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "g9fc0e784",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "g9fc0e784-t2": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "g9fc0e784",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "g9fc0e784-t3": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "g9fc0e784",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "g9fdace66-t1": {
+   "false_alarm": false,
+   "instance": "g9fdace66",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "g9fdace66-t2": {
+   "false_alarm": false,
+   "instance": "g9fdace66",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "g9fdace66-t3": {
+   "false_alarm": false,
+   "instance": "g9fdace66",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "ga2467e91-t1": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "ga2467e91",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "ga2467e91-t2": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "ga2467e91",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "ga2467e91-t3": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "ga2467e91",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "ga50ce70b-t1": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "ga50ce70b",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "ga50ce70b-t2": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "ga50ce70b",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "ga50ce70b-t3": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "ga50ce70b",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "gb04b4e76-t1": {
+   "false_alarm": false,
+   "instance": "gb04b4e76",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "gb04b4e76-t2": {
+   "false_alarm": false,
+   "instance": "gb04b4e76",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "gb04b4e76-t3": {
+   "false_alarm": false,
+   "instance": "gb04b4e76",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "gb22f6deb-t1": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "gb22f6deb",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "gb22f6deb-t2": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "gb22f6deb",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "gb22f6deb-t3": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "gb22f6deb",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "geac9572a-t1": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "geac9572a",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "geac9572a-t2": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "geac9572a",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "geac9572a-t3": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "geac9572a",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "gf8f4e811-t1": {
+   "instance": "gf8f4e811",
+   "state": "completed",
+   "success": true,
+   "type": "C04"
+  },
+  "gf8f4e811-t2": {
+   "instance": "gf8f4e811",
+   "state": "completed",
+   "success": true,
+   "type": "C04"
+  },
+  "gf8f4e811-t3": {
+   "instance": "gf8f4e811",
+   "state": "completed",
+   "success": true,
+   "type": "C04"
+  }
+ },
+ "status": "ok",
+ "task_level": {
+  "cases": 20,
+  "planned": 60,
+  "states": {
+   "completed": 60,
+   "invalid-submission": 0,
+   "no-submission": 0,
+   "not-started": 0
+  },
+  "successful": 59
+ }
+}

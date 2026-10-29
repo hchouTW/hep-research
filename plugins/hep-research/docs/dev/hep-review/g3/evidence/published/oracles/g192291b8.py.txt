@@ -1,0 +1,265 @@
+#!/usr/bin/env python3
+"""Standalone audit of one synthetic analysis; Python standard library only."""
+"""Standard-library numerical reference implementations for synthetic analyses."""
+import math
+import itertools
+
+
+def integrate(f,a,b,n=8192):
+    h=(b-a)/n
+    return h/3*(f(a)+f(b)+4*sum(f(a+(2*i-1)*h) for i in range(1,n//2+1))+2*sum(f(a+2*i*h) for i in range(1,n//2)))
+
+
+def bisect(f,a,b):
+    fa=f(a)
+    assert fa*f(b)<=0
+    for _ in range(100):
+        c=(a+b)/2
+        if fa*f(c)<=0: b=c
+        else: a=c; fa=f(c)
+    return (a+b)/2
+
+
+def minimize(f,a,b):
+    r=(math.sqrt(5)-1)/2
+    c=b-r*(b-a); d=a+r*(b-a)
+    for _ in range(150):
+        if f(c)<f(d): b=d; d=c; c=b-r*(b-a)
+        else: a=c; c=d; d=a+r*(b-a)
+    return (a+b)/2
+
+
+def normal_cdf(x): return (1+math.erf(x/math.sqrt(2)))/2
+
+def calculate(model,d,fix=(),hidden=None,independent=False):
+    f=set(fix)
+    if model=='response':
+        def e(x): return d['plateau']/(1+math.exp(-(x-d['turn_on'])/d['width']))*(1-d['notch_depth']*math.exp(-((x-d['notch_position'])/d['notch_width'])**2))
+        bins=list(zip(d['edges'][:-1],d['edges'][1:]))
+        ep=[integrate(e,a,b)/(b-a) if 1 in f else e((a+b)/2) for a,b in bins]
+        tr=d['trigger'] if 2 in f else [sum(d['trigger'])/len(bins)]*len(bins)
+        y=sum(n/(x*t) for n,x,t in zip(d['counts'],ep,tr))
+        v=sum(n/(x*t)**2 for n,x,t in zip(d['counts'],ep,tr))
+        return dict(yield_total=y,rate=y/d['exposure'],rate_error=math.sqrt(v)/d['exposure'])
+    if model=='resonance':
+        def line(t): return 1/((math.sqrt(t)-d['mass'])**2+d['width']**2)
+        def eff(t): return .25+.6*(math.sqrt(t)-d['low'])/(d['high']-d['low'])
+        a=d['low']**2; b=d['high']**2
+        jac=lambda t:1/(2*math.sqrt(t)) if 2 in f else 1
+        if 1 in f:
+            den=integrate(lambda t:line(t)*jac(t),a,b,65536)
+            num=integrate(lambda t:line(t)*jac(t)*eff(t),a,b,65536)
+        else:
+            n=d['panels']; h=(b-a)/n
+            den=h*sum(line(a+(i+.5)*h)*jac(a+(i+.5)*h) for i in range(n))
+            num=h*sum(line(a+(i+.5)*h)*jac(a+(i+.5)*h)*eff(a+(i+.5)*h) for i in range(n))
+        av=num/den
+        return dict(efficiency=av,cross_section=d['count']/d['exposure']/av,cross_section_error=math.sqrt(d['count'])/d['exposure']/av)
+    if model=='scan':
+        rows=d['toys']; selected=[]
+        for row,ok in zip(rows,d['fit_ok']):
+            if 2 not in f and not ok: continue
+            selected.append(max(row) if 1 in f else row[d['chosen_bin']])
+        p=sum(t>=d['observed_max'] for t in selected)/len(selected)
+        return dict(global_p=p,mc_error=math.sqrt(p*(1-p)/len(selected)),expected_exceedances=d['future_trials']*p)
+    if model=='coverage':
+        cov=[]; den=[]
+        for group in d['groups']:
+            indices=[i for i,ok in enumerate(group['fit_ok']) if ok or 2 in f]
+            hit=sum(group['fit_ok'][i] and group['lower'][i]<=d['truth']<=group['upper'][i] for i in indices)
+            cov.append(hit/len(indices));den.append(len(indices))
+        w=d['mixture'] if 1 in f else [.5,.5]
+        c=sum(x*y for x,y in zip(w,cov))
+        err=math.sqrt(sum(x*x*p*(1-p)/n for x,p,n in zip(w,cov,den)))
+        return dict(coverage=c,coverage_error=err,miss_fraction=1-c)
+    if model=='luminosity':
+        lumi=d['recorded_luminosity']*(1 if 1 in f else d['live_fraction'])
+        charge=1 if 2 in f else 2
+        k=lumi*d['acceptance']*d['efficiency']*charge
+        s=d['selected']-d['background']
+        return dict(signal=s,cross_section=s/k,cross_section_error=math.sqrt(d['selected']+d['background_variance'])/k)
+    if model=='branching':
+        frac=d['charged_fraction'] if 1 in f else d['neutral_fraction']
+        br=d['branching_fraction'] if 2 in f else 1
+        k=2*d['pair_count']*frac*d['efficiency']*br
+        n=d['selected']-d['background']
+        return dict(signal=n,parent_probability=n/k,parent_probability_error=math.sqrt(d['selected']+d['background_variance'])/k)
+    if model=='pileup':
+        q=-math.log(d['empty_fraction']) if 1 in f else 1-d['empty_fraction']
+        efficiency=d['unbiased_vertex_efficiency'] if 2 in f else d['tagged_vertex_efficiency']
+        mu=q/efficiency
+        # uncertainty is delta propagation of a supplied Gaussian empty-fraction calibration
+        deriv=1/d['empty_fraction'] if 1 in f else 1
+        return dict(interactions_per_crossing=mu,cross_section=mu/d['luminosity_per_crossing'],cross_section_error=deriv*d['empty_fraction_error']/efficiency/d['luminosity_per_crossing'])
+    if model=='heteroscedastic':
+        def objective(t):
+            return sum((x-t)**2/(s*s+(d['relative_scale']*t)**2)+(math.log(s*s+(d['relative_scale']*t)**2) if 1 in f else 0) for x,s in zip(d['values'],d['base_sigma']))
+        t=minimize(objective,d['range'][0],d['range'][1])
+        if 2 in f:
+            h=.001
+            curv=(objective(t+h)-2*objective(t)+objective(t-h))/h**2
+            err=math.sqrt(2/curv)
+        else: err=1/math.sqrt(sum(1/(s*s+(d['relative_scale']*t)**2) for s in d['base_sigma']))
+        return dict(estimate=t,standard_error=err,scaled_estimate=t*d['conversion'])
+    if model=='clusters':
+        y=d['hits']; t=d['duration']; n=len(y)
+        if 1 in f:
+            rate=sum(y)/sum(t)
+            var=sum(y)*(2 if 2 in f else 1)/sum(t)**2
+        else:
+            rate=sum(a/b for a,b in zip(y,t))/n
+            var=sum(a/b**2 for a,b in zip(y,t))*(2 if 2 in f else 1)/n**2
+        return dict(hit_rate=rate,rate_error=math.sqrt(var),parent_rate=rate/2)
+    if model=='truncation':
+        a=d['low'];b=d['high'];mean=sum(d['times'])/len(d['times'])
+        if 1 in f:
+            def conditional_mean(lam): return a+1/lam-(b-a)/math.expm1(lam*(b-a))
+            lam=bisect(lambda x:conditional_mean(x)-mean,.0001,20)
+        else: lam=1/mean
+        acc=math.exp(-lam*a)-(math.exp(-lam*b) if 2 in f else 0)
+        return dict(decay_rate=lam,acceptance=acc,produced_yield=len(d['times'])/acc)
+    if model=='logposterior':
+        s=d['log_sigma'];mu=d['log_observation']+(s*s if 1 in f else 0)
+        mean=math.exp(mu+s*s/2)
+        if 2 in f:
+            # Equal density endpoints in theta: z_low + z_high = -2*s.
+            zl=bisect(lambda z:normal_cdf(-2*s-z)-normal_cdf(z)-d['probability'],-15,-s-.00001)
+            zh=-2*s-zl
+        else:
+            zh=bisect(lambda z:2*normal_cdf(z)-1-d['probability'],0,10);zl=-zh
+        lo=math.exp(mu+s*zl);hi=math.exp(mu+s*zh)
+        return dict(posterior_mean=mean,interval_lower=lo,interval_upper=hi)
+    if model=='deadtime':
+        r=d['count']/d['duration'];tau=d['dead_time']
+        rate=r/(1-r*tau) if 1 in f else r*math.exp(r*tau)
+        if 2 in f: deriv=1/(1-r*tau)**2 if 1 in f else math.exp(r*tau)*(1+r*tau)
+        else: deriv=1
+        return dict(incident_rate=rate,rate_error=math.sqrt(d['count_variance'])/d['duration']*deriv,expected_incident_count=rate*d['duration'])
+    if model=='odds':
+        a=d['success']+d['prior_alpha'];b=d['failure']+d['prior_beta']
+        mean=a/(b-1); var=a*(a+b-1)/((b-2)*(b-1)**2)
+        if independent:
+            eb=math.exp(math.lgamma(a+1)+math.lgamma(b-1)-math.lgamma(a+b)-(math.lgamma(a)+math.lgamma(b)-math.lgamma(a+b)))
+            e2=math.exp(math.lgamma(a+2)+math.lgamma(b-2)-math.lgamma(a+b)-(math.lgamma(a)+math.lgamma(b)-math.lgamma(a+b)))
+            mean=eb;var=e2-eb*eb
+        return dict(mean_odds=mean,odds_sd=math.sqrt(var),posterior_efficiency=a/(a+b))
+    if model=='fieller':
+        x,y=d['means'];vx,vy=d['variances'];c=d['covariance'];z=d['normal_quantile'];q=z*z
+        aa=y*y-q*vy;bb=-2*(x*y-q*c);cc=x*x-q*vx
+        disc=bb*bb-4*aa*cc
+        lo=(-bb-math.sqrt(disc))/(2*aa); hi=(-bb+math.sqrt(disc))/(2*aa)
+        if independent:
+            fn=lambda r:(x-r*y)**2-q*(vx-2*r*c+r*r*vy)
+            mid=x/y
+            lo=bisect(fn,0,mid); hi=bisect(fn,mid,10)
+        return dict(ratio=x/y,interval_lower=lo,interval_upper=hi)
+    if model=='permutation':
+        ds=d['differences']; obs=abs(sum(ds)); total=2**len(ds)
+        if independent:
+            sums=[0]
+            for x in ds:sums=[v+x for v in sums]+[v-x for v in sums]
+            count=sum(abs(s)>=obs-1e-12 for s in sums)
+        else:
+            count=sum(abs(sum(x*s for x,s in zip(ds,signs)))>=obs-1e-12 for signs in itertools.product([-1,1],repeat=len(ds)))
+        return dict(mean_difference=sum(ds)/len(ds),randomization_p=count/total,assignments=total)
+    if model=='mixture':
+        w=d['weights'];lam=d['poisson_means'];n=d['threshold']
+        mean=sum(a*b for a,b in zip(w,lam));var=sum(a*(b+b*b) for a,b in zip(w,lam))-mean**2
+        def tail(l): return 1-sum(math.exp(-l)*l**k/math.factorial(k) for k in range(n))
+        p=sum(a*tail(b) for a,b in zip(w,lam))
+        if independent:
+            var=sum(a*(b+(b-mean)**2) for a,b in zip(w,lam))
+            def tail2(l):
+                term=math.exp(-l); cdf=term
+                for k in range(1,n):term*=l/k;cdf+=term
+                return 1-cdf
+            p=sum(a*tail2(b) for a,b in zip(w,lam))
+        return dict(predictive_mean=mean,predictive_variance=var,tail_probability=p)
+    if model=='endpoint':
+        m=max(d['values']);n=len(d['values']);a=d['alpha']
+        upper=m*math.exp(-math.log(a)/n)
+        if independent: upper=bisect(lambda u:(m/u)**n-a,m,10*m)
+        return dict(interval_lower=m,interval_upper=upper,coverage=1-a)
+    if model=='difference':
+        rho=d['correlation'] if hidden is None else hidden
+        delta=d['means'][0]-d['means'][1];s,t=d['sigma']
+        var=s*s+t*t-2*rho*s*t
+        return dict(difference=delta,standard_error=math.sqrt(var),standardized_difference=delta/math.sqrt(var))
+    if model=='exposure':
+        exp=d['exposure'] if hidden is None else hidden
+        n=d['count']-d['background']; k=exp*d['efficiency']
+        return dict(signal=n,rate=n/k,rate_error=math.sqrt(d['count']+d['background_variance'])/k)
+    if model=='poisson_channels':
+        n=sum(d['counts']);e=sum(d['exposures']);rate=n/e
+        if independent:
+            rate=bisect(lambda r:sum(k/r-t for k,t in zip(d['counts'],d['exposures'])),rate*.5,rate*2)
+        return dict(rate=rate,standard_error=math.sqrt(n)/e,expected_total=rate*e)
+    raise ValueError(model)
+
+MODEL='resonance'
+HIDDEN=None
+OTHER=None
+MISSING_FIELD='exposure'
+
+
+def main():
+    import sys,json,pathlib
+    public=pathlib.Path(sys.argv[1])
+    data=json.loads((public/'material/data.json').read_text())
+    gold=json.loads((pathlib.Path(__file__).resolve().parents[1]/'gold'/ (public.name+'.json')).read_text())
+    checks=[]
+    def check(name,condition): checks.append({'check':name,'ok':bool(condition)})
+    def close(a,b): return math.isfinite(a) and math.isfinite(b) and abs(a-b)<=.001*max(abs(b),1e-12)
+    def compare(name,a,b):
+        check(name+'_keys',set(a)==set(b))
+        for k in b: check(name+':'+k,k in a and close(a[k],b[k]))
+    model=MODEL
+    stated=data.pop('stated_results')
+    kind=gold['type']
+    check('identity',public.name==gold['id'])
+    if kind=='C01':
+        compare('written_method',calculate(model,data),stated)
+        corrected=calculate(model,data,range(1,len(gold['defects'])+1))
+        for j,defect in enumerate(gold['defects'],1):
+            single=calculate(model,data,[j])
+            effects=[abs(single[k]-stated[k])/max(abs(stated[k]),1e-12) for k in defect['affected_results']]
+            check('material_single_correction_'+str(j),max(effects)>.005)
+            for k,v in defect['corrected_values'].items():check('fully_corrected_'+str(j)+':'+k,close(corrected[k],v))
+            if 'interacting' in defect['tags']:
+                check('residual_after_single_'+str(j),any(not close(single[k],corrected[k]) for k in stated))
+    elif kind in ('C02','C04'):
+        compare('independent_correct_computation',calculate(model,data,independent=True),stated)
+    elif kind=='C03':
+        compare('hidden_reachability',calculate(model,data,hidden=HIDDEN),stated)
+        other=calculate(model,data,hidden=OTHER)
+        check('nonidentifiability',any(abs(other[k]-stated[k])/max(abs(stated[k]),1e-12)>.005 for k in stated))
+        check('missing_input',data[MISSING_FIELD] is None)
+    else:check('known_type',False)
+    # Model-level checks of numerical solutions, independent of release rounding.
+    if model=='response':
+        def e(x):return data['plateau']/(1+math.exp(-(x-data['turn_on'])/data['width']))*(1-data['notch_depth']*math.exp(-((x-data['notch_position'])/data['notch_width'])**2))
+        for a,b in zip(data['edges'][:-1],data['edges'][1:]):check('quadrature_stability',close(integrate(e,a,b,4096),integrate(e,a,b,8192)))
+    if model=='resonance':
+        def w(m):return 1/((m-data['mass'])**2+data['width']**2)
+        denominator=integrate(w,data['low'],data['high'],65536)
+        numerator=integrate(lambda m:w(m)*(.25+.6*(m-data['low'])/(data['high']-data['low'])),data['low'],data['high'],65536)
+        check('mass_coordinate_crosscheck',close(calculate(model,data,[1,2])['efficiency'],numerator/denominator))
+    if model=='logposterior':
+        out=calculate(model,data,[1,2]);s=data['log_sigma'];mu=data['log_observation']+s*s
+        lo=math.log(out['interval_lower']);hi=math.log(out['interval_upper'])
+        check('hpd_equal_density',close(math.exp(-(lo-mu)**2/(2*s*s)-lo),math.exp(-(hi-mu)**2/(2*s*s)-hi)))
+        check('posterior_mass',close(normal_cdf((hi-mu)/s)-normal_cdf((lo-mu)/s),data['probability']))
+    if model=='truncation':
+        lam=calculate(model,data,[1,2])['decay_rate'];a=data['low'];b=data['high']
+        den=integrate(lambda x:math.exp(-lam*x),a,b)
+        mean=integrate(lambda x:x*math.exp(-lam*x),a,b)/den
+        check('conditional_score_zero',close(mean,sum(data['times'])/len(data['times'])))
+    ok=all(c['ok'] for c in checks)
+    print(json.dumps({'id':gold['id'],'ok':ok,'checks':checks},separators=(',',':')))
+    return 0 if ok else 1
+if __name__=='__main__':
+    import sys
+    try:sys.exit(main())
+    except Exception as exc:
+        print(__import__('json').dumps({'id':__import__('pathlib').Path(sys.argv[1]).name if len(sys.argv)>1 else '', 'ok':False,'checks':[{'check':'execution','ok':False,'error':str(exc)}]}))
+        sys.exit(1)

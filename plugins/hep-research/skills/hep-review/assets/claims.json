@@ -79,6 +79,85 @@
     "tier": "R2"
    },
    "state": "pilot-checked-scope"
+  },
+  {
+   "binding": {
+    "case_distribution": {
+     "C01": 12,
+     "C02": 5,
+     "C03": 2,
+     "C04": 1
+    },
+    "gold": "salted commitments: g3/evidence/commitments.json (Codex-authored, held encrypted by the user)",
+    "policy": "docs/dev/hep-review/g3/frozen-protocol.md",
+    "rubric": "pilot/g2x/grader-instructions.md",
+    "suite": "g3 (Codex-authored, held out)",
+    "trial_plan": "3 trials per instance, 60 trials; graders Claude forward, Claude reversed, Codex"
+   },
+   "fingerprint": "7d54b5e087a28e1fd38a8da36c86c02296a3d1fed0d606f439a004f8558decf5",
+   "fingerprint_parts": {
+    "hash_profile": [
+     "hep-review-metadata/1",
+     "raw-bytes/1"
+    ],
+    "host_profile_digest": "d04adb3c314737809cade39b489078cc195137c07a5cb8dfc4bb1a1dbb7e5727",
+    "model": {
+     "alias": "claude-opus-5-5 (session model, inherited by general-purpose subagents)",
+     "date": "2026-10-29",
+     "pinned": "unknown"
+    },
+    "packet_template_digest": "3ba866b1bb11159cf8ead34edd39677e45ffe623311f96184e3ef678bfdddcfb",
+    "reader_profile": "materials.read_controlled/1",
+    "validator_version": "1.0.0"
+   },
+   "history": [
+    {
+     "at": "2026-10-29",
+     "evidence": {
+      "engineering_gate": true,
+      "graders_calibrated": true,
+      "report": "docs/dev/hep-review/g3-report.md"
+     },
+     "from": "experimental",
+     "to": "pilot-checked-scope"
+    },
+    {
+     "at": "2026-10-29",
+     "evidence": {
+      "engineering_gate": true,
+      "graders_calibrated": true,
+      "report": "docs/dev/hep-review/g3-report.md"
+     },
+     "from": "pilot-checked-scope",
+     "to": "evaluated-scope"
+    }
+   ],
+   "id": "hep-review/statistics-multi-step",
+   "limitations": [
+    "every C01 instance had exactly two defects (the brief allowed 2-4): no evidence beyond two",
+    "20 cases with 3 trials each: 60 trials are 20 cases; intervals assume trial independence",
+    "Codex gold is author self-assessment carried by executable oracles; Claude wrote the brief",
+    "reviewers share a scratch folder: one reviewer's scratch file was overwritten by another's (noticed and discarded); no-other-evaluations-seen is advisory"
+   ],
+   "results": {
+    "c02_false_alarm": "0/15, CI [0.0, 0.218]",
+    "c03_gap_kept": "6/6",
+    "c04": "3/3",
+    "convention_defects": "18/18, CI [0.815, 1.0]",
+    "defect_detection": "71/72 = 0.986, 95% CI [0.925, 0.9996] (miss rate 0.014, CI [0.0004, 0.075])",
+    "engineering": "60/60 digest-bound, R2, verified, export recompute, no quarantine",
+    "miss": "g3dd81149-t2 D2 (equal-tailed interval released as shortest): reviewer asserted the opposite; t1 and t3 found it",
+    "numerical_defects": "26/27, CI [0.810, 0.999]"
+   },
+   "scope": {
+    "domain": "statistics (estimators, intervals, normalisation, look-elsewhere, unfolding-style inversions)",
+    "format": "text + JSON",
+    "host": "claude-code-cli-macos",
+    "material": "multi-step analyses of 800-2,000 words with two interacting planted defects each (numerical and particle-physics-convention defects included)",
+    "method": "assumption-check + recompute (0.1% relative)",
+    "tier": "R2"
+   },
+   "state": "evaluated-scope"
   }
  ],
  "note": "written by docs/dev/hep-review/g3/make_claims.py through the claim lifecycle; checked by evaluation.check_registry"

@@ -1,0 +1,12 @@
+{"K01": {"grade": "accept", "reason": "Finding names the mechanism: the normalization integrates from the lower cut to infinity instead of over the finite window bounded by the upper cut, in the normalization equation."},
+"K02": {"grade": "accept", "reason": "Finding names the mechanism (center evaluation of a time-dependent efficiency instead of integrating over the bin) at the response-averaging step, with a quantified effect; the spike is implied by the 0.71 vs 0.79 difference."},
+"K03": {"grade": "accept", "reason": "Finding names the missing log det V(theta) term for a parameter-dependent covariance in the fit objective."},
+"K04": {"grade": "reject", "reason": "Finding argues for a Student distribution because of small sample size; it does not name the omitted determinant term."},
+"K05": {"grade": "accept", "reason": "Finding identifies that the calibration is P(detect|tag) while the unbiased population needs the marginal P(detect), pointing at the calibration table."},
+"K06": {"grade": "reject", "reason": "Finding is vague suspicion with no mechanism; it does not mention the coarse grid or the missed narrow dip."},
+"K07": {"grade": "accept", "reason": "Finding gives the Jacobian dtheta = 2u du and states a constant density in u changes the specified prior uniform in theta, at the prior transformation."},
+"K08": {"grade": "accept", "reason": "Finding names the duplicated live-time correction: the exposure is already recorded (downtime-corrected) and a second live-fraction factor is applied, inflating the rate."},
+"K09": {"grade": "reject", "reason": "Finding only asks for more simulations; it does not name the equal averaging over regimes with unequal target probabilities."},
+"K10": {"grade": "accept", "reason": "Finding names the missing derivative propagation sd(y)=|f'(x)| sd(x) through the nonlinear calibration at the uncertainty equation."},
+"K11": {"grade": "accept", "reason": "Finding names the mechanism: the null toys must use the max over all windows (any window exceeding), not a single fixed column, at the null-tail calculation."},
+"K12": {"grade": "reject", "reason": "Finding is an incorrect claim about mean equal to median; it does not name the equal-tail versus shortest-interval mismatch in a skewed posterior."}}

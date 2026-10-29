@@ -1,0 +1,42 @@
+{
+  "id": "geac9572a",
+  "type": "C01",
+  "defects": [
+    {
+      "defect_id": "D1",
+      "statement": "Midpoint sampling replaces the required uniform-within-bin response integral, missing the localized efficiency structure.",
+      "affected_results": [
+        "yield_total",
+        "rate",
+        "rate_error"
+      ],
+      "tags": [
+        "numerical",
+        "interacting"
+      ],
+      "corrected_values": {
+        "yield_total": 3464.8873276975028,
+        "rate": 15.749487853170468,
+        "rate_error": 0.5261602258228171
+      }
+    },
+    {
+      "defect_id": "D2",
+      "statement": "The arithmetic trigger mean is substituted for the distinct trigger probability of each interval before correcting the interval yields.",
+      "affected_results": [
+        "yield_total",
+        "rate",
+        "rate_error"
+      ],
+      "tags": [
+        "interacting"
+      ],
+      "corrected_values": {
+        "yield_total": 3464.8873276975028,
+        "rate": 15.749487853170468,
+        "rate_error": 0.5261602258228171
+      }
+    }
+  ],
+  "notes": "Synthetic study. All displayed numbers reproduce the written release method. Gold corrections are joint, with single interventions audited separately."
+}

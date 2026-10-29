@@ -1,0 +1,38 @@
+{
+  "id": "g3b5d0b40",
+  "type": "C01",
+  "defects": [
+    {
+      "defect_id": "D1",
+      "statement": "The parameter-dependent Gaussian normalizations contribute sum log(variance) to minus twice log likelihood; minimizing residual terms alone shifts the stated MLE.",
+      "affected_results": [
+        "estimate",
+        "standard_error",
+        "scaled_estimate"
+      ],
+      "tags": [
+        "numerical",
+        "interacting"
+      ],
+      "corrected_values": {
+        "estimate": 8.416184094663333,
+        "standard_error": 1.4492283744231245,
+        "scaled_estimate": 22.723697055591
+      }
+    },
+    {
+      "defect_id": "D2",
+      "statement": "The frozen-variance inverse weight sum omits derivatives of the parameter-dependent variance and is not the stated observed-information curvature.",
+      "affected_results": [
+        "standard_error"
+      ],
+      "tags": [
+        "interacting"
+      ],
+      "corrected_values": {
+        "standard_error": 1.4492283744231245
+      }
+    }
+  ],
+  "notes": "Synthetic study. All displayed numbers reproduce the written release method. Gold corrections are joint, with single interventions audited separately."
+}

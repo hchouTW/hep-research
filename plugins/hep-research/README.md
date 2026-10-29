@@ -25,7 +25,7 @@ labeled synthetic in file names and metadata. What is and is not validated is li
 | `hep-ml` | a machine-learning model or study for physics (PyTorch) |
 | `hep-citations` | answers from cited sources: what a paper or experiment published, the latest result, citation verification, literature records and matrices |
 | `hep-authoring` | papers, figures, diagrams, talks, referee reports, claims traced to results and sources; every citation from a literature record |
-| `hep-review` | a recorded review of an analysis, derivation, fit or physics code: review obligations, assurance tiers R0-R3, checkpoints, a report that never claims more than its tier (pilot-checked on narrow statistics reviews) |
+| `hep-review` | a recorded review of an analysis, derivation, fit or physics code: review obligations, assurance tiers R0-R3, checkpoints, a report that never claims more than its tier (evaluated on multi-step statistics reviews) |
 
 Each skill folder under `skills/` has a `README.md` (purpose, folder map, scripts, references, handoffs, tests); `SKILL.md` is the entry point the host loads. Skills are chosen by what you want produced, not by the experiment you name. Results that another skill continues
 from are written as JSON artifacts in your project's `artifacts_dir` (default `./hep-research-artifacts/`).

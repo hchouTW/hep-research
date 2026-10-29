@@ -1,0 +1,110 @@
+[
+  {
+    "item": "K01",
+    "defect": "A finite energy-window integral is replaced by an infinite-window normalization when converting a selected line yield to a total yield.",
+    "finding": {
+      "claim": "The upper and lower energy gates both belong in the selection probability.",
+      "element": "normalization equation",
+      "evidence_text": "The stated probability integrates from the lower cut to infinity, although the acquisition explicitly rejects energies above its upper cut."
+    }
+  },
+  {
+    "item": "K02",
+    "defect": "A time-dependent calibration is evaluated at the bin center even though a narrow response spike lies away from that center.",
+    "finding": {
+      "claim": "The efficiency must be integrated within each exposure bin.",
+      "element": "response averaging",
+      "evidence_text": "Numerical integration over the stated uniform production time gives 0.71, whereas the center evaluation gives 0.79; the resulting correction changes by more than ten percent."
+    }
+  },
+  {
+    "item": "K03",
+    "defect": "The covariance model depends on the fitted parameter, but its determinant is omitted from the Gaussian likelihood.",
+    "finding": {
+      "claim": "The objective is missing its volume penalty.",
+      "element": "fit objective",
+      "evidence_text": "For a normalized multivariate Gaussian, minus twice the log density includes log det V(theta). The provided objective contains only the quadratic form, so broadening the model is rewarded without its normalizing cost."
+    }
+  },
+  {
+    "item": "K04",
+    "defect": "The covariance model depends on the fitted parameter, but its determinant is omitted from the Gaussian likelihood.",
+    "finding": {
+      "claim": "This should use a Student distribution because there are only five data points.",
+      "element": "fit objective",
+      "evidence_text": "Small samples always require Student errors."
+    }
+  },
+  {
+    "item": "K05",
+    "defect": "A selected conditional calibration is used as the marginal detection probability in an unbiased sample.",
+    "finding": {
+      "claim": "The calibration conditions on passing a tag absent from the target population.",
+      "element": "calibration table",
+      "evidence_text": "The tabulated probability is P(detect|tag), but the model needs P(detect). The separately supplied untagged sample gives the latter."
+    }
+  },
+  {
+    "item": "K06",
+    "defect": "An efficiency curve is approximated at coarse grid nodes, missing a narrow dip that changes the integrated correction.",
+    "finding": {
+      "claim": "The calculation seems suspicious and should be checked.",
+      "element": "efficiency correction",
+      "evidence_text": "It is complicated and could be inaccurate."
+    }
+  },
+  {
+    "item": "K07",
+    "defect": "A prior uniform in a positive parameter is treated as uniform in its square-root coordinate.",
+    "finding": {
+      "claim": "The transformed prior must include a factor proportional to the square-root coordinate.",
+      "element": "prior transformation",
+      "evidence_text": "Writing u=sqrt(theta), the original measure dtheta is 2u du; a constant density in u therefore changes the specified prior."
+    }
+  },
+  {
+    "item": "K08",
+    "defect": "The total event yield is divided by a luminosity already corrected for detector downtime and then divided by the live fraction again.",
+    "finding": {
+      "claim": "The live-time correction is duplicated.",
+      "element": "effective exposure",
+      "evidence_text": "The ledger reports recorded rather than delivered exposure. Applying a second loss factor reduces the denominator and inflates the inferred rate."
+    }
+  },
+  {
+    "item": "K09",
+    "defect": "Independent simulation allocations in two regimes are averaged equally although the prediction target has unequal regime probabilities.",
+    "finding": {
+      "claim": "The simulation sizes are too small, so all counts should be doubled.",
+      "element": "simulation summary",
+      "evidence_text": "More simulations would reduce Monte Carlo noise."
+    }
+  },
+  {
+    "item": "K10",
+    "defect": "A nonlinear calibration is applied to a central value without propagating its derivative to the standard error.",
+    "finding": {
+      "claim": "The error belongs to the measured input scale rather than the calibrated output scale.",
+      "element": "uncertainty equation",
+      "evidence_text": "If y=f(x), local propagation gives sd(y)=abs(f'(x))*sd(x). The release keeps sd(x) even though the supplied slope is 1.6."
+    }
+  },
+  {
+    "item": "K11",
+    "defect": "The discovery statistic is the maximum over six windows but null toys are evaluated only in one fixed window.",
+    "finding": {
+      "claim": "The null calibration has the wrong random variable.",
+      "element": "null-tail calculation",
+      "evidence_text": "A null experiment exceeds when any window crosses the threshold. Reading only column three misses exceedances in the other columns even when the observed winner was column three."
+    }
+  },
+  {
+    "item": "K12",
+    "defect": "An interval labeled shortest is constructed by equal posterior tails in a skew parameter distribution.",
+    "finding": {
+      "claim": "The displayed mean is necessarily the median.",
+      "element": "posterior summary",
+      "evidence_text": "Bayesian point estimates should all coincide."
+    }
+  }
+]

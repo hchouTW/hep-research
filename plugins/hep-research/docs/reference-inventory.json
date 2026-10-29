@@ -35,7 +35,7 @@
   },
   "hep-review": {
    "references": 9,
-   "bytes": 28068,
+   "bytes": 28280,
    "uncited": 0
   },
   "hep-statistics": {
@@ -3868,14 +3868,14 @@
   {
    "path": "skills/hep-review/references/evaluation-and-claims.md",
    "owner": "hep-review",
-   "bytes": 3102,
-   "lines": 49,
+   "bytes": 3225,
+   "lines": 50,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-review/SKILL.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "f685e8dc 2026-10-29"
+   "last_commit": "5e8d847b 2026-10-29"
   },
   {
    "path": "skills/hep-review/references/evidence-and-adjudication.md",
@@ -3916,7 +3916,7 @@
   {
    "path": "skills/hep-review/references/support-matrix.md",
    "owner": "hep-review",
-   "bytes": 3028,
+   "bytes": 3117,
    "lines": 40,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -3924,7 +3924,7 @@
     "skills/hep-review/references/evaluation-and-claims.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "5e8d847b 2026-10-29"
   },
   {
    "path": "skills/hep-review/references/workflow-and-tiers.md",

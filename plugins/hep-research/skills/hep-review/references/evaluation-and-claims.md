@@ -29,9 +29,10 @@ control, insufficient information, a correct but different solution) before its 
 ## Capability claims
 
 States: experimental, pilot-checked-scope, evaluated-scope, needs-reassessment, retired. Today hep-review is
-**pilot-checked-scope** for single-page statistical analyses with up to three planted defects, reviewed at R2 on the
-measured host (three pilots, `docs/dev/hep-review/g2*-report.md`); no other scope is claimed, and 0.x records stay
-experimental. R3 needs a committed claim-binding object with the evaluation chain
+**evaluated-scope** for multi-step statistical analyses (up to 2,000 words, two interacting planted defects; G3:
+detection 71/72, 95% CI 0.925-0.9996, false alarms 0/15) and **pilot-checked-scope** for single-page ones, both at R2
+on the measured host (`docs/dev/hep-review/g2*-report.md`, `g3-report.md`). No other scope is claimed, and 0.x
+records stay experimental. R3 needs a committed claim-binding object with the evaluation chain
 segment from the checkpoint the plan states, and the plan's capability fingerprint; layer 2 re-checks that the claim's
 current state equals the bound state.
 

@@ -1,0 +1,40 @@
+{
+  "id": "g3dd81149",
+  "type": "C01",
+  "defects": [
+    {
+      "defect_id": "D1",
+      "statement": "A prior flat in theta transforms to exp(z) dz; the Gaussian posterior in z therefore has mean log_observation+log_sigma^2, not log_observation.",
+      "affected_results": [
+        "posterior_mean",
+        "interval_lower",
+        "interval_upper"
+      ],
+      "tags": [
+        "interacting"
+      ],
+      "corrected_values": {
+        "posterior_mean": 2.8683874277549632,
+        "interval_lower": 0.6492378391164206,
+        "interval_upper": 5.113868481934227
+      }
+    },
+    {
+      "defect_id": "D2",
+      "statement": "Equal-tail lognormal endpoints do not give the shortest interval in theta; its endpoints must have equal posterior density in theta.",
+      "affected_results": [
+        "interval_lower",
+        "interval_upper"
+      ],
+      "tags": [
+        "numerical",
+        "interacting"
+      ],
+      "corrected_values": {
+        "interval_lower": 0.6492378391164206,
+        "interval_upper": 5.113868481934227
+      }
+    }
+  ],
+  "notes": "Synthetic study. All displayed numbers reproduce the written release method. Gold corrections are joint, with single interventions audited separately."
+}

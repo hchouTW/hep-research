@@ -1,0 +1,666 @@
+{
+ "F110": {
+  "grade": "none",
+  "reason": "Downstream consequence: produced_yield inherits both defects; neither mechanism is named in the claim."
+ },
+ "D054": {
+  "grade": "accept",
+  "reason": "Second finding names the omitted delta-method derivative 1/(1-r*tau)^2 of the inversion in rate_error."
+ },
+ "D046": {
+  "grade": "accept",
+  "reason": "Second finding: deterministic two-hit clusters give Var(hits_i)=2*hits_i, rate_error understated by sqrt(2)."
+ },
+ "F069": {
+  "grade": "D2",
+  "reason": "Names omission of the daughter branching fraction when efficiency is daughter-mode conditional and target inclusive."
+ },
+ "D143": {
+  "grade": "accept",
+  "reason": "First finding: global_p uses the chosen window instead of the null distribution of the maximum over four windows."
+ },
+ "F099": {
+  "grade": "D2",
+  "reason": "Acceptance omits the upper gate; correct exp(-lambda*low)-exp(-lambda*high)."
+ },
+ "F018": {
+  "grade": "D2",
+  "reason": "SE formula treats theta-dependent variances as fixed weights, not observed information."
+ },
+ "F131": {
+  "grade": "D2",
+  "reason": "Tagged conditional efficiency substituted for the unbiased thinning probability."
+ },
+ "D081": {
+  "grade": "accept",
+  "reason": "Second finding: failed fits removed from the denominator, giving coverage conditional on fit success."
+ },
+ "D024": {
+  "grade": "accept",
+  "reason": "Second finding: SE formula ignores theta dependence of the variances, not the observed information."
+ },
+ "F155": {
+  "grade": "D2",
+  "reason": "Arithmetic mean trigger probability used for every interval instead of own t_i."
+ },
+ "D111": {
+  "grade": "accept",
+  "reason": "First finding: live-time correction applied twice since recorded_luminosity already includes it."
+ },
+ "D041": {
+  "grade": "accept",
+  "reason": "First finding: unweighted mean of per-interval rates is not the MLE total hits / total duration."
+ },
+ "D050": {
+  "grade": "accept",
+  "reason": "Second finding: paired hits give Var=2*hits_i, error understated by sqrt(2)."
+ },
+ "F166": {
+  "grade": "none",
+  "reason": "Only states recomputed rate and rate_error differ; no mechanism named. Valid consequence."
+ },
+ "D058": {
+  "grade": "accept",
+  "reason": "Second finding: delta-method factor 1/(1-r*tau)^2 omitted in rate_error."
+ },
+ "D042": {
+  "grade": "accept",
+  "reason": "Second finding: deterministic two-hit clusters give Var(hits_i)=2*hits_i."
+ },
+ "F074": {
+  "grade": "D2",
+  "reason": "Daughter branching fraction omitted although efficiency excludes it; target inclusive."
+ },
+ "F036": {
+  "grade": "none",
+  "reason": "Says the released interval has mass 0.849 not 0.9 under the shifted posterior without naming the prior Jacobian (D1), and explicitly denies the equal-density defect (D2). Consequence of D1 only."
+ },
+ "D071": {
+  "grade": "accept",
+  "reason": "First finding: neutral pair fraction used instead of charged fraction for charged candidates."
+ },
+ "F142": {
+  "grade": "none",
+  "reason": "Downstream consequence on mc_error and expected_exceedances; no mechanism named."
+ },
+ "F061": {
+  "grade": "none",
+  "reason": "expected_incident_count inherits the wrong incident rate; consequence only."
+ },
+ "D028": {
+  "grade": "accept",
+  "reason": "Third finding: endpoints are equal-tailed in log theta, not the shortest theta interval; endpoint densities unequal."
+ },
+ "F103": {
+  "grade": "D1",
+  "reason": "1/t_bar ignores truncation normalization; truncated-likelihood MLE differs."
+ },
+ "F059": {
+  "grade": "D1",
+  "reason": "Exponential correction does not invert the nonparalyzable relation."
+ },
+ "F009": {
+  "grade": "D1",
+  "reason": "10-panel grid unconverged for a peak narrower than the cell width."
+ },
+ "F008": {
+  "grade": "D2",
+  "reason": "Jacobian dm=dt/(2 sqrt t) omitted."
+ },
+ "F132": {
+  "grade": "none",
+  "reason": "Only recomputed stated results; no mechanism named."
+ },
+ "F052": {
+  "grade": "D2",
+  "reason": "Paired hits give Var(hits_i)=2*hits_i, error understated by sqrt(2)."
+ },
+ "F047": {
+  "grade": "D1",
+  "reason": "Unweighted mean of interval rates is not the MLE total hits / total duration."
+ },
+ "D091": {
+  "grade": "accept",
+  "reason": "Second finding: equal regime weights instead of mixture probabilities [0.82,0.18]."
+ },
+ "D023": {
+  "grade": "accept",
+  "reason": "First finding: Q omits the sum ln V_i(theta) term so the minimizer is not the MLE."
+ },
+ "F105": {
+  "grade": "none",
+  "reason": "Stated results inherit both defects; consequence only."
+ },
+ "F125": {
+  "grade": "D1",
+  "reason": "Linear occupancy 1-P0 instead of Poisson inversion -ln(P0)."
+ },
+ "F004": {
+  "grade": "D1",
+  "reason": "10-panel midpoint table not adequate for the narrow peak."
+ },
+ "D120": {
+  "grade": "accept",
+  "reason": "Second finding: factor 2 in K turns the charge sum into a per-charge average despite the charge-sum label."
+ },
+ "F084": {
+  "grade": "none",
+  "reason": "Consequence: recomputed stated results only."
+ },
+ "D086": {
+  "grade": "accept",
+  "reason": "Second finding: failed fits dropped from the denominator giving conditional-on-success coverage."
+ },
+ "F039": {
+  "grade": "D1",
+  "reason": "Posterior omits the Jacobian of the flat-in-theta prior; mean shifted by s^2."
+ },
+ "F003": {
+  "grade": "D2",
+  "reason": "Jacobian 1/(2 sqrt t) omitted and does not cancel in A/D."
+ },
+ "F108": {
+  "grade": "D1",
+  "reason": "1/t_bar ignores the normalization over [low,high]; truncated MLE differs."
+ },
+ "D011": {
+  "grade": "accept",
+  "reason": "Second finding: ten uniform cells in t cannot resolve the narrow peak; converged quadrature changes efficiency and cross section."
+ },
+ "D053": {
+  "grade": "accept",
+  "reason": "First finding: r*exp(r*tau) is not the inverse of the nonparalyzable relation; correct is r/(1-r*tau)."
+ },
+ "D123": {
+  "grade": "accept",
+  "reason": "First finding: linear occupancy 1-P0 used instead of Poisson inversion -ln(P0)."
+ },
+ "F135": {
+  "grade": "D1",
+  "reason": "Linear occupancy 1-P0 instead of -ln(P0)."
+ },
+ "D076": {
+  "grade": "accept",
+  "reason": "Second finding: daughter branching fraction omitted although efficiency is conditional on the daughter mode; target inclusive."
+ },
+ "D062": {
+  "grade": "accept",
+  "reason": "First finding: exponential correction is not the inversion; r/(1-r*tau) gives 1250."
+ },
+ "D049": {
+  "grade": "accept",
+  "reason": "First finding: unweighted mean of interval rates is not the MLE sum N / sum t."
+ },
+ "D116": {
+  "grade": "accept",
+  "reason": "Second finding: factor 2 in K converts charge-summed yield into per-charge average."
+ },
+ "F100": {
+  "grade": "none",
+  "reason": "stated_results are outputs of inappropriate estimators; consequence only."
+ },
+ "F083": {
+  "grade": "D2",
+  "reason": "Failed fits removed from the denominator, conditional-on-success coverage."
+ },
+ "D012": {
+  "grade": "accept",
+  "reason": "First finding: Jacobian dm/dt=1/(2 sqrt t) omitted; averages over density in squared mass."
+ },
+ "D092": {
+  "grade": "accept",
+  "reason": "First finding: failed fits removed from the denominator, conditional on fit success."
+ },
+ "F146": {
+  "grade": "D2",
+  "reason": "Discarding fit_ok=false toys conditions the null ensemble on a correlated diagnostic."
+ },
+ "D139": {
+  "grade": "accept",
+  "reason": "Second finding: discarding fit_ok=false toys conditions the null ensemble on a diagnostic correlated with extreme scores."
+ },
+ "D085": {
+  "grade": "accept",
+  "reason": "First finding: equal-weight regime average instead of mixture probabilities."
+ },
+ "D002": {
+  "grade": "accept",
+  "reason": "First finding: Jacobian 1/(2 sqrt t) omitted and does not cancel in A/D."
+ },
+ "D128": {
+  "grade": "accept",
+  "reason": "First finding: linear occupancy 1-empty_fraction instead of -ln(empty_fraction)."
+ },
+ "F065": {
+  "grade": "D2",
+  "reason": "rate_error omits the delta-method derivative of the inversion."
+ },
+ "F159": {
+  "grade": "D1",
+  "reason": "Midpoint evaluation is not the interval-averaged selection probability; notch bias."
+ },
+ "F117": {
+  "grade": "D1",
+  "reason": "Live-time correction applied twice."
+ },
+ "F040": {
+  "grade": "D2",
+  "reason": "Equal-tailed interval is not the shortest/HPD interval in theta; endpoint densities unequal."
+ },
+ "F164": {
+  "grade": "D1",
+  "reason": "Midpoint evaluation does not represent the interval selection probability; notch over-weighted."
+ },
+ "F043": {
+  "grade": "D1",
+  "reason": "Unweighted mean of interval rates is not the MLE."
+ },
+ "F122": {
+  "grade": "D2",
+  "reason": "Factor of two converts the charge sum into a per-charge average."
+ },
+ "D157": {
+  "grade": "accept",
+  "reason": "First finding: midpoint evaluation is not the interval-averaged selection probability, biased at the narrow notch."
+ },
+ "D067": {
+  "grade": "accept",
+  "reason": "Second finding: daughter branching fraction omitted although efficiency is conditional on the daughter mode."
+ },
+ "D063": {
+  "grade": "accept",
+  "reason": "Second finding: rate_error omits the delta-method derivative of the inversion."
+ },
+ "D015": {
+  "grade": "accept",
+  "reason": "First finding: objective omits the theta-dependent log-variance normalization term, so not the MLE."
+ },
+ "F089": {
+  "grade": "none",
+  "reason": "Coverage error inherits both defects (weights and retained sizes); a propagated consequence rather than naming either mechanism on its own."
+ },
+ "F025": {
+  "grade": "D1",
+  "reason": "Q omits sum ln V_i(theta), minimizer not the MLE."
+ },
+ "F151": {
+  "grade": "D2",
+  "reason": "Conditioning the null ensemble on fit_ok=true biases global_p."
+ },
+ "D072": {
+  "grade": "accept",
+  "reason": "Second finding: daughter branching fraction omitted while efficiency is daughter-mode conditional; target inclusive."
+ },
+ "F082": {
+  "grade": "D1",
+  "reason": "Equal weights instead of mixture probabilities."
+ },
+ "D019": {
+  "grade": "accept",
+  "reason": "First finding: Q omits the log-determinant term sum ln V_i(theta), minimizer not the MLE."
+ },
+ "D057": {
+  "grade": "accept",
+  "reason": "First finding: estimator does not invert the nonparalyzable relation; exponential correction used."
+ },
+ "D027": {
+  "grade": "accept",
+  "reason": "First finding: posterior omits the Jacobian exp(z) of the flat-in-theta prior; correct mean mu+s^2."
+ },
+ "D162": {
+  "grade": "accept",
+  "reason": "First finding: midpoint evaluation does not represent the interval selection probability; notch over-weighted."
+ },
+ "F029": {
+  "grade": "D1",
+  "reason": "Posterior omits the Jacobian exp(z) of the flat-in-theta prior."
+ },
+ "F022": {
+  "grade": "D2",
+  "reason": "SE formula treats weights as fixed, not observed information."
+ },
+ "F087": {
+  "grade": "D1",
+  "reason": "Equal-weight regime average instead of mixture probabilities."
+ },
+ "F118": {
+  "grade": "D2",
+  "reason": "Factor 2 in K converts the charge-summed yield into a per-charge average."
+ },
+ "F030": {
+  "grade": "none",
+  "reason": "Only says posterior_mean is inconsistent with the prior, without the reason; consequence of D1."
+ },
+ "D107": {
+  "grade": "accept",
+  "reason": "Second finding: acceptance exp(-lambda*low) omits the upper gate; should be exp(-lambda*low)-exp(-lambda*high)."
+ },
+ "F154": {
+  "grade": "D1",
+  "reason": "Midpoint evaluation is not the uniform-density interval average through the notch."
+ },
+ "F077": {
+  "grade": "D1",
+  "reason": "neutral_fraction used though candidates are charged."
+ },
+ "D016": {
+  "grade": "accept",
+  "reason": "Second finding: SE formula treats theta-dependent variances as fixed weights, not observed information."
+ },
+ "F035": {
+  "grade": "none",
+  "reason": "Gives the corrected posterior_mean (using mean x+s^2) without naming the prior-transformation mechanism; a number-off finding consequent on D1."
+ },
+ "D144": {
+  "grade": "accept",
+  "reason": "Second finding: discarding fit_ok=false toys conditions the null ensemble on a diagnostic correlated with extreme scores."
+ },
+ "D106": {
+  "grade": "accept",
+  "reason": "First finding: 1/t_bar ignores the normalization over [low,high] of the truncated likelihood."
+ },
+ "D006": {
+  "grade": "accept",
+  "reason": "Second finding: 10-panel grid unconverged for a peak narrower than the cell width; efficiency moves with N."
+ },
+ "F114": {
+  "grade": "D2",
+  "reason": "Factor of two converts the charge-summed observable into a per-charge average."
+ },
+ "F048": {
+  "grade": "D2",
+  "reason": "Two-hit clusters give Var(hits_i)=2*hits_i."
+ },
+ "D158": {
+  "grade": "accept",
+  "reason": "Second finding: arithmetic trigger mean applied to all intervals instead of each interval's own t_i."
+ },
+ "F026": {
+  "grade": "D2",
+  "reason": "SE ignores theta dependence of the variances."
+ },
+ "D102": {
+  "grade": "accept",
+  "reason": "Second finding: acceptance drops the upper gate; must be exp(-lambda*low)-exp(-lambda*high)."
+ },
+ "F056": {
+  "grade": "D2",
+  "reason": "rate_error omits the inversion derivative 1/(1-r*tau)^2."
+ },
+ "F136": {
+  "grade": "D2",
+  "reason": "Tag-conditional efficiency used where the marginal unbiased one is required."
+ },
+ "F147": {
+  "grade": "none",
+  "reason": "mc_error and expected_exceedances inherit biased p; consequence only."
+ },
+ "F095": {
+  "grade": "none",
+  "reason": "Stated results biased because of F1 and F2; consequence only."
+ },
+ "F031": {
+  "grade": "D2",
+  "reason": "Endpoints are equal-tailed in log theta, not the shortest interval; endpoint densities unequal."
+ },
+ "D066": {
+  "grade": "accept",
+  "reason": "First finding: neutral_fraction used though candidates are charged; charged_fraction required."
+ },
+ "D152": {
+  "grade": "accept",
+  "reason": "First finding: midpoint evaluation is not the uniform-density interval average; notch effect."
+ },
+ "D075": {
+  "grade": "accept",
+  "reason": "First finding: neutral_fraction used instead of charged_fraction for charged candidates."
+ },
+ "D001": {
+  "grade": "accept",
+  "reason": "Second finding: 10-panel midpoint table not adequate for the narrow peak; discretization error 0.8-1.4%."
+ },
+ "F055": {
+  "grade": "D1",
+  "reason": "r*exp(r*tau) is not the inversion; r/(1-r*tau) required."
+ },
+ "D115": {
+  "grade": "accept",
+  "reason": "First finding: live-time correction applied twice via E=recorded_luminosity*live_fraction."
+ },
+ "D007": {
+  "grade": "accept",
+  "reason": "First finding: Jacobian dm=dt/(2 sqrt t) omitted, averaging over a squared-mass density."
+ },
+ "D153": {
+  "grade": "accept",
+  "reason": "Second finding: arithmetic mean trigger used for every interval instead of own t_i."
+ },
+ "F127": {
+  "grade": "none",
+  "reason": "Error-propagation consequence inheriting both defects; neither mechanism is stated as the cause of the central-estimate problem."
+ },
+ "F113": {
+  "grade": "D1",
+  "reason": "Live-time correction applied twice."
+ },
+ "F013": {
+  "grade": "D2",
+  "reason": "Jacobian dm/dt=1/(2 sqrt t) omitted."
+ },
+ "D033": {
+  "grade": "reject",
+  "reason": "No finding names the equal-tail vs shortest (equal-density) mechanism; findings cover the Jacobian, posterior mean and interval mass, and the third finding explicitly asserts the endpoints do meet the equal-density condition."
+ },
+ "D032": {
+  "grade": "accept",
+  "reason": "First finding: posterior omits the Jacobian of the flat-in-theta prior; correct Normal(x+s^2, s^2)."
+ },
+ "D119": {
+  "grade": "accept",
+  "reason": "First finding: live-time correction applied twice; recorded_luminosity already includes it."
+ },
+ "F073": {
+  "grade": "D1",
+  "reason": "Neutral pair fraction used for charged candidates."
+ },
+ "F130": {
+  "grade": "D1",
+  "reason": "Linear occupancy instead of -ln(empty_fraction)."
+ },
+ "F078": {
+  "grade": "D2",
+  "reason": "Daughter branching fraction omitted; efficiency conditional on daughter mode."
+ },
+ "F094": {
+  "grade": "D1",
+  "reason": "Equal weights instead of mixture probabilities."
+ },
+ "F010": {
+  "grade": "none",
+  "reason": "Only states released values differ; no mechanism."
+ },
+ "F088": {
+  "grade": "D2",
+  "reason": "Failed fits dropped from the denominator."
+ },
+ "F145": {
+  "grade": "D1",
+  "reason": "Local p-value in chosen window instead of max over four windows."
+ },
+ "D101": {
+  "grade": "accept",
+  "reason": "First finding: 1/t_bar ignores the [low,high] truncation; truncated-likelihood MLE differs."
+ },
+ "D037": {
+  "grade": "accept",
+  "reason": "First finding: posterior omits the Jacobian of the flat-in-theta prior; mean shifted by s^2."
+ },
+ "D129": {
+  "grade": "accept",
+  "reason": "Second finding: tag-conditional efficiency used instead of the unbiased thinning probability."
+ },
+ "F090": {
+  "grade": "none",
+  "reason": "Recomputed stated results only; no mechanism."
+ },
+ "F034": {
+  "grade": "D1",
+  "reason": "Posterior omits the Jacobian of the flat-in-theta prior; correct Normal(x+s^2, s^2)."
+ },
+ "F068": {
+  "grade": "D1",
+  "reason": "neutral_fraction used; charged_fraction required."
+ },
+ "D038": {
+  "grade": "accept",
+  "reason": "Second finding: interval is equal-tailed, not the shortest/HPD interval in theta; endpoint densities unequal."
+ },
+ "D020": {
+  "grade": "accept",
+  "reason": "Second finding: SE formula treats weights as fixed, not the observed information."
+ },
+ "F098": {
+  "grade": "D1",
+  "reason": "1/t_bar ignores the gated normalization; conditional MLE differs."
+ },
+ "F161": {
+  "grade": "none",
+  "reason": "rate_error inherits wrong selection probabilities; consequence only."
+ },
+ "F051": {
+  "grade": "D1",
+  "reason": "Unweighted mean of rates is not the MLE sum N / sum t."
+ },
+ "D097": {
+  "grade": "accept",
+  "reason": "Second finding: acceptance omits the upper gate; correct exp(-lambda*low)-exp(-lambda*high)."
+ },
+ "D112": {
+  "grade": "accept",
+  "reason": "Second finding: factor of two in K converts the charge sum into a per-charge average under the charge-sum label."
+ },
+ "F070": {
+  "grade": "none",
+  "reason": "Stated results inherit the wrong normalization; consequence only."
+ },
+ "F044": {
+  "grade": "D2",
+  "reason": "Two-hit clusters give Var(hits_i)=2*hits_i."
+ },
+ "F014": {
+  "grade": "D1",
+  "reason": "Ten uniform cells cannot resolve the narrow peak."
+ },
+ "F064": {
+  "grade": "D1",
+  "reason": "Exponential correction is not the inversion of the nonparalyzable relation."
+ },
+ "F104": {
+  "grade": "D2",
+  "reason": "Acceptance drops the upper gate."
+ },
+ "D134": {
+  "grade": "accept",
+  "reason": "Second finding: tag-conditional efficiency used where the marginal unbiased thinning efficiency is required."
+ },
+ "D149": {
+  "grade": "accept",
+  "reason": "Second finding: conditioning the null ensemble on fit_ok=true biases global_p, flag correlated with difficult score configurations."
+ },
+ "F017": {
+  "grade": "D1",
+  "reason": "Objective omits the theta-dependent log-variance term."
+ },
+ "D124": {
+  "grade": "accept",
+  "reason": "Second finding: tagged conditional efficiency used instead of unbiased thinning probability."
+ },
+ "D138": {
+  "grade": "accept",
+  "reason": "First finding: global_p from a single chosen window instead of the maximum over four windows."
+ },
+ "F093": {
+  "grade": "D2",
+  "reason": "Failed fits removed from the denominator."
+ },
+ "D080": {
+  "grade": "accept",
+  "reason": "First finding: equal weights 1/2 instead of mixture probabilities [0.82,0.18]."
+ },
+ "F021": {
+  "grade": "D1",
+  "reason": "Q omits sum ln V_i(theta)."
+ },
+ "F126": {
+  "grade": "D2",
+  "reason": "Tagged conditional efficiency used instead of unbiased."
+ },
+ "F137": {
+  "grade": "none",
+  "reason": "Error-propagation consequence: names the 1/P0 factor and 'wrong efficiency' for the uncertainty formula, inheriting both defects rather than identifying either central mechanism."
+ },
+ "F005": {
+  "grade": "none",
+  "reason": "Only states results differ; no mechanism."
+ },
+ "F165": {
+  "grade": "D2",
+  "reason": "Single arithmetic-mean trigger probability instead of per-interval values."
+ },
+ "F079": {
+  "grade": "none",
+  "reason": "Stated results inherit the wrong normalization; consequence only."
+ },
+ "D096": {
+  "grade": "accept",
+  "reason": "First finding: 1/t_bar ignores the upper-gate normalization of the truncated exponential; conditional MLE differs."
+ },
+ "D163": {
+  "grade": "accept",
+  "reason": "Second finding: single arithmetic-mean trigger probability applied instead of per-interval values."
+ },
+ "D045": {
+  "grade": "accept",
+  "reason": "First finding: unweighted mean of per-interval rates is not the MLE total hits over total duration."
+ },
+ "D148": {
+  "grade": "accept",
+  "reason": "First finding: global_p from the post-hoc chosen window rather than the maximum over four windows."
+ },
+ "F156": {
+  "grade": "none",
+  "reason": "Rate and error inherit biased selection probabilities; consequence only."
+ },
+ "F150": {
+  "grade": "D1",
+  "reason": "Chosen window instead of max over four windows."
+ },
+ "F109": {
+  "grade": "D2",
+  "reason": "Acceptance omits the upper gate."
+ },
+ "D133": {
+  "grade": "accept",
+  "reason": "First finding: linear occupancy 1-P0 instead of Poisson inversion -ln(P0)."
+ },
+ "F160": {
+  "grade": "D2",
+  "reason": "Arithmetic trigger mean applied instead of own t_i."
+ },
+ "F141": {
+  "grade": "D2",
+  "reason": "Discarding fit_ok=false toys conditions the null ensemble."
+ },
+ "F121": {
+  "grade": "D1",
+  "reason": "Live-time correction applied twice."
+ },
+ "F140": {
+  "grade": "D1",
+  "reason": "Single preselected window instead of max over four windows."
+ },
+ "F060": {
+  "grade": "D2",
+  "reason": "rate_error omits the delta-method factor."
+ }
+}

@@ -10,7 +10,7 @@ moves a live claim to needs-reassessment.
 | Domain / method | Format | Material | Host | Tier | State | Evidence |
 |---|---|---|---|---|---|---|
 | Statistics: assumption check + recompute (0.1%) | text + JSON | single page, up to 3 planted defects, closed-form checks | Claude Code CLI, macOS | R2 | **pilot-checked-scope** | G2, g2h, g2x: 141 trials, 0 content misses, 0/39 control false alarms; no miss rate measured |
-| Statistics, longer material | text + JSON | up to 2,000 words, up to 4 defects, numerical and convention defects | Claude Code CLI, macOS | R2 | **not-run** (G3 evaluation pending) | `docs/dev/hep-review/g3/frozen-protocol.md` |
+| Statistics, multi-step | text + JSON | 800-2,000 words, two interacting planted defects (numerical and convention defects included) | Claude Code CLI, macOS | R2 | **evaluated-scope** | G3: defect detection 71/72 (95% CI 0.925-0.9996), false alarms 0/15 (CI 0-0.218); more than two defects per instance not measured |
 | Any other domain: measurement design, detector, theory, ML, code | any | any | any | any | **not-run** | none; route measurement-design review to hep-measurement and manuscript review to hep-authoring |
 
 ## Records and tiers

@@ -1,0 +1,43 @@
+{
+  "id": "g91002406",
+  "type": "C01",
+  "defects": [
+    {
+      "defect_id": "D1",
+      "statement": "Equal weighting of the two conditional regime coverages conflicts with the supplied population mixture probabilities.",
+      "affected_results": [
+        "coverage",
+        "coverage_error",
+        "miss_fraction"
+      ],
+      "tags": [
+        "numerical",
+        "interacting"
+      ],
+      "corrected_values": {
+        "coverage": 0.7164583333333333,
+        "coverage_error": 0.05221779951120904,
+        "miss_fraction": 0.2835416666666667
+      }
+    },
+    {
+      "defect_id": "D2",
+      "statement": "Dropping failed interval fits from the denominator estimates coverage conditional on success rather than the declared unconditional coverage.",
+      "affected_results": [
+        "coverage",
+        "coverage_error",
+        "miss_fraction"
+      ],
+      "tags": [
+        "numerical",
+        "interacting"
+      ],
+      "corrected_values": {
+        "coverage": 0.7164583333333333,
+        "coverage_error": 0.05221779951120904,
+        "miss_fraction": 0.2835416666666667
+      }
+    }
+  ],
+  "notes": "Synthetic study. All displayed numbers reproduce the written release method. Gold corrections are joint, with single interventions audited separately."
+}

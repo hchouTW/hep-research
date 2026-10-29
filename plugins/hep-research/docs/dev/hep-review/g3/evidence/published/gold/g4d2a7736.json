@@ -1,0 +1,12 @@
+{
+  "id": "g4d2a7736",
+  "type": "C03",
+  "defects": [],
+  "notes": "Synthetic study. All displayed numbers reproduce the written release method. Gold corrections are joint, with single interventions audited separately. Hidden admissible value 84; alternative 103.",
+  "missing_input": "The positive exposure normalization from the external run-accounting ledger.",
+  "keywords": [
+    "exposure",
+    "run ledger",
+    "normalization"
+  ]
+}

@@ -1,0 +1,43 @@
+{
+  "id": "ga50ce70b",
+  "type": "C01",
+  "defects": [
+    {
+      "defect_id": "D1",
+      "statement": "At finite occupancy, one minus the empty-crossing probability is a crossing probability rather than a Poisson mean; the thinned mean is -log(empty_fraction).",
+      "affected_results": [
+        "interactions_per_crossing",
+        "cross_section",
+        "cross_section_error"
+      ],
+      "tags": [
+        "convention",
+        "interacting"
+      ],
+      "corrected_values": {
+        "interactions_per_crossing": 0.7596201596669477,
+        "cross_section": 63.301679972245644,
+        "cross_section_error": 0.5926979611190138
+      }
+    },
+    {
+      "defect_id": "D2",
+      "statement": "The tag-conditional vertex efficiency is substituted for the stated unbiased per-interaction thinning probability.",
+      "affected_results": [
+        "interactions_per_crossing",
+        "cross_section",
+        "cross_section_error"
+      ],
+      "tags": [
+        "convention",
+        "interacting"
+      ],
+      "corrected_values": {
+        "interactions_per_crossing": 0.7596201596669477,
+        "cross_section": 63.301679972245644,
+        "cross_section_error": 0.5926979611190138
+      }
+    }
+  ],
+  "notes": "Synthetic study. All displayed numbers reproduce the written release method. Gold corrections are joint, with single interventions audited separately."
+}

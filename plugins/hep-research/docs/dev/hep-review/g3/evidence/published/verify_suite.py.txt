@@ -1,0 +1,31 @@
+import pathlib,json,subprocess,sys,collections,re,ast
+root=pathlib.Path(__file__).resolve().parents[1]
+manifest=json.loads((root/'private/manifest.json').read_text())
+reports=[];structure=[]
+for m in manifest:
+    ident=m['id'];base=root/'public/instances'/ident
+    proc=subprocess.run([sys.executable,str(root/'private/oracles'/(ident+'.py')),str(base)],text=True,capture_output=True)
+    try:report=json.loads(proc.stdout)
+    except Exception:report=dict(ok=False,stdout=proc.stdout,stderr=proc.stderr)
+    report['exit_code']=proc.returncode;reports.append(report)
+    intent=json.loads((base/'intent.json').read_text());text=(base/'material/analysis.md').read_text()
+    expected_req=[dict(id='REQ-1',text='The derived result and its uncertainty are statistically sound and reproducible from the supplied inputs.')]
+    if m['type']=='C04':expected_req.append(dict(id='REQ-2',text='The inputs are tested for mutual consistency before they are used.'))
+    structure.extend([bool(re.fullmatch(r'g[0-9a-f]{8}',ident)),intent==dict(id='intent-'+ident,target_tier='R2',minimum_requirements=expected_req),800<=len(text.split())<=2000,len(re.findall(r'^## ',text,re.M)) in range(5,11)])
+    script=ast.parse((root/'private/oracles'/(ident+'.py')).read_text())
+    imports=[n.module.split('.')[0] for n in ast.walk(script) if isinstance(n,ast.ImportFrom)]+[a.name.split('.')[0] for n in ast.walk(script) if isinstance(n,ast.Import) for a in n.names]
+    structure.append(all(i in sys.stdlib_module_names for i in imports))
+counts=collections.Counter(m['type'] for m in manifest)
+structure.append(counts==dict(C01=12,C02=5,C03=2,C04=1))
+gold=[json.loads(p.read_text()) for p in (root/'private/gold').glob('*.json')]
+for tag,minimum in [('interacting',6),('numerical',4),('convention',3)]:
+    structure.append(sum(g['type']=='C01' and any(tag in d['tags'] for d in g['defects']) for g in gold)>=minimum)
+structure.append(all(2<=len(g['defects'])<=4 for g in gold if g['type']=='C01'))
+structure.append(len(list((root/'public/instances').iterdir()))==20)
+items=json.loads((root/'private/calibration/items.json').read_text());labels=json.loads((root/'private/calibration/labels.json').read_text())
+structure.extend([len(items)==12,set(labels)=={x['item'] for x in items},set(labels.values())=={'accept','reject'}])
+(root/'private/validation_report.json').write_text(json.dumps(dict(oracles=reports,structure=structure),indent=2)+'\n')
+passed=sum(r['ok'] and r['exit_code']==0 for r in reports)
+# Only aggregate diagnostics reach the terminal; answer-key content stays in private/.
+print(json.dumps(dict(oracles_run=len(reports),oracles_passed=passed,structural_checks_passed=sum(structure),structural_checks_total=len(structure),min_words=min(m['word_count'] for m in manifest),max_words=max(m['word_count'] for m in manifest))))
+sys.exit(0 if passed==20 and all(structure) else 1)
