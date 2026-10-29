@@ -3,6 +3,21 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **New skill hep-review (experimental, protocol hep-review/0, schema 0.1.0).** Recorded, tiered review of physics
+  work: review obligations, assurance tiers R0-R3 computed from the records (the R2 floor per obligation), an
+  append-only SQLite commit log in the private state directory with head continuity and checkpoints, export/import,
+  file submissions read by bytes, and a two-layer report (a byte-reproducible projection plus an attestation) that
+  never claims more than its achieved tier. Kernel `contracts/hep_review.py` and schemas
+  `contracts/schemas/hep_review_*.json`; skill `skills/hep-review/` (`review.py` CLI). Gate G1 (record prototype)
+  only: it can produce R0-R2 records; no review-capability pilot has been scored and R3 is not reachable on the
+  measured host. Skill names now nine (`contracts/skill_names.py`); manuscript review stays with hep-authoring and
+  measurement-design review with hep-measurement. Development records: `docs/dev/hep-review/`.
+  New pages: `workflow-and-tiers.md` (entry reference), `evidence-and-adjudication.md`, `host-and-trust-boundaries.md`,
+  `storage-continuity-and-export.md`, `evaluation-and-claims.md`, and the domain cards `domains/index.md`,
+  `domains/statistics.md`, `domains/computing.md`; new script `review.py`.
+
 ## 0.43.0 (2026-10-29)
 
 Minor release; contracts 3.14.0 (one minor, the `CV-CRPROP` of the cr-propagation campaign, new rules gated by
