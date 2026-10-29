@@ -3715,6 +3715,7 @@
    "lines": 28,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-review/README.md",
     "skills/hep-review/assets/registry.json",
     "skills/hep-review/references/domains/index.md"
    ],
@@ -3806,9 +3807,11 @@
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/examples/migration-task.md",
     "skills/hep-detector/SKILL.md",
+    "skills/hep-measurement/README.md",
     "skills/hep-measurement/SKILL.md",
     "skills/hep-measurement/references/hep-measurement-guide.md",
     "skills/hep-ml/SKILL.md",
+    "skills/hep-review/README.md",
     "skills/hep-review/SKILL.md",
     "skills/hep-statistics/SKILL.md",
     "skills/hep-theory/SKILL.md",
@@ -3852,6 +3855,7 @@
     "skills/hep-measurement/references/rare-event-and-neutrino-measurements.md",
     "skills/hep-measurement/scripts/cosmic_ray_flux.py",
     "skills/hep-measurement/scripts/particle_ratio_with_uncertainty.py",
+    "skills/hep-review/README.md",
     "skills/hep-review/assets/registry.json",
     "skills/hep-review/references/domains/index.md",
     "skills/hep-statistics/SKILL.md",
@@ -3881,6 +3885,7 @@
    "lines": 54,
    "linked_from_skill_md": true,
    "cited_by": [
+    "skills/hep-review/README.md",
     "skills/hep-review/SKILL.md"
    ],
    "cited_by_other_skills": [],
@@ -3893,6 +3898,7 @@
    "lines": 51,
    "linked_from_skill_md": true,
    "cited_by": [
+    "skills/hep-review/README.md",
     "skills/hep-review/SKILL.md"
    ],
    "cited_by_other_skills": [],
@@ -3905,6 +3911,7 @@
    "lines": 53,
    "linked_from_skill_md": true,
    "cited_by": [
+    "skills/hep-review/README.md",
     "skills/hep-review/SKILL.md"
    ],
    "cited_by_other_skills": [],
@@ -3917,6 +3924,7 @@
    "lines": 45,
    "linked_from_skill_md": true,
    "cited_by": [
+    "skills/hep-review/README.md",
     "skills/hep-review/SKILL.md"
    ],
    "cited_by_other_skills": [],
@@ -3930,6 +3938,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "contracts/rules/registry.json",
+    "skills/hep-review/README.md",
     "skills/hep-review/SKILL.md",
     "skills/hep-review/references/evaluation-and-claims.md"
    ],
@@ -3943,6 +3952,7 @@
    "lines": 72,
    "linked_from_skill_md": true,
    "cited_by": [
+    "skills/hep-review/README.md",
     "skills/hep-review/SKILL.md",
     "tests/skills/hep_review/test_g1_review_fixes.py"
    ],
@@ -4004,6 +4014,7 @@
    "cited_by": [
     "skills/hep-detector/references/response-and-forward-folding.md",
     "skills/hep-measurement/references/hep-measurement-guide.md",
+    "skills/hep-statistics/README.md",
     "skills/hep-statistics/SKILL.md",
     "skills/hep-statistics/references/core-stats-guide.md",
     "skills/hep-statistics/references/unfolding.md",
@@ -4054,6 +4065,7 @@
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
     "skills/hep-measurement/references/hep-measurement-guide.md",
     "skills/hep-measurement/references/rare-event-and-neutrino-measurements.md",
+    "skills/hep-statistics/README.md",
     "skills/hep-statistics/SKILL.md",
     "skills/hep-statistics/references/astroparticle-statistics.md",
     "skills/hep-statistics/references/core-stats-guide.md",
@@ -4076,6 +4088,7 @@
    "cited_by": [
     "skills/hep-computing/references/root-debugging.md",
     "skills/hep-detector/references/data-mc-validation-and-detector-systematics.md",
+    "skills/hep-statistics/README.md",
     "skills/hep-statistics/SKILL.md",
     "skills/hep-statistics/references/astroparticle-statistics.md",
     "skills/hep-statistics/references/core-stats-guide.md",
@@ -4230,7 +4243,6 @@
     "profiles/theory/heliospheric-modulation/profile.json",
     "skills/hep-detector/references/response-and-forward-folding.md",
     "skills/hep-detector/references/space-based-direct-detection.md",
-    "skills/hep-measurement/README.md",
     "skills/hep-measurement/references/cosmic-ray-measurements.md",
     "skills/hep-statistics/SKILL.md",
     "skills/hep-statistics/references/astroparticle-statistics.md",
@@ -4276,6 +4288,7 @@
     "skills/hep-measurement/references/measurements-and-unfolding.md",
     "skills/hep-measurement/scripts/cosmic_ray_flux.py",
     "skills/hep-measurement/scripts/cr_spectrum_powerlaw_fit.py",
+    "skills/hep-statistics/README.md",
     "skills/hep-statistics/SKILL.md",
     "skills/hep-statistics/references/astroparticle-statistics.md",
     "skills/hep-statistics/references/core-stats-guide.md",

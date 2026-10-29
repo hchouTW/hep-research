@@ -289,29 +289,29 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `transfer-learning.md` | hep-ml | 1.6 | no | 4 | - | 9257d7b5 2026-10-15 |
 | `transformer-architectures.md` | hep-ml | 5.5 | no | 4 | - | 9257d7b5 2026-10-15 |
 | `uncertainty-and-calibration.md` | hep-ml | 6.9 | yes | 10 | hep-statistics | 485e96cb 2026-10-17 |
-| `domains/computing.md` | hep-review | 1.8 | no | 2 | - | dbebc92c 2026-10-29 |
-| `domains/index.md` | hep-review | 1.8 | yes | 93 | hep-authoring, hep-citations, hep-computing, hep-detector, hep-measurement, hep-ml, hep-statistics, hep-theory | dbebc92c 2026-10-29 |
-| `domains/statistics.md` | hep-review | 2.1 | no | 23 | hep-authoring, hep-detector, hep-measurement, hep-statistics, hep-theory | dbebc92c 2026-10-29 |
-| `evaluation-and-claims.md` | hep-review | 3.8 | yes | 1 | - | 92975d12 2026-10-29 |
-| `evidence-and-adjudication.md` | hep-review | 3.4 | yes | 1 | - | dbebc92c 2026-10-29 |
-| `host-and-trust-boundaries.md` | hep-review | 3.8 | yes | 1 | - | 1dfb15fa 2026-10-29 |
-| `storage-continuity-and-export.md` | hep-review | 2.9 | yes | 1 | - | dbebc92c 2026-10-29 |
-| `support-matrix.md` | hep-review | 3.2 | yes | 3 | - | 92975d12 2026-10-29 |
-| `workflow-and-tiers.md` | hep-review | 6.1 | yes | 2 | - | b491ff9e 2026-10-29 |
+| `domains/computing.md` | hep-review | 1.8 | no | 3 | - | dbebc92c 2026-10-29 |
+| `domains/index.md` | hep-review | 1.8 | yes | 95 | hep-authoring, hep-citations, hep-computing, hep-detector, hep-measurement, hep-ml, hep-statistics, hep-theory | dbebc92c 2026-10-29 |
+| `domains/statistics.md` | hep-review | 2.1 | no | 24 | hep-authoring, hep-detector, hep-measurement, hep-statistics, hep-theory | dbebc92c 2026-10-29 |
+| `evaluation-and-claims.md` | hep-review | 3.8 | yes | 2 | - | 92975d12 2026-10-29 |
+| `evidence-and-adjudication.md` | hep-review | 3.4 | yes | 2 | - | dbebc92c 2026-10-29 |
+| `host-and-trust-boundaries.md` | hep-review | 3.8 | yes | 2 | - | 1dfb15fa 2026-10-29 |
+| `storage-continuity-and-export.md` | hep-review | 2.9 | yes | 2 | - | dbebc92c 2026-10-29 |
+| `support-matrix.md` | hep-review | 3.2 | yes | 4 | - | 92975d12 2026-10-29 |
+| `workflow-and-tiers.md` | hep-review | 6.1 | yes | 3 | - | b491ff9e 2026-10-29 |
 | `astroparticle-statistics.md` | hep-statistics | 12.4 | yes | 15 | hep-detector, hep-measurement | e03c0396 2026-10-22 |
 | `combinations.md` | hep-statistics | 6.0 | yes | 6 | - | 6a70f37e 2026-10-29 |
-| `core-stats-commands.md` | hep-statistics | 52.3 | yes | 6 | hep-detector, hep-measurement | f453828b 2026-10-29 |
+| `core-stats-commands.md` | hep-statistics | 52.3 | yes | 7 | hep-detector, hep-measurement | f453828b 2026-10-29 |
 | `core-stats-guide.md` | hep-statistics | 14.8 | yes | 12 | hep-measurement | 1f9b0087 2026-10-29 |
-| `inference-recipes.md` | hep-statistics | 21.6 | yes | 13 | hep-detector, hep-measurement | 2b221f92 2026-10-22 |
-| `likelihood-fitting.md` | hep-statistics | 7.1 | yes | 11 | hep-computing, hep-detector | 09237aee 2026-10-17 |
+| `inference-recipes.md` | hep-statistics | 21.6 | yes | 14 | hep-detector, hep-measurement | 2b221f92 2026-10-22 |
+| `likelihood-fitting.md` | hep-statistics | 7.1 | yes | 12 | hep-computing, hep-detector | 09237aee 2026-10-17 |
 | `ml-assisted-inference.md` | hep-statistics | 6.2 | yes | 8 | hep-ml | 9257d7b5 2026-10-15 |
 | `nuisance-modeling.md` | hep-statistics | 22.2 | yes | 11 | hep-computing, hep-measurement | 16214af1 2026-10-26 |
 | `pdf-fit-statistics.md` | hep-statistics | 7.7 | yes | 6 | hep-theory | 6c7b8ea3 2026-10-23 |
 | `roofit-and-roostats-methods.md` | hep-statistics | 7.6 | yes | 6 | - | 09237aee 2026-10-17 |
 | `statistical-inference-for-physics.md` | hep-statistics | 13.3 | yes | 11 | hep-authoring, hep-citations, hep-computing, hep-theory | e03c0396 2026-10-22 |
 | `statistical-tools.md` | hep-statistics | 9.6 | yes | 4 | - | 578c12ff 2026-10-13 |
-| `time-series-inference.md` | hep-statistics | 20.9 | yes | 16 | hep-detector, hep-measurement | d8ab97cb 2026-10-23 |
-| `unfolding.md` | hep-statistics | 7.9 | yes | 27 | hep-detector, hep-measurement | 97471b3f 2026-10-19 |
+| `time-series-inference.md` | hep-statistics | 20.9 | yes | 15 | hep-detector, hep-measurement | d8ab97cb 2026-10-23 |
+| `unfolding.md` | hep-statistics | 7.9 | yes | 28 | hep-detector, hep-measurement | 97471b3f 2026-10-19 |
 | `amplitudes-and-widths.md` | hep-theory | 8.3 | yes | 3 | - | 83ae4f6b 2026-10-13 |
 | `astroparticle-essentials.md` | hep-theory | 4.6 | yes | 4 | - | 4cedacd8 2026-10-17 |
 | `cosmic-ray-new-physics.md` | hep-theory | 7.8 | no | 4 | - | e70b1a84 2026-10-23 |
