@@ -32,6 +32,11 @@ def ids_of(author: Path) -> list[str]:
 
 def check_layout(author: Path) -> tuple[list[str], list[str]]:
     problems, warnings = [], []
+    for rel in ("public/instances", "private/gold", "private/oracles"):
+        if not (author / rel).is_dir():
+            problems.append(f"missing folder {rel} (has the author finished?)")
+    if problems:
+        return problems, warnings
     ids = ids_of(author)
     if len(ids) != 16:
         problems.append(f"{len(ids)} instances, expected 16")
@@ -72,6 +77,8 @@ def private_files(author: Path) -> list[str]:
 
 def cmd_seal(author: Path, out: Path) -> dict:
     problems, warnings = check_layout(author)
+    if problems:
+        return {"status": "refused", "problems": problems, "warnings": warnings}
     oracles = run_oracles(author)
     if problems or oracles["oracles_failed"]:
         return {"status": "refused", "problems": problems, "warnings": warnings, **oracles}
