@@ -7964,3 +7964,83 @@ identical today; checked). USINE runs (B1.3 cap 60): 2 (the live check); every o
 
 Rebase: before the report the branch was rebased onto the integration HEAD eeb62a4e (status.json and workflow.json
 only, orchestrator files); f0f424da stays the base of the comparisons above.
+
+## CRPROP-L2 — 2026-10-29 (environment E2)
+
+Work package L2 of follow-up wave 8 (decision B1.3, follow-ups 2-6 of the 0.44.0 release): the modulation conformance
+result tied to the provider version (L2-1), adapter and provider versions with a cache-key migration (L2-2), the USINE
+injection variable stated explicitly and the K3/K1 doc slips (L2-3). Contracts 3.16.0 (one minor, gating constant
+`validate.CONFORMANCE_VERSION_FROM`), `CORE_VERSION` 1.4.0 (core/provider refuses more declarations), adapter
+`cr-propagation` 0.3.0.
+
+**Environment field (r3 §0.3, base exception D10).** E2 (macOS arm64), Python 3.13.2; fixtures, theory-profile
+artifacts and examples regenerated with the E2 venv (`~/.venvs/hep-research-e2`); USINE V3.5 (commit fb53006d) through
+HEP_USINE_BIN, HEP_USINE_DATA and USINE, with the host ROOT_INCLUDE_PATH. `git rev-parse --show-toplevel` =
+`.claude/worktrees/crprop-l2`; branch `worktree-crprop-l2`; status clean at start; base f0f424da = integration HEAD
+`worktree-crprop-l` (not `main`; decision D10), which contains the 0.44.0 release merge 31f39ee8; L2 has no
+prerequisite work package (workflow.json deps empty; requires env-usine, present). DRAGON2 not run.
+
+Acceptance entries (frozen in `docs/dev/cr-propagation/acceptance.json`): L2-1, L2-2, L2-3 and ALL-*.
+
+What changed:
+- `contracts/schemas/cr_provider.json`: `modulation.conformance.result` requires `provider_version` (the provider
+  version the result was obtained at). The field is required, not optional, so the change is a minor bump (3.16.0)
+  with `validate.CONFORMANCE_VERSION_FROM`; declarations carry no contract_version, so the constant gates no artifact
+  rule. A 3.15 declaration with a modulation block is refused by core 1.4.0 until the gate is rerun.
+- `core/provider/protocol.py`: `check_declaration(declaration, version=None)` requires the field and refuses a result
+  whose `provider_version` differs from `version` (the caller's resolved provider version), else from the declaration's
+  own `version`; the message says to rerun `tools/provider_registry.py --conformance`. `registry.parse_registry` passes
+  each entry's version and `conformance.run_conformance` passes the entry's version. `CORE_VERSION` 1.4.0.
+- `tools/provider_registry.py`: `--conformance` writes `result.provider_version` (the version the gate ran at);
+  `collect` checks each declaration against its effective version (the declaration's, else the adapter's or profile's).
+- `adapters/cr-propagation/adapter.json`: version 0.3.0; `usine` and `dragon2` declare their own `version` 0.3.0 (they
+  inherited the adapter's 0.2.0); `emulator` stays 1.0.0; the USINE result records `provider_version` 0.3.0.
+- `usine_provider.DEFAULT_TRANSPORT` and `tests/adapters/fixtures/cr_propagation/usine/specs/d1-*.json` state
+  `sources.injection[].spectrum_variable` = `kinetic_energy_per_nucleon`.
+- Contracts bump as in K2: CONTRACTS_VERSION and comment, `vocab/core.json`, the two pinned tests, `make_fixtures.py`
+  and `design_fixtures.py` rerun, three skill templates, six theory-profile scripts rerun, 14 examples rerun; only
+  version strings and the hashes that cover them changed (diff checked line by line after masking 64-hex hashes). No
+  contract fixture was added, so `gate_verdicts.json` is unchanged.
+
+Conformance gate (L2-1; `$CRPROP_OUT/l2/conformance/usine-0.3.0.json`, 2 USINE runs of the 10 allowed):
+`tools/provider_registry.py --conformance usine` at provider version 0.3.0 with K2's reference point, observables and
+tolerance 1e-3: passed, largest relative deviation 4.27721405739101e-05 over 390 nodes of 10B, 10Be, 11B, 12C, 9Be,
+equal to the digit to K2's result at 0.2.0. Recorded in `adapter.json` with `provider_version` 0.3.0.
+
+Versions (L2-2). The point hash (`core/provider/hashing.point_hash`) and so the runner's cache key contain
+`provider_version`; usine and dragon2 inherited the adapter's 0.2.0, set at B1 (77d661c3). Since then usine gained the
+F1 point parameters (low break, phi, production channels) and the K2 modulation block and hook, and the K3 translator
+source checks; dragon2 refuses harmonized-v1 transports whose sources it cannot express (K3). Both go to 0.3.0, set
+explicitly so a later adapter bump does not move them. The emulator stays 1.0.0: its answers for the committed E2 model
+are pinned unchanged (`EmulatorPinnedResponses`), a per-model declaration already carries `+model.<sha12>` in its
+version, and its later changes only add refusals (a non-reproducing self-check), which produce no value to cache;
+bumping it would also rewrite `c2uf/e2-pinned-responses.json`, which L1 may be replacing.
+
+**Migration decision: keep, not re-key.** The committed records stay as records of what produced them, with usine 0.2.0
+(C2U `c2u/usine-family-study.json`, C2UF `c2uf/usine-two-dataset-family-study.json`, `c2uf/` and `e2/` emulator model
+contexts, E1/E2 summaries, F1 `f1-reproduction.json`). Re-keying would claim that 0.3.0 produced values it did not, and
+the emulator model files are hashed by their ml-artifacts and versions. No test replays them through the runner
+expecting a cache hit: the offline tests read their numbers; `ProviderVersionMigration.test_recorded_input_hashes_are_history`
+recomputes all 565 C2U and 367 C2UF input hashes from the recorded point, transport and usine 0.2.0 (all equal) and
+finds none of them among the hashes of the same points under 0.3.0, so a cache filled at 0.2.0 can never answer a
+0.3.0 request (no stale hit; a miss is a fresh run). Live callers now ask the registered version: the F1 example
+`examples/bc-usine-reproduction/run.py` and the C2U study driver read it from `adapter.json`, and the `UsineProvider`
+tests of `test_propagation_fit.py` send the registry's version instead of the record's (the record still asserts
+0.2.0). F1's record tests and the C2UF tests pass unchanged; no file under `c2uf/` or `e2/` was edited.
+
+USINE inputs (L2-3; `$CRPROP_OUT/l2/render/before.json`, `after.json`): each of the five d1 specs and DEFAULT_TRANSPORT
+translated with the old (implicit) and new (explicit) injection by the translator (unchanged by L2, so old and new
+translator agree): all four rendered files identical, sha256 by sha256. The translation record changes (the default
+note for spectrum_variable disappears; the echoed transport has the field) and so does the canonical hash of
+DEFAULT_TRANSPORT (a4a7ec283011... implicit, d25f968e865d... explicit). Committed hashes over the transport object are
+kept unchanged: the E2 and C2UF emulator models record the implicit block as their training transport (hashed into
+their ml-artifacts), and the C2U/C2UF input hashes are history (above). Effect: the emulator compares a request's
+transport by hash, so it refuses the explicit form as another block (out-of-domain) and accepts null or its recorded
+training transport (`EmulatorProviderRefusals.test_transport_and_bins`); `EmulatorArtifact` checks that the training
+transport is DEFAULT_TRANSPORT minus the explicit default and renders the same USINE inputs.
+
+**Erratum (appended; the sections themselves are not edited).** CRPROP-K3, row K3-2: "46 blocks; the 36 the old
+translator accepted" should read 37 accepted blocks (the verifier's scan). CRPROP-K1, environment field: base
+94ba34d1 was the dispatch base; K1 was rebased onto 21ec114d before its merge. Also fixed: the docstring of
+`tests/adapters/fixtures/cr_propagation/d3/d3_study.py` named `dragon2_run.spec_from_transport` for D3_harmonized_v1;
+it is `dragon2_translate.spec_from_transport`.
