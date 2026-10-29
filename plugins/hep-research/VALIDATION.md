@@ -3483,6 +3483,30 @@ Not done in this stage: the independent
 new-problem run by an agent that did not take part (C1.10, section A.8), the `review.py` Markdown review, the release
 manifest. The adequacy table is unchanged; search values remain F1 optimistic bounds and decide nothing.
 
+## 0.49.0 release check (2026-10-29, E2 and the CI lock)
+
+Release commit `51948d5b` on `release/0.49.0`, based on main `cca361ed` (PR #320 merged). It ships the removal of the
+retired cross-artifact check's entry points (PR #319; VALIDATION RETIRE-CROSS-ARTIFACT-CHECK) and the hep-authoring
+follow-ups 2 (PR #320; VALIDATION AUTHORING-FOLLOWUPS-2).
+
+Contracts 3.17.0, `CORE_VERSION` 1.4.0 and the adapters are unchanged. The ams02-research companion needs no change: it
+requires hep-research >= 0.11.0 and uses none of the removed entry points.
+
+What changed in the release commit:
+- version 0.49.0 in both manifests, `pyproject.toml`, the README, two assets, the six theory-profile scripts,
+  `usine_translate.py` and `examples/bc-usine-reproduction/run.py`;
+- CHANGELOG `Unreleased` is now `0.49.0`;
+- the theory-profile artifacts and examples were regenerated with E2. Only version strings and the hashes that cover
+  them change: 196 files, the same set as in 0.48.0. `bc-propagation-fit` and `unfolding-coverage` results, which
+  drift with the environment and carry no version, were left as committed.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 4`, E2 (Python 3.13.2) | 31 pass, 0 fail, 2 skipped (CLI host checks); 6126 tests in 483 modules, 0 failures, 166 skipped |
+| Same with the CI lock (no torch) | 31 pass, 0 fail, 2 skipped; 6126 tests, 0 failures, 261 skipped |
+| `check_relocation.py` | 32 pass, 0 fail, 1 skipped; 6126 tests, 0 failures: the two `test_geant4` path-with-spaces failures known since 0.45.0 are gone (fixed in PR #320) |
+| draft PR #321 Linux CI on `51948d5b` | every required job passes (22 pass, 2 skipped) |
+
 ## 0.48.0 release check (2026-10-29, E2 and the CI lock)
 
 Release commit `9d8ce930` on `release/0.48.0`, based on main `f4ddae5b` (PR #315 merged). It ships the retirement of
