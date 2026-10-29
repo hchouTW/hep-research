@@ -7,7 +7,7 @@
   "unverified",
   "unsupported"
  ],
- "$comment": "Naming rule registry (spec \u00a76.3), checked by contracts/naming_registry.py check; keyed by (rule_id, version); source_sha256 is the digest of the predicate implementation (contracts/analysis_checks/source_digest.py): code that changes needs a new rule version.",
+ "$comment": "Naming rule registry (spec \u00a76.3), checked by contracts/naming_registry.py check; keyed by (rule_id, version); source_sha256 is the digest of the predicate implementation (contracts/source_digest.py): code that changes needs a new rule version.",
  "rules": [
   {
    "rule_id": "naming.common.forbidden",
