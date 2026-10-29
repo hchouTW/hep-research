@@ -442,14 +442,14 @@
    ]
   },
   "L1": {
-   "state": "dispatched",
+   "state": "verifying",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-l1",
-   "base": null,
-   "head": null,
+   "base": "eeb62a4e",
+   "head": "ef04f284",
    "merge_commit": null,
-   "worker_report": null,
+   "worker_report": "DONE: enters_squared retry in w=p^2 for failed toy/calibration fits (committed before reruns); C2UF-1 MET on both emulators (SLIM toys 0/200 failed, p<0.0149); K4 emulator swapped in (byte-identical retrain, holdout 0.0032, drift margin >3000); A1.21 skips removed; 2 USINE runs",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
@@ -1022,6 +1022,11 @@
    "cycle": 4,
    "date": "2026-10-29",
    "event": "L2 round 0 REWORK (emulator transport normalisation)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "L1 DONE (ef04f284), Opus verifier"
   }
  ],
  "env": {
