@@ -79,6 +79,8 @@
   "tests.contracts.test_hep_review_kernel": 0.6,
   "tests.contracts.test_hep_review_review_fixes": 0.37,
   "tests.contracts.test_hep_review_freeze": 0.05,
+  "tests.skills.hep_review.test_claims": 0.05,
+  "tests.skills.hep_review.test_regression": 0.05,
   "tests.contracts.test_identity_and_versions": 0.2,
   "tests.contracts.test_invariant_checks": 0.2,
   "tests.contracts.test_levels_f14": 0.1,

@@ -9,8 +9,8 @@ labelled experimental). Review capability is pilot-checked only for single-page 
 | Path | Holds |
 |---|---|
 | `SKILL.md` | the entry point Claude reads first |
-| `references/` | 6 reference pages and 3 domain cards loaded on demand: workflow and tiers, evidence and adjudication, host and trust boundaries, storage and continuity, evaluation and claims, `domains/` |
-| `assets/` | `registry.json` (domain packs, method cards, readers, host adapter) and `host_profile.json` (measured host capabilities) |
+| `references/` | 7 reference pages and 3 domain cards loaded on demand: workflow and tiers, evidence and adjudication, host and trust boundaries, storage and continuity, evaluation and claims, support matrix, `domains/` |
+| `assets/` | `registry.json` (domain packs, method cards, readers, host adapter), `host_profile.json` (measured host capabilities) and `claims.json` (capability claims, written through the claim lifecycle) |
 | `scripts/` | `review.py` (the CLI) and `hep_review_support/` (controlled reading, store, continuity, export, coordinator, evaluation) |
 
 The pure kernel (validation, projection, tiers, closures) is `contracts/hep_review.py`; its schemas are

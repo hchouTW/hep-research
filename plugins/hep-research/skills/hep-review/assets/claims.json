@@ -1,0 +1,85 @@
+{
+ "claims": [
+  {
+   "binding": {
+    "case_distribution": {
+     "G2": {
+      "C01": 4,
+      "C02": 4,
+      "C03": 4,
+      "C04": 4
+     },
+     "g2h": {
+      "C01": 5,
+      "C02": 5,
+      "C03": 3,
+      "C04": 2
+     },
+     "g2x": {
+      "C01": 8,
+      "C02": 4,
+      "C03": 2,
+      "C04": 2
+     }
+    },
+    "gold": "salted commitments: pilot/commitments.json, g2h/commitments.json, g2x/evidence/commitments.json",
+    "policy": "docs/dev/hep-review/pilot/frozen-protocol.md, g2h/frozen-protocol.md, g2x/frozen-protocol.md",
+    "rubric": "pilot/grader-instructions.md, pilot/g2x/grader-instructions.md",
+    "suite": "G2 (Claude-authored), g2h (held out, seed with the user), g2x (Codex-authored, held out)",
+    "trial_plan": "3 trials per instance: 48 + 45 + 48 = 141 trials, 47 cases"
+   },
+   "fingerprint": "7d54b5e087a28e1fd38a8da36c86c02296a3d1fed0d606f439a004f8558decf5",
+   "fingerprint_parts": {
+    "hash_profile": [
+     "hep-review-metadata/1",
+     "raw-bytes/1"
+    ],
+    "host_profile_digest": "d04adb3c314737809cade39b489078cc195137c07a5cb8dfc4bb1a1dbb7e5727",
+    "model": {
+     "alias": "claude-opus-5-5 (session model, inherited by general-purpose subagents)",
+     "date": "2026-10-29",
+     "pinned": "unknown"
+    },
+    "packet_template_digest": "3ba866b1bb11159cf8ead34edd39677e45ffe623311f96184e3ef678bfdddcfb",
+    "reader_profile": "materials.read_controlled/1",
+    "validator_version": "1.0.0"
+   },
+   "history": [
+    {
+     "at": "2026-10-29",
+     "evidence": {
+      "engineering_gate": true,
+      "graders_calibrated": true,
+      "report": "docs/dev/hep-review/g2h-report.md (and g2-report.md, g2x-report.md)"
+     },
+     "from": "experimental",
+     "to": "pilot-checked-scope"
+    }
+   ],
+   "id": "hep-review/statistics-single-page",
+   "limitations": [
+    "no miss rate measured: every suite was at the ceiling",
+    "reviewers and two of three grader runs are the same model family",
+    "Claude wrote the G2/g2h oracles and every authoring brief; Codex gold is author self-assessment",
+    "3 trials per instance with identical packets: 141 trials are 47 cases"
+   ],
+   "results": {
+    "G2": "both gates 48/48",
+    "c02_false_alarms": "0 of 39 control trials",
+    "content_misses": "0 of 141 trials",
+    "g2h": "both gates 45/45",
+    "g2x": "scientific gate pass (37/39 defect-trials counted; the 2 uncounted were found but quarantined), engineering 47/48 (one fabricated digest)"
+   },
+   "scope": {
+    "domain": "statistics",
+    "format": "text + JSON",
+    "host": "claude-code-cli-macos",
+    "material": "single-page analyses, up to three planted defects, closed-form checks",
+    "method": "assumption-check + recompute (0.1% relative)",
+    "tier": "R2"
+   },
+   "state": "pilot-checked-scope"
+  }
+ ],
+ "note": "written by docs/dev/hep-review/g3/make_claims.py through the claim lifecycle; checked by evaluation.check_registry"
+}

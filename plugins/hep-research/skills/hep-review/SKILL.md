@@ -88,6 +88,7 @@ Store, continuity, export: [storage and continuity](references/storage-continuit
 | Store location, head continuity, checkpoints, fork after broken continuity | [storage and continuity](references/storage-continuity-and-export.md) |
 | Moving a record to another session or host: export, verify, import | `review.py export` / `verify-export` / `import`; [storage and continuity](references/storage-continuity-and-export.md) |
 | Pilot design, salted gold commitments, scoring denominators, capability claims | [evaluation and claims](references/evaluation-and-claims.md) |
+| What is supported, on what evidence (scopes, tiers, hosts, extensions) | [support matrix](references/support-matrix.md) |
 | Reading a reviewer's drop file by bytes; quarantine of a mismatched or invalid submission | `review.py ingest`; [host and trust boundaries](references/host-and-trust-boundaries.md) |
 | A new session on an existing store: anchor on the last checkpoint, or stay unverified | `review.py start --checkpoint LINE`; [storage and continuity](references/storage-continuity-and-export.md) |
 

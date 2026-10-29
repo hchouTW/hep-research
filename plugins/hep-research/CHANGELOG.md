@@ -5,6 +5,16 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **hep-review: capability claims, support matrix and regression suite (G3 / T08 groundwork).** Claims are now
+  objects with a scope, a binding (policy, rubric, gold, suite, case distribution, trial plan), results, limitations
+  and a fingerprint (host profile, packet text, validator, reader and hash profiles, model alias and date). They are
+  written and checked only through `evaluation.py` (`make_claim`, `transition`, `reassess_if_changed`,
+  `check_registry`): upgrades need gate evidence, and a changed fingerprint forces needs-reassessment. The shipped
+  claim (`skills/hep-review/assets/claims.json`) is pilot-checked-scope for single-page statistics at R2. New
+  reference `support-matrix.md`: T05-T07 are not built and listed as unsupported, R3 is unsupported on this host,
+  and only Claude Code on macOS is measured. `tests/skills/hep_review/test_regression.py` re-scores every committed
+  pilot result from its evidence. The host profile records the g2x fabricated-digest observation.
+
 - **New skill hep-review (protocol hep-review/1, schema 1.0.0; 0.x records labelled experimental).** Recorded, tiered review of physics
   work: review obligations, assurance tiers R0-R3 computed from the records (the R2 floor per obligation), an
   append-only SQLite commit log in the private state directory with head continuity and checkpoints, export/import,

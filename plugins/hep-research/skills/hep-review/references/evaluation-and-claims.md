@@ -34,3 +34,15 @@ measured host (three pilots, `docs/dev/hep-review/g2*-report.md`); no other scop
 experimental. R3 needs a committed claim-binding object with the evaluation chain
 segment from the checkpoint the plan states, and the plan's capability fingerprint; layer 2 re-checks that the claim's
 current state equals the bound state.
+
+Claims are written and checked only through the lifecycle in `scripts/hep_review_support/evaluation.py`
+(`make_claim`, `transition`, `reassess_if_changed`, `check_registry`):
+- **One state at a time.** An upgrade needs gate evidence: the engineering gate passed, the graders calibrated, and a
+  report.
+- **Reassessment.** A changed fingerprint or a new failure type moves a claim to needs-reassessment. The fingerprint
+  covers the host-profile digest, the packet text, the validator, the reader and hash profiles, and the model alias
+  with its date.
+- **Retired** is final.
+
+The shipped claims are in `assets/claims.json`. What each scope supports, on what evidence, is in the
+[support matrix](support-matrix.md).
