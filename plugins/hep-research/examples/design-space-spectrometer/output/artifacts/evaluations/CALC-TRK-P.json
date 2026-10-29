@@ -4,7 +4,7 @@
  "artifact_type": "design-evaluation",
  "objective": "detector system design: design-evaluation written by evaluate_design.py",
  "versions": {
-  "plugin": "0.45.0",
+  "plugin": "0.46.0",
   "contracts": "3.16.0",
   "plugin_release": {
    "release": "unreleased",
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-P.json",
-   "sha256": "2edc4745047fc01be6ffa80e398e902a92f675e6187db8ae0e39ccf3bff79eb1",
+   "sha256": "e88c4a50eae05cfe4e7fa9834b4e2f25abe2727225237c544e4f1839caf5ecf1",
    "artifact_type": "design-candidate",
    "artifact_id": "ams-like-v1-cand-P",
    "status": [
@@ -28,7 +28,7 @@
   },
   {
    "ref": "runs/CALC-TRK-P.computational-run.json",
-   "sha256": "95f9d3252a2817477d5f2f7eb70f121e20493a7604d2ed209399fb3439775220",
+   "sha256": "bccdd35c43d5c885f00e2b56c6b27446709bc29911a3fef2b217b9f5776bc80f",
    "artifact_type": "computational-run",
    "artifact_id": "ams-like-v1-CALC-TRK-P-run",
    "status": [

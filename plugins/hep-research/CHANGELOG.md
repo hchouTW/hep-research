@@ -3,7 +3,24 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.46.0 (2026-10-29)
+
+Minor release; contracts 3.16.0, `CORE_VERSION` 1.4.0 and the adapters are unchanged. It ships gate G3 of the
+hep-review skill (spec v9, task T08; PR #312): a held-out evaluation, the capability-claim lifecycle, the support
+matrix and a regression suite for every published pilot and evaluation score.
+
+**Before you upgrade** (details in each entry below):
+- hep-review now carries capability claims in `skills/hep-review/assets/claims.json`. Multi-step statistical reviews
+  are **evaluated-scope** (defect detection 71/72, 95% CI 0.925-0.9997; 0/15 false alarms). The single-page pilot claim
+  is **needs-reassessment**, because the packet text and the validator changed after its pilots. Nothing else is
+  claimed; `skills/hep-review/references/support-matrix.md` lists what is supported, on what evidence.
+- T05-T07 (format readers, controlled tool execution, evidence-based carry-over) are not built and are listed as
+  unsupported; R3 is unsupported on the measured host.
+
+**Known issues**: carried over from 0.45.0 (cr-propagation F1 convergence, F2/F3, the live routing run).
+`tests.adapters.test_cr_propagation.UsineProviderOffline.test_missing_usine_is_a_failed_point` failed once under the
+parallel full run and passes on its own and in CI. hep-review reviewers share the session scratch folder, so
+"no other evaluations seen" stays advisory.
 
 - **hep-review G3 (T08 evaluation): evaluated-scope for multi-step statistical reviews.** A held-out suite authored by
   Codex (20 instances of 800-2,000 words, two interacting defects each, numerical and convention defects included;
