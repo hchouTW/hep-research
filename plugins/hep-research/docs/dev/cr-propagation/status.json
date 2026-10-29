@@ -381,15 +381,15 @@
    ]
   },
   "K1": {
-   "state": "dispatched",
+   "state": "merged",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-k1",
    "base": "94ba34d1",
-   "head": null,
-   "merge_commit": null,
-   "worker_report": null,
-   "verifier_report": null,
+   "head": "eaf66f0d",
+   "merge_commit": "ce869011",
+   "worker_report": "DONE: K1-1 met (opt-in noise rule, k=0.5, 5-point stencil, steps a=clip(2 sqrt(sigma_f V),0.1,1)/sqrt(F_ii)); K1-2 met as worded: BIG/SLIM/QUAINT-Vc0 not converged (EDM 0.0103/0.0147/0.0113 vs thresholds 0.0017/0.0024/0.0034), windows met; 548/600 USINE runs",
+   "verifier_report": "Opus PASS: R9 timing ok, estimator unbiased (ratio 1.0014), opt-in exact, replay 0 runs matches record, windows recomputed, attribution supported; note: F1's 0.3-sigma-step EDMs were below the new thresholds for SLIM/QUAINT-Vc0, the pre-registered steps give 0.010-0.015",
    "missing_capabilities": [],
    "notes": [
     "B1.1"
@@ -972,6 +972,11 @@
    "cycle": 4,
    "date": "2026-10-29",
    "event": "K3 merged (9460a54c), Opus PASS; static ok; K1 remaining"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "K1 merged, Opus PASS; all K WPs merged"
   }
  ],
  "env": {
