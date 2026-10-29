@@ -3,7 +3,36 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.44.0 (2026-10-29)
+
+Minor release; contracts 3.15.0 (gating constant `contracts/validate.py` `MODULATION_FROM`), `CORE_VERSION` 1.3.0,
+adapter `cr-propagation` 0.2.0 unchanged (its version is part of the provider cache keys and of the USINE conformance
+record). It fixes the 0.43.0 known issues in the cr-propagation follow-up K1-K4 (decisions B1.1, B1.2): declared and
+checked provider-side modulation, a noise-aware convergence rule for noisy providers, DRAGON2's accepted differences
+recorded in `adapter.json`, closed translator gaps, and a condition-number bound for GP emulators.
+
+**Before you upgrade** (details in each entry below):
+- A `cr-provider/1` declaration whose domain lists `phi_<period>_gv` now needs a `modulation` block with a passing
+  conformance result (`tools/provider_registry.py --conformance`); the registry refuses it otherwise. The core runner
+  refuses an undeclared top-of-atmosphere prediction and a point with two modulation potentials; from contracts 3.15.0
+  a prediction with more than one nonzero `phi_<period>_gv` fails `prediction.modulated_twice`.
+- The translators no longer drop or zero what they cannot express: unknown `sources.abundances`, an unsupported
+  injection `spectrum_variable` and a USINE gas term without `cm^-3` are refused with a reason. The dragon2 provider
+  refuses a harmonized-v1 transport whose sources DRAGON2 cannot express (its default transport states DRAGON2's own).
+- `train_emulator.py` bounds every kernel's condition number by default (`--max-condition 1e10`); pass 0 to train as
+  before (E2's campaign does).
+- `propagation_fit.py` reports an unconverged fit with reason `not-converged` and writes no statistical-result (it
+  used to fail with "artifact-invalid"); `optimizer.noise` opts a noisy provider into the noise-aware verdict.
+
+**Known issues**: no F1 fit converges even under the noise-aware rule (EDM 0.010-0.015 against thresholds
+0.0017-0.0034 at the pre-registered one-sigma-capped steps; with F1's earlier 0.3-sigma steps SLIM's and
+QUAINT-Vc0's EDMs were below the new thresholds, but the rule was fixed before the refits; next step: a wider-scale
+noise probe or a provider printing more digits), so F1-1 stays not met; C2UF-1 does not survive a well-conditioned
+retrain of the C2UF emulator (SLIM toys stop at the 2% failure threshold), so the committed C2UF emulator and its
+Linux skip (A1.21) are kept until the toy fits are made robust at V_A = 0; the USINE conformance result is not tied to
+the provider version (rerun the gate when the modulation implementation changes); the fit-side isotopic modulation
+path is documented but not implemented; the likely DRAGON2 Ptuskin94/03 enum issue is documented, not reported
+upstream; GALPROP unavailable; F2, F3 and the live routing run not done.
 
 - crprop k2: provider-side modulation is a declared, checked exception to "providers never modulate" (decision B1.1;
   contracts 3.15.0 with the gating constant `validate.MODULATION_FROM`, `CORE_VERSION` 1.3.0). The cr-provider/1
