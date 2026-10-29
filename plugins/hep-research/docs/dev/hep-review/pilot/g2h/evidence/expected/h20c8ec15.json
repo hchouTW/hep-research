@@ -1,0 +1,13 @@
+{
+ "family": "line-fit",
+ "id": "h20c8ec15",
+ "keywords": [
+  "uncertaint",
+  "sigma",
+  "resolution",
+  "error"
+ ],
+ "missing_input": "the per-point uncertainties",
+ "type": "C03",
+ "variant": "missing"
+}

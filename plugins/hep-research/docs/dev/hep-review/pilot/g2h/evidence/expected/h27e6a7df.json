@@ -1,0 +1,11 @@
+{
+ "correct": {
+  "combined": 10.276797330527657,
+  "sigma_combined": 0.2707642230579735
+ },
+ "defect": "the systematic from the shared calibration is correlated between the two measurements but the combination treats them as independent (no covariance term), so the combined uncertainty is underestimated",
+ "family": "combination",
+ "id": "h27e6a7df",
+ "type": "C01",
+ "variant": "defect"
+}

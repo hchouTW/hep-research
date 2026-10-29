@@ -1,0 +1,10 @@
+{
+ "correct": {
+  "sigma_yield": 8.182370988900466
+ },
+ "defect": "the uncertainty of a sum of weights is sqrt(sum w_i^2), not sqrt(sum w_i)",
+ "family": "weighted-yield",
+ "id": "h73eec183",
+ "type": "C01",
+ "variant": "defect"
+}

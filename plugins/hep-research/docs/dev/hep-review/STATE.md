@@ -41,7 +41,7 @@ tasks:
   T06: {status: skipped}
   T07: {status: skipped}
   T08: {status: skipped}
-gates: {G1: done, G2: passed-schema-freeze-pending, G3: pending}
+gates: {G1: done, G2: passed-and-held-out-follow-up-passed-schema-freeze-pending, G3: pending}
 cases:
   T00: {N01: not-applicable-with-basis (worktree created; failure path is the hard stop), N02: pass, N04: pass (no existing hep-review in source or cache), N40: pass}
   T01: "all 62 pass (tests/contracts/test_hep_review_{json,decision_table,kernel,review_fixes}.py)"
@@ -63,7 +63,7 @@ review_inputs_t01:
 blockers:
   - {when: 2026-10-29T09:30+08:00, task: G1, description: "independent G1 review: 4 blockers (B1 rollback stays verified, B2 fork/migrate drop negatives, B3 hand-written assignment bases, B4 records not bound to raw), 4 major, 8 minor; all fixed with tests first in b491ff9e; dispositions in reviews/g1-review-dispositions.md", needs: none, resolved: "2026-10-29 user accepted the G1 dispositions"}
   - {when: 2026-10-29T07:15+08:00, task: T01, description: "independent T01 review returned blocker F1 (layer 1 not byte-reproducible across processes); fixed with a multi-seed test in 3f075184", needs: none, resolved: "2026-10-29 user accepted the dispositions and asked to continue with T03 and G1"}
-next_action: "Maintainer decision: freeze schema 1.0.0 (hep-review/1) as a separate reviewed step, or first run a harder, less-cued, held-out suite (g2-report.md caveats 1-2)"
+next_action: "Maintainer decision: freeze hep-review/1 / schema 1.0.0 as a separate reviewed step (g2h-report.md section 5); a harder multi-defect suite is needed to measure a miss rate"
 ```
 
 ## Log
@@ -101,4 +101,8 @@ next_action: "Maintainer decision: freeze schema 1.0.0 (hep-review/1) as a separ
 2026-10-29 09:28 | T04 | freeze | EvaluationProtocol, commitments, grader instructions, driver committed before any trial | d987d4e2
 2026-10-29 09:35 | T04 | fix | snapshot ns times as decimal strings (found by the pilot path) | 6f7936a7
 2026-10-29 10:40 | T04 | trials | calibration 8/8; 48/48 trials digest-bound at R2; scoring graders agree 12/12; both gates pass; 19/19 commitments verified, nonces published | none
+2026-10-29 11:20 | T04 | g2h | held-out follow-up frozen; seed held by the user | 862de947
+2026-10-29 11:35 | T04 | g2h | gold commitments before any dispatch | cacae2a4
+2026-10-29 12:10 | T04 | g2h | 45/45 trials ingested before the reveal | 596b88e9
+2026-10-29 12:30 | T04 | g2h | reveal 15/15; calibration 10/10; order-swap 15/15; both gates pass 45/45 | none
 ```

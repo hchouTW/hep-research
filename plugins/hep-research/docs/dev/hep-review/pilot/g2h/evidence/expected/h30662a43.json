@@ -1,0 +1,11 @@
+{
+ "correct": {
+  "ndf": 6,
+  "p_value": 0.08330957178485282
+ },
+ "defect": null,
+ "family": "line-fit",
+ "id": "h30662a43",
+ "type": "C02",
+ "variant": "control"
+}

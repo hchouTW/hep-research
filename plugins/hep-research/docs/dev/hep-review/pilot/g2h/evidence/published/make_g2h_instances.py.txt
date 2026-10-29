@@ -1,0 +1,396 @@
+#!/usr/bin/env python3
+"""Held-out G2 suite generator (hep-review T04 follow-up "g2h"; kept off the repository until every trial has ended).
+
+    generate --out DIR          asks for the seed without echo; writes DIR/instances/<id>/... and DIR/commitments.json
+    reveal   --out DIR          asks for the seed; checks every commitment, then writes DIR/expected/ and nonces.json
+    selftest                    builds and checks a suite from a throwaway seed (its instances are exposed)
+
+The seed is the only secret. Gold (the type, family, defect and accepted keywords of every opaque instance) and the
+32-byte nonces are derived from it and are never written by `generate`; only the salted commitments
+SHA-256(nonce || gold) are. Whoever holds the seed holds the gold (spec v9 section 15.4 item 2: held by the user, off
+the host). Every instance passes its oracle before it is written: a defect changes a stated number beyond the
+tolerance, a control (including a correct but differently written method) reproduces the correct numbers, and a
+missing-input instance is reachable for the true value of the missing input and not determinable without it.
+Standard library only.
+"""
+from __future__ import annotations
+
+import argparse
+import getpass
+import hashlib
+import hmac
+import json
+import math
+import random
+import sys
+from pathlib import Path
+
+TOL = 1e-3  # relative tolerance of the computing obligation
+Z90 = 1.2815515655446004
+
+
+def stated(x: float, digits: int = 6) -> float:
+    return float(f"{x:.{digits}g}")
+
+
+def within(a: float, b: float, tol: float = TOL / 2) -> bool:
+    return abs(a - b) <= tol * max(abs(b), 1e-300)
+
+
+def differs(a: float, b: float) -> bool:
+    return abs(a - b) > 5 * TOL * max(abs(b), 1e-300)
+
+
+# ---- special functions -------------------------------------------------------------------------------------------
+
+def gamma_q(a: float, x: float) -> float:
+    """Upper regularized incomplete gamma function Q(a, x)."""
+    if x <= 0:
+        return 1.0
+    if x < a + 1:
+        term = total = 1.0 / a
+        ap = a
+        for _ in range(1000):
+            ap += 1
+            term *= x / ap
+            total += term
+            if abs(term) < abs(total) * 1e-16:
+                break
+        return 1.0 - total * math.exp(-x + a * math.log(x) - math.lgamma(a))
+    b, c, d = x + 1 - a, 1e300, 1 / (x + 1 - a)
+    h = d
+    for i in range(1, 1000):
+        an = -i * (i - a)
+        b += 2
+        d = an * d + b
+        d = 1e-300 if abs(d) < 1e-300 else d
+        c = b + an / c
+        c = 1e-300 if abs(c) < 1e-300 else c
+        d = 1 / d
+        h *= d * c
+        if abs(d * c - 1) < 1e-16:
+            break
+    return math.exp(-x + a * math.log(x) - math.lgamma(a)) * h
+
+
+def poisson_cdf(n: int, mu: float) -> float:
+    return sum(math.exp(-mu + k * math.log(mu) - math.lgamma(k + 1)) for k in range(n + 1)) if n >= 0 else 0.0
+
+
+def poisson_upper(n: int, alpha: float = 0.10) -> float:
+    """Mean s with P(N <= n | s) = alpha (classical one-sided upper limit, no background)."""
+    lo, hi = 0.0, n + 60.0
+    for _ in range(200):
+        mid = (lo + hi) / 2
+        lo, hi = (mid, hi) if poisson_cdf(n, mid) > alpha else (lo, mid)
+    return (lo + hi) / 2
+
+
+def wls_line(x, y, s):
+    w = [1 / v ** 2 for v in s]
+    sw, sx, sy = sum(w), sum(a * b for a, b in zip(w, x)), sum(a * b for a, b in zip(w, y))
+    sxx = sum(a * b * b for a, b in zip(w, x))
+    sxy = sum(a * b * c for a, b, c in zip(w, x, y))
+    det = sw * sxx - sx ** 2
+    a, b = (sxx * sy - sx * sxy) / det, (sw * sxy - sx * sy) / det
+    chi2 = sum(wi * (yi - a - b * xi) ** 2 for wi, xi, yi in zip(w, x, y))
+    return a, b, chi2
+
+
+def blue(x, stat, syst, rho):
+    v11, v22, v12 = stat[0] ** 2 + syst[0] ** 2, stat[1] ** 2 + syst[1] ** 2, rho * syst[0] * syst[1]
+    det = v11 * v22 - v12 ** 2
+    i11, i22, i12 = v22 / det, v11 / det, -v12 / det
+    w1, w2 = i11 + i12, i22 + i12
+    norm = w1 + w2
+    return (w1 * x[0] + w2 * x[1]) / norm, 1 / math.sqrt(norm)
+
+
+# ---- families: f(rng, variant) -> (analysis text, data, verdict); variant in defect / control / alternative / missing
+
+def fam_asymmetry(rng, variant):
+    n1 = rng.randint(400, 3000)
+    n2 = round(n1 * rng.uniform(0.3, 0.65))
+    if rng.random() < 0.5:
+        n1, n2 = n2, n1
+    s = n1 + n2
+    a = (n1 - n2) / s
+    good = math.sqrt((1 - a * a) / s)
+    bad = math.sqrt((1 + a * a) / s)
+    method = {"defect": "obtained by standard error propagation of the ratio A = D/S, with D = N1 - N2 and "
+                        "S = N1 + N2 and their Poisson uncertainties sigma_D = sigma_S = sqrt(S): "
+                        "sigma_A = |A| sqrt((sigma_D/D)^2 + (sigma_S/S)^2).",
+              "control": "sigma_A = sqrt((1 - A^2)/S), from the binomial distribution of N1 at fixed S = N1 + N2.",
+              "alternative": "sigma_A = 2 sqrt(N1 N2 / S^3) with S = N1 + N2, propagated from the independent Poisson "
+                             "uncertainties of N1 and N2."}[variant]
+    text = (f"A forward-backward asymmetry A = (N1 - N2)/(N1 + N2) is measured from N1 forward and N2 backward events. "
+            f"Its statistical uncertainty is {method}")
+    sig = bad if variant == "defect" else good
+    data = {"N1": n1, "N2": n2, "stated_results": {"A": stated(a), "sigma_A": stated(sig)}}
+    ok = differs(bad, good) if variant == "defect" else within(data["stated_results"]["sigma_A"], good)
+    return text, data, {"oracle_ok": ok, "defect": "D = N1 - N2 and S = N1 + N2 are treated as independent in the "
+                        "propagation although both are built from N1 and N2 (correlated); the correct uncertainty is "
+                        "sqrt((1 - A^2)/S), the stated one is sqrt((1 + A^2)/S)" if variant == "defect" else None,
+                        "correct": {"sigma_A": good}}
+
+
+def fam_weighted_yield(rng, variant):
+    n = rng.randint(12, 20)
+    if variant == "missing":
+        w = [round(rng.uniform(0.2, 3.0), 3) for _ in range(n)]
+        total, good = sum(w), math.sqrt(sum(v * v for v in w))
+        data = {"n_events": n, "weights": None, "stated_results": {"yield": stated(total), "sigma_yield": stated(good)}}
+        text = (f"The signal yield is the sum of the event weights of the {n} selected simulated events; the weights "
+                "come from the reweighting step (per-event weights not supplied). Its statistical uncertainty is "
+                "sqrt(sum_i w_i^2).")
+        w2 = [2 * v for v in w]
+        return text, data, {"oracle_ok": differs(math.sqrt(sum(v * v for v in w2)), good),
+                            "missing_input": "the per-event weights", "keywords": ["weight"]}
+    w = [round(rng.uniform(0.2, 3.0), 3) for _ in range(n)]
+    total = sum(w)
+    good, bad = math.sqrt(sum(v * v for v in w)), math.sqrt(total)
+    method = {"defect": "sqrt(sum_i w_i), the Poisson uncertainty of the weighted count.",
+              "control": "sqrt(sum_i w_i^2).",
+              "alternative": "(sum_i w_i)/sqrt(N_eff) with the effective number of events "
+                             "N_eff = (sum_i w_i)^2 / sum_i w_i^2."}[variant]
+    text = f"The signal yield is the sum of the event weights of {n} selected simulated events. Its statistical " \
+           f"uncertainty is {method}"
+    sig = bad if variant == "defect" else good
+    data = {"n_events": n, "weights": w, "stated_results": {"yield": stated(total), "sigma_yield": stated(sig)}}
+    ok = differs(bad, good) if variant == "defect" else within(data["stated_results"]["sigma_yield"], good)
+    return text, data, {"oracle_ok": ok, "defect": "the uncertainty of a sum of weights is sqrt(sum w_i^2), not "
+                        "sqrt(sum w_i)" if variant == "defect" else None, "correct": {"sigma_yield": good}}
+
+
+def fam_combination(rng, variant):
+    x = [round(rng.uniform(9.6, 10.4), 3) for _ in range(2)]
+    stat = [round(rng.uniform(0.10, 0.25), 3) for _ in range(2)]
+    syst = [round(rng.uniform(0.15, 0.30), 3) for _ in range(2)]
+    if variant == "missing":
+        rho = round(rng.uniform(0.3, 0.8), 2)
+        m, s = blue(x, stat, syst, rho)
+        data = {"x": x, "stat": stat, "syst": syst, "syst_correlation": None,
+                "stated_results": {"combined": stated(m), "sigma_combined": stated(s)}}
+        text = ("Two measurements of the same quantity are combined with the BLUE method. The statistical uncertainties "
+                "are independent; the systematic uncertainties come from the shared energy-scale calibration and are "
+                "partially correlated, with the correlation coefficient taken from the calibration note (not supplied).")
+        other = blue(x, stat, syst, 0.0)[1]
+        return text, data, {"oracle_ok": differs(other, s), "missing_input": "the systematic correlation coefficient",
+                            "keywords": ["correlat", "rho", "coefficient", "covarian"]}
+    m_good, s_good = blue(x, stat, syst, 1.0)
+    m_bad, s_bad = blue(x, stat, syst, 0.0)
+    if variant == "defect":
+        text = ("Two measurements of the same quantity are combined. Their systematic uncertainties come from the shared "
+                "energy-scale calibration. The combination uses inverse-variance weights w_i = 1/(stat_i^2 + syst_i^2) "
+                "and its uncertainty is 1/sqrt(sum_i w_i).")
+        m, s = m_bad, s_bad
+    else:
+        text = ("Two measurements of the same quantity are combined with the BLUE method. The statistical uncertainties "
+                "are independent; the systematic uncertainties come from the shared energy-scale calibration and are "
+                "taken as fully correlated (rho = 1).")
+        m, s = m_good, s_good
+    data = {"x": x, "stat": stat, "syst": syst} | ({} if variant == "defect" else {"syst_correlation": 1.0}) | {
+            "stated_results": {"combined": stated(m), "sigma_combined": stated(s)}}
+    ok = (differs(s_bad, s_good) if variant == "defect" else
+          within(data["stated_results"]["combined"], m_good) and within(data["stated_results"]["sigma_combined"], s_good))
+    return text, data, {"oracle_ok": ok, "defect": "the systematic from the shared calibration is correlated between the "
+                        "two measurements but the combination treats them as independent (no covariance term), so the "
+                        "combined uncertainty is underestimated" if variant == "defect" else None,
+                        "correct": {"combined": m_good, "sigma_combined": s_good}}
+
+
+def fam_line_fit(rng, variant):
+    n = rng.randint(8, 12)
+    for _ in range(100):
+        x = list(range(1, n + 1))
+        a0, b0 = rng.uniform(1, 3), rng.uniform(0.3, 0.8)
+        s = [round(rng.uniform(0.15, 0.4), 3) for _ in range(n)]
+        y = [round(a0 + b0 * xi + rng.gauss(0, si), 3) for xi, si in zip(x, s)]
+        a, b, chi2 = wls_line(x, y, s)
+        p_good, p_bad = gamma_q((n - 2) / 2, chi2 / 2), gamma_q((n - 1) / 2, chi2 / 2)
+        if 0.05 < p_good < 0.95:
+            break
+    if variant == "missing":
+        data = {"x": x, "y": y, "sigma": None, "stated_results": {"a": stated(a), "b": stated(b),
+                "chi2": stated(chi2), "ndf": n - 2, "p_value": stated(p_good)}}
+        text = (f"A straight line y = a + b x is fitted to the {n} points by weighted least squares, with per-point "
+                "uncertainties from the detector resolution table (not supplied). The goodness of fit is chi2 with "
+                "ndf = N - 2 and the p-value is the chi2 survival probability.")
+        chi2_other = wls_line(x, y, [2 * v for v in s])[2]
+        return text, data, {"oracle_ok": differs(chi2_other, chi2), "missing_input": "the per-point uncertainties",
+                            "keywords": ["uncertaint", "sigma", "resolution", "error"]}
+    ndf = n - 1 if variant == "defect" else n - 2
+    p = p_bad if variant == "defect" else p_good
+    text = (f"A straight line y = a + b x is fitted to the {n} points by weighted least squares with the per-point "
+            f"uncertainties sigma. The goodness of fit is quoted as chi2 with ndf = {ndf} and the p-value is the chi2 "
+            "survival probability for that ndf.")
+    data = {"x": x, "y": y, "sigma": s, "stated_results": {"a": stated(a), "b": stated(b), "chi2": stated(chi2),
+                                                          "ndf": ndf, "p_value": stated(p)}}
+    ok = differs(p_bad, p_good) if variant == "defect" else within(data["stated_results"]["p_value"], p_good)
+    return text, data, {"oracle_ok": ok, "defect": "two parameters are fitted, so ndf = N - 2, not N - 1; the p-value "
+                        "is computed with the wrong ndf" if variant == "defect" else None,
+                        "correct": {"ndf": n - 2, "p_value": p_good}}
+
+
+def fam_count_limit(rng, variant):
+    n = rng.randint(1, 6)
+    good = poisson_upper(n)
+    bad = poisson_upper(n - 1)  # P(N < n) = P(N <= n - 1)
+    method = {"defect": "the signal mean for which the probability of observing fewer than n events is 10%.",
+              "control": "the signal mean for which the probability of observing n or fewer events is 10% (classical "
+                         "one-sided Neyman construction).",
+              "alternative": "s_up = F^-1(0.90; 2(n + 1)) / 2, where F^-1 is the chi-square quantile function."}[variant]
+    text = (f"A counting experiment with negligible background observes n = {n} event{'s' if n > 1 else ''}. The 90% CL upper limit on the "
+            f"signal mean is {method}")
+    up = bad if variant == "defect" else good
+    data = {"n_observed": n, "background": 0, "confidence_level": 0.9, "stated_results": {"upper_limit": stated(up)}}
+    ok = differs(bad, good) if variant == "defect" else within(data["stated_results"]["upper_limit"], good)
+    return text, data, {"oracle_ok": ok, "defect": "the limit uses P(N < n) instead of P(N <= n): the observed count "
+                        "is excluded, so the limit is too low and undercovers" if variant == "defect" else None,
+                        "correct": {"upper_limit": good}}
+
+
+FAMILIES = {"asymmetry": fam_asymmetry, "weighted-yield": fam_weighted_yield, "combination": fam_combination,
+            "line-fit": fam_line_fit, "count-limit": fam_count_limit}
+ALTERNATIVE = {"asymmetry", "weighted-yield", "count-limit"}  # families with a correct, differently written method
+MISSING = ["combination", "line-fit", "weighted-yield"]
+
+
+def schedule(rng) -> list[tuple[str, str, str]]:
+    """(type, family, variant): C01 and C02 one per family; C03 three missing inputs; C04 two correct materials."""
+    rows = [("C01", f, "defect") for f in FAMILIES]
+    rows += [("C02", f, rng.choice(["control", "alternative"]) if f in ALTERNATIVE else "control") for f in FAMILIES]
+    rows += [("C03", f, "missing") for f in MISSING]
+    rows += [("C04", f, "control") for f in rng.sample(sorted(FAMILIES), 2)]
+    rng.shuffle(rows)
+    return rows
+
+
+def nonce_for(seed: str, name: str) -> bytes:
+    return hmac.new(seed.encode(), f"nonce:{name}".encode(), hashlib.sha256).digest()
+
+
+def gold_bytes(gold: dict) -> bytes:
+    return (json.dumps(gold, indent=1, sort_keys=True) + "\n").encode()
+
+
+def build(seed: str) -> list[dict]:
+    rng = random.Random(hashlib.sha256(seed.encode()).digest())
+    suite = []
+    for n, (typ, fam, variant) in enumerate(schedule(rng), 1):
+        for _attempt in range(100):
+            text, data, verdict = FAMILIES[fam](rng, variant)
+            if verdict["oracle_ok"]:
+                break
+        else:
+            raise RuntimeError(f"no {typ}/{fam} instance passed its oracle")
+        iid = "h" + hmac.new(seed.encode(), f"id:{n}".encode(), hashlib.sha256).hexdigest()[:8]
+        reqs = [{"id": "REQ-1", "text": "The derived result and its uncertainty are statistically sound and "
+                                        "reproducible from the supplied inputs."}]
+        if typ == "C04":
+            reqs.append({"id": "REQ-2", "text": "The inputs are tested for mutual consistency before they are used."})
+        gold = {"id": iid, "type": typ, "family": fam, "variant": variant,
+                **{k: v for k, v in verdict.items() if k != "oracle_ok"}}
+        if typ == "C04":
+            gold["unplanned_requirement"] = "REQ-2"
+        suite.append({"id": iid, "text": text, "data": data, "requirements": reqs, "gold": gold})
+    return suite
+
+
+def write_instances(suite: list[dict], seed: str, out: Path) -> dict:
+    out.mkdir(parents=True, exist_ok=True)
+    commitments = {}
+    for item in suite:
+        d = out / "instances" / item["id"]
+        (d / "material").mkdir(parents=True, exist_ok=True)
+        (d / "material" / "analysis.md").write_text(f"# Analysis {item['id']}\n\n{item['text']}\n", encoding="utf-8")
+        (d / "material" / "data.json").write_text(json.dumps(item["data"], indent=1) + "\n", encoding="utf-8")
+        (d / "intent.json").write_text(json.dumps({"id": f"intent-{item['id']}", "target_tier": "R2",
+                                                   "minimum_requirements": item["requirements"]}, indent=1) + "\n")
+        name = f"expected/{item['id']}.json"
+        commitments[name] = hashlib.sha256(nonce_for(seed, name) + gold_bytes(item["gold"])).hexdigest()
+    me = Path(__file__).read_bytes()
+    record = {"algorithm": "sha256(nonce || gold bytes); nonce = HMAC-SHA256(seed, 'nonce:' + name)",
+              "generator_sha256": hashlib.sha256(me).hexdigest(), "commitments": commitments}
+    (out / "commitments.json").write_text(json.dumps(record, indent=1, sort_keys=True) + "\n")
+    return record
+
+
+def ask_seed() -> str:
+    seed = getpass.getpass("seed (not echoed): ").strip()
+    if len(seed) < 32:
+        raise SystemExit("the seed must be at least 32 characters (e.g. 32 hex digits from secrets.token_hex(16))")
+    return seed
+
+
+def cmd_generate(out: Path) -> dict:
+    if (out / "instances").exists():
+        raise SystemExit(f"{out}/instances exists; refusing to overwrite a suite")
+    seed = ask_seed()
+    record = write_instances(build(seed), seed, out)
+    return {"status": "ok", "instances": len(record["commitments"]), "generator_sha256": record["generator_sha256"]}
+
+
+def cmd_reveal(out: Path, seed: str | None) -> dict:
+    seed = seed or ask_seed()
+    record = json.loads((out / "commitments.json").read_text())
+    suite = build(seed)
+    bad, nonces = [], {}
+    (out / "expected").mkdir(exist_ok=True)
+    for item in suite:
+        name = f"expected/{item['id']}.json"
+        nonce = nonce_for(seed, name)
+        if not hmac.compare_digest(hashlib.sha256(nonce + gold_bytes(item["gold"])).hexdigest(),
+                                   record["commitments"].get(name, "")):
+            bad.append(name)
+        nonces[name] = nonce.hex()
+    if bad or len(suite) != len(record["commitments"]):
+        return {"status": "mismatch", "mismatched": bad}
+    for item in suite:
+        (out / f"expected/{item['id']}.json").write_bytes(gold_bytes(item["gold"]))
+    (out / "nonces.json").write_text(json.dumps(nonces, indent=1, sort_keys=True) + "\n")
+    return {"status": "ok", "verified": len(suite)}
+
+
+def cmd_selftest() -> dict:
+    counts: dict = {}
+    for k in range(20):
+        suite = build(f"selftest-{k:02d}-" + "0" * 32)
+        for item in suite:
+            g = item["gold"]
+            counts[(g["type"], g["family"], g["variant"])] = counts.get((g["type"], g["family"], g["variant"]), 0) + 1
+        assert len(suite) == 15 and len({i["id"] for i in suite}) == 15
+    assert build("same-seed-" + "1" * 32)[3]["data"] == build("same-seed-" + "1" * 32)[3]["data"]
+    # the differently written controls are the same quantity (checked independently of the families)
+    for n1, n2 in ((500, 900), (1234, 377)):
+        s, a = n1 + n2, (n1 - n2) / (n1 + n2)
+        assert within(2 * math.sqrt(n1 * n2 / s ** 3), math.sqrt((1 - a * a) / s), 1e-12)
+    w = [0.3, 1.7, 2.2]
+    assert within(sum(w) / math.sqrt(sum(w) ** 2 / sum(v * v for v in w)), math.sqrt(sum(v * v for v in w)), 1e-12)
+    for n in range(1, 7):  # P(N <= n | s) = Q_chi2(2s; 2n + 2) = gamma_q(n + 1, s)
+        assert within(gamma_q(n + 1, poisson_upper(n)), 0.10, 1e-9)
+    assert within(poisson_upper(2), 5.322, 1e-3) and within(poisson_upper(0), 2.3026, 1e-4)
+    return {"status": "ok", "variants_seen": len(counts)}
+
+
+def main(argv=None) -> int:
+    p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    sub = p.add_subparsers(dest="cmd", required=True)
+    for name in ("generate", "reveal"):
+        s = sub.add_parser(name)
+        s.add_argument("--out", required=True)
+    sub.choices["reveal"].add_argument("--seed-file", help="a file holding the seed (else it is asked for)")
+    sub.add_parser("selftest")
+    a = p.parse_args(argv)
+    if a.cmd == "generate":
+        out = cmd_generate(Path(a.out))
+    elif a.cmd == "reveal":
+        out = cmd_reveal(Path(a.out), Path(a.seed_file).read_text().strip() if a.seed_file else None)
+    else:
+        out = cmd_selftest()
+    print(json.dumps(out, indent=1))
+    return 0 if out["status"] == "ok" else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())

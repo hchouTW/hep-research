@@ -1,0 +1,10 @@
+{
+ "correct": {
+  "upper_limit": 6.680783068255863
+ },
+ "defect": "the limit uses P(N < n) instead of P(N <= n): the observed count is excluded, so the limit is too low and undercovers",
+ "family": "count-limit",
+ "id": "h1f578eed",
+ "type": "C01",
+ "variant": "defect"
+}

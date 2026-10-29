@@ -1,0 +1,10 @@
+{
+ "family": "weighted-yield",
+ "id": "h0c0d78ca",
+ "keywords": [
+  "weight"
+ ],
+ "missing_input": "the per-event weights",
+ "type": "C03",
+ "variant": "missing"
+}
