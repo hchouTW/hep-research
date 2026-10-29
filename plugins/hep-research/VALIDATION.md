@@ -8044,3 +8044,27 @@ translator accepted" should read 37 accepted blocks (the verifier's scan). CRPRO
 94ba34d1 was the dispatch base; K1 was rebased onto 21ec114d before its merge. Also fixed: the docstring of
 `tests/adapters/fixtures/cr_propagation/d3/d3_study.py` named `dragon2_run.spec_from_transport` for D3_harmonized_v1;
 it is `dragon2_translate.spec_from_transport`.
+
+| ID | Result | Evidence |
+|---|---|---|
+| L2-1 | pass | schema requires `result.provider_version`; core and schema agree (`tests.core.test_provider.DeclaredModulation`: the missing and the empty field refused by both, a result of another version core-only, `test_conformance_holds_only_at_the_version_it_was_obtained_at` for the registry); `tests.tools.test_provider_registry` (the gate writes the version, `collect` refuses a bumped version with or without an explicit declaration version); USINE gate rerun at 0.3.0 (above) |
+| L2-2 | pass | adapter 0.3.0, usine and dragon2 0.3.0, emulator 1.0.0 (`ProviderVersionMigration.test_versions`); migration kept, not re-keyed, and checked (`test_recorded_input_hashes_are_history`); F1 record, C2U, C2UF and E2 pinned tests pass unchanged |
+| L2-3 | pass | spectrum_variable stated (`UsineProviderOffline.test_injection_spectrum_variable_is_stated`); rendered USINE inputs identical; effect on hashes recorded above; erratum and docstring fix |
+| ALL-1 | pass | this section |
+| ALL-2 | pass | `workflow_check.py acceptance` exit 0 |
+| ALL-3 | deferred to the wave run (A1.5) | |
+| ALL-4 | pass | `check_naming.py`, `workflow_check.py gaps --base f0f424da` |
+| ALL-5 | fail on the card only | `check_layering.py` passes; `workflow_check.py diff --work-package L2` lists 353 paths outside L2's `files`: the contracts-bump set the assignment requires (contracts/__init__.py, validate.py, vocab/core.json, 159 contract fixtures, 19 theory-profile files, 3 skill templates, 166 example outputs), `core/__init__.py` (CORE_VERSION) and two `tests/skills/hep_statistics` files (migration of live calls); the card needs K2's file list for these |
+| ALL-6 | pass | `check_packaging.py` |
+| ALL-7 | pass | worker report |
+
+| Check | Result |
+|---|---|
+| Impacted tests (`rule_registry.py impact`: 35 modules, plus `test_provider`, `test_adapter_declarations`, `test_gate_verdict_snapshot`, `test_provider_conformance_mixin`) | 756 tests OK (17 skipped) |
+| `tests/examples` | 176 tests OK (22 skipped) |
+| theory-profile tests (9 profiles) | all pass |
+| `run_all_checks.py --part static --jobs 4` | exit 0 |
+| `check_naming.py`, `check_wiring.py --since f0f424da`, `check_layering.py`, `check_packaging.py`, `workflow_check.py gaps/acceptance` | pass / ok |
+| ruff 0.16.10 and mypy 2.4.0 on `core/` and `contracts/` | clean |
+
+USINE runs: 2 of 10 (the gate). DRAGON2 runs: 0. Not run: ALL-3 (deferred to the wave run, A1.5), a live routing run.
