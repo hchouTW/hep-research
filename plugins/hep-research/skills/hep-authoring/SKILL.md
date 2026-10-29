@@ -25,6 +25,7 @@ description: "Use when the deliverable is physics writing or its presentation, e
 4. Draft; mark limitations and statuses where they apply; run `check_citations.py` on the draft.
 5. Write the `communication` artifact for durable deliverables and validate it.
 6. Depth follows the request: **standard** (a durable deliverable with its `communication` record) or **audit** (the traceability record checked with the scripts below). A question about what a paper states, the latest result, a citation alone, or whether a draft's citations are verified is hep-citations's: load it.
+7. A referee reply, response letter or summary of changes states what is true when it is written: completed changes in past tense with their locator, pending ones in planned voice ("we will rerun ...; [VALUE NEEDED: ...]"). Write one such version; do not add a completed-voice draft or template to fill in later, and offer to write the final wording once the result exists.
 
 <!-- BEGIN context-resolution: generated from contracts/stanzas/context-resolution.md by tools/build_stanzas.py; do not edit -->
 ## Context resolution
