@@ -5,7 +5,7 @@
  "by_skill": {
   "hep-authoring": {
    "references": 49,
-   "bytes": 357928,
+   "bytes": 358750,
    "uncited": 0
   },
   "hep-citations": {
@@ -390,8 +390,9 @@
    "owner": "hep-authoring",
    "bytes": 4810,
    "lines": 72,
-   "linked_from_skill_md": false,
+   "linked_from_skill_md": true,
    "cited_by": [
+    "skills/hep-authoring/SKILL.md",
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
@@ -413,8 +414,8 @@
   {
    "path": "skills/hep-authoring/references/independent-review.md",
    "owner": "hep-authoring",
-   "bytes": 16487,
-   "lines": 199,
+   "bytes": 16715,
+   "lines": 201,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-authoring/README.md",
@@ -425,7 +426,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "cecc4dcb 2026-10-22"
+   "last_commit": "9d16210f 2026-10-29"
   },
   {
    "path": "skills/hep-authoring/references/latex-mechanics-and-tooling.md",
@@ -584,7 +585,7 @@
   {
    "path": "skills/hep-authoring/references/paper-structure.md",
    "owner": "hep-authoring",
-   "bytes": 11091,
+   "bytes": 11073,
    "lines": 206,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -604,7 +605,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "ffcdf17b 2026-10-29"
   },
   {
    "path": "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
@@ -731,21 +732,21 @@
   {
    "path": "skills/hep-authoring/references/reviewer-style-assessment.md",
    "owner": "hep-authoring",
-   "bytes": 2130,
-   "lines": 37,
+   "bytes": 2324,
+   "lines": 40,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-authoring/SKILL.md",
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "9d16210f 2026-10-29"
   },
   {
    "path": "skills/hep-authoring/references/revision-impact-tracking.md",
    "owner": "hep-authoring",
-   "bytes": 4015,
-   "lines": 68,
+   "bytes": 4354,
+   "lines": 69,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-authoring/README.md",
@@ -764,12 +765,12 @@
     "tests/skills/hep_authoring/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "c888be49 2026-10-29"
   },
   {
    "path": "skills/hep-authoring/references/scientific-style.md",
    "owner": "hep-authoring",
-   "bytes": 11725,
+   "bytes": 11804,
    "lines": 192,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -792,7 +793,7 @@
     "hep-citations",
     "hep-statistics"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "5f4489ee 2026-10-29"
   },
   {
    "path": "skills/hep-authoring/references/statistics-and-ml-papers.md",
@@ -838,7 +839,7 @@
     "tests/skills/hep_authoring/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "039781da 2026-10-29"
   },
   {
    "path": "skills/hep-authoring/references/supplementary-material-planning.md",
