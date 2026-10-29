@@ -144,7 +144,7 @@ PROGRAM = "USINE"
 PROGRAM_VERSION = ("V3.5 (git tag V3.5, commit fb53006db41d1a640bf1b5af1a4b0f899ca59673; built with Apple clang 21.0.0 "
                    "against ROOT 6.38.04)")
 CONTRACT_VERSION = "3.14.0"
-PLUGIN_VERSION = "0.46.0"
+PLUGIN_VERSION = "0.47.0"
 
 # units (r3 P1): IAU 2012 parsec = 648000/pi au, au = 149 597 870 700 m; Julian year of 365.25 d
 KPC_CM = 648000.0 / math.pi * 1.495978707e13 * 1e3

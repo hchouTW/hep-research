@@ -5,6 +5,45 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Cross-artifact check retired** (`docs/dev/cross-artifact-check/decision-retire.md`, decided
+  2026-10-29). Removed: `contracts/analysis_checks/` (the rules, context, lock and outcome modules),
+  `contracts/migrate.py`, the `counting-chain` and `ratio-subset` suites, the operator coverage contract, the schemas
+  of the v2 bundle, check context, check report, semantic lock and operator coverage, `permit.py check-report`'s
+  implementation and `tools/rename_analysis_check_ids.py`. `contracts/analysis_check.py`, `permit.py check-report` and
+  `review_measurement_spec.py --check-bundle` now refuse with the reason; reproduce old bundles and reports with 0.47.x.
+  - **Kept:** the rule registry (now every new or changed rule is retired) and its CI impact map; `source_digest.py`
+    (moved to `contracts/`); the effect catalog and its check; `custody.py`; `semver.py`; `resolve.py`;
+    `validation_record.json`; the capability `measurement:correction-keys-v1`; the v2 bundle digest in attestations.
+  - **Review questions:** the rules are kept as questions for reviewers: "Spec against implementation" in
+    hep-measurement's review and artifacts, "Ratios of two results" in hep-statistics' combinations; each row is a
+    hep-review obligation (`tests/skills/test_review_question_tables.py` checks this against hep-review's obligation
+    definition and method cards). hep-review itself is unchanged.
+  - **Tests:** the tests of shared code in the checker-named modules are kept under descriptive names
+    (`test_contract_baseline_gaps`, `test_profile_loading`, `test_custody`, `test_reader_refusal_blockers`,
+    `test_rule_registry`, `test_effect_catalog`, `test_source_digest`, `test_correction_keys_capability`,
+    `test_registry_keys_and_semver`, `test_catalog_version_and_retired_rules`); the checker's own tests are removed.
+  - **Contracts 3.17.0** (minor): the sidecar formats read only by the check (analysis bundle 2.0.0, check context,
+    check report, semantic lock, operator coverage) and the rule suites are removed. No artifact type, vocabulary
+    term, envelope field or capability changes, so every 3.16 artifact keeps its outcome; fixtures, theory-profile
+    artifacts and examples carry the new version (only version strings and the hashes that cover them changed).
+
+## 0.47.0 (2026-10-29)
+
+Minor release; contracts 3.16.0, `CORE_VERSION` 1.4.0 and the adapters are unchanged. It ships the hep-authoring
+improvement task (PR #314): a hep-review handoff with an ownership row, a scientific correction of the hedging
+completion criterion, completion criteria for the compact change ledger, and the frozen authoring-pilot tools in the
+repository's `evals/`.
+
+**Before you upgrade** (details in each entry below):
+- hep-authoring now hands a recorded review of the analysis, fit, derivation or code behind a claim to hep-review;
+  manuscript review stays with hep-authoring.
+- One scientific correction (S3, HEDGE-DONE-WHEN): a hedge that states a real uncertainty or limitation is no longer
+  required to be removed.
+
+**Known issues**: carried over from 0.46.0 (cr-propagation F1 convergence, F2/F3, the live routing run). New: reply
+drafts for pending work are often written as completed-voice templates with placeholders; a pilot of a fix found no
+difference and the change was withdrawn (VALIDATION AUTHORING-IMPROVE).
+
 - **hep-authoring hands recorded reviews to hep-review** (G10): a Handoffs row for a recorded review of the analysis,
   fit, derivation or code behind a claim; `independent-review.md` and `reviewer-style-assessment.md` say where the
   manuscript review ends; `docs/routing-contract.md` gains a hep-review ownership row, so `check_ownership.py` guards
@@ -39,27 +78,6 @@ matrix and a regression suite for every published pilot and evaluation score.
 parallel full run and passes on its own and in CI. hep-review reviewers share the session scratch folder, so
 "no other evaluations seen" stays advisory.
 
-- **Cross-artifact check retired** (`docs/dev/cross-artifact-check/decision-retire.md`, decided
-  2026-10-29). Removed: `contracts/analysis_checks/` (the rules, context, lock and outcome modules),
-  `contracts/migrate.py`, the `counting-chain` and `ratio-subset` suites, the operator coverage contract, the schemas
-  of the v2 bundle, check context, check report, semantic lock and operator coverage, `permit.py check-report`'s
-  implementation and `tools/rename_analysis_check_ids.py`. `contracts/analysis_check.py`, `permit.py check-report` and
-  `review_measurement_spec.py --check-bundle` now refuse with the reason; reproduce old bundles and reports with 0.47.x.
-  - **Kept:** the rule registry (now every new or changed rule is retired) and its CI impact map; `source_digest.py`
-    (moved to `contracts/`); the effect catalog and its check; `custody.py`; `semver.py`; `resolve.py`;
-    `validation_record.json`; the capability `measurement:correction-keys-v1`; the v2 bundle digest in attestations.
-  - **Review questions:** the rules are kept as questions for reviewers: "Spec against implementation" in
-    hep-measurement's review and artifacts, "Ratios of two results" in hep-statistics' combinations; each row is a
-    hep-review obligation (`tests/skills/test_review_question_tables.py` checks this against hep-review's obligation
-    definition and method cards). hep-review itself is unchanged.
-  - **Tests:** the tests of shared code in the checker-named modules are kept under descriptive names
-    (`test_contract_baseline_gaps`, `test_profile_loading`, `test_custody`, `test_reader_refusal_blockers`,
-    `test_rule_registry`, `test_effect_catalog`, `test_source_digest`, `test_correction_keys_capability`,
-    `test_registry_keys_and_semver`, `test_catalog_version_and_retired_rules`); the checker's own tests are removed.
-  - **Contracts 3.17.0** (minor): the sidecar formats read only by the check (analysis bundle 2.0.0, check context,
-    check report, semantic lock, operator coverage) and the rule suites are removed. No artifact type, vocabulary
-    term, envelope field or capability changes, so every 3.16 artifact keeps its outcome; fixtures, theory-profile
-    artifacts and examples carry the new version (only version strings and the hashes that cover them changed).
 - **hep-review G3 (T08 evaluation): evaluated-scope for multi-step statistical reviews.** A held-out suite authored by
   Codex (20 instances of 800-2,000 words, two interacting defects each, numerical and convention defects included;
   the gold was held encrypted by the user) was reviewed in 60 R2 trials and graded by Claude and Codex together.
