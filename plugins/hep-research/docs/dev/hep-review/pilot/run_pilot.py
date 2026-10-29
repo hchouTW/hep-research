@@ -30,6 +30,7 @@ from hep_review_support import materials as M  # noqa: E402
 from hep_review_support import store as S  # noqa: E402
 
 AUTHOR = "pilot-generator"
+CONTEXT_PREFIX = "g2"  # a later suite in its own store sets its own
 STAT_Q = "Is the statistical treatment in analysis.md appropriate for the model and inputs stated there?"
 COMP_Q = ("Can every number in data.json 'stated_results' be recomputed from the inputs in data.json with the method "
           "described in analysis.md, within 0.1% relative?")
@@ -84,7 +85,7 @@ def cmd_prepare(a) -> dict:
             if snap["coverage_gaps"]:
                 raise RuntimeError(f"{d.name}: {snap['coverage_gaps']}")
             for t in range(1, a.trials + 1):
-                ctx = f"g2-{d.name}-t{t}"
+                ctx = f"{CONTEXT_PREFIX}-{d.name}-t{t}"
                 tid = f"{d.name}-t{t}"
                 st = C.start_session(store, ctx, f"pilot-{tid}")
                 intent = header("intent", "intent-1", ctx) | {
