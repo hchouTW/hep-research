@@ -18,6 +18,15 @@ C = [
  ("rv-direct-2", "zh-Hant", "direct", "請對這段分析程式和推導做有紀錄的審查：列出 review obligations，並說明能達到哪個 assurance tier。", "hep-review", ["review obligations", "assurance tiers"], None, None, {}),
  ("rv-neighbor-1", "en", "neighboring", "Review this measurement spec: are the systematic uncertainties complete and is the estimand clear?", "hep-measurement", ["measurement review", "systematic uncertainties", "estimand"], "hep-review", None, {}),
  ("rv-negative-1", "en", "negative", "Fit these binned yields with a likelihood and give me the profile-likelihood interval.", "hep-statistics", ["likelihoods", "profile likelihood"], "hep-review", None, {}),
+ # hep-authoring / hep-review boundary (manuscript review vs recorded review of the work behind it)
+ ("rv-ar-neighbor-1", "en", "neighboring", "Review the results section of my draft: are the claims supported by the results and are the figures clear?", "hep-authoring", ["drafting or revising paper sections"], "hep-review", None, {"set": "AR"}),
+ ("rv-ar-direct-1", "en", "direct", "Do a recorded review of the fit behind Table 2 of my manuscript, with review obligations and the assurance tier it reaches.", "hep-review", ["recorded review", "review obligations"], "hep-authoring", None, {"set": "AR"}),
+ ("rv-ar-neighbor-2", "en", "neighboring", "Is the profile-likelihood interval quoted in Table 2 of my paper computed correctly?", "hep-statistics", ["profile likelihood"], "hep-review", None, {"set": "AR"}),
+ ("rv-ar-neighbor-3", "zh-Hant", "neighboring", "請幫我修改草稿的結果章節（revising paper sections）：主張是否有結果支持、圖是否清楚？", "hep-authoring", ["revising paper sections"], "hep-review", None, {"set": "AR"}),
+ ("rv-ar-direct-2", "zh-Hant", "direct", "請對我稿件表 2 背後的擬合做有紀錄的審查，列出 review obligations，並說明能達到哪個 assurance tier。", "hep-review", ["review obligations", "assurance tiers"], "hep-authoring", None, {"set": "AR"}),
+ # hep-authoring: short writing requests (one sentence)
+ ("aw-short-1", "en", "direct", "Write a one-sentence summary of this result for the abstract: the measured B/C ratio agrees with the model within 1 sigma.", "hep-authoring", ["even one sentence for an abstract or summary"], None, None, {"set": "AR"}),
+ ("aw-short-2", "zh-Hant", "direct", "幫我把這個結果寫成摘要裡的一句話（one sentence for an abstract）：量到的 B/C 比與模型在 1σ 內一致。", "hep-authoring", ["one sentence for an abstract"], None, None, {"set": "AR"}),
  # hep-measurement
  ("an-direct-1", "en", "direct", "Review this measurement spec: is the estimand clear and are the systematic uncertainties complete?", "hep-measurement", ["estimand", "systematic uncertainties", "measurement review"], None, None, {}),
  ("an-direct-2", "zh-Hant", "direct", "我要設計一個中微子截面量測的事件選擇與 cutflows，還有 blinding policy。", "hep-measurement", ["cutflows", "blinding policy"], None, None, {}),

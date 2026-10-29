@@ -188,4 +188,4 @@ typically saves 10-20% of word count with no loss of meaning:
 - Redundant pairs: "past history," "future plans," "completely eliminate,"
   "each and every" → drop the redundant word.
 
-**Done when:** significance and limit wording follow the tables here, every hedge is quantified or removed, and status labels survive in text and captions.
+**Done when:** significance and limit wording follow the tables here, every hedge either states a real uncertainty or limitation (quantified where the number is available) or is removed, and status labels survive in text and captions.

@@ -3,6 +3,23 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **hep-authoring hands recorded reviews to hep-review** (G10): a Handoffs row for a recorded review of the analysis,
+  fit, derivation or code behind a claim; `independent-review.md` and `reviewer-style-assessment.md` say where the
+  manuscript review ends; `docs/routing-contract.md` gains a hep-review ownership row, so `check_ownership.py` guards
+  the boundary. Five AR routing cases and two one-sentence abstract cases added.
+- **Revision Done when covers the compact change ledger** (G5): rows verified or blocked, listed locators inspected,
+  response assertions for completed changes only; a recorded hep-review review of a changed result is carried over by
+  hep-review.
+- **Translating or condensing a paper** is routed from SKILL.md to the existing bilingual rules (G9); no rule moved.
+- **sci-fix (S3) HEDGE-DONE-WHEN**: the hedging Done when of `scientific-style.md` no longer demands that every hedge be
+  quantified or removed; a hedge that states a real uncertainty or limitation stays (quantified where the number is
+  available), as the section itself says (G1).
+- `paper-structure.md` no longer repeats the PRL abstract limit; venue limits live in `latex-venue-setup.md` (G2).
+- Evidence: VALIDATION AUTHORING-IMPROVE (engineering checks and live routing; a pilot of a reply-wording change found
+  no difference and the change was withdrawn).
+
 ## 0.46.0 (2026-10-29)
 
 Minor release; contracts 3.16.0, `CORE_VERSION` 1.4.0 and the adapters are unchanged. It ships gate G3 of the

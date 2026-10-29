@@ -63,5 +63,6 @@ final revised version. Do not say an experiment was run, a figure regenerated, o
 a concern resolved when it remains planned. Preserve open items and factual
 disagreements for the user. Deliver the updated artifacts, change ledger, and
 unresolved dependencies; submission or sending the response is a separate action.
+If a changed result is covered by a recorded hep-review review, that review is revised and carried over by hep-review.
 
-**Done when:** `track_revision_impact.py` reports no stale occurrence and every reopened assessment is re-done.
+**Done when:** with a traceability record, `track_revision_impact.py` reports no stale occurrence and every reopened assessment is re-done; with a compact change ledger only, every row is verified or names its blocker, every listed artifact and locator was inspected, and response-letter assertions describe completed changes only.

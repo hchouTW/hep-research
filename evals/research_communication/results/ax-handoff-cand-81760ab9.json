@@ -1,0 +1,95 @@
+{
+ "scorer_version": "1.1.0",
+ "meta": {
+  "run": "ax-handoff-cand-81760ab9",
+  "model": "claude-sonnet-5-5",
+  "prompt_version": "f03a7169f3b26af083290490aeb1c2363b2dba6438b667cabf5082adc1fd84b3",
+  "plugin_commit": "81760ab91667624f6214e48d1f8cdf8e14399ad2",
+  "tool_access": [
+   "Skill",
+   "Read",
+   "Glob",
+   "Grep"
+  ],
+  "coverage": "2 of 2 cases",
+  "judged_by": null,
+  "independent_review": null
+ },
+ "live_run": true,
+ "counts": {
+  "pass": 0,
+  "fail": 0,
+  "critical-fail": 1,
+  "unjudged": 1,
+  "not-run": 0
+ },
+ "critical_failures": [
+  {
+   "case_id": "ax-h2-recorded-review",
+   "critical": [
+    {
+     "kind": "false_completion",
+     "detail": "the prose asserts completed work the case says has not happened"
+    }
+   ]
+  }
+ ],
+ "results": [
+  {
+   "case_id": "ax-h1-missing-result",
+   "outcome": "unjudged",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "pass",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "pass",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "pass",
+    "semantic": "unjudged"
+   },
+   "critical": [],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": []
+   }
+  },
+  {
+   "case_id": "ax-h2-recorded-review",
+   "outcome": "critical-fail",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "pass",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "fail",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "fail",
+    "semantic": "unjudged"
+   },
+   "critical": [
+    {
+     "kind": "false_completion",
+     "detail": "the prose asserts completed work the case says has not happened"
+    }
+   ],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": []
+   }
+  }
+ ],
+ "note": "replay of captured outputs: each case is reported by its own outcome and every critical failure is listed; the run is a live run; its model, prompt version, commit, tool access and coverage are in meta"
+}

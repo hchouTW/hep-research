@@ -1,0 +1,85 @@
+{
+ "meta": {
+  "run": "ax-handoff-cand-81760ab9",
+  "live": true,
+  "date": "2026-10-29",
+  "model": "claude-sonnet-5-5",
+  "models_reported": [
+   "claude-sonnet-5-5"
+  ],
+  "cli": "claude",
+  "cli_version": "2.1.312",
+  "prompt_version": "f03a7169f3b26af083290490aeb1c2363b2dba6438b667cabf5082adc1fd84b3",
+  "plugin_commit": "81760ab91667624f6214e48d1f8cdf8e14399ad2",
+  "plugin_dirty": false,
+  "isolation": "setting-sources",
+  "tool_access": [
+   "Skill",
+   "Read",
+   "Glob",
+   "Grep"
+  ],
+  "max_turns": 20,
+  "case_budget_usd": 1.0,
+  "budget_usd": 2.0,
+  "stopped_early": false,
+  "coverage": "2 of 2 cases",
+  "cost_usd": 0.1512,
+  "judged_by": null,
+  "note": "prose captured as the session's final answer; semantic judgments are unjudged until a reviewer records them"
+ },
+ "outputs": [
+  {
+   "case_id": "ax-h1-missing-result",
+   "skill_loaded": "hep-authoring",
+   "skills": [
+    "hep-authoring"
+   ],
+   "other_skills": [],
+   "prose": "I can't add the PDF uncertainty yet. The notes say it hasn't been evaluated (\"PDF uncertainty not yet evaluated\", `notes.md:6`), and I won't make up a number. There is also no abstract file, since `notes.md` is the only file in `ax03/`. Below is a draft abstract from the notes, with a placeholder for the PDF term and the precision sentence revised.\n\n**Draft abstract** (synthetic notes, not a real calculation; the PDF number is pending)\n\n> We present the next-to-leading-order QCD corrections to inclusive Z+jet production at √s = 13.6 TeV for jet pT > 30 GeV. The K-factor is K = 1.18, with a scale uncertainty of +0.06/−0.05 from a seven-point variation of μ_R and μ_F by factors of 2 and 1/2. [PDF uncertainty on K: **TO BE EVALUATED**; the current single NNLO PDF set gives none yet.] The ratio of the Z+jet to W+jet cross sections has a scale uncertainty of about 1%, because the scale dependence largely cancels when the same scale choice is used for both processes. This makes the ratio a promising observable for precision tests at the current LHC run, once the PDF uncertainty and electroweak corrections are included. Resummation is not included, so we make no predictions below jet pT ≈ 30 GeV. Electroweak corrections are also not included. They are expected to matter above pT ≈ 1 TeV [CITATION NEEDED: literature estimate].\n\n**Why the precision sentence changed**\n- The ~1% figure covers only the scale uncertainty. PDF, electroweak and other uncertainties are not yet in it, so \"precision observable\" is stronger than the notes support.\n- The cancellation holds only if both processes use the same scale choice. The abstract now says so.\n- The claim is now conditional (\"promising… once the PDF uncertainty and electroweak corrections are included\"). The notes list it as an implication to argue, not a result.\n\n**What I need from you**\n1. The PDF uncertainty on K, either from evaluating it with an uncertainty-bearing PDF set or from numbers you give me. I'll then replace the placeholder, and I can hand the evaluation to hep-theory if you want.\n2. The PDF uncertainty on the Z/W ratio, if you want the precision claim to cover it.\n3. A citation for the electroweak estimate, which I can route through hep-citations.\n4. The abstract file itself, if one exists, so I can edit it in place.",
+   "structured": {},
+   "unresolved": [],
+   "judgments": {
+    "semantic": "unjudged"
+   },
+   "run": {
+    "exit_code": 0,
+    "is_error": false,
+    "cost_usd": 0.065124,
+    "turns": 5,
+    "profile_reads": [],
+    "plugins_reported": [
+     "hep-research"
+    ],
+    "cli_version": "2.1.312",
+    "model_reported": "claude-sonnet-5-5"
+   }
+  },
+  {
+   "case_id": "ax-h2-recorded-review",
+   "skill_loaded": "hep-review",
+   "skills": [
+    "hep-review"
+   ],
+   "other_skills": [],
+   "prose": "我沒辦法寫入檔案：這個工作階段停用了 Write 工具。所以我沒有改動任何檔案，下面是回覆草稿全文和審查步驟，你可以直接貼進去。\n\n## 目前能改的部分:回覆草稿\n\n審稿人要的評估還沒做（作者筆記說下個月才能跑 toy）。回覆因此只能如實說明現況和計畫。這一版不含任何假數值，也沒有暗示已完成評估:\n\n> **回覆**:感謝審稿人指出此點。目前第 5 節以 Tikhonov regularization(τ = 0.3)進行 unfolding,且只使用這一個 τ 值。我們尚未評估 regularization 強度選擇所造成的系統不確定度,因此表 3 目前的合計(4.2%)**不包含**此項。\n>\n> 我們同意此項應被評估,並計畫:\n> 1. 在一組 τ 值範圍內重複 unfolding(範圍與選取準則待定),以 toy 檢查偏差(bias)與涵蓋率(coverage)。\n> 2. 依結果將 regularization 強度的系統不確定度新增為表 3 的一列,並更新合計。\n> 3. 在第 5 節說明 τ = 0.3 的選取理由與掃描範圍。\n\n下列項目要等審查和 toy 完成後才能填:\n\n- τ 的掃描範圍與選取準則\n- 新增的系統不確定度數值\n- 更新後的表 3 合計(取代 4.2%)\n- 第 5 節的修訂文字\n\n## 怎麼做有紀錄的審查(hep-review)\n\n1. **先定目標 tier。**\n   - 重新送審前的審查，目標應是 R2(獨立審查)。\n   - 這個 skill 在此環境只對「多步驟統計分析的 R2」有評估證據。單一 unfolding 擬合是否落在範圍內，要在報告裡如實註明。\n   - R3 在此環境無法達到。\n   - 實際達到的 tier 由紀錄算出，不是自己宣告。\n2. **訂 review obligations。** 每條都要寫明問題、判準、所需證據，以及是否 `decision_required`。針對第 5 節，至少需要:\n   - regularization 強度(τ)的選擇與敏感度:掃描 τ 時，結果與不確定度如何變化。\n   - 偏差與涵蓋率:用 toy 檢查，這也是你預計下個月要跑的。\n   - 表 3 是否完整、合計是否正確(含新增列後的 4.2% 更新)。\n   - 回覆與第 5 節文字是否與實際做過的評估一致。\n3. **凍結材料並採用計畫版本**:對第 5 節、表 3、擬合設定做快照。\n4. **R2 的獨立性要求**:\n   - 審查者不能是該段材料的作者。\n   - 審查者要用全新的 context(例如另開 subagent)。\n   - 審查者以檔案提交結果。\n   - 「審查前沒看過其他評估」在此環境只能算建議，報告會註明這一點。\n5. **收件、解決、出報告**:報告分兩層。事後我會給你一行 `hep-review checkpoint: ...`，請保存，下次工作階段要靠它接續紀錄。\n\n## 建議順序\n\n1. 先跑 toy 和 τ 掃描。沒有證據，審查只能判定「缺少證據」。\n2. 再做上述審查。\n3. 最後依審查結果把回覆的 TODO 填上，更新表 3 和第 5 節。\n\n如果你要我現在就啟動審查，請先確認目標 tier。要我把草稿存成檔案，請開放寫入權限，我再存到 `authoring-items/fixtures/ax04/` 下。",
+   "structured": {},
+   "unresolved": [],
+   "judgments": {
+    "semantic": "unjudged"
+   },
+   "run": {
+    "exit_code": 0,
+    "is_error": false,
+    "cost_usd": 0.086113,
+    "turns": 6,
+    "profile_reads": [],
+    "plugins_reported": [
+     "hep-research"
+    ],
+    "cli_version": "2.1.312",
+    "model_reported": "claude-sonnet-5-5"
+   }
+  }
+ ]
+}

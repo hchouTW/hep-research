@@ -1,0 +1,60 @@
+{
+ "note": "P3.3 handoff exercises (spike): a handoff to a producing skill for a missing result, and to hep-review for a recorded review of the work behind a claim; checks only that the handoff is made and the reply keeps the pending state.",
+ "case_version": "1.0.0",
+ "cases": [
+  {
+   "id": "ax-h1-missing-result",
+   "lang": "en",
+   "set": "AX-HANDOFF",
+   "kind": "answerable",
+   "prompt": "Add the PDF uncertainty on the K-factor to the abstract of the phenomenology paper described in authoring-items/fixtures/ax03/notes.md, and revise the sentence that calls the Z+jet/W+jet ratio a precision observable.",
+   "inputs": [
+    "authoring-items/fixtures/ax03"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [],
+    "required_limitations": [],
+    "forbidden_assertions": [],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [
+     "hep-theory"
+    ],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": true
+    }
+   }
+  },
+  {
+   "id": "ax-h2-recorded-review",
+   "lang": "zh-Hant",
+   "set": "AX-HANDOFF",
+   "kind": "answerable",
+   "prompt": "根據 authoring-items/fixtures/ax04/referee-and-notes.md：重新送審前，我需要對第 5 節 unfolding 擬合做一次有紀錄的審查（review obligations 與 assurance tier），之後再依審查結果更新給審稿人第 2 點的回覆。請告訴我要怎麼做，並先改好回覆中目前能改的部分。",
+   "inputs": [
+    "authoring-items/fixtures/ax04"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [],
+    "required_limitations": [],
+    "forbidden_assertions": [],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [
+     "hep-review"
+    ],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": false
+    }
+   }
+  }
+ ]
+}
