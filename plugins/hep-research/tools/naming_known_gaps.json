@@ -1,7 +1,16 @@
 {
  "known_gaps_version": "1.0.0",
  "$comment": "Naming findings of the plugin's own code when the gate came in (tools/check_naming.py). Only shrinks: delete an entry once its name is fixed; never add one by hand (a new name follows the charter, or takes an explicit waiver below).",
- "waivers": [],
+ "waivers": [
+  {
+   "rule_id": "naming.common.vocabulary",
+   "entity_ids": [
+    "N1:skills/hep-computing/scripts/control_layer_support/derivation.py#StepSpec/na_allowed"
+   ],
+   "reason": "field name fixed by the reconstruction v12.1 reference model: its scenarios build and replace StepSpec with na_allowed= (not-applicable allowed), and the control-layer implementation must accept them unchanged to be tested against the model (Delivery 5.1)",
+   "recorded_by": "reconstruction v12 C1, pending maintainer approval"
+  }
+ ],
  "gaps": {
   "naming.common.forbidden|N1:adapters/batch-schedulers/batch_campaign.py#main.emit/obj": 1,
   "naming.common.forbidden|N1:adapters/batch-schedulers/batch_config.py#validate.check_keys/obj": 1,

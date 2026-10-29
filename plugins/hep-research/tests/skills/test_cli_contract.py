@@ -77,6 +77,7 @@ STATUS_FLAG_EXEMPT = {
     "skills/hep-computing/scripts/create_story_card.py": "writes a planning note",
     "skills/hep-computing/scripts/check_definitions.py": "applies frozen decision rules and validates freeze records; no derived numbers",
     "skills/hep-computing/scripts/executor_capabilities.py": "qualifies the local executor by fault injection; no derived numbers",
+    "skills/hep-computing/scripts/control_layer.py": "keeps the task record and derives tiers from facts; no derived numbers",
     "skills/hep-computing/scripts/find_python.py": "chooses an interpreter",
     "skills/hep-computing/scripts/inspect_root_file.py": "lists the contents of a file; no derived numbers",
     "skills/hep-computing/scripts/lint_task.py": "checks a task description",
