@@ -1,0 +1,2 @@
+{"K1": "accept", "K2": "accept", "K3": "reject", "K4": "reject", "K5": "reject", "K6": "reject", "K7": "accept", "K8": "accept",
+ "_categories": {"defect present (correct finding)": ["K1", "K2"], "correct same-scope control (finding of a different, wrong defect)": ["K3", "K4"], "insufficient information (no mechanism)": ["K5", "K6"], "correct but differently worded solution": ["K7", "K8"]}}

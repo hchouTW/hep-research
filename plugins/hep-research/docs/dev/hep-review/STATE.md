@@ -36,12 +36,12 @@ tasks:
   T02: {status: done, deps: [T01], steps_done: [1, 2, 3, 4, 5, 6, 7], notes: "30/30 owned cases pass; interruption, two-process CAS, foreign commit, export->import with checkpoint all tested"}
   T03: {status: done, deps: [T01], steps_done: [1, 2, 3, 4, 5, 6, 7], notes: "15/15 owned cases pass; live routing run not run (paid, needs approval)"}
   U1:  {status: done, deps: [T02, T03], kind: user-gate, notes: "2026-10-29 user chose (b): user-approved deterministic oracles, no secret gold, held-out isolation unmet; full 48 trials"}
-  T04: {status: in_progress, deps: [U1], steps_done: []}
+  T04: {status: done, deps: [U1], steps_done: [freeze-protocol, commitments, calibration, 48-trials, scoring, nonce-publication], notes: "engineering and scientific gates pass 48/48; schema 1.0.0 freeze left as a separate reviewed step (frozen protocol section 5)"}
   T05: {status: skipped}
   T06: {status: skipped}
   T07: {status: skipped}
   T08: {status: skipped}
-gates: {G1: done, G2: pending, G3: pending}
+gates: {G1: done, G2: passed-schema-freeze-pending, G3: pending}
 cases:
   T00: {N01: not-applicable-with-basis (worktree created; failure path is the hard stop), N02: pass, N04: pass (no existing hep-review in source or cache), N40: pass}
   T01: "all 62 pass (tests/contracts/test_hep_review_{json,decision_table,kernel,review_fixes}.py)"
@@ -63,7 +63,7 @@ review_inputs_t01:
 blockers:
   - {when: 2026-10-29T09:30+08:00, task: G1, description: "independent G1 review: 4 blockers (B1 rollback stays verified, B2 fork/migrate drop negatives, B3 hand-written assignment bases, B4 records not bound to raw), 4 major, 8 minor; all fixed with tests first in b491ff9e; dispositions in reviews/g1-review-dispositions.md", needs: none, resolved: "2026-10-29 user accepted the G1 dispositions"}
   - {when: 2026-10-29T07:15+08:00, task: T01, description: "independent T01 review returned blocker F1 (layer 1 not byte-reproducible across processes); fixed with a multi-seed test in 3f075184", needs: none, resolved: "2026-10-29 user accepted the dispositions and asked to continue with T03 and G1"}
-next_action: "T04: freeze the EvaluationProtocol and commit salted commitments before the first trial; then calibrate the grader, run 48 trials, score"
+next_action: "Maintainer decision: freeze schema 1.0.0 (hep-review/1) as a separate reviewed step, or first run a harder, less-cued, held-out suite (g2-report.md caveats 1-2)"
 ```
 
 ## Log
@@ -98,4 +98,7 @@ next_action: "T04: freeze the EvaluationProtocol and commit salted commitments b
 2026-10-29 09:42 | stop | 4.2 | G1 review blockers -> ask the user | none
 2026-10-29 09:50 | G1 | declare | user accepted the G1 dispositions; G1 declared (experimental record prototype); run finished at target G1 | none
 2026-10-29 10:10 | U1 | answer | (b) approved oracles, full 48 trials; target_gate raised to G2 | none
+2026-10-29 09:28 | T04 | freeze | EvaluationProtocol, commitments, grader instructions, driver committed before any trial | d987d4e2
+2026-10-29 09:35 | T04 | fix | snapshot ns times as decimal strings (found by the pilot path) | 6f7936a7
+2026-10-29 10:40 | T04 | trials | calibration 8/8; 48/48 trials digest-bound at R2; scoring graders agree 12/12; both gates pass; 19/19 commitments verified, nonces published | none
 ```

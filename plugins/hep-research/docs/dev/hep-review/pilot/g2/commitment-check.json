@@ -1,0 +1,24 @@
+{
+ "all": true,
+ "verified": {
+  "calibration-labels.json": true,
+  "expected/p0162bce8.json": true,
+  "expected/p01e3f7aa.json": true,
+  "expected/p06f0da0f.json": true,
+  "expected/p1736b719.json": true,
+  "expected/p2986bf7e.json": true,
+  "expected/p36e0a36b.json": true,
+  "expected/p4151ac15.json": true,
+  "expected/p58a3bba0.json": true,
+  "expected/p5fbf2363.json": true,
+  "expected/p69384685.json": true,
+  "expected/p6c7aea0e.json": true,
+  "expected/p8390f2a4.json": true,
+  "expected/pb23059dc.json": true,
+  "expected/pe0278b83.json": true,
+  "expected/pe1154782.json": true,
+  "expected/pf95c79fc.json": true,
+  "grader-instructions.md": true,
+  "oracle.json": true
+ }
+}
