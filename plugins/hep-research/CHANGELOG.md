@@ -13,6 +13,9 @@ Software checks establish contract consistency only, not physical validity.
   response assertions for completed changes only; a recorded hep-review review of a changed result is carried over by
   hep-review.
 - **Translating or condensing a paper** is routed from SKILL.md to the existing bilingual rules (G9); no rule moved.
+- **sci-fix (S3) HEDGE-DONE-WHEN**: the hedging Done when of `scientific-style.md` no longer demands that every hedge be
+  quantified or removed; a hedge that states a real uncertainty or limitation stays (quantified where the number is
+  available), as the section itself says (G1).
 - `paper-structure.md` no longer repeats the PRL abstract limit; venue limits live in `latex-venue-setup.md` (G2).
 - Evidence: VALIDATION AUTHORING-IMPROVE (engineering checks and live routing; a pilot of a reply-wording change found
   no difference and the change was withdrawn).

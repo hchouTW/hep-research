@@ -8158,10 +8158,10 @@ over 10 sessions).
 | G11 short writing requests | live routing: `aw-short-1`, `aw-short-2` pass; exploration 0/11 runs with no skill loaded | gap not kept; description unchanged |
 | G5-F compact-ledger Done when | engineering (`test_revision_impact.py`, `test_reference_links.py`) | pass |
 | G9-F bilingual routing row | engineering (L2) | pass |
-| G1 hedging Done when | — | postponed: S3 needs two located external sources; Hyland (1996, Applied Linguistics 17:433) and Hyland (1998) could not be read in full text |
+| G1 hedging Done when (sci-fix, S3) | ledger HEDGE-DONE-WHEN: Hyland 1995 (Hong Kong Papers in Linguistics and Language Teaching 18:33-42, pp. 34-35) and Bongelli et al. 2019 (PLoS ONE 14 e0221933, Conclusion and Discussion), both read in full; `test_handoff_text.py::HedgingDoneWhen` fails on the parent | pass |
 | G5-V reply wording for pending work | authoring-pilot (two calibrated fresh-context claude-opus-5-5 graders; 3 failure cases, 2 correct controls, 12 gold items each, 3 runs per version) | no difference: failure-case items 106/108 baseline vs 105/108 candidate, p(candidate better) = 1.0, leave-one-out remaining T = -1; controls 72/72 both; no critical or control regression; withdrawn (revert `039781da`) |
 | G3, G4, G6 (verification lane) | spike: 4 baseline runs each of the drafting, method, discussion and talk cases | not reproduced (0/4 each); not selected |
-| Adaptation path (G7) | engineering: golden record, talk outline and manifest through `check_adaptation.py` | exit 0 after a recorded semantic review; slide numbers and the slot length are reported as unmapped numbers (warnings); a review talk from several sources cannot be expressed (one record and one central claim per manifest); contract unchanged |
+| Adaptation path (G7) | engineering: golden record, talk outline and manifest through `check_adaptation.py` | single-study talk (golden record): exit 0 after a recorded semantic review; multi-study review talk: exit 0 with one record holding a claim per study (each from its literature source) and a synthesis claim as the central claim, the record valid (`validate.py` exit 0, assessments unresolved); slide numbers and the slot length are reported as unmapped numbers (warnings); contract unchanged |
 
 Observation (not a claim): in the exploration and the pilot, reply drafts for pending work are often written as
 completed-voice templates with placeholders ("We have repeated ... [X]"), although the model says the work is not done;
@@ -8169,7 +8169,7 @@ confirmed critical failures in 2/3 and 3/3 baseline runs of two pilot cases. The
 `submission-and-peer-review.md`; no exploration run read a reference file. Surfacing it in SKILL.md did not change this.
 The replay scorer's completion pattern misses this wording and matched a negated "已完成" once (scorer artefacts).
 
-Not verified here: G1; P4 talk revisions (G5-V not delivered); P5 teaching examples (skipped, no delivered verification
+Not verified here: P4 talk revisions (G5-V not delivered); P5 teaching examples (skipped, no delivered verification
 item). Limitations: developer-authored brief; same-host gold (advisory); same model family for graders and gold writer;
 gold items hit a ceiling (both versions 11-12 of 12), so the pilot had little power for this target. Records:
 `evals/research_communication/authoring-items/` (exploration, pilot protocol, commitments, revealed gold, result) and
