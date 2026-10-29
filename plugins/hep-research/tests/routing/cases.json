@@ -107,6 +107,90 @@
    "not": "hep-review"
   },
   {
+   "id": "rv-ar-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Review the results section of my draft: are the claims supported by the results and are the figures clear?",
+   "expected_primary": "hep-authoring",
+   "trigger_terms": [
+    "drafting or revising paper sections"
+   ],
+   "not": "hep-review",
+   "set": "AR"
+  },
+  {
+   "id": "rv-ar-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Do a recorded review of the fit behind Table 2 of my manuscript, with review obligations and the assurance tier it reaches.",
+   "expected_primary": "hep-review",
+   "trigger_terms": [
+    "recorded review",
+    "review obligations"
+   ],
+   "not": "hep-authoring",
+   "set": "AR"
+  },
+  {
+   "id": "rv-ar-neighbor-2",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Is the profile-likelihood interval quoted in Table 2 of my paper computed correctly?",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "profile likelihood"
+   ],
+   "not": "hep-review",
+   "set": "AR"
+  },
+  {
+   "id": "rv-ar-neighbor-3",
+   "lang": "zh-Hant",
+   "kind": "neighboring",
+   "prompt": "請幫我修改草稿的結果章節（revising paper sections）：主張是否有結果支持、圖是否清楚？",
+   "expected_primary": "hep-authoring",
+   "trigger_terms": [
+    "revising paper sections"
+   ],
+   "not": "hep-review",
+   "set": "AR"
+  },
+  {
+   "id": "rv-ar-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請對我稿件表 2 背後的擬合做有紀錄的審查，列出 review obligations，並說明能達到哪個 assurance tier。",
+   "expected_primary": "hep-review",
+   "trigger_terms": [
+    "review obligations",
+    "assurance tiers"
+   ],
+   "not": "hep-authoring",
+   "set": "AR"
+  },
+  {
+   "id": "aw-short-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Write a one-sentence summary of this result for the abstract: the measured B/C ratio agrees with the model within 1 sigma.",
+   "expected_primary": "hep-authoring",
+   "trigger_terms": [
+    "even one sentence for an abstract or summary"
+   ],
+   "set": "AR"
+  },
+  {
+   "id": "aw-short-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "幫我把這個結果寫成摘要裡的一句話（one sentence for an abstract）：量到的 B/C 比與模型在 1σ 內一致。",
+   "expected_primary": "hep-authoring",
+   "trigger_terms": [
+    "one sentence for an abstract"
+   ],
+   "set": "AR"
+  },
+  {
    "id": "an-direct-1",
    "lang": "en",
    "kind": "direct",

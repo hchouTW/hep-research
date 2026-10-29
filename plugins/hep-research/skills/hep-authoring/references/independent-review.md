@@ -17,6 +17,8 @@ it does not meet the "a review record exists" criterion of `<plugin root>/docs/d
 (maintainer decision 2026-10-21, `<plugin root>/docs/dev/decision-independent-review.md`): the author agent could
 forge it. It is advisory input that a human reviewer may cite in their own record. Say so when you report it.
 
+**Scope.** This mechanism reviews the document. A recorded review of the analysis, fit, derivation or code the document reports (obligations, tiers, a commit log) is hep-review's: hand it over rather than widening this review.
+
 **Terminology.** "Review packet" and "shadow slot" here are this mechanism's terms. They are unrelated to
 `<plugin root>/docs/dev/cross-artifact-check/review-packet.md` (a human review of the G-ENFORCE inputs) and
 `<plugin root>/docs/dev/cross-artifact-check/shadow-review.md` (a difference review between check suites).

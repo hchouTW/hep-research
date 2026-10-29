@@ -5,6 +5,9 @@ assessment. For responding to actual reviews, use `submission-and-peer-review.md
 Identify the manuscript version and review scope. Apply a venue's rubric when
 provided; retrieve current official criteria if venue-specific scoring is needed.
 
+When a referee point needs a recorded review of the underlying analysis or code, hand it to hep-review; when it needs
+only a judgement, hand it to the owner skill (for example hep-statistics).
+
 Begin with a neutral account of the question, contribution, and evidence, then
 identify substantive strengths. Assess central validity, novelty relative to
 verified prior work, comparison fairness, uncertainty, reproducibility, scope of

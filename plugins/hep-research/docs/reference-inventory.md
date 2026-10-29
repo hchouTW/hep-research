@@ -8,7 +8,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 
 | Skill | References | KB | Cited nowhere |
 |---|---|---|---|
-| hep-authoring | 49 | 358 | 0 |
+| hep-authoring | 49 | 359 | 0 |
 | hep-citations | 11 | 84 | 0 |
 | hep-computing | 36 | 325 | 0 |
 | hep-detector | 42 | 589 | 0 |
@@ -117,9 +117,9 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `evidence-linked-writing.md` | hep-authoring | 5.7 | yes | 5 | hep-citations | ebb58136 2026-10-19 |
 | `figures-and-tables.md` | hep-authoring | 9.3 | yes | 11 | hep-citations | ebb58136 2026-10-19 |
 | `general-diagram-principles.md` | hep-authoring | 7.8 | no | 2 | - | ebb58136 2026-10-19 |
-| `grant-and-fellowship-proposal-writing.md` | hep-authoring | 4.8 | no | 1 | - | ebb58136 2026-10-19 |
+| `grant-and-fellowship-proposal-writing.md` | hep-authoring | 4.8 | yes | 2 | - | ebb58136 2026-10-19 |
 | `graphviz-patterns.md` | hep-authoring | 3.5 | no | 2 | - | ebb58136 2026-10-19 |
-| `independent-review.md` | hep-authoring | 16.5 | yes | 4 | hep-detector | cecc4dcb 2026-10-22 |
+| `independent-review.md` | hep-authoring | 16.7 | yes | 4 | hep-detector | 9d16210f 2026-10-29 |
 | `latex-mechanics-and-tooling.md` | hep-authoring | 14.9 | no | 9 | hep-computing | 16214af1 2026-10-26 |
 | `latex-venue-setup.md` | hep-authoring | 30.4 | yes | 13 | - | 4eae529b 2026-10-22 |
 | `legends-panels-and-export.md` | hep-authoring | 6.6 | no | 2 | - | ebb58136 2026-10-19 |
@@ -129,7 +129,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `multi-venue-reformatting.md` | hep-authoring | 3.0 | no | 1 | - | ebb58136 2026-10-19 |
 | `outreach-and-public-facing-summaries.md` | hep-authoring | 4.2 | yes | 6 | - | ebb58136 2026-10-19 |
 | `paper-genre-variants.md` | hep-authoring | 7.6 | yes | 6 | - | ebb58136 2026-10-19 |
-| `paper-structure.md` | hep-authoring | 11.1 | yes | 12 | hep-citations | ebb58136 2026-10-19 |
+| `paper-structure.md` | hep-authoring | 11.1 | yes | 12 | hep-citations | ffcdf17b 2026-10-29 |
 | `papers-review-modes-and-reference-index.md` | hep-authoring | 12.4 | no | 2 | - | ebb58136 2026-10-19 |
 | `physics-plots.md` | hep-authoring | 8.2 | yes | 8 | - | ebb58136 2026-10-19 |
 | `plagiarism-and-text-reuse-checking.md` | hep-authoring | 3.0 | no | 2 | - | ebb58136 2026-10-19 |
@@ -138,11 +138,11 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `preprint-to-journal-reconciliation.md` | hep-authoring | 2.9 | no | 3 | - | ebb58136 2026-10-19 |
 | `preregistration-and-registered-reports.md` | hep-authoring | 3.5 | no | 1 | - | ebb58136 2026-10-19 |
 | `reproducibility-auditing.md` | hep-authoring | 3.1 | no | 9 | hep-citations, hep-computing | ebb58136 2026-10-19 |
-| `reviewer-style-assessment.md` | hep-authoring | 2.1 | yes | 2 | - | ebb58136 2026-10-19 |
-| `revision-impact-tracking.md` | hep-authoring | 4.0 | yes | 14 | - | ebb58136 2026-10-19 |
-| `scientific-style.md` | hep-authoring | 11.7 | no | 14 | hep-citations, hep-statistics | ebb58136 2026-10-19 |
+| `reviewer-style-assessment.md` | hep-authoring | 2.3 | yes | 2 | - | 9d16210f 2026-10-29 |
+| `revision-impact-tracking.md` | hep-authoring | 4.4 | yes | 14 | - | c888be49 2026-10-29 |
+| `scientific-style.md` | hep-authoring | 11.8 | no | 14 | hep-citations, hep-statistics | 5f4489ee 2026-10-29 |
 | `statistics-and-ml-papers.md` | hep-authoring | 14.2 | yes | 10 | hep-citations | ebb58136 2026-10-19 |
-| `submission-and-peer-review.md` | hep-authoring | 16.7 | no | 12 | - | ebb58136 2026-10-19 |
+| `submission-and-peer-review.md` | hep-authoring | 16.7 | no | 12 | - | 039781da 2026-10-29 |
 | `supplementary-material-planning.md` | hep-authoring | 2.1 | no | 1 | - | ebb58136 2026-10-19 |
 | `thesis-by-publication-assembly.md` | hep-authoring | 4.0 | no | 2 | - | ebb58136 2026-10-19 |
 | `tikz-patterns.md` | hep-authoring | 5.9 | no | 8 | - | ebb58136 2026-10-19 |

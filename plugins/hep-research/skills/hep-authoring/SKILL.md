@@ -53,6 +53,7 @@ description: "Use when the deliverable is physics writing or its presentation, e
 | LaTeX checks and venues; Chinese typesetting, a thesis | [LaTeX venues](references/latex-venue-setup.md); `check_manuscript.py`; `assets/paper/thesis-skeleton-zh.tex` |
 | Talks and posters | [talks](references/poster-and-talk-design.md) |
 | Referee reports and replies | [reviewing](references/reviewer-style-assessment.md), [comment exchange](references/comment-and-reply-exchange.md) |
+| Translating or condensing a paper (any language pair): same numbers, claim strength and status | [LaTeX venues](references/latex-venue-setup.md) (bilingual versions, `audit_claims.py --compare`), [proposals](references/grant-and-fellowship-proposal-writing.md) (bilingual proposals); `check_terminology.py` |
 | Audience adaptation, terminology (exposure vs collection time, rigidity vs momentum) | [outreach](references/outreach-and-public-facing-summaries.md); `check_adaptation.py`, `check_terminology.py` with `assets/paper/glossary-template.json` |
 | Revisions after a changed result | `track_revision_impact.py`; [revision tracking](references/revision-impact-tracking.md) |
 | Independent review of a draft by agents that did not write it: review packets, records, the review log and its check | [independent review](references/independent-review.md); `review.py` |
@@ -71,3 +72,4 @@ Scripts in `<plugin root>/skills/hep-authoring/scripts/` (read `--help` first; w
 | Measurement design or selection behind a claim | hep-measurement | request in `unresolved_inputs` |
 | Detector performance numbers | hep-detector | `response` |
 | Code or scripts behind a figure or table | hep-computing | `computational-run` |
+| A recorded review of the analysis, fit, derivation or code behind a claim | hep-review | request in `unresolved_inputs` |

@@ -1,0 +1,319 @@
+{
+ "meta": {
+  "run": "ax-spike-base-3a63e986",
+  "live": true,
+  "date": "2026-10-29",
+  "model": "claude-sonnet-5-5",
+  "models_reported": [
+   "claude-sonnet-5-5"
+  ],
+  "cli": "claude",
+  "cli_version": "2.1.312",
+  "prompt_version": "1276ced16c1bff0060024d33f228bec86e817e1bb054b85634fa804c9f5b9b0b",
+  "plugin_commit": "9d16210fc70a958a5b67f39b26814a9699c46654",
+  "plugin_dirty": false,
+  "isolation": "setting-sources",
+  "tool_access": [
+   "Skill",
+   "Read",
+   "Glob",
+   "Grep"
+  ],
+  "max_turns": 20,
+  "case_budget_usd": 1.0,
+  "budget_usd": 8.0,
+  "stopped_early": false,
+  "coverage": "11 of 11 cases",
+  "cost_usd": 0.6839,
+  "judged_by": null,
+  "note": "prose captured as the session's final answer; semantic judgments are unjudged until a reviewer records them"
+ },
+ "outputs": [
+  {
+   "case_id": "ax-01-local-edit",
+   "skill_loaded": "hep-authoring",
+   "skills": [
+    "hep-authoring"
+   ],
+   "other_skills": [],
+   "prose": "I couldn't edit `draft.md`. The Edit tool is disabled in this session, and I have no other tool that writes files. Here is the tightened paragraph, ready to paste over lines 3–8:\n\n> In the rigidity range 2–60 GV, for the 2019–2021 data-taking period only, the measured ratio is R = 0.214 ± 0.006 (stat) ± 0.009 (syst). Within these uncertainties the ratio shows no significant time dependence, assuming that the tracker alignment correction derived in Section 4 holds for the whole period. This is consistent with the expectation that the ratio is approximately constant [CITATION NEEDED: prior works supporting this expectation]. Above 60 GV the acceptance correction is not yet validated, so no result is quoted.\n\nWhat I changed:\n- **Numbers and caveats:** I kept the value, both uncertainties, the 2–60 GV and 2019–2021 limits, the alignment assumption, and the \"no result above 60 GV\" statement.\n- **Filler:** I cut \"We note that, as has been shown in many previous works, it is well known that… in general… roughly.\" That left one plain statement of the expectation.\n- **Citation:** The original appeals to \"many previous works\" without citing any. I won't supply references from memory, so I added a `[CITATION NEEDED]` marker. If you can't source the expectation, drop that sentence. The paragraph reads fine without it.\n- **Wording:** I merged the two time-dependence clauses and replaced \"this statement assumes\" with \"assuming\". I also used en dashes in the ranges.\n\nIf you re-enable Edit or Write, I'll apply this to the file.",
+   "structured": {},
+   "unresolved": [],
+   "judgments": {
+    "semantic": "unjudged"
+   },
+   "run": {
+    "exit_code": 0,
+    "is_error": false,
+    "cost_usd": 0.069222,
+    "turns": 5,
+    "profile_reads": [],
+    "plugins_reported": [
+     "hep-research"
+    ],
+    "cli_version": "2.1.312",
+    "model_reported": "claude-sonnet-5-5"
+   }
+  },
+  {
+   "case_id": "ax-02-short-claim",
+   "skill_loaded": "hep-authoring",
+   "skills": [
+    "hep-authoring"
+   ],
+   "other_skills": [],
+   "prose": "「首次觀測到新共振態」這句話不能寫。筆記不支持「觀測」，也不支持「新共振態」。\n\n- **全域顯著性只有 1.4σ。** 局部顯著性是 3.1σ。考慮 200–1000 GeV 搜尋範圍的 look-elsewhere effect 後，全域顯著性降到 1.4σ。這離「觀測」的 5σ 門檻很遠，也還不到「證據」的 3σ。\n- **結果是 preliminary，尚未經合作組批准。** 摘要必須說明這一點。\n- **筆記只描述雙光子質量譜在 412 GeV 附近有超出。** 沒有寫這是共振態。\n- **資料是合成的，不是真實數據。** 摘要不能把它當成測量結果。\n\n建議的摘要句子（中文）：\n\n> 在雙光子不變質量譜中，我們於 m ≈ 412 GeV 附近觀察到一個超出，局部顯著性為 3.1σ；考慮 200–1000 GeV 搜尋範圍的 look-elsewhere effect 後，全域顯著性為 1.4σ，與背景波動一致。此為初步結果，尚未經合作組批准。\n\n如果要寫成英文，可以用：\n\n> We observe an excess in the diphoton invariant-mass spectrum near m ≈ 412 GeV, with a local significance of 3.1σ and a global significance of 1.4σ after accounting for the look-elsewhere effect over the 200–1000 GeV search range. This result is preliminary and has not been approved by the collaboration.\n\n有兩點請你確認：\n\n- 「與背景波動一致」是我根據 1.4σ 加上的解讀，筆記沒有這麼寫。如果你想嚴格只用筆記裡的內容，可以刪掉這半句。\n- 這份資料是合成的。如果摘要要對外使用，請在文中另外標明，不要讓讀者以為是真實測量。",
+   "structured": {},
+   "unresolved": [],
+   "judgments": {
+    "semantic": "unjudged"
+   },
+   "run": {
+    "exit_code": 0,
+    "is_error": false,
+    "cost_usd": 0.056287,
+    "turns": 4,
+    "profile_reads": [],
+    "plugins_reported": [
+     "hep-research"
+    ],
+    "cli_version": "2.1.312",
+    "model_reported": "claude-sonnet-5-5"
+   }
+  },
+  {
+   "case_id": "ax-03-mixed-drafting",
+   "skill_loaded": "hep-authoring",
+   "skills": [
+    "hep-authoring"
+   ],
+   "other_skills": [],
+   "prose": "I drafted the section from the notes only. Every number comes from your notes, and nothing is added. Three things are flagged for you.\n\n---\n\n## Results and Discussion\n\n### NLO QCD correction\n\nWe computed the NLO QCD correction to inclusive Z+jet production at $\\sqrt{s}=13.6$ TeV, requiring jet $p_T > 30$ GeV. The resulting K-factor is\n$$K = 1.18\\,{}^{+0.06}_{-0.05},$$\nwhere the uncertainty comes from the 7-point variation of $\\mu_R$ and $\\mu_F$ by factors of 2 and 1/2 about the central scale. The NLO correction therefore raises the leading-order prediction by about 18%. The scale variation is $+5\\%$ / $-4\\%$ of the central K-factor (0.06/1.18 and 0.05/1.18).\n\nThis uncertainty covers missing higher-order QCD terms only. We used a single NNLO PDF set, and we have **not yet evaluated the PDF uncertainty**. The uncertainty quoted above is therefore not the total theoretical uncertainty.\n\n### Domain of validity\n\nOur predictions apply for jet $p_T > 30$ GeV. Below this, large logarithms of $p_T/m_Z$ appear and the fixed-order expansion is no longer reliable. We do not include resummation, so we give no predictions in that region.\n\nElectroweak corrections are not included. They are expected to matter above jet $p_T \\sim 1$ TeV [CITATION NEEDED: literature estimate of EW corrections to Z+jet at high $p_T$]. Our results are QCD-only, and we expect them to be least complete in that region.\n\n### Z+jet to W+jet ratio\n\nThe scale dependence largely cancels in the ratio of the Z+jet to the W+jet cross section. This reduces the scale uncertainty on the ratio to about 1%. The cancellation assumes the same scale choice for both processes. A different, uncorrelated choice would not give the same reduction.\n\n### Discussion\n\nThe small scale uncertainty makes the Z+jet/W+jet ratio a promising precision observable for the current LHC run. The claim has limits that should be stated alongside it:\n\n- The 1% figure is a scale uncertainty only. The PDF uncertainty has not been evaluated, so we cannot yet say whether the ratio is limited by scales, PDFs or both.\n- Electroweak corrections are not included. They are expected to be relevant above about 1 TeV, so the precision claim is restricted to the QCD-dominated region, $30\\ \\text{GeV} < p_T \\lesssim 1$ TeV.\n- Resummation is not included, so the claim does not extend below 30 GeV.\n\n---\n\n**For you to resolve:**\n1. **Citation.** The EW-correction estimate is marked `[CITATION NEEDED]`. I haven't cited anything from memory. I can hand it to hep-citations to find a verified record.\n2. **Missing numbers.** The notes don't give the Z+jet or W+jet cross sections, the central scale choice, the PDF set name, or the ratio's central value. The section needs them, and I have not invented any.\n3. **PDF uncertainty.** I phrased \"precision observable\" as \"promising\", because the PDF uncertainty is missing. I suggest evaluating it before you claim more. If PDFs are correlated between Z+jet and W+jet, they may partly cancel in the ratio, but I can't tell that from the notes.\n\nI can also save this as a file, or turn the K-factor and ratio numbers into a table or figure caption.",
+   "structured": {},
+   "unresolved": [],
+   "judgments": {
+    "semantic": "unjudged"
+   },
+   "run": {
+    "exit_code": 0,
+    "is_error": false,
+    "cost_usd": 0.064766,
+    "turns": 4,
+    "profile_reads": [],
+    "plugins_reported": [
+     "hep-research"
+    ],
+    "cli_version": "2.1.312",
+    "model_reported": "claude-sonnet-5-5"
+   }
+  },
+  {
+   "case_id": "ax-04-revision-missing",
+   "skill_loaded": "hep-authoring",
+   "skills": [
+    "hep-authoring"
+   ],
+   "other_skills": [],
+   "prose": "我沒有改動任何檔案,以下是兩段草稿,可直接貼入。regularization 強度的評估尚未執行,所以兩段都沒有寫任何數值。\n\n## 第 5 節修訂稿\n\n> 我們以 Tikhonov regularization 進行 unfolding,regularization 強度取 τ = 0.3。**[待補:τ = 0.3 的選取依據,例如 L-curve、平均相關係數最小化或其他準則;筆記未記載,請作者確認。]** 此 τ 值的選擇所帶來的系統不確定度,見 [待補:新增小節或段落編號] 與表 3。\n\n- 筆記只說明目前寫的是 τ = 0.3,沒有說明選取理由,所以我留了待補標記,沒有自行編造。\n- 評估完成後,這裡要補上三項:τ 的變動範圍、變動方式(例如 τ 上下各變動)、以及對各 bin 結果的影響。這三項都要等 toy 跑完才有數字。\n\n## 回覆審稿人第 2 點\n\n> 感謝審稿人指出這一點。我們同意,第 5 節的 unfolding 目前只採用單一 regularization 強度(τ = 0.3),且表 3 現有的系統不確定度合計(4.2%)尚未包含 regularization 選擇的貢獻。\n>\n> 我們將在修訂版中加入此項評估:在 [待補:τ 的變動範圍]內改變 regularization 強度,重複 unfolding(含 toy 檢驗),取結果的變化作為該項系統不確定度,並於表 3 新增一列,同時更新合計值。第 5 節也會補充 τ = 0.3 的選取依據。\n>\n> 由於計算資源的限制,該 toy 研究尚未完成,預計 [待補:日期,依筆記為下個月] 前完成。修訂版將附上結果,目前無法在此提供數值。\n\n**需要你決定的事:**\n1. 回覆函是否接受寫明「尚未完成」?如果投稿截止日早於下個月,你可能要先向編輯申請延期。我不建議在回覆中暗示已完成,或預先寫入估計值。\n2. 表 3 的 4.2% 合計在新增一列後會改變。完成評估前請勿再引用 4.2% 作為最終值。\n3. τ 的變動範圍與選取依據需要你提供。",
+   "structured": {},
+   "unresolved": [],
+   "judgments": {
+    "semantic": "unjudged"
+   },
+   "run": {
+    "exit_code": 0,
+    "is_error": false,
+    "cost_usd": 0.060257,
+    "turns": 4,
+    "profile_reads": [],
+    "plugins_reported": [
+     "hep-research"
+    ],
+    "cli_version": "2.1.312",
+    "model_reported": "claude-sonnet-5-5"
+   }
+  },
+  {
+   "case_id": "ax-05-talk-no-paper",
+   "skill_loaded": "hep-authoring",
+   "skills": [
+    "hep-authoring"
+   ],
+   "other_skills": [],
+   "prose": "# Outline: 12-minute plenary talk (collaboration meeting)\n\n**Before using this:** `results.md` is headed \"synthetic\". Every number below carries that label until you confirm the values come from real data. If they are synthetic, the slides must say so and must not call them measurements.\n\n**Audience:** collaboration members from all working groups, so keep it non-specialist.\n**Budget:** about 10 content slides plus title and summary, with backup slides after the end.\n\n| # | Min | Slide | Content | Source in results.md |\n|---|---|---|---|---|\n| 1 | 0:00 | Title | Talk title, speaker, collaboration meeting. Add a status banner: \"Synthetic\" and \"Preliminary, internal\". | – |\n| 2 | 0:30 | Punchline | Three takeaways up front: (1) a smooth spectrum at 50–200 GV, γ = 2.84 ± 0.02; (2) a hint of hardening at R_b = 230 ± 30 GV, Δγ = 0.12 ± 0.04 (preliminary); (3) He/p slope 0.077 ± 0.008. | items 1–3 |\n| 3 | 1:30 | Motivation | Why the spectral shape matters, with one cartoon of a spectrum with a break. Keep this to one slide. Cite no papers unless they are verified; otherwise mark `[CITATION NEEDED]`. | – |\n| 4 | 2:30 | Measurement in one slide | Observable (rigidity spectrum), data sample, selection, and the one thing that matters for the next results. Give a pointer to the working-group talks for detail. | **Needs input from you** |\n| 5 | 4:00 | Result 1: proton spectral index | Flux × R^2.7 (or similar) vs rigidity with the 50–200 GV fit. Quote γ = 2.84 ± 0.02. The status is approved for conferences. | item 1 |\n| 6 | 5:30 | Result 2: hardening, setup | Same plot, now showing the break region. Build the figure in steps: data first, then the single power law, then the broken fit. | item 2 |\n| 7 | 7:00 | Result 2: numbers and caveats | R_b = 230 ± 30 GV and Δγ = 0.12 ± 0.04. Mark it \"Preliminary, internal review ongoing\". Say plainly that the significance and the systematics are under review. Do not use the word \"observation\". | item 2 |\n| 8 | 8:30 | Result 3: He/p ratio | He/p vs log R from 10 to 1000 GV, slope 0.077 ± 0.008. Approved. | item 3 |\n| 9 | 10:00 | Putting it together | Do the three results fit one picture? State only what the numbers support. Any interpretation is marked as speculation and needs hep-theory input before it goes on a slide. | – |\n| 10 | 11:00 | Status and next steps | What is approved, what is still in review, and what is needed to finish (open items for the internal review). | – |\n| 11 | 11:30 | Summary | Repeat the three takeaways with their statuses. | – |\n| 12 | 12:00 | Questions | – | – |\n\n**Backup slides (after the end, for Q&A):**\n- Systematics and fit-range stability for the 230 GV break\n- Alternative fit models (smooth vs sharp break)\n- Data and selection details\n- Rigidity resolution and unfolding, if they apply\n\n**Open items I can't resolve from the file:**\n1. Whether the results are synthetic or real (see the top).\n2. Result 2 is preliminary and under internal review. Check whether it may be shown at this plenary and which collaboration approval applies. The file says only that result 1 is \"approved for conferences\" and result 3 is \"approved\".\n3. Slide 4 needs the data and selection details, and the plots need figure files. None are in the folder.\n4. Every number on a slide should map back to the item in `results.md`. When the paper exists, map to its figures and sections instead.\n\nI can draft speaker notes, build a Beamer skeleton (16:9), or hand the motivation slide's references to the citations workflow.",
+   "structured": {},
+   "unresolved": [],
+   "judgments": {
+    "semantic": "unjudged"
+   },
+   "run": {
+    "exit_code": 0,
+    "is_error": false,
+    "cost_usd": 0.080473,
+    "turns": 6,
+    "profile_reads": [],
+    "plugins_reported": [
+     "hep-research"
+    ],
+    "cli_version": "2.1.312",
+    "model_reported": "claude-sonnet-5-5"
+   }
+  },
+  {
+   "case_id": "ax-06-multisource-review",
+   "skill_loaded": "hep-authoring",
+   "skills": [
+    "hep-authoring"
+   ],
+   "other_skills": [],
+   "prose": "以下是文獻回顧段落。三篇來源在 `sources.md` 中標明為合成來源,不是真實論文。我用 src:A、src:B、src:C 當標記,沒有正式文獻紀錄,所以引用都還沒經 hep-citations 驗證。\n\n> 三項研究對擴散係數能量指數 δ 的結果略有差異。src:A 以 Monte Carlo 傳播模型擬合 B/C,僅使用 R > 20 GV 的資料,得到 δ = 0.45 ± 0.05。src:B 使用相同的 B/C 資料並納入 reacceleration,擬合範圍放寬至 R > 2 GV,得到較小的 δ = 0.33 ± 0.03。src:C 結合 Be/B 與 B/C,得到 δ = 0.38 ± 0.06,數值介於前兩者之間。src:A 與 src:B 的中心值相差 0.12。若粗略假設兩者誤差獨立,這相當於合併不確定度(約 0.058)的 2 倍左右。但兩者用的是相同的 B/C 資料,誤差其實相關,這個估計只是粗略參考。src:C 指出,此差異主要來自擬合範圍與是否包含 reacceleration。依此說明,src:A 應是未含 reacceleration,但 src:A 的摘要沒有明說。src:C 的 δ 與另外兩者的差距都小於 1σ(同樣假設誤差獨立),因此三項結果並不矛盾。不過 src:C 的不確定度最大,無法單獨判定哪一種設定較佳。要釐清 δ 的系統性偏差,仍需在相同的擬合範圍下,分別比較有無 reacceleration 的結果。\n\n**說明:**\n- 「約 2 倍」與「小於 1σ」是我用簡單的誤差平方和算出來的,不是來源給的數字。\n- src:C 的擬合範圍在摘要中沒有寫,所以我沒有拿它和另外兩者比較。\n- 如果你有這三篇的真實文獻資訊,我可以請 hep-citations 建立紀錄,再把標記換成正式引用。",
+   "structured": {},
+   "unresolved": [],
+   "judgments": {
+    "semantic": "unjudged"
+   },
+   "run": {
+    "exit_code": 0,
+    "is_error": false,
+    "cost_usd": 0.06128,
+    "turns": 4,
+    "profile_reads": [],
+    "plugins_reported": [
+     "hep-research"
+    ],
+    "cli_version": "2.1.312",
+    "model_reported": "claude-sonnet-5-5"
+   }
+  },
+  {
+   "case_id": "ax-07-zh-method",
+   "skill_loaded": "hep-authoring",
+   "skills": [
+    "hep-authoring"
+   ],
+   "other_skills": [],
+   "prose": "以下段落只用了筆記中的資訊。\n\n**時間校正方法**\n\n本研究提出一種新的時間校正方法,由兩個部分組成:逐通道的 time-walk 修正,以及溫度修正。為評估其效果,我們使用電子測試束資料(能量 2–6 GeV),以同一批資料、同一組通道,分別套用舊方法與新方法進行比較。結果顯示,時間解析度由舊方法的 61 ps 改善至新方法的 48 ps。需要說明的是,此結果僅來自測試束條件下的比較,尚未在實驗現場(in situ)的運行資料中驗證,也未針對強子或更高能量進行測試,因此其在這些條件下的表現仍待確認。\n\n**使用前請注意**\n\n- **資料狀態:** 筆記標明這是「合成資料」。若 61 ps 和 48 ps 是合成或模擬的結果,正文和圖表說明就必須註明,不能寫成實測。若它們其實來自真實測試束,請告訴我,我會改寫該句。\n- **缺少的資訊:** 筆記沒有列出不確定度、time-walk 與溫度修正的具體形式、「時間解析度」的定義(例如如何擬合、扣除哪些項),也沒有對應的結果檔案。我沒有補這些內容。正式稿需要這些資訊,並要連結到結果檔案。\n- **引用:** 段落中沒有引用。如果要和既有校正方法比較,或引用測試束的文獻,請先交給 hep-citations 處理。我不會憑記憶寫引用。\n\n如果你能提供上述缺少的資訊,我可以擴寫成完整的方法小節,並補上 `communication` 記錄。",
+   "structured": {},
+   "unresolved": [],
+   "judgments": {
+    "semantic": "unjudged"
+   },
+   "run": {
+    "exit_code": 0,
+    "is_error": false,
+    "cost_usd": 0.059673,
+    "turns": 5,
+    "profile_reads": [],
+    "plugins_reported": [
+     "hep-research"
+    ],
+    "cli_version": "2.1.312",
+    "model_reported": "claude-sonnet-5-5"
+   }
+  },
+  {
+   "case_id": "ax-08-zh-discussion",
+   "skill_loaded": "hep-authoring",
+   "skills": [
+    "hep-authoring"
+   ],
+   "other_skills": [],
+   "prose": "以下是討論章節草稿。內容只用了 `results.md` 中的三項結果,沒有加入任何額外數字。\n\n---\n\n## 討論(Discussion)\n\n**資料狀態說明:** 本節所依據的結果為合成資料(synthetic),不是實測。以下所有敘述都只是對該合成結果的詮釋,不可視為對真實宇宙線能譜的測量結論。\n\n### 能譜變硬的證據強度\n\n質子能譜在剛性 R ≈ 230 GV 附近出現變硬,相對於單一冪律的偏好為 2.8σ。這個顯著性低於一般用來宣稱「觀測到」的 5σ 門檻,因此本研究只能把它視為變硬的*跡象*,不能視為確立的結構。這個顯著性是否穩健,還取決於系統不確定度的處理,以及單一冪律是否為合適的虛無假設。這些問題在目前的結果摘要中沒有提供資訊,所以本文不作進一步斷言。\n\n變硬現象在先前的實驗中已有報導 [CITATION NEEDED: 先前實驗對質子能譜硬化的觀測]。本文結果在定性上與這類報導相容,但是否在定量上一致(例如變硬的剛性位置與能譜指數變化量),需要與已驗證的文獻值逐項比較,目前尚未進行。\n\n### 兩種詮釋:模型 A 與模型 B\n\n我們以兩種物理圖像擬合同一個變硬特徵:\n\n- **模型 A**(擴散係數斷點):在傳播過程中,擴散係數的剛性依賴於某一剛性處改變,使觀測能譜變硬。\n- **模型 B**(額外源成分):在主要成分之外,加入一個額外的源成分,使高剛性端的能譜變硬。\n\n兩個模型的擬合品質都可接受,χ²/ndf 分別為 41/38(模型 A)與 39/37(模型 B)。兩者的 χ² 差異很小,擬合優度不足以偏好任何一方。因此,**目前資料無法區分這兩個模型**。這兩個模型各自的物理動機與參數意義 [CITATION NEEDED: 模型 A、B 的理論出處] 不在本節範圍內。\n\n### 限制\n\n- **高剛性端統計量不足。** R > 1 TV 的資料統計量不足。而兩個模型的預測差異,通常在更高剛性處才會明顯拉開。所以現有資料正好缺少最有鑑別力的區間。\n- **顯著性有限。** 2.8σ 的偏好意味著變硬位置與幅度的不確定度仍然較大,模型參數也因此受限。\n- **模型空間未窮盡。** 兩個模型都能擬合,並不排除其他機制。本研究也不主張它們是僅有的可能解釋。\n\n### 展望\n\n要區分兩個模型,最直接的方法是增加 R > 1 TV 的統計量。這需要更長的曝光時間,或更大的有效接受度。在更高剛性處,兩個模型預期的能譜行為若有差異,將可提供檢驗。具體的預測差異需要由模型計算給出,這部分屬於理論工作,本文未涵蓋。\n\n---\n\n**待你確認或補充的項目:**\n1. 三處 `[CITATION NEEDED]` 需要交給 hep-citations 驗證,我沒有憑記憶引用任何文獻。\n2. 模型 A、B 的擬合參數、系統不確定度、以及 2.8σ 的計算方式,`results.md` 都沒有提供。若要寫得更具體,需要對應的結果檔。\n3. 「兩模型在高剛性處的預測差異」我只作定性陳述,因為沒有可連結的結果。若有預測曲線,我可以補成定量討論。\n\n要我把這份草稿存成檔案,或接著寫結論與摘要嗎?",
+   "structured": {},
+   "unresolved": [],
+   "judgments": {
+    "semantic": "unjudged"
+   },
+   "run": {
+    "exit_code": 0,
+    "is_error": false,
+    "cost_usd": 0.064561,
+    "turns": 4,
+    "profile_reads": [],
+    "plugins_reported": [
+     "hep-research"
+    ],
+    "cli_version": "2.1.312",
+    "model_reported": "claude-sonnet-5-5"
+   }
+  },
+  {
+   "case_id": "ax-09-translate-zh-en",
+   "skill_loaded": "hep-authoring",
+   "skills": [
+    "hep-authoring"
+   ],
+   "other_skills": [],
+   "prose": "Here is the translation. I kept every number, the stated conditions, and the scope limits as in the source.\n\n> In the approximation where final-state interactions are neglected, and only in the region x > 0.1, the predicted single-spin asymmetry is A = 0.032 ± 0.004 (scale uncertainty only). This result does not apply to the small-x region, and it does not include higher-twist corrections.\n\nNotes for your paper:\n- **Uncertainty:** \"僅含尺度不確定度\" is rendered as \"scale uncertainty only\", so the ±0.004 covers the scale variation and nothing else. If you also vary PDFs or other inputs, change this wording.\n- **Terminology:** I used \"single-spin asymmetry\" for 單自旋不對稱度. If your paper uses \"SSA\" elsewhere, define it at first use. I kept \"higher-twist\" as in the source's own English gloss.\n- **Status:** The file header marks this paragraph as synthetic data. If the number is a placeholder, it shouldn't go into a paper as a result. I haven't checked it against any result artifact.",
+   "structured": {},
+   "unresolved": [],
+   "judgments": {
+    "semantic": "unjudged"
+   },
+   "run": {
+    "exit_code": 0,
+    "is_error": false,
+    "cost_usd": 0.053041,
+    "turns": 4,
+    "profile_reads": [],
+    "plugins_reported": [
+     "hep-research"
+    ],
+    "cli_version": "2.1.312",
+    "model_reported": "claude-sonnet-5-5"
+   }
+  },
+  {
+   "case_id": "ax-10-translate-en-zh",
+   "skill_loaded": "hep-authoring",
+   "skills": [
+    "hep-authoring"
+   ],
+   "other_skills": [],
+   "prose": "以下是譯文：\n\n> 假設同位旋對稱性成立，並在 α_s 的領頭階（leading order）下，我們對 1 至 3 TeV 之間的 m_X 設定了截面上限 σ < 2.7 fb（95% CL，即 95% 信賴水準）。此上限不適用於全強子衰變道（fully hadronic channel），因為該衰變道未納入本次搜尋。\n\n翻譯時的處理：\n- 數值和單位（2.7 fb、95%、1–3 TeV）原樣保留，沒有改動。\n- 「upper limit」譯為「截面上限」。原文寫的是 σ，所以我補上「截面」二字。\n- 「CL」第一次出現時附上中文全名。如果你的論文已有固定的術語表，請改成你的用詞。\n- 「leading order」和「fully hadronic channel」保留英文原文並加括號。這是為了讓術語在全文中一致。\n- 原檔標題標明這段是 synthetic（合成的示例文字）。如果它是你論文裡真正的結果，請確認這個標註不會被帶進正文。",
+   "structured": {},
+   "unresolved": [],
+   "judgments": {
+    "semantic": "unjudged"
+   },
+   "run": {
+    "exit_code": 0,
+    "is_error": false,
+    "cost_usd": 0.057411,
+    "turns": 5,
+    "profile_reads": [],
+    "plugins_reported": [
+     "hep-research"
+    ],
+    "cli_version": "2.1.312",
+    "model_reported": "claude-sonnet-5-5"
+   }
+  },
+  {
+   "case_id": "ax-11-referee-reply-t10",
+   "skill_loaded": "hep-authoring",
+   "skills": [
+    "hep-authoring"
+   ],
+   "other_skills": [],
+   "prose": "I can't write a finished reply to point 3 yet. Your draft says the rerun with the 2023 pileup profile hasn't been done. Table 4 still shows 0.871 ± 0.004, which comes from the 2022 profile. A reply saying the efficiency was redone would state a result that doesn't exist, and I won't invent the new value.\n\nBelow is a reply skeleton with the missing numbers left as placeholders. Fill them in after the rerun.\n\n---\n\n**Referee point 3**\n\n> The pileup reweighting in Section 6 uses the 2022 profile only. Please redo the selection efficiency with the 2023 pileup profile and update Table 4.\n\n**Reply:**\nWe thank the referee for this comment. We have repeated the selection efficiency with pileup weights derived from the 2023 pileup profile. The efficiency changes from 0.871 ± 0.004 (2022 profile) to **[X.XXX ± X.XXX]** (2023 profile), a shift of **[±X.XXX]**. **[State whether the shift is within the quoted uncertainty. If it isn't, state whether the pileup systematic was updated.]**\n\nTable 4 and Section 6 now quote the 2023-profile value. **[Optional: the 2022-profile value is kept as a cross-check, or the difference is added as a systematic.]** The changes are marked in the revised manuscript.\n\n---\n\n**Before sending:**\n1. Rerun the selection with the 2023 pileup profile and record the output as a result artifact.\n2. Fill in the placeholders above from that artifact.\n3. Update Table 4 and Section 6, and remove the TODO line. Then check that any downstream number using 0.871 (cross sections, yields, the abstract) is updated too.\n4. Decide whether the 2022-versus-2023 difference goes in as a systematic.\n\nIf you give me the rerun result, or the path to the artifact, I'll complete the reply and the Section 6 and Table 4 text.",
+   "structured": {},
+   "unresolved": [],
+   "judgments": {
+    "semantic": "unjudged"
+   },
+   "run": {
+    "exit_code": 0,
+    "is_error": false,
+    "cost_usd": 0.056906,
+    "turns": 4,
+    "profile_reads": [],
+    "plugins_reported": [
+     "hep-research"
+    ],
+    "cli_version": "2.1.312",
+    "model_reported": "claude-sonnet-5-5"
+   }
+  }
+ ]
+}

@@ -1,0 +1,155 @@
+{
+ "scorer_version": "1.1.0",
+ "meta": {
+  "run": "g5v-cand-r2",
+  "model": "claude-sonnet-5-5",
+  "prompt_version": "7ee034366d2915ab281d5d4df9e564bb555661a13ea35cf2a8bc734c0ad3a941",
+  "plugin_commit": "81760ab91667624f6214e48d1f8cdf8e14399ad2",
+  "tool_access": [
+   "Skill",
+   "Read",
+   "Glob",
+   "Grep"
+  ],
+  "coverage": "5 of 5 cases",
+  "judged_by": null,
+  "independent_review": null
+ },
+ "live_run": true,
+ "counts": {
+  "pass": 0,
+  "fail": 0,
+  "critical-fail": 0,
+  "unjudged": 5,
+  "not-run": 0
+ },
+ "critical_failures": [],
+ "results": [
+  {
+   "case_id": "g5v-c1-det-en",
+   "outcome": "unjudged",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "pass",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "pass",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "pass",
+    "semantic": "unjudged"
+   },
+   "critical": [],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": []
+   }
+  },
+  {
+   "case_id": "g5v-c2-meas-zhHant",
+   "outcome": "unjudged",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "pass",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "pass",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "pass",
+    "semantic": "unjudged"
+   },
+   "critical": [],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": []
+   }
+  },
+  {
+   "case_id": "g5v-f1-meas-en",
+   "outcome": "unjudged",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "pass",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "pass",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "pass",
+    "semantic": "unjudged"
+   },
+   "critical": [],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": []
+   }
+  },
+  {
+   "case_id": "g5v-f2-theory-zhHant",
+   "outcome": "unjudged",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "pass",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "pass",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "pass",
+    "semantic": "unjudged"
+   },
+   "critical": [],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": []
+   }
+  },
+  {
+   "case_id": "g5v-f3-det-en",
+   "outcome": "unjudged",
+   "dimensions": {
+    "source_identity": "pass",
+    "numerical_fidelity": "pass",
+    "status_preservation": "pass",
+    "scope_caveats": "pass",
+    "forbidden_wording": "pass",
+    "unresolved_handling": "pass",
+    "usefulness": "pass",
+    "routing": "pass",
+    "routing_handoffs": "pass",
+    "completion_truthfulness": "pass",
+    "semantic": "unjudged"
+   },
+   "critical": [],
+   "details": {
+    "missing_facts": [],
+    "missing_caveats": [],
+    "forbidden_found": [],
+    "fabricated_ids": [],
+    "invented_numbers": []
+   }
+  }
+ ],
+ "note": "replay of captured outputs: each case is reported by its own outcome and every critical failure is listed; the run is a live run; its model, prompt version, commit, tool access and coverage are in meta"
+}

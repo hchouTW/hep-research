@@ -1,0 +1,308 @@
+{
+ "meta": {
+  "run_id": "ar-doubt-base-r2",
+  "date": "2026-10-29",
+  "cli": "claude",
+  "cli_version": "2.1.312",
+  "model": "claude-sonnet-5-5",
+  "models_reported": [
+   "claude-sonnet-5-5"
+  ],
+  "isolation": "setting-sources",
+  "plugin_commit": "f90882b87dc7821715c91aea9c785cedeeb9b03d",
+  "plugin_dirty": false,
+  "cases_file_sha256": "591a7041cb306ab0b7e03fcc7e060d2dd533758ccb8b13466d84a461377898bb",
+  "selected": 5,
+  "completed": 5,
+  "full_set": false,
+  "max_turns": 6,
+  "case_budget_usd": 0.5,
+  "budget_usd": 2.0,
+  "reused_cases": 0,
+  "spent_usd": 0.4344,
+  "stopped_early": false
+ },
+ "summary": {
+  "overall": {
+   "cases": 5,
+   "strict_pass": 3,
+   "lenient_pass": 3
+  },
+  "by_lang": {
+   "en": {
+    "cases": 5,
+    "strict_pass": 3,
+    "lenient_pass": 3
+   }
+  },
+  "by_kind": {
+   "direct": {
+    "cases": 4,
+    "strict_pass": 2,
+    "lenient_pass": 2
+   },
+   "multi-turn": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   }
+  },
+  "by_variant": {
+   "-": {
+    "cases": 5,
+    "strict_pass": 3,
+    "lenient_pass": 3
+   }
+  },
+  "by_expected_primary": {
+   "hep-authoring": {
+    "cases": 5,
+    "strict_pass": 3,
+    "lenient_pass": 3
+   }
+  },
+  "by_set": {
+   "-": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   },
+   "IR-P1": {
+    "cases": 1,
+    "strict_pass": 0,
+    "lenient_pass": 0
+   },
+   "SPLIT": {
+    "cases": 3,
+    "strict_pass": 2,
+    "lenient_pass": 2
+   }
+  },
+  "outcomes": {
+   "pass": 3,
+   "wrong-skill": 1,
+   "no-skill": 1
+  },
+  "loading_violations": [],
+  "cost_usd": {
+   "total": 0.4344,
+   "per_case": 0.0869,
+   "per_turn": 0.015
+  }
+ },
+ "cases": [
+  {
+   "id": "d-cc-spectrum-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-authoring",
+   "turns": [
+    {
+     "expected": "hep-authoring",
+     "first_skill": "hep-authoring",
+     "skills": [
+      "hep-authoring"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.312",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.114516,
+   "n_turns": 8,
+   "loading_violation": false
+  },
+  {
+   "id": "ir-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "IR-P1",
+   "expected_primary": "hep-authoring",
+   "turns": [
+    {
+     "expected": "hep-authoring",
+     "first_skill": "hep-review",
+     "skills": [
+      "hep-review"
+     ],
+     "outcome": "wrong-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "wrong-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.312",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.069767,
+   "n_turns": 5,
+   "loading_violation": false
+  },
+  {
+   "id": "lit-bound-referee-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "SPLIT",
+   "expected_primary": "hep-authoring",
+   "turns": [
+    {
+     "expected": "hep-authoring",
+     "first_skill": null,
+     "skills": [],
+     "outcome": "no-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "no-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.312",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.037779,
+   "n_turns": 2,
+   "loading_violation": false
+  },
+  {
+   "id": "lit-bound-related-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "SPLIT",
+   "expected_primary": "hep-authoring",
+   "turns": [
+    {
+     "expected": "hep-authoring",
+     "first_skill": "hep-authoring",
+     "skills": [
+      "hep-authoring",
+      "hep-citations"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.312",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.075632,
+   "n_turns": 7,
+   "loading_violation": false
+  },
+  {
+   "id": "lit-turns-1",
+   "lang": "en",
+   "kind": "multi-turn",
+   "variant": null,
+   "set": "SPLIT",
+   "expected_primary": "hep-authoring",
+   "turns": [
+    {
+     "expected": "hep-authoring",
+     "first_skill": "hep-authoring",
+     "skills": [
+      "hep-authoring"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    },
+    {
+     "expected": "hep-citations",
+     "first_skill": "hep-citations",
+     "skills": [
+      "hep-citations"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.312",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.136737,
+   "n_turns": 7,
+   "loading_violation": false
+  }
+ ],
+ "contaminated": [],
+ "note": "scored summary only: prompts, answers and transcripts are not stored here (raw streams stay in runs/ar-doubt-base-r2/raw/, not committed)"
+}

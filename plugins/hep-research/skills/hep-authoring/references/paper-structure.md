@@ -28,7 +28,7 @@ A typical experimental HEP paper (PRL/PRD/JHEP style) runs, roughly (venue limit
 | Section | Purpose | Typical length |
 |---|---|---|
 | Title | States the result, not the method | ≤ 15 words |
-| Abstract | Self-contained summary: context, method, result, significance | 150–250 words (PRL: ≤ 600 characters incl. spaces, about 90 words) |
+| Abstract | Self-contained summary: context, method, result, significance | 150–250 words (venue limits: latex-venue-setup.md) |
 | Introduction | Physics motivation, prior measurements, what's new here | 0.5–1.5 pages |
 | Detector & Dataset | What data, what detector, what luminosity/energy | 0.25–0.75 pages |
 | Analysis / Event Selection | Cuts, reconstruction, background estimation | 1–3 pages |
