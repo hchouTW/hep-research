@@ -3496,6 +3496,12 @@ theory-profile scripts and artifacts, `usine_translate.py` and `examples/bc-usin
 change). ruff 0.16.10 and mypy 2.4.0 (the CI pins) pass on `core/` and `contracts/`. The draft PR #311 ran Linux CI on
 the release commit first; every required job passed.
 
+While PR #311 was in CI, main gained PR #310 (the new skill hep-review, protocol hep-review/1). It was merged into
+the release branch (`fdd97d46`): CHANGELOG (hep-review's entry folded into 0.45.0), README (main's skill table and
+size line, version 0.45.0) and the regenerated reference inventory; the release manifest was regenerated after it.
+The table below is for `c7105355`; the merged tree was checked by the full E2 run and the PR #311 Linux CI listed
+after the table.
+
 | Check | Result |
 |---|---|
 | `run_all_checks.py --no-cli --jobs 4`, E2 (Python 3.13.2, NumPy 2.5.3) | 31 pass, 0 fail, 2 skipped (CLI host checks); 6043 tests in 480 modules, 5875 pass, 0 failures, 168 skipped |
