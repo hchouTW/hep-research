@@ -1,6 +1,6 @@
-"""C3: the preservation checklist names every item a reproduction needs (environment, input checksums, recipe, the
-v2 analysis bundle with its semantic lock and definition snapshots, result bindings, re-foldable products), every
-link and plugin path it cites resolves, and the commands it quotes exist."""
+"""C3: the preservation checklist names every item a reproduction needs (environment, input checksums, recipe, result
+bindings, re-foldable products), every link and plugin path it cites resolves, and it no longer teaches the retired
+cross-artifact check."""
 import re
 import unittest
 from pathlib import Path
@@ -14,8 +14,7 @@ class PreservationChecklist(unittest.TestCase):
         self.text = REF.read_text(encoding="utf-8")
 
     def test_every_required_item_is_listed(self):
-        for item in ("environment_manifest.py", "input_manifest", "recipe", "analysis_bundle_v2", "semantic lock",
-                     "--snapshots", "computational-run", "re-fold", "rehears"):
+        for item in ("environment_manifest.py", "input_manifest", "recipe", "computational-run", "re-fold", "rehears"):
             with self.subTest(item=item):
                 self.assertIn(item, self.text)
 
@@ -33,10 +32,10 @@ class PreservationChecklist(unittest.TestCase):
             with self.subTest(path=rel):
                 self.assertTrue((PLUGIN / rel).exists(), rel)
 
-    def test_quoted_commands_exist(self):
-        check = (PLUGIN / "contracts" / "analysis_check.py").read_text(encoding="utf-8")
-        self.assertIn("--snapshots", check)
-        self.assertIn("freeze", check)
+    def test_retired_check_is_not_taught(self):
+        for retired in ("analysis_check.py", "analysis_bundle_v2", "semantic lock"):
+            with self.subTest(retired=retired):
+                self.assertNotIn(retired, self.text)
 
     def test_routed_from_skill(self):
         self.assertIn("references/preservation-checklist.md", (PLUGIN / "skills" / "hep-computing" / "SKILL.md").read_text(encoding="utf-8"))

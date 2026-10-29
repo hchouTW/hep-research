@@ -56,7 +56,6 @@ class PbarPCurvatureOffsetExample(unittest.TestCase):
     def test_synthetic_labels(self):
         self.assertIn("SYNTHETIC", self.r["label"])
         self.assertIn("SYNTHETIC", (Path(self.tmp.name) / "report.md").read_text(encoding="utf-8"))
-        self.assertIn("unverified", self.r["checks"]["advisory_ratio_subset_v1"])
 
 
 if __name__ == "__main__":
