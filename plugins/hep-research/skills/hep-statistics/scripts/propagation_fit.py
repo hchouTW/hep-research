@@ -35,12 +35,27 @@ then refused (reason not-decomposable). A transport block (contracts ext_theory_
 A provider with numerical noise (for example tables printed with 6 significant digits) needs difference steps well
 above it: parameters.<name>.step is the step in the fit coordinate used for the Jacobian, the Fisher matrix and the
 convergence verdict (default: the optimizer's own steps and 1e-4 x max(1, |t|)).
+Noise-aware convergence (optimizer.noise, opt-in; K1, rule fixed in VALIDATION.md CRPROP-K1): the noise floor
+sigma_noise of -2 ln L at the best fit is measured (residual scatter of a quadratic fitted to -ln L at 5 points spaced
+0.02 conditional sigma along each interior coordinate, 4 evaluations per coordinate within max_evaluations) or
+declared, and recorded under the fit's "noise"; the verdict's, the Fisher matrix's and later restarts' difference steps
+become h_i = a / sqrt(F_ii), a = clip(2 sqrt(sigma_f V), 0.1, 1) (sigma_f = sigma_noise / 2, V the sum of the variance
+inflation factors of the least-squares Fisher matrix F), and the fit converges when EDM <= max(1e-5, 0.5 sigma_noise)
+with the other fit_diagnostics conditions unchanged. Without optimizer.noise the verdict is exactly the 1e-5 one.
+With polish_steps, a polished point with a higher -ln L than the optimizer's is discarded and the optimizer's point is
+judged. An unconverged fit has reason not-converged (restart-cap when restarts were allowed and all were used); a run
+with no converged fit writes no statistical-result.
 Solar modulation: a dataset with a "period" asks for phi_<period>_gv, applied per isotope through the force-field tool
-contract before ratios are formed (P4); a provider that returns only ratios cannot be modulated, so such a dataset is
-refused (exit 1, reason modulation-needs-isotopic-lis), unless the provider's domain declares phi_<period>_gv itself
-(a provider that modulates each isotope in its own run, as the USINE provider does with USINE's force field; F1):
-then phi_<period>_gv is fitted or fixed like any provider parameter, each request carries only the phi of the periods
-of its datasets, and the result records the modulation as provider-side ("modulation").
+contract before ratios are formed (P4). This fit-side isotopic path is the documented default but is not implemented
+yet: a provider that returns only ratios cannot be modulated, so such a dataset is refused (exit 1, reason
+modulation-needs-isotopic-lis), unless the provider's declaration carries a modulation block listing phi_<period>_gv
+(contracts 3.15.0: the declared, checked exception to "providers never modulate", for a provider that modulates each
+isotope in its own run and passed the conformance gate of tools/provider_registry.py --conformance, as the USINE
+provider does with USINE's SolMod0DFF; F1, K2). The declaration decides, not the presence of phi in the domain. Then
+phi_<period>_gv is fitted or fixed like any provider parameter, each request carries only the phi of the periods of
+its datasets, and the result records the modulation as provider-side with the declared model and implementation
+("modulation"). The fit never modulates a provider-modulated prediction again: a top-of-atmosphere prediction for a
+dataset the fit did not ask the provider to modulate is refused (exit 1, reason double-modulation).
 Parameter priors (F1): parameters.<name>.prior {"mean", "sigma"} adds ((p - mean) / sigma)^2 in the parameter's own
 units to -2 ln L of the provider fits and profile intervals (for example a modulation potential or a provider
 cross-section parameter with an external constraint); the Fisher matrix and the dof count them. Response-model
@@ -99,7 +114,9 @@ Input (fit --input CONFIG.json; relative paths are read from the config's folder
                  "prior_sigma": 0.1 | null, "aux": 1.0}],
   "families": [{"name", "free": [...], "fixed": {...}}]   (default: one family, every parameter free),
   "optimizer": {"max_iterations": 100, "max_restarts": 5, "seed": 0, "polish_steps": 0 (F1: Newton steps of the
-                verdict before judging the provider fit)},
+                verdict before judging the provider fit),
+                "noise": {"mode": "measure", "max_evaluations": 40} | {"mode": "declared", "sigma_m2lnl": s}
+                (optional, K1: noise-aware convergence for a provider with numerical noise)},
   "degeneracy_scan": {"family", <degeneracy.py scan keys>}, "theory_spec": "base-theory-spec.json",
   "intervals": [names]   (profile delta chi2 = 1 intervals with the provider; an end on a domain bound is kind "bound"),
   "covariance_alternatives": {"family", "dataset", "model": {build_covariance sources}, "source", "lengths": [...]},
@@ -125,7 +142,7 @@ Usage:
 The registry comes from tools/provider_registry.py --write; the cache (core/provider) keeps provider results between
 runs; --max-evaluations caps the provider point evaluations of the run (status failed, reason evaluation-budget).
 Exit codes: 0 done; 1 refused or failed (gate, bin semantics, out-of-domain start, restart cap, toy-failure threshold,
-response model above tolerance, evaluation budget, modulation without isotopic LIS); 2 bad input or NumPy/SciPy
+response model above tolerance, evaluation budget, modulation without isotopic LIS, double modulation); 2 bad input or NumPy/SciPy
 missing; 3 incomplete (a dataset covariance is missing). Output JSON labelled [General method].
 """
 from __future__ import annotations
@@ -162,8 +179,14 @@ MAX_OUTSIDE_FRACTION = 1e-3  # proposals outside the response box above which a 
 MARGIN_TOL = 0.02           # joint and per-center layouts: a margin short by this fraction of a half-width still holds
 FAMILYWISE_ALPHA = 0.0027   # two-sided 3-sigma
 NOMINAL = 0.6827
+EDM_TOL_BASE = 1e-5         # core/stats/fit_diagnostics.py EDM_TOL (checked equal in the tests); never loosened
 EXACT_FLAT = 1e-8           # eigenvalue ratio of an exactly flat direction (held for the convergence verdict)
 NU_BOUNDS = (1e-3, 10.0)    # multipliers of components
+# noise-aware convergence (optimizer.noise, K1; VALIDATION.md CRPROP-K1): EDM <= max(EDM_TOL, k x sigma of -2 ln L)
+NOISE_EDM_FACTOR = 0.5      # k: the EDM may not exceed the noise of one -ln L evaluation
+NOISE_STENCIL = 0.02        # stencil spacing of the noise measurement, in conditional sigma (1 / sqrt(F_ii))
+NOISE_STEP_RANGE = (0.1, 1.0)   # the step factor a of the verdict's differences, in conditional sigma
+NOISE_BUDGET = 40           # default per-fit evaluation budget of the noise measurement (4 per coordinate)
 AXES = {"kinetic_energy_per_nucleon": ("ekn", "GeV/n"), "rigidity": ("rigidity", "GV")}
 SUPPORTED_NUISANCES = ("production-norm", "parent-abundance")
 REFUSED_NUISANCES = {"inelastic-norm": "an inelastic cross-section change needs a new propagation (P5)",
@@ -408,6 +431,19 @@ def binning_meaning(observable: dict):
     return sem, own
 
 
+def _refuse_double_modulation(datasets, first_predictions: dict, provider_modulates: bool, provider_id: str) -> None:
+    """The fit never modulates twice (contracts 3.15.0, K2): a top-of-atmosphere prediction is accepted only for a
+    dataset with a period whose phi_<period>_gv the provider's declared modulation applies; any other modulated
+    prediction would be modulated again by the fit-side path (P4), which is not implemented, so it is refused."""
+    for ds in datasets:
+        pred = (first_predictions.get(ds.name) or ({},))[0]
+        level = (pred.get("observable") or {}).get("level") if isinstance(pred, dict) else None
+        if level == "top-of-atmosphere" and not (provider_modulates and ds.period):
+            raise FitRefused("double-modulation", f"provider {provider_id} returned a top-of-atmosphere prediction for "
+                             f"dataset {ds.name}, which the fit did not ask it to modulate; the fit never applies a "
+                             "second force field to modulated values (the fit-side isotopic path is not implemented)")
+
+
 def _gate(ds: Dataset, pred: dict, labels, plan: dict, registry_entry, point_keys, run_record_keys=()) -> dict:
     """Explicit bin-semantics check (P2), then contracts/comparison/gate.py, on the provider's prediction."""
     from contracts import CONTRACTS_VERSION
@@ -636,21 +672,31 @@ class Model:
 
 
 # --------------------------------------------------------------------------- one fit
-def _verdict(nll_abs, x_abs, bounds_abs, held, steps=None, polish=0):
+def _offset(v, grid):
+    """An offset from the best fit; on the grid (noise-aware fits) rounded to 10 significant digits, so that the
+    verdict, the noise stencil and the Fisher matrix ask the provider for bit-identical points (one cached run)."""
+    return float(f"{v:.10g}") if grid else v
+
+
+def _verdict(nll_abs, x_abs, bounds_abs, held, steps=None, polish=0, edm_tol=None, grid=False):
     """fit_diagnostics verdict on the interior, non-held coordinates; boundary_kkt on the coordinates at a bound.
     Judged in offsets from the best fit, so the verdict's difference steps are 1e-4 in every fit coordinate whatever
     its value (newton_fit steps 1e-4 x max(1, |x|), which for ln D0 ~ 66 would be a sizeable fraction of sigma).
     With steps (a provider with numerical noise, parameters.<name>.step) the offsets are measured in units of
     step / 1e-4, so the Hessian's difference step is the stated step and boundary_kkt's is 1e-2 of it.
     With polish > 0, newton_fit first takes up to that many damped Newton steps in the interior coordinates (kept
-    inside the bounds) and the verdict is on the point it reaches, returned as "x"."""
-    from core.stats.fit_diagnostics import boundary_kkt, newton_fit
+    inside the bounds) and the verdict is on the point it reaches, returned as "x".
+    edm_tol (noise-aware fits, optimizer.noise) replaces fit_diagnostics' EDM_TOL and is recorded as edm_threshold;
+    grid puts the offsets on the grid of _offset."""
+    from core.stats.fit_diagnostics import EDM_TOL, boundary_kkt, newton_fit
     x0 = [float(v) for v in x_abs]
     unit = [1.0 if steps is None or steps[i] is None else steps[i] / 1e-4 for i in range(len(x0))]
     kkt_scale = 1.0 if steps is None else 1e-2
 
+    tol = EDM_TOL if edm_tol is None else float(edm_tol)
+
     def nll(d):
-        return nll_abs([a + b * u for a, b, u in zip(x0, d, unit)])
+        return nll_abs([a + _offset(b * u, grid) for a, b, u in zip(x0, d, unit)])
     x = [0.0] * len(x0)
     bounds = [((lo - c) / u, (hi - c) / u) for (lo, hi), c, u in zip(bounds_abs, x0, unit)]
     at_bound, kkt = [], []
@@ -683,33 +729,36 @@ def _verdict(nll_abs, x_abs, bounds_abs, held, steps=None, polish=0):
         def clipped(z):
             return reduced([min(max(v, bounds[i][0]), bounds[i][1]) for i, v in zip(judged, z)])
         start = [x[i] for i in judged]
-        res = newton_fit(clipped, start, max_iter=polish)
+        res = newton_fit(clipped, start, max_iter=polish, edm_tol=tol)
         moved = [min(max(v, bounds[i][0]), bounds[i][1]) for i, v in zip(judged, res.x)]
         if all(math.isfinite(v) for v in moved) and moved != list(res.x):
-            res = newton_fit(reduced, moved, max_iter=0)    # judged where it was clipped back
+            res = newton_fit(reduced, moved, max_iter=0, edm_tol=tol)    # judged where it was clipped back
         elif not all(math.isfinite(v) for v in moved):
             moved = start
-            res = newton_fit(reduced, moved, max_iter=0)
+            res = newton_fit(reduced, moved, max_iter=0, edm_tol=tol)
         for i, v in zip(judged, moved):
             x[i] = v
     else:
-        res = newton_fit(reduced, [x[i] for i in judged], max_iter=0)
+        res = newton_fit(reduced, [x[i] for i in judged], max_iter=0, edm_tol=tol)
     ok = res.ok and all(k["ok"] for k in kkt)
     reasons = list(res.reasons) + [f"kkt_{k['bound']}_{k['index']}" for k in kkt if not k["ok"]]
     out = {"status": "converged" if ok else "failed", "reasons": reasons, "edm": _r(res.edm),
            "judged": judged, "held": sorted(held), "at_bound": at_bound, "kkt": kkt}
+    if edm_tol is not None:
+        out["edm_threshold"] = tol
     if polish:
-        out["x"] = [a + b * u for a, b, u in zip(x0, x, unit)]
+        out["x"] = [a + _offset(b * u, grid) for a, b, u in zip(x0, x, unit)]
     return out
 
 
-def _fisher_full(model, names, scales, t, fixed, nu, step=1e-4, bounds=None):
+def _fisher_full(model, names, scales, t, fixed, nu, step=1e-4, bounds=None, steps=None):
     """Fisher matrix in (transport fit coordinates, multipliers) at (t, nu) with the multiplier priors, by central
     differences of the provider components (2 evaluations per transport coordinate; one-sided at a domain bound, so
-    the provider is never asked outside its domain). The difference step is parameters.<name>.step when stated."""
+    the provider is never asked outside its domain). The difference step is parameters.<name>.step when stated, or
+    steps (a noise-aware fit: the steps sized from the noise floor, the same points as its verdict)."""
     k = len(names)
     bounds = bounds or model.coords(names)[2]
-    stated = model.steps(names) or [None] * k
+    stated = list(steps) if steps is not None else (model.steps(names) or [None] * k)
     comps0 = model.ev.components(model.values(names, scales, t, fixed))
     mult = _multipliers(model, nu)
     cols = []
@@ -805,6 +854,89 @@ def _snap_to_bounds(nll, t, steps, lo, hi):
     return t
 
 
+def _interior(t, bounds, held) -> list:
+    """Coordinates the verdict judges by the interior criterion: not held, not on a domain bound (as in _verdict)."""
+    out = []
+    for i, (lo, hi) in enumerate(bounds):
+        span = hi - lo
+        if i not in held and lo + 1e-9 * span < t[i] < hi - 1e-9 * span:
+            out.append(i)
+    return out
+
+
+def _noise_floor(nll, t, F, held, bounds, cfg) -> dict:
+    """Noise floor of -2 ln L at the best fit t (optimizer.noise; VALIDATION.md CRPROP-K1). Declared: taken as given.
+    Measured: for each interior coordinate i (at most max_evaluations / 4 of them, in order), -ln L at
+    t + j s_i e_i, j = -2..2, s_i = NOISE_STENCIL / sqrt(F_ii) (F the least-squares Fisher matrix), a quadratic in j
+    fitted by least squares, and sigma_f^2 = sum RSS_i / (2 m) (2 residual degrees of freedom per coordinate): over
+    +-0.04 conditional sigma the smooth part of -ln L is a quadratic far below the noise, so the residual is the
+    non-smooth part (a deterministic provider gives nothing by repeating a point). sigma_m2lnl = 2 sigma_f, or None
+    with a reason when no coordinate can be measured (then the fit keeps fit_diagnostics' threshold)."""
+    if cfg["mode"] == "declared":
+        return {"mode": "declared", "sigma_m2lnl": cfg["sigma_m2lnl"], "evaluations": 0}
+    t = [float(v) for v in t]
+    budget = cfg["max_evaluations"]
+    cand = []
+    for i in _interior(t, bounds, held):
+        if not F[i, i] > 0:
+            continue
+        s = float(f"{NOISE_STENCIL / math.sqrt(F[i, i]):.3g}")
+        if bounds[i][0] <= t[i] - 2 * s and t[i] + 2 * s <= bounds[i][1]:
+            cand.append((i, s))
+    cand = cand[:budget // 4]
+    rec = {"mode": "measure", "method": "residual scatter of a quadratic fitted to -ln L at 5 points (j = -2..2) "
+                                        "spaced NOISE_STENCIL conditional sigma along each coordinate",
+           "stencil_conditional_sigma": NOISE_STENCIL, "max_evaluations": budget}
+    if not cand:
+        return dict(rec, sigma_m2lnl=None, evaluations=0, reason="no interior coordinate has room for the stencil "
+                    "within the budget; fit_diagnostics' threshold and the stated steps are kept")
+    f0 = nll(t)
+    design = np.array([[1.0, j, j * j] for j in (-2, -1, 0, 1, 2)])
+    rss, per = 0.0, []
+    for i, s in cand:
+        vals = []
+        for j in (-2, -1, 0, 1, 2):
+            w = list(t)
+            w[i] = t[i] + _offset(j * s, True)
+            vals.append(0.0 if j == 0 else nll(w) - f0)
+        coef = np.linalg.lstsq(design, np.asarray(vals), rcond=None)[0]
+        r = float(np.sum((np.asarray(vals) - design @ coef) ** 2))
+        rss += r
+        per.append({"index": i, "spacing": s, "rms_m2lnl": 2 * math.sqrt(r / 2)})
+    dof = 2 * len(cand)
+    return dict(rec, sigma_m2lnl=2 * math.sqrt(rss / dof), dof=dof, evaluations=4 * len(cand), coordinates=per)
+
+
+def _noise_steps(sigma_m2lnl, F, t, bounds, held, stated) -> dict:
+    """Difference steps sized from the noise floor, h_i = a / sqrt(F_ii), a = clip(2 sqrt(sigma_f V), NOISE_STEP_RANGE)
+    with sigma_f = sigma_m2lnl / 2 and V = sum_i F_ii (F^-1)_ii over the interior coordinates: the expected noise part
+    of the verdict's EDM, sigma_f^2 V / (4 a^2), is then at most sigma_f / 16 unless a is capped at one conditional
+    sigma (truncation). Rounded to 3 significant digits, at most half the distance to a domain bound; a coordinate
+    with no curvature keeps its stated step."""
+    sigma_f = 0.5 * float(sigma_m2lnl)
+    judged = [i for i in _interior(t, bounds, held) if F[i, i] > 0]
+    V = math.inf
+    if judged:
+        try:
+            Fj = F[np.ix_(judged, judged)]
+            V = float(np.sum(np.diag(Fj) * np.diag(np.linalg.inv(Fj))))
+        except np.linalg.LinAlgError:
+            V = math.inf
+    lo_a, hi_a = NOISE_STEP_RANGE
+    a = hi_a if not (math.isfinite(V) and V > 0) else min(max(2.0 * math.sqrt(sigma_f * V), lo_a), hi_a)
+    steps = []
+    for i, (lo, hi) in enumerate(bounds):
+        if not F[i, i] > 0:
+            steps.append(stated[i] if stated is not None else None)
+            continue
+        h = a / math.sqrt(F[i, i])
+        room = min(t[i] - lo, hi - t[i])
+        if room > 0:
+            h = min(h, 0.5 * room)
+        steps.append(float(f"{h:.3g}"))
+    return {"step_factor": a, "variance_inflation_sum": V if math.isfinite(V) else None, "steps": steps}
+
+
 def _multipliers(model, nu):
     m = np.ones(len(model.channels))
     for c, j in model.mult_of_channel.items():
@@ -837,13 +969,15 @@ def fit_family(model, family, opt, fixed_global, start=None, ys=None, aux=None):
     rng = np.random.default_rng(int(opt["seed"]))
     attempts, best = [], None
     t_start = t0.copy()
+    noise_cfg = opt.get("noise")
+    noise, jac_steps = None, steps   # noise-aware fit: a later attempt's Jacobian uses the noise-sized steps
     for attempt in range(opt["max_restarts"] + 1):
         if not names:
             t_hat = t0
             jac = np.zeros((len(resid(t0)), 0))
             stop = "no free parameter"
         else:
-            res = optimize.least_squares(resid, t_start, jac=_difference_jacobian(resid, steps, lo, hi),
+            res = optimize.least_squares(resid, t_start, jac=_difference_jacobian(resid, jac_steps, lo, hi),
                                          bounds=(lo, hi), method="trf", x_scale="jac",
                                          max_nfev=opt["max_iterations"], xtol=1e-12, ftol=1e-12,
                                          gtol=1e-10)
@@ -858,22 +992,33 @@ def fit_family(model, family, opt, fixed_global, start=None, ys=None, aux=None):
             cond, eig, degenerate, keep = fisher_screen(F, names, span)
             held = _exactly_flat(F)
         polish = opt.get("polish_steps", 0)
-        verdict = _verdict(nll, t_hat, bounds, held, steps, polish) if names else {
+        v_steps, v_kw, sized = steps, {}, None
+        if noise_cfg is not None and names:   # optimizer.noise (K1): noise floor, sized steps, threshold
+            if noise is None or noise.get("sigma_m2lnl") is None:
+                noise = _noise_floor(nll, t_hat, F, held, bounds, noise_cfg)
+            if noise.get("sigma_m2lnl") is not None:
+                sized = _noise_steps(noise["sigma_m2lnl"], F, t_hat, bounds, held, steps)
+                v_steps = jac_steps = sized["steps"]
+                v_kw = {"edm_tol": max(EDM_TOL_BASE, NOISE_EDM_FACTOR * noise["sigma_m2lnl"]), "grid": True}
+        verdict = _verdict(nll, t_hat, bounds, held, v_steps, polish, **v_kw) if names else {
             "status": "converged", "reasons": [], "judged": [], "held": [], "at_bound": [], "kkt": []}
         if polish and "x" in verdict:   # optimizer.polish_steps (F1): the verdict judged the polished point
             moved = np.clip(np.asarray(verdict.pop("x"), dtype=float), lo, hi)
             if nll(moved) <= nll(t_hat):
                 t_hat = moved
+            else:   # the polished point is worse: keep t_hat and judge it (its differences are the polish's first)
+                verdict = _verdict(nll, t_hat, bounds, held, v_steps, 0, **v_kw)
+                verdict["polish"] = "rejected: the polished point has a higher -ln L; the verdict is on t_hat"
         attempts.append({"attempt": attempt, "status": verdict["status"], "reasons": verdict["reasons"],
                          "optimizer": stop, **({"polish_steps": polish} if polish else {})})
         if best is None or nll(t_hat) < best[1]:
-            best = (t_hat, nll(t_hat), verdict, F, degenerate)
+            best = (t_hat, nll(t_hat), verdict, F, degenerate, sized)
         if verdict["status"] == "converged":
-            best = (t_hat, nll(t_hat), verdict, F, degenerate)
+            best = (t_hat, nll(t_hat), verdict, F, degenerate, sized)
             break
         if attempt < opt["max_restarts"]:
             t_start = np.clip(t0 + rng.uniform(-0.1, 0.1, len(t0)) * span, lo, hi)
-    t_hat, half_chi2, verdict, F, degenerate = best
+    t_hat, half_chi2, verdict, F, degenerate, sized = best
     converged = verdict["status"] == "converged"
     comps = model.ev.components(model.values(names, scales, t_hat, fixed))
     r, nu = model.profiled(comps, ys, aux)
@@ -884,10 +1029,15 @@ def fit_family(model, family, opt, fixed_global, start=None, ys=None, aux=None):
            "chi2": chi2, "best_fit_coordinates": [float(x) for x in t_hat]}
     if len(r_prior):
         out["chi2_parameter_priors"] = float(r_prior @ r_prior)
-    if not converged:
-        out["reason"] = "restart-cap" if len(attempts) - 1 >= opt["max_restarts"] else "not-converged"
+    if noise is not None:
+        out["noise"] = dict(noise, k=NOISE_EDM_FACTOR, edm_threshold=verdict.get("edm_threshold", EDM_TOL_BASE),
+                            **(sized or {}))
+    if not converged:   # restart-cap only when restarts were allowed and all were used
+        out["reason"] = ("restart-cap" if opt["max_restarts"] > 0 and len(attempts) - 1 >= opt["max_restarts"]
+                         else "not-converged")
     k = len(names)
-    Ffull = _fisher_full(model, names, scales, list(t_hat), fixed, nu) if (k or model.n_nu) else np.zeros((0, 0))
+    Ffull = (_fisher_full(model, names, scales, list(t_hat), fixed, nu, steps=(sized or {}).get("steps"))
+             if (k or model.n_nu) else np.zeros((0, 0)))
     if k and model.has_priors():
         Ffull[:k, :k] += model.prior_fisher(names, scales, t_hat)
     cov_full, flat_mask = _pinv_kept(Ffull)
@@ -1912,11 +2062,25 @@ def statistical_result_artifact(result: dict, labels) -> dict:
 
 # --------------------------------------------------------------------------- driver
 def _opt_cfg(cfg) -> dict:
-    o = _keys(cfg.get("optimizer") or {}, {"max_iterations", "max_restarts", "seed", "polish_steps"}, "optimizer")
-    return {"max_iterations": _int(o.get("max_iterations", 100), "optimizer.max_iterations", 1, 10000),
-            "max_restarts": _int(o.get("max_restarts", MAX_RESTARTS), "optimizer.max_restarts", 0, MAX_RESTARTS),
-            "seed": _int(o.get("seed", 0), "optimizer.seed", 0, 2 ** 31),
-            "polish_steps": _int(o.get("polish_steps", 0), "optimizer.polish_steps", 0, 5)}
+    o = _keys(cfg.get("optimizer") or {}, {"max_iterations", "max_restarts", "seed", "polish_steps", "noise"},
+              "optimizer")
+    out = {"max_iterations": _int(o.get("max_iterations", 100), "optimizer.max_iterations", 1, 10000),
+           "max_restarts": _int(o.get("max_restarts", MAX_RESTARTS), "optimizer.max_restarts", 0, MAX_RESTARTS),
+           "seed": _int(o.get("seed", 0), "optimizer.seed", 0, 2 ** 31),
+           "polish_steps": _int(o.get("polish_steps", 0), "optimizer.polish_steps", 0, 5)}
+    if o.get("noise") is not None:   # K1: opt-in noise-aware convergence (VALIDATION.md CRPROP-K1)
+        n = _keys(o["noise"], {"mode", "max_evaluations", "sigma_m2lnl"}, "optimizer.noise")
+        if n.get("mode") == "measure":
+            out["noise"] = {"mode": "measure", "max_evaluations": _int(n.get("max_evaluations", NOISE_BUDGET),
+                                                                       "optimizer.noise.max_evaluations", 4, 400)}
+        elif n.get("mode") == "declared":
+            sig = _num(n.get("sigma_m2lnl"), "optimizer.noise.sigma_m2lnl")
+            if not sig > 0:
+                raise FitInputError("optimizer.noise.sigma_m2lnl must be > 0 (the noise of one -2 ln L evaluation)")
+            out["noise"] = {"mode": "declared", "sigma_m2lnl": sig}
+        else:
+            raise FitInputError("optimizer.noise.mode must be 'measure' or 'declared'")
+    return out
 
 
 def _rm_cfg(cfg) -> dict:
@@ -1963,6 +2127,7 @@ def _family(fams, name, what):
 
 def run(cfg: dict, base: Path, registry, cache_dir=None, max_evaluations=2000, allow_outside=False,
         out_dir: Path | None = None, cfg_ref="config") -> dict:
+    from core.provider.protocol import modulation_parameters
     from core.provider.registry import RegistryError, load_registry, parse_registry
     from core.provider.runner import ProviderRunner
     _keys(cfg, CONFIG_KEYS, "the configuration")
@@ -1996,12 +2161,17 @@ def run(cfg: dict, base: Path, registry, cache_dir=None, max_evaluations=2000, a
     if len({ds.name for ds in datasets}) != len(datasets):
         raise FitInputError("dataset names must be unique")
     periods = sorted({ds.period for ds in datasets if ds.period})
-    provider_modulates = bool(periods) and all(f"phi_{p}_gv" in domain for p in periods)
+    declared = entry.declaration.get("modulation") if isinstance(entry.declaration.get("modulation"), dict) else None
+    declared_phi = modulation_parameters(entry.declaration)
+    provider_modulates = bool(periods) and all(f"phi_{p}_gv" in declared_phi for p in periods)
     if periods and not provider_modulates:
         raise FitRefused("modulation-needs-isotopic-lis",
                          f"datasets with periods {periods} need phi_<period>_gv ({[f'phi_{p}_gv' for p in periods]}) "
                          "applied per isotope before ratios are formed (P4); provider "
-                         f"{entry.provider_id} returns only {entry.declaration['observables']}, no isotopic LIS")
+                         f"{entry.provider_id} returns only {entry.declaration['observables']}, no isotopic LIS, and "
+                         + (f"its declared modulation covers only {declared_phi}" if declared else
+                            "declares no modulation block (contracts 3.15.0)")
+                         + "; the fit-side isotopic path is not implemented")
     fixed_global = {k: _num(v, f"fixed.{k}") for k, v in _keys(cfg.get("fixed") or {}, list(domain), "fixed").items()}
     transport = None
     if cfg.get("transport") is not None:
@@ -2029,7 +2199,8 @@ def run(cfg: dict, base: Path, registry, cache_dir=None, max_evaluations=2000, a
             if unstated:
                 raise FitInputError(f"datasets with periods need {unstated} fitted or fixed (the provider modulates; "
                                     "nothing is left at a default)")
-            modulation = {"by": "provider", "provider": entry.provider_id,
+            modulation = {"by": "provider", "provider": entry.provider_id, "model": (declared or {}).get("model"),
+                          "implementation": (declared or {}).get("implementation"),
                           "parameters": {ds.name: f"phi_{ds.period}_gv" for ds in datasets if ds.period},
                           "note": "the provider applies the force field to each isotope in its own run before forming "
                                   "ratios (P4); each request carries only the phi of its datasets' periods"}
@@ -2064,6 +2235,7 @@ def run(cfg: dict, base: Path, registry, cache_dir=None, max_evaluations=2000, a
                                  f"[{domain[n]['min']:.6g}, {domain[n]['max']:.6g}]; the fit starts only inside it")
         start_fixed = dict(f0.get("fixed") or {})
         ev.components({**start_fixed, **start_vals})
+        _refuse_double_modulation(datasets, ev.first_predictions, provider_modulates, entry.provider_id)
         model.bind_channels(ev.channels)
         point_keys = ev.point({**start_fixed, **start_vals})
         run_ids = cfg.get("run_record_keys") or []
@@ -2260,12 +2432,16 @@ def write_outputs(result, cfg, base, out_dir: Path, labels, cfg_ref):
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / "result.json").write_text(json.dumps(result, indent=1) + "\n", encoding="utf-8")
     written = {"result": "result.json"}
-    sr = statistical_result_artifact(result, labels)
-    rep = validate_artifact(sr)
-    if not rep.ok:
-        raise FitRefused("artifact-invalid", "statistical-result does not validate: " + json.dumps(rep.as_dict())[:800])
-    (out_dir / "statistical-result.json").write_text(json.dumps(sr, indent=1) + "\n", encoding="utf-8")
-    written["statistical_result"] = "statistical-result.json"
+    if any(f.get("status") == "converged" for f in result["fits"]):
+        sr = statistical_result_artifact(result, labels)
+        rep = validate_artifact(sr)
+        if not rep.ok:
+            raise FitRefused("artifact-invalid", "statistical-result does not validate: "
+                             + json.dumps(rep.as_dict())[:800])
+        (out_dir / "statistical-result.json").write_text(json.dumps(sr, indent=1) + "\n", encoding="utf-8")
+        written["statistical_result"] = "statistical-result.json"
+    else:   # nothing to report as a statistical result: the run keeps its own reason (e.g. not-converged)
+        result["warnings"].append("no fit converged: statistical-result.json is not written")
     if cfg.get("theory_spec") is not None:
         base_spec = _load(cfg["theory_spec"], base, "theory_spec")
         entries = [d for d in result["degeneracies"] if d.get("evidence") == "profile-scan" and d.get("valid_range")]

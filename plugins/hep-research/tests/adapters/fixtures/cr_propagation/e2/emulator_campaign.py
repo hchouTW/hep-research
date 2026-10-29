@@ -127,8 +127,10 @@ def train_round(work: Path, name: str, records: list[dict], provider_version: st
     folder = work / "models" / name
     folder.mkdir(parents=True, exist_ok=True)
     (folder / "training-set.json").write_text(json.dumps(training_doc(records, provider_version)), encoding="utf-8")
+    # --max-condition 0: E2's models were trained before the kernel condition bound (K4), so the bound stays off to
+    # reproduce them (the trainer's default since K4 is 1e10)
     trained = run_json([TRAINER, "train", "--training-set", "training-set.json", "--out-dir", ".", "--seed",
-                        str(TRAIN_SEED)], cwd=folder)
+                        str(TRAIN_SEED), "--max-condition", "0"], cwd=folder)
     write_artifact(folder, extra or {}, downstream)
     return {"folder": folder, "artifact": folder / "emulator.ml-artifact.json", "trained": trained,
             "model_sha256": sha256_file(folder / "emulator-model.json")}

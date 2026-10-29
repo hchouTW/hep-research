@@ -189,6 +189,17 @@ def theory_crprop(**entry):
     return doc
 
 
+def prediction_modulated(**point):
+    """prediction at MODULATION_FROM (contracts 3.15.0, cr-propagation K2) whose parameter point carries force-field
+    potentials phi_<period>_gv (SYNTHETIC names and values)."""
+    from contracts.validate import MODULATION_FROM
+    doc = prediction_v26(parameter_point={"p": 1, **point})
+    doc["artifact_id"] = "fixture-synthetic-prediction-modulated"
+    doc["contract_version"] = MODULATION_FROM
+    doc["versions"] = {"plugin": "0.44.0", "contracts": MODULATION_FROM, "profiles": {}}
+    return doc
+
+
 LINKED_SPEC = [{"ref": "artifacts/theory_spec.json", "artifact_type": "theory-spec", "status": ["validated-in-scope"]}]
 
 
@@ -460,6 +471,7 @@ VALID = {
         theory_crprop()["extension"], degenerate_directions=["D0/L (synthetic)", CRPROP_DEGENERACY])),
     "theory_spec_crprop_high_break.json": theory_crprop_breaks(CRPROP_HIGH_BREAK),
     "prediction_v26.json": prediction_v26(),
+    "prediction_modulated_once.json": prediction_modulated(phi_synthetic_period_gv=0.5),
     "prediction_v26_validated_linked.json": _v26(dict(prediction_v26(), status=["validated-in-scope", "synthetic"],
                                                       inputs=LINKED_SPEC)),
     "prediction_v26_derivation_status.json": prediction_v26(theory_spec_ref=None, derivation_status="numerical-evidence"),
@@ -548,6 +560,9 @@ bad["theory_crprop_high_break_incomplete.json"] = (
     ["theory.transport_break_incomplete"])
 bad["theory_crprop_break_kind_unknown.json"] = (theory_crprop_breaks(dict(CRPROP_HIGH_BREAK, kind="middle")),
                                                 ["theory.transport_break_kind_unknown"])
+# cr-propagation K2 (contracts 3.15.0): a prediction modulated at two force-field potentials
+bad["prediction_modulated_twice.json"] = (prediction_modulated(phi_synthetic_a_gv=0.5, phi_synthetic_b_gv=0.6),
+                                          ["prediction.modulated_twice"])
 
 WARNING = {"theory_v26_conventions_incomplete.json": (theory_v26(conventions={"hbar_c_one": True}), ["theory.conventions_incomplete"]),
            "prediction_v26_truncation_no_method.json": (prediction_v26(uncertainties=[

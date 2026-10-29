@@ -28,6 +28,10 @@ and record the `extrapolation_policy` of the ml-artifact); measure the approxima
 simulator across the covered range, not at a few points; check that the reported uncertainty grows near and beyond the
 edge ([uncertainty-and-calibration.md](uncertainty-and-calibration.md)); document known failure regions and check them
 at inference; and measure how much surrogate error moves the final quantity of interest.
+Validate over the whole region the consumer will query (a fit or toy study bounded by the surrogate's box queries its
+edges too, not only the core where its fits lie). For a Gaussian-process emulator, keep every kernel matrix well
+conditioned (a nugget floor; `scripts/train_emulator.py --max-condition`, default 1e10): a near-singular kernel predicts
+the same values only on the libm/BLAS build it was trained on.
 
 ## Inverse problems and simulation-based inference
 

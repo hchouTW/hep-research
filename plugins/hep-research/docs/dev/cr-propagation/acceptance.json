@@ -1140,6 +1140,105 @@
    "tolerance": null,
    "evidence_path": "$CRPROP_OUT/c2uf/acceptance",
    "source": "decisions.md A1.12: C2U-3 moved to C2UF (added 2026-10-28; additions only, r4 5)"
+  },
+  {
+   "id": "K1-1",
+   "wp": "K1",
+   "kind": "judgment",
+   "criterion": "propagation_fit judges the convergence of a fit to a provider with numerical noise by a rule stated before any re-judging: the noise floor of -2 ln L is measured at the best point and recorded in the result, the difference steps are sized from it, and the EDM threshold is max(1e-5, k x noise) with k fixed in VALIDATION before the refits. Providers without declared or measured noise keep the existing verdict exactly (closed-form and emulator fits give the same numbers and verdicts as at 0.43.0).",
+   "command": null,
+   "expect": null,
+   "tolerance": "k fixed before the refits",
+   "evidence_path": null,
+   "source": "decisions.md B1.1 (follow-up of the 0.43.0 known issues)"
+  },
+  {
+   "id": "K1-2",
+   "wp": "K1",
+   "kind": "judgment",
+   "criterion": "F1 is re-judged under K1-1 for BIG, SLIM and QUAINT-Vc0: each verdict is recorded with its noise floor and EDM; best-fit delta and K10 stay inside the D9 1-sigma windows; a fit that still does not converge is attributed with evidence. At most 600 USINE runs.",
+   "command": null,
+   "expect": null,
+   "tolerance": "D9",
+   "evidence_path": null,
+   "source": "decisions.md B1.1 (follow-up of the 0.43.0 known issues)"
+  },
+  {
+   "id": "K2-1",
+   "wp": "K2",
+   "kind": "judgment",
+   "criterion": "Contracts 3.15.0 (one minor, gating constant): the cr-provider/1 declaration may carry an optional modulation block (model force-field only, the implementation, the phi_<period>_gv parameters); the core runner refuses a top-of-atmosphere prediction from a provider without the block and a request that would modulate twice; schema and core agree (tests); every committed artifact keeps its outcome; ruff 0.16.10 and mypy 2.4.0 pass on core/ and contracts/.",
+   "command": null,
+   "expect": null,
+   "tolerance": null,
+   "evidence_path": null,
+   "source": "decisions.md B1.1 (follow-up of the 0.43.0 known issues)"
+  },
+  {
+   "id": "K2-2",
+   "wp": "K2",
+   "kind": "judgment",
+   "criterion": "A provider declares modulation only after a conformance gate: at a reference point its modulated output agrees with the plugin's force-field tool applied to its own isotopic LIS within a stated tolerance (no looser than F1's 1e-3); the USINE provider declares and passes it; propagation_fit uses the declaration instead of detecting phi in the domain, and F1's recorded predictions and results are unchanged.",
+   "command": null,
+   "expect": null,
+   "tolerance": "1e-3",
+   "evidence_path": null,
+   "source": "decisions.md B1.1 (follow-up of the 0.43.0 known issues)"
+  },
+  {
+   "id": "K3-1",
+   "wp": "K3",
+   "kind": "artifact",
+   "criterion": "adapter.json records the DRAGON2 provider as tested with its accepted, attributed differences against USINE (A1.11: D1-1a items; A1.13: D3-1, D3-3) with their sizes and attributions, as A1.11 asked.",
+   "command": null,
+   "expect": null,
+   "tolerance": null,
+   "evidence_path": null,
+   "source": "decisions.md B1.1 (follow-up of the 0.43.0 known issues)"
+  },
+  {
+   "id": "K3-2",
+   "wp": "K3",
+   "kind": "judgment",
+   "criterion": "The escalation-12 translator gaps are closed: sources.abundances are translated or refused with a reason in both translators (never dropped silently), the injection variable is stated in harmonized-v1 and both translators, and a USINE gas term without units is either converted with stated units or refused, not set to 0; each with a test; committed runs keep their outputs or the change is recorded.",
+   "command": null,
+   "expect": null,
+   "tolerance": null,
+   "evidence_path": null,
+   "source": "decisions.md B1.1 (follow-up of the 0.43.0 known issues)"
+  },
+  {
+   "id": "K3-3",
+   "wp": "K3",
+   "kind": "artifact",
+   "criterion": "Escalation 10: the r3 P1 wording of the V_A zone conversion is corrected where the plugin states it, and the likely DRAGON2 Ptuskin94/03 enum issue is documented in the adapter (nothing posted upstream); the B3 10Be/9Be sign error is corrected by an appended erratum in VALIDATION (history not edited).",
+   "command": null,
+   "expect": null,
+   "tolerance": null,
+   "evidence_path": null,
+   "source": "decisions.md B1.1 (follow-up of the 0.43.0 known issues)"
+  },
+  {
+   "id": "K4-1",
+   "wp": "K4",
+   "kind": "judgment",
+   "criterion": "train_emulator.py bounds the GP nugget from below so that the kernel matrix condition number stays under a stated bound; the bound and its effect on accuracy are recorded; E2's existing model and every E2 test keep their behaviour.",
+   "command": null,
+   "expect": null,
+   "tolerance": null,
+   "evidence_path": null,
+   "source": "decisions.md B1.1 (follow-up of the 0.43.0 known issues)"
+  },
+  {
+   "id": "K4-2",
+   "wp": "K4",
+   "kind": "judgment",
+   "criterion": "The C2UF emulator is retrained from the cached USINE training runs with the bounded nugget, validated against USINE at the pre-declared 0.05 sigma (not loosened), and passes the provider self-check under simulated 1-2 ulp libm drift with a margin of at least 10; the A1.21 skip is removed; C2UF-1 is re-run with the new emulator and still passes (or is escalated). At most 100 new USINE runs.",
+   "command": null,
+   "expect": null,
+   "tolerance": "0.05 sigma; margin 10",
+   "evidence_path": null,
+   "source": "decisions.md B1.1 (follow-up of the 0.43.0 known issues)"
   }
  ]
 }

@@ -3483,6 +3483,30 @@ Not done in this stage: the independent
 new-problem run by an agent that did not take part (C1.10, section A.8), the `review.py` Markdown review, the release
 manifest. The adequacy table is unchanged; search values remain F1 optimistic bounds and decide nothing.
 
+## 0.44.0 release check (2026-10-29, E2 and the CI lock)
+
+Release commit `93614c71` on the follow-up integration branch, based on main `42f5bad1`. It ships the cr-propagation
+follow-up K1-K4 (decisions B1.1 and B1.2; sections CRPROP-K1 to CRPROP-K4 above): contracts 3.15.0 (gating constant
+`MODULATION_FROM`), `CORE_VERSION` 1.3.0, adapter `cr-propagation` 0.2.0 unchanged. No sci-fix ledger entry. The
+ams02-research companion needs no change (it requires hep-research >= 0.11.0).
+
+The draft PR #309 ran Linux CI before the release commit and found two issues that the per-WP impacted tests missed:
+K2's two new contract fixtures were not in the gate verdict snapshot (regenerated with `--write`, additions only), and
+K1's longer `core-stats-guide.md` entry pushed hep-statistics `SKILL.md` + guide to 25647 B > 25600 (the 0.43.0 text
+restored, the detail stays in `core-stats-commands.md`). Both fixed and verified before the release commit.
+
+What changed in the release commit: version 0.44.0 in both manifests, `pyproject.toml`, the README, two assets, the
+theory-profile scripts and artifacts, `usine_translate.py` and `examples/bc-usine-reproduction/run.py`; CHANGELOG
+`Unreleased` is now `0.44.0`; examples regenerated with E2 (only version strings and the hashes that cover them
+change). ruff 0.16.10 and mypy 2.4.0 (the CI pins) pass on `core/` and `contracts/`.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 4`, E2 (Python 3.13.2, NumPy 2.5.3) | 31 pass, 0 fail, 2 skipped (CLI host checks); 6031 tests in 480 modules, 5863 pass, 0 failures, 168 skipped |
+| Same with the CI lock (no torch) | 31 pass, 0 fail, 2 skipped; 6031 tests, 5768 pass, 0 failures, 263 skipped |
+| `check_relocation.py` | only the 2 known geant4 path-with-spaces failures (`test_geant4` partition merges), identical on main |
+| PR #309 Linux CI on `93614c71` | every required job passes |
+
 ## 0.43.0 release check (2026-10-29, E2 and the CI lock)
 
 Release commit `790ef3e7` on the cr-propagation integration branch, based on main `8fcbb826` (main has not moved since
@@ -7468,3 +7492,357 @@ the point furthest beyond its bound (NaN counts as worst).
 | `test_cr_propagation`, `test_propagation_fit`, `test_train_emulator`, `test_adapter_missing_dependency`, `test_cli_robustness` | E2 and CI-lock venv: 172 tests OK (15 skipped); on macOS the C2UF declaration tests run and pass (not skipped) |
 | `run_all_checks.py --part static --jobs 4` | exit 0, 31 pass, 0 fail |
 | `check_naming.py` | pass (the skip constants named `SELF_CHECK_REFUSAL`, `TWO_DATASET_EMULATOR_NOT_PORTABLE`) |
+
+## CRPROP-K2 — 2026-10-29 (environment E2)
+
+Work package K2 of follow-up wave 7 (decision B1.1, issue 2 of the 0.43.0 known issues): provider-side modulation
+becomes a declared, checked exception to "providers never modulate". Contracts 3.15.0 (one minor, gating constant
+`validate.MODULATION_FROM`), `CORE_VERSION` 1.3.0 (core/provider behaviour changes).
+
+Environment: E2 (macOS arm64, Python 3.13.2; examples and fixtures regenerated with the E2 venv). Base exception D10:
+base is the integration HEAD `94ba34d1` (worktree-crprop-k), not `main`. r3 §0.3 checks at start:
+`git rev-parse --show-toplevel` = `.claude/worktrees/crprop-k2`; `git branch --show-current` = `worktree-crprop-k2`;
+`git status` clean; base `94ba34d1` is an ancestor of HEAD; no prerequisite work package (K2 `deps` empty; requires
+`env-usine`: USINE V3.5 through `HEP_USINE_BIN`, `HEP_USINE_DATA`). `origin/main` is `42f5bad1` (0.43.0).
+
+Acceptance entries (frozen in `docs/dev/cr-propagation/acceptance.json`): K2-1, K2-2 (tolerance 1e-3) and ALL-*.
+
+What changed:
+- `contracts/schemas/cr_provider.json`: optional declaration block `modulation` {model `force-field` (const),
+  implementation, parameters [`phi_<period>_gv`], conformance {reference_point, observables, tolerance <= 1e-3,
+  result {status `passed` (const), max_relative_deviation, nodes_compared, isotopes, tool}}}; the "never modulate"
+  wording now says "unless the declaration carries a modulation block".
+- `core/provider/protocol.py`: `check_declaration` refuses a `phi_<period>_gv` in the domain without the block, a
+  block parameter outside the domain, an unlisted phi of the domain, a reference point that does not set exactly one
+  modulation parameter or leaves the domain, an undeclared observable, a tolerance outside (0, 1e-3], a result that is
+  not `passed` or whose deviation exceeds the tolerance (the registry, `parse_registry`, uses it, so such a
+  declaration is refused). `point_refusal`: two modulation parameters in one point give `invalid-request` (runner and
+  provider side). `check_modulation`: a top-of-atmosphere prediction without the block, a top-of-atmosphere prediction
+  for a point without a modulation parameter, or another level for a point with one, is an invalid response; the
+  runner applies it to fresh and cached results, the PRV conformance check to its single-shot response. A phi sent to
+  a provider without the block stays `unknown-parameter` (it cannot be in the domain).
+- `contracts/validate.py`: `MODULATION_FROM = "3.15.0"`; rule `prediction.modulated_twice` (more than one nonzero
+  `phi_<period>_gv` in a prediction's parameter point), native from 3.15.0, else `--strict`; fixtures
+  `valid/prediction_modulated_once.json`, `invalid/prediction_modulated_twice.json`.
+- `tools/provider_registry.py --conformance PROVIDER [--reference-point] [--observables] [--tolerance] --out`:
+  `modulation_conformance()` loads the entrypoint module's hook `isotope_tables(request, point)`, asks it for the
+  isotopic LIS (the point without its modulation parameter: a run without modulation) and the modulated per-isotope
+  output, applies the plugin's force-field tool (`solar_modulation_force_field.py --modulate --lis-table`, one call
+  per node, the tool contract) to the LIS at every top-of-atmosphere node whose LIS energy lies inside the LIS table,
+  and passes when every relative deviation is within the tolerance. `usine_provider.py` gains the hook.
+- `adapters/cr-propagation/adapter.json`: the USINE declaration carries the block with its result (dragon2 and
+  emulator entries untouched).
+- `propagation_fit.py`: provider-side modulation is decided from the declared block (`modulation_parameters`), not
+  from a phi in the domain; the result's `modulation` adds the declared `model` and `implementation`; a
+  top-of-atmosphere first prediction for a dataset the fit did not ask the provider to modulate is refused
+  (`double-modulation`). The fit-side isotopic path stays the documented default, not implemented (refusal
+  `modulation-needs-isotopic-lis`, detail extended). Docstring and `core-stats-commands.md` updated; the hep-theory
+  `cosmic-ray-phenomenology.md` does not state the provider rule (unchanged).
+
+Conformance gate run (`$CRPROP_OUT/k2/conformance/`, two USINE runs of the 20 allowed): reference point
+D0_cm2_s 3e28, delta 0.5, L_kpc 4, phi_2011_2016_gv 0.7312345 GV on the provider's DEFAULT_TRANSPORT (ILLUSTRATIVE
+isotopic cross sections, network to O-16); observables B/C (rigidity 2-1000 GV, 4 bins) and 10Be/9Be (ekn 0.1-10
+GeV/n, 2 bins); tolerance 1e-3. Result: passed, largest relative deviation 4.28e-5 over 390 nodes of 10B, 10Be, 11B,
+12C, 9Be (13C is not in that network). Runs in temporary folders (no computational-run record kept).
+
+| ID | Result | Evidence |
+|---|---|---|
+| K2-1 | pass | contracts 3.15.0 with `MODULATION_FROM`; schema/core agreement `tests.core.test_provider.DeclaredModulation` (8 tests: 9 bad blocks refused by both, 6 cross-field rules core-only and named so, registry refusal of a non-passing result, top-of-atmosphere without the block `invalid-response`, levels with the block, two potentials `invalid-request` before the provider runs and on the provider side, phi without the block `unknown-parameter`, a cached top-of-atmosphere result refused); every committed artifact keeps its outcome (below); ruff 0.16.10 and mypy 2.4.0 clean on `core/` and `contracts/` |
+| K2-2 | pass | gate run above (4.28e-5 <= 1e-3, tolerance 1e-3, no looser than F1's); offline replay on USINE's recorded F1 tables (`tests.tools.test_provider_registry.ModulationConformance`: passes below 1e-4 on 11B and 12C; a provider off by 0.2% fails; refusals); `propagation_fit` uses the declaration (`test_provider_side_modulation_needs_the_declared_modulation_block`); F1 unchanged (below) |
+| ALL-1 | pass | this section |
+| ALL-2 | pass | `workflow_check.py acceptance` exit 0 |
+| ALL-3 | deferred to the wave run (A1.5) | |
+| ALL-4 | pass | `check_naming.py`, `workflow_check.py gaps --base 94ba34d1` |
+| ALL-5 | pass | `check_layering.py`, `workflow_check.py diff --work-package K2 --base 94ba34d1` |
+| ALL-6 | pass | `check_packaging.py` |
+| ALL-7 | pass | worker report |
+
+F1 unchanged, no new fit and no USINE run (`$CRPROP_OUT/k2/f1-verify/verify_f1.py`, `verify_f1.json`): for BIG, SLIM,
+QUAINT and QUAINT-Vc0 of the committed `f1-reproduction.json`, the best-fit point (with the family's fixed values)
+was evaluated through the K2 runner and registry from F1's provider cache with `HEP_USINE_BIN` unset: 0 points sent,
+each prediction identical to the cached raw result (level top-of-atmosphere, accepted by `check_modulation`), and
+-2 ln L recomputed from it (data covariance plus the F1 priors) equals the record's chi2 within relative 2.3e-16
+(criterion 1e-9). The fit's decision is unchanged: provider-side for period 2011_2016 under the old rule (phi in the
+domain) and the new one (phi in the declared block); the double-modulation guard accepts these predictions.
+`tests.adapters.test_cr_propagation` (F1 record and force-field tests) passes.
+
+Every committed artifact keeps its outcome (`$CRPROP_OUT/k2/outcome/`): all 696 committed JSON artifacts of the base
+tree (`git archive 94ba34d1`) validated with the base and the K2 validator, default and `--strict`: ok flag and sorted
+findings (severity, path, code) identical for all 696, the restamped ones included. The bump changed only version
+strings and the hashes that cover them (fixtures, design fixtures, three skill templates, 13 theory-profile artifacts,
+14 examples); `bc-propagation-fit` and `unfolding-coverage` were not rerun.
+
+| Check | Result |
+|---|---|
+| Impacted tests (`rule_registry.py impact`: 35 modules, plus `test_cr_propagation`, `test_adapter_declarations`, `test_provider_conformance_mixin`) | 706 tests OK (17 skipped) |
+| `tests/examples` | 176 tests OK (22 skipped) |
+| theory-profile tests (9 profiles) | all pass |
+| `run_all_checks.py --part static --jobs 4` | exit 0 after `tools/reference_inventory.py` was rerun (`core-stats-commands.md` grew) |
+| `check_naming.py`, `check_wiring.py --since 94ba34d1`, `check_layering.py`, `check_packaging.py`, `workflow_check.py diff/gaps/acceptance` | pass / ok |
+| ruff 0.16.10 and mypy 2.4.0 on `core/` and `contracts/` | clean |
+
+Open: `docs/adapter-authoring.md` still says "providers never modulate" without the exception; it is outside K2's file
+list (for the orchestrator). The USINE provider's conformance result was obtained at provider version 0.2.0; the
+gate is rerun when the modulation implementation changes (the registry does not compare versions). Not run: ALL-3
+(deferred to the wave run, A1.5), any new fit, a live routing run.
+
+## CRPROP-K4 — 2026-10-29 (environment E2)
+
+Work package K4 (decision B1.1, follow-up wave 7). Goal: an emulator nugget floor that bounds the kernel condition
+number (K4-1); the C2UF emulator retrained with it, made portable and C2UF-1 re-run, with the A1.21 skip removed (K4-2).
+Outcome (B1.2): K4-1 met; C2UF-1 not met on the retrained emulator, so the committed C2UF emulator and the A1.21 skip
+are kept. SYNTHETIC data only; every input ILLUSTRATIVE.
+
+**Environment field (r3 §0.3, base exception D10):** E2 (macOS arm64 workstation), Python 3.13.2 (miniconda), NumPy
+2.4.4, SciPy 1.17.1; USINE V3.5 (tag V3.5, commit fb53006d) through HEP_USINE_BIN and HEP_USINE_DATA, runs under
+HEP_USINE_RUN_DIR = `$CRPROP_OUT/k4/runs`, provider cache `$CRPROP_OUT/k4/cache` (a copy of C2UF's; C2UF's left
+unchanged). `git rev-parse --show-toplevel` = `.claude/worktrees/crprop-k4`; branch `worktree-crprop-k4`; status clean
+at start; base 94ba34d1 = integration HEAD (`worktree-crprop-k`), not `main`; no prerequisite work package (deps []),
+C2UF and CIFIX (A1.20, A1.21) are ancestors of the base.
+
+### Kernel condition bound (K4-1; chosen before the C2UF retraining)
+
+Diagnosis of the committed models (eigenvalues of each component's kernel matrix K = K_f + nugget I, NumPy `eigvalsh`):
+
+| Model | Points | Largest cond(K) | Nugget at the NUGGET_BOUNDS floor 1e-12 | Self-check drift (CIFIX simulation, 120 trials) |
+|---|---|---|---|---|
+| E2 (`e2/emulator-model.json`) | 110 | 1.3e13 (component 0; 3.8e12, 2.7e11, 1.2e10 next) | 6 of 13 components | max 9.1e-7 x sigma: margin about 110 against 1e-4 x sigma |
+| C2UF (`c2uf/emulator-model.json`, A1.14) | 738 | numerically singular: components 0-4 have negative computed eigenvalues (-5e-11 to -2e-9 against largest 2e5 to 7e6), components 5-11 have 5e16 to 1e12 | nugget/signal 4e-15 to 2e-10 | max 2.5e-2 x sigma: refused in 120 of 120 |
+
+Bound: `train_emulator.py --max-condition C` (default `MAX_CONDITION` = 1e10; 0 = no bound). Every Matern entry is at
+most the signal variance s, so the largest eigenvalue of the noise-free n x n kernel is at most n s (Gershgorin) and the
+smallest is >= 0; a nugget of at least n s / (C - 1) therefore keeps cond(K) <= C for any length scales. The optimizer
+then works in log(nugget / s) with that lower bound (the lower bound on nugget / s is max(n / (C - 1), 1e-12), that is
+NUGGET_BOUNDS' 1e-12 applied to the ratio; the upper edge becomes 0.1 s); the starts are the same absolute values moved inside the bounds. The trained model records
+`training.max_condition`, `training.relative_nugget_floor` and per component `condition_number` (computed); a model
+trained with `--max-condition 0` records none of them and is byte-identical to one trained before K4.
+Why 1e10: a reader on another libm/BLAS sees the kernel entries change by a few ulp (eps = 2.2e-16); the GP weights
+alpha = K^-1 y then move by up to about cond x eps relative, so C = 1e10 bounds that at about 2e-6 relative, while the
+provider's self-check needs ln mean and ln sigma within 1e-4 x sigma (CIFIX round 2), and the C2UF emulator's sigma is
+tiny (2e-5 to 1e-4 in ln). An exploratory retraining (no USINE run; drift only, no validation number looked at) gave
+self-check drifts of at most 3.1e-8 x sigma at C = 1e10 (margin 3200 against 1e-4) and 6.8e-10 x sigma at C = 1e8.
+
+E2 is not retrained: its committed model and every E2 test are unchanged (the bound acts at training time only; the
+provider and the committed model files are untouched). Since E2's model has cond up to 1.3e13, a retraining at the new
+default would change it, so E2's campaign script (`e2/emulator_campaign.py`) now passes `--max-condition 0`, which
+reproduces the training as before (no new field in the model, same optimizer coordinates). The synthetic models of
+`test_train_emulator.py` train at the default and keep their accuracy assertions (held-out relative error < 1e-2).
+
+### C2UF emulator retraining (K4-2): settings written before the recorded training (R9)
+
+| Item | Pre-declared setting or criterion |
+|---|---|
+| Training | as C2UF dispatch 2 (A1.14), unchanged except the bound: `usine_emulator_family_study.py train --round 0` (every cached USINE run of the study inside the box BOX = ln D0 1.9e28-4.0e28 (log), delta 0.40-0.535, V_A 0-105, V_c 0-9.5 km/s, minus the held-out validation and confirmation points, duplicates to 1e-9 dropped: the same 738 points as C2UF), Matern-5/2 GP per principal component of ln values, `--pca-tolerance 1e-4`, `--restarts 4`, `--seed 20261028`, and `--max-condition 1e10` (stated explicitly in the script); outputs ln B/C (15 bins) then ln 10Be/9Be (12 bins); no new USINE run for training |
+| Validation (pre-declared in C2UF, not loosened) | the same 40 held-out USINE runs (30 uniform in the toy box, 10 on the SLIM slice, seed 20261029, all cached); pass when at every point, in every bin of both datasets, abs(emulator - USINE) <= 0.05 of the data sigma; a point the DomainModel refuses fails. If it fails: C2UF-1 is reported not met with the numbers (no refinement round, no tuning) |
+| Confirmation over the toys' domain (new; the C2UF advisory) | the toy fits of kind "provider" are bounded by the model's whole box (k = 4), while the validation covered the toy box (k = 3); the C2UF fit's 77704 emulator evaluations include 2320 outside the k = 3 box (V_c above 7.108 km/s: 2206, V_A above 94.56: 116, delta: 1). 40 new USINE runs: 30 uniform in BOX and 10 uniform on the SLIM slice V_A = V_c = 0 over BOX's ln D0 and delta ranges (seed 20261031). Pass when every point the DomainModel accepts is within 0.05 of the data sigma in every bin; a refused point is listed (in the fit it is a failed toy, counted against the 2% limit, not a wrong answer). Its largest error per bin does not enter the covariance (P10 keeps the holdout's) unless it exceeds the holdout's, in which case C2UF-1 is reported with that finding and not re-run |
+| Drift (portability) | the CIFIX drift simulation (`$CRPROP_OUT/k4/scripts/drift.py`, kernel entries x (1 + n eps/2), n in {-2, -1, 1, 2}, K kept symmetric), 2 seeds x 60 trials: accepted by the provider's self-check in every trial with max deviation <= 1e-5 x sigma (margin >= 10 against 1e-4) |
+| C2UF-1 rerun | `usine_emulator_family_study.py fit` unchanged (emulator provider with the new per-model declaration, the holdout error component in both covariances, families BIG and SLIM, starts, steps, 200 toys per family, seed 20261028, alpha 0.05, the 2% toy-failure limit); pass as declared in C2UF (BIG and SLIM converge; each listed with delta chi2 and toy p-value; at most 2% failed toys; BIG survives at alpha 0.05). If it does not pass: reported PARTIAL with the numbers, nothing tuned |
+| D7 / B1.1 | K4 cap 100 USINE runs; planned 40 (confirmation) + 2 (live test); tally in `$CRPROP_OUT/k4/tally.json` (ProviderRunner `points_sent`); one USINE process at a time |
+
+### Results (K4-2 retraining and the C2UF-1 rerun)
+
+Every number below is from `$CRPROP_OUT/k4/` (outside the repository; the attempt's record, model and ml-artifact are
+in `$CRPROP_OUT/k4/k4-attempt/`).
+
+| Item | C2UF (A1.14, committed) | K4 retraining (`--max-condition 1e10`) |
+|---|---|---|
+| Training set | 738 cached USINE runs | identical document (the same 738 points and values) |
+| Model | `1.0.0+model.0a8dc86fdf16`, 19 components | `1.0.0+model.9b95e7465422`, 19 components; the nugget floor is active in 16 of 19 (nugget/signal = 7.38e-8 = 738 / (1e10 - 1)); components 15, 16 and 17 sit above it (nugget/signal 8.9e-8, 4.3e-7, 1.2e-6) |
+| Largest kernel condition number | singular (computed eigenvalues below 0 in components 0-4; 5e16 in component 5) | 9.7e9 (every component <= 1e10) |
+| Holdout (40 cached runs, 0.05 sigma, not loosened) | passed, largest error 0.0038 sigma, largest relative 2.07e-4 | passed, largest error 0.0032 sigma, largest relative 1.89e-4; none refused. Per bin, the largest error is 0.74-3.7 times C2UF's (worst in the B/C bins 12-14) and stays below 0.0033 sigma in every bin |
+| Confirmation over the model box (k = 4; 40 new USINE runs, seed 20261031) | not run | passed: largest error 0.0226 sigma (point ln D0 = ln 2.41e28, delta 0.469, V_A 103.8, V_c 4.33: the high-V_A edge); 15 points inside the toy box, worst 0.0025; 25 outside it, worst 0.0226; none refused. The largest error per bin is above the holdout's in all 27 bins (1.6 to 19 times). As declared, the covariance keeps the holdout component |
+| Self-check drift (2 seeds x 60 trials) | refused in 120 of 120; max 2.5e-2 x sigma | accepted in 120 of 120; max ln-mean deviation 3.1e-8 x sigma (2.0e-12 absolute), ln-sigma 4.7e-9 x sigma; margin 3217 (seed 1) and 3831 (seed 2) against 1e-4 x sigma, so the >= 10 criterion holds |
+| Fits (emulator provider) | BIG chi2 1.3e-8, SLIM chi2 23.9272 | BIG chi2 1.1e-8 (D0 3.000003e28, delta 0.4500, V_A 70.00002, V_c 0), SLIM chi2 23.9274 (D0 2.50899e28, delta 0.48392); both converged, equal to the USINE fits of study 2 within 1e-3 in chi2 |
+| BIG's toys (200) | 0 failed, p 1.0 (200/200), survives | 0 failed, p 1.0 (200/200), survives |
+| SLIM's toys | 200 run, 3 failed (2 out of domain, 1 restart cap), p < 0.0151 (0/197), excluded | **stopped at the 2% limit after 37 toys**: 5 failed (BIG's fits to SLIM's toys 3, 5, 31, 36 at the restart cap; toy 10 out of the provider domain), 32 ok; family calibration `failed`, reason `toy-failure-threshold` |
+| C2UF-1 | MET | **NOT MET with the retrained emulator** (the calibration fails before SLIM's p-value is computed) |
+
+USINE runs (B1.1 cap 100 for K4, `$CRPROP_OUT/k4/tally.json`): 0 for training and the holdout (all cached), 40 for the
+confirmation: 40 of 100. The live test was not run (the committed fixture is unchanged).
+
+Per the assignment (stop rather than tune), the retrained model was **not committed**. The C2UF fixtures
+(`usine-emulator-family-study.json`, `emulator-model.json`, `emulator.ml-artifact.json`), their tests and the A1.21 skips
+in `EmulatorPerModelDeclaration.setUpClass` and `test_live_emulator_matches_fresh_usine_runs` are left as on the base.
+The A1.21 skip stays until a portable model also passes C2UF-1. What is committed: the bound in `train_emulator.py` (K4-1)
+and its tests; `--max-condition 0` in E2's campaign; in `usine_emulator_family_study.py`, a `--max-condition` option
+(default 0 reproduces the committed A1.14 model: rerun of the train step from the K4 cache gave the same training set and a model byte-identical to the fixture, sha256 0a8dc86f...; K4 used 1e10) and a `confirm` step (the k = 4 confirmation above, kept
+in the record when present). These are tooling only and change no committed result. Not diagnosed here, since diagnosing
+would mean trying variants: why BIG's fits to SLIM's toys reach the restart cap more often with the regularized emulator
+(4 of 37 against 1 of 200 before). The bound makes the GP mean a non-interpolating smoother with a nugget of 7.4e-8 x
+signal (its holdout accuracy is unchanged), and the toy fits near V_A = 0, where B/C depends on V_A^2, were already the
+fragile case in C2UF (dispatch 2, diagnosis 3). Options for the orchestrator: (a) a convergence-rule change for provider
+fits (K1's noise-aware verdict) and then a rerun of this exact model (no retraining); (b) a different declared bound
+(for example 1e12, if its drift margin stays >= 10) with a fresh declaration; (c) mark C2UF-1 on the retrained emulator
+as an escalation and keep the A1.21 skip.
+
+## CRPROP-K3 — 2026-10-29 (environment E2)
+
+Work package K3 of the cr-propagation follow-up wave 7 (decision B1.1, release 0.44.0): DRAGON2's known differences
+in `adapter.json` (A1.11, A1.13), the escalation-12 translator gaps, the escalation-10 wording and enum note, and the
+B3 erratum.
+
+**Environment (r3 §0.3, base exception D10).** E2 host (macOS 27.2 arm64), Python 3.13.2 (miniconda; numpy and scipy
+present). Checked before the first edit: `git rev-parse --show-toplevel` = `.claude/worktrees/crprop-k3`;
+`git branch --show-current` = `worktree-crprop-k3`; `git status` clean; base = integration HEAD `f778b9d3` (not
+`main`, decision D10). K3 has no dependencies (workflow.json `deps: []`); the follow-up card `94ba34d1` and the 0.43.0
+merge `42f5bad1` are ancestors of HEAD. External codes: DRAGON2 cd588707 (`HEP_DRAGON2_BIN`, `HEP_DRAGON2_DATA`, the D1
+build) for one live check; USINE V3.5 not run.
+
+**Criteria (frozen entries K3-1 to K3-3 and ALL-*, acceptance.json).** K3-1 adapter.json records DRAGON2 as tested
+with the A1.11 and A1.13 differences, their sizes and attributions; K3-2 escalation-12 gaps closed, each with a test,
+committed runs keep their outputs or the change is recorded; K3-3 P1 wording corrected where the plugin states it, the
+Ptuskin94/03 enum documented, the B3 sign corrected by an appended erratum.
+
+| ID | Result | Evidence |
+|---|---|---|
+| K3-1 | **done**: the `cr-provider/1` declaration has no free field (`additionalProperties: false`, schema unchanged), so the `dragon2` provider entry's `description` holds them: tested in the declared environment (D1, D3) with D1-1a item effects (decay ¹⁰Be/⁹Be 13.3% closed form / 11.3% USINE, finite gas layer; reacceleration B/C 5.7%, ¹⁰Be/⁹Be 4.4%, first-order zone conversion with bound 0.517; losses B/C 6.1%, Coulomb on Galprop's HII vs ionization-only USINE, 3.0% with HII in USINE), D3-1 (38.2-40.8%, 77.0% for the losses pair; ladder gas column ×1.054-1.087, helium ×1.073-1.136, inelastic ×1.003-1.077, O/C ×1.104-1.110, injection ×1.000-1.031), D3-3 (0.59-0.67% passing; reacceleration 17.0%, losses pair 17.7% with the 0.811 geometry check within 1.9%/3.3%) and the escalation-11 caveats (second-order term not estimated, losses attribution not quantified, thick-gas agreement within ~1% only in bins 3-5 in D1). Numbers from VALIDATION CRPROP-D1, CRPROP-D3 and escalations.md item 11 | `adapters/cr-propagation/adapter.json`; `tests.adapters.test_adapter_declarations` OK |
+| K3-2 abundances | **done**: USINE (ILLUSTRATIVE sets) translates `fixed by the parent list of theory:cr-secondary-ratio` (O/C 0.9) or none (recorded), and refuses any other text, which it used to record as "not parsed" (USINE's own files: `data-normalised ...` only, unchanged). DRAGON2 (`dragon2_translate.py`, new; the provider and the D3 study translate through it) translates `dragon2:BaseModel_DRAGONxsec.source.param` or none (recorded) and refuses the rest with the reason (source.param fixes source abundances; a propagated ratio is known only after a run; BaseModel O/C 1.19-1.21, ×1.10 on B/C) | `TranslatorSourceItems.test_usine_abundances_translated_or_refused`, `test_dragon2_refuses_what_its_source_cannot_express`, `test_dragon2_translates_its_own_sources_and_records_defaults` |
+| K3-2 injection variable | **done**: `sources.injection[].spectrum_variable` (dQ/dX = q β^η R^-γ) is stated in every harmonized-v1 file as `kinetic_energy_per_nucleon` (B1's USINE runs; the harmonized-v1 description says so). USINE: `kinetic_energy_per_nucleon` and `total_energy` give η_s = η, `rigidity` η_s = η − 1 (dR/dE_k/n = (A/\|Z\|)/β, constants absorbed by the normalisation; exact); not given: E_k/n, recorded. DRAGON2: `rigidity` with η = 0 translated (R^-γ per unit momentum, D3's 1/β evidence); per-energy variables and η ≠ 0 refused (they need a β factor source.param cannot carry; up to 3% on B/C at 2-3 GV); not given: rigidity, recorded | `test_harmonized_v1_states_the_injection_variable`, `test_usine_injection_variable`, the two DRAGON2 tests |
+| K3-2 gas term | **done**: a density term `n_<H\|HI\|HII\|H2> = <number>` without `cm^-3` (or with another unit) is refused, not read as 0; a term not written at all stays 0 with its note | `test_usine_gas_term_without_unit_is_refused` (D3's aborted string included) |
+| K3-2 committed runs | **outputs unchanged**: every committed transport (46 blocks; the 36 the old translator accepted) translated before and after K3 by the USINE translator renders identical USINE input files, except the 8 DRAGON2 specs, which now state DRAGON2's abundances and are not USINE inputs; the D1 (6) and D3 (2) DRAGON2 specs were regenerated through `dragon2_translate` with DRAGON2's own sources stated: only `transport.sources` (spectrum_variable `rigidity`, abundances `dragon2:...`) and two substitutes notes changed; the rendered XML and the injection slope (source.param) are identical, so every record's input hashes still match | `$CRPROP_OUT/k3/regen/regen-record.json`, `usine-scan.json`; `D1Items.test_runs_are_recorded_and_translated_from_the_item_files`, `D3CrossCode.test_dragon2_runs_are_recorded_and_translated`, `UsineTranslator.test_specs_render_to_the_recorded_inputs` |
+| K3-2 provider behaviour | the `dragon2` provider now refuses a harmonized-v1 transport (provider-error with the reason); its `DEFAULT_TRANSPORT` is harmonized-v1-isotopic with DRAGON2's sources stated (`with_dragon2_sources`, tested). Live: C1's conformance mixin passes on the new default (4 tests, 231 s; the kept run specs carry the two notes) | `$CRPROP_OUT/k3/acceptance/D1-PRV-1.unittest.log` |
+| K3-3 P1 wording | **done**: `transport_conventions.py` (module docstring and the reacceleration `reason`) and `cosmic-ray-phenomenology.md` state V_A,disc = V_A,halo sqrt(L/(3h)) at first order with bound (1+λ)/5 and say that r3 P1's "about sqrt(L/h)" puts V_A off by sqrt(3); the page stays under 24576 B (24573 B), inventory regenerated; the r3 plan files are not edited | `tests.skills.hep_theory` OK, `reference_inventory.py --check` pass |
+| K3-3 enum note | **done** in the `dragon2` description of `adapter.json`, with the file:line evidence of A1R (galaxy.cc:279-284, constants.h:146-149, input.h:156; Ptuskin94 has 3/4 of USINE's D_pp), the translator's handling (Ptuskin94 with constant 1) and that a fixing commit is a new test; nothing posted upstream | `adapter.json` |
+| K3-3 B3 erratum | **done**, below | `$CRPROP_OUT/k3/b3-sign/b3-sign.json` |
+| ALL-1 | environment field above | this section |
+
+### Erratum to CRPROP-B3 (appended by K3; the B3 section is not edited)
+
+The B3-1b attribution paragraph of CRPROP-B3 reads "USINE 2D / USINE 1D: B/C up to -2.4%, ¹⁰Be/⁹Be up to -1.3%".
+The ¹⁰Be/⁹Be sign is wrong: USINE 2D / USINE 1D for ¹⁰Be/⁹Be (dec-2d over dec-1d, the 12 E_k/n bins 0.05-10 GeV/n)
+is **+0.57% to +1.34%**, positive in every bin, largest at 2.7-4.1 GeV/n. Recomputed by K3 from the committed B3
+output tables (`b3/outputs/dec-2d-nom`, `dec-1d-nom`, read with `usine_to_prediction` as the B3 test does; script and
+result `$CRPROP_OUT/k3/b3-sign/`), equal to `b3-results.json` `b3_1b["dec-2d 10Be/9Be"].usine_2d_over_usine_1d`
+(1.00565-1.01341), as the B3 verifier said. The B/C sign (-0.9% to -2.4%) is right. Radial escape lowers ¹⁰B and ¹¹B
+relative to C but raises ¹⁰Be/⁹Be (plausibly because the decaying ¹⁰Be samples a smaller volume than ⁹Be and loses
+less to the radial boundary; not checked further). The attribution (radial escape, B3-1b product within 1e-3 of 1) is unchanged.
+
+**Runs (budget ≤ 40).** DRAGON2: the conformance mixin of D1-PRV-1, live once (the same mixin recorded 5 runs in D1;
+two point directories kept under `$CRPROP_OUT/k3/live-dragon2/runs/`). USINE: none (every USINE input rendering is
+unchanged; η_s = −1 was already run by D3).
+
+**Not done in K3.** `dragon2_run.py` is not in K3's files (the card names a `dragon2_translate.py`, now added), so its
+own `--from-transport` command line still calls the D1 translator without the source checks; the provider and the
+D3 study go through `dragon2_translate.py`. A one-line delegation in `dragon2_run.py` would close it in a later
+package. The USINE translator's `usine_provider.DEFAULT_TRANSPORT` and B1's `usine/specs/d1-*.json` do not state
+`spectrum_variable` (the default, E_k/n, is recorded). They stay unchanged because the emulator fixtures hash that
+transport (K4's files).
+
+### CRPROP-K3 continuation (same dispatch, 2026-10-29; rebased onto integration 42f41893 with K2 and K4)
+
+`adapters/cr-propagation/assets/dragon2_run.py` was added to K3's card (workflow.json on 42f41893). Its
+`--from-transport` command line now translates through `dragon2_translate.spec_from_transport`, the same source checks
+as the provider: a harmonized-v1 transport is refused (exit 2, status error, the reason; no spec written), and one
+with DRAGON2's own sources is translated and its written spec carries the two source notes. The open item "not done"
+above is closed. Test: `TranslatorSourceItems.test_dragon2_command_line_applies_the_same_source_checks` (no DRAGON2
+run; the translated case stops at the missing data directory, exit 3). Rebase: CHANGELOG and VALIDATION keep the
+integration blocks first and K3's after; `docs/reference-inventory.*` regenerated; the phenomenology page is 24573 B.
+The adapter version is not bumped (the orchestrator sets versions at release); the CHANGELOG entry names the
+behaviour change of the dragon2 provider.
+
+## CRPROP-K1 — 2026-10-29 (environment E2)
+
+Work package K1 of the follow-up wave 7 (decision B1.1, release 0.44.0): a noise-aware convergence rule for provider
+fits in `propagation_fit.py` (K1-1), and F1's BIG, SLIM and QUAINT-Vc0 re-judged under it (K1-2).
+
+**Environment field (r3 §0.3, base exception D10).** E2 (macOS arm64), Python 3.13.2 (miniconda; NumPy, SciPy), USINE
+V3.5 (commit fb53006d) through HEP_USINE_BIN, HEP_USINE_DATA and USINE; runs under HEP_USINE_RUN_DIR =
+`$CRPROP_OUT/k1/runs`, provider cache `$CRPROP_OUT/k1/repro/cache` (a copy of F1's `$CRPROP_OUT/f1/repro/cache`, F1's
+folders left untouched). `git rev-parse --show-toplevel` = `.claude/worktrees/crprop-k1`; branch `worktree-crprop-k1`;
+status clean at start; base 94ba34d1 = integration HEAD `worktree-crprop-k` (not `main`; decision D10); `main` 42f5bad1
+(release 0.43.0) is an ancestor of HEAD; K1 has no prerequisite work package (workflow.json deps empty; requires
+env-usine, present).
+
+**Rule, fixed before any re-judging fit (R9; this paragraph is committed before the first K1 USINE run).** Opt-in:
+a fit uses it only when its configuration declares `optimizer.noise`, either `{"mode": "measure", "max_evaluations": B}`
+or `{"mode": "declared", "sigma_m2lnl": s}`. Without it nothing changes: closed-form and emulator fits give the 0.43.0
+numbers and verdicts (checked on `examples/propagation-fit` and the hep_statistics tests).
+
+1. Noise floor sigma_noise (standard deviation of one evaluation of -2 ln L, the fit's chi2 with priors, at the best
+   point t_hat). Method: polynomial residuals over a small stencil. For each judged coordinate i (interior, not held as
+   exactly flat, stencil inside the domain), -ln L is evaluated at t_hat + j s_i e_i, j = -2..2, with
+   s_i = 0.02 / sqrt(F_ii) (F = J^T J of the least-squares Jacobian, priors included; 1/sqrt(F_ii) is the conditional
+   sigma), and a quadratic in j is fitted by least squares. sigma_f^2 = sum_i RSS_i / (2 m) (2 residual degrees of
+   freedom per coordinate, m coordinates), sigma_noise = 2 sigma_f. Budget: 4 new evaluations per coordinate,
+   m = min(judged coordinates, floor(B / 4)); B = 40 per fit by default (F1: 32 for BIG, 28 for SLIM and QUAINT-Vc0).
+   Justification: USINE is deterministic, so repeats measure nothing; over +-0.04 conditional sigma the smooth part of
+   -ln L is a quadratic to within |f'''| (0.04 sigma)^3 / 6, about 1e-5 for |f'''| sigma^3 <= 1, far below the
+   expected 2.5e-4 to 1.5e-3, so the quadratic absorbs value, slope and curvature and the residual scatter is the
+   non-smooth part. A stencil step of 0.02 conditional sigma moves the predictions by about 1e-4 relative, about 100
+   units of the 6th printed digit, so the rounding errors at neighbouring points are uncorrelated (F1 measured -2 ln L
+   jumps of 5e-4 for a 5e-5 sigma change of delta). For uncorrelated noise E[RSS_i] = 2 sigma_f^2 exactly (linear
+   model); a noise component smooth on the stencil scale is partly absorbed, so the estimate errs low, i.e. strict.
+   With 14 to 16 degrees of freedom its relative standard error is about 19%.
+2. Difference steps, the h ~ (sigma_noise / |f''|)^(1/2) form: h_i = a / sqrt(F_ii) (f''_i = F_ii) with one factor
+   a = clip(2 sqrt(sigma_f V), 0.1, 1), V = sum_i F_ii (F^-1)_ii over the judged coordinates (sum of the variance
+   inflation factors; a = 1 if that block of F is singular), rounded to 3 significant digits and at most half the
+   distance to a domain bound. Derivation: the verdict's central-difference gradient has noise variance
+   sigma_f^2 / (2 h_i^2) per coordinate, so the expected noise contribution to EDM = g^T H^-1 g / 2 is
+   sigma_f^2 V / (4 a^2); the uncapped a makes it sigma_f / 16. The noise error falls as 1/a^2 while the truncation
+   error of the differences grows as a^2; the cap a <= 1 (one conditional sigma, where -ln L rises by 0.5 along the
+   coordinate) bounds the truncation: scaling F1's measured parabola residuals (+-0.11 over +-5.2 conditional sigma for
+   SLIM's delta) as a^3 gives a gradient bias whose EDM contribution is about 1e-4 at a = 1, the same order as the
+   noise term there (BIG: sigma_f^2 V / 4, about 2.5e-5). These steps are used for the verdict's gradient and Hessian,
+   the Newton polish, the reported Fisher matrix and the least-squares Jacobian of any later restart attempt.
+3. Acceptance: EDM <= max(1e-5, k sigma_noise) with **k = 0.5**, i.e. EDM <= max(1e-5, sigma_f): the EDM may not exceed
+   the noise of one -ln L evaluation. The other conditions are unchanged (finite value, positive-definite Hessian,
+   boundary_kkt at a bound). Justification: a minimum of a function with noise sigma_f cannot be located better than
+   where -ln L differs by about sigma_f; at that threshold the accepted point lies within sqrt(2 sigma_f) marginal sigma
+   of the minimum (0.055 sigma for the largest F1 floor, 0.003 in -2 ln L), small against the D9 one-sigma windows. At
+   a true minimum the noise part of EDM has mean at most sigma_f / 16 by step 2, so a false failure needs a 16-fold
+   fluctuation (P(chi2_1 > 16) = 6e-5 for one dominant direction; 0.2% if sigma_noise is estimated 2 standard errors
+   low). The base 1e-5 is not loosened: it still applies whenever k sigma_noise is below it.
+4. The result records `noise` (mode, sigma_m2lnl, method, stencil, coordinates, degrees of freedom, evaluations, budget,
+   step factor a, V, steps) and the verdict's `edm_threshold`.
+
+Also fixed (no criterion change): with polish, a polished point with a higher -ln L than t_hat is discarded and t_hat
+is judged again, so the verdict always describes the returned point; an unconverged fit is reported with reason
+`not-converged` (or `restart-cap` only when restarts were allowed and used up) and no statistical-result is written
+for a run without a converged fit, instead of exiting with "artifact-invalid".
+
+**Re-judging plan for F1 (declared before the refits).** Each family restarts from F1's reported fit with F1's own
+configuration (start, stated steps, priors, `max_restarts` 0), so the least-squares path replays from the cached runs
+(checked: 0 USINE runs for all three) and only the noise stencil and the verdict are new. Stage 1: `optimizer.noise`
+`{"mode": "measure", "max_evaluations": 40}`, polish 0; expected about 4n + 2n^2 + 2n runs (BIG n = 8 judged
+coordinates, V_A held: 176; SLIM and QUAINT-Vc0 n = 7: 140 each). Stage 2: a family whose stage-1 verdict fails only on
+the EDM (reasons gradient_not_small, max_iterations) is refitted with `polish_steps` 1 (one damped Newton step with the
+noise-sized steps, about 2n^2 + 2n + 12 new runs), in the order SLIM, QUAINT-Vc0, BIG while the remaining budget covers
+it. K1 cap: 600 USINE runs (B1.1), at most 4 USINE processes at once. A family passes D9 when its verdict under this
+rule is converged and delta and K10 lie in the CRPROP-F1 windows (unchanged); a family that still fails is attributed
+with its numbers (EDM against the threshold, Hessian eigenvalues, noise). D9 and the 1e-5 base are not loosened.
+
+**Results (record `tests/adapters/fixtures/cr_propagation/f1/f1-reproduction.json`, regenerated through
+`examples/bc-usine-reproduction/run.py --rejudge-from`; outputs `$CRPROP_OUT/k1/repro/`, stage-1 copies in
+`$CRPROP_OUT/k1/repro/stage1/`).** Stage 1 restarted each family from F1's reported fit with F1's own configuration
+(least-squares path replayed from the cache) and the rule above; every verdict failed on the EDM alone (Hessian
+positive definite, no bound), so stage 2 polished SLIM, then QUAINT-Vc0; BIG's polish (about 2n^2 + 2n + 12 = 156
+runs) no longer fitted the remaining budget (52) and was not run.
+
+| Fit | sigma_noise (-2 ln L), dof | step factor a, V | EDM (threshold max(1e-5, 0.5 sigma_noise)) | Verdict | delta (window) | K10 (window) | -2 ln L | D9 |
+|---|---|---|---|---|---|---|---|---|
+| BIG (stage 1) | 0.00345, 16 | 1 (capped), 1575 | 0.0103 (0.00172) | failed: gradient_not_small | 0.500 in | 0.286 in | 83.344 | missed (not converged) |
+| SLIM (polish 1) | 0.00480, 14 | 1 (capped), 176 | 0.0147 (0.00240) | failed: gradient_not_small, line_search_stalled | 0.516 in | 0.289 in | 90.308 | missed (not converged) |
+| QUAINT-Vc0 (polish 1) | 0.00684, 14 | 1 (capped), 333 | 0.0113 (0.00342) | failed: gradient_not_small | 0.459 in | 0.323 in | 84.015 | missed (not converged) |
+
+K1-2: every fit is re-judged and recorded with its noise floor and EDM; best-fit delta and K10 stay inside the D9
+windows for all three; none converges under the rule, so F1-1 stays NOT MET on convergence only (D9 and the 1e-5 base
+not loosened).
+
+Attribution (evidence in `$CRPROP_OUT/k1/repro/`). The measured floors (0.0034 to 0.0068 in -2 ln L) are 1.6 to 7 times
+F1's three-point probes. The EDMs at steps of one conditional sigma are 4.3 to 6.1 times the threshold, but they do not
+describe a reachable improvement: SLIM's polish (one damped Newton step from that gradient and Hessian) found no lower
+-ln L in 12 trials; its full Newton step raised -2 ln L by +0.019 (90.3265 against 90.3078) where the EDM predicted a
+fall of 0.029, about 4 sigma_noise the wrong way. QUAINT-Vc0's polish accepted only a step of about 1e-7 sigma
+(-2 ln L lower by 8e-5, far inside the noise) and judged EDM 0.0113 there, unchanged. With the measured floors the
+expected noise part of EDM at these steps is sigma_f^2 V / 4 = 1.1e-4 (BIG), 2.5e-4 (SLIM), 9.7e-4 (QUAINT-Vc0); the
+observed EDMs are 10 to 90 times larger. So the verdict's central differences over one conditional sigma carry an
+error well above the white-noise floor the stencil sees: a component of USINE's output error that is smooth over the
+0.04-sigma stencil and absorbed by its quadratic (the case the rule noted as making the estimate err low), or
+truncation of the differences in these strongly correlated fits (variance inflation 176 to 1575), or both; the K1
+budget left no runs to separate them (for example a stencil over +-1 sigma). The points remain F1's best fits; the
+rule's verdict, not the fit, is what cannot be reached at USINE's 6-digit output.
+
+**USINE runs (K1 tally):** 548 of 600 (1 published-point evaluation of QUAINT-Vc0 by the start stage; stage 1 about
+414 in all, of which a first batch whose runs were cached was interrupted before writing results and resumed from the
+cache; SLIM polish 12; QUAINT-Vc0 polish 121 including an evaluation-budget stop at 110 resumed from the cache); at most
+3 USINE processes at once.

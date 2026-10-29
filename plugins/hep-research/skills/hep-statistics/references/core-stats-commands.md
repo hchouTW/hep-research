@@ -448,7 +448,14 @@ python3 skills/hep-statistics/scripts/propagation_fit.py fit --input config.json
   set, must be stated in `gate_plan.measurement_conditions`); its
   `bin_semantics` and binning conventions must be the data's: a bin-averaged ratio is never fitted to data declared
   as a ratio of bin integrals (refused, exit 1). Datasets with a `period` need `phi_<period>_gv` applied per isotope
-  (P4 of the propagation plan); a provider that returns only ratios is refused (`modulation-needs-isotopic-lis`).
+  (P4 of the propagation plan). The fit-side isotopic path is the documented default and is not implemented yet, so a
+  provider that returns only ratios is refused (`modulation-needs-isotopic-lis`), unless its declaration carries a
+  `modulation` block listing `phi_<period>_gv` (contracts 3.15.0: model `force-field`, the implementation, and a
+  passing result of the conformance gate `tools/provider_registry.py --conformance`, which compares the provider's
+  modulated output with the plugin's force-field tool applied to its own isotopic LIS within at most 1e-3). The
+  declaration decides, not a `phi` in the domain; the result's `modulation` records `by: provider` with the declared
+  model and implementation. A top-of-atmosphere prediction for a dataset the fit did not ask the provider to modulate
+  is refused (`double-modulation`): the fit never applies a second force field.
 - **Model:** the prediction is the sum of the provider's components, each times at most one multiplier: a
   production norm (prior ~10%) or a parent abundance (free or with a prior). They enter linearly and are profiled
   exactly. Inelastic changes and production slopes need a provider parameter or energy-basis components and are
@@ -458,7 +465,19 @@ python3 skills/hep-statistics/scripts/propagation_fit.py fit --input config.json
   `V_A_kms`, `R_break_gv` for a closed form without them) is listed under `families_not_expressible` with the names.
 - **Convergence:** `fit_diagnostics.newton_fit` verdict in offsets from the best fit; a coordinate on a domain
   bound gets `boundary_kkt`; an exactly flat direction (Fisher eigenvalue below 1e-8 of the largest) is held, and its
-  parameters get no error. At most 5 restarts (`restart-cap`).
+  parameters get no error. At most 5 restarts (`restart-cap`; an unconverged fit without restarts has
+  `not-converged`, and a run with no converged fit writes no `statistical-result.json`). With
+  `optimizer.polish_steps`, a polished point with a higher -ln L than the optimizer's is discarded and the optimizer's
+  point is judged.
+- **Noise-aware convergence** (opt-in, for a provider with numerical noise such as USINE's 6-digit tables):
+  `"optimizer": {"noise": {"mode": "measure", "max_evaluations": 40}}` or `{"mode": "declared", "sigma_m2lnl": s}`.
+  The noise floor of -2 ln L at the best fit is measured as the residual scatter of a quadratic fitted to -ln L at 5
+  points spaced 0.02 conditional sigma along each interior coordinate (4 evaluations per coordinate), the verdict's,
+  Fisher matrix's and later restarts' difference steps become h_i = a / sqrt(F_ii) with a = clip(2 sqrt(sigma_f V),
+  0.1, 1) (sigma_f = sigma_noise / 2, V the sum of the variance inflation factors), and the fit converges when
+  EDM <= max(1e-5, 0.5 sigma_noise), the other conditions unchanged. The fit records `noise` and the verdict's
+  `edm_threshold`. Without `optimizer.noise` the verdict is the 1e-5 one, unchanged. Rule and justification:
+  `VALIDATION.md` section CRPROP-K1.
 - **Degeneracies:** the Fisher screen and profile scans of `degeneracy.py` in object form; with `theory_spec` (a base
   theory-spec) and `--out`, a `theory-spec.json` carrying only the profile-scan entries (with `valid_range`) is written
   and validated, next to `statistical-result.json`.

@@ -30,7 +30,7 @@
   },
   "hep-ml": {
    "references": 42,
-   "bytes": 195039,
+   "bytes": 195454,
    "uncited": 0
   },
   "hep-review": {
@@ -40,12 +40,12 @@
   },
   "hep-statistics": {
    "references": 14,
-   "bytes": 205340,
+   "bytes": 207327,
    "uncited": 0
   },
   "hep-theory": {
    "references": 31,
-   "bytes": 243625,
+   "bytes": 243624,
    "uncited": 0
   }
  },
@@ -3540,8 +3540,8 @@
   {
    "path": "skills/hep-ml/references/scientific-machine-learning.md",
    "owner": "hep-ml",
-   "bytes": 3086,
-   "lines": 43,
+   "bytes": 3501,
+   "lines": 47,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-ml/SKILL.md",
@@ -3973,8 +3973,8 @@
   {
    "path": "skills/hep-statistics/references/core-stats-commands.md",
    "owner": "hep-statistics",
-   "bytes": 49473,
-   "lines": 542,
+   "bytes": 51460,
+   "lines": 561,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/response-and-forward-folding.md",
@@ -4309,7 +4309,7 @@
   {
    "path": "skills/hep-theory/references/cosmic-ray-phenomenology.md",
    "owner": "hep-theory",
-   "bytes": 24574,
+   "bytes": 24573,
    "lines": 291,
    "linked_from_skill_md": true,
    "cited_by": [

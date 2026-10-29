@@ -21,6 +21,89 @@ Software checks establish contract consistency only, not physical validity.
   was frozen at 1.0.0 (validator `1.0.0`; 0.1.0 kept for historical data). The packet now asks reviewers for a
   separately computed SHA-256 or `SHA256: unavailable` (a fabricated digest quarantined a correct review in g2x).
 
+## 0.44.0 (2026-10-29)
+
+Minor release; contracts 3.15.0 (gating constant `contracts/validate.py` `MODULATION_FROM`), `CORE_VERSION` 1.3.0,
+adapter `cr-propagation` 0.2.0 unchanged (its version is part of the provider cache keys and of the USINE conformance
+record). It fixes the 0.43.0 known issues in the cr-propagation follow-up K1-K4 (decisions B1.1, B1.2): declared and
+checked provider-side modulation, a noise-aware convergence rule for noisy providers, DRAGON2's accepted differences
+recorded in `adapter.json`, closed translator gaps, and a condition-number bound for GP emulators.
+
+**Before you upgrade** (details in each entry below):
+- A `cr-provider/1` declaration whose domain lists `phi_<period>_gv` now needs a `modulation` block with a passing
+  conformance result (`tools/provider_registry.py --conformance`); the registry refuses it otherwise. The core runner
+  refuses an undeclared top-of-atmosphere prediction and a point with two modulation potentials; from contracts 3.15.0
+  a prediction with more than one nonzero `phi_<period>_gv` fails `prediction.modulated_twice`.
+- The translators no longer drop or zero what they cannot express: unknown `sources.abundances`, an unsupported
+  injection `spectrum_variable` and a USINE gas term without `cm^-3` are refused with a reason. The dragon2 provider
+  refuses a harmonized-v1 transport whose sources DRAGON2 cannot express (its default transport states DRAGON2's own).
+- `train_emulator.py` bounds every kernel's condition number by default (`--max-condition 1e10`); pass 0 to train as
+  before (E2's campaign does).
+- `propagation_fit.py` reports an unconverged fit with reason `not-converged` and writes no statistical-result (it
+  used to fail with "artifact-invalid"); `optimizer.noise` opts a noisy provider into the noise-aware verdict.
+
+**Known issues**: no F1 fit converges even under the noise-aware rule (EDM 0.010-0.015 against thresholds
+0.0017-0.0034 at the pre-registered one-sigma-capped steps; with F1's earlier 0.3-sigma steps SLIM's and
+QUAINT-Vc0's EDMs were below the new thresholds, but the rule was fixed before the refits; next step: a wider-scale
+noise probe or a provider printing more digits), so F1-1 stays not met; C2UF-1 does not survive a well-conditioned
+retrain of the C2UF emulator (SLIM toys stop at the 2% failure threshold), so the committed C2UF emulator and its
+Linux skip (A1.21) are kept until the toy fits are made robust at V_A = 0; the USINE conformance result is not tied to
+the provider version (rerun the gate when the modulation implementation changes); the fit-side isotopic modulation
+path is documented but not implemented; the likely DRAGON2 Ptuskin94/03 enum issue is documented, not reported
+upstream; GALPROP unavailable; F2, F3 and the live routing run not done.
+
+- crprop k2: provider-side modulation is a declared, checked exception to "providers never modulate" (decision B1.1;
+  contracts 3.15.0 with the gating constant `validate.MODULATION_FROM`, `CORE_VERSION` 1.3.0). The cr-provider/1
+  declaration may carry an optional `modulation` block (model `force-field` only, the implementation, the
+  `phi_<period>_gv` parameters, each in the domain, and a passing conformance result within a tolerance no looser
+  than 1e-3). core/provider refuses a declaration with a `phi_<period>_gv` in its domain but no block, and a block
+  without a passing result. The runner refuses a top-of-atmosphere prediction from a provider without the block
+  (`invalid-response`, also for a cached result) and a point with two modulation parameters (`invalid-request`).
+  New prediction rule `prediction.modulated_twice` (native from 3.15.0, else `--strict`). The conformance gate
+  `tools/provider_registry.py --conformance PROVIDER` takes the provider's isotopic LIS and its modulated output from
+  the entrypoint hook `isotope_tables`, applies the plugin's force-field tool to the LIS isotope by isotope and
+  compares the two. The USINE provider declares the block and passes the gate (largest relative deviation 4.3e-5
+  over 390 nodes of 10B, 11B, 12C, 9Be and 10Be, two USINE runs). `propagation_fit.py` takes provider-side modulation
+  from the declared block, not from a phi in the domain. It records the declared model and implementation and
+  refuses double modulation (`double-modulation`). The fit-side isotopic path stays the documented default; its code
+  is deferred. F1's recorded predictions and results are unchanged (checked against the F1 provider cache). Every
+  committed artifact keeps its outcome.
+- crprop k4: `train_emulator.py` bounds every kernel matrix's condition number through a nugget floor of n x signal /
+  (C - 1), `--max-condition C` (default 1e10; 0 = no bound, as before), and records the bound and each component's
+  condition number in the model. E2's committed model is unchanged, and its campaign passes `--max-condition 0`. A
+  C2UF emulator retrained with the bound passes its holdout (0.0032 sigma) and a new k = 4 confirmation (0.0226 sigma),
+  and passes the provider self-check under simulated libm drift (margin over 3000). C2UF-1 on that model stopped at
+  the 2% toy-failure limit, so it is not committed, and the A1.21 skip stays (VALIDATION CRPROP-K4).
+
+- crprop k3: the DRAGON2 provider entry of `adapters/cr-propagation/adapter.json` records DRAGON2 as tested with its
+  accepted, attributed differences against USINE (decisions A1.11, A1.13): D1-1a item effects (10Be/9Be with decay 13.3%
+  / 11.3%, finite gas layer; reacceleration 5.7%, first-order zone conversion; losses 6.1%, Coulomb on HII vs
+  ionization-only), D3-1 38-77% at level 1 (decomposed into gas column, helium target, inelastic cross sections, parent
+  O/C and injection convention), D3-3 17.0% / 17.7%, the escalation-11 caveats, and the DRAGON2 cd588707
+  Ptuskin94/Ptuskin03 enum note (escalation 10; not reported upstream). Translators (escalation 12): harmonized-v1
+  states the injection variable (`sources.injection[].spectrum_variable` = `kinetic_energy_per_nucleon`). The USINE
+  translator handles `rigidity` (eta_s = eta - 1), `total_energy` and `kinetic_energy_per_nucleon` exactly and records
+  the default when the variable is not given. It refuses `sources.abundances` other than the parent list (or
+  data-normalised with USINE's own files), where it used to record "not parsed", and refuses a gas density term without
+  `cm^-3`, which it used to read as 0. The new `dragon2_translate.py` (used by the provider and the D3 study) refuses a
+  per-energy injection, an eta other than 0 and abundances other than DRAGON2's own
+  (`dragon2:BaseModel_DRAGONxsec.source.param`). So the `dragon2` provider now refuses a harmonized-v1 transport with
+  the reason (provider-error): behaviour change, the dragon2 provider refuses harmonized-v1 transports with sources it
+  cannot express; its built-in transport states DRAGON2's own sources, and `dragon2_run.py --from-transport` applies the
+  same checks (exit 2). Committed runs keep their outputs: every USINE rendering is unchanged, and the D1 and D3 DRAGON2
+  specs were regenerated (sources stated, two notes added; XML and source.param unchanged). The V_A zone wording (r3
+  P1's "about sqrt(L/h)" puts V_A off by sqrt(3); V_A,disc = V_A,halo sqrt(L/(3h)), bound (1+lam)/5) is corrected in
+  `transport_conventions.py` and `cosmic-ray-phenomenology.md`. VALIDATION has an appended erratum for the CRPROP-B3
+  10Be/9Be sign (+1.3%, not -1.3%), and `docs/adapter-authoring.md` has K2's modulation exception. No version bump.
+- crprop k1: `propagation_fit.py` gains an opt-in noise-aware convergence rule for providers with numerical noise
+  (`optimizer.noise`, measured or declared): the noise floor of -2 ln L at the best fit is measured from the residual
+  scatter of a quadratic over a 0.02-sigma stencil and recorded, the difference steps are sized from it, and the fit
+  converges when EDM <= max(1e-5, 0.5 sigma_noise) (VALIDATION.md CRPROP-K1). Without it, verdicts and numbers are
+  unchanged. A rejected polish now judges the returned point; an unconverged fit reports `not-converged` and writes no
+  statistical-result instead of failing with `artifact-invalid`. F1's BIG, SLIM and QUAINT-Vc0 re-judged (548 USINE
+  runs): delta and K10 stay in the D9 windows, none converges under the rule (EDM 0.010-0.015 against thresholds
+  0.0017-0.0034), so F1-1 stays not met on convergence; attribution in VALIDATION.md.
+
 ## 0.43.0 (2026-10-29)
 
 Minor release; contracts 3.14.0 (one minor, the `CV-CRPROP` of the cr-propagation campaign, new rules gated by

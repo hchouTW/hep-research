@@ -3,7 +3,7 @@
  "writer": "orchestrator only (r4 4)",
  "cycle": 4,
  "updated": "2026-10-29",
- "integration_branch": "worktree-crprop-integration",
+ "integration_branch": "worktree-crprop-k",
  "integration_base": "8fcbb826",
  "crprop_out": "$HOME/hep-work/crprop-out",
  "capabilities": {
@@ -378,6 +378,67 @@
    "missing_capabilities": [],
    "notes": [
     "Opus verifier dispatched"
+   ]
+  },
+  "K1": {
+   "state": "merged",
+   "dispatches": 1,
+   "rework_rounds": 0,
+   "branch": "worktree-crprop-k1",
+   "base": "94ba34d1",
+   "head": "eaf66f0d",
+   "merge_commit": "ce869011",
+   "worker_report": "DONE: K1-1 met (opt-in noise rule, k=0.5, 5-point stencil, steps a=clip(2 sqrt(sigma_f V),0.1,1)/sqrt(F_ii)); K1-2 met as worded: BIG/SLIM/QUAINT-Vc0 not converged (EDM 0.0103/0.0147/0.0113 vs thresholds 0.0017/0.0024/0.0034), windows met; 548/600 USINE runs",
+   "verifier_report": "Opus PASS: R9 timing ok, estimator unbiased (ratio 1.0014), opt-in exact, replay 0 runs matches record, windows recomputed, attribution supported; note: F1's 0.3-sigma-step EDMs were below the new thresholds for SLIM/QUAINT-Vc0, the pre-registered steps give 0.010-0.015",
+   "missing_capabilities": [],
+   "notes": [
+    "B1.1"
+   ]
+  },
+  "K2": {
+   "state": "merged",
+   "dispatches": 1,
+   "rework_rounds": 0,
+   "branch": "worktree-crprop-k2",
+   "base": "94ba34d1",
+   "head": "8e3e87ed",
+   "merge_commit": "a1a85cb1",
+   "worker_report": "DONE: contracts 3.15.0 (MODULATION_FROM, prediction.modulated_twice), CORE 1.3.0, declared modulation block + core checks, conformance gate (USINE 4.28e-5 <= 1e-3, 2 runs), fit uses declaration, F1 unchanged; open: adapter-authoring.md wording (to K3)",
+   "verifier_report": "Opus PASS: schema/core agree, refusals tested, 696 artifacts keep outcome, gate not circular (live rerun 4.277e-5, 0.2% offset fails), F1 unchanged, lint clean; notes: conformance not tied to provider version; adapter-authoring.md wording (K3)",
+   "missing_capabilities": [],
+   "notes": [
+    "B1.1"
+   ]
+  },
+  "K3": {
+   "state": "merged",
+   "dispatches": 1,
+   "rework_rounds": 0,
+   "branch": "worktree-crprop-k3",
+   "base": "f778b9d3",
+   "head": "7bf3a8c7",
+   "merge_commit": "9460a54c",
+   "worker_report": "DONE: adapter.json dragon2 differences (description; schema has no field), translator gaps closed with 6 tests, P1 wording, Ptuskin note, B3 erratum (+1.3% confirmed), adapter-authoring wording; open: dragon2_run.py CLI bypasses source checks (file added to card)",
+   "verifier_report": "Opus PASS: 47 numbers match the record, translator gaps closed with tests, eta_s mapping exact, USINE renders identical (29 blocks), DRAGON2 XML hashes match, B3 erratum +0.57..+1.34% recomputed; minor: d3_study.py docstring names dragon2_run, block count 36 vs 37",
+   "missing_capabilities": [],
+   "notes": [
+    "B1.1"
+   ]
+  },
+  "K4": {
+   "state": "merged",
+   "dispatches": 1,
+   "rework_rounds": 1,
+   "branch": "worktree-crprop-k4",
+   "base": "94ba34d1",
+   "head": "805faab1",
+   "merge_commit": "2616f45b",
+   "worker_report": "PARTIAL: K4-1 met (--max-condition 1e10, E2 opt-out); retrained C2UF emulator holdout 0.0032 sigma, drift margin >3000, k=4 confirmation 0.0226 sigma; C2UF-1 not met on it (SLIM toys 5/37 failed, threshold 2%); model not committed, A1.21 skip kept; 40 USINE runs",
+   "verifier_report": "Opus PASS r1 (r0 REWORK: VALIDATION wording): cond bound exact, --max-condition 0 byte-identical, E2 unchanged, drift margin >4000, bound committed before retrain; K4-2 not met per B1.2",
+   "missing_capabilities": [],
+   "notes": [
+    "B1.1",
+    "B1.2: accepted on K4-1, K4-2 recorded as known issue"
    ]
   }
  },
@@ -871,6 +932,51 @@
    "cycle": 4,
    "date": "2026-10-29",
    "event": "PR #308 CI run 2 (6d4ce8a2): all float pins fixed; only EmulatorPerModelDeclaration fails on Linux (C2UF model self-check, amplified libm drift); A1.20 rework round 2 dispatched (self-check bound from the emulator's own sigma)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "B1.1: follow-up K1-K4 for 0.44.0 from main 42f5bad1 (integration branch worktree-crprop-k)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "K1, K2, K4 dispatched from 94ba34d1 (K3 waits for a slot, A1.3)"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "K2 DONE (8e3e87ed), Opus verifier; K3 dispatched; adapter-authoring.md added to K3 files"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "K3 base f778b9d3"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "K4 PARTIAL (4bb5b3ba); B1.2 accepted on K4-1; Opus verifier"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "K2 merged (a1a85cb1), Opus PASS; post-merge static see log"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "K4 merged (2616f45b; appended conflicts resolved mechanically; static ok); K3 DONE (3386a103), sent back to rebase onto K2+K4 and delegate dragon2_run.py"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "K3 merged (9460a54c), Opus PASS; static ok; K1 remaining"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "K1 merged, Opus PASS; all K WPs merged"
   }
  ],
  "env": {

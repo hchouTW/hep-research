@@ -24,13 +24,20 @@ adapters/<name>/
 | `environment` | where the tests ran (OS, Python, tool builds), or "none declared" |
 | `assets`, `tests` | relative paths; every listed file must exist |
 | `owner_skill` | the core skill that owns the method the adapter executes |
-| `provider` | optional (contracts 3.14.0): one cr-provider/1 declaration or a list (schema `contracts/schemas/cr_provider.json#/$defs/declaration`): `id`, `entrypoint` (relative to the adapter folder), `protocol` `cr-provider/1`, `domain` (canonical parameter names, each `{min, max}`), optional `axis_ranges`, `observables`, `axes` (`rigidity`, `ekn`), `decomposable`, `deterministic`, `output_units`, optional `version` (default: the adapter's). A `profile.json` takes the same field. `tools/provider_registry.py` builds the registry from these fields; the declaration test checks them |
+| `provider` | optional (contracts 3.14.0): one cr-provider/1 declaration or a list (schema `contracts/schemas/cr_provider.json#/$defs/declaration`): `id`, `entrypoint` (relative to the adapter folder), `protocol` `cr-provider/1`, `domain` (canonical parameter names, each `{min, max}`), optional `axis_ranges`, `observables`, `axes` (`rigidity`, `ekn`), `decomposable`, `deterministic`, `output_units`, optional `version` (default: the adapter's), optional `modulation` (contracts 3.15.0; below). A `profile.json` takes the same field. `tools/provider_registry.py` builds the registry from these fields; the declaration test checks them |
 
 ## Provider entrypoints (cr-provider/1)
 
 A propagation provider (a closed form, an external code, an emulator) answers requests of the protocol
 `cr-provider/1`: parameter points in the canonical parameter names, observables with bins on the `rigidity` (GV) or
-`ekn` (GeV/n) axis, and `want` limited to `lis` and `components` (providers never modulate). The entrypoint is a
+`ekn` (GeV/n) axis, and `want` limited to `lis` and `components`. Providers never modulate unless the declaration
+carries a `modulation` block (contracts 3.15.0, `validate.MODULATION_FROM`) that names the force-field model, the
+implementation, the `phi_<period>_gv` parameters it reads (each in the domain, and every `phi_<period>_gv` of the domain
+listed) and a passing conformance result: at a reference point the provider's modulated output equals the plugin's
+force-field tool applied to its own isotopic LIS within a tolerance no looser than 1e-3
+(`python3 tools/provider_registry.py --conformance PROVIDER_ID`). Without the block a top-of-atmosphere prediction is
+an invalid response; with it a point carrying two modulation parameters is refused (modulated twice). The entrypoint
+is a
 Python script that declares itself and calls `core.provider.entrypoint.provider_main(declaration, evaluate_point)`;
 that gives it `--request R --response S`, `--serve` (JSON Lines) and `--allow-outside-validated-range`, and applies
 the protocol's refusals (out-of-domain, unsupported-want, ...) before `evaluate_point` runs. Callers never search for

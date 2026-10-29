@@ -1,5 +1,5 @@
 {
- "contract_version": "3.14.0",
+ "contract_version": "3.15.0",
  "artifact_id": "tmdg-prediction-sivers-asymmetry",
  "artifact_type": "prediction",
  "objective": "SIDIS Sivers asymmetry versus P_hT and the Sivers function in SIDIS and Drell-Yan (opposite sign), Gaussian model, synthetic N_q",
@@ -13,8 +13,8 @@
   ]
  },
  "versions": {
-  "plugin": "0.43.0",
-  "contracts": "3.14.0",
+  "plugin": "0.44.0",
+  "contracts": "3.15.0",
   "profiles": {
    "theory:tmd-gaussian-lo": "0.1.0"
   }

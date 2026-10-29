@@ -499,5 +499,146 @@ class CommandLines(ProviderTestCase):
                 self.assertIsNone(re.search(r"""["'][^"'\n]*\b(profiles|adapters|skills)/""", text))
 
 
+# ------------------------------------------------------------------ declared modulation (contracts 3.15.0, K2)
+CONFORMANCE = {"reference_point": {"L_kpc": 4.0, "phi_p_gv": 0.5},
+               "observables": [{"id": "B/C", "axis": "rigidity", "unit": "GV", "bins": [[2.0, 4.0], [4.0, 8.0]]}],
+               "tolerance": 1e-3,
+               "result": {"status": "passed", "max_relative_deviation": 4e-5, "nodes_compared": 40,
+                          "isotopes": ["11B", "12C"], "tool": "SYNTHETIC force-field tool"}}
+MODULATION = {"model": "force-field", "implementation": "SYNTHETIC force field per isotope", "parameters": ["phi_p_gv"],
+              "conformance": CONFORMANCE}
+MODULATED = dict(DECLARATION, id="toy-modulated", domain=dict(DECLARATION["domain"], phi_p_gv={"min": 0.0, "max": 2.0}),
+                 modulation=MODULATION)
+# the toy's level: top-of-atmosphere in mode "toa", or for a point with a modulation potential; else local interstellar
+LEVELLED_TOY = TOY.replace('"level": "top-of-instrument"', '"level": ("top-of-atmosphere" if MODE == "toa" or any('
+                           'v for k, v in point.items() if k.startswith("phi_")) else "crsr:local-interstellar")')
+
+
+def changed(base: dict, path: str, value) -> dict:
+    """A deep copy of base with the dotted path set to value (None removes it)."""
+    out = json.loads(json.dumps(base))
+    *keys, last = path.split(".")
+    node = out
+    for k in keys:
+        node = node[k]
+    if value is None:
+        node.pop(last)
+    else:
+        node[last] = value
+    return out
+
+
+class DeclaredModulation(ProviderTestCase):
+    """K2-1: the optional modulation block; schema and core agree; the runner refuses a top-of-atmosphere prediction
+    without the block, a point that would be modulated twice, and a phi for a provider without the block."""
+
+    def schema_ok(self, value) -> bool:
+        return validate(value, {"$ref": "cr_provider.json#/$defs/declaration"}, Vocabulary()).ok
+
+    def make(self, mode: str = "ok", decl: dict = MODULATED) -> dict:
+        path = Path(self._workdir.name) / f"{decl['id']}-{mode}.py"
+        path.write_text(LEVELLED_TOY.format(root=str(ROOT), mode=mode, decl=dict(decl, entrypoint=path.name)),
+                        encoding="utf-8")
+        return {"declaration": dict(decl, entrypoint=path.name), "version": "1.0.0", "entrypoint_path": str(path),
+                "component": "tests", "user_supplied": False}
+
+    def test_declaration_with_the_block(self):
+        self.assertEqual(protocol.check_declaration(MODULATED), [])
+        self.assertTrue(self.schema_ok(MODULATED))
+        self.assertEqual(protocol.modulation_parameters(MODULATED), ["phi_p_gv"])
+        self.assertEqual(protocol.modulation_parameters(DECLARATION), [])
+
+    def test_bad_blocks_agree_with_the_schema(self):
+        both = {"model": changed(MODULATED, "modulation.model", "drift"),
+                "implementation": changed(MODULATED, "modulation.implementation", ""),
+                "no conformance": changed(MODULATED, "modulation.conformance", None),
+                "not passed": changed(MODULATED, "modulation.conformance.result.status", "failed"),
+                "tolerance looser than 1e-3": changed(MODULATED, "modulation.conformance.tolerance", 2e-3),
+                "zero tolerance": changed(MODULATED, "modulation.conformance.tolerance", 0.0),
+                "parameter name": changed(MODULATED, "modulation.parameters", ["potential"]),
+                "no nodes": changed(MODULATED, "modulation.conformance.result.nodes_compared", 0),
+                "extra field": changed(MODULATED, "modulation.extra", 1)}
+        # rules the schema subset cannot state (cross-field): core only
+        core_only = {"phi without the block": changed(MODULATED, "modulation", None),
+                     "parameter outside the domain": changed(MODULATED, "modulation.parameters", ["phi_q_gv"]),
+                     "deviation above the tolerance": changed(MODULATED,
+                                                              "modulation.conformance.result.max_relative_deviation",
+                                                              2e-3),
+                     "reference point without phi": changed(MODULATED, "modulation.conformance.reference_point",
+                                                            {"L_kpc": 4.0}),
+                     "reference point outside the domain": changed(MODULATED,
+                                                                   "modulation.conformance.reference_point.L_kpc", 99.0),
+                     "undeclared observable": changed(MODULATED, "modulation.conformance.observables",
+                                                      [{"id": "Be/B", "axis": "rigidity", "unit": "GV",
+                                                        "bins": [[2.0, 4.0]]}])}
+        for name, bad in both.items():
+            with self.subTest(both=name):
+                self.assertTrue(protocol.check_declaration(bad))
+                self.assertFalse(self.schema_ok(bad))
+        for name, bad in core_only.items():
+            with self.subTest(core=name):
+                self.assertTrue(protocol.check_declaration(bad))
+                self.assertTrue(self.schema_ok(bad))
+
+    def test_registry_refuses_a_block_without_a_passing_result(self):
+        item = self.make()
+        item["declaration"] = changed(item["declaration"], "modulation.conformance.result.status", "failed")
+        with self.assertRaises(RegistryError) as ctx:
+            parse_registry(self.toys.registry(item))
+        self.assertIn("passed", str(ctx.exception))
+
+    def test_top_of_atmosphere_without_the_block_is_an_invalid_response(self):
+        with ProviderRunner(self.toys.registry(self.make("toa", dict(DECLARATION, id="toy-toa")))) as runner:
+            out = runner.evaluate(request(provider="toy-toa"))
+        self.assertEqual({r["reason"] for r in out["results"]}, {"invalid-response"})
+        self.assertIn("no modulation block", out["results"][0]["detail"])
+
+    def test_declared_modulation_levels(self):
+        points = [{"L_kpc": 4.0, "phi_p_gv": 0.5}, {"L_kpc": 4.0}]
+        with ProviderRunner(self.toys.registry(self.make())) as runner:
+            out = runner.evaluate(request(points=points, provider="toy-modulated"))
+        self.assertEqual(out["status"], "ok", out)
+        levels = [r["predictions"][0]["observable"]["level"] for r in out["results"]]
+        self.assertEqual(levels, ["top-of-atmosphere", "crsr:local-interstellar"])
+        with ProviderRunner(self.toys.registry(self.make("toa"))) as runner:   # modulated without a potential
+            out = runner.evaluate(request(points=[{"L_kpc": 4.0}], provider="toy-modulated"))
+        self.assertEqual(out["results"][0]["reason"], "invalid-response")
+        self.assertIn("without a modulation parameter", out["results"][0]["detail"])
+
+    def test_a_point_modulated_twice_is_refused(self):
+        decl = dict(MODULATED, domain=dict(MODULATED["domain"], phi_q_gv={"min": 0.0, "max": 2.0}),
+                    modulation=dict(MODULATION, parameters=["phi_p_gv", "phi_q_gv"]))
+        self.assertEqual(protocol.check_declaration(decl), [])
+        with ProviderRunner(self.toys.registry(self.make(decl=decl))) as runner:
+            out = runner.evaluate(request(points=[{"L_kpc": 4.0, "phi_p_gv": 0.5, "phi_q_gv": 0.6}],
+                                          provider="toy-modulated"))
+        self.assertEqual(out["results"][0]["reason"], "invalid-request")
+        self.assertIn("modulated", out["results"][0]["detail"])
+        self.assertEqual(self.toys.calls("toy-modulated-ok"), 0)   # refused before the provider runs
+        out = respond(request(points=[{"L_kpc": 4.0, "phi_p_gv": 0.5, "phi_q_gv": 0.6}], provider="toy-modulated"),
+                      decl, lambda *a: {})
+        self.assertEqual(out["results"][0]["reason"], "invalid-request")   # the provider side refuses too
+
+    def test_phi_for_a_provider_without_the_block_is_an_unknown_parameter(self):
+        with ProviderRunner(self.toys.registry(self.toys.make())) as runner:
+            out = runner.evaluate(request(points=[{"L_kpc": 4.0, "phi_p_gv": 0.5}]))
+        self.assertEqual(out["results"][0]["reason"], "unknown-parameter")
+
+    def test_a_cached_top_of_atmosphere_result_is_checked_too(self):
+        cache = Path(self._workdir.name) / "cache"
+        registry = self.toys.registry(self.toys.make())
+        with ProviderRunner(registry, cache_dir=cache) as runner:
+            self.assertEqual(runner.evaluate(request())["status"], "ok")
+        for path in cache.glob("*/*.json"):
+            doc = json.loads(path.read_text())
+            for pred in doc["result"]["predictions"]:
+                pred["observable"]["level"] = "top-of-atmosphere"
+            path.write_text(json.dumps(doc))
+        with ProviderRunner(registry, cache_dir=cache) as runner:
+            out = runner.evaluate(request())
+        self.assertEqual(runner.stats["cache_hits"], 2)
+        self.assertEqual({r["reason"] for r in out["results"]}, {"invalid-response"})
+
+
 if __name__ == "__main__":
     unittest.main()
