@@ -68,7 +68,6 @@
    "dof": 7,
    "p_value": 0.8643
   },
-  "advisory_ratio_subset_v1": "not run: it needs a frozen chain bundle; expected unverified until a test shows how r-ratio.cancellation treats per-sign factor tables",
   "delta_significance": 20.14
  },
  "criteria": {
