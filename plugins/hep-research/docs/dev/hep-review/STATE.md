@@ -34,18 +34,19 @@ tasks:
   T0S: {status: done, deps: [T00], go_no_go: go, notes: "protocol 9044c6af before first dispatch 22:38:01Z; C01 4/4, C02 FA 1/4, C03 3/4, C04 4/4, 16/16 digest-bound; 3 instance construction errors caught by reviewers; H5/H6 pending-next-session"}
   T01: {status: done, deps: [T0S], steps_done: [1, 2, 3, 4, 5, 6, 7, 8], notes: "62/62 owned cases pass; independent review: 1 blocker, 6 major, 8 minor, all dispositioned (12 adopted, 3 partly), fixed with tests first (3f075184); blocker awaits user confirmation (task file 4.2)"}
   T02: {status: done, deps: [T01], steps_done: [1, 2, 3, 4, 5, 6, 7], notes: "30/30 owned cases pass; interruption, two-process CAS, foreign commit, export->import with checkpoint all tested"}
-  T03: {status: in_progress, deps: [T01], steps_done: []}
+  T03: {status: done, deps: [T01], steps_done: [1, 2, 3, 4, 5, 6, 7], notes: "15/15 owned cases pass; live routing run not run (paid, needs approval)"}
   U1:  {status: pending, deps: [T02, T03], kind: user-gate}
   T04: {status: pending, deps: [U1]}
   T05: {status: skipped}
   T06: {status: skipped}
   T07: {status: skipped}
   T08: {status: skipped}
-gates: {G1: pending, G2: pending, G3: pending}
+gates: {G1: waiting-user, G2: pending, G3: pending}
 cases:
   T00: {N01: not-applicable-with-basis (worktree created; failure path is the hard stop), N02: pass, N04: pass (no existing hep-review in source or cache), N40: pass}
   T01: "all 62 pass (tests/contracts/test_hep_review_{json,decision_table,kernel,review_fixes}.py)"
   T02: "all 30 pass (tests/skills/hep_review/test_{materials,store,continuity_export}.py)"
+  T03: "all 15 pass (tests/skills/hep_review/test_{coordinator,cli,pilot_generator,g1_review_fixes}.py)"
 decisions:
   - {when: 2026-10-29T06:25+08:00, task: T00, decision: "Worktree created with the Git fallback (git worktree add -b hep-review-v9-impl) at the repo's host-tool location .claude/worktrees/ (ignored by .gitignore), then entered with the host tool (EnterWorktree path=...)", reason: "The host worktree tool cannot name the branch; the task fixes branch_name=hep-review-v9-impl", reversible: true}
   - {when: 2026-10-29T06:30+08:00, task: T00, decision: "Store location ~/.local/state/hep-research/hep-review ($XDG_STATE_HOME/hep-research/hep-review when set)", reason: "Spec 11.1 lets T00 fix the path per repository convention; the existing authoring review keeps private state under $XDG_STATE_HOME/hep-research (review_lib/store.py default_private_root). The path is on local APFS, outside ~/Library/CloudStorage and ~/Library/Mobile Documents", reversible: true}
@@ -59,8 +60,9 @@ review_inputs_t01:
   tests/contracts/test_hep_review_decision_table.py: 2adf79e1410a09a6e41a824977c5d0e4304df0da44eae4f39cf80559283b8822
   tests/contracts/test_hep_review_kernel.py: a70bf1c3b1d5c521a305fa389e5f1253c20eedb55ce4a4cc5908c1b4b619c265
 blockers:
+  - {when: 2026-10-29T09:30+08:00, task: G1, description: "independent G1 review: 4 blockers (B1 rollback stays verified, B2 fork/migrate drop negatives, B3 hand-written assignment bases, B4 records not bound to raw), 4 major, 8 minor; all fixed with tests first in b491ff9e; dispositions in reviews/g1-review-dispositions.md", needs: user}
   - {when: 2026-10-29T07:15+08:00, task: T01, description: "independent T01 review returned blocker F1 (layer 1 not byte-reproducible across processes); fixed with a multi-seed test in 3f075184", needs: none, resolved: "2026-10-29 user accepted the dispositions and asked to continue with T03 and G1"}
-next_action: "T03 (skill, registration, R0 path, dispatch, host adapter, domain cards, pilot design), then G1 review and report"
+next_action: "Ask the user to accept the G1 review dispositions; then declare G1 (g1-report.md) and finish (target_gate G1); U1 only if the user raises the target to G2"
 ```
 
 ## Log
@@ -87,4 +89,10 @@ next_action: "T03 (skill, registration, R0 path, dispatch, host adapter, domain 
 2026-10-29 07:33 | T02 | 5-6 | continuity, checkpoints, fork/migration, export/verify/import | 283e47a3
 2026-10-29 07:34 | stop | 4.2 | independent review blocker -> ask the user; full branch check running in background | none
 2026-10-29 07:50 | T01 | review | user accepted the dispositions; continue with T03 and G1 | none
+2026-10-29 08:05 | T03 | 1-5 | skill, references, registration, coordinator, host adapter, CLI | dbebc92c
+2026-10-29 08:20 | T03 | 6-7 | domain cards, pilot protocol draft, oracle-checked generator | 96f70b01
+2026-10-29 08:25 | G1 | review | independent G1 reviewer dispatched (inputs frozen at 96f70b01) | none
+2026-10-29 09:15 | G1 | review fixes | B1-B4, M1-M4, m1-m8; regression tests first (19 F + 8 E before) | b491ff9e
+2026-10-29 09:40 | G1 | check | full branch check: 31 pass, 0 fail, 2 host-CLI skips; 6214 tests, 0 failures | none
+2026-10-29 09:42 | stop | 4.2 | G1 review blockers -> ask the user | none
 ```
