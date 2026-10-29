@@ -1,0 +1,6 @@
+{
+ "id": "pe0278b83",
+ "type": "C01",
+ "defect": "Poisson error on k ignores the binomial correlation",
+ "correct_uncertainty": 0.0025947588117838294
+}

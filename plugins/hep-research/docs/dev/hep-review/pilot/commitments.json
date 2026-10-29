@@ -1,0 +1,24 @@
+{
+ "algorithm": "sha256(nonce || gold bytes), nonce 32 random bytes",
+ "commitments": {
+  "calibration-labels.json": "a84b6dcaca6d562620df66d3a9f7e8c4c876cacbb41f4f5e2fb1aa8ca1449a4a",
+  "expected/p0162bce8.json": "5a0731d87494120bb0881eabb3347269fe797c300ff6d9ddec8cce8e0b380962",
+  "expected/p01e3f7aa.json": "bb6c3831f4543c82bf4ce31add6eb506cb998383694e5e884e9d9ed4adc53691",
+  "expected/p06f0da0f.json": "dc0eba41ac4493ba287fe95c1a3fe500f722a388fe39120fa38af135ad1a57e8",
+  "expected/p1736b719.json": "6ec177b2c7cbcd41c68e3dd3579c5c8a8f263c51ebf31ed27a9b1787bb59c12d",
+  "expected/p2986bf7e.json": "03bc3ee5d2d750ee3b84f7ca298165ebc5faa5c23a4fef6001b8165309a1bf33",
+  "expected/p36e0a36b.json": "fb38b4ad85454f51bc11f85794e664bb49cd07e7285753e5cd36b004dd7bdec7",
+  "expected/p4151ac15.json": "eefdbd96ec70de0532508f762d56334b2ddbb0c208094c726a2b9e4816e36c2e",
+  "expected/p58a3bba0.json": "f9a0eefbb15feb4600868c2032fb9a0df73d2fe54ea6e7b92b2293ea619b626a",
+  "expected/p5fbf2363.json": "88f4a5c0d66a66ab3e5ea677118fc8849e7fd35db0d442c80cfcc352db1570b6",
+  "expected/p69384685.json": "4842afbfc26291e2112bde494d7511788206cfb759c2abdc87a1aaa00efd57eb",
+  "expected/p6c7aea0e.json": "6b15b3428dcde5ed9fdf8eb56411d26bb8fdddb1c4616f855c1cf8bde86fa887",
+  "expected/p8390f2a4.json": "42af74d1e4a376d54bb8c10589fc29cabf3b7915a64ad3bc1249c1ff30436587",
+  "expected/pb23059dc.json": "2010fa1537b30e9703787ffea5ecbc33baa8eb60b3c1c39298105634d42074c4",
+  "expected/pe0278b83.json": "a69a5434d9727d916f6e5a2a49df4cff415c5ac2529b4d0a913961fb9bf04cd3",
+  "expected/pe1154782.json": "9e1bc7b10782609568f9a9e20d9220b0457c0b0f923b05b4c55c7b873adbcf92",
+  "expected/pf95c79fc.json": "759ab5fddc0b1ab2249ec9670b07e9ad07efd91456d225c259176113ece94d99",
+  "grader-instructions.md": "c25fa127d55f71ed5d07099b24e1972362be378e4b3b26367604d0259b3df8de",
+  "oracle.json": "ef3fd0956281fa63eba59faa53984b325bfbae00ee8b85c0b595624c537c4fdb"
+ }
+}

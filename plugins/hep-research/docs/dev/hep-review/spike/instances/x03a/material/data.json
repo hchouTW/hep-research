@@ -1,0 +1,21 @@
+{
+ "unit": "GeV",
+ "measurements": [
+  {
+   "name": "M1",
+   "value": 172.4,
+   "stat": 0.4,
+   "syst": 0.5
+  },
+  {
+   "name": "M2",
+   "value": 172.95,
+   "stat": 0.35,
+   "syst": 0.6
+  }
+ ],
+ "stated_results": {
+  "combined_value": 172.71,
+  "combined_uncertainty": 0.46
+ }
+}

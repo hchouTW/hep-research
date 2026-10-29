@@ -19,6 +19,9 @@
   "hep-ml": [
    "references/deep-learning-guide.md"
   ],
+  "hep-review": [
+   "references/domains/index.md"
+  ],
   "hep-theory": [
    "references/cosmic-ray-propagation.md",
    "references/hadron-structure-essentials.md"

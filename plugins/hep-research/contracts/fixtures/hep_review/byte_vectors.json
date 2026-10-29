@@ -1,0 +1,38 @@
+{
+ "description": "Gold byte vectors for the hep-review-metadata/1 encoding (hep-review spec v9 section 10.3). Each 'input' is strict JSON text; 'expected_hex' is the UTF-8 encoding written by hand from the rules (sorted ASCII keys, no whitespace, shortest integers, \\b \\t \\n \\f \\r, other U+0000-001F as lowercase \\u00xx, quote and backslash escaped, slash and every other scalar written directly), not produced by the implementation under test. 'reject' vectors must fail ingestion with the given code.",
+ "accept": [
+  {"name": "control_characters", "input": "\"\\u0000\\u0001\\b\\t\\n\\u000b\\f\\r\\u001f\"", "expected_text": "\"\\u0000\\u0001\\b\\t\\n\\u000b\\f\\r\\u001f\"", "expected_hex": "225c75303030305c75303030315c625c745c6e5c75303030625c665c725c753030316622"},
+  {"name": "slash_quote_backslash", "input": "\"a\\/b\\\"c\\\\d\"", "expected_text": "\"a/b\\\"c\\\\d\"", "expected_hex": "22612f625c22635c5c6422"},
+  {"name": "chinese_and_emoji", "input": "\"\\u4e2d\\u6587\\ud83d\\ude00\"", "expected_hex": "22e4b8ade69687f09f988022"},
+  {"name": "combining_not_normalized", "input": "[\"e\\u0301\",\"\\u00e9\"]", "expected_hex": "5b2265cc81222c22c3a9225d"},
+  {"name": "del_and_line_separators_raw", "input": "\"\\u007f\\u2028\\u2029\"", "expected_hex": "227fe280a8e280a922"},
+  {"name": "safe_integer_boundaries", "input": "[9007199254740991,-9007199254740991,0,-1,10]", "expected_text": "[9007199254740991,-9007199254740991,0,-1,10]", "expected_hex": "5b393030373139393235343734303939312c2d393030373139393235343734303939312c302c2d312c31305d"},
+  {"name": "nested_objects_sorted_arrays_kept", "input": "{ \"b\" : {\"d\":1, \"c\":[3,1,2]}, \"a\":true, \"A\":null, \"e\":[], \"f\":{} }", "expected_text": "{\"A\":null,\"a\":true,\"b\":{\"c\":[3,1,2],\"d\":1},\"e\":[],\"f\":{}}", "expected_hex": "7b2241223a6e756c6c2c2261223a747275652c2262223a7b2263223a5b332c312c325d2c2264223a317d2c2265223a5b5d2c2266223a7b7d7d"},
+  {"name": "booleans_null_false", "input": "[true,false,null]", "expected_text": "[true,false,null]", "expected_hex": "5b747275652c66616c73652c6e756c6c5d"},
+  {"name": "key_order_is_ascii_codepoint", "input": "{\"b_1\":1,\"a\":2,\"B\":3,\"_z\":4,\"a1\":5}", "expected_text": "{\"B\":3,\"_z\":4,\"a\":2,\"a1\":5,\"b_1\":1}", "expected_hex": "7b2242223a332c225f7a223a342c2261223a322c226131223a352c22625f31223a317d"}
+ ],
+ "reject": [
+  {"name": "duplicate_key_plain", "input": "{\"id\":1,\"id\":2}", "code": "json.duplicate_key"},
+  {"name": "duplicate_key_escaped", "input": "{\"id\":1,\"\\u0069d\":2}", "code": "json.duplicate_key"},
+  {"name": "minus_zero", "input": "[-0]", "code": "json.minus_zero"},
+  {"name": "float_decimal", "input": "[1.0]", "code": "json.float"},
+  {"name": "float_exponent", "input": "[1e3]", "code": "json.float"},
+  {"name": "nan", "input": "[NaN]", "code": "json.constant"},
+  {"name": "infinity", "input": "[Infinity]", "code": "json.constant"},
+  {"name": "minus_infinity", "input": "[-Infinity]", "code": "json.constant"},
+  {"name": "above_safe_integer", "input": "[9007199254740992]", "code": "json.int_range"},
+  {"name": "below_safe_integer", "input": "[-9007199254740992]", "code": "json.int_range"},
+  {"name": "escaped_lone_high_surrogate", "input": "[\"\\ud800\"]", "code": "json.lone_surrogate"},
+  {"name": "escaped_lone_low_surrogate", "input": "{\"a\":\"x\\udc00\"}", "code": "json.lone_surrogate"},
+  {"name": "non_ascii_key", "input": "{\"\\u00e9\":1}", "code": "json.key_name"},
+  {"name": "key_with_space", "input": "{\"a b\":1}", "code": "json.key_name"},
+  {"name": "syntax_error", "input": "{\"a\":1,}", "code": "json.syntax"}
+ ],
+ "reject_bytes_hex": [
+  {"name": "utf8_bom", "hex": "efbbbf7b2261223a317d", "code": "json.bom"},
+  {"name": "utf16_le_bom", "hex": "fffe7b002200610022003a0031007d00", "code": "json.encoding"},
+  {"name": "utf32_le_bom", "hex": "fffe00007b000000220000006100000022000000", "code": "json.encoding"},
+  {"name": "raw_lone_surrogate_bytes", "hex": "5b22eda080225d", "code": "json.encoding"},
+  {"name": "invalid_utf8", "hex": "5b22ff225d", "code": "json.encoding"}
+ ]
+}

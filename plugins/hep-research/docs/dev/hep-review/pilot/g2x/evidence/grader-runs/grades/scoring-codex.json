@@ -1,0 +1,354 @@
+{
+  "D043": {
+    "grade": "accept",
+    "reason": "A finding identifies the omitted alpha^2 * off variance from the independent Poisson continuum observation in the yield uncertainty."
+  },
+  "D069": {
+    "grade": "accept",
+    "reason": "A finding identifies the fixed-total multinomial constraint, requiring two degrees of freedom rather than three for three categories."
+  },
+  "F007": {
+    "grade": "D1",
+    "reason": "Identifies the omitted independent transfer-calibration variance term control^2 * transfer_error^2 in the net-signal propagation."
+  },
+  "D064": {
+    "grade": "accept",
+    "reason": "A finding identifies the transposed response inversion as inconsistent with the reconstruction convention; the estimator must use R^{-1} n."
+  },
+  "D019": {
+    "grade": "accept",
+    "reason": "A finding identifies the single branching-fraction factor in the normalization where two independent parent decays require branch_fraction^2."
+  },
+  "F062": {
+    "grade": "D1",
+    "reason": "Identifies the transposed response inversion as inconsistent with the reconstruction convention; the estimator must use R^{-1} n."
+  },
+  "D034": {
+    "grade": "accept",
+    "reason": "A finding identifies the missing finite-population correction 1-sampled/population in the sampling variance and resulting uncertainties."
+  },
+  "F067": {
+    "grade": "D2",
+    "reason": "Identifies the omitted other-bin Poisson contribution; each unfolded variance must sum both squared inverse coefficients times the observed counts."
+  },
+  "F058": {
+    "grade": "D2",
+    "reason": "Identifies the omitted other-bin Poisson contribution; each unfolded variance must sum both squared inverse coefficients times the observed counts."
+  },
+  "F003": {
+    "grade": "D1",
+    "reason": "Identifies the omitted independent transfer-calibration variance term control^2 * transfer_error^2 in the net-signal propagation."
+  },
+  "D080": {
+    "grade": "accept",
+    "reason": "A finding identifies the linear trials expression as a bound rather than the exact independent-trial probability, giving the exact product/complement probability."
+  },
+  "F082": {
+    "grade": "D1",
+    "reason": "Identifies the linear trials expression as a bound rather than the exact independent-trial probability, giving the exact product/complement probability."
+  },
+  "F008": {
+    "grade": "D2",
+    "reason": "Identifies the reference count being held fixed despite its Poisson fluctuation, omitting the denominator contribution to ratio variance."
+  },
+  "F070": {
+    "grade": "D1",
+    "reason": "Identifies the observed-count denominators as inconsistent with the stated Pearson statistic, which requires expected-count denominators."
+  },
+  "D028": {
+    "grade": "accept",
+    "reason": "A finding identifies the reported gamma posterior mean as the mode; the mean is shape/rate, rather than (shape-1)/rate."
+  },
+  "F004": {
+    "grade": "D2",
+    "reason": "Identifies the reference count being held fixed despite its Poisson fluctuation, omitting the denominator contribution to ratio variance."
+  },
+  "F024": {
+    "grade": "D1",
+    "reason": "Identifies the single per-track efficiency in the normalization where both independent track selections require track_efficiency^2."
+  },
+  "D061": {
+    "grade": "accept",
+    "reason": "A finding identifies the omitted other-bin Poisson contribution; each unfolded variance must sum both squared inverse coefficients times the observed counts."
+  },
+  "F020": {
+    "grade": "D1",
+    "reason": "Identifies the single per-track efficiency in the normalization where both independent track selections require track_efficiency^2."
+  },
+  "D077": {
+    "grade": "accept",
+    "reason": "A finding identifies the fixed-total multinomial constraint, requiring two degrees of freedom rather than three for three categories."
+  },
+  "F011": {
+    "grade": "D1",
+    "reason": "Identifies the omitted independent transfer-calibration variance term control^2 * transfer_error^2 in the net-signal propagation."
+  },
+  "F085": {
+    "grade": "D1",
+    "reason": "Identifies the linear trials expression as a bound rather than the exact independent-trial probability, giving the exact product/complement probability."
+  },
+  "D026": {
+    "grade": "accept",
+    "reason": "A finding identifies the reported gamma posterior mean as the mode; the mean is shape/rate, rather than (shape-1)/rate."
+  },
+  "F016": {
+    "grade": "D1",
+    "reason": "Identifies the single per-track efficiency in the normalization where both independent track selections require track_efficiency^2."
+  },
+  "F017": {
+    "grade": "D2",
+    "reason": "Identifies the single branching-fraction factor in the normalization where two independent parent decays require branch_fraction^2."
+  },
+  "D039": {
+    "grade": "accept",
+    "reason": "A finding identifies the missing finite-population correction 1-sampled/population in the sampling variance and resulting uncertainties."
+  },
+  "D073": {
+    "grade": "accept",
+    "reason": "A finding identifies the fixed-total multinomial constraint, requiring two degrees of freedom rather than three for three categories."
+  },
+  "F048": {
+    "grade": "D1",
+    "reason": "Identifies the omitted off_keep correction in the continuum transfer and its effects on the subtraction and rate."
+  },
+  "F044": {
+    "grade": "D1",
+    "reason": "Identifies the omitted off_keep correction in the continuum transfer and its effects on the subtraction and rate."
+  },
+  "D015": {
+    "grade": "accept",
+    "reason": "A finding identifies the single branching-fraction factor in the normalization where two independent parent decays require branch_fraction^2."
+  },
+  "F053": {
+    "grade": "D1",
+    "reason": "Identifies the omitted off_keep correction in the continuum transfer and its effects on the subtraction and rate."
+  },
+  "F071": {
+    "grade": "D2",
+    "reason": "Identifies the fixed-total multinomial constraint, requiring two degrees of freedom rather than three for three categories."
+  },
+  "F075": {
+    "grade": "D1",
+    "reason": "Identifies the observed-count denominators as inconsistent with the stated Pearson statistic, which requires expected-count denominators."
+  },
+  "D068": {
+    "grade": "accept",
+    "reason": "A finding identifies the observed-count denominators as inconsistent with the stated Pearson statistic, which requires expected-count denominators."
+  },
+  "D060": {
+    "grade": "accept",
+    "reason": "A finding identifies the transposed response inversion as inconsistent with the reconstruction convention; the estimator must use R^{-1} n."
+  },
+  "F049": {
+    "grade": "D2",
+    "reason": "Identifies the omitted alpha^2 * off variance from the independent Poisson continuum observation in the yield uncertainty."
+  },
+  "F059": {
+    "grade": "none",
+    "reason": "Lists corrected unfolded results and refers to F1/F2, but this finding itself names neither the transposed inversion nor the omitted other-bin variance mechanism."
+  },
+  "F063": {
+    "grade": "D2",
+    "reason": "Identifies the omitted other-bin Poisson contribution; each unfolded variance must sum both squared inverse coefficients times the observed counts."
+  },
+  "D010": {
+    "grade": "accept",
+    "reason": "A finding identifies the reference count being held fixed despite its Poisson fluctuation, omitting the denominator contribution to ratio variance."
+  },
+  "D022": {
+    "grade": "accept",
+    "reason": "A finding identifies the single per-track efficiency in the normalization where both independent track selections require track_efficiency^2."
+  },
+  "F084": {
+    "grade": "D1",
+    "reason": "Identifies the linear trials expression as a bound rather than the exact independent-trial probability, giving the exact product/complement probability."
+  },
+  "D065": {
+    "grade": "accept",
+    "reason": "A finding identifies the omitted other-bin Poisson contribution; each unfolded variance must sum both squared inverse coefficients times the observed counts."
+  },
+  "D042": {
+    "grade": "accept",
+    "reason": "A finding identifies the omitted off_keep correction in the continuum transfer and its effects on the subtraction and rate."
+  },
+  "D001": {
+    "grade": "accept",
+    "reason": "A finding identifies the omitted independent transfer-calibration variance term control^2 * transfer_error^2 in the net-signal propagation."
+  },
+  "F054": {
+    "grade": "D2",
+    "reason": "Identifies the omitted alpha^2 * off variance from the independent Poisson continuum observation in the yield uncertainty."
+  },
+  "F032": {
+    "grade": "D1",
+    "reason": "Identifies the reported gamma posterior mean as the mode; the mean is shape/rate, rather than (shape-1)/rate."
+  },
+  "D047": {
+    "grade": "accept",
+    "reason": "A finding identifies the omitted alpha^2 * off variance from the independent Poisson continuum observation in the yield uncertainty."
+  },
+  "F040": {
+    "grade": "D1",
+    "reason": "Identifies the missing finite-population correction 1-sampled/population in the sampling variance and resulting uncertainties."
+  },
+  "F087": {
+    "grade": "D1",
+    "reason": "Identifies the linear trials expression as a bound rather than the exact independent-trial probability, giving the exact product/complement probability."
+  },
+  "D006": {
+    "grade": "accept",
+    "reason": "A finding identifies the reference count being held fixed despite its Poisson fluctuation, omitting the denominator contribution to ratio variance."
+  },
+  "D051": {
+    "grade": "accept",
+    "reason": "A finding identifies the omitted alpha^2 * off variance from the independent Poisson continuum observation in the yield uncertainty."
+  },
+  "F045": {
+    "grade": "D2",
+    "reason": "Identifies the omitted alpha^2 * off variance from the independent Poisson continuum observation in the yield uncertainty."
+  },
+  "D086": {
+    "grade": "accept",
+    "reason": "A finding identifies the linear trials expression as a bound rather than the exact independent-trial probability, giving the exact product/complement probability."
+  },
+  "F081": {
+    "grade": "D1",
+    "reason": "Identifies the linear trials expression as a bound rather than the exact independent-trial probability, giving the exact product/complement probability."
+  },
+  "F074": {
+    "grade": "D2",
+    "reason": "Identifies the fixed-total multinomial constraint, requiring two degrees of freedom rather than three for three categories."
+  },
+  "D046": {
+    "grade": "accept",
+    "reason": "A finding identifies the omitted off_keep correction in the continuum transfer and its effects on the subtraction and rate."
+  },
+  "F079": {
+    "grade": "D1",
+    "reason": "Identifies the observed-count denominators as inconsistent with the stated Pearson statistic, which requires expected-count denominators."
+  },
+  "F013": {
+    "grade": "none",
+    "reason": "Reports a numerical underestimate of ratio_error but names neither the missing transfer-calibration term nor the missing Poisson reference contribution."
+  },
+  "D083": {
+    "grade": "accept",
+    "reason": "A finding identifies the linear trials expression as a bound rather than the exact independent-trial probability, giving the exact product/complement probability."
+  },
+  "F057": {
+    "grade": "D1",
+    "reason": "Identifies the transposed response inversion as inconsistent with the reconstruction convention; the estimator must use R^{-1} n."
+  },
+  "F033": {
+    "grade": "D1",
+    "reason": "Identifies the reported gamma posterior mean as the mode; the mean is shape/rate, rather than (shape-1)/rate."
+  },
+  "F038": {
+    "grade": "D1",
+    "reason": "Identifies the missing finite-population correction 1-sampled/population in the sampling variance and resulting uncertainties."
+  },
+  "D002": {
+    "grade": "accept",
+    "reason": "A finding identifies the reference count being held fixed despite its Poisson fluctuation, omitting the denominator contribution to ratio variance."
+  },
+  "D005": {
+    "grade": "accept",
+    "reason": "A finding identifies the omitted independent transfer-calibration variance term control^2 * transfer_error^2 in the net-signal propagation."
+  },
+  "F030": {
+    "grade": "D1",
+    "reason": "Identifies the reported gamma posterior mean as the mode; the mean is shape/rate, rather than (shape-1)/rate."
+  },
+  "F052": {
+    "grade": "D1",
+    "reason": "Identifies the omitted off_keep correction in the continuum transfer and its effects on the subtraction and rate."
+  },
+  "D014": {
+    "grade": "accept",
+    "reason": "A finding identifies the single per-track efficiency in the normalization where both independent track selections require track_efficiency^2."
+  },
+  "D031": {
+    "grade": "accept",
+    "reason": "A finding identifies the reported gamma posterior mean as the mode; the mean is shape/rate, rather than (shape-1)/rate."
+  },
+  "F036": {
+    "grade": "D1",
+    "reason": "Identifies the missing finite-population correction 1-sampled/population in the sampling variance and resulting uncertainties."
+  },
+  "D018": {
+    "grade": "accept",
+    "reason": "A finding identifies the single per-track efficiency in the normalization where both independent track selections require track_efficiency^2."
+  },
+  "D037": {
+    "grade": "accept",
+    "reason": "A finding identifies the missing finite-population correction 1-sampled/population in the sampling variance and resulting uncertainties."
+  },
+  "D076": {
+    "grade": "accept",
+    "reason": "A finding identifies the observed-count denominators as inconsistent with the stated Pearson statistic, which requires expected-count denominators."
+  },
+  "F029": {
+    "grade": "D1",
+    "reason": "Identifies the reported gamma posterior mean as the mode; the mean is shape/rate, rather than (shape-1)/rate."
+  },
+  "F088": {
+    "grade": "D1",
+    "reason": "Identifies the linear trials expression as a bound rather than the exact independent-trial probability, giving the exact product/complement probability."
+  },
+  "F025": {
+    "grade": "D2",
+    "reason": "Identifies the single branching-fraction factor in the normalization where two independent parent decays require branch_fraction^2."
+  },
+  "F021": {
+    "grade": "D2",
+    "reason": "Identifies the single branching-fraction factor in the normalization where two independent parent decays require branch_fraction^2."
+  },
+  "D056": {
+    "grade": "accept",
+    "reason": "A finding identifies the omitted other-bin Poisson contribution; each unfolded variance must sum both squared inverse coefficients times the observed counts."
+  },
+  "F078": {
+    "grade": "D2",
+    "reason": "Identifies the fixed-total multinomial constraint, requiring two degrees of freedom rather than three for three categories."
+  },
+  "F012": {
+    "grade": "D2",
+    "reason": "Identifies the reference count being held fixed despite its Poisson fluctuation, omitting the denominator contribution to ratio variance."
+  },
+  "F041": {
+    "grade": "D1",
+    "reason": "Identifies the missing finite-population correction 1-sampled/population in the sampling variance and resulting uncertainties."
+  },
+  "F066": {
+    "grade": "D1",
+    "reason": "Identifies the transposed response inversion as inconsistent with the reconstruction convention; the estimator must use R^{-1} n."
+  },
+  "D009": {
+    "grade": "accept",
+    "reason": "A finding identifies the omitted independent transfer-calibration variance term control^2 * transfer_error^2 in the net-signal propagation."
+  },
+  "D050": {
+    "grade": "accept",
+    "reason": "A finding identifies the omitted off_keep correction in the continuum transfer and its effects on the subtraction and rate."
+  },
+  "D072": {
+    "grade": "accept",
+    "reason": "A finding identifies the observed-count denominators as inconsistent with the stated Pearson statistic, which requires expected-count denominators."
+  },
+  "F035": {
+    "grade": "D1",
+    "reason": "Identifies the missing finite-population correction 1-sampled/population in the sampling variance and resulting uncertainties."
+  },
+  "D023": {
+    "grade": "accept",
+    "reason": "A finding identifies the single branching-fraction factor in the normalization where two independent parent decays require branch_fraction^2."
+  },
+  "F027": {
+    "grade": "D1",
+    "reason": "Identifies the reported gamma posterior mean as the mode; the mean is shape/rate, rather than (shape-1)/rate."
+  },
+  "D055": {
+    "grade": "accept",
+    "reason": "A finding identifies the transposed response inversion as inconsistent with the reconstruction convention; the estimator must use R^{-1} n."
+  }
+}

@@ -1,0 +1,10 @@
+{
+ "correct": {
+  "sigma_yield": 6.431477512982534
+ },
+ "defect": null,
+ "family": "weighted-yield",
+ "id": "hf2274be0",
+ "type": "C02",
+ "variant": "alternative"
+}

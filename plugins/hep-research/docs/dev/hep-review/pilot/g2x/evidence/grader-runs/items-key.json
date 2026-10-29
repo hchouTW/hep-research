@@ -1,0 +1,442 @@
+{
+ "D001": {
+  "defect_id": "D1",
+  "kind": "defect",
+  "trial": "x4fbb5c80-t1"
+ },
+ "D002": {
+  "defect_id": "D2",
+  "kind": "defect",
+  "trial": "x4fbb5c80-t1"
+ },
+ "D005": {
+  "defect_id": "D1",
+  "kind": "defect",
+  "trial": "x4fbb5c80-t2"
+ },
+ "D006": {
+  "defect_id": "D2",
+  "kind": "defect",
+  "trial": "x4fbb5c80-t2"
+ },
+ "D009": {
+  "defect_id": "D1",
+  "kind": "defect",
+  "trial": "x4fbb5c80-t3"
+ },
+ "D010": {
+  "defect_id": "D2",
+  "kind": "defect",
+  "trial": "x4fbb5c80-t3"
+ },
+ "D014": {
+  "defect_id": "D1",
+  "kind": "defect",
+  "trial": "x66bbe2ee-t1"
+ },
+ "D015": {
+  "defect_id": "D2",
+  "kind": "defect",
+  "trial": "x66bbe2ee-t1"
+ },
+ "D018": {
+  "defect_id": "D1",
+  "kind": "defect",
+  "trial": "x66bbe2ee-t2"
+ },
+ "D019": {
+  "defect_id": "D2",
+  "kind": "defect",
+  "trial": "x66bbe2ee-t2"
+ },
+ "D022": {
+  "defect_id": "D1",
+  "kind": "defect",
+  "trial": "x66bbe2ee-t3"
+ },
+ "D023": {
+  "defect_id": "D2",
+  "kind": "defect",
+  "trial": "x66bbe2ee-t3"
+ },
+ "D026": {
+  "defect_id": "D1",
+  "kind": "defect",
+  "trial": "x83b853ee-t1"
+ },
+ "D028": {
+  "defect_id": "D1",
+  "kind": "defect",
+  "trial": "x83b853ee-t2"
+ },
+ "D031": {
+  "defect_id": "D1",
+  "kind": "defect",
+  "trial": "x83b853ee-t3"
+ },
+ "D034": {
+  "defect_id": "D1",
+  "kind": "defect",
+  "trial": "x87c5cae5-t1"
+ },
+ "D037": {
+  "defect_id": "D1",
+  "kind": "defect",
+  "trial": "x87c5cae5-t2"
+ },
+ "D039": {
+  "defect_id": "D1",
+  "kind": "defect",
+  "trial": "x87c5cae5-t3"
+ },
+ "D042": {
+  "defect_id": "D1",
+  "kind": "defect",
+  "trial": "x9e0a85ed-t1"
+ },
+ "D043": {
+  "defect_id": "D2",
+  "kind": "defect",
+  "trial": "x9e0a85ed-t1"
+ },
+ "D046": {
+  "defect_id": "D1",
+  "kind": "defect",
+  "trial": "x9e0a85ed-t2"
+ },
+ "D047": {
+  "defect_id": "D2",
+  "kind": "defect",
+  "trial": "x9e0a85ed-t2"
+ },
+ "D050": {
+  "defect_id": "D1",
+  "kind": "defect",
+  "trial": "x9e0a85ed-t3"
+ },
+ "D051": {
+  "defect_id": "D2",
+  "kind": "defect",
+  "trial": "x9e0a85ed-t3"
+ },
+ "D055": {
+  "defect_id": "D1",
+  "kind": "defect",
+  "trial": "xb67e4768-t1"
+ },
+ "D056": {
+  "defect_id": "D2",
+  "kind": "defect",
+  "trial": "xb67e4768-t1"
+ },
+ "D060": {
+  "defect_id": "D1",
+  "kind": "defect",
+  "trial": "xb67e4768-t2"
+ },
+ "D061": {
+  "defect_id": "D2",
+  "kind": "defect",
+  "trial": "xb67e4768-t2"
+ },
+ "D064": {
+  "defect_id": "D1",
+  "kind": "defect",
+  "trial": "xb67e4768-t3"
+ },
+ "D065": {
+  "defect_id": "D2",
+  "kind": "defect",
+  "trial": "xb67e4768-t3"
+ },
+ "D068": {
+  "defect_id": "D1",
+  "kind": "defect",
+  "trial": "xc5b7a1ca-t1"
+ },
+ "D069": {
+  "defect_id": "D2",
+  "kind": "defect",
+  "trial": "xc5b7a1ca-t1"
+ },
+ "D072": {
+  "defect_id": "D1",
+  "kind": "defect",
+  "trial": "xc5b7a1ca-t2"
+ },
+ "D073": {
+  "defect_id": "D2",
+  "kind": "defect",
+  "trial": "xc5b7a1ca-t2"
+ },
+ "D076": {
+  "defect_id": "D1",
+  "kind": "defect",
+  "trial": "xc5b7a1ca-t3"
+ },
+ "D077": {
+  "defect_id": "D2",
+  "kind": "defect",
+  "trial": "xc5b7a1ca-t3"
+ },
+ "D080": {
+  "defect_id": "D1",
+  "kind": "defect",
+  "trial": "xfa9a973b-t1"
+ },
+ "D083": {
+  "defect_id": "D1",
+  "kind": "defect",
+  "trial": "xfa9a973b-t2"
+ },
+ "D086": {
+  "defect_id": "D1",
+  "kind": "defect",
+  "trial": "xfa9a973b-t3"
+ },
+ "F003": {
+  "finding_index": 0,
+  "kind": "finding",
+  "trial": "x4fbb5c80-t1"
+ },
+ "F004": {
+  "finding_index": 1,
+  "kind": "finding",
+  "trial": "x4fbb5c80-t1"
+ },
+ "F007": {
+  "finding_index": 0,
+  "kind": "finding",
+  "trial": "x4fbb5c80-t2"
+ },
+ "F008": {
+  "finding_index": 1,
+  "kind": "finding",
+  "trial": "x4fbb5c80-t2"
+ },
+ "F011": {
+  "finding_index": 0,
+  "kind": "finding",
+  "trial": "x4fbb5c80-t3"
+ },
+ "F012": {
+  "finding_index": 1,
+  "kind": "finding",
+  "trial": "x4fbb5c80-t3"
+ },
+ "F013": {
+  "finding_index": 2,
+  "kind": "finding",
+  "trial": "x4fbb5c80-t3"
+ },
+ "F016": {
+  "finding_index": 0,
+  "kind": "finding",
+  "trial": "x66bbe2ee-t1"
+ },
+ "F017": {
+  "finding_index": 1,
+  "kind": "finding",
+  "trial": "x66bbe2ee-t1"
+ },
+ "F020": {
+  "finding_index": 0,
+  "kind": "finding",
+  "trial": "x66bbe2ee-t2"
+ },
+ "F021": {
+  "finding_index": 1,
+  "kind": "finding",
+  "trial": "x66bbe2ee-t2"
+ },
+ "F024": {
+  "finding_index": 0,
+  "kind": "finding",
+  "trial": "x66bbe2ee-t3"
+ },
+ "F025": {
+  "finding_index": 1,
+  "kind": "finding",
+  "trial": "x66bbe2ee-t3"
+ },
+ "F027": {
+  "finding_index": 0,
+  "kind": "finding",
+  "trial": "x83b853ee-t1"
+ },
+ "F029": {
+  "finding_index": 0,
+  "kind": "finding",
+  "trial": "x83b853ee-t2"
+ },
+ "F030": {
+  "finding_index": 1,
+  "kind": "finding",
+  "trial": "x83b853ee-t2"
+ },
+ "F032": {
+  "finding_index": 0,
+  "kind": "finding",
+  "trial": "x83b853ee-t3"
+ },
+ "F033": {
+  "finding_index": 1,
+  "kind": "finding",
+  "trial": "x83b853ee-t3"
+ },
+ "F035": {
+  "finding_index": 0,
+  "kind": "finding",
+  "trial": "x87c5cae5-t1"
+ },
+ "F036": {
+  "finding_index": 1,
+  "kind": "finding",
+  "trial": "x87c5cae5-t1"
+ },
+ "F038": {
+  "finding_index": 0,
+  "kind": "finding",
+  "trial": "x87c5cae5-t2"
+ },
+ "F040": {
+  "finding_index": 0,
+  "kind": "finding",
+  "trial": "x87c5cae5-t3"
+ },
+ "F041": {
+  "finding_index": 1,
+  "kind": "finding",
+  "trial": "x87c5cae5-t3"
+ },
+ "F044": {
+  "finding_index": 0,
+  "kind": "finding",
+  "trial": "x9e0a85ed-t1"
+ },
+ "F045": {
+  "finding_index": 1,
+  "kind": "finding",
+  "trial": "x9e0a85ed-t1"
+ },
+ "F048": {
+  "finding_index": 0,
+  "kind": "finding",
+  "trial": "x9e0a85ed-t2"
+ },
+ "F049": {
+  "finding_index": 1,
+  "kind": "finding",
+  "trial": "x9e0a85ed-t2"
+ },
+ "F052": {
+  "finding_index": 0,
+  "kind": "finding",
+  "trial": "x9e0a85ed-t3"
+ },
+ "F053": {
+  "finding_index": 1,
+  "kind": "finding",
+  "trial": "x9e0a85ed-t3"
+ },
+ "F054": {
+  "finding_index": 2,
+  "kind": "finding",
+  "trial": "x9e0a85ed-t3"
+ },
+ "F057": {
+  "finding_index": 0,
+  "kind": "finding",
+  "trial": "xb67e4768-t1"
+ },
+ "F058": {
+  "finding_index": 1,
+  "kind": "finding",
+  "trial": "xb67e4768-t1"
+ },
+ "F059": {
+  "finding_index": 2,
+  "kind": "finding",
+  "trial": "xb67e4768-t1"
+ },
+ "F062": {
+  "finding_index": 0,
+  "kind": "finding",
+  "trial": "xb67e4768-t2"
+ },
+ "F063": {
+  "finding_index": 1,
+  "kind": "finding",
+  "trial": "xb67e4768-t2"
+ },
+ "F066": {
+  "finding_index": 0,
+  "kind": "finding",
+  "trial": "xb67e4768-t3"
+ },
+ "F067": {
+  "finding_index": 1,
+  "kind": "finding",
+  "trial": "xb67e4768-t3"
+ },
+ "F070": {
+  "finding_index": 0,
+  "kind": "finding",
+  "trial": "xc5b7a1ca-t1"
+ },
+ "F071": {
+  "finding_index": 1,
+  "kind": "finding",
+  "trial": "xc5b7a1ca-t1"
+ },
+ "F074": {
+  "finding_index": 0,
+  "kind": "finding",
+  "trial": "xc5b7a1ca-t2"
+ },
+ "F075": {
+  "finding_index": 1,
+  "kind": "finding",
+  "trial": "xc5b7a1ca-t2"
+ },
+ "F078": {
+  "finding_index": 0,
+  "kind": "finding",
+  "trial": "xc5b7a1ca-t3"
+ },
+ "F079": {
+  "finding_index": 1,
+  "kind": "finding",
+  "trial": "xc5b7a1ca-t3"
+ },
+ "F081": {
+  "finding_index": 0,
+  "kind": "finding",
+  "trial": "xfa9a973b-t1"
+ },
+ "F082": {
+  "finding_index": 1,
+  "kind": "finding",
+  "trial": "xfa9a973b-t1"
+ },
+ "F084": {
+  "finding_index": 0,
+  "kind": "finding",
+  "trial": "xfa9a973b-t2"
+ },
+ "F085": {
+  "finding_index": 1,
+  "kind": "finding",
+  "trial": "xfa9a973b-t2"
+ },
+ "F087": {
+  "finding_index": 0,
+  "kind": "finding",
+  "trial": "xfa9a973b-t3"
+ },
+ "F088": {
+  "finding_index": 1,
+  "kind": "finding",
+  "trial": "xfa9a973b-t3"
+ }
+}

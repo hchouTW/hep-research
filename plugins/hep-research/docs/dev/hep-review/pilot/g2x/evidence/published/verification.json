@@ -1,0 +1,1038 @@
+{
+  "ok": true,
+  "issues": [],
+  "counts": {
+    "C01": 8,
+    "C04": 2,
+    "C02": 4,
+    "C03": 2
+  },
+  "oracle_runs": [
+    {
+      "id": "x9e0a85ed",
+      "returncode": 0,
+      "result": {
+        "id": "x9e0a85ed",
+        "ok": true,
+        "checks": [
+          {
+            "check": "identity",
+            "passed": true
+          },
+          {
+            "check": "complete_result_vector",
+            "passed": true
+          },
+          {
+            "check": "written_method:alpha",
+            "passed": true
+          },
+          {
+            "check": "written_method:background",
+            "passed": true
+          },
+          {
+            "check": "written_method:yield_value",
+            "passed": true
+          },
+          {
+            "check": "written_method:rate",
+            "passed": true
+          },
+          {
+            "check": "written_method:rate_error",
+            "passed": true
+          },
+          {
+            "check": "material_single_correction:D1",
+            "passed": true
+          },
+          {
+            "check": "complete_correction_keys:D1",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D1:alpha",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D1:background",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D1:yield_value",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D1:rate",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D1:rate_error",
+            "passed": true
+          },
+          {
+            "check": "material_single_correction:D2",
+            "passed": true
+          },
+          {
+            "check": "complete_correction_keys:D2",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D2:rate_error",
+            "passed": true
+          }
+        ]
+      },
+      "stderr": ""
+    },
+    {
+      "id": "xb67e4768",
+      "returncode": 0,
+      "result": {
+        "id": "xb67e4768",
+        "ok": true,
+        "checks": [
+          {
+            "check": "identity",
+            "passed": true
+          },
+          {
+            "check": "complete_result_vector",
+            "passed": true
+          },
+          {
+            "check": "written_method:true_first",
+            "passed": true
+          },
+          {
+            "check": "written_method:true_second",
+            "passed": true
+          },
+          {
+            "check": "written_method:variance_first",
+            "passed": true
+          },
+          {
+            "check": "written_method:variance_second",
+            "passed": true
+          },
+          {
+            "check": "written_method:rate_first",
+            "passed": true
+          },
+          {
+            "check": "written_method:rate_first_error",
+            "passed": true
+          },
+          {
+            "check": "material_single_correction:D1",
+            "passed": true
+          },
+          {
+            "check": "complete_correction_keys:D1",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D1:true_first",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D1:true_second",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D1:variance_first",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D1:variance_second",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D1:rate_first",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D1:rate_first_error",
+            "passed": true
+          },
+          {
+            "check": "material_single_correction:D2",
+            "passed": true
+          },
+          {
+            "check": "complete_correction_keys:D2",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D2:variance_first",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D2:variance_second",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D2:rate_first_error",
+            "passed": true
+          }
+        ]
+      },
+      "stderr": ""
+    },
+    {
+      "id": "x87c5cae5",
+      "returncode": 0,
+      "result": {
+        "id": "x87c5cae5",
+        "ok": true,
+        "checks": [
+          {
+            "check": "identity",
+            "passed": true
+          },
+          {
+            "check": "complete_result_vector",
+            "passed": true
+          },
+          {
+            "check": "written_method:tag_fraction",
+            "passed": true
+          },
+          {
+            "check": "written_method:retained_candidates",
+            "passed": true
+          },
+          {
+            "check": "written_method:fraction_error",
+            "passed": true
+          },
+          {
+            "check": "written_method:retained_error",
+            "passed": true
+          },
+          {
+            "check": "material_single_correction:D1",
+            "passed": true
+          },
+          {
+            "check": "complete_correction_keys:D1",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D1:fraction_error",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D1:retained_error",
+            "passed": true
+          }
+        ]
+      },
+      "stderr": ""
+    },
+    {
+      "id": "xc55857c5",
+      "returncode": 0,
+      "result": {
+        "id": "xc55857c5",
+        "ok": true,
+        "checks": [
+          {
+            "check": "identity",
+            "passed": true
+          },
+          {
+            "check": "complete_result_vector",
+            "passed": true
+          },
+          {
+            "check": "written_method:mean",
+            "passed": true
+          },
+          {
+            "check": "written_method:mean_error",
+            "passed": true
+          },
+          {
+            "check": "written_method:consistency_chi2",
+            "passed": true
+          },
+          {
+            "check": "written_method:consistency_p",
+            "passed": true
+          },
+          {
+            "check": "written_method:energy",
+            "passed": true
+          },
+          {
+            "check": "written_method:energy_error",
+            "passed": true
+          },
+          {
+            "check": "empty_defects",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:mean",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:mean_error",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:consistency_chi2",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:consistency_p",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:energy",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:energy_error",
+            "passed": true
+          }
+        ]
+      },
+      "stderr": ""
+    },
+    {
+      "id": "xe0330e8e",
+      "returncode": 0,
+      "result": {
+        "id": "xe0330e8e",
+        "ok": true,
+        "checks": [
+          {
+            "check": "identity",
+            "passed": true
+          },
+          {
+            "check": "complete_result_vector",
+            "passed": true
+          },
+          {
+            "check": "written_method:total_time",
+            "passed": true
+          },
+          {
+            "check": "written_method:decays",
+            "passed": true
+          },
+          {
+            "check": "written_method:rate_summary",
+            "passed": true
+          },
+          {
+            "check": "written_method:rate_sd",
+            "passed": true
+          },
+          {
+            "check": "written_method:lifetime_mean",
+            "passed": true
+          },
+          {
+            "check": "empty_defects",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:total_time",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:decays",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:rate_summary",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:rate_sd",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:lifetime_mean",
+            "passed": true
+          }
+        ]
+      },
+      "stderr": ""
+    },
+    {
+      "id": "xb885e462",
+      "returncode": 0,
+      "result": {
+        "id": "xb885e462",
+        "ok": true,
+        "checks": [
+          {
+            "check": "identity",
+            "passed": true
+          },
+          {
+            "check": "complete_result_vector",
+            "passed": true
+          },
+          {
+            "check": "written_method:total_count",
+            "passed": true
+          },
+          {
+            "check": "written_method:total_exposure",
+            "passed": true
+          },
+          {
+            "check": "written_method:selected_rate",
+            "passed": true
+          },
+          {
+            "check": "written_method:deviance",
+            "passed": true
+          },
+          {
+            "check": "written_method:consistency_p",
+            "passed": true
+          },
+          {
+            "check": "written_method:production_rate",
+            "passed": true
+          },
+          {
+            "check": "written_method:production_error",
+            "passed": true
+          },
+          {
+            "check": "empty_defects",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:total_count",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:total_exposure",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:selected_rate",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:deviance",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:consistency_p",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:production_rate",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:production_error",
+            "passed": true
+          }
+        ]
+      },
+      "stderr": ""
+    },
+    {
+      "id": "xc5b7a1ca",
+      "returncode": 0,
+      "result": {
+        "id": "xc5b7a1ca",
+        "ok": true,
+        "checks": [
+          {
+            "check": "identity",
+            "passed": true
+          },
+          {
+            "check": "complete_result_vector",
+            "passed": true
+          },
+          {
+            "check": "written_method:total",
+            "passed": true
+          },
+          {
+            "check": "written_method:expected_first",
+            "passed": true
+          },
+          {
+            "check": "written_method:statistic",
+            "passed": true
+          },
+          {
+            "check": "written_method:degrees_of_freedom",
+            "passed": true
+          },
+          {
+            "check": "written_method:p_value",
+            "passed": true
+          },
+          {
+            "check": "material_single_correction:D1",
+            "passed": true
+          },
+          {
+            "check": "complete_correction_keys:D1",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D1:statistic",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D1:p_value",
+            "passed": true
+          },
+          {
+            "check": "material_single_correction:D2",
+            "passed": true
+          },
+          {
+            "check": "complete_correction_keys:D2",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D2:degrees_of_freedom",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D2:p_value",
+            "passed": true
+          }
+        ]
+      },
+      "stderr": ""
+    },
+    {
+      "id": "x48d287a1",
+      "returncode": 0,
+      "result": {
+        "id": "x48d287a1",
+        "ok": true,
+        "checks": [
+          {
+            "check": "identity",
+            "passed": true
+          },
+          {
+            "check": "complete_result_vector",
+            "passed": true
+          },
+          {
+            "check": "written_method:selected_pair",
+            "passed": true
+          },
+          {
+            "check": "written_method:fraction",
+            "passed": true
+          },
+          {
+            "check": "written_method:fraction_error",
+            "passed": true
+          },
+          {
+            "check": "written_method:ratio",
+            "passed": true
+          },
+          {
+            "check": "written_method:ratio_error",
+            "passed": true
+          },
+          {
+            "check": "empty_defects",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:selected_pair",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:fraction",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:fraction_error",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:ratio",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:ratio_error",
+            "passed": true
+          }
+        ]
+      },
+      "stderr": ""
+    },
+    {
+      "id": "x16abda08",
+      "returncode": 0,
+      "result": {
+        "id": "x16abda08",
+        "ok": true,
+        "checks": [
+          {
+            "check": "identity",
+            "passed": true
+          },
+          {
+            "check": "complete_result_vector",
+            "passed": true
+          },
+          {
+            "check": "written_method:efficiency",
+            "passed": true
+          },
+          {
+            "check": "written_method:efficiency_error",
+            "passed": true
+          },
+          {
+            "check": "written_method:rate",
+            "passed": true
+          },
+          {
+            "check": "written_method:rate_error",
+            "passed": true
+          },
+          {
+            "check": "empty_defects",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:efficiency",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:efficiency_error",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:rate",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:rate_error",
+            "passed": true
+          }
+        ]
+      },
+      "stderr": ""
+    },
+    {
+      "id": "x4fbb5c80",
+      "returncode": 0,
+      "result": {
+        "id": "x4fbb5c80",
+        "ok": true,
+        "checks": [
+          {
+            "check": "identity",
+            "passed": true
+          },
+          {
+            "check": "complete_result_vector",
+            "passed": true
+          },
+          {
+            "check": "written_method:background",
+            "passed": true
+          },
+          {
+            "check": "written_method:net_signal",
+            "passed": true
+          },
+          {
+            "check": "written_method:ratio",
+            "passed": true
+          },
+          {
+            "check": "written_method:ratio_error",
+            "passed": true
+          },
+          {
+            "check": "material_single_correction:D1",
+            "passed": true
+          },
+          {
+            "check": "complete_correction_keys:D1",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D1:ratio_error",
+            "passed": true
+          },
+          {
+            "check": "material_single_correction:D2",
+            "passed": true
+          },
+          {
+            "check": "complete_correction_keys:D2",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D2:ratio_error",
+            "passed": true
+          }
+        ]
+      },
+      "stderr": ""
+    },
+    {
+      "id": "x83b853ee",
+      "returncode": 0,
+      "result": {
+        "id": "x83b853ee",
+        "ok": true,
+        "checks": [
+          {
+            "check": "identity",
+            "passed": true
+          },
+          {
+            "check": "complete_result_vector",
+            "passed": true
+          },
+          {
+            "check": "written_method:posterior_shape",
+            "passed": true
+          },
+          {
+            "check": "written_method:posterior_rate",
+            "passed": true
+          },
+          {
+            "check": "written_method:posterior_mean",
+            "passed": true
+          },
+          {
+            "check": "written_method:posterior_sd",
+            "passed": true
+          },
+          {
+            "check": "material_single_correction:D1",
+            "passed": true
+          },
+          {
+            "check": "complete_correction_keys:D1",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D1:posterior_mean",
+            "passed": true
+          }
+        ]
+      },
+      "stderr": ""
+    },
+    {
+      "id": "xfb593672",
+      "returncode": 0,
+      "result": {
+        "id": "xfb593672",
+        "ok": true,
+        "checks": [
+          {
+            "check": "identity",
+            "passed": true
+          },
+          {
+            "check": "complete_result_vector",
+            "passed": true
+          },
+          {
+            "check": "written_method:displacement",
+            "passed": true
+          },
+          {
+            "check": "written_method:displacement_error",
+            "passed": true
+          },
+          {
+            "check": "written_method:energy_shift",
+            "passed": true
+          },
+          {
+            "check": "written_method:energy_error",
+            "passed": true
+          },
+          {
+            "check": "written_method:standardized_shift",
+            "passed": true
+          },
+          {
+            "check": "missing_input",
+            "passed": true
+          },
+          {
+            "check": "admissible_witnesses",
+            "passed": true
+          },
+          {
+            "check": "nonidentifiability",
+            "passed": true
+          }
+        ]
+      },
+      "stderr": ""
+    },
+    {
+      "id": "x82e314ad",
+      "returncode": 0,
+      "result": {
+        "id": "x82e314ad",
+        "ok": true,
+        "checks": [
+          {
+            "check": "identity",
+            "passed": true
+          },
+          {
+            "check": "complete_result_vector",
+            "passed": true
+          },
+          {
+            "check": "written_method:signal",
+            "passed": true
+          },
+          {
+            "check": "written_method:signal_variance",
+            "passed": true
+          },
+          {
+            "check": "written_method:selected_rate",
+            "passed": true
+          },
+          {
+            "check": "written_method:selected_rate_error",
+            "passed": true
+          },
+          {
+            "check": "written_method:production_rate",
+            "passed": true
+          },
+          {
+            "check": "written_method:production_rate_error",
+            "passed": true
+          },
+          {
+            "check": "missing_input",
+            "passed": true
+          },
+          {
+            "check": "admissible_witnesses",
+            "passed": true
+          },
+          {
+            "check": "nonidentifiability",
+            "passed": true
+          }
+        ]
+      },
+      "stderr": ""
+    },
+    {
+      "id": "xfa9a973b",
+      "returncode": 0,
+      "result": {
+        "id": "xfa9a973b",
+        "ok": true,
+        "checks": [
+          {
+            "check": "identity",
+            "passed": true
+          },
+          {
+            "check": "complete_result_vector",
+            "passed": true
+          },
+          {
+            "check": "written_method:scanned_width",
+            "passed": true
+          },
+          {
+            "check": "written_method:global_p",
+            "passed": true
+          },
+          {
+            "check": "written_method:null_survival",
+            "passed": true
+          },
+          {
+            "check": "material_single_correction:D1",
+            "passed": true
+          },
+          {
+            "check": "complete_correction_keys:D1",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D1:global_p",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D1:null_survival",
+            "passed": true
+          }
+        ]
+      },
+      "stderr": ""
+    },
+    {
+      "id": "x5309ca4d",
+      "returncode": 0,
+      "result": {
+        "id": "x5309ca4d",
+        "ok": true,
+        "checks": [
+          {
+            "check": "identity",
+            "passed": true
+          },
+          {
+            "check": "complete_result_vector",
+            "passed": true
+          },
+          {
+            "check": "written_method:posterior_shape",
+            "passed": true
+          },
+          {
+            "check": "written_method:posterior_precision",
+            "passed": true
+          },
+          {
+            "check": "written_method:posterior_mean",
+            "passed": true
+          },
+          {
+            "check": "written_method:posterior_sd",
+            "passed": true
+          },
+          {
+            "check": "written_method:upper_rate",
+            "passed": true
+          },
+          {
+            "check": "empty_defects",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:posterior_shape",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:posterior_precision",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:posterior_mean",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:posterior_sd",
+            "passed": true
+          },
+          {
+            "check": "independent_computation:upper_rate",
+            "passed": true
+          }
+        ]
+      },
+      "stderr": ""
+    },
+    {
+      "id": "x66bbe2ee",
+      "returncode": 0,
+      "result": {
+        "id": "x66bbe2ee",
+        "ok": true,
+        "checks": [
+          {
+            "check": "identity",
+            "passed": true
+          },
+          {
+            "check": "complete_result_vector",
+            "passed": true
+          },
+          {
+            "check": "written_method:yield_value",
+            "passed": true
+          },
+          {
+            "check": "written_method:normalization",
+            "passed": true
+          },
+          {
+            "check": "written_method:cross_section",
+            "passed": true
+          },
+          {
+            "check": "written_method:cross_section_error",
+            "passed": true
+          },
+          {
+            "check": "material_single_correction:D1",
+            "passed": true
+          },
+          {
+            "check": "complete_correction_keys:D1",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D1:normalization",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D1:cross_section",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D1:cross_section_error",
+            "passed": true
+          },
+          {
+            "check": "material_single_correction:D2",
+            "passed": true
+          },
+          {
+            "check": "complete_correction_keys:D2",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D2:normalization",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D2:cross_section",
+            "passed": true
+          },
+          {
+            "check": "fully_corrected:D2:cross_section_error",
+            "passed": true
+          }
+        ]
+      },
+      "stderr": ""
+    }
+  ],
+  "multi_defect_count": 5,
+  "interacting_count": 5
+}

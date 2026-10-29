@@ -1,0 +1,66 @@
+{
+ "p0162bce8": {
+  "oracle_ok": true,
+  "type": "C01"
+ },
+ "p01e3f7aa": {
+  "oracle_ok": true,
+  "type": "C02"
+ },
+ "p06f0da0f": {
+  "oracle_ok": true,
+  "type": "C04"
+ },
+ "p1736b719": {
+  "oracle_ok": true,
+  "type": "C01"
+ },
+ "p2986bf7e": {
+  "oracle_ok": true,
+  "type": "C04"
+ },
+ "p36e0a36b": {
+  "oracle_ok": true,
+  "type": "C04"
+ },
+ "p4151ac15": {
+  "oracle_ok": true,
+  "type": "C03"
+ },
+ "p58a3bba0": {
+  "oracle_ok": true,
+  "type": "C01"
+ },
+ "p5fbf2363": {
+  "oracle_ok": true,
+  "type": "C02"
+ },
+ "p69384685": {
+  "oracle_ok": true,
+  "type": "C04"
+ },
+ "p6c7aea0e": {
+  "oracle_ok": true,
+  "type": "C03"
+ },
+ "p8390f2a4": {
+  "oracle_ok": true,
+  "type": "C02"
+ },
+ "pb23059dc": {
+  "oracle_ok": true,
+  "type": "C03"
+ },
+ "pe0278b83": {
+  "oracle_ok": true,
+  "type": "C01"
+ },
+ "pe1154782": {
+  "oracle_ok": true,
+  "type": "C03"
+ },
+ "pf95c79fc": {
+  "oracle_ok": true,
+  "type": "C02"
+ }
+}

@@ -13,6 +13,11 @@ C = [
  ("dr-direct-2", "zh-Hant", "direct", "請幫我建立這個量能器的響應矩陣，並檢查 data/MC agreement。", "hep-detector", ["response matrices", "data/MC agreement"], None, None, {}),
  ("dr-neighbor-1", "en", "neighboring", "Unfold this measured spectrum with the response matrix I already have.", "hep-statistics", ["unfolding"], "hep-detector", None, {}),
  ("dr-negative-1", "en", "negative", "Design the background estimate for my dilepton measurement using control regions.", "hep-measurement", ["background estimation", "control regions"], "hep-detector", None, {}),
+ # hep-review
+ ("rv-direct-1", "en", "direct", "Do a recorded review of my fit's statistical treatment with review obligations and tell me which assurance tier it reaches.", "hep-review", ["recorded review", "review obligations", "assurance tiers"], None, None, {}),
+ ("rv-direct-2", "zh-Hant", "direct", "請對這段分析程式和推導做有紀錄的審查：列出 review obligations，並說明能達到哪個 assurance tier。", "hep-review", ["review obligations", "assurance tiers"], None, None, {}),
+ ("rv-neighbor-1", "en", "neighboring", "Review this measurement spec: are the systematic uncertainties complete and is the estimand clear?", "hep-measurement", ["measurement review", "systematic uncertainties", "estimand"], "hep-review", None, {}),
+ ("rv-negative-1", "en", "negative", "Fit these binned yields with a likelihood and give me the profile-likelihood interval.", "hep-statistics", ["likelihoods", "profile likelihood"], "hep-review", None, {}),
  # hep-measurement
  ("an-direct-1", "en", "direct", "Review this measurement spec: is the estimand clear and are the systematic uncertainties complete?", "hep-measurement", ["estimand", "systematic uncertainties", "measurement review"], None, None, {}),
  ("an-direct-2", "zh-Hant", "direct", "我要設計一個中微子截面量測的事件選擇與 cutflows，還有 blinding policy。", "hep-measurement", ["cutflows", "blinding policy"], None, None, {}),

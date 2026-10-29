@@ -1,0 +1,15 @@
+{
+ "id": "intent-x04c",
+ "purpose": "Review of: Weighted average of four ratio measurements",
+ "target_tier": "R2",
+ "minimum_requirements": [
+  {
+   "id": "REQ-1",
+   "text": "The combined/derived result and its uncertainty are statistically sound and reproducible from the supplied inputs."
+  },
+  {
+   "id": "REQ-2",
+   "text": "The inputs are tested for outliers and the scale-factor (PDG-style) treatment is considered."
+  }
+ ]
+}

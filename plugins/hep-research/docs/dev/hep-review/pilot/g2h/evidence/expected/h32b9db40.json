@@ -1,0 +1,10 @@
+{
+ "correct": {
+  "sigma_A": 0.027231448766654672
+ },
+ "defect": "D = N1 - N2 and S = N1 + N2 are treated as independent in the propagation although both are built from N1 and N2 (correlated); the correct uncertainty is sqrt((1 - A^2)/S), the stated one is sqrt((1 + A^2)/S)",
+ "family": "asymmetry",
+ "id": "h32b9db40",
+ "type": "C01",
+ "variant": "defect"
+}

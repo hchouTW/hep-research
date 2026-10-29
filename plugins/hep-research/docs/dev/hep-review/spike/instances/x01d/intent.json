@@ -1,0 +1,11 @@
+{
+ "id": "intent-x01d",
+ "purpose": "Review of: Ratio of two correlated yields",
+ "target_tier": "R2",
+ "minimum_requirements": [
+  {
+   "id": "REQ-1",
+   "text": "The combined/derived result and its uncertainty are statistically sound and reproducible from the supplied inputs."
+  }
+ ]
+}

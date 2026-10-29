@@ -1,0 +1,102 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "hep_review_report.json",
+ "title": "hep-review report layer 1 (pure projection; schema 1.0.0; 0.x data experimental)",
+ "description": "Output of contracts/hep_review.py project(validated_bundle, validator_version); anyone can recompute it byte for byte from the export and the same validator version (spec 7.6). Layer 2 (attestation) is produced by the I/O layer and is not part of this object. Nobody hand-fills outcomes, facets, flags or tiers.",
+ "type": "object",
+ "required": ["protocol", "schema_version", "kind", "context_id", "segment_id", "as_of_seq", "as_of_commit_digest",
+              "validator_version", "record_integrity", "summary_eligible", "achieved_tier"],
+ "properties": {
+  "protocol": {"enum": ["hep-review/0", "hep-review/1"]},
+  "schema_version": {"type": "string"},
+  "kind": {"const": "hep-review-layer1"},
+  "context_id": {"type": "string"},
+  "segment_id": {"type": "string"},
+  "as_of_seq": {"type": "integer", "minimum": 1},
+  "as_of_commit_digest": {"$ref": "hep_review_definitions.json#/$defs/digest"},
+  "validator_version": {"type": "string"},
+  "record_integrity": {"enum": ["valid", "partial-invalid", "not-checked"]},
+  "experimental": {"type": "boolean", "description": "present under the current validator: true when any committed object is hep-review/0; a 0.x projection carries protocol hep-review/0 instead"},
+  "input_error": {"type": "object", "required": ["code", "message"],
+                  "properties": {"code": {"type": "string"}, "message": {"type": "string"}},
+                  "additionalProperties": false},
+  "target_tier": {"$ref": "hep_review_definitions.json#/$defs/tier"},
+  "head_plan_revision": {"type": "integer", "minimum": 1},
+  "obligations": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": ["id", "required", "decision_required", "outcome", "reasons", "obligation_tier", "tier_reasons",
+                 "discharge", "facets"],
+    "properties": {
+     "id": {"type": "string"}, "required": {"type": "boolean"}, "decision_required": {"type": "boolean"},
+     "outcome": {"$ref": "hep_review_definitions.json#/$defs/outcome"},
+     "reasons": {"type": "array", "items": {"type": "string"}},
+     "obligation_tier": {"$ref": "hep_review_definitions.json#/$defs/tier"},
+     "tier_reasons": {"type": "array", "items": {"type": "string"}},
+     "discharge": {"type": ["object", "null"]},
+     "facets": {
+      "type": "object",
+      "required": ["artifact_functional", "result_reproduced", "independent_method_checked", "domain_assessment"],
+      "properties": {
+       "artifact_functional": {"$ref": "#/$defs/facet"},
+       "result_reproduced": {"$ref": "#/$defs/facet"},
+       "independent_method_checked": {"$ref": "#/$defs/facet"},
+       "domain_assessment": {"type": "object", "required": ["outcome"],
+                             "properties": {"outcome": {"$ref": "hep_review_definitions.json#/$defs/outcome"}},
+                             "additionalProperties": false}
+      },
+      "additionalProperties": false
+     }
+    },
+    "additionalProperties": false
+   }
+  },
+  "findings": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": ["id", "obligation_id", "mapped_to", "state", "current", "stale", "response", "fix_check"],
+    "properties": {
+     "id": {"type": "string"}, "obligation_id": {"type": "string"},
+     "mapped_to": {"type": "array", "items": {"type": "string"}},
+     "state": {"enum": ["candidate", "supported", "disputed", "refuted", "retired-for-current"]},
+     "current": {"type": "boolean"}, "stale": {"type": "boolean"},
+     "response": {"type": ["string", "null"]}, "fix_check": {"type": ["string", "null"]}
+    },
+    "additionalProperties": false
+   }
+  },
+  "flags": {
+   "type": "object",
+   "required": ["has_supported_defects", "has_disputed_findings", "has_open_questions", "plan_requirements_met"],
+   "properties": {"has_supported_defects": {"type": "boolean"}, "has_disputed_findings": {"type": "boolean"},
+                  "has_open_questions": {"type": "boolean"}, "plan_requirements_met": {"type": "boolean"}},
+   "additionalProperties": false
+  },
+  "open_reasons": {"type": "array", "items": {"type": "object"}},
+  "planning_gaps": {"type": "array", "items": {"type": "object", "required": ["kind"]}},
+  "uncovered_optional": {"type": "object", "required": ["not_examined", "undetermined"],
+                         "properties": {"not_examined": {"type": "array", "items": {"type": "string"}},
+                                        "undetermined": {"type": "array", "items": {"type": "string"}}},
+                         "additionalProperties": false},
+  "unverified_historical_defects": {"type": "array", "items": {"type": "object"}},
+  "version_inconsistencies": {"type": "array", "items": {"type": "object"}},
+  "quarantined": {"type": "array", "items": {"type": "object"}},
+  "carried_over": {"type": "array", "items": {"type": "object"}},
+  "coverage": {"type": "object", "required": ["total_obligations", "total_required", "discharged",
+                                              "methods_not_run_by_discharge"]},
+  "independence_floor_not_met": {"type": "boolean"},
+  "advisory_conditions": {"type": "array", "items": {"type": "string"}},
+  "achieved_tier": {"anyOf": [{"$ref": "hep_review_definitions.json#/$defs/tier"}, {"type": "null"}]},
+  "summary_eligible": {"type": "boolean"},
+  "cost": {"type": "object"},
+  "limitations": {"type": "array", "items": {"type": "string"}}
+ },
+ "additionalProperties": false,
+ "$defs": {
+  "facet": {"type": "object", "required": ["performed", "attempts"],
+            "properties": {"performed": {"type": "boolean"}, "attempts": {"type": "array", "items": {"type": "string"}}},
+            "additionalProperties": false}
+ }
+}

@@ -10,9 +10,11 @@ Minor release; contracts 3.16.0 (gating constant `contracts/validate.py` `CONFOR
 of 0.44.0 (decision B1.3): C2UF-1 now passes on the well-conditioned C2UF emulator, which replaces the near-singular
 one, so the C2UF emulator is portable and its Linux test skip (A1.21) is gone; modulation conformance is tied to the
 provider version; provider versions are bumped with the old records kept as history; USINE's default transport states
-its injection variable.
+its injection variable. It also ships the new skill hep-review (#310, protocol hep-review/1, schema 1.0.0).
 
 **Before you upgrade** (details in each entry below):
+- The plugin now has nine skills: hep-review (recorded, tiered review of physics work) is new; manuscript review
+  stays with hep-authoring and measurement-design review with hep-measurement.
 - A `cr-provider/1` declaration's modulation conformance result must carry `provider_version`, equal to the
   declaration's version; core 1.4.0 refuses a 3.15 declaration with a modulation block until its gate is rerun
   (`tools/provider_registry.py --conformance`).
@@ -28,6 +30,21 @@ noise probe, a provider printing more digits, or a new pre-declared step rule), 
 blocked; the fit-side isotopic modulation path is documented but not implemented; the likely DRAGON2 Ptuskin94/03
 enum issue is documented, not reported upstream; GALPROP unavailable; F2, F3 and the live routing run not done.
 
+- **New skill hep-review (protocol hep-review/1, schema 1.0.0; 0.x records labelled experimental).** Recorded, tiered review of physics
+  work: review obligations, assurance tiers R0-R3 computed from the records (the R2 floor per obligation), an
+  append-only SQLite commit log in the private state directory with head continuity and checkpoints, export/import,
+  file submissions read by bytes, and a two-layer report (a byte-reproducible projection plus an attestation) that
+  never claims more than its achieved tier. Kernel `contracts/hep_review.py` and schemas
+  `contracts/schemas/hep_review_*.json`; skill `skills/hep-review/` (`review.py` CLI). R3 is not reachable on the
+  measured host. Skill names now nine (`contracts/skill_names.py`); manuscript review stays with hep-authoring and
+  measurement-design review with hep-measurement. Development records: `docs/dev/hep-review/`.
+  New pages: `workflow-and-tiers.md` (entry reference), `evidence-and-adjudication.md`, `host-and-trust-boundaries.md`,
+  `storage-continuity-and-export.md`, `evaluation-and-claims.md`, and the domain cards `domains/index.md`,
+  `domains/statistics.md`, `domains/computing.md`; new script `review.py`.
+  Gate G2 passed on three narrow pilots (G2, a held-out follow-up, and a Codex-authored multi-defect suite with
+  cross-family grading: 0 content misses in 141 trials; `docs/dev/hep-review/g2*-report.md`), after which the schema
+  was frozen at 1.0.0 (validator `1.0.0`; 0.1.0 kept for historical data). The packet now asks reviewers for a
+  separately computed SHA-256 or `SHA256: unavailable` (a fabricated digest quarantined a correct review in g2x).
 - crprop l1: `propagation_fit.py` gains `parameters.<name>.enters_squared` for a parameter the prediction depends on
   only through its square (B/C on `V_A_kms`; linear axis, provider domain from 0): a toy or family-calibration fit
   that fails in p (not converged, or its first attempt refused as out of the provider domain) spends its remaining

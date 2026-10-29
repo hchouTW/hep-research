@@ -1,0 +1,73 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "hep_review_plan.json",
+ "title": "hep-review plan revision (schema 1.0.0; 0.x data experimental)",
+ "description": "Immutable once adopted (spec 6.2). Admission rules that this schema cannot express (decision_required explicit for required obligations, at least one required obligation, the downgrade list, obligation_map limits, target_tier) are enforced by contracts/hep_review.py check_plan. target_tier is listed only so that check_plan can report it; a plan may not change it.",
+ "type": "object",
+ "$ref": "hep_review_definitions.json#/$defs/header",
+ "required": ["revision", "parent_revision", "intent_id", "intent_revision", "manifest_id", "obligations",
+              "independence_requirements", "assignment_specs", "scope_scan", "judgments", "environment_observations"],
+ "properties": {
+  "protocol": {}, "schema_version": {}, "record_kind": {"const": "plan"}, "id": {}, "context_id": {},
+  "revision": {"type": "integer", "minimum": 1},
+  "parent_revision": {"type": ["integer", "null"], "minimum": 1},
+  "intent_id": {"$ref": "hep_review_definitions.json#/$defs/id"},
+  "intent_revision": {"type": "integer", "minimum": 1},
+  "manifest_id": {"$ref": "hep_review_definitions.json#/$defs/id"},
+  "obligations": {"type": "array", "items": {"$ref": "hep_review_definitions.json#/$defs/obligation"}},
+  "obligation_map": {
+   "type": "array",
+   "items": {"type": "object", "required": ["old_id", "new_ids", "retired_reason"],
+             "properties": {"old_id": {"$ref": "hep_review_definitions.json#/$defs/id"},
+                            "new_ids": {"$ref": "hep_review_definitions.json#/$defs/ids"},
+                            "retired_reason": {"type": ["string", "null"]}},
+             "additionalProperties": false}
+  },
+  "independence_requirements": {
+   "type": "array",
+   "items": {"type": "object", "required": ["condition", "required"],
+             "properties": {"condition": {"type": "string", "minLength": 1}, "required": {"type": "boolean"}},
+             "additionalProperties": false}
+  },
+  "assignment_specs": {
+   "type": "array",
+   "items": {"type": "object", "required": ["id", "obligation_ids", "role"],
+             "properties": {"id": {"$ref": "hep_review_definitions.json#/$defs/id"},
+                            "obligation_ids": {"$ref": "hep_review_definitions.json#/$defs/ids"},
+                            "role": {"enum": ["reviewer", "verifier", "arbiter", "author"]},
+                            "deadline": {"type": "string"}},
+             "additionalProperties": false}
+  },
+  "scope_scan": {"enum": ["not-performed", "performed-with-gaps", "performed-no-known-gaps"]},
+  "judgments": {
+   "type": "array",
+   "items": {"type": "object", "required": ["id", "kind", "actor", "basis"],
+             "properties": {"id": {"$ref": "hep_review_definitions.json#/$defs/id"},
+                            "kind": {"enum": ["equivalent_or_stronger", "scope_coverage"]},
+                            "obligation_ids": {"$ref": "hep_review_definitions.json#/$defs/ids"},
+                            "old_ids": {"$ref": "hep_review_definitions.json#/$defs/ids"},
+                            "actor": {"type": "string"},
+                            "basis": {"$ref": "hep_review_definitions.json#/$defs/basis"},
+                            "reason": {"type": "string"}},
+             "additionalProperties": false}
+  },
+  "environment_observations": {
+   "type": "array",
+   "items": {"type": "object", "required": ["executor", "tools", "environment_refs"],
+             "properties": {"executor": {"type": "string"}, "tools": {"type": "array", "items": {"type": "string"}},
+                            "environment_refs": {"type": "array", "items": {"type": "string"}}},
+             "additionalProperties": false}
+  },
+  "required_restrictions": {"type": "array", "items": {"type": "string"}},
+  "capability_fingerprint": {"type": ["string", "null"]},
+  "evaluation_checkpoint": {"type": "object", "required": ["seq", "digest"],
+                            "properties": {"seq": {"type": "integer", "minimum": 1},
+                                           "digest": {"$ref": "hep_review_definitions.json#/$defs/digest"}},
+                            "additionalProperties": false},
+  "limits": {"type": "object"},
+  "revision_reason": {"type": "object", "required": ["reason", "authority"], "properties": {"reason": {"type": "string"}, "authority": {"type": "string"}}, "additionalProperties": false},
+  "change_request": {"type": "object"},
+  "target_tier": {"$ref": "hep_review_definitions.json#/$defs/tier"}
+ },
+ "additionalProperties": false
+}

@@ -1,0 +1,42 @@
+{
+  "K01": {
+    "grade": "accept",
+    "reason": "The finding identifies the missing reciprocal retention correction in the monitor normalization."
+  },
+  "K02": {
+    "grade": "accept",
+    "reason": "The finding identifies that both independent objects must fire, requiring the product of their efficiencies."
+  },
+  "K03": {
+    "grade": "accept",
+    "reason": "The finding identifies the omitted contribution from another reconstructed bin to the propagated variance."
+  },
+  "K04": {
+    "grade": "accept",
+    "reason": "The finding identifies the fixed-total constraint and consequent loss of one independent residual."
+  },
+  "K05": {
+    "grade": "accept",
+    "reason": "The finding distinguishes the gamma expectation shape/rate from the mode (shape minus one)/rate at the posterior summary."
+  },
+  "K06": {
+    "grade": "reject",
+    "reason": "The finding incorrectly demands a Poisson variance and does not identify the missing finite-population correction."
+  },
+  "K07": {
+    "grade": "reject",
+    "reason": "The finding concerns local-tail sidedness and does not identify the invalid sum approximation for the global probability."
+  },
+  "K08": {
+    "grade": "reject",
+    "reason": "The finding only questions the uncertainty generally; it does not name the omitted random-denominator contribution."
+  },
+  "K09": {
+    "grade": "reject",
+    "reason": "The vague calibration concern does not identify the absent external calibration uncertainty in the subtracted-yield variance."
+  },
+  "K10": {
+    "grade": "reject",
+    "reason": "The finding alleges a unit conversion problem and does not identify the missing second independent decay probability."
+  }
+}

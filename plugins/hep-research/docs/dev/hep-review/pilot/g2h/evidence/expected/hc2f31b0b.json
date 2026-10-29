@@ -1,0 +1,11 @@
+{
+ "correct": {
+  "sigma_yield": 6.001888119583703
+ },
+ "defect": null,
+ "family": "weighted-yield",
+ "id": "hc2f31b0b",
+ "type": "C04",
+ "unplanned_requirement": "REQ-2",
+ "variant": "control"
+}

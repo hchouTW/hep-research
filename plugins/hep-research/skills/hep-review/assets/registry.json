@@ -1,0 +1,20 @@
+{
+ "note": "Extension-point registry of hep-review (spec v9 section 3.3). An entry here does not mean the capability is supported beyond its stated status.",
+ "domain_packs": [
+  {"owner": "hep-statistics", "card": "references/domains/statistics.md", "status": "pilot-domain", "question_types": ["uncertainty model", "degrees of freedom", "propagation with correlations", "combination"], "cases": {"positive": "BLUE with the stated correlation", "negative": "fully correlated systematic with a zero off-diagonal"}},
+  {"owner": "hep-computing", "card": "references/domains/computing.md", "status": "pilot-domain", "question_types": ["recomputation within tolerance", "implementation matches method"], "cases": {"positive": "weighted mean recomputes within 0.1%", "negative": "stated value rounded outside the tolerance"}}
+ ],
+ "method_cards": [
+  {"id": "assumption-check", "evidence": "a finding or support per stated assumption", "acceptance_case": "statistics card, missing input"},
+  {"id": "recompute", "evidence": "recomputed values with tool and environment", "acceptance_case": "computing card, positive"},
+  {"id": "reproduction", "evidence": "reference quantities and tolerance fixed in advance", "acceptance_case": "kernel facet test (reproduction needs a preset tolerance)"},
+  {"id": "fix-verification", "evidence": "fix checked against the original finding", "acceptance_case": "kernel fix_verified judgment"}
+ ],
+ "format_readers": [
+  {"formats": ["markdown", "text", "json"], "locators": ["material_id+digest", "lines", "json_pointer", "byte_range"], "limits": {"max_bytes": 16777216, "max_json_depth": 64}, "blind_spots": ["JSON syntax does not validate a scientific model"], "executes": false, "status": "supported"},
+  {"formats": ["latex", "python-ast", "pdf"], "status": "not-implemented (T05)"}
+ ],
+ "host_adapters": [
+  {"id": "claude-code-cli-macos", "profile": "assets/host_profile.json", "observes": {"dispatch": "Agent-tool call per assignment", "fresh_context": "dispatch record", "tool_restrictions": "none enforced (advisory)", "store_persistence": "marker file across sessions (pending)", "submission_fidelity": "drop file bytes and reported SHA-256", "transcript_writability": "os.access only"}}
+ ]
+}

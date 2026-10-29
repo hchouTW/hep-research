@@ -1,0 +1,34 @@
+{
+ "id": "plan-x03c",
+ "intent": "intent-x03c",
+ "revision": 1,
+ "obligations": [
+  {
+   "id": "O-stat",
+   "origin_requirement_ids": [
+    "REQ-1"
+   ],
+   "question": "Is the statistical treatment in analysis.md appropriate for the model and inputs stated there?",
+   "owner": "hep-statistics",
+   "criterion": "The uncertainty model (correlations, degrees of freedom, propagation) matches the stated inputs; any missing input needed to decide this is named rather than assumed.",
+   "required": true,
+   "decision_required": true
+  },
+  {
+   "id": "O-compute",
+   "origin_requirement_ids": [
+    "REQ-1"
+   ],
+   "question": "Can every number in data.json 'stated_results' be recomputed from the inputs in data.json with the method described in analysis.md, within 0.1% relative?",
+   "owner": "hep-computing",
+   "criterion": "Recomputed values agree with stated values within 0.1% relative; disagreement or an input that is missing is reported.",
+   "required": true,
+   "decision_required": false
+  }
+ ],
+ "independence_requirements": [
+  "non-author",
+  "fresh-context",
+  "no-other-evaluations-before-first-submission"
+ ]
+}

@@ -1,0 +1,591 @@
+{
+ "engineering_gate": {
+  "completed": 45,
+  "continuity_verified": 45,
+  "export_recomputes": 45,
+  "fidelity_ok": 45,
+  "pass": true,
+  "trials": 45,
+  "unplanned_quarantine": 0
+ },
+ "known_defect_level": {
+  "defect_trials": 15,
+  "identified_with_valid_reason": 15
+ },
+ "per_family": {
+  "asymmetry": {
+   "C01": [
+    true,
+    true,
+    true
+   ],
+   "C02": [
+    true,
+    true,
+    true
+   ],
+   "C03": [],
+   "C04": []
+  },
+  "combination": {
+   "C01": [
+    true,
+    true,
+    true
+   ],
+   "C02": [
+    true,
+    true,
+    true
+   ],
+   "C03": [
+    true,
+    true,
+    true
+   ],
+   "C04": []
+  },
+  "count-limit": {
+   "C01": [
+    true,
+    true,
+    true
+   ],
+   "C02": [
+    true,
+    true,
+    true
+   ],
+   "C03": [],
+   "C04": [
+    true,
+    true,
+    true
+   ]
+  },
+  "line-fit": {
+   "C01": [
+    true,
+    true,
+    true
+   ],
+   "C02": [
+    true,
+    true,
+    true
+   ],
+   "C03": [
+    true,
+    true,
+    true
+   ],
+   "C04": []
+  },
+  "weighted-yield": {
+   "C01": [
+    true,
+    true,
+    true
+   ],
+   "C02": [
+    true,
+    true,
+    true
+   ],
+   "C03": [
+    true,
+    true,
+    true
+   ],
+   "C04": [
+    true,
+    true,
+    true
+   ]
+  }
+ },
+ "per_type_instances": {
+  "C01": {
+   "all_scheduled": 5,
+   "at_least_once": 5,
+   "first_attempt": 5,
+   "instances": 5
+  },
+  "C02": {
+   "all_scheduled": 5,
+   "at_least_once": 5,
+   "first_attempt": 5,
+   "instances": 5
+  },
+  "C03": {
+   "all_scheduled": 3,
+   "at_least_once": 3,
+   "first_attempt": 3,
+   "instances": 3
+  },
+  "C04": {
+   "all_scheduled": 2,
+   "at_least_once": 2,
+   "first_attempt": 2,
+   "instances": 2
+  }
+ },
+ "predicted_finding_level": {
+  "C01_findings_graded": 15,
+  "unadjudicated": 0,
+  "verified_correct": 15,
+  "verified_wrong": 0
+ },
+ "rows": {
+  "h0b19ece4-t1": {
+   "false_alarm": false,
+   "family": "asymmetry",
+   "instance": "h0b19ece4",
+   "state": "completed",
+   "success": true,
+   "type": "C02",
+   "variant": "alternative"
+  },
+  "h0b19ece4-t2": {
+   "false_alarm": false,
+   "family": "asymmetry",
+   "instance": "h0b19ece4",
+   "state": "completed",
+   "success": true,
+   "type": "C02",
+   "variant": "alternative"
+  },
+  "h0b19ece4-t3": {
+   "false_alarm": false,
+   "family": "asymmetry",
+   "instance": "h0b19ece4",
+   "state": "completed",
+   "success": true,
+   "type": "C02",
+   "variant": "alternative"
+  },
+  "h0c0d78ca-t1": {
+   "family": "weighted-yield",
+   "gap_kept": true,
+   "input_named": true,
+   "instance": "h0c0d78ca",
+   "outcomes": {
+    "O-compute": "undetermined",
+    "O-stat": "undetermined"
+   },
+   "state": "completed",
+   "success": true,
+   "type": "C03"
+  },
+  "h0c0d78ca-t2": {
+   "family": "weighted-yield",
+   "gap_kept": true,
+   "input_named": true,
+   "instance": "h0c0d78ca",
+   "outcomes": {
+    "O-compute": "undetermined",
+    "O-stat": "undetermined"
+   },
+   "state": "completed",
+   "success": true,
+   "type": "C03"
+  },
+  "h0c0d78ca-t3": {
+   "family": "weighted-yield",
+   "gap_kept": true,
+   "input_named": true,
+   "instance": "h0c0d78ca",
+   "outcomes": {
+    "O-compute": "undetermined",
+    "O-stat": "undetermined"
+   },
+   "state": "completed",
+   "success": true,
+   "type": "C03"
+  },
+  "h175a9700-t1": {
+   "family": "count-limit",
+   "instance": "h175a9700",
+   "state": "completed",
+   "success": true,
+   "type": "C04"
+  },
+  "h175a9700-t2": {
+   "family": "count-limit",
+   "instance": "h175a9700",
+   "state": "completed",
+   "success": true,
+   "type": "C04"
+  },
+  "h175a9700-t3": {
+   "family": "count-limit",
+   "instance": "h175a9700",
+   "state": "completed",
+   "success": true,
+   "type": "C04"
+  },
+  "h1f578eed-t1": {
+   "evidence_grade": "accept",
+   "family": "count-limit",
+   "instance": "h1f578eed",
+   "located": true,
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "h1f578eed-t2": {
+   "evidence_grade": "accept",
+   "family": "count-limit",
+   "instance": "h1f578eed",
+   "located": true,
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "h1f578eed-t3": {
+   "evidence_grade": "accept",
+   "family": "count-limit",
+   "instance": "h1f578eed",
+   "located": true,
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "h20c8ec15-t1": {
+   "family": "line-fit",
+   "gap_kept": true,
+   "input_named": true,
+   "instance": "h20c8ec15",
+   "outcomes": {
+    "O-compute": "undetermined",
+    "O-stat": "undetermined"
+   },
+   "state": "completed",
+   "success": true,
+   "type": "C03"
+  },
+  "h20c8ec15-t2": {
+   "family": "line-fit",
+   "gap_kept": true,
+   "input_named": true,
+   "instance": "h20c8ec15",
+   "outcomes": {
+    "O-compute": "undetermined",
+    "O-stat": "undetermined"
+   },
+   "state": "completed",
+   "success": true,
+   "type": "C03"
+  },
+  "h20c8ec15-t3": {
+   "family": "line-fit",
+   "gap_kept": true,
+   "input_named": true,
+   "instance": "h20c8ec15",
+   "outcomes": {
+    "O-compute": "undetermined",
+    "O-stat": "undetermined"
+   },
+   "state": "completed",
+   "success": true,
+   "type": "C03"
+  },
+  "h27e6a7df-t1": {
+   "evidence_grade": "accept",
+   "family": "combination",
+   "instance": "h27e6a7df",
+   "located": true,
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "h27e6a7df-t2": {
+   "evidence_grade": "accept",
+   "family": "combination",
+   "instance": "h27e6a7df",
+   "located": true,
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "h27e6a7df-t3": {
+   "evidence_grade": "accept",
+   "family": "combination",
+   "instance": "h27e6a7df",
+   "located": true,
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "h30662a43-t1": {
+   "false_alarm": false,
+   "family": "line-fit",
+   "instance": "h30662a43",
+   "state": "completed",
+   "success": true,
+   "type": "C02",
+   "variant": "control"
+  },
+  "h30662a43-t2": {
+   "false_alarm": false,
+   "family": "line-fit",
+   "instance": "h30662a43",
+   "state": "completed",
+   "success": true,
+   "type": "C02",
+   "variant": "control"
+  },
+  "h30662a43-t3": {
+   "false_alarm": false,
+   "family": "line-fit",
+   "instance": "h30662a43",
+   "state": "completed",
+   "success": true,
+   "type": "C02",
+   "variant": "control"
+  },
+  "h32b9db40-t1": {
+   "evidence_grade": "accept",
+   "family": "asymmetry",
+   "instance": "h32b9db40",
+   "located": true,
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "h32b9db40-t2": {
+   "evidence_grade": "accept",
+   "family": "asymmetry",
+   "instance": "h32b9db40",
+   "located": true,
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "h32b9db40-t3": {
+   "evidence_grade": "accept",
+   "family": "asymmetry",
+   "instance": "h32b9db40",
+   "located": true,
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "h53613241-t1": {
+   "false_alarm": false,
+   "family": "count-limit",
+   "instance": "h53613241",
+   "state": "completed",
+   "success": true,
+   "type": "C02",
+   "variant": "control"
+  },
+  "h53613241-t2": {
+   "false_alarm": false,
+   "family": "count-limit",
+   "instance": "h53613241",
+   "state": "completed",
+   "success": true,
+   "type": "C02",
+   "variant": "control"
+  },
+  "h53613241-t3": {
+   "false_alarm": false,
+   "family": "count-limit",
+   "instance": "h53613241",
+   "state": "completed",
+   "success": true,
+   "type": "C02",
+   "variant": "control"
+  },
+  "h73eec183-t1": {
+   "evidence_grade": "accept",
+   "family": "weighted-yield",
+   "instance": "h73eec183",
+   "located": true,
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "h73eec183-t2": {
+   "evidence_grade": "accept",
+   "family": "weighted-yield",
+   "instance": "h73eec183",
+   "located": true,
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "h73eec183-t3": {
+   "evidence_grade": "accept",
+   "family": "weighted-yield",
+   "instance": "h73eec183",
+   "located": true,
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "ha064fa4b-t1": {
+   "family": "combination",
+   "gap_kept": true,
+   "input_named": true,
+   "instance": "ha064fa4b",
+   "outcomes": {
+    "O-compute": "undetermined",
+    "O-stat": "undetermined"
+   },
+   "state": "completed",
+   "success": true,
+   "type": "C03"
+  },
+  "ha064fa4b-t2": {
+   "family": "combination",
+   "gap_kept": true,
+   "input_named": true,
+   "instance": "ha064fa4b",
+   "outcomes": {
+    "O-compute": "undetermined",
+    "O-stat": "undetermined"
+   },
+   "state": "completed",
+   "success": true,
+   "type": "C03"
+  },
+  "ha064fa4b-t3": {
+   "family": "combination",
+   "gap_kept": true,
+   "input_named": true,
+   "instance": "ha064fa4b",
+   "outcomes": {
+    "O-compute": "undetermined",
+    "O-stat": "undetermined"
+   },
+   "state": "completed",
+   "success": true,
+   "type": "C03"
+  },
+  "hc2f31b0b-t1": {
+   "family": "weighted-yield",
+   "instance": "hc2f31b0b",
+   "state": "completed",
+   "success": true,
+   "type": "C04"
+  },
+  "hc2f31b0b-t2": {
+   "family": "weighted-yield",
+   "instance": "hc2f31b0b",
+   "state": "completed",
+   "success": true,
+   "type": "C04"
+  },
+  "hc2f31b0b-t3": {
+   "family": "weighted-yield",
+   "instance": "hc2f31b0b",
+   "state": "completed",
+   "success": true,
+   "type": "C04"
+  },
+  "hc8cccc1b-t1": {
+   "false_alarm": false,
+   "family": "combination",
+   "instance": "hc8cccc1b",
+   "state": "completed",
+   "success": true,
+   "type": "C02",
+   "variant": "control"
+  },
+  "hc8cccc1b-t2": {
+   "false_alarm": false,
+   "family": "combination",
+   "instance": "hc8cccc1b",
+   "state": "completed",
+   "success": true,
+   "type": "C02",
+   "variant": "control"
+  },
+  "hc8cccc1b-t3": {
+   "false_alarm": false,
+   "family": "combination",
+   "instance": "hc8cccc1b",
+   "state": "completed",
+   "success": true,
+   "type": "C02",
+   "variant": "control"
+  },
+  "hedd7f5be-t1": {
+   "evidence_grade": "accept",
+   "family": "line-fit",
+   "instance": "hedd7f5be",
+   "located": true,
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "hedd7f5be-t2": {
+   "evidence_grade": "accept",
+   "family": "line-fit",
+   "instance": "hedd7f5be",
+   "located": true,
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "hedd7f5be-t3": {
+   "evidence_grade": "accept",
+   "family": "line-fit",
+   "instance": "hedd7f5be",
+   "located": true,
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "hf2274be0-t1": {
+   "false_alarm": false,
+   "family": "weighted-yield",
+   "instance": "hf2274be0",
+   "state": "completed",
+   "success": true,
+   "type": "C02",
+   "variant": "alternative"
+  },
+  "hf2274be0-t2": {
+   "false_alarm": false,
+   "family": "weighted-yield",
+   "instance": "hf2274be0",
+   "state": "completed",
+   "success": true,
+   "type": "C02",
+   "variant": "alternative"
+  },
+  "hf2274be0-t3": {
+   "false_alarm": false,
+   "family": "weighted-yield",
+   "instance": "hf2274be0",
+   "state": "completed",
+   "success": true,
+   "type": "C02",
+   "variant": "alternative"
+  }
+ },
+ "scientific_gate": {
+  "C01_instances_ok_at_least_once": 5,
+  "C01_trials_ok": 15,
+  "C02_false_alarms": 0,
+  "C02_false_alarms_alternative_method": 0,
+  "C03_trials_ok": 9,
+  "C04_trials_ok": 6,
+  "pass": true
+ },
+ "status": "ok",
+ "task_level": {
+  "cases": 15,
+  "planned": 45,
+  "states": {
+   "completed": 45,
+   "invalid-submission": 0,
+   "no-submission": 0,
+   "not-started": 0
+  },
+  "successful": 45
+ }
+}

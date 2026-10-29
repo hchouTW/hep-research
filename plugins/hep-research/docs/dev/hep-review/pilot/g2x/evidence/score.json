@@ -1,0 +1,702 @@
+{
+ "defect_rows": [
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "x4fbb5c80",
+   "trial": "x4fbb5c80-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "x4fbb5c80",
+   "trial": "x4fbb5c80-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "x4fbb5c80",
+   "trial": "x4fbb5c80-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "x4fbb5c80",
+   "trial": "x4fbb5c80-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": false,
+   "instance": "x4fbb5c80",
+   "trial": "x4fbb5c80-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": false,
+   "instance": "x4fbb5c80",
+   "trial": "x4fbb5c80-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "x66bbe2ee",
+   "trial": "x66bbe2ee-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "x66bbe2ee",
+   "trial": "x66bbe2ee-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "x66bbe2ee",
+   "trial": "x66bbe2ee-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "x66bbe2ee",
+   "trial": "x66bbe2ee-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "x66bbe2ee",
+   "trial": "x66bbe2ee-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "x66bbe2ee",
+   "trial": "x66bbe2ee-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "x83b853ee",
+   "trial": "x83b853ee-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "x83b853ee",
+   "trial": "x83b853ee-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "x83b853ee",
+   "trial": "x83b853ee-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "x87c5cae5",
+   "trial": "x87c5cae5-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "x87c5cae5",
+   "trial": "x87c5cae5-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "x87c5cae5",
+   "trial": "x87c5cae5-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "x9e0a85ed",
+   "trial": "x9e0a85ed-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "x9e0a85ed",
+   "trial": "x9e0a85ed-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "x9e0a85ed",
+   "trial": "x9e0a85ed-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "x9e0a85ed",
+   "trial": "x9e0a85ed-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "x9e0a85ed",
+   "trial": "x9e0a85ed-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "x9e0a85ed",
+   "trial": "x9e0a85ed-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "xb67e4768",
+   "trial": "xb67e4768-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "xb67e4768",
+   "trial": "xb67e4768-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "xb67e4768",
+   "trial": "xb67e4768-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "xb67e4768",
+   "trial": "xb67e4768-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "xb67e4768",
+   "trial": "xb67e4768-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "xb67e4768",
+   "trial": "xb67e4768-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "xc5b7a1ca",
+   "trial": "xc5b7a1ca-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "xc5b7a1ca",
+   "trial": "xc5b7a1ca-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "xc5b7a1ca",
+   "trial": "xc5b7a1ca-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "xc5b7a1ca",
+   "trial": "xc5b7a1ca-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "xc5b7a1ca",
+   "trial": "xc5b7a1ca-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D2",
+   "detected": true,
+   "instance": "xc5b7a1ca",
+   "trial": "xc5b7a1ca-t3",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "xfa9a973b",
+   "trial": "xfa9a973b-t1",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "xfa9a973b",
+   "trial": "xfa9a973b-t2",
+   "unadjudicated": false
+  },
+  {
+   "defect_id": "D1",
+   "detected": true,
+   "instance": "xfa9a973b",
+   "trial": "xfa9a973b-t3",
+   "unadjudicated": false
+  }
+ ],
+ "engineering_gate": {
+  "completed": 48,
+  "continuity_verified": 48,
+  "export_recomputes": 48,
+  "fidelity_ok": 47,
+  "pass": false,
+  "trials": 48,
+  "unplanned_quarantine": 1
+ },
+ "known_defect_level": {
+  "defect_trials": 39,
+  "identified_with_valid_reason": 37,
+  "unadjudicated": 0
+ },
+ "per_type_instances": {
+  "C01": {
+   "all_scheduled": 7,
+   "at_least_once": 8,
+   "first_attempt": 8,
+   "instances": 8
+  },
+  "C02": {
+   "all_scheduled": 4,
+   "at_least_once": 4,
+   "first_attempt": 4,
+   "instances": 4
+  },
+  "C03": {
+   "all_scheduled": 2,
+   "at_least_once": 2,
+   "first_attempt": 2,
+   "instances": 2
+  },
+  "C04": {
+   "all_scheduled": 2,
+   "at_least_once": 2,
+   "first_attempt": 2,
+   "instances": 2
+  }
+ },
+ "predicted_finding_level": {
+  "C01_findings": 49,
+  "grader_disagreement_unadjudicated": 0,
+  "matched_a_gold_defect": 47,
+  "outside_gold_unadjudicated": 2
+ },
+ "rows": {
+  "x16abda08-t1": {
+   "false_alarm": false,
+   "instance": "x16abda08",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "x16abda08-t2": {
+   "false_alarm": false,
+   "instance": "x16abda08",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "x16abda08-t3": {
+   "false_alarm": false,
+   "instance": "x16abda08",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "x48d287a1-t1": {
+   "false_alarm": false,
+   "instance": "x48d287a1",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "x48d287a1-t2": {
+   "false_alarm": false,
+   "instance": "x48d287a1",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "x48d287a1-t3": {
+   "false_alarm": false,
+   "instance": "x48d287a1",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "x4fbb5c80-t1": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "x4fbb5c80",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "x4fbb5c80-t2": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "x4fbb5c80",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "x4fbb5c80-t3": {
+   "defects": 2,
+   "detected": 0,
+   "instance": "x4fbb5c80",
+   "state": "completed",
+   "success": false,
+   "type": "C01"
+  },
+  "x5309ca4d-t1": {
+   "false_alarm": false,
+   "instance": "x5309ca4d",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "x5309ca4d-t2": {
+   "false_alarm": false,
+   "instance": "x5309ca4d",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "x5309ca4d-t3": {
+   "false_alarm": false,
+   "instance": "x5309ca4d",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "x66bbe2ee-t1": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "x66bbe2ee",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "x66bbe2ee-t2": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "x66bbe2ee",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "x66bbe2ee-t3": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "x66bbe2ee",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "x82e314ad-t1": {
+   "gap_kept": true,
+   "instance": "x82e314ad",
+   "state": "completed",
+   "success": true,
+   "type": "C03"
+  },
+  "x82e314ad-t2": {
+   "gap_kept": true,
+   "instance": "x82e314ad",
+   "state": "completed",
+   "success": true,
+   "type": "C03"
+  },
+  "x82e314ad-t3": {
+   "gap_kept": true,
+   "instance": "x82e314ad",
+   "state": "completed",
+   "success": true,
+   "type": "C03"
+  },
+  "x83b853ee-t1": {
+   "defects": 1,
+   "detected": 1,
+   "instance": "x83b853ee",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "x83b853ee-t2": {
+   "defects": 1,
+   "detected": 1,
+   "instance": "x83b853ee",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "x83b853ee-t3": {
+   "defects": 1,
+   "detected": 1,
+   "instance": "x83b853ee",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "x87c5cae5-t1": {
+   "defects": 1,
+   "detected": 1,
+   "instance": "x87c5cae5",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "x87c5cae5-t2": {
+   "defects": 1,
+   "detected": 1,
+   "instance": "x87c5cae5",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "x87c5cae5-t3": {
+   "defects": 1,
+   "detected": 1,
+   "instance": "x87c5cae5",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "x9e0a85ed-t1": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "x9e0a85ed",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "x9e0a85ed-t2": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "x9e0a85ed",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "x9e0a85ed-t3": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "x9e0a85ed",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "xb67e4768-t1": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "xb67e4768",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "xb67e4768-t2": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "xb67e4768",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "xb67e4768-t3": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "xb67e4768",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "xb885e462-t1": {
+   "instance": "xb885e462",
+   "state": "completed",
+   "success": true,
+   "type": "C04"
+  },
+  "xb885e462-t2": {
+   "instance": "xb885e462",
+   "state": "completed",
+   "success": true,
+   "type": "C04"
+  },
+  "xb885e462-t3": {
+   "instance": "xb885e462",
+   "state": "completed",
+   "success": true,
+   "type": "C04"
+  },
+  "xc55857c5-t1": {
+   "instance": "xc55857c5",
+   "state": "completed",
+   "success": true,
+   "type": "C04"
+  },
+  "xc55857c5-t2": {
+   "instance": "xc55857c5",
+   "state": "completed",
+   "success": true,
+   "type": "C04"
+  },
+  "xc55857c5-t3": {
+   "instance": "xc55857c5",
+   "state": "completed",
+   "success": true,
+   "type": "C04"
+  },
+  "xc5b7a1ca-t1": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "xc5b7a1ca",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "xc5b7a1ca-t2": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "xc5b7a1ca",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "xc5b7a1ca-t3": {
+   "defects": 2,
+   "detected": 2,
+   "instance": "xc5b7a1ca",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "xe0330e8e-t1": {
+   "false_alarm": false,
+   "instance": "xe0330e8e",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "xe0330e8e-t2": {
+   "false_alarm": false,
+   "instance": "xe0330e8e",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "xe0330e8e-t3": {
+   "false_alarm": false,
+   "instance": "xe0330e8e",
+   "state": "completed",
+   "success": true,
+   "type": "C02"
+  },
+  "xfa9a973b-t1": {
+   "defects": 1,
+   "detected": 1,
+   "instance": "xfa9a973b",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "xfa9a973b-t2": {
+   "defects": 1,
+   "detected": 1,
+   "instance": "xfa9a973b",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "xfa9a973b-t3": {
+   "defects": 1,
+   "detected": 1,
+   "instance": "xfa9a973b",
+   "state": "completed",
+   "success": true,
+   "type": "C01"
+  },
+  "xfb593672-t1": {
+   "gap_kept": true,
+   "instance": "xfb593672",
+   "state": "completed",
+   "success": true,
+   "type": "C03"
+  },
+  "xfb593672-t2": {
+   "gap_kept": true,
+   "instance": "xfb593672",
+   "state": "completed",
+   "success": true,
+   "type": "C03"
+  },
+  "xfb593672-t3": {
+   "gap_kept": true,
+   "instance": "xfb593672",
+   "state": "completed",
+   "success": true,
+   "type": "C03"
+  }
+ },
+ "scientific_gate": {
+  "C01_instances_all_defects_at_least_once": 8,
+  "C02_false_alarms": 0,
+  "C03_trials_ok": 6,
+  "C04_trials_ok": 6,
+  "defect_trials": 39,
+  "defect_trials_detected": 37,
+  "defect_trials_unadjudicated": 0,
+  "graders_calibrated": true,
+  "pass": true
+ },
+ "status": "ok",
+ "task_level": {
+  "cases": 16,
+  "planned": 48,
+  "states": {
+   "completed": 48,
+   "invalid-submission": 0,
+   "no-submission": 0,
+   "not-started": 0
+  },
+  "successful": 47
+ }
+}

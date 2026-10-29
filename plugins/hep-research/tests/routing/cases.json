@@ -59,6 +59,54 @@
    }
   },
   {
+   "id": "rv-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Do a recorded review of my fit's statistical treatment with review obligations and tell me which assurance tier it reaches.",
+   "expected_primary": "hep-review",
+   "trigger_terms": [
+    "recorded review",
+    "review obligations",
+    "assurance tiers"
+   ]
+  },
+  {
+   "id": "rv-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "請對這段分析程式和推導做有紀錄的審查：列出 review obligations，並說明能達到哪個 assurance tier。",
+   "expected_primary": "hep-review",
+   "trigger_terms": [
+    "review obligations",
+    "assurance tiers"
+   ]
+  },
+  {
+   "id": "rv-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "Review this measurement spec: are the systematic uncertainties complete and is the estimand clear?",
+   "expected_primary": "hep-measurement",
+   "trigger_terms": [
+    "measurement review",
+    "systematic uncertainties",
+    "estimand"
+   ],
+   "not": "hep-review"
+  },
+  {
+   "id": "rv-negative-1",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "Fit these binned yields with a likelihood and give me the profile-likelihood interval.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "likelihoods",
+    "profile likelihood"
+   ],
+   "not": "hep-review"
+  },
+  {
    "id": "an-direct-1",
    "lang": "en",
    "kind": "direct",

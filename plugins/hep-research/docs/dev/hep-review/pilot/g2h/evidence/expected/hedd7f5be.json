@@ -1,0 +1,11 @@
+{
+ "correct": {
+  "ndf": 9,
+  "p_value": 0.37681867613089015
+ },
+ "defect": "two parameters are fitted, so ndf = N - 2, not N - 1; the p-value is computed with the wrong ndf",
+ "family": "line-fit",
+ "id": "hedd7f5be",
+ "type": "C01",
+ "variant": "defect"
+}

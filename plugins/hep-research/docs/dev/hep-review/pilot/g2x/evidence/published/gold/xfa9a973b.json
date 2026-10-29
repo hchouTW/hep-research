@@ -1,0 +1,19 @@
+{
+  "id": "xfa9a973b",
+  "type": "C01",
+  "defects": [
+    {
+      "defect_id": "D1",
+      "statement": "The trials-factor linear expression is only a union bound or small-tail approximation; the exact independent-trial probability is 1-(1-local_p)^windows.",
+      "affected_results": [
+        "global_p",
+        "null_survival"
+      ],
+      "corrected_values": {
+        "global_p": 0.4733869220724767,
+        "null_survival": 0.5266130779275233
+      }
+    }
+  ],
+  "notes": "Synthetic model; uncertainties and approximations are scoped explicitly in the public note."
+}

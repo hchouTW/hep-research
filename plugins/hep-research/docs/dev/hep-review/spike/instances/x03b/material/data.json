@@ -1,0 +1,8 @@
+{
+ "n_bins": 13,
+ "stated_results": {
+  "chi2": 14.2,
+  "ndf": 10,
+  "p_value": 0.164
+ }
+}
