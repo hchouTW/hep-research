@@ -11,7 +11,9 @@ committed. The provider version is the declaration's 'version', else the adapter
 user-supplied declaration must give one.
 
 A declaration with a modulation block (contracts 3.15.0: the provider modulates, the declared exception to "providers
-never modulate") is refused unless its conformance result passed (core/provider/protocol.py). The conformance gate
+never modulate") is refused unless its conformance result passed and names the provider version it was obtained at,
+equal to the provider's version (contracts 3.16.0, core/provider/protocol.py): a new provider version declares
+modulation only after the gate is rerun at it. The conformance gate
 (--conformance PROVIDER_ID) produces that result: at a reference point it asks the provider's entrypoint module, through
 its hook isotope_tables(request, point), for its isotopic LIS (the point without its modulation parameter: a run
 without modulation) and for its modulated per-isotope output (the point with it), applies the plugin's force-field tool
@@ -19,7 +21,8 @@ without modulation) and for its modulated per-isotope output (the point with it)
 to the LIS of each isotope at every top-of-atmosphere node whose LIS energy E_k/n + |Z| phi / A lies inside the LIS
 table, and compares with the provider's value: passed when every relative deviation is within the tolerance (no looser
 than 1e-3). The reference point, observables and tolerance come from the options or from the declaration's existing
-conformance block. It prints the conformance block to declare and writes the per-node comparison to --out.
+conformance block. It prints the conformance block to declare (its result names the provider version the gate ran at)
+and writes the per-node comparison to --out.
 
 Usage:
   python3 tools/provider_registry.py --write "$CRPROP_OUT/registry.json" [--user-provider DECLARATION.json ...]
@@ -110,11 +113,11 @@ def collect(field, folder: Path, component: str, default_version: str | None, us
     problems = [f"{where}: {f.path} {f.message}" for f in rep.errors]
     items = []
     for decl in declarations_of(field) if not problems else []:
-        core_problems = check_declaration(decl)
+        version = decl.get("version", default_version) if isinstance(decl, dict) else None
+        core_problems = check_declaration(decl, version or None)
         problems += [f"{where} {decl.get('id')}: {p}" for p in core_problems]
         if core_problems:
             continue
-        version = decl.get("version", default_version)
         if not version:
             problems.append(f"{where} {decl['id']}: a user-supplied declaration gives its version")
             continue
@@ -271,7 +274,8 @@ def modulation_conformance(provider_id: str, reference_point: dict | None = None
     conformance = {"reference_point": dict(point), "observables": observables, "tolerance": float(tolerance),
                    "result": {"status": "passed" if passed else "failed",
                               "max_relative_deviation": worst if nodes else None,
-                              "nodes_compared": len(nodes), "isotopes": compared, "tool": FORCE_FIELD_TOOL}}
+                              "nodes_compared": len(nodes), "isotopes": compared, "tool": FORCE_FIELD_TOOL,
+                              "provider_version": version}}
     return {"provider": provider_id, "provider_version": version, "implementation": block.get("implementation"),
             "conformance": conformance, "nodes": nodes, "lis_substitutes": lis.get("substitutes", []),
             "toa_substitutes": toa.get("substitutes", [])}

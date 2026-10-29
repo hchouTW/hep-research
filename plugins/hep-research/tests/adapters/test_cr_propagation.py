@@ -937,6 +937,22 @@ def usine_translation(name):
     return usine_translate.translate(s["transport"], name, s["ekn_range_gev"])
 
 
+def implicit_spectrum_variable(transport: dict) -> dict:
+    """A copy of transport whose injection items leave spectrum_variable to the translator's default (the form before
+    L2-3); an item stating another variable is kept as it is."""
+    out = json.loads(json.dumps(transport))
+    for item in out["sources"]["injection"]:
+        if item.get("spectrum_variable") == usine_translate.DEFAULT_SPECTRUM_VARIABLE:
+            del item["spectrum_variable"]
+    return out
+
+
+def usine_rendered(transport: dict, ekn_range=(0.5, 100.0)) -> dict:
+    """The USINE input files the translator renders for transport (placeholders for the install and run folders)."""
+    return usine_translate.render(usine_translate.translate(transport, "render-check", ekn_range),
+                                  "<TOOL_HOME>/inputs", "<RUN_DIR>")
+
+
 def usine_tables(name):
     t = usine_translation(name)
     return usine_reader.read_run(USINE_FIX / "outputs" / name, t["model"], t["species"])
@@ -1187,6 +1203,23 @@ class UsineProviderOffline(unittest.TestCase):
     covers every bin, a point is written into its block, a missing USINE fails the point with provider-error (R4),
     another cross-section set is refused, and with a stand-in executable replaying the d1-isotopic tables its
     predictions are the reader's ratios of those tables."""
+
+    def test_injection_spectrum_variable_is_stated(self):
+        """L2-3: DEFAULT_TRANSPORT and B1's d1 specs state sources.injection[].spectrum_variable (the translator's
+        default, per E_k/n), so no default is recorded for it, and the rendered USINE inputs equal those of the
+        implicit form file by file (the committed d1 inputs: test_specs_render_to_the_recorded_inputs)."""
+        cases = [("DEFAULT_TRANSPORT", {"transport": usine_provider.DEFAULT_TRANSPORT,
+                                        "ekn_range_gev": usine_spec("d1-isotopic")["ekn_range_gev"]})]
+        cases += [(n, usine_spec(n)) for n in ("d1-convection", "d1-decay", "d1-isotopic", "d1-losses",
+                                               "d1-reacceleration")]
+        for name, s in cases:
+            with self.subTest(spec=name):
+                inj = s["transport"]["sources"]["injection"]
+                self.assertEqual({i.get("spectrum_variable") for i in inj}, {"kinetic_energy_per_nucleon"})
+                t = usine_translate.translate(s["transport"], name, s["ekn_range_gev"])
+                self.assertFalse([x for x in t["substitutes"] if "spectrum_variable =" in x], t["substitutes"])
+                self.assertEqual(usine_rendered(s["transport"], s["ekn_range_gev"]),
+                                 usine_rendered(implicit_spectrum_variable(s["transport"]), s["ekn_range_gev"]))
 
     def test_defaults_and_declaration(self):
         self.assertEqual(usine_provider.DEFAULT_TRANSPORT, usine_spec("d1-isotopic")["transport"])
@@ -1814,6 +1847,39 @@ class EmulatorProviderConformance(ProviderConformance, unittest.TestCase):
             emulator_provider.ARTIFACT_ENV) else None
 
 
+class ProviderVersionMigration(unittest.TestCase):
+    """L2-2: adapter 0.3.0 with usine and dragon2 0.3.0 (their own versions; they used to inherit the adapter's
+    0.2.0). The committed C2U and C2UF records keep usine 0.2.0 as history: every recorded input_hash is the point hash
+    of its point under the recorded transport and usine 0.2.0, and none is a key under the current version, so no replay
+    can hit a cached value of 0.2.0 (the runner keys its cache by the point hash, provider_version included)."""
+
+    RECORDS = (FIX / "c2u" / "usine-family-study.json", FIX / "c2uf" / "usine-two-dataset-family-study.json")
+
+    def test_versions(self):
+        adapter = json.loads((ADAPTER / "adapter.json").read_text(encoding="utf-8"))
+        versions = {d["id"]: d.get("version") for d in adapter["provider"]}
+        self.assertEqual(adapter["version"], "0.3.0")
+        self.assertEqual(versions, {"usine": "0.3.0", "dragon2": "0.3.0", "emulator": "1.0.0"})
+        self.assertEqual(usine_provider.declaration()["version"], versions["usine"])
+        self.assertEqual(dragon2_provider.declaration()["version"], versions["dragon2"])
+
+    def test_recorded_input_hashes_are_history(self):
+        from core.provider.hashing import point_hash
+        current = usine_provider.declaration()["version"]
+        for path in self.RECORDS:
+            doc = json.loads(path.read_text(encoding="utf-8"))
+            records = doc["result"]["provider_evaluations"]["records"]
+            transport = doc["config"]["transport"]
+            with self.subTest(record=path.name):
+                self.assertEqual((doc["config"]["provider"]["id"], doc["config"]["provider"]["version"]),
+                                 ("usine", "0.2.0"))
+                self.assertGreater(len(records), 100)
+                self.assertTrue(all(point_hash(transport, "usine", "0.2.0", r["point"]) == r["input_hash"]
+                                    for r in records))
+                recorded = {r["input_hash"] for r in records}
+                self.assertFalse(recorded & {point_hash(transport, "usine", current, r["point"]) for r in records})
+
+
 class EmulatorArtifact(unittest.TestCase):
     """The committed emulator: its ml-artifact validates and names the model by hash, the provider's declaration is the
     model's training box, the model was trained for the USINE provider's DEFAULT_TRANSPORT, and the provider's
@@ -1846,8 +1912,14 @@ class EmulatorArtifact(unittest.TestCase):
         decl = emulator_provider.declaration()
         self.assertEqual(decl["version"], "1.0.0")
         self.assertEqual(decl["domain"], {f["name"]: {"min": f["min"], "max": f["max"]} for f in self.model["features"]})
-        self.assertEqual(self.model["context"]["transport"], usine_provider.DEFAULT_TRANSPORT)
-        self.assertEqual(self.model["context"]["provider_version"], usine_provider.declaration()["version"])
+        # L2 migration: the model is a record of what produced it (usine 0.2.0 and its DEFAULT_TRANSPORT, whose
+        # injection left spectrum_variable to the translator's default); since L2-3 DEFAULT_TRANSPORT states that
+        # default explicitly and renders the same USINE inputs, and the hashed model is kept unchanged
+        self.assertEqual(self.model["context"]["transport"], implicit_spectrum_variable(usine_provider.DEFAULT_TRANSPORT))
+        self.assertEqual(self.model["context"]["provider_version"], "0.2.0")
+        self.assertNotEqual(usine_provider.declaration()["version"], "0.2.0")
+        self.assertEqual(usine_rendered(self.model["context"]["transport"]),
+                         usine_rendered(usine_provider.DEFAULT_TRANSPORT))
         self.assertEqual(self.emu.edges, [E2_EDGES[0][0]] + [b for _, b in E2_EDGES])
 
     def test_prediction_equals_hep_ml(self):
@@ -1923,8 +1995,13 @@ class EmulatorProviderRefusals(unittest.TestCase):
         other["geometry"]["L_kpc"] = 6.0
         proc, doc = e2_call(dict(EMULATOR_REQUEST, transport=other))
         self.assertEqual((proc.returncode, doc["status"], doc["reason"]), (1, "failed", "out-of-domain"))
-        proc, doc = e2_call(dict(EMULATOR_REQUEST, transport=usine_provider.DEFAULT_TRANSPORT))
+        training = json.loads((E2_FIX / "emulator-model.json").read_text(encoding="utf-8"))["context"]["transport"]
+        proc, doc = e2_call(dict(EMULATOR_REQUEST, transport=training))
         self.assertEqual(proc.returncode, 0, doc)
+        # the emulator compares transport blocks by hash: the explicit form of its training transport (L2-3, the same
+        # USINE inputs) is another block and is refused, never emulated on the strength of a rendering argument
+        proc, doc = e2_call(dict(EMULATOR_REQUEST, transport=usine_provider.DEFAULT_TRANSPORT))
+        self.assertEqual((proc.returncode, doc["reason"]), (1, "out-of-domain"))
         bad = dict(EMULATOR_REQUEST, observables=[{"id": "B/C", "axis": "rigidity", "unit": "GV",
                                                     "bins": [[2.0, 3.0], [3.0, 4.0]]}])
         proc, doc = e2_call(bad)

@@ -155,6 +155,31 @@ class ModulationConformance(unittest.TestCase):
         self.assertLessEqual(conf["tolerance"], 1e-3)
         self.assertLessEqual(conf["result"]["max_relative_deviation"], conf["tolerance"])
         self.assertEqual(decl["modulation"]["parameters"], ["phi_2011_2016_gv"])
+        # L2-1: the result was obtained at the provider's current version (the gate rerun at 0.3.0)
+        self.assertEqual(conf["result"]["provider_version"], decl["version"])
+        self.assertEqual(check_declaration(decl, decl["version"]), [])
+
+    def test_a_result_of_another_version_is_refused(self):
+        """L2-1: a provider version bumped without rerunning the gate is refused when the registry is built (the
+        declaration's version, or the adapter's version it defaults to), with the instruction to rerun the gate."""
+        import copy
+
+        from tools.provider_registry import collect
+        path, manifest = next((p, m) for p, m in declaring_files(ROOT)
+                              if any(isinstance(d, dict) and d.get("id") == "usine" for d in m.get("provider") or []))
+        field = copy.deepcopy(manifest["provider"])
+        usine = next(d for d in field if d["id"] == "usine")
+        items, problems = collect([usine], path.parent, "cr-propagation", manifest["version"], False, "adapter.json")
+        self.assertEqual((len(items), problems), (1, []))
+        bumped = dict(usine, version="9.9.9")
+        items, problems = collect([bumped], path.parent, "cr-propagation", manifest["version"], False, "adapter.json")
+        self.assertEqual(items, [])
+        self.assertTrue(any("differs from the provider version '9.9.9'" in p and "rerun" in p for p in problems),
+                        problems)
+        inherited = {k: v for k, v in usine.items() if k != "version"}       # the adapter's version applies
+        items, problems = collect([inherited], path.parent, "cr-propagation", "9.9.9", False, "adapter.json")
+        self.assertEqual(items, [])
+        self.assertTrue(any("'9.9.9'" in p for p in problems), problems)
 
     def test_gate_on_recorded_usine_tables(self):
         from tools.provider_registry import modulation_conformance
@@ -164,6 +189,9 @@ class ModulationConformance(unittest.TestCase):
         self.assertEqual(result["isotopes"], ["11B", "12C"])
         self.assertGreater(result["nodes_compared"], 100)
         self.assertLess(result["max_relative_deviation"], 1e-4)   # USINE's 6-digit tables and masses
+        self.assertEqual(result["provider_version"], out["provider_version"])   # L2-1: the version the gate ran at
+        from tools.provider_registry import find_declaration
+        self.assertEqual(out["provider_version"], find_declaration("usine")[2])
         bad = modulation_conformance("usine", self.POINT, hook=recorded_usine_hook(1.002))["conformance"]["result"]
         self.assertEqual(bad["status"], "failed")
         self.assertGreater(bad["max_relative_deviation"], 1e-3)

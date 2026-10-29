@@ -1,11 +1,11 @@
 {
- "contract_version": "3.15.0",
+ "contract_version": "3.16.0",
  "artifact_id": "j15-v1-CALC-IFA1-N4",
  "artifact_type": "design-evaluation",
  "objective": "detector system design: design-evaluation written by evaluate_design.py",
  "versions": {
   "plugin": "0.44.0",
-  "contracts": "3.15.0",
+  "contracts": "3.16.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-N4.json",
-   "sha256": "9921edbfb506ff569b8da77c0b09048b6e2f674ac38d61e732a4e19348284324",
+   "sha256": "08627832dd0c4cf91da98d5b38b1ddc807c86576f889b698215a76ff072af350",
    "artifact_type": "design-candidate",
    "artifact_id": "j15-v1-cand-N4",
    "status": [
@@ -28,7 +28,7 @@
   },
   {
    "ref": "candidates/cand-N6.json",
-   "sha256": "cfa580ee557ea02cd97b988a32a151dd5112757481b6460b65f9068d1b6786a9",
+   "sha256": "d0f5057c6815514d84b2d91791fcc9e1571a7a83b137a805571bfc38dec5e06e",
    "artifact_type": "design-candidate",
    "artifact_id": "j15-v1-cand-N6",
    "status": [
@@ -38,7 +38,7 @@
   },
   {
    "ref": "runs/CALC-IFA1-N4.computational-run.json",
-   "sha256": "af3ec6da075a9fcc063ab1b42924f29286c6da299c6857cc1cb3b1c59ed6f070",
+   "sha256": "f1bdc41cdd19f2cb625d89662a2018b7b1de048dbad85712af8e725d410d6f06",
    "artifact_type": "computational-run",
    "artifact_id": "j15-v1-CALC-IFA1-N4-run",
    "status": [
