@@ -1118,7 +1118,7 @@ class UsineEmulatorFamilies(unittest.TestCase):
         self.assertEqual(self.res["families"]["surviving"], self.cal["surviving"])
         self.assertGreater(entries["SLIM"]["delta_chi2"], 20.0)
 
-    def test_l1_portable_model_and_squared_va(self):
+    def test_l1_portable_model_and_squared_retries(self):
         """L1-2 (VALIDATION.md CRPROP-L1): the fixture is the model trained with the kernel condition bound 1e10, its
         k = 4 confirmation over the toy domain passed, V_A_kms is declared enters_squared, and BIG's toy fits that
         failed in V_A went through the V_A^2 retries (recorded per toy as square_retry)."""
