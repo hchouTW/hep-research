@@ -114,6 +114,7 @@ Materials: Parts I–IV saved as `v12-en-{0-core,1-methods,2-control,3-delivery}
 | 2 | `s0-reconstruction-v12-r2` | spec copy after round 1 | R2 | violated (1 major, 2 minor) | violated (0 major, 7 minor) → **passes** with fixes | violated (1 major, 3 minor) | violated (0 major, 4 minor) → **passes** with fixes | violated (1 major, 5 minor) |
 | 3 | `s0-reconstruction-v12-r3` (N1, N3, N5) | spec copy after round 2 | R2 | violated (2 major) → **does not pass** (limit reached) | — | violated (0 major, 4 minor) → **passes** with fixes | — | violated (0 major, 2 minor) → **passes** with fixes |
 | 4 (user-approved, beyond the runbook limit) | `s0-reconstruction-v12-r4` (N1) | spec copy after round 3 (incl. the two unreviewed round-3 N1 fixes) | R2 | violated (3 major, 2 minor) → **does not pass** | — | — | — | — |
+| 5 (user-approved) | `s0-reconstruction-v12-r5` (N1) | spec copy after the user-approved round-4 fixes | R2 | violated (2 major, 1 minor) → **does not pass** | — | — | — | — |
 
 **S0 result: N2, N3, N4, N5 pass; N1 does not pass after three rounds.** Stage gates (runbook 0.5.1): A1 (N2–N5) open;
 B1 (N2) open; A2 (N2, N3) open; B2 (N2) open; **C1 and C2 (N1) blocked**. Process note: in round 1 the N2 reviewer
@@ -151,6 +152,18 @@ digest-bound (`a81d6729…`). Achieved R2; **N1 violated, 3 major and 2 minor; N
 attack reproduced (A1, A1b, A2, A2b, A3, A4). Findings and their status: `spec/revision-log.md`, “N1 — round 4”.
 The three majors each need a design change to the control rules, so the spec copy is **not** changed: per runbook
 Part 0 the acceptance rules are not changed without a human. C1 and C2 stay blocked.
+
+### Round 4 fixes and round 5 (N1 only), 2026-10-29
+
+The user approved the three design changes proposed for the round-4 majors; they and the two minors were made in the
+spec copy (`db9cc646`; reference model 86/86 scenarios, 39/39 mutations; mapping in `spec/revision-log.md`). The user
+then asked for a fifth N1 round: context `s0-reconstruction-v12-r5`, same procedure, coordinator files moved out of the
+round folder before dispatch, submission digest-bound (`a4d19c5f…`). Achieved R2; **N1 violated, 2 major and 1 minor;
+N1 still does not pass.** Report `s0/round5-report.txt`, checkpoint `s0/round5-checkpoint.txt`, export
+`s0/s0-reconstruction-v12-r5.export.json` (`verify-export`: checkpoint `matches`, internal consistency ok); attack
+script `s0/round5-attack.py`, re-run by the coordinator against the committed model (byte-identical): all five attacks
+reproduce. Both majors are gaps in the round-4 fixes themselves (revert detected by identity rather than by digest;
+check inputs not required to be ok). The spec copy is not changed; C1 and C2 stay blocked.
 
 ## A1 — methods and main-Agent resumption (documentation and skill wiring)
 

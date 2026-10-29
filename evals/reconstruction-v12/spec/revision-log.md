@@ -57,6 +57,16 @@ A1 revert pending approval (X2 stays bound, `confirmation_results` = 2 in publis
 
 Also: Core §0.5 review-status row updated (counts, revision after round 4); Control §8 counts and lists.
 
+## N1 — round 5 (open; spec copy not changed)
+
+Context `s0-reconstruction-v12-r5`, R2, N1 violated; reproduced by the coordinator with `s0/round5-attack.py`.
+
+| Id | Severity | Finding | Reproduction | Possible directions (not adopted) |
+|---|---|---|---|---|
+| N1-R5-F1 | major | The revert rule (round-4 F1) tests identities, so a cosmetic content change that reproduces an earlier, already-seen digest takes effect automatically; the new producer re-binds the old digest with its old confirmation results (also through an unchecked upstream step, without recomputing the deliverable step) | a1, a2 | define a revert by the reproduced digest (a producer of a digest an earlier attempt of the step already produced under another identity does not re-bind it without a human), or keep the binding sequence number at the digest's earliest producer |
+| N1-R5-F2 | major | A non-upstream check input (round-4 F3) may be held, or invalidated later, and the check result still counts; the target is accepted | a3, a4 | a check result counts only while each non-upstream input is ok (or is the bound version), mirroring the upstream state of consumed inputs; resolve only to ok versions at admission |
+| N1-R5-F3 | minor | “Same side effect” for check attempts: Control §3 keys on check × criterion × target, the model on the full identity including check inputs, so a second check attempt is admitted while one is unknown | a5 | compare check × criterion × target in admission (model l. 1250–1253) |
+
 ## N3 — statistics
 
 | Finding | Sev. | Change | Where |
