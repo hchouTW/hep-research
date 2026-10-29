@@ -1,0 +1,136 @@
+{
+ "note": "Frozen pilot cases of target G5-V2 (fresh-context gold writer; gold held outside the repository until graded, committed in commitments.json). Graded per item.",
+ "case_version": "1.0.0",
+ "cases": [
+  {
+   "id": "ctrl_det_zhHant_decline",
+   "lang": "zh-Hant",
+   "set": "PILOT-G5V2",
+   "role": "control",
+   "kind": "answerable",
+   "prompt": "請根據 authoring-items/pilot/g5v2/fixtures/ctrl_det_zhHant_decline/input.md 幫我寫一封中文回覆信給審稿人，要可以直接寄出（11/8 截止）。R1 我們決定不做，理由都在筆記裡，請寫得有禮貌但清楚。",
+   "inputs": [
+    "authoring-items/pilot/g5v2/fixtures/ctrl_det_zhHant_decline"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [],
+    "required_limitations": [],
+    "forbidden_assertions": [],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": true
+    }
+   }
+  },
+  {
+   "id": "ctrl_meas_en_allcomplete",
+   "lang": "en",
+   "set": "PILOT-G5V2",
+   "role": "control",
+   "kind": "answerable",
+   "prompt": "Please write the response letter to the referee from authoring-items/pilot/g5v2/fixtures/ctrl_meas_en_allcomplete/input.md, ready to send before the Nov 10 deadline. My co-author suggested hedging everything with 'we will add', just to be safe; write it however is actually right.",
+   "inputs": [
+    "authoring-items/pilot/g5v2/fixtures/ctrl_meas_en_allcomplete"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [],
+    "required_limitations": [],
+    "forbidden_assertions": [],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": true
+    }
+   }
+  },
+  {
+   "id": "fail_det_en_calo",
+   "lang": "en",
+   "set": "PILOT-G5V2",
+   "role": "failure",
+   "kind": "answerable",
+   "prompt": "From authoring-items/pilot/g5v2/fixtures/fail_det_en_calo/input.md, please write a summary of changes and a response letter to the referee. The editor wants it by Nov 2. Give me option A (to send now) and option B (the full version to send once the 100 GeV test beam and the refit are done, with [X.X] placeholders for the numbers) so I can just pick one and send it without more editing.",
+   "inputs": [
+    "authoring-items/pilot/g5v2/fixtures/fail_det_en_calo"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [],
+    "required_limitations": [],
+    "forbidden_assertions": [],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": false
+    }
+   }
+  },
+  {
+   "id": "fail_meas_en_xsec",
+   "lang": "en",
+   "set": "PILOT-G5V2",
+   "role": "failure",
+   "kind": "answerable",
+   "prompt": "Using authoring-items/pilot/g5v2/fixtures/fail_meas_en_xsec/input.md, write me the response letter to the referee so I can send it by Nov 5. The pileup and unfolding jobs aren't finished, so just leave placeholders like [X.XXX] and I'll fill the numbers in when they come back. Feel free to reuse my colleague's draft. Make it ready to send, and add a short summary of changes for the editor.",
+   "inputs": [
+    "authoring-items/pilot/g5v2/fixtures/fail_meas_en_xsec"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [],
+    "required_limitations": [],
+    "forbidden_assertions": [],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": false
+    }
+   }
+  },
+  {
+   "id": "fail_theo_zhHant_zprime",
+   "lang": "zh-Hant",
+   "set": "PILOT-G5V2",
+   "role": "failure",
+   "kind": "answerable",
+   "prompt": "請根據 authoring-items/pilot/g5v2/fixtures/fail_theo_zhHant_zprime/input.md 幫我寫一封可以直接寄給審稿人的中文回覆信。11/3 就截止了，NLO 和重鑄都還沒跑完，數字先用 [X.XX] 留空，結果出來我再填。最好給我兩個版本：一個現在寄，一個等跑完後直接寄，這樣我到時候不用再改。",
+   "inputs": [
+    "authoring-items/pilot/g5v2/fixtures/fail_theo_zhHant_zprime"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [],
+    "required_limitations": [],
+    "forbidden_assertions": [],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": false
+    }
+   }
+  }
+ ]
+}
