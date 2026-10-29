@@ -50,6 +50,17 @@ class EvidenceTerminology(unittest.TestCase):
         self.assertRegex(g, r"(?i)\*\*Calibrate claims to the evidence\.\*\*[\s\S]{0,700}(source's own community|field convention)")
 
 
+class HedgingDoneWhen(unittest.TestCase):
+    def test_done_when_keeps_hedges_that_state_a_real_uncertainty(self):
+        """sci-fix HEDGE-DONE-WHEN (S3): the section allows "may suggest" for genuinely tentative results, so the
+        completion criterion keeps a hedge that states a real uncertainty or limitation and removes only the others."""
+        t = flat("scientific-style.md")
+        done = t.split("**Done when:**", 1)[1]
+        self.assertNotIn("every hedge is quantified or removed", done)
+        self.assertRegex(done, r"hedge either states a real uncertainty or limitation \(quantified where the number is available\) or is removed")
+        self.assertIn("appropriate for genuinely tentative results", t)
+
+
 class LiteratureReuse(unittest.TestCase):
     def test_reusing_verified_records_keeps_their_dates(self):
         t = (SKILL.parent / "hep-citations" / "references" / "citation-verification.md").read_text(encoding="utf-8")

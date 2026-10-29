@@ -6474,6 +6474,33 @@
    ],
    "gaps": [],
    "note": "yes; arXiv:1306.6756v2 Sec. II-C (M_phys/M_cali is a factor to correct for differences between the physics signal and calibration pulses) and arXiv:0912.2642v4 Sec. 3.1.2 eq. 5 (the factor 1/(M_phys/M_cali) quantifies the ratio of response to a calibration pulse and an ionization pulse corresponding to the same input current), both read in the full text 2026-10-25; regression test tests/skills/hep_detector/test_frontend_waveforms.py::InjectionGainGuidance fails on the parent and passes on the fix; split out of the feat: calibration commit by maintainer decision D-C4 2026-10-25"
+  },
+  {
+   "id": "HEDGE-DONE-WHEN",
+   "title": "Hedging Done when contradicted its own section: a hedge that states a real uncertainty or limitation stays (quantified where the number is available); only reflexive softeners are removed (hep-authoring scientific-style.md, G1 of VALIDATION AUTHORING-IMPROVE)",
+   "severity": "S3",
+   "sources": [
+    {
+     "kind": "external",
+     "citation": "K. Hyland, The Author in the Text: Hedging Scientific Writing, Hong Kong Papers in Linguistics and Language Teaching 18 (1995) 33-42 (ERIC ED390258)",
+     "locator": "pp. 34-35, The functions of hedging (hedges as a means of accurately stating uncertain claims with appropriate caution, 'to specify the actual state of knowledge'; hedging because of preliminary results, small samples, doubtful evidence, uncertain predictions, imperfect measuring techniques)",
+     "read": "2026-10-29"
+    },
+    {
+     "kind": "external",
+     "citation": "R. Bongelli, I. Riccioni, R. Burro, A. Zuczkowski, Writers' uncertainty in scientific and popular biomedical articles, PLoS ONE 14(9) (2019) e0221933, doi:10.1371/journal.pone.0221933",
+     "locator": "Conclusion and Discussion (submitted articles must be 'neither too certain nor too uncertain'; possibility markers as the more appropriate way to communicate uncertainty)",
+     "read": "2026-10-29"
+    },
+    {
+     "kind": "internal",
+     "citation": "skills/hep-authoring/references/scientific-style.md",
+     "locator": "Hedging and precision ('appropriate for genuinely tentative results'; quantify wherever possible)",
+     "read": "2026-10-29"
+    }
+   ],
+   "gaps": [],
+   "note": "yes; Hyland 1995 read in the full text (ERIC scan, pp. 33-40) and Bongelli et al. 2019 read in the full text (PLoS ONE HTML, the quoted phrase checked) on 2026-10-29; both state that hedges convey real uncertainty and that claims should be neither overstated nor over-hedged, which the section already said and the old Done when contradicted; regression test tests/skills/hep_authoring/test_handoff_text.py::HedgingDoneWhen fails on the parent e7c6568a045a3967218efe9c0ba776639451ca39 and passes on the fix"
   }
  ],
  "superseded": [
