@@ -280,9 +280,9 @@ silently.
 ## Cross-artifact analysis check (retired)
 
 The opt-in cross-artifact analysis check (`contracts/analysis_check.py`, the `counting-chain` and `ratio-subset`
-suites, `permit.py check-report` and `review_measurement_spec.py --check-bundle`) was retired: its value gate found
-no error it caught that closure tests and contract checks missed. Its commands now refuse with that reason; reproduce
-old bundles and reports with the last release that has the check. The review questions its rules encoded are in the
+suites, `permit.py check-report` and `review_measurement_spec.py --check-bundle`) was retired in 0.48.0: its value gate
+found no error it caught that closure tests and contract checks missed. Its entry points were removed in 0.49.0;
+reproduce old bundles and reports with 0.47.x. The review questions its rules encoded are in the
 measurement review ([review and artifacts](skills/hep-measurement/references/review-and-artifacts.md)) and, for
 ratios, in [combinations](skills/hep-statistics/references/combinations.md); a recorded, tiered review uses them
 through hep-review. Records: [docs/dev/cross-artifact-check/](docs/dev/cross-artifact-check/README.md).

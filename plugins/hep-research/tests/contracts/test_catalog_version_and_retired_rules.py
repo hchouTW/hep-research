@@ -31,9 +31,26 @@ class CheckRetired(unittest.TestCase):
 
     def test_no_checker_suite_or_coverage_is_left(self):
         for rel in ("contracts/analysis_checks", "contracts/rules/suites", "contracts/semantics/coverage",
-                    "contracts/migrate.py"):
+                    "contracts/migrate.py", "contracts/analysis_check.py"):
             with self.subTest(path=rel):
                 self.assertFalse((ROOT / rel).exists())
+
+    def test_retired_entry_points_are_removed(self):
+        # 0.49.0 removed the refusing pointers: check-report and the two review flags are now unknown (usage, exit 2)
+        import contextlib
+        import io
+        import subprocess
+        from contracts import permit
+        with contextlib.redirect_stderr(io.StringIO()) as err:
+            self.assertEqual(permit.main(["check-report", "report.json"]), 2)
+        self.assertIn("invalid choice", err.getvalue())
+        script = ROOT / "skills" / "hep-measurement" / "scripts" / "review_measurement_spec.py"
+        for flag in ("--check-bundle", "--check-root"):
+            with self.subTest(flag=flag):
+                proc = subprocess.run([sys.executable, str(script), "spec.json", flag, "x"], capture_output=True,
+                                      text=True, timeout=60)
+                self.assertEqual(proc.returncode, 2)
+                self.assertIn("unrecognized arguments", proc.stderr)
 
 
 if __name__ == "__main__":

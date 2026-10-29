@@ -2895,7 +2895,6 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "README.md",
-    "contracts/analysis_check.py",
     "examples/ams-flux-ratio/run.py",
     "examples/collider-angular/run.py",
     "profiles/experiments/ams-02/modules/methods/analysis-artifacts.md",
@@ -3987,7 +3986,6 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "README.md",
-    "contracts/analysis_check.py",
     "skills/hep-statistics/SKILL.md",
     "skills/hep-statistics/references/core-stats-commands.md",
     "skills/hep-statistics/references/core-stats-guide.md",

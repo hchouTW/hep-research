@@ -3,6 +3,14 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **Retired cross-artifact check entry points removed** (`docs/dev/cross-artifact-check/decision-retire.md`, as
+  decided for the release after 0.48.0): the refusing stub `contracts/analysis_check.py`, `permit.py check-report`
+  (refusal `permit.check_report_retired`) and the hidden `review_measurement_spec.py --check-bundle` / `--check-root`
+  flags are gone; `check-report` and the two flags are now ordinary usage errors (exit 2). The `context-obligations`
+  CI impact group drops the stub's pattern. Reproduce old bundles and reports with 0.47.x.
+
 ## 0.48.0 (2026-10-29)
 
 Minor release; contracts 3.17.0 (minor), `CORE_VERSION` 1.4.0 and the adapters are unchanged. It retires the

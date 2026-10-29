@@ -33,8 +33,8 @@ when the use takes place. checker(path) returns the formal_check that core.prote
 Usage: python3 contracts/permit.py verify PERMIT --project DIR [--scope formal-use|s3-execution]
            [--purpose PURPOSE] [INPUT ...]
 
-check-report was the advisory check of a cross-artifact analysis-check report; it was retired with the check
-(docs/dev/cross-artifact-check/decision-retire.md) and now refuses with permit.check_report_retired (exit 2).
+check-report (the advisory check of a cross-artifact analysis-check report) was retired with the check in 0.48.0
+and removed in 0.49.0 (docs/dev/cross-artifact-check/decision-retire.md).
 Exit 0 when nothing is refused, 3 when the permit is refused, 2 bad usage. Output: JSON.
 """
 from __future__ import annotations
@@ -252,19 +252,10 @@ def main(argv=None) -> int:
     p.add_argument("--project", type=Path, required=True)
     p.add_argument("--scope", choices=("formal-use", "s3-execution"), default="formal-use")
     p.add_argument("--purpose", default=FORMAL_PURPOSE)
-    q = sub.add_parser("check-report", help="retired with the cross-artifact check; refused with the reason")
-    q.add_argument("rest", nargs=argparse.REMAINDER)
     try:
         args = ap.parse_args(argv)
     except SystemExit as exc:
         return 2 if exc.code else 0
-    if args.cmd == "check-report":
-        print(json.dumps({"status": "refused", "refusals": [_r(
-            "permit.check_report_retired", "$cmd",
-            "the cross-artifact analysis check and its reports were retired "
-            "(docs/dev/cross-artifact-check/decision-retire.md); read old reports with the last release that has the check")],
-            "formal_use_allowed": False}, indent=1))
-        return 2
     ctx = establish(args.inputs, project=args.project)
     refusals = list(ctx.refusals) if ctx.protected else [_r("permit.not_protected", "$project",
                                                             "the project does not run in protected mode")]

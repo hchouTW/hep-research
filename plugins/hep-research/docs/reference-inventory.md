@@ -244,7 +244,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `histograms-efficiencies.md` | hep-measurement | 3.1 | yes | 9 | hep-computing, hep-detector | 9257d7b5 2026-10-15 |
 | `measurements-and-unfolding.md` | hep-measurement | 7.5 | yes | 12 | hep-detector, hep-statistics | 7a584954 2026-10-17 |
 | `rare-event-and-neutrino-measurements.md` | hep-measurement | 7.0 | no | 3 | - | c4d801c4 2026-10-17 |
-| `review-and-artifacts.md` | hep-measurement | 10.1 | yes | 12 | - | 6a70f37e 2026-10-29 |
+| `review-and-artifacts.md` | hep-measurement | 10.1 | yes | 11 | - | 6a70f37e 2026-10-29 |
 | `systematics.md` | hep-measurement | 11.3 | yes | 39 | hep-computing, hep-detector, hep-ml, hep-statistics, hep-theory | 16214af1 2026-10-26 |
 | `weights-normalization.md` | hep-measurement | 4.5 | yes | 10 | hep-computing, hep-detector, hep-ml, hep-theory | 9257d7b5 2026-10-15 |
 | `ablation-and-design-review.md` | hep-ml | 2.3 | no | 13 | hep-authoring | 9257d7b5 2026-10-15 |
@@ -299,7 +299,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `support-matrix.md` | hep-review | 3.2 | yes | 3 | - | 92975d12 2026-10-29 |
 | `workflow-and-tiers.md` | hep-review | 6.1 | yes | 2 | - | b491ff9e 2026-10-29 |
 | `astroparticle-statistics.md` | hep-statistics | 12.4 | yes | 15 | hep-detector, hep-measurement | e03c0396 2026-10-22 |
-| `combinations.md` | hep-statistics | 6.0 | yes | 7 | - | 6a70f37e 2026-10-29 |
+| `combinations.md` | hep-statistics | 6.0 | yes | 6 | - | 6a70f37e 2026-10-29 |
 | `core-stats-commands.md` | hep-statistics | 52.3 | yes | 6 | hep-detector, hep-measurement | f453828b 2026-10-29 |
 | `core-stats-guide.md` | hep-statistics | 14.8 | yes | 12 | hep-measurement | 1f9b0087 2026-10-29 |
 | `inference-recipes.md` | hep-statistics | 21.6 | yes | 13 | hep-detector, hep-measurement | 2b221f92 2026-10-22 |
