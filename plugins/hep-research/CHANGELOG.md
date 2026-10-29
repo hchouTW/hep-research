@@ -10,7 +10,12 @@ Software checks establish contract consistency only, not physical validity.
   that fails in p (not converged, or its first attempt refused as out of the provider domain) spends its remaining
   restarts in w = p^2, from the failed point; the verdict, the 2% toy-failure limit and every tolerance are unchanged,
   fits that converge in p and the main fits keep their numbers, and toy rows record `square_retry`. The C2UF emulator
-  study declares it for `V_A_kms`. Diagnosis of the K4 toy failures and the method: VALIDATION.md CRPROP-L1.
+  study declares it for `V_A_kms`; with it C2UF-1 passes on both the A1.14 and K4's well-conditioned emulator (0 of
+  200 failed toys per family, BIG survives, SLIM excluded at p < 0.015), so the C2UF emulator fixture is now K4's
+  retraining (`--max-condition 1e10`, the study's new default; self-check drift margin above 3000) and the A1.21 skips
+  are removed: a self-check refusal of that fixture fails the tests again (0.43.0/0.44.0 known issue closed). The study
+  driver sends the emulator its recorded training transport and asks for the registered USINE version. Diagnosis of
+  the K4 toy failures, the method and the numbers: VALIDATION.md CRPROP-L1.
 
 ## 0.44.0 (2026-10-29)
 
