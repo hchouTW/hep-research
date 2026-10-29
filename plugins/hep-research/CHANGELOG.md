@@ -3,6 +3,18 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **hep-authoring prose examples** (G8): `skills/hep-authoring/examples/prose/` holds three weak-versus-better examples
+  in the Contrast format: a results paragraph (hedges that state a real limitation, significance wording, status
+  labels), a review synthesis with a referee handoff and a reply written from the change ledger, and a review talk
+  whose good and weak manifests were run through `check_adaptation.py` (reports quoted). Linked from SKILL.md.
+- **Review-talk adaptation template** (G7): `audience-adaptation-templates.md` gains a review-talk outline (one claim
+  per study, a synthesis claim as the central claim), which template applies when, and how layout numbers avoid
+  `unmapped_number` warnings (a `context` statement); test in `test_adaptation.py`.
+- The papers guide's drafting order is the measurement-paper default; other paper types start from their backbone in
+  `paper-genre-variants.md` (G4, document part).
+
 ## 0.47.0 (2026-10-29)
 
 Minor release; contracts 3.16.0, `CORE_VERSION` 1.4.0 and the adapters are unchanged. It ships the hep-authoring

@@ -8212,3 +8212,14 @@ item). Limitations: developer-authored brief; same-host gold (advisory); same mo
 gold items hit a ceiling (both versions 11-12 of 12), so the pilot had little power for this target. Records:
 `evals/research_communication/authoring-items/` (exploration, pilot protocol, commitments, revealed gold, result) and
 `evals/routing/results/ar-*.json` in the repository's top-level `evals/`.
+
+## AUTHORING-FOLLOWUPS — 2026-10-29 (macOS, Claude Code 2.1.312, claude-sonnet-5-5; branch `hep-authoring-followups-20261029` from `5e2a75a2`)
+
+Three follow-ups of AUTHORING-IMPROVE, requested by the maintainer after 0.47.0. Spend: USD 0.80 (12 runs).
+
+| Item | Evidence | Result |
+|---|---|---|
+| G4 document part: drafting order is the measurement-paper default; other types start from their backbone (quick load 22888 -> 23012 B) | engineering (L2) | pass; behaviour not measured (the G4 defect did not reproduce at baseline, 0/4) |
+| G7: review-talk outline in `audience-adaptation-templates.md`, which template applies, layout numbers as `context` statements | engineering: `test_adaptation.py::test_review_talk_with_a_synthesis_claim_and_layout_numbers` (a synthesis central claim passes; the slot length warns until its line is a context statement) | pass |
+| G8/P5: three Contrast-format prose examples in `skills/hep-authoring/examples/prose/` (SKILL.md 9606 -> 9739 B, quick load 23145 of 25600) | engineering: `validate_skill_example.py` on each, `test_diagrams.py::test_prose_examples_follow_the_contrast_format`; example 03 quotes real `check_adaptation.py` reports (good manifest exit 0, weak manifest exit 1: status dropped, invented average, condition dropped) | pass |
+| P5 transfer (spike, no claim): three new synthetic cases (a 2.6 sigma local excess, a review of three determinations, a review talk), 0.47.0 vs this branch, 2 runs each | live runs | no observable difference: both versions declined a consensus value and kept the preliminary label and the global significance; the examples were opened in 0 of 6 runs with them available. Kept as documentation by maintainer decision (2026-10-29); no model benefit is claimed |

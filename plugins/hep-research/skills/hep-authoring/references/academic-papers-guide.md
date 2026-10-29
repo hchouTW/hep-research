@@ -112,8 +112,9 @@ and disclosure modes, each with its file, is in [review modes](papers-review-mod
    See `paper-structure.md`.
 3. **Draft section by section, result-first.** For physics papers, write the abstract
    *last* even though it's read first — it's a compressed version of everything else.
-   Draft in this order: Results → Analysis/Methods → Introduction → Discussion/
-   Conclusion → Abstract → Title. See `paper-structure.md` for what belongs
+   For a measurement paper the default order is Results → Analysis/Methods → Introduction →
+   Discussion/Conclusion → Abstract → Title; a theory, method, review or thesis text starts
+   from its own backbone (`paper-genre-variants.md`). See `paper-structure.md` for what belongs
    in each section and `scientific-style.md` for sentence-level guidance.
 4. **Build figures and tables alongside the text**, not after. A figure that needs a
    paragraph of caption to be understood usually needs redesigning, not more caption.
