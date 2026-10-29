@@ -8177,6 +8177,11 @@ the unchanged joint-fit value; a consistency review found four of five known sou
 missing decimal point, a ratio named inversely to its equation, a missing unit; missed a "position"/"positron" typo)
 plus one more (a subscript typo). Three earlier runs that loaded no plugin were discarded.
 
+L3: `tools/run_all_checks.py` passes (after regenerating the reference inventory). `tools/check_relocation.py` fails in
+two Geant4 adapter tests (`test_geant4.py` partition runs) because a worker command is split at a space in the relocated
+path; the same two tests fail identically on the unmodified base 3a63e986 copied to a path with a space (pre-existing,
+not touched here).
+
 Not verified here: P4 talk revisions at authoring-pilot level; P5 teaching examples (skipped, no delivered verification
 item). Limitations: developer-authored brief; same-host gold (advisory); same model family for graders and gold writer;
 gold items hit a ceiling (both versions 11-12 of 12), so the pilot had little power for this target. Records:
