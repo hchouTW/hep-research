@@ -3,6 +3,17 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## 0.49.1 (2026-10-30)
+
+Patch release, documentation only; contracts 3.17.0, `CORE_VERSION` 1.4.0, the adapters and every skill's behaviour are
+unchanged.
+
+- **READMEs rewritten** (PR #322): the plugin README and the nine skill READMEs follow one structure (core
+  capabilities, triggering conditions, workspace directory architecture, input and output specifications, setup
+  requirements, operational constraints, validation, example requests). Stale facts corrected: nine skills (not
+  eight), all thirteen registered profiles listed, folder and test-module counts recounted. `SKILL.md` files are
+  unchanged, so routing is unchanged.
+
 ## 0.49.0 (2026-10-29)
 
 Minor release; contracts 3.17.0, `CORE_VERSION` 1.4.0 and the adapters are unchanged. It removes the retired
