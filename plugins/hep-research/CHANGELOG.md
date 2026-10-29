@@ -3,6 +3,28 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **hep-review G3 (T08 evaluation): evaluated-scope for multi-step statistical reviews.** A held-out suite authored by
+  Codex (20 instances of 800-2,000 words, two interacting defects each, numerical and convention defects included;
+  the gold was held encrypted by the user) was reviewed in 60 R2 trials and graded by Claude and Codex together.
+  Defect detection was 71/72 (95% CI 0.925-0.9997), the first measured miss; there were 0/15 false alarms, 6/6 gaps
+  kept and 60/60 on the engineering gate (`docs/dev/hep-review/g3-report.md`). New claim
+  `hep-review/statistics-multi-step` (evaluated-scope) in `assets/claims.json`; the support matrix, capability
+  matrix and skill status are updated, and the regression suite re-scores G3.
+- **hep-review: capability claims, support matrix and regression suite (G3 / T08 groundwork).** Claims are now
+  objects with a scope, a binding (policy, rubric, gold, suite, case distribution, trial plan), results, limitations
+  and a fingerprint (host profile, packet text, validator, reader and hash profiles, model alias and date). They are
+  written and checked only through `evaluation.py` (`make_claim`, `transition`, `reassess_if_changed`,
+  `check_registry`): upgrades need new gate evidence of the right kind, a changed fingerprint forces
+  needs-reassessment, fingerprints are taken at the commit a claim was measured on, and the registry check replays
+  every history through the state machine. The single-page pilot claim is therefore needs-reassessment (the packet
+  text and validator changed after its pilots). A new CI impact group runs the claim and regression tests when
+  claims, the host profile or the evidence change. New
+  reference `support-matrix.md`: T05-T07 are not built and listed as unsupported, R3 is unsupported on this host,
+  and only Claude Code on macOS is measured. `tests/skills/hep_review/test_regression.py` re-scores every committed
+  pilot result from its evidence. The host profile records the g2x fabricated-digest observation.
+
 ## 0.45.0 (2026-10-29)
 
 Minor release; contracts 3.16.0 (gating constant `contracts/validate.py` `CONFORMANCE_VERSION_FROM`), `CORE_VERSION`

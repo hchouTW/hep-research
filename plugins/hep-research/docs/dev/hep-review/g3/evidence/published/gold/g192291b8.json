@@ -1,0 +1,42 @@
+{
+  "id": "g192291b8",
+  "type": "C01",
+  "defects": [
+    {
+      "defect_id": "D1",
+      "statement": "The ten-cell midpoint ratio does not resolve the narrow peak and biases the efficiency; a converged quadrature changes the reported cross section.",
+      "affected_results": [
+        "efficiency",
+        "cross_section",
+        "cross_section_error"
+      ],
+      "tags": [
+        "numerical",
+        "interacting"
+      ],
+      "corrected_values": {
+        "efficiency": 0.48573373753416926,
+        "cross_section": 16.8267771039033,
+        "cross_section_error": 0.679627126086768
+      }
+    },
+    {
+      "defect_id": "D2",
+      "statement": "The transformation of a density specified with respect to dm requires the Jacobian 1/(2*sqrt(t)); canceling a common cell width does not cancel this varying factor.",
+      "affected_results": [
+        "efficiency",
+        "cross_section",
+        "cross_section_error"
+      ],
+      "tags": [
+        "interacting"
+      ],
+      "corrected_values": {
+        "efficiency": 0.48573373753416926,
+        "cross_section": 16.8267771039033,
+        "cross_section_error": 0.679627126086768
+      }
+    }
+  ],
+  "notes": "Synthetic study. All displayed numbers reproduce the written release method. Gold corrections are joint, with single interventions audited separately."
+}

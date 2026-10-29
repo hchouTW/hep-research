@@ -14,7 +14,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-detector | 42 | 589 | 0 |
 | hep-measurement | 12 | 123 | 0 |
 | hep-ml | 42 | 195 | 0 |
-| hep-review | 8 | 24 | 0 |
+| hep-review | 9 | 29 | 0 |
 | hep-statistics | 14 | 208 | 0 |
 | hep-theory | 31 | 244 | 0 |
 
@@ -289,17 +289,18 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `transfer-learning.md` | hep-ml | 1.6 | no | 4 | - | 9257d7b5 2026-10-15 |
 | `transformer-architectures.md` | hep-ml | 5.5 | no | 4 | - | 9257d7b5 2026-10-15 |
 | `uncertainty-and-calibration.md` | hep-ml | 6.9 | yes | 10 | hep-statistics | 485e96cb 2026-10-17 |
-| `domains/computing.md` | hep-review | 1.8 | no | 2 | - | untracked |
-| `domains/index.md` | hep-review | 1.8 | yes | 92 | hep-authoring, hep-citations, hep-computing, hep-detector, hep-measurement, hep-ml, hep-statistics, hep-theory | untracked |
-| `domains/statistics.md` | hep-review | 2.1 | no | 23 | hep-authoring, hep-detector, hep-measurement, hep-statistics, hep-theory | untracked |
-| `evaluation-and-claims.md` | hep-review | 2.4 | yes | 1 | - | untracked |
-| `evidence-and-adjudication.md` | hep-review | 3.4 | yes | 1 | - | untracked |
-| `host-and-trust-boundaries.md` | hep-review | 3.8 | yes | 1 | - | untracked |
-| `storage-continuity-and-export.md` | hep-review | 2.9 | yes | 1 | - | untracked |
-| `workflow-and-tiers.md` | hep-review | 6.1 | yes | 2 | - | untracked |
+| `domains/computing.md` | hep-review | 1.8 | no | 2 | - | dbebc92c 2026-10-29 |
+| `domains/index.md` | hep-review | 1.8 | yes | 92 | hep-authoring, hep-citations, hep-computing, hep-detector, hep-measurement, hep-ml, hep-statistics, hep-theory | dbebc92c 2026-10-29 |
+| `domains/statistics.md` | hep-review | 2.1 | no | 23 | hep-authoring, hep-detector, hep-measurement, hep-statistics, hep-theory | dbebc92c 2026-10-29 |
+| `evaluation-and-claims.md` | hep-review | 3.8 | yes | 1 | - | 92975d12 2026-10-29 |
+| `evidence-and-adjudication.md` | hep-review | 3.4 | yes | 1 | - | dbebc92c 2026-10-29 |
+| `host-and-trust-boundaries.md` | hep-review | 3.8 | yes | 1 | - | 1dfb15fa 2026-10-29 |
+| `storage-continuity-and-export.md` | hep-review | 2.9 | yes | 1 | - | dbebc92c 2026-10-29 |
+| `support-matrix.md` | hep-review | 3.2 | yes | 3 | - | 92975d12 2026-10-29 |
+| `workflow-and-tiers.md` | hep-review | 6.1 | yes | 2 | - | b491ff9e 2026-10-29 |
 | `astroparticle-statistics.md` | hep-statistics | 12.4 | yes | 15 | hep-detector, hep-measurement | e03c0396 2026-10-22 |
 | `combinations.md` | hep-statistics | 4.6 | yes | 4 | - | 317c39a3 2026-10-14 |
-| `core-stats-commands.md` | hep-statistics | 52.3 | yes | 6 | hep-detector, hep-measurement | f453828b 2026-10-29 |
+| `core-stats-commands.md` | hep-statistics | 52.3 | yes | 6 | hep-detector, hep-measurement | 473ef786 2026-10-29 |
 | `core-stats-guide.md` | hep-statistics | 14.8 | yes | 12 | hep-measurement | 1f9b0087 2026-10-29 |
 | `inference-recipes.md` | hep-statistics | 21.6 | yes | 13 | hep-detector, hep-measurement | 2b221f92 2026-10-22 |
 | `likelihood-fitting.md` | hep-statistics | 7.1 | yes | 11 | hep-computing, hep-detector | 09237aee 2026-10-17 |

@@ -1,0 +1,39 @@
+{
+  "id": "g6bcd18f0",
+  "type": "C01",
+  "defects": [
+    {
+      "defect_id": "D1",
+      "statement": "The charged-parent candidate sample is normalized with the neutral-pair production fraction instead of the charged fraction.",
+      "affected_results": [
+        "parent_probability",
+        "parent_probability_error"
+      ],
+      "tags": [
+        "convention",
+        "interacting"
+      ],
+      "corrected_values": {
+        "parent_probability": 0.021583767933927384,
+        "parent_probability_error": 0.0004986282152860115
+      }
+    },
+    {
+      "defect_id": "D2",
+      "statement": "A reconstruction efficiency conditional on the visible daughter mode cannot replace its branching probability when extracting the inclusive parent branching probability.",
+      "affected_results": [
+        "parent_probability",
+        "parent_probability_error"
+      ],
+      "tags": [
+        "convention",
+        "interacting"
+      ],
+      "corrected_values": {
+        "parent_probability": 0.021583767933927384,
+        "parent_probability_error": 0.0004986282152860115
+      }
+    }
+  ],
+  "notes": "Synthetic study. All displayed numbers reproduce the written release method. Gold corrections are joint, with single interventions audited separately."
+}

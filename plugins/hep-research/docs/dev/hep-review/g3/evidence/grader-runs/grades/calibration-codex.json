@@ -1,0 +1,50 @@
+{
+  "K01": {
+    "grade": "accept",
+    "reason": "The finding identifies the missing upper energy cut in the selection probability used for normalization."
+  },
+  "K02": {
+    "grade": "accept",
+    "reason": "The finding identifies center evaluation instead of integration over the exposure bin and locates the error in response averaging."
+  },
+  "K03": {
+    "grade": "accept",
+    "reason": "The finding explicitly identifies the omitted log determinant of the parameter-dependent covariance in the Gaussian objective."
+  },
+  "K04": {
+    "grade": "reject",
+    "reason": "The Student-distribution claim does not identify the omitted covariance determinant."
+  },
+  "K05": {
+    "grade": "accept",
+    "reason": "The finding explicitly distinguishes the selected conditional detection probability from the marginal probability required by the model."
+  },
+  "K06": {
+    "grade": "reject",
+    "reason": "The finding expresses only generic suspicion and does not identify coarse sampling missing the narrow efficiency dip."
+  },
+  "K07": {
+    "grade": "accept",
+    "reason": "The finding identifies the missing transformation Jacobian, 2u, and the resulting change to the specified prior."
+  },
+  "K08": {
+    "grade": "accept",
+    "reason": "The finding identifies a duplicate live-time correction applied to exposure that already includes downtime losses."
+  },
+  "K09": {
+    "grade": "reject",
+    "reason": "The finding concerns simulation noise and sample size, not equal averaging despite unequal target regime probabilities."
+  },
+  "K10": {
+    "grade": "accept",
+    "reason": "The finding identifies the missing calibration derivative in propagating the input standard error to the output scale."
+  },
+  "K11": {
+    "grade": "accept",
+    "reason": "The finding identifies fixed-window null calibration in place of the maximum over all windows."
+  },
+  "K12": {
+    "grade": "reject",
+    "reason": "The claim about mean and median does not identify equal-tail construction being mislabeled as a shortest interval."
+  }
+}

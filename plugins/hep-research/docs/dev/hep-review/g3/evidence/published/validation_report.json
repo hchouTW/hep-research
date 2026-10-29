@@ -1,0 +1,1135 @@
+{
+  "oracles": [
+    {
+      "id": "g7cd4ff2a",
+      "ok": true,
+      "checks": [
+        {
+          "check": "identity",
+          "ok": true
+        },
+        {
+          "check": "independent_correct_computation_keys",
+          "ok": true
+        },
+        {
+          "check": "independent_correct_computation:interval_lower",
+          "ok": true
+        },
+        {
+          "check": "independent_correct_computation:interval_upper",
+          "ok": true
+        },
+        {
+          "check": "independent_correct_computation:coverage",
+          "ok": true
+        }
+      ],
+      "exit_code": 0
+    },
+    {
+      "id": "g3dd81149",
+      "ok": true,
+      "checks": [
+        {
+          "check": "identity",
+          "ok": true
+        },
+        {
+          "check": "written_method_keys",
+          "ok": true
+        },
+        {
+          "check": "written_method:posterior_mean",
+          "ok": true
+        },
+        {
+          "check": "written_method:interval_lower",
+          "ok": true
+        },
+        {
+          "check": "written_method:interval_upper",
+          "ok": true
+        },
+        {
+          "check": "material_single_correction_1",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:posterior_mean",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:interval_lower",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:interval_upper",
+          "ok": true
+        },
+        {
+          "check": "residual_after_single_1",
+          "ok": true
+        },
+        {
+          "check": "material_single_correction_2",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_2:interval_lower",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_2:interval_upper",
+          "ok": true
+        },
+        {
+          "check": "residual_after_single_2",
+          "ok": true
+        },
+        {
+          "check": "hpd_equal_density",
+          "ok": true
+        },
+        {
+          "check": "posterior_mass",
+          "ok": true
+        }
+      ],
+      "exit_code": 0
+    },
+    {
+      "id": "g192291b8",
+      "ok": true,
+      "checks": [
+        {
+          "check": "identity",
+          "ok": true
+        },
+        {
+          "check": "written_method_keys",
+          "ok": true
+        },
+        {
+          "check": "written_method:efficiency",
+          "ok": true
+        },
+        {
+          "check": "written_method:cross_section",
+          "ok": true
+        },
+        {
+          "check": "written_method:cross_section_error",
+          "ok": true
+        },
+        {
+          "check": "material_single_correction_1",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:efficiency",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:cross_section",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:cross_section_error",
+          "ok": true
+        },
+        {
+          "check": "residual_after_single_1",
+          "ok": true
+        },
+        {
+          "check": "material_single_correction_2",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_2:efficiency",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_2:cross_section",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_2:cross_section_error",
+          "ok": true
+        },
+        {
+          "check": "residual_after_single_2",
+          "ok": true
+        },
+        {
+          "check": "mass_coordinate_crosscheck",
+          "ok": true
+        }
+      ],
+      "exit_code": 0
+    },
+    {
+      "id": "g91002406",
+      "ok": true,
+      "checks": [
+        {
+          "check": "identity",
+          "ok": true
+        },
+        {
+          "check": "written_method_keys",
+          "ok": true
+        },
+        {
+          "check": "written_method:coverage",
+          "ok": true
+        },
+        {
+          "check": "written_method:coverage_error",
+          "ok": true
+        },
+        {
+          "check": "written_method:miss_fraction",
+          "ok": true
+        },
+        {
+          "check": "material_single_correction_1",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:coverage",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:coverage_error",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:miss_fraction",
+          "ok": true
+        },
+        {
+          "check": "residual_after_single_1",
+          "ok": true
+        },
+        {
+          "check": "material_single_correction_2",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_2:coverage",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_2:coverage_error",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_2:miss_fraction",
+          "ok": true
+        },
+        {
+          "check": "residual_after_single_2",
+          "ok": true
+        }
+      ],
+      "exit_code": 0
+    },
+    {
+      "id": "g4d2a7736",
+      "ok": true,
+      "checks": [
+        {
+          "check": "identity",
+          "ok": true
+        },
+        {
+          "check": "hidden_reachability_keys",
+          "ok": true
+        },
+        {
+          "check": "hidden_reachability:signal",
+          "ok": true
+        },
+        {
+          "check": "hidden_reachability:rate",
+          "ok": true
+        },
+        {
+          "check": "hidden_reachability:rate_error",
+          "ok": true
+        },
+        {
+          "check": "nonidentifiability",
+          "ok": true
+        },
+        {
+          "check": "missing_input",
+          "ok": true
+        }
+      ],
+      "exit_code": 0
+    },
+    {
+      "id": "g814f15fa",
+      "ok": true,
+      "checks": [
+        {
+          "check": "identity",
+          "ok": true
+        },
+        {
+          "check": "independent_correct_computation_keys",
+          "ok": true
+        },
+        {
+          "check": "independent_correct_computation:mean_odds",
+          "ok": true
+        },
+        {
+          "check": "independent_correct_computation:odds_sd",
+          "ok": true
+        },
+        {
+          "check": "independent_correct_computation:posterior_efficiency",
+          "ok": true
+        }
+      ],
+      "exit_code": 0
+    },
+    {
+      "id": "g19d6b014",
+      "ok": true,
+      "checks": [
+        {
+          "check": "identity",
+          "ok": true
+        },
+        {
+          "check": "independent_correct_computation_keys",
+          "ok": true
+        },
+        {
+          "check": "independent_correct_computation:ratio",
+          "ok": true
+        },
+        {
+          "check": "independent_correct_computation:interval_lower",
+          "ok": true
+        },
+        {
+          "check": "independent_correct_computation:interval_upper",
+          "ok": true
+        }
+      ],
+      "exit_code": 0
+    },
+    {
+      "id": "g9fc0e784",
+      "ok": true,
+      "checks": [
+        {
+          "check": "identity",
+          "ok": true
+        },
+        {
+          "check": "written_method_keys",
+          "ok": true
+        },
+        {
+          "check": "written_method:decay_rate",
+          "ok": true
+        },
+        {
+          "check": "written_method:acceptance",
+          "ok": true
+        },
+        {
+          "check": "written_method:produced_yield",
+          "ok": true
+        },
+        {
+          "check": "material_single_correction_1",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:decay_rate",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:acceptance",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:produced_yield",
+          "ok": true
+        },
+        {
+          "check": "residual_after_single_1",
+          "ok": true
+        },
+        {
+          "check": "material_single_correction_2",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_2:acceptance",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_2:produced_yield",
+          "ok": true
+        },
+        {
+          "check": "residual_after_single_2",
+          "ok": true
+        },
+        {
+          "check": "conditional_score_zero",
+          "ok": true
+        }
+      ],
+      "exit_code": 0
+    },
+    {
+      "id": "gb04b4e76",
+      "ok": true,
+      "checks": [
+        {
+          "check": "identity",
+          "ok": true
+        },
+        {
+          "check": "independent_correct_computation_keys",
+          "ok": true
+        },
+        {
+          "check": "independent_correct_computation:mean_difference",
+          "ok": true
+        },
+        {
+          "check": "independent_correct_computation:randomization_p",
+          "ok": true
+        },
+        {
+          "check": "independent_correct_computation:assignments",
+          "ok": true
+        }
+      ],
+      "exit_code": 0
+    },
+    {
+      "id": "geac9572a",
+      "ok": true,
+      "checks": [
+        {
+          "check": "identity",
+          "ok": true
+        },
+        {
+          "check": "written_method_keys",
+          "ok": true
+        },
+        {
+          "check": "written_method:yield_total",
+          "ok": true
+        },
+        {
+          "check": "written_method:rate",
+          "ok": true
+        },
+        {
+          "check": "written_method:rate_error",
+          "ok": true
+        },
+        {
+          "check": "material_single_correction_1",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:yield_total",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:rate",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:rate_error",
+          "ok": true
+        },
+        {
+          "check": "residual_after_single_1",
+          "ok": true
+        },
+        {
+          "check": "material_single_correction_2",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_2:yield_total",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_2:rate",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_2:rate_error",
+          "ok": true
+        },
+        {
+          "check": "residual_after_single_2",
+          "ok": true
+        },
+        {
+          "check": "quadrature_stability",
+          "ok": true
+        },
+        {
+          "check": "quadrature_stability",
+          "ok": true
+        },
+        {
+          "check": "quadrature_stability",
+          "ok": true
+        },
+        {
+          "check": "quadrature_stability",
+          "ok": true
+        }
+      ],
+      "exit_code": 0
+    },
+    {
+      "id": "g62cf1e30",
+      "ok": true,
+      "checks": [
+        {
+          "check": "identity",
+          "ok": true
+        },
+        {
+          "check": "written_method_keys",
+          "ok": true
+        },
+        {
+          "check": "written_method:incident_rate",
+          "ok": true
+        },
+        {
+          "check": "written_method:rate_error",
+          "ok": true
+        },
+        {
+          "check": "written_method:expected_incident_count",
+          "ok": true
+        },
+        {
+          "check": "material_single_correction_1",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:incident_rate",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:expected_incident_count",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:rate_error",
+          "ok": true
+        },
+        {
+          "check": "residual_after_single_1",
+          "ok": true
+        },
+        {
+          "check": "material_single_correction_2",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_2:rate_error",
+          "ok": true
+        },
+        {
+          "check": "residual_after_single_2",
+          "ok": true
+        }
+      ],
+      "exit_code": 0
+    },
+    {
+      "id": "ga50ce70b",
+      "ok": true,
+      "checks": [
+        {
+          "check": "identity",
+          "ok": true
+        },
+        {
+          "check": "written_method_keys",
+          "ok": true
+        },
+        {
+          "check": "written_method:interactions_per_crossing",
+          "ok": true
+        },
+        {
+          "check": "written_method:cross_section",
+          "ok": true
+        },
+        {
+          "check": "written_method:cross_section_error",
+          "ok": true
+        },
+        {
+          "check": "material_single_correction_1",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:interactions_per_crossing",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:cross_section",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:cross_section_error",
+          "ok": true
+        },
+        {
+          "check": "residual_after_single_1",
+          "ok": true
+        },
+        {
+          "check": "material_single_correction_2",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_2:interactions_per_crossing",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_2:cross_section",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_2:cross_section_error",
+          "ok": true
+        },
+        {
+          "check": "residual_after_single_2",
+          "ok": true
+        }
+      ],
+      "exit_code": 0
+    },
+    {
+      "id": "g9fdace66",
+      "ok": true,
+      "checks": [
+        {
+          "check": "identity",
+          "ok": true
+        },
+        {
+          "check": "independent_correct_computation_keys",
+          "ok": true
+        },
+        {
+          "check": "independent_correct_computation:predictive_mean",
+          "ok": true
+        },
+        {
+          "check": "independent_correct_computation:predictive_variance",
+          "ok": true
+        },
+        {
+          "check": "independent_correct_computation:tail_probability",
+          "ok": true
+        }
+      ],
+      "exit_code": 0
+    },
+    {
+      "id": "g6bcd18f0",
+      "ok": true,
+      "checks": [
+        {
+          "check": "identity",
+          "ok": true
+        },
+        {
+          "check": "written_method_keys",
+          "ok": true
+        },
+        {
+          "check": "written_method:signal",
+          "ok": true
+        },
+        {
+          "check": "written_method:parent_probability",
+          "ok": true
+        },
+        {
+          "check": "written_method:parent_probability_error",
+          "ok": true
+        },
+        {
+          "check": "material_single_correction_1",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:parent_probability",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:parent_probability_error",
+          "ok": true
+        },
+        {
+          "check": "residual_after_single_1",
+          "ok": true
+        },
+        {
+          "check": "material_single_correction_2",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_2:parent_probability",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_2:parent_probability_error",
+          "ok": true
+        },
+        {
+          "check": "residual_after_single_2",
+          "ok": true
+        }
+      ],
+      "exit_code": 0
+    },
+    {
+      "id": "gf8f4e811",
+      "ok": true,
+      "checks": [
+        {
+          "check": "identity",
+          "ok": true
+        },
+        {
+          "check": "independent_correct_computation_keys",
+          "ok": true
+        },
+        {
+          "check": "independent_correct_computation:rate",
+          "ok": true
+        },
+        {
+          "check": "independent_correct_computation:standard_error",
+          "ok": true
+        },
+        {
+          "check": "independent_correct_computation:expected_total",
+          "ok": true
+        }
+      ],
+      "exit_code": 0
+    },
+    {
+      "id": "g48ebe90a",
+      "ok": true,
+      "checks": [
+        {
+          "check": "identity",
+          "ok": true
+        },
+        {
+          "check": "written_method_keys",
+          "ok": true
+        },
+        {
+          "check": "written_method:hit_rate",
+          "ok": true
+        },
+        {
+          "check": "written_method:rate_error",
+          "ok": true
+        },
+        {
+          "check": "written_method:parent_rate",
+          "ok": true
+        },
+        {
+          "check": "material_single_correction_1",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:hit_rate",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:parent_rate",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:rate_error",
+          "ok": true
+        },
+        {
+          "check": "residual_after_single_1",
+          "ok": true
+        },
+        {
+          "check": "material_single_correction_2",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_2:rate_error",
+          "ok": true
+        },
+        {
+          "check": "residual_after_single_2",
+          "ok": true
+        }
+      ],
+      "exit_code": 0
+    },
+    {
+      "id": "gb22f6deb",
+      "ok": true,
+      "checks": [
+        {
+          "check": "identity",
+          "ok": true
+        },
+        {
+          "check": "written_method_keys",
+          "ok": true
+        },
+        {
+          "check": "written_method:global_p",
+          "ok": true
+        },
+        {
+          "check": "written_method:mc_error",
+          "ok": true
+        },
+        {
+          "check": "written_method:expected_exceedances",
+          "ok": true
+        },
+        {
+          "check": "material_single_correction_1",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:global_p",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:mc_error",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:expected_exceedances",
+          "ok": true
+        },
+        {
+          "check": "residual_after_single_1",
+          "ok": true
+        },
+        {
+          "check": "material_single_correction_2",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_2:global_p",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_2:mc_error",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_2:expected_exceedances",
+          "ok": true
+        },
+        {
+          "check": "residual_after_single_2",
+          "ok": true
+        }
+      ],
+      "exit_code": 0
+    },
+    {
+      "id": "ga2467e91",
+      "ok": true,
+      "checks": [
+        {
+          "check": "identity",
+          "ok": true
+        },
+        {
+          "check": "written_method_keys",
+          "ok": true
+        },
+        {
+          "check": "written_method:signal",
+          "ok": true
+        },
+        {
+          "check": "written_method:cross_section",
+          "ok": true
+        },
+        {
+          "check": "written_method:cross_section_error",
+          "ok": true
+        },
+        {
+          "check": "material_single_correction_1",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:cross_section",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:cross_section_error",
+          "ok": true
+        },
+        {
+          "check": "residual_after_single_1",
+          "ok": true
+        },
+        {
+          "check": "material_single_correction_2",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_2:cross_section",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_2:cross_section_error",
+          "ok": true
+        },
+        {
+          "check": "residual_after_single_2",
+          "ok": true
+        }
+      ],
+      "exit_code": 0
+    },
+    {
+      "id": "g87a93b02",
+      "ok": true,
+      "checks": [
+        {
+          "check": "identity",
+          "ok": true
+        },
+        {
+          "check": "hidden_reachability_keys",
+          "ok": true
+        },
+        {
+          "check": "hidden_reachability:difference",
+          "ok": true
+        },
+        {
+          "check": "hidden_reachability:standard_error",
+          "ok": true
+        },
+        {
+          "check": "hidden_reachability:standardized_difference",
+          "ok": true
+        },
+        {
+          "check": "nonidentifiability",
+          "ok": true
+        },
+        {
+          "check": "missing_input",
+          "ok": true
+        }
+      ],
+      "exit_code": 0
+    },
+    {
+      "id": "g3b5d0b40",
+      "ok": true,
+      "checks": [
+        {
+          "check": "identity",
+          "ok": true
+        },
+        {
+          "check": "written_method_keys",
+          "ok": true
+        },
+        {
+          "check": "written_method:estimate",
+          "ok": true
+        },
+        {
+          "check": "written_method:standard_error",
+          "ok": true
+        },
+        {
+          "check": "written_method:scaled_estimate",
+          "ok": true
+        },
+        {
+          "check": "material_single_correction_1",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:estimate",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:standard_error",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_1:scaled_estimate",
+          "ok": true
+        },
+        {
+          "check": "residual_after_single_1",
+          "ok": true
+        },
+        {
+          "check": "material_single_correction_2",
+          "ok": true
+        },
+        {
+          "check": "fully_corrected_2:standard_error",
+          "ok": true
+        },
+        {
+          "check": "residual_after_single_2",
+          "ok": true
+        }
+      ],
+      "exit_code": 0
+    }
+  ],
+  "structure": [
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true,
+    true
+  ]
+}

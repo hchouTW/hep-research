@@ -1,0 +1,194 @@
+{
+ "claims": [
+  {
+   "binding": {
+    "case_distribution": {
+     "G2": {
+      "C01": 4,
+      "C02": 4,
+      "C03": 4,
+      "C04": 4
+     },
+     "g2h": {
+      "C01": 5,
+      "C02": 5,
+      "C03": 3,
+      "C04": 2
+     },
+     "g2x": {
+      "C01": 8,
+      "C02": 4,
+      "C03": 2,
+      "C04": 2
+     }
+    },
+    "gold": "salted commitments: pilot/commitments.json, g2h/commitments.json, g2x/evidence/commitments.json",
+    "policy": "docs/dev/hep-review/pilot/frozen-protocol.md, g2h/frozen-protocol.md, g2x/frozen-protocol.md",
+    "rubric": "pilot/grader-instructions.md, pilot/g2x/grader-instructions.md",
+    "suite": "G2 (Claude-authored), g2h (held out, seed with the user), g2x (Codex-authored, held out)",
+    "trial_plan": "3 trials per instance: 48 + 45 + 48 = 141 trials, 47 cases"
+   },
+   "fingerprint": "86a347395f359375037786d7fe7d871306e4866ead15f8c8025b5e9bf6e779d8",
+   "fingerprint_parts": {
+    "hash_profile": [
+     "hep-review-metadata/1",
+     "raw-bytes/1"
+    ],
+    "host_capabilities_digest": "fa2dfc9565f785b94093ed94bdb5adfb99586e229f533a5e4f531027da5368d8",
+    "model": {
+     "alias": "claude-opus-5-5 (session model, inherited by general-purpose subagents)",
+     "date": "2026-10-29",
+     "pinned": "unknown"
+    },
+    "packet_template_digest": "f088142b6e3203f21f2cfd10752caa8700ade1cc7d9ad560219f97114f607e59",
+    "reader_digest": "044dda5558761f780e643983bd1b89ca82d1aa59bbcbc0c9a23d510821486b95",
+    "validator_version": "0.1.0"
+   },
+   "history": [
+    {
+     "at": "2026-10-29",
+     "evidence": {
+      "engineering_gate": true,
+      "graders_calibrated": true,
+      "kind": "pilot",
+      "report": "docs/dev/hep-review/g2h-report.md (and g2-report.md, g2x-report.md)"
+     },
+     "from": "experimental",
+     "to": "pilot-checked-scope"
+    },
+    {
+     "at": "2026-10-29",
+     "from": "pilot-checked-scope",
+     "reason": "fingerprint-changed",
+     "to": "needs-reassessment"
+    }
+   ],
+   "id": "hep-review/statistics-single-page",
+   "initial_fingerprint_parts": {
+    "hash_profile": [
+     "hep-review-metadata/1",
+     "raw-bytes/1"
+    ],
+    "host_capabilities_digest": "fa2dfc9565f785b94093ed94bdb5adfb99586e229f533a5e4f531027da5368d8",
+    "model": {
+     "alias": "claude-opus-5-5 (session model, inherited by general-purpose subagents)",
+     "date": "2026-10-29",
+     "pinned": "unknown"
+    },
+    "packet_template_digest": "f088142b6e3203f21f2cfd10752caa8700ade1cc7d9ad560219f97114f607e59",
+    "reader_digest": "044dda5558761f780e643983bd1b89ca82d1aa59bbcbc0c9a23d510821486b95",
+    "validator_version": "0.1.0"
+   },
+   "limitations": [
+    "no miss rate measured: every suite was at the ceiling",
+    "reviewers and two of three grader runs are the same model family",
+    "Claude wrote the G2/g2h oracles and every authoring brief; Codex gold is author self-assessment",
+    "3 trials per instance with identical packets: 141 trials are 47 cases"
+   ],
+   "measured_at": "9c499a24",
+   "results": {
+    "G2": "both gates 48/48",
+    "c02_false_alarms": "0 of 39 control trials",
+    "content_misses": "0 of 141 trials",
+    "g2h": "both gates 45/45",
+    "g2x": "scientific gate pass (37/39 defect-trials counted; the 2 uncounted were found but quarantined), engineering 47/48 (one fabricated digest)"
+   },
+   "scope": {
+    "domain": "statistics",
+    "format": "text + JSON",
+    "host": "claude-code-cli-macos",
+    "material": "single-page analyses, up to three planted defects, closed-form checks",
+    "method": "assumption-check + recompute (0.1% relative)",
+    "tier": "R2"
+   },
+   "state": "needs-reassessment"
+  },
+  {
+   "binding": {
+    "case_distribution": {
+     "C01": 12,
+     "C02": 5,
+     "C03": 2,
+     "C04": 1
+    },
+    "gold": "salted commitments: g3/evidence/commitments.json (Codex-authored, held encrypted by the user)",
+    "policy": "docs/dev/hep-review/g3/frozen-protocol.md",
+    "rubric": "pilot/g2x/grader-instructions.md",
+    "suite": "g3 (Codex-authored, held out)",
+    "trial_plan": "3 trials per instance, 60 trials; graders Claude forward, Claude reversed, Codex"
+   },
+   "fingerprint": "af22563fbc2f8eb94ac46e0cdd91b7e42d1aee580cebdd3f4c7d4f504cc0d1ef",
+   "fingerprint_parts": {
+    "hash_profile": [
+     "hep-review-metadata/1",
+     "raw-bytes/1"
+    ],
+    "host_capabilities_digest": "fa2dfc9565f785b94093ed94bdb5adfb99586e229f533a5e4f531027da5368d8",
+    "model": {
+     "alias": "claude-opus-5-5 (session model, inherited by general-purpose subagents)",
+     "date": "2026-10-29",
+     "pinned": "unknown"
+    },
+    "packet_template_digest": "3ba866b1bb11159cf8ead34edd39677e45ffe623311f96184e3ef678bfdddcfb",
+    "reader_digest": "0a221da00b1be5a08a5ac9c6082246c4972f514806ac93b897cded1cde29b978",
+    "validator_version": "1.0.0"
+   },
+   "history": [
+    {
+     "at": "2026-10-29",
+     "evidence": {
+      "engineering_gate": true,
+      "graders_calibrated": true,
+      "kind": "held-out-evaluation",
+      "report": "docs/dev/hep-review/g3-report.md"
+     },
+     "from": "experimental",
+     "to": "evaluated-scope"
+    }
+   ],
+   "id": "hep-review/statistics-multi-step",
+   "initial_fingerprint_parts": {
+    "hash_profile": [
+     "hep-review-metadata/1",
+     "raw-bytes/1"
+    ],
+    "host_capabilities_digest": "fa2dfc9565f785b94093ed94bdb5adfb99586e229f533a5e4f531027da5368d8",
+    "model": {
+     "alias": "claude-opus-5-5 (session model, inherited by general-purpose subagents)",
+     "date": "2026-10-29",
+     "pinned": "unknown"
+    },
+    "packet_template_digest": "3ba866b1bb11159cf8ead34edd39677e45ffe623311f96184e3ef678bfdddcfb",
+    "reader_digest": "0a221da00b1be5a08a5ac9c6082246c4972f514806ac93b897cded1cde29b978",
+    "validator_version": "1.0.0"
+   },
+   "limitations": [
+    "every C01 instance had exactly two defects (the brief allowed 2-4): no evidence beyond two",
+    "20 cases with 3 trials each: 60 trials are 20 cases; intervals assume trial independence",
+    "Codex gold is author self-assessment carried by executable oracles; Claude wrote the brief",
+    "reviewers share a scratch folder: one reviewer's scratch file was overwritten by another's (noticed and discarded); no-other-evaluations-seen is advisory"
+   ],
+   "measured_at": "9fd4faca",
+   "results": {
+    "c02_false_alarm": "0/15, CI [0.0, 0.2181]",
+    "c03_gap_kept": "6/6",
+    "c04": "3/3",
+    "convention_defects": "18/18, CI [0.8146, 1.0]",
+    "defect_detection": "71/72 = 0.986, 95% CI [0.925, 0.9997] (miss rate 0.014, CI [0.0003, 0.075])",
+    "engineering": "60/60 digest-bound, R2, verified, export recompute, no quarantine",
+    "miss": "g3dd81149-t2 D2 (equal-tailed interval released as shortest): reviewer asserted the opposite; t1 and t3 found it",
+    "numerical_defects": "26/27, CI [0.810, 0.9991]"
+   },
+   "scope": {
+    "domain": "statistics (estimators, intervals, normalisation, look-elsewhere, unfolding-style inversions)",
+    "format": "text + JSON",
+    "host": "claude-code-cli-macos",
+    "material": "multi-step analyses of 800-2,000 words with two interacting planted defects each (numerical and particle-physics-convention defects included)",
+    "method": "assumption-check + recompute (0.1% relative)",
+    "tier": "R2"
+   },
+   "state": "evaluated-scope"
+  }
+ ],
+ "note": "written by docs/dev/hep-review/g3/make_claims.py through the claim lifecycle; checked by evaluation.check_registry"
+}

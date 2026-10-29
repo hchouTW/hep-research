@@ -1,0 +1,37 @@
+{
+  "id": "g48ebe90a",
+  "type": "C01",
+  "defects": [
+    {
+      "defect_id": "D1",
+      "statement": "Equal averaging of interval rates is not the stated maximum-likelihood common rate; the Poisson parent likelihood gives total hits divided by total duration.",
+      "affected_results": [
+        "hit_rate",
+        "parent_rate",
+        "rate_error"
+      ],
+      "tags": [
+        "interacting"
+      ],
+      "corrected_values": {
+        "hit_rate": 22.275862068965516,
+        "parent_rate": 11.137931034482758,
+        "rate_error": 1.23946212107665
+      }
+    },
+    {
+      "defect_id": "D2",
+      "statement": "The two hits from one parent are fully clustered, so the plug-in variance of a hit count is twice its count, not its count.",
+      "affected_results": [
+        "rate_error"
+      ],
+      "tags": [
+        "interacting"
+      ],
+      "corrected_values": {
+        "rate_error": 1.23946212107665
+      }
+    }
+  ],
+  "notes": "Synthetic study. All displayed numbers reproduce the written release method. Gold corrections are joint, with single interventions audited separately."
+}

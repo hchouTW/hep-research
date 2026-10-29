@@ -694,7 +694,7 @@
   },
   {
    "id": "recorded-review",
-   "capability": "Recorded, tiered review of physics work: review obligations, assurance tiers R0-R3 computed from records, append-only commit log with checkpoints, two-layer report (protocol hep-review/1, schema 1.0.0; pilot-checked on single-page statistical reviews at R2)",
+   "capability": "Recorded, tiered review of physics work: review obligations, assurance tiers R0-R3 computed from records, append-only commit log with checkpoints, two-layer report (protocol hep-review/1, schema 1.0.0; evaluated-scope for multi-step statistical reviews at R2, G3 detection 71/72)",
    "owner": "hep-review",
    "state": "tool",
    "v1": true,

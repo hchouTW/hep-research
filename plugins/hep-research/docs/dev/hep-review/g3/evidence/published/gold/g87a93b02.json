@@ -1,0 +1,12 @@
+{
+  "id": "g87a93b02",
+  "type": "C03",
+  "defects": [],
+  "notes": "Synthetic study. All displayed numbers reproduce the written release method. Gold corrections are joint, with single interventions audited separately. Hidden admissible value 0.42; alternative -0.35.",
+  "missing_input": "The paired Gaussian correlation coefficient from the external joint-calibration record.",
+  "keywords": [
+    "correlation",
+    "covariance",
+    "joint calibration"
+  ]
+}

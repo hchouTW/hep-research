@@ -11,7 +11,7 @@
   "reviewer_can_write_transcript": {"value": true, "basis": "observed", "evidence": "H2: os.access(W_OK) true on subagent transcripts for the same OS user"},
   "parallel_dispatch": {"value": true, "basis": "observed", "evidence": "H3: 18 subagents overlapped; 2.5 min wall for about 15 min summed duration"},
   "reviewer_file_write": {"value": true, "basis": "observed", "evidence": "H4: 16/16 drop files written"},
-  "reviewer_hash_capable": {"value": true, "basis": "observed", "evidence": "H4: 16/16 declared SHA-256 matched the bytes read"},
+  "reviewer_hash_capable": {"value": true, "basis": "observed", "evidence": "H4: 16/16 declared SHA-256 matched the bytes read; g2x: 47/48 matched, one reviewer reported a digest it never computed (recorded as mismatch); the packet now asks for a separate hashing command or SHA256: unavailable"},
   "store_persistence": {"value": null, "basis": "unknown", "evidence": "H5: pending the next session"},
   "checkpoint_round_trip": {"value": null, "basis": "unknown", "evidence": "H6: pending the next session"},
   "runtime_restrictions_enforced": {"value": false, "basis": "observed", "evidence": "reviewers have a shell and file tools; prompt instructions are advisory"},

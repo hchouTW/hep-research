@@ -1,0 +1,666 @@
+{
+ "F060": {
+  "grade": "D2",
+  "reason": "Names the omitted delta-method derivative dR/dr=1/(1-r*tau)^2 in the incident-rate error."
+ },
+ "F140": {
+  "grade": "D1",
+  "reason": "Names use of the single chosen window instead of the maximum over four windows."
+ },
+ "F121": {
+  "grade": "D1",
+  "reason": "Names the double live-time correction from multiplying recorded luminosity by live_fraction."
+ },
+ "F141": {
+  "grade": "D2",
+  "reason": "Names conditioning the null ensemble on fit_ok, a diagnostic correlated with extreme scores."
+ },
+ "F160": {
+  "grade": "D2",
+  "reason": "Names the arithmetic-mean trigger probability replacing per-interval t_i."
+ },
+ "D133": {
+  "grade": "accept",
+  "reason": "Finding 1 names 1-P0 used instead of the Poisson zero-count inversion -ln(P0)."
+ },
+ "F109": {
+  "grade": "D2",
+  "reason": "Names the acceptance omitting the upper gate; gives exp(-lambda*low)-exp(-lambda*high)."
+ },
+ "F150": {
+  "grade": "D1",
+  "reason": "Names the post-hoc chosen window instead of the max over four windows."
+ },
+ "F156": {
+  "grade": "none",
+  "reason": "Downstream consequence finding: states that released values are wrong (recomputed numbers) without naming the mechanism of either planted defect."
+ },
+ "D148": {
+  "grade": "accept",
+  "reason": "Finding 1 names the chosen window used instead of the max over four windows."
+ },
+ "D045": {
+  "grade": "accept",
+  "reason": "Finding 1 names unweighted mean of rates vs total hits / total duration MLE."
+ },
+ "D163": {
+  "grade": "accept",
+  "reason": "Finding 2 names the arithmetic-mean trigger instead of per-interval t_i."
+ },
+ "D096": {
+  "grade": "accept",
+  "reason": "Finding 1 names 1/t_bar ignoring the truncated normalization."
+ },
+ "F079": {
+  "grade": "none",
+  "reason": "Downstream consequence finding: states that released values are wrong (recomputed numbers) without naming the mechanism of either planted defect. The corrected-K formula is shown in evidence but no reason is given."
+ },
+ "F165": {
+  "grade": "D2",
+  "reason": "Names the single arithmetic-mean trigger probability instead of per-interval t_i."
+ },
+ "F005": {
+  "grade": "none",
+  "reason": "Downstream consequence finding: states that released values are wrong (recomputed numbers) without naming the mechanism of either planted defect."
+ },
+ "F137": {
+  "grade": "unsure",
+  "reason": "Error-propagation finding that names both mechanisms in passing: the missing 1/P0 Jacobian of the log inversion (presupposes D1) and the wrong efficiency (D2, without stating why). Could be credited to either."
+ },
+ "F126": {
+  "grade": "D2",
+  "reason": "Names tag-conditional efficiency substituted for the unbiased thinning probability."
+ },
+ "F021": {
+  "grade": "D1",
+  "reason": "Names the omitted sum ln V_i(theta) term shifting the MLE."
+ },
+ "D080": {
+  "grade": "accept",
+  "reason": "Finding 1 names equal weights instead of the mixture probabilities."
+ },
+ "F093": {
+  "grade": "D2",
+  "reason": "Names dropping failed fits from the denominator giving conditional coverage."
+ },
+ "D138": {
+  "grade": "accept",
+  "reason": "Finding 1 names the single chosen window instead of max over windows."
+ },
+ "D124": {
+  "grade": "accept",
+  "reason": "Finding 2 names tagged efficiency used instead of unbiased thinning probability."
+ },
+ "F017": {
+  "grade": "D1",
+  "reason": "Names the omitted theta-dependent log-variance term in the objective."
+ },
+ "D149": {
+  "grade": "accept",
+  "reason": "Finding 2 names conditioning on fit_ok correlated with difficult configurations."
+ },
+ "D134": {
+  "grade": "accept",
+  "reason": "Finding 2 names tag-conditional efficiency instead of marginal unbiased efficiency."
+ },
+ "F104": {
+  "grade": "D2",
+  "reason": "Names the acceptance dropping the upper gate."
+ },
+ "F064": {
+  "grade": "D1",
+  "reason": "Names the exponential correction not inverting the nonparalyzable relation; gives r/(1-r*tau)."
+ },
+ "F014": {
+  "grade": "D1",
+  "reason": "Names ten cells failing to resolve the narrow peak (integration not converged)."
+ },
+ "F044": {
+  "grade": "D2",
+  "reason": "Names Var(hits)=2*hits for deterministic two-hit clusters."
+ },
+ "F070": {
+  "grade": "none",
+  "reason": "Downstream consequence finding: states that released values are wrong (recomputed numbers) without naming the mechanism of either planted defect."
+ },
+ "D112": {
+  "grade": "accept",
+  "reason": "Finding 2 names the factor two converting the charge sum to a per-charge average."
+ },
+ "D097": {
+  "grade": "accept",
+  "reason": "Finding 2 names acceptance omitting the upper gate."
+ },
+ "F051": {
+  "grade": "D1",
+  "reason": "Names unweighted mean of interval rates vs MLE total hits / total duration."
+ },
+ "F161": {
+  "grade": "none",
+  "reason": "Downstream consequence finding: states that released values are wrong (recomputed numbers) without naming the mechanism of either planted defect. Only says rate_error inherits 'the same wrong selection probabilities'."
+ },
+ "F098": {
+  "grade": "D1",
+  "reason": "Names 1/t_bar ignoring the truncated-likelihood normalization."
+ },
+ "D020": {
+  "grade": "accept",
+  "reason": "Finding 2 names SE treating weights as fixed, not observed information."
+ },
+ "D038": {
+  "grade": "accept",
+  "reason": "Finding 2 names equal-tailed interval not the shortest; unequal endpoint densities."
+ },
+ "F068": {
+  "grade": "D1",
+  "reason": "Names neutral_fraction used instead of charged_fraction."
+ },
+ "F034": {
+  "grade": "D1",
+  "reason": "Names the missing exp(z) Jacobian of the flat-in-theta prior; mean x+s^2."
+ },
+ "F090": {
+  "grade": "none",
+  "reason": "Downstream consequence finding: states that released values are wrong (recomputed numbers) without naming the mechanism of either planted defect."
+ },
+ "D129": {
+  "grade": "accept",
+  "reason": "Finding 2 names tagged efficiency instead of unbiased thinning probability."
+ },
+ "D037": {
+  "grade": "accept",
+  "reason": "Finding 1 names the missing flat-in-theta prior Jacobian; mean x+s^2."
+ },
+ "D101": {
+  "grade": "accept",
+  "reason": "Finding 1 names 1/t_bar ignoring the [low,high] truncation."
+ },
+ "F145": {
+  "grade": "D1",
+  "reason": "Names local p in chosen window vs max over four windows."
+ },
+ "F088": {
+  "grade": "D2",
+  "reason": "Names dropping failed fits from the denominator."
+ },
+ "F010": {
+  "grade": "none",
+  "reason": "Downstream consequence finding: states that released values are wrong (recomputed numbers) without naming the mechanism of either planted defect."
+ },
+ "F094": {
+  "grade": "D1",
+  "reason": "Names equal regime weights instead of mixture probabilities."
+ },
+ "F078": {
+  "grade": "D2",
+  "reason": "Names omitted daughter branching fraction with mode-conditional efficiency."
+ },
+ "F130": {
+  "grade": "D1",
+  "reason": "Names linear occupancy 1-P0 instead of -ln(P0)."
+ },
+ "F073": {
+  "grade": "D1",
+  "reason": "Names neutral pair fraction instead of charged fraction."
+ },
+ "D119": {
+  "grade": "accept",
+  "reason": "Finding 1 names the double live-time correction."
+ },
+ "D032": {
+  "grade": "accept",
+  "reason": "Finding 1 names the missing prior Jacobian; posterior mean x+s^2."
+ },
+ "D033": {
+  "grade": "reject",
+  "reason": "No finding says the equal-tail endpoints are not the shortest interval; finding 3 instead asserts the endpoints do meet the equal-density condition and only attributes the error to the wrong mass/half-width."
+ },
+ "F013": {
+  "grade": "D2",
+  "reason": "Names the omitted Jacobian 1/(2 sqrt t)."
+ },
+ "F113": {
+  "grade": "D1",
+  "reason": "Names the double live-time correction."
+ },
+ "F127": {
+  "grade": "unsure",
+  "reason": "Error finding that says it 'inherits both errors' and gives the corrected formula with the 1/P0 factor (D1) and eps_unbiased (D2); names both only as inherited consequences, so attribution to one defect is ambiguous."
+ },
+ "D153": {
+  "grade": "accept",
+  "reason": "Finding 2 names arithmetic-mean trigger instead of per-interval t_i."
+ },
+ "D007": {
+  "grade": "accept",
+  "reason": "Finding 1 names the omitted Jacobian dm=dt/(2 sqrt t)."
+ },
+ "D115": {
+  "grade": "accept",
+  "reason": "Finding 1 names the double live-time correction."
+ },
+ "F055": {
+  "grade": "D1",
+  "reason": "Names the exponential correction not inverting the nonparalyzable relation."
+ },
+ "D001": {
+  "grade": "accept",
+  "reason": "Finding 2 names the 10-panel table inadequate for a peak narrower than the cell width."
+ },
+ "D075": {
+  "grade": "accept",
+  "reason": "Finding 1 names neutral_fraction used instead of charged_fraction."
+ },
+ "D152": {
+  "grade": "accept",
+  "reason": "Finding 1 names midpoint evaluation vs interval-average efficiency through the notch."
+ },
+ "D066": {
+  "grade": "accept",
+  "reason": "Finding 1 names neutral_fraction instead of charged_fraction."
+ },
+ "F031": {
+  "grade": "D2",
+  "reason": "Names equal-tailed endpoints not the shortest interval; endpoint densities unequal."
+ },
+ "F095": {
+  "grade": "none",
+  "reason": "Downstream consequence finding: states that released values are wrong (recomputed numbers) without naming the mechanism of either planted defect."
+ },
+ "F147": {
+  "grade": "none",
+  "reason": "Downstream consequence finding: states that released values are wrong (recomputed numbers) without naming the mechanism of either planted defect."
+ },
+ "F136": {
+  "grade": "D2",
+  "reason": "Names tag-conditional efficiency used instead of unbiased thinning efficiency."
+ },
+ "F056": {
+  "grade": "D2",
+  "reason": "Names the omitted inversion derivative in the incident-rate error."
+ },
+ "D102": {
+  "grade": "accept",
+  "reason": "Finding 2 names acceptance dropping the upper gate."
+ },
+ "F026": {
+  "grade": "D2",
+  "reason": "Names the SE formula ignoring theta dependence of variances, not observed information."
+ },
+ "D158": {
+  "grade": "accept",
+  "reason": "Finding 2 names arithmetic-mean trigger instead of per-interval t_i."
+ },
+ "F048": {
+  "grade": "D2",
+  "reason": "Names Var(hits)=2*hits for two-hit clusters."
+ },
+ "F114": {
+  "grade": "D2",
+  "reason": "Names the factor of two turning the charge sum into a per-charge average."
+ },
+ "D006": {
+  "grade": "accept",
+  "reason": "Finding 2 names the 10-panel grid unconverged for the narrow peak."
+ },
+ "D106": {
+  "grade": "accept",
+  "reason": "Finding 1 names 1/t_bar ignoring the [low,high] normalization."
+ },
+ "D144": {
+  "grade": "accept",
+  "reason": "Finding 2 names discarding fit_ok=false toys conditioning the null ensemble."
+ },
+ "F035": {
+  "grade": "none",
+  "reason": "States the correct posterior mean value (formula implies the s^2 shift) but gives no reason; consequence of D1 without naming the prior-Jacobian mechanism."
+ },
+ "D016": {
+  "grade": "accept",
+  "reason": "Finding 2 names SE treating theta-dependent variances as fixed weights."
+ },
+ "F077": {
+  "grade": "D1",
+  "reason": "Names neutral_fraction used instead of charged_fraction."
+ },
+ "F154": {
+  "grade": "D1",
+  "reason": "Names midpoint evaluation vs interval-average efficiency through the narrow notch."
+ },
+ "D107": {
+  "grade": "accept",
+  "reason": "Finding 2 names acceptance omitting the upper gate."
+ },
+ "F030": {
+  "grade": "none",
+  "reason": "Downstream consequence finding: states that released values are wrong (recomputed numbers) without naming the mechanism of either planted defect."
+ },
+ "F118": {
+  "grade": "D2",
+  "reason": "Names the factor 2 converting the charge sum into a per-charge average."
+ },
+ "F087": {
+  "grade": "D1",
+  "reason": "Names equal-weight regime average instead of mixture probabilities."
+ },
+ "F022": {
+  "grade": "D2",
+  "reason": "Names the SE treating weights as fixed, not observed information."
+ },
+ "F029": {
+  "grade": "D1",
+  "reason": "Names the missing exp(z) Jacobian; posterior mean mu+s^2."
+ },
+ "D162": {
+  "grade": "accept",
+  "reason": "Finding 1 names midpoint evaluation vs interval selection probability at the notch."
+ },
+ "D027": {
+  "grade": "accept",
+  "reason": "Finding 1 names the missing exp(z) prior Jacobian; mean mu+s^2."
+ },
+ "D057": {
+  "grade": "accept",
+  "reason": "Finding 1 names the exponential correction not inverting the nonparalyzable relation."
+ },
+ "D019": {
+  "grade": "accept",
+  "reason": "Finding 1 names the omitted sum ln V_i(theta) term."
+ },
+ "F082": {
+  "grade": "D1",
+  "reason": "Names equal weights instead of mixture [0.82,0.18]."
+ },
+ "D072": {
+  "grade": "accept",
+  "reason": "Finding 2 names the omitted daughter branching fraction with mode-conditional efficiency."
+ },
+ "F151": {
+  "grade": "D2",
+  "reason": "Names conditioning the null ensemble on fit_ok."
+ },
+ "F025": {
+  "grade": "D1",
+  "reason": "Names the omitted sum ln V_i(theta) term."
+ },
+ "F089": {
+  "grade": "unsure",
+  "reason": "Error-formula finding naming both mechanisms as inherited: equal-weight 0.25 factors (D1) and retained sizes M_j instead of full N_j (D2). Could be credited to either."
+ },
+ "D015": {
+  "grade": "accept",
+  "reason": "Finding 1 names the omitted log-variance normalization term."
+ },
+ "D063": {
+  "grade": "accept",
+  "reason": "Finding 2 names the omitted delta-method inversion derivative in rate_error."
+ },
+ "D067": {
+  "grade": "accept",
+  "reason": "Finding 2 names the omitted daughter branching fraction."
+ },
+ "D157": {
+  "grade": "accept",
+  "reason": "Finding 1 names midpoint evaluation biased in the notch interval."
+ },
+ "F122": {
+  "grade": "D2",
+  "reason": "Names the factor of two giving a per-charge average against the charge-summed target."
+ },
+ "F043": {
+  "grade": "D1",
+  "reason": "Names unweighted mean of interval rates vs total hits / total duration MLE."
+ },
+ "F164": {
+  "grade": "D1",
+  "reason": "Names midpoint evaluation missing the narrow sensor notch."
+ },
+ "F040": {
+  "grade": "D2",
+  "reason": "Names equal-tailed interval not the shortest/HPD; unequal endpoint densities."
+ },
+ "F117": {
+  "grade": "D1",
+  "reason": "Names the double live-time correction."
+ },
+ "F159": {
+  "grade": "D1",
+  "reason": "Names midpoint evaluation biased in the notch interval."
+ },
+ "F065": {
+  "grade": "D2",
+  "reason": "Names the omitted delta-method inversion derivative."
+ },
+ "D128": {
+  "grade": "accept",
+  "reason": "Finding 1 names linear 1-P0 instead of -ln(P0)."
+ },
+ "D002": {
+  "grade": "accept",
+  "reason": "Finding 1 names the omitted Jacobian that does not cancel in A/D."
+ },
+ "D085": {
+  "grade": "accept",
+  "reason": "Finding 1 names equal-weight regime average instead of mixture probabilities."
+ },
+ "D139": {
+  "grade": "accept",
+  "reason": "Finding 2 names discarding fit_ok=false toys conditioning the ensemble."
+ },
+ "F146": {
+  "grade": "D2",
+  "reason": "Names conditioning on fit_ok correlated with extreme scores."
+ },
+ "D092": {
+  "grade": "accept",
+  "reason": "Finding 1 names failed fits removed from the denominator."
+ },
+ "D012": {
+  "grade": "accept",
+  "reason": "Finding 1 names the omitted Jacobian dm/dt."
+ },
+ "F083": {
+  "grade": "D2",
+  "reason": "Names failed fits removed from the denominator."
+ },
+ "F100": {
+  "grade": "none",
+  "reason": "Downstream consequence finding: states that released values are wrong (recomputed numbers) without naming the mechanism of either planted defect."
+ },
+ "D116": {
+  "grade": "accept",
+  "reason": "Finding 2 names the factor 2 converting the charge sum to a per-charge average."
+ },
+ "D049": {
+  "grade": "accept",
+  "reason": "Finding 1 names unweighted mean vs total hits / total duration MLE."
+ },
+ "D062": {
+  "grade": "accept",
+  "reason": "Finding 1 names the exponential correction not inverting the nonparalyzable relation."
+ },
+ "D076": {
+  "grade": "accept",
+  "reason": "Finding 2 names the omitted daughter branching fraction."
+ },
+ "F135": {
+  "grade": "D1",
+  "reason": "Names linear 1-P0 instead of -ln(P0)."
+ },
+ "D123": {
+  "grade": "accept",
+  "reason": "Finding 1 names linear 1-P0 instead of -ln(P0)."
+ },
+ "D053": {
+  "grade": "accept",
+  "reason": "Finding 1 names r*exp(r*tau) not inverting the stated relation."
+ },
+ "D011": {
+  "grade": "accept",
+  "reason": "Finding 2 names ten cells not resolving the narrow peak."
+ },
+ "F108": {
+  "grade": "D1",
+  "reason": "Names 1/t_bar ignoring the [low,high] normalization."
+ },
+ "F003": {
+  "grade": "D2",
+  "reason": "Names the omitted Jacobian dm/dt and that it does not cancel."
+ },
+ "F039": {
+  "grade": "D1",
+  "reason": "Names the missing prior Jacobian; mean shifted by s^2."
+ },
+ "D086": {
+  "grade": "accept",
+  "reason": "Finding 2 names failed fits dropped from the denominator."
+ },
+ "F084": {
+  "grade": "none",
+  "reason": "Downstream consequence finding: states that released values are wrong (recomputed numbers) without naming the mechanism of either planted defect."
+ },
+ "D120": {
+  "grade": "accept",
+  "reason": "Finding 2 names the factor of two giving a per-charge average."
+ },
+ "F004": {
+  "grade": "D1",
+  "reason": "Names 10-panel table inadequate for a peak narrower than the cell."
+ },
+ "F125": {
+  "grade": "D1",
+  "reason": "Names linear occupancy instead of Poisson zero-count inversion."
+ },
+ "F105": {
+  "grade": "none",
+  "reason": "Downstream consequence finding: states that released values are wrong (recomputed numbers) without naming the mechanism of either planted defect."
+ },
+ "D023": {
+  "grade": "accept",
+  "reason": "Finding 1 names the omitted sum ln V_i(theta) term."
+ },
+ "D091": {
+  "grade": "accept",
+  "reason": "Finding 2 names equal weights instead of mixture probabilities."
+ },
+ "F047": {
+  "grade": "D1",
+  "reason": "Names unweighted mean vs total hits over total duration MLE."
+ },
+ "F052": {
+  "grade": "D2",
+  "reason": "Names Var(hits)=2*hits for deterministic pairs."
+ },
+ "F132": {
+  "grade": "none",
+  "reason": "Downstream consequence finding: states that released values are wrong (recomputed numbers) without naming the mechanism of either planted defect. Recomputation formula implies both fixes but no reason is stated."
+ },
+ "F008": {
+  "grade": "D2",
+  "reason": "Names the omitted Jacobian dm=dt/(2 sqrt t)."
+ },
+ "F009": {
+  "grade": "D1",
+  "reason": "Names the 10-panel grid unconverged for the narrow peak."
+ },
+ "F059": {
+  "grade": "D1",
+  "reason": "Names the exponential correction not inverting the nonparalyzable relation."
+ },
+ "F103": {
+  "grade": "D1",
+  "reason": "Names 1/t_bar ignoring truncation; not the truncated-likelihood MLE."
+ },
+ "D028": {
+  "grade": "accept",
+  "reason": "Finding 3 names equal-tailed endpoints not the shortest interval; unequal endpoint densities."
+ },
+ "F061": {
+  "grade": "none",
+  "reason": "Downstream consequence finding: states that released values are wrong (recomputed numbers) without naming the mechanism of either planted defect."
+ },
+ "F142": {
+  "grade": "none",
+  "reason": "Downstream consequence finding: states that released values are wrong (recomputed numbers) without naming the mechanism of either planted defect."
+ },
+ "D071": {
+  "grade": "accept",
+  "reason": "Finding 1 names neutral pair fraction instead of charged."
+ },
+ "F036": {
+  "grade": "none",
+  "reason": "Interval-mass finding; the wrong mass follows from D1 but no mechanism is named, and it explicitly asserts the endpoints meet the equal-density condition, contradicting D2."
+ },
+ "F074": {
+  "grade": "D2",
+  "reason": "Names omitted daughter branching fraction with mode-conditional efficiency."
+ },
+ "D042": {
+  "grade": "accept",
+  "reason": "Finding 2 names Var(hits)=2*hits for two-hit clusters."
+ },
+ "D058": {
+  "grade": "accept",
+  "reason": "Finding 2 names the omitted dR/dr derivative in rate_error."
+ },
+ "F166": {
+  "grade": "none",
+  "reason": "Downstream consequence finding: states that released values are wrong (recomputed numbers) without naming the mechanism of either planted defect."
+ },
+ "D050": {
+  "grade": "accept",
+  "reason": "Finding 2 names Var(hits)=2*hits for deterministic pairs."
+ },
+ "D041": {
+  "grade": "accept",
+  "reason": "Finding 1 names unweighted mean vs total-hits MLE."
+ },
+ "D111": {
+  "grade": "accept",
+  "reason": "Finding 1 names the double live-time correction."
+ },
+ "F155": {
+  "grade": "D2",
+  "reason": "Names arithmetic-mean trigger instead of per-interval t_i."
+ },
+ "D024": {
+  "grade": "accept",
+  "reason": "Finding 2 names SE ignoring theta dependence of variances."
+ },
+ "D081": {
+  "grade": "accept",
+  "reason": "Finding 2 names failed fits removed from the denominator."
+ },
+ "F131": {
+  "grade": "D2",
+  "reason": "Names tagged efficiency used instead of unbiased thinning probability."
+ },
+ "F018": {
+  "grade": "D2",
+  "reason": "Names SE treating theta-dependent variances as fixed weights."
+ },
+ "F099": {
+  "grade": "D2",
+  "reason": "Names acceptance omitting the upper gate."
+ },
+ "D143": {
+  "grade": "accept",
+  "reason": "Finding 1 names local p in chosen window vs max over windows."
+ },
+ "F069": {
+  "grade": "D2",
+  "reason": "Names omitted branching fraction with mode-conditional efficiency."
+ },
+ "D046": {
+  "grade": "accept",
+  "reason": "Finding 2 names Var(hits)=2*hits for two-hit clusters."
+ },
+ "D054": {
+  "grade": "accept",
+  "reason": "Finding 2 names the omitted inversion derivative in rate_error."
+ },
+ "F110": {
+  "grade": "none",
+  "reason": "Downstream consequence finding: states that released values are wrong (recomputed numbers) without naming the mechanism of either planted defect."
+ }
+}

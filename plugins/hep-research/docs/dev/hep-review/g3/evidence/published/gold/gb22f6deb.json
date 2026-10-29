@@ -1,0 +1,43 @@
+{
+  "id": "gb22f6deb",
+  "type": "C01",
+  "defects": [
+    {
+      "defect_id": "D1",
+      "statement": "The calibration uses only the observed winning window in each null record, whereas the declared statistic is the maximum across all four windows.",
+      "affected_results": [
+        "global_p",
+        "mc_error",
+        "expected_exceedances"
+      ],
+      "tags": [
+        "numerical",
+        "interacting"
+      ],
+      "corrected_values": {
+        "global_p": 0.5,
+        "mc_error": 0.0625,
+        "expected_exceedances": 200.0
+      }
+    },
+    {
+      "defect_id": "D2",
+      "statement": "Discarding records with failed optional refinements conditions the null ensemble on a diagnostic correlated with the already valid score vectors.",
+      "affected_results": [
+        "global_p",
+        "mc_error",
+        "expected_exceedances"
+      ],
+      "tags": [
+        "numerical",
+        "interacting"
+      ],
+      "corrected_values": {
+        "global_p": 0.5,
+        "mc_error": 0.0625,
+        "expected_exceedances": 200.0
+      }
+    }
+  ],
+  "notes": "Synthetic study. All displayed numbers reproduce the written release method. Gold corrections are joint, with single interventions audited separately."
+}

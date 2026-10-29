@@ -21,7 +21,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-ID = re.compile(r"^x[0-9a-f]{8}$")
+DEFAULT_EXPECT, DEFAULT_PREFIX = 16, "x"  # g2x; later suites pass their own
 PUBLIC_FILES = ("intent.json", "material/analysis.md", "material/data.json")
 HINTS = re.compile(r"\b(defect|planted|gold|oracle|C0[1-4]|control instance|missing-input instance)\b", re.I)
 
@@ -30,7 +30,7 @@ def ids_of(author: Path) -> list[str]:
     return sorted(p.name for p in (author / "public" / "instances").iterdir() if p.is_dir())
 
 
-def check_layout(author: Path) -> tuple[list[str], list[str]]:
+def check_layout(author: Path, expect: int = DEFAULT_EXPECT, prefix: str = DEFAULT_PREFIX) -> tuple[list[str], list[str]]:
     problems, warnings = [], []
     for rel in ("public/instances", "private/gold", "private/oracles"):
         if not (author / rel).is_dir():
@@ -38,11 +38,12 @@ def check_layout(author: Path) -> tuple[list[str], list[str]]:
     if problems:
         return problems, warnings
     ids = ids_of(author)
-    if len(ids) != 16:
-        problems.append(f"{len(ids)} instances, expected 16")
+    id_pattern = re.compile(rf"^{re.escape(prefix)}[0-9a-f]{{8}}$")
+    if len(ids) != expect:
+        problems.append(f"{len(ids)} instances, expected {expect}")
     for iid in ids:
-        if not ID.match(iid):
-            problems.append(f"{iid}: id is not x + 8 hex digits")
+        if not id_pattern.match(iid):
+            problems.append(f"{iid}: id is not {prefix} + 8 hex digits")
         for rel in PUBLIC_FILES:
             f = author / "public" / "instances" / iid / rel
             if not f.is_file():
@@ -75,8 +76,8 @@ def private_files(author: Path) -> list[str]:
     return sorted(str(p.relative_to(root)) for p in root.rglob("*") if p.is_file() and p.name != "nonces.json")
 
 
-def cmd_seal(author: Path, out: Path) -> dict:
-    problems, warnings = check_layout(author)
+def cmd_seal(author: Path, out: Path, expect: int = DEFAULT_EXPECT, prefix: str = DEFAULT_PREFIX) -> dict:
+    problems, warnings = check_layout(author, expect, prefix)
     if problems:
         return {"status": "refused", "problems": problems, "warnings": warnings}
     oracles = run_oracles(author)
@@ -115,11 +116,13 @@ def main(argv=None) -> int:
     s = sub.add_parser("seal")
     s.add_argument("--author", required=True)
     s.add_argument("--out", required=True)
+    s.add_argument("--expect", type=int, default=DEFAULT_EXPECT, help="number of instances")
+    s.add_argument("--prefix", default=DEFAULT_PREFIX, help="id prefix before the 8 hex digits")
     v = sub.add_parser("verify")
     v.add_argument("--author", required=True)
     v.add_argument("--commitments", required=True)
     a = p.parse_args(argv)
-    out = (cmd_seal(Path(a.author), Path(a.out)) if a.cmd == "seal"
+    out = (cmd_seal(Path(a.author), Path(a.out), a.expect, a.prefix) if a.cmd == "seal"
            else cmd_verify(Path(a.author), Path(a.commitments)))
     print(json.dumps(out, indent=1))
     return 0 if out["status"] == "ok" else 1

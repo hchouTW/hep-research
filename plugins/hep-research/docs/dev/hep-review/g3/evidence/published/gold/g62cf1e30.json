@@ -1,0 +1,37 @@
+{
+  "id": "g62cf1e30",
+  "type": "C01",
+  "defects": [
+    {
+      "defect_id": "D1",
+      "statement": "The exponential correction does not invert the specified nonparalyzable mean relation; inversion gives r/(1-r*dead_time).",
+      "affected_results": [
+        "incident_rate",
+        "expected_incident_count",
+        "rate_error"
+      ],
+      "tags": [
+        "interacting"
+      ],
+      "corrected_values": {
+        "incident_rate": 1250.0,
+        "expected_incident_count": 50000.0,
+        "rate_error": 8.457279333832409
+      }
+    },
+    {
+      "defect_id": "D2",
+      "statement": "The incident-rate standard error omits the derivative of the nonlinear rate inversion with respect to recorded rate.",
+      "affected_results": [
+        "rate_error"
+      ],
+      "tags": [
+        "interacting"
+      ],
+      "corrected_values": {
+        "rate_error": 8.457279333832409
+      }
+    }
+  ],
+  "notes": "Synthetic study. All displayed numbers reproduce the written release method. Gold corrections are joint, with single interventions audited separately."
+}

@@ -1,0 +1,666 @@
+{
+  "F060": {
+    "grade": "D2",
+    "reason": "Identifies the omitted nonlinear inversion derivative in propagation from recorded-rate error to incident-rate error."
+  },
+  "F140": {
+    "grade": "D1",
+    "reason": "Identifies calibration at the single observed winning window instead of the scan maximum over all four windows."
+  },
+  "F121": {
+    "grade": "D1",
+    "reason": "Names the repeated live-time correction in E although recorded luminosity already contains it. An erroneous effect direction elsewhere does not erase that identified mechanism."
+  },
+  "F141": {
+    "grade": "D2",
+    "reason": "Identifies conditioning the null ensemble on fit_ok despite valid scores for failed refinements and explains its bias."
+  },
+  "F160": {
+    "grade": "D2",
+    "reason": "Identifies replacing distinct interval trigger probabilities with their arithmetic mean before correcting yields."
+  },
+  "D133": {
+    "grade": "accept",
+    "reason": "A finding identifies 1-P0 as an occupied-crossing probability rather than the Poisson mean and supplies -ln(P0)."
+  },
+  "F109": {
+    "grade": "D2",
+    "reason": "Identifies the omitted upper gate in acceptance and supplies the required difference of exponential survival probabilities."
+  },
+  "F150": {
+    "grade": "D1",
+    "reason": "Identifies calibration at the single observed winning window instead of the scan maximum over all four windows."
+  },
+  "F156": {
+    "grade": "none",
+    "reason": "Reports downstream rate or uncertainty discrepancies and corrected probabilities without naming the midpoint approximation or arithmetic-trigger-mean substitution as the mechanism."
+  },
+  "D148": {
+    "grade": "accept",
+    "reason": "A finding identifies single-winning-window calibration instead of calibration of the maximum over four windows."
+  },
+  "D045": {
+    "grade": "accept",
+    "reason": "A finding identifies the unweighted interval-rate average and supplies the total-count/total-duration Poisson MLE."
+  },
+  "D163": {
+    "grade": "accept",
+    "reason": "A finding explicitly identifies the common arithmetic trigger mean replacing distinct interval trigger probabilities."
+  },
+  "D096": {
+    "grade": "accept",
+    "reason": "A finding identifies 1/t_bar as ignoring the conditional likelihood normalization over the gated interval."
+  },
+  "F079": {
+    "grade": "none",
+    "reason": "Gives a corrected combined K and output values, but does not specify which factor was substituted or omitted in the original normalization."
+  },
+  "F165": {
+    "grade": "D2",
+    "reason": "Identifies replacing distinct interval trigger probabilities with their arithmetic mean before correcting yields."
+  },
+  "F005": {
+    "grade": "none",
+    "reason": "Reports discrepancies in released results without identifying the unresolved grid or missing Jacobian mechanism; the numerical comparison may be valid."
+  },
+  "F137": {
+    "grade": "D2",
+    "reason": "Names the wrong efficiency in the error formula and contrasts tagged efficiency with eps=0.74. Its other point is a missing propagation Jacobian, not an explicit identification of the linear mean estimator in D1."
+  },
+  "F126": {
+    "grade": "D2",
+    "reason": "Identifies tag-conditional efficiency as the wrong thinning probability for the untagged population and requires the unbiased efficiency."
+  },
+  "F021": {
+    "grade": "D1",
+    "reason": "Identifies the omitted parameter-dependent Gaussian log-variance normalization in Q and its effect on the claimed MLE."
+  },
+  "D080": {
+    "grade": "accept",
+    "reason": "A finding identifies equal regime averaging instead of the stated population mixture weights."
+  },
+  "F093": {
+    "grade": "D2",
+    "reason": "Identifies removal of failed fits from the denominator as estimating success-conditional rather than unconditional coverage."
+  },
+  "D138": {
+    "grade": "accept",
+    "reason": "A finding identifies single-winning-window calibration instead of calibration of the maximum over four windows."
+  },
+  "D124": {
+    "grade": "accept",
+    "reason": "A finding explicitly identifies tagged efficiency instead of the unbiased per-interaction thinning probability."
+  },
+  "F017": {
+    "grade": "D1",
+    "reason": "Identifies the omitted parameter-dependent Gaussian log-variance normalization in Q and its effect on the claimed MLE."
+  },
+  "D149": {
+    "grade": "accept",
+    "reason": "A finding identifies conditioning on fit_ok despite unconditional valid score vectors, and locates the record-retention step."
+  },
+  "D134": {
+    "grade": "accept",
+    "reason": "A finding explicitly identifies tagged efficiency instead of the unbiased per-interaction thinning probability."
+  },
+  "F104": {
+    "grade": "D2",
+    "reason": "Identifies the omitted upper gate in acceptance and supplies the required difference of exponential survival probabilities."
+  },
+  "F064": {
+    "grade": "D1",
+    "reason": "Identifies the exponential correction as the wrong inverse of the nonparalyzable relation and supplies r/(1-r*tau)."
+  },
+  "F014": {
+    "grade": "D1",
+    "reason": "Identifies the ten-cell grid as unable to resolve the narrow peak and supplies convergence evidence at the affected efficiency calculation."
+  },
+  "F044": {
+    "grade": "D2",
+    "reason": "Identifies the deterministic two-hit clusters and derives Var(hits)=2*hits rather than the independent-hit Poisson variance."
+  },
+  "F070": {
+    "grade": "none",
+    "reason": "Reports wrong normalization and corrected output numbers without naming either wrong species fraction or omitted daughter branching fraction."
+  },
+  "D112": {
+    "grade": "accept",
+    "reason": "A finding identifies the extra factor of two in K and the resulting per-charge average despite the charge-summed target."
+  },
+  "D097": {
+    "grade": "accept",
+    "reason": "A finding names the missing upper gate in acceptance and supplies the two-boundary exponential probability."
+  },
+  "F051": {
+    "grade": "D1",
+    "reason": "Identifies equal averaging of unequal-duration interval rates and gives the common Poisson MLE as total hits divided by total duration."
+  },
+  "F161": {
+    "grade": "none",
+    "reason": "Reports downstream rate or uncertainty discrepancies and corrected probabilities without naming the midpoint approximation or arithmetic-trigger-mean substitution as the mechanism."
+  },
+  "F098": {
+    "grade": "D1",
+    "reason": "Identifies inverse selected-sample mean as ignoring gate truncation and its conditional-likelihood normalization."
+  },
+  "D020": {
+    "grade": "accept",
+    "reason": "A finding identifies fixed variance weights in the error formula and explains why they are not observed-information curvature."
+  },
+  "D038": {
+    "grade": "accept",
+    "reason": "A finding identifies equal-tail endpoints instead of the shortest theta interval and supplies an endpoint-density check."
+  },
+  "F068": {
+    "grade": "D1",
+    "reason": "Identifies use of the neutral-pair fraction for the charged-parent sample and points to K."
+  },
+  "F034": {
+    "grade": "D1",
+    "reason": "Names the missing exp(z) prior Jacobian and the resulting missing variance shift in the posterior log mean."
+  },
+  "F090": {
+    "grade": "none",
+    "reason": "Reports downstream coverage discrepancies and generic inherited defects without naming either weighting or failure-denominator mechanism."
+  },
+  "D129": {
+    "grade": "accept",
+    "reason": "A finding explicitly identifies tagged efficiency instead of the unbiased per-interaction thinning probability."
+  },
+  "D037": {
+    "grade": "accept",
+    "reason": "A finding names the flat-theta prior Jacobian and derives the missing s^2 shift in the posterior log mean."
+  },
+  "D101": {
+    "grade": "accept",
+    "reason": "A finding identifies 1/t_bar as ignoring the conditional likelihood normalization over the gated interval."
+  },
+  "F145": {
+    "grade": "D1",
+    "reason": "Identifies calibration at the single observed winning window instead of the scan maximum over all four windows."
+  },
+  "F088": {
+    "grade": "D2",
+    "reason": "Identifies removal of failed fits from the denominator as estimating success-conditional rather than unconditional coverage."
+  },
+  "F010": {
+    "grade": "none",
+    "reason": "Reports discrepancies in released results without identifying the unresolved grid or missing Jacobian mechanism; the numerical comparison may be valid."
+  },
+  "F094": {
+    "grade": "D1",
+    "reason": "Identifies equal regime weights instead of the supplied population mixture probabilities in the coverage calculation."
+  },
+  "F078": {
+    "grade": "D2",
+    "reason": "Identifies the omitted daughter branching fraction and explains why daughter-mode-conditional reconstruction efficiency does not include it."
+  },
+  "F130": {
+    "grade": "D1",
+    "reason": "Identifies linear occupied-crossing probability as the wrong Poisson mean and supplies the logarithmic zero-count inversion."
+  },
+  "F073": {
+    "grade": "D1",
+    "reason": "Identifies use of the neutral-pair fraction for the charged-parent sample and points to K."
+  },
+  "D119": {
+    "grade": "accept",
+    "reason": "A finding explicitly identifies multiplying an already live-time-corrected luminosity by live_fraction again; an incorrect numerical effect direction does not change that mechanism match."
+  },
+  "D032": {
+    "grade": "accept",
+    "reason": "A finding names the flat-theta prior Jacobian and derives the missing s^2 shift in the posterior log mean."
+  },
+  "D033": {
+    "grade": "reject",
+    "reason": "The findings identify the prior transformation and insufficient posterior mass, but do not identify the planted equal-tail versus shortest-interval mechanism. The interval finding explicitly says the endpoints meet equal density under the corrected posterior."
+  },
+  "F013": {
+    "grade": "D2",
+    "reason": "Names the missing dm/dt Jacobian in the transformed integration and explains the resulting wrong density measure."
+  },
+  "F113": {
+    "grade": "D1",
+    "reason": "Names the repeated live-time correction in E although recorded luminosity already contains it. An erroneous effect direction elsewhere does not erase that identified mechanism."
+  },
+  "F127": {
+    "grade": "D2",
+    "reason": "Explicitly contrasts eps_tagged in the released error formula with eps_unbiased in the required formula. The additional 1/P0 derivative correction concerns error propagation rather than directly identifying the mean estimator defect D1."
+  },
+  "D153": {
+    "grade": "accept",
+    "reason": "A finding explicitly identifies the common arithmetic trigger mean replacing distinct interval trigger probabilities."
+  },
+  "D007": {
+    "grade": "accept",
+    "reason": "A finding explicitly identifies the missing 1/(2 sqrt(t)) measure Jacobian in the transformed integration."
+  },
+  "D115": {
+    "grade": "accept",
+    "reason": "A finding explicitly identifies multiplying an already live-time-corrected luminosity by live_fraction again; an incorrect numerical effect direction does not change that mechanism match."
+  },
+  "F055": {
+    "grade": "D1",
+    "reason": "Identifies the exponential correction as the wrong inverse of the nonparalyzable relation and supplies r/(1-r*tau)."
+  },
+  "D001": {
+    "grade": "accept",
+    "reason": "A finding identifies insufficient grid resolution of the narrow peak, locates the ten-panel integration, and provides convergence evidence."
+  },
+  "D075": {
+    "grade": "accept",
+    "reason": "A finding names the neutral rather than charged production fraction in the charged-parent normalization K."
+  },
+  "D152": {
+    "grade": "accept",
+    "reason": "A finding identifies midpoint efficiency instead of uniform interval averaging and demonstrates the missed sensor-notch structure."
+  },
+  "D066": {
+    "grade": "accept",
+    "reason": "A finding names the neutral rather than charged production fraction in the charged-parent normalization K."
+  },
+  "F031": {
+    "grade": "D2",
+    "reason": "Identifies equal-tail endpoints as distinct from the required shortest theta interval and checks unequal endpoint densities under the estimator posterior."
+  },
+  "F095": {
+    "grade": "none",
+    "reason": "Reports downstream coverage discrepancies and generic inherited defects without naming either weighting or failure-denominator mechanism."
+  },
+  "F147": {
+    "grade": "none",
+    "reason": "Reports downstream Monte Carlo error and exceedance discrepancies without identifying the single-window calibration or diagnostic-selection mechanism."
+  },
+  "F136": {
+    "grade": "D2",
+    "reason": "Identifies tag-conditional efficiency as the wrong thinning probability for the untagged population and requires the unbiased efficiency."
+  },
+  "F056": {
+    "grade": "D2",
+    "reason": "Identifies the omitted nonlinear inversion derivative in propagation from recorded-rate error to incident-rate error."
+  },
+  "D102": {
+    "grade": "accept",
+    "reason": "A finding names the missing upper gate in acceptance and supplies the two-boundary exponential probability."
+  },
+  "F026": {
+    "grade": "D2",
+    "reason": "Identifies frozen variance weights in the uncertainty prescription instead of curvature including variance derivatives."
+  },
+  "D158": {
+    "grade": "accept",
+    "reason": "A finding explicitly identifies the common arithmetic trigger mean replacing distinct interval trigger probabilities."
+  },
+  "F048": {
+    "grade": "D2",
+    "reason": "Identifies the deterministic two-hit clusters and derives Var(hits)=2*hits rather than the independent-hit Poisson variance."
+  },
+  "F114": {
+    "grade": "D2",
+    "reason": "Identifies the extra factor of two in K as converting a charge-summed target into a per-charge average."
+  },
+  "D006": {
+    "grade": "accept",
+    "reason": "A finding identifies insufficient grid resolution of the narrow peak, locates the ten-panel integration, and provides convergence evidence."
+  },
+  "D106": {
+    "grade": "accept",
+    "reason": "A finding identifies 1/t_bar as ignoring the conditional likelihood normalization over the gated interval."
+  },
+  "D144": {
+    "grade": "accept",
+    "reason": "A finding identifies conditioning on fit_ok despite unconditional valid score vectors, and locates the record-retention step."
+  },
+  "F035": {
+    "grade": "D1",
+    "reason": "The evidence explicitly derives the mean using m=x+s^2, identifying the missing posterior log-mean shift through a correct alternative derivation."
+  },
+  "D016": {
+    "grade": "accept",
+    "reason": "A finding identifies fixed variance weights in the error formula and explains why they are not observed-information curvature."
+  },
+  "F077": {
+    "grade": "D1",
+    "reason": "Identifies use of the neutral-pair fraction for the charged-parent sample and points to K."
+  },
+  "F154": {
+    "grade": "D1",
+    "reason": "Identifies midpoint efficiency sampling instead of the uniform interval average, including its failure at the sensor notch."
+  },
+  "D107": {
+    "grade": "accept",
+    "reason": "A finding names the missing upper gate in acceptance and supplies the two-boundary exponential probability."
+  },
+  "F030": {
+    "grade": "none",
+    "reason": "States that the posterior mean disagrees with the prior and supplies a replacement number, without explaining the prior transformation mechanism."
+  },
+  "F118": {
+    "grade": "D2",
+    "reason": "Identifies the extra factor of two in K as converting a charge-summed target into a per-charge average."
+  },
+  "F087": {
+    "grade": "D1",
+    "reason": "Identifies equal regime weights instead of the supplied population mixture probabilities in the coverage calculation."
+  },
+  "F022": {
+    "grade": "D2",
+    "reason": "Identifies frozen variance weights in the uncertainty prescription instead of curvature including variance derivatives."
+  },
+  "F029": {
+    "grade": "D1",
+    "reason": "Names the missing exp(z) prior Jacobian and the resulting missing variance shift in the posterior log mean."
+  },
+  "D162": {
+    "grade": "accept",
+    "reason": "A finding identifies midpoint efficiency instead of uniform interval averaging and demonstrates the missed sensor-notch structure."
+  },
+  "D027": {
+    "grade": "accept",
+    "reason": "A finding names the flat-theta prior Jacobian and derives the missing s^2 shift in the posterior log mean."
+  },
+  "D057": {
+    "grade": "accept",
+    "reason": "A finding identifies the wrong exponential dead-time inversion and supplies r/(1-r*tau)."
+  },
+  "D019": {
+    "grade": "accept",
+    "reason": "A finding names the omitted sum log(V) normalization in Q and ties it to the incorrect claimed MLE."
+  },
+  "F082": {
+    "grade": "D1",
+    "reason": "Identifies equal regime weights instead of the supplied population mixture probabilities in the coverage calculation."
+  },
+  "D072": {
+    "grade": "accept",
+    "reason": "A finding names the omitted daughter branching fraction and explains that conditional reconstruction efficiency excludes it."
+  },
+  "F151": {
+    "grade": "D2",
+    "reason": "Identifies conditioning the null ensemble on fit_ok despite valid scores for failed refinements and explains its bias."
+  },
+  "F025": {
+    "grade": "D1",
+    "reason": "Identifies the omitted parameter-dependent Gaussian log-variance normalization in Q and its effect on the claimed MLE."
+  },
+  "F089": {
+    "grade": "unsure",
+    "reason": "Explicitly identifies both equal-weight factors instead of population weights (D1) and retained sizes instead of full toy counts (D2). The required single-defect label does not uniquely represent this finding."
+  },
+  "D015": {
+    "grade": "accept",
+    "reason": "A finding names the omitted sum log(V) normalization in Q and ties it to the incorrect claimed MLE."
+  },
+  "D063": {
+    "grade": "accept",
+    "reason": "A finding identifies the omitted inversion derivative in the incident-rate uncertainty prescription."
+  },
+  "D067": {
+    "grade": "accept",
+    "reason": "A finding names the omitted daughter branching fraction and explains that conditional reconstruction efficiency excludes it."
+  },
+  "D157": {
+    "grade": "accept",
+    "reason": "A finding identifies midpoint efficiency instead of uniform interval averaging and demonstrates the missed sensor-notch structure."
+  },
+  "F122": {
+    "grade": "D2",
+    "reason": "Identifies the extra factor of two in K as converting a charge-summed target into a per-charge average."
+  },
+  "F043": {
+    "grade": "D1",
+    "reason": "Identifies equal averaging of unequal-duration interval rates and gives the common Poisson MLE as total hits divided by total duration."
+  },
+  "F164": {
+    "grade": "D1",
+    "reason": "Identifies midpoint efficiency sampling instead of the uniform interval average, including its failure at the sensor notch."
+  },
+  "F040": {
+    "grade": "D2",
+    "reason": "Identifies equal-tail endpoints as distinct from the required shortest theta interval and checks unequal endpoint densities under the estimator posterior."
+  },
+  "F117": {
+    "grade": "D1",
+    "reason": "Names the repeated live-time correction in E although recorded luminosity already contains it. An erroneous effect direction elsewhere does not erase that identified mechanism."
+  },
+  "F159": {
+    "grade": "D1",
+    "reason": "Identifies midpoint efficiency sampling instead of the uniform interval average, including its failure at the sensor notch."
+  },
+  "F065": {
+    "grade": "D2",
+    "reason": "Identifies the omitted nonlinear inversion derivative in propagation from recorded-rate error to incident-rate error."
+  },
+  "D128": {
+    "grade": "accept",
+    "reason": "A finding identifies 1-P0 as an occupied-crossing probability rather than the Poisson mean and supplies -ln(P0)."
+  },
+  "D002": {
+    "grade": "accept",
+    "reason": "A finding explicitly identifies the missing 1/(2 sqrt(t)) measure Jacobian in the transformed integration."
+  },
+  "D085": {
+    "grade": "accept",
+    "reason": "A finding identifies equal regime averaging instead of the stated population mixture weights."
+  },
+  "D139": {
+    "grade": "accept",
+    "reason": "A finding identifies conditioning on fit_ok despite unconditional valid score vectors, and locates the record-retention step."
+  },
+  "F146": {
+    "grade": "D2",
+    "reason": "Identifies conditioning the null ensemble on fit_ok despite valid scores for failed refinements and explains its bias."
+  },
+  "D092": {
+    "grade": "accept",
+    "reason": "A finding identifies excluded failed fits in the coverage denominator and the resulting conditional rather than unconditional coverage."
+  },
+  "D012": {
+    "grade": "accept",
+    "reason": "A finding explicitly identifies the missing 1/(2 sqrt(t)) measure Jacobian in the transformed integration."
+  },
+  "F083": {
+    "grade": "D2",
+    "reason": "Identifies removal of failed fits from the denominator as estimating success-conditional rather than unconditional coverage."
+  },
+  "F100": {
+    "grade": "none",
+    "reason": "Reports consequences for released results without naming the omitted likelihood normalization or omitted upper gate mechanism."
+  },
+  "D116": {
+    "grade": "accept",
+    "reason": "A finding identifies the extra factor of two in K and the resulting per-charge average despite the charge-summed target."
+  },
+  "D049": {
+    "grade": "accept",
+    "reason": "A finding identifies the unweighted interval-rate average and supplies the total-count/total-duration Poisson MLE."
+  },
+  "D062": {
+    "grade": "accept",
+    "reason": "A finding identifies the wrong exponential dead-time inversion and supplies r/(1-r*tau)."
+  },
+  "D076": {
+    "grade": "accept",
+    "reason": "A finding names the omitted daughter branching fraction and explains that conditional reconstruction efficiency excludes it."
+  },
+  "F135": {
+    "grade": "D1",
+    "reason": "Identifies linear occupied-crossing probability as the wrong Poisson mean and supplies the logarithmic zero-count inversion."
+  },
+  "D123": {
+    "grade": "accept",
+    "reason": "A finding identifies 1-P0 as an occupied-crossing probability rather than the Poisson mean and supplies -ln(P0)."
+  },
+  "D053": {
+    "grade": "accept",
+    "reason": "A finding identifies the wrong exponential dead-time inversion and supplies r/(1-r*tau)."
+  },
+  "D011": {
+    "grade": "accept",
+    "reason": "A finding identifies insufficient grid resolution of the narrow peak, locates the ten-panel integration, and provides convergence evidence."
+  },
+  "F108": {
+    "grade": "D1",
+    "reason": "Identifies inverse selected-sample mean as ignoring gate truncation and its conditional-likelihood normalization."
+  },
+  "F003": {
+    "grade": "D2",
+    "reason": "Names the missing dm/dt Jacobian in the transformed integration and explains the resulting wrong density measure."
+  },
+  "F039": {
+    "grade": "D1",
+    "reason": "Names the missing exp(z) prior Jacobian and the resulting missing variance shift in the posterior log mean."
+  },
+  "D086": {
+    "grade": "accept",
+    "reason": "A finding identifies excluded failed fits in the coverage denominator and the resulting conditional rather than unconditional coverage."
+  },
+  "F084": {
+    "grade": "none",
+    "reason": "Gives target-consistent outputs and a general weighted coverage formula without identifying the original equal weighting or exclusion of failed fits."
+  },
+  "D120": {
+    "grade": "accept",
+    "reason": "A finding identifies the extra factor of two in K and the resulting per-charge average despite the charge-summed target."
+  },
+  "F004": {
+    "grade": "D1",
+    "reason": "Identifies the ten-cell grid as unable to resolve the narrow peak and supplies convergence evidence at the affected efficiency calculation."
+  },
+  "F125": {
+    "grade": "D1",
+    "reason": "Identifies linear occupied-crossing probability as the wrong Poisson mean and supplies the logarithmic zero-count inversion."
+  },
+  "F105": {
+    "grade": "none",
+    "reason": "Reports consequences for released results without naming the omitted likelihood normalization or omitted upper gate mechanism."
+  },
+  "D023": {
+    "grade": "accept",
+    "reason": "A finding names the omitted sum log(V) normalization in Q and ties it to the incorrect claimed MLE."
+  },
+  "D091": {
+    "grade": "accept",
+    "reason": "A finding identifies equal regime averaging instead of the stated population mixture weights."
+  },
+  "F047": {
+    "grade": "D1",
+    "reason": "Identifies equal averaging of unequal-duration interval rates and gives the common Poisson MLE as total hits divided by total duration."
+  },
+  "F052": {
+    "grade": "D2",
+    "reason": "Identifies the deterministic two-hit clusters and derives Var(hits)=2*hits rather than the independent-hit Poisson variance."
+  },
+  "F132": {
+    "grade": "none",
+    "reason": "Supplies corrected results and a log-inversion formula without identifying the original linear-occupancy substitution or conditional-efficiency substitution."
+  },
+  "F008": {
+    "grade": "D2",
+    "reason": "Names the missing dm/dt Jacobian in the transformed integration and explains the resulting wrong density measure."
+  },
+  "F009": {
+    "grade": "D1",
+    "reason": "Identifies the ten-cell grid as unable to resolve the narrow peak and supplies convergence evidence at the affected efficiency calculation."
+  },
+  "F059": {
+    "grade": "D1",
+    "reason": "Identifies the exponential correction as the wrong inverse of the nonparalyzable relation and supplies r/(1-r*tau)."
+  },
+  "F103": {
+    "grade": "D1",
+    "reason": "Identifies inverse selected-sample mean as ignoring gate truncation and its conditional-likelihood normalization."
+  },
+  "D028": {
+    "grade": "accept",
+    "reason": "A finding identifies equal-tail endpoints instead of the shortest theta interval and supplies an endpoint-density check."
+  },
+  "F061": {
+    "grade": "none",
+    "reason": "Reports the downstream count discrepancy without explaining the incorrect dead-time inversion mechanism; this may be a valid consequence."
+  },
+  "F142": {
+    "grade": "none",
+    "reason": "Reports downstream Monte Carlo error and exceedance discrepancies without identifying the single-window calibration or diagnostic-selection mechanism."
+  },
+  "D071": {
+    "grade": "accept",
+    "reason": "A finding names the neutral rather than charged production fraction in the charged-parent normalization K."
+  },
+  "F036": {
+    "grade": "none",
+    "reason": "Identifies a posterior-mass error, but explicitly says the endpoints meet equal density under the corrected posterior. It does not identify the planted equal-tail versus shortest-interval mechanism or explain the missing prior Jacobian."
+  },
+  "F074": {
+    "grade": "D2",
+    "reason": "Identifies the omitted daughter branching fraction and explains why daughter-mode-conditional reconstruction efficiency does not include it."
+  },
+  "D042": {
+    "grade": "accept",
+    "reason": "A finding identifies two-hit clustering and derives Var(hits)=2*hits at the uncertainty prescription."
+  },
+  "D058": {
+    "grade": "accept",
+    "reason": "A finding identifies the omitted inversion derivative in the incident-rate uncertainty prescription."
+  },
+  "F166": {
+    "grade": "none",
+    "reason": "Reports downstream rate or uncertainty discrepancies and corrected probabilities without naming the midpoint approximation or arithmetic-trigger-mean substitution as the mechanism."
+  },
+  "D050": {
+    "grade": "accept",
+    "reason": "A finding identifies two-hit clustering and derives Var(hits)=2*hits at the uncertainty prescription."
+  },
+  "D041": {
+    "grade": "accept",
+    "reason": "A finding identifies the unweighted interval-rate average and supplies the total-count/total-duration Poisson MLE."
+  },
+  "D111": {
+    "grade": "accept",
+    "reason": "A finding explicitly identifies multiplying an already live-time-corrected luminosity by live_fraction again; an incorrect numerical effect direction does not change that mechanism match."
+  },
+  "F155": {
+    "grade": "D2",
+    "reason": "Identifies replacing distinct interval trigger probabilities with their arithmetic mean before correcting yields."
+  },
+  "D024": {
+    "grade": "accept",
+    "reason": "A finding identifies fixed variance weights in the error formula and explains why they are not observed-information curvature."
+  },
+  "D081": {
+    "grade": "accept",
+    "reason": "A finding identifies excluded failed fits in the coverage denominator and the resulting conditional rather than unconditional coverage."
+  },
+  "F131": {
+    "grade": "D2",
+    "reason": "Identifies tag-conditional efficiency as the wrong thinning probability for the untagged population and requires the unbiased efficiency."
+  },
+  "F018": {
+    "grade": "D2",
+    "reason": "Identifies frozen variance weights in the uncertainty prescription instead of curvature including variance derivatives."
+  },
+  "F099": {
+    "grade": "D2",
+    "reason": "Identifies the omitted upper gate in acceptance and supplies the required difference of exponential survival probabilities."
+  },
+  "D143": {
+    "grade": "accept",
+    "reason": "A finding identifies single-winning-window calibration instead of calibration of the maximum over four windows."
+  },
+  "F069": {
+    "grade": "D2",
+    "reason": "Identifies the omitted daughter branching fraction and explains why daughter-mode-conditional reconstruction efficiency does not include it."
+  },
+  "D046": {
+    "grade": "accept",
+    "reason": "A finding identifies two-hit clustering and derives Var(hits)=2*hits at the uncertainty prescription."
+  },
+  "D054": {
+    "grade": "accept",
+    "reason": "A finding identifies the omitted inversion derivative in the incident-rate uncertainty prescription."
+  },
+  "F110": {
+    "grade": "none",
+    "reason": "Reports consequences for released results without naming the omitted likelihood normalization or omitted upper gate mechanism."
+  }
+}

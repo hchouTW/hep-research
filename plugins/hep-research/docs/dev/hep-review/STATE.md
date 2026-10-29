@@ -41,7 +41,7 @@ tasks:
   T06: {status: skipped}
   T07: {status: skipped}
   T08: {status: skipped}
-gates: {G1: done, G2: done, G3: pending}
+gates: {G1: done, G2: done, G3: done-evaluated-scope}
 cases:
   T00: {N01: not-applicable-with-basis (worktree created; failure path is the hard stop), N02: pass, N04: pass (no existing hep-review in source or cache), N40: pass}
   T01: "all 62 pass (tests/contracts/test_hep_review_{json,decision_table,kernel,review_fixes}.py)"
@@ -63,7 +63,7 @@ review_inputs_t01:
 blockers:
   - {when: 2026-10-29T09:30+08:00, task: G1, description: "independent G1 review: 4 blockers (B1 rollback stays verified, B2 fork/migrate drop negatives, B3 hand-written assignment bases, B4 records not bound to raw), 4 major, 8 minor; all fixed with tests first in b491ff9e; dispositions in reviews/g1-review-dispositions.md", needs: none, resolved: "2026-10-29 user accepted the G1 dispositions"}
   - {when: 2026-10-29T07:15+08:00, task: T01, description: "independent T01 review returned blocker F1 (layer 1 not byte-reproducible across processes); fixed with a multi-seed test in 3f075184", needs: none, resolved: "2026-10-29 user accepted the dispositions and asked to continue with T03 and G1"}
-next_action: "G3 (evaluated-scope) needs material beyond single-page closed-form statistics to measure a miss rate; merge of PR #310 is a maintainer decision"
+next_action: "G3 done (evaluated-scope for multi-step statistics, detection 71/72). Further scope (more than two defects, other domains, other hosts, T05-T07) needs new measured evaluations; release needs external authorization"
 ```
 
 ## Log

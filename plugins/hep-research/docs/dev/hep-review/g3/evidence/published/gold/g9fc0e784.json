@@ -1,0 +1,40 @@
+{
+  "id": "g9fc0e784",
+  "type": "C01",
+  "defects": [
+    {
+      "defect_id": "D1",
+      "statement": "The inverse selected-sample mean ignores the parameter-dependent normalization of the doubly truncated exponential likelihood.",
+      "affected_results": [
+        "decay_rate",
+        "acceptance",
+        "produced_yield"
+      ],
+      "tags": [
+        "numerical",
+        "interacting"
+      ],
+      "corrected_values": {
+        "decay_rate": 0.6897910618082521,
+        "acceptance": 0.496591579467809,
+        "produced_yield": 36.24709065604853
+      }
+    },
+    {
+      "defect_id": "D2",
+      "statement": "The extrapolation probability omits the upper gate; the selected probability is exp(-lambda*low)-exp(-lambda*high).",
+      "affected_results": [
+        "acceptance",
+        "produced_yield"
+      ],
+      "tags": [
+        "interacting"
+      ],
+      "corrected_values": {
+        "acceptance": 0.496591579467809,
+        "produced_yield": 36.24709065604853
+      }
+    }
+  ],
+  "notes": "Synthetic study. All displayed numbers reproduce the written release method. Gold corrections are joint, with single interventions audited separately."
+}
