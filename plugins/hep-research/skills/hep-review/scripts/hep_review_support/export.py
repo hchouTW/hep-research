@@ -83,6 +83,16 @@ def verify_export(path: str | Path, trusted_checkpoint: dict | None = None) -> d
         H._check_chain(bundle_from_export(path))
     except (H.BundleError, KeyError, TypeError) as e:
         reasons.append(str(e))
+    for c in doc.get("commits", []):  # the top-level fields are bound to the commit headers (review m3)
+        head = c.get("commit", {})
+        if head.get("context_id") != doc.get("context_id") or head.get("segment_id") != doc.get("segment_id"):
+            reasons.append(f"commit {head.get('seq')} names another context or segment than the export")
+            break
+    genesis = (doc.get("commits") or [{}])[0].get("commit", {})
+    origin = {k: genesis[k] for k in ("forked_from", "excluded_commits", "broken_case", "migrated_from")
+              if k in genesis} or None
+    if (doc.get("segment_origin") or None) != origin:
+        reasons.append("segment_origin does not match the genesis commit header")
     blobs = _blob_map(doc)
     for item in doc.get("blob_inventory", []):
         encoded = blobs.get(item["digest"])
@@ -106,7 +116,8 @@ def verify_export(path: str | Path, trusted_checkpoint: dict | None = None) -> d
     commits = {c["commit"]["seq"]: c for c in doc.get("commits", [])}
     n = trusted_checkpoint["seq"]
     at = commits.get(n)
-    if (trusted_checkpoint.get("segment_id") not in (None, doc.get("segment_id")) or at is None
+    if (trusted_checkpoint.get("segment_id") not in (None, doc.get("segment_id"))
+            or trusted_checkpoint.get("context_id") not in (None, doc.get("context_id")) or at is None
             or at["digest"] != trusted_checkpoint["commit_digest"]):
         result["checkpoint"] = "mismatch"
     else:

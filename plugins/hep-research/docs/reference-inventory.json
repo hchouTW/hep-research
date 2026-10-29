@@ -35,7 +35,7 @@
   },
   "hep-review": {
    "references": 8,
-   "bytes": 23146,
+   "bytes": 23783,
    "uncited": 0
   },
   "hep-statistics": {
@@ -3711,7 +3711,7 @@
     "skills/hep-review/references/domains/index.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "dbebc92c 2026-10-29"
   },
   {
    "path": "skills/hep-review/references/domains/index.md",
@@ -3823,7 +3823,7 @@
     "hep-statistics",
     "hep-theory"
    ],
-   "last_commit": "untracked"
+   "last_commit": "dbebc92c 2026-10-29"
   },
   {
    "path": "skills/hep-review/references/domains/statistics.md",
@@ -3863,7 +3863,7 @@
     "hep-statistics",
     "hep-theory"
    ],
-   "last_commit": "untracked"
+   "last_commit": "dbebc92c 2026-10-29"
   },
   {
    "path": "skills/hep-review/references/evaluation-and-claims.md",
@@ -3875,7 +3875,7 @@
     "skills/hep-review/SKILL.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "dbebc92c 2026-10-29"
   },
   {
    "path": "skills/hep-review/references/evidence-and-adjudication.md",
@@ -3887,7 +3887,7 @@
     "skills/hep-review/SKILL.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "dbebc92c 2026-10-29"
   },
   {
    "path": "skills/hep-review/references/host-and-trust-boundaries.md",
@@ -3899,7 +3899,7 @@
     "skills/hep-review/SKILL.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "dbebc92c 2026-10-29"
   },
   {
    "path": "skills/hep-review/references/storage-continuity-and-export.md",
@@ -3911,19 +3911,20 @@
     "skills/hep-review/SKILL.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "dbebc92c 2026-10-29"
   },
   {
    "path": "skills/hep-review/references/workflow-and-tiers.md",
    "owner": "hep-review",
-   "bytes": 5455,
-   "lines": 70,
+   "bytes": 6092,
+   "lines": 72,
    "linked_from_skill_md": true,
    "cited_by": [
-    "skills/hep-review/SKILL.md"
+    "skills/hep-review/SKILL.md",
+    "tests/skills/hep_review/test_g1_review_fixes.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "untracked"
+   "last_commit": "dbebc92c 2026-10-29"
   },
   {
    "path": "skills/hep-statistics/references/astroparticle-statistics.md",

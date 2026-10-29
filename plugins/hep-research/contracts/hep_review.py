@@ -216,7 +216,7 @@ DISCHARGE_REASONS = ("condition-absent", "out-of-scope-by-intent", "superseded-b
 JUDGING_RECORD_TYPES = {"submission", "verification", "adjudication"}
 CLAIM_STATES_R3 = {"pilot-checked-scope", "evaluated-scope"}
 SCOPE_DONE = "performed-no-known-gaps"
-KIND_ORDER = ("intent", "manifest", "plan", "packet", "assignment", "record", "claim-binding")
+KIND_ORDER = ("intent", "manifest", "plan", "packet", "assignment", "supply", "record", "claim-binding")
 QUALIFIER = {"R1": "R1 (non-independent recorded review)",
              "R2": "R2 (independent review under the recorded conditions)",
              "R3": "R3 (review within the evaluated scope)"}
@@ -795,6 +795,8 @@ class _Ctx:
         self.manifests = {o["id"]: o for _, o in ent if o["record_kind"] == "manifest"}
         self.assignments = {o["id"]: o for _, o in ent if o["record_kind"] == "assignment"}
         self.bindings = [o for _, o in ent if o["record_kind"] == "claim-binding"]
+        self.contaminated = {o.get("assignment_id") for _, o in ent if o["record_kind"] == "supply"
+                             and o.get("contains_evaluation") is True}
         self.records = [(s, o) for s, o in ent if o["record_kind"] == "record"
                         and o["id"] not in v["quarantined_records"]]
         self.items: dict[str, dict] = {}
@@ -1020,7 +1022,7 @@ def _tier_of(ctx: _Ctx, ob: dict, recs: list[dict], floor_ok: bool) -> tuple[str
                 advisory.add(c)
         if r["actor"] in target_authors:
             reasons.append(f"{r['actor']} is an author of this obligation's material (non-author unmet)")
-        if a.get("contamination"):
+        if a.get("contamination") or a["id"] in ctx.contaminated:
             reasons.append(f"{a['id']} saw other evaluations before submitting (no-other-evaluations-seen unmet)")
         for c in sorted(extra):  # sorted: layer 1 never depends on set iteration order
             x = cond.get(c, {})

@@ -82,7 +82,10 @@ def read_controlled(root: Path | str, rel: str, *, max_bytes: int = DEFAULT_MAX_
     if not controlled_read_available(caps):
         raise ControlledReadUnavailable("os.open with dir_fd and O_NOFOLLOW/O_DIRECTORY/O_NONBLOCK is required")
     parts = _components(rel)
-    dfd = os.open(root, os.O_RDONLY | os.O_DIRECTORY)
+    try:  # the root's last component is not followed either (review m5: a drops folder replaced by a symlink)
+        dfd = os.open(root, os.O_RDONLY | os.O_DIRECTORY | os.O_NOFOLLOW)
+    except OSError as e:
+        raise _refusal(e, str(root)) from None
     try:
         for p in parts[:-1]:
             try:

@@ -37,10 +37,10 @@ class Base(unittest.TestCase):
 
     def seeded_session(self, session="s-1"):
         st = C.start_session(self.s, "ctx-1", session)
-        objs = [[F.intent()], [F.manifest(self.s)], [F.plan(1, [F.obligation("O1")])],
-                [F.assignment("asg-1", "rev-1")], [F.record(self.s, "rec-1", "asg-1", "rev-1")]]
-        for i, o in enumerate(objs, 1):
-            C.append(self.s, st, o, f"op-{session}-{i}")
+        steps = [lambda: [F.intent()], lambda: [F.manifest(self.s)], lambda: [F.plan(1, [F.obligation("O1")])],
+                 lambda: [F.assignment("asg-1", "rev-1")], lambda: [F.record(self.s, "rec-1", "asg-1", "rev-1")]]
+        for i, make in enumerate(steps, 1):
+            C.append(self.s, st, make(), f"op-{session}-{i}")
         return st
 
     def foreign_append(self, objs, op):

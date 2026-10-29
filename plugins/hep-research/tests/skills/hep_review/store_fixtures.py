@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import copy
+import json
 import sys
 from pathlib import Path
 
@@ -10,6 +11,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "skills" / "hep-review" / "scripts"))
 
 from contracts import hep_review as H  # noqa: E402
+from hep_review_support import submissions as SUB  # noqa: E402
 from hep_review_support.materials import raw_ref  # noqa: E402
 
 FLOOR = [{"condition": c, "required": True} for c in ("non-author", "fresh-context", "no-other-evaluations-seen")]
@@ -57,6 +59,10 @@ def plan(rev, obligations, manifest_id="manifest-1", ctx="ctx-1", **extra):
     return p
 
 
+HOST = json.loads((ROOT / "skills" / "hep-review" / "assets" / "host_profile.json").read_text("utf-8"))
+HOST_DIGEST = H.metadata_digest(HOST)
+
+
 def assignment(aid, actor, rev=1, ctx="ctx-1", role="reviewer"):
     good = {"satisfied": True, "basis": "declared"}
     return header("assignment", aid, ctx) | {
@@ -64,38 +70,35 @@ def assignment(aid, actor, rev=1, ctx="ctx-1", role="reviewer"):
         "qualified": {"satisfied": True, "basis": "declared"},
         "conditions": {"non-author": good, "fresh-context": {"satisfied": True, "basis": "observed"},
                        "no-other-evaluations-seen": {"satisfied": True, "basis": "advisory"}},
-        "restrictions": []}
+        "restrictions": [], "dispatch": {"via": "agent-tool", "host": HOST["id"], "invocation_id": f"test-{aid}"},
+        "host_profile_digest": HOST_DIGEST}
 
 
 def record(store, rid, aid, actor, obligation_id="O1", verdict="supported", rev=1, ctx="ctx-1", evidence=b"ev",
-           submission=b'{"answers": []}', fidelity="file-transfer", finding=False):
-    sub = store.put_blob(submission)
-    ev = store.put_blob(evidence)
-    k = rid
-    fnd = []
-    if finding:
-        fnd.append({"id": f"F-{k}", "obligation_id": obligation_id, "claim": "defect", "element": "x",
-                    "locator": {"material_id": "M1", "digest": ev}, "method": "recompute", "depends_on": [f"E-{k}"]})
-    return header("record", rid, ctx) | {
-        "type": "submission", "plan_revision": rev, "assignment_id": aid, "actor": actor,
-        "raw_submission_ref": raw_ref(f"raw-{rid}", sub), "submission_fidelity": fidelity,
-        "answers": [{"id": f"N-{k}", "obligation_id": obligation_id, "verdict": verdict,
-                     "finding_ids": [f["id"] for f in fnd], "attempt_ids": [f"A-{k}"], "evidence_ids": [f"E-{k}"],
-                     "cited_materials": [], "missing_inputs": [], "depends_on": [f"E-{k}"]}],
-        "findings": fnd,
-        "attempts": [{"id": f"A-{k}", "obligation_id": obligation_id, "method": "recompute", "observation": "completed",
-                      "executor": "exec-1", "tools": ["python3"], "environment_refs": [], "depends_on": []}],
-        "evidence": [{"id": f"E-{k}", "obligation_id": obligation_id, "requirement": "E",
-                      "content_ref": raw_ref(f"E-{k}", ev), "depends_on": [f"A-{k}"]}],
-        "judgments": [], "suspected_conflicts": [], "responses": [], "limitations": []}
+           submission=None, fidelity="file-transfer", finding=False):
+    """A record derived from a real raw submission, as the store requires (it re-derives it at admission)."""
+    del evidence  # evidence is the submission itself
+    objs = [o for c in store.load_bundle(ctx)["commits"] for o in c["objects"]]
+    asg = next(o for o in objs if o["record_kind"] == "assignment" and o["id"] == aid)
+    man = next(o for o in objs if o["record_kind"] == "manifest")
+    loc = {"material_id": "M1", "digest": man["materials"][0]["raw_ref"]["digest"]}
+    answer = {"obligation_id": obligation_id, "outcome": verdict, "reasoning": "recomputed", "missing_inputs": [],
+              "attempts": [{"method": "recompute", "observation": "completed", "tools": ["python3"]}],
+              "evidence": [{"requirement": "E", "summary": "recomputation"}],
+              "findings": [{"claim": "defect", "element": "x", "locator": loc}] if finding else []}
+    raw = submission if submission is not None else json.dumps({"assignment_id": aid, "answers": [answer]}).encode()
+    digest = store.put_blob(raw)
+    return SUB.parse(objs, asg, raw, raw_ref(f"raw-{rid}", digest), fidelity, executor=HOST["reviewer_executor"],
+                     record_id=rid)
 
 
 def seed(store, ctx="ctx-1", session="s-1"):
     """intent, manifest, plan 1 with O1, an assignment and a supported record: five commits."""
     head = None
-    for i, objs in enumerate(([intent(ctx)], [manifest(store, ctx=ctx)], [plan(1, [obligation("O1")], ctx=ctx)],
-                              [assignment("asg-1", "rev-1", ctx=ctx)],
-                              [record(store, "rec-1", "asg-1", "rev-1", ctx=ctx)]), 1):
-        res = store.append(ctx, objs, head, f"op-seed-{i}", writer_session_id=session)
+    steps = (lambda: [intent(ctx)], lambda: [manifest(store, ctx=ctx)], lambda: [plan(1, [obligation("O1")], ctx=ctx)],
+             lambda: [assignment("asg-1", "rev-1", ctx=ctx)],
+             lambda: [record(store, "rec-1", "asg-1", "rev-1", ctx=ctx)])
+    for i, make in enumerate(steps, 1):  # each step built after the previous commit (records derive from the store)
+        res = store.append(ctx, make(), head, f"op-seed-{i}", writer_session_id=session)
         head = res.head
     return head

@@ -58,12 +58,14 @@ out-of-store state file (`--state FILE`) keeps the anchor and the digests this s
 
 | Command | Does |
 |---|---|
-| `r0 --bundle FILE` | an R0 consultation report from an in-memory bundle; no store is created |
-| `start --context ID [--checkpoint LINE]` | begin a session: anchor on the checkpoint, or record an unanchored start |
-| `append --context ID --objects FILE --operation-id ID` | commit objects (intent, manifest, plan, assignment, record) after admission checks |
-| `snapshot --root DIR --paths P... --out FILE` | controlled reading of materials into store blobs; prints manifest materials and gaps |
-| `packets --context ID --out DIR` | build packets and drop folders for the head plan's assignment specs |
-| `ingest --context ID --assignment ID --drop-root DIR [--digest HEX]` | read a drop file by bytes, store the raw blob, print the record skeleton and fidelity |
-| `report --context ID` | layer 1 + layer 2 report, then the checkpoint line |
+| `r0 --bundle FILE` | an R0 consultation report from {intent, plan, answers}; no store is created |
+| `start --context ID --state FILE [--checkpoint LINE]` | begin a session: anchor on the checkpoint, or record an unanchored start |
+| `append --context ID --state FILE --objects FILE --operation-id ID` | commit control objects (intent, manifest, plan) after the admission checks; records come only from `ingest` |
+| `snapshot --root DIR --paths P [P ...]` | controlled reading of materials into store blobs; prints manifest entries and coverage gaps |
+| `assign --context ID --state FILE --actor NAME --spec-id ID --plan-revision N --via agent-tool --invocation-id ID [--authors-declared]` | build and commit an assignment whose condition bases come from the host profile and the dispatch record |
+| `packets --context ID --assignment ID --drop-root DIR --out FILE` | write the packet for an assignment (its obligations, snapshot paths, drop path) |
+| `supply --context ID --state FILE --assignment ID --source S --reason R [--contains-evaluation]` | commit material supplied to a reviewer after dispatch (another evaluation makes "no other evaluations seen" unmet) |
+| `ingest --context ID --state FILE --assignment ID --drop-root DIR [--digest HEX]` | read the drop file by bytes, derive the record and commit it in one call (the store re-derives it) |
+| `report --context ID --state FILE` | layer 1 + layer 2 report, ending with the checkpoint line |
 | `checkpoint --context ID` | the checkpoint line to hand to the user |
-| `export --context ID --out FILE` / `verify-export FILE [--checkpoint LINE]` / `import FILE --checkpoint LINE` | move a record between sessions or hosts |
+| `export --context ID --out FILE` / `verify-export FILE [--checkpoint LINE]` / `import FILE --state FILE --into DIR [--checkpoint LINE]` | move a record between sessions or hosts |

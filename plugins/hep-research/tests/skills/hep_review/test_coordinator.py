@@ -62,7 +62,7 @@ class Base(unittest.TestCase):
 
     def review(self, actor, body_fn, *, via="agent-tool", declared_digest=True, fidelity_override=None,
                authors_declared=True, supplementary=None, rev=1):
-        disp = {"via": via, "actor": actor, "authors_declared": authors_declared}
+        disp = {"via": via, "actor": actor, "authors_declared": authors_declared, "invocation_id": f"inv-{actor}"}
         asg = K.make_assignment(self.s, "ctx-1", HOST, disp, spec_id="spec-1", plan_revision=rev,
                                 supplementary=supplementary)
         C.append(self.s, self.session, [asg], f"op-asg-{asg['id']}")
@@ -193,7 +193,7 @@ class SubmissionsAreData(Base):
 
     def test_invalid_json_submission_keeps_raw_and_examines_nothing(self):
         self.seed()
-        disp = {"via": "agent-tool", "actor": "rev-1", "authors_declared": True}
+        disp = {"via": "agent-tool", "actor": "rev-1", "authors_declared": True, "invocation_id": "inv-rev-1"}
         asg = K.make_assignment(self.s, "ctx-1", HOST, disp, spec_id="spec-1", plan_revision=1)
         C.append(self.s, self.session, [asg], "op-a")
         drop = K.drop_path(self.drops, asg["id"])

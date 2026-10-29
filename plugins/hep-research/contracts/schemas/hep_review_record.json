@@ -16,6 +16,7 @@
   "actor": {"type": "string", "minLength": 1},
   "raw_submission_ref": {"$ref": "hep_review_definitions.json#/$defs/content_ref"},
   "submission_fidelity": {"enum": ["digest-bound", "file-transfer", "host-transcript", "transcribed", "mismatch"]},
+  "declared_digest": {"type": "string"},
   "answers": {"type": "array", "items": {"$ref": "#/$defs/answer"}},
   "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}},
   "attempts": {"type": "array", "items": {"$ref": "#/$defs/attempt"}},
@@ -75,6 +76,7 @@
                                "symbol": {"type": "string"}, "byte_range": {"type": "string"}},
                 "additionalProperties": false},
     "method": {"type": "string"},
+    "evidence_text": {"type": "string"},
     "evidence_ids": {"$ref": "#/$defs/deps"},
     "severity": {"enum": ["major", "minor"]},
     "depends_on": {"$ref": "#/$defs/deps"}

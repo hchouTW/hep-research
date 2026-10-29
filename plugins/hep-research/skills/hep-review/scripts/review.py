@@ -8,8 +8,15 @@ Commands (every one prints JSON with a "status" key; exit 0 ok, 1 negative verdi
   append --context ID --state FILE --objects FILE --operation-id ID
                                             commit a JSON list of objects after the store's admission checks
   snapshot --root DIR --paths P [P ...]     controlled reading of materials into store blobs; prints manifest entries
-  ingest --context ID --assignment ID --drop-root DIR [--digest HEX]
-                                            read a drop file by bytes, store it, print the record (not committed)
+  assign --context ID --state FILE --actor NAME --spec-id ID --plan-revision N --via agent-tool|same-context
+         [--invocation-id ID] [--authors-declared]
+                                            build and commit an assignment from the host profile (never by hand)
+  packets --context ID --assignment ID --drop-root DIR --out FILE
+                                            write the packet text for an assignment (snapshot paths, drop path)
+  supply --context ID --state FILE --assignment ID --source S --reason R [--contains-evaluation]
+                                            commit material supplied to a dispatched reviewer
+  ingest --context ID --state FILE --assignment ID --drop-root DIR [--digest HEX]
+                                            read a drop file by bytes, derive the record and commit it
   report --context ID --state FILE          layer 1 + layer 2 report, ending with the checkpoint line
   checkpoint --context ID                   the checkpoint line to hand to the user
   export --context ID --out FILE            export the head segment
@@ -26,6 +33,7 @@ import json
 import sys
 from pathlib import Path
 
+sys.dont_write_bytecode = True  # importing siblings and plugin packages leaves no __pycache__ (F-10)
 HERE = Path(__file__).resolve().parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(HERE.parents[2]))
@@ -79,7 +87,29 @@ def parser() -> argparse.ArgumentParser:
     sn = sub.add_parser("snapshot", help="capture materials")
     sn.add_argument("--root", required=True)
     sn.add_argument("--paths", nargs="+", required=True)
-    i = sub.add_parser("ingest", help="read a drop file")
+    asg = sub.add_parser("assign", help="build and commit an assignment from the host profile")
+    asg.add_argument("--context", required=True)
+    asg.add_argument("--state", required=True)
+    asg.add_argument("--actor", required=True)
+    asg.add_argument("--spec-id", required=True)
+    asg.add_argument("--plan-revision", type=int, required=True)
+    asg.add_argument("--via", required=True, choices=["agent-tool", "same-context", "other"])
+    asg.add_argument("--invocation-id", help="the host's dispatch record (Agent-tool invocation id)")
+    asg.add_argument("--authors-declared", action="store_true", help="the manifest's author lists are declared")
+    pk = sub.add_parser("packets", help="write the packet for an assignment")
+    pk.add_argument("--context", required=True)
+    pk.add_argument("--assignment", required=True)
+    pk.add_argument("--drop-root", required=True)
+    pk.add_argument("--out", required=True)
+    su = sub.add_parser("supply", help="commit material supplied to a dispatched reviewer")
+    su.add_argument("--context", required=True)
+    su.add_argument("--state", required=True)
+    su.add_argument("--assignment", required=True)
+    su.add_argument("--source", required=True)
+    su.add_argument("--reason", required=True)
+    su.add_argument("--contains-evaluation", action="store_true")
+    i = sub.add_parser("ingest", help="read a drop file, derive and commit the record")
+    i.add_argument("--state", required=True)
     i.add_argument("--context", required=True)
     i.add_argument("--assignment", required=True)
     i.add_argument("--drop-root", required=True)
@@ -142,11 +172,36 @@ def run(args) -> int:
             m = M.snapshot(args.root, args.paths, store.dir / "blobs")
             return emit({"status": "ok" if not m["coverage_gaps"] else "incomplete", **m}, 0 if not m["coverage_gaps"]
                         else 3)
-        if cmd == "ingest":
+        if cmd in ("ingest", "packets", "supply"):
             objs = [o for c in store.load_bundle(args.context)["commits"] for o in c["objects"]]
             asg = next(o for o in objs if o["record_kind"] == "assignment" and o["id"] == args.assignment)
+        if cmd == "ingest":  # parse and commit in one call: the record is never retyped (spec 12.4)
+            st = load_state(args.state)
             rec = K.ingest(store, args.context, asg, args.drop_root, args.digest)
-            return emit({"status": "ok", "fidelity": rec["submission_fidelity"], "record": rec}, 0)
+            res = C.append(store, st, [rec], f"op-ingest-{asg['id']}-{rec['raw_submission_ref']['digest'][:12]}")
+            save_state(args.state, st)
+            return emit({"status": "ok", "result": res.status, "head": res.head, "record_id": rec["id"],
+                         "fidelity": rec["submission_fidelity"], "limitations": rec["limitations"]}, 0)
+        if cmd == "assign":
+            st = load_state(args.state)
+            a = K.make_assignment(store, args.context, K.load_host_profile(),
+                                  {"via": args.via, "actor": args.actor, "authors_declared": args.authors_declared,
+                                   "invocation_id": args.invocation_id}, spec_id=args.spec_id,
+                                  plan_revision=args.plan_revision)
+            res = C.append(store, st, [a], f"op-assign-{a['id']}")
+            save_state(args.state, st)
+            return emit({"status": "ok", "assignment": a["id"], "conditions": a["conditions"], "head": res.head}, 0)
+        if cmd == "packets":
+            text = K.packet_for(store, args.context, asg, args.drop_root)
+            Path(args.out).write_text(text, encoding="utf-8")
+            return emit({"status": "ok", "packet": args.out, "drop": str(K.drop_path(args.drop_root, asg["id"]))}, 0)
+        if cmd == "supply":
+            st = load_state(args.state)
+            supplied = K.supply(store, args.context, asg, source=args.source, reason=args.reason,
+                           contains_evaluation=args.contains_evaluation)
+            res = C.append(store, st, [supplied], f"op-{supplied['id']}")
+            save_state(args.state, st)
+            return emit({"status": "ok", "supply": supplied["id"], "head": res.head}, 0)
         if cmd == "report":
             out = K.report(store, load_state(args.state), args.context)
             return emit({"status": "ok", "text": out["text"], "checkpoint": out["checkpoint"],

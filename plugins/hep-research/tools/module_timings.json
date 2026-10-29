@@ -352,6 +352,7 @@
   "tests.skills.hep_review.test_cli": 0.31,
   "tests.skills.hep_review.test_continuity_export": 0.44,
   "tests.skills.hep_review.test_coordinator": 0.17,
+  "tests.skills.hep_review.test_g1_review_fixes": 0.97,
   "tests.skills.hep_review.test_materials": 0.12,
   "tests.skills.hep_review.test_pilot_generator": 0.12,
   "tests.skills.hep_review.test_store": 0.67,

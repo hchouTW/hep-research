@@ -14,12 +14,10 @@ from pathlib import Path
 from contracts import hep_review as H
 from hep_review_support import continuity as C
 from hep_review_support import materials as M
+from hep_review_support import submissions as SUB
 from hep_review_support.store import AppendResult, Store, check_current_validator
 
 ASSETS = Path(__file__).resolve().parents[2] / "assets"
-SUBMISSION_FIELDS = {"assignment_id", "started_at", "ended_at", "answers", "suggested_obligations", "tools_used"}
-ANSWER_FIELDS = {"obligation_id", "outcome", "reasoning", "missing_inputs", "findings", "attempts", "evidence"}
-
 PACKET = """# hep-review packet {aid}
 
 You are a reviewer working in a fresh context. Rules:
@@ -41,11 +39,12 @@ You are a reviewer working in a fresh context. Rules:
 ## Submission (file transfer)
 Write one JSON file once, with your file-write tool, to `{drop}`:
 {{"assignment_id": "{aid}", "started_at": "...", "ended_at": "...",
- "answers": [{{"obligation_id": "...", "outcome": "supported|violated|undetermined|not-examined|not-applicable",
+ "answers": [{{"obligation_id": "...", "outcome": "supported|violated|undetermined|not-examined",
    "reasoning": "...", "missing_inputs": ["..."],
    "attempts": [{{"method": "...", "observation": "completed|failed|not-run", "tools": ["..."]}}],
    "evidence": [{{"requirement": "...", "summary": "..."}}],
-   "findings": [{{"id": "F1", "claim": "...", "element": "...", "evidence": "...", "severity": "major|minor"}}]}}],
+   "findings": [{{"id": "F1", "claim": "...", "element": "...", "evidence": "...", "severity": "major|minor",
+                 "locator": {{"material_id": "...", "lines": "12-14 or a JSON pointer such as /stated_results/x"}}}}]}}],
  "suggested_obligations": ["..."]}}
 Then, if you can, report the file's SHA-256 in your reply as `SHA256: <hex>`.
 """
@@ -74,25 +73,39 @@ def _authors(objs: list[dict]) -> set[str]:
     return out
 
 
+def non_author_condition(objs: list[dict], targets: list[str], actor: str, *, authors_declared: bool) -> dict:
+    """Non-author is declared only when every target material carries a declared (or observed) non-empty author list;
+    different names prove nothing (spec 4.3, 12.3; cases A13, review M1)."""
+    mats = {m["material_id"]: m for o in objs if o.get("record_kind") == "manifest" for m in o["materials"]}
+    known = [mats.get(t) for t in targets]
+    if not authors_declared or not known or any(m is None or not m.get("authors")
+                                                or m.get("authors_basis") not in ("declared", "observed")
+                                                for m in known):
+        return {"satisfied": None, "basis": "unknown"}
+    return {"satisfied": all(actor not in m["authors"] for m in known), "basis": "declared"}
+
+
 def make_assignment(store: Store, context_id: str, host: dict, dispatch: dict, *, spec_id: str, plan_revision: int,
                     qualifications: tuple[str, ...] = (), supplementary: list[dict] | None = None) -> dict:
-    """An assignment whose independence conditions carry the basis the host can actually provide (spec 4.3, 12.3).
-    `dispatch`: {"via": "agent-tool" | "same-context" | ..., "actor": ..., "authors_declared": bool}."""
+    """An assignment whose independence conditions carry only the basis the host can provide (spec 4.3, 12.2-12.3).
+    `dispatch`: {"via": "agent-tool" | "same-context" | ..., "actor", "authors_declared": bool, "invocation_id"}.
+    Fresh context is observed only with the host's dispatch record (the Agent-tool invocation id)."""
     objs = _objects(store, context_id)
     n = 1 + sum(o["record_kind"] == "assignment" for o in objs)
     actor = dispatch["actor"]
     caps = host["capabilities"]
-    if dispatch.get("via") == "agent-tool" and caps.get("fresh_context_subagents", {}).get("value") is True:
+    plan = _plan(objs, plan_revision)
+    spec = next(x for x in plan["assignment_specs"] if x["id"] == spec_id)
+    targets = sorted({t for o in plan["obligations"] if o["id"] in spec["obligation_ids"] for t in o.get("targets", [])})
+    invocation = dispatch.get("invocation_id")
+    if dispatch.get("via") == "agent-tool" and isinstance(invocation, str) and invocation \
+            and caps.get("fresh_context_subagents", {}).get("value") is True:
         fresh = {"satisfied": True, "basis": "observed"}
     elif dispatch.get("via") == "same-context":
         fresh = {"satisfied": False, "basis": "observed"}
     else:
         fresh = {"satisfied": None, "basis": "unknown"}
-    if not dispatch.get("authors_declared"):
-        non_author = {"satisfied": None, "basis": "unknown"}  # different names prove nothing (case A13)
-    else:
-        non_author = {"satisfied": actor not in _authors(objs), "basis": "declared"}
-    contamination = [dict(s) for s in (supplementary or []) if s.get("contains_evaluation")]
+    contamination = [dict(x) for x in (supplementary or []) if x.get("contains_evaluation")]
     if contamination:
         others = {"satisfied": False, "basis": "observed"}
     elif caps.get("filesystem_isolation", {}).get("value") is True:
@@ -103,12 +116,27 @@ def make_assignment(store: Store, context_id: str, host: dict, dispatch: dict, *
          "context_id": context_id, "plan_revision": plan_revision, "spec_id": spec_id, "actor": actor,
          "role": dispatch.get("role", "reviewer"), "qualified": {"satisfied": True, "basis": "declared"},
          "qualifications": list(qualifications),
-         "conditions": {"non-author": non_author, "fresh-context": fresh, "no-other-evaluations-seen": others},
-         "restrictions": [], "dispatch": {"via": dispatch.get("via"), "host": host.get("id")},
+         "conditions": {"non-author": non_author_condition(objs, targets, actor,
+                                                           authors_declared=bool(dispatch.get("authors_declared"))),
+                        "fresh-context": fresh, "no-other-evaluations-seen": others},
+         "restrictions": [], "dispatch": {"via": dispatch.get("via"), "host": host.get("id"),
+                                          "invocation_id": invocation},
+         "host_profile_digest": H.metadata_digest(host),
          "host_transcript_writable": caps.get("reviewer_can_write_transcript", {}).get("value")}
     if contamination:
         a["contamination"] = contamination
     return a
+
+
+def supply(store: Store, context_id: str, assignment: dict, *, source: str, reason: str,
+           contains_evaluation: bool) -> dict:
+    """Material supplied to an already dispatched reviewer (spec 12.3; case A30): committed and bound to the
+    assignment; when it contains another evaluation the projection turns "no other evaluations seen" unmet."""
+    objs = _objects(store, context_id)
+    n = 1 + sum(o["record_kind"] == "supply" for o in objs)
+    return {"protocol": H.PROTOCOL, "schema_version": H.SCHEMA_VERSION, "record_kind": "supply", "id": f"supply-{n}",
+            "context_id": context_id, "assignment_id": assignment["id"], "source": source, "reason": reason,
+            "contains_evaluation": bool(contains_evaluation)}
 
 
 def drop_path(drops_root: str | Path, assignment_id: str) -> Path:
@@ -145,6 +173,20 @@ def packet_text(spec: dict) -> str:
                          materials=mats, drop=spec["drop"])
 
 
+def packet_for(store: Store, context_id: str, assignment: dict, drops_root: str | Path) -> str:
+    """The packet of an assignment: its spec's obligations, the snapshot paths of their materials, its drop path."""
+    objs = _objects(store, context_id)
+    plan = _plan(objs, assignment["plan_revision"])
+    spec = next(x for x in plan["assignment_specs"] if x["id"] == assignment["spec_id"])
+    obligations = [o for o in plan["obligations"] if o["id"] in spec["obligation_ids"]]
+    man = next(o for o in objs if o["record_kind"] == "manifest" and o["id"] == plan["manifest_id"])
+    wanted = {t for o in obligations for t in o.get("targets", [])}
+    mats = [f"{m['material_id']}: {store.dir / 'blobs' / m['raw_ref']['digest']}" for m in man["materials"]
+            if m["material_id"] in wanted]
+    return packet_text({"assignment_id": assignment["id"], "obligations": obligations, "materials": mats,
+                        "drop": str(drop_path(drops_root, assignment["id"]))})
+
+
 def _plan(objs: list[dict], revision: int) -> dict:
     return next(o for o in objs if o["record_kind"] == "plan" and o["revision"] == revision)
 
@@ -155,87 +197,11 @@ def _manifest_digests(objs: list[dict], plan: dict) -> dict:
 
 
 def parse_submission(store: Store, context_id: str, assignment: dict, raw: bytes, raw_ref: dict, fidelity: str,
-                     host: dict | None = None) -> dict:
-    """Turn the stored raw bytes into a review record. Strictly parsed; unknown fields ignored and listed; nothing in
-    the submission can change the record's type, actor, assignment or the plan (case P09)."""
+                     host: dict | None = None, declared_digest: str | None = None) -> dict:
+    """The review record the stored raw bytes give (submissions.parse); the store re-derives it at admission."""
     host = host or load_host_profile()
-    rid = f"rec-{assignment['id']}"
-    objs = _objects(store, context_id)
-    plan = _plan(objs, assignment["plan_revision"])
-    obligations = {o["id"]: o for o in plan["obligations"]}
-    digests = _manifest_digests(objs, plan)
-    limitations: list[str] = []
-    answers, findings, attempts, evidence = [], [], [], []
-    suggested: list[str] = []
-    try:
-        sub = H.ingest_json(raw)
-    except H.IngestError as e:
-        sub = None
-        limitations.append(f"submission refused by strict ingestion ({e.code}); raw bytes kept, nothing examined")
-    if isinstance(sub, dict):
-        ignored = sorted(set(sub) - SUBMISSION_FIELDS)
-        if ignored:
-            limitations.append(f"ignored fields (data, not instructions): {ignored}")
-        if sub.get("assignment_id") != assignment["id"]:
-            limitations.append("assignment_id does not name this assignment; nothing examined")
-            sub = {}
-        suggested = [s for s in sub.get("suggested_obligations", []) if isinstance(s, str)]
-        for i, a in enumerate(sub.get("answers", []) if isinstance(sub.get("answers"), list) else [], 1):
-            if not isinstance(a, dict) or a.get("obligation_id") not in obligations:
-                limitations.append(f"answer {i} names no obligation of plan revision {plan['revision']}; skipped")
-                continue
-            oid = a["obligation_id"]
-            extra = sorted(set(a) - ANSWER_FIELDS)
-            if extra:
-                limitations.append(f"answer {i}: ignored fields {extra}")
-            verdict = a.get("outcome") if a.get("outcome") in H.OUTCOMES else "not-examined"
-            if verdict == "not-applicable":
-                verdict = "not-examined"
-                limitations.append(f"answer {i}: not-applicable needs a structured discharge; recorded not-examined")
-            att_ids, ev_ids, f_ids = [], [], []
-            for j, t in enumerate(a.get("attempts", []) if isinstance(a.get("attempts"), list) else [], 1):
-                att = {"id": f"{rid}-A{i}-{j}", "obligation_id": oid, "method": str(t.get("method") or "unstated"),
-                       "observation": t.get("observation") if t.get("observation") in H.METHOD_OBSERVATIONS
-                       else "not-run", "executor": host.get("reviewer_executor", "reviewer"),
-                       "environment_refs": [], "depends_on": []}
-                if isinstance(t.get("tools"), list) and all(isinstance(x, str) for x in t["tools"]):
-                    att["tools"] = list(t["tools"])  # a missing tools field stays unrecorded, never []
-                attempts.append(att)
-                att_ids.append(att["id"])
-            for j, e in enumerate(a.get("evidence", []) if isinstance(a.get("evidence"), list) else [], 1):
-                if isinstance(e, dict) and isinstance(e.get("requirement"), str):
-                    ev = {"id": f"{rid}-E{i}-{j}", "obligation_id": oid, "requirement": e["requirement"],
-                          "content_ref": dict(raw_ref, logical_id=f"{rid}-E{i}-{j}"), "depends_on": list(att_ids)}
-                    evidence.append(ev)
-                    ev_ids.append(ev["id"])
-            for j, f in enumerate(a.get("findings", []) if isinstance(a.get("findings"), list) else [], 1):
-                if not isinstance(f, dict):
-                    continue
-                loc = f.get("locator") if isinstance(f.get("locator"), dict) else None
-                if loc is None or loc.get("material_id") not in digests:
-                    target = (obligations[oid].get("targets") or [None])[0]
-                    loc = {"material_id": target, "digest": digests.get(target)}
-                    limitations.append(f"finding {i}.{j}: no valid locator given; located at the obligation's target")
-                fnd = {"id": f"{rid}-F{i}-{j}", "obligation_id": oid, "claim": str(f.get("claim") or "unstated"),
-                       "element": str(f.get("element") or "unstated"),
-                       "locator": {"material_id": loc["material_id"], "digest": loc["digest"]},
-                       "method": att_ids and attempts[-1]["method"] or "unstated", "depends_on": list(ev_ids)}
-                if f.get("severity") in ("major", "minor"):
-                    fnd["severity"] = f["severity"]
-                findings.append(fnd)
-                f_ids.append(fnd["id"])
-            answers.append({"id": f"{rid}-N{i}", "obligation_id": oid, "verdict": verdict, "finding_ids": f_ids,
-                            "attempt_ids": att_ids, "evidence_ids": ev_ids, "cited_materials": [],
-                            "missing_inputs": [str(m) for m in a.get("missing_inputs", []) if isinstance(m, str)],
-                            "depends_on": list(ev_ids) or list(att_ids),
-                            "reasoning": str(a.get("reasoning", ""))})
-    rec = {"protocol": H.PROTOCOL, "schema_version": H.SCHEMA_VERSION, "record_kind": "record", "id": rid,
-           "context_id": context_id, "type": "submission", "plan_revision": assignment["plan_revision"],
-           "assignment_id": assignment["id"], "actor": assignment["actor"], "raw_submission_ref": raw_ref,
-           "submission_fidelity": fidelity, "answers": answers, "findings": findings, "attempts": attempts,
-           "evidence": evidence, "judgments": [], "suggested_obligations": suggested, "suspected_conflicts": [],
-           "responses": [], "limitations": limitations}
-    return rec
+    return SUB.parse(_objects(store, context_id), assignment, raw, raw_ref, fidelity,
+                     executor=host.get("reviewer_executor", "reviewer"), declared_digest=declared_digest)
 
 
 def ingest(store: Store, context_id: str, assignment: dict, drops_root: str | Path,
@@ -244,7 +210,8 @@ def ingest(store: Store, context_id: str, assignment: dict, drops_root: str | Pa
     sub = M.ingest_submission(drops_root, f"{assignment['id']}/submission.json", declared_digest)
     digest = store.put_blob(sub["raw"])
     ref = M.raw_ref(f"raw-{assignment['id']}", digest)
-    return parse_submission(store, context_id, assignment, sub["raw"], ref, sub["submission_fidelity"])
+    return parse_submission(store, context_id, assignment, sub["raw"], ref, sub["submission_fidelity"],
+                            declared_digest=declared_digest if sub["submission_fidelity"] == "mismatch" else None)
 
 
 def record_from_transcript(store: Store, context_id: str, assignment: dict, text: str) -> dict:
@@ -256,9 +223,10 @@ def record_from_transcript(store: Store, context_id: str, assignment: dict, text
 
 
 def report(store: Store, state: C.CoordinatorState, context_id: str, *, validator_version: str = H.LATEST_VALIDATOR,
-           store_persistence: str = "persistent", exported: bool = False) -> dict:
+           store_persistence: str | None = None, exported: bool = False, host: dict | None = None) -> dict:
     """Layer 1 (pure projection) + layer 2 (attestation with its basis), then the checkpoint line (spec 7.6, 11.4).
     The report is never written to the log and never moves the head."""
+    host = host or load_host_profile()
     check_current_validator(validator_version)
     bundle = store.load_bundle(context_id)
     layer1 = H.project(H.validate(bundle, validator_version), validator_version)
@@ -267,9 +235,28 @@ def report(store: Store, state: C.CoordinatorState, context_id: str, *, validato
            "r3_state_matches": None}
     decision = H.decide_summary(layer1, att)
     disclosure = list(decision["disclosure"])
-    if store_persistence == "ephemeral" and not exported:
+    if cont["status"] == "broken":
+        disclosure.append(f"broken case: {cont['basis'].get('case')}")
+    seg = next((x for x in store.segments(context_id) if x["segment_id"] == bundle["segment_id"]), {})
+    origin = seg.get("origin") or {}
+    if "forked_from" in origin:
+        disclosure.append(f"the head segment {bundle['segment_id']} is a fork of {origin['forked_from']['segment_id']} "
+                          f"at seq {origin['forked_from']['seq']} after broken continuity "
+                          f"({origin.get('broken_case')}); excluded commits kept as evidence: "
+                          f"{origin.get('excluded_commits')}")
+    if "migrated_from" in origin:
+        disclosure.append(f"the head segment {bundle['segment_id']} is a schema migration of "
+                          f"{origin['migrated_from']['segment_id']} at seq {origin['migrated_from']['seq']}")
+    persistence = store_persistence
+    if persistence is None:
+        cap = host["capabilities"].get("store_persistence", {})
+        persistence = "persistent" if cap.get("value") is True and cap.get("basis") == "observed" else "unknown"
+    if persistence == "ephemeral" and not exported:
         disclosure.append("the store does not persist on this host and no export was made: the record cannot be "
                           "continued in another session")
+    elif persistence == "unknown":
+        disclosure.append("store persistence across sessions is not yet observed on this host: keep the checkpoint "
+                          "line, and export the record before the session ends if the host may be wiped")
     text = H.render_report(H.encode(layer1), att, bundle=bundle, validator_version=validator_version)
     extra = [f"disclosure: {d}" for d in disclosure if d not in decision["disclosure"]]
     checkpoint = C.checkpoint_line(store, context_id)
@@ -277,7 +264,7 @@ def report(store: Store, state: C.CoordinatorState, context_id: str, *, validato
     return {"layer1": layer1, "attestation": {"report_mode": "current", "validator_version": validator_version,
                                               "head_continuity": cont, "output_summary": decision["output_summary"],
                                               "record_integrity": decision["record_integrity"],
-                                              "disclosure": disclosure},
+                                              "store_persistence": persistence, "disclosure": disclosure},
             "text": text, "checkpoint": checkpoint}
 
 
@@ -333,6 +320,10 @@ def add_obligation(store: Store, state: C.CoordinatorState, context_id: str, obl
     """A new critical dependency found during review becomes a new plan revision within the intent's authority
     (case A09); the store's admission checks still refuse any downgrade."""
     objs = _objects(store, context_id)
+    intent = next(o for o in objs if o["record_kind"] == "intent")
+    if authority != intent["id"]:
+        raise ValueError(f"authority {authority!r} is not the intent ({intent['id']}): extending obligations needs the "
+                         "intent's authority")
     head = max((o for o in objs if o["record_kind"] == "plan"), key=lambda o: o["revision"])
     rev = copy.deepcopy(head)
     rev.update(id=f"plan-{head['revision'] + 1}", revision=head["revision"] + 1, parent_revision=head["revision"],
@@ -355,11 +346,12 @@ def budget_check(limits: dict, dispatched: list[str], planned: list[str]) -> dic
 
 def marginal_value(expected: dict, observed: dict) -> dict:
     """Expected value before adding a reviewer or method, observed delta after (spec 16). Restating the same source
-    is no new independent evidence; a confirming second reviewer still completes separation (cases P20, P30)."""
-    independent = bool(observed.get("new_evidence")) and not observed.get("same_source_as")
-    out = {"expected": expected, "observed": observed, "new_independent_evidence": independent,
-           "separation_completed": independent and bool(observed.get("confirmed") or observed.get("new_evidence")),
-           "value_kept": True}
-    out["note"] = ("restates the same source: no new independent evidence" if observed.get("same_source_as")
-                   else "independent evidence recorded; confirmation keeps its value")
-    return out
+    is no new independent evidence; an independent confirmation completes separation even without new evidence, and
+    its value is kept (cases P20, P30)."""
+    same = bool(observed.get("same_source_as"))
+    new_evidence = bool(observed.get("new_evidence")) and not same
+    return {"expected": expected, "observed": observed, "new_independent_evidence": new_evidence,
+            "separation_completed": not same and bool(observed.get("confirmed") or observed.get("new_evidence")),
+            "value_kept": True,
+            "note": "restates the same source: no new independent evidence" if same
+            else "independent review recorded; a confirmation keeps its value"}

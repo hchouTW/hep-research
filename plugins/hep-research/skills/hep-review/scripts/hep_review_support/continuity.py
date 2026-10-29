@@ -110,6 +110,14 @@ def head_continuity(store: Store, st: CoordinatorState) -> dict:
         return {"status": "broken", "basis": basis | {"case": "foreign-segment",
                                                       "reason": "the head moved to a segment this session did not "
                                                                 "open"}}
+    # every digest this session wrote must still be on the anchor segment (review B1: a rollback over own commits)
+    lost_own = [d for d in st.written if (store.commit_by_digest(st.context_id, d) or {}).get("segment_id")
+                != a["segment_id"]]
+    if lost_own:
+        return {"status": "broken", "basis": basis | {"case": "saved-value-not-on-chain", "saved_not_on_chain": lost_own}}
+    if st.expected_head is not None and st.written and head["seq"] < st.expected_head.get("seq", 0):
+        return {"status": "broken", "basis": basis | {"case": "head-rolled-back", "reason": "the head is behind the "
+                                                      "last commit this session wrote"}}
     after = []
     for seq in range(a["seq"] + 1, head["seq"] + 1):
         x = store.commit_at(st.context_id, a["segment_id"], seq)
@@ -125,7 +133,9 @@ def head_continuity(store: Store, st: CoordinatorState) -> dict:
 
 
 def _next_segment(store: Store, context_id: str) -> str:
-    return f"seg-{len(store.segments(context_id)) + 1}"
+    """A segment id not already present (review m4: an imported store may start at any segment number)."""
+    used = [int(m.group(1)) for x in store.segments(context_id) if (m := re.fullmatch(r"seg-(\d+)", x["segment_id"]))]
+    return f"seg-{max(used, default=0) + 1}"
 
 
 def _open_segment(store: Store, st: CoordinatorState, objects: list[dict], origin: dict, operation_id: str,
@@ -146,20 +156,30 @@ def _open_segment(store: Store, st: CoordinatorState, objects: list[dict], origi
 
 
 def fork(store: Store, st: CoordinatorState, last_trusted_seq: int, operation_id: str) -> AppendResult:
-    """Recovery from broken: a new segment from the last trusted head; the old segment stays as evidence. The new
-    segment anchors on its genesis only when the fork point is this session's trusted anchor."""
+    """Recovery from broken continuity only: a new segment from the last trusted head (the anchor, or the last
+    commit this session wrote that is still on the chain), never earlier, so no own negative record can be forked
+    away (review B2). The old segment stays as evidence; the genesis records the broken case and excluded commits."""
+    status = head_continuity(store, st)
+    if status["status"] != "broken":
+        raise ContinuityBroken("fork is the recovery from broken continuity; continuity is " + status["status"])
     seg = (st.anchor or {}).get("segment_id") or store.head(st.context_id)["segment_id"]
     src = store.commit_at(st.context_id, seg, last_trusted_seq)
     if src is None:
         raise KeyError(f"seq {last_trusted_seq} is not on {seg}")
+    own = [store.commit_by_digest(st.context_id, d) for d in st.written]
+    own_seqs = [x["seq"] for x in own if x and x["segment_id"] == seg]
+    last_trusted = max(own_seqs + ([st.anchor["seq"]] if st.anchor and st.anchor["segment_id"] == seg else []),
+                       default=None)
+    if last_trusted is None or last_trusted_seq != last_trusted:
+        raise ValueError(f"fork only from the last trusted head (seq {last_trusted}), not seq {last_trusted_seq}")
     bundle = store.load_bundle(st.context_id, last_trusted_seq, segment_id=seg)
     objects = [o for c in bundle["commits"] for o in c["objects"]]
     top = store.load_bundle(st.context_id, segment_id=seg)
     excluded = [c["digest"] for c in top["commits"] if c["commit"]["seq"] > last_trusted_seq]
     origin = {"forked_from": {"segment_id": seg, "seq": last_trusted_seq, "commit_digest": src["digest"]},
-              "excluded_commits": excluded}
-    trusted = st.anchor is not None and st.anchor["segment_id"] == seg and st.anchor["seq"] == last_trusted_seq \
-        and st.anchor["commit_digest"] == src["digest"]
+              "excluded_commits": excluded, "broken_case": status["basis"].get("case")}
+    trusted = st.anchor is not None and st.anchor["segment_id"] == seg and (
+        st.anchor["seq"] == last_trusted_seq or src["digest"] in st.written)
     return _open_segment(store, st, objects, origin, operation_id, trusted)
 
 
@@ -171,7 +191,13 @@ def migrate(store: Store, st: CoordinatorState, transform, operation_id: str) ->
         raise ContinuityBroken("fork before migrating")
     head = store.head(st.context_id)
     bundle = store.load_bundle(st.context_id)
-    objects = transform([o for c in bundle["commits"] for o in c["objects"]])
+    source = [o for c in bundle["commits"] for o in c["objects"]]
+    objects = transform(source)
+    carried = {(o.get("record_kind"), o.get("id")) for o in objects}
+    dropped = [o["id"] for o in source if o["record_kind"] in ("record", "assignment", "supply")
+               and (o["record_kind"], o["id"]) not in carried]
+    if dropped:
+        raise ValueError(f"a migration must carry every record, assignment and supplied material; dropped {dropped}")
     origin = {"migrated_from": {"segment_id": head["segment_id"], "seq": head["seq"],
                                 "commit_digest": head["commit_digest"]}}
     return _open_segment(store, st, objects, origin, operation_id, status == "verified")

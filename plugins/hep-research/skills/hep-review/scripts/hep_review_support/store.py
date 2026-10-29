@@ -21,12 +21,14 @@ from pathlib import Path
 from contracts import hep_review as H
 from contracts.schema import SCHEMA_DIR as SCHEMAS
 from contracts.schema import validate as schema_validate
+from hep_review_support import submissions as SUB
 
 UNSUPPORTED_FS = {"nfs", "nfs4", "cifs", "smbfs", "smb", "smb2", "smb3", "afpfs", "webdav", "9p", "virtiofs",
                   "osxfuse", "macfuse", "sshfs"}
 SYNC_MARKERS = ("Library/Mobile Documents", "Library/CloudStorage", "Dropbox", "OneDrive", "Google Drive",
                 "GoogleDrive", "iCloud Drive")
 APPROVED_VALIDATORS = (H.LATEST_VALIDATOR,)
+HOST_PROFILE = Path(__file__).resolve().parents[2] / "assets" / "host_profile.json"
 DB_NAME = "hep-review.sqlite3"
 BUSY_TIMEOUT_MS = 5000
 
@@ -112,9 +114,21 @@ def filesystem_type(path: str | Path, *, mounts_text: str | None = None, platfor
     return fstype
 
 
+def _resolved(path: str | Path) -> str:
+    """The real path of the nearest existing ancestor, plus the rest: a symlink into a synced or network folder is
+    judged by where it leads (review M3)."""
+    p = Path(path).absolute()
+    rest: list[str] = []
+    while not p.exists() and p != p.parent:
+        rest.insert(0, p.name)
+        p = p.parent
+    return str(Path(os.path.realpath(p)).joinpath(*rest))
+
+
 def check_location(path: str | Path, *, mounts_text: str | None = None, platform: str | None = None) -> dict:
-    """Filesystem type and sync status of an intended store location (spec 11.1). Unknown type -> unsupported."""
-    p = str(path)
+    """Filesystem type and sync status of an intended store location (spec 11.1), judged on the resolved path.
+    Unknown type -> unsupported."""
+    p = _resolved(path)
     fs = filesystem_type(p, mounts_text=mounts_text, platform=platform)
     sync = any(m in p for m in SYNC_MARKERS)
     if fs is None:
@@ -169,13 +183,15 @@ def _raw_refs(value):
 class Store:
     """The commit log of every context in one directory: <dir>/hep-review.sqlite3 and <dir>/blobs/<sha256>."""
 
-    def __init__(self, directory: str | Path, *, location: dict | None = None):
+    def __init__(self, directory: str | Path, *, location: dict | None = None, host_profile: dict | None = None):
         directory = Path(directory)
         loc = location if location is not None else check_location(directory.parent if not directory.exists()
                                                                     else directory)
         if not loc.get("supported"):
             raise StoreLocationRefused(f"{loc.get('path')}: {loc.get('reason')} (no live backend; no JSON fallback)")
         self.location = loc
+        self.host = host_profile if host_profile is not None else json.loads(HOST_PROFILE.read_text("utf-8"))
+        self.host_digest = H.metadata_digest(self.host)
         self.dir = directory
         (self.dir / "blobs").mkdir(parents=True, exist_ok=True)
         self.conn = sqlite3.connect(self.dir / DB_NAME, isolation_level=None, timeout=BUSY_TIMEOUT_MS / 1000)
@@ -243,6 +259,11 @@ class Store:
                 for s, g, o in self.conn.execute("SELECT segment_id, genesis_digest, origin FROM segments WHERE "
                                                  "context_id=? ORDER BY rowid", (context_id,))]
 
+    def commit_by_digest(self, context_id: str, digest: str) -> dict | None:
+        row = self.conn.execute("SELECT segment_id, seq FROM commits WHERE context_id=? AND digest=?",
+                                (context_id, digest)).fetchone()
+        return None if row is None else {"segment_id": row[0], "seq": row[1]}
+
     def commit_at(self, context_id: str, segment_id: str, seq: int) -> dict | None:
         row = self.conn.execute("SELECT digest, header FROM commits WHERE context_id=? AND segment_id=? AND seq=?",
                                 (context_id, segment_id, seq)).fetchone()
@@ -299,9 +320,60 @@ class Store:
                 if p is None or o.get("spec_id") not in {s.get("id") for s in p.get("assignment_specs", [])}:
                     errs.append(_err("assignment.binding", "the assignment names no spec of a committed plan "
                                        "revision"))
+                errs.extend(self._assignment_bases(o))
+            if kind == "record":
+                errs.extend(self._derived(o, prior))
+            if kind == "supply" and not any(x.get("record_kind") == "assignment" and x.get("id") == o.get(
+                    "assignment_id") for x in prior):
+                errs.append(_err("supply.binding", "supplied material names no committed assignment"))
             seen[key] = H.metadata_digest(o)
             prior.append(o)
         return errs
+
+    def _assignment_bases(self, a: dict) -> list[dict]:
+        """Condition bases may not exceed what the bound host profile can observe (spec 4.3, 12.2; review B3)."""
+        errs = []
+        caps = self.host.get("capabilities", {})
+        if a.get("host_profile_digest") != self.host_digest:
+            errs.append(_err("assignment.host_profile", "the assignment is not bound to this store's host profile"))
+        cond = a.get("conditions", {})
+        others = cond.get("no-other-evaluations-seen", {})
+        if others.get("basis") == "observed" and others.get("satisfied") is True \
+                and caps.get("filesystem_isolation", {}).get("value") is not True:
+            errs.append(_err("assignment.basis_exceeds_host", "no-other-evaluations-seen cannot be observed without "
+                             "observed filesystem isolation; on this host it is advisory"))
+        fresh = cond.get("fresh-context", {})
+        dispatch = a.get("dispatch") or {}
+        if fresh.get("basis") == "observed" and fresh.get("satisfied") is True and not (
+                dispatch.get("via") == "agent-tool" and isinstance(dispatch.get("invocation_id"), str)
+                and dispatch["invocation_id"] and caps.get("fresh_context_subagents", {}).get("value") is True):
+            errs.append(_err("assignment.basis_exceeds_host", "an observed fresh context needs the host's dispatch "
+                             "record (agent-tool invocation id)"))
+        if cond.get("non-author", {}).get("basis") == "observed":
+            errs.append(_err("assignment.basis_exceeds_host", "authorship is declared, never observed by this host"))
+        return errs
+
+    def _derived(self, rec: dict, prior: list[dict]) -> list[dict]:
+        """A review record must be exactly what its stored raw submission gives (spec 12.4; review B4). Only
+        submission records have a raw-derivation path in this version; others are refused until one exists."""
+        if rec.get("type") != "submission":
+            return [_err("record.type_not_derivable", f"{rec.get('type')} records have no raw-derivation path yet "
+                         "(T04); they cannot be committed")]
+        asg = next((x for x in prior if x.get("record_kind") == "assignment" and x.get("id") == rec.get(
+            "assignment_id")), None)
+        ref = rec.get("raw_submission_ref") or {}
+        if asg is None or self.blob_status(str(ref.get("digest"))) != "ok":
+            return []  # binding and blob errors are reported by their own checks
+        try:
+            expected = SUB.parse(prior, asg, self.read_blob(ref["digest"]), ref, rec.get("submission_fidelity"),
+                                 executor=self.host.get("reviewer_executor", "reviewer"), record_id=rec.get("id"),
+                                 declared_digest=rec.get("declared_digest"))
+        except (StopIteration, KeyError, TypeError):
+            return [_err("record.not_derived_from_raw", "the record's plan or manifest cannot be found")]
+        if H.encode(expected) != H.encode(rec):
+            return [_err("record.not_derived_from_raw", "the record differs from what its stored raw submission "
+                         "gives: it was edited or retyped")]
+        return []
 
     def append(self, context_id: str, objects: list[dict], expected_head: dict | None, operation_id: str, *,
                writer_session_id: str, validator_version: str = H.LATEST_VALIDATOR,

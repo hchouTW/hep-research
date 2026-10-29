@@ -207,7 +207,7 @@ class CommitLog(StoreCase):
         b2 = self.s.load_bundle("ctx-1")
         self.assertEqual(b2["blob_checks"][d], "changed")
         v = H.validate(b2, H.LATEST_VALIDATOR)
-        self.assertIn("E-rec-1", v["quarantined_items"])
+        self.assertIn("rec-1-E1-1", v["quarantined_items"])
         self.assertTrue((self.dir / "blobs" / d).read_bytes() == b"changed after commit")  # never back-filled
 
     def test_n07_reading_and_exporting_do_not_move_the_head(self):
