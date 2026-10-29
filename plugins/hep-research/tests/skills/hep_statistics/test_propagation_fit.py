@@ -19,9 +19,10 @@ compares it with the record. C2U's family calibration was refused (recorded, ass
 tests/adapters/fixtures/cr_propagation/c2uf/usine-two-dataset-family-study.json): B/C and 10Be/9Be from one USINE run
 per point, BIG and SLIM fitted with the provider; the recorded polynomial response model was refused (0.452 sigma >
 0.05). C2UF-1 is met in the emulator study (usine_emulator_family_study.py, fixture usine-emulator-family-study.json,
-decision A1.14): a Gaussian-process emulator of USINE validated on 40 held-out USINE runs (largest error 0.0038 sigma),
-its error in the covariance, BIG and SLIM fitted with the emulator provider and calibrated with 200 toys each, BIG
-surviving. With HEP_USINE_LIVE_TEST=1 live tests rerun the truth point (one USINE run) and compare the emulator with
+decision A1.14; since L1, decision B1.3, K4's retraining with the kernel condition bound 1e10 and V_A_kms declared
+enters_squared): a Gaussian-process emulator of USINE validated on 40 held-out USINE runs (largest error 0.0032 sigma),
+its error in the covariance, BIG and SLIM fitted with the emulator provider and calibrated with 200 toys each (no
+failed toy), BIG surviving. With HEP_USINE_LIVE_TEST=1 live tests rerun the truth point (one USINE run) and compare the emulator with
 two fresh USINE runs.
 """
 import copy
@@ -1117,6 +1118,23 @@ class UsineEmulatorFamilies(unittest.TestCase):
         self.assertEqual(self.res["families"]["surviving"], self.cal["surviving"])
         self.assertGreater(entries["SLIM"]["delta_chi2"], 20.0)
 
+    def test_l1_portable_model_and_squared_va(self):
+        """L1-2 (VALIDATION.md CRPROP-L1): the fixture is the model trained with the kernel condition bound 1e10, its
+        k = 4 confirmation over the toy domain passed, V_A_kms is declared enters_squared, and BIG's toy fits that
+        failed in V_A went through the V_A^2 retries (recorded per toy as square_retry)."""
+        model = json.loads((TWO_DATASET_RECORD.parent / self.doc["emulator"]["model"]).read_text(encoding="utf-8"))
+        self.assertEqual(self.doc["emulator"]["max_condition"], 1e10)
+        self.assertEqual(model["training"]["max_condition"], 1e10)
+        for comp in model["components"]:
+            self.assertLessEqual(comp["condition_number"], 1e10 * (1 + 1e-6))
+        conf = self.doc["emulator"]["confirmation"]
+        self.assertTrue(conf["passed"])
+        self.assertLessEqual(conf["max_error_over_sigma"], conf["tolerance"])
+        self.assertIs(self.doc["config"]["parameters"]["V_A_kms"]["enters_squared"], True)
+        retried = [r for e in self.cal["families"] for r in e["rows"] if r.get("square_retry")]
+        self.assertTrue(retried)
+        self.assertTrue(all(r["square_retry"] == ["BIG"] for r in retried))
+
     def test_statistical_result_validates(self):
         import propagation_fit as pf
         from contracts.validate import validate_artifact
@@ -1146,13 +1164,7 @@ class UsineEmulatorFamilies(unittest.TestCase):
                     os.environ["HEP_USINE_RUN_DIR"] = old
             self.assertEqual(sent, 2)
             artifact = TWO_DATASET_RECORD.parent / self.doc["emulator"]["ml_artifact"]
-            try:
-                emu_reg = study.emulator_registry(str(registry), artifact, work / "emulator-registry.json")
-            except SystemExit as exc:   # decision A1.21: skip on the provider's self-check refusal only
-                if "does not reproduce its self-check predictions" not in str(exc):
-                    raise
-                self.skipTest("decision A1.21: the C2UF emulator fixture is not portable off its training platform "
-                              f"(macOS); the provider refused it: {exc}")
+            emu_reg = study.emulator_registry(str(registry), artifact, work / "emulator-registry.json")
             emu = study.emulator_values(emu_reg, artifact, [r["point"] for r in rows])
             nbc = 15
             for u, e in zip(usine, emu):

@@ -7918,3 +7918,46 @@ EDM is invariant to leading order under a smooth reparametrization at an interio
 | If B passes | B replaces the C2UF fixtures (model, ml-artifact, record); the A1.21 skips are removed; the drift simulation (`$CRPROP_OUT/k4/scripts/drift.py`, 2 seeds x 60 trials) must give margin >= 10 |
 | If B fails | nothing is swapped; numbers and attribution recorded; PARTIAL. Nothing is tuned after a rerun |
 | USINE | expected 0 runs (all points cached); cap 60 |
+
+### Results (L1-1 checks and the C2UF-1 rerun, L1-2)
+
+L1-1 checks (code at 30a5205c, method committed at c8685c5d before any rerun): `examples/propagation-fit/run.py` on
+the base f0f424da and on L1, both exit 0; of its 25 JSON outputs 22 are identical and 3 differ only in absolute plugin
+paths, `report.md` identical (`$CRPROP_OUT/l1/examples/compare.txt`). hep_statistics tests: 354 run, OK (27 skipped,
+live or optional). New `SquaredParameterRetry` tests on a SYNTHETIC stub (prediction linear in a, b and v^2, v nearly
+degenerate with b): fits failing in v converge after the v^2 retries at the exact bounded minimum (lsq_linear,
+chi2 within 1e-6 relative), fits converging in v are bit-identical with and without the declaration, a first attempt
+refused out of domain is retried, and the declaration is refused off a linear axis from 0.
+
+C2UF-1 rerun (the pre-declared plan above; records `$CRPROP_OUT/l1/emu-a114/record/` and `$CRPROP_OUT/l1/emu-k4/record/`;
+emulator B retrained in L1 byte-identical to K4's model-0, sha256 9b95e746..., holdout 0.0032 and confirmation 0.0226
+sigma reproduced from the cache, 0 USINE runs):
+
+| Item | A old (C2UF, committed) | A new (L1) | B old (K4 attempt) | B new (L1) |
+|---|---|---|---|---|
+| Model | `+model.0a8dc86fdf16` | same | `+model.9b95e7465422` | same |
+| BIG fit | converged, chi2 1.3e-8 | identical (fit_family unchanged) | converged, chi2 1.1e-8 | identical |
+| SLIM fit | converged, chi2 23.9272 | identical | converged, chi2 23.9274 | identical |
+| BIG's toys | 200, 0 failed, p 1.0 (200/200), survives | 200, 0 failed, p 1.0 (200/200), survives; 3 toys used the V_A^2 retries | 200, 0 failed, p 1.0, survives | 200, 0 failed, p 1.0 (200/200), survives; 1 retried |
+| SLIM's toys | 200, 3 failed (2 out of domain, 1 restart cap), p < 0.0151 (0/197), excluded | 200, **0 failed**, p < 0.0149 (0/200, 95% upper bound), excluded; 11 retried | **stopped at the 2% limit after 37** (5 failed: 4 restart cap, 1 out of domain) | 200, **0 failed**, p < 0.0149 (0/200), excluded; 20 retried |
+| Largest toy delta chi2 under SLIM | 14.68 | 14.68 | - | 14.68 |
+| C2UF-1 | MET | MET | NOT MET | **MET** |
+
+Toy fits that converged in V_A are bit-identical to the old records (A: 197 of BIG's and 189 of SLIM's toy rows;
+B: 199 and all 31 comparable rows). Toys that converged before only after a random restart in V_A and now went through
+the V_A^2 retries changed chi2 by at most 6e-6 relative (A) and 2e-11 (B). Every previously failed toy now converges:
+A's toys 10, 95, 111 and B's toys 3, 5, 10, 31, 36 (BIG's fits; toy delta chi2 0.003 to 2.26, far below SLIM's 23.93).
+
+Swap (allowed by B1.3 since C2UF-1 passes on B): the C2UF fixtures `usine-emulator-family-study.json`,
+`emulator-model.json` and `emulator.ml-artifact.json` are B's (the study's `train` step now defaults to
+`--max-condition 1e10` and reproduces the committed model byte for byte from the cache: `$CRPROP_OUT/l1/emu-repro/`).
+The A1.21 skips in `EmulatorPerModelDeclaration.setUpClass` and `test_live_emulator_matches_fresh_usine_runs` are
+removed, so a self-check refusal fails again. Drift simulation (`$CRPROP_OUT/k4/scripts/drift.py`, 2 seeds x 60
+trials, on the committed artifact): accepted in 120 of 120, max ln-mean deviation 3.1e-8 x sigma, margin 3217 (seed 1)
+and 3831 (seed 2) against 1e-4 x sigma, so >= 10 holds (`$CRPROP_OUT/l1/drift/`). Live check (HEP_USINE_LIVE_TEST=1):
+two fresh USINE runs, the committed emulator within 0.05 sigma in every bin.
+
+Study driver: the emulator steps now send the transport recorded in the two-dataset study (the emulator's training
+transport) instead of rebuilding it from `usine_provider.DEFAULT_TRANSPORT`, and ask for the registered USINE version,
+so they keep working when L2 makes the default transport explicit and bumps the provider version (the transport is
+identical today; checked). USINE runs (B1.3 cap 60): 2 (the live check); every other point was cached.

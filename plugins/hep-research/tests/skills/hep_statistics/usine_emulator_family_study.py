@@ -16,8 +16,9 @@ Steps (each writes into --work; USINE runs go through the provider cache, so a r
   validate  the emulator against the held-out runs; the regression_validation block; the emulator error component
   confirm   the emulator against fresh USINE runs over its whole box, the domain the toy fits use (K4)
   fit       propagation_fit with the emulator provider; the recorded study to --record
---max-condition is passed to the trainer: 0 (default) reproduces the committed A1.14 model (trained before the bound);
-K4 (decision B1.1) retrained with 1e10, which bounds each kernel's condition number (VALIDATION CRPROP-K4).
+--max-condition is passed to the trainer: 1e10 (default since L1, decision B1.3) bounds each kernel's condition number
+(VALIDATION CRPROP-K4) and reproduces the committed C2UF model (K4's retraining, byte-identical); 0 reproduces the
+A1.14 model it replaced (trained before the bound).
 The fit step declares V_A_kms enters_squared (L1, decision B1.3): a toy fit that fails in V_A retries in V_A^2.
 Usage:
   python3 usine_emulator_family_study.py STEP --registry REGISTRY.json --cache-dir DIR --work DIR [--round 0]
@@ -129,16 +130,25 @@ def _key(p: dict) -> tuple:
 
 
 # ---------------------------------------------------------------------------------------------- USINE
+def training_transport() -> dict:
+    """The transport block of the study's USINE runs, as recorded in the two-dataset study (the emulator was trained
+    on it and refuses any other): read from the record, not rebuilt from usine_provider.DEFAULT_TRANSPORT, so a later
+    change of the provider's default form does not change the study."""
+    return copy.deepcopy(json.loads(TWO_DATASET_RECORD.read_text(encoding="utf-8"))["config"]["transport"])
+
+
 def usine_values(registry: str, cache_dir: str, points: list[dict]) -> tuple[list[list[float]], int]:
     """USINE's 27 values (B/C then 10Be/9Be) per point, one per-point request per chunk; (values, runs sent)."""
+    from core.provider.registry import load_registry
     from core.provider.runner import ProviderRunner
     out, sent = [], 0
+    version = load_registry(registry)[c2u.PROVIDER].version    # the registered USINE provider's version
     with ProviderRunner(registry, cache_dir=cache_dir) as runner:
         for start in range(0, len(points), 20):
             chunk = [dict(p, **c2u.FIXED) for p in points[start:start + 20]]
-            req = {"protocol": "cr-provider/1", "provider": c2u.PROVIDER, "provider_version": c2u.VERSION,
-                   "transport": st.transport(), "points": chunk, "observables": st.observables(), "want": ["lis"],
-                   "seed": None}
+            req = {"protocol": "cr-provider/1", "provider": c2u.PROVIDER, "provider_version": version,
+                   "transport": training_transport(), "points": chunk, "observables": st.observables(),
+                   "want": ["lis"], "seed": None}
             resp = runner.evaluate(req)
             for res in resp["results"]:
                 if res.get("status") != "ok":
@@ -153,7 +163,7 @@ def cached_runs(cache_dir: str) -> list[tuple[dict, list[float]]]:
     want = {"bc": len(c2u.edges()) - 1, "be": len(st.be_edges()) - 1}
     tsha = None
     from core.provider.hashing import canonical_sha256
-    tsha = canonical_sha256(st.transport())
+    tsha = canonical_sha256(training_transport())
     out = []
     for f in sorted(glob.glob(str(Path(cache_dir) / "*" / "*.json"))):
         res = json.loads(Path(f).read_text(encoding="utf-8"))["result"]
@@ -194,7 +204,7 @@ def training_doc(runs) -> dict:
                         + [f"10Be/9Be bin {i}" for i in range(len(be) - 1)]},
             "points": [p for p, _ in runs], "values": [v for _, v in runs], "status": ["synthetic", "unvalidated"],
             "context": {"simulator": "USINE V3.5 through the cr-provider/1 provider usine", "provider": c2u.PROVIDER,
-                        "provider_version": c2u.VERSION, "transport": st.transport(),
+                        "provider_version": c2u.VERSION, "transport": training_transport(),
                         "fixed": dict(c2u.FIXED), "study": "cr-propagation C2UF (A1.14)"}}
 
 
@@ -250,7 +260,7 @@ def emulator_values(registry: Path, artifact: Path, points: list[dict]) -> list[
     out = []
     with ProviderRunner(str(registry), session="serve") as runner:
         req = {"protocol": "cr-provider/1", "provider": "emulator", "provider_version": version, "points": points,
-               "observables": st.observables(), "want": ["lis"], "seed": None, "transport": st.transport()}
+               "observables": st.observables(), "want": ["lis"], "seed": None, "transport": training_transport()}
         for res in runner.evaluate(req)["results"]:
             if res.get("status") != "ok":
                 out.append({"status": res.get("status"), "reason": res.get("reason"), "detail": res.get("detail")})
@@ -439,9 +449,9 @@ def main(argv=None) -> int:
     ap.add_argument("--round", type=int, default=0, choices=[0, 1], help="design and validation round")
     ap.add_argument("--record", type=Path, default=RECORD, help="recorded study (fit step)")
     ap.add_argument("--family-toys", type=int, default=200, help="toys per family")
-    ap.add_argument("--max-condition", type=float, default=0.0,
-                    help="train step: the trainer's kernel condition bound (0, the default, reproduces the committed "
-                         "A1.14 model; K4 used 1e10)")
+    ap.add_argument("--max-condition", type=float, default=1e10,
+                    help="train step: the trainer's kernel condition bound (1e10, the default, reproduces the "
+                         "committed model; 0 the A1.14 model it replaced)")
     args = ap.parse_args(argv)
     if args.step in ("usine", "validate", "confirm") and not (os.environ.get("HEP_USINE_BIN") and os.environ.get("HEP_USINE_DATA")
                                                    and os.environ.get("HEP_USINE_RUN_DIR")):
