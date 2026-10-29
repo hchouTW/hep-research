@@ -3,7 +3,30 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.45.0 (2026-10-29)
+
+Minor release; contracts 3.16.0 (gating constant `contracts/validate.py` `CONFORMANCE_VERSION_FROM`), `CORE_VERSION`
+1.4.0, adapter `cr-propagation` 0.3.0 (providers usine and dragon2 0.3.0, emulator 1.0.0). It closes follow-ups 2-6
+of 0.44.0 (decision B1.3): C2UF-1 now passes on the well-conditioned C2UF emulator, which replaces the near-singular
+one, so the C2UF emulator is portable and its Linux test skip (A1.21) is gone; modulation conformance is tied to the
+provider version; provider versions are bumped with the old records kept as history; USINE's default transport states
+its injection variable.
+
+**Before you upgrade** (details in each entry below):
+- A `cr-provider/1` declaration's modulation conformance result must carry `provider_version`, equal to the
+  declaration's version; core 1.4.0 refuses a 3.15 declaration with a modulation block until its gate is rerun
+  (`tools/provider_registry.py --conformance`).
+- The usine and dragon2 providers are now 0.3.0, so provider caches filled at 0.2.0 no longer answer their requests
+  (a fresh run, never a stale hit); committed records keep 0.2.0 as the version that produced them.
+- `propagation_fit.py` accepts `parameters.<name>.enters_squared`: a failed toy or family-calibration fit retries in
+  w = p^2 on [0, max^2]; main fits, profile intervals and posteriors never use it.
+- The emulator compares transports with the documented default injection variable normalised, so USINE's explicit
+  `DEFAULT_TRANSPORT` is accepted again; any other `spectrum_variable` is refused.
+
+**Known issues**: no F1 fit converges under the noise-aware rule (0.44.0; follow-up 1 needs a decision: a wider-scale
+noise probe, a provider printing more digits, or a new pre-declared step rule), so F1-1 stays not met and F3 stays
+blocked; the fit-side isotopic modulation path is documented but not implemented; the likely DRAGON2 Ptuskin94/03
+enum issue is documented, not reported upstream; GALPROP unavailable; F2, F3 and the live routing run not done.
 
 - crprop l1: `propagation_fit.py` gains `parameters.<name>.enters_squared` for a parameter the prediction depends on
   only through its square (B/C on `V_A_kms`; linear axis, provider domain from 0): a toy or family-calibration fit

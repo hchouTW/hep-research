@@ -4,7 +4,7 @@
  "artifact_type": "computational-run",
  "objective": "detector system design: computational-run written by evaluate_design.py",
  "versions": {
-  "plugin": "0.44.0",
+  "plugin": "0.45.0",
   "contracts": "3.16.0",
   "plugin_release": {
    "release": "unreleased",
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-L.json",
-   "sha256": "f4eb5b6e16914b9eb453f815f7d68024cb6fa189c60a88d28bd96e3ef5c2f3cb",
+   "sha256": "3faef2bbddfebabf3d5f7270d9bcf01bc06adbf904ea389b05cecbfc03f41de0",
    "artifact_type": "design-candidate",
    "artifact_id": "ams-like-v1-cand-L",
    "status": [
@@ -40,13 +40,13 @@
   "input_manifest": [
    {
     "path": "candidates/cand-L.json",
-    "sha256": "f4eb5b6e16914b9eb453f815f7d68024cb6fa189c60a88d28bd96e3ef5c2f3cb"
+    "sha256": "3faef2bbddfebabf3d5f7270d9bcf01bc06adbf904ea389b05cecbfc03f41de0"
    }
   ],
   "tools": [
    {
     "name": "design-estimates",
-    "version": "0.44.0"
+    "version": "0.45.0"
    }
   ],
   "commands": [

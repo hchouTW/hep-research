@@ -13,7 +13,7 @@
   ]
  },
  "versions": {
-  "plugin": "0.44.0",
+  "plugin": "0.45.0",
   "contracts": "3.16.0",
   "profiles": {
    "theory:drell-yan-lo": "0.1.0"
