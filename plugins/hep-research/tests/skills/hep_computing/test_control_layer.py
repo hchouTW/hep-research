@@ -561,6 +561,87 @@ class ReportShape(Base):
         self.assertEqual((code, st["mode"], st["effective_contract"]), (0, "M3", False))
 
 
+C1 = frozenset({("chkA", "crit1")})
+
+
+def engine_log(**reco_over):
+    steps = {"raw": dv.StepSpec(program="pRaw"),
+             "reco": dv.StepSpec(**{"program": "pReco", "upstream": ("raw",), "checked": True, "required": C1,
+                                    **reco_over})}
+    log = dv.Log()
+    log.append("contract", "agent", spec={"steps": steps, "deliverables": {"D": dv.Deliverable("reco", "T2")},
+                                          "families": {}, "samples": {}, "budget": None})
+    return log
+
+
+def engine_run(log, attempt, step, out, end="success", termination="confirmed"):
+    dv.admit(log, log.head, attempt, step, cost=0.0)
+    log.append("receipt", "B", attempt=attempt, end=end, termination=termination,
+               outputs=(out,) if termination == "confirmed" else ())
+
+
+class StateRowItems(unittest.TestCase):
+    """Delivery §5.1 State and Execution items that no reference-model scenario asserts directly."""
+
+    def test_cancellation_and_failure_are_recorded_separately(self):
+        log = engine_log()
+        engine_run(log, "a1", "raw", "R1")
+        dv.admit(log, log.head, "f1", "reco", cost=0.0)
+        log.append("receipt", "B", attempt="f1", end="failure", termination="confirmed", outputs=())
+        dv.admit(log, log.head, "k1", "reco", cost=0.0)
+        log.append("cancel_request", "C", attempt="k1")                       # before start: cancelled
+        dv.admit(log, log.head, "k2", "reco", cost=0.0)
+        log.append("start", "B", attempt="k2")
+        log.append("cancel_request", "C", attempt="k2")
+        self.assertEqual(dv.exec_status(log, "k2"), "cancelling")
+        log.append("receipt", "B", attempt="k2", end="cancelled", termination="confirmed", outputs=())
+        self.assertEqual([dv.exec_status(log, a) for a in ("f1", "k1", "k2")], ["failed", "cancelled", "cancelled"])
+        draws = dv.failed_draws(log, "reco")
+        self.assertEqual(draws, [("reco", "f1", "failed"), ("reco", "k1", "cancelled"), ("reco", "k2", "cancelled")])
+
+    def test_an_unconfirmed_cancellation_is_unknown_and_blocks_the_step(self):
+        log = engine_log()
+        engine_run(log, "a1", "raw", "R1")
+        dv.admit(log, log.head, "k1", "reco", cost=0.0)
+        log.append("start", "B", attempt="k1")
+        log.append("cancel_request", "C", attempt="k1")
+        log.append("receipt", "B", attempt="k1", end="cancelled", termination="unknown", outputs=())
+        self.assertEqual(dv.exec_status(log, "k1"), "unknown")
+        with self.assertRaises(dv.Admission):
+            dv.admit(log, log.head, "k2", "reco", cost=0.0)
+
+    def test_success_before_the_cancellation_took_effect_is_computed(self):
+        log = engine_log()
+        engine_run(log, "a1", "raw", "R1")
+        dv.admit(log, log.head, "k1", "reco", cost=0.0)
+        log.append("start", "B", attempt="k1")
+        log.append("cancel_request", "C", attempt="k1")
+        log.append("receipt", "B", attempt="k1", end="success", termination="confirmed", outputs=("X1",))
+        self.assertEqual((dv.exec_status(log, "k1"), dv.label(log, "X1")), ("computed", "unchecked"))
+
+    def test_upstream_voided_while_the_downstream_is_in_flight(self):
+        log = engine_log()
+        engine_run(log, "a1", "raw", "R1")
+        dv.admit(log, log.head, "b1", "reco", cost=0.0)                      # consumes R1
+        cur = dv.contract(log)
+        log.append("contract", "agent", spec={**cur, "steps": {**cur["steps"], "raw": dv.StepSpec(program="pRaw2")}})
+        log.append("receipt", "B", attempt="b1", end="success", termination="confirmed", outputs=("X1",))
+        self.assertEqual((dv.label(log, "R1"), dv.label(log, "X1")), ("invalidated", "invalidated"))
+
+    def test_pinned_old_conditions_are_not_falsely_invalidated(self):
+        log = engine_log(external=("conditions-v1",))
+        engine_run(log, "a1", "raw", "R1")
+        engine_run(log, "a2", "reco", "X1")
+        dv.admit(log, log.head, "c1", "__check__", cost=0.0, check=("chkA", "crit1", "X1"))
+        log.append("receipt", "B", attempt="c1", end="success", termination="confirmed", outputs=())
+        log.append("check_result", "B", target="X1", check="chkA", criteria="crit1", result="pass", check_attempt="c1")
+        cur = dv.contract(log)                                                  # new conditions released: a new step
+        added = dv.StepSpec(program="pAlt", upstream=("raw",), external=("conditions-v2",))
+        log.append("contract", "agent", spec={**cur, "steps": {**cur["steps"], "alt": added}})
+        self.assertTrue(dv.accepted(log, "X1"))
+        self.assertEqual(dv.label(log, "X1"), "ok")
+
+
 @unittest.skipUnless(shutil.which("true"), "POSIX host")
 class Concurrency(Base):
     """Two writers deriving from the same head: compare-and-set lets exactly one append."""
@@ -576,6 +657,25 @@ class Concurrency(Base):
             p.stdout.close()
         self.assertEqual(codes, [0, 1])
         self.assertEqual(self.head(), head + 1)
+
+    def test_concurrent_admissions_cannot_exceed_the_budget(self):
+        self.assertEqual(self.call("init")[0], 0)
+        doc = contract_json(self.check_d, self.crit_d)
+        doc["budget"] = 1.0
+        (self.root / "budget.json").write_text(json.dumps(doc))
+        self.assertEqual(self.write("contract", "--file", self.root / "budget.json")[0], 0)
+        head = self.head()
+        procs = [subprocess.Popen([sys.executable, "-B", str(CONTROL_CLI), "admit", "--task-log", str(self.task_log),
+                                   "--attempt", attempt, "--step", "raw", "--cost", "1", "--declaration",
+                                   str(self.decl), "--qualification", str(self.qual), "--expect-head", str(head)],
+                                  stdout=subprocess.PIPE, text=True) for attempt in ("p1:raw", "p2:raw")]
+        codes = sorted(p.wait(timeout=120) for p in procs)
+        for p in procs:
+            p.stdout.close()
+        self.assertEqual(codes, [0, 1])            # one admitted, the other told to re-derive (stale head)
+        self.assertEqual(self.head(), head + 1)
+        code, out = self.admit("p3:raw", "--step", "raw", "--cost", "1")
+        self.assertIn("budget", out["reason"])     # re-derived: in-flight 1 + request 1 > budget 1
 
 
 if __name__ == "__main__":
