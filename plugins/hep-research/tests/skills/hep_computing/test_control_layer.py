@@ -481,6 +481,28 @@ class ReceiptAdapter(Base):
         self.assertEqual(code, 2, out)
         self.assertIn("run record", out["error"])
 
+    def test_an_output_of_a_failed_run_is_recorded_as_seen(self):
+        self.admitted_raw()
+        proc, work, receipt = self.run_step("a1:", "raw", ["{python}", "-c",
+                                                           "open('o.txt','w').write('1'); raise SystemExit(1)"])
+        self.assertEqual(proc.returncode, 1, proc.stdout)
+        code, out = self.write("receipt", "--receipt", receipt, "--work", work)
+        self.assertEqual(code, 0, out)
+        fields = out["written"][0]["fields"]
+        self.assertEqual((fields["end"], fields["outputs"]), ("failure", [sha(canonical({"o.txt": sha(b"1")}))]))
+        code, st = self.call("status")
+        self.assertEqual([(a["label"], a["kind"]) for a in st["steps"]["raw"]["artifacts"]],
+                         [("not_usable", "no producer (failed, cancelled, abandoned, or without an intent written "
+                                         "by C)")])
+        code, rep = self.call("report")
+        self.assertEqual(rep["1_deliverables"]["D"]["failed_draws"], [["raw", "a1:raw", "failed"]])
+
+    def test_a_failed_run_without_outputs_records_none(self):
+        self.admitted_raw()
+        proc, work, receipt = self.run_step("a1:", "raw", ["{python}", "-c", "raise SystemExit(3)"])
+        code, out = self.write("receipt", "--receipt", receipt, "--work", work)
+        self.assertEqual((code, out["written"][0]["fields"]["outputs"]), (0, []))
+
     def test_a_second_receipt_for_a_terminated_attempt_is_refused(self):
         self.admitted_raw()
         proc, work, receipt = self.run_step("a1:", "raw", ["{python}", "-c", "open('o.txt','w').write('1')"])
@@ -517,7 +539,8 @@ class ReceiptAdapter(Base):
         code, st = self.call("status")
         self.assertEqual(st["accounts"]["used"], usage)
         self.assertFalse(st["attempts"][0]["attested"])  # usage above the declared cost 0: not attested
-        self.assertEqual(st["steps"]["raw"]["artifacts"][0]["label"], "not_usable")
+        self.assertEqual((st["steps"]["raw"]["artifacts"][0]["label"], st["steps"]["raw"]["artifacts"][0]["kind"]),
+                         ("not_usable", "unattested"))
 
 
 class ReportShape(Base):

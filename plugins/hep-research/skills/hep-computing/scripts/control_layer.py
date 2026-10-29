@@ -181,7 +181,8 @@ def cmd_publish(args) -> dict:
 
 def receipt_facts(receipt: dict, receipt_sha: str, work: Path, usage_field: str, intent) -> list:
     """Facts for one run_workflow.py receipt (B2): a receipt (end status; termination confirmed, or unknown when the
-    runner says unconfirmed; the artifact digest as the output when the step succeeded with termination confirmed),
+    runner says unconfirmed; the artifact digest as the output whenever termination is confirmed and the run wrote an
+    output, also when the step failed: an output once seen stays seen, Control §4.2 overtaken),
     and, for a check run whose result bound to the run, one check_result per sample used (or one without a sample).
     Raises ValueError when the receipt and its run record do not agree."""
     for key in ("attempt", "end_status", "termination", "artifact_digest", "environment_ref"):
@@ -199,7 +200,7 @@ def receipt_facts(receipt: dict, receipt_sha: str, work: Path, usage_field: str,
     if hashlib.sha256(run_record_bytes).hexdigest() != ref.get("sha256"):
         raise ValueError("the run record's SHA-256 differs from the one the receipt cites")
     run_record = json.loads(run_record_bytes.decode("utf-8"))
-    outputs = (receipt["artifact_digest"],) if termination == "confirmed" and end == "success" else ()
+    outputs = (receipt["artifact_digest"],) if termination == "confirmed" and receipt.get("outputs") else ()
     usage = None
     if usage_field != "none":
         usage = (receipt.get("usage") or {}).get(usage_field)

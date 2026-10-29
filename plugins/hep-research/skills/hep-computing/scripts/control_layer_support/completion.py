@@ -34,9 +34,14 @@ def _steps_seen(log) -> list[str]:
 
 
 def _attested_kind(log, digest) -> str:
+    """attested (declared inputs): has a producer; unattested: computed, but usage or reads exceeded the declaration
+    (or no usage under M2/M3); otherwise the output came from no computed attempt with an intent written by C."""
     if dv.producers(log, digest):
         return "attested (declared inputs)"
-    return "unattested"
+    if any(dv.intent_of(log, f.get("attempt")) is not None and dv.exec_status(log, f.get("attempt")) == "computed"
+           for f in dv.output_facts(log, digest)):
+        return "unattested"
+    return "no producer (failed, cancelled, abandoned, or without an intent written by C)"
 
 
 def artifacts(log) -> dict:
