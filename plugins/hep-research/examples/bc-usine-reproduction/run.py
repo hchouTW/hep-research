@@ -502,6 +502,22 @@ def run_fit(out: Path, family: str, reg: Path, cache: Path, max_eval: int, cov_a
     return subprocess.Popen(cmd, stdout=open(work / "result.stdout.json", "w"), stderr=log)
 
 
+def run_rejudge(out: Path, family: str, reg: Path, cache: Path, max_eval: int, earlier: Path, noise_budget: int,
+                polish: int, tag: str = "") -> subprocess.Popen:
+    """K1 re-judging (VALIDATION.md CRPROP-K1): the earlier pass's own configuration of the family (start, stated
+    steps, priors, no restart), so its least-squares path replays from the cached runs, with the noise-aware verdict
+    (optimizer.noise measured within noise_budget evaluations) and polish_steps."""
+    cfg = json.loads((earlier / f"fit-{family}" / "config.json").read_text())
+    cfg["optimizer"] = dict(cfg["optimizer"], noise={"mode": "measure", "max_evaluations": noise_budget},
+                            polish_steps=polish)
+    work = out / f"fit-{family}{tag}"
+    work.mkdir(parents=True, exist_ok=True)
+    (work / "config.json").write_text(json.dumps(cfg, indent=1) + "\n")
+    cmd = [sys.executable, str(FIT), "fit", "--input", str(work / "config.json"), "--provider-registry", str(reg),
+           "--cache-dir", str(cache), "--out", str(work / "out"), "--max-evaluations", str(max_eval)]
+    return subprocess.Popen(cmd, stdout=open(work / "result.stdout.json", "w"), stderr=open(work / "fit.log", "w"))
+
+
 def model_scaled_record(out: Path, record: dict, ref_family: str, reg: Path, cache: Path, work: Path) -> dict:
     """The paper's covariance choice as a declared model alternative: USINE's shipped relative covariance (all five
     error types) times the prediction of ref_family's best fit (USINE's IsModelOrDataForRelCov true), held fixed
@@ -695,6 +711,13 @@ def stage_compare(out: Path, families) -> dict:
                       "best_fit": {n: q["best_fit"] for n, q in p.items()},
                       "sigma_coordinate": {n: q["sigma_coordinate"] for n, q in p.items()},
                       "paper": PAPER_FITS[base_family(fam)]}
+        if "noise" in fit:   # K1 re-judging: the noise-aware verdict (VALIDATION.md CRPROP-K1)
+            n = fit["noise"]
+            table[fam]["convergence"].update({k: fit["convergence"][k] for k in ("edm_threshold", "polish")
+                                              if k in fit["convergence"]})
+            table[fam]["noise"] = {k: n.get(k) for k in ("mode", "sigma_m2lnl", "dof", "evaluations", "max_evaluations",
+                                                         "k", "edm_threshold", "step_factor", "variance_inflation_sum")}
+            table[fam]["polish_steps"] = fit["attempts"][-1].get("polish_steps", 0)
     (out / "compare.json").write_text(json.dumps(table, indent=1) + "\n")
     return {"families": table, "D9_all": ok}
 
@@ -724,7 +747,7 @@ def best_cached(out: Path, family: str) -> dict | None:
     return best
 
 
-def stage_record(out: Path, families, record_path: Path, usine_runs: int) -> dict:
+def stage_record(out: Path, families, record_path: Path, usine_runs: int, rejudge_runs: int | None = None) -> dict:
     """The committed record of the reproduction: numbers only (no data value, no USINE file content)."""
     start = json.loads((out / "start.json").read_text())
     compare = json.loads((out / "compare.json").read_text()) if (out / "compare.json").is_file() else {}
@@ -768,6 +791,10 @@ def stage_record(out: Path, families, record_path: Path, usine_runs: int) -> dic
                                                      "max_rel_syst")} | {"row_roles": sorted({r["role"] for r in
                                                                                              crdb["table"]})},
            "families": fams, "usine_runs": usine_runs}
+    if rejudge_runs is not None:   # K1: BIG, SLIM, QUAINT-Vc0 re-judged under the noise-aware rule
+        doc["rejudge"] = {"work_package": "K1", "rule": "VALIDATION.md CRPROP-K1 (EDM <= max(1e-5, k sigma_noise))",
+                          "families": sorted(f for f, r in fams.items() if "noise" in r), "usine_runs": rejudge_runs,
+                          "usine_cap": 600}
     # D9 is judged on BIG, SLIM and QUAINT, or the declared variant QUAINT-Vc0 when boundary_kkt accepts V_c = 0
     # (VALIDATION CRPROP-F1, dispatch 2); model alternatives (tagged folders) are reported, never judged
     kkt_path = out / "quaint-vc-kkt.json"
@@ -809,6 +836,11 @@ def main(argv=None) -> int:
     ap.add_argument("--tag", default="", help="suffix of the fit folders (fit-<family><tag>)")
     ap.add_argument("--record", type=Path, help="stage record: the JSON record to write (numbers only)")
     ap.add_argument("--usine-runs", type=int, default=0, help="stage record: the USINE run tally to record")
+    ap.add_argument("--rejudge-from", type=Path, help="stage fit (K1): refit each family from <dir>/fit-<family>/"
+                    "config.json with the noise-aware verdict (VALIDATION.md CRPROP-K1)")
+    ap.add_argument("--noise-budget", type=int, default=40, help="K1: evaluations of the noise measurement per fit")
+    ap.add_argument("--polish-steps", type=int, default=0, help="K1: Newton steps of the verdict (optimizer.polish_steps)")
+    ap.add_argument("--rejudge-usine-runs", type=int, help="stage record: the K1 USINE run tally to record")
     a = ap.parse_args(argv)
     try:
         import numpy  # noqa: F401
@@ -833,15 +865,20 @@ def main(argv=None) -> int:
         summary["start"] = stage_start(out, families, reg, cache)
     if "fit" in stages:
         alts = set(a.covariance_alternatives.split(",")) - {""}
-        procs = {f: run_fit(out, f, reg, cache, a.max_evaluations, f in alts,
-                            restart_cached(out, f, a.restart_from, a.step_fraction) if a.restart_cached else
-                            restart_from(a.restart_from / f"fit-{f}" / "out" / "result.json", a.step_fraction)
-                            if a.restart_from else None, a.covariance, a.tag) for f in families}
+        if a.rejudge_from:
+            procs = {f: run_rejudge(out, f, reg, cache, a.max_evaluations, a.rejudge_from, a.noise_budget,
+                                    a.polish_steps, a.tag) for f in families}
+        else:
+            procs = {f: run_fit(out, f, reg, cache, a.max_evaluations, f in alts,
+                                restart_cached(out, f, a.restart_from, a.step_fraction) if a.restart_cached else
+                                restart_from(a.restart_from / f"fit-{f}" / "out" / "result.json", a.step_fraction)
+                                if a.restart_from else None, a.covariance, a.tag) for f in families}
         summary["fit"] = {f: p.wait() for f, p in procs.items()}
     if "compare" in stages:
         summary["compare"] = stage_compare(out, families)
     if "record" in stages:
-        summary["record"] = stage_record(out, families, a.record or out / "f1-reproduction.json", a.usine_runs)
+        summary["record"] = stage_record(out, families, a.record or out / "f1-reproduction.json", a.usine_runs,
+                                         a.rejudge_usine_runs)
     if "attribution" in stages:
         summary["attribution"] = stage_attribution(out, families, reg or registry(out), cache)
     (out / "summary.json").write_text(json.dumps(summary, indent=1, default=str) + "\n")

@@ -48,6 +48,14 @@ Software checks establish contract consistency only, not physical validity.
   P1's "about sqrt(L/h)" puts V_A off by sqrt(3); V_A,disc = V_A,halo sqrt(L/(3h)), bound (1+lam)/5) is corrected in
   `transport_conventions.py` and `cosmic-ray-phenomenology.md`. VALIDATION has an appended erratum for the CRPROP-B3
   10Be/9Be sign (+1.3%, not -1.3%), and `docs/adapter-authoring.md` has K2's modulation exception. No version bump.
+- crprop k1: `propagation_fit.py` gains an opt-in noise-aware convergence rule for providers with numerical noise
+  (`optimizer.noise`, measured or declared): the noise floor of -2 ln L at the best fit is measured from the residual
+  scatter of a quadratic over a 0.02-sigma stencil and recorded, the difference steps are sized from it, and the fit
+  converges when EDM <= max(1e-5, 0.5 sigma_noise) (VALIDATION.md CRPROP-K1). Without it, verdicts and numbers are
+  unchanged. A rejected polish now judges the returned point; an unconverged fit reports `not-converged` and writes no
+  statistical-result instead of failing with `artifact-invalid`. F1's BIG, SLIM and QUAINT-Vc0 re-judged (548 USINE
+  runs): delta and K10 stay in the D9 windows, none converges under the rule (EDM 0.010-0.015 against thresholds
+  0.0017-0.0034), so F1-1 stays not met on convergence; attribution in VALIDATION.md.
 
 ## 0.43.0 (2026-10-29)
 

@@ -2620,6 +2620,31 @@ class UsineF1Record(unittest.TestCase):
         self.assertNotIn('"values"', text)
         self.assertNotIn('"edges"', text)
 
+    def test_k1_rejudge_under_the_noise_rule(self):
+        """K1-2: BIG, SLIM and QUAINT-Vc0 re-judged under the noise-aware rule of VALIDATION.md CRPROP-K1 (k = 0.5,
+        EDM <= max(1e-5, k sigma_noise)), each with its measured noise floor, threshold and EDM; at most 600 USINE runs."""
+        rj = self.rec["rejudge"]
+        self.assertEqual(rj["work_package"], "K1")
+        self.assertLessEqual(rj["usine_runs"], 600)
+        self.assertEqual(rj["families"], ["BIG", "QUAINT-Vc0", "SLIM"])
+        for fam in rj["families"]:
+            row = self.rec["families"][fam]
+            noise, conv = row["noise"], row["convergence"]
+            with self.subTest(family=fam):
+                self.assertEqual((noise["mode"], noise["k"]), ("measure", 0.5))
+                self.assertGreater(noise["sigma_m2lnl"], 0.0)
+                self.assertLessEqual(noise["evaluations"], noise["max_evaluations"])
+                thr = max(1e-5, 0.5 * noise["sigma_m2lnl"])
+                self.assertLessEqual(abs(conv["edm_threshold"] - thr), 1e-12 * thr)
+                self.assertEqual(row["status"], conv["status"])
+                if conv["status"] == "converged":
+                    self.assertEqual(conv["reasons"], [])
+                    self.assertLessEqual(conv["edm"], conv["edm_threshold"])
+                else:
+                    self.assertTrue(conv["reasons"])
+                    if conv["edm"] is not None and "gradient_not_small" in conv["reasons"]:
+                        self.assertGreater(conv["edm"], conv["edm_threshold"])
+
     @unittest.skipUnless(os.environ.get("HEP_USINE_DATA") and HAVE_NUMPY_SCIPY_F1, "needs HEP_USINE_DATA, numpy, scipy")
     def test_data_stage_rebuilds_the_labelled_record(self):
         with tempfile.TemporaryDirectory() as scratch:
