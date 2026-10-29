@@ -178,6 +178,13 @@ scripts `s0/round6-attack.py`, `s0/round6-attack2.py` (run as `python3 -I <scrip
 coordinator against the committed model (byte-identical): both majors and the F4 discrepancy reproduce. The spec copy
 is not changed; C1 and C2 stay blocked pending the user's decision.
 
+### Decision after round 6 (option A), 2026-10-29
+
+The user chose option A: no seventh round; one binding rule (“overtaken”) replaces the revert and reproduced rules,
+the round-6 minors are fixed, and C1 starts with the control rules stated as **not through S0** (N1 violated in all six
+rounds). Spec copy and model updated (90/90 scenarios, 42/42 mutations); mapping in `spec/revision-log.md`. These last
+changes were not reviewed.
+
 ## A1 — methods and main-Agent resumption (documentation and skill wiring)
 
 Entry: N2, N3, N4, N5 passed S0 (above). Location of the dev records: moved from `plugins/hep-research/docs/dev/` out of
@@ -314,7 +321,7 @@ Tests (`TMPDIR` on local disk): `test_executor_b2` 13 (receipts 2, binding 6, ca
 267 run, OK (39 skipped); `tests/skills/hep_review` 141, OK; `tests/routing` 21, OK; runner callers
 (`test_design_m2`, `test_geant4`, `test_cli_robustness`) 79, OK (6 skipped). `check_wiring.py --since <base>`: no new gap.
 
-## C1, C2 — not started (blocked)
+## C1, C2 — blocked until the user's decision after round 6 (C1 now started, see below)
 
 Entry conditions require N1, which did not pass S0 after three rounds (runbook 0.5.2 item 7), nor in the
 user-approved fourth round (3 major findings). Neither stage is

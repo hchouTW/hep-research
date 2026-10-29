@@ -49,6 +49,12 @@ reproduced by a changed computation) is not bound without a human pin (S0r5-N1-F
 of the target's step resolves only to that step's bound version, and the result counts only while it is still the bound
 version; upstreams and check inputs together form an acyclic graph (S0r5-N1-F2). Admission keys the side effect of a
 check attempt on check x criterion x target (S0r5-N1-F3).
+v12.1, after the sixth S0 round (user decision: adopt one rule and start C1 with N1 not passed): the revert rule and
+the reproduced rule are replaced by one binding rule — an artifact of a step is **overtaken** when an output first seen
+in that step after it (any attempt of the step name, any contract, whatever its end state or attestation) is no longer
+usable and current; an overtaken artifact binds only through a pin (human approval). This covers reverts, reproduced
+digests, unattested peeks and removed-and-re-added steps (S0r6-N1-F1, F2). A step added by a later contract has no
+pin (S0r6-N1-F2).
 
 Run: python3 -I hep-research-reconstruction-v12-en-reference-model.py
 """
@@ -487,7 +493,7 @@ def contract_at_least_as_strict(old: dict, new: dict) -> bool:
     for name, ns in new["steps"].items():          # v12.1 (S0v12-N1-F1): an added step takes no value reserved for the
         if name in old["steps"]:                   # first contract or a human, and does not join an existing family
             continue
-        if ns.allow_rerun or ns.na_allowed or ns.family in old["families"]:
+        if ns.allow_rerun or ns.na_allowed or ns.family in old["families"] or ns.pin is not None:   # r6: no pin
             return False
     for did, od in old["deliverables"].items():
         nd = new["deliverables"].get(did)
@@ -515,19 +521,6 @@ def contract_at_least_as_strict(old: dict, new: dict) -> bool:
 
 def _identity(step, s: StepSpec, inputs: dict) -> str:
     return h(step, s.program, s.env, s.external, tuple(sorted(inputs.items())))
-
-
-def revives(log: Log, old: dict, new: dict, before: int) -> bool:
-    """r4 (S0r4-N1-F1): N changes a step's content so that an attempt written before N has a current identity again (a
-    revert). That changes the binding among artifacts already seen, so, like a pin, it needs a human."""
-    for n, ns in new["steps"].items():
-        os_ = old["steps"].get(n)
-        if os_ is None or (ns.program, ns.env, ns.external) == (os_.program, os_.env, os_.external):
-            continue
-        for it in log.of("intent"):
-            if it.seq < before and it.get("step") == n and it.get("identity") == _identity(n, ns, inputs_of(it)):
-                return True
-    return False
 
 
 @memo
@@ -559,7 +552,7 @@ def _contracts(log: Log):
         if f.kind == "contract":
             new = f.get("spec")
             if (eff is None and log.mode() == "M1" and not status) or \
-                    (eff is not None and contract_at_least_as_strict(eff, new) and not revives(log, eff, new, f.seq)):
+                    (eff is not None and contract_at_least_as_strict(eff, new)):
                 activate(f.seq)
             else:
                 status[f.seq], against[f.seq] = "pending_approval", eff_seq
@@ -796,16 +789,15 @@ def self_current(log: Log, digest: str) -> bool:
 
 
 @memo
-def reproduced(log: Log, digest: str) -> bool:
-    """r5 (S0r5-N1-F1): the artifact's representative producer has another identity than its first producer in the step:
-    an output already seen, produced again by a changed computation. Re-binding it is a choice among artifacts already
-    seen, so it binds only through a pin (human approval)."""
-    bp = best_producer(log, digest)
-    if bp is None:
+def overtaken(log: Log, digest: str) -> bool:
+    """r6 (S0r6-N1-F1, F2): an output first seen in the step after this artifact — by any attempt of the step name, under
+    any contract, whatever its end state or attestation — is no longer usable and current. Binding this artifact again
+    would be a choice among outputs already seen, so it binds only through a pin (human approval)."""
+    step = step_of(log, digest)
+    order = candidates_raw(log, step)
+    if digest not in order:
         return False
-    step = bp[1].get("step")
-    first = min((seq, it) for seq, it in producers(log, digest) if it.get("step") == step)[1]
-    return first.get("identity") != bp[1].get("identity")
+    return any(not (usable(log, e) and current(log, e)) for e in order[order.index(digest) + 1:])
 
 
 @memo
@@ -815,7 +807,7 @@ def bound(log: Log, step: str):
         return s.pin if ok(log, s.pin) else None
     best = None
     for d in candidates_raw(log, step):
-        if step_of(log, d) == step and ok(log, d) and not reproduced(log, d):
+        if step_of(log, d) == step and ok(log, d) and not overtaken(log, d):
             if best is None or bind_seq(log, d) > bind_seq(log, best):
                 best = d
     return best
@@ -1160,7 +1152,7 @@ def label(log, digest) -> str:
     if cs == "missing":
         return "unchecked"
     if bound(log, step) != digest:
-        return "reproduced" if reproduced(log, digest) and spec_of(log, step).pin != digest else "superseded"
+        return "overtaken" if overtaken(log, digest) and spec_of(log, step).pin != digest else "superseded"
     return "ok"
 
 
@@ -1699,9 +1691,7 @@ def t24_multi_producer_same_digest():
     recontract(log, raw=StepSpec(program="pRaw_refactor"))
     assert label(log, "X1") == "invalidated"
     run(log, "a3", "raw", "R1")
-    # r5 (S0r5-N1-F1): a refactor that reproduces an already-seen output re-binds it only through a pin (human approval)
-    assert label(log, "R1") == "reproduced" and not accepted(log, "X1")
-    approve(log, recontract(log, raw=StepSpec(program="pRaw_refactor", pin="R1")))
+    # r6: a refactor reproducing the step's only output is no choice among outputs, so it binds (cf. t88, t91)
     assert label(log, "R1") == "ok" and accepted(log, "X1")
 
 
@@ -1849,7 +1839,7 @@ def t36_random_invariants():
     import random
     rnd = random.Random(20261029)
     labels = {"iteration_internal", "superseded_by_iteration", "not_usable", "invalidated", "producer_conflict",
-              "blocked_upstream", "held", "unchecked", "superseded", "reproduced", "ok"}
+              "blocked_upstream", "held", "unchecked", "superseded", "overtaken", "ok"}
     for trial in range(250):
         tgt = rnd.choice(["T2", "T3C"])
         steps = base_steps(allow_rerun=True, na_allowed=C1 if rnd.random() < .3 else frozenset())
@@ -2629,19 +2619,20 @@ def t83_content_revert_needs_a_human():
     check(log, "X1", "chkA", "crit1", "pass", "c1", sample="S1")
     assert contract_status(log, recontract(log, reco=reco_spec(program="pReco_alt"))) == "effective"
     run(log, "a3", "reco", "X2"); check(log, "X2", "chkA", "crit1", "pass", "c2", sample="S2")
-    cf = recontract(log, reco=reco_spec(program="pReco"))                   # the revert
-    assert contract_status(log, cf) == "pending_approval" and label(log, "X1") == "invalidated"
     st = report_status(log, "D")
     assert st["artifact"] == "X2" and len(st["confirmation_results"]) == 2  # both confirmations are on record
     p = publish(log, log.head, "D")
     assert p.get("confirmation_results") == 2 and p.get("chain_artifacts") == 3
-    approve(log, cf)                                                        # a human may take X1 back, knowingly
+    cf = recontract(log, reco=reco_spec(program="pReco"))                   # the revert: r6, X1 is overtaken by X2
+    assert label(log, "X1") == "overtaken" and label(log, "X2") == "invalidated" and bound(log, "reco") is None
+    expect(Admission, publish, log, log.head, "D")
+    approve(log, recontract(log, reco=reco_spec(program="pReco", pin="X1")))  # a human may take X1 back, knowingly
     assert bound(log, "reco") == "X1"
     log = new_log(base_steps())                                             # a revert of an upstream step is caught too
     run(log, "a1", "raw", "R1")
     recontract(log, raw=StepSpec(program="pRaw2")); run(log, "a2", "raw", "R2")
-    assert contract_status(log, recontract(log, raw=StepSpec(program="pRaw"))) == "pending_approval"
-    assert contract_status(log, recontract(log, raw=StepSpec(program="pRaw3"))) == "effective"
+    recontract(log, raw=StepSpec(program="pRaw"))
+    assert label(log, "R1") == "overtaken" and bound(log, "raw") is None
 
 
 def t84_confirmation_fields_belong_to_the_deliverable():
@@ -2735,7 +2726,7 @@ def t88_reproduced_digest_needs_a_pin():
     cf = recontract(log, reco=reco_spec(program="pReco "))                  # cosmetic: a new identity, not a revert
     assert contract_status(log, cf) == "effective" and label(log, "X2") == "invalidated"
     run(log, "a4", "reco", "X1")                                            # reproduces the first, already-seen output
-    assert reproduced(log, "X1") and label(log, "X1") == "reproduced" and bound(log, "reco") is None
+    assert overtaken(log, "X1") and label(log, "X1") == "overtaken" and bound(log, "reco") is None
     assert not deliverable_status(log, "D")["met"]
     expect(Admission, publish, log, log.head, "D")
     cf = recontract(log, reco=reco_spec(program="pReco ", pin="X1"))       # a human may take it, knowingly
@@ -2752,7 +2743,7 @@ def t88_reproduced_digest_needs_a_pin():
     log = new_log(base_steps())                                             # a deterministic same-identity copy is not a reproduction
     run(log, "a1", "raw", "R1")
     admit(log, log.head, "r1", "raw", cost=0.0, reuse_source="R1")
-    assert not reproduced(log, "R1") and bound(log, "raw") == "R1"
+    assert not overtaken(log, "R1") and bound(log, "raw") == "R1"
 
 
 def t89_check_inputs_must_stay_bound():
@@ -2789,6 +2780,44 @@ def t90_check_side_effect_is_check_criterion_target():
     check(log, "X1", "chkA", "crit1", "pass", "c1", termination="unknown")
     recontract(log, ref=StepSpec(program="pRef2")); run(log, "f2", "ref", "F2")
     expect(Admission, check, log, "X1", "chkA", "crit1", "pass", "c2")
+
+
+def t91_overtaken_covers_peeks_and_readded_steps():
+    # S0r6-N1-F1: a draw made unattested on purpose and reproduced later is still an output already seen
+    smp = {"S1": "confirmation", "S2": "confirmation"}
+    log = new_log(t3c_steps(), target="T3C", samples=smp, budget=10.0)
+    log.append("freeze", "agent", step="reco", samples=("S1", "S2"), required=C1)
+    run(log, "a1", "raw", "R1")
+    admit(log, log.head, "a2", "reco", cost=0.0)                            # under-declared cost: unattested peek
+    log.append("receipt", "B", attempt="a2", end="success", termination="confirmed", outputs=("X1",), usage=0.5)
+    assert not usable(log, "X1")
+    recontract(log, reco=reco_spec(program="pReco_alt"))
+    run(log, "a3", "reco", "X2"); check(log, "X2", "chkA", "crit1", "pass", "c2", sample="S2")
+    recontract(log, reco=reco_spec(program="pReco "))                       # cosmetic
+    run(log, "a4", "reco", "X1")                                            # reproduces the peeked output
+    check(log, "X1", "chkA", "crit1", "pass", "c1", sample="S1")
+    assert label(log, "X1") == "overtaken" and not deliverable_status(log, "D")["met"]
+    expect(Admission, publish, log, log.head, "D")
+    # S0r6-N1-F2: a step removed with approval and re-added by the agent with an old program, or with a pin
+    st = {**base_steps(), "alt": reco_spec(program="pAlt1")}
+    dels = {"D": Deliverable("reco", "T2"), "D2": Deliverable("alt", "T2")}
+    log = new_log(st, deliverables=dels)
+    run(log, "a1", "raw", "R1"); run(log, "b1", "alt", "A1"); check(log, "A1", "chkA", "crit1", "pass", "k1")
+    recontract(log, alt=reco_spec(program="pAlt2"))
+    run(log, "b2", "alt", "A2"); check(log, "A2", "chkA", "crit1", "pass", "k2")
+    steps = {k: v for k, v in contract(log)["steps"].items() if k != "alt"}
+    cf = log.append("contract", "agent", spec=spec(steps, {"D": dels["D"]}))
+    approve(log, cf)
+    cf = log.append("contract", "agent", spec=spec({**steps, "alt": reco_spec(program="pAlt1")}, dels))
+    assert contract_status(log, cf) == "effective"
+    assert label(log, "A1") == "overtaken" and bound(log, "alt") is None and not deliverable_status(log, "D2")["met"]
+    log = new_log(st, deliverables=dels)                                    # re-adding a step name with a pin needs a human
+    run(log, "a1", "raw", "R1"); run(log, "b1", "alt", "A1"); check(log, "A1", "chkA", "crit1", "pass", "k1")
+    recontract(log, alt=reco_spec(program="pAlt2")); run(log, "b2", "alt", "A2")
+    steps = {k: v for k, v in contract(log)["steps"].items() if k != "alt"}
+    approve(log, log.append("contract", "agent", spec=spec(steps, {"D": dels["D"]})))
+    cf = log.append("contract", "agent", spec=spec({**steps, "alt": reco_spec(program="pAlt1", pin="A1")}, dels))
+    assert contract_status(log, cf) == "pending_approval" and "alt" not in contract(log)["steps"]
 
 
 # ================================================================ mutation tests: every mutation must be caught by some scenario
@@ -2874,7 +2903,7 @@ MUTATIONS = {
         smp in (f.get("independent") or ()) for f in log.of("freeze")))),
     "task-wide history omitted": ("task_history", lambda orig: (lambda log: {"failures": [], "failed_draws": [],
                                                                             "artifacts": {}})),
-    "content revert re-binds without a human": ("revives", lambda orig: (lambda *a: False)),
+    "overtaken artifact binds without a human": ("overtaken", lambda orig: memo(lambda log, d: False)),
     "confirmation results not reported": ("confirmation_results", lambda orig: (lambda log, step: [])),
     "added T3C deliverable inherits no": ("contract_at_least_as_strict", lambda orig: (
         lambda o, n: orig(o, {**n, "deliverables": {k: replace(v, confirmation_required=True,
@@ -2882,7 +2911,9 @@ MUTATIONS = {
                                                     if k not in o["deliverables"] or o["deliverables"][k].target != "T3C"
                                                     else v for k, v in n["deliverables"].items()}}))),
     "check inputs not resolved by C": ("check_inputs_for", lambda orig: (lambda log, t, c: {})),
-    "reproduced digest binds without a human": ("reproduced", lambda orig: memo(lambda log, d: False)),
+    "added step may carry a pin": ("contract_at_least_as_strict", lambda orig: (
+        lambda o, n: orig(o, {**n, "steps": {k: (replace(v, pin=None) if k not in o["steps"] else v)
+                                             for k, v in n["steps"].items()}}))),
     "check input need not stay bound": ("check_inputs_hold", lambda orig: (lambda log, it, t, c: set(
         k for k in inputs_of(it) if k != "target") == {"input:" + u for u in declared_check_inputs(log, t, c)})),
     "check side effect not recognised across check inputs": ("same_side_effect", lambda orig: (
