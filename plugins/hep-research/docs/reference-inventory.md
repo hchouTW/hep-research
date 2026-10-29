@@ -98,7 +98,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | Reference | Owner | KB | In SKILL.md | Cited by (files) | Other skills citing | Last commit |
 |---|---|---|---|---|---|---|
 | `academic-diagrams-guide.md` | hep-authoring | 10.8 | yes | 4 | - | ebb58136 2026-10-19 |
-| `academic-papers-guide.md` | hep-authoring | 13.3 | yes | 15 | hep-citations | b66baedf 2026-10-23 |
+| `academic-papers-guide.md` | hep-authoring | 13.4 | yes | 15 | hep-citations | 0bac705e 2026-10-29 |
 | `artifact-packaging-for-release.md` | hep-authoring | 2.9 | no | 3 | - | ebb58136 2026-10-19 |
 | `astroparticle-and-cosmic-ray-papers.md` | hep-authoring | 13.4 | yes | 13 | hep-citations, hep-measurement | ebb58136 2026-10-19 |
 | `citations-and-bibliography.md` | hep-authoring | 15.4 | yes | 15 | hep-citations, hep-computing | 16214af1 2026-10-26 |
@@ -114,7 +114,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `diagrams-statistics.md` | hep-authoring | 6.3 | no | 2 | - | ebb58136 2026-10-19 |
 | `equation-and-notation-auditing.md` | hep-authoring | 4.4 | no | 6 | hep-statistics, hep-theory | ebb58136 2026-10-19 |
 | `erratum-and-corrigendum-drafting.md` | hep-authoring | 4.5 | no | 3 | - | ebb58136 2026-10-19 |
-| `evidence-linked-writing.md` | hep-authoring | 5.7 | yes | 5 | hep-citations | ebb58136 2026-10-19 |
+| `evidence-linked-writing.md` | hep-authoring | 5.7 | yes | 6 | hep-citations | ebb58136 2026-10-19 |
 | `figures-and-tables.md` | hep-authoring | 9.3 | yes | 11 | hep-citations | ebb58136 2026-10-19 |
 | `general-diagram-principles.md` | hep-authoring | 7.8 | no | 2 | - | ebb58136 2026-10-19 |
 | `grant-and-fellowship-proposal-writing.md` | hep-authoring | 4.8 | yes | 2 | - | ebb58136 2026-10-19 |
@@ -138,9 +138,9 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `preprint-to-journal-reconciliation.md` | hep-authoring | 2.9 | no | 3 | - | ebb58136 2026-10-19 |
 | `preregistration-and-registered-reports.md` | hep-authoring | 3.5 | no | 1 | - | ebb58136 2026-10-19 |
 | `reproducibility-auditing.md` | hep-authoring | 3.1 | no | 9 | hep-citations, hep-computing | ebb58136 2026-10-19 |
-| `reviewer-style-assessment.md` | hep-authoring | 2.3 | yes | 2 | - | 9d16210f 2026-10-29 |
-| `revision-impact-tracking.md` | hep-authoring | 4.4 | yes | 14 | - | c888be49 2026-10-29 |
-| `scientific-style.md` | hep-authoring | 11.8 | no | 14 | hep-citations, hep-statistics | 5f4489ee 2026-10-29 |
+| `reviewer-style-assessment.md` | hep-authoring | 2.3 | yes | 3 | - | 9d16210f 2026-10-29 |
+| `revision-impact-tracking.md` | hep-authoring | 4.4 | yes | 15 | - | c888be49 2026-10-29 |
+| `scientific-style.md` | hep-authoring | 11.8 | no | 16 | hep-citations, hep-statistics | 5f4489ee 2026-10-29 |
 | `statistics-and-ml-papers.md` | hep-authoring | 14.2 | yes | 10 | hep-citations | ebb58136 2026-10-19 |
 | `submission-and-peer-review.md` | hep-authoring | 16.7 | no | 12 | - | ebb58136 2026-10-19 |
 | `supplementary-material-planning.md` | hep-authoring | 2.1 | no | 1 | - | ebb58136 2026-10-19 |

@@ -302,8 +302,24 @@ class CoverageOutcomes(unittest.TestCase):
         self.assertEqual([b["outcome"] for b in rep["blocks"]], ["source-error", "rendered"])
         self.assertEqual(rc, 1)
 
+    def test_prose_examples_follow_the_contrast_format(self):
+        """examples/prose/: weak-versus-better writing examples pass the canonical-example validator and are indexed."""
+        prose = ROOT / "examples" / "prose"
+        files = sorted(prose.glob("[0-9]*.md"))
+        self.assertGreaterEqual(len(files), 3)
+        index = (prose / "README.md").read_text(encoding="utf-8")
+        validator = ROOT.parents[1] / "tools" / "validate_skill_example.py"
+        for path in files:
+            with self.subTest(path.name):
+                res = subprocess.run([sys.executable, str(validator), str(path)], capture_output=True, text=True, check=False)
+                self.assertEqual(res.returncode, 0, res.stdout + res.stderr)
+                self.assertIn(path.name, index)
+                self.assertIn("Illustrative example", path.read_text(encoding="utf-8"))
+
     def test_every_example_has_caption_and_source(self):
         for path in sorted((ROOT / "examples").rglob("[0-9]*.md")):
+            if "prose" in path.relative_to(ROOT / "examples").parts:
+                continue  # writing examples, not diagrams: checked by test_prose_examples_follow_the_contrast_format
             text = path.read_text(encoding="utf-8")
             self.assertIn("**Caption:**", text, path.name)
             self.assertIn("```", text, path.name)
