@@ -22,7 +22,9 @@ self-check predictions: ln mean and ln sigma each within max(1e-9, 1e-4 x the st
 and output (platform rounding far below the emulator's own uncertainty is harmless; a misread model is not). A kernel matrix that does not factorize as stored (near-singular: it can factorize on one
 platform and not on another) is factorized with a jitter of 1e-14, else 1e-13, times its mean diagonal.
 Request: transport null or equal to the training transport (the model's context; else the request is refused with
-out-of-domain: the emulator knows no other transport); observable B/C on axis rigidity with bins that are a contiguous
+out-of-domain: the emulator knows no other transport), compared after normalise_transport, which drops an injection
+item's spectrum_variable equal to the USINE translator's default (DEFAULT_SPECTRUM_VARIABLE, the same rendered USINE
+inputs; cr-propagation L2); another spectrum_variable stays and is refused; observable B/C on axis rigidity with bins that are a contiguous
 run of the training bins (edges equal within relative 1e-9; else unsupported-observable); want lis only (not
 decomposable). Point: inside the declared box (protocol) and 'inside' by the DomainModel (unit-cube coordinates);
 'sparse' or 'outside' is refused with out-of-domain and the DomainModel's reasons, or with
@@ -328,12 +330,33 @@ def _bin_slice(edges: list[float], wanted: list[float]) -> slice | None:
     return None
 
 
+# usine_translate.DEFAULT_SPECTRUM_VARIABLE, inlined to keep this provider's imports minimal (a test pins the two equal):
+# an injection item without spectrum_variable is translated per E_k/n, so stating that value changes no USINE input
+DEFAULT_SPECTRUM_VARIABLE = "kinetic_energy_per_nucleon"
+
+
+def normalise_transport(transport):
+    """The transport block with every sources.injection[i].spectrum_variable equal to DEFAULT_SPECTRUM_VARIABLE removed
+    (the implicit and explicit forms render identical USINE inputs); anything else, and a non-object, is unchanged.
+    Used only to compare a request's block with the training block; cache keys hash the block as sent."""
+    if not isinstance(transport, dict):
+        return transport
+    src = transport.get("sources")
+    inj = src.get("injection") if isinstance(src, dict) else None
+    if not isinstance(inj, list):
+        return transport
+    items = [{k: v for k, v in item.items() if not (k == "spectrum_variable" and v == DEFAULT_SPECTRUM_VARIABLE)}
+             if isinstance(item, dict) else item for item in inj]
+    return dict(transport, sources=dict(src, injection=items))
+
+
 def request_problem(request, emulator: Emulator):
     """(reason, detail) for a request this emulator cannot answer beyond the generic protocol checks, else None."""
     if not isinstance(request, dict) or not isinstance(request.get("observables"), list):
         return None  # malformed: the generic checks of respond() report it
     transport = request.get("transport")
-    if transport is not None and canonical_sha256(transport) != canonical_sha256(emulator.transport):
+    if transport is not None and (canonical_sha256(normalise_transport(transport))
+                                  != canonical_sha256(normalise_transport(emulator.transport))):
         return ("out-of-domain", "the emulator was trained for one transport block (sha256 "
                 f"{canonical_sha256(emulator.transport)[:12]}...); a request naming another cannot be emulated")
     for obs in request["observables"]:

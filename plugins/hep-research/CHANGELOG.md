@@ -30,8 +30,9 @@ Software checks establish contract consistency only, not physical validity.
   and C2UF input hash under 0.2.0 and finds none under 0.3.0), and the F1 example and the C2U study driver now ask
   the registered version. USINE's `DEFAULT_TRANSPORT` and B1's `d1-*` specs state
   `sources.injection[].spectrum_variable` (`kinetic_energy_per_nucleon`, the translator's default): the rendered USINE
-  inputs are identical; the emulator models keep their recorded training transport (implicit form) unchanged, so the
-  emulator refuses the explicit form as another block. Doc slips: the d3_study.py docstring names
+  inputs are identical; the emulator models keep their recorded training transport (implicit form) byte for byte, and
+  the emulator compares a request's block after dropping a spectrum_variable equal to that default, so it accepts
+  both forms (each keeps its own cache key) and still refuses any other variable. Doc slips: the d3_study.py docstring names
   `dragon2_translate.spec_from_transport`; VALIDATION erratum for the K3 block count and the K1 base.
 
 ## 0.44.0 (2026-10-29)

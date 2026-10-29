@@ -8026,7 +8026,12 @@ finds none of them among the hashes of the same points under 0.3.0, so a cache f
 0.3.0 request (no stale hit; a miss is a fresh run). Live callers now ask the registered version: the F1 example
 `examples/bc-usine-reproduction/run.py` and the C2U study driver read it from `adapter.json`, and the `UsineProvider`
 tests of `test_propagation_fit.py` send the registry's version instead of the record's (the record still asserts
-0.2.0). F1's record tests and the C2UF tests pass unchanged; no file under `c2uf/` or `e2/` was edited.
+0.2.0). F1's record tests pass unchanged; no file under `c2uf/` or `e2/` was edited. The C2UF offline tests passed in
+the first round too, but they never send the study's transport: `usine_emulator_family_study.emulator_values` sends
+`st.transport()`, built from DEFAULT_TRANSPORT, and the C2UF emulator refused it after L2-3 (training transport sha256
+25ea7f409b88..., study transport 4754ca1f5064...), so every rerun of the C2UF emulator study, and the live test
+`test_live_emulator_matches_fresh_usine_runs`, would have failed (verifier, rework round 1). Fixed by the emulator's
+transport normalisation below; `EmulatorPerModelDeclaration.test_study_transport_is_accepted` now covers it offline.
 
 USINE inputs (L2-3; `$CRPROP_OUT/l2/render/before.json`, `after.json`): each of the five d1 specs and DEFAULT_TRANSPORT
 translated with the old (implicit) and new (explicit) injection by the translator (unchanged by L2, so old and new
@@ -8034,10 +8039,18 @@ translator agree): all four rendered files identical, sha256 by sha256. The tran
 note for spectrum_variable disappears; the echoed transport has the field) and so does the canonical hash of
 DEFAULT_TRANSPORT (a4a7ec283011... implicit, d25f968e865d... explicit). Committed hashes over the transport object are
 kept unchanged: the E2 and C2UF emulator models record the implicit block as their training transport (hashed into
-their ml-artifacts), and the C2U/C2UF input hashes are history (above). Effect: the emulator compares a request's
-transport by hash, so it refuses the explicit form as another block (out-of-domain) and accepts null or its recorded
-training transport (`EmulatorProviderRefusals.test_transport_and_bins`); `EmulatorArtifact` checks that the training
-transport is DEFAULT_TRANSPORT minus the explicit default and renders the same USINE inputs.
+their ml-artifacts), and the C2U/C2UF input hashes are history (above). Effect on the emulator, final state (rework
+round 1): `emulator_provider.request_problem` compares canonical_sha256(normalise_transport(request transport)) with
+canonical_sha256(normalise_transport(training transport)); `normalise_transport` drops an injection item's
+spectrum_variable equal to DEFAULT_SPECTRUM_VARIABLE (`kinetic_energy_per_nucleon`, inlined; a test pins it equal to
+`usine_translate.DEFAULT_SPECTRUM_VARIABLE`). So the emulator accepts null, its training transport and USINE's
+DEFAULT_TRANSPORT (and the C2UF study's transport built from it), and still refuses another spectrum_variable or any
+other block (`EmulatorProviderRefusals.test_transport_and_bins`, `test_normalised_transport`). The model files, the
+ml-artifacts and model_sha256 are byte-identical; the runner's point hash still covers the block as sent, so the two
+forms keep distinct cache keys that map to identical values (`test_study_transport_is_accepted` checks equal results
+and different input hashes). No previously answered request changes its answer, so the emulator stays 1.0.0.
+`EmulatorArtifact` checks that the training transport is DEFAULT_TRANSPORT minus the explicit default and renders the
+same USINE inputs.
 
 **Erratum (appended; the sections themselves are not edited).** CRPROP-K3, row K3-2: "46 blocks; the 36 the old
 translator accepted" should read 37 accepted blocks (the verifier's scan). CRPROP-K1, environment field: base
@@ -8048,19 +8061,19 @@ it is `dragon2_translate.spec_from_transport`.
 | ID | Result | Evidence |
 |---|---|---|
 | L2-1 | pass | schema requires `result.provider_version`; core and schema agree (`tests.core.test_provider.DeclaredModulation`: the missing and the empty field refused by both, a result of another version core-only, `test_conformance_holds_only_at_the_version_it_was_obtained_at` for the registry); `tests.tools.test_provider_registry` (the gate writes the version, `collect` refuses a bumped version with or without an explicit declaration version); USINE gate rerun at 0.3.0 (above) |
-| L2-2 | pass | adapter 0.3.0, usine and dragon2 0.3.0, emulator 1.0.0 (`ProviderVersionMigration.test_versions`); migration kept, not re-keyed, and checked (`test_recorded_input_hashes_are_history`); F1 record, C2U, C2UF and E2 pinned tests pass unchanged |
-| L2-3 | pass | spectrum_variable stated (`UsineProviderOffline.test_injection_spectrum_variable_is_stated`); rendered USINE inputs identical; effect on hashes recorded above; erratum and docstring fix |
+| L2-2 | pass | adapter 0.3.0, usine and dragon2 0.3.0, emulator 1.0.0 (`ProviderVersionMigration.test_versions`); migration kept, not re-keyed, and checked (`test_recorded_input_hashes_are_history`); F1 record, C2U and E2 pinned tests pass unchanged; the C2UF study transport is accepted again (rework round 1) |
+| L2-3 | pass | spectrum_variable stated (`UsineProviderOffline.test_injection_spectrum_variable_is_stated`); rendered USINE inputs identical; effect on hashes recorded above; the emulator accepts both forms by normalised comparison, refuses other variables (rework round 1); erratum and docstring fix |
 | ALL-1 | pass | this section |
 | ALL-2 | pass | `workflow_check.py acceptance` exit 0 |
 | ALL-3 | deferred to the wave run (A1.5) | |
 | ALL-4 | pass | `check_naming.py`, `workflow_check.py gaps --base f0f424da` |
-| ALL-5 | fail on the card only | `check_layering.py` passes; `workflow_check.py diff --work-package L2` lists 353 paths outside L2's `files`: the contracts-bump set the assignment requires (contracts/__init__.py, validate.py, vocab/core.json, 159 contract fixtures, 19 theory-profile files, 3 skill templates, 166 example outputs), `core/__init__.py` (CORE_VERSION) and two `tests/skills/hep_statistics` files (migration of live calls); the card needs K2's file list for these |
+| ALL-5 | pass | `check_layering.py`; `workflow_check.py diff --work-package L2 --base f0f424da` ok against the card widened on integration (eeb62a4e: the contracts-bump set, `core/__init__.py`, `tests/skills/hep_statistics/**`); round 0 had listed those 353 paths as outside the card |
 | ALL-6 | pass | `check_packaging.py` |
 | ALL-7 | pass | worker report |
 
 | Check | Result |
 |---|---|
-| Impacted tests (`rule_registry.py impact`: 35 modules, plus `test_provider`, `test_adapter_declarations`, `test_gate_verdict_snapshot`, `test_provider_conformance_mixin`) | 756 tests OK (17 skipped) |
+| Impacted tests (`rule_registry.py impact`: 35 modules, plus `test_provider`, `test_adapter_declarations`, `test_gate_verdict_snapshot`, `test_provider_conformance_mixin`) | 758 tests OK (17 skipped; rework round 1) |
 | `tests/examples` | 176 tests OK (22 skipped) |
 | theory-profile tests (9 profiles) | all pass |
 | `run_all_checks.py --part static --jobs 4` | exit 0 |

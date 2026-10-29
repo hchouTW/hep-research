@@ -1998,10 +1998,30 @@ class EmulatorProviderRefusals(unittest.TestCase):
         training = json.loads((E2_FIX / "emulator-model.json").read_text(encoding="utf-8"))["context"]["transport"]
         proc, doc = e2_call(dict(EMULATOR_REQUEST, transport=training))
         self.assertEqual(proc.returncode, 0, doc)
-        # the emulator compares transport blocks by hash: the explicit form of its training transport (L2-3, the same
-        # USINE inputs) is another block and is refused, never emulated on the strength of a rendering argument
+        # L2: blocks are compared after normalise_transport, so USINE's DEFAULT_TRANSPORT, which states the default
+        # injection spectrum_variable (the same rendered USINE inputs), is accepted; another spectrum_variable is not
         proc, doc = e2_call(dict(EMULATOR_REQUEST, transport=usine_provider.DEFAULT_TRANSPORT))
+        self.assertEqual(proc.returncode, 0, doc)
+        rigidity = json.loads(json.dumps(usine_provider.DEFAULT_TRANSPORT))
+        for item in rigidity["sources"]["injection"]:
+            item["spectrum_variable"] = "rigidity"
+        proc, doc = e2_call(dict(EMULATOR_REQUEST, transport=rigidity))
         self.assertEqual((proc.returncode, doc["reason"]), (1, "out-of-domain"))
+
+    def test_normalised_transport(self):
+        """L2: the provider's inlined default equals the translator's; normalisation drops only that default and never
+        touches the block it was given (the runner hashes the block as sent, so both forms keep their own cache keys)."""
+        self.assertEqual(emulator_provider.DEFAULT_SPECTRUM_VARIABLE, usine_translate.DEFAULT_SPECTRUM_VARIABLE)
+        explicit = usine_provider.DEFAULT_TRANSPORT
+        before = json.dumps(explicit, sort_keys=True)
+        self.assertEqual(emulator_provider.normalise_transport(explicit), implicit_spectrum_variable(explicit))
+        self.assertEqual(json.dumps(explicit, sort_keys=True), before)
+        implicit = implicit_spectrum_variable(explicit)
+        self.assertEqual(emulator_provider.normalise_transport(implicit), implicit)
+        other = json.loads(before)
+        other["sources"]["injection"][0]["spectrum_variable"] = "total_energy"
+        self.assertEqual(emulator_provider.normalise_transport(other), other)
+        self.assertIsNone(emulator_provider.normalise_transport(None))
         bad = dict(EMULATOR_REQUEST, observables=[{"id": "B/C", "axis": "rigidity", "unit": "GV",
                                                     "bins": [[2.0, 3.0], [3.0, 4.0]]}])
         proc, doc = e2_call(bad)
@@ -2641,6 +2661,30 @@ class EmulatorPerModelDeclaration(unittest.TestCase):
         bad = dict(req, observables=[{"id": "B/C", "axis": "rigidity", "unit": "GV", "bins": [[2.0, 3.0]]}])
         proc, doc = e2_call(bad, env=self.env)
         self.assertEqual(doc["status"], "failed")
+
+    def test_study_transport_is_accepted(self):
+        """L2: the C2UF emulator study's transport (usine_two_dataset_family_study.transport(), built from USINE's
+        DEFAULT_TRANSPORT, which since L2-3 states the default injection spectrum_variable) is accepted by the C2UF
+        emulator trained on the implicit form, offline (no USINE run), and answers like the training transport."""
+        sys.path.insert(0, str(ROOT / "tests" / "skills" / "hep_statistics"))
+        import usine_two_dataset_family_study as st
+        study = st.transport()
+        self.assertNotEqual(study, self.model["context"]["transport"])
+        self.assertEqual(implicit_spectrum_variable(study), self.model["context"]["transport"])
+        point = {"D0_cm2_s": 3.0e28, "delta": 0.45, "V_A_kms": 70.0, "V_c_kms": 1.0}
+        req = {"protocol": "cr-provider/1", "provider": "emulator", "provider_version": self.decl["version"],
+               "transport": study, "points": [point], "observables": st.observables(), "want": ["lis"], "seed": None}
+        proc, doc = e2_call(req, env=self.env)
+        self.assertEqual((proc.returncode, doc["status"]), (0, "ok"), doc)
+        _, ref = e2_call(dict(req, transport=self.model["context"]["transport"]), env=self.env)
+        hashes = []
+        for res in (doc, ref):
+            for r in res["results"]:
+                ev = r.get("evaluation") or {}
+                ev.pop("elapsed_s", None)
+                hashes.append(ev.pop("input_hash"))
+        self.assertEqual(doc["results"], ref["results"])   # the same values ...
+        self.assertNotEqual(hashes[0], hashes[1])            # ... under distinct keys (the block as sent is hashed)
 
 F1_WINDOWS = {"BIG": ((0.45, 0.52), (0.266, 0.338)), "SLIM": ((0.49, 0.53), (0.258, 0.304)),
               "QUAINT": ((0.43, 0.50), (0.297, 0.367))}   # VALIDATION.md CRPROP-F1, fixed before any fit (D9)

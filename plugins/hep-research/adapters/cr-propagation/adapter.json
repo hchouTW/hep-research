@@ -252,7 +252,7 @@
    "entrypoint": "assets/emulator_provider.py",
    "protocol": "cr-provider/1",
    "version": "1.0.0",
-   "description": "Gaussian-process emulator of USINE B/C (hep-ml train_emulator.py, ml-artifact task surrogate, tests/adapters/fixtures/cr_propagation/e2) on the 20 rigidity bins 2-1000 GV of its training runs, transport fixed to its training transport, the USINE provider's DEFAULT_TRANSPORT as of usine 0.2.0 (L 4 kpc; requests compare the block by hash, so the 0.3.0 DEFAULT_TRANSPORT, which states the injection spectrum_variable and renders the same USINE inputs, is another block and is refused); points the stored DomainModel calls sparse or outside are refused (out-of-domain); emulator error as numerical uncertainty components; not decomposable; numpy and scipy only",
+   "description": "Gaussian-process emulator of USINE B/C (hep-ml train_emulator.py, ml-artifact task surrogate, tests/adapters/fixtures/cr_propagation/e2) on the 20 rigidity bins 2-1000 GV of its training runs, transport fixed to its training transport, the USINE provider's DEFAULT_TRANSPORT (L 4 kpc; a request's block is compared with it by hash after dropping an injection spectrum_variable equal to the translator's default kinetic_energy_per_nucleon, so usine 0.3.0's DEFAULT_TRANSPORT, which states that default and renders the same USINE inputs, is accepted and any other block is refused); points the stored DomainModel calls sparse or outside are refused (out-of-domain); emulator error as numerical uncertainty components; not decomposable; numpy and scipy only",
    "domain": {
     "D0_cm2_s": {
      "min": 1e+28,
