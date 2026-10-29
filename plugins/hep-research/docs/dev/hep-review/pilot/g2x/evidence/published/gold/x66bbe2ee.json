@@ -1,0 +1,35 @@
+{
+  "id": "x66bbe2ee",
+  "type": "C01",
+  "defects": [
+    {
+      "defect_id": "D1",
+      "statement": "Both tracks must pass, so the event efficiency is the square of the per-track efficiency under the stated independence model.",
+      "affected_results": [
+        "normalization",
+        "cross_section",
+        "cross_section_error"
+      ],
+      "corrected_values": {
+        "normalization": 36.35281919999999,
+        "cross_section": 23.106873647917798,
+        "cross_section_error": 0.8888165912262185
+      }
+    },
+    {
+      "defect_id": "D2",
+      "statement": "Both independent parent decays must enter the selected mode, so the branching normalization is branch_fraction squared.",
+      "affected_results": [
+        "normalization",
+        "cross_section",
+        "cross_section_error"
+      ],
+      "corrected_values": {
+        "normalization": 36.35281919999999,
+        "cross_section": 23.106873647917798,
+        "cross_section_error": 0.8888165912262185
+      }
+    }
+  ],
+  "notes": "Synthetic model; uncertainties and approximations are scoped explicitly in the public note."
+}

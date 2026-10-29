@@ -1,0 +1,19 @@
+{
+  "id": "x87c5cae5",
+  "type": "C01",
+  "defects": [
+    {
+      "defect_id": "D1",
+      "statement": "The design-based variance for sampling without replacement requires the finite-population factor 1-sampled/population; omitting it inflates the reported uncertainty.",
+      "affected_results": [
+        "fraction_error",
+        "retained_error"
+      ],
+      "corrected_values": {
+        "fraction_error": 0.008711864351775482,
+        "retained_error": 78.40677916597933
+      }
+    }
+  ],
+  "notes": "Synthetic model; uncertainties and approximations are scoped explicitly in the public note."
+}

@@ -1,0 +1,21 @@
+import json
+from pathlib import Path
+p=Path(__file__).resolve().parent
+rows=[
+('A rate normalized to a prescaled monitor uses the monitor as though every eligible event had been recorded.','The monitor yield must be expanded by the reciprocal retention probability before forming the relative exposure.','monitor normalization','The retention is 0.25, so the effective unprescaled monitor count is four times the recorded count.','accept'),
+('The efficiency for a coincidence is taken as a single-object probability although two independent objects must both fire.','The event-level detection probability is obtained by multiplying the two object probabilities.','coincidence normalization','With both objects at probability 0.92, coincidence efficiency is 0.8464, rather than 0.92.','accept'),
+('A migration correction propagates only each reconstructed bin own variance, even though each output depends on all reconstructed bins.','A perturbation of the second observed count also moves the first reconstructed truth estimate; its variance cannot be dropped.','inverted response uncertainty','For t1=1.3*n1-0.2*n2 and independent Poisson observations, Var(t1)=1.69*n1+0.04*n2.','accept'),
+('A normalized histogram goodness-of-fit calculation counts all populated bins as independent residuals.','The residuals sum to zero after conditioning on the observed total.','shape-test reference distribution','Seven fixed-total categories span six contrasts; no shape parameters are fitted, so the reference has six degrees of freedom.','accept'),
+('A reported gamma posterior expectation is calculated with its interior mode formula.','The first moment follows by the ratio of two gamma integrals, giving shape/rate.','posterior point summary','Integrating lambda times a Gamma(5,3) density gives 5/3; the stated 4/3 is the stationary point of its density.','accept'),
+('A no-replacement survey variance omits the finite-population correction.','Every binary-tag uncertainty should be computed from a Poisson distribution.','survey variance','The count of tags is a count, therefore its variance must equal the tag count.','reject'),
+('A global probability is approximated by the sum of local tail probabilities outside the rare-tail regime.','The test statistic needs a two-sided local p-value.','local-tail convention','All searches must count deviations on both sides even when the alternative is explicitly an excess.','reject'),
+('A random denominator contribution is omitted from a ratio standard error.','The result may underestimate uncertainty.','reported ratio','The propagation looks questionable and ought to be checked carefully.','reject'),
+('An external calibration uncertainty is absent from a subtracted-yield variance.','There is a calibration issue.','calibration','Something about the scaling seems wrong; more detail is needed.','reject'),
+('Two independent decay probabilities are normalized as one probability in an exclusive pair sample.','The normalizations are missing a luminosity conversion by a thousand.','production normalization','The record and calculation both use inverse picobarns, but a unit conversion is always needed.','reject')]
+items=[]; labels={}
+for i,(defect,claim,element,evidence,label) in enumerate(rows,1):
+    key=f'K{i:02d}'
+    items.append(dict(item=key,defect=defect,finding=dict(claim=claim,element=element,evidence_text=evidence)))
+    labels[key]=label
+(p/'items.json').write_text(json.dumps(items,indent=2)+'\n')
+(p/'labels.json').write_text(json.dumps(labels,indent=2)+'\n')

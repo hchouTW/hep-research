@@ -1,0 +1,51 @@
+#!/usr/bin/env python3
+"""Standalone standard-library numerical oracle; takes one public instance path."""
+import json, math, sys
+from pathlib import Path
+
+def compute(d, fixed=(), hidden=None):
+    t=math.fsum(d['decay_times']+d['censor_times']); k=len(d['decay_times'])
+    a=d['prior_shape']+k; b=d['prior_rate']+t
+    return dict(total_time=t,decays=k,rate_summary=a/b,rate_sd=math.sqrt(a)/b,lifetime_mean=b/(a-1))
+
+
+def main():
+    ident=Path(__file__).stem
+    checks=[]
+    def check(label, condition):
+        checks.append({'check': label, 'passed': bool(condition)})
+    def close(a,b):
+        return math.isfinite(a) and math.isfinite(b) and abs(a-b)<=.001*max(abs(b),1e-300)
+    try:
+        base=Path(sys.argv[1]); data=json.loads((base/'material/data.json').read_text())
+        gold=json.loads((Path(__file__).resolve().parents[1]/'gold'/f'{ident}.json').read_text())
+        reported=data.pop('stated_results')
+        check('identity', gold['id']==ident and base.name==ident)
+        kind=gold['type']; h=None
+        fixed=tuple(range(len(gold['defects']))) if kind=='C01' else ()
+        written=compute(data,(),h['true'] if h else None)
+        check('complete_result_vector',set(reported)==set(written))
+        for key,value in written.items(): check('written_method:'+key,close(reported.get(key,float('nan')),value))
+        if kind=='C01':
+            full=compute(data,fixed)
+            for i,defect in enumerate(gold['defects']):
+                one=compute(data,(i,))
+                affected=defect['affected_results']
+                check('material_single_correction:'+defect['defect_id'],any(abs(one[k]-written[k])>.005*abs(one[k]) for k in affected))
+                check('complete_correction_keys:'+defect['defect_id'],set(affected)==set(defect['corrected_values']))
+                for k in affected: check('fully_corrected:'+defect['defect_id']+':'+k,close(full[k],defect['corrected_values'][k]))
+        elif kind=='C03':
+            check('missing_input',data.get(h['field']) is None)
+            other=compute(data,(),h['alternative'])
+            check('admissible_witnesses',h['true'] > 0 and h['alternative'] > 0)
+            check('nonidentifiability',any(abs(other[k]-written[k])>.005*abs(written[k]) for k in written))
+        else:
+            check('empty_defects',gold['defects']==[])
+            # Computation uses inputs alone, never any reported value.
+            for k,v in compute(data).items(): check('independent_computation:'+k,close(v,reported[k]))
+    except Exception as exc:
+        checks.append({'check':'execution:'+type(exc).__name__,'passed':False})
+    ok=bool(checks) and all(x['passed'] for x in checks)
+    print(json.dumps({'id':ident,'ok':ok,'checks':checks}))
+    return 0 if ok else 1
+if __name__=='__main__': sys.exit(main())

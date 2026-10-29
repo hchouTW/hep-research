@@ -1,0 +1,354 @@
+{
+ "D043": {
+  "grade": "accept",
+  "reason": "Second finding: off is an independent Poisson count and alpha^2*off must be added to the variance (on + alpha^2*off), applied to rate_error."
+ },
+ "D069": {
+  "grade": "accept",
+  "reason": "Second finding: fixed multinomial total removes one dof, dof = k-1 = 2, not 3, with corrected p-value."
+ },
+ "D064": {
+  "grade": "accept",
+  "reason": "First finding: inversion uses inverse of the transpose; correct estimator is R^{-1} n given rows=reco, columns=true."
+ },
+ "D019": {
+  "grade": "accept",
+  "reason": "Second finding: branch_fraction is per parent with two independent decays, so branch_fraction^2; normalization uses it once."
+ },
+ "D034": {
+  "grade": "accept",
+  "reason": "First finding: design-based SRSWOR variance omits the finite-population correction (1-n/N), overstating fraction_error and retained_error."
+ },
+ "D080": {
+  "grade": "accept",
+  "reason": "First finding: global_p uses the Bonferroni bound N*p_loc instead of the exact 1-(1-p_loc)^N under independent trials."
+ },
+ "D028": {
+  "grade": "accept",
+  "reason": "First finding: reported posterior_mean is the mode (a-1)/b instead of the mean a/b = 11/6."
+ },
+ "D061": {
+  "grade": "accept",
+  "reason": "Second finding: variance keeps only the diagonal inverse coefficients, omitting the other bin's Poisson fluctuation; Var(mu_i)=sum_k A_ik^2 n_k."
+ },
+ "D077": {
+  "grade": "accept",
+  "reason": "First finding: dof should be k-1 = 2 because normalization to the observed total imposes a linear constraint."
+ },
+ "D026": {
+  "grade": "accept",
+  "reason": "Single finding: posterior_mean is the mode (shape-1)/rate, mean is shape/rate."
+ },
+ "D039": {
+  "grade": "accept",
+  "reason": "First finding: omits the finite population correction (1-n/N) for sampling without replacement; uncertainties overstated."
+ },
+ "D073": {
+  "grade": "accept",
+  "reason": "First finding: multinomial conditioned on fixed total with specified probabilities has k-1 = 2 dof, not 3."
+ },
+ "D015": {
+  "grade": "accept",
+  "reason": "Second finding: two independent parent decays imply branch_fraction^2; normalization uses it once."
+ },
+ "D068": {
+  "grade": "accept",
+  "reason": "First finding: statistic divides by observed counts (Neyman) although the method names Pearson, which divides by expected counts; values given."
+ },
+ "D060": {
+  "grade": "accept",
+  "reason": "First finding: inverse of transposed response used, inconsistent with rows=reco convention; correct is R^{-1} n."
+ },
+ "D010": {
+  "grade": "accept",
+  "reason": "Second finding: reference count is a Poisson sample but its fluctuation (relative variance 1/reference) is not propagated into ratio_error."
+ },
+ "D022": {
+  "grade": "accept",
+  "reason": "First finding: event efficiency needs both independent tracks, track_efficiency^2, but a single factor is used."
+ },
+ "D065": {
+  "grade": "accept",
+  "reason": "Second finding: variance keeps only the diagonal of the inverse operator, dropping the other bin's Poisson contribution; Var(mu_i)=sum_k A_ik^2 n_k."
+ },
+ "D042": {
+  "grade": "accept",
+  "reason": "First finding: alpha ignores off_keep prescale on the continuum stream; alpha should be width ratio / off_keep = 0.4, changing background, yield and rate."
+ },
+ "D001": {
+  "grade": "accept",
+  "reason": "First finding: transfer_error omitted from net-signal variance; contribution C^2 sigma_t^2 = 900."
+ },
+ "D047": {
+  "grade": "accept",
+  "reason": "Second finding: variance omits Poisson fluctuation of the independent side-window count; Var = on + alpha^2*off."
+ },
+ "D006": {
+  "grade": "accept",
+  "reason": "Second finding: ratio_error omits the Poisson fluctuation of the reference count; delta method adds R^2/reference."
+ },
+ "D051": {
+  "grade": "accept",
+  "reason": "Third finding: uncertainty propagation drops the Poisson fluctuation of the independent off count; Var = on + alpha^2*off."
+ },
+ "D086": {
+  "grade": "accept",
+  "reason": "First finding: global_p uses the Bonferroni bound windows*local_p rather than exact 1-(1-p)^N for independent windows."
+ },
+ "D046": {
+  "grade": "accept",
+  "reason": "First finding: transfer coefficient omits the off-stream retention probability; alpha should be divided by off_keep, changing background, yield and rate."
+ },
+ "D083": {
+  "grade": "accept",
+  "reason": "First finding: global_p = windows*local_p is the Bonferroni bound; exact Sidak value 1-(1-0.035)^18."
+ },
+ "D002": {
+  "grade": "accept",
+  "reason": "Second finding: reference yield is a Poisson sample but propagation fixes it, omitting relative variance 1/N_ref."
+ },
+ "D005": {
+  "grade": "accept",
+  "reason": "First finding: ratio_error omits the independent Gaussian transfer calibration error; term control^2*transfer_error^2 = 900."
+ },
+ "D014": {
+  "grade": "accept",
+  "reason": "First finding: event efficiency must be track_efficiency^2 since both independent tracks must be selected."
+ },
+ "D031": {
+  "grade": "accept",
+  "reason": "First finding: posterior_mean is the mode (alpha-1)/beta instead of mean alpha/beta."
+ },
+ "D018": {
+  "grade": "accept",
+  "reason": "First finding: single track_efficiency factor used; both independent tracks require track_efficiency^2."
+ },
+ "D037": {
+  "grade": "accept",
+  "reason": "Single finding: variance omits finite population correction (1-n/N) for SRSWOR; uncertainties overstated by 1/sqrt(0.4)."
+ },
+ "D076": {
+  "grade": "accept",
+  "reason": "Second finding: statistic divides by observed counts (Neyman) rather than expected counts required by the named Pearson statistic."
+ },
+ "D009": {
+  "grade": "accept",
+  "reason": "First finding: propagation omits control^2*transfer_error^2 from the independent transfer estimate uncertainty."
+ },
+ "D050": {
+  "grade": "accept",
+  "reason": "First finding: transfer coefficient leaves out off_keep; alpha = width_on/(off_keep*width_off), changing background, yield and rate."
+ },
+ "D072": {
+  "grade": "accept",
+  "reason": "Second finding: statistic divides by observed counts although the method is the Pearson statistic with expected-count denominators."
+ },
+ "D023": {
+  "grade": "accept",
+  "reason": "Second finding: branch_fraction per parent with two independent decays implies branch_fraction^2; normalization uses a single power."
+ },
+ "D056": {
+  "grade": "accept",
+  "reason": "Second finding: variance keeps only diagonal inverse entries, omitting the other bin's Poisson fluctuation; Var(mu_i)=sum_k A_ik^2 n_k."
+ },
+ "D055": {
+  "grade": "accept",
+  "reason": "First finding: inverse of transposed response used, inconsistent with P(reco i|true j) convention; correct is R^{-1} n."
+ },
+ "F007": {
+  "grade": "D1",
+  "reason": "Names omission of the independent transfer calibration error, term control^2*transfer_error^2."
+ },
+ "F062": {
+  "grade": "D1",
+  "reason": "Names use of inverse of transposed response instead of R^{-1}."
+ },
+ "F067": {
+  "grade": "D2",
+  "reason": "Names diagonal-only variance propagation omitting the other bin's Poisson contribution, Var=sum_k A_ik^2 n_k."
+ },
+ "F058": {
+  "grade": "D2",
+  "reason": "Names diagonal-only variance propagation omitting the other bin's Poisson fluctuation."
+ },
+ "F003": {
+  "grade": "D1",
+  "reason": "Names omitted transfer_error contribution C^2 sigma_t^2."
+ },
+ "F082": {
+  "grade": "D1",
+  "reason": "Names the linear 1-N*p_loc expression versus exact (1-p_loc)^N for independent windows, applied to null_survival (complement of the same mechanism)."
+ },
+ "F008": {
+  "grade": "D2",
+  "reason": "Names omitted Poisson fluctuation of the reference count in the ratio denominator; adds R^2/reference."
+ },
+ "F070": {
+  "grade": "D1",
+  "reason": "Names observed-count denominators (Neyman) instead of expected counts required by the stated Pearson statistic."
+ },
+ "F004": {
+  "grade": "D2",
+  "reason": "Names reference yield fixed at measured value, omitting its Poisson relative variance 1/N_ref."
+ },
+ "F024": {
+  "grade": "D1",
+  "reason": "Names single track_efficiency where two independent tracks require track_efficiency^2."
+ },
+ "F020": {
+  "grade": "D1",
+  "reason": "Names single track_efficiency factor where both independent tracks require track_efficiency^2."
+ },
+ "F011": {
+  "grade": "D1",
+  "reason": "Names omitted control^2*transfer_error^2 from the transfer estimate uncertainty."
+ },
+ "F085": {
+  "grade": "D1",
+  "reason": "Names linear 1-windows*local_p versus exact (1-0.035)^18 for null_survival; same union-bound mechanism."
+ },
+ "F016": {
+  "grade": "D1",
+  "reason": "Names one power of track_efficiency where two independent tracks require the square."
+ },
+ "F017": {
+  "grade": "D2",
+  "reason": "Names branch_fraction entering once where two independent parent decays imply branch_fraction^2."
+ },
+ "F048": {
+  "grade": "D1",
+  "reason": "Names omission of off-stream retention probability off_keep from the transfer coefficient, with downstream yield and rate."
+ },
+ "F044": {
+  "grade": "D1",
+  "reason": "Names alpha ignoring the off_keep prescale; alpha should be width ratio / off_keep."
+ },
+ "F053": {
+  "grade": "D1",
+  "reason": "Downstream stated values; attributes the error to omitting off_keep ('with off_keep included'), which is the D1 mechanism."
+ },
+ "F071": {
+  "grade": "D2",
+  "reason": "Names fixed multinomial total removing one dof, dof = k-1 = 2."
+ },
+ "F075": {
+  "grade": "D1",
+  "reason": "Names observed-count denominators contrary to the Pearson statistic's expected counts."
+ },
+ "F049": {
+  "grade": "D2",
+  "reason": "Names omitted Poisson fluctuation of the independent off count; Var = on + alpha^2*off."
+ },
+ "F059": {
+  "grade": "none",
+  "reason": "Only states that results inherit other findings and lists corrected numbers; it names no mechanism itself. Valid as a consequence statement."
+ },
+ "F063": {
+  "grade": "D2",
+  "reason": "Names diagonal-only variance omitting the other bin's Poisson fluctuation."
+ },
+ "F084": {
+  "grade": "D1",
+  "reason": "Names Bonferroni windows*local_p versus exact 1-(1-p)^N."
+ },
+ "F054": {
+  "grade": "D2",
+  "reason": "Names dropped Poisson fluctuation of the independent off count; Var = on + alpha^2*off."
+ },
+ "F032": {
+  "grade": "D1",
+  "reason": "Names posterior_mean computed as mode (alpha-1)/beta instead of alpha/beta."
+ },
+ "F040": {
+  "grade": "D1",
+  "reason": "Names omitted finite population correction (1-n/N) for sampling without replacement."
+ },
+ "F087": {
+  "grade": "D1",
+  "reason": "Names Bonferroni bound windows*local_p versus exact 1-(1-p)^N."
+ },
+ "F045": {
+  "grade": "D2",
+  "reason": "Names omitted Poisson uncertainty of the off count; variance alpha^2*off."
+ },
+ "F081": {
+  "grade": "D1",
+  "reason": "Names Bonferroni N*p_loc versus exact 1-(1-p_loc)^N."
+ },
+ "F074": {
+  "grade": "D2",
+  "reason": "Names k-1 = 2 dof for a fixed-total multinomial with specified probabilities."
+ },
+ "F079": {
+  "grade": "D1",
+  "reason": "Names observed-count denominators instead of expected counts for the Pearson statistic."
+ },
+ "F013": {
+  "grade": "none",
+  "reason": "Only says ratio_error is understated by about 38% without naming which term is missing; a number-off statement without the reason."
+ },
+ "F057": {
+  "grade": "D1",
+  "reason": "Names inverse of the transposed response instead of R^{-1}."
+ },
+ "F033": {
+  "grade": "D1",
+  "reason": "Names that the stated posterior_mean equals the gamma mode (11-1)/6 rather than the mean 11/6."
+ },
+ "F038": {
+  "grade": "D1",
+  "reason": "Names omitted finite population correction (1-n/N) for SRSWOR."
+ },
+ "F030": {
+  "grade": "D1",
+  "reason": "Names the mean/mode mislabel as the reason for the wrong stated posterior_mean."
+ },
+ "F052": {
+  "grade": "D1",
+  "reason": "Names omission of off_keep from the transfer coefficient."
+ },
+ "F036": {
+  "grade": "D1",
+  "reason": "Attributes the overstated uncertainties to the missing factor 1/sqrt(0.4), i.e. the FPC ('FPC-corrected'); names the mechanism briefly."
+ },
+ "F029": {
+  "grade": "D1",
+  "reason": "Names posterior_mean computed as mode (a-1)/b instead of a/b."
+ },
+ "F088": {
+  "grade": "D1",
+  "reason": "Names Bonferroni error versus exact (1-0.035)^18 for null_survival; same mechanism."
+ },
+ "F025": {
+  "grade": "D2",
+  "reason": "Names branch_fraction^2 required for two independent parent decays."
+ },
+ "F021": {
+  "grade": "D2",
+  "reason": "Names branch_fraction^2 required for two independent parent decays."
+ },
+ "F078": {
+  "grade": "D2",
+  "reason": "Names dof = k-1 = 2 because normalization to the total is a linear constraint."
+ },
+ "F012": {
+  "grade": "D2",
+  "reason": "Names reference count Poisson fluctuation (relative variance 1/reference) not propagated."
+ },
+ "F041": {
+  "grade": "D1",
+  "reason": "Names the missing factor sqrt(1-1200/2000), the finite-population correction."
+ },
+ "F066": {
+  "grade": "D1",
+  "reason": "Names inverse of the transposed response instead of R^{-1}."
+ },
+ "F035": {
+  "grade": "D1",
+  "reason": "Names omitted finite-population correction (1-n/N)."
+ },
+ "F027": {
+  "grade": "D1",
+  "reason": "Names posterior_mean computed as mode (shape-1)/rate instead of shape/rate."
+ }
+}

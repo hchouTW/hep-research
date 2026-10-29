@@ -1,0 +1,12 @@
+{
+  "id": "x82e314ad",
+  "type": "C03",
+  "defects": [],
+  "notes": "Synthetic model; uncertainties and approximations are scoped explicitly in the public note. Hidden witness acceptance=0.62; alternative admissible value 0.78.",
+  "missing_input": "The exact run acceptance from the external geometry record, in (0,1].",
+  "keywords": [
+    "acceptance",
+    "geometry",
+    "record"
+  ]
+}

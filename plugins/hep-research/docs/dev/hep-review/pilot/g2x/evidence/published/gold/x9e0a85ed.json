@@ -1,0 +1,35 @@
+{
+  "id": "x9e0a85ed",
+  "type": "C01",
+  "defects": [
+    {
+      "defect_id": "D1",
+      "statement": "The continuum count is already thinned; the transfer must divide by off_keep as well as using the width ratio. This changes subtraction and its downstream rate.",
+      "affected_results": [
+        "alpha",
+        "background",
+        "yield_value",
+        "rate",
+        "rate_error"
+      ],
+      "corrected_values": {
+        "alpha": 0.4,
+        "background": 320.0,
+        "yield_value": 100.0,
+        "rate": 3.4722222222222228,
+        "rate_error": 0.812826382688863
+      }
+    },
+    {
+      "defect_id": "D2",
+      "statement": "The finite independent continuum count contributes alpha squared times off to the variance; treating it as fixed discards this sampling term.",
+      "affected_results": [
+        "rate_error"
+      ],
+      "corrected_values": {
+        "rate_error": 0.812826382688863
+      }
+    }
+  ],
+  "notes": "Synthetic model; uncertainties and approximations are scoped explicitly in the public note."
+}
