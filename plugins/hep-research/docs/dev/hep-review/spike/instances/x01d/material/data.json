@@ -1,0 +1,11 @@
+{
+ "A": 120.0,
+ "sigma_A": 6.0,
+ "B": 80.0,
+ "sigma_B": 5.0,
+ "correlation_AB": 0.8,
+ "stated_results": {
+  "R": 1.5,
+  "sigma_R": 0.1201
+ }
+}

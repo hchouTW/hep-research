@@ -1,0 +1,38 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "hep_review_assignment.json",
+ "title": "hep-review assignment (schema 1.0.0; 0.x data experimental)",
+ "description": "Binds an actor and role to a plan revision's assignment spec, with the independence conditions and their basis as observed by the host (spec 4.3, 12.3). Different actor names do not prove separation.",
+ "type": "object",
+ "$ref": "hep_review_definitions.json#/$defs/header",
+ "required": ["plan_revision", "spec_id", "actor", "role", "qualified", "conditions", "restrictions"],
+ "properties": {
+  "protocol": {}, "schema_version": {}, "record_kind": {"const": "assignment"}, "id": {}, "context_id": {},
+  "plan_revision": {"type": "integer", "minimum": 1},
+  "spec_id": {"$ref": "hep_review_definitions.json#/$defs/id"},
+  "actor": {"type": "string", "minLength": 1},
+  "role": {"enum": ["reviewer", "verifier", "arbiter", "author"]},
+  "qualified": {"$ref": "hep_review_definitions.json#/$defs/condition"},
+  "qualifications": {"type": "array", "items": {"type": "string"}},
+  "conditions": {"type": "object", "additionalProperties": {"$ref": "hep_review_definitions.json#/$defs/condition"}},
+  "restrictions": {
+   "type": "array",
+   "items": {"type": "object", "required": ["id", "status"],
+             "properties": {"id": {"type": "string"},
+                            "status": {"enum": ["enforced", "advisory", "unavailable", "unknown"]},
+                            "basis": {"$ref": "hep_review_definitions.json#/$defs/basis"},
+                            "evidence_ref": {"type": "string"}},
+             "additionalProperties": false}
+  },
+  "packet_ref": {"$ref": "hep_review_definitions.json#/$defs/content_ref"},
+  "drop_path_ref": {"type": "string"},
+  "dispatch": {"type": "object", "properties": {"via": {"type": ["string", "null"]}, "host": {"type": ["string", "null"]},
+                                                "invocation_id": {"type": ["string", "null"]}},
+               "additionalProperties": false},
+  "host_profile_digest": {"$ref": "hep_review_definitions.json#/$defs/digest"},
+  "host_transcript_writable": {"type": ["boolean", "null"]},
+  "contamination": {"type": "array", "items": {"type": "object"}},
+  "seen_evaluations": {"type": "array", "items": {"type": "string"}}
+ },
+ "additionalProperties": false
+}

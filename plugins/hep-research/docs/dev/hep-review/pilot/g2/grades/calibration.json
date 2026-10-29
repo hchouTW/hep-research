@@ -1,0 +1,10 @@
+{
+  "K1": {"grade": "accept", "reason": "Names the same mechanism (1/sigma weights instead of inverse-variance 1/sigma^2) and points at the weights and the stated mean."},
+  "K2": {"grade": "accept", "reason": "Names the same mechanism (sqrt(k)/n treats k as Poisson, ignoring the binomial correlation of k and n) and points at the stated uncertainty."},
+  "K3": {"grade": "reject", "reason": "About sample size and the Gaussian approximation, a different issue; does not mention the ignored anticorrelation in the propagation."},
+  "K4": {"grade": "reject", "reason": "About a chi-square scale factor on the average's uncertainty, a different issue; does not identify the 1/sigma versus 1/sigma^2 weighting."},
+  "K5": {"grade": "reject", "reason": "Only says the uncertainty looks wrong, with no mechanism and no evidence."},
+  "K6": {"grade": "reject", "reason": "Only says something is off with the propagation of P; no mechanism (covariance/anticorrelation term) is named."},
+  "K7": {"grade": "accept", "reason": "Names the omitted covariance term 2 rho rA rB with rho = -0.7 in the propagation for P = A B, points at the formula and sigma_P; direction (true uncertainty smaller) is consistent with anticorrelation."},
+  "K8": {"grade": "accept", "reason": "Names the same mechanism (1/sigma weights instead of inverse-variance weights) and points at the weights and the resulting mean shift."}
+}

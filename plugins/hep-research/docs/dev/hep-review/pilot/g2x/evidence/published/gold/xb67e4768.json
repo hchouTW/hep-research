@@ -1,0 +1,41 @@
+{
+  "id": "xb67e4768",
+  "type": "C01",
+  "defects": [
+    {
+      "defect_id": "D1",
+      "statement": "The stored response maps true yields to reconstructed yields; invert response itself, rather than its transpose.",
+      "affected_results": [
+        "true_first",
+        "true_second",
+        "variance_first",
+        "variance_second",
+        "rate_first",
+        "rate_first_error"
+      ],
+      "corrected_values": {
+        "true_first": 623.0769230769231,
+        "true_second": 276.9230769230769,
+        "variance_first": 942.6035502958581,
+        "variance_second": 596.4497041420119,
+        "rate_first": 20.76923076923077,
+        "rate_first_error": 1.0233949765884671
+      }
+    },
+    {
+      "defect_id": "D2",
+      "statement": "Each unfolded yield depends on both reconstructed counts; the propagated variance must include both squared inverse-matrix coefficients.",
+      "affected_results": [
+        "variance_first",
+        "variance_second",
+        "rate_first_error"
+      ],
+      "corrected_values": {
+        "variance_first": 942.6035502958581,
+        "variance_second": 596.4497041420119,
+        "rate_first_error": 1.0233949765884671
+      }
+    }
+  ],
+  "notes": "Synthetic model; uncertainties and approximations are scoped explicitly in the public note."
+}

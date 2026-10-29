@@ -1,0 +1,6 @@
+{
+ "id": "p1736b719",
+ "type": "C01",
+ "defect": "weights 1/sigma instead of 1/sigma^2",
+ "correct_mean": 10.289088067452425
+}

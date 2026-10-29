@@ -1,0 +1,1437 @@
+[
+ {
+  "item": "D043",
+  "kind": "defect",
+  "defect": "The finite independent continuum count contributes alpha squared times off to the variance; treating it as fixed discards this sampling term.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The transfer coefficient ignores the continuum-stream prescale off_keep, underestimating the continuum contribution by a factor 2 and overestimating yield and rate.",
+    "element": "alpha = width_on/width_off (and the derived background, yield_value, rate)",
+    "evidence_text": "Line 7: off counts are after a continuum-stream selection with keep probability off_keep=0.5, independent of the signal stream; efficiency covers only the signal selection. Expected off = 0.5 * continuum(off window), so alpha should be (2/10)/0.5 = 0.4, background 320, yield 100, rate 3.472 vs stated 0.2, 160, 260, 9.028."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "The yield variance omits the Poisson uncertainty of the off-window count used to estimate the continuum, underestimating rate_error.",
+    "element": "rate_error propagation (variance = on, off normalization held fixed)",
+    "evidence_text": "Line 7 states off is an independent Poisson observation; the background estimate alpha*off has variance alpha^2*off. Correct variance = on + alpha^2*off = 420 + 0.16*800 = 548 (rate_error 0.813) with the prescale-corrected alpha, or 452 (0.738) even with alpha=0.2, vs stated 0.712 from variance 420."
+   }
+  ]
+ },
+ {
+  "item": "D069",
+  "kind": "defect",
+  "defect": "A fixed-total multinomial with three categories and no fitted shape parameters has two independent contrasts, hence two degrees of freedom.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The statistic divides by the observed counts (Neyman chi-square), but the note calls it the multinomial Pearson statistic, which divides by the expected counts.",
+    "element": "statistic definition, analysis.md Section 3; stated_results/statistic",
+    "evidence_text": "The note computes sum (O-E)^2/O = 25/70 + 25/110 + 0 = 0.584416, which matches the stated value. The Pearson value sum (O-E)^2/E = 25/75 + 25/105 + 0 = 0.571429. Section 2 says 'chi-square approximation to the multinomial Pearson statistic is adopted'."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "The degrees of freedom should be 2, not 3: the multinomial total is fixed and the expected counts are normalized to it, which removes one degree of freedom.",
+    "element": "degrees_of_freedom and p_value, analysis.md Section 3; stated_results/degrees_of_freedom, stated_results/p_value",
+    "evidence_text": "With k = 3 categories and fixed N, dof = k-1 = 2. The stated p = chi2.sf(0.5844, 3) = 0.899991. The correct p = chi2.sf(0.5714, 2) = 0.751477. Using only the corrected dof with the Neyman statistic gives chi2.sf(0.5844, 2) = 0.746613."
+   }
+  ]
+ },
+ {
+  "item": "F007",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "ratio_error omits the transfer calibration uncertainty, which the model in section 1 declares as an independent Gaussian error on transfer.",
+   "element": "Section 3 net-signal variance (signal + transfer^2*control) and stated_results.ratio_error",
+   "evidence_text": "The term control^2*transfer_error^2 = 900 exceeds the 680 propagated; including it alone gives sigma_R = sqrt(1580)/600 = 0.0662 instead of 0.04346."
+  },
+  "defects": {
+   "D1": "The independent transfer calibration has a nonzero error; its delta-method contribution is control squared times transfer_error squared.",
+   "D2": "The independent Poisson reference count fluctuates; its derivative contribution must be included in the ratio variance."
+  }
+ },
+ {
+  "item": "D064",
+  "kind": "defect",
+  "defect": "The stored response maps true yields to reconstructed yields; invert response itself, rather than its transpose.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The inversion uses the inverse of the transpose of the response, contradicting the stated convention (rows = reconstructed, columns = true); the correct estimator is R^{-1} n.",
+    "element": "Construction: A = inverse(transpose(response)); true_first, true_second, rate_first",
+    "evidence_text": "With n = R mu, mu = R^{-1} n = (623.08, 276.92); stated (595.38, 318.46) come from (R^T)^{-1} n. rate_first should be 20.769, stated 19.846 (4.4% low)."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "Variance propagation keeps only the diagonal of the inverse operator, dropping the contribution of the other bin's Poisson fluctuation and the covariance between true bins.",
+    "element": "Propagation: variance_first = A[0,0]^2 observed[0], variance_second = A[1,1]^2 observed[1]; rate_first_error",
+    "evidence_text": "For linear mu_i = sum_k A_ik n_k with independent Poisson n_k, Var(mu_i) = sum_k A_ik^2 n_k; the note states both bins fluctuate (line 15). Correct (with R^{-1}): 942.60, 596.45, cov -319.53; stated 923.43, 545.33, no covariance."
+   }
+  ]
+ },
+ {
+  "item": "D019",
+  "kind": "defect",
+  "defect": "Both independent parent decays must enter the selected mode, so the branching normalization is branch_fraction squared.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The event selection efficiency uses a single track_efficiency factor, but the model needs both independently selected tracks, so it should be track_efficiency^2. The normalization is overstated by a factor of 1/0.86 and the cross section and its error are understated by the same factor.",
+    "element": "normalization (event selection efficiency factor)",
+    "evidence_text": "analysis.md line 7: two daughter tracks, per-track selection probability track_efficiency, decisions independent. Line 15: normalization constructed as track_efficiency x branch_fraction x luminosity = 66.048. Correct efficiency 0.86^2 = 0.7396 gives N = 56.801 and sigma = 14.788 +- 0.569 pb."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "branch_fraction is defined per parent, with two independent decays, which implies branch_fraction^2 per event. The normalization uses branch_fraction once.",
+    "element": "normalization (branching fraction factor)",
+    "evidence_text": "analysis.md line 7: 'probability for each parent to enter the reconstructed decay mode, and the two decays are independent'. Line 15 multiplies by branch_fraction once. With both corrections N = 36.353 and sigma = 23.107 +- 0.889 pb."
+   }
+  ]
+ },
+ {
+  "item": "F062",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The inversion uses the inverse of the transposed response, which is inconsistent with the stated index convention (rows = reconstructed, columns = true); the correct estimator is R^{-1} n.",
+   "element": "Construction: A = inverse(transpose(response)); true_first, true_second, rate_first",
+   "evidence_text": "R=[[0.8,0.15],[0.2,0.85]] is non-symmetric; R^{-1}n = (623.077, 276.923) vs stated (595.385, 318.462); rate_first 20.769 vs 19.846."
+  },
+  "defects": {
+   "D1": "The stored response maps true yields to reconstructed yields; invert response itself, rather than its transpose.",
+   "D2": "Each unfolded yield depends on both reconstructed counts; the propagated variance must include both squared inverse-matrix coefficients."
+  }
+ },
+ {
+  "item": "D034",
+  "kind": "defect",
+  "defect": "The design-based variance for sampling without replacement requires the finite-population factor 1-sampled/population; omitting it inflates the reported uncertainty.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The design-based variance for sampling without replacement from a finite archive omits the finite-population correction (1 - n/N), overstating fraction_error and retained_error by a factor 1.58 at n/N = 0.6.",
+    "element": "Variance estimator p(1-p)/(n-1) in Section 3 and resulting stated_results fraction_error and retained_error",
+    "evidence_text": "Section 1 and 3 specify SRS without replacement from a fixed finite population with no superpopulation component; data.json population=2000, sampled=1200. Correct SE(p) = sqrt((1-1200/2000)*0.35*0.65/1199) = 0.0087119 (stated 0.0137747); SE(retained) = 78.41 (stated 123.97)."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "Stated uncertainties follow the defective estimator and are too large by 1/sqrt(0.4).",
+    "element": "stated_results fraction_error and retained_error",
+    "evidence_text": "Stated 0.013774667 and 123.972003 vs FPC-corrected 0.008711864 and 78.406779."
+   }
+  ]
+ },
+ {
+  "item": "F067",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "Variance propagation keeps only the diagonal of the inverse operator, dropping the contribution of the other bin's Poisson fluctuation and the covariance between true bins.",
+   "element": "Propagation: variance_first = A[0,0]^2 observed[0], variance_second = A[1,1]^2 observed[1]; rate_first_error",
+   "evidence_text": "For linear mu_i = sum_k A_ik n_k with independent Poisson n_k, Var(mu_i) = sum_k A_ik^2 n_k; the note states both bins fluctuate (line 15). Correct (with R^{-1}): 942.60, 596.45, cov -319.53; stated 923.43, 545.33, no covariance."
+  },
+  "defects": {
+   "D1": "The stored response maps true yields to reconstructed yields; invert response itself, rather than its transpose.",
+   "D2": "Each unfolded yield depends on both reconstructed counts; the propagated variance must include both squared inverse-matrix coefficients."
+  }
+ },
+ {
+  "item": "F058",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "Variance propagation keeps only diagonal entries of the inverse operator, omitting the contribution of the other bin's Poisson fluctuation and the covariance between unfolded bins, contradicting the stated count model.",
+   "element": "Propagation: variance_first, variance_second, rate_first_error",
+   "evidence_text": "Var(mu_i) = sum_k A_ik^2 n_k; with the correct inverse, Var = 942.60 and 596.45 (cov -319.53), rate_first_error = 1.0234; stated 923.43, 545.33, 1.0129. Even with the stated A the off-diagonal terms (0.3077^2*360, 0.2308^2*540) are dropped."
+  },
+  "defects": {
+   "D1": "The stored response maps true yields to reconstructed yields; invert response itself, rather than its transpose.",
+   "D2": "Each unfolded yield depends on both reconstructed counts; the propagated variance must include both squared inverse-matrix coefficients."
+  }
+ },
+ {
+  "item": "F003",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The independent Gaussian uncertainty on transfer (transfer_error = 0.06) is omitted from the net-signal variance although the model declares it a fluctuating estimate; its contribution C^2 sigma_t^2 = 900 exceeds the retained S + t^2 C = 680.",
+   "element": "Section 3 net-signal variance 'signal plus transfer squared times control'",
+   "evidence_text": "With the term, sigma_R(no ref term) = sqrt(1580)/600 = 0.0662 vs stated 0.0435."
+  },
+  "defects": {
+   "D1": "The independent transfer calibration has a nonzero error; its delta-method contribution is control squared times transfer_error squared.",
+   "D2": "The independent Poisson reference count fluctuates; its derivative contribution must be included in the ratio variance."
+  }
+ },
+ {
+  "item": "D080",
+  "kind": "defect",
+  "defect": "The trials-factor linear expression is only a union bound or small-tail approximation; the exact independent-trial probability is 1-(1-local_p)^windows.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "global_p is computed with the Bonferroni bound N*p_loc and reported as the exact probability that the minimum local p-value is no larger than the observed one; under the stated independent, exactly-uniform null model that probability is 1-(1-p_loc)^N = 0.4734, not 0.63.",
+    "element": "global_p construction (analysis.md sec. 3) and stated_results.global_p",
+    "evidence_text": "1 - (1 - 0.035)^18 = 0.473387 vs stated 0.63; N*p is an upper bound only, and is not a probability for p > 1/N."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "null_survival inherits the error: the probability that no window is as extreme is (1-p_loc)^N = 0.5266, not 1 - N*p_loc = 0.37.",
+    "element": "stated_results.null_survival",
+    "evidence_text": "0.965^18 = 0.526613 vs stated 0.3699999999999999."
+   }
+  ]
+ },
+ {
+  "item": "F082",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "null_survival inherits the error: the probability that no window is as extreme is (1-p_loc)^N = 0.5266, not 1 - N*p_loc = 0.37.",
+   "element": "stated_results.null_survival",
+   "evidence_text": "0.965^18 = 0.526613 vs stated 0.3699999999999999."
+  },
+  "defects": {
+   "D1": "The trials-factor linear expression is only a union bound or small-tail approximation; the exact independent-trial probability is 1-(1-local_p)^windows."
+  }
+ },
+ {
+  "item": "F008",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "ratio_error omits the Poisson fluctuation of the reference count, which section 1 defines as a Poisson sample and which enters the ratio denominator.",
+   "element": "Section 3 'reference observation sets the normalization ... at its measured value' and stated_results.ratio_error",
+   "evidence_text": "The delta method adds R^2/reference = 0.4444/800 to Var(R); with only this term sigma_R = 0.0494, and with both omitted terms 0.07032."
+  },
+  "defects": {
+   "D1": "The independent transfer calibration has a nonzero error; its delta-method contribution is control squared times transfer_error squared.",
+   "D2": "The independent Poisson reference count fluctuates; its derivative contribution must be included in the ratio variance."
+  }
+ },
+ {
+  "item": "F070",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The statistic divides by the observed counts (Neyman chi-square), but the note calls it the multinomial Pearson statistic, which divides by the expected counts.",
+   "element": "statistic definition, analysis.md Section 3; stated_results/statistic",
+   "evidence_text": "The note computes sum (O-E)^2/O = 25/70 + 25/110 + 0 = 0.584416, which matches the stated value. The Pearson value sum (O-E)^2/E = 25/75 + 25/105 + 0 = 0.571429. Section 2 says 'chi-square approximation to the multinomial Pearson statistic is adopted'."
+  },
+  "defects": {
+   "D1": "The stated Pearson construction requires expected counts in the denominators; using observed counts changes the statistic and its tail.",
+   "D2": "A fixed-total multinomial with three categories and no fitted shape parameters has two independent contrasts, hence two degrees of freedom."
+  }
+ },
+ {
+  "item": "D028",
+  "kind": "defect",
+  "defect": "The reported gamma posterior mean uses the mode formula; the mean is posterior_shape/posterior_rate.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The reported posterior_mean is the posterior mode (a-1)/b, not the posterior mean a/b; the correct posterior mean is 11/6 = 1.8333, not 1.6667.",
+    "element": "posterior_mean definition and value",
+    "evidence_text": "analysis.md section 3 prescribes (posterior_shape minus one) divided by posterior_rate; for Gamma(11, 6) in rate parameterization the mean is 11/6 = 1.833333 and (11-1)/6 = 1.666667 is the mode. data.json /stated_results/posterior_mean = 1.6666666666666667."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "The stated posterior_mean value inherits the mean/mode mislabel.",
+    "element": "stated posterior_mean",
+    "evidence_text": "1.6666666666666667 vs correct posterior mean 1.8333333333333333 (-9.1% relative)."
+   }
+  ]
+ },
+ {
+  "item": "F004",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The reference yield is declared a Poisson sample (line 7) and the target is defined for underlying means, but the propagation fixes reference at its measured value, omitting the relative variance 1/N_ref = 0.00125.",
+   "element": "Section 3 'The reference observation sets the normalization of this propagation at its measured value'",
+   "evidence_text": "Full delta-method ratio_error = 0.0703 vs stated 0.0435; stated value at /stated_results/ratio_error is underestimated by ~38%."
+  },
+  "defects": {
+   "D1": "The independent transfer calibration has a nonzero error; its delta-method contribution is control squared times transfer_error squared.",
+   "D2": "The independent Poisson reference count fluctuates; its derivative contribution must be included in the ratio variance."
+  }
+ },
+ {
+  "item": "F024",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The event selection efficiency uses a single track_efficiency, but the stated model requires two independent track selections, so it should be track_efficiency^2 = 0.7396. Normalization and cross section are therefore wrong: cross_section is understated by a factor 0.86 (correct value 14.788 +- 0.569 pb with this fix alone).",
+   "element": "normalization construction (Section 3) and stated_results normalization/cross_section/cross_section_error",
+   "evidence_text": "Section 1: 'two distinguishable daughter tracks ... per-track selection has probability track_efficiency and the decisions for the two tracks are independent'. Section 3: 'Construct the event selection normalization as track_efficiency'. Stated normalization 66.048 = 0.86*0.64*120."
+  },
+  "defects": {
+   "D1": "Both tracks must pass, so the event efficiency is the square of the per-track efficiency under the stated independence model.",
+   "D2": "Both independent parent decays must enter the selected mode, so the branching normalization is branch_fraction squared."
+  }
+ },
+ {
+  "item": "D061",
+  "kind": "defect",
+  "defect": "Each unfolded yield depends on both reconstructed counts; the propagated variance must include both squared inverse-matrix coefficients.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The inversion uses the inverse of the transposed response, which is inconsistent with the stated index convention (rows = reconstructed, columns = true); the correct estimator is R^{-1} n.",
+    "element": "Construction: A = inverse(transpose(response)); true_first, true_second, rate_first",
+    "evidence_text": "R=[[0.8,0.15],[0.2,0.85]] is non-symmetric; R^{-1}n = (623.077, 276.923) vs stated (595.385, 318.462); rate_first 20.769 vs 19.846."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "Variance propagation keeps only diagonal entries of the inverse operator, omitting the other bin's Poisson fluctuation; Var(mu_i) = sum_k A[i,k]^2 n_k.",
+    "element": "variance_first, variance_second, rate_first_error",
+    "evidence_text": "With the correct operator R^{-1}: variances (942.604, 596.450) vs stated (923.432, 545.325); rate_first_error 1.0234 vs 1.0129. Even with the authors' A the full-variance values would be (957.515, 574.083). Line 15 states both bins fluctuate, contradicting the diagonal-only formula."
+   }
+  ]
+ },
+ {
+  "item": "F020",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The event selection efficiency uses a single track_efficiency factor, but the model needs both independently selected tracks, so it should be track_efficiency^2. The normalization is overstated by a factor of 1/0.86 and the cross section and its error are understated by the same factor.",
+   "element": "normalization (event selection efficiency factor)",
+   "evidence_text": "analysis.md line 7: two daughter tracks, per-track selection probability track_efficiency, decisions independent. Line 15: normalization constructed as track_efficiency x branch_fraction x luminosity = 66.048. Correct efficiency 0.86^2 = 0.7396 gives N = 56.801 and sigma = 14.788 +- 0.569 pb."
+  },
+  "defects": {
+   "D1": "Both tracks must pass, so the event efficiency is the square of the per-track efficiency under the stated independence model.",
+   "D2": "Both independent parent decays must enter the selected mode, so the branching normalization is branch_fraction squared."
+  }
+ },
+ {
+  "item": "D077",
+  "kind": "defect",
+  "defect": "A fixed-total multinomial with three categories and no fitted shape parameters has two independent contrasts, hence two degrees of freedom.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "Degrees of freedom should be 2 (k-1), not 3: the normalization to the observed total removes one degree of freedom even with no fitted shape parameters.",
+    "element": "degrees_of_freedom and the reference distribution for p_value",
+    "evidence_text": "analysis.md line 15 states 'use three degrees of freedom, one for each populated category'; with expected = total*p, sum(counts-expected)=0 is a linear constraint, so the Pearson statistic is asymptotically chi2(k-1)=chi2(2). p_value would be 0.7515 (Pearson) or 0.7466 (stated statistic) with 2 dof, not 0.8999."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "The statistic divides by observed counts (Neyman chi-square) rather than expected counts, contradicting the Pearson statistic the method names.",
+    "element": "statistic definition",
+    "evidence_text": "analysis.md line 15: '(counts minus expected) squared divided by counts'; line 11 adopts 'the multinomial Pearson statistic', whose denominator is the expected count. Pearson value = 0.571429 vs stated 0.584416."
+   }
+  ]
+ },
+ {
+  "item": "F011",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The propagation omits the uncertainty of the external transfer estimate (control^2*transfer_error^2 = 900), which the model declares as a Gaussian-uncertain independent input; it is the dominant variance term.",
+   "element": "Section 3 net-signal variance (signal + transfer^2*control) and stated_results.ratio_error",
+   "evidence_text": "Var(net) with the term is 1580 vs 680 used; ratio_error with only this term restored is 0.0662 vs stated 0.0435."
+  },
+  "defects": {
+   "D1": "The independent transfer calibration has a nonzero error; its delta-method contribution is control squared times transfer_error squared.",
+   "D2": "The independent Poisson reference count fluctuates; its derivative contribution must be included in the ratio variance."
+  }
+ },
+ {
+  "item": "F085",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "null_survival = 1 - windows*local_p = 0.37 inherits the error; the exact null probability that no window is as extreme is (1-0.035)^18 = 0.52661.",
+   "element": "null_survival",
+   "evidence_text": "data.json /stated_results/null_survival = 0.37 vs exact 0.5266131 under the model in analysis.md section 1."
+  },
+  "defects": {
+   "D1": "The trials-factor linear expression is only a union bound or small-tail approximation; the exact independent-trial probability is 1-(1-local_p)^windows."
+  }
+ },
+ {
+  "item": "D026",
+  "kind": "defect",
+  "defect": "The reported gamma posterior mean uses the mode formula; the mean is posterior_shape/posterior_rate.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The quantity reported as posterior_mean is the posterior mode (shape-1)/rate, not the posterior mean shape/rate; the correct posterior mean is 11/6 = 1.8333, not 1.6667.",
+    "element": "posterior_mean definition and value",
+    "evidence_text": "For Gamma(shape=11, rate=6), E[rate] = 11/6 = 1.8333 while (11-1)/6 = 1.6667 is the mode. analysis.md section 3 prescribes (posterior_shape minus one)/posterior_rate for the 'posterior_mean'; data.json reports 1.6666666666666667."
+   }
+  ]
+ },
+ {
+  "item": "F016",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The normalization uses one power of track_efficiency, but the stated model requires both independent daughter tracks to be selected, so the event efficiency is track_efficiency^2.",
+   "element": "Event selection normalization (Section 3), and the normalization, cross_section and cross_section_error that depend on it",
+   "evidence_text": "Section 1: per-track selection probability track_efficiency, the two track decisions independent, and the event contains two daughter tracks. Section 3: 'Construct the event selection normalization as track_efficiency'. The correct factor is 0.86^2 = 0.7396, which gives normalization 56.80128 and cross_section 14.7884 +- 0.5688 pb against the stated 66.048 and 12.7180 +- 0.4892 pb."
+  },
+  "defects": {
+   "D1": "Both tracks must pass, so the event efficiency is the square of the per-track efficiency under the stated independence model.",
+   "D2": "Both independent parent decays must enter the selected mode, so the branching normalization is branch_fraction squared."
+  }
+ },
+ {
+  "item": "F017",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The branching fraction enters once, but the model describes two independent parent decays per event, each into the reconstructed mode with probability branch_fraction. That implies branch_fraction^2.",
+   "element": "Branching-fraction factor in the normalization (Section 3)",
+   "evidence_text": "Section 1: 'branch_fraction is the probability for each parent to enter the reconstructed decay mode, and the two decays are independent.' Section 3 multiplies by branch_fraction once. With BF^2 (and eff^2), the normalization is 36.3528 and cross_section 23.107 +- 0.889 pb. This finding depends on reading Section 1 as two parents per event, which is the natural reading but is not stated as plainly as the track condition."
+  },
+  "defects": {
+   "D1": "Both tracks must pass, so the event efficiency is the square of the per-track efficiency under the stated independence model.",
+   "D2": "Both independent parent decays must enter the selected mode, so the branching normalization is branch_fraction squared."
+  }
+ },
+ {
+  "item": "D039",
+  "kind": "defect",
+  "defect": "The design-based variance for sampling without replacement requires the finite-population factor 1-sampled/population; omitting it inflates the reported uncertainty.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The design-based variance for sampling without replacement from the finite archive omits the finite population correction (1 - n/N) = 0.4, so fraction_error and retained_error are overstated by a factor 1.581.",
+    "element": "Variance estimator tag_fraction*(1-tag_fraction)/(sampled-1) in section 3",
+    "evidence_text": "analysis.md section 1 specifies a simple random sample without replacement from a fixed finite archive and section 3 claims a design-based estimate with no superpopulation component; data.json gives population=2000, sampled=1200. Correct estimator p(1-p)/(n-1)*(1-n/N) gives fraction_error=0.008712 and retained_error=78.41 instead of 0.013775 and 123.97."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "The stated uncertainties in data.json follow from the defective estimator and are too large by 1.581.",
+    "element": "stated_results fraction_error and retained_error",
+    "evidence_text": "Stated 0.013774667 and 123.972 equal sqrt(0.35*0.65/1199) and 9000 times it, without the factor sqrt(1-1200/2000)=0.6325."
+   }
+  ]
+ },
+ {
+  "item": "D073",
+  "kind": "defect",
+  "defect": "A fixed-total multinomial with three categories and no fitted shape parameters has two independent contrasts, hence two degrees of freedom.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "Degrees of freedom are wrong: a multinomial test conditioned on the fixed total with fully specified probabilities has k-1 = 2 dof, not 3; the stated p_value (0.900) is therefore inflated (correct about 0.75).",
+    "element": "degrees_of_freedom and p_value",
+    "evidence_text": "analysis.md line 7 states counts are multinomial conditional on the total and line 11 normalizes expected counts to the observed total, which removes one degree of freedom; line 15 nevertheless assigns one dof per category. sf(0.5844, 2) = 0.7466 vs stated sf(0.5844, 3) = 0.8999."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "The statistic divides by observed counts (Neyman chi-square) although the method is described as the Pearson statistic, which divides by expected counts.",
+    "element": "statistic",
+    "evidence_text": "analysis.md line 11 names the multinomial Pearson statistic; line 15 defines the denominator as counts. Pearson value is 0.571429, stated value 0.584416 equals the Neyman form."
+   }
+  ]
+ },
+ {
+  "item": "F048",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The transfer coefficient leaves out the off-stream retention probability, so the continuum is underestimated by a factor 1/off_keep = 2, and the yield and rate are overstated (yield 260 vs 100, rate 9.028 vs 3.472).",
+   "element": "alpha = width_on/width_off and the background, yield and rate built from it",
+   "evidence_text": "analysis.md section 1: the continuum stream keeps each event with probability off_keep, and all counts are after this stream selection. data.json: off_keep = 0.5. Section 2: alpha = width_on/width_off = 0.2. The unbiased transfer is 0.2/0.5 = 0.4, so background = 320."
+  },
+  "defects": {
+   "D1": "The continuum count is already thinned; the transfer must divide by off_keep as well as using the width ratio. This changes subtraction and its downstream rate.",
+   "D2": "The finite independent continuum count contributes alpha squared times off to the variance; treating it as fixed discards this sampling term."
+  }
+ },
+ {
+  "item": "F044",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The transfer coefficient ignores the continuum-stream prescale off_keep, underestimating the continuum contribution by a factor 2 and overestimating yield and rate.",
+   "element": "alpha = width_on/width_off (and the derived background, yield_value, rate)",
+   "evidence_text": "Line 7: off counts are after a continuum-stream selection with keep probability off_keep=0.5, independent of the signal stream; efficiency covers only the signal selection. Expected off = 0.5 * continuum(off window), so alpha should be (2/10)/0.5 = 0.4, background 320, yield 100, rate 3.472 vs stated 0.2, 160, 260, 9.028."
+  },
+  "defects": {
+   "D1": "The continuum count is already thinned; the transfer must divide by off_keep as well as using the width ratio. This changes subtraction and its downstream rate.",
+   "D2": "The finite independent continuum count contributes alpha squared times off to the variance; treating it as fixed discards this sampling term."
+  }
+ },
+ {
+  "item": "D015",
+  "kind": "defect",
+  "defect": "Both independent parent decays must enter the selected mode, so the branching normalization is branch_fraction squared.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The normalization uses one power of track_efficiency, but the stated model requires both independent daughter tracks to be selected, so the event efficiency is track_efficiency^2.",
+    "element": "Event selection normalization (Section 3), and the normalization, cross_section and cross_section_error that depend on it",
+    "evidence_text": "Section 1: per-track selection probability track_efficiency, the two track decisions independent, and the event contains two daughter tracks. Section 3: 'Construct the event selection normalization as track_efficiency'. The correct factor is 0.86^2 = 0.7396, which gives normalization 56.80128 and cross_section 14.7884 +- 0.5688 pb against the stated 66.048 and 12.7180 +- 0.4892 pb."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "The branching fraction enters once, but the model describes two independent parent decays per event, each into the reconstructed mode with probability branch_fraction. That implies branch_fraction^2.",
+    "element": "Branching-fraction factor in the normalization (Section 3)",
+    "evidence_text": "Section 1: 'branch_fraction is the probability for each parent to enter the reconstructed decay mode, and the two decays are independent.' Section 3 multiplies by branch_fraction once. With BF^2 (and eff^2), the normalization is 36.3528 and cross_section 23.107 +- 0.889 pb. This finding depends on reading Section 1 as two parents per event, which is the natural reading but is not stated as plainly as the track condition."
+   }
+  ]
+ },
+ {
+  "item": "F053",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The stated alpha, background, yield and rate are wrong because of F1.",
+   "element": "stated_results alpha/background/yield_value/rate",
+   "evidence_text": "Stated 0.2/160/260/9.028; with off_keep included these should be 0.4/320/100/3.472."
+  },
+  "defects": {
+   "D1": "The continuum count is already thinned; the transfer must divide by off_keep as well as using the width ratio. This changes subtraction and its downstream rate.",
+   "D2": "The finite independent continuum count contributes alpha squared times off to the variance; treating it as fixed discards this sampling term."
+  }
+ },
+ {
+  "item": "F071",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The degrees of freedom should be 2, not 3: the multinomial total is fixed and the expected counts are normalized to it, which removes one degree of freedom.",
+   "element": "degrees_of_freedom and p_value, analysis.md Section 3; stated_results/degrees_of_freedom, stated_results/p_value",
+   "evidence_text": "With k = 3 categories and fixed N, dof = k-1 = 2. The stated p = chi2.sf(0.5844, 3) = 0.899991. The correct p = chi2.sf(0.5714, 2) = 0.751477. Using only the corrected dof with the Neyman statistic gives chi2.sf(0.5844, 2) = 0.746613."
+  },
+  "defects": {
+   "D1": "The stated Pearson construction requires expected counts in the denominators; using observed counts changes the statistic and its tail.",
+   "D2": "A fixed-total multinomial with three categories and no fitted shape parameters has two independent contrasts, hence two degrees of freedom."
+  }
+ },
+ {
+  "item": "F075",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The statistic divides by observed counts (Neyman chi-square) although the method is described as the Pearson statistic, which divides by expected counts.",
+   "element": "statistic",
+   "evidence_text": "analysis.md line 11 names the multinomial Pearson statistic; line 15 defines the denominator as counts. Pearson value is 0.571429, stated value 0.584416 equals the Neyman form."
+  },
+  "defects": {
+   "D1": "The stated Pearson construction requires expected counts in the denominators; using observed counts changes the statistic and its tail.",
+   "D2": "A fixed-total multinomial with three categories and no fitted shape parameters has two independent contrasts, hence two degrees of freedom."
+  }
+ },
+ {
+  "item": "D068",
+  "kind": "defect",
+  "defect": "The stated Pearson construction requires expected counts in the denominators; using observed counts changes the statistic and its tail.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The statistic divides by the observed counts (Neyman chi-square), but the note calls it the multinomial Pearson statistic, which divides by the expected counts.",
+    "element": "statistic definition, analysis.md Section 3; stated_results/statistic",
+    "evidence_text": "The note computes sum (O-E)^2/O = 25/70 + 25/110 + 0 = 0.584416, which matches the stated value. The Pearson value sum (O-E)^2/E = 25/75 + 25/105 + 0 = 0.571429. Section 2 says 'chi-square approximation to the multinomial Pearson statistic is adopted'."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "The degrees of freedom should be 2, not 3: the multinomial total is fixed and the expected counts are normalized to it, which removes one degree of freedom.",
+    "element": "degrees_of_freedom and p_value, analysis.md Section 3; stated_results/degrees_of_freedom, stated_results/p_value",
+    "evidence_text": "With k = 3 categories and fixed N, dof = k-1 = 2. The stated p = chi2.sf(0.5844, 3) = 0.899991. The correct p = chi2.sf(0.5714, 2) = 0.751477. Using only the corrected dof with the Neyman statistic gives chi2.sf(0.5844, 2) = 0.746613."
+   }
+  ]
+ },
+ {
+  "item": "D060",
+  "kind": "defect",
+  "defect": "The stored response maps true yields to reconstructed yields; invert response itself, rather than its transpose.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The inversion uses the inverse of the transposed response, which is inconsistent with the stated index convention (rows = reconstructed, columns = true); the correct estimator is R^{-1} n.",
+    "element": "Construction: A = inverse(transpose(response)); true_first, true_second, rate_first",
+    "evidence_text": "R=[[0.8,0.15],[0.2,0.85]] is non-symmetric; R^{-1}n = (623.077, 276.923) vs stated (595.385, 318.462); rate_first 20.769 vs 19.846."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "Variance propagation keeps only diagonal entries of the inverse operator, omitting the other bin's Poisson fluctuation; Var(mu_i) = sum_k A[i,k]^2 n_k.",
+    "element": "variance_first, variance_second, rate_first_error",
+    "evidence_text": "With the correct operator R^{-1}: variances (942.604, 596.450) vs stated (923.432, 545.325); rate_first_error 1.0234 vs 1.0129. Even with the authors' A the full-variance values would be (957.515, 574.083). Line 15 states both bins fluctuate, contradicting the diagonal-only formula."
+   }
+  ]
+ },
+ {
+  "item": "F049",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The yield variance leaves out the Poisson fluctuation of the independent side-window count, so rate_error is underestimated.",
+   "element": "Var(yield) = on (side-window count held fixed)",
+   "evidence_text": "analysis.md section 1 states that off is an independent Poisson observation, yet section 3 fixes the continuum normalization at its observed value. The correct form is Var = on + alpha^2*off: rate_error = 0.8128 with alpha = 0.4 (0.7382 with alpha = 0.2), against the stated 0.7116."
+  },
+  "defects": {
+   "D1": "The continuum count is already thinned; the transfer must divide by off_keep as well as using the width ratio. This changes subtraction and its downstream rate.",
+   "D2": "The finite independent continuum count contributes alpha squared times off to the variance; treating it as fixed discards this sampling term."
+  }
+ },
+ {
+  "item": "F059",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "Stated results inherit F1/F2: they are not correct for the stated model.",
+   "element": "stated_results",
+   "evidence_text": "Correct values: true_first 623.077, true_second 276.923, variance_first 942.604, variance_second 596.450, rate_first 20.769, rate_first_error 1.02339."
+  },
+  "defects": {
+   "D1": "The stored response maps true yields to reconstructed yields; invert response itself, rather than its transpose.",
+   "D2": "Each unfolded yield depends on both reconstructed counts; the propagated variance must include both squared inverse-matrix coefficients."
+  }
+ },
+ {
+  "item": "F063",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "Variance propagation keeps only diagonal entries of the inverse operator, omitting the other bin's Poisson fluctuation; Var(mu_i) = sum_k A[i,k]^2 n_k.",
+   "element": "variance_first, variance_second, rate_first_error",
+   "evidence_text": "With the correct operator R^{-1}: variances (942.604, 596.450) vs stated (923.432, 545.325); rate_first_error 1.0234 vs 1.0129. Even with the authors' A the full-variance values would be (957.515, 574.083). Line 15 states both bins fluctuate, contradicting the diagonal-only formula."
+  },
+  "defects": {
+   "D1": "The stored response maps true yields to reconstructed yields; invert response itself, rather than its transpose.",
+   "D2": "Each unfolded yield depends on both reconstructed counts; the propagated variance must include both squared inverse-matrix coefficients."
+  }
+ },
+ {
+  "item": "D010",
+  "kind": "defect",
+  "defect": "The independent Poisson reference count fluctuates; its derivative contribution must be included in the ratio variance.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The propagation omits the uncertainty of the external transfer estimate (control^2*transfer_error^2 = 900), which the model declares as a Gaussian-uncertain independent input; it is the dominant variance term.",
+    "element": "Section 3 net-signal variance (signal + transfer^2*control) and stated_results.ratio_error",
+    "evidence_text": "Var(net) with the term is 1580 vs 680 used; ratio_error with only this term restored is 0.0662 vs stated 0.0435."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "The reference count is declared a Poisson sample but its fluctuation (relative variance 1/reference) is not propagated; it is held at its measured value.",
+    "element": "Section 3 normalization of ratio_error by reference*relative_efficiency without reference variance",
+    "evidence_text": "Section 1 line 7 declares a disjoint Poisson reference sample; line 15 fixes it. Adding R^2/reference gives 0.0494 alone, and with F1 the full error is 0.0703."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "The stated ratio_error understates the leading delta-method standard error defined in the note's own model by about 38%.",
+    "element": "stated_results.ratio_error",
+    "evidence_text": "Stated 0.04346134936801766; full leading delta-method value 0.07031674369909661."
+   }
+  ]
+ },
+ {
+  "item": "D022",
+  "kind": "defect",
+  "defect": "Both tracks must pass, so the event efficiency is the square of the per-track efficiency under the stated independence model.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The event selection efficiency uses a single track_efficiency, but the stated model requires two independent track selections, so it should be track_efficiency^2 = 0.7396. Normalization and cross section are therefore wrong: cross_section is understated by a factor 0.86 (correct value 14.788 +- 0.569 pb with this fix alone).",
+    "element": "normalization construction (Section 3) and stated_results normalization/cross_section/cross_section_error",
+    "evidence_text": "Section 1: 'two distinguishable daughter tracks ... per-track selection has probability track_efficiency and the decisions for the two tracks are independent'. Section 3: 'Construct the event selection normalization as track_efficiency'. Stated normalization 66.048 = 0.86*0.64*120."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "branch_fraction is defined per parent with two independent decays, which implies an event-level factor branch_fraction^2 = 0.4096. The normalization uses a single power. Combined with F1, this gives cross_section 23.107 +- 0.889 pb.",
+    "element": "branch_fraction factor in the normalization",
+    "evidence_text": "Section 1: 'probability for each parent to enter the reconstructed decay mode, and the two decays are independent'. Section 3 multiplies by branch_fraction once. This depends on reading the topology as two parents, which the 'pair decay' wording leaves somewhat ambiguous."
+   }
+  ]
+ },
+ {
+  "item": "F084",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "global_p is computed as windows*local_p (Bonferroni bound) but reported as the exact probability that the minimum local p-value is no larger than observed; under the stated independent-uniform model the exact value is 1-(1-0.035)^18 = 0.47339, not 0.63.",
+   "element": "global_p construction",
+   "evidence_text": "analysis.md section 3 line 15 defines global_p = windows times local_p and calls it the probability of the minimum local p-value being no larger than the observed minimum; data.json stated_results.global_p = 0.63; exact Sidak value 0.4733869."
+  },
+  "defects": {
+   "D1": "The trials-factor linear expression is only a union bound or small-tail approximation; the exact independent-trial probability is 1-(1-local_p)^windows."
+  }
+ },
+ {
+  "item": "D065",
+  "kind": "defect",
+  "defect": "Each unfolded yield depends on both reconstructed counts; the propagated variance must include both squared inverse-matrix coefficients.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The inversion uses the inverse of the transpose of the response, contradicting the stated convention (rows = reconstructed, columns = true); the correct estimator is R^{-1} n.",
+    "element": "Construction: A = inverse(transpose(response)); true_first, true_second, rate_first",
+    "evidence_text": "With n = R mu, mu = R^{-1} n = (623.08, 276.92); stated (595.38, 318.46) come from (R^T)^{-1} n. rate_first should be 20.769, stated 19.846 (4.4% low)."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "Variance propagation keeps only the diagonal of the inverse operator, dropping the contribution of the other bin's Poisson fluctuation and the covariance between true bins.",
+    "element": "Propagation: variance_first = A[0,0]^2 observed[0], variance_second = A[1,1]^2 observed[1]; rate_first_error",
+    "evidence_text": "For linear mu_i = sum_k A_ik n_k with independent Poisson n_k, Var(mu_i) = sum_k A_ik^2 n_k; the note states both bins fluctuate (line 15). Correct (with R^{-1}): 942.60, 596.45, cov -319.53; stated 923.43, 545.33, no covariance."
+   }
+  ]
+ },
+ {
+  "item": "D042",
+  "kind": "defect",
+  "defect": "The continuum count is already thinned; the transfer must divide by off_keep as well as using the width ratio. This changes subtraction and its downstream rate.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The transfer coefficient ignores the continuum-stream prescale off_keep, underestimating the continuum contribution by a factor 2 and overestimating yield and rate.",
+    "element": "alpha = width_on/width_off (and the derived background, yield_value, rate)",
+    "evidence_text": "Line 7: off counts are after a continuum-stream selection with keep probability off_keep=0.5, independent of the signal stream; efficiency covers only the signal selection. Expected off = 0.5 * continuum(off window), so alpha should be (2/10)/0.5 = 0.4, background 320, yield 100, rate 3.472 vs stated 0.2, 160, 260, 9.028."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "The yield variance omits the Poisson uncertainty of the off-window count used to estimate the continuum, underestimating rate_error.",
+    "element": "rate_error propagation (variance = on, off normalization held fixed)",
+    "evidence_text": "Line 7 states off is an independent Poisson observation; the background estimate alpha*off has variance alpha^2*off. Correct variance = on + alpha^2*off = 420 + 0.16*800 = 548 (rate_error 0.813) with the prescale-corrected alpha, or 452 (0.738) even with alpha=0.2, vs stated 0.712 from variance 420."
+   }
+  ]
+ },
+ {
+  "item": "D001",
+  "kind": "defect",
+  "defect": "The independent transfer calibration has a nonzero error; its delta-method contribution is control squared times transfer_error squared.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The independent Gaussian uncertainty on transfer (transfer_error = 0.06) is omitted from the net-signal variance although the model declares it a fluctuating estimate; its contribution C^2 sigma_t^2 = 900 exceeds the retained S + t^2 C = 680.",
+    "element": "Section 3 net-signal variance 'signal plus transfer squared times control'",
+    "evidence_text": "With the term, sigma_R(no ref term) = sqrt(1580)/600 = 0.0662 vs stated 0.0435."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "The reference yield is declared a Poisson sample (line 7) and the target is defined for underlying means, but the propagation fixes reference at its measured value, omitting the relative variance 1/N_ref = 0.00125.",
+    "element": "Section 3 'The reference observation sets the normalization of this propagation at its measured value'",
+    "evidence_text": "Full delta-method ratio_error = 0.0703 vs stated 0.0435; stated value at /stated_results/ratio_error is underestimated by ~38%."
+   }
+  ]
+ },
+ {
+  "item": "F054",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The uncertainty propagation drops the Poisson fluctuation of the independent off-window count.",
+   "element": "rate_error variance = on only (Sec. 3)",
+   "evidence_text": "Var(on - alpha*off) = on + alpha^2*off for independent Poisson counts (Sec. 1). The off count is an observation, not an exact constant. The correct rate_error is sqrt(420+0.16*800)/28.8 = 0.813 rather than the stated 0.712, and it would be 0.738 even with alpha=0.2."
+  },
+  "defects": {
+   "D1": "The continuum count is already thinned; the transfer must divide by off_keep as well as using the width ratio. This changes subtraction and its downstream rate.",
+   "D2": "The finite independent continuum count contributes alpha squared times off to the variance; treating it as fixed discards this sampling term."
+  }
+ },
+ {
+  "item": "F032",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The reported posterior_mean is the posterior mode (alpha-1)/beta, not the posterior mean alpha/beta of the gamma posterior; the correct mean is 11/6 = 1.8333, so the stated value 1.6667 is low by 9.1%.",
+   "element": "posterior_mean formula in section 3 and stated_results.posterior_mean",
+   "evidence_text": "analysis.md: 'For the reported posterior_mean, use (posterior_shape minus one) divided by posterior_rate.' For Gamma(11, rate 6): mean = 11/6 = 1.833333, mode = 10/6 = 1.666667 (= stated value)."
+  },
+  "defects": {
+   "D1": "The reported gamma posterior mean uses the mode formula; the mean is posterior_shape/posterior_rate."
+  }
+ },
+ {
+  "item": "D047",
+  "kind": "defect",
+  "defect": "The finite independent continuum count contributes alpha squared times off to the variance; treating it as fixed discards this sampling term.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The transfer coefficient leaves out the off-stream retention probability, so the continuum is underestimated by a factor 1/off_keep = 2, and the yield and rate are overstated (yield 260 vs 100, rate 9.028 vs 3.472).",
+    "element": "alpha = width_on/width_off and the background, yield and rate built from it",
+    "evidence_text": "analysis.md section 1: the continuum stream keeps each event with probability off_keep, and all counts are after this stream selection. data.json: off_keep = 0.5. Section 2: alpha = width_on/width_off = 0.2. The unbiased transfer is 0.2/0.5 = 0.4, so background = 320."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "The yield variance leaves out the Poisson fluctuation of the independent side-window count, so rate_error is underestimated.",
+    "element": "Var(yield) = on (side-window count held fixed)",
+    "evidence_text": "analysis.md section 1 states that off is an independent Poisson observation, yet section 3 fixes the continuum normalization at its observed value. The correct form is Var = on + alpha^2*off: rate_error = 0.8128 with alpha = 0.4 (0.7382 with alpha = 0.2), against the stated 0.7116."
+   }
+  ]
+ },
+ {
+  "item": "F040",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The design-based variance for sampling without replacement from the finite archive omits the finite population correction (1 - n/N) = 0.4, so fraction_error and retained_error are overstated by a factor 1.581.",
+   "element": "Variance estimator tag_fraction*(1-tag_fraction)/(sampled-1) in section 3",
+   "evidence_text": "analysis.md section 1 specifies a simple random sample without replacement from a fixed finite archive and section 3 claims a design-based estimate with no superpopulation component; data.json gives population=2000, sampled=1200. Correct estimator p(1-p)/(n-1)*(1-n/N) gives fraction_error=0.008712 and retained_error=78.41 instead of 0.013775 and 123.97."
+  },
+  "defects": {
+   "D1": "The design-based variance for sampling without replacement requires the finite-population factor 1-sampled/population; omitting it inflates the reported uncertainty."
+  }
+ },
+ {
+  "item": "F087",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "global_p is computed as windows*local_p (the Bonferroni upper bound) but reported as the exact probability that the minimum of 18 independent uniform p-values is <= 0.035. Under the stated model the exact value is 1-(1-0.035)^18 = 0.4734, not 0.63.",
+   "element": "global_p construction (analysis.md sec. 3) and stated_results.global_p",
+   "evidence_text": "Model: independent windows, exactly uniform null p-values (sec. 1); target: probability of at least one equally extreme local test (sec. 2). Exact: 1-0.965^18 = 0.473387. Stated: 0.63 = 18*0.035, a bound that is loose when N*p = 0.63 is not small."
+  },
+  "defects": {
+   "D1": "The trials-factor linear expression is only a union bound or small-tail approximation; the exact independent-trial probability is 1-(1-local_p)^windows."
+  }
+ },
+ {
+  "item": "D006",
+  "kind": "defect",
+  "defect": "The independent Poisson reference count fluctuates; its derivative contribution must be included in the ratio variance.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "ratio_error omits the transfer calibration uncertainty, which the model in section 1 declares as an independent Gaussian error on transfer.",
+    "element": "Section 3 net-signal variance (signal + transfer^2*control) and stated_results.ratio_error",
+    "evidence_text": "The term control^2*transfer_error^2 = 900 exceeds the 680 propagated; including it alone gives sigma_R = sqrt(1580)/600 = 0.0662 instead of 0.04346."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "ratio_error omits the Poisson fluctuation of the reference count, which section 1 defines as a Poisson sample and which enters the ratio denominator.",
+    "element": "Section 3 'reference observation sets the normalization ... at its measured value' and stated_results.ratio_error",
+    "evidence_text": "The delta method adds R^2/reference = 0.4444/800 to Var(R); with only this term sigma_R = 0.0494, and with both omitted terms 0.07032."
+   }
+  ]
+ },
+ {
+  "item": "D051",
+  "kind": "defect",
+  "defect": "The finite independent continuum count contributes alpha squared times off to the variance; treating it as fixed discards this sampling term.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The transfer coefficient leaves out the off-stream retention probability, so the continuum is underestimated by a factor of 2.",
+    "element": "alpha = width_on/width_off (and the background, yield, rate derived from it)",
+    "evidence_text": "Sec. 1 says the off counts are after a selection that keeps each continuum event with probability off_keep=0.5 and that efficiency covers only the signal selection. The expected off count is therefore off_keep*width_off*density, so alpha should be width_on/(off_keep*width_off)=0.4. That gives background 320 rather than 160, yield 100 rather than 260 and rate 3.472 rather than 9.028."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "The stated alpha, background, yield and rate are wrong because of F1.",
+    "element": "stated_results alpha/background/yield_value/rate",
+    "evidence_text": "Stated 0.2/160/260/9.028; with off_keep included these should be 0.4/320/100/3.472."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "The uncertainty propagation drops the Poisson fluctuation of the independent off-window count.",
+    "element": "rate_error variance = on only (Sec. 3)",
+    "evidence_text": "Var(on - alpha*off) = on + alpha^2*off for independent Poisson counts (Sec. 1). The off count is an observation, not an exact constant. The correct rate_error is sqrt(420+0.16*800)/28.8 = 0.813 rather than the stated 0.712, and it would be 0.738 even with alpha=0.2."
+   }
+  ]
+ },
+ {
+  "item": "F045",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The yield variance omits the Poisson uncertainty of the off-window count used to estimate the continuum, underestimating rate_error.",
+   "element": "rate_error propagation (variance = on, off normalization held fixed)",
+   "evidence_text": "Line 7 states off is an independent Poisson observation; the background estimate alpha*off has variance alpha^2*off. Correct variance = on + alpha^2*off = 420 + 0.16*800 = 548 (rate_error 0.813) with the prescale-corrected alpha, or 452 (0.738) even with alpha=0.2, vs stated 0.712 from variance 420."
+  },
+  "defects": {
+   "D1": "The continuum count is already thinned; the transfer must divide by off_keep as well as using the width ratio. This changes subtraction and its downstream rate.",
+   "D2": "The finite independent continuum count contributes alpha squared times off to the variance; treating it as fixed discards this sampling term."
+  }
+ },
+ {
+  "item": "D086",
+  "kind": "defect",
+  "defect": "The trials-factor linear expression is only a union bound or small-tail approximation; the exact independent-trial probability is 1-(1-local_p)^windows.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "global_p is computed as windows*local_p (the Bonferroni upper bound) but reported as the exact probability that the minimum of 18 independent uniform p-values is <= 0.035. Under the stated model the exact value is 1-(1-0.035)^18 = 0.4734, not 0.63.",
+    "element": "global_p construction (analysis.md sec. 3) and stated_results.global_p",
+    "evidence_text": "Model: independent windows, exactly uniform null p-values (sec. 1); target: probability of at least one equally extreme local test (sec. 2). Exact: 1-0.965^18 = 0.473387. Stated: 0.63 = 18*0.035, a bound that is loose when N*p = 0.63 is not small."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "null_survival = 1 - global_p inherits the Bonferroni error: stated 0.37, exact P(no window as extreme) = (1-0.035)^18 = 0.5266.",
+    "element": "stated_results.null_survival",
+    "evidence_text": "(0.965)^18 = 0.526613 compared with the stated 0.3699999999999999."
+   }
+  ]
+ },
+ {
+  "item": "F081",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "global_p is computed with the Bonferroni bound N*p_loc and reported as the exact probability that the minimum local p-value is no larger than the observed one; under the stated independent, exactly-uniform null model that probability is 1-(1-p_loc)^N = 0.4734, not 0.63.",
+   "element": "global_p construction (analysis.md sec. 3) and stated_results.global_p",
+   "evidence_text": "1 - (1 - 0.035)^18 = 0.473387 vs stated 0.63; N*p is an upper bound only, and is not a probability for p > 1/N."
+  },
+  "defects": {
+   "D1": "The trials-factor linear expression is only a union bound or small-tail approximation; the exact independent-trial probability is 1-(1-local_p)^windows."
+  }
+ },
+ {
+  "item": "F074",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "Degrees of freedom are wrong: a multinomial test conditioned on the fixed total with fully specified probabilities has k-1 = 2 dof, not 3; the stated p_value (0.900) is therefore inflated (correct about 0.75).",
+   "element": "degrees_of_freedom and p_value",
+   "evidence_text": "analysis.md line 7 states counts are multinomial conditional on the total and line 11 normalizes expected counts to the observed total, which removes one degree of freedom; line 15 nevertheless assigns one dof per category. sf(0.5844, 2) = 0.7466 vs stated sf(0.5844, 3) = 0.8999."
+  },
+  "defects": {
+   "D1": "The stated Pearson construction requires expected counts in the denominators; using observed counts changes the statistic and its tail.",
+   "D2": "A fixed-total multinomial with three categories and no fitted shape parameters has two independent contrasts, hence two degrees of freedom."
+  }
+ },
+ {
+  "item": "D046",
+  "kind": "defect",
+  "defect": "The continuum count is already thinned; the transfer must divide by off_keep as well as using the width ratio. This changes subtraction and its downstream rate.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The transfer coefficient leaves out the off-stream retention probability, so the continuum is underestimated by a factor 1/off_keep = 2, and the yield and rate are overstated (yield 260 vs 100, rate 9.028 vs 3.472).",
+    "element": "alpha = width_on/width_off and the background, yield and rate built from it",
+    "evidence_text": "analysis.md section 1: the continuum stream keeps each event with probability off_keep, and all counts are after this stream selection. data.json: off_keep = 0.5. Section 2: alpha = width_on/width_off = 0.2. The unbiased transfer is 0.2/0.5 = 0.4, so background = 320."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "The yield variance leaves out the Poisson fluctuation of the independent side-window count, so rate_error is underestimated.",
+    "element": "Var(yield) = on (side-window count held fixed)",
+    "evidence_text": "analysis.md section 1 states that off is an independent Poisson observation, yet section 3 fixes the continuum normalization at its observed value. The correct form is Var = on + alpha^2*off: rate_error = 0.8128 with alpha = 0.4 (0.7382 with alpha = 0.2), against the stated 0.7116."
+   }
+  ]
+ },
+ {
+  "item": "F079",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The statistic divides by observed counts (Neyman chi-square) rather than expected counts, contradicting the Pearson statistic the method names.",
+   "element": "statistic definition",
+   "evidence_text": "analysis.md line 15: '(counts minus expected) squared divided by counts'; line 11 adopts 'the multinomial Pearson statistic', whose denominator is the expected count. Pearson value = 0.571429 vs stated 0.584416."
+  },
+  "defects": {
+   "D1": "The stated Pearson construction requires expected counts in the denominators; using observed counts changes the statistic and its tail.",
+   "D2": "A fixed-total multinomial with three categories and no fitted shape parameters has two independent contrasts, hence two degrees of freedom."
+  }
+ },
+ {
+  "item": "F013",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The stated ratio_error understates the leading delta-method standard error defined in the note's own model by about 38%.",
+   "element": "stated_results.ratio_error",
+   "evidence_text": "Stated 0.04346134936801766; full leading delta-method value 0.07031674369909661."
+  },
+  "defects": {
+   "D1": "The independent transfer calibration has a nonzero error; its delta-method contribution is control squared times transfer_error squared.",
+   "D2": "The independent Poisson reference count fluctuates; its derivative contribution must be included in the ratio variance."
+  }
+ },
+ {
+  "item": "D083",
+  "kind": "defect",
+  "defect": "The trials-factor linear expression is only a union bound or small-tail approximation; the exact independent-trial probability is 1-(1-local_p)^windows.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "global_p is computed as windows*local_p (Bonferroni bound) but reported as the exact probability that the minimum local p-value is no larger than observed; under the stated independent-uniform model the exact value is 1-(1-0.035)^18 = 0.47339, not 0.63.",
+    "element": "global_p construction",
+    "evidence_text": "analysis.md section 3 line 15 defines global_p = windows times local_p and calls it the probability of the minimum local p-value being no larger than the observed minimum; data.json stated_results.global_p = 0.63; exact Sidak value 0.4733869."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "null_survival = 1 - windows*local_p = 0.37 inherits the error; the exact null probability that no window is as extreme is (1-0.035)^18 = 0.52661.",
+    "element": "null_survival",
+    "evidence_text": "data.json /stated_results/null_survival = 0.37 vs exact 0.5266131 under the model in analysis.md section 1."
+   }
+  ]
+ },
+ {
+  "item": "F057",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The inversion uses the inverse of the transposed response, inconsistent with the stated convention P(reco i | true j) with reco index on rows; the correct estimator is R^{-1} n.",
+   "element": "Construction: A = inverse(transpose(response)); true_first, true_second",
+   "evidence_text": "With E[n] = R mu, mu_hat = R^{-1} n = (623.08, 276.92); the stated (595.38, 318.46) equals (R^T)^{-1} n. R is asymmetric (R[0][1]=0.15, R[1][0]=0.2), so the transpose matters."
+  },
+  "defects": {
+   "D1": "The stored response maps true yields to reconstructed yields; invert response itself, rather than its transpose.",
+   "D2": "Each unfolded yield depends on both reconstructed counts; the propagated variance must include both squared inverse-matrix coefficients."
+  }
+ },
+ {
+  "item": "F033",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The stated posterior_mean value equals the gamma posterior mode, not the mean, so the result vector mislabels the quantity.",
+   "element": "stated_results.posterior_mean",
+   "evidence_text": "1.6666666666666667 = (11-1)/6; posterior mean would be 1.8333333333333333."
+  },
+  "defects": {
+   "D1": "The reported gamma posterior mean uses the mode formula; the mean is posterior_shape/posterior_rate."
+  }
+ },
+ {
+  "item": "F038",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The variance estimator omits the finite population correction (1 - n/N) required for a design-based SRSWOR uncertainty from a fixed finite archive; with n/N = 0.6 the stated fraction_error and retained_error are overstated by a factor 1/sqrt(0.4) = 1.58.",
+   "element": "Variance estimate tag_fraction*(1-tag_fraction)/(sampled-1) used for fraction_error and propagated to retained_error",
+   "evidence_text": "analysis.md lines 7 and 11 state sampling without replacement from a fixed finite archive with a large sampling fraction, and line 15 claims a design-based estimate with no superpopulation component; data.json gives population=2000, sampled=1200. Correct SE = sqrt(0.4*0.35*0.65/1199) = 0.0087119 (retained_error 78.407), not 0.0137747 (123.972)."
+  },
+  "defects": {
+   "D1": "The design-based variance for sampling without replacement requires the finite-population factor 1-sampled/population; omitting it inflates the reported uncertainty."
+  }
+ },
+ {
+  "item": "D002",
+  "kind": "defect",
+  "defect": "The independent Poisson reference count fluctuates; its derivative contribution must be included in the ratio variance.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The independent Gaussian uncertainty on transfer (transfer_error = 0.06) is omitted from the net-signal variance although the model declares it a fluctuating estimate; its contribution C^2 sigma_t^2 = 900 exceeds the retained S + t^2 C = 680.",
+    "element": "Section 3 net-signal variance 'signal plus transfer squared times control'",
+    "evidence_text": "With the term, sigma_R(no ref term) = sqrt(1580)/600 = 0.0662 vs stated 0.0435."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "The reference yield is declared a Poisson sample (line 7) and the target is defined for underlying means, but the propagation fixes reference at its measured value, omitting the relative variance 1/N_ref = 0.00125.",
+    "element": "Section 3 'The reference observation sets the normalization of this propagation at its measured value'",
+    "evidence_text": "Full delta-method ratio_error = 0.0703 vs stated 0.0435; stated value at /stated_results/ratio_error is underestimated by ~38%."
+   }
+  ]
+ },
+ {
+  "item": "D005",
+  "kind": "defect",
+  "defect": "The independent transfer calibration has a nonzero error; its delta-method contribution is control squared times transfer_error squared.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "ratio_error omits the transfer calibration uncertainty, which the model in section 1 declares as an independent Gaussian error on transfer.",
+    "element": "Section 3 net-signal variance (signal + transfer^2*control) and stated_results.ratio_error",
+    "evidence_text": "The term control^2*transfer_error^2 = 900 exceeds the 680 propagated; including it alone gives sigma_R = sqrt(1580)/600 = 0.0662 instead of 0.04346."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "ratio_error omits the Poisson fluctuation of the reference count, which section 1 defines as a Poisson sample and which enters the ratio denominator.",
+    "element": "Section 3 'reference observation sets the normalization ... at its measured value' and stated_results.ratio_error",
+    "evidence_text": "The delta method adds R^2/reference = 0.4444/800 to Var(R); with only this term sigma_R = 0.0494, and with both omitted terms 0.07032."
+   }
+  ]
+ },
+ {
+  "item": "F030",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The stated posterior_mean value inherits the mean/mode mislabel.",
+   "element": "stated posterior_mean",
+   "evidence_text": "1.6666666666666667 vs correct posterior mean 1.8333333333333333 (-9.1% relative)."
+  },
+  "defects": {
+   "D1": "The reported gamma posterior mean uses the mode formula; the mean is posterior_shape/posterior_rate."
+  }
+ },
+ {
+  "item": "F052",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The transfer coefficient leaves out the off-stream retention probability, so the continuum is underestimated by a factor of 2.",
+   "element": "alpha = width_on/width_off (and the background, yield, rate derived from it)",
+   "evidence_text": "Sec. 1 says the off counts are after a selection that keeps each continuum event with probability off_keep=0.5 and that efficiency covers only the signal selection. The expected off count is therefore off_keep*width_off*density, so alpha should be width_on/(off_keep*width_off)=0.4. That gives background 320 rather than 160, yield 100 rather than 260 and rate 3.472 rather than 9.028."
+  },
+  "defects": {
+   "D1": "The continuum count is already thinned; the transfer must divide by off_keep as well as using the width ratio. This changes subtraction and its downstream rate.",
+   "D2": "The finite independent continuum count contributes alpha squared times off to the variance; treating it as fixed discards this sampling term."
+  }
+ },
+ {
+  "item": "D014",
+  "kind": "defect",
+  "defect": "Both tracks must pass, so the event efficiency is the square of the per-track efficiency under the stated independence model.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The normalization uses one power of track_efficiency, but the stated model requires both independent daughter tracks to be selected, so the event efficiency is track_efficiency^2.",
+    "element": "Event selection normalization (Section 3), and the normalization, cross_section and cross_section_error that depend on it",
+    "evidence_text": "Section 1: per-track selection probability track_efficiency, the two track decisions independent, and the event contains two daughter tracks. Section 3: 'Construct the event selection normalization as track_efficiency'. The correct factor is 0.86^2 = 0.7396, which gives normalization 56.80128 and cross_section 14.7884 +- 0.5688 pb against the stated 66.048 and 12.7180 +- 0.4892 pb."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "The branching fraction enters once, but the model describes two independent parent decays per event, each into the reconstructed mode with probability branch_fraction. That implies branch_fraction^2.",
+    "element": "Branching-fraction factor in the normalization (Section 3)",
+    "evidence_text": "Section 1: 'branch_fraction is the probability for each parent to enter the reconstructed decay mode, and the two decays are independent.' Section 3 multiplies by branch_fraction once. With BF^2 (and eff^2), the normalization is 36.3528 and cross_section 23.107 +- 0.889 pb. This finding depends on reading Section 1 as two parents per event, which is the natural reading but is not stated as plainly as the track condition."
+   }
+  ]
+ },
+ {
+  "item": "D031",
+  "kind": "defect",
+  "defect": "The reported gamma posterior mean uses the mode formula; the mean is posterior_shape/posterior_rate.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The reported posterior_mean is the posterior mode (alpha-1)/beta, not the posterior mean alpha/beta of the gamma posterior; the correct mean is 11/6 = 1.8333, so the stated value 1.6667 is low by 9.1%.",
+    "element": "posterior_mean formula in section 3 and stated_results.posterior_mean",
+    "evidence_text": "analysis.md: 'For the reported posterior_mean, use (posterior_shape minus one) divided by posterior_rate.' For Gamma(11, rate 6): mean = 11/6 = 1.833333, mode = 10/6 = 1.666667 (= stated value)."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "The stated posterior_mean value equals the gamma posterior mode, not the mean, so the result vector mislabels the quantity.",
+    "element": "stated_results.posterior_mean",
+    "evidence_text": "1.6666666666666667 = (11-1)/6; posterior mean would be 1.8333333333333333."
+   }
+  ]
+ },
+ {
+  "item": "F036",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "Stated uncertainties follow the defective estimator and are too large by 1/sqrt(0.4).",
+   "element": "stated_results fraction_error and retained_error",
+   "evidence_text": "Stated 0.013774667 and 123.972003 vs FPC-corrected 0.008711864 and 78.406779."
+  },
+  "defects": {
+   "D1": "The design-based variance for sampling without replacement requires the finite-population factor 1-sampled/population; omitting it inflates the reported uncertainty."
+  }
+ },
+ {
+  "item": "D018",
+  "kind": "defect",
+  "defect": "Both tracks must pass, so the event efficiency is the square of the per-track efficiency under the stated independence model.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The event selection efficiency uses a single track_efficiency factor, but the model needs both independently selected tracks, so it should be track_efficiency^2. The normalization is overstated by a factor of 1/0.86 and the cross section and its error are understated by the same factor.",
+    "element": "normalization (event selection efficiency factor)",
+    "evidence_text": "analysis.md line 7: two daughter tracks, per-track selection probability track_efficiency, decisions independent. Line 15: normalization constructed as track_efficiency x branch_fraction x luminosity = 66.048. Correct efficiency 0.86^2 = 0.7396 gives N = 56.801 and sigma = 14.788 +- 0.569 pb."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "branch_fraction is defined per parent, with two independent decays, which implies branch_fraction^2 per event. The normalization uses branch_fraction once.",
+    "element": "normalization (branching fraction factor)",
+    "evidence_text": "analysis.md line 7: 'probability for each parent to enter the reconstructed decay mode, and the two decays are independent'. Line 15 multiplies by branch_fraction once. With both corrections N = 36.353 and sigma = 23.107 +- 0.889 pb."
+   }
+  ]
+ },
+ {
+  "item": "D037",
+  "kind": "defect",
+  "defect": "The design-based variance for sampling without replacement requires the finite-population factor 1-sampled/population; omitting it inflates the reported uncertainty.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The variance estimator omits the finite population correction (1 - n/N) required for a design-based SRSWOR uncertainty from a fixed finite archive; with n/N = 0.6 the stated fraction_error and retained_error are overstated by a factor 1/sqrt(0.4) = 1.58.",
+    "element": "Variance estimate tag_fraction*(1-tag_fraction)/(sampled-1) used for fraction_error and propagated to retained_error",
+    "evidence_text": "analysis.md lines 7 and 11 state sampling without replacement from a fixed finite archive with a large sampling fraction, and line 15 claims a design-based estimate with no superpopulation component; data.json gives population=2000, sampled=1200. Correct SE = sqrt(0.4*0.35*0.65/1199) = 0.0087119 (retained_error 78.407), not 0.0137747 (123.972)."
+   }
+  ]
+ },
+ {
+  "item": "D076",
+  "kind": "defect",
+  "defect": "The stated Pearson construction requires expected counts in the denominators; using observed counts changes the statistic and its tail.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "Degrees of freedom should be 2 (k-1), not 3: the normalization to the observed total removes one degree of freedom even with no fitted shape parameters.",
+    "element": "degrees_of_freedom and the reference distribution for p_value",
+    "evidence_text": "analysis.md line 15 states 'use three degrees of freedom, one for each populated category'; with expected = total*p, sum(counts-expected)=0 is a linear constraint, so the Pearson statistic is asymptotically chi2(k-1)=chi2(2). p_value would be 0.7515 (Pearson) or 0.7466 (stated statistic) with 2 dof, not 0.8999."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "The statistic divides by observed counts (Neyman chi-square) rather than expected counts, contradicting the Pearson statistic the method names.",
+    "element": "statistic definition",
+    "evidence_text": "analysis.md line 15: '(counts minus expected) squared divided by counts'; line 11 adopts 'the multinomial Pearson statistic', whose denominator is the expected count. Pearson value = 0.571429 vs stated 0.584416."
+   }
+  ]
+ },
+ {
+  "item": "F029",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The reported posterior_mean is the posterior mode (a-1)/b, not the posterior mean a/b; the correct posterior mean is 11/6 = 1.8333, not 1.6667.",
+   "element": "posterior_mean definition and value",
+   "evidence_text": "analysis.md section 3 prescribes (posterior_shape minus one) divided by posterior_rate; for Gamma(11, 6) in rate parameterization the mean is 11/6 = 1.833333 and (11-1)/6 = 1.666667 is the mode. data.json /stated_results/posterior_mean = 1.6666666666666667."
+  },
+  "defects": {
+   "D1": "The reported gamma posterior mean uses the mode formula; the mean is posterior_shape/posterior_rate."
+  }
+ },
+ {
+  "item": "F088",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "null_survival = 1 - global_p inherits the Bonferroni error: stated 0.37, exact P(no window as extreme) = (1-0.035)^18 = 0.5266.",
+   "element": "stated_results.null_survival",
+   "evidence_text": "(0.965)^18 = 0.526613 compared with the stated 0.3699999999999999."
+  },
+  "defects": {
+   "D1": "The trials-factor linear expression is only a union bound or small-tail approximation; the exact independent-trial probability is 1-(1-local_p)^windows."
+  }
+ },
+ {
+  "item": "F025",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "branch_fraction is defined per parent with two independent decays, which implies an event-level factor branch_fraction^2 = 0.4096. The normalization uses a single power. Combined with F1, this gives cross_section 23.107 +- 0.889 pb.",
+   "element": "branch_fraction factor in the normalization",
+   "evidence_text": "Section 1: 'probability for each parent to enter the reconstructed decay mode, and the two decays are independent'. Section 3 multiplies by branch_fraction once. This depends on reading the topology as two parents, which the 'pair decay' wording leaves somewhat ambiguous."
+  },
+  "defects": {
+   "D1": "Both tracks must pass, so the event efficiency is the square of the per-track efficiency under the stated independence model.",
+   "D2": "Both independent parent decays must enter the selected mode, so the branching normalization is branch_fraction squared."
+  }
+ },
+ {
+  "item": "F021",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "branch_fraction is defined per parent, with two independent decays, which implies branch_fraction^2 per event. The normalization uses branch_fraction once.",
+   "element": "normalization (branching fraction factor)",
+   "evidence_text": "analysis.md line 7: 'probability for each parent to enter the reconstructed decay mode, and the two decays are independent'. Line 15 multiplies by branch_fraction once. With both corrections N = 36.353 and sigma = 23.107 +- 0.889 pb."
+  },
+  "defects": {
+   "D1": "Both tracks must pass, so the event efficiency is the square of the per-track efficiency under the stated independence model.",
+   "D2": "Both independent parent decays must enter the selected mode, so the branching normalization is branch_fraction squared."
+  }
+ },
+ {
+  "item": "D056",
+  "kind": "defect",
+  "defect": "Each unfolded yield depends on both reconstructed counts; the propagated variance must include both squared inverse-matrix coefficients.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The inversion uses the inverse of the transposed response, inconsistent with the stated convention P(reco i | true j) with reco index on rows; the correct estimator is R^{-1} n.",
+    "element": "Construction: A = inverse(transpose(response)); true_first, true_second",
+    "evidence_text": "With E[n] = R mu, mu_hat = R^{-1} n = (623.08, 276.92); the stated (595.38, 318.46) equals (R^T)^{-1} n. R is asymmetric (R[0][1]=0.15, R[1][0]=0.2), so the transpose matters."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "Variance propagation keeps only diagonal entries of the inverse operator, omitting the contribution of the other bin's Poisson fluctuation and the covariance between unfolded bins, contradicting the stated count model.",
+    "element": "Propagation: variance_first, variance_second, rate_first_error",
+    "evidence_text": "Var(mu_i) = sum_k A_ik^2 n_k; with the correct inverse, Var = 942.60 and 596.45 (cov -319.53), rate_first_error = 1.0234; stated 923.43, 545.33, 1.0129. Even with the stated A the off-diagonal terms (0.3077^2*360, 0.2308^2*540) are dropped."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "Stated results inherit F1/F2: they are not correct for the stated model.",
+    "element": "stated_results",
+    "evidence_text": "Correct values: true_first 623.077, true_second 276.923, variance_first 942.604, variance_second 596.450, rate_first 20.769, rate_first_error 1.02339."
+   }
+  ]
+ },
+ {
+  "item": "F078",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "Degrees of freedom should be 2 (k-1), not 3: the normalization to the observed total removes one degree of freedom even with no fitted shape parameters.",
+   "element": "degrees_of_freedom and the reference distribution for p_value",
+   "evidence_text": "analysis.md line 15 states 'use three degrees of freedom, one for each populated category'; with expected = total*p, sum(counts-expected)=0 is a linear constraint, so the Pearson statistic is asymptotically chi2(k-1)=chi2(2). p_value would be 0.7515 (Pearson) or 0.7466 (stated statistic) with 2 dof, not 0.8999."
+  },
+  "defects": {
+   "D1": "The stated Pearson construction requires expected counts in the denominators; using observed counts changes the statistic and its tail.",
+   "D2": "A fixed-total multinomial with three categories and no fitted shape parameters has two independent contrasts, hence two degrees of freedom."
+  }
+ },
+ {
+  "item": "F012",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The reference count is declared a Poisson sample but its fluctuation (relative variance 1/reference) is not propagated; it is held at its measured value.",
+   "element": "Section 3 normalization of ratio_error by reference*relative_efficiency without reference variance",
+   "evidence_text": "Section 1 line 7 declares a disjoint Poisson reference sample; line 15 fixes it. Adding R^2/reference gives 0.0494 alone, and with F1 the full error is 0.0703."
+  },
+  "defects": {
+   "D1": "The independent transfer calibration has a nonzero error; its delta-method contribution is control squared times transfer_error squared.",
+   "D2": "The independent Poisson reference count fluctuates; its derivative contribution must be included in the ratio variance."
+  }
+ },
+ {
+  "item": "F041",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The stated uncertainties in data.json follow from the defective estimator and are too large by 1.581.",
+   "element": "stated_results fraction_error and retained_error",
+   "evidence_text": "Stated 0.013774667 and 123.972 equal sqrt(0.35*0.65/1199) and 9000 times it, without the factor sqrt(1-1200/2000)=0.6325."
+  },
+  "defects": {
+   "D1": "The design-based variance for sampling without replacement requires the finite-population factor 1-sampled/population; omitting it inflates the reported uncertainty."
+  }
+ },
+ {
+  "item": "F066",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The inversion uses the inverse of the transpose of the response, contradicting the stated convention (rows = reconstructed, columns = true); the correct estimator is R^{-1} n.",
+   "element": "Construction: A = inverse(transpose(response)); true_first, true_second, rate_first",
+   "evidence_text": "With n = R mu, mu = R^{-1} n = (623.08, 276.92); stated (595.38, 318.46) come from (R^T)^{-1} n. rate_first should be 20.769, stated 19.846 (4.4% low)."
+  },
+  "defects": {
+   "D1": "The stored response maps true yields to reconstructed yields; invert response itself, rather than its transpose.",
+   "D2": "Each unfolded yield depends on both reconstructed counts; the propagated variance must include both squared inverse-matrix coefficients."
+  }
+ },
+ {
+  "item": "D009",
+  "kind": "defect",
+  "defect": "The independent transfer calibration has a nonzero error; its delta-method contribution is control squared times transfer_error squared.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The propagation omits the uncertainty of the external transfer estimate (control^2*transfer_error^2 = 900), which the model declares as a Gaussian-uncertain independent input; it is the dominant variance term.",
+    "element": "Section 3 net-signal variance (signal + transfer^2*control) and stated_results.ratio_error",
+    "evidence_text": "Var(net) with the term is 1580 vs 680 used; ratio_error with only this term restored is 0.0662 vs stated 0.0435."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "The reference count is declared a Poisson sample but its fluctuation (relative variance 1/reference) is not propagated; it is held at its measured value.",
+    "element": "Section 3 normalization of ratio_error by reference*relative_efficiency without reference variance",
+    "evidence_text": "Section 1 line 7 declares a disjoint Poisson reference sample; line 15 fixes it. Adding R^2/reference gives 0.0494 alone, and with F1 the full error is 0.0703."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "The stated ratio_error understates the leading delta-method standard error defined in the note's own model by about 38%.",
+    "element": "stated_results.ratio_error",
+    "evidence_text": "Stated 0.04346134936801766; full leading delta-method value 0.07031674369909661."
+   }
+  ]
+ },
+ {
+  "item": "D050",
+  "kind": "defect",
+  "defect": "The continuum count is already thinned; the transfer must divide by off_keep as well as using the width ratio. This changes subtraction and its downstream rate.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The transfer coefficient leaves out the off-stream retention probability, so the continuum is underestimated by a factor of 2.",
+    "element": "alpha = width_on/width_off (and the background, yield, rate derived from it)",
+    "evidence_text": "Sec. 1 says the off counts are after a selection that keeps each continuum event with probability off_keep=0.5 and that efficiency covers only the signal selection. The expected off count is therefore off_keep*width_off*density, so alpha should be width_on/(off_keep*width_off)=0.4. That gives background 320 rather than 160, yield 100 rather than 260 and rate 3.472 rather than 9.028."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "The stated alpha, background, yield and rate are wrong because of F1.",
+    "element": "stated_results alpha/background/yield_value/rate",
+    "evidence_text": "Stated 0.2/160/260/9.028; with off_keep included these should be 0.4/320/100/3.472."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "The uncertainty propagation drops the Poisson fluctuation of the independent off-window count.",
+    "element": "rate_error variance = on only (Sec. 3)",
+    "evidence_text": "Var(on - alpha*off) = on + alpha^2*off for independent Poisson counts (Sec. 1). The off count is an observation, not an exact constant. The correct rate_error is sqrt(420+0.16*800)/28.8 = 0.813 rather than the stated 0.712, and it would be 0.738 even with alpha=0.2."
+   }
+  ]
+ },
+ {
+  "item": "D072",
+  "kind": "defect",
+  "defect": "The stated Pearson construction requires expected counts in the denominators; using observed counts changes the statistic and its tail.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "Degrees of freedom are wrong: a multinomial test conditioned on the fixed total with fully specified probabilities has k-1 = 2 dof, not 3; the stated p_value (0.900) is therefore inflated (correct about 0.75).",
+    "element": "degrees_of_freedom and p_value",
+    "evidence_text": "analysis.md line 7 states counts are multinomial conditional on the total and line 11 normalizes expected counts to the observed total, which removes one degree of freedom; line 15 nevertheless assigns one dof per category. sf(0.5844, 2) = 0.7466 vs stated sf(0.5844, 3) = 0.8999."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "The statistic divides by observed counts (Neyman chi-square) although the method is described as the Pearson statistic, which divides by expected counts.",
+    "element": "statistic",
+    "evidence_text": "analysis.md line 11 names the multinomial Pearson statistic; line 15 defines the denominator as counts. Pearson value is 0.571429, stated value 0.584416 equals the Neyman form."
+   }
+  ]
+ },
+ {
+  "item": "F035",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The design-based variance for sampling without replacement from a finite archive omits the finite-population correction (1 - n/N), overstating fraction_error and retained_error by a factor 1.58 at n/N = 0.6.",
+   "element": "Variance estimator p(1-p)/(n-1) in Section 3 and resulting stated_results fraction_error and retained_error",
+   "evidence_text": "Section 1 and 3 specify SRS without replacement from a fixed finite population with no superpopulation component; data.json population=2000, sampled=1200. Correct SE(p) = sqrt((1-1200/2000)*0.35*0.65/1199) = 0.0087119 (stated 0.0137747); SE(retained) = 78.41 (stated 123.97)."
+  },
+  "defects": {
+   "D1": "The design-based variance for sampling without replacement requires the finite-population factor 1-sampled/population; omitting it inflates the reported uncertainty."
+  }
+ },
+ {
+  "item": "D023",
+  "kind": "defect",
+  "defect": "Both independent parent decays must enter the selected mode, so the branching normalization is branch_fraction squared.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The event selection efficiency uses a single track_efficiency, but the stated model requires two independent track selections, so it should be track_efficiency^2 = 0.7396. Normalization and cross section are therefore wrong: cross_section is understated by a factor 0.86 (correct value 14.788 +- 0.569 pb with this fix alone).",
+    "element": "normalization construction (Section 3) and stated_results normalization/cross_section/cross_section_error",
+    "evidence_text": "Section 1: 'two distinguishable daughter tracks ... per-track selection has probability track_efficiency and the decisions for the two tracks are independent'. Section 3: 'Construct the event selection normalization as track_efficiency'. Stated normalization 66.048 = 0.86*0.64*120."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "branch_fraction is defined per parent with two independent decays, which implies an event-level factor branch_fraction^2 = 0.4096. The normalization uses a single power. Combined with F1, this gives cross_section 23.107 +- 0.889 pb.",
+    "element": "branch_fraction factor in the normalization",
+    "evidence_text": "Section 1: 'probability for each parent to enter the reconstructed decay mode, and the two decays are independent'. Section 3 multiplies by branch_fraction once. This depends on reading the topology as two parents, which the 'pair decay' wording leaves somewhat ambiguous."
+   }
+  ]
+ },
+ {
+  "item": "F027",
+  "kind": "finding",
+  "finding": {
+   "obligation": "O-stat",
+   "claim": "The quantity reported as posterior_mean is the posterior mode (shape-1)/rate, not the posterior mean shape/rate; the correct posterior mean is 11/6 = 1.8333, not 1.6667.",
+   "element": "posterior_mean definition and value",
+   "evidence_text": "For Gamma(shape=11, rate=6), E[rate] = 11/6 = 1.8333 while (11-1)/6 = 1.6667 is the mode. analysis.md section 3 prescribes (posterior_shape minus one)/posterior_rate for the 'posterior_mean'; data.json reports 1.6666666666666667."
+  },
+  "defects": {
+   "D1": "The reported gamma posterior mean uses the mode formula; the mean is posterior_shape/posterior_rate."
+  }
+ },
+ {
+  "item": "D055",
+  "kind": "defect",
+  "defect": "The stored response maps true yields to reconstructed yields; invert response itself, rather than its transpose.",
+  "findings": [
+   {
+    "obligation": "O-stat",
+    "claim": "The inversion uses the inverse of the transposed response, inconsistent with the stated convention P(reco i | true j) with reco index on rows; the correct estimator is R^{-1} n.",
+    "element": "Construction: A = inverse(transpose(response)); true_first, true_second",
+    "evidence_text": "With E[n] = R mu, mu_hat = R^{-1} n = (623.08, 276.92); the stated (595.38, 318.46) equals (R^T)^{-1} n. R is asymmetric (R[0][1]=0.15, R[1][0]=0.2), so the transpose matters."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "Variance propagation keeps only diagonal entries of the inverse operator, omitting the contribution of the other bin's Poisson fluctuation and the covariance between unfolded bins, contradicting the stated count model.",
+    "element": "Propagation: variance_first, variance_second, rate_first_error",
+    "evidence_text": "Var(mu_i) = sum_k A_ik^2 n_k; with the correct inverse, Var = 942.60 and 596.45 (cov -319.53), rate_first_error = 1.0234; stated 923.43, 545.33, 1.0129. Even with the stated A the off-diagonal terms (0.3077^2*360, 0.2308^2*540) are dropped."
+   },
+   {
+    "obligation": "O-stat",
+    "claim": "Stated results inherit F1/F2: they are not correct for the stated model.",
+    "element": "stated_results",
+    "evidence_text": "Correct values: true_first 623.077, true_second 276.923, variance_first 942.604, variance_second 596.450, rate_first 20.769, rate_first_error 1.02339."
+   }
+  ]
+ }
+]

@@ -97,6 +97,7 @@ In v1 (capability IDs of the map, by owner; the state of each is in the map):
 - hep-ml: ml-training, bdt-pipeline, ml-eras
 - hep-citations: literature-verification
 - hep-authoring: claims-to-results, terminology, papers-and-numbers
+- hep-review: recorded-review
 
 Outside v1 (the closest owner answers with the limited-support notice):
 

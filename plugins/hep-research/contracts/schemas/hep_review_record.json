@@ -1,0 +1,156 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "hep_review_record.json",
+ "title": "hep-review review-record (schema 1.0.0; 0.x data experimental)",
+ "description": "Never overwritten; responses are new records (spec 6.2). Item ids are unique within the context; dependencies, bindings and disposition are checked by contracts/hep_review.py validate, never stored.",
+ "type": "object",
+ "$ref": "hep_review_definitions.json#/$defs/header",
+ "required": ["type", "plan_revision", "assignment_id", "actor", "raw_submission_ref", "submission_fidelity",
+              "answers", "findings", "attempts", "evidence", "judgments", "suspected_conflicts", "responses",
+              "limitations"],
+ "properties": {
+  "protocol": {}, "schema_version": {}, "record_kind": {"const": "record"}, "id": {}, "context_id": {},
+  "type": {"enum": ["submission", "verification", "response", "adjudication"]},
+  "plan_revision": {"type": "integer", "minimum": 1},
+  "assignment_id": {"$ref": "hep_review_definitions.json#/$defs/id"},
+  "actor": {"type": "string", "minLength": 1},
+  "raw_submission_ref": {"$ref": "hep_review_definitions.json#/$defs/content_ref"},
+  "submission_fidelity": {"enum": ["digest-bound", "file-transfer", "host-transcript", "transcribed", "mismatch"]},
+  "declared_digest": {"type": "string"},
+  "answers": {"type": "array", "items": {"$ref": "#/$defs/answer"}},
+  "findings": {"type": "array", "items": {"$ref": "#/$defs/finding"}},
+  "attempts": {"type": "array", "items": {"$ref": "#/$defs/attempt"}},
+  "evidence": {"type": "array", "items": {"$ref": "#/$defs/evidence"}},
+  "judgments": {"type": "array", "items": {"$ref": "#/$defs/judgment"}},
+  "suspected_conflicts": {"type": "array", "items": {"$ref": "#/$defs/suspected_conflict"}},
+  "responses": {"type": "array", "items": {"$ref": "#/$defs/response"}},
+  "suggested_obligations": {"type": "array", "items": {"type": "string"}},
+  "access": {"type": "object"},
+  "provenance": {"type": "array", "items": {"type": "object"}},
+  "limitations": {"type": "array", "items": {"type": "string"}}
+ },
+ "additionalProperties": false,
+ "$defs": {
+  "deps": {"type": "array", "items": {"$ref": "hep_review_definitions.json#/$defs/id"}},
+  "answer": {
+   "type": "object",
+   "required": ["id", "obligation_id", "verdict", "finding_ids", "attempt_ids", "evidence_ids", "cited_materials",
+                "missing_inputs", "depends_on"],
+   "properties": {
+    "id": {"$ref": "hep_review_definitions.json#/$defs/id"},
+    "obligation_id": {"$ref": "hep_review_definitions.json#/$defs/id"},
+    "verdict": {"$ref": "hep_review_definitions.json#/$defs/outcome"},
+    "finding_ids": {"$ref": "#/$defs/deps"},
+    "attempt_ids": {"$ref": "#/$defs/deps"},
+    "evidence_ids": {"$ref": "#/$defs/deps"},
+    "cited_materials": {"$ref": "#/$defs/deps"},
+    "missing_inputs": {"type": "array", "items": {"anyOf": [
+     {"type": "string", "minLength": 1},
+     {"type": "object", "required": ["name"],
+      "properties": {"name": {"type": "string", "minLength": 1}, "needed_for": {"type": "string"},
+                     "basis": {"$ref": "hep_review_definitions.json#/$defs/basis"}},
+      "additionalProperties": false}]}},
+    "depends_on": {"$ref": "#/$defs/deps"},
+    "discharge": {"type": "object", "required": ["reason_category", "basis", "reason"],
+                  "properties": {"reason_category": {"enum": ["condition-absent", "out-of-scope-by-intent",
+                                                              "superseded-by-other-obligation"]},
+                                 "basis": {"$ref": "hep_review_definitions.json#/$defs/basis"},
+                                 "reason": {"type": "string"}},
+                  "additionalProperties": false},
+    "reasoning": {"type": "string"}
+   },
+   "additionalProperties": false
+  },
+  "finding": {
+   "type": "object",
+   "required": ["id", "obligation_id", "claim", "element", "locator", "depends_on"],
+   "properties": {
+    "id": {"$ref": "hep_review_definitions.json#/$defs/id"},
+    "obligation_id": {"$ref": "hep_review_definitions.json#/$defs/id"},
+    "claim": {"$ref": "hep_review_definitions.json#/$defs/text"},
+    "element": {"$ref": "hep_review_definitions.json#/$defs/text"},
+    "locator": {"type": "object", "required": ["material_id", "digest"],
+                "properties": {"material_id": {"$ref": "hep_review_definitions.json#/$defs/id"},
+                               "digest": {"$ref": "hep_review_definitions.json#/$defs/digest"},
+                               "lines": {"type": "string"}, "json_pointer": {"type": "string"},
+                               "symbol": {"type": "string"}, "byte_range": {"type": "string"}},
+                "additionalProperties": false},
+    "method": {"type": "string"},
+    "evidence_text": {"type": "string"},
+    "evidence_ids": {"$ref": "#/$defs/deps"},
+    "severity": {"enum": ["major", "minor"]},
+    "depends_on": {"$ref": "#/$defs/deps"}
+   },
+   "additionalProperties": false
+  },
+  "attempt": {
+   "type": "object",
+   "required": ["id", "obligation_id", "method", "observation", "executor", "environment_refs", "depends_on"],
+   "properties": {
+    "id": {"$ref": "hep_review_definitions.json#/$defs/id"},
+    "obligation_id": {"$ref": "hep_review_definitions.json#/$defs/id"},
+    "method": {"type": "string", "minLength": 1},
+    "observation": {"enum": ["completed", "failed", "not-run"]},
+    "failure_class": {"enum": ["tool-unavailable", "denied", "timeout", "executor-error", "invalid-output"]},
+    "executor": {"type": "string", "minLength": 1},
+    "tools": {"type": "array", "items": {"type": "string"}},
+    "environment_refs": {"type": "array", "items": {"type": "string"}},
+    "independent_method": {"type": "boolean"},
+    "reproduction": {"type": "object", "required": ["reference_quantities", "tolerance_quantities"],
+                     "properties": {"reference_quantities": {"type": "array", "items": {"type": "string"}},
+                                    "tolerance_quantities": {"type": "array", "items": {"type": "string"}}},
+                     "additionalProperties": false},
+    "depends_on": {"$ref": "#/$defs/deps"}
+   },
+   "additionalProperties": false
+  },
+  "evidence": {
+   "type": "object",
+   "required": ["id", "obligation_id", "requirement", "content_ref", "depends_on"],
+   "properties": {
+    "id": {"$ref": "hep_review_definitions.json#/$defs/id"},
+    "obligation_id": {"$ref": "hep_review_definitions.json#/$defs/id"},
+    "requirement": {"type": "string", "minLength": 1},
+    "content_ref": {"$ref": "hep_review_definitions.json#/$defs/content_ref"},
+    "depends_on": {"$ref": "#/$defs/deps"}
+   },
+   "additionalProperties": false
+  },
+  "judgment": {
+   "type": "object",
+   "required": ["id", "kind", "basis", "depends_on"],
+   "properties": {
+    "id": {"$ref": "hep_review_definitions.json#/$defs/id"},
+    "kind": {"enum": ["finding_assessment", "answer_assessment", "adjudication", "conflict", "fix_verified"]},
+    "finding_id": {"$ref": "hep_review_definitions.json#/$defs/id"},
+    "answer_id": {"$ref": "hep_review_definitions.json#/$defs/id"},
+    "verdict": {"enum": ["supported", "refuted"]},
+    "handles": {"$ref": "#/$defs/deps"},
+    "suspicion_id": {"$ref": "hep_review_definitions.json#/$defs/id"},
+    "substantive": {"type": "boolean"},
+    "method": {"type": "string"},
+    "basis": {"$ref": "hep_review_definitions.json#/$defs/basis"},
+    "reason": {"type": "string"},
+    "depends_on": {"$ref": "#/$defs/deps"}
+   },
+   "additionalProperties": false
+  },
+  "suspected_conflict": {
+   "type": "object",
+   "required": ["id", "between"],
+   "properties": {"id": {"$ref": "hep_review_definitions.json#/$defs/id"}, "between": {"$ref": "#/$defs/deps"},
+                  "note": {"type": "string"}},
+   "additionalProperties": false
+  },
+  "response": {
+   "type": "object",
+   "required": ["id", "finding_id", "response", "fix_check"],
+   "properties": {"id": {"$ref": "hep_review_definitions.json#/$defs/id"},
+                  "finding_id": {"$ref": "hep_review_definitions.json#/$defs/id"},
+                  "response": {"enum": ["changed", "disagree", "accepted-risk"]},
+                  "fix_check": {"enum": ["pending", "verified", "failed", "not-applicable"]},
+                  "note": {"type": "string"}},
+   "additionalProperties": false
+  }
+ }
+}

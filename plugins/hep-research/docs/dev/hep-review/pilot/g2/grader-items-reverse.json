@@ -1,0 +1,110 @@
+[
+ {
+  "item": "G12",
+  "defect": "Poisson error on k ignores the binomial correlation",
+  "finding": {
+   "claim": "The efficiency uncertainty uses a Poisson error sqrt(k)/n instead of the binomial error appropriate for k passing out of n trials; it overestimates the uncertainty by about 12.5x (0.0325 vs 0.00259) and gives an interval extending above 1.",
+   "element": "uncertainty formula sqrt(k)/n",
+   "evidence_text": "k=935, n=941: sqrt(eps(1-eps)/n) = 0.0025948; stated 0.032495 = sqrt(k)/n; eps + 0.032495 = 1.026 > 1. Near eps = 1 a Wilson or Clopper-Pearson interval is the standard choice."
+  }
+ },
+ {
+  "item": "G11",
+  "defect": "Poisson error on k ignores the binomial correlation",
+  "finding": {
+   "claim": "The uncertainty formula sqrt(k)/n is the Poisson error, inappropriate for a binomial efficiency k/n with fixed n; the correct binomial error is sqrt(eps(1-eps)/n) = 0.00259 (vs stated 0.0325), and near eps = 1 an exact or Wilson-type (asymmetric) interval should be used.",
+   "element": "uncertainty estimator sqrt(k)/n",
+   "evidence_text": "With k=935, n=941: sqrt(k)/n = 0.032495 while sqrt(eps(1-eps)/n) = 0.002595; eps + sigma_stated = 1.026 > 1, outside the physical range."
+  }
+ },
+ {
+  "item": "G10",
+  "defect": "Poisson error on k ignores the binomial correlation",
+  "finding": {
+   "claim": "The efficiency uncertainty uses a Poisson formula sqrt(k)/n instead of a binomial one, overestimating it by a factor ~12.5 and producing a band beyond eps=1. | The stated uncertainty value carries the Poisson-formula error into the result.",
+   "element": "uncertainty formula sqrt(k)/n and stated_results.uncertainty | stated_results.uncertainty",
+   "evidence_text": "For k=935, n=941: eps=0.993624; binomial sqrt(eps(1-eps)/n)=0.002595; stated 0.032495 = sqrt(935)/941; eps+sigma=1.026>1. Near the boundary a Clopper-Pearson or Wilson interval is appropriate. | 0.032495 equals sqrt(935)/941; the binomial value is 0.002595."
+  }
+ },
+ {
+  "item": "G09",
+  "defect": "anticorrelation ignored in the propagation",
+  "finding": {
+   "claim": "The uncertainty propagation for P = A B ignores the stated correlation between A and B; because the correlation is negative, sigma_P is overestimated (57.15 stated vs 43.79 with the covariance term).",
+   "element": "propagation formula (quadrature sum of relative uncertainties) applied to correlated inputs",
+   "evidence_text": "analysis.md line 3 calls A and B anticorrelated but uses the plain quadrature sum; data.json gives correlation_AB = -0.62. Correct relative variance = rA^2 + rB^2 + 2 rho rA rB, which gives sigma_P = 43.79."
+  }
+ },
+ {
+  "item": "G08",
+  "defect": "anticorrelation ignored in the propagation",
+  "finding": {
+   "claim": "The propagation of the uncertainty on P = A B omits the covariance term although A and B are stated to be anticorrelated (rho = -0.62), overestimating sigma_P (57.15 stated vs 43.79 with correlation).",
+   "element": "Relative-uncertainty propagation rule for P (quadrature sum without the 2 rho term)",
+   "evidence_text": "rel_A = 1.777/31.58 = 0.05627, rel_B = 0.645/30.05 = 0.02146; sqrt(rel_A^2 + rel_B^2) * 948.979 = 57.152; sqrt(rel_A^2 + rel_B^2 + 2(-0.62) rel_A rel_B) * 948.979 = 43.790."
+  }
+ },
+ {
+  "item": "G07",
+  "defect": "anticorrelation ignored in the propagation",
+  "finding": {
+   "claim": "The uncertainty propagation ignores the stated correlation between A and B; with rho = -0.62 the covariance term must be included, giving sigma_P = 43.79 instead of 57.15. | The stated sigma_P is the uncorrelated value and does not reflect the supplied correlation.",
+   "element": "propagation rule: relative uncertainty of P as quadrature sum of relative uncertainties | stated_results.sigma_P",
+   "evidence_text": "analysis.md line 3 states the inputs are anticorrelated and uses the uncorrelated quadrature formula; data.json correlation_AB = -0.62. Correct first-order formula adds 2*rho*(sA/A)*(sB/B); recomputation gives 43.79 (stated value 57.15 is 30.5% too large). | 57.1519 equals P*sqrt(rA^2+rB^2) = 57.15188; correlated propagation with correlation_AB = -0.62 gives 43.790."
+  }
+ },
+ {
+  "item": "G06",
+  "defect": "weights 1/sigma instead of 1/sigma^2",
+  "finding": {
+   "claim": "Weights w_i = 1/sigma_i are not the appropriate weights for averaging independent measurements; inverse-variance weights 1/sigma_i^2 are required. | The quoted uncertainty 1/sqrt(sum 1/sigma_i^2) is inconsistent with the estimator used: it is the uncertainty of the inverse-variance mean, not of the 1/sigma-weighted mean.",
+   "element": "weight definition w_i = 1/sigma_i | uncertainty propagation of the average",
+   "evidence_text": "Minimum-variance combination of independent Gaussian measurements uses 1/sigma_i^2; with those weights the mean is 10.2891 instead of the stated 10.2487 (shift 0.040, about 0.24 sigma of the average). | Propagation for w_i = 1/sigma_i gives sqrt(sum w_i^2 sigma_i^2)/sum w_i = 0.17064, versus stated 0.16733 (underestimated by about 2%)."
+  }
+ },
+ {
+  "item": "G05",
+  "defect": "weights 1/sigma instead of 1/sigma^2",
+  "finding": {
+   "claim": "Weights w_i = 1/sigma_i are not inverse-variance weights; for independent measurements the appropriate weights are 1/sigma_i^2 (inverse-variance mean 10.2891 vs stated 10.2487). | The uncertainty formula 1/sqrt(sum 1/sigma_i^2) is inconsistent with the 1/sigma_i-weighted estimator; propagation for those weights gives 0.17064, so the stated 0.16733 underestimates the uncertainty of the stated mean by about 2%.",
+   "element": "weight definition w_i = 1/sigma_i | uncertainty propagation; stated_results.uncertainty",
+   "evidence_text": "Minimum-variance weighting of independent Gaussian measurements requires w_i proportional to 1/sigma_i^2; recomputed inverse-variance mean = 10.28909. | sqrt(sum (w_i/sum w)^2 sigma_i^2) with w_i = 1/sigma_i = 0.170645 vs stated 0.16733."
+  }
+ },
+ {
+  "item": "G04",
+  "defect": "weights 1/sigma instead of 1/sigma^2",
+  "finding": {
+   "claim": "The averaging weights w_i = 1/sigma_i are not the inverse-variance weights 1/sigma_i^2 appropriate for independent measurements; the average is suboptimal (10.2487 vs inverse-variance 10.2891). | The quoted uncertainty 1/sqrt(sum 1/sigma_i^2) is not the uncertainty of the 1/sigma-weighted mean actually computed; error propagation for that estimator gives 0.17064, so the stated 0.16733 underestimates it.",
+   "element": "weight definition w_i = 1/sigma_i | uncertainty formula and /stated_results/uncertainty",
+   "evidence_text": "For independent Gaussian inputs the ML/minimum-variance weights are 1/sigma_i^2; recomputation with those weights gives 10.28909. | Var = sum(w_i^2 sigma_i^2)/(sum w_i)^2 with w_i = 1/sigma_i gives sigma = 0.170645."
+  }
+ },
+ {
+  "item": "G03",
+  "defect": "anticorrelation ignored in the propagation",
+  "finding": {
+   "claim": "The uncertainty propagation for P ignores the stated correlation between A and B; the covariance term 2*rho*(sigma_A/A)*(sigma_B/B) with rho = -0.8 is omitted, so sigma_P is overestimated (51.94 stated vs 23.40 with correlation). | The stated sigma_P is the uncorrelated value and is wrong given correlation_AB = -0.8.",
+   "element": "Propagation rule 'relative uncertainty of P is the quadrature sum of the relative uncertainties' and the resulting sigma_P | stated_results.sigma_P",
+   "evidence_text": "rA = 1.195/52.59 = 0.022723, rB = 0.668/32.02 = 0.020862; sqrt(rA^2 + rB^2 + 2*(-0.8)*rA*rB) = 0.013895; sigma_P = 1683.93*0.013895 = 23.40, not 51.94. | Recomputed correlated value 23.399 differs from stated 51.9447 by -55%."
+  }
+ },
+ {
+  "item": "G02",
+  "defect": "anticorrelation ignored in the propagation",
+  "finding": {
+   "claim": "Uncertainty propagation for P = A B ignores the stated correlation between A and B; the quadrature sum without the covariance term overestimates sigma_P (51.94 vs 23.40 with rho = -0.8).",
+   "element": "Propagation method (quadrature sum of relative uncertainties) and resulting sigma_P",
+   "evidence_text": "analysis.md line 3 declares A, B anticorrelated with coefficient in data.json and prescribes plain quadrature; data.json correlation_AB = -0.8; recomputation with covariance term gives 23.399."
+  }
+ },
+ {
+  "item": "G01",
+  "defect": "anticorrelation ignored in the propagation",
+  "finding": {
+   "claim": "The uncertainty propagation omits the correlation term even though the model declares A and B anticorrelated and supplies rho = -0.8; sigma_P is overestimated (51.94 stated vs 23.40 with the covariance term).",
+   "element": "Propagation rule 'relative uncertainty of P is the quadrature sum of the relative uncertainties' and resulting stated_results.sigma_P",
+   "evidence_text": "analysis.md line 3 states anticorrelation and quadrature-sum propagation; data.json correlation_AB = -0.8; correct first-order formula adds 2*rho*rA*rB = -0.000758 to rA^2+rB^2 = 0.000951, giving relative uncertainty 0.01390 instead of 0.03085."
+  }
+ }
+]

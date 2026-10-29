@@ -1,0 +1,36 @@
+{
+ "unit": "GeV",
+ "measurements": [
+  {
+   "name": "M1",
+   "value": 91.1,
+   "stat": 0.1,
+   "syst": 0.05
+  },
+  {
+   "name": "M2",
+   "value": 91.3,
+   "stat": 0.12,
+   "syst": 0.06
+  }
+ ],
+ "systematic_correlation": 0.3,
+ "covariance_used": [
+  [
+   0.0125,
+   0.0009
+  ],
+  [
+   0.0009,
+   0.018
+  ]
+ ],
+ "stated_results": {
+  "weights": [
+   0.5958,
+   0.4042
+  ],
+  "combined_value": 91.1808,
+  "combined_uncertainty": 0.0884
+ }
+}

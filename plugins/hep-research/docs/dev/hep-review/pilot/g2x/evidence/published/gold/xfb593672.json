@@ -1,0 +1,12 @@
+{
+  "id": "xfb593672",
+  "type": "C03",
+  "defects": [],
+  "notes": "Synthetic model; uncertainties and approximations are scoped explicitly in the public note. Hidden witness gain=1.7; alternative admissible value 2.1.",
+  "missing_input": "The positive exact run gain from the external calibration ledger.",
+  "keywords": [
+    "gain",
+    "calibration",
+    "ledger"
+  ]
+}

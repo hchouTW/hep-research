@@ -1,0 +1,92 @@
+[
+  {
+    "item": "K01",
+    "defect": "A rate normalized to a prescaled monitor uses the monitor as though every eligible event had been recorded.",
+    "finding": {
+      "claim": "The monitor yield must be expanded by the reciprocal retention probability before forming the relative exposure.",
+      "element": "monitor normalization",
+      "evidence_text": "The retention is 0.25, so the effective unprescaled monitor count is four times the recorded count."
+    }
+  },
+  {
+    "item": "K02",
+    "defect": "The efficiency for a coincidence is taken as a single-object probability although two independent objects must both fire.",
+    "finding": {
+      "claim": "The event-level detection probability is obtained by multiplying the two object probabilities.",
+      "element": "coincidence normalization",
+      "evidence_text": "With both objects at probability 0.92, coincidence efficiency is 0.8464, rather than 0.92."
+    }
+  },
+  {
+    "item": "K03",
+    "defect": "A migration correction propagates only each reconstructed bin own variance, even though each output depends on all reconstructed bins.",
+    "finding": {
+      "claim": "A perturbation of the second observed count also moves the first reconstructed truth estimate; its variance cannot be dropped.",
+      "element": "inverted response uncertainty",
+      "evidence_text": "For t1=1.3*n1-0.2*n2 and independent Poisson observations, Var(t1)=1.69*n1+0.04*n2."
+    }
+  },
+  {
+    "item": "K04",
+    "defect": "A normalized histogram goodness-of-fit calculation counts all populated bins as independent residuals.",
+    "finding": {
+      "claim": "The residuals sum to zero after conditioning on the observed total.",
+      "element": "shape-test reference distribution",
+      "evidence_text": "Seven fixed-total categories span six contrasts; no shape parameters are fitted, so the reference has six degrees of freedom."
+    }
+  },
+  {
+    "item": "K05",
+    "defect": "A reported gamma posterior expectation is calculated with its interior mode formula.",
+    "finding": {
+      "claim": "The first moment follows by the ratio of two gamma integrals, giving shape/rate.",
+      "element": "posterior point summary",
+      "evidence_text": "Integrating lambda times a Gamma(5,3) density gives 5/3; the stated 4/3 is the stationary point of its density."
+    }
+  },
+  {
+    "item": "K06",
+    "defect": "A no-replacement survey variance omits the finite-population correction.",
+    "finding": {
+      "claim": "Every binary-tag uncertainty should be computed from a Poisson distribution.",
+      "element": "survey variance",
+      "evidence_text": "The count of tags is a count, therefore its variance must equal the tag count."
+    }
+  },
+  {
+    "item": "K07",
+    "defect": "A global probability is approximated by the sum of local tail probabilities outside the rare-tail regime.",
+    "finding": {
+      "claim": "The test statistic needs a two-sided local p-value.",
+      "element": "local-tail convention",
+      "evidence_text": "All searches must count deviations on both sides even when the alternative is explicitly an excess."
+    }
+  },
+  {
+    "item": "K08",
+    "defect": "A random denominator contribution is omitted from a ratio standard error.",
+    "finding": {
+      "claim": "The result may underestimate uncertainty.",
+      "element": "reported ratio",
+      "evidence_text": "The propagation looks questionable and ought to be checked carefully."
+    }
+  },
+  {
+    "item": "K09",
+    "defect": "An external calibration uncertainty is absent from a subtracted-yield variance.",
+    "finding": {
+      "claim": "There is a calibration issue.",
+      "element": "calibration",
+      "evidence_text": "Something about the scaling seems wrong; more detail is needed."
+    }
+  },
+  {
+    "item": "K10",
+    "defect": "Two independent decay probabilities are normalized as one probability in an exclusive pair sample.",
+    "finding": {
+      "claim": "The normalizations are missing a luminosity conversion by a thousand.",
+      "element": "production normalization",
+      "evidence_text": "The record and calculation both use inverse picobarns, but a unit conversion is always needed."
+    }
+  }
+]

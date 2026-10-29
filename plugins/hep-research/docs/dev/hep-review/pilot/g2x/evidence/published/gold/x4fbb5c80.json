@@ -1,0 +1,27 @@
+{
+  "id": "x4fbb5c80",
+  "type": "C01",
+  "defects": [
+    {
+      "defect_id": "D1",
+      "statement": "The independent transfer calibration has a nonzero error; its delta-method contribution is control squared times transfer_error squared.",
+      "affected_results": [
+        "ratio_error"
+      ],
+      "corrected_values": {
+        "ratio_error": 0.07031674369909663
+      }
+    },
+    {
+      "defect_id": "D2",
+      "statement": "The independent Poisson reference count fluctuates; its derivative contribution must be included in the ratio variance.",
+      "affected_results": [
+        "ratio_error"
+      ],
+      "corrected_values": {
+        "ratio_error": 0.07031674369909663
+      }
+    }
+  ],
+  "notes": "Synthetic model; uncertainties and approximations are scoped explicitly in the public note."
+}

@@ -33,6 +33,11 @@
    "bytes": 195454,
    "uncited": 0
   },
+  "hep-review": {
+   "references": 8,
+   "bytes": 24322,
+   "uncited": 0
+  },
   "hep-statistics": {
    "references": 14,
    "bytes": 207327,
@@ -1622,6 +1627,7 @@
     "skills/hep-ml/SKILL.md",
     "skills/hep-ml/references/reproducibility.md",
     "skills/hep-ml/scripts/extract_names.py",
+    "skills/hep-review/SKILL.md",
     "skills/hep-statistics/SKILL.md",
     "skills/hep-statistics/references/nuisance-modeling.md",
     "skills/hep-statistics/scripts/extract_names.py",
@@ -1635,6 +1641,7 @@
     "hep-detector",
     "hep-measurement",
     "hep-ml",
+    "hep-review",
     "hep-statistics",
     "hep-theory"
    ],
@@ -3548,7 +3555,7 @@
    "cited_by_other_skills": [
     "hep-statistics"
    ],
-   "last_commit": "fc8606a1 2026-10-29"
+   "last_commit": "9257d7b5 2026-10-15"
   },
   {
    "path": "skills/hep-ml/references/sequence-models.md",
@@ -3694,6 +3701,232 @@
    "last_commit": "485e96cb 2026-10-17"
   },
   {
+   "path": "skills/hep-review/references/domains/computing.md",
+   "owner": "hep-review",
+   "bytes": 1755,
+   "lines": 28,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-review/assets/registry.json",
+    "skills/hep-review/references/domains/index.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "dbebc92c 2026-10-29"
+  },
+  {
+   "path": "skills/hep-review/references/domains/index.md",
+   "owner": "hep-review",
+   "bytes": 1796,
+   "lines": 26,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "contracts/fixtures/projects/local_profile/local-profiles/exp-local/profile.json",
+    "contracts/fixtures/registry/bad_vocab_namespace/profiles/experiments/a/profile.json",
+    "contracts/fixtures/registry/cycle/profiles/theory/a/profile.json",
+    "contracts/fixtures/registry/cycle/profiles/theory/b/profile.json",
+    "contracts/fixtures/registry/duplicate_id/profiles/experiments/a/profile.json",
+    "contracts/fixtures/registry/duplicate_id/profiles/experiments/a2/profile.json",
+    "contracts/fixtures/registry/incompatible_version/profiles/experiments/a/profile.json",
+    "contracts/fixtures/registry/missing_dependency/profiles/theory/a/profile.json",
+    "contracts/fixtures/registry/missing_resource/profiles/experiments/a/profile.json",
+    "contracts/fixtures/registry/registry_mismatch/profiles/experiments/a/profile.json",
+    "contracts/fixtures/registry/template_violation/profiles/theory/a/profile.json",
+    "contracts/fixtures/registry/unbacked_capability/profiles/experiments/a/profile.json",
+    "contracts/fixtures/registry/valid/profiles/experiments/a/profile.json",
+    "contracts/fixtures/registry/valid/profiles/experiments/b/profile.json",
+    "contracts/fixtures/registry/valid/profiles/theory/a/profile.json",
+    "contracts/fixtures/registry/valid/profiles/theory/b/profile.json",
+    "contracts/project.py",
+    "contracts/registry.py",
+    "contracts/stanzas/context-resolution.md",
+    "core/evidence/render_index.py",
+    "examples/eic-profile-routing/output/report.md",
+    "examples/eic-profile-routing/output/results.json",
+    "examples/eic-profile-routing/run.py",
+    "profiles/experiments/ams-02/README.md",
+    "profiles/experiments/ams-02/index.md",
+    "profiles/experiments/ams-02/modules/methods/analysis-artifacts.md",
+    "profiles/experiments/ams-02/modules/methods/calibration-mc-systematics.md",
+    "profiles/experiments/ams-02/modules/methods/worked-examples.md",
+    "profiles/experiments/ams-02/modules/periods/time-dependent-analysis.md",
+    "profiles/experiments/ams-02/modules/sources/cosmic-ray-databases.md",
+    "profiles/experiments/ams-02/modules/sources/source-policy.md",
+    "profiles/experiments/ams-02/modules/species/antimatter-and-leptons.md",
+    "profiles/experiments/ams-02/modules/species/charged-cosmic-rays.md",
+    "profiles/experiments/ams-02/modules/species/nuclei-and-isotopes.md",
+    "profiles/experiments/ams-02/modules/subsystems/detector-and-observables.md",
+    "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
+    "profiles/experiments/ams-02/modules/working-rules.md",
+    "profiles/experiments/ams-02/profile.json",
+    "profiles/experiments/ams-02/tests/test_evidence_ledger.py",
+    "profiles/experiments/eic/README.md",
+    "profiles/experiments/eic/benchmarks/routing-scenarios.json",
+    "profiles/experiments/eic/index.md",
+    "profiles/experiments/eic/profile.json",
+    "profiles/experiments/eic/tests/test_evidence_ledger.py",
+    "profiles/experiments/eic/tests/test_profile_metadata.py",
+    "profiles/experiments/eic/tests/test_routing_scenarios.py",
+    "profiles/experiments/eic/tests/test_scope_and_placement.py",
+    "profiles/experiments/synthetic-collider/README.md",
+    "profiles/experiments/synthetic-collider/profile.json",
+    "profiles/reference/detector-atlas/README.md",
+    "profiles/reference/detector-atlas/index.md",
+    "profiles/reference/detector-atlas/profile.json",
+    "profiles/reference/detector-atlas/tests/test_atlas_ledger.py",
+    "profiles/theory/cr-secondary-antiprotons/README.md",
+    "profiles/theory/cr-secondary-antiprotons/profile.json",
+    "profiles/theory/cr-secondary-ratio/README.md",
+    "profiles/theory/cr-secondary-ratio/profile.json",
+    "profiles/theory/dis-parton-model/README.md",
+    "profiles/theory/dis-parton-model/profile.json",
+    "profiles/theory/dis-parton-model/tests/test_prediction.py",
+    "profiles/theory/drell-yan-lo/README.md",
+    "profiles/theory/drell-yan-lo/profile.json",
+    "profiles/theory/heliospheric-modulation/README.md",
+    "profiles/theory/heliospheric-modulation/profile.json",
+    "profiles/theory/higgs-bb-width/README.md",
+    "profiles/theory/higgs-bb-width/profile.json",
+    "profiles/theory/qcd-r-ratio/README.md",
+    "profiles/theory/qcd-r-ratio/profile.json",
+    "profiles/theory/qed-benchmark/README.md",
+    "profiles/theory/qed-benchmark/profile.json",
+    "profiles/theory/tmd-gaussian-lo/README.md",
+    "profiles/theory/tmd-gaussian-lo/profile.json",
+    "skills/hep-authoring/SKILL.md",
+    "skills/hep-authoring/references/academic-papers-guide.md",
+    "skills/hep-citations/SKILL.md",
+    "skills/hep-computing/SKILL.md",
+    "skills/hep-computing/examples/migration-task.md",
+    "skills/hep-detector/SKILL.md",
+    "skills/hep-measurement/SKILL.md",
+    "skills/hep-measurement/references/hep-measurement-guide.md",
+    "skills/hep-ml/SKILL.md",
+    "skills/hep-review/SKILL.md",
+    "skills/hep-statistics/SKILL.md",
+    "skills/hep-theory/SKILL.md",
+    "tests/contracts/make_registry_fixtures.py",
+    "tests/contracts/test_project_preflight.py",
+    "tests/contracts/test_reference_profile_kind_d13.py",
+    "tests/skills/hep_authoring/test_handoff_text.py",
+    "tests/skills/test_reference_links.py",
+    "tests/tools/test_check_layering.py",
+    "tests/tools/test_scifix_ledger.py",
+    "tools/measure_entrypoints.py"
+   ],
+   "cited_by_other_skills": [
+    "hep-authoring",
+    "hep-citations",
+    "hep-computing",
+    "hep-detector",
+    "hep-measurement",
+    "hep-ml",
+    "hep-statistics",
+    "hep-theory"
+   ],
+   "last_commit": "dbebc92c 2026-10-29"
+  },
+  {
+   "path": "skills/hep-review/references/domains/statistics.md",
+   "owner": "hep-review",
+   "bytes": 2096,
+   "lines": 33,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
+    "skills/hep-authoring/assets/diagrams/bayesian-model.md",
+    "skills/hep-authoring/references/academic-diagrams-guide.md",
+    "skills/hep-detector/references/imaging-atmospheric-cherenkov.md",
+    "skills/hep-detector/references/neutrino-astronomy.md",
+    "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
+    "skills/hep-measurement/references/cosmic-ray-measurements.md",
+    "skills/hep-measurement/references/measurements-and-unfolding.md",
+    "skills/hep-measurement/references/rare-event-and-neutrino-measurements.md",
+    "skills/hep-measurement/scripts/cosmic_ray_flux.py",
+    "skills/hep-measurement/scripts/particle_ratio_with_uncertainty.py",
+    "skills/hep-review/assets/registry.json",
+    "skills/hep-review/references/domains/index.md",
+    "skills/hep-statistics/SKILL.md",
+    "skills/hep-statistics/references/core-stats-guide.md",
+    "skills/hep-statistics/references/inference-recipes.md",
+    "skills/hep-statistics/references/time-series-inference.md",
+    "skills/hep-statistics/scripts/hessian_profiling.py",
+    "skills/hep-statistics/scripts/li_ma_significance.py",
+    "skills/hep-statistics/scripts/pdf_reweighting.py",
+    "skills/hep-theory/references/global-fits-theory-inputs.md",
+    "skills/hep-theory/references/hadron-structure-essentials.md",
+    "tests/skills/hep_statistics/test_li_ma_significance.py"
+   ],
+   "cited_by_other_skills": [
+    "hep-authoring",
+    "hep-detector",
+    "hep-measurement",
+    "hep-statistics",
+    "hep-theory"
+   ],
+   "last_commit": "dbebc92c 2026-10-29"
+  },
+  {
+   "path": "skills/hep-review/references/evaluation-and-claims.md",
+   "owner": "hep-review",
+   "bytes": 2384,
+   "lines": 37,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-review/SKILL.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "f685e8dc 2026-10-29"
+  },
+  {
+   "path": "skills/hep-review/references/evidence-and-adjudication.md",
+   "owner": "hep-review",
+   "bytes": 3445,
+   "lines": 51,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-review/SKILL.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "dbebc92c 2026-10-29"
+  },
+  {
+   "path": "skills/hep-review/references/host-and-trust-boundaries.md",
+   "owner": "hep-review",
+   "bytes": 3830,
+   "lines": 53,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-review/SKILL.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "1dfb15fa 2026-10-29"
+  },
+  {
+   "path": "skills/hep-review/references/storage-continuity-and-export.md",
+   "owner": "hep-review",
+   "bytes": 2924,
+   "lines": 45,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-review/SKILL.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "dbebc92c 2026-10-29"
+  },
+  {
+   "path": "skills/hep-review/references/workflow-and-tiers.md",
+   "owner": "hep-review",
+   "bytes": 6092,
+   "lines": 72,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-review/SKILL.md",
+    "tests/skills/hep_review/test_g1_review_fixes.py"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "b491ff9e 2026-10-29"
+  },
+  {
    "path": "skills/hep-statistics/references/astroparticle-statistics.md",
    "owner": "hep-statistics",
    "bytes": 12414,
@@ -3755,7 +3988,7 @@
     "hep-detector",
     "hep-measurement"
    ],
-   "last_commit": "473ef786 2026-10-29"
+   "last_commit": "a2e8f9b1 2026-10-28"
   },
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
@@ -3780,7 +4013,7 @@
    "cited_by_other_skills": [
     "hep-measurement"
    ],
-   "last_commit": "3400a945 2026-10-29"
+   "last_commit": "1f9b0087 2026-10-29"
   },
   {
    "path": "skills/hep-statistics/references/inference-recipes.md",
@@ -4090,7 +4323,7 @@
     "tests/skills/hep_theory/test_transport_conventions.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "afebe106 2026-10-29"
+   "last_commit": "3b400e3f 2026-10-28"
   },
   {
    "path": "skills/hep-theory/references/cosmic-ray-propagation.md",

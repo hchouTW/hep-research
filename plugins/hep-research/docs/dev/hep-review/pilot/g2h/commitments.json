@@ -1,0 +1,21 @@
+{
+ "algorithm": "sha256(nonce || gold bytes); nonce = HMAC-SHA256(seed, 'nonce:' + name)",
+ "commitments": {
+  "expected/h0b19ece4.json": "95dc6a789d56a5a22939754140742ae8da0c7ac70c565b6b33866b710e30370b",
+  "expected/h0c0d78ca.json": "37c4e438925238e5d4b352ab46ddd23a08780e7a746870dc19de8f3f14b782a0",
+  "expected/h175a9700.json": "100ea9f0c5185afbecf0b0f87d17273769a732e7ce9fc04a960b3db68501417f",
+  "expected/h1f578eed.json": "874ebf0141ddb0b49aa153e1726e4e0b7f10dc9f1e90263154c9968f6b094292",
+  "expected/h20c8ec15.json": "2cd97329f543791a20745d94626ac2578b8b9d645df671789f0b5bf964d3933a",
+  "expected/h27e6a7df.json": "5bbb5f1fa7205db1512488a067e4fd1fc77101c267d5fb0b5e4ddb8509e0226b",
+  "expected/h30662a43.json": "792c42d4b7dfe76c8f23c858a589bbccb8598acb2c18e64dde7d677d4e925784",
+  "expected/h32b9db40.json": "6db505e055cf8d4e8da3e25698f75a5ab3c8da04370b25d82866b1e5cf5137a6",
+  "expected/h53613241.json": "964accd29339bd06ed78de7a970c09d3d95457af1aac57d90f779569011f3948",
+  "expected/h73eec183.json": "06fca25dfbb1a7a8939f02d0eea1d27e8fe3e39864c62facc5e3100acdf1e1df",
+  "expected/ha064fa4b.json": "0559ca86360469580cca4774f847794c63343026f4c5a1a249984e47d26af377",
+  "expected/hc2f31b0b.json": "4e18986de23d04a877ed06a3d46f941e67dd4912f5a3c85020d7889b80f9bd3a",
+  "expected/hc8cccc1b.json": "ddf9c904350eaeb374d5c01e9c04f2ef420ce11ac17130a4d917e0acda65889f",
+  "expected/hedd7f5be.json": "0949d8f82880708bb618068096df0227f5bd953a9178c22e5f8d7eb012289121",
+  "expected/hf2274be0.json": "d087b008c450d197d69c79313354461a2a2357f8ab940445b6c27c609b137f64"
+ },
+ "generator_sha256": "e3136b55cdcc1dab0124f56abc7270eb317169f02437851f019033feb5116d8e"
+}

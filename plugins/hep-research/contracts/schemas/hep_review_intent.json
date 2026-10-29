@@ -1,0 +1,28 @@
+{
+ "$schema": "https://json-schema.org/draft/2020-12/schema",
+ "$id": "hep_review_intent.json",
+ "title": "hep-review intent (schema 1.0.0; 0.x data experimental)",
+ "description": "The user's purpose with minimum requirements, target_tier and authorization source (spec 5.1, 6.1). target_tier is lowered only by a new intent revision with an authorized change-request (T07, not implemented).",
+ "type": "object",
+ "$ref": "hep_review_definitions.json#/$defs/header",
+ "required": ["revision", "target_tier", "minimum_requirements", "material_scope", "authorized_by"],
+ "properties": {
+  "protocol": {}, "schema_version": {}, "record_kind": {"const": "intent"}, "id": {}, "context_id": {},
+  "revision": {"type": "integer", "minimum": 1},
+  "purpose": {"type": "string"},
+  "target_tier": {"$ref": "hep_review_definitions.json#/$defs/tier"},
+  "minimum_requirements": {
+   "type": "array",
+   "items": {"type": "object", "required": ["id", "text"],
+             "properties": {"id": {"$ref": "hep_review_definitions.json#/$defs/id"},
+                            "text": {"$ref": "hep_review_definitions.json#/$defs/text"}},
+             "additionalProperties": false}
+  },
+  "material_scope": {"$ref": "hep_review_definitions.json#/$defs/ids"},
+  "authorized_by": {"type": "object", "required": ["actor", "basis"],
+                    "properties": {"actor": {"type": "string"}, "basis": {"$ref": "hep_review_definitions.json#/$defs/basis"}},
+                    "additionalProperties": false},
+  "resources": {"type": "object"}
+ },
+ "additionalProperties": false
+}

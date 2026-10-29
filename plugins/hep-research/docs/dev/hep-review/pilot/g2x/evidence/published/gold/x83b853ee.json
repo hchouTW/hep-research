@@ -1,0 +1,17 @@
+{
+  "id": "x83b853ee",
+  "type": "C01",
+  "defects": [
+    {
+      "defect_id": "D1",
+      "statement": "The reported gamma posterior mean uses the mode formula; the mean is posterior_shape/posterior_rate.",
+      "affected_results": [
+        "posterior_mean"
+      ],
+      "corrected_values": {
+        "posterior_mean": 1.8333333333333333
+      }
+    }
+  ],
+  "notes": "Synthetic model; uncertainties and approximations are scoped explicitly in the public note."
+}

@@ -1,0 +1,1478 @@
+{
+ "h0b19ece4-t1": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": false,
+   "plan_requirements_met": true
+  },
+  "instance": "h0b19ece4",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": true,
+  "tier": "R2",
+  "trial_id": "h0b19ece4-t1"
+ },
+ "h0b19ece4-t2": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": false,
+   "plan_requirements_met": true
+  },
+  "instance": "h0b19ece4",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": true,
+  "tier": "R2",
+  "trial_id": "h0b19ece4-t2"
+ },
+ "h0b19ece4-t3": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": false,
+   "plan_requirements_met": true
+  },
+  "instance": "h0b19ece4",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": true,
+  "tier": "R2",
+  "trial_id": "h0b19ece4-t3"
+ },
+ "h0c0d78ca-t1": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": true,
+   "has_supported_defects": false,
+   "plan_requirements_met": false
+  },
+  "instance": "h0c0d78ca",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [
+    "per-event weights w_i of the 19 selected events (data.json /weights)"
+   ],
+   "O-stat": [
+    "per-event weights w_i of the 19 selected events (data.json /weights is null; analysis.md says they are not supplied)"
+   ]
+  },
+  "outcomes": {
+   "O-compute": "undetermined",
+   "O-stat": "undetermined"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "h0c0d78ca-t1"
+ },
+ "h0c0d78ca-t2": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": true,
+   "has_supported_defects": false,
+   "plan_requirements_met": false
+  },
+  "instance": "h0c0d78ca",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [
+    "per-event weights w_i (data.json /weights is null)"
+   ],
+   "O-stat": [
+    "per-event weights w_i of the 19 selected simulated events (data.json /weights is null)"
+   ]
+  },
+  "outcomes": {
+   "O-compute": "undetermined",
+   "O-stat": "undetermined"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "h0c0d78ca-t2"
+ },
+ "h0c0d78ca-t3": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": true,
+   "has_supported_defects": false,
+   "plan_requirements_met": false
+  },
+  "instance": "h0c0d78ca",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [
+    "per-event weights w_i of the 19 selected events (data.json /weights is null)"
+   ],
+   "O-stat": [
+    "per-event weights w_i of the 19 selected events (data.json /weights is null)"
+   ]
+  },
+  "outcomes": {
+   "O-compute": "undetermined",
+   "O-stat": "undetermined"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "h0c0d78ca-t3"
+ },
+ "h175a9700-t1": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": true,
+   "has_supported_defects": false,
+   "plan_requirements_met": false
+  },
+  "instance": "h175a9700",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [
+   "REQ-2"
+  ],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "h175a9700-t1"
+ },
+ "h175a9700-t2": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": true,
+   "has_supported_defects": false,
+   "plan_requirements_met": false
+  },
+  "instance": "h175a9700",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [
+   "REQ-2"
+  ],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "h175a9700-t2"
+ },
+ "h175a9700-t3": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": true,
+   "has_supported_defects": false,
+   "plan_requirements_met": false
+  },
+  "instance": "h175a9700",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [
+   "REQ-2"
+  ],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "h175a9700-t3"
+ },
+ "h1f578eed-t1": {
+  "any_findings": true,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": true,
+   "plan_requirements_met": true
+  },
+  "instance": "h1f578eed",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "violated"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [
+   {
+    "claim": "The upper-limit definition uses the probability of observing fewer than n events instead of n or fewer, so the stated 90% CL limit 5.32232 corresponds to n=2, not the observed n=3; the correct classical limit is about 6.681.",
+    "element": "definition of the 90% CL upper limit in analysis.md and the resulting stated_results.upper_limit",
+    "evidence_text": "P(N<=2 | 5.32232) = 0.100 while P(N<=3 | 5.32232) = 0.224 > 0.10; solving P(N<=3|s)=0.10 gives s = 6.6808."
+   }
+  ],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "h1f578eed-t1"
+ },
+ "h1f578eed-t2": {
+  "any_findings": true,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": true,
+   "plan_requirements_met": true
+  },
+  "instance": "h1f578eed",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "violated"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [
+   {
+    "claim": "The upper-limit construction uses P(N < n) = 10% where it should use P(N <= n) = 10%. This off-by-one leaves the observed count out of the tail and gives a limit that is too low (5.32 instead of 6.68 for n = 3) and undercovers.",
+    "element": "Definition of the 90% CL upper limit in analysis.md, and the resulting stated_results.upper_limit",
+    "evidence_text": "Numerical root: P(N<=2|5.3223)=0.10 (stated); the correct condition P(N<=3|s)=0.10 gives s=6.6808, the textbook classical Poisson 90% CL upper limit for n=3, b=0."
+   }
+  ],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "h1f578eed-t2"
+ },
+ "h1f578eed-t3": {
+  "any_findings": true,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": true,
+   "plan_requirements_met": true
+  },
+  "instance": "h1f578eed",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "violated"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [
+   {
+    "claim": "The upper-limit definition uses P(N < n) instead of P(N <= n), so the 90% CL upper limit is computed as for n = 2 rather than n = 3; correct value is about 6.68, not 5.32.",
+    "element": "definition of the 90% CL upper limit in analysis.md and the resulting stated_results.upper_limit",
+    "evidence_text": "P(N<=3 | s=5.32232) = 0.223 (not 0.10); solving P(N<=3|s)=0.10 gives s = 6.6808; the stated 5.32232 solves P(N<=2|s)=0.10."
+   },
+   {
+    "claim": "The stated upper limit 5.32232 is too low (under-covering) for n_observed = 3, b = 0, CL = 0.9.",
+    "element": "stated_results.upper_limit",
+    "evidence_text": "Correct classical limit is 6.6808; stated 5.32232 is the n = 2 value."
+   }
+  ],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "h1f578eed-t3"
+ },
+ "h20c8ec15-t1": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": true,
+   "has_supported_defects": false,
+   "plan_requirements_met": false
+  },
+  "instance": "h20c8ec15",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [
+    "per-point uncertainties sigma_i (detector resolution table), data.json /sigma is null"
+   ],
+   "O-stat": [
+    "per-point uncertainties sigma_i (detector resolution table), data.json /sigma is null"
+   ]
+  },
+  "outcomes": {
+   "O-compute": "undetermined",
+   "O-stat": "undetermined"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "h20c8ec15-t1"
+ },
+ "h20c8ec15-t2": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": true,
+   "has_supported_defects": false,
+   "plan_requirements_met": false
+  },
+  "instance": "h20c8ec15",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [
+    "per-point uncertainties sigma_i (data.json /sigma is null; resolution table not supplied)"
+   ],
+   "O-stat": [
+    "per-point uncertainties sigma_i (detector resolution table), data.json /sigma is null",
+    "whether the uncertainties are independent and Gaussian, or correlated (covariance)"
+   ]
+  },
+  "outcomes": {
+   "O-compute": "undetermined",
+   "O-stat": "undetermined"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "h20c8ec15-t2"
+ },
+ "h20c8ec15-t3": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": true,
+   "has_supported_defects": false,
+   "plan_requirements_met": false
+  },
+  "instance": "h20c8ec15",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [
+    "per-point uncertainties sigma_i (data.json /sigma is null; detector resolution table not supplied)"
+   ],
+   "O-stat": [
+    "per-point uncertainties sigma_i (detector resolution table); data.json /sigma is null",
+    "whether the uncertainties are correlated between points (covariance)"
+   ]
+  },
+  "outcomes": {
+   "O-compute": "undetermined",
+   "O-stat": "undetermined"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "h20c8ec15-t3"
+ },
+ "h27e6a7df-t1": {
+  "any_findings": true,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": true,
+   "plan_requirements_met": true
+  },
+  "instance": "h27e6a7df",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": [
+    "exact correlation coefficient of the shared energy-scale systematic (only needed for the corrected numbers, not for the verdict)"
+   ]
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "violated"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [
+   {
+    "claim": "The combination ignores the correlation of the systematic uncertainties that analysis.md itself says come from a shared energy-scale calibration; the uncorrelated inverse-variance formula underestimates the combined uncertainty and biases the central value.",
+    "element": "combination method: w_i = 1/(stat_i^2 + syst_i^2), sigma = 1/sqrt(sum_i w_i)",
+    "evidence_text": "Shared systematic => off-diagonal covariance rho*0.291*0.198. BLUE with rho=1: 10.2768 +- 0.2708 vs stated 10.2278 +- 0.2174 (sigma 20% low, central shift 0.049 ~ 0.23 sigma)."
+   }
+  ],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "h27e6a7df-t1"
+ },
+ "h27e6a7df-t2": {
+  "any_findings": true,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": true,
+   "plan_requirements_met": true
+  },
+  "instance": "h27e6a7df",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": [
+    "correlation coefficient of the systematic uncertainties between the two measurements (shared energy-scale calibration; full correlation is the natural but unstated reading)"
+   ]
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "violated"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [
+   {
+    "claim": "The combination ignores the correlation of the systematic uncertainties that analysis.md itself attributes to a shared energy-scale calibration, so the weights and the combined uncertainty are wrong (uncertainty underestimated).",
+    "element": "inverse-variance weights w_i = 1/(stat_i^2 + syst_i^2) and sigma = 1/sqrt(sum_i w_i)",
+    "evidence_text": "analysis.md line 3 states the systematics share one calibration source yet uses an uncorrelated formula; with the supplied inputs a BLUE combination with rho=1 gives 10.2768 +- 0.2708 (rho=0.5: 10.2422 +- 0.2467) versus stated 10.2278 +- 0.217433."
+   }
+  ],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "h27e6a7df-t2"
+ },
+ "h27e6a7df-t3": {
+  "any_findings": true,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": true,
+   "plan_requirements_met": true
+  },
+  "instance": "h27e6a7df",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": [
+    "correlation coefficient of the shared energy-scale systematic between the two measurements (needed for the corrected numbers, not for the verdict)"
+   ]
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "violated"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [
+   {
+    "claim": "The combination ignores the correlation of the systematic uncertainties that analysis.md itself says come from a shared energy-scale calibration, so the combined uncertainty is underestimated and the central value weighting is incorrect.",
+    "element": "inverse-variance combination w_i = 1/(stat_i^2 + syst_i^2), sigma = 1/sqrt(sum w_i)",
+    "evidence_text": "analysis.md line 3 states the systematics are shared yet uses the uncorrelated formula; with full correlation BLUE gives 10.277 +/- 0.271 vs stated 10.2278 +/- 0.2174."
+   }
+  ],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "h27e6a7df-t3"
+ },
+ "h30662a43-t1": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": false,
+   "plan_requirements_met": true
+  },
+  "instance": "h30662a43",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": true,
+  "tier": "R2",
+  "trial_id": "h30662a43-t1"
+ },
+ "h30662a43-t2": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": false,
+   "plan_requirements_met": true
+  },
+  "instance": "h30662a43",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": true,
+  "tier": "R2",
+  "trial_id": "h30662a43-t2"
+ },
+ "h30662a43-t3": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": false,
+   "plan_requirements_met": true
+  },
+  "instance": "h30662a43",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": true,
+  "tier": "R2",
+  "trial_id": "h30662a43-t3"
+ },
+ "h32b9db40-t1": {
+  "any_findings": true,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": true,
+   "plan_requirements_met": true
+  },
+  "instance": "h32b9db40",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "violated"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [
+   {
+    "claim": "The statistical uncertainty on A is computed with an error-propagation formula that assumes D and S are uncorrelated. They are fully built from the same counts and are correlated (cov = N1 - N2), so sigma_A is overestimated by about 7.3%: 0.029212 stated against 0.027231 correct.",
+    "element": "sigma_A propagation formula (and stated_results.sigma_A)",
+    "evidence_text": "With N1=793 and N2=461: S=1254 and A=0.264753. Correct sigma_A = 2*sqrt(793*461)/1254^1.5 = sqrt((1-A^2)/S) = 0.0272314. The stated value 0.0292121 follows the formula |A| sqrt(S/D^2 + 1/S), which leaves out the -2 cov(D,S)/(D S) term."
+   }
+  ],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "h32b9db40-t1"
+ },
+ "h32b9db40-t2": {
+  "any_findings": true,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": true,
+   "plan_requirements_met": true
+  },
+  "instance": "h32b9db40",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "violated"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [
+   {
+    "claim": "The uncertainty propagation ignores the full correlation between D = N1 - N2 and S = N1 + N2 (cov(D,S) = N1 - N2), so sigma_A is overestimated by about 7.3%. The correct value is sqrt((1-A^2)/S) = 0.027231, not 0.0292121.",
+    "element": "sigma_A error-propagation formula",
+    "evidence_text": "With cov(D,S) = Var(N1) - Var(N2) = 332, sigma_A^2 = (sigma_D^2 - 2A cov + A^2 sigma_S^2)/S^2 = (1-A^2)/S, which gives 0.027231. The stated 0.0292121 matches only the independence formula."
+   },
+   {
+    "claim": "The stated sigma_A is the value produced by the incorrect uncorrelated propagation and is about 7.3% larger than the correct 0.027231.",
+    "element": "stated_results.sigma_A",
+    "evidence_text": "Stated 0.0292121; correct 2 sqrt(793*461)/1254^1.5 = 0.027231."
+   }
+  ],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "h32b9db40-t2"
+ },
+ "h32b9db40-t3": {
+  "any_findings": true,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": true,
+   "plan_requirements_met": true
+  },
+  "instance": "h32b9db40",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "violated"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [
+   {
+    "claim": "The error propagation for A = D/S omits the covariance between D and S, which share the same counts; the stated sigma_A is overestimated by about 7.3% (correct: sqrt((1-A^2)/S) = 0.027231).",
+    "element": "sigma_A propagation formula",
+    "evidence_text": "Cov(N1-N2, N1+N2) = Var(N1) - Var(N2) = N1 - N2 = 332 != 0; full propagation in N1, N2 yields 2 sqrt(N1 N2)/S^1.5 = 0.0272314, not 0.0292121."
+   }
+  ],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "h32b9db40-t3"
+ },
+ "h53613241-t1": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": false,
+   "plan_requirements_met": true
+  },
+  "instance": "h53613241",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": true,
+  "tier": "R2",
+  "trial_id": "h53613241-t1"
+ },
+ "h53613241-t2": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": false,
+   "plan_requirements_met": true
+  },
+  "instance": "h53613241",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": true,
+  "tier": "R2",
+  "trial_id": "h53613241-t2"
+ },
+ "h53613241-t3": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": false,
+   "plan_requirements_met": true
+  },
+  "instance": "h53613241",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": true,
+  "tier": "R2",
+  "trial_id": "h53613241-t3"
+ },
+ "h73eec183-t1": {
+  "any_findings": true,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": true,
+   "plan_requirements_met": true
+  },
+  "instance": "h73eec183",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "violated"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [
+   {
+    "claim": "The statistical uncertainty of the weighted yield uses sqrt(sum w_i) instead of sqrt(sum w_i^2); with non-unit weights this underestimates the uncertainty (5.488 stated vs 8.182 correct).",
+    "element": "Statistical uncertainty formula sqrt(sum_i w_i) for the weighted signal yield",
+    "evidence_text": "analysis.md line 3 gives sqrt(sum_i w_i); data.json weights range 0.379-2.776 (not unit); sum w^2 = 66.951 -> sqrt = 8.182 vs stated sigma_yield 5.48844."
+   }
+  ],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "h73eec183-t1"
+ },
+ "h73eec183-t2": {
+  "any_findings": true,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": true,
+   "plan_requirements_met": true
+  },
+  "instance": "h73eec183",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "violated"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [
+   {
+    "claim": "The statistical uncertainty of a weighted yield is computed as sqrt(sum_i w_i) instead of sqrt(sum_i w_i^2), underestimating it (5.488 vs 8.182).",
+    "element": "Uncertainty formula for the weighted signal yield",
+    "evidence_text": "Weights in data.json range 0.379-2.776 (not unit); sqrt(sum w^2) = 8.182 while stated sigma_yield = 5.48844 = sqrt(sum w)."
+   }
+  ],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "h73eec183-t2"
+ },
+ "h73eec183-t3": {
+  "any_findings": true,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": true,
+   "plan_requirements_met": true
+  },
+  "instance": "h73eec183",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "violated"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [
+   {
+    "claim": "The uncertainty on the weighted yield uses sqrt(sum w_i) in place of sqrt(sum w_i^2). With non-unit weights this is incorrect: it gives 5.488 where it should be 8.182, an understatement of about 33%.",
+    "element": "statistical uncertainty formula sqrt(sum_i w_i) and stated sigma_yield",
+    "evidence_text": "The weights are non-uniform (0.379 to 2.776). sum w = 30.123 and sum w^2 = 66.951, so sqrt(sum w^2) = 8.1824, compared with the stated 5.48844."
+   }
+  ],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "h73eec183-t3"
+ },
+ "ha064fa4b-t1": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": true,
+   "has_supported_defects": false,
+   "plan_requirements_met": false
+  },
+  "instance": "ha064fa4b",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [
+    "systematic correlation coefficient (data.json /syst_correlation is null; calibration note not supplied)"
+   ],
+   "O-stat": [
+    "systematic correlation coefficient between the two energy-scale systematics (calibration note; data.json /syst_correlation is null)"
+   ]
+  },
+  "outcomes": {
+   "O-compute": "undetermined",
+   "O-stat": "undetermined"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "ha064fa4b-t1"
+ },
+ "ha064fa4b-t2": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": true,
+   "has_supported_defects": false,
+   "plan_requirements_met": false
+  },
+  "instance": "ha064fa4b",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [
+    "syst_correlation (data.json /syst_correlation is null; calibration note not supplied)"
+   ],
+   "O-stat": [
+    "systematic correlation coefficient rho between the two energy-scale systematics (calibration note not supplied; data.json syst_correlation is null)"
+   ]
+  },
+  "outcomes": {
+   "O-compute": "undetermined",
+   "O-stat": "undetermined"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "ha064fa4b-t2"
+ },
+ "ha064fa4b-t3": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": true,
+   "has_supported_defects": false,
+   "plan_requirements_met": false
+  },
+  "instance": "ha064fa4b",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [
+    "systematic correlation coefficient rho (data.json /syst_correlation is null; calibration note not supplied)"
+   ],
+   "O-stat": [
+    "systematic correlation coefficient rho between the two energy-scale systematics (calibration note referenced in analysis.md; data.json syst_correlation is null)"
+   ]
+  },
+  "outcomes": {
+   "O-compute": "undetermined",
+   "O-stat": "undetermined"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "ha064fa4b-t3"
+ },
+ "hc2f31b0b-t1": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": true,
+   "has_supported_defects": false,
+   "plan_requirements_met": false
+  },
+  "instance": "hc2f31b0b",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [
+   "REQ-2"
+  ],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "hc2f31b0b-t1"
+ },
+ "hc2f31b0b-t2": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": true,
+   "has_supported_defects": false,
+   "plan_requirements_met": false
+  },
+  "instance": "hc2f31b0b",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [
+   "REQ-2"
+  ],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "hc2f31b0b-t2"
+ },
+ "hc2f31b0b-t3": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": true,
+   "has_supported_defects": false,
+   "plan_requirements_met": false
+  },
+  "instance": "hc2f31b0b",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [
+   "REQ-2"
+  ],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "hc2f31b0b-t3"
+ },
+ "hc8cccc1b-t1": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": false,
+   "plan_requirements_met": true
+  },
+  "instance": "hc8cccc1b",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": true,
+  "tier": "R2",
+  "trial_id": "hc8cccc1b-t1"
+ },
+ "hc8cccc1b-t2": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": false,
+   "plan_requirements_met": true
+  },
+  "instance": "hc8cccc1b",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": true,
+  "tier": "R2",
+  "trial_id": "hc8cccc1b-t2"
+ },
+ "hc8cccc1b-t3": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": false,
+   "plan_requirements_met": true
+  },
+  "instance": "hc8cccc1b",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": true,
+  "tier": "R2",
+  "trial_id": "hc8cccc1b-t3"
+ },
+ "hedd7f5be-t1": {
+  "any_findings": true,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": true,
+   "plan_requirements_met": true
+  },
+  "instance": "hedd7f5be",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "violated"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [
+   {
+    "claim": "The number of degrees of freedom is wrong: a 2-parameter fit to 11 points has ndf = 9, not 10.",
+    "element": "ndf = 10 in the goodness-of-fit statement and in stated_results/ndf",
+    "evidence_text": "11 points minus 2 fitted parameters (a, b) = 9 degrees of freedom."
+   },
+   {
+    "claim": "The stated p-value is computed with the wrong ndf and is therefore wrong: it should be 0.3768 (ndf = 9), not 0.4688.",
+    "element": "stated_results/p_value and stated_results/ndf",
+    "evidence_text": "scipy.stats.chi2.sf(9.682217, 9) = 0.37682; chi2.sf(9.682217, 10) = 0.46880 reproduces the stated value, confirming the ndf = 10 error propagates."
+   }
+  ],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "hedd7f5be-t1"
+ },
+ "hedd7f5be-t2": {
+  "any_findings": true,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": true,
+   "plan_requirements_met": true
+  },
+  "instance": "hedd7f5be",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "violated"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [
+   {
+    "claim": "The degrees of freedom are wrong: a 2-parameter line fitted to 11 points has ndf = 9, not 10.",
+    "element": "ndf",
+    "evidence_text": "n = 11 points, 2 fitted parameters (a, b); ndf = n - 2 = 9. Stated ndf = 10."
+   },
+   {
+    "claim": "The quoted p-value uses the wrong ndf and is overstated; the correct value is about 0.3768.",
+    "element": "p_value",
+    "evidence_text": "chi2.sf(9.68222, 9) = 0.376819 vs stated 0.468802 (= chi2.sf(9.68222, 10)); relative difference about 20%."
+   }
+  ],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "hedd7f5be-t2"
+ },
+ "hedd7f5be-t3": {
+  "any_findings": true,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": true,
+   "plan_requirements_met": true
+  },
+  "instance": "hedd7f5be",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "violated"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [
+   {
+    "claim": "Goodness-of-fit ndf is wrong: 11 points minus 2 fitted parameters gives ndf = 9, not 10; the quoted p-value inherits the error (correct value 0.3768, stated 0.4688).",
+    "element": "ndf and p_value",
+    "evidence_text": "analysis.md line 3 states ndf = 10 for a 2-parameter fit to 11 points; recomputed chi2 survival probability at ndf=9 is 0.37682."
+   },
+   {
+    "claim": "Stated ndf = 10 and p_value = 0.468802 in data.json are inconsistent with the 2-parameter fit to 11 points.",
+    "element": "stated_results.ndf, stated_results.p_value",
+    "evidence_text": "len(x) = 11, fitted parameters a, b; ndf should be 9 and p_value 0.37682."
+   }
+  ],
+  "state": "completed",
+  "summary": false,
+  "tier": "R2",
+  "trial_id": "hedd7f5be-t3"
+ },
+ "hf2274be0-t1": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": false,
+   "plan_requirements_met": true
+  },
+  "instance": "hf2274be0",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": true,
+  "tier": "R2",
+  "trial_id": "hf2274be0-t1"
+ },
+ "hf2274be0-t2": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": false,
+   "plan_requirements_met": true
+  },
+  "instance": "hf2274be0",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": true,
+  "tier": "R2",
+  "trial_id": "hf2274be0-t2"
+ },
+ "hf2274be0-t3": {
+  "any_findings": false,
+  "continuity": "verified",
+  "export_recomputes": true,
+  "fidelity": "digest-bound",
+  "flags": {
+   "has_disputed_findings": false,
+   "has_open_questions": false,
+   "has_supported_defects": false,
+   "plan_requirements_met": true
+  },
+  "instance": "hf2274be0",
+  "limitations": [],
+  "missing_inputs": {
+   "O-compute": [],
+   "O-stat": []
+  },
+  "outcomes": {
+   "O-compute": "supported",
+   "O-stat": "supported"
+  },
+  "planning_gaps": [],
+  "quarantined": [],
+  "stat_findings": [],
+  "state": "completed",
+  "summary": true,
+  "tier": "R2",
+  "trial_id": "hf2274be0-t3"
+ }
+}

@@ -1,0 +1,12 @@
+{
+ "id": "x01a",
+ "type": "C01",
+ "defective_obligation": "O-stat",
+ "element": "covariance_used off-diagonal = 0 although the systematic is fully correlated (should be 0.20*0.21=0.042); combined uncertainty underestimated",
+ "keywords": [
+  "correlat",
+  "off-diagonal",
+  "covariance"
+ ],
+ "compute_reproducible": true
+}

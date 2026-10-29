@@ -1,0 +1,10 @@
+{
+ "correct": {
+  "upper_limit": 6.680783068255863
+ },
+ "defect": null,
+ "family": "count-limit",
+ "id": "h53613241",
+ "type": "C02",
+ "variant": "control"
+}

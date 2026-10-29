@@ -1,0 +1,340 @@
+"""Authoring source. All inputs are synthetic; no external dependencies."""
+import json, math, secrets, random
+from pathlib import Path
+ROOT=Path(__file__).resolve().parents[1]
+CASES=[]
+def add(kind,title,inputs,method,model,defects=(),hidden=None,unusual=False):
+    CASES.append(dict(kind=kind,title=title,inputs=inputs,method=method,model=model,defects=defects,hidden=hidden,unusual=unusual))
+
+add('C01','A transferred continuum estimate',dict(on=420,off=800,width_on=2.,width_off=10.,off_keep=.5,efficiency=.72,exposure=40.),
+'''The selected sample contains on events in the peak window and off events in a disjoint continuum window. Both are independent Poisson observations. The continuum is flat in the discriminant. The continuum stream retains each event with probability off_keep, independently of the signal stream. All counts in the input are counts after this stream selection; efficiency describes only the signal selection and exposure is in inverse picobarns.
+
+The transfer coefficient alpha is width_on/width_off. The estimated continuum contribution is alpha times off, and the subtracted yield is on minus that contribution. The signal selection is calibrated externally with negligible error. Convert the subtracted yield into rate by dividing by efficiency times exposure. These operations use the selected counts directly without rounding the intermediate continuum prediction.
+
+For the counting uncertainty, use the peak-window count as the variance of the subtracted yield. The side-window count fixes the continuum normalization at its observed value in this propagation. Divide the square root of that variance by the same efficiency and exposure factor to obtain rate_error. Record alpha, background, yield, rate and rate_error as the result vector.''',
+'''def compute(d, fixed=(), hidden=None):
+    a=d['width_on']/d['width_off']/(d['off_keep'] if 0 in fixed else 1)
+    b=a*d['off']; y=d['on']-b
+    v=d['on']+(a*a*d['off'] if 1 in fixed else 0)
+    q=d['efficiency']*d['exposure']
+    return dict(alpha=a,background=b,yield_value=y,rate=y/q,rate_error=math.sqrt(v)/q)
+''',[
+('The continuum count is already thinned; the transfer must divide by off_keep as well as using the width ratio. This changes subtraction and its downstream rate.',['alpha','background','yield_value','rate','rate_error']),
+('The finite independent continuum count contributes alpha squared times off to the variance; treating it as fixed discards this sampling term.',['rate_error'])])
+
+add('C01','A pair-decay production rate',dict(selected=980,background=140,background_variance=64,track_efficiency=.86,branch_fraction=.64,luminosity=120),
+'''Events contain two distinguishable daughter tracks from a pair decay. The input branch_fraction is the probability for each parent to enter the reconstructed decay mode, and the two decays are independent. The per-track selection has probability track_efficiency and the decisions for the two tracks are independent conditional on this decay mode. Luminosity is in inverse picobarns. selected is Poisson and the background estimate is independent with the stated Gaussian variance.
+
+Subtract background from selected to obtain yield_value. For this subtraction, add selected and background_variance to obtain the yield variance. The sample is sufficiently large for propagation of this variance through a deterministic normalization. All efficiencies and branching fractions are fixed constants in this model; their calibration precision is taken to be much better than the precision of the selected count.
+
+Construct the event selection normalization as track_efficiency, multiply it by branch_fraction, and multiply that product by luminosity. Divide the background-subtracted yield by the resulting normalization to obtain cross_section in picobarns. Propagate the counting standard deviation with the identical normalization to obtain cross_section_error. Also report normalization so that the conversion between selected yield and production cross section can be followed without reconstructing a rounded intermediate quantity.''',
+'''def compute(d, fixed=(), hidden=None):
+    e=d['track_efficiency']**(2 if 0 in fixed else 1)
+    b=d['branch_fraction']**(2 if 1 in fixed else 1)
+    q=e*b*d['luminosity']; y=d['selected']-d['background']
+    return dict(yield_value=y,normalization=q,cross_section=y/q,cross_section_error=math.sqrt(d['selected']+d['background_variance'])/q)
+''',[
+('Both tracks must pass, so the event efficiency is the square of the per-track efficiency under the stated independence model.',['normalization','cross_section','cross_section_error']),
+('Both independent parent decays must enter the selected mode, so the branching normalization is branch_fraction squared.',['normalization','cross_section','cross_section_error'])])
+
+add('C01','Two-bin response inversion',dict(observed=[540,360],response=[[.8,.15],[.2,.85]],exposure=30.),
+'''The two reconstructed bins are disjoint Poisson counts. The response array stores P(reconstructed bin i given true bin j), with the reconstructed index running over rows and the true index over columns. Each column sums to unity and there is no selection loss outside these bins. The true-bin yields are the parameters of interest. The response is treated as exactly known and exposure is a fixed normalization in inverse picobarns.
+
+Use an unregularized linear inversion, appropriate here because the matrix is nonsingular and the inferred yields are comfortably positive. For bookkeeping, form A as the inverse of the transpose of response and obtain the vector of inferred true yields by multiplying A by observed. No non-negativity projection or subsequent shape normalization is applied. The two diagonal results are reported as true_first and true_second.
+
+The uncertainty propagation uses only the diagonal entries of this inverse operator: variance_first is A[0,0] squared times observed[0], and variance_second is A[1,1] squared times observed[1]. The off-diagonal response entries enter the central inversion but are excluded from these variance expressions. Divide the first inferred yield by exposure for rate_first and divide the square root of variance_first by exposure for rate_first_error. The count model includes fluctuations of both reconstructed bins, and no auxiliary nuisance parameters are fitted.''',
+'''def compute(d, fixed=(), hidden=None):
+    r=d['response']; a,b=r[0]; c,e=r[1]; det=a*e-b*c
+    A=[[e/det,-b/det],[-c/det,a/det]] if 0 in fixed else [[e/det,-c/det],[-b/det,a/det]]
+    n=d['observed']; t=[sum(A[i][j]*n[j] for j in range(2)) for i in range(2)]
+    v=[sum(A[i][j]**2*n[j] for j in range(2) if 1 in fixed or i==j) for i in range(2)]
+    return dict(true_first=t[0],true_second=t[1],variance_first=v[0],variance_second=v[1],rate_first=t[0]/d['exposure'],rate_first_error=math.sqrt(v[0])/d['exposure'])
+''',[
+('The stored response maps true yields to reconstructed yields; invert response itself, rather than its transpose.',['true_first','true_second','variance_first','variance_second','rate_first','rate_first_error']),
+('Each unfolded yield depends on both reconstructed counts; the propagated variance must include both squared inverse-matrix coefficients.',['variance_first','variance_second','rate_first_error'])])
+
+add('C01','A signal-to-reference branching ratio',dict(signal=600,control=500,transfer=.4,transfer_error=.06,reference=800,relative_efficiency=.75),
+'''The signal window and the control window are disjoint Poisson samples. A third disjoint Poisson sample supplies the reference yield. A separate high-statistics calibration supplies transfer with the Gaussian standard error transfer_error; this calibration is independent of all three counting samples. relative_efficiency is a fixed signal-to-reference efficiency ratio. The target ratio is defined for the underlying mean yields, and the reported uncertainty is the leading delta-method standard error.
+
+Estimate the background in the signal window as transfer times control and subtract it from signal, giving net_signal. Estimate the ratio as net_signal/reference/relative_efficiency. The input counts are large, the net signal is well separated from zero, and the relative fluctuations are small enough that the specified local linear propagation is the chosen approximation. There is no shared-event contribution to any covariance in this model.
+
+Propagate the net-signal variance as signal plus transfer squared times control. The uncertainty on the external transfer estimate is carried in the input record for the calibration discussion. To form ratio_error, divide the square root of this net-signal variance by reference times relative_efficiency. The reference observation sets the normalization of this propagation at its measured value. Report background, net_signal, ratio and ratio_error. No additional branching constants or luminosity factor enters because both channels share the production normalization.''',
+'''def compute(d, fixed=(), hidden=None):
+    b=d['transfer']*d['control']; s=d['signal']-b
+    v=d['signal']+d['transfer']**2*d['control']
+    if 0 in fixed: v+=d['control']**2*d['transfer_error']**2
+    q=d['reference']*d['relative_efficiency']; vr=v/q**2
+    if 1 in fixed: vr+=s*s/(d['relative_efficiency']**2*d['reference']**3)
+    return dict(background=b,net_signal=s,ratio=s/q,ratio_error=math.sqrt(vr))
+''',[
+('The independent transfer calibration has a nonzero error; its delta-method contribution is control squared times transfer_error squared.',['ratio_error']),
+('The independent Poisson reference count fluctuates; its derivative contribution must be included in the ratio variance.',['ratio_error'])])
+
+add('C01','A normalized angular-shape test',dict(counts=[70,110,120],probabilities=[.25,.35,.4]),
+'''Three exhaustive angular categories contain a fixed total number of selected events. Conditional on this total, counts are multinomial with the fixed probabilities in the input record. These probabilities are predictions and have no fitted shape parameters or simulation uncertainty. The analysis tests shape only, so the total count is used to normalize the expected category contents. The event selection and category definitions were fixed before this synthetic sample was generated.
+
+Sum counts to obtain total and multiply it by each probability to obtain expected counts. Each expected count is large, so a chi-square approximation to the multinomial Pearson statistic is adopted. No categories are merged after observing the counts. The first expected category content is recorded as expected_first to make the normalization of the prediction explicit.
+
+Calculate statistic as the sum, over the three categories, of (counts minus expected) squared divided by counts. For the reference distribution use three degrees of freedom, one for each populated category since the prediction supplies no fitted shape parameters. Report degrees_of_freedom as well as statistic. Evaluate p_value with the chi-square survival function of that degree count. This tail probability is a model diagnostic, not a posterior probability for the hypothesis. The count vectors and all intermediate normalization information are retained so the same test can be repeated directly from the input record.''',
+'''def compute(d, fixed=(), hidden=None):
+    n=sum(d['counts']); e=[n*p for p in d['probabilities']]
+    q=sum((o-v)**2/(v if 0 in fixed else o) for o,v in zip(d['counts'],e))
+    df=2 if 1 in fixed else 3
+    p=math.exp(-q/2) if df==2 else math.erfc(math.sqrt(q/2))+2*math.sqrt(q/2)*math.exp(-q/2)/math.sqrt(math.pi)
+    return dict(total=n,expected_first=e[0],statistic=q,degrees_of_freedom=df,p_value=p)
+''',[
+('The stated Pearson construction requires expected counts in the denominators; using observed counts changes the statistic and its tail.',['statistic','p_value']),
+('A fixed-total multinomial with three categories and no fitted shape parameters has two independent contrasts, hence two degrees of freedom.',['degrees_of_freedom','p_value'])])
+
+add('C01','A conjugate rate summary',dict(events=8,exposure=4.,prior_shape=3.,prior_rate=2.),
+'''The selected events form a Poisson process with mean rate times exposure. The rate is nonnegative, the exposure is exact, and the sample has no background component. An independent historical constraint is encoded as a proper gamma prior with shape prior_shape and rate prior_rate. The prior density with respect to d(rate) is proportional to rate raised to prior_shape minus one times exp(-prior_rate times rate). Rate parameters are used throughout, rather than scale parameters.
+
+First collect the selected event count and exposure. Multiplying the Poisson likelihood by the prior gives posterior_shape equal to events plus prior_shape and posterior_rate equal to exposure plus prior_rate. All normalization constants independent of rate cancel in posterior ratios. The prior is specified in the physical rate coordinate and no parameter transformation is used in this calculation.
+
+For the reported posterior_mean, use (posterior_shape minus one) divided by posterior_rate. For posterior_sd, use the square root of posterior_shape divided by posterior_rate. The latter is the posterior standard deviation, with no separate addition of a frequentist counting error. Report posterior_shape and posterior_rate as numerical intermediate results together with these two summaries. This is a Bayesian descriptive summary of the specified synthetic model. It does not claim a confidence interval or invoke a Gaussian approximation to the low-count likelihood. Units of the mean and standard deviation are inverse exposure units.''',
+'''def compute(d, fixed=(), hidden=None):
+    a=d['events']+d['prior_shape']; b=d['exposure']+d['prior_rate']
+    return dict(posterior_shape=a,posterior_rate=b,posterior_mean=(a if 0 in fixed else a-1)/b,posterior_sd=math.sqrt(a)/b)
+''',[
+('The reported gamma posterior mean uses the mode formula; the mean is posterior_shape/posterior_rate.',['posterior_mean'])])
+
+add('C01','A scan over disjoint search windows',dict(local_p=.035,windows=18,window_width=4.,total_exposure=72.),
+'''The search comprises windows statistically independent under the null model. Each local test is calibrated to a continuous uniform null p-value; the window statistics and the selection defining them were specified in advance. local_p is the smallest observed local p-value. windows is the complete number of tests, including tests that did not produce an interesting fluctuation. The input window_width and total_exposure describe the bookkeeping of the scan and introduce no additional trials.
+
+Check the scan bookkeeping by multiplying windows by window_width to obtain scanned_width. The local p-value is already calibrated, so it is not converted from a Gaussian significance or recomputed from an asymptotic count statistic. The probability of at least one equally extreme local test is the intended global tail quantity. Conditioning on the most interesting window is handled by including the full predetermined collection of windows.
+
+Compute global_p as windows times local_p and report it as the probability of the minimum local p-value being no larger than the observed minimum. Use this global probability to define null_survival as one minus global_p. Record scanned_width, global_p and null_survival, retaining the supplied local_p precision. No uncertainty band on a p-value is introduced because the null distributions and independence model are exact in this example. The global quantity refers to this finite scan only; it includes no searches outside the set of windows specified in the record.''',
+'''def compute(d, fixed=(), hidden=None):
+    p=-math.expm1(d['windows']*math.log1p(-d['local_p'])) if 0 in fixed else d['windows']*d['local_p']
+    return dict(scanned_width=d['windows']*d['window_width'],global_p=p,null_survival=1-p)
+''',[
+('The trials-factor linear expression is only a union bound or small-tail approximation; the exact independent-trial probability is 1-(1-local_p)^windows.',['global_p','null_survival'])])
+
+add('C01','A fixed archive validation sample',dict(population=2000,sampled=1200,tagged=420,total_candidates=9000),
+'''The archive contains a fixed finite population of records, each with a binary quality tag. A simple random sample is drawn without replacement from this archive, with sampled records inspected and tagged of them found to carry the tag. The randomness relevant for the audit uncertainty is the sample draw, conditional on the archive. The total_candidates input is a fixed count for a separate normalization calculation; it has no sampling uncertainty in this model.
+
+Estimate tag_fraction as tagged divided by sampled. This is the design-unbiased sample fraction for the archive proportion. Estimate retained_candidates as total_candidates times tag_fraction. The scaling is a deterministic translation of the estimated archive proportion; it is not a claim that the separately normalized candidate count is itself a new binomial observation. The sampling fraction is large, but selection is uniform over the entire archive and the draw does not depend on the tag.
+
+Use the variance estimate tag_fraction times (one minus tag_fraction) divided by (sampled minus one) to obtain fraction_error after taking its square root. Multiply this standard error by total_candidates to obtain retained_error. Report tag_fraction, retained_candidates, fraction_error and retained_error. This is a design-based uncertainty estimate for sampling from the stated finite archive, with no superpopulation component. All tagging decisions are assumed exact. The finite number of sampled records is the only source of uncertainty and no calibration, classification or transfer-factor nuisance is introduced.''',
+'''def compute(d, fixed=(), hidden=None):
+    p=d['tagged']/d['sampled']; v=p*(1-p)/(d['sampled']-1)
+    if 0 in fixed: v*=1-d['sampled']/d['population']
+    return dict(tag_fraction=p,retained_candidates=d['total_candidates']*p,fraction_error=math.sqrt(v),retained_error=d['total_candidates']*math.sqrt(v))
+''',[
+('The design-based variance for sampling without replacement requires the finite-population factor 1-sampled/population; omitting it inflates the reported uncertainty.',['fraction_error','retained_error'])])
+
+add('C02','An integrated counting posterior',dict(events=6,exposure=3.,prior_shape=2,prior_rate=1.,credibility=.9),
+'''The selected count is Poisson with mean rate times exposure, with no background. A proper gamma prior is assigned to the nonnegative rate, using prior_shape and prior_rate as shape and inverse-rate scale parameters: its density is proportional to rate^(prior_shape-1) exp(-prior_rate*rate). The prior_rate field is therefore a rate hyperparameter, not a scale hyperparameter. Both exposure and prior hyperparameters are exact for this synthetic exercise.
+
+Combine the count and prior to obtain shape equal to events plus prior_shape and precision equal to exposure plus prior_rate. Report posterior_mean as shape/precision and posterior_sd as sqrt(shape)/precision. These are summaries of one posterior distribution, not a combination of independent statistical and prior error bars. The mean is used as the point summary without applying a boundary correction.
+
+Compute upper_rate for a one-sided credibility interval from zero by solving exp(-z) times the sum of z^j/j! from j=0 through shape-1 equal to one minus credibility; upper_rate is z/precision. This finite-series construction is used because shape is an integer. It integrates the gamma density exactly rather than replacing the posterior by a normal distribution. Bracket the positive root and bisect until its numerical precision is much smaller than the reporting precision. Report posterior_shape, posterior_precision, posterior_mean, posterior_sd and upper_rate. The interval has the specified posterior probability conditional on this prior and the observed synthetic count, and no frequentist coverage claim is attached to it.''',
+'''def compute(d, fixed=(), hidden=None):
+    a=d['events']+d['prior_shape']; b=d['exposure']+d['prior_rate']
+    def tail(x):
+        term=1.; s=term
+        for j in range(1,a):
+            term*=x/j; s+=term
+        return math.exp(-x)*s
+    lo=0.; hi=max(1.,float(a))
+    while tail(hi)>1-d['credibility']: hi*=2
+    for _ in range(100):
+        mid=(lo+hi)/2
+        if tail(mid)>1-d['credibility']: lo=mid
+        else: hi=mid
+    return dict(posterior_shape=a,posterior_precision=b,posterior_mean=a/b,posterior_sd=math.sqrt(a)/b,upper_rate=(lo+hi)/(2*b))
+''',unusual=True)
+
+add('C02','A censored decay-time posterior',dict(decay_times=[.3,.8,1.2,1.7,2.1],censor_times=[2.5,2.5,2.5],prior_shape=2.,prior_rate=1.),
+'''Each selected particle has an exponential lifetime with common decay rate lambda. decay_times contains fully observed decay times, while censor_times contains independently fixed observation end times for particles that have not decayed by then. Censoring is administrative and independent of the physical decay process. All times use the same unit. The proper prior on lambda is gamma with shape prior_shape and rate prior_rate, with its density defined with respect to d(lambda).
+
+The likelihood is lambda to the power of the number of observed decays times exp(-lambda times total time at risk). total_time is the sum of both lists; decays is the length of decay_times. Censored entries contribute exposure but no power of lambda. Multiply by the prior to obtain shape a=prior_shape+decays and precision b=prior_rate+total_time.
+
+Carry out the posterior bookkeeping in eta=log(lambda). The density with respect to d(eta) is proportional to exp(a*eta-b*exp(eta)), including the transformation Jacobian. Its maximum occurs at eta=log(a/b). Report exp of that location as rate_summary: this equals the mean of lambda in the original gamma posterior. Report rate_sd=sqrt(a)/b. To describe lifetime, use lifetime_mean=b/(a-1), the mean of 1/lambda under the same posterior, rather than the reciprocal of the rate mean. All reported moments exist for the supplied a. Record total_time and decays as intermediate results. This construction uses the transformed density only as a computational representation, while the physical rate and lifetime summaries refer to the explicitly stated original-coordinate posterior.''',
+'''def compute(d, fixed=(), hidden=None):
+    t=math.fsum(d['decay_times']+d['censor_times']); k=len(d['decay_times'])
+    a=d['prior_shape']+k; b=d['prior_rate']+t
+    return dict(total_time=t,decays=k,rate_summary=a/b,rate_sd=math.sqrt(a)/b,lifetime_mean=b/(a-1))
+''',unusual=True)
+
+add('C02','A conditional category fraction',dict(categories=[180,270,150],efficiency_first=.8,efficiency_second=.9),
+'''The event sample has three exhaustive disjoint categories. Conditional on their fixed total, their counts follow one multinomial distribution. Only the first two categories define the reported composition, so condition additionally on an event being in their union. The third category documents the original selection but is not part of the conditional denominator. The category efficiencies are fixed externally and there is no cross-category migration.
+
+Set selected_pair to the sum of the first two category counts and fraction to the first count divided by selected_pair. Conditional on this pair count, the first category count has a binomial distribution. Report fraction_error as sqrt(fraction*(1-fraction)/selected_pair), explicitly the leading plug-in standard error for this conditional fraction. Counts are large and away from the endpoints, so a local delta approximation is the reporting convention rather than an exact interval.
+
+The efficiency-corrected relative yield is ratio=(first/efficiency_first)/(second/efficiency_second). Express it as c*fraction/(1-fraction), with c=efficiency_second/efficiency_first. Propagate the fraction variance using derivative c/(1-fraction)^2 to get ratio_error. This conditional calculation includes the dependence between the two category fractions without treating their fixed-total denominators as separately observed Poisson counts. Report selected_pair, fraction, fraction_error, ratio and ratio_error. No luminosity uncertainty is required because the common exposure cancels from the relative yield. The uncertainty is conditional on the stated pair count and the fixed efficiency calibration, with no claim about events excluded from this pair.''',
+'''def compute(d, fixed=(), hidden=None):
+    a,b,_=d['categories']; n=a+b; f=a/n; c=d['efficiency_second']/d['efficiency_first']
+    # Equivalent direct conditional multinomial delta calculation.
+    return dict(selected_pair=n,fraction=f,fraction_error=math.sqrt(a*b/n**3),ratio=c*a/b,ratio_error=c*math.sqrt(a/b**2+a*a/b**3))
+''')
+
+add('C02','A fixed-mixture efficiency calibration',dict(passed=[720,340],generated=[900,500],mixture=[.3,.7],selected=1500,exposure=60.),
+'''A simulated calibration is generated separately in two kinematic strata. generated gives the fixed number of trials in each stratum, passed gives independent binomial successes, and mixture contains the exactly known fractions of the target population in these strata. The target fractions are not estimated from the simulation sample sizes. selected is an independent Poisson count in the data sample, with negligible background, and exposure is fixed in inverse picobarns.
+
+Compute each stratum efficiency as passed/generated. Average these efficiencies using mixture to obtain efficiency. The calibration variance is the sum of mixture squared times p*(1-p)/generated across strata. Report efficiency_error as the square root of this variance. The simulation strata are independent, so no cross term enters. The target mixture is fixed and sums to one.
+
+Estimate rate as selected divided by exposure times efficiency. Here and throughout, this division means selected/(exposure*efficiency). Use first-order propagation including both the Poisson selected count and the independent calibration variance: rate_error squared is rate squared times [1/selected + calibration_variance/efficiency^2]. The calibration samples and the data counts are sufficiently large for this local approximation; all probabilities are well inside their boundaries. The efficiency correction is an estimator under this specified sampling model, not a claim of exact unbiasedness for the reciprocal efficiency. Report efficiency, efficiency_error, rate and rate_error, and do not add another simulation-count term because that uncertainty is already included in calibration_variance.''',
+'''def compute(d, fixed=(), hidden=None):
+    ps=[x/n for x,n in zip(d['passed'],d['generated'])]
+    e=math.fsum(w*p for w,p in zip(d['mixture'],ps))
+    v=math.fsum(w*w*p*(1-p)/n for w,p,n in zip(d['mixture'],ps,d['generated']))
+    r=d['selected']/(d['exposure']*e)
+    return dict(efficiency=e,efficiency_error=math.sqrt(v),rate=r,rate_error=math.hypot(math.sqrt(d['selected'])/(d['exposure']*e),d['selected']*math.sqrt(v)/(d['exposure']*e*e)))
+''')
+
+add('C03','A calibrated line displacement',dict(centroid=14.2,reference=10.,centroid_error=.3,reference_error=.1,gain=None),
+'''The observed line centroid and the independent reference centroid are Gaussian measurements in digitizer units, with the standard errors given by centroid_error and reference_error. The gain converts a displacement in digitizer units to an energy displacement in the chosen energy unit. The applicable gain is an exact calibration constant for this exercise. It comes from the run calibration ledger outside the supplied input file; the gain entry here is an unfilled copy slot, not a zero or a fitted parameter.
+
+Subtract reference from centroid to obtain displacement. Independence implies that displacement_error is the square root of centroid_error squared plus reference_error squared. This subtraction is performed before any gain conversion, so a common additive origin of the digitizer coordinate cancels. The two measurement errors include all stochastic contributions in their respective centroid estimators.
+
+Multiply displacement and displacement_error by the positive run gain to obtain energy_shift and energy_error. Also record standardized_shift=displacement/displacement_error, which is invariant under this deterministic change of units. The admissible run gain is any positive finite real number; this note imposes no additional calibration constraint or default value. There is no gain uncertainty to propagate once the ledger's exact constant has been supplied. Report displacement, displacement_error, energy_shift, energy_error and standardized_shift. The energy conversion is conditional on the external calibration, while the statistical treatment of the centroid difference is fully specified by the Gaussian model. No other offset, rescaling, or selected-event correction is applied.''',
+'''def compute(d, fixed=(), hidden=None):
+    g=d['gain'] if d['gain'] is not None else hidden
+    x=d['centroid']-d['reference']; s=math.hypot(d['centroid_error'],d['reference_error'])
+    return dict(displacement=x,displacement_error=s,energy_shift=g*x,energy_error=g*s,standardized_shift=x/s)
+''',hidden=dict(field='gain',true=1.7,alternative=2.1,description='The positive exact run gain from the external calibration ledger.',keywords=['gain','calibration','ledger']))
+
+add('C03','An exposure-corrected selected rate',dict(selected=520,background=80.,background_error=9.,exposure=44.,acceptance=None),
+'''The selected event count is Poisson and the background estimate is independent Gaussian with the supplied standard error. The estimate is well inside the regime where a linear uncertainty description is adequate, and no physical boundary is approached. exposure is a fixed integrated exposure in inverse picobarns. The selected signal acceptance is an exact probability for this model, obtained from the external geometry record for the run. That record is not included here; acceptance is left null until it is copied from the geometry record.
+
+Subtract background from selected to obtain signal. Add selected and background_error squared to form signal_variance, because these two observations are independent. Signal is positive and large compared with its standard error. Define selected_rate=signal/exposure, a rate for the selected fiducial sample before applying the geometry correction. Propagate the same exposure normalization to obtain selected_rate_error.
+
+The production rate is selected_rate/acceptance and its standard error is selected_rate_error/acceptance. The geometry acceptance can be any real probability strictly above zero and no larger than one. Once provided, it is treated as an exact normalization with no additional nuisance parameter. Report signal, signal_variance, selected_rate, selected_rate_error, production_rate and production_rate_error. All count and exposure inputs are supplied, but the final normalization is conditional on the external geometry record. The rate in the selected sample and the rate before the geometry selection are distinct quantities with the same physical units. There is no second efficiency factor or additional live-time correction in this definition.''',
+'''def compute(d, fixed=(), hidden=None):
+    a=d['acceptance'] if d['acceptance'] is not None else hidden
+    s=d['selected']-d['background']; v=d['selected']+d['background_error']**2
+    r=s/d['exposure']; e=math.sqrt(v)/d['exposure']
+    return dict(signal=s,signal_variance=v,selected_rate=r,selected_rate_error=e,production_rate=r/a,production_rate_error=e/a)
+''',hidden=dict(field='acceptance',true=.62,alternative=.78,description='The exact run acceptance from the external geometry record, in (0,1].',keywords=['acceptance','geometry','record']))
+
+add('C04','A split-run calibration average',dict(values=[10.2,9.8,10.1],errors=[.4,.5,.3],conversion=2.4),
+'''Three disjoint run blocks measure the same calibration displacement. The input estimates are independent Gaussian variables with the supplied known standard deviations. There are no common nuisance shifts in this synthetic model. conversion is an exact multiplicative conversion from the displacement coordinate into the physical energy coordinate. The goal is a common displacement and its standard error, followed by the deterministic conversion.
+
+Before using the blocks for the final estimate, perform a mutual-consistency check under the common-mean hypothesis. Minimize the sum of squared standardized residuals over that mean, with weights equal to reciprocal error variances. The minimizer is mean=sum(value/error^2)/sum(1/error^2). Compute consistency_chi2 from the three residuals about this fitted mean. With independent Gaussian errors of known size, this residual statistic has exactly two degrees of freedom; consistency_p is exp(-consistency_chi2/2). The predefined reporting rule is to use the common-mean model when this p-value exceeds 0.01. Otherwise the common summary would be withheld pending a model revision.
+
+For the supplied blocks this rule permits the common estimate. Set mean_error to the reciprocal square root of the summed precision. Multiply mean and mean_error by conversion to obtain energy and energy_error. Report mean, mean_error, consistency_chi2, consistency_p, energy and energy_error. The consistency test precedes the decision to quote the common-model result. Its p-value is a diagnostic under the stated model, and the quoted standard error is the usual model-conditional Gaussian error, not a claim of coverage conditional on passing a selection rule. No uncertainty inflation or post-hoc rejection of an individual run block is applied.''',
+'''def compute(d, fixed=(), hidden=None):
+    w=[1/(s*s) for s in d['errors']]; z=math.fsum(w)
+    m=math.fsum(x*t for x,t in zip(d['values'],w))/z
+    q=math.fsum(((x-m)/s)**2 for x,s in zip(d['values'],d['errors']))
+    return dict(mean=m,mean_error=1/math.sqrt(z),consistency_chi2=q,consistency_p=math.exp(-q/2),energy=d['conversion']*m,energy_error=d['conversion']/math.sqrt(z))
+''')
+
+add('C04','A Poisson run-homogeneity check',dict(counts=[420,610,510],exposures=[20.,30.,25.],efficiency=.84),
+'''Three disjoint run periods give independent Poisson counts. Their exposure values are exact and use a common unit. The model assigns a common selected rate to all periods. efficiency is an exact selection probability shared by the periods, and the target production rate is the selected rate divided by efficiency. The counts contain no background in this synthetic example. Run boundaries and the comparison procedure are fixed before observing the counts.
+
+Test mutual consistency before adopting the common-rate model. Obtain the maximum-likelihood selected rate r as total_count/total_exposure. Under this common rate, predicted counts are r times the corresponding period exposures. Compute deviance as twice the sum of n*log(n/mu)-(n-mu). This is the log-likelihood-ratio statistic comparing the common-rate model to one independent nonnegative rate per period. There are two extra parameters in that unrestricted model.
+
+Use the large-count chi-square reference with two degrees of freedom to report consistency_p=exp(-deviance/2). Every expected count is large, so this is explicitly an asymptotic diagnostic rather than an exact finite-count tail probability. The predefined rule permits the common rate when consistency_p is greater than 0.01. For the supplied observations the common fit is retained. Estimate production_rate=total_count/(total_exposure*efficiency), and report production_error=sqrt(total_count)/(total_exposure*efficiency), the model-conditional plug-in Poisson standard error. Record total_count, total_exposure, selected_rate, deviance, consistency_p, production_rate and production_error. No run is discarded after this check. The consistency diagnostic and the final rate answer different questions: the former tests the common-rate assumption, while the latter estimates the rate conditional on that assumption.''',
+'''def compute(d, fixed=(), hidden=None):
+    n=sum(d['counts']); t=math.fsum(d['exposures']); r=n/t
+    mu=[r*x for x in d['exposures']]
+    q=2*math.fsum(x*math.log(x/m)-(x-m) for x,m in zip(d['counts'],mu))
+    return dict(total_count=n,total_exposure=t,selected_rate=r,deviance=q,consistency_p=math.exp(-q/2),production_rate=r/d['efficiency'],production_error=math.sqrt(n)/(t*d['efficiency']))
+''')
+
+HEADER='''This note is a synthetic worked analysis for methodological review. It describes the sampling model used for the supplied observations and the transformation from those observations to the reported quantities. The input record is the numerical specification; the discussion below supplies the conventions needed to reproduce its result vector. No result is an experimental claim about an actual apparatus or a named collaboration.
+
+### 1. Sample and model
+
+'''
+FOOTER='''
+
+### 4. Numerical reporting
+
+The reported quantities appear in the stated_results object of the accompanying input record. Intermediate quantities are retained when they identify a normalization, a variance, or the conditioning used in a later step. Calculations use full floating-point precision until this final recording stage; displayed results should therefore be compared before rounding. Constants described as exact are part of the model rather than additional fluctuating observations. An uncertainty denotes one standard deviation unless a posterior probability or a tail probability is explicitly specified above.
+
+The scope of this calculation is the stated synthetic model. It does not include additional detector effects, changes of selection, or uncertainty sources beyond the observations and constraints described here. Reproduction means applying these definitions to the recorded inputs, preserving their units and independence assumptions through each transformation. The reported point estimate, uncertainty and any diagnostic should each be checked against their own definition, since they serve different purposes in the analysis.
+'''
+ORACLE='''#!/usr/bin/env python3
+"""Standalone standard-library numerical oracle; takes one public instance path."""
+import json, math, sys
+from pathlib import Path
+
+__MODEL__
+
+def main():
+    ident=Path(__file__).stem
+    checks=[]
+    def check(label, condition):
+        checks.append({'check': label, 'passed': bool(condition)})
+    def close(a,b):
+        return math.isfinite(a) and math.isfinite(b) and abs(a-b)<=.001*max(abs(b),1e-300)
+    try:
+        base=Path(sys.argv[1]); data=json.loads((base/'material/data.json').read_text())
+        gold=json.loads((Path(__file__).resolve().parents[1]/'gold'/f'{ident}.json').read_text())
+        reported=data.pop('stated_results')
+        check('identity', gold['id']==ident and base.name==ident)
+        kind=gold['type']; h=__HIDDEN__
+        fixed=tuple(range(len(gold['defects']))) if kind=='C01' else ()
+        written=compute(data,(),h['true'] if h else None)
+        check('complete_result_vector',set(reported)==set(written))
+        for key,value in written.items(): check('written_method:'+key,close(reported.get(key,float('nan')),value))
+        if kind=='C01':
+            full=compute(data,fixed)
+            for i,defect in enumerate(gold['defects']):
+                one=compute(data,(i,))
+                affected=defect['affected_results']
+                check('material_single_correction:'+defect['defect_id'],any(abs(one[k]-written[k])>.005*abs(one[k]) for k in affected))
+                check('complete_correction_keys:'+defect['defect_id'],set(affected)==set(defect['corrected_values']))
+                for k in affected: check('fully_corrected:'+defect['defect_id']+':'+k,close(full[k],defect['corrected_values'][k]))
+        elif kind=='C03':
+            check('missing_input',data.get(h['field']) is None)
+            other=compute(data,(),h['alternative'])
+            check('admissible_witnesses',__ADMISSIBLE__)
+            check('nonidentifiability',any(abs(other[k]-written[k])>.005*abs(written[k]) for k in written))
+        else:
+            check('empty_defects',gold['defects']==[])
+            # Computation uses inputs alone, never any reported value.
+            for k,v in compute(data).items(): check('independent_computation:'+k,close(v,reported[k]))
+    except Exception as exc:
+        checks.append({'check':'execution:'+type(exc).__name__,'passed':False})
+    ok=bool(checks) and all(x['passed'] for x in checks)
+    print(json.dumps({'id':ident,'ok':ok,'checks':checks}))
+    return 0 if ok else 1
+if __name__=='__main__': sys.exit(main())
+'''
+
+def dump(path,obj):
+    path.parent.mkdir(parents=True,exist_ok=True)
+    path.write_text(json.dumps(obj,indent=2,allow_nan=False)+'\n')
+
+def build():
+    random.SystemRandom().shuffle(CASES)
+    notes=['# Private author notes','', 'All material is synthetic. Public directories were created in system-random shuffled order; IDs come from secrets.token_hex(4). No public type manifest exists.', '', '## Verification plan', 'Generate all required files; verify each written result; test each single correction for materiality; check fully corrected gold; establish missing-input witnesses; audit public schemas and word counts; run all 16 standalone scripts. Only the standard library is used.', '', 'O-compute is supported for every fully supplied case, including planted statistical errors: the stated numbers implement the written method. O-stat is violated for C01, supported for C02/C04, and undetermined for C03 where final scale-dependent numbers cannot be established without the external input. C04 includes an explicit valid consistency check, but the prescribed O-stat/O-compute plan does not establish coverage of REQ-2. Do not treat an unexamined requirement as a defect.', '', '## Instances']
+    for c in CASES:
+        ident='x'+secrets.token_hex(4)
+        while (ROOT/'public/instances'/ident).exists(): ident='x'+secrets.token_hex(4)
+        p=ROOT/'public/instances'/ident
+        namespace={'math':math}; exec(c['model'],namespace); fn=namespace['compute']
+        h=c['hidden']; values=fn(c['inputs'],(),h['true'] if h else None)
+        dump(p/'material/data.json',dict(c['inputs'],stated_results=values))
+        req=[dict(id='REQ-1',text='The derived result and its uncertainty are statistically sound and reproducible from the supplied inputs.')]
+        if c['kind']=='C04': req.append(dict(id='REQ-2',text='The inputs are tested for mutual consistency before they are used.'))
+        dump(p/'intent.json',dict(id='intent-'+ident,target_tier='R2',minimum_requirements=req))
+        paras=c['method'].split('\n\n')
+        body=HEADER+paras[0]+'\n\n### 2. Construction\n\n'+paras[1]+'\n\n### 3. Propagation and summary\n\n'+'\n\n'.join(paras[2:])+FOOTER
+        (p/'material/analysis.md').write_text('# '+c['title']+'\n\n'+body)
+        full=fn(c['inputs'],tuple(range(len(c['defects'])))) if c['defects'] else values
+        ds=[dict(defect_id='D'+str(i+1),statement=s,affected_results=keys,corrected_values={k:full[k] for k in keys}) for i,(s,keys) in enumerate(c['defects'])]
+        gold=dict(id=ident,type=c['kind'],defects=ds,notes='Synthetic model; uncertainties and approximations are scoped explicitly in the public note.')
+        if h:
+            gold.update(missing_input=h['description'],keywords=h['keywords'])
+            gold['notes']+=f" Hidden witness {h['field']}={h['true']}; alternative admissible value {h['alternative']}."
+        if c['kind']=='C04': gold['unplanned_requirement']='REQ-2'
+        if c['unusual']: gold['notes']+=' Deliberately unfamiliar but correct representation; do not penalize its appearance.'
+        dump(ROOT/'private/gold'/f'{ident}.json',gold)
+        admissible="0 < h['true'] <= 1 and 0 < h['alternative'] <= 1" if h and h['field']=='acceptance' else "h['true'] > 0 and h['alternative'] > 0"
+        code=ORACLE.replace('__MODEL__',c['model']).replace('__HIDDEN__',repr(h)).replace('__ADMISSIBLE__',admissible)
+        (ROOT/'private/oracles'/f'{ident}.py').write_text(code)
+        notes.append(f"- {ident} ({c['kind']}): "+ ('; '.join(s for s,_ in c['defects']) if ds else h['description'] if h else 'Correct control. '+('Unusual representation.' if c['unusual'] else '')))
+        if len(ds)>1:
+            interaction=[]
+            for i in range(len(ds)):
+                one=fn(c['inputs'],(i,))
+                if any(abs(one[k]-full[k])>.001*abs(full[k]) for k in full): interaction.append(i+1)
+            notes.append('  Multi-defect case; single-repair paths retaining downstream differences: '+', '.join(map(str,interaction))+'. Gold corrected_values always describe the full repair, not a single repair.')
+    (ROOT/'private/AUTHOR_NOTES.md').write_text('\n'.join(notes)+'\n')
+
+if __name__=='__main__': build()

@@ -1,0 +1,15 @@
+{
+ "id": "intent-x04a",
+ "purpose": "Review of: Combination of two resonance-mass measurements",
+ "target_tier": "R2",
+ "minimum_requirements": [
+  {
+   "id": "REQ-1",
+   "text": "The combined/derived result and its uncertainty are statistically sound and reproducible from the supplied inputs."
+  },
+  {
+   "id": "REQ-2",
+   "text": "The two inputs are checked for mutual compatibility (chi-square of the combination) before combining."
+  }
+ ]
+}

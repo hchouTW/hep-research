@@ -1,0 +1,14 @@
+{
+  "G12": {"grade": "accept", "reason": "Names the Poisson error sqrt(k)/n used instead of the binomial error sqrt(eps(1-eps)/n) for k of n, which is the planted mechanism; points at the uncertainty formula and the resulting stated uncertainty."},
+  "G11": {"grade": "accept", "reason": "Identifies sqrt(k)/n as a Poisson error inappropriate for a binomial efficiency with fixed n and gives the binomial value; same mechanism, affected element named."},
+  "G10": {"grade": "accept", "reason": "States the Poisson formula sqrt(k)/n is used instead of a binomial one and that the stated uncertainty carries this error; same mechanism and affected result."},
+  "G09": {"grade": "accept", "reason": "Says the propagation for P = A B ignores the negative correlation (rho = -0.62), omitting the 2 rho rA rB term and overestimating sigma_P; same mechanism, element and result named."},
+  "G08": {"grade": "accept", "reason": "Names the omitted covariance term despite stated anticorrelation rho = -0.62 and recomputes sigma_P; same mechanism, points at the propagation rule."},
+  "G07": {"grade": "accept", "reason": "Identifies that the propagation ignores the anticorrelation (missing 2 rho rA rB term) and that stated sigma_P is the uncorrelated value; same mechanism and result."},
+  "G06": {"grade": "accept", "reason": "Names weights 1/sigma_i used instead of inverse-variance 1/sigma_i^2, pointing at the weight definition and the shifted mean; the extra remark on the inconsistent uncertainty is correct and does not hurt."},
+  "G05": {"grade": "accept", "reason": "Identifies w_i = 1/sigma_i instead of 1/sigma_i^2 and gives the resulting mean shift; same mechanism, affected element named; extra uncertainty remark is correct."},
+  "G04": {"grade": "accept", "reason": "States the weights 1/sigma_i are not the inverse-variance weights 1/sigma_i^2 and quantifies the effect on the average; same mechanism; extra correct remark on uncertainty."},
+  "G03": {"grade": "accept", "reason": "Names the omitted covariance term 2 rho (sA/A)(sB/B) with rho = -0.8 and the overestimated sigma_P; same mechanism, element and result."},
+  "G02": {"grade": "accept", "reason": "Says propagation for P = A B ignores the stated anticorrelation (no covariance term), overestimating sigma_P with rho = -0.8; same mechanism and affected result."},
+  "G01": {"grade": "accept", "reason": "Identifies the omitted correlation term despite declared anticorrelation rho = -0.8 and the overestimated stated sigma_P; same mechanism, element named."}
+}

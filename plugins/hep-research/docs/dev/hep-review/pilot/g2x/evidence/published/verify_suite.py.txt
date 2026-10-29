@@ -1,0 +1,59 @@
+"""Structural audit, all standalone oracle invocations, and negative controls."""
+import ast, collections, json, math, re, subprocess, sys, tempfile
+from pathlib import Path
+root=Path(__file__).resolve().parents[1]
+issues=[]; logs=[]; counts=collections.Counter(); multis=0; interactions=0
+paths=list((root/'public/instances').iterdir())
+def require(test,label):
+    if not test: issues.append(label)
+require(len(paths)==16,'instance count')
+for p in paths:
+    ident=p.name
+    require(bool(re.fullmatch('x[0-9a-f]{8}',ident)),'opaque id')
+    require(sorted(str(x.relative_to(p)) for x in p.rglob('*') if x.is_file())==['intent.json','material/analysis.md','material/data.json'],'public files')
+    intent=json.loads((p/'intent.json').read_text()); d=json.loads((p/'material/data.json').read_text()); text=(p/'material/analysis.md').read_text()
+    g=json.loads((root/'private/gold'/f'{ident}.json').read_text()); counts[g['type']]+=1
+    require(300<=len(text.split())<=900,'word count')
+    require(len(re.findall(r'^### [1-6]\.',text,re.M)) in range(3,7),'analysis steps')
+    req=[{'id':'REQ-1','text':'The derived result and its uncertainty are statistically sound and reproducible from the supplied inputs.'}]
+    if g['type']=='C04': req.append({'id':'REQ-2','text':'The inputs are tested for mutual consistency before they are used.'})
+    require(intent==dict(id='intent-'+ident,target_tier='R2',minimum_requirements=req),'intent shape')
+    require(not any(k in d for k in ('type','defects','corrected_values','gold')),'public leakage')
+    op=root/'private/oracles'/f'{ident}.py'; src=op.read_text(); tree=ast.parse(src)
+    imports=[]
+    for n in ast.walk(tree):
+        if isinstance(n,ast.Import): imports.extend(x.name.split('.')[0] for x in n.names)
+        elif isinstance(n,ast.ImportFrom): imports.append(n.module.split('.')[0])
+    require(set(imports)<=sys.stdlib_module_names,'standard library imports')
+    run=subprocess.run([sys.executable,str(op),str(p)],text=True,capture_output=True)
+    try: output=json.loads(run.stdout)
+    except Exception: output={'ok':False,'checks':[]}
+    logs.append(dict(id=ident,returncode=run.returncode,result=output,stderr=run.stderr))
+    require(run.returncode==0 and output.get('ok') is True,'oracle pass')
+    ns={'__name__':'oracle_inspection'}; exec(compile(src,str(op),'exec'),ns)
+    inp={k:v for k,v in d.items() if k!='stated_results'}
+    if g['type']=='C01':
+        require(1<=len(g['defects'])<=3,'defect count')
+        if len(g['defects'])>=2:
+            multis+=1
+            full=ns['compute'](inp,tuple(range(len(g['defects']))))
+            shared=set(g['defects'][0]['affected_results']) & set(g['defects'][1]['affected_results'])
+            if any(all(abs(ns['compute'](inp,(i,))[k]-full[k])>.005*abs(full[k]) for i in range(len(g['defects']))) for k in shared): interactions+=1
+    else: require(g['defects']==[],'control defects')
+    # Reject a perturbation to every individual reported number, one at a time.
+    with tempfile.TemporaryDirectory(dir=root/'private') as temp:
+        q=Path(temp)/ident; (q/'material').mkdir(parents=True)
+        for key,v in d['stated_results'].items():
+            bad=json.loads(json.dumps(d)); bad['stated_results'][key]=v*1.02 if v else .1
+            (q/'material/data.json').write_text(json.dumps(bad))
+            rr=subprocess.run([sys.executable,str(op),str(q)],capture_output=True,text=True)
+            require(rr.returncode!=0,'negative result perturbation')
+require(counts=={'C01':8,'C02':4,'C03':2,'C04':2},'type counts')
+require(multis>=4,'multi-defect quota'); require(interactions>=2,'interaction quota')
+items=json.loads((root/'private/calibration/items.json').read_text()); labels=json.loads((root/'private/calibration/labels.json').read_text())
+require(len(items)==10 and set(labels)=={f'K{i:02d}' for i in range(1,11)},'calibration count')
+require(all(set(x)=={'item','defect','finding'} and set(x['finding'])=={'claim','element','evidence_text'} for x in items),'calibration shape')
+report=dict(ok=not issues,issues=issues,counts=dict(counts),oracle_runs=logs,multi_defect_count=multis,interacting_count=interactions)
+(root/'private/verification.json').write_text(json.dumps(report,indent=2)+'\n')
+print('C01: 8; C02: 4; C03: 2; C04: 2. All oracles passed: '+('yes' if not issues else 'no')+'.')
+sys.exit(bool(issues))

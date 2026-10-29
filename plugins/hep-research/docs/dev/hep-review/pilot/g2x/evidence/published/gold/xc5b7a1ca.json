@@ -1,0 +1,31 @@
+{
+  "id": "xc5b7a1ca",
+  "type": "C01",
+  "defects": [
+    {
+      "defect_id": "D1",
+      "statement": "The stated Pearson construction requires expected counts in the denominators; using observed counts changes the statistic and its tail.",
+      "affected_results": [
+        "statistic",
+        "p_value"
+      ],
+      "corrected_values": {
+        "statistic": 0.5714285714285714,
+        "p_value": 0.751477293075286
+      }
+    },
+    {
+      "defect_id": "D2",
+      "statement": "A fixed-total multinomial with three categories and no fitted shape parameters has two independent contrasts, hence two degrees of freedom.",
+      "affected_results": [
+        "degrees_of_freedom",
+        "p_value"
+      ],
+      "corrected_values": {
+        "degrees_of_freedom": 2,
+        "p_value": 0.751477293075286
+      }
+    }
+  ],
+  "notes": "Synthetic model; uncertainties and approximations are scoped explicitly in the public note."
+}

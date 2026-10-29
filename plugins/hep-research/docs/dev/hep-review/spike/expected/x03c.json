@@ -1,0 +1,11 @@
+{
+ "id": "x03c",
+ "type": "C03",
+ "missing_input": "sigma of M3 (null; the supplementary table is not supplied)",
+ "gap_obligation": "O-stat",
+ "keywords": [
+  "M3",
+  "null",
+  "missing"
+ ]
+}

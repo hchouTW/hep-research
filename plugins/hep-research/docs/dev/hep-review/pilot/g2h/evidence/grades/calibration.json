@@ -1,0 +1,10 @@
+{"L01": {"grade": "accept", "reason": "Names the omitted covariance between D and S (shared counts, cov = N1 - N2), points at the propagation and sigma_A, and gives the correct sqrt((1 - A^2)/S) against the stated larger value."},
+ "L02": {"grade": "reject", "reason": "About an acceptance correction, a different issue; it does not mention the D/S correlation in the error propagation."},
+ "L03": {"grade": "accept", "reason": "States that the variance of a weighted sum is sum w^2, not sum w, and points at sigma_yield with the corrected value."},
+ "L04": {"grade": "reject", "reason": "Only says the yield uncertainty looks inconsistent; no mechanism (sqrt(sum w^2) versus sqrt(sum w)) is given."},
+ "L05": {"grade": "accept", "reason": "Identifies the shared calibration systematic as fully correlated, missing from the combination's covariance, so the combined uncertainty is understated; points at the weights and sigma_combined."},
+ "L06": {"grade": "reject", "reason": "Gets the mechanism wrong (1/sigma weights instead of 1/sigma^2); does not identify the missing correlation term."},
+ "L07": {"grade": "accept", "reason": "Two free parameters with 12 points give ndf = 10, not 11; points at ndf and the p-value and recomputes the p-value."},
+ "L08": {"grade": "reject", "reason": "About model curvature and a quadratic term, a different issue from the wrong ndf."},
+ "L09": {"grade": "accept", "reason": "Identifies that the observed count is excluded (P(N <= 2) used instead of P(N <= 3)), so the limit is too low and undercovers; points at upper_limit with the correct values."},
+ "L10": {"grade": "reject", "reason": "Recommends a different construction (Feldman-Cousins) and does not identify the P(N < n) versus P(N <= n) error."}}

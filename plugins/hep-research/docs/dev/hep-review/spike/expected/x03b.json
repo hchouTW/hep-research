@@ -1,0 +1,12 @@
+{
+ "id": "x03b",
+ "type": "C03",
+ "missing_input": "the fit function and its number of free parameters (and the data points), so ndf and chi2 cannot be checked",
+ "gap_obligation": "O-stat",
+ "keywords": [
+  "parameters",
+  "function",
+  "missing",
+  "not given"
+ ]
+}

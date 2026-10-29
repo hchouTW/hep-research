@@ -1,0 +1,92 @@
+[
+ {
+  "item": "L01",
+  "defect": "D = N1 - N2 and S = N1 + N2 are treated as independent in the propagation although both are built from N1 and N2 (correlated); the correct uncertainty is sqrt((1 - A^2)/S), the stated one is sqrt((1 + A^2)/S)",
+  "finding": {
+   "claim": "The propagation omits the covariance between D = N1 - N2 and S = N1 + N2; they share the same counts (cov(D,S) = N1 - N2), so the stated sigma_A is too large.",
+   "element": "analysis.md propagation; stated_results.sigma_A",
+   "evidence_text": "Binomial sqrt((1 - A^2)/S) = 0.0209 versus stated 0.0268."
+  }
+ },
+ {
+  "item": "L02",
+  "defect": "D = N1 - N2 and S = N1 + N2 are treated as independent in the propagation although both are built from N1 and N2 (correlated); the correct uncertainty is sqrt((1 - A^2)/S), the stated one is sqrt((1 + A^2)/S)",
+  "finding": {
+   "claim": "The asymmetry is not corrected for the forward/backward acceptance difference.",
+   "element": "stated_results.A",
+   "evidence_text": "No acceptance map is given."
+  }
+ },
+ {
+  "item": "L03",
+  "defect": "the uncertainty of a sum of weights is sqrt(sum w_i^2), not sqrt(sum w_i)",
+  "finding": {
+   "claim": "For weighted events the variance of the sum is the sum of squared weights; sqrt(sum w) would only hold for unit weights. The effective-count uncertainty is 6.91, not 4.94.",
+   "element": "stated_results.sigma_yield",
+   "evidence_text": "sqrt(sum w^2) = 6.91; sqrt(sum w) = 4.94."
+  }
+ },
+ {
+  "item": "L04",
+  "defect": "the uncertainty of a sum of weights is sqrt(sum w_i^2), not sqrt(sum w_i)",
+  "finding": {
+   "claim": "The yield uncertainty looks inconsistent with the inputs.",
+   "element": "stated_results",
+   "evidence_text": ""
+  }
+ },
+ {
+  "item": "L05",
+  "defect": "the systematic from the shared calibration is correlated between the two measurements but the combination treats them as independent (no covariance term), so the combined uncertainty is underestimated",
+  "finding": {
+   "claim": "Both measurements carry the same calibration systematic, which must enter the combination as a fully correlated covariance; inverse-variance weights with total errors ignore it and understate the combined uncertainty.",
+   "element": "analysis.md weights; stated_results.sigma_combined",
+   "evidence_text": "BLUE with rho = 1 gives 0.231 versus stated 0.172."
+  }
+ },
+ {
+  "item": "L06",
+  "defect": "the systematic from the shared calibration is correlated between the two measurements but the combination treats them as independent (no covariance term), so the combined uncertainty is underestimated",
+  "finding": {
+   "claim": "The weights should be 1/sigma_i rather than 1/sigma_i^2.",
+   "element": "analysis.md weights",
+   "evidence_text": ""
+  }
+ },
+ {
+  "item": "L07",
+  "defect": "two parameters are fitted, so ndf = N - 2, not N - 1; the p-value is computed with the wrong ndf",
+  "finding": {
+   "claim": "Twelve points with intercept and slope free leave 10 degrees of freedom; quoting 11 shifts the p-value.",
+   "element": "stated_results.ndf, p_value",
+   "evidence_text": "Q(chi2 = 10.4 | 10) = 0.41 versus stated 0.49."
+  }
+ },
+ {
+  "item": "L08",
+  "defect": "two parameters are fitted, so ndf = N - 2, not N - 1; the p-value is computed with the wrong ndf",
+  "finding": {
+   "claim": "The residuals suggest curvature; a quadratic term should be added.",
+   "element": "fit model",
+   "evidence_text": "Residuals at x = 1 and x = 12 are positive."
+  }
+ },
+ {
+  "item": "L09",
+  "defect": "the limit uses P(N < n) instead of P(N <= n): the observed count is excluded, so the limit is too low and undercovers",
+  "finding": {
+   "claim": "The construction drops the observed count: the 90% limit must solve P(N <= 3 | s) = 0.10 (s = 6.68); the stated 5.32 solves P(N <= 2 | s) = 0.10, so the limit undercovers.",
+   "element": "stated_results.upper_limit",
+   "evidence_text": "Poisson CDF checks."
+  }
+ },
+ {
+  "item": "L10",
+  "defect": "the limit uses P(N < n) instead of P(N <= n): the observed count is excluded, so the limit is too low and undercovers",
+  "finding": {
+   "claim": "A Feldman-Cousins interval would be preferable for such a small count.",
+   "element": "stated_results.upper_limit",
+   "evidence_text": ""
+  }
+ }
+]

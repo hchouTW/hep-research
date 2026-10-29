@@ -1,0 +1,11 @@
+{
+ "id": "x03a",
+ "type": "C03",
+ "missing_input": "the systematic correlation coefficient (only 'partially correlated', value in an unavailable note)",
+ "gap_obligation": "O-stat",
+ "keywords": [
+  "correlation",
+  "not given",
+  "missing"
+ ]
+}

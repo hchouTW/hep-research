@@ -1,0 +1,22 @@
+from pathlib import Path
+import json, math
+root=Path(__file__).resolve().parents[1]
+# Refine one reference-distribution convention before freezing the suite.
+for f in (root/'private/gold').glob('*.json'):
+    g=json.loads(f.read_text())
+    p=root/'public/instances'/g['id']
+    d=json.loads((p/'material/data.json').read_text())
+    if 'probabilities' not in d: continue
+    a=p/'material/analysis.md'
+    text=a.read_text().replace('four degrees of freedom, accounting for three populated categories and the fitted overall normalization in the bookkeeping count','three degrees of freedom, one for each populated category since the prediction supplies no fitted shape parameters')
+    a.write_text(text)
+    o=root/'private/oracles'/f"{g['id']}.py"
+    src=o.read_text().replace('df=2 if 1 in fixed else 4','df=2 if 1 in fixed else 3').replace("p=math.exp(-q/2)*(1+q/2 if df==4 else 1)","p=math.exp(-q/2) if df==2 else math.erfc(math.sqrt(q/2))+2*math.sqrt(q/2)*math.exp(-q/2)/math.sqrt(math.pi)")
+    o.write_text(src)
+    ns={'__name__':'oracle_import','math':math}; exec(src,ns)
+    d['stated_results']=ns['compute']({k:v for k,v in d.items() if k!='stated_results'})
+    (p/'material/data.json').write_text(json.dumps(d,indent=2)+'\n')
+# Keep the private authoring source consistent with the frozen files.
+f=root/'private/build_suite.py'
+s=f.read_text().replace('four degrees of freedom, accounting for three populated categories and the fitted overall normalization in the bookkeeping count','three degrees of freedom, one for each populated category since the prediction supplies no fitted shape parameters').replace('df=2 if 1 in fixed else 4','df=2 if 1 in fixed else 3').replace('p=math.exp(-q/2)*(1+q/2 if df==4 else 1)','p=math.exp(-q/2) if df==2 else math.erfc(math.sqrt(q/2))+2*math.sqrt(q/2)*math.exp(-q/2)/math.sqrt(math.pi)')
+f.write_text(s)

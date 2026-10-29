@@ -1,0 +1,11 @@
+{
+ "correct": {
+  "combined": 10.062837467517127,
+  "sigma_combined": 0.24151774748083513
+ },
+ "defect": null,
+ "family": "combination",
+ "id": "hc8cccc1b",
+ "type": "C02",
+ "variant": "control"
+}

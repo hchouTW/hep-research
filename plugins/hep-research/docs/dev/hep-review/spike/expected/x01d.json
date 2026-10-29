@@ -1,0 +1,12 @@
+{
+ "id": "x01d",
+ "type": "C01",
+ "defective_obligation": "O-stat",
+ "element": "propagation ignores the +0.8 correlation (term -2 rho sA sB/(AB)); correct sigma_R = 0.0562",
+ "keywords": [
+  "correlat",
+  "rho",
+  "0.8"
+ ],
+ "compute_reproducible": true
+}

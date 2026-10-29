@@ -1,0 +1,35 @@
+{
+ "unit": "pb",
+ "measurements": [
+  {
+   "name": "M1",
+   "value": 10.2,
+   "stat": 0.3,
+   "syst": 0.2
+  },
+  {
+   "name": "M2",
+   "value": 10.6,
+   "stat": 0.25,
+   "syst": 0.21
+  }
+ ],
+ "covariance_used": [
+  [
+   0.13,
+   0.0
+  ],
+  [
+   0.0,
+   0.1066
+  ]
+ ],
+ "stated_results": {
+  "weights": [
+   0.4505,
+   0.5495
+  ],
+  "combined_value": 10.4198,
+  "combined_uncertainty": 0.242
+ }
+}

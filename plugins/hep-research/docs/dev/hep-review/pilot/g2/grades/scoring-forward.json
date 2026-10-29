@@ -1,0 +1,14 @@
+{
+ "G01": {"grade": "accept", "reason": "Names the omitted covariance (2*rho*rA*rB) term despite declared anticorrelation rho=-0.8, points at the propagation rule and sigma_P."},
+ "G02": {"grade": "accept", "reason": "States the quadrature sum ignores the stated correlation (rho=-0.8) and lacks the covariance term; points at the propagation method and sigma_P."},
+ "G03": {"grade": "accept", "reason": "Identifies the omitted covariance term 2*rho*rA*rB with rho=-0.8, with a correct recomputation; points at the propagation rule and sigma_P."},
+ "G04": {"grade": "accept", "reason": "Names weights 1/sigma_i instead of inverse-variance 1/sigma_i^2 at the weight definition; extra remark on the uncertainty is correct and does not hurt."},
+ "G05": {"grade": "accept", "reason": "Names weights 1/sigma_i instead of 1/sigma_i^2 at the weight definition, with recomputed mean; extra correct remark on the uncertainty."},
+ "G06": {"grade": "accept", "reason": "States weights w_i=1/sigma_i should be inverse-variance 1/sigma_i^2, pointing at the weight definition; extra remark on uncertainty consistency is correct."},
+ "G07": {"grade": "accept", "reason": "Names the missing covariance term 2*rho*(sA/A)*(sB/B) for rho=-0.62 in the quadrature propagation; points at the rule and sigma_P."},
+ "G08": {"grade": "accept", "reason": "Says the propagation omits the 2*rho covariance term although A and B are anticorrelated (rho=-0.62); points at the propagation rule."},
+ "G09": {"grade": "accept", "reason": "Identifies the plain quadrature sum ignoring the negative correlation, gives correct relative variance with 2*rho*rA*rB; points at the propagation formula."},
+ "G10": {"grade": "accept", "reason": "Names the Poisson formula sqrt(k)/n used instead of the binomial sqrt(eps(1-eps)/n), which is the mechanism of ignoring the binomial correlation of k with n; points at the uncertainty formula and result."},
+ "G11": {"grade": "accept", "reason": "Identifies sqrt(k)/n as a Poisson error inappropriate for a binomial efficiency with fixed n and gives the binomial error; points at the estimator."},
+ "G12": {"grade": "accept", "reason": "States the Poisson error sqrt(k)/n is used instead of the binomial error for k of n trials, with recomputation; points at the uncertainty formula."}
+}
