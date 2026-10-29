@@ -1030,7 +1030,16 @@
     "examples/bc-usine-reproduction/**",
     "examples/propagation-fit/**",
     "docs/adapter-authoring.md",
-    "docs/capability-matrix.md"
+    "docs/capability-matrix.md",
+    "contracts/__init__.py",
+    "contracts/validate.py",
+    "contracts/vocab/core.json",
+    "contracts/fixtures/**",
+    "core/__init__.py",
+    "profiles/**",
+    "examples/**",
+    "skills/*/assets/*.json",
+    "tests/skills/hep_statistics/**"
    ],
    "acceptance": [
     "L2-1",
@@ -1046,7 +1055,8 @@
    "optional": false,
    "critical": false,
    "fallback": "none: escalate",
-   "source": "decisions.md B1.3 (maintainer 2026-10-29)"
+   "source": "decisions.md B1.3 (maintainer 2026-10-29)",
+   "files_source": "widened by the orchestrator 2026-10-29: the contracts 3.16.0 bump the orchestrator asked for (L2-1) touches the same files as K2's 3.15.0 bump; the provider-version migration needs the hep_statistics USINE test drivers"
   }
  ],
  "criticality_source": "r4 8 names B1 and F1 as critical; P0, ENV and RC are marked critical because the campaign cannot proceed or finish without them (derived)",

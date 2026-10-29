@@ -457,14 +457,14 @@
    ]
   },
   "L2": {
-   "state": "dispatched",
+   "state": "verifying",
    "dispatches": 1,
    "rework_rounds": 0,
    "branch": "worktree-crprop-l2",
-   "base": null,
-   "head": null,
+   "base": "f0f424da",
+   "head": "9ba6de3f",
    "merge_commit": null,
-   "worker_report": null,
+   "worker_report": "DONE (ALL-5 card only): contracts 3.16.0 (CONFORMANCE_VERSION_FROM), CORE 1.4.0, conformance records provider_version, USINE gate rerun at 0.3.0 (4.277e-5); adapter 0.3.0, usine/dragon2 0.3.0, emulator 1.0.0; migration keep-as-history (565+367 hashes reproduce under 0.2.0, none under 0.3.0); spectrum_variable explicit, USINE renders identical; emulator refuses explicit form (out-of-domain); doc slips + erratum",
    "verifier_report": null,
    "missing_capabilities": [],
    "notes": [
@@ -1012,6 +1012,11 @@
    "cycle": 4,
    "date": "2026-10-29",
    "event": "B1.3: L1, L2 dispatched for 0.45.0 from main 31f39ee8"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "L2 DONE (9ba6de3f); card widened for the contracts bump; Opus verifier"
   }
  ],
  "env": {
