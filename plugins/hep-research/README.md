@@ -25,6 +25,7 @@ labeled synthetic in file names and metadata. What is and is not validated is li
 | `hep-ml` | a machine-learning model or study for physics (PyTorch) |
 | `hep-citations` | answers from cited sources: what a paper or experiment published, the latest result, citation verification, literature records and matrices |
 | `hep-authoring` | papers, figures, diagrams, talks, referee reports, claims traced to results and sources; every citation from a literature record |
+| `hep-review` | a recorded review of an analysis, derivation, fit or physics code: review obligations, assurance tiers R0-R3, checkpoints, a report that never claims more than its tier (experimental) |
 
 Each skill folder under `skills/` has a `README.md` (purpose, folder map, scripts, references, handoffs, tests); `SKILL.md` is the entry point the host loads. Skills are chosen by what you want produced, not by the experiment you name. Results that another skill continues
 from are written as JSON artifacts in your project's `artifacts_dir` (default `./hep-research-artifacts/`).
@@ -83,7 +84,7 @@ They have not been run with this plugin. Plugins need a paid plan (Pro, Max, Tea
 3. Find `hep-research` under **Discover** and select **Add** (or **Install**).
 4. Alternatively, **Add > Upload plugin** accepts a `.zip` of this folder; the archive must hold exactly one
    `.claude-plugin/plugin.json`. Build it from a clean checkout so it carries no caches:
-   `git archive --format=zip -o hep-research.zip HEAD:plugins/hep-research`. The plugin (about 3800 files, 56.6 MB uncompressed) is inside the documented limits (5,000 files, 200 MB). An uploaded plugin does not update from GitHub.
+   `git archive --format=zip -o hep-research.zip HEAD:plugins/hep-research`. The plugin (about 4200 files, 56.6 MB uncompressed) is inside the documented limits (5,000 files, 200 MB). An uploaded plugin does not update from GitHub.
 
 The plugin is saved to your account, so it is then available in Chat, in Cowork, and in Claude Code sessions signed
 in to the same account (Claude Code downloads it as a synced plugin; run `/reload-plugins`). Pick a skill by typing

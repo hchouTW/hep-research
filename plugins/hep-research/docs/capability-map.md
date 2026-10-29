@@ -83,4 +83,5 @@ session, so this map was rebuilt rather than copied; differences from the plan's
 | exclusive-and-gpd | Exclusive processes and GPDs (DVCS kinematics, azimuthal conventions, GPD properties and sum rules) and diffractive DIS kinematics; GPD extraction outside the tool | hep-theory | tool | yes | Th20 |  |
 | pdf-reweighting-and-profiling | Bayesian reweighting of PDF/nPDF/FF replica sets and linear Hessian profiling of published sets with new data; t0 chi2 for multiplicative uncertainties | hep-statistics | tool | yes | S12 |  |
 | global-pdf-fits | Specification and review of global PDF/nPDF/FF fits (theory inputs, chi2 forms, tolerances, closure tests); executing a full fit needs external software | hep-statistics | documentation | yes | S13 |  |
+| recorded-review | Recorded, tiered review of physics work: review obligations, assurance tiers R0-R3 computed from records, append-only commit log with checkpoints, two-layer report (experimental, protocol hep-review/0; G1 record prototype) | hep-review | tool | yes | hep-review-v9 |  |
 <!-- /capability-map -->

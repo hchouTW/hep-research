@@ -20,7 +20,7 @@ import hashlib
 from typing import Any
 
 SKILLS = ("hep-measurement", "hep-detector", "hep-theory", "hep-statistics", "hep-computing", "hep-ml",
-          "hep-citations", "hep-authoring")
+          "hep-citations", "hep-authoring", "hep-review")
 # SHA-256 of the five names retired in contracts 3.0.0 (the four renamed in 0.11.0 and the one split in 0.16.0)
 RETIRED_SHA256 = frozenset({
     "e57ccb9f1698d58cd4d0aba82fa54e14c8799f828060f1763db2889bdb80d55a",

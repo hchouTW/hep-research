@@ -13,8 +13,8 @@ def resources(skill_dir):
 
 
 class ResourceRouteTests(unittest.TestCase):
-    def test_eight_skills_have_resources(self):
-        self.assertEqual(len(SKILLS), 8)
+    def test_nine_skills_have_resources(self):
+        self.assertEqual(len(SKILLS), 9)
         for s in SKILLS:
             self.assertNotIn("arrive in M2", resources(s), s.name)
 

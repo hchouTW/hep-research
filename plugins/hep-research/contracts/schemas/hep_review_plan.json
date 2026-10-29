@@ -65,6 +65,7 @@
                                            "digest": {"$ref": "hep_review_definitions.json#/$defs/digest"}},
                             "additionalProperties": false},
   "limits": {"type": "object"},
+  "revision_reason": {"type": "object", "required": ["reason", "authority"], "properties": {"reason": {"type": "string"}, "authority": {"type": "string"}}, "additionalProperties": false},
   "change_request": {"type": "object"},
   "target_tier": {"$ref": "hep_review_definitions.json#/$defs/tier"}
  },

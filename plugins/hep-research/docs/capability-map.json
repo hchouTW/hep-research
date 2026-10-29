@@ -691,6 +691,16 @@
     "S13"
    ],
    "note": "documentation until a software plan ships an executable fit"
+  },
+  {
+   "id": "recorded-review",
+   "capability": "Recorded, tiered review of physics work: review obligations, assurance tiers R0-R3 computed from records, append-only commit log with checkpoints, two-layer report (experimental, protocol hep-review/0; G1 record prototype)",
+   "owner": "hep-review",
+   "state": "tool",
+   "v1": true,
+   "items": [
+    "hep-review-v9"
+   ]
   }
  ]
 }

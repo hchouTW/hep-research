@@ -1,4 +1,4 @@
-{"$comment": "Skill names a contract may record (contracts 3.0.0): the eight current names. The names retired in 3.0.0 (renamed in hep-research 0.11.0, or split in 0.16.0) fail the enum; contracts.skill_names adds skill.unknown_name with the migration path (hep-research 0.16.x). Keep in step with contracts/skill_names.py.",
+{"$comment": "Skill names a contract may record (contracts 3.0.0): the nine current names. The names retired in 3.0.0 (renamed in hep-research 0.11.0, or split in 0.16.0) fail the enum; contracts.skill_names adds skill.unknown_name with the migration path (hep-research 0.16.x). Keep in step with contracts/skill_names.py.",
  "$defs": {
-  "skill_name": {"type": "string", "enum": ["hep-measurement", "hep-detector", "hep-theory", "hep-statistics", "hep-computing", "hep-ml", "hep-citations", "hep-authoring"]}
+  "skill_name": {"type": "string", "enum": ["hep-measurement", "hep-detector", "hep-theory", "hep-statistics", "hep-computing", "hep-ml", "hep-citations", "hep-authoring", "hep-review"]}
  }}
