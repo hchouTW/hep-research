@@ -13,7 +13,7 @@ run:
   started: 2026-10-29T06:20+08:00
   sessions: 1
   mode: autonomous
-  target_gate: G1
+  target_gate: G2
 environment:
   source_repo: ~/hep-research (Git repo root; plugin root plugins/hep-research)
   base_ref: main
@@ -35,8 +35,8 @@ tasks:
   T01: {status: done, deps: [T0S], steps_done: [1, 2, 3, 4, 5, 6, 7, 8], notes: "62/62 owned cases pass; independent review: 1 blocker, 6 major, 8 minor, all dispositioned (12 adopted, 3 partly), fixed with tests first (3f075184); blocker awaits user confirmation (task file 4.2)"}
   T02: {status: done, deps: [T01], steps_done: [1, 2, 3, 4, 5, 6, 7], notes: "30/30 owned cases pass; interruption, two-process CAS, foreign commit, export->import with checkpoint all tested"}
   T03: {status: done, deps: [T01], steps_done: [1, 2, 3, 4, 5, 6, 7], notes: "15/15 owned cases pass; live routing run not run (paid, needs approval)"}
-  U1:  {status: pending, deps: [T02, T03], kind: user-gate, notes: "not reached: target_gate G1"}
-  T04: {status: pending, deps: [U1]}
+  U1:  {status: done, deps: [T02, T03], kind: user-gate, notes: "2026-10-29 user chose (b): user-approved deterministic oracles, no secret gold, held-out isolation unmet; full 48 trials"}
+  T04: {status: in_progress, deps: [U1], steps_done: []}
   T05: {status: skipped}
   T06: {status: skipped}
   T07: {status: skipped}
@@ -48,6 +48,7 @@ cases:
   T02: "all 30 pass (tests/skills/hep_review/test_{materials,store,continuity_export}.py)"
   T03: "all 15 pass (tests/skills/hep_review/test_{coordinator,cli,pilot_generator,g1_review_fixes}.py)"
 decisions:
+  - {when: 2026-10-29T10:10+08:00, task: U1, decision: "Option (b): deterministic oracles approved by the user; Claude generates instances with a recorded seed and runs all trials; full 48 trials + 8 calibration items (<= 60 dispatches)", reason: "user answer to the U1 gate", reversible: false}
   - {when: 2026-10-29T06:25+08:00, task: T00, decision: "Worktree created with the Git fallback (git worktree add -b hep-review-v9-impl) at the repo's host-tool location .claude/worktrees/ (ignored by .gitignore), then entered with the host tool (EnterWorktree path=...)", reason: "The host worktree tool cannot name the branch; the task fixes branch_name=hep-review-v9-impl", reversible: true}
   - {when: 2026-10-29T06:30+08:00, task: T00, decision: "Store location ~/.local/state/hep-research/hep-review ($XDG_STATE_HOME/hep-research/hep-review when set)", reason: "Spec 11.1 lets T00 fix the path per repository convention; the existing authoring review keeps private state under $XDG_STATE_HOME/hep-research (review_lib/store.py default_private_root). The path is on local APFS, outside ~/Library/CloudStorage and ~/Library/Mobile Documents", reversible: true}
   - {when: 2026-10-29T06:40+08:00, task: T0S, decision: "Raw spike run kept byte for byte in ~/.local/state/hep-research/hep-review/spike-run1 (outside the repo); committed spike/run1-summary.json carries every raw SHA-256", reason: "packets and drop files contain private absolute paths that tools/check_packaging.py forbids in tracked files", reversible: true}
@@ -62,7 +63,7 @@ review_inputs_t01:
 blockers:
   - {when: 2026-10-29T09:30+08:00, task: G1, description: "independent G1 review: 4 blockers (B1 rollback stays verified, B2 fork/migrate drop negatives, B3 hand-written assignment bases, B4 records not bound to raw), 4 major, 8 minor; all fixed with tests first in b491ff9e; dispositions in reviews/g1-review-dispositions.md", needs: none, resolved: "2026-10-29 user accepted the G1 dispositions"}
   - {when: 2026-10-29T07:15+08:00, task: T01, description: "independent T01 review returned blocker F1 (layer 1 not byte-reproducible across processes); fixed with a multi-seed test in 3f075184", needs: none, resolved: "2026-10-29 user accepted the dispositions and asked to continue with T03 and G1"}
-next_action: "Run finished at target G1. To continue: raise target_gate to G2 and answer U1 (who holds gold and nonces); next session first checks H5 (persistence marker) and H6 (test checkpoint returned)"
+next_action: "T04: freeze the EvaluationProtocol and commit salted commitments before the first trial; then calibrate the grader, run 48 trials, score"
 ```
 
 ## Log
@@ -96,4 +97,5 @@ next_action: "Run finished at target G1. To continue: raise target_gate to G2 an
 2026-10-29 09:40 | G1 | check | full branch check: 31 pass, 0 fail, 2 host-CLI skips; 6214 tests, 0 failures | none
 2026-10-29 09:42 | stop | 4.2 | G1 review blockers -> ask the user | none
 2026-10-29 09:50 | G1 | declare | user accepted the G1 dispositions; G1 declared (experimental record prototype); run finished at target G1 | none
+2026-10-29 10:10 | U1 | answer | (b) approved oracles, full 48 trials; target_gate raised to G2 | none
 ```
