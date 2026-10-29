@@ -1,0 +1,178 @@
+{
+ "target": "G5-V",
+ "baseline_commit": "f7531d2877312c21b6b1a1d94347296f94fc0be3",
+ "candidate_commit": "81760ab91667624f6214e48d1f8cdf8e14399ad2",
+ "model": "claude-sonnet-5-5",
+ "graders": "two fresh-context headless claude-opus-5-5 sessions, grader 2 with reversed item and output order; no plugin; Read/Write only",
+ "deidentification_seed": 20261029,
+ "calibration_passed": {
+  "g5v-c1-det-en__g1": true,
+  "g5v-c1-det-en__g2": true,
+  "g5v-c2-meas-zhHant__g1": true,
+  "g5v-c2-meas-zhHant__g2": true,
+  "g5v-f1-meas-en__g1": true,
+  "g5v-f1-meas-en__g2": true,
+  "g5v-f2-theory-zhHant__g1": true,
+  "g5v-f2-theory-zhHant__g2": true,
+  "g5v-f3-det-en__g1": true,
+  "g5v-f3-det-en__g2": true
+ },
+ "task_level": {
+  "cases": 5,
+  "runs_scheduled": 30,
+  "runs_completed": 30,
+  "plugin_loaded": 30,
+  "hep_authoring_loaded": 30,
+  "first_attempt_success": "30/30 (no rerun needed)"
+ },
+ "gold_item_level": {
+  "failure_cases": {
+   "baseline": "106/108",
+   "candidate": "105/108"
+  },
+  "controls": {
+   "baseline": "72/72",
+   "candidate": "72/72"
+  }
+ },
+ "main_test_grader1": {
+  "table": {
+   "g5v-f2-theory-zhHant": {
+    "baseline": [
+     12,
+     12,
+     12
+    ],
+    "candidate": [
+     12,
+     12,
+     12
+    ]
+   },
+   "g5v-f1-meas-en": {
+    "baseline": [
+     12,
+     11,
+     11
+    ],
+    "candidate": [
+     11,
+     11,
+     11
+    ]
+   },
+   "g5v-f3-det-en": {
+    "baseline": [
+     12,
+     12,
+     12
+    ],
+    "candidate": [
+     12,
+     12,
+     12
+    ]
+   }
+  },
+  "test": {
+   "T": -1,
+   "per_case": {
+    "g5v-f1-meas-en": -1,
+    "g5v-f2-theory-zhHant": 0,
+    "g5v-f3-det-en": 0
+   },
+   "p_candidate_better": 1.0,
+   "p_baseline_better": 0.5,
+   "leave_one_out_up": {
+    "removed": "g5v-f2-theory-zhHant",
+    "remaining_T": -1,
+    "positive": false
+   },
+   "leave_one_out_down": {
+    "removed": "g5v-f1-meas-en",
+    "remaining_T": 0,
+    "negative": false
+   },
+   "n_assignments": 8000
+  }
+ },
+ "main_test_grader2": {
+  "table": {
+   "g5v-f2-theory-zhHant": {
+    "baseline": [
+     12,
+     12,
+     12
+    ],
+    "candidate": [
+     12,
+     12,
+     12
+    ]
+   },
+   "g5v-f1-meas-en": {
+    "baseline": [
+     12,
+     11,
+     11
+    ],
+    "candidate": [
+     11,
+     11,
+     11
+    ]
+   },
+   "g5v-f3-det-en": {
+    "baseline": [
+     12,
+     12,
+     12
+    ],
+    "candidate": [
+     12,
+     12,
+     12
+    ]
+   }
+  },
+  "test": {
+   "T": -1,
+   "per_case": {
+    "g5v-f1-meas-en": -1,
+    "g5v-f2-theory-zhHant": 0,
+    "g5v-f3-det-en": 0
+   },
+   "p_candidate_better": 1.0,
+   "p_baseline_better": 0.5,
+   "leave_one_out_up": {
+    "removed": "g5v-f2-theory-zhHant",
+    "remaining_T": -1,
+    "positive": false
+   },
+   "leave_one_out_down": {
+    "removed": "g5v-f1-meas-en",
+    "remaining_T": 0,
+    "negative": false
+   },
+   "n_assignments": 8000
+  }
+ },
+ "confirmed_critical_runs": {
+  "g5v-c1-det-en|base": "0/3",
+  "g5v-c1-det-en|cand": "0/3",
+  "g5v-c2-meas-zhHant|base": "0/3",
+  "g5v-c2-meas-zhHant|cand": "0/3",
+  "g5v-f1-meas-en|base": "2/3",
+  "g5v-f1-meas-en|cand": "3/3",
+  "g5v-f2-theory-zhHant|base": "3/3",
+  "g5v-f2-theory-zhHant|cand": "2/3",
+  "g5v-f3-det-en|base": "0/3",
+  "g5v-f3-det-en|cand": "0/3"
+ },
+ "decision": "no difference / inconclusive: p(candidate better)=1.0, leave-one-out remaining T=-1; no critical-failure regression (baseline had confirmed critical failures in both affected cases); no correct-control regression (controls 72/72 held on both sides, no failures listed)",
+ "disposition": "withdraw the candidate change; no document-fix part for this target (G5-F already delivered separately); claim: not shown",
+ "observation": "ceiling: the gold items were held 12/12 or 11/12 by both versions; the defect class (completed-voice reply templates for pending work) persisted in the candidate: confirmed in g5v-f1 3/3 candidate vs 2/3 baseline runs, g5v-f2 2/3 vs 3/3; graders listed these as critical failures although only one gold item (f1 g9) encodes them",
+ "grading_cost_usd": 3.7226,
+ "pilot_run_cost_usd": 2.8146,
+ "note": "per-output grades and the de-identification key are kept outside the repository (task artifacts); gold and nonces revealed after all planned runs were graded, verified 15/15 against commitments.json"
+}
