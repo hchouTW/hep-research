@@ -2508,11 +2508,8 @@ class EmulatorPinnedResponses(unittest.TestCase):
             _same_document(self, case["response"], doc, case["name"], rel=1e-4)
 
 
-# Decision A1.21: the C2UF emulator fixture (a near-singular kernel) reproduces its self-check only on its training
-# platform; elsewhere the provider refuses it, and its tests skip on that refusal alone (any other failure fails).
-SELF_CHECK_REFUSAL = "does not reproduce its self-check predictions"
-TWO_DATASET_EMULATOR_NOT_PORTABLE = ("decision A1.21: the C2UF emulator fixture is not portable off its training "
-                                     "platform (macOS); the provider refused it: ")
+# The C2UF emulator fixture is K4's retraining with the kernel condition bound 1e10 (L1, decision B1.3): portable, so
+# the A1.21 skip on a self-check refusal is gone and such a refusal fails the tests.
 
 
 @unittest.skipUnless(HAVE_NUMPY, "needs numpy and scipy")
@@ -2530,9 +2527,6 @@ class EmulatorPerModelDeclaration(unittest.TestCase):
             out = json.loads(proc.stdout)
         except ValueError:
             out = None
-        if (isinstance(out, dict) and out.get("status") == "failed"
-                and SELF_CHECK_REFUSAL in str(out.get("error"))):
-            raise unittest.SkipTest(TWO_DATASET_EMULATOR_NOT_PORTABLE + str(out["error"]))
         try:
             cls.decl = out["declaration"]
         except (TypeError, KeyError):

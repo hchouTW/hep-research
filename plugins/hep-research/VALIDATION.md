@@ -7846,3 +7846,121 @@ rule's verdict, not the fit, is what cannot be reached at USINE's 6-digit output
 414 in all, of which a first batch whose runs were cached was interrupted before writing results and resumed from the
 cache; SLIM polish 12; QUAINT-Vc0 polish 121 including an evaluation-budget stop at 110 resumed from the cache); at most
 3 USINE processes at once.
+
+## CRPROP-L1 — 2026-10-29 (environment E2)
+
+Work package L1 of the follow-up wave 8 (decision B1.3, release 0.45.0): toy fits robust at the V_A = 0 boundary
+(L1-1), and C2UF-1 re-run on the committed (A1.14) and the K4 well-conditioned emulator (L1-2). SYNTHETIC data only;
+every input ILLUSTRATIVE.
+
+**Environment field (r3 §0.3, base exception D10):** E2 (macOS arm64 workstation), Python 3.13.2 (miniconda), NumPy
+2.4.4, SciPy 1.17.1; USINE V3.5 through HEP_USINE_BIN, HEP_USINE_DATA and USINE (validation only, cap 60 runs, B1.3).
+`git rev-parse --show-toplevel` = `.claude/worktrees/crprop-l1`; branch `worktree-crprop-l1`; status clean at start;
+base f0f424da = integration HEAD (`worktree-crprop-l`), not `main`; no prerequisite work package (deps []); the
+0.44.0 release merge 31f39ee8 (K1-K4) is an ancestor of HEAD. Outputs under `$CRPROP_OUT/l1/`.
+
+### Diagnosis of the K4 toy failures (L1-1; base code, before any method was chosen)
+
+The K4 record (`$CRPROP_OUT/k4/k4-attempt/usine-emulator-family-study.json`) keeps only each failed toy's reason, so
+its first 40 SLIM toys were replayed on the same model (`1.0.0+model.9b95e7465422`, emulator provider only, no USINE
+run) with the base `propagation_fit.py` and every SurrogateFit attempt, verdict and provider refusal logged (scratch
+script; the 2% stop disabled in that script only, so that every toy is seen; `$CRPROP_OUT/l1/diag-k4/diag-base.json`).
+The same five toys fail, all in BIG's fit to a SLIM toy:
+
+| Toy | Outcome | What the log shows |
+|---|---|---|
+| 3, 5, 31, 36 | restart-cap | all 6 attempts end with least_squares status 0 (max_nfev = 100 evaluations reached), so no verdict is ever reached; the attempts stop at V_A 0.43-4.0 km/s (toy 31 with V_c on its bound 0) with -ln L equal to 1e-3 between attempts: the optimizer creeps towards V_A = 0 |
+| 10 | provider-out-of-domain | in the first attempt, one dogbox step goes from (V_A 8.34, V_c 1.24) to the box corner (V_A 104.96, V_c 9.5, the upper bound), which the DomainModel calls sparse; the refusal ends the toy |
+
+Cause: B/C depends on V_A only through V_A^2, so near V_A = 0 the residuals are r(V_A) ~ r0 + J_w V_A^2 and their
+Jacobian column 2 J_w V_A vanishes at the bound. Gauss-Newton steps then shrink V_A by about a factor two per step
+when the minimum lies at or near V_A = 0 (linear convergence), which runs out of evaluations (toys 3, 5, 31, 36; 31
+of all logged attempts ended at max_nfev), and `x_scale="jac"` turns the small column into a long step in V_A (toy 10).
+The well-conditioned emulator is a smoother GP mean (nugget 7.4e-8 x signal), which changes where the slow path
+crosses the evaluation cap, not the mechanism; the committed emulator's one restart-cap toy in C2UF is the same case.
+
+### Method (L1-1; written and committed before any C2UF-1 rerun, R9)
+
+Chosen: **fit coordinate w = p^2 for a parameter declared to enter only through its square, used for the retries of a
+toy or family-calibration fit that fails in p.** Declaration: `parameters.<name>.enters_squared: true` (allowed only on
+a linear axis whose provider domain starts at 0; refused otherwise). In `SurrogateFit` (toys and family calibration,
+unconstrained fits only):
+1. The first attempt is unchanged (coordinate p, same start, steps, optimizer and verdict).
+2. If it does not converge, or the provider refuses one of its points as out of domain, the remaining attempts
+   (`max_restarts`, unchanged) run in w = p^2 on [0, max^2]: the first from the failed attempt's point mapped to w
+   (from the fit's start when the attempt was refused), the later ones perturbed as now. The difference step in w is
+   h_w = h x max (the stated step h in p is a step of 2 (max/2) h in w at the middle of the range); no step stated:
+   unchanged (scipy's own).
+3. The verdict is the same fit_diagnostics verdict in the w coordinate: EDM <= 1e-5, positive-definite Hessian, a
+   coordinate within one step of w = 0 set on it when -ln L does not rise by more than 1e-6, and boundary_kkt there.
+   A refusal in a w attempt fails the toy (provider-out-of-domain) as before. The reported chi2 and point are in p.
+4. Unchanged: the main fits (`fit_family`), profile intervals, the posterior, the constrained profile fits of the
+   coverage toys, every fit with no declared parameter, the 2% toy-failure threshold, EDM 1e-5 and every tolerance.
+
+Justification: in w the prediction is regular at the bound (Jacobian column J_w, not 0), the bound is a linear
+constraint, Gauss-Newton converges there as on any interior coordinate, and the first derivative that boundary_kkt
+tests carries the information. The alternatives were rejected: V_A = u^2 makes the dependence u^4, worse; a restart
+seeded on the bound in p starts where the gradient in p is exactly 0, so the optimizer cannot leave it and a KKT check
+at p = 0 passes even when the data prefer p > 0 (a saddle along p, a chi2 too high, a biased delta chi2); projecting
+an out-of-domain step back into the domain mends toy 10 only and keeps the cause. Retrying in w (rather than fitting
+every toy in w) keeps every fit that converges in p bit for bit, as L1-1 requires, and the minimum found is the same
+function's minimum, so toy and observed delta chi2 stay comparable (the observed fits are `fit_family`'s, unchanged;
+EDM is invariant to leading order under a smooth reparametrization at an interior minimum).
+
+### C2UF-1 rerun plan (L1-2; pre-declared)
+
+| Item | Setting |
+|---|---|
+| Configuration | `usine_emulator_family_study.py fit` as in C2UF/K4, with `V_A_kms` declared `enters_squared` (stated in the script; nothing else changed): emulator provider, holdout error component in both covariances, families BIG and SLIM, starts and steps, response_model kind "provider", 200 toys per family, seed 20261028, alpha 0.05, the 2% toy-failure limit |
+| Emulator A (committed, A1.14) | the fixture model `1.0.0+model.0a8dc86fdf16` with C2UF's `validation.json` |
+| Emulator B (K4) | retrained in L1 by `train --max-condition 1e10` from a copy of K4's cache (the same training document); it must be byte-identical to K4's model-0 (sha256 9b95e746...), else stop; `validate` and `confirm` from the cache must reproduce K4's numbers (0.0032 and 0.0226 sigma) |
+| Pass (as C2UF) | BIG and SLIM converge with the provider; each family's calibration has at most 4 of 200 failed toys and lists its delta chi2 and toy p-value; BIG survives at alpha 0.05 |
+| If B passes | B replaces the C2UF fixtures (model, ml-artifact, record); the A1.21 skips are removed; the drift simulation (`$CRPROP_OUT/k4/scripts/drift.py`, 2 seeds x 60 trials) must give margin >= 10 |
+| If B fails | nothing is swapped; numbers and attribution recorded; PARTIAL. Nothing is tuned after a rerun |
+| USINE | expected 0 runs (all points cached); cap 60 |
+
+### Results (L1-1 checks and the C2UF-1 rerun, L1-2)
+
+L1-1 checks (code at f453828b, method committed at 98cb29e6 before any rerun; SHAs after the rebase below): `examples/propagation-fit/run.py` on
+the base f0f424da and on L1, both exit 0; of its 25 JSON outputs 22 are identical and 3 differ only in absolute plugin
+paths, `report.md` identical (`$CRPROP_OUT/l1/examples/compare.txt`). hep_statistics tests: 354 run, OK (27 skipped,
+live or optional). New `SquaredParameterRetry` tests on a SYNTHETIC stub (prediction linear in a, b and v^2, v nearly
+degenerate with b): fits failing in v converge after the v^2 retries at the exact bounded minimum (lsq_linear,
+chi2 within 1e-6 relative), fits converging in v are bit-identical with and without the declaration, a first attempt
+refused out of domain is retried, and the declaration is refused off a linear axis from 0.
+
+C2UF-1 rerun (the pre-declared plan above; records `$CRPROP_OUT/l1/emu-a114/record/` and `$CRPROP_OUT/l1/emu-k4/record/`;
+emulator B retrained in L1 byte-identical to K4's model-0, sha256 9b95e746..., holdout 0.0032 and confirmation 0.0226
+sigma reproduced from the cache, 0 USINE runs):
+
+| Item | A old (C2UF, committed) | A new (L1) | B old (K4 attempt) | B new (L1) |
+|---|---|---|---|---|
+| Model | `+model.0a8dc86fdf16` | same | `+model.9b95e7465422` | same |
+| BIG fit | converged, chi2 1.3e-8 | identical (fit_family unchanged) | converged, chi2 1.1e-8 | identical |
+| SLIM fit | converged, chi2 23.9272 | identical | converged, chi2 23.9274 | identical |
+| BIG's toys | 200, 0 failed, p 1.0 (200/200), survives | 200, 0 failed, p 1.0 (200/200), survives; 3 toys used the V_A^2 retries | 200, 0 failed, p 1.0, survives | 200, 0 failed, p 1.0 (200/200), survives; 1 retried |
+| SLIM's toys | 200, 3 failed (2 out of domain, 1 restart cap), p < 0.0151 (0/197), excluded | 200, **0 failed**, p < 0.0149 (0/200, 95% upper bound), excluded; 11 retried | **stopped at the 2% limit after 37** (5 failed: 4 restart cap, 1 out of domain) | 200, **0 failed**, p < 0.0149 (0/200), excluded; 20 retried |
+| Largest toy delta chi2 under SLIM | 14.68 | 14.68 | - | 14.68 |
+| C2UF-1 | MET | MET | NOT MET | **MET** |
+
+Toy fits that converged in V_A are bit-identical to the old records (A: 197 of BIG's and 189 of SLIM's toy rows;
+B: 199 and all 31 comparable rows). Toys that converged before only after a random restart in V_A and now went through
+the V_A^2 retries changed chi2 by at most 6e-6 relative (A) and 2e-11 (B). Every previously failed toy now converges:
+A's toys 10, 95, 111 and B's toys 3, 5, 10, 31, 36 (BIG's fits; toy delta chi2 0.003 to 2.26, far below SLIM's 23.93).
+
+Swap (allowed by B1.3 since C2UF-1 passes on B): the C2UF fixtures `usine-emulator-family-study.json`,
+`emulator-model.json` and `emulator.ml-artifact.json` are B's (the study's `train` step now defaults to
+`--max-condition 1e10` and reproduces the committed model byte for byte from the cache: `$CRPROP_OUT/l1/emu-repro/`).
+The A1.21 skips in `EmulatorPerModelDeclaration.setUpClass` and `test_live_emulator_matches_fresh_usine_runs` are
+removed, so a self-check refusal fails again. Drift simulation (`$CRPROP_OUT/k4/scripts/drift.py`, 2 seeds x 60
+trials, on the committed artifact): accepted in 120 of 120, max ln-mean deviation 3.1e-8 x sigma, margin 3217 (seed 1)
+and 3831 (seed 2) against 1e-4 x sigma, so >= 10 holds (`$CRPROP_OUT/l1/drift/`). Live check (HEP_USINE_LIVE_TEST=1):
+two fresh USINE runs, the committed emulator within 0.05 sigma in every bin.
+
+Study driver: the emulator steps now send the transport recorded in the two-dataset study (the emulator's training
+transport) instead of rebuilding it from `usine_provider.DEFAULT_TRANSPORT`, and ask for the registered USINE version,
+so they keep working when L2 makes the default transport explicit and bumps the provider version (the transport is
+identical today; checked). USINE runs (B1.3 cap 60): 2 (the live check); every other point was cached.
+
+Rebase: before the report the branch was rebased onto the integration HEAD eeb62a4e (status.json and workflow.json
+only, orchestrator files); f0f424da stays the base of the comparisons above.
