@@ -770,3 +770,11 @@ Run `PYTHONPATH=<script folder> python3 <script>`; individual limits are in the 
 8. **Compare:** `python3 archive/evidence/rename/compare.py OUT_BEFORE OUT_AFTER` maps the pre-rename test IDs to the new names with the tool's rules, then compares check statuses, failure sets and counts.
 9. **One-sided failures:** rerun any failure that appears on one side only 5 times in each copy; if all reruns pass in both, record it as flaky (RN-6).
 10. **Lock impact:** `python3 archive/evidence/rename/lockprobe.py BEFORE_TREE AFTER_TREE` (on clean trees exported with `git archive`): expect 13 `semantics_unreproducible` without a snapshot store and complete with snapshots (RN-4).
+
+## Dated note (retirement)
+
+This architecture describes the checker as of 2026-10-22 (0.24.1). Later events: Phase 0 shipped in 0.25.0; the value
+gate measured I = 0 of 28 twice; Shrink removed `model-card` and `run-lineage` in 0.28.0; `decision-retire.md`
+proposes retiring the rest, with the rules kept as review questions in hep-measurement and hep-statistics for use
+through hep-review. Terms: R0-R3 now name hep-review's assurance tiers; the releases called R1-R3 here are 0.25.0 and
+0.26.0. This note does not rewrite the sections above.

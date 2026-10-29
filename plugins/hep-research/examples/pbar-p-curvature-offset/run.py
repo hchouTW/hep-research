@@ -19,9 +19,6 @@ Chain (each step runs the plugin's tool, as a user would):
    D_i = (pbar/p)_e2 / (pbar/p)_e1 per bin, with its Poisson covariance, is fitted with the exact bin-integrated model
    D_i(delta) = int x^-g (1 + x delta)^(g-2) / int x^-g (1 - x delta)^(g-2); the injected delta is recovered
    within 3 sigma.
-Advisory (not run here): the ratio-subset/v1 analysis check of D1's validation record needs a frozen chain bundle;
-its expected state is `unverified` until a test shows how r-ratio.cancellation treats per-sign factor tables, and
-nothing here depends on it.
 
 Usage (from the plugin root): python3 examples/pbar-p-curvature-offset/run.py [--seed 20261017] [--out DIR]
 Exit 0 when every pre-declared criterion passes, 1 otherwise. Requires numpy and scipy.
@@ -156,8 +153,6 @@ def main(argv=None) -> int:
     pull = (delta_hat - DELTA_TRUE) / delta_err
     checks["fit"] = {"delta_hat": rnd(delta_hat), "delta_error": rnd(delta_err, 4), "pull": rnd(pull, 4),
                      "chi2": rnd(fit["chi2"], 5), "dof": fit["dof"], "p_value": rnd(fit["p_value"], 4)}
-    checks["advisory_ratio_subset_v1"] = ("not run: it needs a frozen chain bundle; expected unverified until a test "
-                                          "shows how r-ratio.cancellation treats per-sign factor tables")
 
     checks["delta_significance"] = rnd(delta_hat / delta_err, 4)
     passed = {

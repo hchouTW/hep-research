@@ -1,4 +1,7 @@
-# v6.3 analysis-check programme: development records
+# v6.3 analysis-check programme: development records (retired)
+
+The cross-artifact check was retired (`decision-retire.md`). These records are kept as history; none of them is an
+instruction.
 
 Design and decision records of the v6.3 programme (opt-in cross-artifact checks). These are records for maintainers,
 not instructions for the agent, and nothing in them authorizes any use: agent-run checks are advisory (HC-05).
@@ -27,6 +30,7 @@ not instructions for the agent, and nothing in them authorizes any use: agent-ru
 | `decision-value-gate.md` | DR-13 | value-gate protocol, pre-registered thresholds, the measurement (harness in the repository's `evals/cross-artifact-value-gate/`), the result and the decision (Stop) |
 | `decision-phase0.md` | Phase 0 (R1) | the Phase 0 gate record: work done, exit conditions, evidence |
 | `g21-classification.md` | Phase 0 item 8 | why tool-produced recipe fragments fail L2, and the fix options |
+| `decision-retire.md` | retirement | whether to retire the check and keep its rules as review questions |
 
 ## Decision-record convention (D12b)
 

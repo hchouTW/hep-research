@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "3.16.0"
+CONTRACTS_VERSION = "3.17.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -225,6 +225,14 @@ CONTRACTS_VERSION = "3.16.0"
 # artifact and carries no contract_version: a 3.15 declaration with a modulation block is refused by core 1.4.0 until
 # the gate is rerun (USINE's was, at usine 0.3.0). No artifact rule and no capability: every 3.15 artifact keeps its
 # outcome, and a 3.15 reader refuses the new result field (additionalProperties) instead of misreading it.
+# 3.17.0 (minor, unreleased; cross-artifact check retired, docs/dev/cross-artifact-check/decision-retire.md) removes
+# the sidecar formats read only by the retired check: analysis bundle 2.0.0 (analysis_bundle_v2.json), check context
+# (check_context.json), check report (check_report.json), semantic lock (semantic_lock.json) and operator coverage
+# (operator_coverage.json, with contracts/semantics/coverage/), and the rule suites (contracts/rules/suites/). Every
+# new or changed rule in the rule registry is retired. contracts/analysis_check.py, permit.py check-report and
+# review_measurement_spec.py --check-bundle refuse with the reason (exit 2). Existing attestations of a 2.0.0 bundle
+# still verify (attestation.py keeps its digest rule). No artifact type, vocabulary term, envelope field or capability
+# changes (measurement:correction-keys-v1 stays): every 3.16 artifact keeps its outcome.
 KNOWN_CAPABILITIES = frozenset({"core:evidence-records", "core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})

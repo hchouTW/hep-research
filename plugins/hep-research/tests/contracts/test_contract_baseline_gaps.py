@@ -63,10 +63,10 @@ def write_project(root: Path, profile_id: str, version: str, local: list[str] = 
     return path
 
 
-def incompatible_project(tmp: Path) -> Path:
+def incompatible_project(workdir: Path) -> Path:
     """A project binding the registry fixture's incompatible_version profile as a local profile."""
-    shutil.copytree(INCOMPATIBLE, tmp / "local-profiles" / "exp-a")
-    return write_project(tmp, "experiment:fixture-exp-a", "1.0.0", ["local-profiles/exp-a"])
+    shutil.copytree(INCOMPATIBLE, workdir / "local-profiles" / "exp-a")
+    return write_project(workdir, "experiment:fixture-exp-a", "1.0.0", ["local-profiles/exp-a"])
 
 
 class Gap1UnknownR4Keys(unittest.TestCase):
@@ -151,9 +151,9 @@ class Gap4CrossArtifactError(unittest.TestCase):
     migration as not_applied. Each artifact is consistent alone; only the relation is wrong."""
 
     def setUp(self):
-        tmp = tempfile.TemporaryDirectory()
-        self.addCleanup(tmp.cleanup)
-        self.root = Path(tmp.name)
+        workdir = tempfile.TemporaryDirectory()
+        self.addCleanup(workdir.cleanup)
+        self.root = Path(workdir.name)
         for name in SPEC_ARTIFACTS:
             shutil.copy(ART / name, self.root / name)
         spec = load(self.root / "measurement_spec.json")

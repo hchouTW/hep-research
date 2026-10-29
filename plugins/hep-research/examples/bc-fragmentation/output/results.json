@@ -87,6 +87,5 @@
   "pull_mean_abs_below_0p2": true,
   "pull_width_0p85_to_1p15": true,
   "fixed_subtraction_bias_measurable": true
- },
- "advisory_analysis_check": "not run: counting-chain/v1 reports unsupported until forward folding and the new catalog effects enter the suite"
+ }
 }

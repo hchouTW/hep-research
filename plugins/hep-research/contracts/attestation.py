@@ -63,7 +63,8 @@ def _bundle_digest(bundle: dict) -> str:
     """The digest of an execution bundle (core.partition.bundle) or an analysis-level bundle (contracts.analysis_bundle,
     format 1 or 2): either can be an attestation's subject."""
     from contracts.analysis_bundle import FORMAT as ANALYSIS_FORMAT, digest_of as analysis_digest_of
-    # analysis bundle 2.0.0 (v6.3, contracts/analysis_check.py) has the same digest rule as 1.0.0
+    # analysis bundle 2.0.0 (written by the retired cross-artifact check) has the same digest rule as 1.0.0; an
+    # attestation of such a bundle stays verifiable
     if bundle.get("format") in (ANALYSIS_FORMAT, "hep-research-analysis-bundle/2"):
         return analysis_digest_of(bundle)
     return digest_of(bundle)

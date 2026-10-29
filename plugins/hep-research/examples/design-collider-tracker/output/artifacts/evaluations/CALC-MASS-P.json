@@ -1,11 +1,11 @@
 {
- "contract_version": "3.16.0",
+ "contract_version": "3.17.0",
  "artifact_id": "collider-tracker-v1-CALC-MASS-P",
  "artifact_type": "design-evaluation",
  "objective": "detector system design: design-evaluation written by evaluate_design.py",
  "versions": {
   "plugin": "0.47.0",
-  "contracts": "3.16.0",
+  "contracts": "3.17.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-P.json",
-   "sha256": "e86084137eec40ffee01049cda5929245fe9c3feac50adf51fb0e80a759bd876",
+   "sha256": "8b0e1d679059845628b3484b2bdf90e2aef9b2d5c3381de93877cc59b8c2bc47",
    "artifact_type": "design-candidate",
    "artifact_id": "collider-tracker-v1-cand-P",
    "status": [
@@ -28,7 +28,7 @@
   },
   {
    "ref": "runs/CALC-MASS-P.computational-run.json",
-   "sha256": "31a07f8d5c13e34ebb98661d349ad88c61eb7733996ed5ea00a26a6806e8cf69",
+   "sha256": "17426a22410dfc1c8a091dc2b72278af7ff69de45dc1666f7bb594baca3d7ce4",
    "artifact_type": "computational-run",
    "artifact_id": "collider-tracker-v1-CALC-MASS-P-run",
    "status": [

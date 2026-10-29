@@ -83,7 +83,7 @@ def full_plan(reasons: list[str], changed: list[str] | None = None, modules: lis
 
 
 def helper_importers(rel: str, every: list[str], root: Path = ROOT) -> list[str]:
-    """Test modules whose source imports the test helper at rel (by its module name, e.g. analysis_check_cases)."""
+    """Test modules whose source imports the test helper at rel (by its module name, e.g. design_fixtures)."""
     name = PurePosixPath(rel).stem
     pattern = re.compile(rf"^\s*(?:import|from)\s+(?:[\w.]*\.)?{re.escape(name)}\b", re.M)
     out = []

@@ -8223,3 +8223,68 @@ Three follow-ups of AUTHORING-IMPROVE, requested by the maintainer after 0.47.0.
 | G7: review-talk outline in `audience-adaptation-templates.md`, which template applies, layout numbers as `context` statements | engineering: `test_adaptation.py::test_review_talk_with_a_synthesis_claim_and_layout_numbers` (a synthesis central claim passes; the slot length warns until its line is a context statement) | pass |
 | G8/P5: three Contrast-format prose examples in `skills/hep-authoring/examples/prose/` (SKILL.md 9606 -> 9739 B, quick load 23145 of 25600) | engineering: `validate_skill_example.py` on each, `test_diagrams.py::test_prose_examples_follow_the_contrast_format`; example 03 quotes real `check_adaptation.py` reports (good manifest exit 0, weak manifest exit 1: status dropped, invented average, condition dropped) | pass |
 | P5 transfer (spike, no claim): three new synthetic cases (a 2.6 sigma local excess, a review of three determinations, a review talk), 0.47.0 vs this branch, 2 runs each | live runs | no observable difference: both versions declined a consensus value and kept the preliminary label and the global significance; the examples were opened in 0 of 6 runs with them available. Kept as documentation by maintainer decision (2026-10-29); no model benefit is claimed |
+
+## RETIRE-CROSS-ARTIFACT-CHECK — 2026-10-29 (environment E2)
+
+Retirement of the cross-artifact analysis check (task file "retire the cross-artifact check" v1; decision option A,
+`docs/dev/cross-artifact-check/decision-retire.md`, maintainer choice 2026-10-29). Contracts 3.17.0 (one minor:
+sidecar formats removed); `CORE_VERSION` and the adapters are unchanged. Run record:
+`docs/dev/cross-artifact-check/retire-STATE.md` (state, test classification, report).
+
+**Environment.** E2 (macOS arm64), Python 3.13.2 in the E2 venv (`~/.venvs/hep-research-e2`); ruff 0.16.10 and mypy
+2.4.0 from the CI venv. Branch `retire-cross-artifact-check` from `3a63e986` (0.46.0), merged with `main` `a2852507`
+(PR #314). Fixtures, theory-profile artifacts and examples regenerated with the E2 venv.
+
+What changed:
+- Removed: the checker (`contracts/analysis_checks/` except `source_digest.py`), `contracts/migrate.py`, the 14 rule
+  suites, `contracts/rules/refusal_matrix.json`, the operator coverage contract, the schemas of analysis bundle 2.0.0,
+  check context, check report, semantic lock and operator coverage, `tools/rename_analysis_check_ids.py`, the two
+  checker test helpers and 12 checker-only test modules.
+- Kept under descriptive names: `contracts/source_digest.py` and ten test modules (five renamed unchanged, five split).
+  Which tests went was decided by a function-level trace of the 301 tests in the 22 checker-named modules and six
+  dependent modules on the unmodified tree; the 18 tests where the trace and the plan disagreed were settled from
+  their source (CLI through a subprocess, imports inside the test, setUpClass, checker-only helpers, skipped
+  placeholders, or rewritten in a kept module).
+- The checker's 12 rules are review questions: 9 in hep-measurement (`review-and-artifacts.md`, "Spec against
+  implementation"), 3 in hep-statistics (`combinations.md`, "Ratios of two results").
+  `tests/skills/test_review_question_tables.py` builds an obligation from each row and validates it against hep-review's
+  obligation definition and method cards (read only).
+- `contracts/analysis_check.py`, `permit.py check-report` and `review_measurement_spec.py --check-bundle/--check-root`
+  refuse with the reason (exit 2). The rule registry retires all 12 new or changed rules; 69 V-case parts became
+  not-run with the reason in `host` (4 remain passing).
+- `tools/naming_known_gaps.json` only shrinks (1,032 to 983 entries, none added): `tools/check_naming.py` compares the
+  file with `origin/main` and counts a key that moves with a renamed file as growth, so the five identifiers flagged in
+  the moved files were renamed instead (`obj` to `target` in `contracts/source_digest.py`, `tmp` to `workdir` in
+  `test_contract_baseline_gaps.py`, `ec` to `catalog_module` in `test_effect_catalog.py`); no behaviour changes.
+- Contracts bump as in CRPROP-L2: CONTRACTS_VERSION and comment, `vocab/core.json`, the two pinned tests,
+  `design_fixtures.py` rerun (`make_fixtures.py` reproduces the edited fixtures), three skill templates, six
+  theory-profile scripts (`--check` passes), 14 examples rerun; only version strings and the hashes that cover them
+  changed (diff checked after masking 64-hex hashes). The two examples that dropped their advisory fields
+  (`bc-fragmentation`, `pbar-p-curvature-offset`) differ from their previous output only by those fields.
+
+Assertions changed (none loosened):
+- `test_rule_registry`: the new-rule test now expects `registry.rule_not_implemented` for a live new rule and accepts
+  a retired one; two module names updated; the suite test removed (no suites remain).
+- `test_cutoff_transmission_m1`, `test_survival_fragmentation_d4`: the coverage-contract tests and assertions removed.
+- `test_preservation_checklist_c3`: the retired items removed; it asserts the checklist no longer teaches the check.
+- `test_pbar_p_curvature_offset`: the assertion on the removed `advisory_ratio_subset_v1` field removed.
+- `test_ci_plan`: example paths moved to `contracts/permit.py`, `test_registry_keys_and_semver.py` and
+  `design_fixtures.py` (a replacement that selects more than one module, so the tamper test still bites).
+- The split modules keep their shared tests; the rewritten ones (`test_source_digest`,
+  `test_catalog_version_and_retired_rules`) test the same shared code without the checker.
+
+Results: `tools/run_all_checks.py --part all --no-cli` on the unmodified base: 31 pass, 2 skip (host CLI), 6,298 unit
+tests, 0 failed (494 modules); after the change and the merge with `main`: 31 pass, 2 skip, 6,123 tests, 0 failed (483
+modules); no failure on one side only (the -176 tests of the retirement; PR #314 added one). Static checks, ruff on
+`core` and `contracts` and mypy pass; ruff on the changed files reports only the two pre-existing B904 in the example
+`run.py` files. hep-review: 374 files hash-identical, claims registry check `[]`; `core/protected`, `core/partition`,
+`release-manifests`, the pinned vocabularies, semantics tables and recipes, and the permit and attestation schemas are
+unchanged. GitHub CI on PR #315 passed.
+
+Cleanups: the `$comment` fields that still described the check as live (`contracts/vocab/effects.json`,
+`contracts/schemas/rule_registry.json`, `contracts/schemas/effect_catalog.json`, `contracts/naming/rules.json`) now
+say it was retired and name `contracts/source_digest.py`; no digest pins these files (checked against every stored
+raw and canonical digest outside the release manifests), and the registry, naming and catalog checks pass. Two
+timing keys of modules removed in 0.28.0 were dropped from `tools/module_timings.json`.
+
+Not verified here: no live routing run.

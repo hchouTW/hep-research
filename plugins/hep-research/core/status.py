@@ -8,7 +8,7 @@ Two vocabularies meet in a script's output and are kept apart:
   (synthetic, observed, ...). A script takes it with --status (default unvalidated) and echoes it as "status_label".
   Some older detector and measurement scripts echo the label under "status"; they are listed in
   tests/skills/test_cli_contract.py.
-The obligation states of the analysis check (satisfied, violated, not_applicable, unverified, unsupported) are a third
+The obligation states of the rule registry (satisfied, violated, not_applicable, unverified, unsupported) are a third
 vocabulary and are not mapped here.
 
 "refused" means a negative verdict (exit 1): the tool ran its checks and refuses the input or the result (a plan, a

@@ -9,7 +9,7 @@ changes the result beyond its uncertainty or breaks blinding), `needs-work` (oth
 not physics, and a human review still writes the physics judgement and may raise the verdict.
 
 Usage: python3 review_measurement_spec.py SPEC.json [--profiles-from hep-research.project.json] [--markdown]
-       [--status S] [--check-bundle BUNDLE --check-root DIR]
+       [--status S]
 Eras (M3): when the spec declares `eras` ([{id, start, end, kind, source, ...}]), four review rules run:
 era.bin_straddles_boundary (error: a period or a time-variable bin crosses an era boundary), era.correction_missing
 (warning: a correction neither determined for an era nor listed in its shared_corrections), era.correlation_undeclared
@@ -19,8 +19,8 @@ dates; values that cannot be compared are not checked. Specs without eras are re
 Coupled backgrounds (M4): when the spec declares `coupled_backgrounds` ([{background, species, treatment, source}]),
 coupled.fixed_subtraction (warning) flags one subtracted as a fixed amount: the other species is measured at the same
 time, so fit them jointly or iterate (references/backgrounds.md, "Coupled species").
---check-bundle (opt-in, experimental) adds "analysis_check": the bounded summary of contracts/analysis_check.py on a v2 analysis
-bundle (violated and unverified obligations, missing bindings, next steps); it never changes the verdict or exit code.
+--check-bundle and --check-root (the cross-artifact check's summary) were retired with the check
+(docs/dev/cross-artifact-check/decision-retire.md): giving either is a usage error (exit 2) with that reason.
 Output: JSON {"status", "verdict", "reason", "defects": [...ranked...], "unresolved": [...], "warnings": [...],
 "note"}; --markdown prints the review in the order of assets/measurement-review-template.md instead.
 Exit codes: 0 verdict acceptable-with-open-inputs; 1 verdict blocked or needs-work (a finding); 2 unreadable or
@@ -179,30 +179,18 @@ def markdown(review: dict, name: str, status: str) -> str:
     return '\n'.join(lines)
 
 
-def check_summary(bundle: Path, root: Path) -> dict:
-    """The bounded summary of the cross-artifact check on a v2 bundle (a diagnostic: it never changes the review's
-    verdict or exit code); a failure of the check is reported in the summary, not hidden."""
-    from contracts import analysis_check as ac
-    try:
-        view, diags = ac.load_subject(bundle, root)
-    except (OSError, ValueError) as exc:
-        return {'status': 'usage', 'error': str(exc)}
-    store = ac.default_snapshot_store(root)
-    return ac.summary_page(ac.evaluate(view, diags, snapshots=store if store.is_dir() else None))
-
-
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument('spec', type=Path, help='measurement-spec JSON artifact')
     ap.add_argument('--profiles-from', type=Path, dest='profiles_from', help='project config whose profiles extend the vocabulary')
     ap.add_argument('--markdown', action='store_true', help='print the review as Markdown')
     ap.add_argument('--status', choices=STATUSES, default='unvalidated', help='status label, echoed as status')
-    ap.add_argument('--check-bundle', type=Path, dest='check_bundle',
-                    help='opt-in, experimental: a v2 analysis bundle; adds the cross-artifact check summary (contracts/analysis_check.py)')
-    ap.add_argument('--check-root', type=Path, dest='check_root', help='project root of --check-bundle')
+    ap.add_argument('--check-bundle', type=Path, dest='check_bundle', help=argparse.SUPPRESS)
+    ap.add_argument('--check-root', type=Path, dest='check_root', help=argparse.SUPPRESS)
     args = ap.parse_args(argv)
-    if (args.check_bundle is None) != (args.check_root is None):
-        ap.error('--check-bundle and --check-root go together')
+    if args.check_bundle is not None or args.check_root is not None:
+        ap.error('--check-bundle and --check-root were retired with the cross-artifact check '
+                 '(docs/dev/cross-artifact-check/decision-retire.md); run the review without them')
     try:
         doc = json.loads(args.spec.read_text(encoding='utf-8'), parse_constant=_reject_constant)
         vocab = None
@@ -216,13 +204,10 @@ def main(argv=None) -> int:
     except (OSError, ValueError) as exc:
         print(f'review_measurement_spec.py: error: {exc}', file=sys.stderr)
         return 2
-    extra = {} if args.check_bundle is None else {'analysis_check': check_summary(args.check_bundle, args.check_root)}
     if args.markdown:
         print(markdown(review, doc.get('artifact_id', args.spec.name), args.status))
-        if extra:
-            print('\n## Cross-artifact check (diagnostic)\n\n```json\n' + json.dumps(extra['analysis_check'], indent=1) + '\n```')
     else:
-        print(json.dumps({'status': args.status, **review, **extra}, indent=1))
+        print(json.dumps({'status': args.status, **review}, indent=1))
     return 0 if review['verdict'] == 'acceptable-with-open-inputs' else 1
 
 

@@ -41,14 +41,13 @@ conventions (inelastic or charge-changing, targets, straight-ahead approximation
 - The material description (grammage, composition) is a second input, with its own uncertainty from the detector
   model or a beam test; a grammage scale enters exactly like a cross-section scale.
 
-## In the analysis check
+## Catalog effects and correction keys
 
 The corrections are named with the catalog effects `survival` and `fragmentation_feeddown`
-(`<plugin root>/contracts/vocab/effects.json`): survival is covered by `divide_effective_exposure` and feed-down by
-`subtract_background` in the differential-flux coverage contract. `survival_feeddown.py` writes them as recipe steps
-with the correction keys of `measurement:correction-keys-v1` (target scope `species:<name>`, the sha256 of the
-cross-section table as calibration digest, variation `nominal`, the declared stage). The check runs in shadow mode;
-these inputs are written for it, and nothing here takes its status from a check outcome.
+(`<plugin root>/contracts/vocab/effects.json`). `survival_feeddown.py` writes them as recipe steps with the correction
+keys of `measurement:correction-keys-v1` (target scope `species:<name>`, the sha256 of the cross-section table as
+calibration digest, variation `nominal`, the declared stage), so a reviewer can trace each factor to the step that
+applies it (hep-measurement's review, "Spec against implementation").
 
 ## Worked example (synthetic)
 

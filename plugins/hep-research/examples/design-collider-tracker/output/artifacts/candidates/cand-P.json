@@ -1,11 +1,11 @@
 {
- "contract_version": "3.16.0",
+ "contract_version": "3.17.0",
  "artifact_id": "collider-tracker-v1-cand-P",
  "artifact_type": "design-candidate",
  "objective": "SYNTHETIC design study (illustrative collider; not CMS or any real detector)",
  "versions": {
   "plugin": "0.47.0",
-  "contracts": "3.16.0",
+  "contracts": "3.17.0",
   "profiles": {
    "experiment:synthetic-collider": "1.0.0"
   }
