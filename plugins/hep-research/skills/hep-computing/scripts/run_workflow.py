@@ -35,8 +35,18 @@ A check step (reconstruction v12 A2 fields, defined in scripts/check_definitions
 {"check_digest", "criterion_digest", "target_artifact_digest" (SHA-256 hex), "criteria_file", "result_file" (relative
 paths: an input and an output of the step), "target_manifest" ({target logical name: staged input path}), "role"
 (closure, confirmation-holdout, confirmation-independent), "type" (threshold, performance-estimate), "samples" (the
-read list)}; the object is validated before any step runs and recorded as extension.check.
+read list)}; the object is validated before any step runs and recorded as extension.check. After the check program
+ends, its result file must bind to the run (B2, VAL-06): the check digest is the hash of a script in argv, the
+criterion digest the hash of the criteria file, the target digest the canonical digest of the staged target outputs,
+and the result file repeats the three digests with a four-valued result, a reason and samples from the read list;
+extension.check_result records the verdict, and an unbound result fails the step.
+Receipts (B2, --receipt-dir DIR): one <attempt>.receipt.json per executed step, outside the run records so that the
+records stay byte-identical: attempt, step, end status, termination, outputs (logical name, location in the work
+folder, digest), artifact digest, observed input evidence (not observable: declared inputs only, DEC-10), conditions
+resolution (not recorded: G6 unsupported), the run record's path and SHA-256, start and end times and resource usage
+(wall and CPU seconds of the step's process tree, POSIX).
 Usage: run_workflow.py WORKFLOW.json --work DIR [--created YYYY-MM-DD] [--dry-run] [--incremental] [--status LABEL]
+       [--receipt-dir DIR] [--attempt-prefix TEXT]
 Output JSON: status (ok, failed, rejected), status_label, inputs, defaults_used, order and per-step results.
 Exit codes: 0 every step ran; 1 a step failed or its termination is unconfirmed (later steps are not run); 2 bad
 input (malformed workflow, an unsafe path, a cycle, an unknown dependency, a missing input or output).
@@ -122,6 +132,47 @@ def check_problem(step: dict) -> str | None:
     if not isinstance(c["samples"], list) or not all(isinstance(x, str) for x in c["samples"]):
         return "samples is the read list (a list of names)"
     return None
+
+
+def check_binding(step: dict, work: Path, inputs: list[dict], scripts: dict, outputs: dict) -> dict:
+    """Whether a check run's result file binds to this run (B2, VAL-06; reconstruction v12.1 Control §7.2)."""
+    from check_definitions import RESULTS  # noqa: PLC0415  (sibling script)
+    c = step["check"]
+    have = {i["path"]: i["sha256"] for i in inputs}
+    problems = []
+    if c["check_digest"] not in set(scripts.values()):
+        problems.append("the check digest is not the hash of a script the run executed")
+    if have.get(c["criteria_file"]) != c["criterion_digest"]:
+        problems.append("the criterion digest is not the hash of the criteria file")
+    staged = {name: have.get(path) for name, path in c["target_manifest"].items()}
+    if canonical_digest(staged) != c["target_artifact_digest"]:
+        problems.append("the staged target outputs do not reproduce the target artifact digest")
+    try:
+        res = json.loads((work / c["result_file"]).read_text(encoding="utf-8")) if c["result_file"] in outputs else None
+    except (OSError, ValueError):
+        res = None
+    if not isinstance(res, dict):
+        return {"bound": False, "problems": problems + ["no readable result file"]}
+    for key in ("check_digest", "criterion_digest", "target_artifact_digest"):
+        if res.get(key) != c[key]:
+            problems.append(f"the result's {key} differs from the declared one")
+    if res.get("result") not in RESULTS or not isinstance(res.get("reason"), str) or not res.get("reason"):
+        problems.append("the result is not four-valued with a reason")
+    used = res.get("samples", [])
+    if not isinstance(used, list) or not set(used) <= set(c["samples"]):
+        problems.append("a sample used is not in the read list")
+    return {"bound": not problems, "problems": problems, "result": res.get("result"), "reason": res.get("reason"),
+            "samples": used if isinstance(used, list) else []}
+
+
+def usage_now() -> tuple[float, float]:
+    """(wall clock, CPU seconds of reaped children) for receipts; CPU is 0.0 where `resource` is missing."""
+    try:
+        import resource  # noqa: PLC0415  (POSIX only)
+        r = resource.getrusage(resource.RUSAGE_CHILDREN)
+        return time.monotonic(), r.ru_utime + r.ru_stime
+    except ImportError:
+        return time.monotonic(), 0.0
 
 
 def through_symlink(work: Path, rel: str) -> bool:
@@ -391,11 +442,17 @@ def main(argv=None) -> int:
     ap.add_argument("--dry-run", action="store_true", help="print the order and run nothing")
     ap.add_argument("--incremental", action="store_true",
                     help="skip a step whose previous record matches (INC-02); never when the release digest is unknown")
+    ap.add_argument("--receipt-dir", type=Path, help="write one <attempt>.receipt.json per executed step here (B2)")
+    ap.add_argument("--attempt-prefix", default="", help="prefix of the attempt id in receipts (default: none)")
     add_status_argument(ap)
     args = ap.parse_args(argv)
     given = {t.split("=")[0] for t in (sys.argv[1:] if argv is None else argv) if t.startswith("--")}
     base = {"status_label": args.status, "inputs": {"workflow": str(args.workflow), "work": str(args.work)},
             "defaults_used": [k for k in ("created", "status") if f"--{k}" not in given]}
+    if args.attempt_prefix and not safe_relative(args.attempt_prefix + "x"):
+        print(json.dumps({"status": "rejected", **base, "error": "--attempt-prefix must stay inside --receipt-dir"},
+                         indent=1))
+        return exit_code("rejected")
     try:
         wf = load(args.workflow)
         steps = {s["id"]: s for s in wf["steps"]}
@@ -472,7 +529,9 @@ def main(argv=None) -> int:
                                 "outputs": (prev or {}).get("extension", {}).get("output_hashes", {})})
                 continue
         before = {o: stat_key(work / o) for o in outs}  # BUG-01: what existed before this run
+        started, (t0, cpu0) = datetime.datetime.now(datetime.timezone.utc), usage_now()
         p = execute(cmd, work, timeout)
+        t1, cpu1 = usage_now()
         confirmed = p["termination"] == "confirmed"
         if stdout_path and confirmed:
             (work / stdout_path).write_text(p["stdout"], encoding="utf-8")
@@ -488,14 +547,41 @@ def main(argv=None) -> int:
         code = p["returncode"]
         if code == 0 and (len(outputs) != len(step.get("outputs", [])) or not confirmed):
             code = 1  # a step that claims success but did not write its outputs (or whose end is unconfirmed) failed
+        bind = check_binding(step, work, inputs, scripts, outputs) if "check" in step and confirmed and code == 0 else None
+        if bind is not None and not bind["bound"]:
+            code = 1  # an unbound check result is not a result of the declared check
         end = p["end"] if p["end"] != "success" or code == 0 else "failure"
         doc = record(wf.get("workflow", args.workflow.stem), step, rec_cmd, inputs, outputs, code, created, args.status,
                      scripts, release, digest, end=end, termination=p["termination"])
-        rec_path.write_text(json.dumps(doc, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+        if bind is not None:
+            doc["extension"]["check_result"] = bind
+        rec_bytes = (json.dumps(doc, indent=1, sort_keys=True) + "\n").encode("utf-8")
+        rec_path.write_bytes(rec_bytes)
+        if args.receipt_dir is not None:
+            attempt = f"{args.attempt_prefix}{sid}"
+            receipt = {"attempt": attempt, "step": sid, "end_status": end, "termination": p["termination"],
+                       "outputs": [{"logical": o, "location": o, "location_kind": "attempt-owned", "sha256": h}
+                                   for o, h in sorted(outputs.items())],
+                       "artifact_digest": canonical_digest(outputs),
+                       "observed_inputs": {"observable": False, "declared": inputs},
+                       "conditions_resolution": None,
+                       "environment_ref": {"run_record": f"runs/{sid}.computational-run.json",
+                                           "sha256": hashlib.sha256(rec_bytes).hexdigest()},
+                       "started": started.isoformat(timespec="seconds"),
+                       "ended": datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds"),
+                       "usage": {"wall_s": round(t1 - t0, 3), "cpu_s": round(cpu1 - cpu0, 3)},
+                       "check_result": bind}
+            rpath = args.receipt_dir / f"{attempt}.receipt.json"
+            rpath.parent.mkdir(parents=True, exist_ok=True)
+            rpath.write_text(json.dumps(receipt, indent=1, sort_keys=True)
+                                                                      + "\n", encoding="utf-8")
         stderr = p["stderr"] + (f"\n[run_workflow] output(s) {stale} existed before and were not written by this run"
                                 if stale else "")
+        if bind is not None and not bind["bound"]:
+            stderr += "\n[run_workflow] check result not bound to this run: " + "; ".join(bind["problems"])
         results.append({"id": sid, "exit_status": code, "outputs": outputs, "skipped": False, "end_status": end,
-                        "termination": p["termination"], "stderr_tail": stderr[-400:] if code else ""})
+                        "termination": p["termination"], "stderr_tail": stderr[-400:] if code else "",
+                        **({"check_result": bind} if bind is not None else {})})
         if code != 0:
             status = "failed"
             break

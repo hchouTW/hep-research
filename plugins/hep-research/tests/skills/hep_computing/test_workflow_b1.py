@@ -258,10 +258,11 @@ class CheckFields(Base):
         return {"workflow": "cf", "steps": [step("s", write("result.json", "{}"), ["result.json"],
                                                  inputs=["criteria.json", "t.txt"], check=chk)]}
 
-    def test_valid_check_is_recorded(self):
+    def test_valid_check_is_recorded(self):  # its result is not bound (no check program): B2 fails the step
         code, out = run(self.wf(self.check()), self.work)
-        self.assertEqual(code, 0, out)
-        self.assertEqual(record(self.work, "s")["extension"]["check"]["role"], "closure")
+        self.assertEqual(code, 1, out)
+        ext = record(self.work, "s")["extension"]
+        self.assertEqual((ext["check"]["role"], ext["check_result"]["bound"]), ("closure", False))
 
     def test_invalid_checks_are_refused(self):
         bad = [self.check(extra=1), self.check(role="confirmation"), self.check(check_digest="x"),

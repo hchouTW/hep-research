@@ -63,6 +63,10 @@ Determination rules:
 | M3 unattended or remote | remote submission or no one present (local metered cost alone does not make M3) | executor guarantees G1–G5: **not available**; remote work follows the existing campaign rules and manual boundary |
 
 Lacking a guarantee is reported as a weaker, stated process; a capability is never simulated by a written policy.
+Which guarantees the local runner actually provides is established by `executor_capabilities.py qualify` (fault
+injection: G1 output isolation and G2 termination pass on Linux; G3 submission reconciliation, G4 metering with
+atomic reservation, G5 persistent state and G6 conditions evidence are unsupported); `admit --mode M2` therefore
+refuses, and M2/M3 cannot be claimed.
 
 ## Trigger matrix (what to load)
 

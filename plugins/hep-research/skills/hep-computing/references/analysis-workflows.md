@@ -36,6 +36,13 @@ reproducible, partial reruns safe, and the provenance of every number checkable.
   `artifact_digest` (SHA-256 of the canonical output manifest). Output hashes are recorded only when termination is
   confirmed. Termination is observed on POSIX hosts (tested on Linux, where processes that leave the group are also
   found through an environment token); a process that leaves the group and clears its environment is not seen.
+  `--receipt-dir DIR` writes one receipt per executed step outside the work folder (attempt, end status,
+  termination, outputs with location and digest, artifact digest, declared inputs, run-record digest, times, wall and
+  CPU seconds). A check step declares its `check` identity (check, criterion and target digests, criteria and result
+  files, target manifest, role, type, read list); its result counts only when it binds to the run, otherwise the step
+  fails. `executor_capabilities.py` qualifies the runner by fault injection (G1 output isolation, G2 termination on
+  POSIX; G3–G6 unsupported) and refuses a capability whose declaration does not cite a passing, current
+  qualification.
   When the numbers will be delivered or used downstream (evidence tier T2-numeric or above), run one step per
   invocation in a fresh output directory and keep the task record of
   [research workflow control](research-workflow-control.md), which also sets the evidence tier and the completion

@@ -86,6 +86,14 @@ and position, in a follow-up); nothing already covered was restated.
   systematic), per-bin multiple-testing levels, cross-round error control against a frozen ceiling, and the freeze
   record (closed fields, append-only JSON lines with a digest chain; DEC-03 default). Tests:
   `tests/skills/hep_computing/test_check_definitions.py` (a positive and a negative case for every rule).
+- **Receipts, bound check results and executor capabilities** (reconstruction v12 stage B2; CAP-01, VAL-06):
+  `run_workflow.py --receipt-dir DIR [--attempt-prefix P]` writes a receipt per executed step (end status,
+  termination, outputs with locations and digests, artifact digest, declared inputs, run-record digest, times, wall
+  and CPU seconds); a check step's declared identity is validated (A2 fields) and its result counts only when bound to
+  the run (check program hash, criteria file, staged target, read list), otherwise the step fails. New
+  `skills/hep-computing/scripts/executor_capabilities.py`: G1-G6 qualification by fault injection (G1, G2 pass on
+  Linux; G3-G6 unsupported), declarations citing the qualification record, and admission refusing any capability
+  without a passing, current qualification. Tests: `tests/skills/hep_computing/test_executor_b2.py`.
 
 ## 0.49.1 (2026-10-30)
 

@@ -15,7 +15,7 @@
   },
   "hep-computing": {
    "references": 37,
-   "bytes": 346284,
+   "bytes": 347356,
    "uncited": 0
   },
   "hep-detector": {
@@ -1177,8 +1177,8 @@
   {
    "path": "skills/hep-computing/references/analysis-workflows.md",
    "owner": "hep-computing",
-   "bytes": 5393,
-   "lines": 69,
+   "bytes": 6090,
+   "lines": 76,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
@@ -1526,8 +1526,8 @@
   {
    "path": "skills/hep-computing/references/research-workflow-control.md",
    "owner": "hep-computing",
-   "bytes": 19694,
-   "lines": 216,
+   "bytes": 20069,
+   "lines": 220,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/references/analysis-workflows.md",
@@ -1537,7 +1537,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "96a0d312 2026-10-29"
+   "last_commit": "ce980a8e 2026-10-29"
   },
   {
    "path": "skills/hep-computing/references/risk-and-quality.md",

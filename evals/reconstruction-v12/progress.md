@@ -246,3 +246,35 @@ artifact digests, criteria file (an input), result file (an output), target mani
 input), role, type, read list), validated before any step runs (exit 2 otherwise) and recorded as `extension.check`.
 Tests: `test_workflow_b1.CheckFields` (valid recorded; seven malformed objects refused). `test_workflow_b1` +
 `test_workflow_c6`: 24 run, OK (1 skipped: snakemake not installed).
+
+## B2 — receipts and capabilities
+
+Entry: B1 and A2 complete; N2 passed S0. Contract (T2-code): scope `run_workflow.py` (receipts, check binding),
+new `executor_capabilities.py`, docs and tests; acceptance = each G's qualification test (Delivery §1.2) passes or is
+explicitly marked unsupported, and capabilities that do not pass are refused at admission; required. DEC defaults
+(pending approval): DEC-07 (local executor only), DEC-10 (declared inputs only: receipts say reads are not observable).
+
+| Guarantee | Qualification (fault injection) | Result on this host (Linux, Python 3.13) |
+|---|---|---|
+| G1 output isolation | old same-name output; exit 0 without writing; absolute, `..` and symlinked destinations; positive control | **pass** |
+| G2 termination confirmation | grandchild alive after the parent's 1 s timeout: record written, termination confirmed, end status timeout, no late write | **pass** |
+| G3 submission reconciliation | — | **unsupported** (no remote submission; stage D) |
+| G4 resource metering | — | **unsupported** (usage reported in receipts; no atomic reservation at intent; stage D) |
+| G5 persistent state | — | **unsupported** (C2 blocked: S0 N1 not passed) |
+| G6 conditions resolution evidence | — | **unsupported** (no resolved payload or IOV recorded) |
+
+Admission (`executor_capabilities.py admit`): refuses an undeclared capability, a declaration that does not cite the
+qualification record, a non-passing qualification, and a qualification of another runner version; `--mode M1` is
+admitted, `--mode M2` refused (G5). Receipts (`--receipt-dir`) carry the Delivery §1.1 fields; checks run through
+the runner and count only when bound to the run (else the step fails).
+
+Tests (`TMPDIR` on local disk): `test_executor_b2` 13 (receipts 2, binding 6, capabilities 3 + setup), with
+`test_workflow_b1` and `test_workflow_c6`: 35 run, OK (1 skipped: snakemake). Suites: `tests/skills/hep_computing`
+267 run, OK (39 skipped); `tests/skills/hep_review` 141, OK; `tests/routing` 21, OK; runner callers
+(`test_design_m2`, `test_geant4`, `test_cli_robustness`) 79, OK (6 skipped). `check_wiring.py --since <base>`: no new gap.
+
+## C1, C2 — not started (blocked)
+
+Entry conditions require N1, which did not pass S0 after three rounds (runbook 0.5.2 item 7). Neither stage is
+started; the control-layer rules (Control §1–§6) and the reference model are not written into skills or code.
+The Agent evaluation of Delivery §5.2 (C2 acceptance) is therefore not run.
