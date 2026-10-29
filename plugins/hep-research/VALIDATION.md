@@ -8169,7 +8169,15 @@ confirmed critical failures in 2/3 and 3/3 baseline runs of two pilot cases. The
 `submission-and-peer-review.md`; no exploration run read a reference file. Surfacing it in SKILL.md did not change this.
 The replay scorer's completion pattern misses this wording and matched a negated "已完成" once (scorer artefacts).
 
-Not verified here: P4 talk revisions (G5-V not delivered); P5 teaching examples (skipped, no delivered verification
+External material (spike, one run each, no claim): an AMS Collaboration proceedings, PoS(ICRC2025)104 (CC BY-NC-ND
+4.0, used verbatim for evaluation only and kept out of the repository). A 12-minute talk outline kept the
+"preliminary" label on every flux slide and traced every number; a hypothetical, labelled result update (two changed
+values) was carried to all six affected places (slide bodies, a caption, the summary, a backup table) without touching
+the unchanged joint-fit value; a consistency review found four of five known source defects (a missing "million", a
+missing decimal point, a ratio named inversely to its equation, a missing unit; missed a "position"/"positron" typo)
+plus one more (a subscript typo). Three earlier runs that loaded no plugin were discarded.
+
+Not verified here: P4 talk revisions at authoring-pilot level; P5 teaching examples (skipped, no delivered verification
 item). Limitations: developer-authored brief; same-host gold (advisory); same model family for graders and gold writer;
 gold items hit a ceiling (both versions 11-12 of 12), so the pilot had little power for this target. Records:
 `evals/research_communication/authoring-items/` (exploration, pilot protocol, commitments, revealed gold, result) and
