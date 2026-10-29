@@ -3,7 +3,21 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.49.0 (2026-10-29)
+
+Minor release; contracts 3.17.0, `CORE_VERSION` 1.4.0 and the adapters are unchanged. It removes the retired
+cross-artifact check's refusing entry points (PR #319) and ships the hep-authoring follow-ups 2 (PR #320: reply wording
+for pending work, the P4b talk-revision pilot, replay scorer 1.2.0, Geant4 tests on paths with spaces).
+
+**Before you upgrade** (details in each entry below):
+- `contracts/analysis_check.py` is gone, and `permit.py check-report` and `review_measurement_spec.py --check-bundle` /
+  `--check-root` are now ordinary usage errors (exit 2) instead of refusals naming `decision-retire.md`. Use 0.47.x to
+  reproduce old analysis bundles or check reports.
+- hep-authoring writes a referee reply, response letter or summary of changes once, in the voice that is true when it is
+  written; it no longer drafts completed-voice templates for pending work.
+
+**Known issues**: carried over from 0.48.0 (cr-propagation F1 convergence, F2/F3, the live routing run). The reply
+drafts known issue of 0.47.0 and 0.48.0 is closed (authoring pilot, VALIDATION AUTHORING-FOLLOWUPS-2).
 
 - **Replies state what is true when written** (G5): a referee reply, response letter or summary of changes gives
   completed changes in past tense with their locator and pending ones in planned voice with a `[VALUE NEEDED: ...]`
@@ -15,6 +29,9 @@ Software checks establish contract consistency only, not physical validity.
   (refusal `permit.check_report_retired`) and the hidden `review_measurement_spec.py --check-bundle` / `--check-root`
   flags are gone; `check-report` and the two flags are now ordinary usage errors (exit 2). The `context-obligations`
   CI impact group drops the stub's pattern. Reproduce old bundles and reports with 0.47.x.
+- Tests: the Geant4 partition tests quote the fixed paths in their `local_partition.py` command templates, and the
+  `batch-scheduling.md` example does the same; `check_relocation.py` no longer fails on a plugin path with spaces
+  (failing since 0.45.0).
 
 ## 0.48.0 (2026-10-29)
 

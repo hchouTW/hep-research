@@ -2,7 +2,7 @@
 
 Claude Code and Codex plugin for experimental and theoretical high-energy and astroparticle physics research.
 
-Version 0.48.0, licensed under Apache-2.0 (see [LICENSE](LICENSE)). Not endorsed by AMS or any collaboration. Example data is synthetic and labeled synthetic in file names and metadata.
+Version 0.49.0, licensed under Apache-2.0 (see [LICENSE](LICENSE)). Not endorsed by AMS or any collaboration. Example data is synthetic and labeled synthetic in file names and metadata.
 Validation status: [docs/capability-matrix.md](docs/capability-matrix.md). Test evidence: [VALIDATION.md](VALIDATION.md).
 
 ## Core capabilities
