@@ -40,7 +40,7 @@ configuration. Do not use this for:
 ```
 python3 batch_campaign.py check-config --config batch-config.json
 python3 batch_campaign.py plan     --config batch-config.json --job toys --items 100000 --chunk-size 1000 --seed 42 \
-        --cmd "$(command -v python3) $PWD/worker/toy.py --start {start} --stop {stop} --seed {seed} --out {out}"
+        --cmd "'$(command -v python3)' '$PWD/worker/toy.py' --start {start} --stop {stop} --seed {seed} --out {out}"
 python3 batch_campaign.py freeze   --config batch-config.json --worker-root ./worker   # bundle digest + approval request
 python3 batch_campaign.py submit   --config batch-config.json --pilot            # dry run: shows the job files
 python3 batch_campaign.py submit   --config batch-config.json --pilot --submit   # one chunk, to size the rest

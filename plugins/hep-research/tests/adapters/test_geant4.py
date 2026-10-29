@@ -10,6 +10,7 @@ import gzip
 import hashlib
 import json
 import os
+import shlex
 import shutil
 import stat
 import subprocess
@@ -511,8 +512,9 @@ class RunAndPartition(_Tmp):
         lp = PLUGIN / "skills" / "hep-computing" / "scripts" / "local_partition.py"
         man, state, work = self.d / "m.json", self.d / "state", self.d / "chunks"
         self.assertEqual(run(lp, "plan", "--job", "g4", "--items", 60, "--chunk-size", 25, "--seed", 3, "--out", man)[0], 0)
-        cmd = (f"{sys.executable} -B {asset('geant4_run.py')} chunk --spec {sp} --exe {self.fake_exe()} --build-record "
-               f"{rec} --work {work} --start {{start}} --stop {{stop}} --seed {{seed}} --id {{id}} --out {{out}}")
+        q = shlex.quote  # the template is shlex-split, so fixed paths with spaces must be quoted
+        cmd = (f"{q(sys.executable)} -B {q(str(asset('geant4_run.py')))} chunk --spec {q(str(sp))} --exe {q(str(self.fake_exe()))} "
+               f"--build-record {q(str(rec))} --work {q(str(work))} --start {{start}} --stop {{stop}} --seed {{seed}} --id {{id}} --out {{out}}")
         code, out = run(lp, "run", "--manifest", man, "--state", state, "--cmd", cmd)
         self.assertEqual(code, 0, out)
         code, merged = run(lp, "merge", "--manifest", man, "--state", state, "--rule", "csv=concat", "--rule",
@@ -695,8 +697,9 @@ class BoundaryArtifacts(_Tmp):
         lp = PLUGIN / "skills" / "hep-computing" / "scripts" / "local_partition.py"
         man, state, work = self.d / "m.json", self.d / "state", self.d / "chunks"
         self.assertEqual(run(lp, "plan", "--job", "g4", "--items", 40, "--chunk-size", 10, "--seed", 3, "--out", man)[0], 0)
-        cmd = (f"{sys.executable} -B {asset('geant4_run.py')} chunk --spec {sp} --exe {self.fake_exe()} --build-record "
-               f"{rec} --work {work} --start {{start}} --stop {{stop}} --seed {{seed}} --id {{id}} --out {{out}}")
+        q = shlex.quote  # the template is shlex-split, so fixed paths with spaces must be quoted
+        cmd = (f"{q(sys.executable)} -B {q(str(asset('geant4_run.py')))} chunk --spec {q(str(sp))} --exe {q(str(self.fake_exe()))} "
+               f"--build-record {q(str(rec))} --work {q(str(work))} --start {{start}} --stop {{stop}} --seed {{seed}} --id {{id}} --out {{out}}")
         self.assertEqual(run(lp, "run", "--manifest", man, "--state", state, "--cmd", cmd)[0], 0)
         code, merged = run(lp, "merge", "--manifest", man, "--state", state, "--rule", "csv=concat", "--rule",
                            "records=concat", "--rule", "summaries=concat")
