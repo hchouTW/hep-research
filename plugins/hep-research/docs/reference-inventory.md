@@ -142,7 +142,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `revision-impact-tracking.md` | hep-authoring | 4.4 | yes | 14 | - | c888be49 2026-10-29 |
 | `scientific-style.md` | hep-authoring | 11.8 | no | 14 | hep-citations, hep-statistics | 5f4489ee 2026-10-29 |
 | `statistics-and-ml-papers.md` | hep-authoring | 14.2 | yes | 10 | hep-citations | ebb58136 2026-10-19 |
-| `submission-and-peer-review.md` | hep-authoring | 16.7 | no | 12 | - | 039781da 2026-10-29 |
+| `submission-and-peer-review.md` | hep-authoring | 16.7 | no | 12 | - | ebb58136 2026-10-19 |
 | `supplementary-material-planning.md` | hep-authoring | 2.1 | no | 1 | - | ebb58136 2026-10-19 |
 | `thesis-by-publication-assembly.md` | hep-authoring | 4.0 | no | 2 | - | ebb58136 2026-10-19 |
 | `tikz-patterns.md` | hep-authoring | 5.9 | no | 8 | - | ebb58136 2026-10-19 |

@@ -839,7 +839,7 @@
     "tests/skills/hep_authoring/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "039781da 2026-10-29"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/supplementary-material-planning.md",

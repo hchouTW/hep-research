@@ -3483,6 +3483,31 @@ Not done in this stage: the independent
 new-problem run by an agent that did not take part (C1.10, section A.8), the `review.py` Markdown review, the release
 manifest. The adequacy table is unchanged; search values remain F1 optimistic bounds and decide nothing.
 
+## 0.47.0 release check (2026-10-29, E2 and the CI lock)
+
+Release commit `3673aa66` on `release/0.47.0`, based on main `a2852507` (PR #314 merged). It ships the hep-authoring
+improvement task (VALIDATION AUTHORING-IMPROVE): the hep-review handoff and ownership row, sci-fix HEDGE-DONE-WHEN
+(S3), the compact-ledger completion criteria, the bilingual routing row and the frozen authoring-pilot tools in the
+repository's `evals/`.
+
+Contracts 3.16.0, `CORE_VERSION` 1.4.0 and the adapters are unchanged. The sci-fix ledger gains HEDGE-DONE-WHEN
+(documentation fix, S3, two located external sources). The ams02-research companion needs no change (it requires
+hep-research >= 0.11.0). No change touches `core/` or `contracts/`, so the lint pins were not rerun.
+
+What changed in the release commit:
+- version 0.47.0 in both manifests, `pyproject.toml`, the README, two assets, the six theory-profile scripts,
+  `usine_translate.py` and `examples/bc-usine-reproduction/run.py`;
+- CHANGELOG `Unreleased` is now `0.47.0`;
+- the theory-profile artifacts and 15 examples were regenerated with E2. Only version strings and the hashes that
+  cover them change: 194 files, 486 lines each way, and no numeric line.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 4`, E2 (Python 3.13.2, NumPy 2.5.3) | 31 pass, 0 fail, 2 skipped (CLI host checks); 6299 tests in 494 modules, 6131 pass, 0 failures, 168 skipped |
+| Same with the CI lock (no torch) | 31 pass, 0 fail, 2 skipped; 6299 tests, 6036 pass, 0 failures, 263 skipped |
+| `check_relocation.py` | only the 2 known geant4 path-with-spaces failures (`test_geant4` partition merges), identical to 0.46.0 |
+| draft PR #316 Linux CI on `3673aa66` | every required job passes (22 pass, 2 skipped) |
+
 ## 0.46.0 release check (2026-10-29, E2 and the CI lock)
 
 Release commit `c1435a41` on `release/0.46.0`, based on main `36101c6f` (PR #312 merged). It ships gate G3 of the
