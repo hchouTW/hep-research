@@ -48,7 +48,9 @@ Write one JSON file once, with your file-write tool, to `{drop}`:
    "findings": [{{"id": "F1", "claim": "...", "element": "...", "evidence": "...", "severity": "major|minor",
                  "locator": {{"material_id": "...", "lines": "12-14 or a JSON pointer such as /stated_results/x"}}}}]}}],
  "suggested_obligations": ["..."]}}
-Then, if you can, report the file's SHA-256 in your reply as `SHA256: <hex>`.
+Then compute the file's SHA-256 with a separate command after the write (for example `shasum -a 256 <path>`) and
+report it in your reply as `SHA256: <hex>`. If you could not compute it, reply `SHA256: unavailable`;
+never report a value you did not compute.
 """
 
 

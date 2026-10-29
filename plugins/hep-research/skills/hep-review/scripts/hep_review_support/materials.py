@@ -195,8 +195,11 @@ def ingest_submission(drop_root: Path | str, rel: str, declared_digest: str | No
                       max_bytes: int = DROP_MAX_BYTES) -> dict:
     """Read a reviewer's drop file by bytes with the section 9.2 procedure; never retyped (spec 12.4). The fidelity is
     digest-bound when a declared SHA-256 matches, mismatch when it does not (both copies kept), else file-transfer.
-    This shows the stored bytes are the submitted bytes, not that nobody else read or wrote the drop file."""
+    This shows the stored bytes are the submitted bytes, not that nobody else read or wrote the drop file. A reviewer
+    that reports `unavailable` (or nothing) has declared no digest."""
     r = read_controlled(drop_root, rel, max_bytes=max_bytes)
+    if declared_digest is not None and declared_digest.strip().lower() in ("", "unavailable"):
+        declared_digest = None
     if declared_digest is None:
         fidelity = "file-transfer"
     elif declared_digest.strip().lower() == r.sha256:

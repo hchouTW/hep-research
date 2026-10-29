@@ -168,6 +168,13 @@ class Submissions(unittest.TestCase):
         self.assertEqual(bad["raw"], self.body)  # both copies kept: the bytes and the declared digest
         self.assertEqual(bad["declared_digest"], "0" * 64)
 
+    def test_declared_unavailable_is_no_declaration(self):
+        # g2x: a reviewer that cannot hash says so; that is file-transfer, not a mismatch
+        for said in ("unavailable", " UNAVAILABLE ", ""):
+            s = M.ingest_submission(self.drops, "asg-1/submission.json", declared_digest=said)
+            self.assertEqual(s["submission_fidelity"], "file-transfer", said)
+            self.assertIsNone(s["declared_digest"])
+
     def test_n67_drop_path_replaced_by_symlink_or_fifo_or_oversize(self):
         outside = Path(self.temp_dir.name) / "outside.json"
         outside.write_bytes(b"{}")

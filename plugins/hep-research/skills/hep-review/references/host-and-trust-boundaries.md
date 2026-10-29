@@ -39,6 +39,10 @@ provide it, so those uses are not supported here.
 
 These prove the stored bytes are the submitted bytes, not that nobody else read or wrote the drop file.
 
+Pass on the reviewer's reported digest exactly as reported. A reviewer that could not hash reports `SHA256:
+unavailable`, which declares nothing (file-transfer). A reported value that differs is a mismatch even when the
+review is right: in the g2x pilot one reviewer reported a digest it never computed, and the record was quarantined.
+
 ## Packets and dispatch
 
 A packet names the obligations, the snapshot files to read, the drop path, the outcome vocabulary and the submission

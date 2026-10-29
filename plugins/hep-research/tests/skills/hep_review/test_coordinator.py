@@ -229,6 +229,14 @@ class PacketsAndDispatch(Base):
         self.assertNotIn("rubric:", text.lower())
         self.assertIn("must not look for, any other evaluation", text)
 
+    def test_packet_asks_for_a_computed_digest_or_unavailable(self):
+        # g2x: one reviewer reported a SHA-256 it never computed; the packet must ask for a separate hashing
+        # command and an explicit "unavailable" instead of a guess
+        text = K.packet_text({"assignment_id": "a", "obligations": [], "materials": [], "drop": "d/s.json"})
+        self.assertIn("separate command", text)
+        self.assertIn("SHA256: unavailable", text)
+        self.assertIn("never report a value you did not compute", text)
+
 
 class Revisions(Base):
     def test_a09_new_critical_dependency_becomes_a_revision_within_authority(self):
