@@ -72,6 +72,18 @@ a5 admission rejects).
 
 Also: Core §0.5 and Control §8 counts and lists.
 
+## N1 — round 6 (open; spec copy not changed)
+
+Context `s0-reconstruction-v12-r6`, R2, N1 violated; reproduced by the coordinator with `s0/round6-attack.py` and
+`s0/round6-attack2.py`.
+
+| Id | Severity | Finding | Reproduction | Possible directions (not adopted) |
+|---|---|---|---|---|
+| N1-R6-F1 | major | `reproduced` (round-5 F1) looks only at attested producers: an agent can make a draw unattested (under-declared cost), see its output, and later reproduce its digest with a cosmetic change; it binds and is published at T3C (only `failed_draws` = 1 shows it). Inconsistent with the revert rule, which counts every attempt | attack A | define “reproduced” against the first attempt of the step whose terminal fact output the digest, whatever its end state or attestation |
+| N1-R6-F2 | major | Strictness is judged only against the current effective contract: after an approved removal of a step, the agent re-adds the same step name with an earlier program, or with a pin to an old output, and the contract takes effect, re-binding an artifact already seen; the added-step row does not require pin none | attack B | apply the revert check to every earlier intent of the step name regardless of E; an added step has no pin; or re-adding a step name that existed before needs a human |
+| N1-R6-F3 | minor | Control §6 still lists “adding a step with confirmation not required”; the field is on the deliverable now | — | name “a deliverable that becomes T3C with either confirmation field no” |
+| N1-R6-F4 | minor | The model's freeze items 3–4 are stricter than the text (an exposure counts only for a check attempt that produced a result on the artifact; item 4 compares any other target, not another artifact of the same step); conservative but unreported | attack2 C | state the model's reading in §4.4, or align the model, and list the difference in §8 |
+
 ## N3 — statistics
 
 | Finding | Sev. | Change | Where |

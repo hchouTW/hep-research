@@ -115,6 +115,7 @@ Materials: Parts I–IV saved as `v12-en-{0-core,1-methods,2-control,3-delivery}
 | 3 | `s0-reconstruction-v12-r3` (N1, N3, N5) | spec copy after round 2 | R2 | violated (2 major) → **does not pass** (limit reached) | — | violated (0 major, 4 minor) → **passes** with fixes | — | violated (0 major, 2 minor) → **passes** with fixes |
 | 4 (user-approved, beyond the runbook limit) | `s0-reconstruction-v12-r4` (N1) | spec copy after round 3 (incl. the two unreviewed round-3 N1 fixes) | R2 | violated (3 major, 2 minor) → **does not pass** | — | — | — | — |
 | 5 (user-approved) | `s0-reconstruction-v12-r5` (N1) | spec copy after the user-approved round-4 fixes | R2 | violated (2 major, 1 minor) → **does not pass** | — | — | — | — |
+| 6 (user-approved; agreed as the last before the C1 decision) | `s0-reconstruction-v12-r6` (N1) | spec copy after the user-approved round-5 fixes | R2 | violated (2 major, 2 minor) → **does not pass** | — | — | — | — |
 
 **S0 result: N2, N3, N4, N5 pass; N1 does not pass after three rounds.** Stage gates (runbook 0.5.1): A1 (N2–N5) open;
 B1 (N2) open; A2 (N2, N3) open; B2 (N2) open; **C1 and C2 (N1) blocked**. Process note: in round 1 the N2 reviewer
@@ -164,6 +165,18 @@ N1 still does not pass.** Report `s0/round5-report.txt`, checkpoint `s0/round5-c
 script `s0/round5-attack.py`, re-run by the coordinator against the committed model (byte-identical): all five attacks
 reproduce. Both majors are gaps in the round-4 fixes themselves (revert detected by identity rather than by digest;
 check inputs not required to be ok). The spec copy is not changed; C1 and C2 stay blocked.
+
+### Round 5 fixes and round 6 (N1 only), 2026-10-29
+
+The user approved both proposed directions for the round-5 majors; they and the minor were made in the spec copy
+(`de3b6e11`; reference model 89/89 scenarios, 42/42 mutations; scenario t24 made stricter on purpose; mapping in
+`spec/revision-log.md`). Sixth N1 round at the user's request, agreed as the last before deciding on C1: context
+`s0-reconstruction-v12-r6`, same procedure, submission digest-bound (`12853525…`). Achieved R2; **N1 violated, 2 major
+and 2 minor; N1 still does not pass.** Report `s0/round6-report.txt`, checkpoint `s0/round6-checkpoint.txt`, export
+`s0/s0-reconstruction-v12-r6.export.json` (`verify-export`: checkpoint `matches`, internal consistency ok); attack
+scripts `s0/round6-attack.py`, `s0/round6-attack2.py` (run as `python3 -I <script> <model.py>`), re-run by the
+coordinator against the committed model (byte-identical): both majors and the F4 discrepancy reproduce. The spec copy
+is not changed; C1 and C2 stay blocked pending the user's decision.
 
 ## A1 — methods and main-Agent resumption (documentation and skill wiring)
 
