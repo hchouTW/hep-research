@@ -8138,3 +8138,39 @@ it is `dragon2_translate.spec_from_transport`.
 | ruff 0.16.10 and mypy 2.4.0 on `core/` and `contracts/` | clean |
 
 USINE runs: 4 of 10 (the gate, 2; the live C2UF emulator test after the rebase, 2). DRAGON2 runs: 0. Not run: ALL-3 (deferred to the wave run, A1.5), a live routing run.
+
+## AUTHORING-IMPROVE — 2026-10-29 (macOS, Claude Code 2.1.312, claude-sonnet-5-5; branch `hep-authoring-improve-20261029` from `3a63e986`)
+
+hep-authoring improvement task (runbook v10). Fast lane: the abstract row of `paper-structure.md` points to the venue
+guide for venue limits (G2); a hep-review handoff row in SKILL.md, scope sentences in `independent-review.md` and
+`reviewer-style-assessment.md`, and a hep-review row in the routing-contract ownership table (G10); the revision Done
+when covers the compact change ledger, and a recorded hep-review review of a changed result is carried over by
+hep-review (G5, fast-lane part); a Resources row routes translating or condensing a paper to the existing bilingual
+rules (G9, fast-lane part). One verification-lane target (G5-V: reply wording for pending work) was frozen, run and
+withdrawn: no difference. SKILL.md 9171 -> 9606 B (quick load 22888 of 25600). Spend: USD 14.79 (routing 5.81 over
+86 case runs; exploration and handoff 1.84 over 28 runs; gold writer 0.61; pilot 2.81 over 30 runs; grading 3.72
+over 10 sessions).
+
+| Item | Evidence | Result |
+|---|---|---|
+| G2 venue limits in the venue guide only | engineering (`test_paper_blueprints.py`, L2) | pass |
+| G10 review handoff and ownership row | engineering (`check_ownership.py` 23 topics, no problems; `check_routing_static.py` ok); live routing of the 50 hep-authoring/hep-review cases on `f90882b8`: 45/50 strict, the 5 new AR boundary cases pass | pass; the 5 failures predate the change (rerun on both sides, descriptions identical): `ir-direct-1` wrong skill 7/7, `lit-bound-referee-1` no skill 6/7, `d-cc-spectrum-1` base 2/6 vs 0/7, `lit-bound-related-1` 3/6 vs 4/7, `lit-turns-1` turn 2 flaky on both sides |
+| G11 short writing requests | live routing: `aw-short-1`, `aw-short-2` pass; exploration 0/11 runs with no skill loaded | gap not kept; description unchanged |
+| G5-F compact-ledger Done when | engineering (`test_revision_impact.py`, `test_reference_links.py`) | pass |
+| G9-F bilingual routing row | engineering (L2) | pass |
+| G1 hedging Done when | — | postponed: S3 needs two located external sources; Hyland (1996, Applied Linguistics 17:433) and Hyland (1998) could not be read in full text |
+| G5-V reply wording for pending work | authoring-pilot (two calibrated fresh-context claude-opus-5-5 graders; 3 failure cases, 2 correct controls, 12 gold items each, 3 runs per version) | no difference: failure-case items 106/108 baseline vs 105/108 candidate, p(candidate better) = 1.0, leave-one-out remaining T = -1; controls 72/72 both; no critical or control regression; withdrawn (revert `039781da`) |
+| G3, G4, G6 (verification lane) | spike: 4 baseline runs each of the drafting, method, discussion and talk cases | not reproduced (0/4 each); not selected |
+| Adaptation path (G7) | engineering: golden record, talk outline and manifest through `check_adaptation.py` | exit 0 after a recorded semantic review; slide numbers and the slot length are reported as unmapped numbers (warnings); a review talk from several sources cannot be expressed (one record and one central claim per manifest); contract unchanged |
+
+Observation (not a claim): in the exploration and the pilot, reply drafts for pending work are often written as
+completed-voice templates with placeholders ("We have repeated ... [X]"), although the model says the work is not done;
+confirmed critical failures in 2/3 and 3/3 baseline runs of two pilot cases. The rule exists in
+`submission-and-peer-review.md`; no exploration run read a reference file. Surfacing it in SKILL.md did not change this.
+The replay scorer's completion pattern misses this wording and matched a negated "已完成" once (scorer artefacts).
+
+Not verified here: G1; P4 talk revisions (G5-V not delivered); P5 teaching examples (skipped, no delivered verification
+item). Limitations: developer-authored brief; same-host gold (advisory); same model family for graders and gold writer;
+gold items hit a ceiling (both versions 11-12 of 12), so the pilot had little power for this target. Records:
+`evals/research_communication/authoring-items/` (exploration, pilot protocol, commitments, revealed gold, result) and
+`evals/routing/results/ar-*.json` in the repository's top-level `evals/`.
