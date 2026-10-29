@@ -1,6 +1,6 @@
 # Decision record: retire the cross-artifact check
 
-Status: **proposed; awaiting the maintainer's decision** (see Decision). Labels: **Confirmed**, **Inferred**,
+Status: **decided 2026-10-29: option A (retire)** (see Decision). Labels: **Confirmed**, **Inferred**,
 **Unresolved**.
 
 ## Analysis question
@@ -46,4 +46,8 @@ hchouTW.
 
 ## Decision
 
-*(The maintainer fills in this section: option chosen, date, conditions.)*
+**2026-10-29, maintainer choice in the session ("A. Retire").** Option A is adopted as written: the checker is
+removed, its rules are kept as review questions in hep-measurement and hep-statistics, and its entry points refuse
+with the reason. Conditions: hep-review stays unchanged; the last release with the check is 0.47.x; the release that
+ships this bumps `CONTRACTS_VERSION` and records the changed assertions in `VALIDATION.md`; the refusing stub, the two
+hidden `review_measurement_spec.py` flags and `permit.py check-report` are removed in the following minor release.

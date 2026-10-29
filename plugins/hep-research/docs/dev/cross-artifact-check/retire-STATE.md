@@ -63,6 +63,8 @@ stops: []
 2026-10-29 | T8 | hep-review hashes identical, claims check [], protected areas unchanged | none
 2026-10-29 | T9 | six grouped commits, then this state commit | 84b4318e..15fd76da
 2026-10-29 | follow-up | merged origin/main a2852507 (PR #314, clean); CHANGELOG 0.45.x -> 0.47.x; checks rerun | see git log
+2026-10-29 | follow-up | full check on the merged tree: 31 pass, 2 skip, 6123 tests, 0 failed | none
+2026-10-29 | follow-up | maintainer chose option A in the session; Decision recorded in decision-retire.md | see git log
 ```
 
 ## Report

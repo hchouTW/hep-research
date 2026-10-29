@@ -39,8 +39,8 @@ matrix and a regression suite for every published pilot and evaluation score.
 parallel full run and passes on its own and in CI. hep-review reviewers share the session scratch folder, so
 "no other evaluations seen" stays advisory.
 
-- **Cross-artifact check retired** (`docs/dev/cross-artifact-check/decision-retire.md`, pending the maintainer's
-  decision). Removed: `contracts/analysis_checks/` (the rules, context, lock and outcome modules),
+- **Cross-artifact check retired** (`docs/dev/cross-artifact-check/decision-retire.md`, decided
+  2026-10-29). Removed: `contracts/analysis_checks/` (the rules, context, lock and outcome modules),
   `contracts/migrate.py`, the `counting-chain` and `ratio-subset` suites, the operator coverage contract, the schemas
   of the v2 bundle, check context, check report, semantic lock and operator coverage, `permit.py check-report`'s
   implementation and `tools/rename_analysis_check_ids.py`. `contracts/analysis_check.py`, `permit.py check-report` and
