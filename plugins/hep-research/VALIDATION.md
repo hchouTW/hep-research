@@ -7921,7 +7921,7 @@ EDM is invariant to leading order under a smooth reparametrization at an interio
 
 ### Results (L1-1 checks and the C2UF-1 rerun, L1-2)
 
-L1-1 checks (code at 30a5205c, method committed at c8685c5d before any rerun): `examples/propagation-fit/run.py` on
+L1-1 checks (code at f453828b, method committed at 98cb29e6 before any rerun; SHAs after the rebase below): `examples/propagation-fit/run.py` on
 the base f0f424da and on L1, both exit 0; of its 25 JSON outputs 22 are identical and 3 differ only in absolute plugin
 paths, `report.md` identical (`$CRPROP_OUT/l1/examples/compare.txt`). hep_statistics tests: 354 run, OK (27 skipped,
 live or optional). New `SquaredParameterRetry` tests on a SYNTHETIC stub (prediction linear in a, b and v^2, v nearly
@@ -7961,3 +7961,6 @@ Study driver: the emulator steps now send the transport recorded in the two-data
 transport) instead of rebuilding it from `usine_provider.DEFAULT_TRANSPORT`, and ask for the registered USINE version,
 so they keep working when L2 makes the default transport explicit and bumps the provider version (the transport is
 identical today; checked). USINE runs (B1.3 cap 60): 2 (the live check); every other point was cached.
+
+Rebase: before the report the branch was rebased onto the integration HEAD eeb62a4e (status.json and workflow.json
+only, orchestrator files); f0f424da stays the base of the comparisons above.
