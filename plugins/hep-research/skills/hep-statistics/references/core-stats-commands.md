@@ -488,6 +488,14 @@ python3 skills/hep-statistics/scripts/propagation_fit.py fit --input config.json
   More than 2% failed toys stop the study. Families: delta chi2 to the best family, its p-value from toys generated
   at that family's fit (no Wilks). Posterior: random-walk Metropolis, at most 2e5 steps per chain, `bayes_diagnostics`;
   no interval when R-hat > 1.01 or ESS < 400 (`unvalidated`).
+- **A parameter that enters only through its square** (B/C depends on `V_A_kms` through V_A^2): declare
+  `"parameters": {"V_A_kms": {"start": 60, "step": 0.3, "enters_squared": true}}` (linear axis, provider domain from
+  0). Near p = 0 the Jacobian column in p vanishes, so toy fits creep towards the bound until the evaluation cap
+  (`restart-cap`) or take a long step out of an emulator's domain. A toy or family-calibration fit that fails in p
+  (not converged, or its first attempt refused as out of domain) spends its remaining restarts in w = p^2 on
+  [0, max^2], from the failed point, with difference step h x max; the verdict is unchanged (EDM <= 1e-5,
+  `boundary_kkt` at w = 0). Fits that converge in p, the main fits, profile intervals and the posterior are unchanged;
+  toy rows record `square_retry`. Diagnosis and justification: `VALIDATION.md` section CRPROP-L1.
 - **Covariance alternatives** (`covariance_alternatives`: a `build_covariance.py` source model with `lengths`) are
   fitted one by one and reported side by side, never combined.
 

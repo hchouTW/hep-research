@@ -18,6 +18,7 @@ Steps (each writes into --work; USINE runs go through the provider cache, so a r
   fit       propagation_fit with the emulator provider; the recorded study to --record
 --max-condition is passed to the trainer: 0 (default) reproduces the committed A1.14 model (trained before the bound);
 K4 (decision B1.1) retrained with 1e10, which bounds each kernel's condition number (VALIDATION CRPROP-K4).
+The fit step declares V_A_kms enters_squared (L1, decision B1.3): a toy fit that fails in V_A retries in V_A^2.
 Usage:
   python3 usine_emulator_family_study.py STEP --registry REGISTRY.json --cache-dir DIR --work DIR [--round 0]
       [--record FILE] [--family-toys 200]
@@ -380,6 +381,8 @@ def step_fit(args) -> int:
             {"name": "emulator", "kind": "systematic", "correlation": "uncorrelated",
              "values": [float(v) for v in val["error_component"][ds["name"]]]})
     cfg["provider"] = {"id": "emulator", "version": version}
+    # L1 (VALIDATION CRPROP-L1): B/C depends on V_A only through V_A^2; toy fits that fail in V_A retry in V_A^2
+    cfg["parameters"]["V_A_kms"]["enters_squared"] = True
     cfg["fixed"] = {}
     cfg.pop("provider_requests", None)
     cfg["provider_requests"] = "per-point"

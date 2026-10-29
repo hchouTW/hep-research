@@ -656,6 +656,118 @@ class NoiseAwareConvergence(unittest.TestCase):
             self.assertLess(abs(v["edm"] / (20 * self.SIGMA_F) - 1.0), 0.3)
 
 
+class _SquaredStub:
+    """A SYNTHETIC 15-bin prediction 1 + a E + b exp(-3E) + 0.004 v^2 exp(-2.7E) (v enters only through v^2, nearly
+    degenerate with b, as V_A with the other transport parameters), a response model refusing v above refuse_above,
+    and the model interface SurrogateFit uses. Linear in (a, b, v^2), so the bounded minimum is exact (lsq_linear)."""
+
+    E = None
+    SIGMA = 0.01
+
+    def __init__(self, squared, refuse_above=None):
+        import numpy as np
+        _SquaredStub.E = np.linspace(0.0, 1.0, 15)
+        self.names, self.lo, self.hi = ["a", "b", "v"], np.array([0.0, 0.0, 0.0]), np.array([2.0, 1.0, 10.0])
+        self.refuse_above, self.n_nu = refuse_above, 0
+        self.params = {"a": {"step": 1e-3}, "b": {"step": 1e-3}, "v": {"step": 0.03, "enters_squared": squared}}
+
+    @classmethod
+    def pred(cls, a, b, v):
+        import numpy as np
+        return 1.0 + a * cls.E + b * np.exp(-3 * cls.E) + 0.004 * v * v * np.exp(-2.7 * cls.E)
+
+    def components(self, t):
+        import propagation_fit as pf
+        if self.refuse_above is not None and t[2] > self.refuse_above:
+            raise pf.FitRefused("out-of-domain", f"v = {t[2]}")
+        return {"d": self.pred(*t)[None, :]}
+
+    def chol_with_error(self):
+        import numpy as np
+        return {"d": np.eye(len(self.E)) * self.SIGMA}
+
+    def steps(self, names):
+        return [self.params[n]["step"] for n in names]
+
+    def residual_at(self, comps, nu, ys, aux, chol):
+        import numpy as np
+        return np.linalg.solve(chol["d"], ys["d"] - comps["d"].sum(axis=0))
+
+    def fit(self, toy, truth_v=0.0):
+        import numpy as np
+        import propagation_fit as pf
+        rng = np.random.default_rng(toy)
+        y = self.pred(0.7, 0.3, truth_v) + self.SIGMA * rng.normal(size=len(self.E))
+        sf = pf.SurrogateFit(self, self, self.names, ["linear"] * 3, {},
+                             (self.names, [(0.0, 2.0), (0.0, 1.0), (0.0, 10.0)]))
+        out = sf.fit({"d": y}, [], np.array([0.7, 0.1, 6.0]), {"max_restarts": 5, "max_iterations": 100,
+                                                                "seed": toy})
+        return out, sf.last_square, y
+
+
+@unittest.skipUnless(HAVE, "needs numpy and scipy")
+class SquaredParameterRetry(unittest.TestCase):
+    """L1-1 (VALIDATION.md CRPROP-L1): a toy fit that fails in a parameter declared enters_squared is retried in
+    w = p^2; it then reaches the exact bounded minimum; a fit that converges in p is unchanged; an out-of-domain
+    refusal in the first attempt is retried; the declaration is refused off a linear axis starting at 0."""
+
+    TOYS = 20
+
+    def test_fits_failing_in_p_reach_the_exact_minimum_in_the_square(self):
+        import numpy as np
+        from scipy.optimize import lsq_linear
+        E = np.linspace(0.0, 1.0, 15)
+        A = np.stack([E, np.exp(-3 * E), 0.004 * np.exp(-2.7 * E)], axis=1) / _SquaredStub.SIGMA
+        failed_in_p, retried = 0, 0
+        for toy in range(self.TOYS):
+            (_, _, ok0, _), sq0, _ = _SquaredStub(False).fit(toy)
+            (chi2, z, ok, reason), sq, y = _SquaredStub(True).fit(toy)
+            self.assertFalse(sq0)
+            failed_in_p += not ok0
+            self.assertTrue(ok, (toy, reason))
+            self.assertEqual(sq, not ok0, toy)
+            retried += sq
+            exact = lsq_linear(A, (y - 1.0) / _SquaredStub.SIGMA, bounds=([0, 0, 0], [2, 1, 100]), tol=1e-14)
+            self.assertLessEqual(abs(chi2 - 2 * exact.cost), 1e-6 * 2 * exact.cost, toy)
+        self.assertGreater(failed_in_p, 0)          # the mechanism of the K4 toys: p fails near the bound
+        self.assertEqual(retried, failed_in_p)
+
+    def test_fits_converging_in_p_keep_their_numbers(self):
+        same = 0
+        for truth_v in (0.0, 6.0):
+            for toy in range(self.TOYS):
+                plain, _, _ = _SquaredStub(False).fit(toy, truth_v)
+                if not plain[2]:
+                    continue
+                declared, sq, _ = _SquaredStub(True).fit(toy, truth_v)
+                self.assertFalse(sq)
+                self.assertEqual((plain[0], tuple(plain[1]), plain[3]), (declared[0], tuple(declared[1]), declared[3]))
+                same += 1
+        self.assertGreater(same, 0)
+
+    def test_an_out_of_domain_first_attempt_is_retried(self):
+        rescued = 0
+        for toy in range(self.TOYS):
+            plain, _, _ = _SquaredStub(False, refuse_above=6.5).fit(toy)
+            declared, sq, _ = _SquaredStub(True, refuse_above=6.5).fit(toy)
+            if plain[3] == "provider-out-of-domain" and declared[2]:
+                self.assertTrue(sq)
+                rescued += 1
+        self.assertGreater(rescued, 0)
+
+    def test_declaration_needs_a_linear_axis_from_zero(self):
+        import propagation_fit as pf
+        domain = {"V_A_kms": {"min": 0.0, "max": 105.0}, "D0_cm2_s": {"min": 1e28, "max": 1e29},
+                  "V_c_kms": {"min": 1.0, "max": 9.0}}
+        ok = pf.Model({"parameters": {"V_A_kms": {"start": 60.0, "enters_squared": True}}}, [], None, domain)
+        self.assertTrue(ok.params["V_A_kms"]["enters_squared"])
+        for name, spec in (("D0_cm2_s", {"start": 3e28, "scale": "log", "enters_squared": True}),
+                           ("V_c_kms", {"start": 2.0, "enters_squared": True}),
+                           ("V_A_kms", {"start": 60.0, "enters_squared": "yes"})):
+            with self.subTest(name=name), self.assertRaises(pf.FitInputError):
+                pf.Model({"parameters": {name: spec}}, [], None, domain)
+
+
 def _usine_record():
     return json.loads(USINE_RECORD.read_text(encoding="utf-8"))
 
