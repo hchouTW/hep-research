@@ -1,7 +1,7 @@
 {
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "$id": "hep_review_supply.json",
- "title": "hep-review supplied material (schema 0.1.0, experimental)",
+ "title": "hep-review supplied material (schema 1.0.0; 0.x data experimental)",
  "description": "Material supplied to an already dispatched reviewer, bound to its assignment, with its source and reason (spec 12.3). When it contains another evaluation, the projection marks no-other-evaluations-seen unmet for that assignment (case A30).",
  "type": "object",
  "$ref": "hep_review_definitions.json#/$defs/header",

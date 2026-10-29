@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""hep-review CLI: the coordinator's commands for a recorded, tiered review (experimental, protocol hep-review/0).
+"""hep-review CLI: the coordinator's commands for a recorded, tiered review (protocol hep-review/1).
 
 Commands (every one prints JSON with a "status" key; exit 0 ok, 1 negative verdict, 2 bad input, 3 incomplete):
   r0 --bundle FILE                          R0 consultation from {"intent", "plan", "answers"}; no store is created
@@ -68,7 +68,7 @@ def save_state(path: str, st: C.CoordinatorState) -> None:
 
 
 def parser() -> argparse.ArgumentParser:
-    p = argparse.ArgumentParser(description="hep-review coordinator CLI (experimental).",
+    p = argparse.ArgumentParser(description="hep-review coordinator CLI (protocol hep-review/1).",
                                 epilog="Every command prints JSON with a status key.")
     p.add_argument("--store", help="store directory (default: the private state directory)")
     sub = p.add_subparsers(dest="command", required=True)

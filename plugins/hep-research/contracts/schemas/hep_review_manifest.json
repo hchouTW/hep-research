@@ -1,7 +1,7 @@
 {
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "$id": "hep_review_manifest.json",
- "title": "hep-review material manifest (schema 0.1.0, experimental)",
+ "title": "hep-review material manifest (schema 1.0.0; 0.x data experimental)",
  "description": "Material ids bound to raw refs of the bytes actually saved (spec 9.3-9.4). An unknown source identity is not upgraded to verified by hashing.",
  "type": "object",
  "$ref": "hep_review_definitions.json#/$defs/header",

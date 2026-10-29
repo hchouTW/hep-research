@@ -1,4 +1,4 @@
-"""hep-review kernel (pure; protocol hep-review/0, schema 0.x, experimental): strict JSON and the metadata encoding.
+"""hep-review kernel (pure; protocol hep-review/1, schema 1.0.0; hep-review/0 data experimental): strict JSON and the metadata encoding.
 
 Specification: docs/dev/hep-review/ (task file and hep-review spec v9). This module is pure: no file, database,
 network or clock access, and no import of a skill. Callers pass bytes and already-loaded objects.
@@ -26,8 +26,12 @@ import re
 from collections.abc import Callable
 from typing import Any
 
-PROTOCOL = "hep-review/0"
-SCHEMA_VERSION = "0.1.0"
+PROTOCOL = "hep-review/1"
+SCHEMA_VERSION = "1.0.0"
+# Frozen after G2 (spec 5.3). The 0.x line stays readable under its own validator version and is labelled
+# experimental wherever it appears; each protocol admits only its own schema major version.
+EXPERIMENTAL_PROTOCOLS = frozenset({"hep-review/0"})
+SCHEMA_MAJOR = {"hep-review/1": "1.", "hep-review/0": "0."}
 METADATA_PROFILE = "hep-review-metadata/1"
 RAW_PROFILE = "raw-bytes/1"
 
@@ -300,8 +304,13 @@ def check_object(committed: dict) -> list[dict]:
     for f in ("protocol", "schema_version", "id", "context_id"):
         if not isinstance(committed.get(f), str) or not committed.get(f):
             errs.append(_err("object.header", f"missing header field {f}", f"$.{f}"))
-    if committed.get("protocol") not in (None, PROTOCOL):
-        errs.append(_err("object.protocol", f"protocol must be {PROTOCOL}", "$.protocol"))
+    protocol = committed.get("protocol")
+    if protocol is not None and protocol not in SCHEMA_MAJOR:
+        errs.append(_err("object.protocol", f"protocol must be one of {sorted(SCHEMA_MAJOR)}", "$.protocol"))
+    elif protocol is not None and isinstance(committed.get("schema_version"), str) \
+            and not committed["schema_version"].startswith(SCHEMA_MAJOR[protocol]):
+        errs.append(_err("object.schema_version", f"{protocol} admits schema {SCHEMA_MAJOR[protocol]}x only",
+                         "$.schema_version"))
     for key in ("digest", "self_digest", "object_digest", "own_digest"):
         if key in committed:
             errs.append(_err("object.embedded_digest", "an object never carries its own digest", f"$.{key}"))
@@ -340,8 +349,9 @@ def rule_check_plan(committed: dict, lookup: dict) -> list[dict]:
 
 # Validator versions: each maps to the object rules it applies. Historical checks use the rule set of their version
 # (old versions are kept as repository tags; this table holds the current line).
-LATEST_VALIDATOR = "0.1.0"
+LATEST_VALIDATOR = "1.0.0"
 VALIDATOR_RULES: dict[str, tuple[Callable[[dict, dict], list[dict]], ...]] = {
+    "1.0.0": (rule_check_object, rule_check_plan),
     "0.1.0": (rule_check_object, rule_check_plan)}
 
 
@@ -1095,7 +1105,9 @@ def project(validated: dict, validator_version: str, *, rules: dict | None = Non
     base = {"protocol": PROTOCOL, "schema_version": SCHEMA_VERSION, "kind": "hep-review-layer1",
             "context_id": b["context_id"], "segment_id": b["segment_id"], "as_of_seq": b["as_of_seq"],
             "as_of_commit_digest": b["as_of_commit_digest"], "validator_version": validator_version,
-            "record_integrity": validated["record_integrity"]}
+            "record_integrity": validated["record_integrity"],
+            "experimental": any(o.get("protocol") in EXPERIMENTAL_PROTOCOLS for c in b["commits"]
+                                for o in c["objects"])}
     if validated["input_error"]:
         return base | {"input_error": validated["input_error"], "summary_eligible": False, "achieved_tier": None}
     ctx = _Ctx(validated)
@@ -1441,6 +1453,8 @@ def render_report(layer1: bytes, attestation: dict, *, bundle: dict, validator_v
     lines = [f"# {presentation.get('title', 'hep-review report')}",
              f"as of seq {p['as_of_seq']} ({p['as_of_commit_digest']}), validator {p['validator_version']}",
              f"layer 1 digest {raw_digest(expected)}"]
+    if p.get("experimental"):
+        lines.append("experimental: this context holds hep-review/0 (schema 0.x) records (spec 5.3)")
     if p.get("input_error"):
         return "\n".join(lines + [f"input-error: {p['input_error']['message']}"]) + "\n"
     lines.append(f"target {p['target_tier']}, achieved {p['achieved_tier']}")

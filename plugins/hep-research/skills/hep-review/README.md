@@ -1,8 +1,8 @@
 # hep-review
 
 Recorded, tiered review of physics work: review obligations, assurance tiers R0-R3, an append-only commit log with
-checkpoints, and a two-layer report computed from the records. **Experimental** (protocol hep-review/0, schema 0.x):
-it can produce R0-R2 review records; no review-capability pilot has been scored.
+checkpoints, and a two-layer report computed from the records. Protocol hep-review/1, schema 1.0.0 (0.x records are
+labelled experimental). Review capability is pilot-checked only for single-page statistical analyses at R2.
 
 ## What is in this folder
 

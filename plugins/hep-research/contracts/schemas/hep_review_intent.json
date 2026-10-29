@@ -1,7 +1,7 @@
 {
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "$id": "hep_review_intent.json",
- "title": "hep-review intent (schema 0.1.0, experimental)",
+ "title": "hep-review intent (schema 1.0.0; 0.x data experimental)",
  "description": "The user's purpose with minimum requirements, target_tier and authorization source (spec 5.1, 6.1). target_tier is lowered only by a new intent revision with an authorized change-request (T07, not implemented).",
  "type": "object",
  "$ref": "hep_review_definitions.json#/$defs/header",

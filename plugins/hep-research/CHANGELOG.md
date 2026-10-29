@@ -5,18 +5,21 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
-- **New skill hep-review (experimental, protocol hep-review/0, schema 0.1.0).** Recorded, tiered review of physics
+- **New skill hep-review (protocol hep-review/1, schema 1.0.0; 0.x records labelled experimental).** Recorded, tiered review of physics
   work: review obligations, assurance tiers R0-R3 computed from the records (the R2 floor per obligation), an
   append-only SQLite commit log in the private state directory with head continuity and checkpoints, export/import,
   file submissions read by bytes, and a two-layer report (a byte-reproducible projection plus an attestation) that
   never claims more than its achieved tier. Kernel `contracts/hep_review.py` and schemas
-  `contracts/schemas/hep_review_*.json`; skill `skills/hep-review/` (`review.py` CLI). Gate G1 (record prototype)
-  only: it can produce R0-R2 records; no review-capability pilot has been scored and R3 is not reachable on the
+  `contracts/schemas/hep_review_*.json`; skill `skills/hep-review/` (`review.py` CLI). R3 is not reachable on the
   measured host. Skill names now nine (`contracts/skill_names.py`); manuscript review stays with hep-authoring and
   measurement-design review with hep-measurement. Development records: `docs/dev/hep-review/`.
   New pages: `workflow-and-tiers.md` (entry reference), `evidence-and-adjudication.md`, `host-and-trust-boundaries.md`,
   `storage-continuity-and-export.md`, `evaluation-and-claims.md`, and the domain cards `domains/index.md`,
   `domains/statistics.md`, `domains/computing.md`; new script `review.py`.
+  Gate G2 passed on three narrow pilots (G2, a held-out follow-up, and a Codex-authored multi-defect suite with
+  cross-family grading: 0 content misses in 141 trials; `docs/dev/hep-review/g2*-report.md`), after which the schema
+  was frozen at 1.0.0 (validator `1.0.0`; 0.1.0 kept for historical data). The packet now asks reviewers for a
+  separately computed SHA-256 or `SHA256: unavailable` (a fabricated digest quarantined a correct review in g2x).
 
 ## 0.43.0 (2026-10-29)
 

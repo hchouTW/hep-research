@@ -1,7 +1,7 @@
 {
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "$id": "hep_review_record.json",
- "title": "hep-review review-record (schema 0.1.0, experimental)",
+ "title": "hep-review review-record (schema 1.0.0; 0.x data experimental)",
  "description": "Never overwritten; responses are new records (spec 6.2). Item ids are unique within the context; dependencies, bindings and disposition are checked by contracts/hep_review.py validate, never stored.",
  "type": "object",
  "$ref": "hep_review_definitions.json#/$defs/header",

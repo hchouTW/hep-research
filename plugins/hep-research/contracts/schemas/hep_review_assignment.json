@@ -1,7 +1,7 @@
 {
  "$schema": "https://json-schema.org/draft/2020-12/schema",
  "$id": "hep_review_assignment.json",
- "title": "hep-review assignment (schema 0.1.0, experimental)",
+ "title": "hep-review assignment (schema 1.0.0; 0.x data experimental)",
  "description": "Binds an actor and role to a plan revision's assignment spec, with the independence conditions and their basis as observed by the host (spec 4.3, 12.3). Different actor names do not prove separation.",
  "type": "object",
  "$ref": "hep_review_definitions.json#/$defs/header",
