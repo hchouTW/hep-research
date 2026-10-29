@@ -71,3 +71,4 @@ Scripts in `<plugin root>/skills/hep-authoring/scripts/` (read `--help` first; w
 | Measurement design or selection behind a claim | hep-measurement | request in `unresolved_inputs` |
 | Detector performance numbers | hep-detector | `response` |
 | Code or scripts behind a figure or table | hep-computing | `computational-run` |
+| A recorded review of the analysis, fit, derivation or code behind a claim | hep-review | request in `unresolved_inputs` |
