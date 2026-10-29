@@ -7978,9 +7978,12 @@ artifacts and examples regenerated with the E2 venv (`~/.venvs/hep-research-e2`)
 HEP_USINE_BIN, HEP_USINE_DATA and USINE, with the host ROOT_INCLUDE_PATH. `git rev-parse --show-toplevel` =
 `.claude/worktrees/crprop-l2`; branch `worktree-crprop-l2`; status clean at start; base f0f424da = integration HEAD
 `worktree-crprop-l` (not `main`; decision D10), which contains the 0.44.0 release merge 31f39ee8; L2 has no
-prerequisite work package (workflow.json deps empty; requires env-usine, present). DRAGON2 not run.
-
-Acceptance entries (frozen in `docs/dev/cr-propagation/acceptance.json`): L2-1, L2-2, L2-3 and ALL-*.
+prerequisite work package (workflow.json deps empty; requires env-usine, present). DRAGON2 not run. Rework round 1
+(verifier): the emulator's normalised transport comparison (below). Rebased onto integration 009f8752 (L1 merged; card
+widened in eeb62a4e) with `git rebase`, so the new base is 009f8752; conflicts only in CHANGELOG and VALIDATION (L1's
+entries kept first). After the rebase the new tests run on L1's swapped C2UF fixture (the K4 model), and L1's tests
+pass under the usine 0.3.0 registry: L1's driver reads the registered version, its records keep 0.2.0, and no test
+replays an L1 cache expecting hits.
 
 What changed:
 - `contracts/schemas/cr_provider.json`: `modulation.conformance.result` requires `provider_version` (the provider
@@ -8066,18 +8069,18 @@ it is `dragon2_translate.spec_from_transport`.
 | ALL-1 | pass | this section |
 | ALL-2 | pass | `workflow_check.py acceptance` exit 0 |
 | ALL-3 | deferred to the wave run (A1.5) | |
-| ALL-4 | pass | `check_naming.py`, `workflow_check.py gaps --base f0f424da` |
-| ALL-5 | pass | `check_layering.py`; `workflow_check.py diff --work-package L2 --base f0f424da` ok against the card widened on integration (eeb62a4e: the contracts-bump set, `core/__init__.py`, `tests/skills/hep_statistics/**`); round 0 had listed those 353 paths as outside the card |
+| ALL-4 | pass | `check_naming.py`, `workflow_check.py gaps --base 009f8752` |
+| ALL-5 | pass | `check_layering.py`; `workflow_check.py diff --work-package L2 --base 009f8752` ok (after the rebase) against the card widened on integration (eeb62a4e: the contracts-bump set, `core/__init__.py`, `tests/skills/hep_statistics/**`); round 0 had listed those 353 paths as outside the card |
 | ALL-6 | pass | `check_packaging.py` |
 | ALL-7 | pass | worker report |
 
 | Check | Result |
 |---|---|
-| Impacted tests (`rule_registry.py impact`: 35 modules, plus `test_provider`, `test_adapter_declarations`, `test_gate_verdict_snapshot`, `test_provider_conformance_mixin`) | 758 tests OK (17 skipped; rework round 1) |
+| Impacted tests (`rule_registry.py impact`: 35 modules, plus `test_provider`, `test_adapter_declarations`, `test_gate_verdict_snapshot`, `test_provider_conformance_mixin`) | after the rebase onto 009f8752: 719 tests OK (17 skipped) in the E2 venv and in `~/.venvs/hep-research-ci` alike (impact set for the new base plus test_cr_propagation, test_propagation_fit with SquaredParameterRetry and UsineEmulatorFamilies, test_provider_registry, test_provider, test_gate_verdict_snapshot, test_adapter_declarations, test_provider_conformance_mixin); live `test_live_emulator_matches_fresh_usine_runs` (HEP_USINE_LIVE_TEST=1, 2 fresh USINE runs against the C2UF emulator through the 0.3.0 registry): OK |
 | `tests/examples` | 176 tests OK (22 skipped) |
 | theory-profile tests (9 profiles) | all pass |
 | `run_all_checks.py --part static --jobs 4` | exit 0 |
 | `check_naming.py`, `check_wiring.py --since f0f424da`, `check_layering.py`, `check_packaging.py`, `workflow_check.py gaps/acceptance` | pass / ok |
 | ruff 0.16.10 and mypy 2.4.0 on `core/` and `contracts/` | clean |
 
-USINE runs: 2 of 10 (the gate). DRAGON2 runs: 0. Not run: ALL-3 (deferred to the wave run, A1.5), a live routing run.
+USINE runs: 4 of 10 (the gate, 2; the live C2UF emulator test after the rebase, 2). DRAGON2 runs: 0. Not run: ALL-3 (deferred to the wave run, A1.5), a live routing run.
