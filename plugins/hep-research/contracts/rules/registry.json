@@ -3187,7 +3187,6 @@
    "id": "context-obligations",
    "change": "context, roots, obligations, declarations",
    "patterns": [
-    "contracts/analysis_check.py",
     "contracts/resolve.py"
    ],
    "checks": [

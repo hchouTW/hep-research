@@ -19,8 +19,6 @@ dates; values that cannot be compared are not checked. Specs without eras are re
 Coupled backgrounds (M4): when the spec declares `coupled_backgrounds` ([{background, species, treatment, source}]),
 coupled.fixed_subtraction (warning) flags one subtracted as a fixed amount: the other species is measured at the same
 time, so fit them jointly or iterate (references/backgrounds.md, "Coupled species").
---check-bundle and --check-root (the cross-artifact check's summary) were retired with the check
-(docs/dev/cross-artifact-check/decision-retire.md): giving either is a usage error (exit 2) with that reason.
 Output: JSON {"status", "verdict", "reason", "defects": [...ranked...], "unresolved": [...], "warnings": [...],
 "note"}; --markdown prints the review in the order of assets/measurement-review-template.md instead.
 Exit codes: 0 verdict acceptable-with-open-inputs; 1 verdict blocked or needs-work (a finding); 2 unreadable or
@@ -185,12 +183,7 @@ def main(argv=None) -> int:
     ap.add_argument('--profiles-from', type=Path, dest='profiles_from', help='project config whose profiles extend the vocabulary')
     ap.add_argument('--markdown', action='store_true', help='print the review as Markdown')
     ap.add_argument('--status', choices=STATUSES, default='unvalidated', help='status label, echoed as status')
-    ap.add_argument('--check-bundle', type=Path, dest='check_bundle', help=argparse.SUPPRESS)
-    ap.add_argument('--check-root', type=Path, dest='check_root', help=argparse.SUPPRESS)
     args = ap.parse_args(argv)
-    if args.check_bundle is not None or args.check_root is not None:
-        ap.error('--check-bundle and --check-root were retired with the cross-artifact check '
-                 '(docs/dev/cross-artifact-check/decision-retire.md); run the review without them')
     try:
         doc = json.loads(args.spec.read_text(encoding='utf-8'), parse_constant=_reject_constant)
         vocab = None
