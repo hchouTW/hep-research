@@ -4,7 +4,7 @@
  "artifact_type": "design-spec",
  "objective": "SYNTHETIC design study (journey J15, minimal spectrometer; names no experiment)",
  "versions": {
-  "plugin": "0.45.0",
+  "plugin": "0.46.0",
   "contracts": "3.16.0"
  },
  "bindings": {

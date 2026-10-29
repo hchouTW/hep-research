@@ -3483,6 +3483,34 @@ Not done in this stage: the independent
 new-problem run by an agent that did not take part (C1.10, section A.8), the `review.py` Markdown review, the release
 manifest. The adequacy table is unchanged; search values remain F1 optimistic bounds and decide nothing.
 
+## 0.46.0 release check (2026-10-29, E2 and the CI lock)
+
+Release commit `c1435a41` on `release/0.46.0`, based on main `36101c6f` (PR #312 merged). It ships gate G3 of the
+hep-review skill (spec v9 T08):
+- the held-out Codex-authored evaluation (`docs/dev/hep-review/g3-report.md`);
+- the capability-claim lifecycle, with fingerprints taken at the measured commit;
+- the support matrix and the regression suite.
+
+Contracts 3.16.0, `CORE_VERSION` 1.4.0 and the adapters are unchanged. There is no sci-fix ledger entry. The
+ams02-research companion needs no change (it requires hep-research >= 0.11.0).
+
+What changed in the release commit:
+- version 0.46.0 in both manifests, `pyproject.toml`, the README, two assets, the six theory-profile scripts,
+  `usine_translate.py` and `examples/bc-usine-reproduction/run.py`;
+- CHANGELOG `Unreleased` is now `0.46.0`;
+- the theory-profile artifacts and 15 examples were regenerated with E2. Only version strings and the hashes that
+  cover them change: 194 files, 486 lines each way, and no numeric line.
+
+ruff 0.16.10 and mypy 2.4.0 (the CI pins) pass on `core/` and `contracts/`. The draft PR #313 ran Linux CI on the
+release commit first, and every required job passed.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 4`, E2 (Python 3.13.2, NumPy 2.5.3) | 31 pass, 0 fail, 2 skipped (CLI host checks); 6298 tests in 494 modules, 6130 pass, 0 failures, 168 skipped |
+| Same with the CI lock (no torch) | 31 pass, 0 fail, 2 skipped; 6298 tests, 6035 pass, 0 failures, 263 skipped |
+| `check_relocation.py` | only the 2 known geant4 path-with-spaces failures (`test_geant4` partition merges), identical to 0.45.0 |
+| PR #313 Linux CI on `c1435a41` | every required job passes |
+
 ## 0.45.0 release check (2026-10-29, E2 and the CI lock)
 
 Release commit `c7105355` on the follow-up integration branch, based on main `31f39ee8`. It ships the cr-propagation
