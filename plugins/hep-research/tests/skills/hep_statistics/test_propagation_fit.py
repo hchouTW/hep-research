@@ -235,7 +235,10 @@ class PropagationFit(unittest.TestCase):
                                               "tolerance": 1e-3,
                                               "result": {"status": "passed", "max_relative_deviation": 1e-5,
                                                          "nodes_compared": 10, "isotopes": ["11B", "12C"],
-                                                         "tool": "SYNTHETIC"}}}
+                                                         "tool": "SYNTHETIC",
+                                                         "provider_version": next(
+                                                             i["version"] for i in reg["providers"]
+                                                             if i["declaration"]["id"] == PROVIDER)}}}
         with self.assertRaises(pf.FitInputError) as ctx:   # phi neither fitted nor fixed
             pf.run(cfg, self.work, reg, cache_dir=self.cache)
         self.assertIn("phi_p1_gv", str(ctx.exception))
@@ -788,6 +791,9 @@ class UsineProvider(unittest.TestCase):
         proc = subprocess.run([sys.executable, str(PLUGIN / "tools" / "provider_registry.py"), "--write",
                                str(cls.registry)], capture_output=True, text=True, timeout=300)
         assert proc.returncode == 0, proc.stdout + proc.stderr
+        # the record keeps the provider version that produced it (usine 0.2.0); a live call names the registered one
+        cls.version = next(i["version"] for i in json.loads(cls.registry.read_text())["providers"]
+                           if i["declaration"]["id"] == "usine")
 
     @classmethod
     def tearDownClass(cls):
@@ -797,6 +803,7 @@ class UsineProvider(unittest.TestCase):
         cfg = copy.deepcopy(self.doc["config"])
         for key in ("family_toys", "intervals"):
             cfg.pop(key, None)
+        cfg["provider"] = dict(cfg["provider"], version=self.version)
         cfg.update(extra)
         return cfg
 
@@ -858,7 +865,7 @@ class UsineProvider(unittest.TestCase):
         from core.provider.runner import ProviderRunner
         obs = {"id": "B/C", "axis": "ekn", "unit": "GeV/n", "bins": [[1.0, 2.0]]}
         point = dict(self.doc["truth"], V_A_kms=200.0)
-        req = {"protocol": "cr-provider/1", "provider": "usine", "provider_version": "0.2.0",
+        req = {"protocol": "cr-provider/1", "provider": "usine", "provider_version": self.version,
                "transport": self.doc["config"]["transport"], "points": [point], "observables": [obs],
                "want": ["lis"], "seed": None}
         env = {k: os.environ.pop(k) for k in ("HEP_USINE_BIN", "HEP_USINE_DATA") if k in os.environ}

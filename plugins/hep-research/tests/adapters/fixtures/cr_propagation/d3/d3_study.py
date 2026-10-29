@@ -16,7 +16,7 @@ DRAGON2's data (production table, inelastic values) are written into the run fol
 numbers computed from runs are committed (DRAGON2's data files are not; USINE is GPL-2.0).
 
 Runs (names):
-  DRAGON2   D3_harmonized_v1   harmonized-v1 (set A) translated by dragon2_run.spec_from_transport
+  DRAGON2   D3_harmonized_v1   harmonized-v1 (set A) translated by dragon2_translate.spec_from_transport
             D3_l2_dragon2      harmonized-v1-isotopic with DRAGON2's shipped production table (Evoli 2019,
                                cumulative) and source abundances: level 2
   USINE     m-<config>         matched level 1 (D3-3) of each configuration

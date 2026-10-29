@@ -16,6 +16,24 @@ Software checks establish contract consistency only, not physical validity.
   are removed: a self-check refusal of that fixture fails the tests again (0.43.0/0.44.0 known issue closed). The study
   driver sends the emulator its recorded training transport and asks for the registered USINE version. Diagnosis of
   the K4 toy failures, the method and the numbers: VALIDATION.md CRPROP-L1.
+- crprop l2: a modulation conformance result holds only for the provider version it was obtained at (decision B1.3;
+  contracts 3.16.0 with the gating constant `validate.CONFORMANCE_VERSION_FROM`, `CORE_VERSION` 1.4.0). The
+  cr-provider/1 declaration's `modulation.conformance.result` gains the required `provider_version`;
+  `tools/provider_registry.py --conformance` writes it, and core/provider (`check_declaration`, the registry) refuses a
+  declaration whose result names another version than the provider's, with the instruction to rerun the gate. Adapter
+  `cr-propagation` 0.3.0; providers `usine` and `dragon2` take their own version 0.3.0 (they inherited the adapter's
+  0.2.0; both changed behaviour since: F1 point parameters and K2 modulation for usine, K3 source refusals for
+  dragon2); `emulator` stays 1.0.0 (the committed E2 model's answers are pinned unchanged). USINE's gate was rerun at
+  0.3.0 (2 USINE runs; passed, 4.28e-5 over 390 nodes, identical to the 0.2.0 result). Cache-key migration: the point
+  hash includes the provider version, so values cached under 0.2.0 are never served for 0.3.0; the committed C2U,
+  C2UF, F1, E1 and E2 records keep 0.2.0 as the record of what produced them (a test recomputes every committed C2U
+  and C2UF input hash under 0.2.0 and finds none under 0.3.0), and the F1 example and the C2U study driver now ask
+  the registered version. USINE's `DEFAULT_TRANSPORT` and B1's `d1-*` specs state
+  `sources.injection[].spectrum_variable` (`kinetic_energy_per_nucleon`, the translator's default): the rendered USINE
+  inputs are identical; the emulator models keep their recorded training transport (implicit form) byte for byte, and
+  the emulator compares a request's block after dropping a spectrum_variable equal to that default, so it accepts
+  both forms (each keeps its own cache key) and still refuses any other variable. Doc slips: the d3_study.py docstring names
+  `dragon2_translate.spec_from_transport`; VALIDATION erratum for the K3 block count and the K1 base.
 
 ## 0.44.0 (2026-10-29)
 

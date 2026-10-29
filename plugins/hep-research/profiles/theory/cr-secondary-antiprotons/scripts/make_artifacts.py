@@ -24,7 +24,7 @@ PROFILE = HERE.parent
 sys.path.insert(0, str(HERE))
 
 PROFILE_ID, PROFILE_VERSION = "theory:cr-secondary-antiprotons", "0.1.0"
-PLUGIN_VERSION, CONTRACTS = "0.44.0", "3.15.0"
+PLUGIN_VERSION, CONTRACTS = "0.44.0", "3.16.0"
 CREATED = "2026-10-15"
 MODEL_FAMILY = "cosmic-ray-secondary-source-term"
 SPEC_PATH = PROFILE / "derivations" / "theory-spec.json"

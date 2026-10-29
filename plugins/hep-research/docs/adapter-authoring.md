@@ -35,8 +35,12 @@ carries a `modulation` block (contracts 3.15.0, `validate.MODULATION_FROM`) that
 implementation, the `phi_<period>_gv` parameters it reads (each in the domain, and every `phi_<period>_gv` of the domain
 listed) and a passing conformance result: at a reference point the provider's modulated output equals the plugin's
 force-field tool applied to its own isotopic LIS within a tolerance no looser than 1e-3
-(`python3 tools/provider_registry.py --conformance PROVIDER_ID`). Without the block a top-of-atmosphere prediction is
-an invalid response; with it a point carrying two modulation parameters is refused (modulated twice). The entrypoint
+(`python3 tools/provider_registry.py --conformance PROVIDER_ID`), recorded with the provider version the gate ran at
+(`result.provider_version`, contracts 3.16.0): the registry refuses a declaration whose result names another version
+than the provider's, so a provider version bump means rerunning the gate and declaring its new result. Without the
+block a top-of-atmosphere prediction is an invalid response; with it a point carrying two modulation parameters is
+refused (modulated twice). A provider whose behaviour changes takes a new `version`: the cache key (the point hash)
+includes it, so values cached under the old version are never served for the new one. The entrypoint
 is a
 Python script that declares itself and calls `core.provider.entrypoint.provider_main(declaration, evaluate_point)`;
 that gives it `--request R --response S`, `--serve` (JSON Lines) and `--allow-outside-validated-range`, and applies

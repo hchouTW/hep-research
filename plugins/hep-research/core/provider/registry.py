@@ -49,7 +49,8 @@ def parse_registry(doc) -> dict[str, RegistryEntry]:
                                                        "user_supplied"}:
             problems.append(f"{where}: exactly declaration, version, entrypoint_path, component and user_supplied")
             continue
-        problems += [f"{where}.declaration: {p}" for p in check_declaration(item["declaration"])]
+        version = item["version"] if isinstance(item["version"], str) and item["version"] else None
+        problems += [f"{where}.declaration: {p}" for p in check_declaration(item["declaration"], version)]
         if not isinstance(item["version"], str) or not item["version"]:
             problems.append(f"{where}.version: a non-empty string")
         if not isinstance(item["user_supplied"], bool) or not isinstance(item["component"], str):

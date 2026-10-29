@@ -1,11 +1,11 @@
 {
- "contract_version": "3.15.0",
+ "contract_version": "3.16.0",
  "artifact_id": "ams-like-v1-CALC-CC-S",
  "artifact_type": "design-evaluation",
  "objective": "detector system design: design-evaluation written by evaluate_design.py",
  "versions": {
   "plugin": "0.44.0",
-  "contracts": "3.15.0",
+  "contracts": "3.16.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-S.json",
-   "sha256": "a431248018ef363452ed061099ebecb1a4eaa2d201126f0fcc93fb9868a92a9d",
+   "sha256": "dae15a4dc354e85702a24c62732bbf74c5195c84225a65414311a14cdc7eba40",
    "artifact_type": "design-candidate",
    "artifact_id": "ams-like-v1-cand-S",
    "status": [
@@ -28,7 +28,7 @@
   },
   {
    "ref": "runs/CALC-CC-S.computational-run.json",
-   "sha256": "3dfddf021ed16689ad8c2635641d3cc55313589fb7b2d551bc6be5d8886727bb",
+   "sha256": "307576e66083850dfba015cb07ec84c2bfc45e5cd69f8c4d2becb20885babf0d",
    "artifact_type": "computational-run",
    "artifact_id": "ams-like-v1-CALC-CC-S-run",
    "status": [
@@ -37,7 +37,7 @@
   },
   {
    "ref": "evaluations/CALC-TRK-S.json",
-   "sha256": "f7fc6c1fa4a13db5c5dc0cabe49b4f48ad35eec51cceb8af5ea966c008ec475c",
+   "sha256": "c6bd5b50258d311a1b5de09225393c28886d032ea70fe90ccd290efe11372e69",
    "artifact_type": "design-evaluation",
    "artifact_id": "ams-like-v1-CALC-TRK-S",
    "status": [
