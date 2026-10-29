@@ -457,15 +457,15 @@
    ]
   },
   "L2": {
-   "state": "rework",
+   "state": "merged",
    "dispatches": 1,
    "rework_rounds": 1,
    "branch": "worktree-crprop-l2",
    "base": "f0f424da",
-   "head": "9ba6de3f",
-   "merge_commit": null,
+   "head": "962a9447",
+   "merge_commit": "2ca279bc",
    "worker_report": "DONE (ALL-5 card only): contracts 3.16.0 (CONFORMANCE_VERSION_FROM), CORE 1.4.0, conformance records provider_version, USINE gate rerun at 0.3.0 (4.277e-5); adapter 0.3.0, usine/dragon2 0.3.0, emulator 1.0.0; migration keep-as-history (565+367 hashes reproduce under 0.2.0, none under 0.3.0); spectrum_variable explicit, USINE renders identical; emulator refuses explicit form (out-of-domain); doc slips + erratum",
-   "verifier_report": "round 0 Opus REWORK: emulator refuses explicit-form DEFAULT_TRANSPORT (usability regression) and breaks usine_emulator_family_study emulator_values; fix = normalise the documented default spectrum_variable before comparing (no stored hash change); L2-1 pass, migration and bumps correct",
+   "verifier_report": "Opus PASS r1 (r0 REWORK: emulator transport normalisation): normalised comparison, distinct cache keys, no stored model change, C2UF driver works on L1's fixture, 698 artifacts keep outcome, lint clean",
    "missing_capabilities": [],
    "notes": [
     "B1.3"
@@ -1032,6 +1032,11 @@
    "cycle": 4,
    "date": "2026-10-29",
    "event": "L1 merged (8d29a558), Opus PASS"
+  },
+  {
+   "cycle": 4,
+   "date": "2026-10-29",
+   "event": "L2 merged (2ca279bc); L1-L2 complete"
   }
  ],
  "env": {
