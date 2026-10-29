@@ -149,6 +149,34 @@ mechanically; incomplete identities; transcribed decisions; the no-child-process
 runner cannot be detected (so neither the order of confirmation access nor the blinded region not being read is
 proven); and that DEC-08/DEC-09 are pending.
 
+## Checks: roles, types, results and the freeze record
+
+`<plugin root>/skills/hep-computing/scripts/check_definitions.py` applies the check definitions (statistical choices
+are made with hep-statistics; the script only applies them):
+
+- **Roles**: closure (internal consistency; catches bugs, never confirmation), confirmation-holdout (guards against
+  tuning bias: a fresh, unexposed sample of the same kind), confirmation-independent (guards against shared
+  systematics: a methodologically independent test). Statistical independence is not systematic independence.
+- **Types**: threshold validation (an acceptance region with a basis; no basis, no freeze) and performance estimate
+  (value ± uncertainty with validity checks; never invent a threshold).
+- **Results** are pass, fail, inconclusive or not-applicable, each with a reason; not-applicable needs the task type
+  and must have been allowed in advance; exit 0 is never a physics pass; 0 events in N gives a 95 % upper limit of
+  about 3/N, not “none seen”.
+- **Decisions** (`decide`): the three-region threshold rule (inside → pass, outside → fail, straddling →
+  inconclusive; a pass is capped at inconclusive when the frozen power design was not met before execution, a fail
+  stays fail); the tolerance rule for validity checks (|deviation| < max(k·σ_stat, δ_phys) ≤ claimed total
+  uncertainty; a deviation incompatible with zero becomes a systematic); per-bin levels (unchanged when pass rejects
+  “non-compliant”, α/n or Šidák when fail rejects “compatible”); cross-round control against a frozen ceiling
+  (threshold: α allocation at level 1 − αᵣ, or a cap R; compatibility: never split α or widen the tolerance).
+- **Freeze record** (`validate-freeze`, `verify-chain`; DEC-03 default): written before the first result it judges,
+  as one line of an append-only JSON-lines log whose lines carry the previous line's SHA-256. Closed fields: step,
+  effective validation identity (check digest, criterion digest pairs), criteria version, confirmation samples and
+  which are method-independent, controls, the commitment to report every confirmation result, the feasibility of
+  independent confirmation with reasons (and conditions when infeasible), the multiple-testing treatment (error
+  type, combination, correlations), cross-round control (kind, ceiling, option), each check's role, type and rule,
+  and the power design evaluated on the combined rule.
+- A check program that can only pass is no evidence: give each check a positive and a negative test.
+
 ## Human decisions
 
 No gate is needed for authorized local reading, fixing and verification, contract changes that only add or tighten,

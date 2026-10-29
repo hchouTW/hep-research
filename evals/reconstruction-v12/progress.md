@@ -212,3 +212,29 @@ Tests (`TMPDIR` on local disk; tested commit = the B1 commit below):
 | runner callers `test_design_m2`, `test_geant4`, `test_cli_robustness` | 79, OK (6 skipped) | 79, OK (6 skipped) |
 
 Probe (`<scratch>/recon-v12/probes/probe_bugs.py`) against the fixed runner: BUG-01..04 FIXED.
+
+## A2 — check definitions
+
+Entry: A1 complete; N2, N3 passed S0. Contract (T2-code): scope `skills/hep-computing/scripts/check_definitions.py`
+(standard library; library + CLI), its section in `research-workflow-control.md` and tests; acceptance = every check
+rule has a positive and a negative test, and the freeze record format has a validation test; required. DEC-03 default
+adopted (pending approval in the sense of the implementer's choice being recorded): append-only JSON lines, each line
+carrying the SHA-256 of the previous line, canonical JSON. Placement in hep-computing follows the DEC-11 default; the
+statistical choices are still made with hep-statistics (the script only applies frozen rules).
+
+Rules and their tests (`tests/skills/hep_computing/test_check_definitions.py`, 20 tests):
+
+| Rule (Methods §, spec copy) | Requirement | Positive | Negative |
+|---|---|---|---|
+| four-valued results with reason; not-applicable needs task type (§2.3) | VAL-02 | `test_four_values_with_reason`, NA with task type | unknown values, empty reason, NA without task type |
+| three-region threshold rule; power not met caps a pass, never rescues a fail (§2.3, §2.4) | VAL-04 | inside → pass | outside → fail, straddling → inconclusive, malformed input refused |
+| tolerance rule, tolerance ≤ claimed uncertainty, deviation → systematic, coarse check (§2.4) | VAL-04 | pass, pass with transferred systematic | fail; tolerance above claimed refused |
+| per-bin levels and combination (§2.4 item 4) | VAL-04 | IUT unchanged, Bonferroni, Šidák, all-pass | bad rejection kind, n = 0, any fail → fail, inconclusive counted as frozen |
+| cross-round control with a frozen ceiling (§2.4 item 5) | VAL-04 | allocation at level 1 − αᵣ; cap with fresh samples; compatibility budget | allocation not implemented by the level; reused sample → Rα; split α or widened tolerance refused; over ceiling |
+| rule of three (§2.3) | VAL-02 | 3/N | N = 0 refused |
+| freeze record format, closed fields (§2.4 items 1–5; DEC-03) | VAL-01, VAL-03, VAL-05 | a valid record | 11 malformed records (unknown/missing field, non-confirmation independent sample, no report-all commitment, infeasible without conditions, bad multiple testing, bad ceiling, power not on the combined rule, checks ≠ identity, independent role without sample, tolerance above claimed) |
+| freeze log digest chain (DEC-03) | VAL-03 | two appended records verify | refused record not written; reordered lines detected |
+| CLI contract (exit 0/1/2, JSON with status) | — | validate, decide | refused record, missing file |
+
+Results: `test_check_definitions` 20, OK; `test_cli_robustness` (with `check_definitions.py` in `MISSING_FILE_ARGS`
+and `HC_CONTRACT`) 6, OK; `check_wiring.py --since <base>`: no new gap.

@@ -78,6 +78,14 @@ and position, in a follow-up); nothing already covered was restated.
   holds the evidence tiers, the trigger matrix, the transition-period task record (no control-layer helper exists
   yet), human decisions and the completion report. Ownership rows added for `reconstruction method routing`
   (hep-detector) and `evidence tiers` / `research task record` (hep-computing). Documentation only; no new runtime.
+- **Check definitions** (reconstruction v12 stage A2; VAL-01..VAL-05): new
+  `skills/hep-computing/scripts/check_definitions.py` applies the check roles (closure, holdout and method-independent
+  confirmation), types (threshold, performance estimate), four-valued results with reasons, the three-region threshold
+  rule (a pass capped at inconclusive when the frozen power design was not met; a fail never rescued), the tolerance
+  rule for validity checks (tolerance at most the claimed uncertainty; a deviation incompatible with zero becomes a
+  systematic), per-bin multiple-testing levels, cross-round error control against a frozen ceiling, and the freeze
+  record (closed fields, append-only JSON lines with a digest chain; DEC-03 default). Tests:
+  `tests/skills/hep_computing/test_check_definitions.py` (a positive and a negative case for every rule).
 
 ## 0.49.1 (2026-10-30)
 
