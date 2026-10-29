@@ -5,7 +5,7 @@
  "by_skill": {
   "hep-authoring": {
    "references": 49,
-   "bytes": 358750,
+   "bytes": 358874,
    "uncited": 0
   },
   "hep-citations": {
@@ -68,8 +68,8 @@
   {
    "path": "skills/hep-authoring/references/academic-papers-guide.md",
    "owner": "hep-authoring",
-   "bytes": 13282,
-   "lines": 179,
+   "bytes": 13406,
+   "lines": 180,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-authoring/README.md",
@@ -91,7 +91,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "b66baedf 2026-10-23"
+   "last_commit": "0bac705e 2026-10-29"
   },
   {
    "path": "skills/hep-authoring/references/artifact-packaging-for-release.md",
@@ -339,6 +339,7 @@
    "cited_by": [
     "skills/hep-authoring/README.md",
     "skills/hep-authoring/SKILL.md",
+    "skills/hep-authoring/examples/prose/01-contrast-results-paragraph.md",
     "skills/hep-authoring/references/academic-papers-guide.md",
     "skills/hep-authoring/references/revision-impact-tracking.md",
     "skills/hep-citations/references/literature-lookup-recipes.md"
@@ -737,6 +738,7 @@
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-authoring/SKILL.md",
+    "skills/hep-authoring/examples/prose/02-contrast-review-synthesis.md",
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md"
    ],
    "cited_by_other_skills": [],
@@ -751,6 +753,7 @@
    "cited_by": [
     "skills/hep-authoring/README.md",
     "skills/hep-authoring/SKILL.md",
+    "skills/hep-authoring/examples/prose/02-contrast-review-synthesis.md",
     "skills/hep-authoring/references/academic-papers-guide.md",
     "skills/hep-authoring/references/collaboration-results-lifecycle.md",
     "skills/hep-authoring/references/erratum-and-corrigendum-drafting.md",
@@ -775,6 +778,8 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-authoring/assets/reporting-policies.json",
+    "skills/hep-authoring/examples/prose/01-contrast-results-paragraph.md",
+    "skills/hep-authoring/examples/prose/02-contrast-review-synthesis.md",
     "skills/hep-authoring/references/academic-papers-guide.md",
     "skills/hep-authoring/references/astroparticle-and-cosmic-ray-papers.md",
     "skills/hep-authoring/references/figures-and-tables.md",

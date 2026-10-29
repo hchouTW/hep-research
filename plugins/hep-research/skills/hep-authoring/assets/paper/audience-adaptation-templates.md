@@ -20,6 +20,13 @@ All examples are synthetic placeholders.
 4. Run the check; fix every error; then read the draft against the claim matrix and record the semantic review in the
    manifest (keyword overlap is not a semantic check).
 
+Slide numbers, the time budget and similar layout numbers carry no claim but raise `adaptation.unmapped_number`
+warnings: record the line that holds them as a `context` statement (no claim id), or keep the warning and say in the
+semantic review why it carries no scientific content.
+
+Which template: a manuscript paragraph, meeting abstract, short talk, poster or public summary of one result; a review
+talk when the talk compares or synthesizes several studies or sources; a referee response letter for replies.
+
 ## Manuscript paragraph
 
 ```
@@ -44,6 +51,23 @@ planned work is described as planned).
 3. Result (2-3 slides): the central claim; the figure with its caption claim ids; the uncertainty breakdown.
 4. Checks (1-2 slides): what was validated and what was not.
 5. Summary (1 slide): the central claim as recorded, its scope, the limitations, what is next.
+```
+
+## Review talk outline (several studies or sources, 15-25 minutes)
+
+One communication record holds one claim per study, each with its own evidence edge to the result artifact or
+literature source it comes from, and a synthesis claim (what the comparison shows, with the conditions that make the
+studies comparable) whose edges point to all of them. The synthesis claim is the brief's central claim.
+
+```
+1. Question (1 slide): the physics question the studies answer and why it matters now.
+2. Comparison conditions (1-2 slides): what each study measured or computed, in which range and with which model or
+   method; the conditions that make results comparable or not.
+3. Results side by side (2-4 slides): one statement per study with its value, uncertainty and status as recorded and
+   its source; no number without its source.
+4. Synthesis (1-2 slides): the synthesis claim; where the studies agree, where they disagree and why (range, model,
+   data), and what is the speaker's own judgement.
+5. Open questions (1 slide): what would resolve the disagreement; planned work described as planned.
 ```
 
 ## Poster content

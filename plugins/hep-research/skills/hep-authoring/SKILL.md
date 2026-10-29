@@ -59,7 +59,7 @@ description: "Use when the deliverable is physics writing or its presentation, e
 | Independent review of a draft by agents that did not write it: review packets, records, the review log and its check | [independent review](references/independent-review.md); `review.py` |
 | Statistics and astroparticle papers | [statistics and ML papers](references/statistics-and-ml-papers.md), [astroparticle papers](references/astroparticle-and-cosmic-ray-papers.md) |
 
-Scripts in `<plugin root>/skills/hep-authoring/scripts/` (read `--help` first; what each checks: [README.md](README.md#scripts)). Field-specific patterns, venues and reviews have their own files under `references/`; diagram skeletons in `assets/diagrams/`, paper templates in `assets/paper/`, worked diagrams in `examples/`. Folder guide for people: [README.md](README.md).
+Scripts in `<plugin root>/skills/hep-authoring/scripts/` (read `--help` first; what each checks: [README.md](README.md#scripts)). Field-specific patterns, venues and reviews have their own files under `references/`; diagram skeletons in `assets/diagrams/`, paper templates in `assets/paper/`, worked diagrams in `examples/`, weak-versus-better prose examples (results paragraph, review synthesis, review talk) in [examples/prose/](examples/prose/README.md). Folder guide for people: [README.md](README.md).
 
 ## Handoffs
 
