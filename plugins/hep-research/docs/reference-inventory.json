@@ -839,7 +839,7 @@
     "tests/skills/hep_authoring/test_handoff_text.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "039781da 2026-10-29"
+   "last_commit": "ebb58136 2026-10-19"
   },
   {
    "path": "skills/hep-authoring/references/supplementary-material-planning.md",
@@ -1462,7 +1462,7 @@
     "tests/skills/hep_computing/test_preservation_checklist_c3.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "d8ab97cb 2026-10-23"
+   "last_commit": "c398d5e0 2026-10-29"
   },
   {
    "path": "skills/hep-computing/references/prompt-engineering-and-token-optimization.md",
@@ -2366,7 +2366,7 @@
    "cited_by_other_skills": [
     "hep-theory"
    ],
-   "last_commit": "c3afd32c 2026-10-17"
+   "last_commit": "c398d5e0 2026-10-29"
   },
   {
    "path": "skills/hep-detector/references/particle-identification.md",
@@ -2903,7 +2903,7 @@
     "tests/skills/test_review_question_tables.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "7d992293 2026-10-22"
+   "last_commit": "6a70f37e 2026-10-29"
   },
   {
    "path": "skills/hep-measurement/references/systematics.md",
@@ -3990,7 +3990,7 @@
     "tests/skills/test_review_question_tables.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "317c39a3 2026-10-14"
+   "last_commit": "6a70f37e 2026-10-29"
   },
   {
    "path": "skills/hep-statistics/references/core-stats-commands.md",

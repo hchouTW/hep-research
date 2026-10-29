@@ -65,6 +65,8 @@ stops: []
 2026-10-29 | follow-up | merged origin/main a2852507 (PR #314, clean); CHANGELOG 0.45.x -> 0.47.x; checks rerun | see git log
 2026-10-29 | follow-up | full check on the merged tree: 31 pass, 2 skip, 6123 tests, 0 failed | none
 2026-10-29 | follow-up | maintainer chose option A in the session; Decision recorded in decision-retire.md | see git log
+2026-10-29 | follow-up | draft PR #315: GitHub CI passed | none
+2026-10-29 | follow-up | maintainer asked for 8.3 items 4-5 and the cleanups: contracts 3.17.0 bump, VALIDATION entry, stale $comment wording (no digest pins them), stale timing keys | see git log
 ```
 
 ## Report
