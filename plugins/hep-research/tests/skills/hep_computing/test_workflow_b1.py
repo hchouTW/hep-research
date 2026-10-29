@@ -228,8 +228,7 @@ class Termination(Base):
 class RecordFields(Base):
     def test_record_carries_contract_end_termination_and_artifact_digest(self):
         from contracts.validate import validate_artifact
-        wf = {"workflow": "rf", "steps": [step("s", write("a.txt") + ";" + write("b.txt", "y"), ["b.txt", "a.txt"],
-                                               check={"check_digest": "c" * 64})]}
+        wf = {"workflow": "rf", "steps": [step("s", write("a.txt") + ";" + write("b.txt", "y"), ["b.txt", "a.txt"])]}
         code, out = run(wf, self.work)
         self.assertEqual(code, 0, out)
         rec = record(self.work, "s")
@@ -238,9 +237,39 @@ class RecordFields(Base):
         self.assertEqual((ext["end_status"], ext["termination"]), ("success", "confirmed"))
         canon = json.dumps(ext["output_hashes"], sort_keys=True, separators=(",", ":"), ensure_ascii=False)
         self.assertEqual(ext["artifact_digest"], hashlib.sha256(canon.encode("utf-8")).hexdigest())
-        self.assertEqual(ext["check"], {"check_digest": "c" * 64})
         rep = validate_artifact(rec)
         self.assertTrue(rep.ok, rep.as_dict())
+
+
+class CheckFields(Base):
+    """After A2: a check step's declared identity is validated before any step runs."""
+
+    def check(self, **over):
+        c = {"check_digest": "c" * 64, "criterion_digest": "d" * 64, "target_artifact_digest": "e" * 64,
+             "criteria_file": "criteria.json", "result_file": "result.json", "target_manifest": {"t.txt": "t.txt"},
+             "role": "closure", "type": "performance-estimate", "samples": []}
+        c.update(over)
+        return c
+
+    def wf(self, chk):
+        self.work.mkdir(exist_ok=True)
+        for f in ("criteria.json", "t.txt"):
+            (self.work / f).write_text("{}")
+        return {"workflow": "cf", "steps": [step("s", write("result.json", "{}"), ["result.json"],
+                                                 inputs=["criteria.json", "t.txt"], check=chk)]}
+
+    def test_valid_check_is_recorded(self):
+        code, out = run(self.wf(self.check()), self.work)
+        self.assertEqual(code, 0, out)
+        self.assertEqual(record(self.work, "s")["extension"]["check"]["role"], "closure")
+
+    def test_invalid_checks_are_refused(self):
+        bad = [self.check(extra=1), self.check(role="confirmation"), self.check(check_digest="x"),
+               self.check(criteria_file="other.json"), self.check(result_file="nope.json"),
+               self.check(target_manifest={"t.txt": "missing.txt"}), self.check(samples="S")]
+        for c in bad:
+            with self.subTest(check=c):
+                self.assertEqual(run(self.wf(c), self.work)[0], 2)
 
 
 if __name__ == "__main__":

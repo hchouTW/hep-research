@@ -30,7 +30,12 @@ are recorded only when termination is confirmed. Termination is observed on POSI
 process that leaves the group and clears its environment is not seen.
 Input: workflow JSON {"workflow": NAME, "steps": [{"id", "needs": [...], "inputs": [...], "outputs": [...],
 "argv": [...], "stdout": FILE (optional), "seeds": {...} (optional), "parameter_digest": {...} (optional),
-"timeout_s": SECONDS (optional, default 3600), "check": {...} (optional, recorded verbatim as extension.check)}]}.
+"timeout_s": SECONDS (optional, default 3600), "check": {...} (optional: a check run's declared identity, below)}]}.
+A check step (reconstruction v12 A2 fields, defined in scripts/check_definitions.py) declares "check":
+{"check_digest", "criterion_digest", "target_artifact_digest" (SHA-256 hex), "criteria_file", "result_file" (relative
+paths: an input and an output of the step), "target_manifest" ({target logical name: staged input path}), "role"
+(closure, confirmation-holdout, confirmation-independent), "type" (threshold, performance-estimate), "samples" (the
+read list)}; the object is validated before any step runs and recorded as extension.check.
 Usage: run_workflow.py WORKFLOW.json --work DIR [--created YYYY-MM-DD] [--dry-run] [--incremental] [--status LABEL]
 Output JSON: status (ok, failed, rejected), status_label, inputs, defaults_used, order and per-step results.
 Exit codes: 0 every step ran; 1 a step failed or its termination is unconfirmed (later steps are not run); 2 bad
@@ -55,6 +60,7 @@ from pathlib import Path, PurePosixPath
 sys.dont_write_bytecode = True  # the imports below leave no __pycache__ (F-10)
 PLUGIN = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(PLUGIN))
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 from contracts import CONTRACTS_VERSION  # noqa: E402
 from contracts import trace  # noqa: E402
 from contracts.identity import plugin_release  # noqa: E402
@@ -90,6 +96,32 @@ def safe_relative(p) -> bool:
         return False
     pp = PurePosixPath(p)
     return not pp.is_absolute() and all(part not in ("", ".", "..") for part in pp.parts) and not p.endswith("/")
+
+
+CHECK_KEYS = {"check_digest", "criterion_digest", "target_artifact_digest", "criteria_file", "result_file",
+              "target_manifest", "role", "type", "samples"}
+
+
+def check_problem(step: dict) -> str | None:
+    """The declared identity of a check run (A2 fields; scripts/check_definitions.py ROLES and TYPES)."""
+    from check_definitions import ROLES, TYPES  # noqa: PLC0415  (sibling script)
+    c = step["check"]
+    if not isinstance(c, dict) or set(c) != CHECK_KEYS:
+        return f"needs exactly {sorted(CHECK_KEYS)}"
+    hexes = [c["check_digest"], c["criterion_digest"], c["target_artifact_digest"]]
+    if not all(isinstance(x, str) and len(x) == 64 and set(x) <= set("0123456789abcdef") for x in hexes):
+        return "check, criterion and target digests are SHA-256 hex"
+    if c["role"] not in ROLES or c["type"] not in TYPES:
+        return f"role in {ROLES}, type in {TYPES}"
+    if c["criteria_file"] not in step.get("inputs", []) or c["result_file"] not in step.get("outputs", []):
+        return "the criteria file is an input and the result file an output of the step"
+    tm = c["target_manifest"]
+    if not isinstance(tm, dict) or not tm or not all(isinstance(k, str) and v in step.get("inputs", [])
+                                                     for k, v in tm.items()):
+        return "target_manifest maps each target logical name to a staged input of the step"
+    if not isinstance(c["samples"], list) or not all(isinstance(x, str) for x in c["samples"]):
+        return "samples is the read list (a list of names)"
+    return None
 
 
 def through_symlink(work: Path, rel: str) -> bool:
@@ -131,8 +163,10 @@ def load(path: Path) -> dict:
         t = s.get("timeout_s", STEP_TIMEOUT_S)
         if isinstance(t, bool) or not isinstance(t, (int, float)) or not math.isfinite(t) or t <= 0:
             raise WorkflowError(f"step {s['id']}: 'timeout_s' must be a positive finite number of seconds")
-        if "check" in s and not isinstance(s["check"], dict):
-            raise WorkflowError(f"step {s['id']}: 'check' must be an object")
+        if "check" in s:
+            why = check_problem(s)
+            if why:
+                raise WorkflowError(f"step {s['id']}: check: {why}")
         ids.append(s["id"])
     if len(set(ids)) != len(ids):
         raise WorkflowError("step ids must be unique")
@@ -302,7 +336,7 @@ def record(wf_name: str, step: dict, cmd: list[str], inputs: list[dict], outputs
     status = [label] if code == 0 else [label, "failed"]
     extra = {"parameter_digest": digest} if digest else {}
     if "check" in step:
-        extra["check"] = step["check"]  # placeholder for the validation identity fields (A2 fills their definition)
+        extra["check"] = step["check"]  # the declared identity of a check run (A2 fields)
     return {"contract_version": CONTRACTS_VERSION, "artifact_id": f"{wf_name}-{step['id']}-run",
             "artifact_type": "computational-run",
             "objective": f"step {step['id']} of workflow {wf_name}, run by run_workflow.py",

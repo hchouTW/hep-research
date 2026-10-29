@@ -238,3 +238,11 @@ Rules and their tests (`tests/skills/hep_computing/test_check_definitions.py`, 2
 
 Results: `test_check_definitions` 20, OK; `test_cli_robustness` (with `check_definitions.py` in `MISSING_FILE_ARGS`
 and `HC_CONTRACT`) 6, OK; `check_wiring.py --since <base>`: no new gap.
+
+### B1 follow-up — validation identity fields (A2 → B1 edge, before B2)
+
+The B1 placeholder `check` object is now the A2-defined declared identity of a check run (check, criterion and target
+artifact digests, criteria file (an input), result file (an output), target manifest (target logical name → staged
+input), role, type, read list), validated before any step runs (exit 2 otherwise) and recorded as `extension.check`.
+Tests: `test_workflow_b1.CheckFields` (valid recorded; seven malformed objects refused). `test_workflow_b1` +
+`test_workflow_c6`: 24 run, OK (1 skipped: snakemake not installed).
