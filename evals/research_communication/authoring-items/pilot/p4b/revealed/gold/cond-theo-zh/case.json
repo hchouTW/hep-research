@@ -1,0 +1,1 @@
+{"id": "cond-theo-zh", "lang": "zh-Hant", "role": "failure", "prompt": "我的報告時段從 25 分鐘縮短為 10 分鐘。請把 cond-theo-zh/input.md 裡的投影片大綱精簡成約 5–6 張投影片的大綱（保留圖說），不需要逐字稿。", "input_file": "input.md"}

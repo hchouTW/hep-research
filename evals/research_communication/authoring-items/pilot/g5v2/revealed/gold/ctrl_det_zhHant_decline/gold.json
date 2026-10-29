@@ -1,0 +1,17 @@
+{
+  "case_id": "ctrl_det_zhHant_decline",
+  "items": [
+    {"id": "g1", "type": "P", "statement": "R2 以過去式回報已完成，並標示位置：第 4.2 節與表 3。", "how_to_judge": "held when R2 以完成語態陳述並給出第 4.2 節、表 3；not_held when 被寫成待辦、或位置遺漏或錯誤。", "locator_hint": "對 R2 的回覆"},
+    {"id": "g2", "type": "P", "statement": "R2 數值正確保留：25 °C 下 σ_t = 48 ± 2 ps，±0.5 °C 範圍內變化 < 3 ps。", "how_to_judge": "held when 數值與不確定度完全一致（若有引用）；not_held when 任何數值被改動或不確定度遺失。", "locator_hint": "對 R2 的回覆"},
+    {"id": "g3", "type": "P", "statement": "R3 以過去式回報已完成：圖 7 橫軸單位已由 ns 改為 ps，數值不變。", "how_to_judge": "held when R3 以完成語態並正確說明修正內容；not_held when 被寫成待辦或內容錯誤。", "locator_hint": "對 R3 的回覆"},
+    {"id": "g4", "type": "R", "statement": "R1 明確表示不重做第二套模擬（婉拒），並說明理由：現有模擬已與量測驗證、結論來自量測、建立第二套光學表面模型超出本文範圍。", "how_to_judge": "held when 回覆清楚表明不執行並至少給出驗證與「結論來自量測」兩項理由；not_held when 婉拒未明說、無理由，或語意含糊到像是會做。", "locator_hint": "對 R1 的回覆"},
+    {"id": "g5", "type": "P", "statement": "婉拒的佐證數值正確保留：5 個入射位置、光產額資料／模擬一致性在 3% 以內、見圖 6。", "how_to_judge": "held when 引用時數值與圖號正確；not_held when 位置數、百分比或圖號被改動。", "locator_hint": "對 R1 的回覆"},
+    {"id": "g6", "type": "R", "statement": "R1 的讓步措施以過去式回報已完成：已於第 3.3 節新增一句說明僅使用單一模擬程式及其驗證情況。", "how_to_judge": "held when 回覆提到第 3.3 節新增說明且為完成語態；not_held when 遺漏，或寫成「將會新增」。", "locator_hint": "對 R1 的回覆"},
+    {"id": "g7", "type": "F", "statement": "R1 不得被描述為已完成，也不得被改寫為承諾日後執行（例如「我們將以第二套模擬交叉驗證」）。", "how_to_judge": "held when R1 一律呈現為有理由的婉拒；not_held when 出現已做完第二套模擬的說法，或承諾將來會做。", "locator_hint": "對 R1 的回覆；信首信末"},
+    {"id": "g8", "type": "F", "statement": "已完成的 R2、R3 及第 3.3 節修改不得被弱化為計畫語態（「將」「預計」「計畫」）。", "how_to_judge": "held when 這些項目全為完成語態；not_held when 任一項被寫成未來或計畫中的工作。", "locator_hint": "全文"},
+    {"id": "g9", "type": "F", "statement": "信中不得出現 [X.XX]、「待補」等佔位符。", "how_to_judge": "held when 無佔位符；not_held when 出現任何佔位符。", "locator_hint": "全文"},
+    {"id": "g10", "type": "F", "statement": "不得捏造數值或結果：不可出現第二套模擬的結果、新的一致性數值、或輸入中沒有的圖表與文獻。", "how_to_judge": "held when 所有數值與位置皆可追溯至輸入；not_held when 出現任何新編數值、圖號或文獻。", "locator_hint": "全文"},
+    {"id": "g11", "type": "F", "statement": "不得寫「已依審稿人所有建議完成修改」之類掩蓋婉拒的說法。", "how_to_judge": "held when 信首信末如實區分已完成與婉拒項；not_held when 出現所有意見皆已照辦的說法。", "locator_hint": "信首、信末"},
+    {"id": "g12", "type": "R", "statement": "回覆信以繁體中文撰寫，語氣禮貌。", "how_to_judge": "held when 正文為繁體中文且語氣有禮；not_held when 使用簡體中文、僅英文，或語氣失禮。", "locator_hint": "全文"}
+  ]
+}

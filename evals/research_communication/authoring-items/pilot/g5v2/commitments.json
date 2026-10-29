@@ -1,0 +1,20 @@
+{
+ "scheme": "sha256(nonce||gold)",
+ "commitments": {
+  "ctrl_det_zhHant_decline/case.json": "c80a8aa7a06ede01b652112c2973d939d61dcadbc14c3a7e43b7b7fa9ba0aa57",
+  "ctrl_det_zhHant_decline/gold.json": "ad70f5ec4b1fe9842cf34c50cb17d82579e4bebca240a6de67664606d2d8b1a1",
+  "ctrl_det_zhHant_decline/input.md": "9d0a89b82d332322caae33b0c2b8c3285ab7248530cadfbd9f3f889bc03cb54e",
+  "ctrl_meas_en_allcomplete/case.json": "b260fe51a623f6776537197f623242a2f53b8e1c23798cba6c2146b07abe45c1",
+  "ctrl_meas_en_allcomplete/gold.json": "428591202a8e9d19e2ca3172ac4f9ef251f54bb819a5f20e0927831bff6af4b3",
+  "ctrl_meas_en_allcomplete/input.md": "953065eb80f5aea39e3c1f2c6676580c10b5c26a2c14a8a783cac1dbc63ea3ea",
+  "fail_det_en_calo/case.json": "112b6fa7c896ddb4e56ce9c91a0728053fc962f21af85ba6afb0f2fab663a5d9",
+  "fail_det_en_calo/gold.json": "c997e010286e76cb31e031d692b934838ebc71f5b558ddf91173900866aecb68",
+  "fail_det_en_calo/input.md": "f9e4da44063852cf3ab61308a8a45969b4ae41fdc6d9d2847bd1a4afc4144ce6",
+  "fail_meas_en_xsec/case.json": "e93bbc083929076e4de33154ef3e26e1d256577665f645303a7533713bb5b394",
+  "fail_meas_en_xsec/gold.json": "ba5eccc4b517572e007be237a51c1ddd4b7d3234a8b953844cd798bd0ac0e307",
+  "fail_meas_en_xsec/input.md": "2bdf874df79c83e297800ab3c59fa3f7168716f81a3635a52ff229e6e5ca8b8b",
+  "fail_theo_zhHant_zprime/case.json": "98a49a501ebd5da69ac1d2f5fdb2ecbe595482fe04d6565e4e8e20a4ac9ad1f8",
+  "fail_theo_zhHant_zprime/gold.json": "c8e518d727a1d7a18cbc274b25d4f6abee64aa84756a785962cb57a58ced2514",
+  "fail_theo_zhHant_zprime/input.md": "0c65ce2770e104008ed77eabfea5d89c42f22fd592e9941942f574d83ab70cab"
+ }
+}

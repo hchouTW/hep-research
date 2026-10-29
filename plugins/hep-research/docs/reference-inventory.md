@@ -142,7 +142,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `revision-impact-tracking.md` | hep-authoring | 4.4 | yes | 15 | - | c888be49 2026-10-29 |
 | `scientific-style.md` | hep-authoring | 11.8 | no | 16 | hep-citations, hep-statistics | 5f4489ee 2026-10-29 |
 | `statistics-and-ml-papers.md` | hep-authoring | 14.2 | yes | 10 | hep-citations | ebb58136 2026-10-19 |
-| `submission-and-peer-review.md` | hep-authoring | 16.7 | no | 12 | - | ebb58136 2026-10-19 |
+| `submission-and-peer-review.md` | hep-authoring | 16.9 | no | 12 | - | 5b94e1bf 2026-10-29 |
 | `supplementary-material-planning.md` | hep-authoring | 2.1 | no | 1 | - | ebb58136 2026-10-19 |
 | `thesis-by-publication-assembly.md` | hep-authoring | 4.0 | no | 2 | - | ebb58136 2026-10-19 |
 | `tikz-patterns.md` | hep-authoring | 5.9 | no | 8 | - | ebb58136 2026-10-19 |
@@ -162,7 +162,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `analysis-data-pipelines.md` | hep-computing | 12.6 | yes | 11 | hep-measurement | 5dbb8c4d 2026-10-26 |
 | `analysis-workflows.md` | hep-computing | 4.1 | yes | 4 | - | ed88037e 2026-10-24 |
 | `bash-balanced-design-guidelines.md` | hep-computing | 7.6 | yes | 3 | - | 8eefac0f 2026-10-13 |
-| `batch-scheduling.md` | hep-computing | 31.7 | yes | 16 | - | 16214af1 2026-10-26 |
+| `batch-scheduling.md` | hep-computing | 31.7 | yes | 16 | - | 0aebec94 2026-10-29 |
 | `batch-site-cern-htcondor.md` | hep-computing | 11.2 | no | 2 | - | 6815df4b 2026-10-10 |
 | `batch-site-nstccore-slurm.md` | hep-computing | 11.7 | no | 1 | - | 746f13aa 2026-10-15 |
 | `cmake-and-build.md` | hep-computing | 2.9 | yes | 6 | - | fe8f71ef 2026-10-13 |

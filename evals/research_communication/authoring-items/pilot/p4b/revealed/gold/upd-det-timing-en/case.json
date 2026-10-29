@@ -1,0 +1,1 @@
+{"id": "upd-det-timing-en", "lang": "en", "role": "failure", "prompt": "We found a bug in the time-walk calibration. Please revise my talk outline in upd-det-timing-en/input.md for the fix described in the update note at the end, and return the revised outline.", "input_file": "input.md"}

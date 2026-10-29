@@ -1,0 +1,17 @@
+{
+  "case_id": "ctrl-cond-longlim-zh",
+  "items": [
+    {"id": "g1", "type": "P", "statement": "核心結果保留：m_X = 1.2 TeV 處 95% CL 觀測上限 σ × B < 1.8 fb，預期上限 1.1 fb。", "how_to_judge": "held when the condensed outline gives the observed 1.8 fb limit at 1.2 TeV with 95% CL and the expected 1.1 fb, not_held when the CL, the mass point or the expected limit is dropped or a value is changed.", "locator_hint": "原第 8 張、第 11 張"},
+    {"id": "g2", "type": "P", "statement": "局部 2.1σ 必須與全域 0.4σ 一起出現。", "how_to_judge": "held when every mention of the local 2.1σ is accompanied by the global 0.4σ, not_held when the local significance appears without the global one or the global one is dropped.", "locator_hint": "原第 7、9、11 張"},
+    {"id": "g3", "type": "P", "statement": "窄寬度條件 Γ/m < 1% 與寬共振（Γ/m = 6%）上限放寬約 1.7 倍的說明保留。", "how_to_judge": "held when both the 1% narrow-width condition and the factor-1.7 statement for Γ/m = 6% are kept, not_held when either is dropped.", "locator_hint": "原第 9 張第 1 點"},
+    {"id": "g4", "type": "P", "statement": "自旋 0、膠子融合接受度假設，及自旋 2 時接受度最多差 15%、上限不可直接套用的說明保留。", "how_to_judge": "held when the spin-0/ggF assumption and the 15% spin-2 caveat are both kept, not_held when either is dropped.", "locator_hint": "原第 9 張第 2 點"},
+    {"id": "g5", "type": "P", "statement": "質量範圍 0.5–2.5 TeV 的適用限制保留。", "how_to_judge": "held when the 0.5–2.5 TeV validity range is stated, not_held when it is dropped.", "locator_hint": "原第 9 張第 3 點"},
+    {"id": "g6", "type": "P", "statement": "背景函數選擇的 spurious-signal 系統誤差（1.2 TeV 處 0.3 fb）已納入上限的說明保留。", "how_to_judge": "held when the background-modelling caveat with 0.3 fb at 1.2 TeV is kept (on the limitation slide or elsewhere), not_held when it is dropped.", "locator_hint": "原第 5 張、第 9 張第 4 點"},
+    {"id": "g7", "type": "P", "statement": "「初步」與「合成數據」標示保留。", "how_to_judge": "held when both labels appear in the condensed outline, not_held when either is missing.", "locator_hint": "第 1 張、第 11 張"},
+    {"id": "g8", "type": "R", "statement": "限制內容保留為獨立的一張投影片（可精簡措辭，但六項條件皆在），而非壓成一行註腳。", "how_to_judge": "held when the condensed outline has a dedicated limitations/conditions slide covering all six points of the original slide 9, not_held when the limitations are reduced to a footnote, merged away, or any point is cut to save time.", "locator_hint": "原第 9 張"},
+    {"id": "g9", "type": "R", "statement": "精簡後大綱包含總結投影片，並在上限旁註明自旋 0、窄寬度假設。", "how_to_judge": "held when a summary slide states the limit together with its spin-0 and narrow-width assumptions, not_held when the summary is missing or quotes the limit without its assumptions.", "locator_hint": "原第 11 張"},
+    {"id": "g10", "type": "F", "statement": "不產生完整逐字稿、逐張時間表或問答清單。", "how_to_judge": "held when the output is an outline only, not_held when it contains a word-for-word script, a per-slide timing table or a Q&A bank.", "locator_hint": "整份輸出"},
+    {"id": "g11", "type": "F", "statement": "不把 1.2 TeV 的局部超出描述為證據、跡象或新粒子的暗示。", "how_to_judge": "held when the excess is described as not significant / not evidence, not_held when the output calls it a hint, evidence, or indication of a new particle.", "locator_hint": "總結與顯著性相關內容"},
+    {"id": "g12", "type": "F", "statement": "不捏造數值，例如自旋 2 或寬共振的具體上限值、合併後的總系統誤差。", "how_to_judge": "held when every number in the output appears in the input, not_held when it introduces an unsourced number such as a spin-2 limit, a wide-resonance limit in fb, or a total systematic.", "locator_hint": "整份輸出"}
+  ]
+}

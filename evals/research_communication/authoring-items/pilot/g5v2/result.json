@@ -1,0 +1,165 @@
+{
+ "target": "G5-V2",
+ "baseline_commit": "bb44fca09495fccc06ae9c6d1b5a031647a84267",
+ "candidate_commit": "5b94e1bfc24720f1ed8451856c77c75d9b17d82b",
+ "model": "claude-sonnet-5-5",
+ "graders": "two fresh-context headless claude-opus-5-5 sessions (grader 2 reversed orders), no plugin, Read/Write only",
+ "deidentification_seed": 20261030,
+ "calibration_passed": true,
+ "task_level": {
+  "cases": 5,
+  "runs_scheduled": 30,
+  "runs_completed": 30,
+  "plugin_loaded": 30,
+  "hep_authoring_loaded": 30
+ },
+ "gold_item_level": {
+  "failure_cases": {
+   "baseline": "77/108",
+   "candidate": "108/108"
+  },
+  "controls": {
+   "baseline": "70/72",
+   "candidate": "71/72"
+  }
+ },
+ "main_test_grader1": {
+  "table": {
+   "fail_det_en_calo": {
+    "baseline": [
+     6,
+     6,
+     6
+    ],
+    "candidate": [
+     12,
+     12,
+     12
+    ]
+   },
+   "fail_theo_zhHant_zprime": {
+    "baseline": [
+     9,
+     9,
+     9
+    ],
+    "candidate": [
+     12,
+     12,
+     12
+    ]
+   },
+   "fail_meas_en_xsec": {
+    "baseline": [
+     10,
+     10,
+     12
+    ],
+    "candidate": [
+     12,
+     12,
+     12
+    ]
+   }
+  },
+  "test": {
+   "T": 31,
+   "per_case": {
+    "fail_det_en_calo": 18,
+    "fail_meas_en_xsec": 4,
+    "fail_theo_zhHant_zprime": 9
+   },
+   "p_candidate_better": 0.0005,
+   "p_baseline_better": 1.0,
+   "leave_one_out_up": {
+    "removed": "fail_det_en_calo",
+    "remaining_T": 13,
+    "positive": true
+   },
+   "leave_one_out_down": {
+    "removed": "fail_meas_en_xsec",
+    "remaining_T": 27,
+    "negative": false
+   },
+   "n_assignments": 8000
+  }
+ },
+ "main_test_grader2": {
+  "table": {
+   "fail_det_en_calo": {
+    "baseline": [
+     6,
+     6,
+     6
+    ],
+    "candidate": [
+     11,
+     12,
+     12
+    ]
+   },
+   "fail_theo_zhHant_zprime": {
+    "baseline": [
+     9,
+     9,
+     9
+    ],
+    "candidate": [
+     12,
+     12,
+     12
+    ]
+   },
+   "fail_meas_en_xsec": {
+    "baseline": [
+     10,
+     10,
+     12
+    ],
+    "candidate": [
+     12,
+     12,
+     12
+    ]
+   }
+  },
+  "test": {
+   "T": 30,
+   "per_case": {
+    "fail_det_en_calo": 17,
+    "fail_meas_en_xsec": 4,
+    "fail_theo_zhHant_zprime": 9
+   },
+   "p_candidate_better": 0.0005,
+   "p_baseline_better": 1.0,
+   "leave_one_out_up": {
+    "removed": "fail_det_en_calo",
+    "remaining_T": 13,
+    "positive": true
+   },
+   "leave_one_out_down": {
+    "removed": "fail_meas_en_xsec",
+    "remaining_T": 26,
+    "negative": false
+   },
+   "n_assignments": 8000
+  }
+ },
+ "confirmed_critical_runs": {
+  "ctrl_det_zhHant_decline|base": "0/3",
+  "ctrl_det_zhHant_decline|cand": "0/3",
+  "ctrl_meas_en_allcomplete|base": "0/3",
+  "ctrl_meas_en_allcomplete|cand": "0/3",
+  "fail_det_en_calo|base": "3/3",
+  "fail_det_en_calo|cand": "0/3",
+  "fail_meas_en_xsec|base": "2/3",
+  "fail_meas_en_xsec|cand": "0/3",
+  "fail_theo_zhHant_zprime|base": "3/3",
+  "fail_theo_zhHant_zprime|cand": "0/3"
+ },
+ "decision": "target improved: p(candidate better) = 0.0005 (both graders), leave-one-out remaining T = 13 > 0, no critical-failure regression (candidate 0/9 confirmed critical runs vs baseline 8/9), no correct-control regression",
+ "disposition": "deliver; claim: local improvement on the listed material and conditions (authoring-pilot)",
+ "grading_cost_usd": 3.74,
+ "pilot_run_cost_usd": 2.5421,
+ "note": "gold and nonces revealed after all planned runs were graded, verified 15/15 against commitments.json; per-output grades kept outside the repository"
+}

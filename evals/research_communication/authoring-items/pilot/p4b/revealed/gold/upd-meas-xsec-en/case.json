@@ -1,0 +1,1 @@
+{"id": "upd-meas-xsec-en", "lang": "en", "role": "failure", "prompt": "Our acceptance correction was revised after the trigger scale-factor fix. Please update my talk in upd-meas-xsec-en/input.md according to the update note at the end of the file and give me the revised slide-by-slide outline.", "input_file": "input.md"}

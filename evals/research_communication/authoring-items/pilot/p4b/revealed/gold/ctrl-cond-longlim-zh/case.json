@@ -1,0 +1,1 @@
+{"id": "ctrl-cond-longlim-zh", "lang": "zh-Hant", "role": "control", "prompt": "研討會把我的報告縮短到 7 分鐘。請把 ctrl-cond-longlim-zh/input.md 的投影片大綱精簡成約 5 張投影片的大綱（含圖說），只要大綱即可。", "input_file": "input.md"}

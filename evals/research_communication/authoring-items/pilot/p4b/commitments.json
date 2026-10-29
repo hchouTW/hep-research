@@ -1,0 +1,20 @@
+{
+ "scheme": "sha256(nonce||gold)",
+ "commitments": {
+  "cond-theo-zh/case.json": "139a53d5232a93e42b66a8d54da4dfff71624785668c12dd86304661b2419450",
+  "cond-theo-zh/gold.json": "21dc8fe9504e9dc0a5caaa6c536f8846e33cb74c0f3ab2acbb4340314407a14f",
+  "cond-theo-zh/input.md": "0f0a01030b2529771131d5a343a5e9d28479f4c0ea368eea0aa2e13ef6bba050",
+  "ctrl-cond-longlim-zh/case.json": "3634bac64cd6b84b2f93cce69fe91b421fdaa6365677ad646fafcde2fbb6520a",
+  "ctrl-cond-longlim-zh/gold.json": "0bda1c670559e87e69261457f26b38cb21e6130ec5578ac563e8d3e0b3037fe9",
+  "ctrl-cond-longlim-zh/input.md": "b5241090905b718d016fa08198680e1ea33bb249e0825a1ec736fd96214db4a6",
+  "ctrl-noeffect-en/case.json": "12ee1df29912d4b79680da139a468dd6ebf70d08fee13ef13b96d1af73ccf770",
+  "ctrl-noeffect-en/gold.json": "546e92ddff99b79649ef1177855459f8f458e72d197cf1f78ecf15f58999d3c8",
+  "ctrl-noeffect-en/input.md": "9b36180a5396df8cfa9da7c2681c942e28661b1391cfbe481d34a3fd9f75cb36",
+  "upd-det-timing-en/case.json": "b5ce8f746b412f6e5486ac4e0510447df57d8e2cc565d58d9bec2046da2eb5f6",
+  "upd-det-timing-en/gold.json": "ae5324025d5618c2de4d8aba35d922c88dbe4cf276c2f1b5e728975b65e79921",
+  "upd-det-timing-en/input.md": "d68c767b66243aab356899e5646c2843359294fae4a7084c6bc60fe156cfd298",
+  "upd-meas-xsec-en/case.json": "4ac8efcf898dc41cf786e6380db3cb869aca49921ba8512cad9bb688b932e36f",
+  "upd-meas-xsec-en/gold.json": "281c0612d02ee706907c1e8c1a9a938a36a7dd8d7e56d3ecf83da71ab85443bf",
+  "upd-meas-xsec-en/input.md": "c8c0a2b487a719f706905fb81db2f3efbb54dc0c085549c41d75f3e89c5a673e"
+ }
+}
