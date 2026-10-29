@@ -106,6 +106,15 @@ class Snapshots(unittest.TestCase):
         self.assertEqual(m["capture"]["method"], "working-copy-file-by-file")
         self.assertFalse(m["capture"]["coherent_version"])
 
+    def test_snapshot_entries_are_committable_metadata(self):
+        # nanosecond times exceed 2^53-1: they are kept as decimal strings (spec 10.2), so a manifest encodes
+        from contracts import hep_review as H
+        m = M.snapshot(self.root, ["analysis.md"], self.snapdir)
+        cap = m["materials"][0]["capture"]
+        self.assertIsInstance(cap["mtime_ns"], str)
+        self.assertTrue(cap["mtime_ns"].isdigit())
+        H.encode(m["materials"][0])
+
     def test_p32_later_source_change_does_not_change_the_snapshot(self):
         m = M.snapshot(self.root, ["analysis.md"], self.snapdir)
         d = m["materials"][0]["raw_ref"]["digest"]

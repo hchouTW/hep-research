@@ -171,8 +171,9 @@ def snapshot(root: Path | str, rels: list[str], snapdir: Path | str, *, max_byte
         _store_blob(snapdir, result.content, result.sha256)
         materials.append({"material_id": rel, "raw_ref": raw_ref(rel, result.sha256), "view_version": "raw/1",
                           "authors": [], "authors_basis": "unknown", "source_category": "file",
-                          "capture": {"size": result.size, "mtime_ns": result.mtime_ns, "ctime_ns": result.ctime_ns,
-                                      "nlink": result.nlink},
+                          "capture": {"size": result.size, "mtime_ns": str(result.mtime_ns),
+                                      "ctime_ns": str(result.ctime_ns), "nlink": result.nlink},  # decimal strings: ns
+                          # times exceed the metadata integer range (spec 10.2)
                           "limitations": [ROOT_BOUND_LIMITATION] + result.limitations})
     if require_coherent_version:
         gaps.append({"path": "*", "code": "capture.no_coherent_version",
