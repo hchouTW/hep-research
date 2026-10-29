@@ -278,3 +278,20 @@ Tests (`TMPDIR` on local disk): `test_executor_b2` 13 (receipts 2, binding 6, ca
 Entry conditions require N1, which did not pass S0 after three rounds (runbook 0.5.2 item 7). Neither stage is
 started; the control-layer rules (Control §1–§6) and the reference model are not written into skills or code.
 The Agent evaluation of Delivery §5.2 (C2 acceptance) is therefore not run.
+
+## Final verification (clean detached checkout of the branch head on local disk, `TMPDIR` on local disk)
+
+| Check | Result |
+|---|---|
+| `tools/run_all_checks.py --part static` | 31 pass, 0 fail (before the last two fixups: naming flagged three new identifiers, fixed in 843c8b55) |
+| `tests/skills` (`-t .`) | 2996 run; one failure (`test_cli_contract.test_scoped_tools_take_status`: the two new helpers lacked a `--status` exemption), fixed in 96d18a76 and rerun OK |
+| `tests/tools` (`-t .`) | 371, OK (after adding local timings for the three new test modules) |
+| `tests/contracts` (`-t .`) | 1160, OK (1 skipped) |
+| `tests/skills/hep_detector` | 587, OK (4 skipped) |
+| `tests/skills/hep_computing` | 267, OK (39 skipped) |
+| `tests/skills/hep_review` | 141, OK |
+| `tests/routing` | 21, OK |
+
+Not run: the full aggregate (`run_all_checks.py` without `--part`, including slow-tier and `ams-optional`), the live
+routing rerun (paid), and the AMS-optional copy check. The main checkout's `git status --porcelain` stayed empty at
+every stage.
