@@ -27,6 +27,10 @@ reproducible, partial reruns safe, and the provenance of every number checkable.
   unknown, as in a development checkout). A step may declare `parameter_digest` (a command printing the digest of the
   design parameters it reads, e.g. `evaluate_design.py run --digest-only`) that replaces the candidate files in the
   skip key, so a design chain reruns only where a parameter it reads changed.
+  When the numbers will be delivered or used downstream (evidence tier T2-numeric or above), run one step per
+  invocation in a fresh output directory and keep the task record of
+  [research workflow control](research-workflow-control.md), which also sets the evidence tier and the completion
+  report.
 - `<plugin root>/skills/hep-computing/assets/workflow/`: a SYNTHETIC example DAG (`workflow.json`: generate events,
   histogram them chunk by chunk, report) and a `Snakefile` with the same rules. Snakemake adds incremental reruns
   (only steps whose inputs changed), cluster profiles and DAG plots; the runner (with `--incremental`) is the dependency-free reference the

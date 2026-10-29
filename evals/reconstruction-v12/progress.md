@@ -137,3 +137,48 @@ only for MC-derived performance), and Core routing scope fixes.
 Items for a human (batched in the final report): DEC-06 re-confirmation; the “not started = failed, confirmed” rule
 (Control §7.2 (c)); N1's two round-3 fixes, which are in the copy but unreviewed; whether to run a further S0 round for
 N1 (beyond the runbook's limit, so a human decision).
+
+## A1 — methods and main-Agent resumption (documentation and skill wiring)
+
+Entry: N2, N3, N4, N5 passed S0 (above). Location of the dev records: moved from `plugins/hep-research/docs/dev/` to
+the repository root `docs/dev/reconstruction-v12/` (runbook 0.2.2 names `docs/dev/reconstruction-v12/` in the
+worktree); inside the plugin they would ship in the package (packaging scan: private-path rules and the README's
+stated package size). Contract (T2-code, Core §6.1): scope = the files below; acceptance = `tools/check_ownership.py`,
+`tools/check_routing_static.py`, `tools/check_wiring.py --since <base>`, `tools/check_layering.py`,
+`tools/reference_inventory.py`, `tests/routing`, and `run_all_checks.py --part static`; required. DEC defaults adopted
+(pending approval): DEC-08/DEC-09 (task record under `hep-research-artifacts/<task>/task-log/task-log.jsonl`), DEC-11
+(B/C spec as a shared hep-computing reference), DEC-12 (M1 first contract effective when listed in the first reply).
+No runtime is claimed; Control §1–§6 (N1 not passed) are not written into skills.
+
+Mapping table (added or modified passage → requirement ID → source section of the v12.1 spec copy):
+
+| Passage (file § heading) | Requirement | Source |
+|---|---|---|
+| hep-computing `research-workflow-control.md` § Status | RULE-01 (rule 5: no false claims) | Core §0.5, §1.4; runbook 0.5.1 |
+| § Always-on rules | RULE-01 | Core §0.4 |
+| § Evidence tier and execution mode (tier table, determination rules, mode table) | TIER-01, TASK-01 | Core §5.1, §5.2 |
+| § Trigger matrix | TIER-01, TASK-01, SCI-01..08, VAL-01..06, CTRL-01, OUT-01, PROV-01, EXEC-02, BUDGET-01, TASK-03, FLOW-01 | Core §5.3 |
+| § Task contract | TASK-01, AUTH-01 (only the add-only rule; the format is not written) | Core §6.1; Control §1.3 (DEC-12) |
+| § Transition period items 1–9 and limitations paragraph | TRANS-01, CTRL-01, OUT-01, EXEC-02, PROV-01, VAL-03, VAL-05, VAL-06 | Core §5.4; Control §7.1–7.4 |
+| § Human decisions | TASK-02, AUTH-01 | Core §6.2, §6.3; Control §6 (kinds listed only) |
+| § Resumption summary | TASK-03 | Core §6.4 |
+| § Completion report | FLOW-01 | Core §7.2–7.4 |
+| hep-computing `analysis-workflows.md` § Tools (link paragraph) | TRANS-01 | Core §5.4 item 1 |
+| hep-detector `event-reconstruction.md` § Planning a reconstruction: semantics table, redoability | SCI-01, SCI-02 | Methods §1.1 |
+| ditto: conditions as observation context | SCI-03 | Methods §1.2 |
+| ditto: propagate uncertainties | SCI-04 | Methods §1.3 |
+| ditto: association and counting | SCI-05 | Methods §1.4 |
+| ditto: method routing table and identifiability | SCI-01 | Methods §1.5 |
+| ditto: selection bias and exposure | SCI-07 | Methods §1.7 |
+| ditto: partitioning, accounts, pilot | PART-01, PART-02 | Methods §3.1, §3.2 |
+| ditto: representative cases (example block) | SCI-01..06 | Methods §4.1–4.4 |
+| ditto: profile values come from profiles | PROF-01 | Methods §5 |
+| hep-detector `calibration-and-alignment.md` § Iterative loops as contract steps | SCI-06 | Methods §1.6, §4.4 |
+| hep-detector `reconstruction-performance-and-truth-matching.md` (simulation vs data paragraph) | SCI-08 | Methods §1.8, §2.1 |
+| `docs/routing-contract.md` ownership rows; hep-detector and hep-computing `**Owns:**` lines | ARC-01 (skill division) | Core §3.2, §4.2; DEC-11 |
+| `tools/wiring_known_gaps.json` hub `analysis-workflows.md`; hep-computing README count; `docs/reference-inventory.*` regenerated | — (repository wiring) | `docs/maintenance.md` “Adding a topic” |
+| `CHANGELOG.md` Unreleased A1 entry | — | `docs/maintenance.md` |
+
+Not done in A1 (for a human): a live routing rerun after the `**Owns:**` changes (`docs/maintenance.md` asks for one
+before merge; it makes paid model calls, so it is not run without approval). `check_ownership.py` itself needed no
+code change: it reads the ownership table.

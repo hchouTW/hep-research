@@ -60,6 +60,14 @@ and position, in a follow-up); nothing already covered was restated.
   `dr-reco-neg`); the principles summary is unchanged (its routing part is at its budget).
 - Evidence: VALIDATION DETECTOR-RECONSTRUCTION-METHODS
 
+- **Reconstruction method contract and research workflow control** (reconstruction v12 stage A1; RULE-01, TIER-01,
+  TRANS-01, TASK-01/02, SCI-01..08, PROF-01, FLOW-01): hep-detector's reconstruction pages gain the method contract
+  (semantics, conditions as observation context, uncertainty propagation, association versus counting, method
+  routing by subsystem, selection bias and exposure, partitioning, representative cases) and iteration loops as
+  contract steps; the new hep-computing reference `skills/hep-computing/references/research-workflow-control.md`
+  holds the evidence tiers, the trigger matrix, the transition-period task record (no control-layer helper exists
+  yet), human decisions and the completion report. Ownership rows added for `reconstruction method routing`
+  (hep-detector) and `evidence tiers` / `research task record` (hep-computing). Documentation only; no new runtime.
 ## 0.49.1 (2026-10-30)
 
 Patch release, documentation only; contracts 3.17.0, `CORE_VERSION` 1.4.0, the adapters and every skill's behaviour are

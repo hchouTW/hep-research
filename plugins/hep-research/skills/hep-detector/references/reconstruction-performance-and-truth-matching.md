@@ -90,6 +90,15 @@ binning, same background subtraction. It also transfers only where the probe sam
 resembles the analysis sample; a scale factor measured on isolated probes does not
 automatically apply inside a dense jet.
 
+What each kind of number can support: a check whose reference is MC truth supports only **performance in
+simulation**. Claiming it for data needs the data/MC comparison above (a scale factor and its uncertainty) when the
+performance was derived in simulation; performance measured directly in data with a data-driven method needs no scale
+factor, but its premises (tag bias, background subtraction, trigger correlations) are recorded and checked. A model
+trained on simulation lists its training and application domains and checks the shift between them; its version is a
+condition. Which confirmation a performance claim on data needs (method-independent, not only a holdout), and how
+the target tier of a performance number is decided, are in hep-computing
+[research workflow control](../../hep-computing/references/research-workflow-control.md).
+
 ## Resolution and bias from reco-versus-truth
 
 With matching defined, resolution is the width and bias the mean of the residual

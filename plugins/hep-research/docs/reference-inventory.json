@@ -14,13 +14,13 @@
    "uncited": 0
   },
   "hep-computing": {
-   "references": 36,
-   "bytes": 325269,
+   "references": 37,
+   "bytes": 342706,
    "uncited": 0
   },
   "hep-detector": {
    "references": 43,
-   "bytes": 652525,
+   "bytes": 666876,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1177,8 +1177,8 @@
   {
    "path": "skills/hep-computing/references/analysis-workflows.md",
    "owner": "hep-computing",
-   "bytes": 4072,
-   "lines": 56,
+   "bytes": 4375,
+   "lines": 60,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
@@ -1524,6 +1524,22 @@
    "last_commit": "16214af1 2026-10-26"
   },
   {
+   "path": "skills/hep-computing/references/research-workflow-control.md",
+   "owner": "hep-computing",
+   "bytes": 17134,
+   "lines": 188,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-computing/references/analysis-workflows.md",
+    "skills/hep-detector/references/event-reconstruction.md",
+    "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md"
+   ],
+   "cited_by_other_skills": [
+    "hep-detector"
+   ],
+   "last_commit": "untracked"
+  },
+  {
    "path": "skills/hep-computing/references/risk-and-quality.md",
    "owner": "hep-computing",
    "bytes": 7384,
@@ -1767,12 +1783,13 @@
   {
    "path": "skills/hep-detector/references/calibration-and-alignment.md",
    "owner": "hep-detector",
-   "bytes": 21695,
-   "lines": 303,
+   "bytes": 24569,
+   "lines": 335,
    "linked_from_skill_md": true,
    "cited_by": [
     "contracts/naming/surfaces.json",
     "profiles/experiments/ams-02/modules/subsystems/instrument-overview.md",
+    "skills/hep-computing/references/research-workflow-control.md",
     "skills/hep-computing/references/semantic-naming.md",
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/calorimetry-ecal-hcal.md",
@@ -2103,10 +2120,11 @@
   {
    "path": "skills/hep-detector/references/event-reconstruction.md",
    "owner": "hep-detector",
-   "bytes": 13717,
-   "lines": 219,
+   "bytes": 24344,
+   "lines": 330,
    "linked_from_skill_md": false,
    "cited_by": [
+    "skills/hep-computing/references/research-workflow-control.md",
     "skills/hep-detector/references/calibration-and-alignment.md",
     "skills/hep-detector/references/calorimetry-ecal-hcal.md",
     "skills/hep-detector/references/data-mc-validation-and-detector-systematics.md",
@@ -2118,7 +2136,9 @@
     "skills/hep-detector/references/timing-detectors.md",
     "skills/hep-detector/references/tracking-and-vertexing.md"
    ],
-   "cited_by_other_skills": [],
+   "cited_by_other_skills": [
+    "hep-computing"
+   ],
    "last_commit": "267d534a 2026-10-30"
   },
   {
@@ -2365,7 +2385,7 @@
     "skills/hep-detector/references/signal-formation-and-readout.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "1450e47f 2026-10-30"
+   "last_commit": "18bef6af 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
@@ -2460,7 +2480,7 @@
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "1450e47f 2026-10-30"
+   "last_commit": "18bef6af 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/physics-objects-jets-btagging-met.md",
@@ -2499,10 +2519,11 @@
   {
    "path": "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md",
    "owner": "hep-detector",
-   "bytes": 10709,
-   "lines": 181,
+   "bytes": 11559,
+   "lines": 190,
    "linked_from_skill_md": true,
    "cited_by": [
+    "skills/hep-computing/references/research-workflow-control.md",
     "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/charge-confusion.md",
     "skills/hep-detector/references/data-mc-validation-and-detector-systematics.md",
@@ -2516,7 +2537,9 @@
     "skills/hep-detector/references/photon-likelihood-reconstruction.md",
     "skills/hep-detector/references/response-and-forward-folding.md"
    ],
-   "cited_by_other_skills": [],
+   "cited_by_other_skills": [
+    "hep-computing"
+   ],
    "last_commit": "9257d7b5 2026-10-15"
   },
   {
@@ -2669,7 +2692,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "1450e47f 2026-10-30"
+   "last_commit": "18bef6af 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/triggers-luminosity-pileup.md",
@@ -5159,6 +5182,10 @@
   "venue": [
    "skills/hep-authoring/references/latex-venue-setup.md",
    "skills/hep-authoring/references/multi-venue-reformatting.md"
+  ],
+  "workflow": [
+   "skills/hep-computing/references/analysis-workflows.md",
+   "skills/hep-computing/references/research-workflow-control.md"
   ],
   "writing": [
    "skills/hep-authoring/references/evidence-linked-writing.md",
