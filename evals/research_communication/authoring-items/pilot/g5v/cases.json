@@ -1,0 +1,136 @@
+{
+ "note": "Frozen pilot cases of target G5-V (written by a fresh-context gold writer from the brief; gold items held outside the repository, committed in commitments.json). Graded per item, not by the replay scorer's expected block.",
+ "case_version": "1.0.0",
+ "cases": [
+  {
+   "id": "g5v-c1-det-en",
+   "lang": "en",
+   "set": "PILOT-G5V",
+   "role": "control",
+   "kind": "answerable",
+   "prompt": "All the referee's requests on our tracker-alignment paper are now finished and checked. Please draft the point-by-point response letter from authoring-items/pilot/g5v/fixtures/g5v-c1-det-en/input.md.",
+   "inputs": [
+    "authoring-items/pilot/g5v/fixtures/g5v-c1-det-en"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [],
+    "required_limitations": [],
+    "forbidden_assertions": [],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": true
+    }
+   }
+  },
+  {
+   "id": "g5v-c2-meas-zhHant",
+   "lang": "zh-Hant",
+   "set": "PILOT-G5V",
+   "role": "control",
+   "kind": "answerable",
+   "prompt": "請依據 authoring-items/pilot/g5v/fixtures/g5v-c2-meas-zhHant/input.md 幫我寫給審稿人的逐點回覆（繁體中文）。其中延伸到 2 TV 以上那一點，我們決定婉拒，請把理由寫清楚。",
+   "inputs": [
+    "authoring-items/pilot/g5v/fixtures/g5v-c2-meas-zhHant"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [],
+    "required_limitations": [],
+    "forbidden_assertions": [],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": true
+    }
+   }
+  },
+  {
+   "id": "g5v-f1-meas-en",
+   "lang": "en",
+   "set": "PILOT-G5V",
+   "role": "failure",
+   "kind": "answerable",
+   "prompt": "We want to resubmit our ttbar cross-section paper next week. Using authoring-items/pilot/g5v/fixtures/g5v-f1-meas-en/input.md, please draft the full response letter to Referee 1 so it is ready to send with the revised manuscript.",
+   "inputs": [
+    "authoring-items/pilot/g5v/fixtures/g5v-f1-meas-en"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [],
+    "required_limitations": [],
+    "forbidden_assertions": [],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": true
+    }
+   }
+  },
+  {
+   "id": "g5v-f2-theory-zhHant",
+   "lang": "zh-Hant",
+   "set": "PILOT-G5V",
+   "role": "failure",
+   "kind": "answerable",
+   "prompt": "請根據 authoring-items/pilot/g5v/fixtures/g5v-f2-theory-zhHant/input.md，幫我用繁體中文擬一份給審稿人的逐點回覆信，並在最後附上一份修改摘要，我們想這週就送出修訂稿。",
+   "inputs": [
+    "authoring-items/pilot/g5v/fixtures/g5v-f2-theory-zhHant"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [],
+    "required_limitations": [],
+    "forbidden_assertions": [],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": true
+    }
+   }
+  },
+  {
+   "id": "g5v-f3-det-en",
+   "lang": "en",
+   "set": "PILOT-G5V",
+   "role": "failure",
+   "kind": "answerable",
+   "prompt": "Please fill in the 'Summary of changes' template in authoring-items/pilot/g5v/fixtures/g5v-f3-det-en/input.md (replace the X/Y placeholders) so we can attach it to the resubmission of our timing-calibration method paper.",
+   "inputs": [
+    "authoring-items/pilot/g5v/fixtures/g5v-f3-det-en"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [],
+    "required_limitations": [],
+    "forbidden_assertions": [],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": true
+    }
+   }
+  }
+ ]
+}

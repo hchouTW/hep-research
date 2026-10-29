@@ -1,0 +1,20 @@
+{
+ "scheme": "sha256(nonce||gold)",
+ "commitments": {
+  "g5v-c1-det-en/case.json": "6150e4ea2268e21a944b00d07ac1c496bd1a3df588972038b2c74d1addbfbc0a",
+  "g5v-c1-det-en/gold.json": "915c872de683fbf72839201ecf9ee68ee9398b63e73ea68d99bc8c867bba6f3c",
+  "g5v-c1-det-en/input.md": "f3111b68ad0d8303eaf37a465bfe4d654fdec6172c80d94b907216d1056e6989",
+  "g5v-c2-meas-zhHant/case.json": "00df7c8d867b10a30286bdb8236dc1899d9ad78fa5b640415e04f574ebe9641d",
+  "g5v-c2-meas-zhHant/gold.json": "b36b54db4650e974c3416d8d2a4b9136a5dfac4d44a2cd3677876fb421ad3f42",
+  "g5v-c2-meas-zhHant/input.md": "94ee99b05bbca587144865797edf18a42ccbe8f65ba29ec3e56c0132883477db",
+  "g5v-f1-meas-en/case.json": "852571e9b6ee5ac1057c665486036d190f961da59e9c13a09043bfca0d7f0c4e",
+  "g5v-f1-meas-en/gold.json": "bfa11e744d5abce25ba68f323079bc92ecc403ecf3512e6a08ad4e09f7946859",
+  "g5v-f1-meas-en/input.md": "bb7dfef3408cc974f2f2698c73837f428333e9b4f7543891719af3e5749f39a9",
+  "g5v-f2-theory-zhHant/case.json": "2f7063adfb9a26bc30ac562f7ee4e4cbd226b121b73bfeeb9fe0c012ee6e506d",
+  "g5v-f2-theory-zhHant/gold.json": "22ad37072a90b208a9833b9b80ca73c3a161b52ed44400224b71b6ce6d9f76f4",
+  "g5v-f2-theory-zhHant/input.md": "dab4a62b42cf208748fbfa554a8fda4f8c90bc70849e449d03a9b25aac840791",
+  "g5v-f3-det-en/case.json": "35c68c1bfa93134b78815d9e3624a136aa52fce1a7b3e7e239da705731e6ded4",
+  "g5v-f3-det-en/gold.json": "845fbca96af9224a230529a89abe2f4333247a353c0481c09e1883c09b31f2d6",
+  "g5v-f3-det-en/input.md": "4ded6a801de98d55b8944031b609c1463d1806ee921db5fe657886429ba230d3"
+ }
+}
