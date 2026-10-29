@@ -1,0 +1,136 @@
+{
+ "note": "Frozen pilot cases of P4b (talk revisions: result update and condensation); fresh-context gold writer; gold held outside the repository until graded.",
+ "case_version": "1.0.0",
+ "cases": [
+  {
+   "id": "cond-theo-zh",
+   "lang": "zh-Hant",
+   "set": "PILOT-P4B",
+   "role": "failure",
+   "kind": "answerable",
+   "prompt": "我的報告時段從 25 分鐘縮短為 10 分鐘。請把 authoring-items/pilot/p4b/fixtures/cond-theo-zh/input.md 裡的投影片大綱精簡成約 5–6 張投影片的大綱（保留圖說），不需要逐字稿。",
+   "inputs": [
+    "authoring-items/pilot/p4b/fixtures/cond-theo-zh"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [],
+    "required_limitations": [],
+    "forbidden_assertions": [],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": true
+    }
+   }
+  },
+  {
+   "id": "ctrl-cond-longlim-zh",
+   "lang": "zh-Hant",
+   "set": "PILOT-P4B",
+   "role": "control",
+   "kind": "answerable",
+   "prompt": "研討會把我的報告縮短到 7 分鐘。請把 authoring-items/pilot/p4b/fixtures/ctrl-cond-longlim-zh/input.md 的投影片大綱精簡成約 5 張投影片的大綱（含圖說），只要大綱即可。",
+   "inputs": [
+    "authoring-items/pilot/p4b/fixtures/ctrl-cond-longlim-zh"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [],
+    "required_limitations": [],
+    "forbidden_assertions": [],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": true
+    }
+   }
+  },
+  {
+   "id": "ctrl-noeffect-en",
+   "lang": "en",
+   "set": "PILOT-P4B",
+   "role": "control",
+   "kind": "answerable",
+   "prompt": "The collaboration circulated an update note (pasted at the end of authoring-items/pilot/p4b/fixtures/ctrl-noeffect-en/input.md). Please revise my talk outline in authoring-items/pilot/p4b/fixtures/ctrl-noeffect-en/input.md accordingly.",
+   "inputs": [
+    "authoring-items/pilot/p4b/fixtures/ctrl-noeffect-en"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [],
+    "required_limitations": [],
+    "forbidden_assertions": [],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": true
+    }
+   }
+  },
+  {
+   "id": "upd-det-timing-en",
+   "lang": "en",
+   "set": "PILOT-P4B",
+   "role": "failure",
+   "kind": "answerable",
+   "prompt": "We found a bug in the time-walk calibration. Please revise my talk outline in authoring-items/pilot/p4b/fixtures/upd-det-timing-en/input.md for the fix described in the update note at the end, and return the revised outline.",
+   "inputs": [
+    "authoring-items/pilot/p4b/fixtures/upd-det-timing-en"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [],
+    "required_limitations": [],
+    "forbidden_assertions": [],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": true
+    }
+   }
+  },
+  {
+   "id": "upd-meas-xsec-en",
+   "lang": "en",
+   "set": "PILOT-P4B",
+   "role": "failure",
+   "kind": "answerable",
+   "prompt": "Our acceptance correction was revised after the trigger scale-factor fix. Please update my talk in authoring-items/pilot/p4b/fixtures/upd-meas-xsec-en/input.md according to the update note at the end of the file and give me the revised slide-by-slide outline.",
+   "inputs": [
+    "authoring-items/pilot/p4b/fixtures/upd-meas-xsec-en"
+   ],
+   "expected": {
+    "skill": "hep-authoring",
+    "answerable": true,
+    "facts": [],
+    "required_limitations": [],
+    "forbidden_assertions": [],
+    "allowed_numbers": [],
+    "allowed_ids": [],
+    "synthetic_values": [],
+    "handoffs": [],
+    "unresolved_expected": [],
+    "completion": {
+     "may_assert_done": true
+    }
+   }
+  }
+ ]
+}
