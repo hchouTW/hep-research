@@ -194,6 +194,8 @@ def cmd_ingest(a) -> dict:
                     "stat_findings": [{"claim": f["claim"], "element": f["element"],
                                        "evidence_text": f.get("evidence_text", "")}
                                       for f in rec["findings"] if f["obligation_id"] == "O-stat"],
+                    "findings": [{"obligation_id": f["obligation_id"], "claim": f["claim"], "element": f["element"],
+                                  "evidence_text": f.get("evidence_text", "")} for f in rec["findings"]],
                     "any_findings": bool(findings), "summary": rep["attestation"]["output_summary"],
                     "limitations": rec["limitations"]}
             results[tid] = row
