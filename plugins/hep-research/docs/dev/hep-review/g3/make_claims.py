@@ -6,7 +6,9 @@
 """
 from __future__ import annotations
 
+import ast
 import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -18,6 +20,30 @@ sys.dont_write_bytecode = True
 from hep_review_support import evaluation as E  # noqa: E402
 
 REGISTRY = ROOT / "skills" / "hep-review" / "assets" / "claims.json"
+SINGLE_PAGE_MEASURED_AT = "9c499a24"  # G2, g2h and g2x ran under this packet text, validator 0.1.0 and host profile
+G3_MEASURED_AT = "9fd4faca"           # every G3 trial ran under this tree (results committed before decryption)
+
+
+def _show(commit: str, rel: str) -> bytes:
+    return subprocess.run(["git", "show", f"{commit}:plugins/hep-research/{rel}"], cwd=ROOT, capture_output=True,
+                          check=True).stdout
+
+
+def _constant(source: bytes, name: str) -> str:
+    for node in ast.parse(source).body:
+        if isinstance(node, ast.Assign) and any(isinstance(t, ast.Name) and t.id == name for t in node.targets):
+            return ast.literal_eval(node.value)
+    raise KeyError(name)
+
+
+def parts_at(commit: str) -> dict:
+    """The fingerprint parts of the tree a claim was measured on, read from the repository history."""
+    sup = "skills/hep-review/scripts/hep_review_support/"
+    return E.fingerprint_parts(
+        **MODEL, host=json.loads(_show(commit, "skills/hep-review/assets/host_profile.json")),
+        packet=_constant(_show(commit, sup + "coordinator.py"), "PACKET"),
+        validator_version=_constant(_show(commit, "contracts/hep_review.py"), "LATEST_VALIDATOR"),
+        reader=E.reader_digest({name: _show(commit, sup + name) for name in E.READER_FILES}))
 MODEL = {"model_alias": "claude-opus-5-5 (session model, inherited by general-purpose subagents)",
          "model_pinned": False, "date": "2026-10-29"}
 
@@ -43,10 +69,12 @@ def pilot_claim() -> dict:
                    "Claude wrote the G2/g2h oracles and every authoring brief; Codex gold is author self-assessment",
                    "3 trials per instance with identical packets: 141 trials are 47 cases"]
     c = E.make_claim("hep-review/statistics-single-page", scope, binding, results=results, limitations=limitations,
-                     parts=E.fingerprint_parts(**MODEL))
-    return E.transition(c, "pilot-checked-scope", at="2026-10-29",
-                        evidence={"engineering_gate": True, "graders_calibrated": True,
-                                  "report": "docs/dev/hep-review/g2h-report.md (and g2-report.md, g2x-report.md)"})
+                     parts=parts_at(SINGLE_PAGE_MEASURED_AT), measured_at=SINGLE_PAGE_MEASURED_AT)
+    c = E.transition(c, "pilot-checked-scope", at="2026-10-29",
+                     evidence={"engineering_gate": True, "graders_calibrated": True, "kind": "pilot",
+                               "report": "docs/dev/hep-review/g2h-report.md (and g2-report.md, g2x-report.md)"})
+    # the packet text and validator changed after these pilots (1dfb15fa, 0bea7326): the claim needs reassessment
+    return E.reassess_if_changed(c, E.fingerprint_parts(**MODEL), at="2026-10-29")
 
 
 def g3_claim() -> dict:
@@ -60,9 +88,9 @@ def g3_claim() -> dict:
                "suite": "g3 (Codex-authored, held out)",
                "case_distribution": {"C01": 12, "C02": 5, "C03": 2, "C04": 1},
                "trial_plan": "3 trials per instance, 60 trials; graders Claude forward, Claude reversed, Codex"}
-    results = {"defect_detection": "71/72 = 0.986, 95% CI [0.925, 0.9996] (miss rate 0.014, CI [0.0004, 0.075])",
-               "numerical_defects": "26/27, CI [0.810, 0.999]", "convention_defects": "18/18, CI [0.815, 1.0]",
-               "c02_false_alarm": "0/15, CI [0.0, 0.218]", "c03_gap_kept": "6/6", "c04": "3/3",
+    results = {"defect_detection": "71/72 = 0.986, 95% CI [0.925, 0.9997] (miss rate 0.014, CI [0.0003, 0.075])",
+               "numerical_defects": "26/27, CI [0.810, 0.9991]", "convention_defects": "18/18, CI [0.8146, 1.0]",
+               "c02_false_alarm": "0/15, CI [0.0, 0.2181]", "c03_gap_kept": "6/6", "c04": "3/3",
                "engineering": "60/60 digest-bound, R2, verified, export recompute, no quarantine",
                "miss": "g3dd81149-t2 D2 (equal-tailed interval released as shortest): reviewer asserted the "
                        "opposite; t1 and t3 found it"}
@@ -72,10 +100,11 @@ def g3_claim() -> dict:
                    "reviewers share a scratch folder: one reviewer's scratch file was overwritten by another's "
                    "(noticed and discarded); no-other-evaluations-seen is advisory"]
     c = E.make_claim("hep-review/statistics-multi-step", scope, binding, results=results, limitations=limitations,
-                     parts=E.fingerprint_parts(**MODEL))
-    evidence = {"engineering_gate": True, "graders_calibrated": True, "report": "docs/dev/hep-review/g3-report.md"}
-    c = E.transition(c, "pilot-checked-scope", evidence=evidence, at="2026-10-29")
-    return E.transition(c, "evaluated-scope", evidence=evidence, at="2026-10-29")
+                     parts=parts_at(G3_MEASURED_AT), measured_at=G3_MEASURED_AT)
+    evidence = {"engineering_gate": True, "graders_calibrated": True, "kind": "held-out-evaluation",
+                "report": "docs/dev/hep-review/g3-report.md"}
+    return E.reassess_if_changed(E.transition(c, "evaluated-scope", evidence=evidence, at="2026-10-29"),
+                                 E.fingerprint_parts(**MODEL), at="2026-10-29")
 
 
 def main(argv=None) -> int:

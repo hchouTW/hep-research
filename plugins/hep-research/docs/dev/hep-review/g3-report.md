@@ -14,19 +14,19 @@ left out; the grader runs are in `grader-runs/`.
 ## 1. Result
 
 **Claim rule (`g3/frozen-protocol.md` §5): evaluated-scope**, with no usage warning. The engineering gate passed 60/60,
-and all three graders calibrated 12/12 on the Codex-written labels.
+and the graders calibrated 12/12 on the Codex-written labels: one Claude calibration run (shared by the forward and reversed Claude scorers, the same model) and one Codex run.
 
 | Measured (pre-registered) | k / n | Rate | 95% Clopper-Pearson |
 |---|---|---|---|
-| Defect detection, all (trial, defect) pairs | 71 / 72 | 0.986 | [0.925, 0.9996] |
-| — interacting | 71 / 72 | 0.986 | [0.925, 0.9996] |
-| — numerical | 26 / 27 | 0.963 | [0.810, 0.999] |
-| — particle-physics convention | 18 / 18 | 1.000 | [0.815, 1.000] |
-| C02 false alarm (controls) | 0 / 15 | 0.000 | [0.000, 0.218] |
+| Defect detection, all (trial, defect) pairs | 71 / 72 | 0.986 | [0.925, 0.9997] |
+| — interacting | 71 / 72 | 0.986 | [0.925, 0.9997] |
+| — numerical | 26 / 27 | 0.963 | [0.810, 0.9991] |
+| — particle-physics convention | 18 / 18 | 1.000 | [0.8146, 1.000] |
+| C02 false alarm (controls) | 0 / 15 | 0.000 | [0.000, 0.2181] |
 | C03 gap kept (missing input) | 6 / 6 | 1.000 | [0.541, 1.000] |
 | C04 planning gap | 3 / 3 | 1.000 | [0.292, 1.000] |
 
-**Miss rate: 1/72 = 0.014, 95% CI [0.0004, 0.075].** This is the first measured miss in four suites.
+**Miss rate: 1/72 = 0.014, 95% CI [0.0003, 0.075].** This is the first measured miss in four suites.
 
 | Check | Result |
 |---|---|
@@ -73,8 +73,10 @@ The claim is **evaluated-scope** (`assets/claims.json`, `hep-review/statistics-m
    It noticed, discarded that output and reran under a unique name. Reviewers share the session scratch folder, so
    "no other evaluations seen" stays advisory (host profile H1). A packet that gives each reviewer a private scratch
    path would close this.
-5. **Single-page claim unchanged.** It stays pilot-checked-scope. It is a different, easier scope that G3 does not
-   re-measure.
+5. **Single-page claim: needs-reassessment.** Its fingerprint is taken at the commit where it was measured
+   (`9c499a24`). The packet text (`1dfb15fa`) and the validator (`0bea7326`) changed after that, so the lifecycle
+   moves it to needs-reassessment. G3 measured the current packet and validator, but on a different, harder scope;
+   it does not re-measure the single-page scope.
 
 ## 4. T08 deliverables
 

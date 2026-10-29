@@ -14,7 +14,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 | hep-detector | 42 | 589 | 0 |
 | hep-measurement | 12 | 123 | 0 |
 | hep-ml | 42 | 195 | 0 |
-| hep-review | 9 | 28 | 0 |
+| hep-review | 9 | 29 | 0 |
 | hep-statistics | 14 | 207 | 0 |
 | hep-theory | 31 | 244 | 0 |
 
@@ -292,11 +292,11 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `domains/computing.md` | hep-review | 1.8 | no | 2 | - | dbebc92c 2026-10-29 |
 | `domains/index.md` | hep-review | 1.8 | yes | 92 | hep-authoring, hep-citations, hep-computing, hep-detector, hep-measurement, hep-ml, hep-statistics, hep-theory | dbebc92c 2026-10-29 |
 | `domains/statistics.md` | hep-review | 2.1 | no | 23 | hep-authoring, hep-detector, hep-measurement, hep-statistics, hep-theory | dbebc92c 2026-10-29 |
-| `evaluation-and-claims.md` | hep-review | 3.2 | yes | 1 | - | 5e8d847b 2026-10-29 |
+| `evaluation-and-claims.md` | hep-review | 3.8 | yes | 1 | - | 1c2846b8 2026-10-29 |
 | `evidence-and-adjudication.md` | hep-review | 3.4 | yes | 1 | - | dbebc92c 2026-10-29 |
 | `host-and-trust-boundaries.md` | hep-review | 3.8 | yes | 1 | - | 1dfb15fa 2026-10-29 |
 | `storage-continuity-and-export.md` | hep-review | 2.9 | yes | 1 | - | dbebc92c 2026-10-29 |
-| `support-matrix.md` | hep-review | 3.1 | yes | 2 | - | 5e8d847b 2026-10-29 |
+| `support-matrix.md` | hep-review | 3.2 | yes | 3 | - | 1c2846b8 2026-10-29 |
 | `workflow-and-tiers.md` | hep-review | 6.1 | yes | 2 | - | b491ff9e 2026-10-29 |
 | `astroparticle-statistics.md` | hep-statistics | 12.4 | yes | 15 | hep-detector, hep-measurement | e03c0396 2026-10-22 |
 | `combinations.md` | hep-statistics | 4.6 | yes | 4 | - | 317c39a3 2026-10-14 |

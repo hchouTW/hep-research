@@ -8,7 +8,7 @@ Software checks establish contract consistency only, not physical validity.
 - **hep-review G3 (T08 evaluation): evaluated-scope for multi-step statistical reviews.** A held-out suite authored by
   Codex (20 instances of 800-2,000 words, two interacting defects each, numerical and convention defects included;
   the gold was held encrypted by the user) was reviewed in 60 R2 trials and graded by Claude and Codex together.
-  Defect detection was 71/72 (95% CI 0.925-0.9996), the first measured miss; there were 0/15 false alarms, 6/6 gaps
+  Defect detection was 71/72 (95% CI 0.925-0.9997), the first measured miss; there were 0/15 false alarms, 6/6 gaps
   kept and 60/60 on the engineering gate (`docs/dev/hep-review/g3-report.md`). New claim
   `hep-review/statistics-multi-step` (evaluated-scope) in `assets/claims.json`; the support matrix, capability
   matrix and skill status are updated, and the regression suite re-scores G3.

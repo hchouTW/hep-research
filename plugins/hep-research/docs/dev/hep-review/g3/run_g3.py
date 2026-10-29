@@ -45,7 +45,7 @@ def clopper_pearson(k: int, n: int, level: float = 0.95) -> tuple[float, float]:
         return (lo + hi) / 2
     lower = 0.0 if k == 0 else solve(lambda p: 1 - binom_cdf(k - 1, n, p) < a)
     upper = 1.0 if k == n else solve(lambda p: binom_cdf(k, n, p) > a)
-    return round(lower, 4), round(upper, 4)
+    return math.floor(lower * 1e4) / 1e4, math.ceil(upper * 1e4) / 1e4  # rounded outward: never narrower
 
 
 def rate(k: int, n: int) -> dict:

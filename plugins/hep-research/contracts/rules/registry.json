@@ -3530,6 +3530,23 @@
    "full": false
   },
   {
+   "id": "hep-review-claims-evidence",
+   "change": "hep-review capability claims, host profile, pilot and evaluation drivers and their committed evidence",
+   "patterns": [
+    "skills/hep-review/assets/**",
+    "skills/hep-review/references/support-matrix.md",
+    "docs/dev/hep-review/**"
+   ],
+   "checks": [
+    "tests.skills.hep_review.test_claims",
+    "tests.skills.hep_review.test_regression",
+    "tests.skills.hep_review.test_pilot_generator",
+    "part:static"
+   ],
+   "not_available": [],
+   "full": false
+  },
+  {
    "id": "docs-records",
    "change": "design and decision records, changelog, validation record",
    "patterns": [
