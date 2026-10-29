@@ -35,13 +35,13 @@ tasks:
   T01: {status: done, deps: [T0S], steps_done: [1, 2, 3, 4, 5, 6, 7, 8], notes: "62/62 owned cases pass; independent review: 1 blocker, 6 major, 8 minor, all dispositioned (12 adopted, 3 partly), fixed with tests first (3f075184); blocker awaits user confirmation (task file 4.2)"}
   T02: {status: done, deps: [T01], steps_done: [1, 2, 3, 4, 5, 6, 7], notes: "30/30 owned cases pass; interruption, two-process CAS, foreign commit, export->import with checkpoint all tested"}
   T03: {status: done, deps: [T01], steps_done: [1, 2, 3, 4, 5, 6, 7], notes: "15/15 owned cases pass; live routing run not run (paid, needs approval)"}
-  U1:  {status: pending, deps: [T02, T03], kind: user-gate}
+  U1:  {status: pending, deps: [T02, T03], kind: user-gate, notes: "not reached: target_gate G1"}
   T04: {status: pending, deps: [U1]}
   T05: {status: skipped}
   T06: {status: skipped}
   T07: {status: skipped}
   T08: {status: skipped}
-gates: {G1: waiting-user, G2: pending, G3: pending}
+gates: {G1: done, G2: pending, G3: pending}
 cases:
   T00: {N01: not-applicable-with-basis (worktree created; failure path is the hard stop), N02: pass, N04: pass (no existing hep-review in source or cache), N40: pass}
   T01: "all 62 pass (tests/contracts/test_hep_review_{json,decision_table,kernel,review_fixes}.py)"
@@ -60,9 +60,9 @@ review_inputs_t01:
   tests/contracts/test_hep_review_decision_table.py: 2adf79e1410a09a6e41a824977c5d0e4304df0da44eae4f39cf80559283b8822
   tests/contracts/test_hep_review_kernel.py: a70bf1c3b1d5c521a305fa389e5f1253c20eedb55ce4a4cc5908c1b4b619c265
 blockers:
-  - {when: 2026-10-29T09:30+08:00, task: G1, description: "independent G1 review: 4 blockers (B1 rollback stays verified, B2 fork/migrate drop negatives, B3 hand-written assignment bases, B4 records not bound to raw), 4 major, 8 minor; all fixed with tests first in b491ff9e; dispositions in reviews/g1-review-dispositions.md", needs: user}
+  - {when: 2026-10-29T09:30+08:00, task: G1, description: "independent G1 review: 4 blockers (B1 rollback stays verified, B2 fork/migrate drop negatives, B3 hand-written assignment bases, B4 records not bound to raw), 4 major, 8 minor; all fixed with tests first in b491ff9e; dispositions in reviews/g1-review-dispositions.md", needs: none, resolved: "2026-10-29 user accepted the G1 dispositions"}
   - {when: 2026-10-29T07:15+08:00, task: T01, description: "independent T01 review returned blocker F1 (layer 1 not byte-reproducible across processes); fixed with a multi-seed test in 3f075184", needs: none, resolved: "2026-10-29 user accepted the dispositions and asked to continue with T03 and G1"}
-next_action: "Ask the user to accept the G1 review dispositions; then declare G1 (g1-report.md) and finish (target_gate G1); U1 only if the user raises the target to G2"
+next_action: "Run finished at target G1. To continue: raise target_gate to G2 and answer U1 (who holds gold and nonces); next session first checks H5 (persistence marker) and H6 (test checkpoint returned)"
 ```
 
 ## Log
@@ -95,4 +95,5 @@ next_action: "Ask the user to accept the G1 review dispositions; then declare G1
 2026-10-29 09:15 | G1 | review fixes | B1-B4, M1-M4, m1-m8; regression tests first (19 F + 8 E before) | b491ff9e
 2026-10-29 09:40 | G1 | check | full branch check: 31 pass, 0 fail, 2 host-CLI skips; 6214 tests, 0 failures | none
 2026-10-29 09:42 | stop | 4.2 | G1 review blockers -> ask the user | none
+2026-10-29 09:50 | G1 | declare | user accepted the G1 dispositions; G1 declared (experimental record prototype); run finished at target G1 | none
 ```

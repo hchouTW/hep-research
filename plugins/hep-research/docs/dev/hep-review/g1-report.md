@@ -1,6 +1,6 @@
 # G1 gate report: hep-review record prototype (spec v9 §18.3)
 
-**Status: prepared; G1 is declared only after the user confirms the dispositions of the G1 review blockers (task file §7.6, §4.2).**
+**Status: G1 declared 2026-10-29, after the user accepted the dispositions of the G1 review (task file §7.6, §4.2). Claim: experimental record prototype only.**
 
 Date: 2026-10-29. Branch `hep-review-v9-impl` in the worktree `~/hep-research/.claude/worktrees/hep-review-v9`, base
 `42f5bad1` (hep-research 0.43.0). Nothing was pushed, merged or released.
