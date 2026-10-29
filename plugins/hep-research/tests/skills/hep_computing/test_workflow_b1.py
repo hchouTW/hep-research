@@ -251,7 +251,7 @@ class CheckFields(Base):
         c.update(over)
         return c
 
-    def wf(self, chk):
+    def write_workflow(self, chk):
         self.work.mkdir(exist_ok=True)
         for f in ("criteria.json", "t.txt"):
             (self.work / f).write_text("{}")
@@ -259,7 +259,7 @@ class CheckFields(Base):
                                                  inputs=["criteria.json", "t.txt"], check=chk)]}
 
     def test_valid_check_is_recorded(self):  # its result is not bound (no check program): B2 fails the step
-        code, out = run(self.wf(self.check()), self.work)
+        code, out = run(self.write_workflow(self.check()), self.work)
         self.assertEqual(code, 1, out)
         ext = record(self.work, "s")["extension"]
         self.assertEqual((ext["check"]["role"], ext["check_result"]["bound"]), ("closure", False))
@@ -270,7 +270,7 @@ class CheckFields(Base):
                self.check(target_manifest={"t.txt": "missing.txt"}), self.check(samples="S")]
         for c in bad:
             with self.subTest(check=c):
-                self.assertEqual(run(self.wf(c), self.work)[0], 2)
+                self.assertEqual(run(self.write_workflow(c), self.work)[0], 2)
 
 
 if __name__ == "__main__":

@@ -48,7 +48,7 @@ class Base(unittest.TestCase):
     def tearDown(self):
         self._t.cleanup()
 
-    def wf(self, steps):
+    def write_workflow(self, steps):
         p = self.root / "wf.json"
         p.write_text(json.dumps({"workflow": "b2", "steps": steps}), encoding="utf-8")
         return p
@@ -57,7 +57,7 @@ class Base(unittest.TestCase):
 class Receipts(Base):
     def test_receipt_fields_and_records_unchanged(self):
         steps = [{"id": "s", "argv": ["{python}", "-c", "open('o.txt','w').write('1')"], "outputs": ["o.txt"]}]
-        code, out = run(RUNNER, self.wf(steps), "--work", self.work, "--created", "2026-10-29",
+        code, out = run(RUNNER, self.write_workflow(steps), "--work", self.work, "--created", "2026-10-29",
                         "--receipt-dir", self.root / "receipts", "--attempt-prefix", "w1/")
         self.assertEqual(code, 0, out)
         rec = json.loads((self.root / "receipts" / "w1" / "s.receipt.json").read_text())
@@ -75,7 +75,7 @@ class Receipts(Base):
 
     def test_no_receipt_without_the_option(self):
         steps = [{"id": "s", "argv": ["{python}", "-c", "open('o.txt','w').write('1')"], "outputs": ["o.txt"]}]
-        self.assertEqual(run(RUNNER, self.wf(steps), "--work", self.work)[0], 0)
+        self.assertEqual(run(RUNNER, self.write_workflow(steps), "--work", self.work)[0], 0)
         self.assertFalse(any(self.root.rglob("*.receipt.json")))
 
 
@@ -102,7 +102,7 @@ class CheckBinding(Base):
                  "outputs": ["result.json"], "check": chk}]
 
     def runit(self, steps):
-        code, out = run(RUNNER, self.wf(steps), "--work", self.work)
+        code, out = run(RUNNER, self.write_workflow(steps), "--work", self.work)
         rec = json.loads((self.work / "runs" / "chk.computational-run.json").read_text())
         return code, out, rec["extension"].get("check_result")
 

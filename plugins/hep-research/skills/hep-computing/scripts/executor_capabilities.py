@@ -151,13 +151,13 @@ def admit(decl: dict, qual: dict, required: list[str]) -> dict:
     refused = {}
     for g in required:
         cap = (decl.get("capabilities") or {}).get(g)
-        test = (qual.get("tests") or {}).get(g) or {}
+        outcome = (qual.get("tests") or {}).get(g) or {}
         if cap is None:
             refused[g] = "not declared"
         elif cap.get("qualification_sha256") != digest:
             refused[g] = "the declaration does not cite this qualification record"
-        elif test.get("status") != "pass":
-            refused[g] = f"qualification {test.get('status', 'missing')}"
+        elif outcome.get("status") != "pass":
+            refused[g] = f"qualification {outcome.get('status', 'missing')}"
         elif qual.get("runner_sha256") != sha256_file(RUNNER):
             refused[g] = "the runner changed since it was qualified"
     return {"status": "refused" if refused else "ok", "required": required, "refused": refused}
