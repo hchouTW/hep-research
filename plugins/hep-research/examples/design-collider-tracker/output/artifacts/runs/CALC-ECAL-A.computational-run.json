@@ -4,7 +4,7 @@
  "artifact_type": "computational-run",
  "objective": "detector system design: computational-run written by evaluate_design.py",
  "versions": {
-  "plugin": "0.46.0",
+  "plugin": "0.47.0",
   "contracts": "3.16.0",
   "plugin_release": {
    "release": "unreleased",
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-A.json",
-   "sha256": "57b7418d1e6b15b1cfe3021aed7f288cfe5a5ee581166ae1e277246c2cb0fe20",
+   "sha256": "d9dcc21cfc73a9759357befd7b78603fc72ab318f2348242e4d757bf60c5dc76",
    "artifact_type": "design-candidate",
    "artifact_id": "collider-tracker-v1-cand-A",
    "status": [
@@ -40,13 +40,13 @@
   "input_manifest": [
    {
     "path": "candidates/cand-A.json",
-    "sha256": "57b7418d1e6b15b1cfe3021aed7f288cfe5a5ee581166ae1e277246c2cb0fe20"
+    "sha256": "d9dcc21cfc73a9759357befd7b78603fc72ab318f2348242e4d757bf60c5dc76"
    }
   ],
   "tools": [
    {
     "name": "calorimeter-resolution",
-    "version": "0.46.0"
+    "version": "0.47.0"
    }
   ],
   "commands": [

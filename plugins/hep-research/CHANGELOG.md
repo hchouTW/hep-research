@@ -3,7 +3,22 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.47.0 (2026-10-29)
+
+Minor release; contracts 3.16.0, `CORE_VERSION` 1.4.0 and the adapters are unchanged. It ships the hep-authoring
+improvement task (PR #314): a hep-review handoff with an ownership row, a scientific correction of the hedging
+completion criterion, completion criteria for the compact change ledger, and the frozen authoring-pilot tools in the
+repository's `evals/`.
+
+**Before you upgrade** (details in each entry below):
+- hep-authoring now hands a recorded review of the analysis, fit, derivation or code behind a claim to hep-review;
+  manuscript review stays with hep-authoring.
+- One scientific correction (S3, HEDGE-DONE-WHEN): a hedge that states a real uncertainty or limitation is no longer
+  required to be removed.
+
+**Known issues**: carried over from 0.46.0 (cr-propagation F1 convergence, F2/F3, the live routing run). New: reply
+drafts for pending work are often written as completed-voice templates with placeholders; a pilot of a fix found no
+difference and the change was withdrawn (VALIDATION AUTHORING-IMPROVE).
 
 - **hep-authoring hands recorded reviews to hep-review** (G10): a Handoffs row for a recorded review of the analysis,
   fit, derivation or code behind a claim; `independent-review.md` and `reviewer-style-assessment.md` say where the
