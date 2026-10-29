@@ -60,6 +60,16 @@ and position, in a follow-up); nothing already covered was restated.
   `dr-reco-neg`); the principles summary is unchanged (its routing part is at its budget).
 - Evidence: VALIDATION DETECTOR-RECONSTRUCTION-METHODS
 
+- **Workflow runner: fresh outputs, complete output contract, safe destinations, confirmed termination**
+  (reconstruction v12 stage B1; OUT-01, CACHE-01, EXEC-02): `run_workflow.py` refuses absolute, `..` and symlinked
+  input, output and stdout paths (exit 2); fails a step whose declared output existed before and was not rewritten
+  (an exit-0 command that writes nothing is no longer a success); reruns under `--incremental` when outputs were added
+  or removed; runs each step in its own process group with a per-step `timeout_s`, stops and confirms the group on a
+  timeout or when the step leaves processes behind, and always writes a run record with `end_status`,
+  `termination`, `output_contract` and `artifact_digest` (output hashes only when termination is confirmed). A step's
+  optional `check` object is recorded as `extension.check`. Tests: `tests/skills/hep_computing/test_workflow_b1.py`
+  (16, each gap with a negative case that failed before the fix and a positive control; BUG-02 with a pinned release
+  digest).
 - **Reconstruction method contract and research workflow control** (reconstruction v12 stage A1; RULE-01, TIER-01,
   TRANS-01, TASK-01/02, SCI-01..08, PROF-01, FLOW-01): hep-detector's reconstruction pages gain the method contract
   (semantics, conditions as observation context, uncertainty propagation, association versus counting, method
@@ -68,6 +78,7 @@ and position, in a follow-up); nothing already covered was restated.
   holds the evidence tiers, the trigger matrix, the transition-period task record (no control-layer helper exists
   yet), human decisions and the completion report. Ownership rows added for `reconstruction method routing`
   (hep-detector) and `evidence tiers` / `research task record` (hep-computing). Documentation only; no new runtime.
+
 ## 0.49.1 (2026-10-30)
 
 Patch release, documentation only; contracts 3.17.0, `CORE_VERSION` 1.4.0, the adapters and every skill's behaviour are

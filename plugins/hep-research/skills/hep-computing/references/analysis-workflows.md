@@ -27,6 +27,15 @@ reproducible, partial reruns safe, and the provenance of every number checkable.
   unknown, as in a development checkout). A step may declare `parameter_digest` (a command printing the digest of the
   design parameters it reads, e.g. `evaluate_design.py run --digest-only`) that replaces the candidate files in the
   skip key, so a design chain reruns only where a parameter it reads changed.
+  Outputs are fresh and owned by the run: every input, output and `stdout` path must be relative to the work folder,
+  without `..` and not through a symlink (anything else is refused before a step runs); an output left from before
+  that the step did not rewrite makes the step fail; `--incremental` also reruns when the set of declared outputs
+  changed. Each step runs in its own process group under its deadline (`timeout_s`, default 3600 s): on a timeout, or
+  when the step leaves processes behind, the group is stopped and confirmed gone, and the record carries
+  `end_status` (success, failure, timeout), `termination` (confirmed, unconfirmed), `output_contract` and
+  `artifact_digest` (SHA-256 of the canonical output manifest). Output hashes are recorded only when termination is
+  confirmed. Termination is observed on POSIX hosts (tested on Linux, where processes that leave the group are also
+  found through an environment token); a process that leaves the group and clears its environment is not seen.
   When the numbers will be delivered or used downstream (evidence tier T2-numeric or above), run one step per
   invocation in a fresh output directory and keep the task record of
   [research workflow control](research-workflow-control.md), which also sets the evidence tier and the completion

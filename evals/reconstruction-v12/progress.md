@@ -182,3 +182,33 @@ Mapping table (added or modified passage → requirement ID → source section o
 Not done in A1 (for a human): a live routing rerun after the `**Owns:**` changes (`docs/maintenance.md` asks for one
 before merge; it makes paid model calls, so it is not run without approval). `check_ownership.py` itself needed no
 code change: it reads the ownership table.
+
+## B1 — runner gap fixes (`run_workflow.py`)
+
+Entry: N2 passed S0. Contract (T2-code): scope `skills/hep-computing/scripts/run_workflow.py`, its documentation and
+new tests; acceptance = every BUG still present at preflight has a regression test that fails before the fix and
+passes after it (BUG-02 with a pinned known release digest), and the preflight suites and runner callers do not
+regress; required. DEC defaults adopted (pending approval): DEC-04 (POSIX process group + confirmation; only Linux
+tested; on Linux processes that leave the group are also found through an environment token in `/proc`), DEC-05
+(strict output-contract matching, decided), DEC-10 (declared inputs only).
+
+Changes: relative-only paths (no absolute, `..`, symlink) for inputs, outputs and stdout, refused before any step
+runs (BUG-03); an output that existed before the step and was not rewritten (same inode, size, mtime and ctime) makes
+the step fail (BUG-01); `--incremental` compares the complete output contract (`extension.output_contract`) and
+reruns when outputs were added or removed (BUG-02); each step and its parameter-digest command run in their own
+process group under a per-step `timeout_s` (default 3600 s), stopped (SIGTERM, then SIGKILL) and confirmed gone on a
+timeout or when the step leaves processes behind; a run record is always written, with `end_status`, `termination`
+(confirmed/unconfirmed, on every record) and `artifact_digest` (canonical output manifest); output hashes only when
+termination is confirmed (BUG-04). Optional `check` object recorded as `extension.check` (placeholder; A2 defines it).
+
+Tests (`TMPDIR` on local disk; tested commit = the B1 commit below):
+
+| Command | Before the fix (tree at A1 + new test file) | After |
+|---|---|---|
+| `python -m unittest tests.skills.hep_computing.test_workflow_b1` | 16 run: 16 failures, 2 errors (all four BUGs reproduced; the positive controls of BUG-02 and the record fields error because the fields do not exist) | 16 run, OK |
+| `python -m unittest discover -s tests/skills/hep_computing -t tests` | 218, OK (39 skipped) | 234, OK (39 skipped) |
+| `python -m unittest discover -s tests/skills/hep_review -t tests` | 141, OK | 141, OK |
+| `python -m unittest discover -s tests/routing -t tests` | 21, OK | 21, OK |
+| runner callers `test_design_m2`, `test_geant4`, `test_cli_robustness` | 79, OK (6 skipped) | 79, OK (6 skipped) |
+
+Probe (`<scratch>/recon-v12/probes/probe_bugs.py`) against the fixed runner: BUG-01..04 FIXED.
