@@ -3483,6 +3483,30 @@ Not done in this stage: the independent
 new-problem run by an agent that did not take part (C1.10, section A.8), the `review.py` Markdown review, the release
 manifest. The adequacy table is unchanged; search values remain F1 optimistic bounds and decide nothing.
 
+## 0.44.0 release check (2026-10-29, E2 and the CI lock)
+
+Release commit `93614c71` on the follow-up integration branch, based on main `42f5bad1`. It ships the cr-propagation
+follow-up K1-K4 (decisions B1.1 and B1.2; sections CRPROP-K1 to CRPROP-K4 above): contracts 3.15.0 (gating constant
+`MODULATION_FROM`), `CORE_VERSION` 1.3.0, adapter `cr-propagation` 0.2.0 unchanged. No sci-fix ledger entry. The
+ams02-research companion needs no change (it requires hep-research >= 0.11.0).
+
+The draft PR #309 ran Linux CI before the release commit and found two issues that the per-WP impacted tests missed:
+K2's two new contract fixtures were not in the gate verdict snapshot (regenerated with `--write`, additions only), and
+K1's longer `core-stats-guide.md` entry pushed hep-statistics `SKILL.md` + guide to 25647 B > 25600 (the 0.43.0 text
+restored, the detail stays in `core-stats-commands.md`). Both fixed and verified before the release commit.
+
+What changed in the release commit: version 0.44.0 in both manifests, `pyproject.toml`, the README, two assets, the
+theory-profile scripts and artifacts, `usine_translate.py` and `examples/bc-usine-reproduction/run.py`; CHANGELOG
+`Unreleased` is now `0.44.0`; examples regenerated with E2 (only version strings and the hashes that cover them
+change). ruff 0.16.10 and mypy 2.4.0 (the CI pins) pass on `core/` and `contracts/`.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 4`, E2 (Python 3.13.2, NumPy 2.5.3) | 31 pass, 0 fail, 2 skipped (CLI host checks); 6031 tests in 480 modules, 5863 pass, 0 failures, 168 skipped |
+| Same with the CI lock (no torch) | 31 pass, 0 fail, 2 skipped; 6031 tests, 5768 pass, 0 failures, 263 skipped |
+| `check_relocation.py` | only the 2 known geant4 path-with-spaces failures (`test_geant4` partition merges), identical on main |
+| PR #309 Linux CI on `93614c71` | every required job passes |
+
 ## 0.43.0 release check (2026-10-29, E2 and the CI lock)
 
 Release commit `790ef3e7` on the cr-propagation integration branch, based on main `8fcbb826` (main has not moved since
