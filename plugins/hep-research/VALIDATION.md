@@ -3483,6 +3483,31 @@ Not done in this stage: the independent
 new-problem run by an agent that did not take part (C1.10, section A.8), the `review.py` Markdown review, the release
 manifest. The adequacy table is unchanged; search values remain F1 optimistic bounds and decide nothing.
 
+## 0.48.0 release check (2026-10-29, E2 and the CI lock)
+
+Release commit `9d8ce930` on `release/0.48.0`, based on main `f4ddae5b` (PR #315 merged). It ships the retirement of
+the cross-artifact check (VALIDATION RETIRE-CROSS-ARTIFACT-CHECK; contracts 3.17.0) and the hep-authoring follow-ups
+(PR #317; VALIDATION AUTHORING-FOLLOWUPS).
+
+`CORE_VERSION` 1.4.0 and the adapters are unchanged (the only `core/` change is one docstring word). The ams02-research
+companion needs no change: it requires hep-research >= 0.11.0 and uses none of the retired entry points. ruff and mypy
+with the CI pins were clean on `core/` and `contracts/` in PR #315; the release commit does not touch either.
+
+What changed in the release commit:
+- version 0.48.0 in both manifests, `pyproject.toml`, the README, two assets, the six theory-profile scripts,
+  `usine_translate.py` and `examples/bc-usine-reproduction/run.py`;
+- CHANGELOG `Unreleased` is now `0.48.0`;
+- the theory-profile artifacts and examples were regenerated with E2. Only version strings and the hashes that cover
+  them change: 196 files. `bc-propagation-fit` and `unfolding-coverage` results, which drift with the environment and
+  carry no version, were left as committed.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --no-cli --jobs 4`, E2 (Python 3.13.2, NumPy 2.5.3) | 31 pass, 0 fail, 2 skipped (CLI host checks); 6125 tests in 483 modules, 5959 pass, 0 failures, 166 skipped |
+| Same with the CI lock (no torch) | 31 pass, 0 fail, 2 skipped; 6125 tests, 5864 pass, 0 failures, 261 skipped |
+| `check_relocation.py` | only the 2 known geant4 path-with-spaces failures (`test_geant4` partition merges), identical to 0.47.0 |
+| draft PR #318 Linux CI on `9d8ce930` | every required job passes (22 pass, 2 skipped) |
+
 ## 0.47.0 release check (2026-10-29, E2 and the CI lock)
 
 Release commit `3673aa66` on `release/0.47.0`, based on main `a2852507` (PR #314 merged). It ships the hep-authoring

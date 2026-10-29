@@ -4,7 +4,7 @@
  "artifact_type": "design-evaluation",
  "objective": "detector system design: design-evaluation written by evaluate_design.py",
  "versions": {
-  "plugin": "0.47.0",
+  "plugin": "0.48.0",
   "contracts": "3.17.0",
   "plugin_release": {
    "release": "unreleased",
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-P.json",
-   "sha256": "8b0e1d679059845628b3484b2bdf90e2aef9b2d5c3381de93877cc59b8c2bc47",
+   "sha256": "3a0110295aad1d040c67780d1c616e2f6f7a9a91b45098dafa26a0f5f7fbff19",
    "artifact_type": "design-candidate",
    "artifact_id": "collider-tracker-v1-cand-P",
    "status": [
@@ -28,7 +28,7 @@
   },
   {
    "ref": "runs/CALC-ECAL-P.computational-run.json",
-   "sha256": "7c7a3bb87ce6df68350259a84bf7d45bea87f80d304d0bea9340f45225a7af3b",
+   "sha256": "5071cfec35f601351db5186d7217e943db82f8ea70fd2bf0bb66b904d928e59d",
    "artifact_type": "computational-run",
    "artifact_id": "collider-tracker-v1-CALC-ECAL-P-run",
    "status": [

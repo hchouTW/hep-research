@@ -3,7 +3,22 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.48.0 (2026-10-29)
+
+Minor release; contracts 3.17.0 (minor), `CORE_VERSION` 1.4.0 and the adapters are unchanged. It retires the
+cross-artifact check (PR #315; its rules become review questions that hep-review can take as obligations) and ships the
+hep-authoring follow-ups (PR #317: prose examples, a review-talk adaptation template, the drafting-order default).
+
+**Before you upgrade** (details in each entry below):
+- The cross-artifact check is gone: `contracts/analysis_check.py`, `permit.py check-report` and
+  `review_measurement_spec.py --check-bundle` / `--check-root` exit 2 and name `decision-retire.md`. To reproduce an
+  old analysis bundle or check report, use 0.47.x. These refusing entry points are removed in the next minor release.
+- Contracts 3.17.0 drops the check's sidecar formats (analysis bundle 2.0.0, check context, check report, semantic lock,
+  operator coverage). No artifact type, vocabulary term, envelope field or capability changes, so every 3.16 artifact
+  keeps its outcome.
+
+**Known issues**: carried over from 0.47.0 (cr-propagation F1 convergence, F2/F3, the live routing run, reply drafts
+for pending work written as completed-voice templates).
 
 - **hep-authoring prose examples** (G8): `skills/hep-authoring/examples/prose/` holds three weak-versus-better examples
   in the Contrast format: a results paragraph (hedges that state a real limitation, significance wording, status
@@ -14,7 +29,6 @@ Software checks establish contract consistency only, not physical validity.
   `unmapped_number` warnings (a `context` statement); test in `test_adaptation.py`.
 - The papers guide's drafting order is the measurement-paper default; other paper types start from their backbone in
   `paper-genre-variants.md` (G4, document part).
-
 - **Cross-artifact check retired** (`docs/dev/cross-artifact-check/decision-retire.md`, decided
   2026-10-29). Removed: `contracts/analysis_checks/` (the rules, context, lock and outcome modules),
   `contracts/migrate.py`, the `counting-chain` and `ratio-subset` suites, the operator coverage contract, the schemas
