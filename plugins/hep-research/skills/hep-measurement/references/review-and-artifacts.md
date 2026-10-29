@@ -62,12 +62,27 @@ One line each; every item maps to an invariant of the skill and, where one exist
 - Status labels (synthetic, Asimov, observed) are carried on everything derived.
 - Unknowns are `unknown` or `not-provided` and listed, never zero (`measurement.zero_value`,
   `measurement.unresolved_not_listed`).
-- Experimental (its value gate found no gain over closure tests and contract checks, `<plugin root>/docs/dev/cross-artifact-check/decision-value-gate.md`): when the analysis is
-  frozen as a v2 bundle (`contracts/analysis_check.py freeze`), you may add the cross-artifact check:
-  `review_measurement_spec.py SPEC --check-bundle BUNDLE --check-root DIR` appends a bounded summary of violated and
-  unverified obligations and the bindings they miss. Report violations as defects with their obligation IDs and the
-  unverified ones under unresolved inputs; the summary is a diagnostic, and declaration-based results need a human
-  review before formal use.
+
+## Spec against implementation
+
+The checklist above reads the spec on its own; these questions compare it with what the recipe, the code and the
+outputs actually do. Ask them when the code or recipe is supplied. Name the element (spec field, recipe step, line)
+for every defect. If an input a question needs is missing, the answer is undetermined with that input named, never a
+pass. In a recorded review (hep-review), each row becomes one obligation with `domain_refs: ["hep-measurement"]`, the
+question and criterion as written, and the methods "assumption and convention check" (plus "numerical
+recomputation" for factor values).
+
+| ID | Question | Criterion | Missing input |
+|---|---|---|---|
+| M-ROOT | Does each reported result have the same estimand, binning, scope and output in spec, code and output files? | edges, units, scope (species, period, selection) and output agree | which output file holds the result |
+| M-CLASS | Is each correction's category an effect of `<plugin root>/contracts/vocab/effects.json`? | a catalog effect; a name that only looks like `*_efficiency` is not a classification | the category of a correction |
+| M-REALIZED | Is each spec correction applied exactly once, by a compatible step, in every instance it applies to? | one application per instance; a declaration that narrows where it applies is itself checked against the code | which instances a correction applies to |
+| M-DESCRIBED | Is every effect the code applies described in the spec? | a correction of exactly that category (bin width excepted); a background only through a non-empty `backgrounds` block; "no backgrounds" while one is subtracted is a contradiction | none: an undescribed applied effect is a defect |
+| M-STAGE | Is each correction applied where the spec's `applied_in` says? | the step that realizes it is at that stage | the step that applies it |
+| M-REPEAT | Is any effect applied twice on one computation path with overlapping scope? | never, unless a declared exclusive partition separates the scopes; read every such declaration, one that contradicts decides, and the answer must not depend on reading order | how two scopes relate |
+| M-COMPOSITION | Are a parent factor and its parts (for example exposure and acceptance × live time) both applied? | never on one path; the parts are the catalog's compositions | which composition the factor table follows |
+| M-FACTOR-VALUES | Do per-bin factor values equal the product of their parts? | relative tolerance 1e-9, or Σ\|power\| · ½·10^(1−d) when every value is quoted to d significant digits; a tolerance written in the table is not used | the parts' per-bin values |
+| M-RESPONSE | Is the response use the spec describes realized in the chain, or bound to a prediction? | the response named in the spec is the one used | which response a step or prediction uses |
 
 ## Measurement brief (one page)
 
