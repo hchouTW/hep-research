@@ -1,5 +1,5 @@
 {
- "contract_version": "3.15.0",
+ "contract_version": "3.16.0",
  "artifact_id": "crpb-theory-spec-source-term",
  "artifact_type": "theory-spec",
  "objective": "Theory spec of the secondary antiproton source term of theory:cr-secondary-antiprotons (pp, pHe, Hep, HeHe; antineutrons and hyperons) with an ILLUSTRATIVE toy cross section",
@@ -13,8 +13,8 @@
   ]
  },
  "versions": {
-  "plugin": "0.44.0",
-  "contracts": "3.15.0",
+  "plugin": "0.45.0",
+  "contracts": "3.16.0",
   "profiles": {
    "theory:cr-secondary-antiprotons": "0.1.0"
   }

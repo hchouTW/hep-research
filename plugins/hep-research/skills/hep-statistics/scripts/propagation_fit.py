@@ -88,6 +88,12 @@ family to a null family's toys with the model whose box holds that family's fit 
 recorded is the largest of the models'). Per-center boxes suit families whose fits to each other's toys stay near
 their best fits; a parameter that is not identifiable under another family's null (V_A near 0 under SLIM toys) spreads
 those fits beyond the box, which then fail as toys.
+A parameter declared parameters.<name>.enters_squared (the prediction depends on it only through its square, as B/C on
+V_A; linear axis, provider domain from 0) makes the toy and family fits that fail in p (unconstrained fits; not
+converged, or a point refused as out of the provider domain) use their remaining restarts in w = p^2 on [0, max^2],
+the first from the failed point, with difference step h x max (L1, VALIDATION.md CRPROP-L1): near p = 0 the Jacobian
+column in p vanishes, in w it does not, and boundary_kkt at w = 0 tests a non-zero derivative. A fit that converges in
+p is unchanged; the main fits, profile intervals and posterior never use w. Toy rows record square_retry.
 - toys: declared with core/stats/toy_ensemble.py (EnsembleSpec, toy_seed, coverage); plug-in at a true point, the
   auxiliary values of the priors redrawn per toy; covered when the profile delta chi2 at the true value is <= 1
   (Wilks); for a parameter on a bound the critical value is calibrated with the toys (its 68.27% quantile), as in
@@ -109,7 +115,7 @@ Input (fit --input CONFIG.json; relative paths are read from the config's folder
   "datasets": [{"name", "measurement": "record.json" | {dataset-record}, "observable": "B/C", "period": optional}],
   "gate_plan": {"measurement_conditions", "mappings", "transformations"} (optional, contracts/comparison/gate.py),
   "parameters": {name: {"start": x, "scale": "log" | "linear", "step": optional,
-                        "prior": {"mean": m, "sigma": s} optional}}, "fixed": {name: value},
+                        "prior": {"mean": m, "sigma": s} optional, "enters_squared": false}}, "fixed": {name: value},
   "nuisances": [{"name", "kind": "production-norm" | "parent-abundance", "channel": "C->B" | "parent": "O",
                  "prior_sigma": 0.1 | null, "aux": 1.0}],
   "families": [{"name", "free": [...], "fixed": {...}}]   (default: one family, every parameter free),
@@ -512,7 +518,7 @@ class Model:
             raise FitInputError("parameters must name at least one transport parameter with its start value")
         self.params = {}
         for name, spec in params.items():
-            spec = _keys(spec, {"start", "scale", "step", "prior"}, f"parameters.{name}")
+            spec = _keys(spec, {"start", "scale", "step", "prior", "enters_squared"}, f"parameters.{name}")
             scale = spec.get("scale", "linear")
             if scale not in ("log", "linear"):
                 raise FitInputError(f"parameters.{name}.scale must be 'log' or 'linear'")
@@ -529,8 +535,14 @@ class Model:
                          _num(pr.get("sigma"), f"parameters.{name}.prior.sigma"))
                 if prior[1] <= 0:
                     raise FitInputError(f"parameters.{name}.prior.sigma must be > 0")
+            squared = spec.get("enters_squared", False)
+            if not isinstance(squared, bool):
+                raise FitInputError(f"parameters.{name}.enters_squared must be true or false")
+            if squared and (scale != "linear" or (domain.get(name) or {}).get("min") != 0):
+                raise FitInputError(f"parameters.{name}.enters_squared needs a linear axis whose provider domain "
+                                    f"starts at 0 (the retries fit in {name}^2 on [0, max^2])")
             self.params[name] = {"start": start, "scale": scale, "step": None if step is None else float(step),
-                                 "prior": prior}
+                                 "prior": prior, "enters_squared": squared}
         self.nuisances = []
         for k, n in enumerate(cfg.get("nuisances") or []):
             n = _keys(n, {"name", "kind", "channel", "parent", "prior_sigma", "aux"}, f"nuisances[{k}]")
@@ -1380,6 +1392,10 @@ class SurrogateFit:
         dom = {n: b for n, b in zip(*domain_bounds)}
         self.domain_edge = [(abs(self.lo[i] - dom[n][0]) < 1e-9 * (dom[n][1] - dom[n][0]),
                              abs(self.hi[i] - dom[n][1]) < 1e-9 * (dom[n][1] - dom[n][0])) for i, n in enumerate(names)]
+        # parameters declared enters_squared (the prediction depends on p only through p^2, domain from 0): a fit
+        # that fails in p is retried in w = p^2 (L1, VALIDATION.md CRPROP-L1); index -> domain maximum
+        self.squared = {i: dom[n][1] for i, n in enumerate(names) if model.params[n].get("enters_squared")}
+        self.last_square = False
 
     def full_t(self, z):
         t = np.zeros(len(self.rm.names))
@@ -1399,7 +1415,9 @@ class SurrogateFit:
 
     def fit(self, ys, aux, start, opt, constraint=None):
         """Minimize; constraint = ("index", i, value) or ("direction", v, z_ref). Returns (chi2, z, ok, reason).
-        A provider evaluated directly (kind "provider") that refuses a point out of its domain fails the fit."""
+        A provider evaluated directly (kind "provider") that refuses a point out of its domain fails the fit.
+        last_square tells whether the result came from the retries in w = p^2 (parameters declared enters_squared)."""
+        self.last_square = False
         try:
             return self._fit(ys, aux, start, opt, constraint)
         except FitRefused as exc:
@@ -1412,39 +1430,79 @@ class SurrogateFit:
         to_z, w0, lo, hi = _constrained_map(constraint, start, self.lo, self.hi)
         rng = np.random.default_rng(opt["seed"])
         last = None
+        sq = self.squared if constraint is None else {}
+        steps_sq = None
         for attempt in range(opt["max_restarts"] + 1):
-            if lo is None:
-                def fun(w):
-                    z = to_z(w)
-                    c = np.clip(z, self.lo, self.hi)
-                    pen = 1e3 * (z - c) / (self.hi - self.lo)
-                    return np.concatenate([self.resid(c, ys, aux), pen])
-                res = optimize.least_squares(fun, w0, method="lm" if len(w0) <= len(fun(w0)) else "trf",
-                                             max_nfev=opt["max_iterations"] * (len(w0) + 1) * 4, xtol=1e-12,
-                                             ftol=1e-12, gtol=1e-10)
-            else:
-                def fun_b(w):
-                    return self.resid(to_z(w), ys, aux)
-                steps_w = self._w_steps(len(w0))
-                jac = _central_jacobian(fun_b, steps_w, lo, hi) if steps_w is not None else "2-point"
-                res = optimize.least_squares(fun_b, w0, jac=jac, bounds=(lo, hi),
-                                             method="dogbox" if steps_w is not None else "trf",
-                                             x_scale="jac" if steps_w is not None else 1.0,
-                                             max_nfev=opt["max_iterations"], xtol=1e-12, ftol=1e-12, gtol=1e-10)
-            z = to_z(res.x)
-            ok, reason, z = self._judge(z, res, ys, aux, to_z, lo, hi)
+            try:
+                res, z, ok, reason = self._attempt(ys, aux, w0, opt, to_z, lo, hi, steps_sq)
+            except FitRefused as exc:
+                if exc.reason != "out-of-domain" or not sq or self.last_square or attempt >= opt["max_restarts"]:
+                    raise
+                # the first attempt (in p) was refused: retry in w = p^2 from the start
+                to_z, w0, lo, hi, steps_sq = self._square_map(start, sq, len(start))
+                self.last_square = True
+                last = (float("nan"), start, False, "provider-out-of-domain")
+                continue
             last = (self.chi2(np.clip(z, self.lo, self.hi), ys, aux), z, ok, reason)
             if ok:
                 return last
             if reason == "left-response-box":
                 return last
             if attempt < opt["max_restarts"]:
+                if sq and not self.last_square:   # retry in w = p^2 from the failed attempt's point, unperturbed
+                    to_z, w0, lo, hi, steps_sq = self._square_map(z, sq, len(start))
+                    self.last_square = True
+                    continue
                 w0 = res.x + rng.normal(0, 0.05, len(res.x)) * (1.0 if lo is None else (hi - lo))
                 if lo is not None:
                     w0 = np.clip(w0, lo, hi)
         return last[0], last[1], False, "restart-cap"
 
-    def _judge(self, z, res, ys, aux, to_z, lo, hi):
+    def _square_map(self, z, sq, n):
+        """(map w -> z, w at z, bounds of w, difference steps in w) for the coordinates sq in w = p^2 (unconstrained
+        fits): bounds [lo^2, hi^2]; the stated step h becomes h x max (its image at the middle of [0, max])."""
+        z = np.clip(np.asarray(z, dtype=float), self.lo, self.hi)
+        idx = list(sq)
+        lo, hi = self.lo.copy(), self.hi.copy()
+        lo[idx], hi[idx] = lo[idx] ** 2, hi[idx] ** 2
+        w0 = z.copy()
+        w0[idx] = z[idx] ** 2
+
+        def to_z(w):
+            out = np.array(w, dtype=float)
+            out[idx] = np.sqrt(np.maximum(out[idx], 0.0))
+            return out
+        steps = self._w_steps(n)
+        if steps is not None:
+            steps = [None if h is None else (h * sq[j] if j in sq else h) for j, h in enumerate(steps)]
+        return to_z, w0, lo, hi, steps
+
+    def _attempt(self, ys, aux, w0, opt, to_z, lo, hi, steps_sq=None):
+        """One optimizer run and its verdict: (least_squares result, z, ok, reason); steps_sq are the difference
+        steps of a retry in w = p^2 (else the stated ones)."""
+        if lo is None:
+            def fun(w):
+                z = to_z(w)
+                c = np.clip(z, self.lo, self.hi)
+                pen = 1e3 * (z - c) / (self.hi - self.lo)
+                return np.concatenate([self.resid(c, ys, aux), pen])
+            res = optimize.least_squares(fun, w0, method="lm" if len(w0) <= len(fun(w0)) else "trf",
+                                         max_nfev=opt["max_iterations"] * (len(w0) + 1) * 4, xtol=1e-12,
+                                         ftol=1e-12, gtol=1e-10)
+        else:
+            def fun_b(w):
+                return self.resid(to_z(w), ys, aux)
+            steps_w = self._w_steps(len(w0)) if steps_sq is None else steps_sq
+            jac = _central_jacobian(fun_b, steps_w, lo, hi) if steps_w is not None else "2-point"
+            res = optimize.least_squares(fun_b, w0, jac=jac, bounds=(lo, hi),
+                                         method="dogbox" if steps_w is not None else "trf",
+                                         x_scale="jac" if steps_w is not None else 1.0,
+                                         max_nfev=opt["max_iterations"], xtol=1e-12, ftol=1e-12, gtol=1e-10)
+        z = to_z(res.x)
+        ok, reason, z = self._judge(z, res, ys, aux, to_z, lo, hi, steps_sq)
+        return res, z, ok, reason
+
+    def _judge(self, z, res, ys, aux, to_z, lo, hi, steps_sq=None):
         """(ok, reason, z). Without a constraint, a coordinate within one stated difference step of a domain bound
         is set on it first when that does not raise -ln L (as in fit_family), so boundary_kkt judges it."""
         if res.status <= 0:
@@ -1461,7 +1519,7 @@ class SurrogateFit:
 
         def nll(q):
             return 0.5 * float(np.sum(res_fun(self, to_z, q, ys, aux) ** 2))
-        steps = self._w_steps(len(w)) if lo is not None else None
+        steps = (self._w_steps(len(w)) if steps_sq is None else list(steps_sq)) if lo is not None else None
         if steps is not None:
             edge_lo = [lo[j] if j < self.k and self.domain_edge[j][0] else -np.inf for j in range(len(w))]
             edge_hi = [hi[j] if j < self.k and self.domain_edge[j][1] else np.inf for j in range(len(w))]
@@ -1752,18 +1810,23 @@ def calibrate_families(model, fits, fam_cfg, rm_cfg, opt, fixed_global):
             rng = np.random.default_rng(toy_seed(fam_cfg["seed"], i))
             ys, aux = _toy_data(model, mu, list(fi["nu"]), rng)
             vals = {}
+            retried = []   # families whose fit used the retries in w = p^2 (enters_squared; CRPROP-L1)
             for g, sf in sfs.items():
                 c, _, ok, reason = sf.fit(ys, aux, starts[g], dict(opt, seed=i))
+                if sf.last_square:
+                    retried.append(g)
                 if not ok:
                     why[f"{g}: {reason}"] = why.get(f"{g}: {reason}", 0) + 1
-                    toy_rows.append({"toy": i, "outcome": "fit_failed", "family": g, "reason": reason})
+                    toy_rows.append({"toy": i, "outcome": "fit_failed", "family": g, "reason": reason,
+                                     **({"square_retry": retried} if retried else {})})
                     vals = None
                     break
                 vals[g] = c
             done += 1
             if vals is not None:
                 toy_rows.append({"toy": i, "outcome": "ok", "chi2": dict(vals),
-                                 "delta_chi2": vals[f["family"]] - min(vals.values())})
+                                 "delta_chi2": vals[f["family"]] - min(vals.values()),
+                                 **({"square_retry": retried} if retried else {})})
             if vals is None:
                 failed += 1
                 if failed > TOY_FAILURE_LIMIT * fam_cfg["n"]:

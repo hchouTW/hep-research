@@ -982,6 +982,81 @@
    "critical": false,
    "fallback": "none: escalate",
    "source": "decisions.md B1.1 (maintainer 2026-10-29)"
+  },
+  {
+   "id": "L1",
+   "title": "Toy fits robust at the V_A = 0 boundary; C2UF-1 re-judged on the well-conditioned emulator",
+   "files": [
+    "skills/hep-statistics/scripts/propagation_fit.py",
+    "tests/skills/hep_statistics/**",
+    "tests/adapters/fixtures/cr_propagation/c2uf/**",
+    "tests/adapters/fixtures/cr_propagation/c2u/**",
+    "tests/adapters/test_cr_propagation.py",
+    "adapters/cr-propagation/assets/emulator_provider.py",
+    "skills/hep-statistics/references/core-stats-commands.md",
+    "skills/hep-statistics/references/core-stats-guide.md"
+   ],
+   "acceptance": [
+    "L1-1",
+    "L1-2"
+   ],
+   "requires": [
+    "env-usine"
+   ],
+   "wave": 8,
+   "card": "decisions.md B1.3",
+   "deps": [],
+   "optional": false,
+   "critical": false,
+   "fallback": "none: escalate",
+   "source": "decisions.md B1.3 (maintainer 2026-10-29)"
+  },
+  {
+   "id": "L2",
+   "title": "Conformance tied to provider version, adapter version bump with cache-key migration, explicit USINE injection variable, doc fixes",
+   "files": [
+    "core/provider/**",
+    "tests/core/**",
+    "tools/provider_registry.py",
+    "tests/tools/**",
+    "contracts/schemas/cr_provider.json",
+    "tests/contracts/**",
+    "adapters/cr-propagation/adapter.json",
+    "adapters/cr-propagation/assets/**",
+    "adapters/cr-propagation/README.md",
+    "tests/adapters/fixtures/cr_propagation/**",
+    "tests/adapters/test_cr_propagation.py",
+    "tests/adapters/test_adapter_declarations.py",
+    "examples/bc-usine-reproduction/**",
+    "examples/propagation-fit/**",
+    "docs/adapter-authoring.md",
+    "docs/capability-matrix.md",
+    "contracts/__init__.py",
+    "contracts/validate.py",
+    "contracts/vocab/core.json",
+    "contracts/fixtures/**",
+    "core/__init__.py",
+    "profiles/**",
+    "examples/**",
+    "skills/*/assets/*.json",
+    "tests/skills/hep_statistics/**"
+   ],
+   "acceptance": [
+    "L2-1",
+    "L2-2",
+    "L2-3"
+   ],
+   "requires": [
+    "env-usine"
+   ],
+   "wave": 8,
+   "card": "decisions.md B1.3",
+   "deps": [],
+   "optional": false,
+   "critical": false,
+   "fallback": "none: escalate",
+   "source": "decisions.md B1.3 (maintainer 2026-10-29)",
+   "files_source": "widened by the orchestrator 2026-10-29: the contracts 3.16.0 bump the orchestrator asked for (L2-1) touches the same files as K2's 3.15.0 bump; the provider-version migration needs the hep_statistics USINE test drivers"
   }
  ],
  "criticality_source": "r4 8 names B1 and F1 as critical; P0, ENV and RC are marked critical because the campaign cannot proceed or finish without them (derived)",

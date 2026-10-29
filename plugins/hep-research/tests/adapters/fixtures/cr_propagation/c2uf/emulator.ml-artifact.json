@@ -1,5 +1,5 @@
 {
- "contract_version": "3.14.0",
+ "contract_version": "3.15.0",
  "artifact_id": "ml-emulator-usine-c2uf",
  "artifact_type": "ml-artifact",
  "objective": "Gaussian-process emulator of USINE B/C and 10Be/9Be (ekn, decay on) on the C2UF toy box, served by the cr-propagation emulator provider (per-model declaration)",
@@ -8,8 +8,8 @@
   "theory": []
  },
  "versions": {
-  "plugin": "0.42.0",
-  "contracts": "3.14.0",
+  "plugin": "0.44.0",
+  "contracts": "3.15.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -38,7 +38,7 @@
    "skills/hep-ml/scripts/write_ml_artifact.py"
   ],
   "code_tags": [],
-  "created": "2026-10-28",
+  "created": "2026-10-29",
   "evidence_ids": []
  },
  "inputs": [],
@@ -121,7 +121,7 @@
     "fit_on": "training"
    }
   ],
-  "model_hash": "sha256:0a8dc86fdf1668555a95af020b9ed9376b5768faf7afd4eeafaab889b96bf4f5",
+  "model_hash": "sha256:9b95e746542295b593f1e8937f9b22a6bc332ac5b97945e5a4a5af9128a73aff",
   "units": {},
   "environment": {
    "framework": "numpy 2.4.4, scipy 1.17.1",
@@ -135,25 +135,25 @@
   "metrics": {
    "training_points": 738,
    "loo_residual_rms_per_component": [
-    0.00014303710997060217,
-    0.0009100901803989523,
-    0.0024115841421361753,
-    0.0019821164813823974,
-    0.00806402473316139,
-    0.021014336024279708,
-    0.043299936085861926,
-    0.03618520123707113,
-    0.06723100239481873,
-    0.09294514549402455,
-    0.19036254378844966,
-    0.15259828774923967,
-    0.21828019488558584,
-    0.07226162683193127,
-    0.19289833230016973,
-    0.11951726495620857,
-    0.23866736042367917,
-    0.17876811966296258,
-    0.3779921526991535
+    0.000307074778697356,
+    0.0013989278608555974,
+    0.0037258257701478573,
+    0.00327174209712622,
+    0.00958695098988518,
+    0.03765019455366018,
+    0.07578487118690724,
+    0.05182131144986412,
+    0.10057415772665762,
+    0.14126381160520118,
+    0.22070220879732177,
+    0.15065619190123275,
+    0.21469290409147362,
+    0.07482756471928992,
+    0.1964491907686416,
+    0.11951742822125928,
+    0.23866736831668703,
+    0.17876824411500958,
+    0.3798998912569715
    ],
    "pca_training_residual_max": 7.622968090587046e-05
   },
@@ -163,12 +163,12 @@
     "round": 0,
     "seed": 20261029,
     "drawn_from": "30 uniform in the toy box, 10 uniform on the SLIM slice V_A = V_c = 0",
-    "max_error_over_data_sigma": 0.0038191054833226724,
+    "max_error_over_data_sigma": 0.003219473985098752,
     "tolerance_over_data_sigma": 0.05,
     "passed": true,
     "refused_by_domain_model": 0
    },
-   "max_relative_error": 0.00020665300348921
+   "max_relative_error": 0.00018881283410210337
   },
   "extrapolation_policy": {
    "action": "reject",
@@ -180,7 +180,7 @@
   "source_files": [
    {
     "ref": "run_summary.json",
-    "sha256": "aca2b5c560475381baf7f1691360831bc37714d7cba24178a554f7610c4b606f",
+    "sha256": "e1e91e7a29cedcf25874bb861307c529610ebd11ba9fe42fd0f825caad341b7b",
     "role": "run-summary"
    }
   ]

@@ -504,7 +504,8 @@ CONFORMANCE = {"reference_point": {"L_kpc": 4.0, "phi_p_gv": 0.5},
                "observables": [{"id": "B/C", "axis": "rigidity", "unit": "GV", "bins": [[2.0, 4.0], [4.0, 8.0]]}],
                "tolerance": 1e-3,
                "result": {"status": "passed", "max_relative_deviation": 4e-5, "nodes_compared": 40,
-                          "isotopes": ["11B", "12C"], "tool": "SYNTHETIC force-field tool"}}
+                          "isotopes": ["11B", "12C"], "tool": "SYNTHETIC force-field tool",
+                          "provider_version": "1.0.0"}}
 MODULATION = {"model": "force-field", "implementation": "SYNTHETIC force field per isotope", "parameters": ["phi_p_gv"],
               "conformance": CONFORMANCE}
 MODULATED = dict(DECLARATION, id="toy-modulated", domain=dict(DECLARATION["domain"], phi_p_gv={"min": 0.0, "max": 2.0}),
@@ -557,7 +558,10 @@ class DeclaredModulation(ProviderTestCase):
                 "zero tolerance": changed(MODULATED, "modulation.conformance.tolerance", 0.0),
                 "parameter name": changed(MODULATED, "modulation.parameters", ["potential"]),
                 "no nodes": changed(MODULATED, "modulation.conformance.result.nodes_compared", 0),
-                "extra field": changed(MODULATED, "modulation.extra", 1)}
+                "extra field": changed(MODULATED, "modulation.extra", 1),
+                # L2 (contracts 3.16.0): the result names the provider version it was obtained at
+                "no provider version": changed(MODULATED, "modulation.conformance.result.provider_version", None),
+                "empty provider version": changed(MODULATED, "modulation.conformance.result.provider_version", "")}
         # rules the schema subset cannot state (cross-field): core only
         core_only = {"phi without the block": changed(MODULATED, "modulation", None),
                      "parameter outside the domain": changed(MODULATED, "modulation.parameters", ["phi_q_gv"]),
@@ -570,7 +574,8 @@ class DeclaredModulation(ProviderTestCase):
                                                                    "modulation.conformance.reference_point.L_kpc", 99.0),
                      "undeclared observable": changed(MODULATED, "modulation.conformance.observables",
                                                       [{"id": "Be/B", "axis": "rigidity", "unit": "GV",
-                                                        "bins": [[2.0, 4.0]]}])}
+                                                        "bins": [[2.0, 4.0]]}]),
+                     "result of another provider version": changed(MODULATED, "version", "1.1.0")}
         for name, bad in both.items():
             with self.subTest(both=name):
                 self.assertTrue(protocol.check_declaration(bad))
@@ -586,6 +591,30 @@ class DeclaredModulation(ProviderTestCase):
         with self.assertRaises(RegistryError) as ctx:
             parse_registry(self.toys.registry(item))
         self.assertIn("passed", str(ctx.exception))
+
+    def test_conformance_holds_only_at_the_version_it_was_obtained_at(self):
+        """L2-1: the registry (and conformance.run_conformance through it) refuses a declaration whose conformance
+        result names another version than the registry entry's; check_declaration compares with the version the
+        caller resolved, else with the declaration's own."""
+        unversioned = changed(MODULATED, "version", None)
+        self.assertEqual(protocol.check_declaration(unversioned), [])           # nothing to compare with
+        self.assertEqual(protocol.check_declaration(unversioned, "1.0.0"), [])
+        problems = protocol.check_declaration(unversioned, "1.1.0")
+        self.assertEqual(len(problems), 1, problems)
+        self.assertIn("provider_version '1.0.0' differs from the provider version '1.1.0'", problems[0])
+        self.assertIn("rerun", problems[0])
+        self.assertTrue(protocol.check_declaration(MODULATED, "1.1.0"))         # the caller's version wins
+        item = self.make()
+        self.assertIn("toy-modulated", parse_registry(self.toys.registry(item)))
+        item["version"] = "1.1.0"                                               # a new provider version, gate not rerun
+        with self.assertRaises(RegistryError) as ctx:
+            parse_registry(self.toys.registry(item))
+        self.assertIn("differs from the provider version '1.1.0'", str(ctx.exception))
+        item = self.make()
+        item["declaration"] = changed(item["declaration"], "modulation.conformance.result.provider_version", None)
+        with self.assertRaises(RegistryError) as ctx:
+            parse_registry(self.toys.registry(item))
+        self.assertIn("result: exactly", str(ctx.exception))
 
     def test_top_of_atmosphere_without_the_block_is_an_invalid_response(self):
         with ProviderRunner(self.toys.registry(self.make("toa", dict(DECLARATION, id="toy-toa")))) as runner:

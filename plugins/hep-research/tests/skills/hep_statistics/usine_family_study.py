@@ -35,7 +35,11 @@ for entry in (str(PLUGIN), str(PLUGIN / "skills" / "hep-statistics" / "scripts")
     if entry not in sys.path:
         sys.path.insert(0, entry)
 
-PROVIDER, VERSION = "usine", "0.2.0"
+PROVIDER = "usine"
+# the provider's current version (a rerun asks the registered version; the committed records keep the version that
+# produced them, usine 0.2.0, as history: cache-key migration of VALIDATION CRPROP-L2)
+VERSION = next(d.get("version") for d in json.loads((PLUGIN / "adapters" / "cr-propagation" / "adapter.json")
+                                                    .read_text(encoding="utf-8"))["provider"] if d["id"] == PROVIDER)
 RECORD = PLUGIN / "tests" / "adapters" / "fixtures" / "cr_propagation" / "c2u" / "usine-family-study.json"
 LOW_BREAK = {"kind": "low", "R_break_gv": 5.0, "delta_below": 0.0, "s": 0.05, "s_convention": "usine"}
 TRUTH = {"D0_cm2_s": 3.0e28, "delta": 0.45, "V_A_kms": 70.0, "V_c_kms": 0.0}

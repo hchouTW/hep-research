@@ -93,7 +93,8 @@ DEFAULT_TRANSPORT = {
     "decay": {"enabled": False, "lorentz_dilation": True, "ec_treatment": "fully-stripped"},
     "gas": {"model": "uniform, n_H = 1 cm^-3", "He_to_H_number": 0.1},
     "sources": {"spatial": "not fixed by harmonized-v1; each code records its choice",
-                "injection": [{"species_group": "all primaries", "gamma": 2.3, "breaks": []}],
+                "injection": [{"species_group": "all primaries", "gamma": 2.3, "breaks": [],
+                               "spectrum_variable": "kinetic_energy_per_nucleon"}],
                 "abundances": "fixed by the parent list of theory:cr-secondary-ratio"},
     "cross_sections": {
         "production_set": "theory:cr-secondary-ratio models/xs-illustrative-decay.json (ILLUSTRATIVE, isotopic)",

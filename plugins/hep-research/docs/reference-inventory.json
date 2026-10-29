@@ -40,7 +40,7 @@
   },
   "hep-statistics": {
    "references": 14,
-   "bytes": 207327,
+   "bytes": 208208,
    "uncited": 0
   },
   "hep-theory": {
@@ -3875,7 +3875,7 @@
     "skills/hep-review/SKILL.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "1c2846b8 2026-10-29"
+   "last_commit": "92975d12 2026-10-29"
   },
   {
    "path": "skills/hep-review/references/evidence-and-adjudication.md",
@@ -3925,7 +3925,7 @@
     "skills/hep-review/references/evaluation-and-claims.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "1c2846b8 2026-10-29"
+   "last_commit": "92975d12 2026-10-29"
   },
   {
    "path": "skills/hep-review/references/workflow-and-tiers.md",
@@ -3987,8 +3987,8 @@
   {
    "path": "skills/hep-statistics/references/core-stats-commands.md",
    "owner": "hep-statistics",
-   "bytes": 51460,
-   "lines": 561,
+   "bytes": 52341,
+   "lines": 569,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/references/response-and-forward-folding.md",

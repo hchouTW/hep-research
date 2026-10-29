@@ -8,7 +8,9 @@ provider). Providers never modulate unless the declaration carries a modulation 
 force-field model, the implementation, the modulation parameters phi_<period>_gv (each in the domain; a phi_<period>_gv
 in the domain needs the block) and a passing conformance result (the provider's modulated output equals the plugin's
 force-field tool applied to its own isotopic LIS within a tolerance no looser than MODULATION_TOLERANCE_MAX;
-tools/provider_registry.py --conformance). Without the block a phi parameter is an unknown parameter and a
+tools/provider_registry.py --conformance) that names the provider version it was obtained at (contracts 3.16.0,
+CORE_VERSION 1.4.0): a declaration whose conformance result names another version than the provider's is refused, so
+a new provider version declares modulation only after the gate is rerun at it. Without the block a phi parameter is an unknown parameter and a
 top-of-atmosphere prediction is an invalid response (check_modulation); with it a point carrying two modulation
 parameters would be modulated twice and is refused (invalid-request), and a prediction is top-of-atmosphere exactly
 when its point carries a nonzero modulation parameter. Any other wanted item fails the request with reason
@@ -62,7 +64,8 @@ MODULATION_PARAMETER = re.compile(r"^phi_[A-Za-z0-9]+(?:_[A-Za-z0-9]+)*_gv$")
 MODULATION_MODELS = ("force-field",)
 MODULATION_KEYS = {"model", "implementation", "parameters", "conformance"}
 CONFORMANCE_KEYS = {"reference_point", "observables", "tolerance", "result"}
-CONFORMANCE_RESULT_KEYS = {"status", "max_relative_deviation", "nodes_compared", "isotopes", "tool"}
+# the provider version the result was obtained at (contracts 3.16.0): it must equal the provider's version
+CONFORMANCE_RESULT_KEYS = {"status", "max_relative_deviation", "nodes_compared", "isotopes", "tool", "provider_version"}
 MODULATION_TOLERANCE_MAX = 1e-3  # the conformance tolerance is no looser than this (F1's force-field agreement)
 MODULATED_LEVEL = "top-of-atmosphere"
 
@@ -77,8 +80,11 @@ def _range_problems(where: str, value) -> list[str]:
     return [] if value["min"] <= value["max"] else [f"{where}: min > max"]
 
 
-def check_declaration(declaration) -> list[str]:
-    """Problems of one provider declaration (the 'provider' field of adapter.json or profile.json)."""
+def check_declaration(declaration, version: str | None = None) -> list[str]:
+    """Problems of one provider declaration (the 'provider' field of adapter.json or profile.json). version is the
+    provider version the caller resolved (the registry entry's: the declaration's 'version', else the declaring
+    adapter's or profile's); without it the declaration's own 'version' is used, if any. A modulation conformance
+    result obtained at another version is refused."""
     if not isinstance(declaration, dict):
         return ["a provider declaration is an object"]
     problems = [f"missing field '{k}'" for k in sorted(DECLARATION_REQUIRED - set(declaration))]
@@ -118,7 +124,9 @@ def check_declaration(declaration) -> list[str]:
     if not isinstance(units, dict) or not all(isinstance(v, str) for v in units.values()):
         problems.append("output_units: name -> unit string")
     if isinstance(domain, dict):
-        problems += _modulation_problems(declaration.get("modulation"), domain, declaration)
+        if version is None and isinstance(declaration.get("version"), str):
+            version = declaration["version"]
+        problems += _modulation_problems(declaration.get("modulation"), domain, declaration, version)
     return problems
 
 
@@ -128,7 +136,7 @@ def modulation_parameters(declaration: dict) -> list[str]:
     return list(block.get("parameters") or []) if isinstance(block, dict) else []
 
 
-def _modulation_problems(block, domain: dict, declaration: dict) -> list[str]:
+def _modulation_problems(block, domain: dict, declaration: dict, version: str | None) -> list[str]:
     """The modulation block (optional): force-field only, the implementation, the parameters (each in the domain, and
     every phi_<period>_gv of the domain listed) and a passing conformance result within its tolerance."""
     in_domain = sorted(n for n in domain if MODULATION_PARAMETER.match(n))
@@ -158,10 +166,10 @@ def _modulation_problems(block, domain: dict, declaration: dict) -> list[str]:
     unlisted = [n for n in in_domain if n not in params]
     if unlisted:
         problems.append(f"domain: modulation parameters {unlisted} are not listed in modulation.parameters")
-    return problems + _conformance_problems(block["conformance"], params, domain, declaration)
+    return problems + _conformance_problems(block["conformance"], params, domain, declaration, version)
 
 
-def _conformance_problems(conf, params: list, domain: dict, declaration: dict) -> list[str]:
+def _conformance_problems(conf, params: list, domain: dict, declaration: dict, version: str | None) -> list[str]:
     where = "modulation.conformance"
     if not isinstance(conf, dict):
         return [f"{where}: an object (a provider declares modulation only after the conformance gate passes)"]
@@ -215,6 +223,13 @@ def _conformance_problems(conf, params: list, domain: dict, declaration: dict) -
         problems.append(f"{where}.result.isotopes: a non-empty list of nuclide names")
     if not isinstance(result["tool"], str) or not result["tool"]:
         problems.append(f"{where}.result.tool: the force-field tool the provider was compared with")
+    obtained = result["provider_version"]
+    if not isinstance(obtained, str) or not obtained:
+        problems.append(f"{where}.result.provider_version: the provider version the result was obtained at")
+    elif version is not None and obtained != version:
+        problems.append(f"{where}.result.provider_version {obtained!r} differs from the provider version {version!r}: "
+                        "the conformance result holds only for the version it was obtained at; rerun "
+                        "tools/provider_registry.py --conformance at the current version")
     return problems
 
 

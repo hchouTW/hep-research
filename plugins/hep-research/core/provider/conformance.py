@@ -93,7 +93,7 @@ def run_conformance(registry, provider_id: str, request: dict, outside_point: di
 
     entries = parse_registry(registry) if isinstance(registry, dict) else load_registry(registry)
     entry = entries.get(provider_id)
-    problems = check_declaration(entry.declaration) if entry else ["not in the registry"]
+    problems = check_declaration(entry.declaration, entry.version) if entry else ["not in the registry"]
     problems += [f"request: {p}" for p in check_request(request)]
     if entry and not problems and (request["provider"] != provider_id or request["provider_version"] != entry.version):
         problems.append(f"the conformance request must name {provider_id} version {entry.version}")
