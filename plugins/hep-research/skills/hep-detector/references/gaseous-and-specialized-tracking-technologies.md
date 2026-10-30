@@ -263,8 +263,8 @@ efficiency, track density (overlap), fading, and distortion of the emulsion.
   layer does shrink on development, so microtrack slopes are rescaled by a shrinkage
   factor measured with base-tracks.
 - **Alignment and volume tracks.** Films are aligned with many passing-through tracks
-  (an affine transformation per film: shift, rotation, expansion, plus the gap between
-  films). Base-tracks are then
+  (an affine transformation per film: shift, rotation, expansion), plus the longitudinal
+  gap between films. Base-tracks are then
   connected across films within position and slope tolerances that allow for scattering
   in the passive material between films (Arrabito et al., J. Instrum. 2 (2007) P05004).
   Allowing a missing film recovers scanning inefficiency at the cost of more fake links;

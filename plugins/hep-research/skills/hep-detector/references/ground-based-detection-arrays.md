@@ -82,7 +82,8 @@ energy, since the shower footprint grows with energy). Each station records a si
   decomposition with its own calibration.
 
 **Check:** The station signal scale, the treatment of saturated and non-triggered stations,
-and the per-event uncertainty of the size estimator are stated.
+the station time-variance model used in the direction fit, and the per-event uncertainty of
+the size estimator are stated.
 
 ## Fluorescence detectors
 
@@ -239,8 +240,8 @@ reconstructed from the antenna signals (review: Huege, Phys. Rep. 620 (2016) 1).
   dividing out the geomagnetic-angle dependence (the geomagnetic field amplitude scales with
   `sin alpha`, so its fluence with `sin^2 alpha`; the charge-excess part does not depend on
   `alpha`, and its fraction grows with the air density) and correcting for the air density at
-  shower maximum, it scales approximately quadratically with the electromagnetic energy
-  (*approximate*, an exponent fitted in simulation; Glaser et al., J. Cosmol. Astropart. Phys.
+  shower maximum, it scales quadratically with the electromagnetic energy (*approximate*:
+  the exponent, close to 2, is fitted in simulation; Glaser et al., J. Cosmol. Astropart. Phys.
   09 (2016) 024). Showers arriving close to the field direction carry little radio signal and
   are measured poorly. Radio measures the electromagnetic energy only; the absolute scale is
   tied to the antenna calibration or to another detector.
@@ -261,7 +262,8 @@ reconstructed from the antenna signals (review: Huege, Phys. Rep. 620 (2016) 1).
 
 **Check:** Radio events state the frequency band, the antenna-pattern and gain calibration,
 the trigger (external or self), the wavefront and footprint model with the corrections for
-geomagnetic angle and air density, and the validation against an independent measurement.
+geomagnetic angle and air density, the atmospheric density profile used to convert to
+`X_max`, and the validation against an independent measurement.
 
 ### Instrument response functions (checklist)
 

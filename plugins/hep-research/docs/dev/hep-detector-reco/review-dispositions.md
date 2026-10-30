@@ -27,7 +27,7 @@ Paths are relative to `skills/hep-detector/references/`.
 | 9 | minor | photon-likelihood-reconstruction.md | Moon shadow applies only to cosmic-ray shower or muon detectors; state it or move it | not fixed | The item already states its applicability in its label ("Pointing (detectors of cosmic-ray muons or showers)"); it is the only mention in the references (single owner), and the content specification (item A, section 8) places it here |
 | 10 | minor | detector-principles-summary.md (wiring) | The summary does not link the new file | not fixed | Repository convention and acceptance criterion 4: the summary's "Reference index" section belongs to its routing part (`tools/reference_inventory.py`, `ROUTING_HEADING` matches "index"), which is at 4081 B of a 4096 B budget and may not grow; the content specification says "no change". The file is reached from the SKILL.md Resources row and from event-reconstruction, neutrino-astronomy and noble-liquid references |
 | 11 | minor | calorimetry-ecal-hcal.md | Later hadronic start needs `lambda_I >> X0`; weaker contrast in low-`Z` media | fixed | "(strongly in high-`Z` absorbers; the contrast is weaker in low-`Z` media)" |
-| 12 | optional | tracking-and-vertexing.md | Garbled sentence in the unchanged track-fit paragraph ("Use the smoother ... outlier down-weighting for wrong hits: rather than treating the trajectory ...") | not fixed | Text unchanged by this change and outside the audited cells; left for a follow-up |
+| 12 | optional | tracking-and-vertexing.md | Garbled sentence in the unchanged track-fit paragraph ("Use the smoother ... outlier down-weighting for wrong hits: rather than treating the trajectory ...") | fixed on user request | Kalman-filter description moved directly after "handles multiple scattering naturally:"; then "The filter assumes Gaussian process noise; ... Use the smoother for unbiased residuals at every layer, and down-weight outliers to handle wrong hits." |
 
 Fix commit: recorded in STATE.md (T7) and below in the next commit, since a commit cannot contain its own sha.
 
@@ -45,9 +45,9 @@ round of the review (OQ-1 default) is used and none is critical or major:
 
 | # | Severity | File | Finding | Disposition |
 |---|---|---|---|---|
-| A | minor | photon-likelihood-reconstruction.md | "`-ln L` per degree of freedom, that is divided by a stated count" reads against its own caveat; mixed punctuation in the list of quality variables | open; its suggested wording also drops the task's marker phrase "per degree of freedom", so a follow-up should reword while keeping it |
-| B | minor | photon-likelihood-reconstruction.md | "the muon is rarely contained" depends on detector size; suggested "often not contained in the instrumented volume" | open (follow-up) |
-| C | minor, optional | ground-based-detection-arrays.md | The surface-array Check line could name the station time-variance model | open (follow-up) |
+| A | minor | photon-likelihood-reconstruction.md | "`-ln L` per degree of freedom, that is divided by a stated count" reads against its own caveat; mixed punctuation in the list of quality variables | fixed on user request: "the minimum of `-ln L` divided by a stated count, often called per degree of freedom (...), a crude normalization with no reference distribution ...", list separated by semicolons (marker phrase kept) |
+| B | minor | photon-likelihood-reconstruction.md | "the muon is rarely contained" depends on detector size; suggested "often not contained in the instrumented volume" | fixed on user request: "often not contained in the instrumented volume" |
+| C | minor, optional | ground-based-detection-arrays.md | The surface-array Check line could name the station time-variance model | fixed on user request: Check line names "the station time-variance model used in the direction fit" |
 
 ## Follow-up review: the 12 deferred cells
 
@@ -87,8 +87,10 @@ major:
 
 | # | Severity | File | Finding | Disposition |
 |---|---|---|---|---|
-| D1 | minor | noble-liquid-neutrino-and-rare-event-detectors.md | Phonon parenthetical mixes the number and the kind of sensors | open (follow-up) |
-| D2 | minor | gaseous-and-specialized-tracking-technologies.md | "plus the gap between films" reads as part of the in-plane affine map | open (follow-up) |
-| D3 | minor | ground-based-detection-arrays.md | "approximately quadratically ... (*approximate*" is redundant | open (follow-up) |
-| D4 | minor | noble-liquid-neutrino-and-rare-event-detectors.md | Scope of "on the heat signal and on a faster channel" ambiguous; long line | open (follow-up) |
-| D5 | optional | ground-based-detection-arrays.md, noble-liquid-neutrino-and-rare-event-detectors.md | Check lines could name the density profile and the energy dependence of the fiducial fraction | open (follow-up) |
+| D1 | minor | noble-liquid-neutrino-and-rare-event-detectors.md | Phonon parenthetical mixes the number and the kind of sensors | fixed on user request: "several fast sensors of athermal phonons (for example superconducting transition-edge sensors), rather than thermistors that respond mainly to the thermal phonons" |
+| D2 | minor | gaseous-and-specialized-tracking-technologies.md | "plus the gap between films" reads as part of the in-plane affine map | fixed on user request: "(... shift, rotation, expansion), plus the longitudinal gap between films" |
+| D3 | minor | ground-based-detection-arrays.md | "approximately quadratically ... (*approximate*" is redundant | fixed on user request: "scales quadratically ... (*approximate*: the exponent, close to 2, is fitted in simulation" |
+| D4 | minor | noble-liquid-neutrino-and-rare-event-detectors.md | Scope of "on the heat signal and on a faster channel" ambiguous; long line | fixed on user request: "Pileup is searched for on the heat signal and on a faster channel where one exists ... by a template fit ..., by pulse-shape tests ..., or by a two-pulse fit", rewrapped |
+| D5 | optional | ground-based-detection-arrays.md, noble-liquid-neutrino-and-rare-event-detectors.md | Check lines could name the density profile and the energy dependence of the fiducial fraction | fixed on user request: radio Check line names the density profile; germanium Check line adds "as a function of energy" |
+
+All open items above (A, B, C, 12, D1-D5) were fixed after the run on the user's request ("fix item in Still open"); see STATE.md.

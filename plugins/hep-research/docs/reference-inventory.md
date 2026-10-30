@@ -214,18 +214,18 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `front-end-calibration.md` | hep-detector | 6.0 | no | 3 | - | e2957da1 2026-10-25 |
 | `front-end-electronics-and-signal-processing.md` | hep-detector | 23.1 | yes | 15 | - | 9c12f2b6 2026-10-26 |
 | `front-end-waveform-processing.md` | hep-detector | 12.7 | no | 8 | - | a1267715 2026-10-25 |
-| `gaseous-and-specialized-tracking-technologies.md` | hep-detector | 20.7 | no | 8 | hep-citations | 6bfc7873 2026-10-30 |
+| `gaseous-and-specialized-tracking-technologies.md` | hep-detector | 20.7 | no | 8 | hep-citations | 93735497 2026-10-30 |
 | `geant4-study-protocol.md` | hep-detector | 43.2 | no | 11 | hep-citations | f360dcc6 2026-10-25 |
-| `ground-based-detection-arrays.md` | hep-detector | 20.8 | no | 7 | - | 6bfc7873 2026-10-30 |
+| `ground-based-detection-arrays.md` | hep-detector | 20.9 | no | 7 | - | 93735497 2026-10-30 |
 | `imaging-atmospheric-cherenkov.md` | hep-detector | 13.4 | no | 11 | hep-citations, hep-ml, hep-statistics | 267d534a 2026-10-30 |
 | `multimessenger-analysis.md` | hep-detector | 6.9 | no | 2 | - | 9257d7b5 2026-10-15 |
 | `muon-systems.md` | hep-detector | 8.4 | no | 8 | hep-citations | 9257d7b5 2026-10-15 |
 | `neutrino-astronomy.md` | hep-detector | 10.5 | no | 8 | hep-statistics | 267d534a 2026-10-30 |
-| `noble-liquid-neutrino-and-rare-event-detectors.md` | hep-detector | 21.0 | no | 8 | - | 6bfc7873 2026-10-30 |
+| `noble-liquid-neutrino-and-rare-event-detectors.md` | hep-detector | 21.2 | no | 8 | - | 93735497 2026-10-30 |
 | `nuclear-interactions-in-detector-material.md` | hep-detector | 4.2 | yes | 4 | hep-theory | c398d5e0 2026-10-29 |
 | `particle-identification.md` | hep-detector | 18.7 | yes | 25 | hep-measurement | fcc1034c 2026-10-22 |
 | `performance-metrics-and-residual-diagnostics.md` | hep-detector | 19.8 | no | 11 | - | e03c0396 2026-10-22 |
-| `photon-likelihood-reconstruction.md` | hep-detector | 17.6 | yes | 7 | - | 9ff83cdf 2026-10-30 |
+| `photon-likelihood-reconstruction.md` | hep-detector | 17.7 | yes | 7 | - | 9ff83cdf 2026-10-30 |
 | `physics-objects-jets-btagging-met.md` | hep-detector | 8.5 | no | 7 | hep-ml | 9257d7b5 2026-10-15 |
 | `readout-digitization-and-overlay.md` | hep-detector | 9.6 | no | 3 | - | e2957da1 2026-10-25 |
 | `reconstruction-performance-and-truth-matching.md` | hep-detector | 10.7 | yes | 12 | - | 9257d7b5 2026-10-15 |

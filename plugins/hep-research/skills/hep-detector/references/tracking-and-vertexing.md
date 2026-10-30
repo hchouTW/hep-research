@@ -129,16 +129,16 @@ ones.
 
 A track fit estimates trajectory parameters - typically a position and direction at a
 reference surface plus a curvature - from the collected hits. The **Kalman filter** formulation is
-standard because it handles multiple scattering naturally. It assumes Gaussian process noise;
-electron bremsstrahlung is not Gaussian, so electrons need a Gaussian-sum filter or a dedicated
-bremsstrahlung fit, and their track momentum is biased low with a long tail. Use the smoother for
-unbiased residuals at every layer and outlier down-weighting for wrong hits: rather than
+standard because it handles multiple scattering naturally: rather than
 treating the trajectory as a single deterministic curve, it propagates the parameter
 estimate and its covariance layer by layer, inflating the covariance at each material
 crossing by the expected scattering. This makes the fit's own uncertainty estimate
 depend on the material model - so an incorrect material description produces
 incorrect, usually overconfident, track parameter errors, without any obvious symptom
-in the fitted values themselves.
+in the fitted values themselves. The filter assumes Gaussian process noise; electron
+bremsstrahlung is not Gaussian, so electrons need a Gaussian-sum filter or a dedicated
+bremsstrahlung fit, and their track momentum is biased low with a long tail. Use the smoother
+for unbiased residuals at every layer, and down-weight outliers to handle wrong hits.
 
 Several points routinely cause trouble:
 

@@ -29,7 +29,7 @@ followup_deferred:
   content: {status: done, cells: {F18: [T1, T2, T3, T4, T5, T6, T7], F4: [T2, T3, T4], F11: [T2, T4]}, new_sections: 4, notes: "Check rule 4/4; layering ok; sizes ground 20248 B, gaseous 20076 B, noble 20239 B, bibliography 23037 B"}
   citations: {status: done, verified: [Huege 2016, Glaser 2016, Buitink 2014, Aiola 2021, Arrabito 2007, De Serio 2003, Chernyak 2014, Broniatowski 2006, Budjas 2009], notes: "found by Crossref bibliographic search and matched to the Crossref record of each DOI (work root deferred/crossref)"}
   gates: {status: done, notes: "after content (5f1da8d2) and after review fixes: wiring exit 0, routing static exit 0, inventory --check pass (6 warnings, 0 overlap pairs), routing part 4081 B, packaging exit 0, layering ok, static 29/0/2"}
-  review: {status: done, content_head: 6bfc7873, fix_commit: 93735497, findings: {critical: 0, major: 3, minor: 12}, fixed: 15, not_fixed: [], re_review: done, open_after_re_review: [D1, D2, D3, D4, D5 optional]}
+  review: {status: done, content_head: 6bfc7873, fix_commit: 93735497, findings: {critical: 0, major: 3, minor: 12}, fixed: 15, not_fixed: [], re_review: done, open_after_re_review: [], open_items_fixed_on_request: [A, B, C, '12', D1, D2, D3, D4, D5]}
   tests: {status: done, after_content: {passed: 2888, failed: 25, errors: 1, skipped: 83, one_sided: ["test_pyroot_floor integration test: nfs4 TMPDIR cleanup flake, see log"]}, after_fixes: {static: {pass: 29, fail: 0, skip: 2}, pytest: {passed: 2887, failed: 26, errors: 1, skipped: 83}, one_sided: []}}
   records: {status: done, notes: "CHANGELOG scope and citation count updated; VALIDATION rows updated with follow-up numbers; coverage-audit follow-up note; dispositions extended"}
 stops: []
@@ -63,4 +63,5 @@ next_action: "await user: review the branch; push or PR only on request"
 2026-10-30 | follow-up | independent review of 37b68e3d..6bfc7873: 0 critical, 3 major, 12 minor; all 15 fixed (5 reworded after reading the abstract on INSPIRE-HEP) | this commit
 2026-10-30 | follow-up | re-review of 6bfc7873..93735497: all 15 resolved; D1-D4 minor and D5 optional left open (fix round used) | this commit
 2026-10-30 | follow-up | pytest after fixes: 2887 passed 26 failed 1 error 83 skipped, no one-sided failure (the PyROOT flake passed); static 29/0/2; VALIDATION and CHANGELOG updated | this commit
+2026-10-30 | open items | user: fix the items still open; A, B, C (first-pass re-review), 12 (garbled unchanged track-fit sentence), D1-D5 (follow-up re-review) fixed; markers 50/50, Check rule pass, layering ok, inventory regenerated (6 warnings, 0 overlaps), wiring, routing, packaging pass, static 29/0/2 | this commit
 ```

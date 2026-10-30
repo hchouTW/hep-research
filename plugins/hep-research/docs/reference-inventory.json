@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 43,
-   "bytes": 652076,
+   "bytes": 652381,
    "uncited": 0
   },
   "hep-measurement": {
@@ -2207,7 +2207,7 @@
   {
    "path": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
    "owner": "hep-detector",
-   "bytes": 20697,
+   "bytes": 20710,
    "lines": 324,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -2223,7 +2223,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "6bfc7873 2026-10-30"
+   "last_commit": "93735497 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/geant4-study-protocol.md",
@@ -2252,8 +2252,8 @@
   {
    "path": "skills/hep-detector/references/ground-based-detection-arrays.md",
    "owner": "hep-detector",
-   "bytes": 20787,
-   "lines": 294,
+   "bytes": 20909,
+   "lines": 296,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
@@ -2265,7 +2265,7 @@
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "6bfc7873 2026-10-30"
+   "last_commit": "93735497 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/imaging-atmospheric-cherenkov.md",
@@ -2351,8 +2351,8 @@
   {
    "path": "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
    "owner": "hep-detector",
-   "bytes": 21037,
-   "lines": 302,
+   "bytes": 21174,
+   "lines": 304,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/detector-case-studies-and-checklists.md",
@@ -2365,7 +2365,7 @@
     "skills/hep-detector/references/signal-formation-and-readout.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "6bfc7873 2026-10-30"
+   "last_commit": "93735497 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
@@ -2447,7 +2447,7 @@
   {
    "path": "skills/hep-detector/references/photon-likelihood-reconstruction.md",
    "owner": "hep-detector",
-   "bytes": 17639,
+   "bytes": 17659,
    "lines": 265,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -2640,7 +2640,7 @@
   {
    "path": "skills/hep-detector/references/tracking-and-vertexing.md",
    "owner": "hep-detector",
-   "bytes": 23594,
+   "bytes": 23607,
    "lines": 350,
    "linked_from_skill_md": true,
    "cited_by": [

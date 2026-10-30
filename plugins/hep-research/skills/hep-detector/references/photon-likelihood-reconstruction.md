@@ -173,8 +173,8 @@ variable, and its efficiency and mis-identification from simulation validated on
   energy at production and only weakly constrains the neutrino energy. Well below the muon
   critical energy ionization dominates and the light per length is nearly constant, so
   range is the estimator for a contained muon; between roughly a hundred GeV and the critical
-  energy the light depends only weakly on energy and the muon is rarely contained, so its
-  energy is poorly constrained.
+  energy the light depends only weakly on energy and the muon is often not contained in the
+  instrumented volume, so its energy is poorly constrained.
 
 **Check:** The energy estimator states what energy it returns (visible, electromagnetic-
 equivalent, muon energy in the detector), its non-linearity and non-uniformity corrections,
@@ -188,12 +188,12 @@ Specific to this method: the directional error is usually taken from a scan of t
 likelihood around the best direction with a fitted (for example paraboloid) contour, or from
 resampling the hits, and its pulls are binned in energy and topology, since a constant
 rescaling is acceptable only if the pull width is flat in both. Useful quality variables
-are the minimum of `-ln L` per degree of freedom, that is divided by a stated count (for
-example hit channels minus fitted parameters, although the likelihood also runs over unhit
-channels): a crude normalization, empirical and with no reference distribution, whose
-energy and topology dependence is calibrated on simulation; the
-number of hits with small time residual, the track length inside the instrumented volume,
-and the agreement between independent fits.
+are: the minimum of `-ln L` divided by a stated count, often called per degree of freedom
+(for example hit channels minus fitted parameters, although the likelihood also runs over
+unhit channels), a crude normalization with no reference distribution whose energy and
+topology dependence is calibrated on simulation; the number of hits with small time
+residual; the track length inside the instrumented volume; and the agreement between
+independent fits.
 
 **Check:** The per-event angular or position error is validated with pulls binned in
 energy and topology, and every quality variable used in a selection is compared between data
