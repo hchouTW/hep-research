@@ -365,8 +365,8 @@ execution layer. Its records are always `unvalidated`.
   tag and commit null and an `unknown` list (source commit, build options, the compiler of the build, dataset MD5s:
   the folders are content-hashed only), so every tool reads it unchanged; `check` re-reads the version, prefix and
   configuration hashes and re-hashes the datasets. An installation whose `find_package(Geant4)` fails (the
-  registration's `cmake_probe`; for example a conda environment without the development files of expat, zlib,
-  freetype or Qt) builds the programs with `geant4_run.py build-sim --configure-with geant4-config` and the official
+  registration's `cmake_probe`; for example a conda environment without the development files of expat, zlib or
+  freetype) builds the programs with `geant4_run.py build-sim --configure-with geant4-config` and the official
   examples with `geant4_examples.py build --configure-with geant4-config`; the examples need `--source`, a Geant4
   source tree of the installation's version (its `G4Version.hh` is checked). Run records then carry
   `simulation.geant4.origin`, and `label` lists the installations of its run records, with a provenance note for a

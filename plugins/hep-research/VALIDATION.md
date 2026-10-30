@@ -8448,3 +8448,39 @@ and the release regeneration procedure in `docs/maintenance.md`.
 | Committed outputs | `geant4-thin-silicon`, `design-minimal-spectrometer`, `design-search-j16` regenerated on E2 (the checker's code-identity hash is in their study records) | `e28ff1b9` (E2): 21 files (`geant4-thin-silicon` 7, `design-minimal-spectrometer` 14, `design-search-j16` none), every changed line a hash (the checker's code identity and the sha256 values covering it), no PNG; afterwards `tests.examples.test_geant4_thin_silicon`, `test_design_minimal_spectrometer`, `test_design_search_j16` and `test_check_geant4_study` pass on Linux with the CI lock |
 
 Passing checks show software consistency, not physical validity.
+## GEANT4-REGISTER — 2026-10-30 (environment E5: RHEL 9 x86_64, GCC 11.5.0, CMake 3.26.5, Python 3.13 CI lock; branch `geant4/register-existing-install` from `313637c1`)
+
+Adapter 0.6.0: `geant4_build.py register` and the downstream changes, run end to end against an existing installation:
+Geant4 11.4.3 from conda-forge in a conda environment (`geant4 11.4.3 qt` build: C++17, MT, external CLHEP 2.4.7.2,
+GDML, Qt; twelve datasets, nine in folders without the `G4` prefix, e.g. `EMLOW8.8`, while `geant4-config
+--datasets` names `G4EMLOW8.8`). Nothing was installed into the environment. The official example sources and
+reference outputs came from a `git clone --depth 1 --branch v11.4.3` of github.com/Geant4/geant4 into the local work
+folder (HEAD 2ee379e6843e55b9c6bbb835d2a2b03cc998fef0, the commit E2 built). Work folders on local disk, removed
+afterwards. Recorded: `tests/adapters/fixtures/geant4/records/geant4-registered-e5.computational-run.json` (paths as
+`~`) and `examples-compare-e5-s1.json` (the work folder written as `<work>`).
+
+| Step | Result |
+|---|---|
+| `register --prefix` without activating the environment | refused (exit 1, no record): nine datasets found nowhere, each naming the folder without the `G4` prefix next to it |
+| `register --prefix` in the activated environment (`--dataset-source auto`) | ok in 27 s: twelve datasets resolved from the environment variables (nine `without-G4-prefix`, three `exact`), content-hashed (G4NDL 16092 files ... G4ENSDFSTATE 3); artifact `geant4-registered-11.4.3-bc4790a9`, origin `registered`, tag and commit null |
+| Content of the eleven datasets E2 also installed | identical content hashes to E2's MD5-checked cern.ch downloads (the MD5 of the conda packages' sources is not checked here) |
+| CMake probe (`find_package(Geant4)`) | fails: `Could NOT find EXPAT (... Required is at least version "2.8.5")`; by hand, with expat and zlib pointed at the libraries, the next stop is freetype (the system 2.10.4 is older than the 2.14.3 required; the environment has no freetype CMake or header files): the environment ships the libraries but not the development files of Geant4's dependencies |
+| `check` (environment deactivated) | ok, no difference (version, prefix, configuration hashes, twelve dataset hashes) |
+| `build-sim` layered_sim with CMake | failed at configure (as the probe said), with the hint to use `--configure-with geant4-config` |
+| `build-sim --configure-with geant4-config` layered_sim, element_sim (+ simroot), simreco | ok (GCC 11.5.0; run path to the environment's `lib`, no `LD_LIBRARY_PATH`; `ldd` finds every library, the environment's newer `libstdc++` included); only `-Wshadow` warnings from Geant4's flags (`s`, `m`, `g` against the unit symbols) |
+| layered_sim TestEm5 run 0 mirror, 2000 events (a trial) | run ok; `geant4_verify.py mirror` failed `leak_secondaries_MeV` at z = -3.26 (z_crit 2.64); reported, not repaired |
+| layered_sim TestEm5 run 0 mirror, 1e5 events (the declared mirror size) | 6/6 pass (largest abs(z) 1.29, z_crit 2.64) |
+| layered_sim checks: overlaps, datapaths, balance (200 events, killed e+), budget (geantino, TestEm3 geometry) | pass (overlaps 0 reports in 10000 test points; balance residual RMS 1.5e-6 MeV); `--inject omit-positron-mass` caught in 200/200 events |
+| element_sim J15 run (200 events) | ok; datapaths pass; balance reported without a verdict (proton primary); `overlaps` failed because the run did not request `/geometry/test/run` (the live test below runs it) |
+| Official examples with CMake | failed at configure (same missing development files) |
+| Official examples with `--configure-with geant4-config`, `--source` the v11.4.3 clone | B1, B4a, TestEm3, TestEm5 built; without `--source` the build is refused (exit 2) |
+| `compare` B1 (runs 0-1), TestEm3 run 0 (10000 events), TestEm5 runs 0-4, seeds 20261030 1 | 48 quantities, Bonferroni z_crit 3.28: all pass, largest abs(z) 2.33 (TestEm5 run 0 steps_neutral) |
+| B4a smoke | pass (three runs, material table, FTFP_BERT) |
+| Live tests on the registration (`HEP_GEANT4_LIVE_TEST=1`) | `test_geant4.Live` 6/6 and `test_geant4_element.Live` 8/8 pass (element_sim test-hooks build made by hand with the same CMake helper) |
+| J14 live (`examples/geant4-thin-silicon/run.py --live` into the work folder; committed `recorded/` untouched) | 27/27 criteria pass in 768 s; both studies re-issued `validated-in-scope` for their benchmarked scopes; the study records list the nine (MPV) and five (stopping power) run records on the registered installation with the provenance note |
+| `HEP_GEANT4_REGISTER_TEST=<conda geant4-config>` (`RealInstallation`) | pass in the activated environment; fails, with the refusals, without the activation |
+
+Every record stays `unvalidated` except the two J14 study records `label --upgrade` re-issued; a completed run or an
+agreement with an official example is verification, not validation. The adapter status stays
+`demonstrated-on-synthetic-data`. Not done: the CVMFS LCG views (slow to list), the Apptainer definition, macOS rerun
+of the changed CMake files (the `find_package` path is unchanged apart from `CMAKE_PREFIX_PATH`).
