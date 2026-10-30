@@ -27,6 +27,9 @@ reconstruct direction, energy, and interaction type. Because the effective targe
 is the surrounding natural medium rather than an engineered detector volume, effective
 area/volume is a strong function of both energy and interaction topology and must be
 computed from full detector simulation, not treated as constant.
+The likelihood behind the fit (photon arrival-time densities, the optical model of the
+medium, seeding, reversed-track minima, energy from the light along a track, per-event
+angular errors) is in [photon likelihood reconstruction](photon-likelihood-reconstruction.md).
 
 ## Event topologies
 

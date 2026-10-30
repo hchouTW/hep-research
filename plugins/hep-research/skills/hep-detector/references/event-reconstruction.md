@@ -10,6 +10,10 @@ applied afterwards are in
 [physics-objects-jets-btagging-met.md](physics-objects-jets-btagging-met.md),
 and how to measure whether reconstruction worked is in
 [reconstruction performance and truth matching](reconstruction-performance-and-truth-matching.md).
+How to choose the estimator for a reconstructed quantity is in
+[detector measurement framework](detector-measurement-framework.md#choosing-the-estimator);
+likelihood reconstruction from many photosensor hits is in
+[photon likelihood reconstruction](photon-likelihood-reconstruction.md).
 
 ## The chain, and why its order matters
 

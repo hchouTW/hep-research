@@ -16,7 +16,7 @@ steps:
   T0: {status: done, notes: "worktree and branch created at BASE; work root outside every Git project; patch sha256 matches; git apply --check succeeds (route A); no Git committer identity configured, commits use -c user.name=Claude -c user.email=noreply@anthropic.com"}
   T1: {status: done, baseline: {static: {pass: 29, fail: 0, skip: 2}, pytest: {passed: 2885, failed: 28, errors: 1, skipped: 83}, failing_ids: {count: 29, file: baseline/failing_ids.txt}, routing_part_bytes: 4081}, notes: "interpreter: existing conda env envs/ml (Python 3.13.2; plugin requires >=3.13, system python3 is 3.12 without numpy); nothing installed. pytest 28 failed counts subtest failures; 29 ids incl. SUBFAILED lines, all outside hep-detector (hep-ml scripts and torch assets, find_python and PyROOT floors, synthetic NanoAOD, diagrams renderer, CLI contract, no-bytecode). Static skips are the two host-CLI checks (--no-cli). reference_inventory --check passes (6 size warnings, none in a touched file). check_wiring --since no-such-rev exits 2 (read as fatal bad input)"}
   T2: {status: done, counts: {C: 60, P: 39, M: 19, na: 15}, reconciled_changes: [], notes: "audited matrix equals the expected matrix; 58 non-covered = A 19 + B 7 + C 6 + D 14 + Deferred 12; 31 anchors resolve; no group premise changed (coverage-audit.md)"}
-  T3: {status: pending, route: A, must_state_missing_added: [], notes: ""}
+  T3: {status: done, route: A, must_state_missing_added: [], notes: "patch applied with git apply --3way --index (clean; Falling back to direct application, exit 0); every must-state point of items F, A, B, C, D and W read in the applied text and present; 50/50 marker phrases found; 16 new sections pass the Check rule; touched references 10456-23471 B (max tracking-and-vertexing.md 23471 B); check_layering ok; no experiment performance number added"}
   T4: {status: pending, verified: [], corrected: [], not_reverifiable: [], notes: ""}
   T5: {status: pending, notes: ""}
   T6: {status: pending, after: {static: {}, pytest: {}}, one_sided: [], notes: ""}
@@ -25,7 +25,7 @@ steps:
   T9: {status: pending, commits: [], notes: ""}
 fix_rounds_used: {}
 stops: []
-next_action: "T3 apply patch (route A)"
+next_action: "T4 citations"
 ```
 
 ## Log
@@ -39,4 +39,5 @@ next_action: "T3 apply patch (route A)"
 2026-10-30 | T1 | baseline with envs/ml Python 3.13.2: static 29 pass 0 fail 2 skip; pytest 2885 passed 28 failed 1 error 83 skipped (53 min); 29 base failure ids; inventory --check pass; routing part 4081 B; wiring --since no-such-rev exit 2 | this commit
 2026-10-30 | T4 | Crossref records of the 13 citations fetched into the work root early (read-only, no repository change); compared at T4 | none
 2026-10-30 | T2 | coverage audit at base: C 60, P 39, M 19, n/a 15; equals expected matrix, no reconciliation needed; script in coverage-audit.md recomputes counts and resolves anchors | this commit
+2026-10-30 | T3 | route A: patch applied cleanly (15 files); must-state check against items F, A, B, C, D, W found nothing missing; markers 50/50, Check rule 16/16, sizes <= 23471 B, layering ok | this commit
 ```

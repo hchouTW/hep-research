@@ -50,6 +50,7 @@ description: "Use when the deliverable is about how a detector responds: signal 
 | Design, trade-offs, layouts meeting a resolution | [design principles](references/detector-design-principles.md); `tracker_resolution.py` |
 | Synthetic spectrometer events and periods (seeded) | `toy_spectrometer.py` |
 | Calorimeter response and resolution | [calorimetry](references/calorimetry-ecal-hcal.md); `calorimeter_resolution.py` |
+| Reconstruction method: estimator choice; track and vertex finding; photon-counting likelihood (water Cherenkov, scintillator, neutrino telescopes, light-pattern positions) | [estimator choice](references/detector-measurement-framework.md#choosing-the-estimator), [tracking](references/tracking-and-vertexing.md#track-finding-strategies), [photon likelihood](references/photon-likelihood-reconstruction.md) |
 | PID: TOF, dE/dx, RICH; many samples (charge, LLR) | [PID](references/particle-identification.md); `pid_separation_power.py`, `cherenkov_angle.py`, `multisample_pid.py` |
 | Signal formation, readout, front-end electronics | [front end](references/front-end-electronics-and-signal-processing.md); `frontend_response.py` |
 | Response matrices, folding; build from events; mix or stack eras; species migration | [response and folding](references/response-and-forward-folding.md); `build_response.py`, `mix_period_responses.py`, `species_response.py` |
