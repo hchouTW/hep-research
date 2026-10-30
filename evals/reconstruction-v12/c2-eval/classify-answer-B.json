@@ -1,0 +1,10 @@
+{
+  "1": {"tier": "T0", "mode": "M1", "reason": "Single fact (concept/constant); answered in this session with general answering discipline, no run needed."},
+  "2": {"tier": "T1", "mode": "M1", "reason": "Method + feasibility conclusion from reasoning and literature; expected precision is stated as an attributed expectation, so it stays T1 and no computational run is forced."},
+  "3": {"tier": "T2-code", "mode": "M1", "reason": "Code fix whose evidence is a diff plus a test-execution receipt from the existing tests/; done locally in the foreground; weakening/skipping tests would need a human."},
+  "4": {"tier": "T2-numeric", "mode": "M1", "reason": "Numeric table on a simulated sample, internal, with no statement about it -> T2-numeric with the limitation 'supports only performance in simulation' ('just internal' does not lower it further); bounded local run in this session."},
+  "5": {"tier": "T3-C", "mode": "M1", "reason": "Claim about collision data, a comparison with a 1% threshold, and external reporting in a paper -> T3-C (each rule alone suffices); run interactively in this session, escalating to M2 (or M1 segmented) only if it is expected to exceed the session."},
+  "6": {"tier": "T3-E", "mode": "M1", "reason": "Simulated-sample performance with an assessment ('does it look flat' = trend judgement) -> T3-E, numbers marked exploratory/unconfirmed; bounded local run."},
+  "7": {"tier": "T2-numeric", "mode": "M2", "reason": "Event counts per sample (numbers, no claim) -> T2-numeric; a ~3-day local job spanning sessions -> M2 resumable, only with the control-layer helper and its qualified G5 record (rules not through S0), otherwise M1 segmented execution with a resumption summary; local cost alone does not make it M3."},
+  "8": {"tier": "T2-numeric", "mode": "M3", "reason": "Output histograms (numeric artifacts, no claim stated) -> T2-numeric; remote Slurm submission with no one present -> M3, whose executor guarantees G1-G5 are not available, so it must be reported as a weaker stated process following the existing campaign rules and manual boundary (M3 cannot be claimed)."}
+}

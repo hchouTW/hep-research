@@ -86,6 +86,16 @@ round-5 attacks still fail.
 | N1-R6-F3 | minor | §6 listed “adding a step with confirmation not required” | §6 list names deliverable confirmation fields and an added step's pin | Control §6 |
 | N1-R6-F4 | minor | Model's freeze items 3–4 stricter than the text, unreported | §4.4 states the model's reading (a required check attempt without a result spends the sample; item 4 covers another artifact of any step) | Control §4.4 |
 
+## N1 — round 7 (first review of the single 'overtaken' rule; open, spec copy not changed)
+
+Context `s0-reconstruction-v12-r7`, R2, N1 violated; reproduced by the coordinator with `s0/round7-attack.py`.
+
+| Id | Severity | Finding | Reproduction | Possible directions (not adopted) |
+|---|---|---|---|---|
+| N1-R7-F1 | major | `overtaken` looks only at outputs of attempts with confirmed termination: a newer draw that ends unknown, or one abandoned by a human and later reconciled, does not overtake the older output; a revert then re-binds and publishes the old checked output without a pin. The abandoned-and-reconciled case contradicts Control §4.2 (“whatever its end state”) | A1, A2 | count every attempt of the step that was admitted after the older output (its intent), whatever its end state and whether it has outputs, as overtaking it |
+| N1-R7-F2 | major | Check attempts that end without a result (cancelled, failed, timed out) are counted nowhere (report, publish, admission): confirmation aborted on S1 and S2, pass on S3, published T3C with `confirmation_results` = 1 and `failed_draws` = 0; a non-deterministic check can be retried until it passes | B1, B2 | count check attempts without a result as failed check draws in history and publish; a confirmation sample read by an aborted check attempt is spent |
+| N1-R7-F3 | minor | Control §3 diagram: cancelling → failed omits timeout | — | add timeout |
+
 ## N3 — statistics
 
 | Finding | Sev. | Change | Where |
