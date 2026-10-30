@@ -667,7 +667,29 @@ seven rounds, round-7 defects fixed in v12.2, not yet re-reviewed (round 8 pendi
 approved. The end-to-end test's assertion on the removed entry was replaced by assertions on the new text and on
 `failed_check_draws`; one CLI test of a check attempt without a result was added.
 
-VERIFY_V122
+Verification (clean clone of `64638f10` on local disk, `TMPDIR` on local disk):
+
+| Check | Result |
+|---|---|
+| `test_control_layer_model` | 8 run, OK: 92/92 scenarios, 44/44 mutations caught (incl. “unresolved newer attempts do not overtake”, “aborted check attempts not counted”), differential on every scenario log and 300 random sequences, task-record round trip |
+| `executor_capabilities.py qualify` | exit 0; G1, G2 pass; **G5 pass (14/14)** with the changed control-layer files (`control_sha256` `e06a8954…`); G3, G4, G6 unsupported |
+| `tools/run_all_checks.py --part static` | 31 pass, 0 fail |
+| `tests/skills/hep_computing` | 324 run, OK (39 skipped) — 323 + 1 new CLI test |
+| CLI robustness + CLI contract | 9 run, OK |
+| `tests/tools` | 371, OK |
+| `tests/contracts` | 1160, OK (1 skipped) |
+| `tests/routing` | 21, OK |
+
+Observations on the v12.2 model (reported, not changed):
+1. “Newer” in `overtaken` means the attempt has *any* fact after the artifact was first seen. That includes an
+   exposure whose free `attempt` label names the attempt (written by B or the agent): an agent-written exposure
+   labelled with an old failed attempt makes it “newer” and overtakes an artifact retroactively (stricter, not a
+   loosening, but a free label changes the binding). A cancel request or an abandon after the artifact also counts.
+2. An attempt admitted before the artifact was first seen but ending after it (concurrent draws) overtakes it.
+3. `aborted_checks` scans every intent per call although the model added a per-step index for `overtaken`
+   (Control §4.8); `log._by_check_target` would serve it.
+4. An unknown check attempt counts as a failed check draw although a later reconcile may still give it a result
+   (then it drops out again); publish counts made at different heads may therefore differ.
 
 ### Limitations
 
