@@ -321,14 +321,164 @@ Tests (`TMPDIR` on local disk): `test_executor_b2` 13 (receipts 2, binding 6, ca
 267 run, OK (39 skipped); `tests/skills/hep_review` 141, OK; `tests/routing` 21, OK; runner callers
 (`test_design_m2`, `test_geant4`, `test_cli_robustness`) 79, OK (6 skipped). `check_wiring.py --since <base>`: no new gap.
 
-## C1, C2 — blocked until the user's decision after round 6 (C1 now started, see below)
+## C1 — control layer and completion: done, with the control rules NOT through S0; C2 — not done
 
-Entry conditions require N1, which did not pass S0 after three rounds (runbook 0.5.2 item 7), nor in the
-user-approved fourth round (3 major findings). Neither stage is
-started; the control-layer rules (Control §1–§6) and the reference model are not written into skills or code.
-The Agent evaluation of Delivery §5.2 (C2 acceptance) is therefore not run.
+History: the entry conditions of C1 and C2 require N1, which did not pass S0 in any of six recorded rounds (runbook
+0.5.2 item 7; rounds 4–6 user-approved). After round 6 the user chose option A and decided to start C1 anyway, with
+the control rules stated as **not through S0**; the last spec change (the single “overtaken” binding rule, 38aae03a)
+was not reviewed at all. C2 (resumption, restart reconciliation, lease lock, the Agent evaluation of Delivery §5.2) is
+**not started**.
 
-## Final verification (clean detached checkout of the branch head on local disk, `TMPDIR` on local disk)
+### What C1 built
+
+Contract (T2-code): scope = the new helper and its tests, the shared reference page and the repository bookkeeping
+(B2 pattern); acceptance = the runbook C1 row adjusted to the spec copy (the model's 90 scenarios and 42 mutations as
+property tests of the implementation; the same derivation as the model on the same fact sequences; the contract,
+state and invalidation tests of Delivery §5.1; existing suites and static checks unchanged); required.
+
+- `plugins/hep-research/skills/hep-computing/scripts/control_layer.py` (CLI) with the library
+  `control_layer_support/`: `derivation.py` (in-memory fact log and derivation, a structural port of the reference
+  model: same function names and rules; identities are SHA-256 of canonical JSON instead of the model's repr hash;
+  admission takes an optional capability check; the log records append batches), `task_record.py` (persistent
+  record and JSON codec), `completion.py` (status and completion report). Standard library only.
+- **Task record** (DEC-01/08/09): one append-only `task-log.jsonl`, path on the command line (default
+  `hep-research-artifacts/<task>/task-log/task-log.jsonl`); each line `{seq, batch, kind, writer, fields, prev
+  (SHA-256 of the previous line's bytes), op, request (digest), time}` in canonical JSON (Control §4). Every load
+  verifies sequence numbers, the chain, canonical bytes and closed field sets, and replays every append batch
+  through the derivation's validation (a hand-edited, re-chained record is refused). Appends: exclusive `flock` on
+  `<file>.lock` (serializes writers only), re-read and verify, compare-and-set on `--expect-head` (and optionally the
+  last line's digest), whole batch validated before one `O_APPEND` write + `fsync`. Operation-id idempotency
+  (`--op`; same request → replayed, other request → refused) and head continuity are the DEC-13 ideas taken from the
+  hep-review store; no store is shared. A chain cannot detect an edit of its own last line: commands print
+  `head_digest`, and `verify --anchor-digest` / `--expect-digest` check it against a digest kept outside.
+- **Contract** (Control §1.1–1.3, DEC-12): closed JSON format (five fields; step `program`, `environment` required,
+  other step and deliverable fields with the documented defaults; unknown fields, wrong types, duplicate pairs and
+  NaN/infinite numbers refused), strictness order and effective contract exactly as the model (M2/M3 first contract
+  waits for `approve_contract`); `contract --dry-run` says whether a contract would take effect.
+- **Writers** (Control §2): agent → contract, freeze, exposure; C (the helper) → session, intent,
+  admission_rejected, reuse, publish (cancel_request exists in the library, no CLI command); adapter → receipt,
+  check_result; human → decision. The CLI offers no generic writer for B/adapter/human facts.
+- **Admission** (Control §5.1–5.3; CAP-01): the model's admission (identity, consumed inputs, accounts, reads,
+  unknown side effects, rerun and check-before-recompute rules, check inputs resolved by C, reuse) plus a capability
+  check right after the effective-contract check: the executor's declaration and qualification
+  (`executor_capabilities.py`) against `MODE_REQUIRES` of the record's mode, so M2/M3 are refused (G5 unsupported).
+- **Adapter** (`receipt`): a `run_workflow.py --receipt-dir` receipt becomes a receipt fact (writer `adapter`) for
+  the admitted attempt whose id equals the receipt's attempt (`--attempt-prefix` + step id); the run record's SHA-256
+  must equal the one the receipt cites; termination `unconfirmed` → `unknown` with no outputs; the artifact digest is
+  the output whenever termination is confirmed and the run wrote an output (also for a failed run, so an output once
+  seen stays seen for the overtaken rule); a bound check result becomes one check_result per sample used (check,
+  criterion and target digests from the run record's `extension.check`), with a warning when they do not match the
+  admitted check attempt's identity; `--not-started` turns the runner's own refusal (exit 2, status rejected) into a
+  failed receipt with termination confirmed. Usage is reported only with `--usage wall_s|cpu_s` (default none: the
+  budget then holds only against declared costs, and the report says so).
+- **Human decisions** (Control §6, DEC-14): `decide` refuses in a shell carrying `CLAUDECODE`,
+  `CLAUDE_CODE_ENTRYPOINT` or `AI_AGENT` and requires `--confirm-human`. This is a **guard, not an enforcement**
+  (documented in the script and the reference page): the agent must never write decisions or work around the guard,
+  and the record cannot prove that a human wrote a decision.
+- **Status and completion report** (FLOW-01, Core §6.4, §7.4, Control §4.5–4.6): per deliverable target and achieved
+  tier, state (done / partial / blocked / not started) with the reason, bound artifact and label, prior failures,
+  failed draws, confirmation-sample results, chain artifacts, publish records; per step artifacts with labels and
+  attested kind; attempts and accounts; samples with exposures, freezes and unblinding; contract states, decisions,
+  items pending a human; unsettled attempts; reproduction entry points. “complete” only when every required
+  deliverable is met and no attempt is unsettled. The limitations paragraph always states that the control rules did
+  not pass S0 (and the other limitations: reads not observable, receipts not authenticated, decision guard, no G6,
+  no M2/M3, pending DECs, budget against declared costs when no usage was reported).
+- Reference page `research-workflow-control.md`: banner rewritten (a helper now exists; rules not through S0; not
+  reviewed or validated; no autonomous capability; the transition procedure remains the reviewed one) and a new
+  section on the helper; `analysis-workflows.md` paragraph; hep-computing README count (twenty-two helpers);
+  CHANGELOG Unreleased entry; reference inventory regenerated; CLI robustness and CLI contract tables; local module
+  timings for the two new test modules; one naming waiver (`StepSpec.na_allowed`: the field name is fixed by the
+  model's scenarios, which the implementation must accept unchanged).
+
+DEC defaults taken, all **pending approval**: DEC-01/DEC-08/DEC-09 (record location and format above), DEC-02 (library
++ CLI, model as oracle, cache per fact sequence number, no incremental derivation across sequence numbers), DEC-06 as
+proposed by the spec copy (partitioned, chained rounds; pending re-confirmation), DEC-07 (local executor only),
+DEC-10 (declared inputs only: “attested (declared inputs)”), DEC-11 (helper in hep-computing), DEC-12 (session fact
+with the mode; M1 first contract effective, M2/M3 first contract waits for `approve_contract`), DEC-13 (no shared
+store with hep-review), DEC-14 (no delegation; decisions through the guard only).
+
+### Tests (`TMPDIR` on local disk)
+
+How the tests find the oracle: `tests/skills/hep_computing/control_oracle.py` loads the model from the repository
+root (`docs/dev/reconstruction-v12/spec/v12-en-reference-model.py`, or `HEP_RESEARCH_V12_MODEL`); the model is not
+copied into the plugin package. If it is missing in a development checkout (the `docs/dev/reconstruction-v12`
+folder exists) the tests **fail**; in an installed plugin (no `docs/dev`) they are **skipped** with the reason “the
+scenario, mutation and differential tests of the control layer did NOT run”. In this verification they ran (no skip).
+Rebinding: every model function (scenarios, scenario helpers, mutation factories) is re-created over a namespace in
+which every engine name is the implementation's object; the model contributes only scenario code (checked by a test).
+
+| Test | Result |
+|---|---|
+| Property tests: the model's 90 scenarios against the implementation (one subtest each) | 90/90 pass |
+| Mutation tests: the model's 42 mutations applied to the implementation's function of the same name | 42/42 caught by at least one scenario; implementation restored and re-run clean |
+| Differential, scenario sequences: every log the 90 scenarios build (model and implementation side by side), derivation snapshot after every append (logs ≤ 150 facts) and at the end, facts compared with identities through a bijection | equal: 395 logs, 6486 facts, 4116 snapshots (the test asserts > 90 logs and > 2000 snapshots) |
+| Differential, random sequences: 300 seeds, 10–36 operations each (runs with failures/timeouts/cancellations/unknown, checks with samples, freezes, recontracts of every kind, approvals, reuse, reconcile/abandon, exposures, decisions, publish incl. stale heads, start/cancel), snapshot after every operation, outcomes compared by exception class and message | equal (9104 facts in all); coverage over the seeds: every label except the iteration ones occurs, 44 seeds reach a met deliverable, T3C achieved in some, publishes written |
+| Codec round trip: 100 random implementation logs written as task records and loaded back | same derivation, byte-identical re-dump, same batches |
+| Sanity of the differential tests: an injected 1e-9 change of `used` after a reuse | caught (5 scenario and 11 random subtests failed) |
+| `test_control_layer.py` (task record, CLI end to end with run_workflow, JSON contract tests, decision guard, M2 refusal, capability refusal, adapter, report, Delivery §5.1 state items no scenario asserts, concurrency) | 33 run, OK |
+
+Delivery §5.1: the contract and state/invalidation rows are covered by the 90 scenarios (Control §8 lists them as
+the conversion of those rows) run against the implementation, plus the JSON-level contract tests (unknown fields,
+wrong types, NaN/infinite budget, unknown roles, checked step without checks, duplicate pairs, family rules in both
+listing orders, loosening pending until approval) and explicit tests for items no scenario asserts: cancellation
+recorded apart from failure, unconfirmed cancellation, success before a cancel took effect, upstream voided while the
+downstream is in flight, pinned old conditions, concurrent admissions against the budget (compare-and-set), an
+unconfirmed termination as unknown, a refused step as a failed draw, a receipt without a C intent refused. Not
+covered (C2/D): stale lock on restart, restart reconciliation, remote submission.
+
+### Verification (clean clone of the branch at `d161ad5b` on local disk, `TMPDIR` on local disk, Python 3.13 venv)
+
+| Check | Result |
+|---|---|
+| `tools/run_all_checks.py --part static` | 31 pass, 0 fail (the first run, on `25f90934`, failed only `packaging_scan`: the phrase “ported from” in a docstring; fixed in `d161ad5b`) |
+| `tests/skills/hep_computing` (`-t .`) | 308 run, OK (39 skipped, as at baseline; the oracle tests ran, not skipped) — 267 before C1 + 8 + 33 |
+| `tests.skills.test_cli_robustness`, `tests.skills.test_cli_contract` | 9 run, OK |
+| `tests/tools` (`-t .`) | 371, OK |
+| `tests/contracts` (`-t .`) | 1160, OK (1 skipped) |
+| `tests/routing` (`-t .`) | 21, OK |
+
+Not run: the whole `tests/skills` tree beyond the suites above, the full aggregate including slow-tier and
+`ams-optional`, the live routing rerun. The main checkout's `git status --porcelain` stayed empty; nothing under
+`docs/dev/reconstruction-v12/spec/` or `s0/` changed.
+
+### Limitations
+
+- The control rules did **not** pass S0; the helper's agreement with the model is agreement with unreviewed rules.
+  Nothing here is a review or validation of them, and the helper gives no autonomous reconstruction capability.
+- Receipts, run records and qualification files live in the workspace: the adapter checks digests and consistency but
+  cannot authenticate them; the decision guard is not an authentication.
+- Reads are not observable (DEC-10); G4 metering (atomic reservation) and G6 conditions evidence are unsupported;
+  M2/M3 refused; no reconcile or cancel CLI, no restart reconciliation or lease lock (C2); PROV-02 (typed sources
+  through `contracts/dependencies.py`) and the partition scope accounts of PART-02 are **not done** (only exposure
+  accounts and failure retention in the report); permissions (Control §5.1 item 1) are not modelled.
+- `flock` on NFS depends on the server's lock support; the compare-and-set check is what guarantees no lost update.
+- The oracle tests are skipped in an installed plugin (no `docs/dev`), with the stated reason.
+
+### Spec/model discrepancies found (not fixed; spec copy and model untouched)
+
+1. **Samples of a check result**: Control §2 and Delivery §1.1 say “samples used” (plural); the model's check_result
+   carries one `sample`. The adapter writes one check_result per sample used, which multiplies the
+   confirmation-sample result count; which reading is meant is not specified.
+2. **Field validation of C-written facts**: Control §2 says the helper validates the type and value of every field;
+   the model's fact validation does not type-check intent fields (an intent with a NaN cost is accepted by append; an
+   intent without `attempt` raises KeyError instead of being refused) nor `observed_exceeds_declared` (a truthy string
+   is accepted). The implementation inherits this in its engine (equivalence); its JSON codec refuses such values.
+3. **Reason of a check result**: Control §2 lists “four-valued result and reason”; the model does not require a reason.
+4. **Outputs of a failed attempt**: Control §2 says the output digest is valid only when termination is confirmed but
+   does not say whether a failed attempt has outputs; the model's receipts carry them and the overtaken rule counts
+   them (“whatever its end state”). The adapter follows the model.
+5. **Cost of derivation (Control §4.8)**: the spec says no derivation call may scan the whole log; the model's
+   `failed_draws`, the unknown-side-effect loop of `admit`, `owner_step` and `independent_sample` iterate over all
+   facts of a kind per call. The implementation inherits this; the scale scenario t28 passes.
+6. **Order of the capability check** in admission (Control §5.1 item 1 lists it with the effective contract; the
+   model leaves it out): the implementation checks it right after the effective-contract check, which only decides
+   which rejection reason is recorded.
+7. **Last line of a digest chain**: Control §2/§5.5 and DEC-01 rely on the chain, which cannot detect an edit of the
+   last line; the spec does not say how the head is anchored (DEC-13 names “head continuity” only as an idea).
+8. Control §8 names the model file `hep-research-reconstruction-v12-en-reference-model.py`; the spec copy holds it
+   as `v12-en-reference-model.py` (naming only).
+
+## Final verification of A1–B2 (clean detached checkout of the branch head on local disk, `TMPDIR` on local disk)
 
 | Check | Result |
 |---|---|
