@@ -22,7 +22,10 @@ non-empty and gets a content hash (SHA-256 over the sorted relative paths and fi
 `register` (adapter 0.6.0) records an existing installation instead of building one (conda-forge, an LCG view, a
 system package, a site build): it reads the version, prefix, C++ standard, features and dataset list from
 geant4-config and cross-checks them with Geant4Config.cmake and Geant4ConfigVersion.cmake (version, C++ standard,
-dataset names, variables and expected versions); a disagreement refuses the registration. Each dataset folder is
+dataset names, variables and expected versions); a disagreement refuses the registration, and so does a
+Geant4Config.cmake whose dataset descriptions cannot be read. --prefix may name a view (LCG) whose bin/geant4-config
+is a symbolic link into the installation: geant4-config reports that installation, which is recorded, with the view
+as registration.prefix_given. Each dataset folder is
 resolved from --dataset-source: `env` the dataset variable of the current environment, `config` the path
 geant4-config reports, `auto` (default) the variable when it is set, else the geant4-config path, with the source used
 reported per dataset. A dataset found nowhere, a variable that points to a folder that is not the dataset the
@@ -472,9 +475,16 @@ def cmd_register(args) -> tuple[str, dict]:
     config = config.resolve()
     version = config_query(config, "--version")
     prefix = Path(config_query(config, "--prefix")).resolve()
-    refused = []
+    refused, view = [], None
     if args.prefix and not same_dir(prefix, args.prefix):
-        refused.append(f"geant4-config --prefix is {tilde(prefix)}, not --prefix {tilde(expand(str(args.prefix)))}")
+        if same_dir(prefix, config.parent.parent):
+            # a view (LCG): --prefix/bin/geant4-config is a symbolic link into the installation, and geant4-config
+            # follows its own links, so it reports that installation; it is recorded, the view named as given
+            view = {"prefix_given": tilde(expand(str(args.prefix))),
+                    "prefix_given_note": f"bin/geant4-config is a symbolic link to {tilde(config)}; the installation "
+                                         f"it reports, {tilde(prefix)}, is recorded (a view only links to it)"}
+        else:
+            refused.append(f"geant4-config --prefix is {tilde(prefix)}, not --prefix {tilde(expand(str(args.prefix)))}")
     cxxstd = config_query(config, "--cxxstd")
     features = dict(re.findall(r"^\s*(\w[\w-]*)\[(yes|no)\]", config_query(config, "--features"), re.M))
     tls = subprocess.run([str(config), "--tls-model"], capture_output=True, text=True, timeout=120)
@@ -493,6 +503,12 @@ def cmd_register(args) -> tuple[str, dict]:
             refused.append(f"Geant4ConfigVersion.cmake says {cm['version']}, geant4-config --version {version}")
         if cm["cxx_standard"] and cm["cxx_standard"] != cxxstd:
             refused.append(f"Geant4Config.cmake C++ standard {cm['cxx_standard']} != geant4-config --cxxstd {cxxstd}")
+        kept = [x[0] for x in listed if x[0] not in (args.skip_dataset or [])]
+        if kept and not cm["datasets"]:  # never skip every cross-check silently
+            refused.append(f"{tilde(cmake_dir / 'Geant4Config.cmake')} declares no dataset (no "
+                           'set(Geant4_DATASET_DESCRIPTIONS "NAME|VARIABLE|PATH|TARBALL|MD5;...") line could be read), '
+                           f"while geant4-config lists {', '.join(kept)}: the dataset names, variables, folders and "
+                           "versions cannot be cross-checked")
     unknown_skip = sorted(set(args.skip_dataset or []) - {x[0] for x in listed})
     if unknown_skip:
         raise SpecError(f"--skip-dataset {unknown_skip}: not a dataset of this installation "
@@ -580,13 +596,16 @@ def cmd_register(args) -> tuple[str, dict]:
                                        "cmake_config_version": cm["version"],
                                        "dataset_source": args.dataset_source,
                                        "environment_variables_not_listed": extra,
-                                       "cmake_probe": probe, "compiler_now": cxx, "cmake_now": cmake}}}}
+                                       "cmake_probe": probe, "compiler_now": cxx, "cmake_now": cmake,
+                                       **(view or {})}}}}
     args.record.parent.mkdir(parents=True, exist_ok=True)
     args.record.write_text(json.dumps(record, indent=1, sort_keys=True) + "\n", encoding="utf-8")
     warnings = []
     if probe.get("ran") and not probe.get("find_package_ok"):
         warnings.append("find_package(Geant4) fails for this installation: " + "; ".join(probe.get("errors", []))[:400]
                         + "; build the programs with geant4_run.py build-sim --configure-with geant4-config")
+    if view:
+        warnings.append(f"--prefix {view['prefix_given']}: {view['prefix_given_note']}")
     if extra:
         warnings.append(f"{', '.join(extra)} set in the environment but not a dataset of this installation: runs "
                         "unset them")

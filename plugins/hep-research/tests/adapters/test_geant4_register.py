@@ -402,6 +402,37 @@ class ReviewFixes(_TempDirCase):
     bin/geant4-config is a symbolic link, check with a geant4-config that writes to stderr, and switching
     --configure-with in one --work (build-sim and the examples; these two need cmake and a C++ compiler)."""
 
+    def test_geant4config_cmake_without_dataset_descriptions_is_refused(self):
+        inst = FakeInstall(self.d, dataset_descriptions=False)
+        code, out, rec_path = self.register(inst)
+        self.assertEqual(code, 1, out)
+        self.assertTrue(any("declares no dataset" in r for r in out["refused"]), out["refused"])
+        self.assertFalse(rec_path.exists())
+
+    def test_a_view_whose_geant4_config_is_a_symbolic_link_is_registered(self):
+        inst = FakeInstall(self.d / "real")  # like Geant4's own script, it reports the real installation's prefix
+        view = self.d / "view"
+        (view / "bin").mkdir(parents=True)
+        (view / "bin" / "geant4-config").symlink_to(inst.config)
+        (view / "lib").mkdir()
+        (view / "lib" / "cmake").symlink_to(inst.prefix / "lib" / "cmake")
+        code, out = run(BUILD, "register", "--prefix", view, "--record", self.d / "v.json", "--no-cmake-probe",
+                        env=clean_env())
+        self.assertEqual(code, 0, out)
+        b = json.loads((self.d / "v.json").read_text(encoding="utf-8"))["extension"]["build"]
+        self.assertEqual(expand_path(b["install_prefix"]), inst.prefix.resolve())
+        self.assertEqual(expand_path(b["registration"]["prefix_given"]), view)
+        self.assertIn("symbolic link", b["registration"]["prefix_given_note"])
+        self.assertTrue(any("symbolic link" in w for w in out["warnings"]), out["warnings"])
+        code, out = run(BUILD, "check", "--record", self.d / "v.json", env=clean_env())
+        self.assertEqual((code, out["differences"]), (0, []), out)
+        # a geant4-config that is not a link into the prefix it reports stays refused
+        other = FakeInstall(self.d / "other", reported_prefix=self.d / "real" / "prefix")
+        code, out = run(BUILD, "register", "--prefix", other.prefix, "--record", self.d / "o.json", "--no-cmake-probe",
+                        env=clean_env())
+        self.assertEqual(code, 1, out)
+        self.assertTrue(any("geant4-config --prefix is" in r for r in out["refused"]), out["refused"])
+
     def test_check_reads_geant4_config_as_register_does(self):
         inst = FakeInstall(self.d, stderr_warning=True)
         code, out, rec_path = self.register(inst)
@@ -412,6 +443,10 @@ class ReviewFixes(_TempDirCase):
         code, out = run(BUILD, "check", "--record", rec_path, env=clean_env())
         self.assertEqual((code, out["status"]), (2, "rejected"), out)
         self.assertIn("exited 3", out["error"])
+
+
+def expand_path(text: str) -> Path:
+    return Path(os.path.expanduser(text))
 
 
 @unittest.skipUnless(REAL, "set HEP_GEANT4_REGISTER_TEST to a Geant4 installation's geant4-config or prefix")
