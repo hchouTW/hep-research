@@ -190,7 +190,9 @@ the transport Jacobian is integrated with it or computed numerically. Consequenc
   dependence belong in the conditions record.
 - **The lever arm is the bending power along the actual path.** The fitted parameter is
   `q/p` at a reference surface, and resolution follows the field weighted by the
-  measurement lever arm along the path (the sagitta-like double integral of `B`), not
+  measurement lever arm along the path (the sagitta-like double integral of `B` when the
+  measurements lie inside the field; `int B dl` with the lever arm of the outer planes when
+  they lie outside it), not
   `int B dl` alone; tracks crossing a region of weak bending power have worse resolution
   at the same rigidity, so quote resolution against the path through the field, not only
   against rigidity.

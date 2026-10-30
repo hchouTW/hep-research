@@ -30,7 +30,9 @@ of their arrival times. The likelihood multiplies over **all** channels:
   probability that the signal stayed below threshold. Leaving unhit channels out discards
   the information that light was *not* seen where a wrong hypothesis predicts it, and is a
   common source of biased vertices near the detector boundary. Only live, enabled channels
-  count as unhit: dead or disabled channels are excluded, never treated as unhit.
+  count as unhit: dead or disabled channels are excluded, never treated as unhit. The hit
+  and unhit terms use the same threshold model, so for each channel the probabilities of a
+  hit and of no hit sum to one.
 - **Time term.** Define the residual `t_res = t_i - t_geo`, where `t_geo` is the arrival
   time of unscattered light from the hypothesis, computed with the group refractive index
   for propagation and the phase index for the Cherenkov angle (the two differ noticeably
@@ -45,8 +47,10 @@ of their arrival times. The likelihood multiplies over **all** channels:
   single-photon time density `f` with cumulative `F` and Poisson mean `mu`, the first
   arrival follows `f_1(t) = mu f(t) exp(-mu F(t)) / (1 - exp(-mu))` (exact under the Poisson
   assumption), which is earlier and narrower than `f`. A recorded first hit can also be a
-  noise hit, so the noise rate is included in `f` and `F` (normalized over the readout
-  window) before forming `f_1`. Using `f` for bright channels biases
+  noise hit, so the noise rate is included: `mu` is the total mean number of above-threshold
+  photoelectrons in the readout window (signal plus noise), and `f` and `F` are the
+  corresponding normalized mixture density over the window and its cumulative. Using `f`
+  for bright channels biases
   the fit; using `f_1` with a wrong `mu` does too. With waveform digitization the
   likelihood can instead use the whole pulse series, for example as Poisson counts in time
   bins.
@@ -56,7 +60,7 @@ of their arrival times. The likelihood multiplies over **all** channels:
 
 **Check:** The likelihood includes live unhit channels and excludes dead ones, handles
 saturated channels as censored, and for single-time readout evaluates the first-photon time
-density with the expected `mu` of every hit channel.
+density with the total expected `mu` (signal plus noise) of every hit channel.
 
 ## The expected-light model
 
@@ -166,9 +170,11 @@ variable, and its efficiency and mis-identification from simulation validated on
   the point where it is seen, with large fluctuations. Robust estimators use a truncated
   mean over track segments or unfold the loss profile along the track (Aartsen et al., J.
   Instrum. 9 (2014) P03009). For a through-going track it is on average below the muon
-  energy at production and only weakly constrains the neutrino energy. Below the muon
-  critical energy the light per length depends weakly on energy, so range is the estimator for a
-  contained muon.
+  energy at production and only weakly constrains the neutrino energy. Well below the muon
+  critical energy ionization dominates and the light per length is nearly constant, so
+  range is the estimator for a contained muon; between roughly a hundred GeV and the critical
+  energy the light depends only weakly on energy and the muon is rarely contained, so its
+  energy is poorly constrained.
 
 **Check:** The energy estimator states what energy it returns (visible, electromagnetic-
 equivalent, muon energy in the detector), its non-linearity and non-uniformity corrections,
@@ -182,9 +188,10 @@ Specific to this method: the directional error is usually taken from a scan of t
 likelihood around the best direction with a fitted (for example paraboloid) contour, or from
 resampling the hits, and its pulls are binned in energy and topology, since a constant
 rescaling is acceptable only if the pull width is flat in both. Useful quality variables
-are the minimum of `-ln L` per degree of freedom (hit channels minus fitted parameters; a
-crude normalization that stays energy dependent, so its energy dependence is calibrated on
-simulation), the
+are the minimum of `-ln L` per degree of freedom, that is divided by a stated count (for
+example hit channels minus fitted parameters, although the likelihood also runs over unhit
+channels): a crude normalization, empirical and with no reference distribution, whose
+energy and topology dependence is calibrated on simulation; the
 number of hits with small time residual, the track length inside the instrumented volume,
 and the agreement between independent fits.
 

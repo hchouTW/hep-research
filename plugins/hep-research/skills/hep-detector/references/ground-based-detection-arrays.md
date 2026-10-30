@@ -69,7 +69,12 @@ energy, since the shower footprint grows with energy). Each station records a si
   small signals and including stations that did not trigger (they bound the footprint, as
   unhit channels do in [photon likelihood reconstruction](photon-likelihood-reconstruction.md#the-per-channel-likelihood)).
   The station-signal model includes shower-to-shower and particle-sampling fluctuations,
-  which set the per-event uncertainty of the size and of the energy.
+  which set the per-event uncertainty of the size and of the energy; that uncertainty also
+  includes the uncertainty of the assumed lateral-distribution shape, which the
+  reference-distance choice above keeps small but not zero.
+- **Station times.** The arrival-direction fit (above) weights each station's start time by
+  a time-variance model: the first particle's arrival time fluctuates more far from the core,
+  where the shower front is thicker, and less when many particles are sampled.
 - **Muon and electromagnetic components.** Separating them needs a second response:
   dedicated shielded or buried muon detectors, layered detectors with different relative
   response to muons and to electrons and photons, or the time structure of the station

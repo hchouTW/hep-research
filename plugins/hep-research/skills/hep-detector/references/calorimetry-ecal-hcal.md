@@ -195,7 +195,8 @@ estimated from a cluster besides its energy.
 - **Shape.** The shape discriminants are introduced under electromagnetic showers above;
   in addition, a core-to-ring energy ratio, rear leakage and a fitted gamma-function
   longitudinal profile are common inputs. Hadronic showers start later on average because
-  the interaction length exceeds the radiation length. Two nearby photons (a neutral-pion
+  the interaction length exceeds the radiation length (strongly in high-`Z` absorbers; the
+  contrast is weaker in low-`Z` media). Two nearby photons (a neutral-pion
   decay) appear as a broadened or double-peaked deposit. In an imaging calorimeter without
   a magnet in front of it, a multivariate combination of shape variables is often the main
   electron-proton separator. Its proton rejection is measured on data, with control

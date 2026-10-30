@@ -19,13 +19,13 @@ steps:
   T3: {status: done, route: A, must_state_missing_added: [], notes: "patch applied with git apply --3way --index (clean; Falling back to direct application, exit 0); every must-state point of items F, A, B, C, D and W read in the applied text and present; 50/50 marker phrases found; 16 new sections pass the Check rule; touched references 10456-23471 B (max tracking-and-vertexing.md 23471 B); check_layering ok; no experiment performance number added"}
   T4: {status: done, verified: [Adam 2005, Waltenberger 2007, Kleinwort 2012, Ai 2022, Awes 1992, Acciarri 2018, Qian 2018, Abratenko 2017, Jiang 2019, Ahrens 2004, Aartsen 2014, Parsons 2014, Auger 2015], corrected: [], not_reverifiable: [], notes: "13/13 Crossref records fetched by curl into the work root (crossref/); authors, title, venue, volume, pages or article number, year match each bibliography entry (Auger 2015: no person authors in Crossref, collaboration compared with the title and other fields); no change, so no T4 commit"}
   T5: {status: done, notes: "route A: every item W bullet present (SKILL.md row, README count forty-three and topic, event-reconstruction intro links, bibliography block, four routing cases, CHANGELOG Unreleased); make_cases.py regenerates cases.json byte-identically; inventory regenerated (247 references); check_wiring --since BASE exit 0, no new gap; check_routing_static exit 0; inventory --check pass, same 6 size warnings as T1, 0 overlap pairs; routing part 4081 B (T1 4081 B)"}
-  T6: {status: pending, after: {static: {}, pytest: {}}, one_sided: [], notes: ""}
-  T7: {status: pending, content_head: , re_review: , findings: {critical: , major: , minor: }, fixed: , not_fixed: [], notes: ""}
+  T6: {status: done, after: {static: {pass: 29, fail: 0, skip: 2}, pytest: {passed: 2888, failed: 25, errors: 1, skipped: 83}}, one_sided: [], notes: "26 failing ids, all in the T1 base list; 3 base failures passed this time (diagrams hanging-renderer, find_python 3.11/3.12 floor, PyROOT floor: environment-timing tests); inventory --check pass; routing part 4081 B"}
+  T7: {status: in-progress, content_head: 2d8e931c53aebae9a14865e45d958839ea04f82b, re_review: pending, findings: {critical: 0, major: 2, minor: 9}, fixed: 9, not_fixed: ["9 (applicability already stated; spec places it)", "10 (routing budget, criterion 4)", "12 optional (unchanged text, follow-up)"], notes: "reviewer dispatched at CONTENT_HEAD while the T6 pytest ran (content unchanged during T6; fixes applied only after T6 finished); report in work root review/report.md"}
   T8: {status: pending, notes: ""}
   T9: {status: pending, commits: [], notes: ""}
-fix_rounds_used: {}
+fix_rounds_used: {T7: 1}
 stops: []
-next_action: "T6 checks"
+next_action: "T7: repeat T5 gate and T6 into after-t7, then re-review"
 ```
 
 ## Log
@@ -42,4 +42,6 @@ next_action: "T6 checks"
 2026-10-30 | T3 | route A: patch applied cleanly (15 files); must-state check against items F, A, B, C, D, W found nothing missing; markers 50/50, Check rule 16/16, sizes <= 23471 B, layering ok | this commit
 2026-10-30 | T4 | 13/13 citations verified against Crossref; no correction | none
 2026-10-30 | T5 | wiring confirmed; inventory regenerated; wiring, routing static, inventory gates pass; routing part unchanged 4081 B | this commit
+2026-10-30 | T6 | static 29/0/2; pytest 2888 passed 25 failed 1 error 83 skipped; no one-sided failure | none
+2026-10-30 | T7 | independent review at 2d8e931c: 0 critical, 2 major, 9 minor, 1 optional; 9 fixed (both majors), 2 minor not fixed by convention, optional left for follow-up (review-dispositions.md) | this commit
 ```

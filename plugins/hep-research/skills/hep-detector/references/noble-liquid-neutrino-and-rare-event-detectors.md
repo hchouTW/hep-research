@@ -78,8 +78,9 @@ one two-dimensional image per wire plane.
   Birks form, parameters measured at the local field; recombination also depends on the
   track angle to the drift field). The conversion is steep at high
   charge density, so errors grow toward the end of a stopping track. The track pitch on a
-  wire grows at large angle to the wire plane, where the deconvolved charge is least
-  reliable.
+  wire grows as the track points along the drift direction (the charge on each wire is
+  spread over a long time) or along the wire orientation, where the deconvolved charge is
+  least reliable.
 - **Momentum and energy.** Range gives the momentum of a contained stopping track (with a
   particle hypothesis); multiple Coulomb scattering, from a likelihood of the deflection
   angles between track segments, gives the momentum of an exiting track (Abratenko et al.,
