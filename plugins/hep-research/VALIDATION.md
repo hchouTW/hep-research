@@ -8492,3 +8492,30 @@ Every record stays `unvalidated` except the two J14 study records `label --upgra
 agreement with an official example is verification, not validation. The adapter status stays
 `demonstrated-on-synthetic-data`. Not done: the CVMFS LCG views (slow to list), the Apptainer definition, macOS rerun
 of the changed CMake files (the `find_package` path is unchanged apart from `CMAKE_PREFIX_PATH`).
+
+## GEANT4-REGISTER-REVIEW — 2026-10-30 (environment E5: RHEL 9 x86_64, GCC 11.5.0, CMake 3.26.5, CI-lock Python 3.13; branch `geant4/register-existing-install` at `50a8569c`)
+
+Fixes for the PR #328 review of adapter 0.6.0. Each finding got a regression test that failed on `ac0b4140` before the
+fix (`tests/adapters/test_geant4_register.py`, class `ReviewFixes`; the fake installation is now accepted by
+`find_package(Geant4 11.4)` and answers `--cflags`/`--libs`, so the two build tests configure with the real CMake and
+compiler and skip without them). Live checks against the conda-forge Geant4 11.4.3 installation of GEANT4-REGISTER
+compare the code at `ac0b4140` (before) with the fixed code (after); work folders on local disk, removed afterwards.
+
+| Finding | Regression test (before the fix) | Live, before | Live, after |
+|---|---|---|---|
+| `check` read `geant4-config` with stderr and ignored its exit | `test_check_reads_geant4_config_as_register_does`: exit 1, version `11.4.3\nbash: warning: ...` | `LC_ALL=xx_XX.UTF-8` (`/bin/sh: warning: setlocale`): `check` failed with a version and a prefix difference | ok, no difference |
+| `Geant4Config.cmake` without readable dataset descriptions skipped every cross-check | `test_geant4config_cmake_without_dataset_descriptions_is_refused`: exit 0, record written | not reproduced live (the conda file declares them) | refused, no record (fake) |
+| `register --prefix` on a view whose `bin/geant4-config` is a symbolic link | `test_a_view_whose_geant4_config_is_a_symbolic_link_is_registered`: refused | view of symbolic links to the conda `bin/geant4-config` and `lib/cmake/Geant4`: refused (`geant4-config --prefix is ~/.../envs/geant4`) | ok, the conda prefix recorded with `prefix_given` the view and a warning; `check` ok. Cause: Geant4's `geant4-config` follows its own links and canonicalises its prefix (`pwd -P`), so not resolving the path before querying would not have helped |
+| `build-sim` kept a cached `G4SIM_GEANT4_CONFIG` | `test_build_sim_cmake_after_geant4_config_does_not_keep_the_helper`: the cmake-mode log says `Geant4 11.4.3 from .../geant4-config` | `--configure-with geant4-config`, then the default in the same `--work`: both ok, the second reported `configure_with: cmake` although `find_package(Geant4)` cannot work for this installation | geant4-config ok; cmake fails at configure (`Could NOT find EXPAT`, the probe's finding) with the hint; geant4-config again ok, `ldd` finds every library |
+| examples: one build folder configured from two sources | `test_examples_switch_configure_with_in_one_work_folder` (B1 stand-in, geant4-config, cmake, geant4-config): the cmake step fails with `does not match the source ... used to generate cache` | not run (building the official examples from the v11.4.3 clone was not permitted in this session) | not run; the regression test passes |
+
+Live end-to-end after the fixes: `register --prefix` (activated environment) ok in 31 s, twelve datasets, CMake probe
+fails as recorded in GEANT4-REGISTER; `check` ok with the environment activated and deactivated; layered_sim (built
+with `--configure-with geant4-config` after the mode switch) 200 events of `balance_killed_tracks` (SYNTHETIC) ok, run
+record `unvalidated`, origin `registered`, every dataset path and content match.
+
+Software checks on a clean clone at `50a8569c` on local disk (no dataset variable set): `run_all_checks.py --part
+static` 31/31 pass; `tests/adapters` 505, 0 failures, 88 skipped (live and real-installation tests);
+`tests/skills/hep_detector` 591, 4 skipped; `test_cli_robustness` and `test_cli_contract` 9; `tests/tools` 371;
+`tests/contracts` 1160, 1 skipped; `tests/routing` 21; repo path guard ok. The adapter status stays
+`demonstrated-on-synthetic-data`.

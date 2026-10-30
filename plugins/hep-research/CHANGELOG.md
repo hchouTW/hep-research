@@ -16,6 +16,17 @@ Software checks establish contract consistency only, not physical validity.
   the order (`qed-prediction` before `published-comparison`), the version-only diff rule, a local project-free
   `TMPDIR` for `check_relocation.py`, and the README size statement and manifest order.
 - Evidence: VALIDATION RELEASE-FOLLOWUPS-0.50.0
+- **Geant4 adapter 0.6.0 review fixes** (PR #328, `adapters/geant4`). `geant4_build.py check` reads `geant4-config`
+  as `register` does (stdout only, a non-zero exit rejected), so a stderr warning (a bash locale warning) no longer
+  fails `check` on an installation `register` accepted. `register` refuses a `Geant4Config.cmake` whose dataset
+  descriptions cannot be read instead of skipping every dataset cross-check, and accepts `--prefix` on a view (LCG)
+  whose `bin/geant4-config` is a symbolic link into the installation: Geant4's script follows its own links, so the
+  installation it reports is recorded, with the view as `registration.prefix_given`. `geant4_run.py build-sim` with
+  CMake drops a `G4SIM_GEANT4_CONFIG` cached by an earlier `--configure-with geant4-config` build in the same folder
+  (the binary was linked through `geant4-config` while reporting `cmake`); `geant4_examples.py build` clears a CMake
+  cache made from the other mode's source (`cache_cleared` in `adapter-build.json`) instead of failing every example.
+  The adapter stays `demonstrated-on-synthetic-data`.
+- Evidence: VALIDATION GEANT4-REGISTER-REVIEW
 
 ## 0.50.0 (2026-10-30)
 
