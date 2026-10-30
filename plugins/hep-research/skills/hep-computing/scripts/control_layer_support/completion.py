@@ -237,3 +237,115 @@ def markdown(rep: dict) -> str:
             f"- task log `{repro['task_log']}` at head {repro['head']} (last line `{repro['head_digest']}`), "
             f"derivation {repro['derivation']}, mode {repro['mode']}", ""]
     return "\n".join(out)
+
+
+# ---------------------------------------------------------------- resumption summary (C2; Core §6.4)
+
+RESUME_RULES = (
+    "Never resubmit an attempt that is admitted, running, cancelling, unknown or abandoned: its outcome is not known "
+    "to this session. Take its receipt if the run left one; if the run left none, record it lost (`receipt --lost`, "
+    "termination unknown); reconcile an unknown or abandoned attempt only from a receipt that proves its outcome "
+    "(`reconcile`), or ask a human to abandon it (`decide --action abandon`, in the human's terminal).",
+    "Reconcile first, then take over an expired lease (`lock acquire`); a live lease of another owner is not taken "
+    "over.",
+    "When this summary and the actual state disagree (a run record exists that the record does not show, a process "
+    "still runs), the actual state wins: record it through the commands above, and note the difference.",
+)
+
+
+def _dry_admit(log, step: str):
+    """Would C admit a computation of `step` now? (capability is checked only at the real admission)"""
+    import copy  # noqa: PLC0415
+    trial = copy.deepcopy(log)
+    try:
+        dv.admit(trial, trial.head, "__resume_probe__", step, cost=0.0)
+        return None
+    except dv.Admission as exc:
+        return str(exc)
+    except dv.Rejected as exc:
+        return f"rejected: {exc}"
+
+
+def next_actions(log) -> list[dict]:
+    """What may be done next, derived from the facts (in this order: settle attempts, human items, then work)."""
+    actions = []
+    for row in attempts(log):
+        state = row["state"]
+        if state in ("unknown", "abandoned"):
+            actions.append({"do": "reconcile from a receipt that proves the outcome, or ask a human to abandon",
+                            "attempt": row["attempt"], "state": state} if state == "unknown" else
+                           {"do": "nothing to resubmit; reconcile if its outcome is later proven", "attempt":
+                            row["attempt"], "state": state})
+        elif state in ("admitted", "running", "cancelling"):
+            actions.append({"do": "take the run's receipt (`receipt`), or record it lost (`receipt --lost`); never "
+                                  "rerun it", "attempt": row["attempt"], "state": state})
+    for item in pending_for_humans(log):
+        if item["kind"] != "abandon or reconcile":
+            actions.append({"do": f"ask a human: {item['kind']}", **{k: v for k, v in item.items() if k != "kind"}})
+    if not dv.has_contract(log):
+        actions.append({"do": "write the first contract" if not log.of("contract") else
+                        "wait for the human approval of the first contract (M2/M3) or write a new contract"})
+        return actions
+    eff = dv.contract(log)
+    for did, dl in eff["deliverables"].items():
+        status = dv.deliverable_status(log, did)
+        if status["met"]:
+            if not any(p.get("deliverable") == did for p in log.of("publish")):
+                actions.append({"do": "publish", "deliverable": did})
+            continue
+        for name in reversed(dv.chain_steps(log, dl.step)):
+            if dv.bound(log, name) is not None:
+                continue
+            spec = eff["steps"][name]
+            usable = [d for d in dv.candidates_raw(log, name) if dv.step_of(log, d) == name and dv.current(log, d)]
+            if usable:
+                latest = usable[-1]
+                lab = dv.label(log, latest)
+                missing = sorted(list(p) for p in spec.required if not dv.counted_result(log, latest, *p))
+                if lab == "unchecked" and missing:
+                    actions.append({"do": "admit the missing checks", "deliverable": did, "step": name,
+                                    "target": latest, "checks": missing})
+                else:
+                    actions.append({"do": f"resolve {lab}", "deliverable": did, "step": name, "artifact": latest,
+                                    "admission": _dry_admit(log, name) or "a new computation would be admitted"})
+            else:
+                actions.append({"do": "compute", "deliverable": did, "step": name,
+                                "admission": _dry_admit(log, name) or "would be admitted"})
+            break
+        else:
+            artifact = status["artifact"]
+            if artifact is not None and dl.target == "T3C" and status["achieved"] != "T3C":
+                actions.append({"do": "freeze, then confirm on an unexposed confirmation sample", "deliverable": did,
+                                "artifact": artifact})
+    return actions
+
+
+def resume(log, task_log: str, head_digest: str | None, lease: dict, history: list[dict]) -> dict:
+    """The resumption summary (Core §6.4): enough for a new session without the chat history. Facts only."""
+    eff = dv.has_contract(log)
+    rows = attempts(log)
+    by_state: dict = {}
+    for row in rows:
+        by_state.setdefault(row["state"], []).append(row["attempt"])
+    eff_seq = next((c["seq"] for c in contracts(log) if c["status"] == "effective"), None)
+    from .task_record import encode_contract  # noqa: PLC0415
+    return {
+        "task_log": task_log, "head": log.head, "head_digest": head_digest, "mode": log.mode(),
+        "derivation": dv.DERIVATION_VERSION,
+        "limitation": LIMITATIONS[0],
+        "contract": {"effective_seq": eff_seq, "effective": encode_contract(dv.contract(log)) if eff else None,
+                     "states": contracts(log)},
+        "deliverables": status(log)["deliverables"],
+        "attempts_by_state": {k: sorted(v) for k, v in sorted(by_state.items())},
+        "do_not_resubmit": sorted(a for s in ("admitted", "running", "cancelling", "unknown", "abandoned")
+                                  for a in by_state.get(s, [])),
+        "pending_for_humans": pending_for_humans(log),
+        "freezes": [{"seq": f.seq, "step": f.get("step"), "samples": list(f.get("samples")),
+                     "independent": list(f.get("independent") or ())} for f in log.of("freeze")],
+        "samples": exposures(log),
+        "accounts": status(log)["accounts"],
+        "lease": {k: lease.get(k) for k in ("held", "owner", "expires", "pid", "host")},
+        "lease_events": len(history),
+        "rules": list(RESUME_RULES),
+        "next_actions": next_actions(log),
+    }

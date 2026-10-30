@@ -16,7 +16,8 @@ append holds an exclusive lock on <file>.lock (POSIX flock; the lock only serial
 the record, refuses unless the caller's expected head (and, when given, the expected last-line digest) still holds
 (compare-and-set, Control §5.5), validates the whole batch before writing anything, and writes the batch with one
 O_APPEND write followed by fsync. A crash in the middle of that write leaves a torn last line, which the next load
-reports; recovery belongs to C2.
+reports; `control_layer.py recover` (C2, lease.py) removes that never-acknowledged fragment and records it. Writers
+may additionally hold a lease (lease.py), checked under the same flock before the compare-and-set.
 """
 from __future__ import annotations
 
@@ -434,8 +435,20 @@ class TaskRecord:
             self._write(lines)
             return Outcome(list(log.facts), log.head, hashlib.sha256(lines[-1]).hexdigest())
 
+    def locked(self):
+        """The record's exclusive flock (also taken by every append); lease operations run under it."""
+        return self._locked()
+
+    def recover(self) -> dict:
+        """Restart recovery of a torn, never acknowledged last line (C2; lease.recover_torn_tail)."""
+        from .lease import recover_torn_tail  # noqa: PLC0415
+        with self._locked():
+            result = recover_torn_tail(self.path)
+            loaded = self.read()
+            return {**result, "head": loaded.log.head, "head_digest": loaded.head_digest}
+
     def transact(self, operation, expect_head: int, expect_digest: str | None = None, op_id: str | None = None,
-                 request: dict | None = None) -> Outcome:
+                 request: dict | None = None, guard=None) -> Outcome:
         """Run `operation(log)` on the verified record and append what it wrote, all under the lock.
         Idempotency: a repeated op_id with the same request returns the facts written the first time (replayed);
         with another request it is an OperationConflict. Compare-and-set: StaleWrite unless the record's head (and
@@ -451,6 +464,8 @@ class TaskRecord:
                         raise OperationConflict(f"operation {op_id} was used with another request")
                     return Outcome([log.facts[line["seq"]] for line in earlier], log.head, loaded.head_digest,
                                    replayed=True)
+            if guard is not None:
+                guard(log)                      # the lease (C2): in addition to compare-and-set, never instead
             if expect_head != log.head:
                 raise StaleWrite(f"expected head {expect_head}, actual {log.head}: re-read, re-derive and retry")
             if expect_digest is not None and expect_digest != loaded.head_digest:

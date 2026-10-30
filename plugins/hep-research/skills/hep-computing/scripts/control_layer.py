@@ -35,6 +35,17 @@ Commands:
   status   --task-log FILE        derive at the current head (resumption view)
   report   --task-log FILE [--format json|markdown] [--out FILE]      completion report (Core §7.4)
   verify   --task-log FILE [--anchor-digest SHA256 [--anchor-seq N]]   verify the chain, replay every fact
+ C2 (resumption and recovery; the same rules, still not through S0):
+  resume   --task-log FILE        resumption summary for a new session: what not to resubmit, what to do next
+  receipt  --task-log FILE --lost --attempt ID [--reason TEXT] --expect-head N   a run that left no receipt: unknown
+  reconcile --task-log FILE --receipt R.receipt.json --work DIR --expect-head N  outcome of an unknown/abandoned attempt
+  cancel   --task-log FILE --attempt ID --expect-head N        C's cancel request (stopping the process is B's)
+  lock     acquire|release|status --task-log FILE [--owner NAME] [--lease-s SECONDS]   lease lock (Control §5.5)
+  recover  --task-log FILE        remove a torn, never acknowledged last line (kept aside, recorded)
+After a restart: run `resume`; settle every admitted, running or unknown attempt first (take its receipt, record it
+lost, reconcile it from a receipt that proves its outcome, or have a human abandon it) -- never resubmit it; then
+take over an expired lease. A live lease of another owner refuses every write except a human decision; under M2/M3
+every such write needs --owner holding a live lease. The lease never replaces compare-and-set.
 Contract JSON (closed format, Control §1.1): {"steps": {NAME: {"program", "environment", "external": [],
 "upstream": [], "checked": false, "required_checks": [[CHECK_SHA256, CRITERION_SHA256]], "na_allowed": [],
 "check_inputs": [[CHECK_SHA256, STEP]], "family": null, "round": null, "rerun_allowed": false, "pin": null}},
@@ -43,11 +54,13 @@ Contract JSON (closed format, Control §1.1): {"steps": {NAME: {"program", "envi
 "mode_check"}}, "samples": {NAME: ROLE}, "budget": null|NUMBER}; program and environment are required in a step, the
 other step and deliverable fields default as shown; unknown fields are refused.
 Admission compares the executor's declared capabilities (executor_capabilities.py declare/qualify) with the
-record's execution mode (CAP-01): M2 and M3 need G5, which is unsupported, so they are refused. A run_workflow.py
+record's execution mode (CAP-01): M2 needs G1, G2 and G5 (G5 is qualified with this helper's record as the persistent
+state, stage C2), M3 also G3 and G4, which are unsupported, so M3 is refused. A run_workflow.py
 receipt is bound to the admitted attempt by its attempt id: run the step with --receipt-dir DIR and --attempt-prefix
 P so that P + the workflow step id equals the admitted attempt id. An unconfirmed termination becomes a receipt with
-termination unknown. --usage none (default) reports no usage, so the budget holds only against declared costs; with
-wall_s or cpu_s the declared costs and the budget are in that unit.
+termination unknown. --usage auto (default) reports no usage under M1, so the budget holds only against declared
+costs, and wall_s under M2/M3, where receipts must carry usage; with wall_s or cpu_s the declared costs and the
+budget are in that unit.
 Human decisions: `decide` is a guard, not an enforcement. It refuses when the shell carries an agent marker
 (CLAUDECODE, CLAUDE_CODE_ENTRYPOINT, AI_AGENT) and requires --confirm-human. An agent must never run it, nor unset
 those variables to get past it; the record cannot prove that a human wrote a decision.
@@ -72,11 +85,12 @@ sys.path.insert(0, str(PLUGIN))
 from core.status import exit_code  # noqa: E402
 from control_layer_support import completion  # noqa: E402
 from control_layer_support import derivation as dv  # noqa: E402
+from control_layer_support import lease as leases  # noqa: E402
 from control_layer_support.task_record import (CorruptRecord, OperationConflict, TaskRecord,  # noqa: E402
                                                decode_contract, decode_fields, encode_fields)
 
 AGENT_MARKERS = ("CLAUDECODE", "CLAUDE_CODE_ENTRYPOINT", "AI_AGENT")
-USAGE_FIELDS = ("none", "wall_s", "cpu_s")
+USAGE_FIELDS = ("auto", "none", "wall_s", "cpu_s")
 
 
 def _read_json(path: Path):
@@ -99,8 +113,11 @@ def _written(outcome, **extra) -> dict:
 
 def _transact(args, operation, request: dict, **extra) -> dict:
     record = TaskRecord(args.task_log)
+
+    def guard(log):
+        leases.check_write(Path(args.task_log), getattr(args, "owner", None), log.mode(), args.command == "decide")
     outcome = record.transact(operation, args.expect_head, args.expect_digest, args.op,
-                              {"command": args.command, **request})
+                              {"command": args.command, **request}, guard=guard)
     return _written(outcome, **extra)
 
 
@@ -179,7 +196,8 @@ def cmd_publish(args) -> dict:
 
 # ---------------------------------------------------------------- adapter: run_workflow.py receipts -> facts
 
-def receipt_facts(receipt: dict, receipt_sha: str, work: Path, usage_field: str, intent) -> list:
+def receipt_facts(receipt: dict, receipt_sha: str, work: Path, usage_field: str, intent, mode: str = "M1",
+                  kind: str = "receipt") -> list:
     """Facts for one run_workflow.py receipt (B2): a receipt (end status; termination confirmed, or unknown when the
     runner says unconfirmed; the artifact digest as the output whenever termination is confirmed and the run wrote an
     output, also when the step failed: an output once seen stays seen, Control §4.2 overtaken),
@@ -202,6 +220,8 @@ def receipt_facts(receipt: dict, receipt_sha: str, work: Path, usage_field: str,
     run_record = json.loads(run_record_bytes.decode("utf-8"))
     outputs = (receipt["artifact_digest"],) if termination == "confirmed" and receipt.get("outputs") else ()
     usage = None
+    if usage_field == "auto":
+        usage_field = "wall_s" if mode in ("M2", "M3") else "none"
     if usage_field != "none":
         usage = (receipt.get("usage") or {}).get(usage_field)
         if usage is None:
@@ -212,7 +232,7 @@ def receipt_facts(receipt: dict, receipt_sha: str, work: Path, usage_field: str,
               "artifact_digest": receipt["artifact_digest"], "outputs": receipt.get("outputs", []),
               "reads_observable": bool(observed.get("observable")), "usage": receipt.get("usage"),
               "termination": receipt["termination"], "started": receipt.get("started"), "ended": receipt.get("ended")}
-    facts = [("receipt", "adapter", {"attempt": intent.get("attempt"), "end": end, "termination": termination,
+    facts = [(kind, "adapter", {"attempt": intent.get("attempt"), "end": end, "termination": termination,
                                      "outputs": outputs, "usage": usage, "observed_exceeds_declared": False,
                                      "record": record})]
     bind = receipt.get("check_result")
@@ -233,7 +253,16 @@ def receipt_facts(receipt: dict, receipt_sha: str, work: Path, usage_field: str,
 
 
 def cmd_receipt(args) -> dict:
-    if args.not_started:
+    if args.lost:
+        if not args.attempt:
+            raise ValueError("--lost needs --attempt")
+        attempt = args.attempt
+        facts = [("receipt", "adapter", {"attempt": attempt, "end": "failure", "termination": "unknown",
+                                         "outputs": (), "observed_exceeds_declared": False,
+                                         "record": {"lost": True, "reason": args.reason or "no receipt or run record "
+                                                    "of this attempt was found; its outcome is unknown"}})]
+        request = {"lost": attempt, "reason": args.reason}
+    elif args.not_started:
         if not (args.attempt and args.runner_output):
             raise ValueError("--not-started needs --attempt and --runner-output")
         runner_bytes = Path(args.runner_output).read_bytes()
@@ -267,7 +296,7 @@ def cmd_receipt(args) -> dict:
             raise dv.Rejected(f"attempt {attempt!r} is {dv.exec_status(log, attempt)}: a receipt is taken only for "
                               f"an admitted or running attempt")
         items = facts if facts is not None else receipt_facts(receipt, request["receipt"], Path(args.work),
-                                                              args.usage, intent)
+                                                              args.usage, intent, log.mode())
         consumed = dict(intent.get("inputs") or ())
         extra = {k: v for k, v in consumed.items() if k != "target"}
         for kind, _, fields in items:
@@ -334,6 +363,69 @@ def cmd_verify(args) -> dict:
     return out
 
 
+# ---------------------------------------------------------------- C2: reconcile, cancel, resume, lease, recover
+
+def cmd_reconcile(args) -> dict:
+    """Adapter: a receipt that proves the outcome of an unknown or abandoned attempt (Control §3)."""
+    receipt_bytes = Path(args.receipt).read_bytes()
+    receipt = json.loads(receipt_bytes.decode("utf-8"))
+    attempt = receipt.get("attempt")
+    if receipt.get("termination") != "confirmed":
+        raise ValueError("a reconciliation needs a receipt with termination confirmed; an unconfirmed one changes "
+                         "nothing")
+    request = {"receipt": hashlib.sha256(receipt_bytes).hexdigest(), "usage": args.usage}
+
+    def operation(log):
+        intent = dv.intent_of(log, attempt)
+        if intent is None:
+            raise dv.Rejected(f"attempt {attempt!r} has no intent written by C")
+        state = dv.exec_status(log, attempt)
+        if state not in ("unknown", "abandoned"):
+            raise dv.Rejected(f"attempt {attempt!r} is {state}: a reconcile takes effect only for unknown or "
+                              f"abandoned attempts")
+        log.append_batch(receipt_facts(receipt, request["receipt"], Path(args.work), args.usage, intent, log.mode(),
+                                       kind="reconcile"), log.head)
+    return _transact(args, operation, request)
+
+
+def cmd_cancel(args) -> dict:
+    """C's cancel request. It records the request; stopping the process is B's (run_workflow.py has no cancel
+    operation: stop its process group yourself), and the receipt decides the state."""
+    def operation(log):
+        state = dv.exec_status(log, args.attempt)
+        if dv.intent_of(log, args.attempt) is None or state not in ("admitted", "running"):
+            raise dv.Rejected(f"attempt {args.attempt!r} is {state}: only an admitted or running attempt is cancelled")
+        log.append("cancel_request", "C", log.head, attempt=args.attempt)
+    return _transact(args, operation, {"attempt": args.attempt})
+
+
+def cmd_resume(args) -> dict:
+    record = TaskRecord(args.task_log)
+    loaded = record.read()
+    summary = completion.resume(loaded.log, str(args.task_log), loaded.head_digest,
+                                leases.lease_state(Path(args.task_log)), leases.read_history(Path(args.task_log)))
+    return {"status": "ok", **summary}
+
+
+def cmd_lock(args) -> dict:
+    record = TaskRecord(args.task_log)
+    path = Path(args.task_log)
+    if args.action == "status":
+        return {"status": "ok", "lease": leases.lease_state(path), "history": leases.read_history(path)}
+    if not args.owner:
+        raise ValueError("lock acquire/renew/release needs --owner")
+    with record.locked():
+        log = record.read().log
+        if args.action == "release":
+            return {"status": "ok", **leases.release(path, args.owner)}
+        unsettled = [row["attempt"] for row in completion.attempts(log) if row["state"] in leases.UNSETTLED]
+        return {"status": "ok", **leases.acquire(path, args.owner, args.lease_s, unsettled)}
+
+
+def cmd_recover(args) -> dict:
+    return {"status": "ok", **TaskRecord(args.task_log).recover()}
+
+
 def cmd_init(args) -> dict:
     outcome = TaskRecord(args.task_log).create(args.mode)
     return _written(outcome)
@@ -341,8 +433,9 @@ def cmd_init(args) -> dict:
 
 COMMANDS = {"init": cmd_init, "contract": cmd_contract, "freeze": cmd_freeze, "exposure": cmd_exposure,
             "admit": cmd_admit, "receipt": cmd_receipt, "decide": cmd_decide, "publish": cmd_publish,
-            "status": cmd_status, "report": cmd_report, "verify": cmd_verify}
-WRITES = ("contract", "freeze", "exposure", "admit", "receipt", "decide", "publish")
+            "status": cmd_status, "report": cmd_report, "verify": cmd_verify, "reconcile": cmd_reconcile,
+            "cancel": cmd_cancel, "resume": cmd_resume, "lock": cmd_lock, "recover": cmd_recover}
+WRITES = ("contract", "freeze", "exposure", "admit", "receipt", "decide", "publish", "reconcile", "cancel")
 
 
 def parser() -> argparse.ArgumentParser:
@@ -355,6 +448,8 @@ def parser() -> argparse.ArgumentParser:
             cmd.add_argument("--expect-head", type=int, required=True, help="the head the caller derived from")
             cmd.add_argument("--expect-digest", help="the SHA-256 of the record's last line (head continuity)")
             cmd.add_argument("--op", help="operation id: a repeated write with the same request is not appended twice")
+            if name != "decide":
+                cmd.add_argument("--owner", help="the lease owner writing (required under M2/M3; C2 lease lock)")
     cmds["init"].add_argument("--mode", choices=dv.MODES, default="M1")
     for name in ("contract", "freeze"):
         cmds[name].add_argument("--file", type=Path, required=True)
@@ -375,7 +470,10 @@ def parser() -> argparse.ArgumentParser:
     rec = cmds["receipt"]
     rec.add_argument("--receipt", type=Path, help="a run_workflow.py <attempt>.receipt.json")
     rec.add_argument("--work", type=Path, help="the run's work folder (holds runs/<step>.computational-run.json)")
-    rec.add_argument("--usage", choices=USAGE_FIELDS, default="none")
+    rec.add_argument("--usage", choices=USAGE_FIELDS, default="auto",
+                     help="auto: none under M1, wall_s under M2/M3 (where receipts must carry usage)")
+    rec.add_argument("--lost", action="store_true", help="no receipt or run record exists: termination unknown")
+    rec.add_argument("--reason", help="with --lost: why the outcome is unknown")
     rec.add_argument("--not-started", action="store_true", help="the runner refused the step before starting it")
     rec.add_argument("--attempt", help="with --not-started: the admitted attempt")
     rec.add_argument("--runner-output", type=Path, help="with --not-started: run_workflow.py's JSON output")
@@ -391,6 +489,13 @@ def parser() -> argparse.ArgumentParser:
     dec.add_argument("--basis", help="what the decision rests on (for the record)")
     dec.add_argument("--confirm-human", action="store_true", help="the human deciding confirms it is a human")
     cmds["publish"].add_argument("--deliverable", required=True)
+    cmds["reconcile"].add_argument("--receipt", type=Path, required=True)
+    cmds["reconcile"].add_argument("--work", type=Path, required=True)
+    cmds["reconcile"].add_argument("--usage", choices=USAGE_FIELDS, default="auto")
+    cmds["cancel"].add_argument("--attempt", required=True)
+    cmds["lock"].add_argument("action", choices=("acquire", "release", "status"))
+    cmds["lock"].add_argument("--owner")
+    cmds["lock"].add_argument("--lease-s", type=float, default=900.0, help="lease length in seconds (default 900)")
     cmds["report"].add_argument("--format", choices=("json", "markdown"), default="json")
     cmds["report"].add_argument("--out", type=Path)
     cmds["verify"].add_argument("--anchor-digest", help="a line digest kept outside the record (head_digest of an "
@@ -405,6 +510,8 @@ def main(argv=None) -> int:
         out = COMMANDS[args.command](args)
     except dv.StaleWrite as exc:
         out = {"status": "rerun-required", "reason": str(exc)}
+    except leases.LeaseRefused as exc:
+        out = {"status": "refused", "reason": f"lease: {exc}"}
     except (dv.Rejected, CorruptRecord, OperationConflict, FileExistsError) as exc:
         out = {"status": "rejected", "error": f"{type(exc).__name__}: {exc}"}
     except (OSError, ValueError, KeyError, TypeError) as exc:
