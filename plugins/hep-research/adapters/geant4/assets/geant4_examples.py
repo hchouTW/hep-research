@@ -39,7 +39,9 @@ Subcommands:
            geant4-config (adapter 0.6.0) compiles each example's own sources and macros with the installation's
            geant4-config flags through a generated CMakeLists.txt (the example's own CMakeLists.txt is not used: an
            installation without the development files of Geant4's dependencies); the choice, the compiler and the
-           example source are written to <build>/adapter-build.json and into every run record
+           example source are written to <build>/adapter-build.json and into every run record; the two modes share
+           <work>/examples/<name>/build, so a cache configured from the other mode's source is cleared (and recorded
+           as cache_cleared) before configuring
   run      run one example unchanged through a wrapper macro (/random/setSeeds, then /control/execute <name>.in),
            always serial (G4FORCE_RUN_MANAGER_TYPE=Serial), and write a computational-run record of the run;
            --run0-events N runs only the commands up to the first /run/beamOn, with N events (mirror reference)
@@ -414,14 +416,17 @@ def cmd_build(args) -> tuple[str, dict]:
         else:
             configure = ["cmake", "-S", str(src / "examples" / folder), "-B", str(bld), f"-DGeant4_DIR={g4dir}",
                          f"-DCMAKE_PREFIX_PATH={install_prefix(rec)}", "-DCMAKE_BUILD_TYPE=Release"]
+        cleared = clear_foreign_cache(bld, Path(configure[2]))
         with (bld / "build.log").open("w", encoding="utf-8") as fh:
+            if cleared:
+                fh.write(f"# {cleared}\n")
             codes = []
             for c in (configure, ["cmake", "--build", str(bld), "--parallel", str(args.jobs)]):
                 codes.append(subprocess.run(c, stdout=fh, stderr=subprocess.STDOUT, timeout=3600).returncode)
                 if codes[-1]:
                     break
         ok = not any(codes) and (bld / exe).is_file()
-        meta = {"example": name, "configure_with": args.configure_with, "source": src_info,
+        meta = {"example": name, "configure_with": args.configure_with, "source": src_info, "cache_cleared": cleared,
                 "compiler": cmake_compiler(bld), "geant4": geant4_identity(rec),
                 "exit_codes": codes, "exe_sha256": sha256_file(bld / exe) if ok else None}
         write_json(bld / "adapter-build.json", meta)
@@ -429,6 +434,22 @@ def cmd_build(args) -> tuple[str, dict]:
     return ("ok" if all(b["ok"] for b in built.values()) else "failed"), {
         "examples": built, "configure_with": args.configure_with, "source": src_info,
         "geant4": geant4_identity(rec)}
+
+
+def clear_foreign_cache(bld: Path, source: Path) -> str | None:
+    """Remove the CMake cache of a build folder configured from another source folder: the two modes configure one
+    build folder from different sources (the example's own folder, or the generated <work>/examples/<name>/cmake), and
+    CMake refuses a cache made from another source. Returns what was cleared, or None."""
+    cache = bld / "CMakeCache.txt"
+    if not cache.is_file():
+        return None
+    text = cache.read_text(encoding="utf-8", errors="replace")
+    home = next((ln.split("=", 1)[1] for ln in text.splitlines() if ln.startswith("CMAKE_HOME_DIRECTORY:")), None)
+    if home and Path(home).resolve() == source.resolve():
+        return None
+    cache.unlink()
+    shutil.rmtree(bld / "CMakeFiles", ignore_errors=True)
+    return f"CMake cache of {tilde(Path(home)) if home else 'an unknown source'} cleared: configuring from {tilde(source)}"
 
 
 def cmake_compiler(bld: Path) -> dict:

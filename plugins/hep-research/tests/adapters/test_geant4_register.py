@@ -466,6 +466,28 @@ class ReviewFixes(_TempDirCase):
         cache = (bld / "CMakeCache.txt").read_text(encoding="utf-8")
         self.assertFalse(re.search(r"^G4SIM_GEANT4_CONFIG:\w+=.+$", cache, re.M))
 
+    def test_examples_switch_configure_with_in_one_work_folder(self):
+        self._needs_cmake()
+        inst = FakeInstall(self.d)
+        code, out, rec_path = self.register(inst)
+        self.assertEqual(code, 0, out)
+        src = self.d / "src"
+        b1 = src / "examples" / "basic" / "B1"
+        (b1 / "src").mkdir(parents=True)
+        (b1 / "exampleB1.cc").write_text("int main() { return 0; }\n")
+        (b1 / "exampleB1.in").write_text("/run/beamOn 1\n")
+        (b1 / "CMakeLists.txt").write_text("cmake_minimum_required(VERSION 3.16...3.27)\nproject(B1 CXX)\n"
+                                           "find_package(Geant4 REQUIRED)\nadd_executable(exampleB1 exampleB1.cc)\n")
+        for mode in ("geant4-config", "cmake", "geant4-config"):
+            code, out = run(ASSETS / "geant4_examples.py", "build", "--build-record", rec_path, "--work", self.d / "w",
+                            "--source", src, "--examples", "B1", "--configure-with", mode, "--jobs", "1",
+                            env=clean_env())
+            with self.subTest(mode=mode):
+                self.assertEqual(code, 0, (out, (self.d / "w" / "examples" / "B1" / "build" / "build.log")
+                                           .read_text(encoding="utf-8")[-1500:]))
+                meta = json.loads((self.d / "w" / "examples" / "B1" / "build" / "adapter-build.json").read_text())
+                self.assertEqual(meta["configure_with"], mode)
+
 
 def expand_path(text: str) -> Path:
     return Path(os.path.expanduser(text))
