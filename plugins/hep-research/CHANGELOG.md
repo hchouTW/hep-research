@@ -30,6 +30,18 @@ Software checks establish contract consistency only, not physical validity.
   step that replaces `runs/` by a symlink fails without a run record or receipt. Tests:
   `test_workflow_b1.Destinations.test_a_parent_the_step_turns_into_a_symlink`,
   `test_a_runs_folder_the_step_replaces_with_a_symlink`.
+- **`run_workflow.py`: termination waits for the step to end, ignores zombies, records survivors, and sees nested
+  runners** (review of PR #329). After a step's main process exits, its other processes get 1 s to end on their
+  own, and zombies (ended, cannot write) no longer count, so a child that is just exiting, or an exited child left
+  unreaped by an init that never reaps, no longer fails a good step. Processes still running then are stopped and
+  fail the step as before (no write after the step's end), and are now named in the record's
+  `extension.leftover_processes`; a helper daemon the step starts (ssh ControlPersist master, gpg-agent, a
+  compiler-cache server) is such a process: start it before the workflow. The token in `HEP_RUN_WORKFLOW_ATTEMPT` is
+  now a colon-separated chain that a nested `run_workflow.py` extends instead of replacing, so the steps of an inner
+  runner (each in its own session) are found and stopped with the outer step; before, they escaped while the outer
+  record said termination confirmed. Every record carries `extension.termination_scope` (`process-group`,
+  `environment-marker`). The G2 qualification gains three cases (a child that left the group, a nested runner's step,
+  and a positive control for a child ending just after the step). Tests: `test_workflow_b1.Termination`.
 
 ## 0.50.0 (2026-10-30)
 

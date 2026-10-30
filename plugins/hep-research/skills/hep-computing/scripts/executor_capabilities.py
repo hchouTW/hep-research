@@ -8,7 +8,10 @@ qualification record (Delivery §1.2 of the reconstruction v12.1 spec copy). The
 - G1 output isolation: an old same-name output, absolute / `..` / symlinked destinations, an exit-0 command that
   writes nothing -- each must be refused or failed, with a positive control that a fresh output is accepted;
 - G2 termination confirmation: a child still alive after its parent times out must be stopped and the record must
-  say termination confirmed, with no write after the timeout (POSIX only; tested on Linux);
+  say termination confirmed, with no write after the timeout; a child that leaves the process group (its own
+  session) and outlives the step, and the step of a nested run_workflow.py, must be found, stopped and recorded with
+  no late write; positive control: a child that ends just after the step does not fail it (POSIX; the cases outside
+  the group need /proc, so G2 passes on Linux only);
 - G3 submission reconciliation, G4 resource metering with atomic reservation, G5 persistent state and G6 conditions
   resolution evidence are not provided by this executor: they are recorded as unsupported, never declared.
 The qualification record names the platform and the SHA-256 of the runner it tested; a changed runner makes it stale.
@@ -114,12 +117,41 @@ def qualify_g2(root: Path) -> dict:
     rec = work / "runs" / "s.computational-run.json"
     ext = json.loads(rec.read_text(encoding="utf-8"))["extension"] if rec.is_file() else {}
     time.sleep(4)
+    leave = ("import subprocess, sys; subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(2.5); "
+             "open(\"late.txt\", \"w\").write(\"x\")'], start_new_session=True, stdout=subprocess.DEVNULL, "
+             "stderr=subprocess.DEVNULL); open('o.txt', 'w').write('x')")
+    l_code, l_out, l_work = _run(root, _step(leave, ["o.txt"]), "leave")
+    l_rec = l_work / "runs" / "s.computational-run.json"
+    l_ext = json.loads(l_rec.read_text(encoding="utf-8"))["extension"] if l_rec.is_file() else {}
+    started, n_late = root / "nested-started", root / "nested-late"
+    (root / "inner.json").write_text(json.dumps(_step(
+        f"import time; open({str(started)!r}, 'w').write('x'); time.sleep(2.5); open({str(n_late)!r}, 'w').write('x')",
+        [])), encoding="utf-8")
+    nest = (f"import os, subprocess, sys, time; subprocess.Popen([sys.executable, {str(RUNNER)!r}, "
+            f"{str(root / 'inner.json')!r}, '--work', {str(root / 'inner-work')!r}], stdout=subprocess.DEVNULL, "
+            f"stderr=subprocess.DEVNULL)\nwhile not os.path.exists({str(started)!r}): time.sleep(0.05)\nos._exit(0)")
+    n_code, n_out, n_work = _run(root, _step(nest, [], timeout_s=120), "nested")
+    n_rec = n_work / "runs" / "s.computational-run.json"
+    n_ext = json.loads(n_rec.read_text(encoding="utf-8"))["extension"] if n_rec.is_file() else {}
+    quick = ("import subprocess, sys; subprocess.Popen([sys.executable, '-c', 'import time; time.sleep(0.3)'], "
+             "stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL); open('o.txt', 'w').write('x')")
+    q_code, q_out, _ = _run(root, _step(quick, ["o.txt"]), "quick")
+    time.sleep(3)  # a late write of the stopped children would have landed by now
     cases = [{"case": "a run record is written on a timeout", "passed": rec.is_file(), "detail": out.get("status")},
              {"case": "termination confirmed and end status timeout",
               "passed": (ext.get("termination"), ext.get("end_status")) == ("confirmed", "timeout"), "detail": ext.get("termination")},
              {"case": "no write after the timeout", "passed": not (work / "late.txt").exists(), "detail": ""},
              {"case": "the runner returned promptly", "passed": elapsed < 60, "detail": round(elapsed, 1)},
-             {"case": "the step failed", "passed": code == 1, "detail": code}]
+             {"case": "the step failed", "passed": code == 1, "detail": code},
+             {"case": "a child that left the group and outlived the step is stopped, recorded and fails the step",
+              "passed": l_code == 1 and l_ext.get("termination") == "confirmed"
+              and len(l_ext.get("leftover_processes") or []) == 1 and not (l_work / "late.txt").exists(),
+              "detail": l_ext.get("leftover_processes")},
+             {"case": "the step of a nested runner (own session) is stopped with the outer step",
+              "passed": n_code == 1 and n_ext.get("termination") == "confirmed" and started.exists()
+              and not n_late.exists(), "detail": n_ext.get("leftover_processes")},
+             {"case": "positive control: a child that ends just after the step does not fail it", "passed": q_code == 0,
+              "detail": q_out.get("status")}]
     return {"status": "pass" if all(c["passed"] for c in cases) else "fail", "cases": cases}
 
 

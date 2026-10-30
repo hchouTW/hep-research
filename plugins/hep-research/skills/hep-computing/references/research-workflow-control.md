@@ -64,7 +64,8 @@ Determination rules:
 
 Lacking a guarantee is reported as a weaker, stated process; a capability is never simulated by a written policy.
 Which guarantees the local runner actually provides is established by `executor_capabilities.py qualify` (fault
-injection: G1 output isolation and G2 termination pass on Linux; G3 submission reconciliation, G4 metering with
+injection: G1 output isolation and G2 termination, including processes that leave the group and nested runners,
+pass on Linux; G3 submission reconciliation, G4 metering with
 atomic reservation, G5 persistent state and G6 conditions evidence are unsupported); `admit --mode M2` therefore
 refuses, and M2/M3 cannot be claimed.
 

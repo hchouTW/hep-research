@@ -32,11 +32,14 @@ reproducible, partial reruns safe, and the provenance of every number checkable.
   after it, so a parent directory the step turned into a symlink fails the step); an output left from before
   that the step did not rewrite makes the step fail; `--incremental` also reruns when the set of declared outputs
   changed. Each step runs in its own process group under its deadline (`timeout_s`, default 3600 s): on a timeout, or
-  when the step leaves processes behind, the group is stopped and confirmed gone, and the record carries
+  when processes of the step are still running 1 s after its main process ended (zombies do not count), they are
+  stopped, named in `leftover_processes` and fail the step (start helper daemons such as an ssh ControlPersist
+  master, gpg-agent or a compiler-cache server before the workflow), and the record carries
   `end_status` (success, failure, timeout), `termination` (confirmed, unconfirmed), `output_contract` and
   `artifact_digest` (SHA-256 of the canonical output manifest). Output hashes are recorded only when termination is
   confirmed. Termination is observed on POSIX hosts (tested on Linux, where processes that leave the group are also
-  found through an environment token); a process that leaves the group and clears its environment is not seen.
+  found through an environment token that a nested runner extends, never replaces; `termination_scope` says which);
+  a process that leaves the group and removes or replaces the token is not seen.
   A step id is one plain name (letters, digits, `_`, `.`, `:`, `-`), since it names the run record and the receipt.
   `--receipt-dir DIR` writes one receipt per executed step outside the work folder, named by the attempt id
   (`--attempt-prefix` + step id), which is used once: a rerun whose attempt id already has a receipt is refused
