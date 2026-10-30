@@ -75,3 +75,20 @@ anchors, Check lines, example blocks and ownership in order.
 | 15 | minor | ground-based-detection-arrays.md | "leading energy-scale systematic" not universal | fixed | "usually the leading" |
 
 Fix commit: recorded in STATE.md (follow-up) in the next commit.
+
+Fix commit: `93735497`.
+
+### Re-review of the follow-up fixes
+
+One fresh-context re-reviewer was given the follow-up report, `git diff 6bfc7873 93735497` and the table above
+(report in the work root, `deferred/review/rereview.md`). Verdict: all 15 findings resolved, no physics error
+introduced; approve. Its new points, left open because the follow-up's one fix round is used and none is critical or
+major:
+
+| # | Severity | File | Finding | Disposition |
+|---|---|---|---|---|
+| D1 | minor | noble-liquid-neutrino-and-rare-event-detectors.md | Phonon parenthetical mixes the number and the kind of sensors | open (follow-up) |
+| D2 | minor | gaseous-and-specialized-tracking-technologies.md | "plus the gap between films" reads as part of the in-plane affine map | open (follow-up) |
+| D3 | minor | ground-based-detection-arrays.md | "approximately quadratically ... (*approximate*" is redundant | open (follow-up) |
+| D4 | minor | noble-liquid-neutrino-and-rare-event-detectors.md | Scope of "on the heat signal and on a faster channel" ambiguous; long line | open (follow-up) |
+| D5 | optional | ground-based-detection-arrays.md, noble-liquid-neutrino-and-rare-event-detectors.md | Check lines could name the density profile and the energy dependence of the fiducial fraction | open (follow-up) |
