@@ -11,8 +11,8 @@ reconstruction method content is in hep-detector ([event reconstruction](../../h
 > the source repository; Core, Methods, Delivery and the transition-period part of Control). S0 (recorded spec review,
 > hep-review R2) passed for the routing, transition, statistics and method obligations; **the control-layer
 > obligation (contract format, strictness order, derivation, admission; Control §1–§6 and the reference model) did not
-> pass**: it was violated in six recorded review rounds, and the last change (the single “overtaken” binding rule)
-> was not reviewed at all. A control-layer helper now exists (`control_layer.py`, stages C1 and C2 — resumption,
+> pass**: violated in all seven review rounds; round 7 left two open defects, listed in every report of the
+> helper. A control-layer helper now exists (`control_layer.py`, stages C1 and C2 — resumption,
 > reconciliation, lease lock — built by the user's decision with the control rules stated as **not through S0**;
 > section below). It implements the spec copy's Control
 > part and agrees with its reference model on the tested fact sequences, but it is **not reviewed or validated**: its

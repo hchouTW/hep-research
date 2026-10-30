@@ -6,11 +6,16 @@ from . import derivation as dv
 
 LIMITATIONS = (
     "The control rules this helper applies (Control §1-§6 of the reconstruction v12.1 spec copy) did NOT pass the S0 "
-    "spec review: obligation N1 was violated in six recorded review rounds, and the last change (the single "
-    "'overtaken' binding rule) was not reviewed at all. The helper implements the spec copy's Control part and "
+    "spec review: obligation N1 was violated in all seven recorded review rounds, the last of which reviewed the "
+    "single 'overtaken' binding rule and found two open defects (below); reviewing stopped there. The helper implements the spec copy's Control part and "
     "agrees with its reference model on the tested fact sequences; that is not a review or a validation of the "
     "rules, and the derivation below is a mechanical consequence of unreviewed rules, not an established result. "
     "It gives no autonomous reconstruction capability.",
+    "Known open defects (S0 round 7, not fixed; the helper is equivalent to the reference model, so it has them "
+    "too): (1) a newer attempt of a step that ends unknown, or is abandoned and later reconciled, does not overtake "
+    "an older output, so a revert can re-bind and publish the older output without a pin; (2) check attempts that "
+    "end without a result (cancelled, failed, timed out) are counted nowhere, so a check can be retried until it "
+    "passes without trace. Treat both paths as open.",
     "Reads are not observable with the local runner: attested artifacts are 'attested (declared inputs)' (DEC-10); "
     "undeclared reads cannot be detected.",
     "Receipts and run records are files in the workspace: the adapter checks their digests and consistency but cannot "

@@ -15,7 +15,7 @@
   },
   "hep-computing": {
    "references": 37,
-   "bytes": 352434,
+   "bytes": 352406,
    "uncited": 0
   },
   "hep-detector": {
@@ -1187,7 +1187,7 @@
     "tests/skills/hep_computing/test_workflow_c6.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "1262a64d 2026-10-29"
+   "last_commit": "af893dd7 2026-10-30"
   },
   {
    "path": "skills/hep-computing/references/bash-balanced-design-guidelines.md",
@@ -1526,7 +1526,7 @@
   {
    "path": "skills/hep-computing/references/research-workflow-control.md",
    "owner": "hep-computing",
-   "bytes": 24529,
+   "bytes": 24501,
    "lines": 265,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -1538,7 +1538,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "1262a64d 2026-10-29"
+   "last_commit": "af893dd7 2026-10-30"
   },
   {
    "path": "skills/hep-computing/references/risk-and-quality.md",

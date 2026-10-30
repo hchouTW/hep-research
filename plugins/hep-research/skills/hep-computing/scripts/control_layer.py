@@ -5,7 +5,7 @@ Standard library only.
 
 Status: implements Control §1-§6 of the reconstruction v12.1 spec copy and agrees with its reference model on the
 tested fact sequences (90 scenarios, 42 mutations, random sequences). The control rules did NOT pass the S0 spec
-review (obligation N1 violated in six rounds; the last change, the 'overtaken' binding rule, was not reviewed): the
+review (obligation N1 violated in all seven rounds; round 7 left two open defects, listed in every report): the
 derivation is a mechanical consequence of unreviewed rules, not a reviewed or validated result, and the helper gives
 no autonomous reconstruction capability. Every report carries that limitation.
 
