@@ -22,7 +22,8 @@ parameter_digest (evaluate_design.py run --digest-only), recorded as extension.p
 does not read does not rerun it.
 Output freshness and termination (reconstruction v12 B1, OUT-01, CACHE-01, EXEC-02): every input, output and stdout
 path is relative to the work folder, without `..` and not through a symlink (anything else is refused before any step
-runs); an output counts only when this run wrote it (a file left from before and not rewritten makes the step fail);
+runs; outputs, stdout and the run record are checked again after the step, which may have made a parent directory a
+symlink: such an output is not recorded and fails the step, and nothing is written through it); an output counts only when this run wrote it (a file left from before and not rewritten makes the step fail);
 each step runs in its own process group, which is stopped and confirmed gone on a timeout and after the step exits.
 The record carries extension.end_status (success, failure, timeout), extension.termination (confirmed, unconfirmed),
 extension.output_contract and extension.artifact_digest (SHA-256 of the canonical output manifest); output hashes
@@ -193,6 +194,18 @@ def through_symlink(work: Path, rel: str) -> bool:
             return True
         if not cur.exists():
             return False
+    return False
+
+
+def escapes(work: Path, rel: str) -> bool:
+    """True when work/rel passes through a symlink or resolves outside the work folder. Checked again after a step,
+    which may have turned a parent directory into a symlink (OUT-01)."""
+    if through_symlink(work, rel):
+        return True
+    try:
+        (work / rel).resolve().relative_to(work.resolve())
+    except ValueError:
+        return True
     return False
 
 
@@ -441,7 +454,7 @@ def skip_reason(prev: dict | None, rec: dict, work: Path, replaced: set[str]) ->
     if pe.get("termination", "confirmed") != "confirmed":
         return "the previous termination is unconfirmed"
     for path, h in (pe.get("output_hashes") or {}).items():
-        if not safe_relative(path) or through_symlink(work, path) or not (work / path).is_file() \
+        if not safe_relative(path) or escapes(work, path) or not (work / path).is_file() \
                 or sha256(work / path) != h:
             return f"output {path} changed or is missing"
     return None
@@ -554,18 +567,26 @@ def main(argv=None) -> int:
         p = execute(cmd, work, timeout)
         t1, cpu1 = usage_now()
         confirmed = p["termination"] == "confirmed"
-        if stdout_path and confirmed:
+        escaped = [o for o in outs if escapes(work, o)]  # the step may have made a parent a symlink (OUT-01)
+        if escapes(work, f"runs/{sid}.computational-run.json"):
+            print(json.dumps({"status": "failed", **base, "order": seq, "steps": results,
+                              "error": f"step {sid}: the step made the runs folder a symlink or moved it out of the "
+                                       "work folder; no run record or receipt is written (OUT-01)"}, indent=1))
+            return exit_code("failed")
+        if stdout_path and confirmed and stdout_path not in escaped:
             (work / stdout_path).write_text(p["stdout"], encoding="utf-8")
         outputs, stale = {}, []
         if confirmed:  # an output digest is valid only once termination is confirmed
             for o in step.get("outputs", []):
                 f = work / o
-                if f.is_file() and not f.is_symlink():
+                if o not in escaped and f.is_file():
                     if before[o] is not None and stat_key(f) == before[o] and o != stdout_path:
                         stale.append(o)  # left from before, not written by this run
                     else:
                         outputs[o] = sha256(f)
         code = p["returncode"]
+        if escaped:
+            code = code or 1  # an output (or stdout) path the step redirected outside the work folder
         if code == 0 and (len(outputs) != len(step.get("outputs", [])) or not confirmed):
             code = 1  # a step that claims success but did not write its outputs (or whose end is unconfirmed) failed
         bind = check_binding(step, work, inputs, scripts, outputs) if "check" in step and confirmed and code == 0 else None
@@ -604,6 +625,9 @@ def main(argv=None) -> int:
                 return exit_code("rejected")
         stderr = p["stderr"] + (f"\n[run_workflow] output(s) {stale} existed before and were not written by this run"
                                 if stale else "")
+        if escaped:
+            stderr += (f"\n[run_workflow] path(s) {escaped} pass through a symlink or leave the work folder after the "
+                       "step; not recorded or written (OUT-01)")
         if bind is not None and not bind["bound"]:
             stderr += "\n[run_workflow] check result not bound to this run: " + "; ".join(bind["problems"])
         results.append({"id": sid, "exit_status": code, "outputs": outputs, "skipped": False, "end_status": end,

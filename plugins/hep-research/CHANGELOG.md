@@ -23,6 +23,13 @@ Software checks establish contract consistency only, not physical validity.
   refused before any step runs (exit 2), and receipts are created exclusively: an earlier attempt's receipt is never
   replaced. Use a new prefix per attempt. Tests: `test_workflow_b1.StepIds`,
   `test_executor_b2.Receipts.test_an_attempt_id_is_used_once`.
+- **`run_workflow.py`: outputs are checked for symlinks again after the step** (review of PR #329). A step that made an
+  output's parent directory a symlink (e.g. to a folder outside the work folder) had the outside file recorded as its
+  output. Every component of each output and stdout path is now checked after the step and the path must resolve
+  inside the work folder; otherwise the output is not recorded, the stdout file is not written and the step fails. A
+  step that replaces `runs/` by a symlink fails without a run record or receipt. Tests:
+  `test_workflow_b1.Destinations.test_a_parent_the_step_turns_into_a_symlink`,
+  `test_a_runs_folder_the_step_replaces_with_a_symlink`.
 
 ## 0.50.0 (2026-10-30)
 

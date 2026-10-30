@@ -154,6 +154,33 @@ class Destinations(Base):
         (self.work / "link").symlink_to(outside, target_is_directory=True)
         self.assert_refused({"workflow": "b3", "steps": [step("s", "pass", ["link/res.txt"])]})
 
+    @unittest.skipUnless(POSIX, "symlinks")
+    def test_a_parent_the_step_turns_into_a_symlink(self):
+        """Checked again after the step: a parent directory the step makes a symlink to a folder outside the work
+        folder does not get the outside file recorded as an output, and the runner writes nothing through it."""
+        outside = self.root / "outside"
+        outside.mkdir()
+        link = f"import os; os.symlink({str(outside)!r}, 'sub'); "
+        code, out = run({"workflow": "b3", "steps": [step("s", link + write("sub/out.txt"), ["sub/out.txt"])]},
+                        self.work)
+        self.assertEqual((code, out["status"]), (1, "failed"), out)
+        self.assertEqual(record(self.work, "s")["extension"]["output_hashes"], {})
+        self.assertIn("symlink", out["steps"][0]["stderr_tail"])
+        code, out = run({"workflow": "b3", "steps": [step("t", link.replace("'sub'", "'log'") + "print(1)", [],
+                                                          stdout="log/t.txt")]}, self.root / "work2")
+        self.assertEqual(code, 1, out)
+        self.assertFalse((outside / "t.txt").exists())  # the runner did not write the stdout file outside
+
+    @unittest.skipUnless(POSIX, "symlinks")
+    def test_a_runs_folder_the_step_replaces_with_a_symlink(self):
+        outside = self.root / "outside"
+        outside.mkdir()
+        code, out = run({"workflow": "b3", "steps": [step("s", "import os, shutil; shutil.rmtree('runs'); "
+                                                          f"os.symlink({str(outside)!r}, 'runs'); " + write("o.txt"),
+                                                          ["o.txt"])]}, self.work)
+        self.assertNotEqual(code, 0, out)
+        self.assertEqual(list(outside.iterdir()), [])  # no run record written outside the work folder
+
     def test_relative_output_runs(self):  # positive control
         code, out = run({"workflow": "b3", "steps": [step("s", "import os; os.makedirs('d', exist_ok=True);"
                                                                + write("d/r.txt"), ["d/r.txt"])]}, self.work)
