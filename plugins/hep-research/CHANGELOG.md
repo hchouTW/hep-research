@@ -3,7 +3,11 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.50.0 (2026-10-30)
+
+Minor release; contracts 3.17.0, `CORE_VERSION` 1.4.0, the adapters, scripts and every skill's `description` are
+unchanged. It ships PR #325: hep-detector reconstruction methods by detector family (a new reference, 22 citations and
+four routing cases).
 
 hep-detector reconstruction methods by detector family (documentation and routing cases only; contracts, adapters,
 scripts and the skill description are unchanged). Scope came from a coverage audit of 19 detector families x 7
