@@ -1,12 +1,12 @@
 """The reconstruction v12.1 reference model as an oracle for the control-layer helper (stage C1; Delivery §5.1).
 
-The model is development material at the repository root (docs/dev/reconstruction-v12/spec/
-v12-en-reference-model.py, outside the plugin package on purpose: docs/dev does not ship). The environment variable
+The model is development material at the repository root (evals/reconstruction-v12/spec/
+v12-en-reference-model.py, outside the plugin package on purpose: evals/ does not ship). The environment variable
 HEP_RESEARCH_V12_MODEL may name another copy. Locating it:
 - found: the model is loaded and its scenarios, helpers and mutations are rebound to the implementation;
-- not found, but this is a development checkout (the repository's docs/dev/reconstruction-v12 folder exists): the
+- not found, but this is a development checkout (the repository's evals/reconstruction-v12 folder exists): the
   tests FAIL, because the oracle is missing where it must be;
-- not found and not a development checkout (an installed plugin, which ships without docs/dev): the tests are SKIPPED
+- not found and not a development checkout (an installed plugin, which ships without evals/): the tests are SKIPPED
   with the reason MODEL_MISSING, which unittest prints; they never pass silently.
 
 Rebinding: every function defined in the model (scenarios t01..t91, the scenario helpers new_log, run, check,
@@ -26,7 +26,7 @@ from pathlib import Path
 
 PLUGIN = Path(__file__).resolve().parents[3]
 REPO = PLUGIN.parents[1]
-DEV_FOLDER = REPO / "docs" / "dev" / "reconstruction-v12"
+DEV_FOLDER = REPO / "evals" / "reconstruction-v12"
 MODEL_PATH = Path(os.environ.get("HEP_RESEARCH_V12_MODEL") or DEV_FOLDER / "spec" / "v12-en-reference-model.py")
 SCRIPTS = PLUGIN / "skills" / "hep-computing" / "scripts"
 if str(SCRIPTS) not in sys.path:

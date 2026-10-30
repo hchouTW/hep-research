@@ -446,9 +446,9 @@ store with hep-review), DEC-14 (no delegation; decisions through the guard only)
 ### Tests (`TMPDIR` on local disk)
 
 How the tests find the oracle: `tests/skills/hep_computing/control_oracle.py` loads the model from the repository
-root (`docs/dev/reconstruction-v12/spec/v12-en-reference-model.py`, or `HEP_RESEARCH_V12_MODEL`); the model is not
-copied into the plugin package. If it is missing in a development checkout (the `docs/dev/reconstruction-v12`
-folder exists) the tests **fail**; in an installed plugin (no `docs/dev`) they are **skipped** with the reason “the
+root (`evals/reconstruction-v12/spec/v12-en-reference-model.py`, or `HEP_RESEARCH_V12_MODEL`); the model is not
+copied into the plugin package. If it is missing in a development checkout (the `evals/reconstruction-v12`
+folder exists) the tests **fail**; in an installed plugin (no `evals/reconstruction-v12`) they are **skipped** with the reason “the
 scenario, mutation and differential tests of the control layer did NOT run”. In this verification they ran (no skip).
 Rebinding: every model function (scenarios, scenario helpers, mutation factories) is re-created over a namespace in
 which every engine name is the implementation's object; the model contributes only scenario code (checked by a test).
@@ -485,7 +485,7 @@ covered (C2/D): stale lock on restart, restart reconciliation, remote submission
 
 Not run: the whole `tests/skills` tree beyond the suites above, the full aggregate including slow-tier and
 `ams-optional`, the live routing rerun. The main checkout's `git status --porcelain` stayed empty; nothing under
-`docs/dev/reconstruction-v12/spec/` or `s0/` changed.
+`evals/reconstruction-v12/spec/` or `s0/` changed.
 
 ### Limitations
 
@@ -498,7 +498,7 @@ Not run: the whole `tests/skills` tree beyond the suites above, the full aggrega
   through `contracts/dependencies.py`) and the partition scope accounts of PART-02 are **not done** (only exposure
   accounts and failure retention in the report); permissions (Control §5.1 item 1) are not modelled.
 - `flock` on NFS depends on the server's lock support; the compare-and-set check is what guarantees no lost update.
-- The oracle tests are skipped in an installed plugin (no `docs/dev`), with the stated reason.
+- The oracle tests are skipped in an installed plugin (no `evals/reconstruction-v12`), with the stated reason.
 
 ### Spec/model discrepancies found (not fixed; spec copy and model untouched)
 
@@ -757,8 +757,9 @@ Given by the maintainer in the conversation after the final report (transcribed 
   approved; the round-7 defects are fixed in the spec copy and model (v12.2) and are to be reviewed again (round 8).
 - **Approved:** the transition-period rule that a step the runner refused before starting any process counts as
   failed with termination confirmed (Control §7.2 (c)).
-- **Locations:** `docs/dev/` stays at the repository root (outside the plugin package), with the hep-review exports
-  committed as the durable record. Future hep-review stores go on local disk, not NFS or Ceph (both refused): this
+- **Locations:** the dev records stay outside the plugin package, with the hep-review exports committed as the
+  durable record — at `evals/reconstruction-v12/` (corrected on 2026-10-30: the first choice, the repository root
+  `docs/dev/`, is refused by the repository's path guard). Future hep-review stores go on local disk, not NFS or Ceph (both refused): this
   host's only writable local disk is the root disk, where `/var/tmp` entries unused for 30 days are removed
   (`systemd-tmpfiles`), so the store lives at `/var/tmp/hsinyichou-hep-review` and every context is exported to the
   repository after each round. The S0 store was copied there; the round-7 export from the copy verifies against its
