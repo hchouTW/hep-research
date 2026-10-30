@@ -106,6 +106,19 @@ publishes (X1 overtaken, D not met); the remaining attacks are covered by t92, t
 | N1-R7-F2 | Check attempts on artifacts of the chain that ended without a check result are **failed check draws**, in the report, the task-wide history and publish (`failed_check_draws`); those that read a confirmation sample are listed among the confirmation results; such a sample is spent (already so by §4.4 item 3, now stated). Model: `failed_check_draws`, `aborted_checks`, `confirmation_results`, `publish`; scenario t93; mutation “aborted check attempts not counted” | Control §2 (publish), §4.5, §5.4 |
 | N1-R7-F3 | cancelling → failed includes timeout | Control §3 |
 
+## N1 — round 8 (review of v12.2; open, spec copy not changed)
+
+Context `s0-reconstruction-v12-r8`, R2, N1 violated; reproduced with `s0/round8-attack.py` and `s0/round8-attack2.py`.
+
+| Id | Severity | Finding | Reproduction | Possible directions (not adopted) |
+|---|---|---|---|---|
+| N1-R8-F1 | major | Parallel draws: several variants run at once, only the preferred one is let finish; draws still in flight do not overtake, are not failed draws or artifacts, and publish does not check for attempts in flight — a selection the published record does not show (assumes the agent can see outputs before the attempt ends) | a4, a4b | publish refused (or the in-flight attempts listed) while an attempt of a chain step is in flight; in-flight attempts admitted after the bound artifact overtake once they end |
+| N1-R8-F2 | major | A draw that ends `success` with no outputs is neither a failed draw nor an artifact, contrary to Control §5.1 item 6 (“every draw without a usable artifact is a failed draw”) | a1 | count a computed attempt without outputs as a failed draw |
+| N1-R8-F3 | major | Steps that supply a check's inputs are outside the deliverable's dependency chain, so their failures and draws are not in the chain history; publish carries no task-wide failed draws although the model header says it does | a2 | include check-input steps in `chain_steps`; add task-wide failed draws to publish |
+| N1-R8-F4 | minor | Parallel draws are never required to be checked (check before recompute does not see artifacts of attempts admitted before the earlier artifact existed), contrary to Control §5.1 item 6 | a3 | apply check-before-recompute to every produced artifact of the step at the next admission and at publish |
+| N1-R8-F5 | minor | Core lines 511–512 describe the confirmation fields differently from Control §1.1 | — | align Core |
+| N1-R8-F6 | minor | Core says T2-numeric needs “every required check pass”; Control §4.3 also accepts an allowed not-applicable | — | align Core |
+
 ## N3 — statistics
 
 | Finding | Sev. | Change | Where |

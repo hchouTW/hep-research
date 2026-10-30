@@ -117,6 +117,7 @@ Materials: Parts I–IV saved as `v12-en-{0-core,1-methods,2-control,3-delivery}
 | 5 (user-approved) | `s0-reconstruction-v12-r5` (N1) | spec copy after the user-approved round-4 fixes | R2 | violated (2 major, 1 minor) → **does not pass** | — | — | — | — |
 | 6 (user-approved; agreed as the last before the C1 decision) | `s0-reconstruction-v12-r6` (N1) | spec copy after the user-approved round-5 fixes | R2 | violated (2 major, 2 minor) → **does not pass** | — | — | — | — |
 | 7 (user-requested, after C1/C2) | `s0-reconstruction-v12-r7` (N1) | spec copy with the single 'overtaken' rule (38aae03a), its first review | R2 | violated (2 major, 1 minor) → **does not pass** | — | — | — | — |
+| 8 (user decision: fix round 7 and review again) | `s0-reconstruction-v12-r8` (N1) | spec copy v12.2 (38573b63) | R2 | violated (3 major, 3 minor) → **does not pass** | — | — | — | — |
 
 **S0 result: N2, N3, N4, N5 pass; N1 does not pass after three rounds.** Stage gates (runbook 0.5.1): A1 (N2–N5) open;
 B1 (N2) open; A2 (N2, N3) open; B2 (N2) open; **C1 and C2 (N1) blocked**. Process note: in round 1 the N2 reviewer
@@ -208,6 +209,16 @@ derivations as unreviewed and these paths as open.
 **Superseded the same day:** the user then decided that the control layer ships, approved DEC-02 and asked to fix the
 defects and review again; the spec copy and model were fixed (v12.2, 38573b63) and the helper ported (“v12.2 port”
 in the C2 section). v12.2 has not yet been re-reviewed.
+
+### Round 8 (N1 only, review of v12.2), 2026-10-30
+
+After the user's decision to fix the round-7 defects (spec copy and model v12.2, `38573b63`; helper port `daf50076`):
+context `s0-reconstruction-v12-r8` in the store `/var/tmp/hsinyichou-hep-review`, same procedure, submission
+digest-bound (`884f9fbb…`). Achieved R2; **N1 violated, 3 major and 3 minor; N1 still does not pass** — the "not
+through S0" label stays. Report `s0/round8-report.txt`, checkpoint `s0/round8-checkpoint.txt`, export
+`s0/s0-reconstruction-v12-r8.export.json` (`verify-export`: checkpoint `matches`, internal consistency ok); attack
+scripts `s0/round8-attack.py`, `s0/round8-attack2.py`, re-run by the coordinator against the committed model
+(byte-identical): all five sequences reproduce. The round-7 fixes hold; the findings are new paths. Not fixed.
 
 ## A1 — methods and main-Agent resumption (documentation and skill wiring)
 
