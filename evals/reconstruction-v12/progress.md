@@ -196,6 +196,16 @@ internal consistency ok); attack script `s0/round7-attack.py`, re-run by the coo
 (byte-identical): all attacks reproduce. Findings in `spec/revision-log.md` (“N1 — round 7”). The spec copy is not
 changed.
 
+### Decision after round 7, 2026-10-30
+
+The user decided to stop reviewing N1. The control rules stay **not through S0** (violated in all seven rounds), and
+C1/C2 keep that label. The round-7 findings are **known open defects** of the spec copy, the model and the C1/C2
+helper (the helper is equivalent to the model): (1) a newer draw that ends unknown, or is abandoned and later
+reconciled, does not overtake an older output, so a revert can re-bind and publish it without a pin; (2) check
+attempts that end without a result are counted nowhere, so a check can be retried until it passes without trace;
+(3) Control §3 cancelling → failed omits timeout. Not fixed. Anyone using `control_layer.py` must treat its
+derivations as unreviewed and these paths as open.
+
 ## A1 — methods and main-Agent resumption (documentation and skill wiring)
 
 Entry: N2, N3, N4, N5 passed S0 (above). Location of the dev records: moved from `plugins/hep-research/docs/dev/` out of
