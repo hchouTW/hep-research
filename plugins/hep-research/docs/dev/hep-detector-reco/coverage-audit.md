@@ -168,3 +168,16 @@ for a in sorted(anchors):
     assert frag in heads, a
 print("anchors resolved", len(anchors))
 ```
+
+## Follow-up: deferred cells written
+
+After the first run the user asked for the 12 deferred cells to be written (OQ-4 answered: in scope). They were
+written on the same branch, from the evidence rows above:
+
+| Cells | Target section |
+|---|---|
+| F18 T1-T7 | ground-based-detection-arrays.md#radio-reconstruction |
+| F4 T2-T4 | gaseous-and-specialized-tracking-technologies.md#fibre-tracker-reconstruction, gaseous-and-specialized-tracking-technologies.md#emulsion-reconstruction |
+| F11 T2, T4 | noble-liquid-neutrino-and-rare-event-detectors.md#pileup-and-position-in-cryogenic-and-germanium-detectors |
+
+All 58 non-covered cells of the matrix are now written (46 in the first pass, 12 in the follow-up).

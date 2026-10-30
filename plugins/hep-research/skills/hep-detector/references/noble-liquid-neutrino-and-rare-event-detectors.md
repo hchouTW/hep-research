@@ -192,6 +192,47 @@ fiducialization, and energy scale** dominate the result.
   with calibration sources; extrapolation to low energy is the dominant uncertainty.
 - **Blind analysis**: masked signal regions ([analysis design](../../hep-measurement/references/analysis-design.md)).
 
+### Pileup and position in cryogenic and germanium detectors
+
+- **Pileup in slow detectors.** A thermal or phonon pulse rises over a long time compared
+  with fast scintillator or ionization pulses, so two events closer than the rise time
+  merge into one amplitude. Random coincidences scale with the square of the event rate
+  times the resolving time; in a double-beta-decay search the coincidences of
+  two-neutrino decays can fill the region of interest of the neutrinoless decay. Pileup is
+  found by a template fit of the pulse (the optimal filter of
+  [front-end waveform processing](front-end-waveform-processing.md#amplitude-and-time-from-sampled-waveforms))
+  with a goodness-of-fit or residual test, by a two-pulse fit, or by a faster channel
+  such as the light detector of a scintillating bolometer (Chernyak et al., Eur. Phys. J. C
+  74 (2014) 2913). The rejection versus pulse separation is measured by superposing
+  measured pulses at known separations, not assumed; near threshold, noise triggers and
+  pileup with small pulses enter the low-energy event rate. Pileup in fast germanium
+  readout is handled by the fast channel of
+  [digital pulse processing](front-end-waveform-processing.md#digital-pulse-processing-for-spectroscopy).
+- **Position from phonons.** With several phonon sensors, the early (athermal) part of the
+  signal is shared among them according to where the energy was deposited, and its arrival
+  is delayed in the far sensors; the partition and delay give a position, while the later
+  thermal part does not.
+- **Position from the charge electrodes.** In ionization-and-heat detectors, interleaved
+  electrodes on the surfaces separate events near a surface, whose charge is collected on
+  the electrodes of that side only, from bulk events, whose electrons and holes reach the
+  fiducial electrodes of opposite sides (Broniatowski et al., Nucl. Instrum. Methods A 559 (2006) 378). The fiducial
+  volume that this defines is measured as the fraction of uniformly distributed events
+  (cosmogenic activation lines, dissolved or gaseous sources) that pass the cut.
+- **Position and topology in germanium.** The current pulse shape depends on where the
+  charge is created: the ratio of maximum current to energy separates single-site from
+  multi-site events and flags events near the read-out contact and slow events in the
+  surface layer (Budjáš et al., J. Instrum. 4 (2009) P10007). The cut is calibrated on
+  double-escape peaks (single-site) and full-energy gamma peaks (mostly multi-site) and
+  checked for its energy dependence; the discrimination itself is in
+  [front-end waveform processing](front-end-waveform-processing.md#pulse-shape-discrimination).
+  Segmented detectors add position from which segment collects the charge and from the
+  transient signals induced on its neighbours.
+
+**Check:** The pileup resolving time and its rejection efficiency versus pulse separation
+are measured with superposed pulses, and the position or fiducial cut states its
+observable (phonon partition, electrode charge, pulse shape) and its calibration with
+uniformly distributed events or calibration peaks.
+
 ### Distinctive but generalizable reconstruction and performance features (rare-event)
 
 - **Topology**: waveform/pulse at the noise floor; few events. **Inverse problem**:
@@ -244,6 +285,8 @@ fiducialization, and energy scale** dominate the result.
   samples.
 - The energy scale (electron-equivalent vs nuclear recoil) and its calibration source.
 - Threshold efficiency, fiducial volume, and their uncertainties.
+- For cryogenic and germanium detectors: the pileup resolving time and rejection efficiency,
+  and the position or fiducial observable with its calibration.
 - Discrimination leakage versus energy with its calibration sample.
 - For neutrino work: containment, the energy-estimator definition, and the near/far
   cancellation assumption.

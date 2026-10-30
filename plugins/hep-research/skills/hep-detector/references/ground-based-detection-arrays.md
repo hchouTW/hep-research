@@ -203,6 +203,60 @@ scintillators on its water-Cherenkov stations (PDG RPP 2025, sec. 36.2.1;
 arXiv:1604.03637).
 <!-- /example -->
 
+### Radio reconstruction
+
+The emission and its scaling are summarized above; this subsection covers how an event is
+reconstructed from the antenna signals (review: Huege, Phys. Rep. 620 (2016) 1).
+
+- **Voltage to electric field.** Each antenna records two or three polarization channels.
+  The field vector is obtained by unfolding the antenna's vector effective length (its
+  direction- and frequency-dependent pattern) and the gain and phase of the analogue chain.
+  The unfolding needs the arrival direction, so field and direction are iterated. The result
+  is a band-limited field, so the band is part of every quoted amplitude. Narrow-band
+  transmitters are removed in the frequency domain, which also removes some signal power.
+  The antenna pattern and absolute gain, calibrated with a reference source and monitored
+  with the Galactic radio background, are the leading energy-scale systematic.
+- **Finding the pulses.** Most arrays read out on an external trigger from particle
+  detectors, which then sets the radio efficiency. Self-triggering must reject impulsive
+  man-made noise: it requires coincidences between neighbouring antennas consistent with a
+  front moving at about the speed of light, a polarization consistent with geomagnetic
+  emission, and directions away from known noise sources near the horizon. Within the
+  trigger-predicted window an antenna counts as having a signal above a signal-to-noise
+  threshold; near that threshold, noise produces false pulses and biases the measured signal
+  upward.
+- **Energy fluence per antenna.** The observable is the energy fluence, the time-integrated
+  Poynting flux `epsilon_0 c ∫ E^2 dt` (definition) in the signal window. The noise
+  fluence measured outside the window is subtracted; the noise, including its interference
+  term with the signal, sets the per-antenna uncertainty.
+- **Direction and core.** Antenna times fit a wavefront, a plane as first guess and then a
+  hyperbolic (conical far from the axis) front; interferometric beamforming is an
+  alternative. The footprint is not rotationally symmetric: geomagnetic and charge-excess
+  emission have different polarization patterns and interfere. The core and the lateral
+  distribution are therefore fitted in shower-plane coordinates (along `v x B` and
+  `v x (v x B)`).
+- **Energy.** The fluence integrated over the footprint is the radiation energy. It scales
+  quadratically with the electromagnetic energy after correcting for the geomagnetic angle
+  (the geomagnetic part scales with `sin alpha`) and for the air density at shower maximum
+  (Glaser et al., J. Cosmol. Astropart. Phys. 09 (2016) 024). Showers arriving close to the
+  field direction carry little radio signal and are measured poorly. Radio measures the
+  electromagnetic energy only; the absolute scale is tied to the antenna calibration or to
+  another detector.
+- **Depth of maximum and composition.** The footprint size and its Cherenkov-like ring
+  depend on the geometric distance to the shower maximum. Comparing each event with
+  simulated footprints spanning `X_max` gives `X_max` (Buitink et al., Phys. Rev. D 90 (2014)
+  082003); parametric lateral functions with a distance-to-`X_max` term are the faster
+  alternative. Radio sees only the electromagnetic cascade, so muon content needs a particle
+  detector (see the muon and electromagnetic bullet in surface-array reconstruction above).
+- **Per-event uncertainty.** Noise sets the per-antenna errors and the threshold bias.
+  Events with few antennas have a degenerate core and `X_max`. Template results also carry
+  the simulation's uncertainty: the refractive-index profile (humidity), the antenna model
+  and shower-to-shower fluctuations. Validate with pulls in simulation and against an
+  independent energy or `X_max` measurement on common events.
+
+**Check:** Radio events state the frequency band, the antenna-pattern and gain calibration,
+the trigger (external or self), the wavefront and footprint model with the corrections for
+geomagnetic angle and air density, and the validation against an independent measurement.
+
 ### Instrument response functions (checklist)
 
 State, with its version: the effective area or aperture (m^2 sr) above full trigger efficiency, the trigger efficiency below it for each primary; the energy threshold and the energy bias and resolution versus energy; the angular
@@ -229,3 +283,5 @@ resolution (PSF, for example the 68% containment radius R68) versus energy; and 
 - Station signal scale and the treatment of saturated and non-triggered stations; for
   fluorescence events, the geometry mode (monocular, hybrid, stereo) and the Cherenkov
   subtraction.
+- For radio events: the frequency band, antenna calibration, trigger, footprint model and
+  the `X_max` method with its simulation inputs.

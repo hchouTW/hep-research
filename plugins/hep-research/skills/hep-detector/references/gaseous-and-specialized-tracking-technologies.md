@@ -200,6 +200,32 @@ and time information that can assist matching in high rate. Resolution ~ fiber p
 - **Transfers**: amplitude-based interpolation and attenuation correction to
   scintillator calorimeters and timing layers.
 
+### Fibre-tracker reconstruction
+
+- **Clusters.** Adjacent fibres above threshold form a cluster whose position is the
+  amplitude-weighted centroid (light sharing gives sub-pitch position). The cluster size
+  grows with the track angle; clusters wider than expected (cross-talk, showers, two close
+  tracks) are flagged or split. One view gives no position along the fibres.
+- **Ghosts and track finding.** Two views at a stereo angle give a point, but `n` tracks
+  give up to `n^2` view intersections, most of them ghosts. They are resolved by a third
+  view, by requiring consistency in all stereo layers at the track level, and by hit time
+  where it is measured. Finding usually proceeds in the measured (bending) projection
+  first, with seeds and search windows sized for the momentum range, and then adds the
+  stereo hits to obtain the second coordinate (a standalone example: Aiola et al., Comput.
+  Phys. Commun. 260 (2021) 107713). The generic strategies are in
+  [tracking and vertexing](tracking-and-vertexing.md#track-finding-strategies).
+- **Parameters.** Once the coordinate along the fibre is known from the stereo layers, the
+  amplitude is corrected for attenuation and the time for propagation along the fibre; the
+  fit is iterated. Fibre-mat positions and their shape (bending or sagging of long modules)
+  are alignment parameters.
+- **Position at a vertex.** Fibre layers far from the interaction are matched to upstream
+  track segments within a window; where fibres form an active target, the vertex is the
+  intersection of fitted tracks, with a resolution set by the pitch and the lever arm.
+
+**Check:** The clustering rule, the ghost-resolution method, the attenuation and
+propagation corrections and the fibre-mat alignment are stated, with the ghost rate
+measured.
+
 ## Nuclear emulsions
 
 **Principle.** Ionizing particles sensitize silver-halide grains; development
@@ -221,6 +247,39 @@ efficiency, track density (overlap), fading, and distortion of the emulsion.
 - **Data sample**: passing-through tracks (cosmic/beam) for alignment;
   **transfers**: precise-vertex and kink analysis to silicon vertex detectors; **does
   not transfer**: event timing.
+
+### Emulsion reconstruction
+
+- **Microtracks.** The scanning microscope takes tomographic images at several focal
+  depths in each emulsion layer; grains aligned across the images form a microtrack.
+  Randomly developed fog grains form fake microtracks at a rate set by the fog density
+  and the slope acceptance.
+- **Base-tracks.** The microtracks on the two sides of the plastic base are linked when
+  their projections agree in position and slope. The base-track slope is taken from the
+  two base-side points, which is precise because the base does not shrink. The emulsion
+  layer does shrink on development, so microtrack slopes are rescaled by a shrinkage
+  factor measured with base-tracks.
+- **Alignment and volume tracks.** Films are aligned with many passing-through tracks
+  (an affine transformation per film: shift, rotation, expansion). Base-tracks are then
+  connected across films within position and slope tolerances that allow for scattering
+  in the passive material between films (Arrabito et al., J. Instrum. 2 (2007) P05004).
+  Allowing a missing film recovers scanning inefficiency at the cost of more fake links;
+  the background of tracks accumulated over the exposure sets the fake-link rate.
+- **Momentum without a field.** Momentum comes from multiple Coulomb scattering along the
+  track: from the angle differences between consecutive base-tracks (angular method; De
+  Serio et al., Nucl. Instrum. Methods A 512 (2003) 539) or from the position deviations
+  (coordinate method). The resolution depends on the number of films crossed, and the
+  method saturates at high momentum, where the scattering falls below the measurement
+  error, so the measurement has an upper limit like a spectrometer's maximum detectable
+  rigidity.
+- **Vertices.** A track predicted by an electronic detector is followed back film by film
+  to its stopping point; the vertex is where several volume tracks converge within an
+  impact-parameter cut, and short-lived particles appear as kinks or secondary vertices.
+  The event time comes only from the electronic detectors.
+
+**Check:** The scanning and linking tolerances, the shrinkage and alignment corrections,
+the momentum method with its saturation, and the vertex-location efficiency are stated,
+with the fake-link rate measured on the exposed background.
 
 ## Diamond and other radiation-hard sensors
 
@@ -253,3 +312,5 @@ use. Quote fluence-dependent signal loss only with its source and conditions
 - The ambiguity resolved (left-right, ghost, `t_0`) and how.
 - Efficiency versus voltage/rate/occupancy and the operating point.
 - The distinctive-but-generalizable block for each family used.
+- For fibre trackers, the ghost rate and fibre-mat alignment; for emulsion, the linking
+  tolerances, fake-link rate, momentum method and vertex-location efficiency.

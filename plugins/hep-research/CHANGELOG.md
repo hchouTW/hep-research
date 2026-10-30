@@ -7,9 +7,9 @@ Software checks establish contract consistency only, not physical validity.
 
 hep-detector reconstruction methods by detector family (documentation and routing cases only; contracts, adapters,
 scripts and the skill description are unchanged). Scope came from a coverage audit of 19 detector families x 7
-reconstruction tasks: 60 of 118 applicable cells were already covered; 46 of the 58 partial or missing cells were
-written and 12 deferred (radio detection, emulsion and fibre linking, cryogenic pileup and position); nothing already
-covered was restated.
+reconstruction tasks: 60 of 118 applicable cells were already covered, and all 58 partial or missing cells were
+written (46 in the first pass; the 12 first deferred, radio detection, emulsion and fibre linking, cryogenic pileup
+and position, in a follow-up); nothing already covered was restated.
 
 - **New reference** `photon-likelihood-reconstruction.md`: the per-channel charge and arrival-time likelihood (unhit
   and saturated channels, first-photon time density), analytic, tabulated and data-driven expected-light models with
@@ -31,8 +31,14 @@ covered was restated.
 - **IACT**: image cleaning against night-sky background and the choice among moment, template and learned
   reconstruction. **Ground arrays**: station signal scale, saturated and non-triggered stations, muon/electromagnetic
   separation; fluorescence shower-detector plane, time fit, hybrid and stereo geometry, Cherenkov subtraction.
+- **Radio, fibre, emulsion and cryogenic reconstruction**: radio air-shower reconstruction (field unfolding, pulse
+  finding, energy fluence, wavefront and asymmetric footprint, radiation energy, `X_max` from footprints, per-event
+  errors) in `ground-based-detection-arrays.md`; fibre-tracker clustering, ghosts and alignment, and emulsion
+  base-track linking, film alignment, scattering momentum and vertex location in
+  `gaseous-and-specialized-tracking-technologies.md`; pileup in slow detectors and position from phonons, interleaved
+  electrodes and germanium pulse shape in `noble-liquid-neutrino-and-rare-event-detectors.md`.
 - Wiring: a SKILL.md Resources row, links from the event-reconstruction, neutrino-telescope and noble-liquid
-  references, 13 Crossref-verified bibliography entries, and four routing cases (`dr-reco-1` to `dr-reco-3`,
+  references, 22 Crossref-verified bibliography entries, and four routing cases (`dr-reco-1` to `dr-reco-3`,
   `dr-reco-neg`); the principles summary is unchanged (its routing part is at its budget).
 - Evidence: VALIDATION DETECTOR-RECONSTRUCTION-METHODS
 

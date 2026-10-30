@@ -11,7 +11,7 @@ repo: hep-research
 plugin_root: plugins/hep-research
 main_checkout_t0: {head: 313637c16fd1fb4871d4ab3714ada7ab54ec5dd6, porcelain_lines: 0}
 route: A
-open_questions: {OQ-1: "default: 1 fix round", OQ-2: "default: one review and one re-review of fixed findings", OQ-3: "default: origin/main (exists; equals main at T0)", OQ-4: "default: deferred cells out of scope"}
+open_questions: {OQ-1: "default: 1 fix round", OQ-2: "default: one review and one re-review of fixed findings", OQ-3: "default: origin/main (exists; equals main at T0)", OQ-4: "answered by the user after T9: write the 12 deferred cells (follow-up on the same branch)"}
 steps:
   T0: {status: done, notes: "worktree and branch created at BASE; work root outside every Git project; patch sha256 matches; git apply --check succeeds (route A); no Git committer identity configured, commits use -c user.name=Claude -c user.email=noreply@anthropic.com"}
   T1: {status: done, baseline: {static: {pass: 29, fail: 0, skip: 2}, pytest: {passed: 2885, failed: 28, errors: 1, skipped: 83}, failing_ids: {count: 29, file: baseline/failing_ids.txt}, routing_part_bytes: 4081}, notes: "interpreter: existing conda env envs/ml (Python 3.13.2; plugin requires >=3.13, system python3 is 3.12 without numpy); nothing installed. pytest 28 failed counts subtest failures; 29 ids incl. SUBFAILED lines, all outside hep-detector (hep-ml scripts and torch assets, find_python and PyROOT floors, synthetic NanoAOD, diagrams renderer, CLI contract, no-bytecode). Static skips are the two host-CLI checks (--no-cli). reference_inventory --check passes (6 size warnings, none in a touched file). check_wiring --since no-such-rev exits 2 (read as fatal bad input)"}
@@ -24,8 +24,16 @@ steps:
   T8: {status: done, notes: "CHANGELOG Unreleased matches item W and names photon-likelihood-reconstruction.md and the four case ids; VALIDATION section DETECTOR-RECONSTRUCTION-METHODS appended with this run's numbers; spot checks of the first must-state point of F (five-row estimator table), A (product over hit and unhit channels with censored saturated channels), B (four track-finding families), C (LArTPC topology bullet replaced by pointer to the new subsection), D (track segment before the shower start): all present; static 29/0/2 after the VALIDATION edit; check_wiring pass; wiring, routing and doc-consistency tests pass; check_packaging exit 0"}
   T9: {status: done, commits: [258895ae, 9bf0ee1a, 267d534a, 2d8e931c, 9ff83cdf, 37b68e3d, 75456b50, this commit], notes: "patch series exported to work root out/; main checkout HEAD and porcelain equal their T0 record; nothing pushed"}
 fix_rounds_used: {T7: 1}
+followup_deferred:
+  request: "user: fix Deferred and open questions; chose: write the 12 deferred cells"
+  content: {status: done, cells: {F18: [T1, T2, T3, T4, T5, T6, T7], F4: [T2, T3, T4], F11: [T2, T4]}, new_sections: 4, notes: "Check rule 4/4; layering ok; sizes ground 20248 B, gaseous 20076 B, noble 20239 B, bibliography 23037 B"}
+  citations: {status: done, verified: [Huege 2016, Glaser 2016, Buitink 2014, Aiola 2021, Arrabito 2007, De Serio 2003, Chernyak 2014, Broniatowski 2006, Budjas 2009], notes: "found by Crossref bibliographic search and matched to the Crossref record of each DOI (work root deferred/crossref)"}
+  gates: {status: pending}
+  review: {status: pending}
+  tests: {status: pending}
+  records: {status: pending}
 stops: []
-next_action: "await user: review the branch; push or PR only on request"
+next_action: "follow-up: inventory and gates, review, tests, records"
 ```
 
 ## Log
@@ -50,4 +58,5 @@ next_action: "await user: review the branch; push or PR only on request"
 2026-10-30 | T7 | re-review of 2d8e931c..9ff83cdf: all findings resolved or justifiably deferred; new minor A, B, C left open (fix round used; A's wording would drop a marker phrase) | this commit
 2026-10-30 | T8 | VALIDATION section written; CHANGELOG checked against item W; five must-state spot checks pass; check_packaging exit 0 | this commit
 2026-10-30 | T9 | final run state; series exported with git format-patch BASE..HEAD to the work root out/ | this commit
+2026-10-30 | follow-up | user answered OQ-4: write the 12 deferred cells; 4 new subsections (radio; fibre; emulsion; cryogenic and germanium pileup and position), 9 citations found by Crossref search and verified against their records, CHANGELOG scope updated, coverage-audit follow-up note | this commit
 ```

@@ -198,7 +198,8 @@ criteria as above.
 
 **Reconstruction methods** (cited in [tracking and vertexing](tracking-and-vertexing.md), [calorimetry](calorimetry-ecal-hcal.md),
 [noble liquid neutrino and rare event detectors](noble-liquid-neutrino-and-rare-event-detectors.md),
-[photon likelihood reconstruction](photon-likelihood-reconstruction.md) and
+[photon likelihood reconstruction](photon-likelihood-reconstruction.md),
+[gaseous and specialized tracking technologies](gaseous-and-specialized-tracking-technologies.md) and
 [ground based detection arrays](ground-based-detection-arrays.md)). Each entry below was matched against the Crossref
 record of its DOI (authors, title, venue, volume, pages, year) on 2026-10-30; as above, the annotation is the use made
 here, not a re-reading of the work, and no performance number is taken from them.
@@ -234,6 +235,30 @@ here, not a re-reading of the work, and no performance number is taken from them
   56 (2014) 26-34, DOI 10.1016/j.astropartphys.2014.03.002. Pixel-likelihood image templates.
 - The Pierre Auger Collaboration, "The Pierre Auger Cosmic Ray Observatory", Nucl. Instrum. Methods A798 (2015)
   172-213, DOI 10.1016/j.nima.2015.06.058. Surface and fluorescence reconstruction in a hybrid observatory.
+- T. Huege, "Radio detection of cosmic ray air showers in the digital era", Phys. Rep. 620 (2016) 1-52,
+  DOI 10.1016/j.physrep.2016.02.001. Radio emission and reconstruction (review).
+- C. Glaser, M. Erdmann, J. R. Hörandel, T. Huege and J. Schulz, "Simulation of radiation energy release in air
+  showers", J. Cosmol. Astropart. Phys. 09 (2016) 024, DOI 10.1088/1475-7516/2016/09/024. Radiation energy and its
+  geomagnetic-angle and air-density corrections.
+- S. Buitink et al., "Method for high precision reconstruction of air shower X_max using two-dimensional radio
+  intensity profiles", Phys. Rev. D 90 (2014) 082003, DOI 10.1103/PhysRevD.90.082003. `X_max` from simulated radio
+  footprints.
+- S. Aiola et al., "Hybrid seeding: A standalone track reconstruction algorithm for scintillating fibre tracker at
+  LHCb", Comput. Phys. Commun. 260 (2021) 107713, DOI 10.1016/j.cpc.2020.107713. Fibre-tracker track finding.
+- L. Arrabito et al., "Track reconstruction in the emulsion-lead target of the OPERA experiment using the ESS
+  microscope", J. Instrum. 2 (2007) P05004, DOI 10.1088/1748-0221/2/05/P05004. Emulsion base-track linking and film
+  alignment.
+- M. De Serio et al., "Momentum measurement by the angular method in the Emulsion Cloud Chamber", Nucl. Instrum.
+  Methods A512 (2003) 539-545, DOI 10.1016/S0168-9002(03)02016-3. Momentum from multiple scattering in emulsion.
+- D. M. Chernyak et al., "Rejection of randomly coinciding events in ZnMoO4 scintillating bolometers", Eur. Phys.
+  J. C 74 (2014) 2913, DOI 10.1140/epjc/s10052-014-2913-4. Pileup rejection in bolometers.
+- A. Broniatowski, B. Censier, A. Juillard and L. Bergé, "Cryogenic germanium detectors for dark matter search:
+  Surface events rejection by charge measurements", Nucl. Instrum. Methods A559 (2006) 378-380,
+  DOI 10.1016/j.nima.2005.12.015. Surface-event rejection with interleaved electrodes.
+- D. Budjáš, M. Barnabé Heider, O. Chkvorets, N. Khanbekov and S. Schönert, "Pulse shape discrimination studies with a
+  Broad-Energy Germanium detector for signal identification and background suppression in the GERDA double beta
+  decay experiment", J. Instrum. 4 (2009) P10007, DOI 10.1088/1748-0221/4/10/P10007. Germanium current-pulse
+  discrimination.
 <!-- /example -->
 
 ## Statistics, performance measurement, and uncertainties ([reconstruction performance and truth matching](reconstruction-performance-and-truth-matching.md), [performance metrics and residual diagnostics](performance-metrics-and-residual-diagnostics.md), [data mc validation and detector systematics](data-mc-validation-and-detector-systematics.md))
