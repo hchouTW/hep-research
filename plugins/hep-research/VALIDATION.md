@@ -3500,6 +3500,8 @@ What changed on the release branch:
   regenerated on E2 (`~/.venvs/hep-research-e2`): 162 files in `16f778f4` and 2 in `91aea00b`. Every changed line is a
   version string or a hash (removed and added lines equal after masking both); no PNG changed. `published-comparison`
   takes its version from the `qed-prediction` output, so it must run after it (`91aea00b`).
+- the README's package-size statement updated to the measured 71.3 MB (about 4400 files, the release manifest
+  included): with the 0.50.0 manifest the package passed the 10% tolerance of `check_packaging.py` around the old 63.9 MB.
 
 | Check | Result |
 |---|---|

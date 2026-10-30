@@ -219,7 +219,7 @@ Taken from Anthropic's documentation, read on 2026-10-04 ([Plugins](https://clau
 3. Find `hep-research` under **Discover** and select **Add** (or **Install**).
 4. Or **Add > Upload plugin** with a `.zip` holding exactly one `.claude-plugin/plugin.json`, built from a clean
    checkout so it carries no caches:
-   `git archive --format=zip -o hep-research.zip HEAD:plugins/hep-research`. The plugin (about 4400 files, 63.9 MB uncompressed) is inside the documented limits (5,000 files, 200 MB). An uploaded plugin does not update from GitHub.
+   `git archive --format=zip -o hep-research.zip HEAD:plugins/hep-research`. The plugin (about 4400 files, 71.3 MB uncompressed) is inside the documented limits (5,000 files, 200 MB). An uploaded plugin does not update from GitHub.
 
 - The plugin is saved to the account: available in Chat, Cowork, and Claude Code sessions signed in to the same account
   (synced plugin; run `/reload-plugins`). Pick a skill with `/` and `hep-research:`, or describe the task.
