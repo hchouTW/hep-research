@@ -495,26 +495,21 @@ Not run: the full aggregate (`run_all_checks.py` without `--part`, including slo
 routing rerun (paid), and the AMS-optional copy check. The main checkout's `git status --porcelain` stayed empty at
 every stage.
 
-## Maintainer decisions (2026-10-30)
+### C1 independent verification by the coordinator (2026-10-30)
 
-Given by the maintainer in the conversation after the final report (transcribed here by the coordinator):
+Clean clone of `f786bd2b` on local disk, `TMPDIR` on local disk:
 
-- **Approved at their defaults:** DEC-01 (fact log as an append-only file in a persistent task-record directory),
-  DEC-03 (freeze records as append-only JSON lines with a digest chain), DEC-04 (POSIX process-group termination,
-  tested on Linux only; macOS untested), DEC-07 (local executor only), DEC-08/DEC-09
-  (`hep-research-artifacts/<task>/task-log/task-log.jsonl`), DEC-10 (declared inputs only), DEC-11 (the shared
-  workflow page in hep-computing), DEC-12 (M1: the first contract takes effect when listed in the first reply; M2/M3:
-  human approval), DEC-13 (no shared store with hep-review), DEC-14 (no delegation of human decisions).
-- **DEC-06 re-confirmed as reopened by S0:** an iteration round may hold several steps (partitioned, chained rounds,
-  as in the spec copy), replacing "one step per round".
-- **Not decided:** DEC-02 (library + CLI helper) stays pending, tied to the decision on the control layer (stage C1).
-- **Approved:** the transition-period rule that a step the runner refused before starting any process counts as
-  failed with termination confirmed (Control §7.2 (c)).
-- **Locations:** the dev records stay outside the plugin package, with the hep-review exports committed as the
-  durable record — at `evals/reconstruction-v12/` (corrected on 2026-10-30: the first choice, the repository root
-  `docs/dev/`, is refused by the repository's path guard). Future hep-review stores go on local disk, not NFS or Ceph (both refused): this
-  host's only writable local disk is the root disk, where `/var/tmp` entries unused for 30 days are removed
-  (`systemd-tmpfiles`), so the store lives at `/var/tmp/hsinyichou-hep-review` and every context is exported to the
-  repository after each round. The S0 store was copied there; the round-7 export from the copy verifies against its
-  checkpoint.
+| Check | Result |
+|---|---|
+| `test_control_layer_model` + `test_control_layer` | 41 run, OK (90 scenarios, 42 mutations, differential) |
+| Sabotage: `overtaken` forced to False in the implementation | scenarios t83/t88/t91, the mutation test and the differential tests fail |
+| Sabotage: the same in the reference model | the differential tests fail |
+| `tools/run_all_checks.py --part static` | 31 pass, 0 fail |
+| `tests/skills` (whole tree) | 3037 run, OK (173 skipped) |
+| `tests/tools` | 371 run, OK |
+| `tests/contracts` | 1160 run, OK (1 skipped) |
+| `tests/routing` | 21 run, OK |
+| decision guard from an agent shell | refused with its reason, nothing written |
+
+Not run: the slow-tier aggregate, the AMS-optional check, the live routing rerun (paid).
 
