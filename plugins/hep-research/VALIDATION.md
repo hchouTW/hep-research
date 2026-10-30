@@ -3483,6 +3483,36 @@ Not done in this stage: the independent
 new-problem run by an agent that did not take part (C1.10, section A.8), the `review.py` Markdown review, the release
 manifest. The adequacy table is unchanged; search values remain F1 optimistic bounds and decide nothing.
 
+## 0.50.0 release check (2026-10-30, E2 and the CI lock)
+
+Release branch `release/0.50.0`, based on main `72edcf08` (PR #325 merged). Minor release: it ships PR #325 (hep-detector
+reconstruction methods by detector family: a new reference, 22 Crossref-verified citations, four routing cases).
+Documentation and routing cases only: no script, contract or adapter change and no skill `description` change;
+contracts 3.17.0 and `CORE_VERSION` 1.4.0 are unchanged; the ams02-research companion needs no change.
+
+What changed on the release branch:
+- version 0.50.0 in both manifests, `pyproject.toml`, the README, two assets, the six theory-profile scripts,
+  `usine_translate.py` and `examples/bc-usine-reproduction/run.py`; a CHANGELOG `0.50.0` section;
+- the theory-profile artifacts and examples regenerated, with only version strings and the hashes that cover them
+  changing. 17 files (8 theory-profile files; the `detector-resolution`, `eic-profile-routing` and `recasting` outputs)
+  reproduce that way on Linux with the CI lock (`efe33b36`). The others drift at rounding level between macOS arm64 and
+  Linux x86_64 even with identical package versions, and E2 records NumPy 2.5.3 (the lock has 2.4.6), so they were
+  regenerated on E2 (`~/.venvs/hep-research-e2`): 162 files in `16f778f4` and 2 in `91aea00b`. Every changed line is a
+  version string or a hash (removed and added lines equal after masking both); no PNG changed. `published-comparison`
+  takes its version from the `qed-prediction` output, so it must run after it (`91aea00b`).
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --part static --no-cli`, CI lock on Linux (Python 3.13.2) | 29 pass, 0 fail, 2 skipped (CLI host checks) |
+| `tests/examples` (unittest), CI lock on Linux, at `16f778f4` | 176 tests, 0 failures, 22 skipped |
+| `check_relocation.py`, CI lock on Linux, at `91aea00b` | 32 pass, 0 fail, 1 skipped; 6126 tests, 0 failures, 309 skipped |
+| draft PR #326 Linux CI on `91aea00b` | every required job passes (22 pass, 2 skipped) |
+
+The relocation check needs a local, project-free temporary folder on this host: with `TMPDIR` on the NFS home it hit
+temporary-folder cleanup errors and the sticky-directory test, and under `/tmp` (which holds another user's `.git`) the
+name extractors rightly refused the test folders as inside a project; with `TMPDIR` under `/var/tmp` it is clean. The
+full suite was not run on E2 itself for this release (E2 was used for the regeneration only).
+
 ## 0.49.1 release check (2026-10-30, E2 and the CI lock)
 
 Release commit `f6c295f9` on `release/0.49.1`, based on main `e6bd8326` (PR #322 merged). Documentation-only patch: it ships
