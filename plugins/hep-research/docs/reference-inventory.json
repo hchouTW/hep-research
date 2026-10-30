@@ -15,7 +15,7 @@
   },
   "hep-computing": {
    "references": 37,
-   "bytes": 347259,
+   "bytes": 347256,
    "uncited": 0
   },
   "hep-detector": {
@@ -1187,7 +1187,7 @@
     "tests/skills/hep_computing/test_workflow_c6.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "1a291f43 2026-10-29"
+   "last_commit": "fc3595cb 2026-10-29"
   },
   {
    "path": "skills/hep-computing/references/bash-balanced-design-guidelines.md",
@@ -1526,7 +1526,7 @@
   {
    "path": "skills/hep-computing/references/research-workflow-control.md",
    "owner": "hep-computing",
-   "bytes": 19972,
+   "bytes": 19969,
    "lines": 220,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -1537,7 +1537,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "1a291f43 2026-10-29"
+   "last_commit": "ed224db0 2026-10-30"
   },
   {
    "path": "skills/hep-computing/references/risk-and-quality.md",
@@ -1816,7 +1816,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "96a0d312 2026-10-29"
+   "last_commit": "5e3b104e 2026-10-29"
   },
   {
    "path": "skills/hep-detector/references/calorimetry-ecal-hcal.md",
@@ -2139,7 +2139,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "96a0d312 2026-10-29"
+   "last_commit": "5e3b104e 2026-10-29"
   },
   {
    "path": "skills/hep-detector/references/extensive-air-showers.md",
@@ -2540,7 +2540,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "96a0d312 2026-10-29"
+   "last_commit": "5e3b104e 2026-10-29"
   },
   {
    "path": "skills/hep-detector/references/response-and-forward-folding.md",

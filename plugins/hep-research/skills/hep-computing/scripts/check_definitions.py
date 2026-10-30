@@ -4,7 +4,7 @@ cross-round error control and the criteria freeze record (reconstruction v12 A2;
 
 Purpose: the method-layer definitions a check program and its caller share, so that a check result is decided by a
 rule frozen before the result was seen, never by the text written afterwards. The rules follow Methods §2 of the
-reconstruction v12.1 spec copy (docs/dev/reconstruction-v12/spec/ in the source repository); the statistical choices
+reconstruction v12.1 spec copy (evals/reconstruction-v12/spec/ in the source repository); the statistical choices
 themselves (intervals, covariance, power estimates) are made with hep-statistics, this module only applies them.
 Definitions:
 - check roles: closure (internal consistency, never confirmation), confirmation-holdout, confirmation-independent;

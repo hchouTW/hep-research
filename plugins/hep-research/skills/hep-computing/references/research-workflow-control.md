@@ -7,7 +7,7 @@ reconstruction study, a fit, a training run or a numerical prediction use the sa
 reconstruction method content is in hep-detector ([event reconstruction](../../hep-detector/references/event-reconstruction.md),
 [calibration and alignment](../../hep-detector/references/calibration-and-alignment.md)).
 
-> **Status.** Source: the reconstruction v12 specification, v12.1 spec copy (`docs/dev/reconstruction-v12/spec/` in
+> **Status.** Source: the reconstruction v12 specification, v12.1 spec copy (`evals/reconstruction-v12/spec/` in
 > the source repository; Core, Methods, Delivery and the transition-period part of Control). S0 (recorded spec review,
 > hep-review R2) passed for the routing, transition, statistics and method obligations; **the control-layer
 > obligation (contract format, strictness order, derivation, admission; Control §1–§6 and the reference model) did not
