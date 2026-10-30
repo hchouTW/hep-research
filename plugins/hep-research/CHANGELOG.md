@@ -109,6 +109,21 @@ and position, in a follow-up); nothing already covered was restated.
   reference model's 90 scenarios and 42 mutations against the helper; the same derivation as the model on every
   scenario log and 300 random fact sequences; task-record round trip) and `test_control_layer.py` (task record,
   CLI, adapter, decision guard, report).
+- **Control-layer resumption, reconciliation and lease lock** (reconstruction v12 stage C2, implementation part;
+  CTRL-01, STATE-01, TASK-03, G5; **the control rules still did not pass the S0 spec review**): `control_layer.py
+  resume` prints, from the task log alone, what a new session needs (contract states, deliverables, attempts by
+  state, what never to resubmit, pending human items, freezes and exposures, accounts, the lease, next permitted
+  actions); `receipt --lost` records a run that left no receipt as termination unknown; `reconcile` takes a receipt
+  that proves the outcome of an unknown or abandoned attempt; `cancel` writes C's cancel request; `lock
+  acquire|release|status` is a lease with owner and expiry that serializes writers in addition to compare-and-set
+  (a live lease of another owner refuses writes except a human decision; an expired one is taken over only after
+  every admitted, running or unknown attempt is settled; events recorded in a chained history beside the record;
+  under M2/M3 every write holds the lease); `recover` removes a torn, never acknowledged last line. The receipt
+  adapter reports wall-clock usage by default under M2/M3. `executor_capabilities.py qualify` now runs a G5
+  qualification by fault injection (a writer killed mid-session, a fresh process with only the task log, a torn
+  line, a killed lease owner) tied to the SHA-256 of the control-layer files; with it `admit --mode M2` accepts and
+  M3 stays refused (G3, G4 unsupported). Tests: `tests/skills/hep_computing/test_control_layer_c2.py`;
+  `test_executor_b2.py` now expects G5 to pass (and still refuses M3, a failed G5 and a changed control layer).
 
 ## 0.49.1 (2026-10-30)
 

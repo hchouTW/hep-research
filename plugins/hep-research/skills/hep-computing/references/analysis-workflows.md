@@ -45,8 +45,10 @@ reproducible, partial reruns safe, and the provenance of every number checkable.
   qualification.
   `control_layer.py` keeps the task record of a T2-numeric+ deliverable (append-only, digest-chained, compare-and-set
   appends), admits each attempt, turns these receipts into facts and derives labels, achieved tiers, publish records
-  and the completion report; its control rules did not pass the spec review, so its derivations are stated as such
-  (see [research workflow control](research-workflow-control.md)).
+  and the completion report; after an interruption its `resume` summary says which attempts must never be
+  resubmitted and how to settle them (receipt, lost run, reconcile, human abandon) before taking over the writer's
+  lease. Its control rules did not pass the spec review, so its derivations are stated as such (see
+  [research workflow control](research-workflow-control.md)).
   When the numbers will be delivered or used downstream (evidence tier T2-numeric or above), run one step per
   invocation in a fresh output directory and keep the task record of
   [research workflow control](research-workflow-control.md), which also sets the evidence tier and the completion
