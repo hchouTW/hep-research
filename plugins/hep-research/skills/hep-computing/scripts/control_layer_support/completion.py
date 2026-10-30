@@ -19,8 +19,9 @@ LIMITATIONS = (
     "authentication: the record cannot prove that a human wrote them.",
     "Conditions resolution evidence (G6) is unsupported: conditions were not re-resolved or compared against a "
     "snapshot before publish or the completion check.",
-    "M2/M3 are not available (G5 persistent state and the C2 resumption stage are missing); the helper refuses "
-    "admission under them.",
+    "M3 is not available (G3 submission reconciliation and G4 metering are unsupported) and is refused. M2 is "
+    "admitted only with a G5 qualification of this helper's task record (restart recovery, stale lock takeover): "
+    "that qualifies persistence, not the rules.",
     "Defaults pending maintainer approval: DEC-01/DEC-08/DEC-09 (task record location and format), DEC-02 (library "
     "and CLI helper), DEC-12 (first contract), DEC-13 (no shared store with hep-review), DEC-14 (no delegation of "
     "human decisions).",
