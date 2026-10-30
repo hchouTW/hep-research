@@ -6,12 +6,19 @@ from . import derivation as dv
 
 LIMITATIONS = (
     "The control rules this helper applies (Control §1-§6 of the reconstruction v12.2 spec copy) did NOT pass the S0 "
-    "spec review: obligation N1 was violated in all seven recorded review rounds. The two defects of round 7 (newer "
+    "spec review: obligation N1 was violated in all eight recorded review rounds. The two defects of round 7 (newer "
     "unresolved attempts not overtaking an older output; check attempts without a result counted nowhere) are fixed "
-    "in v12.2, which has not yet been re-reviewed (round 8 pending). The helper implements the spec copy's Control "
+    "in v12.2; round 8 reviewed v12.2 and found three further defects (below), and reviewing stopped there by the "
+    "maintainer's decision. The helper implements the spec copy's Control "
     "part and agrees with its reference model on the tested fact sequences; that is not a review or a validation of "
     "the rules, and the derivation below is a mechanical consequence of unreviewed rules, not an established result. "
     "It gives no autonomous reconstruction capability.",
+    "Known open defects (S0 round 8, not fixed; the helper is equivalent to the reference model, so it has them "
+    "too): (1) attempts still in flight are neither failed draws nor artifacts and publish does not check for them, "
+    "so running several variants and letting only one finish is not visible; (2) an attempt that ends in success "
+    "without outputs is counted nowhere; (3) steps that supply a check's inputs are outside the deliverable's "
+    "dependency chain, so their failures and draws are not in its history, and publish carries no task-wide failed "
+    "draws. Treat these paths as open.",
     "Reads are not observable with the local runner: attested artifacts are 'attested (declared inputs)' (DEC-10); "
     "undeclared reads cannot be detected.",
     "Receipts and run records are files in the workspace: the adapter checks their digests and consistency but cannot "

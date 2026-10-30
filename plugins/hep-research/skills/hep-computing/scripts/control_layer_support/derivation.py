@@ -6,8 +6,8 @@ only.
 Status: this module implements the spec copy's Control part and is kept structurally close to its executable
 reference model (derivation version v12.2), which serves as the oracle: tests run the model's 92 scenarios and 44
 mutations against this module and compare both derivations on the same fact sequences. **The control rules did not
-pass the S0 spec review** (obligation N1 was violated in all seven recorded rounds; the two round-7 defects are fixed
-in v12.2, which has not yet been re-reviewed). Agreeing with the model therefore shows only that this module computes
+pass the S0 spec review** (obligation N1 was violated in all eight recorded rounds; round 8 left three open defects,
+which this module shares with the model: see completion.LIMITATIONS). Agreeing with the model therefore shows only that this module computes
 what the unreviewed rules say; it is not a review or a validation of the rules, and gives no autonomous
 reconstruction capability.
 

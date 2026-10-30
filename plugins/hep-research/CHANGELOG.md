@@ -124,8 +124,8 @@ and position, in a follow-up); nothing already covered was restated.
   line, a killed lease owner) tied to the SHA-256 of the control-layer files; with it `admit --mode M2` accepts and
   M3 stays refused (G3, G4 unsupported). Tests: `tests/skills/hep_computing/test_control_layer_c2.py`;
   `test_executor_b2.py` now expects G5 to pass (and still refuses M3, a failed G5 and a changed control layer).
-- **Control layer: derivation v12.2** (the two defects of S0 round 7 fixed; v12.2 not yet re-reviewed, round 8
-  pending; N1 did not pass S0 in seven rounds): a newer attempt of a step that produced no usable and current output
+- **Control layer: derivation v12.2** (the two defects of S0 round 7 fixed; round 8 reviewed v12.2 and left three
+  open defects, listed in every report; N1 did not pass S0 in eight rounds): a newer attempt of a step that produced no usable and current output
   -- failed, cancelled, unknown, abandoned (also when later reconciled) or unattested, with or without outputs --
   now overtakes an older output, which then binds only through a human-approved pin (attempts in flight and reuse do
   not overtake); check attempts that ended without a result are counted as failed check draws per deliverable,

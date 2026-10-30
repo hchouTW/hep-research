@@ -5,8 +5,8 @@ completion report (reconstruction v12 stages C1 and C2; DEC-02, library + CLI, a
 
 Status: implements Control §1-§6 of the reconstruction v12.2 spec copy and agrees with its reference model on the
 tested fact sequences (92 scenarios, 44 mutations, random sequences). The control rules did NOT pass the S0 spec
-review (obligation N1 violated in all seven rounds); the two round-7 defects are fixed in v12.2, which has not yet
-been re-reviewed (round 8 pending). The derivation is a mechanical consequence of unreviewed rules, not a reviewed or
+review (obligation N1 violated in all eight rounds); the round-7 defects are fixed in v12.2, and round 8 left three
+open defects, listed in every report. The derivation is a mechanical consequence of unreviewed rules, not a reviewed or
 validated result, and the helper gives no autonomous reconstruction capability. Every report carries that
 limitation.
 

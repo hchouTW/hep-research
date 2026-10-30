@@ -220,6 +220,16 @@ through S0" label stays. Report `s0/round8-report.txt`, checkpoint `s0/round8-ch
 scripts `s0/round8-attack.py`, `s0/round8-attack2.py`, re-run by the coordinator against the committed model
 (byte-identical): all five sequences reproduce. The round-7 fixes hold; the findings are new paths. Not fixed.
 
+### Decision after round 8 (ship as is), 2026-10-30
+
+The user decided to ship the control layer as is, with no further review: the control rules stay **not through S0**
+(violated in all eight rounds). The round-7 defects are fixed in v12.2; the round-8 findings are **known open
+defects** of the spec copy, the model and the helper, listed in every completion report: (1) attempts still in
+flight are neither failed draws nor artifacts and publish does not check for them; (2) an attempt that ends in
+success without outputs is counted nowhere; (3) steps that supply a check's inputs are outside the deliverable's
+chain, and publish carries no task-wide failed draws. The round-8 minors (parallel draws not forced through
+check-before-recompute; two Core/Control wording differences) are recorded in `spec/revision-log.md`, not fixed.
+
 ## A1 — methods and main-Agent resumption (documentation and skill wiring)
 
 Entry: N2, N3, N4, N5 passed S0 (above). Location of the dev records: moved from `plugins/hep-research/docs/dev/` out of
