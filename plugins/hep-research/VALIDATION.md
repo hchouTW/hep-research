@@ -8445,6 +8445,6 @@ and the release regeneration procedure in `docs/maintenance.md`.
 |---|---|---|
 | Realization entry | `RealizationEntryTests` in `tests/skills/hep_detector/test_check_geant4_study.py` (recorded path present; path from another machine resolved to a matching copy; a copy with another or no recorded hash refused; nothing taken from outside the study root) | 28 tests in the module pass |
 | Replay away from E2 | `examples/design-minimal-spectrometer/run.py --out <tmp>` on Linux, with no file at the recorded `~/Workspace/...` path | the input manifest of all 11 study records equals the committed (E2) one; before the change each lacked the realization-profile entry |
-| Committed outputs | `geant4-thin-silicon`, `design-minimal-spectrometer`, `design-search-j16` regenerated on E2 (the checker's code-identity hash is in their study records) | <E2_RESULT> |
+| Committed outputs | `geant4-thin-silicon`, `design-minimal-spectrometer`, `design-search-j16` regenerated on E2 (the checker's code-identity hash is in their study records) | `e28ff1b9` (E2): 21 files (`geant4-thin-silicon` 7, `design-minimal-spectrometer` 14, `design-search-j16` none), every changed line a hash (the checker's code identity and the sha256 values covering it), no PNG; afterwards `tests.examples.test_geant4_thin_silicon`, `test_design_minimal_spectrometer`, `test_design_search_j16` and `test_check_geant4_study` pass on Linux with the CI lock |
 
 Passing checks show software consistency, not physical validity.
