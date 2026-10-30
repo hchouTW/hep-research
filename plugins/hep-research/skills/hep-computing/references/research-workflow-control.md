@@ -12,8 +12,8 @@ reconstruction method content is in hep-detector ([event reconstruction](../../h
 > hep-review R2) passed for the routing, transition, statistics and method obligations; **the control-layer
 > obligation (contract format, strictness order, derivation, admission; Control §1–§6 and the reference model) did not
 > pass**, so those rules are not written here and **no control-layer helper exists**: every derivation below is the
-> main Agent's own statement, not a mechanical guarantee. Placing this page in hep-computing is the recommended default
-> of DEC-11, pending maintainer approval; the task-record location is the default of DEC-08/DEC-09, also pending.
+> main Agent's own statement, not a mechanical guarantee. Placing this page in hep-computing (DEC-11) and the task-record
+> location (DEC-08/DEC-09) were approved by the maintainer on 2026-10-30.
 
 ## Always-on rules
 
@@ -95,8 +95,8 @@ Load a row only when its condition holds; when it does not, no fact log, manifes
   its strictness order are specified in Control §1 of the spec copy, which **did not pass S0**: until it does, a
   change that only adds (a required check, a deliverable, a sample, a lower budget) may be applied, and **any other
   change waits for a human**, listed in the report.
-- In M1 the first contract takes effect when it is listed in the first reply, where the user can correct it (DEC-12
-  default, pending approval).
+- In M1 the first contract takes effect when it is listed in the first reply, where the user can correct it (DEC-12,
+  approved).
 
 ## Transition period: running and recording without a control layer
 
@@ -117,8 +117,8 @@ Until a control-layer helper exists, T2-numeric and T3 deliverables are complete
    test_workflow_b1.py`); where they are not, follow the workarounds of Control §7.4 of the spec copy (no incremental
    skip; outputs absent before execution; relative paths only; confirm no child processes remain).
 4. **Task record**: one persistent directory per task, separate from every output directory and outside the project
-   config — default `hep-research-artifacts/<task>/task-log/task-log.jsonl` in the project (DEC-08/DEC-09 default,
-   pending). It is a **single append-only file**; each line carries a sequence number, a kind, a writer (main Agent,
+   config — default `hep-research-artifacts/<task>/task-log/task-log.jsonl` in the project (DEC-08/DEC-09,
+   approved). It is a **single append-only file**; each line carries a sequence number, a kind, a writer (main Agent,
    human, or main-Agent transcription) and the SHA-256 of the previous line. Before appending, read the last line and
    check its hash; never edit or delete a line — correct with a new one. The main Agent writes only these kinds:
    contract, freeze, exposure, attempt registration, run registration, field-mapping table, transcribed human decision.
@@ -151,7 +151,7 @@ The report's limitations paragraph says: the runner gaps not fixed in the target
 attested (declared inputs) was used; that derivation and admission were stated by the main Agent, not guaranteed
 mechanically; incomplete identities; transcribed decisions; the no-child-process statements; that reads outside the
 runner cannot be detected (so neither the order of confirmation access nor the blinded region not being read is
-proven); and that DEC-08/DEC-09 are pending.
+proven).
 
 ## Checks: roles, types, results and the freeze record
 
