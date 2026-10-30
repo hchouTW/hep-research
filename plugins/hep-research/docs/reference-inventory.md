@@ -10,7 +10,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 |---|---|---|---|
 | hep-authoring | 49 | 359 | 0 |
 | hep-citations | 11 | 84 | 0 |
-| hep-computing | 37 | 347 | 0 |
+| hep-computing | 37 | 348 | 0 |
 | hep-detector | 43 | 667 | 0 |
 | hep-measurement | 12 | 125 | 0 |
 | hep-ml | 42 | 195 | 0 |
@@ -161,7 +161,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `acceptance-criteria.md` | hep-computing | 3.7 | no | 3 | - | 351029c0 2026-10-07 |
 | `agile-development-guide.md` | hep-computing | 10.9 | yes | 8 | hep-ml | 9257d7b5 2026-10-15 |
 | `analysis-data-pipelines.md` | hep-computing | 12.6 | yes | 11 | hep-measurement | 5dbb8c4d 2026-10-26 |
-| `analysis-workflows.md` | hep-computing | 6.1 | yes | 4 | - | fc3595cb 2026-10-29 |
+| `analysis-workflows.md` | hep-computing | 7.1 | yes | 4 | - | 5e3a9c56 2026-10-30 |
 | `bash-balanced-design-guidelines.md` | hep-computing | 7.6 | yes | 3 | - | 8eefac0f 2026-10-13 |
 | `batch-scheduling.md` | hep-computing | 31.7 | yes | 16 | - | 0aebec94 2026-10-29 |
 | `batch-site-cern-htcondor.md` | hep-computing | 11.2 | no | 2 | - | 6815df4b 2026-10-10 |
@@ -182,7 +182,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `prompt-engineering-and-token-optimization.md` | hep-computing | 9.4 | no | 3 | - | 351029c0 2026-10-07 |
 | `python-balanced-design-guidelines.md` | hep-computing | 7.5 | yes | 7 | hep-ml | 5dbb8c4d 2026-10-26 |
 | `python-hep-coding-patterns.md` | hep-computing | 7.8 | yes | 9 | - | 16214af1 2026-10-26 |
-| `research-workflow-control.md` | hep-computing | 20.0 | no | 3 | hep-detector | ed224db0 2026-10-30 |
+| `research-workflow-control.md` | hep-computing | 20.0 | no | 3 | hep-detector | 5e3a9c56 2026-10-30 |
 | `risk-and-quality.md` | hep-computing | 7.4 | no | 3 | - | f4372374 2026-10-13 |
 | `root-balanced-design-guidelines.md` | hep-computing | 37.3 | yes | 10 | - | 56a5a6c9 2026-10-23 |
 | `root-debugging.md` | hep-computing | 3.6 | yes | 4 | - | 9257d7b5 2026-10-15 |
