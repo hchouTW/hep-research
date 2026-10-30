@@ -195,20 +195,22 @@ fiducialization, and energy scale** dominate the result.
 ### Pileup and position in cryogenic and germanium detectors
 
 - **Pileup in slow detectors.** A thermal or phonon pulse rises over a long time compared
-  with fast scintillator or ionization pulses, so two events closer than the rise time
-  merge into one amplitude. Random coincidences scale with the square of the event rate
-  times the resolving time; in a double-beta-decay search the coincidences of
-  two-neutrino decays can fill the region of interest of the neutrinoless decay. Pileup is
-  found by a template fit of the pulse (the optimal filter of
+  with fast scintillator or ionization pulses, so two events closer than a resolving time
+  (of order the rise time, or below it with pulse-shape tests) merge into one amplitude.
+  Random coincidences in one detector scale as the resolving time times the square of that
+  detector's event rate, which favours small or segmented detectors; in a double-beta-decay
+  search the coincidences of two-neutrino decays can fill the region of interest of the
+  neutrinoless decay. Pileup is found by a template fit of the pulse (the optimal filter of
   [front-end waveform processing](front-end-waveform-processing.md#amplitude-and-time-from-sampled-waveforms))
-  with a goodness-of-fit or residual test, by a two-pulse fit, or by a faster channel
-  such as the light detector of a scintillating bolometer (Chernyak et al., Eur. Phys. J. C
-  74 (2014) 2913). The rejection versus pulse separation is measured by superposing
+  with a goodness-of-fit or residual test, by pulse-shape tests on the rising edge, or by a
+  two-pulse fit, on the heat signal and on a faster channel such as the light detector of a
+  scintillating bolometer (Chernyak et al., Eur. Phys. J. C 74 (2014) 2913). The rejection versus pulse separation is measured by superposing
   measured pulses at known separations, not assumed; near threshold, noise triggers and
   pileup with small pulses enter the low-energy event rate. Pileup in fast germanium
   readout is handled by the fast channel of
   [digital pulse processing](front-end-waveform-processing.md#digital-pulse-processing-for-spectroscopy).
-- **Position from phonons.** With several phonon sensors, the early (athermal) part of the
+- **Position from phonons.** With several athermal-phonon sensors (not a thermistor
+  bolometer read by one sensor), the early (athermal) part of the
   signal is shared among them according to where the energy was deposited, and its arrival
   is delayed in the far sensors; the partition and delay give a position, while the later
   thermal part does not.
@@ -216,14 +218,21 @@ fiducialization, and energy scale** dominate the result.
   electrodes on the surfaces separate events near a surface, whose charge is collected on
   the electrodes of that side only, from bulk events, whose electrons and holes reach the
   fiducial electrodes of opposite sides (Broniatowski et al., Nucl. Instrum. Methods A 559 (2006) 378). The fiducial
-  volume that this defines is measured as the fraction of uniformly distributed events
-  (cosmogenic activation lines, dissolved or gaseous sources) that pass the cut.
+  volume that this defines is measured as the fraction of events uniform in the bulk
+  (cosmogenic or neutron-activation lines) that pass the cut, as a function of energy,
+  since the charge resolution degrades the cut near threshold.
 - **Position and topology in germanium.** The current pulse shape depends on where the
-  charge is created: the ratio of maximum current to energy separates single-site from
-  multi-site events and flags events near the read-out contact and slow events in the
-  surface layer (Budjáš et al., J. Instrum. 4 (2009) P10007). The cut is calibrated on
-  double-escape peaks (single-site) and full-energy gamma peaks (mostly multi-site) and
-  checked for its energy dependence; the discrimination itself is in
+  charge is created. In small-contact detectors (point-contact or broad-energy types),
+  whose weighting field is concentrated near the read-out contact, the maximum current of a
+  single-site event hardly depends on its position, so the ratio of maximum current to
+  energy separates single-site from multi-site events and flags events near the read-out
+  contact and slow events in the surface layer (Budjáš et al., J. Instrum. 4 (2009) P10007);
+  in large-contact (semi-coaxial) detectors this ratio discriminates poorly and other
+  pulse-shape variables are used. The cut is calibrated on double-escape peaks (a
+  single-site proxy, but not uniform in the volume) and on single-escape and full-energy
+  peaks (multi-site-rich); its acceptance at the signal energy is an extrapolation,
+  cross-checked on the two-neutrino continuum or with simulation. The discrimination itself
+  is in
   [front-end waveform processing](front-end-waveform-processing.md#pulse-shape-discrimination).
   Segmented detectors add position from which segment collects the charge and from the
   transient signals induced on its neighbours.

@@ -28,8 +28,8 @@ followup_deferred:
   request: "user: fix Deferred and open questions; chose: write the 12 deferred cells"
   content: {status: done, cells: {F18: [T1, T2, T3, T4, T5, T6, T7], F4: [T2, T3, T4], F11: [T2, T4]}, new_sections: 4, notes: "Check rule 4/4; layering ok; sizes ground 20248 B, gaseous 20076 B, noble 20239 B, bibliography 23037 B"}
   citations: {status: done, verified: [Huege 2016, Glaser 2016, Buitink 2014, Aiola 2021, Arrabito 2007, De Serio 2003, Chernyak 2014, Broniatowski 2006, Budjas 2009], notes: "found by Crossref bibliographic search and matched to the Crossref record of each DOI (work root deferred/crossref)"}
-  gates: {status: pending}
-  review: {status: pending}
+  gates: {status: done, notes: "after content (5f1da8d2) and after review fixes: wiring exit 0, routing static exit 0, inventory --check pass (6 warnings, 0 overlap pairs), routing part 4081 B, packaging exit 0, layering ok, static 29/0/2"}
+  review: {status: in-progress, content_head: 6bfc7873, findings: {critical: 0, major: 3, minor: 12}, fixed: 15, not_fixed: [], re_review: pending}
   tests: {status: pending}
   records: {status: pending}
 stops: []
@@ -59,4 +59,6 @@ next_action: "follow-up: inventory and gates, review, tests, records"
 2026-10-30 | T8 | VALIDATION section written; CHANGELOG checked against item W; five must-state spot checks pass; check_packaging exit 0 | this commit
 2026-10-30 | T9 | final run state; series exported with git format-patch BASE..HEAD to the work root out/ | this commit
 2026-10-30 | follow-up | user answered OQ-4: write the 12 deferred cells; 4 new subsections (radio; fibre; emulsion; cryogenic and germanium pileup and position), 9 citations found by Crossref search and verified against their records, CHANGELOG scope updated, coverage-audit follow-up note | this commit
+2026-10-30 | follow-up | pytest after content: 2888 passed 25 failed 1 error 83 skipped; one id not in the base list, test_pyroot_floor integration test: OSError Directory not empty in TemporaryDirectory cleanup on the nfs4 TMPDIR; file alone 5 repeats -> a different test of the same file failed once (test_cpp_asset_tests..., itself a base failure); the file reads no reference; judged environment flakiness, not caused by the Markdown change | none
+2026-10-30 | follow-up | independent review of 37b68e3d..6bfc7873: 0 critical, 3 major, 12 minor; all 15 fixed (5 reworded after reading the abstract on INSPIRE-HEP) | this commit
 ```

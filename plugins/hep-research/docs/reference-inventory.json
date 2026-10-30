@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 43,
-   "bytes": 650118,
+   "bytes": 652076,
    "uncited": 0
   },
   "hep-measurement": {
@@ -2207,8 +2207,8 @@
   {
    "path": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
    "owner": "hep-detector",
-   "bytes": 20076,
-   "lines": 317,
+   "bytes": 20697,
+   "lines": 324,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
@@ -2252,8 +2252,8 @@
   {
    "path": "skills/hep-detector/references/ground-based-detection-arrays.md",
    "owner": "hep-detector",
-   "bytes": 20248,
-   "lines": 288,
+   "bytes": 20787,
+   "lines": 294,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
@@ -2351,8 +2351,8 @@
   {
    "path": "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
    "owner": "hep-detector",
-   "bytes": 20239,
-   "lines": 293,
+   "bytes": 21037,
+   "lines": 302,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/detector-case-studies-and-checklists.md",

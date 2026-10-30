@@ -48,3 +48,30 @@ round of the review (OQ-1 default) is used and none is critical or major:
 | A | minor | photon-likelihood-reconstruction.md | "`-ln L` per degree of freedom, that is divided by a stated count" reads against its own caveat; mixed punctuation in the list of quality variables | open; its suggested wording also drops the task's marker phrase "per degree of freedom", so a follow-up should reword while keeping it |
 | B | minor | photon-likelihood-reconstruction.md | "the muon is rarely contained" depends on detector size; suggested "often not contained in the instrumented volume" | open (follow-up) |
 | C | minor, optional | ground-based-detection-arrays.md | The surface-array Check line could name the station time-variance model | open (follow-up) |
+
+## Follow-up review: the 12 deferred cells
+
+One fresh-context reviewer (general-purpose subagent, same model family) reviewed
+`git diff 37b68e3d..6bfc7873 -- plugins/hep-research/skills/hep-detector` (report in the work root,
+`deferred/review/report.md`). Verdict: approve after the three major items; no critical finding; citations,
+anchors, Check lines, example blocks and ownership in order.
+
+| # | Severity | File | Finding | Disposition | Changed text |
+|---|---|---|---|---|---|
+| 1 | major | ground-based-detection-arrays.md | "the geomagnetic part scales with `sin alpha`" wrong for an energy; quadratic scaling is a fit | fixed | geomagnetic amplitude `sin alpha`, fluence `sin^2 alpha`; charge-excess part independent of `alpha`, fraction grows with air density; "approximately quadratically (*approximate*, an exponent fitted in simulation)" |
+| 2 | major | noble-liquid-neutrino-and-rare-event-detectors.md | Maximum-current-over-energy cut works only in small-contact germanium; calibration peaks incomplete | fixed | small-contact geometry and weighting-field reason, semi-coaxial caveat; double-escape peaks (single-site proxy, not uniform), single-escape and full-energy peaks (multi-site-rich), acceptance extrapolated and cross-checked on the two-neutrino continuum or simulation |
+| 3 | major | noble-liquid-neutrino-and-rare-event-detectors.md | Dissolved or gaseous sources impossible in solid germanium; fiducial fraction energy dependent | fixed | "events uniform in the bulk (cosmogenic or neutron-activation lines) ... as a function of energy, since the charge resolution degrades the cut near threshold" |
+| 4 | minor | noble-liquid-neutrino-and-rare-event-detectors.md | Resolving time can be below the rise time; rate per detector | fixed | "a resolving time (of order the rise time, or below it with pulse-shape tests)"; "scale as the resolving time times the square of that detector's event rate, which favours small or segmented detectors" |
+| 5 | minor | noble-liquid-neutrino-and-rare-event-detectors.md | Reviewer doubted (from memory) that the cited paper treats the light channel | fixed (reworded) | Abstract read via INSPIRE-HEP (arXiv:1404.1231, abstract+metadata, 2026-10-30): pulse-shape rejection on both heat and light signals; citation kept on "pulse-shape tests on the rising edge, or a two-pulse fit, on the heat signal and on a faster channel such as the light detector" |
+| 6 | minor | noble-liquid-neutrino-and-rare-event-detectors.md | Phonon partition needs athermal-phonon sensors | fixed | "With several athermal-phonon sensors (not a thermistor bolometer read by one sensor)" |
+| 7 | minor | gaseous-and-specialized-tracking-technologies.md | `n^2` ghost count restates the strips paragraph | fixed | "Stereo views give ghost intersections as for strips (see the strips paragraph above)" |
+| 8 | minor | gaseous-and-specialized-tracking-technologies.md | Bending-projection-first holds only for axial layers in a field | fixed | "When the axial layers measure the bending coordinate in a field, finding proceeds in that projection first" |
+| 9 | minor | gaseous-and-specialized-tracking-technologies.md | Clusters are photosensor channels; staggered layers; double-ended readout | fixed | channel spans several fibres, staggered layers and light spread; "except a coarse one from the time difference or amplitude ratio with double-ended readout" |
+| 10 | minor | gaseous-and-specialized-tracking-technologies.md | Scattering measures `p beta`, needs radiation lengths; larger cells | fixed | "Scattering measures `p beta`, not `p` ... radiation lengths (the Highland formula, *approximate*)"; "comparing non-adjacent films (larger cells) pushes that limit up" |
+| 11 | minor | gaseous-and-specialized-tracking-technologies.md | Film gap is an alignment parameter | fixed | "plus the gap between films" |
+| 12 | minor | gaseous-and-specialized-tracking-technologies.md | Following a predicted track back is for hybrid set-ups | fixed | "In hybrid set-ups ...; standalone emulsion detectors scan the full area instead" |
+| 13 | minor | ground-based-detection-arrays.md | Polarization geometry of the footprint asymmetry | fixed | interference along `v x B`, no interference along `v x (v x B)`, where the polarization measures the charge-excess fraction |
+| 14 | minor | ground-based-detection-arrays.md | Geometric distance to slant depth needs the density profile; other `X_max` observables; EM-only stated twice | fixed | curvature and spectral slope added; density-profile conversion listed; duplicate EM-only sentence removed from the `X_max` bullet |
+| 15 | minor | ground-based-detection-arrays.md | "leading energy-scale systematic" not universal | fixed | "usually the leading" |
+
+Fix commit: recorded in STATE.md (follow-up) in the next commit.

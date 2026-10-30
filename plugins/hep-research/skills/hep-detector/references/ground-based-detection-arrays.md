@@ -215,7 +215,7 @@ reconstructed from the antenna signals (review: Huege, Phys. Rep. 620 (2016) 1).
   is a band-limited field, so the band is part of every quoted amplitude. Narrow-band
   transmitters are removed in the frequency domain, which also removes some signal power.
   The antenna pattern and absolute gain, calibrated with a reference source and monitored
-  with the Galactic radio background, are the leading energy-scale systematic.
+  with the Galactic radio background, are usually the leading energy-scale systematic.
 - **Finding the pulses.** Most arrays read out on an external trigger from particle
   detectors, which then sets the radio efficiency. Self-triggering must reject impulsive
   man-made noise: it requires coincidences between neighbouring antennas consistent with a
@@ -230,23 +230,29 @@ reconstructed from the antenna signals (review: Huege, Phys. Rep. 620 (2016) 1).
   term with the signal, sets the per-antenna uncertainty.
 - **Direction and core.** Antenna times fit a wavefront, a plane as first guess and then a
   hyperbolic (conical far from the axis) front; interferometric beamforming is an
-  alternative. The footprint is not rotationally symmetric: geomagnetic and charge-excess
-  emission have different polarization patterns and interfere. The core and the lateral
-  distribution are therefore fitted in shower-plane coordinates (along `v x B` and
-  `v x (v x B)`).
-- **Energy.** The fluence integrated over the footprint is the radiation energy. It scales
-  quadratically with the electromagnetic energy after correcting for the geomagnetic angle
-  (the geomagnetic part scales with `sin alpha`) and for the air density at shower maximum
-  (Glaser et al., J. Cosmol. Astropart. Phys. 09 (2016) 024). Showers arriving close to the
-  field direction carry little radio signal and are measured poorly. Radio measures the
-  electromagnetic energy only; the absolute scale is tied to the antenna calibration or to
-  another detector.
+  alternative. The footprint is not rotationally symmetric: geomagnetic emission is
+  polarized along `v x B` and charge-excess emission radially, so they interfere along the
+  `v x B` axis and add without interference along `v x (v x B)`, where the polarization
+  measures the charge-excess fraction. The core and the lateral distribution are therefore
+  fitted in these shower-plane coordinates.
+- **Energy.** The fluence integrated over the footprint is the radiation energy. After
+  dividing out the geomagnetic-angle dependence (the geomagnetic field amplitude scales with
+  `sin alpha`, so its fluence with `sin^2 alpha`; the charge-excess part does not depend on
+  `alpha`, and its fraction grows with the air density) and correcting for the air density at
+  shower maximum, it scales approximately quadratically with the electromagnetic energy
+  (*approximate*, an exponent fitted in simulation; Glaser et al., J. Cosmol. Astropart. Phys.
+  09 (2016) 024). Showers arriving close to the field direction carry little radio signal and
+  are measured poorly. Radio measures the electromagnetic energy only; the absolute scale is
+  tied to the antenna calibration or to another detector.
 - **Depth of maximum and composition.** The footprint size and its Cherenkov-like ring
   depend on the geometric distance to the shower maximum. Comparing each event with
   simulated footprints spanning `X_max` gives `X_max` (Buitink et al., Phys. Rev. D 90 (2014)
   082003); parametric lateral functions with a distance-to-`X_max` term are the faster
-  alternative. Radio sees only the electromagnetic cascade, so muon content needs a particle
-  detector (see the muon and electromagnetic bullet in surface-array reconstruction above).
+  alternative, and the wavefront curvature and the spectral slope are further
+  `X_max`-sensitive observables. The fit returns a geometric distance; converting it to slant
+  depth needs the atmospheric density profile, an uncertainty to list. Muon content needs a
+  particle detector (see the muon and electromagnetic bullet in surface-array reconstruction
+  above).
 - **Per-event uncertainty.** Noise sets the per-antenna errors and the threshold bias.
   Events with few antennas have a degenerate core and `X_max`. Template results also carry
   the simulation's uncertainty: the refractive-index profile (humidity), the antenna model
