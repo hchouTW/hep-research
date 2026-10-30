@@ -124,6 +124,15 @@ and position, in a follow-up); nothing already covered was restated.
   line, a killed lease owner) tied to the SHA-256 of the control-layer files; with it `admit --mode M2` accepts and
   M3 stays refused (G3, G4 unsupported). Tests: `tests/skills/hep_computing/test_control_layer_c2.py`;
   `test_executor_b2.py` now expects G5 to pass (and still refuses M3, a failed G5 and a changed control layer).
+- **Control layer: derivation v12.2** (the two defects of S0 round 7 fixed; v12.2 not yet re-reviewed, round 8
+  pending; N1 did not pass S0 in seven rounds): a newer attempt of a step that produced no usable and current output
+  -- failed, cancelled, unknown, abandoned (also when later reconciled) or unattested, with or without outputs --
+  now overtakes an older output, which then binds only through a human-approved pin (attempts in flight and reuse do
+  not overtake); check attempts that ended without a result are counted as failed check draws per deliverable,
+  task-wide, in publish (`failed_check_draws`) and in the completion report, and those that read a confirmation
+  sample are listed among the confirmation results ("no result"). The maintainer decided on 2026-10-30 that the
+  control layer ships and approved DEC-02 (library + CLI). Tests: the model's 92 scenarios and 44 mutations against
+  the helper; the G5 qualification is regenerated for the changed control-layer files.
 
 ## 0.49.1 (2026-10-30)
 

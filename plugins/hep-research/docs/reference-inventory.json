@@ -15,7 +15,7 @@
   },
   "hep-computing": {
    "references": 37,
-   "bytes": 352355,
+   "bytes": 352413,
    "uncited": 0
   },
   "hep-detector": {
@@ -1526,8 +1526,8 @@
   {
    "path": "skills/hep-computing/references/research-workflow-control.md",
    "owner": "hep-computing",
-   "bytes": 24450,
-   "lines": 264,
+   "bytes": 24508,
+   "lines": 263,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/references/analysis-workflows.md",
@@ -1538,7 +1538,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "dde8f031 2026-10-30"
+   "last_commit": "8884361a 2026-10-30"
   },
   {
    "path": "skills/hep-computing/references/risk-and-quality.md",

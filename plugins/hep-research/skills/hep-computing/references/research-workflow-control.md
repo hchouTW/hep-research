@@ -7,15 +7,14 @@ reconstruction study, a fit, a training run or a numerical prediction use the sa
 reconstruction method content is in hep-detector ([event reconstruction](../../hep-detector/references/event-reconstruction.md),
 [calibration and alignment](../../hep-detector/references/calibration-and-alignment.md)).
 
-> **Status.** Source: the reconstruction v12 specification, v12.1 spec copy (`evals/reconstruction-v12/spec/` in
+> **Status.** Source: the reconstruction v12 specification, v12.2 spec copy (`docs/dev/reconstruction-v12/spec/` in
 > the source repository; Core, Methods, Delivery and the transition-period part of Control). S0 (recorded spec review,
 > hep-review R2) passed for the routing, transition, statistics and method obligations; **the control-layer
 > obligation (contract format, strictness order, derivation, admission; Control §1–§6 and the reference model) did not
-> pass**: violated in all seven review rounds; round 7 left two open defects, listed in every report of the
-> helper. A control-layer helper now exists (`control_layer.py`, stages C1 and C2 — resumption,
-> reconciliation, lease lock — built by the user's decision with the control rules stated as **not through S0**;
-> section below). It implements the spec copy's Control
-> part and agrees with its reference model on the tested fact sequences, but it is **not reviewed or validated**: its
+> pass**: violated in all seven review rounds; the two round-7 defects are fixed in v12.2, not yet re-reviewed
+> (round 8 pending). The control-layer helper (`control_layer.py`, stages C1 and C2 — resumption, reconciliation,
+> lease lock) ships by the maintainer's decision of 2026-10-30, with the control rules stated as **not through S0**
+> (section below). It implements the spec copy's Control part and agrees with its reference model on the tested fact sequences, but it is **not reviewed or validated**: its
 > derivations are mechanical consequences of unreviewed rules, not established results, and it gives no autonomous
 > reconstruction capability. The transition-period procedure below remains the reviewed one. Placing this page in
 > hep-computing (DEC-11) and the task-record location (DEC-08/DEC-09) were approved by the maintainer on 2026-10-30.
@@ -162,9 +161,9 @@ proven).
 
 ## Control-layer helper (C1, C2; control rules not through S0)
 
-`<plugin root>/skills/hep-computing/scripts/control_layer.py` keeps the task record and derives from it (DEC-02
-default, pending). It implements Control §1–§6 of the spec copy and is tested against its reference model (90
-scenarios, 42 mutations, the same derivation on scenario and random fact sequences) — agreement with **rules that
+`<plugin root>/skills/hep-computing/scripts/control_layer.py` keeps the task record and derives from it (DEC-02,
+approved 2026-10-30). It implements Control §1–§6 of the spec copy and is tested against its reference model (92
+scenarios, 44 mutations, the same derivation on scenario and random fact sequences) — agreement with **rules that
 did not pass review**, not a validation.
 
 - **Record**: one append-only `task-log.jsonl` (default `hep-research-artifacts/<task>/task-log/task-log.jsonl`,
@@ -253,7 +252,7 @@ separately; none stands in for another.
 |---|---|---|---|---|
 | 1. Deliverables | each deliverable's target and achieved tier, done/partial/blocked/not done with the reason; the stated derivation (transition period) | one sentence | ✓ | ✓ |
 | 2. Computation | main steps and their state; attested kind (only: attested, attested (declared inputs), transitional attested (declared inputs)); unattested listed separately | — | ✓ | ✓ |
-| 3. Scientific evidence | tier of each claim, four-valued check results, decision rule, sample roles and exposure, every historical fail/inconclusive, failed draws and artifacts on the dependency chain | — | if numeric | ✓ |
+| 3. Scientific evidence | tier of each claim, four-valued check results, decision rule, sample roles and exposure, every historical fail/inconclusive, failed draws, check attempts without a result and artifacts on the dependency chain | — | if numeric | ✓ |
 | 4. Contracts and authorization | each contract's state, every human decision (and its transcriber), authorization used, pending decisions | if present | ✓ | ✓ |
 | 5. Scope and limitations | scope, conditions context, known biases, uncovered regions, transition-period limitations | one sentence | ✓ | ✓ |
 | 6. Unconfirmed risks | unknown attempts, unconfirmed terminations, committed resources | — | if present | if present |

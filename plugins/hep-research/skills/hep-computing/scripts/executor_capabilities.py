@@ -3,7 +3,7 @@
 check that refuses a capability without a passing qualification (reconstruction v12 B2; CAP-01). Standard library only.
 
 Purpose: a capability may be relied on only when the executor declares it and the declaration cites a passing
-qualification record (Delivery §1.2 of the reconstruction v12.1 spec copy). The executor here is the local runner
+qualification record (Delivery §1.2 of the reconstruction v12.2 spec copy). The executor here is the local runner
 (skills/hep-computing/scripts/run_workflow.py, DEC-07 default: local executor only). Its qualification tests:
 - G1 output isolation: an old same-name output, absolute / `..` / symlinked destinations, an exit-0 command that
   writes nothing -- each must be refused or failed, with a positive control that a fresh output is accepted;

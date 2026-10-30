@@ -1,13 +1,14 @@
 #!/usr/bin/env python3
 """Control-layer helper: task contract, fact log, derivation, admission, receipts, human decisions, publish and the
-completion report (reconstruction v12 stage C1, DEC-02 default: library + CLI; pending maintainer approval).
-Standard library only.
+completion report (reconstruction v12 stages C1 and C2; DEC-02, library + CLI, approved by the maintainer on
+2026-10-30, who also decided that the control layer ships). Standard library only.
 
-Status: implements Control §1-§6 of the reconstruction v12.1 spec copy and agrees with its reference model on the
-tested fact sequences (90 scenarios, 42 mutations, random sequences). The control rules did NOT pass the S0 spec
-review (obligation N1 violated in all seven rounds; round 7 left two open defects, listed in every report): the
-derivation is a mechanical consequence of unreviewed rules, not a reviewed or validated result, and the helper gives
-no autonomous reconstruction capability. Every report carries that limitation.
+Status: implements Control §1-§6 of the reconstruction v12.2 spec copy and agrees with its reference model on the
+tested fact sequences (92 scenarios, 44 mutations, random sequences). The control rules did NOT pass the S0 spec
+review (obligation N1 violated in all seven rounds); the two round-7 defects are fixed in v12.2, which has not yet
+been re-reviewed (round 8 pending). The derivation is a mechanical consequence of unreviewed rules, not a reviewed or
+validated result, and the helper gives no autonomous reconstruction capability. Every report carries that
+limitation.
 
 Task record (DEC-01/08/09, approved 2026-10-30): one append-only JSON-lines file, by default
 <project>/hep-research-artifacts/<task>/task-log/task-log.jsonl, separate from every run's work folder. Each line

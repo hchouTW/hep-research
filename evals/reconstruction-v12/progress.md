@@ -205,6 +205,9 @@ reconciled, does not overtake an older output, so a revert can re-bind and publi
 attempts that end without a result are counted nowhere, so a check can be retried until it passes without trace;
 (3) Control §3 cancelling → failed omits timeout. Not fixed. Anyone using `control_layer.py` must treat its
 derivations as unreviewed and these paths as open.
+**Superseded the same day:** the user then decided that the control layer ships, approved DEC-02 and asked to fix the
+defects and review again; the spec copy and model were fixed (v12.2, 38573b63) and the helper ported (“v12.2 port”
+in the C2 section). v12.2 has not yet been re-reviewed.
 
 ## A1 — methods and main-Agent resumption (documentation and skill wiring)
 
@@ -649,6 +652,23 @@ the three lease cases and fails `test_takeover_only_when_expired_and_after_recon
 OK. The two changed existing tests follow the capability change and keep the refusals (M3, failed G5, changed
 control layer).
 
+### v12.2 port (2026-10-30)
+
+The coordinator fixed the two round-7 findings in the spec copy and the model (38573b63, derivation `v12.2`, 92
+scenarios, 44 mutations). Ported into `derivation.py` with the model's names: `_by_step_intent` index (rebuilt by the
+task-record replay through `_index`), `first_seen`, `IN_FLIGHT`, `step_intents`, the new `overtaken` (any newer
+attempt of the step name that did not produce a usable and current output overtakes, with or without outputs;
+in-flight, reuse and reproducing attempts do not), `failed_check_draws` / `aborted_checks`, `task_history` and
+`report_status` with `failed_check_draws`, `confirmation_results` with “no result” entries, publish field
+`failed_check_draws` (also in the JSON codec), `DERIVATION_VERSION = "v12.2"`. The completion report lists failed
+check draws per deliverable and task-wide (JSON and markdown). The “Known open defects” limitation is removed;
+LIMITATIONS[0], the docstrings, the reference page, the CHANGELOG and the decision texts say: N1 not through S0 in
+seven rounds, round-7 defects fixed in v12.2, not yet re-reviewed (round 8 pending); the control layer ships; DEC-02
+approved. The end-to-end test's assertion on the removed entry was replaced by assertions on the new text and on
+`failed_check_draws`; one CLI test of a check attempt without a result was added.
+
+VERIFY_V122
+
 ### Limitations
 
 - The control rules still did **not** pass S0; C2 adds persistence and recovery around them. A passing G5 shows that
@@ -689,7 +709,9 @@ Given by the maintainer in the conversation after the final report (transcribed 
   human approval), DEC-13 (no shared store with hep-review), DEC-14 (no delegation of human decisions).
 - **DEC-06 re-confirmed as reopened by S0:** an iteration round may hold several steps (partitioned, chained rounds,
   as in the spec copy), replacing "one step per round".
-- **Not decided:** DEC-02 (library + CLI helper) stays pending, tied to the decision on the control layer (stage C1).
+- **Decided later on 2026-10-30 (after S0 round 7; transcribed by the coordinator):** the control layer ships (no
+  longer a draft); DEC-02 (library + CLI helper, reference model as oracle, cache per fact sequence number) is
+  approved; the round-7 defects are fixed in the spec copy and model (v12.2) and are to be reviewed again (round 8).
 - **Approved:** the transition-period rule that a step the runner refused before starting any process counts as
   failed with termination confirmed (Control §7.2 (c)).
 - **Locations:** `docs/dev/` stays at the repository root (outside the plugin package), with the hep-review exports
