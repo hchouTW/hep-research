@@ -771,6 +771,24 @@ def bench_published(b: dict, rows: list[dict], columns: Columns | None = None) -
             "reference": {"source": "published measurement (dataset-record)", "version": None, "validity": "interface"}}
 
 
+def geant4_installation(rec: dict) -> dict | None:
+    """What a run record states about the Geant4 installation it ran with (adapters/geant4 0.6.0 writes
+    extension.simulation.geant4.origin): `built-from-source` (geant4_build.py build: tag, commit, MD5-checked datasets)
+    or `registered` (geant4_build.py register: an existing installation; no source commit, build options or dataset
+    MD5s, the datasets content-hashed only), the latter reported as weaker provenance. None for a record without an
+    origin (written before 0.6.0, always by a source build), so older outputs are unchanged. Reported, never a gap: the
+    benchmarks and their references decide validity, not how Geant4 was installed."""
+    g = ((rec.get("extension") or {}).get("simulation") or {}).get("geant4") or {}
+    if not g.get("origin"):
+        return None
+    out = {"origin": g["origin"], "version": g.get("installation_version") or g.get("version"),
+           "commit": g.get("commit")}
+    if g["origin"] == "registered":
+        out["provenance"] = ("weaker: a registered installation (source commit, build options and dataset MD5s "
+                             "unknown; datasets content-hashed only)")
+    return out
+
+
 def configuration(b: dict, cfg_dir: Path) -> dict:
     """CV-A1 (A1.3): configuration, target hash (hash_scheme spec-v1) and its basis, derived from the spec/1 of the
     run record the setting names (run_record), never from user input. The target is target_slabs (absorbers
@@ -796,6 +814,9 @@ def configuration(b: dict, cfg_dir: Path) -> dict:
         raise BenchmarkError(f"{b['benchmark']}: {exc}") from exc
     out = {**conf, "configuration_basis": {"run_record": rr, "artifact_id": rec.get("artifact_id"),
                                            "sha256": hashlib.sha256(raw).hexdigest()}}
+    inst = geant4_installation(rec)
+    if inst:  # adapter 0.6.0 records: how Geant4 was installed (a registered installation is weaker provenance)
+        out["configuration_basis"]["geant4_installation"] = inst
     if "measured_configuration" in b:
         out["measured_configuration"] = b["measured_configuration"]
     return out
