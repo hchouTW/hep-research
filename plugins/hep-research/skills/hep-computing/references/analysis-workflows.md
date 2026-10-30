@@ -43,7 +43,9 @@ reproducible, partial reruns safe, and the provenance of every number checkable.
   termination, outputs with location and digest, artifact digest, declared inputs, run-record digest, times, wall and
   CPU seconds). A check step declares its `check` identity (check, criterion and target digests, criteria and result
   files, target manifest, role, type, read list); its result counts only when it binds to the run, otherwise the step
-  fails. `executor_capabilities.py` qualifies the runner by fault injection (G1 output isolation, G2 termination on
+  fails. The target manifest maps each of the target's logical names (an output's path in the producer's work folder,
+  as in its record and receipt) to the staged copy, one entry per target output, so the target digest is the
+  producer's `artifact_digest` copied as it is. `executor_capabilities.py` qualifies the runner by fault injection (G1 output isolation, G2 termination on
   POSIX; G3–G6 unsupported) and refuses a capability whose declaration does not cite a passing, current
   qualification.
   When the numbers will be delivered or used downstream (evidence tier T2-numeric or above), run one step per

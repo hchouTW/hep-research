@@ -148,6 +148,31 @@ class CheckBinding(Base):
         code, _, res = self.runit(self.step(args=[self.check_d, self.crit_d, self.target_d, "CONF"]))
         self.assertEqual((code, res["bound"]), (1, False))
 
+    def producer_digest(self, files: dict) -> str:
+        """Run a producer step in its own work folder; return the artifact digest its run record holds."""
+        prod = self.root / "producer"
+        code = ";".join(f"open({n!r}, 'w').write({t!r})" for n, t in files.items())
+        steps = [{"id": "reco", "argv": ["{python}", "-c", code], "outputs": sorted(files)}]
+        rc, out = run(RUNNER, self.write_workflow(steps), "--work", prod)
+        self.assertEqual(rc, 0, out)
+        return json.loads((prod / "runs" / "reco.computational-run.json").read_text())["extension"]["artifact_digest"]
+
+    def test_the_producers_artifact_digest_binds(self):
+        """Control §4: the artifact is the manifest {logical name: digest}; the runner's logical name of an output is
+        its path in the producer's work folder, and target_manifest maps those names to the staged copies. A digest
+        copied from the producer's record binds, whatever the staged file is called."""
+        digest = self.producer_digest({"value.txt": "1.02"})
+        self.assertEqual(digest, self.target_d)
+        code, out, res = self.runit(self.step(args=[self.check_d, self.crit_d, digest, "CR"],
+                                              target_artifact_digest=digest))
+        self.assertEqual((code, res["bound"]), (0, True), out)
+
+    def test_a_target_staged_in_part_does_not_bind(self):  # every output of the target must be staged
+        digest = self.producer_digest({"value.txt": "1.02", "extra.txt": "x"})
+        code, _, res = self.runit(self.step(args=[self.check_d, self.crit_d, digest, "CR"],
+                                            target_artifact_digest=digest))
+        self.assertEqual((code, res["bound"]), (1, False))
+
     def test_a_failing_check_is_a_bound_fail(self):  # the result is recorded as it is, never upgraded
         (self.work / "target.txt").write_text("1.5")
         target_d = sha(canonical({"value.txt": sha(b"1.5")}))

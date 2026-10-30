@@ -35,11 +35,14 @@ starting with '.', ':' or '-', at most 128 characters; it names the run record a
 "timeout_s": SECONDS (optional, default 3600), "check": {...} (optional: a check run's declared identity, below)}]}.
 A check step (reconstruction v12 A2 fields, defined in scripts/check_definitions.py) declares "check":
 {"check_digest", "criterion_digest", "target_artifact_digest" (SHA-256 hex), "criteria_file", "result_file" (relative
-paths: an input and an output of the step), "target_manifest" ({target logical name: staged input path}), "role"
+paths: an input and an output of the step), "target_manifest" ({target logical name: staged input path}, one entry
+per output of the target; a logical name is the output's path in the producer's work folder, the key of its
+output_hashes and the receipt's "logical", so the producer's artifact_digest binds as it is), "role"
 (closure, confirmation-holdout, confirmation-independent), "type" (threshold, performance-estimate), "samples" (the
 read list)}; the object is validated before any step runs and recorded as extension.check. After the check program
 ends, its result file must bind to the run (B2, VAL-06): the check digest is the hash of a script in argv, the
-criterion digest the hash of the criteria file, the target digest the canonical digest of the staged target outputs,
+criterion digest the hash of the criteria file, the target digest the canonical digest of {logical name: SHA-256 of
+the staged copy} (the same manifest as the producer's artifact_digest, Control §4),
 and the result file repeats the three digests with a four-valued result, a reason and samples from the read list;
 extension.check_result records the verdict, and an unbound result fails the step.
 Receipts (B2, --receipt-dir DIR): one <attempt>.receipt.json per executed step, outside the run records so that the
