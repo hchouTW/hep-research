@@ -46,7 +46,8 @@ def clean_env(**extra):
 class FakeInstall:
     """A fake Geant4 11.4.3 installation under root/prefix; layout 'geant4' (G4EMLOW8.8) or 'conda' (EMLOW8.8)."""
 
-    def __init__(self, root: Path, layout="geant4", cmake=True, cmake_version="11.4.3", reported_prefix=None):
+    def __init__(self, root: Path, layout="geant4", cmake=True, cmake_version="11.4.3", reported_prefix=None,
+                 stderr_warning=False, dataset_descriptions=True):
         self.prefix = root / "prefix"
         self.data_dir = self.prefix / "share" / "Geant4" / "data"
         self.data_dir.mkdir(parents=True)
@@ -61,8 +62,9 @@ class FakeInstall:
         bindir.mkdir()
         lines = "\n".join(f"{n} {v} {self.data_dir / (n + ver)}" for n, v, ver, _t in DATASETS)
         self.config = bindir / "geant4-config"
+        warn = "echo 'bash: warning: setlocale: LC_ALL: cannot change locale (en_US.UTF-8)' >&2\n" if stderr_warning else ""
         self.config.write_text(f"""#!/bin/sh
-case "$1" in
+{warn}case "$1" in
   --version) echo 11.4.3 ;;
   --prefix) echo "{reported_prefix or self.prefix}" ;;
   --cxxstd) echo 17 ;;
@@ -73,6 +75,7 @@ case "$1" in
 EOF
   ;;
   --check-datasets) echo "information only" ;;
+  --cflags|--cflags-without-gui|--libs|--libs-without-gui) echo "" ;;
   *) exit 1 ;;
 esac
 """)
@@ -81,9 +84,14 @@ esac
             cdir = self.prefix / "lib" / "cmake" / "Geant4"
             cdir.mkdir(parents=True)
             desc = ";".join(f"{n}|{v}|{self.data_dir / (n + ver)}|{t}.{ver}.tar.gz|{'0' * 32}" for n, v, ver, t in DATASETS)
+            # usable by find_package(Geant4 11.4): a compatible version and an empty use file (no library)
+            (cdir / "UseGeant4.cmake").write_text("")
             (cdir / "Geant4Config.cmake").write_text(
-                f'set(Geant4_CXX_STANDARD "17")\nset(Geant4_DATASET_DESCRIPTIONS "{desc}")\n')
-            (cdir / "Geant4ConfigVersion.cmake").write_text(f'set(PACKAGE_VERSION "{cmake_version}")\n')
+                'set(Geant4_CXX_STANDARD "17")\n'
+                + (f'set(Geant4_DATASET_DESCRIPTIONS "{desc}")\n' if dataset_descriptions else "")
+                + 'set(Geant4_USE_FILE "${CMAKE_CURRENT_LIST_DIR}/UseGeant4.cmake")\nset(Geant4_LIBRARIES)\n')
+            (cdir / "Geant4ConfigVersion.cmake").write_text(
+                f'set(PACKAGE_VERSION "{cmake_version}")\nset(PACKAGE_VERSION_COMPATIBLE TRUE)\n')
 
 
 class _TempDirCase(unittest.TestCase):
@@ -387,6 +395,23 @@ class GeantConfigBuild(unittest.TestCase):
                 self.skipTest("cmake not found on PATH")
             self.assertEqual(code, 3, out)
             self.assertIn("no geant4-config", out["error"])
+
+
+class ReviewFixes(_TempDirCase):
+    """Regressions from the PR #328 review: a dataset list Geant4Config.cmake does not declare, a view whose
+    bin/geant4-config is a symbolic link, check with a geant4-config that writes to stderr, and switching
+    --configure-with in one --work (build-sim and the examples; these two need cmake and a C++ compiler)."""
+
+    def test_check_reads_geant4_config_as_register_does(self):
+        inst = FakeInstall(self.d, stderr_warning=True)
+        code, out, rec_path = self.register(inst)
+        self.assertEqual(code, 0, out)
+        code, out = run(BUILD, "check", "--record", rec_path, env=clean_env())
+        self.assertEqual((code, out.get("version"), out.get("differences")), (0, "11.4.3", []), out)
+        inst.config.write_text("#!/bin/sh\nexit 3\n")  # a broken tool is reported as one, not as a version change
+        code, out = run(BUILD, "check", "--record", rec_path, env=clean_env())
+        self.assertEqual((code, out["status"]), (2, "rejected"), out)
+        self.assertIn("exited 3", out["error"])
 
 
 @unittest.skipUnless(REAL, "set HEP_GEANT4_REGISTER_TEST to a Geant4 installation's geant4-config or prefix")

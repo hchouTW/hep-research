@@ -303,11 +303,13 @@ def cmd_check(args) -> tuple[str, dict]:
     if not config.is_file():
         return "missing-dependency", {"error": f"{tilde(config)} not found"}
     diffs = []
-    version = capture([str(config), "--version"])
+    # read as register reads it: stdout only (a locale warning on stderr is not part of the answer), and a non-zero
+    # exit is a broken geant4-config (rejected), not a version change
+    version = config_query(config, "--version")
     if version != build["geant4_config"].get("version"):
         diffs.append(f"version {version} != {build['geant4_config'].get('version')}")
     if registered:  # the registration's identity: prefix, geant4-config and Geant4Config.cmake unchanged
-        prefix = capture([str(config), "--prefix"])
+        prefix = config_query(config, "--prefix")
         if not same_dir(prefix, build["install_prefix"]):
             diffs.append(f"geant4-config --prefix {tilde(prefix)} != {build['install_prefix']}")
         for key, path_key in (("geant4_config_sha256", "geant4_config"), ("cmake_config_sha256", "cmake_config")):
