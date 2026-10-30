@@ -180,14 +180,14 @@ class EndToEnd(Base):
         code, rep = self.call("report")
         self.assertEqual((code, rep["overall"], rep["unsettled_attempts"]), (0, "complete", []))
         self.assertIn("did NOT pass the S0", rep["5_limitations"][0])
-        defects = [x for x in rep["5_limitations"] if x.startswith("Known open defects")]  # S0 round 7
-        self.assertEqual(len(defects), 1)
-        self.assertIn("without a pin", defects[0])
-        self.assertIn("counted nowhere", defects[0])
+        self.assertIn("seven recorded review rounds", rep["5_limitations"][0])  # S0 round 7, fixed in v12.2 ...
+        self.assertIn("not yet been re-reviewed", rep["5_limitations"][0])      # ... which is not re-reviewed
+        self.assertFalse([x for x in rep["5_limitations"] if x.startswith("Known open defects")])
+        self.assertEqual((fields["failed_check_draws"], rep["1_deliverables"]["D"]["failed_check_draws"]), (0, []))
         self.assertEqual(rep["2_computation"]["steps"]["reco"]["artifacts"][0]["kind"], "attested (declared inputs)")
         code, rep = self.call("report", "--format", "markdown")
         self.assertIn("did NOT pass the S0", rep["markdown"])
-        self.assertIn("Known open defects", rep["markdown"])
+        self.assertIn("check attempts without a result", rep["markdown"])
         self.assertEqual(self.call("verify")[1]["head"], self.head())
 
 

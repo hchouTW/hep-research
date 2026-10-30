@@ -5,17 +5,13 @@ from __future__ import annotations
 from . import derivation as dv
 
 LIMITATIONS = (
-    "The control rules this helper applies (Control §1-§6 of the reconstruction v12.1 spec copy) did NOT pass the S0 "
-    "spec review: obligation N1 was violated in all seven recorded review rounds, the last of which reviewed the "
-    "single 'overtaken' binding rule and found two open defects (below); reviewing stopped there. The helper implements the spec copy's Control part and "
-    "agrees with its reference model on the tested fact sequences; that is not a review or a validation of the "
-    "rules, and the derivation below is a mechanical consequence of unreviewed rules, not an established result. "
+    "The control rules this helper applies (Control §1-§6 of the reconstruction v12.2 spec copy) did NOT pass the S0 "
+    "spec review: obligation N1 was violated in all seven recorded review rounds. The two defects of round 7 (newer "
+    "unresolved attempts not overtaking an older output; check attempts without a result counted nowhere) are fixed "
+    "in v12.2, which has not yet been re-reviewed (round 8 pending). The helper implements the spec copy's Control "
+    "part and agrees with its reference model on the tested fact sequences; that is not a review or a validation of "
+    "the rules, and the derivation below is a mechanical consequence of unreviewed rules, not an established result. "
     "It gives no autonomous reconstruction capability.",
-    "Known open defects (S0 round 7, not fixed; the helper is equivalent to the reference model, so it has them "
-    "too): (1) a newer attempt of a step that ends unknown, or is abandoned and later reconciled, does not overtake "
-    "an older output, so a revert can re-bind and publish the older output without a pin; (2) check attempts that "
-    "end without a result (cancelled, failed, timed out) are counted nowhere, so a check can be retried until it "
-    "passes without trace. Treat both paths as open.",
     "Reads are not observable with the local runner: attested artifacts are 'attested (declared inputs)' (DEC-10); "
     "undeclared reads cannot be detected.",
     "Receipts and run records are files in the workspace: the adapter checks their digests and consistency but cannot "
@@ -27,9 +23,9 @@ LIMITATIONS = (
     "M3 is not available (G3 submission reconciliation and G4 metering are unsupported) and is refused. M2 is "
     "admitted only with a G5 qualification of this helper's task record (restart recovery, stale lock takeover): "
     "that qualifies persistence, not the rules.",
-    "Design defaults: DEC-01/DEC-08/DEC-09 (task record location and format), DEC-12 (first contract), DEC-13 (no "
-    "shared store with hep-review) and DEC-14 (no delegation of human decisions) were approved by the maintainer on "
-    "2026-10-30; DEC-02 (library and CLI helper) is still pending, with the decision on the control layer itself.",
+    "Maintainer decisions of 2026-10-30: the control layer ships; DEC-02 (library and CLI helper), DEC-01/DEC-08/"
+    "DEC-09 (task record location and format), DEC-12 (first contract), DEC-13 (no shared store with hep-review) and "
+    "DEC-14 (no delegation of human decisions) are approved. Shipping is not a review of the rules (above).",
 )
 
 
@@ -87,6 +83,7 @@ def deliverables(log) -> dict:
                      "independent_confirmation_required": dl.independent_confirmation,
                      "prior_failures": [list(x) for x in row["prior_failures"]],
                      "failed_draws": [list(x) for x in row["failed_draws"]],
+                     "failed_check_draws": [list(x) for x in row["failed_check_draws"]],
                      "confirmation_results": [list(x) for x in row["confirmation_results"]],
                      "chain_artifacts": sum(len(dv.step_artifacts(log, n)) for n in dv.chain_steps(log, dl.step)),
                      "published": [{"seq": p.seq, "digest": p.get("digest"), "achieved": p.get("achieved"),
@@ -174,7 +171,8 @@ def report(log, task_log: str, head_digest: str | None) -> dict:
     checks = [{"seq": r.seq, "target": r.get("target"), "check": r.get("check"), "criteria": r.get("criteria"),
                "result": r.get("result"), "reason": r.get("reason"), "check_attempt": r.get("check_attempt"),
                "sample": r.get("sample"), "counted_sample": dv.result_sample(log, r)} for r in log.of("check_result")]
-    history = dv.task_history(log) if eff else {"failures": [], "failed_draws": [], "artifacts": {}}
+    history = dv.task_history(log) if eff else {"failures": [], "failed_draws": [], "artifacts": {},
+                                                "failed_check_draws": []}
     accounts = status(log)["accounts"]
     limitations = list(LIMITATIONS)
     if accounts["budget"] is not None and not accounts["usage_reported"]:
@@ -187,7 +185,8 @@ def report(log, task_log: str, head_digest: str | None) -> dict:
         "2_computation": {"steps": steps, "unattested": unattested, "attempts": attempts(log)},
         "3_scientific_evidence": {"check_results": checks, "task_history": {
             "failures": [list(x) for x in history["failures"]],
-            "failed_draws": [list(x) for x in history["failed_draws"]], "artifacts": history["artifacts"]},
+            "failed_draws": [list(x) for x in history["failed_draws"]], "artifacts": history["artifacts"],
+            "failed_check_draws": [list(x) for x in history["failed_check_draws"]]},
             "samples": exposures(log),
             "freezes": [{"seq": f.seq, "step": f.get("step"), "samples": list(f.get("samples")),
                          "independent": list(f.get("independent") or ()), "plan": f.get("plan")}
@@ -221,10 +220,12 @@ def markdown(rep: dict) -> str:
     out += ["", "## 3. Scientific evidence", ""]
     for did, row in rep["1_deliverables"].items():
         out.append(f"- {did}: {len(row['prior_failures'])} historical fail/inconclusive, {len(row['failed_draws'])} "
-                   f"failed draws, {row['chain_artifacts']} artifacts and {len(row['confirmation_results'])} "
+                   f"failed draws, {len(row['failed_check_draws'])} check attempts without a result, "
+                   f"{row['chain_artifacts']} artifacts and {len(row['confirmation_results'])} "
                    f"confirmation-sample results on the dependency chain")
     hist = rep["3_scientific_evidence"]["task_history"]
     out.append(f"- task-wide: {len(hist['failures'])} fail/inconclusive, {len(hist['failed_draws'])} failed draws, "
+               f"{len(hist['failed_check_draws'])} check attempts without a result, "
                f"artifacts per step {hist['artifacts']}")
     for res in rep["3_scientific_evidence"]["check_results"]:
         out.append(f"- check `{res['check'][:12]}` on `{res['target'][:12]}`: {res['result']} ({res['reason'] or ''})")

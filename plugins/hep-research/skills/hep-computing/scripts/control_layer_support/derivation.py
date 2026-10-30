@@ -1,13 +1,14 @@
 """Control layer C, in memory: fact log, closed contract format, strictness order, effective contract, execution
 state, artifact derivation, achieved tier, admission and per-deliverable publish (Control §1-§6 of the reconstruction
-v12.1 spec copy; reconstruction v12 stage C1, DEC-02 default: library + CLI helper). Standard library only.
+v12.2 spec copy; reconstruction v12 stage C1, DEC-02 approved 2026-10-30: library + CLI helper). Standard library
+only.
 
 Status: this module implements the spec copy's Control part and is kept structurally close to its executable
-reference model (derivation version v12.1), which serves as the oracle: tests run the model's 90 scenarios and 42
+reference model (derivation version v12.2), which serves as the oracle: tests run the model's 92 scenarios and 44
 mutations against this module and compare both derivations on the same fact sequences. **The control rules did not
-pass the S0 spec review** (obligation N1 was violated in all seven recorded rounds; round 7 left two open
-defects, which this module shares with the model: see completion.LIMITATIONS). Agreeing with the model therefore shows only that this module
-computes what the unreviewed rules say; it is not a review or a validation of the rules, and gives no autonomous
+pass the S0 spec review** (obligation N1 was violated in all seven recorded rounds; the two round-7 defects are fixed
+in v12.2, which has not yet been re-reviewed). Agreeing with the model therefore shows only that this module computes
+what the unreviewed rules say; it is not a review or a validation of the rules, and gives no autonomous
 reconstruction capability.
 
 Differences from the model, none of which changes a derivation:
@@ -25,7 +26,7 @@ import math
 from dataclasses import dataclass
 from typing import Any
 
-DERIVATION_VERSION = "v12.1"
+DERIVATION_VERSION = "v12.2"
 
 
 def canonical_bytes(value: Any) -> bytes:
@@ -110,6 +111,7 @@ class Log:
         self._by_identity: dict = {}
         self._by_step_out: dict = {}
         self._by_check_target: dict = {}
+        self._by_step_intent: dict = {}
         self._intent: dict = {}
 
     @property
@@ -194,6 +196,7 @@ class Log:
         if fact.kind == "intent":
             self._intent[attempt] = fact
             self._by_identity.setdefault(fact.get("identity"), []).append(fact)
+            self._by_step_intent.setdefault(fact.get("step"), []).append(fact)
             if fact.get("step") == "__check__":
                 self._by_check_target.setdefault(dict(fact.get("inputs") or ()).get("target"), []).append(fact)
         if fact.kind in ("receipt", "reconcile", "reuse"):
@@ -773,15 +776,50 @@ def self_current(log: Log, digest: str) -> bool:
 
 
 @memo
+def first_seen(log: Log, step: str, digest: str):
+    """Sequence number of the first terminal fact of an attempt of the step that output this digest."""
+    for fact in log._by_step_out.get(step, []):
+        if terminal_fact(log, fact.get("attempt")) is fact and \
+                digest in ((fact.get("source"),) if fact.kind == "reuse" else (fact.get("outputs") or ())):
+            return fact.seq
+    return None
+
+
+IN_FLIGHT = ("admitted", "running", "cancelling")
+
+
+@memo
+def step_intents(log: Log, step: str) -> tuple:
+    """The intents of one step, from the log's index (Control §4.8: no whole-log scan per derivation call)."""
+    return tuple(log._by_step_intent.get(step, ()))
+
+
+@memo
 def overtaken(log: Log, digest: str) -> bool:
-    """An output first seen in the step after this artifact -- by any attempt of the step name, under any contract,
-    whatever its end state or attestation -- is no longer usable and current (Control §4.2): binding this artifact
-    again would be a choice among outputs already seen, so it binds only through a pin (human approval)."""
+    """A newer attempt of the step name -- one with a fact after this artifact was first seen, under any contract --
+    produced no usable and current output: it failed, was cancelled, is unknown, was abandoned (reconciled or not), or
+    its output is unattested, invalidated or otherwise not current, with or without outputs (Control §4.2, v12.2).
+    Binding this artifact again would be a choice among draws already made, so it binds only through a pin (human
+    approval). Attempts still in flight, reuse attempts and attempts that reproduced this digest do not overtake."""
     step = step_of(log, digest)
-    order = candidates_raw(log, step)
-    if digest not in order:
+    first = first_seen(log, step, digest)
+    if first is None:
         return False
-    return any(not (usable(log, later) and current(log, later)) for later in order[order.index(digest) + 1:])
+    for intent in step_intents(log, step):
+        attempt = intent.get("attempt")
+        if max(fact.seq for fact in log.of_attempt(attempt)) <= first:
+            continue
+        state = exec_status(log, attempt)
+        if state in IN_FLIGHT or state == "reused":
+            continue
+        term = terminal_fact(log, attempt)
+        outs = tuple(term.get("outputs") or ()) if term is not None and term.kind != "reuse" else ()
+        if digest in outs:
+            continue
+        if state == "computed" and any(usable(log, other) and current(log, other) for other in outs):
+            continue
+        return True
+    return False
 
 
 @memo
@@ -1057,10 +1095,36 @@ def failed_draws(log, step) -> list:
 
 
 def confirmation_results(log, step) -> list:
-    """Every result on a confirmation sample of any artifact of the chain."""
-    return [(name, digest, r.get("check"), result_sample(log, r), r.get("result")) for name in chain_steps(log, step)
+    """Every result on a confirmation sample of any artifact of the chain, and every check attempt on the chain that
+    read a confirmation sample and ended without a result ("no result", v12.2)."""
+    done = [(name, digest, r.get("check"), result_sample(log, r), r.get("result")) for name in chain_steps(log, step)
             for digest in candidates_raw(log, name) for r in log.results_for(digest)
             if result_sample(log, r) is not None and sample_role(log, result_sample(log, r)) == "confirmation"]
+    aborted = [(name, digest, None, sample, "no result") for name, digest, _, _, reads in failed_check_draws(log, step)
+               for sample in reads if sample_role(log, sample) == "confirmation"]
+    return done + aborted
+
+
+def failed_check_draws(log, step) -> list:
+    """Check attempts on artifacts of the chain that ended without a check result (failed, cancelled, unknown,
+    abandoned, or computed without a result), so retrying a check until it passes stays visible (v12.2)."""
+    targets = {digest: name for name in chain_steps(log, step) for digest in candidates_raw(log, name)}
+    return aborted_checks(log, targets)
+
+
+def aborted_checks(log, targets: dict) -> list:
+    found = []
+    for intent in log.of("intent"):
+        if intent.get("step") != "__check__":
+            continue
+        target = inputs_of(intent).get("target")
+        attempt = intent.get("attempt")
+        if target not in targets or exec_status(log, attempt) in IN_FLIGHT:
+            continue
+        if not any(r.get("check_attempt") == attempt for r in log.results_for(target)):
+            found.append((targets[target], target, attempt, exec_status(log, attempt),
+                          tuple(intent.get("reads") or ())))
+    return found
 
 
 def task_history(log) -> dict:
@@ -1070,7 +1134,8 @@ def task_history(log) -> dict:
              for r in log.results_for(digest) if r.get("result") in ("fail", "inconclusive")]
     draws = [x for name in steps for x in failed_draws_of_step(log, name)]
     arts = {name: len(step_artifacts(log, name)) for name in steps}
-    return {"failures": fails, "failed_draws": draws, "artifacts": arts}
+    checks = aborted_checks(log, {digest: name for name in steps for digest in candidates_raw(log, name)})
+    return {"failures": fails, "failed_draws": draws, "artifacts": arts, "failed_check_draws": checks}
 
 
 def failed_draws_of_step(log, name) -> list:
@@ -1101,7 +1166,8 @@ def report_status(log, did) -> dict:
     """One row of the completion report: deliverable_status plus the histories of the dependency chain."""
     step = contract(log)["deliverables"][did].step
     return {**deliverable_status(log, did), "prior_failures": prior_failures(log, step),
-            "failed_draws": failed_draws(log, step), "confirmation_results": confirmation_results(log, step),
+            "failed_draws": failed_draws(log, step), "failed_check_draws": failed_check_draws(log, step),
+            "confirmation_results": confirmation_results(log, step),
             "task_history": task_history(log)}
 
 
@@ -1289,6 +1355,7 @@ def publish(log: Log, expect_head: int, did: str) -> Fact:
     return log.append("publish", "C", expect_head, deliverable=did, digest=status["artifact"], target=status["target"],
                       achieved=status["achieved"], prior_failures=len(failures), chain_artifacts=draws,
                       failed_draws=len(failed_draws(log, step)),
+                      failed_check_draws=len(failed_check_draws(log, step)),
                       confirmation_results=len(confirmation_results(log, step)),
                       task_failures=len(task_history(log)["failures"]),
                       task_artifacts=sum(task_history(log)["artifacts"].values()), head=expect_head,

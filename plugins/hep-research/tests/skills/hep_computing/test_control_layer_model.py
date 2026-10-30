@@ -1,8 +1,8 @@
 """Reconstruction v12 C1: the control-layer derivation against its reference model (Delivery §5.1 last row; DEC-02).
 
-1. Property tests: the model's 90 scenarios run against the implementation (control_layer_support.derivation),
+1. Property tests: the model's 92 scenarios run against the implementation (control_layer_support.derivation),
    each as a subtest; the model contributes only the scenario code (control_oracle.py rebinds it).
-2. Mutation tests: each of the model's 42 mutations is applied to the implementation's corresponding function and
+2. Mutation tests: each of the model's 44 mutations is applied to the implementation's corresponding function and
    must make at least one scenario fail; the implementation is restored after each.
 3. Differential tests: the model and the implementation are given the same fact sequences -- every log the 90
    scenarios build, and random sequences -- and must give the same derivation: contract states, execution states,
@@ -25,8 +25,8 @@ import control_oracle as oracle  # noqa: E402
 from control_layer_support import derivation as impl  # noqa: E402
 from control_layer_support import task_record  # noqa: E402
 
-EXPECTED_SCENARIOS = 90
-EXPECTED_MUTATIONS = 42
+EXPECTED_SCENARIOS = 92
+EXPECTED_MUTATIONS = 44
 RANDOM_TRIALS = 300
 PER_APPEND_SNAPSHOT_LIMIT = 150
 

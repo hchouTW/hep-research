@@ -72,7 +72,7 @@ FIELD_KINDS = {
                  "attempt": Codec.TEXT, "basis": Codec.TEXT},
     "publish": {"deliverable": Codec.TEXT, "digest": Codec.TEXT, "target": Codec.TEXT, "achieved": Codec.TEXT,
                 "prior_failures": Codec.INTEGER, "chain_artifacts": Codec.INTEGER, "failed_draws": Codec.INTEGER,
-                "confirmation_results": Codec.INTEGER, "task_failures": Codec.INTEGER,
+                "failed_check_draws": Codec.INTEGER, "confirmation_results": Codec.INTEGER, "task_failures": Codec.INTEGER,
                 "task_artifacts": Codec.INTEGER, "head": Codec.INTEGER, "derivation": Codec.TEXT},
 }
 
@@ -401,7 +401,7 @@ class Outcome:
 
 class TaskRecord:
     """One task record file (DEC-01/DEC-08/DEC-09 default location hep-research-artifacts/<task>/task-log/
-    task-log.jsonl; pending approval). Facts are appended only through transact()."""
+    task-log.jsonl; approved 2026-10-30). Facts are appended only through transact()."""
 
     def __init__(self, path: Path):
         self.path = Path(path)

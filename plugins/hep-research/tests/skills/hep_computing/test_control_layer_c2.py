@@ -104,6 +104,21 @@ class Reconciliation(C2Base):
         code, out = self.write("reconcile", "--receipt", receipt, "--work", work)
         self.assertEqual(code, 2, out)
 
+    def test_a_check_attempt_without_a_result_is_a_failed_check_draw(self):
+        self.init_and_contract()
+        self.admit("a1:raw", "--step", "raw", "--cost", "0")
+        proc, work, receipt = self.real_receipt()
+        self.write("receipt", "--receipt", receipt, "--work", work)
+        self.admit("b1:reco", "--step", "reco", "--cost", "0")
+        proc, work, receipt = self.run_step("b1:", "reco", ["{python}", "-c", "open('o.txt','w').write('2')"])
+        reco = self.write("receipt", "--receipt", receipt, "--work", work)[1]["written"][0]["fields"]["outputs"][0]
+        self.assertEqual(self.admit("c1:chk", "--check", self.check_d, "--criterion", self.crit_d, "--target", reco,
+                                    "--cost", "0", "--read", "CR")[0], 0)
+        self.assertEqual(self.write("receipt", "--lost", "--attempt", "c1:chk")[0], 0)
+        code, rep = self.call("report")
+        self.assertEqual(rep["1_deliverables"]["D"]["failed_check_draws"], [["reco", reco, "c1:chk", "unknown", ["CR"]]])
+        self.assertEqual(len(rep["3_scientific_evidence"]["task_history"]["failed_check_draws"]), 1)
+
     def test_lost_is_only_for_an_unsettled_attempt(self):
         self.init_and_contract()
         code, out = self.write("receipt", "--lost", "--attempt", "never")
