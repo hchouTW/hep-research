@@ -19,13 +19,35 @@ non-empty and gets a content hash (SHA-256 over the sorted relative paths and fi
 --check-datasets` is recorded as information only: it checks only that the compiled-in directories exist.
 `check` recomputes the version and the dataset content hashes of an installation and compares them with a record.
 
+`register` (adapter 0.6.0) records an existing installation instead of building one (conda-forge, an LCG view, a
+system package, a site build): it reads the version, prefix, C++ standard, features and dataset list from
+geant4-config and cross-checks them with Geant4Config.cmake and Geant4ConfigVersion.cmake (version, C++ standard,
+dataset names, variables and expected versions); a disagreement refuses the registration. Each dataset folder is
+resolved from --dataset-source: `env` the dataset variable of the current environment, `config` the path
+geant4-config reports, `auto` (default) the variable when it is set, else the geant4-config path, with the source used
+reported per dataset. A dataset found nowhere, a variable that points to a folder that is not the dataset the
+installation expects (name and version; a folder name without the G4 prefix, as conda-forge installs them, is
+accepted and reported), or a folder with no file refuses the registration, unless --skip-dataset leaves the dataset
+out of the record on purpose. Every recorded folder is content-hashed as `build` does. The record has the shape of a
+build record (so every tool of the adapter reads it unchanged) with extension.build.origin `registered`, tag and
+commit null and `unknown` listing what a registration cannot show (source commit, build options, the compiler of the
+build, dataset MD5s); it also records the compiler and CMake found now, the geant4-config and Geant4Config.cmake paths
+and hashes, and a CMake probe (find_package(Geant4) in an empty project, unless --no-cmake-probe): a probe that fails
+is recorded and reported, and the programs are then built with `geant4_run.py build-sim --configure-with
+geant4-config`. `check` on a registered record re-reads the version and prefix, the two configuration hashes and
+the dataset content hashes. Nothing is downloaded and nothing is written into the installation.
+
 Usage (from the plugin root):
   python3 adapters/geant4/assets/geant4_build.py build --spec BUILD_SPEC.json --work DIR --record OUT.json [--jobs N] [--created YYYY-MM-DD]
-  python3 adapters/geant4/assets/geant4_build.py check --record BUILD.json [--work DIR]
+  python3 adapters/geant4/assets/geant4_build.py register (--geant4-config PATH | --prefix DIR) --record OUT.json
+      [--dataset-source auto|env|config] [--skip-dataset NAME ...] [--cxx COMPILER] [--no-cmake-probe] [--created YYYY-MM-DD]
+  python3 adapters/geant4/assets/geant4_build.py check --record BUILD.json
 Every subcommand takes --status LABEL (default unvalidated), echoed as status_label.
-Output JSON: status, status_label, inputs, defaults_used, and the record (build) or the comparison (check).
-Exit codes: 0 ok; 1 the build failed, a commit or MD5 does not match, or check found a difference; 2 bad input
-(also a missing or unreadable spec or record); 3 git, cmake or a compiler missing. Standard library only.
+Output JSON: status, status_label, inputs, defaults_used, and the record (build, register) or the comparison (check).
+Exit codes: 0 ok; 1 the build failed, a commit or MD5 does not match, check found a difference, or a registration
+was refused (the reasons are listed; no record is written); 2 bad input (also a missing or unreadable spec or
+record, or a geant4-config that is not one); 3 git, cmake or a compiler missing (build), or the installation's
+geant4-config missing (check). Standard library only.
 """
 from __future__ import annotations
 
@@ -39,13 +61,14 @@ import shutil
 import subprocess
 import sys
 import tarfile
+import tempfile
 import urllib.request
 from pathlib import Path
 
 sys.dont_write_bytecode = True  # importing core leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from g4common import (CONTRACTS_VERSION, JsonArgumentParser, SpecError, plugin_version, sha256_file,  # noqa: E402
-                      tilde)
+from g4common import (CONTRACTS_VERSION, DATA_VARS, REGISTERED_UNKNOWN, JsonArgumentParser, SpecError,  # noqa: E402
+                      expand, plugin_version, sha256_file, tilde)
 from core.status import add_status_argument, exit_code  # noqa: E402
 
 FORCED = {"GEANT4_INSTALL_DATA": "OFF"}
@@ -260,7 +283,7 @@ def cmd_build(args) -> tuple[str, dict]:
                                                "work": tilde(work)},
             "seeds": {}, "tolerances": {}, "exit_status": 0 if ok else 1,
             "output_hashes": {d["path"]: d["content_sha256"] for d in datasets if d.get("content_sha256")},
-            "build": {"tag": g["tag"], "commit": head, "cmake_options": options,
+            "build": {"origin": "built-from-source", "tag": g["tag"], "commit": head, "cmake_options": options,
                       "cmake_cxx_standard": options["CMAKE_CXX_STANDARD"],
                       "multithreaded": options["GEANT4_BUILD_MULTITHREADED"], "install_prefix": tilde(inst),
                       "geant4_config": info, "datasets": datasets, "log": tilde(log), "step_exit_codes": codes}}}
@@ -274,19 +297,302 @@ def cmd_check(args) -> tuple[str, dict]:
     rec = json.loads(read_input(args.record))
     build = rec["extension"]["build"]
     inst = Path(os.path.expanduser(build["install_prefix"]))
-    config = inst / "bin" / "geant4-config"
+    registered = build.get("origin") == "registered"
+    reg = build.get("registration") or {}
+    config = expand(reg["geant4_config"]) if registered else inst / "bin" / "geant4-config"
     if not config.is_file():
         return "missing-dependency", {"error": f"{tilde(config)} not found"}
     diffs = []
     version = capture([str(config), "--version"])
     if version != build["geant4_config"].get("version"):
         diffs.append(f"version {version} != {build['geant4_config'].get('version')}")
+    if registered:  # the registration's identity: prefix, geant4-config and Geant4Config.cmake unchanged
+        prefix = capture([str(config), "--prefix"])
+        if not same_dir(prefix, build["install_prefix"]):
+            diffs.append(f"geant4-config --prefix {tilde(prefix)} != {build['install_prefix']}")
+        for key, path_key in (("geant4_config_sha256", "geant4_config"), ("cmake_config_sha256", "cmake_config")):
+            path = expand(reg.get(path_key) or "")
+            got = sha256_file(path) if reg.get(path_key) and path.is_file() else None
+            if got != reg.get(key):
+                diffs.append(f"{reg.get(path_key)}: sha256 {got} != {reg.get(key)}")
     for d in build["datasets"]:
         path = Path(os.path.expanduser(d["path"]))
         got = tree_hash(path)[0] if path.is_dir() else None
         if got != d.get("content_sha256"):
             diffs.append(f"dataset {d['name']}: content hash {got} != {d.get('content_sha256')}")
-    return ("ok" if not diffs else "failed"), {"version": version, "differences": diffs}
+    return ("ok" if not diffs else "failed"), {"version": version, "origin": build.get("origin", "built-from-source"),
+                                               "differences": diffs}
+
+
+# --- register: an existing installation (adapter 0.6.0) -----------------------------------------------------------
+
+TARBALL = re.compile(r"(.+?)\.(\d+(?:\.\d+)*)\.(?:tar\.gz|tgz|tar\.bz2|tar\.xz|zip)")
+
+
+def same_dir(a, b) -> bool:
+    try:
+        return Path(os.path.expanduser(str(a))).resolve() == Path(os.path.expanduser(str(b))).resolve()
+    except OSError:
+        return False
+
+
+def config_query(config: Path, *flags: str) -> str:
+    """geant4-config's output for flags; a non-zero exit is bad input (not a working geant4-config)."""
+    p = subprocess.run([str(config), *flags], capture_output=True, text=True, timeout=120)
+    if p.returncode != 0:
+        raise SpecError(f"{tilde(config)} {' '.join(flags)} exited {p.returncode}: {(p.stdout + p.stderr).strip()[:200]}")
+    return p.stdout.strip()
+
+
+def find_cmake_config(prefix: Path) -> Path | None:
+    """The folder of Geant4Config.cmake under an installation prefix (lib/ or lib64/, as GNUInstallDirs chose)."""
+    for sub in ("lib/cmake/Geant4", "lib64/cmake/Geant4"):
+        if (prefix / sub / "Geant4Config.cmake").is_file():
+            return prefix / sub
+    hits = sorted(prefix.glob("lib*/Geant4-*/Geant4Config.cmake"))  # the layout of some older installations
+    return hits[0].parent if hits else None
+
+
+def read_cmake_config(cmake_dir: Path) -> dict:
+    """Version, C++ standard and the dataset descriptions (name -> envvar, path, tarball, md5) that the installation's
+    CMake configuration declares."""
+    text = (cmake_dir / "Geant4Config.cmake").read_text(encoding="utf-8", errors="replace")
+    vfile = cmake_dir / "Geant4ConfigVersion.cmake"
+    vtext = vfile.read_text(encoding="utf-8", errors="replace") if vfile.is_file() else ""
+    version = re.search(r'set\(PACKAGE_VERSION\s+"([^"]+)"\)', vtext)
+    cxx = re.search(r'set\(Geant4_CXX_STANDARD\s+"?(\d+)"?\)', text)
+    datasets = {}
+    m = re.search(r'set\(Geant4_DATASET_DESCRIPTIONS\s+"([^"]*)"\)', text)
+    for item in (m.group(1).split(";") if m else []):
+        parts = item.split("|")
+        if len(parts) >= 5:
+            datasets[parts[0]] = {"envvar": parts[1], "path": parts[2], "tarball": parts[3], "md5": parts[4]}
+    return {"version": version.group(1) if version else None, "cxx_standard": cxx.group(1) if cxx else None,
+            "datasets": datasets}
+
+
+def accepted_folders(name: str, version: str) -> dict[str, str]:
+    """Folder names that hold dataset `name` at `version`: NAMEversion (Geant4's own installation), or without the G4
+    prefix (conda-forge installs G4EMLOW8.8 as EMLOW8.8); folder name -> how it matched."""
+    out = {f"{name}{version}": "exact"}
+    if name.startswith("G4"):
+        out[f"{name[2:]}{version}"] = "without-G4-prefix"
+    return out
+
+
+def folder_problem(path: Path, accepted: dict[str, str]) -> str | None:
+    if not path.is_dir():
+        return f"{tilde(path)} is not a directory"
+    if path.name not in accepted:
+        return f"{tilde(path)}: folder {path.name} is not the expected {' or '.join(sorted(accepted))}"
+    if not any(x.is_file() for x in path.rglob("*")):
+        return f"{tilde(path)} holds no file"
+    return None
+
+
+def resolve_dataset(name: str, envvar: str, config_path: str, version: str, mode: str) -> tuple[dict | None, str | None]:
+    """(entry, None) for the folder of one dataset under --dataset-source mode, or (None, why it is refused)."""
+    accepted = accepted_folders(name, version)
+    env_value = os.environ.get(envvar)
+    cfg = Path(config_path)
+    if mode in ("env", "auto") and env_value:
+        why = folder_problem(Path(env_value), accepted)
+        if why:  # a variable that is set but wrong is never passed over silently
+            return None, f"{name}: {envvar} is set to a folder that is not the dataset: {why}"
+        chosen, source = Path(env_value), "environment"
+    elif mode == "env":
+        return None, f"{name}: {envvar} is not set (--dataset-source env)"
+    else:
+        why = folder_problem(cfg, accepted)
+        if why:
+            where = "" if mode == "config" else f" and {envvar} is not set"
+            near = sorted(n for n in accepted if n != cfg.name and (cfg.parent / n).is_dir())
+            hint = (f" ({', '.join(near)} exists next to it: set {envvar} to it, e.g. by activating the environment "
+                    "that installed it)") if near else ""
+            return None, f"{name}: not found: the geant4-config path {why}{where}{hint}"
+        chosen, source = cfg, "geant4-config"
+    entry = {"name": name, "version": version, "envvar": envvar, "path": tilde(chosen), "resolved_from": source,
+             "folder_name_match": accepted[chosen.name], "path_geant4_config": tilde(cfg),
+             "path_geant4_config_exists": cfg.is_dir(),
+             "environment_value": tilde(env_value) if env_value else None}
+    return entry, None
+
+
+def cmake_probe(cmake_dir: Path, prefix: Path) -> dict:
+    """find_package(Geant4) in an empty CMake project against the installation: whether a CMake build of the
+    adapter's programs can find it and every dependency it declares (headers and CMake files of its external
+    packages included)."""
+    cmake = shutil.which("cmake")
+    if not cmake:
+        return {"ran": False, "reason": "cmake not found on PATH"}
+    with tempfile.TemporaryDirectory(prefix="g4probe-") as tmp:
+        t = Path(tmp)
+        (t / "CMakeLists.txt").write_text("cmake_minimum_required(VERSION 3.16...3.27)\nproject(g4probe CXX)\n"
+                                          "find_package(Geant4 REQUIRED)\n", encoding="utf-8")
+        p = subprocess.run([cmake, "-S", str(t), "-B", str(t / "b"), f"-DGeant4_DIR={cmake_dir}",
+                            f"-DCMAKE_PREFIX_PATH={prefix}"], capture_output=True, text=True, timeout=600)
+    text = (p.stdout + p.stderr).replace(str(Path.home()) + os.sep, "~" + os.sep)
+    errors, block = [], None
+    for ln in text.splitlines():  # each "CMake Error at ...:" paragraph, its wrapped lines joined
+        if ln.startswith("CMake Error"):
+            block = []
+        elif block is not None and (not ln.strip() or ln.startswith("Call Stack")):
+            errors.append(" ".join(block))
+            block = None
+        elif block is not None:
+            block.append(ln.strip())
+    if block:
+        errors.append(" ".join(block))
+    out = {"ran": True, "find_package_ok": p.returncode == 0, "exit": p.returncode}
+    if p.returncode != 0:
+        out["errors"] = errors[:6] or [ln.strip() for ln in text.splitlines() if ln.strip()][-6:]
+        out["advice"] = ("build the adapter's programs with geant4_run.py build-sim --configure-with geant4-config, or "
+                         "install the development files of the packages named above into the installation")
+    return out
+
+
+def tool_version(cmd: str) -> dict:
+    path = shutil.which(cmd)
+    if not path:
+        return {"name": cmd, "version": "not found on PATH", "path": None}
+    return {"name": cmd, "version": capture([path, "--version"]).splitlines()[0], "path": tilde(path)}
+
+
+def cmd_register(args) -> tuple[str, dict]:
+    if args.geant4_config:
+        config = expand(str(args.geant4_config))
+        if not config.is_file() or not os.access(config, os.X_OK):
+            raise SpecError(f"--geant4-config {tilde(config)} is not an executable file")
+    else:
+        config = expand(str(args.prefix)) / "bin" / "geant4-config"
+        if not config.is_file():
+            raise SpecError(f"--prefix {tilde(expand(str(args.prefix)))} has no bin/geant4-config: not a Geant4 installation")
+    config = config.resolve()
+    version = config_query(config, "--version")
+    prefix = Path(config_query(config, "--prefix")).resolve()
+    refused = []
+    if args.prefix and not same_dir(prefix, args.prefix):
+        refused.append(f"geant4-config --prefix is {tilde(prefix)}, not --prefix {tilde(expand(str(args.prefix)))}")
+    cxxstd = config_query(config, "--cxxstd")
+    features = dict(re.findall(r"^\s*(\w[\w-]*)\[(yes|no)\]", config_query(config, "--features"), re.M))
+    tls = subprocess.run([str(config), "--tls-model"], capture_output=True, text=True, timeout=120)
+    listed = [ln.split(None, 2) for ln in config_query(config, "--datasets").splitlines() if ln.strip()]
+    if any(len(x) != 3 for x in listed):
+        raise SpecError("geant4-config --datasets: a line is not 'NAME VARIABLE PATH'")
+    check_ds = capture([str(config), "--check-datasets"])
+    cmake_dir = find_cmake_config(prefix)
+    cm = {"version": None, "cxx_standard": None, "datasets": {}}
+    if cmake_dir is None:
+        refused.append(f"no Geant4Config.cmake under {tilde(prefix)} (lib/cmake/Geant4, lib64/cmake/Geant4): the "
+                       "installation's CMake configuration is needed to cross-check the version and the datasets")
+    else:
+        cm = read_cmake_config(cmake_dir)
+        if cm["version"] != version:
+            refused.append(f"Geant4ConfigVersion.cmake says {cm['version']}, geant4-config --version {version}")
+        if cm["cxx_standard"] and cm["cxx_standard"] != cxxstd:
+            refused.append(f"Geant4Config.cmake C++ standard {cm['cxx_standard']} != geant4-config --cxxstd {cxxstd}")
+    unknown_skip = sorted(set(args.skip_dataset or []) - {x[0] for x in listed})
+    if unknown_skip:
+        raise SpecError(f"--skip-dataset {unknown_skip}: not a dataset of this installation "
+                        f"({', '.join(x[0] for x in listed)})")
+    datasets, skipped = [], []
+    for name, envvar, path in listed:
+        if name in (args.skip_dataset or []):
+            skipped.append({"name": name, "envvar": envvar, "reason": "--skip-dataset: left out by the user"})
+            continue
+        desc = cm["datasets"].get(name)
+        if cm["datasets"] and desc is None:
+            refused.append(f"{name}: listed by geant4-config but not by Geant4Config.cmake")
+            continue
+        if desc and desc["envvar"] != envvar:
+            refused.append(f"{name}: geant4-config names {envvar}, Geant4Config.cmake {desc['envvar']}")
+            continue
+        m = TARBALL.fullmatch(desc["tarball"]) if desc else None
+        base = Path(path).name
+        dv = m.group(2) if m else (base[len(name):] if base.startswith(name) and base[len(name):] else None)
+        if not dv:
+            refused.append(f"{name}: the expected version cannot be read (tarball {desc and desc['tarball']}, "
+                           f"folder {base})")
+            continue
+        if desc and not same_dir(desc["path"], path):
+            refused.append(f"{name}: geant4-config path {tilde(path)} != Geant4Config.cmake {tilde(desc['path'])}")
+            continue
+        entry, why = resolve_dataset(name, envvar, path, dv, args.dataset_source)
+        if why:
+            refused.append(why)
+            continue
+        entry.update(md5_expected=desc["md5"] if desc else None, md5=None, md5_verified=None,
+                     source="registered installation")
+        datasets.append(entry)
+    if refused:
+        return "refused", {"refused": refused, "note": "no record written; fix the installation or the environment, "
+                                                       "or leave a dataset out on purpose with --skip-dataset"}
+    for d in datasets:
+        d["content_sha256"], d["n_files"] = tree_hash(expand(d["path"]))
+    listed_vars = {x[1] for x in listed}
+    extra = sorted(v for v in DATA_VARS if v in os.environ and v not in listed_vars)
+    probe = cmake_probe(cmake_dir, prefix) if not args.no_cmake_probe else {"ran": False,
+                                                                            "reason": "--no-cmake-probe"}
+    cxx = tool_version(args.cxx)
+    cmake = tool_version("cmake")
+    created = args.created or datetime.date.today().isoformat()
+    cfg_sha = sha256_file(config)
+    cmake_cfg = cmake_dir / "Geant4Config.cmake"
+    ident = hashlib.sha256(f"{tilde(prefix)}\0{version}\0{cfg_sha}".encode()).hexdigest()[:8]
+    info = {"version": version, "prefix": tilde(prefix), "cxxstd": cxxstd,
+            "tls_model": tls.stdout.strip() if tls.returncode == 0 else None,
+            "features": features, "has_multithreading": features.get("multithreading"),
+            "check_datasets": check_ds,
+            "check_datasets_note": "information only: checks that the compiled-in directories exist (a conda-forge "
+                                   "installation reports NOTFOUND for folders it installs without the G4 prefix)"}
+    record = {
+        "contract_version": CONTRACTS_VERSION, "artifact_id": f"geant4-registered-{version}-{ident}",
+        "artifact_type": "computational-run",
+        "objective": f"Register the existing Geant4 {version} installation at {tilde(prefix)} for adapters/geant4 "
+                     "(origin registered: not built by the adapter; source commit, build options and dataset MD5s "
+                     "unknown)",
+        "bindings": {"experiments": [], "theory": []},
+        "versions": {"plugin": plugin_version(), "contracts": CONTRACTS_VERSION, "profiles": {}},
+        "provenance": {"producer_skill": "hep-detector", "created": created, "evidence_ids": []},
+        "inputs": [], "outputs": [], "unresolved_inputs": [], "status": ["unvalidated"],
+        "extension": {
+            "input_manifest": [{"path": tilde(config), "sha256": cfg_sha},
+                               {"path": tilde(cmake_cfg), "sha256": sha256_file(cmake_cfg)}],
+            "tools": [{"name": "Geant4", "version": f"{version} (registered installation, source commit unknown)",
+                       "source": tilde(prefix)}, cmake, cxx],
+            "commands": [f"{tilde(config)} {f}" for f in ("--version", "--prefix", "--cxxstd", "--tls-model",
+                                                          "--features", "--datasets", "--check-datasets")],
+            "environment": {"platform": platform.platform(), "machine": platform.machine(),
+                            "python": platform.python_version(), "hosts_contacted": [],
+                            "dataset_variables_set": {v: tilde(os.environ[v]) for v in DATA_VARS if v in os.environ}},
+            "seeds": {}, "tolerances": {}, "exit_status": 0,
+            "output_hashes": {d["path"]: d["content_sha256"] for d in datasets},
+            "build": {"origin": "registered", "tag": None, "commit": None, "unknown": list(REGISTERED_UNKNOWN),
+                      "cmake_options": {}, "cmake_cxx_standard": cxxstd,
+                      "multithreaded": {"yes": "ON", "no": "OFF"}.get(features.get("multithreading")),
+                      "install_prefix": tilde(prefix), "geant4_config": info, "datasets": datasets,
+                      "datasets_skipped": skipped, "log": None, "step_exit_codes": [],
+                      "registration": {"geant4_config": tilde(config), "geant4_config_sha256": cfg_sha,
+                                       "cmake_config_dir": tilde(cmake_dir), "cmake_config": tilde(cmake_cfg),
+                                       "cmake_config_sha256": sha256_file(cmake_cfg),
+                                       "cmake_config_version": cm["version"],
+                                       "dataset_source": args.dataset_source,
+                                       "environment_variables_not_listed": extra,
+                                       "cmake_probe": probe, "compiler_now": cxx, "cmake_now": cmake}}}}
+    args.record.parent.mkdir(parents=True, exist_ok=True)
+    args.record.write_text(json.dumps(record, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+    warnings = []
+    if probe.get("ran") and not probe.get("find_package_ok"):
+        warnings.append("find_package(Geant4) fails for this installation: " + "; ".join(probe.get("errors", []))[:400]
+                        + "; build the programs with geant4_run.py build-sim --configure-with geant4-config")
+    if extra:
+        warnings.append(f"{', '.join(extra)} set in the environment but not a dataset of this installation: runs "
+                        "unset them")
+    return "ok", {"record": str(args.record), "version": version, "prefix": tilde(prefix),
+                  "datasets": [{k: d[k] for k in ("name", "version", "envvar", "path", "resolved_from",
+                                                  "folder_name_match", "n_files")} for d in datasets],
+                  "datasets_skipped": skipped, "cmake_probe": probe, "warnings": warnings,
+                  "unknown": list(REGISTERED_UNKNOWN)}
 
 
 def main(argv=None) -> int:
@@ -298,18 +604,33 @@ def main(argv=None) -> int:
     p.add_argument("--record", type=Path, required=True, help="where to write the computational-run record")
     p.add_argument("--jobs", type=int, default=os.cpu_count() or 1)
     p.add_argument("--created", help="the created date written into the record (default: today)")
-    p = sub.add_parser("check", help="compare an installation with its build record")
+    p = sub.add_parser("register", help="record an existing installation (no build): version, prefix, datasets")
+    g = p.add_mutually_exclusive_group(required=True)
+    g.add_argument("--geant4-config", type=Path, help="the installation's geant4-config")
+    g.add_argument("--prefix", type=Path, help="the installation prefix (holds bin/geant4-config)")
+    p.add_argument("--record", type=Path, required=True, help="where to write the computational-run record")
+    p.add_argument("--dataset-source", choices=("auto", "env", "config"), default="auto",
+                   help="where each dataset folder is taken from (default auto: the variable if set, else geant4-config)")
+    p.add_argument("--skip-dataset", action="append", metavar="NAME",
+                   help="leave this dataset out of the record on purpose (repeatable)")
+    p.add_argument("--cxx", default="c++", help="the C++ compiler the programs will be built with (recorded)")
+    p.add_argument("--no-cmake-probe", action="store_true", help="skip the find_package(Geant4) probe")
+    p.add_argument("--created", help="the created date written into the record (default: today)")
+    p = sub.add_parser("check", help="compare an installation with its build or registration record")
     p.add_argument("--record", type=Path, required=True)
     for sp in sub.choices.values():
         add_status_argument(sp)
     args = ap.parse_args(argv)
     inputs = {k: tilde(v) if isinstance(v, Path) else v for k, v in vars(args).items() if k != "status"}
     given = {t.split("=")[0] for t in (sys.argv[1:] if argv is None else argv) if t.startswith("--")}
-    defaults = [k for k in ("jobs", "created", "status") if f"--{k}" not in given and hasattr(args, k)]
+    defaults = [k for k in ("jobs", "created", "dataset_source", "cxx", "status")
+                if f"--{k.replace('_', '-')}" not in given and hasattr(args, k)]
     try:
-        status, doc = {"build": cmd_build, "check": cmd_check}[args.command](args)
+        status, doc = {"build": cmd_build, "register": cmd_register, "check": cmd_check}[args.command](args)
     except (SpecError, KeyError, json.JSONDecodeError) as exc:
         status, doc = "rejected", {"error": str(exc)}
+    except subprocess.TimeoutExpired as exc:
+        status, doc = "failed", {"error": f"timed out: {exc}"}
     except OSError as exc:
         status, doc = "failed", {"error": str(exc)}
     print(json.dumps({"status": status, "status_label": args.status, "inputs": inputs, "defaults_used": defaults,
