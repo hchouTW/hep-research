@@ -48,18 +48,18 @@ class FakeInstall:
 
     def __init__(self, root: Path, layout="geant4", cmake=True, cmake_version="11.4.3", reported_prefix=None):
         self.prefix = root / "prefix"
-        self.data = self.prefix / "share" / "Geant4" / "data"
-        self.data.mkdir(parents=True)
+        self.data_dir = self.prefix / "share" / "Geant4" / "data"
+        self.data_dir.mkdir(parents=True)
         self.folders = {}
         for name, _var, ver, _tar in DATASETS:
             folder = f"{name}{ver}" if layout == "geant4" or not name.startswith("G4") else f"{name[2:]}{ver}"
-            d = self.data / folder
+            d = self.data_dir / folder
             d.mkdir()
             (d / "table.dat").write_text(f"{name} {ver}\n")
             self.folders[name] = d
         bindir = self.prefix / "bin"
         bindir.mkdir()
-        lines = "\n".join(f"{n} {v} {self.data / (n + ver)}" for n, v, ver, _t in DATASETS)
+        lines = "\n".join(f"{n} {v} {self.data_dir / (n + ver)}" for n, v, ver, _t in DATASETS)
         self.config = bindir / "geant4-config"
         self.config.write_text(f"""#!/bin/sh
 case "$1" in
@@ -80,13 +80,13 @@ esac
         if cmake:
             cdir = self.prefix / "lib" / "cmake" / "Geant4"
             cdir.mkdir(parents=True)
-            desc = ";".join(f"{n}|{v}|{self.data / (n + ver)}|{t}.{ver}.tar.gz|{'0' * 32}" for n, v, ver, t in DATASETS)
+            desc = ";".join(f"{n}|{v}|{self.data_dir / (n + ver)}|{t}.{ver}.tar.gz|{'0' * 32}" for n, v, ver, t in DATASETS)
             (cdir / "Geant4Config.cmake").write_text(
                 f'set(Geant4_CXX_STANDARD "17")\nset(Geant4_DATASET_DESCRIPTIONS "{desc}")\n')
             (cdir / "Geant4ConfigVersion.cmake").write_text(f'set(PACKAGE_VERSION "{cmake_version}")\n')
 
 
-class _Tmp(unittest.TestCase):
+class _TempDirCase(unittest.TestCase):
     def setUp(self):
         self._t = tempfile.TemporaryDirectory()
         self.d = Path(self._t.name)
@@ -100,7 +100,7 @@ class _Tmp(unittest.TestCase):
         return code, out, self.d / record
 
 
-class Register(_Tmp):
+class Register(_TempDirCase):
     def test_dataset_variables_of_a_conda_layout_are_used_and_reported(self):
         inst = FakeInstall(self.d, layout="conda")
         env = clean_env(G4LEDATA=inst.folders["G4EMLOW"], G4LEVELGAMMADATA=inst.folders["PhotonEvaporation"])
@@ -237,7 +237,7 @@ class Register(_Tmp):
         self.assertTrue(any("--configure-with geant4-config" in w for w in out["warnings"]))
 
 
-class CheckAndDownstream(_Tmp):
+class CheckAndDownstream(_TempDirCase):
     def setUp(self):
         super().setUp()
         self.inst = FakeInstall(self.d)
@@ -358,10 +358,10 @@ class GeantConfigBuild(unittest.TestCase):
     """--configure-with geant4-config: the CMake helper and its use (static: no compiler or Geant4 here)."""
 
     def test_both_programs_and_the_examples_can_take_geant4_config_explicitly(self):
-        helper = (ASSETS / "g4sim" / "Geant4FromConfig.cmake").read_text(encoding="utf-8")
+        cmake_text = (ASSETS / "g4sim" / "Geant4FromConfig.cmake").read_text(encoding="utf-8")
         for needle in ("--cflags-without-gui", "--libs-without-gui", "LINKER:-rpath,", "set(Geant4_LIBRARIES g4sim_geant4)",
                        "G4SIM_GEANT4_MIN_VERSION"):
-            self.assertIn(needle, helper)
+            self.assertIn(needle, cmake_text)
         for prog in ("layered_sim", "element_sim"):
             text = (ASSETS / prog / "CMakeLists.txt").read_text(encoding="utf-8")
             with self.subTest(program=prog):

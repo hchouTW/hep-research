@@ -40,7 +40,7 @@ the dataset content hashes. Nothing is downloaded and nothing is written into th
 Usage (from the plugin root):
   python3 adapters/geant4/assets/geant4_build.py build --spec BUILD_SPEC.json --work DIR --record OUT.json [--jobs N] [--created YYYY-MM-DD]
   python3 adapters/geant4/assets/geant4_build.py register (--geant4-config PATH | --prefix DIR) --record OUT.json
-      [--dataset-source auto|env|config] [--skip-dataset NAME ...] [--cxx COMPILER] [--no-cmake-probe] [--created YYYY-MM-DD]
+      [--dataset-source auto|env|config] [--skip-dataset NAME ...] [--compiler CXX] [--no-cmake-probe] [--created YYYY-MM-DD]
   python3 adapters/geant4/assets/geant4_build.py check --record BUILD.json
 Every subcommand takes --status LABEL (default unvalidated), echoed as status_label.
 Output JSON: status, status_label, inputs, defaults_used, and the record (build, register) or the comparison (check).
@@ -425,8 +425,8 @@ def cmake_probe(cmake_dir: Path, prefix: Path) -> dict:
     cmake = shutil.which("cmake")
     if not cmake:
         return {"ran": False, "reason": "cmake not found on PATH"}
-    with tempfile.TemporaryDirectory(prefix="g4probe-") as tmp:
-        t = Path(tmp)
+    with tempfile.TemporaryDirectory(prefix="g4probe-") as probe_dir:
+        t = Path(probe_dir)
         (t / "CMakeLists.txt").write_text("cmake_minimum_required(VERSION 3.16...3.27)\nproject(g4probe CXX)\n"
                                           "find_package(Geant4 REQUIRED)\n", encoding="utf-8")
         p = subprocess.run([cmake, "-S", str(t), "-B", str(t / "b"), f"-DGeant4_DIR={cmake_dir}",
@@ -533,7 +533,7 @@ def cmd_register(args) -> tuple[str, dict]:
     extra = sorted(v for v in DATA_VARS if v in os.environ and v not in listed_vars)
     probe = cmake_probe(cmake_dir, prefix) if not args.no_cmake_probe else {"ran": False,
                                                                             "reason": "--no-cmake-probe"}
-    cxx = tool_version(args.cxx)
+    cxx = tool_version(args.compiler)
     cmake = tool_version("cmake")
     created = args.created or datetime.date.today().isoformat()
     cfg_sha = sha256_file(config)
@@ -613,7 +613,7 @@ def main(argv=None) -> int:
                    help="where each dataset folder is taken from (default auto: the variable if set, else geant4-config)")
     p.add_argument("--skip-dataset", action="append", metavar="NAME",
                    help="leave this dataset out of the record on purpose (repeatable)")
-    p.add_argument("--cxx", default="c++", help="the C++ compiler the programs will be built with (recorded)")
+    p.add_argument("--compiler", default="c++", help="the C++ compiler the programs will be built with (recorded)")
     p.add_argument("--no-cmake-probe", action="store_true", help="skip the find_package(Geant4) probe")
     p.add_argument("--created", help="the created date written into the record (default: today)")
     p = sub.add_parser("check", help="compare an installation with its build or registration record")
@@ -623,7 +623,7 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
     inputs = {k: tilde(v) if isinstance(v, Path) else v for k, v in vars(args).items() if k != "status"}
     given = {t.split("=")[0] for t in (sys.argv[1:] if argv is None else argv) if t.startswith("--")}
-    defaults = [k for k in ("jobs", "created", "dataset_source", "cxx", "status")
+    defaults = [k for k in ("jobs", "created", "dataset_source", "compiler", "status")
                 if f"--{k.replace('_', '-')}" not in given and hasattr(args, k)]
     try:
         status, doc = {"build": cmd_build, "register": cmd_register, "check": cmd_check}[args.command](args)
