@@ -633,6 +633,33 @@ def _rel(path: Path, root: Path) -> str:
         raise StudyError(f"{path} is outside the project root {root}") from exc
 
 
+def realization_entry(realization: dict, esp: Path, root: Path) -> dict | None:
+    """Input-manifest entry for the realization profile an element_sim spec's provenance names, or None.
+
+    The recorded path is used when it exists on this machine. A recorded path from another machine (a live campaign
+    replayed elsewhere) is replaced by a file of the same name next to the spec or in a folder above it inside root,
+    accepted only when its sha256 equals the recorded one; the entry then keeps the recorded path, so the record is
+    the same on every machine."""
+    rp = realization.get("path")
+    if not isinstance(rp, str):
+        return None
+    rpath = Path(rp.replace("<plugin root>", str(PLUGIN))).expanduser()
+    if not rpath.is_absolute():
+        rpath = esp.parent / rpath
+    if rpath.is_file():
+        return {"path": _rel(rpath, root) if _inside(rpath, root) else rp, "sha256": sha256_file(rpath)}
+    recorded = realization.get("sha256")
+    if not isinstance(recorded, str):
+        return None
+    for folder in (esp.parent, *esp.parent.parents):
+        if not _inside(folder, root):
+            break
+        copy = folder / rpath.name
+        if copy.is_file() and sha256_file(copy) == recorded:
+            return {"path": rp, "sha256": recorded}
+    return None
+
+
 def evidence_overlap(conv: dict, bench: dict, var: dict | None) -> list[dict]:
     """A1.11 (D7): the runs that serve more than one decision of the study (convergence gate, statistical target,
     each benchmark and its controls, the variation table), so that they are not read as independent evidence."""
@@ -850,14 +877,9 @@ def cmd_label(args) -> tuple[str, dict]:
             esp = spec_path.parent / es
             manifest.append({"path": _rel(esp, root), "sha256": sha256_file(esp)})
             prov = load_json(esp).get("provenance") or {}
-            rp = (prov.get("realization") or {}).get("path")
-            if isinstance(rp, str):
-                rpath = Path(rp.replace("<plugin root>", str(PLUGIN))).expanduser()
-                if not rpath.is_absolute():
-                    rpath = esp.parent / rpath
-                if rpath.is_file():
-                    entry = {"path": _rel(rpath, root) if _inside(rpath, root) else rp, "sha256": sha256_file(rpath)}
-                    manifest.append(entry)
+            entry = realization_entry(prov.get("realization") or {}, esp, root)
+            if entry:
+                manifest.append(entry)
         record = {
             "contract_version": CONTRACTS_VERSION, "artifact_id": study.get("study_id", "geant4-study") + "-study",
             "artifact_type": "computational-run",

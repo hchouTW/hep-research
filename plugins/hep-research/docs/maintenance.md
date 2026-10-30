@@ -306,7 +306,7 @@ from the plugin root (each takes `--help`; the seeds are in each `output/report.
 | `examples/collider-angular/` | J3 |
 | `examples/qed-prediction/` | J4 |
 | `examples/theory-comparison/` (run after B and C) | J5 |
-| `examples/published-comparison/` | J6 |
+| `examples/published-comparison/` (run after `qed-prediction`: it copies that output's plugin version) | J6 |
 | `examples/recasting/` | J7 |
 | `examples/local-partition/` | - |
 | `examples/batch-partition/` (fake Slurm and HTCondor schedulers) | - |
@@ -324,6 +324,23 @@ from the plugin root (each takes `--help`; the seeds are in each `output/report.
 `tests/examples/` compares a fresh run with the
 committed output. When a change alters a committed number, explain why in the commit, regenerate the output, and
 record the old and new values; a change beyond the declared tolerance is a breaking change.
+
+**Regenerating outputs for a release.** A version bump changes the `"plugin"` version in the committed outputs, so
+each release reruns the six `profiles/theory/*/scripts/make_artifacts.py` and the examples whose outputs carry the
+version, in the order of the table above (`qed-prediction` before `published-comparison`).
+- Run them in the environment that produced the committed outputs (E2, `~/.venvs/hep-research-e2`). Other machines
+  differ at rounding level even with the CI lock's package versions (macOS arm64 against Linux x86_64), and run
+  records name the platform and NumPy version.
+- Accept the diff only if every changed line is a version string or a hash that covers one, and no PNG changed.
+- The same applies between releases to a script whose code hash is recorded in committed outputs (for example
+  `check_geant4_study.py` in the `geant4-thin-silicon`, `design-minimal-spectrometer` and `design-search-j16` study
+  records): regenerate those examples in E2 with the change.
+- Run `tools/check_relocation.py` with `TMPDIR` on a local disk with no `.git` or `hep-research.project.json` above
+  it: on a network home, temporary-folder cleanup and the sticky-directory test fail, and the name extractors refuse a
+  folder inside a project.
+- Each release manifest adds about 0.9 MB, so keep the README's "(about N files, X MB uncompressed)" statement within
+  `tools/check_packaging.py`'s 10 % of the measured size. Generate `release-manifests/X.Y.Z.json` last, after the
+  VALIDATION release check and any README change, and verify it on a `git archive` export.
 
 ## Evidence ledgers
 
