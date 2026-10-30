@@ -755,8 +755,9 @@ def cmd_build_sim(args) -> tuple[str, dict]:
                 return "missing-dependency", {"error": f"no Geant4 CMake configuration at {tilde(g4dir)} (with "
                                                        "--configure-with geant4-config it is not needed)"}
             # the prefix lets find_package(Geant4) find the dependencies the installation itself provides (CLHEP,
-            # expat, Qt, ...): a conda or LCG prefix holds them next to Geant4
-            g4opt = [f"-DGeant4_DIR={g4dir}", f"-DCMAKE_PREFIX_PATH={install_prefix(build)}"]
+            # expat, Qt, ...): a conda or LCG prefix holds them next to Geant4; -U drops a G4SIM_GEANT4_CONFIG cached
+            # by an earlier --configure-with geant4-config build in this folder, which would still take precedence
+            g4opt = ["-UG4SIM_GEANT4_CONFIG", f"-DGeant4_DIR={g4dir}", f"-DCMAKE_PREFIX_PATH={install_prefix(build)}"]
     bld = expand(str(args.work)) / f"{program}-build"
     log = bld / "build.log"
     bld.mkdir(parents=True, exist_ok=True)

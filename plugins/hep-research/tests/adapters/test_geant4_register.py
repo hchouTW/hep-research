@@ -12,6 +12,8 @@ folder and check it (the dataset variables of the current environment are used a
 it those tests skip, which is unverified, not passing."""
 import json
 import os
+import re
+import shutil
 import stat
 import subprocess
 import sys
@@ -443,6 +445,26 @@ class ReviewFixes(_TempDirCase):
         code, out = run(BUILD, "check", "--record", rec_path, env=clean_env())
         self.assertEqual((code, out["status"]), (2, "rejected"), out)
         self.assertIn("exited 3", out["error"])
+
+    def _needs_cmake(self):
+        if not shutil.which("cmake") or not (shutil.which("c++") or shutil.which("g++")):
+            self.skipTest("cmake or a C++ compiler not found on PATH")
+
+    def test_build_sim_cmake_after_geant4_config_does_not_keep_the_helper(self):
+        self._needs_cmake()
+        inst = FakeInstall(self.d)
+        code, out, rec_path = self.register(inst)
+        self.assertEqual(code, 0, out)
+        bld = self.d / "w" / "layered_sim-build"
+        for mode in ("geant4-config", "cmake"):  # the fake has no Geant4 headers: configure passes, compile fails
+            code, out = run(ASSETS / "geant4_run.py", "build-sim", "--build-record", rec_path, "--work", self.d / "w",
+                            "--configure-with", mode, "--jobs", "1", env=clean_env())
+            self.assertEqual((out["configure_with"], out["exit_codes"][0]), (mode, 0), out)
+            log = (bld / "build.log").read_text(encoding="utf-8")
+            with self.subTest(mode=mode):
+                self.assertEqual(f"from {inst.config.resolve()}" in log, mode == "geant4-config", log[-2000:])
+        cache = (bld / "CMakeCache.txt").read_text(encoding="utf-8")
+        self.assertFalse(re.search(r"^G4SIM_GEANT4_CONFIG:\w+=.+$", cache, re.M))
 
 
 def expand_path(text: str) -> Path:
