@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 43,
-   "bytes": 634477,
+   "bytes": 635926,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1804,8 +1804,8 @@
   {
    "path": "skills/hep-detector/references/calorimetry-ecal-hcal.md",
    "owner": "hep-detector",
-   "bytes": 15947,
-   "lines": 249,
+   "bytes": 16023,
+   "lines": 250,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
@@ -1822,7 +1822,7 @@
     "skills/hep-detector/scripts/calorimeter_resolution.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "267d534a 2026-10-30"
+   "last_commit": "9ff83cdf 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/charge-confusion.md",
@@ -1991,7 +1991,7 @@
   {
    "path": "skills/hep-detector/references/detector-measurement-framework.md",
    "owner": "hep-detector",
-   "bytes": 15262,
+   "bytes": 15366,
    "lines": 236,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -2014,7 +2014,7 @@
     "hep-citations",
     "hep-measurement"
    ],
-   "last_commit": "267d534a 2026-10-30"
+   "last_commit": "9ff83cdf 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/detector-principles-bibliography.md",
@@ -2252,8 +2252,8 @@
   {
    "path": "skills/hep-detector/references/ground-based-detection-arrays.md",
    "owner": "hep-detector",
-   "bytes": 15577,
-   "lines": 227,
+   "bytes": 16004,
+   "lines": 232,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
@@ -2265,7 +2265,7 @@
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "267d534a 2026-10-30"
+   "last_commit": "9ff83cdf 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/imaging-atmospheric-cherenkov.md",
@@ -2351,8 +2351,8 @@
   {
    "path": "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
    "owner": "hep-detector",
-   "bytes": 16833,
-   "lines": 249,
+   "bytes": 16931,
+   "lines": 250,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/detector-case-studies-and-checklists.md",
@@ -2365,7 +2365,7 @@
     "skills/hep-detector/references/signal-formation-and-readout.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "267d534a 2026-10-30"
+   "last_commit": "9ff83cdf 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
@@ -2447,8 +2447,8 @@
   {
    "path": "skills/hep-detector/references/photon-likelihood-reconstruction.md",
    "owner": "hep-detector",
-   "bytes": 17018,
-   "lines": 258,
+   "bytes": 17639,
+   "lines": 265,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
@@ -2460,7 +2460,7 @@
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "267d534a 2026-10-30"
+   "last_commit": "9ff83cdf 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/physics-objects-jets-btagging-met.md",
@@ -2640,8 +2640,8 @@
   {
    "path": "skills/hep-detector/references/tracking-and-vertexing.md",
    "owner": "hep-detector",
-   "bytes": 23471,
-   "lines": 348,
+   "bytes": 23594,
+   "lines": 350,
    "linked_from_skill_md": true,
    "cited_by": [
     "contracts/rules/design_adequacy.json",
@@ -2669,7 +2669,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "267d534a 2026-10-30"
+   "last_commit": "9ff83cdf 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/triggers-luminosity-pileup.md",

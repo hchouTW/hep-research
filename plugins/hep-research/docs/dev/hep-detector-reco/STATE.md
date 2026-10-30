@@ -44,4 +44,6 @@ next_action: "T7: repeat T5 gate and T6 into after-t7, then re-review"
 2026-10-30 | T5 | wiring confirmed; inventory regenerated; wiring, routing static, inventory gates pass; routing part unchanged 4081 B | this commit
 2026-10-30 | T6 | static 29/0/2; pytest 2888 passed 25 failed 1 error 83 skipped; no one-sided failure | none
 2026-10-30 | T7 | independent review at 2d8e931c: 0 critical, 2 major, 9 minor, 1 optional; 9 fixed (both majors), 2 minor not fixed by convention, optional left for follow-up (review-dispositions.md) | this commit
+2026-10-30 | T7 | repeating the T5 gate after 9ff83cdf: inventory --check reported the committed inventory stale (fixed references changed size) and run_all_checks failed only reference_inventory; T5's own procedure regenerates the inventory (tool output, never hand-edited), so it was regenerated as the T5 step, not as a content fix; stale-run outputs kept in work root after-t7/stale-inventory-attempt; pytest started on the stale tree was stopped | this commit
+2026-10-30 | T7 | T5 gate after regeneration: wiring exit 0 no new gap, routing static exit 0, inventory --check pass (same 6 warnings, 0 overlap pairs), routing part 4081 B | this commit
 ```
