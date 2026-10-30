@@ -98,7 +98,7 @@ and position, in a follow-up); nothing already covered was restated.
   BUDGET-01 accounts; **the control rules did not pass the S0 spec review**, so the helper is not reviewed or
   validated): new `skills/hep-computing/scripts/control_layer.py` (library in `control_layer_support/`) keeps the task
   record as one append-only JSON-lines file with a digest chain, compare-and-set appends, whole-batch validation,
-  operation-id idempotency and full verification on every load (DEC-01/08/09/13 defaults, pending); validates the
+  operation-id idempotency and full verification on every load (DEC-01/08/09/13, approved 2026-10-30); validates the
   closed contract format and applies the strictness order and effective contract (M2/M3 first contract waits for a
   human); admits attempts (identity, consumed inputs and accounts computed by the helper; capabilities compared with
   the mode, so M2/M3 are refused for lack of G5); turns `run_workflow.py` receipts and bound check results into

@@ -9,7 +9,7 @@ review (obligation N1 violated in all seven rounds; round 7 left two open defect
 derivation is a mechanical consequence of unreviewed rules, not a reviewed or validated result, and the helper gives
 no autonomous reconstruction capability. Every report carries that limitation.
 
-Task record (DEC-01/08/09 default, pending): one append-only JSON-lines file, by default
+Task record (DEC-01/08/09, approved 2026-10-30): one append-only JSON-lines file, by default
 <project>/hep-research-artifacts/<task>/task-log/task-log.jsonl, separate from every run's work folder. Each line
 carries seq, batch, kind, writer, fields, the SHA-256 of the previous line, the operation id and the request digest;
 every load verifies the chain and replays the facts. Agents never edit the file: every fact goes through a command

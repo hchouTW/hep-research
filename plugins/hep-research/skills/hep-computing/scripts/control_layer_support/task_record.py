@@ -1,6 +1,6 @@
 """The persistent task record of the control layer: one append-only JSON-lines file with a digest chain and
-compare-and-set appends, and the JSON codec of facts and contracts (reconstruction v12 C1; DEC-01, DEC-08, DEC-09
-defaults, pending maintainer approval: `hep-research-artifacts/<task>/task-log/task-log.jsonl`, the path given on the
+compare-and-set appends, and the JSON codec of facts and contracts (reconstruction v12 C1; DEC-01, DEC-08, DEC-09,
+approved by the maintainer on 2026-10-30: `hep-research-artifacts/<task>/task-log/task-log.jsonl`, the path given on the
 command line; DEC-13: ideas reused from the hep-review store -- operation-id idempotency, head continuity -- but no
 shared store). Standard library only.
 

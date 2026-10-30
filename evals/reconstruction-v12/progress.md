@@ -676,3 +676,26 @@ control layer).
 4. Delivery §1.2's G5 test names “restart recovery; stale lock takeover” without saying what counts as recovered; the
    qualification's criteria (exactly-once acknowledged facts, operation replay, identical derivation, unknown
    preserved, torn-line recovery, takeover only after expiry and reconciliation) are this implementation's reading.
+
+## Maintainer decisions (2026-10-30)
+
+Given by the maintainer in the conversation after the final report (transcribed here by the coordinator):
+
+- **Approved at their defaults:** DEC-01 (fact log as an append-only file in a persistent task-record directory),
+  DEC-03 (freeze records as append-only JSON lines with a digest chain), DEC-04 (POSIX process-group termination,
+  tested on Linux only; macOS untested), DEC-07 (local executor only), DEC-08/DEC-09
+  (`hep-research-artifacts/<task>/task-log/task-log.jsonl`), DEC-10 (declared inputs only), DEC-11 (the shared
+  workflow page in hep-computing), DEC-12 (M1: the first contract takes effect when listed in the first reply; M2/M3:
+  human approval), DEC-13 (no shared store with hep-review), DEC-14 (no delegation of human decisions).
+- **DEC-06 re-confirmed as reopened by S0:** an iteration round may hold several steps (partitioned, chained rounds,
+  as in the spec copy), replacing "one step per round".
+- **Not decided:** DEC-02 (library + CLI helper) stays pending, tied to the decision on the control layer (stage C1).
+- **Approved:** the transition-period rule that a step the runner refused before starting any process counts as
+  failed with termination confirmed (Control §7.2 (c)).
+- **Locations:** `docs/dev/` stays at the repository root (outside the plugin package), with the hep-review exports
+  committed as the durable record. Future hep-review stores go on local disk, not NFS or Ceph (both refused): this
+  host's only writable local disk is the root disk, where `/var/tmp` entries unused for 30 days are removed
+  (`systemd-tmpfiles`), so the store lives at `/var/tmp/hsinyichou-hep-review` and every context is exported to the
+  repository after each round. The S0 store was copied there; the round-7 export from the copy verifies against its
+  checkpoint.
+

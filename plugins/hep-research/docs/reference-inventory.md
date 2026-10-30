@@ -182,7 +182,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `prompt-engineering-and-token-optimization.md` | hep-computing | 9.4 | no | 3 | - | 351029c0 2026-10-07 |
 | `python-balanced-design-guidelines.md` | hep-computing | 7.5 | yes | 7 | hep-ml | 5dbb8c4d 2026-10-26 |
 | `python-hep-coding-patterns.md` | hep-computing | 7.8 | yes | 9 | - | 16214af1 2026-10-26 |
-| `research-workflow-control.md` | hep-computing | 24.5 | no | 4 | hep-detector | af893dd7 2026-10-30 |
+| `research-workflow-control.md` | hep-computing | 24.4 | no | 4 | hep-detector | dde8f031 2026-10-30 |
 | `risk-and-quality.md` | hep-computing | 7.4 | no | 3 | - | f4372374 2026-10-13 |
 | `root-balanced-design-guidelines.md` | hep-computing | 37.3 | yes | 10 | - | 56a5a6c9 2026-10-23 |
 | `root-debugging.md` | hep-computing | 3.6 | yes | 4 | - | 9257d7b5 2026-10-15 |

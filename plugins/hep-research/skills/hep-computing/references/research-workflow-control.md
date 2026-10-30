@@ -18,8 +18,7 @@ reconstruction method content is in hep-detector ([event reconstruction](../../h
 > part and agrees with its reference model on the tested fact sequences, but it is **not reviewed or validated**: its
 > derivations are mechanical consequences of unreviewed rules, not established results, and it gives no autonomous
 > reconstruction capability. The transition-period procedure below remains the reviewed one. Placing this page in
-> hep-computing is the default of DEC-11, pending maintainer approval; the task-record location is the default of
-> DEC-08/DEC-09, also pending.
+> hep-computing (DEC-11) and the task-record location (DEC-08/DEC-09) were approved by the maintainer on 2026-10-30.
 
 ## Always-on rules
 
@@ -103,8 +102,8 @@ Load a row only when its condition holds; when it does not, no fact log, manifes
   change that only adds (a required check, a deliverable, a sample, a lower budget) may be applied, and **any other
   change waits for a human**, listed in the report. `control_layer.py contract --dry-run` says whether a contract
   would take effect under that (unreviewed) order.
-- In M1 the first contract takes effect when it is listed in the first reply, where the user can correct it (DEC-12
-  default, pending approval).
+- In M1 the first contract takes effect when it is listed in the first reply, where the user can correct it (DEC-12,
+  approved).
 
 ## Transition period: running and recording without a control layer
 
@@ -169,7 +168,7 @@ scenarios, 42 mutations, the same derivation on scenario and random fact sequenc
 did not pass review**, not a validation.
 
 - **Record**: one append-only `task-log.jsonl` (default `hep-research-artifacts/<task>/task-log/task-log.jsonl`,
-  DEC-01/08/09 default, pending); each line carries sequence number, batch, kind, writer, fields and the previous
+  DEC-01/08/09, approved); each line carries sequence number, batch, kind, writer, fields and the previous
   line's SHA-256; every load verifies the chain and replays the facts. Never edit it: every fact goes through a
   command with `--expect-head` (compare-and-set), optionally `--expect-digest`; `--op` makes a retry idempotent. Keep
   the printed `head_digest` outside the record: the chain cannot catch an edit of its last line.

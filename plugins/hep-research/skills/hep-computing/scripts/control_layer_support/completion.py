@@ -27,9 +27,9 @@ LIMITATIONS = (
     "M3 is not available (G3 submission reconciliation and G4 metering are unsupported) and is refused. M2 is "
     "admitted only with a G5 qualification of this helper's task record (restart recovery, stale lock takeover): "
     "that qualifies persistence, not the rules.",
-    "Defaults pending maintainer approval: DEC-01/DEC-08/DEC-09 (task record location and format), DEC-02 (library "
-    "and CLI helper), DEC-12 (first contract), DEC-13 (no shared store with hep-review), DEC-14 (no delegation of "
-    "human decisions).",
+    "Design defaults: DEC-01/DEC-08/DEC-09 (task record location and format), DEC-12 (first contract), DEC-13 (no "
+    "shared store with hep-review) and DEC-14 (no delegation of human decisions) were approved by the maintainer on "
+    "2026-10-30; DEC-02 (library and CLI helper) is still pending, with the decision on the control layer itself.",
 )
 
 
