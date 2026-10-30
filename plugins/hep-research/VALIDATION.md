@@ -8480,6 +8480,14 @@ afterwards. Recorded: `tests/adapters/fixtures/geant4/records/geant4-registered-
 | J14 live (`examples/geant4-thin-silicon/run.py --live` into the work folder; committed `recorded/` untouched) | 27/27 criteria pass in 768 s; both studies re-issued `validated-in-scope` for their benchmarked scopes; the study records list the nine (MPV) and five (stopping power) run records on the registered installation with the provenance note |
 | `HEP_GEANT4_REGISTER_TEST=<conda geant4-config>` (`RealInstallation`) | pass in the activated environment; fails, with the refusals, without the activation |
 
+Software checks on a clean clone of the branch at `1e19ad29` on local disk (CI-lock Python 3.13, no dataset variable
+set): `run_all_checks.py --part static` 31/31 pass (the naming gate first found five new names, renamed in `1e19ad29`);
+the Geant4 adapter modules (`test_geant4`, `test_geant4_element`, `test_geant4_register`, `test_g4sim`, `test_simreco`,
+`test_adapter_declarations`) 134 run, 0 failures, 15 skipped (the live and real-installation tests: unverified there,
+run above); `tests/skills/hep_detector` 587, 0 failures, 4 skipped; `test_cli_robustness` and `test_cli_contract` 9;
+`tests/tools` 371; `tests/contracts` 1160, 1 skipped; `tests/routing` 21; the J14, J15 and J16 example tests 16, 1
+skipped; no failures anywhere.
+
 Every record stays `unvalidated` except the two J14 study records `label --upgrade` re-issued; a completed run or an
 agreement with an official example is verification, not validation. The adapter status stays
 `demonstrated-on-synthetic-data`. Not done: the CVMFS LCG views (slow to list), the Apptainer definition, macOS rerun
