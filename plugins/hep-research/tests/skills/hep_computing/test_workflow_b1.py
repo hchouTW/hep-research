@@ -161,6 +161,28 @@ class Destinations(Base):
         self.assertEqual(list(record(self.work, "s")["extension"]["output_hashes"]), ["d/r.txt"])
 
 
+class StepIds(Base):
+    """A step id names the run record and the receipt: an id that is not one plain path component is refused before
+    any step runs (OUT-01), so neither file can leave its folder."""
+
+    def test_unsafe_step_ids_are_refused(self):
+        for sid in ("../../x", "a/../../y", "a/b", "/abs", ".", "..", "a\\b", " ", "-x", "a\nb"):
+            with self.subTest(sid=sid):
+                ran = self.root / "ran.txt"
+                wf = {"workflow": "ids", "steps": [step("first", f"open({str(ran)!r}, 'w').write('x')", []),
+                                                   step(sid, "pass", [], needs=["first"])]}
+                code, out = run(wf, self.work, "--receipt-dir", self.root / "receipts" / "r")
+                self.assertEqual((code, out["status"]), (2, "rejected"), out)
+                self.assertIn("step id", out["error"])
+                self.assertFalse(ran.exists())  # refused before any step ran
+                self.assertFalse((self.root / "x").exists() or (self.root / "y").exists())
+
+    def test_plain_ids_run(self):  # positive control: the ids the shipped workflows and adapters use
+        steps = [step(sid, "pass", []) for sid in ("generate", "CALC-CC-B", "scan-000", "__check__", "a.b_c")]
+        code, out = run({"workflow": "ids", "steps": steps}, self.work)
+        self.assertEqual(code, 0, out)
+
+
 @unittest.skipUnless(POSIX, "process groups (DEC-04: only POSIX is claimed, tested on Linux)")
 class Termination(Base):
     """BUG-04: a timeout leaves a run record, stops the process tree and confirms it is gone."""

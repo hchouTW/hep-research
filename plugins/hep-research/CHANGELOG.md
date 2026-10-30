@@ -16,6 +16,13 @@ Software checks establish contract consistency only, not physical validity.
   the order (`qed-prediction` before `published-comparison`), the version-only diff rule, a local project-free
   `TMPDIR` for `check_relocation.py`, and the README size statement and manifest order.
 - Evidence: VALIDATION RELEASE-FOLLOWUPS-0.50.0
+- **`run_workflow.py`: step ids are one plain name, and an attempt id is used once** (review of PR #329). A step id
+  names its run record and receipt, so an id such as `../../x` or `a/b` is refused before any step runs (exit 2);
+  allowed are letters, digits, `_`, `.`, `:` and `-` (not first: `.`, `:`, `-`), at most 128 characters. With
+  `--receipt-dir`, a run in which any step's attempt id (`--attempt-prefix` + step id) already has a receipt is
+  refused before any step runs (exit 2), and receipts are created exclusively: an earlier attempt's receipt is never
+  replaced. Use a new prefix per attempt. Tests: `test_workflow_b1.StepIds`,
+  `test_executor_b2.Receipts.test_an_attempt_id_is_used_once`.
 
 ## 0.50.0 (2026-10-30)
 

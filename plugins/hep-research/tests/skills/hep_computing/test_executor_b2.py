@@ -73,6 +73,26 @@ class Receipts(Base):
         self.assertGreaterEqual(rec["usage"]["cpu_s"], 0)
         self.assertFalse(any(self.work.rglob("*.receipt.json")))  # receipts stay out of the work folder
 
+    def test_an_attempt_id_is_used_once(self):
+        """A receipt identifies one attempt: a rerun with the same prefix is refused before it runs and the earlier
+        receipt is kept; a new prefix runs (positive control)."""
+        receipts = self.root / "receipts"
+        steps = [{"id": "s", "argv": ["{python}", "-c", "open('o.txt','w').write('1')"], "outputs": ["o.txt"]}]
+        self.assertEqual(run(RUNNER, self.write_workflow(steps), "--work", self.work, "--receipt-dir", receipts,
+                             "--attempt-prefix", "a1:")[0], 0)
+        first = (receipts / "a1:s.receipt.json").read_bytes()
+        steps[0]["argv"][-1] = "open('o.txt','w').write('2')"
+        code, out = run(RUNNER, self.write_workflow(steps), "--work", self.work, "--receipt-dir", receipts,
+                        "--attempt-prefix", "a1:")
+        self.assertEqual((code, out["status"]), (2, "rejected"), out)
+        self.assertIn("a1:s", out["error"])
+        self.assertEqual((receipts / "a1:s.receipt.json").read_bytes(), first)
+        self.assertEqual((self.work / "o.txt").read_text(), "1")  # the second attempt did not run
+        code, out = run(RUNNER, self.write_workflow(steps), "--work", self.work, "--receipt-dir", receipts,
+                        "--attempt-prefix", "a2:")
+        self.assertEqual(code, 0, out)
+        self.assertEqual(json.loads((receipts / "a2:s.receipt.json").read_text())["attempt"], "a2:s")
+
     def test_no_receipt_without_the_option(self):
         steps = [{"id": "s", "argv": ["{python}", "-c", "open('o.txt','w').write('1')"], "outputs": ["o.txt"]}]
         self.assertEqual(run(RUNNER, self.write_workflow(steps), "--work", self.work)[0], 0)

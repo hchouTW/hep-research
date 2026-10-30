@@ -28,7 +28,9 @@ The record carries extension.end_status (success, failure, timeout), extension.t
 extension.output_contract and extension.artifact_digest (SHA-256 of the canonical output manifest); output hashes
 are recorded only when termination is confirmed. Termination is observed on POSIX hosts only (tested on Linux): a
 process that leaves the group and clears its environment is not seen.
-Input: workflow JSON {"workflow": NAME, "steps": [{"id", "needs": [...], "inputs": [...], "outputs": [...],
+Input: workflow JSON {"workflow": NAME, "steps": [{"id" (one plain name: letters, digits, '_', '.', ':', '-', not
+starting with '.', ':' or '-', at most 128 characters; it names the run record and the receipt), "needs": [...],
+"inputs": [...], "outputs": [...],
 "argv": [...], "stdout": FILE (optional), "seeds": {...} (optional), "parameter_digest": {...} (optional),
 "timeout_s": SECONDS (optional, default 3600), "check": {...} (optional: a check run's declared identity, below)}]}.
 A check step (reconstruction v12 A2 fields, defined in scripts/check_definitions.py) declares "check":
@@ -41,15 +43,17 @@ criterion digest the hash of the criteria file, the target digest the canonical 
 and the result file repeats the three digests with a four-valued result, a reason and samples from the read list;
 extension.check_result records the verdict, and an unbound result fails the step.
 Receipts (B2, --receipt-dir DIR): one <attempt>.receipt.json per executed step, outside the run records so that the
-records stay byte-identical: attempt, step, end status, termination, outputs (logical name, location in the work
-folder, digest), artifact digest, observed input evidence (not observable: declared inputs only, DEC-10), conditions
+records stay byte-identical. The attempt id is --attempt-prefix + step id and is used once: a run in which any step's
+attempt id already has a receipt is refused before any step runs (exit 2), and a receipt is never replaced. Fields:
+attempt, step, end status, termination, outputs (logical name, location in the work folder, digest), artifact digest, observed input evidence (not observable: declared inputs only, DEC-10), conditions
 resolution (not recorded: G6 unsupported), the run record's path and SHA-256, start and end times and resource usage
 (wall and CPU seconds of the step's process tree, POSIX).
 Usage: run_workflow.py WORKFLOW.json --work DIR [--created YYYY-MM-DD] [--dry-run] [--incremental] [--status LABEL]
        [--receipt-dir DIR] [--attempt-prefix TEXT]
 Output JSON: status (ok, failed, rejected), status_label, inputs, defaults_used, order and per-step results.
 Exit codes: 0 every step ran; 1 a step failed or its termination is unconfirmed (later steps are not run); 2 bad
-input (malformed workflow, an unsafe path, a cycle, an unknown dependency, a missing input or output).
+input (malformed workflow, an unsafe path or step id, a cycle, an unknown dependency, a missing input or output,
+an attempt id that already has a receipt).
 """
 from __future__ import annotations
 
@@ -60,6 +64,7 @@ import json
 import math
 import os
 import platform
+import re
 import signal
 import subprocess
 import sys
@@ -80,6 +85,7 @@ STEP_TIMEOUT_S = 3600
 STOP_GRACE_S = 5.0     # SIGTERM, then SIGKILL after this many seconds
 CONFIRM_S = 5.0        # how long to wait for the process group to disappear
 MARKER = "HEP_RUN_WORKFLOW_ATTEMPT"  # environment token used to find processes that left the group (Linux /proc)
+STEP_ID = re.compile(r"[A-Za-z0-9_][A-Za-z0-9._:-]{0,127}")  # one plain path component: names records and receipts
 
 
 class WorkflowError(ValueError):
@@ -199,6 +205,10 @@ def load(path: Path) -> dict:
     for s in steps:
         if not isinstance(s, dict) or not isinstance(s.get("id"), str) or not s["id"]:
             raise WorkflowError("every step needs a string 'id'")
+        if not STEP_ID.fullmatch(s["id"]) or s["id"] in (".", ".."):
+            raise WorkflowError(f"step id {s['id']!r}: a step id names the run record and the receipt, so it is one "
+                                "plain name (letters, digits, '_', '.', ':', '-'; not starting with '.', ':' or '-'; "
+                                "at most 128 characters) (OUT-01)")
         if not isinstance(s.get("argv"), list) or not s["argv"] or not all(isinstance(a, str) for a in s["argv"]):
             raise WorkflowError(f"step {s['id']}: 'argv' must be a non-empty list of strings")
         for key in ("needs", "inputs", "outputs"):
@@ -460,6 +470,14 @@ def main(argv=None) -> int:
     except WorkflowError as exc:
         print(json.dumps({"status": "rejected", **base, "error": str(exc)}, indent=1))
         return exit_code("rejected")
+    if args.receipt_dir is not None:  # an attempt id identifies one attempt: never replace an earlier receipt
+        used = [f"{args.attempt_prefix}{sid}" for sid in seq
+                if (args.receipt_dir / f"{args.attempt_prefix}{sid}.receipt.json").exists()]
+        if used:
+            print(json.dumps({"status": "rejected", **base, "order": seq,
+                              "error": f"attempt id(s) {used} already have a receipt in {args.receipt_dir}; an "
+                                       "attempt id is used once: choose a new --attempt-prefix"}, indent=1))
+            return exit_code("rejected")
     if args.dry_run:
         print(json.dumps({"status": "ok", **base, "order": seq}, indent=1))
         return 0
@@ -573,8 +591,14 @@ def main(argv=None) -> int:
                        "check_result": bind}
             rpath = args.receipt_dir / f"{attempt}.receipt.json"
             rpath.parent.mkdir(parents=True, exist_ok=True)
-            rpath.write_text(json.dumps(receipt, indent=1, sort_keys=True)
-                                                                      + "\n", encoding="utf-8")
+            try:
+                with rpath.open("x", encoding="utf-8") as fh:  # exclusive: a concurrent run took the id first
+                    fh.write(json.dumps(receipt, indent=1, sort_keys=True) + "\n")
+            except FileExistsError:
+                print(json.dumps({"status": "rejected", **base, "order": seq, "steps": results,
+                                  "error": f"attempt id {attempt} got a receipt from another run while step {sid} "
+                                           "ran; its receipt was not written"}, indent=1))
+                return exit_code("rejected")
         stderr = p["stderr"] + (f"\n[run_workflow] output(s) {stale} existed before and were not written by this run"
                                 if stale else "")
         if bind is not None and not bind["bound"]:

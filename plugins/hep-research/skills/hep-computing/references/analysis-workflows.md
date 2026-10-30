@@ -36,7 +36,10 @@ reproducible, partial reruns safe, and the provenance of every number checkable.
   `artifact_digest` (SHA-256 of the canonical output manifest). Output hashes are recorded only when termination is
   confirmed. Termination is observed on POSIX hosts (tested on Linux, where processes that leave the group are also
   found through an environment token); a process that leaves the group and clears its environment is not seen.
-  `--receipt-dir DIR` writes one receipt per executed step outside the work folder (attempt, end status,
+  A step id is one plain name (letters, digits, `_`, `.`, `:`, `-`), since it names the run record and the receipt.
+  `--receipt-dir DIR` writes one receipt per executed step outside the work folder, named by the attempt id
+  (`--attempt-prefix` + step id), which is used once: a rerun whose attempt id already has a receipt is refused
+  before any step runs, so use a new prefix per attempt (attempt, end status,
   termination, outputs with location and digest, artifact digest, declared inputs, run-record digest, times, wall and
   CPU seconds). A check step declares its `check` identity (check, criterion and target digests, criteria and result
   files, target manifest, role, type, read list); its result counts only when it binds to the run, otherwise the step
