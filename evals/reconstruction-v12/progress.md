@@ -321,13 +321,14 @@ Tests (`TMPDIR` on local disk): `test_executor_b2` 13 (receipts 2, binding 6, ca
 267 run, OK (39 skipped); `tests/skills/hep_review` 141, OK; `tests/routing` 21, OK; runner callers
 (`test_design_m2`, `test_geant4`, `test_cli_robustness`) 79, OK (6 skipped). `check_wiring.py --since <base>`: no new gap.
 
-## C1 — control layer and completion: done, with the control rules NOT through S0; C2 — not done
+## C1 — control layer and completion: done, with the control rules NOT through S0 (C2: see its own section below)
 
 History: the entry conditions of C1 and C2 require N1, which did not pass S0 in any of six recorded rounds (runbook
 0.5.2 item 7; rounds 4–6 user-approved). After round 6 the user chose option A and decided to start C1 anyway, with
 the control rules stated as **not through S0**; the last spec change (the single “overtaken” binding rule, 38aae03a)
-was not reviewed at all. C2 (resumption, restart reconciliation, lease lock, the Agent evaluation of Delivery §5.2) is
-**not started**.
+was not reviewed at all. At the time C1 was done, C2 (resumption, restart reconciliation, lease lock, the Agent
+evaluation of Delivery §5.2) was not started; its implementation part was done later at the user's request (C2
+section at the end of this file).
 
 ### What C1 built
 
@@ -513,3 +514,114 @@ Clean clone of `f786bd2b` on local disk, `TMPDIR` on local disk:
 
 Not run: the slow-tier aggregate, the AMS-optional check, the live routing rerun (paid).
 
+## C2 — resumption, reconciliation, lease lock: implementation part done, control rules still NOT through S0
+
+Entry: C1 complete and independently verified (2fa766d2); N1 still not passed — the user asked to start C2 under the
+same status as C1: the control rules are stated as **not through S0** wherever C2 is described (script docstrings,
+the reference page, the CHANGELOG, every report's limitations and the resumption summary's `limitation`). Contract
+(T2-code): scope `control_layer.py` and `control_layer_support/`, the G5 qualification in `executor_capabilities.py`,
+tests and docs; acceptance (implementation part of the runbook C2 row) = the G5 qualification test passes, restart
+recovery and stale lock takeover are tested, existing suites and static checks unchanged; the Agent evaluation of
+Delivery §5.2 is the coordinator's, not part of this part.
+
+### What C2 built
+
+- **Resumption summary** (Core §6.4, TASK-03): `control_layer.py resume` derives, from the task log alone and at
+  one head (deterministic; time-dependent lease fields left out): the effective contract (JSON) and every contract's
+  state, deliverables target / achieved / state, attempts by execution state, `do_not_resubmit` (every admitted,
+  running, cancelling, unknown or abandoned attempt), items pending a human, freezes, samples with exposures and
+  unblinding, accounts (budget, used, in flight), the lease, the resumption rules and the derived next actions
+  (settle unsettled attempts first; human items; then per unmet deliverable, upstream first: compute — with a
+  dry-run admission on a copy of the log saying whether C would admit it —, admit the missing checks of the latest
+  current artifact, resolve its label, freeze and confirm for T3C, or publish). Its `limitation` field is the
+  “did NOT pass S0” paragraph.
+- **Restart reconciliation** (Control §3): `receipt --lost` (adapter; an admitted or running attempt whose run left
+  no receipt or run record → termination unknown, never left admitted); `reconcile` (adapter; only for an unknown or
+  abandoned attempt, only from a receipt with termination confirmed, run record digest checked; a check attempt's
+  bound result comes with it; after an abandon the cost moves to used, `abandoned_reconciled`, and the attempt stays
+  no producer); `cancel` (C's cancel_request for an admitted or running attempt; it does not stop a process —
+  `run_workflow.py` has no cancel operation — and the receipt decides the state). Admission already refuses anything
+  with the same side effect as an unknown attempt; the resumption summary says to settle first.
+- **Lease lock** (Control §5.5, CTRL-01): `lock acquire|release|status` with owner, pid, host and expiry in
+  `<task-log>.lease.json`; every event (acquire, renew, release, takeover with the previous owner, recover) in
+  `<task-log>.lease-history.jsonl`, canonical JSON lines chained by SHA-256 and verified on read. It serializes
+  writers **in addition to** compare-and-set (the append still checks `--expect-head` under the flock, which stays
+  for the append itself). A live lease of another owner refuses every write except a human decision; an expired
+  lease is taken over only by `lock acquire` and only after every admitted, running, cancelling or unknown attempt
+  is settled (“reconcile first, then take over”); under M2/M3 every write except a human decision must pass
+  `--owner` holding a live lease. Liveness is the expiry alone.
+- **Torn-tail recovery**: `recover` moves a last line without its newline (never acknowledged: an append is
+  acknowledged only after its single write and fsync) to `<task-log>.torn-<sha256>`, truncates it and records the
+  event; nothing else is ever removed.
+- **G5 qualification** (`executor_capabilities.py qualify`, fault injection, POSIX; tested on Linux): restart
+  recovery — a writer process appending with operation ids is SIGKILLed mid-session; a fresh process verifies the
+  record, every acknowledged fact is there exactly once and nothing is duplicated, a repeated operation id is
+  replayed, two fresh processes derive the same resumption summary, the unknown attempt stays unknown, is listed as
+  not to be resubmitted and blocks admission of its step, a torn line is refused, recovered, and the derived state
+  is unchanged — and stale lock takeover — the live lease of a killed owner is not taken over and blocks another
+  owner's writes; once expired it is not taken over before the unknown attempt is reconciled (from a real
+  `run_workflow.py` receipt); then it is, the takeover is recorded with the previous owner, and the old owner's write
+  is refused. The record names every case and the SHA-256 of every control-layer file and of the runner it tested
+  (`tests.G5.tested`, top-level `control_sha256`); `admit` refuses G5 when the control layer changed since. With G5
+  passing, `declare` declares G1, G2, G5; `admit --mode M2` accepts; M3 stays refused (G3, G4 unsupported).
+- **M2 path in `control_layer.py`**: session fact with M2 (`init --mode M2`), first contract pending until a human
+  `approve_contract` (DEC-12), lease held for every write, admission's capability check against G1, G2, G5, and
+  receipts carrying usage (`--usage auto` = `wall_s` under M2/M3, so declared costs are in wall-clock seconds and an
+  attempt whose usage exceeds its declared cost is unattested). M3 refused.
+- Docs: reference page (banner names C1 and C2; M2 row; qualification paragraph: “a qualified G5 shows the record
+  survives restarts, not that its rules were reviewed”; resumption bullet), `analysis-workflows.md`, README,
+  CHANGELOG, inventory, CLI tables (resume, reconcile, lock), module timings; the completion report's M2/M3
+  limitation updated.
+
+Changed existing test (not loosened, the capability changed): `test_executor_b2` expected G5 “unsupported” and
+`admit --mode M2` refused; it now expects G5 “pass” with its cases and tested files, `admit --mode M2` accepted, and
+keeps three refusals: M3 (G3, G4), a failed G5 qualification, and a control layer changed since qualification.
+`test_control_layer` M2 test now holds the lease (its assertion — no admission without G5 — is unchanged).
+
+### Verification (clean clone of the branch at `918ed72e` on local disk, `TMPDIR` on local disk, Python 3.13 venv)
+
+| Check | Result |
+|---|---|
+| `executor_capabilities.py qualify` | exit 0; G1 pass, G2 pass, **G5 pass (14/14 cases)**, G3/G4/G6 unsupported; `control_sha256` `53cae035…` over the six control-layer files |
+| `tools/run_all_checks.py --part static` | 31 pass, 0 fail |
+| `tests/skills/hep_computing` (`-t .`) | 323 run, OK (39 skipped, as at baseline) — 308 after C1 + 15 new C2 tests |
+| `tests.skills.test_cli_robustness`, `tests.skills.test_cli_contract` | 9 run, OK |
+| `tests/tools` | 371, OK |
+| `tests/contracts` | 1160, OK (1 skipped) |
+| `tests/routing` | 21, OK |
+
+Not run here: the whole `tests/skills` tree (the coordinator runs it), the slow-tier aggregate, the live routing
+rerun. The main checkout stayed clean; nothing under `spec/` or `s0/` changed.
+
+### Agent evaluation (Delivery §5.2)
+
+Not run here: the Agent evaluation (at least the paired case with a missing backend and the resumption case) is run
+by the coordinator separately. C2 is not complete until it is done and recorded.
+
+### Limitations
+
+- The control rules still did **not** pass S0; C2 adds persistence and recovery around them. A passing G5 shows that
+  the record survives restarts and that writers are serialized, not that the rules are right.
+- The lease is advisory between cooperating processes using this helper; anything that writes the file directly
+  bypasses it (and the chain then refuses the record). Liveness is the expiry only; a paused (not dead) owner keeps
+  its lease until it runs out. `flock` on NFS depends on the server's lock support.
+- `receipt --lost` and the lease rely on the caller's honesty in the same way receipts do (files in the workspace,
+  not authenticated). `reconcile` accepts only `run_workflow.py` receipts; there is no remote reconciliation (G3,
+  stage D) and no restart reconciliation of campaign submissions.
+- The G5 test uses a synthetic G1 declaration for the record's admissions (it qualifies persistence only); it is
+  tested on Linux only.
+
+### Spec discrepancies found in C2 (not fixed)
+
+1. Control §2 closes the fact kinds and has no kind for lock events, while Control §5.5 asks that takeovers be
+   handled after reconciliation; the takeover record is therefore kept in a chained history file beside the record,
+   not in the fact log.
+2. Control §3 requires “entry into unknown always goes through a receipt” but defines no evidence for a run that left
+   nothing; `receipt --lost` lets the adapter write that receipt with termination unknown on the caller's word
+   (conservative: it only blocks). An end value is required by the fact format even though it is ignored for
+   unknown; `failure` is written.
+3. Control §5.5 does not say whether a human decision needs the lease; the helper exempts decisions (a human must be
+   able to approve or abandon while an agent holds the lease).
+4. Delivery §1.2's G5 test names “restart recovery; stale lock takeover” without saying what counts as recovered; the
+   qualification's criteria (exactly-once acknowledged facts, operation replay, identical derivation, unknown
+   preserved, torn-line recovery, takeover only after expiry and reconciliation) are this implementation's reading.
