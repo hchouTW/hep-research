@@ -196,6 +196,71 @@ criteria as above.
   Methods A506 (2003) 250-303, DOI 10.1016/S0168-9002(03)01368-8. Documentation: <https://geant4.web.cern.ch/support/user_documentation>
   (Physics Reference Manual for physics lists, production cuts, model validity ranges).
 
+**Reconstruction methods** (cited in [tracking and vertexing](tracking-and-vertexing.md), [calorimetry](calorimetry-ecal-hcal.md),
+[noble liquid neutrino and rare event detectors](noble-liquid-neutrino-and-rare-event-detectors.md),
+[photon likelihood reconstruction](photon-likelihood-reconstruction.md),
+[gaseous and specialized tracking technologies](gaseous-and-specialized-tracking-technologies.md) and
+[ground based detection arrays](ground-based-detection-arrays.md)). Each entry below was matched against the Crossref
+record of its DOI (authors, title, venue, volume, pages, year) on 2026-10-30; as above, the annotation is the use made
+here, not a re-reading of the work, and no performance number is taken from them.
+
+<!-- example: source citations (experiments named as the source of a general method) -->
+- W. Adam, R. Frühwirth, A. Strandlie and T. Todorov, "Reconstruction of electrons with the Gaussian-sum filter in the
+  CMS tracker at the LHC", J. Phys. G 31 (2005) N9-N20, DOI 10.1088/0954-3899/31/9/N01. Gaussian-sum filter.
+- W. Waltenberger, R. Frühwirth and P. Vanlaer, "Adaptive vertex fitting", J. Phys. G 34 (2007) N343-N356,
+  DOI 10.1088/0954-3899/34/12/N01. Adaptive (annealed) vertex fit.
+- C. Kleinwort, "General broken lines as advanced track fitting method", Nucl. Instrum. Methods A673 (2012) 107-110,
+  DOI 10.1016/j.nima.2012.01.024. Broken-lines global fit.
+- X. Ai et al., "A Common Tracking Software Project", Comput. Softw. Big Sci. 6 (2022) 8,
+  DOI 10.1007/s41781-021-00078-8. Combinatorial Kalman filter track finding in a shared implementation.
+- T. C. Awes, F. E. Obenshain, F. Plasil, S. Saini et al., "A simple method of shower localization and identification
+  in laterally segmented calorimeters", Nucl. Instrum. Methods A311 (1992) 130-138,
+  DOI 10.1016/0168-9002(92)90858-2. Logarithmic position weighting.
+- R. Acciarri et al. (MicroBooNE), "The Pandora multi-algorithm approach to automated pattern recognition of
+  cosmic-ray muon and neutrino events in the MicroBooNE detector", Eur. Phys. J. C 78 (2018) 82,
+  DOI 10.1140/epjc/s10052-017-5481-6. LArTPC view matching.
+- X. Qian, C. Zhang, B. Viren and M. Diwan, "Three-dimensional imaging for large LArTPCs", J. Instrum. 13 (2018)
+  P05032, DOI 10.1088/1748-0221/13/05/P05032. Tomographic LArTPC imaging.
+- P. Abratenko et al. (MicroBooNE), "Determination of muon momentum in the MicroBooNE LArTPC using an improved model
+  of multiple Coulomb scattering", J. Instrum. 12 (2017) P10010, DOI 10.1088/1748-0221/12/10/P10010. Momentum from
+  multiple scattering.
+- M. Jiang et al. (Super-Kamiokande), "Atmospheric neutrino oscillation analysis with improved event reconstruction
+  in Super-Kamiokande IV", Prog. Theor. Exp. Phys. 2019 (2019) 053F01, DOI 10.1093/ptep/ptz015. Joint charge-time
+  likelihood with multi-ring hypotheses.
+- J. Ahrens et al. (AMANDA), "Muon track reconstruction and data selection techniques in AMANDA", Nucl. Instrum.
+  Methods A524 (2004) 169-194, DOI 10.1016/j.nima.2004.01.065. First-guess line fit, photon arrival-time likelihood.
+- M. G. Aartsen et al. (IceCube), "Energy reconstruction methods in the IceCube neutrino telescope", J. Instrum. 9
+  (2014) P03009, DOI 10.1088/1748-0221/9/03/P03009. Tabulated light model, energy from the light along a track.
+- R. D. Parsons and J. A. Hinton, "A Monte Carlo template based analysis for air-Cherenkov arrays", Astropart. Phys.
+  56 (2014) 26-34, DOI 10.1016/j.astropartphys.2014.03.002. Pixel-likelihood image templates.
+- The Pierre Auger Collaboration, "The Pierre Auger Cosmic Ray Observatory", Nucl. Instrum. Methods A798 (2015)
+  172-213, DOI 10.1016/j.nima.2015.06.058. Surface and fluorescence reconstruction in a hybrid observatory.
+- T. Huege, "Radio detection of cosmic ray air showers in the digital era", Phys. Rep. 620 (2016) 1-52,
+  DOI 10.1016/j.physrep.2016.02.001. Radio emission and reconstruction (review).
+- C. Glaser, M. Erdmann, J. R. Hörandel, T. Huege and J. Schulz, "Simulation of radiation energy release in air
+  showers", J. Cosmol. Astropart. Phys. 09 (2016) 024, DOI 10.1088/1475-7516/2016/09/024. Radiation energy and its
+  geomagnetic-angle and air-density corrections.
+- S. Buitink et al., "Method for high precision reconstruction of air shower X_max using two-dimensional radio
+  intensity profiles", Phys. Rev. D 90 (2014) 082003, DOI 10.1103/PhysRevD.90.082003. `X_max` from simulated radio
+  footprints.
+- S. Aiola et al., "Hybrid seeding: A standalone track reconstruction algorithm for scintillating fibre tracker at
+  LHCb", Comput. Phys. Commun. 260 (2021) 107713, DOI 10.1016/j.cpc.2020.107713. Fibre-tracker track finding.
+- L. Arrabito et al., "Track reconstruction in the emulsion-lead target of the OPERA experiment using the ESS
+  microscope", J. Instrum. 2 (2007) P05004, DOI 10.1088/1748-0221/2/05/P05004. Emulsion base-track linking and film
+  alignment.
+- M. De Serio et al., "Momentum measurement by the angular method in the Emulsion Cloud Chamber", Nucl. Instrum.
+  Methods A512 (2003) 539-545, DOI 10.1016/S0168-9002(03)02016-3. Momentum from multiple scattering in emulsion.
+- D. M. Chernyak et al., "Rejection of randomly coinciding events in ZnMoO4 scintillating bolometers", Eur. Phys.
+  J. C 74 (2014) 2913, DOI 10.1140/epjc/s10052-014-2913-4. Pileup rejection in bolometers.
+- A. Broniatowski, B. Censier, A. Juillard and L. Bergé, "Cryogenic germanium detectors for dark matter search:
+  Surface events rejection by charge measurements", Nucl. Instrum. Methods A559 (2006) 378-380,
+  DOI 10.1016/j.nima.2005.12.015. Surface-event rejection with interleaved electrodes.
+- D. Budjáš, M. Barnabé Heider, O. Chkvorets, N. Khanbekov and S. Schönert, "Pulse shape discrimination studies with a
+  Broad-Energy Germanium detector for signal identification and background suppression in the GERDA double beta
+  decay experiment", J. Instrum. 4 (2009) P10007, DOI 10.1088/1748-0221/4/10/P10007. Germanium current-pulse
+  discrimination.
+<!-- /example -->
+
 ## Statistics, performance measurement, and uncertainties ([reconstruction performance and truth matching](reconstruction-performance-and-truth-matching.md), [performance metrics and residual diagnostics](performance-metrics-and-residual-diagnostics.md), [data mc validation and detector systematics](data-mc-validation-and-detector-systematics.md))
 
 - G. Cowan, K. Cranmer, E. Gross and O. Vitells, "Asymptotic formulae for

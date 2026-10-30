@@ -60,6 +60,32 @@ before citing) are arrays rather than single
 telescopes.
 <!-- /example -->
 
+## Image cleaning and reconstruction choices
+
+- **Cleaning.** Before any parameterization, pixels are kept only if they pass a high
+  threshold with a neighbour above a lower one (a two-level cleaning), often with a
+  time-coincidence condition between neighbours. The thresholds are set against the
+  night-sky background, which varies with the field and the moonlight. Cleaning removes
+  the faint edges of images, which lowers the size and width of low-energy showers, so the
+  simulation must use the same cleaning and the night-sky-background level of each
+  observation; the threshold region is the most affected.
+- **Reconstruction method.** In an array, image moments with geometric stereo
+  intersection are fast, robust, and the seed for anything more detailed; for a single
+  telescope the source position along the image axis is estimated from the image shape
+  (displacement method), with a head-tail ambiguity. A pixel-likelihood fit to simulated
+  image templates uses the whole image and depends more on the simulation
+  ([photon likelihood reconstruction](photon-likelihood-reconstruction.md#the-image-template-variant));
+  learned methods on the raw images follow the training requirements in hep-ml. The
+  time gradient along the image axis adds information on the impact distance. Muon rings
+  in the camera calibrate the optical throughput that the templates and moments assume.
+- **Per-event direction error.** The spread of the pairwise axis intersections, or the fit
+  covariance, gives a per-event error; the point-spread function measured on a bright
+  point source in data is the check.
+
+**Check:** The cleaning thresholds and the night-sky-background level are matched between
+data and simulation per observation, and the reconstruction method is named with its
+per-event error and point-source check.
+
 ## Energy reconstruction
 
 <!-- example: experiment-specific illustration -->
@@ -165,3 +191,6 @@ resolution (PSF, for example the 68% containment radius R68) versus energy; and 
   the instrument response or by unfolding, given the steep-spectrum migration bias.
 - Observation live time, duty-cycle-driven exposure, and zenith-angle range (which
   affects both the low-energy threshold and the effective area) for the dataset used.
+- Image cleaning thresholds and the night-sky-background matching, and the direction and
+  energy reconstruction method (moments, template likelihood, learned) with its per-event
+  error.

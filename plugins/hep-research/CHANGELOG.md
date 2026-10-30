@@ -3,6 +3,45 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+hep-detector reconstruction methods by detector family (documentation and routing cases only; contracts, adapters,
+scripts and the skill description are unchanged). Scope came from a coverage audit of 19 detector families x 7
+reconstruction tasks: 60 of 118 applicable cells were already covered, and all 58 partial or missing cells were
+written (46 in the first pass; the 12 first deferred, radio detection, emulsion and fibre linking, cryogenic pileup
+and position, in a follow-up); nothing already covered was restated.
+
+- **New reference** `photon-likelihood-reconstruction.md`: the per-channel charge and arrival-time likelihood (unhit
+  and saturated channels, first-photon time density), analytic, tabulated and data-driven expected-light models with
+  coherent optical systematics, hit cleaning and seeds (reversed-track minima), topology and ring hypotheses, energy
+  from light (scintillator non-linearity and non-uniformity, muon energy along a track), per-event errors with pulls,
+  the IACT image-template variant, and validation handles. Covers water Cherenkov, liquid scintillator, neutrino
+  telescopes and light-pattern positions in dual-phase TPCs.
+- **Estimator choice** (`detector-measurement-framework.md`): moment, least-squares, likelihood, template and learned
+  estimators with what each needs and how it fails; seeds and local minima, discrete hypotheses, per-event errors,
+  fit quality and fixed nuisance parameters.
+- **Tracking** (`tracking-and-vertexing.md`): track-finding strategies (combinatorial Kalman filter, Hough/Legendre
+  transforms, cellular automaton, graph-based), fitter variants (global and broken-lines fit, deterministic annealing,
+  Gaussian sum), propagation in a non-uniform field with the field map as a nuisance parameter, and vertex finding.
+- **LArTPC imaging reconstruction and dual-phase positions** (`noble-liquid-neutrino-and-rare-event-detectors.md`):
+  view matching and tomographic 3D, `t0`, `dQ/dx` to `dE/dx` with a recombination model, range and multiple-scattering
+  momentum, Bragg-peak and shower-start identification; light-pattern `xy` and the field-distortion map.
+- **Calorimetry**: shower position (S-curve, logarithmic weighting, depth), direction from layer centroids, shape
+  variables for electron-hadron separation, per-event energy errors.
+- **IACT**: image cleaning against night-sky background and the choice among moment, template and learned
+  reconstruction. **Ground arrays**: station signal scale, saturated and non-triggered stations, muon/electromagnetic
+  separation; fluorescence shower-detector plane, time fit, hybrid and stereo geometry, Cherenkov subtraction.
+- **Radio, fibre, emulsion and cryogenic reconstruction**: radio air-shower reconstruction (field unfolding, pulse
+  finding, energy fluence, wavefront and asymmetric footprint, radiation energy, `X_max` from footprints, per-event
+  errors) in `ground-based-detection-arrays.md`; fibre-tracker clustering, ghosts and alignment, and emulsion
+  base-track linking, film alignment, scattering momentum and vertex location in
+  `gaseous-and-specialized-tracking-technologies.md`; pileup in slow detectors and position from phonons, interleaved
+  electrodes and germanium pulse shape in `noble-liquid-neutrino-and-rare-event-detectors.md`.
+- Wiring: a SKILL.md Resources row, links from the event-reconstruction, neutrino-telescope and noble-liquid
+  references, 22 Crossref-verified bibliography entries, and four routing cases (`dr-reco-1` to `dr-reco-3`,
+  `dr-reco-neg`); the principles summary is unchanged (its routing part is at its budget).
+- Evidence: VALIDATION DETECTOR-RECONSTRUCTION-METHODS
+
 ## 0.49.1 (2026-10-30)
 
 Patch release, documentation only; contracts 3.17.0, `CORE_VERSION` 1.4.0, the adapters and every skill's behaviour are

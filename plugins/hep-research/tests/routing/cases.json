@@ -59,6 +59,54 @@
    }
   },
   {
+   "id": "dr-reco-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Which track-finding and vertex-finding algorithms suit a high-occupancy silicon tracker, and how do I check their efficiency for displaced tracks?",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "tracking",
+    "vertexing"
+   ],
+   "set": "RECO"
+  },
+  {
+   "id": "dr-reco-2",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Set up the charge and arrival-time likelihood reconstruction of vertex, direction and energy for our water Cherenkov detector.",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "reconstruction"
+   ],
+   "set": "RECO"
+  },
+  {
+   "id": "dr-reco-3",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "LArTPC 的 3D 重建與 dE/dx 量能（reconstruction, calorimetry）該怎麼選方法？",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "reconstruction",
+    "calorimetry"
+   ],
+   "set": "RECO"
+  },
+  {
+   "id": "dr-reco-neg",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "Train a graph neural network that scores hit-pair edges for our tracker: set up the training loops, data loading and mixed precision.",
+   "expected_primary": "hep-ml",
+   "trigger_terms": [
+    "training loops",
+    "mixed precision"
+   ],
+   "not": "hep-detector",
+   "set": "RECO"
+  },
+  {
    "id": "rv-direct-1",
    "lang": "en",
    "kind": "direct",

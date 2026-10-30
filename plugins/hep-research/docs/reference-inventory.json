@@ -19,8 +19,8 @@
    "uncited": 0
   },
   "hep-detector": {
-   "references": 42,
-   "bytes": 589139,
+   "references": 43,
+   "bytes": 652525,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1804,8 +1804,8 @@
   {
    "path": "skills/hep-detector/references/calorimetry-ecal-hcal.md",
    "owner": "hep-detector",
-   "bytes": 13005,
-   "lines": 208,
+   "bytes": 16023,
+   "lines": 250,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
@@ -1822,7 +1822,7 @@
     "skills/hep-detector/scripts/calorimeter_resolution.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "a1267715 2026-10-25"
+   "last_commit": "9ff83cdf 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/charge-confusion.md",
@@ -1856,6 +1856,7 @@
     "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
+    "skills/hep-detector/references/photon-likelihood-reconstruction.md",
     "skills/hep-detector/references/signal-formation-and-readout.md"
    ],
    "cited_by_other_skills": [
@@ -1990,18 +1991,21 @@
   {
    "path": "skills/hep-detector/references/detector-measurement-framework.md",
    "owner": "hep-detector",
-   "bytes": 11044,
-   "lines": 189,
-   "linked_from_skill_md": false,
+   "bytes": 15366,
+   "lines": 236,
+   "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
+    "skills/hep-detector/SKILL.md",
     "skills/hep-detector/references/data-mc-validation-and-detector-systematics.md",
     "skills/hep-detector/references/detector-case-studies-and-checklists.md",
     "skills/hep-detector/references/detector-glossary.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/detector-systems-overview.md",
+    "skills/hep-detector/references/event-reconstruction.md",
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
+    "skills/hep-detector/references/photon-likelihood-reconstruction.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-measurement/references/hep-measurement-guide.md",
     "tests/skills/hep_detector/test_reference_links.py"
@@ -2010,13 +2014,13 @@
     "hep-citations",
     "hep-measurement"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "9ff83cdf 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/detector-principles-bibliography.md",
    "owner": "hep-detector",
-   "bytes": 17036,
-   "lines": 218,
+   "bytes": 23037,
+   "lines": 283,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/charge-confusion.md",
@@ -2024,7 +2028,7 @@
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "6f156782 2026-10-25"
+   "last_commit": "6bfc7873 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/detector-principles-summary.md",
@@ -2099,20 +2103,23 @@
   {
    "path": "skills/hep-detector/references/event-reconstruction.md",
    "owner": "hep-detector",
-   "bytes": 13430,
-   "lines": 215,
+   "bytes": 13717,
+   "lines": 219,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/calibration-and-alignment.md",
+    "skills/hep-detector/references/calorimetry-ecal-hcal.md",
     "skills/hep-detector/references/data-mc-validation-and-detector-systematics.md",
+    "skills/hep-detector/references/detector-measurement-framework.md",
     "skills/hep-detector/references/detector-principles-bibliography.md",
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/detector-simulation.md",
     "skills/hep-detector/references/readout-digitization-and-overlay.md",
-    "skills/hep-detector/references/timing-detectors.md"
+    "skills/hep-detector/references/timing-detectors.md",
+    "skills/hep-detector/references/tracking-and-vertexing.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "e2957da1 2026-10-25"
+   "last_commit": "267d534a 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/extensive-air-showers.md",
@@ -2190,6 +2197,7 @@
     "skills/hep-detector/references/detector-simulation.md",
     "skills/hep-detector/references/event-reconstruction.md",
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
+    "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-detector/references/triggers-luminosity-pileup.md"
    ],
@@ -2199,8 +2207,8 @@
   {
    "path": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
    "owner": "hep-detector",
-   "bytes": 15790,
-   "lines": 256,
+   "bytes": 20710,
+   "lines": 324,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
@@ -2215,7 +2223,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "1450e47f 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/geant4-study-protocol.md",
@@ -2244,8 +2252,8 @@
   {
    "path": "skills/hep-detector/references/ground-based-detection-arrays.md",
    "owner": "hep-detector",
-   "bytes": 11706,
-   "lines": 169,
+   "bytes": 20909,
+   "lines": 296,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
@@ -2257,13 +2265,13 @@
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "1450e47f 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/imaging-atmospheric-cherenkov.md",
    "owner": "hep-detector",
-   "bytes": 11356,
-   "lines": 168,
+   "bytes": 13375,
+   "lines": 197,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-citations/references/primary-sources-and-version-checks.md",
@@ -2273,6 +2281,7 @@
     "skills/hep-detector/references/extensive-air-showers.md",
     "skills/hep-detector/references/neutrino-astronomy.md",
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
+    "skills/hep-detector/references/photon-likelihood-reconstruction.md",
     "skills/hep-ml/references/space-and-astroparticle-ml.md",
     "skills/hep-statistics/references/astroparticle-statistics.md",
     "skills/hep-statistics/scripts/li_ma_significance.py"
@@ -2282,7 +2291,7 @@
     "hep-ml",
     "hep-statistics"
    ],
-   "last_commit": "ebb58136 2026-10-19"
+   "last_commit": "267d534a 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/multimessenger-analysis.md",
@@ -2321,8 +2330,8 @@
   {
    "path": "skills/hep-detector/references/neutrino-astronomy.md",
    "owner": "hep-detector",
-   "bytes": 10187,
-   "lines": 154,
+   "bytes": 10456,
+   "lines": 157,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/cherenkov-imaging-variants-and-photosensors.md",
@@ -2331,18 +2340,19 @@
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/multimessenger-analysis.md",
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
+    "skills/hep-detector/references/photon-likelihood-reconstruction.md",
     "skills/hep-statistics/references/astroparticle-statistics.md"
    ],
    "cited_by_other_skills": [
     "hep-statistics"
    ],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "267d534a 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
    "owner": "hep-detector",
-   "bytes": 12538,
-   "lines": 188,
+   "bytes": 21180,
+   "lines": 303,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/detector-case-studies-and-checklists.md",
@@ -2351,10 +2361,11 @@
     "skills/hep-detector/references/detector-principles-summary.md",
     "skills/hep-detector/references/front-end-waveform-processing.md",
     "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
+    "skills/hep-detector/references/photon-likelihood-reconstruction.md",
     "skills/hep-detector/references/signal-formation-and-readout.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9257d7b5 2026-10-15"
+   "last_commit": "1450e47f 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
@@ -2396,6 +2407,7 @@
     "skills/hep-detector/references/muon-systems.md",
     "skills/hep-detector/references/neutrino-astronomy.md",
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
+    "skills/hep-detector/references/photon-likelihood-reconstruction.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-detector/references/space-based-direct-detection.md",
     "skills/hep-detector/references/timing-detectors.md",
@@ -2431,6 +2443,24 @@
    ],
    "cited_by_other_skills": [],
    "last_commit": "e03c0396 2026-10-22"
+  },
+  {
+   "path": "skills/hep-detector/references/photon-likelihood-reconstruction.md",
+   "owner": "hep-detector",
+   "bytes": 17669,
+   "lines": 265,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-detector/SKILL.md",
+    "skills/hep-detector/references/detector-principles-bibliography.md",
+    "skills/hep-detector/references/event-reconstruction.md",
+    "skills/hep-detector/references/ground-based-detection-arrays.md",
+    "skills/hep-detector/references/imaging-atmospheric-cherenkov.md",
+    "skills/hep-detector/references/neutrino-astronomy.md",
+    "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "1450e47f 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/physics-objects-jets-btagging-met.md",
@@ -2483,6 +2513,7 @@
     "skills/hep-detector/references/detector-systems-overview.md",
     "skills/hep-detector/references/event-reconstruction.md",
     "skills/hep-detector/references/performance-metrics-and-residual-diagnostics.md",
+    "skills/hep-detector/references/photon-likelihood-reconstruction.md",
     "skills/hep-detector/references/response-and-forward-folding.md"
    ],
    "cited_by_other_skills": [],
@@ -2534,6 +2565,7 @@
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
     "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
+    "skills/hep-detector/references/photon-likelihood-reconstruction.md",
     "skills/hep-detector/references/readout-digitization-and-overlay.md"
    ],
    "cited_by_other_skills": [
@@ -2608,8 +2640,8 @@
   {
    "path": "skills/hep-detector/references/tracking-and-vertexing.md",
    "owner": "hep-detector",
-   "bytes": 16699,
-   "lines": 248,
+   "bytes": 23735,
+   "lines": 352,
    "linked_from_skill_md": true,
    "cited_by": [
     "contracts/rules/design_adequacy.json",
@@ -2637,7 +2669,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "765bf693 2026-10-25"
+   "last_commit": "1450e47f 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/triggers-luminosity-pileup.md",
@@ -5059,6 +5091,7 @@
   ],
   "reconstruction": [
    "skills/hep-detector/references/event-reconstruction.md",
+   "skills/hep-detector/references/photon-likelihood-reconstruction.md",
    "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md"
   ],
   "report": [

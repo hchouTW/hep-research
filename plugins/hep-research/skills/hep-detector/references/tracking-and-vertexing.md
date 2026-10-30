@@ -90,20 +90,57 @@ threshold is a tunable parameter that directly trades duplicate tracks against
 efficiency for genuinely nearby tracks, such as those in a dense jet core or a
 collimated decay.
 
+### Track-finding strategies
+
+The finding algorithm sets which tracks can be found at all, so its assumptions are part
+of the efficiency definition. Four families are in use:
+
+- **Road following / combinatorial Kalman filter.** Seeds of a few hits are extended
+  layer by layer; the filter's predicted covariance sets the search window, the search
+  branches on every compatible hit and branches are pruned on fit quality. It suits dense
+  silicon trackers. A track whose seed layers miss a hit is lost unless several seed
+  layer combinations are used, and the cost grows with branching (a common implementation:
+  Ai et al., Comput. Softw. Big Sci. 6 (2022) 8).
+- **Global transforms (Hough, Legendre and relatives).** Each hit maps to a curve in
+  track-parameter space, and tracks are peaks where curves intersect; the Legendre form
+  uses lines tangent to drift circles. Missing hits matter little, which suits drift
+  chambers and uniformly sampled geometries. The trajectory family is assumed (a line, or
+  a circle through a known origin), so displaced, kinked and looping tracks fall outside
+  it; the binning limits the resolution, and high occupancy gives fake peaks.
+- **Cellular automaton and segment linking.** Short segments between neighbouring layers
+  are connected when compatible and evolved into the longest consistent chains. It is
+  local and parallel; the compatibility cuts must allow for scattering at low momentum.
+- **Graph-based learned finding.** Hits are nodes, candidate links are edges, and a
+  trained network scores the edges before a classical fit. It is validated as a learned
+  reconstruction ([event reconstruction](event-reconstruction.md#validating-a-learned-reconstruction));
+  the parameters and covariance still come from the classical fit.
+
+Detectors with few measurement planes (a space-borne spectrometer, a cosmic-ray
+telescope) can test every hit combination and rank by fit quality, since the combinatorics
+are small. The risk then moves to noise and secondary hits that fit well by chance and to
+tracks with a missing plane. Whatever the strategy, quote the efficiency separately for
+the populations it can miss: displaced, low-momentum, kinked and closely spaced tracks.
+
+**Check:** The finding strategy and its trajectory assumption are stated, and efficiency is
+quoted for displaced, low-momentum and closely spaced tracks, not only for prompt isolated
+ones.
+
 ## The track fit
 
 A track fit estimates trajectory parameters - typically a position and direction at a
 reference surface plus a curvature - from the collected hits. The **Kalman filter** formulation is
-standard because it handles multiple scattering naturally. It assumes Gaussian process noise;
-electron bremsstrahlung is not Gaussian, so electrons need a Gaussian-sum filter or a dedicated
-bremsstrahlung fit, and their track momentum is biased low with a long tail. Use the smoother for
-unbiased residuals at every layer and outlier down-weighting for wrong hits: rather than
+standard because it handles multiple scattering naturally: rather than
 treating the trajectory as a single deterministic curve, it propagates the parameter
 estimate and its covariance layer by layer, inflating the covariance at each material
 crossing by the expected scattering. This makes the fit's own uncertainty estimate
 depend on the material model - so an incorrect material description produces
 incorrect, usually overconfident, track parameter errors, without any obvious symptom
-in the fitted values themselves.
+in the fitted values themselves. The filter assumes Gaussian process noise; electron
+bremsstrahlung is not Gaussian, so electrons need a Gaussian-sum filter or a dedicated
+bremsstrahlung fit, and their track momentum is biased low with a long tail. Use the smoother
+for the best estimate at every layer; for unbiased residuals remove the hit from the smoothed
+state (or refit without it), since a smoothed residual includes the hit; and down-weight
+outliers to handle wrong hits.
 
 Several points routinely cause trouble:
 
@@ -121,6 +158,55 @@ Several points routinely cause trouble:
   systematic momentum bias.
 - **Fitting quality varies across the detector.** Efficiency and resolution must be
   quoted differentially in the relevant variables, not integrated.
+
+Three variants of the fit address specific failures of the plain filter:
+
+- **Global `chi^2` and broken lines.** All hits are fitted at once, with a scattering
+  angle at each layer as an explicit parameter (general broken lines: Kleinwort, Nucl.
+  Instrum. Methods A 673 (2012) 107). For a linear Gaussian model it gives the same result
+  as the filter plus smoother, and its derivatives with respect to sensor positions make it
+  the natural fit for track-based alignment.
+- **Deterministic annealing filter.** Each hit carries an assignment weight computed from
+  its residual and iterated with a decreasing temperature, so outliers and the wrong side
+  of a left-right ambiguity are down-weighted rather than cut.
+- **Gaussian-sum filter.** The bremsstrahlung energy-loss distribution is approximated by
+  a mixture of Gaussians propagated as parallel components (Adam et al., J. Phys. G 31
+  (2005) N9). The number of components is reduced by merging at each step, a tunable
+  approximation. The estimate is a mixture, so state whether its mean or its mode is
+  used; the two differ in the low-momentum tail.
+
+**Check:** The fitter (filter and smoother, global or broken-lines fit, annealing, Gaussian
+sum) is named for each particle type, with how outliers are handled.
+
+## Propagation in a non-uniform field
+
+The fit transports the track state and its covariance between measurement surfaces. In a
+uniform field the helix is analytic; in a non-uniform field (fringe fields, dipoles and
+permanent magnets with strong gradients, layers partly outside the field) the equation of
+motion is integrated numerically, usually with an adaptive-step Runge-Kutta method, and
+the transport Jacobian is integrated with it or computed numerically. Consequences:
+
+- **The field map is a nuisance parameter.** A scale error in the map is a rigidity scale
+  error; a shape error gives a bias that depends on rigidity and on the path. The map's
+  version, its measurement or model source, and (for permanent magnets) its temperature
+  dependence belong in the conditions record.
+- **The lever arm is the bending power along the actual path.** The fitted parameter is
+  `q/p` at a reference surface, and resolution follows the field weighted by the
+  measurement lever arm along the path (the sagitta-like double integral of `B` when the
+  measurements lie inside the field; `int B dl` with the lever arm of the outer planes when
+  they lie outside it), not
+  `int B dl` alone; tracks crossing a region of weak bending power have worse resolution
+  at the same rigidity, so quote resolution against the path through the field, not only
+  against rigidity.
+- **Step size and tolerance are reconstruction parameters.** Validate them against a
+  fine-step reference propagation and with pulls; a tolerance that is too loose produces
+  a rigidity bias with no visible effect on `chi^2`.
+- Energy loss and scattering are applied along the steps with the mass hypothesis, as for
+  the uniform case above.
+
+**Check:** For a non-uniform field, the field-map version and source, the propagation
+method and its tolerance are recorded, and resolution is quoted against the bending power
+along the path.
 
 ## Rigidity resolution and its two regimes
 
@@ -209,6 +295,21 @@ signal; a map of reconstructed vertices reproduces the detector material layout,
 that map is both a background to reject and a useful tool for validating the material
 model against data.
 
+**Vertex finding** comes before the vertex fit: it decides which tracks belong to which
+vertex. Seeds come from clustering the tracks' longitudinal positions (and times, where
+measured) near the beam line or from pairs of compatible tracks. Iterative finding fits
+all candidate tracks, removes the least compatible, refits, and repeats for the next
+vertex. Adaptive fitting gives each track a weight from its compatibility, recomputed
+with a decreasing annealing temperature, which makes the fit robust against mis-assigned
+tracks (Waltenberger, Frühwirth and Vanlaer, J. Phys. G 34 (2007) N343); in a multi-vertex
+fit several vertices compete for the same tracks. The failures are merged nearby vertices,
+split vertices and fake vertices from secondary interactions; timing separates vertices
+that are close in space. Vertex efficiency, merging rate and fake rate depend on vertex
+separation and track multiplicity and are quoted against both.
+
+**Check:** The vertex-finding method is stated, and efficiency, merging and fake rates are
+quoted against vertex separation and track multiplicity.
+
 ## Alignment coupling
 
 A track fit assumes it knows where the sensors are. Alignment errors propagate
@@ -245,3 +346,6 @@ external information - see
 - Impact parameter and vertex resolution quoted with momentum dependence.
 - Alignment weak modes considered, and what external constraint bounds a
   charge-antisymmetric rigidity bias.
+- Track-finding strategy and fitter per particle type; for a non-uniform field, the
+  field-map version, propagation method and tolerance.
+- Vertex-finding method with efficiency, merging and fake rates.

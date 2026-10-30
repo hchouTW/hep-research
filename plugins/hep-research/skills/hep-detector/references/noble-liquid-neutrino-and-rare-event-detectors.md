@@ -38,11 +38,67 @@ wavelength shifter such as TPB (PDG RPP 2025, sec. 36, noble liquids).
   position-dependent light collection and charge (nonuniformity), field distortions,
   recombination model, and electron-equivalent vs nuclear-recoil energy scales.
 - **Topology reconstruction** in large single-phase LArTPC neutrino detectors:
-  tracks/showers/vertices from pattern recognition on wire-time images.
+  tracks, showers and vertices from the wire-time images (next subsection).
 
 **Ambiguities.** `S1`/`S2` mis-pairing, wire-plane ambiguity (three planes resolve 2D
 projections), diffusion and lifetime uncertainty vs true `dE/dx`, and cosmic pileup in
 surface detectors.
+
+**Position from the light pattern (dual phase).** The `xy` of an `S2` comes from the
+fraction of light seen by each top-array sensor, fitted with a light-response map; how the
+map is derived and why positions near the wall are biased inward are in
+[photon likelihood reconstruction](photon-likelihood-reconstruction.md#the-expected-light-model).
+Field non-uniformity displaces the drifting electrons, so the reconstructed `S2` position
+is mapped back to the interaction position with a field-distortion map, which enters the
+fiducial volume.
+
+### Imaging reconstruction in single-phase LArTPCs
+
+The input is the deconvolved charge on each wire versus drift time
+([front-end waveform processing](front-end-waveform-processing.md#lar-tpc-signal-processing)),
+one two-dimensional image per wire plane.
+
+- **From views to 3D.** Two strategies dominate. *View matching* reconstructs 2D clusters
+  in each plane and matches them across planes by their common drift-time range, with many
+  small algorithms run in passes for cosmic-ray and neutrino hypotheses (Acciarri et al.,
+  Eur. Phys. J. C 78 (2018) 82). It struggles with tracks at nearly constant drift time
+  (all hits at one time in every view) and with tracks along one wire direction. *Tomographic
+  imaging* solves for the charge in 3D cells consistent with all planes at once, using the
+  charge measured on each plane to suppress ghost cells (Qian et al., J. Instrum. 13 (2018)
+  P05032). Ghosts remain in dense regions. Both depend on the dead and noisy channel map,
+  which breaks tracks or opens gaps.
+- **Interaction time.** The drift coordinate needs `t0` from scintillation light, a beam
+  spill or an external tagger. At the surface many cosmic tracks fall within each readout
+  (drift-time) window, but few within the spill itself, so matching the light to a track
+  is how the beam-coincident track is found; removing the rest is the first reconstruction
+  step, with its own efficiency for the neutrino interaction.
+- **Calorimetry.** Charge per unit length `dQ/dx` is corrected for electron lifetime,
+  for space-charge displacement of the position and of the local field, and for the
+  channel response, then converted to `dE/dx` with a recombination model (modified Box or
+  Birks form, parameters measured at the local field; recombination also depends on the
+  track angle to the drift field). The conversion is steep at high
+  charge density, so errors grow toward the end of a stopping track. The track pitch on a
+  wire grows as the track points along the drift direction (the charge on each wire is
+  spread over a long time) or along the wire orientation, where the deconvolved charge is
+  least reliable.
+- **Momentum and energy.** Range gives the momentum of a contained stopping track (with a
+  particle hypothesis); multiple Coulomb scattering, from a likelihood of the deflection
+  angles between track segments, gives the momentum of an exiting track (Abratenko et al.,
+  J. Instrum. 12 (2017) P10010); showers are measured calorimetrically, with a correction
+  for charge lost below threshold.
+- **Identification.** For stopping particles, `dE/dx` versus residual range (the Bragg
+  peak) separates protons from muons and pions. Electron and photon showers differ in the
+  `dE/dx` of their first few centimetres (one minimum-ionizing track versus two from a
+  pair conversion) and in the gap between the vertex and a photon shower's start.
+- **Failure modes.** Tracks broken at dead regions, merged tracks near the vertex, a track
+  direction reversed, and a vertex placed at the wrong end; each has a rate measured in
+  simulation and checked on control samples: stopping cosmic muons (Bragg peak and the
+  `dE/dx` scale), decay electrons, neutral-pion mass, and crossing tracks for lifetime and
+  space charge.
+
+**Check:** The 3D strategy, the `t0` source, the recombination model with its field, the
+momentum method for each track class, and the rates of broken, merged and reversed tracks
+are stated.
 
 ### Distinctive but generalizable reconstruction and performance features (noble-liquid TPC)
 
@@ -105,6 +161,9 @@ PMT gain/timing calibration, reflection, and light-attenuation time dependence.
 **Liquid scintillator.** Much higher light yield (better energy resolution, low
 threshold), isotropic light so weaker directional information, quenching for heavy
 particles, and scintillator/optical aging.
+The vertex, direction, energy and ring or topology fits of both media, with their seeds,
+hypothesis comparisons and per-event errors, are in
+[photon likelihood reconstruction](photon-likelihood-reconstruction.md).
 
 ## Rare-event detectors
 
@@ -132,6 +191,57 @@ fiducialization, and energy scale** dominate the result.
 - **Discrimination and background leakage**: leakage fraction versus acceptance measured
   with calibration sources; extrapolation to low energy is the dominant uncertainty.
 - **Blind analysis**: masked signal regions ([analysis design](../../hep-measurement/references/analysis-design.md)).
+
+### Pileup and position in cryogenic and germanium detectors
+
+- **Pileup in slow detectors.** A thermal or phonon pulse rises over a long time compared
+  with fast scintillator or ionization pulses, so two events closer than a resolving time
+  (of order the rise time, or below it with pulse-shape tests) merge into one amplitude.
+  Random coincidences in one detector scale as the resolving time times the square of that
+  detector's event rate, which favours small or segmented detectors; in a double-beta-decay
+  search the coincidences of two-neutrino decays can fill the region of interest of the
+  neutrinoless decay. Pileup is searched for on the heat signal and on a faster channel
+  where one exists, such as the light detector of a scintillating bolometer, by a template
+  fit of the pulse (the optimal filter of
+  [front-end waveform processing](front-end-waveform-processing.md#amplitude-and-time-from-sampled-waveforms))
+  with a goodness-of-fit or residual test, by pulse-shape tests on the rising edge, or by a
+  two-pulse fit (Chernyak et al., Eur. Phys. J. C 74 (2014) 2913). The rejection versus
+  pulse separation is measured by superposing measured pulses at known separations, not
+  assumed; near threshold, noise triggers and pileup with small pulses enter the
+  low-energy event rate. Pileup in fast germanium readout is handled by the fast channel of
+  [digital pulse processing](front-end-waveform-processing.md#digital-pulse-processing-for-spectroscopy).
+- **Position from phonons.** With several fast sensors of athermal phonons (for example
+  superconducting transition-edge sensors), rather than thermistors that respond mainly to
+  the thermal phonons, the early (athermal) part of the signal is shared among the sensors
+  according to where the energy was deposited, and its arrival is delayed in the far
+  sensors; the partition and delay give a position, while the later thermal part does not.
+- **Position from the charge electrodes.** In ionization-and-heat detectors, interleaved
+  electrodes on the surfaces separate events near a surface, whose charge is collected on
+  the electrodes of that side only, from bulk events, whose electrons and holes reach the
+  fiducial electrodes of opposite sides (Broniatowski et al., Nucl. Instrum. Methods A 559 (2006) 378). The fiducial
+  volume that this defines is measured as the fraction of events uniform in the bulk
+  (cosmogenic or neutron-activation lines) that pass the cut, as a function of energy,
+  since the charge resolution degrades the cut near threshold.
+- **Position and topology in germanium.** The current pulse shape depends on where the
+  charge is created. In small-contact detectors (point-contact or broad-energy types),
+  whose weighting field is concentrated near the read-out contact, the maximum current of a
+  single-site event hardly depends on its position, so the ratio of maximum current to
+  energy separates single-site from multi-site events and flags events near the read-out
+  contact and slow events in the surface layer (Budjáš et al., J. Instrum. 4 (2009) P10007);
+  in large-contact (semi-coaxial) detectors this ratio discriminates poorly and other
+  pulse-shape variables are used. The cut is calibrated on double-escape peaks (a
+  single-site proxy, but not uniform in the volume) and on single-escape and full-energy
+  peaks (multi-site-rich); its acceptance at the signal energy is an extrapolation,
+  cross-checked on the two-neutrino continuum or with simulation. The discrimination itself
+  is in
+  [front-end waveform processing](front-end-waveform-processing.md#pulse-shape-discrimination).
+  Segmented detectors add position from which segment collects the charge and from the
+  transient signals induced on its neighbours.
+
+**Check:** The pileup resolving time and its rejection efficiency versus pulse separation
+are measured with superposed pulses, and the position or fiducial cut states its
+observable (phonon partition, electrode charge, pulse shape) and its calibration, as a
+function of energy, with uniformly distributed events or calibration peaks.
 
 ### Distinctive but generalizable reconstruction and performance features (rare-event)
 
@@ -180,8 +290,13 @@ fiducialization, and energy scale** dominate the result.
 
 - The two (or more) signal channels, the combination rule, and the recombination/lifetime
   correction with its uncertainty.
+- For LArTPC topology reconstruction: the 3D strategy, the dead-channel map used, the
+  momentum method per track class, and the identification variables with their control
+  samples.
 - The energy scale (electron-equivalent vs nuclear recoil) and its calibration source.
 - Threshold efficiency, fiducial volume, and their uncertainties.
+- For cryogenic and germanium detectors: the pileup resolving time and rejection efficiency,
+  and the position or fiducial observable with its calibration.
 - Discrimination leakage versus energy with its calibration sample.
 - For neutrino work: containment, the energy-estimator definition, and the near/far
   cancellation assumption.

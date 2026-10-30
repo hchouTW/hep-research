@@ -172,6 +172,46 @@ All three are energy-dependent and direction-dependent, so a single global corre
 is inadequate; corrections are normally parameterized in energy and pseudorapidity or
 polar angle, and their residual uncertainty flows into the constant term.
 
+## Shower position, direction and shape
+
+Clustering itself (windows, topological growth, splitting) is in
+[event reconstruction](event-reconstruction.md#clustering); this section covers what is
+estimated from a cluster besides its energy.
+
+- **Position.** The energy-weighted centroid of the cells is pulled toward the centre of
+  the hit cell, because the shower core is narrow compared with the cell, giving an
+  S-shaped bias against the true position within the cell. It is corrected with a
+  parameterized S-curve from simulation or test beam, or reduced by logarithmic weights
+  `w_i = max(0, w_0 + ln(E_i/E))`, which also suppress noisy low-energy cells; `w_0` is a
+  tuned cut-off (Awes et al., Nucl. Instrum. Methods A 311 (1992) 130). At inclined
+  incidence the centroid moves with depth, so the position is quoted at a stated depth,
+  usually the energy-dependent depth of shower maximum.
+- **Direction.** In a longitudinally segmented or imaging calorimeter, a line fitted
+  through the per-layer centroids (weighted by each layer's energy and position
+  resolution) gives the shower axis. Its resolution improves with energy and with the
+  number of layers sampled; early-shower fluctuations and back-scattered energy bias it,
+  so the fit uses the layers around and after the start of the shower. For a charged
+  primary, the track segment before the shower start also constrains the direction.
+- **Shape.** The shape discriminants are introduced under electromagnetic showers above;
+  in addition, a core-to-ring energy ratio, rear leakage and a fitted gamma-function
+  longitudinal profile are common inputs. Hadronic showers start later on average because
+  the interaction length exceeds the radiation length (strongly in high-`Z` absorbers; the
+  contrast is weaker in low-`Z` media). Two nearby photons (a neutral-pion
+  decay) appear as a broadened or double-peaked deposit. In an imaging calorimeter without
+  a magnet in front of it, a multivariate combination of shape variables is often the main
+  electron-proton separator. Its proton rejection is measured on data, with control
+  samples tagged by an independent subsystem or by template fits of the shape variable,
+  because the simulated tails of hadronic showers are the least reliable part of the
+  model.
+- **Per-event energy uncertainty.** Evaluate the stochastic, noise and constant terms at
+  the cluster energy, and enlarge or flag the error for events whose shape indicates
+  leakage (a late shower maximum, a large rear fraction, a shower near a crack). Validate
+  with pulls on test-beam data or `E/p` of isolated electrons.
+
+**Check:** Position is corrected for the cell bias and quoted at a stated depth; the
+direction fit, shape variables and their electron-hadron rejection are validated on data
+control samples; per-event energy errors are checked with pulls.
+
 ## Calorimeter-based identification
 
 Beyond shower shape, the ratio of calorimeter energy to track momentum, `E/p`, is a
@@ -205,3 +245,5 @@ the other identification systems.
   dependence.
 - Shower-shape or `E/p` discriminants used for identification, with data/MC agreement
   demonstrated in a control region before they are relied on.
+- Position correction (S-curve or logarithmic weighting, `w_0`) and the depth at which
+  position is quoted; the direction-fit method for segmented calorimeters.

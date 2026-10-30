@@ -13,6 +13,10 @@ C = [
  ("dr-direct-2", "zh-Hant", "direct", "請幫我建立這個量能器的響應矩陣，並檢查 data/MC agreement。", "hep-detector", ["response matrices", "data/MC agreement"], None, None, {}),
  ("dr-neighbor-1", "en", "neighboring", "Unfold this measured spectrum with the response matrix I already have.", "hep-statistics", ["unfolding"], "hep-detector", None, {}),
  ("dr-negative-1", "en", "negative", "Design the background estimate for my dilepton measurement using control regions.", "hep-measurement", ["background estimation", "control regions"], "hep-detector", None, {}),
+ ("dr-reco-1", "en", "direct", "Which track-finding and vertex-finding algorithms suit a high-occupancy silicon tracker, and how do I check their efficiency for displaced tracks?", "hep-detector", ["tracking", "vertexing"], None, None, {"set": "RECO"}),
+ ("dr-reco-2", "en", "direct", "Set up the charge and arrival-time likelihood reconstruction of vertex, direction and energy for our water Cherenkov detector.", "hep-detector", ["reconstruction"], None, None, {"set": "RECO"}),
+ ("dr-reco-3", "zh-Hant", "direct", "LArTPC 的 3D 重建與 dE/dx 量能（reconstruction, calorimetry）該怎麼選方法？", "hep-detector", ["reconstruction", "calorimetry"], None, None, {"set": "RECO"}),
+ ("dr-reco-neg", "en", "negative", "Train a graph neural network that scores hit-pair edges for our tracker: set up the training loops, data loading and mixed precision.", "hep-ml", ["training loops", "mixed precision"], "hep-detector", None, {"set": "RECO"}),
  # hep-review
  ("rv-direct-1", "en", "direct", "Do a recorded review of my fit's statistical treatment with review obligations and tell me which assurance tier it reaches.", "hep-review", ["recorded review", "review obligations", "assurance tiers"], None, None, {}),
  ("rv-direct-2", "zh-Hant", "direct", "請對這段分析程式和推導做有紀錄的審查：列出 review obligations，並說明能達到哪個 assurance tier。", "hep-review", ["review obligations", "assurance tiers"], None, None, {}),

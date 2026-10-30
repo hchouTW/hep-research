@@ -53,6 +53,38 @@ energy, since the shower footprint grows with energy). Each station records a si
   why hybrid designs use fluorescence for calibration rather than as the primary
   exposure-defining detector.
 
+### Surface-array event reconstruction
+
+- **Station signal scale.** Each station's signal is expressed in units of a reference
+  muon signal (the vertical through-going muon in a water-Cherenkov tank, the
+  minimum-ionizing peak in a scintillator), calibrated continuously from the
+  atmospheric-muon background, so the scale follows ageing and temperature without a
+  separate run. That background is omnidirectional, so its peak is related to the
+  reference unit by a fixed ratio measured separately, not equal to it.
+- **Saturation.** Stations near the core can saturate. A low-gain channel or a fit to the
+  undistorted part of the pulse recovers part of the range; beyond that the signal is a
+  lower bound and enters the lateral-distribution fit as censored, not as a measured value.
+- **Core and size fit.** The core position and the signal at the reference distance are
+  fitted together with a lateral-distribution function, using Poisson-like statistics for
+  small signals and including stations that did not trigger (they bound the footprint, as
+  unhit channels do in [photon likelihood reconstruction](photon-likelihood-reconstruction.md#the-per-channel-likelihood)).
+  The station-signal model includes shower-to-shower and particle-sampling fluctuations,
+  which set the per-event uncertainty of the size and of the energy; that uncertainty also
+  includes the uncertainty of the assumed lateral-distribution shape, which the
+  reference-distance choice above keeps small but not zero.
+- **Station times.** The arrival-direction fit (above) weights each station's start time by
+  a time-variance model: the first particle's arrival time fluctuates more far from the core,
+  where the shower front is thicker, and less when many particles are sampled.
+- **Muon and electromagnetic components.** Separating them needs a second response:
+  dedicated shielded or buried muon detectors, layered detectors with different relative
+  response to muons and to electrons and photons, or the time structure of the station
+  signal (muons arrive earlier and sharper). Each separation is a model-dependent
+  decomposition with its own calibration.
+
+**Check:** The station signal scale, the treatment of saturated and non-triggered stations,
+the station time-variance model used in the direction fit, and the per-event uncertainty of
+the size estimator are stated.
+
 ## Fluorescence detectors
 
 As a shower's charged particles ionize atmospheric nitrogen, the nitrogen fluoresces,
@@ -87,6 +119,35 @@ rather than of the shower physics.
   fluorescence yield 3.6%; Verzi for the Pierre Auger Collaboration, PoS ICRC2019 (2019) 231, opened
   2026-10-14; take the budget from the experiment's energy-scale paper).
 <!-- /example -->
+
+### Fluorescence geometry and profile reconstruction
+
+- **Shower-detector plane.** The pixels on the shower image define, through their
+  pointing directions weighted by signal, the plane containing the shower axis and the
+  telescope.
+- **Axis within the plane.** The arrival time at each pixel against its viewing angle
+  `chi_i` in that plane follows `t_i = t_0 + (R_p/c) tan((chi_0 - chi_i)/2)` for a shower at
+  the speed of light, where `t_0` is the time the shower front passes the point of closest
+  approach, giving the distance of closest approach `R_p` and the axis angle `chi_0`. For short
+  or distant tracks the curvature of this relation is weak and `R_p` and
+  `chi_0` are degenerate, the main weakness of monocular reconstruction. One surface
+  station's time breaks the degeneracy (hybrid reconstruction); a second telescope gives
+  the axis as the intersection of two planes (stereo).
+- **Profile.** The light at the aperture is converted to energy deposit per depth after
+  subtracting the direct and scattered Cherenkov light that the shower also sends toward
+  the telescope, with the atmospheric transmission of the night; the deposit profile is then
+  fitted (see [extensive air showers](extensive-air-showers.md)). Geometry errors propagate
+  into both `X_max` and energy, so the event selection usually requires a well-constrained
+  geometry and a viewed shower maximum.
+
+<!-- example: source citation -->
+These steps follow the reconstruction described for a hybrid observatory (The Pierre Auger
+Collaboration, Nucl. Instrum. Methods A 798 (2015) 172).
+<!-- /example -->
+
+**Check:** Fluorescence events state monocular, hybrid or stereo geometry, the Cherenkov
+subtraction and atmospheric transmission used, and the propagation of geometry errors into
+`X_max` and energy.
 
 ## Atmospheric monitoring
 
@@ -143,6 +204,67 @@ scintillators on its water-Cherenkov stations (PDG RPP 2025, sec. 36.2.1;
 arXiv:1604.03637).
 <!-- /example -->
 
+### Radio reconstruction
+
+The emission and its scaling are summarized above; this subsection covers how an event is
+reconstructed from the antenna signals (review: Huege, Phys. Rep. 620 (2016) 1).
+
+- **Voltage to electric field.** Each antenna records two or three polarization channels.
+  The field vector is obtained by unfolding the antenna's vector effective length (its
+  direction- and frequency-dependent pattern) and the gain and phase of the analogue chain.
+  The unfolding needs the arrival direction, so field and direction are iterated. The result
+  is a band-limited field, so the band is part of every quoted amplitude. Narrow-band
+  transmitters are removed in the frequency domain, which also removes some signal power.
+  The antenna pattern and absolute gain, calibrated with a reference source and monitored
+  with the Galactic radio background, are usually the leading energy-scale systematic.
+- **Finding the pulses.** Most arrays read out on an external trigger from particle
+  detectors, which then sets the radio efficiency. Self-triggering must reject impulsive
+  man-made noise: it requires coincidences between neighbouring antennas consistent with a
+  front moving at about the speed of light, a polarization consistent with geomagnetic
+  emission, and directions away from known noise sources near the horizon. Within the
+  trigger-predicted window an antenna counts as having a signal above a signal-to-noise
+  threshold; near that threshold, noise produces false pulses and biases the measured signal
+  upward.
+- **Energy fluence per antenna.** The observable is the energy fluence, the time-integrated
+  Poynting flux `epsilon_0 c ∫ E^2 dt` (definition) in the signal window. The noise
+  fluence measured outside the window is subtracted; the noise, including its interference
+  term with the signal, sets the per-antenna uncertainty.
+- **Direction and core.** Antenna times fit a wavefront, a plane as first guess and then a
+  hyperbolic (conical far from the axis) front; interferometric beamforming is an
+  alternative. The footprint is not rotationally symmetric: geomagnetic emission is
+  polarized along `v x B` and charge-excess emission radially, so they interfere along the
+  `v x B` axis and add without interference along `v x (v x B)`, where the polarization
+  measures the charge-excess fraction. The core and the lateral distribution are therefore
+  fitted in these shower-plane coordinates.
+- **Energy.** The fluence integrated over the footprint is the radiation energy. After
+  dividing out the geomagnetic-angle dependence (the geomagnetic field amplitude scales with
+  `sin alpha`, so its fluence with `sin^2 alpha`; the charge-excess part does not depend on
+  `alpha`, and its fraction grows with the air density) and correcting for the air density at
+  shower maximum, it scales quadratically with the electromagnetic energy (*approximate*:
+  the exponent, close to 2, is fitted in simulation; Glaser et al., J. Cosmol. Astropart. Phys.
+  09 (2016) 024). Showers arriving close to the field direction carry little radio signal and
+  are measured poorly. Radio measures the electromagnetic energy only; the absolute scale is
+  tied to the antenna calibration or to another detector.
+- **Depth of maximum and composition.** The footprint size and its Cherenkov-like ring
+  depend on the geometric distance to the shower maximum. Comparing each event with
+  simulated footprints spanning `X_max` gives `X_max` (Buitink et al., Phys. Rev. D 90 (2014)
+  082003); parametric lateral functions with a distance-to-`X_max` term are the faster
+  alternative, and the wavefront curvature and the spectral slope are further
+  `X_max`-sensitive observables. The fit returns a geometric distance; converting it to slant
+  depth needs the atmospheric density profile, an uncertainty to list. Muon content needs a
+  particle detector (see the muon and electromagnetic bullet in surface-array reconstruction
+  above).
+- **Per-event uncertainty.** Noise sets the per-antenna errors and the threshold bias.
+  Events with few antennas have a degenerate core and `X_max`. Template results also carry
+  the simulation's uncertainty: the refractive-index profile (humidity), the antenna model
+  and shower-to-shower fluctuations. Validate with pulls in simulation and against an
+  independent energy or `X_max` measurement on common events.
+
+**Check:** Radio events state the frequency band, the antenna-pattern and gain calibration,
+the trigger (external or self), the wavefront and footprint model with the corrections for
+geomagnetic angle and air density, the atmospheric density profile used to convert to
+`X_max`, and the validation against an independent measurement.
+
 ### Instrument response functions (checklist)
 
 State, with its version: the effective area or aperture (m^2 sr) above full trigger efficiency, the trigger efficiency below it for each primary; the energy threshold and the energy bias and resolution versus energy; the angular
@@ -166,3 +288,8 @@ resolution (PSF, for example the 68% containment radius R68) versus energy; and 
 - Duty cycle and exposure calculation for the dataset used, and whether a spectrum
   measurement relies on the surface array's continuous exposure or the fluorescence
   detector's reduced duty cycle.
+- Station signal scale and the treatment of saturated and non-triggered stations; for
+  fluorescence events, the geometry mode (monocular, hybrid, stereo) and the Cherenkov
+  subtraction.
+- For radio events: the frequency band, antenna calibration, trigger, footprint model and
+  the `X_max` method with its simulation inputs.

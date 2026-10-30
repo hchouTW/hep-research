@@ -85,6 +85,51 @@ An estimate of `x` from `y` is only as good as the answer to four questions:
 A "resolution" in a plot usually blends the first two and hides the rest; a
 "systematic uncertainty" is the leftover freedom in the last four.
 
+## Choosing the estimator
+
+Reconstruction replaces `p(x | y, theta)` by a point estimate `x_hat` and, at best, a
+per-event uncertainty. The estimator families differ in how much of the forward model
+they use, and so in what they need and how they fail:
+
+| Family | Uses | Optimal when | Fails when |
+|---|---|---|---|
+| Moments and geometry (centroid, image moments, truncated mean, a straight-line fit to hit times) | a few summary statistics | rarely (a centroid is the maximum-likelihood estimate for independent position samples from a Gaussian of known width, not for cell-integrated deposits); fast, robust, needs no full model | the response is asymmetric, truncated or saturated (edges, gaps, saturated channels): biased, with no per-event error |
+| Least squares (`chi^2`, Kalman filter) | measurements with a covariance | measurement errors Gaussian with known covariance and a model linear near the solution | asymmetric tails (Landau, bremsstrahlung): inefficient, and biased when the model uses the most-probable value or hit selection truncates the tails; wrong hits: biased; symmetric tails (scattering tails): inefficient, with an underestimated covariance |
+| Full likelihood over all channels | the probability of every channel's observation given `x` and `theta`, including channels without signal | the forward model is right, including noise and medium | the model or `theta_hat` is wrong; local minima; cost |
+| Template (likelihood with a simulated library) | the expected observation for each `x`, tabulated from simulation | simulation describes the detector and the physics | simulation mismodelling enters the estimate directly; grid and interpolation error |
+| Learned (trained regression or classifier) | an approximation to the posterior mean or quantiles under the training sample's prior on `x` (estimates regress toward it; a different true spectrum gives a different bias) | the training sample covers the data | domain shift and out-of-range inputs (training in hep-ml; [validating a learned reconstruction](event-reconstruction.md#validating-a-learned-reconstruction)) |
+
+A moment estimate is the usual seed for a fit, and an `x_hat` from a later family is not
+better unless the extra model content is validated.
+
+Five issues recur in every family:
+
+- **Seeds and local minima.** An iterative fit converges to the minimum nearest its
+  start. Use several starts or a coarse scan, record which minimum was taken, and count
+  the events that converge to a wrong one: that rate is a reconstruction inefficiency,
+  usually concentrated in a mirror solution (a reversed direction, the other side of a
+  wire, a reflected image).
+- **Discrete hypotheses.** Where the topology or species is discrete (one ring or two,
+  track or cascade, electron or muon), fit each hypothesis and compare. The comparison is
+  a classifier with an efficiency and a mis-identification rate, and a hypothesis with
+  more parameters fits better by construction, so the raw likelihood difference is not
+  the decision variable without calibration.
+- **Per-event uncertainty.** The curvature of `-ln L` or `chi^2` at the minimum gives
+  an asymptotic error that fails for few-photon or few-hit events, near physical
+  boundaries and for non-parabolic likelihoods. A likelihood scan, a fit to the
+  likelihood landscape, or resampling is the alternative. Either way, validate it with
+  pulls in simulation in the variables that matter, and with redundant measurements in
+  data.
+- **Fit quality is not goodness of fit.** The minimum of `-ln L` depends on the number
+  of channels and the signal size, so a raw likelihood value is not comparable across
+  events; use a quality variable normalized per event and calibrated on simulation.
+- **Fixed `theta_hat`.** A fit with `theta` fixed returns an uncertainty without the
+  shared systematic; that part comes from varying `theta` coherently over the whole
+  sample ([data mc validation and detector systematics](data-mc-validation-and-detector-systematics.md)).
+
+**Check:** Each reconstructed quantity names its estimator family, seed, hypothesis
+comparison and how its per-event uncertainty was validated with pulls.
+
 ## Bias, variance, resolution, efficiency, robustness, calibration
 
 - **Response** `R = <x_reco>/x_true` at fixed truth (a property of the detector plus
@@ -186,3 +231,5 @@ subdetectors, sidebands, cosmic rays) whose own bias is part of the uncertainty
   source and correlation.
 - Every quoted performance number with its conditioning population, estimator,
   center, width, and tail definition.
+- For each reconstructed quantity: the estimator family, its seed, the hypotheses
+  compared, and the pull validation of its per-event uncertainty.
