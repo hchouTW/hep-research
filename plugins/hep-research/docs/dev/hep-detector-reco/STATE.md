@@ -22,10 +22,10 @@ steps:
   T6: {status: done, after: {static: {pass: 29, fail: 0, skip: 2}, pytest: {passed: 2888, failed: 25, errors: 1, skipped: 83}}, one_sided: [], notes: "26 failing ids, all in the T1 base list; 3 base failures passed this time (diagrams hanging-renderer, find_python 3.11/3.12 floor, PyROOT floor: environment-timing tests); inventory --check pass; routing part 4081 B"}
   T7: {status: done, content_head: 2d8e931c53aebae9a14865e45d958839ea04f82b, re_review: done, findings: {critical: 0, major: 2, minor: 9}, fixed: 9, not_fixed: ["9 (applicability already stated; spec places it)", "10 (routing budget, criterion 4)", "12 optional (unchanged text, follow-up)"], notes: "fix commit 9ff83cdf, inventory regenerated 37b68e3d; after-t7: T5 gate pass, static 29/0/2, pytest 2888 passed 25 failed 0 errors 83 skipped, no one-sided failure; re-review: all resolved or justifiably deferred, 3 new minor wording points (A, B, C) open, no fix round left; reviewer dispatched while the T6 pytest ran (content fixed at CONTENT_HEAD)"}
   T8: {status: done, notes: "CHANGELOG Unreleased matches item W and names photon-likelihood-reconstruction.md and the four case ids; VALIDATION section DETECTOR-RECONSTRUCTION-METHODS appended with this run's numbers; spot checks of the first must-state point of F (five-row estimator table), A (product over hit and unhit channels with censored saturated channels), B (four track-finding families), C (LArTPC topology bullet replaced by pointer to the new subsection), D (track segment before the shower start): all present; static 29/0/2 after the VALIDATION edit; check_wiring pass; wiring, routing and doc-consistency tests pass; check_packaging exit 0"}
-  T9: {status: pending, commits: [], notes: ""}
+  T9: {status: done, commits: [258895ae, 9bf0ee1a, 267d534a, 2d8e931c, 9ff83cdf, 37b68e3d, 75456b50, this commit], notes: "patch series exported to work root out/; main checkout HEAD and porcelain equal their T0 record; nothing pushed"}
 fix_rounds_used: {T7: 1}
 stops: []
-next_action: "T9 final run state and export"
+next_action: "await user: review the branch; push or PR only on request"
 ```
 
 ## Log
@@ -49,4 +49,5 @@ next_action: "T9 final run state and export"
 2026-10-30 | T7 | after-t7: static 29/0/2; pytest 2888 passed 25 failed 0 errors 83 skipped; no one-sided failure | none
 2026-10-30 | T7 | re-review of 2d8e931c..9ff83cdf: all findings resolved or justifiably deferred; new minor A, B, C left open (fix round used; A's wording would drop a marker phrase) | this commit
 2026-10-30 | T8 | VALIDATION section written; CHANGELOG checked against item W; five must-state spot checks pass; check_packaging exit 0 | this commit
+2026-10-30 | T9 | final run state; series exported with git format-patch BASE..HEAD to the work root out/ | this commit
 ```
