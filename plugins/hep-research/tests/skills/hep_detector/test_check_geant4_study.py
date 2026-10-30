@@ -382,5 +382,49 @@ class EffectiveConfigInputs(unittest.TestCase):
             self.C.derived(study, {"recorded": False})
 
 
+class RealizationEntryTests(unittest.TestCase):
+    """The realization profile named by an element_sim spec enters the input manifest from its recorded path, or,
+    when that path is from another machine, from a same-named copy above the spec whose sha256 matches; the entry
+    keeps the recorded path, so a replayed campaign writes the same record on every machine."""
+
+    def setUp(self):
+        sys.path.insert(0, str(SCRIPT.parent))
+        import check_geant4_study as C
+        self.C = C
+        self._t = tempfile.TemporaryDirectory()
+        self.root = Path(self._t.name)
+        self.esp = self.root / "artifacts" / "specs" / "x.spec.json"
+        self.esp.parent.mkdir(parents=True)
+        self.esp.write_text("{}", encoding="utf-8")
+        self.profile = self.root / "artifacts" / "p.realization.json"
+        self.profile.write_text('{"mapping": "1.1.0"}', encoding="utf-8")
+        self.sha = C.sha256_file(self.profile)
+
+    def tearDown(self):
+        self._t.cleanup()
+
+    def test_recorded_path_present_is_used(self):
+        entry = self.C.realization_entry({"path": str(self.profile), "sha256": self.sha}, self.esp, self.root)
+        self.assertEqual(entry, {"path": "artifacts/p.realization.json", "sha256": self.sha})
+
+    def test_path_from_another_machine_resolves_to_the_matching_copy(self):
+        rp = "~/no-such-machine-folder/p.realization.json"
+        entry = self.C.realization_entry({"path": rp, "sha256": self.sha}, self.esp, self.root)
+        self.assertEqual(entry, {"path": rp, "sha256": self.sha})
+
+    def test_copy_with_another_hash_or_no_recorded_hash_is_not_used(self):
+        rp = "~/no-such-machine-folder/p.realization.json"
+        self.assertIsNone(self.C.realization_entry({"path": rp, "sha256": "0" * 64}, self.esp, self.root))
+        self.assertIsNone(self.C.realization_entry({"path": rp}, self.esp, self.root))
+
+    def test_no_copy_found_outside_root(self):
+        inner = self.root / "inner"
+        (inner / "specs").mkdir(parents=True)
+        esp = inner / "specs" / "y.spec.json"
+        esp.write_text("{}", encoding="utf-8")
+        rp = "~/no-such-machine-folder/p.realization.json"
+        self.assertIsNone(self.C.realization_entry({"path": rp, "sha256": self.sha}, esp, inner))
+
+
 if __name__ == "__main__":
     unittest.main()

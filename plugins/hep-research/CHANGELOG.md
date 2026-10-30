@@ -3,6 +3,20 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **`check_geant4_study.py`: a replayed campaign writes the same study record on every machine.** The realization
+  profile named by an element_sim spec's provenance entered the input manifest only when its recorded path existed on
+  the running machine, so replaying the J15 campaign (`examples/design-minimal-spectrometer/`) away from the machine
+  that recorded it silently dropped that entry. A same-named copy next to the spec or in a folder above it (inside the
+  study root) now stands in when its sha256 equals the recorded one, and the entry keeps the recorded path. The
+  checker's code-identity hash changes, so the `geant4-thin-silicon`, `design-minimal-spectrometer` and
+  `design-search-j16` outputs are regenerated on E2; no other value changes.
+- **Release regeneration documented** (`docs/maintenance.md`, "Regenerating outputs for a release"): the environment,
+  the order (`qed-prediction` before `published-comparison`), the version-only diff rule, a local project-free
+  `TMPDIR` for `check_relocation.py`, and the README size statement and manifest order.
+- Evidence: VALIDATION RELEASE-FOLLOWUPS-0.50.0
+
 ## 0.50.0 (2026-10-30)
 
 Minor release; contracts 3.17.0, `CORE_VERSION` 1.4.0, the adapters, scripts and every skill's `description` are

@@ -8435,3 +8435,16 @@ branch `task/hep-detector-reco-methods` at base `313637c1`; every number below w
 | Tests | `run_all_checks.py --part static --no-cli` and `pytest tests/skills tests/routing tests/tools/test_check_wiring.py` at the base, after the content, and after the review fixes | static: 29 pass, 0 fail, 2 skip (host CLI) at all three; pytest base 2885 passed, 28 failed, 1 error, 83 skipped; after the review fixes 2888 passed, 25 failed, 0 errors, 83 skipped; every failure is a base failure (29 base ids: hep-ml script and torch-asset tests, the Python and PyROOT floor tests, synthetic NanoAOD, the diagram renderer, the CLI contract, no-bytecode), 0 one-sided failures; 4 base failures passed in the later runs (environment timing). Follow-up: static 29/0/2; pytest after the follow-up fixes 2887 passed, 26 failed, 1 error, 83 skipped, 0 one-sided failures; in the run before those fixes one PyROOT-floor test failed outside the base list, from temporary-folder cleanup on the network file system (it fails at random when its file is repeated alone and reads no reference), and passed in the final run. After the open-item fixes (final text): static 29/0/2; pytest 2886 passed, 27 failed, 1 error, 83 skipped, 0 one-sided failures |
 
 Passing checks show contract and documentation consistency, not physical validity of the methods described.
+
+## RELEASE-FOLLOWUPS-0.50.0 — 2026-10-30 (Linux, EL9 x86_64; Python 3.13.2 with the CI lock; version 0.50.0 + unreleased)
+
+Two follow-ups from the 0.50.0 release: a portable realization-profile entry in `check_geant4_study.py` study records,
+and the release regeneration procedure in `docs/maintenance.md`.
+
+| Item | Evidence | Result |
+|---|---|---|
+| Realization entry | `RealizationEntryTests` in `tests/skills/hep_detector/test_check_geant4_study.py` (recorded path present; path from another machine resolved to a matching copy; a copy with another or no recorded hash refused; nothing taken from outside the study root) | 28 tests in the module pass |
+| Replay away from E2 | `examples/design-minimal-spectrometer/run.py --out <tmp>` on Linux, with no file at the recorded `~/Workspace/...` path | the input manifest of all 11 study records equals the committed (E2) one; before the change each lacked the realization-profile entry |
+| Committed outputs | `geant4-thin-silicon`, `design-minimal-spectrometer`, `design-search-j16` regenerated on E2 (the checker's code-identity hash is in their study records) | `e28ff1b9` (E2): 21 files (`geant4-thin-silicon` 7, `design-minimal-spectrometer` 14, `design-search-j16` none), every changed line a hash (the checker's code identity and the sha256 values covering it), no PNG; afterwards `tests.examples.test_geant4_thin_silicon`, `test_design_minimal_spectrometer`, `test_design_search_j16` and `test_check_geant4_study` pass on Linux with the CI lock |
+
+Passing checks show software consistency, not physical validity.
