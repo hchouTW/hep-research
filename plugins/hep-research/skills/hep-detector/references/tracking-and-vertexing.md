@@ -138,7 +138,9 @@ incorrect, usually overconfident, track parameter errors, without any obvious sy
 in the fitted values themselves. The filter assumes Gaussian process noise; electron
 bremsstrahlung is not Gaussian, so electrons need a Gaussian-sum filter or a dedicated
 bremsstrahlung fit, and their track momentum is biased low with a long tail. Use the smoother
-for unbiased residuals at every layer, and down-weight outliers to handle wrong hits.
+for the best estimate at every layer; for unbiased residuals remove the hit from the smoothed
+state (or refit without it), since a smoothed residual includes the hit; and down-weight
+outliers to handle wrong hits.
 
 Several points routinely cause trouble:
 

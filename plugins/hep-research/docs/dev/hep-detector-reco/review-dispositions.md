@@ -94,3 +94,15 @@ major:
 | D5 | optional | ground-based-detection-arrays.md, noble-liquid-neutrino-and-rare-event-detectors.md | Check lines could name the density profile and the energy dependence of the fiducial fraction | fixed on user request: radio Check line names the density profile; germanium Check line adds "as a function of energy" |
 
 All open items above (A, B, C, 12, D1-D5) were fixed after the run on the user's request ("fix item in Still open"); see STATE.md.
+
+### Re-review of the open-item fixes
+
+A fresh-context re-reviewer of `git diff 976114a6 1450e47f` found all nine items (A, B, C, 12, D1-D5) resolved, nothing
+critical or major, and four new points, all fixed in the next commit:
+
+| # | Severity | File | Finding | Disposition |
+|---|---|---|---|---|
+| N1 | minor | tracking-and-vertexing.md | "Use the smoother for unbiased residuals": smoothed residuals include the hit (the glossary defines an unbiased residual as one whose prediction excludes the measurement) | fixed: "Use the smoother for the best estimate at every layer; for unbiased residuals remove the hit from the smoothed state (or refit without it), since a smoothed residual includes the hit" |
+| N2 | minor | noble-liquid-neutrino-and-rare-event-detectors.md | "as a function of energy" attached to the calibration peaks in the Check line | fixed: "its calibration, as a function of energy, with uniformly distributed events or calibration peaks" |
+| N3 | cosmetic | noble-liquid-neutrino-and-rare-event-detectors.md | Short and over-long lines after the rewrap | fixed: rewrapped |
+| N4 | cosmetic | photon-likelihood-reconstruction.md | "often called per degree of freedom" | fixed: "often called the value per degree of freedom" |

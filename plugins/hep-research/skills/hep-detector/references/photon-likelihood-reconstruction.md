@@ -188,7 +188,7 @@ Specific to this method: the directional error is usually taken from a scan of t
 likelihood around the best direction with a fitted (for example paraboloid) contour, or from
 resampling the hits, and its pulls are binned in energy and topology, since a constant
 rescaling is acceptable only if the pull width is flat in both. Useful quality variables
-are: the minimum of `-ln L` divided by a stated count, often called per degree of freedom
+are: the minimum of `-ln L` divided by a stated count, often called the value per degree of freedom
 (for example hit channels minus fitted parameters, although the likelihood also runs over
 unhit channels), a crude normalization with no reference distribution whose energy and
 topology dependence is calibrated on simulation; the number of hits with small time

@@ -64,4 +64,5 @@ next_action: "await user: review the branch; push or PR only on request"
 2026-10-30 | follow-up | re-review of 6bfc7873..93735497: all 15 resolved; D1-D4 minor and D5 optional left open (fix round used) | this commit
 2026-10-30 | follow-up | pytest after fixes: 2887 passed 26 failed 1 error 83 skipped, no one-sided failure (the PyROOT flake passed); static 29/0/2; VALIDATION and CHANGELOG updated | this commit
 2026-10-30 | open items | user: fix the items still open; A, B, C (first-pass re-review), 12 (garbled unchanged track-fit sentence), D1-D5 (follow-up re-review) fixed; markers 50/50, Check rule pass, layering ok, inventory regenerated (6 warnings, 0 overlaps), wiring, routing, packaging pass, static 29/0/2 | this commit
+2026-10-30 | open items | re-review of 976114a6..1450e47f: all nine resolved; N1 (smoothed residual not unbiased), N2, N3, N4 fixed; the pytest started before these fixes was stopped (log in work root open-items/stopped-run) and restarted on the final text | this commit
 ```

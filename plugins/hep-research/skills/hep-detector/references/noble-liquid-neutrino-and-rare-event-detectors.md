@@ -207,15 +207,14 @@ fiducialization, and energy scale** dominate the result.
   with a goodness-of-fit or residual test, by pulse-shape tests on the rising edge, or by a
   two-pulse fit (Chernyak et al., Eur. Phys. J. C 74 (2014) 2913). The rejection versus
   pulse separation is measured by superposing measured pulses at known separations, not
-  assumed; near threshold, noise triggers and
-  pileup with small pulses enter the low-energy event rate. Pileup in fast germanium
-  readout is handled by the fast channel of
+  assumed; near threshold, noise triggers and pileup with small pulses enter the
+  low-energy event rate. Pileup in fast germanium readout is handled by the fast channel of
   [digital pulse processing](front-end-waveform-processing.md#digital-pulse-processing-for-spectroscopy).
 - **Position from phonons.** With several fast sensors of athermal phonons (for example
   superconducting transition-edge sensors), rather than thermistors that respond mainly to
-  the thermal phonons, the early (athermal) part of the signal is shared among them according to where the energy was deposited, and its arrival
-  is delayed in the far sensors; the partition and delay give a position, while the later
-  thermal part does not.
+  the thermal phonons, the early (athermal) part of the signal is shared among the sensors
+  according to where the energy was deposited, and its arrival is delayed in the far
+  sensors; the partition and delay give a position, while the later thermal part does not.
 - **Position from the charge electrodes.** In ionization-and-heat detectors, interleaved
   electrodes on the surfaces separate events near a surface, whose charge is collected on
   the electrodes of that side only, from bulk events, whose electrons and holes reach the
@@ -241,8 +240,8 @@ fiducialization, and energy scale** dominate the result.
 
 **Check:** The pileup resolving time and its rejection efficiency versus pulse separation
 are measured with superposed pulses, and the position or fiducial cut states its
-observable (phonon partition, electrode charge, pulse shape) and its calibration with
-uniformly distributed events or calibration peaks, as a function of energy.
+observable (phonon partition, electrode charge, pulse shape) and its calibration, as a
+function of energy, with uniformly distributed events or calibration peaks.
 
 ### Distinctive but generalizable reconstruction and performance features (rare-event)
 

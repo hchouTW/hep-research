@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 43,
-   "bytes": 652381,
+   "bytes": 652525,
    "uncited": 0
   },
   "hep-measurement": {
@@ -2223,7 +2223,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "93735497 2026-10-30"
+   "last_commit": "1450e47f 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/geant4-study-protocol.md",
@@ -2265,7 +2265,7 @@
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "93735497 2026-10-30"
+   "last_commit": "1450e47f 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/imaging-atmospheric-cherenkov.md",
@@ -2351,8 +2351,8 @@
   {
    "path": "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
    "owner": "hep-detector",
-   "bytes": 21174,
-   "lines": 304,
+   "bytes": 21180,
+   "lines": 303,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/detector-case-studies-and-checklists.md",
@@ -2365,7 +2365,7 @@
     "skills/hep-detector/references/signal-formation-and-readout.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "93735497 2026-10-30"
+   "last_commit": "1450e47f 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/nuclear-interactions-in-detector-material.md",
@@ -2447,7 +2447,7 @@
   {
    "path": "skills/hep-detector/references/photon-likelihood-reconstruction.md",
    "owner": "hep-detector",
-   "bytes": 17659,
+   "bytes": 17669,
    "lines": 265,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -2460,7 +2460,7 @@
     "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "9ff83cdf 2026-10-30"
+   "last_commit": "1450e47f 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/physics-objects-jets-btagging-met.md",
@@ -2640,8 +2640,8 @@
   {
    "path": "skills/hep-detector/references/tracking-and-vertexing.md",
    "owner": "hep-detector",
-   "bytes": 23607,
-   "lines": 350,
+   "bytes": 23735,
+   "lines": 352,
    "linked_from_skill_md": true,
    "cited_by": [
     "contracts/rules/design_adequacy.json",
@@ -2669,7 +2669,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "9ff83cdf 2026-10-30"
+   "last_commit": "1450e47f 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/triggers-luminosity-pileup.md",
