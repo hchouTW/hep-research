@@ -86,7 +86,7 @@ round-5 attacks still fail.
 | N1-R6-F3 | minor | §6 listed “adding a step with confirmation not required” | §6 list names deliverable confirmation fields and an added step's pin | Control §6 |
 | N1-R6-F4 | minor | Model's freeze items 3–4 stricter than the text, unreported | §4.4 states the model's reading (a required check attempt without a result spends the sample; item 4 covers another artifact of any step) | Control §4.4 |
 
-## N1 — round 7 (first review of the single 'overtaken' rule; open, spec copy not changed)
+## N1 — round 7 (first review of the single 'overtaken' rule; fixed in v12.2 after the user's decision of 2026-10-30, re-reviewed in round 8)
 
 Context `s0-reconstruction-v12-r7`, R2, N1 violated; reproduced by the coordinator with `s0/round7-attack.py`.
 
@@ -95,6 +95,16 @@ Context `s0-reconstruction-v12-r7`, R2, N1 violated; reproduced by the coordinat
 | N1-R7-F1 | major | `overtaken` looks only at outputs of attempts with confirmed termination: a newer draw that ends unknown, or one abandoned by a human and later reconciled, does not overtake the older output; a revert then re-binds and publishes the old checked output without a pin. The abandoned-and-reconciled case contradicts Control §4.2 (“whatever its end state”) | A1, A2 | count every attempt of the step that was admitted after the older output (its intent), whatever its end state and whether it has outputs, as overtaking it |
 | N1-R7-F2 | major | Check attempts that end without a result (cancelled, failed, timed out) are counted nowhere (report, publish, admission): confirmation aborted on S1 and S2, pass on S3, published T3C with `confirmation_results` = 1 and `failed_draws` = 0; a non-deterministic check can be retried until it passes | B1, B2 | count check attempts without a result as failed check draws in history and publish; a confirmation sample read by an aborted check attempt is spent |
 | N1-R7-F3 | minor | Control §3 diagram: cancelling → failed omits timeout | — | add timeout |
+
+Changes for round 7 (user decision 2026-10-30: the control layer ships, DEC-02 approved, fix and review again).
+Model 92/92 scenarios, 44/44 mutations; derivation version v12.2. Replaying `s0/round7-attack.py`: A1 no longer
+publishes (X1 overtaken, D not met); the remaining attacks are covered by t92, t93.
+
+| Id | Change | Where |
+|---|---|---|
+| N1-R7-F1 | `overtaken` counts every newer **attempt** of the step name (a fact after the artifact was first seen) that did not produce a usable and current output — failed, cancelled, unknown, abandoned (reconciled or not), unattested or not current — with or without outputs; in-flight and reuse attempts and attempts that reproduced the artifact do not overtake. Model: `first_seen`, `overtaken`, `step_intents` (per-step intent index, Control §4.8); scenario t92; mutation “unresolved newer attempts do not overtake” | Control §4.2 |
+| N1-R7-F2 | Check attempts on artifacts of the chain that ended without a check result are **failed check draws**, in the report, the task-wide history and publish (`failed_check_draws`); those that read a confirmation sample are listed among the confirmation results; such a sample is spent (already so by §4.4 item 3, now stated). Model: `failed_check_draws`, `aborted_checks`, `confirmation_results`, `publish`; scenario t93; mutation “aborted check attempts not counted” | Control §2 (publish), §4.5, §5.4 |
+| N1-R7-F3 | cancelling → failed includes timeout | Control §3 |
 
 ## N3 — statistics
 

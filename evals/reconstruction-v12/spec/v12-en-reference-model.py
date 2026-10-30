@@ -55,6 +55,12 @@ in that step after it (any attempt of the step name, any contract, whatever its 
 usable and current; an overtaken artifact binds only through a pin (human approval). This covers reverts, reproduced
 digests, unattested peeks and removed-and-re-added steps (S0r6-N1-F1, F2). A step added by a later contract has no
 pin (S0r6-N1-F2).
+v12.2, after the seventh S0 round (user decision 2026-10-30: fix and review again): an artifact is also overtaken by a
+newer attempt of its step that produced no usable and current output — one that failed, was cancelled, is unknown, was
+abandoned (also when later reconciled), or computed an unattested output — whether or not it has outputs; attempts
+still in flight and reuse attempts do not overtake (S0r7-N1-F1). Check attempts on artifacts of the chain that ended
+without a check result are counted as failed check draws in the report and in publish, and those that read a
+confirmation sample appear among the confirmation results (S0r7-N1-F2). The derivation version is v12.2.
 
 Run: python3 -I hep-research-reconstruction-v12-en-reference-model.py
 """
@@ -65,7 +71,7 @@ import math
 from dataclasses import dataclass, field, replace
 from typing import Any
 
-DERIVATION_VERSION = "v12.1"
+DERIVATION_VERSION = "v12.2"
 
 
 def h(*parts: Any) -> str:
@@ -140,6 +146,7 @@ class Log:
         self._by_identity: dict = {}
         self._by_step_out: dict = {}
         self._by_check_target: dict = {}
+        self._by_step_intent: dict = {}
         self._intent: dict = {}
 
     @property
@@ -221,6 +228,7 @@ class Log:
         if f.kind == "intent":
             self._intent[a] = f
             self._by_identity.setdefault(f.get("identity"), []).append(f)
+            self._by_step_intent.setdefault(f.get("step"), []).append(f)
             if f.get("step") == "__check__":
                 self._by_check_target.setdefault(dict(f.get("inputs") or ()).get("target"), []).append(f)
         if f.kind in ("receipt", "reconcile", "reuse"):
@@ -789,15 +797,51 @@ def self_current(log: Log, digest: str) -> bool:
 
 
 @memo
+def first_seen(log: Log, step: str, digest: str):
+    """Sequence number of the first terminal fact of an attempt of the step that output this digest."""
+    for f in log._by_step_out.get(step, []):
+        if terminal_fact(log, f.get("attempt")) is f and \
+                digest in ((f.get("source"),) if f.kind == "reuse" else (f.get("outputs") or ())):
+            return f.seq
+    return None
+
+
+IN_FLIGHT = ("admitted", "running", "cancelling")
+
+
+@memo
+def step_intents(log: Log, step: str) -> tuple:
+    """The intents of one step, from the log's index (Control §4.8: no whole-log scan per derivation call)."""
+    return tuple(log._by_step_intent.get(step, ()))
+
+
+@memo
 def overtaken(log: Log, digest: str) -> bool:
-    """r6 (S0r6-N1-F1, F2): an output first seen in the step after this artifact — by any attempt of the step name, under
-    any contract, whatever its end state or attestation — is no longer usable and current. Binding this artifact again
-    would be a choice among outputs already seen, so it binds only through a pin (human approval)."""
+    """r6, r7 (S0r6-N1-F1, F2; S0r7-N1-F1): a newer attempt of the step name — one with a fact after this artifact was
+    first seen, under any contract — produced no usable and current output: it failed, was cancelled, is unknown, was
+    abandoned (reconciled or not), or its output is unattested, invalidated or otherwise not current, with or without
+    outputs. Binding this artifact again would be a choice among draws already made, so it binds only through a pin
+    (human approval). Attempts still in flight, reuse attempts and attempts that reproduced this digest do not
+    overtake."""
     step = step_of(log, digest)
-    order = candidates_raw(log, step)
-    if digest not in order:
+    first = first_seen(log, step, digest)
+    if first is None:
         return False
-    return any(not (usable(log, e) and current(log, e)) for e in order[order.index(digest) + 1:])
+    for it in step_intents(log, step):
+        a = it.get("attempt")
+        if max(f.seq for f in log.of_attempt(a)) <= first:
+            continue
+        st = exec_status(log, a)
+        if st in IN_FLIGHT or st == "reused":
+            continue
+        tf = terminal_fact(log, a)
+        outs = tuple(tf.get("outputs") or ()) if tf is not None and tf.kind != "reuse" else ()
+        if digest in outs:
+            continue
+        if st == "computed" and any(usable(log, e) and current(log, e) for e in outs):
+            continue
+        return True
+    return False
 
 
 @memo
@@ -1070,9 +1114,33 @@ def failed_draws(log, step) -> list:
 def confirmation_results(log, step) -> list:
     """r4 (S0r4-N1-F1): every result on a confirmation sample of any artifact of the chain, so that confirming several
     draws on different samples and keeping one stays visible."""
-    return [(n, d, r.get("check"), result_sample(log, r), r.get("result")) for n in chain_steps(log, step)
+    done = [(n, d, r.get("check"), result_sample(log, r), r.get("result")) for n in chain_steps(log, step)
             for d in candidates_raw(log, n) for r in log.results_for(d)
             if result_sample(log, r) is not None and sample_role(log, result_sample(log, r)) == "confirmation"]
+    aborted = [(n, d, None, smp, "no result") for n, d, _, _, reads in failed_check_draws(log, step)  # r7
+               for smp in reads if sample_role(log, smp) == "confirmation"]
+    return done + aborted
+
+
+def failed_check_draws(log, step) -> list:
+    """r7 (S0r7-N1-F2): check attempts on artifacts of the chain that ended without a check result (failed, cancelled,
+    unknown, abandoned, or computed without a result), so retrying a check until it passes stays visible."""
+    targets = {d: n for n in chain_steps(log, step) for d in candidates_raw(log, n)}
+    return aborted_checks(log, targets)
+
+
+def aborted_checks(log, targets: dict) -> list:
+    out = []
+    for it in log.of("intent"):
+        if it.get("step") != "__check__":
+            continue
+        tgt = inputs_of(it).get("target")
+        a = it.get("attempt")
+        if tgt not in targets or exec_status(log, a) in IN_FLIGHT:
+            continue
+        if not any(r.get("check_attempt") == a for r in log.results_for(tgt)):
+            out.append((targets[tgt], tgt, a, exec_status(log, a), tuple(it.get("reads") or ())))
+    return out
 
 
 def task_history(log) -> dict:
@@ -1083,7 +1151,8 @@ def task_history(log) -> dict:
              for r in log.results_for(d) if r.get("result") in ("fail", "inconclusive")]
     draws = [x for n in steps for x in failed_draws_of_step(log, n)]
     arts = {n: len(step_artifacts(log, n)) for n in steps}  # r4 (S0r4-N1-F5): unchecked side-step variants are counted too
-    return {"failures": fails, "failed_draws": draws, "artifacts": arts}
+    checks = aborted_checks(log, {d: n for n in steps for d in candidates_raw(log, n)})  # r7 (S0r7-N1-F2)
+    return {"failures": fails, "failed_draws": draws, "artifacts": arts, "failed_check_draws": checks}
 
 
 def failed_draws_of_step(log, n) -> list:
@@ -1113,7 +1182,8 @@ def report_status(log, did) -> dict:
     """One row of the completion report: deliverable_status plus the historical failures on the dependency chain."""
     step = contract(log)["deliverables"][did].step
     return {**deliverable_status(log, did), "prior_failures": prior_failures(log, step),
-            "failed_draws": failed_draws(log, step), "confirmation_results": confirmation_results(log, step),
+            "failed_draws": failed_draws(log, step), "failed_check_draws": failed_check_draws(log, step),
+            "confirmation_results": confirmation_results(log, step),
             "task_history": task_history(log)}
 
 
@@ -1292,6 +1362,7 @@ def publish(log: Log, expect_head: int, did: str) -> Fact:
     return log.append("publish", "C", expect_head, deliverable=did, digest=st["artifact"], target=st["target"],
                       achieved=st["achieved"], prior_failures=len(pf), chain_artifacts=draws,
                       failed_draws=len(failed_draws(log, step)),
+                      failed_check_draws=len(failed_check_draws(log, step)),
                       confirmation_results=len(confirmation_results(log, step)),
                       task_failures=len(task_history(log)["failures"]),
                       task_artifacts=sum(task_history(log)["artifacts"].values()), head=expect_head,
@@ -2820,6 +2891,59 @@ def t91_overtaken_covers_peeks_and_readded_steps():
     assert contract_status(log, cf) == "pending_approval" and "alt" not in contract(log)["steps"]
 
 
+# ================================================================ counterexamples from the seventh S0 round (fixed in v12.2)
+
+def t92_unresolved_newer_draws_overtake():
+    # S0r7-N1-F1: a newer draw that ends unknown, or is abandoned and later reconciled, overtakes the older output
+    for ending in ("unknown", "abandoned", "abandoned-reconciled", "failed-no-output"):
+        log = new_log(base_steps())
+        run(log, "a1", "raw", "R1"); run(log, "a2", "reco", "X1"); check(log, "X1", "chkA", "crit1", "pass", "c1")
+        recontract(log, reco=reco_spec(program="pReco_alt"))
+        admit(log, log.head, "a3", "reco")
+        log.append("start", "B", attempt="a3")
+        if ending == "failed-no-output":
+            log.append("receipt", "B", attempt="a3", end="failure", termination="confirmed", outputs=())
+        else:
+            log.append("receipt", "B", attempt="a3", end="success", termination="unknown", outputs=())
+        if ending in ("abandoned", "abandoned-reconciled"):
+            log.append("decision", "human", action="abandon", attempt="a3")
+        if ending == "abandoned-reconciled":
+            log.append("reconcile", "B", attempt="a3", end="success", termination="confirmed", outputs=("Y",))
+        recontract(log, reco=reco_spec(program="pReco"))                    # revert to X1's program
+        assert label(log, "X1") == "overtaken" and bound(log, "reco") is None, ending
+        expect(Admission, publish, log, log.head, "D")
+    log = new_log(base_steps())                                             # an attempt still in flight does not overtake
+    run(log, "a1", "raw", "R1"); run(log, "a2", "reco", "X1"); check(log, "X1", "chkA", "crit1", "pass", "c1")
+    recontract(log, reco=reco_spec(program="pReco_alt")); admit(log, log.head, "a3", "reco")
+    recontract(log, reco=reco_spec(program="pReco"))
+    assert not overtaken(log, "X1") and bound(log, "reco") == "X1"
+
+
+def t93_aborted_checks_are_counted():
+    # S0r7-N1-F2: check attempts without a result are failed check draws; their confirmation samples are listed and spent
+    smp = {"S1": "confirmation", "S2": "confirmation", "S3": "confirmation"}
+    log = new_log(t3c_steps(), target="T3C", samples=smp)
+    log.append("freeze", "agent", step="reco", samples=("S1", "S2", "S3"), required=C1)
+    run(log, "a1", "raw", "R1"); run(log, "a2", "reco", "X1")
+    for a, s, end in (("c1", "S1", "cancelled"), ("c2", "S2", "failure")):
+        admit(log, log.head, a, "__check__", cost=0.0, reads=(s,), check=("chkA", "crit1", "X1"))
+        log.append("receipt", "B", attempt=a, end=end, termination="confirmed", outputs=())
+    check(log, "X1", "chkA", "crit1", "pass", "c3", sample="S3")
+    st = report_status(log, "D")
+    assert st["achieved"] == "T3C" and len(st["failed_check_draws"]) == 2
+    assert sorted(x[3] for x in st["confirmation_results"]) == ["S1", "S2", "S3"]
+    p = publish(log, log.head, "D")
+    assert p.get("failed_check_draws") == 2 and p.get("confirmation_results") == 3
+    check(log, "X1", "chkA", "crit1", "pass", "c4", sample="S1")           # S1 is spent: its result does not confirm
+    log2 = new_log(t3c_steps(), target="T3C", samples={"S1": "confirmation"})
+    log2.append("freeze", "agent", step="reco", samples=("S1",), required=C1)
+    run(log2, "a1", "raw", "R1"); run(log2, "a2", "reco", "X1")
+    admit(log2, log2.head, "c1", "__check__", cost=0.0, reads=("S1",), check=("chkA", "crit1", "X1"))
+    log2.append("receipt", "B", attempt="c1", end="cancelled", termination="confirmed", outputs=())
+    check(log2, "X1", "chkA", "crit1", "pass", "c2", sample="S1")
+    assert deliverable_status(log2, "D")["achieved"] == "T3E"               # a retry on the same sample is not a confirmation
+
+
 # ================================================================ mutation tests: every mutation must be caught by some scenario
 
 def _mut_fail_only_from_computed(log, digest):
@@ -2910,6 +3034,10 @@ MUTATIONS = {
                                                                independent_confirmation=True)
                                                     if k not in o["deliverables"] or o["deliverables"][k].target != "T3C"
                                                     else v for k, v in n["deliverables"].items()}}))),
+    "unresolved newer attempts do not overtake": ("overtaken", lambda orig: memo(lambda log, d: (lambda order: (
+        d in order and any(not (usable(log, e) and current(log, e)) for e in order[order.index(d) + 1:])))(
+        candidates_raw(log, step_of(log, d))))),
+    "aborted check attempts not counted": ("aborted_checks", lambda orig: (lambda log, targets: [])),
     "check inputs not resolved by C": ("check_inputs_for", lambda orig: (lambda log, t, c: {})),
     "added step may carry a pin": ("contract_at_least_as_strict", lambda orig: (
         lambda o, n: orig(o, {**n, "steps": {k: (replace(v, pin=None) if k not in o["steps"] else v)
