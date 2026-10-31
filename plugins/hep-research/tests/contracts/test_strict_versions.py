@@ -12,6 +12,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
+from tests._platform import protected_refusal  # noqa: E402
 from contracts import CONTRACTS_VERSION, dependencies, validate  # noqa: E402
 
 FIXTURE = json.loads((ROOT / "contracts" / "fixtures" / "artifacts" / "valid" / "computational_run.json").read_text())
@@ -71,7 +72,7 @@ class StrictVersionsTests(unittest.TestCase):
             self.assertEqual(code, 1, text)
             code, text = self.run_main(validate.main, [str(up), "--protected"])  # protected mode, no project: refused
             self.assertEqual(code, 3, text)
-            self.assertIn("protected.policy_missing", text)
+            self.assertIn(protected_refusal("protected.policy_missing"), text)
 
 
 if __name__ == "__main__":

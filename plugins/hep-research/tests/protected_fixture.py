@@ -14,9 +14,11 @@ import contextlib
 import datetime
 import json
 import os
+import unittest
 from pathlib import Path
 from unittest import mock
 
+from core import hostcaps
 from core.protected import revocation_log as rl
 from core.protected.trusted_input import Account
 
@@ -130,6 +132,8 @@ class ProtectedProject:
 
     # --- patches -----------------------------------------------------------------------------------------------------
     def start(self) -> ProtectedProject:
+        if not hostcaps.has("posix_ids"):  # protected mode is unsupported there (protected.unsupported_platform)
+            raise unittest.SkipTest("needs posix_ids")
         fake = Account(os.geteuid() + 4242, frozenset())
         self._patches = [mock.patch.object(Account, "current", classmethod(lambda cls: fake)),
                          mock.patch("core.protected.guard.plugin_identity", lambda: dict(PLUGIN))]

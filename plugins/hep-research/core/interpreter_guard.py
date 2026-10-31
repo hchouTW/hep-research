@@ -19,6 +19,9 @@ guard():
 3. Remove the marker from the environment, so programs this script starts get their own single switch.
 Nothing is ever printed on stdout.
 
+child_flags() is the interpreter options a parent passes to a child Python that runs a hep-research script: ["-X",
+"utf8"] on Windows, where rule 2 needs UTF-8 mode and isolated mode (-I) ignores PYTHONUTF8; [] elsewhere.
+
 This file is standard library only, imports nothing from the plugin and must parse and run on Python 3.9
 (tests/tools/test_python_compat.py FILES). Remove the guard when the default `python3` on supported macOS releases is
 at least MIN_PYTHON (docs/architecture.md section 6).
@@ -68,6 +71,11 @@ def switch_target(environ=None, argv=None) -> str | None:
     if os.access(target, os.W_OK) or os.access(os.path.dirname(target), os.W_OK):
         return None
     return target
+
+
+def child_flags() -> list:
+    """["-X", "utf8"] on Windows, else [] (module docstring): put it right after sys.executable."""
+    return ["-X", "utf8"] if os.name == "nt" else []
 
 
 def guard() -> None:

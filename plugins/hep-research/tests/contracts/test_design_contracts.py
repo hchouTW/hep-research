@@ -19,6 +19,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 from contracts.tool_contract import check  # noqa: E402
+from core.interpreter_guard import child_flags  # noqa: E402
 from design_fixtures import attach_cases, fake_contract  # noqa: E402
 
 CONTRACTS = ROOT / "contracts" / "tool_contracts"
@@ -28,7 +29,7 @@ PHI = NormalDist().cdf
 
 
 def tool(script: str, *args) -> dict:
-    p = subprocess.run([sys.executable, "-I", "-B", str(SCRIPTS / script), *map(str, args)], capture_output=True,
+    p = subprocess.run([sys.executable, *child_flags(), "-I", "-B", str(SCRIPTS / script), *map(str, args)], capture_output=True,
                        text=True, timeout=120)
     assert p.returncode == 0, p.stdout + p.stderr
     return json.loads(p.stdout)

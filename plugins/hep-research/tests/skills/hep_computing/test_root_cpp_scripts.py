@@ -2,9 +2,13 @@
 import json
 import shutil
 import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[3]))
+from tests._root_toolchain import with_vdt  # noqa: E402
 
 SCRIPTS = Path(__file__).resolve().parents[3] / 'skills' / 'hep-computing' / 'scripts'
 
@@ -92,7 +96,7 @@ class RootCppScriptArgsTests(unittest.TestCase):
     def test_env_check_parallel_runs_and_cleanup(self):
         import os
         with tempfile.TemporaryDirectory() as tmp:
-            env = dict(os.environ, TMPDIR=tmp)
+            env = with_vdt(dict(os.environ, TMPDIR=tmp))
             procs = [subprocess.Popen(['bash', str(SCRIPTS / 'check_root_cpp_env.sh'), '--json'], env=env,
                                       stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True) for _ in range(2)]
             results = [p.communicate(timeout=600) for p in procs]
@@ -112,7 +116,7 @@ class RootCppScriptArgsTests(unittest.TestCase):
             (fake / 'root').write_text('#!/bin/sh\necho "ROOT Version: 6.38/00"\necho "Built for linuxx8664gcc"\nexit 1\n')
             (fake / 'root').chmod(0o755)
             os.symlink(shutil.which('root-config'), fake / 'root-config')
-            env = dict(os.environ, PATH=f"{fake}{os.pathsep}{os.environ['PATH']}", TMPDIR=tmp)
+            env = with_vdt(dict(os.environ, PATH=f"{fake}{os.pathsep}{os.environ['PATH']}", TMPDIR=tmp))
             proc = subprocess.run(['bash', str(SCRIPTS / 'check_root_cpp_env.sh'), '--json'], env=env,
                                   capture_output=True, text=True, timeout=600)
             self.assertEqual(proc.returncode, 0, proc.stderr[-2000:])
@@ -127,7 +131,7 @@ class RootCppScriptArgsTests(unittest.TestCase):
             for name, body in (('root', 'echo "ROOT Version: 6.38/00"'), ('root-config', 'exit 1')):
                 (fake / name).write_text(f'#!/bin/sh\n{body}\n')
                 (fake / name).chmod(0o755)
-            env = dict(os.environ, PATH=f"{fake}{os.pathsep}{os.environ['PATH']}", TMPDIR=tmp)
+            env = with_vdt(dict(os.environ, PATH=f"{fake}{os.pathsep}{os.environ['PATH']}", TMPDIR=tmp))
             proc = subprocess.run(['bash', str(SCRIPTS / 'check_root_cpp_env.sh'), '--json'], env=env,
                                   capture_output=True, text=True, timeout=60)
             self.assertEqual(proc.returncode, 1, proc.stderr[-2000:])

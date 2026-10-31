@@ -16,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from tests.skills.test_cli_contract import TOOLS  # noqa: E402
-from tests.skills.test_cli_robustness import MISSING_FILE_ARGS, argv_sets  # noqa: E402
+from tests.skills.test_cli_robustness import MISSING_FILE_ARGS, argv_sets, unique_missing  # noqa: E402
 
 COPY = ("skills", "core", "contracts", "adapters", "profiles", ".claude-plugin")
 
@@ -48,7 +48,7 @@ class NoBytecode(unittest.TestCase):
         for script in TOOLS:
             runs = [["--help"]] + (argv_sets(MISSING_FILE_ARGS[script]) if script in MISSING_FILE_ARGS else [])
             for args in runs:
-                with tempfile.TemporaryDirectory() as cwd:
+                with tempfile.TemporaryDirectory() as cwd, unique_missing(args) as args:
                     subprocess.run([sys.executable, str(self.root / script), *args], capture_output=True, text=True,
                                    timeout=180, cwd=cwd, env=self.env)
                 made = _caches(self.root)

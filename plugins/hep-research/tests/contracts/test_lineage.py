@@ -16,6 +16,7 @@ from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
+from tests._platform import needs  # noqa: E402
 from contracts import lineage as ln  # noqa: E402
 from contracts import revocation as rv  # noqa: E402
 from contracts import validate as vd  # noqa: E402
@@ -276,6 +277,7 @@ class ProducerTests(unittest.TestCase):
         self.assertEqual(out["changes"][0]["decision"], "exposure-unknown")
         self.assertEqual(out["changes"][0]["data_exposure"]["state"], "unknown")
 
+    @needs("process_groups")  # batch bundles name a POSIX interpreter path (Slurm, HTCondor: not on Windows)
     def test_bundle_freezing(self):
         from tests.adapters.batch_harness import WORKER, Harness
         h = Harness("slurm", items=4, chunk=2)

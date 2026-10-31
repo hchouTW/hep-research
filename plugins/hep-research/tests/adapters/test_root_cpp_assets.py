@@ -17,6 +17,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from tests._root_toolchain import with_vdt
 from tests.skills.hep_computing.pyroot_floor import meets_floor
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
@@ -38,11 +39,19 @@ ROOT_CONFIG = _root_config()
 BIN = Path(ROOT_CONFIG).parent if ROOT_CONFIG else None
 
 
+# ROOT works, not only imports: its interpreter builds a RooWorkspace from a factory string, as make_root_fixtures.py
+# does. A ROOT whose cling no longer matches the host's C++ standard library (Homebrew ROOT 6.38.04 after a macOS
+# toolchain update: "header '__type_traits/can_extract_key.h' not found") imports, but the factory makes nothing.
+ROOT_WORKS = ("import sys, ROOT\nws = ROOT.RooWorkspace('w')\nws.factory('Gaussian::g(m[0,1], mu[0.5,0,1], s[0.1,0.01,1])')\n"
+              "sys.exit(0 if ws.var('m') else 1)\n")
+BROKEN = []  # interpreters that import ROOT but fail ROOT_WORKS
+
+
 def _pyroot_python():
-    """First interpreter that can `import ROOT`: $HEP_ROOT_PYTHON, python next to root-config, the Python ROOT was
-    built for (`root-config --python-version`), this interpreter, python3. None if none can (e.g. Homebrew ROOT
-    built for 3.14 while python3 is 3.13, where the import fails at dlopen). A candidate older than the plugin's
-    Python floor (3.13) is never used."""
+    """First interpreter whose ROOT works (ROOT_WORKS): $HEP_ROOT_PYTHON, python next to root-config, the Python ROOT
+    was built for (`root-config --python-version`), this interpreter, python3. None if none can (e.g. Homebrew ROOT
+    built for 3.14 while python3 is 3.13, where the import fails at dlopen); one that imports ROOT but fails the probe
+    goes into BROKEN. A candidate older than the plugin's Python floor (3.13) is never used."""
     cands = [os.environ.get("HEP_ROOT_PYTHON"), str(BIN / "python") if BIN else None]
     if ROOT_CONFIG:
         try:
@@ -55,17 +64,21 @@ def _pyroot_python():
         if not meets_floor(py):
             continue
         try:
-            if subprocess.run([py, "-c", "import ROOT"], capture_output=True, timeout=120, env=_env()).returncode == 0:
+            if subprocess.run([py, "-c", ROOT_WORKS], capture_output=True, timeout=120, env=_env()).returncode == 0:
                 return py
+            if subprocess.run([py, "-c", "import ROOT"], capture_output=True, timeout=120, env=_env()).returncode == 0:
+                BROKEN.append(py)
         except (OSError, subprocess.TimeoutExpired):
             continue
     return None
 
 
+
+
 def _env():
     env = dict(os.environ)
     env["PATH"] = f"{BIN}{os.pathsep}{env.get('PATH', '')}"
-    return env
+    return with_vdt(env, ROOT_CONFIG)  # the workaround check_root_cpp_env.sh recommends
 
 
 def _rc(*args):
@@ -82,6 +95,10 @@ class RootCppAssetTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         python = _pyroot_python()
+        if python is None and BROKEN:
+            raise unittest.SkipTest(f"ROOT imports under {BROKEN[0]} but its interpreter does not work (RooWorkspace.factory "
+                                    "makes nothing; cling does not match this host's C++ standard library): reinstall "
+                                    "or upgrade ROOT")
         if python is None:
             raise unittest.SkipTest("root-config found but no Python can import ROOT (set HEP_ROOT_PYTHON)")
         cls._tmp = tempfile.TemporaryDirectory()
