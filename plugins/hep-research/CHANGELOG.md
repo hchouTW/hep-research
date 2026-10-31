@@ -16,6 +16,40 @@ Software checks establish contract consistency only, not physical validity.
   the order (`qed-prediction` before `published-comparison`), the version-only diff rule, a local project-free
   `TMPDIR` for `check_relocation.py`, and the README size statement and manifest order.
 - Evidence: VALIDATION RELEASE-FOLLOWUPS-0.50.0
+- **Workflow runner: fresh outputs, complete output contract, safe destinations, confirmed termination**
+  (reconstruction v12 stage B1; OUT-01, CACHE-01, EXEC-02): `run_workflow.py` refuses absolute, `..` and symlinked
+  input, output and stdout paths (exit 2); fails a step whose declared output existed before and was not rewritten
+  (an exit-0 command that writes nothing is no longer a success); reruns under `--incremental` when outputs were added
+  or removed; runs each step in its own process group with a per-step `timeout_s`, stops and confirms the group on a
+  timeout or when the step leaves processes behind, and always writes a run record with `end_status`,
+  `termination`, `output_contract` and `artifact_digest` (output hashes only when termination is confirmed). A step's
+  optional `check` object is recorded as `extension.check`. Tests: `tests/skills/hep_computing/test_workflow_b1.py`
+  (16, each gap with a negative case that failed before the fix and a positive control; BUG-02 with a pinned release
+  digest).
+- **Reconstruction method contract and research workflow control** (reconstruction v12 stage A1; RULE-01, TIER-01,
+  TRANS-01, TASK-01/02, SCI-01..08, PROF-01, FLOW-01): hep-detector's reconstruction pages gain the method contract
+  (semantics, conditions as observation context, uncertainty propagation, association versus counting, method
+  routing by subsystem, selection bias and exposure, partitioning, representative cases) and iteration loops as
+  contract steps; the new hep-computing reference `skills/hep-computing/references/research-workflow-control.md`
+  holds the evidence tiers, the trigger matrix, the transition-period task record (no control-layer helper exists
+  yet), human decisions and the completion report. Ownership rows added for `reconstruction method routing`
+  (hep-detector) and `evidence tiers` / `research task record` (hep-computing). Documentation only; no new runtime.
+- **Check definitions** (reconstruction v12 stage A2; VAL-01..VAL-05): new
+  `skills/hep-computing/scripts/check_definitions.py` applies the check roles (closure, holdout and method-independent
+  confirmation), types (threshold, performance estimate), four-valued results with reasons, the three-region threshold
+  rule (a pass capped at inconclusive when the frozen power design was not met; a fail never rescued), the tolerance
+  rule for validity checks (tolerance at most the claimed uncertainty; a deviation incompatible with zero becomes a
+  systematic), per-bin multiple-testing levels, cross-round error control against a frozen ceiling, and the freeze
+  record (closed fields, append-only JSON lines with a digest chain; DEC-03 default). Tests:
+  `tests/skills/hep_computing/test_check_definitions.py` (a positive and a negative case for every rule).
+- **Receipts, bound check results and executor capabilities** (reconstruction v12 stage B2; CAP-01, VAL-06):
+  `run_workflow.py --receipt-dir DIR [--attempt-prefix P]` writes a receipt per executed step (end status,
+  termination, outputs with locations and digests, artifact digest, declared inputs, run-record digest, times, wall
+  and CPU seconds); a check step's declared identity is validated (A2 fields) and its result counts only when bound to
+  the run (check program hash, criteria file, staged target, read list), otherwise the step fails. New
+  `skills/hep-computing/scripts/executor_capabilities.py`: G1-G6 qualification by fault injection (G1, G2 pass on
+  Linux; G3-G6 unsupported), declarations citing the qualification record, and admission refusing any capability
+  without a passing, current qualification. Tests: `tests/skills/hep_computing/test_executor_b2.py`.
 - **`run_workflow.py`: step ids are one plain name, and an attempt id is used once** (review of PR #329). A step id
   names its run record and receipt, so an id such as `../../x` or `a/b` is refused before any step runs (exit 2);
   allowed are letters, digits, `_`, `.`, `:` and `-` (not first: `.`, `:`, `-`), at most 128 characters. With
@@ -86,40 +120,6 @@ and position, in a follow-up); nothing already covered was restated.
   `dr-reco-neg`); the principles summary is unchanged (its routing part is at its budget).
 - Evidence: VALIDATION DETECTOR-RECONSTRUCTION-METHODS
 
-- **Workflow runner: fresh outputs, complete output contract, safe destinations, confirmed termination**
-  (reconstruction v12 stage B1; OUT-01, CACHE-01, EXEC-02): `run_workflow.py` refuses absolute, `..` and symlinked
-  input, output and stdout paths (exit 2); fails a step whose declared output existed before and was not rewritten
-  (an exit-0 command that writes nothing is no longer a success); reruns under `--incremental` when outputs were added
-  or removed; runs each step in its own process group with a per-step `timeout_s`, stops and confirms the group on a
-  timeout or when the step leaves processes behind, and always writes a run record with `end_status`,
-  `termination`, `output_contract` and `artifact_digest` (output hashes only when termination is confirmed). A step's
-  optional `check` object is recorded as `extension.check`. Tests: `tests/skills/hep_computing/test_workflow_b1.py`
-  (16, each gap with a negative case that failed before the fix and a positive control; BUG-02 with a pinned release
-  digest).
-- **Reconstruction method contract and research workflow control** (reconstruction v12 stage A1; RULE-01, TIER-01,
-  TRANS-01, TASK-01/02, SCI-01..08, PROF-01, FLOW-01): hep-detector's reconstruction pages gain the method contract
-  (semantics, conditions as observation context, uncertainty propagation, association versus counting, method
-  routing by subsystem, selection bias and exposure, partitioning, representative cases) and iteration loops as
-  contract steps; the new hep-computing reference `skills/hep-computing/references/research-workflow-control.md`
-  holds the evidence tiers, the trigger matrix, the transition-period task record (no control-layer helper exists
-  yet), human decisions and the completion report. Ownership rows added for `reconstruction method routing`
-  (hep-detector) and `evidence tiers` / `research task record` (hep-computing). Documentation only; no new runtime.
-- **Check definitions** (reconstruction v12 stage A2; VAL-01..VAL-05): new
-  `skills/hep-computing/scripts/check_definitions.py` applies the check roles (closure, holdout and method-independent
-  confirmation), types (threshold, performance estimate), four-valued results with reasons, the three-region threshold
-  rule (a pass capped at inconclusive when the frozen power design was not met; a fail never rescued), the tolerance
-  rule for validity checks (tolerance at most the claimed uncertainty; a deviation incompatible with zero becomes a
-  systematic), per-bin multiple-testing levels, cross-round error control against a frozen ceiling, and the freeze
-  record (closed fields, append-only JSON lines with a digest chain; DEC-03 default). Tests:
-  `tests/skills/hep_computing/test_check_definitions.py` (a positive and a negative case for every rule).
-- **Receipts, bound check results and executor capabilities** (reconstruction v12 stage B2; CAP-01, VAL-06):
-  `run_workflow.py --receipt-dir DIR [--attempt-prefix P]` writes a receipt per executed step (end status,
-  termination, outputs with locations and digests, artifact digest, declared inputs, run-record digest, times, wall
-  and CPU seconds); a check step's declared identity is validated (A2 fields) and its result counts only when bound to
-  the run (check program hash, criteria file, staged target, read list), otherwise the step fails. New
-  `skills/hep-computing/scripts/executor_capabilities.py`: G1-G6 qualification by fault injection (G1, G2 pass on
-  Linux; G3-G6 unsupported), declarations citing the qualification record, and admission refusing any capability
-  without a passing, current qualification. Tests: `tests/skills/hep_computing/test_executor_b2.py`.
 
 ## 0.49.1 (2026-10-30)
 
