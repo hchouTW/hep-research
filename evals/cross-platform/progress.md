@@ -245,3 +245,21 @@ PR 1b: draft PR #334 (base `xplat/pr-1a-modules`); CI 22 pass, 2 skipped. *Done 
 **macOS known-differences list (A8, for the maintainer): empty.** No test at or below 1e-12 differed on the runner.
 Fix attempts: one per distinct failure (3 failures). CI runs of the units part: 1 (counts toward the PR 2 limit with
 the local runs).
+
+### Local units 1/6 in a hostile path (2026-10-31)
+
+Working directory `<WT_ROOT>/scratch/hep 測試 paths/work` (a symlink to the worktree), `TMPDIR` a symlink in the same
+folder. 6322 run, 34 failures, 9 errors. **All pre-existing** (A6): the same ten modules fail on unmodified
+`origin/main` (`<WT_ROOT>/scratch/main-ref`, `97df572e`) with the same `TMPDIR`, most with more failures there:
+
+| Module (failures/errors on `main`) | Root cause |
+|---|---|
+| `test_simreco` (11/0) | **product defect**: the simreco C++ JSON reader rejects `\uXXXX` escapes ("non-ASCII \u escapes are not supported"), which Python's `json.dumps` writes for a non-ASCII path |
+| `test_batch_slurm` (14/0), `test_batch_htcondor` (16/4), `test_batch_cmp_regressions` (2/0), `test_batch_provenance` (2/0), `test_batch_watch` (4/0), `test_batch_hardening` (1/1), `examples/test_batch_partition` (0/1) | tests assume a space-free `TMPDIR`: HTCondor's deliberate `htcondor.path_whitespace` refusal, Slurm golden scripts that now carry quoted paths, shims whose `#!` line points into the spaced folder |
+| `test_partition_bundle` (2/0) | a test writes a `#!` interpreter inside the spaced `TMPDIR`; the bundle correctly refuses it (`bundle.bad_shebang`) |
+| `test_diagrams` (0/2) | renderer shims with a `#!` line inside the spaced `TMPDIR` |
+| `test_root_cpp_assets` | the host's `python3.14` has no ROOT (as before) |
+
+Not fixed (A6: pre-existing). Effect: the `hostile-paths` job passes on pull requests (its subset), but its full units
+run on pushes to `main`, weekly and manual runs will fail until these are addressed (simreco `\u` decoding; tests that
+need a space-free temporary folder create one). **Open human checkpoint.**
