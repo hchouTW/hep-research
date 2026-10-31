@@ -286,3 +286,10 @@ suite: 6/6), and the remaining choices are the maintainer's: fix the pre-existin
 check with a space-free `TMPDIR` (the copy path itself still has spaces), or drop it from the PR subset. No fix
 attempted. PR 2 *Done when*: AC1 holds (macOS units green in CI, `needs ` skips 0.14 %), AC9 holds, AC10 not yet
 (hostile-paths red on the relocation step), macOS job run and recorded (known-differences list empty).
+
+## 2026-10-31 PR 2: STOP resolved (maintainer decision: option 1)
+
+- Decision: the PR-subset `tools/check_relocation.py` runs with `TMPDIR="$RUNNER_TEMP"` (space-free); the relocated
+  copy's own path still has spaces. The space + Chinese TMPDIR stays on the PR-subset unit tests. The full run on
+  main/weekly keeps the hostile TMPDIR and stays red until the ten pre-existing modules are fixed (open checkpoint).
+- One extra units run authorized beyond the A6 limit (PR 2 units runs: 7, 6 + 1 authorized).

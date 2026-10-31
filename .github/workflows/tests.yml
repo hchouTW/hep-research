@@ -30,7 +30,7 @@
 #   hostile-paths  TMPDIR and the working directory reached through symlinks, in a folder whose name has a space and
 #              Chinese characters; a test tree with an NFD-named file, .DS_Store and an AppleDouble file through
 #              tools/check_packaging.py. Pull requests: tests/contracts, tests/core (protected, partition, blinding),
-#              tests/tools and tools/check_relocation.py, skipped when the plan selects none of those modules; pushes
+#              tests/tools and tools/check_relocation.py (with a space-free TMPDIR), skipped when the plan selects none of those modules; pushes
 #              to main, weekly and manual runs: the full units part (record platform-run-hostile-paths)
 #   old-python a real Python 3.9 as `python3` first on PATH: every skill script stops or switches as the interpreter
 #              guard says (tools/platform_checks.py old-python: AC2-AC4, the root case through sudo), and the real
@@ -537,7 +537,10 @@ jobs:
           for p in "test_partition*.py" "test_blinding*.py" "test_r5*.py"; do
             python -m unittest discover -s tests/core -t . -p "$p"
           done
-          python tools/check_relocation.py
+          # the relocated copy's own path has spaces; its full suite runs with a space-free TMPDIR, since ten modules
+          # (simreco's JSON reader, batch and diagram tests) fail under the hostile TMPDIR on main too
+          # (evals/cross-platform/progress.md); the full run below keeps the hostile TMPDIR
+          TMPDIR="$RUNNER_TEMP" python tools/check_relocation.py
       - name: Units part in the hostile folder (main, weekly, manual)
         if: steps.sel.outputs.scope == 'full'
         working-directory: ${{ runner.temp }}
