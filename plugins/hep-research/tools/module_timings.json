@@ -1,5 +1,5 @@
 {
- "note": "Seconds per test module, from CI checks (Python 3.13); used only to order and shard modules (tools/run_all_checks.py --shard). Refresh with --write-timings; a module missing here gets the median.",
+ "note": "Seconds per test module, from CI checks (Python 3.13); used only to order and shard modules (tools/run_all_checks.py --shard). Refresh with --write-timings; a module missing here gets the median. The three reconstruction-v12 modules (test_workflow_b1, test_check_definitions, test_executor_b2) were added from a local run (Linux, 2026-10-29) until the next CI refresh.",
  "source": "median of the passing runs of each module in GitHub Actions runs 39573953922 (PR #191 head ad0fc1f8) and the main run on a5663baa, ubuntu-latest, --jobs 4, Python 3.13 units shards (2 samples per module); refreshed 2026-10-21",
  "seconds": {
   "tests.adapters.test_adapter_declarations": 0.1,
@@ -439,6 +439,9 @@
   "tests.tools.test_scifix_ledger": 0.1,
   "tests.tools.test_statistics_evidence": 0.1,
   "tests.tools.test_subprocess_timeouts": 2.5,
-  "tests.tools.test_validate_skill_bundle": 0.2
+  "tests.tools.test_validate_skill_bundle": 0.2,
+  "tests.skills.hep_computing.test_workflow_b1": 23.3,
+  "tests.skills.hep_computing.test_check_definitions": 0.5,
+  "tests.skills.hep_computing.test_executor_b2": 30.0
  }
 }

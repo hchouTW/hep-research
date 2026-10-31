@@ -9,7 +9,8 @@
   "hep-computing": [
    "references/agile-development-guide.md",
    "references/task-authoring-guide.md",
-   "references/batch-scheduling.md"
+   "references/batch-scheduling.md",
+   "references/analysis-workflows.md"
   ],
   "hep-detector": [
    "references/detector-simulation.md",

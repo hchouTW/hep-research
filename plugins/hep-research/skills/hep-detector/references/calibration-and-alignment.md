@@ -256,6 +256,38 @@ Tool: `propagate_scale_distortion.py` (`response`: analytic yields for power-law
 distortions applied to an event table; modes `scale`, `inverse-offset`, `resolution`, `plugin`). A seeded test
 sample comes from `toy_spectrometer.py`.
 
+## Iterative loops as contract steps
+
+A loop feeding constants derived from reconstruction back into it is recorded so that the passing round cannot be
+picked after seeing the results (iterative unfolding is regularization, hep-statistics).
+
+- **Rounds are steps.** Each round is one or more steps of the task contract (a round may be partitioned: per-chunk
+  refits with the previous constants and a global solve), labelled with the loop (family) and round; its identity
+  includes the inputs it consumed, and its output is a new conditions payload with a producer edge.
+- **Fixed before starting.** The first contract fixes the final round and, by check digest, the **convergence check**
+  and the **unconstrained-mode check**; rounds are exactly 1…final round and chained (every step of a later round
+  consumes the previous round, directly or through steps of its own round). Only the final round's single checked
+  step — the final step — is checked, and both checks are required on it, never not-applicable. The final round is the
+  cap; there is no “maximum number of rounds”.
+- **Changing the number of rounds needs a human.** Not converged at the final round → held (the convergence check
+  fails); to run more, attach the convergence record and ask for a contract that adds rounds, which demotes the old
+  final step and moves the two checks to the new one; the old non-convergence stays in the history. Converged early →
+  run on to the final round, or ask a human to approve shortening. Loosening the convergence criteria also needs a
+  human, and “not converged” under the original criteria is never rewritten as converged.
+- **Members other than the final step** are exempt from checks (`iteration_internal`, then `superseded_by_iteration`);
+  steps outside the loop consume only the final step. After constants change, artifacts that consumed the old ones
+  are invalidated unless the contract deliberately pins the old constants.
+- **Convergence is numerical stability, not validation.** Every loop — and every single-pass alignment or
+  intercalibration solve, which has the same modes — lists its unconstrained global modes and the external
+  information that constrains them (cosmics, overlaps, vertex or mass constraints, an external scale), and validates
+  with observables sensitive to them (a resonance mass versus η, φ and charge; E/p). φ-symmetry fixes only constants
+  within an η ring (ring-to-ring and global scales need external input; real φ dependence absorbed is a systematic).
+  Splitting same-kind tracks is an optional closure that cannot see weak modes. A quantity used in the derivation (a known mass) no
+  longer validates it independently.
+- Downstream artifacts record which round's constants they used.
+
+**Check:** Final round, convergence and mode checks fixed first; modes and their constraints listed.
+
 ## Common misconceptions and failure modes
 
 - **Tuning on the measured observable**, then reading agreement as validation (circularity).

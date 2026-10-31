@@ -55,6 +55,8 @@ Correlations: hep-measurement supplies the physical correlation evidence and a p
 | Independent review packets, review records and the review log | hep-authoring | `independent review`, `review packet` | — |
 | Semantic naming of identifiers, files and named objects: charter, engine, contract levels, change sets | hep-computing | `semantic naming` | Semantic naming governance (charter, engine, extractors for all 17 surfaces, cross-surface names, plugin gate) |
 | Recorded review of physics work: review obligations, assurance tiers, the review commit log | hep-review | `review obligations`, `assurance tiers` | — |
+| Reconstruction method contract: method routing by subsystem and quantity, conditions as observation context, association versus counting, iterative calibration loops as contract steps | hep-detector | `reconstruction method routing` | — |
+| Research workflow control: evidence tiers, the research-task record, transition-period rules and the completion report (shared by every skill) | hep-computing | `evidence tiers`, `research task record` | — |
 <!-- /ownership-table -->
 
 hep-measurement keeps the measurement-design view (which level to publish, which corrections the response carries) in

@@ -16,7 +16,66 @@ Software checks establish contract consistency only, not physical validity.
   the order (`qed-prediction` before `published-comparison`), the version-only diff rule, a local project-free
   `TMPDIR` for `check_relocation.py`, and the README size statement and manifest order.
 - Evidence: VALIDATION RELEASE-FOLLOWUPS-0.50.0
-- Evidence: VALIDATION GEANT4-REGISTER-REVIEW
+- **Workflow runner: fresh outputs, complete output contract, safe destinations, confirmed termination**
+  (reconstruction v12 stage B1; OUT-01, CACHE-01, EXEC-02): `run_workflow.py` refuses absolute, `..` and symlinked
+  input, output and stdout paths (exit 2); fails a step whose declared output existed before and was not rewritten
+  (an exit-0 command that writes nothing is no longer a success); reruns under `--incremental` when outputs were added
+  or removed; runs each step in its own process group with a per-step `timeout_s`, stops and confirms the group on a
+  timeout or when the step leaves processes behind, and always writes a run record with `end_status`,
+  `termination`, `output_contract` and `artifact_digest` (output hashes only when termination is confirmed). A step's
+  optional `check` object is recorded as `extension.check`. Tests: `tests/skills/hep_computing/test_workflow_b1.py`
+  (16, each gap with a negative case that failed before the fix and a positive control; BUG-02 with a pinned release
+  digest).
+- **Reconstruction method contract and research workflow control** (reconstruction v12 stage A1; RULE-01, TIER-01,
+  TRANS-01, TASK-01/02, SCI-01..08, PROF-01, FLOW-01): hep-detector's reconstruction pages gain the method contract
+  (semantics, conditions as observation context, uncertainty propagation, association versus counting, method
+  routing by subsystem, selection bias and exposure, partitioning, representative cases) and iteration loops as
+  contract steps; the new hep-computing reference `skills/hep-computing/references/research-workflow-control.md`
+  holds the evidence tiers, the trigger matrix, the transition-period task record (no control-layer helper exists
+  yet), human decisions and the completion report. Ownership rows added for `reconstruction method routing`
+  (hep-detector) and `evidence tiers` / `research task record` (hep-computing). Documentation only; no new runtime.
+- **Check definitions** (reconstruction v12 stage A2; VAL-01..VAL-05): new
+  `skills/hep-computing/scripts/check_definitions.py` applies the check roles (closure, holdout and method-independent
+  confirmation), types (threshold, performance estimate), four-valued results with reasons, the three-region threshold
+  rule (a pass capped at inconclusive when the frozen power design was not met; a fail never rescued), the tolerance
+  rule for validity checks (tolerance at most the claimed uncertainty; a deviation incompatible with zero becomes a
+  systematic), per-bin multiple-testing levels, cross-round error control against a frozen ceiling, and the freeze
+  record (closed fields, append-only JSON lines with a digest chain; DEC-03 default). Tests:
+  `tests/skills/hep_computing/test_check_definitions.py` (a positive and a negative case for every rule).
+- **Receipts, bound check results and executor capabilities** (reconstruction v12 stage B2; CAP-01, VAL-06):
+  `run_workflow.py --receipt-dir DIR [--attempt-prefix P]` writes a receipt per executed step (end status,
+  termination, outputs with locations and digests, artifact digest, declared inputs, run-record digest, times, wall
+  and CPU seconds); a check step's declared identity is validated (A2 fields) and its result counts only when bound to
+  the run (check program hash, criteria file, staged target, read list), otherwise the step fails. New
+  `skills/hep-computing/scripts/executor_capabilities.py`: G1-G6 qualification by fault injection (G1, G2 pass on
+  Linux; G3-G6 unsupported), declarations citing the qualification record, and admission refusing any capability
+  without a passing, current qualification. Tests: `tests/skills/hep_computing/test_executor_b2.py`.
+- **`run_workflow.py`: step ids are one plain name, and an attempt id is used once** (review of PR #329). A step id
+  names its run record and receipt, so an id such as `../../x` or `a/b` is refused before any step runs (exit 2);
+  allowed are letters, digits, `_`, `.`, `:` and `-` (not first: `.`, `:`, `-`), at most 128 characters. With
+  `--receipt-dir`, a run in which any step's attempt id (`--attempt-prefix` + step id) already has a receipt is
+  refused before any step runs (exit 2), and receipts are created exclusively: an earlier attempt's receipt is never
+  replaced. Use a new prefix per attempt. Tests: `test_workflow_b1.StepIds`,
+  `test_executor_b2.Receipts.test_an_attempt_id_is_used_once`.
+- **`run_workflow.py`: outputs are checked for symlinks again after the step** (review of PR #329). A step that made an
+  output's parent directory a symlink (e.g. to a folder outside the work folder) had the outside file recorded as its
+  output. Every component of each output and stdout path is now checked after the step and the path must resolve
+  inside the work folder; otherwise the output is not recorded, the stdout file is not written and the step fails. A
+  step that replaces `runs/` by a symlink fails without a run record or receipt. Tests:
+  `test_workflow_b1.Destinations.test_a_parent_the_step_turns_into_a_symlink`,
+  `test_a_runs_folder_the_step_replaces_with_a_symlink`.
+- **`run_workflow.py`: termination waits for the step to end, ignores zombies, records survivors, and sees nested
+  runners** (review of PR #329). After a step's main process exits, its other processes get 1 s to end on their
+  own, and zombies (ended, cannot write) no longer count, so a child that is just exiting, or an exited child left
+  unreaped by an init that never reaps, no longer fails a good step. Processes still running then are stopped and
+  fail the step as before (no write after the step's end), and are now named in the record's
+  `extension.leftover_processes`; a helper daemon the step starts (ssh ControlPersist master, gpg-agent, a
+  compiler-cache server) is such a process: start it before the workflow. The token in `HEP_RUN_WORKFLOW_ATTEMPT` is
+  now a colon-separated chain that a nested `run_workflow.py` extends instead of replacing, so the steps of an inner
+  runner (each in its own session) are found and stopped with the outer step; before, they escaped while the outer
+  record said termination confirmed. Every record carries `extension.termination_scope` (`process-group`,
+  `environment-marker`). The G2 qualification gains three cases (a child that left the group, a nested runner's step,
+  and a positive control for a child ending just after the step). Tests: `test_workflow_b1.Termination`.
 - **Geant4 adapter 0.6.0: any existing Geant4 installation** (`adapters/geant4`). `geant4_build.py register
   (--geant4-config PATH | --prefix DIR) --record OUT.json [--dataset-source auto|env|config] [--skip-dataset NAME]`
   records an installation the adapter did not build (conda-forge, an LCG view, a site build): version, prefix, C++
@@ -51,6 +110,7 @@ Software checks establish contract consistency only, not physical validity.
   (the binary was linked through `geant4-config` while reporting `cmake`); `geant4_examples.py build` clears a CMake
   cache made from the other mode's source (`cache_cleared` in `adapter-build.json`) instead of failing every example.
   The adapter stays `demonstrated-on-synthetic-data`.
+- Evidence: VALIDATION GEANT4-REGISTER-REVIEW
 
 ## 0.50.0 (2026-10-30)
 

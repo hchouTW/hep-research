@@ -5,7 +5,7 @@ description: "Use when the deliverable is about how a detector responds: signal 
 
 # hep-detector: detector performance and response
 
-**Owns:** signal formation, reconstruction, detector calibration, alignment, efficiency and resolution, truth matching, detector simulation, data/MC comparison, parametrized response for recasting, response matrices, forward folding of predictions, double-counting checks, detector design principles, sourced detector atlas.
+**Owns:** signal formation, reconstruction (including reconstruction method routing), detector calibration, alignment, efficiency and resolution, truth matching, detector simulation, data/MC comparison, parametrized response for recasting, response matrices, forward folding of predictions, double-counting checks, detector design principles, sourced detector atlas.
 **Typical artifacts:** `response` (truth/reco axes, orientation, normalization, what sits inside the matrix, intended use), folded `prediction`, performance reports, conditions provenance.
 **Never:** invent detector facts; detector specifics come from an experiment profile, the user, the sourced detector atlas, or are `unknown`. Inference on top of a response belongs to hep-statistics.
 

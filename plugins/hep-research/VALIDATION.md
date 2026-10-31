@@ -8448,6 +8448,20 @@ and the release regeneration procedure in `docs/maintenance.md`.
 | Committed outputs | `geant4-thin-silicon`, `design-minimal-spectrometer`, `design-search-j16` regenerated on E2 (the checker's code-identity hash is in their study records) | `e28ff1b9` (E2): 21 files (`geant4-thin-silicon` 7, `design-minimal-spectrometer` 14, `design-search-j16` none), every changed line a hash (the checker's code identity and the sha256 values covering it), no PNG; afterwards `tests.examples.test_geant4_thin_silicon`, `test_design_minimal_spectrometer`, `test_design_search_j16` and `test_check_geant4_study` pass on Linux with the CI lock |
 
 Passing checks show software consistency, not physical validity.
+
+## RECON-V12-PR-A-ROUTING — 2026-10-30 (Linux, EL9 x86_64; Claude Code 2.1.314, claude-sonnet-5-5; branch `recon-v12/pr-a-runner-checks` rebased on 0.50.0, `3fd5b425`)
+
+Live routing rerun required by `docs/maintenance.md` before merging a change to what hep-detector and hep-computing
+read (their Owns lines and two routing-contract rows; descriptions unchanged).
+
+| Item | Evidence | Result |
+|---|---|---|
+| Live routing, the cases involving hep-detector or hep-computing | `evals/routing/results/pr-a-0.50-routing.json` (137 cases, 139 prompt turns, $11.92) | 126/137 strict; hep-detector 61/67, hep-computing 43/48; 0 loading violations, no contamination |
+| Misses against earlier runs | the same case ids in `evals/routing/results/` | 5 never passed before (0/7 each), 3 varied before, 3 passed every earlier run |
+| Repeats of those 3, branch vs main 0.50.0 | `repeat-0.50-pra-1..3`, `repeat-0.50-main-1..3` ($1.09) | `d-cc-preserve-2` 3/3 vs 3/3, `d-cc-columnar-2` 2/3 vs 3/3, `th14-reco-1` 1/3 vs 2/3; descriptions identical, differences within run-to-run variation: no regression shown |
+
+Single runs per case except the repeats; the result supports "no routing regression shown", not a routing guarantee.
+
 ## GEANT4-REGISTER — 2026-10-30 (environment E5: RHEL 9 x86_64, GCC 11.5.0, CMake 3.26.5, Python 3.13 CI lock; branch `geant4/register-existing-install` from `313637c1`)
 
 Adapter 0.6.0: `geant4_build.py register` and the downstream changes, run end to end against an existing installation:

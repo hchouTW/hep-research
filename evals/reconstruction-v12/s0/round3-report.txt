@@ -1,0 +1,21 @@
+# hep-review report
+as of seq 9 (946a991b2457fbb6ec5371dcca27e56c5570d49dadf93bb7dc23fbcd1dfd5c63), validator 1.0.0
+layer 1 digest ac870817059f82f0064e68bed9eca7ea1c0bed32fdd95b2883bc86ff599ba072
+target R2, achieved R2
+disclosure: The reviewer was instructed not to read other evaluations; this was neither observed nor enforced.
+defects=True disputed=False open=False plan_requirements_met=True record_integrity=valid
+- N1 (required): violated; tier R2
+- N3 (required): violated; tier R2
+- N5 (required): violated; tier R2
+- finding rec-asg-1-F1-1: supported
+- finding rec-asg-1-F1-2: supported
+- finding rec-asg-2-F1-1: supported
+- finding rec-asg-2-F1-2: supported
+- finding rec-asg-2-F1-3: supported
+- finding rec-asg-2-F1-4: supported
+- finding rec-asg-3-F1-1: supported
+- finding rec-asg-3-F1-2: supported
+coverage: {"discharged": 0, "methods_not_run_by_discharge": [], "total_obligations": 3, "total_required": 3}
+disclosure: store persistence across sessions is not yet observed on this host: keep the checkpoint line, and export the record before the session ends if the host may be wiped
+hep-review checkpoint: context=s0-reconstruction-v12-r3 segment=seg-1 seq=9 digest=946a991b2457fbb6ec5371dcca27e56c5570d49dadf93bb7dc23fbcd1dfd5c63
+
