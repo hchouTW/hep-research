@@ -15,6 +15,7 @@ sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "tests" / "contracts"))
 
 from contracts import CONTRACTS_VERSION  # noqa: E402
+from core.interpreter_guard import child_flags  # noqa: E402
 from contracts import validate as v  # noqa: E402
 
 ART = ROOT / "contracts" / "fixtures" / "artifacts"
@@ -216,7 +217,7 @@ class ShippedSpecs(unittest.TestCase):
 
 class ValidatorCli(unittest.TestCase):
     def run_cli(self, *args):
-        return subprocess.run([sys.executable, "-I", str(ROOT / "contracts" / "validate.py"), *args],
+        return subprocess.run([sys.executable, *child_flags(), "-I", str(ROOT / "contracts" / "validate.py"), *args],
                               capture_output=True, text=True, timeout=60)
 
     def test_flags_before_the_artifact(self):

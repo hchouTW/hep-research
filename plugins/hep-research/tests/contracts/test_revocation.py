@@ -17,6 +17,7 @@ sys.path.insert(0, str(ROOT))
 from contracts import revocation as rv  # noqa: E402
 from contracts.release_manifest import canonical_sha256  # noqa: E402
 from core.protected.trusted_input import Account, file_refusals, read_protected  # noqa: E402
+from tests._platform import needs  # noqa: E402
 
 NOW = datetime.datetime(2026, 10, 14, 12, 0, 0, tzinfo=datetime.UTC)
 SRC = "custodian:synthetic-revocations"
@@ -176,6 +177,7 @@ class ChainTests(unittest.TestCase):
             rv.next_event(self.recs, {"kind": "planet", "ref": "x"}, "r", "c")
 
 
+@needs("posix_ids")  # models another account with os.geteuid; protected mode needs POSIX ids
 class SourceTests(unittest.TestCase):
     """DP-4: in protected use the log and head must be files the running account neither owns nor can write or replace.
     Ownership by another identity cannot be created in a test without privileges, so the 'custodian' case is modeled by

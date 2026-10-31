@@ -23,6 +23,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
+from core.interpreter_guard import child_flags  # noqa: E402
 OUT = ROOT / "contracts" / "fixtures" / "design" / "spectrometer"
 SYN = "SYNTHETIC design fixture; parameter values are proposals, not an experiment's numbers"
 NS = "spectrometer-demo"
@@ -207,7 +208,7 @@ class Builder:
     def run(self, run_id: str, script: str, args: list[str], inputs: list[str]) -> tuple[str, dict]:
         """Run a plugin tool for real; write its output file and computational-run (argv, script_sha256)."""
         argv = ["python3", script, *args]
-        proc = subprocess.run([sys.executable, "-I", "-B", str(ROOT / script), *args], capture_output=True, text=True,
+        proc = subprocess.run([sys.executable, *child_flags(), "-I", "-B", str(ROOT / script), *args], capture_output=True, text=True,
                               cwd=str(ROOT), timeout=120)
         if proc.returncode != 0:
             raise RuntimeError(f"{script} {args} exited {proc.returncode}: {proc.stdout} {proc.stderr}")
