@@ -36,7 +36,7 @@
    "ref": "artifacts/ml_artifact.json",
    "artifact_type": "ml-artifact",
    "artifact_id": "synthetic-j9-classifier",
-   "sha256": "3039675cd4e33433a3c192943dfbbf5b34d1b4a62b82f0fb2200821c6dac0a3f",
+   "sha256": "3364cc1f8b4d0f01e2b164d0bfece6cbfb561c2fb5ecf846861f9da8de72fbee",
    "version": "3.17.0",
    "status": [
     "synthetic"
