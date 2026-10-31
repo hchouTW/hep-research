@@ -8594,3 +8594,34 @@ high or low surrogate, reversed pair, a high surrogate followed by a non-surroga
 `selftest.cc` compiles with `-Wall -Wextra -Wconversion -Werror` without a new diagnostic in MiniJson. Under a
 `TMPDIR` named with a space and Chinese characters, `tests.adapters.test_simreco` and `tests.adapters.test_geant4`
 pass (70 tests, 6 skipped; 11 simreco failures before).
+
+## 0.52.0 release check (2026-11-01, E2 and CI)
+
+Release branch `release/0.52.0`, based on main `bf5e453a` (the cross-platform stack #333-#337 and #338 merged).
+Minor release: cross-platform support. Contracts 3.17.0 and every skill `description` are unchanged; `CORE_VERSION`
+1.5.0 (`core/interpreter_guard.py`, `core/hostcaps.py`). The code-release digest changes (the guard block in 198
+skill scripts): deployments re-pin and requalify.
+
+What changed on the release branch:
+- version 0.52.0 in both manifests, `pyproject.toml`, the README, two assets, the six theory-profile scripts,
+  `usine_translate.py` and `examples/bc-usine-reproduction/run.py`; the CHANGELOG `0.52.0` section; the ledger entry
+  MINIJSON-UNICODE-ESCAPES names release 0.52.0;
+- regenerated on E2 (`~/.venvs/hep-research-e2`, macOS arm64, Python 3.13.2, NumPy 2.5.3) in `b61c791b`: the six
+  theory-profile scripts (13 files, the plugin version only) and the examples in the order of `docs/maintenance.md`;
+  167 files. Every changed line is a version string, a hash or hash prefix covering one, or one of 24 provenance
+  `code_paths` lines naming `core/hostcaps.py` and `core/interpreter_guard.py` (skill scripts load them since the
+  guard; maintainer option 1 of 2026-10-31); the `check_geant4_study.py` and `geant4_benchmarks.py` hashes in the
+  `design-minimal-spectrometer` and `design-search-j16` study records follow the guard block. No number and no PNG
+  changed. `bc-propagation-fit` and `unfolding-coverage` carry no plugin version and were left as committed;
+  `bc-usine-reproduction` and `propagation-fit` have no committed output.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on `b61c791b` (run 41245961042) | success: `checks-complete`, units 1/3-3/3, static, AMS optional, lint, `old-python`, four `hostile-paths` legs |
+| CI `platforms.yml` on `b61c791b` (run 41247746941) | macOS units part under `ulimit -n 256`: success; Windows (guard sweep, line endings, `tests/contracts`): success |
+| `run_all_checks.py` (all parts, host CLIs), E2 at `b61c791b`, `--jobs 4` | 32 pass, 1 fail; units 6290 tests, 0 failures, 0 errors, 170 skipped, 3 modules timed out (below) |
+
+The three modules that passed the 600 s module limit at `--jobs 4` pass alone on E2: `test_cli_input_fuzz` (4 tests,
+277 s), `test_bc_propagation_fit` (14 tests, 241 s) and `test_diagrams` (31 tests, 176 s). `claude plugin validate
+--strict` and `codex plugin load` pass. Host: Homebrew ROOT 6.40.04 (upgraded 2026-11-01); its include folder for vdt
+is not in `root-config --cflags` (`check_root_cpp_env.sh` names it), and `test_root_cpp_assets` passes with it.
