@@ -99,9 +99,9 @@ class StateDir(unittest.TestCase):
 
     def test_windows_uses_localappdata(self):
         with mock.patch.object(hostcaps, "on_windows", return_value=True):
-            got = hostcaps.state_dir("a", "b", environ={"LOCALAPPDATA": "C:/Users/u/AppData/Local",
+            got = hostcaps.state_dir("a", "b", environ={"LOCALAPPDATA": "C:/state/AppData/Local",
                                                         "XDG_STATE_HOME": "/ignored"})
-        self.assertEqual(got, Path("C:/Users/u/AppData/Local") / "hep-research" / "a" / "b")
+        self.assertEqual(got, Path("C:/state/AppData/Local") / "hep-research" / "a" / "b")
 
 
 class NeedsDecorator(unittest.TestCase):

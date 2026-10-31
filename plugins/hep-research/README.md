@@ -165,7 +165,7 @@ export HEP_RESEARCH_PYTHON=~/miniconda3/envs/sympy-py313/bin/python
   running as root, and no `--protected` argument. The batch executor and bundle freezing refuse both guard variables
   (`HEP_RESEARCH_PYTHON`, `HEP_RESEARCH_GUARD_REEXEC`): a job runs the interpreter its bundle names.
 
-**macOS.** `/usr/bin/python3` is the Xcode command-line tools' Python 3.9, which the guard stops. Install Python 3.13
+**macOS.** `/usr/bin/python3` is the Xcode command-line tools' interpreter (3.9, below the floor), which the guard stops. Install Python 3.13
 from Homebrew (`brew install python@3.13`), conda (`conda create -n hep python=3.13`) or uv
 (`uv python install 3.13`), create the virtual environment with it and install
 [requirements-core.txt](requirements-core.txt). Point the guard at an interpreter whose file and folder you cannot

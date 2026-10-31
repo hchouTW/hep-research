@@ -15,7 +15,7 @@
   },
   "hep-computing": {
    "references": 37,
-   "bytes": 353409,
+   "bytes": 354673,
    "uncited": 0
   },
   "hep-detector": {
@@ -86,7 +86,8 @@
     "skills/hep-citations/references/interpreting-scientific-graphics.md",
     "skills/hep-citations/references/literature-guide.md",
     "skills/hep-citations/references/literature-lookup-recipes.md",
-    "tests/skills/hep_authoring/test_handoff_text.py"
+    "tests/skills/hep_authoring/test_handoff_text.py",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [
     "hep-citations"
@@ -172,7 +173,8 @@
    "cited_by": [
     "skills/hep-authoring/references/code-to-methodology-synthesis.md",
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
-    "tests/skills/hep_authoring/test_handoff_text.py"
+    "tests/skills/hep_authoring/test_handoff_text.py",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
    "last_commit": "ebb58136 2026-10-19"
@@ -635,7 +637,8 @@
     "skills/hep-authoring/references/latex-venue-setup.md",
     "skills/hep-authoring/references/legends-panels-and-export.md",
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
-    "skills/hep-authoring/scripts/spectrum_plot.py"
+    "skills/hep-authoring/scripts/spectrum_plot.py",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
    "last_commit": "ebb58136 2026-10-19"
@@ -930,7 +933,8 @@
     "skills/hep-citations/references/literature-review.md",
     "skills/hep-computing/references/semantic-naming.md",
     "skills/hep-theory/references/cosmic-ray-phenomenology.md",
-    "tests/skills/hep_authoring/test_handoff_text.py"
+    "tests/skills/hep_authoring/test_handoff_text.py",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [
     "hep-authoring",
@@ -955,7 +959,8 @@
     "skills/hep-citations/references/interpreting-scientific-graphics.md",
     "skills/hep-citations/references/literature-guide.md",
     "skills/hep-statistics/references/statistical-inference-for-physics.md",
-    "skills/hep-theory/references/mathematical-reasoning-and-proof.md"
+    "skills/hep-theory/references/mathematical-reasoning-and-proof.md",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [
     "hep-authoring",
@@ -1008,7 +1013,8 @@
     "skills/hep-authoring/references/academic-papers-guide.md",
     "skills/hep-authoring/references/papers-review-modes-and-reference-index.md",
     "skills/hep-citations/README.md",
-    "skills/hep-citations/SKILL.md"
+    "skills/hep-citations/SKILL.md",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [
     "hep-authoring"
@@ -1069,7 +1075,8 @@
     "skills/hep-detector/references/geant4-study-protocol.md",
     "skills/hep-detector/references/imaging-atmospheric-cherenkov.md",
     "skills/hep-detector/scripts/multiple_scattering.py",
-    "skills/hep-measurement/references/hep-measurement-guide.md"
+    "skills/hep-measurement/references/hep-measurement-guide.md",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [
     "hep-detector",
@@ -1184,7 +1191,8 @@
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/references/preservation-checklist.md",
     "skills/hep-computing/scripts/run_workflow.py",
-    "tests/skills/hep_computing/test_workflow_c6.py"
+    "tests/skills/hep_computing/test_workflow_c6.py",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
    "last_commit": "53411e1d 2026-10-31"
@@ -1225,7 +1233,8 @@
     "skills/hep-computing/references/semantic-naming.md",
     "tests/adapters/batch_shims/shimlib.py",
     "tests/adapters/test_batch_reference.py",
-    "tools/check_instruction_text.py"
+    "tools/check_instruction_text.py",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
    "last_commit": "0aebec94 2026-10-29"
@@ -1317,7 +1326,8 @@
     "skills/hep-computing/references/engineering-playbook.md",
     "skills/hep-computing/references/performance-profiling.md",
     "skills/hep-computing/references/root-balanced-design-guidelines.md",
-    "skills/hep-computing/references/root-debugging.md"
+    "skills/hep-computing/references/root-debugging.md",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
    "last_commit": "9257d7b5 2026-10-15"
@@ -1356,8 +1366,8 @@
   {
    "path": "skills/hep-computing/references/environments-and-containers.md",
    "owner": "hep-computing",
-   "bytes": 5359,
-   "lines": 81,
+   "bytes": 6623,
+   "lines": 99,
    "linked_from_skill_md": true,
    "cited_by": [
     "contracts/naming/surfaces.json",
@@ -1370,7 +1380,7 @@
     "skills/hep-computing/references/semantic-naming.md"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "5dbb8c4d 2026-10-26"
+   "last_commit": "061ce622 2026-10-31"
   },
   {
    "path": "skills/hep-computing/references/host-notes.md",
@@ -1496,7 +1506,8 @@
     "skills/hep-computing/references/python-hep-coding-patterns.md",
     "skills/hep-computing/references/root-balanced-design-guidelines.md",
     "skills/hep-computing/references/semantic-naming.md",
-    "skills/hep-ml/references/deep-learning-guide.md"
+    "skills/hep-ml/references/deep-learning-guide.md",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [
     "hep-ml"
@@ -1518,7 +1529,8 @@
     "skills/hep-computing/references/python-balanced-design-guidelines.md",
     "skills/hep-computing/references/root-balanced-design-guidelines.md",
     "skills/hep-computing/references/semantic-naming.md",
-    "skills/hep-computing/references/storage-cern-eos.md"
+    "skills/hep-computing/references/storage-cern-eos.md",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
    "last_commit": "16214af1 2026-10-26"
@@ -1533,7 +1545,8 @@
     "skills/hep-computing/references/analysis-workflows.md",
     "skills/hep-computing/scripts/control_layer_support/__init__.py",
     "skills/hep-detector/references/event-reconstruction.md",
-    "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md"
+    "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [
     "hep-detector"
@@ -1656,7 +1669,8 @@
     "skills/hep-statistics/scripts/extract_names.py",
     "skills/hep-theory/SKILL.md",
     "skills/hep-theory/references/regularization-and-schemes.md",
-    "skills/hep-theory/scripts/extract_names.py"
+    "skills/hep-theory/scripts/extract_names.py",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [
     "hep-authoring",
@@ -1812,7 +1826,8 @@
     "skills/hep-detector/references/tracking-and-vertexing.md",
     "skills/hep-detector/scripts/propagate_scale_distortion.py",
     "skills/hep-detector/scripts/stability_monitor.py",
-    "tests/skills/hep_detector/test_adding_layer_d6.py"
+    "tests/skills/hep_detector/test_adding_layer_d6.py",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [
     "hep-computing"
@@ -2263,12 +2278,13 @@
     "skills/hep-detector/references/detector-simulation.md",
     "skills/hep-detector/references/system-design-workflow.md",
     "skills/hep-detector/scripts/check_geant4_study.py",
-    "skills/hep-detector/scripts/geant4_benchmarks.py"
+    "skills/hep-detector/scripts/geant4_benchmarks.py",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "f360dcc6 2026-10-25"
+   "last_commit": "d25adee7 2026-10-30"
   },
   {
    "path": "skills/hep-detector/references/ground-based-detection-arrays.md",
@@ -2563,7 +2579,8 @@
     "skills/hep-detector/scripts/mix_period_responses.py",
     "skills/hep-detector/scripts/species_response.py",
     "skills/hep-measurement/references/measurements-and-unfolding.md",
-    "skills/hep-statistics/references/unfolding.md"
+    "skills/hep-statistics/references/unfolding.md",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [
     "hep-computing",
@@ -2618,7 +2635,8 @@
     "skills/hep-measurement/scripts/orbit_averaged_geomagnetic_cutoff.py",
     "skills/hep-measurement/scripts/solar_modulation_force_field.py",
     "skills/hep-statistics/references/astroparticle-statistics.md",
-    "tests/skills/test_one_owner_per_topic_x2.py"
+    "tests/skills/test_one_owner_per_topic_x2.py",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [
     "hep-citations",
@@ -2745,7 +2763,8 @@
     "skills/hep-measurement/references/rare-event-and-neutrino-measurements.md",
     "skills/hep-measurement/references/review-and-artifacts.md",
     "tests/skills/hep_measurement/test_method_references.py",
-    "tests/skills/hep_measurement/test_review_eras_m3.py"
+    "tests/skills/hep_measurement/test_review_eras_m3.py",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [
     "hep-computing",
@@ -2873,7 +2892,8 @@
     "tests/skills/hep_measurement/test_rare_event_m10.py",
     "tests/skills/hep_measurement/test_reference_links.py",
     "tests/skills/test_doc_consistency.py",
-    "tests/skills/test_one_owner_per_topic_x2.py"
+    "tests/skills/test_one_owner_per_topic_x2.py",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [
     "hep-detector"
@@ -3175,7 +3195,8 @@
     "skills/hep-ml/references/evaluation-metrics.md",
     "skills/hep-ml/references/multivariate-analysis-bdt-nn.md",
     "skills/hep-ml/references/optimization-and-training-dynamics.md",
-    "tests/routing/test_theory_routing.py"
+    "tests/routing/test_theory_routing.py",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [
     "hep-computing"
@@ -3191,7 +3212,8 @@
    "cited_by": [
     "skills/hep-ml/references/checkpointing.md",
     "skills/hep-ml/references/deep-learning-guide.md",
-    "skills/hep-ml/references/parallelism-strategy.md"
+    "skills/hep-ml/references/parallelism-strategy.md",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
    "last_commit": "9257d7b5 2026-10-15"
@@ -4056,7 +4078,8 @@
     "skills/hep-statistics/references/core-stats-commands.md",
     "skills/hep-statistics/references/core-stats-guide.md",
     "skills/hep-statistics/references/time-series-inference.md",
-    "tests/skills/test_review_question_tables.py"
+    "tests/skills/test_review_question_tables.py",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
    "last_commit": "6a70f37e 2026-10-29"
@@ -4074,7 +4097,8 @@
     "skills/hep-statistics/SKILL.md",
     "skills/hep-statistics/references/core-stats-guide.md",
     "skills/hep-statistics/references/unfolding.md",
-    "tests/skills/hep_statistics/test_core_stats_guide.py"
+    "tests/skills/hep_statistics/test_core_stats_guide.py",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [
     "hep-detector",
@@ -4100,7 +4124,8 @@
     "tests/skills/hep_statistics/test_cap_override_s7.py",
     "tests/skills/hep_statistics/test_core_stats_guide.py",
     "tests/skills/test_documented_output_claims.py",
-    "tests/tools/test_reference_soft_budget.py"
+    "tests/tools/test_reference_soft_budget.py",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [
     "hep-measurement"
@@ -4127,7 +4152,8 @@
     "skills/hep-statistics/references/core-stats-guide.md",
     "skills/hep-statistics/references/ml-assisted-inference.md",
     "skills/hep-statistics/references/roofit-and-roostats-methods.md",
-    "skills/hep-statistics/scripts/project_uncertainty.py"
+    "skills/hep-statistics/scripts/project_uncertainty.py",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [
     "hep-detector",
@@ -4199,7 +4225,8 @@
     "skills/hep-statistics/references/core-stats-guide.md",
     "skills/hep-statistics/references/statistical-tools.md",
     "skills/hep-statistics/references/time-series-inference.md",
-    "tests/adapters/test_nuisance_interpolation.py"
+    "tests/adapters/test_nuisance_interpolation.py",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [
     "hep-computing",
@@ -4414,7 +4441,8 @@
     "skills/hep-theory/references/solar-modulation-models.md",
     "skills/hep-theory/scripts/transport_conventions.py",
     "tests/skills/hep_theory/test_cosmic_ray_phenomenology_th13.py",
-    "tests/skills/hep_theory/test_transport_conventions.py"
+    "tests/skills/hep_theory/test_transport_conventions.py",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
    "last_commit": "afebe106 2026-10-29"
@@ -4522,7 +4550,8 @@
     "skills/hep-theory/references/hadron-structure-essentials.md",
     "skills/hep-theory/references/nuclear-parton-effects.md",
     "skills/hep-theory/references/sidis-and-tmd.md",
-    "skills/hep-theory/scripts/drell_yan_lo.py"
+    "skills/hep-theory/scripts/drell_yan_lo.py",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
    "last_commit": "9648218d 2026-10-23"
@@ -4553,7 +4582,8 @@
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-theory/references/hadron-structure-essentials.md",
-    "skills/hep-theory/scripts/exclusive_kinematics.py"
+    "skills/hep-theory/scripts/exclusive_kinematics.py",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
    "last_commit": "2414de9a 2026-10-23"
@@ -4606,7 +4636,8 @@
     "skills/hep-theory/references/polarized-dis.md",
     "skills/hep-theory/references/sidis-and-tmd.md",
     "skills/hep-theory/references/small-x-and-saturation.md",
-    "tests/skills/hep_theory/test_hadron_structure_th14.py"
+    "tests/skills/hep_theory/test_hadron_structure_th14.py",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
    "last_commit": "6c7b8ea3 2026-10-23"
@@ -4623,7 +4654,8 @@
     "skills/hep-theory/references/drell-yan.md",
     "skills/hep-theory/references/global-fits-theory-inputs.md",
     "skills/hep-theory/references/hadron-structure-essentials.md",
-    "skills/hep-theory/references/particle-physics-essentials.md"
+    "skills/hep-theory/references/particle-physics-essentials.md",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
    "last_commit": "bb6cb81e 2026-10-23"
@@ -4845,7 +4877,8 @@
     "skills/hep-theory/references/fragmentation-functions.md",
     "skills/hep-theory/references/hadron-structure-essentials.md",
     "skills/hep-theory/scripts/sidis_kinematics.py",
-    "skills/hep-theory/scripts/tmd_gaussian.py"
+    "skills/hep-theory/scripts/tmd_gaussian.py",
+    "tools/skill_scripts.json"
    ],
    "cited_by_other_skills": [],
    "last_commit": "bd9d753e 2026-10-23"
