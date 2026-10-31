@@ -5,6 +5,18 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Control layer: three review fixes (PR #330)** (reconstruction v12 C1/C2; the control rules still did not pass
+  the S0 spec review). A task-record batch is all-or-nothing: every line carries its batch's size, a batch cut
+  short by a crash is refused on load and removed by `recover` back to its start, and an `--op` replay must name one
+  whole batch (before, a half batch loaded as acknowledged and a retry replayed only its first facts). New
+  `control_layer.py start --attempt` records that execution began (write it right before the run); `cancel` of an
+  attempt without a start fact needs `--never-started`, so a running attempt is no longer settled as cancelled and
+  its receipt refused. The lease holds a secret: `lock acquire` returns a token once (stored only as a hash);
+  renewal, release and every write while a lease is live (always under M2/M3) need `--lease-token`, which replaces
+  the self-declared `--owner` on writes; no new lease is acquired while one is live or any attempt is unsettled (a
+  release by name followed by an acquire no longer bypasses the takeover rules). The G5 qualification keeps its 14
+  cases and adds two for that bypass. Tests: `tests/skills/hep_computing/test_control_layer_review330.py`.
+
 - **`check_geant4_study.py`: a replayed campaign writes the same study record on every machine.** The realization
   profile named by an element_sim spec's provenance entered the input manifest only when its recorded path existed on
   the running machine, so replaying the J15 campaign (`examples/design-minimal-spectrometer/`) away from the machine

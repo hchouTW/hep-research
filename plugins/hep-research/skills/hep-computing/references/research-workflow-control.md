@@ -167,15 +167,15 @@ approved 2026-10-30). It implements Control §1–§6 of the spec copy and is te
 scenarios, 44 mutations, the same derivation on scenario and random fact sequences) — agreement with **rules that
 did not pass review**, not a validation.
 
-- **Record**: one append-only `task-log.jsonl` (default `hep-research-artifacts/<task>/task-log/task-log.jsonl`,
-  DEC-01/08/09, approved); each line carries sequence number, batch, kind, writer, fields and the previous
-  line's SHA-256; every load verifies the chain and replays the facts. Never edit it: every fact goes through a
-  command with `--expect-head` (compare-and-set), optionally `--expect-digest`; `--op` makes a retry idempotent. Keep
-  the printed `head_digest` outside the record: the chain cannot catch an edit of its last line.
+- **Record**: one append-only `task-log.jsonl` (default `hep-research-artifacts/<task>/task-log/task-log.jsonl`);
+  each line carries sequence number, batch and its size, kind, writer, fields, the previous line's SHA-256; a load
+  verifies the chain, replays the facts and refuses a cut-short batch. Never edit it: write through a command with
+  `--expect-head` (compare-and-set), optionally `--expect-digest`; `--op` makes a retry idempotent. Keep the printed
+  `head_digest` outside the record: the chain cannot catch an edit of its last line.
 - **Writers**: the agent writes `contract`, `freeze`, `exposure`; the helper writes session, intents, rejections,
-  reuse, publish; `receipt` turns a `run_workflow.py --receipt-dir` receipt (and bound check result) into adapter
-  facts — run each admitted attempt as one step with `--attempt-prefix P`, P plus step id being the attempt id; an
-  unconfirmed termination becomes **unknown**; `--not-started` records a step the runner refused.
+  reuse, publish. Per attempt: `admit`, `start` (just before the run), one `run_workflow.py --receipt-dir` step
+  with `--attempt-prefix P` (P plus step id = attempt id), `receipt` (adapter facts; unconfirmed termination →
+  **unknown**; `--not-started` for a step the runner refused).
 - **Admission** (`admit`) computes the identity and the consumed inputs itself, applies the budget, read, unknown,
   rerun and check-before-recompute rules, and compares the executor's qualified capabilities with the mode
   (`executor_capabilities.py`): M2 needs G5 (qualified with this helper), M3 also G3/G4 (unsupported, refused). A
@@ -190,9 +190,9 @@ did not pass review**, not a validation.
 - **Resumption (C2)**: a new session runs `resume` first (the summary below from the record alone, with what never
   to resubmit and what to do next). Settle every admitted, running or unknown attempt before anything else: take its
   receipt, `receipt --lost` when the run left none, `reconcile` from a receipt that proves the outcome, or ask a
-  human to abandon it; `cancel` records C's cancel request. Then `lock acquire --owner NAME` (an expired lease is
-  taken over only after that; a live one never; takeovers are recorded beside the record). Under M2 every
-  write but a human decision passes `--owner` holding a live lease. `recover` removes a torn, unacknowledged line.
+  human to abandon it; `cancel` needs a `start` fact or `--never-started`. Then `lock acquire --owner NAME`, which
+  prints a token once: no new lease while one is live or an attempt unsettled; takeovers recorded. Writes present
+  `--lease-token` while a lease is live (always under M2); release and renewal need it. `recover` removes a torn tail.
 - **Not provided**: M3, conditions evidence (G6), typed-source checks of `contracts/dependencies.py` (PROV-02),
   partition scope accounts (stage D).
 
