@@ -120,7 +120,6 @@ and position, in a follow-up); nothing already covered was restated.
   `dr-reco-neg`); the principles summary is unchanged (its routing part is at its budget).
 - Evidence: VALIDATION DETECTOR-RECONSTRUCTION-METHODS
 
-
 ## 0.49.1 (2026-10-30)
 
 Patch release, documentation only; contracts 3.17.0, `CORE_VERSION` 1.4.0, the adapters and every skill's behaviour are
