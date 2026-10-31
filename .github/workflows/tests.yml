@@ -477,8 +477,8 @@ jobs:
               print("scope=full")
               raise SystemExit
           plan = json.load(open("../../ci-plan/plan.json"))
-          prefixes = ("tests.contracts.", "tests.tools.", "tests.core.test_protected", "tests.core.test_partition",
-                      "tests.core.test_blinding", "tests.core.test_r5_blinding")
+          prefixes = ("tests.contracts.", "tests.tools.", "tests.core.test_partition", "tests.core.test_blinding",
+                      "tests.core.test_r5")
           hit = plan["full"] or any(m.startswith(prefixes) for m in plan["modules"])
           print("scope=subset" if hit else "scope=none")
           PY
@@ -533,7 +533,8 @@ jobs:
           export TMPDIR="$HOSTILE/tmp"
           python -m unittest discover -s tests/contracts -t .
           python -m unittest discover -s tests/tools -t .
-          for p in "test_protected*.py" "test_partition*.py" "test_blinding*.py" "test_r5_blinding.py"; do
+          # protected mode is tested in tests/contracts and test_partition_protected_batch (no tests/core/test_protected*)
+          for p in "test_partition*.py" "test_blinding*.py" "test_r5*.py"; do
             python -m unittest discover -s tests/core -t . -p "$p"
           done
           python tools/check_relocation.py
