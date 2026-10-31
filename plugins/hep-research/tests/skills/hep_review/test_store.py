@@ -55,6 +55,14 @@ class Location(unittest.TestCase):
         loc = S.check_location(MAC_HOME + "/.local/state/x", mounts_text=MAC_MOUNT, platform="darwin")
         self.assertEqual((loc["fs_type"], loc["supported"]), ("apfs", True))
 
+    @unittest.skipUnless(sys.platform == "darwin", "the live mount(8) output of macOS")
+    def test_live_macos_mount_output_parses(self):
+        """On a real Mac, the temporary folder (/var is a link to /private/var on the Data volume) resolves to a
+        local APFS mount through mount(8): the darwin branch reads the live output, not only the fixture."""
+        with tempfile.TemporaryDirectory() as d:
+            loc = S.check_location(Path(d) / "store")
+        self.assertEqual(loc["fs_type"], "apfs", loc)
+
     def test_n51_sync_folders_and_unknown_type_refused(self):
         for p in (MAC_HOME + "/Library/CloudStorage/GoogleDrive-x/s", MAC_HOME + "/Library/Mobile Documents/s",
                   MAC_HOME + "/Dropbox/s", MAC_HOME + "/OneDrive - Org/s"):

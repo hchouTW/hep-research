@@ -922,7 +922,6 @@
   "naming.common.vocabulary|N5:adapters/crdb/assets/crdb_query.py#fch/--crdb-version": 1,
   "naming.common.vocabulary|N5:adapters/geomagnetic-backtracing/assets/otso_cutoff.py#p/--g10-nt": 1,
   "naming.common.vocabulary|N5:skills/hep-authoring/scripts/check_manuscript.py#parser/--bbl": 1,
-  "naming.common.vocabulary|N5:skills/hep-authoring/scripts/review_lib/store.py#<environment>/XDG_STATE_HOME": 1,
   "naming.common.vocabulary|N5:skills/hep-authoring/scripts/spectrum_plot.py#ap/--lw-index": 1,
   "naming.common.vocabulary|N5:skills/hep-detector/scripts/frontend_response.py#p/--af": 1,
   "naming.common.vocabulary|N5:skills/hep-detector/scripts/frontend_response.py#p/--cfd-delay": 1,

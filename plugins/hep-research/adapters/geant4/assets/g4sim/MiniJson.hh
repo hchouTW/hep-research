@@ -164,6 +164,35 @@ class Parser {
     v.kind = Value::Kind::Number;
     return v;
   }
+  unsigned hex4() {  // exactly four hex digits after \\u
+    if (i_ + 4 > s_.size()) fail("bad \\u escape");
+    unsigned code = 0;
+    for (int k = 0; k < 4; ++k) {
+      char h = s_[i_++];
+      int d = (h >= '0' && h <= '9') ? h - '0' : (h >= 'a' && h <= 'f') ? h - 'a' + 10
+            : (h >= 'A' && h <= 'F') ? h - 'A' + 10 : -1;
+      if (d < 0) fail("bad \\u escape");
+      code = code * 16 + static_cast<unsigned>(d);
+    }
+    return code;
+  }
+  static void utf8(unsigned code, std::string& out) {
+    if (code < 0x80) {
+      out += static_cast<char>(code);
+    } else if (code < 0x800) {
+      out += static_cast<char>(0xC0 | (code >> 6));
+      out += static_cast<char>(0x80 | (code & 0x3F));
+    } else if (code < 0x10000) {
+      out += static_cast<char>(0xE0 | (code >> 12));
+      out += static_cast<char>(0x80 | ((code >> 6) & 0x3F));
+      out += static_cast<char>(0x80 | (code & 0x3F));
+    } else {
+      out += static_cast<char>(0xF0 | (code >> 18));
+      out += static_cast<char>(0x80 | ((code >> 12) & 0x3F));
+      out += static_cast<char>(0x80 | ((code >> 6) & 0x3F));
+      out += static_cast<char>(0x80 | (code & 0x3F));
+    }
+  }
   std::string string() {
     ++i_;  // opening quote
     std::string out;
@@ -181,12 +210,17 @@ class Parser {
           case 'r': out += '\r'; break;
           case 'b': out += '\b'; break;
           case 'f': out += '\f'; break;
-          case 'u': {
-            if (i_ + 4 > s_.size()) fail("bad \\u escape");
-            unsigned code = static_cast<unsigned>(std::strtoul(s_.substr(i_, 4).c_str(), nullptr, 16));
-            i_ += 4;
-            if (code < 0x80) out += static_cast<char>(code);
-            else fail("non-ASCII \\u escapes are not supported");
+          case 'u': {  // any code point, as UTF-8; a surrogate pair is one code point, a lone surrogate an error
+            unsigned code = hex4();
+            if (code >= 0xDC00 && code <= 0xDFFF) fail("bad \\u escape: lone low surrogate");
+            if (code >= 0xD800 && code <= 0xDBFF) {
+              if (i_ + 2 > s_.size() || s_[i_] != '\\' || s_[i_ + 1] != 'u') fail("bad \\u escape: lone high surrogate");
+              i_ += 2;
+              unsigned low = hex4();
+              if (low < 0xDC00 || low > 0xDFFF) fail("bad \\u escape: high surrogate without a low one");
+              code = 0x10000 + ((code - 0xD800) << 10) + (low - 0xDC00);
+            }
+            utf8(code, out);
             break;
           }
           default: fail("bad escape");

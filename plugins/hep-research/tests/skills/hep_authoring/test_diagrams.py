@@ -9,6 +9,7 @@ Standard library only; DOT compilation is skipped when Graphviz is absent, Plant
 import importlib.util
 import json
 import os
+import shlex
 import shutil
 import subprocess
 import sys
@@ -146,7 +147,7 @@ class RealBundle(unittest.TestCase):
         import time
         with tempfile.TemporaryDirectory() as tmp:
             fake = Path(tmp) / "mmdc"
-            fake.write_text(f"#!/bin/sh\necho launched >> {tmp}/launches\nsleep 30\n")
+            fake.write_text(f"#!/bin/sh\necho launched >> {shlex.quote(tmp + '/launches')}\nsleep 30\n")
             fake.chmod(0o755)
             md = Path(tmp) / "two.md"
             md.write_text("```mermaid\nflowchart LR\n  A --> B\n```\n\n```mermaid\nflowchart LR\n  C --> D\n```\n")
@@ -256,7 +257,7 @@ class CoverageOutcomes(unittest.TestCase):
 
     def test_startup_failure_preflights_once_and_marks_blocks(self):
         tmp = tempfile.mkdtemp()
-        self.fake(tmp, "mmdc", f"echo launched >> {tmp}/launches\necho 'Error: Could not find Chromium (rev. 1181205)' >&2\nexit 1\n")
+        self.fake(tmp, "mmdc", f"echo launched >> {shlex.quote(tmp + '/launches')}\necho 'Error: Could not find Chromium (rev. 1181205)' >&2\nexit 1\n")
         md = "```mermaid\nflowchart LR\n  A --> B\n```\n\n```mermaid\nflowchart LR\n  C --> D\n```\n"
         rc, rep, res = self.run_checker(md, bin_dir=tmp)
         self.assertIsNotNone(rep, res.stdout + res.stderr)

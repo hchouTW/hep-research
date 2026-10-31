@@ -8,8 +8,10 @@ LCG_PLATFORM="<PLATFORM_TAG>"        # for example x86_64-el9-gcc13-opt
 VIEW="/cvmfs/sft.cern.ch/lcg/views/${LCG_VERSION}/${LCG_PLATFORM}/setup.sh"
 if [ ! -r "$VIEW" ]; then
   echo "lcg_view_setup.sh: $VIEW not found (is CVMFS mounted, and do the release and platform exist?)" >&2
+  # shellcheck disable=SC2317  # return when sourced, exit when executed
   return 1 2>/dev/null || exit 1
 fi
+# shellcheck source=/dev/null  # the LCG view setup script is chosen at run time
 . "$VIEW"
 export LCG_VERSION
 # Record what you got, next to the run's outputs:

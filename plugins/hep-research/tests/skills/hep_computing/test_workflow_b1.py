@@ -18,6 +18,8 @@ from pathlib import Path
 PLUGIN = Path(__file__).resolve().parents[3]
 RUNNER = PLUGIN / "skills" / "hep-computing" / "scripts" / "run_workflow.py"
 sys.path.insert(0, str(PLUGIN))
+from tests._platform import needs  # noqa: E402
+
 KNOWN = {"release": "b1-test", "digest": "b" * 64, "source": "pinned by the test"}
 POSIX = os.name == "posix"
 
@@ -210,7 +212,7 @@ class StepIds(Base):
         self.assertEqual(code, 0, out)
 
 
-@unittest.skipUnless(POSIX, "process groups (DEC-04: only POSIX is claimed, tested on Linux)")
+@needs("process_groups")  # DEC-04: only POSIX is claimed, tested on Linux
 class Termination(Base):
     """BUG-04: a timeout leaves a run record, stops the process tree and confirms it is gone."""
 
@@ -243,7 +245,7 @@ class Termination(Base):
         time.sleep(4)
         self.assertFalse((self.work / "late.txt").exists())
 
-    @unittest.skipUnless(Path("/proc").is_dir(), "the environment token is found through /proc (Linux)")
+    @needs("proc_fs")  # the environment token is found through /proc (Linux)
     def test_a_process_that_leaves_the_group_is_found(self):
         """A child that starts its own session and outlives the step (as a daemonized helper: an ssh ControlPersist
         master, gpg-agent, a compiler-cache server) is found by its token, stopped and recorded; the step fails."""
@@ -289,7 +291,7 @@ class Termination(Base):
         self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
         self.assertEqual(record(self.work, "s")["extension"]["termination"], "confirmed")
 
-    @unittest.skipUnless(Path("/proc").is_dir(), "the environment token is found through /proc (Linux)")
+    @needs("proc_fs")  # the environment token is found through /proc (Linux)
     def test_a_nested_runner_does_not_hide_its_steps(self):
         """A step that runs run_workflow.py: the inner runner's step starts its own session, and the inner runner adds
         its token to the marker instead of replacing it, so the outer runner still finds and stops that step when the
@@ -311,7 +313,7 @@ class Termination(Base):
         time.sleep(4)
         self.assertFalse(late.exists())  # the inner step was stopped with the outer one
 
-    @unittest.skipUnless(Path("/proc").is_dir(), "the environment token is found through /proc (Linux)")
+    @needs("proc_fs")  # the environment token is found through /proc (Linux)
     def test_the_record_names_what_termination_observed(self):
         code, out = run({"workflow": "b4", "steps": [step("s", write("o.txt"), ["o.txt"])]}, self.work)
         self.assertEqual(code, 0, out)

@@ -58,6 +58,7 @@ import argparse
 import json
 import math
 import os
+import shlex
 import subprocess
 import sys
 import time
@@ -224,8 +225,9 @@ class BatchRunner:
             shard_points = sdir / "points.json"
             shard_points.write_text(json.dumps({"request": self.request,
                                                 "points": points[first:first + len(shard)]}), encoding="utf-8")
-            cmd = (f"{sys.executable} {Path(__file__).resolve()} evaluate --points {shard_points} --registry "
-                   f"{self.registry} --cache-dir {self.work_dir / 'cache'} --start {{start}} --stop {{stop}} "
+            q = shlex.quote
+            cmd = (f"{q(sys.executable)} {q(str(Path(__file__).resolve()))} evaluate --points {q(str(shard_points))} --registry "
+                   f"{q(str(self.registry))} --cache-dir {q(str(self.work_dir / 'cache'))} --start {{start}} --stop {{stop}} "
                    "--out {out}")
             procs.append((first, sdir, manifest, subprocess.Popen(
                 [sys.executable, str(PARTITION), "run", "--manifest", str(manifest), "--state", str(sdir / "state"),

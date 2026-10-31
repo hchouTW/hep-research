@@ -14,6 +14,7 @@ import importlib.util
 import io
 import json
 import os
+import shlex
 import sys
 import tempfile
 import unittest
@@ -108,7 +109,7 @@ class Env:
         self.state.mkdir(exist_ok=True)
         self.batch_cfg = pp.artifact("batch.json", {"campaign_dir": str(self.campaign)})
         spec = {"manifest": {"manifest_hash": "0" * 64, "chunks": [{"id": "c0", "start": 0, "stop": 1, "seed": 1}]},
-                "cmd": f"{sys.executable} -c pass"}
+                "cmd": f"{shlex.quote(sys.executable)} -c pass"}
         self.spec = pp.artifact("spec.json", spec)
         self.out = self.proj / "runner-out"
 

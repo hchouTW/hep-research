@@ -5,6 +5,44 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Cross-platform follow-ups.** The tests that failed under a `TMPDIR` named with a space and Chinese characters on
+  main pass: the batch-scheduler harness and the batch-partition example test take a plain temporary folder
+  (`tests/_platform.plain_tmpdir()`: HTCondor refuses a path with spaces by design, Slurm's golden scripts, `#!`
+  lines), and the hardening and diagram shims quote their paths. CI: the relocated run on pull requests uses the
+  hostile `TMPDIR` again; `checks-complete` also requires `old-python` and every `hostile-paths` leg (the one gate to
+  merge on); the macOS job fails on a failure (the known-differences list is empty).
+
+- **Geant4 programs read a spec naming a non-ASCII path (sci-fix MINIJSON-UNICODE-ESCAPES, S2).** The JSON reader of
+  simreco, layered_sim and element_sim (`g4sim/MiniJson.hh`) refused every `\u` escape above 0x7f, which Python's
+  `json.dumps` writes for a folder named with Chinese characters, and read a short escape such as `\u12g4` as U+0012.
+  It now decodes every code point to UTF-8 (a surrogate pair as one) and refuses a lone surrogate or an escape
+  without four hex digits. Only runs that stopped with a parse error change; no result changes.
+
+- **Cross-platform, part 3: Windows minimum.** Where native Windows lacks a capability the code says so instead of
+  crashing: `Account.current()` requires POSIX ids, and `establish` turns that into the refusal
+  `protected.unsupported_platform` (exit 3, `"status": "refused"`); `run_workflow.py` reports `missing-dependency`
+  (`"reason": "unsupported-platform"`, exit 3) before running a step when the host has no process groups (`--dry-run`
+  still answers); hep-review's CLI reports `missing-dependency` (exit 3) when controlled reading is unavailable; the
+  local executor names the host with `platform.node()`. The two review stores and the AMS paper cache use
+  `core.hostcaps.state_dir` (`%LOCALAPPDATA%\hep-research\` on Windows; unchanged on Linux and macOS).
+  `.gitattributes` checks every text file out with LF (`.gz`, `.png`, `.root`, `.dat`, `.npz` binary); renormalizing
+  changes no file. README: a Windows section (`PYTHONUTF8=1`, what is tested, what needs WSL2) and Tested hosts
+  ("Windows: scripts tested in CI only"). No tool contract changes: `charge_confusion_rate` has no exit-3 path (it
+  calls no protected guard), so no exit-3 failure state is added. `tools/check_relocation.py` passes `--part`, `--shard`,
+  `--jobs` and `--no-cli` to `run_all_checks.py`; CI's `hostile-paths` job is a four-leg matrix (units 1/3-3/3,
+  checks) that splits the relocated run, runs the pull-request subset in parallel through a plan of its modules, and
+  on main reconciles its three hostile units shards in `hostile-paths-complete`.
+
+- **Cross-platform, part 2: macOS and Linux.** `executor_capabilities.py` and `run_workflow.py` take their host
+  answers from `core.hostcaps`; the qualification record and `qualify` output name the modes a host cannot admit
+  (`unavailable_modes`: M2 where `/proc` is missing, as on macOS; M3 everywhere), and the workflow-control reference
+  says so. G2-dependent tests use `@needs("proc_fs")`. `tools/check_packaging.py` rejects AppleDouble `._` files
+  (magic `00 05 16 07`) and accepts a regular file named `._x`. Test command lines built as f-strings quote their
+  paths (`test_lineage.py:286` and seven more). CI: `hostile-paths` (space, Chinese characters and symlinks in
+  `TMPDIR` and the working directory; a tree with NFD, `.DS_Store` and AppleDouble names) and `old-python` (a real
+  3.9 as `python3`: `tools/platform_checks.py old-python`, AC2-AC4 with the root case through sudo) in `tests.yml`;
+  shellcheck in `lint`; new `platforms.yml` (macOS units part under `ulimit -n 256`; Windows; not required).
+
 - **Cross-platform, part 1b: the interpreter guard block in every skill script.** `tools/insert_interpreter_guard.py`
   inserted the fixed block into the 198 scripts of `tools/skill_scripts.json` (after the docstring and any
   `from __future__` import; idempotent, a second run changes nothing; a shebang stays first). Under Python 3.9 every

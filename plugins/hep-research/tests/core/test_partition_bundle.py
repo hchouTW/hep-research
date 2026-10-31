@@ -4,6 +4,7 @@ is refused when the campaign changed. Freezing approves nothing. Synthetic campa
 import json
 import os
 import shlex
+import shutil
 import sys
 import tempfile
 import unittest
@@ -174,8 +175,10 @@ class BundleTests(unittest.TestCase):
         py = os.path.realpath(sys.executable)
         exe = self.worker / "run.py"
         os.chmod(self.worker, 0o755)
-        bin_dir = root / "bin"
-        bin_dir.mkdir()
+        # a '#!' line cannot name a path with a space, so the launcher link lives in a space-free folder even when
+        # TMPDIR has one (the hostile-paths CI job)
+        bin_dir = Path(tempfile.mkdtemp(prefix="hep-launcher-", dir="/tmp" if os.path.isdir("/tmp") else None))
+        self.addCleanup(shutil.rmtree, bin_dir, True)
         os.symlink("/usr/bin/env", bin_dir / "myenv")
         bad = {"#!/usr/bin/env python3": "bundle.bad_shebang", f"#!{bin_dir / 'myenv'}": "bundle.launcher",
                "#!/bin/sh /tmp/evil.sh": "bundle.bad_shebang", f"#!{py} -mpkg": "bundle.bad_shebang",
@@ -194,7 +197,7 @@ class BundleTests(unittest.TestCase):
         for first in ("/usr/bin/env", str(bin_dir / "myenv"), "/usr/bin/nice"):
             with self.subTest(first=first):
                 with self.assertRaises(bd.BundleError) as err:
-                    bd.build(cp.init(root / f"l{first.replace('/', '_')}", self.manifest, f"{first} {shlex.quote(str(exe))}" + tail), self.worker)
+                    bd.build(cp.init(root / f"l{first.replace('/', '_')}", self.manifest, f"{shlex.quote(first)} {shlex.quote(str(exe))}" + tail), self.worker)
                 self.assertEqual(err.exception.code, "bundle.launcher")
         exe.write_text(f"#!/bin/sh /tmp/evil.sh\n{WORKER}")
         with self.assertRaises(bd.BundleError):

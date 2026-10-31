@@ -28,7 +28,8 @@ YYYY-MM-DDTHH:MM:SSZ (default: the clock), --observation FILE (fixed host facts,
 Files: <project>/reviews/review-config.json (created with defaults by start when missing; a review started with
 --own-config uses <project>/reviews/<id>/review-config.json instead), <project>/reviews/<id>/,
 and the private directory (config private_dir, else $XDG_STATE_HOME/hep-research/reviews/ or
-~/.local/state/hep-research/reviews/). `python3 <plugin root>/contracts/review.py check <review dir>` checks a review.
+~/.local/state/hep-research/reviews/; on Windows %LOCALAPPDATA%\\hep-research\\reviews\\).
+`python3 <plugin root>/contracts/review.py check <review dir>` checks a review.
 Output: one JSON object with a "status" key. Exit 0 ok, 1 negative result (a stop on error, a reverted change at close),
 2 refused command or bad input, 3 incomplete. A closed review here is not a review record by a non-author reviewer
 in the sense of docs/dev/cross-artifact-check/decision-enforce.md (maintainer decision 2026-10-21); it is advisory input a human

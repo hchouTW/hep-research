@@ -6,6 +6,7 @@
 Before the fix a local worker had no time limit, the Mermaid CLI always ran when installed, and the note had no rule."""
 import json
 import os
+import shlex
 import stat
 import subprocess
 import sys
@@ -35,7 +36,7 @@ class LocalWorkerTimeout(unittest.TestCase):
 
     def test_local_runner_has_a_default_timeout(self):
         self.assertGreater(runner.DEFAULT_LOCAL_WORKER_TIMEOUT_S, 0)
-        ok = f"{sys.executable} -c \"import json,sys; json.dump(dict(), open(sys.argv[1], 'w'))\" {{out}}"
+        ok = f"{shlex.quote(sys.executable)} -c \"import json,sys; json.dump(dict(), open(sys.argv[1], 'w'))\" {{out}}"
         with tempfile.TemporaryDirectory() as td:
             d = Path(td)
             code, meta = self.run_runner(d, self.spec(d, ok), "--local-worker")
@@ -48,7 +49,7 @@ class LocalWorkerTimeout(unittest.TestCase):
             self.assertEqual((meta["worker_timeout_s"], meta["worker_timeout_source"]), (None, "none (batch node)"))
 
     def test_spec_timeout_wins_and_stops_a_slow_worker(self):
-        slow = f"{sys.executable} -c \"import time; time.sleep(30)\" {{out}}"
+        slow = f"{shlex.quote(sys.executable)} -c \"import time; time.sleep(30)\" {{out}}"
         with tempfile.TemporaryDirectory() as td:
             d = Path(td)
             code, meta = self.run_runner(d, self.spec(d, slow, worker_timeout_s=1), "--local-worker")
