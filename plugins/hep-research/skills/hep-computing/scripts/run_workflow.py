@@ -104,6 +104,7 @@ PLUGIN = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(PLUGIN))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from contracts import CONTRACTS_VERSION  # noqa: E402
+from core import hostcaps  # noqa: E402
 from contracts import trace  # noqa: E402
 from contracts.identity import plugin_release  # noqa: E402
 from core.status import add_status_argument, exit_code  # noqa: E402
@@ -337,13 +338,13 @@ def _group_alive(pgid: int) -> bool:
 
 def _proc_scan() -> bool:
     """Whether processes can be listed with their group, state and environment (Linux /proc)."""
-    return Path("/proc/self/stat").is_file()
+    return hostcaps.proc_fs()
 
 
 def termination_scope() -> list[str]:
     """What termination observes on this host: the step's process group (POSIX) and, through /proc, the processes
     that left the group but still carry the attempt's token in their environment."""
-    return (["process-group"] if os.name == "posix" else []) + (["environment-marker"] if _proc_scan() else [])
+    return (["process-group"] if hostcaps.process_groups() else []) + (["environment-marker"] if _proc_scan() else [])
 
 
 def _carries(environ: bytes, token: str) -> bool:
@@ -443,7 +444,7 @@ def execute(cmd: list[str], cwd: Path, timeout: float) -> dict:
     token = uuid.uuid4().hex
     outer = os.environ.get(MARKER)
     env = dict(os.environ, **{MARKER: f"{outer}:{token}" if outer else token})  # a chain: a nested run keeps ours
-    posix = os.name == "posix"
+    posix = hostcaps.process_groups()
     proc = subprocess.Popen(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env,
                             start_new_session=posix)
     pgid = proc.pid if posix else None
