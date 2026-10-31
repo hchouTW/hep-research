@@ -151,3 +151,30 @@ PR 1a: draft PR #333 (base `main`), pushed 2026-10-31; CI results below when com
   parent's environment.
 - **1b.4** `docs/architecture.md` §6 (block, rules, conflicts, exemptions, removal condition); CHANGELOG
   (code-release digest changes; re-pin and requalify).
+
+PR 1a: CI on #333 complete, 22 pass, 2 skipped (all required jobs green). PR 1a *Done when* holds (AC1 on macOS:
+only the pre-existing `test_root_cpp_assets` host error).
+
+### Local validation — units 1/6 (2026-10-31): **STOP**
+
+`run_all_checks.py --part units`: 6318 run, 12 failures, 1 error (pre-existing `test_root_cpp_assets`). The 12
+failures are three example-replay tests, all caused by the guard block itself:
+
+| Test | What differs from the committed output |
+|---|---|
+| `tests.examples.test_analysis_to_paper` (2 files) | `provenance.code_paths` gains `core/interpreter_guard.py` |
+| `tests.examples.test_ml_classifier_to_inference` | `ml_artifact.provenance.code_paths` 17 → 18 entries (same file) |
+| `tests.examples.test_geant4_thin_silicon` (9 files) | `provenance.code_paths` +1 (same file); `extension.tools[].version` of `check_geant4_study.py` and `geant4_benchmarks.py` (the first 16 hex of each script's SHA-256) change because the scripts now carry the block |
+
+Cause: the artifacts are written by skill scripts the examples start as `__main__` subprocesses; the guard block
+imports `core.interpreter_guard`, and `core/trace.py code_paths` records every loaded plugin file. In-process imports
+(non-`__main__`) are unaffected. This contradicts task Background 10 ("after changing one, all example and fixture
+tests still passed"): the thin-silicon replay compares the recorded script hashes.
+
+Why this is a STOP (A6 fatal: the fix requires an out-of-scope change): every fix either edits committed example
+outputs (Out of Scope; AC6 requires an empty `examples/` diff), changes what provenance records (`core/trace.py`
+excluding a loaded file, or the replay tests ignoring `code_paths`/tool versions: a change to recorded provenance and
+to test strictness the maintainer must decide), or changes the task's fixed guard block (e.g. dropping the module from
+`sys.modules`). No fix attempted. Counters PR 1b: units runs 1/6, fix attempts on this failure 0/3.
+
+Pushed `xplat/pr-1b-guard` (work in progress, no PR opened). Options for the maintainer are in the conversation report.
