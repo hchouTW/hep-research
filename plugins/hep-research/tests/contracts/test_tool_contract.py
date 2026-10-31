@@ -13,6 +13,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from contracts import tool_contract as tc  # noqa: E402
+from core.interpreter_guard import child_flags  # noqa: E402
 
 FLUX = json.loads((ROOT / "contracts" / "tool_contracts" / "cosmic_ray_flux.json").read_text(encoding="utf-8"))
 FLUX_ARGS = ["--counts", "42", "--exposure", "1.5e7", "--bin-width", "10", "--bin-width-unit", "GV"]
@@ -24,7 +25,7 @@ def codes(res):
 
 
 def run_tool(entry, args):
-    return subprocess.run([sys.executable, "-I", "-B", str(ROOT / entry), *args], capture_output=True, text=True,
+    return subprocess.run([sys.executable, *child_flags(), "-I", "-B", str(ROOT / entry), *args], capture_output=True, text=True,
                           timeout=60)
 
 

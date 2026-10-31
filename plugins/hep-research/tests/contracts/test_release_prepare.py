@@ -14,6 +14,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
+from core import hostcaps  # noqa: E402
 from contracts import release_manifest as rm  # noqa: E402
 from contracts import release_prepare as rp  # noqa: E402
 from core.blinding import transforms as tf  # noqa: E402
@@ -151,7 +152,8 @@ class ReviewFindingTests(unittest.TestCase):
         import os
         rel = RELEASES["common-offset"]()
         rp.prepare(rel, META, self.d / "r", self.d / "c" / "sealed.json", code_digest=CODE)
-        self.assertEqual(os.stat(self.d / "c" / "sealed.json").st_mode & 0o777, 0o600)
+        if hostcaps.has("posix_ids"):  # Windows has no POSIX file modes (the file ACL is the user's own)
+            self.assertEqual(os.stat(self.d / "c" / "sealed.json").st_mode & 0o777, 0o600)
         with self.assertRaises(rp.PrepareRefused) as cm:
             rp.prepare(rel, META, self.d / "r2", self.d / "c" / "sealed.json", code_digest=CODE)
         self.assertEqual(cm.exception.code, "prepare.sealed_exists")

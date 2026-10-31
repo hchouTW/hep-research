@@ -41,6 +41,7 @@ if __package__ in (None, ""):
 
 from contracts import KNOWN_CAPABILITIES  # noqa: E402
 from contracts.schema import Report, validate  # noqa: E402
+from core.interpreter_guard import child_flags  # noqa: E402
 
 PLUGIN_ROOT = Path(__file__).resolve().parents[1]
 CONTRACT_DIR = PLUGIN_ROOT / "contracts" / "tool_contracts"
@@ -123,7 +124,8 @@ def subcommands(help_text: str) -> set[str]:
 
 def run_help(entry: Path, *sub: str) -> tuple[str | None, str]:
     try:
-        p = subprocess.run([sys.executable, "-I", "-B", str(entry), *sub, "--help"], capture_output=True, text=True,
+        p = subprocess.run([sys.executable, *child_flags(), "-I", "-B", str(entry), *sub, "--help"], capture_output=True,
+                           text=True,
                            timeout=HELP_TIMEOUT_S, cwd=str(entry.parent))
     except (OSError, subprocess.TimeoutExpired) as exc:
         return None, f"--help did not run: {exc}"

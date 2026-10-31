@@ -28,7 +28,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from core.status import EXIT_CODES  # noqa: E402
-from tests.skills.test_cli_robustness import HC_CONTRACT, MISSING_FILE_ARGS, argv_sets  # noqa: E402
+from tests.skills.test_cli_robustness import HC_CONTRACT, MISSING_FILE_ARGS, argv_sets, unique_missing  # noqa: E402
 
 
 def _tools(patterns):
@@ -138,7 +138,7 @@ def bad_exit_codes(path):
 
 
 def run(script, args, timeout=180):
-    with tempfile.TemporaryDirectory() as cwd:
+    with tempfile.TemporaryDirectory() as cwd, unique_missing(args) as args:
         return subprocess.run([sys.executable, "-I", str(ROOT / script), *args], capture_output=True, text=True,
                               timeout=timeout, cwd=cwd)
 

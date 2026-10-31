@@ -81,6 +81,16 @@ CPP
 # shellcheck disable=SC2086  # root-config flags are word lists
 if ! c++ "$WORK/check.cpp" $CFLAGS $LIBS -o "$WORK/check" >"$WORK/build.log" 2>&1; then
   [ "$JSON" -eq 1 ] || cat "$WORK/build.log" >&2
+  # ROOT 6.40 headers include <vdt/vdtMath.h>; a ROOT built against a separate vdt (Homebrew) may not report vdt's
+  # include folder in root-config --cflags or its CMake target: name the folder that has it
+  if grep -q "vdt/vdtMath.h' file not found\|vdt/vdtMath.h: No such file" "$WORK/build.log"; then
+    for dir in "$(root-config --incdir)/.." /opt/homebrew/include /usr/local/include /usr/include; do
+      if [ -f "$dir/vdt/vdtMath.h" ]; then
+        finish failed 1 "the RDataFrame test program does not compile: ROOT's headers need vdt/vdtMath.h, which is in $dir but not in root-config --cflags; add -I$dir to the compile line (or export CPATH=$dir)."
+      fi
+    done
+    finish failed 1 'the RDataFrame test program does not compile: ROOT needs vdt (vdt/vdtMath.h), which is not installed or not on the include path.'
+  fi
   finish failed 1 'the RDataFrame test program does not compile against this ROOT.'
 fi
 if ! RUN_OUT=$("$WORK/check" 2>&1); then

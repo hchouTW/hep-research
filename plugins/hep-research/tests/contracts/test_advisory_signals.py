@@ -13,6 +13,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
 from contracts.dependencies import validate_dependencies  # noqa: E402
+from core.interpreter_guard import child_flags  # noqa: E402
 
 
 class NoFormalUseSignal(unittest.TestCase):
@@ -42,7 +43,7 @@ class NoFormalUseSignal(unittest.TestCase):
     def test_cli_never_prints_true(self):
         p = self.root / "empty.json"
         p.write_text("{}", encoding="utf-8")
-        out = subprocess.run([sys.executable, "-I", str(ROOT / "contracts" / "dependencies.py"), str(p),
+        out = subprocess.run([sys.executable, *child_flags(), "-I", str(ROOT / "contracts" / "dependencies.py"), str(p),
                               "--root", str(self.root)], capture_output=True, text=True, timeout=60)
         self.assertIs(json.loads(out.stdout)["formal_use_allowed"], False)
 
