@@ -13,7 +13,7 @@ class BundleCliTests(unittest.TestCase):
         self.wdir = self.h.dir / "worker-code"
         self.wdir.mkdir()
         (self.wdir / "worker.py").write_text(WORKER)
-        self.h.cmd = (f"{shlex.quote(sys.executable)} {self.wdir / 'worker.py'} --start {{start}} --stop {{stop}} "
+        self.h.cmd = (f"{shlex.quote(sys.executable)} {shlex.quote(str(self.wdir / 'worker.py'))} --start {{start}} --stop {{stop}} "
                       "--seed {seed} --out {out} --id {id}")
         self.assertEqual(self.h.plan()[0], 0)
 

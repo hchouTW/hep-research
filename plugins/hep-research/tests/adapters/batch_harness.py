@@ -34,7 +34,7 @@ class Harness:
                         HEP_BATCH_SHIM_STATE=str(self.dir / "shim-store"), HEP_BATCH_SHIM_LOG=str(self.log),
                         HEP_BATCH_SHIM_FAULTS=str(self.faults))
         (self.dir / "worker.py").write_text(WORKER)
-        self.cmd = (f"{shlex.quote(sys.executable)} {self.dir / 'worker.py'} --start {{start}} --stop {{stop}} --seed {{seed}} "
+        self.cmd = (f"{shlex.quote(sys.executable)} {shlex.quote(str(self.dir / 'worker.py'))} --start {{start}} --stop {{stop}} --seed {{seed}} "
                     f"--out {{out}} --id {{id}}" + (f" --print {worker_print}" if worker_print else ""))
         cfg = {"backend": backend, "campaign_dir": "campaign", "resources": {"cpus": 1, "memory_mb": 1000},
                "env_passthrough": ["HEP_BATCH_SHIM_STATE", "HEP_BATCH_SHIM_LOG", "HEP_BATCH_SHIM_FAULTS"]}
