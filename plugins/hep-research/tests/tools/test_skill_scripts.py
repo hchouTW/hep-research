@@ -54,3 +54,39 @@ class SkillScriptList(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class InsertionScript(unittest.TestCase):
+    """tools/insert_interpreter_guard.py: idempotent, keeps a shebang first, replaces a stale block."""
+
+    @classmethod
+    def setUpClass(cls):
+        spec = importlib.util.spec_from_file_location("insert_interpreter_guard",
+                                                      ROOT / "tools" / "insert_interpreter_guard.py")
+        cls.ins = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(cls.ins)
+        cls.gen = generator()
+
+    def test_every_listed_script_is_current(self):
+        self.assertEqual(self.ins.main(["--check"]), 0)
+
+    def test_insertion_is_idempotent_and_placed(self):
+        sources = {
+            "docstring and future": '"""Doc."""\nfrom __future__ import annotations\n\nimport json\n',
+            "shebang only": "#!/usr/bin/env python3\n# a comment\nimport json\n",
+            "docstring only": '"""Doc\n\nmore."""\nimport sys\nsys.path.insert(0, "x")\n',
+            "no trailing newline": '"""Doc."""\nimport json',
+        }
+        for name, source in sources.items():
+            with self.subTest(case=name):
+                once = self.ins.with_guard(source, 3, self.gen)
+                self.assertEqual(self.gen.guard_problems(once, 3), [])
+                self.assertEqual(self.ins.with_guard(once, 3, self.gen), once)
+                self.assertEqual(once.splitlines()[0], source.splitlines()[0])
+
+    def test_a_stale_block_is_replaced(self):
+        good = self.ins.with_guard('"""Doc."""\nimport json\n', 3, self.gen)
+        stale = good.replace("parents[3]", "parents[2]")
+        fixed = self.ins.with_guard(stale, 3, self.gen)
+        self.assertEqual(fixed, good)
+        self.assertEqual(fixed.count("hep-research interpreter guard"), 1)
