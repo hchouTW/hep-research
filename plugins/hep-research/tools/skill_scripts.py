@@ -28,6 +28,7 @@ Standard library only.
 from __future__ import annotations
 
 import argparse
+import ast
 import json
 import re
 import sys
@@ -40,6 +41,72 @@ TOKEN = re.compile(r"[^\s`'\"()\[\]|,;*]*\.py\b")
 SHORTHAND = re.compile(r"`([A-Za-z0-9_-]+/)`\s*=\s*`<plugin root>/([^`]+?)/?`")
 MAIN_BLOCK = re.compile(r"^if __name__ == [\"']__main__[\"']\s*:", re.M)
 SKIP_DIRS = {"__pycache__", "tests", "examples", "output"}
+
+# The interpreter guard block every listed script carries, first after the module docstring and any `from __future__`
+# import (tools/insert_interpreter_guard.py inserts it; tests/tools/test_python_compat.py checks it). {N} is the
+# script's depth below the plugin root.
+GUARD_BLOCK = """\
+if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.dont_write_bytecode = True
+    _root = str(_Path(__file__).resolve().parents[{N}])
+    if _root not in _sys.path:
+        _sys.path.insert(0, _root)
+    try:
+        from core.interpreter_guard import guard as _guard
+    except ImportError:  # copied outside the plugin
+        pass
+    else:
+        _guard()
+"""
+
+
+def guard_block(depth: int) -> str:
+    return GUARD_BLOCK.replace("{N}", str(depth))
+
+
+def guard_insertion_line(source: str) -> int:
+    """The 0-based line index where the guard block belongs: after the module docstring and every leading
+    `from __future__` import (comments and blank lines before them stay where they are)."""
+    tree = ast.parse(source)
+    after = 0
+    body = list(tree.body)
+    if body and isinstance(body[0], ast.Expr) and isinstance(body[0].value, ast.Constant) \
+            and isinstance(body[0].value.value, str):
+        after = body.pop(0).end_lineno or 0
+    while body and isinstance(body[0], ast.ImportFrom) and body[0].module == "__future__":
+        after = body.pop(0).end_lineno or after
+    return after
+
+
+def guard_problems(source: str, depth: int) -> list[str]:
+    """Why source does not carry the guard block for depth in the right place (empty when it does)."""
+    block = guard_block(depth).splitlines()
+    lines = source.splitlines()
+    try:
+        start = guard_insertion_line(source)
+        tree = ast.parse(source)
+    except SyntaxError as exc:
+        return [f"does not parse: {exc}"]
+    found = [i for i, line in enumerate(lines) if line == block[0]]
+    if not found:
+        return ["no interpreter guard block"]
+    at = found[0]
+    problems = []
+    if len(found) > 1:
+        problems.append("more than one interpreter guard block")
+    if lines[at:at + len(block)] != block:
+        got = next((ln for ln in lines[at:at + len(block)] if "parents[" in ln), "")
+        problems.append(f"the guard block differs from tools/skill_scripts.py GUARD_BLOCK (depth {depth}; {got.strip()})")
+    first_stmt = [n for n in tree.body if n.lineno - 1 >= start]
+    late_future = any(isinstance(n, ast.ImportFrom) and n.module == "__future__" and n.lineno - 1 > at
+                      for n in tree.body)
+    if late_future or not first_stmt or first_stmt[0].lineno - 1 != at:
+        problems.append(f"the guard block is not the first statement after the docstring and __future__ imports "
+                        f"(found at line {at + 1}, expected the first statement after line {start})")
+    return problems
+
 
 EXCLUDED_TREES = {  # plugin-root-relative prefixes never listed, with the reason
     "tests/": "tests run under the test runner, not as skill scripts",
