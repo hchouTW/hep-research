@@ -5,6 +5,12 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Geant4 programs read a spec naming a non-ASCII path (sci-fix MINIJSON-UNICODE-ESCAPES, S2).** The JSON reader of
+  simreco, layered_sim and element_sim (`g4sim/MiniJson.hh`) refused every `\u` escape above 0x7f, which Python's
+  `json.dumps` writes for a folder named with Chinese characters, and read a short escape such as `\u12g4` as U+0012.
+  It now decodes every code point to UTF-8 (a surrogate pair as one) and refuses a lone surrogate or an escape
+  without four hex digits. Only runs that stopped with a parse error change; no result changes.
+
 - **Cross-platform, part 3: Windows minimum.** Where native Windows lacks a capability the code says so instead of
   crashing: `Account.current()` requires POSIX ids, and `establish` turns that into the refusal
   `protected.unsupported_platform` (exit 3, `"status": "refused"`); `run_workflow.py` reports `missing-dependency`
