@@ -23,7 +23,8 @@ Commands (every one prints JSON with a "status" key; exit 0 ok, 1 negative verdi
   verify-export FILE [--checkpoint LINE]    internal consistency and integrity against a checkpoint
   import FILE --state FILE [--checkpoint LINE] --into DIR
                                             verify, then rebuild a store from an export
-Common: --store DIR (default $XDG_STATE_HOME/hep-research/hep-review or ~/.local/state/hep-research/hep-review).
+Common: --store DIR (default $XDG_STATE_HOME/hep-research/hep-review or ~/.local/state/hep-research/hep-review;
+on Windows %LOCALAPPDATA%\\hep-research\\hep-review).
 The checkpoint line must be copied from tool output, never retyped. Nothing here certifies physics as correct.
 """
 from __future__ import annotations
@@ -242,6 +243,9 @@ def main(argv=None) -> int:
         return emit({"status": "refused", "message": f"{type(e).__name__}: {e}"}, 1)
     except S.StoreLocationRefused as e:
         return emit({"status": "refused", "message": str(e)}, 1)
+    except M.ControlledReadUnavailable as e:  # no dir_fd/O_NOFOLLOW opening on this platform (native Windows)
+        return emit({"status": "missing-dependency", "reason": "unsupported-platform", "platform": sys.platform,
+                     "hint": "use WSL2", "message": str(e)}, 3)
 
 
 if __name__ == "__main__":

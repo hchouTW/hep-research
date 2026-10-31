@@ -7,6 +7,7 @@ import json
 import os
 from pathlib import Path
 
+from core import hostcaps
 from contracts.review import encode, event_problems, make_event, make_head, parse_log, parse_time, verify_log
 
 ASSETS = Path(__file__).resolve().parents[2] / "assets"
@@ -34,8 +35,8 @@ def load_asset(name: str) -> dict:
 
 
 def default_private_root() -> Path:
-    base = os.environ.get("XDG_STATE_HOME") or str(Path.home() / ".local" / "state")
-    return Path(base) / "hep-research" / "reviews"
+    """$XDG_STATE_HOME/hep-research/reviews, else ~/.local/state/..., on Windows %LOCALAPPDATA%\\hep-research\\reviews."""
+    return hostcaps.state_dir("reviews")
 
 
 @contextlib.contextmanager

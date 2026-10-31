@@ -35,7 +35,9 @@ Codes: protected.policy_missing, protected.policy_unanchored, protected.policy_a
 protected.policy_differs, protected.inputs_missing, protected.qualification_malformed,
 protected.qualification_not_valid_now, protected.qualification_other_policy, protected.qualification_other_plugin,
 protected.qualification_revoked, protected.formal_use_unavailable, protected.input_revoked,
-protected.unknown_capability, protected.input_unreadable, protected.config_unreadable, protected.input_malformed, plus the source.* codes of trusted_input and the revocation.* codes of revocation_log.
+protected.unknown_capability, protected.input_unreadable, protected.config_unreadable, protected.input_malformed,
+protected.unsupported_platform (no POSIX account identity on this host, e.g. native Windows: use WSL2), plus the source.*
+codes of trusted_input and the revocation.* codes of revocation_log.
 """
 from __future__ import annotations
 
@@ -50,6 +52,7 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
+from core.hostcaps import UnsupportedPlatform, has
 from core.protected import identity
 from core.protected.revocation_log import (MAX_STATUS_AGE_S, TIMESTAMP, RevocationStatus, canonical_sha256, load,
                                            parse_ts)
@@ -211,15 +214,25 @@ def establish(paths=(), flag: bool = False, project=None, use: str = "protected"
     input never raises: it is a refusal."""
     try:
         return _establish(paths, flag, project, use, now, account)
+    except UnsupportedPlatform as exc:
+        return _unsupported(exc.missing)
     except (ValueError, UnicodeError, RecursionError, TypeError, KeyError) as exc:
         return Context(protected=True, reasons=["protected inputs could not be evaluated"],
                        refusals=[_refusal("protected.input_malformed", "$", f"malformed protected input: {type(exc).__name__}")])
+
+
+def _unsupported(missing: list[str]) -> Context:
+    return Context(protected=True, reasons=["protected mode needs POSIX account identity"],
+                   refusals=[_refusal("protected.unsupported_platform", "$",
+                                      f"this platform ({sys.platform}) lacks {', '.join(missing)}; use WSL2 on Windows")])
 
 
 def _establish(paths, flag, project, use, now, account) -> Context:
     on, reasons, cfg_path, cfg = detect(paths, flag, project)
     if not on:
         return Context(protected=False)
+    if account is None and not has("posix_ids"):
+        return _unsupported(["posix_ids"])
     now = now or datetime.datetime.now(datetime.UTC)
     ctx = Context(protected=True, reasons=reasons, config=None if cfg_path is None else str(cfg_path))
     if cfg_path is not None and cfg is None:

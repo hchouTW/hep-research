@@ -5,6 +5,18 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Cross-platform, part 3: Windows minimum.** Where native Windows lacks a capability the code says so instead of
+  crashing: `Account.current()` requires POSIX ids, and `establish` turns that into the refusal
+  `protected.unsupported_platform` (exit 3, `"status": "refused"`); `run_workflow.py` reports `missing-dependency`
+  (`"reason": "unsupported-platform"`, exit 3) before running a step when the host has no process groups (`--dry-run`
+  still answers); hep-review's CLI reports `missing-dependency` (exit 3) when controlled reading is unavailable; the
+  local executor names the host with `platform.node()`. The two review stores and the AMS paper cache use
+  `core.hostcaps.state_dir` (`%LOCALAPPDATA%\hep-research\` on Windows; unchanged on Linux and macOS).
+  `.gitattributes` checks every text file out with LF (`.gz`, `.png`, `.root`, `.dat`, `.npz` binary); renormalizing
+  changes no file. README: a Windows section (`PYTHONUTF8=1`, what is tested, what needs WSL2) and Tested hosts
+  ("Windows: scripts tested in CI only"). No tool contract changes: `charge_confusion_rate` has no exit-3 path (it
+  calls no protected guard), so no exit-3 failure state is added.
+
 - **Cross-platform, part 2: macOS and Linux.** `executor_capabilities.py` and `run_workflow.py` take their host
   answers from `core.hostcaps`; the qualification record and `qualify` output name the modes a host cannot admit
   (`unavailable_modes`: M2 where `/proc` is missing, as on macOS; M3 everywhere), and the workflow-control reference

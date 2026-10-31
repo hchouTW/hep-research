@@ -5,7 +5,7 @@ Purpose: let a maintainer read the primary papers behind the evidence ledger wit
 committing PDFs (licenses are per paper and the files are large). The manifest
 `evidence/papers_manifest.json` holds metadata only: DOI, INSPIRE record, journal
 reference, ledger source IDs, and an ordered list of candidate PDF URLs. PDFs, opt-in APS Supplemental Material files and extracted text go to a cache directory OUTSIDE the repository
-(`$AMS_PAPERS_CACHE`, else `~/.cache/hep-research/papers`) with a SHA-256 index.
+(`$AMS_PAPERS_CACHE`, else `~/.cache/hep-research/papers`, on Windows `%LOCALAPPDATA%\\hep-research\\papers`) with a SHA-256 index.
 
 Rules this script follows: it identifies itself, waits between requests, retries a transient error (HTTP 5xx, 406, network failure) once after a pause, never sends
 credentials, and never works around a bot-verification page, a login or an HTTP
@@ -48,6 +48,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]  # the ams-02 profile folder
+PLUGIN_ROOT = ROOT.parents[2]
 MANIFEST = ROOT / "evidence" / "papers_manifest.json"
 SOURCES = ROOT / "evidence" / "sources.json"
 USER_AGENT = "hep-research-paper-fetch/1 (maintainer cache; no credentials; honors blocks)"
@@ -236,7 +237,16 @@ def classify(resp: Response, max_bytes: int) -> tuple[str, str]:
 
 # ---------------------------------------------------------------- cache
 def default_cache() -> Path:
-    return Path(os.environ.get("AMS_PAPERS_CACHE") or Path.home() / ".cache" / "hep-research" / "papers")
+    """$AMS_PAPERS_CACHE, else ~/.cache/hep-research/papers; on Windows the per-user state folder
+    (core.hostcaps.state_dir: %LOCALAPPDATA%\\hep-research\\papers)."""
+    if os.environ.get("AMS_PAPERS_CACHE"):
+        return Path(os.environ["AMS_PAPERS_CACHE"])
+    if str(PLUGIN_ROOT) not in sys.path:
+        sys.path.insert(0, str(PLUGIN_ROOT))
+    from core import hostcaps
+    if hostcaps.on_windows():
+        return hostcaps.state_dir("papers")
+    return Path.home() / ".cache" / "hep-research" / "papers"
 
 
 def safe_name(name: str) -> str:
