@@ -58,5 +58,40 @@ class TornBatch(Base):
         self.assertEqual(self.task_log.read_bytes(), before)
 
 
+class StartBeforeCancel(Base):
+    """Finding 2: `start` records that execution began; `cancel` of an attempt without it needs --never-started."""
+
+    def test_cancel_cannot_settle_an_attempt_whose_run_may_be_in_progress(self):
+        self.init_and_contract()
+        self.assertEqual(self.admit("a1:raw", "--step", "raw", "--cost", "0")[0], 0)
+        before = self.task_log.read_bytes()
+        code, out = self.write("cancel", "--attempt", "a1:raw")
+        self.assertEqual(code, 2, out)
+        self.assertIn("--never-started", out["error"])
+        self.assertEqual(self.task_log.read_bytes(), before)
+
+    def test_a_started_attempt_is_cancelling_and_keeps_its_receipt(self):
+        self.init_and_contract()
+        self.assertEqual(self.admit("a1:raw", "--step", "raw", "--cost", "0")[0], 0)
+        code, out = self.write("start", "--attempt", "a1:raw")
+        self.assertEqual((code, out["written"][0]["kind"], out["written"][0]["writer"]), (0, "start", "adapter"), out)
+        proc, work, receipt = self.run_step("a1:", "raw", ["{python}", "-c", "open('o.txt','w').write('1.02')"])
+        self.assertEqual(self.write("cancel", "--attempt", "a1:raw")[0], 0)
+        code, st = self.call("status")
+        self.assertEqual(st["attempts"][0]["state"], "cancelling")
+        code, out = self.write("receipt", "--receipt", receipt, "--work", work)
+        self.assertEqual(code, 0, out)                     # succeeded before the cancellation took effect
+        code, st = self.call("status")
+        self.assertEqual(st["attempts"][0]["state"], "computed")
+
+    def test_never_started_is_stated_explicitly(self):
+        self.init_and_contract()
+        self.admit("a1:raw", "--step", "raw", "--cost", "0")
+        code, out = self.write("cancel", "--attempt", "a1:raw", "--never-started")
+        self.assertEqual(code, 0, out)
+        self.assertEqual(self.call("status")[1]["attempts"][0]["state"], "cancelled")
+        self.assertEqual(self.write("start", "--attempt", "a1:raw")[0], 2)   # no start after a settled cancel
+
+
 if __name__ == "__main__":
     unittest.main()

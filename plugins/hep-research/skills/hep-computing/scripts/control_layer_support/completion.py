@@ -291,8 +291,10 @@ def next_actions(log) -> list[dict]:
                            {"do": "nothing to resubmit; reconcile if its outcome is later proven", "attempt":
                             row["attempt"], "state": state})
         elif state in ("admitted", "running", "cancelling"):
-            actions.append({"do": "take the run's receipt (`receipt`), or record it lost (`receipt --lost`); never "
-                                  "rerun it", "attempt": row["attempt"], "state": state})
+            actions.append({"do": ("if its run began, record `start` first; " if state == "admitted" else "") +
+                                  "take the run's receipt (`receipt`), or record it lost (`receipt --lost`); never "
+                                  "rerun it; cancel only a started attempt, or one that never started "
+                                  "(`cancel --never-started`)", "attempt": row["attempt"], "state": state})
     for item in pending_for_humans(log):
         if item["kind"] != "abandon or reconcile":
             actions.append({"do": f"ask a human: {item['kind']}", **{k: v for k, v in item.items() if k != "kind"}})

@@ -19,8 +19,9 @@ given, --expect-digest (the last line's SHA-256). --op ID makes a write idempote
 returns the first result. The chain detects an edit of any line except the last; keep the head_digest a command
 prints outside the record and pass it to --expect-digest or `verify --anchor-digest` to cover that line too.
 Writers (Control §2): the agent writes contract, freeze and exposure; C (this helper) writes session, intent,
-admission_rejected, reuse and publish; the adapter writes receipt and check_result from run_workflow.py receipts;
-only a human writes decision.
+admission_rejected, reuse, cancel_request and publish; the adapter writes start, receipt and check_result (from
+run_workflow.py receipts) and reconcile; only a human writes decision. Order for every attempt: `admit`, then
+`start` (right before the run begins), then run the step, then `receipt` (or `receipt --lost`).
 Commands:
   init     --task-log FILE [--mode M1|M2|M3]                         create the record (session fact)
   contract --task-log FILE --file CONTRACT.json --expect-head N [--dry-run]
@@ -40,7 +41,8 @@ Commands:
   resume   --task-log FILE        resumption summary for a new session: what not to resubmit, what to do next
   receipt  --task-log FILE --lost --attempt ID [--reason TEXT] --expect-head N   a run that left no receipt: unknown
   reconcile --task-log FILE --receipt R.receipt.json --work DIR --expect-head N  outcome of an unknown/abandoned attempt
-  cancel   --task-log FILE --attempt ID --expect-head N        C's cancel request (stopping the process is B's)
+  start    --task-log FILE --attempt ID --expect-head N        execution began: record it BEFORE running the step
+  cancel   --task-log FILE --attempt ID [--never-started] --expect-head N   C's cancel request (stopping is B's)
   lock     acquire|release|status --task-log FILE [--owner NAME] [--lease-s SECONDS]   lease lock (Control §5.5)
   recover  --task-log FILE        remove a torn, never acknowledged last line (kept aside, recorded)
 After a restart: run `resume`; settle every admitted, running or unknown attempt first (take its receipt, record it
@@ -389,15 +391,32 @@ def cmd_reconcile(args) -> dict:
     return _transact(args, operation, request)
 
 
+def cmd_start(args) -> dict:
+    """Adapter: execution of an admitted attempt has begun (Control §3 admitted -> running). Record it right before
+    the run starts, so that a cancel request can never settle an attempt whose process may be running."""
+    def operation(log):
+        state = dv.exec_status(log, args.attempt)
+        if dv.intent_of(log, args.attempt) is None or state != "admitted":
+            raise dv.Rejected(f"attempt {args.attempt!r} is {state}: start is recorded only for an admitted attempt")
+        log.append("start", "adapter", log.head, attempt=args.attempt)
+    return _transact(args, operation, {"attempt": args.attempt})
+
+
 def cmd_cancel(args) -> dict:
     """C's cancel request. It records the request; stopping the process is B's (run_workflow.py has no cancel
-    operation: stop its process group yourself), and the receipt decides the state."""
+    operation: stop its process group yourself), and the receipt decides the state. For an attempt with no start
+    fact the model settles it as cancelled at once, so the caller must state --never-started: an attempt whose run
+    may be in progress is first given its `start`, and then cancelling leaves it open for its receipt."""
     def operation(log):
         state = dv.exec_status(log, args.attempt)
         if dv.intent_of(log, args.attempt) is None or state not in ("admitted", "running"):
             raise dv.Rejected(f"attempt {args.attempt!r} is {state}: only an admitted or running attempt is cancelled")
+        if state == "admitted" and not args.never_started:
+            raise dv.Rejected(f"attempt {args.attempt!r} has no start fact: cancelling it now settles it as cancelled "
+                              f"and refuses its later receipt. If its run began, record `start` first; if it never "
+                              f"started, say so with --never-started")
         log.append("cancel_request", "C", log.head, attempt=args.attempt)
-    return _transact(args, operation, {"attempt": args.attempt})
+    return _transact(args, operation, {"attempt": args.attempt, "never_started": bool(args.never_started)})
 
 
 def cmd_resume(args) -> dict:
@@ -435,8 +454,8 @@ def cmd_init(args) -> dict:
 COMMANDS = {"init": cmd_init, "contract": cmd_contract, "freeze": cmd_freeze, "exposure": cmd_exposure,
             "admit": cmd_admit, "receipt": cmd_receipt, "decide": cmd_decide, "publish": cmd_publish,
             "status": cmd_status, "report": cmd_report, "verify": cmd_verify, "reconcile": cmd_reconcile,
-            "cancel": cmd_cancel, "resume": cmd_resume, "lock": cmd_lock, "recover": cmd_recover}
-WRITES = ("contract", "freeze", "exposure", "admit", "receipt", "decide", "publish", "reconcile", "cancel")
+            "cancel": cmd_cancel, "start": cmd_start, "resume": cmd_resume, "lock": cmd_lock, "recover": cmd_recover}
+WRITES = ("contract", "freeze", "exposure", "admit", "receipt", "decide", "publish", "reconcile", "cancel", "start")
 
 
 def parser() -> argparse.ArgumentParser:
@@ -494,6 +513,9 @@ def parser() -> argparse.ArgumentParser:
     cmds["reconcile"].add_argument("--work", type=Path, required=True)
     cmds["reconcile"].add_argument("--usage", choices=USAGE_FIELDS, default="auto")
     cmds["cancel"].add_argument("--attempt", required=True)
+    cmds["cancel"].add_argument("--never-started", action="store_true",
+                                help="the attempt has no start fact and its run never began (it is settled at once)")
+    cmds["start"].add_argument("--attempt", required=True)
     cmds["lock"].add_argument("action", choices=("acquire", "release", "status"))
     cmds["lock"].add_argument("--owner")
     cmds["lock"].add_argument("--lease-s", type=float, default=900.0, help="lease length in seconds (default 900)")

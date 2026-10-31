@@ -127,7 +127,7 @@ class Reconciliation(C2Base):
     def test_cancel_before_start_and_after_end(self):
         self.init_and_contract()
         self.admit("a1:raw", "--step", "raw", "--cost", "0")
-        code, out = self.write("cancel", "--attempt", "a1:raw")
+        code, out = self.write("cancel", "--attempt", "a1:raw", "--never-started")   # PR #330: stated explicitly
         self.assertEqual((code, out["written"][0]["kind"], out["written"][0]["writer"]), (0, "cancel_request", "C"))
         code, st = self.call("status")
         self.assertEqual(st["attempts"][0]["state"], "cancelled")
