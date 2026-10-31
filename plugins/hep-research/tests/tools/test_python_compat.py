@@ -4,6 +4,8 @@
 - skills/hep-computing/scripts/find_python.py is started as `python3 find_python.py`, and `python3` may be old (macOS
   ships 3.9): it must run there to find a qualifying interpreter. Its PROBE string runs inside every candidate, so it
   keeps to syntax every Python 3 parses (checked at 3.7, the lowest version `ast` can parse as);
+- core/interpreter_guard.py runs first in every skill script, on whatever `python3` started it, to stop or switch an
+  old interpreter (tests/core/test_interpreter_guard.py);
 - tools/run_all_checks.py and tools/check_ams_optional.py must parse on an old Python far enough to print their
   "Python 3.13 or newer is required" message (tests/tools/test_run_all_checks.py).
 
@@ -25,6 +27,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 FILES = {  # path -> oldest Python that must parse it
     "core/partition/runner.py": (3, 9),
+    "core/interpreter_guard.py": (3, 9),
     "skills/hep-computing/scripts/find_python.py": (3, 9),
     "tools/run_all_checks.py": (3, 9),
     "tools/check_ams_optional.py": (3, 9),
