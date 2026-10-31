@@ -1,0 +1,784 @@
+{
+ "alpha_family": 0.05,
+ "examples": {
+  "B1": {
+   "local_outputs": [
+    "<work>/ex/examples/B1/build/local-s1.out"
+   ],
+   "not_compared": [],
+   "reference": "<work>/geant4-src/examples/basic/B1/exampleB1.out",
+   "rows": [
+    {
+     "condition": "10000 gamma of 6 MeV",
+     "local": 4.32571e-10,
+     "quantity": "dose_total_Gy",
+     "reference": 4.3361599999999996e-10,
+     "run": 0,
+     "se_formula": "rms printed (SD of the run total) combined with rounding",
+     "se_local": 1.2311000003384506e-11,
+     "se_reference": 1.2390200003362872e-11,
+     "verdict": "pass",
+     "z": -0.0598288980211319,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "10000 proton of 210 MeV",
+     "local": 5.06671e-08,
+     "quantity": "dose_total_Gy",
+     "reference": 4.9437300000000004e-08,
+     "run": 1,
+     "se_formula": "rms printed (SD of the run total) combined with rounding",
+     "se_local": 4.634750008990057e-10,
+     "se_reference": 4.6356800089882533e-10,
+     "verdict": "pass",
+     "z": 1.8760724441929877,
+     "z_crit": 3.2790242977180215
+    }
+   ]
+  },
+  "TestEm3": {
+   "local_outputs": [
+    "<work>/ex/examples/TestEm3/build/local-s1.out"
+   ],
+   "not_compared": [
+    {
+     "quantity": "eleak_MeV",
+     "reason": "anti-correlated with edep_total (sum = beam energy): one test",
+     "run": 0
+    },
+    {
+     "quantity": "mean_number_e+",
+     "reason": "reference only (no uncertainty printed)",
+     "run": 0
+    },
+    {
+     "quantity": "mean_number_e-",
+     "reason": "reference only (no uncertainty printed)",
+     "run": 0
+    },
+    {
+     "quantity": "mean_number_gamma",
+     "reason": "reference only (no uncertainty printed)",
+     "run": 0
+    },
+    {
+     "quantity": "resolution_G4_Pb_percent",
+     "reason": "RMS over mean: the RMS and the mean are compared instead",
+     "run": 0
+    },
+    {
+     "quantity": "resolution_G4_lAr_percent",
+     "reason": "RMS over mean: the RMS and the mean are compared instead",
+     "run": 0
+    },
+    {
+     "quantity": "edep_G4_Pb_MeV",
+     "reason": "secondary biasing: deposit weighted, leakage not (energy balance fails)",
+     "run": 1
+    },
+    {
+     "quantity": "edep_rms_G4_Pb_MeV",
+     "reason": "secondary biasing: deposit weighted, leakage not (energy balance fails)",
+     "run": 1
+    },
+    {
+     "quantity": "edep_total_MeV",
+     "reason": "secondary biasing: deposit weighted, leakage not (energy balance fails)",
+     "run": 1
+    },
+    {
+     "quantity": "eleak_MeV",
+     "reason": "anti-correlated with edep_total (sum = beam energy): one test",
+     "run": 1
+    },
+    {
+     "quantity": "mean_number_e+",
+     "reason": "reference only (no uncertainty printed)",
+     "run": 1
+    },
+    {
+     "quantity": "mean_number_e-",
+     "reason": "reference only (no uncertainty printed)",
+     "run": 1
+    },
+    {
+     "quantity": "mean_number_gamma",
+     "reason": "reference only (no uncertainty printed)",
+     "run": 1
+    },
+    {
+     "quantity": "resolution_G4_Pb_percent",
+     "reason": "RMS over mean: the RMS and the mean are compared instead",
+     "run": 1
+    },
+    {
+     "quantity": "tracklen_G4_Pb_mm",
+     "reason": "secondary biasing: deposit weighted, leakage not (energy balance fails)",
+     "run": 1
+    }
+   ],
+   "reference": "<work>/geant4-src/examples/extended/electromagnetic/TestEm3/TestEm3.out",
+   "rows": [
+    {
+     "condition": null,
+     "local": 775.22,
+     "quantity": "edep_G4_Pb_MeV",
+     "reference": 775.53,
+     "run": 0,
+     "se_formula": "RMS/sqrt(N) (+) rounding",
+     "se_local": 0.16842474085873885,
+     "se_reference": 1.5710026522362506,
+     "verdict": "pass",
+     "z": -0.19620189398779603,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": null,
+     "local": 214.71,
+     "quantity": "edep_G4_lAr_MeV",
+     "reference": 214.27,
+     "run": 0,
+     "se_formula": "RMS/sqrt(N) (+) rounding",
+     "se_local": 0.15852628593811607,
+     "se_reference": 1.4660028421982452,
+     "verdict": "pass",
+     "z": 0.2983963120116143,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": null,
+     "local": 16.84,
+     "quantity": "edep_rms_G4_Pb_MeV",
+     "reference": 15.71,
+     "run": 0,
+     "se_formula": "RMS/sqrt(2N) (Gaussian) (+) rounding",
+     "se_local": 0.11911176824031004,
+     "se_reference": 1.110868504069376,
+     "verdict": "pass",
+     "z": 1.011424555260855,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": null,
+     "local": 15.85,
+     "quantity": "edep_rms_G4_lAr_MeV",
+     "reference": 14.66,
+     "run": 0,
+     "se_formula": "RMS/sqrt(2N) (Gaussian) (+) rounding",
+     "se_local": 0.11211359566677599,
+     "se_reference": 1.0366225606908877,
+     "verdict": "pass",
+     "z": 1.1413032907277263,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": null,
+     "local": 989.9,
+     "quantity": "edep_total_MeV",
+     "reference": 989.8,
+     "run": 0,
+     "se_formula": "RMS/sqrt(N) (+) rounding",
+     "se_local": 0.08114825280517955,
+     "se_reference": 0.6993960060890636,
+     "verdict": "pass",
+     "z": 0.14202771533280265,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": null,
+     "local": 547.0,
+     "quantity": "tracklen_G4_Pb_mm",
+     "reference": 548.0,
+     "run": 0,
+     "se_formula": "RMS/sqrt(N) (+) rounding",
+     "se_local": 0.31700841208607283,
+     "se_reference": 1.1566042250196622,
+     "verdict": "pass",
+     "z": -0.8338466351379655,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": null,
+     "local": 1060.0,
+     "quantity": "tracklen_G4_lAr_mm",
+     "reference": 1060.0,
+     "run": 0,
+     "se_formula": "RMS/sqrt(N) (+) rounding",
+     "se_local": 2.9979683676338773,
+     "se_reference": 7.924502087407974,
+     "verdict": "pass",
+     "z": 0.0,
+     "z_crit": 3.2790242977180215
+    }
+   ]
+  },
+  "TestEm5": {
+   "local_outputs": [
+    "<work>/ex/examples/TestEm5/build/local-s1.out"
+   ],
+   "not_compared": [
+    {
+     "quantity": "rms_proj_angle_rad",
+     "reason": "reference only",
+     "run": 0
+    },
+    {
+     "quantity": "rms_proj_angle_rad",
+     "reason": "reference only",
+     "run": 1
+    },
+    {
+     "quantity": "rms_proj_angle_rad",
+     "reason": "reference only",
+     "run": 2
+    },
+    {
+     "quantity": "rms_proj_angle_rad",
+     "reason": "reference only",
+     "run": 3
+    },
+    {
+     "quantity": "steps_neutral",
+     "reason": "printed with zero uncertainty: no statistical test",
+     "run": 3
+    },
+    {
+     "quantity": "tracklen_neutral_mm",
+     "reason": "printed with zero uncertainty: no statistical test",
+     "run": 3
+    },
+    {
+     "quantity": "rms_proj_angle_rad",
+     "reason": "reference only",
+     "run": 4
+    },
+    {
+     "quantity": "steps_neutral",
+     "reason": "printed with zero uncertainty: no statistical test",
+     "run": 4
+    },
+    {
+     "quantity": "tracklen_neutral_mm",
+     "reason": "printed with zero uncertainty: no statistical test",
+     "run": 4
+    }
+   ],
+   "reference": "<work>/geant4-src/examples/extended/electromagnetic/TestEm5/TestEm5.out",
+   "rows": [
+    {
+     "condition": "pi+ 5 GeV through 20 um  of Silicon (density: 2.33 g/cm3 )",
+     "local": 0.006322,
+     "quantity": "edep_MeV",
+     "reference": 0.006353,
+     "run": 0,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 1.598260721325946e-05,
+     "se_reference": 1.634254978065948e-05,
+     "verdict": "pass",
+     "z": -1.3561543662359221,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "pi+ 5 GeV through 20 um  of Silicon (density: 2.33 g/cm3 )",
+     "local": 5000.0,
+     "quantity": "leak_primary_MeV",
+     "reference": 5000.0,
+     "run": 0,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 0.2886752670139639,
+     "se_reference": 0.28867604575617867,
+     "verdict": "pass",
+     "z": 0.0,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "pi+ 5 GeV through 20 um  of Silicon (density: 2.33 g/cm3 )",
+     "local": 0.002028,
+     "quantity": "leak_secondaries_MeV",
+     "reference": 0.0026720000000000003,
+     "run": 0,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 0.00027520015140499707,
+     "se_reference": 0.0007246000575029878,
+     "verdict": "pass",
+     "z": -0.830860287495148,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "pi+ 5 GeV through 20 um  of Silicon (density: 2.33 g/cm3 )",
+     "local": 0.0,
+     "quantity": "reflected_fraction",
+     "reference": 0.0,
+     "run": 0,
+     "se_formula": "sqrt(p(1-p)/N) (+) rounding",
+     "se_local": 0.0,
+     "se_reference": 0.0,
+     "verdict": "pass",
+     "z": 0.0,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "pi+ 5 GeV through 20 um  of Silicon (density: 2.33 g/cm3 )",
+     "local": 1.165,
+     "quantity": "steps_charged",
+     "reference": 1.179,
+     "run": 0,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 0.0051830452760257975,
+     "se_reference": 0.005535532253842745,
+     "verdict": "pass",
+     "z": -1.8461677915618726,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "pi+ 5 GeV through 20 um  of Silicon (density: 2.33 g/cm3 )",
+     "local": 8e-05,
+     "quantity": "steps_neutral",
+     "reference": 1e-05,
+     "run": 0,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 2.8280000147336164e-05,
+     "se_reference": 1.000000041666666e-05,
+     "verdict": "pass",
+     "z": 2.3336465599736043,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "pi+ 5 GeV through 20 um  of Silicon (density: 2.33 g/cm3 )",
+     "local": 0.02025,
+     "quantity": "tracklen_charged_mm",
+     "reference": 0.020260000000000004,
+     "run": 0,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 7.972951607361814e-06,
+     "se_reference": 8.289859729412393e-06,
+     "verdict": "pass",
+     "z": -0.8694346257370489,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "pi+ 5 GeV through 20 um  of Silicon (density: 2.33 g/cm3 )",
+     "local": 7.769999999999999e-07,
+     "quantity": "tracklen_neutral_mm",
+     "reference": 7.452999999999999e-08,
+     "run": 0,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 3.3100000125881165e-07,
+     "se_reference": 7.453000005590589e-08,
+     "verdict": "pass",
+     "z": 2.0704295689257894,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "pi+ 5 GeV through 20 um  of Silicon (density: 2.33 g/cm3 )",
+     "local": 1.0,
+     "quantity": "transmitted_fraction",
+     "reference": 1.0,
+     "run": 0,
+     "se_formula": "sqrt(p(1-p)/N) (+) rounding",
+     "se_local": 0.0002886751345948129,
+     "se_reference": 0.0002886751345948129,
+     "verdict": "pass",
+     "z": 0.0,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "e- 15.7 MeV through 9.66 um  of Gold (density: 19.3 g/cm3 )",
+     "local": 0.01849,
+     "quantity": "edep_MeV",
+     "reference": 0.01838,
+     "run": 1,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 6.506407098647711e-05,
+     "se_reference": 6.450462722420255e-05,
+     "verdict": "pass",
+     "z": 1.2006143764267214,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "e- 15.7 MeV through 9.66 um  of Gold (density: 19.3 g/cm3 )",
+     "local": 15.64,
+     "quantity": "leak_primary_MeV",
+     "reference": 15.64,
+     "run": 1,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 0.003604804340506338,
+     "se_reference": 0.0035756724309328634,
+     "verdict": "pass",
+     "z": 0.0,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "e- 15.7 MeV through 9.66 um  of Gold (density: 19.3 g/cm3 )",
+     "local": 0.04209,
+     "quantity": "leak_secondaries_MeV",
+     "reference": 0.03748,
+     "run": 1,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 0.002148001939788075,
+     "se_reference": 0.0021020019822382023,
+     "verdict": "pass",
+     "z": 1.5339145092339541,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "e- 15.7 MeV through 9.66 um  of Gold (density: 19.3 g/cm3 )",
+     "local": 0.00014000000000000001,
+     "quantity": "reflected_fraction",
+     "reference": 0.0002,
+     "run": 1,
+     "se_formula": "sqrt(p(1-p)/N) (+) rounding",
+     "se_local": 5.291132991461595e-05,
+     "se_reference": 6.323923492052487e-05,
+     "verdict": "pass",
+     "z": -0.7276687295799399,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "e- 15.7 MeV through 9.66 um  of Gold (density: 19.3 g/cm3 )",
+     "local": 2.618,
+     "quantity": "steps_charged",
+     "reference": 2.602,
+     "run": 1,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 0.009577351530216134,
+     "se_reference": 0.009028616136115952,
+     "verdict": "pass",
+     "z": 1.2156090513065516,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "e- 15.7 MeV through 9.66 um  of Gold (density: 19.3 g/cm3 )",
+     "local": 0.02936,
+     "quantity": "steps_neutral",
+     "reference": 0.02698,
+     "run": 1,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 0.0007927052562796171,
+     "se_reference": 0.0007528055348716117,
+     "verdict": "pass",
+     "z": 2.177084241311298,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "e- 15.7 MeV through 9.66 um  of Gold (density: 19.3 g/cm3 )",
+     "local": 0.009924,
+     "quantity": "tracklen_charged_mm",
+     "reference": 0.009911,
+     "run": 1,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 1.1083759891541015e-05,
+     "se_reference": 1.1243706387723458e-05,
+     "verdict": "pass",
+     "z": 0.8233941264610335,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "e- 15.7 MeV through 9.66 um  of Gold (density: 19.3 g/cm3 )",
+     "local": 0.0001394,
+     "quantity": "tracklen_neutral_mm",
+     "reference": 0.0001414,
+     "run": 1,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 8.33205000785121e-06,
+     "se_reference": 1.3240031470254644e-05,
+     "verdict": "pass",
+     "z": -0.12784800072740418,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "e- 15.7 MeV through 9.66 um  of Gold (density: 19.3 g/cm3 )",
+     "local": 0.9998999999999999,
+     "quantity": "transmitted_fraction",
+     "reference": 0.9998,
+     "run": 1,
+     "se_formula": "sqrt(p(1-p)/N) (+) rounding",
+     "se_local": 5.3227186036229015e-05,
+     "se_reference": 6.951642491766169e-05,
+     "verdict": "pass",
+     "z": 1.2910912842120836,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "mu+ 96.2 MeV through 4.74 mm  of G4_POLYETHYLENE (density: 940 mg/cm3)",
+     "local": 1.047,
+     "quantity": "edep_MeV",
+     "reference": 1.048,
+     "run": 2,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 0.0010427546851169422,
+     "se_reference": 0.0010347816307479242,
+     "verdict": "pass",
+     "z": -0.680711637730772,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "mu+ 96.2 MeV through 4.74 mm  of G4_POLYETHYLENE (density: 940 mg/cm3)",
+     "local": 95.13,
+     "quantity": "leak_primary_MeV",
+     "reference": 95.13,
+     "run": 2,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 0.0031830196878645496,
+     "se_reference": 0.003179238483243013,
+     "verdict": "pass",
+     "z": 0.0,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "mu+ 96.2 MeV through 4.74 mm  of G4_POLYETHYLENE (density: 940 mg/cm3)",
+     "local": 0.02589,
+     "quantity": "leak_secondaries_MeV",
+     "reference": 0.026010000000000002,
+     "run": 2,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 0.0007078058867608642,
+     "se_reference": 0.0007013059413218551,
+     "verdict": "pass",
+     "z": -0.1204331825500991,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "mu+ 96.2 MeV through 4.74 mm  of G4_POLYETHYLENE (density: 940 mg/cm3)",
+     "local": 0.0,
+     "quantity": "reflected_fraction",
+     "reference": 0.0,
+     "run": 2,
+     "se_formula": "sqrt(p(1-p)/N) (+) rounding",
+     "se_local": 0.0,
+     "se_reference": 0.0,
+     "verdict": "pass",
+     "z": 0.0,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "mu+ 96.2 MeV through 4.74 mm  of G4_POLYETHYLENE (density: 940 mg/cm3)",
+     "local": 12.17,
+     "quantity": "steps_charged",
+     "reference": 12.17,
+     "run": 2,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 0.03745142097882714,
+     "se_reference": 0.037321809084412474,
+     "verdict": "pass",
+     "z": 0.0,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "mu+ 96.2 MeV through 4.74 mm  of G4_POLYETHYLENE (density: 940 mg/cm3)",
+     "local": 0.00968,
+     "quantity": "steps_neutral",
+     "reference": 0.00988,
+     "run": 2,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 0.000488800085242764,
+     "se_reference": 0.00048460008598155794,
+     "verdict": "pass",
+     "z": -0.2905691697983976,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "mu+ 96.2 MeV through 4.74 mm  of G4_POLYETHYLENE (density: 940 mg/cm3)",
+     "local": 5.172,
+     "quantity": "tracklen_charged_mm",
+     "reference": 5.17,
+     "run": 2,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 0.0038279005124654602,
+     "se_reference": 0.0037860214385728634,
+     "verdict": "pass",
+     "z": 0.37147535249638414,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "mu+ 96.2 MeV through 4.74 mm  of G4_POLYETHYLENE (density: 940 mg/cm3)",
+     "local": 0.02195,
+     "quantity": "tracklen_neutral_mm",
+     "reference": 0.022350000000000002,
+     "run": 2,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 0.002437001709751828,
+     "se_reference": 0.0022730018331126207,
+     "verdict": "pass",
+     "z": -0.1200302322210036,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "mu+ 96.2 MeV through 4.74 mm  of G4_POLYETHYLENE (density: 940 mg/cm3)",
+     "local": 1.0,
+     "quantity": "transmitted_fraction",
+     "reference": 1.0,
+     "run": 2,
+     "se_formula": "sqrt(p(1-p)/N) (+) rounding",
+     "se_local": 0.0002886751345948129,
+     "se_reference": 0.0002886751345948129,
+     "verdict": "pass",
+     "z": 0.0,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "proton 175 GeV through 8 mm  of Aluminium (density: 2.7 g/cm3 )",
+     "local": 4.72,
+     "quantity": "edep_MeV",
+     "reference": 5.362,
+     "run": 3,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 0.20700020128814692,
+     "se_reference": 0.3819001091035892,
+     "verdict": "pass",
+     "z": -1.4779263330725931,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "proton 175 GeV through 8 mm  of Aluminium (density: 2.7 g/cm3 )",
+     "local": 174700.0,
+     "quantity": "leak_primary_MeV",
+     "reference": 174700.0,
+     "run": 3,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 28.868255616391746,
+     "se_reference": 28.870039503667698,
+     "verdict": "pass",
+     "z": 0.0,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "proton 175 GeV through 8 mm  of Aluminium (density: 2.7 g/cm3 )",
+     "local": 0.0,
+     "quantity": "reflected_fraction",
+     "reference": 0.0,
+     "run": 3,
+     "se_formula": "sqrt(p(1-p)/N) (+) rounding",
+     "se_local": 0.0,
+     "se_reference": 0.0,
+     "verdict": "pass",
+     "z": 0.0,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "proton 175 GeV through 8 mm  of Aluminium (density: 2.7 g/cm3 )",
+     "local": 1.263,
+     "quantity": "steps_charged",
+     "reference": 1.268,
+     "run": 3,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 0.002306139053338574,
+     "se_reference": 0.0023339214496921985,
+     "verdict": "pass",
+     "z": -1.52388984171671,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "proton 175 GeV through 8 mm  of Aluminium (density: 2.7 g/cm3 )",
+     "local": 8.004,
+     "quantity": "tracklen_charged_mm",
+     "reference": 8.004,
+     "run": 3,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 0.0002886751345948129,
+     "se_reference": 0.0002886751345948129,
+     "verdict": "pass",
+     "z": 0.0,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "proton 175 GeV through 8 mm  of Aluminium (density: 2.7 g/cm3 )",
+     "local": 1.0,
+     "quantity": "transmitted_fraction",
+     "reference": 1.0,
+     "run": 3,
+     "se_formula": "sqrt(p(1-p)/N) (+) rounding",
+     "se_local": 0.0002886751345948129,
+     "se_reference": 0.0002886751345948129,
+     "verdict": "pass",
+     "z": 0.0,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "mu+ 100 GeV through 1 m   of Iron (density: 7.87 g/cm3 )",
+     "local": 2140.0,
+     "quantity": "edep_MeV",
+     "reference": 2163.0,
+     "run": 4,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 14.412891220478054,
+     "se_reference": 15.062766456840967,
+     "verdict": "pass",
+     "z": -1.1032496500000153,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "mu+ 100 GeV through 1 m   of Iron (density: 7.87 g/cm3 )",
+     "local": 97860.0,
+     "quantity": "leak_primary_MeV",
+     "reference": 97840.0,
+     "run": 4,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 14.696306792297626,
+     "se_reference": 15.334175339200128,
+     "verdict": "pass",
+     "z": 0.9416396583464368,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "mu+ 100 GeV through 1 m   of Iron (density: 7.87 g/cm3 )",
+     "local": 0.0,
+     "quantity": "reflected_fraction",
+     "reference": 0.0,
+     "run": 4,
+     "se_formula": "sqrt(p(1-p)/N) (+) rounding",
+     "se_local": 0.0,
+     "se_reference": 0.0,
+     "verdict": "pass",
+     "z": 0.0,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "mu+ 100 GeV through 1 m   of Iron (density: 7.87 g/cm3 )",
+     "local": 47.61,
+     "quantity": "steps_charged",
+     "reference": 47.58,
+     "run": 4,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 0.030596485636970358,
+     "se_reference": 0.030576574911741393,
+     "verdict": "pass",
+     "z": 0.6935471961569782,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "mu+ 100 GeV through 1 m   of Iron (density: 7.87 g/cm3 )",
+     "local": 1000.0,
+     "quantity": "tracklen_charged_mm",
+     "reference": 1000.0,
+     "run": 4,
+     "se_formula": "printed error on the mean (+) rounding",
+     "se_local": 0.2886751349803785,
+     "se_reference": 0.2886751346811446,
+     "verdict": "pass",
+     "z": 0.0,
+     "z_crit": 3.2790242977180215
+    },
+    {
+     "condition": "mu+ 100 GeV through 1 m   of Iron (density: 7.87 g/cm3 )",
+     "local": 1.0,
+     "quantity": "transmitted_fraction",
+     "reference": 1.0,
+     "run": 4,
+     "se_formula": "sqrt(p(1-p)/N) (+) rounding",
+     "se_local": 0.0002886751345948129,
+     "se_reference": 0.0002886751345948129,
+     "verdict": "pass",
+     "z": 0.0,
+     "z_crit": 3.2790242977180215
+    }
+   ]
+  }
+ },
+ "expected_exceedances_without_correction": 2.4,
+ "m_compared": 48,
+ "not_passing": [],
+ "rule": "z = (local - reference) / sqrt(SE_local^2 + SE_ref^2), each SE combined with the rounding of its printed value (fractions: two-proportion test with the pooled fraction); a value printed as zero with zero error is not tested; Bonferroni threshold over all compared quantities; an exceedance is rerun with another seed and pooled",
+ "status": "ok",
+ "z_crit": 3.2790242977180215
+}

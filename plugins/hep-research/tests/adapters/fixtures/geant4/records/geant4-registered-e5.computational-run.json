@@ -1,0 +1,384 @@
+{
+ "artifact_id": "geant4-registered-11.4.3-bc4790a9",
+ "artifact_type": "computational-run",
+ "bindings": {
+  "experiments": [],
+  "theory": []
+ },
+ "contract_version": "3.17.0",
+ "extension": {
+  "build": {
+   "cmake_cxx_standard": "17",
+   "cmake_options": {},
+   "commit": null,
+   "datasets": [
+    {
+     "content_sha256": "29ed57a56dfd2ff5c1236f41c9dc06390a8552525dfcefef600526e94238962b",
+     "environment_value": "~/software/miniconda3/envs/geant4/share/Geant4/data/NDL4.7.1",
+     "envvar": "G4NEUTRONHPDATA",
+     "folder_name_match": "without-G4-prefix",
+     "md5": null,
+     "md5_expected": "54f0ed3995856f02433d42ec96d70bc6",
+     "md5_verified": null,
+     "n_files": 16092,
+     "name": "G4NDL",
+     "path": "~/software/miniconda3/envs/geant4/share/Geant4/data/NDL4.7.1",
+     "path_geant4_config": "~/software/miniconda3/envs/geant4/share/Geant4/data/G4NDL4.7.1",
+     "path_geant4_config_exists": false,
+     "resolved_from": "environment",
+     "source": "registered installation",
+     "version": "4.7.1"
+    },
+    {
+     "content_sha256": "55e8055d32cb664e2f733d563eb499ab0fba9e9a6c6ed2697975fb0bf0e45fd9",
+     "environment_value": "~/software/miniconda3/envs/geant4/share/Geant4/data/EMLOW8.8",
+     "envvar": "G4LEDATA",
+     "folder_name_match": "without-G4-prefix",
+     "md5": null,
+     "md5_expected": "328330009df633f7e9b3a9f445745298",
+     "md5_verified": null,
+     "n_files": 11424,
+     "name": "G4EMLOW",
+     "path": "~/software/miniconda3/envs/geant4/share/Geant4/data/EMLOW8.8",
+     "path_geant4_config": "~/software/miniconda3/envs/geant4/share/Geant4/data/G4EMLOW8.8",
+     "path_geant4_config_exists": false,
+     "resolved_from": "environment",
+     "source": "registered installation",
+     "version": "8.8"
+    },
+    {
+     "content_sha256": "bfc6516a08a06ac1c7cecef004c30b222f8473af4d193d58ff06e71a5b5f76fd",
+     "environment_value": "~/software/miniconda3/envs/geant4/share/Geant4/data/PhotonEvaporation6.1.2",
+     "envvar": "G4LEVELGAMMADATA",
+     "folder_name_match": "exact",
+     "md5": null,
+     "md5_expected": "d80ba9bdefcf9e23487a26adfa273304",
+     "md5_verified": null,
+     "n_files": 3366,
+     "name": "PhotonEvaporation",
+     "path": "~/software/miniconda3/envs/geant4/share/Geant4/data/PhotonEvaporation6.1.2",
+     "path_geant4_config": "~/software/miniconda3/envs/geant4/share/Geant4/data/PhotonEvaporation6.1.2",
+     "path_geant4_config_exists": true,
+     "resolved_from": "environment",
+     "source": "registered installation",
+     "version": "6.1.2"
+    },
+    {
+     "content_sha256": "92bff015b052c5758f58c2750d81d582bfbc5c4c60c7ce37b6513fdcaedaa9f2",
+     "environment_value": "~/software/miniconda3/envs/geant4/share/Geant4/data/RadioactiveDecay6.1.2",
+     "envvar": "G4RADIOACTIVEDATA",
+     "folder_name_match": "exact",
+     "md5": null,
+     "md5_expected": "20d494f73d4bddabd7fab5c06a58895c",
+     "md5_verified": null,
+     "n_files": 2965,
+     "name": "RadioactiveDecay",
+     "path": "~/software/miniconda3/envs/geant4/share/Geant4/data/RadioactiveDecay6.1.2",
+     "path_geant4_config": "~/software/miniconda3/envs/geant4/share/Geant4/data/RadioactiveDecay6.1.2",
+     "path_geant4_config_exists": true,
+     "resolved_from": "environment",
+     "source": "registered installation",
+     "version": "6.1.2"
+    },
+    {
+     "content_sha256": "bd81a6bca55021fcbc3232c77fe99eb332ad29a7c62ac278521c74985430e02d",
+     "environment_value": "~/software/miniconda3/envs/geant4/share/Geant4/data/PARTICLEXS4.2",
+     "envvar": "G4PARTICLEXSDATA",
+     "folder_name_match": "without-G4-prefix",
+     "md5": null,
+     "md5_expected": "b63341cc97a472b04ff607b094493174",
+     "md5_verified": null,
+     "n_files": 3362,
+     "name": "G4PARTICLEXS",
+     "path": "~/software/miniconda3/envs/geant4/share/Geant4/data/PARTICLEXS4.2",
+     "path_geant4_config": "~/software/miniconda3/envs/geant4/share/Geant4/data/G4PARTICLEXS4.2",
+     "path_geant4_config_exists": false,
+     "resolved_from": "environment",
+     "source": "registered installation",
+     "version": "4.2"
+    },
+    {
+     "content_sha256": "e18d419405fa873f66ab5430ab9036313b1a9960ad0eba944fdd67b27a0f478b",
+     "environment_value": "~/software/miniconda3/envs/geant4/share/Geant4/data/PII1.3",
+     "envvar": "G4PIIDATA",
+     "folder_name_match": "without-G4-prefix",
+     "md5": null,
+     "md5_expected": "05f2471dbcdf1a2b17cbff84e8e83b37",
+     "md5_verified": null,
+     "n_files": 6189,
+     "name": "G4PII",
+     "path": "~/software/miniconda3/envs/geant4/share/Geant4/data/PII1.3",
+     "path_geant4_config": "~/software/miniconda3/envs/geant4/share/Geant4/data/G4PII1.3",
+     "path_geant4_config_exists": false,
+     "resolved_from": "environment",
+     "source": "registered installation",
+     "version": "1.3"
+    },
+    {
+     "content_sha256": "ecd82faa275df12dae0cdb5965d48ae6f70c616906a4020d83bd83907cb181e3",
+     "environment_value": "~/software/miniconda3/envs/geant4/share/Geant4/data/RealSurface2.2",
+     "envvar": "G4REALSURFACEDATA",
+     "folder_name_match": "exact",
+     "md5": null,
+     "md5_expected": "ea8f1cfa8d8aafd64b71fb30b3e8a6d9",
+     "md5_verified": null,
+     "n_files": 41,
+     "name": "RealSurface",
+     "path": "~/software/miniconda3/envs/geant4/share/Geant4/data/RealSurface2.2",
+     "path_geant4_config": "~/software/miniconda3/envs/geant4/share/Geant4/data/RealSurface2.2",
+     "path_geant4_config_exists": true,
+     "resolved_from": "environment",
+     "source": "registered installation",
+     "version": "2.2"
+    },
+    {
+     "content_sha256": "9290b9e349008463694d9eedc856c5c9344658ad71e354ca6caa80dbc6a8be52",
+     "environment_value": "~/software/miniconda3/envs/geant4/share/Geant4/data/SAIDDATA2.0",
+     "envvar": "G4SAIDXSDATA",
+     "folder_name_match": "without-G4-prefix",
+     "md5": null,
+     "md5_expected": "d5d4e9541120c274aeed038c621d39da",
+     "md5_verified": null,
+     "n_files": 37,
+     "name": "G4SAIDDATA",
+     "path": "~/software/miniconda3/envs/geant4/share/Geant4/data/SAIDDATA2.0",
+     "path_geant4_config": "~/software/miniconda3/envs/geant4/share/Geant4/data/G4SAIDDATA2.0",
+     "path_geant4_config_exists": false,
+     "resolved_from": "environment",
+     "source": "registered installation",
+     "version": "2.0"
+    },
+    {
+     "content_sha256": "611b73a995c1f54e863c3683cf555053968fa9f2f7ff00d3816789fd3ded2e9b",
+     "environment_value": "~/software/miniconda3/envs/geant4/share/Geant4/data/ABLA3.3",
+     "envvar": "G4ABLADATA",
+     "folder_name_match": "without-G4-prefix",
+     "md5": null,
+     "md5_expected": "b25d093339e1e4532e31038653580ca6",
+     "md5_verified": null,
+     "n_files": 10,
+     "name": "G4ABLA",
+     "path": "~/software/miniconda3/envs/geant4/share/Geant4/data/ABLA3.3",
+     "path_geant4_config": "~/software/miniconda3/envs/geant4/share/Geant4/data/G4ABLA3.3",
+     "path_geant4_config_exists": false,
+     "resolved_from": "environment",
+     "source": "registered installation",
+     "version": "3.3"
+    },
+    {
+     "content_sha256": "2da60a059be71feb0409abe06200957f25ef30eb5bc58aad73547e8969a9b337",
+     "environment_value": "~/software/miniconda3/envs/geant4/share/Geant4/data/INCL1.3",
+     "envvar": "G4INCLDATA",
+     "folder_name_match": "without-G4-prefix",
+     "md5": null,
+     "md5_expected": "72c3ff5f7f1e6f727f2ebf3b11ce784f",
+     "md5_verified": null,
+     "n_files": 16,
+     "name": "G4INCL",
+     "path": "~/software/miniconda3/envs/geant4/share/Geant4/data/INCL1.3",
+     "path_geant4_config": "~/software/miniconda3/envs/geant4/share/Geant4/data/G4INCL1.3",
+     "path_geant4_config_exists": false,
+     "resolved_from": "environment",
+     "source": "registered installation",
+     "version": "1.3"
+    },
+    {
+     "content_sha256": "12826f019ef9c87fe3ead34957e35e4e9484ccdd960cfb76df5160f87a455db6",
+     "environment_value": "~/software/miniconda3/envs/geant4/share/Geant4/data/ENSDFSTATE3.0",
+     "envvar": "G4ENSDFSTATEDATA",
+     "folder_name_match": "without-G4-prefix",
+     "md5": null,
+     "md5_expected": "c500728534ce3e9fb2fefa0112eb3a74",
+     "md5_verified": null,
+     "n_files": 3,
+     "name": "G4ENSDFSTATE",
+     "path": "~/software/miniconda3/envs/geant4/share/Geant4/data/ENSDFSTATE3.0",
+     "path_geant4_config": "~/software/miniconda3/envs/geant4/share/Geant4/data/G4ENSDFSTATE3.0",
+     "path_geant4_config_exists": false,
+     "resolved_from": "environment",
+     "source": "registered installation",
+     "version": "3.0"
+    },
+    {
+     "content_sha256": "fe83064bcd51e8191398e7934b961c66b048fc183ab463aa7a8ac18c9608c181",
+     "environment_value": "~/software/miniconda3/envs/geant4/share/Geant4/data/CHANNELING2.0",
+     "envvar": "G4CHANNELINGDATA",
+     "folder_name_match": "without-G4-prefix",
+     "md5": null,
+     "md5_expected": "e853fbcba1e8640f7c3a437253955482",
+     "md5_verified": null,
+     "n_files": 21,
+     "name": "G4CHANNELING",
+     "path": "~/software/miniconda3/envs/geant4/share/Geant4/data/CHANNELING2.0",
+     "path_geant4_config": "~/software/miniconda3/envs/geant4/share/Geant4/data/G4CHANNELING2.0",
+     "path_geant4_config_exists": false,
+     "resolved_from": "environment",
+     "source": "registered installation",
+     "version": "2.0"
+    }
+   ],
+   "datasets_skipped": [],
+   "geant4_config": {
+    "check_datasets": "G4NDL INSTALLED ~/software/miniconda3/envs/geant4/share/Geant4/data/NDL4.7.1\nG4EMLOW INSTALLED ~/software/miniconda3/envs/geant4/share/Geant4/data/EMLOW8.8\nPhotonEvaporation INSTALLED ~/software/miniconda3/envs/geant4/share/Geant4/data/PhotonEvaporation6.1.2\nRadioactiveDecay INSTALLED ~/software/miniconda3/envs/geant4/share/Geant4/data/RadioactiveDecay6.1.2\nG4PARTICLEXS INSTALLED ~/software/miniconda3/envs/geant4/share/Geant4/data/PARTICLEXS4.2\nG4PII INSTALLED ~/software/miniconda3/envs/geant4/share/Geant4/data/PII1.3\nRealSurface INSTALLED ~/software/miniconda3/envs/geant4/share/Geant4/data/RealSurface2.2\nG4SAIDDATA INSTALLED ~/software/miniconda3/envs/geant4/share/Geant4/data/SAIDDATA2.0\nG4ABLA INSTALLED ~/software/miniconda3/envs/geant4/share/Geant4/data/ABLA3.3\nG4INCL INSTALLED ~/software/miniconda3/envs/geant4/share/Geant4/data/INCL1.3\nG4ENSDFSTATE INSTALLED ~/software/miniconda3/envs/geant4/share/Geant4/data/ENSDFSTATE3.0\nG4CHANNELING INSTALLED ~/software/miniconda3/envs/geant4/share/Geant4/data/CHANNELING2.0",
+    "check_datasets_note": "information only: checks that the compiled-in directories exist (a conda-forge installation reports NOTFOUND for folders it installs without the G4 prefix)",
+    "cxxstd": "17",
+    "features": {
+     "clhep": "no",
+     "expat": "no",
+     "freetype": "yes",
+     "g3tog4": "no",
+     "gdml": "yes",
+     "hdf5": "yes",
+     "motif": "no",
+     "multithreading": "yes",
+     "opengl-x11": "yes",
+     "openinventor": "no",
+     "php_as_hp": "no",
+     "ptl": "yes",
+     "qt": "yes",
+     "raytracer-x11": "yes",
+     "smartstack": "no",
+     "staticlibs": "no",
+     "usolids": "no",
+     "vtk": "no",
+     "zlib": "no"
+    },
+    "has_multithreading": "yes",
+    "prefix": "~/software/miniconda3/envs/geant4",
+    "tls_model": "global-dynamic",
+    "version": "11.4.3"
+   },
+   "install_prefix": "~/software/miniconda3/envs/geant4",
+   "log": null,
+   "multithreaded": "ON",
+   "origin": "registered",
+   "registration": {
+    "cmake_config": "~/software/miniconda3/envs/geant4/lib/cmake/Geant4/Geant4Config.cmake",
+    "cmake_config_dir": "~/software/miniconda3/envs/geant4/lib/cmake/Geant4",
+    "cmake_config_sha256": "37fb0adf10c1f866ba9ad77208fa84e88e78a60d66d4de93f23e1d21bbb35b60",
+    "cmake_config_version": "11.4.3",
+    "cmake_now": {
+     "name": "cmake",
+     "path": "/usr/bin/cmake",
+     "version": "cmake version 3.26.5"
+    },
+    "cmake_probe": {
+     "advice": "build the adapter's programs with geant4_run.py build-sim --configure-with geant4-config, or install the development files of the packages named above into the installation",
+     "errors": [
+      "Could NOT find EXPAT (missing: EXPAT_LIBRARY EXPAT_INCLUDE_DIR) (Required is at least version \"2.8.5\")"
+     ],
+     "exit": 1,
+     "find_package_ok": false,
+     "ran": true
+    },
+    "compiler_now": {
+     "name": "g++",
+     "path": "/usr/bin/g++",
+     "version": "g++ (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5)"
+    },
+    "dataset_source": "auto",
+    "environment_variables_not_listed": [],
+    "geant4_config": "~/software/miniconda3/envs/geant4/bin/geant4-config",
+    "geant4_config_sha256": "c41df7a46fa56e16b69a0c1846a97782908971251446765bfe3c9dcd2b81e0fd"
+   },
+   "step_exit_codes": [],
+   "tag": null,
+   "unknown": [
+    "the Geant4 source tag and commit",
+    "the CMake options Geant4 was built with",
+    "the compiler Geant4 was built with",
+    "the dataset tarball MD5s (no tarball was downloaded: the installed folders are content-hashed only)"
+   ]
+  },
+  "commands": [
+   "~/software/miniconda3/envs/geant4/bin/geant4-config --version",
+   "~/software/miniconda3/envs/geant4/bin/geant4-config --prefix",
+   "~/software/miniconda3/envs/geant4/bin/geant4-config --cxxstd",
+   "~/software/miniconda3/envs/geant4/bin/geant4-config --tls-model",
+   "~/software/miniconda3/envs/geant4/bin/geant4-config --features",
+   "~/software/miniconda3/envs/geant4/bin/geant4-config --datasets",
+   "~/software/miniconda3/envs/geant4/bin/geant4-config --check-datasets"
+  ],
+  "environment": {
+   "dataset_variables_set": {
+    "G4ABLADATA": "~/software/miniconda3/envs/geant4/share/Geant4/data/ABLA3.3",
+    "G4CHANNELINGDATA": "~/software/miniconda3/envs/geant4/share/Geant4/data/CHANNELING2.0",
+    "G4ENSDFSTATEDATA": "~/software/miniconda3/envs/geant4/share/Geant4/data/ENSDFSTATE3.0",
+    "G4INCLDATA": "~/software/miniconda3/envs/geant4/share/Geant4/data/INCL1.3",
+    "G4LEDATA": "~/software/miniconda3/envs/geant4/share/Geant4/data/EMLOW8.8",
+    "G4LEVELGAMMADATA": "~/software/miniconda3/envs/geant4/share/Geant4/data/PhotonEvaporation6.1.2",
+    "G4NEUTRONHPDATA": "~/software/miniconda3/envs/geant4/share/Geant4/data/NDL4.7.1",
+    "G4PARTICLEXSDATA": "~/software/miniconda3/envs/geant4/share/Geant4/data/PARTICLEXS4.2",
+    "G4PIIDATA": "~/software/miniconda3/envs/geant4/share/Geant4/data/PII1.3",
+    "G4RADIOACTIVEDATA": "~/software/miniconda3/envs/geant4/share/Geant4/data/RadioactiveDecay6.1.2",
+    "G4REALSURFACEDATA": "~/software/miniconda3/envs/geant4/share/Geant4/data/RealSurface2.2",
+    "G4SAIDXSDATA": "~/software/miniconda3/envs/geant4/share/Geant4/data/SAIDDATA2.0"
+   },
+   "hosts_contacted": [],
+   "machine": "x86_64",
+   "platform": "Linux-5.14.0-687.49.1.el9_8.x86_64-x86_64-with-glibc2.34",
+   "python": "3.13.2"
+  },
+  "exit_status": 0,
+  "input_manifest": [
+   {
+    "path": "~/software/miniconda3/envs/geant4/bin/geant4-config",
+    "sha256": "c41df7a46fa56e16b69a0c1846a97782908971251446765bfe3c9dcd2b81e0fd"
+   },
+   {
+    "path": "~/software/miniconda3/envs/geant4/lib/cmake/Geant4/Geant4Config.cmake",
+    "sha256": "37fb0adf10c1f866ba9ad77208fa84e88e78a60d66d4de93f23e1d21bbb35b60"
+   }
+  ],
+  "output_hashes": {
+   "~/software/miniconda3/envs/geant4/share/Geant4/data/ABLA3.3": "611b73a995c1f54e863c3683cf555053968fa9f2f7ff00d3816789fd3ded2e9b",
+   "~/software/miniconda3/envs/geant4/share/Geant4/data/CHANNELING2.0": "fe83064bcd51e8191398e7934b961c66b048fc183ab463aa7a8ac18c9608c181",
+   "~/software/miniconda3/envs/geant4/share/Geant4/data/EMLOW8.8": "55e8055d32cb664e2f733d563eb499ab0fba9e9a6c6ed2697975fb0bf0e45fd9",
+   "~/software/miniconda3/envs/geant4/share/Geant4/data/ENSDFSTATE3.0": "12826f019ef9c87fe3ead34957e35e4e9484ccdd960cfb76df5160f87a455db6",
+   "~/software/miniconda3/envs/geant4/share/Geant4/data/INCL1.3": "2da60a059be71feb0409abe06200957f25ef30eb5bc58aad73547e8969a9b337",
+   "~/software/miniconda3/envs/geant4/share/Geant4/data/NDL4.7.1": "29ed57a56dfd2ff5c1236f41c9dc06390a8552525dfcefef600526e94238962b",
+   "~/software/miniconda3/envs/geant4/share/Geant4/data/PARTICLEXS4.2": "bd81a6bca55021fcbc3232c77fe99eb332ad29a7c62ac278521c74985430e02d",
+   "~/software/miniconda3/envs/geant4/share/Geant4/data/PII1.3": "e18d419405fa873f66ab5430ab9036313b1a9960ad0eba944fdd67b27a0f478b",
+   "~/software/miniconda3/envs/geant4/share/Geant4/data/PhotonEvaporation6.1.2": "bfc6516a08a06ac1c7cecef004c30b222f8473af4d193d58ff06e71a5b5f76fd",
+   "~/software/miniconda3/envs/geant4/share/Geant4/data/RadioactiveDecay6.1.2": "92bff015b052c5758f58c2750d81d582bfbc5c4c60c7ce37b6513fdcaedaa9f2",
+   "~/software/miniconda3/envs/geant4/share/Geant4/data/RealSurface2.2": "ecd82faa275df12dae0cdb5965d48ae6f70c616906a4020d83bd83907cb181e3",
+   "~/software/miniconda3/envs/geant4/share/Geant4/data/SAIDDATA2.0": "9290b9e349008463694d9eedc856c5c9344658ad71e354ca6caa80dbc6a8be52"
+  },
+  "seeds": {},
+  "tolerances": {},
+  "tools": [
+   {
+    "name": "Geant4",
+    "source": "~/software/miniconda3/envs/geant4",
+    "version": "11.4.3 (registered installation, source commit unknown)"
+   },
+   {
+    "name": "cmake",
+    "path": "/usr/bin/cmake",
+    "version": "cmake version 3.26.5"
+   },
+   {
+    "name": "g++",
+    "path": "/usr/bin/g++",
+    "version": "g++ (GCC) 11.5.0 20240719 (Red Hat 11.5.0-5)"
+   }
+  ]
+ },
+ "inputs": [],
+ "objective": "Register the existing Geant4 11.4.3 installation at ~/software/miniconda3/envs/geant4 for adapters/geant4 (origin registered: not built by the adapter; source commit, build options and dataset MD5s unknown)",
+ "outputs": [],
+ "provenance": {
+  "created": "2026-10-30",
+  "evidence_ids": [],
+  "producer_skill": "hep-detector"
+ },
+ "status": [
+  "unvalidated"
+ ],
+ "unresolved_inputs": [],
+ "versions": {
+  "contracts": "3.17.0",
+  "plugin": "0.49.1",
+  "profiles": {}
+ }
+}

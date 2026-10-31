@@ -232,8 +232,8 @@ class Declaration(unittest.TestCase):
             self.assertIn(f"assets/layered_sim/{src}", listed)
         # adapter 0.2.0 (A2.8): every file under g4sim/ and schemas/, and summary_from_csv.py, is an asset; adapter
         # 0.3.0 (B1.9): also every file under element_sim/ and simroot/, and element_spec.py; 0.4.0 (B2.9): every file
-        # under simreco/ and simreco_spec.py
-        self.assertEqual(doc["version"], "0.5.0")
+        # under simreco/ and simreco_spec.py; 0.6.0: g4sim/Geant4FromConfig.cmake (registered installations)
+        self.assertEqual(doc["version"], "0.6.0")
         on_disk = {f"assets/{p.relative_to(ASSETS)}" for d in ("g4sim", "schemas", "element_sim", "simroot", "simreco")
                    for p in (ASSETS / d).iterdir() if p.is_file()}
         self.assertLessEqual(on_disk | {"assets/summary_from_csv.py", "assets/element_spec.py",
@@ -775,9 +775,9 @@ class BoundaryArtifacts(_Tmp):
         import geant4_run
         for group, listed in geant4_run.SIM_SOURCES.items():  # adapter 0.3.0: one group per program (B1.9)
             files = {f"{group}/{p.name}" for p in (ASSETS / group).iterdir()
-                     if p.suffix in (".cc", ".hh") or p.name == "CMakeLists.txt"}
-            if group == "g4sim":
-                files = {f for f in files if f.endswith(".hh")}  # selftest.cc is built by the tests only
+                     if p.suffix in (".cc", ".hh", ".cmake") or p.name == "CMakeLists.txt"}
+            if group == "g4sim":  # selftest.cc is built by the tests only; 0.6.0: the geant4-config build helper
+                files = {f for f in files if f.endswith((".hh", ".cmake"))}
             with self.subTest(group=group):
                 self.assertEqual(files, set(listed))
         for program, groups in geant4_run.PROGRAM_GROUPS.items():

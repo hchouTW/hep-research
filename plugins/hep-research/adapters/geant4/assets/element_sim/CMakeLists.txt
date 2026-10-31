@@ -4,8 +4,13 @@
 cmake_minimum_required(VERSION 3.16...3.27)
 project(element_sim CXX)
 
-find_package(Geant4 11.4 REQUIRED)
-include(${Geant4_USE_FILE})
+if(G4SIM_GEANT4_CONFIG)  # adapter 0.6.0: geant4_run.py build-sim --configure-with geant4-config
+  set(G4SIM_GEANT4_MIN_VERSION 11.4)
+  include(${CMAKE_CURRENT_SOURCE_DIR}/../g4sim/Geant4FromConfig.cmake)
+else()
+  find_package(Geant4 11.4 REQUIRED)
+  include(${Geant4_USE_FILE})
+endif()
 
 add_executable(element_sim element_sim.cc Spec.cc Detector.cc Field.cc Actions.cc EventFile.cc)
 target_include_directories(element_sim PRIVATE ${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_SOURCE_DIR}/../g4sim)
