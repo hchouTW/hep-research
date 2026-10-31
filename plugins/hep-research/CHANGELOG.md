@@ -5,6 +5,14 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Cross-platform, part 1b: the interpreter guard block in every skill script.** `tools/insert_interpreter_guard.py`
+  inserted the fixed block into the 198 scripts of `tools/skill_scripts.json` (after the docstring and any
+  `from __future__` import; idempotent, a second run changes nothing; a shebang stays first). Under Python 3.9 every
+  script now exits 2 with one `hep-research:` line, or switches once to a safe `HEP_RESEARCH_PYTHON`
+  (README "Setup requirements"); on 3.13 behaviour is unchanged. `test_python_compat.py` asserts the block's presence,
+  place and depth. **The code-release digest changes (198 scripts): deployments must re-pin and requalify
+  (`docs/deployment-model.md`).** Committed example outputs and fixtures, including recorded `script_sha256` values,
+  are not touched; the per-release regeneration refreshes them (`docs/maintenance.md`).
 - **Cross-platform, part 1a: interpreter guard and host capability modules (`CORE_VERSION` 1.5.0).**
   `core/interpreter_guard.py` (standard library, parses and runs on Python 3.9) stops a Python older than 3.13 with
   one stderr line and exit 2, or switches once to `HEP_RESEARCH_PYTHON` when it is an absolute path to an executable
