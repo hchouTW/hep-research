@@ -19,7 +19,8 @@ ctx: {"campaign_dir", "submission_id", "submission_dir", "rows": [{"index", "chu
 "hold_code", "host", "elapsed_s", "max_rss_mb", "alloc_cpus", "alloc_gpus", "restarts", "evidence"}; missing facts are
 None, never guessed.
 Every tool call has a timeout (scheduler_timeout_s, default 120 s) and runs with an allow-listed environment
-(ENV_ALLOW plus the configured env_passthrough names), so tokens and agent sockets in the caller's environment do not
+(ENV_ALLOW plus the configured env_passthrough names, never credential-like names or the interpreter guard's
+variables), so tokens and agent sockets in the caller's environment do not
 reach scheduler clients or local workers. Standard library only.
 """
 from __future__ import annotations
@@ -30,6 +31,8 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+
+from core.interpreter_guard import MARKER_VARIABLE, TARGET_VARIABLE
 
 
 class PollError(Exception):
@@ -59,11 +62,14 @@ ENV_ALLOW = ("PATH", "HOME", "USER", "LOGNAME", "LANG", "LC_ALL", "LC_CTYPE", "T
 
 ENV_NAME = re.compile(r"^[A-Z_][A-Z0-9_]{0,63}$")
 SECRET_LIKE = re.compile(r"TOKEN|SECRET|PASSW|PROXY|KEY|CRED|COOKIE|SSH_AUTH|KRB5|AUTH", re.I)
+# the interpreter guard's variables (core/interpreter_guard.py): a job must run the interpreter its bundle hashed, so
+# no switch target or switch marker reaches a scheduler client, job or local worker
+GUARD_VARIABLES = (TARGET_VARIABLE, MARKER_VARIABLE)
 
 
 def passthrough_problems(names) -> list[str]:
-    """Why these passthrough names are refused: not variable names, or credential-like (credentials never reach
-    scheduler clients, jobs or local workers)."""
+    """Why these passthrough names are refused: not variable names, credential-like (credentials never reach
+    scheduler clients, jobs or local workers), or the interpreter guard's variables (GUARD_VARIABLES)."""
     if not isinstance(names, (list, tuple)):
         return ["must be a list of environment variable names"]
     out = []
@@ -72,6 +78,8 @@ def passthrough_problems(names) -> list[str]:
             out.append(f"{x!r} is not an environment variable name")
         elif SECRET_LIKE.search(x):
             out.append(f"{x!r} looks like a credential; credentials never reach scheduler clients or jobs")
+        elif x in GUARD_VARIABLES:
+            out.append(f"{x!r} is an interpreter guard variable; a job runs the interpreter its bundle names")
     return out
 
 
