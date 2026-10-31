@@ -1,0 +1,130 @@
+# platforms: the plugin on macOS and Windows runners (cross-platform task, PR 2). Not a required check, so the path
+# filter below is safe; results are recorded and read by the maintainer.
+#   macos      macos-latest (arm64): the units part under `ulimit -n 256` (the macOS default soft limit), `/bin/bash -n`
+#              on the plugin's shell scripts, and the version of the system /usr/bin/python3. continue-on-error until
+#              the maintainer approves the known-differences list of tolerance tests (NumPy uses Accelerate on macOS
+#              arm64); record platform-run-macos, reconciled in the job
+#   windows    windows-latest, checked out under a folder named with a space and Chinese characters, with USERPROFILE,
+#              HOME, TEMP, TMP and LOCALAPPDATA moved there: every skill script under the interpreter guard's
+#              Windows rule and with PYTHONUTF8=1 (tools/platform_checks.py windows: AC11), the line endings of a fresh
+#              clone with core.autocrlf=true (AC12), and tests/contracts. The only Windows evidence: installing the
+#              plugin into Claude Code or Codex on Windows is not covered
+# Actions are pinned to the commit SHAs tests.yml uses.
+name: platforms
+on:
+  schedule:
+    - cron: "41 3 * * *"  # nightly 03:41 UTC
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - plugins/hep-research/core/interpreter_guard.py
+      - plugins/hep-research/core/hostcaps.py
+      - plugins/hep-research/core/protected/**
+      - plugins/hep-research/core/partition/**
+      - plugins/hep-research/contracts/registry.py
+      - plugins/hep-research/tools/skill_scripts.json
+      - .github/workflows/platforms.yml
+
+permissions:
+  contents: read
+
+concurrency:
+  group: platforms-${{ github.event_name == 'pull_request' && format('pr-{0}', github.event.pull_request.number) || format('{0}-{1}', github.ref, github.run_id) }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+jobs:
+  macos:
+    runs-on: macos-latest
+    timeout-minutes: 60
+    continue-on-error: true  # until the maintainer approves the known-differences list (evals/cross-platform/progress.md)
+    defaults:
+      run:
+        working-directory: plugins/hep-research
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: plugins/hep-research/requirements-ci.lock
+      - name: Host facts
+        run: |
+          sw_vers
+          uname -m
+          /usr/bin/python3 --version || echo "no /usr/bin/python3"
+      - name: Install the pinned set
+        run: python -m pip install -r requirements-ci.lock
+      - name: Shell scripts parse with the system bash
+        run: |
+          for f in adapters/environments/assets/lcg_view_setup.sh skills/hep-computing/scripts/check_root_cpp_env.sh skills/hep-computing/scripts/new_root_cpp_project.sh; do
+            /bin/bash -n "$f"
+          done
+      - name: Units part under ulimit -n 256
+        run: |
+          ulimit -n 256
+          python tools/run_all_checks.py --no-cli --jobs 4 --part units --shard 1/1 --out ../../platform-runs --summary "$GITHUB_STEP_SUMMARY"
+      - name: Reconcile the record
+        if: always()
+        run: python tools/reconcile_check_runs.py ../../platform-runs --python 3.13 --shards 1 --parts "" --summary "$GITHUB_STEP_SUMMARY"
+      - name: Keep the record
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
+        with:
+          name: platform-run-macos
+          path: platform-runs/
+
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: bash
+        working-directory: "hep 測試/src/plugins/hep-research"
+    steps:
+      - name: Long paths
+        working-directory: .
+        run: git config --system core.longpaths true
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          path: "hep 測試/src"
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        id: py
+        with:
+          python-version: "3.13"
+          cache: pip
+          cache-dependency-path: "hep 測試/src/plugins/hep-research/requirements-ci.lock"
+      - name: Install the pinned set
+        env:
+          PY: ${{ steps.py.outputs.python-path }}
+        run: '"$PY" -m pip install -r requirements-ci.lock'
+      - name: Home and temporary folders under the hostile folder
+        working-directory: .
+        run: mkdir -p "hep 測試/home/AppData/Local" "hep 測試/tmp"
+      - name: Skill scripts under the guard (AC11)
+        env:
+          PY: ${{ steps.py.outputs.python-path }}
+          USERPROFILE: ${{ github.workspace }}\hep 測試\home
+          HOME: ${{ github.workspace }}\hep 測試\home
+          TEMP: ${{ github.workspace }}\hep 測試\tmp
+          TMP: ${{ github.workspace }}\hep 測試\tmp
+          LOCALAPPDATA: ${{ github.workspace }}\hep 測試\home\AppData\Local
+        run: '"$PY" -X utf8 tools/platform_checks.py windows --python "$PY" | tee "$RUNNER_TEMP/windows.json"'
+      - name: Line endings of a fresh clone with core.autocrlf=true (AC12)
+        working-directory: .
+        run: |
+          git -c core.autocrlf=true clone -q --no-local "hep 測試/src" "hep 測試/crlf-clone"
+          cd "hep 測試/crlf-clone"
+          crlf=$(git ls-files --eol plugins/hep-research | grep "w/crlf" || true)
+          echo "files checked out with CRLF: $(printf '%s' "$crlf" | grep -c . || true)"
+          printf '%s\n' "$crlf" | head -20
+          test -z "$crlf"
+      - name: Contract tests
+        env:
+          PY: ${{ steps.py.outputs.python-path }}
+          PYTHONUTF8: "1"
+          USERPROFILE: ${{ github.workspace }}\hep 測試\home
+          HOME: ${{ github.workspace }}\hep 測試\home
+          TEMP: ${{ github.workspace }}\hep 測試\tmp
+          TMP: ${{ github.workspace }}\hep 測試\tmp
+          LOCALAPPDATA: ${{ github.workspace }}\hep 測試\home\AppData\Local
+        run: '"$PY" -m unittest discover -s tests/contracts -t .'
