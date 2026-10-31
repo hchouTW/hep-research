@@ -320,3 +320,27 @@ Given by the maintainer in the conversation after the final report (transcribed 
   repository after each round. The S0 store was copied there; the round-7 export from the copy verifies against its
   checkpoint.
 
+
+## Review fixes (PR #329) — 2026-10-30
+
+Five findings of an unverified code review on PR #329 (`run_workflow.py`), each with a regression test written first
+and run against the unfixed runner (b31cdbf8):
+
+| Finding | Reproduced | Fix (commit) | Test |
+|---|---|---|---|
+| 1 unchecked step ids; a rerun replaced the earlier attempt's receipt | yes: `../../x` ran (exit 0); a second run with the same prefix exit 0 and replaced the receipt | step id = one plain name, refused before any step runs (exit 2); a run whose attempt id already has a receipt is refused before any step runs, receipts created exclusively (c47e4af4) | `test_workflow_b1.StepIds`, `test_executor_b2.Receipts.test_an_attempt_id_is_used_once` |
+| 2 target digest over logical names vs `artifact_digest` over output paths | no: a logical name is the output's path in the producer's work folder (the key of `output_hashes`, the receipt's `logical`), so both are the Control §4 manifest; a check that copies the producer's `artifact_digest` binds on the unfixed runner | tests and docs only (02039f45) | `test_executor_b2.CheckBinding.test_the_producers_artifact_digest_binds`, `test_a_target_staged_in_part_does_not_bind` |
+| 3 a just-exiting child or an unreaped zombie failed a good step; survivors not recorded | yes: a child ending 0.3 s after the step failed it; a zombie under a non-reaping subreaper (prctl) failed it | 1 s grace for the step's processes, zombies ignored, survivors stopped, named in `leftover_processes` and still failing the step (no write after the step's end); helper daemons must be started outside the workflow (5e3a9c56) | `test_workflow_b1.Termination` (5 new or extended) |
+| 4 a nested runner replaced the marker, its steps escaped while the record said confirmed | yes: the inner step wrote after the outer step ended | the marker is a chain a nested runner extends; `termination_scope` on every record; residual limit (a process that leaves the group and removes or replaces the marker) documented (5e3a9c56) | `test_a_nested_runner_does_not_hide_its_steps`, `test_the_record_names_what_termination_observed` |
+| 5 a parent directory turned into a symlink by the step | yes: the outside file was recorded as the output (exit 0); `runs/` replaced by a symlink got the record written outside | every output/stdout path and the record path checked again after the step (ab948546) | `Destinations.test_a_parent_the_step_turns_into_a_symlink`, `test_a_runs_folder_the_step_replaces_with_a_symlink` |
+
+G2 qualification gains three cases (a child that left the group, a nested runner's step, a positive control for a
+child ending just after the step); all three fail against b31cdbf8 and pass after the fix; `qualify` on this host:
+G1 pass, G2 pass, G3–G6 unsupported. The existing `test_a_process_that_leaves_the_group_is_found` called `os.setsid()`
+in a child that was already a session leader (the child died at once); corrected. The attempt-id contract for the
+control layer is unchanged (attempt id = prefix + step id); attempt ids must now be unused in the receipt folder.
+
+Verification (clean clone of fcbcccd8 on local disk, `TMPDIR` on local disk): `run_all_checks.py --part static` 31
+pass, 0 fail (after regenerating the reference inventory, fcbcccd8); `tests/skills` 3011, OK (173 skipped);
+`tests/tools` 371, OK; `tests/contracts` 1160, OK (1 skipped); `tests/routing` 21, OK; `tests/adapters/test_geant4.py`
+54, OK (6 skipped); path guard on the branch history: pass.
