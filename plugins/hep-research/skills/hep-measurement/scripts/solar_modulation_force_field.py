@@ -39,6 +39,20 @@ error with status failed and error_kind invalid-input on stdout, the usage on st
 Run: python3 <plugin root>/skills/hep-measurement/scripts/solar_modulation_force_field.py --modulate --energy 1.0 --mass 0.938272 --charge 1 --phi 0.5 --lis-normalization 1e4 --lis-index 2.7
      python3 <plugin root>/skills/hep-measurement/scripts/solar_modulation_force_field.py --demodulate --energy 1.0 --mass 0.938272 --charge 1 --phi 0.5 --toa-flux 123.4
 """
+if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.dont_write_bytecode = True
+    _root = str(_Path(__file__).resolve().parents[3])
+    if _root not in _sys.path:
+        _sys.path.insert(0, _root)
+    try:
+        from core.interpreter_guard import guard as _guard
+    except ImportError:  # copied outside the plugin
+        pass
+    else:
+        _guard()
+
 import argparse
 import json
 import math

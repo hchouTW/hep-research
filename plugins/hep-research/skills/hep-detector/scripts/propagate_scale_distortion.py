@@ -41,6 +41,20 @@ components (nominal, up, down, relative shifts, systematic_variations, covarianc
 1 the plugin failed (status failed); 2 invalid input or arguments (status rejected).
 Run: python3 <plugin root>/skills/hep-detector/scripts/propagate_scale_distortion.py response model.json --mode inverse-offset --delta 1e-4
 """
+if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.dont_write_bytecode = True
+    _root = str(_Path(__file__).resolve().parents[3])
+    if _root not in _sys.path:
+        _sys.path.insert(0, _root)
+    try:
+        from core.interpreter_guard import guard as _guard
+    except ImportError:  # copied outside the plugin
+        pass
+    else:
+        _guard()
+
 import argparse
 import bisect
 import csv

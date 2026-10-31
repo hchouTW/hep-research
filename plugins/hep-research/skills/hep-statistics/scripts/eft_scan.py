@@ -26,6 +26,19 @@ Usage: eft_scan.py scan --input MODEL.json [--cl 0.95] [--toys 0 --seed 1]
 Exit codes: 0 ok; 2 bad input. Output JSON labelled [General method] EXPERIMENTAL.
 """
 from __future__ import annotations
+if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.dont_write_bytecode = True
+    _root = str(_Path(__file__).resolve().parents[3])
+    if _root not in _sys.path:
+        _sys.path.insert(0, _root)
+    try:
+        from core.interpreter_guard import guard as _guard
+    except ImportError:  # copied outside the plugin
+        pass
+    else:
+        _guard()
 
 import argparse
 import json

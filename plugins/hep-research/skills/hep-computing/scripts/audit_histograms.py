@@ -6,6 +6,20 @@ Standard library only. Input excludes flow bins; sumw2 is MC variance bookkeepin
 not a general covariance matrix. Output: JSON with "status" ("ok", "warnings", "invalid" or "error").
 Exit 0 valid (warnings allowed), 1 invalid content, 2 unreadable input.
 """
+if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.dont_write_bytecode = True
+    _root = str(_Path(__file__).resolve().parents[3])
+    if _root not in _sys.path:
+        _sys.path.insert(0, _root)
+    try:
+        from core.interpreter_guard import guard as _guard
+    except ImportError:  # copied outside the plugin
+        pass
+    else:
+        _guard()
+
 import argparse
 import json
 import math
