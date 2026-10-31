@@ -35,7 +35,7 @@ FILES = {  # path -> oldest Python that must parse it
     "tools/check_ams_optional.py": (3, 9),
 }
 PROBE_VERSION = (3, 7)
-GUARD_ROLLED_OUT = False  # PR 1b inserts the guard block into every skill script and sets this True
+GUARD_ROLLED_OUT = True  # tools/insert_interpreter_guard.py inserted the block into every skill script
 
 
 def skill_scripts() -> list[dict]:
