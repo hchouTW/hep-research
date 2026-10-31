@@ -4,7 +4,7 @@
  "artifact_type": "communication",
  "objective": "detector system design: communication written by evaluate_design.py",
  "versions": {
-  "plugin": "0.50.0",
+  "plugin": "0.51.0",
   "contracts": "3.17.0",
   "plugin_release": {
    "release": "unreleased",
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "design-spec.v1.json",
-   "sha256": "2a1efff15937d9daf11947f2797e3b4f7a489e454f06a68a12ba51402d69ce88",
+   "sha256": "ec96a1e90121ff27adf30c5ad2e56e33c5985d77241feae3758ba1e30472b5a2",
    "artifact_type": "design-spec",
    "artifact_id": "j15-v1-spec-v1",
    "status": [
@@ -27,7 +27,7 @@
   },
   {
    "ref": "evaluations/CALC-CC-N4.json",
-   "sha256": "86855625a2e1e61260e304e159452cdf5785c10ff207dec97f0cc29d5fd59426",
+   "sha256": "66cf937e17f1e1771199572abfb4f6e9ebc1c5e31e65e5f2d145b17c8bc7ae83",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-CALC-CC-N4",
    "status": [
@@ -36,7 +36,7 @@
   },
   {
    "ref": "evaluations/CALC-CC-N6.json",
-   "sha256": "21c27b071df07d6c01f51fa87088f142de33ab27f15b69bbe048538d39d65fcb",
+   "sha256": "0fbe2ce5ab127ab3c221c5fe6b700fbb7974879f96b06acdd8083d48a53fdbc2",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-CALC-CC-N6",
    "status": [
@@ -45,7 +45,7 @@
   },
   {
    "ref": "evaluations/CALC-CC-N8.json",
-   "sha256": "a3aac1874f01ad665c47640c51bf5d7ec3d9cd356ba342239776bf772072299c",
+   "sha256": "e8f6568b830b10810451b8ef99c83432247ad43dbd0e91c4b80443317a9e0f12",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-CALC-CC-N8",
    "status": [
@@ -54,7 +54,7 @@
   },
   {
    "ref": "evaluations/CALC-CHAN-N4.json",
-   "sha256": "3228c9a34335c77ebd3d7bd0291954320d8a4596a4d2e894607cd63db415ce82",
+   "sha256": "3b23bbce2fba31c1340f77a84c0d6a60e3fd83632cf0212466b541652d50e51e",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-CALC-CHAN-N4",
    "status": [
@@ -63,7 +63,7 @@
   },
   {
    "ref": "evaluations/CALC-CHAN-N6.json",
-   "sha256": "cc5e6db24359f2c78002ff29c5ec591c97410f4348c9ebcb5fa6e28e17c8c4c7",
+   "sha256": "546652fad888cd50d617529549351ad05fb7839a2ddedd060f7021b6d95e2796",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-CALC-CHAN-N6",
    "status": [
@@ -72,7 +72,7 @@
   },
   {
    "ref": "evaluations/CALC-CHAN-N8.json",
-   "sha256": "d684a7df73d0338818b950b02eda62fbefdd30331a9322d802a39c1c5458a57e",
+   "sha256": "3dc58502383492f8905333db207eed3ca139f46af3decf2ec65ab4a57ac0753b",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-CALC-CHAN-N8",
    "status": [
@@ -81,7 +81,7 @@
   },
   {
    "ref": "evaluations/CALC-MASS-N4.json",
-   "sha256": "a59d74901e7e617628f981ecfb48ddb50ad8840f72f54e29748faaeaab3e6104",
+   "sha256": "863a9904f0dc26a618a91e7307ec47caadad701e8f2aa7f0cb18499850f3336b",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-CALC-MASS-N4",
    "status": [
@@ -90,7 +90,7 @@
   },
   {
    "ref": "evaluations/CALC-MASS-N6.json",
-   "sha256": "8553b2ac9946fa56c4a6d48b3c4c820a4a6d44245247399224bc368887d5a6da",
+   "sha256": "24540a065565c00be755bcf4332f2149df8d14e71f705f7d2b6c57949714cbe2",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-CALC-MASS-N6",
    "status": [
@@ -99,7 +99,7 @@
   },
   {
    "ref": "evaluations/CALC-MASS-N8.json",
-   "sha256": "93bcf1381f50f0d24d81a69adab889307f29190b0e97f9bfed9d140da9863f38",
+   "sha256": "784775e251717abc4c59ae1c15759ee3e2400121bce3850a666171c010465e64",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-CALC-MASS-N8",
    "status": [
@@ -108,7 +108,7 @@
   },
   {
    "ref": "evaluations/CALC-TOY1-N4.json",
-   "sha256": "893e5dee2c918c9a6f841f1a8b96b613cf449c94799b5f8a54afda183b75ee10",
+   "sha256": "701d6751f5987a725c8c0ba62e159639a789f542fe35b923627a927fc0312fc3",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-CALC-TOY1-N4",
    "status": [
@@ -117,7 +117,7 @@
   },
   {
    "ref": "evaluations/CALC-TOY1-N6.json",
-   "sha256": "82966f94b7004f887edfdcd47f065c570ba6f12f53cc3aa1f2905427a0d65562",
+   "sha256": "28fa2cdb8f10835bd3bf78541edf564b253276874e94b0abfd472a71a52ca540",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-CALC-TOY1-N6",
    "status": [
@@ -126,7 +126,7 @@
   },
   {
    "ref": "evaluations/CALC-TOY1-N8.json",
-   "sha256": "6a17b16f339e39190d8a7bba616def91efa5e1f59b439cdcc6cefe0bfb6f35fb",
+   "sha256": "a3478d309cec76b23ca4eef71de191bdf7aa1a3de53a71bbe9a14645cbbd5cd6",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-CALC-TOY1-N8",
    "status": [
@@ -135,7 +135,7 @@
   },
   {
    "ref": "evaluations/CALC-TOY100-N4.json",
-   "sha256": "9ee7b77306afee3fd12b59e30983f4c49f4d2ddeba9e6ffbd8c4bea7af2d4262",
+   "sha256": "7fab7771a1b33adc083543cc7304d5f932bdac4377b8cba5327257020bedf7db",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-CALC-TOY100-N4",
    "status": [
@@ -144,7 +144,7 @@
   },
   {
    "ref": "evaluations/CALC-TOY100-N6.json",
-   "sha256": "a76594011a0b686e8d9f7a3e7b05af3340925d3bba488b5799e8c15791b62d42",
+   "sha256": "0c2b1e2b98f6831dc8bf6cba8e412de4cb49804403777d56096f2c970a11d4fc",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-CALC-TOY100-N6",
    "status": [
@@ -153,7 +153,7 @@
   },
   {
    "ref": "evaluations/CALC-TOY100-N8.json",
-   "sha256": "725a2edbf0d82227e61dc4a980dff71c61b5fc4bfb72c6e9178cf30f08e4038d",
+   "sha256": "f9dc9b90795f371ff2a725da598c5079fbc29d1d020a30f43be70e35a8a58121",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-CALC-TOY100-N8",
    "status": [
@@ -162,7 +162,7 @@
   },
   {
    "ref": "evaluations/CALC-TR1-N4.json",
-   "sha256": "366c2b370edabcf840a621546bd17b18dfe03be9586517d822cb90c637e22aac",
+   "sha256": "adb93fbef20cbefd32d83e9f6c1f02303c5779456143d400dbfee4dd3bd8e26e",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-CALC-TR1-N4",
    "status": [
@@ -171,7 +171,7 @@
   },
   {
    "ref": "evaluations/CALC-TR1-N6.json",
-   "sha256": "09946bd0f953e6e026db6a0e7a130abdeff8c5462060f14fe667b052c395adc7",
+   "sha256": "9ee0aef5217dfb181c0abc3450136d2f094290bbccd68176dc285754dce25da5",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-CALC-TR1-N6",
    "status": [
@@ -180,7 +180,7 @@
   },
   {
    "ref": "evaluations/CALC-TR1-N8.json",
-   "sha256": "ffe1cea01025fe14b541ed990bbe24053567720bc6315c5d616b7f596bbd146a",
+   "sha256": "c4775a74e152aaeb5f3790bf88ed68bb7277623400d663f98a5f42832af196a2",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-CALC-TR1-N8",
    "status": [
@@ -189,7 +189,7 @@
   },
   {
    "ref": "evaluations/CALC-TR100-N4.json",
-   "sha256": "ead7478e0242764dcf3964cfb5e4ea173bdcd48748afc3a8053da752e7dafa0f",
+   "sha256": "e123110f12b288a7f520f853ad2101a24de3221ab3a5a2f9af8855fae3f27233",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-CALC-TR100-N4",
    "status": [
@@ -198,7 +198,7 @@
   },
   {
    "ref": "evaluations/CALC-TR100-N6.json",
-   "sha256": "9110cd41e6dce0e3730f04106a3cb28bb7a574daf114520614c7af503fea409f",
+   "sha256": "1ea7494dd28863f5c91e08c043d2e4c4f59e41087e7db5aa2cdd50e2540d355e",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-CALC-TR100-N6",
    "status": [
@@ -207,7 +207,7 @@
   },
   {
    "ref": "evaluations/CALC-TR100-N8.json",
-   "sha256": "d2d7cf6e0242b5a1a1e33f6483e0c2597f9093db48da71f58744e7b9e50d2e0b",
+   "sha256": "7feb2c99546117b5108085f6ada02b1c3475bc85408156b91f0e0e832009a946",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-CALC-TR100-N8",
    "status": [
@@ -216,7 +216,7 @@
   },
   {
    "ref": "evaluations/SIM-N4-TRK1.json",
-   "sha256": "478565d00eb14f0138da8d1175f68a87922e40ad86e2886952aeb83f75a27367",
+   "sha256": "2b683635dd21d1041677bc16a2e85c9b17e5b8aa34c2c2544be4130b07450939",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-SIM-N4-TRK1",
    "status": [
@@ -226,7 +226,7 @@
   },
   {
    "ref": "evaluations/SIM-N6-TRK1-notails.json",
-   "sha256": "5a20d76ce85cce3890f6dd47805d11d3c889a078d26ba57524f6af2b49b99c93",
+   "sha256": "6739eb074ae8e7f046774a4996278bf5785d9240caaa4c563b7965dee7fd8136",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-SIM-N6-TRK1-notails",
    "status": [
@@ -236,7 +236,7 @@
   },
   {
    "ref": "evaluations/SIM-N6-TRK1.json",
-   "sha256": "452fec669e90ed9ebf3a1f6bc70a93f875c38eaa629aa4ec3da73c955c69643a",
+   "sha256": "593d75f68de44eeb73f3049201aa4aa1853335c33256c28ab406fd99333fa5ef",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-SIM-N6-TRK1",
    "status": [
@@ -246,7 +246,7 @@
   },
   {
    "ref": "evaluations/SIM-N8-TRK1.json",
-   "sha256": "bacbdb72aee5841cc288ccce13b4de352ba26ad6d0f788e9861d033760cb73b5",
+   "sha256": "5686d0b740f55ad2e0b1fc192337c77691b3c046811222a53bb535edeceb2a2a",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-SIM-N8-TRK1",
    "status": [

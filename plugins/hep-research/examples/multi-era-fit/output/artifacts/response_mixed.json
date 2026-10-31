@@ -8,7 +8,7 @@
   "theory": []
  },
  "versions": {
-  "plugin": "0.50.0",
+  "plugin": "0.51.0",
   "contracts": "3.17.0",
   "plugin_release": {
    "release": "unreleased",
@@ -142,7 +142,7 @@
    ]
   ],
   "conditions": "mixed over eras e1, e2 with per-truth-bin weights (mix_period_responses.py)",
-  "provenance": "exposure-weighted mixture of the era responses e1 (sha256 1a225e65022a), e2 (sha256 2e772583a575)",
+  "provenance": "exposure-weighted mixture of the era responses e1 (sha256 407e62f77f91), e2 (sha256 7f844e6c262f)",
   "applied_separately": [],
   "underflow": [
    0.018462121466570537,

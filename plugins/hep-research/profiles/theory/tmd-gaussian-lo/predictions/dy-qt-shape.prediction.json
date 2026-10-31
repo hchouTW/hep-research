@@ -110,7 +110,7 @@
     {
      "qT_gev": 0.0,
      "shape_per_gev2": 0.578745247606892,
-     "shape_quadrature": 0.5787452476068922
+     "shape_quadrature": 0.5787452476068923
     },
     {
      "qT_gev": 0.25,
@@ -120,7 +120,7 @@
     {
      "qT_gev": 0.5,
      "shape_per_gev2": 0.36735068594470544,
-     "shape_quadrature": 0.3673506859447053
+     "shape_quadrature": 0.3673506859447055
     },
     {
      "qT_gev": 1.0,
