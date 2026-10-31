@@ -5,6 +5,13 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **`executor_capabilities.py`: G2 is `unsupported`, not `fail`, on a host without `/proc` (macOS).** The runner
+  finds a process that left the step's group only through `/proc`, so G2 cannot pass there; qualification now says
+  so, and an M2 or M3 admission is refused for an unsupported G2 as before. `test_executor_b2` expects that on such a
+  host.
+- **`test_geant4_register`: the `G4LEDATA` check compares resolved paths**, so it passes on macOS with `TMPDIR` under
+  `/var/folders` (a symlink to `/private/var/folders`); `data_env` keeps the recorded paths.
+
 ## 0.51.0 (2026-10-31)
 
 Minor release; contracts 3.17.0, `CORE_VERSION` 1.4.0 and every skill's `description` are unchanged. It ships

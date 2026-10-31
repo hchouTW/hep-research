@@ -276,7 +276,7 @@ class CheckAndDownstream(_TempDirCase):
         self.assertEqual(g4common.geant4_config_path(self.rec), self.inst.config.resolve())
         self.assertEqual(g4common.geant4_cmake_dir(self.rec), (self.inst.prefix / "lib" / "cmake" / "Geant4").resolve())
         env = g4common.data_env(self.rec)
-        self.assertEqual(Path(env["G4LEDATA"]), self.inst.folders["G4EMLOW"].resolve())
+        self.assertEqual(Path(env["G4LEDATA"]).resolve(), self.inst.folders["G4EMLOW"].resolve())
         bad = json.loads(json.dumps(self.rec))
         bad["extension"]["build"]["origin"] = "downloaded"
         self.assertIn("unknown origin", g4common.build_record_ok(bad))

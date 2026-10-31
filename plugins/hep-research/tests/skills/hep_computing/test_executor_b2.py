@@ -14,6 +14,7 @@ PLUGIN = Path(__file__).resolve().parents[3]
 SCRIPTS = PLUGIN / "skills" / "hep-computing" / "scripts"
 RUNNER = SCRIPTS / "run_workflow.py"
 CAPS = SCRIPTS / "executor_capabilities.py"
+HAS_PROC = Path("/proc/self/stat").is_file()  # G2 needs /proc to see processes that left the group
 
 
 def sha(b: bytes) -> str:
@@ -200,16 +201,17 @@ class Capabilities(unittest.TestCase):
     def test_g1_g2_g5_pass_and_the_rest_are_unsupported(self):
         # C2 (reconstruction v12): G5 is qualified with the control-layer helper as the persistent state
         self.assertEqual(self.q_code, 0, self.q_out)
-        self.assertEqual(self.q_out["tests"], {"G1": "pass", "G2": "pass", "G3": "unsupported", "G4": "unsupported",
+        g2 = "pass" if HAS_PROC else "unsupported"
+        self.assertEqual(self.q_out["tests"], {"G1": "pass", "G2": g2, "G3": "unsupported", "G4": "unsupported",
                                                "G5": "pass", "G6": "unsupported"})
         qual = json.loads(self.qual.read_text())
         for g in ("G1", "G5"):
             self.assertTrue(all(c["passed"] for c in qual["tests"][g]["cases"]), qual["tests"][g])
         self.assertIn("control_layer.py", qual["tests"]["G5"]["tested"]["control_layer"])
         self.assertEqual(len(qual["control_sha256"]), 64)
-        self.assertEqual(self.d_out["declared"], ["G1", "G2", "G5"])
+        self.assertEqual(self.d_out["declared"], ["G1", "G2", "G5"] if HAS_PROC else ["G1", "G5"])
 
-    @unittest.skipUnless(os.name == "posix", "G1/G2 are qualified on POSIX hosts")
+    @unittest.skipUnless(HAS_PROC, "G2 (required by M2) is qualified only on hosts with /proc")
     def test_admission(self):
         self.assertEqual(run(CAPS, "admit", "--declaration", self.decl, "--qualification", self.qual,
                              "--require", "G1,G2")[0], 0)
