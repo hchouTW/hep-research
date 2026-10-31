@@ -195,3 +195,38 @@ not change. Fix attempts on this failure: 1/3.
 6318 run, 0 failures, 1 error (pre-existing `test_root_cpp_assets`), 292 skipped. Static part exit 0; ruff, mypy,
 layering, naming, host-neutral, packaging all pass; `insert_interpreter_guard.py --check` ok. AC6 diff empty outside
 the 14 approved example files. A6 counters PR 1b: units runs 2/6; fix attempts max 1/3; no early stop.
+
+PR 1b: draft PR #334 (base `xplat/pr-1a-modules`); CI 22 pass, 2 skipped. *Done when* holds.
+
+## PR 2 — macOS and Linux
+
+### Preflight
+
+| Item | Value |
+|---|---|
+| Worktree | `<WT_ROOT>/pr-2` |
+| Branch | `xplat/pr-2-macos-linux` |
+| Base | `xplat/pr-1b-guard` = `cc23f8cee074482e90bc799748d2207951cb1f55` |
+| `git rev-parse --show-toplevel` | `<WT_ROOT>/pr-2` (equals the worktree) |
+| Main checkout `git status --porcelain` | empty (0 lines) |
+
+### Steps (2026-10-31)
+
+- **2.1** `executor_capabilities.py` (G2: `process_groups`, `proc_fs`; G5: `process_groups`) and `run_workflow.py`
+  (`_proc_scan`, termination scope, POSIX branch) use `core.hostcaps`. New `unavailable_modes` in the
+  qualification record and the `qualify` output; on this Mac: M2 (G2 `unsupported`: no /proc) and M3. Tests:
+  `@needs("proc_fs")` / `@needs("process_groups")` in `test_executor_b2`, `test_workflow_b1`; new
+  `test_modes_this_host_cannot_admit_are_named` (attempt 1 asserted M3 lacks only G3/G4; on macOS it also lacks G2:
+  test corrected). The hep-review store tests already carry a macOS `mount` fixture (`MAC_MOUNT`); added a live
+  darwin test (the temporary folder resolves to APFS through mount(8)). Reference
+  `research-workflow-control.md`: M2 unavailable without /proc. `tools/skill_scripts.json` regenerated (a source line
+  moved). Fix attempts max 1/3.
+- **2.2** `test_lineage.py:286` quotes the worker path; also quoted: `test_partition_remote` (2),
+  `test_side_effects_f13` (2), `test_protected_entry_points`, `test_batch_hardening` (2), `batch_harness`,
+  `test_batch_bundle`, `fixtures/cr_propagation/e1/active_addition.py`. All affected modules pass.
+- **2.3** `check_packaging.py` rule `appledouble`; tests in `test_check_packaging_rules.py` (AC9).
+- **2.4** `tests.yml`: `hostile-paths`, `old-python`, shellcheck step in `lint`; `platforms.yml`: `macos`,
+  `windows`. `tools/platform_checks.py` drives AC2-AC4 (local run: 198/198 every case, AC3, AC4 pass) and AC11.
+  Two scripts answer `--help` with usage and exit 2 on every platform (`contracts/comparison/gate.py`,
+  `contracts/project.py`): listed in `USAGE_EXIT`, not failures. shellcheck is not installed locally (CI only);
+  `/bin/bash -n` passes on the three scripts.

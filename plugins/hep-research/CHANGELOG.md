@@ -5,6 +5,16 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Cross-platform, part 2: macOS and Linux.** `executor_capabilities.py` and `run_workflow.py` take their host
+  answers from `core.hostcaps`; the qualification record and `qualify` output name the modes a host cannot admit
+  (`unavailable_modes`: M2 where `/proc` is missing, as on macOS; M3 everywhere), and the workflow-control reference
+  says so. G2-dependent tests use `@needs("proc_fs")`. `tools/check_packaging.py` rejects AppleDouble `._` files
+  (magic `00 05 16 07`) and accepts a regular file named `._x`. Test command lines built as f-strings quote their
+  paths (`test_lineage.py:286` and seven more). CI: `hostile-paths` (space, Chinese characters and symlinks in
+  `TMPDIR` and the working directory; a tree with NFD, `.DS_Store` and AppleDouble names) and `old-python` (a real
+  3.9 as `python3`: `tools/platform_checks.py old-python`, AC2-AC4 with the root case through sudo) in `tests.yml`;
+  shellcheck in `lint`; new `platforms.yml` (macOS units part under `ulimit -n 256`; Windows; not required).
+
 - **Cross-platform, part 1b: the interpreter guard block in every skill script.** `tools/insert_interpreter_guard.py`
   inserted the fixed block into the 198 scripts of `tools/skill_scripts.json` (after the docstring and any
   `from __future__` import; idempotent, a second run changes nothing; a shebang stays first). Under Python 3.9 every
