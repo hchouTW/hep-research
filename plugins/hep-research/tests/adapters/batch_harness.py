@@ -11,6 +11,7 @@ ADAPTER = ROOT / "adapters" / "batch-schedulers"
 SHIMS = Path(__file__).resolve().parent / "batch_shims"
 sys.path.insert(0, str(ADAPTER))
 import batch_campaign  # noqa: E402
+from tests._platform import plain_tmpdir  # noqa: E402
 
 WORKER = """
 import json, sys
@@ -25,7 +26,7 @@ class Harness:
     """One temporary project: config, campaign, fake-scheduler store, fault file and call log."""
 
     def __init__(self, backend: str, items=10, chunk=1, extra=None, worker_print=""):
-        self.tmp = tempfile.TemporaryDirectory(prefix="hepbatch")
+        self.tmp = tempfile.TemporaryDirectory(prefix="hepbatch", dir=plain_tmpdir())  # schedulers refuse spaces
         self.dir = Path(self.tmp.name).resolve()  # macOS: /var/folders is a symlink to /private/var/folders
         self.log = self.dir / "shim-calls.jsonl"
         self.faults = self.dir / "faults.json"

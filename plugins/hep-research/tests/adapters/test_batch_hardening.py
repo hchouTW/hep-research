@@ -274,7 +274,7 @@ class ReviewFollowUpsWP3(unittest.TestCase):
         bin_ = self.d / "bin"
         bin_.mkdir()
         log = self.d / "argv"
-        fake_tool(bin_, "sacct", f'echo "$@" > {log}')
+        fake_tool(bin_, "sacct", f'echo "$@" > {shlex.quote(str(log))}')
         SlurmExecutor(BASE, {"PATH": str(bin_)}).find("hepr-x-s001", "2026-10-08T12:00:00Z")
         import datetime
         want = (datetime.datetime(2026, 10, 8, 11, 0, tzinfo=datetime.timezone.utc).astimezone()
