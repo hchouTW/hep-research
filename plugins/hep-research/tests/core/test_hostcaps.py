@@ -1,6 +1,7 @@
 """core/hostcaps.py: capability probes, require() and its missing-dependency report, state_dir() per platform; and
 its consumers on a host without the capabilities (native Windows, modelled by patching the probes): the protected
-guard, run_workflow.py, the hep-review CLI and the per-user state folders."""
+guard, run_workflow.py, the hep-review CLI and the per-user state folders (the AMS paper cache test needs the
+AMS-02 profile and is skipped in a copy without it)."""
 import contextlib
 import importlib
 import importlib.util
@@ -125,6 +126,8 @@ class NeedsDecorator(unittest.TestCase):
                 pass
         self.assertFalse(getattr(g, "__unittest_skip__", False))
 
+FETCH_PAPERS = ROOT / "profiles" / "experiments" / "ams-02" / "scripts" / "fetch_papers.py"
+
 
 def _load(rel: str, name: str):
     path = ROOT / rel
@@ -215,17 +218,24 @@ class Consumers(unittest.TestCase):
                 sys.path.insert(0, str(ROOT / rel))
         store = importlib.import_module("hep_review_support.store")
         authoring = importlib.import_module("review_lib.store")
-        papers = _load("profiles/experiments/ams-02/scripts/fetch_papers.py", "fetch_papers_hostcaps")
         env = {"LOCALAPPDATA": "C:/state/AppData/Local", "HOME": "/h"}
         local = Path("C:/state/AppData/Local") / "hep-research"
         with mock.patch.object(hostcaps, "on_windows", return_value=True), mock.patch.dict(os.environ, env, clear=True):
             self.assertEqual(store.default_store_dir(env), local / "hep-review")
             self.assertEqual(authoring.default_private_root(), local / "reviews")
-            self.assertEqual(papers.default_cache(), local / "papers")
         with mock.patch.object(hostcaps, "on_windows", return_value=False), \
                 mock.patch.dict(os.environ, {"HOME": "/h"}, clear=True):
             self.assertEqual(store.default_store_dir({"HOME": "/h"}), Path("/h/.local/state/hep-research/hep-review"))
             self.assertEqual(authoring.default_private_root(), Path("/h/.local/state/hep-research/reviews"))
+
+    @unittest.skipUnless(FETCH_PAPERS.is_file(), "the AMS-02 profile is not in this copy")
+    def test_ams_paper_cache_follows_state_dir_on_windows(self):
+        papers = _load(FETCH_PAPERS.relative_to(ROOT).as_posix(), "fetch_papers_hostcaps")
+        env = {"LOCALAPPDATA": "C:/state/AppData/Local", "HOME": "/h"}
+        with mock.patch.object(hostcaps, "on_windows", return_value=True), mock.patch.dict(os.environ, env, clear=True):
+            self.assertEqual(papers.default_cache(), Path("C:/state/AppData/Local") / "hep-research" / "papers")
+        with mock.patch.object(hostcaps, "on_windows", return_value=False), \
+                mock.patch.dict(os.environ, {"HOME": "/h"}, clear=True):
             self.assertEqual(papers.default_cache(), Path("/h/.cache/hep-research/papers"))
 
 
