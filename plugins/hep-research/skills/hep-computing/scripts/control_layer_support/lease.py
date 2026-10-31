@@ -2,16 +2,19 @@
 Standard library only. The control rules this layer serves did not pass the S0 spec review (obligation N1).
 
 The lease serializes writers **in addition to** compare-and-set, never instead of it: every append still checks the
-caller's expected head under the record's flock. A lease has an owner and an expiry:
-  <task-log>.lease.json            {"owner", "pid", "host", "acquired", "expires" (epoch seconds), "lease_s"}
+caller's expected head under the record's flock. A lease has an owner name, a secret token and an expiry:
+  <task-log>.lease.json            {"owner", "token_sha256", "pid", "host", "acquired", "expires" (epoch seconds),
+                                   "lease_s"}; the token itself is returned once by `acquire` and never stored
   <task-log>.lease-history.jsonl   append-only, canonical JSON lines, each with the SHA-256 of the previous line:
                                    acquire, renew, release, takeover (with the previous owner) and recover events
 The fact kinds of Control §2 are closed and have no lock kind, so lease events are kept in this history file beside
 the record, not in the record itself.
-Rules: a live lease of another owner refuses every write except a human decision; under M2/M3 every write except a
-human decision must hold a live lease; an expired lease is taken over only by `acquire` and only after restart
-reconciliation -- while any attempt is admitted, running, cancelling or unknown, takeover is refused (reconcile, or
-have a human abandon, first). Liveness is the expiry alone: a dead owner stops renewing, and its lease runs out.
+Rules: the owner name is a label; what proves the holder is the token. A live lease refuses every write that does not
+present its token, except a human decision; under M2/M3 every write except a human decision must present the token
+of a live lease. Renewal and release need the token. Every acquisition without the token -- a new owner, a takeover
+of an expired lease, or a first lease after a release -- is refused while a lease is live, and while any attempt is
+admitted, running, cancelling or unknown (reconcile, record lost runs or have a human abandon first). Liveness is the
+expiry alone: a dead owner stops renewing, and its lease runs out.
 Restart recovery of a torn tail: an append is acknowledged only after its single O_APPEND write and fsync, so a last
 line without its newline, and a last batch with fewer lines than its size, were never acknowledged; `recover` moves
 that tail (back to the start of its batch) to <task-log>.torn-<sha256> and truncates it away, recording the event.
@@ -20,8 +23,10 @@ Nothing else is ever removed.
 from __future__ import annotations
 
 import hashlib
+import hmac
 import json
 import os
+import secrets
 import socket
 import time
 from pathlib import Path
@@ -97,51 +102,71 @@ def _write_lease(task_log: Path, lease: dict):
     os.replace(scratch, path)
 
 
-def check_write(task_log: Path, owner: str | None, mode: str, human: bool, now: float | None = None):
+def _token_matches(task_log: Path, token: str | None) -> bool:
+    lease = read_lease(task_log)
+    if lease is None or not isinstance(token, str) or not isinstance(lease.get("token_sha256"), str):
+        return False
+    return hmac.compare_digest(hashlib.sha256(token.encode("utf-8")).hexdigest(), lease["token_sha256"])
+
+
+def check_write(task_log: Path, token: str | None, mode: str, human: bool, now: float | None = None):
     """Called under the record's flock before an append. Raises LeaseRefused."""
     if human:
         return
     state = lease_state(task_log, now)
-    if state["held"] and state["live"] and state["owner"] != owner:
-        raise LeaseRefused(f"the task record is leased to {state['owner']!r} for {state['seconds_left']} s more")
-    if mode in ("M2", "M3") and not (state["held"] and state["live"] and state["owner"] == owner):
+    holds = _token_matches(task_log, token)
+    if state["held"] and state["live"] and not holds:
+        raise LeaseRefused(f"the task record is leased to {state['owner']!r} for {state['seconds_left']} s more; a "
+                           f"write presents the lease token (--lease-token)")
+    if mode in ("M2", "M3") and not (state["held"] and state["live"] and holds):
         raise LeaseRefused(f"under {mode} every write holds a live lease: run `lock acquire --owner NAME` and pass "
-                           f"--owner NAME")
+                           f"the token it returns as --lease-token")
 
 
-def acquire(task_log: Path, owner: str, lease_s: float, unsettled: list[str], now: float | None = None) -> dict:
-    """Acquire, renew (same owner) or take over (expired lease of another owner, only after reconciliation)."""
+def acquire(task_log: Path, owner: str, lease_s: float, unsettled: list[str], token: str | None = None,
+            now: float | None = None) -> dict:
+    """Renew with the token (live or expired); otherwise acquire or take over, which is refused while a lease is
+    live and while any attempt is unsettled. A new acquisition returns a fresh token, once."""
     if not (isinstance(lease_s, (int, float)) and 0 < lease_s <= 86400):
         raise ValueError("--lease-s must be in (0, 86400]")
     now = time.time() if now is None else now
     state = lease_state(task_log, now)
-    event = "acquire"
-    if state["held"] and state["owner"] != owner:
-        if state["live"]:
-            raise LeaseRefused(f"a live lease of {state['owner']!r} ({state['seconds_left']} s left): not taken over")
-        if unsettled:
-            raise LeaseRefused(f"reconcile first: attempts {unsettled} are admitted, running, cancelling or unknown; "
-                               f"take their receipts (or record them lost), reconcile them or have a human abandon "
-                               f"them, then take over the expired lease")
-        event = "takeover"
-    elif state["held"]:
-        event = "renew" if state["live"] else "acquire"
-    lease = {"owner": owner, "pid": os.getpid(), "host": socket.gethostname(), "acquired": now,
-             "expires": now + lease_s, "lease_s": lease_s}
+    if token is not None:
+        if not _token_matches(task_log, token):
+            raise LeaseRefused("the token does not belong to the current lease")
+        lease = {**read_lease(task_log), "pid": os.getpid(), "host": socket.gethostname(), "expires": now + lease_s,
+                 "lease_s": lease_s}
+        _write_lease(task_log, lease)
+        _record_event(task_log, {"event": "renew", "owner": lease["owner"], "previous_owner": lease["owner"],
+                                 "expires": lease["expires"]})
+        return {"event": "renew", **lease_state(task_log, now)}
+    if state["held"] and state["live"]:
+        raise LeaseRefused(f"a live lease of {state['owner']!r} ({state['seconds_left']} s left): not taken over; "
+                           f"its holder renews or releases it with its token")
+    if unsettled:
+        raise LeaseRefused(f"reconcile first: attempts {unsettled} are admitted, running, cancelling or unknown; "
+                           f"take their receipts (or record them lost), reconcile them or have a human abandon them, "
+                           f"then acquire the lease")
+    event = "takeover" if state["held"] else "acquire"
+    new_token = secrets.token_hex(16)
+    lease = {"owner": owner, "token_sha256": hashlib.sha256(new_token.encode("utf-8")).hexdigest(),
+             "pid": os.getpid(), "host": socket.gethostname(), "acquired": now, "expires": now + lease_s,
+             "lease_s": lease_s}
     _write_lease(task_log, lease)
     _record_event(task_log, {"event": event, "owner": owner, "previous_owner": state.get("owner"),
                              "expires": lease["expires"]})
-    return {"event": event, **lease_state(task_log, now)}
+    return {"event": event, "token": new_token, **lease_state(task_log, now)}
 
 
-def release(task_log: Path, owner: str) -> dict:
+def release(task_log: Path, token: str | None) -> dict:
     state = lease_state(task_log)
     if not state["held"]:
         return {"event": "none", "held": False}
-    if state["owner"] != owner:
-        raise LeaseRefused(f"the lease belongs to {state['owner']!r}")
+    if not _token_matches(task_log, token):
+        raise LeaseRefused(f"the lease of {state['owner']!r} is released only with its token")
     lease_path(task_log).unlink()
-    _record_event(task_log, {"event": "release", "owner": owner, "previous_owner": owner, "expires": None})
+    _record_event(task_log, {"event": "release", "owner": state["owner"], "previous_owner": state["owner"],
+                             "expires": None})
     return {"event": "release", "held": False}
 
 

@@ -137,42 +137,51 @@ class Reconciliation(C2Base):
 
 
 class LeaseLock(C2Base):
-    def lock(self, action, owner=None, lease_s=None):
-        args = ["lock", action] + (["--owner", owner] if owner else []) + (["--lease-s", lease_s] if lease_s else [])
+    def lock(self, action, owner=None, lease_s=None, token=None):
+        args = ["lock", action] + (["--owner", owner] if owner else []) + (["--lease-s", lease_s] if lease_s else []) \
+            + (["--lease-token", token] if token else [])
         return self.call(*args)
 
     def test_a_live_lease_serializes_writers_but_not_compare_and_set(self):
         self.init_and_contract()
         code, out = self.lock("acquire", "s1")
         self.assertEqual((code, out["event"]), (0, "acquire"))
-        code, out = self.write("exposure", "--sample", "CR", "--owner", "s2")
+        token = out["token"]
+        code, out = self.write("exposure", "--sample", "CR", "--lease-token", "f" * 32)
         self.assertEqual((code, out["status"]), (1, "refused"))
         self.assertIn("lease", out["reason"])
         code, out = self.write("exposure", "--sample", "CR")
-        self.assertEqual(code, 1, out)                                     # no owner: also refused
-        code, out = self.write("exposure", "--sample", "CR", "--owner", "s1", expect=0)
+        self.assertEqual(code, 1, out)                                     # no token: also refused
+        code, out = self.write("exposure", "--sample", "CR", "--lease-token", token, expect=0)
         self.assertEqual((code, out["status"]), (1, "rerun-required"))     # the lease never replaces the CAS
-        self.assertEqual(self.write("exposure", "--sample", "CR", "--owner", "s1")[0], 0)
+        self.assertEqual(self.write("exposure", "--sample", "CR", "--lease-token", token)[0], 0)
         code, out = self.write("decide", "--action", "unblind", "--sample", "S", "--confirm-human",
                                env=agent_free_env())
         self.assertEqual(code, 0, out)                                     # a human decision is not blocked
-        self.assertEqual(self.lock("acquire", "s1")[1]["event"], "renew")
-        self.assertEqual(self.lock("release", "s2")[0], 1)
-        self.assertEqual(self.lock("release", "s1")[1]["event"], "release")
+        self.assertEqual(self.lock("acquire", token=token)[1]["event"], "renew")
+        self.assertEqual(self.lock("release", "s1")[0], 1)                 # the name alone does not release
+        self.assertEqual(self.lock("release", token=token)[1]["event"], "release")
         events = [e["event"] for e in self.lock("status")[1]["history"]]
         self.assertEqual(events, ["acquire", "renew", "release"])
 
     def test_takeover_only_when_expired_and_after_reconciliation(self):
         self.raw_admitted_and_lost()
+        code, out = self.lock("acquire", "s1", 1)
+        self.assertIn("reconcile first", out["reason"])                   # PR #330: no new lease while unsettled
+        proc, work, receipt = self.real_receipt()
+        self.assertEqual(self.write("reconcile", "--receipt", receipt, "--work", work)[0], 0)
         self.assertEqual(self.lock("acquire", "s1", 1)[0], 0)
         code, out = self.lock("acquire", "s2")
         self.assertIn("live lease", out["reason"])
+        self.assertEqual(self.admit("a2:raw", "--step", "raw", "--cost", "0")[0], 1)   # leased: no write
         time.sleep(1.2)
+        self.assertEqual(self.admit("b1:reco", "--step", "reco", "--cost", "0")[0], 0)  # expired: writes again
         code, out = self.lock("acquire", "s2")
         self.assertEqual(code, 1)
-        self.assertIn("reconcile first", out["reason"])
-        proc, work, receipt = self.real_receipt()
-        self.assertEqual(self.write("reconcile", "--receipt", receipt, "--work", work)[0], 0)
+        self.assertIn("reconcile first", out["reason"])                   # b1 is admitted: unsettled
+        self.assertEqual(self.write("receipt", "--lost", "--attempt", "b1:reco")[0], 0)
+        self.assertEqual(self.write("decide", "--action", "abandon", "--attempt", "b1:reco", "--confirm-human",
+                                    env=agent_free_env())[0], 0)
         code, out = self.lock("acquire", "s2")
         self.assertEqual((code, out["event"], out["owner"]), (0, "takeover", "s2"))
         last = self.lock("status")[1]["history"][-1]
@@ -186,8 +195,8 @@ class LeaseLock(C2Base):
 
     def test_a_tampered_lease_history_is_refused(self):
         self.init_and_contract()
-        self.lock("acquire", "s1")
-        self.lock("release", "s1")
+        token = self.lock("acquire", "s1")[1]["token"]
+        self.lock("release", token=token)
         path = leases.history_path(self.task_log)
         path.write_bytes(path.read_bytes().replace(b'"s1"', b'"sX"', 1))
         code, out = self.lock("status")
@@ -227,10 +236,10 @@ class M2Path(C2Base):
         self.assertEqual(out["contract_status"], "pending_approval")
         self.assertEqual(self.write("decide", "--action", "approve_contract", "--ref", 1, "--confirm-human",
                                     env=agent_free_env())[0], 0)
-        code, out = self.admit("a1:raw", "--step", "raw", "--cost", "600", "--owner", "s1")
+        code, out = self.admit("a1:raw", "--step", "raw", "--cost", "600", "--lease-token", self.lease_token)
         self.assertEqual(code, 0, out)
         proc, work, receipt = self.real_receipt()
-        code, out = self.write("receipt", "--receipt", receipt, "--work", work, "--owner", "s1")
+        code, out = self.write("receipt", "--receipt", receipt, "--work", work, "--lease-token", self.lease_token)
         self.assertEqual(code, 0, out)
         self.assertGreaterEqual(out["written"][0]["fields"]["usage"], 0)   # --usage auto: wall_s under M2
         code, st = self.call("status")
@@ -239,7 +248,7 @@ class M2Path(C2Base):
     def test_m3_stays_refused(self):
         self.init_and_contract(mode="M3")
         self.write("decide", "--action", "approve_contract", "--ref", 1, "--confirm-human", env=agent_free_env())
-        code, out = self.admit("a1:raw", "--step", "raw", "--cost", "600", "--owner", "s1")
+        code, out = self.admit("a1:raw", "--step", "raw", "--cost", "600", "--lease-token", self.lease_token)
         self.assertEqual(code, 1, out)
         self.assertIn("G3", out["reason"])
         self.assertIn("G4", out["reason"])

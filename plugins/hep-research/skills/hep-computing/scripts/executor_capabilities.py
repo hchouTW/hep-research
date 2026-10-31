@@ -15,9 +15,10 @@ qualification record (Delivery §1.2 of the reconstruction v12.2 spec copy). The
 - G5 persistent state (reconstruction v12 C2), with the control-layer helper (control_layer.py) as the persistent
   state: restart recovery (a writer killed mid-session; a fresh process with only the task log derives the same
   state, every acknowledged fact exactly once, an operation id not appended twice, an unknown attempt still unknown
-  and blocking its step, a torn last line recovered) and stale lock takeover (the live lease of a killed owner is not
-  taken over; once expired it is taken over only after the unknown attempt is reconciled, and the takeover is
-  recorded). The control rules that state serves did not pass the S0 spec review (obligation N1);
+  and blocking its step, a torn last line recovered) and stale lock takeover (a killed owner leaves its lease and an
+  unknown attempt; the live lease is not taken over, the owner's name alone neither releases it nor acquires it,
+  once expired it is taken over only after the unknown attempt is reconciled, the takeover is recorded, and the old
+  token no longer writes). The control rules that state serves did not pass the S0 spec review (obligation N1);
 - G3 submission reconciliation, G4 resource metering with atomic reservation and G6 conditions resolution evidence are
   not provided by this executor: they are recorded as unsupported, never declared.
 The qualification record names the platform and the SHA-256 of the runner it tested and, for G5, the SHA-256 of
@@ -195,11 +196,25 @@ while True:
         print(f"ACK w{i}", flush=True)
         i += 1
 """
-G5_LEASE_HOLDER = """import sys
+G5_LEASE_HOLDER = """import contextlib, io, json, sys, time
 sys.path.insert(0, sys.argv[1])
-import control_layer, time
-control_layer.main(["lock", "acquire", "--task-log", sys.argv[2], "--owner", "s1", "--lease-s", sys.argv[3]])
-print("ACK lease", flush=True)
+import control_layer
+from control_layer_support.task_record import TaskRecord
+log, lease_s, decl, qual = sys.argv[2:6]
+
+def call(*args):
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        control_layer.main(list(args))
+    return json.loads(buf.getvalue())
+
+token = call("lock", "acquire", "--task-log", log, "--owner", "s1", "--lease-s", lease_s)["token"]
+head = TaskRecord(log).read().log.head
+call("admit", "--task-log", log, "--attempt", "a3:reco", "--step", "reco", "--cost", "0", "--declaration", decl,
+     "--qualification", qual, "--lease-token", token, "--expect-head", str(head))
+call("receipt", "--task-log", log, "--lost", "--attempt", "a3:reco", "--lease-token", token,
+     "--expect-head", str(head + 1))
+print(f"ACK {token}", flush=True)
 time.sleep(600)
 """
 
@@ -279,18 +294,8 @@ def qualify_g5(root: Path) -> dict:
     case("a torn last line is refused, then recovered, with the same derived state", torn_code == 2
          and rec_code == 0 and recovered.get("recovered") is True and _ctl("status", "--task-log", log) == before,
          recovered.get("torn_sha256"))
-    # stale lock takeover
-    _spawn_until(G5_LEASE_HOLDER, [str(HERE), str(log), "3"], 1)
-    t_dead = time.monotonic()
-    code, live = _ctl("lock", "acquire", "--task-log", log, "--owner", "s2")
-    case("the live lease of a killed owner is not taken over", code == 1, live.get("reason"))
-    head = _ctl("verify", "--task-log", log)[1].get("head")
-    code, out = _ctl("exposure", "--task-log", log, "--sample", "CR", "--owner", "s2", "--expect-head", head)
-    case("a write by another owner is refused while that lease is live", code == 1, out.get("reason"))
-    time.sleep(max(0.0, 3.3 - (time.monotonic() - t_dead)))
-    code, early = _ctl("lock", "acquire", "--task-log", log, "--owner", "s2")
-    case("an expired lease is not taken over before the unknown attempt is reconciled", code == 1,
-         early.get("reason"))
+    # stale lock takeover: the restart's unknown attempt is reconciled first, then a session takes the lease, leaves
+    # an attempt of its own unknown and dies holding the lease
     work = root / "run-a1"
     work.mkdir()
     workflow = root / "a1.json"
@@ -298,19 +303,52 @@ def qualify_g5(root: Path) -> dict:
         {"id": "raw", "argv": ["{python}", "-c", "open('o.txt', 'w').write('1')"], "outputs": ["o.txt"]}]}))
     subprocess.run([sys.executable, "-B", str(RUNNER), str(workflow), "--work", str(work), "--receipt-dir",
                     str(root / "receipts"), "--attempt-prefix", "a1:"], capture_output=True, timeout=600)
+    head = _ctl("verify", "--task-log", log)[1].get("head")
     code, rec = _ctl("reconcile", "--task-log", log, "--receipt", root / "receipts" / "a1:raw.receipt.json",
                      "--work", work, "--expect-head", head)
     states = _ctl("resume", "--task-log", log)[1].get("attempts_by_state", {})
-    case("the unknown attempt is reconciled from the receipt that proves its outcome", code == 0
-         and states.get("computed") == ["a1:raw"], rec.get("status"))
+    reconciled_first = code == 0 and states.get("computed") == ["a1:raw"]
+    tokens, _ = _spawn_until(G5_LEASE_HOLDER, [str(HERE), str(log), "3", str(root / "decl.json"),
+                                               str(root / "qual.json")], 1)
+    t_dead = time.monotonic()
+    old_token = tokens[0] if tokens else ""
+    code, live = _ctl("lock", "acquire", "--task-log", log, "--owner", "s2")
+    case("the live lease of a killed owner is not taken over", code == 1 and bool(old_token), live.get("reason"))
+    head = _ctl("verify", "--task-log", log)[1].get("head")
+    code, out = _ctl("exposure", "--task-log", log, "--sample", "CR", "--expect-head", head)
+    case("a write by another owner is refused while that lease is live", code == 1, out.get("reason"))
+    code, out = _ctl("lock", "release", "--task-log", log, "--owner", "s1")
+    case("the owner's name alone does not release the lease (no release-then-acquire bypass)", code == 1
+         and _ctl("lock", "status", "--task-log", log)[1].get("lease", {}).get("owner") == "s1", out.get("reason"))
+    time.sleep(max(0.0, 3.3 - (time.monotonic() - t_dead)))
+    code, early = _ctl("lock", "acquire", "--task-log", log, "--owner", "s2")
+    case("an expired lease is not taken over before the unknown attempt is reconciled", code == 1
+         and "reconcile first" in str(early.get("reason")), early.get("reason"))
+    code, named = _ctl("lock", "acquire", "--task-log", log, "--owner", "s1")
+    case("acquiring under the dead owner's name without its token is refused as well", code == 1
+         and "reconcile first" in str(named.get("reason")), named.get("reason"))
+    work3 = root / "run-a3"
+    work3.mkdir()
+    workflow3 = root / "a3.json"
+    workflow3.write_text(json.dumps({"workflow": "g5", "steps": [
+        {"id": "reco", "argv": ["{python}", "-c", "open('o.txt', 'w').write('3')"], "outputs": ["o.txt"]}]}))
+    subprocess.run([sys.executable, "-B", str(RUNNER), str(workflow3), "--work", str(work3), "--receipt-dir",
+                    str(root / "receipts"), "--attempt-prefix", "a3:"], capture_output=True, timeout=600)
+    head = _ctl("verify", "--task-log", log)[1].get("head")
+    code, rec = _ctl("reconcile", "--task-log", log, "--receipt", root / "receipts" / "a3:reco.receipt.json",
+                     "--work", work3, "--expect-head", head)
+    states = _ctl("resume", "--task-log", log)[1].get("attempts_by_state", {})
+    case("the unknown attempts are reconciled from the receipts that prove their outcome", reconciled_first
+         and code == 0 and states.get("computed") == ["a1:raw", "a3:reco"], rec.get("status"))
     code, taken = _ctl("lock", "acquire", "--task-log", log, "--owner", "s2")
     history = _ctl("lock", "status", "--task-log", log)[1].get("history", [])
     case("after reconciliation the expired lease is taken over and the takeover is recorded",
          code == 0 and taken.get("event") == "takeover" and history and history[-1].get("event") == "takeover"
          and history[-1].get("previous_owner") == "s1", taken.get("event"))
     head = _ctl("verify", "--task-log", log)[1].get("head")
-    code, stale = _ctl("exposure", "--task-log", log, "--sample", "CR", "--owner", "s1", "--expect-head", head)
-    case("the old owner's write is refused after the takeover", code == 1, stale.get("reason"))
+    code, stale = _ctl("exposure", "--task-log", log, "--sample", "CR", "--lease-token", old_token,
+                       "--expect-head", head)
+    case("the old owner's write is refused after the takeover, even with its token", code == 1, stale.get("reason"))
     return {"status": "pass" if all(c["passed"] for c in cases) else "fail", "cases": cases,
             "tested": {"control_layer": control_files(), "runner_sha256": sha256_file(RUNNER),
                        "note": "the control rules this state serves did not pass the S0 spec review (N1)"}}

@@ -93,5 +93,52 @@ class StartBeforeCancel(Base):
         self.assertEqual(self.write("start", "--attempt", "a1:raw")[0], 2)   # no start after a settled cancel
 
 
+class LeaseToken(Base):
+    """Finding 3: the lease holds a secret; a name alone neither releases, renews nor writes; a new owner never
+    acquires while attempts are unsettled."""
+
+    def unsettled_under_s1(self):
+        """s1 takes the lease, then leaves an attempt unknown (the state a dead session leaves behind)."""
+        self.init_and_contract()
+        code, out = self.call("lock", "acquire", "--owner", "s1", "--lease-s", "600")
+        self.assertEqual(code, 0, out)
+        token = out["token"]
+        self.assertEqual(self.admit("a1:raw", "--step", "raw", "--cost", "0", "--lease-token", token)[0], 0)
+        self.assertEqual(self.write("receipt", "--lost", "--attempt", "a1:raw", "--lease-token", token)[0], 0)
+        return token
+
+    def test_release_by_name_then_acquire_does_not_bypass_the_rules(self):
+        token = self.unsettled_under_s1()
+        code, out = self.call("lock", "release", "--owner", "s1")
+        self.assertEqual(code, 1, out)                     # the name alone does not release
+        self.assertEqual(self.call("lock", "status")[1]["lease"]["owner"], "s1")
+        code, out = self.call("lock", "release", "--owner", "s1", "--lease-token", token)
+        self.assertEqual(code, 0, out)                     # the holder may release ...
+        code, out = self.call("lock", "acquire", "--owner", "s2")
+        self.assertEqual(code, 1, out)                     # ... but no new owner acquires while a1 is unknown
+        self.assertIn("reconcile first", out["reason"])
+
+    def test_a_name_alone_neither_renews_nor_writes(self):
+        token = self.unsettled_under_s1()
+        code, out = self.call("lock", "acquire", "--owner", "s1")
+        self.assertEqual(code, 1, out)                     # renewal needs the token
+        with self.assertRaisesRegex(AssertionError, r"exit 2"):   # --owner is no write credential any more:
+            self.write("exposure", "--sample", "CR", "--owner", "s1")  # an unknown option (usage error)
+        code, out = self.write("exposure", "--sample", "CR")
+        self.assertEqual(code, 1, out)
+        code, out = self.write("exposure", "--sample", "CR", "--lease-token", "0" * 32)
+        self.assertEqual(code, 1, out)
+        code, out = self.write("exposure", "--sample", "CR", "--lease-token", token)
+        self.assertEqual(code, 0, out)
+        code, out = self.call("lock", "acquire", "--owner", "s1", "--lease-token", token)
+        self.assertEqual((code, out["event"]), (0, "renew"))
+
+    def test_the_token_is_stored_only_as_a_hash(self):
+        token = self.unsettled_under_s1()
+        lease_file = self.task_log.with_name(self.task_log.name + ".lease.json")
+        self.assertNotIn(token, lease_file.read_text())
+        self.assertNotIn(token, json.dumps(self.call("lock", "status")[1]))
+
+
 if __name__ == "__main__":
     unittest.main()

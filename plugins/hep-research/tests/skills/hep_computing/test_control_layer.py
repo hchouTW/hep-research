@@ -98,8 +98,10 @@ class Base(unittest.TestCase):
         path = self.root / "contract.json"
         path.write_text(json.dumps(contract_json(self.check_d, self.crit_d, **reco_over)))
         if mode != "M1":  # C2: under M2/M3 every write holds the lease
-            self.assertEqual(self.call("lock", "acquire", "--owner", "s1")[0], 0)
-            return self.write("contract", "--file", path, "--owner", "s1")
+            code, out = self.call("lock", "acquire", "--owner", "s1")
+            self.assertEqual(code, 0, out)
+            self.lease_token = out["token"]                # PR #330: the token, not the name, proves the holder
+            return self.write("contract", "--file", path, "--lease-token", self.lease_token)
         return self.write("contract", "--file", path)
 
     def admit(self, attempt, *args):
@@ -408,12 +410,12 @@ class AdmissionAndCapabilities(Base):
     def test_m2_first_contract_waits_and_admission_refuses_without_g5(self):
         code, out = self.init_and_contract(mode="M2")
         self.assertEqual(out["contract_status"], "pending_approval")
-        code, out = self.admit("a1:raw", "--step", "raw", "--cost", "0", "--owner", "s1")
+        code, out = self.admit("a1:raw", "--step", "raw", "--cost", "0", "--lease-token", self.lease_token)
         self.assertEqual((code, out["reason"]), (1, "no effective contract"), out)
         code, out = self.write("decide", "--action", "approve_contract", "--ref", 1, "--confirm-human",
                                env=agent_free_env())
         self.assertEqual(code, 0, out)
-        code, out = self.admit("a2:raw", "--step", "raw", "--cost", "0", "--owner", "s1")
+        code, out = self.admit("a2:raw", "--step", "raw", "--cost", "0", "--lease-token", self.lease_token)
         self.assertEqual(code, 1, out)
         self.assertIn("G5", out["reason"])
         self.assertEqual(out["written"][0]["kind"], "admission_rejected")

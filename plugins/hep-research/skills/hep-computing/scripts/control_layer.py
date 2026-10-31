@@ -43,12 +43,14 @@ Commands:
   reconcile --task-log FILE --receipt R.receipt.json --work DIR --expect-head N  outcome of an unknown/abandoned attempt
   start    --task-log FILE --attempt ID --expect-head N        execution began: record it BEFORE running the step
   cancel   --task-log FILE --attempt ID [--never-started] --expect-head N   C's cancel request (stopping is B's)
-  lock     acquire|release|status --task-log FILE [--owner NAME] [--lease-s SECONDS]   lease lock (Control §5.5)
+  lock     acquire|release|status --task-log FILE [--owner NAME] [--lease-token TOKEN] [--lease-s SECONDS]
+           lease lock (Control §5.5): acquire prints a token once; renew (acquire) and release need it
   recover  --task-log FILE        remove a torn, never acknowledged last line (kept aside, recorded)
 After a restart: run `resume`; settle every admitted, running or unknown attempt first (take its receipt, record it
 lost, reconcile it from a receipt that proves its outcome, or have a human abandon it) -- never resubmit it; then
-take over an expired lease. A live lease of another owner refuses every write except a human decision; under M2/M3
-every such write needs --owner holding a live lease. The lease never replaces compare-and-set.
+acquire the lease (a new acquisition, takeover or not, is refused while any attempt is unsettled or a lease is live).
+A live lease refuses every write without its token (--lease-token) except a human decision; under M2/M3 every such
+write needs the token of a live lease. The owner name is only a label. The lease never replaces compare-and-set.
 Contract JSON (closed format, Control §1.1): {"steps": {NAME: {"program", "environment", "external": [],
 "upstream": [], "checked": false, "required_checks": [[CHECK_SHA256, CRITERION_SHA256]], "na_allowed": [],
 "check_inputs": [[CHECK_SHA256, STEP]], "family": null, "round": null, "rerun_allowed": false, "pin": null}},
@@ -118,7 +120,8 @@ def _transact(args, operation, request: dict, **extra) -> dict:
     record = TaskRecord(args.task_log)
 
     def guard(log):
-        leases.check_write(Path(args.task_log), getattr(args, "owner", None), log.mode(), args.command == "decide")
+        leases.check_write(Path(args.task_log), getattr(args, "lease_token", None), log.mode(),
+                           args.command == "decide")
     outcome = record.transact(operation, args.expect_head, args.expect_digest, args.op,
                               {"command": args.command, **request}, guard=guard)
     return _written(outcome, **extra)
@@ -432,14 +435,14 @@ def cmd_lock(args) -> dict:
     path = Path(args.task_log)
     if args.action == "status":
         return {"status": "ok", "lease": leases.lease_state(path), "history": leases.read_history(path)}
-    if not args.owner:
-        raise ValueError("lock acquire/renew/release needs --owner")
     with record.locked():
         log = record.read().log
         if args.action == "release":
-            return {"status": "ok", **leases.release(path, args.owner)}
+            return {"status": "ok", **leases.release(path, args.lease_token)}
+        if not args.owner and args.lease_token is None:
+            raise ValueError("lock acquire needs --owner (a new lease) or --lease-token (a renewal)")
         unsettled = [row["attempt"] for row in completion.attempts(log) if row["state"] in leases.UNSETTLED]
-        return {"status": "ok", **leases.acquire(path, args.owner, args.lease_s, unsettled)}
+        return {"status": "ok", **leases.acquire(path, args.owner, args.lease_s, unsettled, args.lease_token)}
 
 
 def cmd_recover(args) -> dict:
@@ -469,7 +472,8 @@ def parser() -> argparse.ArgumentParser:
             cmd.add_argument("--expect-digest", help="the SHA-256 of the record's last line (head continuity)")
             cmd.add_argument("--op", help="operation id: a repeated write with the same request is not appended twice")
             if name != "decide":
-                cmd.add_argument("--owner", help="the lease owner writing (required under M2/M3; C2 lease lock)")
+                cmd.add_argument("--lease-token", help="the token `lock acquire` returned (needed while a lease is "
+                                 "live, and always under M2/M3)")
     cmds["init"].add_argument("--mode", choices=dv.MODES, default="M1")
     for name in ("contract", "freeze"):
         cmds[name].add_argument("--file", type=Path, required=True)
@@ -517,7 +521,8 @@ def parser() -> argparse.ArgumentParser:
                                 help="the attempt has no start fact and its run never began (it is settled at once)")
     cmds["start"].add_argument("--attempt", required=True)
     cmds["lock"].add_argument("action", choices=("acquire", "release", "status"))
-    cmds["lock"].add_argument("--owner")
+    cmds["lock"].add_argument("--owner", help="a label for a new lease")
+    cmds["lock"].add_argument("--lease-token", help="the current lease's token (renew, release)")
     cmds["lock"].add_argument("--lease-s", type=float, default=900.0, help="lease length in seconds (default 900)")
     cmds["report"].add_argument("--format", choices=("json", "markdown"), default="json")
     cmds["report"].add_argument("--out", type=Path)
