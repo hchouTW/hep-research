@@ -189,3 +189,9 @@ SciPy 1.18.1) with each `run.py`'s defaults: 14 files, +29/−17. Every changed 
 (3 lines); no number, no PNG (the `docs/maintenance.md` acceptance rule). The three replays pass, and so do
 `test_design_minimal_spectrometer` and `test_design_search_j16`, which also record a Geant4 script hash but did
 not change. Fix attempts on this failure: 1/3.
+
+### Local validation — units 2/6 (2026-10-31)
+
+6318 run, 0 failures, 1 error (pre-existing `test_root_cpp_assets`), 292 skipped. Static part exit 0; ruff, mypy,
+layering, naming, host-neutral, packaging all pass; `insert_interpreter_guard.py --check` ok. AC6 diff empty outside
+the 14 approved example files. A6 counters PR 1b: units runs 2/6; fix attempts max 1/3; no early stop.
