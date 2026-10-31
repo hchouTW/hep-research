@@ -5,6 +5,19 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Cross-platform, part 1a: interpreter guard and host capability modules (`CORE_VERSION` 1.5.0).**
+  `core/interpreter_guard.py` (standard library, parses and runs on Python 3.9) stops a Python older than 3.13 with
+  one stderr line and exit 2, or switches once to `HEP_RESEARCH_PYTHON` when it is an absolute path to an executable
+  whose file and folder the account cannot write (not as root, not with `--protected`); on Windows it requires
+  UTF-8 mode. `core/hostcaps.py` probes POSIX ids, process groups, `/proc` and WSL; `require()` raises
+  `UnsupportedPlatform` with a `missing-dependency` report; `state_dir()` is the per-user state folder (unchanged on
+  Linux and macOS). `passthrough_problems` and `bundle.freeze` refuse the two guard variables
+  (`bundle.guard_variable`). `tools/skill_scripts.py` writes `tools/skill_scripts.json` (198 skill scripts, 70
+  unresolved names listed with their source line); `test_python_compat.py` checks every listed script against Python
+  3.9 grammar, and `render_results.py` no longer puts a backslash inside an f-string expression. The guard block is
+  not inserted yet (part 1b). Docs: README "Setup requirements" (macOS), the environments reference, the capability
+  matrix. Naming vocabulary: `wsl`, `xdg`.
+
 - **`executor_capabilities.py`: G2 is `unsupported`, not `fail`, on a host without `/proc` (macOS).** The runner
   finds a process that left the step's group only through `/proc`, so G2 cannot pass there; qualification now says
   so, and an M2 or M3 admission is refused for an unsupported G2 as before. `test_executor_b2` expects that on such a
