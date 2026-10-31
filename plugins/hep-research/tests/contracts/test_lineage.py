@@ -283,7 +283,7 @@ class ProducerTests(unittest.TestCase):
         wdir = h.dir / "worker-code"
         wdir.mkdir()
         (wdir / "worker.py").write_text(WORKER)
-        h.cmd = (f"{shlex.quote(sys.executable)} {wdir / 'worker.py'} --start {{start}} --stop {{stop}} "
+        h.cmd = (f"{shlex.quote(sys.executable)} {shlex.quote(str(wdir / 'worker.py'))} --start {{start}} --stop {{stop}} "
                  "--seed {seed} --out {out} --id {id}")
         self.assertEqual(h.plan()[0], 0)
         rec = self.d / "exposure.json"

@@ -1,0 +1,8 @@
+# Line endings (cross-platform task, PR 3): every text file is checked out with LF on every platform, also with
+# core.autocrlf=true on Windows; compressed records, images and data files are binary.
+* text eol=lf
+*.gz binary
+*.png binary
+*.root binary
+*.dat binary
+*.npz binary

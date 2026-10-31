@@ -1,5 +1,6 @@
 """B02: remote chunk protocol: worker-side runner, collection, duplicate safety, quarantine."""
 import json
+import shlex
 import subprocess
 import sys
 import tempfile
@@ -47,7 +48,7 @@ class RunnerTests(unittest.TestCase):
 
     def test_failed_command_leaves_only_meta(self):
         spec = json.loads((self.cdir / "spec.json").read_text())
-        spec["cmd"] = f"{sys.executable} -c \"import sys; sys.exit(3)\""
+        spec["cmd"] = f"{shlex.quote(sys.executable)} -c \"import sys; sys.exit(3)\""
         (self.cdir / "spec.json").write_text(json.dumps(spec))
         out = self.cdir / "outputs" / "c0001"
         self.assertEqual(run_runner(self.cdir, "c0001", "c0001-a01"), 3)
@@ -56,7 +57,7 @@ class RunnerTests(unittest.TestCase):
 
     def test_missing_result_is_a_runner_error(self):
         spec = json.loads((self.cdir / "spec.json").read_text())
-        spec["cmd"] = f"{sys.executable} -c pass"
+        spec["cmd"] = f"{shlex.quote(sys.executable)} -c pass"
         (self.cdir / "spec.json").write_text(json.dumps(spec))
         self.assertEqual(run_runner(self.cdir, "c0001", "c0001-a01"), 70)
 

@@ -70,6 +70,19 @@ input (malformed workflow, an unsafe path or step id, a cycle, an unknown depend
 an attempt id that already has a receipt).
 """
 from __future__ import annotations
+if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.dont_write_bytecode = True
+    _root = str(_Path(__file__).resolve().parents[3])
+    if _root not in _sys.path:
+        _sys.path.insert(0, _root)
+    try:
+        from core.interpreter_guard import guard as _guard
+    except ImportError:  # copied outside the plugin
+        pass
+    else:
+        _guard()
 
 import argparse
 import datetime
@@ -91,6 +104,7 @@ PLUGIN = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(PLUGIN))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from contracts import CONTRACTS_VERSION  # noqa: E402
+from core import hostcaps  # noqa: E402
 from contracts import trace  # noqa: E402
 from contracts.identity import plugin_release  # noqa: E402
 from core.status import add_status_argument, exit_code  # noqa: E402
@@ -324,13 +338,13 @@ def _group_alive(pgid: int) -> bool:
 
 def _proc_scan() -> bool:
     """Whether processes can be listed with their group, state and environment (Linux /proc)."""
-    return Path("/proc/self/stat").is_file()
+    return hostcaps.proc_fs()
 
 
 def termination_scope() -> list[str]:
     """What termination observes on this host: the step's process group (POSIX) and, through /proc, the processes
     that left the group but still carry the attempt's token in their environment."""
-    return (["process-group"] if os.name == "posix" else []) + (["environment-marker"] if _proc_scan() else [])
+    return (["process-group"] if hostcaps.process_groups() else []) + (["environment-marker"] if _proc_scan() else [])
 
 
 def _carries(environ: bytes, token: str) -> bool:
@@ -430,7 +444,7 @@ def execute(cmd: list[str], cwd: Path, timeout: float) -> dict:
     token = uuid.uuid4().hex
     outer = os.environ.get(MARKER)
     env = dict(os.environ, **{MARKER: f"{outer}:{token}" if outer else token})  # a chain: a nested run keeps ours
-    posix = os.name == "posix"
+    posix = hostcaps.process_groups()
     proc = subprocess.Popen(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env,
                             start_new_session=posix)
     pgid = proc.pid if posix else None
@@ -559,6 +573,11 @@ def main(argv=None) -> int:
     if args.dry_run:
         print(json.dumps({"status": "ok", **base, "order": seq}, indent=1))
         return 0
+    try:  # steps run in their own process group and are stopped with SIGTERM/SIGKILL (none on native Windows)
+        hostcaps.require("process_groups")
+    except hostcaps.UnsupportedPlatform as exc:
+        print(json.dumps({**exc.report(), **base, "order": seq}, indent=1))
+        return exit_code("missing-dependency")
     created = args.created or datetime.date.today().isoformat()
     work = args.work
     try:

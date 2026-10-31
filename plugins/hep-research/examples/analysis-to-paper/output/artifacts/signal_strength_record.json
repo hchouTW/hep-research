@@ -26,6 +26,8 @@
    "contracts/validate.py",
    "contracts/vocab.py",
    "core/__init__.py",
+   "core/hostcaps.py",
+   "core/interpreter_guard.py",
    "core/protected/__init__.py",
    "core/protected/guard.py",
    "core/protected/identity.py",
@@ -47,7 +49,7 @@
  "inputs": [
   {
    "ref": "signal_strength.json",
-   "sha256": "64b9c6754a70ff7d7fe58f575d1601de2ba90e9085df1bf8658d1e04cad43244",
+   "sha256": "8eda0d48f725c67a2c2224ced4673bde9016a0bb584a2b4f53f254e8a350260a",
    "role": "statistical-result"
   }
  ],

@@ -40,6 +40,20 @@ Run: python3 <plugin root>/skills/hep-measurement/scripts/orbit_averaged_geomagn
      python3 <plugin root>/skills/hep-measurement/scripts/orbit_averaged_geomagnetic_cutoff.py --inclination 51.6 --radius-re 1.065
          --pole-lat <deg N> --pole-lon <deg E> --days 30 --thresholds 1,5,10
 """
+if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.dont_write_bytecode = True
+    _root = str(_Path(__file__).resolve().parents[3])
+    if _root not in _sys.path:
+        _sys.path.insert(0, _root)
+    try:
+        from core.interpreter_guard import guard as _guard
+    except ImportError:  # copied outside the plugin
+        pass
+    else:
+        _guard()
+
 import argparse
 import json
 import math

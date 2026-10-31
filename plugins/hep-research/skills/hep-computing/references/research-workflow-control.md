@@ -71,7 +71,9 @@ Which guarantees the local runner actually provides is established by `executor_
 injection: G1 output isolation, G2 termination (also processes that leave the group and nested runners) and G5
 persistent state — restart recovery and stale lock takeover of the helper's task record — pass on Linux; G3
 submission reconciliation, G4 metering with atomic reservation and G6 conditions evidence are unsupported); `admit
---mode M2` accepts only with that G5 record; M3 cannot be claimed.
+--mode M2` accepts only with that G5 record; M3 cannot be claimed. G2 needs `/proc` to see processes that left the
+step's group, so on macOS (and any host without `/proc`) G2 is `unsupported` and **M2 is unavailable**: use M1
+segmented execution. The qualification record names such modes under `unavailable_modes`.
 A qualified G5 shows the record survives restarts, not that its rules were reviewed.
 
 ## Trigger matrix (what to load)

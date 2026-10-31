@@ -57,6 +57,19 @@ Exit codes: 0 ok; 2 rejected input. Standard library only.
 Importable: boundary, template_stat, template_bb, unfold_scan, ratio_toys, ratio_cov, ratio_measured, poisson_draw.
 """
 from __future__ import annotations
+if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.dont_write_bytecode = True
+    _root = str(_Path(__file__).resolve().parents[2])
+    if _root not in _sys.path:
+        _sys.path.insert(0, _root)
+    try:
+        from core.interpreter_guard import guard as _guard
+    except ImportError:  # copied outside the plugin
+        pass
+    else:
+        _guard()
 
 import sys as _sys
 from pathlib import Path as _Path

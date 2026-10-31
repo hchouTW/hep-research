@@ -15,7 +15,7 @@
   },
   "hep-computing": {
    "references": 37,
-   "bytes": 354673,
+   "bytes": 354922,
    "uncited": 0
   },
   "hep-detector": {
@@ -1538,8 +1538,8 @@
   {
    "path": "skills/hep-computing/references/research-workflow-control.md",
    "owner": "hep-computing",
-   "bytes": 24521,
-   "lines": 264,
+   "bytes": 24770,
+   "lines": 266,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/references/analysis-workflows.md",

@@ -41,6 +41,19 @@ similarity check (see <plugin root>/skills/hep-ml/references/data-strategy.md).
 Output: a text report, or the JSON report with --json (strict JSON).
 Run: python3 <plugin root>/skills/hep-ml/scripts/check_split_integrity.py <plugin root>/skills/hep-ml/assets/dataset-splits.example.json
 """
+if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.dont_write_bytecode = True
+    _root = str(_Path(__file__).resolve().parents[3])
+    if _root not in _sys.path:
+        _sys.path.insert(0, _root)
+    try:
+        from core.interpreter_guard import guard as _guard
+    except ImportError:  # copied outside the plugin
+        pass
+    else:
+        _guard()
 
 import argparse
 import datetime

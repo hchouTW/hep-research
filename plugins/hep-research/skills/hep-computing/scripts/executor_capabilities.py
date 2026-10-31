@@ -11,7 +11,8 @@ qualification record (Delivery §1.2 of the reconstruction v12.2 spec copy). The
   say termination confirmed, with no write after the timeout; a child that leaves the process group (its own
   session) and outlives the step, and the step of a nested run_workflow.py, must be found, stopped and recorded with
   no late write; positive control: a child that ends just after the step does not fail it (POSIX; the cases outside
-  the group need /proc, so G2 passes on Linux only and is unsupported on a host without /proc);
+  the group need /proc, so G2 passes on Linux only and is unsupported on a host without /proc, where M2 is
+  unavailable; the qualification record lists such modes under "unavailable_modes"; host answers from core/hostcaps);
 - G5 persistent state (reconstruction v12 C2), with the control-layer helper (control_layer.py) as the persistent
   state: restart recovery (a writer killed mid-session; a fresh process with only the task log derives the same
   state, every acknowledged fact exactly once, an operation id not appended twice, an unknown attempt still unknown
@@ -31,6 +32,19 @@ Output JSON with "status". Exit codes: 0 ok (qualified; declared; admitted), 1 r
 not qualified), 2 bad input.
 """
 from __future__ import annotations
+if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.dont_write_bytecode = True
+    _root = str(_Path(__file__).resolve().parents[3])
+    if _root not in _sys.path:
+        _sys.path.insert(0, _root)
+    try:
+        from core.interpreter_guard import guard as _guard
+    except ImportError:  # copied outside the plugin
+        pass
+    else:
+        _guard()
 
 import argparse
 import hashlib
@@ -47,6 +61,7 @@ sys.dont_write_bytecode = True
 HERE = Path(__file__).resolve().parent
 PLUGIN = HERE.parents[2]
 sys.path.insert(0, str(PLUGIN))
+from core import hostcaps  # noqa: E402
 from core.status import exit_code  # noqa: E402
 
 RUNNER = HERE / "run_workflow.py"
@@ -115,9 +130,9 @@ def qualify_g1(root: Path) -> dict:
 
 
 def qualify_g2(root: Path) -> dict:
-    if os.name != "posix":
+    if not hostcaps.process_groups():
         return {"status": "unsupported", "reason": "termination is observed only on POSIX hosts (DEC-04)"}
-    if not Path("/proc/self/stat").is_file():
+    if not hostcaps.proc_fs():
         return {"status": "unsupported", "reason": "without /proc the runner observes only the step's process group, "
                 "not a process that left it (run_workflow.py, Termination)"}
     late = ("import subprocess, sys; subprocess.Popen([sys.executable, '-c', "
@@ -243,7 +258,7 @@ def _spawn_until(script: str, args: list[str], acks: int) -> tuple[list[str], in
 
 def qualify_g5(root: Path) -> dict:
     """G5: restart recovery and stale lock takeover of the control-layer task record (fault injection)."""
-    if os.name != "posix":
+    if not hostcaps.process_groups():
         return {"status": "unsupported", "reason": "the record's flock and the fault injection are POSIX only"}
     cases = []
 
@@ -368,7 +383,18 @@ def qualify() -> dict:
     return {"kind": "executor-qualification", "executor": "local-run_workflow",
             "runner_sha256": sha256_file(RUNNER), "control_sha256": control_digest(), "platform": {"system": platform.system(), "machine": platform.machine(),
                                                                "python": platform.python_version()},
-            "tests": tests}
+            "tests": tests, "unavailable_modes": unavailable_modes(tests)}
+
+
+def unavailable_modes(tests: dict) -> dict:
+    """Modes this host cannot admit, with the guarantees that did not pass: M2 needs G2, which needs /proc
+    (core.hostcaps.proc_fs), so M2 is unavailable on macOS; M3 needs G3 and G4, which this executor never provides."""
+    out = {}
+    for mode, needs in MODE_REQUIRES.items():
+        missing = [g for g in needs if tests.get(g, {}).get("status") != "pass"]
+        if missing:
+            out[mode] = {g: tests.get(g, {}).get("reason", tests.get(g, {}).get("status", "not run")) for g in missing}
+    return out
 
 
 def declare(qual: dict) -> dict:
@@ -419,7 +445,8 @@ def main(argv=None) -> int:
             qual = qualify()
             args.out.write_text(json.dumps(qual, indent=1, sort_keys=True) + "\n", encoding="utf-8")
             ok = all(qual["tests"][g]["status"] == "pass" for g in ("G1",))
-            out = {"status": "ok" if ok else "refused", "tests": {k: v["status"] for k, v in qual["tests"].items()}}
+            out = {"status": "ok" if ok else "refused", "tests": {k: v["status"] for k, v in qual["tests"].items()},
+                   "unavailable_modes": sorted(qual["unavailable_modes"])}
         elif args.cmd == "declare":
             decl = declare(json.loads(args.qualification.read_text(encoding="utf-8")))
             args.out.write_text(json.dumps(decl, indent=1, sort_keys=True) + "\n", encoding="utf-8")

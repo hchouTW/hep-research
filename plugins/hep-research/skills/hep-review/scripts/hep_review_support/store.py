@@ -19,6 +19,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from contracts import hep_review as H
+from core import hostcaps
 from contracts.schema import SCHEMA_DIR as SCHEMAS
 from contracts.schema import validate as schema_validate
 from hep_review_support import submissions as SUB
@@ -69,11 +70,10 @@ def _err(code: str, message: str) -> dict:
 
 
 def default_store_dir(env: dict | None = None) -> Path:
-    """$XDG_STATE_HOME/hep-research/hep-review, else ~/.local/state/hep-research/hep-review (the repository's
-    convention for private state; outside the project under review)."""
-    env = os.environ if env is None else env
-    base = env.get("XDG_STATE_HOME") or str(Path(env.get("HOME", str(Path.home()))) / ".local" / "state")
-    return Path(base) / "hep-research" / "hep-review"
+    """$XDG_STATE_HOME/hep-research/hep-review, else ~/.local/state/hep-research/hep-review, on Windows
+    %LOCALAPPDATA%\\hep-research\\hep-review (core.hostcaps.state_dir: the repository's convention for private state;
+    outside the project under review)."""
+    return hostcaps.state_dir("hep-review", environ=env)
 
 
 def _mounts(platform: str) -> str:

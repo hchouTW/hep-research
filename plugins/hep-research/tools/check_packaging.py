@@ -3,7 +3,9 @@
 
 Scans the files a package would contain (git-tracked files when run in a checkout, else every file except caches); the
 content rules below apply to every text file (a known text suffix, or no NUL byte in the first 8 KiB):
-- no symlinks, caches (__pycache__, *.pyc, .pytest_cache, .DS_Store) or editor/OS debris
+- no symlinks, caches (__pycache__, *.pyc, .pytest_cache, .DS_Store) or editor/OS debris, including AppleDouble
+  files (a `._<name>` file starting with the AppleDouble magic 00 05 16 07, written by macOS on non-HFS volumes and
+  by archivers); a regular file whose name merely starts with `._` is not debris
 - no model transcripts or session logs (*.jsonl, files named *transcript*), no grading rubrics or eval answer keys
 - no archives (.tar.gz, .zip, ...): they are build or tool outputs, such as the submission.tar.gz hepdata_lib writes
 - no project data: no hep-research-artifacts/ folder; project configs only as test fixtures
@@ -60,6 +62,20 @@ def is_text(p: Path) -> bool:
         return True
     with p.open("rb") as fh:
         return b"\0" not in fh.read(8192)
+
+
+APPLEDOUBLE_MAGIC = b"\x00\x05\x16\x07"
+
+
+def is_appledouble(p: Path) -> bool:
+    """An AppleDouble resource-fork file: named ._<name> and starting with the AppleDouble magic number."""
+    if not p.name.startswith("._") or p.is_symlink() or not p.is_file():
+        return False
+    try:
+        with p.open("rb") as fh:
+            return fh.read(4) == APPLEDOUBLE_MAGIC
+    except OSError:
+        return False
 
 
 def files() -> list[Path]:
@@ -140,6 +156,8 @@ def main(argv=None) -> int:
             continue
         if CACHE.search(rel):
             add(rel, "cache")
+        if is_appledouble(p):
+            add(rel, "appledouble")
         if TRANSCRIPT.search(rel):
             add(rel, "transcript-or-log")
         if ARCHIVE.search(rel):

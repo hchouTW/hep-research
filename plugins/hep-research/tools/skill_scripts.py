@@ -77,6 +77,10 @@ def guard_insertion_line(source: str) -> int:
         after = body.pop(0).end_lineno or 0
     while body and isinstance(body[0], ast.ImportFrom) and body[0].module == "__future__":
         after = body.pop(0).end_lineno or after
+    if after == 0:  # no docstring and no __future__ import: keep a shebang and leading comments first
+        lines = source.splitlines()
+        while after < len(lines) and (not lines[after].strip() or lines[after].lstrip().startswith("#")):
+            after += 1
     return after
 
 

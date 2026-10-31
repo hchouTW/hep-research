@@ -120,8 +120,13 @@ class PyprojectTests(unittest.TestCase):
         matrix = re.search(r'python: \[([^\]]*)\]', workflow).group(1)
         self.assertEqual([v.strip(' "') for v in matrix.split(",")], ["3.13"])
         self.assertRegex(workflow, r"reconcile_check_runs\.py \S+ --python 3\.13 ")
-        for v in re.findall(r'python-version: "?([0-9.]+)', workflow):
-            self.assertEqual(v, "3.13", "every setup-python step uses the floor")
+        # the old-python job sets up a real 3.9 on purpose: it checks that the interpreter guard stops it
+        old_job = re.search(r"(?ms)^  old-python:\n(.*?)(?=^  [A-Za-z0-9_-]+:\n|\Z)", workflow)
+        self.assertIsNotNone(old_job, "the old-python job (interpreter guard under a real 3.9) is missing")
+        self.assertEqual(re.findall(r'python-version: "?([0-9.]+)', old_job.group(1)), ["3.9", "3.13"])
+        rest = workflow[:old_job.start()] + workflow[old_job.end():]
+        for v in re.findall(r'python-version: "?([0-9.]+)', rest):
+            self.assertEqual(v, "3.13", "every other setup-python step uses the floor")
 
 
     @unittest.skipUnless((ROOT.parents[1] / ".github" / "workflows" / "tests.yml").is_file(),

@@ -1,11 +1,13 @@
-// g4sim/selftest.cc: a Geant4-free driver of SimHash.hh and SimSummary.hh for tests/adapters/test_g4sim.py, which
-// compares its output with core/simulation/seeds.py, Python's float.hex() and core/simulation/summary.py.
+// g4sim/selftest.cc: a Geant4-free driver of MiniJson.hh, SimHash.hh and SimSummary.hh for tests/adapters/test_g4sim.py,
+// which compares its output with Python's json decoder, core/simulation/seeds.py, Python's float.hex() and
+// core/simulation/summary.py.
 // Build: c++ -std=c++17 -O2 -ffp-contract=off -I. selftest.cc -o g4sim_selftest
 // Usage: g4sim_selftest REQUEST.json   (prints one JSON object)
 // REQUEST: {"seed_hash": [[part, ...], ...], "float_hex": ["<64-bit pattern as 16 hex digits>", ...],
 //           "splitmix": {"seed": "<decimal>", "n": N}, "box_muller": {"seed": "<decimal>", "n": N},
 //           "summary": {"observables": [...], "block_size": B, "blocks": K, "first_event": E, "rows": [{...}, ...],
 //                       "split": S}}   (S > 1: the rows are filled into S accumulators in turn, then merged)
+//          "utf8_hex": ["<string>", ...]   (each string as MiniJson decoded it, as the hex of its UTF-8 bytes)
 #include <cstdint>
 #include <cstdlib>
 #include <cstring>
@@ -86,6 +88,22 @@ int main(int argc, char** argv) {
     out << "[";
     for (int i = 0; i < static_cast<int>(s.at("n", "box_muller").num); ++i)
       out << (i ? ", " : "") << g4sim::SummaryAccumulator::Num(r.Next());
+    out << "]";
+  }
+  if (req.has("utf8_hex")) {
+    key("utf8_hex");
+    out << "[";
+    bool f = true;
+    for (const auto& p : req.obj.at("utf8_hex").array("utf8_hex")) {
+      static const char* digits = "0123456789abcdef";
+      std::string h;
+      for (unsigned char c : p.str) {
+        h += digits[c >> 4];
+        h += digits[c & 15];
+      }
+      out << (f ? "" : ", ") << "\"" << h << "\"";
+      f = false;
+    }
     out << "]";
   }
   if (req.has("summary")) {
