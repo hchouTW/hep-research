@@ -109,3 +109,45 @@ A6 counters, PR 1a: units runs 2/6; max fix attempts on one failure 2/3 (skill-s
 AC status (local): AC1 not yet (macOS units run green except the pre-existing host error; `needs ` skips 0);
 AC3 holds (`find_python.py` under 3.9 finds 3.13; it has no `--json` flag, JSON is its default output;
 `runner.py --help` under 3.9 exits 0); AC6 holds locally; AC7 holds (`test_partition_guard_variables`).
+
+PR 1a: draft PR #333 (base `main`), pushed 2026-10-31; CI results below when complete.
+
+## PR 1b — guard roll-out
+
+### Preflight
+
+| Item | Value |
+|---|---|
+| Worktree | `<WT_ROOT>/pr-1b` |
+| Branch | `xplat/pr-1b-guard` |
+| Base | `xplat/pr-1a-modules` = `bbf90eec3e6129cc44eb8265a7355010aa7f2840` |
+| `git rev-parse --show-toplevel` | `<WT_ROOT>/pr-1b` (equals the worktree) |
+| Main checkout `git status --porcelain` | empty (0 lines) |
+| Python | venv 3.13.7; `/usr/bin/python3` 3.9.6; read-only 3.13 venv `<WT_ROOT>/scratch/ro/py313` (`--copies`, `chmod a-w`) |
+
+### Steps (2026-10-31)
+
+- **1b.1** `tools/insert_interpreter_guard.py` (block text and placement from `tools/skill_scripts.py`
+  `GUARD_BLOCK`/`guard_insertion_line`; a stale block is replaced in place). First run: 198 changed; second run: 0
+  changed (idempotent). `guard_insertion_line` now keeps a shebang and leading comments first when a file has no
+  docstring or `__future__` import. `ruff check core contracts`: clean; `ruff --statistics` on `skills tools`
+  identical before and after. Naming gate: `new` → `inserted` (1 attempt). Tests for the script added to
+  `tests/tools/test_skill_scripts.py` (idempotency on four layouts, stale-block replacement, `--check`).
+- **1b.2** `GUARD_ROLLED_OUT = True`: `test_python_compat`, `test_no_bytecode`, `test_skill_scripts` pass.
+- **1b.3** AC2 driver `<WT_ROOT>/scratch/ac2_check.py` over all 198 scripts with `/usr/bin/python3` (3.9.6),
+  `--help`, result file `<WT_ROOT>/scratch/runs/1b-ac2/ac2.json`:
+
+  | Case | Passed |
+  |---|---|
+  | (a) unset → exit 2, one `hep-research:` line, empty stdout | 198/198 |
+  | (b) read-only 3.13 venv → same exit and stdout as that interpreter directly | 198/198 |
+  | (c) 3.9 itself / wrapper script launching 3.9 → "did not provide one" | 198/198, 198/198 |
+  | (d) relative / bare name / writable target (the shared venv) / `--protected` → guidance, no switch | 198/198 each |
+  | (d) root | not run (session is unprivileged, no root available); covered by `test_interpreter_guard` (patched `geteuid`) |
+
+  AC3: `find_python.py` under 3.9 → `found` 3.13.2; `runner.py --help` under 3.9 → exit 0. AC4: a parent started
+  with 3.9 + `HEP_RESEARCH_PYTHON` (switched to 3.13) runs `/usr/bin/python3 li_ma_significance.py --on 10 --off 40
+  --alpha 0.2`: exit 0 and stdout identical to the 3.13 interpreter run directly; the marker is not left in the
+  parent's environment.
+- **1b.4** `docs/architecture.md` §6 (block, rules, conflicts, exemptions, removal condition); CHANGELOG
+  (code-release digest changes; re-pin and requalify).
