@@ -133,7 +133,8 @@ def render_quantity(spec: str, rounding: str) -> tuple[str, dict]:
              f"\\newcommand{{\\{name}Value}}{{{shown_v}}}"]
     if shown_u is not None:
         lines.append(f"\\newcommand{{\\{name}Unc}}{{{shown_u}}}")
-        lines.append(f"\\newcommand{{\\{name}}}{{{_wrap(shown_v + ' \\pm ' + shown_u, labels)}}}")
+        with_unc = _wrap(shown_v + " \\pm " + shown_u, labels)  # outside the f-string: Python 3.9 grammar
+        lines.append(f"\\newcommand{{\\{name}}}{{{with_unc}}}")
     else:
         lines.append(f"\\newcommand{{\\{name}}}{{{_wrap(shown_v, labels)}}}")
     entry = {"artifact": path, "artifact_id": doc.get("artifact_id"), "artifact_sha256": sha, "value_key": parts[0],
