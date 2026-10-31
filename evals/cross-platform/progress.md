@@ -230,3 +230,18 @@ PR 1b: draft PR #334 (base `xplat/pr-1a-modules`); CI 22 pass, 2 skipped. *Done 
   Two scripts answer `--help` with usage and exit 2 on every platform (`contracts/comparison/gate.py`,
   `contracts/project.py`): listed in `USAGE_EXIT`, not failures. shellcheck is not installed locally (CI only);
   `/bin/bash -n` passes on the three scripts.
+
+### First CI run of the new jobs (#335, 2026-10-31) and 2.5 fixes
+
+| Job | Result | Finding → fix (one commit each) |
+|---|---|---|
+| `old-python` | pass | AC2 (all cases incl. root through sudo), AC3, AC4 on Linux with a real 3.9; real 3.9 compiles every skill script |
+| `lint` | fail | shellcheck SC1090 / SC2317 in `lcg_view_setup.sh` → directives (no behaviour change) |
+| `hostile-paths` | fail | packaging scan of the NFD/.DS_Store/AppleDouble tree: pass; `tests/contracts` 1160 OK; `tests/tools`: `test_ci_follows_the_floor` rejects the old-python job's 3.9 → the test exempts that job by name and pins it to 3.9 + 3.13 |
+| `checks` units 2/3, `checks-complete` | fail | same floor test |
+| `platforms/macos` (macos-26-arm64, Python 3.13.17, `ulimit -n 256`) | fail (continue-on-error) | 6327 run, the one failure is the same floor test; **no tolerance difference**; `needs ` skips 9 = 0.14 % of run (4 `needs proc_fs`) |
+| `platforms/windows` | fail (not required) | AC11 sweep **passed** (198 scripts, no traceback, `state_dir` under the redirected LOCALAPPDATA); AC12: 4170 files `w/crlf` (no `.gitattributes` yet, PR 3) and the step itself died of SIGPIPE (`head`) → `sed -n`; contract tests now run after it (`if: always()`) |
+
+**macOS known-differences list (A8, for the maintainer): empty.** No test at or below 1e-12 differed on the runner.
+Fix attempts: one per distinct failure (3 failures). CI runs of the units part: 1 (counts toward the PR 2 limit with
+the local runs).
