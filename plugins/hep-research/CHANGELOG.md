@@ -5,18 +5,6 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
-- **Control layer: three review fixes (PR #330)** (reconstruction v12 C1/C2; the control rules still did not pass
-  the S0 spec review). A task-record batch is all-or-nothing: every line carries its batch's size, a batch cut
-  short by a crash is refused on load and removed by `recover` back to its start, and an `--op` replay must name one
-  whole batch (before, a half batch loaded as acknowledged and a retry replayed only its first facts). New
-  `control_layer.py start --attempt` records that execution began (write it right before the run); `cancel` of an
-  attempt without a start fact needs `--never-started`, so a running attempt is no longer settled as cancelled and
-  its receipt refused. The lease holds a secret: `lock acquire` returns a token once (stored only as a hash);
-  renewal, release and every write while a lease is live (always under M2/M3) need `--lease-token`, which replaces
-  the self-declared `--owner` on writes; no new lease is acquired while one is live or any attempt is unsettled (a
-  release by name followed by an acquire no longer bypasses the takeover rules). The G5 qualification keeps its 14
-  cases and adds two for that bypass. Tests: `tests/skills/hep_computing/test_control_layer_review330.py`.
-
 - **`check_geant4_study.py`: a replayed campaign writes the same study record on every machine.** The realization
   profile named by an element_sim spec's provenance entered the input manifest only when its recorded path existed on
   the running machine, so replaying the J15 campaign (`examples/design-minimal-spectrometer/`) away from the machine
@@ -88,6 +76,41 @@ Software checks establish contract consistency only, not physical validity.
   record said termination confirmed. Every record carries `extension.termination_scope` (`process-group`,
   `environment-marker`). The G2 qualification gains three cases (a child that left the group, a nested runner's step,
   and a positive control for a child ending just after the step). Tests: `test_workflow_b1.Termination`.
+- **Geant4 adapter 0.6.0: any existing Geant4 installation** (`adapters/geant4`). `geant4_build.py register
+  (--geant4-config PATH | --prefix DIR) --record OUT.json [--dataset-source auto|env|config] [--skip-dataset NAME]`
+  records an installation the adapter did not build (conda-forge, an LCG view, a site build): version, prefix, C++
+  standard, features and datasets from `geant4-config`, cross-checked with `Geant4Config.cmake` and
+  `Geant4ConfigVersion.cmake`. Each dataset folder comes from its environment variable or the `geant4-config` path,
+  with the source reported per dataset; a folder named without the `G4` prefix (conda-forge's `EMLOW8.8`) is accepted
+  and reported; a dataset found nowhere, a variable pointing to another dataset or version, an empty folder, a prefix
+  without `Geant4Config.cmake` or a version or prefix that disagrees refuses the registration (exit 1, no record).
+  The record has the build record's shape with `origin: registered`, tag and commit null and an `unknown` list (source
+  commit, build options, the compiler of the build, dataset MD5s), plus the compiler and CMake found and a
+  `find_package(Geant4)` probe; `check` re-reads the version, prefix and configuration hashes and re-hashes the
+  datasets. Run and example records carry `simulation.geant4.origin` (and `installation_version`); records of source
+  builds now carry `origin: built-from-source`. `geant4_run.py build-sim` and `geant4_examples.py build` take
+  `--configure-with geant4-config` (new `g4sim/Geant4FromConfig.cmake`: the installation's flags and a run path to its
+  library folders, so no `LD_LIBRARY_PATH`/`DYLD_LIBRARY_PATH` is needed) for an installation whose CMake
+  configuration cannot be used; `build-sim` with CMake now passes the installation prefix as `CMAKE_PREFIX_PATH` and
+  the registered CMake folder (`lib` or `lib64`); the examples of a registered installation need `--source` (a source
+  tree whose `G4Version.hh` must match). hep-detector's `check_geant4_study.py label` lists the installations of its
+  run records (`geant4_installations`, with a provenance note for a registered one) and `geant4_benchmarks.py` adds the
+  installation to `configuration_basis`; the origin is reported, never a gap, and records from before 0.6.0 are
+  reported as before. Fixes found on Linux: a relative `--exe` was not found from the run folder; `geant4_run.py`
+  listed `z_max` as a default even when `--z-max` was given. Demonstrated on E5 (RHEL 9, GCC 11.5.0, CMake 3.26.5,
+  conda-forge Geant4 11.4.3); the adapter stays `demonstrated-on-synthetic-data` (VALIDATION GEANT4-REGISTER). The J14
+  example's committed output is regenerated: only the two script hashes of its study records changed.
+- **Geant4 adapter 0.6.0 review fixes** (PR #328, `adapters/geant4`). `geant4_build.py check` reads `geant4-config`
+  as `register` does (stdout only, a non-zero exit rejected), so a stderr warning (a bash locale warning) no longer
+  fails `check` on an installation `register` accepted. `register` refuses a `Geant4Config.cmake` whose dataset
+  descriptions cannot be read instead of skipping every dataset cross-check, and accepts `--prefix` on a view (LCG)
+  whose `bin/geant4-config` is a symbolic link into the installation: Geant4's script follows its own links, so the
+  installation it reports is recorded, with the view as `registration.prefix_given`. `geant4_run.py build-sim` with
+  CMake drops a `G4SIM_GEANT4_CONFIG` cached by an earlier `--configure-with geant4-config` build in the same folder
+  (the binary was linked through `geant4-config` while reporting `cmake`); `geant4_examples.py build` clears a CMake
+  cache made from the other mode's source (`cache_cleared` in `adapter-build.json`) instead of failing every example.
+  The adapter stays `demonstrated-on-synthetic-data`.
+- Evidence: VALIDATION GEANT4-REGISTER-REVIEW
 - **Control-layer helper** (reconstruction v12 stage C1; STATE-01, AUTH-01, ADM-01, CTRL-01, CAP-01, FLOW-01,
   BUDGET-01 accounts; **the control rules did not pass the S0 spec review**, so the helper is not reviewed or
   validated): new `skills/hep-computing/scripts/control_layer.py` (library in `control_layer_support/`) keeps the task
@@ -127,6 +150,17 @@ Software checks establish contract consistency only, not physical validity.
   sample are listed among the confirmation results ("no result"). The maintainer decided on 2026-10-30 that the
   control layer ships and approved DEC-02 (library + CLI). Tests: the model's 92 scenarios and 44 mutations against
   the helper; the G5 qualification is regenerated for the changed control-layer files.
+- **Control layer: three review fixes (PR #330)** (reconstruction v12 C1/C2; the control rules still did not pass
+  the S0 spec review). A task-record batch is all-or-nothing: every line carries its batch's size, a batch cut
+  short by a crash is refused on load and removed by `recover` back to its start, and an `--op` replay must name one
+  whole batch (before, a half batch loaded as acknowledged and a retry replayed only its first facts). New
+  `control_layer.py start --attempt` records that execution began (write it right before the run); `cancel` of an
+  attempt without a start fact needs `--never-started`, so a running attempt is no longer settled as cancelled and
+  its receipt refused. The lease holds a secret: `lock acquire` returns a token once (stored only as a hash);
+  renewal, release and every write while a lease is live (always under M2/M3) need `--lease-token`, which replaces
+  the self-declared `--owner` on writes; no new lease is acquired while one is live or any attempt is unsettled (a
+  release by name followed by an acquire no longer bypasses the takeover rules). The G5 qualification keeps its 14
+  cases and adds two for that bypass. Tests: `tests/skills/hep_computing/test_control_layer_review330.py`.
 
 ## 0.50.0 (2026-10-30)
 

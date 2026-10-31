@@ -33,7 +33,10 @@ Subcommands:
               B2.6) the record keeps the F4 results, the tail sources and the geometry file; --write writes the study record, a computational-run whose
               inputs are the run records and reference dataset-records (statuses declared, sha256), with the
               benchmarks, convergence, variations and scope embedded. Insufficient evidence still writes the record,
-              listing the gaps; only invalid input is refused (exit 2).
+              listing the gaps; only invalid input is refused (exit 2). Run records from geant4 adapter 0.6.0 name
+              their installation's origin: label lists them (geant4_installations) and, for a registered
+              installation (geant4_build.py register: no source commit, build options or dataset MD5s), adds a
+              provenance note; the origin is reported, not a gap.
 Usage (paths relative to the current folder):
   check_geant4_study.py spec --spec STUDY.json [--rules RULES.json] [--effective-config EFFECTIVE_CONFIG.json]
   check_geant4_study.py run --spec STUDY.json --summary SUMMARY.json [...] [--out CONVERGENCE.json]
@@ -801,7 +804,7 @@ def cmd_label(args) -> tuple[str, dict]:
                 gaps += [f"{b['benchmark']}: {o}" for o in outside]
             elif conv.get("convergence", {}).get("gate") == "pass":
                 eligible.append({"benchmark": b["benchmark"], "scope": b["scope"]})
-    run_refs, seen = [], {}
+    run_refs, seen, installations = [], {}, []
     for path in args.run_record or []:
         rec = load_json(path)
         if rec.get("artifact_type") != "computational-run":
@@ -819,6 +822,9 @@ def cmd_label(args) -> tuple[str, dict]:
         run_refs.append({"ref": _rel(Path(path), root), "artifact_type": "computational-run",
                          "artifact_id": rec["artifact_id"], "version": rec["contract_version"],
                          "sha256": sha256_file(Path(path)), "status": rec["status"]})
+        inst = B.geant4_installation(rec)  # None for records from before adapter 0.6.0 (source builds)
+        if inst:
+            installations.append({"artifact_id": rec["artifact_id"], **inst})
     for path in args.reference_record or []:
         rec = load_json(path)
         run_refs.append({"ref": _rel(Path(path), root), "artifact_type": rec.get("artifact_type"),
@@ -854,6 +860,13 @@ def cmd_label(args) -> tuple[str, dict]:
            "note": "without --upgrade the record stays unvalidated with its evidence and scope embedded; --upgrade "
                    "re-issues it as validated-in-scope only when a scope is eligible and no gap remains (contracts "
                    "3.1.0 rule geant4.upgrade_*)"}
+    if installations:  # adapter 0.6.0 run records: how Geant4 was installed; a registered one is weaker provenance
+        doc["geant4_installations"] = installations
+        weaker = [i["artifact_id"] for i in installations if i["origin"] == "registered"]
+        if weaker:
+            doc["provenance_notes"] = [f"{len(weaker)} run record(s) ran on a registered Geant4 installation (no "
+                                       "source commit, build options or dataset MD5s; datasets content-hashed only): "
+                                       "state the installation and its origin when reporting (protocol section 9)"]
     if args.write:
         out = Path(args.write)
         created = args.created or datetime.date.today().isoformat()
@@ -905,6 +918,10 @@ def cmd_label(args) -> tuple[str, dict]:
                                     "phase2_upgrade_eligible_scopes": eligible,
                                     "evidence_overlap": overlap, "evidence_overlap_version": 1,
                                     "highest_usable_label": doc["highest_usable_label"]}}}
+        if installations:
+            record["extension"]["study"]["geant4_installations"] = installations
+            if doc.get("provenance_notes"):
+                record["extension"]["study"]["provenance_notes"] = doc["provenance_notes"]
         if args.upgrade and not upgrade:  # kept in the record, so evaluate_design.py f4 refuses it later too
             record["extension"]["study"]["upgrade_refused"] = refused
         if results is not None:  # B2.6: kept across the re-issue (label rebuilds the record from scratch)

@@ -102,12 +102,71 @@ def install_prefix(build_record: dict) -> Path:
     return expand(build_record["extension"]["build"]["install_prefix"])
 
 
+# where a Geant4 installation came from (adapter 0.6.0): built by geant4_build.py build from a pinned tag, or an
+# existing installation registered by geant4_build.py register (conda-forge, LCG, a system package, a site build). A
+# record written before 0.6.0 has no origin and is a source build.
+ORIGINS = ("built-from-source", "registered")
+REGISTERED_UNKNOWN = ("the Geant4 source tag and commit", "the CMake options Geant4 was built with",
+                      "the compiler Geant4 was built with",
+                      "the dataset tarball MD5s (no tarball was downloaded: the installed folders are content-hashed only)")
+
+
+def build_origin(build_record: dict) -> str:
+    return build_record["extension"]["build"].get("origin", "built-from-source")
+
+
+def geant4_identity(build_record: dict) -> dict:
+    """What a run or example record states about the Geant4 it ran with: version, tag, commit and origin (tag and
+    commit are null for a registered installation, whose `unknown` list says what the record cannot show)."""
+    b = build_record["extension"]["build"]
+    out = {"version": (b.get("geant4_config") or {}).get("version"), "tag": b.get("tag"), "commit": b.get("commit"),
+           "origin": build_origin(build_record)}
+    if out["origin"] == "registered":
+        out["unknown"] = list(b.get("unknown") or REGISTERED_UNKNOWN)
+    return out
+
+
+def identity_label(ident: dict) -> str:
+    """The version string of a Geant4 tool entry from an identity (geant4_identity, or a run record's
+    extension.simulation.geant4): 'v11.4.3 (<commit>)' for a source build, '11.4.3 (registered installation, source
+    commit unknown)' for a registered one."""
+    if ident.get("origin") == "registered":
+        version = ident.get("installation_version") or ident.get("version")
+        return f"{version} (registered installation, source commit unknown)"
+    return f"{ident.get('tag')} ({ident.get('commit')})"
+
+
+def geant4_label(build_record: dict) -> str:
+    return identity_label(geant4_identity(build_record))
+
+
+def geant4_config_path(build_record: dict) -> Path:
+    """The installation's geant4-config: the registered path, else <install prefix>/bin/geant4-config."""
+    b = build_record["extension"]["build"]
+    reg = b.get("registration") or {}
+    return expand(reg["geant4_config"]) if reg.get("geant4_config") else install_prefix(build_record) / "bin" / "geant4-config"
+
+
+def geant4_cmake_dir(build_record: dict) -> Path:
+    """The folder that holds Geant4Config.cmake: the registered one (lib/ or lib64/), else <prefix>/lib/cmake/Geant4."""
+    b = build_record["extension"]["build"]
+    reg = b.get("registration") or {}
+    return expand(reg["cmake_config_dir"]) if reg.get("cmake_config_dir") else \
+        install_prefix(build_record) / "lib" / "cmake" / "Geant4"
+
+
 def build_record_ok(build_record: dict) -> str | None:
     """None when the build record can be used for runs, else why not."""
     if build_record.get("artifact_type") != "computational-run" or "build" not in build_record.get("extension", {}):
         return "not a geant4_build.py record"
     if "failed" in build_record.get("status", []):
         return "the build record carries 'failed'"
+    b = build_record["extension"]["build"]
+    if b.get("origin", "built-from-source") not in ORIGINS:
+        return f"unknown origin {b.get('origin')!r} (one of {', '.join(ORIGINS)})"
+    if not isinstance(b.get("datasets"), list) or not b.get("install_prefix") or \
+            not (b.get("geant4_config") or {}).get("version"):
+        return "the record lacks install_prefix, the Geant4 version or the dataset list"
     return None
 
 

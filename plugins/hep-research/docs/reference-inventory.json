@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 43,
-   "bytes": 666876,
+   "bytes": 668863,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1187,7 +1187,7 @@
     "tests/skills/hep_computing/test_workflow_c6.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "a183909f 2026-10-30"
+   "last_commit": "53411e1d 2026-10-31"
   },
   {
    "path": "skills/hep-computing/references/bash-balanced-design-guidelines.md",
@@ -1538,7 +1538,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "583f59bc 2026-10-31"
+   "last_commit": "2162435c 2026-10-31"
   },
   {
    "path": "skills/hep-computing/references/risk-and-quality.md",
@@ -2249,8 +2249,8 @@
   {
    "path": "skills/hep-detector/references/geant4-study-protocol.md",
    "owner": "hep-detector",
-   "bytes": 43212,
-   "lines": 439,
+   "bytes": 45199,
+   "lines": 457,
    "linked_from_skill_md": false,
    "cited_by": [
     "examples/design-minimal-spectrometer/README.md",
