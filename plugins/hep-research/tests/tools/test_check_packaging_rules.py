@@ -108,5 +108,25 @@ class PlaceholderEmailTests(unittest.TestCase):
         self.assertTrue(scan({"docs/probe.md": "bob" + "@" + "notexample.com\n"}))
 
 
+
+class AppleDoubleRuleTests(unittest.TestCase):
+    """AC9: an AppleDouble ._x file is rejected; a regular file named ._x is not."""
+
+    def scan(self, content: bytes) -> list[dict]:
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / "README.md").write_text("plain\n", encoding="utf-8")
+            (Path(d) / "._x").write_bytes(content)
+            out = subprocess.run([sys.executable, str(ROOT / "tools" / "check_packaging.py"), "--root", d],
+                                 capture_output=True, text=True, timeout=120)
+            return [f for f in json.loads(out.stdout)["findings"] if f["file"] == "._x"]
+
+    def test_appledouble_file_is_rejected(self):
+        found = self.scan(CP.APPLEDOUBLE_MAGIC + b"\x00\x02\x00\x00Mac OS X        ")
+        self.assertEqual([f["rule"] for f in found], ["appledouble"])
+
+    def test_regular_file_named_like_appledouble_is_accepted(self):
+        self.assertEqual(self.scan(b"just text, not a resource fork\n"), [])
+
+
 if __name__ == "__main__":
     unittest.main()
