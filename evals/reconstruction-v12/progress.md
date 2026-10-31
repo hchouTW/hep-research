@@ -788,3 +788,33 @@ Verification (clean clone of fcbcccd8 on local disk, `TMPDIR` on local disk): `r
 pass, 0 fail (after regenerating the reference inventory, fcbcccd8); `tests/skills` 3011, OK (173 skipped);
 `tests/tools` 371, OK; `tests/contracts` 1160, OK (1 skipped); `tests/routing` 21, OK; `tests/adapters/test_geant4.py`
 54, OK (6 skipped); path guard on the branch history: pass.
+
+## Review fixes (PR #330) — 2026-10-31
+
+Three findings of the code review on PR #330 (the control layer), each with a regression test written first
+(`tests/skills/hep_computing/test_control_layer_review330.py`) and run against the unfixed helper (583f59bc): all
+8 tests failed there. The control rules still did not pass S0; these are helper-level fixes, and the reference
+model is unchanged (the oracle tests still pass: 92 scenarios, 44 mutations, differential).
+
+| Finding | Reproduced | Fix (commit) | Test |
+|---|---|---|---|
+| 1 a multi-line append cut short by a crash loaded as an acknowledged batch; a retry with the same `--op` replayed only the partial facts | yes: with the exposure line of an intent+exposure batch removed, `verify` exit 0 and the retry returned `replayed: true` with the intent alone | every line carries its batch's `size`; an incomplete last batch is refused on load (torn) and `recover` cuts back to the batch start, keeping it aside; a short batch before a later one is corrupt; an `--op` replay must name one whole batch; chain and compare-and-set unchanged (c6bf68da) | `TornBatch` (2) |
+| 2 no command wrote `start`, so `cancel` settled a possibly running attempt as cancelled and its receipt was refused | yes: `cancel` of an admitted attempt wrote cancel_request, state `cancelled` | new `start --attempt` (adapter), documented order admit → start → run → receipt; `cancel` of an attempt without a start fact refused unless `--never-started`; a started attempt goes to `cancelling` and its receipt still decides; the resume summary says to record start first (356a9b81) | `StartBeforeCancel` (3); the C2 cancel-before-start test now states `--never-started` |
+| 3 lease owners were self-declared names: release by name then acquire bypassed the live-lease and reconcile-first rules; `--owner s1` passed the write check | yes: `lock acquire` returned no token; release and writes by name were accepted | `lock acquire` returns a token once (stored only as SHA-256); renewal, release and every write while a lease is live (always under M2/M3) need `--lease-token`, which replaces `--owner` on writes; every acquisition without the token is refused while a lease is live or an attempt is unsettled (b077aec7) | `LeaseToken` (3); C2 lease tests and the M2 helper now use tokens |
+
+G5 qualification: the dying lease holder now takes the lease while everything is settled and leaves its own unknown
+attempt (the new rule refuses any acquisition while an attempt is unsettled); the 14 case intents are kept (the
+reconcile case now covers both unknown attempts) and two cases are added for the bypass (a release by name alone is
+refused; an acquire under the dead owner's name without its token is refused): 16/16 pass. Docs: reference page
+(record, writers/order, resumption and lease bullets; 24,521 bytes), CHANGELOG under `## Unreleased`, inventory,
+timings (6f052a09).
+
+Verification (clean clone of 6f052a09 on local disk, `TMPDIR` on local disk): path guard over `main..HEAD` exit 0;
+`executor_capabilities.py qualify` exit 0, G1 pass, G2 pass, G5 pass (16/16; `control_sha256` `e30994d4…`), G3, G4,
+G6 unsupported; `run_all_checks.py --part static` 31 pass, 0 fail; `tests/skills/hep_computing` 343, OK (39
+skipped; includes the model oracle tests and `test_executor_b2`); CLI robustness + CLI contract 9, OK; `tests/tools`
+371, OK; `tests/contracts` 1160, OK (1 skipped); `tests/routing` 21, OK.
+
+Not addressed here (other review comments on PR #330, outside this task): reads without the flock during an append,
+G5 not exercising M2, wall-clock lease expiry across hosts, repeated status/attempt derivations in resume/report, the
+deep-copy dry-run admission, and the lease's liveness missing from the resume summary.
