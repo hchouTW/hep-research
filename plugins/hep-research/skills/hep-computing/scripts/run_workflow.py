@@ -573,6 +573,11 @@ def main(argv=None) -> int:
     if args.dry_run:
         print(json.dumps({"status": "ok", **base, "order": seq}, indent=1))
         return 0
+    try:  # steps run in their own process group and are stopped with SIGTERM/SIGKILL (none on native Windows)
+        hostcaps.require("process_groups")
+    except hostcaps.UnsupportedPlatform as exc:
+        print(json.dumps({**exc.report(), **base, "order": seq}, indent=1))
+        return exit_code("missing-dependency")
     created = args.created or datetime.date.today().isoformat()
     work = args.work
     try:

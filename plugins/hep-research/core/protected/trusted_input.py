@@ -18,7 +18,8 @@ returned are the bytes checked.
 Codes (refusals; a path, never a value): source.missing, source.not_regular, source.hard_linked, source.owned_by_account,
 source.writable_by_account, source.replaceable, source.changed, source.link_loop, source.unreadable.
 The account defaults to the running process; tests pass another Account to model a custodian-owned file. Running as
-root refuses every input (root can replace anything).
+root refuses every input (root can replace anything). Account.current() raises core.hostcaps.UnsupportedPlatform
+on a host without POSIX account identity (native Windows); guard.establish turns that into a refusal.
 """
 from __future__ import annotations
 
@@ -26,6 +27,8 @@ import os
 import stat
 from dataclasses import dataclass, field
 from pathlib import Path
+
+from core.hostcaps import require
 
 MAX_LINKS = 40
 
@@ -38,6 +41,7 @@ class Account:
 
     @classmethod
     def current(cls) -> Account:
+        require("posix_ids")  # UnsupportedPlatform on a host without POSIX account identity (native Windows)
         return cls(os.geteuid(), frozenset(os.getgroups()) | {os.getegid()}, True)
 
 

@@ -27,6 +27,7 @@ from __future__ import annotations
 
 import json
 import os
+import platform
 import re
 import subprocess
 import sys
@@ -191,7 +192,7 @@ class LocalExecutor(Executor):
                 out[rec["attempt_id"]] = _blank(state="lost", evidence="local results missing")
             else:
                 out[rec["attempt_id"]] = _blank(state="done" if code == 0 else "failed", native_state=f"exit {code}",
-                                                exit_code=code, host=os.uname().nodename, evidence="local process exit code")
+                                                exit_code=code, host=platform.node(), evidence="local process exit code")
         return out
 
     def cancel(self, records: list[dict]) -> list[list[str]]:

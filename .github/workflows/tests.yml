@@ -13,7 +13,8 @@
 #   checks-complete  reconciles the check-run records of all checks jobs (tools/reconcile_check_runs.py): every
 #              expected run present once, of this commit, passing, and the shards partition the selected modules (it
 #              recomputes the plan rather than trusting the plan job's copy; every run must name that plan); it
-#              runs even when a checks job failed and fails when a record is missing; required
+#              runs even when a checks job failed and fails when a record is missing, or when old-python or a
+#              hostile-paths leg did not pass; required (the one gate to merge on)
 #   lint       ruff and mypy on core/ and contracts/; required
 #   stats-backends  the statistics tests with pyhf 0.7.6 and ArviZ 0.23.4 required, and NumPy and hypothesis from the
 #              lock (the sci-fix eigenvalue oracle and the property tests): a skip for any of them fails; required
@@ -29,9 +30,11 @@
 #   release-manifests  published release bundles unchanged (C10); required
 #   hostile-paths  TMPDIR and the working directory reached through symlinks, in a folder whose name has a space and
 #              Chinese characters; a test tree with an NFD-named file, .DS_Store and an AppleDouble file through
-#              tools/check_packaging.py. Pull requests: tests/contracts, tests/core (protected, partition, blinding),
-#              tests/tools and tools/check_relocation.py (with a space-free TMPDIR), skipped when the plan selects none of those modules; pushes
-#              to main, weekly and manual runs: the full units part (record platform-run-hostile-paths)
+#              tools/check_packaging.py. Four legs (units 1/3-3/3, checks), each running its part of
+#              tools/check_relocation.py, under the hostile TMPDIR. Pull requests also run tests/contracts,
+#              tests/core (partition, blinding, R5) and tests/tools in parallel on the checks leg, skipped when the plan
+#              selects none of those modules; pushes to main, weekly and manual runs: each units leg runs its shard in
+#              the hostile folder (records platform-run-hostile-paths-*, reconciled by hostile-paths-complete)
 #   old-python a real Python 3.9 as `python3` first on PATH: every skill script stops or switches as the interpreter
 #              guard says (tools/platform_checks.py old-python: AC2-AC4, the root case through sudo), and the real
 #              3.9 byte-compiles every skill script (tests/tools/test_python_compat.py)
@@ -156,8 +159,9 @@ jobs:
   checks-complete:
     # The gate over the checks matrix: a missing, duplicated, failed or foreign record fails it, and so does a module
     # that no shard ran; equal test counts are not evidence. It runs after a failed checks job too (always()), and a
-    # cancelled run leaves it cancelled, never passing.
-    needs: checks
+    # cancelled run leaves it cancelled, never passing. It also requires the platform jobs old-python and every
+    # hostile-paths leg (branch protection names no required checks; this gate is the one to merge on).
+    needs: [checks, old-python, hostile-paths]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -183,6 +187,13 @@ jobs:
           fi
       - name: Reconcile the check-run records
         run: python tools/reconcile_check_runs.py ../../check-runs --python 3.13 --shards 3 --parts static,ams-optional --plan ../../gate-plan/plan.json --sha "$GITHUB_SHA" --summary "$GITHUB_STEP_SUMMARY"
+      - name: The platform jobs passed (old-python, hostile-paths)
+        env:
+          OLD_PYTHON: ${{ needs.old-python.result }}
+          HOSTILE: ${{ needs.hostile-paths.result }}
+        run: |
+          echo "old-python: $OLD_PYTHON; hostile-paths: $HOSTILE"
+          test "$OLD_PYTHON" = success && test "$HOSTILE" = success
 
   stats-backends:
     # hep-statistics audit (CI gate 1): the backends the statistics tests promise (pyhf 0.7.6, ArviZ 0.23.4; NumPy and
@@ -450,11 +461,23 @@ jobs:
 
   hostile-paths:
     # Paths with a space, Chinese characters and symlinks (TMPDIR and the working directory), plus a tree with an
-    # NFD-named file, .DS_Store and an AppleDouble file for the packaging scan. Its record uses the prefix
-    # platform-run- (never check-run-, which the checks gate collects) and is reconciled here.
+    # NFD-named file, .DS_Store and an AppleDouble file for the packaging scan. Four legs, like the checks matrix: the
+    # relocated run (tools/check_relocation.py) is split into units 1/3-3/3 and the checks part; the checks leg also
+    # runs the packaging scan and the pull-request subset (in parallel, through a plan of those modules). On main,
+    # weekly and manual runs each units leg also runs its shard in the hostile folder; its records use the prefix
+    # platform-run- (never check-run-, which the checks gate collects) and hostile-paths-complete reconciles them.
+    name: hostile-paths (${{ matrix.leg.name }})
     needs: plan
     runs-on: ubuntu-24.04
-    timeout-minutes: 90
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        leg:
+          - {name: "units 1/3", key: units-1, shard: "1/3"}
+          - {name: "units 2/3", key: units-2, shard: "2/3"}
+          - {name: "units 3/3", key: units-3, shard: "3/3"}
+          - {name: "checks", key: checks, shard: ""}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
       - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
@@ -495,7 +518,7 @@ jobs:
           ln -s "$H/real-tmp" "$H/tmp"
           echo "HOSTILE=$H" >> "$GITHUB_ENV"
       - name: Packaging scan of a tree with an NFD name, .DS_Store and an AppleDouble file
-        if: steps.sel.outputs.scope != 'none'
+        if: steps.sel.outputs.scope != 'none' && matrix.leg.key == 'checks'
         working-directory: ${{ runner.temp }}
         run: |
           T="$HOSTILE/tree"
@@ -525,39 +548,77 @@ jobs:
           print(json.dumps({"exit": code, "findings": rep["findings"]}, ensure_ascii=False, indent=1))
           assert code == 1 and expected <= rules and not extra, "the scan must flag exactly .DS_Store and the AppleDouble file"
           PY
-      - name: Tests in the hostile folder (pull request subset)
-        if: steps.sel.outputs.scope == 'subset'
+      - name: Tests in the hostile folder (pull request subset, in parallel)
+        if: steps.sel.outputs.scope == 'subset' && matrix.leg.key == 'checks'
         working-directory: ${{ runner.temp }}
         run: |
           cd "$HOSTILE/work/plugins/hep-research"
           export TMPDIR="$HOSTILE/tmp"
-          python -m unittest discover -s tests/contracts -t .
-          python -m unittest discover -s tests/tools -t .
-          # protected mode is tested in tests/contracts and test_partition_protected_batch (no tests/core/test_protected*)
-          for p in "test_partition*.py" "test_blinding*.py" "test_r5*.py"; do
-            python -m unittest discover -s tests/core -t . -p "$p"
-          done
-          # the relocated copy's own path has spaces; its full suite runs with a space-free TMPDIR, since ten modules
-          # (simreco's JSON reader, batch and diagram tests) fail under the hostile TMPDIR on main too
-          # (evals/cross-platform/progress.md); the full run below keeps the hostile TMPDIR
-          TMPDIR="$RUNNER_TEMP" python tools/check_relocation.py
-      - name: Units part in the hostile folder (main, weekly, manual)
-        if: steps.sel.outputs.scope == 'full'
+          # every module of tests/contracts, tests/tools and tests/core test_partition*, test_blinding*, test_r5*
+          # (protected mode is tested in tests/contracts and test_partition_protected_batch)
+          python tools/ci_plan.py plan --full "hostile-paths subset" --out "$HOSTILE/full-plan.json" > /dev/null
+          python - "$HOSTILE/full-plan.json" "$HOSTILE/subset-plan.json" <<'PY'
+          import json, sys
+          sys.path.insert(0, "tools")
+          import ci_plan
+          plan = json.load(open(sys.argv[1], encoding="utf-8"))
+          prefixes = ("tests.contracts.", "tests.tools.", "tests.core.test_partition", "tests.core.test_blinding",
+                      "tests.core.test_r5")
+          plan["modules"] = [m for m in plan["modules"] if m.startswith(prefixes)]
+          plan["parts"], plan["reasons"] = [], ["hostile-paths pull-request subset"]
+          plan.pop("plan_sha256")
+          plan["plan_sha256"] = ci_plan.digest(plan)
+          json.dump(plan, open(sys.argv[2], "w", encoding="utf-8"), indent=1)
+          print(f"{len(plan['modules'])} modules")
+          PY
+          python tools/run_all_checks.py --no-cli --jobs 4 --part units --plan "$HOSTILE/subset-plan.json" --summary "$GITHUB_STEP_SUMMARY"
+      - name: Units shard in the hostile folder (main, weekly, manual)
+        if: steps.sel.outputs.scope == 'full' && matrix.leg.shard != ''
         working-directory: ${{ runner.temp }}
+        env:
+          SHARD: ${{ matrix.leg.shard }}
         run: |
           cd "$HOSTILE/work/plugins/hep-research"
           export TMPDIR="$HOSTILE/tmp"
-          python tools/run_all_checks.py --no-cli --jobs 4 --part units --shard 1/1 --out "$GITHUB_WORKSPACE/platform-runs" --summary "$GITHUB_STEP_SUMMARY"
-          python tools/check_relocation.py
-      - name: Reconcile the record
-        if: steps.sel.outputs.scope == 'full'
-        run: python tools/reconcile_check_runs.py ../../platform-runs --python 3.13 --shards 1 --parts "" --summary "$GITHUB_STEP_SUMMARY"
+          python tools/run_all_checks.py --no-cli --jobs 4 --part units --shard "$SHARD" --out "$GITHUB_WORKSPACE/platform-runs" --summary "$GITHUB_STEP_SUMMARY"
+      - name: Relocated run (this leg's part)
+        if: steps.sel.outputs.scope != 'none'
+        working-directory: ${{ runner.temp }}
+        env:
+          SHARD: ${{ matrix.leg.shard }}
+        run: |
+          cd "$HOSTILE/work/plugins/hep-research"
+          if [ -n "$SHARD" ]; then part=(--part units --shard "$SHARD"); else part=(--part checks); fi
+          export TMPDIR="$HOSTILE/tmp"  # the relocated copy's own path has spaces too
+          python tools/check_relocation.py "${part[@]}" --jobs 4 --no-cli
       - name: Keep the record
-        if: always() && steps.sel.outputs.scope == 'full'
+        if: always() && steps.sel.outputs.scope == 'full' && matrix.leg.shard != ''
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9  # v7.0.2
         with:
-          name: platform-run-hostile-paths
+          name: platform-run-hostile-paths-${{ matrix.leg.key }}
           path: platform-runs/
+
+  hostile-paths-complete:
+    # main, weekly and manual runs: the three hostile units shards together cover every module once
+    if: always() && github.event_name != 'pull_request'
+    needs: hostile-paths
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    defaults:
+      run:
+        working-directory: plugins/hep-research
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+      - uses: actions/setup-python@5fda3b95a4ea91299a34e894583c3862153e4b97  # v7.0.0
+        with:
+          python-version: "3.13"
+      - uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          pattern: platform-run-hostile-paths-*
+          path: platform-runs
+          merge-multiple: true
+      - name: Reconcile the records
+        run: python tools/reconcile_check_runs.py ../../platform-runs --python 3.13 --shards 3 --parts "" --summary "$GITHUB_STEP_SUMMARY"
 
   old-python:
     # A real CPython 3.9 (end of life; no macOS arm64 or Windows build in actions/python-versions) as `python3`:

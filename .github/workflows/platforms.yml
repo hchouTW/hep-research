@@ -1,9 +1,9 @@
 # platforms: the plugin on macOS and Windows runners (cross-platform task, PR 2). Not a required check, so the path
 # filter below is safe; results are recorded and read by the maintainer.
 #   macos      macos-latest (arm64): the units part under `ulimit -n 256` (the macOS default soft limit), `/bin/bash -n`
-#              on the plugin's shell scripts, and the version of the system /usr/bin/python3. continue-on-error until
-#              the maintainer approves the known-differences list of tolerance tests (NumPy uses Accelerate on macOS
-#              arm64); record platform-run-macos, reconciled in the job
+#              on the plugin's shell scripts, and the version of the system /usr/bin/python3; a failure fails the job (the
+#              known-differences list of tolerance tests is empty: evals/cross-platform/progress.md); record
+#              platform-run-macos, reconciled in the job
 #   windows    windows-latest, checked out under a folder named with a space and Chinese characters, with USERPROFILE,
 #              HOME, TEMP, TMP and LOCALAPPDATA moved there: every skill script under the interpreter guard's
 #              Windows rule and with PYTHONUTF8=1 (tools/platform_checks.py windows: AC11), the line endings of a fresh
@@ -36,7 +36,6 @@ jobs:
   macos:
     runs-on: macos-latest
     timeout-minutes: 60
-    continue-on-error: true  # until the maintainer approves the known-differences list (evals/cross-platform/progress.md)
     defaults:
       run:
         working-directory: plugins/hep-research

@@ -1,5 +1,6 @@
 """B11: the T21 job as a batch campaign on fake Slurm and HTCondor schedulers (SYNTHETIC, injected faults)."""
 import json
+import os
 import subprocess
 import sys
 import tempfile
@@ -7,6 +8,8 @@ import unittest
 from pathlib import Path
 
 PLUGIN = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(PLUGIN))
+from tests._platform import plain_tmpdir  # noqa: E402
 
 try:
     import numpy  # noqa: F401
@@ -18,9 +21,11 @@ except ImportError:
 @unittest.skipUnless(HAVE_NP, "numpy required (D5 environment)")
 class BatchPartitionExampleTests(unittest.TestCase):
     def test_every_criterion_passes_and_output_is_reproducible(self):
-        with tempfile.TemporaryDirectory() as td:
+        plain = plain_tmpdir()  # HTCondor refuses a path with spaces by design; run.py makes its own temporary folder
+        env = dict(os.environ, **({"TMPDIR": plain} if plain else {}))
+        with tempfile.TemporaryDirectory(dir=plain) as td:
             p = subprocess.run([sys.executable, str(PLUGIN / "examples" / "batch-partition" / "run.py"), "--out", td],
-                               capture_output=True, text=True, timeout=1200)
+                               capture_output=True, text=True, timeout=1200, env=env)
             fresh = (Path(td) / "results.json").read_bytes()
         r = json.loads(fresh)
         self.assertEqual(p.returncode, 0, r["pass"])

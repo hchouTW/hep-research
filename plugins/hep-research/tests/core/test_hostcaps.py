@@ -1,7 +1,15 @@
-"""core/hostcaps.py: capability probes, require() and its missing-dependency report, state_dir() per platform."""
+"""core/hostcaps.py: capability probes, require() and its missing-dependency report, state_dir() per platform; and
+its consumers on a host without the capabilities (native Windows, modelled by patching the probes): the protected
+guard, run_workflow.py, the hep-review CLI and the per-user state folders (the AMS paper cache test needs the
+AMS-02 profile and is skipped in a copy without it)."""
+import contextlib
+import importlib
+import importlib.util
+import io
 import json
 import os
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 from unittest import mock
@@ -117,6 +125,118 @@ class NeedsDecorator(unittest.TestCase):
             def g():
                 pass
         self.assertFalse(getattr(g, "__unittest_skip__", False))
+
+FETCH_PAPERS = ROOT / "profiles" / "experiments" / "ams-02" / "scripts" / "fetch_papers.py"
+
+
+def _load(rel: str, name: str):
+    path = ROOT / rel
+    if str(path.parent) not in sys.path:
+        sys.path.insert(0, str(path.parent))
+    spec = importlib.util.spec_from_file_location(name, path)
+    mod = importlib.util.module_from_spec(spec)
+    sys.modules[name] = mod  # dataclasses look their module up there
+    spec.loader.exec_module(mod)
+    return mod
+
+
+def _call(main, argv):
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        code = main(argv)
+    return code, json.loads(buf.getvalue())
+
+
+class Consumers(unittest.TestCase):
+    """What the code does where a capability is missing: a stated refusal or missing-dependency, never a crash."""
+
+    def test_account_current_needs_posix_ids(self):
+        from core.protected.trusted_input import Account
+        with mock.patch.dict(hostcaps.PROBES, {"posix_ids": lambda: False}):
+            with self.assertRaises(hostcaps.UnsupportedPlatform) as cm:
+                Account.current()
+        self.assertEqual(cm.exception.missing, ["posix_ids"])
+
+    def test_establish_refuses_without_posix_ids(self):
+        from core.protected import guard as G
+        with mock.patch.dict(hostcaps.PROBES, {"posix_ids": lambda: False}):
+            ctx = G.establish(flag=True)
+        self.assertTrue(ctx.protected and ctx.refused)
+        self.assertEqual([r["code"] for r in ctx.refusals], ["protected.unsupported_platform"])
+
+    def test_establish_turns_a_late_unsupported_platform_into_the_refusal(self):
+        from core.protected import guard as G
+        with mock.patch.object(G, "_establish", side_effect=hostcaps.UnsupportedPlatform(["posix_ids"])):
+            ctx = G.establish(flag=True)
+        self.assertEqual([r["code"] for r in ctx.refusals], ["protected.unsupported_platform"])
+
+    def test_protected_entry_point_exits_3_refused(self):
+        from core.protected import guard as G
+
+        @G.protected_main("tests.core.test_hostcaps.entry")
+        def main(argv):
+            return 0
+        with mock.patch.dict(hostcaps.PROBES, {"posix_ids": lambda: False}):
+            code, out = _call(main, ["--protected"])
+            self.assertEqual(main([]), 0)  # outside protected mode nothing changes
+        self.assertEqual((code, out["status"]), (3, "refused"))
+        self.assertEqual([r["code"] for r in out["refusals"]], ["protected.unsupported_platform"])
+
+    def test_establish_off_is_unchanged_without_posix_ids(self):
+        from core.protected import guard as G
+        with tempfile.TemporaryDirectory() as d, mock.patch.dict(hostcaps.PROBES, {"posix_ids": lambda: False}):
+            self.assertFalse(G.establish([d]).protected)
+
+    def test_run_workflow_without_process_groups_is_missing_dependency(self):
+        mod = _load("skills/hep-computing/scripts/run_workflow.py", "run_workflow_hostcaps")
+        with tempfile.TemporaryDirectory() as d:
+            wf = Path(d) / "wf.json"
+            wf.write_text(json.dumps({"workflow": "w", "steps": [
+                {"id": "s", "argv": ["{python}", "-c", "pass"], "outputs": ["out.txt"]}]}), encoding="utf-8")
+            args = [str(wf), "--work", str(Path(d) / "work"), "--created", "2026-10-31"]
+            with mock.patch.dict(hostcaps.PROBES, {"process_groups": lambda: False}):
+                self.assertEqual(_call(mod.main, [*args, "--dry-run"])[0], 0)  # nothing runs: still answered
+                code, out = _call(mod.main, args)
+            self.assertFalse((Path(d) / "work" / "out.txt").exists())
+        self.assertEqual(code, exit_code("missing-dependency"))
+        self.assertEqual((out["status"], out["reason"], out["missing"]),
+                         ("missing-dependency", "unsupported-platform", ["process_groups"]))
+
+    def test_hep_review_snapshot_without_controlled_read_is_missing_dependency(self):
+        mod = _load("skills/hep-review/scripts/review.py", "hep_review_cli_hostcaps")
+        with tempfile.TemporaryDirectory() as d:
+            (Path(d) / "a.txt").write_text("x", encoding="utf-8")
+            with mock.patch.object(mod.M, "controlled_read_available", return_value=False):
+                code, out = _call(mod.main, ["--store", str(Path(d) / "store"), "snapshot", "--root", d,
+                                             "--paths", "a.txt"])
+        self.assertEqual(code, exit_code("missing-dependency"))
+        self.assertEqual((out["status"], out["reason"]), ("missing-dependency", "unsupported-platform"))
+
+    def test_state_folders_follow_state_dir_on_windows(self):
+        for rel in ("skills/hep-review/scripts", "skills/hep-authoring/scripts"):
+            if str(ROOT / rel) not in sys.path:
+                sys.path.insert(0, str(ROOT / rel))
+        store = importlib.import_module("hep_review_support.store")
+        authoring = importlib.import_module("review_lib.store")
+        env = {"LOCALAPPDATA": "C:/state/AppData/Local", "HOME": "/h"}
+        local = Path("C:/state/AppData/Local") / "hep-research"
+        with mock.patch.object(hostcaps, "on_windows", return_value=True), mock.patch.dict(os.environ, env, clear=True):
+            self.assertEqual(store.default_store_dir(env), local / "hep-review")
+            self.assertEqual(authoring.default_private_root(), local / "reviews")
+        with mock.patch.object(hostcaps, "on_windows", return_value=False), \
+                mock.patch.dict(os.environ, {"HOME": "/h"}, clear=True):
+            self.assertEqual(store.default_store_dir({"HOME": "/h"}), Path("/h/.local/state/hep-research/hep-review"))
+            self.assertEqual(authoring.default_private_root(), Path("/h/.local/state/hep-research/reviews"))
+
+    @unittest.skipUnless(FETCH_PAPERS.is_file(), "the AMS-02 profile is not in this copy")
+    def test_ams_paper_cache_follows_state_dir_on_windows(self):
+        papers = _load(FETCH_PAPERS.relative_to(ROOT).as_posix(), "fetch_papers_hostcaps")
+        env = {"LOCALAPPDATA": "C:/state/AppData/Local", "HOME": "/h"}
+        with mock.patch.object(hostcaps, "on_windows", return_value=True), mock.patch.dict(os.environ, env, clear=True):
+            self.assertEqual(papers.default_cache(), Path("C:/state/AppData/Local") / "hep-research" / "papers")
+        with mock.patch.object(hostcaps, "on_windows", return_value=False), \
+                mock.patch.dict(os.environ, {"HOME": "/h"}, clear=True):
+            self.assertEqual(papers.default_cache(), Path("/h/.cache/hep-research/papers"))
 
 
 if __name__ == "__main__":
