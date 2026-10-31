@@ -4,7 +4,7 @@
  "artifact_type": "computational-run",
  "objective": "detector system design: computational-run written by evaluate_design.py",
  "versions": {
-  "plugin": "0.51.0",
+  "plugin": "0.52.0",
   "contracts": "3.17.0",
   "plugin_release": {
    "release": "unreleased",
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-A.json",
-   "sha256": "0d6585c200e693f9dd925f370565cd9a5ad8e65af3a553a249bd30fabb3ebbb6",
+   "sha256": "0ef2d79c35e0bed2145c311e27ed0705548fdbaba00c2b2a1a605cea59150e7d",
    "artifact_type": "design-candidate",
    "artifact_id": "collider-tracker-v1-cand-A",
    "status": [
@@ -40,13 +40,13 @@
   "input_manifest": [
    {
     "path": "candidates/cand-A.json",
-    "sha256": "0d6585c200e693f9dd925f370565cd9a5ad8e65af3a553a249bd30fabb3ebbb6"
+    "sha256": "0ef2d79c35e0bed2145c311e27ed0705548fdbaba00c2b2a1a605cea59150e7d"
    }
   ],
   "tools": [
    {
     "name": "calorimeter-resolution",
-    "version": "0.51.0"
+    "version": "0.52.0"
    }
   ],
   "commands": [
@@ -78,7 +78,7 @@
    "synthetic"
   ],
   "script_sha256": {
-   "skills/hep-detector/scripts/calorimeter_resolution.py": "95e271ce83513d9ee9faf62c0aa95e8cac78915e7c44631bc76c641b80d458ab"
+   "skills/hep-detector/scripts/calorimeter_resolution.py": "72953ec410ec762c7eead904ffeeeecd41da170fc7b0b9634c7c36398d25958c"
   }
  }
 }

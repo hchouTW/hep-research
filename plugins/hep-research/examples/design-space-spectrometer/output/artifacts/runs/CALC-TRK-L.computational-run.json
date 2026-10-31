@@ -4,7 +4,7 @@
  "artifact_type": "computational-run",
  "objective": "detector system design: computational-run written by evaluate_design.py",
  "versions": {
-  "plugin": "0.51.0",
+  "plugin": "0.52.0",
   "contracts": "3.17.0",
   "plugin_release": {
    "release": "unreleased",
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-L.json",
-   "sha256": "e6300b0adba36cbc97611597c828e73e636c2d6f172cf642079648cee0d485c2",
+   "sha256": "05817a16d7531da1ed56c61bdd3b497083dee7c15d83a1089cbe1019906890b3",
    "artifact_type": "design-candidate",
    "artifact_id": "ams-like-v1-cand-L",
    "status": [
@@ -40,13 +40,13 @@
   "input_manifest": [
    {
     "path": "candidates/cand-L.json",
-    "sha256": "e6300b0adba36cbc97611597c828e73e636c2d6f172cf642079648cee0d485c2"
+    "sha256": "05817a16d7531da1ed56c61bdd3b497083dee7c15d83a1089cbe1019906890b3"
    }
   ],
   "tools": [
    {
     "name": "tracker-resolution",
-    "version": "0.51.0"
+    "version": "0.52.0"
    }
   ],
   "commands": [
@@ -88,7 +88,7 @@
    "synthetic"
   ],
   "script_sha256": {
-   "skills/hep-detector/scripts/tracker_resolution.py": "767043e87f2c00903246bce1627ec40cd7d9bf0a2fdac100e756a9d09bd56fbc"
+   "skills/hep-detector/scripts/tracker_resolution.py": "58d9ee5e7e674e399b9f9e9b7e37935aedd11db9f219f76272227d6e04ad2e4d"
   }
  }
 }

@@ -4,7 +4,7 @@
  "artifact_type": "computational-run",
  "objective": "detector system design: computational-run written by evaluate_design.py",
  "versions": {
-  "plugin": "0.51.0",
+  "plugin": "0.52.0",
   "contracts": "3.17.0",
   "plugin_release": {
    "release": "unreleased",
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-P.json",
-   "sha256": "4e6bef8c3edb4cfc33dfea08d736f9bbe6dc94aef6ea65d7e10ec27d24e5de14",
+   "sha256": "3e0c8e9c232ac696d48864a16825c1a5c6188a021202a4c526c4c074727c3e2b",
    "artifact_type": "design-candidate",
    "artifact_id": "collider-tracker-v1-cand-P",
    "status": [
@@ -40,13 +40,13 @@
   "input_manifest": [
    {
     "path": "candidates/cand-P.json",
-    "sha256": "4e6bef8c3edb4cfc33dfea08d736f9bbe6dc94aef6ea65d7e10ec27d24e5de14"
+    "sha256": "3e0c8e9c232ac696d48864a16825c1a5c6188a021202a4c526c4c074727c3e2b"
    }
   ],
   "tools": [
    {
     "name": "tracker-resolution",
-    "version": "0.51.0"
+    "version": "0.52.0"
    }
   ],
   "commands": [
@@ -89,7 +89,7 @@
    "synthetic"
   ],
   "script_sha256": {
-   "skills/hep-detector/scripts/tracker_resolution.py": "767043e87f2c00903246bce1627ec40cd7d9bf0a2fdac100e756a9d09bd56fbc"
+   "skills/hep-detector/scripts/tracker_resolution.py": "58d9ee5e7e674e399b9f9e9b7e37935aedd11db9f219f76272227d6e04ad2e4d"
   }
  }
 }
