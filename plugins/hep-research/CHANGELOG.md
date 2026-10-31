@@ -5,6 +5,17 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+## 0.51.0 (2026-10-31)
+
+Minor release; contracts 3.17.0, `CORE_VERSION` 1.4.0 and every skill's `description` are unchanged. It ships
+PR #328 (Geant4 adapter 0.6.0: register an existing Geant4 installation), PR #329 (reconstruction v12, first part:
+method contract and research workflow control, workflow-runner fixes, check definitions, receipts and executor
+capabilities) and PR #330 (reconstruction v12, second part: the control-layer helper, stages C1 and C2). The
+control layer's rules did **not** pass the S0 spec review (eight rounds); it ships by the maintainer's decision with
+three known open defects, listed in every completion report. **Partial release:** the outputs that reproduce on Linux
+were regenerated here; the outputs that drift between Linux x86_64 and macOS arm64 are still to be regenerated on E2,
+and the release manifest follows that (VALIDATION, 0.51.0 release check).
+
 - **`check_geant4_study.py`: a replayed campaign writes the same study record on every machine.** The realization
   profile named by an element_sim spec's provenance entered the input manifest only when its recorded path existed on
   the running machine, so replaying the J15 campaign (`examples/design-minimal-spectrometer/`) away from the machine
