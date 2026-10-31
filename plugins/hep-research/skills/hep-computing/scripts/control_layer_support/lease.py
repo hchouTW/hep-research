@@ -12,9 +12,10 @@ Rules: a live lease of another owner refuses every write except a human decision
 human decision must hold a live lease; an expired lease is taken over only by `acquire` and only after restart
 reconciliation -- while any attempt is admitted, running, cancelling or unknown, takeover is refused (reconcile, or
 have a human abandon, first). Liveness is the expiry alone: a dead owner stops renewing, and its lease runs out.
-Restart recovery of a torn last line: an append is acknowledged only after its single O_APPEND write and fsync, so a
-last line without its newline was never acknowledged; `recover` moves that fragment to <task-log>.torn-<sha256> and
-truncates it away, recording the event. Nothing else is ever removed.
+Restart recovery of a torn tail: an append is acknowledged only after its single O_APPEND write and fsync, so a last
+line without its newline, and a last batch with fewer lines than its size, were never acknowledged; `recover` moves
+that tail (back to the start of its batch) to <task-log>.torn-<sha256> and truncates it away, recording the event.
+Nothing else is ever removed.
 """
 from __future__ import annotations
 
@@ -145,11 +146,13 @@ def release(task_log: Path, owner: str) -> dict:
 
 
 def recover_torn_tail(task_log: Path) -> dict:
-    """Remove a torn (never acknowledged) last line; keep it in a side file and record the event."""
+    """Remove the never-acknowledged tail -- a torn last line, and the whole lines of a last batch that has fewer
+    lines than its size -- back to the start of its batch; keep it in a side file and record the event."""
+    from .task_record import torn_tail_cut  # noqa: PLC0415
     content = task_log.read_bytes()
-    if not content or content.endswith(b"\n"):
+    cut = torn_tail_cut(content)
+    if cut == len(content):
         return {"recovered": False}
-    cut = content.rfind(b"\n") + 1
     fragment = content[cut:]
     digest = hashlib.sha256(fragment).hexdigest()
     task_log.with_name(f"{task_log.name}.torn-{digest}").write_bytes(fragment)

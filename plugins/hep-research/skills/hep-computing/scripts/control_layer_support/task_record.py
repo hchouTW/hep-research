@@ -5,9 +5,9 @@ command line; DEC-13: ideas reused from the hep-review store -- operation-id ide
 shared store). Standard library only.
 
 Line format (every line is the canonical JSON of Control §4: sorted keys, separators ',' ':', non-ASCII kept):
-  {"seq": N, "batch": FIRST_SEQ_OF_ITS_APPEND, "kind": KIND, "writer": C|B|adapter|agent|human, "fields": {...},
-   "prev": SHA-256 of the previous line's bytes (null for line 0), "op": OPERATION_ID|null,
-   "request": SHA-256 of the request|null, "time": UTC ISO-8601}
+  {"seq": N, "batch": FIRST_SEQ_OF_ITS_APPEND, "size": LINES_IN_ITS_APPEND, "kind": KIND,
+   "writer": C|B|adapter|agent|human, "fields": {...}, "prev": SHA-256 of the previous line's bytes (null for line 0),
+   "op": OPERATION_ID|null, "request": SHA-256 of the request|null, "time": UTC ISO-8601}
 Every load verifies the whole chain (sequence numbers, previous-line digests, canonical bytes, closed field sets)
 and replays every append batch through the derivation's validation, so a record edited by hand is refused -- except
 an edit of the last line, which no later line commits to: that one is caught only against a digest kept outside
@@ -15,8 +15,10 @@ the record (the expected digest of the next append, or an anchor given to `verif
 append holds an exclusive lock on <file>.lock (POSIX flock; the lock only serializes writers), re-reads and verifies
 the record, refuses unless the caller's expected head (and, when given, the expected last-line digest) still holds
 (compare-and-set, Control §5.5), validates the whole batch before writing anything, and writes the batch with one
-O_APPEND write followed by fsync. A crash in the middle of that write leaves a torn last line, which the next load
-reports; `control_layer.py recover` (C2, lease.py) removes that never-acknowledged fragment and records it. Writers
+O_APPEND write followed by fsync. A batch is all-or-nothing: every line names its batch's first sequence number and
+size, so a crash in the middle of that write -- a torn last line, or only the first whole lines of a multi-line
+batch -- is refused by the next load, and `control_layer.py recover` (C2, lease.py) removes the never-acknowledged
+tail back to the start of its batch and records it. Writers
 may additionally hold a lease (lease.py), checked under the same flock before the compare-and-set.
 """
 from __future__ import annotations
@@ -37,7 +39,7 @@ try:
 except ImportError:  # pragma: no cover - non-POSIX: compare-and-set still holds, writers are not serialized
     posix_lock = None
 
-LINE_KEYS = {"seq", "batch", "kind", "writer", "fields", "prev", "op", "request", "time"}
+LINE_KEYS = {"seq", "batch", "size", "kind", "writer", "fields", "prev", "op", "request", "time"}
 
 # ---------------------------------------------------------------- field codec
 
@@ -292,6 +294,10 @@ class CorruptRecord(Exception):
     """The record does not verify: a broken chain, a non-canonical or torn line, or a fact that does not validate."""
 
 
+class TornBatch(CorruptRecord):
+    """The last batch is incomplete: its append was cut short and never acknowledged (`recover` removes it)."""
+
+
 class OperationConflict(Exception):
     """An operation id was used before with another request."""
 
@@ -348,18 +354,53 @@ def load_bytes(content: bytes) -> Loaded:
                 raise Rejected("fields are not in canonical form")
         except Rejected as exc:
             raise CorruptRecord(f"line {index}: {exc}") from None
+        size = line["size"]
+        if not isinstance(size, int) or isinstance(size, bool) or size < 1:
+            raise CorruptRecord(f"line {index}: size must be a positive integer")
         if group and line["batch"] != group[0][0]["batch"]:
-            _replay(loaded.log, group)
+            _close(loaded.log, group)
             group = []
         if not group and line["batch"] != index:
             raise CorruptRecord(f"line {index}: batch {line['batch']!r} does not start here")
+        if group and size != group[0][0]["size"]:
+            raise CorruptRecord(f"line {index}: size differs within its batch")
+        if len(group) >= size:
+            raise CorruptRecord(f"line {index}: batch {line['batch']} has more lines than its size {size}")
         group.append((line, typed))
         loaded.lines.append(line)
         loaded.raw.append(raw)
         prev = hashlib.sha256(raw).hexdigest()
     if group:
+        if len(group) < group[0][0]["size"]:
+            raise TornBatch(f"the last batch (from line {group[0][0]['batch']}) has {len(group)} of its "
+                            f"{group[0][0]['size']} lines: its append was cut short and never acknowledged; "
+                            f"`recover` removes it")
         _replay(loaded.log, group)
     return loaded
+
+
+def _close(log: Log, group):
+    if len(group) != group[0][0]["size"]:
+        raise CorruptRecord(f"batch {group[0][0]['batch']} has {len(group)} of its {group[0][0]['size']} lines "
+                            f"before a later batch (lines removed)")
+    _replay(log, group)
+
+
+def torn_tail_cut(content: bytes) -> int:
+    """Byte offset where the never-acknowledged tail starts: a last line without its newline, and then every whole
+    line of a last batch that has fewer lines than its size. len(content) when nothing is torn."""
+    cut = content.rfind(b"\n") + 1 if content and not content.endswith(b"\n") else len(content)
+    raws = content[:cut].split(b"\n")[:-1] if cut else []
+    if not raws:
+        return cut
+    try:
+        last = json.loads(raws[-1])
+        start, size = last["batch"], last["size"]
+    except (ValueError, KeyError, TypeError):
+        return cut                       # not this module's line format: left to load to report
+    if isinstance(start, int) and isinstance(size, int) and 0 <= start < len(raws) and len(raws) - start < size:
+        return sum(len(raw) + 1 for raw in raws[:start])
+    return cut
 
 
 def _replay(log: Log, group):
@@ -375,8 +416,12 @@ def encode_lines(log: Log, start: int, prev: str | None, op_id: str | None, requ
     """Canonical lines for log.facts[start:], chained to `prev`."""
     when = when or datetime.datetime.now(datetime.timezone.utc).isoformat(timespec="seconds")
     lines = []
+    sizes: dict = {}
+    for batch in log.batch_start:
+        sizes[batch] = sizes.get(batch, 0) + 1
     for fact in log.facts[start:]:
-        line = {"seq": fact.seq, "batch": log.batch_start[fact.seq], "kind": fact.kind, "writer": fact.writer,
+        batch = log.batch_start[fact.seq]
+        line = {"seq": fact.seq, "batch": batch, "size": sizes[batch], "kind": fact.kind, "writer": fact.writer,
                 "fields": encode_fields(fact.kind, fact.fields), "prev": prev, "op": op_id, "request": request,
                 "time": when}
         raw = canonical_bytes(line)
@@ -460,6 +505,9 @@ class TaskRecord:
             if op_id is not None:
                 earlier = [line for line in loaded.lines if line["op"] == op_id]
                 if earlier:
+                    if {line["batch"] for line in earlier} != {earlier[0]["batch"]} or \
+                            len(earlier) != earlier[0]["size"]:
+                        raise CorruptRecord(f"operation {op_id} does not name exactly one whole batch")
                     if earlier[0]["request"] != request_digest:
                         raise OperationConflict(f"operation {op_id} was used with another request")
                     return Outcome([log.facts[line["seq"]] for line in earlier], log.head, loaded.head_digest,
