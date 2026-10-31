@@ -396,3 +396,28 @@ none was added (a declared outcome the tool cannot produce would be false). No c
 4. The 10 hostile-TMPDIR failures on main (simreco `\u` decoding is a robust-fix candidate).
 5. The `charge_confusion_rate` deviation above.
 6. Merging the four PRs in order (1a, 1b, 2, 3); the code-release digest changes: deployments re-pin and requalify.
+
+## PR 4 — cross-platform follow-ups (maintainer request "fix all issues", 2026-11-01; branch `xplat/pr-4-followups`)
+
+Decisions taken as recommended, per open checkpoint:
+1. Required checks: branch protection names none (merges go by the CI gate), so instead of a settings change
+   `checks-complete` now needs `old-python` and every `hostile-paths` leg and fails unless both succeeded.
+2. macOS: `continue-on-error` removed (two green runs; known-differences list empty).
+3. Manual validation: `run_all_checks.py --part static` with the host CLIs passes (31/31, `claude plugin validate
+   --strict` and `codex plugin load` included). Install and skill loading on E1 and on Windows still need the
+   maintainer.
+4. The 10 hostile-TMPDIR failures:
+   - simreco: sci-fix MINIJSON-UNICODE-ESCAPES (S2, C2/D2, advisory waiver; parent `54b2d011`, fix `7eb98412`;
+     VALIDATION CROSS-PLATFORM-FOLLOWUPS).
+   - tests whose subject refuses or quotes spaced paths by design take `tests/_platform.plain_tmpdir()` (batch
+     harness, batch-partition example test); the hardening and diagram shims quote their paths.
+   - the PR relocation run uses the hostile TMPDIR again.
+5. `charge_confusion_rate`: no change. Its contract covers only `gaussian-core`, which returns ok or exit 2, exactly
+   as declared.
+6. Merging: top-down into the stacked bases, then #333 into main after its CI on the combined content.
+
+Local units part in the hostile folder (space, Chinese characters, symlinked TMPDIR and working directory): 6298 run,
+3 failures, 1 error, 2 module timeouts. Pre-existing: `test_root_cpp_assets` (no ROOT for the host's python3.14).
+The other five (`test_control_layer_model` x2, `test_hep_detector_audit`, and the timeouts of `test_diagrams` and
+`test_design_search_j16`) pass when rerun alone under the same TMPDIR (63, 31, 246, 251 s): load on this laptop at
+`--jobs 6`, not the path. None of the ten modules fails any more.
