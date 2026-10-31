@@ -39,6 +39,86 @@ and are listed as open decisions in the final report.
 | N2-F10 | minor | Environment manifest produced or verified (`environment_manifest.py check`) in the same environment no earlier than the attempt registration; `plugin_release` digest `unknown` with plugin code imported → identity incomplete | Control §7.2 identity row |
 | N2-F11 | minor | Core §5.4 item 1: the attempt registration line stands in for the intent; the run record is the receipt content | Core §5.4 item 1 |
 
+## N1 — round 4 (fixed after user approval; re-reviewed in round 5)
+
+Context `s0-reconstruction-v12-r4`, R2, N1 violated; reproduced by the coordinator with `s0/round4-attack.py` against the
+unmodified model. The user approved the three design changes proposed for the majors (2026-10-29); the two minors are
+local corrections. Model after the changes: 86/86 scenarios, 39/39 mutations killed; replaying `round4-attack.py`:
+A1 revert pending approval (X2 stays bound, `confirmation_results` = 2 in publish), A2/A2b closed by the field move
+(scenario t84), A3 gives T3E, A4 counts the five side-step variants (`task_artifacts`).
+
+| Id | Severity | Finding | Change | Where |
+|---|---|---|---|---|
+| N1-R4-F1 | major | Re-binding a confirmed draw by reverting the program (confirm X1 on S1, X2 on S2, revert to X1) without a pin or human, contrary to Control §4.2 | A contract whose content change makes an earlier attempt's identity current again (a revert) is not at least as strict and needs human approval. Every confirmation-sample result on the chain is reported and counted in publish (`confirmation_results`), so keeping one of several confirmed draws is visible. Model: `revives` in `_contracts`, `confirmation_results`; scenario t83; mutations “content revert re-binds without a human”, “confirmation results not reported” | Control §1.2 (row “content changes”, paragraph below the table), §2 (publish), §4.2 (binding), §4.5, §5.4; Delivery §5.2 C1 row |
+| N1-R4-F2 | major | Confirmation fields on the step: a T3C deliverable added later inherits “confirmation required = no” / “independent = no” | The two confirmation fields move from the step to the **deliverable**. A deliverable that becomes T3C by a later contract (added, or target raised) must carry yes for both, otherwise the contract needs approval; existing deliverables cannot change them to no. Model: `Deliverable.confirmation_required`, `Deliverable.independent_confirmation`, `contract_at_least_as_strict`, `freeze_ok(…, conf_req, indep_req)`; scenario t84; t44, t72, t79, t82 moved to deliverable fields; mutation “added T3C deliverable inherits no” | Control §1.1 (deliverables row, step table, paragraph), §1.2, §4.4 item 5, §4.5 table |
+| N1-R4-F3 | major | Check extra inputs outside the check identity, unresolved, unmodelled | New step field **check inputs** (check digest, step). C resolves them at admission (an upstream of the target's step to the version the target consumed, otherwise bound or latest current; unresolvable → reject); they are written in the intent and part of the check attempt's identity. A result counts only when its inputs are exactly the declared ones and upstream inputs equal the consumed versions. Changing them needs approval. Model: `StepSpec.check_inputs`, `check_identity(…, extra)`, `check_inputs_for`, `check_inputs_hold`, `check_attempt_of`; scenario t85; mutation “check inputs not resolved by C” | Control §1.1, §1.2, §2 (intent), §4.3, §5.2, §7.2 (declared check identity) |
+| N1-R4-F4 | minor | An agent-written exposure labelled with an existing check-attempt id satisfies freeze item 3 | Only exposures C wrote at that attempt's admission are attributed to a check attempt; in the transition period, only the exposure lines written for a registered check attempt's read list. Model: `freeze_ok` (writer); scenario t86; mutation “agent exposure attributed to a check attempt” | Control §2 (exposure), §4.4 item 3, §7.2 (exposure) |
+| N1-R4-F5 | minor | Task-wide history omits successful draws on unchecked off-chain steps | The task-wide history counts the artifacts of every step, and publish records the total (`task_artifacts`). Model: `task_history` `artifacts`; scenario t87 | Control §4.5, §2, §5.4 |
+
+Also: Core §0.5 review-status row updated (counts, revision after round 4); Control §8 counts and lists.
+
+## N1 — round 5 (fixed after user approval; re-reviewed in round 6)
+
+Context `s0-reconstruction-v12-r5`, R2, N1 violated; reproduced by the coordinator with `s0/round5-attack.py`. The user
+approved both proposed directions (2026-10-29). Model after the changes: 89/89 scenarios, 42/42 mutations killed;
+replaying `round5-attack.py`: all five attacks fail (a1, a2 not met / not bound; a3 admission rejects; a4 check missing;
+a5 admission rejects).
+
+| Id | Severity | Finding | Change | Where |
+|---|---|---|---|---|
+| N1-R5-F1 | major | A cosmetic change reproducing an already-seen digest re-binds it (also through an unchecked upstream) | New derived property **reproduced**: the representative producer's identity differs from the first producer's in the step. A reproduced artifact is not bound unless pinned (human approval); new label `reproduced`. Model: `reproduced`, `bound`, `label`; scenario t88; mutation “reproduced digest binds without a human”. **Behaviour change:** scenario t24 used to accept a refactor that reproduced R1 automatically; it now needs an approved pin (assertion updated, stricter) | Control §4.2, §4.6, §4.7; Delivery §5.2 C1 row |
+| N1-R5-F2 | major | A held or later-invalidated non-upstream check input still counts | A non-upstream check input resolves only to its step's bound version (admission rejects otherwise), and the result counts only while it is still bound. Upstreams and check inputs form an acyclic graph, so a check input never depends on the target's step; a check that needs data processed with the target does that processing inside the check attempt (the §5.2 mode-check example changed accordingly). Model: `check_inputs_for`, `check_inputs_hold`, `validate_contract` (cycle visit); scenario t89; mutation “check input need not stay bound” | Control §1.1, §4.3, §4.7, §5.2 |
+| N1-R5-F3 | minor | Same side effect of check attempts keyed on the full identity in the model | Admission compares check × criterion × target (`same_side_effect`), as Control §3 says; §3 text made explicit. Scenario t90; mutation “check side effect not recognised across check inputs” | model `admit`; Control §3 |
+
+Also: Core §0.5 and Control §8 counts and lists.
+
+## N1 — round 6 (fixed after the user's decision; not re-reviewed)
+
+Context `s0-reconstruction-v12-r6`, R2, N1 violated; reproduced with `s0/round6-attack.py` and `s0/round6-attack2.py`.
+The user chose option A (2026-10-29): replace the per-route rules with one binding rule, fix the minors, and start C1
+with N1 stated as not through S0 (no seventh round). Model after the change: 90/90 scenarios, 42/42 mutations;
+attack A (with the helper renamed) does not reach the deliverable; attack B is covered by scenario t91; the five
+round-5 attacks still fail.
+
+| Id | Severity | Finding | Change | Where |
+|---|---|---|---|---|
+| N1-R6-F1, F2 | major | Re-binding an already-seen output through an unattested peek, or through a step removed with approval and re-added (old program or pin) | **One rule replaces the revert rule (r4) and the reproduced rule (r5): overtaken.** An artifact is overtaken when some output first seen in its step after it (any attempt of the step name, any contract, any end state or attestation) is not usable and current; an overtaken artifact binds only through a pin (human). A step added by a later contract carries no pin. Model: `overtaken` (replaces `reproduced`), `revives` removed, `contract_at_least_as_strict` (added step: no pin), label `overtaken`; scenarios t83, t88 adapted, t91 new; t24 back to its original expectation (a refactor reproducing a step's only output binds: nothing to choose from); mutations “overtaken artifact binds without a human”, “added step may carry a pin” (replace the two removed ones) | Control §1.2 (row “content changes” removed; added-step row), §4.2, §4.6, §4.7, §6; Delivery §5.2 C1 row |
+| N1-R6-F3 | minor | §6 listed “adding a step with confirmation not required” | §6 list names deliverable confirmation fields and an added step's pin | Control §6 |
+| N1-R6-F4 | minor | Model's freeze items 3–4 stricter than the text, unreported | §4.4 states the model's reading (a required check attempt without a result spends the sample; item 4 covers another artifact of any step) | Control §4.4 |
+
+## N1 — round 7 (first review of the single 'overtaken' rule; fixed in v12.2 after the user's decision of 2026-10-30, re-reviewed in round 8)
+
+Context `s0-reconstruction-v12-r7`, R2, N1 violated; reproduced by the coordinator with `s0/round7-attack.py`.
+
+| Id | Severity | Finding | Reproduction | Possible directions (not adopted) |
+|---|---|---|---|---|
+| N1-R7-F1 | major | `overtaken` looks only at outputs of attempts with confirmed termination: a newer draw that ends unknown, or one abandoned by a human and later reconciled, does not overtake the older output; a revert then re-binds and publishes the old checked output without a pin. The abandoned-and-reconciled case contradicts Control §4.2 (“whatever its end state”) | A1, A2 | count every attempt of the step that was admitted after the older output (its intent), whatever its end state and whether it has outputs, as overtaking it |
+| N1-R7-F2 | major | Check attempts that end without a result (cancelled, failed, timed out) are counted nowhere (report, publish, admission): confirmation aborted on S1 and S2, pass on S3, published T3C with `confirmation_results` = 1 and `failed_draws` = 0; a non-deterministic check can be retried until it passes | B1, B2 | count check attempts without a result as failed check draws in history and publish; a confirmation sample read by an aborted check attempt is spent |
+| N1-R7-F3 | minor | Control §3 diagram: cancelling → failed omits timeout | — | add timeout |
+
+Changes for round 7 (user decision 2026-10-30: the control layer ships, DEC-02 approved, fix and review again).
+Model 92/92 scenarios, 44/44 mutations; derivation version v12.2. Replaying `s0/round7-attack.py`: A1 no longer
+publishes (X1 overtaken, D not met); the remaining attacks are covered by t92, t93.
+
+| Id | Change | Where |
+|---|---|---|
+| N1-R7-F1 | `overtaken` counts every newer **attempt** of the step name (a fact after the artifact was first seen) that did not produce a usable and current output — failed, cancelled, unknown, abandoned (reconciled or not), unattested or not current — with or without outputs; in-flight and reuse attempts and attempts that reproduced the artifact do not overtake. Model: `first_seen`, `overtaken`, `step_intents` (per-step intent index, Control §4.8); scenario t92; mutation “unresolved newer attempts do not overtake” | Control §4.2 |
+| N1-R7-F2 | Check attempts on artifacts of the chain that ended without a check result are **failed check draws**, in the report, the task-wide history and publish (`failed_check_draws`); those that read a confirmation sample are listed among the confirmation results; such a sample is spent (already so by §4.4 item 3, now stated). Model: `failed_check_draws`, `aborted_checks`, `confirmation_results`, `publish`; scenario t93; mutation “aborted check attempts not counted” | Control §2 (publish), §4.5, §5.4 |
+| N1-R7-F3 | cancelling → failed includes timeout | Control §3 |
+
+## N1 — round 8 (review of v12.2; open, spec copy not changed)
+
+Context `s0-reconstruction-v12-r8`, R2, N1 violated; reproduced with `s0/round8-attack.py` and `s0/round8-attack2.py`.
+
+| Id | Severity | Finding | Reproduction | Possible directions (not adopted) |
+|---|---|---|---|---|
+| N1-R8-F1 | major | Parallel draws: several variants run at once, only the preferred one is let finish; draws still in flight do not overtake, are not failed draws or artifacts, and publish does not check for attempts in flight — a selection the published record does not show (assumes the agent can see outputs before the attempt ends) | a4, a4b | publish refused (or the in-flight attempts listed) while an attempt of a chain step is in flight; in-flight attempts admitted after the bound artifact overtake once they end |
+| N1-R8-F2 | major | A draw that ends `success` with no outputs is neither a failed draw nor an artifact, contrary to Control §5.1 item 6 (“every draw without a usable artifact is a failed draw”) | a1 | count a computed attempt without outputs as a failed draw |
+| N1-R8-F3 | major | Steps that supply a check's inputs are outside the deliverable's dependency chain, so their failures and draws are not in the chain history; publish carries no task-wide failed draws although the model header says it does | a2 | include check-input steps in `chain_steps`; add task-wide failed draws to publish |
+| N1-R8-F4 | minor | Parallel draws are never required to be checked (check before recompute does not see artifacts of attempts admitted before the earlier artifact existed), contrary to Control §5.1 item 6 | a3 | apply check-before-recompute to every produced artifact of the step at the next admission and at publish |
+| N1-R8-F5 | minor | Core lines 511–512 describe the confirmation fields differently from Control §1.1 | — | align Core |
+| N1-R8-F6 | minor | Core says T2-numeric needs “every required check pass”; Control §4.3 also accepts an allowed not-applicable | — | align Core |
+
 ## N3 — statistics
 
 | Finding | Sev. | Change | Where |

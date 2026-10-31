@@ -35,6 +35,32 @@ of round r > 1 consumes round r-1 directly or through steps of its own round (S0
 v12.1, round 3 (not re-reviewed; N1 did not pass S0): a sample counts as method-independent only when a freeze that
 precedes its first exposure lists it so (S0r3-N1-F1); the report and publish also carry the task-wide history of
 fail/inconclusive results and failed draws on steps off the deliverable's chain (S0r3-N1-F2).
+v12.1, round 4 (user-approved fixes; N1 did not pass the fourth S0 round): a contract that changes a step's content so that
+an earlier attempt's identity becomes current again (a revert) changes the binding among artifacts already seen, and like a
+pin needs human approval; report and publish carry every confirmation-sample result on the chain (S0r4-N1-F1). The
+confirmation fields belong to the deliverable, and a deliverable that becomes T3C by a later contract takes the reserved
+values (confirmation and method-independent confirmation required) unless a human approves (S0r4-N1-F2). A check's
+declared further inputs are named in the contract, resolved by C at admission and part of the check attempt's identity; an
+input that is an upstream of the target must be the version the target consumed (S0r4-N1-F3). Only exposures written by C
+are attributed to a check attempt (S0r4-N1-F4); the task-wide history counts the artifacts of every step (S0r4-N1-F5).
+v12.1, round 5 (user-approved fixes; N1 did not pass the fifth S0 round): a revert is also recognised by its digest — an
+artifact whose representative producer has another identity than its first producer in the step (an output already seen,
+reproduced by a changed computation) is not bound without a human pin (S0r5-N1-F1). A check input that is not an upstream
+of the target's step resolves only to that step's bound version, and the result counts only while it is still the bound
+version; upstreams and check inputs together form an acyclic graph (S0r5-N1-F2). Admission keys the side effect of a
+check attempt on check x criterion x target (S0r5-N1-F3).
+v12.1, after the sixth S0 round (user decision: adopt one rule and start C1 with N1 not passed): the revert rule and
+the reproduced rule are replaced by one binding rule — an artifact of a step is **overtaken** when an output first seen
+in that step after it (any attempt of the step name, any contract, whatever its end state or attestation) is no longer
+usable and current; an overtaken artifact binds only through a pin (human approval). This covers reverts, reproduced
+digests, unattested peeks and removed-and-re-added steps (S0r6-N1-F1, F2). A step added by a later contract has no
+pin (S0r6-N1-F2).
+v12.2, after the seventh S0 round (user decision 2026-10-30: fix and review again): an artifact is also overtaken by a
+newer attempt of its step that produced no usable and current output — one that failed, was cancelled, is unknown, was
+abandoned (also when later reconciled), or computed an unattested output — whether or not it has outputs; attempts
+still in flight and reuse attempts do not overtake (S0r7-N1-F1). Check attempts on artifacts of the chain that ended
+without a check result are counted as failed check draws in the report and in publish, and those that read a
+confirmation sample appear among the confirmation results (S0r7-N1-F2). The derivation version is v12.2.
 
 Run: python3 -I hep-research-reconstruction-v12-en-reference-model.py
 """
@@ -45,7 +71,7 @@ import math
 from dataclasses import dataclass, field, replace
 from typing import Any
 
-DERIVATION_VERSION = "v12.1"
+DERIVATION_VERSION = "v12.2"
 
 
 def h(*parts: Any) -> str:
@@ -119,6 +145,8 @@ class Log:
         self._by_sample: dict = {}
         self._by_identity: dict = {}
         self._by_step_out: dict = {}
+        self._by_check_target: dict = {}
+        self._by_step_intent: dict = {}
         self._intent: dict = {}
 
     @property
@@ -200,6 +228,9 @@ class Log:
         if f.kind == "intent":
             self._intent[a] = f
             self._by_identity.setdefault(f.get("identity"), []).append(f)
+            self._by_step_intent.setdefault(f.get("step"), []).append(f)
+            if f.get("step") == "__check__":
+                self._by_check_target.setdefault(dict(f.get("inputs") or ()).get("target"), []).append(f)
         if f.kind in ("receipt", "reconcile", "reuse"):
             outs = (f.get("source"),) if f.kind == "reuse" else (f.get("outputs") or ())
             for d in outs:
@@ -282,8 +313,7 @@ class StepSpec:
     checked: bool = False
     required: frozenset = frozenset()          # required (check, criteria)
     na_allowed: frozenset = frozenset()
-    confirmation_required: bool = True         # in effect when the delivery target is T3C
-    independent_confirmation: bool = False     # v12.1 r2: a pass on a method-independent confirmation sample is also required
+    check_inputs: frozenset = frozenset()       # r4 (S0r4-N1-F3): (check digest, step) — further inputs a required check reads
     family: str | None = None
     round: int | None = None
     allow_rerun: bool = False
@@ -295,6 +325,8 @@ class Deliverable:
     step: str
     target: str                                 # T2 / T3E / T3C
     required: bool = True
+    confirmation_required: bool = True          # r4 (S0r4-N1-F2): in effect when the target is T3C; a deliverable field
+    independent_confirmation: bool = False      # v12.1 r2: a pass on a method-independent confirmation sample is also required
 
 
 @dataclass(frozen=True)
@@ -330,9 +362,8 @@ def _opt(x, typ):
 def _types_ok(s: StepSpec) -> bool:
     return (isinstance(s.program, str) and isinstance(s.env, str) and _strs(s.upstream) and _strs(s.external)
             and len(set(s.upstream)) == len(s.upstream)
-            and all(isinstance(getattr(s, k), bool) for k in ("checked", "confirmation_required", "allow_rerun",
-                                                             "independent_confirmation"))
-            and _pairs(s.required) and _pairs(s.na_allowed)
+            and all(isinstance(getattr(s, k), bool) for k in ("checked", "allow_rerun"))
+            and _pairs(s.required) and _pairs(s.na_allowed) and _pairs(s.check_inputs)
             and _opt(s.family, str) and _opt(s.round, int) and _opt(s.pin, str))
 
 
@@ -375,7 +406,8 @@ def validate_contract(log: Log, spec: dict):
         raise Rejected("step names starting with __ are reserved")
     if not all(isinstance(s, StepSpec) and _types_ok(s) for s in steps.values()):
         raise Rejected("every step must be a StepSpec with fields of the declared types")
-    if not all(isinstance(d, Deliverable) and isinstance(d.step, str) and isinstance(d.required, bool)
+    if not all(isinstance(d, Deliverable) and isinstance(d.step, str) and all(
+            isinstance(getattr(d, k), bool) for k in ("required", "confirmation_required", "independent_confirmation"))
                for d in dels.values()):
         raise Rejected("every deliverable must be a Deliverable with fields of the declared types")
     if not all(isinstance(f, Family) and isinstance(f.final_round, int) and not isinstance(f.final_round, bool)
@@ -394,6 +426,9 @@ def validate_contract(log: Log, spec: dict):
             raise Rejected(f"{name}: a checked step needs at least one required check")
         if not s.na_allowed <= s.required:
             raise Rejected(f"{name}: not-applicable may only be allowed for required checks")
+        for c, u in s.check_inputs:                 # r4 (S0r4-N1-F3)
+            if c not in {k for k, _ in s.required} or u not in steps or u == name:
+                raise Rejected(f"{name}: a check input names a required check of this step and another step")
         if (s.family is None) != (s.round is None):
             raise Rejected(f"{name}: family and round go together")
         if s.family is not None and (s.family not in fams or not isinstance(s.round, int) or s.round < 1):
@@ -432,7 +467,7 @@ def validate_contract(log: Log, spec: dict):
         if n in seen:
             return
         stack.add(n)
-        for u in steps[n].upstream:
+        for u in steps[n].upstream + tuple(sorted(x for _, x in steps[n].check_inputs)):   # r5 (S0r5-N1-F2)
             visit(u)
         stack.discard(n)
         seen.add(n)
@@ -451,8 +486,7 @@ def step_at_least_as_strict(o: StepSpec, n: StepSpec) -> bool:
             and (n.checked or not o.checked)
             and n.required >= o.required
             and n.na_allowed <= o.na_allowed
-            and (n.confirmation_required or not o.confirmation_required)
-            and (n.independent_confirmation or not o.independent_confirmation)
+            and n.check_inputs == o.check_inputs
             and (n.family, n.round) == (o.family, o.round)
             and (not n.allow_rerun or o.allow_rerun)
             and n.pin == o.pin)
@@ -467,12 +501,19 @@ def contract_at_least_as_strict(old: dict, new: dict) -> bool:
     for name, ns in new["steps"].items():          # v12.1 (S0v12-N1-F1): an added step takes no value reserved for the
         if name in old["steps"]:                   # first contract or a human, and does not join an existing family
             continue
-        if not ns.confirmation_required or ns.allow_rerun or ns.na_allowed or ns.family in old["families"]:
+        if ns.allow_rerun or ns.na_allowed or ns.family in old["families"] or ns.pin is not None:   # r6: no pin
             return False
     for did, od in old["deliverables"].items():
         nd = new["deliverables"].get(did)
         if nd is None or nd.step != od.step or TIER_RANK[nd.target] < TIER_RANK[od.target] \
-                or (od.required and not nd.required):
+                or (od.required and not nd.required) \
+                or (od.confirmation_required and not nd.confirmation_required) \
+                or (od.independent_confirmation and not nd.independent_confirmation):
+            return False
+    for did, nd in new["deliverables"].items():    # r4 (S0r4-N1-F2): a deliverable that becomes T3C later takes the
+        od = old["deliverables"].get(did)          # reserved values; "no" comes only from the first contract or a human
+        if nd.target == "T3C" and (od is None or od.target != "T3C") \
+                and not (nd.confirmation_required and nd.independent_confirmation):
             return False
     for fam, of in old["families"].items():
         if new["families"].get(fam) != of:
@@ -484,6 +525,10 @@ def contract_at_least_as_strict(old: dict, new: dict) -> bool:
     if ob is not None and (nb is None or nb > ob):
         return False
     return True
+
+
+def _identity(step, s: StepSpec, inputs: dict) -> str:
+    return h(step, s.program, s.env, s.external, tuple(sorted(inputs.items())))
 
 
 @memo
@@ -696,8 +741,7 @@ def inputs_of(it) -> dict:
 
 
 def expected_identity(log: Log, step: str, inputs: dict) -> str:
-    s = spec_of(log, step)
-    return h(step, s.program, s.env, s.external, tuple(sorted(inputs.items())))
+    return _identity(step, spec_of(log, step), inputs)
 
 
 def identity_accepted(log, digest, step, old_id, new_id) -> bool:
@@ -753,13 +797,61 @@ def self_current(log: Log, digest: str) -> bool:
 
 
 @memo
+def first_seen(log: Log, step: str, digest: str):
+    """Sequence number of the first terminal fact of an attempt of the step that output this digest."""
+    for f in log._by_step_out.get(step, []):
+        if terminal_fact(log, f.get("attempt")) is f and \
+                digest in ((f.get("source"),) if f.kind == "reuse" else (f.get("outputs") or ())):
+            return f.seq
+    return None
+
+
+IN_FLIGHT = ("admitted", "running", "cancelling")
+
+
+@memo
+def step_intents(log: Log, step: str) -> tuple:
+    """The intents of one step, from the log's index (Control §4.8: no whole-log scan per derivation call)."""
+    return tuple(log._by_step_intent.get(step, ()))
+
+
+@memo
+def overtaken(log: Log, digest: str) -> bool:
+    """r6, r7 (S0r6-N1-F1, F2; S0r7-N1-F1): a newer attempt of the step name — one with a fact after this artifact was
+    first seen, under any contract — produced no usable and current output: it failed, was cancelled, is unknown, was
+    abandoned (reconciled or not), or its output is unattested, invalidated or otherwise not current, with or without
+    outputs. Binding this artifact again would be a choice among draws already made, so it binds only through a pin
+    (human approval). Attempts still in flight, reuse attempts and attempts that reproduced this digest do not
+    overtake."""
+    step = step_of(log, digest)
+    first = first_seen(log, step, digest)
+    if first is None:
+        return False
+    for it in step_intents(log, step):
+        a = it.get("attempt")
+        if max(f.seq for f in log.of_attempt(a)) <= first:
+            continue
+        st = exec_status(log, a)
+        if st in IN_FLIGHT or st == "reused":
+            continue
+        tf = terminal_fact(log, a)
+        outs = tuple(tf.get("outputs") or ()) if tf is not None and tf.kind != "reuse" else ()
+        if digest in outs:
+            continue
+        if st == "computed" and any(usable(log, e) and current(log, e) for e in outs):
+            continue
+        return True
+    return False
+
+
+@memo
 def bound(log: Log, step: str):
     s = spec_of(log, step)
     if s.pin is not None:
         return s.pin if ok(log, s.pin) else None
     best = None
     for d in candidates_raw(log, step):
-        if step_of(log, d) == step and ok(log, d):
+        if step_of(log, d) == step and ok(log, d) and not overtaken(log, d):
             if best is None or bind_seq(log, d) > bind_seq(log, best):
                 best = d
     return best
@@ -809,15 +901,50 @@ def current(log, digest) -> bool:
 
 # ================================================================ checks, freeze and achieved tier
 
-def check_identity(chk, crit, target):
-    return h("check", chk, crit, target)
+def check_identity(chk, crit, target, extra=None):
+    """r4 (S0r4-N1-F3): the declared further inputs, resolved by C, are part of the check attempt's identity."""
+    return h("check", chk, crit, target) if not extra else h("check", chk, crit, target, tuple(sorted(extra.items())))
+
+
+def declared_check_inputs(log, target, chk) -> tuple:
+    st = step_of(log, target)
+    return tuple(sorted(u for c, u in spec_of(log, st).check_inputs if c == chk)) if st is not None else ()
+
+
+def check_inputs_for(log, target, chk):
+    """At admission C resolves each declared input: an upstream of the target's step to the version the target consumed,
+    any other step to its bound version (r5, S0r5-N1-F2: never a held or unbound one). None if one cannot be resolved."""
+    consumed = inputs_of(best_producer(log, target)[1])
+    out = {}
+    for u in declared_check_inputs(log, target, chk):
+        d = consumed[u] if u in consumed else bound(log, u)
+        if d is None:
+            return None
+        out["input:" + u] = d
+    return out
+
+
+def check_attempt_of(it, target, chk, crit) -> bool:
+    ins = inputs_of(it)
+    extra = {k: v for k, v in ins.items() if k != "target"}
+    return ins.get("target") == target and it.get("identity") == check_identity(chk, crit, target, extra)
+
+
+def check_inputs_hold(log, it, target, chk) -> bool:
+    """The attempt read exactly the declared inputs of the effective contract; an upstream input is the consumed version,
+    any other input is still the bound version of its step (r5, S0r5-N1-F2)."""
+    extra = {k: v for k, v in inputs_of(it).items() if k != "target"}
+    if set(extra) != {"input:" + u for u in declared_check_inputs(log, target, chk)}:
+        return False
+    consumed = inputs_of(best_producer(log, target)[1])
+    return all(extra[k] == (consumed[k[6:]] if k[6:] in consumed else bound(log, k[6:])) for k in extra)
 
 
 def valid_check_attempt(log, r, target, chk, crit) -> bool:
     a = r.get("check_attempt")
     it = intent_of(log, a)
     return (it is not None and exec_status(log, a) == "computed" and attested(log, a)
-            and it.get("identity") == check_identity(chk, crit, target))
+            and check_attempt_of(it, target, chk, crit) and check_inputs_hold(log, it, target, chk))
 
 
 def result_sample(log, r):
@@ -827,8 +954,8 @@ def result_sample(log, r):
 
 
 def pending_check_attempts(log, target, chk, crit) -> bool:
-    for it in log._by_identity.get(check_identity(chk, crit, target), []):
-        if exec_status(log, it.get("attempt")) in ("admitted", "running", "cancelling", "unknown", "abandoned"):
+    for it in log._by_check_target.get(target, []):
+        if check_attempt_of(it, target, chk, crit) and exec_status(log, it.get("attempt")) in ("admitted", "running", "cancelling", "unknown", "abandoned"):
             return True
     return False
 
@@ -880,8 +1007,8 @@ def checks_state(log: Log, digest: str) -> str:
 
 
 @memo
-def freeze_ok(log: Log, digest: str) -> bool:
-    """Freeze and confirmation conditions for T3-C."""
+def freeze_ok(log: Log, digest: str, conf_req: bool = True, indep_req: bool = False) -> bool:
+    """Freeze and confirmation conditions for T3-C; the two flags are the deliverable's (r4, S0r4-N1-F2)."""
     _, it = best_producer(log, digest)
     step = it.get("step")
     s = spec_of(log, step)
@@ -904,7 +1031,7 @@ def freeze_ok(log: Log, digest: str) -> bool:
         for e in log.of_sample(smp):
             if e.kind != "exposure" or e.seq >= r.seq:
                 continue
-            if e.seq < min(holding) or e.get("attempt") not in mine:
+            if e.seq < min(holding) or e.writer != "C" or e.get("attempt") not in mine:   # r4 (S0r4-N1-F4)
                 return False
         for r2 in log.of_sample(smp):
             if r2.kind == "check_result" and r2.seq < r.seq and r2.get("target") != digest \
@@ -914,9 +1041,9 @@ def freeze_ok(log: Log, digest: str) -> bool:
             conf_ok = True
             if independent_sample(log, step, s.required, smp):
                 indep_ok = True
-    if s.independent_confirmation and not independent_ok(log, digest, indep_ok):
+    if indep_req and not independent_ok(log, digest, indep_ok):
         return False
-    return conf_ok or not s.confirmation_required
+    return conf_ok or not conf_req
 
 
 def independent_sample(log, step, required, smp) -> bool:
@@ -938,11 +1065,11 @@ def ok(log: Log, digest: str) -> bool:
     return current(log, digest) and upstream_state(log, digest) == "ok" and checks_state(log, digest) == "ok"
 
 
-def achieved_tier(log, digest) -> str | None:
+def achieved_tier(log, digest, conf_req: bool = True, indep_req: bool = False) -> str | None:
     """Achieved tier derived from facts: T2 needs ok; T3E has the same mechanical conditions as T2 (the difference is in how the report labels it); T3C additionally needs freeze and confirmation."""
     if not ok(log, digest) or not spec_of(log, step_of(log, digest)).checked:
         return None
-    return "T3C" if freeze_ok(log, digest) else "T3E"
+    return "T3C" if freeze_ok(log, digest, conf_req, indep_req) else "T3E"
 
 
 def chain_steps(log, step) -> list:
@@ -984,6 +1111,38 @@ def failed_draws(log, step) -> list:
     return out
 
 
+def confirmation_results(log, step) -> list:
+    """r4 (S0r4-N1-F1): every result on a confirmation sample of any artifact of the chain, so that confirming several
+    draws on different samples and keeping one stays visible."""
+    done = [(n, d, r.get("check"), result_sample(log, r), r.get("result")) for n in chain_steps(log, step)
+            for d in candidates_raw(log, n) for r in log.results_for(d)
+            if result_sample(log, r) is not None and sample_role(log, result_sample(log, r)) == "confirmation"]
+    aborted = [(n, d, None, smp, "no result") for n, d, _, _, reads in failed_check_draws(log, step)  # r7
+               for smp in reads if sample_role(log, smp) == "confirmation"]
+    return done + aborted
+
+
+def failed_check_draws(log, step) -> list:
+    """r7 (S0r7-N1-F2): check attempts on artifacts of the chain that ended without a check result (failed, cancelled,
+    unknown, abandoned, or computed without a result), so retrying a check until it passes stays visible."""
+    targets = {d: n for n in chain_steps(log, step) for d in candidates_raw(log, n)}
+    return aborted_checks(log, targets)
+
+
+def aborted_checks(log, targets: dict) -> list:
+    out = []
+    for it in log.of("intent"):
+        if it.get("step") != "__check__":
+            continue
+        tgt = inputs_of(it).get("target")
+        a = it.get("attempt")
+        if tgt not in targets or exec_status(log, a) in IN_FLIGHT:
+            continue
+        if not any(r.get("check_attempt") == a for r in log.results_for(tgt)):
+            out.append((targets[tgt], tgt, a, exec_status(log, a), tuple(it.get("reads") or ())))
+    return out
+
+
 def task_history(log) -> dict:
     """r3 (S0r3-N1-F2): fail/inconclusive results and failed draws on every step of the effective contract, so a selection
     made on a step off the deliverable's chain stays visible."""
@@ -991,7 +1150,9 @@ def task_history(log) -> dict:
     fails = [(n, d, r.get("check"), r.get("result")) for n in steps for d in candidates_raw(log, n)
              for r in log.results_for(d) if r.get("result") in ("fail", "inconclusive")]
     draws = [x for n in steps for x in failed_draws_of_step(log, n)]
-    return {"failures": fails, "failed_draws": draws}
+    arts = {n: len(step_artifacts(log, n)) for n in steps}  # r4 (S0r4-N1-F5): unchecked side-step variants are counted too
+    checks = aborted_checks(log, {d: n for n in steps for d in candidates_raw(log, n)})  # r7 (S0r7-N1-F2)
+    return {"failures": fails, "failed_draws": draws, "artifacts": arts, "failed_check_draws": checks}
 
 
 def failed_draws_of_step(log, n) -> list:
@@ -1010,7 +1171,7 @@ def failed_draws_of_step(log, n) -> list:
 def deliverable_status(log, did) -> dict:
     d = contract(log)["deliverables"][did]
     a = bound(log, d.step)
-    got = achieved_tier(log, a) if a is not None else None
+    got = achieved_tier(log, a, d.confirmation_required, d.independent_confirmation) if a is not None else None
     if got == "T3E" and d.target == "T2":
         got = "T2"
     met = got is not None and TIER_RANK[got] >= TIER_RANK[d.target]
@@ -1021,7 +1182,9 @@ def report_status(log, did) -> dict:
     """One row of the completion report: deliverable_status plus the historical failures on the dependency chain."""
     step = contract(log)["deliverables"][did].step
     return {**deliverable_status(log, did), "prior_failures": prior_failures(log, step),
-            "failed_draws": failed_draws(log, step), "task_history": task_history(log)}
+            "failed_draws": failed_draws(log, step), "failed_check_draws": failed_check_draws(log, step),
+            "confirmation_results": confirmation_results(log, step),
+            "task_history": task_history(log)}
 
 
 def accepted(log, digest) -> bool:
@@ -1059,7 +1222,7 @@ def label(log, digest) -> str:
     if cs == "missing":
         return "unchecked"
     if bound(log, step) != digest:
-        return "superseded"
+        return "overtaken" if overtaken(log, digest) and spec_of(log, step).pin != digest else "superseded"
     return "ok"
 
 
@@ -1108,6 +1271,12 @@ def unchecked_artifacts(log, step) -> list:
     return [d for d in step_artifacts(log, step) if not all(counted_result(log, d, c, k) for c, k in s.required)]
 
 
+def same_side_effect(f, step, check) -> bool:
+    """r5 (S0r5-N1-F3): check attempts have the same side effect when they check the same check x criterion x target,
+    whatever check inputs were resolved (Control §3)."""
+    return f.get("step") == step and check_attempt_of(f, check[2], check[0], check[1])
+
+
 def admit(log: Log, expect_head: int, attempt: str, step: str, cost: float = 1.0, reads: tuple = (),
           check: tuple | None = None, reuse_source: str | None = None) -> Fact:
     """C computes the identity; the caller may specify only the step, reads, cost and (for a check attempt) the (check, criteria, target) to check."""
@@ -1141,7 +1310,10 @@ def admit(log: Log, expect_head: int, attempt: str, step: str, cost: float = 1.0
         chk, crit, target = check
         if not usable(log, target):
             reject("check target is not a usable artifact")
-        identity, inputs = check_identity(chk, crit, target), {"target": target}
+        extra = check_inputs_for(log, target, chk)
+        if extra is None:
+            reject("a declared check input has no usable version")
+        identity, inputs = check_identity(chk, crit, target, extra), {"target": target, **extra}
     else:
         if step not in c["steps"] or check is not None:
             reject("unknown step")
@@ -1164,7 +1336,7 @@ def admit(log: Log, expect_head: int, attempt: str, step: str, cost: float = 1.0
                 reject("an earlier artifact of this checked step has no counted result for every required check; "
                        "check it before computing another")
     for f in log.of("intent"):
-        same = (f.get("identity") == identity) if step in SPECIAL_STEPS else (f.get("step") == step)
+        same = same_side_effect(f, step, check) if step in SPECIAL_STEPS else (f.get("step") == step)
         if same and exec_status(log, f.get("attempt")) == "unknown":
             reject("same side effect has an unknown attempt; reconcile or abandon first")
     items = [("intent", "C", dict(attempt=attempt, step=step, identity=identity,
@@ -1190,7 +1362,10 @@ def publish(log: Log, expect_head: int, did: str) -> Fact:
     return log.append("publish", "C", expect_head, deliverable=did, digest=st["artifact"], target=st["target"],
                       achieved=st["achieved"], prior_failures=len(pf), chain_artifacts=draws,
                       failed_draws=len(failed_draws(log, step)),
-                      task_failures=len(task_history(log)["failures"]), head=expect_head,
+                      failed_check_draws=len(failed_check_draws(log, step)),
+                      confirmation_results=len(confirmation_results(log, step)),
+                      task_failures=len(task_history(log)["failures"]),
+                      task_artifacts=sum(task_history(log)["artifacts"].values()), head=expect_head,
                       derivation=DERIVATION_VERSION)
 
 
@@ -1587,6 +1762,7 @@ def t24_multi_producer_same_digest():
     recontract(log, raw=StepSpec(program="pRaw_refactor"))
     assert label(log, "X1") == "invalidated"
     run(log, "a3", "raw", "R1")
+    # r6: a refactor reproducing the step's only output is no choice among outputs, so it binds (cf. t88, t91)
     assert label(log, "R1") == "ok" and accepted(log, "X1")
 
 
@@ -1734,7 +1910,7 @@ def t36_random_invariants():
     import random
     rnd = random.Random(20261029)
     labels = {"iteration_internal", "superseded_by_iteration", "not_usable", "invalidated", "producer_conflict",
-              "blocked_upstream", "held", "unchecked", "superseded", "ok"}
+              "blocked_upstream", "held", "unchecked", "superseded", "overtaken", "ok"}
     for trial in range(250):
         tgt = rnd.choice(["T2", "T3C"])
         steps = base_steps(allow_rerun=True, na_allowed=C1 if rnd.random() < .3 else frozenset())
@@ -1799,8 +1975,9 @@ def t36_random_invariants():
                 _, it = best_producer(log, d)
                 for u, ud in inputs_of(it).items():
                     assert ud == bound(log, u) and ok(log, ud)
-                if contract(log)["deliverables"]["D"].target == "T3C":
-                    assert freeze_ok(log, d)
+                dd = contract(log)["deliverables"]["D"]
+                if dd.target == "T3C":
+                    assert freeze_ok(log, d, dd.confirmation_required, dd.independent_confirmation)
         snap = {x: label(log, x) for x in candidates_raw(log, "reco")}
         log._memo.clear()
         assert snap == {x: label(log, x) for x in candidates_raw(log, "reco")}
@@ -1891,7 +2068,7 @@ def t43_sample_roles_change_only_with_approval():
 def t44_no_downgrade_path_target_stays():
     # S0 O1 F7, S0 rerun N1 F2, N2 F3, FX1 F2: there is no downgrade mechanism; a looser contract written early stays pending approval forever
     log = new_log(t3c_steps(), target="T3C", samples={"S": "confirmation"})
-    dormant = recontract(log, reco=reco_spec(confirmation_required=False))
+    dormant = recontract(log, deliverables={"D": Deliverable("reco", "T3C", confirmation_required=False)})
     run(log, "a1", "raw", "R1"); run(log, "a2", "reco", "X1")
     log.append("freeze", "agent", step="reco", samples=("S",), required=C1)
     check(log, "X1", "chkA", "crit1", "pass", "c1")
@@ -1900,11 +2077,11 @@ def t44_no_downgrade_path_target_stays():
     assert st["target"] == "T3C" and st["achieved"] == "T3E" and not st["met"]
     # declaring already in the first contract that confirmation is not required is allowed only when the claim type needs no
     # independent confirmation (Methods §2.1; not when confirmation is judged infeasible at freeze, which leaves the field yes), and the report shows it
-    log = new_log(t3c_steps(confirmation_required=False), target="T3C")
+    log = new_log(t3c_steps(), deliverables={"D": Deliverable("reco", "T3C", confirmation_required=False)})
     run(log, "a1", "raw", "R1"); run(log, "a2", "reco", "X1")
     log.append("freeze", "agent", step="reco", samples=(), required=C1)
     check(log, "X1", "chkA", "crit1", "pass", "c1")
-    assert deliverable_status(log, "D")["met"] and not spec_of(log, "reco").confirmation_required
+    assert deliverable_status(log, "D")["met"] and not contract(log)["deliverables"]["D"].confirmation_required
 
 
 def t45_reuse_source_is_checked():
@@ -2284,16 +2461,21 @@ def t72_added_step_cannot_take_reserved_values():
     log = new_log(t3c_steps(), target="T3C", samples={"S": "confirmation"}, mode="M2")
     approve(log, log.of("contract")[0])
     run(log, "a1", "raw", "R1")
-    dels = {"D": Deliverable("reco", "T3C"), "D2": Deliverable("reco2", "T3C")}
-    for loose in (dict(confirmation_required=False), dict(allow_rerun=True), dict(na_allowed=C1)):
+    dels = {"D": Deliverable("reco", "T3C"), "D2": Deliverable("reco2", "T3C", independent_confirmation=True)}
+    for loose in (dict(allow_rerun=True), dict(na_allowed=C1)):
         cf = recontract(log, deliverables=dels, reco2=reco_spec(program="pReco2", **loose))
         assert contract_status(log, cf) == "pending_approval", loose
         assert "reco2" not in contract(log)["steps"]
+    cf = recontract(log, deliverables={**dels, "D2": Deliverable("reco2", "T3C", confirmation_required=False,
+                                                                 independent_confirmation=True)},
+                    reco2=reco_spec(program="pReco2"))
+    assert contract_status(log, cf) == "pending_approval"                   # r4: the field is on the deliverable now
     cf = recontract(log, deliverables=dels, reco2=reco_spec(program="pReco2"))
     assert contract_status(log, cf) == "effective"                          # a plain added step is a tightening
     log = new_log(t3c_steps(), target="T3C", samples={"S": "confirmation"})  # M1 log for the execution part
     run(log, "a1", "raw", "R1")
-    recontract(log, deliverables=dels, reco2=reco_spec(program="pReco2", confirmation_required=False))
+    recontract(log, deliverables={**dels, "D2": Deliverable("reco2", "T3C", confirmation_required=False)},
+               reco2=reco_spec(program="pReco2"))
     assert "reco2" not in contract(log)["steps"]
     recontract(log, deliverables=dels, reco2=reco_spec(program="pReco2"))
     run(log, "a2", "reco2", "Y1"); check(log, "Y1", "chkA", "crit1", "pass", "c1")
@@ -2432,19 +2614,21 @@ def t79_method_independent_confirmation():
     # S0r2-N5-F1: when the step requires method-independent confirmation, a holdout-only pass does not give T3C
     req = frozenset({("hold", "h"), ("indep", "i")})
     smp = {"H": "confirmation", "I": "confirmation", "CR": "control"}
-    log = new_log(t3c_steps(required=req, independent_confirmation=True), target="T3C", samples=smp)
+    log = new_log(t3c_steps(required=req), samples=smp,
+                  deliverables={"D": Deliverable("reco", "T3C", independent_confirmation=True)})
     run(log, "a1", "raw", "R1"); run(log, "a2", "reco", "X1")
     log.append("freeze", "agent", step="reco", samples=("H", "I"), required=req, independent=("I",))
     check(log, "X1", "hold", "h", "pass", "c1", sample="H")
     check(log, "X1", "indep", "i", "pass", "c2", sample="CR")              # method-independent check on a control sample
     assert deliverable_status(log, "D")["achieved"] == "T3E"
-    log = new_log(t3c_steps(required=req, independent_confirmation=True), target="T3C", samples=smp)
+    log = new_log(t3c_steps(required=req), samples=smp,
+                  deliverables={"D": Deliverable("reco", "T3C", independent_confirmation=True)})
     run(log, "a1", "raw", "R1"); run(log, "a2", "reco", "X1")
     log.append("freeze", "agent", step="reco", samples=("H", "I"), required=req, independent=("I",))
     check(log, "X1", "hold", "h", "pass", "c1", sample="H")
     check(log, "X1", "indep", "i", "pass", "c2", sample="I")
     assert deliverable_status(log, "D")["achieved"] == "T3C"
-    cf = recontract(log, reco=reco_spec(required=req, independent_confirmation=False))
+    cf = recontract(log, deliverables={"D": Deliverable("reco", "T3C")})
     assert contract_status(log, cf) == "pending_approval"                   # dropping it is a loosening
     expect(Rejected, log.append, "freeze", "agent", step="reco", samples=("H",), required=req, independent=("I",))
 
@@ -2474,7 +2658,8 @@ def t81_family_membership_rules():
 def t82_independent_label_and_off_chain_history():
     # S0r3-N1-F1: a freeze written after the sample was exposed cannot relabel it as method-independent
     req = frozenset({("hold", "h")})
-    log = new_log(t3c_steps(required=req, independent_confirmation=True), target="T3C", samples={"H": "confirmation"})
+    log = new_log(t3c_steps(required=req), samples={"H": "confirmation"},
+                  deliverables={"D": Deliverable("reco", "T3C", independent_confirmation=True)})
     run(log, "a1", "raw", "R1"); run(log, "a2", "reco", "X1")
     log.append("freeze", "agent", step="reco", samples=("H",), required=req)
     check(log, "X1", "hold", "h", "pass", "c1", sample="H")
@@ -2492,6 +2677,271 @@ def t82_independent_label_and_off_chain_history():
     run(log, "a2", "reco", "X1"); check(log, "X1", "chkA", "crit1", "pass", "c1")
     p = publish(log, log.head, "D")
     assert p.get("prior_failures") == 0 and p.get("task_failures") == 3
+
+
+# ================================================================ counterexamples from the fourth S0 round (user-approved fixes, r4)
+
+def t83_content_revert_needs_a_human():
+    # S0r4-N1-F1: confirm X1 on S1 and X2 on S2, then revert the program to re-bind X1 — that choice needs a human
+    smp = {"S1": "confirmation", "S2": "confirmation"}
+    log = new_log(t3c_steps(), target="T3C", samples=smp)
+    log.append("freeze", "agent", step="reco", samples=("S1", "S2"), required=C1)
+    run(log, "a1", "raw", "R1"); run(log, "a2", "reco", "X1")
+    check(log, "X1", "chkA", "crit1", "pass", "c1", sample="S1")
+    assert contract_status(log, recontract(log, reco=reco_spec(program="pReco_alt"))) == "effective"
+    run(log, "a3", "reco", "X2"); check(log, "X2", "chkA", "crit1", "pass", "c2", sample="S2")
+    st = report_status(log, "D")
+    assert st["artifact"] == "X2" and len(st["confirmation_results"]) == 2  # both confirmations are on record
+    p = publish(log, log.head, "D")
+    assert p.get("confirmation_results") == 2 and p.get("chain_artifacts") == 3
+    cf = recontract(log, reco=reco_spec(program="pReco"))                   # the revert: r6, X1 is overtaken by X2
+    assert label(log, "X1") == "overtaken" and label(log, "X2") == "invalidated" and bound(log, "reco") is None
+    expect(Admission, publish, log, log.head, "D")
+    approve(log, recontract(log, reco=reco_spec(program="pReco", pin="X1")))  # a human may take X1 back, knowingly
+    assert bound(log, "reco") == "X1"
+    log = new_log(base_steps())                                             # a revert of an upstream step is caught too
+    run(log, "a1", "raw", "R1")
+    recontract(log, raw=StepSpec(program="pRaw2")); run(log, "a2", "raw", "R2")
+    recontract(log, raw=StepSpec(program="pRaw"))
+    assert label(log, "R1") == "overtaken" and bound(log, "raw") is None
+
+
+def t84_confirmation_fields_belong_to_the_deliverable():
+    # S0r4-N1-F2: a deliverable that becomes T3C later takes the reserved values unless a human approves
+    log = new_log(t3c_steps(), samples={"S": "confirmation", "CR": "control"}, mode="M2",
+                  deliverables={"D": Deliverable("reco", "T2", confirmation_required=False)})
+    approve(log, log.of("contract")[0])
+    for d2 in (Deliverable("reco", "T3C"), Deliverable("reco", "T3C", confirmation_required=False,
+                                                       independent_confirmation=True)):
+        cf = recontract(log, deliverables={"D": contract(log)["deliverables"]["D"], "D2": d2})
+        assert contract_status(log, cf) == "pending_approval", d2
+    cf = recontract(log, deliverables={"D": Deliverable("reco", "T3C", confirmation_required=False)})
+    assert contract_status(log, cf) == "pending_approval"                   # raising the target counts as adding T3C
+    cf = recontract(log, deliverables={"D": contract(log)["deliverables"]["D"],
+                                       "D2": Deliverable("reco", "T3C", independent_confirmation=True)})
+    assert contract_status(log, cf) == "effective"
+    log.append("freeze", "agent", step="reco", samples=("S",), required=C1)
+    for a, s, o in (("a1", "raw", "R1"), ("a2", "reco", "X1")):
+        admit(log, log.head, a, s)
+        log.append("receipt", "B", attempt=a, end="success", termination="confirmed", outputs=(o,), usage=0.5)
+    admit(log, log.head, "c1", "__check__", cost=1.0, reads=("CR",), check=("chkA", "crit1", "X1"))
+    log.append("receipt", "B", attempt="c1", end="success", termination="confirmed", outputs=(), usage=0.5)
+    log.append("check_result", "B", target="X1", check="chkA", criteria="crit1", result="pass",
+               check_attempt="c1", sample="CR")
+    assert deliverable_status(log, "D")["met"] and not deliverable_status(log, "D2")["met"]
+    assert not accepted(log, "X1")
+    expect(Admission, publish, log, log.head, "D2")
+
+
+def t85_check_inputs_are_resolved_by_c():
+    # S0r4-N1-F3: a check's further inputs are declared in the contract, resolved by C and part of its identity
+    st = iteration_steps()
+    st["al3"] = replace(st["al3"], check_inputs=frozenset({("converged", "al2")}))
+    st["ref"] = StepSpec(program="pRef")
+    st["reco"] = replace(st["reco"], check_inputs=frozenset({("chkA", "ref")}))
+    log = new_log(st, families=ALIGN)
+    for a, s, o in (("i1", "al1", "A1"), ("i2", "al2", "A2"), ("i3", "al3", "A3")):
+        run(log, a, s, o)
+    check(log, "A3", "converged", "c", "pass", "k1"); check(log, "A3", "weak_mode", "w", "pass", "k2")
+    it = intent_of(log, "k1")
+    assert inputs_of(it) == {"target": "A3", "input:al2": "A2"}             # the version al3 consumed, chosen by C
+    assert it.get("identity") == check_identity("converged", "c", "A3", {"input:al2": "A2"}) \
+        != check_identity("converged", "c", "A3")
+    assert label(log, "A3") == "ok"
+    run(log, "r1", "reco", "X1")
+    expect(Admission, check, log, "X1", "chkA", "crit1", "pass", "c1")      # ref has no usable version yet
+    run(log, "f1", "ref", "F1"); check(log, "X1", "chkA", "crit1", "pass", "c2")
+    assert inputs_of(intent_of(log, "c2"))["input:ref"] == "F1" and accepted(log, "X1")
+    cf = recontract(log, reco=replace(spec_of(log, "reco"), check_inputs=frozenset()))
+    assert contract_status(log, cf) == "pending_approval"                   # the declared inputs change only with a human
+    expect(Rejected, new_log, {**st, "reco": replace(st["reco"], check_inputs=frozenset({("chkZ", "ref")}))},
+           families=ALIGN)
+
+
+def t86_agent_exposure_is_not_a_check_attempt():
+    # S0r4-N1-F4: an exposure the agent writes is never attributed to a C-admitted check attempt
+    req = frozenset({("chkA", "crit1"), ("chkB", "crit2")})
+    log = new_log(t3c_steps(required=req), target="T3C", samples={"S": "confirmation"})
+    log.append("freeze", "agent", step="reco", samples=("S",), required=req)
+    run(log, "a1", "raw", "R1"); run(log, "a2", "reco", "X1")
+    check(log, "X1", "chkA", "crit1", "pass", "c1", sample="S")
+    log.append("exposure", "agent", sample="S", attempt="c1")
+    check(log, "X1", "chkB", "crit2", "pass", "c2", sample="S")
+    assert deliverable_status(log, "D")["achieved"] == "T3E"
+
+
+def t87_off_chain_artifacts_are_counted():
+    # S0r4-N1-F5: unchecked side-step variants are counted in the task-wide history and in publish
+    log = new_log(base_steps(), samples={"CR": "control"})
+    run(log, "a1", "raw", "R1")
+    for i in range(5):
+        recontract(log, side=StepSpec(program=f"pVariant{i}", upstream=("raw",)))
+        run(log, f"s{i}", "side", f"SV{i}", reads=("CR",))
+    run(log, "a2", "reco", "X1"); check(log, "X1", "chkA", "crit1", "pass", "c1", sample="CR")
+    assert report_status(log, "D")["task_history"]["artifacts"]["side"] == 5
+    p = publish(log, log.head, "D")
+    assert p.get("chain_artifacts") == 2 and p.get("task_artifacts") == 7
+
+
+# ================================================================ counterexamples from the fifth S0 round (user-approved fixes, r5)
+
+def t88_reproduced_digest_needs_a_pin():
+    # S0r5-N1-F1: a cosmetic change that reproduces an already-seen digest does not re-bind it without a human
+    smp = {"S1": "confirmation", "S2": "confirmation"}
+    log = new_log(t3c_steps(), target="T3C", samples=smp)
+    log.append("freeze", "agent", step="reco", samples=("S1", "S2"), required=C1)
+    run(log, "a1", "raw", "R1"); run(log, "a2", "reco", "X1")
+    check(log, "X1", "chkA", "crit1", "pass", "c1", sample="S1")
+    recontract(log, reco=reco_spec(program="pReco_alt"))
+    run(log, "a3", "reco", "X2"); check(log, "X2", "chkA", "crit1", "pass", "c2", sample="S2")
+    cf = recontract(log, reco=reco_spec(program="pReco "))                  # cosmetic: a new identity, not a revert
+    assert contract_status(log, cf) == "effective" and label(log, "X2") == "invalidated"
+    run(log, "a4", "reco", "X1")                                            # reproduces the first, already-seen output
+    assert overtaken(log, "X1") and label(log, "X1") == "overtaken" and bound(log, "reco") is None
+    assert not deliverable_status(log, "D")["met"]
+    expect(Admission, publish, log, log.head, "D")
+    cf = recontract(log, reco=reco_spec(program="pReco ", pin="X1"))       # a human may take it, knowingly
+    assert contract_status(log, cf) == "pending_approval"
+    approve(log, cf)
+    assert bound(log, "reco") == "X1" and label(log, "X1") == "ok"
+    log = new_log(base_steps())                                             # through an unchecked upstream step
+    run(log, "a1", "raw", "R1"); run(log, "a2", "reco", "X1"); check(log, "X1", "chkA", "crit1", "pass", "c1")
+    recontract(log, raw=StepSpec(program="pRaw2")); run(log, "a3", "raw", "R2")
+    run(log, "a4", "reco", "X2"); check(log, "X2", "chkA", "crit1", "pass", "c2")
+    recontract(log, raw=StepSpec(program="pRaw "))
+    run(log, "a5", "raw", "R1")                                             # reproduces R1
+    assert bound(log, "raw") is None and label(log, "X1") == "blocked_upstream" and not accepted(log, "X1")
+    log = new_log(base_steps())                                             # a deterministic same-identity copy is not a reproduction
+    run(log, "a1", "raw", "R1")
+    admit(log, log.head, "r1", "raw", cost=0.0, reuse_source="R1")
+    assert not overtaken(log, "R1") and bound(log, "raw") == "R1"
+
+
+def t89_check_inputs_must_stay_bound():
+    # S0r5-N1-F2: a non-upstream check input resolves only to a bound version, and the result counts only while it is bound
+    st = base_steps()
+    st["ref"] = StepSpec(program="pRef", checked=True, required=frozenset({("refchk", "r")}))
+    st["reco"] = replace(st["reco"], check_inputs=frozenset({("chkA", "ref")}))
+    log = new_log(st)
+    run(log, "a1", "raw", "R1"); run(log, "a2", "reco", "X1"); run(log, "f1", "ref", "F1")
+    check(log, "F1", "refchk", "r", "fail", "k1")                           # the reference is held
+    expect(Admission, check, log, "X1", "chkA", "crit1", "pass", "c1")
+    recontract(log, ref=replace(st["ref"], program="pRef2"))
+    run(log, "f2", "ref", "F2"); check(log, "F2", "refchk", "r", "pass", "k2")
+    check(log, "X1", "chkA", "crit1", "pass", "c2")
+    assert inputs_of(intent_of(log, "c2"))["input:ref"] == "F2" and accepted(log, "X1")
+    recontract(log, ref=replace(st["ref"], program="pRef3"))                # the reference changes after the check
+    run(log, "f3", "ref", "F3"); check(log, "F3", "refchk", "r", "pass", "k3")
+    assert label(log, "X1") == "unchecked" and not accepted(log, "X1")      # the result no longer counts
+    check(log, "X1", "chkA", "crit1", "pass", "c3")
+    assert accepted(log, "X1")
+    st2 = dict(st)                                                          # a check input that depends on the target is a cycle
+    st2["down"] = StepSpec(program="pDown", upstream=("reco",))
+    st2["reco"] = replace(st["reco"], check_inputs=frozenset({("chkA", "down")}))
+    expect(Rejected, new_log, st2)
+
+
+def t90_check_side_effect_is_check_criterion_target():
+    # S0r5-N1-F3: while a check attempt of check x criterion x target is unknown, another one is rejected
+    st = base_steps()
+    st["ref"] = StepSpec(program="pRef")
+    st["reco"] = replace(st["reco"], check_inputs=frozenset({("chkA", "ref")}))
+    log = new_log(st)
+    run(log, "a1", "raw", "R1"); run(log, "a2", "reco", "X1"); run(log, "f1", "ref", "F1")
+    check(log, "X1", "chkA", "crit1", "pass", "c1", termination="unknown")
+    recontract(log, ref=StepSpec(program="pRef2")); run(log, "f2", "ref", "F2")
+    expect(Admission, check, log, "X1", "chkA", "crit1", "pass", "c2")
+
+
+def t91_overtaken_covers_peeks_and_readded_steps():
+    # S0r6-N1-F1: a draw made unattested on purpose and reproduced later is still an output already seen
+    smp = {"S1": "confirmation", "S2": "confirmation"}
+    log = new_log(t3c_steps(), target="T3C", samples=smp, budget=10.0)
+    log.append("freeze", "agent", step="reco", samples=("S1", "S2"), required=C1)
+    run(log, "a1", "raw", "R1")
+    admit(log, log.head, "a2", "reco", cost=0.0)                            # under-declared cost: unattested peek
+    log.append("receipt", "B", attempt="a2", end="success", termination="confirmed", outputs=("X1",), usage=0.5)
+    assert not usable(log, "X1")
+    recontract(log, reco=reco_spec(program="pReco_alt"))
+    run(log, "a3", "reco", "X2"); check(log, "X2", "chkA", "crit1", "pass", "c2", sample="S2")
+    recontract(log, reco=reco_spec(program="pReco "))                       # cosmetic
+    run(log, "a4", "reco", "X1")                                            # reproduces the peeked output
+    check(log, "X1", "chkA", "crit1", "pass", "c1", sample="S1")
+    assert label(log, "X1") == "overtaken" and not deliverable_status(log, "D")["met"]
+    expect(Admission, publish, log, log.head, "D")
+    # S0r6-N1-F2: a step removed with approval and re-added by the agent with an old program, or with a pin
+    st = {**base_steps(), "alt": reco_spec(program="pAlt1")}
+    dels = {"D": Deliverable("reco", "T2"), "D2": Deliverable("alt", "T2")}
+    log = new_log(st, deliverables=dels)
+    run(log, "a1", "raw", "R1"); run(log, "b1", "alt", "A1"); check(log, "A1", "chkA", "crit1", "pass", "k1")
+    recontract(log, alt=reco_spec(program="pAlt2"))
+    run(log, "b2", "alt", "A2"); check(log, "A2", "chkA", "crit1", "pass", "k2")
+    steps = {k: v for k, v in contract(log)["steps"].items() if k != "alt"}
+    cf = log.append("contract", "agent", spec=spec(steps, {"D": dels["D"]}))
+    approve(log, cf)
+    cf = log.append("contract", "agent", spec=spec({**steps, "alt": reco_spec(program="pAlt1")}, dels))
+    assert contract_status(log, cf) == "effective"
+    assert label(log, "A1") == "overtaken" and bound(log, "alt") is None and not deliverable_status(log, "D2")["met"]
+    log = new_log(st, deliverables=dels)                                    # re-adding a step name with a pin needs a human
+    run(log, "a1", "raw", "R1"); run(log, "b1", "alt", "A1"); check(log, "A1", "chkA", "crit1", "pass", "k1")
+    recontract(log, alt=reco_spec(program="pAlt2")); run(log, "b2", "alt", "A2")
+    steps = {k: v for k, v in contract(log)["steps"].items() if k != "alt"}
+    approve(log, log.append("contract", "agent", spec=spec(steps, {"D": dels["D"]})))
+    cf = log.append("contract", "agent", spec=spec({**steps, "alt": reco_spec(program="pAlt1", pin="A1")}, dels))
+    assert contract_status(log, cf) == "pending_approval" and "alt" not in contract(log)["steps"]
+
+
+# ================================================================ counterexamples from the seventh S0 round (fixed in v12.2)
+
+def t92_unresolved_newer_draws_overtake():
+    # S0r7-N1-F1: a newer draw that ends unknown, or is abandoned and later reconciled, overtakes the older output
+    for ending in ("unknown", "abandoned", "abandoned-reconciled", "failed-no-output"):
+        log = new_log(base_steps())
+        run(log, "a1", "raw", "R1"); run(log, "a2", "reco", "X1"); check(log, "X1", "chkA", "crit1", "pass", "c1")
+        recontract(log, reco=reco_spec(program="pReco_alt"))
+        admit(log, log.head, "a3", "reco")
+        log.append("start", "B", attempt="a3")
+        if ending == "failed-no-output":
+            log.append("receipt", "B", attempt="a3", end="failure", termination="confirmed", outputs=())
+        else:
+            log.append("receipt", "B", attempt="a3", end="success", termination="unknown", outputs=())
+        if ending in ("abandoned", "abandoned-reconciled"):
+            log.append("decision", "human", action="abandon", attempt="a3")
+        if ending == "abandoned-reconciled":
+            log.append("reconcile", "B", attempt="a3", end="success", termination="confirmed", outputs=("Y",))
+        recontract(log, reco=reco_spec(program="pReco"))                    # revert to X1's program
+        assert label(log, "X1") == "overtaken" and bound(log, "reco") is None, ending
+        expect(Admission, publish, log, log.head, "D")
+    log = new_log(base_steps())                                             # an attempt still in flight does not overtake
+    run(log, "a1", "raw", "R1"); run(log, "a2", "reco", "X1"); check(log, "X1", "chkA", "crit1", "pass", "c1")
+    recontract(log, reco=reco_spec(program="pReco_alt")); admit(log, log.head, "a3", "reco")
+    recontract(log, reco=reco_spec(program="pReco"))
+    assert not overtaken(log, "X1") and bound(log, "reco") == "X1"
+
+
+def t93_aborted_checks_are_counted():
+    # S0r7-N1-F2: check attempts without a result are failed check draws; their confirmation samples are listed and spent
+    smp = {"S1": "confirmation", "S2": "confirmation", "S3": "confirmation"}
+    log = new_log(t3c_steps(), target="T3C", samples=smp)
+    log.append("freeze", "agent", step="reco", samples=("S1", "S2", "S3"), required=C1)
+    run(log, "a1", "raw", "R1"); run(log, "a2", "reco", "X1")
+    for a, s, end in (("c1", "S1", "cancelled"), ("c2", "S2", "failure")):
+        admit(log, log.head, a, "__check__", cost=0.0, reads=(s,), check=("chkA", "crit1", "X1"))
+        log.append("receipt", "B", attempt=a, end=end, termination="confirmed", outputs=())
+    check(log, "X1", "chkA", "crit1", "pass", "c3", sample="S3")
+    st = report_status(log, "D")
+    assert st["achieved"] == "T3C" and len(st["failed_check_draws"]) == 2
+    assert sorted(x[3] for x in st["confirmation_results"]) == ["S1", "S2", "S3"]
+    p = publish(log, log.head, "D")
+    assert p.get("failed_check_draws") == 2 and p.get("confirmation_results") == 3
+    check(log, "X1", "chkA", "crit1", "pass", "c4", sample="S1")           # S1 is spent: its result does not confirm
+    log2 = new_log(t3c_steps(), target="T3C", samples={"S1": "confirmation"})
+    log2.append("freeze", "agent", step="reco", samples=("S1",), required=C1)
+    run(log2, "a1", "raw", "R1"); run(log2, "a2", "reco", "X1")
+    admit(log2, log2.head, "c1", "__check__", cost=0.0, reads=("S1",), check=("chkA", "crit1", "X1"))
+    log2.append("receipt", "B", attempt="c1", end="cancelled", termination="confirmed", outputs=())
+    check(log2, "X1", "chkA", "crit1", "pass", "c2", sample="S1")
+    assert deliverable_status(log2, "D")["achieved"] == "T3E"               # a retry on the same sample is not a confirmation
 
 
 # ================================================================ mutation tests: every mutation must be caught by some scenario
@@ -2528,7 +2978,7 @@ def _mut_newest_producer(log, digest):
 
 MUTATIONS = {
     "fail counts only computed check attempts": ("checks_state", lambda orig: memo(_mut_fail_only_from_computed)),
-    "freeze not checked": ("freeze_ok", lambda orig: memo(lambda log, d: True)),
+    "freeze not checked": ("freeze_ok", lambda orig: memo(lambda log, d, *a: True)),
     "upstream ignores current": ("current", lambda orig: (lambda log, d: self_current(log, d))),
     "strictness order not checked": ("contract_at_least_as_strict", lambda orig: (lambda o, n: True)),
     "required checks can be reduced": ("step_at_least_as_strict", lambda orig: (
@@ -2561,7 +3011,7 @@ MUTATIONS = {
         r.get("observed_exceeds_declared") for r in log.of_attempt(a) if r.kind in ("receipt", "reconcile")))),
     "same-identity rerun allowed before the check": ("same_identity_ran", lambda orig: (lambda log, st, i: any(
         ok(log, d) for d in candidates_raw(log, st) if best_producer(log, d) and best_producer(log, d)[1].get("identity") == i))),
-    "freeze constrains all samples": ("freeze_ok", lambda orig: memo(lambda log, d: orig.__wrapped__(log, d) and not any(
+    "freeze constrains all samples": ("freeze_ok", lambda orig: memo(lambda log, d, *a: orig.__wrapped__(log, d, *a) and not any(
         result_sample(log, r) and sample_role(log, result_sample(log, r)) != "confirmation" for r in log.results_for(d)))),
     "reuse changes the binding": ("best_producer", lambda orig: memo(lambda log, d: _mut_newest_producer(log, d))),
     "added step may take reserved values": ("contract_at_least_as_strict", lambda orig: (
@@ -2575,8 +3025,43 @@ MUTATIONS = {
     "fact fields not validated": ("fact_field_problem", lambda orig: (lambda kind, data: None)),
     "independent label from any freeze": ("independent_sample", lambda orig: (lambda log, step, req, smp: any(
         smp in (f.get("independent") or ()) for f in log.of("freeze")))),
-    "task-wide history omitted": ("task_history", lambda orig: (lambda log: {"failures": [], "failed_draws": []})),
+    "task-wide history omitted": ("task_history", lambda orig: (lambda log: {"failures": [], "failed_draws": [],
+                                                                            "artifacts": {}})),
+    "overtaken artifact binds without a human": ("overtaken", lambda orig: memo(lambda log, d: False)),
+    "confirmation results not reported": ("confirmation_results", lambda orig: (lambda log, step: [])),
+    "added T3C deliverable inherits no": ("contract_at_least_as_strict", lambda orig: (
+        lambda o, n: orig(o, {**n, "deliverables": {k: replace(v, confirmation_required=True,
+                                                               independent_confirmation=True)
+                                                    if k not in o["deliverables"] or o["deliverables"][k].target != "T3C"
+                                                    else v for k, v in n["deliverables"].items()}}))),
+    "unresolved newer attempts do not overtake": ("overtaken", lambda orig: memo(lambda log, d: (lambda order: (
+        d in order and any(not (usable(log, e) and current(log, e)) for e in order[order.index(d) + 1:])))(
+        candidates_raw(log, step_of(log, d))))),
+    "aborted check attempts not counted": ("aborted_checks", lambda orig: (lambda log, targets: [])),
+    "check inputs not resolved by C": ("check_inputs_for", lambda orig: (lambda log, t, c: {})),
+    "added step may carry a pin": ("contract_at_least_as_strict", lambda orig: (
+        lambda o, n: orig(o, {**n, "steps": {k: (replace(v, pin=None) if k not in o["steps"] else v)
+                                             for k, v in n["steps"].items()}}))),
+    "check input need not stay bound": ("check_inputs_hold", lambda orig: (lambda log, it, t, c: set(
+        k for k in inputs_of(it) if k != "target") == {"input:" + u for u in declared_check_inputs(log, t, c)})),
+    "check side effect not recognised across check inputs": ("same_side_effect", lambda orig: (
+        lambda f, step, chk: orig(f, step, chk) and set(inputs_of(f)) == {"target"})),
+    "agent exposure attributed to a check attempt": ("freeze_ok", lambda orig: memo(
+        lambda log, d, *a: orig.__wrapped__(_NoWriterLog(log), d, *a))),
 }
+
+
+class _NoWriterLog:
+    """Mutation helper: a view of the log in which every exposure appears to be written by C."""
+    def __init__(self, log):
+        self._log = log
+        self._memo = {}
+
+    def __getattr__(self, k):
+        return getattr(self._log, k)
+
+    def of_sample(self, smp):
+        return [replace(f, writer="C") if f.kind == "exposure" else f for f in self._log.of_sample(smp)]
 
 
 def run_tests(tests):

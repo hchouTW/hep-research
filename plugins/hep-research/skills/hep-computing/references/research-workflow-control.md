@@ -1,19 +1,23 @@
 # Research Workflow Control: Evidence Tiers, Triggers and the Task Record
 
 How a research request is carried to its deliverable with the evidence it needs: the evidence tier and execution mode
-of each deliverable, which rules to load, the task contract, the transition-period task record kept while no
-control-layer helper exists, human decisions and the completion report. This page is shared by every skill (a
+of each deliverable, which rules to load, the task contract, the transition-period task record, the control-layer
+helper (whose rules did not pass review), human decisions and the completion report. This page is shared by every skill (a
 reconstruction study, a fit, a training run or a numerical prediction use the same tiers and records); the
 reconstruction method content is in hep-detector ([event reconstruction](../../hep-detector/references/event-reconstruction.md),
 [calibration and alignment](../../hep-detector/references/calibration-and-alignment.md)).
 
-> **Status.** Source: the reconstruction v12 specification, v12.1 spec copy (`evals/reconstruction-v12/spec/` in
+> **Status.** Source: the reconstruction v12 specification, v12.2 spec copy (`evals/reconstruction-v12/spec/` in
 > the source repository; Core, Methods, Delivery and the transition-period part of Control). S0 (recorded spec review,
 > hep-review R2) passed for the routing, transition, statistics and method obligations; **the control-layer
 > obligation (contract format, strictness order, derivation, admission; Control §1–§6 and the reference model) did not
-> pass**, so those rules are not written here and **no control-layer helper exists**: every derivation below is the
-> main Agent's own statement, not a mechanical guarantee. Placing this page in hep-computing (DEC-11) and the task-record
-> location (DEC-08/DEC-09) were approved by the maintainer on 2026-10-30.
+> pass**: violated in all eight review rounds; round 8 left three open defects, listed in every report of the
+> helper. The control-layer helper (`control_layer.py`, stages C1 and C2 — resumption, reconciliation,
+> lease lock) ships by the maintainer's decision of 2026-10-30, with the control rules stated as **not through S0**
+> (section below). It implements the spec copy's Control part and agrees with its reference model on the tested fact sequences, but it is **not reviewed or validated**: its
+> derivations are mechanical consequences of unreviewed rules, not established results, and it gives no autonomous
+> reconstruction capability. The transition-period procedure below remains the reviewed one. Placing this page in
+> hep-computing (DEC-11) and the task-record location (DEC-08/DEC-09) were approved by the maintainer on 2026-10-30.
 
 ## Always-on rules
 
@@ -59,15 +63,16 @@ Determination rules:
 | Execution mode | When | Needs |
 |---|---|---|
 | M1 interactive, bounded local | done in this session, locally, in the foreground | host limits and a bounded plan; T2-numeric and above use the transition rules below |
-| M2 resumable | a T2-numeric+ deliverable expected to exceed a session, moved to the background, or resumed after an interruption | persisted identities and state (G1, G2, G5): **not available yet** — use M1 segmented execution and a resumption summary |
+| M2 resumable | a T2-numeric+ deliverable expected to exceed a session, moved to the background, or resumed after an interruption | persisted identities and state (G1, G2, G5): only with the control-layer helper (G5 qualified on its record; rules not through S0), otherwise M1 segmented execution and a resumption summary |
 | M3 unattended or remote | remote submission or no one present (local metered cost alone does not make M3) | executor guarantees G1–G5: **not available**; remote work follows the existing campaign rules and manual boundary |
 
 Lacking a guarantee is reported as a weaker, stated process; a capability is never simulated by a written policy.
 Which guarantees the local runner actually provides is established by `executor_capabilities.py qualify` (fault
-injection: G1 output isolation and G2 termination, including processes that leave the group and nested runners,
-pass on Linux; G3 submission reconciliation, G4 metering with
-atomic reservation, G5 persistent state and G6 conditions evidence are unsupported); `admit --mode M2` therefore
-refuses, and M2/M3 cannot be claimed.
+injection: G1 output isolation, G2 termination (also processes that leave the group and nested runners) and G5
+persistent state — restart recovery and stale lock takeover of the helper's task record — pass on Linux; G3
+submission reconciliation, G4 metering with atomic reservation and G6 conditions evidence are unsupported); `admit
+--mode M2` accepts only with that G5 record; M3 cannot be claimed.
+A qualified G5 shows the record survives restarts, not that its rules were reviewed.
 
 ## Trigger matrix (what to load)
 
@@ -95,14 +100,15 @@ Load a row only when its condition holds; when it does not, no fact log, manifes
   modules and execution scope (existing project documents may be cited, not copied). The closed contract format and
   its strictness order are specified in Control §1 of the spec copy, which **did not pass S0**: until it does, a
   change that only adds (a required check, a deliverable, a sample, a lower budget) may be applied, and **any other
-  change waits for a human**, listed in the report.
+  change waits for a human**, listed in the report. `control_layer.py contract --dry-run` says whether a contract
+  would take effect under that (unreviewed) order.
 - In M1 the first contract takes effect when it is listed in the first reply, where the user can correct it (DEC-12,
   approved).
 
 ## Transition period: running and recording without a control layer
 
-Until a control-layer helper exists, T2-numeric and T3 deliverables are completed as **transitional attested
-(declared inputs)**:
+While the control rules have not passed review, a task that keeps its record by hand (without the helper below)
+completes T2-numeric and T3 deliverables as **transitional attested (declared inputs)**:
 
 1. **Execution**: artifacts go through `run_workflow.py`, **one step per invocation**, each in a **fresh output
    directory** with its upstream outputs staged in as declared inputs. The attempt registration line (below) stands
@@ -154,6 +160,42 @@ mechanically; incomplete identities; transcribed decisions; the no-child-process
 runner cannot be detected (so neither the order of confirmation access nor the blinded region not being read is
 proven).
 
+## Control-layer helper (C1, C2; control rules not through S0)
+
+`<plugin root>/skills/hep-computing/scripts/control_layer.py` keeps the task record and derives from it (DEC-02,
+approved 2026-10-30). It implements Control §1–§6 of the spec copy and is tested against its reference model (92
+scenarios, 44 mutations, the same derivation on scenario and random fact sequences) — agreement with **rules that
+did not pass review**, not a validation.
+
+- **Record**: one append-only `task-log.jsonl` (default `hep-research-artifacts/<task>/task-log/task-log.jsonl`);
+  each line carries sequence number, batch and its size, kind, writer, fields, the previous line's SHA-256; a load
+  verifies the chain, replays the facts and refuses a cut-short batch. Never edit it: write through a command with
+  `--expect-head` (compare-and-set), optionally `--expect-digest`; `--op` makes a retry idempotent. Keep the printed
+  `head_digest` outside the record: the chain cannot catch an edit of its last line.
+- **Writers**: the agent writes `contract`, `freeze`, `exposure`; the helper writes session, intents, rejections,
+  reuse, publish. Per attempt: `admit`, `start` (just before the run), one `run_workflow.py --receipt-dir` step
+  with `--attempt-prefix P` (P plus step id = attempt id), `receipt` (adapter facts; unconfirmed termination →
+  **unknown**; `--not-started` for a step the runner refused).
+- **Admission** (`admit`) computes the identity and the consumed inputs itself, applies the budget, read, unknown,
+  rerun and check-before-recompute rules, and compares the executor's qualified capabilities with the mode
+  (`executor_capabilities.py`): M2 needs G5 (qualified with this helper), M3 also G3/G4 (unsupported, refused). A
+  check attempt names only check, criterion and target; the helper resolves declared check inputs.
+- **Human decisions**: `decide` is for humans only, in their own terminal; it refuses in a shell with an agent
+  marker (`CLAUDECODE` and similar) and needs `--confirm-human` — a guard, **not an enforcement**: the agent never
+  runs or works around it and asks instead; the record cannot prove who wrote a decision.
+- **Reports**: `status` and `report` (paragraphs 1–7) derive at one head; the limitations always say the rules did
+  not pass S0. Report results as “derived by the control-layer helper at sequence N (control rules not through
+  S0)”; “attested (declared inputs)” describes the mechanism (helper intent, runner receipt, reads not observable),
+  not the rules.
+- **Resumption (C2)**: a new session runs `resume` first (the summary below from the record alone, with what never
+  to resubmit and what to do next). Settle every admitted, running or unknown attempt before anything else: take its
+  receipt, `receipt --lost` when the run left none, `reconcile` from a receipt that proves the outcome, or ask a
+  human to abandon it; `cancel` needs a `start` fact or `--never-started`. Then `lock acquire --owner NAME`, which
+  prints a token once: no new lease while one is live or an attempt unsettled; takeovers recorded. Writes present
+  `--lease-token` while a lease is live (always under M2); release and renewal need it. `recover` removes a torn tail.
+- **Not provided**: M3, conditions evidence (G6), typed-source checks of `contracts/dependencies.py` (PROV-02),
+  partition scope accounts (stage D).
+
 ## Checks: roles, types, results and the freeze record
 
 `<plugin root>/skills/hep-computing/scripts/check_definitions.py` applies the check definitions (statistical choices
@@ -184,7 +226,8 @@ are made with hep-statistics; the script only applies them):
 
 ## Human decisions
 
-No gate is needed for authorized local reading, fixing and verification, contract changes that only add or tighten,
+With the control-layer helper, decisions enter the record only through its `decide` command, run by the human
+(above). No gate is needed for authorized local reading, fixing and verification, contract changes that only add or tighten,
 or changing the method or code (which invalidates its artifacts). A human decides: approving a contract that is not
 at least as strict, identity continuation, producer attribution, unblinding, abandoning an unknown attempt, loosening
 a T2-code contract, changing the estimand or required claims, submission/installation/publication beyond
@@ -210,7 +253,7 @@ separately; none stands in for another.
 |---|---|---|---|---|
 | 1. Deliverables | each deliverable's target and achieved tier, done/partial/blocked/not done with the reason; the stated derivation (transition period) | one sentence | ✓ | ✓ |
 | 2. Computation | main steps and their state; attested kind (only: attested, attested (declared inputs), transitional attested (declared inputs)); unattested listed separately | — | ✓ | ✓ |
-| 3. Scientific evidence | tier of each claim, four-valued check results, decision rule, sample roles and exposure, every historical fail/inconclusive, failed draws and artifacts on the dependency chain | — | if numeric | ✓ |
+| 3. Scientific evidence | tier of each claim, four-valued check results, decision rule, sample roles and exposure, every historical fail/inconclusive, failed draws, check attempts without a result and artifacts on the dependency chain | — | if numeric | ✓ |
 | 4. Contracts and authorization | each contract's state, every human decision (and its transcriber), authorization used, pending decisions | if present | ✓ | ✓ |
 | 5. Scope and limitations | scope, conditions context, known biases, uncovered regions, transition-period limitations | one sentence | ✓ | ✓ |
 | 6. Unconfirmed risks | unknown attempts, unconfirmed terminations, committed resources | — | if present | if present |

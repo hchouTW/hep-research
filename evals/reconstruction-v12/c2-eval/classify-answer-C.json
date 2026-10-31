@@ -1,0 +1,10 @@
+{
+  "1": {"tier": "T0", "mode": "M1", "reason": "Single fact (concept answer) given in this session; general answering discipline only."},
+  "2": {"tier": "T1", "mode": "M1", "reason": "Method plus feasibility conclusion from reasoning and literature, with the expected precision stated as an attributed expectation; no computational run is forced."},
+  "3": {"tier": "T2-code", "mode": "M1", "reason": "Code fix; needs a diff/commit digest and a test-execution receipt from the existing tests/ suite, done locally and interactively."},
+  "4": {"tier": "T2-numeric", "mode": "M1", "reason": "Performance table on a simulated sample, internal, delivered without any statement about it; carries the limitation 'supports only performance in simulation'; bounded local run in this session."},
+  "5": {"tier": "T3-C", "mode": "M1", "reason": "Claim that holds for collision data, compared with a threshold (within 1% of unity), and reported externally in a paper; any one of these makes it confirmatory; run interactively in this session."},
+  "6": {"tier": "T3-E", "mode": "M1", "reason": "An assessment of a trend (is the efficiency vs pT flat) on simulation, with no confirmation asked; numbers marked exploratory, unconfirmed; bounded local run."},
+  "7": {"tier": "T2-numeric", "mode": "M2", "reason": "Per-sample skim counts on simulated events delivered without any statement; runs about three days locally, so it exceeds a session (resumable, not M3: local cost alone does not make M3). M2 is valid only with the control-layer helper whose G5 record qualified; otherwise run as M1 segments with a resumption summary."},
+  "8": {"tier": "T3-E", "mode": "M3", "reason": "Output histograms from reprocessed raw (assumed collision) data for internal use, not asked as a claim that holds for data, so T3-E (T2-numeric if the raw files were simulation; when unclear the higher tier applies). Remote Slurm submission with no one present is M3, whose G1-G5 guarantees are not available: it follows the existing campaign rules and manual boundary, and submission needs authorization."}
+}

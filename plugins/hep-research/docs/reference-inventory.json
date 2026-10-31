@@ -15,7 +15,7 @@
   },
   "hep-computing": {
    "references": 37,
-   "bytes": 348301,
+   "bytes": 353409,
    "uncited": 0
   },
   "hep-detector": {
@@ -1177,8 +1177,8 @@
   {
    "path": "skills/hep-computing/references/analysis-workflows.md",
    "owner": "hep-computing",
-   "bytes": 7073,
-   "lines": 85,
+   "bytes": 7691,
+   "lines": 91,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
@@ -1187,7 +1187,7 @@
     "tests/skills/hep_computing/test_workflow_c6.py"
    ],
    "cited_by_other_skills": [],
-   "last_commit": "5e3a9c56 2026-10-30"
+   "last_commit": "53411e1d 2026-10-31"
   },
   {
    "path": "skills/hep-computing/references/bash-balanced-design-guidelines.md",
@@ -1526,18 +1526,19 @@
   {
    "path": "skills/hep-computing/references/research-workflow-control.md",
    "owner": "hep-computing",
-   "bytes": 20031,
-   "lines": 221,
+   "bytes": 24521,
+   "lines": 264,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/references/analysis-workflows.md",
+    "skills/hep-computing/scripts/control_layer_support/__init__.py",
     "skills/hep-detector/references/event-reconstruction.md",
     "skills/hep-detector/references/reconstruction-performance-and-truth-matching.md"
    ],
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "5e3a9c56 2026-10-30"
+   "last_commit": "2162435c 2026-10-31"
   },
   {
    "path": "skills/hep-computing/references/risk-and-quality.md",

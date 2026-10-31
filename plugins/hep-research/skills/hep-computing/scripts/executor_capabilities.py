@@ -3,7 +3,7 @@
 check that refuses a capability without a passing qualification (reconstruction v12 B2; CAP-01). Standard library only.
 
 Purpose: a capability may be relied on only when the executor declares it and the declaration cites a passing
-qualification record (Delivery §1.2 of the reconstruction v12.1 spec copy). The executor here is the local runner
+qualification record (Delivery §1.2 of the reconstruction v12.2 spec copy). The executor here is the local runner
 (skills/hep-computing/scripts/run_workflow.py, DEC-07 default: local executor only). Its qualification tests:
 - G1 output isolation: an old same-name output, absolute / `..` / symlinked destinations, an exit-0 command that
   writes nothing -- each must be refused or failed, with a positive control that a fresh output is accepted;
@@ -12,9 +12,17 @@ qualification record (Delivery §1.2 of the reconstruction v12.1 spec copy). The
   session) and outlives the step, and the step of a nested run_workflow.py, must be found, stopped and recorded with
   no late write; positive control: a child that ends just after the step does not fail it (POSIX; the cases outside
   the group need /proc, so G2 passes on Linux only);
-- G3 submission reconciliation, G4 resource metering with atomic reservation, G5 persistent state and G6 conditions
-  resolution evidence are not provided by this executor: they are recorded as unsupported, never declared.
-The qualification record names the platform and the SHA-256 of the runner it tested; a changed runner makes it stale.
+- G5 persistent state (reconstruction v12 C2), with the control-layer helper (control_layer.py) as the persistent
+  state: restart recovery (a writer killed mid-session; a fresh process with only the task log derives the same
+  state, every acknowledged fact exactly once, an operation id not appended twice, an unknown attempt still unknown
+  and blocking its step, a torn last line recovered) and stale lock takeover (a killed owner leaves its lease and an
+  unknown attempt; the live lease is not taken over, the owner's name alone neither releases it nor acquires it,
+  once expired it is taken over only after the unknown attempt is reconciled, the takeover is recorded, and the old
+  token no longer writes). The control rules that state serves did not pass the S0 spec review (obligation N1);
+- G3 submission reconciliation, G4 resource metering with atomic reservation and G6 conditions resolution evidence are
+  not provided by this executor: they are recorded as unsupported, never declared.
+The qualification record names the platform and the SHA-256 of the runner it tested and, for G5, the SHA-256 of
+every control-layer file it tested; a changed runner (or control layer, for G5) makes it stale.
 Usage:
   executor_capabilities.py qualify --out QUAL.json             run the tests, write the qualification record
   executor_capabilities.py declare --qualification QUAL.json --out DECL.json
@@ -42,11 +50,11 @@ sys.path.insert(0, str(PLUGIN))
 from core.status import exit_code  # noqa: E402
 
 RUNNER = HERE / "run_workflow.py"
+CONTROL = HERE / "control_layer.py"
 GUARANTEES = ("G1", "G2", "G3", "G4", "G5", "G6")
 UNSUPPORTED = {
     "G3": "the local executor submits nothing remotely; submission reconciliation belongs to stage D",
     "G4": "usage is reported in receipts, but there is no atomic quota reservation at intent (stage D)",
-    "G5": "no persistent control state or lease lock (stage C2, blocked: S0 N1 did not pass)",
     "G6": "the runner records no resolved conditions payload or interval of validity",
 }
 MODE_REQUIRES = {"M1": ("G1",), "M2": ("G1", "G2", "G5"), "M3": ("G1", "G2", "G3", "G4", "G5")}
@@ -155,16 +163,207 @@ def qualify_g2(root: Path) -> dict:
     return {"status": "pass" if all(c["passed"] for c in cases) else "fail", "cases": cases}
 
 
+def control_files() -> dict:
+    """{relative name: SHA-256} of the control-layer files G5 qualifies."""
+    files = [CONTROL] + sorted((HERE / "control_layer_support").glob("*.py"))
+    return {f.relative_to(HERE).as_posix(): sha256_file(f) for f in files}
+
+
+def control_digest() -> str:
+    return hashlib.sha256(canonical(control_files())).hexdigest()
+
+
+def _ctl(*args, env=None) -> tuple[int, dict]:
+    proc = subprocess.run([sys.executable, "-B", str(CONTROL), *map(str, args)], capture_output=True, text=True,
+                          timeout=600, env=env)
+    try:
+        return proc.returncode, json.loads(proc.stdout)
+    except ValueError:
+        return proc.returncode, {"status": "unparsable", "stderr": proc.stderr[-400:]}
+
+
+G5_WRITER = """import json, sys
+sys.path.insert(0, sys.argv[1])
+import control_layer
+from control_layer_support.task_record import TaskRecord
+log = sys.argv[2]
+i = 0
+while True:
+    head = TaskRecord(log).read().log.head
+    code = control_layer.main(["exposure", "--task-log", log, "--sample", "CR", "--op", f"w{i}",
+                               "--expect-head", str(head)])
+    if code == 0:
+        print(f"ACK w{i}", flush=True)
+        i += 1
+"""
+G5_LEASE_HOLDER = """import contextlib, io, json, sys, time
+sys.path.insert(0, sys.argv[1])
+import control_layer
+from control_layer_support.task_record import TaskRecord
+log, lease_s, decl, qual = sys.argv[2:6]
+
+def call(*args):
+    buf = io.StringIO()
+    with contextlib.redirect_stdout(buf):
+        control_layer.main(list(args))
+    return json.loads(buf.getvalue())
+
+token = call("lock", "acquire", "--task-log", log, "--owner", "s1", "--lease-s", lease_s)["token"]
+head = TaskRecord(log).read().log.head
+call("admit", "--task-log", log, "--attempt", "a3:reco", "--step", "reco", "--cost", "0", "--declaration", decl,
+     "--qualification", qual, "--lease-token", token, "--expect-head", str(head))
+call("receipt", "--task-log", log, "--lost", "--attempt", "a3:reco", "--lease-token", token,
+     "--expect-head", str(head + 1))
+print(f"ACK {token}", flush=True)
+time.sleep(600)
+"""
+
+
+def _spawn_until(script: str, args: list[str], acks: int) -> tuple[list[str], int]:
+    """Start a writer, wait for `acks` acknowledgements on stdout, then SIGKILL it (a session dying mid-work)."""
+    proc = subprocess.Popen([sys.executable, "-B", "-c", script, *args], stdout=subprocess.PIPE,
+                            stderr=subprocess.DEVNULL, text=True)
+    seen = []
+    deadline = time.monotonic() + 120
+    while len(seen) < acks and time.monotonic() < deadline:
+        line = proc.stdout.readline()
+        if not line:
+            break
+        if line.startswith("ACK "):
+            seen.append(line.split()[1])
+    proc.kill()
+    rest = proc.stdout.read()                      # acknowledgements printed before the kill landed
+    seen += [line.split()[1] for line in rest.splitlines() if line.startswith("ACK ")]
+    proc.stdout.close()
+    return seen, proc.wait()
+
+
+def qualify_g5(root: Path) -> dict:
+    """G5: restart recovery and stale lock takeover of the control-layer task record (fault injection)."""
+    if os.name != "posix":
+        return {"status": "unsupported", "reason": "the record's flock and the fault injection are POSIX only"}
+    cases = []
+
+    def case(name, ok, detail=""):
+        cases.append({"case": name, "passed": bool(ok), "detail": detail})
+
+    log = root / "hep-research-artifacts" / "g5" / "task-log" / "task-log.jsonl"
+    qual = {"kind": "executor-qualification", "executor": "local-run_workflow", "runner_sha256": sha256_file(RUNNER),
+            "tests": {"G1": {"status": "pass", "note": "synthetic: G5 qualifies persistence only"}}}
+    (root / "qual.json").write_text(json.dumps(qual))
+    (root / "decl.json").write_text(json.dumps(declare(qual)))
+    contract = {"steps": {"raw": {"program": "pRaw", "environment": "g5"},
+                          "reco": {"program": "pReco", "environment": "g5", "upstream": ["raw"], "checked": True,
+                                   "required_checks": [["c" * 64, "k" * 64]]}},
+                "deliverables": {"D": {"step": "reco", "target": "T2"}}, "families": {},
+                "samples": {"CR": "control"}, "budget": None}
+    (root / "contract.json").write_text(json.dumps(contract))
+    admit_args = ["--declaration", root / "decl.json", "--qualification", root / "qual.json", "--cost", "0"]
+    steps = [_ctl("init", "--task-log", log),
+             _ctl("contract", "--task-log", log, "--file", root / "contract.json", "--expect-head", 1),
+             _ctl("admit", "--task-log", log, "--attempt", "a1:raw", "--step", "raw", "--expect-head", 2, *admit_args),
+             _ctl("receipt", "--task-log", log, "--lost", "--attempt", "a1:raw", "--expect-head", 3)]
+    case("setup: record, contract, an admitted attempt recorded lost (unknown)", all(c == 0 for c, _ in steps),
+         [o.get("status") for _, o in steps])
+    # restart recovery: a writer killed mid-session
+    acked, _ = _spawn_until(G5_WRITER, [str(HERE), str(log)], 8)
+    code, verified = _ctl("verify", "--task-log", log)
+    lines = [json.loads(raw) for raw in log.read_bytes().split(b"\n")[:-1]]
+    ops = [line["op"] for line in lines if (line["op"] or "").startswith("w")]
+    case("the record verifies in a fresh process after the writer was killed", code == 0, verified.get("status"))
+    case("every acknowledged fact is present exactly once, nothing duplicated", set(acked) <= set(ops)
+         and len(ops) == len(set(ops)) and len(ops) <= len(acked) + 1, f"{len(acked)} acknowledged, {len(ops)} found")
+    head = verified.get("head")
+    code, again = _ctl("exposure", "--task-log", log, "--sample", "CR", "--op", "w0", "--expect-head", head)
+    case("a repeated operation id is replayed, not appended", code == 0 and again.get("replayed") is True
+         and again.get("head") == head, again.get("status"))
+    first, second = _ctl("resume", "--task-log", log), _ctl("resume", "--task-log", log)
+    case("two fresh processes derive the same resumption summary", first == second and first[0] == 0, "")
+    summary = first[1]
+    case("the unknown attempt stays unknown and is listed as not to be resubmitted",
+         summary.get("attempts_by_state", {}).get("unknown") == ["a1:raw"]
+         and "a1:raw" in summary.get("do_not_resubmit", []), summary.get("attempts_by_state"))
+    code, blocked = _ctl("admit", "--task-log", log, "--attempt", "a2:raw", "--step", "raw", "--expect-head", head,
+                         *admit_args)
+    case("admission of the same step is refused while the attempt is unknown", code == 1, blocked.get("reason"))
+    before = _ctl("status", "--task-log", log)
+    with open(log, "ab") as handle:                 # a torn, never acknowledged append
+        handle.write(b'{"batch":')
+    torn_code, _ = _ctl("verify", "--task-log", log)
+    rec_code, recovered = _ctl("recover", "--task-log", log)
+    case("a torn last line is refused, then recovered, with the same derived state", torn_code == 2
+         and rec_code == 0 and recovered.get("recovered") is True and _ctl("status", "--task-log", log) == before,
+         recovered.get("torn_sha256"))
+    # stale lock takeover: the restart's unknown attempt is reconciled first, then a session takes the lease, leaves
+    # an attempt of its own unknown and dies holding the lease
+    work = root / "run-a1"
+    work.mkdir()
+    workflow = root / "a1.json"
+    workflow.write_text(json.dumps({"workflow": "g5", "steps": [
+        {"id": "raw", "argv": ["{python}", "-c", "open('o.txt', 'w').write('1')"], "outputs": ["o.txt"]}]}))
+    subprocess.run([sys.executable, "-B", str(RUNNER), str(workflow), "--work", str(work), "--receipt-dir",
+                    str(root / "receipts"), "--attempt-prefix", "a1:"], capture_output=True, timeout=600)
+    head = _ctl("verify", "--task-log", log)[1].get("head")
+    code, rec = _ctl("reconcile", "--task-log", log, "--receipt", root / "receipts" / "a1:raw.receipt.json",
+                     "--work", work, "--expect-head", head)
+    states = _ctl("resume", "--task-log", log)[1].get("attempts_by_state", {})
+    reconciled_first = code == 0 and states.get("computed") == ["a1:raw"]
+    tokens, _ = _spawn_until(G5_LEASE_HOLDER, [str(HERE), str(log), "3", str(root / "decl.json"),
+                                               str(root / "qual.json")], 1)
+    t_dead = time.monotonic()
+    old_token = tokens[0] if tokens else ""
+    code, live = _ctl("lock", "acquire", "--task-log", log, "--owner", "s2")
+    case("the live lease of a killed owner is not taken over", code == 1 and bool(old_token), live.get("reason"))
+    head = _ctl("verify", "--task-log", log)[1].get("head")
+    code, out = _ctl("exposure", "--task-log", log, "--sample", "CR", "--expect-head", head)
+    case("a write by another owner is refused while that lease is live", code == 1, out.get("reason"))
+    code, out = _ctl("lock", "release", "--task-log", log, "--owner", "s1")
+    case("the owner's name alone does not release the lease (no release-then-acquire bypass)", code == 1
+         and _ctl("lock", "status", "--task-log", log)[1].get("lease", {}).get("owner") == "s1", out.get("reason"))
+    time.sleep(max(0.0, 3.3 - (time.monotonic() - t_dead)))
+    code, early = _ctl("lock", "acquire", "--task-log", log, "--owner", "s2")
+    case("an expired lease is not taken over before the unknown attempt is reconciled", code == 1
+         and "reconcile first" in str(early.get("reason")), early.get("reason"))
+    code, named = _ctl("lock", "acquire", "--task-log", log, "--owner", "s1")
+    case("acquiring under the dead owner's name without its token is refused as well", code == 1
+         and "reconcile first" in str(named.get("reason")), named.get("reason"))
+    work3 = root / "run-a3"
+    work3.mkdir()
+    workflow3 = root / "a3.json"
+    workflow3.write_text(json.dumps({"workflow": "g5", "steps": [
+        {"id": "reco", "argv": ["{python}", "-c", "open('o.txt', 'w').write('3')"], "outputs": ["o.txt"]}]}))
+    subprocess.run([sys.executable, "-B", str(RUNNER), str(workflow3), "--work", str(work3), "--receipt-dir",
+                    str(root / "receipts"), "--attempt-prefix", "a3:"], capture_output=True, timeout=600)
+    head = _ctl("verify", "--task-log", log)[1].get("head")
+    code, rec = _ctl("reconcile", "--task-log", log, "--receipt", root / "receipts" / "a3:reco.receipt.json",
+                     "--work", work3, "--expect-head", head)
+    states = _ctl("resume", "--task-log", log)[1].get("attempts_by_state", {})
+    case("the unknown attempts are reconciled from the receipts that prove their outcome", reconciled_first
+         and code == 0 and states.get("computed") == ["a1:raw", "a3:reco"], rec.get("status"))
+    code, taken = _ctl("lock", "acquire", "--task-log", log, "--owner", "s2")
+    history = _ctl("lock", "status", "--task-log", log)[1].get("history", [])
+    case("after reconciliation the expired lease is taken over and the takeover is recorded",
+         code == 0 and taken.get("event") == "takeover" and history and history[-1].get("event") == "takeover"
+         and history[-1].get("previous_owner") == "s1", taken.get("event"))
+    head = _ctl("verify", "--task-log", log)[1].get("head")
+    code, stale = _ctl("exposure", "--task-log", log, "--sample", "CR", "--lease-token", old_token,
+                       "--expect-head", head)
+    case("the old owner's write is refused after the takeover, even with its token", code == 1, stale.get("reason"))
+    return {"status": "pass" if all(c["passed"] for c in cases) else "fail", "cases": cases,
+            "tested": {"control_layer": control_files(), "runner_sha256": sha256_file(RUNNER),
+                       "note": "the control rules this state serves did not pass the S0 spec review (N1)"}}
+
+
 def qualify() -> dict:
     with tempfile.TemporaryDirectory() as d:
         root = Path(d)
-        (root / "g1").mkdir()
-        (root / "g2").mkdir()
-        tests = {"G1": qualify_g1(root / "g1"), "G2": qualify_g2(root / "g2")}
+        for name in ("g1", "g2", "g5"):
+            (root / name).mkdir()
+        tests = {"G1": qualify_g1(root / "g1"), "G2": qualify_g2(root / "g2"), "G5": qualify_g5(root / "g5")}
     for g, why in UNSUPPORTED.items():
         tests[g] = {"status": "unsupported", "reason": why}
     return {"kind": "executor-qualification", "executor": "local-run_workflow",
-            "runner_sha256": sha256_file(RUNNER), "platform": {"system": platform.system(), "machine": platform.machine(),
+            "runner_sha256": sha256_file(RUNNER), "control_sha256": control_digest(), "platform": {"system": platform.system(), "machine": platform.machine(),
                                                                "python": platform.python_version()},
             "tests": tests}
 
@@ -192,6 +391,8 @@ def admit(decl: dict, qual: dict, required: list[str]) -> dict:
             refused[g] = f"qualification {outcome.get('status', 'missing')}"
         elif qual.get("runner_sha256") != sha256_file(RUNNER):
             refused[g] = "the runner changed since it was qualified"
+        elif g == "G5" and qual.get("control_sha256") != control_digest():
+            refused[g] = "the control layer changed since it was qualified"
     return {"status": "refused" if refused else "ok", "required": required, "refused": refused}
 
 

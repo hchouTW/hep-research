@@ -197,13 +197,17 @@ class Capabilities(unittest.TestCase):
         cls._t.cleanup()
 
     @unittest.skipUnless(os.name == "posix", "G1/G2 are qualified on POSIX hosts (tested on Linux)")
-    def test_g1_g2_pass_and_the_rest_are_unsupported(self):
+    def test_g1_g2_g5_pass_and_the_rest_are_unsupported(self):
+        # C2 (reconstruction v12): G5 is qualified with the control-layer helper as the persistent state
         self.assertEqual(self.q_code, 0, self.q_out)
         self.assertEqual(self.q_out["tests"], {"G1": "pass", "G2": "pass", "G3": "unsupported", "G4": "unsupported",
-                                               "G5": "unsupported", "G6": "unsupported"})
+                                               "G5": "pass", "G6": "unsupported"})
         qual = json.loads(self.qual.read_text())
-        self.assertTrue(all(c["passed"] for c in qual["tests"]["G1"]["cases"]))
-        self.assertEqual(self.d_out["declared"], ["G1", "G2"])
+        for g in ("G1", "G5"):
+            self.assertTrue(all(c["passed"] for c in qual["tests"][g]["cases"]), qual["tests"][g])
+        self.assertIn("control_layer.py", qual["tests"]["G5"]["tested"]["control_layer"])
+        self.assertEqual(len(qual["control_sha256"]), 64)
+        self.assertEqual(self.d_out["declared"], ["G1", "G2", "G5"])
 
     @unittest.skipUnless(os.name == "posix", "G1/G2 are qualified on POSIX hosts")
     def test_admission(self):
@@ -211,9 +215,24 @@ class Capabilities(unittest.TestCase):
                              "--require", "G1,G2")[0], 0)
         self.assertEqual(run(CAPS, "admit", "--declaration", self.decl, "--qualification", self.qual,
                              "--mode", "M1")[0], 0)
-        code, out = run(CAPS, "admit", "--declaration", self.decl, "--qualification", self.qual, "--mode", "M2")
+        self.assertEqual(run(CAPS, "admit", "--declaration", self.decl, "--qualification", self.qual,
+                             "--mode", "M2")[0], 0)
+        code, out = run(CAPS, "admit", "--declaration", self.decl, "--qualification", self.qual, "--mode", "M3")
         self.assertEqual(code, 1)
-        self.assertEqual(sorted(out["refused"]), ["G5"])
+        self.assertEqual(sorted(out["refused"]), ["G3", "G4"])
+        qual = json.loads(self.qual.read_text())  # G5 is refused when its qualification failed ...
+        failed = {**qual, "tests": {**qual["tests"], "G5": {"status": "fail", "cases": []}}}
+        failed_q, failed_d = self.root / "failed-q.json", self.root / "failed-d.json"
+        failed_q.write_text(json.dumps(failed))
+        self.assertEqual(run(CAPS, "declare", "--qualification", failed_q, "--out", failed_d)[0], 0)
+        code, out = run(CAPS, "admit", "--declaration", failed_d, "--qualification", failed_q, "--mode", "M2")
+        self.assertEqual((code, sorted(out["refused"])), (1, ["G5"]))
+        stale = {**qual, "control_sha256": "2" * 64}  # ... and when the control layer changed since
+        stale_q, stale_d = self.root / "stale-c-q.json", self.root / "stale-c-d.json"
+        stale_q.write_text(json.dumps(stale))
+        run(CAPS, "declare", "--qualification", stale_q, "--out", stale_d)
+        code, out = run(CAPS, "admit", "--declaration", stale_d, "--qualification", stale_q, "--mode", "M2")
+        self.assertEqual((code, out["refused"]), (1, {"G5": "the control layer changed since it was qualified"}))
 
     @unittest.skipUnless(os.name == "posix", "G1/G2 are qualified on POSIX hosts")
     def test_fabricated_or_stale_declarations_are_refused(self):

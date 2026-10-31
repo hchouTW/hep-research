@@ -111,6 +111,56 @@ Software checks establish contract consistency only, not physical validity.
   cache made from the other mode's source (`cache_cleared` in `adapter-build.json`) instead of failing every example.
   The adapter stays `demonstrated-on-synthetic-data`.
 - Evidence: VALIDATION GEANT4-REGISTER-REVIEW
+- **Control-layer helper** (reconstruction v12 stage C1; STATE-01, AUTH-01, ADM-01, CTRL-01, CAP-01, FLOW-01,
+  BUDGET-01 accounts; **the control rules did not pass the S0 spec review**, so the helper is not reviewed or
+  validated): new `skills/hep-computing/scripts/control_layer.py` (library in `control_layer_support/`) keeps the task
+  record as one append-only JSON-lines file with a digest chain, compare-and-set appends, whole-batch validation,
+  operation-id idempotency and full verification on every load (DEC-01/08/09/13, approved 2026-10-30); validates the
+  closed contract format and applies the strictness order and effective contract (M2/M3 first contract waits for a
+  human); admits attempts (identity, consumed inputs and accounts computed by the helper; capabilities compared with
+  the mode, so M2/M3 are refused for lack of G5); turns `run_workflow.py` receipts and bound check results into
+  adapter facts (unconfirmed termination becomes unknown); writes human decisions only through a guard (refused in an
+  agent's shell, explicit confirmation; not an enforcement); derives labels, bound artifacts, achieved tiers and
+  histories; publishes per deliverable; and prints the status and the completion report, whose limitations paragraph
+  states that the rules did not pass S0. Tests: `tests/skills/hep_computing/test_control_layer_model.py` (the
+  reference model's 90 scenarios and 42 mutations against the helper; the same derivation as the model on every
+  scenario log and 300 random fact sequences; task-record round trip) and `test_control_layer.py` (task record,
+  CLI, adapter, decision guard, report).
+- **Control-layer resumption, reconciliation and lease lock** (reconstruction v12 stage C2, implementation part;
+  CTRL-01, STATE-01, TASK-03, G5; **the control rules still did not pass the S0 spec review**): `control_layer.py
+  resume` prints, from the task log alone, what a new session needs (contract states, deliverables, attempts by
+  state, what never to resubmit, pending human items, freezes and exposures, accounts, the lease, next permitted
+  actions); `receipt --lost` records a run that left no receipt as termination unknown; `reconcile` takes a receipt
+  that proves the outcome of an unknown or abandoned attempt; `cancel` writes C's cancel request; `lock
+  acquire|release|status` is a lease with owner and expiry that serializes writers in addition to compare-and-set
+  (a live lease of another owner refuses writes except a human decision; an expired one is taken over only after
+  every admitted, running or unknown attempt is settled; events recorded in a chained history beside the record;
+  under M2/M3 every write holds the lease); `recover` removes a torn, never acknowledged last line. The receipt
+  adapter reports wall-clock usage by default under M2/M3. `executor_capabilities.py qualify` now runs a G5
+  qualification by fault injection (a writer killed mid-session, a fresh process with only the task log, a torn
+  line, a killed lease owner) tied to the SHA-256 of the control-layer files; with it `admit --mode M2` accepts and
+  M3 stays refused (G3, G4 unsupported). Tests: `tests/skills/hep_computing/test_control_layer_c2.py`;
+  `test_executor_b2.py` now expects G5 to pass (and still refuses M3, a failed G5 and a changed control layer).
+- **Control layer: derivation v12.2** (the two defects of S0 round 7 fixed; round 8 reviewed v12.2 and left three
+  open defects, listed in every report; N1 did not pass S0 in eight rounds): a newer attempt of a step that produced no usable and current output
+  -- failed, cancelled, unknown, abandoned (also when later reconciled) or unattested, with or without outputs --
+  now overtakes an older output, which then binds only through a human-approved pin (attempts in flight and reuse do
+  not overtake); check attempts that ended without a result are counted as failed check draws per deliverable,
+  task-wide, in publish (`failed_check_draws`) and in the completion report, and those that read a confirmation
+  sample are listed among the confirmation results ("no result"). The maintainer decided on 2026-10-30 that the
+  control layer ships and approved DEC-02 (library + CLI). Tests: the model's 92 scenarios and 44 mutations against
+  the helper; the G5 qualification is regenerated for the changed control-layer files.
+- **Control layer: three review fixes (PR #330)** (reconstruction v12 C1/C2; the control rules still did not pass
+  the S0 spec review). A task-record batch is all-or-nothing: every line carries its batch's size, a batch cut
+  short by a crash is refused on load and removed by `recover` back to its start, and an `--op` replay must name one
+  whole batch (before, a half batch loaded as acknowledged and a retry replayed only its first facts). New
+  `control_layer.py start --attempt` records that execution began (write it right before the run); `cancel` of an
+  attempt without a start fact needs `--never-started`, so a running attempt is no longer settled as cancelled and
+  its receipt refused. The lease holds a secret: `lock acquire` returns a token once (stored only as a hash);
+  renewal, release and every write while a lease is live (always under M2/M3) need `--lease-token`, which replaces
+  the self-declared `--owner` on writes; no new lease is acquired while one is live or any attempt is unsettled (a
+  release by name followed by an acquire no longer bypasses the takeover rules). The G5 qualification keeps its 14
+  cases and adds two for that bypass. Tests: `tests/skills/hep_computing/test_control_layer_review330.py`.
 
 ## 0.50.0 (2026-10-30)
 
