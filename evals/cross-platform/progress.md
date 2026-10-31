@@ -293,3 +293,36 @@ attempted. PR 2 *Done when*: AC1 holds (macOS units green in CI, `needs ` skips 
   copy's own path still has spaces. The space + Chinese TMPDIR stays on the PR-subset unit tests. The full run on
   main/weekly keeps the hostile TMPDIR and stays red until the ten pre-existing modules are fixed (open checkpoint).
 - One extra units run authorized beyond the A6 limit (PR 2 units runs: 7, 6 + 1 authorized).
+
+## PR 2 result (2026-10-31, run 41216651690, recorded here so PR 2 gets no further CI run)
+
+hostile-paths passed (PR subset under the hostile TMPDIR; relocation with a space-free TMPDIR; the step took 34 min);
+all required checks green; macOS passed; Windows red as expected until PR 3 (AC12, contract tests). AC1, AC9, AC10
+hold. PR 2 *Done when* holds. Counters PR 2: units runs 7 (6 + 1 authorized); fix attempts max 2/3.
+
+## PR 3 — Windows minimum (branch `xplat/pr-3-windows`, base `xplat/pr-2-macos-linux`)
+
+- 3.1 `Account.current()` requires `posix_ids`; `run_workflow.py` main requires `process_groups` after `--dry-run`
+  (missing-dependency, exit 3, before any step); `executors.py` uses `platform.node()`; hep-review `review.py` reports
+  missing-dependency (exit 3) on `ControlledReadUnavailable`.
+- 3.2 `establish` refuses with `protected.unsupported_platform` (exit 3, status refused) when the account is the running
+  one and `posix_ids` is missing, or when `UnsupportedPlatform` is raised later (tests with a patched probe).
+- 3.3 Deviation: `charge_confusion_rate` has no exit-3 path (no protected guard, no `protected_main`; its statuses are
+  ok/failed/rejected), so no exit-3 failure state was added: declaring one would make the contract state an outcome the
+  tool cannot produce. No other contracted tool gained an exit-3 path. Noted for the maintainer (open checkpoint).
+- 3.4 hep-review store, hep-authoring review store and `fetch_papers.py` use `hostcaps.state_dir` (fetch_papers only
+  on Windows: its Linux/macOS default stays `~/.cache/hep-research/papers`). Stale naming waiver removed.
+- 3.5 `plugins/hep-research/.gitattributes`; `git add --renormalize .` stages nothing; a fresh `core.autocrlf=true`
+  clone has 0 CRLF files (AC12 locally).
+- 3.6 README Windows section (before the install instructions) and Tested hosts.
+- Maintainer request: hostile-paths speed-up (options 1 and 2): four-leg matrix, relocation split by part/shard,
+  subset in parallel through a derived plan; `check_relocation.py --part static --jobs 4 --no-cli` passes locally.
+
+### Local validation — units 1/6 (2026-10-31)
+
+6330 run, 12 failures, 1 error. Pre-existing: `test_root_cpp_assets`. New: the three example replays
+(analysis-to-paper, ml-classifier-to-inference, geant4-thin-silicon): `core/hostcaps.py` joins `code_paths`, the same
+mechanism as PR 1b. Regenerated in E2 under the option-1 decision: 14 files, 12 `code_paths` lines and 3 artifact
+sha256 lines, no number, no PNG. The 5 replay modules pass (33 tests). Static checks, ruff, mypy, layering, naming,
+host-neutral pass; AC6 diff empty outside the approved example files. Counters PR 3: units runs 1/6; fix attempts max
+1/3 (example replays); no early stop.
