@@ -270,3 +270,19 @@ CI run 3 (#335): every required job passes and macOS passes; `hostile-paths` fai
 the first word is quoted (test-only; bundle semantics unchanged). The PR subset passes locally in the hostile path
 (contracts, tools, partition, blinding, r5). Fix attempts on it: 1/3. The earlier pattern fix (no
 `tests/core/test_protected*`, exit 5 "NO TESTS RAN"): 1/3.
+
+### CI run 4 (#335, 2026-10-31): **STOP**
+
+All required jobs pass; macOS passes; Windows fails as expected (AC12 CRLF until PR 3; Windows contract tests
+recorded). `hostile-paths`: the packaging scan and every unit-test part of the PR subset pass (contracts 1160 OK,
+tools 383 OK, partition 132 OK, blinding 91 OK, r5 14 OK); the last command, `tools/check_relocation.py`, fails: it
+runs the whole `run_all_checks.py` in a relocated copy (`.../hep 測試 paths/tmp/hep research relocated .../plugin
+copy`) with the hostile `TMPDIR` inherited, and its `unittest` check has 6327 run, 32 failures, 8 errors: the
+pre-existing hostile-`TMPDIR` failures listed above (simreco `\u` decoding; tests that assume a space-free temporary
+folder).
+
+Why STOP (A6): the units-part limit for PR 2 is reached (local hostile run 1, CI runs 1-4, and this relocated full
+suite: 6/6), and the remaining choices are the maintainer's: fix the pre-existing failures, or run the relocation
+check with a space-free `TMPDIR` (the copy path itself still has spaces), or drop it from the PR subset. No fix
+attempted. PR 2 *Done when*: AC1 holds (macOS units green in CI, `needs ` skips 0.14 %), AC9 holds, AC10 not yet
+(hostile-paths red on the relocation step), macOS job run and recorded (known-differences list empty).
