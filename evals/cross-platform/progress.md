@@ -326,3 +326,73 @@ mechanism as PR 1b. Regenerated in E2 under the option-1 decision: 14 files, 12 
 sha256 lines, no number, no PNG. The 5 replay modules pass (33 tests). Static checks, ruff, mypy, layering, naming,
 host-neutral pass; AC6 diff empty outside the approved example files. Counters PR 3: units runs 1/6; fix attempts max
 1/3 (example replays); no early stop.
+
+### PR 3 CI (2026-10-31)
+
+- Run 1 (tests 41220716713, platforms 41220716831, commit ce19e8fa): all units shards and three hostile-paths units
+  legs green; AMS optional (and so `checks-complete`) and the hostile-paths checks leg failed on one new test that
+  loads the AMS profile's `fetch_papers.py` in the copy without the AMS-02 profile. Fix (attempt 1/3): that test
+  skips without the profile (62761206).
+- Run 2 (tests 41221696103, platforms 41221696226, commit 62761206): 27 pass, 3 skipping (latest,
+  optional-selection, hostile-paths-complete: not on pull requests); every required job green; Windows red only in
+  the contract-test step.
+- macOS on run 2 (platforms 41221696226): units part under `ulimit -n 256` passed, 6336 run, 0 failures, 0 errors,
+  312 skipped; known-differences list still empty.
+- hostile-paths speed-up: legs units 1/3 10.8 min, 2/3 6.5 min, 3/3 9.2 min, checks 13.5 min, against
+  ~40 min for the single job on PR 2; the PR subset went from ~3.5 min serial to 1.4 min in parallel.
+- Windows (AC11, AC12): the AC11 sweep passes (every skill script exits 2 with the PYTHONUTF8 line when it is unset,
+  and `--help` exits 0 or 3 with "unsupported-platform" with it, no traceback, `state_dir()` under the redirected
+  LOCALAPPDATA); AC12 passes (0 CRLF files; PR 2 had 4170). `tests/contracts` on Windows: 1160 run, 64 failures,
+  77 errors (PR 2: 88 failures, 77 errors), recorded, not fixed: 49 are tests calling `os.geteuid` directly to model
+  accounts, 26 child processes whose environment drops PYTHONUTF8 (the guard stops them, as designed), 17
+  tool-contract `--help` checks stopped the same way.
+- Counters PR 3: units runs 3/6 (1 local + 2 CI); fix attempts max 1/3 (example replays; AMS-optional skip); no
+  early stop. PR 3 *Done when* holds.
+
+## Final report (A9, 2026-10-31)
+
+**PRs** (all open drafts; none merged; stacked):
+- #333 part 1a modules and generator (`xplat/pr-1a-modules` → main): CI green.
+- #334 part 1b guard roll-out (`xplat/pr-1b-guard` → 1a): CI green.
+- #335 part 2 macOS and Linux (`xplat/pr-2-macos-linux` → 1b): required CI green, hostile-paths and macOS green,
+  Windows red (fixed by PR 3; PR 2 is not re-run).
+- #336 part 3 Windows minimum (`xplat/pr-3-windows` → 2): required CI green, hostile-paths (4 legs) green, Windows
+  red only in the recorded contract tests.
+
+**Acceptance criteria**
+- AC1 passed: units part exits 0 on Linux (CI) and macOS (platforms.yml); `needs ` skips 9/6327 = 0.14% on macOS.
+- AC2 passed: 198/198 scripts in every case locally and in CI `old-python` (root case through sudo).
+- AC3, AC4 passed (`old-python`; `find_python.py` has no `--json` flag, JSON is its default).
+- AC5 passed (`test_python_compat.py`, `test_skill_scripts.py`).
+- AC6 passed with the maintainer's exception: the SKILL.md, stanzas, tool-contract schema, fixtures and `.githooks`
+  diffs are empty; `EXIT_CODES`, `RUN_STATUSES` unchanged; the named tests and checks pass; `examples/` differs only
+  in the three approved examples (provenance `code_paths` and hash lines, no number, no PNG; PR 1b and PR 3).
+- AC7 passed (`test_partition_guard_variables.py`). AC8 passed (`test_hostcaps.py`, patched probe). AC9 passed.
+- AC10 passed after the maintainer's decision: hostile-paths green with the relocated suite under a space-free TMPDIR
+  on pull requests; macOS ran with no failure (known-differences list empty).
+- AC11, AC12 passed on `windows-latest` (PR 3).
+- AC13 this report; AC14 counters below; AC15 two STOPs, each reported and resolved by the maintainer.
+
+**A6 counters** (local and CI runs): PR 1a units 3/6; PR 1b 3/6; PR 2 7 (6 + 1 authorized); PR 3 3/6. Fix attempts
+never above 2/3. STOPs: PR 1b example replays (option 1: regenerate), PR 2 units limit and relocation under the
+hostile TMPDIR (option 1: space-free TMPDIR for relocation on PRs). The hostile-paths speed-up was a maintainer
+request, done in PR 3.
+
+**Pre-existing failures (not fixed, also on unmodified main)**
+- `tests.adapters.test_root_cpp_assets` on a host whose python3 lacks ROOT (local E2 host only).
+- Under the hostile TMPDIR (space + Chinese characters), 10 modules fail on main too: simreco's C++ JSON reader
+  rejects `\u` escapes (a product defect); the batch Slurm/HTCondor/cmp/provenance/watch/hardening tests,
+  `examples/test_batch_partition` and the diagram tests assume a space-free TMPDIR. The full hostile run on
+  main/weekly stays red until they are fixed.
+
+**Deviation**: task 3.3 names `charge_confusion_rate` for an exit-3 failure state; the tool has no exit-3 path, so
+none was added (a declared outcome the tool cannot produce would be false). No contracted tool gained an exit-3 path.
+
+**Open checkpoints for the maintainer**
+1. Branch protection: which new checks become required (task default: hostile-paths and old-python; hostile-paths
+   is now four matrix checks `hostile-paths (units 1/3)` … `hostile-paths (checks)`).
+2. The macOS known-differences list (empty) and dropping `continue-on-error` from the macOS job.
+3. Manual E1/E2 validation of the stack (install, skill loading) before release; Windows installation is not verified.
+4. The 10 hostile-TMPDIR failures on main (simreco `\u` decoding is a robust-fix candidate).
+5. The `charge_confusion_rate` deviation above.
+6. Merging the four PRs in order (1a, 1b, 2, 3); the code-release digest changes: deployments re-pin and requalify.
