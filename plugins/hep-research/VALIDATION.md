@@ -8534,7 +8534,7 @@ static` 31/31 pass; `tests/adapters` 505, 0 failures, 88 skipped (live and real-
 `tests/contracts` 1160, 1 skipped; `tests/routing` 21; repo path guard ok. The adapter status stays
 `demonstrated-on-synthetic-data`.
 
-## 0.51.0 release check, partial (2026-10-31, Linux with the CI lock; E2 pending)
+## 0.51.0 release check (2026-10-31, E2 and the CI lock)
 
 Release branch `release/0.51.0`, based on main `ed4d07ff` (PR #328, #329, #330 merged). Minor release: it ships the
 Geant4 adapter 0.6.0 (registration of an existing installation), reconstruction v12 part one (method contract and
@@ -8542,23 +8542,37 @@ research workflow control, workflow-runner fixes, check definitions, receipts an
 (the control-layer helper, C1 and C2, whose rules did not pass S0: eight rounds, three known open defects). Contracts
 3.17.0, `CORE_VERSION` 1.4.0 and every skill `description` are unchanged.
 
-What changed on the release branch so far:
+What changed on the release branch:
 - version 0.51.0 in both manifests, `pyproject.toml`, the README, two assets, the six theory-profile scripts,
   `usine_translate.py` and `examples/bc-usine-reproduction/run.py`; a CHANGELOG `0.51.0` section;
-- regenerated on Linux (EL9 x86_64, Python 3.13.2, CI lock), accepted only where every changed line is a version
-  string or a hash (old and new equal after masking both): 21 files — 13 theory-profile files and the
-  `detector-resolution`, `eic-profile-routing` and `recasting` JSON outputs. The `detector-resolution` PNG changed on
-  Linux and was restored, for E2.
-
-**Not done here (needs E2, `~/.venvs/hep-research-e2`):** the outputs that drift between macOS arm64 and Linux
-x86_64 (in 0.50.0, 164 files: the remaining examples and `published-comparison` after `qed-prediction`), the
-`detector-resolution` PNG, the release check on the result, the README package size if it drifts, and the release
-manifest `release-manifests/0.51.0.json` last. Until then `tests/examples` reports 13 failures (176 run, 22
-skipped), each only `versions.plugin` 0.51.0 against the committed 0.50.0 (J14 `geant4-thin-silicon`, J9
-`ml-classifier-to-inference`, `analysis-to-paper`), and CI on the release branch is expected to fail on them.
+- regenerated on Linux (EL9 x86_64, Python 3.13.2, CI lock) in `e41da037`: 21 files, 13 theory-profile files and the
+  `detector-resolution`, `eic-profile-routing` and `recasting` JSON outputs;
+- regenerated on E2 (`~/.venvs/hep-research-e2`, macOS arm64, Python 3.13.2, NumPy 2.5.3) in `320c31b9`: the six
+  theory-profile scripts and the examples, `qed-prediction` before `published-comparison` and `theory-comparison`
+  last; 166 files. 160 change only in version strings and the hashes that cover them (removed and added lines equal
+  after masking both). Five theory-profile predictions (`cr-secondary-antiprotons`, `cr-secondary-ratio`,
+  `dis-parton-model`, both `tmd-gaussian-lo`) return to their 0.50.0 E2 values: `e41da037` had accepted Linux values
+  that differ in the last digits, because its mask treated a run of 16 or more decimal digits as a hash. The
+  `detector-resolution` PNG returns to the E2 image shipped from 0.5.0 to 0.49.1 (sha256 `9b3c5d1e`); 0.50.0 had
+  shipped a Linux rendering (`22e2512e`). `bc-propagation-fit` and `unfolding-coverage` carry no plugin version and
+  drift at rounding level from their 0.42.0 outputs on E2; they were left as committed.
 
 | Check | Result |
 |---|---|
 | `run_all_checks.py --part static`, CI lock on Linux (Python 3.13.2) | 31 pass, 0 fail |
-| `tests/examples` (unittest), CI lock on Linux | 176 tests, 13 failures (version string only, above), 22 skipped |
+| `run_all_checks.py --part static`, E2 at `320c31b9` | 31 pass, 0 fail |
+| `tests/examples` (unittest), E2 at `320c31b9` | 176 tests, 0 failures, 17 skipped |
+| `check_relocation.py`, E2 at `320c31b9`, `TMPDIR` on local disk, `SDKROOT` set to the Xcode SDK | 30 pass, 2 fail, 1 skipped; 6277 tests, 2 failures, 188 skipped, 1 module timed out (below) |
 
+The relocation failures on E2 are host limits, not release changes:
+- `test_executor_b2` (`test_admission`, `test_g1_g2_g5_pass_and_the_rest_are_unsupported`; the same two in the
+  `ams_optional` check): G2 qualification fails because the runner finds processes that left the step's group only
+  through `/proc`, which macOS lacks (documented in `run_workflow.py`). The tests assume Linux; `qualify_g2` could
+  report `unsupported` there instead of `fail`. Follow-up.
+- `tests.skills.hep_statistics.test_cli_input_fuzz` timed out at 600 s under load (15-minute load average about 70);
+  alone it passes in 62 s.
+- Without `SDKROOT`, every C++ build fails on this host (Xcode clang 21 cannot read the Command Line Tools'
+  MacOSX 27.2 SDK), giving 13 failures and 3 errors; with `SDKROOT` set they pass.
+- `test_geant4_register` `test_the_helpers_read_a_registered_record` fails on macOS when `TMPDIR` is under
+  `/var/folders` (it compares an unresolved `G4LEDATA` path with a resolved one); it passes with a resolved `TMPDIR`.
+  Follow-up.
