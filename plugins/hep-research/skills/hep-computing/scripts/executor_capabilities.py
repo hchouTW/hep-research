@@ -11,7 +11,7 @@ qualification record (Delivery §1.2 of the reconstruction v12.2 spec copy). The
   say termination confirmed, with no write after the timeout; a child that leaves the process group (its own
   session) and outlives the step, and the step of a nested run_workflow.py, must be found, stopped and recorded with
   no late write; positive control: a child that ends just after the step does not fail it (POSIX; the cases outside
-  the group need /proc, so G2 passes on Linux only);
+  the group need /proc, so G2 passes on Linux only and is unsupported on a host without /proc);
 - G5 persistent state (reconstruction v12 C2), with the control-layer helper (control_layer.py) as the persistent
   state: restart recovery (a writer killed mid-session; a fresh process with only the task log derives the same
   state, every acknowledged fact exactly once, an operation id not appended twice, an unknown attempt still unknown
@@ -117,6 +117,9 @@ def qualify_g1(root: Path) -> dict:
 def qualify_g2(root: Path) -> dict:
     if os.name != "posix":
         return {"status": "unsupported", "reason": "termination is observed only on POSIX hosts (DEC-04)"}
+    if not Path("/proc/self/stat").is_file():
+        return {"status": "unsupported", "reason": "without /proc the runner observes only the step's process group, "
+                "not a process that left it (run_workflow.py, Termination)"}
     late = ("import subprocess, sys; subprocess.Popen([sys.executable, '-c', "
             "'import time; time.sleep(2.5); open(\"late.txt\", \"w\").write(\"x\")']); import time; time.sleep(60)")
     t0 = time.monotonic()
