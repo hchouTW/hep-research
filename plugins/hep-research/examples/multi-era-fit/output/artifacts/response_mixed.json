@@ -8,7 +8,7 @@
   "theory": []
  },
  "versions": {
-  "plugin": "0.51.0",
+  "plugin": "0.52.0",
   "contracts": "3.17.0",
   "plugin_release": {
    "release": "unreleased",
@@ -30,6 +30,8 @@
    "contracts/validate.py",
    "contracts/vocab.py",
    "core/__init__.py",
+   "core/hostcaps.py",
+   "core/interpreter_guard.py",
    "core/protected/__init__.py",
    "core/protected/guard.py",
    "core/protected/identity.py",
@@ -142,7 +144,7 @@
    ]
   ],
   "conditions": "mixed over eras e1, e2 with per-truth-bin weights (mix_period_responses.py)",
-  "provenance": "exposure-weighted mixture of the era responses e1 (sha256 407e62f77f91), e2 (sha256 7f844e6c262f)",
+  "provenance": "exposure-weighted mixture of the era responses e1 (sha256 a2456b921a0c), e2 (sha256 73fa7d540ff6)",
   "applied_separately": [],
   "underflow": [
    0.018462121466570537,
