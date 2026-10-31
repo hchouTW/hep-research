@@ -116,9 +116,10 @@ jobs:
           cd "hep 測試/crlf-clone"
           crlf=$(git ls-files --eol plugins/hep-research | grep "w/crlf" || true)
           echo "files checked out with CRLF: $(printf '%s' "$crlf" | grep -c . || true)"
-          printf '%s\n' "$crlf" | head -20
+          printf '%s\n' "$crlf" | sed -n '1,20p'
           test -z "$crlf"
       - name: Contract tests
+        if: always()
         env:
           PY: ${{ steps.py.outputs.python-path }}
           PYTHONUTF8: "1"
