@@ -5,6 +5,13 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **Cross-platform follow-ups.** The tests that failed under a `TMPDIR` named with a space and Chinese characters on
+  main pass: the batch-scheduler harness and the batch-partition example test take a plain temporary folder
+  (`tests/_platform.plain_tmpdir()`: HTCondor refuses a path with spaces by design, Slurm's golden scripts, `#!`
+  lines), and the hardening and diagram shims quote their paths. CI: the relocated run on pull requests uses the
+  hostile `TMPDIR` again; `checks-complete` also requires `old-python` and every `hostile-paths` leg (the one gate to
+  merge on); the macOS job fails on a failure (the known-differences list is empty).
+
 - **Geant4 programs read a spec naming a non-ASCII path (sci-fix MINIJSON-UNICODE-ESCAPES, S2).** The JSON reader of
   simreco, layered_sim and element_sim (`g4sim/MiniJson.hh`) refused every `\u` escape above 0x7f, which Python's
   `json.dumps` writes for a folder named with Chinese characters, and read a short escape such as `\u12g4` as U+0012.

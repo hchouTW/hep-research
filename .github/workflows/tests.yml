@@ -13,7 +13,8 @@
 #   checks-complete  reconciles the check-run records of all checks jobs (tools/reconcile_check_runs.py): every
 #              expected run present once, of this commit, passing, and the shards partition the selected modules (it
 #              recomputes the plan rather than trusting the plan job's copy; every run must name that plan); it
-#              runs even when a checks job failed and fails when a record is missing; required
+#              runs even when a checks job failed and fails when a record is missing, or when old-python or a
+#              hostile-paths leg did not pass; required (the one gate to merge on)
 #   lint       ruff and mypy on core/ and contracts/; required
 #   stats-backends  the statistics tests with pyhf 0.7.6 and ArviZ 0.23.4 required, and NumPy and hypothesis from the
 #              lock (the sci-fix eigenvalue oracle and the property tests): a skip for any of them fails; required
@@ -30,7 +31,7 @@
 #   hostile-paths  TMPDIR and the working directory reached through symlinks, in a folder whose name has a space and
 #              Chinese characters; a test tree with an NFD-named file, .DS_Store and an AppleDouble file through
 #              tools/check_packaging.py. Four legs (units 1/3-3/3, checks), each running its part of
-#              tools/check_relocation.py (pull requests: with a space-free TMPDIR). Pull requests also run tests/contracts,
+#              tools/check_relocation.py, under the hostile TMPDIR. Pull requests also run tests/contracts,
 #              tests/core (partition, blinding, R5) and tests/tools in parallel on the checks leg, skipped when the plan
 #              selects none of those modules; pushes to main, weekly and manual runs: each units leg runs its shard in
 #              the hostile folder (records platform-run-hostile-paths-*, reconciled by hostile-paths-complete)
@@ -158,8 +159,9 @@ jobs:
   checks-complete:
     # The gate over the checks matrix: a missing, duplicated, failed or foreign record fails it, and so does a module
     # that no shard ran; equal test counts are not evidence. It runs after a failed checks job too (always()), and a
-    # cancelled run leaves it cancelled, never passing.
-    needs: checks
+    # cancelled run leaves it cancelled, never passing. It also requires the platform jobs old-python and every
+    # hostile-paths leg (branch protection names no required checks; this gate is the one to merge on).
+    needs: [checks, old-python, hostile-paths]
     if: ${{ always() }}
     runs-on: ubuntu-latest
     timeout-minutes: 10
@@ -185,6 +187,13 @@ jobs:
           fi
       - name: Reconcile the check-run records
         run: python tools/reconcile_check_runs.py ../../check-runs --python 3.13 --shards 3 --parts static,ams-optional --plan ../../gate-plan/plan.json --sha "$GITHUB_SHA" --summary "$GITHUB_STEP_SUMMARY"
+      - name: The platform jobs passed (old-python, hostile-paths)
+        env:
+          OLD_PYTHON: ${{ needs.old-python.result }}
+          HOSTILE: ${{ needs.hostile-paths.result }}
+        run: |
+          echo "old-python: $OLD_PYTHON; hostile-paths: $HOSTILE"
+          test "$OLD_PYTHON" = success && test "$HOSTILE" = success
 
   stats-backends:
     # hep-statistics audit (CI gate 1): the backends the statistics tests promise (pyhf 0.7.6, ArviZ 0.23.4; NumPy and
@@ -577,14 +586,10 @@ jobs:
         working-directory: ${{ runner.temp }}
         env:
           SHARD: ${{ matrix.leg.shard }}
-          SCOPE: ${{ steps.sel.outputs.scope }}
         run: |
           cd "$HOSTILE/work/plugins/hep-research"
           if [ -n "$SHARD" ]; then part=(--part units --shard "$SHARD"); else part=(--part checks); fi
-          # the relocated copy's own path has spaces; on pull requests its suite runs with a space-free TMPDIR, since ten
-          # modules (simreco's JSON reader, batch and diagram tests) fail under the hostile TMPDIR on main too
-          # (evals/cross-platform/progress.md); the full run keeps the hostile TMPDIR
-          if [ "$SCOPE" = subset ]; then export TMPDIR="$RUNNER_TEMP"; else export TMPDIR="$HOSTILE/tmp"; fi
+          export TMPDIR="$HOSTILE/tmp"  # the relocated copy's own path has spaces too
           python tools/check_relocation.py "${part[@]}" --jobs 4 --no-cli
       - name: Keep the record
         if: always() && steps.sel.outputs.scope == 'full' && matrix.leg.shard != ''
