@@ -157,6 +157,8 @@
   "params",
   "pkg",
   "proc",
+  "wsl",
+  "xdg",
   "rel",
   "rep",
   "req",
