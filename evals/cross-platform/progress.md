@@ -263,3 +263,10 @@ folder. 6322 run, 34 failures, 9 errors. **All pre-existing** (A6): the same ten
 Not fixed (A6: pre-existing). Effect: the `hostile-paths` job passes on pull requests (its subset), but its full units
 run on pushes to `main`, weekly and manual runs will fail until these are addressed (simreco `\u` decoding; tests that
 need a space-free temporary folder create one). **Open human checkpoint.**
+
+CI run 3 (#335): every required job passes and macOS passes; `hostile-paths` failed only in
+`test_partition_bundle.test_shebang_interpreters_are_hashed_and_launchers_refused` (pre-existing under a spaced
+`TMPDIR`, but inside the job's PR subset, so fixed per 2.5): the launcher link now lives in a space-free folder and
+the first word is quoted (test-only; bundle semantics unchanged). The PR subset passes locally in the hostile path
+(contracts, tools, partition, blinding, r5). Fix attempts on it: 1/3. The earlier pattern fix (no
+`tests/core/test_protected*`, exit 5 "NO TESTS RAN"): 1/3.
