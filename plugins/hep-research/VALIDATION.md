@@ -8533,3 +8533,32 @@ static` 31/31 pass; `tests/adapters` 505, 0 failures, 88 skipped (live and real-
 `tests/skills/hep_detector` 591, 4 skipped; `test_cli_robustness` and `test_cli_contract` 9; `tests/tools` 371;
 `tests/contracts` 1160, 1 skipped; `tests/routing` 21; repo path guard ok. The adapter status stays
 `demonstrated-on-synthetic-data`.
+
+## 0.51.0 release check, partial (2026-10-31, Linux with the CI lock; E2 pending)
+
+Release branch `release/0.51.0`, based on main `ed4d07ff` (PR #328, #329, #330 merged). Minor release: it ships the
+Geant4 adapter 0.6.0 (registration of an existing installation), reconstruction v12 part one (method contract and
+research workflow control, workflow-runner fixes, check definitions, receipts and executor capabilities) and part two
+(the control-layer helper, C1 and C2, whose rules did not pass S0: eight rounds, three known open defects). Contracts
+3.17.0, `CORE_VERSION` 1.4.0 and every skill `description` are unchanged.
+
+What changed on the release branch so far:
+- version 0.51.0 in both manifests, `pyproject.toml`, the README, two assets, the six theory-profile scripts,
+  `usine_translate.py` and `examples/bc-usine-reproduction/run.py`; a CHANGELOG `0.51.0` section;
+- regenerated on Linux (EL9 x86_64, Python 3.13.2, CI lock), accepted only where every changed line is a version
+  string or a hash (old and new equal after masking both): 21 files — 13 theory-profile files and the
+  `detector-resolution`, `eic-profile-routing` and `recasting` JSON outputs. The `detector-resolution` PNG changed on
+  Linux and was restored, for E2.
+
+**Not done here (needs E2, `~/.venvs/hep-research-e2`):** the outputs that drift between macOS arm64 and Linux
+x86_64 (in 0.50.0, 164 files: the remaining examples and `published-comparison` after `qed-prediction`), the
+`detector-resolution` PNG, the release check on the result, the README package size if it drifts, and the release
+manifest `release-manifests/0.51.0.json` last. Until then `tests/examples` reports 13 failures (176 run, 22
+skipped), each only `versions.plugin` 0.51.0 against the committed 0.50.0 (J14 `geant4-thin-silicon`, J9
+`ml-classifier-to-inference`, `analysis-to-paper`), and CI on the release branch is expected to fail on them.
+
+| Check | Result |
+|---|---|
+| `run_all_checks.py --part static`, CI lock on Linux (Python 3.13.2) | 31 pass, 0 fail |
+| `tests/examples` (unittest), CI lock on Linux | 176 tests, 13 failures (version string only, above), 22 skipped |
+
