@@ -22,34 +22,52 @@ parameter_digest (evaluate_design.py run --digest-only), recorded as extension.p
 does not read does not rerun it.
 Output freshness and termination (reconstruction v12 B1, OUT-01, CACHE-01, EXEC-02): every input, output and stdout
 path is relative to the work folder, without `..` and not through a symlink (anything else is refused before any step
-runs); an output counts only when this run wrote it (a file left from before and not rewritten makes the step fail);
-each step runs in its own process group, which is stopped and confirmed gone on a timeout and after the step exits.
+runs; outputs, stdout and the run record are checked again after the step, which may have made a parent directory a
+symlink: such an output is not recorded and fails the step, and nothing is written through it); an output counts
+only when this run wrote it (a file left from before and not rewritten makes the step fail).
+Termination (EXEC-02; no write after the step's end): the step's processes are its process group (POSIX: each step
+runs in its own) and, through /proc (Linux), every process whose environment carries the attempt's token in
+HEP_RUN_WORKFLOW_ATTEMPT (a colon-separated chain: a nested run_workflow.py appends its token, so its steps stay the
+outer step's). The step ends when its last process has ended: after the main process exits, the others get
+LEFTOVER_GRACE_S (1 s) to end on their own; zombies have ended and do not count. Processes still running then (e.g. a
+daemon such as an ssh ControlPersist master, gpg-agent or a compiler-cache server started by the step) are stopped
+(SIGTERM, then SIGKILL), named in extension.leftover_processes, and fail the step: start such helpers before the
+workflow or disable their persistence. On a timeout all of them are stopped. Termination is "confirmed" when none
+is left; extension.termination_scope names what was observed (process-group, environment-marker). Limits: without
+/proc only the group is observed (scope process-group); a process that leaves the group and removes or replaces the
+marker (rather than appending to it) is not seen on any host.
 The record carries extension.end_status (success, failure, timeout), extension.termination (confirmed, unconfirmed),
 extension.output_contract and extension.artifact_digest (SHA-256 of the canonical output manifest); output hashes
-are recorded only when termination is confirmed. Termination is observed on POSIX hosts only (tested on Linux): a
-process that leaves the group and clears its environment is not seen.
-Input: workflow JSON {"workflow": NAME, "steps": [{"id", "needs": [...], "inputs": [...], "outputs": [...],
+are recorded only when termination is confirmed.
+Input: workflow JSON {"workflow": NAME, "steps": [{"id" (one plain name: letters, digits, '_', '.', ':', '-', not
+starting with '.', ':' or '-', at most 128 characters; it names the run record and the receipt), "needs": [...],
+"inputs": [...], "outputs": [...],
 "argv": [...], "stdout": FILE (optional), "seeds": {...} (optional), "parameter_digest": {...} (optional),
 "timeout_s": SECONDS (optional, default 3600), "check": {...} (optional: a check run's declared identity, below)}]}.
 A check step (reconstruction v12 A2 fields, defined in scripts/check_definitions.py) declares "check":
 {"check_digest", "criterion_digest", "target_artifact_digest" (SHA-256 hex), "criteria_file", "result_file" (relative
-paths: an input and an output of the step), "target_manifest" ({target logical name: staged input path}), "role"
+paths: an input and an output of the step), "target_manifest" ({target logical name: staged input path}, one entry
+per output of the target; a logical name is the output's path in the producer's work folder, the key of its
+output_hashes and the receipt's "logical", so the producer's artifact_digest binds as it is), "role"
 (closure, confirmation-holdout, confirmation-independent), "type" (threshold, performance-estimate), "samples" (the
 read list)}; the object is validated before any step runs and recorded as extension.check. After the check program
 ends, its result file must bind to the run (B2, VAL-06): the check digest is the hash of a script in argv, the
-criterion digest the hash of the criteria file, the target digest the canonical digest of the staged target outputs,
+criterion digest the hash of the criteria file, the target digest the canonical digest of {logical name: SHA-256 of
+the staged copy} (the same manifest as the producer's artifact_digest, Control §4),
 and the result file repeats the three digests with a four-valued result, a reason and samples from the read list;
 extension.check_result records the verdict, and an unbound result fails the step.
 Receipts (B2, --receipt-dir DIR): one <attempt>.receipt.json per executed step, outside the run records so that the
-records stay byte-identical: attempt, step, end status, termination, outputs (logical name, location in the work
-folder, digest), artifact digest, observed input evidence (not observable: declared inputs only, DEC-10), conditions
+records stay byte-identical. The attempt id is --attempt-prefix + step id and is used once: a run in which any step's
+attempt id already has a receipt is refused before any step runs (exit 2), and a receipt is never replaced. Fields:
+attempt, step, end status, termination, outputs (logical name, location in the work folder, digest), artifact digest, observed input evidence (not observable: declared inputs only, DEC-10), conditions
 resolution (not recorded: G6 unsupported), the run record's path and SHA-256, start and end times and resource usage
 (wall and CPU seconds of the step's process tree, POSIX).
 Usage: run_workflow.py WORKFLOW.json --work DIR [--created YYYY-MM-DD] [--dry-run] [--incremental] [--status LABEL]
        [--receipt-dir DIR] [--attempt-prefix TEXT]
 Output JSON: status (ok, failed, rejected), status_label, inputs, defaults_used, order and per-step results.
 Exit codes: 0 every step ran; 1 a step failed or its termination is unconfirmed (later steps are not run); 2 bad
-input (malformed workflow, an unsafe path, a cycle, an unknown dependency, a missing input or output).
+input (malformed workflow, an unsafe path or step id, a cycle, an unknown dependency, a missing input or output,
+an attempt id that already has a receipt).
 """
 from __future__ import annotations
 
@@ -60,6 +78,7 @@ import json
 import math
 import os
 import platform
+import re
 import signal
 import subprocess
 import sys
@@ -79,7 +98,9 @@ from core.status import add_status_argument, exit_code  # noqa: E402
 STEP_TIMEOUT_S = 3600
 STOP_GRACE_S = 5.0     # SIGTERM, then SIGKILL after this many seconds
 CONFIRM_S = 5.0        # how long to wait for the process group to disappear
+LEFTOVER_GRACE_S = 1.0  # after the main process exits, how long the step's other processes may take to end
 MARKER = "HEP_RUN_WORKFLOW_ATTEMPT"  # environment token used to find processes that left the group (Linux /proc)
+STEP_ID = re.compile(r"[A-Za-z0-9_][A-Za-z0-9._:-]{0,127}")  # one plain path component: names records and receipts
 
 
 class WorkflowError(ValueError):
@@ -187,6 +208,18 @@ def through_symlink(work: Path, rel: str) -> bool:
     return False
 
 
+def escapes(work: Path, rel: str) -> bool:
+    """True when work/rel passes through a symlink or resolves outside the work folder. Checked again after a step,
+    which may have turned a parent directory into a symlink (OUT-01)."""
+    if through_symlink(work, rel):
+        return True
+    try:
+        (work / rel).resolve().relative_to(work.resolve())
+    except ValueError:
+        return True
+    return False
+
+
 def load(path: Path) -> dict:
     try:
         wf = json.loads(path.read_text(encoding="utf-8"))
@@ -199,6 +232,10 @@ def load(path: Path) -> dict:
     for s in steps:
         if not isinstance(s, dict) or not isinstance(s.get("id"), str) or not s["id"]:
             raise WorkflowError("every step needs a string 'id'")
+        if not STEP_ID.fullmatch(s["id"]) or s["id"] in (".", ".."):
+            raise WorkflowError(f"step id {s['id']!r}: a step id names the run record and the receipt, so it is one "
+                                "plain name (letters, digits, '_', '.', ':', '-'; not starting with '.', ':' or '-'; "
+                                "at most 128 characters) (OUT-01)")
         if not isinstance(s.get("argv"), list) or not s["argv"] or not all(isinstance(a, str) for a in s["argv"]):
             raise WorkflowError(f"step {s['id']}: 'argv' must be a non-empty list of strings")
         for key in ("needs", "inputs", "outputs"):
@@ -275,6 +312,7 @@ def stat_key(path: Path):
 
 
 def _group_alive(pgid: int) -> bool:
+    """Fallback without /proc: whether any process (a zombie included) is in the group."""
     try:
         os.killpg(pgid, 0)
     except ProcessLookupError:
@@ -284,22 +322,62 @@ def _group_alive(pgid: int) -> bool:
     return True
 
 
-def _marked(token: str) -> list[int]:
-    """PIDs of processes still carrying this attempt's environment token (Linux /proc); [] elsewhere."""
-    proc = Path("/proc")
-    if not proc.is_dir():
-        return []
-    needle = f"{MARKER}={token}".encode()
-    pids = []
-    for d in proc.iterdir():
-        if not d.name.isdigit() or int(d.name) == os.getpid():
+def _proc_scan() -> bool:
+    """Whether processes can be listed with their group, state and environment (Linux /proc)."""
+    return Path("/proc/self/stat").is_file()
+
+
+def termination_scope() -> list[str]:
+    """What termination observes on this host: the step's process group (POSIX) and, through /proc, the processes
+    that left the group but still carry the attempt's token in their environment."""
+    return (["process-group"] if os.name == "posix" else []) + (["environment-marker"] if _proc_scan() else [])
+
+
+def _carries(environ: bytes, token: str) -> bool:
+    """Whether an environment block holds the token in its MARKER chain (nested runners append, never replace)."""
+    key = MARKER.encode() + b"="
+    return any(item.startswith(key) and token.encode() in item[len(key):].split(b":")
+               for item in environ.split(b"\0"))
+
+
+def _step_processes(pgid: int | None, token: str) -> dict[int, str] | None:
+    """The step's live processes {pid: name}: members of its process group and processes carrying its token.
+    Zombies have ended (they cannot write) and are left out. None where /proc is missing."""
+    if not _proc_scan():
+        return None
+    me, uid, found = os.getpid(), os.getuid(), {}
+    for d in Path("/proc").iterdir():
+        if not d.name.isdigit() or int(d.name) == me:
             continue
         try:
-            if needle in (d / "environ").read_bytes().split(b"\0"):
-                pids.append(int(d.name))
+            stat = (d / "stat").read_bytes()
+            close = stat.rindex(b")")
+            fields = stat[close + 2:].split()
+            state, pgrp = fields[0], int(fields[2])
+        except (OSError, ValueError, IndexError):
+            continue  # gone meanwhile
+        if state in (b"Z", b"X"):
+            continue
+        name = stat[stat.find(b"(") + 1:close].decode("utf-8", "replace")
+        if pgid is not None and pgrp == pgid:
+            found[int(d.name)] = name
+            continue
+        try:
+            if uid != 0 and d.stat().st_uid != uid:
+                continue  # another user's process: its environment is not readable
+            if _carries((d / "environ").read_bytes(), token):
+                found[int(d.name)] = name
         except OSError:
             continue
-    return pids
+    return found
+
+
+def _alive(pgid: int | None, token: str) -> dict[int, str]:
+    """The step's live processes; without /proc, the process group as a whole ({pgid: '?'}) while any member exists."""
+    found = _step_processes(pgid, token)
+    if found is not None:
+        return found
+    return {pgid: "?"} if pgid is not None and _group_alive(pgid) else {}
 
 
 def _stop(pgid: int | None, token: str, proc: subprocess.Popen) -> bool:
@@ -315,7 +393,7 @@ def _stop(pgid: int | None, token: str, proc: subprocess.Popen) -> bool:
                 proc.send_signal(sig)
             except OSError:
                 pass
-        for pid in _marked(token):
+        for pid in _step_processes(pgid, token) or {}:
             try:
                 os.kill(pid, sig)
             except (ProcessLookupError, PermissionError):
@@ -324,10 +402,10 @@ def _stop(pgid: int | None, token: str, proc: subprocess.Popen) -> bool:
     def left() -> bool:
         if proc.poll() is None:
             return True
-        return (pgid is not None and _group_alive(pgid)) or bool(_marked(token))
+        return bool(_alive(pgid, token))
 
     if not left():
-        return True
+        return pgid is not None
     signal_all(signal.SIGTERM)
     deadline = time.monotonic() + STOP_GRACE_S
     while left() and time.monotonic() < deadline:
@@ -346,10 +424,12 @@ def _stop(pgid: int | None, token: str, proc: subprocess.Popen) -> bool:
 
 def execute(cmd: list[str], cwd: Path, timeout: float) -> dict:
     """Run cmd in its own process group (POSIX) under a deadline; stop and confirm the group at the end (BUG-04).
-    Returns returncode, stdout, stderr, end ('success', 'failure', 'timeout') and termination ('confirmed',
-    'unconfirmed'). Leftover processes after the step exits are stopped and make the step a failure."""
+    Returns returncode, stdout, stderr, end ('success', 'failure', 'timeout'), termination ('confirmed',
+    'unconfirmed') and leftover (names of the step's processes still running LEFTOVER_GRACE_S after its main process
+    ended: they were stopped and make the step a failure)."""
     token = uuid.uuid4().hex
-    env = dict(os.environ, **{MARKER: token})
+    outer = os.environ.get(MARKER)
+    env = dict(os.environ, **{MARKER: f"{outer}:{token}" if outer else token})  # a chain: a nested run keeps ours
     posix = os.name == "posix"
     proc = subprocess.Popen(cmd, cwd=cwd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, env=env,
                             start_new_session=posix)
@@ -369,20 +449,26 @@ def execute(cmd: list[str], cwd: Path, timeout: float) -> dict:
                     pipe.close()
         return {"returncode": proc.returncode if proc.returncode is not None else -1, "stdout": out or "",
                 "stderr": (err or "") + f"\n[run_workflow] {note}", "end": end,
-                "termination": "confirmed" if confirmed else "unconfirmed"}
-    leftover = (pgid is not None and _group_alive(pgid)) or bool(_marked(token))
-    confirmed = _stop(pgid, token, proc) if leftover else pgid is not None
+                "termination": "confirmed" if confirmed else "unconfirmed", "leftover": []}
+    # The step ends when its last process has ended: a child still exiting gets a short grace period.
+    deadline = time.monotonic() + LEFTOVER_GRACE_S
+    survivors = _alive(pgid, token)
+    while survivors and time.monotonic() < deadline:
+        time.sleep(0.05)
+        survivors = _alive(pgid, token)
+    confirmed = _stop(pgid, token, proc) if survivors else pgid is not None
     code = proc.returncode
-    if leftover:
-        note = "\n[run_workflow] the step left processes running; they were stopped and the step counts as failed"
+    if survivors:
+        note = (f"\n[run_workflow] the step left processes running ({', '.join(sorted(set(survivors.values())))}); "
+                "they were stopped and the step counts as failed")
         code = code or 1
     return {"returncode": code, "stdout": out, "stderr": err + note, "end": "success" if code == 0 else "failure",
-            "termination": "confirmed" if confirmed else "unconfirmed"}
+            "termination": "confirmed" if confirmed else "unconfirmed", "leftover": sorted(survivors.values())}
 
 
 def record(wf_name: str, step: dict, cmd: list[str], inputs: list[dict], outputs: dict, code: int, created: str,
            label: str, scripts: dict | None = None, release: dict | None = None, digest: str | None = None,
-           end: str = "success", termination: str = "confirmed") -> dict:
+           end: str = "success", termination: str = "confirmed", leftover: list | None = None) -> dict:
     plugin_version = json.loads((PLUGIN / ".claude-plugin" / "plugin.json").read_text(encoding="utf-8"))["version"]
     status = [label] if code == 0 else [label, "failed"]
     extra = {"parameter_digest": digest} if digest else {}
@@ -401,7 +487,9 @@ def record(wf_name: str, step: dict, cmd: list[str], inputs: list[dict], outputs
                           "seeds": step.get("seeds", {}), "tolerances": {}, "exit_status": code,
                           "output_hashes": outputs, "argv": list(cmd), "script_sha256": scripts or {},
                           "output_contract": sorted(step.get("outputs", [])), "end_status": end,
-                          "termination": termination, "artifact_digest": canonical_digest(outputs), **extra}}
+                          "termination": termination, "termination_scope": termination_scope(),
+                          "leftover_processes": leftover or [], "artifact_digest": canonical_digest(outputs),
+                          **extra}}
 
 
 def skip_reason(prev: dict | None, rec: dict, work: Path, replaced: set[str]) -> str | None:
@@ -428,7 +516,7 @@ def skip_reason(prev: dict | None, rec: dict, work: Path, replaced: set[str]) ->
     if pe.get("termination", "confirmed") != "confirmed":
         return "the previous termination is unconfirmed"
     for path, h in (pe.get("output_hashes") or {}).items():
-        if not safe_relative(path) or through_symlink(work, path) or not (work / path).is_file() \
+        if not safe_relative(path) or escapes(work, path) or not (work / path).is_file() \
                 or sha256(work / path) != h:
             return f"output {path} changed or is missing"
     return None
@@ -460,6 +548,14 @@ def main(argv=None) -> int:
     except WorkflowError as exc:
         print(json.dumps({"status": "rejected", **base, "error": str(exc)}, indent=1))
         return exit_code("rejected")
+    if args.receipt_dir is not None:  # an attempt id identifies one attempt: never replace an earlier receipt
+        used = [f"{args.attempt_prefix}{sid}" for sid in seq
+                if (args.receipt_dir / f"{args.attempt_prefix}{sid}.receipt.json").exists()]
+        if used:
+            print(json.dumps({"status": "rejected", **base, "order": seq,
+                              "error": f"attempt id(s) {used} already have a receipt in {args.receipt_dir}; an "
+                                       "attempt id is used once: choose a new --attempt-prefix"}, indent=1))
+            return exit_code("rejected")
     if args.dry_run:
         print(json.dumps({"status": "ok", **base, "order": seq}, indent=1))
         return 0
@@ -533,18 +629,26 @@ def main(argv=None) -> int:
         p = execute(cmd, work, timeout)
         t1, cpu1 = usage_now()
         confirmed = p["termination"] == "confirmed"
-        if stdout_path and confirmed:
+        escaped = [o for o in outs if escapes(work, o)]  # the step may have made a parent a symlink (OUT-01)
+        if escapes(work, f"runs/{sid}.computational-run.json"):
+            print(json.dumps({"status": "failed", **base, "order": seq, "steps": results,
+                              "error": f"step {sid}: the step made the runs folder a symlink or moved it out of the "
+                                       "work folder; no run record or receipt is written (OUT-01)"}, indent=1))
+            return exit_code("failed")
+        if stdout_path and confirmed and stdout_path not in escaped:
             (work / stdout_path).write_text(p["stdout"], encoding="utf-8")
         outputs, stale = {}, []
         if confirmed:  # an output digest is valid only once termination is confirmed
             for o in step.get("outputs", []):
                 f = work / o
-                if f.is_file() and not f.is_symlink():
+                if o not in escaped and f.is_file():
                     if before[o] is not None and stat_key(f) == before[o] and o != stdout_path:
                         stale.append(o)  # left from before, not written by this run
                     else:
                         outputs[o] = sha256(f)
         code = p["returncode"]
+        if escaped:
+            code = code or 1  # an output (or stdout) path the step redirected outside the work folder
         if code == 0 and (len(outputs) != len(step.get("outputs", [])) or not confirmed):
             code = 1  # a step that claims success but did not write its outputs (or whose end is unconfirmed) failed
         bind = check_binding(step, work, inputs, scripts, outputs) if "check" in step and confirmed and code == 0 else None
@@ -552,7 +656,7 @@ def main(argv=None) -> int:
             code = 1  # an unbound check result is not a result of the declared check
         end = p["end"] if p["end"] != "success" or code == 0 else "failure"
         doc = record(wf.get("workflow", args.workflow.stem), step, rec_cmd, inputs, outputs, code, created, args.status,
-                     scripts, release, digest, end=end, termination=p["termination"])
+                     scripts, release, digest, end=end, termination=p["termination"], leftover=p["leftover"])
         if bind is not None:
             doc["extension"]["check_result"] = bind
         rec_bytes = (json.dumps(doc, indent=1, sort_keys=True) + "\n").encode("utf-8")
@@ -573,10 +677,19 @@ def main(argv=None) -> int:
                        "check_result": bind}
             rpath = args.receipt_dir / f"{attempt}.receipt.json"
             rpath.parent.mkdir(parents=True, exist_ok=True)
-            rpath.write_text(json.dumps(receipt, indent=1, sort_keys=True)
-                                                                      + "\n", encoding="utf-8")
+            try:
+                with rpath.open("x", encoding="utf-8") as fh:  # exclusive: a concurrent run took the id first
+                    fh.write(json.dumps(receipt, indent=1, sort_keys=True) + "\n")
+            except FileExistsError:
+                print(json.dumps({"status": "rejected", **base, "order": seq, "steps": results,
+                                  "error": f"attempt id {attempt} got a receipt from another run while step {sid} "
+                                           "ran; its receipt was not written"}, indent=1))
+                return exit_code("rejected")
         stderr = p["stderr"] + (f"\n[run_workflow] output(s) {stale} existed before and were not written by this run"
                                 if stale else "")
+        if escaped:
+            stderr += (f"\n[run_workflow] path(s) {escaped} pass through a symlink or leave the work folder after the "
+                       "step; not recorded or written (OUT-01)")
         if bind is not None and not bind["bound"]:
             stderr += "\n[run_workflow] check result not bound to this run: " + "; ".join(bind["problems"])
         results.append({"id": sid, "exit_status": code, "outputs": outputs, "skipped": False, "end_status": end,

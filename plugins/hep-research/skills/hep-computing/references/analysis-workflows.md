@@ -28,19 +28,28 @@ reproducible, partial reruns safe, and the provenance of every number checkable.
   design parameters it reads, e.g. `evaluate_design.py run --digest-only`) that replaces the candidate files in the
   skip key, so a design chain reruns only where a parameter it reads changed.
   Outputs are fresh and owned by the run: every input, output and `stdout` path must be relative to the work folder,
-  without `..` and not through a symlink (anything else is refused before a step runs); an output left from before
+  without `..` and not through a symlink (anything else is refused before a step runs, and outputs are checked again
+  after it, so a parent directory the step turned into a symlink fails the step); an output left from before
   that the step did not rewrite makes the step fail; `--incremental` also reruns when the set of declared outputs
   changed. Each step runs in its own process group under its deadline (`timeout_s`, default 3600 s): on a timeout, or
-  when the step leaves processes behind, the group is stopped and confirmed gone, and the record carries
+  when processes of the step are still running 1 s after its main process ended (zombies do not count), they are
+  stopped, named in `leftover_processes` and fail the step (start helper daemons such as an ssh ControlPersist
+  master, gpg-agent or a compiler-cache server before the workflow), and the record carries
   `end_status` (success, failure, timeout), `termination` (confirmed, unconfirmed), `output_contract` and
   `artifact_digest` (SHA-256 of the canonical output manifest). Output hashes are recorded only when termination is
   confirmed. Termination is observed on POSIX hosts (tested on Linux, where processes that leave the group are also
-  found through an environment token); a process that leaves the group and clears its environment is not seen.
-  `--receipt-dir DIR` writes one receipt per executed step outside the work folder (attempt, end status,
+  found through an environment token that a nested runner extends, never replaces; `termination_scope` says which);
+  a process that leaves the group and removes or replaces the token is not seen.
+  A step id is one plain name (letters, digits, `_`, `.`, `:`, `-`), since it names the run record and the receipt.
+  `--receipt-dir DIR` writes one receipt per executed step outside the work folder, named by the attempt id
+  (`--attempt-prefix` + step id), which is used once: a rerun whose attempt id already has a receipt is refused
+  before any step runs, so use a new prefix per attempt (attempt, end status,
   termination, outputs with location and digest, artifact digest, declared inputs, run-record digest, times, wall and
   CPU seconds). A check step declares its `check` identity (check, criterion and target digests, criteria and result
   files, target manifest, role, type, read list); its result counts only when it binds to the run, otherwise the step
-  fails. `executor_capabilities.py` qualifies the runner by fault injection (G1 output isolation, G2 termination on
+  fails. The target manifest maps each of the target's logical names (an output's path in the producer's work folder,
+  as in its record and receipt) to the staged copy, one entry per target output, so the target digest is the
+  producer's `artifact_digest` copied as it is. `executor_capabilities.py` qualifies the runner by fault injection (G1 output isolation, G2 termination on
   POSIX; G3–G6 unsupported) and refuses a capability whose declaration does not cite a passing, current
   qualification.
   `control_layer.py` keeps the task record of a T2-numeric+ deliverable (append-only, digest-chained, compare-and-set

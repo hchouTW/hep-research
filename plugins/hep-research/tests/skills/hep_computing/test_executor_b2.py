@@ -73,6 +73,26 @@ class Receipts(Base):
         self.assertGreaterEqual(rec["usage"]["cpu_s"], 0)
         self.assertFalse(any(self.work.rglob("*.receipt.json")))  # receipts stay out of the work folder
 
+    def test_an_attempt_id_is_used_once(self):
+        """A receipt identifies one attempt: a rerun with the same prefix is refused before it runs and the earlier
+        receipt is kept; a new prefix runs (positive control)."""
+        receipts = self.root / "receipts"
+        steps = [{"id": "s", "argv": ["{python}", "-c", "open('o.txt','w').write('1')"], "outputs": ["o.txt"]}]
+        self.assertEqual(run(RUNNER, self.write_workflow(steps), "--work", self.work, "--receipt-dir", receipts,
+                             "--attempt-prefix", "a1:")[0], 0)
+        first = (receipts / "a1:s.receipt.json").read_bytes()
+        steps[0]["argv"][-1] = "open('o.txt','w').write('2')"
+        code, out = run(RUNNER, self.write_workflow(steps), "--work", self.work, "--receipt-dir", receipts,
+                        "--attempt-prefix", "a1:")
+        self.assertEqual((code, out["status"]), (2, "rejected"), out)
+        self.assertIn("a1:s", out["error"])
+        self.assertEqual((receipts / "a1:s.receipt.json").read_bytes(), first)
+        self.assertEqual((self.work / "o.txt").read_text(), "1")  # the second attempt did not run
+        code, out = run(RUNNER, self.write_workflow(steps), "--work", self.work, "--receipt-dir", receipts,
+                        "--attempt-prefix", "a2:")
+        self.assertEqual(code, 0, out)
+        self.assertEqual(json.loads((receipts / "a2:s.receipt.json").read_text())["attempt"], "a2:s")
+
     def test_no_receipt_without_the_option(self):
         steps = [{"id": "s", "argv": ["{python}", "-c", "open('o.txt','w').write('1')"], "outputs": ["o.txt"]}]
         self.assertEqual(run(RUNNER, self.write_workflow(steps), "--work", self.work)[0], 0)
@@ -126,6 +146,31 @@ class CheckBinding(Base):
 
     def test_a_sample_outside_the_read_list_is_not_bound(self):
         code, _, res = self.runit(self.step(args=[self.check_d, self.crit_d, self.target_d, "CONF"]))
+        self.assertEqual((code, res["bound"]), (1, False))
+
+    def producer_digest(self, files: dict) -> str:
+        """Run a producer step in its own work folder; return the artifact digest its run record holds."""
+        prod = self.root / "producer"
+        code = ";".join(f"open({n!r}, 'w').write({t!r})" for n, t in files.items())
+        steps = [{"id": "reco", "argv": ["{python}", "-c", code], "outputs": sorted(files)}]
+        rc, out = run(RUNNER, self.write_workflow(steps), "--work", prod)
+        self.assertEqual(rc, 0, out)
+        return json.loads((prod / "runs" / "reco.computational-run.json").read_text())["extension"]["artifact_digest"]
+
+    def test_the_producers_artifact_digest_binds(self):
+        """Control §4: the artifact is the manifest {logical name: digest}; the runner's logical name of an output is
+        its path in the producer's work folder, and target_manifest maps those names to the staged copies. A digest
+        copied from the producer's record binds, whatever the staged file is called."""
+        digest = self.producer_digest({"value.txt": "1.02"})
+        self.assertEqual(digest, self.target_d)
+        code, out, res = self.runit(self.step(args=[self.check_d, self.crit_d, digest, "CR"],
+                                              target_artifact_digest=digest))
+        self.assertEqual((code, res["bound"]), (0, True), out)
+
+    def test_a_target_staged_in_part_does_not_bind(self):  # every output of the target must be staged
+        digest = self.producer_digest({"value.txt": "1.02", "extra.txt": "x"})
+        code, _, res = self.runit(self.step(args=[self.check_d, self.crit_d, digest, "CR"],
+                                            target_artifact_digest=digest))
         self.assertEqual((code, res["bound"]), (1, False))
 
     def test_a_failing_check_is_a_bound_fail(self):  # the result is recorded as it is, never upgraded

@@ -68,9 +68,10 @@ Determination rules:
 
 Lacking a guarantee is reported as a weaker, stated process; a capability is never simulated by a written policy.
 Which guarantees the local runner actually provides is established by `executor_capabilities.py qualify` (fault
-injection: G1 output isolation, G2 termination and G5 persistent state — restart recovery and stale lock takeover
-of the helper's task record — pass on Linux; G3 submission reconciliation, G4 metering with atomic reservation and
-G6 conditions evidence are unsupported); `admit --mode M2` accepts only with that G5 record; M3 cannot be claimed.
+injection: G1 output isolation, G2 termination (also processes that leave the group and nested runners) and G5
+persistent state — restart recovery and stale lock takeover of the helper's task record — pass on Linux; G3
+submission reconciliation, G4 metering with atomic reservation and G6 conditions evidence are unsupported); `admit
+--mode M2` accepts only with that G5 record; M3 cannot be claimed.
 A qualified G5 shows the record survives restarts, not that its rules were reviewed.
 
 ## Trigger matrix (what to load)

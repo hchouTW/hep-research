@@ -154,11 +154,60 @@ class Destinations(Base):
         (self.work / "link").symlink_to(outside, target_is_directory=True)
         self.assert_refused({"workflow": "b3", "steps": [step("s", "pass", ["link/res.txt"])]})
 
+    @unittest.skipUnless(POSIX, "symlinks")
+    def test_a_parent_the_step_turns_into_a_symlink(self):
+        """Checked again after the step: a parent directory the step makes a symlink to a folder outside the work
+        folder does not get the outside file recorded as an output, and the runner writes nothing through it."""
+        outside = self.root / "outside"
+        outside.mkdir()
+        link = f"import os; os.symlink({str(outside)!r}, 'sub'); "
+        code, out = run({"workflow": "b3", "steps": [step("s", link + write("sub/out.txt"), ["sub/out.txt"])]},
+                        self.work)
+        self.assertEqual((code, out["status"]), (1, "failed"), out)
+        self.assertEqual(record(self.work, "s")["extension"]["output_hashes"], {})
+        self.assertIn("symlink", out["steps"][0]["stderr_tail"])
+        code, out = run({"workflow": "b3", "steps": [step("t", link.replace("'sub'", "'log'") + "print(1)", [],
+                                                          stdout="log/t.txt")]}, self.root / "work2")
+        self.assertEqual(code, 1, out)
+        self.assertFalse((outside / "t.txt").exists())  # the runner did not write the stdout file outside
+
+    @unittest.skipUnless(POSIX, "symlinks")
+    def test_a_runs_folder_the_step_replaces_with_a_symlink(self):
+        outside = self.root / "outside"
+        outside.mkdir()
+        code, out = run({"workflow": "b3", "steps": [step("s", "import os, shutil; shutil.rmtree('runs'); "
+                                                          f"os.symlink({str(outside)!r}, 'runs'); " + write("o.txt"),
+                                                          ["o.txt"])]}, self.work)
+        self.assertNotEqual(code, 0, out)
+        self.assertEqual(list(outside.iterdir()), [])  # no run record written outside the work folder
+
     def test_relative_output_runs(self):  # positive control
         code, out = run({"workflow": "b3", "steps": [step("s", "import os; os.makedirs('d', exist_ok=True);"
                                                                + write("d/r.txt"), ["d/r.txt"])]}, self.work)
         self.assertEqual((code, out["status"]), (0, "ok"), out)
         self.assertEqual(list(record(self.work, "s")["extension"]["output_hashes"]), ["d/r.txt"])
+
+
+class StepIds(Base):
+    """A step id names the run record and the receipt: an id that is not one plain path component is refused before
+    any step runs (OUT-01), so neither file can leave its folder."""
+
+    def test_unsafe_step_ids_are_refused(self):
+        for sid in ("../../x", "a/../../y", "a/b", "/abs", ".", "..", "a\\b", " ", "-x", "a\nb"):
+            with self.subTest(sid=sid):
+                ran = self.root / "ran.txt"
+                wf = {"workflow": "ids", "steps": [step("first", f"open({str(ran)!r}, 'w').write('x')", []),
+                                                   step(sid, "pass", [], needs=["first"])]}
+                code, out = run(wf, self.work, "--receipt-dir", self.root / "receipts" / "r")
+                self.assertEqual((code, out["status"]), (2, "rejected"), out)
+                self.assertIn("step id", out["error"])
+                self.assertFalse(ran.exists())  # refused before any step ran
+                self.assertFalse((self.root / "x").exists() or (self.root / "y").exists())
+
+    def test_plain_ids_run(self):  # positive control: the ids the shipped workflows and adapters use
+        steps = [step(sid, "pass", []) for sid in ("generate", "CALC-CC-B", "scan-000", "__check__", "a.b_c")]
+        code, out = run({"workflow": "ids", "steps": steps}, self.work)
+        self.assertEqual(code, 0, out)
 
 
 @unittest.skipUnless(POSIX, "process groups (DEC-04: only POSIX is claimed, tested on Linux)")
@@ -188,21 +237,86 @@ class Termination(Base):
                                                "); " + write("o.txt"), ["o.txt"])]}
         code, out = run(wf, self.work)
         self.assertEqual(code, 1, out)
-        self.assertEqual(record(self.work, "s")["extension"]["termination"], "confirmed")
+        ext = record(self.work, "s")["extension"]
+        self.assertEqual(ext["termination"], "confirmed")
+        self.assertEqual(len(ext["leftover_processes"]), 1, ext)  # recorded, not silently stopped
         time.sleep(4)
         self.assertFalse((self.work / "late.txt").exists())
 
     @unittest.skipUnless(Path("/proc").is_dir(), "the environment token is found through /proc (Linux)")
     def test_a_process_that_leaves_the_group_is_found(self):
+        """A child that starts its own session and outlives the step (as a daemonized helper: an ssh ControlPersist
+        master, gpg-agent, a compiler-cache server) is found by its token, stopped and recorded; the step fails."""
         wf = {"workflow": "b4", "steps": [step("s", "import subprocess, sys; subprocess.Popen([sys.executable, "
-                                               "'-c', 'import os, time; os.setsid(); time.sleep(2.5); "
+                                               "'-c', 'import time; time.sleep(2.5); "
                                                "open(\"late.txt\", \"w\").write(\"x\")'], start_new_session=True, "
                                                "stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL); "
                                                + write("o.txt"), ["o.txt"])]}
         code, out = run(wf, self.work)
         self.assertEqual(code, 1, out)
+        self.assertEqual(len(record(self.work, "s")["extension"]["leftover_processes"]), 1)
+        self.assertIn("left processes running", out["steps"][0]["stderr_tail"])
         time.sleep(4)
         self.assertFalse((self.work / "late.txt").exists())
+
+    def test_a_child_that_ends_just_after_the_step_does_not_fail_it(self):
+        """A child still exiting when the step's main process ends belongs to the step: the runner waits a short grace
+        period for the step's processes to end on their own before it counts survivors."""
+        wf = {"workflow": "b4", "steps": [step("s", "import subprocess, sys; subprocess.Popen([sys.executable, '-c', "
+                                               "'import time; time.sleep(0.3)'], stdout=subprocess.DEVNULL, "
+                                               "stderr=subprocess.DEVNULL); " + write("o.txt"), ["o.txt"])]}
+        code, out = run(wf, self.work)
+        self.assertEqual(code, 0, out)
+        ext = record(self.work, "s")["extension"]
+        self.assertEqual((ext["termination"], ext["leftover_processes"]), ("confirmed", []))
+
+    @unittest.skipUnless(Path("/proc/self/stat").is_file() and sys.platform.startswith("linux"),
+                         "a child subreaper (prctl) stands in for a container init that never reaps")
+    def test_an_unreaped_zombie_does_not_fail_the_step(self):
+        """A zombie has ended: it cannot write. Run under a subreaper that never reaps orphans (as a runner that is
+        PID 1 of a container), the step's exited child stays a zombie in its process group."""
+        wrapper = self.root / "subreaper.py"
+        wrapper.write_text("import ctypes, runpy, sys\n"
+                           "assert ctypes.CDLL(None, use_errno=True).prctl(36, 1, 0, 0, 0) == 0\n"
+                           f"sys.argv = [{str(RUNNER)!r}, *sys.argv[1:]]\n"
+                           f"runpy.run_path({str(RUNNER)!r}, run_name='__main__')\n")
+        wf = self.root / "wf.json"
+        wf.write_text(json.dumps({"workflow": "b4", "steps": [step(
+            "s", "import subprocess, sys, time; subprocess.Popen([sys.executable, '-c', 'pass']); time.sleep(1); "
+            + write("o.txt"), ["o.txt"])]}))
+        p = subprocess.run([sys.executable, "-B", str(wrapper), str(wf), "--work", str(self.work)],
+                           capture_output=True, text=True, timeout=120)
+        self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
+        self.assertEqual(record(self.work, "s")["extension"]["termination"], "confirmed")
+
+    @unittest.skipUnless(Path("/proc").is_dir(), "the environment token is found through /proc (Linux)")
+    def test_a_nested_runner_does_not_hide_its_steps(self):
+        """A step that runs run_workflow.py: the inner runner's step starts its own session, and the inner runner adds
+        its token to the marker instead of replacing it, so the outer runner still finds and stops that step when the
+        outer step ends and leaves it running."""
+        started, late = self.root / "started.txt", self.root / "late.txt"
+        inner = self.root / "inner.json"
+        inner.write_text(json.dumps({"workflow": "inner", "steps": [step(
+            "i", f"import time; open({str(started)!r}, 'w').write('x'); time.sleep(3); "
+                 f"open({str(late)!r}, 'w').write('x')", [])]}))
+        outer = (f"import os, subprocess, sys, time; subprocess.Popen([sys.executable, {str(RUNNER)!r}, "
+                 f"{str(inner)!r}, '--work', {str(self.root / 'inner-work')!r}], stdout=subprocess.DEVNULL, "
+                 f"stderr=subprocess.DEVNULL)\nwhile not os.path.exists({str(started)!r}): time.sleep(0.05)\n"
+                 "os._exit(0)")
+        code, out = run({"workflow": "b4", "steps": [step("outer", outer, [], timeout_s=60)]}, self.work)
+        self.assertTrue(started.exists())
+        self.assertEqual(code, 1, out)  # the outer step left processes running
+        ext = record(self.work, "outer")["extension"]
+        self.assertEqual(ext["termination"], "confirmed")
+        time.sleep(4)
+        self.assertFalse(late.exists())  # the inner step was stopped with the outer one
+
+    @unittest.skipUnless(Path("/proc").is_dir(), "the environment token is found through /proc (Linux)")
+    def test_the_record_names_what_termination_observed(self):
+        code, out = run({"workflow": "b4", "steps": [step("s", write("o.txt"), ["o.txt"])]}, self.work)
+        self.assertEqual(code, 0, out)
+        self.assertEqual(record(self.work, "s")["extension"]["termination_scope"],
+                         ["process-group", "environment-marker"])
 
     def test_unconfirmed_termination_is_recorded_and_fails(self):
         mod = load_runner()
