@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import shlex
 import stat
 import subprocess
 import sys
@@ -181,7 +182,7 @@ class WorkerTimeoutT31(unittest.TestCase):
         with tempfile.TemporaryDirectory() as td:
             d = Path(td)
             m = engine.make_manifest("synthetic-test", 1, 1, 1)
-            cmd = f"{sys.executable} -c 'import time; time.sleep(5)' {{out}}"
+            cmd = f"{shlex.quote(sys.executable)} -c 'import time; time.sleep(5)' {{out}}"
             cdir = cp.init(d / "c", m, cmd, worker_timeout_s=1)
             p = subprocess.run([sys.executable, str(cdir / "runner.py"), "--spec", str(cdir / "spec.json"), "--chunk", "c0000",
                                 "--attempt", "c0000-a01", "--out-dir", str(d / "out")], capture_output=True, text=True, timeout=60)
@@ -202,7 +203,7 @@ class LocalRulesX16(unittest.TestCase):
                                                       timeout=120, env=env)
             self.assertEqual(run("plan", "--job", "t", "--items", "2", "--chunk-size", "1", "--seed", "1",
                                  "--out", str(d / "m.json")).returncode, 0)
-            cmd = f"{sys.executable} {d / 'w.py'} --out {{out}} --id {{id}}"
+            cmd = f"{shlex.quote(sys.executable)} {shlex.quote(str(d / 'w.py'))} --out {{out}} --id {{id}}"
             env = dict(os.environ, HEP_SYNTHETIC_CANARY="sentinel", SLEEP_S="0")
             p = run("run", "--manifest", str(d / "m.json"), "--state", str(d / "s1"), "--cmd", cmd, env=env)
             self.assertEqual(p.returncode, 0, p.stdout + p.stderr)
@@ -273,7 +274,7 @@ class ReviewFollowUpsWP3(unittest.TestCase):
         bin_ = self.d / "bin"
         bin_.mkdir()
         log = self.d / "argv"
-        fake_tool(bin_, "sacct", f'echo "$@" > {log}')
+        fake_tool(bin_, "sacct", f'echo "$@" > {shlex.quote(str(log))}')
         SlurmExecutor(BASE, {"PATH": str(bin_)}).find("hepr-x-s001", "2026-10-08T12:00:00Z")
         import datetime
         want = (datetime.datetime(2026, 10, 8, 11, 0, tzinfo=datetime.timezone.utc).astimezone()

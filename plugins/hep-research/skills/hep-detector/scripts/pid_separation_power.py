@@ -45,6 +45,20 @@ Exit codes: 0 ok; 1 the computation failed or the input file is unreadable or in
 2 invalid input (JSON with error_kind invalid-input on stdout, the usage on stderr).
 Run: python3 <plugin root>/skills/hep-detector/scripts/pid_separation_power.py --mode tof --species pi K --momentum 2.0 --path 1.2 --time-resolution 60
 """
+if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.dont_write_bytecode = True
+    _root = str(_Path(__file__).resolve().parents[3])
+    if _root not in _sys.path:
+        _sys.path.insert(0, _root)
+    try:
+        from core.interpreter_guard import guard as _guard
+    except ImportError:  # copied outside the plugin
+        pass
+    else:
+        _guard()
+
 import argparse
 import json
 import math

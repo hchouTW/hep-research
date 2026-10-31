@@ -1,0 +1,1912 @@
+{
+ "format": "hep-research-skill-scripts/1",
+ "generated_by": "tools/skill_scripts.py",
+ "note": "generated; do not edit. Each script carries the interpreter guard block (tools/insert_interpreter_guard.py)",
+ "scripts": [
+  {
+   "path": "adapters/batch-schedulers/batch_campaign.py",
+   "depth": 2,
+   "skills": [
+    "hep-computing",
+    "hep-measurement"
+   ]
+  },
+  {
+   "path": "adapters/cr-propagation/assets/dragon2_to_prediction.py",
+   "depth": 3,
+   "skills": [
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "adapters/geant4/assets/geant4_build.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "adapters/geant4/assets/geant4_examples.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "adapters/geant4/assets/geant4_run.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "adapters/geant4/assets/geant4_verify.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "adapters/geant4/assets/summary_from_csv.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "adapters/geomagnetic-backtracing/assets/otso_cutoff.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "adapters/hepdata/assets/hepdata_export.py",
+   "depth": 3,
+   "skills": [
+    "hep-citations"
+   ]
+  },
+  {
+   "path": "adapters/literature-lookup/assets/literature_lookup.py",
+   "depth": 3,
+   "skills": [
+    "hep-citations"
+   ]
+  },
+  {
+   "path": "adapters/pyhf-combine/assets/backend_comparison.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "adapters/pyhf-combine/assets/model_card.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "adapters/root-uproot/assets/coffea_dijet_processor.py",
+   "depth": 3,
+   "skills": [
+    "hep-computing"
+   ]
+  },
+  {
+   "path": "adapters/unbinned-fit/assets/unbinned_fit.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "adapters/unfolding/assets/unfold.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "contracts/comparison/gate.py",
+   "depth": 2,
+   "skills": [
+    "hep-statistics",
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "contracts/dependencies.py",
+   "depth": 1,
+   "skills": [
+    "hep-computing",
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "contracts/design.py",
+   "depth": 1,
+   "skills": [
+    "hep-detector",
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "contracts/lineage.py",
+   "depth": 1,
+   "skills": [
+    "hep-measurement",
+    "hep-ml"
+   ]
+  },
+  {
+   "path": "contracts/migrate_statistical_result.py",
+   "depth": 1,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "contracts/naming_check.py",
+   "depth": 1,
+   "skills": [
+    "hep-computing"
+   ]
+  },
+  {
+   "path": "contracts/naming_registry.py",
+   "depth": 1,
+   "skills": [
+    "hep-authoring",
+    "hep-citations",
+    "hep-computing",
+    "hep-detector",
+    "hep-measurement",
+    "hep-ml",
+    "hep-statistics",
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "contracts/permit.py",
+   "depth": 1,
+   "skills": [
+    "hep-computing"
+   ]
+  },
+  {
+   "path": "contracts/project.py",
+   "depth": 1,
+   "skills": [
+    "hep-authoring",
+    "hep-citations",
+    "hep-computing",
+    "hep-detector",
+    "hep-measurement",
+    "hep-ml",
+    "hep-review",
+    "hep-statistics",
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "contracts/protected_use.py",
+   "depth": 1,
+   "skills": [
+    "hep-computing"
+   ]
+  },
+  {
+   "path": "contracts/release_prepare.py",
+   "depth": 1,
+   "skills": [
+    "hep-computing",
+    "hep-measurement"
+   ]
+  },
+  {
+   "path": "contracts/response_adapter.py",
+   "depth": 1,
+   "skills": [
+    "hep-detector",
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "contracts/review.py",
+   "depth": 1,
+   "skills": [
+    "hep-authoring"
+   ]
+  },
+  {
+   "path": "contracts/validate.py",
+   "depth": 1,
+   "skills": [
+    "hep-authoring",
+    "hep-citations",
+    "hep-computing",
+    "hep-detector",
+    "hep-measurement",
+    "hep-ml",
+    "hep-review",
+    "hep-statistics",
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "core/kinematics/relativistic.py",
+   "depth": 2,
+   "skills": [
+    "hep-measurement",
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "core/stats/likelihood_limits.py",
+   "depth": 2,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "core/stats/poisson_diagnostics.py",
+   "depth": 2,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "core/stats/statistical_toys.py",
+   "depth": 2,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "core/stats/template_fit.py",
+   "depth": 2,
+   "skills": [
+    "hep-detector",
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "core/stats/unfolding_diagnostics.py",
+   "depth": 2,
+   "skills": [
+    "hep-detector",
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "core/stats/validate_covariance.py",
+   "depth": 2,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "core/stats/validate_response.py",
+   "depth": 2,
+   "skills": [
+    "hep-detector",
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-authoring/scripts/audit_claims.py",
+   "depth": 3,
+   "skills": [
+    "hep-authoring"
+   ]
+  },
+  {
+   "path": "skills/hep-authoring/scripts/check_adaptation.py",
+   "depth": 3,
+   "skills": [
+    "hep-authoring"
+   ]
+  },
+  {
+   "path": "skills/hep-authoring/scripts/check_citations.py",
+   "depth": 3,
+   "skills": [
+    "hep-authoring"
+   ]
+  },
+  {
+   "path": "skills/hep-authoring/scripts/check_communication.py",
+   "depth": 3,
+   "skills": [
+    "hep-authoring"
+   ]
+  },
+  {
+   "path": "skills/hep-authoring/scripts/check_diagram_sources.py",
+   "depth": 3,
+   "skills": [
+    "hep-authoring"
+   ]
+  },
+  {
+   "path": "skills/hep-authoring/scripts/check_manuscript.py",
+   "depth": 3,
+   "skills": [
+    "hep-authoring"
+   ]
+  },
+  {
+   "path": "skills/hep-authoring/scripts/check_terminology.py",
+   "depth": 3,
+   "skills": [
+    "hep-authoring"
+   ]
+  },
+  {
+   "path": "skills/hep-authoring/scripts/extract_names.py",
+   "depth": 3,
+   "skills": [
+    "hep-authoring"
+   ]
+  },
+  {
+   "path": "skills/hep-authoring/scripts/render_results.py",
+   "depth": 3,
+   "skills": [
+    "hep-authoring"
+   ]
+  },
+  {
+   "path": "skills/hep-authoring/scripts/review.py",
+   "depth": 3,
+   "skills": [
+    "hep-authoring"
+   ]
+  },
+  {
+   "path": "skills/hep-authoring/scripts/spectrum_plot.py",
+   "depth": 3,
+   "skills": [
+    "hep-authoring"
+   ]
+  },
+  {
+   "path": "skills/hep-authoring/scripts/track_revision_impact.py",
+   "depth": 3,
+   "skills": [
+    "hep-authoring"
+   ]
+  },
+  {
+   "path": "skills/hep-citations/scripts/build_lit_matrix.py",
+   "depth": 3,
+   "skills": [
+    "hep-citations"
+   ]
+  },
+  {
+   "path": "skills/hep-citations/scripts/extract_names.py",
+   "depth": 3,
+   "skills": [
+    "hep-citations"
+   ]
+  },
+  {
+   "path": "skills/hep-citations/scripts/manage_literature.py",
+   "depth": 3,
+   "skills": [
+    "hep-citations"
+   ]
+  },
+  {
+   "path": "skills/hep-computing/assets/chunked_histogram.py",
+   "depth": 3,
+   "skills": [
+    "hep-computing"
+   ]
+  },
+  {
+   "path": "skills/hep-computing/assets/time_slice_reduction.py",
+   "depth": 3,
+   "skills": [
+    "hep-computing"
+   ]
+  },
+  {
+   "path": "skills/hep-computing/scripts/audit_blinded_outputs.py",
+   "depth": 3,
+   "skills": [
+    "hep-computing"
+   ]
+  },
+  {
+   "path": "skills/hep-computing/scripts/audit_histograms.py",
+   "depth": 3,
+   "skills": [
+    "hep-computing"
+   ]
+  },
+  {
+   "path": "skills/hep-computing/scripts/check_definitions.py",
+   "depth": 3,
+   "skills": [
+    "hep-computing"
+   ]
+  },
+  {
+   "path": "skills/hep-computing/scripts/check_histogram_errors.py",
+   "depth": 3,
+   "skills": [
+    "hep-computing"
+   ]
+  },
+  {
+   "path": "skills/hep-computing/scripts/compare_root_histograms.py",
+   "depth": 3,
+   "skills": [
+    "hep-computing"
+   ]
+  },
+  {
+   "path": "skills/hep-computing/scripts/control_layer.py",
+   "depth": 3,
+   "skills": [
+    "hep-computing"
+   ]
+  },
+  {
+   "path": "skills/hep-computing/scripts/create_story_card.py",
+   "depth": 3,
+   "skills": [
+    "hep-computing"
+   ]
+  },
+  {
+   "path": "skills/hep-computing/scripts/environment_manifest.py",
+   "depth": 3,
+   "skills": [
+    "hep-computing"
+   ]
+  },
+  {
+   "path": "skills/hep-computing/scripts/executor_capabilities.py",
+   "depth": 3,
+   "skills": [
+    "hep-computing"
+   ]
+  },
+  {
+   "path": "skills/hep-computing/scripts/extract_names.py",
+   "depth": 3,
+   "skills": [
+    "hep-computing"
+   ]
+  },
+  {
+   "path": "skills/hep-computing/scripts/inspect_root_file.py",
+   "depth": 3,
+   "skills": [
+    "hep-computing"
+   ]
+  },
+  {
+   "path": "skills/hep-computing/scripts/lint_task.py",
+   "depth": 3,
+   "skills": [
+    "hep-computing"
+   ]
+  },
+  {
+   "path": "skills/hep-computing/scripts/local_partition.py",
+   "depth": 3,
+   "skills": [
+    "hep-computing"
+   ]
+  },
+  {
+   "path": "skills/hep-computing/scripts/make_synthetic_nanoaod.py",
+   "depth": 3,
+   "skills": [
+    "hep-computing"
+   ]
+  },
+  {
+   "path": "skills/hep-computing/scripts/roofit_workspace_summary.py",
+   "depth": 3,
+   "skills": [
+    "hep-computing",
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-computing/scripts/run_workflow.py",
+   "depth": 3,
+   "skills": [
+    "hep-computing",
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "skills/hep-computing/scripts/summarize_histogram_statistics.py",
+   "depth": 3,
+   "skills": [
+    "hep-computing"
+   ]
+  },
+  {
+   "path": "skills/hep-computing/scripts/validate_agile_notes.py",
+   "depth": 3,
+   "skills": [
+    "hep-computing"
+   ]
+  },
+  {
+   "path": "skills/hep-detector/scripts/build_response.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "skills/hep-detector/scripts/calorimeter_resolution.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "skills/hep-detector/scripts/charge_confusion_rate.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "skills/hep-detector/scripts/check_geant4_study.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "skills/hep-detector/scripts/cherenkov_angle.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "skills/hep-detector/scripts/design_estimates.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "skills/hep-detector/scripts/detector_atlas.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "skills/hep-detector/scripts/evaluate_design.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "skills/hep-detector/scripts/extract_names.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "skills/hep-detector/scripts/frontend_response.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "skills/hep-detector/scripts/geant4_benchmarks.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "skills/hep-detector/scripts/mix_period_responses.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "skills/hep-detector/scripts/multiple_scattering.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "skills/hep-detector/scripts/multisample_pid.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "skills/hep-detector/scripts/pid_separation_power.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "skills/hep-detector/scripts/pileup_reweight.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "skills/hep-detector/scripts/propagate_scale_distortion.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "skills/hep-detector/scripts/species_response.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector",
+    "hep-measurement"
+   ]
+  },
+  {
+   "path": "skills/hep-detector/scripts/stability_monitor.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "skills/hep-detector/scripts/survival_feeddown.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "skills/hep-detector/scripts/tag_and_probe_efficiency.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "skills/hep-detector/scripts/toy_spectrometer.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "skills/hep-detector/scripts/tracker_resolution.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "skills/hep-detector/scripts/xmax_gaisser_hillas.py",
+   "depth": 3,
+   "skills": [
+    "hep-citations",
+    "hep-detector"
+   ]
+  },
+  {
+   "path": "skills/hep-measurement/scripts/acceptance_from_generation.py",
+   "depth": 3,
+   "skills": [
+    "hep-measurement"
+   ]
+  },
+  {
+   "path": "skills/hep-measurement/scripts/anisotropy.py",
+   "depth": 3,
+   "skills": [
+    "hep-measurement"
+   ]
+  },
+  {
+   "path": "skills/hep-measurement/scripts/check_systematic_variations.py",
+   "depth": 3,
+   "skills": [
+    "hep-measurement"
+   ]
+  },
+  {
+   "path": "skills/hep-measurement/scripts/collection_time.py",
+   "depth": 3,
+   "skills": [
+    "hep-measurement"
+   ]
+  },
+  {
+   "path": "skills/hep-measurement/scripts/cosmic_ray_flux.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector",
+    "hep-measurement"
+   ]
+  },
+  {
+   "path": "skills/hep-measurement/scripts/counting_reference.py",
+   "depth": 3,
+   "skills": [
+    "hep-measurement",
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-measurement/scripts/cr_spectrum_powerlaw_fit.py",
+   "depth": 3,
+   "skills": [
+    "hep-measurement"
+   ]
+  },
+  {
+   "path": "skills/hep-measurement/scripts/extract_names.py",
+   "depth": 3,
+   "skills": [
+    "hep-measurement"
+   ]
+  },
+  {
+   "path": "skills/hep-measurement/scripts/geomagnetic_cutoff.py",
+   "depth": 3,
+   "skills": [
+    "hep-citations",
+    "hep-detector",
+    "hep-measurement"
+   ]
+  },
+  {
+   "path": "skills/hep-measurement/scripts/isotope_fraction.py",
+   "depth": 3,
+   "skills": [
+    "hep-measurement"
+   ]
+  },
+  {
+   "path": "skills/hep-measurement/scripts/make_yield_table.py",
+   "depth": 3,
+   "skills": [
+    "hep-measurement"
+   ]
+  },
+  {
+   "path": "skills/hep-measurement/scripts/mask_blinded_bins.py",
+   "depth": 3,
+   "skills": [
+    "hep-measurement"
+   ]
+  },
+  {
+   "path": "skills/hep-measurement/scripts/orbit_averaged_geomagnetic_cutoff.py",
+   "depth": 3,
+   "skills": [
+    "hep-measurement"
+   ]
+  },
+  {
+   "path": "skills/hep-measurement/scripts/particle_ratio_with_uncertainty.py",
+   "depth": 3,
+   "skills": [
+    "hep-measurement"
+   ]
+  },
+  {
+   "path": "skills/hep-measurement/scripts/review_analysis_change.py",
+   "depth": 3,
+   "skills": [
+    "hep-measurement"
+   ]
+  },
+  {
+   "path": "skills/hep-measurement/scripts/review_measurement_spec.py",
+   "depth": 3,
+   "skills": [
+    "hep-measurement"
+   ]
+  },
+  {
+   "path": "skills/hep-measurement/scripts/solar_modulation_force_field.py",
+   "depth": 3,
+   "skills": [
+    "hep-citations",
+    "hep-detector",
+    "hep-measurement",
+    "hep-statistics",
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "skills/hep-measurement/scripts/spectrum_transform.py",
+   "depth": 3,
+   "skills": [
+    "hep-measurement"
+   ]
+  },
+  {
+   "path": "skills/hep-measurement/scripts/systematics_table_tex.py",
+   "depth": 3,
+   "skills": [
+    "hep-measurement"
+   ]
+  },
+  {
+   "path": "skills/hep-ml/assets/calibration.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml"
+   ]
+  },
+  {
+   "path": "skills/hep-ml/assets/hep_metrics.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml"
+   ]
+  },
+  {
+   "path": "skills/hep-ml/assets/inference.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml"
+   ]
+  },
+  {
+   "path": "skills/hep-ml/assets/lora_finetune.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml"
+   ]
+  },
+  {
+   "path": "skills/hep-ml/assets/set_classifier.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml"
+   ]
+  },
+  {
+   "path": "skills/hep-ml/assets/train_classifier.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml"
+   ]
+  },
+  {
+   "path": "skills/hep-ml/assets/transformer_classifier.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml"
+   ]
+  },
+  {
+   "path": "skills/hep-ml/scripts/benchmark_model.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml"
+   ]
+  },
+  {
+   "path": "skills/hep-ml/scripts/check_dataset_contract.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml"
+   ]
+  },
+  {
+   "path": "skills/hep-ml/scripts/check_pytorch_env.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml"
+   ]
+  },
+  {
+   "path": "skills/hep-ml/scripts/check_split_integrity.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml"
+   ]
+  },
+  {
+   "path": "skills/hep-ml/scripts/check_surrogate_domain.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml"
+   ]
+  },
+  {
+   "path": "skills/hep-ml/scripts/compare_model_runs.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml"
+   ]
+  },
+  {
+   "path": "skills/hep-ml/scripts/domain_shift_report.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml"
+   ]
+  },
+  {
+   "path": "skills/hep-ml/scripts/estimate_compute_budget.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml"
+   ]
+  },
+  {
+   "path": "skills/hep-ml/scripts/estimate_training_memory.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml"
+   ]
+  },
+  {
+   "path": "skills/hep-ml/scripts/export_bdt.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml"
+   ]
+  },
+  {
+   "path": "skills/hep-ml/scripts/extract_names.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml"
+   ]
+  },
+  {
+   "path": "skills/hep-ml/scripts/inspect_checkpoint.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml"
+   ]
+  },
+  {
+   "path": "skills/hep-ml/scripts/make_grouped_splits.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml"
+   ]
+  },
+  {
+   "path": "skills/hep-ml/scripts/profile_dataloader.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml"
+   ]
+  },
+  {
+   "path": "skills/hep-ml/scripts/serving_capacity.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml"
+   ]
+  },
+  {
+   "path": "skills/hep-ml/scripts/train_bdt.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml"
+   ]
+  },
+  {
+   "path": "skills/hep-ml/scripts/train_emulator.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml"
+   ]
+  },
+  {
+   "path": "skills/hep-ml/scripts/write_ml_artifact.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml"
+   ]
+  },
+  {
+   "path": "skills/hep-review/scripts/review.py",
+   "depth": 3,
+   "skills": [
+    "hep-review"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/bayes_calibration.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/bayes_diagnostics.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/build_covariance.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/combine_asymmetric.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/combine_measurements.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/covariance_fit.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/degeneracy.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/discrete_profile.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/eft_scan.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/extract_names.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/global_significance.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/hessian_profiling.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/li_ma_significance.py",
+   "depth": 3,
+   "skills": [
+    "hep-citations",
+    "hep-detector",
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/look_elsewhere.py",
+   "depth": 3,
+   "skills": [
+    "hep-measurement",
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/pcl_efficiency_ratio.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/pdf_reweighting.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/periodicity_scan.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/project_uncertainty.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/propagation_fit.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/ratio_estimation.py",
+   "depth": 3,
+   "skills": [
+    "hep-ml",
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/result_artifact.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/roofit_fit_check.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/sensitivity_and_gof.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/split_consistency.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/sweighted_fit.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/tail_extrapolation.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/time_structure.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-theory/scripts/bartels_rotation.py",
+   "depth": 3,
+   "skills": [
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "skills/hep-theory/scripts/coalescence.py",
+   "depth": 3,
+   "skills": [
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "skills/hep-theory/scripts/decay_chain.py",
+   "depth": 3,
+   "skills": [
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "skills/hep-theory/scripts/dipole_lo.py",
+   "depth": 3,
+   "skills": [
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "skills/hep-theory/scripts/dis_kinematics.py",
+   "depth": 3,
+   "skills": [
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "skills/hep-theory/scripts/dm_direct_rate.py",
+   "depth": 3,
+   "skills": [
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "skills/hep-theory/scripts/drell_yan_lo.py",
+   "depth": 3,
+   "skills": [
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "skills/hep-theory/scripts/eft_truncation.py",
+   "depth": 3,
+   "skills": [
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "skills/hep-theory/scripts/event_weights.py",
+   "depth": 3,
+   "skills": [
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "skills/hep-theory/scripts/exclusive_kinematics.py",
+   "depth": 3,
+   "skills": [
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "skills/hep-theory/scripts/extract_names.py",
+   "depth": 3,
+   "skills": [
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "skills/hep-theory/scripts/import_published_table.py",
+   "depth": 3,
+   "skills": [
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "skills/hep-theory/scripts/kinematics.py",
+   "depth": 3,
+   "skills": [
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "skills/hep-theory/scripts/lepton_energy_losses.py",
+   "depth": 3,
+   "skills": [
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "skills/hep-theory/scripts/neutrino_oscillation.py",
+   "depth": 3,
+   "skills": [
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "skills/hep-theory/scripts/nuclear_combination.py",
+   "depth": 3,
+   "skills": [
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "skills/hep-theory/scripts/pdf_uncertainty.py",
+   "depth": 3,
+   "skills": [
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "skills/hep-theory/scripts/physical_data.py",
+   "depth": 3,
+   "skills": [
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "skills/hep-theory/scripts/running_coupling.py",
+   "depth": 3,
+   "skills": [
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "skills/hep-theory/scripts/secondary_gamma.py",
+   "depth": 3,
+   "skills": [
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "skills/hep-theory/scripts/sidis_kinematics.py",
+   "depth": 3,
+   "skills": [
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "skills/hep-theory/scripts/structure_functions_lo.py",
+   "depth": 3,
+   "skills": [
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "skills/hep-theory/scripts/sum_rules.py",
+   "depth": 3,
+   "skills": [
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "skills/hep-theory/scripts/tmd_gaussian.py",
+   "depth": 3,
+   "skills": [
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "skills/hep-theory/scripts/transport_conventions.py",
+   "depth": 3,
+   "skills": [
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "tools/build_stanzas.py",
+   "depth": 1,
+   "skills": [
+    "hep-authoring",
+    "hep-citations",
+    "hep-computing",
+    "hep-detector",
+    "hep-measurement",
+    "hep-ml",
+    "hep-review",
+    "hep-statistics",
+    "hep-theory"
+   ]
+  },
+  {
+   "path": "tools/check_naming.py",
+   "depth": 1,
+   "skills": [
+    "hep-computing"
+   ]
+  },
+  {
+   "path": "tools/provider_registry.py",
+   "depth": 1,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "tools/run_required_backends.py",
+   "depth": 1,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "tools/scifix_advisories.py",
+   "depth": 1,
+   "skills": [
+    "hep-computing"
+   ]
+  }
+ ],
+ "excluded": [
+  {
+   "path": "adapters/pyhf-combine/assets/pyhf_nuisance_diagnostics.py",
+   "reason": "self-contained adapter template users copy into their own projects, where core cannot be imported"
+  },
+  {
+   "path": "adapters/root-uproot/assets/pyroot_roofit_signal_background.py",
+   "reason": "self-contained adapter template users copy into their own projects, where core cannot be imported"
+  },
+  {
+   "path": "adapters/root-uproot/assets/root_to_parquet.py",
+   "reason": "self-contained adapter template users copy into their own projects, where core cannot be imported"
+  },
+  {
+   "path": "skills/hep-computing/scripts/find_python.py",
+   "reason": "runs on an old python3 to find a qualifying interpreter; must not stop it (tests/tools/test_python_compat.py)"
+  },
+  {
+   "path": "skills/hep-ml/assets/ddp_train_skeleton.py",
+   "reason": "self-contained template users copy into their own projects, where core cannot be imported"
+  },
+  {
+   "path": "examples/",
+   "reason": "examples are worked inputs and outputs, regenerated per release (docs/maintenance.md)"
+  },
+  {
+   "path": "profiles/",
+   "reason": "profile scripts are reached from profile text, outside this list (task Open Questions: default no)"
+  },
+  {
+   "path": "tests/",
+   "reason": "tests run under the test runner, not as skill scripts"
+  }
+ ],
+ "unresolved": [
+  {
+   "skill": "hep-authoring",
+   "name": "build_lit_matrix.py",
+   "source": "skills/hep-authoring/references/academic-papers-guide.md:165",
+   "matches": []
+  },
+  {
+   "skill": "hep-authoring",
+   "name": "file.py",
+   "source": "skills/hep-authoring/references/code-review-report.md:93",
+   "matches": []
+  },
+  {
+   "skill": "hep-authoring",
+   "name": "spectrum_transform.py",
+   "source": "skills/hep-authoring/references/physics-plots.md:96",
+   "matches": []
+  },
+  {
+   "skill": "hep-authoring",
+   "name": "train.py",
+   "source": "skills/hep-authoring/references/code-review-report.md:93",
+   "matches": []
+  },
+  {
+   "skill": "hep-citations",
+   "name": "audit_claims.py",
+   "source": "skills/hep-citations/references/citation-verification.md:82",
+   "matches": []
+  },
+  {
+   "skill": "hep-citations",
+   "name": "check_citations.py",
+   "source": "skills/hep-citations/references/literature-guide.md:117",
+   "matches": []
+  },
+  {
+   "skill": "hep-citations",
+   "name": "check_manuscript.py",
+   "source": "skills/hep-citations/references/citation-verification.md:95",
+   "matches": []
+  },
+  {
+   "skill": "hep-citations",
+   "name": "cherenkov_angle.py",
+   "source": "skills/hep-citations/references/primary-sources-and-version-checks.md:16",
+   "matches": []
+  },
+  {
+   "skill": "hep-citations",
+   "name": "cosmic_ray_flux.py",
+   "source": "skills/hep-citations/references/primary-sources-and-version-checks.md:29",
+   "matches": []
+  },
+  {
+   "skill": "hep-citations",
+   "name": "pid_separation_power.py",
+   "source": "skills/hep-citations/references/primary-sources-and-version-checks.md:16",
+   "matches": []
+  },
+  {
+   "skill": "hep-citations",
+   "name": "render_results.py",
+   "source": "skills/hep-citations/references/claim-evidence-mapping.md:43",
+   "matches": []
+  },
+  {
+   "skill": "hep-citations",
+   "name": "tag_and_probe_efficiency.py",
+   "source": "skills/hep-citations/references/primary-sources-and-version-checks.md:29",
+   "matches": []
+  },
+  {
+   "skill": "hep-computing",
+   "name": "$PWD/worker/toy.py",
+   "source": "skills/hep-computing/references/batch-scheduling.md:43",
+   "matches": []
+  },
+  {
+   "skill": "hep-computing",
+   "name": "analysis.py",
+   "source": "skills/hep-computing/references/python-hep-coding-patterns.md:115",
+   "matches": []
+  },
+  {
+   "skill": "hep-computing",
+   "name": "batch_campaign.py",
+   "source": "skills/hep-computing/references/batch-scheduling.md:11",
+   "matches": []
+  },
+  {
+   "skill": "hep-computing",
+   "name": "batch_config.py",
+   "source": "skills/hep-computing/references/batch-scheduling.md:11",
+   "matches": []
+  },
+  {
+   "skill": "hep-computing",
+   "name": "check_pytorch_env.py",
+   "source": "skills/hep-computing/references/batch-scheduling.md:232",
+   "matches": []
+  },
+  {
+   "skill": "hep-computing",
+   "name": "evaluate_design.py",
+   "source": "skills/hep-computing/references/analysis-workflows.md:28",
+   "matches": []
+  },
+  {
+   "skill": "hep-computing",
+   "name": "htcondor_backend.py",
+   "source": "skills/hep-computing/references/batch-scheduling.md:11",
+   "matches": []
+  },
+  {
+   "skill": "hep-computing",
+   "name": "script.py",
+   "source": "skills/hep-computing/references/crash-and-memory-debugging.md:44",
+   "matches": []
+  },
+  {
+   "skill": "hep-computing",
+   "name": "skills/<owner>/scripts/extract_names.py",
+   "source": "skills/hep-computing/references/semantic-naming.md:10",
+   "matches": []
+  },
+  {
+   "skill": "hep-computing",
+   "name": "slurm_backend.py",
+   "source": "skills/hep-computing/references/batch-scheduling.md:11",
+   "matches": []
+  },
+  {
+   "skill": "hep-computing",
+   "name": "test_workflow_b1.py",
+   "source": "skills/hep-computing/references/research-workflow-control.md:126",
+   "matches": []
+  },
+  {
+   "skill": "hep-computing",
+   "name": "utils.py",
+   "source": "skills/hep-computing/references/python-balanced-design-guidelines.md:17",
+   "matches": []
+  },
+  {
+   "skill": "hep-detector",
+   "name": "check_citations.py",
+   "source": "skills/hep-detector/references/geant4-study-protocol.md:448",
+   "matches": []
+  },
+  {
+   "skill": "hep-detector",
+   "name": "check_systematic_variations.py",
+   "source": "skills/hep-detector/references/calibration-and-alignment.md:251",
+   "matches": []
+  },
+  {
+   "skill": "hep-detector",
+   "name": "collection_time.py",
+   "source": "skills/hep-detector/references/response-and-forward-folding.md:57",
+   "matches": []
+  },
+  {
+   "skill": "hep-detector",
+   "name": "local_partition.py",
+   "source": "skills/hep-detector/references/geant4-study-protocol.md:382",
+   "matches": []
+  },
+  {
+   "skill": "hep-detector",
+   "name": "solar_modulation_force_field.py",
+   "source": "skills/hep-detector/references/space-based-direct-detection.md:124",
+   "matches": []
+  },
+  {
+   "skill": "hep-detector",
+   "name": "split_consistency.py",
+   "source": "skills/hep-detector/references/response-and-forward-folding.md:68",
+   "matches": []
+  },
+  {
+   "skill": "hep-measurement",
+   "name": "covariance_fit.py",
+   "source": "skills/hep-measurement/references/hep-measurement-guide.md:108",
+   "matches": []
+  },
+  {
+   "skill": "hep-measurement",
+   "name": "global_significance.py",
+   "source": "skills/hep-measurement/references/analysis-design.md:123",
+   "matches": []
+  },
+  {
+   "skill": "hep-measurement",
+   "name": "split_consistency.py",
+   "source": "skills/hep-measurement/references/analysis-design.md:105",
+   "matches": []
+  },
+  {
+   "skill": "hep-ml",
+   "name": "data.py",
+   "source": "skills/hep-ml/references/deep-learning-guide.md:46",
+   "matches": []
+  },
+  {
+   "skill": "hep-ml",
+   "name": "evaluate.py",
+   "source": "skills/hep-ml/references/deep-learning-guide.md:47",
+   "matches": []
+  },
+  {
+   "skill": "hep-ml",
+   "name": "infer.py",
+   "source": "skills/hep-ml/references/deep-learning-guide.md:47",
+   "matches": []
+  },
+  {
+   "skill": "hep-ml",
+   "name": "losses.py",
+   "source": "skills/hep-ml/references/deep-learning-guide.md:47",
+   "matches": []
+  },
+  {
+   "skill": "hep-ml",
+   "name": "train.py",
+   "source": "skills/hep-ml/references/deep-learning-guide.md:47",
+   "matches": []
+  },
+  {
+   "skill": "hep-ml",
+   "name": "train_ddp.py",
+   "source": "skills/hep-ml/references/distributed-training.md:14",
+   "matches": []
+  },
+  {
+   "skill": "hep-statistics",
+   "name": "combineTool.py",
+   "source": "skills/hep-statistics/references/nuisance-modeling.md:248",
+   "matches": []
+  },
+  {
+   "skill": "hep-statistics",
+   "name": "counting_reference.py",
+   "source": "skills/hep-statistics/references/inference-recipes.md:192",
+   "matches": []
+  },
+  {
+   "skill": "hep-statistics",
+   "name": "cr_spectrum_powerlaw_fit.py",
+   "source": "skills/hep-statistics/references/core-stats-commands.md:352",
+   "matches": []
+  },
+  {
+   "skill": "hep-statistics",
+   "name": "diffNuisances.py",
+   "source": "skills/hep-statistics/references/nuisance-modeling.md:247",
+   "matches": []
+  },
+  {
+   "skill": "hep-statistics",
+   "name": "interpolators/code4p.py",
+   "source": "skills/hep-statistics/references/nuisance-modeling.md:56",
+   "matches": []
+  },
+  {
+   "skill": "hep-statistics",
+   "name": "modifiers/staterror.py",
+   "source": "skills/hep-statistics/references/nuisance-modeling.md:161",
+   "matches": []
+  },
+  {
+   "skill": "hep-statistics",
+   "name": "particle_ratio_with_uncertainty.py",
+   "source": "skills/hep-statistics/references/core-stats-commands.md:536",
+   "matches": []
+  },
+  {
+   "skill": "hep-statistics",
+   "name": "plotImpacts.py",
+   "source": "skills/hep-statistics/references/nuisance-modeling.md:249",
+   "matches": []
+  },
+  {
+   "skill": "hep-statistics",
+   "name": "propagate_scale_distortion.py",
+   "source": "skills/hep-statistics/references/combinations.md:67",
+   "matches": []
+  },
+  {
+   "skill": "hep-statistics",
+   "name": "stability_monitor.py",
+   "source": "skills/hep-statistics/references/core-stats-guide.md:81",
+   "matches": []
+  },
+  {
+   "skill": "hep-statistics",
+   "name": "test_backend_likelihood_equivalence.py",
+   "source": "skills/hep-statistics/references/core-stats-commands.md:312",
+   "matches": []
+  },
+  {
+   "skill": "hep-statistics",
+   "name": "test_bayes_arviz_oracle.py",
+   "source": "skills/hep-statistics/references/core-stats-commands.md:306",
+   "matches": []
+  },
+  {
+   "skill": "hep-statistics",
+   "name": "test_bayes_calibration.py",
+   "source": "skills/hep-statistics/references/core-stats-commands.md:306",
+   "matches": []
+  },
+  {
+   "skill": "hep-statistics",
+   "name": "test_core_stats_guide.py",
+   "source": "skills/hep-statistics/references/core-stats-guide.md:43",
+   "matches": []
+  },
+  {
+   "skill": "hep-statistics",
+   "name": "test_covariance_fit.py",
+   "source": "skills/hep-statistics/references/core-stats-commands.md:303",
+   "matches": []
+  },
+  {
+   "skill": "hep-statistics",
+   "name": "test_eft_scan.py",
+   "source": "skills/hep-statistics/references/core-stats-commands.md:307",
+   "matches": []
+  },
+  {
+   "skill": "hep-statistics",
+   "name": "test_global_significance.py",
+   "source": "skills/hep-statistics/references/core-stats-commands.md:309",
+   "matches": []
+  },
+  {
+   "skill": "hep-statistics",
+   "name": "test_grid_fit.py",
+   "source": "skills/hep-statistics/references/core-stats-commands.md:304",
+   "matches": []
+  },
+  {
+   "skill": "hep-statistics",
+   "name": "test_pcl_efficiency_ratio.py",
+   "source": "skills/hep-statistics/references/core-stats-commands.md:310",
+   "matches": []
+  },
+  {
+   "skill": "hep-statistics",
+   "name": "test_ratio_estimation.py",
+   "source": "skills/hep-statistics/references/core-stats-commands.md:311",
+   "matches": []
+  },
+  {
+   "skill": "hep-statistics",
+   "name": "test_result_artifact.py",
+   "source": "skills/hep-statistics/references/core-stats-commands.md:302",
+   "matches": []
+  },
+  {
+   "skill": "hep-statistics",
+   "name": "test_sr_cr_model_card.py",
+   "source": "skills/hep-statistics/references/core-stats-commands.md:313",
+   "matches": []
+  },
+  {
+   "skill": "hep-statistics",
+   "name": "test_sweighted_fit.py",
+   "source": "skills/hep-statistics/references/core-stats-commands.md:305",
+   "matches": []
+  },
+  {
+   "skill": "hep-theory",
+   "name": "covariance_fit.py",
+   "source": "skills/hep-theory/references/cosmic-ray-phenomenology.md:207",
+   "matches": []
+  },
+  {
+   "skill": "hep-theory",
+   "name": "hessian_profiling.py",
+   "source": "skills/hep-theory/references/hadron-structure-essentials.md:21",
+   "matches": []
+  },
+  {
+   "skill": "hep-theory",
+   "name": "pdf_reweighting.py",
+   "source": "skills/hep-theory/references/hadron-structure-essentials.md:21",
+   "matches": []
+  },
+  {
+   "skill": "hep-theory",
+   "name": "scripts/derive.py",
+   "source": "skills/hep-theory/references/higher-order-predictions.md:8",
+   "matches": []
+  },
+  {
+   "skill": "hep-theory",
+   "name": "scripts/predict.py",
+   "source": "skills/hep-theory/references/higher-order-predictions.md:9",
+   "matches": []
+  },
+  {
+   "skill": "hep-theory",
+   "name": "test_dy_angular_frames.py",
+   "source": "skills/hep-theory/references/drell-yan.md:132",
+   "matches": []
+  },
+  {
+   "skill": "hep-theory",
+   "name": "test_sum_rules.py",
+   "source": "skills/hep-theory/references/exclusive-and-gpd.md:89",
+   "matches": []
+  },
+  {
+   "skill": "hep-theory",
+   "name": "test_tmd_gaussian.py",
+   "source": "skills/hep-theory/references/sidis-and-tmd.md:136",
+   "matches": []
+  }
+ ],
+ "counts": {
+  "scripts": 198,
+  "unresolved": 70,
+  "named_without_main": 28
+ }
+}

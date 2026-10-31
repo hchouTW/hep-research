@@ -38,6 +38,19 @@ and removed in 0.49.0 (docs/dev/cross-artifact-check/decision-retire.md).
 Exit 0 when nothing is refused, 3 when the permit is refused, 2 bad usage. Output: JSON.
 """
 from __future__ import annotations
+if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.dont_write_bytecode = True
+    _root = str(_Path(__file__).resolve().parents[1])
+    if _root not in _sys.path:
+        _sys.path.insert(0, _root)
+    try:
+        from core.interpreter_guard import guard as _guard
+    except ImportError:  # copied outside the plugin
+        pass
+    else:
+        _guard()
 
 import argparse
 import datetime

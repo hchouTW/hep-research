@@ -218,6 +218,40 @@
     "skills/hep-statistics/scripts (propagation fit, C2)"
    ],
    "source": "new in this plugin (cr-propagation campaign r4, work package C1, 2026-10-26); the adapter and hep-statistics consumers are the planned work packages that follow, the closed-form profile provider is the first"
+  },
+  "interpreter_guard": {
+   "steward": "hep-computing",
+   "status": "implemented",
+   "purpose": "Interpreter guard run first by every skill script: stop a Python older than the 3.13 floor with one stderr line and exit 2, or switch once to HEP_RESEARCH_PYTHON when that is safe; require UTF-8 mode on Windows",
+   "files": [
+    "interpreter_guard"
+   ],
+   "consumers": [
+    "skills/*/scripts",
+    "skills/*/assets",
+    "adapters/*/assets",
+    "contracts",
+    "core",
+    "tools/skill_scripts.json"
+   ],
+   "source": "new in this plugin (cross-platform task, PR 1a); standard library only, parses and runs on Python 3.9"
+  },
+  "hostcaps": {
+   "steward": "hep-computing",
+   "status": "implemented",
+   "purpose": "Host capability probes (POSIX ids, process groups, /proc, WSL), require() with the missing-dependency report for unsupported platforms, and the per-user state folder",
+   "files": [
+    "hostcaps"
+   ],
+   "consumers": [
+    "core/protected",
+    "core/partition",
+    "skills/hep-computing/scripts",
+    "skills/hep-review/scripts",
+    "skills/hep-authoring/scripts",
+    "tests/_platform.py"
+   ],
+   "source": "new in this plugin (cross-platform task, PR 1a)"
   }
  }
 }

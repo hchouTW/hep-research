@@ -28,6 +28,19 @@ eta dimensionless, phi in radians. The same seed always gives the same file.
 Output: one JSON object with "status" ("written", "error" or "missing-dependency"). The parent folder of --out is
 created. Exit codes: 0 written, 2 bad input or unwritable output, 3 numpy, awkward or uproot missing.
 """
+if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.dont_write_bytecode = True
+    _root = str(_Path(__file__).resolve().parents[3])
+    if _root not in _sys.path:
+        _sys.path.insert(0, _root)
+    try:
+        from core.interpreter_guard import guard as _guard
+    except ImportError:  # copied outside the plugin
+        pass
+    else:
+        _guard()
 
 import argparse
 import json

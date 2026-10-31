@@ -16,6 +16,19 @@ file of <project>/naming/, refused inside artifacts_dir. Prints one JSON object 
 2 bad input, 3 written but zero inputs scanned (the check reports N11 unsupported). Standard library only.
 """
 from __future__ import annotations
+if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.dont_write_bytecode = True
+    _root = str(_Path(__file__).resolve().parents[3])
+    if _root not in _sys.path:
+        _sys.path.insert(0, _root)
+    try:
+        from core.interpreter_guard import guard as _guard
+    except ImportError:  # copied outside the plugin
+        pass
+    else:
+        _guard()
 
 import json
 import re

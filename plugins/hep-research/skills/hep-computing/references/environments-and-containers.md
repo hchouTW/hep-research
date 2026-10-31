@@ -17,6 +17,24 @@ without CVMFS or Apptainer at hand; raise the status only after building or sour
 Mixing routes (a venv on top of an LCG view, `pip install --user` inside a container) is where environments silently
 diverge: record both layers or avoid the mix.
 
+## Interpreter for skill scripts
+
+Skill scripts start with `python3 <script>`, so `requires-python` does not stop an old interpreter. Each one runs a
+guard block first (`<plugin root>/core/interpreter_guard.py`; the list is `<plugin root>/tools/skill_scripts.json`):
+
+- Python 3.13 or newer: the script runs.
+- Older (macOS ships 3.9 as `/usr/bin/python3`): one stderr line `hep-research: Python 3.13 or newer is required ...`
+  and exit 2, before any work; nothing on stdout.
+- Older with `HEP_RESEARCH_PYTHON` set to an absolute path of an existing executable whose file and folder the account
+  cannot write, not as root and without `--protected`: the script is re-run once with that interpreter (the path is
+  kept as given, so a virtual environment keeps its packages). If that one is old too, exit 2 with "did not provide
+  one"; never a second switch.
+- Windows: UTF-8 mode is required (`PYTHONUTF8=1`), otherwise exit 2 with that instruction.
+
+`find_python.py --json` (`<plugin root>/skills/hep-computing/scripts/`) runs on an old `python3` and finds a 3.13+
+interpreter with the packages; it carries no guard. Batch jobs never see `HEP_RESEARCH_PYTHON`: the executor and bundle
+freezing refuse it, and the command names its interpreter by absolute path.
+
 ## Record with every run
 
 Run, inside the environment that produced the result:

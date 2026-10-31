@@ -1,5 +1,5 @@
 {
- "note": "Seconds per test module, from CI checks (Python 3.13); used only to order and shard modules (tools/run_all_checks.py --shard). Refresh with --write-timings; a module missing here gets the median. The seven reconstruction-v12 modules (test_workflow_b1, test_check_definitions, test_executor_b2, test_control_layer, test_control_layer_model, test_control_layer_c2, test_control_layer_review330) were added from a local run (Linux, 2026-10-29) until the next CI refresh.",
+ "note": "Seconds per test module, from CI checks (Python 3.13); used only to order and shard modules (tools/run_all_checks.py --shard). Refresh with --write-timings; a module missing here gets the median. The seven reconstruction-v12 modules (test_workflow_b1, test_check_definitions, test_executor_b2, test_control_layer, test_control_layer_model, test_control_layer_c2, test_control_layer_review330) were added from a local run (Linux, 2026-10-29) until the next CI refresh. The four cross-platform modules (test_interpreter_guard, test_hostcaps, test_partition_guard_variables, test_skill_scripts) carry the median until the next CI refresh.",
  "source": "median of the passing runs of each module in GitHub Actions runs 39573953922 (PR #191 head ad0fc1f8) and the main run on a5663baa, ubuntu-latest, --jobs 4, Python 3.13 units shards (2 samples per module); refreshed 2026-10-21",
  "seconds": {
   "tests.adapters.test_adapter_declarations": 0.1,
@@ -446,6 +446,10 @@
   "tests.skills.hep_computing.test_control_layer": 25.0,
   "tests.skills.hep_computing.test_control_layer_model": 43.0,
   "tests.skills.hep_computing.test_control_layer_c2": 30.0,
-  "tests.skills.hep_computing.test_control_layer_review330": 9.0
+  "tests.skills.hep_computing.test_control_layer_review330": 9.0,
+  "tests.core.test_hostcaps": 0.9,
+  "tests.core.test_interpreter_guard": 0.9,
+  "tests.core.test_partition_guard_variables": 0.9,
+  "tests.tools.test_skill_scripts": 0.9
  }
 }

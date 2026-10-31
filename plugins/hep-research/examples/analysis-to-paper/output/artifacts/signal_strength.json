@@ -29,6 +29,8 @@
    "contracts/validate.py",
    "contracts/vocab.py",
    "core/__init__.py",
+   "core/hostcaps.py",
+   "core/interpreter_guard.py",
    "core/protected/__init__.py",
    "core/protected/guard.py",
    "core/protected/identity.py",

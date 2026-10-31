@@ -312,11 +312,11 @@
   "tools": [
    {
     "name": "check_geant4_study.py",
-    "version": "a305c4d1dfa78b86"
+    "version": "b7121e2b4d8e7480"
    },
    {
     "name": "geant4_benchmarks.py",
-    "version": "a1ef685c08f1ed0f"
+    "version": "d10569e7cb964fdb"
    }
   ]
  },
@@ -407,6 +407,8 @@
    "core/__init__.py",
    "core/constants/__init__.py",
    "core/constants/physical.py",
+   "core/hostcaps.py",
+   "core/interpreter_guard.py",
    "core/protected/__init__.py",
    "core/protected/guard.py",
    "core/protected/identity.py",

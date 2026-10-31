@@ -4,6 +4,8 @@
 - skills/hep-computing/scripts/find_python.py is started as `python3 find_python.py`, and `python3` may be old (macOS
   ships 3.9): it must run there to find a qualifying interpreter. Its PROBE string runs inside every candidate, so it
   keeps to syntax every Python 3 parses (checked at 3.7, the lowest version `ast` can parse as);
+- core/interpreter_guard.py runs first in every skill script, on whatever `python3` started it, to stop or switch an
+  old interpreter (tests/core/test_interpreter_guard.py);
 - tools/run_all_checks.py and tools/check_ams_optional.py must parse on an old Python far enough to print their
   "Python 3.13 or newer is required" message (tests/tools/test_run_all_checks.py).
 
@@ -15,7 +17,9 @@ has avoided it before. A real old interpreter, when present, byte-compiles the f
 from __future__ import annotations
 
 import ast
+import importlib.util
 import io
+import json
 import shutil
 import subprocess
 import tokenize
@@ -25,11 +29,25 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 FILES = {  # path -> oldest Python that must parse it
     "core/partition/runner.py": (3, 9),
+    "core/interpreter_guard.py": (3, 9),
     "skills/hep-computing/scripts/find_python.py": (3, 9),
     "tools/run_all_checks.py": (3, 9),
     "tools/check_ams_optional.py": (3, 9),
 }
 PROBE_VERSION = (3, 7)
+GUARD_ROLLED_OUT = True  # tools/insert_interpreter_guard.py inserted the block into every skill script
+
+
+def skill_scripts() -> list[dict]:
+    """tools/skill_scripts.json entries: every script a skill's text tells the agent to run (tools/skill_scripts.py)."""
+    return json.loads((ROOT / "tools" / "skill_scripts.json").read_text(encoding="utf-8"))["scripts"]
+
+
+def skill_scripts_tool():
+    spec = importlib.util.spec_from_file_location("skill_scripts", ROOT / "tools" / "skill_scripts.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    return mod
 
 
 def _quote(token_text: str) -> str:
@@ -61,8 +79,10 @@ def _fstring_problems(source: str) -> list[str]:
     return found
 
 
-def incompatibilities(source: str, version: tuple[int, int]) -> list[str]:
-    """Reasons `source` would not parse (or would fail at import) on Python `version`; empty when it is compatible."""
+def incompatibilities(source: str, version: tuple[int, int], runtime_names: bool = True) -> list[str]:
+    """Reasons `source` would not parse (or, with runtime_names, would fail at import) on Python `version`; empty when
+    it is compatible. Skill scripts are checked for grammar only (runtime_names=False): the interpreter guard stops an
+    old Python before any newer name is reached."""
     try:
         tree = ast.parse(source, feature_version=version)
     except SyntaxError as exc:
@@ -73,7 +93,7 @@ def incompatibilities(source: str, version: tuple[int, int]) -> list[str]:
                 isinstance(node.slice, ast.Starred)
                 or isinstance(node.slice, ast.Tuple) and any(isinstance(e, ast.Starred) for e in node.slice.elts)):
             found.append(f"line {node.lineno}: starred subscript (Python 3.11)")
-        if version < (3, 11) and (
+        if runtime_names and version < (3, 11) and (
                 isinstance(node, ast.ImportFrom) and node.module == "datetime"
                 and any(a.name == "UTC" for a in node.names)
                 or isinstance(node, ast.Attribute) and node.attr == "UTC"
@@ -136,12 +156,49 @@ class OldPythonCompatibilityTests(unittest.TestCase):
             with self.subTest(ok=ok):
                 self.assertEqual(incompatibilities(ok, (3, 9)), [])
 
+    def test_skill_scripts_parse_on_python_3_9(self):
+        """Grammar only (the guard stops an old Python before any newer runtime name is reached)."""
+        for entry in skill_scripts():
+            with self.subTest(file=entry["path"]):
+                source = (ROOT / entry["path"]).read_text(encoding="utf-8")
+                self.assertEqual(incompatibilities(source, (3, 9), runtime_names=False), [])
+
+    @unittest.skipUnless(GUARD_ROLLED_OUT, "guard block rolled out in PR 1b (tools/insert_interpreter_guard.py)")
+    def test_skill_scripts_carry_the_guard_block(self):
+        tool = skill_scripts_tool()
+        for entry in skill_scripts():
+            with self.subTest(file=entry["path"]):
+                source = (ROOT / entry["path"]).read_text(encoding="utf-8")
+                self.assertEqual(tool.guard_problems(source, entry["depth"]), [])
+
+    def test_the_guard_check_catches_a_missing_misplaced_or_wrong_block(self):
+        tool = skill_scripts_tool()
+        doc = '"""Doc."""\nfrom __future__ import annotations\n'
+        good = doc + tool.guard_block(3) + "\nimport json\n"
+        self.assertEqual(tool.guard_problems(good, 3), [])
+        self.assertEqual(tool.guard_problems('"""Doc."""\n' + tool.guard_block(2) + "import os\n", 2), [])
+        self.assertEqual(tool.guard_problems("#!/usr/bin/env python3\n" + tool.guard_block(1), 1), [])
+        cases = {
+            "missing": (doc + "import json\n", "no interpreter guard block"),
+            "wrong depth": (good, "differs"),
+            "after another import": (doc + "import json\n" + tool.guard_block(3), "not the first statement"),
+            "before __future__": ('"""Doc."""\n' + tool.guard_block(3) + "from __future__ import annotations\n",
+                                  "not the first statement"),
+            "edited body": (good.replace("_guard()", "pass"), "differs"),
+        }
+        for name, (source, expected) in cases.items():
+            with self.subTest(case=name):
+                depth = 2 if name == "wrong depth" else 3
+                problems = tool.guard_problems(source, depth)
+                self.assertTrue(any(expected in p for p in problems), problems)
+
     @unittest.skipUnless(old_interpreter(), "no Python 3.9 or older on this machine")
     def test_a_real_old_python_compiles_them(self):
         exe = old_interpreter()
         code = "import sys; [compile(open(p, encoding='utf-8').read(), p, 'exec') for p in sys.argv[1:]]"
-        p = subprocess.run([exe, "-c", code, *(str(ROOT / rel) for rel in FILES)], capture_output=True, text=True,
-                           timeout=60)
+        paths = [*FILES, *(e["path"] for e in skill_scripts())]
+        p = subprocess.run([exe, "-c", code, *(str(ROOT / rel) for rel in paths)], capture_output=True, text=True,
+                           timeout=120)
         self.assertEqual(p.returncode, 0, p.stderr[-800:])
         p = subprocess.run([exe, "-c", "import sys; compile(sys.stdin.read(), 'PROBE', 'exec')"], input=probe_source(),
                            capture_output=True, text=True, timeout=60)

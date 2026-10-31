@@ -19,6 +19,19 @@ the batch, so it assumes batches actually fill; below the fill rate the batching
 timeout dominates instead, which the output reports separately.
 Run: python3 <plugin root>/skills/hep-ml/scripts/serving_capacity.py --qps 500 --batch-size 16 --batch-latency-ms 40 --latency-budget-ms 250
 """
+if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.dont_write_bytecode = True
+    _root = str(_Path(__file__).resolve().parents[3])
+    if _root not in _sys.path:
+        _sys.path.insert(0, _root)
+    try:
+        from core.interpreter_guard import guard as _guard
+    except ImportError:  # copied outside the plugin
+        pass
+    else:
+        _guard()
 
 import argparse
 import math

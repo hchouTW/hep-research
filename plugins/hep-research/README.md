@@ -158,6 +158,45 @@ python3 -m venv ~/.venvs/hep && ~/.venvs/hep/bin/pip install -r requirements-cor
 export HEP_RESEARCH_PYTHON=~/miniconda3/envs/sympy-py313/bin/python
 ```
 
+- Interpreter guard: every script a skill runs starts with a guard block (`core/interpreter_guard.py`). Under a
+  Python older than 3.13 it stops before any work with one stderr line starting `hep-research:` and exit 2, or, when
+  `HEP_RESEARCH_PYTHON` names a safe interpreter, re-runs the script once with it. Safe means an absolute path to an
+  existing executable file (no PATH lookup), neither the file nor its folder writable by the running account, not
+  running as root, and no `--protected` argument. The batch executor and bundle freezing refuse both guard variables
+  (`HEP_RESEARCH_PYTHON`, `HEP_RESEARCH_GUARD_REEXEC`): a job runs the interpreter its bundle names.
+
+**macOS.** `/usr/bin/python3` is the Xcode command-line tools' interpreter (3.9, below the floor), which the guard stops. Install Python 3.13
+from Homebrew (`brew install python@3.13`), conda (`conda create -n hep python=3.13`) or uv
+(`uv python install 3.13`), create the virtual environment with it and install
+[requirements-core.txt](requirements-core.txt). Point the guard at an interpreter whose file and folder you cannot
+write (Homebrew's `/opt/homebrew/bin` is user-writable, so the guard does not switch to it; use a copy or an
+environment owned by another account, or start scripts with the 3.13 interpreter directly):
+
+```bash
+export HEP_RESEARCH_PYTHON=/absolute/path/to/python3.13
+```
+
+PyTorch and xgboost publish arm64 wheels for Apple Silicon (`pip install torch xgboost`; no CUDA, the MPS device is
+used where the code asks for it). ROOT is easiest from conda-forge (`conda install -c conda-forge root`), in the same
+environment as the Python that runs the scripts.
+
+**Windows.** Native Windows is a minimum: set UTF-8 mode before running any script (the guard stops every script
+with exit 2 and a `hep-research: set PYTHONUTF8=1` line otherwise), and use Python 3.13 from python.org or conda:
+
+```powershell
+setx PYTHONUTF8 1
+```
+
+What is tested (CI on `windows-latest` only): every skill script answers `--help`, or reports
+`"reason": "unsupported-platform"` with exit 3, without a traceback; the per-user state (the review stores, the AMS
+paper cache) goes under `%LOCALAPPDATA%\hep-research\`; `tests/contracts` runs, with its known Windows failures recorded
+in `evals/cross-platform/progress.md` at the repository root. What does not work natively, each with a stated answer
+instead of a crash: protected mode (refusal `protected.unsupported_platform`, exit 3), `run_workflow.py` execution and the executor modes that need process groups or `/proc` (`missing-dependency`,
+`"reason": "unsupported-platform"`, exit 3), and hep-review's controlled reading of materials (`snapshot`, `ingest`;
+exit 3). Not supported on Windows at all: the shell scripts (ROOT C++ project setup, LCG views), Slurm and HTCondor
+submission, ROOT and Geant4 builds. Use WSL2 (Ubuntu) for all of these: there the Linux code paths run (WSL2 itself is not tested).
+Text files are checked out with LF line endings (`.gitattributes`), also with `core.autocrlf=true`.
+
 **Optional tools** (each installed and verified after the v1 handover, see the `*-RUN` sections of `VALIDATION.md`,
 except the tectonic paper build). Scripts that need a missing tool report it and stop with a `failed` status; tests
 that need it are skipped and counted as unverified.
@@ -260,6 +299,8 @@ git archive --format=zip --prefix=hep-statistics/ -o hep-statistics.zip HEAD:plu
 discovery, invocation, profile access and removal (VALIDATION.md, MULTIHOST); Claude Code on Linux (E1, CLI 2.1.287).
 Codex also installs from the GitHub marketplace (`hchouTW/hep-research`). Codex on Linux and other hosts are not
 tested. "Tested" means install, discovery and invocation only.
+Windows: scripts tested in CI only (`windows-latest`, `.github/workflows/platforms.yml`); installation and skill loading
+not verified.
 
 ## Operational constraints
 

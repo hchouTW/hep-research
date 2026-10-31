@@ -31,6 +31,9 @@ absolute interpreter with no arguments, and that interpreter is hashed too. Inte
 nice, nohup, xargs, timeout, sudo, ...; judged by the resolved name) or '#!' scripts themselves. So no -m, -c or PATH
 lookup; what the bundled worker does with a plain word is reviewed code, and enforcing approved bytes at run time is
 the trusted submitter's job.
+A spec whose environment ('env' or 'environment') or a configuration whose env_passthrough sets an interpreter guard
+variable (HEP_RESEARCH_PYTHON, HEP_RESEARCH_GUARD_REEXEC; core/interpreter_guard.py) is refused (bundle.guard_variable):
+the job must run the interpreter the bundle hashed.
 Standard library only.
 """
 from __future__ import annotations
@@ -45,6 +48,7 @@ import stat
 from pathlib import Path
 
 from core.partition import engine
+from core.partition.executors import GUARD_VARIABLES
 
 FORMAT = "hep-research-execution-bundle/1"
 IMAGE_PINNED = re.compile(r"^[^\s@]+@sha256:[0-9a-f]{64}$")
@@ -153,12 +157,30 @@ def digest_of(doc: dict) -> str:
     return hashlib.sha256(json.dumps(body, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode("utf-8")).hexdigest()
 
 
+def guard_problems(spec: dict, config: dict | None = None) -> None:
+    """Refuse a spec whose environment (its 'env' or 'environment' mapping) or a configuration whose env_passthrough
+    sets an interpreter guard variable (core/interpreter_guard.py): the bundle hashes the interpreter the command
+    names, and HEP_RESEARCH_PYTHON would make an old one switch to another."""
+    named = []
+    for key in ("env", "environment"):
+        value = spec.get(key)
+        if isinstance(value, dict):
+            named += [n for n in value if n in GUARD_VARIABLES]
+    passthrough = (config or {}).get("env_passthrough") or ()
+    if isinstance(passthrough, (list, tuple)):
+        named += [n for n in passthrough if n in GUARD_VARIABLES]
+    if named:
+        raise BundleError("bundle.guard_variable", f"{', '.join(sorted(set(named)))}: the interpreter guard's "
+                          "variables never reach a job; the command names its interpreter by absolute path")
+
+
 def build(campaign_dir, worker_root=None, env_lock=None, data_exposure=None) -> dict:
     """The bundle document for the campaign as it is on disk now (no approval request, no file written)."""
     cdir = Path(campaign_dir).resolve()
     spec = json.loads((cdir / "spec.json").read_text(encoding="utf-8"))
     state = json.loads((cdir / "state.json").read_text(encoding="utf-8"))
     image = spec.get("container_image")
+    guard_problems(spec)
     if not state.get("campaign_uid"):
         raise BundleError("bundle.no_uid", "the campaign has no campaign_uid yet (created before tags): run a submit dry "
                           "run once, then freeze")
@@ -296,8 +318,9 @@ def verify(doc: dict) -> dict:
 def freeze(campaign_dir, worker_root=None, env_lock=None, data_exposure=None, config: dict | None = None,
            scope: str | None = None, config_hash: str | None = None) -> dict:
     """Write <campaign>/bundles/<digest>.json once (an identical re-freeze returns the existing one)."""
-    doc = build(campaign_dir, worker_root, env_lock, data_exposure)
     cfg = config or {}
+    guard_problems({}, cfg)
+    doc = build(campaign_dir, worker_root, env_lock, data_exposure)
     doc["approval_request"] = {"bundle_digest": doc["bundle_digest"], "config_hash": config_hash, "limits": cfg.get("limits"),
                                "max_attempts": cfg.get("max_attempts"), "scope": scope,
                                "note": "a request, not an approval: a human decides through the trusted gate"}

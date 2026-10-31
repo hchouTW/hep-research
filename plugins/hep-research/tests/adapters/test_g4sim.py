@@ -143,5 +143,38 @@ class G4simSelfTest(unittest.TestCase):
                 self.assertTrue(validate(got, "simulation_summary.json").ok)
 
 
+    def test_strings_decode_like_python_json(self):
+        """MiniJson decodes \\u escapes (any code point, surrogate pairs) to the same UTF-8 bytes as Python's json
+        (an independent implementation); a JSON path written by json.dumps for a folder named with a space and
+        Chinese characters reaches the C++ programs intact."""
+        rng = random.Random(3)
+        strings = ["", "plain", "a b", "hep 測試 paths/tmp", "café", "\u00e9\u0301", "€", "\U0001f600 emoji", "\x7f\x00ok",
+                   "quote \" backslash \\ slash / tab \t nl \n", "\uffff", "\U0010ffff", "\ud7ff\ue000"]
+        for _ in range(300):
+            cps = [rng.choice([rng.randrange(0x20, 0x80), rng.randrange(0x80, 0x800), rng.randrange(0x800, 0xd800),
+                               rng.randrange(0xe000, 0x10000), rng.randrange(0x10000, 0x110000)])
+                   for _ in range(rng.randrange(1, 12))]
+            strings.append("".join(map(chr, cps)))
+        for ensure_ascii in (True, False):
+            with self.subTest(ensure_ascii=ensure_ascii):
+                path = Path(self.tmp.name) / "strings.json"
+                path.write_text(json.dumps({"utf8_hex": strings}, ensure_ascii=ensure_ascii), encoding="utf-8")
+                p = subprocess.run([str(self.exe), str(path)], capture_output=True, text=True, timeout=120)
+                self.assertEqual(p.returncode, 0, p.stderr)
+                got = json.loads(p.stdout)["utf8_hex"]
+                self.assertEqual(got, [s.encode("utf-8").hex() for s in strings])
+
+    def test_malformed_unicode_escapes_are_refused(self):
+        """Negative control: a lone or reversed surrogate, or a \\u escape without four hex digits, is a JsonError, never
+        decoded into bytes that are not UTF-8."""
+        for bad in ("\\ud800", "\\udc00", "\\ud800x", "\\ud800\\u0041", "\\udc00\\ud800", "\\u12", "\\u12g4", "\\u+123"):
+            with self.subTest(escape=bad):
+                path = Path(self.tmp.name) / "bad.json"
+                path.write_text('{"utf8_hex": ["' + bad + '"]}', encoding="utf-8")
+                p = subprocess.run([str(self.exe), str(path)], capture_output=True, text=True, timeout=120)
+                self.assertNotEqual(p.returncode, 0, p.stdout)
+                self.assertIn("escape", p.stderr)
+
+
 if __name__ == "__main__":
     unittest.main()

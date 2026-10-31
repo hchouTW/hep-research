@@ -3,7 +3,6 @@ G1-G6 qualification tests with capability declarations refused at admission unle
 STATE-01 receipt fields). All inputs are SYNTHETIC."""
 import hashlib
 import json
-import os
 import subprocess
 import sys
 import tempfile
@@ -14,7 +13,11 @@ PLUGIN = Path(__file__).resolve().parents[3]
 SCRIPTS = PLUGIN / "skills" / "hep-computing" / "scripts"
 RUNNER = SCRIPTS / "run_workflow.py"
 CAPS = SCRIPTS / "executor_capabilities.py"
-HAS_PROC = Path("/proc/self/stat").is_file()  # G2 needs /proc to see processes that left the group
+sys.path.insert(0, str(PLUGIN))
+from core import hostcaps  # noqa: E402
+from tests._platform import needs  # noqa: E402
+
+HAS_PROC = hostcaps.proc_fs()  # G2 needs /proc to see processes that left the group
 
 
 def sha(b: bytes) -> str:
@@ -197,7 +200,7 @@ class Capabilities(unittest.TestCase):
     def tearDownClass(cls):
         cls._t.cleanup()
 
-    @unittest.skipUnless(os.name == "posix", "G1/G2 are qualified on POSIX hosts (tested on Linux)")
+    @needs("process_groups")  # G1/G2 are qualified on POSIX hosts (tested on Linux)
     def test_g1_g2_g5_pass_and_the_rest_are_unsupported(self):
         # C2 (reconstruction v12): G5 is qualified with the control-layer helper as the persistent state
         self.assertEqual(self.q_code, 0, self.q_out)
@@ -211,7 +214,17 @@ class Capabilities(unittest.TestCase):
         self.assertEqual(len(qual["control_sha256"]), 64)
         self.assertEqual(self.d_out["declared"], ["G1", "G2", "G5"] if HAS_PROC else ["G1", "G5"])
 
-    @unittest.skipUnless(HAS_PROC, "G2 (required by M2) is qualified only on hosts with /proc")
+    @needs("process_groups")
+    def test_modes_this_host_cannot_admit_are_named(self):
+        """M3 needs G3 and G4 (never provided); M2 needs G2, so it is unavailable where /proc is missing (macOS)."""
+        qual = json.loads(self.qual.read_text())
+        self.assertEqual(sorted(qual["unavailable_modes"]), ["M2", "M3"] if not HAS_PROC else ["M3"])
+        self.assertEqual(self.q_out["unavailable_modes"], sorted(qual["unavailable_modes"]))
+        self.assertLessEqual({"G3", "G4"}, set(qual["unavailable_modes"]["M3"]))
+        if not HAS_PROC:
+            self.assertIn("/proc", qual["unavailable_modes"]["M2"]["G2"])
+
+    @needs("proc_fs")  # G2 (required by M2) is qualified only on hosts with /proc
     def test_admission(self):
         self.assertEqual(run(CAPS, "admit", "--declaration", self.decl, "--qualification", self.qual,
                              "--require", "G1,G2")[0], 0)
@@ -236,7 +249,7 @@ class Capabilities(unittest.TestCase):
         code, out = run(CAPS, "admit", "--declaration", stale_d, "--qualification", stale_q, "--mode", "M2")
         self.assertEqual((code, out["refused"]), (1, {"G5": "the control layer changed since it was qualified"}))
 
-    @unittest.skipUnless(os.name == "posix", "G1/G2 are qualified on POSIX hosts")
+    @needs("process_groups")  # G1/G2 are qualified on POSIX hosts
     def test_fabricated_or_stale_declarations_are_refused(self):
         decl = json.loads(self.decl.read_text())
         forged = self.root / "forged.json"

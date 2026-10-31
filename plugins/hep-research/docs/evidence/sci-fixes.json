@@ -6091,6 +6091,78 @@
     }
    ],
    "mutants": []
+  },
+  {
+   "id": "MINIJSON-UNICODE-ESCAPES",
+   "title": "the Geant4 programs' JSON reader decodes \\u escapes to UTF-8, so a spec naming a non-ASCII path runs",
+   "changelog": {
+    "kind": "unreleased",
+    "detail": "cross-platform follow-ups (MiniJson \\u escapes)"
+   },
+   "severity": "S2",
+   "evidence_tests": [
+    "tests/adapters/test_g4sim.py::G4simSelfTest::test_strings_decode_like_python_json",
+    "tests/adapters/test_g4sim.py::G4simSelfTest::test_malformed_unicode_escapes_are_refused"
+   ],
+   "oracle_kinds": [
+    "independent-implementation"
+   ],
+   "correctness": "C2",
+   "discrimination": "D2",
+   "negative_control_emulates_pre_fix": false,
+   "gaps": [],
+   "note": "g4sim/MiniJson.hh (simreco, layered_sim, element_sim) refused every \\u escape above 0x7f, which Python's json.dumps writes for a non-ASCII path, and read '\\u12g4' as U+0012; now every code point is decoded, a surrogate pair as one, and a lone surrogate or a short escape is a JsonError (VALIDATION CROSS-PLATFORM-FOLLOWUPS)",
+   "independence": [
+    {
+     "kind": "independent-implementation",
+     "test": "tests/adapters/test_g4sim.py::G4simSelfTest::test_strings_decode_like_python_json",
+     "basis": "third-party",
+     "detail": "the decoded UTF-8 bytes of 313 strings (300 random code points over every UTF-8 length, plus fixed cases) against Python's json decoder and str.encode('utf-8'), with ensure_ascii on and off",
+     "requires": {
+      "core": [],
+      "backend": []
+     },
+     "expected_from": "third-party-definition"
+    }
+   ],
+   "commits": {
+    "parent": "54b2d011c67ede8dcb2a87fcf1a2dcc3b993135b",
+    "fix": "7eb984127566ad3d8a22fbbc40e98f50348770e6",
+    "follow_up": []
+   },
+   "parent_records": [
+    {
+     "test": "tests/adapters/test_g4sim.py::G4simSelfTest::test_strings_decode_like_python_json",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "CROSS-PLATFORM-FOLLOWUPS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    },
+    {
+     "test": "tests/adapters/test_g4sim.py::G4simSelfTest::test_malformed_unicode_escapes_are_refused",
+     "parent": "fail",
+     "fix": "pass",
+     "failure": "assertion",
+     "env": "ci-lock",
+     "adapted_parent": false,
+     "validation": "CROSS-PLATFORM-FOLLOWUPS",
+     "requires": {
+      "core": [],
+      "backend": []
+     }
+    }
+   ],
+   "mutants": [],
+   "advisory_waiver": {
+    "reason": "changes only the status of a Geant4 program run whose spec names a non-ASCII string as a \\u escape (it stopped with a JSON parse error), where no result was produced",
+    "decided": "2026-11-01, VALIDATION CROSS-PLATFORM-FOLLOWUPS"
+   }
   }
  ],
  "documentation_fixes": [

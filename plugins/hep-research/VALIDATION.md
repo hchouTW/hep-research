@@ -8576,3 +8576,21 @@ The relocation failures on E2 are host limits, not release changes:
 - `test_geant4_register` `test_the_helpers_read_a_registered_record` fails on macOS when `TMPDIR` is under
   `/var/folders` (it compares an unresolved `G4LEDATA` path with a resolved one); it passes with a resolved `TMPDIR`.
   Follow-up.
+
+## CROSS-PLATFORM-FOLLOWUPS — 2026-11-01 (macOS arm64, Apple clang 21.0.0, Python 3.13.7 with the CI lock; branch `xplat/pr-4-followups`)
+
+Follow-ups to the cross-platform task (PRs #333-#336). MINIJSON-UNICODE-ESCAPES (sci-fix S2,
+`docs/evidence/sci-fixes.json`): `adapters/geant4/assets/g4sim/MiniJson.hh` decodes `\u` escapes to UTF-8.
+
+| Evidence test | Parent `54b2d011` (harness only) | Fix `7eb98412` |
+|---|---|---|
+| `test_g4sim.G4simSelfTest.test_strings_decode_like_python_json` | fail (assertion: exit -6, "non-ASCII \u escapes are not supported", ensure_ascii on) | pass |
+| `test_g4sim.G4simSelfTest.test_malformed_unicode_escapes_are_refused` | fail (assertion: `\u12` and `\u12g4` decoded, exit 0) | pass |
+
+The parent is the commit that adds only the self-test driver's `utf8_hex` request; MiniJson is unchanged there. The
+oracle is Python's json decoder and `str.encode("utf-8")` (an independent implementation): 313 strings, 300 of them
+random over every UTF-8 length, with `ensure_ascii` on and off. The negative control refuses 8 malformed escapes (lone
+high or low surrogate, reversed pair, a high surrogate followed by a non-surrogate, fewer than four or non-hex digits).
+`selftest.cc` compiles with `-Wall -Wextra -Wconversion -Werror` without a new diagnostic in MiniJson. Under a
+`TMPDIR` named with a space and Chinese characters, `tests.adapters.test_simreco` and `tests.adapters.test_geant4`
+pass (70 tests, 6 skipped; 11 simreco failures before).
