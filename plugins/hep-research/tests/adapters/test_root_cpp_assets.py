@@ -17,6 +17,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from tests._root_toolchain import with_vdt
 from tests.skills.hep_computing.pyroot_floor import meets_floor
 
 ROOT_DIR = Path(__file__).resolve().parents[2]
@@ -72,35 +73,12 @@ def _pyroot_python():
     return None
 
 
-def _vdt_include():
-    """The folder holding vdt/vdtMath.h when ROOT's headers need it but root-config --cflags does not name it
-    (Homebrew ROOT 6.40 with a separate vdt; skills/hep-computing/scripts/check_root_cpp_env.sh reports the same),
-    else None."""
-    if not ROOT_CONFIG:
-        return None
-    try:
-        incdir = subprocess.run([ROOT_CONFIG, "--incdir"], capture_output=True, text=True, timeout=60).stdout.strip()
-        cflags = subprocess.run([ROOT_CONFIG, "--cflags"], capture_output=True, text=True, timeout=60).stdout
-    except (OSError, subprocess.TimeoutExpired):
-        return None
-    rvec = Path(incdir) / "ROOT" / "RVec.hxx"
-    if not rvec.is_file() or "vdt/vdtMath.h" not in rvec.read_text(encoding="utf-8", errors="replace"):
-        return None
-    for d in (Path(incdir).parent, Path("/opt/homebrew/include"), Path("/usr/local/include"), Path("/usr/include")):
-        if (d / "vdt" / "vdtMath.h").is_file():
-            return None if f"-I{d}" in cflags.split() or d == Path(incdir) else str(d)
-    return None
-
-
-VDT_INCLUDE = _vdt_include()
 
 
 def _env():
     env = dict(os.environ)
     env["PATH"] = f"{BIN}{os.pathsep}{env.get('PATH', '')}"
-    if VDT_INCLUDE:  # the workaround check_root_cpp_env.sh recommends
-        env["CPATH"] = os.pathsep.join(p for p in (VDT_INCLUDE, env.get("CPATH")) if p)
-    return env
+    return with_vdt(env, ROOT_CONFIG)  # the workaround check_root_cpp_env.sh recommends
 
 
 def _rc(*args):
