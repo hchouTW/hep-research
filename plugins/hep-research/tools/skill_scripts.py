@@ -3,7 +3,7 @@
 
 A skill's text is its SKILL.md and every Markdown file under its references/. A script reference is any token ending
 in `.py`, in each form the skills use:
-  1. a full path (`<plugin root>/skills/hep-detector/scripts/x.py`) or a plugin-root-relative path (`contracts/x.py`);
+  1. a full path (`<plugin root>/skills/hep-detector/scripts/tracker_resolution.py`) or a plugin-root-relative path (`contracts/x.py`);
   2. a path relative to the referencing file (Markdown links such as `../scripts/x.py`);
   3. a path relative to the skill folder (`scripts/x.py`, `assets/x.py`), or to skills/ (`hep-computing/scripts/x.py`);
      after the shorthands (4), a path relative to an adapter folder (`assets/geant4_build.py` in text about the
@@ -158,7 +158,7 @@ def shorthands(skill_md: Path) -> dict[str, str]:
 def resolve(token: str, text: Path, skill_dir: Path, short: dict[str, str], root: Path) -> list[Path]:
     """Candidate files for token: one file when it resolves, several when ambiguous, none when it names nothing."""
     name = token
-    for prefix in ("<plugin_root>/", "root>/", "${CLAUDE_PLUGIN_ROOT}/", "./"):  # root>/: `<plugin root>` wrapped
+    for prefix in ("<plugin_root>/", "root>/", "./"):  # root>/: `<plugin root>` wrapped
         if name.startswith(prefix):
             name = name[len(prefix):]
     if "<" in name or ">" in name or "{" in name or "$" in name:
