@@ -24,8 +24,8 @@ class SkillScriptList(unittest.TestCase):
 
     def test_no_new_unresolved_name(self):
         known = {(u["skill"], u["name"]) for u in self.committed["unresolved"]}
-        new = [u for u in self.fresh["unresolved"] if (u["skill"], u["name"]) not in known]
-        self.assertEqual(new, [], "a skill names a script that resolves to no file or to several: fix the text or "
+        unseen = [u for u in self.fresh["unresolved"] if (u["skill"], u["name"]) not in known]
+        self.assertEqual(unseen, [], "a skill names a script that resolves to no file or to several: fix the text or "
                                   "the name, or regenerate with python3 tools/skill_scripts.py and review the entry")
 
     def test_committed_list_is_up_to_date(self):
