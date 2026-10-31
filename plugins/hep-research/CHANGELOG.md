@@ -15,7 +15,10 @@ Software checks establish contract consistency only, not physical validity.
   `.gitattributes` checks every text file out with LF (`.gz`, `.png`, `.root`, `.dat`, `.npz` binary); renormalizing
   changes no file. README: a Windows section (`PYTHONUTF8=1`, what is tested, what needs WSL2) and Tested hosts
   ("Windows: scripts tested in CI only"). No tool contract changes: `charge_confusion_rate` has no exit-3 path (it
-  calls no protected guard), so no exit-3 failure state is added.
+  calls no protected guard), so no exit-3 failure state is added. `tools/check_relocation.py` passes `--part`, `--shard`,
+  `--jobs` and `--no-cli` to `run_all_checks.py`; CI's `hostile-paths` job is a four-leg matrix (units 1/3-3/3,
+  checks) that splits the relocated run, runs the pull-request subset in parallel through a plan of its modules, and
+  on main reconciles its three hostile units shards in `hostile-paths-complete`.
 
 - **Cross-platform, part 2: macOS and Linux.** `executor_capabilities.py` and `run_workflow.py` take their host
   answers from `core.hostcaps`; the qualification record and `qualify` output name the modes a host cannot admit
