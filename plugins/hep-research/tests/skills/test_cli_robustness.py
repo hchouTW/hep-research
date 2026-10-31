@@ -11,18 +11,34 @@ script without an entry fails the inventory test.
    each give one JSON object with a "status" key and the exit code SKILL.md invariant 5 documents; the .sh scripts are
    run too. A new hep-computing script needs an entry there or in HC_EXEMPT.
 """
+import contextlib
 import glob
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
 import unittest
+import uuid
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-M = "/nonexistent/hep-research-cli-check/input.json"
-OUT = "/nonexistent/hep-research-cli-check/out"
+MISSING_BASE = "/nonexistent/hep-research-cli-check"
+M = MISSING_BASE + "/input.json"
+OUT = MISSING_BASE + "/out"
+
+
+@contextlib.contextmanager
+def unique_missing(args):
+    """args with MISSING_BASE replaced by a base only this call uses, removed afterwards: a tool may create its --out
+    folder, and root may create /nonexistent (the optional ROOT job runs as root), so a folder one call made must not
+    make another call's input exist (extract_names.py then scanned an empty --root: exit 3, not 2)."""
+    base = f"{MISSING_BASE}-{uuid.uuid4().hex}"
+    try:
+        yield [a.replace(MISSING_BASE, base) for a in args]
+    finally:
+        shutil.rmtree(base, ignore_errors=True)
 
 MISSING_FILE_ARGS = {
     "skills/hep-review/scripts/review.py": [["verify-export", M], ["r0", "--bundle", M]],
@@ -279,7 +295,7 @@ SCRIPTS = sorted(os.path.relpath(p, ROOT) for p in glob.glob(str(ROOT / "skills/
 
 
 def run(script, args, timeout=120):
-    with tempfile.TemporaryDirectory() as cwd:
+    with tempfile.TemporaryDirectory() as cwd, unique_missing(args) as args:
         return subprocess.run([sys.executable, "-I", str(ROOT / script), *args], capture_output=True, text=True,
                               timeout=timeout, cwd=cwd)
 
