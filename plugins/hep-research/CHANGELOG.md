@@ -16,6 +16,41 @@ Software checks establish contract consistency only, not physical validity.
   the order (`qed-prediction` before `published-comparison`), the version-only diff rule, a local project-free
   `TMPDIR` for `check_relocation.py`, and the README size statement and manifest order.
 - Evidence: VALIDATION RELEASE-FOLLOWUPS-0.50.0
+- Evidence: VALIDATION GEANT4-REGISTER-REVIEW
+- **Geant4 adapter 0.6.0: any existing Geant4 installation** (`adapters/geant4`). `geant4_build.py register
+  (--geant4-config PATH | --prefix DIR) --record OUT.json [--dataset-source auto|env|config] [--skip-dataset NAME]`
+  records an installation the adapter did not build (conda-forge, an LCG view, a site build): version, prefix, C++
+  standard, features and datasets from `geant4-config`, cross-checked with `Geant4Config.cmake` and
+  `Geant4ConfigVersion.cmake`. Each dataset folder comes from its environment variable or the `geant4-config` path,
+  with the source reported per dataset; a folder named without the `G4` prefix (conda-forge's `EMLOW8.8`) is accepted
+  and reported; a dataset found nowhere, a variable pointing to another dataset or version, an empty folder, a prefix
+  without `Geant4Config.cmake` or a version or prefix that disagrees refuses the registration (exit 1, no record).
+  The record has the build record's shape with `origin: registered`, tag and commit null and an `unknown` list (source
+  commit, build options, the compiler of the build, dataset MD5s), plus the compiler and CMake found and a
+  `find_package(Geant4)` probe; `check` re-reads the version, prefix and configuration hashes and re-hashes the
+  datasets. Run and example records carry `simulation.geant4.origin` (and `installation_version`); records of source
+  builds now carry `origin: built-from-source`. `geant4_run.py build-sim` and `geant4_examples.py build` take
+  `--configure-with geant4-config` (new `g4sim/Geant4FromConfig.cmake`: the installation's flags and a run path to its
+  library folders, so no `LD_LIBRARY_PATH`/`DYLD_LIBRARY_PATH` is needed) for an installation whose CMake
+  configuration cannot be used; `build-sim` with CMake now passes the installation prefix as `CMAKE_PREFIX_PATH` and
+  the registered CMake folder (`lib` or `lib64`); the examples of a registered installation need `--source` (a source
+  tree whose `G4Version.hh` must match). hep-detector's `check_geant4_study.py label` lists the installations of its
+  run records (`geant4_installations`, with a provenance note for a registered one) and `geant4_benchmarks.py` adds the
+  installation to `configuration_basis`; the origin is reported, never a gap, and records from before 0.6.0 are
+  reported as before. Fixes found on Linux: a relative `--exe` was not found from the run folder; `geant4_run.py`
+  listed `z_max` as a default even when `--z-max` was given. Demonstrated on E5 (RHEL 9, GCC 11.5.0, CMake 3.26.5,
+  conda-forge Geant4 11.4.3); the adapter stays `demonstrated-on-synthetic-data` (VALIDATION GEANT4-REGISTER). The J14
+  example's committed output is regenerated: only the two script hashes of its study records changed.
+- **Geant4 adapter 0.6.0 review fixes** (PR #328, `adapters/geant4`). `geant4_build.py check` reads `geant4-config`
+  as `register` does (stdout only, a non-zero exit rejected), so a stderr warning (a bash locale warning) no longer
+  fails `check` on an installation `register` accepted. `register` refuses a `Geant4Config.cmake` whose dataset
+  descriptions cannot be read instead of skipping every dataset cross-check, and accepts `--prefix` on a view (LCG)
+  whose `bin/geant4-config` is a symbolic link into the installation: Geant4's script follows its own links, so the
+  installation it reports is recorded, with the view as `registration.prefix_given`. `geant4_run.py build-sim` with
+  CMake drops a `G4SIM_GEANT4_CONFIG` cached by an earlier `--configure-with geant4-config` build in the same folder
+  (the binary was linked through `geant4-config` while reporting `cmake`); `geant4_examples.py build` clears a CMake
+  cache made from the other mode's source (`cache_cleared` in `adapter-build.json`) instead of failing every example.
+  The adapter stays `demonstrated-on-synthetic-data`.
 
 ## 0.50.0 (2026-10-30)
 

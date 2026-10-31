@@ -27,8 +27,21 @@ SE_ref^2); family-wise alpha (default 0.05) with a Bonferroni threshold z_crit =
 compared quantities of all examples together. A quantity beyond z_crit is rerun with another seed and the rerun is
 pooled with the original (inverse-variance weighted mean; counts pooled for fractions), never substituted.
 
+The example sources and reference outputs come from the Geant4 source tree of the build record (<work>/src) or, with
+--source, from a folder that holds examples/ (adapter 0.6.0; required for a registered installation, which has no
+source tree of the adapter's: a clone of https://github.com/Geant4/geant4 at the installation's version tag, or an
+installation's share/Geant4 folder when it ships examples/). When the folder is a source tree its G4Version.hh must
+give the installation's version (else the input is rejected); a folder without it is recorded as version not checked.
+Nothing is ever taken from another place silently.
+
 Subcommands:
-  build    configure and build the examples against the installation of a build record
+  build    configure and build the examples against the installation of a build record; --configure-with
+           geant4-config (adapter 0.6.0) compiles each example's own sources and macros with the installation's
+           geant4-config flags through a generated CMakeLists.txt (the example's own CMakeLists.txt is not used: an
+           installation without the development files of Geant4's dependencies); the choice, the compiler and the
+           example source are written to <build>/adapter-build.json and into every run record; the two modes share
+           <work>/examples/<name>/build, so a cache configured from the other mode's source is cleared (and recorded
+           as cache_cleared) before configuring
   run      run one example unchanged through a wrapper macro (/random/setSeeds, then /control/execute <name>.in),
            always serial (G4FORCE_RUN_MANAGER_TYPE=Serial), and write a computational-run record of the run;
            --run0-events N runs only the commands up to the first /run/beamOn, with N events (mirror reference)
@@ -36,8 +49,8 @@ Subcommands:
   compare  local outputs against the references -> comparison table JSON (with pooled reruns)
   smoke    the B4a smoke comparison
 Usage (from the plugin root):
-  python3 adapters/geant4/assets/geant4_examples.py build --build-record BUILD.json --work DIR
-  python3 adapters/geant4/assets/geant4_examples.py run --build-record BUILD.json --work DIR --example NAME --seeds A B --tag T --record OUT.json
+  python3 adapters/geant4/assets/geant4_examples.py build --build-record BUILD.json --work DIR [--source SRC] [--configure-with geant4-config]
+  python3 adapters/geant4/assets/geant4_examples.py run --build-record BUILD.json --work DIR --example NAME --seeds A B --tag T --record OUT.json [--source SRC]
   python3 adapters/geant4/assets/geant4_examples.py extract --example NAME --out-file FILE.out
   python3 adapters/geant4/assets/geant4_examples.py compare --source SRC --local NAME=FILE[,RERUN] ... [--alpha 0.05] --out TABLE.json
   python3 adapters/geant4/assets/geant4_examples.py smoke --source SRC --local FILE.out
@@ -60,7 +73,8 @@ from pathlib import Path
 
 sys.dont_write_bytecode = True  # importing core leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parent))
-from g4common import (JsonArgumentParser, SpecError, UNITS, build_record_ok, data_env, expand,  # noqa: E402
+from g4common import (ASSETS, JsonArgumentParser, SpecError, UNITS, build_origin, build_record_ok,  # noqa: E402
+                      data_env, expand, geant4_cmake_dir, geant4_config_path, geant4_identity, geant4_label,
                       install_prefix, record_skeleton, sha256_file, tilde, write_json)
 from core.status import add_status_argument, exit_code  # noqa: E402
 
@@ -315,29 +329,142 @@ def source_dir(rec: dict) -> Path:
     return expand(rec["extension"]["environment"]["work"]) / "src"
 
 
+def version_of_number(n: int) -> str:
+    """G4VERSION_NUMBER 1143 -> '11.4.3' (major * 100 + minor * 10 + patch)."""
+    return f"{n // 100}.{n // 10 % 10}.{n % 10}"
+
+
+def example_source(rec: dict, given) -> tuple[Path, dict]:
+    """The folder that holds examples/ and what is known of it: --source when given, else the build's source tree; a
+    registered installation has none, so --source is required (never another folder silently)."""
+    if given:
+        src, how = expand(str(given)), "--source"
+    elif build_origin(rec) == "registered":
+        version = rec["extension"]["build"]["geant4_config"]["version"]
+        raise SpecError(f"a registered installation has no source tree of the adapter's: pass --source, a Geant4 "
+                        f"source tree of version {version} (git clone --branch v{version} "
+                        "https://github.com/Geant4/geant4) or an installed share/Geant4 folder that holds examples/")
+    else:
+        src, how = source_dir(rec), "the build's source tree"
+    if not (src / "examples").is_dir():
+        raise SpecError(f"{tilde(src)} has no examples/ folder")
+    want = rec["extension"]["build"]["geant4_config"].get("version")
+    info = {"path": tilde(src), "from": how, "version_expected": want}
+    vh = src / "source" / "global" / "management" / "include" / "G4Version.hh"
+    if vh.is_file():
+        m = re.search(r"#define\s+G4VERSION_NUMBER\s+(\d+)", vh.read_text(encoding="utf-8", errors="replace"))
+        got = version_of_number(int(m.group(1))) if m else None
+        if got != want:
+            raise SpecError(f"{tilde(src)}: G4Version.hh gives Geant4 {got}, the installation is {want}: the examples "
+                            "and reference outputs must be of the installation's version")
+        info.update(version=got, version_checked=True)
+    else:
+        info.update(version=None, version_checked=False,
+                    note="no source/global/management/include/G4Version.hh: the examples' version is not checked")
+    if (src / ".git").exists() and shutil.which("git"):
+        p = subprocess.run(["git", "-C", str(src), "rev-parse", "HEAD"], capture_output=True, text=True, timeout=60)
+        info["git_commit"] = p.stdout.strip() if p.returncode == 0 else None
+    return src, info
+
+
+EXAMPLE_CMAKE = """# Generated by adapters/geant4/assets/geant4_examples.py build --configure-with geant4-config: the official
+# example's own sources and macros compiled with the installation's geant4-config flags (the example's own
+# CMakeLists.txt is not used). EXAMPLE_DIR is the example's folder.
+cmake_minimum_required(VERSION 3.16...3.27)
+project({exe} CXX)
+set(G4SIM_GEANT4_CONFIG_GUI ON)
+include("{helper}")
+file(GLOB _sources "${{EXAMPLE_DIR}}/src/*.cc")
+add_executable({exe} "${{EXAMPLE_DIR}}/{exe}.cc" ${{_sources}})
+target_include_directories({exe} PRIVATE "${{EXAMPLE_DIR}}/include")
+target_link_libraries({exe} PRIVATE ${{Geant4_LIBRARIES}})
+file(GLOB _scripts "${{EXAMPLE_DIR}}/*.mac" "${{EXAMPLE_DIR}}/*.in" "${{EXAMPLE_DIR}}/*.out")
+foreach(_script ${{_scripts}})
+  get_filename_component(_name "${{_script}}" NAME)
+  configure_file("${{_script}}" "${{PROJECT_BINARY_DIR}}/${{_name}}" COPYONLY)
+endforeach()
+"""
+
+
 def cmd_build(args) -> tuple[str, dict]:
     rec = _build(args)
     if not shutil.which("cmake"):
         return "missing-dependency", {"error": "cmake not found on PATH"}
-    g4dir = install_prefix(rec) / "lib" / "cmake" / "Geant4"
-    if not g4dir.is_dir():
-        return "missing-dependency", {"error": f"no Geant4 CMake configuration at {tilde(g4dir)}"}
-    work, src = expand(str(args.work)), source_dir(rec)
+    src, src_info = example_source(rec, args.source)
+    if args.configure_with == "geant4-config":
+        cfg = geant4_config_path(rec)
+        if not cfg.is_file():
+            return "missing-dependency", {"error": f"no geant4-config at {tilde(cfg)}"}
+    else:
+        g4dir = geant4_cmake_dir(rec)
+        if not g4dir.is_dir():
+            return "missing-dependency", {"error": f"no Geant4 CMake configuration at {tilde(g4dir)} (with "
+                                                   "--configure-with geant4-config it is not needed)"}
+    work = expand(str(args.work))
     built = {}
     for name in args.examples:
         folder, exe, *_ = EXAMPLES[name]
         bld = work / "examples" / name / "build"
         bld.mkdir(parents=True, exist_ok=True)
+        if args.configure_with == "geant4-config":
+            wrap = work / "examples" / name / "cmake"
+            wrap.mkdir(parents=True, exist_ok=True)
+            (wrap / "CMakeLists.txt").write_text(EXAMPLE_CMAKE.format(
+                exe=exe, helper=(ASSETS / "g4sim" / "Geant4FromConfig.cmake").as_posix()), encoding="utf-8")
+            configure = ["cmake", "-S", str(wrap), "-B", str(bld), f"-DG4SIM_GEANT4_CONFIG={cfg}",
+                         f"-DEXAMPLE_DIR={src / 'examples' / folder}", "-DCMAKE_BUILD_TYPE=Release"]
+        else:
+            configure = ["cmake", "-S", str(src / "examples" / folder), "-B", str(bld), f"-DGeant4_DIR={g4dir}",
+                         f"-DCMAKE_PREFIX_PATH={install_prefix(rec)}", "-DCMAKE_BUILD_TYPE=Release"]
+        cleared = clear_foreign_cache(bld, Path(configure[2]))
         with (bld / "build.log").open("w", encoding="utf-8") as fh:
-            codes = [subprocess.run(c, stdout=fh, stderr=subprocess.STDOUT, timeout=3600).returncode for c in (
-                ["cmake", "-S", str(src / "examples" / folder), "-B", str(bld), f"-DGeant4_DIR={g4dir}",
-                 "-DCMAKE_BUILD_TYPE=Release"], ["cmake", "--build", str(bld), "--parallel", str(args.jobs)])]
-        built[name] = {"exe": tilde(bld / exe), "ok": not any(codes) and (bld / exe).is_file()}
-    return ("ok" if all(b["ok"] for b in built.values()) else "failed"), {"examples": built}
+            if cleared:
+                fh.write(f"# {cleared}\n")
+            codes = []
+            for c in (configure, ["cmake", "--build", str(bld), "--parallel", str(args.jobs)]):
+                codes.append(subprocess.run(c, stdout=fh, stderr=subprocess.STDOUT, timeout=3600).returncode)
+                if codes[-1]:
+                    break
+        ok = not any(codes) and (bld / exe).is_file()
+        meta = {"example": name, "configure_with": args.configure_with, "source": src_info, "cache_cleared": cleared,
+                "compiler": cmake_compiler(bld), "geant4": geant4_identity(rec),
+                "exit_codes": codes, "exe_sha256": sha256_file(bld / exe) if ok else None}
+        write_json(bld / "adapter-build.json", meta)
+        built[name] = {"exe": tilde(bld / exe), "ok": ok, "log": tilde(bld / "build.log"), "exit_codes": codes}
+    return ("ok" if all(b["ok"] for b in built.values()) else "failed"), {
+        "examples": built, "configure_with": args.configure_with, "source": src_info,
+        "geant4": geant4_identity(rec)}
+
+
+def clear_foreign_cache(bld: Path, source: Path) -> str | None:
+    """Remove the CMake cache of a build folder configured from another source folder: the two modes configure one
+    build folder from different sources (the example's own folder, or the generated <work>/examples/<name>/cmake), and
+    CMake refuses a cache made from another source. Returns what was cleared, or None."""
+    cache = bld / "CMakeCache.txt"
+    if not cache.is_file():
+        return None
+    text = cache.read_text(encoding="utf-8", errors="replace")
+    home = next((ln.split("=", 1)[1] for ln in text.splitlines() if ln.startswith("CMAKE_HOME_DIRECTORY:")), None)
+    if home and Path(home).resolve() == source.resolve():
+        return None
+    cache.unlink()
+    shutil.rmtree(bld / "CMakeFiles", ignore_errors=True)
+    return f"CMake cache of {tilde(Path(home)) if home else 'an unknown source'} cleared: configuring from {tilde(source)}"
+
+
+def cmake_compiler(bld: Path) -> dict:
+    cache = bld / "CMakeCache.txt"
+    text = cache.read_text(encoding="utf-8", errors="replace") if cache.is_file() else ""
+    path = next((ln.split("=", 1)[1] for ln in text.splitlines() if ln.startswith("CMAKE_CXX_COMPILER:")), None)
+    if not path:
+        return {"path": None, "version": None}
+    p = subprocess.run([path, "--version"], capture_output=True, text=True, timeout=60)
+    return {"path": tilde(path), "version": (p.stdout.splitlines() or [None])[0]}
 
 
 def cmd_run(args) -> tuple[str, dict]:
     rec = _build(args)
+    src, src_info = example_source(rec, args.source)
     folder, exe_name, macro, _, flag, _ = EXAMPLES[args.example]
     bld = expand(str(args.work)) / "examples" / args.example / "build"
     exe = bld / exe_name
@@ -368,17 +495,24 @@ def cmd_run(args) -> tuple[str, dict]:
     ok = p.returncode == 0
     created = args.created or datetime.date.today().isoformat()
     b = rec["extension"]["build"]
+    ident = geant4_identity(rec)
+    meta_file = bld / "adapter-build.json"
+    meta = json.loads(meta_file.read_text(encoding="utf-8")) if meta_file.is_file() else None
+    origin = "" if ident["origin"] != "registered" else " of a registered installation"
     run_rec = record_skeleton(f"geant4-example-{args.example}-{args.tag}",
-                              f"Geant4 {b['tag']} official example {args.example} run unchanged in serial mode "
-                              f"(verification of the installation, not validation)", created,
+                              f"Geant4 {b['tag'] or ident['version']}{origin} official example {args.example} run "
+                              "unchanged in serial mode (verification of the installation, not validation)", created,
                               ["unvalidated"] if ok else ["unvalidated", "failed"])
+    in_src = f"geant4@{b['commit']}" if b.get("commit") and not args.source else src_info["path"]
     run_rec["extension"] = {
-        "input_manifest": [{"path": f"geant4@{b['commit']}/examples/{folder}/{EXAMPLES[args.example][2]}",
-                            "sha256": sha256_file(source_dir(rec) / "examples" / folder / EXAMPLES[args.example][2])},
+        "input_manifest": [{"path": f"{in_src}/examples/{folder}/{EXAMPLES[args.example][2]}",
+                            "sha256": sha256_file(src / "examples" / folder / EXAMPLES[args.example][2])},
                            {"path": tilde(bld / macro), "sha256": sha256_file(bld / macro)},
                            {"path": tilde(wrapper), "sha256": sha256_file(wrapper)}],
-        "tools": [{"name": "Geant4", "version": f"{b['tag']} ({b['commit']})"},
+        "tools": [{"name": "Geant4", "version": geant4_label(rec)},
                   {"name": exe_name, "version": sha256_file(exe)[:16]}],
+        "geant4": ident, "examples_source": src_info,
+        "example_build": meta or {"note": "no adapter-build.json: built before adapter 0.6.0 or by hand"},
         "commands": [f"G4FORCE_RUN_MANAGER_TYPE=Serial {' '.join(cmd)}"],
         "environment": {"G4FORCE_RUN_MANAGER_TYPE": "Serial",
                         "dataset_variables": {d["envvar"]: d["path"] for d in b["datasets"]}},
@@ -430,6 +564,10 @@ def main(argv=None) -> int:
     p.add_argument("--work", required=True)
     p.add_argument("--examples", nargs="+", default=list(EXAMPLES), choices=list(EXAMPLES))
     p.add_argument("--jobs", type=int, default=os.cpu_count() or 1)
+    p.add_argument("--source", help="a folder that holds examples/ (default: the build's source tree; required for a "
+                                    "registered installation)")
+    p.add_argument("--configure-with", choices=("cmake", "geant4-config"), default="cmake",
+                   help="the example's own CMakeLists.txt (default) or the installation's geant4-config flags")
     p = sub.add_parser("run", help="run one example through a wrapper macro (serial)")
     p.add_argument("--build-record", required=True)
     p.add_argument("--work", required=True)
@@ -439,6 +577,7 @@ def main(argv=None) -> int:
     p.add_argument("--record", required=True)
     p.add_argument("--created")
     p.add_argument("--timeout", type=float, default=86400.0)
+    p.add_argument("--source", help="the folder the example was built from (as for build)")
     p.add_argument("--run0-events", type=int,
                    help="run only the example's first run with this many events (the mirror comparison reference)")
     p = sub.add_parser("extract", help="quantities of a .out file")
@@ -457,8 +596,8 @@ def main(argv=None) -> int:
     args = ap.parse_args(argv)
     inputs = {k: v for k, v in vars(args).items() if k != "status"}
     given = {t.split("=")[0] for t in (sys.argv[1:] if argv is None else argv) if t.startswith("--")}
-    defaults = [k for k in ("examples", "jobs", "alpha", "created", "timeout", "status")
-                if hasattr(args, k) and f"--{k}" not in given]
+    defaults = [k for k in ("examples", "jobs", "alpha", "created", "timeout", "configure_with", "status")
+                if hasattr(args, k) and f"--{k.replace('_', '-')}" not in given]
     handlers = {"build": cmd_build, "run": cmd_run, "extract": cmd_extract, "compare": cmd_compare, "smoke": cmd_smoke}
     try:
         status, doc = handlers[args.command](args)

@@ -355,6 +355,23 @@ execution layer. Its records are always `unvalidated`.
 - `assets/geant4_build.py build --spec BUILD_SPEC.json --work DIR --record OUT.json`: clone the tag, check the commit,
   build, install, fetch the datasets the spec names (tarball MD5 checked), hash every dataset folder; `check` compares
   an installation with its record.
+- From adapter 0.6.0, `assets/geant4_build.py register (--geant4-config PATH | --prefix DIR) --record OUT.json
+  [--dataset-source auto|env|config]` records an existing installation instead (conda-forge, an LCG view, a site
+  build): version, prefix, C++ standard, features and datasets from `geant4-config`, cross-checked with
+  `Geant4Config.cmake`; each dataset folder from the environment variable or the `geant4-config` path (the source
+  used is reported per dataset; a folder name without the `G4` prefix, as conda-forge installs them, is accepted and
+  reported); a dataset found nowhere or of another name or version refuses the registration (exit 1, no record),
+  unless `--skip-dataset` leaves it out on purpose. The record has the build record's shape with origin `registered`,
+  tag and commit null and an `unknown` list (source commit, build options, the compiler of the build, dataset MD5s:
+  the folders are content-hashed only), so every tool reads it unchanged; `check` re-reads the version, prefix and
+  configuration hashes and re-hashes the datasets. An installation whose `find_package(Geant4)` fails (the
+  registration's `cmake_probe`; for example a conda environment without the development files of expat, zlib or
+  freetype) builds the programs with `geant4_run.py build-sim --configure-with geant4-config` and the official
+  examples with `geant4_examples.py build --configure-with geant4-config`; the examples need `--source`, a Geant4
+  source tree of the installation's version (its `G4Version.hh` is checked). Run records then carry
+  `simulation.geant4.origin`, and `label` lists the installations of its run records, with a provenance note for a
+  registered one: weaker provenance is reported, it is not a gap, because the benchmarks and their references decide
+  validity. Section 9 asks for the origin.
 - `assets/geant4_examples.py build|run|extract|compare|smoke`: the four official examples, run unchanged through a
   wrapper macro in serial mode and compared with the reference outputs, each quantity with its own standard error and
   a Bonferroni threshold; reruns are pooled, never substituted. B4a is a smoke test only.
@@ -423,7 +440,8 @@ journey with real runs, negative-control scenarios and an offline replay is
 
 ## 9. Reporting and citation
 
-State the Geant4 version and commit, the physics constructor and options, the cuts, the documentation version relied
+State the Geant4 version and commit (for a registered installation: the version, its origin and where it came
+from, for example the conda-forge build, and that the commit is unknown), the physics constructor and options, the cuts, the documentation version relied
 on, the reference sources and their editions, the benchmarks with scope and detection limit, and the label. Cite the
 Geant4 papers and the documents from a hep-citations literature-record, never from memory, following
 [primary sources and version checks](../../hep-citations/references/primary-sources-and-version-checks.md); check the

@@ -8,20 +8,26 @@ spec and material-dump hashes, random engine and seeds, event count, run manager
 `unvalidated` (or also `failed`): a run that completes is not physical validity, which hep-detector decides.
 
 Tool and licence boundary: Geant4 (Geant4 Software License, Version 1.0, 28 June 2006) is built by geant4_build.py
-in the user's work folder; layered_sim (assets/layered_sim/, this plugin's code) links against that installation and
+in the user's work folder, or is an existing installation recorded by geant4_build.py register; layered_sim (assets/layered_sim/, this plugin's code) links against that installation and
 runs as a separate executable that exchanges JSON and CSV. Nothing of Geant4 is bundled.
 
 Method: the spec is validated here first (spec.schema.json; exit 2 on any problem), the output paths are set inside
 <work>/<run-id>/, and layered_sim runs with every Geant4 dataset variable unset except those of the build record (so
 Geant4's automatic data search cannot silently pick another copy). After the run the data-path record is compared
-with the build record: a resolved path or content hash that differs makes the run `failed`.
+with the build record: a resolved path or content hash that differs makes the run `failed`. The build record may be a
+registration of an existing installation (adapter 0.6.0): the run record's simulation.geant4 then carries origin
+`registered`, a null tag and commit and the list of what the registration cannot show.
 From adapter 0.3.0 (Geant4 program B1) a spec whose schema is element_sim.spec/1 runs element_sim (box elements, one
 level of nesting, uniform field regions, plane crossings of every charged track, calorimeter leakage, per-event
 seeding only) with the same boundary artifacts, plus the per-event ROOT file events.root at event-file level summary
 or above, recorded by path, file sha256 and simroot's content_sha256 (the files are never committed); a run that is
 killed or times out is incomplete (exit 3).
 Subcommands:
-  build-sim  configure and build layered_sim (default) or, with --program element_sim, element_sim and simroot
+  build-sim  configure and build layered_sim (default) or, with --program element_sim, element_sim and simroot;
+             from adapter 0.6.0 --configure-with geant4-config takes the compile and link flags from the installation's
+             geant4-config instead of find_package(Geant4) (an installation without the development files of Geant4's
+             dependencies), with a run path to the library folders (no LD_LIBRARY_PATH or DYLD_LIBRARY_PATH needed);
+             the output names the compiler CMake chose and the installation's origin
   check-spec validate an element_sim.spec/1 (element_sim/spec.schema.json and the cross-field rules of
              element_spec.py): {ok, problems}, exit 0 or 2; no Geant4 needed
   from-geometry  a design-geometry/1 file (evaluate_design.py geometry) and an element_sim.realization/1 profile ->
@@ -48,7 +54,7 @@ Subcommands:
   reduce     a gzip-compressed copy (mtime 0, byte-reproducible) of chosen columns of a run's CSV, for replay
   oracle     run hep-detector's geant4_benchmarks.py on a recorded run through a subprocess (never imported)
 Usage (from the plugin root):
-  python3 adapters/geant4/assets/geant4_run.py build-sim --build-record BUILD.json --work DIR [--program element_sim]
+  python3 adapters/geant4/assets/geant4_run.py build-sim --build-record BUILD.json --work DIR [--program element_sim] [--configure-with geant4-config]
   python3 adapters/geant4/assets/geant4_run.py check-spec --spec SPEC.json
   python3 adapters/geant4/assets/geant4_run.py from-geometry --geometry studies/G.geometry.json --profile PROFILE.json --out SPEC.json
   python3 adapters/geant4/assets/geant4_run.py run --spec SPEC.json --exe EXE --build-record BUILD.json --work DIR --run-id ID --record OUT.json
@@ -81,8 +87,8 @@ from pathlib import Path
 sys.dont_write_bytecode = True  # importing core leaves no __pycache__ (F-10)
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from g4common import (ASSETS, DATA_VARS, PLUGIN, JsonArgumentParser, SpecError, build_record_ok, data_env,  # noqa: E402
-                      expand, install_prefix, record_skeleton, run_settings, sha256_file, sha256_json, tilde,
-                      write_json)
+                      expand, geant4_cmake_dir, geant4_config_path, geant4_identity, identity_label, install_prefix,
+                      record_skeleton, run_settings, sha256_file, sha256_json, tilde, write_json)
 from contracts.identity import plugin_release  # noqa: E402
 from contracts.schema import validate  # noqa: E402
 from contracts.validate import geant4_spec_v1, geant4_tree_v1  # noqa: E402
@@ -95,7 +101,7 @@ import simreco_spec as RS  # noqa: E402
 # every source file of each program's build, as paths under assets/, per program (adapter 0.2.0: the g4sim/ group was
 # added and MiniJson.hh moved there, so the keys of sources_sha256 changed once, from bare names to these paths;
 # adapter 0.3.0: a map per program instead of one flat tuple, the keys of a layered_sim record are unchanged)
-ADAPTER_VERSION = "0.5.0"
+ADAPTER_VERSION = "0.6.0"
 SCHEMAS = ASSETS / "schemas"
 STRING_COLUMNS = ("primary_end_process",)  # the only non-numeric CSV column (output.schema.json)
 A2_OUTPUTS = ("summary.json", "column_map.json", "probe.json", "observables_dump.csv")  # adapter 0.2.0
@@ -110,7 +116,7 @@ SIM_SOURCES = {
     "simreco": ("simreco/CMakeLists.txt", "simreco/Fit.hh", "simreco/simreco.cc"),
     "g4sim": tuple(f"g4sim/{s}" for s in (
         "MiniJson.hh", "SimHash.hh", "SimSeed.hh", "SimSummary.hh", "SimObservables.hh", "SimProbe.hh", "SimCsv.hh",
-        "SimMaterials.hh", "SimPhysics.hh")),
+        "SimMaterials.hh", "SimPhysics.hh", "Geant4FromConfig.cmake")),  # 0.6.0: the geant4-config build helper
 }
 PROGRAM_GROUPS = {"layered_sim": ("layered_sim", "g4sim"), "element_sim": ("element_sim", "simroot", "g4sim"),
                   "simreco": ("simreco", "g4sim")}
@@ -503,13 +509,13 @@ def run_one(spec: dict, exe: Path, build: dict, build_path: Path, work: Path, ru
             outputs[f"{run_id}/{name}"] = sha256_file(run_dir / name)
     if "events.csv" not in " ".join(outputs) and not problems:
         problems.append(f"{program} wrote no events.csv")
-    b = build["extension"]["build"]
     run = spec["run"]
     a2 = boundary_artifacts(spec, run_dir, work, build_path, sources, problems)
     if a2.get("inconsistent"):
         return "rejected", {"error": a2["inconsistent"], "run_dir": tilde(run_dir)}, {}
     sim = {
-        "geant4": {"version": datapaths.get("geant4_version"), "tag": b["tag"], "commit": b["commit"],
+        "geant4": {**geant4_identity(build), "version": datapaths.get("geant4_version"),  # as the program reports it
+                   "installation_version": geant4_identity(build)["version"],  # geant4-config's, from the record
                    "build_record_sha256": sha256_file(build_path)},
         "program": {"name": program, "path": tilde(exe), "sha256": sha256_file(exe), "adapter": ADAPTER_VERSION,
                     "sources_sha256": sources},
@@ -687,7 +693,7 @@ def write_run_record(path: Path, run_id: str, spec_path: Path, spec: dict, exe: 
                           ["unvalidated"] if result["ok"] else ["unvalidated", "failed"])
     rec["extension"] = {
         "input_manifest": [{"path": tilde(spec_path), "sha256": sha256_file(spec_path)}],
-        "tools": [{"name": "Geant4", "version": f"{sim['geant4']['tag']} ({sim['geant4']['commit']})"},
+        "tools": [{"name": "Geant4", "version": identity_label(sim["geant4"])},
                   {"name": program, "version": sim["program"]["sha256"][:16]}],
         "commands": [f"{tilde(exe)} {run_id}/spec.json"],
         "environment": {"work": tilde(work), "dataset_variables": "all unset except the build record's",
@@ -714,19 +720,44 @@ def _evidence_fields(sim: dict, args) -> None:
         sim["seed_scheme"] = "legacy"
 
 
+def cmake_cache_compiler(bld: Path) -> dict:
+    """The C++ compiler CMake chose for a build folder (CMakeCache.txt) and its --version line."""
+    cache = bld / "CMakeCache.txt"
+    text = cache.read_text(encoding="utf-8", errors="replace") if cache.is_file() else ""
+    path = next((ln.split("=", 1)[1] for ln in text.splitlines() if ln.startswith("CMAKE_CXX_COMPILER:")), None)
+    if not path:
+        return {"path": None, "version": None}
+    try:
+        v = subprocess.run([path, "--version"], capture_output=True, text=True, timeout=60).stdout.splitlines()[0]
+    except (OSError, IndexError, subprocess.TimeoutExpired):
+        v = None
+    return {"path": tilde(path), "version": v}
+
+
 def cmd_build_sim(args) -> tuple[str, dict]:
     program = args.program
     if not shutil.which("cmake"):
         return "missing-dependency", {"error": "cmake not found on PATH"}
-    g4opt = []
+    g4opt, ident = [], None
     if program != "simreco":  # simreco links no Geant4 (B2.1)
         if not args.build_record:
             raise SpecError(f"--build-record is required to build {program}")
         build = _load_build(args.build_record)
-        g4dir = install_prefix(build) / "lib" / "cmake" / "Geant4"
-        if not g4dir.is_dir():
-            return "missing-dependency", {"error": f"no Geant4 CMake configuration at {tilde(g4dir)}"}
-        g4opt = [f"-DGeant4_DIR={g4dir}"]
+        ident = geant4_identity(build)
+        if args.configure_with == "geant4-config":  # 0.6.0: an installation whose CMake configuration cannot be used
+            cfg = geant4_config_path(build)
+            if not cfg.is_file():
+                return "missing-dependency", {"error": f"no geant4-config at {tilde(cfg)}"}
+            g4opt = [f"-DG4SIM_GEANT4_CONFIG={cfg}"]
+        else:
+            g4dir = geant4_cmake_dir(build)
+            if not g4dir.is_dir():
+                return "missing-dependency", {"error": f"no Geant4 CMake configuration at {tilde(g4dir)} (with "
+                                                       "--configure-with geant4-config it is not needed)"}
+            # the prefix lets find_package(Geant4) find the dependencies the installation itself provides (CLHEP,
+            # expat, Qt, ...): a conda or LCG prefix holds them next to Geant4; -U drops a G4SIM_GEANT4_CONFIG cached
+            # by an earlier --configure-with geant4-config build in this folder, which would still take precedence
+            g4opt = ["-UG4SIM_GEANT4_CONFIG", f"-DGeant4_DIR={g4dir}", f"-DCMAKE_PREFIX_PATH={install_prefix(build)}"]
     bld = expand(str(args.work)) / f"{program}-build"
     log = bld / "build.log"
     bld.mkdir(parents=True, exist_ok=True)
@@ -739,9 +770,18 @@ def cmd_build_sim(args) -> tuple[str, dict]:
                 break
     exe = bld / program
     built = [exe] + ([bld / "simroot"] if program == "element_sim" else [])
+    configure = "none (no Geant4)" if program == "simreco" else args.configure_with
     if any(codes) or not all(f.is_file() for f in built):
-        return "failed", {"error": f"{program} did not build", "log": tilde(log), "exit_codes": codes}
-    out = {"exe": tilde(exe), "sha256": sha256_file(exe), "sources_sha256": program_sources(program)}
+        doc = {"error": f"{program} did not build", "log": tilde(log), "exit_codes": codes, "configure_with": configure}
+        if codes and codes[0] and args.configure_with == "cmake" and program != "simreco":
+            doc["hint"] = ("the CMake configuration failed (see the log); an installation without the development "
+                           "files of Geant4's dependencies builds with --configure-with geant4-config (the "
+                           "registration's cmake_probe tells)")
+        return "failed", doc
+    out = {"exe": tilde(exe), "sha256": sha256_file(exe), "sources_sha256": program_sources(program),
+           "configure_with": configure, "compiler": cmake_cache_compiler(bld)}
+    if ident:
+        out["geant4"] = ident
     if program == "element_sim":
         out["simroot"] = {"path": tilde(bld / "simroot"), "sha256": sha256_file(bld / "simroot")}
     return "ok", out
@@ -751,7 +791,7 @@ def _exe(path: str) -> Path:
     exe = expand(path)
     if not exe.is_file():
         raise FileNotFoundError(f"executable {tilde(exe)} not found (build it with build-sim)")
-    return exe
+    return exe.resolve()  # absolute: the program runs in the run folder, so a relative --exe would not be found
 
 
 def _overrides(items) -> dict[str, str]:
@@ -1316,6 +1356,9 @@ def main(argv=None) -> int:
     p.add_argument("--jobs", type=int, default=os.cpu_count() or 1)
     p.add_argument("--program", choices=("layered_sim", "element_sim", "simreco"), default="layered_sim",
                    help="which program to build (element_sim also builds simroot; simreco needs no Geant4)")
+    p.add_argument("--configure-with", choices=("cmake", "geant4-config"), default="cmake",
+                   help="find Geant4 with find_package (Geant4Config.cmake, default) or with the flags of the "
+                        "installation's geant4-config (adapter 0.6.0; never chosen automatically)")
     p = sub.add_parser("check-spec", help="validate an element_sim.spec/1 (schema and cross-field rules)")
     p.add_argument("--spec", required=True)
     p = sub.add_parser("from-geometry", help="design-geometry/1 + realization profile -> element_sim.spec/1")
@@ -1391,8 +1434,8 @@ def main(argv=None) -> int:
     args.argv_run = [sys.executable, str(Path(__file__).resolve()), *(sys.argv[1:] if argv is None else argv)]
     inputs = {k: v for k, v in vars(args).items() if k not in ("status", "argv_run")}
     given = {t.split("=")[0] for t in (sys.argv[1:] if argv is None else argv) if t.startswith("--")}
-    defaults = [k for k in ("jobs", "timeout", "created", "z_max", "seeding", "role", "program", "status")
-                if hasattr(args, k) and f"--{k}" not in given]
+    defaults = [k for k in ("jobs", "timeout", "created", "z_max", "seeding", "role", "program", "configure_with",
+                            "status") if hasattr(args, k) and f"--{k.replace('_', '-')}" not in given]
     handlers = {"build-sim": cmd_build_sim, "check-spec": cmd_check_spec, "from-geometry": cmd_from_geometry,
                 "run": cmd_run, "scan": cmd_scan, "chunk": cmd_chunk, "summarize": cmd_summarize, "reduce": cmd_reduce,
                 "reco": cmd_reco, "table": cmd_table, "oracle": cmd_oracle}

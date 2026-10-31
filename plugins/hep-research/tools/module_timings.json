@@ -21,6 +21,7 @@
   "tests.adapters.test_g4sim": 3.0,
   "tests.adapters.test_geant4": 12.9,
   "tests.adapters.test_geant4_element": 1.0,
+  "tests.adapters.test_geant4_register": 6.0,
   "tests.adapters.test_geomagnetic_backtracing": 2.7,
   "tests.adapters.test_hepdata_export": 0.1,
   "tests.adapters.test_hepdata_record": 2.1,
