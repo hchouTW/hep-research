@@ -18,6 +18,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
+from tests._platform import needs  # noqa: E402
 from contracts import analysis_bundle as ab  # noqa: E402
 from contracts import communication_project as cproj  # noqa: E402
 from contracts.project import load_project  # noqa: E402
@@ -254,6 +255,7 @@ class Gap5ExecutionFacts(unittest.TestCase):
         self.assertEqual(rep["status"], "complete", rep)
         self.assertEqual([w["code"] for w in rep["provenance_warnings"]], ["merge.provenance_unrecorded"])
 
+    @needs("process_groups")  # the batch example drives fake Slurm and HTCondor shell shims (not on Windows)
     def test_batch_example_submissions_have_null_bundle_digests(self):
         try:
             import numpy  # noqa: F401  (the example's worker needs it)

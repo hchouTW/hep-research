@@ -15,6 +15,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
+from tests._platform import protected_refusal  # noqa: E402
 
 from contracts.project import load_blinding, load_project  # noqa: E402
 from contracts.project import main as project_main  # noqa: E402
@@ -127,7 +128,7 @@ class ProtectedModeTests(unittest.TestCase):
         with tempfile.TemporaryDirectory() as d:
             (Path(d) / "hep-research.project.json").write_text(json.dumps(BASE))
             codes = {f.code for f in load_project(Path(d)).report.errors}
-        self.assertIn("protected.policy_unanchored", codes)
+        self.assertIn(protected_refusal("protected.policy_unanchored"), codes)
 
     def test_without_policy_nothing_changes(self):
         with tempfile.TemporaryDirectory() as d:

@@ -6,6 +6,9 @@ plain_tmpdir() is a parent for temporary folders whose path is ASCII without spa
 quotes such a path by design (HTCondor's htcondor.path_whitespace refusal, Slurm's golden job scripts, a #! line, which
 the kernel splits at a space): under a TMPDIR named with a space or other characters (the hostile-paths CI job) they
 would test the path instead of their subject. Everything else keeps the hostile TMPDIR.
+
+protected_refusal(code) is the refusal a protected-mode test expects on this host: code on a host with POSIX account
+identity, protected.unsupported_platform without it (native Windows refuses every protected use first).
 """
 from __future__ import annotations
 
@@ -39,3 +42,8 @@ def plain_tmpdir() -> str | None:
     if os.name == "nt" or _PLAIN.fullmatch(os.path.realpath(default)):
         return None
     return "/tmp" if os.path.isdir("/tmp") and _PLAIN.fullmatch(os.path.realpath("/tmp")) else None
+
+
+def protected_refusal(code: str) -> str:
+    """code where protected mode is supported, else protected.unsupported_platform (module docstring)."""
+    return code if hostcaps.has("posix_ids") else "protected.unsupported_platform"

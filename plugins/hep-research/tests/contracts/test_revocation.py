@@ -17,7 +17,8 @@ sys.path.insert(0, str(ROOT))
 from contracts import revocation as rv  # noqa: E402
 from contracts.release_manifest import canonical_sha256  # noqa: E402
 from core.protected.trusted_input import Account, file_refusals, read_protected  # noqa: E402
-from tests._platform import needs  # noqa: E402
+from core import hostcaps  # noqa: E402
+from tests._platform import needs, protected_refusal  # noqa: E402
 
 NOW = datetime.datetime(2026, 10, 14, 12, 0, 0, tzinfo=datetime.UTC)
 SRC = "custodian:synthetic-revocations"
@@ -433,7 +434,7 @@ class DependencyTests(unittest.TestCase):
     def test_protected_flag_without_a_protected_project_is_refused(self):
         self.write_log([])
         rep = self.deps(protected=True)
-        self.assertIn("protected.policy_missing", self.codes(rep))
+        self.assertIn(protected_refusal("protected.policy_missing"), self.codes(rep))
         self.assertEqual((rep["status"], rep["checked"]), ("error", []))
 
     def test_inside_protected_mode(self):
@@ -495,7 +496,9 @@ class CliTests(unittest.TestCase):
             code, out = self.run_cli("verify", str(log), "--head", str(head), "--source", SRC, "--now",
                                      "2026-10-14T12:00:00Z", "--protected")
             self.assertEqual((code, out["status"]), (1, "refused"))
-            self.assertTrue({"source.owned_by_account", "source.replaceable"} & {f["code"] for f in out["findings"]})
+            want = ({"source.owned_by_account", "source.replaceable"} if hostcaps.has("posix_ids")
+                    else {"source.unsupported_platform"})  # no POSIX account identity: nothing can be judged
+            self.assertTrue(want & {f["code"] for f in out["findings"]}, out)
             proj = Path(d, "proj")
             proj.mkdir()
             code, out = self.run_cli("affected", str(log), "--head", str(head), "--source", SRC, "--now",

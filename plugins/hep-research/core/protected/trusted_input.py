@@ -16,10 +16,12 @@ on the open descriptor (regular, one link, not owned, not writable) and read fro
 returned are the bytes checked.
 
 Codes (refusals; a path, never a value): source.missing, source.not_regular, source.hard_linked, source.owned_by_account,
-source.writable_by_account, source.replaceable, source.changed, source.link_loop, source.unreadable.
+source.writable_by_account, source.replaceable, source.changed, source.link_loop, source.unreadable,
+source.unsupported_platform (read_protected on a host without POSIX account identity).
 The account defaults to the running process; tests pass another Account to model a custodian-owned file. Running as
 root refuses every input (root can replace anything). Account.current() raises core.hostcaps.UnsupportedPlatform
-on a host without POSIX account identity (native Windows); guard.establish turns that into a refusal.
+on a host without POSIX account identity (native Windows); read_protected then refuses with
+source.unsupported_platform, and guard.establish refuses with protected.unsupported_platform.
 """
 from __future__ import annotations
 
@@ -28,7 +30,7 @@ import stat
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from core.hostcaps import require
+from core.hostcaps import UnsupportedPlatform, require
 
 MAX_LINKS = 40
 
@@ -139,7 +141,11 @@ def file_refusals(st: os.stat_result, acct: Account, where: str) -> list[tuple[s
 def read_protected(path, account: Account | None = None) -> SourceCheck:
     """The bytes of a protected input and the refusals; ok only without any refusal."""
     import hashlib
-    acct = account or Account.current()
+    try:
+        acct = account or Account.current()
+    except UnsupportedPlatform as exc:  # no POSIX account identity (native Windows): nothing can be judged
+        return SourceCheck(False, None, [("source.unsupported_platform",
+                                          f"{path}: this platform lacks {', '.join(exc.missing)}; use WSL2 on Windows")])
     refusals: list[tuple[str, str]] = []
     walked = _walk(str(path), acct, refusals)
     if walked is None:

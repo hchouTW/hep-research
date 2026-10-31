@@ -157,6 +157,16 @@ class Consumers(unittest.TestCase):
                 Account.current()
         self.assertEqual(cm.exception.missing, ["posix_ids"])
 
+    def test_read_protected_refuses_without_posix_ids(self):
+        from core.protected.trusted_input import read_protected
+        with tempfile.TemporaryDirectory() as d, mock.patch.dict(hostcaps.PROBES, {"posix_ids": lambda: False}):
+            f = Path(d) / "log.jsonl"
+            f.write_text("{}\n", encoding="utf-8")
+            chk = read_protected(f)
+        self.assertFalse(chk.ok)
+        self.assertIsNone(chk.data)
+        self.assertEqual([code for code, _ in chk.refusals], ["source.unsupported_platform"])
+
     def test_establish_refuses_without_posix_ids(self):
         from core.protected import guard as G
         with mock.patch.dict(hostcaps.PROBES, {"posix_ids": lambda: False}):
