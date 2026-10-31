@@ -6096,7 +6096,8 @@
    "id": "MINIJSON-UNICODE-ESCAPES",
    "title": "the Geant4 programs' JSON reader decodes \\u escapes to UTF-8, so a spec naming a non-ASCII path runs",
    "changelog": {
-    "kind": "unreleased",
+    "kind": "release",
+    "release": "0.52.0",
     "detail": "cross-platform follow-ups (MiniJson \\u escapes)"
    },
    "severity": "S2",

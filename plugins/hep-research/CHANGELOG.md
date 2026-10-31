@@ -3,8 +3,28 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.52.0 (2026-11-01)
 
+Minor release: cross-platform support. Contracts 3.17.0 and every skill's `description` are unchanged; `CORE_VERSION`
+1.5.0 (`core/interpreter_guard.py`, `core/hostcaps.py`). It ships the cross-platform stack (PRs #333-#337: the
+interpreter guard in every skill script, macOS and Linux, a Windows minimum, the follow-ups) and PR #338 (the CLI
+tests' missing paths, `test_root_cpp_assets` on a broken or vdt-less ROOT, the Windows contract tests). **The
+code-release digest changes (the guard block is in 198 scripts): deployments re-pin and requalify
+(`docs/deployment-model.md`).** CI now runs `old-python`, four `hostile-paths` legs (required through
+`checks-complete`) and `platforms.yml` (macOS and Windows); on `windows-latest` every skill script answers under the
+guard and `tests/contracts` passes.
+
+- **Windows contract tests pass.** Isolated mode (`-I`) ignores `PYTHONUTF8`, so every child Python the contract
+  checker and the contract tests started on Windows was stopped by the guard: `core.interpreter_guard.child_flags()`
+  gives `-X utf8` there (nothing elsewhere). `read_protected` refuses with `source.unsupported_platform` instead of
+  raising on a host without POSIX ids (`contracts/revocation.py verify --protected` crashed on Windows). Protected-mode
+  tests expect the host's refusal; tests of POSIX-only features (file modes, batch schedulers) skip with `needs `.
+- **`check_root_cpp_env.sh` names a vdt include folder ROOT needs but `root-config` omits** (Homebrew ROOT 6.40:
+  `RVec.hxx` includes `<vdt/vdtMath.h>`), with the `-I` or `CPATH` fix; `test_root_cpp_assets` uses a ROOT whose
+  interpreter works and skips with the reason when ROOT only imports.
+- **Tests.** Each CLI missing-input call gets its own missing path (the optional ROOT job runs as root, which may
+  create `/nonexistent`); the reconstruction-v12 timing scenario `t28_scale_linear` is retried up to three times
+  before it counts as failed.
 - **Cross-platform follow-ups.** The tests that failed under a `TMPDIR` named with a space and Chinese characters on
   main pass: the batch-scheduler harness and the batch-partition example test take a plain temporary folder
   (`tests/_platform.plain_tmpdir()`: HTCondor refuses a path with spaces by design, Slurm's golden scripts, `#!`
