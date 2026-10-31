@@ -178,3 +178,14 @@ to test strictness the maintainer must decide), or changes the task's fixed guar
 `sys.modules`). No fix attempted. Counters PR 1b: units runs 1/6, fix attempts on this failure 0/3.
 
 Pushed `xplat/pr-1b-guard` (work in progress, no PR opened). Options for the maintainer are in the conversation report.
+
+### Maintainer decision and resume (2026-10-31)
+
+The maintainer chose option 1: regenerate the three examples' committed outputs and continue (AC6's empty
+`examples/` diff relaxed for these three). Regenerated in E2 (`~/.venvs/hep-research-e2`, Python 3.13.2, NumPy 2.5.3,
+SciPy 1.18.1) with each `run.py`'s defaults: 14 files, +29/−17. Every changed line is `"core/interpreter_guard.py"` in
+`code_paths` (12), the two tool hashes (`check_geant4_study.py` a305c4d1dfa78b86 → b7121e2b4d8e7480,
+`geant4_benchmarks.py` a1ef685c08f1ed0f → d10569e7cb964fdb, 7 records each), or an artifact `sha256` covering them
+(3 lines); no number, no PNG (the `docs/maintenance.md` acceptance rule). The three replays pass, and so do
+`test_design_minimal_spectrometer` and `test_design_search_j16`, which also record a Geant4 script hash but did
+not change. Fix attempts on this failure: 1/3.
