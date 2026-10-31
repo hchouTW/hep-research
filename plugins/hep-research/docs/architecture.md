@@ -21,6 +21,8 @@ Core skill ownership and contested-topic resolution are restated per skill in ea
 | stats | hep-statistics | implemented |
 | blinding | hep-computing | implemented |
 | evidence | hep-citations | implemented |
+| interpreter_guard | hep-computing | implemented |
+| hostcaps | hep-computing | implemented |
 
 Admission rule: code enters `core/` only when more than one top-level component uses it; experiment and theory-domain specifics never do.
 
