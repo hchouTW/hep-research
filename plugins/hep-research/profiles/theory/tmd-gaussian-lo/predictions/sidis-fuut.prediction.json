@@ -13,7 +13,7 @@
   ]
  },
  "versions": {
-  "plugin": "0.50.0",
+  "plugin": "0.51.0",
   "contracts": "3.17.0",
   "profiles": {
    "theory:tmd-gaussian-lo": "0.1.0"
@@ -146,13 +146,13 @@
     {
      "PhT_gev": 0.0,
      "F_UU_T": 0.020778562014775227,
-     "F_UU_T_quadrature": 0.020778562014775237,
+     "F_UU_T_quadrature": 0.020778562014775234,
      "cahn_ratio": 1.0
     },
     {
      "PhT_gev": 0.1,
      "F_UU_T": 0.01993057761846081,
-     "F_UU_T_quadrature": 0.019930577618460812,
+     "F_UU_T_quadrature": 0.019930577618460815,
      "cahn_ratio": 0.9292893218813452
     },
     {
@@ -182,7 +182,7 @@
     {
      "PhT_gev": 1.0,
      "F_UU_T": 0.0003221477834750114,
-     "F_UU_T_quadrature": 0.00032214778347501127,
+     "F_UU_T_quadrature": 0.0003221477834750113,
      "cahn_ratio": 0.2928932188134524
     }
    ],

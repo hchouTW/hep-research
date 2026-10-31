@@ -13,7 +13,7 @@
   ]
  },
  "versions": {
-  "plugin": "0.50.0",
+  "plugin": "0.51.0",
   "contracts": "3.17.0",
   "profiles": {
    "theory:tmd-gaussian-lo": "0.1.0"
@@ -110,7 +110,7 @@
     {
      "qT_gev": 0.0,
      "shape_per_gev2": 0.578745247606892,
-     "shape_quadrature": 0.5787452476068923
+     "shape_quadrature": 0.5787452476068922
     },
     {
      "qT_gev": 0.25,
@@ -120,7 +120,7 @@
     {
      "qT_gev": 0.5,
      "shape_per_gev2": 0.36735068594470544,
-     "shape_quadrature": 0.3673506859447055
+     "shape_quadrature": 0.3673506859447053
     },
     {
      "qT_gev": 1.0,
