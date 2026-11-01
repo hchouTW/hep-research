@@ -8764,3 +8764,24 @@ Not run: Linux (linux-g0 unsupported until measured); a run-time library failure
 broken view before a run; the mapping is tested with a stand-in program). The example table is not reference data.
 
 Passing checks show software consistency, not physical validity.
+
+## DETSIM-W4A — 2026-11-02 (macOS 27.2 arm64, APFS; controller Homebrew Python 3.15.2 with PyROOT for the acceptance runs, Python 3.13.2 venv for the tests; version 0.53.0 + unreleased)
+
+The Allpix Squared backend of the detector-simulation adapter (capability `allpix.pixel-charge` 1.0.0, card AP-BOOT) on
+Allpix Squared `df69a6a4` built from source with a C++20 Geant4 11.4.3 and Homebrew ROOT 6.40.04, run through `detsim`.
+
+| Item | Evidence | Result |
+|---|---|---|
+| Offline tests | `tests/adapters/test_detsim_allpix.py` (synthetic data: extractor logic, checks 1-3b, charge-sign, argv whitelist (12 rejection cases), class versions, check-2 comparison, library identity with a fake library folder, counterexamples) | 39 run, OK (1 live test skipped) |
+| Live test | the same module with `HEP_DETSIM_ALLPIX_VIEW` under Python 3.15 (probe direct and through a symlink, two replicates, another seed, the library-free read against the library's accessors) | 39 of 39 OK |
+| T-ENV | `check --probe`: identity 04b91a73… (Allpix version, Geant4 registration with 12 dataset hashes, 97 resolved libraries); same identity and plan digest through a symlink; missing G4NDL, object library, program, or a controller without PyROOT → missing-dependency (exit 3), nothing written | pass |
+| T-AP | runs 1302c2dd… / fe0e9b88… (seed 1, replicates 0 and 1, plan 619d2ff8…) and 0642769d… (seed 2, plan c5983a63…) | complete: check 1, class versions, 10 events with hits in both detectors, charge-sign (44 and 28 charges negative), check 3b medians 27579 e and 21871 e in [10687.5, 42750] e; check 2 identical over 86 per-pixel entries, seed 2 differs; a rerun is reused |
+| Native comparison (auxiliary) | `allpix` with the same configuration and `multithreading=false` | identical to replicate 0 |
+| T-OUTPUT, contracts | a 1 s timeout → failed (`failed/`); an input replaced after prepare → plan-stale; `contracts/validate.py` (24 warnings: non-JSON outputs named only in `output_hashes`), `contracts/verify_run.py` on the three records | pass |
+| Conventions | layering, naming, adapter declarations and missing-dependency, CLI robustness, python compat; static part | pass; static 29 pass, 0 fail, 2 skip |
+| Independent review | round 1 (fresh subagent, advisory, shared host): 3 major / 6 minor, fixed; round 2 below | — |
+
+Not run: Linux (linux-g0 unsupported; the `ldd` branch of library resolution untested). 10 events are not statistics;
+check 3b is a plausibility band, not physics validation.
+
+Passing checks show software consistency, not physical validity.

@@ -25,3 +25,23 @@ physics statistics and check 3b is a plausibility band, not physics validation.
 | Budget | native pilot (allowed): 10 events in 2.77 s wall (74 ms/event); one acceptance run ≤ 120 s timeout; whole acceptance (three runs + native) ≤ 10 min |
 | Required guarantees | G0 `macos-g0`: inputs not modified (hard), timeout (hard), output-size abort (soft) |
 | Not claimed | 10 events are not statistics; check 3b is not an external numerical oracle; no efficiency, waveform or scan |
+
+## Amendments (recorded after W4A review round 1, 2026-11-02; none relaxes a tolerance or criterion)
+
+- Override method, as built: the command line is exactly `ENV_ROOT/allpix/bin/allpix -c INPUT_ROOT/<config>` followed by
+  the three overrides `number_of_events=10`, `multithreading=false`, `random_seed=<n>`, each once (check 1 whitelists the
+  whole argv); no `output_directory` override — the output goes to Allpix's default folder under ATTEMPT_ROOT (the
+  runner binds a logical root only at the start of an argument). `DYLD_LIBRARY_PATH = ENV_ROOT/allpix/lib` only.
+- Added check `charge-sign`: every PixelCharge charge is strictly negative (this example propagates electrons only);
+  catches a sign read wrongly even where the plausibility band would pass.
+- Stored class versions pinned: PixelCharge 9, PixelHit 7, Pixel 2 (as written at `df69a6a4`); another version fails the
+  members check. The extractor reads data members through ROOT's stored class layouts, without the Allpix object
+  library (cross-checked against the library's accessors: identical).
+- Check 2 procedure: `compare_summary_files(A, B)` of `detsim_backend_allpix.py` on two committed runs'
+  `extract/pixel_summary.json` (command in its docstring); its result lists per-pixel values from both runs.
+- Environment identity: also the SHA-256 of every library the `allpix` program and its module libraries load
+  (resolved in the loader's order: the plan's library path, LC_RPATH, install names; system libraries excluded), grouped
+  by Allpix, Geant4, ROOT, dependencies and other; the rpaths are recorded in facts.
+- Known limitation: collect reads ROOT files inside the detsim controller; a crash of ROOT there ends the controller
+  without a JSON answer; the OS releases the lock, the record stays unfinished (inspect: stale) and the next run moves
+  the attempt to orphans (TASK.md 10.4).
