@@ -57,6 +57,7 @@ Environment availability (2a): Allpix Squared — not installed; obtainable unde
 | WK | WK | `~/hep-research-detsim-sub-WK` | detsim-sub-WK | `e480371cbe36929a0c08e2979778ff367b943007` | `WR/patches/WK/` | applied (WK, WK-2) |
 | W3a | W3a | `~/hep-research-detsim-sub-W3a` | detsim-sub-W3a | `e480371cbe36929a0c08e2979778ff367b943007` | `WR/patches/W3a/` | applied (3 patches) |
 | W4G | W4G | `~/hep-research-detsim-sub-W4G` | detsim-sub-W4G | `6e7b3263d844b18f89ef1b13573ad62f908284ba` | `WR/patches/W4G/` | running |
+| W4A | W4A | `~/hep-research-detsim-sub-W4A` | detsim-sub-W4A | `45d1a379db8ceec75cacb8820b19a9ce66eb2ddb` | `WR/patches/W4A/` | running |
 
 ## Environment reconnaissance
 
@@ -96,7 +97,7 @@ Host: Darwin arm64 (macOS 27.2), 8 CPUs, Python 3.13.2, git 2.54.0, CMake 4.3.2,
 | W2-GF | done | 2026-11-02 | 0 / 0 | card-GF-QUERY.md (no critical TBD: commit, table, storage form, routine, order 2, extrapolation constant/linear, units, query points, tolerances fixed before any query); V-09..V-13 concluded | |
 | W3a | done | 2026-11-01 | 0 / 3 | patches 5ca7dbd1, 3fd54f69, 510315a5; review fixes 2468b15e, ff6a077e, f348166f; T-CANON 17, T-SCHEMA 12, T-PLAN 35, missing-dependency 3 OK; VALIDATION DETSIM-W3A | round-3 minor findings M1-M2 fixed after round 3 without a fourth review |
 | W3b | done | 2026-11-02 | 1 / 3 | detsim_platform, detsim_runner, detsim_run; tests/adapters/test_detsim_run.py 62 (61 OK, 1 not run: platform); static 29/0/2; VALIDATION DETSIM-W3B; shared layer demonstrated-on-synthetic-data | round-3 minor finding B1 fixed after round 3 without a fourth review |
-| W4A | not-started | | 0 / 0 | | |
+| W4A | in-progress | 2026-11-02 | 0 / 0 | subagent W4A | |
 | W4G | in-progress | 2026-11-02 | 0 / 0 | subagent W4G | |
 | W5 | not-started | | 0 / 0 | | |
 
