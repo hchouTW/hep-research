@@ -102,7 +102,7 @@ Host: Darwin arm64 (macOS 27.2), 8 CPUs, Python 3.13.2, git 2.54.0, CMake 4.3.2,
 | W3b | done | 2026-11-02 | 1 / 3 | detsim_platform, detsim_runner, detsim_run; tests/adapters/test_detsim_run.py 62 (61 OK, 1 not run: platform); static 29/0/2; VALIDATION DETSIM-W3B; shared layer demonstrated-on-synthetic-data | round-3 minor finding B1 fixed after round 3 without a fourth review |
 | W4A | done | 2026-11-02 | 2 / 2 | detsim_backend_allpix.py, assets/allpix/, tests (39 + live); acceptance-3 runs 1302c2dd…, fe0e9b88…, 0642769d…; T-ENV, T-AP, T-OUTPUT, T-CONV; VALIDATION DETSIM-W4A | round-2 documentation items fixed after round 2 |
 | W4G | done | 2026-11-02 | 1 / 2 | detsim_backend_garfield.py, assets/garfield/, tests (78 + live); acceptance-2 runs efc8f707…, 8fdc5f83…; T-ENV, T-GF, T-OUTPUT, T-CONV; VALIDATION DETSIM-W4G | round-2 documentation items fixed after round 2 |
-| W5 | not-started | | 0 / 0 | | |
+| W5 | in-progress | 2026-11-02 | 0 / 0 | non-author reruns started | |
 
 ## To-verify results
 
