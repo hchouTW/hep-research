@@ -92,7 +92,7 @@ Host: Darwin arm64 (macOS 27.2), 8 CPUs, Python 3.13.2, git 2.54.0, CMake 4.3.2,
 | W1 | done | 2026-11-01 | 0 / 0 | W1 reuse table; V-01..V-06; D-W1-1..5; WR/scratch/W1 | |
 | WK | done | 2026-11-01 | 0 / 3 | guides, SOURCES.md (56 records), question set run 4 20/20 no veto; T-DISCOVER raw log; T-CONV pass; VALIDATION DETSIM-WK | round-3 minor findings C1-C3 fixed after round 3 without a fourth review |
 | W2-AP | in-progress | 2026-11-01 | 0 / 0 | V-07, V-14 read at df69a6a4; G4NDL 4.7.1 in WR/env/g4data (MD5 54f0ed39 matches) | environment (V-08): ROOT with a working interpreter, Allpix build |
-| W2-GF | in-progress | 2026-11-01 | 0 / 0 | card-GF-QUERY.md (query points and tolerances fixed before any query); V-09..V-12 read at e2e58ea | environment (V-13): ROOT with a working interpreter |
+| W2-GF | done | 2026-11-02 | 0 / 0 | card-GF-QUERY.md (no critical TBD: commit, table, storage form, routine, order 2, extrapolation constant/linear, units, query points, tolerances fixed before any query); V-09..V-13 concluded | |
 | W3a | done | 2026-11-01 | 0 / 3 | patches 5ca7dbd1, 3fd54f69, 510315a5; review fixes 2468b15e, ff6a077e, f348166f; T-CANON 17, T-SCHEMA 12, T-PLAN 35, missing-dependency 3 OK; VALIDATION DETSIM-W3A | round-3 minor findings M1-M2 fixed after round 3 without a fourth review |
 | W3b | in-progress | 2026-11-01 | 1 / 0 | 5fda61cd, d6dc4c66: detsim_platform, detsim_runner, detsim_run, run/inspect/check --probe; tests/adapters/test_detsim_run.py 45 tests (1 skipped: Linux only) | T-CONV complete, review |
 | W4A | not-started | | 0 / 0 | | |
@@ -103,6 +103,11 @@ Host: Darwin arm64 (macOS 27.2), 8 CPUs, Python 3.13.2, git 2.54.0, CMake 4.3.2,
 
 | V-ID | Conclusion | Evidence (repo, commit, file:line or URL + date) | Affected sections |
 |---|---|---|---|
+| V-09 | Pinned table `Examples/GasFile/ar_80_co2_20_0T.gas` at `e2e58ea`: 1D (`Dimension : F 30 1 1 9 2`), SHA-256 `ba435734…b732`, T 300 K, p 760 Torr, E/p 0.13157895…105.26316 V/(cm·Torr), `Interp 2`, `L Extr 0`, `H Extr 1`; no licence file (H0 #13 conditions apply) | WR/upstream/garfieldpp (2026-11-01); card-GF-QUERY.md | §12.3 |
+| V-10 | Storage form confirmed: E/p × p (MediumGas.cc:560); 1D records read by ReadRecord1D (837-876; dispatch 477-483) as value/discarded-column pairs (alpha0 has none, line 852), velocities × 1e-3 at 848-850 (the spec's 796-798 is the 3D reader, same conversion); numbers fixed-width and touching, so the independent parser tokenises with a float regex (55 numbers per record here) | e2e58ea source | §12.3 |
+| V-11 | Interpolate (1419-1437) → Interpolate1D (1439-1542): order 1 LinearInterpolation, order ≥ 2 Divdif (Numerics.cc:1658-1754) with the stencil of §12.3; extrapolation codes 0/1/2 from the file (MediumGas.cc:590-612), setters take strings (Medium.cc:1291, 1341-1356) | e2e58ea source | §12.3 |
+| V-12 | LoadGasFile sets m_pressure/m_temperature from PGAS/TGAS (555-556); measured: 760 Torr, 300 K after loading; Velocity B=0 formula (205-238), ElectronVelocity q=−1 (490-495) | e2e58ea source; pilot 2026-11-02 | §12.3 |
+| V-13 | Environment: Garfield++ e2e58ea source build against Homebrew ROOT 6.40.04, Python 3.15 + PyROOT works in a clean environment (inherited ROOT_INCLUDE_PATH removed); Python query script route chosen; view folder WR/env/gf-view | card-GF-QUERY.md "Environment record" | §8.2, §12.3 |
 | V-01 | Confirmed on base `25a8dbe6`: every §7 file and R-07 item present with the stated boundary (table "W1 reuse table") | WR/scratch/W1/out/w1_probe.json; files cited in the table | §7, R-07 |
 | V-02 | Mechanism present: `parameter_digest` {argv, replaces}, stdout exemption, `timeout_s` default 3600, attempt token. The incremental skip also needs a known plugin-release digest (INC-03, `skip_reason`, line ~510), so in a development checkout a detsim step always reruns; in a released install it can skip | run_workflow.py:19-46, 116, 488, 509-535, 593-670; fixture WR/scratch/W1/wf (2026-11-01) | §8.3 |
 | V-03 | Add `detsim-observables/1` (D-W1-2) | core/simulation/summary.py (accumulators per run) | §9.5 |

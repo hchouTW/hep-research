@@ -32,4 +32,14 @@ not reference data.
 
 ## Environment record (V-13)
 
-Filled in when the build of the pinned commit finishes (see the ledger, To-verify V-13).
+Pinned 2026-11-02 (V-13 concluded):
+
+| Item | Value |
+|---|---|
+| Garfield++ | commit `e2e58ea74ec8b20d347d78b7a769f40e3b156072` (`git describe`: `2026.10-4-ge2e58ea`), built from source in `WR/env/garfield` (`WR/env/build_garfield.sh`): Release, `GARFIELD_WITH_GSL=ON` (libc++ has no `std::comp_ellint_1`, used by neBEM), `GARFIELD_WITH_EIGEN=OFF`, examples, tests, docs and CUDA off; `libGarfield.0.3.dylib` SHA-256 `29a501382d01cdca6e9f48c10370cb67c9d103f6d28c427df152556b7a21240c` |
+| ROOT | Homebrew ROOT 6.40.04 (C++20) with its PyROOT; the login environment's ROOT variables (`ROOT_INCLUDE_PATH`, `ROOTSYS`, `LD_LIBRARY_PATH`, `PYTHONPATH`) are cleared (decision log: they break cling) |
+| Python | Homebrew Python 3.15.2 (PyROOT is built for 3.15) |
+| Environment root | a view folder `WR/env/gf-view` with `bin/python3 → python3.15`, `root → ROOT prefix`, `garfield → Garfield install`; the plan names only `ENV_ROOT/...` paths; identity is content-based (commit, library hash, ROOT and Python versions), never the path |
+| Variables | `PYTHONPATH = ENV_ROOT/root/lib/root:ENV_ROOT/garfield/lib/python3.15/site-packages`, `DYLD_LIBRARY_PATH = ENV_ROOT/garfield/lib` |
+| Query method | Python query script through PyROOT (`import ROOT, Garfield`; `ROOT.Garfield.MediumMagboltz`), a rendered file in the plan; no compiled driver |
+| Pilot (allowed, no query of results) | `LoadGasFile` of the pinned table returns true and sets pressure 760 Torr and temperature 300 K (V-12 measured) |
