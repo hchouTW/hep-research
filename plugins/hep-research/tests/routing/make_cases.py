@@ -604,6 +604,14 @@ C = [
  ("dsd-neighbor-1", "en", "neighboring", "Define the physics goals and the precision we need on the antiproton-to-proton ratio before we choose a detector layout.", "hep-measurement", ["observable definition"], "hep-detector", None, {"set": "DSD"}),
  ("dsd-neighbor-2", "zh-Hant", "neighboring", "用 Asimov 資料估計這兩個偵測器方案的預期測量精度（expected precision），nuisance 參數要怎麼放？", "hep-statistics", ["toys and Asimov datasets"], "hep-detector", None, {"set": "DSD"}),
  ("j13", "en", "journey", "Find what AMS-02 published on B/C, compare it with my propagation model, check the compatibility, and write it up.", "hep-citations", ["what a named experiment published"], None, "J13", {"set": "SPLIT", "profiles": ["experiment:ams-02"], "chain": ["hep-citations", "hep-theory", "hep-statistics", "hep-authoring"]}),
+ # event displays (EVD): web event displays with Phoenix and already-computed result charts route to hep-computing;
+ # a physics question asked from a display goes to its owner, and a paper figure goes to hep-authoring
+ ("evd-direct-1", "en", "direct", "Build a web page that shows a few events from my ROOT ntuple in 3D with Phoenix, with the histograms we already computed as JSROOT panels next to it.", "hep-computing", ["event displays (Phoenix)"], None, None, {"set": "EVD"}),
+ ("evd-direct-2", "zh-Hant", "direct", "幫我做一個 Phoenix 事件顯示網頁（event displays），用 3D 呈現 ROOT 檔裡的幾個事件，旁邊放已經算好的直方圖。", "hep-computing", ["event displays (Phoenix)"], None, None, {"set": "EVD"}),
+ ("evd-neighbor-1", "en", "neighboring", "For the collaboration meeting, put three of our events and the already-computed cross-section histogram into an interactive Phoenix page people can open in a browser.", "hep-computing", ["event displays (Phoenix)"], "hep-authoring", None, {"set": "EVD", "note": "an interactive page is software, not a talk or a figure"}),
+ ("evd-negative-1", "en", "negative", "Looking at our Phoenix event display, which tracking and vertexing algorithms should we use for displaced vertices in this silicon tracker?", "hep-detector", ["tracking", "vertexing"], "hep-computing", None, {"set": "EVD"}),
+ ("evd-adv-1", "en", "negative", "Using JSROOT and our Phoenix event display, compute the goodness of fit of the unfolded spectrum to the model.", "hep-statistics", ["goodness of fit"], "hep-computing", None, {"set": "EVD", "variant": "adversarial"}),
+ ("evd-negative-2", "en", "negative", "Turn the already-computed unfolded cross section into the final paper figure, with caption, in the journal's style; no web page or event display.", "hep-authoring", ["figures"], "hep-computing", None, {"set": "EVD", "note": "a static paper figure is writing, not an event display"}),
 ]
 
 cases = []
