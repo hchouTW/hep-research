@@ -129,10 +129,10 @@ class RunLock:
 
     def write(self, record: dict) -> None:
         self.record = dict(record)
-        data = json.dumps(self.record, indent=1, sort_keys=True).encode("utf-8")
+        serialized = json.dumps(self.record, indent=1, sort_keys=True).encode("utf-8")
         os.lseek(self.fd, 0, os.SEEK_SET)
         os.ftruncate(self.fd, 0)
-        os.write(self.fd, data)
+        os.write(self.fd, serialized)
         os.fsync(self.fd)
 
     def update(self, **fields) -> None:
@@ -342,7 +342,7 @@ def _fsync_tree(folder: Path) -> None:
 
 def finish_folder(attempt: Path, store: Path, plan: dict, plan_digest: str, replicate: int, ok: bool, facts: dict,
                   completeness: dict, observables_doc: dict | None, final_rel: str) -> None:
-    """Write completeness, observables, manifests and the run record into the attempt folder (final paths)."""
+    """Write completeness, observables, manifests and the run record into the attempt folder (committed_folder paths)."""
     (attempt / "plan.canonical.json").write_bytes(canonical.canonical_bytes(plan))
     (attempt / "completeness.json").write_text(json.dumps(completeness, indent=1, sort_keys=True), encoding="utf-8")
     if observables_doc is not None:
@@ -360,12 +360,12 @@ def finish_folder(attempt: Path, store: Path, plan: dict, plan_digest: str, repl
     (attempt / RECORD_NAME).write_text(json.dumps(record, indent=1, sort_keys=True), encoding="utf-8")
 
 
-def commit(attempt: Path, target: Path, profile_doc: dict) -> str:
+def commit(attempt: Path, target: Path, profile_doc: dict, success: bool = True) -> str:
     """Steps 12.2-12.6: fsync, then a no-replace rename; returns the commit_noreplace level achieved.
     FileExistsError when the target exists (commit-conflict)."""
     _fsync_tree(attempt)
     target.parent.mkdir(parents=True, exist_ok=True)
-    if "before_rename" in HOOKS:
+    if success and "before_rename" in HOOKS:
         HOOKS["before_rename"](attempt, target)
     if platform_calls.rename_noreplace(attempt, target):
         level = "hard"
@@ -423,8 +423,8 @@ def run(plan: dict, workspace: Path, backend, profile_doc: dict, replicate: int,
                           shortfalls=short)
     hostcaps.require("process_groups")  # step 10's precondition, checked before the lock (missing-dependency)
     run_id = canonical.run_id(plan_digest, replicate)
-    final = store / "runs" / run_id
-    reused = _reuse(final, plan_digest, run_id)                                 # step 5
+    committed_folder = store / "runs" / run_id
+    reused = _reuse(committed_folder, plan_digest, run_id)                                 # step 5
     if reused:
         return reused
     pending = store / ".pending"
@@ -439,7 +439,7 @@ def run(plan: dict, workspace: Path, backend, profile_doc: dict, replicate: int,
                                                                            "budget_timeout_s")})
     terminal = {"status": "error", "error_code": "internal"}
     try:
-        answer = _locked_run(plan, plan_digest, replicate, run_id, nonce, workspace, store, pending, final, backend,
+        answer = _locked_run(plan, plan_digest, replicate, run_id, nonce, workspace, store, pending, committed_folder, backend,
                              profile_doc, lock)
         terminal = {"status": answer["status"], "error_code": answer.get("error_code"),
                     "reused": answer.get("reused", False)}
@@ -448,9 +448,9 @@ def run(plan: dict, workspace: Path, backend, profile_doc: dict, replicate: int,
         lock.release(state="finished", finished=_now(), terminal=terminal)
 
 
-def _reuse(final: Path, plan_digest: str, run_id: str) -> dict | None:
-    canonical_plan = final / "plan.canonical.json"
-    if not final.exists():
+def _reuse(committed_folder: Path, plan_digest: str, run_id: str) -> dict | None:
+    canonical_plan = committed_folder / "plan.canonical.json"
+    if not committed_folder.exists():
         return None
     try:
         existing = canonical.digest(canonical.load_json_strict(canonical_plan.read_bytes()))
@@ -458,13 +458,13 @@ def _reuse(final: Path, plan_digest: str, run_id: str) -> dict | None:
         existing = None
     if existing != plan_digest:
         raise DetsimError("refused", "run-id-collision", "runs/<run_id>/ exists with another plan; nothing is "
-                          "overwritten", str(final), run_id=run_id)
+                          "overwritten", str(committed_folder), run_id=run_id)
     return {"status": "ok", "reused": True, "run_id": run_id, "folder": f"runs/{run_id}"}
 
 
-def _locked_run(plan, plan_digest, replicate, run_id, nonce, workspace, store, pending, final, backend, profile_doc,
+def _locked_run(plan, plan_digest, replicate, run_id, nonce, workspace, store, pending, committed_folder, backend, profile_doc,
                 lock) -> dict:
-    reused = _reuse(final, plan_digest, run_id)                                 # step 7
+    reused = _reuse(committed_folder, plan_digest, run_id)                                 # step 7
     if reused:
         return reused
     orphans = move_leftovers(pending, run_id, lock.previous)                    # step 8
@@ -525,12 +525,12 @@ def _locked_run(plan, plan_digest, replicate, run_id, nonce, workspace, store, p
         if "before_commit" in HOOKS:
             HOOKS["before_commit"](attempt)
         try:
-            level = commit(attempt, final, profile_doc)
+            level = commit(attempt, committed_folder, profile_doc)
         except FileExistsError:
             facts["error_code"] = "commit-conflict"
             return _fail(plan, plan_digest, replicate, attempt, store, run_id, facts, profile_doc, completeness)
         if "after_rename" in HOOKS:
-            HOOKS["after_rename"](final)
+            HOOKS["after_rename"](committed_folder)
     answer = {"status": "ok", "reused": False, "run_id": run_id, "folder": f"runs/{run_id}",
               "plan_digest": plan_digest, "replicate": replicate, "commit_noreplace": level,
               "achieved_guarantees": facts["achieved"], "signals_during_commit": masked.received,
@@ -559,7 +559,11 @@ def _fail(plan, plan_digest, replicate, attempt, store, run_id, facts, profile_d
     with _MaskSignals():
         finish_folder(attempt, store, plan, plan_digest, replicate, False, facts, completeness, None, final_rel)
         target = store / "failed" / name
-        commit(attempt, target, profile_doc)
+        try:
+            commit(attempt, target, profile_doc, success=False)
+        except FileExistsError:  # a unique nonce makes this practically impossible; keep the attempt, say so
+            raise DetsimError("error", "internal", "the failed/ folder name already exists; the attempt stays in "
+                              ".pending/", str(target), reason="failed-folder-exists") from None
     return {"status": "failed", "error_code": facts.get("error_code") or "failed", "run_id": run_id,
             "folder": f"failed/{name}", "native_exit_code": facts.get("native_exit_code"),
             "signal": facts.get("signal"), "end": facts.get("end"), "completeness": completeness.get("state"),
@@ -624,9 +628,9 @@ def probe(workspace: Path, backend, env_root: Path) -> dict:
                                    path_record={"env_root": str(env_root), "environment_manifest": manifest})
     path = plan_layer.env_record_path(plan_layer.artifacts_root(workspace), record["env_identity"])
     path.parent.mkdir(parents=True, exist_ok=True)
-    tmp = path.with_suffix(".json.tmp")
-    tmp.write_text(json.dumps(record, indent=1, sort_keys=True), encoding="utf-8")
-    os.replace(tmp, path)
+    partial_path = path.with_suffix(".json.tmp")
+    partial_path.write_text(json.dumps(record, indent=1, sort_keys=True), encoding="utf-8")
+    os.replace(partial_path, path)
     return {"status": "ok", "env_identity": record["env_identity"], "record": f".env/{path.name}",
             "identity": identity, "variables": sorted(variables)}
 

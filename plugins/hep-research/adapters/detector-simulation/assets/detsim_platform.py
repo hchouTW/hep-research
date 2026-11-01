@@ -37,8 +37,8 @@ LOCAL_FILESYSTEMS = {"darwin": frozenset({"apfs", "hfs"}),
                      "linux": frozenset({"ext2", "ext3", "ext4", "xfs", "btrfs", "tmpfs"})}
 RENAME_EXCL = 0x00000004       # macOS <stdio.h>
 RENAME_NOREPLACE = 1           # Linux <linux/fs.h>
-AT_FDCWD = -100
-PR_SET_PDEATHSIG = 1
+CURRENT_DIRECTORY_FD = -100  # AT_FDCWD (<fcntl.h>)
+PARENT_DEATH_SIGNAL_OPTION = 1  # PR_SET_PDEATHSIG (<sys/prctl.h>)
 CALLS: list = []  # (operation, path) in call order; tests read and clear it
 _LIBC = None
 
@@ -141,7 +141,7 @@ def rename_noreplace(src, dst) -> bool:
         fn = libc.renameat2
         fn.argtypes = [ctypes.c_int, ctypes.c_char_p, ctypes.c_int, ctypes.c_char_p, ctypes.c_uint]
         fn.restype = ctypes.c_int
-        rc = fn(AT_FDCWD, os.fsencode(src), AT_FDCWD, os.fsencode(dst), RENAME_NOREPLACE)
+        rc = fn(CURRENT_DIRECTORY_FD, os.fsencode(src), CURRENT_DIRECTORY_FD, os.fsencode(dst), RENAME_NOREPLACE)
     else:
         return False
     if rc == 0:
@@ -158,6 +158,6 @@ def set_parent_death_signal() -> None:  # pragma: no cover - runs in the child b
     """preexec_fn on Linux: SIGKILL this child when its parent dies, then exit if the parent is already gone."""
     import signal
     parent = os.getppid()
-    _libc().prctl(PR_SET_PDEATHSIG, int(signal.SIGKILL), 0, 0, 0)
+    _libc().prctl(PARENT_DEATH_SIGNAL_OPTION, int(signal.SIGKILL), 0, 0, 0)
     if os.getppid() != parent:
         os._exit(1)

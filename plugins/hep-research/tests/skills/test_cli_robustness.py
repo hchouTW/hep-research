@@ -286,6 +286,9 @@ NO_INPUT_FILE = {  # script: why the missing-file check does not apply
     "adapters/detector-simulation/assets/detsim_profile.py": "shared-layer module of detsim.py; only --help",
     "adapters/detector-simulation/assets/detsim_schemas.py": "shared-layer module of detsim.py; only --help",
     "adapters/detector-simulation/assets/detsim_plan.py": "shared-layer module of detsim.py; only --help",
+    "adapters/detector-simulation/assets/detsim_platform.py": "shared-layer module of detsim.py; only --help",
+    "adapters/detector-simulation/assets/detsim_run.py": "shared-layer module of detsim.py; only --help",
+    "adapters/detector-simulation/assets/detsim_runner.py": "shared-layer module of detsim.py; only --help",
     "adapters/geant4/assets/element_spec.py": "element_sim spec rules imported by geant4_run.py; only --help",
     "adapters/geant4/assets/simreco_spec.py": "simreco spec rules imported by geant4_run.py; only --help",
     "adapters/cr-propagation/assets/dragon2_translate.py": "source-item rules imported by dragon2_provider.py and the D3 "

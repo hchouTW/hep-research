@@ -25,8 +25,8 @@ from pathlib import Path
 
 def main(argv):
     config, inp, out = Path(argv[0]), Path(argv[2]), Path(argv[4])
-    data = Path(os.environ["SYNTHETIC_DATA"])
-    words = (data / "mode").read_text(encoding="utf-8").split() if (data / "mode").is_file() else ["ok"]
+    data_dir = Path(os.environ["SYNTHETIC_DATA"])
+    words = (data_dir / "mode").read_text(encoding="utf-8").split() if (data_dir / "mode").is_file() else ["ok"]
     mode, arg = words[0], (words[1] if len(words) > 1 else None)
     settings = dict(line.split(" = ", 1) for line in config.read_text(encoding="utf-8").splitlines() if " = " in line)
     events, seed = int(settings["events"]), int(settings["seed"])
@@ -47,7 +47,7 @@ def main(argv):
     if mode in ("sleep", "ignore_term", "late"):
         if mode == "ignore_term":
             signal.signal(signal.SIGTERM, signal.SIG_IGN)
-        (data / "started").write_text(str(os.getpid()), encoding="utf-8")
+        (data_dir / "started").write_text(str(os.getpid()), encoding="utf-8")
         time.sleep(float(arg or 30))
         if mode == "late":
             Path("raw").mkdir(exist_ok=True)
@@ -61,7 +61,7 @@ def main(argv):
     if mode == "grandchild":
         pid = os.fork()
         if pid == 0:
-            (data / "grandchild").write_text(str(os.getpid()), encoding="utf-8")
+            (data_dir / "grandchild").write_text(str(os.getpid()), encoding="utf-8")
             time.sleep(30)
             os._exit(0)
     if mode == "modify_input":
