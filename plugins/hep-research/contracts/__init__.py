@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "3.17.0"
+CONTRACTS_VERSION = "3.18.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -233,6 +233,15 @@ CONTRACTS_VERSION = "3.17.0"
 # review_measurement_spec.py --check-bundle refuse with the reason (exit 2). Existing attestations of a 2.0.0 bundle
 # still verify (attestation.py keeps its digest rule). No artifact type, vocabulary term, envelope field or capability
 # changes (measurement:correction-keys-v1 stays): every 3.16 artifact keeps its outcome.
+# 3.18.0 (minor, unreleased; detector-simulation adapter, work item W3a of docs/dev/detector-simulation/TASK.md)
+# adds four sidecar schemas read by adapters/detector-simulation/assets/detsim.py, none of them an artifact type:
+# detector_task.json (detector-task/1, a capability run's intent: capability_id, objective, environment_ref, inputs,
+# parameters with {value, unit} quantities as decimal strings, budget; no replicate), detector_plan.json
+# (detector-plan/1, the pinned plan whose canonical_sha256 is the plan_digest), detsim_completeness.json
+# (detsim-completeness/1, a backend's collect result) and detsim_observables.json (detsim-observables/1, the long
+# table of values handed to hep-statistics; decision D-W1-2: not simulation-summary/1). Their patterns are re-applied
+# with re.fullmatch and their other rules checked in code (detsim_schemas.py). No artifact type, vocabulary term,
+# envelope field, rule or capability changes: every 3.17 artifact keeps its outcome.
 KNOWN_CAPABILITIES = frozenset({"core:evidence-records", "core:plugin-release-identity", "core:data-exposure", "stats:result-semantics",
                                 "communication:traceability-v1", "core:revocation-log", "core:exposure-record",
                                 "core:decision-lineage", "measurement:correction-keys-v1"})

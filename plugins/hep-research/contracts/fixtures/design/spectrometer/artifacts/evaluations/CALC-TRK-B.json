@@ -1,11 +1,11 @@
 {
- "contract_version": "3.17.0",
+ "contract_version": "3.18.0",
  "artifact_id": "spectrometer-demo-CALC-TRK-B",
  "artifact_type": "design-evaluation",
  "objective": "SYNTHETIC design fixture; parameter values are proposals, not an experiment's numbers",
  "versions": {
   "plugin": "0.36.0",
-  "contracts": "3.17.0",
+  "contracts": "3.18.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-B.json",
-   "sha256": "62b70fe669f487a298e2545963bd423d5bbd9a13620a474ab7d1252d450b9a3b",
+   "sha256": "296d79cea7cade3c56cb6b54026e9fa1e78d163023d09f85e44ab3bf98ed59b5",
    "artifact_type": "design-candidate",
    "artifact_id": "spectrometer-demo-cand-B",
    "status": [
@@ -27,7 +27,7 @@
   },
   {
    "ref": "runs/CALC-TRK-B.computational-run.json",
-   "sha256": "e63cb1b562c9b8598ea55b7461672dd2e51cd085d01ecfb5ec7351cd06d71769",
+   "sha256": "021d86072100390ecd000dbd5b49f181676ffb3fad2fff9c2f65b5103e09a482",
    "artifact_type": "computational-run",
    "artifact_id": "spectrometer-demo-CALC-TRK-B",
    "status": [

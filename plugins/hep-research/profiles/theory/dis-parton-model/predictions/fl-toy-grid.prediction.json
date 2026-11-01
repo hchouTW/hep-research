@@ -1,5 +1,5 @@
 {
- "contract_version": "3.17.0",
+ "contract_version": "3.18.0",
  "artifact_id": "dispm-prediction-fl-toy-grid",
  "artifact_type": "prediction",
  "objective": "F_L at O(alpha_s) and LO F_2 on SYNTHETIC toy densities (demonstration of the machinery, not a statement about any nucleon)",
@@ -14,7 +14,7 @@
  },
  "versions": {
   "plugin": "0.53.0",
-  "contracts": "3.17.0",
+  "contracts": "3.18.0",
   "profiles": {
    "theory:dis-parton-model": "0.1.0"
   }

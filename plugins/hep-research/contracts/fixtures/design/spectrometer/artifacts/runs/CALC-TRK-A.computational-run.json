@@ -1,11 +1,11 @@
 {
- "contract_version": "3.17.0",
+ "contract_version": "3.18.0",
  "artifact_id": "spectrometer-demo-CALC-TRK-A",
  "artifact_type": "computational-run",
  "objective": "SYNTHETIC design fixture; parameter values are proposals, not an experiment's numbers",
  "versions": {
   "plugin": "0.36.0",
-  "contracts": "3.17.0",
+  "contracts": "3.18.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-A.json",
-   "sha256": "e770a9123cc94cb6317c5265e116ff94afdccf3e5eaf77a7baa18dc6641e5341",
+   "sha256": "fb6e7bdfd713b4fff710a1adddbfb9dda85dd8c5bce5b2b9f4af362bea054c09",
    "artifact_type": "design-candidate",
    "artifact_id": "spectrometer-demo-cand-A",
    "status": [
@@ -39,7 +39,7 @@
   "input_manifest": [
    {
     "path": "candidates/cand-A.json",
-    "sha256": "e770a9123cc94cb6317c5265e116ff94afdccf3e5eaf77a7baa18dc6641e5341"
+    "sha256": "fb6e7bdfd713b4fff710a1adddbfb9dda85dd8c5bce5b2b9f4af362bea054c09"
    }
   ],
   "tools": [
@@ -90,7 +90,7 @@
    "synthetic"
   ],
   "script_sha256": {
-   "skills/hep-detector/scripts/tracker_resolution.py": "767043e87f2c00903246bce1627ec40cd7d9bf0a2fdac100e756a9d09bd56fbc"
+   "skills/hep-detector/scripts/tracker_resolution.py": "58d9ee5e7e674e399b9f9e9b7e37935aedd11db9f219f76272227d6e04ad2e4d"
   }
  }
 }

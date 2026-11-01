@@ -1,11 +1,11 @@
 {
- "contract_version": "3.17.0",
+ "contract_version": "3.18.0",
  "artifact_id": "ams-like-v1-cand-P",
  "artifact_type": "design-candidate",
  "objective": "SYNTHETIC design study (AMS-like; not the AMS-02 detector)",
  "versions": {
   "plugin": "0.53.0",
-  "contracts": "3.17.0"
+  "contracts": "3.18.0"
  },
  "bindings": {
   "experiments": [],
