@@ -32,10 +32,11 @@ parameter scans, coupling the two tools.
 |---|---|---|
 | Charge deposited, drifted and collected per pixel or strip in a semiconductor sensor, event by event, with a Geant4 particle source and a detector model | **Allpix Squared** | Module chain from Geant4 deposition through propagation, transfer and digitization [AP-02, AP-11, AP-12] |
 | Hit maps, cluster size, efficiency versus threshold in a pixel telescope or a device under test, with a stated field map | **Allpix Squared** (with its own detector model and field) | Same chain; the field and model are inputs that must be pinned |
-| Drift velocity, diffusion, Townsend or attachment coefficient of a gas at a field, read from a gas table | **Garfield++** (`MediumMagboltz` + `LoadGasFile`) | The table is the model; Garfield++ interpolates it [GF-02, GF-03] |
+| Electron drift velocity of a gas at a field, B = 0, read from a 1D gas table | **Garfield++** (`MediumMagboltz` + `LoadGasFile`) | The table is the model; Garfield++ interpolates it [GF-02, GF-03]. The only Garfield++ query of the first batch |
+| Diffusion, Townsend or attachment coefficient from a gas table; any quantity at B ≠ 0 or from a 3D table | **Garfield++** natively | Not in the first batch: each needs its own storage and interpolation semantics (log-space Townsend and attachment, zero below threshold, √N scaling of diffusion) and a later task card |
 | Signal induced on electrodes of a gaseous or semiconductor detector with a field solved elsewhere (TCAD, finite elements) | **Garfield++** components (`ComponentTcad2d/3d`, `ComponentComsol`, `ComponentElmer`, `ComponentAnsys…`) [GF-12] | Not in the first batch; a later task card |
 | Avalanche gain, microscopic electron tracking, primary ionization clusters in gas | **Garfield++** (`AvalancheMicroscopic`, `AvalancheMC`, `TrackHeed`) [GF-12] | Not in the first batch |
-| Electric field inside a sensor from doping and bias | **Neither**: a TCAD or finite-element solver produces it; Allpix Squared reads it (`ElectricFieldReader`, `tools/mesh_converter`) [AP-23] and Garfield++ imports it | Neither tool solves the device equations for a doped sensor |
+| Electric field inside a sensor from its doping profile and bias | **Neither**: a TCAD device simulator produces it; Allpix Squared reads the map (`ElectricFieldReader` model `mesh`, `tools/mesh_converter`) [AP-23, AP-24] and Garfield++ imports it (`ComponentTcad2d/3d`) [GF-12] | Neither tool solves the semiconductor device equations from doping. Allpix Squared also offers simple analytic fields (constant, linear, parabolic, custom) [AP-24], and Garfield++ solves electrostatics for wires and electrodes (`ComponentAnalyticField`, neBEM) [GF-12]; neither of those is a doping-based device field |
 | Front-end ASIC behaviour (shaper, comparator, ToT logic) at transistor level | **Neither**: a circuit simulator; both tools stop at a simplified electronics model | DefaultDigitizer is Gaussian noise + threshold + linear QDC/TDC [AP-12] |
 | Shower development, material budget, physics-list choice | **Geant4 directly** ([detector simulation](detector-simulation.md), [Geant4 study protocol](geant4-study-protocol.md)) | Allpix Squared embeds Geant4 only for deposition |
 | Gas properties at a temperature or pressure different from the table's | **Neither, through this plugin**: generate a new table (Magboltz, later task card) | Garfield++ density scaling is "very approximate" by its own tutorial [GW-02]; the adapter refuses it (section 6) |
@@ -48,14 +49,14 @@ running the nearest tool.
 
 - **Version basis.** Name the commit or release whose documentation you cite, and run that same version. Allpix
   Squared master and its latest release are on different branches: tag `v3.3.0` (2026-09-30) is not an ancestor of
-  master `df69a6a4` (2026-10-30), and they differ in 473 files [AP-01]. Example: master requires spdlog >= 1.9.2,
-  `v3.3.0` does not [AP-20, AP-21]; the `log_level` values differ [AP-08]. Garfield++ is cited at master
+  master `df69a6a4` (2026-10-30), and they differ in 473 files [AP-01]. Example: master's build script requires spdlog >= 1.9.2,
+  which its own prerequisites page does not list, and `v3.3.0` does not require it [AP-16, AP-20, AP-21]; the `log_level` values differ [AP-08]. Garfield++ is cited at master
   `e2e58ea7` = tag `2026.10` + 4 commits [GF-01]; the online User Guide is "Version 2026.1, July 2026" [GW-01].
   A statement read at one version is re-read at the version the task card pins.
 - **Inputs exist and are legitimate.** Allpix: configuration, detector setup, model, field map, each hashed
   [AP-02 … AP-05]. Garfield++: one gas table with its source, conditions and licence. The Garfield++ repository has no
   licence file, so its example tables have unstated terms [GF-01]; the user allowed one example table for pipeline
-  validation only (H0 #13 in [H-01]). The first batch uses only public or synthetic inputs; gas tables, field maps
+  validation only, by an explicit decision recorded in the task specification [H-01]. The first batch uses only public or synthetic inputs; gas tables, field maps
   and other large inputs are never committed to the plugin or its test fixtures, and the project's protected-data
   policy applies unchanged.
 - **Environment.** How to obtain it and what it needs: the [operations guide](../../hep-computing/references/sensor-and-gas-simulation-operations.md).
@@ -111,8 +112,10 @@ time-resolved simulation of the signal formation" [AP-14]. An induced signal fro
 `TransientPropagation` (Shockley-Ramo) [AP-15]. The two have different validity domains even though both pass through
 `PulseTransfer`; a total collected charge does not determine a waveform.
 
-**Field boundary.** The field map is an input; its source (TCAD, analytic, the example's mesh file), units and
-mapping are part of the result. Allpix Squared does not compute it.
+**Field boundary.** The field is an input to the chain: either a map read from file (the example uses a mesh file
+[AP-04]) or one of `ElectricFieldReader`'s simple analytic models (constant, linear, parabolic, custom) [AP-24]. Its
+source, units and mapping are part of the result. Allpix Squared does not solve for the field of a doped device; that
+comes from a TCAD simulator.
 
 ## 6. Garfield++: table interpolation, extrapolation, temperature and pressure
 
@@ -121,7 +124,11 @@ Read at `e2e58ea7` [GF-02 … GF-08]; re-read at the pinned commit.
 - **Table dimension.** The header line `Dimension : F` marks a 1D table (E only); `T` marks a 3D table with B and
   angle grids [GF-02 line 671]. The first batch accepts 1D tables only.
 - **Stored forms.** The E grid is stored as E/p in V/(cm·Torr) and multiplied by the table pressure in Torr on load
-  (line 560); drift velocities are stored in cm/µs and converted to cm/ns (× 1e-3, line 796); Townsend and
+  (line 560); a 1D table is read record by record by `ReadRecord1D` (dispatch at lines 477-483; reader lines 837-850), in which
+  each quantity is followed by a column that is read and discarded (`ve, waste, vb, waste, vx, waste`, then
+  `dl, waste, dt, waste`, …), so the drift velocity along E is the first value of each record, not every second
+  column; drift velocities are stored in cm/µs and converted to cm/ns (× 1e-3, lines 848-850; the 3D reader
+  `ReadRecord3D` does the same at line 796); Townsend and
   attachment coefficients are stored as logarithms and shifted by ln p on load (lines 563-577) [GF-02]. The user
   guide confirms the logarithmic storage of α and η [GF-08].
 - **Temperature and pressure.** `LoadGasFile` sets the medium's pressure and temperature to the table's (lines
@@ -133,8 +140,9 @@ Read at `e2e58ea7` [GF-02 … GF-08]; re-read at the pinned commit.
 - **Interpolation and extrapolation come from the file.** The compiled defaults are order 2 and extrapolation
   constant below, linear above [GF-05 lines 770, 779], which the user guide also states as the default [GF-08, GW-01].
   But `LoadGasFile` overwrites them with the file's `Interp`, `L Extr`, `H Extr` lines [GF-02 lines 590-612]
-  (codes: 0 constant, 1 linear, 2 exponential; the setter also accepts the names case-insensitively [GF-03 line
-  1341]). The example table `ar_80_co2_20_0T.gas` has `Interp 2`, `L Extr 0`, `H Extr 1` [GF-07]. A pinned query
+  (file codes: 0 constant, 1 linear, 2 exponential). The setter `SetExtrapolationMethodVelocity(low, high)` takes
+  **strings** only: `"const"`/`"constant"`, `"lin"`/`"linear"`, `"exp"`/`"exponential"`, case-insensitive; an
+  unknown string prints an error and leaves that side unchanged [GF-03 lines 1291, 1321-1356]. The example table `ar_80_co2_20_0T.gas` has `Interp 2`, `L Extr 0`, `H Extr 1` [GF-07]. A pinned query
   therefore records the values read from the file and sets them explicitly with `SetInterpolationMethodVelocity` and
   `SetExtrapolationMethodVelocity`; note that `SetInterpolationMethodVelocity(0)` is ignored [GF-03 line 1381].
 - **Code path.** `Medium::Interpolate` uses `Numerics::Boxin3` for a 3D table and `Interpolate1D` otherwise
@@ -147,7 +155,9 @@ Read at `e2e58ea7` [GF-02 … GF-08]; re-read at the pinned commit.
   averages the two highest divided differences, but as soon as an index falls outside the table it uses m+1 nodes.
   For m = 2 inside the table (2 <= ix <= n−2) the result is the average of the quadratics through (ix−1, ix, ix+1)
   and (ix, ix+1, ix+2); next to the ends a single quadratic through the first or last three nodes. At the first and
-  last node (within 1e-6 of the end spacing) the stored value is returned. The user guide calls orders above 2 "not
+  last node (within 1e-6 of the end spacing) the stored value is returned directly; at an interior node the Newton
+  form also returns the stored value exactly, because its first coefficient is that value and every further term is
+  multiplied by (x − x_ix) = 0. The user guide calls orders above 2 "not
   recommended" [GF-08]. A reimplementation that uses a different stencil differs by O(h³ f‴) and is wrong.
 - **Velocity vector at B = 0.** `ElectronVelocity` uses charge q = −1 [GF-03 lines 490-495]; for B below `Small`
   the velocity is (q·v_E/|E|)·E component by component (lines 232-238): electrons drift opposite to E, components
@@ -158,13 +168,13 @@ Read at `e2e58ea7` [GF-02 … GF-08]; re-read at the pinned commit.
 **Adapter policy, differing from native behaviour on purpose.** Garfield++ extrapolates silently outside the table.
 The adapter refuses a query outside the table's E range by default (`out-of-domain`, with the valid range); with the
 task parameter `allow_outside_validated_range` it evaluates natively and labels the row `outside-validated-range`
-[H-01 §12.3; pattern of `core/provider`, decision D-W1-5 in H-02]. The difference is a stated policy, not a failure.
+[H-01 §12.3; the same pattern as the plugin's bounded-model providers, `core/provider`]. The difference is a stated policy, not a failure.
 
 ## 7. The two first-batch task cards
 
 Both are **pipeline-validation cases**: they show that identity, execution, commit and extraction work. They do not
 produce research conclusions [H-01 §1.4]. Full cards: task specification §12.2 and §12.3 [H-01]; the pinned versions
-are written by W2-AP and W2-GF.
+are written when each card is pinned.
 
 **AP-BOOT — rerun of the official pixel example** (capability `allpix.pixel-charge`, state `proposed`).
 
@@ -219,11 +229,13 @@ The status values and error codes behind these classes are in the [operations gu
 
 ## 10. Limitations and untested scope
 
-- Nothing here has run: both capabilities are `proposed`; tested versions, environments and platforms are empty until
-  W4A / W4G pass, and the macOS host is the only platform considered (Linux declared unsupported until measured,
-  decision D-W1-3 in [H-02]).
+- Nothing here has run: both capabilities are `proposed`; tested versions, environments and platforms stay empty
+  until each backend's acceptance checks pass. The adapter's guarantees are measured on macOS only; on Linux they are
+  declared unsupported until measured on a Linux host [H-02], so a capability that requires them is refused there.
 - First batch only: no waveforms, gas-table generation, microscopic tracking, avalanche, TCAD field maps, user
   Allpix Squared configurations, scans or cross-tool coupling.
+- Garfield++: only the electron drift velocity at B = 0 from a 1D table is queryable in the first batch; diffusion,
+  Townsend and attachment coefficients, ion quantities and B ≠ 0 are not.
 - Garfield++ 3D tables are refused: a B = 0 query on a table with B and angle grids still interpolates over the angle
   axis, whose convention at B = 0 is not pinned.
 - Garfield++ temperature and pressure scaling is never used; a new condition needs a new table.

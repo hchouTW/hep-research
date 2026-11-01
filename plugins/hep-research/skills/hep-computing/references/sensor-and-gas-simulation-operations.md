@@ -25,19 +25,33 @@ Preconditions before any run:
 
 - A project folder (`--workspace`) on a local file system: APFS or HFS on macOS; ext2/3/4, xfs, btrfs or tmpfs on
   Linux. NFS, CIFS, FUSE and unknown types are refused (`unsupported-fs`) [H-01 §6.2, §10.2].
-- One backend environment obtained by a route of section 2 and recorded (section 4).
-- The task card's pinned commit and inputs (W2-AP, W2-GF), and the guide's version basis.
+- One backend environment obtained by a route of section 3 and recorded (section 5).
+- The task card's pinned commit and inputs, and the hep-detector guide's version basis.
+- Platform: the adapter's guarantees are measured on macOS only. On Linux (for example an EL9 node) the environment
+  routes below exist, but the adapter's Linux guarantees are declared unsupported until measured on a Linux host, so
+  a capability that requires one of them is refused there (`guarantee-insufficient`) [H-02].
 
-## 2. Environment sources
+## 2. Inputs
+
+| Input | Form | Where it comes from |
+|---|---|---|
+| Task | `task.json` (`detector-task/1`): capability id, objective, environment reference, inputs, parameters, budget; unknown fields are rejected | written by the user for a capability (AP-BOOT, GF-QUERY) |
+| Workspace | `--workspace <project>`; inputs resolve relative to it, never to the current directory | the research project |
+| Native inputs | Allpix Squared: main configuration, detector setup, models, field map; Garfield++: one 1D gas table | files in the project, each hashed into the plan's input manifest; never committed to the plugin |
+| Environment | the validation record `.env/<env_identity>.json` | `detsim check --probe` (section 6) |
+| Plan | `plan.json` (`detector-plan/1`) and its `plan_digest` | `detsim prepare` |
+| Replicate | `--replicate N`, default 0 | only for reproducibility tests; not part of the task or plan |
+
+## 3. Environment sources
 
 Building from source is the last resort: it is the largest cost of the first batch [H-01 §14.2]. Obtain and identify
 each backend separately; the two need not share an LCG release.
 
 | Backend | Route | Identity recorded | Notes (versions as read) |
 |---|---|---|---|
-| Allpix Squared | Docker image `gitlab-registry.cern.ch/allpix-squared/allpix-squared:<tag>`; host folder mounted at `/data` [AP-18, AW-06] | image digest | The tag must equal the pinned commit's release; Geant4 data sets complete; image architecture on Apple Silicon unverified |
-| Allpix Squared | CVMFS: `source /cvmfs/clicdp.cern.ch/software/allpix-squared/<version>/<system-specifier>/setup.sh` [AP-19, AW-07] | version + platform + SHA-256 of `setup.sh` | Binaries only for CentOS 7 (GCC) and EL9 (GCC, LLVM); not in LCG releases; CVMFS must already be mounted (never mount it yourself) |
-| Allpix Squared | Source build | manifest digest | Linux and macOS stated by upstream [AP-17]; needs the build authorization of the task (H0 #5) |
+| Allpix Squared | Docker image `gitlab-registry.cern.ch/allpix-squared/allpix-squared:<tag>`; host folder mounted at `/data` [AP-18, AW-06] | image digest | The tag must be the release that the pinned commit is; a development (master) commit such as `df69a6a4` has no release image, so pin a release tag or build that commit from source; Geant4 data sets complete; image architecture on Apple Silicon unverified |
+| Allpix Squared | CVMFS: `source /cvmfs/clicdp.cern.ch/software/allpix-squared/<version>/<system-specifier>/setup.sh` [AP-19, AW-07] | version + platform + SHA-256 of `setup.sh` | Binaries only for CentOS 7 (GCC) and EL9 (GCC, LLVM), published per release, so a master commit has none; not in LCG releases; CVMFS must already be mounted (never mount it yourself) |
+| Allpix Squared | Source build | manifest digest | Linux and macOS stated by upstream [AP-17]; the only route for a development commit; needs explicit authorization to download and build |
 | Garfield++ | LCG views | view name + platform + Garfield++ commit | The LCG package index lists releases 110a, 110, 109a, 109, 108a, 108, dev and SWAN variants; versions are commit abbreviations, not tags [GW-05, retrieved 2026-11-01] |
 | Garfield++ | Source build (`gitlab.cern.ch/garfield/garfieldpp`) | manifest digest | Master `e2e58ea7` = tag `2026.10` + 4 commits [GF-01] |
 | Both | `adapters/environments/` templates: LCG view setup and Apptainer definition (state `documented`) [H-04]; the [environments](environments-and-containers.md) page | manifest digest | Estimate build time and disk first |
@@ -45,7 +59,7 @@ each backend separately; the two need not share an LCG release.
 An installed Garfield++ ships its headers (`Include/Garfield/*.hh`): they give signatures and defaults, not the
 interpolation stencil. Without the implementation source, the GF-QUERY plan pins order 1 [H-01 §14.2].
 
-## 3. Build preconditions (from the upstream sources; unverified on this plugin's hosts)
+## 4. Build preconditions (from the upstream sources; unverified on this plugin's hosts)
 
 **Allpix Squared** at master `df69a6a4` [AP-16, AP-17, AP-20]:
 
@@ -53,8 +67,9 @@ interpolation stencil. Without the implementation source, the GF-QUERY plan pins
 - ROOT 6 built with C++20 (`-DCMAKE_CXX_STANDARD=20`), with the `GenVector` component (CMake asks for Geom, Core,
   GenVector, Hist, RIO).
 - Boost.Random >= 1.64.0 (portable random distributions; older `normal_distribution` implementations differ).
-- spdlog >= 1.9.2: required by master, **not** by release `v3.3.0` [AP-20, AP-21]. Match the dependency list to the
-  version you build.
+- spdlog >= 1.9.2: required by master's build script (`CMakeLists.txt` line 326) although the master prerequisites
+  page does not list it; **not** required by release `v3.3.0` [AP-16, AP-20, AP-21]. Take the dependency list from
+  the build script of the version you build, not only from the manual.
 - Geant4 built with C++20, with **all** data sets installed, and multithreading enabled if MT runs are wanted.
   Upstream's suggested flags include `-DGEANT4_INSTALL_DATA=ON`, `-DGEANT4_USE_GDML=ON`,
   `-DGEANT4_BUILD_MULTITHREADED=ON`, `-DCMAKE_CXX_STANDARD=20`.
@@ -62,7 +77,8 @@ interpolation stencil. Without the implementation source, the GF-QUERY plan pins
 
 **Garfield++** at master `e2e58ea7` [GF-09, GF-10, GF-11]:
 
-- ROOT 6 (the build checks ROOT >= 6.20), CMake >= 3.12, a C++ compiler with the same C++ standard as ROOT, a Fortran
+- ROOT 6 (`find_package(ROOT 6.0 REQUIRED …)`, `CMakeLists.txt` line 94; line 97 only branches on ROOT < 6.20 for
+  compatibility), CMake >= 3.12, a C++ compiler with the same C++ standard as ROOT, a Fortran
   compiler; GSL only with `GARFIELD_WITH_GSL`; OpenMP optional.
 - After `make install`, source `<install>/share/Garfield/setupGarfield.sh`: it sets `HEED_DATABASE` and
   `CMAKE_PREFIX_PATH`.
@@ -71,7 +87,7 @@ interpolation stencil. Without the implementation source, the GF-QUERY plan pins
 
 Record build flags, compiler, ROOT and Geant4 versions with the manifest; a rebuilt library is a new environment.
 
-## 4. Record the environment
+## 5. Record the environment
 
 - Run the hep-computing `environment_manifest.py record` for the path-bearing record and `check` before reuse; the
   `detsim check --probe` verb calls it as a subprocess with the captured environment (as specified).
@@ -79,13 +95,13 @@ Record build flags, compiler, ROOT and Geant4 versions with the manifest; a rebu
   and re-check with `check`: their data-set hashes enter the environment identity. Every data set listed by
   `geant4-config --datasets` must be present: Allpix Squared requires all of them [AP-16]. `register` refuses an
   installation with a data set missing unless that set is skipped explicitly [H-02]; whether any skip is acceptable
-  for AP-BOOT, given that upstream requires every set, is decided when the card is pinned (W2-AP) and recorded in
-  the ledger.
+  for AP-BOOT, given that upstream requires every set, is decided when the card is pinned and recorded with
+  the plan.
 - Environment variables are recorded by name, never by value.
 - The validation record lives at `artifacts_root/detector-simulation/.env/<env_identity>.json`; the identity is
   content-based, so reaching the same installation through another path does not change it [H-01 §9.1].
 
-## 5. The `detsim` command (as specified; unverified)
+## 6. The `detsim` command (as specified; unverified)
 
 `detsim` below stands for running the adapter's entry file `adapters/detector-simulation/assets/detsim` (a Python
 file, suffix `.py`) with `python3` from the plugin root; there is no console script. `--backend allpix-squared` or
@@ -123,7 +139,7 @@ commit: `run.computational-run.json`, `plan.canonical.json`, `completeness.json`
 records, attempt folders, `orphans/`) and `.env/`. Read results only from `runs/` or through `inspect`; never from
 `.pending/`.
 
-## 6. Execution
+## 7. Execution
 
 1. `check --probe` once per environment; then `check` per task.
 2. `prepare > plan.json`; keep the plan with the task.
@@ -132,7 +148,7 @@ records, attempt folders, `orphans/`) and `.env/`. Read results only from `runs/
 4. `inspect --view summary` for the observables; hand them to hep-statistics or the owning physics skill.
 
 In a workflow, `detsim run` can be an opaque [workflow](analysis-workflows.md) step whose `parameter_digest` command is
-`detsim prepare --digest-only` and whose only output is its `stdout` answer (decision D-W1-1 [H-02]). The step
+`detsim prepare --digest-only` and whose only output is its `stdout` answer (a design decision of the task [H-02]). The step
 timeout (default 3600 s) bounds it; the incremental skip works only where the plugin release digest is known, so in a
 development checkout the step always reruns.
 
@@ -142,10 +158,10 @@ often than every 30 s. A background command stopped by the host is a controller 
 
 **Platform guarantees.** On macOS the controller's death does not kill the backend (`soft`); commit without
 overwriting is `hard` with `renamex_np`; durable commit is `soft`; Linux guarantees are declared `unsupported` until
-measured on a Linux host (decision D-W1-3 [H-02]). The run record states the achieved level of each guarantee; cite
+measured on a Linux host [H-02]. The run record states the achieved level of each guarantee; cite
 those fields, never a word such as "isolated".
 
-## 7. Statuses and troubleshooting
+## 8. Statuses and troubleshooting
 
 Exit codes are only 0-3; `status` and `error_code` tell cases apart [H-01 §11.3, H-03]. An exit without parseable
 JSON on stdout means `detsim` itself crashed or was killed from outside.
@@ -162,7 +178,7 @@ JSON on stdout means `detsim` itself crashed or was killed from outside.
 | `refused` / `out-of-domain` (1) | a GF-QUERY point outside the table's E range; the valid range is reported | drop the point, or set `allow_outside_validated_range` knowingly (rows get `outside-validated-range`) |
 | `refused` / `condition-mismatch` (1) | GF-QUERY temperature or pressure differs from the table's | use the table's conditions or a table made for yours |
 | `refused` (3) | the protected-use guard refused before anything ran | follow the project's protected-data policy |
-| `missing-dependency` (3) | backend program, ROOT bindings, library or Geant4 data set missing, found before the lock | fix the environment (sections 2-4); nothing ran |
+| `missing-dependency` (3) | backend program, ROOT bindings, library or Geant4 data set missing, found before the lock | fix the environment (sections 3-5); nothing ran |
 | `failed` / `missing-dependency` (1) | a library failed to load after the lock | a run record exists with the `failed` label; fix and rerun the same plan |
 | `incomplete` / `in-progress` (3) | another controller holds the run lock | wait; poll `inspect --view state` |
 | `failed` (1), e.g. `cancelled`, `commit-conflict`, timeout, partial | the run did not produce a complete result | read `failed/…` with `inspect --attempt <id>`; rerunning the same plan is a retry |
@@ -179,7 +195,7 @@ standard than the backend; a Geant4 without all data sets or with another C++ st
 `HEED_DATABASE` because `setupGarfield.sh` was not sourced (Garfield++); `import Garfield` failing because the
 library directory is not on the loader path.
 
-## 8. Outputs, checks and limitations
+## 9. Outputs, checks and limitations
 
 - Outputs per run: the computational-run record (with `plan_digest`, `run_id`, replicate, achieved guarantees and its
   sidecars), the canonical plan, the completeness result and a long observables table. Their schemas are added by
@@ -190,9 +206,9 @@ library directory is not on the loader path.
 - Limitations: unverified throughout; macOS host only; no batch execution, cross-session recovery or cancel command
   (later work, "L1"); no container isolation, so no claim of "no network".
 
-## 9. Citations
+## 10. Citations
 
 `docs/dev/detector-simulation/SOURCES.md`: Allpix Squared prerequisites, supported systems, Docker and CVMFS pages and
 build script [AP-16 … AP-21, AW-06, AW-07]; Garfield++ installation, readme and build script [GF-09 … GF-11]; LCG package
-index [GW-05]; task specification 9.1 [H-01]; ledger decisions D-W1-1 and D-W1-3 [H-02]; repository status codes
+index [GW-05]; task specification 9.1 [H-01]; the task ledger's design decisions [H-02]; repository status codes
 [H-03]; environment templates [H-04].
