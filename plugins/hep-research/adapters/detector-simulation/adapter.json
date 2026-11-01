@@ -1,13 +1,15 @@
 {
  "id": "adapter:detector-simulation",
- "version": "0.1.0",
+ "version": "0.2.0",
  "status": "proposed",
  "purpose": "Run pinned detector-simulation capabilities of Allpix Squared (silicon pixel charge collection) and Garfield++ (gas-table queries) as content-addressed plans through one CLI, detsim.py (docs/dev/detector-simulation/TASK.md). The shared layer: the plan and identity part (0.1.0, work item W3a): the contracts detector-task/1, detector-plan/1, detsim-completeness/1 and detsim-observables/1 (contracts 3.18.0); canonical/1 (the repository's canonical_sha256 behind a hash-scope check that refuses binary floats, integers beyond 2^53 - 1, non-ASCII keys, duplicate keys, NaN, lone surrogates and unresolved path or $NAME references) and decimal/1 (exact normalized decimal strings for physical quantities); plan assembly from a task, its inputs (hashed, resolved inside the project), a validated environment record, the trusted backend's ExecutionSpec and a runner profile (macos-g0 as measured, linux-g0 all unsupported until measured); the rebuild comparison that refuses a stale plan with plan-stale and the mismatched fields; plan_digest, run digest and run_id; the verbs describe, check (without --probe) and prepare (with --digest-only) that launch nothing. From 0.2.0 (work item W3b) the execution part: run (file-system allowlist, digest and rebuild checks, required guarantees refused never downgraded, idempotent reuse, a flock lock per run_id, leftovers moved and reported but never signalled, input snapshot, the backend launched directly in its own session with exactly the plan's environment, timeout and output budget enforced on its own unreaped process group only, collect, durable no-replace commit to runs/<run_id>/ or failed/), inspect (read-only) and check --probe (environment record). Both backends are later work items and answer not-run. Every record is unvalidated: no state implies physical validity. Optional, required by no skill",
  "tools": [
   {
    "name": "Shared layer: detsim.py and its sibling modules detsim_canonical.py, detsim_profile.py, detsim_schemas.py, detsim_plan.py, detsim_platform.py, detsim_runner.py, detsim_run.py (this plugin's code, standard library, core and contracts only); tested with the simulator-free backend tests/adapters/detsim_backend_synthetic.py and the cooperative program tests/adapters/detsim_coop_program.py",
-   "status": "proposed",
-   "tested_versions": []
+   "status": "demonstrated-on-synthetic-data",
+   "tested_versions": [
+    "adapter 0.2.0 on E2 (macOS 27.2 arm64, APFS, Python 3.13.2), 2026-11-01: plan and identity (T-CANON, T-SCHEMA, T-PLAN) and execution and commit (T-IDEM, T-LOCK, T-NOKILL, T-ORPHAN, T-RUNNER, T-COMMIT, T-FS, T-GUARANTEE, T-PLATFORM, T-EXIT, T-CONTRACT, T-OUTPUT) with the simulator-free synthetic backend and a cooperative program; profile macos-g0 as measured (VALIDATION DETSIM-W3A, DETSIM-W3B); linux-g0 not measured (every level unsupported); no simulator run"
+   ]
   },
   {
    "name": "Allpix Squared backend (detsim_backend_allpix.py, capability allpix.pixel-charge; https://gitlab.cern.ch/allpix-squared/allpix-squared; licence recorded when the backend is pinned): not part of this version",
@@ -21,7 +23,7 @@
   }
  ],
  "licence_boundary": "Nothing of Allpix Squared or Garfield++ is bundled, copied or linked by this version; the adapter's own code is Apache-2.0 like the plugin. Backends will run as separate programs in an environment the user approves; gas tables, field maps, builds and images are never committed",
- "environment": "none declared: 0.1.0 runs no backend (its unit tests use only the standard library, core, contracts and a simulator-free test backend)",
+ "environment": "E2 (docs/capability-matrix.md): macOS 27.2 arm64 on APFS, Python 3.13 with the standard library, core and contracts only on the plugin side; the shared layer's tests run the simulator-free synthetic backend and a cooperative program (tests/adapters/), no simulator. Runner profiles: macos-g0 as measured on this host (V-04 of docs/dev/detector-simulation/PROGRESS.md), linux-g0 declared with every guarantee unsupported until measured on Linux. Backends need their own environment records (check --probe)",
  "assets": [
   "assets/detsim.py",
   "assets/detsim_canonical.py",

@@ -30,6 +30,18 @@ Software checks establish contract consistency only, not physical validity.
   `plan-stale` and the mismatched fields, the run digest and `run_id`. Tests use a simulator-free backend under
   `tests/adapters/`.
 - Evidence: VALIDATION DETSIM-W3A
+- **`adapters/detector-simulation` 0.2.0: execution and commit of the shared layer** (work item W3b). `detsim.py run`
+  follows TASK.md 10.2: an allowlisted local file system (`unsupported-fs`), `--plan-digest`, the rebuild comparison,
+  required guarantees refused never downgraded (`guarantee-insufficient`), idempotent reuse of `runs/<run_id>/`, a
+  `flock` lock per run_id (`incomplete` / `in-progress`), leftovers of dead controllers moved to `.pending/orphans/`
+  and reported but never signalled, an input snapshot hash-checked against the plan (`input-changed`), the backend
+  launched directly in its own session with exactly the plan's environment, timeout, output budget and interruption
+  enforced on its own unreaped process group only, collect and observables, then a durable no-replace commit
+  (`renamex_np` / `renameat2`, `F_FULLFSYNC` on macOS) to `runs/<run_id>/` or `failed/<run_id>-<UTC ms>-<nonce>/`
+  with a computational-run record naming its sidecars. `inspect` is read-only (state, summary, failed attempts);
+  `check --probe` validates and records an environment. The shared layer is `demonstrated-on-synthetic-data`
+  (macos-g0 as measured; linux-g0 unsupported until measured); both backends stay `proposed`.
+- Evidence: VALIDATION DETSIM-W3B
 
 ## 0.53.0 (2026-11-01)
 

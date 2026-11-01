@@ -8689,3 +8689,22 @@ on loopback), occurred under `--jobs 4` load; it passes 3 of 3 times alone on E2
 this release. `claude plugin validate --strict` and `codex plugin load` pass.
 
 Passing checks show software consistency, not physical validity.
+
+## DETSIM-W3A — 2026-11-01 (macOS 27.2 arm64, Python 3.13.2 venv; examples regenerated with the E2 venv, NumPy 2.5.3; version 0.53.0 + unreleased)
+
+The detector-simulation shared layer's plan and identity part (adapter `adapters/detector-simulation`, verbs
+`describe`, `check`, `prepare`) and contracts 3.18.0, checked with a simulator-free backend on synthetic inputs; no
+simulator was run.
+
+| Item | Evidence | Result |
+|---|---|---|
+| T-CANON | `tests/adapters/test_detsim_identity.py`: golden vectors through the four `canonical_sha256` copies and an independent JCS serializer; `normalize_decimal` edge cases (incl. `decimal-exponent-range`); `check_hash_scope` refusals by name; run digest and `run_id` encoding | 17 OK |
+| T-SCHEMA | `tests/adapters/test_detsim_schemas.py`: positive and negative fixtures, unknown keys, units, supported keywords only, anchored patterns re-applied with `re.fullmatch` (walker over every schema pattern), a float in the hash scope refused | 12 OK |
+| T-PLAN | `tests/adapters/test_detsim_plan.py`: same plan from four working folders and a moved project; replaced input, changed backend or shared-layer code, changed or corrupt environment record, another profile, one extra argv, one changed rendered byte → `plan-stale`; wrong `--plan-digest` → `digest-mismatch`; review-round regression tests | 35 OK |
+| Without ROOT / uproot | `tests/adapters/test_detsim_missing_dependency.py` | 3 OK |
+| Contracts | `unittest discover -s tests/contracts`; every 3.17 artifact under `contracts/fixtures`, `examples` and `profiles` (602) gives the same findings with the 3.18 validator (independent review) | 1160 run, OK (1 skipped); 602 identical |
+| Conventions | layering, naming, wiring, reference inventory, skill scripts, interpreter guard, python compat, adapter declarations and missing-dependency, CLI robustness and contract | pass |
+| Hostile `TMPDIR` | a symlinked folder whose name has a space and non-ASCII characters | OK |
+| Independent review | three rounds (fresh subagents, advisory, shared host): round 1 0 major / 9 minor, round 2 1 major / 6 minor, round 3 no earlier finding open and 2 new minor findings, fixed with tests after round 3 (no fourth round) | findings fixed |
+
+Passing checks show software consistency, not physical validity.

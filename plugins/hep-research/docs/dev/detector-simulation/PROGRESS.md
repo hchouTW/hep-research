@@ -93,7 +93,7 @@ Host: Darwin arm64 (macOS 27.2), 8 CPUs, Python 3.13.2, git 2.54.0, CMake 4.3.2,
 | WK | in-progress | 2026-11-01 | 0 / 2 | patches WK (d3ee1c15), WK-2 (8628dc11), round-2 fixes 8abe2652; T-DISCOVER (WR/scratch/WK/t-discover.txt, raw); question set run 2: 19/20, Q05 partial (dc8f1d42) | review round 3; question set rerun |
 | W2-AP | in-progress | 2026-11-01 | 0 / 0 | V-07, V-14 read at df69a6a4; G4NDL 4.7.1 in WR/env/g4data (MD5 54f0ed39 matches) | environment (V-08): ROOT with a working interpreter, Allpix build |
 | W2-GF | in-progress | 2026-11-01 | 0 / 0 | card-GF-QUERY.md (query points and tolerances fixed before any query); V-09..V-12 read at e2e58ea | environment (V-13): ROOT with a working interpreter |
-| W3a | in-progress | 2026-11-01 | 0 / 2 | patches 5ca7dbd1, 3fd54f69, 510315a5; review fixes 2468b15e (round 1), ff6a077e (round 2); 62 + 2 tests | review round 3; VALIDATION entry |
+| W3a | done | 2026-11-01 | 0 / 3 | patches 5ca7dbd1, 3fd54f69, 510315a5; review fixes 2468b15e, ff6a077e, f348166f; T-CANON 17, T-SCHEMA 12, T-PLAN 35, missing-dependency 3 OK; VALIDATION DETSIM-W3A | round-3 minor findings M1-M2 fixed after round 3 without a fourth review |
 | W3b | in-progress | 2026-11-01 | 1 / 0 | 5fda61cd, d6dc4c66: detsim_platform, detsim_runner, detsim_run, run/inspect/check --probe; tests/adapters/test_detsim_run.py 45 tests (1 skipped: Linux only) | T-CONV complete, review |
 | W4A | not-started | | 0 / 0 | | |
 | W4G | not-started | | 0 / 0 | | |
@@ -173,6 +173,25 @@ V-items concluded / still open: V-01..V-06 concluded
 Independent review: not applicable
 Blockers and gates raised: none
 Next step: WK, W2-AP, W2-GF, W3a
+```
+
+```text
+Work item ID: W3a
+Status: done
+Isolation guard: pass at start / pass before each commit
+Files changed: adapters/detector-simulation/ (adapter.json, assets/detsim*.py of W3a), contracts/schemas/{detector_task,
+  detector_plan,detsim_completeness,detsim_observables}.json, contracts 3.18.0 bump (fixtures, examples, profiles,
+  templates), tests/adapters/test_detsim_{identity,schemas,plan,missing_dependency}.py, detsim_backend_synthetic.py,
+  docs/capability-matrix.md, tests/skills/test_cli_robustness.py, tools/module_timings.json, CHANGELOG, VALIDATION
+Decisions made (with reasons): D-W3a-1..14 (WR/patches/W3a/REPORT.md); review dispositions in the decision log
+Commands actually run and results: the four test modules (67 OK); contracts tests 1160 OK; conventions pass;
+  run_all_checks --part static 29 pass / 2 skip at the time of W3a's application
+Tests not run and reasons: none for W3a's scope
+V-items concluded / still open: none owned
+Independent review: 3 rounds (round 1: 0 major / 9 minor; round 2: 1 major / 6 minor; round 3: no earlier finding
+  open, 2 new minor findings M1-M2 fixed with tests after the round; no fourth round)
+Blockers and gates raised: H5 (review bound) answered: 3 rounds
+Next step: W3b
 ```
 
 ## Final report

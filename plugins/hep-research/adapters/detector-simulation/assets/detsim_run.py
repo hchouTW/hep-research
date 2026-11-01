@@ -623,6 +623,15 @@ def probe(workspace: Path, backend, env_root: Path) -> dict:
         raise DetsimError("rejected", "env-root-missing", f"--env-root {str(env_root)!r} is not a folder", "--env-root")
     facts = backend.probe(env_root)  # may raise DetsimError (missing-dependency) before anything is written
     identity, variables = facts["identity"], facts["variables"]
+    problems = canonical.check_hash_scope({"identity": identity, "variables": variables})
+    problems += [dict(f, path=f["path"]) for f in schemas.host_path_findings(
+        (f"variables.{n}", v) for n, v in sorted(variables.items()))]
+    problems += [{"path": f"variables.{n}", "code": "variable-name"} for n, v in variables.items()
+                 if schemas.ENV_NAME.fullmatch(n) is None or not isinstance(v, str)]
+    if problems:  # validate before writing: prepare would refuse such a record (environment-record-invalid)
+        raise DetsimError("refused", "environment-invalid", "the captured environment cannot be recorded: "
+                          + "; ".join(f"{i['path']}: {i['code']}" for i in problems[:5]), "--env-root",
+                          problems=problems[:20])
     manifest = _environment_manifest(env_root, variables)
     record = plan_layer.env_record(identity, variables, facts=facts.get("facts", {}),
                                    path_record={"env_root": str(env_root), "environment_manifest": manifest})
