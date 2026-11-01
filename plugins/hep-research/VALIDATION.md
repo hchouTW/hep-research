@@ -8664,3 +8664,28 @@ hep-computing.
 | Misses | `d-cc-pairs-1`, `d-cc-pairs-2`, `d-cc-preserve-1`, `c-ml-roothist-2` | the first three missed before this change (2026-10-31 control on the unchanged base); `c-ml-roothist-2` 1/3 on the branch and 1/3 on main `cf622dab` (USD 0.39), varying in earlier runs: no regression shown |
 
 Passing checks show software consistency, not physical validity.
+
+## 0.53.0 release check (2026-11-01, E2 and CI)
+
+Release branch `release/0.53.0`, based on main `395806ce` (PRs #340 and #341 merged). Minor release: event displays.
+Contracts 3.17.0 and `CORE_VERSION` 1.5.0 are unchanged; the `hep-computing` description changes (VALIDATION
+EVENT-DISPLAY-ROUTING), every other skill `description` is unchanged.
+
+What changed on the release branch:
+- version 0.53.0 in both manifests, `pyproject.toml`, the README, two assets, the six theory-profile scripts,
+  `usine_translate.py` and `examples/bc-usine-reproduction/run.py`; the CHANGELOG `0.53.0` section;
+- regenerated on E2 (`~/.venvs/hep-research-e2`, macOS arm64, Python 3.13.2, NumPy 2.5.3) in `bc06db3f`: the six
+  theory-profile scripts and the examples in the order of `docs/maintenance.md`; every changed line is a version
+  string or a hash covering one (checked hunk by hunk), no PNG changed. `bc-propagation-fit` and
+  `unfolding-coverage` carry no plugin version and drift at rounding level: left as committed.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on `bc06db3f` (run 41264271915) | success: `checks-complete`, units 1/3-3/3, static, AMS optional, lint, `old-python`, four `hostile-paths` legs, the six optional extras |
+| `run_all_checks.py` (all parts, host CLIs), E2 at `bc06db3f`, `--jobs 4` | 32 pass, 1 fail; units 6342 tests, 6168 passed, 173 skipped, 1 failure, 0 modules timed out |
+
+The one failure, `tests.skills.hep_ml.test_assets_smoke` `test_ddp_skeleton_two_gloo_processes` (two gloo processes
+on loopback), occurred under `--jobs 4` load; it passes 3 of 3 times alone on E2, and no file it reads changed in
+this release. `claude plugin validate --strict` and `codex plugin load` pass.
+
+Passing checks show software consistency, not physical validity.
