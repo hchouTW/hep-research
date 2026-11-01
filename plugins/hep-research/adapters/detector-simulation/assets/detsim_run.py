@@ -57,7 +57,7 @@ import detsim_runner as runner  # noqa: E402
 import detsim_schemas as schemas  # noqa: E402
 from detsim_plan import DetsimError  # noqa: E402
 
-ADAPTER_VERSION = "0.3.0"
+ADAPTER_VERSION = "0.4.0"
 PLUGIN = Path(__file__).resolve().parents[3]
 RECORD_NAME = "run.computational-run.json"
 OBSERVABLE_COLUMNS = ("quantity", "unit", "value", "uncertainty_type", "uncertainty", "point_kind", "point",
@@ -579,7 +579,10 @@ def _locked_run(plan, plan_digest, replicate, run_id, nonce, workspace, store, p
         facts["error_code"] = "backend-failed"
     if facts.get("error_code") or completeness.get("state") != "complete":
         facts.setdefault("error_code", None)
-        facts["error_code"] = facts["error_code"] or f"collect-{completeness.get('state')}"
+        missing = any(e.get("check") == "dependency" and e.get("result") == "fail"
+                      for e in completeness.get("evidence", []) if isinstance(e, dict))
+        facts["error_code"] = facts["error_code"] or ("missing-dependency" if missing  # §11.3: failed, missing-dependency
+                                                      else f"collect-{completeness.get('state')}")
         return _fail(plan, plan_digest, replicate, attempt, store, run_id, facts, profile_doc, completeness)
     observables_doc = dict(backend.observables(attempt, spec), run_id=run_id)
     problems = schemas.check_completeness(completeness) + schemas.check_observables(observables_doc)

@@ -58,7 +58,7 @@ Environment availability (2a): Allpix Squared — not installed; obtainable unde
 | W3a | W3a | `~/hep-research-detsim-sub-W3a` | detsim-sub-W3a | `e480371cbe36929a0c08e2979778ff367b943007` | `WR/patches/W3a/` | applied (3 patches) |
 | W4G | W4G | `~/hep-research-detsim-sub-W4G` | detsim-sub-W4G | `6e7b3263d844b18f89ef1b13573ad62f908284ba` | `WR/patches/W4G/` | applied |
 | W4A | W4A | `~/hep-research-detsim-sub-W4A` | detsim-sub-W4A | `45d1a379db8ceec75cacb8820b19a9ce66eb2ddb` | `WR/patches/W4A/` | rerun (conflict with W4G's test edits) |
-| W4A-2 | W4A | `~/hep-research-detsim-sub-W4A-2` | detsim-sub-W4A-2 | `7cbde8cecd610794d1dd0225321ab034b154dfe1` | `WR/patches/W4A-2/` | applying |
+| W4A-2 | W4A | `~/hep-research-detsim-sub-W4A-2` | detsim-sub-W4A-2 | `7cbde8cecd610794d1dd0225321ab034b154dfe1` | `WR/patches/W4A-2/` | applied |
 
 ## Environment reconnaissance
 
@@ -145,6 +145,11 @@ Host: Darwin arm64 (macOS 27.2), 8 CPUs, Python 3.13.2, git 2.54.0, CMake 4.3.2,
 | 2026-11-02 | W4G | `check` of a backend that declares `CHECK_READS_INPUTS` receives the input files (bytes re-hashed against the manifest), so GF-QUERY's out-of-domain refusal at check/prepare (§11.3) can read the table's range; opt-in, every other backend keeps the three-argument call of §8.2 (implementation detail, not a contract change) | §11.3 requires the refusal at check/prepare | drop the hook; refuse at run |
 | 2026-11-02 | W4G | Interpolation order and extrapolation methods are task parameters that must equal the table footer (`interpolation-mismatch` otherwise); `PYTHONPATH = ENV_ROOT/root/lib/root` only (the runner binds a leading logical root only); the script loads the Garfield libraries itself; the query script's hash is in the plan's code hashes, not in the environment identity | W4G report | — |
 | 2026-11-02 | W4G | Proposal to add a free-text `notes` field to detsim-observables/1 declined (a contract change for a note): "example table, pipeline validation only" stays in the task objective and the run record | — | add the field in a contracts minor |
+| 2026-11-02 | W4A | Extractor reads Allpix data members through ROOT's stored class layouts (TTree::Draw on member names), without loading libAllpixObjects, so `collect(attempt_dir, spec)` needs no environment root (the §8.2 interface unchanged); a controller without PyROOT reports the completeness check `dependency` failed, which the shared layer maps to failed / missing-dependency (§11.3) | W4A report | load the object library |
+| 2026-11-02 | W4A | H3-a (bind logical roots inside path lists and after "=") not taken: `DYLD_LIBRARY_PATH = ENV_ROOT/allpix/lib` only (the executable's own library paths find Geant4, ROOT and the dependencies; a native run with exactly this environment works) and no `output_directory` override (Allpix's default output folder under ATTEMPT_ROOT); recorded deviations from the card | W4A report | extend bind() |
+| 2026-11-02 | W4A | H3-b (an `error_code` field in detsim-completeness/1) not taken: the mapping above uses the existing evidence list | — | add the field in a contracts minor |
+| 2026-11-02 | W4A | Capability version `1.0.0` (the plan schema requires three parts) for both backends | detector_plan.json | — |
+| 2026-11-02 | W4A | The patch conflicted with W4G's test edits; rerun under key W4A-2 (cherry-pick with both backends kept; one cycle used) | §2.7 | — |
 | 2026-11-01 | W0 | Base is `origin/HEAD` = `25a8dbe6` (0.53.0), not the spec's `bf5e453` (0.51.0 + unreleased) | §2.3 step 3 takes the current `origin/HEAD`; W1 re-checks every repository fact on this base | rebase onto another base |
 | 2026-11-01 | W0 | Upstream clones are blob-less (`--filter=blob:none`) rather than `--depth 1` | keeps tags, so `git describe` (used by the Allpix version string) works; still read-only | reclone shallow |
 | 2026-11-01 | W1 | D-W1-1: `detsim run` can be an opaque `run_workflow.py` step with `parameter_digest` from `detsim prepare --digest-only` and only its `stdout` answer as output; incremental skip works only where the plugin release digest is known (released installs) | V-02 fixture | run detsim directly |

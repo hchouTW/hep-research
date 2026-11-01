@@ -840,5 +840,18 @@ class ReviewRoundThree(Base):
         self.assertTrue((target / "raw" / "x.txt").is_file())
 
 
+class DependencyAfterTheLock(Base):
+    """§11.3: a dependency found missing at collect (after the lock) is failed / missing-dependency, exit 1."""
+
+    def test_dependency_check_maps_to_missing_dependency(self):
+        def no_reader(attempt, spec):
+            return {"schema": "detsim-completeness/1", "state": "invalid", "missing_outputs": [],
+                    "evidence": [{"check": "dependency", "result": "fail", "detail": "reader module missing"}]}
+        plan, _ = self.prepare()
+        with mock.patch.object(synthetic, "collect", no_reader):
+            code, answer = self.run_plan(plan)
+        self.assertEqual((code, answer["status"], answer["error_code"]), (1, "failed", "missing-dependency"))
+
+
 if __name__ == "__main__":
     unittest.main()
