@@ -43,3 +43,16 @@ Pinned 2026-11-02 (V-13 concluded):
 | Variables | `PYTHONPATH = ENV_ROOT/root/lib/root:ENV_ROOT/garfield/lib/python3.15/site-packages`, `DYLD_LIBRARY_PATH = ENV_ROOT/garfield/lib` |
 | Query method | Python query script through PyROOT (`import ROOT, Garfield`; `ROOT.Garfield.MediumMagboltz`), a rendered file in the plan; no compiled driver |
 | Pilot (allowed, no query of results) | `LoadGasFile` of the pinned table returns true and sets pressure 760 Torr and temperature 300 K (V-12 measured) |
+
+## Amendments (recorded after W4G review round 1, 2026-11-02; none changes a tolerance or criterion)
+
+- Environment identity: Garfield++ commit, build options, SHA-256 of the six Garfield++ libraries (libGarfield,
+  libGarfieldRandom, libHeed, libMagboltz, libDegrade, libneBEM) and of ROOT's libCore and PyROOT binding library,
+  ROOT and Python versions, platform. The query script's SHA-256 is in the plan's code hashes (and the run record's
+  `script_sha256`), not in the environment identity.
+- `PYTHONPATH = ENV_ROOT/root/lib/root` only; the script loads the Garfield++ libraries itself.
+- Observables rows carry the note "example table, pipeline validation only" (optional row field `note` of
+  detsim-observables/1, contracts 3.18.0) when the pinned example table is used.
+- Interpolation order and extrapolation methods are task parameters and must equal the table footer.
+- Query points must include the first node, the last node and an interior node of the table (refused at `check`,
+  partial at collect otherwise).
