@@ -252,7 +252,7 @@ def stage_data(out: Path) -> dict:
         "objective": "AMS-02 B/C (PRL 117, 231102, 2016), 67 rigidity bins, read from the per-source breakdown table "
                      "shipped with USINE V3.5 (a transcription of the paper's table), for the F1 reproduction",
         "bindings": {"experiments": [{"profile": "experiment:ams-02", "version": "2.0.0"}], "theory": []},
-        "versions": {"plugin": "0.53.0", "contracts": CONTRACTS_VERSION, "profiles": {"experiment:ams-02": "2.0.0"}},
+        "versions": {"plugin": "0.54.0", "contracts": CONTRACTS_VERSION, "profiles": {"experiment:ams-02": "2.0.0"}},
         "provenance": {"producer_skill": "hep-statistics", "created": "2026-10-28", "evidence_ids": ["ams02:S10"]},
         "inputs": [], "outputs": [], "status": ["observed"],
         "unresolved_inputs": ["values transcribed by USINE's authors (GPL-2.0 file, read in place): compared with the "
