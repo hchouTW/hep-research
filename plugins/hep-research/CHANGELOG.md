@@ -15,6 +15,21 @@ Software checks establish contract consistency only, not physical validity.
   index `docs/dev/detector-simulation/SOURCES.md` and the 20-question set
   `docs/dev/detector-simulation/knowledge-questions.md`.
 - Evidence: VALIDATION DETSIM-WK
+- **Contracts 3.18.0: four sidecar schemas for the detector-simulation adapter**, none an artifact type:
+  `detector_task.json` (detector-task/1), `detector_plan.json` (detector-plan/1), `detsim_completeness.json`
+  (detsim-completeness/1) and `detsim_observables.json` (detsim-observables/1, a long table for hep-statistics). No
+  artifact type, vocabulary term, rule or capability changes: every 3.17 artifact keeps its outcome. Fixtures,
+  theory-profile artifacts, skill templates and the 14 examples carry the new version (examples regenerated with the
+  E2 venv; only versions and hashes change).
+- **New optional adapter `adapters/detector-simulation` 0.1.0** (owner hep-detector, proposed): `detsim.py`
+  `describe`, `check` and `prepare [--digest-only [--replicate N]]` build a content-addressed plan without launching
+  anything: a hash-scope check before hashing (no binary floats, integers beyond 2^53-1, non-ASCII or duplicate
+  keys, NaN, lone surrogates, absolute paths or `$NAME` references), exact normalized decimal strings (`decimal/1`),
+  inputs hashed inside the project, the environment from a validated record, a runner profile per platform
+  (`macos-g0` as measured; `linux-g0` unsupported until measured), a rebuild comparison refusing a stale plan with
+  `plan-stale` and the mismatched fields, the run digest and `run_id`. Tests use a simulator-free backend under
+  `tests/adapters/`.
+- Evidence: VALIDATION DETSIM-W3A
 
 ## 0.53.0 (2026-11-01)
 
