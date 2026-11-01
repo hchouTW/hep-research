@@ -196,7 +196,7 @@ def check(args, backends: dict) -> dict:
     task, capability = plan_layer.checked_task(task, backend, args.allow_outside_validated_range)
     manifest = plan_layer.resolve_inputs(task, workspace)
     environment = plan_layer.load_env_record(plan_layer.artifacts_root(workspace), task["environment_ref"])
-    plan_layer.raise_backend_issues(backend.check(task, capability, manifest))
+    plan_layer.raise_backend_issues(plan_layer.backend_check(backend, task, capability, manifest, workspace))
     return {"status": "ok", "backend": args.backend, "capability": {"id": capability["id"],
                                                                      "version": capability["version"]},
             "inputs": manifest, "environment": {"env_identity": environment["env_identity"]},

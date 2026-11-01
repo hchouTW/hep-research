@@ -4,8 +4,10 @@ detsim.py is the adapter's only command (the only assets file containing the str
 third-party package anywhere, so tests/adapters/test_adapter_missing_dependency.py does not put it in its domain.
 This test hides ROOT and uproot (sys.modules[name] = None, so importing them fails whether or not they are
 installed) and runs describe, check and prepare with the simulator-free backend: everything this version offers
-works without them. The backends, which import ROOT or uproot only inside the functions that need them, and the
-expectation that check --probe answers missing-dependency (exit 3) without them, come with work items W4A and W4G.
+works without them. The backends import ROOT or uproot only inside the functions that need them (the Garfield++
+backend not at all: ROOT is imported by its query script, in the backend process); with ROOT hidden, check --probe of
+the Garfield++ backend answers missing-dependency (exit 3) for an environment root without ROOT (more cases in
+test_detsim_garfield.py). The Allpix Squared backend's expectation comes with work item W4A.
 SYNTHETIC inputs; standard library only.
 """
 import ast
@@ -56,6 +58,22 @@ class WithoutRootOrUproot(unittest.TestCase):
                     with self.subTest(hidden=hidden, argv=argv[-3:]):
                         code, answer, err = run_cli(argv, hide=hidden)
                         self.assertEqual((code, answer["status"]), (0, "ok"), (answer, err[-300:]))
+
+    @needs("process_groups")
+    def test_garfield_probe_without_root_is_missing_dependency(self):
+        with tempfile.TemporaryDirectory() as scratch:
+            project = synthetic.make_project(Path(scratch) / "project")
+            empty_view = Path(scratch) / "view without ROOT"
+            (empty_view / "bin").mkdir(parents=True)
+            for hidden in ("ROOT", "ROOT,uproot"):
+                with self.subTest(hidden=hidden):
+                    code, answer, err = run_cli(["--backend", "garfieldpp", "describe"], hide=hidden)
+                    self.assertEqual((code, answer["status"]), (0, "ok"), (answer, err[-300:]))
+                    code, answer, err = run_cli(["--backend", "garfieldpp", "check", "--workspace", str(project),
+                                                 "--probe", "--env-root", str(empty_view)], hide=hidden)
+                    self.assertEqual((code, answer["status"], answer["error_code"]),
+                                     (3, "missing-dependency", "missing-dependency"), (answer, err[-300:]))
+                    self.assertTrue(any("ROOT" in m for m in answer["missing"]), answer["missing"])
 
     def test_hidden_module_really_fails_to_import(self):
         proc = subprocess.run([sys.executable, "-I", "-c", "import sys; sys.modules['ROOT'] = None; import ROOT"],

@@ -362,10 +362,13 @@ class CommandLine(ProjectCase):
     def test_real_file_without_backends(self):
         code, answer, err = run_file(["describe"])
         self.assertEqual((code, answer["status"]), (0, "ok"), err)
-        for backend in ("allpix-squared", "garfieldpp"):
-            code, answer, _ = run_file(["--backend", backend, "check", "--workspace", str(self.project), "--task",
-                                        "task.json"])
-            self.assertEqual((code, answer["status"], answer["error_code"]), (3, "not-run", "backend-unavailable"))
+        self.assertEqual(answer["backends"]["garfieldpp"], "present")  # W4G
+        code, answer, _ = run_file(["--backend", "allpix-squared", "check", "--workspace", str(self.project), "--task",
+                                    "task.json"])
+        self.assertEqual((code, answer["status"], answer["error_code"]), (3, "not-run", "backend-unavailable"))
+        code, answer, _ = run_file(["--backend", "garfieldpp", "check", "--workspace", str(self.project), "--task",
+                                    "task.json"])  # a synthetic task: the Garfield++ backend has no such capability
+        self.assertEqual((code, answer["status"], answer["error_code"]), (2, "rejected", "unknown-capability"))
         code, answer, _ = run_file(["--backend", "allpix-squared", "check", "--workspace", "/nonexistent/x", "--task",
                                     "/nonexistent/x/task.json"])
         self.assertEqual((code, answer["status"], answer["error_code"]), (2, "rejected", "workspace-missing"))

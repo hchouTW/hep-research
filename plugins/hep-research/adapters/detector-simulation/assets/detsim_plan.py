@@ -277,6 +277,18 @@ def code_hashes(backend, capability: dict, assets_dir: Path | None = None) -> di
             "schemas": schemas.schema_file_hashes()}
 
 
+def backend_check(backend, task: dict, capability: dict, manifest: list, workspace: Path) -> list:
+    """The backend's check. A backend that declares CHECK_READS_INPUTS = True also receives input_files = {relative
+    path: project file} so it may read a recorded input (a gas table's grid and conditions, TASK.md 12.3); it must
+    verify the bytes it reads against the manifest's SHA-256, which stays authoritative. Others get the three
+    arguments of TASK.md 8.2."""
+    if getattr(backend, "CHECK_READS_INPUTS", False) is True:
+        root = Path(workspace).resolve()
+        files = {item["path"]: root.joinpath(*item["path"].split("/")) for item in manifest}
+        return backend.check(task, capability, manifest, input_files=files)
+    return backend.check(task, capability, manifest)
+
+
 def raise_backend_issues(issues) -> None:
     if not issues:
         return
@@ -297,7 +309,7 @@ def assemble_plan(task, workspace: Path, backend, profile_doc: dict, assets_dir:
     task, capability = checked_task(task, backend, allow_outside_validated_range)
     manifest = resolve_inputs(task, workspace)
     environment = load_env_record(artifacts_root(workspace), task["environment_ref"])
-    raise_backend_issues(backend.check(task, capability, manifest))
+    raise_backend_issues(backend_check(backend, task, capability, manifest, workspace))
     profile_in_scope = plan_profile(profile_doc)
     spec = backend.build_spec(copy.deepcopy(task), capability, copy.deepcopy(manifest), copy.deepcopy(environment),
                               copy.deepcopy(profile_in_scope))

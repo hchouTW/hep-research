@@ -1,0 +1,39 @@
+{
+ "id": "garfield.gas-table-query",
+ "version": "1.0.0",
+ "backend": "garfieldpp",
+ "parameters_schema": {
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["table_role", "query_fields", "magnetic_field", "temperature", "pressure", "interpolation"],
+  "properties": {
+   "table_role": {"type": "string", "pattern": "^[a-z][a-z0-9_-]*$"},
+   "query_fields": {"type": "array", "minItems": 1, "maxItems": 1000, "items": {"$ref": "detector_task.json#/$defs/quantity"}},
+   "magnetic_field": {"$ref": "detector_task.json#/$defs/quantity"},
+   "temperature": {"$ref": "detector_task.json#/$defs/quantity"},
+   "pressure": {"$ref": "detector_task.json#/$defs/quantity"},
+   "interpolation": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": ["order", "low", "high"],
+    "properties": {
+     "order": {"enum": [1, 2]},
+     "low": {"enum": ["constant", "linear", "exponential"]},
+     "high": {"enum": ["constant", "linear", "exponential"]}
+    }
+   },
+   "allow_outside_validated_range": {"type": "boolean"}
+  }
+ },
+ "required_guarantees": {"timeout_kill": "hard", "inputs_unmodified": "hard", "output_size_abort": "soft"},
+ "limitations": [
+  "electron drift velocity only: the velocity along E of one 1D Garfield++ gas table (Dimension : F); a table with B or angle grids (Dimension : T) is refused",
+  "B = 0 and E along +x (query_fields in V/cm): the velocity components perpendicular to E are exactly zero by construction",
+  "temperature and pressure must equal the table's (TGAS, PGAS); any other value is refused with condition-mismatch (no density scaling)",
+  "the interpolation order (1 or 2) and the low and high extrapolation methods must equal the table footer's velocity entries (Interp, L Extr, H Extr); the query script sets them explicitly",
+  "points outside the table's E range are refused with out-of-domain unless allow_outside_validated_range is true; then Garfield++'s native extrapolation is used and the rows carry outside-validated-range (an adapter policy that differs from native behaviour)",
+  "Garfield++ commit e2e58ea74ec8b20d347d78b7a769f40e3b156072 is pinned (docs/dev/detector-simulation/card-GF-QUERY.md); the environment record must name it",
+  "verification only: checks 1-4 compare Garfield++ with an independent parser and reimplementation of its interpolation; no agreement with independent gas data and no physical validity is claimed",
+  "deterministic: no random number generator, so no seed"
+ ]
+}
