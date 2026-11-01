@@ -3,6 +3,16 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **hep-computing: event displays as knowledge and templates.** New references `event-displays.md` (rules, decision
+  table, eight build steps with done conditions), `event-display-facts.md` (Phoenix, JSROOT, Plotly, ECharts and
+  serving facts, each marked run or source) and `event-display-checklist.md`; templates in `assets/event-display/`
+  (event and result exporters with sidecars and an oracle, a content-addressed bundle builder and checker, a headless
+  browser test, a Vite page), with event selection, a check of every chart against its source result, and refusal
+  of error bars that the result does not support. No script, contract, adapter or skill description changes.
+- Evidence: VALIDATION EVENT-DISPLAY-TEMPLATES
+
 ## 0.52.0 (2026-11-01)
 
 Minor release: cross-platform support. Contracts 3.17.0 and every skill's `description` are unchanged; `CORE_VERSION`
