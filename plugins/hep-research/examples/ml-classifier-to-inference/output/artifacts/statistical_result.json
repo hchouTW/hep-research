@@ -16,7 +16,7 @@
   "theory": []
  },
  "versions": {
-  "plugin": "0.52.0",
+  "plugin": "0.53.0",
   "contracts": "3.17.0",
   "plugin_release": {
    "release": "unreleased",
@@ -36,7 +36,7 @@
    "ref": "artifacts/ml_artifact.json",
    "artifact_type": "ml-artifact",
    "artifact_id": "synthetic-j9-classifier",
-   "sha256": "5d6749e5ad88fb283eea91f47cfa33af05829079ab5186cd65a2fdc8e7e69155",
+   "sha256": "097ad4e95dc8c1685d2bd0a03d08d937b1e3a525a05a70483ab03861e13fdd00",
    "version": "3.17.0",
    "status": [
     "synthetic"
