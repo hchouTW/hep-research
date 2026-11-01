@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 44,
-   "bytes": 693701,
+   "bytes": 694436,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1747,7 +1747,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "4607531f 2026-11-01"
+   "last_commit": "d7e81298 2026-11-01"
   },
   {
    "path": "skills/hep-computing/references/software-architecture.md",
@@ -2660,8 +2660,8 @@
   {
    "path": "skills/hep-detector/references/sensor-and-gas-transport-tools.md",
    "owner": "hep-detector",
-   "bytes": 24306,
-   "lines": 253,
+   "bytes": 25041,
+   "lines": 257,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/references/sensor-and-gas-simulation-operations.md",

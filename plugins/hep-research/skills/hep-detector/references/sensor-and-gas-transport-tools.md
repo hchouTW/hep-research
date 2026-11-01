@@ -9,8 +9,8 @@ how to obtain, build and run the tools and the `detsim` command is in the hep-co
 [operations guide](../../hep-computing/references/sensor-and-gas-simulation-operations.md).
 
 **Status (2026-11-01).** Usable with no simulator installed: everything in this page is read from sources, nothing
-from a run. Neither backend has been built or run through hep-research; every statement about what a run produces
-is **unverified** until the task card's acceptance checks pass, and no example result is given. Source IDs in
+from a run. Both backends have run their task cards' acceptance checks on one macOS arm64 environment (section 10);
+every statement about another version, platform or configuration is **unverified**, and no example result is given. Source IDs in
 brackets (`[GF-03]`) refer to the source index `docs/dev/detector-simulation/SOURCES.md` (plugin root), which gives
 the commit, file, lines, retrieval time and content hash of each.
 
@@ -176,7 +176,8 @@ Both are **pipeline-validation cases**: they show that identity, execution, comm
 produce research conclusions [H-01 §1.4]. Full cards: task specification §12.2 and §12.3 [H-01]; the pinned versions
 are written when each card is pinned.
 
-**AP-BOOT — rerun of the official pixel example** (capability `allpix.pixel-charge`, state `proposed`).
+**AP-BOOT — rerun of the official pixel example** (capability `allpix.pixel-charge` 1.0.0, state `demonstrated-on-synthetic-data`: its checks passed on one macOS arm64
+environment with Allpix Squared `df69a6a4`; see the adapter's capability-matrix row).
 
 | Item | Content |
 |---|---|
@@ -186,15 +187,16 @@ are written when each card is pinned.
 | Counterexamples it must catch | missing dependency, wrong version, missing Geant4 data set, exit 0 with content missing, an event without hits, sign read wrongly, replaced input |
 | Not claimed | 10 events are not statistics; no efficiency, waveform or scan |
 
-**GF-QUERY — electron drift velocity on one pinned 1D table** (capability `garfield.gas-table-query`, state
-`proposed`).
+**GF-QUERY — electron drift velocity on one pinned 1D table** (capability `garfield.gas-table-query` 1.0.0,
+state `demonstrated-on-synthetic-data`: its checks passed on one macOS arm64 environment with Garfield++ `e2e58ea`; see
+the adapter's capability-matrix row).
 
 | Item | Content |
 |---|---|
 | Input | one 1D `.gas` table; candidate `Examples/GasFile/ar_80_co2_20_0T.gas`: Ar 80 % / CO₂ 20 %, 300 K, 760 Torr, 30 E points, E/p 0.1316 … 105.26 V/(cm·Torr) (100 V/cm to 80 kV/cm), B = 0, created 2012, format version 12 [GF-07]. Local input only, never committed; "example table, pipeline validation only", never reference physics data |
 | Query | B = 0, E along +x; three nodes (first, middle, last), interior points including one in the first and one in the last interval; two out-of-range points in a separate task |
 | Checks | (1) at nodes, the magnitude of v equals the independent parse (E = (E/p)·p, v = value × 1e-3) within 4 ulp, perpendicular components exactly 0; (2) electrons drift opposite to E, per component; (3) interior points equal an independent reimplementation of the pinned stencil within relative 1e-12 + 4 ulp; (4) out of range: refused by default, with the option equal to the reimplemented constant / linear / exponential extrapolation and labelled |
-| Refused | a 3D table, a temperature or pressure other than the table's, a missing quantity |
+| Refused | a 3D table (B or angle grids), B ≠ 0, a temperature or pressure other than the table's, interpolation settings other than the table footer's, a missing velocity quantity, a malformed table, a field outside the table unless `allow_outside_validated_range` (`out-of-domain` with the valid range) |
 | Not claimed | agreement with independent gas data; no seed (deterministic query) |
 
 All tolerances are fixed before any query and never relaxed afterwards.
@@ -229,8 +231,10 @@ The status values and error codes behind these classes are in the [operations gu
 
 ## 10. Limitations and untested scope
 
-- Nothing here has run: both capabilities are `proposed`; tested versions, environments and platforms stay empty
-  until each backend's acceptance checks pass. The adapter's guarantees are measured on macOS only; on Linux they are
+- Both capabilities ran their acceptance checks on one environment only (macOS 27.2 arm64; Allpix Squared `df69a6a4`
+  with a C++20 Geant4 11.4.3, Garfield++ `e2e58ea`, ROOT 6.40.04); their state is `demonstrated-on-synthetic-data`
+  until a non-author rerun and the performance measurement complete the checklist; any other version or environment
+  is untested. The adapter's guarantees are measured on macOS only; on Linux they are
   declared unsupported until measured on a Linux host [H-02], so a capability that requires them is refused there.
 - First batch only: no waveforms, gas-table generation, microscopic tracking, avalanche, TCAD field maps, user
   Allpix Squared configurations, scans or cross-tool coupling.

@@ -191,7 +191,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `root-debugging.md` | hep-computing | 3.6 | yes | 4 | - | 9257d7b5 2026-10-15 |
 | `root-usage-patterns.md` | hep-computing | 7.0 | yes | 6 | hep-ml | 16214af1 2026-10-26 |
 | `semantic-naming.md` | hep-computing | 17.5 | yes | 42 | hep-authoring, hep-citations, hep-detector, hep-measurement, hep-ml, hep-review, hep-statistics, hep-theory | 7be56d2b 2026-10-26 |
-| `sensor-and-gas-simulation-operations.md` | hep-computing | 17.8 | no | 4 | hep-detector | 4607531f 2026-11-01 |
+| `sensor-and-gas-simulation-operations.md` | hep-computing | 17.8 | no | 4 | hep-detector | d7e81298 2026-11-01 |
 | `software-architecture.md` | hep-computing | 7.8 | no | 4 | - | 351029c0 2026-10-07 |
 | `status-updates-and-completion.md` | hep-computing | 2.0 | no | 2 | - | 351029c0 2026-10-07 |
 | `storage-cern-eos.md` | hep-computing | 13.4 | yes | 4 | - | 50decbd0 2026-10-17 |
@@ -236,7 +236,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `readout-digitization-and-overlay.md` | hep-detector | 9.6 | no | 3 | - | e2957da1 2026-10-25 |
 | `reconstruction-performance-and-truth-matching.md` | hep-detector | 11.6 | yes | 13 | hep-computing | 5e3b104e 2026-10-29 |
 | `response-and-forward-folding.md` | hep-detector | 15.9 | yes | 15 | hep-computing, hep-measurement, hep-statistics | e03c0396 2026-10-22 |
-| `sensor-and-gas-transport-tools.md` | hep-detector | 24.3 | no | 2 | hep-computing | 8abe2652 2026-11-01 |
+| `sensor-and-gas-transport-tools.md` | hep-detector | 25.0 | no | 2 | hep-computing | 8abe2652 2026-11-01 |
 | `signal-formation-and-readout.md` | hep-detector | 19.3 | no | 12 | hep-citations | a1267715 2026-10-25 |
 | `space-based-direct-detection.md` | hep-detector | 20.9 | yes | 16 | hep-citations, hep-measurement, hep-statistics | c90b601b 2026-10-22 |
 | `system-design-workflow.md` | hep-detector | 30.6 | no | 5 | - | bbeb133f 2026-10-25 |
