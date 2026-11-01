@@ -419,10 +419,10 @@ class Commit(Base):  # T-COMMIT
         self.run_plan(plan)
         junk = self.store / ".pending" / f"{canonical.run_id(digest, 0)}.junk"
         junk.mkdir(parents=True)
-        (junk / "observables.csv").write_text("not,a,result\n")
+        (junk / "observables.csv").write_text("junkquantity,a,result\n")
         code, summary = self.call("inspect", "--workspace", str(self.project), "--view", "summary")
         self.assertEqual(len(summary["runs"]), 1)
-        self.assertNotIn("not", json.dumps(summary["runs"][0]["observables"]))
+        self.assertNotIn("junkquantity", json.dumps(summary["runs"][0]["observables"]))  # ("not" is in "note")
 
 
 class FileSystem(Base):  # T-FS

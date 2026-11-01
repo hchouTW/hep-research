@@ -303,7 +303,7 @@ def check_completeness(doc) -> list[dict]:
 
 
 def check_observables(doc) -> list[dict]:
-    """detsim-observables/1: schema, fullmatch, the uncertainty rules and unique labels per row."""
+    """detsim-observables/1: schema, fullmatch, the uncertainty rules, unique labels and a one-line note per row."""
     out = schema_findings(doc, "detsim_observables.json")
     if not isinstance(doc, dict):
         return out
@@ -329,6 +329,10 @@ def check_observables(doc) -> list[dict]:
                                 f"uncertainty_type {kind!r} needs an uncertainty"))
         if isinstance(row.get("uncertainty"), str) and row["uncertainty"].startswith("-"):
             out.append(_finding(where + ".uncertainty", "observables.uncertainty_negative", "an uncertainty is >= 0"))
+        note = row.get("note")
+        if isinstance(note, str) and (not note.strip() or any(ord(c) < 32 or ord(c) == 127 for c in note)):
+            out.append(_finding(where + ".note", "observables.note_format", "a note is one non-blank line without "
+                                                                              "control characters"))
         labels = row.get("labels") if isinstance(row.get("labels"), list) else []
         if len(labels) != len(set(map(str, labels))):
             out.append(_finding(where + ".labels", "observables.duplicate_label", "a label is listed twice"))

@@ -61,7 +61,7 @@ ADAPTER_VERSION = "0.4.0"
 PLUGIN = Path(__file__).resolve().parents[3]
 RECORD_NAME = "run.computational-run.json"
 OBSERVABLE_COLUMNS = ("quantity", "unit", "value", "uncertainty_type", "uncertainty", "point_kind", "point",
-                      "detector", "component", "labels", "source_sha256")
+                      "detector", "component", "labels", "note", "source_sha256")
 FS_ADVICE = "artifacts must lie on a local file system of the allowlist (TASK.md 6.2); NFS, CIFS, FUSE are refused"
 HOOKS: dict = {}  # test hooks: "before_snapshot", "before_commit", "before_rename", "after_rename" (callables)
 
@@ -575,14 +575,15 @@ def _locked_run(plan, plan_digest, replicate, run_id, nonce, workspace, store, p
     facts["completeness_state"] = completeness.get("state")
     if interrupts.received and not facts.get("error_code"):
         facts["error_code"], facts["end"] = "cancelled", "cancelled"
+    missing = any(e.get("check") == "dependency" and e.get("result") == "fail"
+                  for e in completeness.get("evidence", []) if isinstance(e, dict))
+    if missing and facts.get("error_code") in (None, "backend-failed"):
+        facts["error_code"] = "missing-dependency"  # §11.3: failed, missing-dependency; before backend-failed
     if launched["native_exit_code"] not in (0, None) and not facts.get("error_code"):
         facts["error_code"] = "backend-failed"
     if facts.get("error_code") or completeness.get("state") != "complete":
         facts.setdefault("error_code", None)
-        missing = any(e.get("check") == "dependency" and e.get("result") == "fail"
-                      for e in completeness.get("evidence", []) if isinstance(e, dict))
-        facts["error_code"] = facts["error_code"] or ("missing-dependency" if missing  # §11.3: failed, missing-dependency
-                                                      else f"collect-{completeness.get('state')}")
+        facts["error_code"] = facts["error_code"] or f"collect-{completeness.get('state')}"
         return _fail(plan, plan_digest, replicate, attempt, store, run_id, facts, profile_doc, completeness)
     observables_doc = dict(backend.observables(attempt, spec), run_id=run_id)
     problems = schemas.check_completeness(completeness) + schemas.check_observables(observables_doc)

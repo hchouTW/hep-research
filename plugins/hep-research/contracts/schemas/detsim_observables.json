@@ -1,5 +1,5 @@
 {
- "$comment": "detsim-observables/1 (contracts 3.18.0; adapters/detector-simulation, decision D-W1-2 of docs/dev/detector-simulation/PROGRESS.md, TASK.md 9.5): the long table a detector-simulation run hands to hep-statistics, one row per value: quantity name, unit, value as a normalized decimal string (decimal/1), uncertainty type and value, the event or query point, the detector and component when they apply, artifact status labels (e.g. outside-validated-range) and the SHA-256 of the native file the value was read from. runs/<run_id>/observables.csv holds the rows; this schema validates them as JSON objects. Not simulation-summary/1 (per-run accumulators). Code checks (detsim_schemas.check_observables): uncertainty_type none has no uncertainty and every other type has one; an uncertainty is not negative; labels are unique; patterns are re-applied with re.fullmatch.",
+ "$comment": "detsim-observables/1 (contracts 3.18.0; adapters/detector-simulation, decision D-W1-2 of docs/dev/detector-simulation/PROGRESS.md, TASK.md 9.5): the long table a detector-simulation run hands to hep-statistics, one row per value: quantity name, unit, value as a normalized decimal string (decimal/1), uncertainty type and value, the event or query point, the detector and component when they apply, artifact status labels (e.g. outside-validated-range) and the SHA-256 of the native file the value was read from, and an optional one-line note qualifying the source. runs/<run_id>/observables.csv holds the rows; this schema validates them as JSON objects. Not simulation-summary/1 (per-run accumulators). Code checks (detsim_schemas.check_observables): uncertainty_type none has no uncertainty and every other type has one; an uncertainty is not negative; labels are unique; patterns are re-applied with re.fullmatch.",
  "type": "object",
  "required": [
   "schema",
@@ -88,6 +88,11 @@
     },
     "source_sha256": {
      "$ref": "detector_task.json#/$defs/sha256"
+    },
+    "note": {
+     "type": "string",
+     "minLength": 1,
+     "description": "a short free-text qualification of the row's source (e.g. 'example table, pipeline validation only'); one line, no control characters (code check)"
     }
    }
   }

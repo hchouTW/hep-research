@@ -20,6 +20,7 @@ Standard library only; passes with a TMPDIR whose name has spaces and non-ASCII 
 """
 from __future__ import annotations
 
+import base64
 import contextlib
 import copy
 import hashlib
@@ -162,19 +163,23 @@ def task_document(env_identity: str, fields=None, table_path: str = "inputs/syn 
             "budget": {"timeout_s": 60, "max_output_bytes": 1048576}}
 
 
-FAKE_IDENTITY = {"kind": "garfieldpp-view", "garfield_commit": garfield.PINNED_COMMIT, "libgarfield_sha256": "0" * 64,
-                 "libcore_sha256": "1" * 64, "root_version": "6.40.04", "python_version": "3.15.2",
+FAKE_IDENTITY = {"kind": "garfieldpp-view", "garfield_commit": garfield.PINNED_COMMIT,
+                 "library_sha256": {"libGarfield": "0" * 64, "libCore": "1" * 64},
+                 "root_version": "6.40.04", "python_version": "3.15.2",
                  "build_options": {}, "platform": "test"}
 FAKE_VARIABLES = {"PYTHONPATH": "ENV_ROOT/root/lib/root", "DYLD_LIBRARY_PATH": "ENV_ROOT/garfield/lib"}
 
 
-def make_project(root: Path, kind: str = "1d", identity=None, **task_overrides) -> Path:
-    """A project with the synthetic table, an environment record (fake identity) and task.json."""
+def make_project(root: Path, kind: str = "1d", identity=None, env_root: Path | None = None, table_bytes=None,
+                 **task_overrides) -> Path:
+    """A project with the synthetic table (or table_bytes), an environment record (fake identity) and task.json."""
     project = Path(root)
     (project / "inputs").mkdir(parents=True, exist_ok=True)
-    shutil.copyfile(fixture(kind), project / "inputs" / "syn table.gas")
+    (project / "inputs" / "syn table.gas").write_bytes(table_bytes if table_bytes is not None
+                                                       else fixture(kind).read_bytes())
+    path_record = {"note": "fake view (tests)"} | ({"env_root": str(env_root)} if env_root is not None else {})
     record = detsim_plan.env_record(identity or FAKE_IDENTITY, FAKE_VARIABLES, facts={"backend": "garfieldpp"},
-                                    path_record={"note": "fake view (tests)"})
+                                    path_record=path_record)
     path = detsim_plan.env_record_path(detsim_plan.artifacts_root(project), record["env_identity"])
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(record, indent=1), encoding="utf-8")
@@ -482,7 +487,7 @@ def simulated_output(query: dict, table: dict, mutate=None) -> str:
 
 
 class Collect(ProjectCase):
-    def attempt(self, fields=None, allow=False, mutate=None, write_raw=True, **overrides):
+    def attempt(self, fields=None, allow=False, mutate=None, write_raw=True, status=None, **overrides):
         project = self.project(fields=fields, **overrides)
         task = json.loads((project / "task.json").read_text(encoding="utf-8"))
         plan, _ = detsim_plan.assemble_plan(task, project, garfield, MACOS, allow_outside_validated_range=allow)
@@ -492,8 +497,12 @@ class Collect(ProjectCase):
         detsim_run.write_rendered_files(spec, attempt)
         (attempt / "input" / "inputs").mkdir(parents=True)
         shutil.copyfile(project / "inputs" / "syn table.gas", attempt / "input" / "inputs" / "syn table.gas")
+        (attempt / "logs").mkdir()
+        query = garfield.query_from_spec(spec)
+        (attempt / "logs" / "stdout.txt").write_text(
+            "MediumMagboltz::LoadGasFile:\n    Reading file.\n"
+            + json.dumps(status or {"points": len(query["points"]), "status": "ok"}) + "\n", encoding="utf-8")
         if write_raw:
-            query = garfield.query_from_spec(spec)
             (attempt / "raw").mkdir()
             (attempt / "raw" / "drift_velocity.txt").write_text(simulated_output(query, parsed(), mutate),
                                                                 encoding="ascii")
@@ -507,7 +516,8 @@ class Collect(ProjectCase):
         doc = garfield.collect(attempt, spec)
         self.assertEqual(doc["state"], "complete", doc)
         self.assertEqual(detsim_schemas.check_completeness(doc), [])
-        self.assertEqual(self.evidence(doc), {"expected-outputs": "pass", "table-identity": "pass",
+        self.assertEqual(self.evidence(doc), {"script-status": "pass", "node-coverage": "pass",
+                                              "expected-outputs": "pass", "table-identity": "pass",
                                               "conditions": "pass", "interpolation-settings": "pass",
                                               "query-points": "pass", "check-1-nodes": "pass", "check-2-sign": "pass",
                                               "check-3-interior": "pass", "check-4-outside": "pass", "rows": "pass"})
@@ -750,6 +760,201 @@ class Module(unittest.TestCase):
         answer = json.loads(out.getvalue())
         self.assertEqual((code, answer["capabilities"][0]["id"]), (0, "garfield.gas-table-query"))
         self.assertIn("allow_outside_validated_range", answer["capabilities"][0]["parameters"])
+
+
+# ---------------------------------------------------------------- review round 1 (W4G-2)
+
+def table_variant(low: str | None = None, first_velocity: float | None = None, text: str | None = None) -> bytes:
+    """The synthetic 1D table with another low extrapolation code and / or another first stored velocity."""
+    text = text or synthetic_gas_text("1d")
+    if low is not None:
+        code = {"constant": 0, "linear": 1, "exponential": 2}[low]
+        text = text.replace(" L Extr:     0", f" L Extr:     {code}")
+    if first_velocity is not None:
+        head, records = text.split(" The gas tables follow:\n")
+        records = records.replace(fortran_e(synthetic_velocity(E_OVER_P[0])), fortran_e(first_velocity), 1)
+        text = head + " The gas tables follow:\n" + records
+    return text.encode("ascii")
+
+
+def respec(spec: dict, query: dict) -> dict:
+    """spec with its rendered query replaced (for collect tests of plans check would not produce)."""
+    raw = (json.dumps(query, sort_keys=True, indent=1) + "\n").encode("ascii")
+    files = [f for f in spec["files"] if f["path"] != garfield.QUERY_PATH]
+    files.append({"path": garfield.QUERY_PATH, "encoding": "base64", "content": base64.b64encode(raw).decode("ascii"),
+                  "sha256": hashlib.sha256(raw).hexdigest()})
+    return dict(spec, files=files)
+
+
+class ReviewRound1(Collect):
+    # M1: the note on every row of a known example table
+    def test_example_table_rows_carry_the_note(self):
+        attempt, plain_spec = self.attempt()  # the same table bytes; only the plan's query differs
+        sha = hashlib.sha256(fixture().read_bytes()).hexdigest()
+        with unittest.mock.patch.dict(garfield.EXAMPLE_TABLES, {sha: "test example"}):
+            project = self.project(name="noted")
+            task = json.loads((project / "task.json").read_text(encoding="utf-8"))
+            task["objective"] += " (" + garfield.NOTE_EXAMPLE + ")"
+            (project / "task.json").write_text(json.dumps(task), encoding="utf-8")
+            plan, _ = detsim_plan.assemble_plan(task, project, garfield, MACOS)
+        query = garfield.query_from_spec(plan["execution"])
+        self.assertEqual(query["note"], garfield.NOTE_EXAMPLE)
+        spec = respec(plain_spec, query)
+        doc = garfield.collect(attempt, spec)
+        self.assertEqual(doc["state"], "complete", doc)
+        table = garfield.observables(attempt, spec)
+        self.assertEqual({r.get("note") for r in table["rows"]}, {garfield.NOTE_EXAMPLE})
+        self.assertEqual(detsim_schemas.check_observables(table), [])
+        csv_text = detsim_run.observables_csv(table)
+        header = csv_text.splitlines()[0].split(",")
+        self.assertEqual(header[header.index("labels") + 1], "note")
+        self.assertIn(garfield.NOTE_EXAMPLE, csv_text.splitlines()[1])
+        stripped = copy.deepcopy(table["rows"])
+        del stripped[0]["note"]
+        self.assertTrue(garfield.check_rows(stripped, query, parsed()))
+
+    def test_note_must_be_one_line(self):
+        row = {"quantity": "electric_field", "unit": "V/cm", "value": "1e2", "uncertainty_type": "none",
+               "point_kind": "query_point", "point": 0, "labels": [], "source_sha256": "0" * 64}
+        self.assertEqual(detsim_schemas.check_observables({"schema": "detsim-observables/1",
+                                                           "rows": [dict(row, note="ok note")]}), [])
+        for bad in ("two\nlines", "", "   "):
+            with self.subTest(note=bad):
+                self.assertTrue(detsim_schemas.check_observables({"schema": "detsim-observables/1",
+                                                                  "rows": [dict(row, note=bad)]}))
+
+    # M2: the query script answers in JSON, exits 0-3 and has no __main__ string
+    def run_script(self, args, hide="ROOT"):
+        harness = ("import sys, runpy; [sys.modules.__setitem__(m, None) for m in sys.argv[1].split(',') if m != '-'];"
+                   " sys.argv = sys.argv[2:]; runpy.run_path(sys.argv[0])")
+        proc = subprocess.run([sys.executable, "-I", "-c", harness, hide, str(garfield.SCRIPT_FILE), *args],
+                              capture_output=True, text=True, timeout=120, cwd=self.work)
+        return proc.returncode, json.loads(proc.stdout.splitlines()[-1])
+
+    def test_query_script_json_status_and_exit_codes(self):
+        self.assertNotIn("__main__", garfield.SCRIPT_FILE.read_text(encoding="utf-8"))
+        query = self.work / "query.json"
+        query.write_text(json.dumps({"points": []}), encoding="utf-8")
+        common = ["--table", "t.gas", "--garfield-lib", "lib", "--out", str(self.work / "out.txt")]
+        code, answer = self.run_script(["--query", str(query)] + common)
+        self.assertEqual((code, answer["status"], answer["error_code"]), (3, "missing-dependency",
+                                                                          "missing-dependency"))
+        code, answer = self.run_script(["--query", str(self.work / "absent.json")] + common)
+        self.assertEqual((code, answer["status"]), (2, "rejected"))
+        code, answer = self.run_script(["--nope"])
+        self.assertEqual((code, answer["status"], answer["error_code"]), (2, "rejected", "usage"))
+
+    # minor 1: a library that does not load at run time -> failed, missing-dependency (not backend-failed)
+    def test_script_missing_dependency_is_reported_by_collect(self):
+        attempt, spec = self.attempt(write_raw=False, status={"status": "missing-dependency",
+                                                              "error_code": "missing-dependency",
+                                                              "message": "cannot load libGarfield.dylib"})
+        doc = garfield.collect(attempt, spec)
+        self.assertEqual(self.evidence(doc)["dependency"], "fail")
+        self.assertEqual(doc["state"], "partial")
+        self.assertEqual(detsim_schemas.check_completeness(doc), [])
+        attempt, spec = self.attempt(write_raw=False, status={"status": "failed", "error_code": "table-load"})
+        self.assertEqual(self.evidence(garfield.collect(attempt, spec))["script-status"], "fail")
+
+    def test_run_maps_a_run_time_missing_library_to_missing_dependency(self):
+        if detsim_profile.host_profile_id() != "macos-g0":
+            self.skipTest("not run (platform): runs need a measured runner profile; only macos-g0 is measured")
+        env_root = self.work / "env root"
+        (env_root / "bin").mkdir(parents=True)
+        program = env_root / "bin" / "python3"  # stands in for the query script whose library does not load
+        program.write_text("#!/bin/sh\necho 'loading'\necho '{\"error_code\": \"missing-dependency\", "
+                           "\"message\": \"cannot load libGarfield\", \"status\": \"missing-dependency\"}'\n"
+                           "exit 3\n", encoding="utf-8")
+        program.chmod(0o755)
+        project = self.project(name="run-dep", env_root=env_root)
+        task = json.loads((project / "task.json").read_text(encoding="utf-8"))
+        plan, _ = detsim_plan.assemble_plan(task, project, garfield, MACOS)
+        answer = detsim_run.run(plan, project, garfield, MACOS, 0, None)
+        self.assertEqual((answer["status"], answer["error_code"], answer["native_exit_code"]),
+                         ("failed", "missing-dependency", 3), answer)
+
+    # minor 2: malformed numbers and extra numbers in counted blocks
+    def test_malformed_and_extra_numbers(self):
+        good = synthetic_gas_text("1d")
+        cases = {"format": good.replace("Dimension : F         6", "Dimension : F         x"),
+                 "format-footer": good.replace(" Interp:     2    2", " Interp:     y    2"),
+                 "header": good.replace(" E-B angles", fortran_e(42.0) + "\n E-B angles"),
+                 "records": good.replace(" H Extr:", fortran_e(1.0) + "\n H Extr:")}
+        expected = {"format": "format", "format-footer": "format", "header": "header", "records": "records"}
+        for name, text in cases.items():
+            with self.subTest(case=name), self.assertRaises(garfield.GasTableError) as ctx:
+                garfield.parse_gas_table(text.encode("ascii"))
+            self.assertEqual(ctx.exception.code, expected[name])
+        project = self.project(name="malformed", table_bytes=cases["format"].encode("ascii"))
+        issues = self.checked(project)
+        self.assertEqual((issues[0]["code"], issues[0]["kind"]), ("table-format", "rejected"))
+
+    # minor 3: exponential extrapolation as upstream writes it, and refused when log is undefined
+    def test_exponential_extrapolation_matches_upstream_formula(self):
+        xs, ys = [1.0, 2.0, 3.0, 4.0], [2.0, 4.0, 5.0, 6.0]
+        # low: extr4 = log(y1/y0)/(x1-x0) = log 2, extr3 = log(y0) - extr4 x0 = 0 -> exp(0.5 log 2) = sqrt 2
+        self.assertAlmostEqual(garfield.extrapolate(xs, ys, 0.5, "exponential", "low"), math.sqrt(2.0), delta=1e-15)
+        # high: extr2 = log(6/5), extr1 = log 6 - 4 extr2 -> 6 (6/5)^(x-4); at x = 6: 6 * 1.44 = 8.64
+        self.assertAlmostEqual(garfield.extrapolate(xs, ys, 6.0, "exponential", "high"), 8.64, delta=1e-13)
+        self.assertEqual(garfield.extrapolate(xs, ys, 1e9, "exponential", "high"), math.exp(50.0))  # capped
+        self.assertEqual(garfield.extrapolate([1.0, 1.0, 2.0], [3.0, 4.0, 5.0], 0.5, "linear", "low"), 3.0)
+
+    def test_exponential_with_non_positive_end_values_is_refused(self):
+        exponential = {"order": 2, "low": "exponential", "high": "linear"}
+        ok = self.project(name="exp-ok", table_bytes=table_variant(low="exponential"), interpolation=exponential)
+        self.assertEqual(self.checked(ok), [])
+        bad = self.project(name="exp-bad", table_bytes=table_variant(low="exponential", first_velocity=-1.0),
+                           interpolation=exponential)
+        issues = self.checked(bad)
+        self.assertEqual((issues[0]["code"], issues[0]["kind"]), ("extrapolation-undefined", "refused"))
+
+    # minor 7: the settings are reported as requested, not as read back from the library
+    def test_settings_evidence_says_requested(self):
+        attempt, spec = self.attempt()
+        detail = next(e["detail"] for e in garfield.collect(attempt, spec)["evidence"]
+                      if e["check"] == "interpolation-settings")
+        self.assertIn("requested settings", detail)
+        self.assertIn("does not report", detail)
+
+    # minor 8: the identity holds the SHA-256 of every library the script loads and of ROOT's binding libraries
+    def test_identity_covers_every_loaded_library(self):
+        view = fake_view(self.work / "ident")
+        identity = garfield.probe(view)["identity"]
+        self.assertEqual(sorted(identity["library_sha256"]), sorted(list(garfield.LIBRARIES) + ["libCore",
+                                                                                                "libCPyCppyy"]))
+        (view / "garfield" / "lib" / ("libHeed" + LIBRARY_SUFFIX)).write_bytes(b"another build")
+        self.assertNotEqual(garfield.probe(view)["identity"], identity)
+
+    # minor 9: node coverage (first, last, an interior node), at check and in collect
+    def test_node_coverage(self):
+        xs = nodes()
+        mistyped = repr(xs[0])[:-1] + str((int(repr(xs[0])[-1]) + 1) % 10)
+        for name, fields, missing in (("no-first", [mistyped, "200", repr(xs[2]), repr(xs[-1])], "first node"),
+                                      ("no-last", [repr(xs[0]), repr(xs[2]), "7000"], "last node"),
+                                      ("no-interior", [repr(xs[0]), "200", repr(xs[-1])], "interior node")):
+            with self.subTest(case=name):
+                issues = self.checked(self.project(name=name, fields=fields))
+                self.assertEqual((issues[0]["code"], issues[0]["kind"]), ("node-coverage", "rejected"))
+                self.assertIn(missing, issues[0]["message"])
+        attempt, spec = self.attempt()
+        query = garfield.query_from_spec(spec)
+        query["points"][0]["field_v_per_cm"] = mistyped  # the first node, mistyped
+        spec = respec(spec, query)
+        (attempt / "raw" / "drift_velocity.txt").write_text(simulated_output(query, parsed()), encoding="ascii")
+        doc = garfield.collect(attempt, spec)
+        self.assertEqual((doc["state"], self.evidence(doc)["node-coverage"]), ("partial", "fail"))
+
+    # the interface: a backend without CHECK_READS_INPUTS gets the three-argument call of TASK.md 8.2
+    def test_backend_check_call_shapes(self):
+        calls = []
+        three = types.SimpleNamespace(check=lambda task, capability, manifest: calls.append("3") or [])
+        reads = types.SimpleNamespace(CHECK_READS_INPUTS=True,
+                                      check=lambda task, capability, manifest, input_files: calls.append(
+                                          sorted(input_files)) or [])
+        manifest = [{"role": "gas_table", "path": "inputs/syn table.gas", "size": 1, "sha256": "0" * 64}]
+        self.assertEqual(detsim_plan.backend_check(three, {}, {}, manifest, self.work), [])
+        self.assertEqual(detsim_plan.backend_check(reads, {}, {}, manifest, self.work), [])
+        self.assertEqual(calls, ["3", ["inputs/syn table.gas"]])
 
 
 # ---------------------------------------------------------------- live: the real backend (skipped without it)

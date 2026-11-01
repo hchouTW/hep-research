@@ -27,8 +27,13 @@ end nodes) or exponential (through the two end nodes in log space, exponent capp
 Checks of collect (card GF-QUERY; tolerances fixed before any query): 1 nodes |v| within 4 ulp of the stored value
 and perpendicular components exactly 0; 2 vx < 0 and vy = vz = 0 at every point; 3 interior points within
 1e-12 |r| + 4 ulp(r) of the reimplementation; 4 outside points (only with allow_outside_validated_range) within the
-same tolerance of the reimplemented extrapolation, rows labelled outside-validated-range. Any failure makes the
-attempt invalid (or partial when a point or the output is missing).
+same tolerance of the reimplemented extrapolation, rows labelled outside-validated-range. Besides: the script's
+JSON status (its last stdout line; missing-dependency becomes the dependency check, which the shared layer maps to
+failed / missing-dependency), node coverage (query points at the first, the last and an interior node), conditions,
+the requested settings and every planned point. Any failure makes the attempt invalid (partial when a point, the
+node coverage or the output is missing). Rows of a known example table carry the note "example table, pipeline
+validation only". The environment identity holds the SHA-256 of every library the script loads and of ROOT's
+libCore and libCPyCppyy.
 """
 from __future__ import annotations
 
@@ -108,6 +113,9 @@ def _take(lines: list[str], start: int, count: int, what: str) -> tuple[list[flo
         i += 1
     if len(found) != count:
         raise GasTableError("header", f"{what}: expected {count} numbers, found {len(found)}")
+    following = lines[i].split() if i < len(lines) else []
+    if following and NUMBER.fullmatch(following[0]):  # a further line of numbers: the block holds more than count
+        raise GasTableError("header", f"{what}: more than the {count} numbers the Dimension line states")
     return found, i
 
 
@@ -119,7 +127,17 @@ def record_length_1d(version: int, gasok: str, nexc: int, nion: int) -> int:
 
 
 def parse_gas_table(raw: bytes) -> dict:
-    """The grids, the velocity along E, the footer settings and the conditions of a .gas file (pinned storage form)."""
+    """The grids, the velocity along E, the footer settings and the conditions of a .gas file (pinned storage form);
+    GasTableError for anything else (a malformed integer or number included: code "format")."""
+    try:
+        return _parse_gas_table(raw)
+    except GasTableError:
+        raise
+    except (ValueError, IndexError, KeyError, TypeError) as err:
+        raise GasTableError("format", f"malformed table ({type(err).__name__}: {err})") from None
+
+
+def _parse_gas_table(raw: bytes) -> dict:
     try:
         text = raw.decode("ascii")
     except UnicodeDecodeError:
@@ -263,15 +281,29 @@ def linear_interpolation(xs: list[float], ys: list[float], x: float) -> float:
 
 
 def extrapolate(xs: list[float], ys: list[float], x: float, method: str, side: str) -> float:
-    """Outside the grid: constant (the end value), linear or exponential through the two end nodes."""
-    (xa, ya), (xb, yb) = ((xs[0], ys[0]), (xs[1], ys[1])) if side == "low" else ((xs[-1], ys[-1]), (xs[-2], ys[-2]))
-    if method == "constant" or xa == xb:
-        return ya
-    if method == "linear":
-        return ya + (yb - ya) / (xb - xa) * (x - xa)
-    if method == "exponential":
-        slope = (math.log(yb) - math.log(ya)) / (xb - xa)
-        return math.exp(min(50.0, math.log(ya) + slope * (x - xa)))
+    """Outside the grid, as Medium::Interpolate1D (non-log values) writes it: constant (the end value), linear or
+    exponential through the two end nodes; the end value when the two end fields coincide."""
+    n = len(xs)
+    if side == "low":
+        if xs[0] >= xs[1] or method == "constant":
+            return ys[0]
+        if method == "linear":
+            extr4 = (ys[1] - ys[0]) / (xs[1] - xs[0])
+            return ys[0] + extr4 * (x - xs[0])
+        if method == "exponential":
+            extr4 = math.log(ys[1] / ys[0]) / (xs[1] - xs[0])
+            extr3 = math.log(ys[0]) - extr4 * xs[0]
+            return math.exp(min(50.0, extr3 + extr4 * x))
+    else:
+        if xs[n - 1] <= xs[n - 2] or method == "constant":
+            return ys[n - 1]
+        if method == "linear":
+            extr2 = (ys[n - 1] - ys[n - 2]) / (xs[n - 1] - xs[n - 2])
+            return ys[n - 1] + extr2 * (x - xs[n - 1])
+        if method == "exponential":
+            extr2 = math.log(ys[n - 1] / ys[n - 2]) / (xs[n - 1] - xs[n - 2])
+            extr1 = math.log(ys[n - 1]) - extr2 * xs[n - 1]
+            return math.exp(min(50.0, extr1 + extr2 * x))
     raise ValueError(f"unknown extrapolation method {method!r}")
 
 
@@ -313,6 +345,15 @@ def _issue(code: str, kind: str, message: str, location: str, **details) -> dict
 
 def _value(quantity: dict) -> Decimal:
     return Decimal(quantity["value"])
+
+
+def node_coverage(queried_fields: list[float], fields: list[float]) -> list[str]:
+    """What check 1 lacks: a query exactly at the first node, at the last node, at an interior node (doubles)."""
+    found = set(queried_fields)
+    missing = [] if fields[0] in found else ["the first node"]
+    missing += [] if fields[-1] in found else ["the last node"]
+    missing += [] if found & set(fields[1:-1]) else ["an interior node"]
+    return missing
 
 
 def table_input(task: dict, input_manifest: list) -> dict | None:
@@ -404,6 +445,16 @@ def check(task: dict, capability: dict, input_manifest: list, input_files: dict 
         return [_issue("interpolation-mismatch", "refused", f"the task's interpolation {p['interpolation']} is not "
                        f"the table footer's velocity entries {settings} (Interp, L Extr, H Extr)",
                        "$.parameters.interpolation", table_interpolation=settings)]
+    velocities = node_velocities(table)
+    for side, ends in (("low", velocities[:2]), ("high", velocities[-2:])):
+        if settings[side] == "exponential" and min(ends) <= 0:
+            return [_issue("extrapolation-undefined", "refused", f"the table's {side} extrapolation is exponential "
+                           f"but its two end velocities {ends} are not both positive (log undefined)", "$.inputs")]
+    uncovered = node_coverage([float(q["value"]) for q in p["query_fields"]], fields)
+    if uncovered:
+        return [_issue("node-coverage", "rejected", "the query fields must include the first node, the last node "
+                       f"and at least one interior node of the table (check 1); missing: {', '.join(uncovered)}",
+                       "$.parameters.query_fields", first_node=repr(fields[0]), last_node=repr(fields[-1]))]
     if EXAMPLE_TABLES.get(item["sha256"]) and NOTE_EXAMPLE not in task["objective"]:
         return [_issue("note-missing", "rejected", f"this table is used under H0 #13 ({EXAMPLE_TABLES[item['sha256']]}"
                        f"): the objective must carry the note {NOTE_EXAMPLE!r}", "$.objective")]
@@ -564,6 +615,8 @@ def rows_for(query: dict, table: dict, queried: dict, source_sha256: str) -> lis
             rows.append({"quantity": quantity, "unit": unit, "value": canonical.normalize_decimal(text),
                          "uncertainty_type": "none", "point_kind": "query_point", "point": point["index"],
                          "labels": list(labels), "source_sha256": source_sha256})
+            if query.get("note"):
+                rows[-1]["note"] = query["note"]
     return rows
 
 
@@ -583,6 +636,9 @@ def check_rows(rows: list[dict], query: dict, table: dict) -> list[str]:
             problems.append(f"point {point['index']}: rows {sorted(r.get('quantity') for r in found)}")
         outside = point["region"] in ("below", "above")
         for row in found:
+            if row.get("note") != query.get("note"):
+                problems.append(f"point {point['index']} {row.get('quantity')}: note {row.get('note')!r}, expected "
+                                f"{query.get('note')!r}")
             if ("outside-validated-range" in row.get("labels", [])) != outside:
                 problems.append(f"point {point['index']} {row.get('quantity')}: outside-validated-range label "
                                 f"{'missing' if outside else 'on an in-range row'}")
@@ -597,9 +653,39 @@ def _read_attempt(attempt_dir: Path, spec: dict):
     return query, table, parse_output(raw.decode("ascii")), raw
 
 
+def script_status(attempt_dir: Path) -> dict | None:
+    """The query script's JSON answer: the last stdout line that is a JSON object with a status (R-07 (a))."""
+    try:
+        lines = (Path(attempt_dir) / "logs" / "stdout.txt").read_text(encoding="utf-8", errors="replace").splitlines()
+    except OSError:
+        return None
+    for line in reversed(lines):
+        if line.startswith("{"):
+            try:
+                answer = json.loads(line)
+            except ValueError:
+                continue
+            if isinstance(answer, dict) and isinstance(answer.get("status"), str):
+                return answer
+    return None
+
+
+def status_evidence(answer: dict | None) -> dict:
+    """missing-dependency -> the shared layer's dependency check (failed, missing-dependency; TASK.md 11.3)."""
+    if answer is None:
+        return {"check": "script-status", "result": "fail", "detail": "no JSON status line on the script's stdout"}
+    text = f"{answer.get('status')}" + (f" ({answer.get('error_code')}: {str(answer.get('message', ''))[:200]})"
+                                        if answer.get("status") != "ok" else "")
+    if answer["status"] == "missing-dependency":
+        return {"check": "dependency", "result": "fail", "detail": "the query script reported " + text}
+    return {"check": "script-status", "result": "pass" if answer["status"] == "ok" else "fail",
+            "detail": "the query script reported " + text}
+
+
 def collect(attempt_dir: Path, spec: dict) -> dict:
     missing = [p for p in spec["expected_outputs"] if not _local(attempt_dir, p).is_file()]
     doc = {"schema": "detsim-completeness/1", "state": "complete", "missing_outputs": missing, "evidence": [
+        status_evidence(script_status(attempt_dir)),
         {"check": "expected-outputs", "result": "fail" if missing else "pass",
          "detail": f"{len(spec['expected_outputs']) - len(missing)} of {len(spec['expected_outputs'])} present"}]}
     if missing:
@@ -627,7 +713,8 @@ def collect(attempt_dir: Path, spec: dict) -> dict:
                                f"LoadGasFile; table {table['pressure_torr']!r} Torr, {table['temperature_k']!r} K"})
     settings_ok = queried.get("interpolation") == query["interpolation"]
     evidence.append({"check": "interpolation-settings", "result": "pass" if settings_ok else "fail",
-                     "detail": f"set {queried.get('interpolation')}, planned {query['interpolation']}"})
+                     "detail": f"requested settings {queried.get('interpolation')} as echoed by the script, planned "
+                               f"{query['interpolation']} (the library does not report the settings it uses)"})
     wanted = {p["index"]: p["field_v_per_cm"] for p in query["points"]}
     absent = sorted(set(wanted) - set(queried["points"]))
     extra = sorted(set(queried["points"]) - set(wanted))
@@ -637,6 +724,11 @@ def collect(attempt_dir: Path, spec: dict) -> dict:
                      "detail": f"{len(queried['points'])} of {len(wanted)} point(s); end line {queried['end']}"
                                + (f"; missing {absent}" if absent else "") + (f"; unexpected {extra}" if extra else "")
                                + (f"; field differs at {mislabelled}" if mislabelled else "")})
+    uncovered = node_coverage([float(p["field_v_per_cm"]) for p in query["points"] if p["index"] in queried["points"]],
+                              node_fields(table))
+    evidence.append({"check": "node-coverage", "result": "fail" if uncovered else "pass",
+                     "detail": ("missing " + ", ".join(uncovered)) if uncovered else "query points at the first node, "
+                               "the last node and an interior node of the table"})
     evidence += evaluate(query, table, queried)
     if complete:
         try:
@@ -647,7 +739,7 @@ def collect(attempt_dir: Path, spec: dict) -> dict:
                          "detail": "; ".join(problems[:5]) or "five rows per point, units V/cm and cm/ns, "
                                                               "outside-validated-range exactly on outside points"})
     failed = [e for e in evidence if e["result"] != "pass"]
-    state = "complete" if not failed else "partial" if absent or queried["end"] is None else "invalid"
+    state = "complete" if not failed else "partial" if absent or queried["end"] is None or uncovered else "invalid"
     return dict(doc, state=state)
 
 
@@ -741,8 +833,10 @@ def probe(env_root: Path) -> dict:
         raise _error("refused", "build-record-mismatch", f"{BUILD_RECORD} names library SHA-256 "
                      f"{record.get('library_sha256')}, the installed libGarfield has {library_sha}", "--env-root")
     options = record.get("build_options") if isinstance(record.get("build_options"), dict) else {}
+    loaded = {name: _sha256(Path(os.path.realpath(garfield_lib / (name + suffix)))) for name in LIBRARIES}
+    loaded.update({p.name.split(".")[0]: _sha256(Path(os.path.realpath(p))) for p in needed_root[1:]})
     identity = {"kind": "garfieldpp-view", "garfield_commit": record["garfield_commit"],
-                "libgarfield_sha256": library_sha, "libcore_sha256": _sha256(needed_root[1]),
+                "library_sha256": dict(sorted(loaded.items())),
                 "root_version": root_version, "python_version": python_version,
                 "build_options": {str(k): str(v) for k, v in sorted(options.items())},
                 "platform": f"{sys.platform}-{platform.machine()}"}
