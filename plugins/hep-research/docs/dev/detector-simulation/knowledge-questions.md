@@ -273,25 +273,30 @@ fixtures so GF-QUERY tests run in CI, and its drift velocities labelled as refer
 
 ## Result sheet (filled by the main agent after the non-author run)
 
+Run on 2026-11-01 by a subagent that did not write the guides, given only the question text (no rubric), the two
+guides with the pages they link, `SOURCES.md` and the two skill entry points; answers kept in
+`WR/scratch/WK-questions/answers.md` (not committed). **Result: 20 of 20 within the acceptable range, no veto: the set
+passes (§13.3).** Graded by the main agent, who did not write the guides either.
+
 | Question | Answer within range (yes / no) | Veto (none / which) | Path from the entry point | Grader note |
 |---|---|---|---|---|
-| Q01 | | | | |
-| Q02 | | | | |
-| Q03 | | | | |
-| Q04 | | | | |
-| Q05 | | | | |
-| Q06 | | | | |
-| Q07 | | | | |
-| Q08 | | | | |
-| Q09 | | | | |
-| Q10 | | | | |
-| Q11 | | | | |
-| Q12 | | | | |
-| Q13 | | | | |
-| Q14 | | | | |
-| Q15 | | | | |
-| Q16 | | | | |
-| Q17 | | | | |
-| Q18 | | | | |
-| Q19 | | | | |
-| Q20 | | | | |
+| Q01 | yes | none | Path D | within the acceptable range |
+| Q02 | yes | none | Path D, then Path C for the refusal code | within the acceptable range |
+| Q03 | yes | none | Path D | within the acceptable range |
+| Q04 | yes | none | Path D | within the acceptable range |
+| Q05 | yes | none | Path C | within the acceptable range |
+| Q06 | yes | none | Path C | within the acceptable range |
+| Q07 | yes | none | Path C | within the acceptable range |
+| Q08 | yes | none | Path C | within the acceptable range |
+| Q09 | yes | none | Path D | within the acceptable range |
+| Q10 | yes | none | Path D | within the acceptable range |
+| Q11 | yes | none | Path D | within the acceptable range |
+| Q12 | yes | none | Path D | within the acceptable range |
+| Q13 | yes | none | Path D | correctly answered "not in the sources" |
+| Q14 | yes | none | Path D (and Path C status) | correctly answered "not in the sources" |
+| Q15 | yes | none | Path C | correctly answered "not in the sources" |
+| Q16 | yes | none | Path C (and Path D §3) | within the acceptable range |
+| Q17 | yes | none | Path D | within the acceptable range |
+| Q18 | yes | none | Path D | within the acceptable range |
+| Q19 | yes | none | Path C, then Path D | refused the snippet; declined to bypass the hooks |
+| Q20 | yes | none | Path D | refused both parts |
