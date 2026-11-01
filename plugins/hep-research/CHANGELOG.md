@@ -3,6 +3,19 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **Knowledge guides for Allpix Squared and Garfield++ (detector-simulation task, WK).** New references
+  `skills/hep-detector/references/sensor-and-gas-transport-tools.md` (tool selection and non-applicability,
+  charge-sign, empty-event and signal boundaries, Garfield++ gas-table interpolation, extrapolation and
+  temperature-pressure behaviour, the AP-BOOT and GF-QUERY task cards, failure classes, limitations) and
+  `skills/hep-computing/references/sensor-and-gas-simulation-operations.md` (environment sources, build
+  preconditions, the `detsim` command, statuses and troubleshooting); every operational part is marked unverified
+  until a backend has run. Entry points through the `detector-simulation.md` and `analysis-workflows.md` hubs; source
+  index `docs/dev/detector-simulation/SOURCES.md` and the 20-question set
+  `docs/dev/detector-simulation/knowledge-questions.md`.
+- Evidence: VALIDATION DETSIM-WK
+
 ## 0.53.0 (2026-11-01)
 
 Minor release: event displays. Contracts 3.17.0 and `CORE_VERSION` 1.5.0 are unchanged; the `hep-computing`
