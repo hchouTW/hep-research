@@ -763,5 +763,66 @@ class ReviewRoundOne(Base):
         self.assertTrue(calls and all(c[0] == "KILL" and c[1] == backend for c in calls), calls)
 
 
+class ReviewRoundTwo(Base):
+    """W3b independent review round 2: N1-N4."""
+
+    def test_reuse_after_the_environment_root_moved(self):  # N1
+        plan, _ = self.prepare()
+        self.assertEqual(self.run_plan(plan)[0], 0)
+        shutil.rmtree(self.env_root)
+        code, answer = self.run_plan(plan)
+        self.assertEqual((code, answer["status"], answer["reused"]), (0, "ok", True))
+
+    def test_in_place_input_is_named_as_outside_the_folder(self):  # N2 (decision: verify_run cannot check it)
+        with mock.patch.dict(detsim_profile.POLICY, {"input_copy_threshold_bytes": 1}), \
+                mock.patch.object(detsim_platform, "clone_file", lambda src, dst: False):
+            plan, _ = self.prepare()
+            code, answer = self.run_plan(plan)
+        self.assertEqual(code, 0, answer)
+        record_path = self.store / "runs" / answer["run_id"] / detsim_run.RECORD_NAME
+        ext = json.loads(record_path.read_text())["extension"]
+        self.assertEqual(ext["detsim"]["input_isolation"], "soft")
+        self.assertIn("inputs/run config.conf", ext["evidence"]["provenance"])
+        verify = subprocess.run([sys.executable, str(ROOT / "contracts" / "verify_run.py"), str(record_path)],
+                                capture_output=True, text=True)
+        rows = [r for r in json.loads(verify.stdout)["entries"] if r.get("result") != "match"] \
+            if '"entries"' in verify.stdout else None
+        self.assertIn("outside-base", verify.stdout)
+        if rows is not None:
+            self.assertEqual({r["path"] for r in rows}, {"input/inputs/run config.conf"})
+
+    def test_no_replace_lost_at_commit_fails_the_run(self):  # N3
+        plan, _ = self.prepare()
+        real = detsim_platform.rename_noreplace
+
+        def lost(src, dst, record=True):
+            return False if record and "/runs/" in str(dst) else real(src, dst, record)
+        with mock.patch.object(detsim_platform, "rename_noreplace", lost):
+            code, answer = self.run_plan(plan)
+        self.assertEqual((code, answer["status"], answer["error_code"]), (1, "failed", "guarantee-not-achieved"))
+        record = json.loads((self.store / answer["folder"] / detsim_run.RECORD_NAME).read_text())
+        self.assertEqual(record["extension"]["detsim"]["achieved_guarantees"]["commit_noreplace"], "soft")
+
+    def test_reported_orphans_survive_a_reuse_under_the_lock(self):  # N4
+        plan, digest = self.prepare()
+        run_id = canonical.run_id(digest, 0)
+        survivor = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"])
+        self.procs.append(survivor)
+        pending = self.store / ".pending"
+        pending.mkdir(parents=True, exist_ok=True)
+        (pending / f"{run_id}.lock").write_text(json.dumps({"state": "running", "pid": survivor.pid,
+                                                            "pgid": survivor.pid, "started": "earlier"}))
+        self.run_plan(plan)
+        original, calls = detsim_run._reuse, []
+
+        def first_check_misses(*args):
+            calls.append(args)
+            return None if len(calls) == 1 else original(*args)
+        with mock.patch.object(detsim_run, "_reuse", first_check_misses):
+            self.run_plan(plan)  # reused at step 7, under the lock
+        code, answer = self.call("inspect", "--workspace", str(self.project), "--run", run_id)
+        self.assertTrue(any(o["pid"] == survivor.pid for o in answer["orphans"]), answer)
+
+
 if __name__ == "__main__":
     unittest.main()

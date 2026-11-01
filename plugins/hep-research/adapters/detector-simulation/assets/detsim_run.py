@@ -120,6 +120,8 @@ class RunLock:
         self.previous = self._parse(raw)
         if existed and self.previous is None:  # an existing but empty record: a crash between truncate and write
             self.previous = {"unreadable": True}
+        if isinstance(self.previous, dict) and isinstance(self.previous.get("orphans_seen"), list):
+            record = dict(record, orphans_seen=self.previous["orphans_seen"])  # kept across every exit (inspect)
         self.write(record)
         return True
 
@@ -326,7 +328,9 @@ def run_record(plan: dict, plan_digest: str, replicate: int, ok: bool, facts: di
             "evidence": {  # four kinds of evidence, never substituted for one another (TASK.md 9.5, 16.2)
                 "contracts": "completeness and observables checked against detsim-completeness/1 and "
                              "detsim-observables/1" + ("" if ok else " (not reached or failed)"),
-                "provenance": "input and output SHA-256 recorded (check with contracts/verify_run.py)",
+                "provenance": "input and output SHA-256 recorded (check with contracts/verify_run.py)" + (
+                    "; inputs read in place lie outside this folder, so verify_run reports them outside-base: "
+                    + ", ".join(facts["in_place"]) if facts.get("in_place") else ""),
                 "raw_files": facts.get("completeness_state", "unknown"),
                 "physical_validity": "not claimed: a completed run is verification at most"},
             "output_hashes": output_hashes, "parameter_digest": run_digest,
@@ -376,7 +380,11 @@ def finish_folder(attempt: Path, store: Path, plan: dict, plan_digest: str, repl
     (attempt / RECORD_NAME).write_text(json.dumps(record, indent=1, sort_keys=True), encoding="utf-8")
 
 
-def commit(attempt: Path, target: Path, profile_doc: dict, success: bool = True) -> str:
+class NoReplaceLost(OSError):
+    """The no-replace rename was probed available but the commit could not use it."""
+
+
+def commit(attempt: Path, target: Path, profile_doc: dict, success: bool = True, expect_noreplace: bool = False) -> str:
     """Steps 12.2-12.6: fsync, then a no-replace rename; returns the commit_noreplace level achieved.
     FileExistsError when the target exists (commit-conflict)."""
     _fsync_tree(attempt)
@@ -385,6 +393,8 @@ def commit(attempt: Path, target: Path, profile_doc: dict, success: bool = True)
         HOOKS["before_rename"](attempt, target)
     if platform_calls.rename_noreplace(attempt, target):
         level = "hard"
+    elif success and expect_noreplace:  # the probe found the call, the commit did not get it: never claim "hard"
+        raise NoReplaceLost(str(target))
     else:  # no no-replace call here: check then rename under the lock (only detsim controllers are in the model)
         if target.exists():
             raise FileExistsError(str(target))
@@ -449,12 +459,12 @@ def run(plan: dict, workspace: Path, backend, profile_doc: dict, replicate: int,
                           "required guarantees; refused, never downgraded", "$.capability.required_guarantees",
                           shortfalls=short)
     hostcaps.require("process_groups")  # step 10's precondition, checked before the lock (missing-dependency)
-    env_root = _env_root(workspace, plan)  # the environment root must exist before anything is locked or written
     run_id = canonical.run_id(plan_digest, replicate)
     committed_folder = store / "runs" / run_id
     reused = _reuse(committed_folder, plan_digest, run_id)                                 # step 5
     if reused:
         return reused
+    env_root = _env_root(workspace, plan)  # needed only to launch: after reuse, before anything is locked
     pending = store / ".pending"
     nonce = uuid.uuid4().hex[:16]
     lock = RunLock(pending / f"{run_id}.lock")
@@ -513,7 +523,7 @@ def _locked_run(plan, plan_digest, replicate, run_id, nonce, workspace, store, p
     if reused:
         return reused
     orphans = move_leftovers(pending, run_id, lock.previous)                    # step 8
-    seen = list((lock.previous or {}).get("orphans_seen", [])) if isinstance(lock.previous, dict) else []
+    seen = list(lock.record.get("orphans_seen", []))
     seen += [o for o in orphans if "moved" not in o]  # kept in the lock record so inspect shows them later
     lock.update(orphans_seen=seen[-50:])
     attempt = pending / f"{run_id}.{nonce}"
@@ -587,9 +597,16 @@ def _locked_run(plan, plan_digest, replicate, run_id, nonce, workspace, store, p
         if "before_commit" in HOOKS:
             HOOKS["before_commit"](attempt)
         try:
-            level = commit(attempt, committed_folder, profile_doc)
+            level = commit(attempt, committed_folder, profile_doc,
+                           expect_noreplace=bool(facts.get("noreplace_available")))
         except FileExistsError:
             facts["error_code"] = "commit-conflict"
+            return _fail(plan, plan_digest, replicate, attempt, store, run_id, facts, profile_doc, completeness)
+        except NoReplaceLost:
+            facts["noreplace_available"] = False
+            facts["achieved"] = _achieved(profile_doc, facts)
+            facts["below_declared"] = _below_declared(profile_doc, facts["achieved"])
+            facts["error_code"] = "guarantee-not-achieved"
             return _fail(plan, plan_digest, replicate, attempt, store, run_id, facts, profile_doc, completeness)
         if "after_rename" in HOOKS:
             HOOKS["after_rename"](committed_folder)
