@@ -3,7 +3,13 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.54.0 (2026-11-02)
+
+Minor release: detector simulation with Allpix Squared and Garfield++. Contracts 3.18.0 (four sidecar schemas, no
+artifact-type change); `CORE_VERSION` 1.5.0 and every skill `description` are unchanged. It ships PR #343: the
+optional adapter `adapters/detector-simulation` 0.4.0 (shared layer `demonstrated-on-synthetic-data`; backends
+`allpix-squared` and `garfieldpp` `tested-in-declared-environment` on macOS 27.2 arm64 only), the knowledge guides
+in hep-detector and hep-computing, and the task ledger under `docs/dev/detector-simulation/`.
 
 - **Knowledge guides for Allpix Squared and Garfield++ (detector-simulation task, WK).** New references
   `skills/hep-detector/references/sensor-and-gas-transport-tools.md` (tool selection and non-applicability,

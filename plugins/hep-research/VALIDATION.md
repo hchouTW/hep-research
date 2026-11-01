@@ -8801,3 +8801,29 @@ guides, native-vs-detsim performance in one environment, the support matrix, and
 | §17.3 checklist per backend | ledger "Definition of done" | complete for both; Linux untested |
 
 Passing checks show software consistency, not physical validity.
+
+## 0.54.0 release check (2026-11-02, E2 and CI)
+
+Release branch `release/0.54.0`, based on main `4e96946f` (PR #343 merged). Minor release: detector simulation with
+Allpix Squared and Garfield++. Contracts 3.18.0 (shipped by #343); `CORE_VERSION` 1.5.0 and every skill `description`
+are unchanged.
+
+What changed on the release branch:
+- version 0.54.0 in both manifests, `pyproject.toml`, the README, two assets, the six theory-profile scripts,
+  `usine_translate.py` and `examples/bc-usine-reproduction/run.py`; the CHANGELOG `0.54.0` section;
+- regenerated on E2 (`~/.venvs/hep-research-e2`, macOS arm64, Python 3.13.2, NumPy 2.5.3) in `d92b831a`: the six
+  theory-profile scripts and the examples in the order of `docs/maintenance.md`; every changed line is a version
+  string or a hash covering one (checked hunk by hunk), no PNG changed. `bc-propagation-fit` and
+  `unfolding-coverage` carry no plugin version and drift at rounding level: left as committed.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on `d92b831a` (run 41354344018) | success: `checks-complete`, units 1/3-3/3, static, AMS optional, lint, `old-python`, four `hostile-paths` legs, the six optional extras |
+| `run_all_checks.py` (all parts, host CLIs), E2 at `d92b831a`, `--jobs 4` | 32 pass, 1 fail; units 6591 tests, 6410 passed, 180 skipped, 1 failure, 0 modules timed out |
+
+The one failure, `tests.skills.hep_ml.test_assets_smoke` `test_ddp_skeleton_two_gloo_processes` (two gloo processes
+on loopback), occurred under `--jobs 4` load, as in 0.53.0; it passes 3 of 3 times alone on E2, and no file it reads
+changed in this release. `claude plugin validate --strict` (Claude Code 2.1.316) and `codex plugin load` (codex-cli
+0.164.0) pass.
+
+Passing checks show software consistency, not physical validity.

@@ -373,7 +373,7 @@
  "unresolved_inputs": [],
  "versions": {
   "contracts": "3.18.0",
-  "plugin": "0.53.0",
+  "plugin": "0.54.0",
   "profiles": {}
  }
 }

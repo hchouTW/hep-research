@@ -25,7 +25,7 @@ PROFILE = HERE.parent
 sys.path.insert(0, str(HERE))
 
 PROFILE_ID, PROFILE_VERSION = "theory:tmd-gaussian-lo", "0.1.0"
-PLUGIN_VERSION, CONTRACTS = "0.53.0", "3.18.0"
+PLUGIN_VERSION, CONTRACTS = "0.54.0", "3.18.0"
 CREATED = "2026-10-23"
 SPEC_PATH = PROFILE / "derivations" / "theory-spec.json"
 PRED_DIR = PROFILE / "predictions"
