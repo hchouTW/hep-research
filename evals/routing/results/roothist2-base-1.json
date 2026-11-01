@@ -1,0 +1,118 @@
+{
+ "meta": {
+  "run_id": "roothist2-base-1",
+  "date": "2026-11-01",
+  "cli": "claude",
+  "cli_version": "2.1.316",
+  "model": "claude-sonnet-5-5",
+  "models_reported": [
+   "claude-sonnet-5-5"
+  ],
+  "isolation": "setting-sources",
+  "plugin_commit": "cf622dab9f237d4ff83b7576f9388ee095da30f9",
+  "plugin_dirty": false,
+  "cases_file_sha256": "95b5996ff92f1e7db1a86212e96d344df4b3d1c3d18318a0dba95c0a3dac8532",
+  "selected": 1,
+  "completed": 1,
+  "full_set": false,
+  "max_turns": 6,
+  "case_budget_usd": 0.5,
+  "budget_usd": 1.0,
+  "reused_cases": 0,
+  "spent_usd": 0.0472,
+  "stopped_early": false
+ },
+ "summary": {
+  "overall": {
+   "cases": 1,
+   "strict_pass": 0,
+   "lenient_pass": 0
+  },
+  "by_lang": {
+   "zh-Hant": {
+    "cases": 1,
+    "strict_pass": 0,
+    "lenient_pass": 0
+   }
+  },
+  "by_kind": {
+   "direct": {
+    "cases": 1,
+    "strict_pass": 0,
+    "lenient_pass": 0
+   }
+  },
+  "by_variant": {
+   "-": {
+    "cases": 1,
+    "strict_pass": 0,
+    "lenient_pass": 0
+   }
+  },
+  "by_expected_primary": {
+   "hep-computing": {
+    "cases": 1,
+    "strict_pass": 0,
+    "lenient_pass": 0
+   }
+  },
+  "by_set": {
+   "-": {
+    "cases": 1,
+    "strict_pass": 0,
+    "lenient_pass": 0
+   }
+  },
+  "outcomes": {
+   "no-skill": 1
+  },
+  "loading_violations": [],
+  "cost_usd": {
+   "total": 0.0472,
+   "per_case": 0.0472,
+   "per_turn": 0.0472
+  }
+ },
+ "cases": [
+  {
+   "id": "c-ml-roothist-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "variant": null,
+   "set": null,
+   "expected_primary": "hep-computing",
+   "turns": [
+    {
+     "expected": "hep-computing",
+     "first_skill": null,
+     "skills": [],
+     "outcome": "no-skill",
+     "strict": false,
+     "lenient": false,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "no-skill",
+   "strict": false,
+   "lenient": false,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.316",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.047242,
+   "n_turns": 1,
+   "loading_violation": false
+  }
+ ],
+ "contaminated": [],
+ "note": "scored summary only: prompts, answers and transcripts are not stored here (raw streams stay in runs/roothist2-base-1/raw/, not committed)"
+}

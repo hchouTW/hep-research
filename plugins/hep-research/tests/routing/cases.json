@@ -5617,6 +5617,80 @@
     "hep-statistics",
     "hep-authoring"
    ]
+  },
+  {
+   "id": "evd-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "prompt": "Build a web page that shows a few events from my ROOT ntuple in 3D with Phoenix, with the histograms we already computed as JSROOT panels next to it.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "event displays (Phoenix)"
+   ],
+   "set": "EVD"
+  },
+  {
+   "id": "evd-direct-2",
+   "lang": "zh-Hant",
+   "kind": "direct",
+   "prompt": "幫我做一個 Phoenix 事件顯示網頁（event displays），用 3D 呈現 ROOT 檔裡的幾個事件，旁邊放已經算好的直方圖。",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "event displays (Phoenix)"
+   ],
+   "set": "EVD"
+  },
+  {
+   "id": "evd-neighbor-1",
+   "lang": "en",
+   "kind": "neighboring",
+   "prompt": "For the collaboration meeting, put three of our events and the already-computed cross-section histogram into an interactive Phoenix page people can open in a browser.",
+   "expected_primary": "hep-computing",
+   "trigger_terms": [
+    "event displays (Phoenix)"
+   ],
+   "not": "hep-authoring",
+   "set": "EVD",
+   "note": "an interactive page is software, not a talk or a figure"
+  },
+  {
+   "id": "evd-negative-1",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "Looking at our Phoenix event display, which tracking and vertexing algorithms should we use for displaced vertices in this silicon tracker?",
+   "expected_primary": "hep-detector",
+   "trigger_terms": [
+    "tracking",
+    "vertexing"
+   ],
+   "not": "hep-computing",
+   "set": "EVD"
+  },
+  {
+   "id": "evd-adv-1",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "Using JSROOT and our Phoenix event display, compute the goodness of fit of the unfolded spectrum to the model.",
+   "expected_primary": "hep-statistics",
+   "trigger_terms": [
+    "goodness of fit"
+   ],
+   "not": "hep-computing",
+   "set": "EVD",
+   "variant": "adversarial"
+  },
+  {
+   "id": "evd-negative-2",
+   "lang": "en",
+   "kind": "negative",
+   "prompt": "Turn the already-computed unfolded cross section into the final paper figure, with caption, in the journal's style; no web page or event display.",
+   "expected_primary": "hep-authoring",
+   "trigger_terms": [
+    "figures"
+   ],
+   "not": "hep-computing",
+   "set": "EVD",
+   "note": "a static paper figure is writing, not an event display"
   }
  ]
 }

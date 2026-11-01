@@ -8645,3 +8645,22 @@ test module, the end-to-end demo and the repository's static, unit and relocatio
 | Forced failure | `columns` renamed to `data` in `export_events.py`, then `check_naming.py` | exit 1 with `naming.common.forbidden` at `export_events.py:123`; file restored, diff empty |
 
 Passing checks show software consistency, not physical validity.
+
+## EVENT-DISPLAY-ROUTING — 2026-11-01 (macOS 27.2 arm64, Python 3.13.2 venv with the CI lock, Claude Code 2.1.316; version 0.52.0 + unreleased)
+
+The `hep-computing` description names event displays (Phoenix) and sends paper figures to hep-authoring in its
+`Not for` part, with six EVD routing cases, checked statically and by a live routing run of every case that involves
+hep-computing.
+
+| Item | Evidence | Result |
+|---|---|---|
+| Description length | `skills/hep-computing/SKILL.md` | 1,015 characters (limit 1,024; 1,022 before) |
+| `tools/check_routing_static.py` | 481 cases, 6 in set EVD | exit 0; `failed`, `coverage_errors`, `topic_errors`, `scope_errors` empty; `event displays (phoenix)` no longer unpinned |
+| Forced failure | the `paper figures: hep-authoring` clause removed | exit 1 on `evd-negative-2` only ("does not route this to hep-authoring in its 'Not for' part"); restored |
+| `tools/check_ownership.py` | | exit 0 |
+| Routing tests, `tests/skills` top-level modules | `unittest discover -s tests/routing`; `tests/skills/test_*.py` | OK: 21 tests; OK: 46 tests |
+| Static part, `run_all_checks.py --part static --no-cli` | before and after | 29 pass, 0 fail, 2 skip (host CLIs) in both |
+| Live routing run `evd-routing-20261101` | claude-sonnet-5-5, Claude Code 2.1.316, 68 cases, 4 jobs; smoke case first | 64/68 strict, USD 5.29 (smoke USD 0.08); EVD 6/6; `compare` with `claude-2.1.293-claude-sonnet-5-5`: 27 shared cases, 0 regressions |
+| Misses | `d-cc-pairs-1`, `d-cc-pairs-2`, `d-cc-preserve-1`, `c-ml-roothist-2` | the first three missed before this change (2026-10-31 control on the unchanged base); `c-ml-roothist-2` 1/3 on the branch and 1/3 on main `cf622dab` (USD 0.39), varying in earlier runs: no regression shown |
+
+Passing checks show software consistency, not physical validity.

@@ -1,0 +1,120 @@
+{
+ "meta": {
+  "run_id": "evd-smoke-20261101",
+  "date": "2026-11-01",
+  "cli": "claude",
+  "cli_version": "2.1.316",
+  "model": "claude-sonnet-5-5",
+  "models_reported": [
+   "claude-sonnet-5-5"
+  ],
+  "isolation": "setting-sources",
+  "plugin_commit": "2f9a77615e36452451bdd7197de52f9541646dff",
+  "plugin_dirty": false,
+  "cases_file_sha256": "b102fa910617689d0f0d69cc62e9b3359a34eb5f7af066bfde8290888d3b287b",
+  "selected": 1,
+  "completed": 1,
+  "full_set": false,
+  "max_turns": 6,
+  "case_budget_usd": 0.5,
+  "budget_usd": 1.0,
+  "reused_cases": 0,
+  "spent_usd": 0.0841,
+  "stopped_early": false
+ },
+ "summary": {
+  "overall": {
+   "cases": 1,
+   "strict_pass": 1,
+   "lenient_pass": 1
+  },
+  "by_lang": {
+   "en": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   }
+  },
+  "by_kind": {
+   "direct": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   }
+  },
+  "by_variant": {
+   "-": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   }
+  },
+  "by_expected_primary": {
+   "hep-computing": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   }
+  },
+  "by_set": {
+   "EVD": {
+    "cases": 1,
+    "strict_pass": 1,
+    "lenient_pass": 1
+   }
+  },
+  "outcomes": {
+   "pass": 1
+  },
+  "loading_violations": [],
+  "cost_usd": {
+   "total": 0.0841,
+   "per_case": 0.0841,
+   "per_turn": 0.014
+  }
+ },
+ "cases": [
+  {
+   "id": "evd-direct-1",
+   "lang": "en",
+   "kind": "direct",
+   "variant": null,
+   "set": "EVD",
+   "expected_primary": "hep-computing",
+   "turns": [
+    {
+     "expected": "hep-computing",
+     "first_skill": "hep-computing",
+     "skills": [
+      "hep-computing"
+     ],
+     "outcome": "pass",
+     "strict": true,
+     "lenient": true,
+     "heuristic": false,
+     "exit_code": 0
+    }
+   ],
+   "outcome": "pass",
+   "strict": true,
+   "lenient": true,
+   "profile_reads": [],
+   "other_skills": [],
+   "plugins_reported": [
+    "hep-research"
+   ],
+   "builtin_plugins": [
+    "cc-plugin-agents-md",
+    "cc-plugin-plugin-authoring",
+    "cc-plugin-telemetry"
+   ],
+   "cli_version": "2.1.316",
+   "model_reported": "claude-sonnet-5-5",
+   "cost_usd": 0.084097,
+   "n_turns": 6,
+   "loading_violation": false
+  }
+ ],
+ "contaminated": [],
+ "note": "scored summary only: prompts, answers and transcripts are not stored here (raw streams stay in runs/evd-smoke-20261101/raw/, not committed)"
+}

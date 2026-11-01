@@ -5,6 +5,12 @@ Software checks establish contract consistency only, not physical validity.
 
 ## Unreleased
 
+- **hep-computing: event-display requests route to the skill.** The description names "event displays (Phoenix)"
+  and its `Not for` part sends paper figures to hep-authoring (1,022 -> 1,015 characters; space freed by dropping
+  "build chains", covered by "CMake builds", "Also small, verified code changes;", and shortening "a quick build or
+  code fix" to "a quick fix"); six routing cases (set EVD) pin the phrase and its boundaries with hep-authoring
+  (an interactive page is software; a paper figure is not), hep-detector and hep-statistics.
+- Evidence: VALIDATION EVENT-DISPLAY-ROUTING
 - **hep-computing: event displays as knowledge and templates.** New references `event-displays.md` (rules, decision
   table, eight build steps with done conditions), `event-display-facts.md` (Phoenix, JSROOT, Plotly, ECharts and
   serving facts, each marked run or source) and `event-display-checklist.md`; templates in `assets/event-display/`
