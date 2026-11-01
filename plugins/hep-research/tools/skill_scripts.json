@@ -1478,6 +1478,10 @@
    "reason": "profile scripts are reached from profile text, outside this list (task Open Questions: default no)"
   },
   {
+   "path": "skills/hep-computing/assets/event-display/",
+   "reason": "self-contained templates users copy into their own projects, where core cannot be imported"
+  },
+  {
    "path": "tests/",
    "reason": "tests run under the test runner, not as skill scripts"
   }

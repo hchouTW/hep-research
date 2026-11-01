@@ -1,0 +1,13 @@
+{
+  "tree": "events",
+  "unit": "mm",
+  "id": {"run": "run", "subrun": "subrun", "event": "event"},
+  "points": [
+    {"collection": "Tracker hits", "x": "hit.x", "y": "hit.y", "z": "hit.z", "color": "#2b8cbe"}
+  ],
+  "polylines": [
+    {"collection": "Tracks (sampled points)", "x": "trk.x", "y": "trk.y", "z": "trk.z", "group": "trk.id",
+     "color": "#e6550d"}
+  ],
+  "limits": {"max_events": 50, "max_objects_per_event": 200000}
+}
