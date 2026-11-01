@@ -60,6 +60,7 @@ Environment availability (2a): Allpix Squared — not installed; obtainable unde
 | W4A | W4A | `~/hep-research-detsim-sub-W4A` | detsim-sub-W4A | `45d1a379db8ceec75cacb8820b19a9ce66eb2ddb` | `WR/patches/W4A/` | rerun (conflict with W4G's test edits) |
 | W4A-2 | W4A | `~/hep-research-detsim-sub-W4A-2` | detsim-sub-W4A-2 | `7cbde8cecd610794d1dd0225321ab034b154dfe1` | `WR/patches/W4A-2/` | applied |
 | W4G-2 | W4G | `~/hep-research-detsim-sub-W4G-2` | detsim-sub-W4G-2 | `770c3b3a62cfb7c6a7d314415f443d19c17bb15c` | `WR/patches/W4G-2/` | applied |
+| W4A-3 | W4A | `~/hep-research-detsim-sub-W4A-3` | detsim-sub-W4A-3 | `5453790d64c8600771a814be3869697e9e8d1875` | `WR/patches/W4A-3/` | applying |
 
 ## Environment reconnaissance
 
