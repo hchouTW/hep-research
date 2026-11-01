@@ -57,7 +57,7 @@ import detsim_runner as runner  # noqa: E402
 import detsim_schemas as schemas  # noqa: E402
 from detsim_plan import DetsimError  # noqa: E402
 
-ADAPTER_VERSION = "0.2.0"
+ADAPTER_VERSION = "0.3.0"
 PLUGIN = Path(__file__).resolve().parents[3]
 RECORD_NAME = "run.computational-run.json"
 OBSERVABLE_COLUMNS = ("quantity", "unit", "value", "uncertainty_type", "uncertainty", "point_kind", "point",

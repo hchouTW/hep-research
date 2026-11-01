@@ -42,6 +42,15 @@ Software checks establish contract consistency only, not physical validity.
   `check --probe` validates and records an environment. The shared layer is `demonstrated-on-synthetic-data`
   (macos-g0 as measured; linux-g0 unsupported until measured); both backends stay `proposed`.
 - Evidence: VALIDATION DETSIM-W3B
+- **`adapters/detector-simulation` 0.3.0: Garfield++ backend** (work item W4G). Backend `garfieldpp` with capability
+  `garfield.gas-table-query` 1.0.0 (`detsim_backend_garfield.py`, a PyROOT query script and its descriptor under
+  `assets/garfield/`): electron drift velocity at B = 0 from one 1D gas table; temperature, pressure and interpolation
+  settings must equal the table's; out-of-range fields refused `out-of-domain` with the valid range unless
+  `allow_outside_validated_range` (then labelled `outside-validated-range`); collect runs checks 1-4 of card GF-QUERY
+  with an independent `.gas` parser and a reimplementation of Garfield++'s `Divdif` stencil and extrapolation;
+  `check --probe` records a content-based identity and answers `missing-dependency` without ROOT, the libraries or the
+  bindings. Shared layer: a backend that declares `CHECK_READS_INPUTS` receives the hash-checked input files in `check`.
+- Evidence: VALIDATION DETSIM-W4G
 
 ## 0.53.0 (2026-11-01)
 

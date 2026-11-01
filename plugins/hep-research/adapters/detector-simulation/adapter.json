@@ -1,8 +1,8 @@
 {
  "id": "adapter:detector-simulation",
- "version": "0.2.0",
+ "version": "0.3.0",
  "status": "proposed",
- "purpose": "Run pinned detector-simulation capabilities of Allpix Squared (silicon pixel charge collection) and Garfield++ (gas-table queries) as content-addressed plans through one CLI, detsim.py (docs/dev/detector-simulation/TASK.md). The shared layer: the plan and identity part (0.1.0, work item W3a): the contracts detector-task/1, detector-plan/1, detsim-completeness/1 and detsim-observables/1 (contracts 3.18.0); canonical/1 (the repository's canonical_sha256 behind a hash-scope check that refuses binary floats, integers beyond 2^53 - 1, non-ASCII keys, duplicate keys, NaN, lone surrogates and unresolved path or $NAME references) and decimal/1 (exact normalized decimal strings for physical quantities); plan assembly from a task, its inputs (hashed, resolved inside the project), a validated environment record, the trusted backend's ExecutionSpec and a runner profile (macos-g0 as measured, linux-g0 all unsupported until measured); the rebuild comparison that refuses a stale plan with plan-stale and the mismatched fields; plan_digest, run digest and run_id; the verbs describe, check (without --probe) and prepare (with --digest-only) that launch nothing. From 0.2.0 (work item W3b) the execution part: run (file-system allowlist, digest and rebuild checks, required guarantees refused never downgraded, idempotent reuse, a flock lock per run_id, leftovers moved and reported but never signalled, input snapshot, the backend launched directly in its own session with exactly the plan's environment, timeout and output budget enforced on its own unreaped process group only, collect, durable no-replace commit to runs/<run_id>/ or failed/), inspect (read-only) and check --probe (environment record). Both backends are later work items and answer not-run. Every record is unvalidated: no state implies physical validity. Optional, required by no skill",
+ "purpose": "Run pinned detector-simulation capabilities of Allpix Squared (silicon pixel charge collection) and Garfield++ (gas-table queries) as content-addressed plans through one CLI, detsim.py (docs/dev/detector-simulation/TASK.md). The shared layer: the plan and identity part (0.1.0, work item W3a): the contracts detector-task/1, detector-plan/1, detsim-completeness/1 and detsim-observables/1 (contracts 3.18.0); canonical/1 (the repository's canonical_sha256 behind a hash-scope check that refuses binary floats, integers beyond 2^53 - 1, non-ASCII keys, duplicate keys, NaN, lone surrogates and unresolved path or $NAME references) and decimal/1 (exact normalized decimal strings for physical quantities); plan assembly from a task, its inputs (hashed, resolved inside the project), a validated environment record, the trusted backend's ExecutionSpec and a runner profile (macos-g0 as measured, linux-g0 all unsupported until measured); the rebuild comparison that refuses a stale plan with plan-stale and the mismatched fields; plan_digest, run digest and run_id; the verbs describe, check (without --probe) and prepare (with --digest-only) that launch nothing. From 0.2.0 (work item W3b) the execution part: run (file-system allowlist, digest and rebuild checks, required guarantees refused never downgraded, idempotent reuse, a flock lock per run_id, leftovers moved and reported but never signalled, input snapshot, the backend launched directly in its own session with exactly the plan's environment, timeout and output budget enforced on its own unreaped process group only, collect, durable no-replace commit to runs/<run_id>/ or failed/), inspect (read-only) and check --probe (environment record). From 0.3.0 the Garfield++ backend (work item W4G): electron drift velocity at B = 0 from one 1D gas table, checked against an independent parser and a reimplementation of the pinned interpolation; out-of-range fields refused unless allow_outside_validated_range (labelled). The Allpix Squared backend is a later work item. Every record is unvalidated: no state implies physical validity. Optional, required by no skill",
  "tools": [
   {
    "name": "Shared layer: detsim.py and its sibling modules detsim_canonical.py, detsim_profile.py, detsim_schemas.py, detsim_plan.py, detsim_platform.py, detsim_runner.py, detsim_run.py (this plugin's code, standard library, core and contracts only); tested with the simulator-free backend tests/adapters/detsim_backend_synthetic.py and the cooperative program tests/adapters/detsim_coop_program.py",
@@ -17,9 +17,11 @@
    "tested_versions": []
   },
   {
-   "name": "Garfield++ backend (detsim_backend_garfield.py, capability garfield.gas-table-query; https://gitlab.cern.ch/garfield/garfieldpp; licence recorded when the backend is pinned): not part of this version",
-   "status": "proposed",
-   "tested_versions": []
+   "name": "Garfield++ backend (detsim_backend_garfield.py with assets/garfield/gas_table_query.py and its descriptor; capability garfield.gas-table-query 1.0.0; https://gitlab.cern.ch/garfield/garfieldpp; no licence file at the pinned commit; run as a separate program, nothing bundled)",
+   "status": "demonstrated-on-synthetic-data",
+   "tested_versions": [
+    "adapter 0.3.0 on E2 (macOS 27.2 arm64, APFS, macos-g0), 2026-11-02: Garfield++ e2e58ea74ec8b20d347d78b7a769f40e3b156072 (source build, GSL on, Eigen off) with Homebrew ROOT 6.40.04 and Python 3.15.2 PyROOT; GF-QUERY task 1 ok (checks 1-3), task 2 refused out-of-domain, task 2 with allow_outside_validated_range ok (check 4, rows labelled); example table ar_80_co2_20_0T.gas (SHA-256 ba435734…b732) under H0 #13, pipeline validation only; tested-in-declared-environment only after the non-author rerun and T-PERF (W5); no physical validity"
+   ]
   }
  ],
  "licence_boundary": "Nothing of Allpix Squared or Garfield++ is bundled, copied or linked by this version; the adapter's own code is Apache-2.0 like the plugin. Backends will run as separate programs in an environment the user approves; gas tables, field maps, builds and images are never committed",
@@ -32,14 +34,18 @@
   "assets/detsim_plan.py",
   "assets/detsim_platform.py",
   "assets/detsim_runner.py",
-  "assets/detsim_run.py"
+  "assets/detsim_run.py",
+  "assets/detsim_backend_garfield.py",
+  "assets/garfield/gas_table_query.py",
+  "assets/garfield/gas_table_query.capability.json"
  ],
  "tests": [
   "../../tests/adapters/test_detsim_identity.py",
   "../../tests/adapters/test_detsim_schemas.py",
   "../../tests/adapters/test_detsim_plan.py",
   "../../tests/adapters/test_detsim_missing_dependency.py",
-  "../../tests/adapters/test_detsim_run.py"
+  "../../tests/adapters/test_detsim_run.py",
+  "../../tests/adapters/test_detsim_garfield.py"
  ],
  "owner_skill": "hep-detector",
  "status_rule": "the adapter status is the lowest of its tools' statuses; the shared layer becomes demonstrated-on-synthetic-data only when run, lock and commit are tested with cooperative programs (W3b), and a backend only when its task card's checks pass in a recorded environment; a completed run is verification, never physical validity"
