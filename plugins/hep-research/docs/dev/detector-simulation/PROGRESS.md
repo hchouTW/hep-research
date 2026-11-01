@@ -102,7 +102,7 @@ Host: Darwin arm64 (macOS 27.2), 8 CPUs, Python 3.13.2, git 2.54.0, CMake 4.3.2,
 | W3b | done | 2026-11-02 | 1 / 3 | detsim_platform, detsim_runner, detsim_run; tests/adapters/test_detsim_run.py 62 (61 OK, 1 not run: platform); static 29/0/2; VALIDATION DETSIM-W3B; shared layer demonstrated-on-synthetic-data | round-3 minor finding B1 fixed after round 3 without a fourth review |
 | W4A | done | 2026-11-02 | 2 / 2 | detsim_backend_allpix.py, assets/allpix/, tests (39 + live); acceptance-3 runs 1302c2dd…, fe0e9b88…, 0642769d…; T-ENV, T-AP, T-OUTPUT, T-CONV; VALIDATION DETSIM-W4A | round-2 documentation items fixed after round 2 |
 | W4G | done | 2026-11-02 | 1 / 2 | detsim_backend_garfield.py, assets/garfield/, tests (78 + live); acceptance-2 runs efc8f707…, 8fdc5f83…; T-ENV, T-GF, T-OUTPUT, T-CONV; VALIDATION DETSIM-W4G | round-2 documentation items fixed after round 2 |
-| W5 | in-progress | 2026-11-02 | 0 / 0 | non-author reruns started | |
+| W5 | done | 2026-11-02 | 0 / 0 | non-author reruns (WR/projects/W5-rerun-*), PERF.md, SUPPORT-MATRIX.md; both backends tested-in-declared-environment; full run_all_checks 31 pass / 0 fail / 2 skip (units 6591 run, 0 failures, 217 skipped); VALIDATION DETSIM-W5 | |
 
 ## To-verify results
 
@@ -290,6 +290,46 @@ Blockers and gates raised: H5 (Allpix environment budget) answered: +1.5 h
 Next step: W5
 ```
 
+```text
+Work item ID: W5
+Status: done
+Isolation guard: pass at start / pass before each commit
+Files changed: operations guide, hep-detector guide and README (rerun gaps), PERF.md, SUPPORT-MATRIX.md, adapter.json
+  (both tools tested-in-declared-environment), capability-matrix row, tests (every subprocess call bounded by a
+  timeout), CHANGELOG, VALIDATION
+Decisions made (with reasons): decision log rows W5 (2026-11-02)
+Commands actually run and results: VALIDATION DETSIM-W5; `tools/run_all_checks.py --no-cli` 31 pass, 0 fail, 2 skip
+  (claude-plugin-validate, codex-plugin-load: host CLIs, --no-cli); units 6591 run, 6374 passed, 217 skipped, 0 failures
+Tests not run and reasons: Linux (platform); host plugin CLIs (--no-cli)
+V-items concluded / still open: none open
+Independent review: none (operational acceptance; the non-author reruns are the independent check)
+Blockers and gates raised: none
+Next step: Phase 3 final report
+```
+
 ## Final report
 
-(E.3, written in Phase 3)
+```text
+Conclusion: K done, A done, G done.
+Work items: W0, W1, WK, W2-AP, W2-GF, W3a, W3b, W4A, W4G, W5 all done (table "Work status"; evidence in
+  VALIDATION DETSIM-WK, -W3A, -W3B, -W4G, -W4A, -W5, WR/scratch/<item>, WR/patches/<key>, WR/projects/W5-rerun-*).
+Definition of done (§17): ticked all of 17.1 (entry points, T-DISCOVER, T-CONV; tool selection, both cards, version
+  sources, limitations; question set run 4 20/20), all of 17.2 (shared layer on the §7 components; W3a/W3b tests pass
+  on macOS, Linux tests "not run (platform)" with linux-g0 unsupported; contracts 3.18.0, CHANGELOG, VALIDATION,
+  capability-matrix row; D-W1-1..5), and all of 17.3 for both A and G (WT/WR with the guard; cards pinned before any
+  run; macos-g0 levels tested and recorded per run; every check and counterexample passes; adapter.json tested versions
+  and environment; non-author rerun, T-PERF, support matrix; no out-of-scope feature). Unticked: none. 17.4: both
+  backends were run end to end with content checks; nothing counted from documents, mocks or exit codes alone.
+V-items: V-01..V-14 concluded (table "To-verify results").
+Gate queue: H1 (ROOT interpreter) answered and resolved without a ROOT build; H5 (review bound 3 rounds; Allpix
+  budget +1.5 h) answered. No open gate.
+H0: answered by the user 2026-11-01 (#5 source builds of both, default budget; #11 PR, merge and release when done
+  and CI green; all others defaults).
+Isolation: WT ~/hep-research-detsim, WR ~/hep-research-detsim-work, branch detsim-integration, base 25a8dbe6; last
+  commit: the commit carrying this report. View: `git -C "$WT" log`, `git -C "$MAIN" diff 25a8dbe6..detsim-integration`.
+  Remove only if you want to: `git -C "$MAIN" worktree remove "$WT"` and the subagent worktrees
+  ~/hep-research-detsim-sub-*; delete WR. Nothing pushed, merged or removed when this report was written; H0 #11
+  authorizes the PR, merge and release that follow it.
+Tests not run: Linux runner-profile and PDEATHSIG tests (platform: no Linux host); the ldd branch of Allpix library
+  resolution (platform); claude-plugin-validate and codex-plugin-load (host CLIs, --no-cli).
+```
