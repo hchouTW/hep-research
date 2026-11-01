@@ -402,9 +402,6 @@ class CommandLine(ProjectCase):
         self.assertTrue(os.path.isdir(hostile))
 
 
-if __name__ == "__main__":
-    unittest.main()
-
 
 class ReviewRoundOne(unittest.TestCase):
     """W3a independent review round 1: F1 (unencodable answer), F2 (fullmatch everywhere), F3 (host paths and '..'
@@ -444,3 +441,33 @@ class ReviewRoundOne(unittest.TestCase):
         self.assertEqual((bad.returncode, json.loads(bad.stdout)["status"]), (2, "rejected"))
         optimized = subprocess.run([sys.executable, "-OO", str(script), "--help"], capture_output=True, text=True)
         self.assertEqual(optimized.returncode, 0, optimized.stderr)
+
+
+class ReviewRoundTwo(unittest.TestCase):
+    """W3a independent review round 2: N1 (malformed budget), F9 / N6 (declared shared-layer modules)."""
+
+    def test_malformed_budget_is_a_finding_not_a_crash(self):
+        import detsim_schemas
+        for budget in ("x", [1], 5):
+            with self.subTest(budget=budget):
+                findings = detsim_schemas.check_plan({"schema": "detector-plan/1", "task": {"budget": budget}})
+                self.assertTrue(findings)
+
+    def test_undeclared_or_missing_module_is_refused(self):
+        with tempfile.TemporaryDirectory() as work_dir:
+            assets = Path(work_dir) / "assets"
+            shutil.copytree(ASSETS, assets)
+            shutil.copy(ASSETS.parent / "adapter.json", Path(work_dir) / "adapter.json")
+            (assets / "detsim_extra.py").write_text("")
+            with self.assertRaises(detsim_plan.DetsimError) as caught:
+                detsim_plan.shared_layer_modules(assets)
+            self.assertEqual(caught.exception.details["reason"], "undeclared-module")
+            (assets / "detsim_extra.py").unlink()
+            (assets / "detsim_runner.py").unlink()
+            with self.assertRaises(detsim_plan.DetsimError) as caught:
+                detsim_plan.shared_layer_modules(assets)
+            self.assertEqual(caught.exception.details["reason"], "declared-module-missing")
+
+
+if __name__ == "__main__":
+    unittest.main()

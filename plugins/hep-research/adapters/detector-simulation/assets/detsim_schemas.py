@@ -268,7 +268,8 @@ def check_plan(plan) -> list[dict]:
     policy = profile.get("policy") if isinstance(profile.get("policy"), dict) else {}
     out += _execution_findings(plan.get("execution"), policy)
     out += _scope_findings(plan, "$")
-    budget = ((plan.get("task") or {}).get("budget") or {}).get("timeout_s") if isinstance(plan.get("task"), dict) else None
+    task_doc = plan.get("task") if isinstance(plan.get("task"), dict) else {}
+    budget = task_doc.get("budget").get("timeout_s") if isinstance(task_doc.get("budget"), dict) else None
     execution = plan.get("execution") if isinstance(plan.get("execution"), dict) else {}
     if isinstance(execution.get("timeout_s"), int) and isinstance(budget, int) and execution["timeout_s"] > budget:
         out.append(_finding("$.execution.timeout_s", "execution.timeout_over_budget",

@@ -137,22 +137,26 @@ def load_env_record(artifacts: Path, env_identity: str) -> dict:
     except (OSError, canonical.CanonicalError) as err:
         raise DetsimError("rejected", "environment-record-unreadable", f"the environment record is unreadable: {err}",
                           "$.environment_ref", record=str(path)) from None
-    problems = []
+    malformed = []  # a record that is not a detsim-env/1 document at all: rejected (unreadable input, TASK.md 11.3)
     if not isinstance(doc, dict) or doc.get("format") != ENV_RECORD_FORMAT:
-        problems.append(f"format is not {ENV_RECORD_FORMAT}")
-    else:
-        identity, variables = doc.get("identity"), doc.get("variables")
-        if not isinstance(identity, dict) or not isinstance(variables, dict):
-            problems.append("identity and variables are objects")
-        else:
-            problems += [f"{i['path']}: {i['code']}" for i in canonical.check_hash_scope({"identity": identity,
-                                                                                         "variables": variables})]
-            problems += [f"variable {n!r}" for n, v in variables.items()
-                         if schemas.ENV_NAME.fullmatch(n) is None or not isinstance(v, str)]
-            if not problems and canonical.digest(identity) != env_identity:
-                problems.append("the canonical_sha256 of identity is not the record's name")
-            if doc.get("env_identity") != env_identity:
-                problems.append("env_identity is not the record's name")
+        malformed.append(f"format is not {ENV_RECORD_FORMAT}")
+    elif not isinstance(doc.get("identity"), dict) or not isinstance(doc.get("variables"), dict):
+        malformed.append("identity and variables are objects")
+    elif any(schemas.ENV_NAME.fullmatch(n) is None or not isinstance(v, str) for n, v in doc["variables"].items()):
+        malformed.append("variable names are environment names with string values")
+    if malformed:
+        raise DetsimError("rejected", "environment-record-unreadable", f"environment record {env_identity}: "
+                          + "; ".join(malformed), "$.environment_ref", record=str(path))
+    problems = []  # a well-formed record whose content contradicts itself or the rules: refused
+    identity, variables = doc["identity"], doc["variables"]
+    problems += [f"{i['path']}: {i['code']}" for i in canonical.check_hash_scope({"identity": identity,
+                                                                                 "variables": variables})]
+    problems += [f"{f['path']}: {f['code']}" for f in schemas.host_path_findings(
+        (f"variables.{n}", v) for n, v in variables.items())]  # only ENV_ROOT paths (TASK.md 8.2)
+    if not problems and canonical.digest(identity) != env_identity:
+        problems.append("the canonical_sha256 of identity is not the record's name")
+    if doc.get("env_identity") != env_identity:
+        problems.append("env_identity is not the record's name")
     if problems:
         raise DetsimError("refused", "environment-record-invalid", f"environment record {env_identity}: "
                           + "; ".join(problems[:5]), "$.environment_ref", record=str(path))
@@ -256,6 +260,11 @@ def shared_layer_modules(assets: Path) -> list[Path]:
     if undeclared:
         raise DetsimError("error", "internal", f"shared-layer modules not declared in adapter.json: {undeclared}",
                           reason="undeclared-module")
+    absent = sorted(n for n in declared if n.startswith("detsim") and n.endswith(".py")
+                    and not n.startswith("detsim_backend_") and not (Path(assets) / n).is_file())
+    if absent:
+        raise DetsimError("error", "internal", f"shared-layer modules declared in adapter.json are missing: {absent}",
+                          reason="declared-module-missing")
     return present
 
 
@@ -305,10 +314,7 @@ def assemble_plan(task, workspace: Path, backend, profile_doc: dict, assets_dir:
         "profile": profile_in_scope,
         "execution": spec,
     }
-    findings = schemas.check_plan(plan)
-    if isinstance(spec, dict) and isinstance(spec.get("timeout_s"), int) and spec["timeout_s"] > task["budget"]["timeout_s"]:
-        findings.append({"severity": "error", "path": "$.execution.timeout_s", "code": "execution.timeout_over_budget",
-                         "message": "the backend's timeout exceeds the task budget"})
+    findings = schemas.check_plan(plan)  # includes the timeout-over-budget rule
     if findings:
         raise DetsimError("error", "internal", f"the backend produced an invalid plan: {findings[0]['message']}",
                           findings[0]["path"], reason="plan-invalid", findings=findings[:50])
@@ -377,6 +383,8 @@ def rebuild_comparison(plan: dict, workspace: Path, backend, profile_doc: dict,
         rebuilt, rebuilt_digest = assemble_plan(copy.deepcopy(plan["task"]), workspace, backend, profile_doc,
                                                 assets_dir)
     except DetsimError as err:
+        if err.status == "error":  # a fault of trusted code, not a stale plan: reported as such
+            raise
         field = next((v for k, v in _STALE_FIELD.items() if err.error_code.startswith(k)), "/")  # "/": the whole plan
         raise DetsimError("refused", "plan-stale", f"the plan cannot be rebuilt now ({err.error_code}: {err.message});"
                           " run prepare again", err.location, mismatched_fields=[field], rebuild_error=err.answer())
