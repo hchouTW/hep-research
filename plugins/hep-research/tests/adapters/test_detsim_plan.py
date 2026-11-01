@@ -6,7 +6,7 @@ replaced input, changed backend or shared-layer code, a changed environment reco
 with the mismatched fields; one extra argv or a one-byte change in a rendered file -> plan-stale; a wrong
 --plan-digest -> digest-mismatch; another profile -> another plan_digest. The command line (describe, check, prepare,
 prepare --digest-only) runs as a subprocess with the backend injected, answers one JSON object with a status and a
-stable error_code and exits 0-3 only; run and inspect answer not-run (execution layer, W3b). SYNTHETIC inputs; no
+stable error_code and exits 0-3 only (run and inspect are tested in test_detsim_run.py). SYNTHETIC inputs; no
 simulator is run; passes with a TMPDIR whose name has spaces and non-ASCII characters.
 """
 import base64
@@ -467,6 +467,46 @@ class ReviewRoundTwo(unittest.TestCase):
             with self.assertRaises(detsim_plan.DetsimError) as caught:
                 detsim_plan.shared_layer_modules(assets)
             self.assertEqual(caught.exception.details["reason"], "declared-module-missing")
+
+
+class ReviewRoundThree(ProjectCase):
+    """W3a independent review round 3 (M1): regression tests for three round-2 behaviours."""
+
+    def _record_path(self):
+        env_identity = task_of(self.project)["environment_ref"]
+        return detsim_plan.env_record_path(detsim_plan.artifacts_root(self.project), env_identity), env_identity
+
+    def test_not_a_detsim_env_document_is_rejected(self):
+        path, env_identity = self._record_path()
+        good = json.loads(path.read_text(encoding="utf-8"))
+        for broken in ([], dict(good, format="other/1"), dict(good, identity=[1]), dict(good, variables={"1X": "a"}),
+                       dict(good, variables={"PATH": 5})):
+            with self.subTest(broken=str(broken)[:40]):
+                path.write_text(json.dumps(broken), encoding="utf-8")
+                with self.assertRaises(DetsimError) as ctx:
+                    detsim_plan.load_env_record(detsim_plan.artifacts_root(self.project), env_identity)
+                self.assertEqual((ctx.exception.status, ctx.exception.error_code),
+                                 ("rejected", "environment-record-unreadable"))
+
+    def test_host_paths_in_record_variables_are_refused(self):
+        path, env_identity = self._record_path()
+        good = json.loads(path.read_text(encoding="utf-8"))
+        for value in ("ENV_ROOT/bin:/usr/bin", "~", "ENV_ROOT/../x"):
+            with self.subTest(value=value):
+                path.write_text(json.dumps(dict(good, variables=dict(good["variables"], PATH=value))),
+                                encoding="utf-8")
+                with self.assertRaises(DetsimError) as ctx:
+                    detsim_plan.load_env_record(detsim_plan.artifacts_root(self.project), env_identity)
+                self.assertEqual((ctx.exception.status, ctx.exception.error_code),
+                                 ("refused", "environment-record-invalid"))
+
+    def test_trusted_code_fault_during_rebuild_is_internal(self):
+        plan, _ = self.assemble()
+        original = synthetic.build_spec
+        broken = lambda *a: dict(original(*a), argv=["/usr/bin/x"])  # noqa: E731
+        with mock.patch.object(synthetic, "build_spec", broken), self.assertRaises(DetsimError) as ctx:
+            detsim_plan.rebuild_comparison(plan, self.project, synthetic, MACOS)
+        self.assertEqual((ctx.exception.status, ctx.exception.error_code), ("error", "internal"))
 
 
 if __name__ == "__main__":
