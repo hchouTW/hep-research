@@ -54,6 +54,8 @@ Environment availability (2a): Allpix Squared — not installed; obtainable unde
 
 | Key | Item | Path | Branch | Base commit | Patch folder | State |
 |---|---|---|---|---|---|---|
+| WK | WK | `/Users/hchou/hep-research-detsim-sub-WK` | detsim-sub-WK | `e480371cbe36929a0c08e2979778ff367b943007` | `WR/patches/WK/` | running |
+| W3a | W3a | `/Users/hchou/hep-research-detsim-sub-W3a` | detsim-sub-W3a | `e480371cbe36929a0c08e2979778ff367b943007` | `WR/patches/W3a/` | running |
 
 ## Environment reconnaissance
 
@@ -88,10 +90,10 @@ Host: Darwin arm64 (macOS 27.2), 8 CPUs, Python 3.13.2, git 2.54.0, CMake 4.3.2,
 |---|---|---|---|---|---|
 | W0 | done | 2026-11-01 | 0 / 0 | T-WT (this ledger, isolation record) | |
 | W1 | done | 2026-11-01 | 0 / 0 | W1 reuse table; V-01..V-06; D-W1-1..5; WR/scratch/W1 | |
-| WK | not-started | | 0 / 0 | | |
+| WK | in-progress | 2026-11-01 | 0 / 0 | subagent WK | |
 | W2-AP | not-started | | 0 / 0 | | |
 | W2-GF | not-started | | 0 / 0 | | |
-| W3a | not-started | | 0 / 0 | | |
+| W3a | in-progress | 2026-11-01 | 0 / 0 | subagent W3a | |
 | W3b | not-started | | 0 / 0 | | |
 | W4A | not-started | | 0 / 0 | | |
 | W4G | not-started | | 0 / 0 | | |
