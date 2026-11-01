@@ -15,7 +15,7 @@
   },
   "hep-computing": {
    "references": 41,
-   "bytes": 397374,
+   "bytes": 397712,
    "uncited": 0
   },
   "hep-detector": {
@@ -1735,8 +1735,8 @@
   {
    "path": "skills/hep-computing/references/sensor-and-gas-simulation-operations.md",
    "owner": "hep-computing",
-   "bytes": 17452,
-   "lines": 215,
+   "bytes": 17790,
+   "lines": 216,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/references/analysis-workflows.md",
@@ -1747,7 +1747,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "8abe2652 2026-11-01"
+   "last_commit": "4607531f 2026-11-01"
   },
   {
    "path": "skills/hep-computing/references/software-architecture.md",

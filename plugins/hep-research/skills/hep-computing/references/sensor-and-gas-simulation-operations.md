@@ -49,7 +49,7 @@ each backend separately; the two need not share an LCG release.
 
 | Backend | Route | Identity recorded | Notes (versions as read) |
 |---|---|---|---|
-| Allpix Squared | Docker image `gitlab-registry.cern.ch/allpix-squared/allpix-squared:<tag>`; host folder mounted at `/data` [AP-18, AW-06] | image digest | The tag must be the release that the pinned commit is; a development (master) commit such as `df69a6a4` has no release image, so pin a release tag or build that commit from source; Geant4 data sets complete; image architecture on Apple Silicon unverified |
+| Allpix Squared | Docker image `gitlab-registry.cern.ch/allpix-squared/allpix-squared:<tag>`; host folder mounted at `/data` [AP-18, AW-06] | image digest | The tag must be the release that the pinned commit is; a development (master) commit such as `df69a6a4` has no release image; nightly `latest` images track master and are overwritten, so pin a release tag, build that commit from source, or use an image digest whose `allpix --version` (from `git describe --tags`, [AP-26]) names the pinned commit [AP-25]; Geant4 data sets complete; image architecture on Apple Silicon unverified |
 | Allpix Squared | CVMFS: `source /cvmfs/clicdp.cern.ch/software/allpix-squared/<version>/<system-specifier>/setup.sh` [AP-19, AW-07] | version + platform + SHA-256 of `setup.sh` | Binaries only for CentOS 7 (GCC) and EL9 (GCC, LLVM), published per release; nightly `latest` builds track master and are overwritten, so a specific master commit is reproducible only from a source build or an image digest whose `allpix --version` matches the pin [AP-25]; not in LCG releases; CVMFS must already be mounted (never mount it yourself); **unverified**: no hep-research run has used this route |
 | Allpix Squared | Source build | manifest digest | Linux and macOS stated by upstream [AP-17]; the only route for a development commit; needs explicit authorization to download and build |
 | Garfield++ | LCG views | view name + platform + Garfield++ commit | The LCG package index lists releases 110a, 110, 109a, 109, 108a, 108, dev and SWAN variants; versions are commit abbreviations, not tags [GW-05, retrieved 2026-11-01] |
@@ -164,7 +164,8 @@ those fields, never a word such as "isolated".
 ## 8. Statuses and troubleshooting
 
 Exit codes are only 0-3; `status` and `error_code` tell cases apart [H-01 §11.3, H-03]. An exit without parseable
-JSON on stdout means `detsim` itself crashed or was killed from outside.
+JSON on stdout means `detsim` itself crashed or was killed from outside. `failed` and `refused` share exit 1; only
+`failed` writes a run record (under `failed/`); `refused`, `rejected` and `missing-dependency` write none [H-01 §11.3].
 
 | `status` / `error_code` (exit) | Meaning | What to do |
 |---|---|---|
