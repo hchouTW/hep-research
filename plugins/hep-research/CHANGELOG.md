@@ -3,7 +3,12 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.53.0 (2026-11-01)
+
+Minor release: event displays. Contracts 3.17.0 and `CORE_VERSION` 1.5.0 are unchanged; the `hep-computing`
+description changes (it names event displays and sends paper figures to hep-authoring), every other skill
+description is unchanged. It ships PR #340 (event-display references and templates in `hep-computing`) and PR #341
+(their routing: six EVD cases, live run 64/68 with no regression).
 
 - **hep-computing: event-display requests route to the skill.** The description names "event displays (Phoenix)"
   and its `Not for` part sends paper figures to hep-authoring (1,022 -> 1,015 characters; space freed by dropping
