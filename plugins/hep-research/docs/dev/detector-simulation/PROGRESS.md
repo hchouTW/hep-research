@@ -100,7 +100,7 @@ Host: Darwin arm64 (macOS 27.2), 8 CPUs, Python 3.13.2, git 2.54.0, CMake 4.3.2,
 | W3a | done | 2026-11-01 | 0 / 3 | patches 5ca7dbd1, 3fd54f69, 510315a5; review fixes 2468b15e, ff6a077e, f348166f; T-CANON 17, T-SCHEMA 12, T-PLAN 35, missing-dependency 3 OK; VALIDATION DETSIM-W3A | round-3 minor findings M1-M2 fixed after round 3 without a fourth review |
 | W3b | done | 2026-11-02 | 1 / 3 | detsim_platform, detsim_runner, detsim_run; tests/adapters/test_detsim_run.py 62 (61 OK, 1 not run: platform); static 29/0/2; VALIDATION DETSIM-W3B; shared layer demonstrated-on-synthetic-data | round-3 minor finding B1 fixed after round 3 without a fourth review |
 | W4A | in-progress | 2026-11-02 | 1 / 0 | subagent W4A | |
-| W4G | in-progress | 2026-11-02 | 0 / 0 | subagent W4G | |
+| W4G | done | 2026-11-02 | 1 / 2 | detsim_backend_garfield.py, assets/garfield/, tests (78 + live); acceptance-2 runs efc8f707…, 8fdc5f83…; T-ENV, T-GF, T-OUTPUT, T-CONV; VALIDATION DETSIM-W4G | round-2 documentation items fixed after round 2 |
 | W5 | not-started | | 0 / 0 | | |
 
 ## To-verify results
@@ -252,6 +252,23 @@ V-items concluded / still open: V-04 used
 Independent review: 3 rounds; round-3 finding B1 fixed with a test after the round (no fourth review)
 Blockers and gates raised: none
 Next step: W4G (W2-GF done), W4A after W2-AP
+```
+
+```text
+Work item ID: W4G
+Status: done
+Isolation guard: pass at start / pass before each commit (subagent keys W4G, W4G-2)
+Files changed: adapters/detector-simulation/assets/detsim_backend_garfield.py, assets/garfield/*, detsim_plan.py
+  (CHECK_READS_INPUTS hook), detsim_run.py (note column, dependency mapping), contracts/schemas/detsim_observables.json
+  (optional note), tests/adapters/test_detsim_garfield.py and fixtures, adapter.json, capability matrix, guides, card
+  amendments, CHANGELOG, VALIDATION
+Decisions made (with reasons): decision log rows W4G (2026-11-02)
+Commands actually run and results: VALIDATION DETSIM-W4G
+Tests not run and reasons: Linux (platform)
+V-items concluded / still open: V-09..V-13 used
+Independent review: 2 rounds; round 2 left documentation items, fixed after the round
+Blockers and gates raised: none
+Next step: W5 (non-author rerun, T-PERF, support matrix)
 ```
 
 ## Final report

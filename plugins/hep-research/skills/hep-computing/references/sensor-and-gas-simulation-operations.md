@@ -6,9 +6,10 @@ and troubleshooting. Which tool to use, what its result means and the physics of
 hep-detector [sensor and gas transport tools](../../hep-detector/references/sensor-and-gas-transport-tools.md) guide;
 read it first.
 
-**Status (2026-11-01): unverified.** Neither backend has been built or run through hep-research, and the `detsim`
-command is being built by another work item; it is described here **as specified** (task specification 9.1 §9-§11,
-source H-01), not as observed. No output below comes from a run. Source IDs in brackets refer to
+**Status (2026-11-02):** the `detsim` command and both backends ran their task cards' acceptance checks on one macOS
+arm64 environment (Allpix Squared `df69a6a4`, Garfield++ `e2e58ea`, ROOT 6.40.04); any other version, platform or
+configuration is **unverified**, and the command is described as specified (task specification 9.1 §9-§11, source
+H-01). No output below is a result to reuse. Source IDs in brackets refer to
 `docs/dev/detector-simulation/SOURCES.md` (plugin root). Replace "unverified" by the tested versions only after the
 backend's acceptance tests pass in a recorded environment.
 
@@ -178,6 +179,11 @@ JSON on stdout means `detsim` itself crashed or was killed from outside. `failed
 | `refused` / `run-id-collision` (1) | `runs/<run_id>/` holds a different plan | investigate; nothing was overwritten |
 | `refused` / `out-of-domain` (1) | a GF-QUERY point outside the table's E range; the valid range is reported | drop the point, or set `allow_outside_validated_range` knowingly (rows get `outside-validated-range`) |
 | `refused` / `condition-mismatch` (1) | GF-QUERY temperature or pressure differs from the table's | use the table's conditions or a table made for yours |
+| `refused` / `interpolation-mismatch` (1) | GF-QUERY interpolation order or extrapolation methods differ from the table footer | use the footer's values |
+| `refused` / `extrapolation-undefined` (1) | exponential extrapolation requested on a side whose end velocities are not both positive | use another table |
+| `rejected` / `node-coverage` (2) | the query points lack the first node, the last node or an interior node of the table | add those points |
+| `rejected` / `table-format` (2) | the gas table cannot be parsed in the pinned storage form | use an intact 1D table |
+| `rejected` / `note-missing` (2) | the pinned example table is used without "example table, pipeline validation only" in the objective | add the note |
 | `refused` (3) | the protected-use guard refused before anything ran | follow the project's protected-data policy |
 | `missing-dependency` (3) | backend program, ROOT bindings, library or Geant4 data set missing, found before the lock | fix the environment (sections 3-5); nothing ran |
 | `failed` / `missing-dependency` (1) | a library failed to load after the lock | a run record exists with the `failed` label; fix and rerun the same plan |

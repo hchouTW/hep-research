@@ -49,7 +49,12 @@ Software checks establish contract consistency only, not physical validity.
   `allow_outside_validated_range` (then labelled `outside-validated-range`); collect runs checks 1-4 of card GF-QUERY
   with an independent `.gas` parser and a reimplementation of Garfield++'s `Divdif` stencil and extrapolation;
   `check --probe` records a content-based identity and answers `missing-dependency` without ROOT, the libraries or the
-  bindings. Shared layer: a backend that declares `CHECK_READS_INPUTS` receives the hash-checked input files in `check`.
+  bindings. The query script prints one JSON status and exits 0-3; refusals `table-format`, `extrapolation-undefined`,
+  `interpolation-mismatch` and `node-coverage`; observables rows from the pinned example table carry the note
+  "example table, pipeline validation only" (an optional row field `note` of detsim-observables/1, contracts 3.18.0, and a
+  `note` column in observables.csv). Shared layer: a backend that declares `CHECK_READS_INPUTS` receives the
+  hash-checked input files in `check`; a backend's missing-dependency status at run time makes the run failed /
+  missing-dependency.
 - Evidence: VALIDATION DETSIM-W4G
 - **`adapters/detector-simulation` 0.4.0: Allpix Squared backend** (work item W4A). Backend `allpix-squared` with
   capability `allpix.pixel-charge` 1.0.0 (`detsim_backend_allpix.py`, descriptor under `assets/allpix/`): the official

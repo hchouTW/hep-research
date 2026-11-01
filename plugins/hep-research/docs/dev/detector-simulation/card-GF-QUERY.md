@@ -54,5 +54,5 @@ Pinned 2026-11-02 (V-13 concluded):
 - Observables rows carry the note "example table, pipeline validation only" (optional row field `note` of
   detsim-observables/1, contracts 3.18.0) when the pinned example table is used.
 - Interpolation order and extrapolation methods are task parameters and must equal the table footer.
-- Query points must include the first node, the last node and an interior node of the table (refused at `check`,
-  partial at collect otherwise).
+- Query points must include the first node, the last node and an interior node of the table (rejected at `check`,
+  partial at collect otherwise); at `check` the answer is `rejected` / `node-coverage` (exit 2).

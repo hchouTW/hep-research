@@ -8740,3 +8740,28 @@ with the simulator-free synthetic backend and a cooperative program; no simulato
 | Independent review | three rounds (fresh subagents, advisory, shared host): round 1 7 major / 17 minor, round 2 0 major / 5 minor, round 3 no earlier finding open and 1 new minor finding, fixed with a test after round 3 (no fourth round) | findings fixed |
 
 Passing checks show software consistency, not physical validity.
+
+## DETSIM-W4G — 2026-11-02 (macOS 27.2 arm64, APFS; controller Python 3.13.2 venv, backend Homebrew Python 3.15.2 with PyROOT; version 0.53.0 + unreleased)
+
+The Garfield++ backend of the detector-simulation adapter (capability `garfield.gas-table-query` 1.0.0) on Garfield++
+`e2e58ea` built from source with Homebrew ROOT 6.40.04, run through `detsim` on the example table
+`ar_80_co2_20_0T.gas` (H0 #13: local input only, pipeline validation only).
+
+| Item | Evidence | Result |
+|---|---|---|
+| Offline tests | `tests/adapters/test_detsim_garfield.py` with synthetic 1D, 3D and no-velocity fixtures (independent parser, Divdif order-2 stencil incl. both end cases, linear / constant / exponential extrapolation against hand-computed values, refusals, node coverage, note, three-argument check call) | 78 run, OK (5 live tests skipped) |
+| Live tests | the same module with `HEP_DETSIM_GARFIELD_VIEW` and `HEP_DETSIM_GARFIELD_TABLE`, also with a TMPDIR whose name has a space and non-ASCII characters | OK |
+| T-ENV | `check --probe` on the view and through a symlink: same identity 96827976… (commit, build options, six Garfield++ libraries, libCore, libCPyCppyy, ROOT and Python versions) and same plan digest; missing ROOT, library or bindings → missing-dependency (exit 3) | pass |
+| T-GF task 1 | six in-range points; run `efc8f707…`, plan `d30a70ab…` | ok; check 1 (nodes within 4 ulp, perpendicular components exactly 0), check 2 (vx < 0), check 3 (interior vs the independent Divdif, ≤ 1e-12 relative + 4 ulp) pass; vx = -0.00034219876 cm/ns at 100.000002 V/cm, -0.006209797047009455 cm/ns at 2800 V/cm; a rerun is reused |
+| T-GF task 2 | plus 50 and 100000 V/cm | refused out-of-domain (exit 1) at check and prepare, valid range [100.000002, 80000.0016] V/cm |
+| T-GF task 2 with the option | run `8fdc5f83…`, plan `c2396499…` | ok; check 4 (constant low, linear high) passes, the two points' rows labelled `outside-validated-range`; vx = -0.027253885159861574 cm/ns at 100000 V/cm |
+| T-OUTPUT, contracts | `contracts/validate.py` on the artifacts; `contracts/verify_run.py` on both records; every observables row carries the note | pass; 11 of 11 hashes match per run |
+| Independent check of the numbers | a reviewer's own parser and Divdif port | 5 of 8 points identical, 3 within 2.9e-16 relative |
+| Conventions | layering, naming, adapter declarations and missing-dependency, CLI robustness, python compat; contracts tests (schema field `note`); static part | pass; contracts 1160 OK (1 skipped); static 29 pass, 0 fail, 2 skip |
+| Independent review | two rounds (fresh subagents, advisory, shared host): round 1 2 major / 9 minor, round 2 no code finding open, documentation items fixed after the round | findings fixed |
+
+Not run: Linux (linux-g0 unsupported until measured); a run-time library failure on the real view (`probe` refuses a
+broken view before a run; the mapping is tested with a stand-in program). Passing checks show software consistency,
+not physical validity: the example table is not reference data.
+
+Passing checks show software consistency, not physical validity.
