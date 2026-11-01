@@ -55,7 +55,7 @@ Environment availability (2a): Allpix Squared — not installed; obtainable unde
 | Key | Item | Path | Branch | Base commit | Patch folder | State |
 |---|---|---|---|---|---|---|
 | WK | WK | `~/hep-research-detsim-sub-WK` | detsim-sub-WK | `e480371cbe36929a0c08e2979778ff367b943007` | `WR/patches/WK/` | applied (WK, WK-2) |
-| W3a | W3a | `~/hep-research-detsim-sub-W3a` | detsim-sub-W3a | `e480371cbe36929a0c08e2979778ff367b943007` | `WR/patches/W3a/` | applying |
+| W3a | W3a | `~/hep-research-detsim-sub-W3a` | detsim-sub-W3a | `e480371cbe36929a0c08e2979778ff367b943007` | `WR/patches/W3a/` | applied (3 patches) |
 
 ## Environment reconnaissance
 
@@ -79,7 +79,7 @@ Host: Darwin arm64 (macOS 27.2), 8 CPUs, Python 3.13.2, git 2.54.0, CMake 4.3.2,
 | 7 | G0 platforms | current host (macOS); Linux declared soft or unsupported until measured | default | 2026-11-01 |
 | 8 | Guide language | English | default | 2026-11-01 |
 | 9 | Budget | environment 2 h and 20 GB; one test run 10 min | default (confirmed by user) | 2026-11-01 |
-| 10 | Loop bounds | as in §3.4 | default | 2026-11-01 |
+| 10 | Loop bounds | as in §3.4; **review rounds per item raised to 3** (gate H5, 2026-11-01) | default; user for the review bound | 2026-11-01 |
 | 11 | Push / PR when finished | **push, open a PR, merge and release when the task ends done and CI is green** | user | 2026-11-01 |
 | 12 | Owners of §15.3 | the user, every role | default | 2026-11-01 |
 | 13 | Example gas table `ar_80_co2_20_0T.gas` | yes, under the two conditions (local input only; pipeline validation only) | default (user decision 2026-10-30) | 2026-11-01 |
@@ -90,11 +90,11 @@ Host: Darwin arm64 (macOS 27.2), 8 CPUs, Python 3.13.2, git 2.54.0, CMake 4.3.2,
 |---|---|---|---|---|---|
 | W0 | done | 2026-11-01 | 0 / 0 | T-WT (this ledger, isolation record) | |
 | W1 | done | 2026-11-01 | 0 / 0 | W1 reuse table; V-01..V-06; D-W1-1..5; WR/scratch/W1 | |
-| WK | in-progress | 2026-11-01 | 0 / 0 | subagent WK | |
-| W2-AP | not-started | | 0 / 0 | | |
-| W2-GF | not-started | | 0 / 0 | | |
-| W3a | in-progress | 2026-11-01 | 0 / 0 | subagent W3a | |
-| W3b | not-started | | 0 / 0 | | |
+| WK | in-progress | 2026-11-01 | 0 / 2 | patches WK (d3ee1c15), WK-2 (8628dc11), round-2 fixes 8abe2652; T-DISCOVER (WR/scratch/WK/t-discover.txt, raw); question set run 2: 19/20, Q05 partial (dc8f1d42) | review round 3; question set rerun |
+| W2-AP | in-progress | 2026-11-01 | 0 / 0 | V-07, V-14 read at df69a6a4; G4NDL 4.7.1 in WR/env/g4data (MD5 54f0ed39 matches) | environment (V-08): ROOT with a working interpreter, Allpix build |
+| W2-GF | in-progress | 2026-11-01 | 0 / 0 | card-GF-QUERY.md (query points and tolerances fixed before any query); V-09..V-12 read at e2e58ea | environment (V-13): ROOT with a working interpreter |
+| W3a | in-progress | 2026-11-01 | 0 / 2 | patches 5ca7dbd1, 3fd54f69, 510315a5; review fixes 2468b15e (round 1), ff6a077e (round 2); 62 + 2 tests | review round 3; VALIDATION entry |
+| W3b | in-progress | 2026-11-01 | 1 / 0 | 5fda61cd, d6dc4c66: detsim_platform, detsim_runner, detsim_run, run/inspect/check --probe; tests/adapters/test_detsim_run.py 45 tests (1 skipped: Linux only) | T-CONV complete, review |
 | W4A | not-started | | 0 / 0 | | |
 | W4G | not-started | | 0 / 0 | | |
 | W5 | not-started | | 0 / 0 | | |
@@ -114,6 +114,16 @@ Host: Darwin arm64 (macOS 27.2), 8 CPUs, Python 3.13.2, git 2.54.0, CMake 4.3.2,
 
 | Time | Work item | Decision (incl. D-W1-n) | Reason | How to revert |
 |---|---|---|---|---|
+| 2026-11-01 | WK | Entry points through the registered hubs `detector-simulation.md` (hep-detector §11 lists it; reachable from the SKILL.md row "Simulation (Geant4)") and `analysis-workflows.md`; no new row in `detector-principles-summary.md` §11 (its routing part is 4081 B of the 4096 B soft limit; nine other hep-detector references are also reached through hubs) | review round 1 F4, round 2 confirmed as a decision | add a §11 entry after trimming that page |
+| 2026-11-01 | WK | `detsim` is named without a `.py` token in skill text until R-07 (m) is handled for it in W3b/W5 (skill_scripts list, interpreter guard) | review round 1 F15 | name the file and regenerate the skill-script list |
+| 2026-11-01 | W3a | D-W3a-4 (canonical/1 rule): `$NAME` references are refused only for an upper-case NAME (plus `${…}` and `$(`), so `#/$defs` and lower-case words after `$` in free text pass; a task string starting with `/`, `~` or a drive letter is refused anywhere, including `objective` (free text starting with "~" must be reworded) | review round 1 F3, round 2 | widen or narrow the regular expression |
+| 2026-11-01 | W3a | F7: the T-PLAN clauses "wrong --plan-digest → digest-mismatch" and "plan-stale → refused, exit 1" are tested at library level in W3a and through `main()` in W3b (test_detsim_run ExitTable) | review round 1 F7 | — |
+| 2026-11-01 | W3a | F9: the shared-layer hash scope is the set of `detsim*.py` modules declared in `adapter.json` "assets"; an undeclared or a declared-but-missing module is error/internal | review rounds 1-2 | glob again |
+| 2026-11-01 | W3a | F5: a record that is not a detsim-env/1 document is `rejected` (environment-record-unreadable); a well-formed record that contradicts itself (identity hash, host paths) is `refused` (environment-record-invalid) | review rounds 1-2 | — |
+| 2026-11-01 | W2 | Homebrew ROOT 6.40.04's interpreter (cling) crashes on the macOS 27 SDK (even a trivial rootcling), which blocks the Garfield++ dictionary, the Allpix object dictionaries and PyROOT; gate H1 answered by the user: build ROOT 6.40.04 from source in WR. First attempt against MacOSX26.5.sdk failed (C++ modules mixed SDK headers); second attempt with the Xcode SDK and `runtime_cxxmodules=OFF` | WR/scratch/rootcling-test, WR/env/root/build*.log | use another ROOT |
+| 2026-11-01 | W2 | Garfield++ build: `GARFIELD_WITH_EIGEN=OFF`, examples/tests/docs/CUDA off; Allpix build: `BUILD_GDMLOutputWriter=OFF` (the host Geant4 has no GDML; AP-BOOT does not use the module) | build logs in WR/env | turn the options back on |
+| 2026-11-01 | W2-AP | Allpix requires `G4NEUTRONHPDATA` to name an existing folder (GeometryBuilderGeant4Module.cpp:106-117 at df69a6a4); G4NDL 4.7.1 downloaded into `WR/env/g4data` (official MD5 54f0ed39…), never written into the Geant4 installation | V-08 | — |
+| 2026-11-01 | WK | Question set run 1 (20/20) superseded: it predated the review fixes; run 2 graded 19/20 (Q05 omits "unverified") | review round 2 B1 | — |
 | 2026-11-01 | W0 | Base is `origin/HEAD` = `25a8dbe6` (0.53.0), not the spec's `bf5e453` (0.51.0 + unreleased) | §2.3 step 3 takes the current `origin/HEAD`; W1 re-checks every repository fact on this base | rebase onto another base |
 | 2026-11-01 | W0 | Upstream clones are blob-less (`--filter=blob:none`) rather than `--depth 1` | keeps tags, so `git describe` (used by the Allpix version string) works; still read-only | reclone shallow |
 | 2026-11-01 | W1 | D-W1-1: `detsim run` can be an opaque `run_workflow.py` step with `parameter_digest` from `detsim prepare --digest-only` and only its `stdout` answer as output; incremental skip works only where the plugin release digest is known (released installs) | V-02 fixture | run detsim directly |
@@ -128,6 +138,8 @@ Host: Darwin arm64 (macOS 27.2), 8 CPUs, Python 3.13.2, git 2.54.0, CMake 4.3.2,
 
 | Gate | Question | Blocked work | Suggested options | Status |
 |---|---|---|---|---|
+| H1 | ROOT with a working interpreter: Homebrew ROOT's cling fails on the macOS 27 SDK | W2-AP, W2-GF, W4A, W4G | build ROOT from source in WR; conda-forge ROOT; block | answered 2026-11-01: build from source in WR |
+| H5 | Review-round bound reached for WK and W3a (2 rounds, findings fixed) | WK, W3a and their dependents | raise to 3 or 4; keep 2 | answered 2026-11-01: raised to 3 |
 
 ## Delivery reports
 
