@@ -14,13 +14,13 @@
    "uncited": 0
   },
   "hep-computing": {
-   "references": 40,
-   "bytes": 379059,
+   "references": 41,
+   "bytes": 395434,
    "uncited": 0
   },
   "hep-detector": {
-   "references": 43,
-   "bytes": 668863,
+   "references": 44,
+   "bytes": 691528,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1184,12 +1184,13 @@
   {
    "path": "skills/hep-computing/references/analysis-workflows.md",
    "owner": "hep-computing",
-   "bytes": 7691,
-   "lines": 91,
+   "bytes": 8025,
+   "lines": 94,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-computing/SKILL.md",
     "skills/hep-computing/references/preservation-checklist.md",
+    "skills/hep-computing/references/sensor-and-gas-simulation-operations.md",
     "skills/hep-computing/scripts/run_workflow.py",
     "tests/skills/hep_computing/test_workflow_c6.py",
     "tools/skill_scripts.json"
@@ -1349,8 +1350,8 @@
   {
    "path": "skills/hep-computing/references/engineering-playbook.md",
    "owner": "hep-computing",
-   "bytes": 12816,
-   "lines": 179,
+   "bytes": 13109,
+   "lines": 182,
    "linked_from_skill_md": true,
    "cited_by": [
     "contracts/naming/surfaces.json",
@@ -1366,8 +1367,8 @@
   {
    "path": "skills/hep-computing/references/environments-and-containers.md",
    "owner": "hep-computing",
-   "bytes": 6623,
-   "lines": 99,
+   "bytes": 6859,
+   "lines": 102,
    "linked_from_skill_md": true,
    "cited_by": [
     "contracts/naming/surfaces.json",
@@ -1377,7 +1378,8 @@
     "skills/hep-computing/references/engineering-playbook.md",
     "skills/hep-computing/references/preservation-checklist.md",
     "skills/hep-computing/references/root-usage-patterns.md",
-    "skills/hep-computing/references/semantic-naming.md"
+    "skills/hep-computing/references/semantic-naming.md",
+    "skills/hep-computing/references/sensor-and-gas-simulation-operations.md"
    ],
    "cited_by_other_skills": [],
    "last_commit": "061ce622 2026-10-31"
@@ -1729,6 +1731,23 @@
     "hep-theory"
    ],
    "last_commit": "7be56d2b 2026-10-26"
+  },
+  {
+   "path": "skills/hep-computing/references/sensor-and-gas-simulation-operations.md",
+   "owner": "hep-computing",
+   "bytes": 15512,
+   "lines": 199,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-computing/references/analysis-workflows.md",
+    "skills/hep-computing/references/engineering-playbook.md",
+    "skills/hep-computing/references/environments-and-containers.md",
+    "skills/hep-detector/references/sensor-and-gas-transport-tools.md"
+   ],
+   "cited_by_other_skills": [
+    "hep-detector"
+   ],
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-computing/references/software-architecture.md",
@@ -2128,8 +2147,8 @@
   {
    "path": "skills/hep-detector/references/detector-simulation.md",
    "owner": "hep-detector",
-   "bytes": 14467,
-   "lines": 232,
+   "bytes": 14999,
+   "lines": 238,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
@@ -2142,6 +2161,7 @@
     "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
     "skills/hep-detector/references/geant4-study-protocol.md",
     "skills/hep-detector/references/readout-digitization-and-overlay.md",
+    "skills/hep-detector/references/sensor-and-gas-transport-tools.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-ml/references/fast-simulation-validation.md",
     "skills/hep-theory/references/event-generation.md"
@@ -2258,6 +2278,7 @@
     "skills/hep-detector/references/front-end-waveform-processing.md",
     "skills/hep-detector/references/geant4-study-protocol.md",
     "skills/hep-detector/references/readout-digitization-and-overlay.md",
+    "skills/hep-detector/references/sensor-and-gas-transport-tools.md",
     "skills/hep-detector/references/signal-formation-and-readout.md",
     "skills/hep-detector/references/timing-detectors.md",
     "skills/hep-detector/references/tracking-and-vertexing.md",
@@ -2322,6 +2343,7 @@
     "skills/hep-detector/examples/02-geant4-adversarial-audit.md",
     "skills/hep-detector/examples/README.md",
     "skills/hep-detector/references/detector-simulation.md",
+    "skills/hep-detector/references/sensor-and-gas-transport-tools.md",
     "skills/hep-detector/references/system-design-workflow.md",
     "skills/hep-detector/scripts/check_geant4_study.py",
     "skills/hep-detector/scripts/geant4_benchmarks.py",
@@ -2634,6 +2656,21 @@
     "hep-statistics"
    ],
    "last_commit": "e03c0396 2026-10-22"
+  },
+  {
+   "path": "skills/hep-detector/references/sensor-and-gas-transport-tools.md",
+   "owner": "hep-detector",
+   "bytes": 22133,
+   "lines": 241,
+   "linked_from_skill_md": false,
+   "cited_by": [
+    "skills/hep-computing/references/sensor-and-gas-simulation-operations.md",
+    "skills/hep-detector/references/detector-simulation.md"
+   ],
+   "cited_by_other_skills": [
+    "hep-computing"
+   ],
+   "last_commit": "untracked"
   },
   {
    "path": "skills/hep-detector/references/signal-formation-and-readout.md",

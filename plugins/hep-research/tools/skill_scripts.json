@@ -22,6 +22,7 @@
    "path": "adapters/geant4/assets/geant4_build.py",
    "depth": 3,
    "skills": [
+    "hep-computing",
     "hep-detector"
    ]
   },

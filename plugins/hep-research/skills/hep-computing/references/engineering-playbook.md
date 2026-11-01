@@ -124,6 +124,9 @@ Debugging, performance and numerics references beyond this playbook (all in `ski
 - [Symbolic and numerical computation](symbolic-and-numerical-computation.md): SymPy assumptions, numeric identity
   checks, `lambdify`, exact rationals; `quad` error estimates, singularities and narrow peaks; `solve_ivp` methods,
   tolerances and events; root finding and minimization.
+- [Sensor and gas simulation operations](sensor-and-gas-simulation-operations.md): Allpix Squared and Garfield++
+  environments (Docker, CVMFS, LCG views, source builds), build prerequisites, the adapter's `detsim` command,
+  statuses and troubleshooting (unverified until a backend has run).
 
 ## Scripts of the hep-computing skill
 
