@@ -6,18 +6,18 @@ Spec version: 9.1
 
 | Item | Value |
 |---|---|
-| Main checkout | `/Users/hchou/hep-research` (branch `main`, HEAD `cf622dab`, clean) |
-| Task worktree WT | `/Users/hchou/hep-research-detsim` |
-| Work root WR | `/Users/hchou/hep-research-detsim-work` |
+| Main checkout | `~/hep-research` (branch `main`, HEAD `cf622dab`, clean) |
+| Task worktree WT | `~/hep-research-detsim` |
+| Work root WR | `~/hep-research-detsim-work` |
 | Branch | detsim-integration |
 | Base ref and commit | `origin/HEAD` (after `git fetch origin`) `25a8dbe6bfe426b9cac52733e5487625d213f056` (hep-research 0.53.0 release merge) |
-| Parent folder PARENT | `/Users/hchou` |
-| Installed plugin (never written) | `/Users/hchou/.claude/plugins/cache/hep-research-dev/hep-research/0.52.0` (the folder this session loaded skills from) |
-| Git version; `core.hooksPath`; hooks present | git 2.54.0 (Apple Git-157); `/Users/hchou/hep-research/.githooks` (`check-paths.sh`, `pre-commit`, `pre-push`); no hooks in the common `hooks/` folder besides samples |
+| Parent folder PARENT | `~` |
+| Installed plugin (never written) | `~/.claude/plugins/cache/hep-research-dev/hep-research/0.52.0` (the folder this session loaded skills from) |
+| Git version; `core.hooksPath`; hooks present | git 2.54.0 (Apple Git-157); `~/hep-research/.githooks` (`check-paths.sh`, `pre-commit`, `pre-push`); no hooks in the common `hooks/` folder besides samples |
 | Plugin root PR | `<WT>/plugins/hep-research` |
 | `git status --porcelain` of MAIN at W0 | empty (0 lines) |
 | Isolation guard at W0 | pass, 2026-11-01T11:59Z; fails from MAIN ("not running inside .../hep-research-detsim"); byte-identical to §2.4 (`diff` empty) |
-| Interpreter and venv | `/Users/hchou/miniconda3/bin/python3` 3.13.2 (`find_python.py`); `WR/venv` with `--system-site-packages`; `requirements-core.txt` and `requirements-test.txt` installed (numpy 2.4.4, scipy 1.17.1, sympy 1.14.0); `import ROOT` works (Homebrew ROOT 6.40.04) |
+| Interpreter and venv | `~/miniconda3/bin/python3` 3.13.2 (`find_python.py`); `WR/venv` with `--system-site-packages`; `requirements-core.txt` and `requirements-test.txt` installed (numpy 2.4.4, scipy 1.17.1, sympy 1.14.0); `import ROOT` works (Homebrew ROOT 6.40.04) |
 | Baseline test run | `python3 tools/run_all_checks.py --no-cli --out "$WR/scratch/baseline"` from PR: 31 pass, 0 fail, 2 skip (host CLIs); units 6342 run, 6132 passed, 210 skipped, 0 failures, 0 errors; no pre-existing failure |
 
 ## W1 reuse table (§7, V-01) — base `25a8dbe6` (plugin 0.53.0, contracts 3.17.0, `CORE_VERSION` 1.5.0)
@@ -54,12 +54,12 @@ Environment availability (2a): Allpix Squared — not installed; obtainable unde
 
 | Key | Item | Path | Branch | Base commit | Patch folder | State |
 |---|---|---|---|---|---|---|
-| WK | WK | `/Users/hchou/hep-research-detsim-sub-WK` | detsim-sub-WK | `e480371cbe36929a0c08e2979778ff367b943007` | `WR/patches/WK/` | running |
-| W3a | W3a | `/Users/hchou/hep-research-detsim-sub-W3a` | detsim-sub-W3a | `e480371cbe36929a0c08e2979778ff367b943007` | `WR/patches/W3a/` | running |
+| WK | WK | `~/hep-research-detsim-sub-WK` | detsim-sub-WK | `e480371cbe36929a0c08e2979778ff367b943007` | `WR/patches/WK/` | running |
+| W3a | W3a | `~/hep-research-detsim-sub-W3a` | detsim-sub-W3a | `e480371cbe36929a0c08e2979778ff367b943007` | `WR/patches/W3a/` | running |
 
 ## Environment reconnaissance
 
-Host: Darwin arm64 (macOS 27.2), 8 CPUs, Python 3.13.2, git 2.54.0, CMake 4.3.2, Apple clang 21.0.0; 406 GiB free on `/Users/hchou`. Variables present (names only): `ROOTSYS`.
+Host: Darwin arm64 (macOS 27.2), 8 CPUs, Python 3.13.2, git 2.54.0, CMake 4.3.2, Apple clang 21.0.0; 406 GiB free on `~`. Variables present (names only): `ROOTSYS`.
 
 | Backend | Found here | Obtainable with H0 permission | Notes |
 |---|---|---|---|
