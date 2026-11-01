@@ -47,6 +47,7 @@
   "ROOTObjectWriter": []
  },
  "non_module_sections": ["Allpix", "Ignore"],
+ "class_versions": {"allpix::PixelCharge": 9, "allpix::PixelHit": 7, "allpix::Pixel": 2},
  "members": {
   "allpix::PixelCharge": ["pixel_", "charge_"],
   "allpix::PixelHit": ["pixel_", "signal_"],
@@ -54,6 +55,7 @@
  },
  "checks": {
   "hits_required_in": "every detector of the detector input",
+  "charge_sign": "negative: GenericPropagation in this example propagates electrons only, so every PixelCharge charge_ is < 0 (PixelCharge.cpp, PulseTransferModule.cpp at the pinned commit)",
   "band_detector": "detector1",
   "band_e": {"low": "10687.5", "high": "42750"},
   "band_rule": "median over events of the per-event sum over band_detector pixels of PixelCharge::getAbsoluteCharge() (= |charge_|) lies in [low, high]; [0.5, 2] x 75 e/um x 285 um (cmsp1 sensor_thickness)"

@@ -19,8 +19,14 @@ members are read (pixel index, charge_, signal_, the Event tree's seed); object 
 stored configuration (except as recorded run configuration) and the file hash are never compared. The expected tree
 set is the module chain of the configuration minus the ROOTObjectWriter include / exclude lists. collect writes one
 deterministic summary, ATTEMPT_ROOT/extract/pixel_summary.json (per event: seed, per detector the PixelCharge and
-PixelHit data members per pixel), and checks: config-fidelity (check 1), event-count, expected-trees, members,
-hits-per-detector (check 3), plausibility-band (check 3b). compare_summaries(a, b) is check 2 (reproducibility).
+PixelHit data members per pixel), and checks: config-fidelity (check 1: the whole argv whitelisted, pinned input
+hashes), run-settings, event-count, expected-trees, members (pinned class versions), hits-per-detector (check 3),
+charge-sign (every charge_ negative: electrons only), plausibility-band (check 3b). compare_summaries(a, b) and
+compare_summary_files(a, b) are check 2 (reproducibility, with per-pixel values).
+
+Limitation (recorded): collect runs ROOT inside the controller while it holds the run's lock. A crash of ROOT there
+ends the controller without a JSON answer; the OS releases the flock, the lock record stays unfinished, inspect shows
+stale and the next run moves the attempt to .pending/orphans/ (TASK.md 10.4).
 
 ROOT is imported only inside the functions that need it (R-07 (i)); standard library, core, contracts and sibling
 modules otherwise. This file never launches the simulator and never decides a run's terminal state.
@@ -40,6 +46,7 @@ if __spec__ is None:  # run as a file (tests/skills/test_cli_robustness.py): a m
 import copy  # noqa: E402
 import hashlib  # noqa: E402
 import json  # noqa: E402
+import os  # noqa: E402
 import platform  # noqa: E402
 import signal  # noqa: E402
 import subprocess  # noqa: E402
@@ -60,7 +67,8 @@ ROLES = ("config", "detector", "field")
 SUMMARY_FILE = "ATTEMPT_ROOT/extract/pixel_summary.json"
 SUMMARY_FORMAT = "allpix-pixel-summary/1"
 FIXED_OVERRIDES = ("number_of_events", "multithreading")
-ALLOWED_OVERRIDES = ("number_of_events", "multithreading", "random_seed", "output_directory")
+ALLOWED_OVERRIDES = ("number_of_events", "multithreading", "random_seed")  # each exactly once, in argv
+EXECUTABLE = "ENV_ROOT/allpix/bin/allpix"
 DRAW_ESTIMATE = 1000000  # rows TTree::Draw keeps per call (one event per call)
 PROBE_TIMEOUT_S = 300
 SYSTEM_PATH = "/usr/bin:/bin"  # for the shell scripts geant4-config and root-config during probe only
@@ -238,16 +246,45 @@ def _sha256(path: Path) -> str:
     return h.hexdigest()
 
 
+def argv_problems(argv: list) -> list:
+    """Whitelist of the whole argv: ENV_ROOT/allpix/bin/allpix -c INPUT_ROOT/<config> followed only by
+    -o number_of_events=10, -o multithreading=false and -o random_seed=<decimal integer>, each exactly once. Any other
+    token (-j, -g, -v, a second -c, another -o key or value) is a problem."""
+    problems = []
+    if len(argv) < 3 or argv[0] != EXECUTABLE or argv[1] != "-c" or not str(argv[2]).startswith("INPUT_ROOT/"):
+        problems.append(f"argv must start with {EXECUTABLE} -c INPUT_ROOT/<config>, found {argv[:3]}")
+    rest = list(argv[3:])
+    if len(rest) % 2:
+        problems.append(f"argv has a dangling token: {rest[-1]!r}")
+    seen = []
+    fixed = {"number_of_events": "10", "multithreading": "false"}
+    for flag, value in zip(rest[0::2], rest[1::2]):
+        if flag != "-o":
+            problems.append(f"argv token {flag!r} is not allowed (only -o key=value)")
+            continue
+        key, sep, text = value.partition("=")
+        seen.append(key)
+        if not sep or key not in ALLOWED_OVERRIDES:
+            problems.append(f"override {value!r} is not allowed")
+        elif key in fixed and text != fixed[key]:
+            problems.append(f"override {key}={text} (pinned {fixed[key]})")
+        elif key == "random_seed" and not (text.isdigit() and text == str(int(text))):
+            problems.append(f"override random_seed={text!r} is not a decimal integer")
+    for key in ALLOWED_OVERRIDES:
+        if seen.count(key) != 1:
+            problems.append(f"override {key} given {seen.count(key)} times (exactly once required)")
+    return problems
+
+
 def config_fidelity(attempt_dir: Path, spec: dict, descriptor: dict) -> tuple[dict, dict]:
-    """Check 1 at run time: the three snapshot inputs carry the pinned hashes and the overrides are only the allowed
-    keys with the fixed values. Returns (evidence, {"config": text, "detectors": [names]})."""
+    """Check 1 at run time: the whole argv passes the whitelist (argv_problems) and the three snapshot inputs carry
+    the pinned hashes. Returns (evidence, {"config": text, "detectors": [names]})."""
     argv = spec["argv"]
-    problems, found = [], {}
+    problems, found = argv_problems(argv), {}
     pinned = descriptor["pinned"]["inputs"]
-    try:
-        config_path = _local(attempt_dir, argv[argv.index("-c") + 1])
-    except (ValueError, IndexError):
-        return {"check": "config-fidelity", "result": "fail", "detail": "no -c configuration in argv"}, found
+    if len(argv) < 3 or argv[1] != "-c":
+        return {"check": "config-fidelity", "result": "fail", "detail": "; ".join(problems)}, found
+    config_path = _local(attempt_dir, argv[2])
     paths = {"config": config_path, "detector": config_path.parent / pinned["detector"]["name"],
              "field": config_path.parent / pinned["field"]["name"]}
     for role, path in paths.items():
@@ -255,24 +292,12 @@ def config_fidelity(attempt_dir: Path, spec: dict, descriptor: dict) -> tuple[di
             problems.append(f"{role} input {path.name} missing from the snapshot")
         elif _sha256(path) != pinned[role]["sha256"]:
             problems.append(f"{role} input {path.name} is not the pinned file")
-    fixed = {"number_of_events": "10", "multithreading": "false"}
-    keys = [k for k, _v in overrides_of(argv)]
-    for key, value in overrides_of(argv):
-        if key not in ALLOWED_OVERRIDES:
-            problems.append(f"override {key} is not allowed")
-        elif key in fixed and value != fixed[key]:
-            problems.append(f"override {key}={value} (pinned {fixed[key]})")
-        elif key == "random_seed" and not (value.isdigit() and value == str(int(value))):
-            problems.append(f"override random_seed={value!r} is not a decimal integer")
-    for key in ("number_of_events", "multithreading", "random_seed"):
-        if keys.count(key) != 1:
-            problems.append(f"override {key} given {keys.count(key)} times (exactly once required)")
     if not problems:
         found["config"] = paths["config"].read_text(encoding="utf-8")
         found["detectors"] = detectors_of(paths["detector"].read_text(encoding="utf-8"))
     detail = "; ".join(problems) if problems else (
-        "the three inputs carry the pinned SHA-256; overrides " + ", ".join(f"{k}={v}" for k, v in overrides_of(argv))
-        + " (allowed keys only; random_seed_core not set)")
+        "the three inputs carry the pinned SHA-256; argv is the whitelisted command with overrides "
+        + ", ".join(f"{k}={v}" for k, v in overrides_of(argv)) + " (random_seed_core not set)")
     return {"check": "config-fidelity", "result": "fail" if problems else "pass", "detail": detail}, found
 
 
@@ -405,6 +430,23 @@ def charge_sums(events: list, detector: str) -> list:
     return [sum(abs(c) for _x, _y, c in event["pixel_charge"].get(detector, [])) for event in events]
 
 
+def charge_sign(events: list, detectors: list) -> dict:
+    """Every PixelCharge charge_ is negative: this example propagates electrons only (Allpix stores charge signed), so
+    a non-negative value means the sign was read or produced wrongly."""
+    wrong, total = [], 0
+    for event in events:
+        for detector in detectors:
+            for x, y, charge in event["pixel_charge"].get(detector, []):
+                total += 1
+                if charge >= 0:
+                    wrong.append(f"event {event['id']} {detector} pixel ({x}, {y}) charge_ {charge}")
+    ok = total > 0 and not wrong
+    return {"check": "charge-sign", "result": "pass" if ok else "fail",
+            "detail": (f"{len(wrong)} non-negative charge_ value(s): {', '.join(wrong[:10])}" if wrong else
+                       f"all {total} PixelCharge charge_ values are negative (electrons only)" if total else
+                       "no PixelCharge values")}
+
+
 def plausibility(sums: list, descriptor: dict) -> dict:
     band = descriptor["checks"]["band_e"]
     low, high = Fraction(band["low"]), Fraction(band["high"])
@@ -464,6 +506,9 @@ def evaluate(raw: dict, config_text: str, detectors: list, descriptor: dict, num
             member_problems.append(f"{cls}: no streamer information")
         else:
             member_problems += [f"{cls}::{n} absent" for n in names if n not in found["members"]]
+            pinned_version = descriptor.get("class_versions", {}).get(cls)
+            if pinned_version is not None and found.get("class_version") != pinned_version:
+                member_problems.append(f"{cls} class version {found.get('class_version')} (pinned {pinned_version})")
     evidence.append({"check": "members", "result": "fail" if member_problems else "pass",
                      "detail": "; ".join(member_problems) if member_problems else
                      "data members read through the streamer information: " + ", ".join(
@@ -478,6 +523,7 @@ def evaluate(raw: dict, config_text: str, detectors: list, descriptor: dict, num
                      "detail": (f"no PixelHit in: {', '.join(missing_hits[:20])}" if missing_hits else
                                 f"every one of {len(raw['events'])} events has at least one PixelHit in each of "
                                 f"{detectors}")})
+    evidence.append(charge_sign(raw["events"], detectors))
     if "PixelCharge" in trees and raw["events"]:
         evidence.append(plausibility(charge_sums(raw["events"], descriptor["checks"]["band_detector"]), descriptor))
     else:
@@ -506,9 +552,21 @@ def summary_document(raw: dict, source_sha256: str, detectors: list, expected: l
 
 def compare_summaries(a: dict, b: dict) -> dict:
     """Check 2: data members per event, detector and pixel, and the per-event seeds; never the configuration,
-    references or file hashes. {"identical": bool, "differences": [...] (first 50), "pixels_compared": n}."""
-    differences, pixels = [], 0
-    ea, eb = a.get("events", []), b.get("events", [])
+    references or file hashes. Refuses (identical false) an empty summary, another format or different detector
+    lists. Returns {"identical", "differences" (first 50), "difference_count", "pixels_compared", "per_pixel"}: one
+    per_pixel row per event, detector and pixel of a with the index and the charge_ / signal_ values of both."""
+    differences, pixels, per_pixel = [], 0, []
+    for name, doc in (("a", a), ("b", b)):
+        if not isinstance(doc, dict) or doc.get("format") != SUMMARY_FORMAT:
+            differences.append(f"summary {name} is not {SUMMARY_FORMAT}")
+        elif not doc.get("events"):
+            differences.append(f"summary {name} has no events")
+    if differences:
+        return {"identical": False, "differences": differences, "difference_count": len(differences),
+                "pixels_compared": 0, "per_pixel": []}
+    if a.get("detectors") != b.get("detectors"):
+        differences.append(f"detectors {a.get('detectors')} vs {b.get('detectors')}")
+    ea, eb = a["events"], b["events"]
     if len(ea) != len(eb):
         differences.append(f"event count {len(ea)} vs {len(eb)}")
     for x, y in zip(ea, eb):
@@ -521,8 +579,23 @@ def compare_summaries(a: dict, b: dict) -> dict:
                 pixels += max(len(px), len(py))
                 if px != py:
                     differences.append(f"event {x['id']} {detector} {kind}: {px[:4]} vs {py[:4]}")
+                for k in range(max(len(px), len(py))):
+                    va, vb = (px[k] if k < len(px) else None), (py[k] if k < len(py) else None)
+                    index = (va or vb)[:2]
+                    per_pixel.append({"event": x["id"], "detector": detector, "kind": kind, "index": index,
+                                      "a": va[2] if va else None, "b": vb[2] if vb else None,
+                                      "same": va == vb})
     return {"identical": not differences, "differences": differences[:50], "difference_count": len(differences),
-            "pixels_compared": pixels}
+            "pixels_compared": pixels, "per_pixel": per_pixel}
+
+
+def compare_summary_files(path_a, path_b) -> dict:
+    """Check 2 on two committed runs: runs/<run_id>/extract/pixel_summary.json of each (the documented procedure:
+    python3 -I -c "import sys, json; sys.path[:0] = sys.argv[1:3]; import detsim_backend_allpix as b;
+    print(json.dumps(b.compare_summary_files(sys.argv[3], sys.argv[4]), indent=1))" ASSETS_DIR PLUGIN_ROOT A B,
+    where ASSETS_DIR is adapters/detector-simulation/assets and PLUGIN_ROOT the plugin root)."""
+    docs = [json.loads(Path(p).read_text(encoding="utf-8")) for p in (path_a, path_b)]
+    return dict(compare_summaries(*docs), files=[str(path_a), str(path_b)])
 
 
 # ---------------------------------------------------------------- collect and observables
@@ -691,11 +764,125 @@ def _geant4_registration(env_root: Path, variables: dict) -> dict:
             "register": "ok", "check": json.loads(chk.stdout).get("status")}
 
 
+SYSTEM_LIBRARY_PREFIXES = ("/usr/lib/", "/System/", "/lib/", "/lib64/", "/usr/lib64/")
+LOAD_COMMANDS = ("LC_LOAD_DYLIB", "LC_LOAD_WEAK_DYLIB", "LC_REEXPORT_DYLIB", "LC_LOAD_UPWARD_DYLIB")
+
+
+def _load_commands(path: Path) -> tuple[list, list]:
+    """(LC_RPATH entries, (install name, weak) of each linked library) of a Mach-O file, from otool -l."""
+    out = _run(["/usr/bin/otool", "-l", str(path)], {"PATH": SYSTEM_PATH})
+    if out.returncode != 0:
+        raise _missing(f"otool -l failed for {path.name}: {out.stderr.strip()[-200:]}", ["otool"])
+    rpaths, deps, cmd = [], [], None
+    for line in out.stdout.splitlines():
+        words = line.split()
+        if len(words) >= 2 and words[0] == "cmd":
+            cmd = words[1]
+        elif cmd == "LC_RPATH" and len(words) >= 2 and words[0] == "path":
+            rpaths.append(line.split("path", 1)[1].rsplit("(offset", 1)[0].strip())
+        elif cmd in LOAD_COMMANDS and len(words) >= 2 and words[0] == "name":
+            deps.append((line.split("name", 1)[1].rsplit("(offset", 1)[0].strip(), cmd == "LC_LOAD_WEAK_DYLIB"))
+    return rpaths, deps
+
+
+def _ldd(path: Path) -> list:
+    """Resolved library paths of an ELF file from ldd (Linux)."""
+    out = _run(["ldd", str(path)], {"PATH": SYSTEM_PATH})
+    found = []
+    for line in out.stdout.splitlines():
+        if "=>" in line:
+            target = line.split("=>", 1)[1].split("(", 1)[0].strip()
+            found.append(target if target and target != "not found" else "not found:" + line.split()[0])
+    return found
+
+
+def linked_libraries(env_root: Path, binaries: list) -> dict:
+    """The libraries the binaries load, resolved as the dynamic loader would with the plan's library path
+    (ENV_ROOT/allpix/lib first), the files' LC_RPATH entries (@loader_path / @executable_path substituted) and
+    absolute install names, followed transitively; system libraries (/usr/lib, /System) are left out. Returns
+    {"resolved": {real path: SHA-256}, "unresolved": [...], "rpaths": [...]}."""
+    env_root = Path(env_root)
+    first = env_root / "allpix" / "lib"
+    executable_dir = Path(binaries[0]).parent
+    resolved, unresolved, rpaths_seen, executable_rpaths = {}, [], [], []
+    queue = [(Path(binaries[0]), [])]
+    roots_pending = [Path(b) for b in binaries[1:]]  # module libraries: loaded by the executable, its rpaths apply
+    done = set()
+    linux = platform_calls.platform_key() != "darwin"
+    while queue or roots_pending:
+        if not queue:
+            queue = [(b, list(executable_rpaths)) for b in roots_pending]
+            roots_pending = []
+        path, inherited = queue.pop(0)
+        real = Path(os.path.realpath(path))
+        if real in done:
+            continue
+        done.add(real)
+        resolved[str(real)] = _sha256(real)
+        if linux:
+            for target in _ldd(real):
+                if target.startswith("not found:"):
+                    unresolved.append(f"{target[10:]} (needed by {path.name})")
+                elif not target.startswith(SYSTEM_LIBRARY_PREFIXES):
+                    queue.append((Path(target), []))
+            continue
+        rpaths, deps = _load_commands(real)
+        own = []
+        for rp in rpaths:
+            rp = rp.replace("@loader_path", str(path.parent)).replace("@executable_path", str(executable_dir))
+            own.append(rp)
+            if rp not in rpaths_seen:
+                rpaths_seen.append(rp)
+        chain = own + inherited
+        if path == Path(binaries[0]):
+            executable_rpaths = own
+        for name, weak in deps:
+            if name.startswith(SYSTEM_LIBRARY_PREFIXES):
+                continue
+            leaf = name.rsplit("/", 1)[-1]
+            candidates = [first / leaf]
+            if name.startswith("@rpath/"):
+                candidates += [Path(rp) / name[len("@rpath/"):] for rp in chain]
+            elif name.startswith("@loader_path/"):
+                candidates.append(path.parent / name[len("@loader_path/"):])
+            elif name.startswith("@executable_path/"):
+                candidates.append(executable_dir / name[len("@executable_path/"):])
+            else:
+                candidates.append(Path(name))
+            hit = next((c for c in candidates if c.is_file()), None)
+            if hit is None:
+                if not weak:
+                    unresolved.append(f"{name} (needed by {path.name})")
+                continue
+            if Path(os.path.realpath(hit)) == real:
+                continue  # its own install name
+            queue.append((hit, chain))
+    return {"resolved": resolved, "unresolved": sorted(set(unresolved)), "rpaths": rpaths_seen}
+
+
+def library_identity(env_root: Path, linked: dict) -> dict:
+    """Content-only view of linked_libraries: per group (allpix, geant4, root, deps, other: where the real file
+    lies) {file name: SHA-256}; never a path."""
+    groups = {}
+    for name in ("allpix", "geant4", "root", "deps"):
+        groups[name] = os.path.realpath(Path(env_root) / name) + os.sep
+    out = {name: {} for name in list(groups) + ["other"]}
+    for real, digest in sorted(linked["resolved"].items()):
+        group = next((g for g, prefix in groups.items() if real.startswith(prefix)), "other")
+        leaf = Path(real).name
+        if leaf in out[group] and out[group][leaf] != digest:
+            leaf = f"{leaf}#{len(out[group])}"  # two different files of one name: both kept
+        out[group][leaf] = digest
+    return {g: v for g, v in out.items() if v}
+
+
 def probe(env_root: Path) -> dict:
     """{identity, variables, facts} of an Allpix Squared environment root holding allpix/, geant4/, root/, deps/ and
     data/<dataset folder> (card AP-BOOT). Content-based identity: the Allpix version string, the SHA-256 of the
-    executable, libAllpixCore and libAllpixObjects and of the model file cmsp1.conf, the Geant4 version and its
-    datasets' content hashes (geant4_build.py register / check), the ROOT version and the platform; never a path.
+    executable, libAllpixCore and libAllpixObjects and of the model file cmsp1.conf, the SHA-256 of every library the
+    executable and every allpix/lib module library load (resolved transitively, linked_libraries), the Geant4
+    version and its datasets' content hashes (geant4_build.py register / check), the ROOT version and the platform;
+    never a path.
     missing-dependency when the ROOT bindings (for the extractor), a program, a library, a dataset folder or a
     dataset variable is missing; refused when the Allpix version is not the pinned one."""
     env_root = Path(env_root)
@@ -730,6 +917,11 @@ def probe(env_root: Path) -> dict:
     if version != descriptor["pinned"]["version_string"]:
         raise _error("refused", "backend-version-mismatch", f"allpix --version reports {version!r}; the capability "
                      f"is pinned to {descriptor['pinned']['version_string']!r}", "--env-root")
+    binaries = [env_root / "allpix" / "bin" / "allpix"] + sorted((env_root / "allpix" / "lib").glob(f"*{suffix}"))
+    linked = linked_libraries(env_root, binaries)
+    if linked["unresolved"]:
+        raise _missing(f"libraries the program needs cannot be resolved: {linked['unresolved'][:10]}",
+                       linked["unresolved"][:20])
     registration = _geant4_registration(env_root, variables)
     recorded = sorted(d["envvar"] for d in registration["datasets"])
     if recorded != sorted(e for _n, e, _f in datasets):
@@ -746,10 +938,14 @@ def probe(env_root: Path) -> dict:
         "geant4": {"version": registration["version"], "cxx_standard": registration["cxx_standard"],
                    "datasets": registration["datasets"]},
         "root": {"version": _root_version(env_root)},
+        "libraries_sha256": library_identity(env_root, linked),
     }
     facts = {"backend": NAME, "allpix_version_text": version_text, "extractor_root_version": extractor_root,
              "controller_python": platform.python_version(), "geant4_register": registration["register"],
              "geant4_check": registration["check"],
              "library_resolution": "Geant4, ROOT and dependency libraries through the executable's LC_RPATH / "
-                                   "RUNPATH entries; the library path variable names ENV_ROOT/allpix/lib only"}
+                                   "RUNPATH entries; the library path variable names ENV_ROOT/allpix/lib only",
+             "rpaths": linked["rpaths"], "linked_library_count": len(linked["resolved"]),
+             "not_covered": "libraries opened at run time by name (dlopen of ROOT plug-ins, Geant4 data readers) "
+                            "and system libraries are not hashed"}
     return {"identity": copy.deepcopy(identity), "variables": variables, "facts": facts}

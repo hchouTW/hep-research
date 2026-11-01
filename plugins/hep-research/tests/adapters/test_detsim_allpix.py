@@ -22,6 +22,7 @@ import io
 import json
 import os
 import shutil
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -243,6 +244,78 @@ class CheckAndSpec(unittest.TestCase):
         self.assertEqual(ctx.exception.error_code, "environment-variables-missing")
 
 
+class ArgvWhitelist(unittest.TestCase):  # review m2
+    GOOD = ["ENV_ROOT/allpix/bin/allpix", "-c", "INPUT_ROOT/inputs/example.conf", "-o", "number_of_events=10", "-o",
+            "multithreading=false", "-o", "random_seed=7"]
+
+    def test_good(self):
+        self.assertEqual(allpix.argv_problems(self.GOOD), [])
+
+    def test_anything_else_fails(self):
+        cases = {"-j": self.GOOD + ["-j", "4"], "-g": self.GOOD + ["-g", "detector1.type=x"], "-v": self.GOOD + ["-v",
+                 "DEBUG"], "second -c": self.GOOD + ["-c", "INPUT_ROOT/other.conf"],
+                 "output_directory": self.GOOD + ["-o", "output_directory=raw"],
+                 "other value": [a.replace("number_of_events=10", "number_of_events=11") for a in self.GOOD],
+                 "multithreading": [a.replace("multithreading=false", "multithreading=true") for a in self.GOOD],
+                 "seed twice": self.GOOD + ["-o", "random_seed=8"], "no seed": self.GOOD[:-2],
+                 "executable": ["ENV_ROOT/allpix/bin/other"] + self.GOOD[1:], "dangling": self.GOOD + ["-o"],
+                 "seed text": [a.replace("random_seed=7", "random_seed=07") for a in self.GOOD]}
+        for name, argv in cases.items():
+            with self.subTest(case=name):
+                self.assertTrue(allpix.argv_problems(argv), argv)
+
+
+class Libraries(unittest.TestCase):  # review M1: module libraries and resolved Geant4 / ROOT libraries
+    def setUp(self):
+        self.root = Path(tempfile.mkdtemp(prefix="detsim libs é "))
+        self.addCleanup(shutil.rmtree, self.root, True)
+        self.real = self.root / "real"
+        for rel in ("allpix/bin/allpix", "allpix/lib/libAllpixCore.dylib", "allpix/lib/libAllpixModuleA.dylib",
+                    "geant4/lib/libG4run.dylib", "root/lib/root/libCore.so"):
+            (self.real / rel).parent.mkdir(parents=True, exist_ok=True)
+            (self.real / rel).write_text(rel, encoding="utf-8")
+        self.view = self.root / "view"
+        self.view.mkdir()
+        for name in ("allpix", "geant4", "root"):
+            (self.view / name).symlink_to(self.real / name)
+        g4, rootlib = self.real / "geant4" / "lib", self.real / "root" / "lib" / "root"
+        self.commands = {"allpix": ([str(g4), "@loader_path/../lib"], [("@rpath/libAllpixCore.dylib", False),
+                                                                       ("@rpath/libG4run.dylib", False),
+                                                                       ("/usr/lib/libSystem.B.dylib", False)]),
+                         "libAllpixCore.dylib": ([str(rootlib)], [("@rpath/libCore.so", False)]),
+                         "libAllpixModuleA.dylib": ([], [("@rpath/libG4run.dylib", False),
+                                                         ("@rpath/libMissing.dylib", True)]),
+                         "libG4run.dylib": ([], []), "libCore.so": ([], [])}
+
+    def identity(self):
+        binaries = [self.view / "allpix" / "bin" / "allpix"] + sorted((self.view / "allpix" / "lib").glob("*.dylib"))
+        with mock.patch.object(allpix, "_load_commands", lambda path: self.commands[Path(path).name]), \
+                mock.patch.object(allpix.platform_calls, "platform_key", return_value="darwin"):
+            linked = allpix.linked_libraries(self.view, binaries)
+        return linked, allpix.library_identity(self.view, linked)
+
+    def test_resolution_and_identity(self):
+        linked, ident = self.identity()
+        self.assertEqual(linked["unresolved"], [])  # the weak libMissing is not required
+        self.assertEqual(sorted(ident), ["allpix", "geant4", "root"])
+        self.assertEqual(sorted(ident["allpix"]), ["allpix", "libAllpixCore.dylib", "libAllpixModuleA.dylib"])
+        self.assertEqual(list(ident["geant4"]), ["libG4run.dylib"])
+        self.assertEqual(list(ident["root"]), ["libCore.so"])  # through libAllpixCore's own LC_RPATH
+        self.assertNotIn(str(self.root), json.dumps(ident))      # content only, never a path
+        before = ident
+        (self.real / "allpix" / "lib" / "libAllpixModuleA.dylib").write_text("changed module", encoding="utf-8")
+        self.assertNotEqual(self.identity()[1], before)  # a changed module library changes the identity
+        (self.real / "allpix" / "lib" / "libAllpixModuleA.dylib").write_text("allpix/lib/libAllpixModuleA.dylib",
+                                                                               encoding="utf-8")
+        (self.real / "root" / "lib" / "root" / "libCore.so").write_text("other ROOT", encoding="utf-8")
+        self.assertNotEqual(self.identity()[1]["root"], before["root"])  # and so does a resolved ROOT library
+
+    def test_unresolved_required_library(self):
+        self.commands["libAllpixModuleA.dylib"] = ([], [("@rpath/libGone.dylib", False)])
+        linked, _ident = self.identity()
+        self.assertEqual(linked["unresolved"], ["@rpath/libGone.dylib (needed by libAllpixModuleA.dylib)"])
+
+
 class ExpectedTrees(unittest.TestCase):
     def test_module_chain_minus_exclude(self):
         trees, problems = allpix.expected_trees(allpix.parse_config(CONFIG), allpix._descriptor())
@@ -268,7 +341,7 @@ class Evaluate(unittest.TestCase):
         evidence = allpix.evaluate(raw_events(), CONFIG, ["detector1", "detector2"], allpix._descriptor(), 10)
         self.assertEqual({e["check"]: e["result"] for e in evidence},
                          {"run-settings": "pass", "event-count": "pass", "expected-trees": "pass", "members": "pass",
-                          "hits-per-detector": "pass", "plausibility-band": "pass"})
+                          "hits-per-detector": "pass", "charge-sign": "pass", "plausibility-band": "pass"})
         band = self.result(raw_events(), "plausibility-band")
         self.assertIn("plausibility, not physics validation", band["detail"])
         self.assertIn("2.00045e4 e", band["detail"])  # median of |-20000 - i|, i = 0..9 (exact half-integer)
@@ -314,6 +387,29 @@ class Evaluate(unittest.TestCase):
         raw["classes"]["allpix::PixelCharge"]["members"].remove("charge_")
         self.assertEqual(self.result(raw, "members")["result"], "fail")
 
+    def test_class_versions_are_pinned(self):  # review m3
+        self.assertEqual(allpix._descriptor()["class_versions"],
+                         {"allpix::PixelCharge": 9, "allpix::PixelHit": 7, "allpix::Pixel": 2})
+        raw = raw_events()
+        raw["classes"]["allpix::PixelHit"]["class_version"] = 8
+        found = self.result(raw, "members")
+        self.assertEqual(found["result"], "fail")
+        self.assertIn("allpix::PixelHit class version 8 (pinned 7)", found["detail"])
+
+    def test_flipped_sign_fails(self):  # review m1: a file whose charges are positive (sign flipped)
+        raw = raw_events(d1=(20000,), d2=(15000, 5000))
+        for event in raw["events"]:
+            for pixels in event["pixel_charge"].values():
+                for pixel in pixels:
+                    pixel[2] = abs(pixel[2])
+        found = self.result(raw, "charge-sign")
+        self.assertEqual(found["result"], "fail")
+        self.assertIn("non-negative charge_", found["detail"])
+        self.assertEqual(self.result(raw, "plausibility-band")["result"], "pass")  # the band alone cannot see it
+        one = raw_events()
+        one["events"][6]["pixel_charge"]["detector2"][0][2] = 0
+        self.assertEqual(self.result(one, "charge-sign")["result"], "fail")
+
 
 class Reproducibility(unittest.TestCase):
     def summary(self, raw):
@@ -331,6 +427,28 @@ class Reproducibility(unittest.TestCase):
         seeded = copy.deepcopy(raw_events())
         seeded["events"][0]["seed"] = "7"
         self.assertIn("id/seed", allpix.compare_summaries(a, self.summary(seeded))["differences"][0])
+
+    def test_compare_refuses_and_reports_pixels(self):  # review m4
+        a = self.summary(raw_events())
+        found = allpix.compare_summaries(a, copy.deepcopy(a))
+        self.assertEqual(len(found["per_pixel"]), 60)
+        first = found["per_pixel"][0]
+        self.assertEqual((first["event"], first["detector"], first["kind"], first["index"], first["a"], first["b"],
+                          first["same"]), (1, "detector1", "pixel_charge", [26, 40], -20000, -20000, True))
+        empty = copy.deepcopy(a)
+        empty["events"] = []
+        self.assertEqual(allpix.compare_summaries(empty, copy.deepcopy(empty))["identical"], False)
+        other = copy.deepcopy(a)
+        other["format"] = "something-else/1"
+        self.assertIn("is not allpix-pixel-summary/1", allpix.compare_summaries(a, other)["differences"][0])
+        fewer = copy.deepcopy(a)
+        fewer["detectors"] = ["detector1"]
+        self.assertFalse(allpix.compare_summaries(a, fewer)["identical"])
+        with tempfile.TemporaryDirectory(prefix="detsim compare é ") as scratch:
+            paths = [Path(scratch) / "a.json", Path(scratch) / "b.json"]
+            for path in paths:
+                path.write_text(json.dumps(a), encoding="utf-8")
+            self.assertTrue(allpix.compare_summary_files(*paths)["identical"])
 
     def test_summary_is_deterministic(self):
         one = json.dumps(self.summary(raw_events()), sort_keys=True)
@@ -487,10 +605,14 @@ class Runs(_FakeEnvironment):
     def test_root_missing_at_collect_fails_with_evidence(self):
         with mock.patch.object(allpix, "import_root", side_effect=allpix.RootUnavailable("hidden")):
             code, answer = self.run_task()
-        self.assertEqual((code, answer["status"], answer["completeness"]), (1, "failed", "invalid"), answer)
+        self.assertEqual((code, answer["status"], answer["completeness"], answer["error_code"]),
+                         (1, "failed", "invalid", "missing-dependency"), answer)
         folder = detsim_run.store_root(self.project) / answer["folder"]
         completeness = json.loads((folder / "completeness.json").read_text(encoding="utf-8"))
         found = next(e for e in completeness["evidence"] if e["check"] == "dependency")
+        self.assertEqual(found["result"], "fail")
+        record = json.loads((folder / "run.computational-run.json").read_text(encoding="utf-8"))
+        self.assertEqual(record["extension"]["detsim"]["error_code"], "missing-dependency")
         self.assertIn("missing-dependency", found["detail"])
 
     def test_backend_failure(self):
@@ -541,7 +663,7 @@ class Runs(_FakeEnvironment):
             (attempt / "input" / "inputs" / name).write_text(TEXTS[role], encoding="utf-8")
         evidence, _found = allpix.config_fidelity(attempt, spec, allpix._descriptor())
         self.assertEqual(evidence["result"], "fail")
-        self.assertIn("override log_level is not allowed", evidence["detail"])
+        self.assertIn("override 'log_level=DEBUG' is not allowed", evidence["detail"])
         spec["argv"] = spec["argv"][:-2]
         self.assertEqual(allpix.config_fidelity(attempt, spec, allpix._descriptor())[0]["result"], "pass")
         (attempt / "input" / "inputs" / "example.conf").write_text(CONFIG.replace("600e", "500e"), encoding="utf-8")
@@ -573,6 +695,21 @@ class Live(unittest.TestCase):
             code = detsim.main(["--backend", "allpix-squared", *argv])
         return code, json.loads(out.getvalue())
 
+    def write_task(self, env_identity, seed):
+        doc = dict(task(env_identity, seed=seed), budget={"timeout_s": 120, "max_output_bytes": 67108864})
+        (self.project / f"task-{seed}.json").write_text(json.dumps(doc), encoding="utf-8")
+        code, prepared = self.call("prepare", "--workspace", str(self.project), "--task", f"task-{seed}.json")
+        self.assertEqual(code, 0, prepared)
+        plan = self.work / f"plan-{seed}.json"
+        plan.write_text(json.dumps(prepared), encoding="utf-8")
+        return plan
+
+    def run_plan(self, plan, replicate):
+        code, answer = self.call("run", "--workspace", str(self.project), "--plan", str(plan), "--replicate",
+                                 replicate)
+        self.assertEqual((code, answer["status"]), (0, "ok"), answer)
+        return detsim_run.store_root(self.project) / answer["folder"]
+
     def test_probe_through_a_symlink_and_reproducibility(self):
         code, direct = self.call("check", "--workspace", str(self.project), "--probe", "--env-root", str(self.view))
         self.assertEqual(code, 0, direct)
@@ -580,23 +717,68 @@ class Live(unittest.TestCase):
         link.symlink_to(self.view)
         code, linked = self.call("check", "--workspace", str(self.project), "--probe", "--env-root", str(link))
         self.assertEqual((code, linked["env_identity"]), (0, direct["env_identity"]))
-        (self.project / "task.json").write_text(json.dumps(dict(task(direct["env_identity"], seed=3),
-                                                                budget={"timeout_s": 120,
-                                                                        "max_output_bytes": 67108864})),
-                                                encoding="utf-8")
-        code, prepared = self.call("prepare", "--workspace", str(self.project), "--task", "task.json")
-        self.assertEqual(code, 0, prepared)
-        plan = self.work / "plan.json"
-        plan.write_text(json.dumps(prepared), encoding="utf-8")
-        summaries = []
-        for replicate in ("0", "1"):
-            code, answer = self.call("run", "--workspace", str(self.project), "--plan", str(plan), "--replicate",
-                                     replicate)
-            self.assertEqual((code, answer["status"]), (0, "ok"), answer)
-            folder = detsim_run.store_root(self.project) / answer["folder"]
-            summaries.append(json.loads((folder / "extract" / "pixel_summary.json").read_text(encoding="utf-8")))
-        self.assertTrue(allpix.compare_summaries(*summaries)["identical"])
+        self.assertIn("libraries_sha256", direct["identity"])
+        plan = self.write_task(direct["env_identity"], 3)
+        folders = [self.run_plan(plan, r) for r in ("0", "1")]
+        summaries = [json.loads((f / "extract" / "pixel_summary.json").read_text(encoding="utf-8")) for f in folders]
+        found = allpix.compare_summaries(*summaries)
+        self.assertTrue(found["identical"], found["differences"])
+        self.assertTrue(found["per_pixel"] and all(r["same"] for r in found["per_pixel"]))
+        other = self.run_plan(self.write_task(direct["env_identity"], 4), "0")  # another seed differs somewhere
+        other_summary = json.loads((other / "extract" / "pixel_summary.json").read_text(encoding="utf-8"))
+        self.assertFalse(allpix.compare_summaries(summaries[0], other_summary)["identical"])
+        for folder in folders + [other]:
+            evidence = {e["check"]: e for e in json.loads((folder / "completeness.json").read_text(
+                encoding="utf-8"))["evidence"]}
+            for check in ("config-fidelity", "run-settings", "members", "hits-per-detector", "charge-sign",
+                          "plausibility-band"):
+                self.assertEqual(evidence[check]["result"], "pass", (check, evidence[check]))
+        sums = allpix.charge_sums([{"pixel_charge": {d: v["pixel_charge"] for d, v in e["detectors"].items()}}
+                                   for e in summaries[0]["events"]], "detector1")
+        self.assertTrue(10687.5 <= float(allpix.median(sums)) <= 42750, sums)
+        self.assertTrue(all(e["detectors"][d]["pixel_hit"] for e in summaries[0]["events"]
+                            for d in ("detector1", "detector2")))
+        self.compare_with_library_accessors(folders[0], summaries[0])
 
+    def compare_with_library_accessors(self, folder, summary):
+        """The emulated read equals the values of the Allpix object library's accessors (getCharge, getSignal,
+        getPixel().getIndex(), getAbsoluteCharge), read in a separate interpreter that loads libAllpixObjects."""
+        script = self.work / "read_typed.py"
+        script.write_text(TYPED_READER, encoding="utf-8")
+        library = self.view / "allpix" / "lib" / f"libAllpixObjects{allpix.library_suffix()}"
+        env = {k: v for k, v in os.environ.items() if k in ("HOME", "PATH", "PYTHONPATH", "TMPDIR")}
+        proc = subprocess.run([sys.executable, str(script), str(library), str(folder / "output" / "data.root"),
+                               ",".join(summary["detectors"])], capture_output=True, text=True, env=env, timeout=120)
+        self.assertEqual(proc.returncode, 0, proc.stderr[-500:])
+        typed = json.loads(proc.stdout)
+        self.assertEqual(len(typed), len(summary["events"]))
+        for event, values in zip(summary["events"], typed):
+            for detector in summary["detectors"]:
+                mine = event["detectors"][detector]
+                self.assertEqual(mine["pixel_charge"], [v[:3] for v in values[detector]["pixel_charge"]])
+                self.assertEqual([abs(c) for _x, _y, c in mine["pixel_charge"]],
+                                 [v[3] for v in values[detector]["pixel_charge"]])  # getAbsoluteCharge
+                self.assertEqual(mine["pixel_hit"], values[detector]["pixel_hit"])
+
+
+TYPED_READER = """import json, sys
+import ROOT
+ROOT.gROOT.SetBatch(True)
+if ROOT.gSystem.Load(sys.argv[1]) < 0:
+    sys.exit("libAllpixObjects did not load")
+handle = ROOT.TFile.Open(sys.argv[2])
+detectors = sys.argv[3].split(",")
+charges, hits = handle.Get("PixelCharge"), handle.Get("PixelHit")
+found = []
+for entry in range(int(charges.GetEntries())):
+    charges.GetEntry(entry)
+    hits.GetEntry(entry)
+    found.append({d: {"pixel_charge": [[int(p.getPixel().getIndex().x()), int(p.getPixel().getIndex().y()),
+                                        int(p.getCharge()), int(p.getAbsoluteCharge())] for p in getattr(charges, d)],
+                      "pixel_hit": [[int(h.getPixel().getIndex().x()), int(h.getPixel().getIndex().y()),
+                                     repr(float(h.getSignal()))] for h in getattr(hits, d)]} for d in detectors})
+print(json.dumps(found))
+"""
 
 if __name__ == "__main__":
     unittest.main()
