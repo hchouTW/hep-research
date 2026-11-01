@@ -74,7 +74,7 @@ pinned interpolation and extrapolation settings. The research workflow is the sa
    dimension, conditions, stored quantities and interpolation lines (section 6).
 4. **Pin the plan**: inputs, environment identity, overrides, seeds or the deterministic query, tolerances written
    before running. The command that pins and runs it is in the [operations guide](../../hep-computing/references/sensor-and-gas-simulation-operations.md)
-   (unverified: not yet built).
+   (built and run on one host; see section 10).
 5. **Execute and store** through that command, never by editing results afterwards.
 6. **Check the results** against the card's independent checks (section 7) and classify any failure (section 9).
 
@@ -194,7 +194,7 @@ the adapter's capability-matrix row).
 | Item | Content |
 |---|---|
 | Input | one 1D `.gas` table; candidate `Examples/GasFile/ar_80_co2_20_0T.gas`: Ar 80 % / CO₂ 20 %, 300 K, 760 Torr, 30 E points, E/p 0.1316 … 105.26 V/(cm·Torr) (100 V/cm to 80 kV/cm), B = 0, created 2012, format version 12 [GF-07]. Local input only, never committed; "example table, pipeline validation only", never reference physics data |
-| Query | B = 0, E along +x; three nodes (first, middle, last), interior points including one in the first and one in the last interval; two out-of-range points in a separate task |
+| Query | B = 0, E along +x; three nodes (first, middle, last), interior points including one in the first and one in the last interval; two out-of-range points in a second task that also holds the in-range points (node coverage applies to every task) |
 | Checks | (1) at nodes, the magnitude of v equals the independent parse (E = (E/p)·p, v = value × 1e-3) within 4 ulp, perpendicular components exactly 0; (2) electrons drift opposite to E, per component; (3) interior points equal an independent reimplementation of the pinned stencil within relative 1e-12 + 4 ulp; (4) out of range: refused by default, with the option equal to the reimplemented constant / linear / exponential extrapolation and labelled |
 | Refused | a 3D table (B or angle grids), B ≠ 0, a temperature or pressure other than the table's, interpolation settings other than the table footer's, a missing velocity quantity, a malformed table, a field outside the table unless `allow_outside_validated_range` (`out-of-domain` with the valid range) |
 | Not claimed | agreement with independent gas data; no seed (deterministic query) |

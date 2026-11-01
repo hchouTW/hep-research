@@ -11,7 +11,7 @@ Detector performance and response for collider, fixed-target, neutrino, rare-eve
 - Response matrices: built from matched events, era responses mixed or stacked, species-migration blocks, forward folding, double-count check against the correction chain.
 - Calibration, alignment and conditions: stability over time (trends, change points, CUSUM), proposed calibration era boundaries, propagation of a calibration residual into yields and ratios.
 - Charge-sign confusion rates; survival and fragmentation feed-down of nuclei in detector material.
-- Detector simulation: Geant4 study protocol, study checker, independent-reference benchmarks for Geant4 runs; choosing Allpix Squared or Garfield++ for charge transport in sensors and gases (documented, not yet run).
+- Detector simulation: Geant4 study protocol, study checker, independent-reference benchmarks for Geant4 runs; choosing Allpix Squared or Garfield++ for charge transport in sensors and gases (both task cards run on one macOS host; see the guide's limitations).
 - Detector design: system design workflow, design evaluations from tool contracts, automated candidate generation (Sobol, NSGA-II, hypervolume), design-level budget sums, tracker resolution for a stated layout.
 - Sourced detector atlas for large experiments (validate, render, query, audit); `unknown` when a fact is absent.
 - Astroparticle instruments: cosmic-ray spectrum and composition, air showers (Gaisser-Hillas profile), ground arrays, imaging atmospheric Cherenkov telescopes, neutrino telescopes, space-based direct detection, multimessenger analysis; geomagnetic cutoff backtracing through the optional OTSO adapter.

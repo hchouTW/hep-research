@@ -15,12 +15,12 @@
   },
   "hep-computing": {
    "references": 41,
-   "bytes": 398538,
+   "bytes": 403677,
    "uncited": 0
   },
   "hep-detector": {
    "references": 44,
-   "bytes": 694670,
+   "bytes": 694758,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1735,8 +1735,8 @@
   {
    "path": "skills/hep-computing/references/sensor-and-gas-simulation-operations.md",
    "owner": "hep-computing",
-   "bytes": 18616,
-   "lines": 222,
+   "bytes": 23755,
+   "lines": 280,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-computing/references/analysis-workflows.md",
@@ -2660,7 +2660,7 @@
   {
    "path": "skills/hep-detector/references/sensor-and-gas-transport-tools.md",
    "owner": "hep-detector",
-   "bytes": 25275,
+   "bytes": 25363,
    "lines": 257,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -2670,7 +2670,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "94c0385b 2026-11-02"
+   "last_commit": "edecde8f 2026-11-02"
   },
   {
    "path": "skills/hep-detector/references/signal-formation-and-readout.md",

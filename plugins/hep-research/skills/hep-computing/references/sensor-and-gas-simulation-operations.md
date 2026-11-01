@@ -58,7 +58,8 @@ each backend separately; the two need not share an LCG release.
 | Both | `adapters/environments/` templates: LCG view setup and Apptainer definition (state `documented`) [H-04]; the [environments](environments-and-containers.md) page | manifest digest | Estimate build time and disk first |
 
 An installed Garfield++ ships its headers (`Include/Garfield/*.hh`): they give signatures and defaults, not the
-interpolation stencil. Without the implementation source, the GF-QUERY plan pins order 1 [H-01 §14.2].
+interpolation stencil. GF-QUERY pins the interpolation order and extrapolation methods of the table's own footer (order 2,
+constant low, linear high for the example table), read from the implementation source at the pinned commit [GF-02].
 
 ## 4. Build preconditions (from the upstream sources; unverified on this plugin's hosts)
 
@@ -90,22 +91,35 @@ Record build flags, compiler, ROOT and Geant4 versions with the manifest; a rebu
 
 ## 5. Record the environment
 
-- Run the hep-computing `environment_manifest.py record` for the path-bearing record and `check` before reuse; the
-  `detsim check --probe` verb calls it as a subprocess with the captured environment (as specified).
-- For Allpix Squared, register the Geant4 installation it links with the Geant4 adapter's `geant4_build.py register`
-  and re-check with `check`: their data-set hashes enter the environment identity. Every data set listed by
-  `geant4-config --datasets` must be present: Allpix Squared requires all of them [AP-16]. `register` refuses an
-  installation with a data set missing unless that set is skipped explicitly [H-02]; whether any skip is acceptable
-  for AP-BOOT, given that upstream requires every set, is decided when the card is pinned and recorded with
-  the plan.
+- `detsim --backend <name> check --workspace <project> --probe --env-root <environment root>` validates and records an
+  environment: it hashes the backend's programs, libraries and data, runs `environment_manifest.py record` itself
+  for the path-bearing part, and writes the record; you do not run those scripts yourself.
+- The **environment root** is one folder (typically a folder of symbolic links, a "view") with a fixed layout, because
+  plans name only paths under it:
+  - Allpix Squared: `allpix/` (the install: `allpix/bin/allpix`, `allpix/lib/`), `geant4/`, `root/`, `deps/` and
+    `data/<data set folder>` for every data set of `geant4-config --datasets` (Allpix Squared requires all of them,
+    including G4NDL [AP-16]).
+  - Garfield++: `bin/python3` (a Python with ROOT's bindings), `root/` (the ROOT prefix), `garfield/` (the install),
+    and a build record `detsim-garfield-build.json` at the root, written by whoever built Garfield++:
+    `{"format": "detsim-garfield-build/1", "garfield_commit": "<40-hex commit of the built source>",
+    "library_sha256": "<SHA-256 of garfield/lib/libGarfield…dylib>"}` (plus the build options if known). The probe
+    refuses `environment-unpinned` without it; the commit is the builder's statement and is recorded as such.
+- `describe` prints the layout and variables a backend expects.
 - Environment variables are recorded by name, never by value.
 - The validation record lives at `artifacts_root/detector-simulation/.env/<env_identity>.json`; the identity is
   content-based, so reaching the same installation through another path does not change it [H-01 §9.1].
 
-## 6. The `detsim` command (as specified; unverified)
+## 6. The `detsim` command
 
 `detsim` below stands for running the adapter's entry file `adapters/detector-simulation/assets/detsim` (a Python
-file, suffix `.py`) with `python3` from the plugin root; there is no console script. `--backend allpix-squared` or
+file, suffix `.py`) with a Python 3.13 or newer; there is no console script. The interpreter matters for one backend:
+**Allpix Squared's results are read with ROOT's Python bindings inside `detsim`**, so its verbs must run under a
+Python that has them (for example a Homebrew Python matching the ROOT build, with `PYTHONPATH` set to ROOT's library
+folder); without them `check --probe` answers `missing-dependency`. Garfield++ runs its own Python from the
+environment root, so any Python 3.13+ runs `detsim` for it. Clear any ROOT setup inherited from a login shell
+(`ROOT_INCLUDE_PATH`, `ROOTSYS`, `LD_LIBRARY_PATH`, a ROOT `PYTHONPATH`) before running ROOT or `detsim`:
+`ROOT_INCLUDE_PATH` pointing at another SDK's C++ headers breaks ROOT's interpreter. Backends themselves always run with
+exactly the plan's variables, so the login environment never reaches them. `--backend allpix-squared` or
 `--backend garfieldpp` selects the backend; parameters come from the capability schema, never from free argv or
 shell [H-01 §11.1].
 
@@ -120,7 +134,8 @@ shell [H-01 §11.1].
 Usage, as specified:
 
 ```bash
-detsim --backend allpix-squared check   --workspace <project> --task task.json [--probe]
+detsim --backend allpix-squared check   --workspace <project> --probe --env-root <environment root>
+detsim --backend allpix-squared check   --workspace <project> --task task.json
 detsim --backend allpix-squared prepare --workspace <project> --task task.json > plan.json
 detsim --backend allpix-squared run     --workspace <project> --plan plan.json [--plan-digest <sha256>] [--replicate N]
 detsim --backend allpix-squared inspect --workspace <project> --run <run_id> --view state|summary [--attempt <id>]
@@ -134,19 +149,60 @@ a stable `error_code`, the location of the problem and diagnostics; large output
 A new seed is a new plan; running the same plan again is a retry; `--replicate N` (default 0) is only for
 reproducibility tests [H-01 §9.3].
 
+**Where results land.** `artifacts_root` is the project's artifacts folder: `artifacts_dir` of
+`hep-research.project.json` if the project has one, else `<workspace>/hep-research-artifacts/`. `prepare > plan.json`
+saves the answer (`status`, `plan_digest`, `plan`); `run` accepts that file or the bare plan.
+
 **Layout** under `artifacts_root/detector-simulation/` [H-01 §9.6]: `runs/<run_id>/` (exists only after a successful
-commit: `run.computational-run.json`, `plan.canonical.json`, `completeness.json`, `observables.csv`, `manifests/`,
-`raw/`, `logs/`), `failed/<run_id>-<UTC ms>-<nonce>/` (same inner layout, kept), and the hidden `.pending/` (lock
+commit: `run.computational-run.json`, `plan.canonical.json`, `completeness.json` — **the card's check results** —
+`observables.csv`, `manifests/`, `input/`, `logs/`, plus the backend's own output: `output/` and `extract/` for Allpix
+Squared, `query/` and `raw/` for Garfield++), `failed/<run_id>-<UTC ms>-<nonce>/` (same inner layout, kept), and the hidden `.pending/` (lock
 records, attempt folders, `orphans/`) and `.env/`. Read results only from `runs/` or through `inspect`; never from
 `.pending/`.
 
+The development record of the adapter ships with the plugin under `docs/dev/detector-simulation/`: `TASK.md` (the
+specification the command's help and `describe` cite by section), the pinned task cards `card-AP-BOOT.md` and
+`card-GF-QUERY.md`, the source index `SOURCES.md` and the support matrix `SUPPORT-MATRIX.md`.
+
 ## 7. Execution
 
-1. `check --probe` once per environment; then `check` per task.
-2. `prepare > plan.json`; keep the plan with the task.
+1. `check --probe --env-root <root>` once per environment; its answer gives the `env_identity` for the task.
+2. Write the task (examples below) and `check` it; then `prepare > plan.json`; keep the plan with the task.
 3. `run --plan plan.json --plan-digest <digest>`. A second `run` of the same plan returns the committed result
-   (`reused: true`) without launching.
-4. `inspect --view summary` for the observables; hand them to hep-statistics or the owning physics skill.
+   (`reused: true`) without launching. The `run_id` is the first 32 hex characters of
+   `prepare --digest-only [--replicate N]`'s `parameter_digest`, so it is known before running.
+4. The card's checks are in `runs/<run_id>/completeness.json` (`state: complete` when every check passed); the
+   observables are `runs/<run_id>/observables.csv` (also `inspect --view summary`, which prints all rows).
+5. Check the files against the record with the contracts layer's run verifier (`verify_run` in the plugin's
+   `contracts/` folder, given the record `runs/<run_id>/run.computational-run.json`); the contracts validator
+   (`validate` there, given the artifacts folder) validates the records (it warns about non-JSON outputs, which are named in
+   the record's `output_hashes`).
+
+**Task file (`detector-task/1`).** One JSON object; unknown fields are rejected; physical quantities are
+`{"value": "<decimal string>", "unit": "<unit>"}`, never binary floats:
+
+```json
+{"schema": "detector-task/1", "capability_id": "allpix.pixel-charge",
+ "objective": "AP-BOOT: pinned rerun of the official Allpix Squared example (pipeline validation only)",
+ "environment_ref": "<env_identity from check --probe>",
+ "inputs": [{"role": "config", "path": "inputs/example.conf"}, {"role": "detector", "path": "inputs/example_detector.conf"},
+            {"role": "field", "path": "inputs/example_electric_field.init"}],
+ "parameters": {"random_seed": 1, "number_of_events": 10, "multithreading": false},
+ "budget": {"timeout_s": 120, "max_output_bytes": 67108864}}
+```
+
+For GF-QUERY the capability is `garfield.gas-table-query`, the input role is the one `describe` names for the table,
+and the parameters hold the query fields (`{"value", "unit": "V/cm"}`), B = 0, the table's temperature and pressure,
+the interpolation settings of the table's footer and, optionally, `allow_outside_validated_range`; `describe
+--backend garfieldpp` lists the exact names. When the example table is used, the objective must contain "example
+table, pipeline validation only". Node fields are the table's E/p values times its pressure in Torr, computed in double
+precision (for the example table 100.000002 and 80000.0016 V/cm, not 100 and 80000); the query must include the
+first node, the last node and an interior node, so an out-of-range task is the in-range task plus the outside points.
+
+**Comparing replicates (AP-BOOT check 2).** Run the same plan with `--replicate 0` and `--replicate 1`; compare the two
+runs' `extract/pixel_summary.json` with the backend's `compare_summary_files` (its docstring gives the one-line
+command); it lists per-pixel values from both runs. A different seed is a new task and plan; its comparison must
+differ.
 
 In a workflow, `detsim run` can be an opaque [workflow](analysis-workflows.md) step whose `parameter_digest` command is
 `detsim prepare --digest-only` and whose only output is its `stdout` answer (a design decision of the task [H-02]). The step
@@ -155,7 +211,9 @@ development checkout the step always reruns.
 
 **Agent time limits.** If the plan's budget timeout plus 60 s fits under the host's foreground tool limit, run in the
 foreground with an explicit tool timeout; otherwise run in the background and poll `inspect --view state` no more
-often than every 30 s. A background command stopped by the host is a controller death, not a result [H-01 §10.5].
+often than every 30 s (`inspect` needs `--run <run_id>`). A background command stopped by the host is a controller
+death, not a result [H-01 §10.5]. The first-batch runs take seconds (about 4 s for AP-BOOT, 2 s for GF-QUERY on the
+tested host), so they run in the foreground.
 
 **Platform guarantees.** On macOS the controller's death does not kill the backend (`soft`); commit without
 overwriting is `hard` with `renamex_np`; durable commit is `soft`; Linux guarantees are declared `unsupported` until
