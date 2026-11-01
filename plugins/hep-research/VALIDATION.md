@@ -8761,7 +8761,6 @@ The Garfield++ backend of the detector-simulation adapter (capability `garfield.
 | Independent review | two rounds (fresh subagents, advisory, shared host): round 1 2 major / 9 minor, round 2 no code finding open, documentation items fixed after the round | findings fixed |
 
 Not run: Linux (linux-g0 unsupported until measured); a run-time library failure on the real view (`probe` refuses a
-broken view before a run; the mapping is tested with a stand-in program). Passing checks show software consistency,
-not physical validity: the example table is not reference data.
+broken view before a run; the mapping is tested with a stand-in program). The example table is not reference data.
 
 Passing checks show software consistency, not physical validity.
