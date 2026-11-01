@@ -12,6 +12,12 @@ simulated response matches the real detector. The upstream stage is
 [event generation](../../hep-theory/references/event-generation.md); the constants that tie simulation to the
 real detector are in [calibration and alignment](calibration-and-alignment.md).
 
+Charge transport inside a sensor or a gas, beyond what Geant4 deposits, is the job of two specialised tools: Allpix
+Squared (semiconductor pixel and strip sensors) and Garfield++ (gas tables, fields, signals). When to use either, or
+neither, their charge-sign, empty-event and interpolation semantics, and the two pinned task cards of the optional
+`detector-simulation` adapter are in [sensor and gas transport tools](sensor-and-gas-transport-tools.md); building
+and running them is in the hep-computing operations guide it links.
+
 ## What full simulation does
 
 A full simulation (Geant4 being the standard toolkit) transports each particle through

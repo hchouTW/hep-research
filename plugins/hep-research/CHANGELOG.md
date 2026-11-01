@@ -3,6 +3,79 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+- **Knowledge guides for Allpix Squared and Garfield++ (detector-simulation task, WK).** New references
+  `skills/hep-detector/references/sensor-and-gas-transport-tools.md` (tool selection and non-applicability,
+  charge-sign, empty-event and signal boundaries, Garfield++ gas-table interpolation, extrapolation and
+  temperature-pressure behaviour, the AP-BOOT and GF-QUERY task cards, failure classes, limitations) and
+  `skills/hep-computing/references/sensor-and-gas-simulation-operations.md` (environment sources, build
+  preconditions, the `detsim` command, statuses and troubleshooting); every operational part is marked unverified
+  until a backend has run. Entry points through the `detector-simulation.md` and `analysis-workflows.md` hubs; source
+  index `docs/dev/detector-simulation/SOURCES.md` and the 20-question set
+  `docs/dev/detector-simulation/knowledge-questions.md`.
+- Evidence: VALIDATION DETSIM-WK
+- **Contracts 3.18.0: four sidecar schemas for the detector-simulation adapter**, none an artifact type:
+  `detector_task.json` (detector-task/1), `detector_plan.json` (detector-plan/1), `detsim_completeness.json`
+  (detsim-completeness/1) and `detsim_observables.json` (detsim-observables/1, a long table for hep-statistics). No
+  artifact type, vocabulary term, rule or capability changes: every 3.17 artifact keeps its outcome. Fixtures,
+  theory-profile artifacts, skill templates and the 14 examples carry the new version (examples regenerated with the
+  E2 venv; only versions and hashes change).
+- **New optional adapter `adapters/detector-simulation` 0.1.0** (owner hep-detector, proposed): `detsim.py`
+  `describe`, `check` and `prepare [--digest-only [--replicate N]]` build a content-addressed plan without launching
+  anything: a hash-scope check before hashing (no binary floats, integers beyond 2^53-1, non-ASCII or duplicate
+  keys, NaN, lone surrogates, absolute paths or `$NAME` references), exact normalized decimal strings (`decimal/1`),
+  inputs hashed inside the project, the environment from a validated record, a runner profile per platform
+  (`macos-g0` as measured; `linux-g0` unsupported until measured), a rebuild comparison refusing a stale plan with
+  `plan-stale` and the mismatched fields, the run digest and `run_id`. Tests use a simulator-free backend under
+  `tests/adapters/`.
+- Evidence: VALIDATION DETSIM-W3A
+- **`adapters/detector-simulation` 0.2.0: execution and commit of the shared layer** (work item W3b). `detsim.py run`
+  follows TASK.md 10.2: an allowlisted local file system (`unsupported-fs`), `--plan-digest`, the rebuild comparison,
+  required guarantees refused never downgraded (`guarantee-insufficient`), idempotent reuse of `runs/<run_id>/`, a
+  `flock` lock per run_id (`incomplete` / `in-progress`), leftovers of dead controllers moved to `.pending/orphans/`
+  and reported but never signalled, an input snapshot hash-checked against the plan (`input-changed`), the backend
+  launched directly in its own session with exactly the plan's environment, timeout, output budget and interruption
+  enforced on its own unreaped process group only, collect and observables, then a durable no-replace commit
+  (`renamex_np` / `renameat2`, `F_FULLFSYNC` on macOS) to `runs/<run_id>/` or `failed/<run_id>-<UTC ms>-<nonce>/`
+  with a computational-run record naming its sidecars. `inspect` is read-only (state, summary, failed attempts);
+  `check --probe` validates and records an environment. The shared layer is `demonstrated-on-synthetic-data`
+  (macos-g0 as measured; linux-g0 unsupported until measured); both backends stay `proposed`.
+- Evidence: VALIDATION DETSIM-W3B
+- **`adapters/detector-simulation` 0.3.0: Garfield++ backend** (work item W4G). Backend `garfieldpp` with capability
+  `garfield.gas-table-query` 1.0.0 (`detsim_backend_garfield.py`, a PyROOT query script and its descriptor under
+  `assets/garfield/`): electron drift velocity at B = 0 from one 1D gas table; temperature, pressure and interpolation
+  settings must equal the table's; out-of-range fields refused `out-of-domain` with the valid range unless
+  `allow_outside_validated_range` (then labelled `outside-validated-range`); collect runs checks 1-4 of card GF-QUERY
+  with an independent `.gas` parser and a reimplementation of Garfield++'s `Divdif` stencil and extrapolation;
+  `check --probe` records a content-based identity and answers `missing-dependency` without ROOT, the libraries or the
+  bindings. The query script prints one JSON status and exits 0-3; refusals `table-format`, `extrapolation-undefined`,
+  `interpolation-mismatch` and `node-coverage`; observables rows from the pinned example table carry the note
+  "example table, pipeline validation only" (an optional row field `note` of detsim-observables/1, contracts 3.18.0, and a
+  `note` column in observables.csv). Shared layer: a backend that declares `CHECK_READS_INPUTS` receives the
+  hash-checked input files in `check`; a backend's missing-dependency status at run time makes the run failed /
+  missing-dependency.
+- Evidence: VALIDATION DETSIM-W4G
+- **`adapters/detector-simulation` 0.4.0: Allpix Squared backend** (work item W4A). Backend `allpix-squared` with
+  capability `allpix.pixel-charge` 1.0.0 (`detsim_backend_allpix.py`, descriptor under `assets/allpix/`): the official
+  pixel example rerun with exactly the allowed `-o` overrides (10 events, `multithreading=false`, a random seed; the whole
+  command line is whitelisted); collect
+  reads the PixelCharge, PixelHit and Event data members through ROOT's stored class layouts (no Allpix library in the
+  controller) and checks configuration fidelity, the expected tree set, a hit in every event and detector and the
+  detector1 charge plausibility band, that every pixel charge is negative (charge-sign) and that the stored class
+  versions are the pinned ones; `compare_summary_files` gives the per-pixel replicate comparison; `check --probe` records a
+  content-based identity (versions, dataset hashes and every library the program and its modules resolve). Shared layer: a completeness check `dependency` that failed makes the run `failed` / `missing-dependency`.
+- Evidence: VALIDATION DETSIM-W4A
+- **detector-simulation: both backends `tested-in-declared-environment`** (work item W5) for exactly the environment
+  of the support matrix (`docs/dev/detector-simulation/SUPPORT-MATRIX.md`: macOS 27.2 arm64, Allpix Squared
+  `df69a6a4`, Garfield++ `e2e58ea`, ROOT 6.40.04), after a non-author rerun that followed only the guides and a
+  native-vs-detsim performance measurement (`PERF.md`: about 0.5-1.2 s overhead per Allpix run, 0.2-0.4 s per
+  Garfield++ run; input-copy threshold and foreground rule unchanged). The operations guide now gives the
+  environment-root layout and the Garfield++ build record, `--env-root`, the interpreter rule and the inherited ROOT
+  variables to clear, a task-file example, node coverage, where results and check results land, how to compare
+  replicates and how to verify a run. The shared layer and the adapter stay `demonstrated-on-synthetic-data`.
+- Evidence: VALIDATION DETSIM-W5
+
 ## 0.53.0 (2026-11-01)
 
 Minor release: event displays. Contracts 3.17.0 and `CORE_VERSION` 1.5.0 are unchanged; the `hep-computing`

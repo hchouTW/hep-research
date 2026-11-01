@@ -8689,3 +8689,115 @@ on loopback), occurred under `--jobs 4` load; it passes 3 of 3 times alone on E2
 this release. `claude plugin validate --strict` and `codex plugin load` pass.
 
 Passing checks show software consistency, not physical validity.
+
+## DETSIM-W3A — 2026-11-01 (macOS 27.2 arm64, Python 3.13.2 venv; examples regenerated with the E2 venv, NumPy 2.5.3; version 0.53.0 + unreleased)
+
+The detector-simulation shared layer's plan and identity part (adapter `adapters/detector-simulation`, verbs
+`describe`, `check`, `prepare`) and contracts 3.18.0, checked with a simulator-free backend on synthetic inputs; no
+simulator was run.
+
+| Item | Evidence | Result |
+|---|---|---|
+| T-CANON | `tests/adapters/test_detsim_identity.py`: golden vectors through the four `canonical_sha256` copies and an independent JCS serializer; `normalize_decimal` edge cases (incl. `decimal-exponent-range`); `check_hash_scope` refusals by name; run digest and `run_id` encoding | 17 OK |
+| T-SCHEMA | `tests/adapters/test_detsim_schemas.py`: positive and negative fixtures, unknown keys, units, supported keywords only, anchored patterns re-applied with `re.fullmatch` (walker over every schema pattern), a float in the hash scope refused | 12 OK |
+| T-PLAN | `tests/adapters/test_detsim_plan.py`: same plan from four working folders and a moved project; replaced input, changed backend or shared-layer code, changed or corrupt environment record, another profile, one extra argv, one changed rendered byte → `plan-stale`; wrong `--plan-digest` → `digest-mismatch`; review-round regression tests | 35 OK |
+| Without ROOT / uproot | `tests/adapters/test_detsim_missing_dependency.py` | 3 OK |
+| Contracts | `unittest discover -s tests/contracts`; every 3.17 artifact under `contracts/fixtures`, `examples` and `profiles` (602) gives the same findings with the 3.18 validator (independent review) | 1160 run, OK (1 skipped); 602 identical |
+| Conventions | layering, naming, wiring, reference inventory, skill scripts, interpreter guard, python compat, adapter declarations and missing-dependency, CLI robustness and contract | pass |
+| Hostile `TMPDIR` | a symlinked folder whose name has a space and non-ASCII characters | OK |
+| Independent review | three rounds (fresh subagents, advisory, shared host): round 1 0 major / 9 minor, round 2 1 major / 6 minor, round 3 no earlier finding open and 2 new minor findings, fixed with tests after round 3 (no fourth round) | findings fixed |
+
+Passing checks show software consistency, not physical validity.
+
+## DETSIM-WK — 2026-11-01 (E2 macOS 27.2 arm64, Python 3.13.2 venv; version 0.53.0 + unreleased)
+
+The knowledge deliverable K of the detector-simulation task: the hep-detector guide
+`sensor-and-gas-transport-tools.md`, the hep-computing guide `sensor-and-gas-simulation-operations.md`, the source
+index and the 20-question set; no simulator was built or run for it, and every operational part is marked unverified.
+
+| Item | Evidence | Result |
+|---|---|---|
+| Sources | `docs/dev/detector-simulation/SOURCES.md`: 56 records (commit or URL, lines, retrieval time, SHA-256, licence, review status) | recorded; content hashes re-checked by the independent reviewers |
+| T-DISCOVER | `WR/scratch/WK/t-discover.txt` (raw log): `skills/hep-detector/SKILL.md` row "Simulation (Geant4)" → `detector-simulation.md` → the hep-detector guide; `skills/hep-computing/SKILL.md` → `analysis-workflows.md` / `environments-and-containers.md` → the operations guide; `tools/check_wiring.py` pass; no backend on the host; the non-author answerer reached both guides from both entry points (result sheet, path column) | pass |
+| T-CONTENT (knowledge part) | 20 questions (4/4/4/3/3/2) answered by fresh non-author subagents from the three corpus files and five routing pages, graded element by element: run 4 on the final guides | 20 of 20 within range, no veto (runs 2 and 3: 19 of 20, the gaps fixed in the guides) |
+| T-CONV | `reference_inventory --check` (0 overlap pairs), `check_wiring`, `check_layering`, `check_naming`, `check_routing_static`, `check_ownership`, `capability_map --check`, `skill_scripts --check`, `insert_interpreter_guard --check`; routing-table, reference-link and doc-consistency tests (also with a TMPDIR with a space and non-ASCII) | pass |
+| Independent review | three rounds (fresh subagents, advisory, shared host): round 1 5 major / 11 minor, round 2 1 major / 4 minor, round 3 no earlier finding open and 3 new minor findings, fixed after round 3 (no fourth round) | findings fixed |
+
+Passing checks show software consistency, not physical validity.
+
+## DETSIM-W3B — 2026-11-02 (macOS 27.2 arm64, APFS, Python 3.13.2 venv; version 0.53.0 + unreleased)
+
+The execution part of the detector-simulation shared layer (adapter 0.2.0: `run`, `inspect`, `check --probe`), tested
+with the simulator-free synthetic backend and a cooperative program; no simulator was run.
+
+| Item | Evidence | Result |
+|---|---|---|
+| T-IDEM, T-LOCK, T-NOKILL, T-ORPHAN, T-RUNNER, T-COMMIT, T-FS, T-GUARANTEE, T-PLATFORM, T-EXIT, T-CONTRACT, T-OUTPUT | `tests/adapters/test_detsim_run.py` (controllers as separate processes for lock, orphan, interruption and crash injection before commit and after rename; signal shims around `os.kill`, `os.killpg` and the runner's call; injected recorder for the fsync / F_FULLFSYNC / rename order; file-system types nfs, smbfs, cifs, fuse, osxfuse, s3fs, unknown refused) | 62 tests: 61 OK, 1 not run (platform: PR_SET_PDEATHSIG is Linux only) |
+| `contracts/validate.py`, `contracts/verify_run.py` | after a successful and after a failed run, in the tests | pass (an input read in place is reported outside-base by design and named in the record) |
+| Runner profile | macos-g0 as measured (V-04): commit_noreplace hard (`renamex_np`), durable_commit soft (F_FULLFSYNC on files), local_fs_check hard (apfs), timeout_kill hard, output_size_abort soft, descendants_killed soft, backend_dies_with_controller soft, no_network unsupported; linux-g0 every level unsupported (not measured) | declared and recorded per run |
+| Hostile `TMPDIR` | a symlinked folder whose name has a space and non-ASCII characters | OK |
+| Conventions | layering, naming, wiring, adapter declarations and missing-dependency, CLI robustness, python compat; `run_all_checks.py --part static --no-cli` | pass; static 29 pass, 0 fail, 2 skip (host CLIs) |
+| Independent review | three rounds (fresh subagents, advisory, shared host): round 1 7 major / 17 minor, round 2 0 major / 5 minor, round 3 no earlier finding open and 1 new minor finding, fixed with a test after round 3 (no fourth round) | findings fixed |
+
+Passing checks show software consistency, not physical validity.
+
+## DETSIM-W4G — 2026-11-02 (macOS 27.2 arm64, APFS; controller Python 3.13.2 venv, backend Homebrew Python 3.15.2 with PyROOT; version 0.53.0 + unreleased)
+
+The Garfield++ backend of the detector-simulation adapter (capability `garfield.gas-table-query` 1.0.0) on Garfield++
+`e2e58ea` built from source with Homebrew ROOT 6.40.04, run through `detsim` on the example table
+`ar_80_co2_20_0T.gas` (H0 #13: local input only, pipeline validation only).
+
+| Item | Evidence | Result |
+|---|---|---|
+| Offline tests | `tests/adapters/test_detsim_garfield.py` with synthetic 1D, 3D and no-velocity fixtures (independent parser, Divdif order-2 stencil incl. both end cases, linear / constant / exponential extrapolation against hand-computed values, refusals, node coverage, note, three-argument check call) | 78 run, OK (5 live tests skipped) |
+| Live tests | the same module with `HEP_DETSIM_GARFIELD_VIEW` and `HEP_DETSIM_GARFIELD_TABLE`, also with a TMPDIR whose name has a space and non-ASCII characters | OK |
+| T-ENV | `check --probe` on the view and through a symlink: same identity 96827976… (commit, build options, six Garfield++ libraries, libCore, libCPyCppyy, ROOT and Python versions) and same plan digest; missing ROOT, library or bindings → missing-dependency (exit 3) | pass |
+| T-GF task 1 | six in-range points; run `efc8f707…`, plan `d30a70ab…` | ok; check 1 (nodes within 4 ulp, perpendicular components exactly 0), check 2 (vx < 0), check 3 (interior vs the independent Divdif, ≤ 1e-12 relative + 4 ulp) pass; vx = -0.00034219876 cm/ns at 100.000002 V/cm, -0.006209797047009455 cm/ns at 2800 V/cm; a rerun is reused |
+| T-GF task 2 | plus 50 and 100000 V/cm | refused out-of-domain (exit 1) at check and prepare, valid range [100.000002, 80000.0016] V/cm |
+| T-GF task 2 with the option | run `8fdc5f83…`, plan `c2396499…` | ok; check 4 (constant low, linear high) passes, the two points' rows labelled `outside-validated-range`; vx = -0.027253885159861574 cm/ns at 100000 V/cm |
+| T-OUTPUT, contracts | `contracts/validate.py` on the artifacts; `contracts/verify_run.py` on both records; every observables row carries the note | pass; 11 of 11 hashes match per run |
+| Independent check of the numbers | a reviewer's own parser and Divdif port | 5 of 8 points identical, 3 within 2.9e-16 relative |
+| Conventions | layering, naming, adapter declarations and missing-dependency, CLI robustness, python compat; contracts tests (schema field `note`); static part | pass; contracts 1160 OK (1 skipped); static 29 pass, 0 fail, 2 skip |
+| Independent review | two rounds (fresh subagents, advisory, shared host): round 1 2 major / 9 minor, round 2 no code finding open, documentation items fixed after the round | findings fixed |
+
+Not run: Linux (linux-g0 unsupported until measured); a run-time library failure on the real view (`probe` refuses a
+broken view before a run; the mapping is tested with a stand-in program). The example table is not reference data.
+
+Passing checks show software consistency, not physical validity.
+
+## DETSIM-W4A — 2026-11-02 (macOS 27.2 arm64, APFS; controller Homebrew Python 3.15.2 with PyROOT for the acceptance runs, Python 3.13.2 venv for the tests; version 0.53.0 + unreleased)
+
+The Allpix Squared backend of the detector-simulation adapter (capability `allpix.pixel-charge` 1.0.0, card AP-BOOT) on
+Allpix Squared `df69a6a4` built from source with a C++20 Geant4 11.4.3 and Homebrew ROOT 6.40.04, run through `detsim`.
+
+| Item | Evidence | Result |
+|---|---|---|
+| Offline tests | `tests/adapters/test_detsim_allpix.py` (synthetic data: extractor logic, checks 1-3b, charge-sign, argv whitelist (12 rejection cases), class versions, check-2 comparison, library identity with a fake library folder, counterexamples) | 39 run, OK (1 live test skipped) |
+| Live test | the same module with `HEP_DETSIM_ALLPIX_VIEW` under Python 3.15 (probe direct and through a symlink, two replicates, another seed, the library-free read against the library's accessors) | 39 of 39 OK |
+| T-ENV | `check --probe`: identity 04b91a73… (Allpix version, Geant4 registration with 12 dataset hashes, 97 resolved libraries); same identity and plan digest through a symlink; missing G4NDL, object library, program, or a controller without PyROOT → missing-dependency (exit 3), nothing written | pass |
+| T-AP | runs 1302c2dd… / fe0e9b88… (seed 1, replicates 0 and 1, plan 619d2ff8…) and 0642769d… (seed 2, plan c5983a63…) | complete: check 1, class versions, 10 events with hits in both detectors, charge-sign (44 and 28 charges negative), check 3b medians 27579 e and 21871 e in [10687.5, 42750] e; check 2 identical over 86 per-pixel entries, seed 2 differs; a rerun is reused |
+| Native comparison (auxiliary) | `allpix` with the same configuration and `multithreading=false` | identical to replicate 0 |
+| T-OUTPUT, contracts | a 1 s timeout → failed (`failed/`); an input replaced after prepare → plan-stale; `contracts/validate.py` (24 warnings: non-JSON outputs named only in `output_hashes`), `contracts/verify_run.py` on the three records | pass |
+| Conventions | layering, naming, adapter declarations and missing-dependency, CLI robustness, python compat; static part | pass; static 29 pass, 0 fail, 2 skip |
+| Independent review | two rounds (fresh subagents, advisory, shared host): round 1 3 major / 6 minor, fixed (m6 recorded as a limitation); round 2 no code finding open, three documentation items fixed after the round | findings fixed |
+
+Not run: Linux (linux-g0 unsupported; the `ldd` branch of library resolution untested). 10 events are not statistics;
+check 3b is a plausibility band, not physics validation.
+
+Passing checks show software consistency, not physical validity.
+
+## DETSIM-W5 — 2026-11-02 (macOS 27.2 arm64, APFS; version 0.53.0 + unreleased)
+
+Operational acceptance of the detector-simulation adapter: a non-author rerun of each backend following only the
+guides, native-vs-detsim performance in one environment, the support matrix, and the state change of both backends.
+
+| Item | Evidence | Result |
+|---|---|---|
+| Non-author rerun, Garfield++ | fresh subagent, guides and `--help` only, project `WR/projects/W5-rerun-garfieldpp` | in-range task ok (run ac03aa29…, checks 1-3 and node coverage pass, vx = -3.4219876e-4 cm/ns at the first node), out-of-range task refused by default and ok with the option (run 931c473e…, check 4, rows labelled); 12 guide gaps reported |
+| Non-author rerun, Allpix Squared | fresh subagent, guides and `--help` only, project `WR/projects/W5-rerun-allpix-squared` | probe ok (identity 04b91a73…, the same as acceptance-3), replicates 0 and 1 ok and identical over 122 observables rows (runs 6fd1ae08…, bc5c157a…), all ten checks pass, median 22867 e; another seed differs; 13 guide gaps reported |
+| Guide corrections | operations guide, hep-detector guide and README (decision log W5) | every reported gap addressed except two recorded: the SKILL.md rows (entry through the hubs) and help text citing TASK.md sections |
+| T-PERF | `docs/dev/detector-simulation/PERF.md` (`/usr/bin/time -l`, native and detsim twice each) | Allpix native 3.1-3.8 s, detsim 4.1-4.3 s; Garfield++ native 1.4-1.6 s, detsim 1.7-1.8 s; peak RSS 0.40-0.47 GB and about 0.59 GB; threshold and foreground rule unchanged |
+| Support matrix | `docs/dev/detector-simulation/SUPPORT-MATRIX.md`, in step with `adapter.json` and the capability-matrix row | written; both backends `tested-in-declared-environment` for that environment only |
+| §17.3 checklist per backend | ledger "Definition of done" | complete for both; Linux untested |
+
+Passing checks show software consistency, not physical validity.

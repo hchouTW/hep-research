@@ -1,5 +1,5 @@
 {
- "contract_version": "3.17.0",
+ "contract_version": "3.18.0",
  "artifact_id": "dylo-theory-spec-lo-and-lam-tung",
  "artifact_type": "theory-spec",
  "objective": "Theory spec of the LO Drell-Yan cross section and the O(alpha_s) angular coefficients with the Lam-Tung relation in theory:drell-yan-lo",
@@ -14,7 +14,7 @@
  },
  "versions": {
   "plugin": "0.53.0",
-  "contracts": "3.17.0",
+  "contracts": "3.18.0",
   "profiles": {
    "theory:drell-yan-lo": "0.1.0"
   }

@@ -1,0 +1,64 @@
+{
+ "$comment": "detsim-completeness/1 (contracts 3.18.0; adapters/detector-simulation, docs/dev/detector-simulation/TASK.md 9.5): the result of a backend's collect for one attempt: complete, partial or invalid, with the evidence of each check. A sidecar (runs/<run_id>/completeness.json, or the same file in a failed/ folder), named by the run record's extension.sidecars; not an artifact type. Code checks (detsim_schemas.check_completeness): complete needs every check passed and no missing output; partial or invalid needs a failed or inconclusive check or a missing output; check names are unique; patterns are re-applied with re.fullmatch.",
+ "type": "object",
+ "required": [
+  "schema",
+  "state",
+  "evidence",
+  "missing_outputs"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "schema": {
+   "const": "detsim-completeness/1"
+  },
+  "run_id": {
+   "type": "string",
+   "pattern": "^[0-9a-f]{32}$"
+  },
+  "state": {
+   "enum": [
+    "complete",
+    "partial",
+    "invalid"
+   ]
+  },
+  "evidence": {
+   "type": "array",
+   "minItems": 1,
+   "items": {
+    "type": "object",
+    "required": [
+     "check",
+     "result"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "check": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_.-]*$"
+     },
+     "result": {
+      "type": "string",
+      "x-vocab": "check_results"
+     },
+     "detail": {
+      "type": "string"
+     }
+    }
+   }
+  },
+  "missing_outputs": {
+   "type": "array",
+   "items": {
+    "$ref": "detector_plan.json#/$defs/attempt_path"
+   }
+  },
+  "native_exit_code": {
+   "type": [
+    "integer",
+    "null"
+   ]
+  }
+ }
+}

@@ -1,0 +1,63 @@
+{
+ "id": "allpix.pixel-charge",
+ "version": "1.0.0",
+ "backend": "allpix-squared",
+ "parameters_schema": {
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["random_seed", "number_of_events", "multithreading"],
+  "properties": {
+   "random_seed": {"type": "integer", "minimum": 0, "maximum": 9007199254740991},
+   "number_of_events": {"type": "integer", "const": 10},
+   "multithreading": {"type": "boolean", "const": false}
+  }
+ },
+ "required_guarantees": {"inputs_unmodified": "hard", "timeout_kill": "hard", "output_size_abort": "soft"},
+ "limitations": [
+  "AP-BOOT only (docs/dev/detector-simulation/card-AP-BOOT.md): a pinned rerun of the official Allpix Squared example examples/example.conf with its two external files, unchanged; only number_of_events = 10, multithreading = false and random_seed are overridden (allpix -o key=value)",
+  "10 events are not physics statistics; the charge band [10687.5, 42750] e is a plausibility check, not physics validation and not an external numerical oracle",
+  "the output folder is the program's default <working folder>/output (ATTEMPT_ROOT/output): Allpix resolves a relative output_directory against the configuration file's folder and the shared layer binds a logical root only at the start of an argument, so no output_directory override is written",
+  "libraries of Geant4, ROOT and the dependencies are found through the executable's own LC_RPATH entries; the library path variable names only ENV_ROOT/allpix/lib because the shared layer binds one leading logical root per value (H3 question in the W4A report)",
+  "the extractor reads data members through ROOT's streamer information (emulated classes, TTree::Draw on member names) without loading libAllpixObjects; it needs the ROOT Python bindings in the controller's interpreter, else check --probe answers missing-dependency and a run's collect is invalid",
+  "no efficiency, waveform, scan or cross-tool coupling; a completed run is verification at most, never physical validity"
+ ],
+ "pinned": {
+  "upstream": "https://github.com/allpix-squared/allpix-squared",
+  "licence": "MIT",
+  "commit": "df69a6a4c69219e035dadf1005e7509856b73b86",
+  "version_string": "v3.2.0-689-gdf69a6a4",
+  "geant4_version": "11.4.3",
+  "inputs": {
+   "config": {"name": "example.conf", "sha256": "bc735e7ae12414b7f1cb42fb8a6f8ecc2a59a6616f8c8c6d4410c49bb3312ce3"},
+   "detector": {"name": "example_detector.conf", "sha256": "296abda7e360dcdec9d99a1c2b6737e2567070747cc940e15666f902b8d5f182"},
+   "field": {"name": "example_electric_field.init", "sha256": "9d4da3e4b965fd5d55580e020c34c13f355ae8c4e9562c3952ca7b68849d4fd8"}
+  },
+  "model_files": ["allpix/share/Allpix/models/cmsp1.conf"],
+  "overrides": {"number_of_events": "10", "multithreading": "false", "random_seed": "<task random_seed>"},
+  "output_file": "ATTEMPT_ROOT/output/data.root"
+ },
+ "module_outputs": {
+  "GeometryBuilderGeant4": [],
+  "DepositionGeant4": ["DepositedCharge", "MCParticle", "MCTrack"],
+  "ElectricFieldReader": [],
+  "GenericPropagation": ["PropagatedCharge"],
+  "PulseTransfer": ["PixelCharge"],
+  "DefaultDigitizer": ["PixelHit"],
+  "DetectorHistogrammer": [],
+  "ROOTObjectWriter": []
+ },
+ "non_module_sections": ["Allpix", "Ignore"],
+ "class_versions": {"allpix::PixelCharge": 9, "allpix::PixelHit": 7, "allpix::Pixel": 2},
+ "members": {
+  "allpix::PixelCharge": ["pixel_", "charge_"],
+  "allpix::PixelHit": ["pixel_", "signal_"],
+  "allpix::Pixel": ["index_"]
+ },
+ "checks": {
+  "hits_required_in": "every detector of the detector input",
+  "charge_sign": "negative: GenericPropagation in this example propagates electrons only, so every PixelCharge charge_ is < 0 (PixelCharge.cpp, PulseTransferModule.cpp at the pinned commit)",
+  "band_detector": "detector1",
+  "band_e": {"low": "10687.5", "high": "42750"},
+  "band_rule": "median over events of the per-event sum over band_detector pixels of PixelCharge::getAbsoluteCharge() (= |charge_|) lies in [low, high]; [0.5, 2] x 75 e/um x 285 um (cmsp1 sensor_thickness)"
+ }
+}

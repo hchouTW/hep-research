@@ -1,0 +1,269 @@
+{
+ "$comment": "detector-plan/1 (contracts 3.18.0; adapters/detector-simulation, docs/dev/detector-simulation/TASK.md 9.2-9.5): the complete pinned plan with the task embedded, written by detsim.py prepare. A sidecar (runs/<run_id>/plan.canonical.json), not an artifact type. Its plan_digest is the repository's canonical_sha256 of the whole object (canonical/1), so every field here is in the hash scope: no binary floats, integers within +-(2^53-1), ASCII keys, no lone surrogates, no absolute or home paths and no $VAR references outside the base64 file contents (detsim_canonical.check_hash_scope). Paths use only the logical roots ENV_ROOT, INPUT_ROOT and ATTEMPT_ROOT. Replicate, nonce, host and achieved guarantee levels are not in the plan. Patterns are re-applied with re.fullmatch and environment variable names, file sizes and hashes are checked in code (detsim_schemas.py).",
+ "type": "object",
+ "required": [
+  "schema",
+  "canonicalization",
+  "task",
+  "capability",
+  "code",
+  "environment",
+  "inputs",
+  "profile",
+  "execution"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "schema": {
+   "const": "detector-plan/1"
+  },
+  "canonicalization": {
+   "type": "object",
+   "required": [
+    "json",
+    "decimal"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "json": {
+     "const": "canonical/1"
+    },
+    "decimal": {
+     "const": "decimal/1"
+    }
+   }
+  },
+  "task": {
+   "$ref": "detector_task.json"
+  },
+  "capability": {
+   "type": "object",
+   "required": [
+    "id",
+    "version",
+    "backend",
+    "descriptor_sha256",
+    "required_guarantees"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "type": "string",
+     "pattern": "^[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)+$"
+    },
+    "version": {
+     "type": "string",
+     "pattern": "^(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)\\.(0|[1-9][0-9]*)$"
+    },
+    "backend": {
+     "type": "string",
+     "pattern": "^[a-z][a-z0-9-]*$"
+    },
+    "descriptor_sha256": {
+     "$ref": "detector_task.json#/$defs/sha256"
+    },
+    "required_guarantees": {
+     "type": "object",
+     "additionalProperties": {
+      "enum": [
+       "soft",
+       "hard"
+      ]
+     }
+    }
+   }
+  },
+  "code": {
+   "type": "object",
+   "required": [
+    "shared_layer",
+    "backend",
+    "schemas"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "shared_layer": {
+     "$ref": "#/$defs/hash_map"
+    },
+    "backend": {
+     "$ref": "#/$defs/hash_map"
+    },
+    "schemas": {
+     "$ref": "#/$defs/hash_map"
+    }
+   }
+  },
+  "environment": {
+   "type": "object",
+   "required": [
+    "env_identity",
+    "identity",
+    "variables"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "env_identity": {
+     "$ref": "detector_task.json#/$defs/sha256"
+    },
+    "identity": {
+     "type": "object",
+     "description": "content identity of the environment (image digest, or view + platform + commit, ...); env_identity is its canonical_sha256"
+    },
+    "variables": {
+     "type": "object",
+     "description": "the allowlisted backend environment with the environment-root prefix written as ENV_ROOT",
+     "additionalProperties": {
+      "type": "string"
+     }
+    }
+   }
+  },
+  "inputs": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "role",
+     "path",
+     "size",
+     "sha256"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "role": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_-]*$"
+     },
+     "path": {
+      "$ref": "detector_task.json#/$defs/relative_path"
+     },
+     "size": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 9007199254740991
+     },
+     "sha256": {
+      "$ref": "detector_task.json#/$defs/sha256"
+     }
+    }
+   }
+  },
+  "profile": {
+   "type": "object",
+   "required": [
+    "id",
+    "level",
+    "guarantees",
+    "policy"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "id": {
+     "type": "string",
+     "pattern": "^[a-z][a-z0-9]*-g[0-9]$"
+    },
+    "level": {
+     "enum": [
+      "G0",
+      "G1"
+     ]
+    },
+    "guarantees": {
+     "type": "object",
+     "additionalProperties": {
+      "enum": [
+       "unsupported",
+       "soft",
+       "hard"
+      ]
+     }
+    },
+    "policy": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "integer"
+     }
+    }
+   }
+  },
+  "execution": {
+   "type": "object",
+   "description": "the backend's ExecutionSpec (TASK.md 8.2)",
+   "required": [
+    "argv",
+    "environment",
+    "files",
+    "expected_outputs",
+    "timeout_s"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "argv": {
+     "type": "array",
+     "minItems": 1,
+     "items": {
+      "type": "string",
+      "minLength": 1
+     }
+    },
+    "environment": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "string"
+     }
+    },
+    "files": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "path",
+       "encoding",
+       "content",
+       "sha256"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "path": {
+        "$ref": "#/$defs/attempt_path"
+       },
+       "encoding": {
+        "const": "base64"
+       },
+       "content": {
+        "type": "string",
+        "pattern": "^[A-Za-z0-9+/]*={0,2}$"
+       },
+       "sha256": {
+        "$ref": "detector_task.json#/$defs/sha256"
+       }
+      }
+     }
+    },
+    "expected_outputs": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/attempt_path"
+     }
+    },
+    "timeout_s": {
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 86400
+    }
+   }
+  }
+ },
+ "$defs": {
+  "hash_map": {
+   "type": "object",
+   "additionalProperties": {
+    "$ref": "detector_task.json#/$defs/sha256"
+   }
+  },
+  "attempt_path": {
+   "type": "string",
+   "pattern": "^ATTEMPT_ROOT(/[A-Za-z0-9_+-][A-Za-z0-9_.+-]*)+$"
+  }
+ }
+}

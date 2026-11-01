@@ -1,0 +1,120 @@
+{
+ "$comment": "detector-task/1 (contracts 3.18.0; adapters/detector-simulation, docs/dev/detector-simulation/TASK.md 9.5): the user's intent for one detector-simulation capability run. A sidecar read by adapters/detector-simulation/assets/detsim.py, not an artifact type. No replicate (it comes only from --replicate). Every pattern is anchored and is applied again with re.fullmatch by detsim_schemas.py, because contracts/schema.py uses re.search (where $ also matches before a trailing newline). Code checks also refuse '.' and '..' path segments, a repeated input path, a float anywhere and the other hash-scope violations of detsim_canonical.check_hash_scope. Physical quantities are {value, unit} with a decimal string (see $defs/quantity); the plan carries them normalized (decimal/1).",
+ "type": "object",
+ "required": [
+  "schema",
+  "capability_id",
+  "objective",
+  "environment_ref",
+  "inputs",
+  "parameters",
+  "budget"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "schema": {
+   "const": "detector-task/1"
+  },
+  "capability_id": {
+   "type": "string",
+   "pattern": "^[a-z][a-z0-9-]*(\\.[a-z][a-z0-9-]*)+$"
+  },
+  "objective": {
+   "type": "string",
+   "minLength": 1
+  },
+  "environment_ref": {
+   "$ref": "#/$defs/sha256",
+   "description": "the env_identity of a validated environment record artifacts_root/detector-simulation/.env/<env_identity>.json"
+  },
+  "inputs": {
+   "type": "array",
+   "items": {
+    "$ref": "#/$defs/input"
+   }
+  },
+  "parameters": {
+   "type": "object",
+   "description": "capability parameters, validated by the capability descriptor's parameters_schema"
+  },
+  "budget": {
+   "type": "object",
+   "required": [
+    "timeout_s",
+    "max_output_bytes"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "timeout_s": {
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 86400
+    },
+    "max_output_bytes": {
+     "type": "integer",
+     "minimum": 1,
+     "maximum": 9007199254740991
+    }
+   }
+  }
+ },
+ "$defs": {
+  "sha256": {
+   "type": "string",
+   "pattern": "^[0-9a-f]{64}$"
+  },
+  "relative_path": {
+   "type": "string",
+   "description": "a path relative to the project root, '/'-separated, ASCII; no '.' or '..' segment (code check)",
+   "pattern": "^[A-Za-z0-9_.+-][A-Za-z0-9_. +-]*(/[A-Za-z0-9_.+-][A-Za-z0-9_. +-]*)*$"
+  },
+  "input": {
+   "type": "object",
+   "required": [
+    "role",
+    "path"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "role": {
+     "type": "string",
+     "pattern": "^[a-z][a-z0-9_-]*$"
+    },
+    "path": {
+     "$ref": "#/$defs/relative_path"
+    }
+   }
+  },
+  "decimal": {
+   "type": "string",
+   "description": "decimal/1 input grammar (ASCII); normalize_decimal turns it into the normalized form",
+   "pattern": "^[+-]?(0|[1-9][0-9]*)(\\.[0-9]+)?([eE][+-]?[0-9]+)?$"
+  },
+  "normalized_decimal": {
+   "type": "string",
+   "description": "decimal/1 output form: [-]d[.ddd]e<exponent>, or 0",
+   "pattern": "^(0|-?[1-9](\\.[0-9]*[1-9])?e(0|-?[1-9][0-9]*))$"
+  },
+  "unit": {
+   "type": "string",
+   "description": "an ASCII unit symbol such as um, V/cm, cm/ns, e, or 1 for a dimensionless quantity",
+   "pattern": "^([A-Za-z%][A-Za-z0-9%/*^._-]*|1)$"
+  },
+  "quantity": {
+   "type": "object",
+   "required": [
+    "value",
+    "unit"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "value": {
+     "$ref": "#/$defs/decimal"
+    },
+    "unit": {
+     "$ref": "#/$defs/unit"
+    }
+   }
+  }
+ }
+}

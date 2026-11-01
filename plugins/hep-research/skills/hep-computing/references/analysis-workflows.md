@@ -66,6 +66,9 @@ reproducible, partial reruns safe, and the provenance of every number checkable.
   histogram them chunk by chunk, report) and a `Snakefile` with the same rules. Snakemake adds incremental reruns
   (only steps whose inputs changed), cluster profiles and DAG plots; the runner (with `--incremental`) is the dependency-free reference the
   tests use. Keep the two in step: the tests check that the Snakefile has one rule per step with the same outputs.
+- Allpix Squared and Garfield++ runs through the optional `detector-simulation` adapter (its `detsim` command, one
+  pinned plan per run, a committed run folder): environment, build, command and troubleshooting in
+  [sensor and gas simulation operations](sensor-and-gas-simulation-operations.md) (unverified until a backend has run).
 - Other engines (Make, Nextflow, Luigi, law, coffea processors) fit the same pattern; what matters is declared files
   and a run record per step, not the engine.
 

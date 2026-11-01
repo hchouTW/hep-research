@@ -14,6 +14,9 @@ without CVMFS or Apptainer at hand; raise the status only after building or sour
 | Experiment release (profile software modules) | the experiment's framework and its externals | analysis code that links against the framework; follow the bound profile, not this page |
 | Virtual environment plus lock file | Python packages only, on the host's Python and system libraries | local development and unit tests; not enough for a published result that depends on ROOT or compilers. An interpreter that anything outside the agent sandbox runs (hooks, batch jobs) lives outside agent-writable paths |
 
+Allpix Squared and Garfield++ environments (image tags, CVMFS paths, LCG views, build prerequisites, recording them
+for the detector-simulation adapter): [sensor and gas simulation operations](sensor-and-gas-simulation-operations.md).
+
 Mixing routes (a venv on top of an LCG view, `pip install --user` inside a container) is where environments silently
 diverge: record both layers or avoid the mix.
 
