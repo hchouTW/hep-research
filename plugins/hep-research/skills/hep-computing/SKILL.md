@@ -61,6 +61,7 @@ description: "Use when the deliverable is working, reproducible scientific softw
 | Blinding checks of outputs, logs, caches | `audit_blinded_outputs.py` (synthetic sentinels only) |
 | Naming, renames, naming review (any surface: charter, levels, change sets, report table) | [semantic naming](references/semantic-naming.md); `extract_names.py`, `<plugin root>/contracts/naming_check.py` |
 | Implementation-ready research task | [tasks](references/task-authoring-guide.md); `lint_task.py` |
+| Event displays, result charts (Phoenix; JSROOT, Plotly, ECharts) | [guide](references/event-displays.md) (start here), [facts](references/event-display-facts.md), [checklist](references/event-display-checklist.md), `assets/event-display/` |
 | Agile delivery, definition of done | [agile](references/agile-development-guide.md), [done](references/validation-and-done.md) |
 
 Scripts in `<plugin root>/skills/hep-computing/scripts/` (read `--help` first; each is described in the [engineering playbook](references/engineering-playbook.md)); design guidelines: [Python](references/python-balanced-design-guidelines.md), [C++](references/cpp-balanced-design-guidelines.md), [Bash](references/bash-balanced-design-guidelines.md). Submission is unsandboxed execution: synthetic test environments only, each submission user-approved. Folder guide for people: [README.md](README.md).

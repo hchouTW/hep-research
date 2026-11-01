@@ -1,0 +1,24 @@
+{
+  "title": "Demo event display (synthetic)",
+  "labels": ["synthetic"],
+  "events_export": "work/events",
+  "default_event": "1_0_100",
+  "view": {"camera": [2500, -4500, 1500, 0, 0, 0]},
+  "geometry": [
+    {"name": "Detector (schematic)", "file": "demo/detector.obj", "format": "obj", "unit": "mm",
+     "labels": ["schematic", "unvalidated"]}
+  ],
+  "panels": [
+    {"id": "pt", "title": "Track pT, all events", "integration": "jsroot", "binding": "static",
+     "payload": "work/results/h_pt.jsroot.json", "sidecar": "work/results/h_pt.sidecar.json",
+     "source": {"root": "demo/demo.root", "object": "h_pt"}},
+    {"id": "runs", "title": "Hits per run", "integration": "echarts", "binding": "dataset",
+     "payload": "work/results/hits_per_run.echarts.json", "sidecar": "work/results/hits_per_run.sidecar.json",
+     "source": {"json": "demo/results/hits_per_run.json"}},
+    {"id": "hit_r", "title": "Hit radius, this event", "integration": "plotly", "binding": "event",
+     "per_event": "work/results/hit_r/{key}/hit_r.plotly.json", "sidecar": "work/results/hit_r/{key}/hit_r.sidecar.json",
+     "source": {"json": "demo/results/hit_r/{key}.json"}}
+  ],
+  "web": "web/dist",
+  "out": "bundle"
+}

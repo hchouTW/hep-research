@@ -10,7 +10,7 @@ Overlap: Jaccard index of 8-word shingles, pairs >= 0.08. full history
 |---|---|---|---|
 | hep-authoring | 49 | 359 | 0 |
 | hep-citations | 11 | 84 | 0 |
-| hep-computing | 37 | 355 | 0 |
+| hep-computing | 40 | 379 | 0 |
 | hep-detector | 43 | 669 | 0 |
 | hep-measurement | 12 | 125 | 0 |
 | hep-ml | 42 | 195 | 0 |
@@ -36,7 +36,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 - **batch**: `batch-scheduling.md`, `batch-site-cern-htcondor.md`, `batch-site-nstccore-slurm.md`
 - **calibration**: `calibration-and-alignment.md`, `front-end-calibration.md`
 - **cern**: `batch-site-cern-htcondor.md`, `storage-cern-eos.md`
-- **checklist**: `preservation-checklist.md`, `task-quality-checklist.md`
+- **checklist**: `event-display-checklist.md`, `preservation-checklist.md`, `task-quality-checklist.md`
 - **cherenkov**: `cherenkov-imaging-variants-and-photosensors.md`, `imaging-atmospheric-cherenkov.md`
 - **citation**: `citation-databases.md`, `citation-verification.md`
 - **code**: `code-review-report.md`, `code-to-methodology-synthesis.md`
@@ -47,11 +47,11 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 - **deployment**: `export-and-deployment.md`, `ml-analysis-validation-and-deployment.md`
 - **detection**: `ground-based-detection-arrays.md`, `space-based-direct-detection.md`
 - **dis**: `dis-kinematics.md`, `dis-structure-functions.md`, `polarized-dis.md`
+- **display**: `event-display-checklist.md`, `event-display-facts.md`, `event-displays.md`
 - **end**: `front-end-calibration.md`, `front-end-electronics-and-signal-processing.md`, `front-end-waveform-processing.md`
 - **engineering**: `engineering-playbook.md`, `loop-engineering.md`, `prompt-engineering-and-token-optimization.md`
 - **essential**: `astroparticle-essentials.md`, `hadron-structure-essentials.md`, `nuclear-physics-essentials.md`, `particle-physics-essentials.md`
 - **evaluation**: `evaluation-metrics.md`, `evaluation-strategy.md`
-- **event**: `event-reconstruction.md`, `noble-liquid-neutrino-and-rare-event-detectors.md`
 - **figure**: `diagram-figure-style.md`, `figures-and-tables.md`
 - **front**: `front-end-calibration.md`, `front-end-electronics-and-signal-processing.md`, `front-end-waveform-processing.md`
 - **function**: `dis-structure-functions.md`, `fragmentation-functions.md`
@@ -173,6 +173,9 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `design-and-estimation.md` | hep-computing | 5.1 | no | 3 | - | f4372374 2026-10-13 |
 | `engineering-playbook.md` | hep-computing | 12.8 | yes | 6 | - | 5dbb8c4d 2026-10-26 |
 | `environments-and-containers.md` | hep-computing | 6.6 | yes | 8 | - | 061ce622 2026-10-31 |
+| `event-display-checklist.md` | hep-computing | 3.0 | yes | 3 | - | bbb78c3b 2026-11-01 |
+| `event-display-facts.md` | hep-computing | 10.5 | yes | 6 | - | bbb78c3b 2026-11-01 |
+| `event-displays.md` | hep-computing | 10.6 | yes | 4 | - | bbb78c3b 2026-11-01 |
 | `host-notes.md` | hep-computing | 5.6 | no | 2 | - | 364918e6 2026-10-09 |
 | `implementation-discipline.md` | hep-computing | 7.6 | no | 3 | - | f4372374 2026-10-13 |
 | `loop-engineering.md` | hep-computing | 7.0 | no | 7 | - | 4665f433 2026-10-13 |
@@ -182,7 +185,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `prompt-engineering-and-token-optimization.md` | hep-computing | 9.4 | no | 3 | - | 351029c0 2026-10-07 |
 | `python-balanced-design-guidelines.md` | hep-computing | 7.5 | yes | 8 | hep-ml | 5dbb8c4d 2026-10-26 |
 | `python-hep-coding-patterns.md` | hep-computing | 7.8 | yes | 10 | - | 16214af1 2026-10-26 |
-| `research-workflow-control.md` | hep-computing | 24.8 | no | 5 | hep-detector | 2162435c 2026-10-31 |
+| `research-workflow-control.md` | hep-computing | 24.8 | no | 5 | hep-detector | a6a9d27b 2026-10-31 |
 | `risk-and-quality.md` | hep-computing | 7.4 | no | 3 | - | f4372374 2026-10-13 |
 | `root-balanced-design-guidelines.md` | hep-computing | 37.3 | yes | 10 | - | 56a5a6c9 2026-10-23 |
 | `root-debugging.md` | hep-computing | 3.6 | yes | 4 | - | 9257d7b5 2026-10-15 |

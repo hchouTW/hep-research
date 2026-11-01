@@ -8625,3 +8625,23 @@ The three modules that passed the 600 s module limit at `--jobs 4` pass alone on
 277 s), `test_bc_propagation_fit` (14 tests, 241 s) and `test_diagrams` (31 tests, 176 s). `claude plugin validate
 --strict` and `codex plugin load` pass. Host: Homebrew ROOT 6.40.04 (upgraded 2026-11-01); its include folder for vdt
 is not in `root-config --cflags` (`check_root_cpp_env.sh` names it), and `test_root_cpp_assets` passes with it.
+
+## EVENT-DISPLAY-TEMPLATES — 2026-11-01 (macOS 27.2 arm64, Python 3.13.2 venvs with the CI lock, E-full adding uproot 5.7.7, awkward 2.14.0, Playwright 1.63.0; version 0.52.0 + unreleased)
+
+The event-display guide, facts file, checklist, templates (`skills/hep-computing/assets/event-display/`) and test
+module added to hep-computing on branch `feat/event-display-templates` from main `cf622dab`, checked by the focused
+test module, the end-to-end demo and the repository's static, unit and relocation runs.
+
+| Item | Evidence | Result |
+|---|---|---|
+| `tests.skills.hep_computing.test_event_display_templates`, E-ci | `python -m unittest ... -v` | OK: 3 skipped (uproot/awkward not installed; full demo not requested) |
+| Same module, E-full | `python -m unittest ... -v` | OK: 2 passed, 1 skipped (full demo not requested) |
+| End-to-end demo (`run_demo.sh` on a copy of the templates outside the repository) | Node 26.10.0, npm 11.19.1, Vite 7.3.7, Phoenix 4.2.3, Playwright 1.63.0, Chromium headless shell 153.0.8010.12 | exit 0; steps 1, 2, 3 and 5 report `"status": "ok"`; Vite `✓ built`; `check_bundle.py` `sources_checked: true`, no unchecked sources (5 events, 3 panels, 20 objects); `test_page.py` `"status": "ok"`, 9 of 9 checks `ok` |
+| Same module with `HEP_EVENT_DISPLAY_FULL=1`, E-full | `python -m unittest ...` | OK: 3 passed |
+| Static part, `run_all_checks.py --part static --no-cli` | baseline at `cf622dab` and after the change | 29 pass, 0 fail, 2 skip (host CLIs) in both |
+| Unit part, `run_all_checks.py --part units --no-cli`, E-ci | 6342 tests in 496 modules | 6046 passed, 295 skipped, 1 failed: `test_control_layer_model` scenario `t28_scale_linear`, a wall-clock ratio scenario (`control_oracle.py` `TIMING_SCENARIOS`) run while the demo and the relocation check loaded the host; the module passes 3 of 3 times alone on the branch and at `cf622dab`, and no changed file is on its path |
+| `check_relocation.py --no-cli`, E-ci | relocated copy, path with spaces, outside the repository | pass (exit 0); 2 host-CLI skips |
+| Wiring, skill scripts, naming | `check_wiring.py --since cf622dab`, `skill_scripts.py --check`, `insert_interpreter_guard.py --check`, `check_naming.py` | pass, ok, ok, pass; the template folder is excluded from the skill-script list, no template carries the guard block |
+| Forced failure | `columns` renamed to `data` in `export_events.py`, then `check_naming.py` | exit 1 with `naming.common.forbidden` at `export_events.py:123`; file restored, diff empty |
+
+Passing checks show software consistency, not physical validity.

@@ -14,8 +14,8 @@
    "uncited": 0
   },
   "hep-computing": {
-   "references": 37,
-   "bytes": 354922,
+   "references": 40,
+   "bytes": 379059,
    "uncited": 0
   },
   "hep-detector": {
@@ -1383,6 +1383,52 @@
    "last_commit": "061ce622 2026-10-31"
   },
   {
+   "path": "skills/hep-computing/references/event-display-checklist.md",
+   "owner": "hep-computing",
+   "bytes": 3038,
+   "lines": 39,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-computing/SKILL.md",
+    "skills/hep-computing/assets/event-display/task.md",
+    "skills/hep-computing/references/event-displays.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "bbb78c3b 2026-11-01"
+  },
+  {
+   "path": "skills/hep-computing/references/event-display-facts.md",
+   "owner": "hep-computing",
+   "bytes": 10466,
+   "lines": 82,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-computing/SKILL.md",
+    "skills/hep-computing/assets/event-display/README.md",
+    "skills/hep-computing/assets/event-display/export_histogram.py",
+    "skills/hep-computing/assets/event-display/task.md",
+    "skills/hep-computing/references/event-display-checklist.md",
+    "skills/hep-computing/references/event-displays.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "bbb78c3b 2026-11-01"
+  },
+  {
+   "path": "skills/hep-computing/references/event-displays.md",
+   "owner": "hep-computing",
+   "bytes": 10633,
+   "lines": 112,
+   "linked_from_skill_md": true,
+   "cited_by": [
+    "skills/hep-computing/SKILL.md",
+    "skills/hep-computing/assets/event-display/README.md",
+    "skills/hep-computing/assets/event-display/task.md",
+    "skills/hep-computing/references/event-display-checklist.md"
+   ],
+   "cited_by_other_skills": [],
+   "last_commit": "bbb78c3b 2026-11-01"
+  },
+  {
    "path": "skills/hep-computing/references/host-notes.md",
    "owner": "hep-computing",
    "bytes": 5648,
@@ -1551,7 +1597,7 @@
    "cited_by_other_skills": [
     "hep-detector"
    ],
-   "last_commit": "2162435c 2026-10-31"
+   "last_commit": "a6a9d27b 2026-10-31"
   },
   {
    "path": "skills/hep-computing/references/risk-and-quality.md",
@@ -4970,6 +5016,7 @@
    "skills/hep-computing/references/storage-cern-eos.md"
   ],
   "checklist": [
+   "skills/hep-computing/references/event-display-checklist.md",
    "skills/hep-computing/references/preservation-checklist.md",
    "skills/hep-computing/references/task-quality-checklist.md"
   ],
@@ -5015,6 +5062,11 @@
    "skills/hep-theory/references/dis-structure-functions.md",
    "skills/hep-theory/references/polarized-dis.md"
   ],
+  "display": [
+   "skills/hep-computing/references/event-display-checklist.md",
+   "skills/hep-computing/references/event-display-facts.md",
+   "skills/hep-computing/references/event-displays.md"
+  ],
   "end": [
    "skills/hep-detector/references/front-end-calibration.md",
    "skills/hep-detector/references/front-end-electronics-and-signal-processing.md",
@@ -5034,10 +5086,6 @@
   "evaluation": [
    "skills/hep-ml/references/evaluation-metrics.md",
    "skills/hep-ml/references/evaluation-strategy.md"
-  ],
-  "event": [
-   "skills/hep-detector/references/event-reconstruction.md",
-   "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md"
   ],
   "figure": [
    "skills/hep-authoring/references/diagram-figure-style.md",

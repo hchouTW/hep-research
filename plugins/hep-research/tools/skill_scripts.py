@@ -116,6 +116,8 @@ EXCLUDED_TREES = {  # plugin-root-relative prefixes never listed, with the reaso
     "tests/": "tests run under the test runner, not as skill scripts",
     "examples/": "examples are worked inputs and outputs, regenerated per release (docs/maintenance.md)",
     "profiles/": "profile scripts are reached from profile text, outside this list (task Open Questions: default no)",
+    "skills/hep-computing/assets/event-display/":
+        "self-contained templates users copy into their own projects, where core cannot be imported",
 }
 EXCLUDED = {  # plugin-root-relative path -> reason
     "skills/hep-computing/scripts/find_python.py":
