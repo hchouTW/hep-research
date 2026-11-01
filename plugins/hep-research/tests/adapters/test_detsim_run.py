@@ -142,7 +142,7 @@ class Base(unittest.TestCase):
 
     def validate(self):
         out = subprocess.run([sys.executable, str(ROOT / "contracts" / "validate.py"),
-                              str(detsim_run.plan_layer.artifacts_root(self.project))], capture_output=True, text=True)
+                              str(detsim_run.plan_layer.artifacts_root(self.project))], capture_output=True, text=True, timeout=300)
         return out.returncode, out.stdout
 
 
@@ -314,7 +314,8 @@ class NoKill(Base):  # T-NOKILL
         path = self.env_root / "share" / "synthetic" / "grandchild"
         self.assertTrue(wait_for(path.is_file))
         pid = int(path.read_text())
-        alive = subprocess.run(["ps", "-p", str(pid), "-o", "pid="], capture_output=True, text=True).stdout.strip()
+        alive = subprocess.run(["ps", "-p", str(pid), "-o", "pid="], capture_output=True, text=True,
+                               timeout=60).stdout.strip()
         self.assertEqual(alive, str(pid), "the grandchild should still run (reported, not killed)")
 
 
@@ -561,7 +562,7 @@ class Contract(Base):  # T-CONTRACT, T-OUTPUT and contracts/validate.py after a 
         header = (folder / "observables.csv").read_text().splitlines()[0].split(",")
         self.assertEqual(header, list(detsim_run.OBSERVABLE_COLUMNS))
         verify = subprocess.run([sys.executable, str(ROOT / "contracts" / "verify_run.py"),
-                                 str(folder / detsim_run.RECORD_NAME)], capture_output=True, text=True)
+                                 str(folder / detsim_run.RECORD_NAME)], capture_output=True, text=True, timeout=300)
         self.assertEqual(verify.returncode, 0, verify.stdout[-600:])
         code, out = self.validate()
         self.assertEqual(code, 0, out[-1500:])
@@ -692,7 +693,7 @@ class ReviewRoundOne(Base):
         self.assertEqual(answer["error_code"], "timeout")
         member = int((self.env_root / "share" / "synthetic" / "member").read_text())
         gone = wait_for(lambda: subprocess.run(["ps", "-p", str(member), "-o", "stat="], capture_output=True,
-                                               text=True).stdout.strip() in ("", "Z"), 10)
+                                               text=True, timeout=60).stdout.strip() in ("", "Z"), 10)
         self.assertTrue(gone, "a process of the backend's group survived the timeout")
 
     def test_signalled_backend_and_malformed_plan_rows(self):  # minor 16
@@ -784,7 +785,7 @@ class ReviewRoundTwo(Base):
         self.assertEqual(ext["detsim"]["input_isolation"], "soft")
         self.assertIn("inputs/run config.conf", ext["evidence"]["provenance"])
         verify = subprocess.run([sys.executable, str(ROOT / "contracts" / "verify_run.py"), str(record_path)],
-                                capture_output=True, text=True)
+                                capture_output=True, text=True, timeout=300)
         rows = [r for r in json.loads(verify.stdout)["entries"] if r.get("result") != "match"] \
             if '"entries"' in verify.stdout else None
         self.assertIn("outside-base", verify.stdout)

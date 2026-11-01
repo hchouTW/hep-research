@@ -438,11 +438,11 @@ class ReviewRoundOne(unittest.TestCase):
 
     def test_module_run_as_a_file(self):
         script = ASSETS / "detsim_plan.py"
-        help_run = subprocess.run([sys.executable, str(script), "--help"], capture_output=True, text=True)
+        help_run = subprocess.run([sys.executable, str(script), "--help"], capture_output=True, text=True, timeout=300)
         self.assertEqual(help_run.returncode, 0)
-        bad = subprocess.run([sys.executable, str(script), "--frobnicate"], capture_output=True, text=True)
+        bad = subprocess.run([sys.executable, str(script), "--frobnicate"], capture_output=True, text=True, timeout=300)
         self.assertEqual((bad.returncode, json.loads(bad.stdout)["status"]), (2, "rejected"))
-        optimized = subprocess.run([sys.executable, "-OO", str(script), "--help"], capture_output=True, text=True)
+        optimized = subprocess.run([sys.executable, "-OO", str(script), "--help"], capture_output=True, text=True, timeout=300)
         self.assertEqual(optimized.returncode, 0, optimized.stderr)
 
 
