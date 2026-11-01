@@ -227,7 +227,8 @@ class PlanAssembly(ProjectCase):
         broken = lambda *a: dict(original(*a), argv=["/usr/local/bin/sim"])  # noqa: E731
         with mock.patch.object(synthetic, "build_spec", broken), self.assertRaises(DetsimError) as ctx:
             self.assemble()
-        self.assertEqual((ctx.exception.status, ctx.exception.error_code), ("error", "plan-invalid"))
+        self.assertEqual((ctx.exception.status, ctx.exception.error_code), ("error", "internal"))
+        self.assertEqual(ctx.exception.details["reason"], "plan-invalid")
 
 
 @needs("process_groups")
@@ -403,3 +404,43 @@ class CommandLine(ProjectCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class ReviewRoundOne(unittest.TestCase):
+    """W3a independent review round 1: F1 (unencodable answer), F2 (fullmatch everywhere), F3 (host paths and '..'
+    in variables), F6 (a sibling module run as a file)."""
+
+    def test_unencodable_answer_is_internal_error(self):
+        broken = types.SimpleNamespace(NAME="broken", capabilities=lambda: (_ for _ in ()).throw(
+            detsim_plan.DetsimError("refused", "x", "y", location=Path("/tmp"))))
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            code = detsim.main(["--backend", "broken", "describe"], backends={"broken": broken})
+        answer = json.loads(out.getvalue())
+        self.assertEqual((code, answer["status"], answer["error_code"]), (2, "error", "internal"))
+
+    def test_trailing_newline_is_refused_in_completeness_and_plan(self):
+        import detsim_schemas
+        doc = {"schema": "detsim-completeness/1", "state": "partial", "missing_outputs": ["ATTEMPT_ROOT/x\n"],
+               "evidence": [{"check": "outputs", "result": "fail"}]}
+        self.assertIn("pattern.fullmatch", {f["code"] for f in detsim_schemas.check_completeness(doc)})
+        findings = detsim_schemas._pattern_walk({"capability": {"id": "synthetic.echo\n"}},
+                                                detsim_schemas.load_schema("detector_plan.json"),
+                                                "detector_plan.json", "$")
+        self.assertTrue(any(f["path"] == "$.capability.id" for f in findings), findings)
+
+    def test_host_path_and_parent_segment_in_variables(self):
+        import detsim_schemas
+        found = detsim_schemas.host_path_findings([("v", "ENV_ROOT/lib:/usr/lib"), ("a", "INPUT_ROOT/../x"),
+                                                   ("ok", "ENV_ROOT/lib")])
+        self.assertEqual(sorted((f["path"], f["code"]) for f in found),
+                         [("a", "execution.parent_segment"), ("v", "execution.host_path")])
+
+    def test_module_run_as_a_file(self):
+        script = ASSETS / "detsim_plan.py"
+        help_run = subprocess.run([sys.executable, str(script), "--help"], capture_output=True, text=True)
+        self.assertEqual(help_run.returncode, 0)
+        bad = subprocess.run([sys.executable, str(script), "--frobnicate"], capture_output=True, text=True)
+        self.assertEqual((bad.returncode, json.loads(bad.stdout)["status"]), (2, "rejected"))
+        optimized = subprocess.run([sys.executable, "-OO", str(script), "--help"], capture_output=True, text=True)
+        self.assertEqual(optimized.returncode, 0, optimized.stderr)

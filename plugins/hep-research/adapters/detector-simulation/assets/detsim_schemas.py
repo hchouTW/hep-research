@@ -16,8 +16,12 @@ from __future__ import annotations
 import sys
 
 if __spec__ is None:  # run as a file (tests/skills/test_cli_robustness.py): a module of detsim.py, not a command
-    print(__doc__.splitlines()[0] + "\nA module of detsim.py, not a command: python3 detsim.py --help")
-    sys.exit(0 if sys.argv[1:] in ([], ["--help"], ["-h"]) else 2)
+    if sys.argv[1:] in ([], ["--help"], ["-h"]):
+        print((__doc__ or "detsim module").splitlines()[0] + "\nA module of detsim.py, not a command: "
+              "python3 detsim.py --help")
+        sys.exit(0)
+    print('{"status": "rejected", "error_code": "usage", "message": "a module of detsim.py, not a command"}')
+    sys.exit(2)
 
 import base64  # noqa: E402
 import binascii  # noqa: E402
@@ -61,6 +65,57 @@ def _fullmatch_findings(value, pattern_owner: dict, path: str) -> list[dict]:
         return [_finding(path, "pattern.fullmatch", f"{value[:80]!r} does not match {pattern_owner['pattern']} as a "
                                                     "whole (re.fullmatch)")]
     return []
+
+
+def _resolve(ref: str, current: str) -> tuple[dict, str]:
+    """A $ref ("#/$defs/x" or "file.json#/$defs/x") to (schema node, its file)."""
+    file_part, _, pointer = ref.partition("#")
+    file_name = file_part or current
+    node = load_schema(file_name)
+    for part in [p for p in pointer.split("/") if p]:
+        node = node[part]
+    return node, file_name
+
+
+def _pattern_walk(value, node: dict, file_name: str, path: str, depth: int = 0) -> list[dict]:
+    """Every schema pattern on the way to value, applied with re.fullmatch (the repository validator uses re.search,
+    so a trailing newline would pass it); follows $ref, properties, items, additionalProperties and any/oneOf."""
+    if depth > 40 or not isinstance(node, dict):
+        return []
+    if "$ref" in node:
+        target, target_file = _resolve(node["$ref"], file_name)
+        return _pattern_walk(value, target, target_file, path, depth + 1)
+    out = []
+    if isinstance(value, str) and "pattern" in node:
+        out += _fullmatch_findings(value, node, path)
+    for key in ("anyOf", "oneOf"):
+        if key in node and isinstance(value, str):
+            branches = [b for b in node[key] if isinstance(b, dict)]
+            results = [_pattern_walk(value, b, file_name, path, depth + 1) for b in branches]
+            if results and all(results):
+                out += results[0]
+    if isinstance(value, dict):
+        props = node.get("properties", {})
+        extra = node.get("additionalProperties")
+        for k, v in value.items():
+            if k in props:
+                out += _pattern_walk(v, props[k], file_name, f"{path}.{k}", depth + 1)
+            elif isinstance(extra, dict):
+                out += _pattern_walk(v, extra, file_name, f"{path}.{k}", depth + 1)
+    if isinstance(value, list) and isinstance(node.get("items"), dict):
+        for i, v in enumerate(value):
+            out += _pattern_walk(v, node["items"], file_name, f"{path}[{i}]", depth + 1)
+    return out
+
+
+def _with_patterns(findings: list[dict], doc, schema_file: str) -> list[dict]:
+    """findings plus every fullmatch finding of the walker, without duplicates (same path and code)."""
+    seen = {(f["path"], f["code"]) for f in findings}
+    for f in _pattern_walk(doc, load_schema(schema_file), schema_file, "$"):
+        if (f["path"], f["code"]) not in seen:
+            seen.add((f["path"], f["code"]))
+            findings.append(f)
+    return findings
 
 
 def _scope_findings(value, prefix: str) -> list[dict]:
@@ -111,6 +166,24 @@ def check_task(task) -> list[dict]:
         if not isinstance(quantity.get("value"), str):
             out.append(_finding(where + ".value", "quantity.value_not_string", "a quantity's value is a decimal string"))
     out += _scope_findings(task, "$")
+    return _with_patterns(out, task, "detector_task.json")
+
+
+_PARENT_SEGMENT = re.compile(r"(?:^|[/=:,;\s])\.\.(?:/|$)")
+
+
+def host_path_findings(strings) -> list[dict]:
+    """A host path (/... or ~ after a separator) or a '..' segment in an argv entry or a variable value: refused
+    (TASK.md 8.2: paths use only the logical roots; 9.4: no unresolved path references)."""
+    out = []
+    for where, text in strings:
+        if not isinstance(text, str):
+            continue
+        if _ROOT_TOKEN.search(text):
+            out.append(_finding(where, "execution.host_path", f"{text[:80]!r} names a host path; use ENV_ROOT, "
+                                                              "INPUT_ROOT or ATTEMPT_ROOT"))
+        if _PARENT_SEGMENT.search(text):
+            out.append(_finding(where, "execution.parent_segment", f"{text[:80]!r} has a '..' segment"))
     return out
 
 
@@ -131,10 +204,7 @@ def _execution_findings(spec, policy: dict) -> list[dict]:
             out.append(_finding(f"$.execution.environment.{name}", "execution.variable_name",
                                 f"{name!r} is not an environment variable name"))
         strings.append((f"$.execution.environment.{name}", item))
-    for where, text in strings:
-        if isinstance(text, str) and _ROOT_TOKEN.search(text):
-            out.append(_finding(where, "execution.host_path", f"{text[:80]!r} names a host path; use ENV_ROOT, "
-                                                              "INPUT_ROOT or ATTEMPT_ROOT"))
+    out += host_path_findings(strings)
     paths = []
     for i, item in enumerate(spec.get("files") if isinstance(spec.get("files"), list) else []):
         if not isinstance(item, dict):
@@ -188,7 +258,9 @@ def check_plan(plan) -> list[dict]:
         if canonical.digest(environment["identity"]) != environment.get("env_identity"):
             out.append(_finding("$.environment.env_identity", "environment.identity_hash",
                                 "env_identity is not the canonical_sha256 of identity"))
-    for name in (environment.get("variables") if isinstance(environment.get("variables"), dict) else {}):
+    variables = environment.get("variables") if isinstance(environment.get("variables"), dict) else {}
+    out += host_path_findings((f"$.environment.variables.{n}", v) for n, v in variables.items())
+    for name in variables:
         if ENV_NAME.fullmatch(name) is None:
             out.append(_finding(f"$.environment.variables.{name}", "execution.variable_name",
                                 f"{name!r} is not an environment variable name"))
@@ -196,7 +268,12 @@ def check_plan(plan) -> list[dict]:
     policy = profile.get("policy") if isinstance(profile.get("policy"), dict) else {}
     out += _execution_findings(plan.get("execution"), policy)
     out += _scope_findings(plan, "$")
-    return out
+    budget = ((plan.get("task") or {}).get("budget") or {}).get("timeout_s") if isinstance(plan.get("task"), dict) else None
+    execution = plan.get("execution") if isinstance(plan.get("execution"), dict) else {}
+    if isinstance(execution.get("timeout_s"), int) and isinstance(budget, int) and execution["timeout_s"] > budget:
+        out.append(_finding("$.execution.timeout_s", "execution.timeout_over_budget",
+                            "the backend's timeout exceeds the task budget"))
+    return _with_patterns(out, plan, "detector_plan.json")
 
 
 def check_completeness(doc) -> list[dict]:
@@ -221,7 +298,7 @@ def check_completeness(doc) -> list[dict]:
     if doc.get("state") in ("partial", "invalid") and not (not_passed or missing):
         out.append(_finding("$.state", "completeness.failure_without_evidence",
                             f"{doc.get('state')} needs a failed or inconclusive check or a missing output"))
-    return out
+    return _with_patterns(out, doc, "detsim_completeness.json")
 
 
 def check_observables(doc) -> list[dict]:
@@ -254,7 +331,7 @@ def check_observables(doc) -> list[dict]:
         labels = row.get("labels") if isinstance(row.get("labels"), list) else []
         if len(labels) != len(set(map(str, labels))):
             out.append(_finding(where + ".labels", "observables.duplicate_label", "a label is listed twice"))
-    return out
+    return _with_patterns(out, doc, "detsim_observables.json")
 
 
 def schema_file_hashes() -> dict:

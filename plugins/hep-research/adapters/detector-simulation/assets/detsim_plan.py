@@ -36,8 +36,12 @@ from __future__ import annotations
 import sys
 
 if __spec__ is None:  # run as a file (tests/skills/test_cli_robustness.py): a module of detsim.py, not a command
-    print(__doc__.splitlines()[0] + "\nA module of detsim.py, not a command: python3 detsim.py --help")
-    sys.exit(0 if sys.argv[1:] in ([], ["--help"], ["-h"]) else 2)
+    if sys.argv[1:] in ([], ["--help"], ["-h"]):
+        print((__doc__ or "detsim module").splitlines()[0] + "\nA module of detsim.py, not a command: "
+              "python3 detsim.py --help")
+        sys.exit(0)
+    print('{"status": "rejected", "error_code": "usage", "message": "a module of detsim.py, not a command"}')
+    sys.exit(2)
 
 import copy  # noqa: E402
 import hashlib  # noqa: E402
@@ -131,7 +135,7 @@ def load_env_record(artifacts: Path, env_identity: str) -> dict:
     try:
         doc = canonical.load_json_strict(path.read_bytes())
     except (OSError, canonical.CanonicalError) as err:
-        raise DetsimError("refused", "environment-record-invalid", f"the environment record is unreadable: {err}",
+        raise DetsimError("rejected", "environment-record-unreadable", f"the environment record is unreadable: {err}",
                           "$.environment_ref", record=str(path)) from None
     problems = []
     if not isinstance(doc, dict) or doc.get("format") != ENV_RECORD_FORMAT:
@@ -167,7 +171,8 @@ def capability_of(backend, capability_id: str) -> dict:
         problems.append("id or backend")
     problems += [i["path"] + " " + i["code"] for i in canonical.check_hash_scope(descriptor)]
     if problems:
-        raise DetsimError("error", "capability-descriptor-invalid", f"descriptor {capability_id}: {problems[:5]}")
+        raise DetsimError("error", "internal", f"the trusted descriptor {capability_id} is invalid: {problems[:5]}",
+                          reason="capability-descriptor-invalid")
     return descriptor
 
 
@@ -231,16 +236,34 @@ def _file_hashes(pairs) -> dict:
     out = {}
     for key, path in pairs:
         if key in out:
-            raise DetsimError("error", "code-files-invalid", f"code file key {key!r} listed twice")
+            raise DetsimError("error", "internal", f"code file key {key!r} listed twice", reason="code-files-invalid")
         out[key] = sha256_file(Path(path))[1]
     return out
+
+
+def shared_layer_modules(assets: Path) -> list[Path]:
+    """The shared-layer modules declared in adapter.json "assets" (backends excluded); an undeclared detsim*.py next
+    to them is refused, so no module can escape the hash scope (TASK.md 9.2 item 2)."""
+    import json
+    declared = None
+    manifest = Path(assets).parent / "adapter.json"
+    if manifest.is_file():
+        declared = {Path(a).name for a in json.loads(manifest.read_text(encoding="utf-8")).get("assets", [])}
+    present = sorted(p for p in Path(assets).glob("detsim*.py") if not p.name.startswith("detsim_backend_"))
+    if declared is None:  # a copy of the assets folder without adapter.json (tests of a changed shared layer)
+        return present
+    undeclared = [p.name for p in present if p.name not in declared]
+    if undeclared:
+        raise DetsimError("error", "internal", f"shared-layer modules not declared in adapter.json: {undeclared}",
+                          reason="undeclared-module")
+    return present
 
 
 def code_hashes(backend, capability: dict, assets_dir: Path | None = None) -> dict:
     """SHA-256 of every shared-layer module (assets/detsim*.py except backends), of the backend's code files and of
     the four contract schemas. assets_dir is for tests that rebuild against a changed copy of the shared layer."""
     assets = Path(assets_dir) if assets_dir is not None else ASSETS_DIR
-    shared = [(p.name, p) for p in sorted(assets.glob("detsim*.py")) if not p.name.startswith("detsim_backend_")]
+    shared = [(p.name, p) for p in shared_layer_modules(assets)]
     return {"shared_layer": _file_hashes(shared), "backend": _file_hashes(backend.code_files(capability)),
             "schemas": schemas.schema_file_hashes()}
 
@@ -287,8 +310,8 @@ def assemble_plan(task, workspace: Path, backend, profile_doc: dict, assets_dir:
         findings.append({"severity": "error", "path": "$.execution.timeout_s", "code": "execution.timeout_over_budget",
                          "message": "the backend's timeout exceeds the task budget"})
     if findings:
-        raise DetsimError("error", "plan-invalid", f"the backend produced an invalid plan: {findings[0]['message']}",
-                          findings[0]["path"], findings=findings[:50])
+        raise DetsimError("error", "internal", f"the backend produced an invalid plan: {findings[0]['message']}",
+                          findings[0]["path"], reason="plan-invalid", findings=findings[:50])
     return plan, canonical.digest(plan)
 
 
@@ -354,7 +377,7 @@ def rebuild_comparison(plan: dict, workspace: Path, backend, profile_doc: dict,
         rebuilt, rebuilt_digest = assemble_plan(copy.deepcopy(plan["task"]), workspace, backend, profile_doc,
                                                 assets_dir)
     except DetsimError as err:
-        field = next((v for k, v in _STALE_FIELD.items() if err.error_code.startswith(k)), "")
+        field = next((v for k, v in _STALE_FIELD.items() if err.error_code.startswith(k)), "/")  # "/": the whole plan
         raise DetsimError("refused", "plan-stale", f"the plan cannot be rebuilt now ({err.error_code}: {err.message});"
                           " run prepare again", err.location, mismatched_fields=[field], rebuild_error=err.answer())
     if canonical.canonical_bytes(rebuilt) != canonical.canonical_bytes(plan):

@@ -93,7 +93,7 @@ class JsonArgumentParser(argparse.ArgumentParser):
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = JsonArgumentParser(prog="detsim.py", description=__doc__.splitlines()[0],
+    parser = JsonArgumentParser(prog="detsim.py", description=(__doc__ or "detsim").splitlines()[0],
                                 epilog="See the module docstring (python3 -c 'help(...)') or TASK.md 11 for details.")
     parser.add_argument("--backend", help="allpix-squared or garfieldpp")
     verbs = parser.add_subparsers(dest="verb", required=True, metavar="VERB")
@@ -255,7 +255,12 @@ def main(argv=None, backends=None) -> int:
         answer = dict(err.report(), error_code="unsupported-platform", message=str(err))
     except Exception as err:  # noqa: BLE001 - every exception is reported as JSON (TASK.md 11.3)
         answer = {"status": "error", "error_code": "internal", "message": f"{type(err).__name__}: {err}"}
-    print(json.dumps(answer, indent=1, ensure_ascii=True))
+    try:
+        text = json.dumps(answer, indent=1, ensure_ascii=True)
+    except (TypeError, ValueError) as err:  # a value JSON cannot encode (e.g. a backend issue holding a Path)
+        answer = {"status": "error", "error_code": "internal", "message": f"unencodable answer: {err}"}
+        text = json.dumps(answer, indent=1, ensure_ascii=True)
+    print(text)
     return exit_code(answer["status"])
 
 

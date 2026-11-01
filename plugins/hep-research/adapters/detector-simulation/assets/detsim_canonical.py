@@ -27,8 +27,12 @@ from __future__ import annotations
 import sys
 
 if __spec__ is None:  # run as a file (tests/skills/test_cli_robustness.py): a module of detsim.py, not a command
-    print(__doc__.splitlines()[0] + "\nA module of detsim.py, not a command: python3 detsim.py --help")
-    sys.exit(0 if sys.argv[1:] in ([], ["--help"], ["-h"]) else 2)
+    if sys.argv[1:] in ([], ["--help"], ["-h"]):
+        print((__doc__ or "detsim module").splitlines()[0] + "\nA module of detsim.py, not a command: "
+              "python3 detsim.py --help")
+        sys.exit(0)
+    print('{"status": "rejected", "error_code": "usage", "message": "a module of detsim.py, not a command"}')
+    sys.exit(2)
 
 import hashlib  # noqa: E402
 import json  # noqa: E402
@@ -49,7 +53,8 @@ DECIMAL_OUTPUT = re.compile(r"^(0|-?[1-9](\.[0-9]*[1-9])?e(0|-?[1-9][0-9]*))$", 
 _DECIMAL_PARTS = re.compile(r"([+-]?)(0|[1-9][0-9]*)(?:\.([0-9]+))?(?:[eE]([+-]?[0-9]+))?", re.ASCII)
 SHA256_HEX = re.compile(r"[0-9a-f]{64}", re.ASCII)
 _REPLICATE = re.compile(r"0|[1-9][0-9]{0,9}", re.ASCII)
-_ENVIRONMENT_REFERENCE = re.compile(r"\$(\{|[A-Z_])")  # ${...} or $NAME (upper case: a JSON Schema "#/$defs" is not one)
+_ENVIRONMENT_REFERENCE = re.compile(r"\$(\{|\(|[A-Z_])")  # ${...}, $(...) or $NAME; canonical/1 rule: an upper-case NAME
+# only, so a JSON Schema "#/$defs" or a lower-case word after "$" in free text is not refused (decision D-W3a-4)
 _DRIVE_PATH = re.compile(r"[A-Za-z]:[\\/]")
 
 
@@ -182,8 +187,9 @@ def normalize_decimal(text) -> str:
     sign, whole, fraction, exponent_text = parts.group(1), parts.group(2), parts.group(3) or "", parts.group(4) or "0"
     try:
         exponent = int(exponent_text) - len(fraction)
-    except ValueError:  # an exponent longer than Python converts
-        raise CanonicalError("decimal-grammar", "the exponent has too many digits") from None
+    except ValueError:  # an exponent longer than Python's int string limit (about 4300 digits)
+        raise CanonicalError("decimal-exponent-range", "the exponent has more digits than decimal/1 handles "
+                             "(Python's integer string limit, about 4300 digits)") from None
     digits = (whole + fraction).lstrip("0")
     if not digits:
         return "0"

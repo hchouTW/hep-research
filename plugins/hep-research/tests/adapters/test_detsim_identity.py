@@ -140,7 +140,7 @@ class NormalizeDecimal(unittest.TestCase):
         "1e99999": "1e99999",
     }
     REFUSED = ["1_000", " 1", "1 ", "\u0661\u0662", "NaN", "nan", "Infinity", "-Infinity", ".5", "1.", "01", "00.5",
-               "1e", "1e+", "+", "-", "", "1.5e3\n", "0x10", "1,5", "1.5.0", "--1", "1e1.5", "\uff11", "1e" + "9" * 5000]
+               "1e", "1e+", "+", "-", "", "1.5e3\n", "0x10", "1,5", "1.5.0", "--1", "1e1.5", "\uff11"]
 
     def test_spec_cases(self):
         for text, expected in self.CASES.items():
@@ -156,6 +156,12 @@ class NormalizeDecimal(unittest.TestCase):
         self.assertEqual(out, "1.234567890123456789012345678901234567891e39")
         self.assertEqual(Decimal(out), Decimal(text))
         self.assertNotEqual(Decimal(out), Decimal(text).normalize())  # 28-digit context rounding loses digits
+
+    def test_exponent_beyond_the_integer_limit_is_its_own_refusal(self):
+        """The grammar accepts any exponent; decimal/1 refuses one longer than Python's int limit by name."""
+        with self.assertRaises(canonical.CanonicalError) as caught:
+            canonical.normalize_decimal("1e" + "9" * 5000)
+        self.assertEqual(caught.exception.code, "decimal-exponent-range")
 
     def test_refused_spellings(self):
         for text in self.REFUSED + [1.5, 15, None, b"15"]:

@@ -27,7 +27,10 @@
   "assets/detsim_canonical.py",
   "assets/detsim_profile.py",
   "assets/detsim_schemas.py",
-  "assets/detsim_plan.py"
+  "assets/detsim_plan.py",
+  "assets/detsim_platform.py",
+  "assets/detsim_runner.py",
+  "assets/detsim_run.py"
  ],
  "tests": [
   "../../tests/adapters/test_detsim_identity.py",

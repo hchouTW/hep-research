@@ -19,8 +19,12 @@ from __future__ import annotations
 import sys
 
 if __spec__ is None:  # run as a file (tests/skills/test_cli_robustness.py): a module of detsim.py, not a command
-    print(__doc__.splitlines()[0] + "\nA module of detsim.py, not a command: python3 detsim.py --help")
-    sys.exit(0 if sys.argv[1:] in ([], ["--help"], ["-h"]) else 2)
+    if sys.argv[1:] in ([], ["--help"], ["-h"]):
+        print((__doc__ or "detsim module").splitlines()[0] + "\nA module of detsim.py, not a command: "
+              "python3 detsim.py --help")
+        sys.exit(0)
+    print('{"status": "rejected", "error_code": "usage", "message": "a module of detsim.py, not a command"}')
+    sys.exit(2)
 
 import ctypes  # noqa: E402
 import ctypes.util  # noqa: E402
