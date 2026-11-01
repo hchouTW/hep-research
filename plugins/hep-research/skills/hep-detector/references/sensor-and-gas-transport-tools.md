@@ -125,8 +125,8 @@ Read at `e2e58ea7` [GF-02 … GF-08]; re-read at the pinned commit.
   angle grids [GF-02 line 671]. The first batch accepts 1D tables only.
 - **Stored forms.** The E grid is stored as E/p in V/(cm·Torr) and multiplied by the table pressure in Torr on load
   (line 560); a 1D table is read record by record by `ReadRecord1D` (dispatch at lines 477-483; reader lines 837-850), in which
-  each quantity is followed by a column that is read and discarded (`ve, waste, vb, waste, vx, waste`, then
-  `dl, waste, dt, waste`, …), so the drift velocity along E is the first value of each record, not every second
+  most quantities are followed by a column that is read and discarded (`ve, waste, vb, waste, vx, waste`, then
+  `dl, waste, dt, waste`, then `alpha, waste, alpha0, eta, waste` — `alpha0` has none, line 852 — …), so the drift velocity along E is the first value of each record, not every second
   column; drift velocities are stored in cm/µs and converted to cm/ns (× 1e-3, lines 848-850; the 3D reader
   `ReadRecord3D` does the same at line 796); Townsend and
   attachment coefficients are stored as logarithms and shifted by ln p on load (lines 563-577) [GF-02]. The user
