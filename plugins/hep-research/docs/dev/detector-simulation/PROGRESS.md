@@ -60,7 +60,7 @@ Environment availability (2a): Allpix Squared — not installed; obtainable unde
 | W4A | W4A | `~/hep-research-detsim-sub-W4A` | detsim-sub-W4A | `45d1a379db8ceec75cacb8820b19a9ce66eb2ddb` | `WR/patches/W4A/` | rerun (conflict with W4G's test edits) |
 | W4A-2 | W4A | `~/hep-research-detsim-sub-W4A-2` | detsim-sub-W4A-2 | `7cbde8cecd610794d1dd0225321ab034b154dfe1` | `WR/patches/W4A-2/` | applied |
 | W4G-2 | W4G | `~/hep-research-detsim-sub-W4G-2` | detsim-sub-W4G-2 | `770c3b3a62cfb7c6a7d314415f443d19c17bb15c` | `WR/patches/W4G-2/` | applied |
-| W4A-3 | W4A | `~/hep-research-detsim-sub-W4A-3` | detsim-sub-W4A-3 | `5453790d64c8600771a814be3869697e9e8d1875` | `WR/patches/W4A-3/` | applying |
+| W4A-3 | W4A | `~/hep-research-detsim-sub-W4A-3` | detsim-sub-W4A-3 | `5453790d64c8600771a814be3869697e9e8d1875` | `WR/patches/W4A-3/` | applied |
 
 ## Environment reconnaissance
 
@@ -100,7 +100,7 @@ Host: Darwin arm64 (macOS 27.2), 8 CPUs, Python 3.13.2, git 2.54.0, CMake 4.3.2,
 | W2-GF | done | 2026-11-02 | 0 / 0 | card-GF-QUERY.md (no critical TBD: commit, table, storage form, routine, order 2, extrapolation constant/linear, units, query points, tolerances fixed before any query); V-09..V-13 concluded | |
 | W3a | done | 2026-11-01 | 0 / 3 | patches 5ca7dbd1, 3fd54f69, 510315a5; review fixes 2468b15e, ff6a077e, f348166f; T-CANON 17, T-SCHEMA 12, T-PLAN 35, missing-dependency 3 OK; VALIDATION DETSIM-W3A | round-3 minor findings M1-M2 fixed after round 3 without a fourth review |
 | W3b | done | 2026-11-02 | 1 / 3 | detsim_platform, detsim_runner, detsim_run; tests/adapters/test_detsim_run.py 62 (61 OK, 1 not run: platform); static 29/0/2; VALIDATION DETSIM-W3B; shared layer demonstrated-on-synthetic-data | round-3 minor finding B1 fixed after round 3 without a fourth review |
-| W4A | in-progress | 2026-11-02 | 1 / 0 | subagent W4A | |
+| W4A | done | 2026-11-02 | 2 / 2 | detsim_backend_allpix.py, assets/allpix/, tests (39 + live); acceptance-3 runs 1302c2dd…, fe0e9b88…, 0642769d…; T-ENV, T-AP, T-OUTPUT, T-CONV; VALIDATION DETSIM-W4A | round-2 documentation items fixed after round 2 |
 | W4G | done | 2026-11-02 | 1 / 2 | detsim_backend_garfield.py, assets/garfield/, tests (78 + live); acceptance-2 runs efc8f707…, 8fdc5f83…; T-ENV, T-GF, T-OUTPUT, T-CONV; VALIDATION DETSIM-W4G | round-2 documentation items fixed after round 2 |
 | W5 | not-started | | 0 / 0 | | |
 
@@ -270,6 +270,22 @@ V-items concluded / still open: V-09..V-13 used
 Independent review: 2 rounds; round 2 left documentation items, fixed after the round
 Blockers and gates raised: none
 Next step: W5 (non-author rerun, T-PERF, support matrix)
+```
+
+```text
+Work item ID: W4A
+Status: done
+Isolation guard: pass at start / pass before each commit (subagent keys W4A, W4A-2, W4A-3)
+Files changed: adapters/detector-simulation/assets/detsim_backend_allpix.py, assets/allpix/allpix.pixel-charge.json,
+  detsim_run.py (dependency mapping), tests/adapters/test_detsim_allpix.py and test edits, adapter.json, capability
+  matrix, card amendments, guide, CHANGELOG, VALIDATION
+Decisions made (with reasons): decision log rows W4A (2026-11-02)
+Commands actually run and results: VALIDATION DETSIM-W4A
+Tests not run and reasons: Linux (platform; the ldd branch of library resolution)
+V-items concluded / still open: V-07, V-08, V-14 used
+Independent review: 2 rounds; round 2 left documentation items, fixed after the round
+Blockers and gates raised: H5 (Allpix environment budget) answered: +1.5 h
+Next step: W5
 ```
 
 ## Final report

@@ -8779,7 +8779,7 @@ Allpix Squared `df69a6a4` built from source with a C++20 Geant4 11.4.3 and Homeb
 | Native comparison (auxiliary) | `allpix` with the same configuration and `multithreading=false` | identical to replicate 0 |
 | T-OUTPUT, contracts | a 1 s timeout → failed (`failed/`); an input replaced after prepare → plan-stale; `contracts/validate.py` (24 warnings: non-JSON outputs named only in `output_hashes`), `contracts/verify_run.py` on the three records | pass |
 | Conventions | layering, naming, adapter declarations and missing-dependency, CLI robustness, python compat; static part | pass; static 29 pass, 0 fail, 2 skip |
-| Independent review | round 1 (fresh subagent, advisory, shared host): 3 major / 6 minor, fixed; round 2 below | — |
+| Independent review | two rounds (fresh subagents, advisory, shared host): round 1 3 major / 6 minor, fixed (m6 recorded as a limitation); round 2 no code finding open, three documentation items fixed after the round | findings fixed |
 
 Not run: Linux (linux-g0 unsupported; the `ldd` branch of library resolution untested). 10 events are not statistics;
 check 3b is a plausibility band, not physics validation.

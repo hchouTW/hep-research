@@ -58,11 +58,13 @@ Software checks establish contract consistency only, not physical validity.
 - Evidence: VALIDATION DETSIM-W4G
 - **`adapters/detector-simulation` 0.4.0: Allpix Squared backend** (work item W4A). Backend `allpix-squared` with
   capability `allpix.pixel-charge` 1.0.0 (`detsim_backend_allpix.py`, descriptor under `assets/allpix/`): the official
-  pixel example rerun with only the allowed `-o` overrides (10 events, `multithreading=false`, a random seed); collect
+  pixel example rerun with exactly the allowed `-o` overrides (10 events, `multithreading=false`, a random seed; the whole
+  command line is whitelisted); collect
   reads the PixelCharge, PixelHit and Event data members through ROOT's stored class layouts (no Allpix library in the
   controller) and checks configuration fidelity, the expected tree set, a hit in every event and detector and the
-  detector1 charge plausibility band; `check --probe` records a content-based identity (versions, library and dataset
-  hashes). Shared layer: a completeness check `dependency` that failed makes the run `failed` / `missing-dependency`.
+  detector1 charge plausibility band, that every pixel charge is negative (charge-sign) and that the stored class
+  versions are the pinned ones; `compare_summary_files` gives the per-pixel replicate comparison; `check --probe` records a
+  content-based identity (versions, dataset hashes and every library the program and its modules resolve). Shared layer: a completeness check `dependency` that failed makes the run `failed` / `missing-dependency`.
 - Evidence: VALIDATION DETSIM-W4A
 
 ## 0.53.0 (2026-11-01)
