@@ -83,12 +83,15 @@ def _now() -> str:
 # ---------------------------------------------------------------- step 1: file system
 
 def check_filesystem(store: Path) -> str:
-    store.mkdir(parents=True, exist_ok=True)
-    kind = platform_calls.filesystem_type(store)
+    probe = store
+    while not probe.exists() and probe.parent != probe:  # check the nearest existing folder; write nothing first
+        probe = probe.parent
+    kind = platform_calls.filesystem_type(probe)
     allowed = platform_calls.LOCAL_FILESYSTEMS.get(platform_calls.platform_key(), frozenset())
     if kind not in allowed:
         raise DetsimError("rejected", "unsupported-fs", f"the artifacts folder is on file system {kind!r}; "
                           + FS_ADVICE, str(store), filesystem=kind, allowed=sorted(allowed))
+    store.mkdir(parents=True, exist_ok=True)
     return kind
 
 
@@ -103,6 +106,7 @@ class RunLock:
 
     def acquire(self, record: dict) -> bool:
         self.path.parent.mkdir(parents=True, exist_ok=True)
+        existed = self.path.exists()
         fd = os.open(self.path, os.O_RDWR | os.O_CREAT | os.O_CLOEXEC, 0o644)
         try:
             fcntl.flock(fd, fcntl.LOCK_EX | fcntl.LOCK_NB)
@@ -114,6 +118,8 @@ class RunLock:
         while chunk := os.read(fd, 1 << 16):
             raw += chunk
         self.previous = self._parse(raw)
+        if existed and self.previous is None:  # an existing but empty record: a crash between truncate and write
+            self.previous = {"unreadable": True}
         self.write(record)
         return True
 
@@ -211,31 +217,33 @@ def _readonly(path: Path) -> None:
 
 
 def snapshot_inputs(plan: dict, workspace: Path, attempt: Path) -> dict:
-    """Copy (or link) each input into attempt/input/ and check its hash against the plan; returns isolation facts."""
+    """Copy each input into attempt/input/ (above the threshold: a copy-on-write clone with its own inode, else a
+    symbolic link to the input left in place, hash-checked before and after the run); check its hash against the plan.
+    Only files with their own inode are made read-only, so the user's project files are never changed."""
     threshold = plan["profile"]["policy"]["input_copy_threshold_bytes"]
-    facts = {"input_isolation": "hard", "linked": [], "in_place": []}
+    facts = {"input_isolation": "hard", "cloned": [], "in_place": []}
     root = Path(workspace).resolve()
     for item in plan["inputs"]:
         source = root.joinpath(*item["path"].split("/"))
         target = attempt / "input" / Path(*item["path"].split("/"))
         target.parent.mkdir(parents=True, exist_ok=True)
         size = source.stat().st_size
+        own_inode = True
         if size <= threshold:
             shutil.copyfile(source, target)
+        elif platform_calls.clone_file(source, target):
+            facts["cloned"].append(item["path"])
         else:
-            try:
-                os.link(source, target)
-                facts["linked"].append(item["path"])
-            except OSError:
-                facts["in_place"].append(item["path"])
-                target = source
+            os.symlink(source, target)  # the backend reads the input in place; hashed before and after
+            facts["in_place"].append(item["path"])
             facts["input_isolation"] = "soft"
+            own_inode = False
         actual = plan_layer.sha256_file(target)[1]
         if actual != item["sha256"]:
             raise DetsimError("refused", "input-changed", f"input {item['path']!r} differs from the plan "
                               "(hash); run prepare again", "$.inputs", path=item["path"], expected=item["sha256"],
                               actual=actual)
-        if target != source:
+        if own_inode:
             _readonly(target)
     return facts
 
@@ -251,8 +259,7 @@ def write_rendered_files(spec: dict, attempt: Path) -> None:
 def input_hashes_after(plan: dict, workspace: Path, attempt: Path, facts: dict) -> list[str]:
     changed = []
     for item in plan["inputs"]:
-        where = (Path(workspace).resolve().joinpath(*item["path"].split("/")) if item["path"] in facts["in_place"]
-                 else attempt / "input" / Path(*item["path"].split("/")))
+        where = attempt / "input" / Path(*item["path"].split("/"))  # a symlink for an in-place input
         if not where.is_file() or plan_layer.sha256_file(where)[1] != item["sha256"]:
             changed.append(item["path"])
     return changed
@@ -279,7 +286,7 @@ def observables_csv(doc: dict) -> str:
 
 def _seeds(plan: dict) -> dict:
     found = {k: v for k, v in plan["task"]["parameters"].items() if k in ("seed", "random_seed")}
-    return found or {"none": "no random number generator: the capability is deterministic; no seed is invented"}
+    return found or {"none": "the task has no seed parameter; detsim invents no seed"}
 
 
 def run_record(plan: dict, plan_digest: str, replicate: int, ok: bool, facts: dict, folder_rel: str,
@@ -315,6 +322,13 @@ def run_record(plan: dict, plan_digest: str, replicate: int, ok: bool, facts: di
             "environment": {"env_identity": plan["environment"]["env_identity"],
                             "variables": sorted(spec.get("environment", {}))},
             "seeds": _seeds(plan), "tolerances": {}, "exit_status": 0 if ok else 1,
+            "script_sha256": dict(plan["code"]["backend"], **plan["code"]["shared_layer"]),
+            "evidence": {  # four kinds of evidence, never substituted for one another (TASK.md 9.5, 16.2)
+                "contracts": "completeness and observables checked against detsim-completeness/1 and "
+                             "detsim-observables/1" + ("" if ok else " (not reached or failed)"),
+                "provenance": "input and output SHA-256 recorded (check with contracts/verify_run.py)",
+                "raw_files": facts.get("completeness_state", "unknown"),
+                "physical_validity": "not claimed: a completed run is verification at most"},
             "output_hashes": output_hashes, "parameter_digest": run_digest,
             "sidecars": sidecars,
             "detsim": {"plan_digest": plan_digest, "run_id": canonical.run_id(plan_digest, replicate),
@@ -327,6 +341,8 @@ def run_record(plan: dict, plan_digest: str, replicate: int, ok: bool, facts: di
                        "nonce": facts["nonce"], "host": socket.gethostname(), "python": platform.python_version(),
                        "orphans_reported": facts.get("orphans_reported", []),
                        "input_isolation": facts.get("input_isolation"),
+                       "inputs_cloned": facts.get("cloned", []), "inputs_in_place": facts.get("in_place", []),
+                       "guarantees_below_declared": facts.get("below_declared", []),
                        "workflow_attempt": os.environ.get(runner.WORKFLOW_TOKEN)}},
     }
 
@@ -402,10 +418,21 @@ class _MaskSignals:
 
 
 def _achieved(profile_doc: dict, facts: dict) -> dict:
+    """The level each guarantee reached in this attempt: the declared level, lowered by what was observed (the
+    no-replace rename probed on this file system, inputs changed during the run)."""
     achieved = dict(profile_doc["guarantees"])
-    if facts.get("input_isolation") == "soft":
-        achieved["inputs_isolated"] = "soft"
+    if facts.get("noreplace_available") is False:
+        achieved["commit_noreplace"] = min("soft", achieved.get("commit_noreplace", "unsupported"),
+                                           key=profiles.LEVELS.index)
+    if facts.get("inputs_changed"):
+        achieved["inputs_unmodified"] = "unsupported"
     return achieved
+
+
+def _below_declared(profile_doc: dict, achieved: dict) -> list[dict]:
+    return [{"guarantee": g, "declared": lvl, "achieved": achieved.get(g, "unsupported")}
+            for g, lvl in sorted(profile_doc["guarantees"].items())
+            if profiles.LEVELS.index(achieved.get(g, "unsupported")) < profiles.LEVELS.index(lvl)]
 
 
 def run(plan: dict, workspace: Path, backend, profile_doc: dict, replicate: int, expected_digest: str | None,
@@ -422,6 +449,7 @@ def run(plan: dict, workspace: Path, backend, profile_doc: dict, replicate: int,
                           "required guarantees; refused, never downgraded", "$.capability.required_guarantees",
                           shortfalls=short)
     hostcaps.require("process_groups")  # step 10's precondition, checked before the lock (missing-dependency)
+    env_root = _env_root(workspace, plan)  # the environment root must exist before anything is locked or written
     run_id = canonical.run_id(plan_digest, replicate)
     committed_folder = store / "runs" / run_id
     reused = _reuse(committed_folder, plan_digest, run_id)                                 # step 5
@@ -435,17 +463,34 @@ def run(plan: dict, workspace: Path, backend, profile_doc: dict, replicate: int,
     if not lock.acquire(record):                                                # step 6
         held = read_lock_state(pending / f"{run_id}.lock").get("record", {})
         raise DetsimError("incomplete", "in-progress", "another detsim controller holds this run's lock",
-                          run_id=run_id, holder={k: held.get(k) for k in ("host", "controller_pid", "started",
-                                                                           "budget_timeout_s")})
+                          run_id=run_id, holder=holder_view(held))
     terminal = {"status": "error", "error_code": "internal"}
     try:
-        answer = _locked_run(plan, plan_digest, replicate, run_id, nonce, workspace, store, pending, committed_folder, backend,
-                             profile_doc, lock)
+        with runner._Interrupts() as interrupts:  # SIGINT / SIGTERM anywhere under the lock -> cancelled (10.5)
+            answer = _locked_run(plan, plan_digest, replicate, run_id, nonce, workspace, store, pending,
+                                 committed_folder, backend, profile_doc, lock, env_root, interrupts)
         terminal = {"status": answer["status"], "error_code": answer.get("error_code"),
                     "reused": answer.get("reused", False)}
         return answer
+    except DetsimError as err:
+        terminal = {"status": err.status, "error_code": err.error_code, "reused": False}
+        raise
+    except BaseException as err:  # noqa: BLE001 - recorded, then re-raised (main reports it as error/internal)
+        terminal = {"status": "error", "error_code": "internal", "detail": type(err).__name__}
+        raise
     finally:                                                                    # step 13
         lock.release(state="finished", finished=_now(), terminal=terminal)
+
+
+def holder_view(record: dict) -> dict:
+    """run_id holder diagnostics for an in-progress answer: host, pid, start time, elapsed and budget timeout."""
+    view = {k: record.get(k) for k in ("host", "controller_pid", "started", "budget_timeout_s")}
+    try:
+        started = datetime.datetime.fromisoformat(record["started"])
+        view["elapsed_s"] = round((datetime.datetime.now(datetime.timezone.utc) - started).total_seconds(), 3)
+    except (KeyError, TypeError, ValueError):
+        view["elapsed_s"] = None
+    return view
 
 
 def _reuse(committed_folder: Path, plan_digest: str, run_id: str) -> dict | None:
@@ -462,12 +507,15 @@ def _reuse(committed_folder: Path, plan_digest: str, run_id: str) -> dict | None
     return {"status": "ok", "reused": True, "run_id": run_id, "folder": f"runs/{run_id}"}
 
 
-def _locked_run(plan, plan_digest, replicate, run_id, nonce, workspace, store, pending, committed_folder, backend, profile_doc,
-                lock) -> dict:
+def _locked_run(plan, plan_digest, replicate, run_id, nonce, workspace, store, pending, committed_folder, backend,
+                profile_doc, lock, env_root, interrupts) -> dict:
     reused = _reuse(committed_folder, plan_digest, run_id)                                 # step 7
     if reused:
         return reused
     orphans = move_leftovers(pending, run_id, lock.previous)                    # step 8
+    seen = list((lock.previous or {}).get("orphans_seen", [])) if isinstance(lock.previous, dict) else []
+    seen += [o for o in orphans if "moved" not in o]  # kept in the lock record so inspect shows them later
+    lock.update(orphans_seen=seen[-50:])
     attempt = pending / f"{run_id}.{nonce}"
     attempt.mkdir(parents=True)
     facts = {"nonce": nonce, "orphans_reported": orphans}
@@ -485,17 +533,23 @@ def _locked_run(plan, plan_digest, replicate, run_id, nonce, workspace, store, p
                      {"schema": "detsim-completeness/1", "state": "invalid", "missing_outputs": [],
                       "evidence": [{"check": "snapshot", "result": "fail", "detail": str(err)}]})
     write_rendered_files(spec, attempt)
-    env_root = _env_root(workspace, plan)
+    facts["noreplace_available"] = platform_calls.probe_noreplace(pending)
     roots = {"ENV_ROOT": env_root, "INPUT_ROOT": attempt / "input", "ATTEMPT_ROOT": attempt}
     lock.update(state="running")
-    launched = runner.launch(spec, roots, plan["task"]["budget"]["max_output_bytes"], profile_doc["id"],
-                             on_start=lambda pid, pgid: lock.update(state="running", pid=pid, pgid=pgid))  # step 10
+    if interrupts.received:
+        launched = {"native_exit_code": None, "signal": None, "end": "cancelled", "duration_s": 0.0,
+                    "peak_rss_kib": None, "launch_error": None, "terminated_by_controller": "cancelled",
+                    "interruptions": list(interrupts.received)}
+    else:
+        launched = runner.launch(spec, roots, plan["task"]["budget"]["max_output_bytes"], profile_doc["id"],
+                                 on_start=lambda pid, pgid: lock.update(state="running", pid=pid, pgid=pgid),
+                                 interrupts=interrupts)                        # step 10
     facts.update({k: launched[k] for k in ("native_exit_code", "signal", "end", "duration_s", "peak_rss_kib",
                                            "launch_error", "terminated_by_controller", "interruptions")})
     changed = input_hashes_after(plan, workspace, attempt, facts)
+    facts["inputs_changed"] = changed
     facts["achieved"] = _achieved(profile_doc, facts)
-    if changed:
-        facts["achieved"]["inputs_unmodified"] = "unsupported"
+    facts["below_declared"] = _below_declared(profile_doc, facts["achieved"])
     if launched["end"] == "launch-failed":
         facts["error_code"] = "missing-dependency"
     elif launched["end"] == "cancelled":
@@ -504,8 +558,13 @@ def _locked_run(plan, plan_digest, replicate, run_id, nonce, workspace, store, p
         facts["error_code"] = launched["end"]
     elif changed:
         facts["error_code"] = "input-modified"
+    elif facts["below_declared"]:
+        facts["error_code"] = "guarantee-not-achieved"
     completeness = backend.collect(attempt, spec)                               # step 11
     completeness = dict(completeness, run_id=run_id, native_exit_code=launched["native_exit_code"])
+    facts["completeness_state"] = completeness.get("state")
+    if interrupts.received and not facts.get("error_code"):
+        facts["error_code"], facts["end"] = "cancelled", "cancelled"
     if launched["native_exit_code"] not in (0, None) and not facts.get("error_code"):
         facts["error_code"] = "backend-failed"
     if facts.get("error_code") or completeness.get("state") != "complete":
@@ -514,6 +573,9 @@ def _locked_run(plan, plan_digest, replicate, run_id, nonce, workspace, store, p
         return _fail(plan, plan_digest, replicate, attempt, store, run_id, facts, profile_doc, completeness)
     observables_doc = dict(backend.observables(attempt, spec), run_id=run_id)
     problems = schemas.check_completeness(completeness) + schemas.check_observables(observables_doc)
+    if interrupts.received:
+        facts["error_code"], facts["end"] = "cancelled", "cancelled"
+        return _fail(plan, plan_digest, replicate, attempt, store, run_id, facts, profile_doc, completeness)
     if problems:
         facts["error_code"] = "output-contract"
         facts["contract_findings"] = problems[:20]
@@ -603,6 +665,8 @@ def inspect(workspace: Path, run_id: str | None, view: str, attempt_id: str | No
         else ("failed-only" if failures else "none")
     orphans = []
     for entry in record.get("orphans_seen", []) + ([record] if lock_state["lock"] == "stale" else []):
+        if not isinstance(entry, dict) or entry.get("pid") is None:
+            continue
         orphans.append({k: entry.get(k) for k in ("pid", "pgid", "started", "nonce")}
                        | {"process_with_that_pid_exists_now": _process_exists(entry.get("pid"))})
     answer = {"status": "ok", "view": "state", "run_id": run_id, "state": state, "failures": len(failures),
@@ -610,7 +674,7 @@ def inspect(workspace: Path, run_id: str | None, view: str, attempt_id: str | No
               "orphan_folders": sorted(p.name for p in (store / ".pending" / "orphans").glob(f"{run_id}-*"))
               if (store / ".pending" / "orphans").is_dir() else []}
     if state == "in-progress":
-        answer["holder"] = {k: record.get(k) for k in ("host", "controller_pid", "started", "budget_timeout_s")}
+        answer["holder"] = holder_view(record)
     return answer
 
 

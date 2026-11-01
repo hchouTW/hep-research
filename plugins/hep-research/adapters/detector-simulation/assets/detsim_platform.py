@@ -94,7 +94,8 @@ def filesystem_type(path) -> str | None:
             return None
         return buf.f_fstypename.decode("ascii", "replace") or None
     if platform_key() == "linux":
-        return _mountinfo_type(path)
+        from core import hostcaps
+        return _mountinfo_type(path) if hostcaps.proc_fs() else None
     return None
 
 
@@ -129,9 +130,10 @@ def fsync_dir(path) -> bool:
         os.close(fd)
 
 
-def rename_noreplace(src, dst) -> bool:
+def rename_noreplace(src, dst, record: bool = True) -> bool:
     """Rename src to dst unless dst exists (FileExistsError). False when no no-replace call is available here."""
-    CALLS.append(("rename_noreplace", str(dst)))
+    if record:
+        CALLS.append(("rename_noreplace", str(dst)))
     libc = _libc()
     if platform_key() == "darwin" and hasattr(libc, "renamex_np"):
         fn = libc.renamex_np
@@ -152,6 +154,38 @@ def rename_noreplace(src, dst) -> bool:
     if err in (errno.EINVAL, errno.ENOSYS, errno.ENOTSUP):
         return False  # the file system or kernel lacks the flag: caller falls back (commit_noreplace: soft)
     raise OSError(err, os.strerror(err), str(src))
+
+
+def probe_noreplace(folder) -> bool:
+    """Whether the no-replace rename works on the file system of folder (renames a fresh empty folder onto another
+    one inside folder and expects FileExistsError); used to record the commit_noreplace level achieved before the
+    run record is written."""
+    import tempfile
+    base = Path(tempfile.mkdtemp(prefix=".noreplace-probe-", dir=folder))
+    try:
+        (base / "a").mkdir()
+        (base / "b").mkdir()
+        try:
+            rename_noreplace(base / "a", base / "b", record=False)  # False: no such call here; True would mean it replaced
+        except FileExistsError:
+            return True
+        return False
+    finally:
+        for name in ("a", "b"):
+            with __import__("contextlib").suppress(OSError):
+                (base / name).rmdir()
+        with __import__("contextlib").suppress(OSError):
+            base.rmdir()
+
+
+def clone_file(src, dst) -> bool:
+    """A copy-on-write clone with its own inode (macOS clonefile(2) on APFS); False when unavailable here."""
+    libc = _libc()
+    if platform_key() != "darwin" or not hasattr(libc, "clonefile"):
+        return False
+    fn = libc.clonefile
+    fn.argtypes, fn.restype = [ctypes.c_char_p, ctypes.c_char_p, ctypes.c_uint32], ctypes.c_int
+    return fn(os.fsencode(src), os.fsencode(dst), 0) == 0
 
 
 def set_parent_death_signal() -> None:  # pragma: no cover - runs in the child between fork and exec, Linux only

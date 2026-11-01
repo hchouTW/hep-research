@@ -87,7 +87,7 @@ class _Interrupts:
         return False
 
 
-def launch(spec: dict, roots: dict, max_output_bytes: int, profile_id: str, on_start=None) -> dict:
+def launch(spec: dict, roots: dict, max_output_bytes: int, profile_id: str, on_start=None, interrupts=None) -> dict:
     """Run spec in roots; return the execution facts (never raises for a backend failure).
 
     roots: {"ENV_ROOT", "INPUT_ROOT", "ATTEMPT_ROOT"} real folders. on_start(pid, pgid) is called right after the
@@ -108,7 +108,10 @@ def launch(spec: dict, roots: dict, max_output_bytes: int, profile_id: str, on_s
              "launch_error": None}
     usage_before = resource.getrusage(resource.RUSAGE_CHILDREN).ru_maxrss
     start = time.monotonic()
-    with _Interrupts() as interrupts, open(logs / "stdout.txt", "wb") as out, open(logs / "stderr.txt", "wb") as err:
+    baseline_bytes = _tree_bytes(attempt)  # inputs and rendered files do not count against the output budget
+    own = _Interrupts() if interrupts is None else None  # the caller's recorder covers the whole run when given
+    with (own or _Nothing()) as installed, open(logs / "stdout.txt", "wb") as out, open(logs / "stderr.txt", "wb") as err:
+        interrupts = interrupts or installed
         try:
             proc = subprocess.Popen(argv, cwd=attempt, env=env, stdin=subprocess.DEVNULL, stdout=out, stderr=err,
                                     start_new_session=True, close_fds=True, preexec_fn=preexec)
@@ -130,7 +133,7 @@ def launch(spec: dict, roots: dict, max_output_bytes: int, profile_id: str, on_s
                     cause = "cancelled"
                 elif now - start > timeout:
                     cause = "timeout"
-                elif _tree_bytes(attempt) > max_output_bytes:
+                elif _tree_bytes(attempt) - baseline_bytes > max_output_bytes:
                     cause = "output-exceeded"
                 if cause is not None:
                     term_at = now
@@ -151,6 +154,14 @@ def launch(spec: dict, roots: dict, max_output_bytes: int, profile_id: str, on_s
     facts["terminated_by_controller"] = cause
     facts["end"] = cause or ("signalled" if code < 0 else "exited")
     return facts
+
+
+class _Nothing:
+    def __enter__(self):
+        return None
+
+    def __exit__(self, *exc):
+        return False
 
 
 def _signal_own_group(proc: subprocess.Popen, sig) -> None:

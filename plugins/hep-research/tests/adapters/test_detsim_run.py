@@ -62,6 +62,8 @@ class Base(unittest.TestCase):
     """A synthetic project with an environment root holding the cooperative program."""
 
     def setUp(self):
+        if detsim_profile.host_profile_id() != "macos-g0":  # linux-g0 declares every guarantee unsupported (D-W1-3)
+            self.skipTest("not run (platform): runs need a measured runner profile; only macos-g0 is measured")
         self.work_dir = Path(tempfile.mkdtemp(prefix="detsim run é "))
         self.addCleanup(shutil.rmtree, self.work_dir, True)
         self.env_root = self.work_dir / "env root"
@@ -83,7 +85,7 @@ class Base(unittest.TestCase):
             if proc.poll() is None:
                 proc.kill()
                 proc.wait()
-        for name in ("started", "grandchild"):
+        for name in ("started", "grandchild", "member"):
             path = self.env_root / "share" / "synthetic" / name
             if path.is_file():  # a backend or grandchild the test's own controller started
                 pid = int(path.read_text())
@@ -619,6 +621,146 @@ class Probe(Base):  # check --probe
         code, answer = self.call("check", "--workspace", str(self.project), "--probe", "--env-root",
                                  str(self.env_root))
         self.assertEqual((code, answer["status"]), (3, "missing-dependency"))
+
+
+class ReviewRoundOne(Base):
+    """W3b independent review round 1: tests that fail on the reviewed defects (M1-M7 and minor findings)."""
+
+    def test_refusal_under_the_lock_records_its_terminal_status(self):  # M1
+        plan, digest = self.prepare()
+        detsim_run.HOOKS["before_snapshot"] = lambda attempt: (self.project / "inputs" / "run config.conf").write_text(
+            "changed\n")
+        self.run_plan(plan)
+        record = json.loads((self.store / ".pending" / f"{canonical.run_id(digest, 0)}.lock").read_text())
+        self.assertEqual(record["terminal"]["status"], "refused")
+        self.assertEqual(record["terminal"]["error_code"], "input-changed")
+
+    def test_inspect_shows_a_reported_orphan_after_the_next_run(self):  # M2
+        plan, digest = self.prepare()
+        run_id = canonical.run_id(digest, 0)
+        survivor = subprocess.Popen([sys.executable, "-c", "import time; time.sleep(60)"])
+        self.procs.append(survivor)
+        pending = self.store / ".pending"
+        pending.mkdir(parents=True, exist_ok=True)
+        (pending / f"{run_id}.lock").write_text(json.dumps({"state": "running", "pid": survivor.pid,
+                                                            "pgid": survivor.pid, "started": "earlier"}))
+        self.run_plan(plan)
+        code, answer = self.call("inspect", "--workspace", str(self.project), "--run", run_id)
+        self.assertTrue(any(o["pid"] == survivor.pid and o["process_with_that_pid_exists_now"]
+                            for o in answer["orphans"]), answer)
+        self.assertIsNone(survivor.poll())
+
+    def test_commit_fallback_below_declared_fails_the_run(self):  # M3
+        plan, _ = self.prepare()
+        with mock.patch.object(detsim_platform, "probe_noreplace", lambda folder: False):
+            code, answer = self.run_plan(plan)
+        self.assertEqual((code, answer["status"], answer["error_code"]), (1, "failed", "guarantee-not-achieved"))
+        record = json.loads((self.store / answer["folder"] / detsim_run.RECORD_NAME).read_text())
+        facts = record["extension"]["detsim"]
+        self.assertEqual(facts["achieved_guarantees"]["commit_noreplace"], "soft")
+        self.assertEqual(facts["guarantees_below_declared"][0]["guarantee"], "commit_noreplace")
+
+    def test_interruption_during_collect_is_cancelled(self):  # M4
+        original = synthetic.collect
+
+        def interrupted_collect(attempt, spec):
+            os.kill(os.getpid(), signal.SIGINT)  # the test process itself
+            return original(attempt, spec)
+        plan, digest = self.prepare()
+        with mock.patch.object(synthetic, "collect", interrupted_collect):
+            code, answer = self.run_plan(plan)
+        self.assertEqual((code, answer["status"], answer["error_code"]), (1, "failed", "cancelled"))
+        self.assertFalse(list((self.store / ".pending").glob(f"{canonical.run_id(digest, 0)}.*/")))
+
+    def test_large_input_never_changes_the_project_file(self):  # M6
+        source = self.project / "inputs" / "run config.conf"
+        mode_before = stat.S_IMODE(source.stat().st_mode)
+        with mock.patch.dict(detsim_profile.POLICY, {"input_copy_threshold_bytes": 1}):
+            plan, _ = self.prepare()
+            code, answer = self.run_plan(plan)
+        self.assertEqual(code, 0, answer)
+        self.assertEqual(stat.S_IMODE(source.stat().st_mode), mode_before)
+        self.assertEqual(source.stat().st_nlink, 1)
+        record = json.loads((self.store / "runs" / answer["run_id"] / detsim_run.RECORD_NAME).read_text())
+        self.assertEqual(record["extension"]["detsim"]["inputs_cloned"], ["inputs/run config.conf"])
+
+    def test_timeout_kills_a_member_of_the_group(self):  # M7
+        self.set_task(timeout_s=1)
+        self.mode("group")
+        plan, _ = self.prepare()
+        code, answer = self.run_plan(plan)
+        self.assertEqual(answer["error_code"], "timeout")
+        member = int((self.env_root / "share" / "synthetic" / "member").read_text())
+        gone = wait_for(lambda: subprocess.run(["ps", "-p", str(member), "-o", "stat="], capture_output=True,
+                                               text=True).stdout.strip() in ("", "Z"), 10)
+        self.assertTrue(gone, "a process of the backend's group survived the timeout")
+
+    def test_signalled_backend_and_malformed_plan_rows(self):  # minor 16
+        self.mode("selfkill")
+        plan, _ = self.prepare()
+        code, answer = self.run_plan(plan)
+        self.assertEqual((code, answer["status"], answer["error_code"], answer["signal"]),
+                         (1, "failed", "signalled", "SIGKILL"))
+        bad = self.work_dir / "bad plan.json"
+        bad.write_text('{"schema": "detector-plan/1", "task": {"budget": "x"}}')
+        code, answer = self.run_plan(bad)
+        self.assertEqual((code, answer["status"], answer["error_code"]), (2, "rejected", "plan-invalid"))
+
+    def test_four_kinds_of_evidence_and_observables_rows(self):  # minors 5, 7, 17
+        import csv
+        import detsim_schemas
+        plan, _ = self.prepare()
+        code, answer = self.run_plan(plan)
+        folder = self.store / "runs" / answer["run_id"]
+        ext = json.loads((folder / detsim_run.RECORD_NAME).read_text())["extension"]
+        self.assertEqual(sorted(ext["evidence"]), ["contracts", "physical_validity", "provenance", "raw_files"])
+        self.assertEqual(ext["evidence"]["raw_files"], "complete")
+        self.assertIn("detsim_run.py", ext["script_sha256"])
+        rows = list(csv.DictReader(io.StringIO((folder / "observables.csv").read_text())))
+        doc = {"schema": "detsim-observables/1", "rows": [
+            {k: (v.split(";") if k == "labels" else int(v) if k == "point" else v) for k, v in r.items() if v != ""}
+            for r in rows]}
+        self.assertEqual(detsim_schemas.check_observables(doc), [])
+        self.assertEqual({r["unit"] for r in rows}, {"e"})
+
+    def test_empty_values_and_missing_output_are_told_apart(self):  # minor 15
+        evidence = {}
+        for mode in ("empty", "partial"):
+            self.mode(mode)
+            self.set_task(seed=len(mode))
+            plan, _ = self.prepare()
+            code, answer = self.run_plan(plan)
+            evidence[mode] = json.loads((self.store / answer["folder"] / "completeness.json").read_text())
+        self.assertEqual(evidence["empty"]["missing_outputs"], [])
+        self.assertTrue(evidence["partial"]["missing_outputs"])
+
+    def test_no_seed_parameter_invents_no_seed(self):  # minor 6
+        seeds = detsim_run._seeds({"task": {"parameters": {"points": []}}})
+        self.assertEqual(list(seeds), ["none"])
+
+    def test_every_file_is_flushed_before_the_rename(self):  # minor 14
+        plan, _ = self.prepare()
+        detsim_platform.CALLS.clear()
+        code, answer = self.run_plan(plan)
+        calls = list(detsim_platform.CALLS)
+        rename = [op for op, _ in calls].index("rename_noreplace")
+        flushed = {Path(path).name for op, path in calls[:rename] if op in ("F_FULLFSYNC", "fsync")}
+        committed = self.store / "runs" / answer["run_id"]
+        self.assertTrue({p.name for p in committed.rglob("*") if p.is_file() and not p.is_symlink()} <= flushed)
+
+    def test_no_signal_reaches_anything_but_the_own_group(self):  # minor 13
+        calls = []
+        self.set_task(timeout_s=1)
+        self.mode("sleep 30")
+        plan, _ = self.prepare()
+        real = os.killpg
+        with mock.patch.object(os, "killpg", lambda pgid, sig: (calls.append(("os.killpg", pgid)), real(pgid, sig))), \
+                mock.patch.object(detsim_runner, "KILL", lambda pgid, sig: (calls.append(("KILL", pgid)),
+                                                                            real(pgid, sig))), \
+                mock.patch.object(os, "kill", lambda *a: calls.append(("os.kill",) + a)):
+            self.run_plan(plan)
+        backend = int((self.env_root / "share" / "synthetic" / "started").read_text())
+        self.assertTrue(calls and all(c[0] == "KILL" and c[1] == backend for c in calls), calls)
 
 
 if __name__ == "__main__":

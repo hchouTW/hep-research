@@ -14,6 +14,9 @@ changing the plan:
   grandchild   start a grandchild that sleeps 30 s and records its pid in $SYNTHETIC_DATA/grandchild, then ok
   modify_input make the input writable and append to it, then ok
   late S       write started, sleep S, then write raw/late.txt by relative path (an orphan's late write)
+  group        fork a child in the same process group that records its pid in $SYNTHETIC_DATA/member and sleeps,
+               write started, sleep 30 (a timeout must kill the whole group)
+  selfkill     kill itself with SIGKILL (the backend ends by a signal)
 Never used outside tests; no physics.
 """
 import os
@@ -56,6 +59,16 @@ def main(argv):
     if mode == "bigout":
         out.parent.mkdir(parents=True, exist_ok=True)
         (out.parent / "big.bin").write_bytes(b"\0" * (4 << 20))
+        time.sleep(30)
+        return 0
+    if mode == "selfkill":
+        os.kill(os.getpid(), signal.SIGKILL)
+    if mode == "group":
+        if os.fork() == 0:
+            (data_dir / "member").write_text(str(os.getpid()), encoding="utf-8")
+            time.sleep(30)
+            os._exit(0)
+        (data_dir / "started").write_text(str(os.getpid()), encoding="utf-8")
         time.sleep(30)
         return 0
     if mode == "grandchild":
