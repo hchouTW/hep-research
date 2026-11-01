@@ -176,7 +176,7 @@ Both are **pipeline-validation cases**: they show that identity, execution, comm
 produce research conclusions [H-01 §1.4]. Full cards: task specification §12.2 and §12.3 [H-01]; the pinned versions
 are written when each card is pinned.
 
-**AP-BOOT — rerun of the official pixel example** (capability `allpix.pixel-charge` 1.0.0, state `demonstrated-on-synthetic-data`: its checks passed on one macOS arm64
+**AP-BOOT — rerun of the official pixel example** (capability `allpix.pixel-charge` 1.0.0, state `tested-in-declared-environment`: its checks passed on one macOS arm64
 environment with Allpix Squared `df69a6a4`; see the adapter's capability-matrix row).
 
 | Item | Content |
@@ -188,7 +188,7 @@ environment with Allpix Squared `df69a6a4`; see the adapter's capability-matrix 
 | Not claimed | 10 events are not statistics; no efficiency, waveform or scan |
 
 **GF-QUERY — electron drift velocity on one pinned 1D table** (capability `garfield.gas-table-query` 1.0.0,
-state `demonstrated-on-synthetic-data`: its checks passed on one macOS arm64 environment with Garfield++ `e2e58ea`; see
+state `tested-in-declared-environment`: its checks passed on one macOS arm64 environment with Garfield++ `e2e58ea`; see
 the adapter's capability-matrix row).
 
 | Item | Content |
@@ -232,9 +232,9 @@ The status values and error codes behind these classes are in the [operations gu
 ## 10. Limitations and untested scope
 
 - Both capabilities ran their acceptance checks on one environment only (macOS 27.2 arm64; Allpix Squared `df69a6a4`
-  with a C++20 Geant4 11.4.3, Garfield++ `e2e58ea`, ROOT 6.40.04); their state is `demonstrated-on-synthetic-data`
-  until a non-author rerun and the performance measurement complete the checklist; any other version or environment
-  is untested. The adapter's guarantees are measured on macOS only; on Linux they are
+  with a C++20 Geant4 11.4.3, Garfield++ `e2e58ea`, ROOT 6.40.04); their state is `tested-in-declared-environment`
+  for exactly that environment (support matrix `docs/dev/detector-simulation/SUPPORT-MATRIX.md`); any other version
+  or environment is untested. The adapter's guarantees are measured on macOS only; on Linux they are
   declared unsupported until measured on a Linux host [H-02], so a capability that requires them is refused there.
 - First batch only: no waveforms, gas-table generation, microscopic tracking, avalanche, TCAD field maps, user
   Allpix Squared configurations, scans or cross-tool coupling.

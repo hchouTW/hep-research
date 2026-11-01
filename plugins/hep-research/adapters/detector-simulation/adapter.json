@@ -13,16 +13,16 @@
   },
   {
    "name": "Allpix Squared backend (detsim_backend_allpix.py with assets/allpix/allpix.pixel-charge.json; capability allpix.pixel-charge 1.0.0; https://github.com/allpix-squared/allpix-squared, MIT; run as a separate program, nothing bundled)",
-   "status": "demonstrated-on-synthetic-data",
+   "status": "tested-in-declared-environment",
    "tested_versions": [
-    "adapter 0.4.0 on E2 (macOS 27.2 arm64, APFS, macos-g0), 2026-11-02, final code (acceptance-3): Allpix Squared df69a6a4c69219e035dadf1005e7509856b73b86 (v3.2.0-689, source build) with Geant4 11.4.3 (C++20 build, 12 datasets registered) and Homebrew ROOT 6.40.04, env_identity 04b91a73… (97 resolved libraries hashed); AP-BOOT runs 1302c2dd… and fe0e9b88… (seed 1, replicates 0 and 1) and 0642769d… (seed 2): check 1 (pinned inputs, whitelisted argv), class versions, every event with hits in both detectors, charge-sign, band medians 27579 e and 21871 e in [10687.5, 42750] e; check 2 identical over 86 per-pixel entries, seed 2 differs; native run identical; missing G4NDL, object library, program or PyROOT → missing-dependency; tested-in-declared-environment only after the non-author rerun and T-PERF (W5); no physical validity"
+    "adapter 0.4.0 on E2 (macOS 27.2 arm64, APFS, macos-g0), 2026-11-02, final code (acceptance-3): Allpix Squared df69a6a4c69219e035dadf1005e7509856b73b86 (v3.2.0-689, source build) with Geant4 11.4.3 (C++20 build, 12 datasets registered) and Homebrew ROOT 6.40.04, env_identity 04b91a73… (97 resolved libraries hashed); AP-BOOT runs 1302c2dd… and fe0e9b88… (seed 1, replicates 0 and 1) and 0642769d… (seed 2): check 1 (pinned inputs, whitelisted argv), class versions, every event with hits in both detectors, charge-sign, band medians 27579 e and 21871 e in [10687.5, 42750] e; check 2 identical over 86 per-pixel entries, seed 2 differs; native run identical; missing G4NDL, object library, program or PyROOT → missing-dependency; non-author rerun following the guides, T-PERF and support matrix done (W5, VALIDATION DETSIM-W5); no physical validity"
    ]
   },
   {
    "name": "Garfield++ backend (detsim_backend_garfield.py with assets/garfield/gas_table_query.py and its descriptor; capability garfield.gas-table-query 1.0.0; https://gitlab.cern.ch/garfield/garfieldpp; no licence file at the pinned commit; run as a separate program, nothing bundled)",
-   "status": "demonstrated-on-synthetic-data",
+   "status": "tested-in-declared-environment",
    "tested_versions": [
-    "adapter 0.4.0 on E2 (macOS 27.2 arm64, APFS, macos-g0), 2026-11-02, final code (acceptance-2): Garfield++ e2e58ea74ec8b20d347d78b7a769f40e3b156072 (source build, GSL on, Eigen off) with Homebrew ROOT 6.40.04 and Python 3.15.2 PyROOT, env_identity 96827976… (six Garfield++ libraries, libCore and libCPyCppyy hashed); GF-QUERY task 1 ok (run efc8f707…, checks 1-3 and node coverage), task 2 refused out-of-domain with range [100.000002, 80000.0016] V/cm, task 2 with allow_outside_validated_range ok (run 8fdc5f83…, check 4, rows labelled); every row carries the note; example table ar_80_co2_20_0T.gas (SHA-256 ba435734…b732) under H0 #13, pipeline validation only; tested-in-declared-environment only after the non-author rerun and T-PERF (W5); no physical validity"
+    "adapter 0.4.0 on E2 (macOS 27.2 arm64, APFS, macos-g0), 2026-11-02, final code (acceptance-2): Garfield++ e2e58ea74ec8b20d347d78b7a769f40e3b156072 (source build, GSL on, Eigen off) with Homebrew ROOT 6.40.04 and Python 3.15.2 PyROOT, env_identity 96827976… (six Garfield++ libraries, libCore and libCPyCppyy hashed); GF-QUERY task 1 ok (run efc8f707…, checks 1-3 and node coverage), task 2 refused out-of-domain with range [100.000002, 80000.0016] V/cm, task 2 with allow_outside_validated_range ok (run 8fdc5f83…, check 4, rows labelled); every row carries the note; example table ar_80_co2_20_0T.gas (SHA-256 ba435734…b732) under H0 #13, pipeline validation only; non-author rerun following the guides, T-PERF and support matrix done (W5, VALIDATION DETSIM-W5); no physical validity"
    ]
   }
  ],

@@ -8785,3 +8785,19 @@ Not run: Linux (linux-g0 unsupported; the `ldd` branch of library resolution unt
 check 3b is a plausibility band, not physics validation.
 
 Passing checks show software consistency, not physical validity.
+
+## DETSIM-W5 — 2026-11-02 (macOS 27.2 arm64, APFS; version 0.53.0 + unreleased)
+
+Operational acceptance of the detector-simulation adapter: a non-author rerun of each backend following only the
+guides, native-vs-detsim performance in one environment, the support matrix, and the state change of both backends.
+
+| Item | Evidence | Result |
+|---|---|---|
+| Non-author rerun, Garfield++ | fresh subagent, guides and `--help` only, project `WR/projects/W5-rerun-garfieldpp` | in-range task ok (run ac03aa29…, checks 1-3 and node coverage pass, vx = -3.4219876e-4 cm/ns at the first node), out-of-range task refused by default and ok with the option (run 931c473e…, check 4, rows labelled); 12 guide gaps reported |
+| Non-author rerun, Allpix Squared | fresh subagent, guides and `--help` only, project `WR/projects/W5-rerun-allpix-squared` | probe ok (identity 04b91a73…, the same as acceptance-3), replicates 0 and 1 ok and identical over 122 observables rows (runs 6fd1ae08…, bc5c157a…), all ten checks pass, median 22867 e; another seed differs; 13 guide gaps reported |
+| Guide corrections | operations guide, hep-detector guide and README (decision log W5) | every reported gap addressed except two recorded: the SKILL.md rows (entry through the hubs) and help text citing TASK.md sections |
+| T-PERF | `docs/dev/detector-simulation/PERF.md` (`/usr/bin/time -l`, native and detsim twice each) | Allpix native 3.1-3.8 s, detsim 4.1-4.3 s; Garfield++ native 1.4-1.6 s, detsim 1.7-1.8 s; peak RSS 0.40-0.47 GB and about 0.59 GB; threshold and foreground rule unchanged |
+| Support matrix | `docs/dev/detector-simulation/SUPPORT-MATRIX.md`, in step with `adapter.json` and the capability-matrix row | written; both backends `tested-in-declared-environment` for that environment only |
+| §17.3 checklist per backend | ledger "Definition of done" | complete for both; Linux untested |
+
+Passing checks show software consistency, not physical validity.

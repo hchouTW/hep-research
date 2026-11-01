@@ -66,6 +66,15 @@ Software checks establish contract consistency only, not physical validity.
   versions are the pinned ones; `compare_summary_files` gives the per-pixel replicate comparison; `check --probe` records a
   content-based identity (versions, dataset hashes and every library the program and its modules resolve). Shared layer: a completeness check `dependency` that failed makes the run `failed` / `missing-dependency`.
 - Evidence: VALIDATION DETSIM-W4A
+- **detector-simulation: both backends `tested-in-declared-environment`** (work item W5) for exactly the environment
+  of the support matrix (`docs/dev/detector-simulation/SUPPORT-MATRIX.md`: macOS 27.2 arm64, Allpix Squared
+  `df69a6a4`, Garfield++ `e2e58ea`, ROOT 6.40.04), after a non-author rerun that followed only the guides and a
+  native-vs-detsim performance measurement (`PERF.md`: about 0.5-1.2 s overhead per Allpix run, 0.2-0.4 s per
+  Garfield++ run; input-copy threshold and foreground rule unchanged). The operations guide now gives the
+  environment-root layout and the Garfield++ build record, `--env-root`, the interpreter rule and the inherited ROOT
+  variables to clear, a task-file example, node coverage, where results and check results land, how to compare
+  replicates and how to verify a run. The shared layer and the adapter stay `demonstrated-on-synthetic-data`.
+- Evidence: VALIDATION DETSIM-W5
 
 ## 0.53.0 (2026-11-01)
 
