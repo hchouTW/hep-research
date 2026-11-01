@@ -94,7 +94,7 @@ Host: Darwin arm64 (macOS 27.2), 8 CPUs, Python 3.13.2, git 2.54.0, CMake 4.3.2,
 | W2-AP | in-progress | 2026-11-01 | 0 / 0 | V-07, V-14 read at df69a6a4; G4NDL 4.7.1 in WR/env/g4data (MD5 54f0ed39 matches) | environment (V-08): ROOT with a working interpreter, Allpix build |
 | W2-GF | done | 2026-11-02 | 0 / 0 | card-GF-QUERY.md (no critical TBD: commit, table, storage form, routine, order 2, extrapolation constant/linear, units, query points, tolerances fixed before any query); V-09..V-13 concluded | |
 | W3a | done | 2026-11-01 | 0 / 3 | patches 5ca7dbd1, 3fd54f69, 510315a5; review fixes 2468b15e, ff6a077e, f348166f; T-CANON 17, T-SCHEMA 12, T-PLAN 35, missing-dependency 3 OK; VALIDATION DETSIM-W3A | round-3 minor findings M1-M2 fixed after round 3 without a fourth review |
-| W3b | in-progress | 2026-11-01 | 1 / 0 | 5fda61cd, d6dc4c66: detsim_platform, detsim_runner, detsim_run, run/inspect/check --probe; tests/adapters/test_detsim_run.py 45 tests (1 skipped: Linux only) | T-CONV complete, review |
+| W3b | done | 2026-11-02 | 1 / 3 | detsim_platform, detsim_runner, detsim_run; tests/adapters/test_detsim_run.py 62 (61 OK, 1 not run: platform); static 29/0/2; VALIDATION DETSIM-W3B; shared layer demonstrated-on-synthetic-data | round-3 minor finding B1 fixed after round 3 without a fourth review |
 | W4A | not-started | | 0 / 0 | | |
 | W4G | not-started | | 0 / 0 | | |
 | W5 | not-started | | 0 / 0 | | |
@@ -218,6 +218,23 @@ V-items concluded / still open: none owned (WK confirmed V-07, V-10, V-11, V-14 
 Independent review: 3 rounds; round-3 minor findings C1-C3 fixed after the round (no fourth review)
 Blockers and gates raised: H5 (review bound) answered: 3 rounds
 Next step: W5 (after W4A / W4G settle)
+```
+
+```text
+Work item ID: W3b
+Status: done
+Isolation guard: pass at start / pass before each commit
+Files changed: adapters/detector-simulation/assets/{detsim_platform,detsim_runner,detsim_run}.py, detsim.py (run,
+  inspect, check --probe), adapter.json (0.2.0, shared layer demonstrated-on-synthetic-data), capability-matrix row,
+  tests/adapters/{test_detsim_run,detsim_coop_program,detsim_synthetic_cli}.py, detsim_backend_synthetic.py,
+  tests/skills/test_cli_robustness.py, CHANGELOG, VALIDATION
+Decisions made (with reasons): decision log rows of 2026-11-02 (W3b)
+Commands actually run and results: see VALIDATION DETSIM-W3B
+Tests not run and reasons: the Linux PDEATHSIG test (platform); every run test on an unmeasured profile (skipped)
+V-items concluded / still open: V-04 used
+Independent review: 3 rounds; round-3 finding B1 fixed with a test after the round (no fourth review)
+Blockers and gates raised: none
+Next step: W4G (W2-GF done), W4A after W2-AP
 ```
 
 ## Final report

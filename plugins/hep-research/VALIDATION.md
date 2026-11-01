@@ -8724,3 +8724,19 @@ index and the 20-question set; no simulator was built or run for it, and every o
 | Independent review | three rounds (fresh subagents, advisory, shared host): round 1 5 major / 11 minor, round 2 1 major / 4 minor, round 3 no earlier finding open and 3 new minor findings, fixed after round 3 (no fourth round) | findings fixed |
 
 Passing checks show software consistency, not physical validity.
+
+## DETSIM-W3B — 2026-11-02 (macOS 27.2 arm64, APFS, Python 3.13.2 venv; version 0.53.0 + unreleased)
+
+The execution part of the detector-simulation shared layer (adapter 0.2.0: `run`, `inspect`, `check --probe`), tested
+with the simulator-free synthetic backend and a cooperative program; no simulator was run.
+
+| Item | Evidence | Result |
+|---|---|---|
+| T-IDEM, T-LOCK, T-NOKILL, T-ORPHAN, T-RUNNER, T-COMMIT, T-FS, T-GUARANTEE, T-PLATFORM, T-EXIT, T-CONTRACT, T-OUTPUT | `tests/adapters/test_detsim_run.py` (controllers as separate processes for lock, orphan, interruption and crash injection before commit and after rename; signal shims around `os.kill`, `os.killpg` and the runner's call; injected recorder for the fsync / F_FULLFSYNC / rename order; file-system types nfs, smbfs, cifs, fuse, osxfuse, s3fs, unknown refused) | 62 tests: 61 OK, 1 not run (platform: PR_SET_PDEATHSIG is Linux only) |
+| `contracts/validate.py`, `contracts/verify_run.py` | after a successful and after a failed run, in the tests | pass (an input read in place is reported outside-base by design and named in the record) |
+| Runner profile | macos-g0 as measured (V-04): commit_noreplace hard (`renamex_np`), durable_commit soft (F_FULLFSYNC on files), local_fs_check hard (apfs), timeout_kill hard, output_size_abort soft, descendants_killed soft, backend_dies_with_controller soft, no_network unsupported; linux-g0 every level unsupported (not measured) | declared and recorded per run |
+| Hostile `TMPDIR` | a symlinked folder whose name has a space and non-ASCII characters | OK |
+| Conventions | layering, naming, wiring, adapter declarations and missing-dependency, CLI robustness, python compat; `run_all_checks.py --part static --no-cli` | pass; static 29 pass, 0 fail, 2 skip (host CLIs) |
+| Independent review | three rounds (fresh subagents, advisory, shared host): round 1 7 major / 17 minor, round 2 0 major / 5 minor, round 3 no earlier finding open and 1 new minor finding, fixed with a test after round 3 (no fourth round) | findings fixed |
+
+Passing checks show software consistency, not physical validity.

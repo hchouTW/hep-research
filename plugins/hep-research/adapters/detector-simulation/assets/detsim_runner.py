@@ -36,7 +36,7 @@ from pathlib import Path  # noqa: E402
 import detsim_platform as platform_calls  # noqa: E402
 
 ROOTS = ("ENV_ROOT", "INPUT_ROOT", "ATTEMPT_ROOT")
-WORKFLOW_TOKEN = "HEP_RUN_WORKFLOW_ATTEMPT"
+WORKFLOW_ATTEMPT_VARIABLE = "HEP_RUN_WORKFLOW_ATTEMPT"
 POLL_S = 0.05
 GRACE_S = 2.0
 KILL = os.killpg  # the only signalling call of this module; tests wrap it to record calls
@@ -99,8 +99,8 @@ def launch(spec: dict, roots: dict, max_output_bytes: int, profile_id: str, on_s
     logs.mkdir(parents=True, exist_ok=True)
     argv = [bind(a, roots) for a in spec["argv"]]
     env = {name: bind(value, roots) for name, value in spec.get("environment", {}).items()}
-    if WORKFLOW_TOKEN in os.environ:
-        env[WORKFLOW_TOKEN] = os.environ[WORKFLOW_TOKEN]
+    if WORKFLOW_ATTEMPT_VARIABLE in os.environ:
+        env[WORKFLOW_ATTEMPT_VARIABLE] = os.environ[WORKFLOW_ATTEMPT_VARIABLE]
     timeout = float(spec["timeout_s"])
     preexec = platform_calls.set_parent_death_signal if platform_calls.platform_key() == "linux" else None
     facts = {"argv_bound": argv, "end": None, "native_exit_code": None, "signal": None, "duration_s": None,

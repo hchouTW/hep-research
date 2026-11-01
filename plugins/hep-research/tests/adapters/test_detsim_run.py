@@ -824,5 +824,21 @@ class ReviewRoundTwo(Base):
         self.assertTrue(any(o["pid"] == survivor.pid for o in answer["orphans"]), answer)
 
 
+class ReviewRoundThree(Base):
+    """W3b independent review round 3: B1 (a fallback is a failure only below a declared hard level)."""
+
+    def test_fallback_under_a_soft_declaration_commits_soft(self):
+        attempt = self.work_dir / "attempt"
+        (attempt / "raw").mkdir(parents=True)
+        (attempt / "raw" / "x.txt").write_text("x")
+        target = self.work_dir / "runs" / "target"
+        soft_profile = dict(detsim_profile.profile("macos-g0"))
+        soft_profile["guarantees"] = dict(soft_profile["guarantees"], commit_noreplace="soft")
+        with mock.patch.object(detsim_platform, "rename_noreplace", lambda *a, **k: False):
+            level = detsim_run.commit(attempt, target, soft_profile, expect_noreplace=False)
+        self.assertEqual(level, "soft")
+        self.assertTrue((target / "raw" / "x.txt").is_file())
+
+
 if __name__ == "__main__":
     unittest.main()

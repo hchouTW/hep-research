@@ -347,7 +347,7 @@ def run_record(plan: dict, plan_digest: str, replicate: int, ok: bool, facts: di
                        "input_isolation": facts.get("input_isolation"),
                        "inputs_cloned": facts.get("cloned", []), "inputs_in_place": facts.get("in_place", []),
                        "guarantees_below_declared": facts.get("below_declared", []),
-                       "workflow_attempt": os.environ.get(runner.WORKFLOW_TOKEN)}},
+                       "workflow_attempt": os.environ.get(runner.WORKFLOW_ATTEMPT_VARIABLE)}},
     }
 
 
@@ -597,8 +597,9 @@ def _locked_run(plan, plan_digest, replicate, run_id, nonce, workspace, store, p
         if "before_commit" in HOOKS:
             HOOKS["before_commit"](attempt)
         try:
-            level = commit(attempt, committed_folder, profile_doc,
-                           expect_noreplace=bool(facts.get("noreplace_available")))
+            hard_declared = profile_doc["guarantees"].get("commit_noreplace") == "hard"
+            level = commit(attempt, committed_folder, profile_doc,  # a fallback below "hard" fails the run only
+                           expect_noreplace=bool(facts.get("noreplace_available")) and hard_declared)
         except FileExistsError:
             facts["error_code"] = "commit-conflict"
             return _fail(plan, plan_digest, replicate, attempt, store, run_id, facts, profile_doc, completeness)
