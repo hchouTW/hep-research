@@ -8708,3 +8708,19 @@ simulator was run.
 | Independent review | three rounds (fresh subagents, advisory, shared host): round 1 0 major / 9 minor, round 2 1 major / 6 minor, round 3 no earlier finding open and 2 new minor findings, fixed with tests after round 3 (no fourth round) | findings fixed |
 
 Passing checks show software consistency, not physical validity.
+
+## DETSIM-WK — 2026-11-01 (E2 macOS 27.2 arm64, Python 3.13.2 venv; version 0.53.0 + unreleased)
+
+The knowledge deliverable K of the detector-simulation task: the hep-detector guide
+`sensor-and-gas-transport-tools.md`, the hep-computing guide `sensor-and-gas-simulation-operations.md`, the source
+index and the 20-question set; no simulator was built or run for it, and every operational part is marked unverified.
+
+| Item | Evidence | Result |
+|---|---|---|
+| Sources | `docs/dev/detector-simulation/SOURCES.md`: 56 records (commit or URL, lines, retrieval time, SHA-256, licence, review status) | recorded; content hashes re-checked by the independent reviewers |
+| T-DISCOVER | `WR/scratch/WK/t-discover.txt` (raw log): `skills/hep-detector/SKILL.md` row "Simulation (Geant4)" → `detector-simulation.md` → the hep-detector guide; `skills/hep-computing/SKILL.md` → `analysis-workflows.md` / `environments-and-containers.md` → the operations guide; `tools/check_wiring.py` pass; no backend on the host; the non-author answerer reached both guides from both entry points (result sheet, path column) | pass |
+| T-CONTENT (knowledge part) | 20 questions (4/4/4/3/3/2) answered by fresh non-author subagents from the three corpus files and five routing pages, graded element by element: run 4 on the final guides | 20 of 20 within range, no veto (runs 2 and 3: 19 of 20, the gaps fixed in the guides) |
+| T-CONV | `reference_inventory --check` (0 overlap pairs), `check_wiring`, `check_layering`, `check_naming`, `check_routing_static`, `check_ownership`, `capability_map --check`, `skill_scripts --check`, `insert_interpreter_guard --check`; routing-table, reference-link and doc-consistency tests (also with a TMPDIR with a space and non-ASCII) | pass |
+| Independent review | three rounds (fresh subagents, advisory, shared host): round 1 5 major / 11 minor, round 2 1 major / 4 minor, round 3 no earlier finding open and 3 new minor findings, fixed after round 3 (no fourth round) | findings fixed |
+
+Passing checks show software consistency, not physical validity.

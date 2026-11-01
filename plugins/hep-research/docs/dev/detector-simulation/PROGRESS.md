@@ -90,7 +90,7 @@ Host: Darwin arm64 (macOS 27.2), 8 CPUs, Python 3.13.2, git 2.54.0, CMake 4.3.2,
 |---|---|---|---|---|---|
 | W0 | done | 2026-11-01 | 0 / 0 | T-WT (this ledger, isolation record) | |
 | W1 | done | 2026-11-01 | 0 / 0 | W1 reuse table; V-01..V-06; D-W1-1..5; WR/scratch/W1 | |
-| WK | in-progress | 2026-11-01 | 0 / 2 | patches WK (d3ee1c15), WK-2 (8628dc11), round-2 fixes 8abe2652; T-DISCOVER (WR/scratch/WK/t-discover.txt, raw); question set run 2: 19/20, Q05 partial (dc8f1d42) | review round 3; question set rerun |
+| WK | done | 2026-11-01 | 0 / 3 | guides, SOURCES.md (56 records), question set run 4 20/20 no veto; T-DISCOVER raw log; T-CONV pass; VALIDATION DETSIM-WK | round-3 minor findings C1-C3 fixed after round 3 without a fourth review |
 | W2-AP | in-progress | 2026-11-01 | 0 / 0 | V-07, V-14 read at df69a6a4; G4NDL 4.7.1 in WR/env/g4data (MD5 54f0ed39 matches) | environment (V-08): ROOT with a working interpreter, Allpix build |
 | W2-GF | in-progress | 2026-11-01 | 0 / 0 | card-GF-QUERY.md (query points and tolerances fixed before any query); V-09..V-12 read at e2e58ea | environment (V-13): ROOT with a working interpreter |
 | W3a | done | 2026-11-01 | 0 / 3 | patches 5ca7dbd1, 3fd54f69, 510315a5; review fixes 2468b15e, ff6a077e, f348166f; T-CANON 17, T-SCHEMA 12, T-PLAN 35, missing-dependency 3 OK; VALIDATION DETSIM-W3A | round-3 minor findings M1-M2 fixed after round 3 without a fourth review |
@@ -192,6 +192,22 @@ Independent review: 3 rounds (round 1: 0 major / 9 minor; round 2: 1 major / 6 m
   open, 2 new minor findings M1-M2 fixed with tests after the round; no fourth round)
 Blockers and gates raised: H5 (review bound) answered: 3 rounds
 Next step: W3b
+```
+
+```text
+Work item ID: WK
+Status: done
+Isolation guard: pass at start / pass before each commit
+Files changed: skills/hep-detector/references/sensor-and-gas-transport-tools.md,
+  skills/hep-computing/references/sensor-and-gas-simulation-operations.md, hub links, README counts, reference
+  inventory, docs/dev/detector-simulation/{SOURCES,knowledge-questions}.md, CHANGELOG, VALIDATION
+Decisions made (with reasons): hub entry points (decision log); detsim named without a .py token in skill text
+Commands actually run and results: see VALIDATION DETSIM-WK
+Tests not run and reasons: none in scope
+V-items concluded / still open: none owned (WK confirmed V-07, V-10, V-11, V-14 readings as information)
+Independent review: 3 rounds; round-3 minor findings C1-C3 fixed after the round (no fourth review)
+Blockers and gates raised: H5 (review bound) answered: 3 rounds
+Next step: W5 (after W4A / W4G settle)
 ```
 
 ## Final report

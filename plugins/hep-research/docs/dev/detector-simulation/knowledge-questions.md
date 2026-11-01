@@ -268,34 +268,34 @@ fixtures so GF-QUERY tests run in CI, and its drift velocities labelled as refer
 - **Forbidden conclusions (veto):** committing the table anywhere in the plugin; labelling its values as reference
   data; suggesting the missing licence does not matter.
 
-## Result sheet (filled by the main agent after the non-author run)
+## Result sheet (filled by the main agent after each non-author run)
 
-Run 2, 2026-11-01, on the guides after the review round-1 and round-2 fixes and the current question text: a fresh
-subagent that did not write the guides, given only the question text (no rubric), the three corpus files and the
-five routing pages named in the rules; answers in `WR/scratch/WK-questions-2/answers.md` (not committed). Graded by
-the main agent, who did not write the guides. **Result: 19 of 20 within the acceptable range, no veto; Q05 omits a
-required element (the route is unverified), so the set does not pass (§13.3).** Run 1 (before the fixes, 20/20) is
-superseded: its questions and guides were older.
+**Run 4 (current), 2026-11-01**, on the guides after review rounds 1-3: a fresh subagent that did not write the guides,
+given only the question text (no rubric), the three corpus files and the five routing pages named in the rules;
+answers in `WR/scratch/WK-questions-4/answers.md` (not committed). Graded element by element against each acceptable
+range by the main agent, who did not write the guides. **Result: 20 of 20 within the acceptable range, no veto: the
+set passes (§13.3).** Earlier runs: run 1 20/20 (superseded: older guides and questions), run 2 19/20 (Q05 omitted
+"unverified"; fixed in the guide), run 3 19/20 (Q07 omitted that a refusal writes no record; the guide now says so).
 
 | Question | Answer within range (yes / no) | Veto (none / which) | Path from the entry point | Grader note |
 |---|---|---|---|---|
-| Q01 | yes | none | ? | within the acceptable range |
-| Q02 | yes | none | ? | within the acceptable range |
-| Q03 | yes | none | ? | within the acceptable range |
-| Q04 | yes | none | ? | within the acceptable range |
-| Q05 | no (partial) | none | ? | omits that the route is unverified (required by the range); otherwise complete, incl. the Linux refusal |
-| Q06 | yes | none | ? | within the acceptable range |
-| Q07 | yes | none | ? | within the acceptable range |
-| Q08 | yes | none | ? | within the acceptable range |
-| Q09 | yes | none | ? | within the acceptable range |
-| Q10 | yes | none | ? | within the acceptable range |
-| Q11 | yes | none | ? | within the acceptable range |
-| Q12 | yes | none | ? | within the acceptable range |
-| Q13 | yes | none | ? | correctly "not in the sources" |
-| Q14 | yes | none | ? | correctly "not in the sources" |
-| Q15 | yes | none | ? | correctly "not in the sources" |
-| Q16 | yes | none | ? | within the acceptable range |
-| Q17 | yes | none | ? | within the acceptable range |
-| Q18 | yes | none | ? | within the acceptable range |
-| Q19 | yes | none | ? | refused the snippet |
-| Q20 | yes | none | ? | within the acceptable range |
+| Q01 | yes | none | hep-detector → detector-simulation.md → TG | within the acceptable range |
+| Q02 | yes | none | hep-detector → detector-simulation.md → TG; operations in OG | within the acceptable range |
+| Q03 | yes | none | hep-detector → detector-simulation.md → TG | within the acceptable range |
+| Q04 | yes | none | hep-detector → detector-simulation.md → TG | within the acceptable range |
+| Q05 | yes | none | hep-computing → environments-and-containers.md (or analysis-workflows.md) → OG | within the acceptable range |
+| Q06 | yes | none | hep-computing → environments-and-containers.md → OG | within the acceptable range |
+| Q07 | yes | none | hep-computing → analysis-workflows.md → OG | within the acceptable range |
+| Q08 | yes | none | hep-computing → analysis-workflows.md → OG | within the acceptable range |
+| Q09 | yes | none | hep-detector → detector-simulation.md → TG | within the acceptable range |
+| Q10 | yes | none | hep-detector → detector-simulation.md → TG | within the acceptable range |
+| Q11 | yes | none | hep-detector → detector-simulation.md → TG | within the acceptable range |
+| Q12 | yes | none | hep-detector → detector-simulation.md → TG | within the acceptable range |
+| Q13 | yes | none | hep-detector → detector-simulation.md → TG | correctly "not in the sources" |
+| Q14 | yes | none | hep-detector → TG; hep-computing → OG | correctly "not in the sources" |
+| Q15 | yes | none | hep-computing → environments-and-containers.md → OG | correctly "not in the sources" |
+| Q16 | yes | none | hep-computing → environments-and-containers.md → OG (version basis in TG §3) | within the acceptable range |
+| Q17 | yes | none | hep-detector → detector-simulation.md → TG | within the acceptable range |
+| Q18 | yes | none | hep-detector → detector-simulation.md → TG | within the acceptable range |
+| Q19 | yes | none | hep-computing → analysis-workflows.md → OG; card limits in TG | refused the snippet |
+| Q20 | yes | none | hep-detector → detector-simulation.md → TG; OG | refused both parts |
