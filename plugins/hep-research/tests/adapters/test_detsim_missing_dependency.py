@@ -4,10 +4,11 @@ detsim.py is the adapter's only command (the only assets file containing the str
 third-party package anywhere, so tests/adapters/test_adapter_missing_dependency.py does not put it in its domain.
 This test hides ROOT and uproot (sys.modules[name] = None, so importing them fails whether or not they are
 installed) and runs describe, check and prepare with the simulator-free backend: everything this version offers
-works without them. The backends import ROOT or uproot only inside the functions that need them (the Garfield++
-backend not at all: ROOT is imported by its query script, in the backend process); with ROOT hidden, check --probe of
-the Garfield++ backend answers missing-dependency (exit 3) for an environment root without ROOT (more cases in
-test_detsim_garfield.py). The Allpix Squared backend's expectation comes with work item W4A.
+works without them. The backends import ROOT or uproot only inside the functions that need them, never at module
+level (the Garfield++ backend not at all: ROOT is imported by its query script, in the backend process); with ROOT
+hidden, check --probe answers missing-dependency (exit 3) for the Garfield++ backend on an environment root without
+ROOT (more cases in test_detsim_garfield.py) and for the Allpix Squared backend before anything is written (its
+extractor needs the ROOT bindings in the controller; more cases in test_detsim_allpix.py).
 SYNTHETIC inputs; standard library only.
 """
 import ast
@@ -39,8 +40,14 @@ class WithoutRootOrUproot(unittest.TestCase):
         self.assertEqual(commands, ["detsim.py"])
         for path in sorted(ASSETS.glob("*.py")):
             with self.subTest(module=path.name):
-                self.assertEqual(third_party_imports(str(path.relative_to(ROOT))), [])
                 tree = ast.parse(path.read_text(encoding="utf-8"))
+                top = {a.name.split(".")[0] for n in tree.body if isinstance(n, ast.Import) for a in n.names}
+                top |= {n.module.split(".")[0] for n in tree.body if isinstance(n, ast.ImportFrom) and n.module}
+                self.assertFalse(top & set(HIDDEN), f"{path.name}: ROOT / uproot imported at module level")
+                if path.name.startswith("detsim_backend_"):  # inside functions only, and nothing else third-party
+                    self.assertTrue(set(third_party_imports(str(path.relative_to(ROOT)))) <= set(HIDDEN), path.name)
+                    continue
+                self.assertEqual(third_party_imports(str(path.relative_to(ROOT))), [])
                 names = {a.name.split(".")[0] for n in ast.walk(tree) if isinstance(n, ast.Import) for a in n.names}
                 names |= {n.module.split(".")[0] for n in ast.walk(tree) if isinstance(n, ast.ImportFrom) and n.module}
                 self.assertFalse(names & set(HIDDEN), path.name)
@@ -74,6 +81,21 @@ class WithoutRootOrUproot(unittest.TestCase):
                     self.assertEqual((code, answer["status"], answer["error_code"]),
                                      (3, "missing-dependency", "missing-dependency"), (answer, err[-300:]))
                     self.assertTrue(any("ROOT" in m for m in answer["missing"]), answer["missing"])
+
+    @needs("process_groups")
+    def test_allpix_probe_without_root_is_missing_dependency(self):
+        with tempfile.TemporaryDirectory(prefix="detsim probe é ") as scratch:
+            project = Path(scratch) / "project"
+            project.mkdir()
+            env_root = Path(scratch) / "env root"
+            env_root.mkdir()
+            for hidden in ("ROOT", "ROOT,uproot"):
+                with self.subTest(hidden=hidden):
+                    code, answer, err = run_cli(["--backend", "allpix-squared", "check", "--workspace", str(project),
+                                                 "--probe", "--env-root", str(env_root)], hide=hidden)
+                    self.assertEqual((code, answer["status"], answer["missing"]), (3, "missing-dependency", ["ROOT"]),
+                                     (answer, err[-300:]))
+            self.assertFalse((project / "hep-research-artifacts").exists())  # nothing written before the answer
 
     def test_hidden_module_really_fails_to_import(self):
         proc = subprocess.run([sys.executable, "-I", "-c", "import sys; sys.modules['ROOT'] = None; import ROOT"],

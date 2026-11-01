@@ -349,7 +349,7 @@ class CommandLine(ProjectCase):
     def test_describe(self):
         code, answer, _ = run_cli(["describe"])
         self.assertEqual((code, answer["status"]), (0, "ok"))
-        self.assertEqual(answer["backends"]["allpix-squared"], "not in this adapter version")
+        self.assertEqual(answer["backends"]["allpix-squared"], "present")  # W4A
         self.assertEqual(answer["backends"]["synthetic"], "in-process module")
         self.assertEqual(sorted(answer["contracts"]), ["detector-plan/1", "detector-task/1", "detsim-completeness/1",
                                                        "detsim-observables/1"])
@@ -364,8 +364,8 @@ class CommandLine(ProjectCase):
         self.assertEqual((code, answer["status"]), (0, "ok"), err)
         self.assertEqual(answer["backends"]["garfieldpp"], "present")  # W4G
         code, answer, _ = run_file(["--backend", "allpix-squared", "check", "--workspace", str(self.project), "--task",
-                                    "task.json"])
-        self.assertEqual((code, answer["status"], answer["error_code"]), (3, "not-run", "backend-unavailable"))
+                                    "task.json"])  # W4A: the backend exists; a synthetic task is not its capability
+        self.assertEqual((code, answer["status"], answer["error_code"]), (2, "rejected", "unknown-capability"))
         code, answer, _ = run_file(["--backend", "garfieldpp", "check", "--workspace", str(self.project), "--task",
                                     "task.json"])  # a synthetic task: the Garfield++ backend has no such capability
         self.assertEqual((code, answer["status"], answer["error_code"]), (2, "rejected", "unknown-capability"))

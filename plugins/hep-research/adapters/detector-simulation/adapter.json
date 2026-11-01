@@ -37,7 +37,9 @@
   "assets/detsim_run.py",
   "assets/detsim_backend_garfield.py",
   "assets/garfield/gas_table_query.py",
-  "assets/garfield/gas_table_query.capability.json"
+  "assets/garfield/gas_table_query.capability.json",
+  "assets/detsim_backend_allpix.py",
+  "assets/allpix/allpix.pixel-charge.json"
  ],
  "tests": [
   "../../tests/adapters/test_detsim_identity.py",
@@ -45,7 +47,8 @@
   "../../tests/adapters/test_detsim_plan.py",
   "../../tests/adapters/test_detsim_missing_dependency.py",
   "../../tests/adapters/test_detsim_run.py",
-  "../../tests/adapters/test_detsim_garfield.py"
+  "../../tests/adapters/test_detsim_garfield.py",
+  "../../tests/adapters/test_detsim_allpix.py"
  ],
  "owner_skill": "hep-detector",
  "status_rule": "the adapter status is the lowest of its tools' statuses; the shared layer becomes demonstrated-on-synthetic-data only when run, lock and commit are tested with cooperative programs (W3b), and a backend only when its task card's checks pass in a recorded environment; a completed run is verification, never physical validity"
