@@ -6,18 +6,26 @@ Verbs (docs/dev/detector-simulation/TASK.md 11):
              adapter's backends, runner profiles and contracts. Launches nothing.
   check      static and semantic checks of a task and its project: the task against detector-task/1 and the
              capability's parameter schema, quantities (decimal/1), inputs resolved inside the project, the
-             environment record, the backend's own checks. --probe (environment capture) comes with the execution
-             layer and answers not-run in this version.
+             environment record, the backend's own checks. --probe --env-root DIR calls the backend's probe,
+             captures and validates the environment and writes artifacts_root/detector-simulation/.env/<id>.json
+             (environment_manifest.py record runs as a subprocess for the path-bearing part); nothing else.
   prepare    the pinned plan (detector-plan/1) and its plan_digest; stateless, writes nothing. --digest-only
              [--replicate N] prints only {"status": "ok", "parameter_digest": <run digest>} (the computational-run
              parameter_digest, for run_workflow.py's incremental mode).
-  run, inspect  not part of this version (execution layer, work item W3b): they answer not-run and start nothing.
+  run        TASK.md 10.2: file system, --plan-digest, rebuild comparison, guarantees, idempotency, flock lock,
+             leftovers (moved and reported, never signalled), input snapshot, launch, collect, no-replace commit to
+             runs/<run_id>/ (or failed/<run_id>-<UTC ms>-<nonce>/), release. --replicate N (default 0).
+  inspect    read-only: --view state (committed, in-progress, stale, failures, reported orphans), --view summary,
+             --attempt ID; never writes, signals or kills anything.
 
 Usage:
   python3 detsim.py [--backend allpix-squared|garfieldpp] describe
   python3 detsim.py --backend NAME check   --workspace PROJECT --task task.json [--allow-outside-validated-range]
+  python3 detsim.py --backend NAME check   --workspace PROJECT --probe --env-root DIR
   python3 detsim.py --backend NAME prepare --workspace PROJECT --task task.json [--allow-outside-validated-range]
                                             [--digest-only [--replicate N]]
+  python3 detsim.py --backend NAME run     --workspace PROJECT --plan plan.json [--plan-digest SHA256] [--replicate N]
+  python3 detsim.py --backend NAME inspect --workspace PROJECT --run RUN_ID --view state|summary [--attempt ID]
 The task path is relative to the project root (--workspace), never to the current folder. Identity: plan_digest =
 canonical_sha256 of the plan (canonical/1); run digest = SHA-256("detsim-run/1\\0" + raw plan_digest + uint32
 big-endian replicate); run_id = its first 32 hex characters; replicate 0 ... 2^32 - 1, default 0.
@@ -64,12 +72,13 @@ from core.status import exit_code  # noqa: E402
 import detsim_canonical as canonical  # noqa: E402
 import detsim_plan as plan_layer  # noqa: E402
 import detsim_profile as profiles  # noqa: E402
+import detsim_run  # noqa: E402
 import detsim_schemas as schemas  # noqa: E402
 from detsim_plan import DetsimError  # noqa: E402
 
 ADAPTER_ID = "adapter:detector-simulation"
 DEFAULT_BACKENDS = {"allpix-squared": "detsim_backend_allpix", "garfieldpp": "detsim_backend_garfield"}
-LATER_VERBS = ("run", "inspect")
+LATER_VERBS: tuple = ()
 
 
 class UsageError(Exception):
@@ -92,16 +101,25 @@ def build_parser() -> argparse.ArgumentParser:
     for name, text in (("check", "static and semantic checks of a task"), ("prepare", "the pinned plan and digest")):
         verb = verbs.add_parser(name, help=text)
         verb.add_argument("--workspace", required=True, help="the project root (task and inputs resolve against it)")
-        verb.add_argument("--task", required=True, help="detector-task/1 file, relative to the project root")
+        verb.add_argument("--task", required=(name == "prepare"), help="detector-task/1 file, relative to the project root")
         verb.add_argument("--allow-outside-validated-range", action="store_true",
                           help="set the capability's allow_outside_validated_range parameter (in the hash scope)")
         if name == "check":
-            verb.add_argument("--probe", action="store_true", help="environment capture (execution layer; not-run)")
+            verb.add_argument("--probe", action="store_true", help="capture and validate the environment (--env-root)")
+            verb.add_argument("--env-root", help="the backend environment root to probe (with --probe)")
         else:
             verb.add_argument("--digest-only", action="store_true", help="print only the run digest")
             verb.add_argument("--replicate", help="0 ... 2^32 - 1 (with --digest-only), default 0")
-    for name in LATER_VERBS:  # their arguments are not read in this version
-        verbs.add_parser(name, help="execution layer (not in this version): answers not-run")
+    run_verb = verbs.add_parser("run", help="run a pinned plan (TASK.md 10.2)")
+    run_verb.add_argument("--workspace", required=True, help="the project root")
+    run_verb.add_argument("--plan", required=True, help="the plan file (prepare's answer or the plan object)")
+    run_verb.add_argument("--plan-digest", help="the expected plan_digest (64 hex)")
+    run_verb.add_argument("--replicate", help="0 ... 2^32 - 1, default 0")
+    look = verbs.add_parser("inspect", help="read-only state and results")
+    look.add_argument("--workspace", required=True, help="the project root")
+    look.add_argument("--run", help="the run_id")
+    look.add_argument("--view", choices=("state", "summary"), default="state")
+    look.add_argument("--attempt", help="a failed/ folder name: its completeness evidence")
     return parser
 
 
@@ -152,7 +170,7 @@ def describe(args, backends: dict) -> dict:
         return {"status": "ok", "adapter": ADAPTER_ID, "backends": available, "host_profile": host,
                 "profiles": profiles.PROFILES, "contracts": sorted(schemas.SCHEMA_FILES),
                 "canonicalization": [canonical.CANONICAL_VERSION, canonical.DECIMAL_VERSION],
-                "verbs_not_in_this_version": list(LATER_VERBS) + ["check --probe"]}
+                "verbs_not_in_this_version": list(LATER_VERBS)}
     backend = load_backend(args.backend, backends)
     found = []
     for capability_id, descriptor in sorted(backend.capabilities().items()):
@@ -165,8 +183,12 @@ def describe(args, backends: dict) -> dict:
 
 def check(args, backends: dict) -> dict:
     if args.probe:
-        return {"status": "not-run", "error_code": "not-implemented", "message": "check --probe (environment "
-                "capture) comes with the execution layer; nothing was probed or written", "location": "--probe"}
+        if args.env_root is None:
+            raise DetsimError("rejected", "usage", "--probe needs --env-root", "--env-root")
+        backend = load_backend(args.backend, backends)
+        return detsim_run.probe(project_root(args.workspace), backend, Path(args.env_root))
+    if args.task is None:
+        raise DetsimError("rejected", "usage", "check needs --task (or --probe --env-root)", "--task")
     workspace = project_root(args.workspace)
     task = read_task(workspace, args.task)
     backend = load_backend(args.backend, backends)
@@ -196,12 +218,23 @@ def prepare(args, backends: dict) -> dict:
     return {"status": "ok", "plan_digest": plan_digest, "plan": plan}
 
 
-def later_verb(args, backends: dict) -> dict:
-    return {"status": "not-run", "error_code": "not-implemented", "message": f"{args.verb} comes with the execution "
-            "layer (work item W3b) and is not part of this version; nothing was started", "location": args.verb}
+def run(args, backends: dict) -> dict:
+    replicate = canonical.parse_replicate(args.replicate) if args.replicate is not None else 0
+    workspace = project_root(args.workspace)
+    plan_path = Path(args.plan)
+    plan = plan_layer.load_plan(plan_path if plan_path.is_absolute() else Path.cwd() / plan_path)
+    backend = load_backend(plan["capability"]["backend"] if args.backend is None else args.backend, backends)
+    if backend.NAME != plan["capability"]["backend"]:
+        raise DetsimError("rejected", "backend-mismatch", f"the plan is for backend {plan['capability']['backend']}",
+                          "--backend")
+    return detsim_run.run(plan, workspace, backend, host_profile(), replicate, args.plan_digest)
 
 
-VERBS = {"describe": describe, "check": check, "prepare": prepare, "run": later_verb, "inspect": later_verb}
+def inspect(args, backends: dict) -> dict:
+    return detsim_run.inspect(project_root(args.workspace), args.run, args.view, args.attempt)
+
+
+VERBS = {"describe": describe, "check": check, "prepare": prepare, "run": run, "inspect": inspect}
 
 
 def main(argv=None, backends=None) -> int:

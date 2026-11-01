@@ -313,9 +313,9 @@ class CommandLine(ProjectCase):
              2, "rejected", "input-role-missing"),
             (["prepare", *ws, "--task", task_file("ood.json", lambda t: t["parameters"].update(
                 point={"value": "5", "unit": "V/cm"}))], 1, "refused", "out-of-domain"),
-            (["check", *ws, "--task", "task.json", "--probe"], 3, "not-run", "not-implemented"),
-            (["run", "--plan", "plan.json"], 3, "not-run", "not-implemented"),
-            (["inspect", "--run", "0" * 32, "--view", "state"], 3, "not-run", "not-implemented"),
+            (["check", *ws, "--task", "task.json", "--probe"], 2, "rejected", "usage"),  # --probe needs --env-root
+            (["run", *ws, "--plan", "missing-plan.json"], 2, "rejected", "plan-unreadable"),
+            (["inspect", *ws, "--view", "state"], 2, "rejected", "usage"),  # --view state needs --run
             (["frobnicate"], 2, "rejected", "usage"),
             (["prepare", *ws], 2, "rejected", "usage"),
         ]

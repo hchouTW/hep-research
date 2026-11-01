@@ -125,7 +125,13 @@ def observables(attempt_dir: Path, spec: dict) -> dict:
 
 
 def probe(env_root: Path) -> dict:
-    return {"backend": NAME, "version": "synthetic 1.0.0"}
+    """{identity, variables, facts}; the identity is content-based (never the path)."""
+    if not (Path(env_root) / "bin" / "synthetic-sim").is_file():
+        import detsim_plan  # the shared layer (on sys.path in the tests)
+        raise detsim_plan.DetsimError("missing-dependency", "missing-dependency", "bin/synthetic-sim not found in "
+                                      "the environment root", "--env-root", missing=["synthetic-sim"])
+    return {"identity": dict(IDENTITY), "variables": dict(VARIABLES),
+            "facts": {"backend": NAME, "version": "synthetic 1.0.0"}}
 
 
 IDENTITY = {"kind": "synthetic", "backend_version": "1.0.0", "platform": "any"}
@@ -140,23 +146,27 @@ def task_document(env_identity: str, **parameters) -> dict:
             "parameters": params, "budget": {"timeout_s": 60, "max_output_bytes": 1048576}}
 
 
-def write_env_record(project: Path, identity: dict | None = None, variables: dict | None = None) -> str:
+def write_env_record(project: Path, identity: dict | None = None, variables: dict | None = None,
+                     env_root: Path | None = None) -> str:
     """Write the environment record into the project's artifacts directory; returns its env_identity."""
     import detsim_plan  # the shared layer (the caller puts adapters/detector-simulation/assets on sys.path)
-    record = detsim_plan.env_record(identity or IDENTITY, variables or VARIABLES, facts=probe(Path("/")),
-                                    path_record={"note": "synthetic"})
+    path_record = {"note": "synthetic"}
+    if env_root is not None:
+        path_record["env_root"] = str(env_root)
+    record = detsim_plan.env_record(identity or IDENTITY, variables or VARIABLES,
+                                    facts={"backend": NAME, "version": "synthetic 1.0.0"}, path_record=path_record)
     path = detsim_plan.env_record_path(detsim_plan.artifacts_root(project), record["env_identity"])
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text(json.dumps(record, indent=1, sort_keys=True), encoding="utf-8")
     return record["env_identity"]
 
 
-def make_project(root: Path, **parameters) -> Path:
+def make_project(root: Path, env_root: Path | None = None, **parameters) -> Path:
     """A synthetic project under root: inputs/run config.conf, task.json and the environment record."""
     project = Path(root)
     (project / "inputs").mkdir(parents=True, exist_ok=True)
     (project / "inputs" / "run config.conf").write_text("synthetic configuration\nmodel = toy\n", encoding="utf-8")
-    env_identity = write_env_record(project)
+    env_identity = write_env_record(project, env_root=env_root)
     (project / "task.json").write_text(json.dumps(task_document(env_identity, **parameters), indent=1),
                                        encoding="utf-8")
     return project
