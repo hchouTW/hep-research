@@ -379,6 +379,7 @@ def _replay(here: Path) -> dict:
     call(LIT, "import", "literature-input.json", "--project-root", ".", "--out",
          f"{o}/artifacts/geant4.literature-record.json", "--today", CREATED, "--artifact-id", "j14-geant4-literature")
     variations = {"mpv": ["em-option0", "em-option3", "pai", "ftfp-bert-emz"], "sp": ["em-option0", "em-option3"]}
+    study_runs = {}
     for study in ("mpv", "sp"):
         _, spec = call(CHECK, "spec", "--spec", f"study-{study}.json")
         write(out / f"spec-check-{study}.json", spec)
@@ -393,6 +394,7 @@ def _replay(here: Path) -> dict:
              f"recorded/blocks/{study}-nominal.json", *var_args, "--out", f"{o}/variations-{study}.json")
         runs = [f"{o}/artifacts/runs/{study}-{r}.computational-run.json"
                 for r in ["nominal", "control", "control-minus", *[f"cut-{c}" for c in CUTS], *variations[study]]]
+        study_runs[study] = runs
         _, lab = call(CHECK, "label", "--spec", f"study-{study}.json", "--benchmarks", f"{o}/benchmarks-{study}.json",
                       "--convergence", f"{o}/convergence-{study}.json", "--variations", f"{o}/variations-{study}.json",
                       *[a for r in runs for a in ("--run-record", r)], "--project-root", ".",
@@ -422,8 +424,9 @@ def _replay(here: Path) -> dict:
     vmpv = json.loads((out / "variations-mpv.json").read_text(encoding="utf-8"))
     crit["same_model_variation_excluded"] = [v["variation"] for v in vmpv["variations"] if not v["listed"]] == \
         ["ftfp-bert-emz"]
-    # scenarios
+    # scenarios: each lists the run records its benchmarks derive their configuration from (dependencies.py checks them)
     scen = out / "scenarios"
+    run_args = lambda runs: [a for r in runs for a in ("--run-record", r)]  # noqa: E731
     coarse = json.loads((here / "study-mpv.json").read_text(encoding="utf-8"))
     coarse["study_id"] = "j14-scenario-coarse-cut"
     coarse["convergence_plan"]["parameters"][0]["values"] = list(COARSE)
@@ -435,7 +438,7 @@ def _replay(here: Path) -> dict:
                  "--out", f"{o}/scenarios/coarse-cut.convergence.json", ok=(1,))
     _, lc = call(CHECK, "label", "--spec", f"{o}/scenarios/coarse-cut.study.json", "--benchmarks",
                  f"{o}/benchmarks-mpv.json", "--convergence", f"{o}/scenarios/coarse-cut.convergence.json",
-                 "--variations", f"{o}/variations-mpv.json", "--project-root", ".", "--write",
+                 "--variations", f"{o}/variations-mpv.json", *run_args(study_runs["mpv"]), "--project-root", ".", "--write",
                  f"{o}/artifacts/scenario-coarse-cut.study.computational-run.json", "--created", CREATED)
     crit["coarse_cut_stopped_by_gate"] = cc["convergence"]["gate"] == "fail" and any(
         "convergence gate not passed" in g for g in lc["gaps"])
@@ -449,6 +452,7 @@ def _replay(here: Path) -> dict:
                   f"{o}/scenarios/density-10.benchmarks.json", ok=(1,))
     _, l10 = call(CHECK, "label", "--spec", "study-sp.json", "--benchmarks", f"{o}/scenarios/density-10.benchmarks.json",
                   "--convergence", f"{o}/convergence-sp.json", "--variations", f"{o}/variations-sp.json",
+                  *run_args([*study_runs["sp"], f"{o}/artifacts/runs/sp-density-10.computational-run.json"]),
                   "--project-root", ".", "--write", f"{o}/artifacts/scenario-density-10.study.computational-run.json",
                   "--created", CREATED)
     crit["density_10_caught"] = b10["benchmarks"][0]["verdict"] == "fail" and "stopping-power" in b10["failed"] and \
@@ -462,7 +466,7 @@ def _replay(here: Path) -> dict:
     write(scen / "dump-reference.study.json", dump)
     _, ld = call(CHECK, "label", "--spec", f"{o}/scenarios/dump-reference.study.json", "--benchmarks",
                  f"{o}/benchmarks-sp.json", "--convergence", f"{o}/convergence-sp.json", "--variations",
-                 f"{o}/variations-sp.json", "--project-root", ".", "--write",
+                 f"{o}/variations-sp.json", *run_args(study_runs["sp"]), "--project-root", ".", "--write",
                  f"{o}/artifacts/scenario-dump-reference.study.computational-run.json", "--created", CREATED)
     crit["dump_reference_flagged"] = any("taken from the Geant4 material dump" in g for g in ld["gaps"])
     results["scenarios"] = {"coarse-cut": lc["gaps"], "density-10": l10["gaps"], "dump-reference": ld["gaps"]}
@@ -502,6 +506,10 @@ def _replay(here: Path) -> dict:
             dcode, dep = call(DEPS, f"{o}/artifacts/{study}.{kind}.computational-run.json", "--root", ".",
                               ok=(0, 1, 3))
             crit[f"{study}_{kind}_dependencies_ok"] = dcode == 0 and dep.get("dependency_consistency_ok") is True
+    for scenario in ("coarse-cut", "density-10", "dump-reference"):
+        dcode, dep = call(DEPS, f"{o}/artifacts/scenario-{scenario}.study.computational-run.json", "--root", ".",
+                          ok=(0, 1, 3))
+        crit[f"scenario_{scenario}_dependencies_ok"] = dcode == 0 and dep.get("dependency_consistency_ok") is True
     dcode, _ = call(DEPS, f"{o}/artifacts/response.json", "--root", ".", ok=(0, 1, 3))
     crit["response_linked_to_its_run"] = dcode == 0
     results["pass"] = crit

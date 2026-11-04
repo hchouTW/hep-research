@@ -1,0 +1,146 @@
+{
+ "schema": "g4sim-task-registry/1",
+ "note": "One entry per registration, oldest first. The latest entry of a card is the one in force; gate records cite it.",
+ "registrations": [
+  {
+   "card": "g4sim-tasks/S0.md",
+   "sha256": "c47ab6fa93b9ced08f485625fee5b55ad489ddff996979ebd13873ccae02e4d5",
+   "registered_at": "2026-11-04T09:23:57Z",
+   "card_commit": "be509c39",
+   "reason": "initial registration in S0"
+  },
+  {
+   "card": "g4sim-tasks/S1.md",
+   "sha256": "ad76765c28ea280101ddb49d4e435a4798ad12646670976ae29db592ec847ca7",
+   "registered_at": "2026-11-04T09:23:57Z",
+   "card_commit": "be509c39",
+   "reason": "initial registration in S0"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "eeef4a338e055ea9a3a6ac73e741b6d348ae55019724429666439120628bc603",
+   "registered_at": "2026-11-04T09:23:57Z",
+   "card_commit": "be509c39",
+   "reason": "initial registration in S0"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "75b1b530e7ba4c4d9a275c2cc185dbb876eb3c20c4e7284b1ddaa656e29f7c25",
+   "registered_at": "2026-11-04T09:23:57Z",
+   "card_commit": "be509c39",
+   "reason": "initial registration in S0"
+  },
+  {
+   "card": "g4sim-tasks/S4.md",
+   "sha256": "3ae54f8a569f45170a9db19d7b43668d4e80d3b94e2bc6bd0b423acdbef48c01",
+   "registered_at": "2026-11-04T09:23:57Z",
+   "card_commit": "be509c39",
+   "reason": "initial registration in S0"
+  },
+  {
+   "card": "g4sim-tasks/S5.md",
+   "sha256": "d890fb46ac7894845d704df67c27cab8ab1951b50d366fb3f24cbc1aac5d39b9",
+   "registered_at": "2026-11-04T09:23:57Z",
+   "card_commit": "be509c39",
+   "reason": "initial registration in S0"
+  },
+  {
+   "card": "g4sim-tasks/S6.md",
+   "sha256": "693a9d16765ef0390d886597d1dda1b67bd3786348f634c5241f823b6a1082fc",
+   "registered_at": "2026-11-04T09:23:57Z",
+   "card_commit": "be509c39",
+   "reason": "initial registration in S0"
+  },
+  {
+   "card": "g4sim-tasks/S7.md",
+   "sha256": "2c5be345a9b690c5aa0b6891b8c19ef9f4586a9a3ad5e274deed749db121c511",
+   "registered_at": "2026-11-04T09:23:57Z",
+   "card_commit": "be509c39",
+   "reason": "initial registration in S0"
+  },
+  {
+   "card": "g4sim-tasks/S8.md",
+   "sha256": "ae2c638cb5b102dd65d3b48a0a63930bf31fec4a0a6afc0c71d37e3a896b0679",
+   "registered_at": "2026-11-04T09:23:57Z",
+   "card_commit": "be509c39",
+   "reason": "initial registration in S0"
+  },
+  {
+   "card": "g4sim-tasks/S9.md",
+   "sha256": "45c71739e6812e45d3914cab0fe4bb07a0c747c14fbd739c73ad4d66e4527f9f",
+   "registered_at": "2026-11-04T09:23:57Z",
+   "card_commit": "be509c39",
+   "reason": "initial registration in S0"
+  },
+  {
+   "card": "g4sim-tasks/S0.md",
+   "sha256": "e24b80f841a2b8a0c592813961a27256adb2d84913ac8a6f2526d34a4d2f6a8b",
+   "registered_at": "2026-11-04T09:53:58Z",
+   "card_commit": "2f265781",
+   "reason": "Execution log only; thresholds unchanged from the initial registration"
+  },
+  {
+   "card": "g4sim-tasks/S0.md",
+   "sha256": "9e6d9b37c8731fecdefc56d009583574e420dca122de2067e3f8dbdc10b82e3e",
+   "registered_at": "2026-11-04T09:58:11Z",
+   "card_commit": "95b102c0",
+   "reason": "Execution log only; thresholds unchanged from the initial registration"
+  },
+  {
+   "card": "g4sim-tasks/S0.md",
+   "sha256": "3abfa69e06447dd5e338355da23a6945e3875dac7374672fa3f2b9db75c1af79",
+   "registered_at": "2026-11-04T09:59:21Z",
+   "card_commit": "01be7857",
+   "reason": "Execution log only (correction); thresholds unchanged from the initial registration"
+  },
+  {
+   "card": "g4sim-tasks/S0.md",
+   "sha256": "1b063e185955009cd6411060b26c4edd3403d337bec391ed7c02ba6e803bc1eb",
+   "registered_at": "2026-11-04T11:30:06Z",
+   "card_commit": "e88b4467",
+   "reason": "Execution log only (dependencies.py investigation); thresholds unchanged from the initial registration"
+  },
+  {
+   "card": "g4sim-tasks/S0.md",
+   "sha256": "b6d34c24cdd5fb4da88387abacf9c51ce6084106d4ddce2b1dead6420668fba2",
+   "registered_at": "2026-11-04T11:38:45Z",
+   "card_commit": "7dc2c5ed",
+   "reason": "Execution log only (maintainer's decision on the dependencies.py check); thresholds unchanged from the initial registration"
+  },
+  {
+   "card": "g4sim-tasks/S0.md",
+   "sha256": "c646093a68ccc6fb24b4e03429ae36ef948c2357caca9116ca8414ab3cb6f5e6",
+   "registered_at": "2026-11-04T11:57:17Z",
+   "card_commit": "80b87f8c",
+   "reason": "Execution log only (example fixes); thresholds unchanged from the initial registration"
+  },
+  {
+   "card": "g4sim-tasks/S0.md",
+   "sha256": "aaa384a39dfeb0d63ce8443efa0e40b725ca37e5f857f373daea75de449e5bcc",
+   "registered_at": "2026-11-04T12:02:25Z",
+   "card_commit": "d2632d88",
+   "reason": "Execution log only (custodian named); thresholds unchanged from the initial registration"
+  },
+  {
+   "card": "g4sim-tasks/S0.md",
+   "sha256": "b77012890ca601c0c387c235a54b375cbd274b3536c28941a4f796886b6b78af",
+   "registered_at": "2026-11-04T19:48:00Z",
+   "card_commit": "594735a7",
+   "reason": "Execution log only (rebase onto PR #345, shorter E2 job); thresholds unchanged from the initial registration"
+  },
+  {
+   "card": "g4sim-tasks/S0.md",
+   "sha256": "61835025208f86661857c03965e27c1dffc9f4cd38fc62aab99a90279f5fb340",
+   "registered_at": "2026-11-04T20:11:47Z",
+   "card_commit": "5106f69e",
+   "reason": "Execution log only (PR #345 merged, branch pushed); thresholds unchanged from the initial registration"
+  },
+  {
+   "card": "g4sim-tasks/S0.md",
+   "sha256": "abe88133bac93e961a06a168b121a6fd8674f6e239d35b0f5c24bb9c2d75efe0",
+   "registered_at": "2026-11-04T20:42:25Z",
+   "card_commit": "ed5daa0a",
+   "reason": "Execution log only (E2 job and final checks); thresholds unchanged from the initial registration"
+  }
+ ]
+}

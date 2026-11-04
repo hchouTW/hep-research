@@ -4,6 +4,7 @@ Geant4 11.4.3, gzip-compressed run records), every F4 study re-labelled through 
 the derived results reproduce the committed output (numbers within 1e-9 relative, since libm differs between
 platforms in the last bit), every pre-declared criterion passes, and recorded/ stays inside its budget (B3.7)."""
 import contextlib
+import hashlib
 import importlib.util
 import io
 import json
@@ -74,6 +75,30 @@ class DesignMinimalSpectrometer(unittest.TestCase):
     def test_every_verdict_is_derived(self):
         rep = json.loads((self.out / "artifacts" / "reports" / "design-report.json").read_text(encoding="utf-8"))
         self.assertEqual((rep["artifact_type"], rep["provenance"]["producer_skill"]), ("communication", "hep-detector"))
+
+    def test_scrub_makes_refs_relative_and_keeps_citations(self):
+        sys.path.insert(0, str(HERE))
+        spec = importlib.util.spec_from_file_location("design_minimal_spectrometer_live", HERE / "live.py")
+        live = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(live)
+        prefix = "~/w/proj/artifacts/"
+        with tempfile.TemporaryDirectory() as workdir:
+            root = Path(workdir)
+            (root / "artifacts" / "checks").mkdir(parents=True)
+            check = root / "artifacts" / "checks" / "c.json"
+            check.write_text(json.dumps({"ref": f"{prefix}runs/r.json"}), encoding="utf-8")
+            digest_before = hashlib.sha256(check.read_bytes()).hexdigest()
+            study = root / "artifacts" / "study.json"
+            study.write_text(json.dumps({"sha256": digest_before}), encoding="utf-8")
+            run = root / "run.json"
+            argv = json.dumps({"argv": [f"{prefix}runs/r.json"]})
+            run.write_text(argv, encoding="utf-8")
+            live.scrub_home(root, prefix)
+            self.assertEqual(json.loads(check.read_text(encoding="utf-8"))["ref"], "runs/r.json")
+            digest_after = json.loads(study.read_text(encoding="utf-8"))["sha256"]
+            self.assertEqual(digest_after, hashlib.sha256(check.read_bytes()).hexdigest())
+            self.assertNotEqual(digest_after, digest_before)
+            self.assertEqual(run.read_text(encoding="utf-8"), argv)
 
     def test_recorded_budget(self):
         """B3.7: no file above 2 MiB, recorded/ at most 3 MB; no ROOT file is committed."""

@@ -11,6 +11,21 @@ profiles and five example tests ignore that version and still compare everything
 `docs/maintenance.md`). Outputs are regenerated only when a change alters a committed result. Negative controls:
 `tests/tools/test_outputs_keep_their_version.py`.
 
+## 0.55.0 (unreleased)
+
+Minor version for g4sim phase S0: documents, plus two example fixes asked for by the maintainer, on branch `g4sim/S0`.
+`examples/geant4-thin-silicon/run.py` gives its three negative-control scenario records their run records, and checks
+them with `dependencies.py`. `examples/design-minimal-spectrometer/live.py` writes the run refs of its check records
+relative to the artifacts folder, and `--strip-prefix` repairs an existing `recorded/` without simulating. No schema,
+contract, adapter or skill behaviour changes: contracts 3.18.0, `CORE_VERSION` 1.5.0, `adapters/geant4` 0.6.0
+and `adapters/detector-simulation` 0.4.0 are unchanged. The release date and the release steps assigned to E2 are set
+at merge.
+
+- **g4sim plan documents (phase S0).** `docs/dev/geant4-architecture/` gains the task document `g4sim-task.md`, the
+  Chinese original of its specification `g4sim-task.zh.md`, the task cards `g4sim-tasks/S0.md` to `S9.md`, their
+  registry `g4sim-task-registry.json`, the status file `g4sim-status.json` and the approval packet
+  `g4sim-approvals.md`. `geant4-program.md` and `geant4-program.en.md` gain Part 7, a summary of the plan.
+
 ## 0.54.0 (2026-11-02)
 
 Minor release: detector simulation with Allpix Squared and Garfield++. Contracts 3.18.0 (four sidecar schemas, no

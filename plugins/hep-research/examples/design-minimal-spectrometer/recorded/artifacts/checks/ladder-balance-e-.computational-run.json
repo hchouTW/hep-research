@@ -14,7 +14,7 @@
   "exit_status": 0,
   "input_manifest": [
    {
-    "path": "~/Workspace/geant4-work/sim-b3/j15/proj/artifacts/runs/ladder-balance-e-.computational-run.json",
+    "path": "runs/ladder-balance-e-.computational-run.json",
     "sha256": "298c2950cffd1fc64e5b59d3097fb288e667fd263ae027ae97f651a838ed4e45"
    }
   ],
@@ -48,7 +48,7 @@
   {
    "artifact_id": "geant4-run-ladder-balance-e-",
    "artifact_type": "computational-run",
-   "ref": "~/Workspace/geant4-work/sim-b3/j15/proj/artifacts/runs/ladder-balance-e-.computational-run.json",
+   "ref": "runs/ladder-balance-e-.computational-run.json",
    "sha256": "298c2950cffd1fc64e5b59d3097fb288e667fd263ae027ae97f651a838ed4e45",
    "status": [
     "unvalidated"
