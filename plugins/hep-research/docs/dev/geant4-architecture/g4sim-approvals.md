@@ -2,7 +2,7 @@
 
 Approval packet of phase S0 and the record of approvals given (Part A, Sections E7 and E9, of `g4sim-task.md`).
 
-**Status (2026-11-04):** all Section 20 decisions, both stewards and the five execution choices are approved. Open: the custodian's re-evaluation of qualification at the S0 release.
+**Status (2026-11-04):** all Section 20 decisions, both stewards, the five execution choices and the application of the `dependencies.py` common check are approved. Open: the custodian's re-evaluation of qualification at the S0 release.
 
 ## How to approve
 
@@ -60,6 +60,16 @@ Approval packet of phase S0 and the record of approvals given (Part A, Sections 
 | Steward of `core/canonical` | Maintainer and the steward | hep-computing (Section 20, M3) | Yes | hsinyichou (maintainer, and speaking for both stewards) | 2026-11-04 | Answer in the Claude Code session to the stewards question: "Approve; I speak for both" |
 | Steward of `core/geometry` | Maintainer and the steward | hep-detector (Section 20, M2) | Yes | hsinyichou (maintainer, and speaking for both stewards) | 2026-11-04 | Answer in the Claude Code session to the stewards question: "Approve; I speak for both" |
 | Re-evaluation of qualification at the S0 release | Custodian | Follows the S0 release (Sections 21, 22) |  |  |  |  |
+
+## Application of the `dependencies.py` common check
+
+Maintainer's decision on E7 item 9 (S0 Execution log). It settles how the check applies to stored example records; it does not change any threshold or Part B.
+
+| Item | Decision | Approved | Person | Date | Words or link |
+| --- | --- | --- | --- | --- | --- |
+| Scope | The check runs on study records, those with `extension.study` (30 stored in the three examples) | Yes | hsinyichou (maintainer) | 2026-11-04 | Session message: "approve your recommendation for the dependencies.py check" |
+| Layout | Each example is checked in its unpacked layout: gzipped runs unpacked as its `run.py` does, `--root` at its artifacts folder (`geant4-thin-silicon`: its example folder) | Yes | hsinyichou (maintainer) | 2026-11-04 | Session message: "approve your recommendation for the dependencies.py check" |
+| Known exceptions for S0 | 5 of the 30 fail and are accepted with reasons, to be fixed in a later release (no phase assigned): `studies/ladder/ladder.computational-run.json` in `design-minimal-spectrometer` `output` and `recorded` (`~` refs); scenario records `coarse-cut`, `density-10`, `dump-reference` in `geant4-thin-silicon` (`geant4.configuration_unlinked`) | Yes | hsinyichou (maintainer) | 2026-11-04 | Session message: "approve your recommendation for the dependencies.py check" |
 
 ## Execution choices to confirm
 
