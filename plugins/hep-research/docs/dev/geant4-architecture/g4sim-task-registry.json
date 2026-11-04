@@ -113,6 +113,13 @@
    "registered_at": "2026-11-04T11:57:17Z",
    "card_commit": "80b87f8c",
    "reason": "Execution log only (example fixes); thresholds unchanged from the initial registration"
+  },
+  {
+   "card": "g4sim-tasks/S0.md",
+   "sha256": "aaa384a39dfeb0d63ce8443efa0e40b725ca37e5f857f373daea75de449e5bcc",
+   "registered_at": "2026-11-04T12:02:25Z",
+   "card_commit": "d2632d88",
+   "reason": "Execution log only (custodian named); thresholds unchanged from the initial registration"
   }
  ]
 }
