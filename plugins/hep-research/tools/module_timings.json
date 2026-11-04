@@ -22,6 +22,7 @@
   "tests.adapters.test_detsim_missing_dependency": 1.4,
   "tests.adapters.test_detsim_plan": 4.0,
   "tests.adapters.test_detsim_schemas": 0.1,
+  "tests.adapters.test_g4proto_judge": 0.2,
   "tests.adapters.test_g4sim": 3.0,
   "tests.adapters.test_geant4": 12.9,
   "tests.adapters.test_geant4_element": 1.0,
