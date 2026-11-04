@@ -5,10 +5,10 @@
    "state": "blocked",
    "worktree": "../hep-research-g4sim-S0",
    "branch": "g4sim/S0",
-   "task_card_sha256": "b6d34c24cdd5fb4da88387abacf9c51ce6084106d4ddce2b1dead6420668fba2",
+   "task_card_sha256": "c646093a68ccc6fb24b4e03429ae36ef948c2357caca9116ca8414ab3cb6f5e6",
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S0.md",
    "blocked_on": [
-    "E7 item 7: regeneration of committed outputs for 0.55.0 in E2, which clears 22 failing tests",
+    "E7 item 7: in E2, the live.py --strip-prefix repair and the 0.55.0 regeneration of committed outputs, which clears the 22 failing tests and the one added by the geant4-thin-silicon fix",
     "E7 item 1: custodian's re-evaluation of qualification at the S0 release"
    ]
   },
@@ -111,5 +111,5 @@
   "GB23": "unconfirmed",
   "GB24": "unconfirmed"
  },
- "updated": "2026-11-04T11:38:45Z"
+ "updated": "2026-11-04T11:57:17Z"
 }
