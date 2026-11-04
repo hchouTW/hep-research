@@ -148,6 +148,13 @@
    "registered_at": "2026-11-04T23:14:42Z",
    "card_commit": "36c9d5bc",
    "reason": "S1 refresh at the phase start: Section 22 answers, gate 11 added by the custodian, environments; no threshold loosened"
+  },
+  {
+   "card": "g4sim-tasks/S1.md",
+   "sha256": "17823ee57f3815f2ffb34bdcd6b48bd9f5511ee98b72a2265e7f0d8f647fb9a4",
+   "registered_at": "2026-11-04T23:28:21Z",
+   "card_commit": "65ca85d1",
+   "reason": "Execution log only (core/canonical, E5 results of GB4 and GB10); thresholds unchanged from the S1 refresh"
   }
  ]
 }
