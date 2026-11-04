@@ -2,7 +2,7 @@
  "schema": "g4sim-status/1",
  "phases": {
   "S0": {
-   "state": "gates-recorded",
+   "state": "merged",
    "worktree": "../hep-research-g4sim-S0",
    "branch": "g4sim/S0",
    "task_card_sha256": "abe88133bac93e961a06a168b121a6fd8674f6e239d35b0f5c24bb9c2d75efe0",
@@ -107,5 +107,5 @@
   "GB23": "unconfirmed",
   "GB24": "unconfirmed"
  },
- "updated": "2026-11-04T20:42:25Z"
+ "updated": "2026-11-04T21:13:38Z"
 }

@@ -3,28 +3,26 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.55.0 (2026-11-05)
 
-A release no longer regenerates committed outputs, so a version bump needs no reference machine and the tests pass on
-macOS and Linux. A committed output keeps the plugin version that wrote it: `make_artifacts.py --check` of six theory
-profiles and five example tests ignore that version and still compare everything else (`tests/_outputs.py`,
-`docs/maintenance.md`). Outputs are regenerated only when a change alters a committed result. Negative controls:
-`tests/tools/test_outputs_keep_their_version.py`.
+Minor release: g4sim phase S0 (PR #346) and a release process that no longer regenerates outputs (PR #345). No schema,
+contract, adapter or skill behaviour changes: contracts 3.18.0, `CORE_VERSION` 1.5.0, `adapters/geant4` 0.6.0 and
+`adapters/detector-simulation` 0.4.0 are unchanged.
 
-## 0.55.0 (unreleased)
-
-Minor version for g4sim phase S0: documents, plus two example fixes asked for by the maintainer, on branch `g4sim/S0`.
-`examples/geant4-thin-silicon/run.py` gives its three negative-control scenario records their run records, and checks
-them with `dependencies.py`. `examples/design-minimal-spectrometer/live.py` writes the run refs of its check records
-relative to the artifacts folder, and `--strip-prefix` repairs an existing `recorded/` without simulating. No schema,
-contract, adapter or skill behaviour changes: contracts 3.18.0, `CORE_VERSION` 1.5.0, `adapters/geant4` 0.6.0
-and `adapters/detector-simulation` 0.4.0 are unchanged. The release date and the release steps assigned to E2 are set
-at merge.
-
+- **A release no longer regenerates committed outputs (PR #345).** A version bump needs no reference machine and the
+  tests pass on macOS and Linux. A committed output keeps the plugin version that wrote it: `make_artifacts.py --check`
+  of six theory profiles and five example tests ignore that version and still compare everything else
+  (`tests/_outputs.py`, `docs/maintenance.md`). Outputs are regenerated only when a change alters a committed result.
+  Negative controls: `tests/tools/test_outputs_keep_their_version.py`.
 - **g4sim plan documents (phase S0).** `docs/dev/geant4-architecture/` gains the task document `g4sim-task.md`, the
   Chinese original of its specification `g4sim-task.zh.md`, the task cards `g4sim-tasks/S0.md` to `S9.md`, their
   registry `g4sim-task-registry.json`, the status file `g4sim-status.json` and the approval packet
   `g4sim-approvals.md`. `geant4-program.md` and `geant4-program.en.md` gain Part 7, a summary of the plan.
+- **Dependency links of two examples' records (phase S0).** `examples/geant4-thin-silicon/run.py` gives its three
+  negative-control scenario records their run records, and checks them with `dependencies.py`.
+  `examples/design-minimal-spectrometer/live.py` writes the run refs of its check records relative to the artifacts
+  folder, and `--strip-prefix` repairs an existing `recorded/` without simulating. Both examples were rerun on E2 for
+  this change; no number changed.
 
 ## 0.54.0 (2026-11-02)
 
