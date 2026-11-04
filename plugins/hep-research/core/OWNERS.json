@@ -269,14 +269,18 @@
   "geometry": {
    "steward": "hep-detector",
    "status": "implemented-in-part",
-   "purpose": "Pure geometric computation of the g4sim plan: exact decimal arithmetic, params, rotations, bitfields and the double-precision error bound; legality is judged by contracts/geometry.py; never Geant4, a physics judgment or a schema check",
+   "purpose": "Pure geometric computation of the g4sim plan: exact decimal arithmetic, params, rotations, bitfields, the strides of volume IDs, expansion of a specification into the IR, the actual region and field of each logical, the gap rule and the double-precision error bound; legality is judged by contracts/geometry.py; never Geant4, a physics judgment or a schema check",
    "consumers": [],
    "files": [
     "numbers",
     "params",
     "rotation",
     "bitfield",
-    "bound"
+    "bound",
+    "modules",
+    "expand",
+    "overlap",
+    "identity"
    ],
    "source": "new in this plugin (g4sim S1, 2026-11-05)"
   }

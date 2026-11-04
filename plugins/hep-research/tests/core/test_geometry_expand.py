@@ -1,0 +1,309 @@
+"""Expansion and the gap rule (g4sim S1): the IR negative tests of Section 15.1, and the two Part B decisions of
+g4sim-approvals.md on copy numbers and volume IDs."""
+from __future__ import annotations
+
+import copy
+import itertools
+import sys
+import unittest
+from pathlib import Path
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+
+from core.geometry import expand, identity, overlap  # noqa: E402
+from core.geometry.numbers import GeometryError  # noqa: E402
+
+
+def box(size, material="G4_Si", **extra):
+    return {"solid": {"box": {"size_mm": size}}, "material": material, **extra}
+
+
+def single(template, centre=("0", "0", "0"), rotation=None):
+    body = {"centre_mm": list(centre)}
+    if rotation:
+        body["rotation"] = rotation
+    return {"template": template, "placement": {"single": body}}
+
+
+def spec(templates=None, children=None, **extra):
+    return {"schema": "detector-spec/1", "params": {}, "templates": templates or {}, "world": {
+        "material": "G4_AIR", "size_mm": ["1000", "1000", "1000"], "children": children or []}, **extra}
+
+
+def calorimeter():
+    return {"schema": "detector-spec/1", "params": {"t": "2", "gap": "0.5", "n": "4"},
+            "templates": {"absorber": box(["50", "50", "t"], "G4_Pb", tags=["passive"]),
+                          "active": box(["50", "50", "1"], "G4_PLASTIC_SC_VINYLTOLUENE", tags=["active"]),
+                          "module": {**box(["50", "50", "n * (t + 1 + gap)"], "G4_AIR", region="calorimeter"), "children": [
+                              {"placement": {"stack": {"axis": "z", "from": "-z", "repeat": 4, "sequence": [
+                                  "absorber", {"template": "active", "index": "layer"}, {"spacer_mm": "gap"}]}}}]}},
+            "world": {"material": "G4_AIR", "size_mm": ["1000", "1000", "1000"], "children": [
+                {"template": "module", "placement": {"linear": {"count": 3, "pitch_mm": ["60", "0", "0"],
+                                                                "start_mm": ["-60", "0", "0"], "index": "m"}}}]},
+            "frames": {"beam": {"in": "world", "origin_mm": ["0", "0", "-100"]}},
+            "readout": {"cal": {"fields": {"m": 2, "layer": 2, "z": 6}}},
+            "physics_requirements": [{"need": "birks", "select": {"tags": ["active"]}}]}
+
+
+def volume_ids(ir):
+    """Every touchable's volume ID, walking the tree: (copy number + 1) x stride at each level."""
+    daughters = {}
+    for placement in ir["physical"]["placements"]:
+        daughters.setdefault(placement["mother"], []).append(placement)
+    strides = ir["physical"]["volume_id"]["strides"]
+    found = [0]
+
+    def walk(name, depth, value):
+        for placement in daughters.get(name, []):
+            mine = value + (placement["copy_number"] + 1) * strides[depth]
+            found.append(mine)
+            walk(placement["template"], depth + 1, mine)
+
+    walk("world", 0, 0)
+    return found
+
+
+def codes(ir):
+    return [finding["code"] for finding in overlap.findings(ir)]
+
+
+class Expansion(unittest.TestCase):
+    def setUp(self):
+        self.document = expand.expand(calorimeter())
+
+    def test_a_legal_detector_has_no_findings(self):
+        self.assertEqual(overlap.findings(self.document), [])
+
+    def test_a_stack_abuts_exactly_and_ends_on_the_mother_face(self):
+        centres = [p["centre_mm"][2] for p in self.document["physical"]["placements"] if p["mother"] == "module"]
+        self.assertEqual(centres[:2], ["-6e0", "-4.5e0"])
+
+    def test_half_lengths_are_written_for_the_builder(self):
+        self.assertEqual(self.document["physical"]["templates"]["absorber"]["half_mm"], ["2.5e1", "2.5e1", "1e0"])
+
+    def test_expansion_is_repeatable(self):
+        self.assertEqual(identity.geometry_id(self.document), identity.geometry_id(expand.expand(calorimeter())))
+
+    def test_the_same_template_gives_the_same_solid_at_every_position(self):
+        near = spec({"a": box(["1", "2", "3"])}, [single("a", ("-5", "0", "0")), single("a", ("5", "0", "0"))])
+        far = spec({"a": box(["1", "2", "3"])}, [single("a", ("-400", "0", "0")), single("a", ("400", "9", "0"))])
+        solids = [expand.expand(document)["physical"]["templates"]["a"] for document in (near, far)]
+        self.assertEqual(solids[0], solids[1])
+        self.assertEqual(sum(p["template"] == "a" for p in expand.expand(far)["physical"]["placements"]), 2)
+
+    def test_a_cycle_of_templates_is_refused(self):
+        document = spec({"a": {**box(["1", "1", "1"]), "children": [single("b")]}, "b": {**box(["1", "1", "1"]), "children": [single("a")]}},
+                        [single("a")])
+        with self.assertRaises(GeometryError) as caught:
+            expand.expand(document)
+        self.assertEqual(caught.exception.code, "template-cycle")
+
+    def test_a_later_shape_or_placement_is_refused(self):
+        tube = spec({"a": {"solid": {"tube": {}}, "material": "G4_Si"}})
+        grid = spec({"a": box(["1", "1", "1"])}, [{"template": "a", "placement": {"grid": {}}}])
+        for document in (tube, grid):
+            with self.assertRaises(GeometryError) as caught:
+                expand.expand(document)
+            self.assertEqual(caught.exception.code, "module-not-open")
+
+    def test_thirty_degrees_is_refused_for_a_single_placement(self):
+        document = spec({"a": box(["1", "1", "1"])}, [single("a", rotation={"axis": "z", "angle_deg": "30"})])
+        with self.assertRaises(GeometryError) as caught:
+            expand.expand(document)
+        self.assertEqual(caught.exception.code, "rotation-angle")
+
+
+class VolumeIds(unittest.TestCase):
+    def test_every_touchable_has_its_own_id(self):
+        found = volume_ids(expand.expand(calorimeter()))
+        self.assertEqual(len(found), 1 + 3 + 3 * 8)
+        self.assertEqual(len(set(found)), len(found))
+
+    def test_a_mother_and_its_copy_zero_daughter_differ(self):
+        document = spec({"a": {**box(["10", "10", "10"]), "children": [single("b")]}, "b": box(["1", "1", "1"])}, [single("a")])
+        found = volume_ids(expand.expand(document))
+        self.assertEqual(found, [0, 1, 3])
+
+    def test_ids_are_unique_for_every_shape_of_small_tree(self):
+        for counts in itertools.product((1, 2, 3), repeat=2):
+            document = spec({"a": {**box(["100", "100", "100"]), "children": [
+                {"template": "b", "placement": {"linear": {"count": counts[1], "pitch_mm": ["3", "0", "0"], "start_mm": ["0", "0", "0"]}}}]},
+                "b": box(["1", "1", "1"])}, [{"template": "a", "placement": {"linear": {"count": counts[0], "pitch_mm": ["200", "0", "0"],
+                                                                                        "start_mm": ["-200", "0", "0"]}}}])
+            with self.subTest(counts=counts):
+                found = volume_ids(expand.expand(document))
+                self.assertEqual(len(set(found)), len(found))
+
+
+class CopyNumbers(unittest.TestCase):
+    def test_indexed_placements_keep_the_index_and_others_follow(self):
+        ir = expand.expand(calorimeter())
+        placed = [(p["template"], p["copy_number"]) for p in ir["physical"]["placements"] if p["mother"] == "module"]
+        self.assertEqual(sorted(c for t, c in placed if t == "active"), [0, 1, 2, 3])
+        self.assertEqual(sorted(c for t, c in placed if t == "absorber"), [4, 5, 6, 7])
+
+    def test_two_single_placements_get_distinct_copy_numbers(self):
+        ir = expand.expand(spec({"a": box(["1", "1", "1"])}, [single("a", ("-5", "0", "0")), single("a", ("5", "0", "0"))]))
+        self.assertEqual([p["copy_number"] for p in ir["physical"]["placements"]], [0, 1])
+
+    def test_two_indexed_placements_that_collide_are_refused(self):
+        children = [{"template": "a", "placement": {"linear": {"count": 2, "pitch_mm": ["3", "0", "0"], "start_mm": [x, "0", "0"], "index": i}}}
+                    for x, i in (("0", "m"), ("100", "n"))]
+        with self.assertRaises(GeometryError) as caught:
+            expand.expand(spec({"a": box(["1", "1", "1"])}, children))
+        self.assertEqual(caught.exception.code, "copy-collision")
+
+
+class GapRule(unittest.TestCase):
+    def pair(self, second_x, width="10"):
+        return spec({"a": box([width, width, width])}, [single("a", ("0", "0", "0")), single("a", (second_x, "0", "0"))])
+
+    def test_touching_faces_are_legal(self):
+        self.assertEqual(codes(expand.expand(self.pair("10"))), [])
+
+    def test_a_gap_of_c_is_legal(self):
+        self.assertEqual(codes(expand.expand(self.pair("10.000001"))), [])
+
+    def test_faces_1p1e_7_apart_are_an_error(self):
+        self.assertEqual(codes(expand.expand(self.pair("10.00000011"))), ["sibling-too-close"])
+
+    def test_overlapping_siblings_are_an_error(self):
+        self.assertEqual(codes(expand.expand(self.pair("9"))), ["sibling-overlap"])
+
+    def test_a_third_three_times_coincides_within_epsilon(self):
+        document = spec({"a": box(["1/3", "10", "10"]), "m": {**box(["1", "10", "10"]), "children": [
+            {"placement": {"stack": {"axis": "x", "from": "-x", "sequence": ["a", "a", "a"]}}}]}}, [single("m")])
+        self.assertEqual(codes(expand.expand(document)), [])
+
+    def test_a_daughter_face_1e_7_outside_its_mother_is_an_error(self):
+        document = spec({"m": {**box(["10", "10", "10"]), "children": [single("d", ("0.0000001", "0", "0"))]}, "d": box(["10", "10", "10"])},
+                        [single("m")])
+        self.assertIn("containment-outside", codes(expand.expand(document)))
+
+    def test_a_daughter_face_inside_by_less_than_c_is_an_error(self):
+        document = spec({"m": {**box(["10", "10", "10"]), "children": [single("d")]}, "d": box(["9.9999998", "10", "10"])}, [single("m")])
+        self.assertIn("containment-too-close", codes(expand.expand(document)))
+
+    def test_a_quarter_turn_is_checked_on_its_rotated_extent(self):
+        document = spec({"m": {**box(["10", "20", "10"]), "children": [single("d", rotation={"axis": "z", "angle_deg": "90"})]},
+                         "d": box(["20", "8", "8"])}, [single("m")])
+        self.assertEqual(codes(expand.expand(document)), [])
+        del document["templates"]["m"]["children"][0]["placement"]["single"]["rotation"]
+        self.assertIn("containment-outside", codes(expand.expand(document)))
+
+    def test_a_compound_rotation_is_checked_on_its_active_extent(self):
+        # Rz(90) Ry(90) sends x to -z, y to -x, z to y, so a box 2 x 4 x 6 lands as 4 x 6 x 2; the transpose would give 6 x 2 x 4.
+        rotation = {"zyx_deg": ["90", "90", "0"]}
+        fits = spec({"m": {**box(["4", "6", "2"]), "children": [single("d", rotation=rotation)]}, "d": box(["2", "4", "6"])}, [single("m")])
+        self.assertEqual(codes(expand.expand(fits)), [])
+        transposed = spec({"m": {**box(["6", "2", "4"]), "children": [single("d", rotation=rotation)]}, "d": box(["2", "4", "6"])}, [single("m")])
+        self.assertIn("containment-outside", codes(expand.expand(transposed)))
+
+    def test_below_the_minimum_feature_is_an_error(self):
+        self.assertIn("minimum-feature", codes(expand.expand(spec({"a": box(["0.000001", "1", "1"])}, [single("a")]))))
+
+    def test_a_rotated_mother_turns_its_daughter_onto_another_axis(self):
+        # In a mother turned by 90 degrees about z, a daughter along y lies along -x: both 4e5 mm shifts add up on one axis.
+        def chain(rotation):
+            document = spec({"m": {**box(["900000", "900000", "10"]), "children": [single("d", ("0", "400000", "0"))]}, "d": box(["1", "1", "1"])},
+                            [single("m", ("-420000", "0", "0"), rotation=rotation)])
+            document["world"]["size_mm"] = ["2000000", "2000000", "2000000"]
+            return expand.expand(document)
+        self.assertLess(overlap.chain_reach(chain(None))["d"], 420002)
+        self.assertGreaterEqual(overlap.chain_reach(chain({"axis": "z", "angle_deg": "90"}))["d"], 820000)
+
+    def test_a_placement_at_a_million_mm_is_refused(self):
+        document = spec({"a": box(["1", "1", "1"])}, [single("a", ("1000000", "0", "0"))])
+        document["world"]["size_mm"] = ["3000000", "3000000", "3000000"]
+        self.assertIn("error-bound", codes(expand.expand(document)))
+
+
+class RegionsAndFields(unittest.TestCase):
+    def shared(self, key):
+        return spec({"m1": {**box(["10", "10", "10"]), key: "one", "children": [single("d")]}, "m2": {**box(["10", "10", "10"]), "children": [single("d")]},
+                     "d": box(["1", "1", "1"])}, [single("m1", ("-20", "0", "0")), single("m2", ("20", "0", "0"))])
+
+    def test_a_daughter_inherits_unless_it_is_a_root(self):
+        ir = expand.expand(calorimeter())
+        self.assertEqual({n: t["region"] for n, t in ir["physical"]["templates"].items()},
+                         {"world": "default", "module": "calorimeter", "absorber": "calorimeter", "active": "calorimeter"})
+
+    def test_one_template_through_two_regions_is_refused(self):
+        with self.assertRaises(GeometryError) as caught:
+            expand.expand(self.shared("region"))
+        self.assertEqual(caught.exception.code, "region-conflict")
+
+    def test_field_against_no_field_is_refused(self):
+        with self.assertRaises(GeometryError) as caught:
+            expand.expand(self.shared("field"))
+        self.assertEqual(caught.exception.code, "field-conflict")
+
+    def test_a_declaration_on_the_template_settles_it(self):
+        document = self.shared("region")
+        document["templates"]["d"]["region"] = "own"
+        self.assertEqual(expand.expand(document)["physical"]["templates"]["d"]["region"], "own")
+
+
+class Bits(unittest.TestCase):
+    def test_one_bit_too_few_is_refused(self):
+        document = calorimeter()
+        document["readout"]["cal"]["fields"]["layer"] = 1
+        with self.assertRaises(GeometryError) as caught:
+            expand.expand(document)
+        self.assertEqual(caught.exception.code, "bitfield-range")
+
+
+class Identities(unittest.TestCase):
+    def ids(self, document):
+        ir = expand.expand(document)
+        return identity.geometry_id(ir), identity.provenance_id(ir)
+
+    def setUp(self):
+        self.base = self.ids(calorimeter())
+
+    def test_changing_frames_changes_geometry_id(self):
+        document = calorimeter()
+        document["frames"]["beam"]["origin_mm"][2] = "-101"
+        self.assertNotEqual(self.ids(document)[0], self.base[0])
+
+    def test_changing_only_tags_changes_neither_selection_nor_geometry_id(self):
+        document = calorimeter()
+        document["templates"]["absorber"]["tags"] = ["passive", "lead"]
+        geometry, provenance = self.ids(document)
+        self.assertEqual(geometry, self.base[0])
+        self.assertNotEqual(provenance, self.base[1])
+
+    def test_changing_a_selection_through_tags_changes_geometry_id(self):
+        document = calorimeter()
+        document["templates"]["absorber"]["tags"] = ["passive", "active"]
+        self.assertNotEqual(self.ids(document)[0], self.base[0])
+
+    def test_tags_are_not_in_the_physical_part(self):
+        physical = expand.expand(calorimeter())["physical"]
+        self.assertNotIn("tags", str(sorted(physical)))
+        self.assertTrue(all("tags" not in template for template in physical["templates"].values()))
+
+    def test_a_requirement_is_written_as_an_expanded_list(self):
+        physical = expand.expand(calorimeter())["physical"]
+        self.assertEqual(physical["physics_requirements"], [{"need": "birks", "templates": ["active"]}])
+
+    def test_a_material_source_is_marker_only(self):
+        def material(facts, density):
+            document = calorimeter()
+            document["materials"] = {"glue": {"density_g_cm3": density, "facts": facts}}
+            return self.ids(document)
+        self.assertEqual(material("assumed", "1.2")[0], material("measured", "1.2")[0])
+        self.assertNotEqual(material("assumed", "1.2")[1], material("measured", "1.2")[1])
+        self.assertNotEqual(material("assumed", "1.2")[0], material("assumed", "1.3")[0])
+
+    def test_an_empty_selection_is_refused(self):
+        document = copy.deepcopy(calorimeter())
+        document["physics_requirements"][0]["select"]["tags"] = ["missing"]
+        with self.assertRaises(GeometryError) as caught:
+            expand.expand(document)
+        self.assertEqual(caught.exception.code, "select-empty")
+
+
+if __name__ == "__main__":
+    unittest.main()
