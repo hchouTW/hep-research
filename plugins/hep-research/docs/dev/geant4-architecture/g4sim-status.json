@@ -2,12 +2,16 @@
  "schema": "g4sim-status/1",
  "phases": {
   "S0": {
-   "state": "in-progress",
+   "state": "blocked",
    "worktree": "../hep-research-g4sim-S0",
    "branch": "g4sim/S0",
-   "task_card_sha256": "c47ab6fa93b9ced08f485625fee5b55ad489ddff996979ebd13873ccae02e4d5",
+   "task_card_sha256": "e24b80f841a2b8a0c592813961a27256adb2d84913ac8a6f2526d34a4d2f6a8b",
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S0.md",
-   "blocked_on": []
+   "blocked_on": [
+    "E7 item 1: maintainer's approval of M1-M12, Q1-Q5, D1-D20 and of the stewards of core/canonical and core/geometry (g4sim-approvals.md)",
+    "E7 item 1: custodian's re-evaluation of qualification at the S0 release",
+    "E7 item 7: regeneration of committed outputs for 0.55.0 in E2, which clears 22 failing tests"
+   ]
   },
   "S1": {
    "state": "not-started",
@@ -108,5 +112,5 @@
   "GB23": "unconfirmed",
   "GB24": "unconfirmed"
  },
- "updated": "2026-11-04T09:23:57Z"
+ "updated": "2026-11-04T09:53:58Z"
 }
