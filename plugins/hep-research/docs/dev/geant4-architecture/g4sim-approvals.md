@@ -2,7 +2,7 @@
 
 Approval packet of phase S0 and the record of approvals given (Part A, Sections E7 and E9, of `g4sim-task.md`).
 
-**Status (2026-11-04):** all Section 20 decisions, both stewards, the five execution choices and the application of the `dependencies.py` common check are approved. The custodian is hsinyichou. Open: the custodian's re-evaluation of qualification, which follows the S0 release.
+**Status (2026-11-05):** all Section 20 decisions, both stewards, the five execution choices, the application of the `dependencies.py` common check and the custodian's re-evaluation at the S0 release are approved. The custodian is hsinyichou. A re-evaluation follows every release through S9.
 
 ## How to approve
 
@@ -59,7 +59,7 @@ Approval packet of phase S0 and the record of approvals given (Part A, Sections 
 | All decisions in Section 20 | Maintainer | The table above | Yes | hsinyichou (maintainer) | 2026-11-04 | Answer in the Claude Code session to the Section 20 question: "Approve all as written" |
 | Steward of `core/canonical` | Maintainer and the steward | hep-computing (Section 20, M3) | Yes | hsinyichou (maintainer, and speaking for both stewards) | 2026-11-04 | Answer in the Claude Code session to the stewards question: "Approve; I speak for both" |
 | Steward of `core/geometry` | Maintainer and the steward | hep-detector (Section 20, M2) | Yes | hsinyichou (maintainer, and speaking for both stewards) | 2026-11-04 | Answer in the Claude Code session to the stewards question: "Approve; I speak for both" |
-| Re-evaluation of qualification at the S0 release | Custodian | Follows the S0 release (Sections 21, 22) | Pending: the release has not happened | hsinyichou (custodian) | 2026-11-04 (custodian named; not the re-evaluation) | Session message naming the custodian: "i am custodian" |
+| Re-evaluation of qualification at the S0 release | Custodian | Follows the S0 release (Sections 21, 22) | Yes | hsinyichou (custodian) | 2026-11-05 | Session message, "I give this re-evaluation", of the wording: "Custodian re-evaluation for 0.55.0: I checked my Mac; the qualification record found there is `protected-synthetic.json` (release 0.9.0, stage S1, expired 2026-10-28), from the 2026-10-14 C07 test. I know of no deployment in use for protected work. 0.55.0 invalidates no valid qualification, none is issued, and the plugin stays limited to public and synthetic data." |
 
 ## Application of the `dependencies.py` common check
 
