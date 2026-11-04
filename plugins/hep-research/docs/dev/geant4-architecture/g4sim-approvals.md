@@ -61,6 +61,13 @@ Approval packet of phase S0 and the record of approvals given (Part A, Sections 
 | Steward of `core/geometry` | Maintainer and the steward | hep-detector (Section 20, M2) | Yes | hsinyichou (maintainer, and speaking for both stewards) | 2026-11-04 | Answer in the Claude Code session to the stewards question: "Approve; I speak for both" |
 | Re-evaluation of qualification at the S0 release | Custodian | Follows the S0 release (Sections 21, 22) | Yes | hsinyichou (custodian) | 2026-11-05 | Session message, "I give this re-evaluation", of the wording: "Custodian re-evaluation for 0.55.0: I checked my Mac; the qualification record found there is `protected-synthetic.json` (release 0.9.0, stage S1, expired 2026-10-28), from the 2026-10-14 C07 test. I know of no deployment in use for protected work. 0.55.0 invalidates no valid qualification, none is issued, and the plugin stays limited to public and synthetic data." |
 
+## Section 22 items due in S1
+
+| Item | Who approves | Decision | Approved | Person | Date | Words or link |
+| --- | --- | --- | --- | --- | --- | --- |
+| `detsim_canonical.py` importing from core | Owner of detector-simulation | `canonical_json`, `check_hash_scope`, `normalize_decimal` and `load_json_strict` come from `core/canonical`; `canonical_sha256` stays imported from `contracts/recipe_semantics.py`, so the cross-check of `canonical_bytes` compares two implementations | Yes | hsinyichou (owner of detector-simulation) | 2026-11-05 | Answer in the Claude Code session to the detsim question: "Approve as recommended" |
+| Wiring the new entry points to the `core/protected` guard | Custodian | Yes: `contracts/geometry.py` (S1), `g4sim_run` and check-spec (S2), `g4kit.py` (S5) are each wired in the phase that delivers them, and that phase's gates add entry-point tests under protected mode. If `contracts/geometry.py` has no command line, the guard applies at the entry points that call it | Yes | hsinyichou (custodian) | 2026-11-05 | Answer in the Claude Code session to the guard question: "Yes, wire them" |
+
 ## Application of the `dependencies.py` common check
 
 Maintainer's decision on E7 item 9 (S0 Execution log). It settles how the check applies to stored example records; it does not change any threshold or Part B.
