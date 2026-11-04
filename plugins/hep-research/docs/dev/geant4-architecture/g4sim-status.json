@@ -5,10 +5,11 @@
    "state": "blocked",
    "worktree": "../hep-research-g4sim-S0",
    "branch": "g4sim/S0",
-   "task_card_sha256": "aaa384a39dfeb0d63ce8443efa0e40b725ca37e5f857f373daea75de449e5bcc",
+   "task_card_sha256": "b77012890ca601c0c387c235a54b375cbd274b3536c28941a4f796886b6b78af",
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S0.md",
    "blocked_on": [
-    "E7 item 7: in E2, the live.py --strip-prefix repair and the 0.55.0 regeneration of committed outputs, which clears the 22 failing tests and the one added by the geant4-thin-silicon fix",
+    "E7 item 8: merge of PR #345, which this branch is rebased on, then the rebase on main and the push, each by the maintainer's request",
+    "E7 item 7: in E2, the live.py --strip-prefix repair and the reruns of geant4-thin-silicon and design-minimal-spectrometer (S0 Execution log), which clear the 4 remaining test failures and should bring dependencies.py to 30 of 30",
     "E7 item 1: re-evaluation of qualification by the custodian (hsinyichou) at the S0 release"
    ]
   },
