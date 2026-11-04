@@ -1,0 +1,5 @@
+{
+ "schema": "g4sim-task-registry/1",
+ "note": "One entry per registration, oldest first. The latest entry of a card is the one in force; gate records cite it.",
+ "registrations": []
+}
