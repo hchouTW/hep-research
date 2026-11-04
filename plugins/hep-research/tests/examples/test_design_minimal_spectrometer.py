@@ -82,22 +82,22 @@ class DesignMinimalSpectrometer(unittest.TestCase):
         live = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(live)
         prefix = "~/w/proj/artifacts/"
-        with tempfile.TemporaryDirectory() as tmp:
-            root = Path(tmp)
+        with tempfile.TemporaryDirectory() as workdir:
+            root = Path(workdir)
             (root / "artifacts" / "checks").mkdir(parents=True)
             check = root / "artifacts" / "checks" / "c.json"
             check.write_text(json.dumps({"ref": f"{prefix}runs/r.json"}), encoding="utf-8")
-            old = hashlib.sha256(check.read_bytes()).hexdigest()
+            digest_before = hashlib.sha256(check.read_bytes()).hexdigest()
             study = root / "artifacts" / "study.json"
-            study.write_text(json.dumps({"sha256": old}), encoding="utf-8")
+            study.write_text(json.dumps({"sha256": digest_before}), encoding="utf-8")
             run = root / "run.json"
             argv = json.dumps({"argv": [f"{prefix}runs/r.json"]})
             run.write_text(argv, encoding="utf-8")
             live.scrub_home(root, prefix)
             self.assertEqual(json.loads(check.read_text(encoding="utf-8"))["ref"], "runs/r.json")
-            new = json.loads(study.read_text(encoding="utf-8"))["sha256"]
-            self.assertEqual(new, hashlib.sha256(check.read_bytes()).hexdigest())
-            self.assertNotEqual(new, old)
+            digest_after = json.loads(study.read_text(encoding="utf-8"))["sha256"]
+            self.assertEqual(digest_after, hashlib.sha256(check.read_bytes()).hexdigest())
+            self.assertNotEqual(digest_after, digest_before)
             self.assertEqual(run.read_text(encoding="utf-8"), argv)
 
     def test_recorded_budget(self):
