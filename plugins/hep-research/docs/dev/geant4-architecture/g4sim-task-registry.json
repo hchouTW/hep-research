@@ -134,6 +134,13 @@
    "registered_at": "2026-11-04T20:11:47Z",
    "card_commit": "5106f69e",
    "reason": "Execution log only (PR #345 merged, branch pushed); thresholds unchanged from the initial registration"
+  },
+  {
+   "card": "g4sim-tasks/S0.md",
+   "sha256": "abe88133bac93e961a06a168b121a6fd8674f6e239d35b0f5c24bb9c2d75efe0",
+   "registered_at": "2026-11-04T20:42:25Z",
+   "card_commit": "ed5daa0a",
+   "reason": "Execution log only (E2 job and final checks); thresholds unchanged from the initial registration"
   }
  ]
 }

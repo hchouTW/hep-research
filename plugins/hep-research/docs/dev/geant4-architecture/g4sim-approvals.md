@@ -71,6 +71,8 @@ Maintainer's decision on E7 item 9 (S0 Execution log). It settles how the check 
 | Layout | Each example is checked in its unpacked layout: gzipped runs unpacked as its `run.py` does, `--root` at its artifacts folder (`geant4-thin-silicon`: its example folder) | Yes | hsinyichou (maintainer) | 2026-11-04 | Session message: "approve your recommendation for the dependencies.py check" |
 | Known exceptions for S0 | 5 of the 30 fail and are accepted with reasons, to be fixed in a later release (no phase assigned): `studies/ladder/ladder.computational-run.json` in `design-minimal-spectrometer` `output` and `recorded` (`~` refs); scenario records `coarse-cut`, `density-10`, `dump-reference` in `geant4-thin-silicon` (`geant4.configuration_unlinked`) | Yes | hsinyichou (maintainer) | 2026-11-04 | Session message: "approve your recommendation for the dependencies.py check" |
 
+The five known exceptions no longer apply: after the E2 job (`a5edebdd`), 30 of 30 study records pass under this rule (S0 Execution log). The decision is kept as approved.
+
 ## Execution choices to confirm
 
 These are not Section 20 decisions. They are how S0 reconciled requirements of the task document; see the S0 task card.

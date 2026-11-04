@@ -2,15 +2,11 @@
  "schema": "g4sim-status/1",
  "phases": {
   "S0": {
-   "state": "blocked",
+   "state": "gates-recorded",
    "worktree": "../hep-research-g4sim-S0",
    "branch": "g4sim/S0",
-   "task_card_sha256": "61835025208f86661857c03965e27c1dffc9f4cd38fc62aab99a90279f5fb340",
-   "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S0.md",
-   "blocked_on": [
-    "E7 item 7: in E2, the live.py --strip-prefix repair and the reruns of geant4-thin-silicon and design-minimal-spectrometer (S0 Execution log), which clear the 4 remaining test failures and should bring dependencies.py to 30 of 30",
-    "E7 item 1: re-evaluation of qualification by the custodian (hsinyichou) at the S0 release"
-   ]
+   "task_card_sha256": "abe88133bac93e961a06a168b121a6fd8674f6e239d35b0f5c24bb9c2d75efe0",
+   "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S0.md"
   },
   "S1": {
    "state": "not-started",
@@ -111,5 +107,5 @@
   "GB23": "unconfirmed",
   "GB24": "unconfirmed"
  },
- "updated": "2026-11-04T12:02:25Z"
+ "updated": "2026-11-04T20:42:25Z"
 }
