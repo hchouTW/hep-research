@@ -155,6 +155,13 @@
    "registered_at": "2026-11-04T23:28:21Z",
    "card_commit": "65ca85d1",
    "reason": "Execution log only (core/canonical, E5 results of GB4 and GB10); thresholds unchanged from the S1 refresh"
+  },
+  {
+   "card": "g4sim-tasks/S1.md",
+   "sha256": "c96a7412484a8c47b1f9f08ea5a6ba7c0aa2024f0dd8c9c6b6b03e135bbbfd22",
+   "registered_at": "2026-11-04T23:56:58Z",
+   "card_commit": "286ddc72",
+   "reason": "Execution log and environments only (E2 results of GB4 and GB10, E2 installation); thresholds unchanged from the S1 refresh"
   }
  ]
 }
