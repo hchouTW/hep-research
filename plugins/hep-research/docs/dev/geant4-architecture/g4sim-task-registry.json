@@ -1,5 +1,76 @@
 {
  "schema": "g4sim-task-registry/1",
  "note": "One entry per registration, oldest first. The latest entry of a card is the one in force; gate records cite it.",
- "registrations": []
+ "registrations": [
+  {
+   "card": "g4sim-tasks/S0.md",
+   "sha256": "c47ab6fa93b9ced08f485625fee5b55ad489ddff996979ebd13873ccae02e4d5",
+   "registered_at": "2026-11-04T09:23:57Z",
+   "card_commit": "be509c39",
+   "reason": "initial registration in S0"
+  },
+  {
+   "card": "g4sim-tasks/S1.md",
+   "sha256": "ad76765c28ea280101ddb49d4e435a4798ad12646670976ae29db592ec847ca7",
+   "registered_at": "2026-11-04T09:23:57Z",
+   "card_commit": "be509c39",
+   "reason": "initial registration in S0"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "eeef4a338e055ea9a3a6ac73e741b6d348ae55019724429666439120628bc603",
+   "registered_at": "2026-11-04T09:23:57Z",
+   "card_commit": "be509c39",
+   "reason": "initial registration in S0"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "75b1b530e7ba4c4d9a275c2cc185dbb876eb3c20c4e7284b1ddaa656e29f7c25",
+   "registered_at": "2026-11-04T09:23:57Z",
+   "card_commit": "be509c39",
+   "reason": "initial registration in S0"
+  },
+  {
+   "card": "g4sim-tasks/S4.md",
+   "sha256": "3ae54f8a569f45170a9db19d7b43668d4e80d3b94e2bc6bd0b423acdbef48c01",
+   "registered_at": "2026-11-04T09:23:57Z",
+   "card_commit": "be509c39",
+   "reason": "initial registration in S0"
+  },
+  {
+   "card": "g4sim-tasks/S5.md",
+   "sha256": "d890fb46ac7894845d704df67c27cab8ab1951b50d366fb3f24cbc1aac5d39b9",
+   "registered_at": "2026-11-04T09:23:57Z",
+   "card_commit": "be509c39",
+   "reason": "initial registration in S0"
+  },
+  {
+   "card": "g4sim-tasks/S6.md",
+   "sha256": "693a9d16765ef0390d886597d1dda1b67bd3786348f634c5241f823b6a1082fc",
+   "registered_at": "2026-11-04T09:23:57Z",
+   "card_commit": "be509c39",
+   "reason": "initial registration in S0"
+  },
+  {
+   "card": "g4sim-tasks/S7.md",
+   "sha256": "2c5be345a9b690c5aa0b6891b8c19ef9f4586a9a3ad5e274deed749db121c511",
+   "registered_at": "2026-11-04T09:23:57Z",
+   "card_commit": "be509c39",
+   "reason": "initial registration in S0"
+  },
+  {
+   "card": "g4sim-tasks/S8.md",
+   "sha256": "ae2c638cb5b102dd65d3b48a0a63930bf31fec4a0a6afc0c71d37e3a896b0679",
+   "registered_at": "2026-11-04T09:23:57Z",
+   "card_commit": "be509c39",
+   "reason": "initial registration in S0"
+  },
+  {
+   "card": "g4sim-tasks/S9.md",
+   "sha256": "45c71739e6812e45d3914cab0fe4bb07a0c747c14fbd739c73ad4d66e4527f9f",
+   "registered_at": "2026-11-04T09:23:57Z",
+   "card_commit": "be509c39",
+   "reason": "initial registration in S0"
+  }
+ ]
 }
