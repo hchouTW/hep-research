@@ -3,6 +3,14 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+A release no longer regenerates committed outputs, so a version bump needs no reference machine and the tests pass on
+macOS and Linux. A committed output keeps the plugin version that wrote it: `make_artifacts.py --check` of six theory
+profiles and five example tests ignore that version and still compare everything else (`tests/_outputs.py`,
+`docs/maintenance.md`). Outputs are regenerated only when a change alters a committed result. Negative controls:
+`tests/tools/test_outputs_keep_their_version.py`.
+
 ## 0.54.0 (2026-11-02)
 
 Minor release: detector simulation with Allpix Squared and Garfield++. Contracts 3.18.0 (four sidecar schemas, no

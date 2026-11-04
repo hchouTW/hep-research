@@ -216,7 +216,10 @@ def main(argv=None) -> int:
     for path, doc in arts.items():
         text = json.dumps(doc, indent=1) + "\n"
         if opts.check:
-            if not path.exists() or not same(json.loads(path.read_text(encoding="utf-8")), json.loads(text)):
+            stored = json.loads(path.read_text(encoding="utf-8")) if path.exists() else None
+            if stored:  # the version that wrote a file is not a result (docs/maintenance.md)
+                stored["versions"]["plugin"] = doc["versions"]["plugin"]
+            if not stored or not same(stored, json.loads(text)):
                 stale.append(str(path))
         else:
             path.write_text(text, encoding="utf-8")

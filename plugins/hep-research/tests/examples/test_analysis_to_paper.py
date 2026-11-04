@@ -17,6 +17,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from tests._outputs import without_plugin_version
+
 PLUGIN = Path(__file__).resolve().parents[2]
 SCRIPT = PLUGIN / "examples" / "analysis-to-paper" / "run.py"
 ROOT_PYTHON = os.environ.get("HEP_ROOT_PYTHON")
@@ -79,7 +81,8 @@ class AnalysisToPaper(unittest.TestCase):
     def test_reproduces_committed_output(self):
         # versions.plugin_release is the release identity: "unreleased" in a working tree, the version and manifest
         # digest in a tree identical to its release manifest (CI after a release). It is not compared, nor are the
-        # sha256 hashes of artifacts that carry it (record provenance, numbers.tex); every value is.
+        # sha256 hashes of artifacts that carry it (record provenance, numbers.tex), nor the plugin version that wrote
+        # the artifact; every value is.
         out = SCRIPT.parent / "output"
         for rel in ("results.json", "draft/main.tex"):
             with self.subTest(file=rel):
@@ -87,7 +90,7 @@ class AnalysisToPaper(unittest.TestCase):
         for rel in ("artifacts/signal_strength.json", "artifacts/selected_mass.json",
                     "artifacts/signal_strength_record.json"):
             with self.subTest(file=rel):
-                a, b = (_without_release(json.loads((d / rel).read_text(encoding="utf-8")))
+                a, b = (_without_release(without_plugin_version(json.loads((d / rel).read_text(encoding="utf-8"))))
                         for d in (Path(self.tmp.name), out))
                 self.assertEqual(a, b)
         sha = re.compile(r"sha256 [0-9a-f]{64}")

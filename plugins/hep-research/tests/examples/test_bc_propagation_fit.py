@@ -17,6 +17,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from tests._outputs import without_plugin_version
+
 PLUGIN = Path(__file__).resolve().parents[2]
 EXAMPLE = PLUGIN / "examples" / "bc-propagation-fit"
 SCRIPT = EXAMPLE / "run.py"
@@ -149,7 +151,7 @@ class BCPropagationFitTests(unittest.TestCase):
         mine = json.loads((self.work / "theory-spec-xs-A.json").read_text())
         stored = json.loads((PLUGIN / "profiles/theory/cr-secondary-ratio/derivations/theory-spec.json").read_text())
         mine["artifact_id"] = stored["artifact_id"]
-        self.assertEqual(mine, stored)
+        self.assertEqual(without_plugin_version(mine), without_plugin_version(stored))
 
     def test_reproduces_committed_output(self):
         diffs = differences(self.r, json.loads(COMMITTED.read_text()))
