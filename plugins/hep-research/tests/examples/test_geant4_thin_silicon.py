@@ -12,6 +12,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from tests._outputs import without_plugin_version
+
 PLUGIN = Path(__file__).resolve().parents[2]
 EXAMPLE = PLUGIN / "examples" / "geant4-thin-silicon"
 
@@ -92,7 +94,7 @@ class J14Replay(unittest.TestCase):
                 if rel.suffix == ".json" and new != old:
                     # versions.plugin_release is the code identity of the checkout (contracts/identity.py): it reads
                     # "unreleased" until a release manifest matches the tree, so it cannot be committed byte for byte
-                    a, b = json.loads(new), json.loads(old)
+                    a, b = without_plugin_version(json.loads(new)), without_plugin_version(json.loads(old))
                     for doc in (a, b):
                         if isinstance(doc, dict) and isinstance(doc.get("versions"), dict):
                             doc["versions"].pop("plugin_release", None)

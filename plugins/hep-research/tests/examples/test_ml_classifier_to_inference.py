@@ -13,6 +13,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from tests._outputs import without_plugin_version
+
 PLUGIN = Path(__file__).resolve().parents[2]
 SCRIPT = PLUGIN / "examples" / "ml-classifier-to-inference" / "run.py"
 _MISSING = object()
@@ -125,9 +127,10 @@ class J9MlToInferenceTests(unittest.TestCase):
         model hash and score-file hashes are taken over float bytes, so a last-bit difference changes them. The
         framework version is skipped because it records the installed NumPy, not a result."""
         committed = SCRIPT.parent / "output" / "artifacts"
-        bad = artifact_differences(json.loads((committed / "ml_artifact.json").read_text()), self.ml, "ml_artifact")
-        bad += artifact_differences(json.loads((committed / "statistical_result.json").read_text()), self.stat,
-                                    "statistical_result")
+        bad = artifact_differences(without_plugin_version(json.loads((committed / "ml_artifact.json").read_text())),
+                                   without_plugin_version(self.ml), "ml_artifact")
+        bad += artifact_differences(without_plugin_version(json.loads((committed / "statistical_result.json").read_text())),
+                                    without_plugin_version(self.stat), "statistical_result")
         self.assertEqual(bad, [], f"{len(bad)} differences (committed, rerun): {bad[:15]}")
 
     def test_artifact_comparison_sees_what_the_rounded_results_do_not(self):

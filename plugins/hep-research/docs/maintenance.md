@@ -325,13 +325,16 @@ from the plugin root (each takes `--help`; the seeds are in each `output/report.
 committed output. When a change alters a committed number, explain why in the commit, regenerate the output, and
 record the old and new values; a change beyond the declared tolerance is a breaking change.
 
-**Regenerating outputs for a release.** A version bump changes the `"plugin"` version in the committed outputs, so
-each release reruns the six `profiles/theory/*/scripts/make_artifacts.py` and the examples whose outputs carry the
-version, in the order of the table above (`qed-prediction` before `published-comparison`).
+**Regenerating outputs.** A release does not regenerate committed outputs: a committed output keeps the plugin version
+that wrote it, as provenance, and the comparisons ignore that version (`tests/_outputs.py`, `make_artifacts.py --check`)
+while still comparing everything else, numbers within each test's tolerance. So a version bump needs no reference
+machine, and the tests pass on macOS and Linux. Regenerate only when a change alters a committed result: rerun the six
+`profiles/theory/*/scripts/make_artifacts.py` and the affected examples, in the order of the table above
+(`qed-prediction` before `published-comparison`).
 - Run them in the environment that produced the committed outputs (E2, `~/.venvs/hep-research-e2`). Other machines
   differ at rounding level even with the CI lock's package versions (macOS arm64 against Linux x86_64), and run
   records name the platform and NumPy version.
-- Accept the diff only if every changed line is a version string or a hash that covers one, and no PNG changed.
+- Accept the diff only if every changed line is explained by the change, and no PNG changed without a reason.
 - The same applies between releases to a script whose code hash is recorded in committed outputs (for example
   `check_geant4_study.py` in the `geant4-thin-silicon`, `design-minimal-spectrometer` and `design-search-j16` study
   records): regenerate those examples in E2 with the change.

@@ -190,7 +190,10 @@ def main(argv=None) -> int:
         text = json.dumps(doc, indent=1) + "\n"
         target = (opts.out_dir / path.name) if opts.out_dir else path
         if opts.check:
-            if not target.exists() or not same(json.loads(target.read_text(encoding="utf-8")), json.loads(text)):
+            stored = json.loads(target.read_text(encoding="utf-8")) if target.exists() else None
+            if stored:  # the version that wrote a file is not a result (docs/maintenance.md)
+                stored["versions"]["plugin"] = doc["versions"]["plugin"]
+            if not stored or not same(stored, json.loads(text)):
                 stale.append(str(target))
         else:
             target.write_text(text, encoding="utf-8")

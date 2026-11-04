@@ -7,6 +7,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+from tests._outputs import without_plugin_version
+
 PLUGIN = Path(__file__).resolve().parents[2]
 SCRIPT = PLUGIN / "examples" / "eic-profile-routing" / "run.py"
 COMMITTED = PLUGIN / "examples" / "eic-profile-routing" / "output" / "results.json"
@@ -58,8 +60,9 @@ class EicRoutingExampleTests(unittest.TestCase):
         self.assertEqual(sel["source"], "project-config")
         self.assertEqual(sel["experiments"], ["experiment:eic"])
 
-    def test_committed_output_is_reproduced_byte_for_byte(self):
-        self.assertEqual((self.out / "results.json").read_bytes(), COMMITTED.read_bytes())
+    def test_committed_output_is_reproduced(self):
+        fresh = json.loads((self.out / "results.json").read_text(encoding="utf-8"))
+        self.assertEqual(without_plugin_version(fresh), without_plugin_version(json.loads(COMMITTED.read_text(encoding="utf-8"))))
 
 
 if __name__ == "__main__":

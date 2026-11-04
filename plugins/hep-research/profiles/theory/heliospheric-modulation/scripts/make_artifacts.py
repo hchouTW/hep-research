@@ -102,9 +102,13 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     ap.add_argument("--check", action="store_true")
     opts = ap.parse_args(argv)
-    text = json.dumps(build(), indent=1) + "\n"
+    doc = build()
+    text = json.dumps(doc, indent=1) + "\n"
     if opts.check:
-        stale = not SPEC_PATH.exists() or json.loads(SPEC_PATH.read_text(encoding="utf-8")) != json.loads(text)
+        stored = json.loads(SPEC_PATH.read_text(encoding="utf-8")) if SPEC_PATH.exists() else None
+        if stored:  # the version that wrote a file is not a result (docs/maintenance.md)
+            stored["versions"]["plugin"] = doc["versions"]["plugin"]
+        stale = stored != json.loads(text)
         print(json.dumps({"status": "stale" if stale else "ok", "path": str(SPEC_PATH)}))
         return 1 if stale else 0
     SPEC_PATH.write_text(text, encoding="utf-8")
