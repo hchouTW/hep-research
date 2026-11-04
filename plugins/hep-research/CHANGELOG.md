@@ -5,8 +5,11 @@ Software checks establish contract consistency only, not physical validity.
 
 ## 0.55.0 (unreleased)
 
-Minor version for g4sim phase S0: documents only, on branch `g4sim/S0`, awaiting the maintainer's approval. No code,
-schema, contract, adapter or skill behaviour changes: contracts 3.18.0, `CORE_VERSION` 1.5.0, `adapters/geant4` 0.6.0
+Minor version for g4sim phase S0: documents, plus two example fixes asked for by the maintainer, on branch `g4sim/S0`.
+`examples/geant4-thin-silicon/run.py` gives its three negative-control scenario records their run records, and checks
+them with `dependencies.py`. `examples/design-minimal-spectrometer/live.py` writes the run refs of its check records
+relative to the artifacts folder, and `--strip-prefix` repairs an existing `recorded/` without simulating. No schema,
+contract, adapter or skill behaviour changes: contracts 3.18.0, `CORE_VERSION` 1.5.0, `adapters/geant4` 0.6.0
 and `adapters/detector-simulation` 0.4.0 are unchanged. The release date and the release steps assigned to E2 are set
 at merge.
 

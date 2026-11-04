@@ -13,6 +13,8 @@ the qualification path (B2.8).
 Usage (from the plugin root): HEP_GEANT4_CONFIG=cfg.json python3 examples/design-minimal-spectrometer/live.py
     --work DIR [--only STEP ...] [--recorded DIR]
 Steps: msref, shared, ladder, tracking, cc, shower, export (default: all, in that order).
+Repairing recorded/ without running anything (no Geant4 needed; --strip-prefix is the campaign's artifacts folder as the
+records write it, ending in /): python3 examples/design-minimal-spectrometer/live.py --strip-prefix PREFIX [--recorded DIR]
 """
 from __future__ import annotations
 
@@ -872,17 +874,21 @@ class Campaign3(Campaign2):
                 shutil.copytree(src, recorded / "artifacts" / sub,
                                 ignore=shutil.ignore_patterns("G-*.geometry.json", "derived.element_sim.json"))
         (recorded / "campaign-log.json").write_text(json.dumps(self.log, indent=1, default=str) + "\n")
-        scrub_home(recorded)
+        scrub_home(recorded, f"{self.art}/")
         total = sum(p.stat().st_size for p in recorded.rglob("*") if p.is_file())
         print(json.dumps({"recorded": str(recorded), "bytes": total}))
 
 
 
-def scrub_home(recorded: Path) -> None:
-    """Write ~ for the home directory in every recorded file (gz members too) and rewrite every sha256 that cites a
-    file so changed, to a fixpoint (citations form a DAG): the committed records carry no private path and still
-    reference each other by the bytes they hold."""
+def scrub_home(recorded: Path, artifacts_prefix: str = "") -> None:
+    """Write ~ for the home directory in every recorded file (gz members too), make the run refs of the check records
+    relative to the artifacts folder, as contracts/dependencies.py resolves them (geant4_verify.py writes an absolute
+    ref when the run is not below its record; a run record's argv stays as it was run), and rewrite every sha256 that
+    cites a file so changed, to a fixpoint
+    (citations form a DAG): the committed records carry no private path and still reference each other by the bytes
+    they hold."""
     home = str(Path.home()).encode()
+    runs = artifacts_prefix.encode().replace(home, b"~") + b"runs/"
     files = sorted(p for p in recorded.rglob("*") if p.is_file())
     data = {p: gzip.decompress(p.read_bytes()) if p.suffix == ".gz" else p.read_bytes() for p in files}
     digest = {p: hashlib.sha256(d).hexdigest() for p, d in data.items()}
@@ -892,6 +898,8 @@ def scrub_home(recorded: Path) -> None:
         changed = False
         for p in files:
             d = data[p].replace(home, b"~")
+            if artifacts_prefix and p.parent == recorded / "artifacts" / "checks":
+                d = d.replace(runs, b"runs/")
             for old, new in latest.items():
                 d = d.replace(old.encode(), new.encode())
             if d != data[p]:
@@ -913,11 +921,18 @@ def scrub_home(recorded: Path) -> None:
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    ap.add_argument("--work", type=Path, required=True)
+    ap.add_argument("--work", type=Path)
     ap.add_argument("--recorded", type=Path, default=HERE / "recorded")
     ap.add_argument("--only", nargs="*", default=None)
     ap.add_argument("--studies", nargs="*", default=None, help="tracking studies to run (default all)")
+    ap.add_argument("--strip-prefix", help="only repair --recorded: see scrub_home; nothing is simulated")
     args = ap.parse_args(argv)
+    if args.strip_prefix:
+        scrub_home(args.recorded, args.strip_prefix)
+        print(json.dumps({"status": "ok", "recorded": str(args.recorded)}))
+        return 0
+    if args.work is None:
+        ap.error("--work is required for a campaign")
     cfg = json.loads(Path(os.environ["HEP_GEANT4_CONFIG"]).expanduser().read_text())
     c = Campaign3(args.work.expanduser().resolve(), cfg)
     c.setup()
