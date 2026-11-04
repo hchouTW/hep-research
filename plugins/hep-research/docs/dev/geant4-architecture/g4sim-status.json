@@ -5,12 +5,12 @@
    "state": "blocked",
    "worktree": "../hep-research-g4sim-S0",
    "branch": "g4sim/S0",
-   "task_card_sha256": "e24b80f841a2b8a0c592813961a27256adb2d84913ac8a6f2526d34a4d2f6a8b",
+   "task_card_sha256": "9e6d9b37c8731fecdefc56d009583574e420dca122de2067e3f8dbdc10b82e3e",
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S0.md",
    "blocked_on": [
-    "E7 item 1: maintainer's approval of M1-M12, Q1-Q5, D1-D20 and of the stewards of core/canonical and core/geometry (g4sim-approvals.md)",
-    "E7 item 1: custodian's re-evaluation of qualification at the S0 release",
-    "E7 item 7: regeneration of committed outputs for 0.55.0 in E2, which clears 22 failing tests"
+    "E7 item 7: regeneration of committed outputs for 0.55.0 in E2, which clears 22 failing tests",
+    "E7 item 9: dependencies.py fails on 36 of 89 Geant4 records in the examples, not caused by S0; the maintainer decides how the common check applies to them",
+    "E7 item 1: custodian's re-evaluation of qualification at the S0 release"
    ]
   },
   "S1": {
@@ -112,5 +112,5 @@
   "GB23": "unconfirmed",
   "GB24": "unconfirmed"
  },
- "updated": "2026-11-04T09:53:58Z"
+ "updated": "2026-11-04T09:58:11Z"
 }
