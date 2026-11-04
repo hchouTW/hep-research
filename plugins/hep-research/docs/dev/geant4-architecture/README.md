@@ -22,6 +22,8 @@ study qualifies as F4, §P.7.1; issue #273) decided as recommended; G-D0 has pas
 |---|---|
 | `geant4-program.md` | **The consolidated document** (Traditional Chinese original). Front matter: how to use, a reading index per stage, conventions and a global glossary. Part 1 plan (§P), Part 2 task A (§A), Part 3 task B (§B), Part 4 task C (§C), Part 5 design rationale (§R), Part 6 revisions, reviews and decisions (§H, history only) |
 | `geant4-program.en.md` | English translation with the same parts, sections, tables, checkboxes and numbers, line by line; if they disagree, the Chinese wins until the English is corrected |
+| `g4sim-task.md`, `g4sim-task.zh.md` | Task document of the g4sim plan (execution protocol and frozen specification) and the Chinese original of its specification; summarised in Part 7 of `geant4-program.md` |
+| `g4sim-status.json`, `g4sim-task-registry.json`, `g4sim-approvals.md`, `g4sim-tasks/`, `g4sim-gates/` | Execution state, pre-registration of task cards, approvals, task cards and gate records of g4sim |
 | `decision-d0-f4-qualification.md` | Decision record D0 for the maintainer (the form linked from issue #273): options, the qualification path, sub-decisions D0-a to D0-d; open |
 | `gate_operating_characteristics.py` | Convergence-gate operating characteristics, two-stage factors, Welch degrees of freedom (§A.8, §A.9, §A Appendix B). Needs numpy and scipy; a design aid, not plugin code |
 | `j15_design_estimates.py` | J15 design numbers (§B Appendix A). Standard library; scipy optional |
