@@ -183,6 +183,12 @@ Terms used across parts; part-specific terms are in that part's §X.1.
   - §H.3 Concept mapping: old design → current
   - §H.4 Superseded designs
   - §H.5 Decision log
+- **Part 7 — g4sim: a general simulation layer (§G)**
+  - §G.0 Goal
+  - §G.1 Architecture in brief
+  - §G.2 Phases
+  - §G.3 Relation to this program
+  - §G.4 Files
 
 ---
 
@@ -448,6 +454,7 @@ Calls across adapters and skills always go through subprocesses and JSON files (
 | Part 4 (task C) | Design of automated candidate generation; work items and acceptance of C1, C2, C3 | Content and acceptance of these three stages |
 | Part 5 (design rationale) | Relation to main's design loop, design rationale, reference experiments, architecture | Rationale; where it conflicts with the specs, the specs win and the conflict is reported |
 | Part 6 (record) | Version history, review findings and how they were handled (including the review against main 0.38.0), old-to-new design mapping, superseded designs, decision log | History only; not part of the specification |
+| Part 7 (g4sim) | Summary of the g4sim plan, pointing to `g4sim-task.md` | None; `g4sim-task.md` is the specification |
 | `decision-d0-f4-qualification.md` | Decision record for D0 (the maintainer's form; issue #273) | The maintainer's decision; content matches §P.7.1 |
 | `README.md` | Folder entry, points to this document | — |
 | `gate_operating_characteristics.py`, `j15_design_estimates.py`, `design_search_closure.py` | Programs computing design numbers | The numbers of the corresponding appendices |
@@ -3505,3 +3512,57 @@ Still valid from the previous version (merged into Part 5): the fixes of D1–D1
 ### §H.5.3 For the maintainer to decide
 
 The merged list and its proposals are in §P.7; Part 5's original seven items are all included there.
+
+---
+
+# Part 7 — g4sim: a general simulation layer (§G)
+
+This part summarises the g4sim plan and is not its specification. The specification and execution protocol are [`g4sim-task.md`](g4sim-task.md); the Chinese original of its Part B is [`g4sim-task.zh.md`](g4sim-task.zh.md). If this summary and `g4sim-task.md` disagree, `g4sim-task.md` wins. Status: drafted in phase S0; awaiting the maintainer's approval of its decisions; no implementation code exists yet.
+
+## §G.0 Goal
+
+A research detector of moderate complexity can be simulated with Geant4, digitized through a response model, validated and connected to the design loop (F4) by writing JSON specifications only, without C++. Detectors of the large experiments serve only as design references and coverage tests; g4sim does not interface with their software.
+
+## §G.1 Architecture in brief
+
+- **Three inputs, each hashed separately:** `detector-spec/1` (what the detector is), `simulation-request/1` (what is shot at it and recorded) and `g4sim-run/1` (how Geant4 is run).
+- **One geometry IR:** `core/geometry` expands the detector-spec into `geometry-ir/1` with exact decimal arithmetic, and the C++ code reads only the IR. `geometry_id` hashes the IR's physical part.
+- **A common language:** cellIDs and four kinds of hits. Differences between detector types stay in hep-detector's kits and the response pipeline's parameters.
+- **The response is defined in Python:** Philox4x32-10 and correctly rounded summation make results independent of processing order and chunking.
+- **Old results stay reproducible:** legacy mode serves `layered_sim` and `element_sim` runs through the regression levels T1 (bit-identical) and T2 (joint equivalence test), classified by an inventory table.
+
+## §G.2 Phases
+
+| Phase | Content |
+|---|---|
+| S0 | Decisions, this part, task cards and their pre-registration |
+| S1 | Identities, specifications, geometry foundations, translator, inventory table |
+| S2 | `g4sim_run` and regression |
+| S3 | Extensions of geometry, readout and sources; comparison with `zdcsim.cc` |
+| S4 | Hits and response |
+| S5 | Kits and the design loop |
+| S6 | First reference cases |
+| S7 | Optics, transition radiation, remaining shapes |
+| S8 | Scale and conditional items |
+| S9 | Conditions and alignment, only if research needs them |
+
+Dependencies are linear. Every phase runs in its own isolated worktree `../hep-research-g4sim-S<n>` on branch `g4sim/S<n>`, which differs from the convention of §P.10 and is defined in `g4sim-task.md`, Section E2.
+
+## §G.3 Relation to this program
+
+- Decision D0 (§P.7.1) is unchanged; S5 applies its four F4 conditions to the g4sim path.
+- The checks of §A.8 apply to every g4sim phase, and the G5 gate of this program applies to its new C++ code.
+- The existing layered-spectrometer path keeps its realization, so the results of J15 and existing candidates do not change.
+- The labels S0–S9, T1, T2 and GB1–GB24 are local to the g4sim plan. Its decisions D1–D20 are not decision D0 of this program.
+
+## §G.4 Files
+
+| File | Content |
+|---|---|
+| `g4sim-task.md` | Task document: execution protocol (Part A) and frozen specification (Part B) |
+| `g4sim-task.zh.md` | Chinese original of Part B |
+| `g4sim-status.json` | Execution state of each phase and target behavior |
+| `g4sim-task-registry.json` | SHA-256 and time of each task-card registration |
+| `g4sim-approvals.md` | Approval packet and recorded approvals |
+| `g4sim-tasks/S<n>.md` | Task card of each phase |
+| `g4sim-gates/S<n>.md` | Gate record of each phase |
