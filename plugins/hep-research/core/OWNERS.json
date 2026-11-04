@@ -265,6 +265,20 @@
     "encoding"
    ],
    "source": "moved from core/provider/hashing.py and adapters/detector-simulation/assets/detsim_canonical.py (g4sim S1, 2026-11-05); load_spec_json is new"
+  },
+  "geometry": {
+   "steward": "hep-detector",
+   "status": "implemented-in-part",
+   "purpose": "Pure geometric computation of the g4sim plan: exact decimal arithmetic, params, rotations, bitfields and the double-precision error bound; legality is judged by contracts/geometry.py; never Geant4, a physics judgment or a schema check",
+   "consumers": [],
+   "files": [
+    "numbers",
+    "params",
+    "rotation",
+    "bitfield",
+    "bound"
+   ],
+   "source": "new in this plugin (g4sim S1, 2026-11-05)"
   }
  }
 }
