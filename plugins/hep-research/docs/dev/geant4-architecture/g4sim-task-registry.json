@@ -71,6 +71,13 @@
    "registered_at": "2026-11-04T09:23:57Z",
    "card_commit": "be509c39",
    "reason": "initial registration in S0"
+  },
+  {
+   "card": "g4sim-tasks/S0.md",
+   "sha256": "e24b80f841a2b8a0c592813961a27256adb2d84913ac8a6f2526d34a4d2f6a8b",
+   "registered_at": "2026-11-04T09:53:58Z",
+   "card_commit": "2f265781",
+   "reason": "Execution log only; thresholds unchanged from the initial registration"
   }
  ]
 }
