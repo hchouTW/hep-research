@@ -5,11 +5,11 @@
    "state": "blocked",
    "worktree": "../hep-research-g4sim-S0",
    "branch": "g4sim/S0",
-   "task_card_sha256": "3abfa69e06447dd5e338355da23a6945e3875dac7374672fa3f2b9db75c1af79",
+   "task_card_sha256": "1b063e185955009cd6411060b26c4edd3403d337bec391ed7c02ba6e803bc1eb",
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S0.md",
    "blocked_on": [
     "E7 item 7: regeneration of committed outputs for 0.55.0 in E2, which clears 22 failing tests",
-    "E7 item 9: dependencies.py fails on 32 of 89 Geant4 records stored in the examples; no dependency changed in S0; the maintainer decides how the common check applies to stored example records",
+    "E7 item 9: dependencies.py fails on 32 of 89 Geant4 records stored in the examples, the same on origin/main before S0; causes in the S0 Execution log: 21 layout of my invocation, 8 home-path refs, 3 real findings on negative-control scenarios; the maintainer decides how the common check applies to stored example records and whether to fix them",
     "E7 item 1: custodian's re-evaluation of qualification at the S0 release"
    ]
   },
@@ -112,5 +112,5 @@
   "GB23": "unconfirmed",
   "GB24": "unconfirmed"
  },
- "updated": "2026-11-04T09:59:21Z"
+ "updated": "2026-11-04T11:30:06Z"
 }

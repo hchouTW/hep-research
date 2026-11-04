@@ -92,6 +92,13 @@
    "registered_at": "2026-11-04T09:59:21Z",
    "card_commit": "01be7857",
    "reason": "Execution log only (correction); thresholds unchanged from the initial registration"
+  },
+  {
+   "card": "g4sim-tasks/S0.md",
+   "sha256": "1b063e185955009cd6411060b26c4edd3403d337bec391ed7c02ba6e803bc1eb",
+   "registered_at": "2026-11-04T11:30:06Z",
+   "card_commit": "e88b4467",
+   "reason": "Execution log only (dependencies.py investigation); thresholds unchanged from the initial registration"
   }
  ]
 }
