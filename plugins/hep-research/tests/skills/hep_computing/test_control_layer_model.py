@@ -14,11 +14,13 @@
 The model is located per control_oracle.py: a missing model FAILS in a development checkout and is SKIPPED with an
 explicit reason in an installed plugin. The control rules themselves did not pass S0 (N1); agreement with the model
 is agreement with unreviewed rules."""
+import contextlib
 import dataclasses
 import random
 import sys
 import unittest
 from pathlib import Path
+from unittest import mock
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import control_oracle as oracle  # noqa: E402
@@ -379,9 +381,14 @@ class Differential(ModelTestCase):
                 saved = (model_ns["Log"], impl_ns["Log"])
                 model_ns["Log"] = self._recording(model_ns, saved[0], model_logs, per_append)
                 impl_ns["Log"] = self._recording(impl_ns, saved[1], impl_logs, per_append)
+                # This test compares derivations, not speed. A timing scenario's wall-clock limit is judged by
+                # oracle.run_scenarios, which allows for a loaded host, so the clock stands still here.
+                clock = (mock.patch("time.perf_counter", return_value=0.0) if name in oracle.TIMING_SCENARIOS
+                         else contextlib.nullcontext())
                 try:
-                    getattr(model, name)()
-                    impl_ns[name]()
+                    with clock:
+                        getattr(model, name)()
+                        impl_ns[name]()
                 finally:
                     model_ns["Log"], impl_ns["Log"] = saved
                 self.assertEqual(len(model_logs), len(impl_logs))
