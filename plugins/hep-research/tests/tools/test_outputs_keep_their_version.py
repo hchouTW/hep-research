@@ -59,8 +59,8 @@ class ProfileCheck(unittest.TestCase):
 
     def test_a_stored_version_is_ignored_and_a_stored_result_is_not(self):
         for profile in PROFILES:
-            with self.subTest(profile=profile), tempfile.TemporaryDirectory() as tmp:
-                root = Path(tmp) / "hep-research"
+            with self.subTest(profile=profile), tempfile.TemporaryDirectory() as workdir:
+                root = Path(workdir) / "hep-research"
                 for sub in (".claude-plugin", "contracts", "core"):
                     shutil.copytree(PLUGIN / sub, root / sub, ignore=shutil.ignore_patterns("__pycache__", "fixtures"))
                 shutil.copytree(PLUGIN / "profiles/theory" / profile, root / "profiles/theory" / profile,
