@@ -8827,3 +8827,29 @@ changed in this release. `claude plugin validate --strict` (Claude Code 2.1.316)
 0.164.0) pass.
 
 Passing checks show software consistency, not physical validity.
+
+## 0.55.0 release check (2026-11-05, E2 and CI)
+
+Release branch `release/0.55.0`, based on main `0f0b4fcc` (PR #346 merged). Minor release: g4sim phase S0 and a release
+process that no longer regenerates outputs (PR #345). Contracts 3.18.0, `CORE_VERSION` 1.5.0, `adapters/geant4` 0.6.0,
+`adapters/detector-simulation` 0.4.0 and every skill `description` are unchanged.
+
+What changed on the release branch:
+- the CHANGELOG `0.55.0` section and the g4sim status (S0 `merged`); the version constants were bumped in S0;
+- no regeneration for the release (PR #345). The only regenerated outputs are those of the S0 example fixes, on E2 in
+  `a5edebdd` (`~/.venvs/hep-research-e2`): `geant4-thin-silicon` and `design-minimal-spectrometer`, 80 files, no PNG
+  and no float changed, compared field by field. Gate record: `docs/dev/geant4-architecture/g4sim-gates/S0.md`.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on `630b2660` (run 41914141195) | success: 25 jobs passed, 3 skipped by the pull-request plan |
+| `run_all_checks.py` (all parts, host CLIs), E2 at `630b2660`, `--jobs 4` | 33 pass, 0 fail, 0 skip; units 6596 tests, 6416 passed, 180 skipped, 0 failures, 504 modules, 0 timed out |
+
+E2: macOS arm64, Python 3.13.2, NumPy 2.5.3. `claude-plugin-validate` (Claude Code 2.1.316) and `codex-plugin-load`
+(codex-cli 0.164.0) pass.
+
+Open: the macOS job of `platforms.yml` fails on `t28_scale_linear` (`evals/reconstruction-v12/spec/v12-en-reference-model.py`)
+on `main` before this release too (run 41841427933), and it did not run on this branch. The custodian's re-evaluation of
+qualification follows this release and is not recorded here.
+
+Passing checks show software consistency, not physical validity.
