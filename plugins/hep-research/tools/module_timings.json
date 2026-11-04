@@ -67,6 +67,7 @@
   "tests.contracts.test_gate_adversarial": 1.3,
   "tests.contracts.test_gate_verdict_snapshot": 1.2,
   "tests.contracts.test_geant4_a1": 45.0,
+  "tests.contracts.test_geometry": 0.6,
   "tests.contracts.test_geant4_upgrade": 37.8,
   "tests.contracts.test_hep_review_decision_table": 0.42,
   "tests.contracts.test_hep_review_json": 0.08,

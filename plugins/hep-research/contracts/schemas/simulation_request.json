@@ -1,0 +1,93 @@
+{
+ "$comment": "simulation-request/1 (g4sim plan, Section 6.3): source, reference planes, scorers and truth keeping. The blocks are defined with the phases that use them (S3, S4); S1 fixes the envelope.",
+ "type": "object",
+ "required": [
+  "schema",
+  "source"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "schema": {
+   "const": "simulation-request/1"
+  },
+  "source": {
+   "type": "object",
+   "required": [
+    "density",
+    "particle",
+    "energy",
+    "position",
+    "direction"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "density": {
+     "enum": [
+      "analytic",
+      "external"
+     ]
+    },
+    "particle": {
+     "anyOf": [
+      {
+       "type": "string",
+       "minLength": 1
+      },
+      {
+       "type": "object",
+       "required": [
+        "z",
+        "a"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "z": {
+         "type": "integer",
+         "minimum": 1
+        },
+        "a": {
+         "type": "integer",
+         "minimum": 1
+        }
+       }
+      }
+     ]
+    },
+    "energy": {
+     "type": "object"
+    },
+    "position": {
+     "type": "object"
+    },
+    "direction": {
+     "type": "object"
+    }
+   }
+  },
+  "reference_planes": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "name",
+     "frame"
+    ]
+   }
+  },
+  "scorers": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "name",
+     "readout",
+     "select",
+     "quantity"
+    ]
+   }
+  },
+  "truth": {
+   "type": "object"
+  }
+ }
+}

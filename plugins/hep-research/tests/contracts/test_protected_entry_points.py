@@ -120,6 +120,7 @@ def cli_entries(env: Env):
     return [
         ("contracts/validate.py", load_script("contracts/validate.py").main, [a], True, False),
         ("contracts/dependencies.py", load_script("contracts/dependencies.py").main, [a, "--root", str(env.proj)], True, False),
+        ("contracts/geometry.py", load_script("contracts/geometry.py").main, [a], False, False),
         ("contracts/comparison/gate.py", load_script("contracts/comparison/gate.py").main, [a, a], True, False),
         ("contracts/project.py", load_script("contracts/project.py").main, [str(env.proj)], False, False),
         ("combine_measurements.py", load_script("skills/hep-statistics/scripts/combine_measurements.py").main, [a], True, False),
@@ -145,7 +146,7 @@ def cli_entries(env: Env):
 def lib_entries(env: Env):
     """(name, callable, formal) for the lower-level functions, called directly with placeholder arguments: the guard
     runs before any argument is used."""
-    from contracts import dependencies, project, validate
+    from contracts import dependencies, geometry, project, validate
     from contracts.comparison import combination, gate, model_set
     from core.blinding import blinding
     from core.evidence import ledger, query
@@ -161,6 +162,7 @@ def lib_entries(env: Env):
     c = env.campaign
     return [
         ("validate.validate_artifact", lambda: validate.validate_artifact(env.doc), False),
+        ("contracts.geometry.check_file", lambda: geometry.check_file(env.art), False),
         ("dependencies.validate_dependencies", lambda: dependencies.validate_dependencies(env.art, env.proj), False),
         ("gate.gate", lambda: gate.gate({}, {}), False),
         ("gate.check", lambda: gate.check(env.doc, env.doc), False),
