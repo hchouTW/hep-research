@@ -1,0 +1,112 @@
+{
+ "schema": "g4sim-status/1",
+ "phases": {
+  "S0": {
+   "state": "in-progress",
+   "worktree": "../hep-research-g4sim-S0",
+   "branch": "g4sim/S0",
+   "task_card_sha256": "",
+   "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S0.md",
+   "blocked_on": []
+  },
+  "S1": {
+   "state": "not-started",
+   "worktree": "../hep-research-g4sim-S1",
+   "branch": "g4sim/S1",
+   "task_card_sha256": "",
+   "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S1.md",
+   "blocked_on": []
+  },
+  "S2": {
+   "state": "not-started",
+   "worktree": "../hep-research-g4sim-S2",
+   "branch": "g4sim/S2",
+   "task_card_sha256": "",
+   "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S2.md",
+   "blocked_on": []
+  },
+  "S3": {
+   "state": "not-started",
+   "worktree": "../hep-research-g4sim-S3",
+   "branch": "g4sim/S3",
+   "task_card_sha256": "",
+   "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S3.md",
+   "blocked_on": []
+  },
+  "S4": {
+   "state": "not-started",
+   "worktree": "../hep-research-g4sim-S4",
+   "branch": "g4sim/S4",
+   "task_card_sha256": "",
+   "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S4.md",
+   "blocked_on": []
+  },
+  "S5": {
+   "state": "not-started",
+   "worktree": "../hep-research-g4sim-S5",
+   "branch": "g4sim/S5",
+   "task_card_sha256": "",
+   "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S5.md",
+   "blocked_on": []
+  },
+  "S6": {
+   "state": "not-started",
+   "worktree": "../hep-research-g4sim-S6",
+   "branch": "g4sim/S6",
+   "task_card_sha256": "",
+   "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S6.md",
+   "blocked_on": []
+  },
+  "S7": {
+   "state": "not-started",
+   "worktree": "../hep-research-g4sim-S7",
+   "branch": "g4sim/S7",
+   "task_card_sha256": "",
+   "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S7.md",
+   "blocked_on": []
+  },
+  "S8": {
+   "state": "not-started",
+   "worktree": "../hep-research-g4sim-S8",
+   "branch": "g4sim/S8",
+   "task_card_sha256": "",
+   "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S8.md",
+   "blocked_on": []
+  },
+  "S9": {
+   "state": "not-started",
+   "worktree": "../hep-research-g4sim-S9",
+   "branch": "g4sim/S9",
+   "task_card_sha256": "",
+   "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S9.md",
+   "blocked_on": []
+  }
+ },
+ "gb": {
+  "GB1": "unconfirmed",
+  "GB2": "unconfirmed",
+  "GB3": "unconfirmed",
+  "GB4": "unconfirmed",
+  "GB5": "unconfirmed",
+  "GB6": "unconfirmed",
+  "GB7": "unconfirmed",
+  "GB8": "unconfirmed",
+  "GB9": "unconfirmed",
+  "GB10": "unconfirmed",
+  "GB11": "unconfirmed",
+  "GB12": "unconfirmed",
+  "GB13": "unconfirmed",
+  "GB14": "unconfirmed",
+  "GB15": "unconfirmed",
+  "GB16": "unconfirmed",
+  "GB17": "unconfirmed",
+  "GB18": "unconfirmed",
+  "GB19": "unconfirmed",
+  "GB20": "unconfirmed",
+  "GB21": "unconfirmed",
+  "GB22": "unconfirmed",
+  "GB23": "unconfirmed",
+  "GB24": "unconfirmed"
+ },
+ "updated": "2026-11-04T09:22:40Z"
+}
