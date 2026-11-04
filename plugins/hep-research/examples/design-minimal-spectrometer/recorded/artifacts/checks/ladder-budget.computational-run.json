@@ -14,7 +14,7 @@
   "exit_status": 0,
   "input_manifest": [
    {
-    "path": "~/Workspace/geant4-work/sim-b3/j15/proj/artifacts/runs/N6-geantino.computational-run.json",
+    "path": "runs/N6-geantino.computational-run.json",
     "sha256": "c2a68f3ed1e31be58c7157c9f264c5de78ddd87585daf8f810eba5d12d1fa0ba"
    }
   ],
@@ -45,7 +45,7 @@
   {
    "artifact_id": "geant4-run-N6-geantino",
    "artifact_type": "computational-run",
-   "ref": "~/Workspace/geant4-work/sim-b3/j15/proj/artifacts/runs/N6-geantino.computational-run.json",
+   "ref": "runs/N6-geantino.computational-run.json",
    "sha256": "c2a68f3ed1e31be58c7157c9f264c5de78ddd87585daf8f810eba5d12d1fa0ba",
    "status": [
     "unvalidated"

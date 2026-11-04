@@ -14,7 +14,7 @@
   "exit_status": 0,
   "input_manifest": [
    {
-    "path": "~/Workspace/geant4-work/sim-b3/j15/proj/artifacts/runs/ladder-overlap-test.computational-run.json",
+    "path": "runs/ladder-overlap-test.computational-run.json",
     "sha256": "d1c449e2e525e77e107e8faa6d1c9321cad623b382b70edf5aed411076a2a208"
    }
   ],
@@ -42,7 +42,7 @@
   {
    "artifact_id": "geant4-run-ladder-overlap-test",
    "artifact_type": "computational-run",
-   "ref": "~/Workspace/geant4-work/sim-b3/j15/proj/artifacts/runs/ladder-overlap-test.computational-run.json",
+   "ref": "runs/ladder-overlap-test.computational-run.json",
    "sha256": "d1c449e2e525e77e107e8faa6d1c9321cad623b382b70edf5aed411076a2a208",
    "status": [
     "unvalidated"
