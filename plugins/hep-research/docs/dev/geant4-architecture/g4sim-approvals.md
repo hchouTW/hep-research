@@ -70,4 +70,5 @@ These are not Section 20 decisions. They are how S0 reconciled requirements of t
 | Task-card layout | Section E5's eight sections are level-4 headings under the twelve headings `lint_task.py` requires, because the linter rejects any other level-2 or level-3 heading |  |  |  |  |
 | Registration of Execution-log updates | A card changed only in its Execution log is registered again with that reason; the thresholds keep their earlier registration (Sections E4, E8 and 19.2 otherwise conflict) |  |  |  |  |
 | Linter root | Cards are linted with both `--repo <worktree>` (Section E4) and `--repo <plugin root>` (Section 19.2) |  |  |  |  |
+| Version bump | The plugin is bumped to 0.55.0 on the branch; regenerating committed outputs in E2, the VALIDATION release check and the release manifest are left for the maintainer, because E2 is not reachable from this host. Until then 22 "committed output is current" tests fail |  |  |  |  |
 | Main language | English is the main text for g4sim documents and for writing Part 7 (user's instruction, 2026-11-04); the header of `geant4-program.md`, which says the Chinese wins, is unchanged |  |  |  |  |
