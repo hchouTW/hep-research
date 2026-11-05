@@ -239,6 +239,13 @@
    "registered_at": "2026-11-05T09:25:27Z",
    "card_commit": "f17e583c",
    "reason": "Execution log only (versions, final checks); thresholds unchanged"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "ae601bf4d74161bb15fdaa7b335537c4116375c01e86dd9e760b72a42aab4072",
+   "registered_at": "2026-11-05T17:20:30Z",
+   "card_commit": "6b08af32",
+   "reason": "Refreshed at the start of S2: q_max and r_max of legacy physics lists registered, T2 not needed, execution rules; no threshold loosened"
   }
  ]
 }
