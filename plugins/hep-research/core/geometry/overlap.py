@@ -94,7 +94,7 @@ def _chains(ir: dict) -> dict:
     daughters: dict[str, list] = {}
     for placement in ir["physical"]["placements"]:
         daughters.setdefault(placement["mother"], []).append(placement)
-    reach = {WORLD: ((Decimal(0),) * 3, 0, False)}
+    reach: dict[str, tuple[tuple[Decimal, ...], int, bool]] = {WORLD: ((Decimal(0),) * 3, 0, False)}
     pending = [WORLD]
     while pending:
         mother = pending.pop()

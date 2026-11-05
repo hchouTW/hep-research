@@ -31,7 +31,7 @@ def _interval(origin: tuple, direction: tuple, half: tuple):
         ends = sorted(divide(subtract(side, origin[axis]), direction[axis]) for side in (-half[axis], half[axis]))
         enter = ends[0] if enter is None else max(enter, ends[0])
         leave = ends[1] if leave is None else min(leave, ends[1])
-    if enter is None:
+    if enter is None or leave is None:
         return None
     return (enter, leave) if enter < leave else None
 

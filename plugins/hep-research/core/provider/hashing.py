@@ -12,7 +12,7 @@ from __future__ import annotations
 
 import math
 
-from core.canonical import canonical_json, canonical_sha256
+from core.canonical import canonical_json, canonical_sha256  # noqa: F401  (canonical_json is re-exported)
 
 
 def point_key(point: dict) -> dict:

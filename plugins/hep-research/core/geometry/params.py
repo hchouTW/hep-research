@@ -20,7 +20,8 @@ def tokens(text: str) -> list[tuple[str, str]]:
         match = _TOKEN.match(text, position)
         if match is None:
             raise GeometryError("params-syntax", f"{text[:80]!r}: cannot read from position {position}")
-        found.append((match.lastgroup, match.group(match.lastgroup)))
+        kind = match.lastgroup or ""
+        found.append((kind, match.group(kind)))
         position = match.end()
     return found
 
