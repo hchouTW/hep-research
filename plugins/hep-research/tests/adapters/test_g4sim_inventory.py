@@ -74,14 +74,14 @@ class Table(unittest.TestCase):
 class Collect(unittest.TestCase):
     def test_every_recorded_geant4_run_is_found(self):
         rows = inventory.collect(ROOT)
-        self.assertEqual(Counter(row["journey"] for row in rows), {"J14": 26, "J15": 74, "J16": 10})
-        self.assertEqual(len({row["run"] for row in rows}), 110)
+        self.assertEqual(Counter(row["journey"] for row in rows), {"J14": 26, "J15": 74, "J16": 10, "mirrors": 2})
+        self.assertEqual(len({row["run"] for row in rows}), 112)
 
     def test_every_run_has_a_source_commit_and_a_spec_file_with_its_hash(self):
         for row in inventory.collect(ROOT):
             with self.subTest(run=row["run"]):
                 self.assertIsNotNone(row["source_commit"])
-                found = list((ROOT / inventory.EXAMPLES[row["journey"]] / "recorded").rglob(row["spec_name"]))
+                found = list((ROOT / inventory.SPEC_FOLDERS[row["journey"]]).rglob(row["spec_name"]))
                 self.assertIn(row["spec_file_sha256"], {hashlib.sha256(path.read_bytes()).hexdigest() for path in found})
 
     def test_each_row_says_how_to_rerun_it(self):

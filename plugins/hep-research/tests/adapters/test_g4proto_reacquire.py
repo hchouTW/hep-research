@@ -204,5 +204,37 @@ class CostSample(unittest.TestCase):
         self.assertTrue(all("schema" in self.module.spec_of(row) for row in rows))
 
 
+class G5Scan(unittest.TestCase):
+    spec = importlib.util.spec_from_file_location("g5_scan", FOLDER.parent / "g5_scan.py")
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    code = "int a = 1;\nint b = 2;\nint c = 3;\nint d = 4;\nint e = 5;\n"
+
+    def test_comments_whitespace_and_trivial_lines_do_not_count(self):
+        text = '#include "x.hh"\n// note\n{\n  int   a = 1; // why\n/* block\n*/\n}\n'
+        self.assertEqual(self.module.normalized(text), ["inta=1;"])
+
+    def run_scan(self, new_text):
+        with tempfile.TemporaryDirectory() as folder:
+            examples = Path(folder, "examples")
+            examples.mkdir()
+            (examples / "a.cc").write_text(self.code, encoding="utf-8")
+            candidate = Path(folder, "candidate.hh")
+            candidate.write_text(new_text, encoding="utf-8")
+            return self.module.main(["--examples", str(examples), str(candidate)])
+
+    def test_new_code_passes(self):
+        self.assertEqual(self.run_scan("double x = 9;\ndouble y = 8;\ndouble z = 7;\n"), 0)
+
+    def test_a_reformatted_copy_is_found(self):
+        self.assertEqual(self.run_scan(self.module.reformatted(self.code)), 1)
+
+    def test_an_empty_tree_is_refused(self):
+        with tempfile.TemporaryDirectory() as folder:
+            candidate = Path(folder, "candidate.hh")
+            candidate.write_text("int a;\n", encoding="utf-8")
+            self.assertEqual(self.module.main(["--examples", folder + "/none", str(candidate)]), 2)
+
+
 if __name__ == "__main__":
     unittest.main()

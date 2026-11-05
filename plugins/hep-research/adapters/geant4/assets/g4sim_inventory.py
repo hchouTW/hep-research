@@ -23,14 +23,16 @@ from pathlib import Path
 PLUGIN = Path(__file__).resolve().parents[3]
 SOURCES = {"J14": "examples/geant4-thin-silicon/output/artifacts/runs/*.json",
            "J15": "examples/design-minimal-spectrometer/recorded/runs/*",
-           "J16": "examples/design-search-j16/recorded/runs/*"}
+           "J16": "examples/design-search-j16/recorded/runs/*",
+           "mirrors": "tests/adapters/fixtures/geant4/records/mirror-*"}
 PROGRAMS = ("layered_sim", "element_sim")
 CLASSES = ("T1-recorded", "T1-regenerated", "T2", "not-regressable")
 COLUMN_FILE, SUMMARY_FILE = "events.csv", "summary.json"
 # The commit whose files match sources_sha256 of each recorded executable, found by walking the history (S1 task card).
 SOURCE_COMMITS = {"d39225ea24707abf": "636213ae", "a69ffad7c003aad9": "3f4f9985", "193c678cb9e97fad": "d9db638c",
                   "db090f9ea07ec303": "2a0b9f29"}
-EXAMPLES = {"J14": "examples/geant4-thin-silicon", "J15": "examples/design-minimal-spectrometer", "J16": "examples/design-search-j16"}
+SPEC_FOLDERS = {"J14": "examples/geant4-thin-silicon/recorded", "J15": "examples/design-minimal-spectrometer/recorded",
+                "J16": "examples/design-search-j16/recorded", "mirrors": "adapters/geant4/assets/layered_sim"}
 HOME_PREFIX = "~/Workspace/geant4-work/"
 
 

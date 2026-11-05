@@ -82,7 +82,7 @@ def timed_run(executable: Path, spec: dict, events: int, folder: Path) -> float:
 
 def spec_of(row: dict) -> dict:
     """The spec file of a run, by its recorded hash: other recorded files can share its name."""
-    folder = PLUGIN / inventory.EXAMPLES[row["journey"]] / "recorded"
+    folder = PLUGIN / inventory.SPEC_FOLDERS[row["journey"]]
     for path in folder.rglob(row["spec_name"]):
         if hashlib.sha256(path.read_bytes()).hexdigest() == row["spec_file_sha256"]:
             return json.loads(path.read_text(encoding="utf-8"))
