@@ -12,7 +12,7 @@
    "state": "in-progress",
    "worktree": "../hep-research-g4sim-S1",
    "branch": "g4sim/S1",
-   "task_card_sha256": "68cfea4eacf2f35101129cdff8ed4f3bb77d15bebd8d86a190cba47bbb264566",
+   "task_card_sha256": "41fceb6c7b7ebd2ff90d7e39539ce47860dc8efed3a4bb39efb7dbd3e41fed67",
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S1.md",
    "blocked_on": []
   },
@@ -82,7 +82,7 @@
   }
  },
  "gb": {
-  "GB1": "unconfirmed",
+  "GB1": "confirmed",
   "GB2": "unconfirmed",
   "GB3": "unconfirmed",
   "GB4": "confirmed",
@@ -103,9 +103,9 @@
   "GB19": "unconfirmed",
   "GB20": "unconfirmed",
   "GB21": "unconfirmed",
-  "GB22": "unconfirmed",
+  "GB22": "confirmed",
   "GB23": "unconfirmed",
   "GB24": "unconfirmed"
  },
- "updated": "2026-11-05T00:19:34Z"
+ "updated": "2026-11-05T00:25:44Z"
 }
