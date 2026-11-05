@@ -176,6 +176,13 @@
    "registered_at": "2026-11-05T00:25:44Z",
    "card_commit": "e101ea51",
    "reason": "Execution log and environments only (E2 results of GB1 and GB22, golden test on E2, E2 dataset versions); thresholds unchanged from the S1 refresh"
+  },
+  {
+   "card": "g4sim-tasks/S1.md",
+   "sha256": "97f8e0f4a2af239a5eb4ba6cfa7c158fb1308b02839ae4b6b1a424e2d64db89e",
+   "registered_at": "2026-11-05T00:27:50Z",
+   "card_commit": "71c4e0af",
+   "reason": "Execution log only (golden test on E5, E5 dataset versions); thresholds unchanged from the S1 refresh"
   }
  ]
 }
