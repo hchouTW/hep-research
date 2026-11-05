@@ -330,6 +330,13 @@
    "registered_at": "2026-11-05T23:26:07Z",
    "card_commit": "e1e7a48c",
    "reason": "Two-step registration: q, p0, p1 and n, before the reference and under-test runs"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "fb3db7d5bf37e60e3d7bcd1995165af10443734ee32cd1d4c843ca24b89ec441",
+   "registered_at": "2026-11-05T23:39:05Z",
+   "card_commit": "863d95d0",
+   "reason": "Execution log only; thresholds unchanged from the previous registration"
   }
  ]
 }
