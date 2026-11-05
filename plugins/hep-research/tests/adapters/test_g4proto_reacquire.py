@@ -317,6 +317,17 @@ class Baseline(unittest.TestCase):
             self.assertIn("another environment", printed.call_args.args[0])
 
 
+class DatasetTable(unittest.TestCase):
+    """The physics-list table: every legacy list has an entry, and the silent dataset is required for hadronic lists."""
+
+    def test_every_list_of_the_recorded_runs_is_in_the_table(self):
+        table = json.loads((ROOT / "contracts/rules/geant4_datasets.json").read_text(encoding="utf-8"))["physics_lists"]
+        for name in ("FTFP_BERT_EMZ", "FTFP_BERT_EMY", "FTFP_BERT__SS", "QGSP_BIC_EMZ", "G4EmStandardPhysics_option4"):
+            self.assertIn("G4LEDATA", table[name])
+        self.assertIn("G4LEVELGAMMADATA", table["FTFP_BERT_EMZ"])
+        self.assertNotIn("G4LEVELGAMMADATA", table["G4EmStandardPhysics"])
+
+
 class G5Scan(unittest.TestCase):
     spec = importlib.util.spec_from_file_location("g5_scan", FOLDER.parent / "g5_scan.py")
     module = importlib.util.module_from_spec(spec)

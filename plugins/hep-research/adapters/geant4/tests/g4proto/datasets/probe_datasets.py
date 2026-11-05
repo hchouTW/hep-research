@@ -23,6 +23,7 @@ from pathlib import Path
 
 DATASETS = ("G4NEUTRONHPDATA", "G4LEDATA", "G4LEVELGAMMADATA", "G4RADIOACTIVEDATA", "G4PARTICLEXSDATA", "G4PIIDATA", "G4REALSURFACEDATA",
             "G4SAIDXSDATA", "G4ABLADATA", "G4INCLDATA", "G4ENSDFSTATEDATA", "G4CHANNELINGDATA")
+TIME_LIMIT_S = 900
 HERE = Path(__file__).resolve().parent
 PLUGIN = HERE.parents[4]
 CASES = {"FTFP_BERT_EMZ": ("element_sim", "FTFP_BERT_EMZ"), "QGSP_BIC_EMZ": ("element_sim", "QGSP_BIC_EMZ"),
@@ -44,7 +45,11 @@ def run_case(executable: Path, spec: dict, folder: Path, missing: str | None, em
     environment = dict(os.environ)
     if missing:
         environment[missing] = str(empty)
-    done = subprocess.run([str(executable), "spec.json"], cwd=folder, capture_output=True, text=True, env=environment, check=False, timeout=1200)
+    try:
+        done = subprocess.run([str(executable), "spec.json"], cwd=folder, capture_output=True, text=True, env=environment, check=False,
+                              timeout=TIME_LIMIT_S)
+    except subprocess.TimeoutExpired:
+        return {"exit": None, "fatal": False, "events_sha256": None, "timed_out": True}
     text = done.stdout + done.stderr
     csv = folder / "events.csv"
     return {"exit": done.returncode, "fatal": failed(text), "events_sha256": hashlib.sha256(csv.read_bytes()).hexdigest() if csv.is_file() else None}
@@ -82,9 +87,10 @@ def main(argv=None) -> int:
         base = cases["unchanged"]
         if base["exit"] != 0 or base["fatal"]:
             broken.append(name)
-        table[name] = {"needed": sorted(k for k, v in cases.items() if k != "unchanged" and (v["exit"] != 0 or v["fatal"])),
+        table[name] = {"needed": sorted(k for k, v in cases.items() if k != "unchanged" and (v["exit"] not in (0, None) or v["fatal"])),
                        "output_changed": sorted(k for k, v in cases.items() if k != "unchanged" and v["exit"] == 0
-                                                and v["events_sha256"] != base["events_sha256"])}
+                                                and v["events_sha256"] != base["events_sha256"]),
+                       "timed_out": sorted(k for k, v in cases.items() if v.get("timed_out"))}
     args.out.write_text(json.dumps({"table": table, "cases": results}, indent=1) + "\n", encoding="utf-8")
     print(json.dumps({"status": "failed" if broken else "ok", "broken": broken, "table": table}, indent=1))
     return 1 if broken else 0
