@@ -15,6 +15,7 @@ from core.geometry.numbers import CONTEXT, EPSILON_MM, MINIMUM_GAP_MM, PRECISION
 WORLD = "world"
 DEFAULT_REGION = "default"
 NO_FIELD = "none"
+NIST_PREFIX = "G4_"
 _AXES = {"x": 0, "y": 1, "z": 2}
 _ZERO = Decimal(0)
 
@@ -269,6 +270,9 @@ def expand(spec: dict) -> dict:
     nodes = {**spec.get("templates", {}), WORLD: spec["world"]}
     sizes = {name: _solid(node, values, f"/templates/{name}") for name, node in spec.get("templates", {}).items()}
     sizes[WORLD] = values.vector(spec["world"]["size_mm"], "/world/size_mm")
+    for name, node in nodes.items():
+        if not node["material"].startswith(NIST_PREFIX) and node["material"] not in spec.get("materials", {}):
+            raise GeometryError("material-unknown", f"{node['material']!r} is neither a NIST name nor declared", f"/templates/{name}")
     tree = {name: _children(name, node, sizes, values, f"/templates/{name}") for name, node in nodes.items()}
     order = _order(tree)
     regions = _inherited("region", DEFAULT_REGION, nodes, tree, order)

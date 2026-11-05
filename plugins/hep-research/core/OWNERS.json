@@ -280,7 +280,9 @@
     "modules",
     "expand",
     "overlap",
-    "identity"
+    "identity",
+    "material",
+    "gdml"
    ],
    "source": "new in this plugin (g4sim S1, 2026-11-05)"
   }

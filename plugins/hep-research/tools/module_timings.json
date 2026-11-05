@@ -125,6 +125,7 @@
   "tests.core.test_constants": 0.1,
   "tests.core.test_geometry_expand": 0.3,
   "tests.core.test_geometry_foundations": 0.2,
+  "tests.core.test_geometry_material_gdml": 0.2,
   "tests.core.test_evidence_ledger": 0.1,
   "tests.core.test_evidence_query": 0.5,
   "tests.core.test_kinematics_fourvector": 0.1,
