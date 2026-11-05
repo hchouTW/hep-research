@@ -8866,3 +8866,34 @@ one example gives 863 and 880 (positive control).
 **Confirmation** (hsinyichou, maintainer, 2026-11-05, in the Claude Code session, answering "Yes, I reviewed them"): "G5 for S1: I
 reviewed ProbeV2.hh, ProbeHook.hh, gb4_gb10/main.cc and beamon_zero/main.cc. They are written from the Geant4 API, with no example code
 copied or adapted."
+
+## 0.56.0 release check (2026-11-05, E2 and CI)
+
+Release branch `release/0.56.0`, based on main `da363929` (PR #350 merged). Minor release: g4sim phase S1 and the macOS fix
+for `t28_scale_linear` (PR #348). Contracts 3.19.0, `CORE_VERSION` 1.6.0, `adapters/geant4` 0.7.0,
+`adapters/detector-simulation` 0.5.0; the version constants were bumped in S1.
+
+What changed on the release branch:
+- the CHANGELOG `0.56.0` section and the g4sim status (S1 `merged`);
+- the README size statement (about 4500 files, 79.9 MB): the release manifest took the package past the 10 % that
+  `tools/check_packaging.py` allows against the old 71.3 MB. This came after the E2 check below and changes text only;
+- no regeneration for the release: committed outputs keep the plugin and contracts versions that wrote them. Gate record:
+  `docs/dev/geant4-architecture/g4sim-gates/S1.md`.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on `be4ed521` (run 42009907744) | success: 25 jobs passed, 3 skipped by the pull-request plan |
+| `run_all_checks.py` (all parts, host CLIs), E2 at `be4ed521`, `--jobs 4` | 33 pass, 0 fail, 0 skip; units 6797 tests, 6617 passed, 180 skipped, 0 failures, 514 modules, 0 timed out |
+
+E2: macOS arm64, Python 3.13.2, NumPy 2.5.3. `claude-plugin-validate` (Claude Code 2.1.318) and `codex-plugin-load`
+(codex-cli 0.164.0) pass. The two `hep_authoring` tests that failed in the S1 worktree, whose path contains the reviewer
+label `S1`, pass here.
+
+The `t28_scale_linear` failure listed as open at 0.55.0 is closed: the macOS and Windows jobs of `platforms.yml` passed on
+the fix (`175a8fcf`, run 41922856255), and that job did not run on this branch.
+
+Open: two hand-formatted mirror specs round-trip as documents, not bytes; gate 6 of S1 rests on one golden file; two
+performance limits are proposals (`g4sim-performance-budget.md`). The custodian's re-evaluation of qualification follows
+this release and is not recorded here.
+
+Passing checks show software consistency, not physical validity.
