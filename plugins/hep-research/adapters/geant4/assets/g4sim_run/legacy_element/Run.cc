@@ -310,11 +310,13 @@ int Run(const char* specPath, const minijson::Value& legacy) {
   std::printf("G4SIM_BEAM_ON %.3f\n", std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count());
   std::fflush(stdout);
   rm->BeamOn(static_cast<int>(spec.events));
+  const auto beamOff = std::chrono::steady_clock::now();
   if (spec.run_manager == "mt") {
     g4sim::MergeThreadFiles(spec.csv, spec.threads, 2);  // line 1 "# SIMULATION", line 2 the column names
     g4sim::MergeThreadFiles(g4sim::ConservationPath(spec.csv), spec.threads, 2);
     if (spec.debug_observable_dump) g4sim::MergeThreadFiles(spec.dump_out, spec.threads, 2);
   }
+  std::printf("G4SIM_MERGE_SECONDS %.3f\n", std::chrono::duration<double>(std::chrono::steady_clock::now() - beamOff).count());
   std::ofstream dp(spec.datapaths_out);
   dp << "{\"geant4_version\": " << JsonQuote(G4Version) << ", \"before_initialization\": " << envBefore
      << ", \"after_run\": " << EnvJson() << "}\n";

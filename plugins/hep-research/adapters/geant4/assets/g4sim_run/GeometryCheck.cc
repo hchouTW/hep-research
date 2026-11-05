@@ -1,6 +1,7 @@
 // g4sim_run/GeometryCheck.cc: run.mode geometry-check (g4sim plan, Section 19.2, S2): the volume tree of a new specification from its IR, with
 // fields set explicitly in pre-order, one geantino event to trigger the probe, and the write-back. Written from the Geant4 11.4 API; no example
 // code copied or adapted. No accounting and no scorers: those come in S3.
+#include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
@@ -50,6 +51,8 @@ std::string Control() {
   const char* value = std::getenv("G4SIM_BUILDER_CONTROL");
   return value ? value : "";
 }
+
+double Now() { return std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count(); }
 
 double Decimal(const Value& value) { return value.isNumber() ? value.num : std::strtod(value.str.c_str(), nullptr); }
 
@@ -108,8 +111,10 @@ class NewDetector : public G4VUserDetectorConstruction {
       const double shift = Control() == "overlap" && static_cast<G4int>(placement.at("copy_number", "placement").num) == 1 ? -10. : 0.;
       fChildren[mother].push_back(name);
       new G4PVPlacement(rotation, G4ThreeVector(Decimal(c[0]) + shift, Decimal(c[1]), Decimal(c[2])), fLogicals.at(name), name, fLogicals.at(mother), false,
-                        static_cast<G4int>(placement.at("copy_number", "placement").num), true);
+                        static_cast<G4int>(placement.at("copy_number", "placement").num), !std::getenv("G4SIM_NO_OVERLAP_CHECK"));
     }
+    std::printf("G4SIM_TREE_BUILT %.3f\n", Now());
+    std::fflush(stdout);
     for (const auto& [name, logicals] : regions) {
       auto* region = new G4Region(name);
       region->SetProductionCuts(new G4ProductionCuts());
@@ -210,8 +215,12 @@ int GeometryCheck(const Value& ir, const Value& card) {
   }
   manager->SetUserInitialization(list);
   manager->SetUserInitialization(new Actions());
+  std::printf("G4SIM_START %.3f\n", Now());
   manager->Initialize();
+  std::printf("G4SIM_INITIALIZED %.3f\n", Now());
+  std::fflush(stdout);
   manager->BeamOn(1);
+  std::printf("G4SIM_DONE %.3f\n", Now());
   delete manager;
   return 0;
 }

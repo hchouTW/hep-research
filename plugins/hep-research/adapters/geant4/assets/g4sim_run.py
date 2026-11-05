@@ -41,6 +41,7 @@ SURFACE_TOLERANCE = re.compile(r"surface.?tolerance|world.?maximum.?extent", re.
 OPTICAL = re.compile(r"optical", re.IGNORECASE)
 TIMING_FIELDS = ("wall_seconds", "cpu_seconds", "startup_seconds", "threads", "load_at_start")
 BEAM_ON_MARK = "G4SIM_BEAM_ON "
+MERGE_MARK = "G4SIM_MERGE_SECONDS "
 OVERLAP_MARK = "GeomVol1002"
 ATOMIC_MASS_TOLERANCE = 1e-3  # natural mixtures and table editions differ below this; a swapped element differs by far more
 KEPT = ("events.csv", "summary.json", "column_map.json", "materials.json", "conservation.csv", "probe-v2.json")
@@ -111,6 +112,14 @@ def startup_seconds(log: Path, started_epoch: float) -> float:
     return 0.0
 
 
+def merge_seconds(log: Path) -> float:
+    with log.open(encoding="utf-8", errors="replace") as stream:
+        for line in stream:
+            if line.startswith(MERGE_MARK):
+                return float(line[len(MERGE_MARK):])
+    return 0.0
+
+
 def read_record(path: Path) -> dict:
     opener = gzip.open if path.suffix == ".gz" else open
     with opener(path, "rt", encoding="utf-8") as stream:
@@ -149,7 +158,7 @@ def run(args) -> dict:
     after = resource.getrusage(resource.RUSAGE_CHILDREN)
     record = {"status": "ok" if code == 0 else "failed", "exit_status": code, "wall_seconds": round(time.perf_counter() - begun, 3),
               "cpu_seconds": round(after.ru_utime + after.ru_stime - before.ru_utime - before.ru_stime, 3),
-              "startup_seconds": startup_seconds(work / "log.txt", started), "threads": card["run"].get("threads", 1), "load_at_start": round(load, 2),
+              "startup_seconds": startup_seconds(work / "log.txt", started), "merge_seconds": merge_seconds(work / "log.txt"), "threads": card["run"].get("threads", 1), "load_at_start": round(load, 2),
               "extension": {"geometry": {"geometry_id": geometry_identity, "provenance_id": identity.provenance_id(ir), "request_id": request_identity,
                                          "run_id": run_id(geometry_identity, request_identity, card, build_hash), "build_hash": build_hash,
                                          "installed_features": {"datasets": sorted(json.loads(DATASETS.read_text(encoding="utf-8"))["physics_lists"][physics_list(card)])}}},
