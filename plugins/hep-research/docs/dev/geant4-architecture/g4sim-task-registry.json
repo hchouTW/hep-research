@@ -246,6 +246,13 @@
    "registered_at": "2026-11-05T17:20:30Z",
    "card_commit": "6b08af32",
    "reason": "Refreshed at the start of S2: q_max and r_max of legacy physics lists registered, T2 not needed, execution rules; no threshold loosened"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "4e88188e34c520b06dae13d47dd00d6ea086532a0f5beb74e66df96d2ac83a4f",
+   "registered_at": "2026-11-05T17:43:25Z",
+   "card_commit": "efddbeb5",
+   "reason": "Execution log and the closed open question only; thresholds unchanged from the previous registration"
   }
  ]
 }
