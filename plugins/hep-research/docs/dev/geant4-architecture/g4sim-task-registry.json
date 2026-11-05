@@ -323,6 +323,13 @@
    "registered_at": "2026-11-05T23:17:50Z",
    "card_commit": "ee6b2ce9",
    "reason": "GB6's negative re-registered by the maintainer's decision of 2026-11-05; Execution log; no other threshold changed"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "4e408194f98e56ef920784c124b9497ede0eeee641fd266991775d00fef61844",
+   "registered_at": "2026-11-05T23:26:07Z",
+   "card_commit": "e1e7a48c",
+   "reason": "Two-step registration: q, p0, p1 and n, before the reference and under-test runs"
   }
  ]
 }
