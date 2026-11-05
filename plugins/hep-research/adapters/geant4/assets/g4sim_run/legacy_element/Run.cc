@@ -40,6 +40,8 @@
 #include "G4RunManagerFactory.hh"
 #include "G4SystemOfUnits.hh"
 #include "G4UImanager.hh"
+#include "G4EmExtraPhysics.hh"
+#include "G4StepLimiterPhysics.hh"
 #include "G4VModularPhysicsList.hh"
 #include "G4Version.hh"
 #include "MiniJson.hh"
@@ -264,6 +266,11 @@ int Run(const char* specPath, const minijson::Value& legacy) {
     G4VModularPhysicsList* phys = g4sim::BuildPhysicsList(spec.reference_list, spec.em_constructor, spec.decay,
                                                           spec.HasField(), spec.default_cut_mm, err);
     if (!phys) return Status("rejected", err);
+    // tests only, the negative test of Section 15.1: one extra step-limit process must change the process list and the output (GB6)
+    if (const char* control = std::getenv("G4SIM_PHYSICS_CONTROL")) {
+      if (std::string(control) == "extra_discrete") phys->RegisterPhysics(new G4EmExtraPhysics());
+      else phys->RegisterPhysics(new G4StepLimiterPhysics());
+    }
     rm->SetUserInitialization(phys);
   } catch (const std::exception& e) {
     return Status("rejected", e.what());
