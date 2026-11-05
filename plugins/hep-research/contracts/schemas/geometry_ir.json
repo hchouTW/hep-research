@@ -1,5 +1,5 @@
 {
- "$comment": "geometry-ir/1 (g4sim plan, Section 7.1): the resolved geometry. The physical part fixes geometry_id and the marker part provenance_id. The field set of the physical part is finalized in S1 once GB4 and GB10 are confirmed; later phases add only module kinds and optional fields.",
+ "$comment": "geometry-ir/1 (g4sim plan, Section 7.1): the resolved geometry. The physical part fixes geometry_id and the marker part provenance_id. The field set of the physical part was finalized in S1 after GB4 and GB10 were confirmed (D20); later phases add only module kinds and optional fields, so an existing geometry_id does not change.",
  "type": "object",
  "required": [
   "schema",
