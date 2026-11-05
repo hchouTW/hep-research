@@ -19,6 +19,7 @@
 // A build with -DELEMENT_SIM_TEST_HOOKS=ON adds the UI commands /element_sim/test/reportFieldManagers (every thread
 // prints its field managers' addresses at the run start) and /element_sim/test/primaryOnlyCrossings (tests only).
 #include <algorithm>
+#include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
@@ -299,6 +300,8 @@ int Run(const char* specPath, const minijson::Value& legacy) {
   std::string cmap = ColumnMap(spec);
   std::ofstream(spec.column_map_out, std::ios::binary) << cmap;
   info.column_map_sha256 = g4sim::Sha256::HexOf(cmap);
+  std::printf("G4SIM_BEAM_ON %.3f\n", std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count());
+  std::fflush(stdout);
   rm->BeamOn(static_cast<int>(spec.events));
   if (spec.run_manager == "mt") {
     g4sim::MergeThreadFiles(spec.csv, spec.threads, 2);  // line 1 "# SIMULATION", line 2 the column names

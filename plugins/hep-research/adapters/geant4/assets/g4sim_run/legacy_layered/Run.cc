@@ -14,6 +14,7 @@
 // /layered_sim/test/probeAfterInitialize (tests only): the probe also runs after /run/initialize, before BeamOn, and
 // writes probe.test.json, which must say recorded: false.
 #include <algorithm>
+#include <chrono>
 #include <cstdio>
 #include <cstdlib>
 #include <fstream>
@@ -306,6 +307,8 @@ int Run(const char* specPath, const minijson::Value& legacy) {
   }
 #endif
   WriteMaterials(*det, spec.materials_out);
+  std::printf("G4SIM_BEAM_ON %.3f\n", std::chrono::duration<double>(std::chrono::system_clock::now().time_since_epoch()).count());
+  std::fflush(stdout);
   rm->BeamOn(static_cast<int>(spec.events));
   if (spec.run_manager == "mt") {
     g4sim::MergeThreadFiles(spec.csv, spec.threads, 2);  // line 1 "# SIMULATION", line 2 the column names

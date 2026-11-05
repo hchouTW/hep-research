@@ -45,6 +45,12 @@
        }
       }
      }
+    },
+    "extra_constructors": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
     }
    }
   },
