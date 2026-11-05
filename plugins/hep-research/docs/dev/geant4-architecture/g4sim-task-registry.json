@@ -288,6 +288,13 @@
    "registered_at": "2026-11-05T21:41:59Z",
    "card_commit": "6eb0f2d8",
    "reason": "Execution log only; thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "4849a016d85f06155f546510a17e325b9b45f01b07f7c86e2fb9acab8aa458bd",
+   "registered_at": "2026-11-05T22:04:14Z",
+   "card_commit": "0fe79f53",
+   "reason": "GB9 re-registered by the maintainer's decision of 2026-11-05: the limit judges the chain logic with Geant4's own masses, because the limit could not be met against PDG 2026 masses; no other threshold changed"
   }
  ]
 }
