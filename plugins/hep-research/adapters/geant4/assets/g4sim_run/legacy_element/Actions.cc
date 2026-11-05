@@ -1,4 +1,5 @@
 #include "Actions.hh"
+#include "Accounting.hh"
 #include "WriteBack.hh"
 
 #include <algorithm>
@@ -158,6 +159,7 @@ void RunAction::FillRunRows() {
 }
 
 void RunAction::EndOfRunAction(const G4Run*) {
+  g4sim::Accounting::Thread().Close();
   if (fOut.is_open()) fOut.close();
   if (fDump.is_open()) fDump.close();
   bool filler = G4Threading::IsMultithreadedApplication() ? G4Threading::G4GetThreadId() == 0
@@ -174,7 +176,11 @@ void RunAction::EndOfRunAction(const G4Run*) {
   }
 }
 
-void EventAction::BeginOfEventAction(const G4Event*) { fRec.Reset(fSpec.elements.size()); }
+void EventAction::BeginOfEventAction(const G4Event*) {
+  fRec.Reset(fSpec.elements.size());
+  g4sim::Accounting::Thread().Open(g4sim::ThreadConservationPath(fSpec.csv, fSpec.run_manager == "mt"));
+  g4sim::Accounting::Thread().BeginEvent();
+}
 
 void EventAction::FillEventFile(long number, const G4Event* event) {
   EventFile& ef = fRun->Events();
@@ -231,6 +237,7 @@ void EventAction::FillEventFile(long number, const G4Event* event) {
 }
 
 void EventAction::EndOfEventAction(const G4Event* event) {
+  g4sim::Accounting::Thread().EndEvent(event, fSpec.first_event);
   long number = fSpec.first_event + event->GetEventID();
   FillEventFile(number, event);
   auto& o = fRun->Out();
@@ -297,6 +304,7 @@ SteppingAction::SteppingAction(const Spec& spec, const Detector& det, EventActio
 }
 
 void SteppingAction::UserSteppingAction(const G4Step* step) {
+  g4sim::Accounting::Thread().Step(step);
   EventRecord& r = fEv->Record();
   const G4Track* track = step->GetTrack();
   const G4StepPoint* pre = step->GetPreStepPoint();

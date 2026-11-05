@@ -42,6 +42,7 @@
 #include "SimObservables.hh"
 #include "SimSummary.hh"
 #include "Spec.hh"
+#include "WriteBack.hh"
 #ifdef LAYERED_SIM_TEST_HOOKS
 #include "G4UIcmdWithoutParameter.hh"
 #include "G4UImessenger.hh"
@@ -308,6 +309,7 @@ int Run(const char* specPath, const minijson::Value& legacy) {
   rm->BeamOn(static_cast<int>(spec.events));
   if (spec.run_manager == "mt") {
     g4sim::MergeThreadFiles(spec.csv, spec.threads, 2);  // line 1 "# SIMULATION", line 2 the column names
+    g4sim::MergeThreadFiles(g4sim::ConservationPath(spec.csv), spec.threads, 2);
     if (spec.debug_observable_dump) g4sim::MergeThreadFiles(spec.dump_out, spec.threads, 2);
   }
   WriteColumnMap(spec, *det);

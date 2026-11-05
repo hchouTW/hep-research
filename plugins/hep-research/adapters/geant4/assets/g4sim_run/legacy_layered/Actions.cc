@@ -1,4 +1,5 @@
 #include "Actions.hh"
+#include "Accounting.hh"
 #include "WriteBack.hh"
 
 #include <cmath>
@@ -125,6 +126,7 @@ void RunAction::BeginOfRunAction(const G4Run*) {
 }
 
 void RunAction::EndOfRunAction(const G4Run*) {
+  g4sim::Accounting::Thread().Close();
   if (fOut.is_open()) fOut.close();
   if (fDump.is_open()) fDump.close();
   if (fSpec.observables.empty()) return;
@@ -144,10 +146,13 @@ void RunAction::WriteSummary() {
 }
 
 void EventAction::BeginOfEventAction(const G4Event*) {
+  g4sim::Accounting::Thread().Open(g4sim::ThreadConservationPath(fSpec.csv, fSpec.run_manager == "mt"));
+  g4sim::Accounting::Thread().BeginEvent();
   fRec.Reset(fDet.SlabNames().size(), fSpec.per_instance ? fDet.NumberOfPlacements() : 0);
 }
 
 void EventAction::EndOfEventAction(const G4Event* event) {
+  g4sim::Accounting::Thread().EndEvent(event, fSpec.first_event);
   auto& o = fRun->Out();
   if (!o.is_open()) return;
   const G4PrimaryVertex* v = event->GetPrimaryVertex(0);
@@ -239,6 +244,7 @@ void EventAction::EndOfEventAction(const G4Event* event) {
 }
 
 void SteppingAction::UserSteppingAction(const G4Step* step) {
+  g4sim::Accounting::Thread().Step(step);
   EventRecord& r = fEv->Record();
   const G4Track* track = step->GetTrack();
   const G4StepPoint* pre = step->GetPreStepPoint();
@@ -301,6 +307,7 @@ G4ClassificationOfNewTrack StackingAction::ClassifyNewTrack(const G4Track* track
   else ++r.nOther;
   if (fSpec.kill_secondaries) {
     r.killedUnbooked += track->GetKineticEnergy() * track->GetWeight();
+    g4sim::Accounting::Thread().StackingKill(track);
     if (pdg == -11) ++r.killedEplus;
     return fKill;
   }
