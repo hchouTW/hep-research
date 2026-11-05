@@ -2,7 +2,7 @@
 
 Approval packet of phase S0 and the record of approvals given (Part A, Sections E7 and E9, of `g4sim-task.md`).
 
-**Status (2026-11-05):** all Section 20 decisions, both stewards, the five execution choices, the application of the `dependencies.py` common check and the custodian's re-evaluations at the S0 and S1 releases are approved. The custodian is hsinyichou. A re-evaluation follows every release through S9.
+**Status (2026-11-05):** all Section 20 decisions, both stewards, the five execution choices, the application of the `dependencies.py` common check, the custodian's re-evaluations at the S0 and S1 releases and the two approvals due before S2 are approved. The custodian is hsinyichou. A re-evaluation follows every release through S9.
 
 ## How to approve
 
@@ -69,6 +69,13 @@ Approval packet of phase S0 and the record of approvals given (Part A, Sections 
 | `detsim_canonical.py` importing from core | Owner of detector-simulation | `canonical_json`, `check_hash_scope`, `normalize_decimal` and `load_json_strict` come from `core/canonical`; `canonical_sha256` stays imported from `contracts/recipe_semantics.py`, so the cross-check of `canonical_bytes` compares two implementations | Yes | hsinyichou (owner of detector-simulation) | 2026-11-05 | Answer in the Claude Code session to the detsim question: "Approve as recommended" |
 | Wiring the new entry points to the `core/protected` guard | Custodian | Yes: `contracts/geometry.py` (S1), `g4sim_run` and check-spec (S2), `g4kit.py` (S5) are each wired in the phase that delivers them, and that phase's gates add entry-point tests under protected mode. If `contracts/geometry.py` has no command line, the guard applies at the entry points that call it | Yes | hsinyichou (custodian) | 2026-11-05 | Answer in the Claude Code session to the guard question: "Yes, wire them" |
 
+## Section 22 items due before S2
+
+| Item | Who approves | Decision | Approved | Person | Date | Words or link |
+| --- | --- | --- | --- | --- | --- | --- |
+| Adding `physics.g4sim` to the study spec; rule engine reading the three specifications | Owner of the study protocol | A third form of `physics` in `geant4-study-spec/1`, beside `layered_sim_spec` and `element_sim_spec`, and `check_geant4_study.py` reads the three specifications. Additive: old study specs are unaffected (Section 14.1) | Yes | hsinyichou (owner of the study protocol) | 2026-11-05 | Answer in the Claude Code session to the question on `physics.g4sim`: "Approve (Recommended)" |
+| Adding `extension.geometry` to `contracts/schemas/ext_computational_run.json` | hep-computing (owner of the computational-run schema) | `extension.geometry` records the three identities and the installed features of each g4sim run. Additive (Sections 8.10, 14.3) | Yes | hsinyichou (owner of the computational-run schema) | 2026-11-05 | Answer in the Claude Code session to the question on `extension.geometry`: "Approve (Recommended)" |
+
 ## Gaps in Part B (Section E7, item 6)
 
 Part B stays frozen; these decisions fill gaps found while implementing S1.
@@ -83,6 +90,8 @@ Part B stays frozen; these decisions fill gaps found while implementing S1.
 | Item | Decision | Scope | Person | Date | Words or link |
 | --- | --- | --- | --- | --- | --- |
 | Baseline environment | New g4sim baselines are recorded on Linux (E5), and each run record stores its wall-clock time | From S2 on. The 112 recorded runs of the inventory keep their E2 reference outputs and their E2 reproduction, because Section 7.4 allows a regenerated baseline only when no usable reference output exists. Gates that name E2 and E5 still run on both. Written into the S2 card at its refresh | hsinyichou (maintainer) | 2026-11-05 | Session message: "use linux as baseline" |
+| Where S2 gate 4 is judged | Development regression runs against E5 working baselines of the 112 runs, rebuilt from the old sources. Gate 4 itself stays as registered: judged on E2 against the recorded references, by one detached job at the end of S2 | From S2 | Yes | hsinyichou (maintainer) | 2026-11-05 | Answer in the Claude Code session to the gate 4 question: "Linux daily, Mac once (Recommended)" |
+| Reference folder | `~/AMS/hsinyichou/g4sim-references` on this host (`/ceph/sharedfs/work/AMS`), with a `SHA256SUMS` file | From S2 | Yes | hsinyichou (maintainer) | 2026-11-05 | Answer in the Claude Code session to the reference folder question: "AMS area (Recommended)" |
 
 ## Application of the `dependencies.py` common check
 
