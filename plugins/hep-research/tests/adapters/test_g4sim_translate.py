@@ -85,6 +85,47 @@ class RoundTrip(unittest.TestCase):
         self.assertIsNone(translate.key_layout({"a": 1, "b": {"c": [1, {"d": 2}]}}))
 
 
+def record():
+    material = {"name": "G4_Si", "density_g_cm3": (2.33).hex(), "state": "solid", "temperature_K": (293.15).hex(), "pressure_Pa": (101325.0).hex(),
+                "mean_excitation_energy_eV": (173.0).hex(), "elements": []}
+    placement = {"name": "Si1", "copy_number": 0, "translation_mm": [(-500.0).hex(), (0.0).hex(), (0.0).hex()], "rotation": None}
+    return {"recorded": True, "random_state_unchanged": True, "materials": [{"name": "G4_Si", "radiation_length_mm": (93.7).hex()}],
+            "regions": [{"name": "r"}], "logical_fields": [{"logical": "Si1", "source": "probe"}], "processes": [{"particle": "e-"}],
+            "base": {"geometry": {"placements": [placement], "logical_volumes": [{"name": "Si1"}], "materials": [material]}}}
+
+
+class LegacyBlock(unittest.TestCase):
+    old = {"elements": [{"name": "FieldRegion", "centre_mm": [-100.0, 0.0, 0.0], "role": "field"},
+                        {"name": "Si1", "centre_mm": [-600.0, 0.0, 0.0], "role": "tracker-plane", "mother": "FieldRegion"}]}
+
+    def block(self):
+        return translate.legacy_block(record(), self.old, "per-event")
+
+    def test_a_block_equals_its_record(self):
+        block = self.block()
+        self.assertEqual(block["source"], "probe")
+        self.assertEqual(block["materials"][0]["radiation_length_mm"], (93.7).hex())
+        self.assertEqual(block["roles"]["Si1"], {"role": "tracker-plane", "mother": "FieldRegion"})
+        self.assertEqual(translate.block_differences(block, record()), [])
+
+    def test_a_changed_process_list_is_a_difference(self):
+        block = self.block()
+        block["processes"] = []
+        self.assertEqual(translate.block_differences(block, record()), ["processes"])
+
+    def test_one_ulp_in_a_position_is_caught(self):
+        self.assertEqual(translate.position_differences(self.block(), self.old), [])
+        block = self.block()
+        block["positions"][0]["translation_mm"][0] = math.nextafter(-500.0, 0.0).hex()
+        self.assertEqual(translate.position_differences(block, self.old), ["Si1"])
+        self.assertEqual(translate.block_differences(block, record()), ["positions"])
+
+    def test_an_unrecorded_or_disturbed_record_is_refused(self):
+        for key, value in (("recorded", False), ("random_state_unchanged", False)):
+            with self.assertRaises(translate.TranslationError):
+                translate.legacy_block({**record(), key: value}, self.old, "per-event")
+
+
 class CommandLine(unittest.TestCase):
     def test_a_missing_file_exits_2(self):
         self.assertEqual(translate.main(["check", "/opt/none/spec.json"]), 2)
@@ -96,6 +137,14 @@ class Meaning(unittest.TestCase):
         self.assertEqual(detector["schema"], "detector-spec/1")
         self.assertEqual(request["source"]["particle"], "proton")
         self.assertEqual((card["accounting"], card["run"]["seeding"], card["run"]["mode"]), ("legacy", "per-event", "mt"))
+
+    def test_a_daughter_is_placed_in_its_mother_s_frame(self):
+        # N4-TRK1: FieldRegion at x = -100 in the world, Si1 at x = -500 in world coordinates, so -400 in its mother.
+        detector = translate.split(element_spec())[0]
+        children = {item["template"]: item for item in detector["templates"]["FieldRegion"]["children"]}
+        self.assertEqual(children["Si1"]["placement"]["single"]["centre_mm"], ["-4e2", "0", "0"])
+        placed = geometry.check_spec(json.dumps(detector))["ir"]["physical"]["placements"]
+        self.assertEqual(next(p["centre_mm"] for p in placed if p["template"] == "Si1"), ["-4e2", "0", "0"])
 
     def test_a_layered_run_keeps_stream_seeding(self):
         text = next(text for path, text in recorded() if path.name == "mpv-control.json")

@@ -204,6 +204,19 @@ def _merge_layered(detector: dict, request: dict, card: dict) -> dict:
             "schema": LAYERED, "ui_commands": card["ui_commands"]}
 
 
+def _in_mother(centre: list[str], mother: list[str] | None) -> list[str]:
+    """An old centre is in world coordinates, also for a daughter; a placement is in its mother's frame."""
+    if mother is None:
+        return centre
+    return [normalize_decimal(str(subtract(Decimal(a), Decimal(b)))) for a, b in zip(centre, mother)]
+
+
+def _in_world(local: list[str], mother: list[str] | None) -> list[float]:
+    if mother is None:
+        return _numbers(local)
+    return [float(add(Decimal(a), Decimal(b))) for a, b in zip(local, mother)]
+
+
 def _split_element(old: dict) -> tuple:
     _only(old, {"schema", "note", "elements", "field", "materials", "output", "physics", "provenance", "run", "source", "world"},
           "specification")
@@ -214,16 +227,18 @@ def _split_element(old: dict) -> tuple:
     _only(old["world"], {"half_mm", "material"}, "world")
     templates: dict = {}
     children: dict = {"world": []}
+    centres = {element["name"]: _texts(element["centre_mm"]) for element in old["elements"]}
     for element in old["elements"]:
         _only(element, {"centre_mm", "half_mm", "material", "mother", "name", "repeat", "role"}, "element")
+        local = _in_mother(centres[element["name"]], centres.get(element.get("mother")))
         size = [normalize_decimal(str(multiply(Decimal(_text(half)), Decimal(2)))) for half in element["half_mm"]]
         templates[element["name"]] = {**_box(size, element["material"]), "tags": [ROLE_PREFIX + element["role"]]}
         if "repeat" in element:
             _only(element["repeat"], {"count", "pitch_mm"}, "repeat")
             placement = {"linear": {"count": element["repeat"]["count"], "pitch_mm": _texts(element["repeat"]["pitch_mm"]),
-                                    "start_mm": _texts(element["centre_mm"])}}
+                                    "start_mm": local}}
         else:
-            placement = {"single": {"centre_mm": _texts(element["centre_mm"])}}
+            placement = {"single": {"centre_mm": local}}
         children.setdefault(element.get("mother", "world"), []).append({"template": element["name"], "placement": placement})
     for name, placed in children.items():
         if name != "world":
@@ -259,6 +274,14 @@ def _half(text: str) -> float:
     return float(divide(Decimal(text), Decimal(2)))
 
 
+def _mother_centre(placed: dict, mother: str) -> list[str] | None:
+    """A mother is placed once in the world (element_sim's rule), so its placement holds its world centre."""
+    if mother == "world":
+        return None
+    body = placed[mother][1]["placement"]
+    return (body.get("single") or body["linear"]).get("centre_mm") or body["linear"]["start_mm"]
+
+
 def _merge_element(detector: dict, request: dict, card: dict) -> dict:
     legacy, source, templates = detector["legacy"], request["source"], detector["templates"]
     placed = {item["template"]: ("world", item) for item in detector["world"]["children"]}
@@ -270,7 +293,8 @@ def _merge_element(detector: dict, request: dict, card: dict) -> dict:
         template = templates[name]
         mother, item = placed[name]
         body = item["placement"].get("single") or item["placement"]["linear"]
-        element = {"centre_mm": _numbers(body.get("centre_mm") or body["start_mm"]), "half_mm": [_half(text) for text in _size(template)],
+        element = {"centre_mm": _in_world(body.get("centre_mm") or body["start_mm"], _mother_centre(placed, mother)),
+                   "half_mm": [_half(text) for text in _size(template)],
                    "material": template["material"], "name": name, "role": template["tags"][0].removeprefix(ROLE_PREFIX)}
         if mother != "world":
             element["mother"] = mother
@@ -334,6 +358,53 @@ def split(old: dict) -> tuple:
 def merge(detector: dict, request: dict, card: dict) -> dict:
     document = (_merge_layered if detector["legacy"]["format"] == LAYERED else _merge_element)(detector, request, card)
     return _ordered(document, detector["legacy"].get("key_layout"))
+
+
+def _material_record(base: dict, derived: dict) -> dict:
+    keys = ("name", "density_g_cm3", "state", "temperature_K", "pressure_Pa", "mean_excitation_energy_eV", "elements")
+    return {**{key: base[key] for key in keys}, **{key: value for key, value in derived.items() if key != "name"}}
+
+
+def _old_roles(old: dict) -> dict:
+    return {element["name"]: {"role": element["role"], "mother": element.get("mother")} for element in old.get("elements", [])}
+
+
+def legacy_block(record: dict, old: dict, seeding: str) -> dict:
+    """The legacy block of a T1-class run (Section 7.1): every value from a ProbeV2 record, as float.hex() strings, plus what only
+    the old specification knows. A record that did not record, or changed the random state, cannot be used."""
+    if record.get("recorded") is not True or record.get("random_state_unchanged") is not True:
+        raise TranslationError("the re-acquisition record did not record, or changed the random state")
+    geometry = record["base"]["geometry"]
+    derived = {item["name"]: item for item in record["materials"]}
+    return {"source": "probe", "seeding": seeding, "positions": geometry["placements"], "logical_volumes": geometry["logical_volumes"],
+            "materials": [_material_record(item, derived[item["name"]]) for item in geometry["materials"]],
+            "regions": record["regions"], "fields": record["logical_fields"], "processes": record["processes"], "roles": _old_roles(old)}
+
+
+def _hex_equal(text: str, value: float) -> bool:
+    return float.fromhex(text) == value
+
+
+def block_differences(block: dict, record: dict) -> list[str]:
+    """Where a legacy block differs from the record it must equal (S1 gate 4)."""
+    expected = legacy_block(record, {"elements": []}, block["seeding"])
+    return [key for key in expected if key != "roles" and block.get(key) != expected[key]]
+
+
+def position_differences(block: dict, old: dict) -> list[str]:
+    """Placements of an element_sim record whose translation is not, bit for bit, what the old program computes from the old
+    specification: the world centre less the mother's, in double precision."""
+    elements = {element["name"]: element for element in old.get("elements", [])}
+    out = []
+    for placement in block["positions"]:
+        element = elements.get(placement["name"])
+        if element is None or placement["copy_number"] != 0:
+            continue
+        origin = elements[element["mother"]]["centre_mm"] if element.get("mother", "world") != "world" else [0.0, 0.0, 0.0]
+        wanted = [a - b for a, b in zip(element["centre_mm"], origin)]
+        if not all(_hex_equal(text, value) for text, value in zip(placement["translation_mm"], wanted)):
+            out.append(placement["name"])
+    return out
 
 
 def as_file(document: dict) -> str:
