@@ -211,6 +211,13 @@
    "registered_at": "2026-11-05T03:33:32Z",
    "card_commit": "2fe3819c",
    "reason": "Execution log only (G5 evidence, mirrors); thresholds unchanged"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "3c9bf96eb2e734c3c3881230c20f4225e7b46c44a96ff62bc2b514631918f951",
+   "registered_at": "2026-11-05T04:10:18Z",
+   "card_commit": "7b0f564e",
+   "reason": "Scope additions from the maintainer's decision of 2026-11-05; no threshold loosened"
   }
  ]
 }
