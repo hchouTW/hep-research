@@ -218,6 +218,13 @@
    "registered_at": "2026-11-05T04:10:18Z",
    "card_commit": "7b0f564e",
    "reason": "Scope additions from the maintainer's decision of 2026-11-05; no threshold loosened"
+  },
+  {
+   "card": "g4sim-tasks/S1.md",
+   "sha256": "034bb1894569d74deaa40d82a5010013291b3a6c3f4f7f23a091fa06ffe13a3c",
+   "registered_at": "2026-11-05T07:53:15Z",
+   "card_commit": "e6443107",
+   "reason": "Execution log only (reproduction results, inventory, gates 4 and 5); thresholds unchanged"
   }
  ]
 }
