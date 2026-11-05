@@ -197,6 +197,13 @@
    "registered_at": "2026-11-05T02:25:22Z",
    "card_commit": "2a8152d1",
    "reason": "Performance budget of Section 16, registered before any S2 run"
+  },
+  {
+   "card": "g4sim-tasks/S1.md",
+   "sha256": "46e15f1c4dd7b4ace1817cd4e0f273ca2d708bfccb09477d81cb1266101c8974",
+   "registered_at": "2026-11-05T02:55:09Z",
+   "card_commit": "a7e9954a",
+   "reason": "Rerun cost corrected from recorded timestamps; Execution log; no threshold changed"
   }
  ]
 }
