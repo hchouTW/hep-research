@@ -3,6 +3,7 @@ Geant4 here; live runs are recorded in the S1 task card."""
 from __future__ import annotations
 
 import copy
+import hashlib
 import importlib.util
 import tempfile
 import unittest
@@ -120,6 +121,43 @@ class ApplyProbe(unittest.TestCase):
             self.assertIn('if (G4Threading::IsMasterThread()) g4proto::Record("layered_sim");', text)
             self.assertTrue(Path(folder, "out", "g4sim", "SimProbe.hh").exists())
             self.assertIn("../g4sim", Path(folder, "out", "layered_sim", "CMakeLists.txt").read_text(encoding="utf-8"))
+
+
+class Reproduction(unittest.TestCase):
+    module = load("reproduce")
+
+    def test_the_column_file_and_the_summary_must_be_identical(self):
+        self.assertTrue(self.module.reproduced({"events.csv": "same", "column_map.json": "different"}))
+        self.assertFalse(self.module.reproduced({"events.csv": "different"}))
+        self.assertFalse(self.module.reproduced({"events.csv": "same", "summary.json": "different"}))
+        self.assertFalse(self.module.reproduced({"events.csv": "missing"}))
+
+    def test_nothing_compared_is_not_reproduced(self):
+        self.assertFalse(self.module.reproduced({"column_map.json": "same"}))
+
+    def test_one_ulp_in_an_existing_probe_record_is_caught(self):
+        geometry = {"placements": [{"translation_mm": [(0.1).hex()]}]}
+        moved = copy.deepcopy(geometry)
+        moved["placements"][0]["translation_mm"][0] = (0.1 + 2 ** -56).hex()
+        self.assertTrue(self.module.probe_agrees({"geometry": geometry}, {"base": {"geometry": copy.deepcopy(geometry)}}))
+        self.assertFalse(self.module.probe_agrees({"geometry": moved}, {"base": {"geometry": geometry}}))
+        self.assertIsNone(self.module.probe_agrees(None, {"base": {"geometry": geometry}}))
+
+    def test_a_declared_field_or_an_unrecorded_run_is_not_visible(self):
+        self.assertTrue(self.module.field_visible({"recorded": True, "logical_fields": [{"source": "probe"}]}))
+        self.assertFalse(self.module.field_visible({"recorded": True, "logical_fields": [{"source": "declared"}]}))
+        self.assertFalse(self.module.field_visible({"recorded": False}))
+
+    def test_outputs_are_compared_by_hash_and_others_ignored(self):
+        with tempfile.TemporaryDirectory() as folder:
+            Path(folder, "events.csv").write_text("1\n", encoding="utf-8")
+            digest = hashlib.sha256(b"1\n").hexdigest()
+            row = {"outputs": {"r/events.csv": digest, "r/summary.json": digest, "r/log.txt": digest}}
+            self.assertEqual(self.module.output_states(row, Path(folder)), {"events.csv": "same", "summary.json": "missing"})
+
+    def test_a_field_region_is_declared_for_the_hook(self):
+        self.assertEqual(self.module.declared_fields({"field": {"regions": [{"element": "A"}, {"element": "B"}]}}), "A,B")
+        self.assertEqual(self.module.declared_fields({}), "")
 
 
 class CostSample(unittest.TestCase):

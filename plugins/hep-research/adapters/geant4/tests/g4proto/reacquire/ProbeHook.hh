@@ -2,7 +2,7 @@
 // Around ProbeV2 it saves the full engine state to two files, and it dumps the doubles of G4PhysicalVolumeStore with %a,
 // separately from the probe's own formatter, so judge.py compares two independently written records.
 // G4PROTO_OUT names the output folder; G4PROTO_DECLARED lists, comma separated, the logical volumes the program declares a
-// field on.
+// field on; G4PROTO_EXTRA_RANDOM draws one extra number, so the reproduction check must fail.
 #ifndef G4PROTO_PROBEHOOK_HH
 #define G4PROTO_PROBEHOOK_HH
 
@@ -45,6 +45,7 @@ inline void Record(const char* program) {
     G4Random::saveFullState(state);
   }
   std::ofstream(out + "/probe-v2.json") << result.json;
+  if (std::getenv("G4PROTO_EXTRA_RANDOM")) G4UniformRand();  // negative test of the reproduction check (Section 15.1)
   std::ofstream dump(out + "/store-dump.txt");
   for (const G4VPhysicalVolume* volume : *G4PhysicalVolumeStore::GetInstance()) {
     const G4ThreeVector t = volume->GetObjectTranslation();
