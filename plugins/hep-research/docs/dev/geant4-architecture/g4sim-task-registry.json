@@ -204,6 +204,13 @@
    "registered_at": "2026-11-05T02:55:09Z",
    "card_commit": "a7e9954a",
    "reason": "Rerun cost corrected from recorded timestamps; Execution log; no threshold changed"
+  },
+  {
+   "card": "g4sim-tasks/S1.md",
+   "sha256": "ea375a868036dfcbb5b85d948f13deb99bfeecd2dc4c740ef70dcc3debdb89a3",
+   "registered_at": "2026-11-05T03:33:32Z",
+   "card_commit": "2fe3819c",
+   "reason": "Execution log only (G5 evidence, mirrors); thresholds unchanged"
   }
  ]
 }
