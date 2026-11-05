@@ -127,6 +127,38 @@ class TreeComparison(unittest.TestCase):
         self.assertIn("translation differs", driver.tree_problems(self.ir(), record, self.FIELDS)[0])
 
 
+class OutputChecks(unittest.TestCase):
+    """The negative tests of the column list, the material table and the overlap report."""
+
+    MAP = {"columns": [{"column": "event", "file": "csv"}, {"column": "edep_MeV", "file": "csv"}, {"column": "hits", "file": "root"}]}
+
+    def test_all_columns_present_passes(self):
+        self.assertEqual(driver.missing_columns(self.MAP, "event,edep_MeV\n"), [])
+
+    def test_a_deleted_column_is_named(self):
+        self.assertEqual(driver.missing_columns(self.MAP, "event\n"), ["edep_MeV"])
+
+    def record(self, symbol="Si", z=14.0, mass=28.0855):
+        return {"base": {"geometry": {"materials": [{"name": "m", "elements": [{"symbol": symbol, "z": z.hex(), "a_g_mole": mass.hex()}]}]}}}
+
+    def test_the_table_agrees_with_core_constants(self):
+        self.assertEqual(driver.material_problems(self.record()), [])
+
+    def test_a_swapped_elemental_constant_is_caught(self):
+        def swapped(symbol):
+            return {"Z": 14, "pdg_atomic_mass": "26.98(1)"}
+        self.assertEqual(len(driver.material_problems(self.record(), swapped)), 1)
+
+    def test_a_wrong_atomic_number_is_caught(self):
+        self.assertEqual(len(driver.material_problems(self.record(z=13.0))), 1)
+
+    def test_the_overlap_mark_is_counted(self):
+        with tempfile.TemporaryDirectory() as folder:
+            log = Path(folder) / "log.txt"
+            log.write_text("ok\nGeomVol1002 x\nGeomVol1002 y\n", encoding="utf-8")
+            self.assertEqual(driver.overlaps_in_log(log), 2)
+
+
 class RunRecord(unittest.TestCase):
     RECORD = {"wall_seconds": 9.1, "cpu_seconds": 36.2, "startup_seconds": 3.1, "threads": 8, "load_at_start": 23.0}
 

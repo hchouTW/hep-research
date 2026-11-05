@@ -137,7 +137,7 @@ class Accounting {
       if (control != "no_escape") BookEscape(particle, kinetic);
     } else if (name == "UserSpecialCut") {
       ++fRow.tracksKilled;
-      if (control == "class_d_kinetic") fRow.killedKineticSpecialCut += kinetic;
+      if (control == "class_d_kinetic") fRow.killedKineticSpecialCut += step->GetPreStepPoint()->GetKineticEnergy();  // the post-step value is already 0
       BookResidual(particle);
     } else if (name == "Transportation" || name == "CoupledTransportation") {
       ++fRow.tracksKilled;  // a looper: transportation ended it inside the world

@@ -104,8 +104,10 @@ class NewDetector : public G4VUserDetectorConstruction {
       }
       const std::string& name = placement.at("template", "placement").str;
       const std::string& mother = placement.at("mother", "placement").str;
+      // G4SIM_BUILDER_CONTROL=overlap is the negative test of Section 15.1: the IR layer refused such a placement, so the shift is applied here
+      const double shift = Control() == "overlap" && static_cast<G4int>(placement.at("copy_number", "placement").num) == 1 ? -10. : 0.;
       fChildren[mother].push_back(name);
-      new G4PVPlacement(rotation, G4ThreeVector(Decimal(c[0]), Decimal(c[1]), Decimal(c[2])), fLogicals.at(name), name, fLogicals.at(mother), false,
+      new G4PVPlacement(rotation, G4ThreeVector(Decimal(c[0]) + shift, Decimal(c[1]), Decimal(c[2])), fLogicals.at(name), name, fLogicals.at(mother), false,
                         static_cast<G4int>(placement.at("copy_number", "placement").num), true);
     }
     for (const auto& [name, logicals] : regions) {

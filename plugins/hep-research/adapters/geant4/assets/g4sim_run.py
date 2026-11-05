@@ -31,6 +31,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import g4sim_translate as translate  # noqa: E402
 from contracts import KNOWN_CAPABILITIES, geometry  # noqa: E402
+from core import constants  # noqa: E402
 from core.canonical import canonical_sha256, require_hash_scope  # noqa: E402
 from core.geometry import identity  # noqa: E402
 from core.protected.guard import guard, protected_main  # noqa: E402
@@ -40,6 +41,8 @@ SURFACE_TOLERANCE = re.compile(r"surface.?tolerance|world.?maximum.?extent", re.
 OPTICAL = re.compile(r"optical", re.IGNORECASE)
 TIMING_FIELDS = ("wall_seconds", "cpu_seconds", "startup_seconds", "threads", "load_at_start")
 BEAM_ON_MARK = "G4SIM_BEAM_ON "
+OVERLAP_MARK = "GeomVol1002"
+ATOMIC_MASS_TOLERANCE = 1e-3  # natural mixtures and table editions differ below this; a swapped element differs by far more
 KEPT = ("events.csv", "summary.json", "column_map.json", "materials.json", "conservation.csv", "probe-v2.json")
 
 
@@ -151,6 +154,10 @@ def run(args) -> dict:
                                          "run_id": run_id(geometry_identity, request_identity, card, build_hash), "build_hash": build_hash,
                                          "installed_features": {"datasets": sorted(json.loads(DATASETS.read_text(encoding="utf-8"))["physics_lists"][physics_list(card)])}}},
               "output_hashes": {name: _sha256(work / name) for name in KEPT if (work / name).is_file()}}
+    if code == 0 and (work / "column_map.json").is_file():
+        record["missing_columns"] = missing_columns(json.loads((work / "column_map.json").read_text(encoding="utf-8")), event_header(work / "events.csv"))
+        if record["missing_columns"]:
+            record["status"] = "failed"
     problems = record_problems(record)
     if problems:
         return {"status": "failed", "problems": problems}
@@ -196,6 +203,37 @@ def tree_problems(ir: dict, record: dict, field_records: dict) -> list[str]:
     return problems
 
 
+def missing_columns(column_map: dict, header: str) -> list[str]:
+    """Columns the column map declares for the event file that the file's header does not have (S2 gate 2)."""
+    present = set(header.strip().split(","))
+    return [item["column"] for item in column_map["columns"] if item.get("file") == "csv" and item["column"] not in present]
+
+
+def event_header(path: Path) -> str:
+    with path.open(encoding="utf-8") as stream:
+        next(stream)
+        return next(stream)
+
+
+def material_problems(record: dict, table=None) -> list[str]:
+    """The material table Geant4 used against core/constants (Section 8.10): each element's Z and atomic mass."""
+    table = constants.element if table is None else table
+    problems = []
+    for material in record["base"]["geometry"]["materials"]:
+        for item in material["elements"]:
+            z = round(float.fromhex(item["z"]))
+            mass = float.fromhex(item["a_g_mole"])
+            entry = table(item["symbol"])
+            wanted = float(entry["pdg_atomic_mass"].split("(")[0])
+            if z != entry["Z"] or abs(mass - wanted) > ATOMIC_MASS_TOLERANCE * wanted:
+                problems.append(f"material {material['name']}: element {item['symbol']} has Z={z}, A {mass}; core/constants says Z={entry['Z']}, A {wanted}")
+    return problems
+
+
+def overlaps_in_log(log: Path) -> int:
+    return log.read_text(encoding="utf-8", errors="replace").count(OVERLAP_MARK)
+
+
 def read_field_records(folder: Path) -> dict:
     records = {}
     for path in sorted(folder.glob("field-managers.thread*.txt")):
@@ -223,7 +261,10 @@ def geometry_check(args) -> dict:
     if code != 0:
         return {"status": "failed", "exit_status": code}
     record = read_record(work / "probe-v2.json")
-    problems = tree_problems(checked["ir"], record, read_field_records(work))
+    problems = tree_problems(checked["ir"], record, read_field_records(work)) + material_problems(record)
+    overlaps = overlaps_in_log(work / "log.txt")
+    if overlaps:
+        problems.append(f"Geant4's overlap test reported {overlaps} overlap(s)")
     effective = {"geometry_id": checked["geometry_id"], "provenance_id": checked["provenance_id"], "run_card_sha256": _sha256(args.run),
                  "surface_tolerance_mm": (work / "tolerance.txt").read_text(encoding="utf-8").strip()}
     (work / "effective-config.json").write_text(json.dumps(effective, indent=1) + "\n", encoding="utf-8")
