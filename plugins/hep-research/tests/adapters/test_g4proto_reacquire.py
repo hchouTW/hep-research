@@ -5,6 +5,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import importlib.util
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -158,6 +159,19 @@ class Reproduction(unittest.TestCase):
     def test_a_field_region_is_declared_for_the_hook(self):
         self.assertEqual(self.module.declared_fields({"field": {"regions": [{"element": "A"}, {"element": "B"}]}}), "A,B")
         self.assertEqual(self.module.declared_fields({}), "")
+
+
+class Status(unittest.TestCase):
+    def test_status_counts_runs_and_adds_up_wall_time(self):
+        module = Reproduction.module
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder, "status.json")
+            results = {"a": {"reproduced": True, "wall_seconds": 60.0}, "b": {"reproduced": False, "wall_seconds": 30.5}}
+            module.write_status(path, 5, results, "c", "start")
+            document = json.loads(path.read_text(encoding="utf-8"))
+            self.assertEqual((document["done"], document["total"], document["reproduced"]), (2, 5, 1))
+            self.assertEqual((document["current"], document["wall_seconds"]), ("c", 90.5))
+            self.assertEqual(list(Path(folder).iterdir()), [path])
 
 
 class CostSample(unittest.TestCase):

@@ -3,7 +3,8 @@
 rerun with the recorded seed and number of events, and compare the outputs with the recorded hashes.
 
 Every output path is redirected below --work, so a reference output cannot be touched. A finished run is kept in results.json and
-skipped on the next start; bulky outputs are deleted once hashed, and the probe record is kept compressed.
+skipped on the next start; bulky outputs are deleted once hashed, and the probe record is kept compressed. status.json says how far
+the job is, what it is running, and the wall time of each finished run, so a job's real cost is on record.
 
 Usage: reproduce.py --facts FACTS.json --states WORK.json --work-root DIR --work DIR [--only TEXT] [--extra-random]
                     [--geant4-config PATH]
@@ -21,6 +22,7 @@ import json
 import os
 import subprocess
 import sys
+import time
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
@@ -114,6 +116,16 @@ def run_one(row: dict, executable: Path, folder: Path, work_root: Path, extra_ra
     return result
 
 
+def write_status(path: Path, total: int, results: dict, current: str | None, started: str) -> None:
+    """How far the job is, written atomically, so a reader never sees half a file."""
+    wall = sum(item.get("wall_seconds", 0.0) for item in results.values())
+    document = {"total": total, "done": len(results), "reproduced": sum(1 for item in results.values() if item.get("reproduced")),
+                "current": current, "started": started, "updated": time.strftime("%Y-%m-%dT%H:%M:%S%z"), "wall_seconds": round(wall, 1)}
+    scratch = path.with_suffix(".part")
+    scratch.write_text(json.dumps(document, indent=1) + "\n", encoding="utf-8")
+    scratch.replace(path)
+
+
 def table(rows: list[dict], states: dict, results: dict) -> list[dict]:
     out = []
     for row in rows:
@@ -142,9 +154,12 @@ def main(argv=None) -> int:
     results_path = work / ("negative.json" if args.extra_random else "results.json")
     results = json.loads(results_path.read_text(encoding="utf-8")) if results_path.is_file() else {}
     executables: dict = {}
+    started = time.strftime("%Y-%m-%dT%H:%M:%S%z")
+    wanted = sum(1 for row in facts if args.only in row["run"])
     for row in facts:
         if args.only not in row["run"] or row["run"] in results:
             continue
+        write_status(work / "status.json", wanted, results, row["run"], started)
         commit = row["source_commit"]
         if commit not in executables:
             folder = work / "build" / commit
@@ -158,9 +173,12 @@ def main(argv=None) -> int:
         if executables[commit] is None:
             results[row["run"]] = {"built": False, "reproduced": False, "seed_as_recorded": True, "probe_agrees": None, "field_visible": False}
         else:
+            begun = time.perf_counter()
             results[row["run"]] = run_one(row, executables[commit], work / "runs" / row["run"], args.work_root.expanduser(), args.extra_random)
+            results[row["run"]]["wall_seconds"] = round(time.perf_counter() - begun, 1)
         results_path.write_text(json.dumps(results, indent=1) + "\n", encoding="utf-8")
         print(json.dumps({"run": row["run"], "reproduced": results[row["run"]]["reproduced"]}), flush=True)
+    write_status(work / "status.json", wanted, results, None, started)
     if args.extra_random:
         print(json.dumps({"status": "ok", "negative": {run: result["reproduced"] for run, result in results.items()}}, indent=1))
         return 0
