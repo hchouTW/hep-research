@@ -109,7 +109,7 @@ class Golden(unittest.TestCase):
 
 class CommandLine(unittest.TestCase):
     def run_it(self, *argv):
-        return subprocess.run([sys.executable, str(ROOT / "contracts/geometry.py"), *argv], capture_output=True, text=True)
+        return subprocess.run([sys.executable, str(ROOT / "contracts/geometry.py"), *argv], capture_output=True, text=True, timeout=60)
 
     def test_a_valid_file_writes_the_ir(self):
         with tempfile.TemporaryDirectory() as folder:

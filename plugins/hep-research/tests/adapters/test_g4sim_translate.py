@@ -85,6 +85,11 @@ class RoundTrip(unittest.TestCase):
         self.assertIsNone(translate.key_layout({"a": 1, "b": {"c": [1, {"d": 2}]}}))
 
 
+class CommandLine(unittest.TestCase):
+    def test_a_missing_file_exits_2(self):
+        self.assertEqual(translate.main(["check", "/opt/none/spec.json"]), 2)
+
+
 class Meaning(unittest.TestCase):
     def test_the_three_parts_hold_what_section_18_says(self):
         detector, request, card = translate.split(element_spec())

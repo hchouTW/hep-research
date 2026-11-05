@@ -68,7 +68,8 @@ def siblings(ir: dict) -> list[dict]:
     for mother, placed in by_mother.items():
         placed.sort(key=lambda item: item[0][0][0])
         for at, (a, first) in enumerate(placed):
-            for b, second in placed[at + 1:]:
+            for later in range(at + 1, len(placed)):  # by index: a slice would copy the rest for every placement
+                b, second = placed[later]
                 if subtract(b[0][0], a[1][0]) >= MINIMUM_GAP_MM:
                     break
                 separation = _separation(a, b)

@@ -91,7 +91,11 @@
   "assets/simreco/Fit.hh",
   "assets/simreco/simreco.cc",
   "assets/simreco/spec.schema.json",
-  "assets/simreco/f4_results.schema.json"
+  "assets/simreco/f4_results.schema.json",
+  "assets/g4sim/ProbeV2.hh",
+  "assets/g4sim_inventory.py",
+  "assets/g4sim_translate.py",
+  "assets/g4sim_run.schema.json"
  ],
  "tests": [
   "../../tests/adapters/test_g4sim.py",

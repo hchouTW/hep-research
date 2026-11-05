@@ -282,6 +282,8 @@ NO_INPUT_FILE = {  # script: why the missing-file check does not apply
     "skills/hep-ml/scripts/profile_dataloader.py": "a synthetic dataset, no input",
     "skills/hep-ml/scripts/serving_capacity.py": "numbers on the command line",
     "adapters/geant4/assets/g4common.py": "shared helpers of the geant4 adapter scripts; only --help",
+    "adapters/geant4/assets/g4sim_inventory.py": "reads the plugin's own records; subcommands with required options",
+    "adapters/geant4/assets/g4sim_translate.py": "a subcommand comes first; the missing-file case is tested in test_g4sim_translate",
     "adapters/detector-simulation/assets/detsim_canonical.py": "shared-layer module of detsim.py; only --help",
     "adapters/detector-simulation/assets/detsim_profile.py": "shared-layer module of detsim.py; only --help",
     "adapters/detector-simulation/assets/detsim_schemas.py": "shared-layer module of detsim.py; only --help",
