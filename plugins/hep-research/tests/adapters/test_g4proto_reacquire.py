@@ -7,6 +7,7 @@ import hashlib
 import importlib.util
 import json
 import math
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -283,6 +284,37 @@ class CostSample(unittest.TestCase):
     def test_a_spec_is_chosen_by_its_hash_not_its_name(self):
         rows = [row for row in self.module.inventory.collect(ROOT) if row["journey"] == "J14"]
         self.assertTrue(all("schema" in self.module.spec_of(row) for row in rows))
+
+
+class Baseline(unittest.TestCase):
+    """The working baselines: longest runs first, cores shared by threads, and no folder mixes two environments."""
+
+    def setUp(self):
+        sys.path.insert(0, str(FOLDER))
+        self.addCleanup(sys.path.remove, str(FOLDER))
+        self.module = load("baseline")
+
+    def test_longest_first_by_work_per_core(self):
+        rows = [{"run": "mt", "events": 800, "threads": 8}, {"run": "serial", "events": 200, "threads": 1}, {"run": "tiny", "events": 1}]
+        self.assertEqual([row["run"] for row in self.module.order(rows)], ["serial", "mt", "tiny"])
+
+    def test_a_run_never_takes_more_cores_than_there_are(self):
+        cores = self.module.Cores(4)
+        self.assertEqual(cores.take(8), 4)
+        self.assertEqual(cores.free, 0)
+        cores.give(4)
+        self.assertEqual(cores.free, 4)
+
+    def test_a_folder_of_another_environment_is_refused(self):
+        with tempfile.TemporaryDirectory() as folder:
+            work = Path(folder)
+            (work / "facts.json").write_text("[]", encoding="utf-8")
+            (work / "baselines.json").write_text(json.dumps({"environment": {"platform": "other"}, "runs": {}}), encoding="utf-8")
+            with mock.patch.object(self.module, "environment_record", return_value={"platform": "this"}), \
+                    mock.patch("builtins.print") as printed:
+                code = self.module.main(["--facts", str(work / "facts.json"), "--work", str(work), "--geant4-config", "unused"])
+            self.assertEqual(code, 2)
+            self.assertIn("another environment", printed.call_args.args[0])
 
 
 class G5Scan(unittest.TestCase):
