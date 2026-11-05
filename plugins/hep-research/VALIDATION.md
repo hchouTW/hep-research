@@ -8853,3 +8853,16 @@ on `main` before this release too (run 41841427933), and it did not run on this 
 qualification follows this release and is not recorded here.
 
 Passing checks show software consistency, not physical validity.
+
+## G4SIM-S1-G5 (2026-11-05, E5 for the scan; confirmation by the maintainer)
+
+G5 for g4sim phase S1 (gate 10): `adapters/geant4/assets/g4sim/ProbeV2.hh` and the prototype programs of GB1, GB2, GB4, GB10 and GB22
+(`tests/g4proto/reacquire/ProbeHook.hh`, `tests/g4proto/gb4_gb10/main.cc`, `tests/g4proto/reacquire/beamon_zero/main.cc`).
+
+**Evidence**: `adapters/geant4/tests/g4proto/g5_scan.py` against all 5,657 `.cc`, `.hh` and `.icc` files of the Geant4 11.4.3 examples
+tree (commit `2ee379e6`, the recorded build's), normalized lines: 0 shared runs of 3 and of 4 consecutive lines. A reformatted copy of
+one example gives 863 and 880 (positive control).
+
+**Confirmation** (hsinyichou, maintainer, 2026-11-05, in the Claude Code session, answering "Yes, I reviewed them"): "G5 for S1: I
+reviewed ProbeV2.hh, ProbeHook.hh, gb4_gb10/main.cc and beamon_zero/main.cc. They are written from the Geant4 API, with no example code
+copied or adapted."
