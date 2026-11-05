@@ -44,6 +44,14 @@ class RoundTrip(unittest.TestCase):
             with self.subTest(file=path.name):
                 self.assertEqual(translate.as_file(translate.merge(*translate.split(json.loads(text)))), text)
 
+    def test_the_hand_formatted_mirrors_round_trip_as_documents(self):
+        for name in ("mirror_testem3.json", "mirror_testem5_run0.json"):
+            with self.subTest(file=name):
+                old = json.loads((ROOT / "adapters/geant4/assets/layered_sim" / name).read_text(encoding="utf-8"))
+                parts = translate.split(old)
+                self.assertEqual(json.dumps(translate.merge(*parts)), json.dumps(old))  # every value, type and key order
+                self.assertEqual(geometry.check_spec(json.dumps(parts[0]))["status"], "ok")
+
     def test_every_part_is_valid(self):
         for path, text in recorded():
             detector, request, card = translate.split(json.loads(text))

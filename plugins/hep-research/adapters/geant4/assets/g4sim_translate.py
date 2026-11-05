@@ -29,6 +29,7 @@ LAYERED, ELEMENT = "layered_sim.spec/1", "element_sim.spec/1"
 SENSITIVE = "sensitive"
 ROLE_PREFIX = "role:"
 RUN_MODES = {"serial": "serial", "mt": "mt"}
+MATERIAL_NUMBERS = ("a_g_mole", "density_g_cm3", "temperature_K", "pressure_Pa")
 
 
 class TranslationError(ValueError):
@@ -60,11 +61,12 @@ def _only(document: dict, known: set, where: str) -> None:
 
 
 def _material(material: dict) -> dict:
-    _only(material, {"name", "z", "a_g_mole", "density_g_cm3", "source", "components"}, "material")
+    _only(material, {"name", "z", "source", "components", "state", *MATERIAL_NUMBERS}, "material")
     out: dict = {}
-    if "z" in material:
-        out["z"] = material["z"]
-    for key in ("a_g_mole", "density_g_cm3"):
+    for key in ("z", "state"):
+        if key in material:
+            out[key] = material[key]
+    for key in MATERIAL_NUMBERS:
         if key in material:
             out[key] = _text(material[key])
     if "components" in material:
@@ -77,9 +79,10 @@ def _material(material: dict) -> dict:
 
 def _material_back(name: str, material: dict) -> dict:
     out: dict = {"name": name}
-    if "z" in material:
-        out["z"] = material["z"]
-    for key in ("a_g_mole", "density_g_cm3"):
+    for key in ("z", "state"):
+        if key in material:
+            out[key] = material[key]
+    for key in MATERIAL_NUMBERS:
         if key in material:
             out[key] = _number(material[key])
     if "components" in material:
@@ -129,10 +132,10 @@ def _physics_back(physics: dict) -> dict:
 
 
 def _split_layered(old: dict) -> tuple:
-    _only(old, {"schema", "note", "geometry", "gun", "materials", "output", "physics", "run", "ui_commands"}, "specification")
+    _only(old, {"schema", "note", "source", "geometry", "gun", "materials", "output", "physics", "run", "ui_commands"}, "specification")
     geometry, gun = old["geometry"], old["gun"]
     _only(geometry, {"lateral_mm", "layers", "world"}, "geometry")
-    _only(geometry["world"], {"material", "scale"}, "geometry.world")
+    _only(geometry["world"], {"material", "scale", "size_mm"}, "geometry.world")
     _only(gun, {"direction", "energy_MeV", "particle", "world_fraction"}, "gun")
     _only(old["physics"], {"decay", "default_cut_mm", "em_constructor", "reference_list", "regions"}, "physics")
     _only(old["run"], {"events", "run_manager", "seeds"}, "run")
@@ -167,13 +170,20 @@ def _split_layered(old: dict) -> tuple:
             names.append(slab["name"])
         cursor = add(cursor, multiply(period, Decimal(layer["repeat"])))
         groups.append({"repeat": layer["repeat"], "slabs": names})
-    scale = Decimal(_text(geometry["world"]["scale"]))
-    world = {"material": geometry["world"]["material"], "children": children,
-             "size_mm": [normalize_decimal(str(multiply(scale, stack)))] + [normalize_decimal(str(multiply(scale, Decimal(lateral))))] * 2}
+    world = {"material": geometry["world"]["material"], "children": children}
+    if "size_mm" in geometry["world"]:
+        world["size_mm"] = _texts(geometry["world"]["size_mm"])
+    else:
+        scale = Decimal(_text(geometry["world"]["scale"]))
+        world["size_mm"] = [normalize_decimal(str(multiply(scale, stack)))] + [normalize_decimal(str(multiply(scale, Decimal(lateral))))] * 2
     detector = {"schema": "detector-spec/1", "materials": {m["name"]: _material(m) for m in old["materials"]}, "templates": templates,
-                "world": world, "legacy": {"format": LAYERED, "note": old["note"], "world_scale": _text(geometry["world"]["scale"]),
-                                           "groups": groups, "material_order": [m["name"] for m in old["materials"]],
+                "world": world, "legacy": {"format": LAYERED, "note": old["note"], "groups": groups,
+                                           "material_order": [m["name"] for m in old["materials"]],
                                            "region_order": [r["name"] for r in old["physics"].get("regions", [])]}}
+    if "scale" in geometry["world"]:
+        detector["legacy"]["world_scale"] = _text(geometry["world"]["scale"])
+    if "source" in old:
+        detector["legacy"]["source"] = old["source"]
     request = {"schema": "simulation-request/1", "source": {
         "density": "analytic", "particle": gun["particle"], "energy": {"mono": {"energy_MeV": _text(gun["energy_MeV"])}},
         "position": {"world_fraction": _text(gun["world_fraction"])}, "direction": {"fixed": {"frame": "world", "vector": gun["direction"]}}}}
@@ -194,14 +204,21 @@ def _merge_layered(detector: dict, request: dict, card: dict) -> dict:
         physics["regions"] = [{"cut_mm": _number(regions[name]), "name": name, "slabs": [
             slab for group in legacy["groups"] for slab in group["slabs"] if templates[slab].get("region") == name]}
             for name in legacy["region_order"]]
-    return {"geometry": {"lateral_mm": _number(_size(first)[1]), "layers": layers,
-                         "world": {"material": detector["world"]["material"], "scale": _number(legacy["world_scale"])}},
+    world = {"material": detector["world"]["material"]}
+    if "world_scale" in legacy:
+        world["scale"] = _number(legacy["world_scale"])
+    else:
+        world["size_mm"] = _numbers(detector["world"]["size_mm"])
+    document = {"geometry": {"lateral_mm": _number(_size(first)[1]), "layers": layers, "world": world},
             "gun": {"direction": source["direction"]["fixed"]["vector"], "energy_MeV": _number(source["energy"]["mono"]["energy_MeV"]),
                     "particle": source["particle"], "world_fraction": _number(source["position"]["world_fraction"])},
             "materials": [_material_back(name, detector["materials"][name]) for name in legacy["material_order"]],
             "note": legacy["note"], "output": card["output"], "physics": physics,
             "run": {"events": card["run"]["events"], "run_manager": card["run"]["mode"], "seeds": card["run"]["seeds"]},
             "schema": LAYERED, "ui_commands": card["ui_commands"]}
+    if "source" in legacy:
+        document["source"] = legacy["source"]
+    return document
 
 
 def _in_mother(centre: list[str], mother: list[str] | None) -> list[str]:

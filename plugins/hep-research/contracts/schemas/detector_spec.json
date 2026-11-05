@@ -83,6 +83,19 @@
         }
        }
       }
+     },
+     "state": {
+      "enum": [
+       "gas",
+       "liquid",
+       "solid"
+      ]
+     },
+     "temperature_K": {
+      "$ref": "#/$defs/quantity"
+     },
+     "pressure_Pa": {
+      "$ref": "#/$defs/quantity"
      }
     }
    }
