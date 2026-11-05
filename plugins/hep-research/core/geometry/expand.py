@@ -291,6 +291,8 @@ def expand(spec: dict) -> dict:
                 "readout": _readout(spec, tree), "volume_id": {"rule": "sum of (copy_number + 1) * stride",
                                                                "strides": _level_strides(tree)},
                 "materials": _without_sources(spec.get("materials", {})), "physics_requirements": _requirements(spec, tags)}
+    if spec.get("fields"):  # optional: a specification with no field keeps its geometry_id (Section 7.1)
+        physical["fields"] = spec["fields"]
     marker = {"tags": {name: sorted(own) for name, own in tags.items() if own}, "derivations": spec.get("params", {}),
               "source_of_facts": spec.get("source_of_facts", {}), "material_sources": _sources(spec.get("materials", {}))}
     document = {"schema": "geometry-ir/1", "physical": physical, "marker": marker}

@@ -58,6 +58,31 @@
      },
      "facts": {
       "type": "string"
+     },
+     "z": {
+      "$ref": "#/$defs/integer"
+     },
+     "a_g_mole": {
+      "$ref": "#/$defs/quantity"
+     },
+     "components": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "required": [
+        "material",
+        "mass_fraction"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "material": {
+         "type": "string"
+        },
+        "mass_fraction": {
+         "$ref": "#/$defs/quantity"
+        }
+       }
+      }
      }
     }
    }
@@ -246,6 +271,61 @@
    "additionalProperties": {
     "type": "string",
     "minLength": 1
+   }
+  },
+  "fields": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "object",
+    "required": [
+     "b_tesla"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "b_tesla": {
+      "type": "array",
+      "items": {
+       "$ref": "#/$defs/quantity"
+      },
+      "minItems": 3,
+      "maxItems": 3
+     }
+    }
+   }
+  },
+  "legacy": {
+   "type": "object",
+   "required": [
+    "format"
+   ],
+   "properties": {
+    "format": {
+     "enum": [
+      "layered_sim.spec/1",
+      "element_sim.spec/1"
+     ]
+    },
+    "groups": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "repeat",
+       "slabs"
+      ],
+      "properties": {
+       "repeat": {
+        "$ref": "#/$defs/integer"
+       },
+       "slabs": {
+        "type": "array",
+        "items": {
+         "type": "string"
+        }
+       }
+      }
+     }
+    }
    }
   }
  },

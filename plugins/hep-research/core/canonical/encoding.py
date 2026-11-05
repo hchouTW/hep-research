@@ -238,9 +238,10 @@ def _normalized(value, nodes: list[dict], path: str):
     return value
 
 
-def load_spec_json(text, field_types: dict):
+def load_spec_json(text, field_types: dict, unhashed: tuple = ()):
     """The reading procedure of a specification: every number normalized by field_types, {JSON Pointer: "integer" or
-    "quantity"} with "*" for any one key or index, and the result checked against the hash scope."""
+    "quantity"} with "*" for any one key or index, and the result checked against the hash scope. unhashed names top-level keys
+    that never enter a hash, so the scope does not apply to them."""
     if isinstance(text, (bytes, bytearray)):
         try:
             text = bytes(text).decode("utf-8")
@@ -255,5 +256,5 @@ def load_spec_json(text, field_types: dict):
     except (ValueError, RecursionError, decimal.InvalidOperation) as err:
         raise CanonicalError("json-syntax", f"not JSON: {err}") from None
     value = _normalized(parsed, [tree], "")
-    require_hash_scope(value)
+    require_hash_scope({key: item for key, item in value.items() if key not in unhashed} if isinstance(value, dict) else value)
     return value

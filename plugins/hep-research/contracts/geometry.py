@@ -30,6 +30,7 @@ from core.protected.guard import guard, protected_main  # noqa: E402
 SPEC_SCHEMA = "detector_spec.json"
 IR_SCHEMA = "geometry_ir.json"
 CLAIM_PREFIX = "claim:"
+UNHASHED = ("legacy",)  # what the translator keeps for the round trip; expansion never reads it, so no identity depends on it
 
 
 def _walk(node: dict, pointer: str, defs: dict, table: dict) -> None:
@@ -89,7 +90,7 @@ def claim_findings(spec: dict, claims) -> list[dict]:
 def check_spec(text, claims=()) -> dict:
     """{status, findings, ir, geometry_id, provenance_id}: the whole reading and judging of one specification."""
     try:
-        spec = load_spec_json(text, field_types())
+        spec = load_spec_json(text, field_types(), unhashed=UNHASHED)
     except CanonicalError as err:
         return {"status": "rejected", "findings": [_finding(err.code, "", str(err))]}
     report = validate(spec, SPEC_SCHEMA)
@@ -101,7 +102,8 @@ def check_spec(text, claims=()) -> dict:
         ir = expand.expand(spec)
     except GeometryError as err:
         return {"status": "rejected", "findings": [*findings, _finding(err.code, err.path, str(err))]}
-    findings += overlap.findings(ir)
+    if "legacy" not in spec:  # legacy mode does not apply the gap rule: the old geometries passed G4's overlap test (Section 7.4)
+        findings += overlap.findings(ir)
     if findings:
         return {"status": "rejected", "findings": findings}
     report = validate(ir, IR_SCHEMA)

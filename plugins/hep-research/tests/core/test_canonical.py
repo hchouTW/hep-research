@@ -143,6 +143,11 @@ class SpecReader(unittest.TestCase):
             self.load('{"path": "/home/user/file"}')
         self.assertEqual(caught.exception.code, "path-reference")
 
+    def test_an_unhashed_key_is_exempt_and_nothing_else_is(self):
+        self.assertEqual(canonical.load_spec_json('{"legacy": {"path": "/home/user"}}', {}, unhashed=("legacy",))["legacy"]["path"], "/home/user")
+        with self.assertRaises(canonical.CanonicalError):
+            canonical.load_spec_json('{"legacy": {}, "path": "/home/user"}', {}, unhashed=("legacy",))
+
     def test_a_bad_type_table_is_refused(self):
         for table in ({"/a": "float"}, {"a": "integer"}, {"/a": "integer", "/*": "quantity"}):
             with self.subTest(table=table), self.assertRaises(canonical.CanonicalError) as caught:
