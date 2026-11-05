@@ -94,6 +94,19 @@ class Specification(unittest.TestCase):
         self.assertEqual(check(spec)["ir"]["physical"]["templates"]["cell"]["half_mm"][0], "5.00000000000000000000000000000005e0")
 
 
+class Golden(unittest.TestCase):
+    """Gate 6: the same specification gives the same identities on E2 and E5. Exact decimal arithmetic has no platform in it."""
+    folder = ROOT / "tests/core/data/geometry"
+
+    def test_the_golden_specification_reproduces_its_identities_and_ir(self):
+        result = geometry.check_spec((self.folder / "calorimeter.spec.json").read_bytes())
+        self.assertEqual(result["status"], "ok", result["findings"])
+        ids = json.loads((self.folder / "calorimeter.ids.json").read_text(encoding="utf-8"))
+        self.assertEqual(result["geometry_id"], ids["geometry_id"])
+        self.assertEqual(result["provenance_id"], ids["provenance_id"])
+        self.assertEqual(result["ir"], json.loads((self.folder / "calorimeter.ir.json").read_text(encoding="utf-8")))
+
+
 class CommandLine(unittest.TestCase):
     def run_it(self, *argv):
         return subprocess.run([sys.executable, str(ROOT / "contracts/geometry.py"), *argv], capture_output=True, text=True)
