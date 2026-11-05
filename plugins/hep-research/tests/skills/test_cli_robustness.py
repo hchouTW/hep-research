@@ -216,6 +216,8 @@ MISSING_FILE_ARGS = {
                                                       MISSING_BASE, "--task", M],
     "adapters/geant4/assets/geant4_build.py": ["check", "--record", M],
     "adapters/geant4/assets/geant4_examples.py": ["extract", "--example", "B1", "--out-file", M],
+    "adapters/geant4/assets/g4sim_inventory.py": [["check-work", "--facts", M, "--work-root", OUT, "--out", OUT]],
+    "adapters/geant4/assets/g4sim_translate.py": [["check", M]],
     "adapters/geant4/assets/geant4_run.py": [["run", "--spec", M, "--exe", M, "--build-record", M, "--work", OUT,
                                               "--run-id", "r", "--record", OUT], ["check-spec", "--spec", M],
                                              ["from-geometry", "--geometry", M, "--profile", M, "--out", OUT],

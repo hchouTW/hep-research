@@ -16,7 +16,7 @@ from pathlib import Path
 HERE = Path(__file__).resolve().parent
 PROFILE = HERE.parent
 PROFILE_ID, PROFILE_VERSION = "theory:heliospheric-modulation", "0.1.0"
-PLUGIN_VERSION, CONTRACTS = "0.55.0", "3.18.0"
+PLUGIN_VERSION, CONTRACTS = "0.56.0", "3.19.0"
 CREATED = "2026-10-15"
 SPEC_PATH = PROFILE / "derivations" / "theory-spec.json"
 CORE_KEYS = ("unit_system", "hbar_c_one", "metric_signature", "coupling_normalization", "renormalization_scheme",
@@ -108,6 +108,8 @@ def main(argv=None) -> int:
         stored = json.loads(SPEC_PATH.read_text(encoding="utf-8")) if SPEC_PATH.exists() else None
         if stored:  # the version that wrote a file is not a result (docs/maintenance.md)
             stored["versions"]["plugin"] = doc["versions"]["plugin"]
+            stored["versions"]["contracts"] = doc["versions"]["contracts"]
+            stored["contract_version"] = doc["contract_version"]
         stale = stored != json.loads(text)
         print(json.dumps({"status": "stale" if stale else "ok", "path": str(SPEC_PATH)}))
         return 1 if stale else 0

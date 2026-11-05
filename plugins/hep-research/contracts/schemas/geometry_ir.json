@@ -1,0 +1,259 @@
+{
+ "$comment": "geometry-ir/1 (g4sim plan, Section 7.1): the resolved geometry. The physical part fixes geometry_id and the marker part provenance_id. The field set of the physical part was finalized in S1 after GB4 and GB10 were confirmed (D20); later phases add only module kinds and optional fields, so an existing geometry_id does not change.",
+ "type": "object",
+ "required": [
+  "schema",
+  "physical",
+  "marker"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "schema": {
+   "const": "geometry-ir/1"
+  },
+  "physical": {
+   "type": "object",
+   "required": [
+    "numerics",
+    "templates",
+    "placements",
+    "frames",
+    "readout",
+    "volume_id",
+    "materials",
+    "physics_requirements"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "numerics": {
+     "type": "object",
+     "required": [
+      "precision",
+      "rounding",
+      "epsilon_mm",
+      "minimum_gap_mm",
+      "decimal"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "precision": {
+       "const": 34
+      },
+      "rounding": {
+       "const": "half-even"
+      },
+      "epsilon_mm": {
+       "type": "string",
+       "pattern": "^(0|-?[1-9](\\.[0-9]*[1-9])?e(0|-?[1-9][0-9]*))$"
+      },
+      "minimum_gap_mm": {
+       "type": "string",
+       "pattern": "^(0|-?[1-9](\\.[0-9]*[1-9])?e(0|-?[1-9][0-9]*))$"
+      },
+      "decimal": {
+       "const": "decimal/1"
+      }
+     }
+    },
+    "templates": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "object",
+      "required": [
+       "half_mm",
+       "shape",
+       "material",
+       "region",
+       "field"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "half_mm": {
+        "type": "array",
+        "items": {
+         "type": "string",
+         "pattern": "^(0|-?[1-9](\\.[0-9]*[1-9])?e(0|-?[1-9][0-9]*))$"
+        },
+        "minItems": 3,
+        "maxItems": 3
+       },
+       "shape": {
+        "enum": [
+         "box"
+        ]
+       },
+       "material": {
+        "type": "string"
+       },
+       "region": {
+        "type": "string"
+       },
+       "field": {
+        "type": "string"
+       }
+      }
+     }
+    },
+    "placements": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "mother",
+       "template",
+       "copy_number",
+       "index",
+       "centre_mm",
+       "rotation"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "mother": {
+        "type": "string"
+       },
+       "template": {
+        "type": "string"
+       },
+       "copy_number": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 2147483647
+       },
+       "index": {
+        "type": "object",
+        "additionalProperties": {
+         "type": "integer",
+         "minimum": 0
+        }
+       },
+       "centre_mm": {
+        "type": "array",
+        "items": {
+         "type": "string",
+         "pattern": "^(0|-?[1-9](\\.[0-9]*[1-9])?e(0|-?[1-9][0-9]*))$"
+        },
+        "minItems": 3,
+        "maxItems": 3
+       },
+       "rotation": {
+        "anyOf": [
+         {
+          "type": "null"
+         },
+         {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+           "type": "array",
+           "minItems": 3,
+           "maxItems": 3,
+           "items": {
+            "enum": [
+             -1,
+             0,
+             1
+            ]
+           }
+          }
+         }
+        ]
+       }
+      }
+     }
+    },
+    "frames": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "object",
+      "required": [
+       "in",
+       "origin_mm"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "in": {
+        "type": "string"
+       },
+       "origin_mm": {
+        "type": "array",
+        "items": {
+         "type": "string",
+         "pattern": "^(0|-?[1-9](\\.[0-9]*[1-9])?e(0|-?[1-9][0-9]*))$"
+        },
+        "minItems": 3,
+        "maxItems": 3
+       }
+      }
+     }
+    },
+    "readout": {
+     "type": "object",
+     "additionalProperties": {
+      "$ref": "readout_encoding.json"
+     }
+    },
+    "volume_id": {
+     "type": "object",
+     "required": [
+      "rule",
+      "strides"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "rule": {
+       "const": "sum of (copy_number + 1) * stride"
+      },
+      "strides": {
+       "type": "array",
+       "items": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 9007199254740991
+       }
+      }
+     }
+    },
+    "materials": {
+     "type": "object"
+    },
+    "physics_requirements": {
+     "type": "array",
+     "items": {
+      "type": "object"
+     }
+    },
+    "legacy": {
+     "type": "object"
+    },
+    "fields": {
+     "type": "object"
+    }
+   }
+  },
+  "marker": {
+   "type": "object",
+   "required": [
+    "tags",
+    "derivations",
+    "source_of_facts",
+    "material_sources"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "tags": {
+     "type": "object"
+    },
+    "derivations": {
+     "type": "object"
+    },
+    "source_of_facts": {
+     "type": "object"
+    },
+    "material_sources": {
+     "type": "object"
+    }
+   }
+  }
+ }
+}

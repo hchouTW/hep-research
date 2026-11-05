@@ -1,0 +1,8 @@
+cmake_minimum_required(VERSION 3.16)
+project(g4proto_gb4_gb10 CXX)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+find_package(Geant4 REQUIRED)
+include(${Geant4_USE_FILE})
+add_executable(gb4_gb10 main.cc)
+target_link_libraries(gb4_gb10 ${Geant4_LIBRARIES})

@@ -1,4 +1,4 @@
-"""A release does not regenerate committed outputs: the plugin version that wrote a file is not compared, everything
+"""Neither a release nor a contracts bump regenerates committed outputs: the versions that wrote a file are not compared, everything
 else is. The negative controls show a changed result still fails."""
 import copy
 import json
@@ -10,7 +10,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tests._outputs import without_plugin_version
+from tests._outputs import without_writer_versions, written_by_a_supported_contract
 
 PLUGIN = Path(__file__).resolve().parents[2]
 PROFILES = ("cr-secondary-ratio", "cr-secondary-antiprotons", "dis-parton-model", "drell-yan-lo", "tmd-gaussian-lo",
@@ -29,24 +29,31 @@ def moved_float(node):
     return False
 
 
-class WithoutPluginVersion(unittest.TestCase):
-    DOC = {"plugin_version": "1.0.0", "versions": {"plugin": "1.0.0", "contracts": "3.0.0"}, "plugin": "kept",
-           "nested": [{"versions": {"plugin": "1.0.0"}, "value": 1}]}
+class WithoutWriterVersions(unittest.TestCase):
+    DOC = {"plugin_version": "1.0.0", "contract_version": "3.0.0", "versions": {"plugin": "1.0.0", "contracts": "3.0.0", "profiles": {}},
+           "plugin": "kept", "nested": [{"versions": {"plugin": "1.0.0"}, "value": 1}]}
 
-    def test_drops_only_the_version_that_wrote_the_file(self):
-        self.assertEqual(without_plugin_version(self.DOC), {"versions": {"contracts": "3.0.0"}, "plugin": "kept",
-                                                            "nested": [{"versions": {}, "value": 1}]})
+    def test_drops_only_the_versions_that_wrote_the_file(self):
+        self.assertEqual(without_writer_versions(self.DOC), {"versions": {"profiles": {}}, "plugin": "kept",
+                                                             "nested": [{"versions": {}, "value": 1}]})
 
-    def test_a_new_version_compares_equal_and_a_new_contract_does_not(self):
+    def test_new_writers_compare_equal_and_a_changed_value_does_not(self):
         other = copy.deepcopy(self.DOC)
         other["plugin_version"] = other["versions"]["plugin"] = other["nested"][0]["versions"]["plugin"] = "2.0.0"
-        self.assertEqual(without_plugin_version(other), without_plugin_version(self.DOC))
-        other["versions"]["contracts"] = "4.0.0"
-        self.assertNotEqual(without_plugin_version(other), without_plugin_version(self.DOC))
+        other["contract_version"] = other["versions"]["contracts"] = "4.0.0"
+        self.assertEqual(without_writer_versions(other), without_writer_versions(self.DOC))
+        other["nested"][0]["value"] = 2
+        self.assertNotEqual(without_writer_versions(other), without_writer_versions(self.DOC))
+
+    def test_a_committed_output_may_be_older_within_the_major_and_never_newer(self):
+        self.assertTrue(written_by_a_supported_contract("3.18.0", "3.19.0"))
+        self.assertTrue(written_by_a_supported_contract("3.19.0", "3.19.0"))
+        self.assertFalse(written_by_a_supported_contract("3.20.0", "3.19.0"))
+        self.assertFalse(written_by_a_supported_contract("2.9.0", "3.19.0"))
 
     def test_the_input_is_not_changed(self):
         doc = copy.deepcopy(self.DOC)
-        without_plugin_version(doc)
+        without_writer_versions(doc)
         self.assertEqual(doc, self.DOC)
 
 
@@ -72,12 +79,10 @@ class ProfileCheck(unittest.TestCase):
                 stored.write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8")
                 proc = self.check(root, profile)
                 self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
-                doc["versions"]["contracts"] = "0.0.1"
+                doc["versions"]["contracts"] = doc["contract_version"] = "3.0.0"
                 stored.write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8")
-                self.assertEqual(self.check(root, profile).returncode, 1)
-                doc = json.loads(stored.read_text(encoding="utf-8"))
-                doc["versions"]["contracts"] = json.loads((PLUGIN / "profiles/theory" / profile / "derivations/theory-spec.json")
-                                                          .read_text(encoding="utf-8"))["versions"]["contracts"]
+                proc = self.check(root, profile)
+                self.assertEqual(proc.returncode, 0, proc.stdout + proc.stderr)
                 self.assertTrue(moved_float(doc["extension"]))
                 stored.write_text(json.dumps(doc, indent=1) + "\n", encoding="utf-8")
                 self.assertEqual(self.check(root, profile).returncode, 1)

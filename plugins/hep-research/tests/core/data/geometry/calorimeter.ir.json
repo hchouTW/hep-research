@@ -1,0 +1,373 @@
+{
+ "schema": "geometry-ir/1",
+ "physical": {
+  "numerics": {
+   "precision": 34,
+   "rounding": "half-even",
+   "epsilon_mm": "1e-20",
+   "minimum_gap_mm": "1e-6",
+   "decimal": "decimal/1"
+  },
+  "templates": {
+   "world": {
+    "half_mm": [
+     "1e3",
+     "1e3",
+     "1e3"
+    ],
+    "shape": "box",
+    "material": "G4_AIR",
+    "region": "default",
+    "field": "none"
+   },
+   "plate": {
+    "half_mm": [
+     "6e1",
+     "2e1",
+     "5e-1"
+    ],
+    "shape": "box",
+    "material": "G4_Al",
+    "region": "default",
+    "field": "none"
+   },
+   "module": {
+    "half_mm": [
+     "2e1",
+     "2e1",
+     "1e1"
+    ],
+    "shape": "box",
+    "material": "G4_AIR",
+    "region": "calorimeter",
+    "field": "none"
+   },
+   "tile": {
+    "half_mm": [
+     "2e1",
+     "2e1",
+     "1.666666666666666666666666666666666e-1"
+    ],
+    "shape": "box",
+    "material": "scintillator",
+    "region": "calorimeter",
+    "field": "none"
+   },
+   "absorber": {
+    "half_mm": [
+     "2e1",
+     "2e1",
+     "1.25e0"
+    ],
+    "shape": "box",
+    "material": "G4_Pb",
+    "region": "calorimeter",
+    "field": "none"
+   }
+  },
+  "placements": [
+   {
+    "mother": "world",
+    "template": "module",
+    "copy_number": 0,
+    "index": {
+     "tower": 0
+    },
+    "centre_mm": [
+     "-4.05e1",
+     "0",
+     "0"
+    ],
+    "rotation": null
+   },
+   {
+    "mother": "world",
+    "template": "module",
+    "copy_number": 1,
+    "index": {
+     "tower": 1
+    },
+    "centre_mm": [
+     "0",
+     "0",
+     "0"
+    ],
+    "rotation": null
+   },
+   {
+    "mother": "world",
+    "template": "module",
+    "copy_number": 2,
+    "index": {
+     "tower": 2
+    },
+    "centre_mm": [
+     "4.05e1",
+     "0",
+     "0"
+    ],
+    "rotation": null
+   },
+   {
+    "mother": "world",
+    "template": "plate",
+    "copy_number": 3,
+    "index": {},
+    "centre_mm": [
+     "0",
+     "0",
+     "-3.01e1"
+    ],
+    "rotation": [
+     [
+      -1,
+      0,
+      0
+     ],
+     [
+      0,
+      -1,
+      0
+     ],
+     [
+      0,
+      0,
+      1
+     ]
+    ]
+   },
+   {
+    "mother": "module",
+    "template": "absorber",
+    "copy_number": 6,
+    "index": {},
+    "centre_mm": [
+     "0",
+     "0",
+     "-8.75e0"
+    ],
+    "rotation": null
+   },
+   {
+    "mother": "module",
+    "template": "tile",
+    "copy_number": 0,
+    "index": {
+     "layer": 0
+    },
+    "centre_mm": [
+     "0",
+     "0",
+     "-7.333333333333333333333333333333335e0"
+    ],
+    "rotation": null
+   },
+   {
+    "mother": "module",
+    "template": "absorber",
+    "copy_number": 7,
+    "index": {},
+    "centre_mm": [
+     "0",
+     "0",
+     "-5.416666666666666666666666666666665e0"
+    ],
+    "rotation": null
+   },
+   {
+    "mother": "module",
+    "template": "tile",
+    "copy_number": 1,
+    "index": {
+     "layer": 1
+    },
+    "centre_mm": [
+     "0",
+     "0",
+     "-4e0"
+    ],
+    "rotation": null
+   },
+   {
+    "mother": "module",
+    "template": "absorber",
+    "copy_number": 8,
+    "index": {},
+    "centre_mm": [
+     "0",
+     "0",
+     "-2.083333333333333333333333333333334e0"
+    ],
+    "rotation": null
+   },
+   {
+    "mother": "module",
+    "template": "tile",
+    "copy_number": 2,
+    "index": {
+     "layer": 2
+    },
+    "centre_mm": [
+     "0",
+     "0",
+     "-6.666666666666666666666666666666675e-1"
+    ],
+    "rotation": null
+   },
+   {
+    "mother": "module",
+    "template": "absorber",
+    "copy_number": 9,
+    "index": {},
+    "centre_mm": [
+     "0",
+     "0",
+     "1.249999999999999999999999999999999e0"
+    ],
+    "rotation": null
+   },
+   {
+    "mother": "module",
+    "template": "tile",
+    "copy_number": 3,
+    "index": {
+     "layer": 3
+    },
+    "centre_mm": [
+     "0",
+     "0",
+     "2.666666666666666666666666666666666e0"
+    ],
+    "rotation": null
+   },
+   {
+    "mother": "module",
+    "template": "absorber",
+    "copy_number": 10,
+    "index": {},
+    "centre_mm": [
+     "0",
+     "0",
+     "4.583333333333333333333333333333332e0"
+    ],
+    "rotation": null
+   },
+   {
+    "mother": "module",
+    "template": "tile",
+    "copy_number": 4,
+    "index": {
+     "layer": 4
+    },
+    "centre_mm": [
+     "0",
+     "0",
+     "6e0"
+    ],
+    "rotation": null
+   },
+   {
+    "mother": "module",
+    "template": "absorber",
+    "copy_number": 11,
+    "index": {},
+    "centre_mm": [
+     "0",
+     "0",
+     "7.916666666666666666666666666666665e0"
+    ],
+    "rotation": null
+   },
+   {
+    "mother": "module",
+    "template": "tile",
+    "copy_number": 5,
+    "index": {
+     "layer": 5
+    },
+    "centre_mm": [
+     "0",
+     "0",
+     "9.33333333333333333333333333333333e0"
+    ],
+    "rotation": null
+   }
+  ],
+  "frames": {
+   "beam": {
+    "in": "world",
+    "origin_mm": [
+     "0",
+     "0",
+     "-5e2"
+    ]
+   }
+  },
+  "readout": {
+   "cal": {
+    "fields": [
+     {
+      "name": "depth",
+      "kind": "segmentation",
+      "width": 5,
+      "stride": 1
+     },
+     {
+      "name": "layer",
+      "kind": "copy",
+      "width": 3,
+      "stride": 32
+     },
+     {
+      "name": "tower",
+      "kind": "copy",
+      "width": 2,
+      "stride": 256
+     }
+    ]
+   }
+  },
+  "volume_id": {
+   "rule": "sum of (copy_number + 1) * stride",
+   "strides": [
+    1,
+    8
+   ]
+  },
+  "materials": {
+   "scintillator": {
+    "base": "G4_PLASTIC_SC_VINYLTOLUENE",
+    "ionisation": {
+     "birks_mm_per_MeV": "1.26e-1"
+    }
+   }
+  },
+  "physics_requirements": [
+   {
+    "need": "birks",
+    "templates": [
+     "tile"
+    ]
+   }
+  ]
+ },
+ "marker": {
+  "tags": {
+   "tile": [
+    "active"
+   ],
+   "absorber": [
+    "passive"
+   ]
+  },
+  "derivations": {
+   "t": "2.5e0",
+   "gap": "5e-1",
+   "layers": "6e0"
+  },
+  "source_of_facts": {},
+  "material_sources": {
+   "/scintillator/ionisation": "assumed"
+  }
+ }
+}

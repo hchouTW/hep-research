@@ -325,10 +325,11 @@ from the plugin root (each takes `--help`; the seeds are in each `output/report.
 committed output. When a change alters a committed number, explain why in the commit, regenerate the output, and
 record the old and new values; a change beyond the declared tolerance is a breaking change.
 
-**Regenerating outputs.** A release does not regenerate committed outputs: a committed output keeps the plugin version
-that wrote it, as provenance, and the comparisons ignore that version (`tests/_outputs.py`, `make_artifacts.py --check`)
-while still comparing everything else, numbers within each test's tolerance. So a version bump needs no reference
-machine, and the tests pass on macOS and Linux. Regenerate only when a change alters a committed result: rerun the six
+**Regenerating outputs.** Neither a release nor a contracts bump regenerates committed outputs: a committed output keeps the
+plugin and contracts versions that wrote it, as provenance, and the comparisons ignore them (`tests/_outputs.py`,
+`make_artifacts.py --check`) while still comparing everything else, numbers within each test's tolerance. An output may be
+older than the contracts within the same major version, never newer. A contracts bump updates fixtures and templates, which
+state the current contract. So a version bump needs no reference machine, and the tests pass on macOS and Linux. Regenerate only when a change alters a committed result: rerun the six
 `profiles/theory/*/scripts/make_artifacts.py` and the affected examples, in the order of the table above
 (`qed-prediction` before `published-comparison`).
 - Run them in the environment that produced the committed outputs (E2, `~/.venvs/hep-research-e2`). Other machines

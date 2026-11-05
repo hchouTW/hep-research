@@ -32,7 +32,8 @@ from functools import cache
 from pathlib import Path
 
 DATA = Path(__file__).resolve().parent / "data"
-FILES = {"codata": "codata-2022.json", "pdg": "pdg-2026.json", "nuclides": "ame2020-nubase2020.json"}
+FILES = {"codata": "codata-2022.json", "pdg": "pdg-2026.json", "nuclides": "ame2020-nubase2020.json",
+         "elements": "elements-ciaaw-pdg-2024.json"}
 LABEL = "[General method]"
 PI = Decimal("3.14159265358979323846264338327950288419716939937510")
 YEAR_NOTE = "NUBASE2020 year: 1 y = 365.2422 d (tropical year), Kondev et al., Chinese Phys. C 45 (2021) 030001, Sec. 2.3"
@@ -72,6 +73,18 @@ def _load(kind: str) -> dict:
 def editions() -> list[dict]:
     """Edition, source, read level and license of each bundled data file."""
     return [{k: _load(kind)[k] for k in ("edition", "source", "read", "license")} for kind in FILES]
+
+
+def element(symbol: str) -> dict:
+    """The record of one element, Z = 1 to 98: printed strings, each with its source in editions()."""
+    table = _load("elements")["elements"]
+    if symbol not in table:
+        raise ConstantsError(f"no element {symbol!r} in the table")
+    return dict(table[symbol])
+
+
+def element_symbols() -> list[str]:
+    return sorted(_load("elements")["elements"], key=lambda symbol: _load("elements")["elements"][symbol]["Z"])
 
 
 # ---------------------------------------------------------------- units

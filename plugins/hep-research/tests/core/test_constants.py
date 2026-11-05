@@ -43,7 +43,7 @@ class ProvenanceTests(unittest.TestCase):
 
     def test_editions(self):
         eds = {e["edition"] for e in K.editions()}
-        self.assertEqual(eds, {"CODATA 2022", "PDG 2026", "AME2020 + NUBASE2020"})
+        self.assertEqual(eds, {"CODATA 2022", "PDG 2026", "AME2020 + NUBASE2020", "CIAAW 2024 + PDG Atomic and Nuclear Properties 2024"})
 
     def test_exact_si_constants_are_exact(self):
         for name in ("speed_of_light", "planck_constant", "elementary_charge", "boltzmann_constant", "avogadro_constant"):

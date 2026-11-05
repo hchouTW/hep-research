@@ -1,0 +1,540 @@
+{
+ "$comment": "detector-spec/1 (g4sim plan, Section 6.2): the detector itself; requirements only, never Geant4 numerical settings. S1 holds box, single, linear and stack; later phases add module kinds. $defs quantity and integer are read by contracts/geometry.py to generate the type table of core.canonical.load_spec_json.",
+ "type": "object",
+ "required": [
+  "schema",
+  "world"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "schema": {
+   "const": "detector-spec/1"
+  },
+  "params": {
+   "type": "object",
+   "additionalProperties": {
+    "$ref": "#/$defs/quantity"
+   }
+  },
+  "materials": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "object",
+    "additionalProperties": false,
+    "not": {
+     "required": [
+      "base",
+      "composition"
+     ]
+    },
+    "properties": {
+     "base": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_+-]*$"
+     },
+     "composition": {
+      "type": "object",
+      "additionalProperties": {
+       "$ref": "#/$defs/quantity"
+      }
+     },
+     "density_g_cm3": {
+      "$ref": "#/$defs/quantity"
+     },
+     "ionisation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+       "birks_mm_per_MeV": {
+        "$ref": "#/$defs/quantity"
+       },
+       "mean_excitation_eV": {
+        "$ref": "#/$defs/quantity"
+       },
+       "facts": {
+        "type": "string"
+       }
+      }
+     },
+     "facts": {
+      "type": "string"
+     },
+     "z": {
+      "$ref": "#/$defs/integer"
+     },
+     "a_g_mole": {
+      "$ref": "#/$defs/quantity"
+     },
+     "components": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "required": [
+        "material",
+        "mass_fraction"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "material": {
+         "type": "string"
+        },
+        "mass_fraction": {
+         "$ref": "#/$defs/quantity"
+        }
+       }
+      }
+     },
+     "state": {
+      "enum": [
+       "gas",
+       "liquid",
+       "solid"
+      ]
+     },
+     "temperature_K": {
+      "$ref": "#/$defs/quantity"
+     },
+     "pressure_Pa": {
+      "$ref": "#/$defs/quantity"
+     }
+    }
+   }
+  },
+  "templates": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "object",
+    "required": [
+     "solid",
+     "material"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "solid": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+       "box": {
+        "type": "object",
+        "required": [
+         "size_mm"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "size_mm": {
+          "type": "array",
+          "items": {
+           "$ref": "#/$defs/quantity"
+          },
+          "minItems": 3,
+          "maxItems": 3
+         }
+        }
+       }
+      }
+     },
+     "material": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_+-]*$"
+     },
+     "tags": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      }
+     },
+     "region": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_+-]*$"
+     },
+     "field": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_+-]*$"
+     },
+     "children": {
+      "type": "array",
+      "items": {
+       "$ref": "#/$defs/child"
+      }
+     }
+    }
+   }
+  },
+  "world": {
+   "type": "object",
+   "required": [
+    "material",
+    "size_mm"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "material": {
+     "type": "string",
+     "pattern": "^[A-Za-z_][A-Za-z0-9_+-]*$"
+    },
+    "size_mm": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/quantity"
+     },
+     "minItems": 3,
+     "maxItems": 3
+    },
+    "tags": {
+     "type": "array",
+     "items": {
+      "type": "string"
+     }
+    },
+    "region": {
+     "type": "string",
+     "pattern": "^[A-Za-z_][A-Za-z0-9_+-]*$"
+    },
+    "field": {
+     "type": "string",
+     "pattern": "^[A-Za-z_][A-Za-z0-9_+-]*$"
+    },
+    "children": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/child"
+     }
+    }
+   }
+  },
+  "frames": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "object",
+    "required": [
+     "in",
+     "origin_mm"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "in": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_+-]*$"
+     },
+     "origin_mm": {
+      "type": "array",
+      "items": {
+       "$ref": "#/$defs/quantity"
+      },
+      "minItems": 3,
+      "maxItems": 3
+     }
+    }
+   }
+  },
+  "readout": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "object",
+    "required": [
+     "fields"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "fields": {
+      "type": "object",
+      "additionalProperties": {
+       "$ref": "#/$defs/integer"
+      }
+     }
+    }
+   }
+  },
+  "physics_requirements": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "need"
+    ],
+    "additionalProperties": true,
+    "properties": {
+     "need": {
+      "enum": [
+       "thin_layer_ionisation",
+       "transition_radiation",
+       "optical_scope",
+       "birks",
+       "step_limit",
+       "fast_sim_envelope"
+      ]
+     },
+     "select": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+       "tags": {
+        "type": "array",
+        "items": {
+         "type": "string"
+        }
+       }
+      }
+     }
+    }
+   }
+  },
+  "source_of_facts": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "string",
+    "minLength": 1
+   }
+  },
+  "fields": {
+   "type": "object",
+   "additionalProperties": {
+    "type": "object",
+    "required": [
+     "b_tesla"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "b_tesla": {
+      "type": "array",
+      "items": {
+       "$ref": "#/$defs/quantity"
+      },
+      "minItems": 3,
+      "maxItems": 3
+     }
+    }
+   }
+  },
+  "legacy": {
+   "type": "object",
+   "required": [
+    "format"
+   ],
+   "properties": {
+    "format": {
+     "enum": [
+      "layered_sim.spec/1",
+      "element_sim.spec/1"
+     ]
+    },
+    "groups": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "repeat",
+       "slabs"
+      ],
+      "properties": {
+       "repeat": {
+        "$ref": "#/$defs/integer"
+       },
+       "slabs": {
+        "type": "array",
+        "items": {
+         "type": "string"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ },
+ "$defs": {
+  "quantity": {
+   "type": "string",
+   "minLength": 1
+  },
+  "integer": {
+   "type": "integer"
+  },
+  "rotation": {
+   "anyOf": [
+    {
+     "type": "object",
+     "required": [
+      "zyx_deg"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "zyx_deg": {
+       "type": "array",
+       "items": {
+        "$ref": "#/$defs/quantity"
+       },
+       "minItems": 3,
+       "maxItems": 3
+      }
+     }
+    },
+    {
+     "type": "object",
+     "required": [
+      "axis",
+      "angle_deg"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "axis": {
+       "enum": [
+        "x",
+        "y",
+        "z"
+       ]
+      },
+      "angle_deg": {
+       "$ref": "#/$defs/quantity"
+      }
+     }
+    }
+   ]
+  },
+  "child": {
+   "type": "object",
+   "required": [
+    "placement"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "template": {
+     "type": "string",
+     "pattern": "^[A-Za-z_][A-Za-z0-9_+-]*$"
+    },
+    "placement": {
+     "type": "object",
+     "additionalProperties": false,
+     "properties": {
+      "single": {
+       "type": "object",
+       "required": [
+        "centre_mm"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "centre_mm": {
+         "type": "array",
+         "items": {
+          "$ref": "#/$defs/quantity"
+         },
+         "minItems": 3,
+         "maxItems": 3
+        },
+        "rotation": {
+         "$ref": "#/$defs/rotation"
+        }
+       }
+      },
+      "linear": {
+       "type": "object",
+       "required": [
+        "count",
+        "pitch_mm",
+        "start_mm"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "count": {
+         "$ref": "#/$defs/integer"
+        },
+        "pitch_mm": {
+         "type": "array",
+         "items": {
+          "$ref": "#/$defs/quantity"
+         },
+         "minItems": 3,
+         "maxItems": 3
+        },
+        "start_mm": {
+         "type": "array",
+         "items": {
+          "$ref": "#/$defs/quantity"
+         },
+         "minItems": 3,
+         "maxItems": 3
+        },
+        "index": {
+         "type": "string",
+         "pattern": "^[A-Za-z_][A-Za-z0-9_+-]*$"
+        }
+       }
+      },
+      "stack": {
+       "type": "object",
+       "required": [
+        "axis",
+        "from",
+        "sequence"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "axis": {
+         "enum": [
+          "x",
+          "y",
+          "z"
+         ]
+        },
+        "from": {
+         "enum": [
+          "-x",
+          "+x",
+          "-y",
+          "+y",
+          "-z",
+          "+z"
+         ]
+        },
+        "sequence": {
+         "type": "array",
+         "minItems": 1,
+         "items": {
+          "anyOf": [
+           {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_+-]*$"
+           },
+           {
+            "type": "object",
+            "required": [
+             "template"
+            ],
+            "additionalProperties": false,
+            "properties": {
+             "template": {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_+-]*$"
+             },
+             "index": {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_+-]*$"
+             }
+            }
+           },
+           {
+            "type": "object",
+            "required": [
+             "spacer_mm"
+            ],
+            "additionalProperties": false,
+            "properties": {
+             "spacer_mm": {
+              "$ref": "#/$defs/quantity"
+             }
+            }
+           }
+          ]
+         }
+        },
+        "repeat": {
+         "$ref": "#/$defs/integer"
+        }
+       }
+      }
+     }
+    }
+   }
+  }
+ }
+}

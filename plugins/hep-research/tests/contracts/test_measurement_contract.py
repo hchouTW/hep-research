@@ -8,6 +8,7 @@ import json
 import subprocess
 import sys
 import unittest
+from tests._outputs import written_by_a_supported_contract  # noqa: E402
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -209,7 +210,7 @@ class ShippedSpecs(unittest.TestCase):
                 if not (spec.exists() and profile_json.exists()):
                     continue  # the AMS-optional check runs this suite without the AMS profile and its example
                 doc = load(spec)
-                self.assertEqual(doc["contract_version"], CONTRACTS_VERSION)
+                self.assertTrue(written_by_a_supported_contract(doc["contract_version"], CONTRACTS_VERSION))
                 vocab = Vocabulary.with_profiles([load(ROOT / "profiles" / "experiments" / profile / "profile.json")])
                 rep = v.validate_artifact(doc, vocab, strict=True)
                 self.assertTrue(rep.ok, rep.as_dict())

@@ -118,7 +118,7 @@
     "revocation_log",
     "trusted_input"
    ],
-   "source": "protected-data-architecture.md \u00a79, task P1/P2"
+   "source": "protected-data-architecture.md §9, task P1/P2"
   },
   "status": {
    "steward": "hep-computing",
@@ -252,6 +252,39 @@
     "tests/_platform.py"
    ],
    "source": "new in this plugin (cross-platform task, PR 1a)"
+  },
+  "canonical": {
+   "steward": "hep-computing",
+   "status": "implemented",
+   "purpose": "Canonical identity: canonical/1 hashing, the hash scope, decimal/1 and the JSON readers of hashed documents (load_json_strict; load_spec_json, normalizing by a type table the caller passes in); never a schema check, a geometry rule or a point hash",
+   "consumers": [
+    "core/provider/hashing.py",
+    "adapters/detector-simulation/assets/detsim_canonical.py"
+   ],
+   "files": [
+    "encoding"
+   ],
+   "source": "moved from core/provider/hashing.py and adapters/detector-simulation/assets/detsim_canonical.py (g4sim S1, 2026-11-05); load_spec_json is new"
+  },
+  "geometry": {
+   "steward": "hep-detector",
+   "status": "implemented-in-part",
+   "purpose": "Pure geometric computation of the g4sim plan: exact decimal arithmetic, params, rotations, bitfields, the strides of volume IDs, expansion of a specification into the IR, the actual region and field of each logical, the gap rule and the double-precision error bound; legality is judged by contracts/geometry.py; never Geant4, a physics judgment or a schema check",
+   "consumers": [],
+   "files": [
+    "numbers",
+    "params",
+    "rotation",
+    "bitfield",
+    "bound",
+    "modules",
+    "expand",
+    "overlap",
+    "identity",
+    "material",
+    "gdml"
+   ],
+   "source": "new in this plugin (g4sim S1, 2026-11-05)"
   }
  }
 }

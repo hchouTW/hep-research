@@ -114,7 +114,7 @@ import simreco_spec as RS  # noqa: E402
 # every source file of each program's build, as paths under assets/, per program (adapter 0.2.0: the g4sim/ group was
 # added and MiniJson.hh moved there, so the keys of sources_sha256 changed once, from bare names to these paths;
 # adapter 0.3.0: a map per program instead of one flat tuple, the keys of a layered_sim record are unchanged)
-ADAPTER_VERSION = "0.6.0"
+ADAPTER_VERSION = "0.7.0"
 SCHEMAS = ASSETS / "schemas"
 STRING_COLUMNS = ("primary_end_process",)  # the only non-numeric CSV column (output.schema.json)
 A2_OUTPUTS = ("summary.json", "column_map.json", "probe.json", "observables_dump.csv")  # adapter 0.2.0

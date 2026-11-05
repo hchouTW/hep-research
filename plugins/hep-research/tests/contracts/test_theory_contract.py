@@ -9,6 +9,7 @@ import copy
 import json
 import sys
 import unittest
+from tests._outputs import written_by_a_supported_contract  # noqa: E402
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -334,7 +335,7 @@ class CommittedExampleTests(unittest.TestCase):
                 if not (ROOT / rel).is_file():  # tools/check_ams_optional.py runs tests/contracts on a copy without examples
                     self.skipTest(f"{rel} is not in this copy of the plugin")
                 doc = json.loads((ROOT / rel).read_text())
-                self.assertEqual(doc["contract_version"], CONTRACTS_VERSION)
+                self.assertTrue(written_by_a_supported_contract(doc["contract_version"], CONTRACTS_VERSION))
                 rep = v.validate_artifact(doc)
                 self.assertTrue(rep.ok, rep.as_dict())
                 self.assertFalse({f.code for f in rep.findings if f.code.startswith(("theory.", "prediction."))},

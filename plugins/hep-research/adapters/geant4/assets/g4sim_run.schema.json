@@ -1,0 +1,129 @@
+{
+ "$comment": "g4sim-run/1 (g4sim plan, Section 6.4): physics list, cuts, kill policy, accounting, field integration, events, seeds, threads and chunks. S1 fixes the blocks the translator writes; output and ui_commands carry an old specification's settings in legacy mode.",
+ "type": "object",
+ "required": [
+  "schema",
+  "physics",
+  "accounting",
+  "run"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "schema": {
+   "const": "g4sim-run/1"
+  },
+  "physics": {
+   "type": "object",
+   "required": [
+    "cuts_mm"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "reference_list": {
+     "type": "string"
+    },
+    "em_constructor": {
+     "type": "string"
+    },
+    "decay": {
+     "type": "boolean"
+    },
+    "cuts_mm": {
+     "type": "object",
+     "required": [
+      "default"
+     ],
+     "additionalProperties": false,
+     "properties": {
+      "default": {
+       "type": "string"
+      },
+      "regions": {
+       "type": "object",
+       "additionalProperties": {
+        "type": "string"
+       }
+      }
+     }
+    }
+   }
+  },
+  "accounting": {
+   "enum": [
+    "legacy",
+    "separated"
+   ]
+  },
+  "kill_policy": {
+   "type": "object"
+  },
+  "field_integration": {
+   "anyOf": [
+    {
+     "type": "null"
+    },
+    {
+     "type": "object"
+    }
+   ]
+  },
+  "run": {
+   "type": "object",
+   "required": [
+    "events",
+    "mode",
+    "seeding"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "events": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "first_event": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "logical_run_seed": {
+     "type": "integer"
+    },
+    "seeding": {
+     "enum": [
+      "stream",
+      "per-event"
+     ]
+    },
+    "mode": {
+     "enum": [
+      "serial",
+      "mt",
+      "geometry-check"
+     ]
+    },
+    "threads": {
+     "type": "integer",
+     "minimum": 1
+    },
+    "chunk": {
+     "type": "integer",
+     "minimum": 0
+    },
+    "seeds": {
+     "type": "array",
+     "items": {
+      "type": "integer"
+     }
+    }
+   }
+  },
+  "output": {
+   "type": "object"
+  },
+  "ui_commands": {
+   "type": "array",
+   "items": {
+    "type": "string"
+   }
+  }
+ }
+}

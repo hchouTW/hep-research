@@ -7,6 +7,8 @@ from core.constants.physical import (  # noqa: F401
     constant_names,
     convert,
     editions,
+    element,
+    element_symbols,
     half_life,
     half_life_seconds,
     has_particle_property,

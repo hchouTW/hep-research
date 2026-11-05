@@ -10,17 +10,9 @@ Writing every point value as repr(float(x)) makes 3e28, 3.0e28 and 3000000000000
 """
 from __future__ import annotations
 
-import hashlib
-import json
 import math
 
-
-def canonical_json(value) -> str:
-    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False)
-
-
-def canonical_sha256(value) -> str:
-    return hashlib.sha256(canonical_json(value).encode("utf-8")).hexdigest()
+from core.canonical import canonical_json, canonical_sha256  # noqa: F401  (canonical_json is re-exported)
 
 
 def point_key(point: dict) -> dict:

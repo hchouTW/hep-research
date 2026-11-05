@@ -7,7 +7,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tests._outputs import without_plugin_version
+from tests._outputs import without_writer_versions
 
 PLUGIN = Path(__file__).resolve().parents[2]
 SCRIPT = PLUGIN / "examples" / "eic-profile-routing" / "run.py"
@@ -62,7 +62,7 @@ class EicRoutingExampleTests(unittest.TestCase):
 
     def test_committed_output_is_reproduced(self):
         fresh = json.loads((self.out / "results.json").read_text(encoding="utf-8"))
-        self.assertEqual(without_plugin_version(fresh), without_plugin_version(json.loads(COMMITTED.read_text(encoding="utf-8"))))
+        self.assertEqual(without_writer_versions(fresh), without_writer_versions(json.loads(COMMITTED.read_text(encoding="utf-8"))))
 
 
 if __name__ == "__main__":

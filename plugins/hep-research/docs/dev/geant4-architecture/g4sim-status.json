@@ -9,10 +9,10 @@
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S0.md"
   },
   "S1": {
-   "state": "not-started",
+   "state": "gates-recorded",
    "worktree": "../hep-research-g4sim-S1",
    "branch": "g4sim/S1",
-   "task_card_sha256": "ad76765c28ea280101ddb49d4e435a4798ad12646670976ae29db592ec847ca7",
+   "task_card_sha256": "a07b24068dd4b04d4c3cdd60f4d3afa093418d40e58a432a13d867ac948cc7ad",
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S1.md",
    "blocked_on": []
   },
@@ -20,7 +20,7 @@
    "state": "not-started",
    "worktree": "../hep-research-g4sim-S2",
    "branch": "g4sim/S2",
-   "task_card_sha256": "eeef4a338e055ea9a3a6ac73e741b6d348ae55019724429666439120628bc603",
+   "task_card_sha256": "3c9bf96eb2e734c3c3881230c20f4225e7b46c44a96ff62bc2b514631918f951",
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S2.md",
    "blocked_on": []
   },
@@ -82,16 +82,16 @@
   }
  },
  "gb": {
-  "GB1": "unconfirmed",
-  "GB2": "unconfirmed",
+  "GB1": "confirmed",
+  "GB2": "confirmed",
   "GB3": "unconfirmed",
-  "GB4": "unconfirmed",
+  "GB4": "confirmed",
   "GB5": "unconfirmed",
   "GB6": "unconfirmed",
   "GB7": "unconfirmed",
   "GB8": "unconfirmed",
   "GB9": "unconfirmed",
-  "GB10": "unconfirmed",
+  "GB10": "confirmed",
   "GB11": "unconfirmed",
   "GB12": "unconfirmed",
   "GB13": "unconfirmed",
@@ -103,9 +103,9 @@
   "GB19": "unconfirmed",
   "GB20": "unconfirmed",
   "GB21": "unconfirmed",
-  "GB22": "unconfirmed",
+  "GB22": "confirmed",
   "GB23": "unconfirmed",
   "GB24": "unconfirmed"
  },
- "updated": "2026-11-04T21:13:38Z"
+ "updated": "2026-11-05T09:25:27Z"
 }

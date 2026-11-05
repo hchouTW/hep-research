@@ -141,6 +141,104 @@
    "registered_at": "2026-11-04T20:42:25Z",
    "card_commit": "ed5daa0a",
    "reason": "Execution log only (E2 job and final checks); thresholds unchanged from the initial registration"
+  },
+  {
+   "card": "g4sim-tasks/S1.md",
+   "sha256": "cd71b00e9a664b338d27effd2f339308c24a93f2396ecb1baa3cc98a54f15f48",
+   "registered_at": "2026-11-04T23:14:42Z",
+   "card_commit": "36c9d5bc",
+   "reason": "S1 refresh at the phase start: Section 22 answers, gate 11 added by the custodian, environments; no threshold loosened"
+  },
+  {
+   "card": "g4sim-tasks/S1.md",
+   "sha256": "17823ee57f3815f2ffb34bdcd6b48bd9f5511ee98b72a2265e7f0d8f647fb9a4",
+   "registered_at": "2026-11-04T23:28:21Z",
+   "card_commit": "65ca85d1",
+   "reason": "Execution log only (core/canonical, E5 results of GB4 and GB10); thresholds unchanged from the S1 refresh"
+  },
+  {
+   "card": "g4sim-tasks/S1.md",
+   "sha256": "c96a7412484a8c47b1f9f08ea5a6ba7c0aa2024f0dd8c9c6b6b03e135bbbfd22",
+   "registered_at": "2026-11-04T23:56:58Z",
+   "card_commit": "286ddc72",
+   "reason": "Execution log and environments only (E2 results of GB4 and GB10, E2 installation); thresholds unchanged from the S1 refresh"
+  },
+  {
+   "card": "g4sim-tasks/S1.md",
+   "sha256": "68cfea4eacf2f35101129cdff8ed4f3bb77d15bebd8d86a190cba47bbb264566",
+   "registered_at": "2026-11-05T00:19:34Z",
+   "card_commit": "0c259bcf",
+   "reason": "Execution log only (deliveries, E5 results of GB1 and GB22); thresholds unchanged from the S1 refresh"
+  },
+  {
+   "card": "g4sim-tasks/S1.md",
+   "sha256": "41fceb6c7b7ebd2ff90d7e39539ce47860dc8efed3a4bb39efb7dbd3e41fed67",
+   "registered_at": "2026-11-05T00:25:44Z",
+   "card_commit": "e101ea51",
+   "reason": "Execution log and environments only (E2 results of GB1 and GB22, golden test on E2, E2 dataset versions); thresholds unchanged from the S1 refresh"
+  },
+  {
+   "card": "g4sim-tasks/S1.md",
+   "sha256": "97f8e0f4a2af239a5eb4ba6cfa7c158fb1308b02839ae4b6b1a424e2d64db89e",
+   "registered_at": "2026-11-05T00:27:50Z",
+   "card_commit": "71c4e0af",
+   "reason": "Execution log only (golden test on E5, E5 dataset versions); thresholds unchanged from the S1 refresh"
+  },
+  {
+   "card": "g4sim-tasks/S1.md",
+   "sha256": "af54fe4068470236cb9e02caf501065c64826d51266e1c48b1c33974d2518c1f",
+   "registered_at": "2026-11-05T01:03:02Z",
+   "card_commit": "7fcb993d",
+   "reason": "Rerun cost registered before the first re-acquisition build, as the card requires; Execution log; no threshold changed"
+  },
+  {
+   "card": "g4sim-performance-budget.md",
+   "sha256": "371734e524cf84d1d7dd6a430288b241ec9d79609173d92a229ca21fbb896ea5",
+   "registered_at": "2026-11-05T02:25:22Z",
+   "card_commit": "2a8152d1",
+   "reason": "Performance budget of Section 16, registered before any S2 run"
+  },
+  {
+   "card": "g4sim-tasks/S1.md",
+   "sha256": "46e15f1c4dd7b4ace1817cd4e0f273ca2d708bfccb09477d81cb1266101c8974",
+   "registered_at": "2026-11-05T02:55:09Z",
+   "card_commit": "a7e9954a",
+   "reason": "Rerun cost corrected from recorded timestamps; Execution log; no threshold changed"
+  },
+  {
+   "card": "g4sim-tasks/S1.md",
+   "sha256": "ea375a868036dfcbb5b85d948f13deb99bfeecd2dc4c740ef70dcc3debdb89a3",
+   "registered_at": "2026-11-05T03:33:32Z",
+   "card_commit": "2fe3819c",
+   "reason": "Execution log only (G5 evidence, mirrors); thresholds unchanged"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "3c9bf96eb2e734c3c3881230c20f4225e7b46c44a96ff62bc2b514631918f951",
+   "registered_at": "2026-11-05T04:10:18Z",
+   "card_commit": "7b0f564e",
+   "reason": "Scope additions from the maintainer's decision of 2026-11-05; no threshold loosened"
+  },
+  {
+   "card": "g4sim-tasks/S1.md",
+   "sha256": "034bb1894569d74deaa40d82a5010013291b3a6c3f4f7f23a091fa06ffe13a3c",
+   "registered_at": "2026-11-05T07:53:15Z",
+   "card_commit": "e6443107",
+   "reason": "Execution log only (reproduction results, inventory, gates 4 and 5); thresholds unchanged"
+  },
+  {
+   "card": "g4sim-tasks/S1.md",
+   "sha256": "f7cd34c86518f77f816fc593e1f4543dc0fec0878d4da3378966d073d17474ca",
+   "registered_at": "2026-11-05T07:54:16Z",
+   "card_commit": "9eda807d",
+   "reason": "Execution log only (transfer hash); thresholds unchanged"
+  },
+  {
+   "card": "g4sim-tasks/S1.md",
+   "sha256": "a07b24068dd4b04d4c3cdd60f4d3afa093418d40e58a432a13d867ac948cc7ad",
+   "registered_at": "2026-11-05T09:25:27Z",
+   "card_commit": "f17e583c",
+   "reason": "Execution log only (versions, final checks); thresholds unchanged"
   }
  ]
 }
