@@ -3,7 +3,8 @@
 
 For each recorded executable: extract the source at its commit, add the probe, build, and time three of its runs (most events,
 median, fewest) at N and at 2N events. The difference gives seconds per event with start-up removed; the slowest of the three
-prices every run of that executable, so the estimate is an upper bound, because cost per event differs between run types. N doubles until the difference is at least MINIMUM_DIFFERENCE_S, because a smaller one is start-up
+prices every run of that executable. It is an estimate, not a bound: an untimed run can be slower, and start-up and builds are
+left out. N doubles until the difference is at least MINIMUM_DIFFERENCE_S, because a smaller one is start-up
 noise; a sample that never gets there is reported as unreliable, never as a small cost. Nothing it writes is a reference output.
 
 Usage: cost_sample.py --facts FACTS.json --work DIR [--events N] [--geant4-config PATH]
