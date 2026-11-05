@@ -102,7 +102,8 @@ def classify(states: dict, result: dict | None) -> dict:
     """The class of one run. result is its re-acquisition: built, reproduced, probe_agrees (None without an existing probe
     record), field_visible (GB22), regenerated (a baseline of the unmodified program), and seed_as_recorded."""
     covers = scope(states)
-    result = result or {}
+    if result is None:
+        return {"class": None, "reason": "no re-acquisition result yet", "scope": covers}
     if result.get("seed_as_recorded") is False:
         return {"class": None, "reason": "the reproduction check used a different seed, so it proves nothing", "scope": covers}
     reference = bool(covers) or bool(result.get("regenerated"))

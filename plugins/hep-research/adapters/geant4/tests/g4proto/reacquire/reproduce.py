@@ -7,10 +7,11 @@ skipped on the next start; bulky outputs are deleted once hashed, and the probe 
 the job is, what it is running, and the wall time of each finished run, so a job's real cost is on record.
 
 Usage: reproduce.py --facts FACTS.json --states WORK.json --work-root DIR --work DIR [--only TEXT] [--extra-random]
-                    [--keep-outputs] [--geant4-config PATH]
+                    [--keep-outputs] [--redo TEXT] [--geant4-config PATH]
 From the plugin root. --states is the output of g4sim_inventory.py check-work; --work-root holds the recorded probe records.
 --only runs those whose name holds TEXT. --extra-random is the negative test: one extra random number, so reproduction must fail;
 its results go to negative.json and never into the table. --keep-outputs keeps the bulky outputs, for looking into a difference.
+--redo reruns finished runs whose name holds TEXT. With --only the table is not written, because it would be partial.
 A build of a commit is reused on a later start; a partial one is cleared and redone. A build failure is never saved as a run's
 result, so a later start tries it again. Prints JSON with a status key. Exit 0 ok, 1 a problem in the table or a build failure.
 """
@@ -32,6 +33,11 @@ HERE = Path(__file__).resolve().parent
 PLUGIN = HERE.parents[4]
 COMPARED = ("events.csv", "summary.json", "column_map.json")
 REQUIRED = ("events.csv", "summary.json")
+# geant4_run.py completes summary.json after the program ends (complete_summary at d9db638c, lines 657-663): these keys of its "run"
+# block are not program output, and the recorded hash is the completed file's. Nothing else may differ.
+COMPLETED_KEYS = ("completed_by", "data_path_problems", "datasets_content_match", "evidence_role", "run_id", "run_record", "seed_scheme",
+                  "settings", "spec_sha256")
+SAME_BEFORE_COMPLETION = "same-before-completion"
 BULK = ("events.csv", "events.root", "column_map.json", "summary.json", "materials.json", "datapaths.json")
 
 
@@ -54,21 +60,38 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def output_states(row: dict, folder: Path) -> dict:
-    """Each compared output of a rerun against its recorded hash: "same", "different" or "missing"."""
+def same_before_completion(rerun: dict, recorded: dict) -> bool:
+    """The recorded summary equals the rerun's once the keys the wrapper added are taken out: exactly those, and nothing else."""
+    stripped = json.loads(json.dumps(recorded))
+    run = stripped.get("run", {})
+    if not all(key in run for key in COMPLETED_KEYS) or any(key in rerun.get("run", {}) for key in COMPLETED_KEYS):
+        return False
+    for key in COMPLETED_KEYS:
+        del run[key]
+    return stripped == rerun
+
+
+def output_states(row: dict, folder: Path, work_root: Path | None = None) -> dict:
+    """Each compared output of a rerun against its recorded hash: "same", "different", "missing", or, for a summary whose program
+    output is equal to the recorded one, "same-before-completion"."""
     states = {}
     for name, expected in row["outputs"].items():
         base = name.rsplit("/", 1)[-1]
         if base in COMPARED:
             path = folder / base
             states[base] = "missing" if not path.is_file() else ("same" if _sha256(path) == expected else "different")
+            if base == "summary.json" and states[base] == "different" and work_root is not None:
+                reference = work_root / (row["work"] or "").removeprefix(inventory.HOME_PREFIX) / name
+                if reference.is_file() and same_before_completion(json.loads(path.read_text(encoding="utf-8")),
+                                                                  json.loads(reference.read_text(encoding="utf-8"))):
+                    states[base] = SAME_BEFORE_COMPLETION
     return states
 
 
 def reproduced(states: dict) -> bool:
     """The reference outputs are bit-identical: the column file and the summary wherever they were recorded."""
     checked = [states[name] for name in REQUIRED if name in states]
-    return bool(checked) and all(state == "same" for state in checked)
+    return bool(checked) and all(state in ("same", SAME_BEFORE_COMPLETION) for state in checked)
 
 
 def probe_agrees(existing: dict | None, record: dict):
@@ -116,7 +139,7 @@ def run_one(row: dict, executable: Path, folder: Path, work_root: Path, extra_ra
         environment["G4PROTO_EXTRA_RANDOM"] = "1"
     with (folder / "log.txt").open("w", encoding="utf-8") as log:
         code = subprocess.run([str(executable), "spec.json"], cwd=folder, stdout=log, stderr=log, env=environment, check=False).returncode
-    states = output_states(row, folder)
+    states = output_states(row, folder, work_root)
     result = {"exit": code, "built": True, "outputs": states, "reproduced": code == 0 and reproduced(states),
               "seed_as_recorded": seed_as_recorded, "probe_agrees": None, "field_visible": False, "random_state_unchanged": False}
     record_path = folder / "probe-v2.json"
@@ -164,6 +187,7 @@ def main(argv=None) -> int:
     parser.add_argument("--only", default="")
     parser.add_argument("--extra-random", action="store_true")
     parser.add_argument("--keep-outputs", action="store_true")
+    parser.add_argument("--redo", default="")
     parser.add_argument("--geant4-config")
     args = parser.parse_args(argv)
     try:
@@ -176,6 +200,8 @@ def main(argv=None) -> int:
     work.mkdir(parents=True, exist_ok=True)
     results_path = work / ("negative.json" if args.extra_random else "results.json")
     results = json.loads(results_path.read_text(encoding="utf-8")) if results_path.is_file() else {}
+    if args.redo:
+        results = {run: result for run, result in results.items() if args.redo not in run}
     executables: dict = {}
     build_failures: list = []
     started = time.strftime("%Y-%m-%dT%H:%M:%S%z")
@@ -204,6 +230,10 @@ def main(argv=None) -> int:
     if args.extra_random:
         print(json.dumps({"status": "ok", "negative": {run: result["reproduced"] for run, result in results.items()}}, indent=1))
         return 0
+    if args.only:
+        print(json.dumps({"status": "ok" if not build_failures else "failed", "partial": True, "runs_done": len(results),
+                          "reproduced": {run: result["reproduced"] for run, result in results.items() if args.only in run}}, indent=1))
+        return 1 if build_failures else 0
     rows = table(facts, states, results)
     (work / "inventory.json").write_text(json.dumps(rows, indent=1) + "\n", encoding="utf-8")
     tally: dict = {}

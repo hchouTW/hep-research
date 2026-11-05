@@ -6,6 +6,7 @@ import copy
 import hashlib
 import importlib.util
 import json
+import math
 import tempfile
 import unittest
 from pathlib import Path
@@ -160,6 +161,41 @@ class Reproduction(unittest.TestCase):
     def test_a_field_region_is_declared_for_the_hook(self):
         self.assertEqual(self.module.declared_fields({"field": {"regions": [{"element": "A"}, {"element": "B"}]}}), "A,B")
         self.assertEqual(self.module.declared_fields({}), "")
+
+
+class Completion(unittest.TestCase):
+    module = Reproduction.module
+
+    def recorded(self):
+        run = {key: "added" for key in self.module.COMPLETED_KEYS}
+        return {"observables": [{"sum": 1.5}], "merge": {}, "run": {"events": 4000, **run}, "summary_version": "1"}
+
+    def rerun(self):
+        return {"observables": [{"sum": 1.5}], "merge": {}, "run": {"events": 4000}, "summary_version": "1"}
+
+    def test_the_wrapper_keys_alone_are_taken_out(self):
+        self.assertTrue(self.module.same_before_completion(self.rerun(), self.recorded()))
+        self.assertTrue(self.module.reproduced({"events.csv": "same", "summary.json": self.module.SAME_BEFORE_COMPLETION}))
+
+    def test_one_changed_number_is_still_a_difference(self):
+        rerun = self.rerun()
+        rerun["observables"][0]["sum"] = math.nextafter(1.5, 2.0)
+        self.assertFalse(self.module.same_before_completion(rerun, self.recorded()))
+
+    def test_a_changed_key_in_the_run_block_is_still_a_difference(self):
+        rerun = self.rerun()
+        rerun["run"]["events"] = 3999
+        self.assertFalse(self.module.same_before_completion(rerun, self.recorded()))
+
+    def test_a_recorded_file_without_those_keys_is_not_excused(self):
+        recorded = self.recorded()
+        del recorded["run"]["completed_by"]
+        self.assertFalse(self.module.same_before_completion(self.rerun(), recorded))
+
+    def test_a_rerun_holding_a_wrapper_key_is_not_excused(self):
+        rerun = self.rerun()
+        rerun["run"]["run_id"] = "added"
+        self.assertFalse(self.module.same_before_completion(rerun, self.recorded()))
 
 
 class Rebuild(unittest.TestCase):

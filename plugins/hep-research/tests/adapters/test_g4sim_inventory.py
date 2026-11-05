@@ -45,8 +45,10 @@ class Classes(unittest.TestCase):
     def test_a_different_seed_gives_no_class(self):
         self.assertIsNone(inventory.classify(COLUMNS, {**GOOD, "seed_as_recorded": False})["class"])
 
-    def test_no_result_yet_is_never_t1(self):
-        self.assertEqual(inventory.classify(COLUMNS, None)["class"], "T2")
+    def test_no_result_yet_gets_no_class_and_the_table_check_finds_it(self):
+        self.assertIsNone(inventory.classify(COLUMNS, None)["class"])
+        row = {"run": "a", **inventory.classify(COLUMNS, None), "states": COLUMNS}
+        self.assertTrue(inventory.table_problems([row], [{"run": "a"}]))
 
 
 class Table(unittest.TestCase):
