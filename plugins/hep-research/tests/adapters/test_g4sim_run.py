@@ -85,6 +85,48 @@ class Identities(unittest.TestCase):
         self.assertNotEqual(driver.request_id({"x": 1}, "a" * 64), driver.request_id({"x": 1}, "b" * 64))
 
 
+class TreeComparison(unittest.TestCase):
+    """The write-back against the IR: placements, rotation convention, regions and each thread's fields."""
+
+    def ir(self):
+        node = {"region": "default", "field": "none"}
+        return {"physical": {"templates": {"world": dict(node), "plate": {"region": "inner", "field": "solenoid"}},
+                             "placements": [{"mother": "world", "template": "plate", "copy_number": 0, "centre_mm": ["1.5", "0", "0"],
+                                             "rotation": [[0, 1, 0], [-1, 0, 0], [0, 0, 1]]}]}}
+
+    def record(self):
+        hexes = [value.hex() for value in (0.0, -1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0)]  # the object's rotation: the transpose
+        return {"base": {"geometry": {"logical_volumes": [{"id": 0, "name": "world", "region": "DefaultRegionForTheWorld"},
+                                                          {"id": 1, "name": "plate", "region": "inner"}],
+                                      "placements": [{"name": "world", "copy_number": 0, "mother_logical": None, "translation_mm": [], "rotation": None},
+                                                     {"name": "plate", "copy_number": 0, "mother_logical": 0, "rotation": hexes,
+                                                      "translation_mm": [(1.5).hex(), (0.0).hex(), (0.0).hex()]}]}}}
+
+    FIELDS = {"thread0": {"world": "none", "plate": "field"}}
+
+    def test_a_faithful_write_back_passes(self):
+        self.assertEqual(driver.tree_problems(self.ir(), self.record(), self.FIELDS), [])
+
+    def test_the_other_rotation_convention_is_caught(self):
+        record = self.record()
+        record["base"]["geometry"]["placements"][1]["rotation"] = [value.hex() for value in (0.0, 1.0, 0.0, -1.0, 0.0, 0.0, 0.0, 0.0, 1.0)]
+        self.assertIn("rotation differs", driver.tree_problems(self.ir(), record, self.FIELDS)[0])
+
+    def test_a_field_set_only_on_the_mother_is_caught_on_every_thread(self):
+        fields = {"thread0": {"world": "none", "plate": "none"}, "thread1": {"world": "none", "plate": "none"}}
+        self.assertEqual(len(driver.tree_problems(self.ir(), self.record(), fields)), 2)
+
+    def test_a_wrong_region_is_caught(self):
+        record = self.record()
+        record["base"]["geometry"]["logical_volumes"][1]["region"] = "other"
+        self.assertIn("region other", driver.tree_problems(self.ir(), record, self.FIELDS)[0])
+
+    def test_a_shifted_placement_is_caught_at_one_ulp(self):
+        record = self.record()
+        record["base"]["geometry"]["placements"][1]["translation_mm"][0] = (1.5000000000000002).hex()
+        self.assertIn("translation differs", driver.tree_problems(self.ir(), record, self.FIELDS)[0])
+
+
 class RunRecord(unittest.TestCase):
     RECORD = {"wall_seconds": 9.1, "cpu_seconds": 36.2, "startup_seconds": 3.1, "threads": 8, "load_at_start": 23.0}
 

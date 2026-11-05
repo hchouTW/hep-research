@@ -1,0 +1,16 @@
+{
+ "schema": "g4sim-run/1",
+ "physics": {
+  "cuts_mm": {
+   "default": "0.7"
+  },
+  "reference_list": "FTFP_BERT_EMZ"
+ },
+ "accounting": "separated",
+ "run": {
+  "events": 1,
+  "mode": "geometry-check",
+  "seeding": "per-event",
+  "threads": 2
+ }
+}

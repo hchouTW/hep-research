@@ -10,7 +10,7 @@ else()
   include(${Geant4_USE_FILE})
 endif()
 
-add_executable(g4sim_run g4sim_run.cc
+add_executable(g4sim_run g4sim_run.cc GeometryCheck.cc
   legacy_element/Run.cc legacy_element/Spec.cc legacy_element/Detector.cc legacy_element/Field.cc legacy_element/Actions.cc legacy_element/EventFile.cc
   legacy_layered/Run.cc legacy_layered/Spec.cc legacy_layered/Detector.cc legacy_layered/Physics.cc legacy_layered/Actions.cc)
 set_source_files_properties(legacy_element/Run.cc legacy_element/Spec.cc legacy_element/Detector.cc legacy_element/Field.cc legacy_element/Actions.cc

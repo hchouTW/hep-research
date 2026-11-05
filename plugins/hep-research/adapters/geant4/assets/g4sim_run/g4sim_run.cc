@@ -2,6 +2,7 @@
 //
 // Usage: g4sim_run IR.json OLD_SPEC.json   (in the run folder). S2 legacy mode: the IR's legacy block gives the volume tree, and the old
 // specification, merged back from the three specifications by g4sim_translate.py, configures the legacy observer of its program.
+//        g4sim_run --geometry-check IR.json RUN.json   (a new specification: one geantino, the write-back; no accounting, no scorers)
 // Exit codes as the old programs: 0 ok, 1 the run failed, 2 refused.
 #include <fstream>
 #include <iostream>
@@ -13,6 +14,8 @@
 namespace legacy_element { int Run(const char* specPath, const minijson::Value& legacy); }
 namespace legacy_layered { int Run(const char* specPath, const minijson::Value& legacy); }
 
+int GeometryCheck(const minijson::Value& ir, const minijson::Value& card);
+
 static minijson::Value ReadJson(const char* path) {
   std::ifstream in(path);
   if (!in) throw minijson::JsonError(std::string("cannot read ") + path);
@@ -22,11 +25,17 @@ static minijson::Value ReadJson(const char* path) {
 }
 
 int main(int argc, char** argv) {
-  if (argc != 3) {
-    std::cerr << "usage: g4sim_run IR.json OLD_SPEC.json" << std::endl;
+  const bool geometryCheck = argc == 4 && std::string(argv[1]) == "--geometry-check";
+  if (argc != 3 && !geometryCheck) {
+    std::cerr << "usage: g4sim_run IR.json OLD_SPEC.json | g4sim_run --geometry-check IR.json RUN.json" << std::endl;
     return 2;
   }
   try {
+    if (geometryCheck) {
+      const minijson::Value ir = ReadJson(argv[2]);
+      const minijson::Value card = ReadJson(argv[3]);
+      return GeometryCheck(ir, card);
+    }
     const minijson::Value ir = ReadJson(argv[1]);
     const minijson::Value old = ReadJson(argv[2]);
     const minijson::Value& legacy = ir.at("physical", "ir").at("legacy", "ir.physical");

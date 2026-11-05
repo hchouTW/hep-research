@@ -3,6 +3,7 @@
 
 Usage: g4sim_run.py check-spec --run RUN.json [--detector DETECTOR.json]
        g4sim_run.py run --detector D.json --request R.json --run RUN.json --record PROBE.json --program PATH --work DIR
+       g4sim_run.py geometry-check --detector D.json --run RUN.json --program PATH --work DIR
 check-spec holds the checks of Geant4 behavior (Appendix B); S2 has three: nothing may call SetSurfaceTolerance, the run card's seeding must
 equal the legacy block's, and optical physics is refused before S7. run needs a re-acquisition record for the legacy block (T1 class).
 A project with agent_policy, or --protected, runs this in protected mode. Prints JSON with a status key. Exit 0 ok, 1 the run failed,
@@ -174,6 +175,78 @@ def run(args) -> dict:
     return record
 
 
+def tree_problems(ir: dict, record: dict, field_records: dict) -> list[str]:
+    """What the write-back says that the IR does not: placements bit for bit, regions, and each thread's fields (Sections 6.2.8, 6.2.10)."""
+    physical = ir["physical"]
+    geometry = record["base"]["geometry"]
+    problems = []
+    logical_names = {item["id"]: item["name"] for item in geometry["logical_volumes"]}
+    written = {(logical_names[item["mother_logical"]], item["name"], item["copy_number"]): item
+               for item in geometry["placements"] if item["mother_logical"] is not None}
+    for placement in physical["placements"]:
+        key = (placement["mother"], placement["template"], placement["copy_number"])
+        item = written.pop(key, None)
+        if item is None:
+            problems.append(f"placement {key} was not written back")
+            continue
+        if [float.fromhex(text) for text in item["translation_mm"]] != [float(text) for text in placement["centre_mm"]]:
+            problems.append(f"placement {key}: translation differs")
+        wanted = placement["rotation"]
+        found = item["rotation"]
+        if (wanted is None) != (found is None):
+            problems.append(f"placement {key}: rotation differs")
+        # the IR holds the passive matrix G4PVPlacement takes; the probe writes the object's rotation, which is its transpose
+        elif wanted is not None and [float.fromhex(text) for text in found] != [float(row[column]) for column in range(3) for row in wanted]:
+            problems.append(f"placement {key}: rotation differs")
+    problems += [f"placement {key} is not in the IR" for key in written]
+    for item in geometry["logical_volumes"]:
+        node = physical["templates"].get(item["name"])
+        if node is None:
+            problems.append(f"logical {item['name']} is not in the IR")
+        elif node["region"] != "default" and item["region"] != node["region"]:
+            problems.append(f"logical {item['name']}: region {item['region']}, the IR says {node['region']}")
+    for thread, rows in field_records.items():
+        for name, node in physical["templates"].items():
+            wanted = "none" if node["field"] == "none" else "field"
+            if rows.get(name) != wanted:
+                problems.append(f"thread {thread}, logical {name}: field {rows.get(name)}, the IR says {wanted}")
+    return problems
+
+
+def read_field_records(folder: Path) -> dict:
+    records = {}
+    for path in sorted(folder.glob("field-managers.thread*.txt")):
+        records[path.name] = {line.split()[0]: line.split()[1] for line in path.read_text(encoding="utf-8").splitlines()}
+    return records
+
+
+def geometry_check(args) -> dict:
+    card = json.loads(args.run.read_text(encoding="utf-8"))
+    checked = geometry.check_spec(args.detector.read_bytes())
+    if checked["status"] != "ok":
+        return {"status": "rejected", "findings": checked["findings"]}
+    findings = check_card(card)
+    if findings:
+        return {"status": "rejected", "findings": findings}
+    missing = missing_datasets(card)
+    if missing:
+        return {"status": "missing-dataset", "missing": missing}
+    work = args.work.resolve()
+    work.mkdir(parents=True, exist_ok=True)
+    (work / "ir.json").write_text(json.dumps(checked["ir"]), encoding="utf-8")
+    (work / "run.json").write_text(json.dumps(card), encoding="utf-8")
+    with (work / "log.txt").open("w", encoding="utf-8") as log:
+        code = subprocess.run([str(args.program.resolve()), "--geometry-check", "ir.json", "run.json"], cwd=work, stdout=log, stderr=log, check=False).returncode
+    if code != 0:
+        return {"status": "failed", "exit_status": code}
+    record = read_record(work / "probe-v2.json")
+    problems = tree_problems(checked["ir"], record, read_field_records(work))
+    effective = {"geometry_id": checked["geometry_id"], "provenance_id": checked["provenance_id"], "run_card_sha256": _sha256(args.run),
+                 "surface_tolerance_mm": (work / "tolerance.txt").read_text(encoding="utf-8").strip()}
+    (work / "effective-config.json").write_text(json.dumps(effective, indent=1) + "\n", encoding="utf-8")
+    return {"status": "failed" if problems else "ok", "problems": problems[:20], **effective}
+
+
 @protected_main("adapters.geant4.g4sim_run", capabilities=KNOWN_CAPABILITIES)
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -187,6 +260,10 @@ def main(argv=None) -> int:
         execute.add_argument(f"--{name}", type=Path, required=True)
     execute.add_argument("--observer-revision", default="current")
     execute.add_argument("--protected", action="store_true", help="protected mode (a project with agent_policy needs no flag)")
+    shape = commands.add_parser("geometry-check")
+    for name in ("detector", "run", "program", "work"):
+        shape.add_argument(f"--{name}", type=Path, required=True)
+    shape.add_argument("--protected", action="store_true", help="protected mode (a project with agent_policy needs no flag)")
     args = parser.parse_args(argv)
     guard(f"adapters.geant4.g4sim_run.{args.command}", paths=[str(args.run)], flag=args.protected, capabilities=KNOWN_CAPABILITIES)
     try:
@@ -195,7 +272,7 @@ def main(argv=None) -> int:
             findings = check_card(card, {"seeding": args.legacy_seeding} if args.legacy_seeding else None)
             print(json.dumps({"status": "rejected" if findings else "ok", "findings": findings}))
             return 2 if findings else 0
-        result = run(args)
+        result = geometry_check(args) if args.command == "geometry-check" else run(args)
     except (OSError, ValueError, KeyError) as err:
         print(json.dumps({"status": "error", "message": str(err)}))
         return 2
