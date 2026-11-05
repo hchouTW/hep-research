@@ -302,6 +302,13 @@
    "registered_at": "2026-11-05T22:12:03Z",
    "card_commit": "09efb9eb",
    "reason": "Conservation design registered before any trial run; no threshold changed"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "cd1fe6393c8962c69e62b2d201c53a2cd58a92b8ecebd1504724aebbcbc013b2",
+   "registered_at": "2026-11-05T22:26:22Z",
+   "card_commit": "f1148e68",
+   "reason": "Execution log only; thresholds unchanged from the previous registration"
   }
  ]
 }
