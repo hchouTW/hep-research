@@ -183,6 +183,13 @@
    "registered_at": "2026-11-05T00:27:50Z",
    "card_commit": "71c4e0af",
    "reason": "Execution log only (golden test on E5, E5 dataset versions); thresholds unchanged from the S1 refresh"
+  },
+  {
+   "card": "g4sim-tasks/S1.md",
+   "sha256": "af54fe4068470236cb9e02caf501065c64826d51266e1c48b1c33974d2518c1f",
+   "registered_at": "2026-11-05T01:03:02Z",
+   "card_commit": "7fcb993d",
+   "reason": "Rerun cost registered before the first re-acquisition build, as the card requires; Execution log; no threshold changed"
   }
  ]
 }
