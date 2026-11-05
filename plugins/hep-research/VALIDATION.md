@@ -8875,6 +8875,8 @@ for `t28_scale_linear` (PR #348). Contracts 3.19.0, `CORE_VERSION` 1.6.0, `adapt
 
 What changed on the release branch:
 - the CHANGELOG `0.56.0` section and the g4sim status (S1 `merged`);
+- the README size statement (about 4500 files, 79.9 MB): the release manifest took the package past the 10 % that
+  `tools/check_packaging.py` allows against the old 71.3 MB. This came after the E2 check below and changes text only;
 - no regeneration for the release: committed outputs keep the plugin and contracts versions that wrote them. Gate record:
   `docs/dev/geant4-architecture/g4sim-gates/S1.md`.
 
