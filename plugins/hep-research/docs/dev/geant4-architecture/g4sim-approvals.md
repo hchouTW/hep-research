@@ -2,7 +2,7 @@
 
 Approval packet of phase S0 and the record of approvals given (Part A, Sections E7 and E9, of `g4sim-task.md`).
 
-**Status (2026-11-05):** all Section 20 decisions, both stewards, the five execution choices, the application of the `dependencies.py` common check and the custodian's re-evaluation at the S0 release are approved. The custodian is hsinyichou. A re-evaluation follows every release through S9.
+**Status (2026-11-05):** all Section 20 decisions, both stewards, the five execution choices, the application of the `dependencies.py` common check and the custodian's re-evaluations at the S0 and S1 releases are approved. The custodian is hsinyichou. A re-evaluation follows every release through S9.
 
 ## How to approve
 
@@ -60,6 +60,7 @@ Approval packet of phase S0 and the record of approvals given (Part A, Sections 
 | Steward of `core/canonical` | Maintainer and the steward | hep-computing (Section 20, M3) | Yes | hsinyichou (maintainer, and speaking for both stewards) | 2026-11-04 | Answer in the Claude Code session to the stewards question: "Approve; I speak for both" |
 | Steward of `core/geometry` | Maintainer and the steward | hep-detector (Section 20, M2) | Yes | hsinyichou (maintainer, and speaking for both stewards) | 2026-11-04 | Answer in the Claude Code session to the stewards question: "Approve; I speak for both" |
 | Re-evaluation of qualification at the S0 release | Custodian | Follows the S0 release (Sections 21, 22) | Yes | hsinyichou (custodian) | 2026-11-05 | Session message, "I give this re-evaluation", of the wording: "Custodian re-evaluation for 0.55.0: I checked my Mac; the qualification record found there is `protected-synthetic.json` (release 0.9.0, stage S1, expired 2026-10-28), from the 2026-10-14 C07 test. I know of no deployment in use for protected work. 0.55.0 invalidates no valid qualification, none is issued, and the plugin stays limited to public and synthetic data." |
+| Re-evaluation of qualification at the S1 release | Custodian | Follows the S1 release, 0.56.0 (Sections 21, 22) | Yes | hsinyichou (custodian) | 2026-11-05 | Session message, "approve", of the wording: "Custodian re-evaluation for 0.56.0: I checked my Mac; the only qualification record found there is `protected-synthetic.json` (release 0.9.0, stage S1, expired 2026-10-28), from the 2026-10-14 C07 test. The Linux host has none. I know of no deployment in use for protected work. The code identity changed at 0.56.0, so no earlier qualification carries over, and `core/protected` is unchanged since 0.55.0. 0.56.0 invalidates no valid qualification, none is issued, and the plugin stays limited to public and synthetic data." The output of the Mac search was not shown in the session. |
 
 ## Section 22 items due in S1
 
