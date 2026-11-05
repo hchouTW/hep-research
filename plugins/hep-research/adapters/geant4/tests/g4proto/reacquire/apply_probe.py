@@ -13,28 +13,51 @@ import sys
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-CALL_SITES = {"layered_sim": "void RunAction::WriteProbe() const {\n",
-              "element_sim": "    g4sim::ProbeResult res = g4sim::RunProbe(\"element_sim: master"}
-INCLUDE_SITE = '#include "SimProbe.hh"\n'
+CURRENT_HEADERS = HERE.parents[2] / "assets" / "g4sim"
+# The call goes in the master's run start. Newer sources have a probe call to stand next to; older ones have neither the probe
+# nor the g4sim/ headers, so the call opens BeginOfRunAction, guarded by the master thread (Section 7.4).
+PROBE_SITES = {"layered_sim": "void RunAction::WriteProbe() const {\n",
+               "element_sim": "    g4sim::ProbeResult res = g4sim::RunProbe(\"element_sim: master"}
+RUN_START = "void RunAction::BeginOfRunAction(const G4Run*) {\n"
+FIRST_INCLUDE = '#include "Actions.hh"\n'
+INCLUDE_LINE = "target_include_directories({program} PRIVATE ${{CMAKE_CURRENT_SOURCE_DIR}}/../g4sim)\n"
+
+
+def _call(text: str, program: str, path: Path) -> str:
+    site, call = PROBE_SITES[program], f'g4proto::Record("{program}");\n'
+    if text.count(site) == 1:
+        return text.replace(site, site + "  " + call if program == "layered_sim" else "    " + call + site)
+    if text.count(RUN_START) == 1:
+        return text.replace(RUN_START, RUN_START + f"  if (G4Threading::IsMasterThread()) {call}")
+    raise ValueError(f"{path}: no single call site; this source version needs its own patch")
 
 
 def apply(program: str, assets: Path, destination: Path) -> Path:
-    if program not in CALL_SITES:
+    """assets is the program's folder as recorded: the plugin's, or one extracted with git archive at the run's commit."""
+    if program not in PROBE_SITES:
         raise ValueError(f"{program!r} is not an old program")
     shutil.copytree(assets / program, destination / program)
-    shutil.copytree(assets / "g4sim", destination / "g4sim", dirs_exist_ok=True)
+    headers = destination / "g4sim"
+    if (assets / "g4sim").is_dir():
+        shutil.copytree(assets / "g4sim", headers, dirs_exist_ok=True)
+    else:
+        headers.mkdir(parents=True, exist_ok=True)
     if (assets / "simroot").is_dir():  # element_sim's CMakeLists.txt also builds simroot from the next folder
         shutil.copytree(assets / "simroot", destination / "simroot", dirs_exist_ok=True)
-    shutil.copy(HERE / "ProbeHook.hh", destination / "g4sim" / "ProbeHook.hh")
+    for header in CURRENT_HEADERS.glob("*.hh"):  # a source's own older headers stay; only what it lacks comes from the plugin
+        if not (headers / header.name).exists():
+            shutil.copy(header, headers / header.name)
+    shutil.copy(HERE / "ProbeHook.hh", headers / "ProbeHook.hh")
     actions = destination / program / "Actions.cc"
     text = actions.read_text(encoding="utf-8")
-    site = CALL_SITES[program]
-    if text.count(site) != 1 or text.count(INCLUDE_SITE) != 1:
-        raise ValueError(f"{actions}: no single call site; this source version needs its own patch")
-    call = f'g4proto::Record("{program}");\n'
-    patched = site + "  " + call if program == "layered_sim" else "    " + call + site
-    text = text.replace(site, patched).replace(INCLUDE_SITE, INCLUDE_SITE + '#include "ProbeHook.hh"\n')
+    if text.count(FIRST_INCLUDE) != 1:
+        raise ValueError(f"{actions}: no single first include")
+    text = _call(text, program, actions).replace(FIRST_INCLUDE, FIRST_INCLUDE + '#include "ProbeHook.hh"\n')
     actions.write_text(text, encoding="utf-8")
+    cmake = destination / program / "CMakeLists.txt"
+    build = cmake.read_text(encoding="utf-8")
+    if "../g4sim" not in build:
+        cmake.write_text(build + INCLUDE_LINE.format(program=program), encoding="utf-8")
     return destination / program
 
 

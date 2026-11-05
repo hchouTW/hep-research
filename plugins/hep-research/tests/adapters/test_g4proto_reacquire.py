@@ -100,14 +100,70 @@ class ApplyProbe(unittest.TestCase):
                 self.assertTrue(Path(folder, "simroot", "simroot.cc").exists())
                 self.assertEqual((assets / program / "Actions.cc").read_bytes(), before)
 
+    def old_source(self, folder, actions):
+        assets = Path(folder, "assets")
+        (assets / "layered_sim").mkdir(parents=True)
+        (assets / "layered_sim" / "Actions.cc").write_text(actions, encoding="utf-8")
+        (assets / "layered_sim" / "CMakeLists.txt").write_text("add_executable(layered_sim a.cc)\n", encoding="utf-8")
+        return assets
+
     def test_a_source_with_no_call_site_is_refused(self):
         with tempfile.TemporaryDirectory() as folder:
-            assets = Path(folder, "assets")
-            (assets / "layered_sim").mkdir(parents=True)
-            (assets / "g4sim").mkdir()
-            (assets / "layered_sim" / "Actions.cc").write_text("// old source\n", encoding="utf-8")
             with self.assertRaises(ValueError):
-                apply_module.apply("layered_sim", assets, Path(folder, "out"))
+                apply_module.apply("layered_sim", self.old_source(folder, '#include "Actions.hh"\n// old source\n'), Path(folder, "out"))
+
+    def test_a_source_before_the_probe_gets_a_master_only_call_and_the_headers(self):
+        actions = '#include "Actions.hh"\nvoid RunAction::BeginOfRunAction(const G4Run*) {\n  bool mt = true;\n}\n'
+        with tempfile.TemporaryDirectory() as folder:
+            apply_module.apply("layered_sim", self.old_source(folder, actions), Path(folder, "out"))
+            text = Path(folder, "out", "layered_sim", "Actions.cc").read_text(encoding="utf-8")
+            self.assertIn('if (G4Threading::IsMasterThread()) g4proto::Record("layered_sim");', text)
+            self.assertTrue(Path(folder, "out", "g4sim", "SimProbe.hh").exists())
+            self.assertIn("../g4sim", Path(folder, "out", "layered_sim", "CMakeLists.txt").read_text(encoding="utf-8"))
+
+
+class CostSample(unittest.TestCase):
+    module = load("cost_sample")
+
+    def test_a_clear_difference_gives_seconds_per_event(self):
+        timing = self.module.per_event(lambda n: 2.0 + 0.01 * n, 1000)
+        self.assertTrue(timing["reliable"])
+        self.assertAlmostEqual(timing["seconds_per_event"], 0.01)
+
+    def test_a_small_difference_grows_the_sample(self):
+        seen = []
+        def measure(n):
+            seen.append(n)
+            return 2.0 + 0.001 * n
+        timing = self.module.per_event(measure, 100)
+        self.assertGreater(timing["sample_events"], 100)
+        self.assertAlmostEqual(timing["seconds_per_event"], 0.001)
+
+    def test_noise_is_reported_as_unreliable_never_as_a_small_cost(self):
+        timing = self.module.per_event(lambda n: 6.0, 100)
+        self.assertFalse(timing["reliable"])
+        self.assertIsNone(timing["seconds_per_event"])
+
+    def test_a_faster_long_run_is_not_a_zero_cost(self):
+        answers = iter([6.6, 6.0] * 20)
+        self.assertFalse(self.module.per_event(lambda n: next(answers), 100)["reliable"])
+
+    def test_the_slowest_rate_prices_the_whole_executable(self):
+        timings = [{"reliable": True, "seconds_per_event": 0.001}, {"reliable": True, "seconds_per_event": 0.5},
+                   {"reliable": False, "seconds_per_event": None}]
+        self.assertEqual(self.module.priced(timings, 7200)["estimated_hours"], 1.0)
+
+    def test_no_reliable_rate_gives_no_estimate(self):
+        self.assertIsNone(self.module.priced([{"reliable": False, "seconds_per_event": None}], 100)["estimated_hours"])
+
+    def test_three_runs_are_timed_and_a_short_list_has_no_repeats(self):
+        rows = [{"run": name, "events": events} for name, events in (("a", 5), ("b", 1), ("c", 9), ("d", 3))]
+        self.assertEqual({row["run"] for row in self.module.chosen(rows)}, {"c", "a", "b"})
+        self.assertEqual(len(self.module.chosen(rows[:1])), 1)
+
+    def test_a_spec_is_chosen_by_its_hash_not_its_name(self):
+        rows = [row for row in self.module.inventory.collect(ROOT) if row["journey"] == "J14"]
+        self.assertTrue(all("schema" in self.module.spec_of(row) for row in rows))
 
 
 if __name__ == "__main__":
