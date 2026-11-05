@@ -17,7 +17,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tests._outputs import without_plugin_version
+from tests._outputs import without_writer_versions
 
 PLUGIN = Path(__file__).resolve().parents[2]
 SCRIPT = PLUGIN / "examples" / "analysis-to-paper" / "run.py"
@@ -90,7 +90,7 @@ class AnalysisToPaper(unittest.TestCase):
         for rel in ("artifacts/signal_strength.json", "artifacts/selected_mass.json",
                     "artifacts/signal_strength_record.json"):
             with self.subTest(file=rel):
-                a, b = (_without_release(without_plugin_version(json.loads((d / rel).read_text(encoding="utf-8"))))
+                a, b = (_without_release(without_writer_versions(json.loads((d / rel).read_text(encoding="utf-8"))))
                         for d in (Path(self.tmp.name), out))
                 self.assertEqual(a, b)
         sha = re.compile(r"sha256 [0-9a-f]{64}")

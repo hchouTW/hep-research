@@ -13,7 +13,7 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from tests._outputs import without_plugin_version
+from tests._outputs import without_writer_versions
 
 PLUGIN = Path(__file__).resolve().parents[2]
 SCRIPT = PLUGIN / "examples" / "ml-classifier-to-inference" / "run.py"
@@ -38,6 +38,11 @@ def load():
 
 
 SKIPPED_KEYS = {"plugin_release", "digest", "framework", "model_hash"}
+
+
+def without_input_contract(doc):
+    """doc with each input's version gone: it is the contracts version that wrote the input, provenance like the others."""
+    return {**doc, "inputs": [{k: v for k, v in item.items() if k != "version"} for item in doc.get("inputs", [])]}
 
 
 def artifact_differences(a, b, path, rtol=1e-7):
@@ -127,10 +132,10 @@ class J9MlToInferenceTests(unittest.TestCase):
         model hash and score-file hashes are taken over float bytes, so a last-bit difference changes them. The
         framework version is skipped because it records the installed NumPy, not a result."""
         committed = SCRIPT.parent / "output" / "artifacts"
-        bad = artifact_differences(without_plugin_version(json.loads((committed / "ml_artifact.json").read_text())),
-                                   without_plugin_version(self.ml), "ml_artifact")
-        bad += artifact_differences(without_plugin_version(json.loads((committed / "statistical_result.json").read_text())),
-                                    without_plugin_version(self.stat), "statistical_result")
+        bad = artifact_differences(without_writer_versions(json.loads((committed / "ml_artifact.json").read_text())),
+                                   without_writer_versions(self.ml), "ml_artifact")
+        bad += artifact_differences(without_input_contract(without_writer_versions(json.loads((committed / "statistical_result.json").read_text()))),
+                                    without_input_contract(without_writer_versions(self.stat)), "statistical_result")
         self.assertEqual(bad, [], f"{len(bad)} differences (committed, rerun): {bad[:15]}")
 
     def test_artifact_comparison_sees_what_the_rounded_results_do_not(self):

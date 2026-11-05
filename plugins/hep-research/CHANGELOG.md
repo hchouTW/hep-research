@@ -3,6 +3,16 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+g4sim phase S1 (plugin 0.56.0; proposed adapters: `adapters/geant4` 0.7.0, `adapters/detector-simulation` 0.5.0; contracts 3.19.0,
+`CORE_VERSION` 1.6.0). New `core/canonical` and `core/geometry`: canonical/1, exact decimals, params, bitfields, expansion of
+`detector-spec/1` into `geometry-ir/1`, the gap rule, the error bound, material budget and GDML export. New schemas and
+`contracts/geometry.py`, guarded in protected mode. `core/constants` gains an elemental table (CIAAW 2024, PDG). `adapters/geant4` gains
+`g4sim/ProbeV2.hh`, `g4sim_translate.py`, `g4sim_inventory.py` and `g4sim_run.schema.json`. detsim imports from `core/canonical`, with
+hashes unchanged. All 112 recorded Geant4 runs reproduce bit for bit in the recorded environment. A contracts bump no longer regenerates
+committed outputs (`docs/maintenance.md`).
+
 ## 0.55.0 (2026-11-05)
 
 Minor release: g4sim phase S0 (PR #346) and a release process that no longer regenerates outputs (PR #345). No schema,
