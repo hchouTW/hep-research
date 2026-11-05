@@ -190,6 +190,13 @@
    "registered_at": "2026-11-05T01:03:02Z",
    "card_commit": "7fcb993d",
    "reason": "Rerun cost registered before the first re-acquisition build, as the card requires; Execution log; no threshold changed"
+  },
+  {
+   "card": "g4sim-performance-budget.md",
+   "sha256": "371734e524cf84d1d7dd6a430288b241ec9d79609173d92a229ca21fbb896ea5",
+   "registered_at": "2026-11-05T02:25:22Z",
+   "card_commit": "2a8152d1",
+   "reason": "Performance budget of Section 16, registered before any S2 run"
   }
  ]
 }
