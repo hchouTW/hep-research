@@ -75,6 +75,7 @@ Approval packet of phase S0 and the record of approvals given (Part A, Sections 
 | --- | --- | --- | --- | --- | --- | --- |
 | Adding `physics.g4sim` to the study spec; rule engine reading the three specifications | Owner of the study protocol | A third form of `physics` in `geant4-study-spec/1`, beside `layered_sim_spec` and `element_sim_spec`, and `check_geant4_study.py` reads the three specifications. Additive: old study specs are unaffected (Section 14.1) | Yes | hsinyichou (owner of the study protocol) | 2026-11-05 | Answer in the Claude Code session to the question on `physics.g4sim`: "Approve (Recommended)" |
 | Adding `extension.geometry` to `contracts/schemas/ext_computational_run.json` | hep-computing (owner of the computational-run schema) | `extension.geometry` records the three identities and the installed features of each g4sim run. Additive (Sections 8.10, 14.3) | Yes | hsinyichou (owner of the computational-run schema) | 2026-11-05 | Answer in the Claude Code session to the question on `extension.geometry`: "Approve (Recommended)" |
+| q_max and r_max of legacy physics lists (Section 8.9) | hep-detector design, shown to the maintainer before registration | Pure EM: q_max 1e-7 E, r_max 1e-8 E. Hadronic: q_max 0.60 E + 1 GeV, r_max 0.40 E. Basis in `g4sim-tasks/S2.md` | Yes | hsinyichou (maintainer) | 2026-11-05 | Session message: "approve the limits" |
 
 ## Gaps in Part B (Section E7, item 6)
 
