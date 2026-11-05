@@ -2,8 +2,7 @@
 // written from the Geant4 API (no example code copied or adapted).
 //
 // Every number comes from a float.hex() string of the re-acquisition record, read exactly by strtod, so nothing is recomputed. Logical
-// volumes are made in the record's id order and placements in the record's order, which is the old program's: placing with the overlap
-// check draws no event random numbers, but the same order keeps the stores, and so the probe's write-back, the same.
+// volumes are made in the record's id order and placements in the record's order, so the stores, and the probe's write-back, are the same.
 #ifndef G4SIM_RUN_IRTREE_HH
 #define G4SIM_RUN_IRTREE_HH
 
@@ -64,11 +63,12 @@ inline G4Material* MakeMaterial(const std::string& name, const minijson::Value& 
   if (elements.size() == 1)
     return new G4Material(name, HexDouble(elements[0].at("z", "element"), "z"), values.a, values.density, state, temperature, pressure);
   auto* material = new G4Material(name, values.density, static_cast<G4int>(elements.size()), state, temperature, pressure);
+  // the old programs mix the NIST material of each element, in this order, so its components and the table's order are theirs
   for (const auto& element : elements) {
-    const std::string& symbol = element.at("symbol", "element").string("element.symbol");
-    material->AddElement(new G4Element(name + "_" + symbol, symbol, HexDouble(element.at("z", "element"), "z"),
-                                       HexDouble(element.at("a_g_mole", "element"), "a") * g / mole),
-                         HexDouble(element.at("mass_fraction", "element"), "mass fraction"));
+    const std::string nistName = "G4_" + element.at("symbol", "element").string("element.symbol");
+    G4Material* component = G4NistManager::Instance()->FindOrBuildMaterial(nistName, false);
+    if (!component) throw std::runtime_error("material " + name + ": no NIST material " + nistName);
+    material->AddMaterial(component, HexDouble(element.at("mass_fraction", "element"), "mass fraction"));
   }
   return material;
 }
@@ -89,13 +89,22 @@ inline void Forget(G4Material* material, std::size_t materials, const std::strin
 // derived quantities tell which neighbour it was (GB18): a value that reproduces them all is the one.
 inline MaterialValues RecoveredValues(const std::string& name, const minijson::Value& record) {
   const auto& elements = record.at("elements", "material").array("material.elements");
-  double density = HexDouble(record.at("density_g_cm3", "material"), "density") * g / cm3;
-  double a = elements.size() == 1 ? HexDouble(elements[0].at("a_g_mole", "element"), "a") * g / mole : 0.;
+  const double recorded = HexDouble(record.at("density_g_cm3", "material"), "density");
+  double density = recorded * g / cm3;
+  if (elements.size() > 1) {  // a mixture is built once, because its NIST components stay in the tables: the density alone decides
+    for (int steps : {0, -1, 1, -2, 2}) {
+      double trial = density;
+      for (int i = 0; i < std::abs(steps); ++i) trial = std::nextafter(trial, steps > 0 ? DBL_MAX : 0.);
+      if (trial / (g / cm3) == recorded) return {trial, 0.};
+    }
+    throw std::runtime_error("material " + name + ": no density near the record divides back to it");
+  }
+  double a = HexDouble(elements[0].at("a_g_mole", "element"), "a") * g / mole;
   for (int stepsDensity : {0, -1, 1, -2, 2})
     for (int stepsA : {0, -1, 1, -2, 2}) {
       MaterialValues trial{density, a};
       for (int i = 0; i < std::abs(stepsDensity); ++i) trial.density = std::nextafter(trial.density, stepsDensity > 0 ? DBL_MAX : 0.);
-      for (int i = 0; i < std::abs(stepsA) && a > 0; ++i) trial.a = std::nextafter(trial.a, stepsA > 0 ? DBL_MAX : 0.);
+      for (int i = 0; i < std::abs(stepsA); ++i) trial.a = std::nextafter(trial.a, stepsA > 0 ? DBL_MAX : 0.);
       const std::size_t materials = G4Material::GetMaterialTable()->size();
       G4Material* made = MakeMaterial(name + "_trial", record, trial);
       bool same = SameDerived(*made, record);
@@ -115,8 +124,10 @@ inline G4Material* LegacyMaterial(const std::string& name, const minijson::Value
   for (const auto& record : legacy.at("materials", "legacy").array("legacy.materials")) {
     if (record.at("name", "material").string("material.name") != name) continue;
     G4Material* material = MakeMaterial(name, record, RecoveredValues(name, record));
-    double excitation = HexDouble(record.at("mean_excitation_energy_eV", "material"), "I") * eV;
-    if (material->GetIonisation()->GetMeanExcitationEnergy() != excitation) material->GetIonisation()->SetMeanExcitationEnergy(excitation);
+    if (!SameDerived(*material, record)) throw std::runtime_error("material " + name + ": the rebuilt material differs from the record (GB18)");
+    // compared in the record's unit: multiplying the record back could overwrite Geant4's own value with one a rounding away
+    const double excitation = HexDouble(record.at("mean_excitation_energy_eV", "material"), "I");
+    if (material->GetIonisation()->GetMeanExcitationEnergy() / eV != excitation) material->GetIonisation()->SetMeanExcitationEnergy(excitation * eV);
     return material;
   }
   throw std::runtime_error("material " + name + " is not in the legacy block");
@@ -131,6 +142,8 @@ inline G4UserLimits* LegacyLimits(const minijson::Value& limits) {
 inline IrTree BuildLegacyTree(const minijson::Value& legacy) {
   IrTree tree;
   std::map<std::string, G4UserLimits*> shared;
+  // in the record's order, which is Geant4's table: logical volumes are numbered differently, and the table's order is the old program's
+  for (const auto& record : legacy.at("materials", "legacy").array("legacy.materials")) LegacyMaterial(record.at("name", "material").str, legacy);
   for (const auto& record : legacy.at("logical_volumes", "legacy").array("legacy.logical_volumes")) {
     const auto& solid = record.at("solid", "logical");
     if (solid.at("type", "solid").string("solid.type") != "G4Box") throw std::runtime_error("a legacy run has only boxes");
