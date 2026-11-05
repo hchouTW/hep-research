@@ -1,0 +1,1966 @@
+[
+ {
+  "run": "geant4-run-mpv-control-minus",
+  "journey": "J14",
+  "states": {
+   "mpv-control-minus/datapaths.json": "match",
+   "mpv-control-minus/events.csv": "match",
+   "mpv-control-minus/log.txt": "match",
+   "mpv-control-minus/materials.json": "match",
+   "mpv-control-minus/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-mpv-control",
+  "journey": "J14",
+  "states": {
+   "mpv-control/datapaths.json": "match",
+   "mpv-control/events.csv": "match",
+   "mpv-control/log.txt": "match",
+   "mpv-control/materials.json": "match",
+   "mpv-control/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-mpv-cut-0.03-trial",
+  "journey": "J14",
+  "states": {
+   "mpv-cut-0.03-trial/datapaths.json": "match",
+   "mpv-cut-0.03-trial/events.csv": "match",
+   "mpv-cut-0.03-trial/log.txt": "match",
+   "mpv-cut-0.03-trial/materials.json": "match",
+   "mpv-cut-0.03-trial/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-mpv-cut-0.03",
+  "journey": "J14",
+  "states": {
+   "mpv-cut-0.03/datapaths.json": "match",
+   "mpv-cut-0.03/events.csv": "match",
+   "mpv-cut-0.03/log.txt": "match",
+   "mpv-cut-0.03/materials.json": "match",
+   "mpv-cut-0.03/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-mpv-cut-0.1-trial",
+  "journey": "J14",
+  "states": {
+   "mpv-cut-0.1-trial/datapaths.json": "match",
+   "mpv-cut-0.1-trial/events.csv": "match",
+   "mpv-cut-0.1-trial/log.txt": "match",
+   "mpv-cut-0.1-trial/materials.json": "match",
+   "mpv-cut-0.1-trial/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-mpv-cut-0.1",
+  "journey": "J14",
+  "states": {
+   "mpv-cut-0.1/datapaths.json": "match",
+   "mpv-cut-0.1/events.csv": "match",
+   "mpv-cut-0.1/log.txt": "match",
+   "mpv-cut-0.1/materials.json": "match",
+   "mpv-cut-0.1/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-mpv-cut-0.3-trial",
+  "journey": "J14",
+  "states": {
+   "mpv-cut-0.3-trial/datapaths.json": "match",
+   "mpv-cut-0.3-trial/events.csv": "match",
+   "mpv-cut-0.3-trial/log.txt": "match",
+   "mpv-cut-0.3-trial/materials.json": "match",
+   "mpv-cut-0.3-trial/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-mpv-cut-0.3",
+  "journey": "J14",
+  "states": {
+   "mpv-cut-0.3/datapaths.json": "match",
+   "mpv-cut-0.3/events.csv": "match",
+   "mpv-cut-0.3/log.txt": "match",
+   "mpv-cut-0.3/materials.json": "match",
+   "mpv-cut-0.3/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-mpv-cut-1.0-trial",
+  "journey": "J14",
+  "states": {
+   "mpv-cut-1.0-trial/datapaths.json": "match",
+   "mpv-cut-1.0-trial/events.csv": "match",
+   "mpv-cut-1.0-trial/log.txt": "match",
+   "mpv-cut-1.0-trial/materials.json": "match",
+   "mpv-cut-1.0-trial/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-mpv-cut-1.0",
+  "journey": "J14",
+  "states": {
+   "mpv-cut-1.0/datapaths.json": "match",
+   "mpv-cut-1.0/events.csv": "match",
+   "mpv-cut-1.0/log.txt": "match",
+   "mpv-cut-1.0/materials.json": "match",
+   "mpv-cut-1.0/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-mpv-em-option0",
+  "journey": "J14",
+  "states": {
+   "mpv-em-option0/datapaths.json": "match",
+   "mpv-em-option0/events.csv": "match",
+   "mpv-em-option0/log.txt": "match",
+   "mpv-em-option0/materials.json": "match",
+   "mpv-em-option0/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-mpv-em-option3",
+  "journey": "J14",
+  "states": {
+   "mpv-em-option3/datapaths.json": "match",
+   "mpv-em-option3/events.csv": "match",
+   "mpv-em-option3/log.txt": "match",
+   "mpv-em-option3/materials.json": "match",
+   "mpv-em-option3/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-mpv-ftfp-bert-emz",
+  "journey": "J14",
+  "states": {
+   "mpv-ftfp-bert-emz/datapaths.json": "match",
+   "mpv-ftfp-bert-emz/events.csv": "match",
+   "mpv-ftfp-bert-emz/log.txt": "match",
+   "mpv-ftfp-bert-emz/materials.json": "match",
+   "mpv-ftfp-bert-emz/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-mpv-nominal-trial",
+  "journey": "J14",
+  "states": {
+   "mpv-nominal-trial/datapaths.json": "match",
+   "mpv-nominal-trial/events.csv": "match",
+   "mpv-nominal-trial/log.txt": "match",
+   "mpv-nominal-trial/materials.json": "match",
+   "mpv-nominal-trial/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-mpv-nominal",
+  "journey": "J14",
+  "states": {
+   "mpv-nominal/datapaths.json": "match",
+   "mpv-nominal/events.csv": "match",
+   "mpv-nominal/log.txt": "match",
+   "mpv-nominal/materials.json": "match",
+   "mpv-nominal/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-mpv-pai",
+  "journey": "J14",
+  "states": {
+   "mpv-pai/datapaths.json": "match",
+   "mpv-pai/events.csv": "match",
+   "mpv-pai/log.txt": "match",
+   "mpv-pai/materials.json": "match",
+   "mpv-pai/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-sp-control-minus",
+  "journey": "J14",
+  "states": {
+   "sp-control-minus/datapaths.json": "match",
+   "sp-control-minus/events.csv": "match",
+   "sp-control-minus/log.txt": "match",
+   "sp-control-minus/materials.json": "match",
+   "sp-control-minus/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-sp-control",
+  "journey": "J14",
+  "states": {
+   "sp-control/datapaths.json": "match",
+   "sp-control/events.csv": "match",
+   "sp-control/log.txt": "match",
+   "sp-control/materials.json": "match",
+   "sp-control/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-sp-cut-0.03-trial",
+  "journey": "J14",
+  "states": {
+   "sp-cut-0.03-trial/datapaths.json": "match",
+   "sp-cut-0.03-trial/events.csv": "match",
+   "sp-cut-0.03-trial/log.txt": "match",
+   "sp-cut-0.03-trial/materials.json": "match",
+   "sp-cut-0.03-trial/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-sp-cut-0.03",
+  "journey": "J14",
+  "states": {
+   "sp-cut-0.03/datapaths.json": "match",
+   "sp-cut-0.03/events.csv": "match",
+   "sp-cut-0.03/log.txt": "match",
+   "sp-cut-0.03/materials.json": "match",
+   "sp-cut-0.03/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-sp-cut-0.1-trial",
+  "journey": "J14",
+  "states": {
+   "sp-cut-0.1-trial/datapaths.json": "match",
+   "sp-cut-0.1-trial/events.csv": "match",
+   "sp-cut-0.1-trial/log.txt": "match",
+   "sp-cut-0.1-trial/materials.json": "match",
+   "sp-cut-0.1-trial/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-sp-cut-0.1",
+  "journey": "J14",
+  "states": {
+   "sp-cut-0.1/datapaths.json": "match",
+   "sp-cut-0.1/events.csv": "match",
+   "sp-cut-0.1/log.txt": "match",
+   "sp-cut-0.1/materials.json": "match",
+   "sp-cut-0.1/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-sp-density-10",
+  "journey": "J14",
+  "states": {
+   "sp-density-10/datapaths.json": "match",
+   "sp-density-10/events.csv": "match",
+   "sp-density-10/log.txt": "match",
+   "sp-density-10/materials.json": "match",
+   "sp-density-10/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-sp-em-option0",
+  "journey": "J14",
+  "states": {
+   "sp-em-option0/datapaths.json": "match",
+   "sp-em-option0/events.csv": "match",
+   "sp-em-option0/log.txt": "match",
+   "sp-em-option0/materials.json": "match",
+   "sp-em-option0/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-sp-em-option3",
+  "journey": "J14",
+  "states": {
+   "sp-em-option3/datapaths.json": "match",
+   "sp-em-option3/events.csv": "match",
+   "sp-em-option3/log.txt": "match",
+   "sp-em-option3/materials.json": "match",
+   "sp-em-option3/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-sp-nominal",
+  "journey": "J14",
+  "states": {
+   "sp-nominal/datapaths.json": "match",
+   "sp-nominal/events.csv": "match",
+   "sp-nominal/log.txt": "match",
+   "sp-nominal/materials.json": "match",
+   "sp-nominal/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N4-TRK1-nominal",
+  "journey": "J15",
+  "states": {
+   "N4-TRK1-nominal/column_map.json": "match",
+   "N4-TRK1-nominal/datapaths.json": "match",
+   "N4-TRK1-nominal/events.csv": "match",
+   "N4-TRK1-nominal/log.txt": "match",
+   "N4-TRK1-nominal/materials.json": "match",
+   "N4-TRK1-nominal/probe.json": "match",
+   "N4-TRK1-nominal/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N4-TRK1-scan",
+  "journey": "J15",
+  "states": {
+   "N4-TRK1-scan/column_map.json": "match",
+   "N4-TRK1-scan/datapaths.json": "match",
+   "N4-TRK1-scan/events.csv": "match",
+   "N4-TRK1-scan/log.txt": "match",
+   "N4-TRK1-scan/materials.json": "match",
+   "N4-TRK1-scan/probe.json": "match",
+   "N4-TRK1-scan/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N4-TRK1-trial",
+  "journey": "J15",
+  "states": {
+   "N4-TRK1-trial/column_map.json": "match",
+   "N4-TRK1-trial/datapaths.json": "match",
+   "N4-TRK1-trial/events.csv": "match",
+   "N4-TRK1-trial/log.txt": "match",
+   "N4-TRK1-trial/materials.json": "match",
+   "N4-TRK1-trial/probe.json": "match",
+   "N4-TRK1-trial/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N4-TRK1-var-qgsp-bic",
+  "journey": "J15",
+  "states": {
+   "N4-TRK1-var-qgsp-bic/column_map.json": "match",
+   "N4-TRK1-var-qgsp-bic/datapaths.json": "match",
+   "N4-TRK1-var-qgsp-bic/events.csv": "match",
+   "N4-TRK1-var-qgsp-bic/log.txt": "match",
+   "N4-TRK1-var-qgsp-bic/materials.json": "match",
+   "N4-TRK1-var-qgsp-bic/probe.json": "match",
+   "N4-TRK1-var-qgsp-bic/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N4-TRK1-var-ss",
+  "journey": "J15",
+  "states": {
+   "N4-TRK1-var-ss/column_map.json": "match",
+   "N4-TRK1-var-ss/datapaths.json": "match",
+   "N4-TRK1-var-ss/events.csv": "match",
+   "N4-TRK1-var-ss/log.txt": "match",
+   "N4-TRK1-var-ss/materials.json": "match",
+   "N4-TRK1-var-ss/probe.json": "match",
+   "N4-TRK1-var-ss/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N4-TRK100-nominal",
+  "journey": "J15",
+  "states": {
+   "N4-TRK100-nominal/column_map.json": "match",
+   "N4-TRK100-nominal/datapaths.json": "match",
+   "N4-TRK100-nominal/events.csv": "match",
+   "N4-TRK100-nominal/log.txt": "match",
+   "N4-TRK100-nominal/materials.json": "match",
+   "N4-TRK100-nominal/probe.json": "match",
+   "N4-TRK100-nominal/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N4-TRK100-scan",
+  "journey": "J15",
+  "states": {
+   "N4-TRK100-scan/column_map.json": "match",
+   "N4-TRK100-scan/datapaths.json": "match",
+   "N4-TRK100-scan/events.csv": "match",
+   "N4-TRK100-scan/log.txt": "match",
+   "N4-TRK100-scan/materials.json": "match",
+   "N4-TRK100-scan/probe.json": "match",
+   "N4-TRK100-scan/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N4-TRK100-trial",
+  "journey": "J15",
+  "states": {
+   "N4-TRK100-trial/column_map.json": "match",
+   "N4-TRK100-trial/datapaths.json": "match",
+   "N4-TRK100-trial/events.csv": "match",
+   "N4-TRK100-trial/log.txt": "match",
+   "N4-TRK100-trial/materials.json": "match",
+   "N4-TRK100-trial/probe.json": "match",
+   "N4-TRK100-trial/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N4-TRK100-var-emy",
+  "journey": "J15",
+  "states": {
+   "N4-TRK100-var-emy/column_map.json": "match",
+   "N4-TRK100-var-emy/datapaths.json": "match",
+   "N4-TRK100-var-emy/events.csv": "match",
+   "N4-TRK100-var-emy/log.txt": "match",
+   "N4-TRK100-var-emy/materials.json": "match",
+   "N4-TRK100-var-emy/probe.json": "match",
+   "N4-TRK100-var-emy/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N4-TRK100-var-qgsp-bic",
+  "journey": "J15",
+  "states": {
+   "N4-TRK100-var-qgsp-bic/column_map.json": "match",
+   "N4-TRK100-var-qgsp-bic/datapaths.json": "match",
+   "N4-TRK100-var-qgsp-bic/events.csv": "match",
+   "N4-TRK100-var-qgsp-bic/log.txt": "match",
+   "N4-TRK100-var-qgsp-bic/materials.json": "match",
+   "N4-TRK100-var-qgsp-bic/probe.json": "match",
+   "N4-TRK100-var-qgsp-bic/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N4-chargedgeantino",
+  "journey": "J15",
+  "states": {
+   "N4-chargedgeantino/column_map.json": "match",
+   "N4-chargedgeantino/datapaths.json": "match",
+   "N4-chargedgeantino/events.csv": "match",
+   "N4-chargedgeantino/log.txt": "match",
+   "N4-chargedgeantino/materials.json": "match",
+   "N4-chargedgeantino/probe.json": "match",
+   "N4-chargedgeantino/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N4-closure",
+  "journey": "J15",
+  "states": {
+   "N4-closure/column_map.json": "match",
+   "N4-closure/datapaths.json": "match",
+   "N4-closure/events.csv": "match",
+   "N4-closure/log.txt": "match",
+   "N4-closure/materials.json": "match",
+   "N4-closure/probe.json": "match",
+   "N4-closure/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N4-geantino",
+  "journey": "J15",
+  "states": {
+   "N4-geantino/column_map.json": "match",
+   "N4-geantino/datapaths.json": "match",
+   "N4-geantino/events.csv": "match",
+   "N4-geantino/log.txt": "match",
+   "N4-geantino/materials.json": "match",
+   "N4-geantino/probe.json": "match",
+   "N4-geantino/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N6-CAL10-cut-0.1",
+  "journey": "J15",
+  "states": {
+   "N6-CAL10-cut-0.1/column_map.json": "match",
+   "N6-CAL10-cut-0.1/datapaths.json": "match",
+   "N6-CAL10-cut-0.1/events.csv": "match",
+   "N6-CAL10-cut-0.1/log.txt": "match",
+   "N6-CAL10-cut-0.1/materials.json": "match",
+   "N6-CAL10-cut-0.1/probe.json": "match",
+   "N6-CAL10-cut-0.1/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N6-CAL10-cut-0.3",
+  "journey": "J15",
+  "states": {
+   "N6-CAL10-cut-0.3/column_map.json": "match",
+   "N6-CAL10-cut-0.3/datapaths.json": "match",
+   "N6-CAL10-cut-0.3/events.csv": "match",
+   "N6-CAL10-cut-0.3/log.txt": "match",
+   "N6-CAL10-cut-0.3/materials.json": "match",
+   "N6-CAL10-cut-0.3/probe.json": "match",
+   "N6-CAL10-cut-0.3/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N6-CAL10-cut-1",
+  "journey": "J15",
+  "states": {
+   "N6-CAL10-cut-1/column_map.json": "match",
+   "N6-CAL10-cut-1/datapaths.json": "match",
+   "N6-CAL10-cut-1/events.csv": "match",
+   "N6-CAL10-cut-1/log.txt": "match",
+   "N6-CAL10-cut-1/materials.json": "match",
+   "N6-CAL10-cut-1/probe.json": "match",
+   "N6-CAL10-cut-1/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N6-CAL10-nominal",
+  "journey": "J15",
+  "states": {
+   "N6-CAL10-nominal/column_map.json": "match",
+   "N6-CAL10-nominal/datapaths.json": "match",
+   "N6-CAL10-nominal/events.csv": "match",
+   "N6-CAL10-nominal/log.txt": "match",
+   "N6-CAL10-nominal/materials.json": "match",
+   "N6-CAL10-nominal/probe.json": "match",
+   "N6-CAL10-nominal/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N6-CAL10-trial",
+  "journey": "J15",
+  "states": {
+   "N6-CAL10-trial/column_map.json": "match",
+   "N6-CAL10-trial/datapaths.json": "match",
+   "N6-CAL10-trial/events.csv": "match",
+   "N6-CAL10-trial/log.txt": "match",
+   "N6-CAL10-trial/materials.json": "match",
+   "N6-CAL10-trial/probe.json": "match",
+   "N6-CAL10-trial/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N6-CAL10-var-emy",
+  "journey": "J15",
+  "states": {
+   "N6-CAL10-var-emy/column_map.json": "match",
+   "N6-CAL10-var-emy/datapaths.json": "match",
+   "N6-CAL10-var-emy/events.csv": "match",
+   "N6-CAL10-var-emy/log.txt": "match",
+   "N6-CAL10-var-emy/materials.json": "match",
+   "N6-CAL10-var-emy/probe.json": "match",
+   "N6-CAL10-var-emy/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N6-CC500-nominal",
+  "journey": "J15",
+  "states": {
+   "N6-CC500-nominal/column_map.json": "match",
+   "N6-CC500-nominal/datapaths.json": "match",
+   "N6-CC500-nominal/events.csv": "match",
+   "N6-CC500-nominal/log.txt": "match",
+   "N6-CC500-nominal/materials.json": "match",
+   "N6-CC500-nominal/probe.json": "match",
+   "N6-CC500-nominal/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N6-CC500-scan",
+  "journey": "J15",
+  "states": {
+   "N6-CC500-scan/column_map.json": "match",
+   "N6-CC500-scan/datapaths.json": "match",
+   "N6-CC500-scan/events.csv": "match",
+   "N6-CC500-scan/log.txt": "match",
+   "N6-CC500-scan/materials.json": "match",
+   "N6-CC500-scan/probe.json": "match",
+   "N6-CC500-scan/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N6-CC500-trial",
+  "journey": "J15",
+  "states": {
+   "N6-CC500-trial/column_map.json": "match",
+   "N6-CC500-trial/datapaths.json": "match",
+   "N6-CC500-trial/events.csv": "match",
+   "N6-CC500-trial/log.txt": "match",
+   "N6-CC500-trial/materials.json": "match",
+   "N6-CC500-trial/probe.json": "match",
+   "N6-CC500-trial/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N6-CC500-var-emy",
+  "journey": "J15",
+  "states": {
+   "N6-CC500-var-emy/column_map.json": "match",
+   "N6-CC500-var-emy/datapaths.json": "match",
+   "N6-CC500-var-emy/events.csv": "match",
+   "N6-CC500-var-emy/log.txt": "match",
+   "N6-CC500-var-emy/materials.json": "match",
+   "N6-CC500-var-emy/probe.json": "match",
+   "N6-CC500-var-emy/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N6-TRK1-nominal",
+  "journey": "J15",
+  "states": {
+   "N6-TRK1-nominal/column_map.json": "match",
+   "N6-TRK1-nominal/datapaths.json": "match",
+   "N6-TRK1-nominal/events.csv": "match",
+   "N6-TRK1-nominal/log.txt": "match",
+   "N6-TRK1-nominal/materials.json": "match",
+   "N6-TRK1-nominal/probe.json": "match",
+   "N6-TRK1-nominal/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N6-TRK1-scan",
+  "journey": "J15",
+  "states": {
+   "N6-TRK1-scan/column_map.json": "match",
+   "N6-TRK1-scan/datapaths.json": "match",
+   "N6-TRK1-scan/events.csv": "match",
+   "N6-TRK1-scan/log.txt": "match",
+   "N6-TRK1-scan/materials.json": "match",
+   "N6-TRK1-scan/probe.json": "match",
+   "N6-TRK1-scan/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N6-TRK1-trial",
+  "journey": "J15",
+  "states": {
+   "N6-TRK1-trial/column_map.json": "match",
+   "N6-TRK1-trial/datapaths.json": "match",
+   "N6-TRK1-trial/events.csv": "match",
+   "N6-TRK1-trial/log.txt": "match",
+   "N6-TRK1-trial/materials.json": "match",
+   "N6-TRK1-trial/probe.json": "match",
+   "N6-TRK1-trial/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N6-TRK1-var-air",
+  "journey": "J15",
+  "states": {
+   "N6-TRK1-var-air/column_map.json": "match",
+   "N6-TRK1-var-air/datapaths.json": "match",
+   "N6-TRK1-var-air/events.csv": "match",
+   "N6-TRK1-var-air/log.txt": "match",
+   "N6-TRK1-var-air/materials.json": "match",
+   "N6-TRK1-var-air/probe.json": "match",
+   "N6-TRK1-var-air/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N6-TRK1-var-qgsp-bic",
+  "journey": "J15",
+  "states": {
+   "N6-TRK1-var-qgsp-bic/column_map.json": "match",
+   "N6-TRK1-var-qgsp-bic/datapaths.json": "match",
+   "N6-TRK1-var-qgsp-bic/events.csv": "match",
+   "N6-TRK1-var-qgsp-bic/log.txt": "match",
+   "N6-TRK1-var-qgsp-bic/materials.json": "match",
+   "N6-TRK1-var-qgsp-bic/probe.json": "match",
+   "N6-TRK1-var-qgsp-bic/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N6-TRK1-var-ss",
+  "journey": "J15",
+  "states": {
+   "N6-TRK1-var-ss/column_map.json": "match",
+   "N6-TRK1-var-ss/datapaths.json": "match",
+   "N6-TRK1-var-ss/events.csv": "match",
+   "N6-TRK1-var-ss/log.txt": "match",
+   "N6-TRK1-var-ss/materials.json": "match",
+   "N6-TRK1-var-ss/probe.json": "match",
+   "N6-TRK1-var-ss/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N6-TRK100-nominal",
+  "journey": "J15",
+  "states": {
+   "N6-TRK100-nominal/column_map.json": "match",
+   "N6-TRK100-nominal/datapaths.json": "match",
+   "N6-TRK100-nominal/events.csv": "match",
+   "N6-TRK100-nominal/log.txt": "match",
+   "N6-TRK100-nominal/materials.json": "match",
+   "N6-TRK100-nominal/probe.json": "match",
+   "N6-TRK100-nominal/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N6-TRK100-scan",
+  "journey": "J15",
+  "states": {
+   "N6-TRK100-scan/column_map.json": "match",
+   "N6-TRK100-scan/datapaths.json": "match",
+   "N6-TRK100-scan/events.csv": "match",
+   "N6-TRK100-scan/log.txt": "match",
+   "N6-TRK100-scan/materials.json": "match",
+   "N6-TRK100-scan/probe.json": "match",
+   "N6-TRK100-scan/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N6-TRK100-trial",
+  "journey": "J15",
+  "states": {
+   "N6-TRK100-trial/column_map.json": "match",
+   "N6-TRK100-trial/datapaths.json": "match",
+   "N6-TRK100-trial/events.csv": "match",
+   "N6-TRK100-trial/log.txt": "match",
+   "N6-TRK100-trial/materials.json": "match",
+   "N6-TRK100-trial/probe.json": "match",
+   "N6-TRK100-trial/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N6-TRK100-var-emy",
+  "journey": "J15",
+  "states": {
+   "N6-TRK100-var-emy/column_map.json": "match",
+   "N6-TRK100-var-emy/datapaths.json": "match",
+   "N6-TRK100-var-emy/events.csv": "match",
+   "N6-TRK100-var-emy/log.txt": "match",
+   "N6-TRK100-var-emy/materials.json": "match",
+   "N6-TRK100-var-emy/probe.json": "match",
+   "N6-TRK100-var-emy/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N6-TRK100-var-qgsp-bic",
+  "journey": "J15",
+  "states": {
+   "N6-TRK100-var-qgsp-bic/column_map.json": "match",
+   "N6-TRK100-var-qgsp-bic/datapaths.json": "match",
+   "N6-TRK100-var-qgsp-bic/events.csv": "match",
+   "N6-TRK100-var-qgsp-bic/log.txt": "match",
+   "N6-TRK100-var-qgsp-bic/materials.json": "match",
+   "N6-TRK100-var-qgsp-bic/probe.json": "match",
+   "N6-TRK100-var-qgsp-bic/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N6-chargedgeantino",
+  "journey": "J15",
+  "states": {
+   "N6-chargedgeantino/column_map.json": "match",
+   "N6-chargedgeantino/datapaths.json": "match",
+   "N6-chargedgeantino/events.csv": "match",
+   "N6-chargedgeantino/log.txt": "match",
+   "N6-chargedgeantino/materials.json": "match",
+   "N6-chargedgeantino/probe.json": "match",
+   "N6-chargedgeantino/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N6-closure",
+  "journey": "J15",
+  "states": {
+   "N6-closure/column_map.json": "match",
+   "N6-closure/datapaths.json": "match",
+   "N6-closure/events.csv": "match",
+   "N6-closure/log.txt": "match",
+   "N6-closure/materials.json": "match",
+   "N6-closure/probe.json": "match",
+   "N6-closure/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N6-geantino",
+  "journey": "J15",
+  "states": {
+   "N6-geantino/column_map.json": "match",
+   "N6-geantino/datapaths.json": "match",
+   "N6-geantino/events.csv": "match",
+   "N6-geantino/log.txt": "match",
+   "N6-geantino/materials.json": "match",
+   "N6-geantino/probe.json": "match",
+   "N6-geantino/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N8-TRK1-nominal",
+  "journey": "J15",
+  "states": {
+   "N8-TRK1-nominal/column_map.json": "match",
+   "N8-TRK1-nominal/datapaths.json": "match",
+   "N8-TRK1-nominal/events.csv": "match",
+   "N8-TRK1-nominal/log.txt": "match",
+   "N8-TRK1-nominal/materials.json": "match",
+   "N8-TRK1-nominal/probe.json": "match",
+   "N8-TRK1-nominal/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N8-TRK1-scan",
+  "journey": "J15",
+  "states": {
+   "N8-TRK1-scan/column_map.json": "match",
+   "N8-TRK1-scan/datapaths.json": "match",
+   "N8-TRK1-scan/events.csv": "match",
+   "N8-TRK1-scan/log.txt": "match",
+   "N8-TRK1-scan/materials.json": "match",
+   "N8-TRK1-scan/probe.json": "match",
+   "N8-TRK1-scan/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N8-TRK1-trial",
+  "journey": "J15",
+  "states": {
+   "N8-TRK1-trial/column_map.json": "match",
+   "N8-TRK1-trial/datapaths.json": "match",
+   "N8-TRK1-trial/events.csv": "match",
+   "N8-TRK1-trial/log.txt": "match",
+   "N8-TRK1-trial/materials.json": "match",
+   "N8-TRK1-trial/probe.json": "match",
+   "N8-TRK1-trial/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N8-TRK1-var-qgsp-bic",
+  "journey": "J15",
+  "states": {
+   "N8-TRK1-var-qgsp-bic/column_map.json": "match",
+   "N8-TRK1-var-qgsp-bic/datapaths.json": "match",
+   "N8-TRK1-var-qgsp-bic/events.csv": "match",
+   "N8-TRK1-var-qgsp-bic/log.txt": "match",
+   "N8-TRK1-var-qgsp-bic/materials.json": "match",
+   "N8-TRK1-var-qgsp-bic/probe.json": "match",
+   "N8-TRK1-var-qgsp-bic/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N8-TRK1-var-ss",
+  "journey": "J15",
+  "states": {
+   "N8-TRK1-var-ss/column_map.json": "match",
+   "N8-TRK1-var-ss/datapaths.json": "match",
+   "N8-TRK1-var-ss/events.csv": "match",
+   "N8-TRK1-var-ss/log.txt": "match",
+   "N8-TRK1-var-ss/materials.json": "match",
+   "N8-TRK1-var-ss/probe.json": "match",
+   "N8-TRK1-var-ss/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N8-TRK100-nominal",
+  "journey": "J15",
+  "states": {
+   "N8-TRK100-nominal/column_map.json": "match",
+   "N8-TRK100-nominal/datapaths.json": "match",
+   "N8-TRK100-nominal/events.csv": "match",
+   "N8-TRK100-nominal/log.txt": "match",
+   "N8-TRK100-nominal/materials.json": "match",
+   "N8-TRK100-nominal/probe.json": "match",
+   "N8-TRK100-nominal/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N8-TRK100-scan",
+  "journey": "J15",
+  "states": {
+   "N8-TRK100-scan/column_map.json": "match",
+   "N8-TRK100-scan/datapaths.json": "match",
+   "N8-TRK100-scan/events.csv": "match",
+   "N8-TRK100-scan/log.txt": "match",
+   "N8-TRK100-scan/materials.json": "match",
+   "N8-TRK100-scan/probe.json": "match",
+   "N8-TRK100-scan/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N8-TRK100-trial",
+  "journey": "J15",
+  "states": {
+   "N8-TRK100-trial/column_map.json": "match",
+   "N8-TRK100-trial/datapaths.json": "match",
+   "N8-TRK100-trial/events.csv": "match",
+   "N8-TRK100-trial/log.txt": "match",
+   "N8-TRK100-trial/materials.json": "match",
+   "N8-TRK100-trial/probe.json": "match",
+   "N8-TRK100-trial/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N8-TRK100-var-emy",
+  "journey": "J15",
+  "states": {
+   "N8-TRK100-var-emy/column_map.json": "match",
+   "N8-TRK100-var-emy/datapaths.json": "match",
+   "N8-TRK100-var-emy/events.csv": "match",
+   "N8-TRK100-var-emy/log.txt": "match",
+   "N8-TRK100-var-emy/materials.json": "match",
+   "N8-TRK100-var-emy/probe.json": "match",
+   "N8-TRK100-var-emy/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N8-TRK100-var-qgsp-bic",
+  "journey": "J15",
+  "states": {
+   "N8-TRK100-var-qgsp-bic/column_map.json": "match",
+   "N8-TRK100-var-qgsp-bic/datapaths.json": "match",
+   "N8-TRK100-var-qgsp-bic/events.csv": "match",
+   "N8-TRK100-var-qgsp-bic/log.txt": "match",
+   "N8-TRK100-var-qgsp-bic/materials.json": "match",
+   "N8-TRK100-var-qgsp-bic/probe.json": "match",
+   "N8-TRK100-var-qgsp-bic/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N8-chargedgeantino",
+  "journey": "J15",
+  "states": {
+   "N8-chargedgeantino/column_map.json": "match",
+   "N8-chargedgeantino/datapaths.json": "match",
+   "N8-chargedgeantino/events.csv": "match",
+   "N8-chargedgeantino/log.txt": "match",
+   "N8-chargedgeantino/materials.json": "match",
+   "N8-chargedgeantino/probe.json": "match",
+   "N8-chargedgeantino/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N8-closure",
+  "journey": "J15",
+  "states": {
+   "N8-closure/column_map.json": "match",
+   "N8-closure/datapaths.json": "match",
+   "N8-closure/events.csv": "match",
+   "N8-closure/log.txt": "match",
+   "N8-closure/materials.json": "match",
+   "N8-closure/probe.json": "match",
+   "N8-closure/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-N8-geantino",
+  "journey": "J15",
+  "states": {
+   "N8-geantino/column_map.json": "match",
+   "N8-geantino/datapaths.json": "match",
+   "N8-geantino/events.csv": "match",
+   "N8-geantino/log.txt": "match",
+   "N8-geantino/materials.json": "match",
+   "N8-geantino/probe.json": "match",
+   "N8-geantino/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-ladder-balance-e+",
+  "journey": "J15",
+  "states": {
+   "ladder-balance-e+/column_map.json": "match",
+   "ladder-balance-e+/datapaths.json": "match",
+   "ladder-balance-e+/events.csv": "match",
+   "ladder-balance-e+/log.txt": "match",
+   "ladder-balance-e+/materials.json": "match",
+   "ladder-balance-e+/probe.json": "match",
+   "ladder-balance-e+/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-ladder-balance-e-",
+  "journey": "J15",
+  "states": {
+   "ladder-balance-e-/column_map.json": "match",
+   "ladder-balance-e-/datapaths.json": "match",
+   "ladder-balance-e-/events.csv": "match",
+   "ladder-balance-e-/log.txt": "match",
+   "ladder-balance-e-/materials.json": "match",
+   "ladder-balance-e-/probe.json": "match",
+   "ladder-balance-e-/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-ladder-field-minus",
+  "journey": "J15",
+  "states": {
+   "ladder-field-minus/column_map.json": "match",
+   "ladder-field-minus/datapaths.json": "match",
+   "ladder-field-minus/events.csv": "match",
+   "ladder-field-minus/log.txt": "match",
+   "ladder-field-minus/materials.json": "match",
+   "ladder-field-minus/probe.json": "match",
+   "ladder-field-minus/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-ladder-field-plus",
+  "journey": "J15",
+  "states": {
+   "ladder-field-plus/column_map.json": "match",
+   "ladder-field-plus/datapaths.json": "match",
+   "ladder-field-plus/events.csv": "match",
+   "ladder-field-plus/log.txt": "match",
+   "ladder-field-plus/materials.json": "match",
+   "ladder-field-plus/probe.json": "match",
+   "ladder-field-plus/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-ladder-geantino-pb-control",
+  "journey": "J15",
+  "states": {
+   "ladder-geantino-pb-control/column_map.json": "match",
+   "ladder-geantino-pb-control/datapaths.json": "match",
+   "ladder-geantino-pb-control/events.csv": "match",
+   "ladder-geantino-pb-control/log.txt": "match",
+   "ladder-geantino-pb-control/materials.json": "match",
+   "ladder-geantino-pb-control/probe.json": "match",
+   "ladder-geantino-pb-control/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-ladder-mu1-trial",
+  "journey": "J15",
+  "states": {
+   "ladder-mu1-trial/column_map.json": "match",
+   "ladder-mu1-trial/datapaths.json": "match",
+   "ladder-mu1-trial/events.csv": "match",
+   "ladder-mu1-trial/log.txt": "match",
+   "ladder-mu1-trial/materials.json": "match",
+   "ladder-mu1-trial/probe.json": "match",
+   "ladder-mu1-trial/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-ladder-mu1",
+  "journey": "J15",
+  "states": {
+   "ladder-mu1/column_map.json": "match",
+   "ladder-mu1/datapaths.json": "match",
+   "ladder-mu1/events.csv": "match",
+   "ladder-mu1/log.txt": "match",
+   "ladder-mu1/materials.json": "match",
+   "ladder-mu1/probe.json": "match",
+   "ladder-mu1/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-ladder-mu10-field-control",
+  "journey": "J15",
+  "states": {
+   "ladder-mu10-field-control/column_map.json": "match",
+   "ladder-mu10-field-control/datapaths.json": "match",
+   "ladder-mu10-field-control/events.csv": "match",
+   "ladder-mu10-field-control/log.txt": "match",
+   "ladder-mu10-field-control/materials.json": "match",
+   "ladder-mu10-field-control/probe.json": "match",
+   "ladder-mu10-field-control/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-ladder-mu10-trial",
+  "journey": "J15",
+  "states": {
+   "ladder-mu10-trial/column_map.json": "match",
+   "ladder-mu10-trial/datapaths.json": "match",
+   "ladder-mu10-trial/events.csv": "match",
+   "ladder-mu10-trial/log.txt": "match",
+   "ladder-mu10-trial/materials.json": "match",
+   "ladder-mu10-trial/probe.json": "match",
+   "ladder-mu10-trial/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-ladder-mu10",
+  "journey": "J15",
+  "states": {
+   "ladder-mu10/column_map.json": "match",
+   "ladder-mu10/datapaths.json": "match",
+   "ladder-mu10/events.csv": "match",
+   "ladder-mu10/log.txt": "match",
+   "ladder-mu10/materials.json": "match",
+   "ladder-mu10/probe.json": "match",
+   "ladder-mu10/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-ladder-mu100-trial",
+  "journey": "J15",
+  "states": {
+   "ladder-mu100-trial/column_map.json": "match",
+   "ladder-mu100-trial/datapaths.json": "match",
+   "ladder-mu100-trial/events.csv": "match",
+   "ladder-mu100-trial/log.txt": "match",
+   "ladder-mu100-trial/materials.json": "match",
+   "ladder-mu100-trial/probe.json": "match",
+   "ladder-mu100-trial/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-ladder-mu100",
+  "journey": "J15",
+  "states": {
+   "ladder-mu100/column_map.json": "match",
+   "ladder-mu100/datapaths.json": "match",
+   "ladder-mu100/events.csv": "match",
+   "ladder-mu100/log.txt": "match",
+   "ladder-mu100/materials.json": "match",
+   "ladder-mu100/probe.json": "match",
+   "ladder-mu100/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-ladder-overlap-test",
+  "journey": "J15",
+  "states": {
+   "ladder-overlap-test/column_map.json": "match",
+   "ladder-overlap-test/datapaths.json": "match",
+   "ladder-overlap-test/events.csv": "match",
+   "ladder-overlap-test/log.txt": "match",
+   "ladder-overlap-test/materials.json": "match",
+   "ladder-overlap-test/probe.json": "match",
+   "ladder-overlap-test/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-ladder-sf-pvt-control",
+  "journey": "J15",
+  "states": {
+   "ladder-sf-pvt-control/column_map.json": "match",
+   "ladder-sf-pvt-control/datapaths.json": "match",
+   "ladder-sf-pvt-control/events.csv": "match",
+   "ladder-sf-pvt-control/log.txt": "match",
+   "ladder-sf-pvt-control/materials.json": "match",
+   "ladder-sf-pvt-control/probe.json": "match",
+   "ladder-sf-pvt-control/spec.json": "match",
+   "ladder-sf-pvt-control/summary.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns",
+   "summary"
+  ]
+ },
+ {
+  "run": "geant4-run-ladder-sf",
+  "journey": "J15",
+  "states": {
+   "ladder-sf/column_map.json": "match",
+   "ladder-sf/datapaths.json": "match",
+   "ladder-sf/events.csv": "match",
+   "ladder-sf/log.txt": "match",
+   "ladder-sf/materials.json": "match",
+   "ladder-sf/probe.json": "match",
+   "ladder-sf/spec.json": "match",
+   "ladder-sf/summary.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns",
+   "summary"
+  ]
+ },
+ {
+  "run": "geant4-run-msref-100gv-density-minus",
+  "journey": "J15",
+  "states": {
+   "msref-100gv-density-minus/column_map.json": "match",
+   "msref-100gv-density-minus/datapaths.json": "match",
+   "msref-100gv-density-minus/events.csv": "match",
+   "msref-100gv-density-minus/log.txt": "match",
+   "msref-100gv-density-minus/materials.json": "match",
+   "msref-100gv-density-minus/probe.json": "match",
+   "msref-100gv-density-minus/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-msref-100gv-density-plus",
+  "journey": "J15",
+  "states": {
+   "msref-100gv-density-plus/column_map.json": "match",
+   "msref-100gv-density-plus/datapaths.json": "match",
+   "msref-100gv-density-plus/events.csv": "match",
+   "msref-100gv-density-plus/log.txt": "match",
+   "msref-100gv-density-plus/materials.json": "match",
+   "msref-100gv-density-plus/probe.json": "match",
+   "msref-100gv-density-plus/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-msref-100gv-nominal",
+  "journey": "J15",
+  "states": {
+   "msref-100gv-nominal/column_map.json": "match",
+   "msref-100gv-nominal/datapaths.json": "match",
+   "msref-100gv-nominal/events.csv": "match",
+   "msref-100gv-nominal/log.txt": "match",
+   "msref-100gv-nominal/materials.json": "match",
+   "msref-100gv-nominal/probe.json": "match",
+   "msref-100gv-nominal/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-msref-1gv-density-minus",
+  "journey": "J15",
+  "states": {
+   "msref-1gv-density-minus/column_map.json": "match",
+   "msref-1gv-density-minus/datapaths.json": "match",
+   "msref-1gv-density-minus/events.csv": "match",
+   "msref-1gv-density-minus/log.txt": "match",
+   "msref-1gv-density-minus/materials.json": "match",
+   "msref-1gv-density-minus/probe.json": "match",
+   "msref-1gv-density-minus/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-msref-1gv-density-plus",
+  "journey": "J15",
+  "states": {
+   "msref-1gv-density-plus/column_map.json": "match",
+   "msref-1gv-density-plus/datapaths.json": "match",
+   "msref-1gv-density-plus/events.csv": "match",
+   "msref-1gv-density-plus/log.txt": "match",
+   "msref-1gv-density-plus/materials.json": "match",
+   "msref-1gv-density-plus/probe.json": "match",
+   "msref-1gv-density-plus/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-msref-1gv-nominal",
+  "journey": "J15",
+  "states": {
+   "msref-1gv-nominal/column_map.json": "match",
+   "msref-1gv-nominal/datapaths.json": "match",
+   "msref-1gv-nominal/events.csv": "match",
+   "msref-1gv-nominal/log.txt": "match",
+   "msref-1gv-nominal/materials.json": "match",
+   "msref-1gv-nominal/probe.json": "match",
+   "msref-1gv-nominal/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-msref-500gv-density-minus",
+  "journey": "J15",
+  "states": {
+   "msref-500gv-density-minus/column_map.json": "match",
+   "msref-500gv-density-minus/datapaths.json": "match",
+   "msref-500gv-density-minus/events.csv": "match",
+   "msref-500gv-density-minus/log.txt": "match",
+   "msref-500gv-density-minus/materials.json": "match",
+   "msref-500gv-density-minus/probe.json": "match",
+   "msref-500gv-density-minus/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-msref-500gv-density-plus",
+  "journey": "J15",
+  "states": {
+   "msref-500gv-density-plus/column_map.json": "match",
+   "msref-500gv-density-plus/datapaths.json": "match",
+   "msref-500gv-density-plus/events.csv": "match",
+   "msref-500gv-density-plus/log.txt": "match",
+   "msref-500gv-density-plus/materials.json": "match",
+   "msref-500gv-density-plus/probe.json": "match",
+   "msref-500gv-density-plus/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-msref-500gv-nominal",
+  "journey": "J15",
+  "states": {
+   "msref-500gv-nominal/column_map.json": "match",
+   "msref-500gv-nominal/datapaths.json": "match",
+   "msref-500gv-nominal/events.csv": "match",
+   "msref-500gv-nominal/log.txt": "match",
+   "msref-500gv-nominal/materials.json": "match",
+   "msref-500gv-nominal/probe.json": "match",
+   "msref-500gv-nominal/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-F937-TRK1000-nominal",
+  "journey": "J16",
+  "states": {
+   "F937-TRK1000-nominal/column_map.json": "match",
+   "F937-TRK1000-nominal/datapaths.json": "match",
+   "F937-TRK1000-nominal/events.csv": "match",
+   "F937-TRK1000-nominal/log.txt": "match",
+   "F937-TRK1000-nominal/materials.json": "match",
+   "F937-TRK1000-nominal/probe.json": "match",
+   "F937-TRK1000-nominal/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-F937-TRK1000-scan",
+  "journey": "J16",
+  "states": {
+   "F937-TRK1000-scan/column_map.json": "match",
+   "F937-TRK1000-scan/datapaths.json": "match",
+   "F937-TRK1000-scan/events.csv": "match",
+   "F937-TRK1000-scan/log.txt": "match",
+   "F937-TRK1000-scan/materials.json": "match",
+   "F937-TRK1000-scan/probe.json": "match",
+   "F937-TRK1000-scan/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-F937-TRK1000-var-emy",
+  "journey": "J16",
+  "states": {
+   "F937-TRK1000-var-emy/column_map.json": "match",
+   "F937-TRK1000-var-emy/datapaths.json": "match",
+   "F937-TRK1000-var-emy/events.csv": "match",
+   "F937-TRK1000-var-emy/log.txt": "match",
+   "F937-TRK1000-var-emy/materials.json": "match",
+   "F937-TRK1000-var-emy/probe.json": "match",
+   "F937-TRK1000-var-emy/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-F937-TRK1000-var-qgsp-bic",
+  "journey": "J16",
+  "states": {
+   "F937-TRK1000-var-qgsp-bic/column_map.json": "match",
+   "F937-TRK1000-var-qgsp-bic/datapaths.json": "match",
+   "F937-TRK1000-var-qgsp-bic/events.csv": "match",
+   "F937-TRK1000-var-qgsp-bic/log.txt": "match",
+   "F937-TRK1000-var-qgsp-bic/materials.json": "match",
+   "F937-TRK1000-var-qgsp-bic/probe.json": "match",
+   "F937-TRK1000-var-qgsp-bic/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-F937-chargedgeantino",
+  "journey": "J16",
+  "states": {
+   "F937-chargedgeantino/column_map.json": "match",
+   "F937-chargedgeantino/datapaths.json": "match",
+   "F937-chargedgeantino/events.csv": "match",
+   "F937-chargedgeantino/log.txt": "match",
+   "F937-chargedgeantino/materials.json": "match",
+   "F937-chargedgeantino/probe.json": "match",
+   "F937-chargedgeantino/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-F937-closure",
+  "journey": "J16",
+  "states": {
+   "F937-closure/column_map.json": "match",
+   "F937-closure/datapaths.json": "match",
+   "F937-closure/events.csv": "match",
+   "F937-closure/log.txt": "match",
+   "F937-closure/materials.json": "match",
+   "F937-closure/probe.json": "match",
+   "F937-closure/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-F937-geantino",
+  "journey": "J16",
+  "states": {
+   "F937-geantino/column_map.json": "match",
+   "F937-geantino/datapaths.json": "match",
+   "F937-geantino/events.csv": "match",
+   "F937-geantino/log.txt": "match",
+   "F937-geantino/materials.json": "match",
+   "F937-geantino/probe.json": "match",
+   "F937-geantino/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-msref-1000gv-density-minus",
+  "journey": "J16",
+  "states": {
+   "msref-1000gv-density-minus/column_map.json": "match",
+   "msref-1000gv-density-minus/datapaths.json": "match",
+   "msref-1000gv-density-minus/events.csv": "match",
+   "msref-1000gv-density-minus/log.txt": "match",
+   "msref-1000gv-density-minus/materials.json": "match",
+   "msref-1000gv-density-minus/probe.json": "match",
+   "msref-1000gv-density-minus/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-msref-1000gv-density-plus",
+  "journey": "J16",
+  "states": {
+   "msref-1000gv-density-plus/column_map.json": "match",
+   "msref-1000gv-density-plus/datapaths.json": "match",
+   "msref-1000gv-density-plus/events.csv": "match",
+   "msref-1000gv-density-plus/log.txt": "match",
+   "msref-1000gv-density-plus/materials.json": "match",
+   "msref-1000gv-density-plus/probe.json": "match",
+   "msref-1000gv-density-plus/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-msref-1000gv-nominal",
+  "journey": "J16",
+  "states": {
+   "msref-1000gv-nominal/column_map.json": "match",
+   "msref-1000gv-nominal/datapaths.json": "match",
+   "msref-1000gv-nominal/events.csv": "match",
+   "msref-1000gv-nominal/log.txt": "match",
+   "msref-1000gv-nominal/materials.json": "match",
+   "msref-1000gv-nominal/probe.json": "match",
+   "msref-1000gv-nominal/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-mirror-testem3",
+  "journey": "mirrors",
+  "states": {
+   "mirror-testem3/datapaths.json": "match",
+   "mirror-testem3/events.csv": "match",
+   "mirror-testem3/log.txt": "match",
+   "mirror-testem3/materials.json": "match",
+   "mirror-testem3/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ },
+ {
+  "run": "geant4-run-mirror-testem5_run0",
+  "journey": "mirrors",
+  "states": {
+   "mirror-testem5_run0/datapaths.json": "match",
+   "mirror-testem5_run0/events.csv": "match",
+   "mirror-testem5_run0/log.txt": "match",
+   "mirror-testem5_run0/materials.json": "match",
+   "mirror-testem5_run0/spec.json": "match"
+  },
+  "class": "T1-recorded",
+  "reason": "existing output reproduced",
+  "scope": [
+   "columns"
+  ]
+ }
+]
