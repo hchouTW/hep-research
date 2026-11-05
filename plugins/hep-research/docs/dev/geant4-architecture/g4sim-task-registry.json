@@ -225,6 +225,13 @@
    "registered_at": "2026-11-05T07:53:15Z",
    "card_commit": "e6443107",
    "reason": "Execution log only (reproduction results, inventory, gates 4 and 5); thresholds unchanged"
+  },
+  {
+   "card": "g4sim-tasks/S1.md",
+   "sha256": "f7cd34c86518f77f816fc593e1f4543dc0fec0878d4da3378966d073d17474ca",
+   "registered_at": "2026-11-05T07:54:16Z",
+   "card_commit": "9eda807d",
+   "reason": "Execution log only (transfer hash); thresholds unchanged"
   }
  ]
 }
