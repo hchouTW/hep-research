@@ -316,6 +316,13 @@
    "registered_at": "2026-11-05T22:54:12Z",
    "card_commit": "384f00e0",
    "reason": "Two-step registration: N and the trial values, before any calibration run"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "83fafafef9a771289eb6f8ab054d41dd3bc5464946c573fe87b5cab60b675d2b",
+   "registered_at": "2026-11-05T23:17:50Z",
+   "card_commit": "ee6b2ce9",
+   "reason": "GB6's negative re-registered by the maintainer's decision of 2026-11-05; Execution log; no other threshold changed"
   }
  ]
 }
