@@ -77,6 +77,12 @@ Part B stays frozen; these decisions fill gaps found while implementing S1.
 | Composition of volume IDs (glossary, Section 7.1) | "Copy number times stride" cannot be unique: a mother with copy 3 and its copy-0 daughter both give 3, and the world and its first child both give 0 | Volume ID = sum over levels of (copy number + 1) x stride; 0 means no volume at that level. G4 copy numbers and cellIDs are unchanged; the 64-bit and stride limits apply to the widths of copy number + 1 | Yes | hsinyichou (maintainer) | 2026-11-05 | Answer in the Claude Code session to the volume ID question: "Use copy + 1 (Recommended)" |
 | Copy numbers of sibling placements (Sections 6.2.2, 6.2.6) | Part B does not say how placements in one mother get distinct copy numbers, and read-out placements need copy number = index | A placement with named indices keeps copy = its packed index; placements without named indices take the next free numbers after them, in order; two indexed placements that collide in one mother are refused, with a message to wrap one in its own template. In a stack, only sequence items that name an index carry it | Yes | hsinyichou (maintainer) | 2026-11-05 | Answer in the Claude Code session to the sibling question: "Use this rule (Recommended)" |
 
+## Execution decisions after S0
+
+| Item | Decision | Scope | Person | Date | Words or link |
+| --- | --- | --- | --- | --- | --- |
+| Baseline environment | New g4sim baselines are recorded on Linux (E5), and each run record stores its wall-clock time | From S2 on. The 112 recorded runs of the inventory keep their E2 reference outputs and their E2 reproduction, because Section 7.4 allows a regenerated baseline only when no usable reference output exists. Gates that name E2 and E5 still run on both. Written into the S2 card at its refresh | hsinyichou (maintainer) | 2026-11-05 | Session message: "use linux as baseline" |
+
 ## Application of the `dependencies.py` common check
 
 Maintainer's decision on E7 item 9 (S0 Execution log). It settles how the check applies to stored example records; it does not change any threshold or Part B.
