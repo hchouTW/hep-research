@@ -9,6 +9,7 @@ import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
 FOLDER = ROOT / "adapters/geant4/tests/g4proto/reacquire"
@@ -159,6 +160,36 @@ class Reproduction(unittest.TestCase):
     def test_a_field_region_is_declared_for_the_hook(self):
         self.assertEqual(self.module.declared_fields({"field": {"regions": [{"element": "A"}, {"element": "B"}]}}), "A,B")
         self.assertEqual(self.module.declared_fields({}), "")
+
+
+class Rebuild(unittest.TestCase):
+    module = Reproduction.module
+    row = {"program": "element_sim", "source_commit": "abc"}
+
+    def test_an_earlier_build_is_reused(self):
+        with tempfile.TemporaryDirectory() as folder:
+            built = Path(folder, "build", "element_sim")
+            built.parent.mkdir()
+            built.write_text("binary", encoding="utf-8")
+            with mock.patch.object(self.module.sampler, "extract", side_effect=AssertionError("must not rebuild")):
+                self.assertEqual(self.module.prepare(self.row, Path(folder), None), built)
+
+    def test_a_partial_build_is_cleared_first(self):
+        with tempfile.TemporaryDirectory() as folder:
+            work = Path(folder, "commit")
+            (work / "src").mkdir(parents=True)
+            (work / "src" / "left.cc").write_text("old", encoding="utf-8")
+            seen = []
+
+            def extract(commit, target):
+                seen.append((work / "src").exists())
+                return target
+
+            with mock.patch.object(self.module.sampler, "extract", extract), \
+                 mock.patch.object(self.module.sampler.apply_probe, "apply", return_value=work), \
+                 mock.patch.object(self.module.sampler, "build", return_value=work / "element_sim"):
+                self.module.prepare(self.row, work, None)
+            self.assertEqual(seen, [False])
 
 
 class Status(unittest.TestCase):
