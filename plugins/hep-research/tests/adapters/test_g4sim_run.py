@@ -76,13 +76,13 @@ class Datasets(unittest.TestCase):
 
 class Identities(unittest.TestCase):
     def test_a_binary_float_is_hashed_as_its_decimal_string(self):
-        self.assertEqual(driver.in_decimals({"a": [0.25, 1, "x"]}), {"a": ["0.25", 1, "x"]})
+        self.assertEqual(driver.identity.in_decimals({"a": [0.25, 1, "x"]}), {"a": ["0.25", 1, "x"]})
 
     def test_the_run_identity_follows_the_build_and_the_card(self):
         base = driver.run_id("a" * 64, "b" * 64, card(), "c" * 64)
         self.assertNotEqual(base, driver.run_id("a" * 64, "b" * 64, card(), "d" * 64))
         self.assertNotEqual(base, driver.run_id("a" * 64, "b" * 64, card(reference_list="QGSP_BIC_EMZ"), "c" * 64))
-        self.assertNotEqual(driver.request_id({"x": 1}, "a" * 64), driver.request_id({"x": 1}, "b" * 64))
+        self.assertNotEqual(driver.identity.request_id({"x": 1}, "a" * 64), driver.identity.request_id({"x": 1}, "b" * 64))
 
 
 class TreeComparison(unittest.TestCase):

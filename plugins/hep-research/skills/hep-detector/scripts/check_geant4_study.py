@@ -78,10 +78,12 @@ sys.path.insert(0, str(PLUGIN))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import geant4_benchmarks as B  # noqa: E402  (sibling: one MPV estimator, CSV reader and bootstrap for both scripts)
 from contracts import CONTRACTS_VERSION  # noqa: E402
+from contracts import geometry  # noqa: E402
 from contracts import trace  # noqa: E402
 from contracts.schema import validate as schema_validate  # noqa: E402
 from contracts.validate import (geant4_tree_thickness_mm, qualification_missing, qualification_reference,  # noqa: E402
                                 qualified_uncertainty, scope_outside)
+from core.geometry import identity  # noqa: E402
 from core.simulation import estimates as E  # noqa: E402
 from core.simulation.summary import SUMMARY_VERSION  # noqa: E402
 from core.stats import batch_means as M, decisions as D  # noqa: E402
@@ -187,11 +189,36 @@ def load_study(path: Path) -> dict:
     es = get(study, "physics.element_sim_spec")  # Geant4 program B2: an element_sim study (geant4 adapter 0.3.0)
     if isinstance(es, str):
         study.setdefault("physics", {})["element_sim"] = load_json(path.parent / es)
+    if isinstance(get(study, "physics.g4sim"), dict):
+        study["physics"]["g4sim_loaded"] = load_g4sim(study["physics"]["g4sim"], path.parent)
     return study
+
+
+def load_g4sim(block: dict, folder: Path) -> dict:
+    """The three specifications of a study on the g4sim path, with their hashes and the two identities recomputed (g4sim plan, Section 14.1)."""
+    texts = {}
+    for key in ("detector_spec", "simulation_request", "run_card"):
+        file = folder / block[key]["path"]
+        texts[key] = file.read_bytes()
+        found = hashlib.sha256(texts[key]).hexdigest()
+        if found != block[key]["sha256"]:
+            raise StudyError(f"physics.g4sim.{key}: {block[key]['path']} has sha256 {found}, the study spec says {block[key]['sha256']}")
+    checked = geometry.check_spec(texts["detector_spec"])
+    if checked["status"] != "ok":
+        raise StudyError(f"physics.g4sim.detector_spec: {checked['findings'][:3]}")
+    request, card = json.loads(texts["simulation_request"]), json.loads(texts["run_card"])
+    found = {"geometry_id": checked["geometry_id"], "request_id": identity.request_id(request, checked["geometry_id"])}
+    for key, value in found.items():
+        if value != block[key]:
+            raise StudyError(f"physics.g4sim.{key}: recomputed {value}, the study spec says {block[key]}")
+    return {"ir": checked["ir"], "request": request, "run_card": card, **found}
 
 
 def sim_spec(study: dict) -> tuple[str, dict]:
     """(program, spec) of the study: element_sim when it names an element_sim spec, else layered_sim."""
+    loaded = get(study, "physics.g4sim_loaded")
+    if isinstance(loaded, dict):  # the rule table's facts come from the run card and the IR, not from an old specification
+        return "g4sim", {"physics": loaded["run_card"]["physics"], "ui_commands": loaded["run_card"].get("ui_commands") or []}
     es = get(study, "physics.element_sim")
     if isinstance(es, dict):
         return "element_sim", es
@@ -216,6 +243,10 @@ def derived(study: dict, effective_config: dict | None = None) -> dict:
     if program == "element_sim":  # every element that is not a mother of another one, thickness along x
         mothers = {e.get("mother") for e in ls.get("elements", [])}
         slabs = [{"thickness_mm": 2 * e["half_mm"][0]} for e in ls.get("elements", []) if e["name"] not in mothers]
+    if program == "g4sim":  # every template that holds no daughter; its thinnest side
+        physical = study["physics"]["g4sim_loaded"]["ir"]["physical"]
+        mothers = {item["mother"] for item in physical["placements"]}
+        slabs = [{"thickness_mm": 2 * min(float(side) for side in node["half_mm"])} for name, node in physical["templates"].items() if name not in mothers]
     ref = phys.get("reference_list")
     had = None
     if ref:

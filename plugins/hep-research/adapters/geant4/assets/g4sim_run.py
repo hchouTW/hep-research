@@ -81,25 +81,8 @@ def missing_datasets(card: dict, environment: dict | None = None) -> list[str]:
                                                          and any(Path(environment[variable]).iterdir()))]
 
 
-def in_decimals(value):
-    """A translated document for hashing: a float becomes its repr, the decimal string the translator writes (no binary float in the hash scope)."""
-    if isinstance(value, float):
-        return repr(value)
-    if isinstance(value, dict):
-        return {key: in_decimals(item) for key, item in value.items()}
-    if isinstance(value, list):
-        return [in_decimals(item) for item in value]
-    return value
-
-
-def request_id(request: dict, geometry_identity: str) -> str:
-    document = in_decimals({"request": request, "geometry_id": geometry_identity})
-    require_hash_scope(document)
-    return canonical_sha256(document)
-
-
 def run_id(geometry_identity: str, request_identity: str, card: dict, build_hash: str) -> str:
-    document = in_decimals({"geometry_id": geometry_identity, "request_id": request_identity, "run_card": card, "build_hash": build_hash})
+    document = identity.in_decimals({"geometry_id": geometry_identity, "request_id": request_identity, "run_card": card, "build_hash": build_hash})
     require_hash_scope(document)
     return canonical_sha256(document)
 
@@ -148,7 +131,7 @@ def run(args) -> dict:
     ir = checked["ir"]
     ir["physical"]["legacy"] = block
     geometry_identity = identity.geometry_id(ir)
-    request_identity = request_id(request, geometry_identity)
+    request_identity = identity.request_id(request, geometry_identity)
     build_hash = _sha256(args.program)
     work = args.work.resolve()
     work.mkdir(parents=True, exist_ok=True)
