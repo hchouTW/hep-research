@@ -2,7 +2,7 @@
 """T1 regression of g4sim_run against working baselines of the same platform (g4sim plan, Section 18): each run's legacy block comes from
 the baseline's probe record, the run is repeated with g4sim_run, and the output hashes and the volume-tree write-back are compared.
 
-Usage: regress.py --facts FACTS.json --baselines DIR --program PATH --work DIR [--cores N] [--only TEXT] [--keep-outputs]
+Usage: regress.py --facts FACTS.json --baselines DIR --program PATH --work DIR [--cores N] [--only TEXT] [--keep-outputs] [--threads N]
 From the plugin root, in an activated Geant4 environment. Prints JSON with a status key. Exit 0 every run identical, 1 otherwise, 2 bad input.
 """
 from __future__ import annotations
@@ -32,7 +32,7 @@ EARLY_OBSERVER, EARLY_SOURCES = "layered-early", ("3f4f9985",)  # layered_sim be
 TREE_KEYS = ("positions", "logical_volumes", "materials", "regions", "fields", "processes")
 
 
-def write_inputs(row: dict, record: dict, folder: Path) -> None:
+def write_inputs(row: dict, record: dict, folder: Path, threads: int | None = None) -> None:
     folder.mkdir(parents=True, exist_ok=True)
     old = sampler.spec_of(row)
     revision = EARLY_OBSERVER if row["source_commit"] in EARLY_SOURCES else "current"
@@ -40,6 +40,8 @@ def write_inputs(row: dict, record: dict, folder: Path) -> None:
     (folder / "ir.json").write_text(json.dumps({"schema": "geometry-ir/1", "physical": {"legacy": block}}), encoding="utf-8")
     old.setdefault("output", {}).update({"csv": str(folder / "events.csv"), "materials": str(folder / "materials.json"),
                                          "datapaths": str(folder / "datapaths.json")})
+    if threads:  # S2 gate 6: per-event seeding must not depend on the thread count
+        old["run"]["threads"] = threads
     (folder / "spec.json").write_text(json.dumps(old), encoding="utf-8")
 
 
@@ -50,8 +52,8 @@ def tree_differences(expected: dict, record: dict) -> list[str]:
     return [key for key in TREE_KEYS if wanted[key] != found[key]]
 
 
-def run_one(row: dict, reference: dict, record: dict, program: Path, folder: Path, keep: bool = False) -> dict:
-    write_inputs(row, record, folder)
+def run_one(row: dict, reference: dict, record: dict, program: Path, folder: Path, keep: bool = False, threads: int | None = None) -> dict:
+    write_inputs(row, record, folder, threads)
     begun = time.perf_counter()
     with (folder / "log.txt").open("w", encoding="utf-8") as log:
         code = subprocess.run([str(program), "ir.json", "spec.json"], cwd=folder, stdout=log, stderr=log, check=False).returncode
@@ -72,6 +74,7 @@ def main(argv=None) -> int:
     parser.add_argument("--cores", type=int, default=os.cpu_count() or 1)
     parser.add_argument("--only", default="")
     parser.add_argument("--keep-outputs", action="store_true")
+    parser.add_argument("--threads", type=int)
     args = parser.parse_args(argv)
     try:
         facts = json.loads(args.facts.read_text(encoding="utf-8"))
@@ -90,7 +93,7 @@ def main(argv=None) -> int:
             record = json.load(stream)
         taken = cores.take(row.get("threads") or 1)
         try:
-            result = run_one(row, references[row["run"]], record, args.program.resolve(), args.work / "runs" / row["run"], args.keep_outputs)
+            result = run_one(row, references[row["run"]], record, args.program.resolve(), args.work / "runs" / row["run"], args.keep_outputs, args.threads)
         finally:
             cores.give(taken)
         results[row["run"]] = result
