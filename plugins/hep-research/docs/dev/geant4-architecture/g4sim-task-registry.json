@@ -253,6 +253,13 @@
    "registered_at": "2026-11-05T17:43:25Z",
    "card_commit": "efddbeb5",
    "reason": "Execution log and the closed open question only; thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "c0f12d8216d5605924e1f8c2bbe1764613b9054cdf0be909c2325631aa62b90e",
+   "registered_at": "2026-11-05T18:07:42Z",
+   "card_commit": "5170ad35",
+   "reason": "Execution log only; thresholds unchanged from the previous registration"
   }
  ]
 }
