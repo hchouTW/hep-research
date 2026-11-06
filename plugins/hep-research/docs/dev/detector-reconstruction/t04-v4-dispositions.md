@@ -219,3 +219,38 @@ Requested by the user 2026-11-06. Fixed before any output exists. Scripts `<priv
 | D1 passes, D4 clears only at 200 or 1,000 | Method limit at low `N_exp`, against section 18's cap of 200 |
 | D1 passes, D4 does not clear at 1,000 | Hessian pulls do not describe these parameters here, or the method fails. `2 dlnL` and the tangent rows are read to separate the two |
 
+## Diagnostics for the two stops: results
+
+Job 7477066, `COMPLETED`, exit `0:0`, 6 min 45 s, both scripts exit 0, empty error logs. Evidence: `<private>/evidence/t04-v4/job-diag-7477066/`. Neither part is void: the T08 replay printed 0.83670 and 0.84327, and the T09 `RAW` rows match job 7474461. **No T04 value has moved.**
+
+**T08: second row of the rules applies.** 300,000 new events give 0.840860, equal to the rate of any cell reaching the seed threshold, so the clusterer loses nothing.
+
+| Closed form | Value | `dev` | Limit | |
+| --- | --- | --- | --- | --- |
+| Gaussian cell response, grid 6, 24 or 96 | 0.843273 | 0.002413 | 0.002001 | Over |
+| Exact, `q x Poisson` + noise, grid 6, 24 or 96 | 0.840203 | 0.000657 | 0.002017 | Within |
+
+The Gaussian approximation is the cause, overstating `p` by 0.0031 at E 80. The position grid is not: all three grids agree to six places. The approximation stands in section 4.2's efficiency row and in `R`; those values at other energies were not recomputed.
+
+**T09: D1 passes, D2 fails, D3 passes, D4 falls outside the outcome table.**
+
+| Check | Result |
+| --- | --- |
+| D1 score | Largest pooled `|z|` 2.83 of 28, limit 3.5. Variance over curvature within 8 % of 1. `2 dlnL` mean 6.90 to 7.06, chi2 7 gives 7. Generator and likelihood agree |
+| D2 fit | Fit `theta` is out of range in 22.6 to 23.7 % of events, equal to the raw `any |pull| > 5` rate at every `N_exp`. Polishing gains nothing: gain above 0.5 is 0, and the truth start is never better by 0.5. The fits are at the minimum, at an equivalent angle pair |
+| D3 error estimate | Sigma ratios 1.0 at both steps |
+| D4, `N_exp` 80 | Not clear. Pooled: `N` centre -0.126. Radial: `theta` -0.140, `phi` -0.146, `t0` width 1.139, `N` -0.187 |
+| D4, `N_exp` 120 | Clear, pooled and radial |
+| D4, `N_exp` 200 | Pooled clear. One radial value over: `N` centre -0.123, limit 0.120 |
+| D4, `N_exp` 1,000 | Clear, pooled and radial |
+
+The theta and phi departure of the section 18 stop is a defect in `calc-t09-lowmu.py`: it wraps `phi` but compares an out-of-range `theta` with truth. After polishing and range mapping, pooled `theta` and `phi` clear at all four `N_exp`.
+
+The rules did not provide for "clears at 120, not at 80". Neither row is claimed. What remains at 80 is not a direction problem. Coordinator's reading, not a finding: `SCORE z` for `N` at 80 is 2.83 in these same events, which alone implies a mean pull near -0.08, and the one-parameter toy of section 3.3 gives -0.035, together close to the -0.126 seen. So the same draw may explain most of it. The radial limits sit near 2 standard errors at n = 400, so single excesses there are expected. New events would decide; these cannot.
+
+Consequences recorded for the user's decision:
+
+- Version 4 does not say how T09 direction angles enter a pull: no range rule, and nothing at the poles, although the fixture's directions are isotropic and the script drew `theta` only from 0.5 to 2.6. This gap is in the design text as well as the script.
+- Not affected by the defect: x, y, z, `t0` and `N` pulls, the dead screen (x, y, z, `t0`), fit failure, and the H2 results, which use likelihood values, not angle differences.
+- Wrong minimum clause (b) as defined would count the same out-of-range fits unless angles are mapped first.
+
