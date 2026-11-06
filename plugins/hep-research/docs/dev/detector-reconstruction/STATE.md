@@ -39,6 +39,7 @@ jobs:
   t04-calc-a-1: {state: COMPLETED, slurm_exit: "0:0", elapsed: "00:14:37", result: "section 18 stops: T08, T09; see t04-v4-dispositions.md", job_id: 7474461, script: "<private>/jobs/t04-calc-a/calc.sh", script_sha256: 288ff27b3a5810f2386e08fb451d3eb4c790993191827aba7064a05333129009, approval: "approve all three jobs"}
   t04-calc-b-1: {state: COMPLETED, slurm_exit: "0:0", elapsed: "00:17:43", result: "no stop; see t04-v4-dispositions.md", job_id: 7474462, script: "<private>/jobs/t04-calc-b/calc.sh", script_sha256: 41839f3adf327d0b51cf97af05e2e67cfbf79324f994e82567ab0fb96ed20c00, approval: "approve all three jobs"}
   t04-diag-1: {state: COMPLETED, slurm_exit: "0:0", elapsed: "00:06:45", node: hpa-wn28, result: "T08 cause: Gaussian approximation in the closed form. T09: theta range defect in the reference script; N_exp 80 unresolved; see t04-v4-dispositions.md", job_id: 7477066, script: "<private>/jobs/t04-diag/diag.sh", script_sha256: 55ffb8b8f7814f55f98edd5641803df06eed2044f7c085898f2efaa5e2cac6ff, approval: "approve the diagnostic job"}
+  t04-round4-1: {state: COMPLETED, slurm_exit: "0:0", elapsed: "00:09:23", node: hpa-wn28, result: "T09 range 120, T08 exact form accepted, dead control clear; see t04-v4-dispositions.md", job_id: 7477126, script: "<private>/jobs/t04-round4/run.sh", script_sha256: aab787a884ccb3928c830b55ac46639b493280c923a4e94868e04f0e71be689a, approval: "approve the round 4 job"}
 backup_a1: {path: "<workdir>/backup/20261106T083302Z", bundle_sha256: 448d4dc5e9d397f4273ce96e4471230c8e9b0397b8829e32caa04ea2fe2fddb9, archive_sha256: 5e39d7a536146a0ae22d8ac07c8b95e6dfae388ea6a25ab95761fb0b2c580e7b, bundle_commit: 2bf2ef92, approval: "approve the backup commands", task: "A1 step 4"}
 backup_a2: {path: "<workdir>/backup/20261106T091043Z", bundle_sha256: 8105206658cc42616a2d3afeca05e21778c570c099b15e8428f263f6caa311da, archive_sha256: 3fc41ab24421f1362160598981c5657611a2c31c10ec881d894e3837f04672f2, bundle_commit: a2281ca3, approval: "rerun the backup and remove the citation worktree", note: "holds the filled task log; predates the B1 rebase"}
 backup_b2: {path: "<workdir>/backup/20261106T194259Z", bundle_sha256: cae42545cc8794ab89b1b9cb12a504e87ef8add9aa63015f1969cdfd11ddcb0f, archive_sha256: ac12ce399e6209e43188df2d678c49a69a9a353dc56a53f54c3dfa5ef487fde8, bundle_commit: 21b591a4, approval: "approve the backup, write the T09 and T08 diagnostic job", note: "B2 step 4; bundle and archive verified"}
@@ -51,11 +52,11 @@ tasks:
   T01: {state: done, note: "checkpoint 7470679 compared; K defaults used: K01"}
   T02: {state: done, note: "definitions and contract map; fixtures run in T06; provisional defaults K04, K05, K13"}
   T03: {state: done, note: "comparison clean with rerun 7474460 (R28); t03-selection.md, t07-t09-task-sheets.md; gaps stay recorded"}
-  T04: {state: blocked-by-decision, record: blockers/T04.md, draft: t04-values-v4.md, review: t04-review.md, note: "third review not freeze-ready; version 4 after three fix rounds; calculation jobs 7474461 and 7474462 done, two section 18 stops (T08, T09) await the user, then section 18 rules, then section 16 choices and Freeze A", deciding: [K09, K12, K16]}
+  T04: {state: blocked-by-decision, record: blockers/T04.md, draft: t04-values-v4.md, review: t04-review.md, note: "third review not freeze-ready; version 4 after three fix rounds; section 18 jobs and both stops resolved by the user, version 4 updated, then section 18 rules, then section 16 choices and Freeze A", deciding: [K09, K12, K16]}
   T05: {state: done, note: "P1 sheets complete, P2 onward list blockers; record t05-task-sheets.md"}
   T11: {state: done, note: "comparison clean with rerun 7474460 (R28); every applicable cell is sourced or a recorded gap (R14); 10 citation uses unread; plugin defects in t11-citation-findings.md not applied"}
 k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K08, K09, K10, K11, K12, K16, K17, K18]}
-next_action: "User: approve round 4 job aab787a884ccb392; then apply its rule, update version 4, section 16 choices, Freeze A (U5)"
+next_action: "User: section 16 choices of version 4, then Freeze A (U5): needs the element_sim spec for K16 and the generator-agreement check"
 ```
 
 ## Plan conflicts found

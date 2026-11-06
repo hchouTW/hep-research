@@ -1,5 +1,7 @@
 # T04: proposed values, version 4 (draft, nothing frozen)
 
+Updated after jobs 7474461, 7474462, 7477066 and 7477126, under the rules of section 18 and the user's decisions of 2026-11-06 (decisions.md). Results: section 18.1.
+
 Replaces t04-values-v3.md, after the third review (`<private>/evidence/20261106T102310Z-b3-review/verdict.md`) and the rechecks of round 1 and 2 (`<private>/evidence/t04-v4/recheck.md`, `recheck2.md`). This document stands alone. K09, K12 and K16 freeze only on the user's word (R02). Until then, no pass or fail claim.
 
 Plain numbers in brackets refer to the verdict; R-numbers to the first recheck; S-numbers to the second. t04-v4-dispositions.md lists each finding and the edits other documents need.
@@ -101,7 +103,7 @@ Outside a range a pull is ungated (section 10). Every range is fixed at Freeze A
 | --- | --- | --- | --- |
 | T07 `q/p` | `sigma(q/p)/|q/p|`, closed form, at each bin's upper edge | At most 0.10. 24 GeV gives 0.0988, so all 4 momentum bins are inside | Closed form from the fixture |
 | T08 pulls | Seed reference `p` at the bin's lower edge | `p` at least 0.99: E2-E4 gated, E1 ungated | Below this, a pull is conditional on the same cells firing the seed, so its target is not `E_ref`. Closed form: sub-cell mean `p` is 0.84 at E1's lower edge, 0.77 at a cell corner (Poisson-exact, recheck), 1.000 at 0.25 GeV [R10, S4] |
-| T09 pulls | Truth expected photons `N_exp` | At least 80: B2-B4 gated, B1 ungated | Gated statistic reaches the slack: in a one-parameter toy with Hessian uncertainty, trimmed centre `-0.3125/sqrt(mu)` reaches 0.0356 at mu = 77 [18]. Mean bias `-0.5/sqrt(mu)` would reach it at 197. Trimmed values at 20, 50, 80, 200: -0.070, -0.044, -0.035, -0.022. The seven-parameter check is **pending** `calc-t09-lowmu.py`, with its decision rule in section 18 |
+| T09 pulls | Truth expected photons `N_exp` | At least 120: B2-B4 gated, B1 ungated | Seven-parameter check, job 7477126: 80 does not clear (`E_vis` centre -0.062 pooled, -0.111 at `r/R_s` [0.4, 0.7)), 120 clears, so the rule of section 18.1 sets 120. The toy alone had suggested 80: in a one-parameter toy with Hessian uncertainty, trimmed centre `-0.3125/sqrt(mu)` reaches 0.0356 at mu = 77 [18]. Mean bias `-0.5/sqrt(mu)` would reach it at 197. Trimmed values at 20, 50, 80, 200: -0.070, -0.044, -0.035, -0.022. |
 
 ### 3.4 Attempts [6]
 
@@ -219,7 +221,7 @@ Interpolation error is under 0.002 sigma on the iso grid (recheck, closed form).
 | Quantity | Reference |
 | --- | --- |
 | Contained energy, main | `E`, to better than 1e-8: 6 `W` from any edge |
-| Efficiency, iso and far | Closed form per shower: `p = 1 - prod_c Phi((T_s - e_c)/s_c)`, `s_c^2 = sigma_n^2 + q e_c`. `R` is the integral over ln E and sub-cell position, not a node sum: 0.992 in E1 (`p` 0.84 at the lower edge, 0.77 at a cell corner), 1.000 in E2-E4 [S4]. The far case takes each shower alone, checked by a section 18 row |
+| Efficiency, iso and far | Closed form per shower, exact cell response: `p = 1 - prod_c P(cell c < T_s)`, each cell `q x Poisson(e_c/q)` plus Gaussian noise `sigma_n`. The Gaussian form used before overstated `p` by 0.0031 at 80 MeV (job 7477066). `R` is the integral over ln E and sub-cell position, not a node sum: 0.992 in E1 (`p` 0.84 at the lower edge, 0.77 at a cell corner), 1.000 in E2-E4 [S4]. The far case takes each shower alone, checked by a section 18 row |
 | Efficiency, near | **None exists.** Reported only |
 | Reference's own uncertainty [M6] | Statistical error of `b` at a node at most 0.011 sigma (12,000 events), usually less. It enters section 5.4 |
 
@@ -242,7 +244,7 @@ Generator and version field: `t09-sphere/1`, NumPy `Generator` with PCG64. Event
 | Readout | Charge: sum over photons of Gaussian(1, 0.3). First-arrival time of the channel |
 | Charge threshold | 0.25 |
 | Saturation | None in main. Control: 5, censored |
-| `N_exp` bins | B1 [20, 80), B2 [80, 200), B3 [200, 500), B4 [500, 2000), uniform in ln N |
+| `N_exp` bins | B1 [20, 120), B2 [120, 200), B3 [200, 500), B4 [500, 2000), uniform in ln N |
 | Radial bins, `r/R_s` | [0, 0.4), [0.4, 0.7), [0.7, 0.9), uniform in volume within the bin |
 | Direction | Isotropic |
 | `t0` | Uniform [10, 30] ns |
@@ -250,7 +252,7 @@ Generator and version field: `t09-sphere/1`, NumPy `Generator` with PCG64. Event
 
 | Control | Change from main | Events |
 | --- | --- | --- |
-| Dead | The 100 channels nearest the +z axis dead. `N_exp` B3, `r/R_s` [0.4, 0.7) | 12,000 |
+| Dead | The 200 channels nearest the +z axis dead. `N_exp` B3, `r/R_s` [0.4, 0.7) | 12,000 |
 | Saturation | Clip at 5. `N_exp` B3, `r/R_s` [0.7, 0.9) | 12,000 |
 | Two-source | Two sources, each `N_exp` B3 independently. Midpoint uniform in the ball of radius 0.3 `R_s`; separation uniform [0.4, 1.2] `R_s` along an isotropic axis, so radii stay under 0.9 `R_s`. Directions independent, isotropic. Same `t0` | 12,000 |
 
@@ -328,7 +330,7 @@ Closed form, at `DEFF_hat` = 1: `U` is non-decreasing in `k` for `N_ev` 300 to 1
 | 1 % | 3,000 | 0.10 % |
 | 0.5 % | 6,000 | 0.05 % |
 
-The rule's rate with varying objects per event is **pending** `calc-rate-rule.py`. It replaces the reviewer's `calc-deff-unequal.py`, because the zero rule changed. Earlier rule: at exactly 10 objects per event and a true rate at the limit, it passed 4.2-5.7 %, against 4.3-24.7 % for plain Clopper-Pearson on objects.
+The rule's rate with varying objects per event, `calc-rate-rule.py`, job 7474461: pass at `L` at most 7.0 % in 132 scenarios, pass at slack at least 99.7 % in all. It replaces the reviewer's `calc-deff-unequal.py`, because the zero rule changed. Earlier rule: at exactly 10 objects per event and a true rate at the limit, it passed 4.2-5.7 %, against 4.3-24.7 % for plain Clopper-Pearson on objects.
 
 **Efficiency tests.** The failure rate is `1 - efficiency`, on the same rule. The lower bound on efficiency is `1 - U`, and `L` is `1 - (R - delta)`. `N_min` is 3,000 events.
 
@@ -379,7 +381,7 @@ The target is at most 1 % false failure per workflow, **if all of these hold** [
 | True centre and width error in every gated bin | Within `slack(se)`: 0.0356 at the cap, 0.043 near design. T08 energy: less the reference's own error, 0.011 sigma, so 0.0246 and 0.0324 [M6] |
 | T08 pull model | Model over true sd at least 0.983 (closed form), so added width at most 0.017, inside the slack. Sharing spread about 0.09 sigma at most. Pulls with sharing near `d` = 3 are checked only by `calc-t08-reference.py` [11] |
 | T08 far position | Asymmetric truncation pulls each two-peak centroid inward. Expected image, hard threshold, rms bias against the Fisher sigma: 0.36, 0.34, 0.32, 0.31, 0.15 at `d` = 3, 3.5, 4, 5, 6 at 0.25 GeV; 0.23-0.16 at 1 GeV; about 0.12 at 4 GeV. Bin-level width about 1.026 (E2), 1.010 (E3), 1.004 (E4), inside the position slack of 0.0356, by 0.01 in E2. Coarse [S3] |
-| T09 penalty | The H1-truth tail above 30 is under the rate slack. Not known: **pending** `calc-t09-null-h2.py` [R8] |
+| T09 penalty | The H1-truth tail above 30: 3 of 600 at `N_exp` 50, exactly at 0.5 %, and 0 of 600 at 1,000 (job 7474462). The penalty stays 30, with no margin at 50 [R8] |
 | `se` | At or under the cap |
 | True rate under a limit | Under the rate slack, below |
 | Skew of pulls | The trimmed centre moves by about `-0.0937 gamma` (Cornish-Fisher). So `|gamma|` at most 0.38 at the cap, 0.46 at `se` 0.0095 |
@@ -416,7 +418,7 @@ Closed form, Gaussian pulls, one bad bin, pass probability.
 
 So an error of 0.10 or more across a whole bin is found at least 95 % of the time. Errors within `slack(se)` pass. Between them the outcome is uncertain. That band is accepted, not hidden.
 
-Table with the gate's own bootstrap, fail and inconclusive labels: **pending** `calc-pull-table.py` [20]. Earlier rule: v3's "directly simulated" table (3,000 trials, `t04_v2_b.py`, fixed design `se`, limits from 1.012). "100 % in 3,000" bounds failure only at about 0.1 %. So the family target is a Gaussian extrapolation, not a measurement. Width 1.10: 5.0 % is the closed form with a scale-aware `se`; it was never measured with the gate's bootstrap.
+Table with the gate's own bootstrap, fail and inconclusive labels: `calc-pull-table.py`, job 7474461 [20]. At a true error of 0.10 a single bin passes 4.0 % (centre) and 4.8 % (width), under the rule's 7.9 %; no fail at state `none`. Earlier rule: v3's "directly simulated" table (3,000 trials, `t04_v2_b.py`, fixed design `se`, limits from 1.012). "100 % in 3,000" bounds failure only at about 0.1 %. So the family target is a Gaussian extrapolation, not a measurement. Width 1.10: 5.0 % is the closed form with a scale-aware `se`; it was never measured with the gate's bootstrap.
 
 ## 6. Common gates
 
@@ -456,12 +458,12 @@ Blocker 5. Quantities are fixed here. Each recipe's output must supply them.
 | Merge | Two-shower event in which both showers give their largest energy share to one object. Denominator: far events, E2-E4. The event is the object |
 | Split | Showers with more than one matched cluster. Reported |
 | T08 parameters, 3 | Named energy "clustered deposited energy", and x, y of the object. Truth x, y: shower axis. Never called incident energy. Clustering, estimators and uncertainties: section 7.1 |
-| T09 parameters, 7 | Vertex x, y, z; time `t0`; two direction components in the tangent plane at the truth direction; visible energy `E_vis` |
+| T09 parameters, 7 | Vertex x, y, z; time `t0`; two direction components in the tangent plane at the truth direction; visible energy `E_vis`. Frame at truth direction `d`: `e_1 = a x d`, normalised, `e_2 = d x e_1`, with `a` the z axis, or the x axis where `|d_z|` exceeds 0.9, so it is defined at the poles. Residuals are `(d_fit - d) . e_k`; uncertainties come from the covariance in those local coordinates. Fitted angles never enter a pull directly |
 | Fit failure | Fit returned no result, no finite covariance, or hit its iteration budget. Denominator: all generated events |
 | Truth-start fit | The same recipe started at truth, scoring side only. Never reaches the data side (A09), never reported as a result |
 | Wrong minimum | Either: (a) truth-start fit reaches `lnL` at least 0.5 higher than the reported fit; or (b) any of the 7 parameters more than 5 of its truth-start uncertainties from truth. Clause (b) is any-parameter, not chi2: for a correct fit it has rate 4.0e-6, while chi2 with 7 d.o.f. above 25 has 7.6e-4 [5]. Clause (b) applies exactly where pulls are gated, B2-B4 [M5]. In B1 only clause (a) is gated, and (b) is reported |
 | Reversed, mirrored | Reversed: cosine of fitted to truth direction below -0.5. Mirrored: fitted vertex closer to `-x_true` than `x_true`, for `r/R_s` at least 0.4 |
-| Topology hypotheses | H1: one source, 7 parameters. H2: two sources, 14 parameters. H2 is chosen if and only if `2(lnL_2 - lnL_1) >= 30`. The 30 is a penalty, so more parameters and a higher raw likelihood are not enough. Design choice, not tuned on any recipe sample. H1 is H2 at zero second-source yield, so Wilks does not apply under H1 truth: the tail is **pending** `calc-t09-null-h2.py` [R8] |
+| Topology hypotheses | H1: one source, 7 parameters. H2: two sources, 14 parameters. H2 is chosen if and only if `2(lnL_2 - lnL_1) >= 30`. The 30 is a penalty, so more parameters and a higher raw likelihood are not enough. Design choice, not tuned on any recipe sample. H1 is H2 at zero second-source yield, so Wilks does not apply under H1 truth: the tail is measured, job 7474462 [R8] |
 | Mis-ID | H1 truth: H2 chosen, in each main bin. H2 truth: H1 chosen, in the two-source control |
 | `D_bar`, expected difference | Charge-only `lnL` difference on expected data, truth H2 against the best H1 fit, 8 starts. A reported design figure only. No rule reads it: charge alone gives 0.5-25 in this stratum, while the statistic also uses time [S1] |
 | Fixed likelihood points | 50 parameter points drawn from block 6, frozen with the generator |
@@ -526,12 +528,12 @@ Per-bin rate count: 6 clean, 8 noise. Earlier rule, simulated at reference 0.98:
 
 **Why not a plain number, and why not the recipe's own rate.** v3's "development rate plus 0.01" tests stability, not fakes: a true 30 % gets a 31 % ceiling and passes 65 %. A plain 1 % has no link to the fixture, which is the second review's objection: it is a floor-like target that a correct recipe might not meet if noise itself makes fakes. So the limit is derived from the fixture, then capped.
 
-**Fixture-derived rate.** `f_ref(o)` is the chance rate with no recipe under test. Closed-form estimate, for a candidate needing 6 hits: about 1e-7 per reconstructed track at o3, by the script's own formula `2 p_w^2 x 0.13 x 14 x 1.6 / 36`, and less at the others [M2]. For comparison, a 4-hit requirement gives about 0.03 candidates per event at o3 per triple. So at these noise levels a correct recipe with the fixture's reconstructable definition has almost no chance fakes, and the objection does not bite. The number is **pending** `calc-fake-reference.py`. Chance 6-hit candidates are too rare to count, and it searches 4 of 56 plane triples, so its result is an extrapolation from a 4-hit count: a 95 % upper bound, scaled by `2 p_w^2 x 14 x 1.6` [M4].
+**Fixture-derived rate.** `f_ref(o)` is the chance rate with no recipe under test. Closed-form estimate, for a candidate needing 6 hits: about 1e-7 per reconstructed track at o3, by the script's own formula `2 p_w^2 x 0.13 x 14 x 1.6 / 36`, and less at the others [M2]. For comparison, a 4-hit requirement gives about 0.03 candidates per event at o3 per triple. So at these noise levels a correct recipe with the fixture's reconstructable definition has almost no chance fakes, and the objection does not bite. `calc-fake-reference.py`, job 7474462: upper bounds 7.7e-12, 3.6e-10 and 1.0e-7 per reconstructed track at the three levels. Chance 6-hit candidates are too rare to count, and it searches 4 of 56 plane triples, so its result is an extrapolation from a 4-hit count: a 95 % upper bound, scaled by `2 p_w^2 x 14 x 1.6` [M4].
 
 | Item | Value |
 | --- | --- |
 | Absolute cap `C(o)` | `max(0.005, 5 f_ref(o))`, fixed at Freeze A, at most 0.01. Rule in section 18 |
-| Expected value at Freeze A | 0.005 at all three levels, pending the script |
+| Value at Freeze A | 0.005 at all three levels (job 7474462) |
 | Stability tolerance `tau` | 0.0025, fixed at Freeze A |
 | Recipe | CKF at the Freeze-B hash |
 | `r_dev` | Per bin, from the Freeze-B run, 12,000 events per bin. Duplicates do not share it |
@@ -618,7 +620,7 @@ Recipe: `reco.light.channel-likelihood/1`.
 | Item | Treatment |
 | --- | --- |
 | Few photons | B1, required by the sheet and plan. Gated on fit failure, wrong minimum clause (a) and mis-ID, none of which needs Gaussian pulls. Pulls ungated in B1, because no result shows a correct fit has unit pulls there. Obligation open for pulls |
-| Live-unhit against dead | Dead control: 21 pull tests with dead channels masked. Negative check [R7]: the same 12,000 events, same fit, dead read as unhit. It fires if at least one of x, y, z, `t0` gives `|centre| - 1.645 se > 0.10`, at 95 %. Sensitivity is **pending** `calc-t09-lowmu.py`; section 18 says what follows |
+| Live-unhit against dead | Dead control: 21 pull tests with dead channels masked. Negative check [R7]: the same 12,000 events, same fit, dead read as unhit. It fires if at least one of x, y, z, `t0` gives `|centre| - 1.645 se > 0.10`, at 95 %. Screen at n = 500, job 7474461: 0.120 at 100 channels, 0.486 at 200, so the patch is 200 by section 18's rule. Masked control at 200 clears, job 7477126 |
 | Saturation | Saturation control: 21 pull tests with censoring |
 | Mirrored, reversed | 2 rate tests, `L` = 0.5 %, pooled over B2-B4, from the main sample |
 | Two simultaneous events | Two-source control: H2-truth mis-ID, `L` = 1 %, 1 test, all events of the control. See below |
@@ -731,15 +733,15 @@ Evaluation, per attempt, closed form. Cost is unknown until a recipe has run.
 | Cap, centre and width | 0.0129, 0.0119 | 0.0108 both | Closed form |
 | Slack at cap | 0.0223 | 0.0356 | Closed form |
 | Slack at `n` = 10,000 | 0.0379, 0.0426 | 0.0386, 0.0427 | Closed form |
-| T09 range | 200 (mean) | 80 (trimmed) | Closed form, toy; 7 parameters pending |
+| T09 range | 200 (mean) | 120 (trimmed) | Seven-parameter check, job 7477126 |
 | Wrong-minimum clause | "5 sigma" | Any of 7 parameters, 4.0e-6 | Closed form |
-| Topology gate region | `D_bar` 10 | Separation at least 0.4 `R_s`, miss rate tested directly | Corner pending |
+| Topology gate region | `D_bar` 10 | Separation at least 0.4 `R_s`, miss rate tested directly | Corner: 0 of 600, job 7474462 |
 | T08 noise, cell threshold | Not stated | 0.2, 0.6 MeV (round 1: 1, 3) | Design choice; closed form shows why |
 | T07 vertex separation | Transverse, `u_v` 0.043 | Along v, `u_v` 0.0184, on a line | Design choice; closed form |
 | T07 ideal wrong assignment at o3 | Not stated (round 1: 0.02 %) | 0.027 % | Closed form |
 | Freeze-B run, T08, T09 | Not stated | 45,000 each | Closed form |
 | Rate minimum | None | 3,000 and 6,000 events | Design choice |
-| Clustered rate pass at limit | 4.2-5.7 % | Pending | Earlier rule for the old number |
+| Clustered rate pass at limit | 4.2-5.7 % | At most 7.0 %, job 7474461 | Earlier rule for the old number |
 | Charge-bias 66 % | 66 % | Unchanged | Earlier rule; unaffected, not rerun |
 | Paired efficiency 6.1 % | 6.1 % | Unchanged | Earlier rule; unaffected, not rerun |
 
@@ -780,7 +782,7 @@ If 0.075 with 30,000: tolerance 0.075, cap 0.0067, which keeps slack 0.035 (`n` 
 
 - Family target: holds only under section 5.4. For true errors above the slack, failure is the intended outcome.
 - The family target's tiny per-test rate is a Gaussian extrapolation. Nothing has measured it. `calc-rate-rule.py` at 1,000 reps bounds a failure rate at 0.3 % only.
-- Rates: the `alpha` slack is computed at known DEFF. The effect of estimating DEFF is pending.
+- Rates: the `alpha` slack is computed at known DEFF. With DEFF estimated, the pass rate at the limit reached 7.0 % at most in 132 scenarios (job 7474461), above the nominal 5 % and under the rule's 7.1 %.
 - Gates apply where the task is easy [18]. Charge sign is gated where `sigma(q/p)/|q/p|` is at most 0.1, so a Gaussian wrong sign is a 10-sigma event: the gate catches gross errors only. Assignment at 5 `u_v`, merge at 3 `W` and mis-ID at separation 0.4 `R_s` follow the same pattern. Where confusion really happens, results are reported only.
 - Skewed pulls can pass or fail for reasons other than bias.
 - Sign-odd bias inside a bin cancels, except by charge and by slope sign. Position sign is reported only.
@@ -792,14 +794,15 @@ If 0.075 with 30,000: tolerance 0.075, cap 0.0067, which keeps slack 0.035 (`n` 
 - T08 far position has an inward centroid bias, section 5.4, which uses most of the slack in E2 (expected image, coarse) [S3].
 - H1-truth tail: 600 events per `N_exp` cannot show a tail under the slack. 3 of 600 clears the rule with a 95 % bound of 1.29 %, and a true 1 % clears it 15 % of the time. Only false failure follows, not false pass. The tail is also a lower limit through search [M6].
 - T08 far showers have equal energies, so unequal sharing is untested. Sharing in near is untested. Saturated energy has no target. Targets depend on an independent coding of the same clustering definition, by the same author, so a defect in the definition is shared and a defect repeated in both codings is possible.
-- T09's valid range rests on a one-parameter toy and a gross check (`se` about 0.03). The reference fit in `calc-t09-lowmu.py` is simplified: integer charge, no threshold, no saturation. If a correct fit departs in B2 by less than the script can see, T09 fails (section 16).
+- T09's valid range rests on `calc-t09-range.py`, n = 4,800 per `N_exp`, `se` about 0.015. Its reference fit is simplified: integer charge, no threshold, no saturation. At 120 the `E_vis` centre is -0.044 and the `N_exp` centre -0.042: inside the rule's 0.060, but not clearly inside the slack of 0.0356 that section 5.4 assumes, and B2's lower edge sits there. The bin's mean over [120, 200) should be smaller; that is not measured. If a correct fit departs in B2 by more than the gate allows, T09 fails (section 16).
+- Near the +z axis the masked control, with 200 dead channels, had one reversed fit in 500 and a largest pull of 9.45 (job 7477126). No rule reads it at that size; the 12,000-event control will.
 - Vertex pulls at worst-case correlation sit exactly at the cap with retention 0.95. There, B = 1,000 jitter of 2.2 % gives about even odds of inconclusive, which is `failed`. Expected correlation is far lower [M8].
 - Adaptive vertex weights may give pull widths away from 1 for a correct fit.
 - No fixture number has been run through a recipe. Retentions in section 4.4 are assumptions.
 
 ## 18. Pending scripts and decision rules
 
-All in `<private>/evidence/t04-v4/`, not run, syntax-parsed only. All are **required** for Freeze A [R6]. numpy and scipy only, fixed seeds. Every script writes results to stdout as they appear, flushed, so a crash keeps earlier output, and sets one BLAS thread per worker. Each runs on 6 CPUs, one after another in its job; a script's failure does not stop the next. Runtimes are the recheck's estimates with assumed unit costs, not measured.
+All in `<private>/evidence/t04-v4/`. All have now run; results in section 18.1. All were **required** for Freeze A [R6]. numpy and scipy only, fixed seeds. Every script writes results to stdout as they appear, flushed, so a crash keeps earlier output, and sets one BLAS thread per worker. Each runs on 6 CPUs, one after another in its job; a script's failure does not stop the next. Runtimes are the recheck's estimates with assumed unit costs, not measured.
 
 | Job | Script | SHA-256 prefix | Estimate | Claim |
 | --- | --- | --- | --- | --- |
@@ -841,3 +844,16 @@ All in `<private>/evidence/t04-v4/`, not run, syntax-parsed only. All are **requ
 | Pull | Any fail at state `none` | Stop |
 
 A pending-script change that moves a required test to reported goes in the scope-change table for the maintainer.
+
+### 18.1 Results
+
+Jobs 7474461 and 7474462 ran the scripts above. Their two stops were answered by the user's decisions of 2026-11-06, using diagnostic job 7477066 and job 7477126. Full tables and the rules as fixed before each job: t04-v4-dispositions.md. `<private>/evidence/t04-v4/job-round4-7477126/` holds `calc-t08-exact.py` and `calc-t09-range.py` output.
+
+| Item | Result | Action taken |
+| --- | --- | --- |
+| T08 `fired` at 80 MeV | Stop. Cause: the Gaussian cell response. 300,000 events give 0.84086, exact 0.84020, Gaussian 0.84327 | Exact form in section 4.2. All six nodes up to 250 MeV within limits against it |
+| T08 quoted values | `R(E1)` 0.9924, `p` 0.8402 at 80 MeV, 0.7671 at a cell corner, far E1 node mean 0.96006 | Rounded values in sections 4.2 and 9.2 unchanged: 0.992, 0.84, 0.77 |
+| T09 `theta`, `phi` | Stop. Cause: `calc-t09-lowmu.py` departed from section 7: it gated angles, not tangent components, left `theta` out of range in 23 % of fits, used `N_exp` for `E_vis` and did not draw isotropic directions | `calc-t09-range.py` follows sections 4.3 and 7 |
+| T09 range | 80 not clear, 120 clear on all four rows. No fit failure, clause (a) or clause (b) at either | Range and B1/B2 edge 120 |
+| T09 dead | Screen 0.486 at 200 channels. Masked control clear | `PATCH` 200 |
+| H2, Rate, Pull, Fake | No rule triggered | Penalty 30, `C` 0.005 |

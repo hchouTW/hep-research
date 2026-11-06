@@ -278,3 +278,24 @@ Fixed before any output exists. Scripts `<private>/evidence/t04-v4/round4/calc-t
 
 A row's kept count below its n is fit failure and is read above. A rule not listed leaves version 4 unchanged, and an outcome the table does not cover goes to the user.
 
+## Round 4: results
+
+Job 7477126, `COMPLETED`, exit `0:0`, 9 min 23 s, both scripts exit 0, empty error logs. Evidence: `<private>/evidence/t04-v4/job-round4-7477126/`. Script check line reproduces the diagnostic's 0.843273 and 0.840203.
+
+**T09: second row applies. Range and the B1/B2 edge become 120.**
+
+| Row | n | Over its limit |
+| --- | --- | --- |
+| `N_exp` 80, pooled | 4,800 | `E_vis` centre -0.062, limit 0.0601 |
+| 80, `r/R_s` from 0 | 1,600 | None |
+| 80, from 0.4 | 1,600 | `E_vis` centre -0.111, limit 0.0780 |
+| 80, from 0.7 | 1,600 | None |
+| `N_exp` 120, pooled and three radial | 4,800, 1,600 | None. Pooled `E_vis` centre -0.044 |
+| Dead masked, patch 200 | 500 | None. Clause (a), clause (b), reversed: 1 of 500 each; largest pull 9.45 |
+
+Fit failure, clause (a) and clause (b) are 0 at both `N_exp`, 4,800 events each. Tangent components and x, y, z, `t0` clear everywhere. `E_vis` and `N_exp` centres agree within 0.002, so the earlier parameter mismatch did not hide anything.
+
+**T08: every node within its limit.** Section 4.2 takes the exact form. Rounded values do not change: `R(E1)` 0.99239 against 0.99244, `p` 0.8402 against 0.8433, corner 0.7671 against 0.7752, all rounding as quoted, except that 0.84 and 0.77 now round from a different value. Far E1 node mean 0.96006 against 0.96083.
+
+Version 4 updated accordingly (section 18.1). Freeze A edits still to make in t04-prereg.md and the sheets: those listed above, plus the B1/B2 edge at 120, `PATCH` 200, and the exact efficiency form.
+
