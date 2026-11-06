@@ -8903,8 +8903,8 @@ Passing checks show software consistency, not physical validity.
 G5 for g4sim phase S2 (gate 10), at `57825b63`: `adapters/geant4/assets/g4sim/Accounting.hh`, `adapters/geant4/assets/g4sim_run/` (`IrTree.hh`, `GeometryCheck.cc`,
 `g4sim_run.cc`, `WriteBack.hh`, the two legacy `Detector.cc` files and the legacy observer ports) and `adapters/geant4/tests/g4proto/s2_gates/main.cc`.
 
-**Evidence**: `adapters/geant4/tests/g4proto/g5_scan.py` at `ebd4d056` against all 5,657 `.cc`, `.hh` and `.icc` files of the Geant4 11.4.3 examples tree, normalized
-lines: 0 shared runs of 3 and of 4 consecutive lines; the positive control found 863 and 880. The fixes after `ebd4d056` were not rescanned. An independent read by an agent
+**Evidence**: `adapters/geant4/tests/g4proto/g5_scan.py` against all 5,657 `.cc`, `.hh` and `.icc` files of the Geant4 11.4.3 examples tree, normalized
+lines: 0 shared runs of 3 and of 4 consecutive lines; the positive control found 863 and 880. The same at `81dea13c`, after the later fixes. An independent read by an agent
 that did not write the code found no copying and could not compare side by side, because the examples are not on E5. The legacy ports differ from the plugin's own `Actions.cc`,
 `Spec.hh` and main programs only by hooks, the early-observer columns and test-only switches.
 
