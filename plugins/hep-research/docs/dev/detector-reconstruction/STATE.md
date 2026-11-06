@@ -35,8 +35,8 @@ jobs:
   cvmfs-probe-1: {state: COMPLETED, slurm_exit: "0:0", result: "lcg listed in 2 s; views and releases/acts stalled past 240 s", job_id: 7470680, script: "<private>/jobs/cvmfs-probe/cvmfs.sh", script_sha256: 8b4a0c66e43727b44744b0c67b67b0d753ba8a064dbd87de39a54aec11dec136, approval: "approve both jobs and the read-only network queries"}
   acts-confirm-1: {state: COMPLETED, slurm_exit: "0:0", elapsed: "00:00:27", node: hpa-wn28, result: "5 of 5 checks pass; backend-smoke level only", job_id: 7470886, script: "<private>/jobs/acts-confirm/confirm.sh", script_sha256: 3fe1402c5e0242b4d9cffdd51264f44f478930a039116f278a1d1adce6a091b1, approval: "approve the submission"}
   checkpoint-b2-1: {state: FAILED, slurm_exit: "1:0", elapsed: "00:22:29", node: hpa-wn28, result: "not clean: LCG error as known, and tests.adapters.test_unbinned_fit timed out at 600 s; see baseline.md", job_id: 7472812, tested_commit: e57716dc, script: "<private>/jobs/checkpoint-b2/checkpoint.sh", script_sha256: 694e9f9343466979a870a5b09da66016192b186bfc37d83152f96b0fd29f54c8, approval: "approve the submission"}
-  unbinned-rerun-1: {state: submitted, job_id: 7474460, tested_commit: e57716dc, script: "<private>/jobs/unbinned-rerun/rerun.sh", script_sha256: 3595166a8a26705cf819877fe308fae95ad239665be270d9de2f88e71d8c6a17, approval: "approve all three jobs"}
-  t04-calc-a-1: {state: submitted, job_id: 7474461, script: "<private>/jobs/t04-calc-a/calc.sh", script_sha256: 288ff27b3a5810f2386e08fb451d3eb4c790993191827aba7064a05333129009, approval: "approve all three jobs"}
+  unbinned-rerun-1: {state: COMPLETED, slurm_exit: "0:0", elapsed: "00:00:31", node: hpa-wn28, result: "module passes alone in 29 s, 9 run, 1 skipped; see baseline.md", job_id: 7474460, tested_commit: e57716dc, script: "<private>/jobs/unbinned-rerun/rerun.sh", script_sha256: 3595166a8a26705cf819877fe308fae95ad239665be270d9de2f88e71d8c6a17, approval: "approve all three jobs"}
+  t04-calc-a-1: {state: running, job_id: 7474461, script: "<private>/jobs/t04-calc-a/calc.sh", script_sha256: 288ff27b3a5810f2386e08fb451d3eb4c790993191827aba7064a05333129009, approval: "approve all three jobs"}
   t04-calc-b-1: {state: submitted, job_id: 7474462, script: "<private>/jobs/t04-calc-b/calc.sh", script_sha256: 41839f3adf327d0b51cf97af05e2e67cfbf79324f994e82567ab0fb96ed20c00, approval: "approve all three jobs"}
 backup_a1: {path: "<workdir>/backup/20261106T083302Z", bundle_sha256: 448d4dc5e9d397f4273ce96e4471230c8e9b0397b8829e32caa04ea2fe2fddb9, archive_sha256: 5e39d7a536146a0ae22d8ac07c8b95e6dfae388ea6a25ab95761fb0b2c580e7b, bundle_commit: 2bf2ef92, approval: "approve the backup commands", task: "A1 step 4"}
 backup_a2: {path: "<workdir>/backup/20261106T091043Z", bundle_sha256: 8105206658cc42616a2d3afeca05e21778c570c099b15e8428f263f6caa311da, archive_sha256: 3fc41ab24421f1362160598981c5657611a2c31c10ec881d894e3837f04672f2, bundle_commit: a2281ca3, approval: "rerun the backup and remove the citation worktree", note: "holds the filled task log; predates the B1 rebase"}
@@ -48,12 +48,12 @@ baseline_static: {evidence: "<private>/evidence/20261106T044938Z", exit: 0, seco
 tasks:
   T01: {state: done, note: "checkpoint 7470679 compared; K defaults used: K01"}
   T02: {state: done, note: "definitions and contract map; fixtures run in T06; provisional defaults K04, K05, K13"}
-  T03: {state: in-progress, note: "done-provisional (R28), awaiting module rerun 7474460 (checkpoint 7472812 not clean); t03-selection.md, t07-t09-task-sheets.md; gaps stay recorded"}
+  T03: {state: done, note: "comparison clean with rerun 7474460 (R28); t03-selection.md, t07-t09-task-sheets.md; gaps stay recorded"}
   T04: {state: blocked-by-decision, record: blockers/T04.md, draft: t04-values-v4.md, review: t04-review.md, note: "third review not freeze-ready; version 4 after three fix rounds; calculation jobs 7474461 and 7474462 submitted, then section 18 rules, then section 16 choices and Freeze A", deciding: [K09, K12, K16]}
   T05: {state: done, note: "P1 sheets complete, P2 onward list blockers; record t05-task-sheets.md"}
-  T11: {state: in-progress, note: "done-provisional (R28), awaiting module rerun 7474460 (checkpoint 7472812 not clean); every applicable cell is sourced or a recorded gap (R14); 10 citation uses unread; plugin defects in t11-citation-findings.md not applied"}
+  T11: {state: done, note: "comparison clean with rerun 7474460 (R28); every applicable cell is sourced or a recorded gap (R14); 10 citation uses unread; plugin defects in t11-citation-findings.md not applied"}
 k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K08, K09, K10, K11, K12, K16, K17, K18]}
-next_action: "Read jobs 7474460, 7474461, 7474462; judge the rerun by baseline.md; then section 18 rules, backup, Freeze A (U5)"
+next_action: "B2 step 4 backup awaits approval; read jobs 7474461, 7474462; then section 18 rules, Freeze A (U5)"
 ```
 
 ## Plan conflicts found

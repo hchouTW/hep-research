@@ -112,7 +112,7 @@ Task B2 step 2, job 7472812, commit `e57716dc`, 2026-11-06. Slurm state `FAILED`
 | `--part units` | 6,797 run, 6,415 passed, 0 failures, 1 error, 381 skipped | 6,829 run, 6,448 passed, 0 failures, 1 error, 380 skipped |
 | Modules that did not finish | 0 | 1 |
 
-The error is the known LCG test. The module that did not finish is `tests.adapters.test_unbinned_fit`, stopped by the runner's default 600 s limit per module, so its tests have no result in this job. Its test file and `unbinned_fit.py` did not change in the release. It took 468.65 s at the 0.56.0 checkpoint, and `tools/module_timings.json` gives 272.7 s. The whole units part took 974 s against 734 s. The node's load was 161 of 192 CPUs when read after the job ended, so its load during the run is unknown. Slowness is the suspected cause; a hang is not excluded.
+The error is the known LCG test. The module that did not finish is `tests.adapters.test_unbinned_fit`, stopped by the runner's default 600 s limit per module, so its tests have no result in this job. Its test file and `unbinned_fit.py` did not change in the release. It took 468.65 s at the 0.56.0 checkpoint, and `tools/module_timings.json` gives 272.7 s. The whole units part took 974 s against 734 s. The node's load was 161 of 192 CPUs when read after the job ended, so its load during the run is unknown. The cause is not established; see the rerun's result below.
 
 This job is not clean and stays failed (R11). T03 and T11 stay provisional.
 
@@ -126,4 +126,14 @@ Job 7474460 runs that one module at the same commit, alone, with no per-module l
 | Passes in more than 600 s | Not clean by itself. The module cannot meet the runner's limit on this node even alone; goes to the user. |
 | Fails, errors, or reaches the job's time limit | A finding, recorded with its test IDs. T03 and T11 stay provisional; goes to the user. |
 
-Result: pending.
+Result: job 7474460, `COMPLETED`, exit `0:0`, 31 s, node `hpa-wn28`, commit `e57716dc`, tree clean. Evidence: `<private>/evidence/unbinned-rerun-7474460/`.
+
+| Item | Checkpoint at 0.56.0 | Job 7472812 | Job 7474460 |
+| --- | --- | --- | --- |
+| How it ran | Suite, 6 modules at a time | Suite, 6 modules at a time | Alone |
+| Time | 468.65 s | Stopped at 600 s | 29 s (tests 28.7 s) |
+| Tests | 9 run, 1 skipped, OK | No result | 9 run, 1 skipped, OK |
+
+First row of the table above applies: the comparison is clean apart from the LCG error. With this module counted, the unit suite at 0.57.0 is 6,838 run, 6,456 passed, 0 failures, 1 error, 381 skipped; the skip count equals the one at 0.56.0. Those totals combine two jobs. Job 7472812 stays failed.
+
+Cause of the timeout: not established. Node load does not explain it by itself: the load average was 163 to 166 during this 29 s run, close to the 161 read after job 7472812. The module was 16 times slower inside the suite at 0.56.0 and over 20 times slower at 0.57.0 than alone, so contention inside the job is the leading suspect; neither the job scripts nor the runner limit threads. That is not tested. A hang is unlikely but was not excluded for job 7472812 itself. Any later unit job can hit the same timeout, so one that does is read against this record, not assumed harmless.
