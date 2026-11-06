@@ -1,12 +1,12 @@
 # T03: selection for the three required workflows
 
-State: `blocked-by-decision` (R16, K02, K03). No reconstruction backend is confirmed on this host. Nothing below has run on this host unless marked. Package facts come from read-only `conda search` queries on conda-forge, 2026-11-06, listed at the end; anything else is marked `unverified`. A package existing is not a confirmed backend: that needs an approved job (R02). Costs are not estimated: no recorded times exist.
+State: `in-progress`. K02 and K03 are decided (decisions.md): ACTS for tracking, confirmed at smoke level by job 7470886; development bindings for calorimetry and photon likelihood; data synthetic or Geant4-simulated. Still to write: the complete task sheets for T07-T09. Options not chosen stay listed for the record. Apart from ACTS, nothing below has run on this host. Package facts come from read-only `conda search` queries on conda-forge, 2026-11-06, listed at the end; anything else is marked `unverified`. A package existing is not a confirmed backend: that needs an approved job (R02). Costs are not estimated: no recorded times exist.
 
 ## Tracking and vertexing (BP03, BP04)
 
 | Rank | Option | Form | Version | Install route | Licence | Data | Limits |
 | --- | --- | --- | --- | --- | --- | --- | --- |
-| 1 | ACTS | Library | `acts-core` 48.2.0, linux-64, built 2026-10-18 | conda-forge into a new environment. CVMFS is not a dependable route (below) | MPL-2.0 | Synthetic, or simulated from the installed Geant4 | The only option here with general finding and vertexing. Depends on Boost and the C++ runtime with no Python dependency, so it appears to be the core library alone: a C++ driver and a geometry would have to be written. Needs K02 |
+| 1, **selected** | ACTS | Library | `acts-core` 48.2.0, linux-64, built 2026-10-18 | Installed at `<workdir>/env/acts48`. Smoke test passed in job 7470886 | MPL-2.0 | Synthetic, or simulated from the installed Geant4 | The only option here with general finding and vertexing. One library, `libActsCore.so`, C++23, with headers for seeding, CKF, fitting, ambiguity resolution and vertexing. No Python layer, simulation or example framework, so a C++ driver and a geometry have to be written |
 | 2 | `simreco` pattern recognition | Existing tool, present in the tree | `adapters/geant4` 0.7.0 | None for the code; needs a build and `element_sim` events | Plugin licence | Simulated events only | Plane-by-plane association plus fit. No vertexing. Not a general tracker, so it cannot stand for BP04 |
 | 3 | GenFit | Library | Unverified | Not on conda-forge; source build only | Unverified | Needs measurements and seeds | Fitter only: an existing fitter cannot replace finding (T03) |
 

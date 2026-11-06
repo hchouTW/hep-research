@@ -71,4 +71,4 @@ Later jobs load `cmake/3.28`, so the comparison set is now the single LCG test.
 
 ## Backends and data
 
-K02 and K03 are unresolved. No reconstruction backend has been probed. Site modules on this host include no Geant4 or ACTS. Unprobed means unavailable (R02). CVMFS is not a dependable route: t03-selection.md records the listing stalls on the login node and in job 7470680.
+K02 and K03 are decided (decisions.md). `acts-core` 48.2.0 is confirmed at smoke level in `<workdir>/env/acts48`; any other backend stays unavailable until an approved job confirms it (R02). Site modules on this host include no Geant4 or ACTS. CVMFS is not a dependable route: t03-selection.md records the listing stalls on the login node and in job 7470680.

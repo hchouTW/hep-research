@@ -9,6 +9,7 @@ private: "<private>, on the group file system with ACLs removed, mode 700 (decis
 worktree: <private>/worktree
 checkout: <private>/checkout
 workdir: "<workdir>, on the group file system, ACLs removed, mode 750 (decisions.md, Q3)"
+backend_env: {path: <workdir>/env/acts48, package: acts-core 48.2.0, size: 1.4 GB, approval: "approve the install commands", package_list: "<private>/evidence/acts48-explicit.txt"}
 job_interpreter: {path: <workdir>/env/py313/bin/python, version: 3.13.18, sha256: 32545eb5023762341770737253e9fd8a64e41f993e255561246f50d5c0ff4a53, deviation: "R29 option b"}
 plugin_root: plugins/hep-research
 main_checkout_t0: {head: 9bd365f0, porcelain_lines: 0}
@@ -30,15 +31,16 @@ jobs:
   baseline-units-1: {state: COMPLETED, slurm_exit: "0:0", suite_exit: 1, elapsed: "00:16:41", node: hpa-wn28, result: "see baseline.md, 2 failing IDs", job_id: 7470206, script: "<private>/jobs/baseline-units/units.sh", script_sha256: d3d448062ddc63290b166e709a2d81120b58d3050f7f5f694d420f532d7a9b44, command: "sbatch --parsable <private>/jobs/baseline-units/units.sh", approval: "approve the submission"}
   checkpoint-p0-1: {state: FAILED, slurm_exit: "1:0", elapsed: "00:17:22", result: "no new failure; 1 baseline error remains, see baseline.md", job_id: 7470679, tested_commit: 1d31ebd3, script: "<private>/jobs/checkpoint-p0/checkpoint.sh", script_sha256: 4f359e1719687390bcc26952cbab0853126ce788d73fcbb47054d0da6a9b08c8, approval: "approve both jobs and the read-only network queries"}
   cvmfs-probe-1: {state: COMPLETED, slurm_exit: "0:0", result: "lcg listed in 2 s; views and releases/acts stalled past 240 s", job_id: 7470680, script: "<private>/jobs/cvmfs-probe/cvmfs.sh", script_sha256: 8b4a0c66e43727b44744b0c67b67b0d753ba8a064dbd87de39a54aec11dec136, approval: "approve both jobs and the read-only network queries"}
+  acts-confirm-1: {state: COMPLETED, slurm_exit: "0:0", elapsed: "00:00:27", node: hpa-wn28, result: "5 of 5 checks pass; backend-smoke level only", job_id: 7470886, script: "<private>/jobs/acts-confirm/confirm.sh", script_sha256: 3fe1402c5e0242b4d9cffdd51264f44f478930a039116f278a1d1adce6a091b1, approval: "approve the submission"}
 baseline_static: {evidence: "<private>/evidence/20261106T044938Z", exit: 0, seconds: 327, note: "run on the login node, --jobs 2, under Q8; docs/dev/detector-reconstruction was present and untracked"}
 tasks:
   T01: {state: done, note: "checkpoint 7470679 compared; K defaults used: K01"}
   T02: {state: done, note: "definitions and contract map; fixtures run in T06; provisional defaults K04, K05, K13"}
-  T03: {state: blocked-by-decision, record: blockers/T03.md, options: t03-selection.md, deciding: [K02, K03]}
+  T03: {state: in-progress, note: "K02, K03 decided; ACTS smoke passed; T07-T09 task sheets still to write; options t03-selection.md"}
   T04: {state: blocked-by-decision, record: blockers/T04.md, draft: t04-prereg.md, deciding: [K02, K09, K12, K16]}
   T05: {state: done, note: "P1 sheets complete, P2 onward list blockers; record t05-task-sheets.md"}
-k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K02, K03, K08, K09, K10, K11, K12, K16, K17, K18]}
-next_action: "P0 incomplete (T03, T04 blocked). Await K02 and K03; T06 waits for the 0.57.0 re-baseline (D1)"
+k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K08, K09, K10, K11, K12, K16, K17, K18]}
+next_action: "finish T03 task sheets; T04 awaits recipes and K09, K12, K16; T06 waits for the 0.57.0 re-baseline (D1)"
 ```
 
 ## Plan conflicts found

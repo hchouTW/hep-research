@@ -165,11 +165,17 @@ See contract-map.md. Fixed provisionally: `recipe`, `qualification_record` and `
 
 | Item | Needed by | Recommended | Default meanwhile |
 | --- | --- | --- | --- |
-| K02 backend, install, network | T03, then T07-T09 | Decide from the R16 list after T03 | Unavailable; `blocked-by-decision` |
-| K03 downloads or real data | T03, data control | Decide with K02 | Synthetic only |
 | K11 holdout and harness | T13, T16 | See K11 | Not established |
 | K09 thresholds | T04 | Freeze per recipe | No pass/fail claim |
 | K16 gates, objective | T15b | With K09 | Declared baseline only |
 | K12 targets | P5 | After P2 | No speed claim |
 | K08, K18 confirmation | P6 | With K03 | No confirmation claim |
 | K10, K17 Slurm limits | First campaign. No default: user must choose | Asked at that campaign's approval | None submitted |
+
+## K02 and K03 decision
+
+User's answer, 2026-11-06, verbatim: "approve K02 as recommended, show the install commands". Recommendation accepted: `acts-core` in a new environment under `<workdir>/env/`, confirmed by one approved job; calorimetry and photon likelihood as labelled development bindings; data synthetic or Geant4-simulated. Consequences recorded: no native backend for those two workflows, a gap in required delivery; no data-control evidence. This approves the direction. Install commands and the confirmation job each need their own approval (R03, R15).
+
+Install approved, verbatim: "approve the install commands". Job 7470886 approved, verbatim: "approve the submission".
+
+Result: `acts-core` 48.2.0 is confirmed at backend-smoke level on `hpa-wn28` (Section 12.1): built in 24 s with conda gcc 15.3.0, version check, surface round trip and off-surface refusal passed. Confirmed scope: it builds, links and runs here. Nothing about tracking quality. `libActsCore.so` SHA-256 `d1ac87d045b0a055301a30b14b003f876dde8bbdcd2b3b984b0559363b0297a7`.
