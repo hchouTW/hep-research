@@ -35,7 +35,8 @@ Drafted 2026-11-06 on contracts 3.19.0. Everything here is provisional. "Fixed" 
 ### K02 stack (agent for probes; user for the rest)
 
 - **Basis, read-only probes:** Geant4 11.4.3 (conda env, login node). ROOT 6.32.10 (conda env) and 6.40.02 (module, confirmed in job 7470150). `simreco` in the tree, simulated events only. No ACTS, DD4hep or EDM4hep in the conda envs or modules.
-- **CVMFS:** `/cvmfs/sft.cern.ch` is mounted, but a directory listing stalled in uninterruptible I/O on the login node and a read check timed out on a compute node. Its contents are unprobed.
+- **CVMFS:** `/cvmfs/sft.cern.ch` is mounted, but listings of `lcg/views` and `lcg/releases/acts` stalled on the login node and past 240 s in job 7470680. Not a dependable route.
+- **conda-forge (read-only queries):** `acts-core` 48.2.0, MPL-2.0, core library only as far as its dependencies show. See t03-selection.md.
 - **Options:** decided per workflow in T03 (R16): existing tool, library adapter, native executable.
 - **Fixed:** no reconstruction backend is confirmed. Geant4 and ROOT are simulation and I/O tools, not reconstruction backends. On Slurm a backend is confirmed only after an approved job has run it.
 - **Needs the user:** installation, network, GPU, each submission, the backend's environment.

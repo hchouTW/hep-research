@@ -28,15 +28,17 @@ open_questions:
 jobs:
   tiny-1: {state: COMPLETED, exit: "0:0", elapsed: "00:00:51", node: hpa-wn28, result: "interpreter hash matches; core imports pass; no credential-like variable names in job or login environment; root.exe exit 0 with libxxhash from /lib64 on this node", job_id: 7470150, script: "<private>/jobs/tiny/tiny.sh", script_sha256: ea8217e77cd21d79fa67c7fe9d0d4beb29d8164c0cb55610ce08325a91305148, command: "sbatch --parsable <private>/jobs/tiny/tiny.sh", approval: "as suggested, approve the commands, kill the bfs search"}
   baseline-units-1: {state: COMPLETED, slurm_exit: "0:0", suite_exit: 1, elapsed: "00:16:41", node: hpa-wn28, result: "see baseline.md, 2 failing IDs", job_id: 7470206, script: "<private>/jobs/baseline-units/units.sh", script_sha256: d3d448062ddc63290b166e709a2d81120b58d3050f7f5f694d420f532d7a9b44, command: "sbatch --parsable <private>/jobs/baseline-units/units.sh", approval: "approve the submission"}
+  checkpoint-p0-1: {state: FAILED, slurm_exit: "1:0", elapsed: "00:17:22", result: "no new failure; 1 baseline error remains, see baseline.md", job_id: 7470679, tested_commit: 1d31ebd3, script: "<private>/jobs/checkpoint-p0/checkpoint.sh", script_sha256: 4f359e1719687390bcc26952cbab0853126ce788d73fcbb47054d0da6a9b08c8, approval: "approve both jobs and the read-only network queries"}
+  cvmfs-probe-1: {state: COMPLETED, slurm_exit: "0:0", result: "lcg listed in 2 s; views and releases/acts stalled past 240 s", job_id: 7470680, script: "<private>/jobs/cvmfs-probe/cvmfs.sh", script_sha256: 8b4a0c66e43727b44744b0c67b67b0d753ba8a064dbd87de39a54aec11dec136, approval: "approve both jobs and the read-only network queries"}
 baseline_static: {evidence: "<private>/evidence/20261106T044938Z", exit: 0, seconds: 327, note: "run on the login node, --jobs 2, under Q8; docs/dev/detector-reconstruction was present and untracked"}
 tasks:
-  T01: {state: in-progress, note: "done-provisional for R24; awaiting checkpoint suite at the end of P0 (R28); K defaults used: K01 all F01-F38 kept"}
-  T02: {state: in-progress, note: "done-provisional: definitions and contract map; fixtures run in T06; provisional defaults K04, K05, K13"}
+  T01: {state: done, note: "checkpoint 7470679 compared; K defaults used: K01"}
+  T02: {state: done, note: "definitions and contract map; fixtures run in T06; provisional defaults K04, K05, K13"}
   T03: {state: blocked-by-decision, record: blockers/T03.md, options: t03-selection.md, deciding: [K02, K03]}
   T04: {state: blocked-by-decision, record: blockers/T04.md, draft: t04-prereg.md, deciding: [K02, K09, K12, K16]}
-  T05: {state: in-progress, note: "done-provisional: P1 sheets complete, P2 onward list blockers; record t05-task-sheets.md"}
+  T05: {state: done, note: "P1 sheets complete, P2 onward list blockers; record t05-task-sheets.md"}
 k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K02, K03, K08, K09, K10, K11, K12, K16, K17, K18]}
-next_action: "decision batch to the user; P0 checkpoint suite; T06 waits for the 0.57.0 re-baseline (D1)"
+next_action: "P0 incomplete (T03, T04 blocked). Await K02 and K03; T06 waits for the 0.57.0 re-baseline (D1)"
 ```
 
 ## Plan conflicts found

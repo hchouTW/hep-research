@@ -52,9 +52,23 @@ Later runs compare against these two (R05). Both are preserved as failures, and 
 
 | Test ID | Result | Observed | Suspected cause |
 | --- | --- | --- | --- |
-| `tests.adapters.test_geant4_register.CheckAndDownstream.test_examples_need_an_explicit_source_of_the_installed_version` | Failure, exit 3 where 2 is expected | `cmake not found on PATH`; the job loaded no `cmake` module, though `cmake/3.28` exists | Job environment. Not confirmed by a rerun with the module loaded |
-| `tests.skills.hep_computing.test_environment_manifest.EnvironmentTemplateTests.test_lcg_setup_is_valid_sh_and_refuses_missing_view` | Error, `TimeoutExpired` after 60 s | The script's only file access is a read check of a path under `/cvmfs/sft.cern.ch`. The same test passes alone on the login node in under 1 s | A slow or stalled CVMFS access on the compute node. Not confirmed on a node |
+| `tests.adapters.test_geant4_register.CheckAndDownstream.test_examples_need_an_explicit_source_of_the_installed_version` | Failure, exit 3 where 2 is expected | `cmake not found on PATH`; the job loaded no `cmake` module, though `cmake/3.28` exists | Job environment. **Confirmed:** passes in job 7470679 with `cmake/3.28` loaded |
+| `tests.skills.hep_computing.test_environment_manifest.EnvironmentTemplateTests.test_lcg_setup_is_valid_sh_and_refuses_missing_view` | Error, `TimeoutExpired` after 60 s | The script's only file access is a read check of a path under `/cvmfs/sft.cern.ch`. The same test passes alone on the login node in under 1 s | A slow or stalled CVMFS access on the compute node. Still fails in job 7470679. Supported by job 7470680, where listings under the same tree stalled past 240 s; the exact cause is not known |
+
+### P0 checkpoint
+
+Job 7470679, `hpa-wn28`, commit `1d31ebd3`, clean before and after, 17 min 22 s, Slurm `FAILED 1:0`, which is the suite's real status.
+
+| Part | Result |
+| --- | --- |
+| `tests/skills/hep_detector` | 591 run, OK, 4 skipped |
+| `tests/routing` | 21 run, OK |
+| `--part units` | 6,797 run, 6,415 passed, 0 failures, 1 error, 381 skipped |
+
+Against the baseline: no new failure. One baseline failure passes once `cmake` is loaded. The LCG test still errors. Three fewer tests are skipped, which fits `cmake` being available; the skip lists were not compared one by one.
+
+Later jobs load `cmake/3.28`, so the comparison set is now the single LCG test.
 
 ## Backends and data
 
-K02 and K03 are unresolved. No reconstruction backend has been probed. Site modules on this host include no Geant4 or ACTS. Unprobed means unavailable (R02). `/cvmfs/sft.cern.ch` is listed on the login node, which makes LCG views a possible K02 candidate, but nothing has been probed there, and the second failing test above suggests access from compute nodes needs checking first.
+K02 and K03 are unresolved. No reconstruction backend has been probed. Site modules on this host include no Geant4 or ACTS. Unprobed means unavailable (R02). CVMFS is not a dependable route: t03-selection.md records the listing stalls on the login node and in job 7470680.
