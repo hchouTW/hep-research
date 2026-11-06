@@ -100,3 +100,30 @@ The installed plugin copy does not govern (R01).
 | Fixtures under `contracts/fixtures` (143 files) | Version lines only |
 
 The anchor check shows that headings survive. The cells whose reference text PR #353 changed were then compared with their verdicts; no status changes (t11-cells.md, "Effect of PR #353 at 0.57.0").
+
+### Unit checkpoint at 0.57.0
+
+Task B2 step 2, job 7472812, commit `e57716dc`, 2026-11-06. Slurm state `FAILED`, exit `1:0`, 22 min 29 s, node `hpa-wn28`. Tree clean before and after, no file outside the records differs from the release. Evidence: `<private>/evidence/checkpoint-b2-7472812/`.
+
+| Part | Checkpoint at 0.56.0 | This job |
+| --- | --- | --- |
+| `tests/skills/hep_detector` | 591 run, OK, 4 skipped | 594 run, OK, 4 skipped |
+| `tests/routing` | 21 run, OK | 21 run, OK |
+| `--part units` | 6,797 run, 6,415 passed, 0 failures, 1 error, 381 skipped | 6,829 run, 6,448 passed, 0 failures, 1 error, 380 skipped |
+| Modules that did not finish | 0 | 1 |
+
+The error is the known LCG test. The module that did not finish is `tests.adapters.test_unbinned_fit`, stopped by the runner's default 600 s limit per module, so its tests have no result in this job. Its test file and `unbinned_fit.py` did not change in the release. It took 468.65 s at the 0.56.0 checkpoint, and `tools/module_timings.json` gives 272.7 s. The whole units part took 974 s against 734 s. The node's load was 161 of 192 CPUs when read after the job ended, so its load during the run is unknown. Slowness is the suspected cause; a hang is not excluded.
+
+This job is not clean and stays failed (R11). T03 and T11 stay provisional.
+
+### Rerun of the unfinished module
+
+Job 7474460 runs that one module at the same commit, alone, with no per-module limit, and records its time. The method change is that the module runs alone and is measured rather than stopped. The 600 s value is a runner default (`--module-timeout`), not a requirement of the plan, but lifting it after a timeout could read as relaxing a check (§1.3 item 6), so the reading was fixed before the result (deviations.md, no. 8):
+
+| Rerun result | Reading |
+| --- | --- |
+| Passes in 600 s or less, same tests as at 0.56.0 | The comparison is clean apart from the LCG error. T03 and T11 go to `done`. Job 7472812 stays recorded as failed. |
+| Passes in more than 600 s | Not clean by itself. The module cannot meet the runner's limit on this node even alone; goes to the user. |
+| Fails, errors, or reaches the job's time limit | A finding, recorded with its test IDs. T03 and T11 stay provisional; goes to the user. |
+
+Result: pending.
