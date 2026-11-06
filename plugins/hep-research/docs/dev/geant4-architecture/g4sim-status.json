@@ -28,7 +28,7 @@
    "state": "in-progress",
    "worktree": "../hep-research-g4sim-S3",
    "branch": "g4sim/S3",
-   "task_card_sha256": "27f1b483994ae90290827b851e212015333bd3749ea96d1d68355cb64ad2633a",
+   "task_card_sha256": "f878acf9f526df9b51f26ef56d9d743c6b5ecc7a51b09ba9e7185db1cb81e570",
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S3.md",
    "blocked_on": [
     "Section 23 step 4: the maintainer's targeted review of g4sim-addendum-11.1.md, before this phase's gate"
@@ -109,5 +109,5 @@
   "GB23": "unconfirmed",
   "GB24": "unconfirmed"
  },
- "updated": "2026-11-06T20:40:16Z"
+ "updated": "2026-11-06T21:12:20Z"
 }

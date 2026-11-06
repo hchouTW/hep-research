@@ -456,6 +456,13 @@
    "registered_at": "2026-11-06T20:40:16Z",
    "card_commit": "4d205c76",
    "reason": "Maintainer's decision of 2026-11-06: addendum 11.1 restates GB11, GB12, GB17, GB19, GB20, GB21; GB15 and GB17 numbers registered before their judged runs"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "f878acf9f526df9b51f26ef56d9d743c6b5ecc7a51b09ba9e7185db1cb81e570",
+   "registered_at": "2026-11-06T21:12:20Z",
+   "card_commit": "30e02e96",
+   "reason": "Gate 3's K, grouping and events registered from the independent trial, before any test sample; Execution log"
   }
  ]
 }
