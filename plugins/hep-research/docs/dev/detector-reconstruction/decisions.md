@@ -179,3 +179,7 @@ User's answer, 2026-11-06, verbatim: "approve K02 as recommended, show the insta
 Install approved, verbatim: "approve the install commands". Job 7470886 approved, verbatim: "approve the submission".
 
 Result: `acts-core` 48.2.0 is confirmed at backend-smoke level on `hpa-wn28` (Section 12.1): built in 24 s with conda gcc 15.3.0, version check, surface round trip and off-surface refusal passed. Confirmed scope: it builds, links and runs here. Nothing about tracking quality. `libActsCore.so` SHA-256 `d1ac87d045b0a055301a30b14b003f876dde8bbdcd2b3b984b0559363b0297a7`.
+
+## T04 draft
+
+User's answer, 2026-11-06, verbatim: "accept the draft, use a fresh reviewer". t04-values-draft.md is accepted as the working draft. Nothing is frozen: each workflow's gates are frozen just before its first run, once bin edges exist. A fresh reviewer checks the statistical design first.

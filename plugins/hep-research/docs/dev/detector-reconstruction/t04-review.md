@@ -1,0 +1,19 @@
+# T04: independent review of the proposed values
+
+Reviewer: a fresh agent with no access to the author's reasoning, 2026-11-06. **Verdict: redesign needed** for the shared pull design; the rest needs fixes. This is an unrecorded consultation, not a hep-review tier. The author recomputed findings 1-4 separately and they hold (`<private>/evidence/t04-oc/`).
+
+| # | Severity | Finding | Number | Fix proposed |
+| --- | --- | --- | --- | --- |
+| 1 | Blocker | The 1 % family rate covers one parameter only | 0.49 % per parameter; 3.8 % for 8 parameters; 7.5 % over two fixtures; about 17 % with efficiency at the quoted true values | Count every test; about 7,100 per bin for pulls alone |
+| 2 | Blocker | "Caught 100 %" holds only when all 12 bins shift, while Section 11.3.2 gates each bin | One bad bin: bias 0.06 caught 76 %, width 1.06 caught 83 %; 50 % at the tolerance | Test that the bound lies within tolerance, about 10,700 per bin; report single-bin power |
+| 3 | Blocker | The width gate contradicts the 1 % wrong-minimum allowance | Two entries at pull 20 give sd 1.077; 38 give 2.01 | Core width (`sigma_68` or MAD) plus a separate tail gate; state the population |
+| 4 | Blocker | Pull gates fail a correct fit at low counts | Poisson with Hessian sigma: mean -0.105 at mu = 25, -0.051 at mu = 100 | Declare a valid range; report only outside it |
+| 5 | Major | A fixed 0.99 floor is a performance target, not closure | 0.995 fails 6.5 % | Compare with fixture-known efficiency; freeze fixture parameters |
+| 6 | Major | "Too few events" has no number; denominators are not always 5,000 | Matched n below 4,979 when efficiency is below 0.9958 | Numeric minimum on actual denominators; bounds computed from n |
+| 7 | Major | Objects in one event are not independent (11.3.1, 11.3.2) | ICC 0.05, 10 objects per event: 4 % pull-mean false failure, 7.5 % efficiency false pass | Define the statistical unit; bootstrap by event |
+| 8 | Major | K16's "not resolved" has no interval or level; split, merge, mis-ID, vertex assignment ungated | | State the interval; add gates or justify |
+| 9 | Major | "The code is correct for this fixture" overclaims; T07 also shares its geometry with its fixture | | Say "no discrepancy above X" |
+
+Minor: 0.3 % was a 13-of-4,000 fluctuation (exact 0.49 %); Sidak control covers pulls only; bin in truth, not observed photon count; sum-to-1 gates may be tautological, and unclustered cells sum to 0; "K09 budgets" belongs to K10.
+
+Reviewer found sound: Clopper-Pearson cutoffs, every-bin efficiency false pass 4.7 %, K12.

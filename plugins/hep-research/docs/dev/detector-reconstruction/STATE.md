@@ -40,7 +40,7 @@ tasks:
   T04: {state: blocked-by-decision, record: blockers/T04.md, draft: t04-prereg.md, deciding: [K09, K12, K16]}
   T05: {state: done, note: "P1 sheets complete, P2 onward list blockers; record t05-task-sheets.md"}
 k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K08, K09, K10, K11, K12, K16, K17, K18]}
-next_action: "draft T04 values for the user; T06 waits for the 0.57.0 re-baseline (D1)"
+next_action: "user decides the T04 redesign (t04-review.md); T06 waits for the 0.57.0 re-baseline (D1)"
 ```
 
 ## Plan conflicts found
