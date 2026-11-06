@@ -360,3 +360,14 @@ Candidate, one-peak objects, nothing fitted, no truth used: `sigma_x^2 = sum_c (
 
 An outcome the table does not cover goes to the user. The candidate may not be adjusted after seeing this output and then counted as passed: a changed formula is a new test on new events.
 
+### Result
+
+Job 7478897, `COMPLETED`, exit `0:0`, 42 s, error logs empty. Evidence: `<private>/evidence/t04-v4/job-diag-t08c-7478897/`. `REPLAY` printed job 7478606's four widths exactly. **First row applies: the candidate passes. No T04 value has moved; section 7.1 waits for the user's word.**
+
+| `BIN E2`, limit 0.039527 | Old | New |
+| --- | --- | --- |
+| x | 0.041533 | 0.008351 |
+| y | 0.043113 | 0.009338 |
+
+All 30 `NODE` lines are within 0.0474. New widths run from 0.9988 to 1.0167, and at 250 MeV are 1.0101 and 1.0118 against 1.0655 and 1.0671. Model and true spread agree within 1.5 % at 250 MeV and better above. Tails are 0.24 to 0.33 %, near the Gaussian 0.27 %. Centres are unchanged. All objects were one-peak, so this tests iso only. Edge, dead and saturation objects and the far and near strata have not been tested with it.
+
