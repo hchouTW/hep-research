@@ -372,6 +372,13 @@
    "registered_at": "2026-11-06T05:53:06Z",
    "card_commit": "f585cd1a",
    "reason": "Two-step registration of the conservation rerun: q, p0, p1 and n, before its reference and under-test runs"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "e71332bf56cd6f60c74c79bef3054a879b50675fb3b55f9db41cd1ab11ba7fb7",
+   "registered_at": "2026-11-06T06:15:41Z",
+   "card_commit": "a6779042",
+   "reason": "Execution log only; thresholds unchanged from the previous registration"
   }
  ]
 }
