@@ -1,7 +1,8 @@
 // g4sim_run/IrTree.hh: the volume tree of a legacy run from the IR's legacy block (g4sim plan, Sections 7.4, 8.1). Geant4 API only;
 // written from the Geant4 API (no example code copied or adapted).
 //
-// Every number comes from a float.hex() string of the re-acquisition record, read exactly by strtod, so nothing is recomputed. Logical
+// Every number comes from a float.hex() string of the re-acquisition record, read exactly by strtod. Lengths are the record's own; a material's
+// density and A are divided by their units there, so they are multiplied back and the exact double recovered (RecoveredValues). Logical
 // volumes are made in the record's id order and placements in the record's order, so the stores, and the probe's write-back, are the same.
 #ifndef G4SIM_RUN_IRTREE_HH
 #define G4SIM_RUN_IRTREE_HH
@@ -153,7 +154,8 @@ inline IrTree BuildLegacyTree(const minijson::Value& legacy) {
     auto* logical = new G4LogicalVolume(box, LegacyMaterial(record.at("material", "logical").string("logical.material"), legacy), name);
     const auto& limits = record.at("user_limits", "logical");
     if (limits.isObject()) {
-      std::string key = limits.at("max_step_mm", "limits").str + limits.at("max_time_ns", "limits").str + limits.at("min_ekin_MeV", "limits").str;
+      std::string key;
+      for (const char* name : {"max_step_mm", "max_track_length_mm", "max_time_ns", "min_ekin_MeV", "min_range_mm"}) key += limits.at(name, "limits").str + " ";
       auto found = shared.find(key);
       logical->SetUserLimits(found != shared.end() ? found->second : (shared[key] = LegacyLimits(limits)));
     }

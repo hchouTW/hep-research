@@ -1,4 +1,4 @@
-// Prototypes GB3, GB5, GB7, GB8 and GB9 of the g4sim plan (Section 23): one program, judged by judge.py; it measures and judges nothing itself.
+// Prototypes GB3, GB5, GB7, GB8 and GB9 of the g4sim plan (Section 23): one program, judged by judge.py; it measures and gives no verdict.
 // Written from the Geant4 11.4 API; no example code copied or adapted.
 //   s2_gates gb9 OUT.json                decay tables and the unreleased-energy table
 //   s2_gates gb7 OUT.json [MAX_STEP_MM]  G4UserSpecialCuts kills and e+- step lengths in silicon (a second run gets the limit)

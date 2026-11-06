@@ -3,7 +3,7 @@
 // Usage: g4sim_run IR.json OLD_SPEC.json   (in the run folder). S2 legacy mode: the IR's legacy block gives the volume tree, and the old
 // specification, merged back from the three specifications by g4sim_translate.py, configures the legacy observer of its program.
 //        g4sim_run --geometry-check IR.json RUN.json   (a new specification: one geantino, the write-back; no accounting, no scorers)
-// Exit codes as the old programs: 0 ok, 1 the run failed, 2 refused.
+// Exit codes as the old programs: 0 ok, 1 the run failed, 2 refused or an exception; geometry-check returns 0 or 2, and its driver judges the tree.
 #include <fstream>
 #include <iostream>
 #include <sstream>

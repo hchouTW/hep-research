@@ -80,7 +80,7 @@ G4Material* NewMaterial(const std::string& name, const Value& materials) {
 
 class NewDetector : public G4VUserDetectorConstruction {
  public:
-  explicit NewDetector(const Value& physical) : fPhysical(physical) {}
+  NewDetector(const Value& physical, const Value& cuts) : fPhysical(physical), fCuts(cuts) {}
 
   G4VPhysicalVolume* Construct() override {
     const Value& materials = fPhysical.at("materials", "physical");
@@ -117,7 +117,10 @@ class NewDetector : public G4VUserDetectorConstruction {
     std::fflush(stdout);
     for (const auto& [name, logicals] : regions) {
       auto* region = new G4Region(name);
-      region->SetProductionCuts(new G4ProductionCuts());
+      auto* cuts = new G4ProductionCuts();
+      if (fCuts.has("regions") && fCuts.obj.at("regions").has(name)) cuts->SetProductionCut(Decimal(fCuts.obj.at("regions").obj.at(name)) * mm);
+      else cuts->SetProductionCut(Decimal(fCuts.at("default", "cuts")) * mm);
+      region->SetProductionCuts(cuts);
       for (auto* logical : logicals) region->AddRootLogicalVolume(logical);
     }
     return world;
@@ -162,6 +165,7 @@ class NewDetector : public G4VUserDetectorConstruction {
   }
 
   const Value& fPhysical;
+  const Value& fCuts;
   std::map<std::string, G4LogicalVolume*> fLogicals;
   std::map<std::string, std::vector<std::string>> fChildren;
 };
@@ -204,7 +208,7 @@ int GeometryCheck(const Value& ir, const Value& card) {
   const Value& run = card.at("run", "run card");
   const int threads = run.has("threads") ? static_cast<int>(run.obj.at("threads").num) : 2;
   auto* manager = G4RunManagerFactory::CreateRunManager(G4RunManagerType::MTOnly, threads);
-  manager->SetUserInitialization(new NewDetector(ir.at("physical", "ir")));
+  manager->SetUserInitialization(new NewDetector(ir.at("physical", "ir"), physics.at("cuts_mm", "physics")));
   std::string error;
   const auto text = [&](const char* key) { return physics.has(key) ? physics.obj.at(key).str : std::string(); };
   G4VModularPhysicsList* list = g4sim::BuildPhysicsList(text("reference_list"), text("em_constructor"), true, false,

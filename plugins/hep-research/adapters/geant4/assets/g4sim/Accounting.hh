@@ -4,7 +4,8 @@
 // It only reads: no random number, no change to a track, and its columns go to a separate file, so the old columns cannot move (Section 8.9).
 // Every ended track falls into exactly one class. A track is decided by what ended it, never by its status alone, which world escapes and
 // physical ends share with kills (GB8). Class (d), G4UserSpecialCuts, books only the residual energy U: its kinetic energy is already in the
-// deposit (GB7). Class (b) never reaches a step, so the stacking action reports it here.
+// deposit (GB7). Class (b) never reaches a step, so the stacking action reports it here. A neutron ended by the physics list's nKiller is a
+// further killed class, which Section 8.4 does not list: its kinetic energy and U are booked (maintainer's decision, g4sim-approvals.md).
 //
 // G4SIM_ACCOUNTING_CONTROL names one negative control of Section 15.1, for tests only: no_escape, no_killed_unbooked, stop_status_is_killed,
 // class_d_kinetic, neutron_rest_energy, nuclei_unreleased.
@@ -84,11 +85,11 @@ class UnreleasedEnergy {
 
 struct ConservationRow {
   double incident = 0, deposit = 0, escapeGamma = 0, escapeElectron = 0, escapeNeutrino = 0, escapeOther = 0;
-  double killedKineticStacking = 0, killedKineticLooper = 0, killedKineticSpecialCut = 0, unreleased = 0, eplusResidual = 0;
+  double killedKineticStacking = 0, killedKineticLooper = 0, killedKineticSpecialCut = 0, killedKineticNeutron = 0, unreleased = 0, eplusResidual = 0;
   long tracksPhysical = 0, tracksEscaped = 0, tracksKilled = 0, accountingErrors = 0;
   double Residual() const {
     return incident - deposit - (escapeGamma + escapeElectron + escapeNeutrino + escapeOther) -
-           (killedKineticStacking + killedKineticLooper + killedKineticSpecialCut) - unreleased - eplusResidual;
+           (killedKineticStacking + killedKineticLooper + killedKineticSpecialCut + killedKineticNeutron) - unreleased - eplusResidual;
   }
 };
 
@@ -139,6 +140,10 @@ class Accounting {
       ++fRow.tracksKilled;
       if (control == "class_d_kinetic") fRow.killedKineticSpecialCut += step->GetPreStepPoint()->GetKineticEnergy();  // the post-step value is already 0
       BookResidual(particle);
+    } else if (name == "nKiller") {
+      ++fRow.tracksKilled;
+      fRow.killedKineticNeutron += step->GetPreStepPoint()->GetKineticEnergy();  // the post-step value is already 0
+      BookResidual(particle);
     } else if (name == "Transportation" || name == "CoupledTransportation") {
       ++fRow.tracksKilled;  // a looper: transportation ended it inside the world
       fRow.killedKineticLooper += kinetic;
@@ -161,16 +166,19 @@ class Accounting {
   }
 
   void EndEvent(const G4Event* event, long firstEvent) {
-    if (const G4PrimaryVertex* vertex = event->GetPrimaryVertex(0)) {
-      const G4PrimaryParticle* primary = vertex->GetPrimary(0);
-      const G4ParticleDefinition* particle = primary->GetParticleDefinition();
-      fRow.incident = primary->GetKineticEnergy() + (particle->GetPDGEncoding() == -11 ? 2 * CLHEP::electron_mass_c2 : fUnreleased.Of(particle));
+    for (G4int v = 0; v < event->GetNumberOfPrimaryVertex(); ++v) {
+      const G4PrimaryVertex* vertex = event->GetPrimaryVertex(v);
+      for (G4int i = 0; i < vertex->GetNumberOfParticle(); ++i) {
+        const G4PrimaryParticle* primary = vertex->GetPrimary(i);
+        const G4ParticleDefinition* particle = primary->GetParticleDefinition();
+        fRow.incident += primary->GetKineticEnergy() + (particle->GetPDGEncoding() == -11 ? 2 * CLHEP::electron_mass_c2 : fUnreleased.Of(particle));
+      }
     }
     if (!fOut) return;
     const ConservationRow& r = fRow;
-    std::fprintf(fOut, "%ld,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%ld,%ld,%ld,%ld\n", firstEvent + event->GetEventID(),
+    std::fprintf(fOut, "%ld,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%ld,%ld,%ld,%ld\n", firstEvent + event->GetEventID(),
                  r.incident / MeV, r.deposit / MeV, r.escapeGamma / MeV, r.escapeElectron / MeV, r.escapeNeutrino / MeV, r.escapeOther / MeV,
-                 r.killedKineticStacking / MeV, r.killedKineticLooper / MeV, r.killedKineticSpecialCut / MeV, r.unreleased / MeV,
+                 r.killedKineticStacking / MeV, r.killedKineticLooper / MeV, r.killedKineticSpecialCut / MeV, r.killedKineticNeutron / MeV, r.unreleased / MeV,
                  r.eplusResidual / MeV, r.Residual() / MeV, r.tracksPhysical, r.tracksEscaped, r.tracksKilled, r.accountingErrors);
   }
   void Close() {
@@ -182,7 +190,7 @@ class Accounting {
 
   static const char* Header() {
     return "event,incident_MeV,deposit_MeV,escape_gamma_MeV,escape_electron_MeV,escape_neutrino_MeV,escape_other_MeV,killed_kinetic_stacking_MeV,"
-           "killed_kinetic_looper_MeV,killed_kinetic_special_cut_MeV,unreleased_MeV,eplus_residual_MeV,residual_MeV,tracks_physical,tracks_escaped,"
+           "killed_kinetic_looper_MeV,killed_kinetic_special_cut_MeV,killed_kinetic_neutron_MeV,unreleased_MeV,eplus_residual_MeV,residual_MeV,tracks_physical,tracks_escaped,"
            "tracks_killed,accounting_errors";
   }
 

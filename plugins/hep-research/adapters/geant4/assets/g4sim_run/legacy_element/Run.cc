@@ -238,10 +238,6 @@ class TestMessenger : public G4UImessenger {
 }  // namespace
 
 int Run(const char* specPath, const minijson::Value& legacy) {
-  if (false) {
-    std::cerr << "usage: element_sim SPEC.json" << std::endl;
-    return Status("rejected", "usage: element_sim SPEC.json");
-  }
   Spec spec;
   try {
     spec = ReadSpec(specPath);
