@@ -17,7 +17,7 @@ T11 also found the inventory too strict in places, with text existing for F12's 
 
 F21, F24, F26-F28 and F33-F38 now have sourced cells in t11-cells.md Part 3, from papers read; the plugin itself still has no text for them, so this table's rows stand.
 
-Status: provisional, awaiting the checkpoint suite (R28). Gaps here are obligations, not not-applicable (Section 1.3 item 6).
+Status: checkpoint comparison clean at 0.57.0 (baseline.md). Gaps here are obligations, not not-applicable (Section 1.3 item 6).
 
 ## F01-F38
 
@@ -105,3 +105,15 @@ Notes on the old index:
 9. J14 evidence is filed under F01 as silicon energy deposition, which is not F01 reconstruction. The Garfield++ query is noted as adjacent under F04 and F07 only, though it is family-neutral for gas detectors.
 10. Absence claims come from `grep` over `skills`, `profiles`, `adapters`, `core`, `contracts`, `examples`; the bibliography file was excluded from the F21-F38 sweeps. Terms outside the search lists could still exist.
 11. The acceptance-case gaps were spot-checked by keyword, not by reading every reference in full.
+
+## obligations
+
+From t04-values-v4.md, section 10. Open obligations narrow the claim; a report lists each one. Accepted for the first pass by the user's section 16 answer (decisions.md).
+
+| Obligation | Owner |
+| --- | --- |
+| T07 material; T08 angle and particle type; T09 medium | No owner: the user's decision at Freeze A against plan 11.4 |
+| T07 particle type, timing, displaced vertices, near vertices | T07 later pass, or the user |
+| T07 A01 | T15b, if `simreco` qualifies on the shared domain |
+| T08 E1 pulls, E1 merge, near per-shower pulls and near sharing, saturated energy, split rate, unequal sharing, noise-dominated regime | No owner, user's decision |
+| T09 B1 pulls | No owner, user's decision |

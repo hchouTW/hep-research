@@ -183,9 +183,9 @@ Follow t07-t09-task-sheets.md. Ask U9 and U12 at the start of this phase, so the
 ### Task D4: Freeze B and evaluation
 
 - [ ] **Step 1:** Run development samples. Costs are recorded, which replaces every estimate so far.
-- [ ] **Step 2:** Draft bin edges, valid ranges and the noise-fixture fake ceiling, only by the stated rules. Wait for U6, verbatim.
+- [ ] **Step 2:** Run the Freeze-B run; record hashes and r_dev, only by the stated rules. Bin edges and valid ranges are already fixed. Wait for U6, verbatim.
 - [ ] **Step 3:** Only now generate evaluation samples, under seeds not used before.
-- [ ] **Step 4:** Run once. Report pass, fail or inconclusive per bin. A failure stands.
+- [ ] **Step 4:** Run once. Report pass, fail or inconclusive per bin. A failure stands. A retry follows t04-values-v4.md, section 3.4.
 
 ### Task D5: T15b selection
 

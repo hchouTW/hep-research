@@ -1,4 +1,4 @@
-# T04: proposed values, version 4 (draft, nothing frozen)
+# T04: values, version 4 (Freeze A candidate)
 
 Updated after jobs 7474461, 7474462, 7477066 and 7477126, under the rules of section 18 and the user's decisions of 2026-11-06 (decisions.md). Results: section 18.1.
 
@@ -33,7 +33,7 @@ Frozen by hash:
 
 - this document, including the fixture table, every edge, tolerance, cap, floor, range and the clustering definition;
 - t04-prereg.md and t07-t09-task-sheets.md, after the edits listed in t04-v4-dispositions.md [16]. Prereg's sample roles, failure classes, negative cases and critical false-success table are in force through this hash;
-- the job logs of all scripts in section 18, and the T08 target tables they give;
+- the job logs of all scripts in section 18, of the diagnostic and round 4 scripts of section 18.1, and of the generator check, and the T08 target tables they give;
 - each fixture generator [R11]. A generator needs no recipe output. T08 and T09 generators are frozen with this document. T07's depends on the ACTS driver: if it is not ready, its hash is an addendum to Freeze A, on the user's word, before any T07 development run. After that, a generator change is a section 2.3 amendment.
 
 A deterministic check ties each generator to the fixture text [R11, S8], on a fixed seed block (block 6), 1,000 events at each of 3 energies or `N_exp` values.
@@ -211,11 +211,11 @@ Expected objects per event: 1 shower (iso, controls), 2 (far, near).
 
 | Stratum | Target | Closed-form check |
 | --- | --- | --- |
-| iso | `E_ref = E - b_iso` | `b_iso` 2.97-3.10 MeV for every `E` from 0.25 to 16 GeV: flat in `E`, so one constant serves. Sub-cell spread at most 0.018 sigma |
+| iso | `E_ref = E - b_iso` | `b_iso` 2.907 MeV (job 7474461; largest node departure 0.0128 sigma, inside section 18's limit), so one constant serves. Sub-cell spread at most 0.018 sigma |
 | far, per shower | `E_ref = E - b_far(E, d)`, bilinear in (ln E, d) on the script's nodes | `b_far` 2.3-3.3 MeV. Spread over azimuth and sub-cell about 0.09 sigma at 0.25 GeV and 0.04 sigma at 2 GeV or more (recheck, 5 azimuths and 3 sub-cells [M5]), against round 1's 2.2 sigma, with 30 sharing iterations. Added width about 1.004 |
 | near, event | `E_ref = 2E - b_near(E, d)`, same interpolation | `b_near` 3.3-3.9 MeV over `d` 1.5 to 3, spread at most 0.008 sigma |
-| Dead | `E_ref = E (1 - f(x, y)) - b_dead`, `f = g_c` of the dead cell at truth `x, y`, closed form | Unconditioned, `f` has sd 0.0061, which would give pull width about 1.4 at 4 GeV. Conditioned, residual spread at most 0.014 sigma, `b_dead` 3.0 MeV |
-| Edge | `E_ref = E Phi(t) - b_edge(t)`, for each of the four exact `t` | `b_edge` 1.5-2.1 MeV, spread at most 0.013 sigma. Discrete `t` removes round 1's interpolation error. `Phi(t)`: 0.6915, 0.8413, 0.9332, 0.9773 |
+| Dead | `E_ref = E (1 - f(x, y)) - b_dead`, `f = g_c` of the dead cell at truth `x, y`, closed form | Unconditioned, `f` has sd 0.0061, which would give pull width about 1.4 at 4 GeV. Conditioned, residual spread at most 0.014 sigma, `b_dead` 2.855 MeV (job 7474461) |
+| Edge | `E_ref = E Phi(t) - b_edge(t)`, for each of the four exact `t` | `b_edge` 1.503, 1.633, 1.701, 1.967 MeV at `t` 0.5, 1, 1.5, 2 (job 7474461), spread at most 0.013 sigma. Discrete `t` removes round 1's interpolation error. `Phi(t)`: 0.6915, 0.8413, 0.9332, 0.9773 |
 
 Interpolation error is under 0.002 sigma on the iso grid (recheck, closed form). Below 0.25 GeV pulls are ungated, so no target is needed.
 
