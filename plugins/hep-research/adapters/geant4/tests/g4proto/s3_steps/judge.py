@@ -214,6 +214,7 @@ def judge_kills(rows: list, ignore_secondaries: bool = False, shift: Fraction = 
     particles = Counter()
     bit_exact = 0
     worst_over_ulps = worst_deposit_ulps = 0.0
+    over_both = 0
     for row in rows:
         v = fractions_of(row)
         loss = v["pre"] - v["entry"] - v["secondary_along"]
@@ -223,7 +224,9 @@ def judge_kills(rows: list, ignore_secondaries: bool = False, shift: Fraction = 
         for name, value in checks.items():
             worst[name] = max(worst[name], value)
             over[name] += value > TOLERANCE
-        worst_deposit_ulps = max(worst_deposit_ulps, float(abs(v["deposit"] - loss) / Fraction(math.ulp(float(v["pre"])))))
+        deposit_ulps = float(abs(v["deposit"] - loss) / Fraction(math.ulp(float(v["pre"]))))
+        worst_deposit_ulps = max(worst_deposit_ulps, deposit_ulps)
+        over_both += checks["deposit_is_continuous_loss"] > TOLERANCE and deposit_ulps > DEPOSIT_ULPS
         if checks["deposit_is_continuous_loss"] > TOLERANCE:
             worst_over_ulps = max(worst_over_ulps, float(abs(v["deposit"] - loss) / Fraction(math.ulp(float(v["pre"])))))
         has_loss = v["deposit"] > 0 and loss > 0
@@ -248,7 +251,7 @@ def judge_kills(rows: list, ignore_secondaries: bool = False, shift: Fraction = 
             "worst_relative": {name: float(value) for name, value in worst.items()}, "steps_over_tolerance": {name: over[name] for name in worst},
             "resolvable": {"steps": resolved_rows, "worst_deposit_relative": float(resolved_worst), "note": "loss large enough that half an ulp of the kinetic energy is <= 1e-12 of it"},
             "not_resolvable": {"steps": unresolved_rows, "over_tolerance": unresolved_over, "worst_difference_in_ulps_of_pre_kinetic": worst_unresolved_ulps},
-            "deposit_worst_ulps_of_pre_kinetic": worst_deposit_ulps, "over_tolerance_worst_difference_in_ulps_of_pre_kinetic": worst_over_ulps, "kinetic_equals_rounded_pre_minus_deposit_bit_for_bit": bit_exact, "by_particle": dict(particles),
+            "deposit_worst_ulps_of_pre_kinetic": worst_deposit_ulps, "deposit_over_both_limits": over_both, "over_tolerance_worst_difference_in_ulps_of_pre_kinetic": worst_over_ulps, "kinetic_equals_rounded_pre_minus_deposit_bit_for_bit": bit_exact, "by_particle": dict(particles),
             "deposit_unchanged_by_the_kill": sum(row[5] == row[6] for row in rows), "post_kinetic_zero_and_status_stop_and_kill": sum(row[9] == "0x0p+0" and row[10] == 2 for row in rows)}
 
 
@@ -266,8 +269,8 @@ def judge_kill_runs(folder: Path) -> dict:
                 "sum_off_by_5e-13_passes": just_under["steps_over_tolerance"]["sum"] == 0}
     sum_and_kill = all(value["steps_over_tolerance"]["sum"] == 0 and value["steps_over_tolerance"]["killed_is_kinetic_before_kill"] == 0 for value in judged.values())
     deposit_literal = all(value["steps_over_tolerance"]["deposit_is_continuous_loss"] == 0 for value in judged.values())
-    deposit_in_ulps = all(value["deposit_worst_ulps_of_pre_kinetic"] <= DEPOSIT_ULPS for value in judged.values())
-    detected["kill_booked_as_deposit_exceeds_the_ulp_limit"] = booked["deposit_worst_ulps_of_pre_kinetic"] > DEPOSIT_ULPS
+    deposit_in_ulps = all(value["deposit_over_both_limits"] == 0 for value in judged.values())
+    detected["kill_booked_as_deposit_exceeds_both_limits"] = booked["deposit_over_both_limits"] > 0
     exercised = judged["plain"]["with_continuous_loss"] > 0 and judged["emit"]["continuous_loss_and_secondary"] > 0 and judged["pixe"]["with_along_step_secondary"] > 0
     return {"criterion_met": sum_and_kill and deposit_in_ulps and exercised, "deposit_within_the_ulp_limit": deposit_in_ulps, "comparison_trustworthy": all(detected.values()) and exercised, "killed_and_sum_identities_met": sum_and_kill, "deposit_identity_met_as_written": deposit_literal,
             "runs": judged, "controls": detected, "control_counts": {"booked_as_deposit": booked["steps_over_tolerance"], "pre_step_energy": early["steps_over_tolerance"], "emit_without_secondaries": no_secondaries["steps_over_tolerance"]}}
