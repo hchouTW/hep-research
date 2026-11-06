@@ -31,6 +31,7 @@ if str(ROOT) not in sys.path:
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 import g4sim_physics_check as physics_check  # noqa: E402
+import g4sim_simulate as simulate_new  # noqa: E402
 import g4sim_translate as translate  # noqa: E402
 from contracts import KNOWN_CAPABILITIES, geometry  # noqa: E402
 from core import constants  # noqa: E402
@@ -312,6 +313,22 @@ def geometry_check(args) -> dict:
     return {"status": "failed" if problems else "ok", "problems": problems[:20], **effective}
 
 
+def simulate(args) -> dict:
+    """A run of a new specification: `separated` accounting, sources and scorers (Section 8)."""
+    card = json.loads(args.run.read_text(encoding="utf-8"))
+    request = json.loads(args.request.read_text(encoding="utf-8"))
+    checked = geometry.check_file(args.detector, protected=args.protected)
+    if checked["status"] != "ok":
+        return {"status": "rejected", "findings": checked["findings"]}
+    findings = check_card(card)
+    if findings:
+        return {"status": "rejected", "findings": findings}
+    missing = missing_datasets(card)
+    if missing:
+        return {"status": "missing-dataset", "missing": missing}
+    return simulate_new.simulate(card, request, checked, args.program.resolve(), args.work.resolve())
+
+
 @protected_main("adapters.geant4.g4sim_run", capabilities=KNOWN_CAPABILITIES)
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -329,6 +346,10 @@ def main(argv=None) -> int:
     for name in ("detector", "run", "program", "work"):
         shape.add_argument(f"--{name}", type=Path, required=True)
     shape.add_argument("--protected", action="store_true", help="protected mode (a project with agent_policy needs no flag)")
+    simulating = commands.add_parser("simulate")
+    for name in ("detector", "request", "run", "program", "work"):
+        simulating.add_argument(f"--{name}", type=Path, required=True)
+    simulating.add_argument("--protected", action="store_true", help="protected mode (a project with agent_policy needs no flag)")
     args = parser.parse_args(argv)
     guard(f"adapters.geant4.g4sim_run.{args.command}", paths=[str(args.run)], flag=args.protected, capabilities=KNOWN_CAPABILITIES)
     try:
@@ -337,7 +358,7 @@ def main(argv=None) -> int:
             findings = check_card(card, {"seeding": args.legacy_seeding} if args.legacy_seeding else None)
             print(json.dumps({"status": "rejected" if findings else "ok", "findings": findings}))
             return 2 if findings else 0
-        result = geometry_check(args) if args.command == "geometry-check" else run(args)
+        result = {"geometry-check": geometry_check, "simulate": simulate, "run": run}[args.command](args)
     except (OSError, ValueError, KeyError) as err:
         print(json.dumps({"status": "error", "message": str(err)}))
         return 2

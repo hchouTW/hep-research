@@ -2,6 +2,7 @@
 //
 // Usage: g4sim_run IR.json OLD_SPEC.json   (in the run folder). S2 legacy mode: the IR's legacy block gives the volume tree, and the old
 // specification, merged back from the three specifications by g4sim_translate.py, configures the legacy observer of its program.
+//        g4sim_run --new IR.json RUN.json RESOLVED_REQUEST.json   (a new specification: sources, scorers and `separated` accounting; driven by g4sim_run.py simulate)
 //        g4sim_run --geometry-check IR.json RUN.json   (a new specification: one geantino, the write-back; no accounting, no scorers)
 // Exit codes as the old programs: 0 ok, 1 the run failed, 2 refused or an exception; geometry-check returns 0 or 2, and its driver judges the tree.
 #include <fstream>
@@ -15,6 +16,7 @@ namespace legacy_element { int Run(const char* specPath, const minijson::Value& 
 namespace legacy_layered { int Run(const char* specPath, const minijson::Value& legacy); }
 
 int GeometryCheck(const minijson::Value& ir, const minijson::Value& card);
+int NewRun(const minijson::Value& ir, const minijson::Value& card, const minijson::Value& request);
 
 static minijson::Value ReadJson(const char* path) {
   std::ifstream in(path);
@@ -26,8 +28,9 @@ static minijson::Value ReadJson(const char* path) {
 
 int main(int argc, char** argv) {
   const bool geometryCheck = argc == 4 && std::string(argv[1]) == "--geometry-check";
-  if (argc != 3 && !geometryCheck) {
-    std::cerr << "usage: g4sim_run IR.json OLD_SPEC.json | g4sim_run --geometry-check IR.json RUN.json" << std::endl;
+  const bool newRun = argc == 5 && std::string(argv[1]) == "--new";
+  if (argc != 3 && !geometryCheck && !newRun) {
+    std::cerr << "usage: g4sim_run IR.json OLD_SPEC.json | g4sim_run --geometry-check IR.json RUN.json | g4sim_run --new IR.json RUN.json RESOLVED_REQUEST.json" << std::endl;
     return 2;
   }
   try {
@@ -35,6 +38,12 @@ int main(int argc, char** argv) {
       const minijson::Value ir = ReadJson(argv[2]);
       const minijson::Value card = ReadJson(argv[3]);
       return GeometryCheck(ir, card);
+    }
+    if (newRun) {
+      const minijson::Value ir = ReadJson(argv[2]);
+      const minijson::Value card = ReadJson(argv[3]);
+      const minijson::Value request = ReadJson(argv[4]);
+      return NewRun(ir, card, request);
     }
     const minijson::Value ir = ReadJson(argv[1]);
     const minijson::Value old = ReadJson(argv[2]);
