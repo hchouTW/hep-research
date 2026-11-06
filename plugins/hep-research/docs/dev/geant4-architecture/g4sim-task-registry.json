@@ -484,6 +484,13 @@
    "registered_at": "2026-11-06T21:58:26Z",
    "card_commit": "177c9489",
    "reason": "The maintainer's corrected GB21 rule; designs of gate 4 and the separated conservation checks registered before their runs; E2 waiver"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "5a75a57acaf59f79a35e60d929b6d3930dfce1c369a7bbd303252e9f6f57f652",
+   "registered_at": "2026-11-06T22:04:07Z",
+   "card_commit": "c1b43e8b",
+   "reason": "Gate 4's tolerance and events registered from its independent trial, before the test"
   }
  ]
 }
