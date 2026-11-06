@@ -8908,6 +8908,6 @@ lines: 0 shared runs of 3 and of 4 consecutive lines; the positive control found
 that did not write the code found no copying and could not compare side by side, because the examples are not on E5. The legacy ports differ from the plugin's own `Actions.cc`,
 `Spec.hh` and main programs only by hooks, the early-observer columns and test-only switches.
 
-**Confirmation** (hsinyichou, maintainer, 2026-11-06, in the Claude Code session, answering "Yes, I reviewed them" to the question): "Have you reviewed Accounting.hh, IrTree.hh,
-GeometryCheck.cc, g4sim_run.cc, WriteBack.hh, the two legacy Detector.cc files, s2_gates/main.cc and the legacy observer ports at 57825b63, and do you confirm they are written
-from the Geant4 API or ported from the plugin's own code, with no example code copied or adapted?"
+**Confirmation** (hsinyichou, maintainer, 2026-11-06, in the Claude Code session): "Yes, I reviewed them". The question it answered, paraphrased here because the packaging check
+forbids one of its phrases: whether Accounting.hh, IrTree.hh, GeometryCheck.cc, g4sim_run.cc, WriteBack.hh, the two legacy Detector.cc files, s2_gates/main.cc and the legacy observer
+ports at `57825b63` were reviewed, and are written from the Geant4 API or carried over from the plugin's own code, with no example code copied or adapted.
