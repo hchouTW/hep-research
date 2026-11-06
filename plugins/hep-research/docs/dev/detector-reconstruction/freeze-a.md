@@ -6,9 +6,9 @@ Candidate for the user's word (R02, finish-plan B4, decision U5). Not frozen unt
 
 | File | SHA-256 |
 | --- | --- |
-| t04-values-v4.md | `8e5f0bafa77ae7e59ea54e600b3190c5e58ee22a01dfda20859498902b19081b` |
-| t04-prereg.md | `f9d4028ff81c4b64c39d712eb080280bc767989a1cc537ace8d88b913d4bcba8` |
-| t07-t09-task-sheets.md | `afb6da0ef20d1164efea060d696e2741182e509373d50906720377565f1a8df2` |
+| t04-values-v4.md | `dc6d7b2e60a91e2a98f2066dc8f39fd7f12038eb5db50e1e09e45f22fee3b7ad` |
+| t04-prereg.md | `39495c3f7db0cded7f88b45711a9457f438be0cbd4113370880d69866448a151` |
+| t07-t09-task-sheets.md | `01f3509156734372a725eba77b3604935bf420b74fc5f9670fed4348269906f0` |
 
 ## Generators and check
 
@@ -26,7 +26,7 @@ Candidate for the user's word (R02, finish-plan B4, decision U5). Not frozen unt
 | --- | --- |
 | job-a-7474461/calc-pull-table.log | `a3ccbf2851825b770c8adaea6bb4868c621165c4940e92c24b2f9badc2cf8e38` |
 | job-a-7474461/calc-rate-rule.log | `1987316771b3595d7d37730a5fc2b60ca0da3271cb2057a28256f9560c9faace` |
-| job-a-7474461/calc-t08-reference.log | `b009ab7d073a9be37d42cc147ad2b29b7439b353d5735fbefba37c49cb1cd490` |
+| job-a-7474461/calc-t08-reference.log (history: replaced by job-round5-7479146; first numbers of the third stop) | `b009ab7d073a9be37d42cc147ad2b29b7439b353d5735fbefba37c49cb1cd490` |
 | job-a-7474461/calc-t09-lowmu.log | `22330f0678a76ecef8916c4415d1c17f29aeddfe14f8a878a61a393b8e9cc47b` |
 | job-b-7474462/calc-fake-reference.log | `01cdc90f9736ca2299700ee71fe1838a60a13d2044d4ff7e5f08d1619a69d15f` |
 | job-b-7474462/calc-t09-null-h2.log | `f9a1c3cad67c638d25f4c45c0f4a88114293d80220ff4cab89ada167bf768948` |
@@ -35,6 +35,9 @@ Candidate for the user's word (R02, finish-plan B4, decision U5). Not frozen unt
 | job-round4-7477126/calc-t08-exact.log | `ca10b2b31c375ce0f2136725d6c638bf913dd1c01992e7df2e4319b261ceae5b` |
 | job-round4-7477126/calc-t09-range.log | `978c95d65d98a5588cb08c8ecf1f3e732c388aaf297bb813b8e583c336ea9f1c` |
 | job-generators-7477787/check_generators.log | `1514b37372614b8552ebb4edfe761124c7543546aabaa03885ac270e1ef55022` |
+| job-diag-t08b-7478606/diag-t08-width.log | `519c2628ca9b17caf35dc1272aaf78ff9b07eb35d0f4cdb64273e0e6a02a7f93` |
+| job-diag-t08c-7478897/test-t08-sigma.log | `a478ad84b444154c70e9942b20796e115a28a073c94d910faeb52563dba2d02b` |
+| job-round5-7479146/calc-t08-reference.log | `325e070b5a929a8d77d2cb88d00767e2ab5daa985a2d567c096486249835d0c8` |
 
 ## Not in this freeze
 
@@ -45,14 +48,14 @@ Candidate for the user's word (R02, finish-plan B4, decision U5). Not frozen unt
 
 ## Choices the generators make where version 4 is silent
 
-None changes a number in version 4. All freeze with the generator hashes. Rows 1 and 19 were closed by edits to sections 2.1 and 18.
+None changes a number in version 4. All freeze with the generator hashes. Rows 1, 16 and 19 were closed by edits to sections 2.1, 4.3 and 18.
 
 | # | Section | Gap | Assumed |
 | --- | --- | --- | --- |
-| 1 | 2.1 | **Defect.** The charge reference `mu_i`, `1.09 mu_i` leaves out dark noise, which the fixture has, and the threshold. True moments are near `mu_i + 0.002` and `1.09 (mu_i + 0.002)`. Section 2.1 also names no channel set for T09, though "same two criteria" needs one: on back-facing channels `mu_i` is small enough that the z are not Gaussian and dark counts are comparable to the standard error | Text kept literally as the criterion, on channels with `mu_i` at least 0.1 (100 photons per 1,000 events). There the dark term adds at most 0.037 per channel to the sum of z^2, against a half-range of `3.29 sqrt(2 df)`: at most 11 at 300 channels against 80. Threshold: under 2 in total. `INFO` lines print the sum with `mu_i + 0.002` too. No rule reads them |
-| 2 | 2.1 | Threshold also separates fixture from `generate()` in hit fraction: `generate()` has none | Accepted, as the text compares them. Single photons below 0.25 are 0.62 %; the sum of z^2 rises by at most about 12 at 1,000 channels, against a half-range near 147. The check therefore cannot see a missing threshold |
+| 1 | 2.1 | **Defect.** The charge reference `mu_i`, `1.09 mu_i` leaves out dark noise, which the fixture has, and the threshold. True moments are near `mu_i + 0.002` and `1.09 (mu_i + 0.002)`. Section 2.1 also names no channel set for T09, though "same two criteria" needs one: on back-facing channels `mu_i` is small enough that the z are not Gaussian and dark counts are comparable to the standard error | Closed: section 2.1 now states the dark term and the channel sets |
+| 2 | 2.1 | Threshold also separates fixture from `generate()` in hit fraction: `generate()` has none | Accepted, as the text compares them. Single photons below 0.25 are 0.62 %; the sum of z^2 rises by at most about 12 at 1,000 channels, against a half-range near 147. Job 7477787 used 1,000, 1,000 and 987 channels, every channel with a hit and a miss. The check therefore cannot see a missing threshold |
 | 3 | 2.1 | T09 reference sample size | 1,000 `generate()` events per `N_exp`, own stream: `default_rng([9001, 6, 1000 + stratum, i])` |
-| 4 | 2.1 | Position in the T08 and T09 check | Fixed, see above |
+| 4 | 2.1 | Position in the T08 and T09 check | One fixed position per energy or `N_exp`: the one the generator draws for event 0 of that stratum, with T09's direction and `t0` too |
 | 5 | 3.2 | Stratum integers are not defined | Main: `3 x bin + stratum` (T08: E1-E4, iso, far, near; T09: B1-B4, radial). Controls: 0 |
 | 6 | 4.2 | Coordinate origin | Grid is [0, 40) on each axis; section 7.1's flat index is C order |
 | 7 | 4.2 | Does the generator apply `T_c`? | No. Section 7.1 applies it, and the section 2.1 reference (mean down to 1 MeV, near 0.6) needs unthresholded values |
@@ -64,7 +67,7 @@ None changes a number in version 4. All freeze with the generator hashes. Rows 1
 | 13 | 4.3 | Dark window origin | [0, 200) ns, as the script |
 | 14 | 4.3 | What the threshold does | Applied to the summed charge of the channel. Below: unhit, charge 0, no time. Time stays the earliest photon of a passing channel |
 | 15 | 4.3 | Dead channels and `N_exp`, `S`, `E_vis` | Sums over all 1,000, dead included, as the script. Their photons exist in truth and are not read |
-| 16 | 4.3 | Saturation flag | Data field `saturated` for charge at 5. Censoring itself belongs to the likelihood |
+| 16 | 4.3 | Saturation flag | Closed: section 4.3 now names it. Data field `saturated` for charge at 5. Censoring itself belongs to the likelihood |
 | 17 | 4.3 | "Nearest the +z axis" | Largest cos(polar angle): channels 0 to 199, as the script |
 | 18 | 7, 3.2 | How the 50 fixed likelihood points are drawn | Not asked explicitly, but section 7 freezes them with the generator, so a later addition would be an amendment. `likelihood_points()`: reserved stratum 100 of fixture 9001, block 6, index k, main bin `k mod 12`, same draws as main truth |
-| 19 | 2.1 | What a FAIL forces. Section 18 fixes outcomes, but this check has no row, and block 6 is fixed, so no redraw | Nothing assumed. See concern 3 |
+| 19 | 2.1 | What a FAIL forces. Section 18 fixes outcomes, but this check has no row, and block 6 is fixed, so no redraw | Closed: section 18, generator check rows 1 to 5 |

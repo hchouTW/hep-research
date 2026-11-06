@@ -1,6 +1,6 @@
 # T03: task sheets for T07, T08, T09
 
-Section 16.2 structure. Paths are relative to `plugins/hep-research/`. Nothing here is applied in P0 (R07). All three start after T06, which waits for the 0.57.0 re-baseline (D1). `<freeze>` values are the user's. They are frozen at Freeze A, before any development run, except the items in t04-values-v4.md, section 2.2, frozen at Freeze B, before any evaluation sample (t04-prereg.md).
+Section 16.2 structure. Paths are relative to `plugins/hep-research/`. Nothing here is applied in P0 (R07). All three start after T06. `<freeze>` values are the user's. They are frozen at Freeze A, before any development run, except the items in t04-values-v4.md, section 2.2, frozen at Freeze B, before any evaluation sample (t04-prereg.md).
 
 ## Recipes named
 
@@ -61,7 +61,7 @@ Section 16.2 structure. Paths are relative to `plugins/hep-research/`. Nothing h
 - **Files, confirmed:** `skills/hep-detector/references/photon-likelihood-reconstruction.md`. **Proposed:** `adapters/photon-likelihood/`, `examples/reconstruction-photon-likelihood/`.
 - **Input:** events from fixture t09-sphere/1 (t04-values-v4.md, section 4.3), a stated analytic light model, which makes this a shared-model closure: it tests the code, not the model, and is labelled so (Section 11.1).
 - **Likelihood:** per the reference. All live channels enter. Dead or disabled channels are excluded, never treated as unhit. Hit and no-hit terms share one threshold model, so their probabilities sum to one per channel. Saturated channels are censored. Single-time readout uses the first-arrival density, with the noise rate included.
-- **Interfaces:** live, dead and unhit states are three explicit states; charge and time from one sensor are modelled jointly or conditionally, not assumed independent (Section 8.2).
+- **Interfaces:** live, dead and unhit states are three explicit states; per-channel `saturated` flag from the readout; charge and time from one sensor are modelled jointly or conditionally, not assumed independent (Section 8.2).
 - **Steps:** charge-only likelihood, then time, then multistart seeds, then topology.
 - **Acceptance:**
   - Controls: live-unhit against dead channels (200 channels); few photons (bin B1, `N_exp` below 120); saturation; mirrored vertices and reversed tracks; two simultaneous events.

@@ -379,3 +379,27 @@ Void, and goes to the user, unless every `CONST` line and every node's `n`, `b`,
 
 Section 18's T08 rows apply as written, with `closed` now exact. A value within 1e-4 of a limit is recomputed from its node values before it is read, because the prints have 4 decimals. Any stop goes to the user. With no stop, this job's log replaces job 7474461's T08 log in the freeze list, and the target tables, which should be equal, are confirmed.
 
+### Rerun result
+
+Job 7479146, `COMPLETED`, exit `0:0`, 5 min 24 s, error log empty. Evidence: `<private>/evidence/t04-v4/job-round5-7479146/`. Not void: same 764 lines, every `CONST`, `E:`, `total`, `b_far`, `edge`, `dead`, `sat` and `residual` line equal to job 7474461's, and iso and pair lines equal apart from closed-form values. No section 18 row fires: 30 `fired` nodes within, 154 value limits with none over and none within 1e-4, 21 merge values, 22 efficiency values. Iso E2 position `|s68 - 1|` 0.0078 and 0.0080, before 0.0410 and 0.0412. Far E2 from `d` 3: 0.0069 and 0.0097, before 0.0130 and 0.0156. This log replaces job 7474461's T08 log in the freeze list. The target tables are confirmed equal. The third stop is resolved.
+
+## Batch of read fixes
+
+All 28 findings applied by a fresh editor; no gate, limit, tolerance, range, edge, size, count or decision changed. Report: finish-plan workspace, `b4-batch-report.md`. One question it raised, whether the reference error 0.011 sigma covers the far nodes at `d` = 3, was settled from job 7479146's log: yes, 0.0067 at most from the core width, and section 4.2 says why. freeze-a.md's tables regenerated: job 7474461's T08 log stays listed as history.
+
+## Final read, and the far stratum between d 6 and 8
+
+Fresh reader: `<private>/evidence/t04-v4/freeze-a-read2.md`. Fixes needed, text only, 0 blocker, 1 major, 9 minor. Section 7.1 matches the code symbol by symbol, all changed numbers match their logs, all hashes match. Minors applied. The major: the reference grid has no far node between `d` 6 and 8, 2/5 of the gated range, where the new uncertainty takes over; that interval reaches bin values only by interpolation. The reader's rough bound puts the gate out of danger, and proposed narrowing the claim. The coordinator proposes measuring it instead, given the user's standard: "I want correct method and right result".
+
+Fixed before any output exists. Script `<private>/evidence/t04-v4/diag-t08d/test-t08-far-gap.py` (`1031de6ddd3183f0`), job `<private>/jobs/t04-diag-t08d/run.sh` (`4a6d14009264c3df`). Syntax-parsed only, not run, not independently reviewed. Round 5's `pair()`, 12,000 events per node, 7 energies from 0.25 to 16 GeV, `d` 6.5, 7, 7.5.
+
+Void unless each `REPLAY` line equals job 7479146's `BIN far ... from d 3.0` line on the fields it prints.
+
+| Result | Reading |
+| --- | --- |
+| Every `GAP` line within section 18's far limits, every `NODE` width within its node limit, about 0.054, and `b_far` within 0.02 sigma + 3 `se` of its linear interpolation | The gap is measured and clean. Section 7.1's claim widens to it |
+| `GAP` lines within, a `NODE` width over | Works on average only: goes to the user |
+| A `GAP` line over, or `b_far` off its interpolation | Stop: goes to the user. Target tables may need these nodes |
+
+An outcome the table does not cover goes to the user.
+

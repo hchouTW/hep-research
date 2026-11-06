@@ -16,7 +16,7 @@ State: frozen at Freeze A with t04-values-v4.md; K09 and K16 values are in that 
 
 ## Rules for every workflow
 
-- **Sample roles:** tuning, calibration, selection and confirmation are separate, grouped by run, conditions source, noise realization and fixture derivation (K08).
+- **Sample roles:** tuning, calibration, selection and confirmation are separate, grouped by run, conditions source, noise realization and fixture derivation (K08). For fixtures, t04-values-v4.md section 3.1 applies.
 - **Sample size:** set from the claim to be supported, with hep-statistics. No universal number exists. Too few events in a required bin gives inconclusive, never pass.
 - **Results:** pass, fail, inconclusive, not-applicable.
 - **Weighted data:** an explicit statistical method; binomial only for unweighted independent trials with negligible background.

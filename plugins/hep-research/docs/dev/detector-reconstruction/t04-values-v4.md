@@ -1,15 +1,14 @@
 # T04: values, version 4 (Freeze A candidate)
 
-Updated after jobs 7474461, 7474462, 7477066 and 7477126, under the rules of section 18 and the user's decisions of 2026-11-06 (decisions.md). Results: section 18.1.
+Updated after jobs 7474461, 7474462, 7477066, 7477126, 7477787, 7478606, 7478897 and 7479146, under the rules of section 18 and the user's decisions of 2026-11-06 (decisions.md). Results: section 18.1.
 
 Replaces t04-values-v3.md, after the third review (`<private>/evidence/20261106T102310Z-b3-review/verdict.md`) and the rechecks of round 1 and 2 (`<private>/evidence/t04-v4/recheck.md`, `recheck2.md`). This document stands alone. K09, K12 and K16 freeze only on the user's word (R02). Until then, no pass or fail claim.
 
-Plain numbers in brackets refer to the verdict; R-numbers to the first recheck; S-numbers to the second. t04-v4-dispositions.md lists each finding and the edits other documents need.
+Plain numbers in brackets refer to the verdict; R-numbers in square brackets to the first recheck; S-numbers to the second; M-numbers to a minor finding of either recheck, in the dispositions' Round 2 and Round 3 tables. R-numbers in round brackets or plain text (R02, R11, R37) are requirements of plan v9.2, `hep-research-detector-reconstruction-plan-v9.2-en.md`. So are capital "Section" numbers, "plan 11.4" and bare numbers such as 11.3.1. Lower-case "section" means this document. t04-v4-dispositions.md lists each finding and the edits other documents need.
 
 Labels on numbers:
 
 - **Closed form:** deterministic arithmetic, no random numbers: `<private>/evidence/t04-v4/calc-closed-form.py` (`d73ed58fcd64b344…`), `calc-t08-closed.py` (`7dd0b289f98a9b9a…`), `calc-round2-small.py` (`8c204a41a95d8469…`). `calc-t08-closed.py` evaluates the expected image only, with independent-cell moments. Where calc-closed-form.py still prints round-1 T07 or T08 fixture values, the later scripts govern.
-- **Pending:** needs a named script, not yet run. Scripts are in the same folder, and the claim stands unproved until the job runs.
 - **Earlier rule:** simulated in v2 or v3 under a rule that has since changed. Kept for history only.
 - **Design choice:** an arbitrary synthetic value. Not an instrument fact and not from a source.
 
@@ -21,7 +20,7 @@ A pass supports exactly this statement [14]:
 
 > In each gated bin, the robust centre, core width, tail fraction and listed rates showed no departure beyond their limits, on this fixture. Departures that cancel within a bin, or lie outside these statistics, are not excluded.
 
-A pass does not show the code is correct. It is not a performance claim, an instrument result or T3-C (R23). Uncertainties are tested in the core and by the tail rate only. "Found about 93-95 % of the time" (section 5.5) holds for a shift or scale across a whole bin. Every fixture shares something with its reconstruction: geometry in T07, geometry and shower profile in T08, the light model as well in T09. A shared model error cannot be seen here. T08's near gate tests thresholds and membership only: sharing in near is untested. A recipe with a constant derived from pulls would pass on any seed; section 2.2 forbids this.
+A pass does not show the code is correct. It is not a performance claim, an instrument result or T3-C (R23). Uncertainties are tested in the core and by the tail rate only. "Found at least 95 % of the time" (section 5.5) holds for a shift or scale across a whole bin. Every fixture shares something with its reconstruction: geometry in T07, geometry and shower profile in T08, the light model as well in T09. A shared model error cannot be seen here. T08's near gate tests thresholds and membership only: sharing in near is untested. A recipe with a constant derived from pulls would pass on any seed; section 2.2 forbids this.
 
 ## 2. Two-step freeze
 
@@ -33,16 +32,16 @@ Frozen by hash:
 
 - this document, including the fixture table, every edge, tolerance, cap, floor, range and the clustering definition;
 - t04-prereg.md and t07-t09-task-sheets.md, after the edits listed in t04-v4-dispositions.md [16]. Prereg's sample roles, failure classes, negative cases and critical false-success table are in force through this hash;
-- the job logs of all scripts in section 18, of the diagnostic and round 4 scripts of section 18.1, and of the generator check, and the T08 target tables they give;
+- these job logs, and the T08 target tables they give: job 7474461's `calc-t09-lowmu.py`, `calc-pull-table.py` and `calc-rate-rule.py`; job 7474462's `calc-t09-null-h2.py` and `calc-fake-reference.py`; diagnostic job 7477066; round 4 job 7477126; the generator check, job 7477787; the two T08 width jobs, 7478606 and 7478897; and round 5 job 7479146's `calc-t08-reference.py`, which replaces job 7474461's T08 log;
 - each fixture generator [R11]. A generator needs no recipe output. T08 and T09 generators are frozen with this document. T07's depends on the ACTS driver: if it is not ready, its hash is an addendum to Freeze A, on the user's word, before any T07 development run. After that, a generator change is a section 2.3 amendment.
 
-A deterministic check ties each generator to the fixture text [R11, S8], on a fixed seed block (block 6), 1,000 events at each of 3 energies or `N_exp` values.
+A deterministic check ties each generator to the fixture text [R11, S8], on a fixed seed block (block 6), 1,000 events at each of 3 energies or `N_exp` values, and 3,000 events per stratum for draws.
 
 - T08: the reference is `E g_c(x, y)` and its variance `q E g_c + sigma_n^2`, not one draw. Per energy, over cells with mean above 1 MeV, for mean and variance: every `|z|` below 5, and the sum of `z^2` within its 99.9 % chi-square range.
-- T09, over channels with `mu_i` at least 0.1: hit fraction and mean first time against `calc-t09-lowmu.py`'s `generate()`; charge moments against the analytic `mu_i + 0.002` and `1.09 (mu_i + 0.002)`, dark counts included, because `generate()` has integer charge and the fixture does not. Same two criteria.
+- T09: hit fraction against `calc-t09-lowmu.py`'s `generate()`, over every channel with both a hit and a miss. Over channels with `mu_i` at least 0.1: mean first time against the same `generate()`; charge moments against the analytic `mu_i + 0.002` and `1.09 (mu_i + 0.002)`, dark counts included, because `generate()` has integer charge and the fixture does not. Same two criteria.
 - Both: drawn distributions, control constants, `E_vis` truth and golden digests, as `check_generators.py` prints them on `DRAW`, `SMOKE`, `TRUTH` and `GOLDEN` lines.
 
-Events must be byte-identical under the recorded NumPy version on the same partition. Any digest difference goes to the user. This job runs on one node, so equality across the partition's nodes is untested.
+Events must be byte-identical under the recorded NumPy version on the same partition. Any digest difference goes to the user. This job ran on one node, `hpa-wn28`, so equality across the partition's nodes is untested.
 
 The scripts must have run first. What each result forces is fixed in section 18, before the job. No recipe result exists at that point, so revision is allowed.
 
@@ -106,7 +105,7 @@ Outside a range a pull is ungated (section 10). Every range is fixed at Freeze A
 | --- | --- | --- | --- |
 | T07 `q/p` | `sigma(q/p)/|q/p|`, closed form, at each bin's upper edge | At most 0.10. 24 GeV gives 0.0988, so all 4 momentum bins are inside | Closed form from the fixture |
 | T08 pulls | Seed reference `p` at the bin's lower edge | `p` at least 0.99: E2-E4 gated, E1 ungated | Below this, a pull is conditional on the same cells firing the seed, so its target is not `E_ref`. Closed form: sub-cell mean `p` is 0.84 at E1's lower edge, 0.77 at a cell corner (Poisson-exact, recheck), 1.000 at 0.25 GeV [R10, S4] |
-| T09 pulls | Truth expected photons `N_exp` | At least 120: B2-B4 gated, B1 ungated | Seven-parameter check, job 7477126: 80 does not clear (`E_vis` centre -0.062 pooled, -0.111 at `r/R_s` [0.4, 0.7)), 120 clears, so the rule of section 18.1 sets 120. The toy alone had suggested 80: in a one-parameter toy with Hessian uncertainty, trimmed centre `-0.3125/sqrt(mu)` reaches 0.0356 at mu = 77 [18]. Mean bias `-0.5/sqrt(mu)` would reach it at 197. Trimmed values at 20, 50, 80, 200: -0.070, -0.044, -0.035, -0.022. |
+| T09 pulls | Truth expected photons `N_exp` | At least 120: B2-B4 gated, B1 ungated | Seven-parameter check, job 7477126: 80 does not clear (`E_vis` centre -0.062 pooled, -0.111 at `r/R_s` [0.4, 0.7)), 120 clears, so the rule of section 18.1, row T09 range, sets 120. The toy alone had suggested 80: in a one-parameter toy with Hessian uncertainty, trimmed centre `-0.3125/sqrt(mu)` reaches 0.0356 at mu = 77 [18]. Mean bias `-0.5/sqrt(mu)` would reach it at 197. Trimmed values at 20, 50, 80, 200: -0.070, -0.044, -0.035, -0.022. |
 
 ### 3.4 Attempts [6]
 
@@ -132,7 +131,7 @@ Each event belongs to one stratum, fixed by the generator before any random draw
 
 ### 4.1 T07 telescope
 
-Generator and version field: `t07-telescope-clean/1`, `t07-telescope-noise/1`. C++ driver using the ACTS 48.2.0 propagator through the same geometry, as the sheet says. Generator commit: section 2.1. Fixture frame: z along the telescope, u bending, v along the field. In the ACTS frame the telescope runs along x and the field along z, so fixture v is ACTS z, the axis of the vertex seeder [R14].
+Generator and version field: `t07-telescope-clean/1`, `t07-telescope-noise/1`. C++ driver using the ACTS 48.2.0 propagator through the same geometry, as the sheet says. Generator hash: section 2.1. Fixture frame: z along the telescope, u bending, v along the field. In the ACTS frame the telescope runs along x and the field along z, so fixture v is ACTS z, the axis of the vertex seeder [R14].
 
 | Parameter | Clean | Noise |
 | --- | --- | --- |
@@ -207,12 +206,12 @@ Generator and version field: `t08-grid/1`, NumPy `Generator` with PCG64. Round 1
 
 Expected objects per event: 1 shower (iso, controls), 2 (far, near).
 
-**Targets.** Each is an explicit function of named truth quantities [R3]. Constants `b` come from the reference clusterer of section 7.1, and are frozen with the job log. `b` uses the trimmed mean, as the gate does [S12]. `b_iso`, `b_edge(t)`, `b_dead` are unweighted means of node values over gated nodes: `E` at or above 0.25 GeV for iso, E3 nodes for the controls [S11]. Closed form values are the independent-cell estimate, a check on the script.
+**Targets.** Each is an explicit function of named truth quantities [R3]. Constants `b` come from the reference clusterer of section 7.1, and are frozen with the job log. The frozen log is job 7479146's. Its `b`, `se`, `sd` and `model` values equal job 7474461's, so a value labelled job 7474461 here is the same in both. `b` uses the trimmed mean, as the gate does [S12]. `b_iso`, `b_edge(t)`, `b_dead` are unweighted means of node values over gated nodes: `E` at or above 0.25 GeV for iso, E3 nodes for the controls [S11]. Closed form values are the independent-cell estimate, a check on the script.
 
 | Stratum | Target | Closed-form check |
 | --- | --- | --- |
 | iso | `E_ref = E - b_iso` | `b_iso` 2.907 MeV (job 7474461; largest node departure 0.0128 sigma, inside section 18's limit), so one constant serves. Sub-cell spread at most 0.018 sigma |
-| far, per shower | `E_ref = E - b_far(E, d)`, bilinear in (ln E, d) on the script's nodes | `b_far` 2.3-3.3 MeV. Spread over azimuth and sub-cell about 0.09 sigma at 0.25 GeV and 0.04 sigma at 2 GeV or more (recheck, 5 azimuths and 3 sub-cells [M5]), against round 1's 2.2 sigma, with 30 sharing iterations. Added width about 1.004 |
+| far, per shower | `E_ref = E - b_far(E, d)`, bilinear in (ln E, d) on the script's nodes | `b_far` 1.3-3.0 MeV on the 63 gated nodes, mean 2.05 (job 7479146). The independent-cell estimate 2.3-3.3 is high by up to 0.5 MeV at small `d`, at 250 MeV. The log's table governs. Spread over azimuth and sub-cell about 0.09 sigma at 0.25 GeV and 0.04 sigma at 2 GeV or more (recheck, 5 azimuths and 3 sub-cells [M5]), against round 1's 2.2 sigma, with 30 sharing iterations. Added width about 1.004 |
 | near, event | `E_ref = 2E - b_near(E, d)`, same interpolation | `b_near` 3.3-3.9 MeV over `d` 1.5 to 3, spread at most 0.008 sigma |
 | Dead | `E_ref = E (1 - f(x, y)) - b_dead`, `f = g_c` of the dead cell at truth `x, y`, closed form | Unconditioned, `f` has sd 0.0061, which would give pull width about 1.4 at 4 GeV. Conditioned, residual spread at most 0.014 sigma, `b_dead` 2.855 MeV (job 7474461) |
 | Edge | `E_ref = E Phi(t) - b_edge(t)`, for each of the four exact `t` | `b_edge` 1.503, 1.633, 1.701, 1.967 MeV at `t` 0.5, 1, 1.5, 2 (job 7474461), spread at most 0.013 sigma. Discrete `t` removes round 1's interpolation error. `Phi(t)`: 0.6915, 0.8413, 0.9332, 0.9773 |
@@ -224,9 +223,9 @@ Interpolation error is under 0.002 sigma on the iso grid (recheck, closed form).
 | Quantity | Reference |
 | --- | --- |
 | Contained energy, main | `E`, to better than 1e-8: 6 `W` from any edge |
-| Efficiency, iso and far | Closed form per shower, exact cell response: `p = 1 - prod_c P(cell c < T_s)`, each cell `q x Poisson(e_c/q)` plus Gaussian noise `sigma_n`. The Gaussian form used before overstated `p` by 0.0031 at 80 MeV (job 7477066). `R` is the integral over ln E and sub-cell position, not a node sum: 0.992 in E1 (`p` 0.84 at the lower edge, 0.77 at a cell corner), 1.000 in E2-E4 [S4]. The far case takes each shower alone, checked by a section 18 row |
+| Efficiency, iso and far | Closed form per shower, exact cell response: `p = 1 - prod_c P(cell c < T_s)`, each cell `q x Poisson(E g_c/q)` plus Gaussian noise `sigma_n`. The Gaussian form used before overstated `p` by 0.0031 at 80 MeV (job 7477066). `R` is the integral over ln E and sub-cell position, not a node sum: 0.992 in E1 (`p` 0.84 at the lower edge, 0.77 at a cell corner), 1.000 in E2-E4 [S4]. The far case takes each shower alone, checked by a section 18 row |
 | Efficiency, near | **None exists.** Reported only |
-| Reference's own uncertainty [M6] | Statistical error of `b` at a node at most 0.011 sigma (12,000 events), usually less. It enters section 5.4 |
+| Reference's own uncertainty [M6] | Statistical error of `b` at a node at most 0.011 sigma (8,000-event control nodes), usually less. The 7 gated far nodes at `d` = 3 print more, 0.013 to 0.040 sigma, because the printed `se` is `sd/sqrt(n)` and rare far outliers make `sd` 2 to 6 times `model`. `b` is a trimmed mean, which those outliers do not reach: from the core width, `1.03 s_68/sqrt(n)` gives at most 0.0067 sigma over all 63 gated far nodes (job 7479146), so 0.011 stands. It enters section 5.4 |
 
 This is closure of the recipe against an independent coding of the same clustering definition. It is not a test of that definition. The sheet's open item on Geant4 tuning is closed for this fixture: none. Any tuned profile would be a new version.
 
@@ -356,7 +355,7 @@ No reference in these fixtures falls below 0.98 as a bin mean (0.992 is the lowe
 
 ### 5.3 Error budget
 
-Every gate counts. The budget is a union bound: `alpha = 0.01/M`, with no independence needed [19]. Failure is one-sided for a true error of one sign, so `z` is one-sided: `z1`. All gates use T07's count.
+Every gate counts. The budget is a union bound: `alpha = 0.01/M`, with no independence needed [19]. Failure is one-sided for a true error of one sign, so `z` is one-sided: `z1`. All T07-T09 gates use T07's count.
 
 | Workflow | Tests | Composition |
 | --- | --- | --- |
@@ -382,8 +381,8 @@ The target is at most 1 % false failure per workflow, **if all of these hold** [
 | Condition | Stated value |
 | --- | --- |
 | True centre and width error in every gated bin | Within `slack(se)`: 0.0356 at the cap, 0.043 near design. T08 energy: less the reference's own error, 0.011 sigma, so 0.0246 and 0.0324 [M6] |
-| T08 pull model | Model over true sd at least 0.983 (closed form), so added width at most 0.017, inside the slack. Sharing spread about 0.09 sigma at most. Pulls with sharing near `d` = 3 are checked only by `calc-t08-reference.py` [11] |
-| T08 far position | Asymmetric truncation pulls each two-peak centroid inward. Expected image, hard threshold, rms bias against the Fisher sigma: 0.36, 0.34, 0.32, 0.31, 0.15 at `d` = 3, 3.5, 4, 5, 6 at 0.25 GeV; 0.23-0.16 at 1 GeV; about 0.12 at 4 GeV. Bin-level width about 1.026 (E2), 1.010 (E3), 1.004 (E4), inside the position slack of 0.0356, by 0.01 in E2. Coarse [S3] |
+| T08 pull model | Model over true sd at least 0.983 (closed form), so added width at most 0.017, inside the slack. Job 7479146: 0.979 at node level, at the iso nodes of 250 and 297 MeV. Sharing spread about 0.09 sigma at most. Pulls with sharing near `d` = 3 are checked only by `calc-t08-reference.py` [11] |
+| T08 far position | Asymmetric truncation pulls each two-peak centroid inward. Expected image, hard threshold, rms bias against the Fisher sigma: 0.36, 0.34, 0.32, 0.31, 0.15 at `d` = 3, 3.5, 4, 5, 6 at 0.25 GeV; 0.23-0.16 at 1 GeV; about 0.12 at 4 GeV. Closed-form bin-level width about 1.026 (E2), 1.010 (E3), 1.004 (E4), inside the position slack of 0.0356, by 0.01 in E2. Coarse [S3]. Job 7479146, `|s68 - 1|` x and y on `BIN` lines. Far from `d` 3: 0.0069, 0.0097 (E2), 0.0035, 0.0017 (E3), 0.0005, 0.0003 (E4). Iso: 0.0078, 0.0080 (E2), 0.0015, 0.0005 (E3), 0.0020, 0.0018 (E4). So E2 widths are 1.007-1.010 in far and 1.008 in iso, under the coarse 1.026. The tightest T08 position width is far E2 y, 0.0097 against the slack of 0.0356. The tightest T08 width of any kind is iso E2 energy, 0.0117 against 0.0246 |
 | T09 penalty | The H1-truth tail above 30: 3 of 600 at `N_exp` 50, exactly at 0.5 %, and 0 of 600 at 1,000 (job 7474462). The penalty stays 30, with no margin at 50 [R8] |
 | `se` | At or under the cap |
 | True rate under a limit | Under the rate slack, below |
@@ -403,7 +402,7 @@ Rate slack: the largest true rate with false failure at most `alpha`, closed for
 | 0.5 % | 12,000 | 0.198 % | 0.40 |
 | 0.5 % | 72,000 | 0.356 % | 0.71 |
 
-For objects of equal number per event, `n_eff` cannot fall below the event count. So 12,000 events give a rate slack of 0.54 L at any correlation. The tail gate's Gaussian 0.27 % is inside this. v3's "74 % at half the limit" came from 1,000 events of 10 (earlier rule) and does not describe these samples.
+For objects of equal number per event, `n_eff` cannot fall below the event count. So 12,000 events give a rate slack of 0.54 L at `L` = 1 % and 0.40 L at `L` = 0.5 %, at any correlation. The tail gate's Gaussian 0.27 % is inside this. v3's "74 % at half the limit" came from 1,000 events of 10 (earlier rule) and does not describe these samples.
 
 Outside these conditions a correct recipe may fail. Section 2.3 says what follows.
 
@@ -421,7 +420,7 @@ Closed form, Gaussian pulls, one bad bin, pass probability.
 
 So an error of 0.10 or more across a whole bin is found at least 95 % of the time. Errors within `slack(se)` pass. Between them the outcome is uncertain. That band is accepted, not hidden.
 
-Table with the gate's own bootstrap, fail and inconclusive labels: `calc-pull-table.py`, job 7474461 [20]. At a true error of 0.10 a single bin passes 4.0 % (centre) and 4.8 % (width), under the rule's 7.9 %; no fail at state `none`. Earlier rule: v3's "directly simulated" table (3,000 trials, `t04_v2_b.py`, fixed design `se`, limits from 1.012). "100 % in 3,000" bounds failure only at about 0.1 %. So the family target is a Gaussian extrapolation, not a measurement. Width 1.10: 5.0 % is the closed form with a scale-aware `se`; it was never measured with the gate's bootstrap.
+Table with the gate's own bootstrap, fail and inconclusive labels: `calc-pull-table.py`, job 7474461 [20]. At a true error of 0.10 a single bin passes 4.0 % (centre) and 4.8 % (width), under the rule's 7.9 %; no fail at state `none`. Earlier rule: v3's "directly simulated" table (3,000 trials, `t04_v2_b.py`, fixed design `se`, limits from 1.012). "100 % in 3,000" bounds failure only at about 0.1 %. So the family target is a Gaussian extrapolation, not a measurement. Width 1.10: 5.0 % is the closed form with a scale-aware `se`; the gate's bootstrap measured 4.8 %, job 7474461.
 
 ## 6. Common gates
 
@@ -468,7 +467,7 @@ Blocker 5. Quantities are fixed here. Each recipe's output must supply them.
 | Reversed, mirrored | Reversed: cosine of fitted to truth direction below -0.5. Mirrored: fitted vertex closer to `-x_true` than `x_true`, for `r/R_s` at least 0.4 |
 | Topology hypotheses | H1: one source, 7 parameters. H2: two sources, 14 parameters. H2 is chosen if and only if `2(lnL_2 - lnL_1) >= 30`. The 30 is a penalty, so more parameters and a higher raw likelihood are not enough. Design choice, not tuned on any recipe sample. H1 is H2 at zero second-source yield, so Wilks does not apply under H1 truth: the tail is measured, job 7474462 [R8] |
 | Mis-ID | H1 truth: H2 chosen, in each main bin. H2 truth: H1 chosen, in the two-source control |
-| `D_bar`, expected difference | Charge-only `lnL` difference on expected data, truth H2 against the best H1 fit, 8 starts. A reported design figure only. No rule reads it: charge alone gives 0.5-25 in this stratum, while the statistic also uses time [S1] |
+| `D_bar`, expected difference | Charge-only `lnL` difference on expected data, truth H2 against the best H1 fit, 8 starts. A reported design figure only. No rule reads it: charge alone gives 0.5-2 at the corner, median 44 (job 7474461), while the statistic also uses time [S1] |
 | Fixed likelihood points | 50 parameter points drawn from block 6, frozen with the generator |
 | DEFF, bootstrap, seeds, development size | Sections 5.2, 5.1, 3.2 |
 | Weighted data | None. All fixtures are unweighted |
@@ -485,10 +484,12 @@ The recipe and the reference clusterer both follow this text [R3]. They share no
 | One peak, or none kept | One object: `A = sum e_c` over the component. `x = sum e_c x_c / A`, likewise `y` |
 | Two peaks | Two objects, by 30 iterations of sharing, no early stop. Start: `c_k` = centre of peak cell k, `A_k` = that cell's value. Each iteration: `f_kc = A_k g_c(c_k) / sum_j A_j g_c(c_j)`, then `A_k = sum_c f_kc e_c`, `c_k = sum_c f_kc e_c x_c / A_k`. `g_c` is the cell-integrated profile of width `W`. All sums over the component |
 | Sharing fractions | `f_kc` from the last iteration, kept per object. 1 for one-peak objects |
-| Uncertainty, one peak | `sigma_A^2 = sum_c v_c` over the component, with `v_c = q max(e_c, 0) + sigma_n^2`. `sigma_x^2 = sum_c (x_c - x)^2 V_c / A^2`, likewise y, over the component and its 8-connected ring, absent and dead cells left out. `V_c` is the variance of `e 1(e >= T_c)`, for `e` Gaussian with mean `mu_c = A g_c(x, y)` and variance `s_c^2 = q mu_c + sigma_n^2`: with `a = (T_c - mu_c)/s_c`, `V_c = M_2 - M_1^2`, `M_1 = mu_c Q(a) + s_c phi(a)`, `M_2 = (mu_c^2 + s_c^2) Q(a) + s_c (mu_c + T_c) phi(a)`, `Q` the upper normal tail and `phi` the normal density. The term carries cells near `T_c` entering and leaving the sum, which a sum over kept cells alone omits: pull width 1.07 at 0.25 GeV without it, 1.01 with it (job 7478897) |
+| Uncertainty, one peak | `sigma_A^2 = sum_c v_c` over the component, with `v_c = q max(e_c, 0) + sigma_n^2`. `sigma_x^2 = sum_c (x_c - x)^2 V_c / A^2`, likewise y, over the component and its 8-connected ring, absent and dead cells left out. `V_c` is the variance of `e 1(e >= T_c)`, for `e` Gaussian with mean `mu_c = A g_c(x, y)`, at the estimate, and variance `s_c^2 = q mu_c + sigma_n^2`: with `a = (T_c - mu_c)/s_c`, `V_c = M_2 - M_1^2`, `M_1 = mu_c Q(a) + s_c phi(a)`, `M_2 = (mu_c^2 + s_c^2) Q(a) + s_c (mu_c + T_c) phi(a)`, `Q` the upper normal tail and `phi` the standard normal density. The term carries cells near `T_c` entering and leaving the sum, which a sum over kept cells alone omits: pull width 1.07 at 0.25 GeV without it, 1.01 with it (job 7478897) |
 | Uncertainty, two peaks | Fisher matrix on the component's cells, `theta = (A_1, A_2, x_1, y_1, x_2, y_2)`, `I_ij = sum_c (d mu_c/d theta_i)(d mu_c/d theta_j)/v_c`, `mu_c = sum_k A_k g_c(c_k)`, `v_c = q mu_c + sigma_n^2`, evaluated at the estimate. `sigma_j^2 = (I^-1)_jj`. This is needed: at `d` = 3, `sigma_A` is 1.17 `sqrt(q E)`, closed form, so the plain sum would fail the width gate. A singular `I`, or a non-positive or non-finite variance, leaves that shower with no primary: it counts against shower efficiency and enters no pull [S11] |
 | Event sum | Sum of `A` over all objects = sum of `e_c` over all kept components. `sigma^2 = q S + n sigma_n^2`, `S` the event sum, `n` its cells |
 | Which sum enters | iso, edge, dead, near: the event sum. A split in iso or dead cannot move energy, and a hole at a dead cell may give two peaks. far: per-shower primary object. Position in iso: the largest object |
+
+**One-peak position uncertainty: what has been shown.** Job 7478897 tested it on new iso showers, 0.25 to 16 GeV, all objects one-peak. Job 7479146 used it on job 7474461's events. That log prints position pulls for iso and far only. Its near nodes print total energy, and its edge, dead and saturation nodes print energy. So the uncertainty has not been shown for near, edge, dead or saturation objects, or with absent or dead cells in the ring. No gate reads those positions (section 9). The log does not separate one-peak from two-peak objects in far. Only the one-peak form changed, so a changed far line shows one-peak objects there. In gated bins, `s68` moved at `d` 8 up to 4 GeV and at `d` 6 at 0.25 GeV. At `d` 3 at every energy and at `d` 3.25 at 0.25 GeV, only mean and rms moved (`d` 3, 0.25 GeV: rms 2.56, 2.45 to 3.56, 3.27).
 
 Interpolation of tables: linear in ln E and in `d`, on the nodes in the job log. No extrapolation: every gated value lies inside the nodes.
 
@@ -565,9 +566,9 @@ Split and merged vertices; near vertices; predicted and filtered states; unbiase
 
 ### 8.5 Vertex finding
 
-No analytic reference exists [10]. Rule: efficiency over reconstructable vertices, far events, lower bound at least 0.95. Named Freeze-A proposal, a design requirement. Reason: at 5 `u_v` or more, with 3 or more tracks, the fixture makes finding nearly unambiguous, but no formula gives a value. It carries none of the "fixture-known" meaning of a reference. A correct finder below it fails, and section 2.3 applies.
+No analytic reference exists [10]. Rule: efficiency over reconstructable vertices, far events, lower bound at least 0.95. Accepted by the user (section 16), a design requirement. Reason: at 5 `u_v` or more, with 3 or more tracks, the fixture makes finding nearly unambiguous, but no formula gives a value. It carries none of the "fixture-known" meaning of a reference. A correct finder below it fails, and section 2.3 applies.
 
-Seeding [R14]. The installed headers describe a seeder that models tracks by d0/z0 and finds a z seed, and a default split check on z distance. So the fixture separates vertices along that axis and keeps them near one line. Read from headers, not run: `seedFinder` is a configuration choice, frozen at Freeze B. If the driver exists before Freeze A, a small interface probe on block 1 should run, reading only "are seeds found", no gate statistic.
+Seeding [R14]. The installed headers describe a seeder that models tracks by d0/z0 and finds a z seed, and a default split check on z distance. So the fixture separates vertices along that axis and keeps them near one line. Read from headers, not run: `seedFinder` is a configuration choice, frozen at Freeze B.
 
 AMVF uses adaptive weights, so Gaussian vertex pulls are not guaranteed by anything in this design. Development will show it. If they fall outside the conditions, section 2.3 applies.
 
@@ -752,7 +753,7 @@ Evaluation, per attempt, closed form. Cost is unknown until a recipe has run.
 
 ## 16. Choices for the user
 
-Each is genuinely the maintainer's. The rest of this document assumes the recommendation.
+Each is genuinely the maintainer's. The rest of this document assumes the recommendation. All were accepted by the user on 2026-11-06, with the vertex finding floor at 0.95 (decisions.md, "T04 section 16"). The `element_sim` spec was not named. "Proposal" and "recommendation" in sections 5.1, 13 and 16 now mean those accepted values.
 
 | Choice | Recommendation | What changes otherwise |
 | --- | --- | --- |
@@ -762,7 +763,7 @@ Each is genuinely the maintainer's. The rest of this document assumes the recomm
 | **Required set** | Section 10: T07 all; T08 80 tests; T09 270 tests | Fewer required tests narrow the claim. Set before results only |
 | **Method limit in E2 or B2** | Accept: all ranges fixed at Freeze A, E2 and B2 required. A method limit there fails the workflow until the user amends Freeze A (section 2.3). This is the only route with no new review | Alternative: freeze complete reference estimators by hash at Freeze A, with positions and uncertainties, before any development run. A range then moves if and only if the recipe and the reference show the same departure in at least two of the bin's three strata. Maximum one bin. This needs a further review, and does not exclude a defect shared by both codings |
 | **Material, particle type, medium** | Accept as open obligations for the first pass, the user's decision at Freeze A against plan 11.4 | Otherwise the fixtures must vary them, a new version of the design. Without this decision a task reaches `done` with those dimensions never judged |
-| **T08 saturated energy** | Keep reported, for the simpler design | Gate 3 tests with `b_sat`, which `calc-t08-reference.py` prints. M does not change, since all gates use T07's count |
+| **T08 saturated energy** | Keep reported, for the simpler design | Gate 3 tests with `b_sat`, which `calc-t08-reference.py` prints. M does not change, since all T07-T09 gates use T07's count |
 | **T08 noise regime** | Accept as an open obligation | One reported iso sample at `sigma_n` 1, `T_c` 3. It would show behaviour, not gate it |
 | **Refit** | Gated, clean fixture only: 252 tests, M = 1,260 | Reported only, with a reason: M = 1,008, `z1` 4.267, slack at cap 0.0362, and the sheet's "counted separately" rests on reporting. Gated on both fixtures: M = 1,512, `z1` 4.356, slack at cap 0.0352, for no new information |
 | **Vertex finding floor** | 0.95 | No reference exists, so this is a value judgment. A higher floor risks failing a correct finder, a lower one tests little |
@@ -794,18 +795,19 @@ If 0.075 with 30,000: tolerance 0.075, cap 0.0067, which keeps slack 0.035 (`n` 
 - T08 noise is 0.2 MeV, chosen so the pull model closes. Noise is at most 2.2 % of the variance in gated bins, so an omitted or wrong `sigma_n` passes every gate. Threshold handling is sensed only in E2, to about 1 MeV of `b`. Round 1's noise-dominated regime is not tested [S5].
 - T08 saturated energy is reported by choice: a truth-side target exists (section 16).
 - T08 E1 merge is reported: only efficiency bounds it, to a merge rate of about 2 % [S13].
-- T08 far position has an inward centroid bias, section 5.4, which uses most of the slack in E2 (expected image, coarse) [S3].
+- T08 far position has an inward centroid bias, section 5.4. The expected image, coarse, puts it at most of the slack in E2 [S3]. Job 7479146 gives far E2 width 1.007-1.010, at most 0.0097 of the slack of 0.0356.
+- T08 one-peak position uncertainty: shown for iso and far only, section 7.1.
 - H1-truth tail: 600 events per `N_exp` cannot show a tail under the slack. 3 of 600 clears the rule with a 95 % bound of 1.29 %, and a true 1 % clears it 15 % of the time. Only false failure follows, not false pass. The tail is also a lower limit through search [M6].
 - T08 far showers have equal energies, so unequal sharing is untested. Sharing in near is untested. Saturated energy has no target. Targets depend on an independent coding of the same clustering definition, by the same author, so a defect in the definition is shared and a defect repeated in both codings is possible.
-- T09's valid range rests on `calc-t09-range.py`, n = 4,800 per `N_exp`, `se` about 0.015. Its reference fit is simplified: integer charge, no threshold, no saturation. At 120 the `E_vis` centre is -0.044 and the `N_exp` centre -0.042: inside the rule's 0.060, but not clearly inside the slack of 0.0356 that section 5.4 assumes, and B2's lower edge sits there. The bin's mean over [120, 200) should be smaller; that is not measured. If a correct fit departs in B2 by more than the gate allows, T09 fails (section 16).
+- T09's valid range rests on `calc-t09-range.py`, n = 4,800 per `N_exp`, `se` about 0.015. Its reference fit is simplified: integer charge, no threshold, no saturation. At 120 the `E_vis` centre is -0.044 and the `N_exp` centre -0.042: inside the rule's 0.0601 (section 18.1, row T09 range), but not clearly inside the slack of 0.0356 that section 5.4 assumes, and B2's lower edge sits there. The bin's mean over [120, 200) should be smaller; that is not measured. If a correct fit departs in B2 by more than the gate allows, T09 fails (section 16).
 - Near the +z axis the masked control, with 200 dead channels, had one reversed fit in 500 and a largest pull of 9.45 (job 7477126). No rule reads it at that size; the 12,000-event control will.
 - Vertex pulls at worst-case correlation sit exactly at the cap with retention 0.95. There, B = 1,000 jitter of 2.2 % gives about even odds of inconclusive, which is `failed`. Expected correlation is far lower [M8].
 - Adaptive vertex weights may give pull widths away from 1 for a correct fit.
 - No fixture number has been run through a recipe. Retentions in section 4.4 are assumptions.
 
-## 18. Pending scripts and decision rules
+## 18. Scripts and decision rules
 
-All in `<private>/evidence/t04-v4/`. All have now run; results in section 18.1. All were **required** for Freeze A [R6]. numpy and scipy only, fixed seeds. Every script writes results to stdout as they appear, flushed, so a crash keeps earlier output, and sets one BLAS thread per worker. Each runs on 6 CPUs, one after another in its job; a script's failure does not stop the next. Runtimes are the recheck's estimates with assumed unit costs, not measured.
+All in `<private>/evidence/t04-v4/`. All have now run; results in section 18.1. All were **required** for Freeze A [R6]. numpy and scipy only, fixed seeds. Every script writes results to stdout as they appear, flushed, so a crash keeps earlier output, and sets one BLAS thread per worker. Each runs on 6 CPUs, one after another in its job; a script's failure does not stop the next. The table's runtimes are the recheck's estimates with assumed unit costs, kept as history. Measured, from the receipts: job A 874 s, job B 1,062 s.
 
 | Job | Script | SHA-256 prefix | Estimate | Claim |
 | --- | --- | --- | --- | --- |
@@ -821,7 +823,7 @@ All in `<private>/evidence/t04-v4/`. All have now run; results in section 18.1. 
 | A | 43 min | 1 h 50 min | 2.6 |
 | B | 42 min | 1 h 50 min | 2.6 |
 
-**Decision rules [R6, S1-S3].** Fixed now. An outcome not listed leaves v4 unchanged. No rule may be chosen after seeing output. **"Stop" means: return to the user, and no number moves until the user answers.** An agent does not choose what follows. Where a rule needs a rerun, the script does it and logs it, except where stated. Bin values are those printed on `BIN` lines: node values weighted as the fixture draws them (trapezoid in ln E, and in `d` or uniformly over `t`), `se` from the total events, per gated bin and stratum. Limits there are printed beside each value.
+**Decision rules [R6, S1-S3].** Fixed now. An outcome not listed leaves v4 unchanged. No rule may be chosen after seeing output. **"Stop" means: return to the user, and no number moves until the user answers.** An agent does not choose what follows. Where a rule needs a rerun, the script does it and logs it, except where stated. Bin values are those printed on `BIN` lines: node values weighted as the fixture draws them (trapezoid in ln E, and in `d` or uniformly over `t`), `se` from the total events, per gated bin and stratum. Limits there are printed beside each value. A value within 1e-4 of a limit is recomputed from its node values before it is read, because the prints have 4 decimals. This rule was fixed in the dispositions before job 7479146, and written here after it.
 
 | Script | Result | Forced action, before Freeze A |
 | --- | --- | --- |
@@ -853,17 +855,25 @@ All in `<private>/evidence/t04-v4/`. All have now run; results in section 18.1. 
 
 For the generator check, the first matching row applies.
 
-A pending-script change that moves a required test to reported goes in the scope-change table for the maintainer.
+`calc-t08-reference.py`'s frozen log is round 5's: job 7479146, `round5/calc-t08-reference.py` (`5f096622f3bbe1b3`). The prefix in the table above is round 3's, run in job A. Round 5 changes section 7.1's uncertainty and the form in `p_closed`, exact up to 250 MeV and Gaussian above, where both give 1 to six places, with the same seeds. The T08 rows stay as fixed, and round 5 was read against them.
+
+The T09 range row is as fixed before job A, at n = 1,200 and 400. Job 7477126 ran at n = 4,800 and 1,600, with the limits in section 18.1, row T09 range. A reader must not apply this row's limits to that job.
+
+A script result that moves a required test to reported goes in the scope-change table for the maintainer.
 
 ### 18.1 Results
 
-Jobs 7474461 and 7474462 ran the scripts above. Their two stops were answered by the user's decisions of 2026-11-06, using diagnostic job 7477066 and job 7477126. Full tables and the rules as fixed before each job: t04-v4-dispositions.md. `<private>/evidence/t04-v4/job-round4-7477126/` holds `calc-t08-exact.py` and `calc-t09-range.py` output.
+Jobs 7474461 and 7474462 ran the scripts above. They gave three stops. Two were seen at once, and the user's decisions of 2026-11-06 answered them, using diagnostic job 7477066 and round 4 job 7477126. The full read before Freeze A found the third. Jobs 7478606, 7478897 and 7479146 resolved it. Job 7477787 is the generator check. This section states what binds. t04-v4-dispositions.md keeps the full tables and the rules as fixed before each job, as a record. Evidence: `<private>/evidence/t04-v4/`, folders `job-diag-7477066/`, `job-round4-7477126/`, `job-generators-7477787/`, `job-diag-t08b-7478606/`, `job-diag-t08c-7478897/`, `job-round5-7479146/`.
 
 | Item | Result | Action taken |
 | --- | --- | --- |
-| T08 `fired` at 80 MeV | Stop. Cause: the Gaussian cell response. 300,000 events give 0.84086, exact 0.84020, Gaussian 0.84327 | Exact form in section 4.2. All six nodes up to 250 MeV within limits against it |
+| T08 `fired` at 80 MeV, first stop | Stop. Job 7474461: 0.83670 against 0.84327, `dev` 0.00657, limit 0.00640. Cause: the Gaussian cell response. Job 7477066: 300,000 events give 0.84086, exact 0.84020, Gaussian 0.84327 | Exact form in section 4.2, by the user's decision. Job 7477126: all six nodes up to 250 MeV within limits against it. Job 7479146: all 30 iso nodes within |
 | T08 quoted values | `R(E1)` 0.9924, `p` 0.8402 at 80 MeV, 0.7671 at a cell corner, far E1 node mean 0.96006 | Rounded values in sections 4.2 and 9.2 unchanged: 0.992, 0.84, 0.77 |
-| T09 `theta`, `phi` | Stop. Cause: `calc-t09-lowmu.py` departed from section 7: it gated angles, not tangent components, left `theta` out of range in 23 % of fits, used `N_exp` for `E_vis` and did not draw isotropic directions | `calc-t09-range.py` follows sections 4.3 and 7 |
-| T09 range | 80 not clear, 120 clear on all four rows. No fit failure, clause (a) or clause (b) at either | Range and B1/B2 edge 120 |
-| T09 dead | Screen 0.486 at 200 channels. Masked control clear | `PATCH` 200 |
-| H2, Rate, Pull, Fake | No rule triggered | Penalty 30, `C` 0.005 |
+| T09 `theta`, `phi`, second stop | Stop, not clear at 200. Cause, from job 7477066: `calc-t09-lowmu.py` departed from section 7: it gated angles, not tangent components, left `theta` out of range in 23 % of fits, used `N_exp` for `E_vis` and did not draw isotropic directions | `calc-t09-range.py` follows sections 4.3 and 7, by the user's decision, on new events (job 7477126) |
+| T09 range | Rule, fixed before job 7477126: 80 clear on the pooled and all three radial rows keeps 80; 80 not clear and 120 clear on the same four rows sets 120; neither clear is a stop. Limits keep section 18's form, 0.0356 + 1.645 `se`, `se` 1.03 and 0.962 over `sqrt(n)`, at the new n: centre 0.0601 and width 0.0584 pooled (n = 4,800), 0.0780 and 0.0752 radial (n = 1,600). Section 18's row is as fixed before job A. Job 7477126: 80 over on `E_vis` centre, -0.062 pooled, -0.111 at `r/R_s` from 0.4. 120 clear on all four rows | Range and B1/B2 edge 120 |
+| T09 fit failure, wrong minimum | Limits at n = 4,800, section 18's `0.5 L + 3 se`: fit failure 0.00805, wrong minimum, clause (a) or (b), 0.00466. Job 7477126: all 0 at `N_exp` 80 and 120 | No action |
+| T09 dead | Screen 0.486 at 200 channels. Masked control clear at n = 500, limits as in row T09 range at that n, 0.1114 and 0.1064, an excess going to the user; clauses (a) and (b) 1 of 500, under 0.0092 (job 7477126) | `PATCH` 200 |
+| T08 iso E2 position width, third stop | Stop. Job 7474461 `BIN iso E2` y printed 0.0412, limit 0.0412. From node values: 0.041206 against 0.041154, over by 5.2e-5. It was first recorded as none over, from 4-decimal prints. Job 7478606, 540,000 new showers, limit 0.039527, x and y: `raw` 0.040374, 0.039683, so the excess is reproduced; `cross`, the measured sub-cell shift removed, 0.040737, 0.039370, so a fixed shift is not the cause; `oracle`, a threshold-free centroid, 0.024994, 0.025769. `cross` split across the limit, so the job's reading table did not apply and the outcome went to the user. Cause, as tested: section 7.1's one-peak sum over kept cells left out cells near `T_c` entering and leaving the sum | The user asked for the cause, then adopted the tested form (decisions.md, "T08 width stop"). Section 7.1 replaced. Job 7478897, new showers: `BIN E2` 0.008351, 0.009338, limit 0.039527; all 30 `NODE` lines within 0.0474. Job 7479146 reran the T08 reference with it and the exact efficiency, on job 7474461's events. Every energy, `b` and `CONST` line is unchanged. No section 18 row fires. Iso E2 position 0.0078, 0.0080, before 0.0410, 0.0412. Far E2 from `d` 3: 0.0069, 0.0097, before 0.0130, 0.0156. This log replaces job 7474461's T08 log |
+| T08 other rows, job 7479146 | Constant: worst node E 2378.4, 0.0128 sigma, limit 0.0374. `BIN` limits, iso, edge, dead, near, far: 154 values, none over, none within 1e-4. Position tails print with no limit, at most 0.00309; position values exist on iso and far lines only. Largest ratio to its limit: 0.53, far E2 energy tail; 0.39, iso E2 energy width; 0.25, far E2 y position width. Far merge: 21 values, largest 0.00012, limit 0.00574. Far efficiency: 22 values, largest deficit 0.00006, limit 0.00526. Iso `split` in E2-E4: 0.00000 | No action. One `b_iso`, far's lower edge stays 3 |
+| Generator check, job 7477787 | `RESULT PASS`, stderr empty, exit 0. No `FAIL` line | Row 5: hashes and 61 `GOLDEN` lines go into Freeze A |
+| H2, Rate, Pull, Fake | No rule triggered. The Pull row quotes section 1's former 93-95 %. Section 1 now reads at least 95 %, as section 5.5 does | Penalty 30, `C` 0.005 |
