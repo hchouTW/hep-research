@@ -28,7 +28,7 @@
    "state": "in-progress",
    "worktree": "../hep-research-g4sim-S3",
    "branch": "g4sim/S3",
-   "task_card_sha256": "4919dbffd9d5329a3181889803a593f6193da549bd1b5081f2ee4a5c9e2268af",
+   "task_card_sha256": "336ba95bba6c034e0865c0371df597339cea9b79602ef5b95b82eedac07cfb4e",
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S3.md",
    "blocked_on": [
     "Section 23 step 4: the maintainer's targeted review of g4sim-addendum-11.1.md, before this phase's gate"
@@ -94,20 +94,20 @@
   "GB8": "confirmed",
   "GB9": "confirmed",
   "GB10": "confirmed",
-  "GB11": "unconfirmed",
-  "GB12": "unconfirmed",
-  "GB13": "unconfirmed",
-  "GB14": "unconfirmed",
-  "GB15": "unconfirmed",
-  "GB16": "unconfirmed",
-  "GB17": "unconfirmed",
+  "GB11": "confirmed",
+  "GB12": "confirmed",
+  "GB13": "confirmed",
+  "GB14": "confirmed",
+  "GB15": "confirmed",
+  "GB16": "confirmed",
+  "GB17": "confirmed",
   "GB18": "confirmed",
-  "GB19": "unconfirmed",
-  "GB20": "unconfirmed",
-  "GB21": "unconfirmed",
+  "GB19": "confirmed",
+  "GB20": "confirmed",
+  "GB21": "confirmed",
   "GB22": "confirmed",
-  "GB23": "unconfirmed",
-  "GB24": "unconfirmed"
+  "GB23": "confirmed",
+  "GB24": "confirmed"
  },
- "updated": "2026-11-06T21:53:17Z"
+ "updated": "2026-11-06T21:58:26Z"
 }

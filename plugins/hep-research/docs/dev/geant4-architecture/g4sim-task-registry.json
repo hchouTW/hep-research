@@ -477,6 +477,13 @@
    "registered_at": "2026-11-06T21:53:17Z",
    "card_commit": "d6e20770",
    "reason": "Execution log only (output negatives); thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "336ba95bba6c034e0865c0371df597339cea9b79602ef5b95b82eedac07cfb4e",
+   "registered_at": "2026-11-06T21:58:26Z",
+   "card_commit": "177c9489",
+   "reason": "The maintainer's corrected GB21 rule; designs of gate 4 and the separated conservation checks registered before their runs; E2 waiver"
   }
  ]
 }
