@@ -104,7 +104,7 @@ criteria as above.
   flat tops against ballistic deficit and trapping.
 <!-- example: source citations (experiments named as the source of a general method) -->
 - M. Aharrouche et al., "Response uniformity of the ATLAS liquid argon electromagnetic
-  calorimeter", arXiv:0709.1094 (read 2026-10-25; journal reference not checked). Optimal
+  calorimeter", Nucl. Instrum. Methods A 582 (2007) 429, arXiv:0709.1094 (read 2026-10-25). Optimal
   filtering coefficients from the pulse shape, its derivative and the pedestal-run noise
   autocorrelation by Lagrange multipliers.
 - N. Nikiforou for the ATLAS Collaboration, "Performance of the ATLAS liquid argon
@@ -182,7 +182,7 @@ criteria as above.
   Astrophys. J. 272 (1983) 317-324, DOI 10.1086/161295. ON/OFF significance.
 
 <!-- example: source citation (experiment named as the source of a general method or number) -->
-- **Read 2026-10-14 for the hep-detector audit** (astroparticle corrections): Verzi for the Pierre Auger
+- **Read 2026-10-14 for the hep-detector audit** (astroparticle corrections): Dawson for the Pierre Auger
   Collaboration, PoS(ICRC2019)231 (energy-scale budget); Gesualdi et al., PoS(ICRC2021)473 (WHISP muon-scale
   summary); LHAASO, arXiv:2505.14447 (proton knee); ANTARES, IceCube, LIGO and Virgo, arXiv:1703.06298 (+-500 s
   window); DAMPE, Sci. Adv. 5 (2019) eaax3793, arXiv:1909.12860 (calorimetric unfolding); R. Nolty, Caltech thesis,

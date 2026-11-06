@@ -115,8 +115,9 @@ rather than of the shower physics.
   that calibration to the full, 100%-duty-cycle surface-only dataset for the spectrum
   measurement, tying the absolute energy scale to the fluorescence calorimetric
   measurement's own systematic uncertainty (in the published Auger budget, 14% in total, the
-  absolute telescope calibration is the largest term, 9.9%, with the atmosphere 3.4-6.2% and the
-  fluorescence yield 3.6%; Verzi for the Pierre Auger Collaboration, PoS ICRC2019 (2019) 231, opened
+  photometric calibration, with its absolute, relative and wavelength terms, is the largest term,
+  9.9%, with the atmosphere 3.4-6.2% and the
+  fluorescence yield 3.6%; Dawson for the Pierre Auger Collaboration, PoS ICRC2019 (2019) 231, opened
   2026-10-14; take the budget from the experiment's energy-scale paper).
 <!-- /example -->
 
@@ -207,7 +208,9 @@ arXiv:1604.03637).
 ### Radio reconstruction
 
 The emission and its scaling are summarized above; this subsection covers how an event is
-reconstructed from the antenna signals (review: Huege, Phys. Rep. 620 (2016) 1).
+reconstructed from the antenna signals (background review: Huege, Phys. Rep. 620 (2016) 1; the
+review does not give the vector effective length, the iteration of field and direction, or the
+signal power lost to transmitter removal).
 
 - **Voltage to electric field.** Each antenna records two or three polarization channels.
   The field vector is obtained by unfolding the antenna's vector effective length (its

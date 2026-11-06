@@ -204,8 +204,9 @@ fiducialization, and energy scale** dominate the result.
   where one exists, such as the light detector of a scintillating bolometer, by a template
   fit of the pulse (the optimal filter of
   [front-end waveform processing](front-end-waveform-processing.md#amplitude-and-time-from-sampled-waveforms))
-  with a goodness-of-fit or residual test, by pulse-shape tests on the rising edge, or by a
-  two-pulse fit (Chernyak et al., Eur. Phys. J. C 74 (2014) 2913). The rejection versus
+  with a goodness-of-fit or residual test, or by mean-time and rising-edge tests (Chernyak
+  et al., Eur. Phys. J. C 74 (2014) 2913); a two-pulse fit is a further option, not used in
+  that paper. The rejection versus
   pulse separation is measured by superposing measured pulses at known separations, not
   assumed; near threshold, noise triggers and pileup with small pulses enter the
   low-energy event rate. Pileup in fast germanium readout is handled by the fast channel of
@@ -227,7 +228,9 @@ fiducialization, and energy scale** dominate the result.
   whose weighting field is concentrated near the read-out contact, the maximum current of a
   single-site event hardly depends on its position, so the ratio of maximum current to
   energy separates single-site from multi-site events and flags events near the read-out
-  contact and slow events in the surface layer (Budjáš et al., J. Instrum. 4 (2009) P10007);
+  contact and slow events in the surface layer (Budjáš et al., J. Instrum. 4 (2009) P10007,
+  for the separation and the events near the contact; that paper gives neither the
+  weighting-field argument nor the surface-layer events);
   in large-contact (semi-coaxial) detectors this ratio discriminates poorly and other
   pulse-shape variables are used. The cut is calibrated on double-escape peaks (a
   single-site proxy, but not uniform in the volume) and on single-escape and full-energy
