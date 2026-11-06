@@ -138,17 +138,26 @@ def main() -> int:
     returning = copy.deepcopy(request)
     returning["source"]["particle"] = "e-"
     returning["source"]["energy"] = {"uniform": {"min_MeV": "20", "max_MeV": "60"}}
+    returning["source"]["position"]["box_uniform"]["centre_mm"] = ["0", "0", "190"]  # 10 mm before the block, or the field turns them away first
     bounded = copy.deepcopy(card)  # in vacuum they would circle for ever: KillProcess ends them, and books what it takes
     bounded["kill_policy"] = {"time_cut_ns": "100"}
     with_field, field_work = case("backflow_nominal", spec_in=bent, request_in=returning, card_in=bounded)
     without, _ = case("no_backflow", spec_in=bent, request_in=returning, card_in=bounded, environment={"G4SIM_SCORER_CONTROL": "no_backflow"})
-    unbooked, _ = case("kill_unbooked", spec_in=bent, request_in=returning, card_in=bounded, environment={"G4SIM_ACCOUNTING_CONTROL": "no_killed_process"})
+    killing = copy.deepcopy(card)
+    killing["kill_policy"] = {"min_kinetic_energy_MeV": "1"}
+    killing["physics"] = {"em_constructor": "G4EmStandardPhysics_option4", "cuts_mm": {"default": "0.7"}}  # pure EM: a photonuclear event breaks this closure by a binding energy
+    booked, booked_work = case("kill_booked", card_in=killing)
+    unbooked, _ = case("kill_unbooked", card_in=killing, environment={"G4SIM_ACCOUNTING_CONTROL": "no_killed_process"})
     with (field_work / "boundary.csv").open(encoding="utf-8", newline="") as handle:
         backflows = sum(int(row[5]) for row in csv.reader(handle) if row[2] != "balance")
     checks["backflow_was_exercised"] = backflows > 0
-    checks["conservation_holds_with_kills"] = with_field["conservation"]["largest_residual_MeV"] < BALANCE_TOLERANCE_MEV and with_field["conservation"]["accounting_errors"] == 0
+    with (booked_work / "conservation.csv").open(encoding="utf-8", newline="") as handle:
+        killed_mev = sum(float(row["killed_kinetic_process_MeV"]) for row in csv.DictReader(handle))
+    checks["kill_process_fired"] = killed_mev > 0
+    checks["conservation_holds_with_kills"] = booked["conservation"]["largest_residual_MeV"] < BALANCE_TOLERANCE_MEV and booked["conservation"]["accounting_errors"] == 0
+    checks["balance_holds_with_kills"] = booked["balance"]["largest_MeV"] < BALANCE_TOLERANCE_MEV
     checks["unbooked_kill_caught"] = unbooked["conservation"]["largest_residual_MeV"] > BALANCE_TOLERANCE_MEV
-    checks["balance_holds_with_backflow"] = with_field["status"] == "ok" and with_field["balance"]["largest_MeV"] < BALANCE_TOLERANCE_MEV
+    checks["balance_holds_with_backflow"] = with_field["status"] == "ok" and with_field["balance"]["mean_incident_MeV"] > 0 and with_field["balance"]["largest_MeV"] < BALANCE_TOLERANCE_MEV
     checks["no_backflow_caught"] = without["balance"]["largest_MeV"] > BALANCE_TOLERANCE_MEV
 
     early = copy.deepcopy(card)
