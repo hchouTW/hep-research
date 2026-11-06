@@ -365,6 +365,13 @@
    "registered_at": "2026-11-06T05:24:25Z",
    "card_commit": "3ac0b81a",
    "reason": "Two-step registration of the conservation rerun: N and the trial values, before its calibration runs"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "fbeb50f1923d1cda9fc4751a1b2474d50daf089622dc4f48b50c4d21176ad2bc",
+   "registered_at": "2026-11-06T05:53:06Z",
+   "card_commit": "f585cd1a",
+   "reason": "Two-step registration of the conservation rerun: q, p0, p1 and n, before its reference and under-test runs"
   }
  ]
 }
