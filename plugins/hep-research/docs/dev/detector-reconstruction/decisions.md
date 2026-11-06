@@ -208,3 +208,17 @@ User's answers, 2026-11-06, verbatim: "give me best suggestion. I want correct m
 User's answer, 2026-11-06, verbatim: "go ahead with option A". The position uncertainty of section 7.1 is to be tested with an added variance term; the estimator is kept.
 
 User's answer, 2026-11-06, verbatim: "adopt the new uncertainty in section 7.1". Section 7.1's one-peak position uncertainty is replaced by the tested form. T08's reference reruns against the unchanged section 18 rule.
+
+## Freeze A
+
+User's answer, 2026-11-06, verbatim: "freeze A as listed". Frozen by hash, with the generators, check and job logs listed in freeze-a.md:
+
+| File | SHA-256 |
+| --- | --- |
+| t04-values-v4.md | `c55ff22fee9268e5cf245aee43ae673920baf002086946071cba5b5920789105` |
+| t04-prereg.md | `39495c3f7db0cded7f88b45711a9457f438be0cbd4113370880d69866448a151` |
+| t07-t09-task-sheets.md | `01f3509156734372a725eba77b3604935bf420b74fc5f9670fed4348269906f0` |
+| freeze-a.md | `d1befec78733523619e29deac7588fb6a06129b98c4d87c9535abd3110468243` |
+
+From here, a change to any of these is a section 2.3 amendment by the user, labelled "after development", reported under both rules. Outside this freeze: T07's generator, an addendum on the user's word before any T07 development run; the `element_sim` spec, before T15b; K12 targets, after P2; Freeze B items.
+

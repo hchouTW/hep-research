@@ -57,11 +57,11 @@ tasks:
   T01: {state: done, note: "checkpoint 7470679 compared; K defaults used: K01"}
   T02: {state: done, note: "definitions and contract map; fixtures run in T06; provisional defaults K04, K05, K13"}
   T03: {state: done, note: "comparison clean with rerun 7474460 (R28); t03-selection.md, t07-t09-task-sheets.md; gaps stay recorded"}
-  T04: {state: blocked-by-decision, record: blockers/T04.md, draft: t04-values-v4.md, review: t04-review.md, note: "third review not freeze-ready; version 4 after three fix rounds; section 18 jobs and both stops resolved by the user, version 4 updated, then section 18 rules, then section 16 choices and Freeze A", deciding: [K09, K12, K16]}
+  T04: {state: done, record: decisions.md, draft: t04-values-v4.md, review: t04-review.md, note: "Freeze A given 2026-11-06, verbatim in decisions.md; hashes in freeze-a.md"}
   T05: {state: done, note: "P1 sheets complete, P2 onward list blockers; record t05-task-sheets.md"}
   T11: {state: done, note: "comparison clean with rerun 7474460 (R28); every applicable cell is sourced or a recorded gap (R14); 10 citation uses unread; plugin defects in t11-citation-findings.md not applied"}
 k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K08, K09, K10, K11, K12, K16, K17, K18]}
-next_action: "User: Freeze A (U5) on freeze-a.md; then record the word and hashes in decisions.md, T04 to done, backup"
+next_action: "Backup after Freeze A (needs approval); then Phase C, T06"
 ```
 
 ## Plan conflicts found
