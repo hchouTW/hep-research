@@ -400,6 +400,13 @@
    "registered_at": "2026-11-06T08:33:15Z",
    "card_commit": "4dac8e63",
    "reason": "Execution log only; thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "95c93b3d489bfb161d4b892b57696e202db2ee93dcd2bc0c9964d8975651803f",
+   "registered_at": "2026-11-06T10:20:54Z",
+   "card_commit": "2ba2810b",
+   "reason": "Refreshed at the start of S3: accounting mode of gate 3, limits carried over from S2, baseline versions; no threshold loosened"
   }
  ]
 }
