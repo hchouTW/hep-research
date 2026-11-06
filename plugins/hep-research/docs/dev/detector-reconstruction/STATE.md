@@ -56,7 +56,7 @@ tasks:
   T05: {state: done, note: "P1 sheets complete, P2 onward list blockers; record t05-task-sheets.md"}
   T11: {state: done, note: "comparison clean with rerun 7474460 (R28); every applicable cell is sourced or a recorded gap (R14); 10 citation uses unread; plugin defects in t11-citation-findings.md not applied"}
 k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K08, K09, K10, K11, K12, K16, K17, K18]}
-next_action: "User: section 16 choices of version 4, then Freeze A (U5): needs the element_sim spec for K16 and the generator-agreement check"
+next_action: "User: approve generator check job 849a56a3f3e6a46c; then Freeze A (U5). The element_sim spec stays open until T15b"
 ```
 
 ## Plan conflicts found

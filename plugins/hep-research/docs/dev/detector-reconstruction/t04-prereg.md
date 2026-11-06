@@ -1,18 +1,18 @@
-# T04: quality and resource preregistration (draft)
+# T04: quality and resource preregistration
 
-State: `blocked-by-decision`. T03's recipes are named in t07-t09-task-sheets.md; it still needs the K09, K12, K16 answers. This file fixes the structure, so that values can be frozen before any result exists. No threshold is set here; proposed values are in t04-values-v3.md, not frozen. Entries marked `<freeze>` are the user's (R02); none may be set after seeing results (Section 1.3 item 8).
+State: frozen at Freeze A with t04-values-v4.md; K09 and K16 values are in that document, except the `element_sim` spec, which is frozen before T15b. K12 targets are not frozen here: they are drafted after P2 from recorded costs (U10), and until then no speed or cost claim is made. This file fixes the structure, so that values can be frozen before any result exists. Thresholds are in t04-values-v4.md, frozen at Freeze A by SHA-256. Entries marked `<freeze>` are the user's (R02). None may be set after seeing results (Section 1.3 item 8), with these exceptions only, each bounded by its rule in t04-values-v4.md, section 2.2: recipe, configuration and budget hashes, and `r_dev`.
 
 ## Per workflow
 
 | Field | Tracking, vertexing | Calorimetry | Photon likelihood |
 | --- | --- | --- | --- |
-| Primary quantities | Efficiency, fake rate, duplicate rate, charge sign, track-state residual core and tails; vertex finding, assignment, position | Named energy kind: scale, core, tails; containment, linearity; split and merge rates | Vertex, time, direction, visible energy; topology mis-ID |
-| Bins | Momentum, angle, occupancy, material | Energy, particle type, angle, overlap | Photon count, position, medium |
-| Denominators (11.3.1) | Fiducial truth objects for efficiency; reconstructed objects for fakes; resolution on matches only, reported with efficiency | Same definition of selection as the response; full efficiency reported | Full population, with wrong-minimum rate reported beside resolution |
-| Matching | `<freeze>` observable and threshold; ties; one-to-one rule; sensitivity evaluated | `<freeze>` | `<freeze>` |
+| Primary quantities | Efficiency, fake rate, duplicate rate, charge sign, track-state residual core and tails; vertex finding, assignment, position | Named energy kind: scale, core, tails; containment (edge control), linearity (centre per energy bin); merge rate gated; split rate reported | Vertex, time, direction, visible energy; fit failure, wrong minimum, topology mis-ID |
+| Bins | Momentum, occupancy (bins); angle (pooled slices). Material: not tested, obligation open | Energy, overlap. Particle type, angle: not tested, obligation open | Photon count, position. Medium: not tested, obligation open |
+| Denominators (11.3.1) | Fiducial truth objects for efficiency; reconstructed objects for fakes; resolution on matches only, reported with efficiency; duplicates on the reconstructed convention | Same definition of selection as the response; full efficiency reported | Full population, with wrong-minimum rate reported beside resolution |
+| Matching | t04-values-v4.md, section 7 | t04-values-v4.md, section 7 | t04-values-v4.md, section 7 |
 | Failure classes (11.4) | Seed or finding, fit, ambiguity, branch or resource truncation | Clustering, leakage, threshold, double counting | Wrong minimum, reversed track, multiple events, model mismatch |
 | Required negative case | Wrong hits, branch explosion, seed failure | Digital read as analog; deposited energy used as incident | Live-unhit against dead channels; first-time readout under a single-photon density |
-| Tolerances, directions | `<freeze>` | `<freeze>` | `<freeze>` |
+| Tolerances, directions | t04-values-v4.md | t04-values-v4.md | t04-values-v4.md |
 
 ## Rules for every workflow
 
@@ -20,7 +20,7 @@ State: `blocked-by-decision`. T03's recipes are named in t07-t09-task-sheets.md;
 - **Sample size:** set from the claim to be supported, with hep-statistics. No universal number exists. Too few events in a required bin gives inconclusive, never pass.
 - **Results:** pass, fail, inconclusive, not-applicable.
 - **Weighted data:** an explicit statistical method; binomial only for unweighted independent trials with negligible background.
-- **Budgets:** `<freeze>` wall time, memory, retries, trial budgets. Hitting a limit is recorded; truncated candidates are marked as such.
+- **Budgets:** Algorithmic budgets frozen by hash at Freeze B; wall time, memory and retries at each job's approval (K10). Hitting a limit is recorded; truncated candidates are marked as such.
 - **Reproducibility:** each recipe declares byte, numerical or statistical (Section 14.1).
 
 ## Critical false success

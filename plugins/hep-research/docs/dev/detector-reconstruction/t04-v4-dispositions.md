@@ -299,3 +299,11 @@ Fit failure, clause (a) and clause (b) are 0 at both `N_exp`, 4,800 events each.
 
 Version 4 updated accordingly (section 18.1). Freeze A edits still to make in t04-prereg.md and the sheets: those listed above, plus the B1/B2 edge at 120, `PATCH` 200, and the exact efficiency form.
 
+## Generators: review and rulings
+
+Written from the text by a fresh author; reviewed by a second fresh reviewer: `<private>/evidence/t04-v4/generators-review.md`. Verdict: fixes needed, 1 blocker, 5 major, 9 minor. No wrong number, distribution, bin edge, seed use or control was found, by reading only: nothing has run. All findings accepted. Version 4 changed: section 2.1 (dark-count reference, new lines, byte-equality rule), 4.2 (saturation flag), 7.1 (cell frame, recipe reads raw values), 18 (four generator-check rows, closing the blocker). The rows are written before the job.
+
+Fix round 1, then a scoped re-review by a third fresh reviewer: `<private>/evidence/t04-v4/generators-rereview.md`. 0 blockers, 2 major, 8 minor, majors both in section 18's new rows. Code ready for the job by hand trace; nothing has run. Section 18's rows rewritten: ordered, first match applies, every printed outcome listed. n1, n4, n5, n7, n8 fixed in version 4 and the sheets. n2 and n3 left: a docstring claim and two control assertions, correct today, and fixing them would change hashes for no present defect.
+
+Added to the Freeze A edit list, after the table above: `t04-prereg.md` title loses "(draft)"; its State sentences now say frozen at Freeze A, K09 and K16 in version 4 except the `element_sim` spec, K12 targets after P2 (U10). Sheets: the T08 Interfaces list names the saturation flag.
+

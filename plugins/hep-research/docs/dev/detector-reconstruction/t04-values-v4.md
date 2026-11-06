@@ -39,7 +39,10 @@ Frozen by hash:
 A deterministic check ties each generator to the fixture text [R11, S8], on a fixed seed block (block 6), 1,000 events at each of 3 energies or `N_exp` values.
 
 - T08: the reference is `E g_c(x, y)` and its variance `q E g_c + sigma_n^2`, not one draw. Per energy, over cells with mean above 1 MeV, for mean and variance: every `|z|` below 5, and the sum of `z^2` within its 99.9 % chi-square range.
-- T09: hit fraction and mean first time against `calc-t09-lowmu.py`'s `generate()`; charge moments against the analytic `mu_i` and `1.09 mu_i`, because `generate()` has integer charge and the fixture does not. Same two criteria.
+- T09, over channels with `mu_i` at least 0.1: hit fraction and mean first time against `calc-t09-lowmu.py`'s `generate()`; charge moments against the analytic `mu_i + 0.002` and `1.09 (mu_i + 0.002)`, dark counts included, because `generate()` has integer charge and the fixture does not. Same two criteria.
+- Both: drawn distributions, control constants, `E_vis` truth and golden digests, as `check_generators.py` prints them on `DRAW`, `SMOKE`, `TRUTH` and `GOLDEN` lines.
+
+Events must be byte-identical under the recorded NumPy version on the same partition. Any digest difference goes to the user. This job runs on one node, so equality across the partition's nodes is untested.
 
 The scripts must have run first. What each result forces is fixed in section 18, before the job. No recipe result exists at that point, so revision is allowed.
 
@@ -198,7 +201,7 @@ Generator and version field: `t08-grid/1`, NumPy `Generator` with PCG64. Round 1
 | Separation strata | iso: one shower. far: two showers, `d` uniform [3, 8) `W`. near: two showers, `d` uniform [1.5, 3) `W`. Both showers share `E` | iso | iso | iso |
 | Shower position | At least 6 `W` from any edge, uniform | Distance to one edge exactly `t` = 0.5, 1, 1.5, 2 `W`, a quarter of events each. The edge is a cell edge. Other axis uniform | Uniform within the dead cell | As main |
 | Dead cells | None | None | One: the cell containing the shower centre | None |
-| Saturation | None | None | None | Cell clips at 0.4 GeV after noise is added, so every E4 shower clips [M1] |
+| Saturation | None | None | None | Cell clips at 0.4 GeV after noise is added, so every E4 shower clips [M1]. The readout carries a per-cell saturation flag, set at that point, before gain |
 | Two-shower geometry | Azimuth of the pair uniform in [0, 2 pi). The midpoint is uniform, subject to both showers lying at least 6 `W` from any edge, by choosing the midpoint range for the largest `d`; no resampling [S11] | | | |
 | Events | 12,000 per bin, 144,000 | 12,000 | 12,000 | 12,000 |
 
@@ -243,7 +246,7 @@ Generator and version field: `t09-sphere/1`, NumPy `Generator` with PCG64. Event
 | Time spread | Gaussian, 1.5 ns, per photon. Instant emission |
 | Readout | Charge: sum over photons of Gaussian(1, 0.3). First-arrival time of the channel |
 | Charge threshold | 0.25 |
-| Saturation | None in main. Control: 5, censored |
+| Saturation | None in main. Control: 5, censored. The readout carries a per-channel `saturated` flag |
 | `N_exp` bins | B1 [20, 120), B2 [120, 200), B3 [200, 500), B4 [500, 2000), uniform in ln N |
 | Radial bins, `r/R_s` | [0, 0.4), [0.4, 0.7), [0.7, 0.9), uniform in volume within the bin |
 | Direction | Isotropic |
@@ -476,7 +479,7 @@ The recipe and the reference clusterer both follow this text [R3]. They share no
 
 | Step | Rule |
 | --- | --- |
-| Cells | Read value `e_c`, after gain and pedestal. Dead or absent cells have no value and are never in a cluster |
+| Cells | Read value `e_c`, computed by the recipe from the readout's raw value, gain and pedestal. Cell `ix` has centre `x_c = ix + 0.5`, in the frame of truth x, y. Dead or absent cells have no value and are never in a cluster |
 | Components | Cells with `e_c >= T_c`, 8-connected. A component is kept if it has a cell at or above `T_s`. All others are unclustered |
 | Peaks | In a kept component: a cell at or above `T_s`, with `e_c` at least that of all 8 neighbours. Candidates in ascending flat index `ix x 40 + iy`; a candidate adjacent to one already kept is dropped [M1]. Keep the two highest. The fixture has at most two showers, so no more are used |
 | One peak, or none kept | One object: `A = sum e_c` over the component. `x = sum e_c x_c / A`, likewise `y` |
@@ -600,7 +603,7 @@ Merge in E1 is reported, not gated: at E1 a seed may not fire (`p` 0.84 at the l
 | Linearity | Covered by the centre gate per energy bin: a slope in scale moves some bin's centre. No separate test |
 | Angle, particle type | Not varied: this fixture has one layer and an analytic profile. Not tested. Obligation open |
 | Split | Reported. No closure reference exists: its correct value depends on the fixture's splitting definition |
-| Negative cases | Digital read as analog: typed refusal or recorded error. Deposited energy used as incident: the named-energy check rejects it. Deterministic |
+| Negative cases | Digital read as analog: typed refusal or recorded error. The fixture has no digital readout, so the test builds its own digital-typed input. Deposited energy used as incident: the named-energy check rejects it. Deterministic |
 
 ### 9.3 T09
 
@@ -842,6 +845,13 @@ All in `<private>/evidence/t04-v4/`. All have now run; results in section 18.1. 
 | Pull | m = 1 jobs only: pass at true error 0.10 above 7.9 % | Revise section 5.5 and the 93-95 % of section 1 to the measured value |
 | Pull | `POOLED` line, six m = 1 jobs at states `none` and `bias`, 3,000 reps, relative `se` 1.3 %: differs by over 9 %, centre or width | Stop. No number moves until the cause is known |
 | Pull | Any fail at state `none` | Stop |
+| Generator check, row 1 | A hash check stops the job, the job stops with no `RESULT` line, or a traceback or `ran to its end` line appears | No criterion of that run is read. Remove the cause; if code changes, new hash. New approval either way |
+| Generator check, row 2 | Any `FAIL` on a T08 or T09 `|z|` line (limit 5), a `defined` line, a `DRAW-RANGE`, `SMOKE` or `TRUTH` line (`TRUTH` deposit limit 6: 72,000 values), or a `DRAW-DIST` line with non-finite values | Defect in the generator or the check: fix, new hash, new approval. Block 6 is reused, since the fix is not a redraw |
+| Generator check, row 3 | Nothing in rows 1 and 2, and a sum of `z^2` outside its range, or a `DRAW-DIST` p-value below 1e-4 | Stop. A correct generator reaches this row with about 3.7 % chance, and block 6 cannot be redrawn. No generator changes until the user answers |
+| Generator check, row 4 | Nothing in rows 1 to 3, and stderr not empty | Goes to the user, whatever the lines say |
+| Generator check, row 5 | `RESULT PASS`, stderr empty, job exit 0 | Hashes and `GOLDEN` digests go into Freeze A |
+
+For the generator check, the first matching row applies.
 
 A pending-script change that moves a required test to reported goes in the scope-change table for the maintainer.
 

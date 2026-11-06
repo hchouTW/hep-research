@@ -196,3 +196,7 @@ User's answer, 2026-11-06, verbatim: "accept version 3, third review before the 
 
 User's answer, 2026-11-06, verbatim: "go ahead with 1, 2, 3(a) and 4 as recommended". Meaning, from the options then shown: (1) the exact sum becomes T08's efficiency reference and section 4.2's values are recomputed; (2) direction enters pulls through mapped angles and the tangent plane; (3a) a corrected rerun with new events and about 4 times as many at `N_exp` 80 and 120, keeping 80 if it clears and otherwise raising the edge to 120; (4) `PATCH` becomes 200. Nothing is frozen. Rule and results: t04-v4-dispositions.md.
 
+
+## T04 section 16
+
+User's answer, 2026-11-06, verbatim: "accept the section 16 recommendations, vertex floor 0.95". Each recommendation of section 16 of t04-values-v4.md is accepted, and the vertex finding floor is 0.95. This is not Freeze A, which needs the user's own word on the final text. The `element_sim` spec for K16 was not named.
