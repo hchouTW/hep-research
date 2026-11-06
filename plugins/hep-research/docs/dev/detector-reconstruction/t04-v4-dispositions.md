@@ -191,3 +191,31 @@ Both jobs `COMPLETED`, exit `0:0`, all six scripts exit 0, hashes in the receipt
 
 Coordinator's reading, not a finding. T09: generator and likelihood call the same `shape` and `direction` functions, and no mismatch was seen by reading them. The departure is confined to `theta`, `phi` and, at low `N_exp`, the weight; x, y, z and `t0` stay inside the limits at the pooled level. It does not shrink with `N_exp`, and at the smallest radii the `theta` centre grows with it. `phi` is wrapped before the pull and `theta` is not. Whether the cause is the reference script, its Hessian or the method is not known. T08: the excess is 3.1 standard errors at one of 30 nodes, and only few nodes are off plateau. Chance and a small missing term in the closed form both remain possible.
 
+## Diagnostics for the two stops: reading rules
+
+Requested by the user 2026-11-06. Fixed before any output exists. Scripts `<private>/evidence/t04-v4/diag/diag-t08.py` (`324acd28b16a57b1`), `diag-t09.py` (`2e485d7b3fcb2b8f`), job `<private>/jobs/t04-diag/diag.sh` (`55ffb8b8f7814f55`). Syntax-parsed only, not run, not independently reviewed. **Every outcome goes to the user. No T04 value moves from this output**, and section 18 stays as written.
+
+**T08, node E 80.** Void unless the replay prints 0.83670 and 0.84327 and `gauss grid 6` prints 0.84327.
+
+| Result, 300,000 new events, `3 se + 3/n` | Reading |
+| --- | --- |
+| Within the limit of `gauss grid 6` | Excess not reproduced; the first reading is compatible with chance |
+| Over at `gauss grid 6`, within at `exact grid 96` | The closed form's approximation is the cause. The ladder names the term: position grid, Gaussian cell response, or both |
+| Over at every rung | Stop stands. Something the closed form omits, in the fixture or the clusterer. `fired` against the seed-threshold rate says which |
+
+**T09.** Void unless the `RAW` pooled rows at `N_exp` 80, 120, 200 reproduce job 7474461's centre and width to rounding.
+
+| Check, pooled rows | Limit |
+| --- | --- |
+| D1 likelihood: `SCORE z`, 7 parameters at 4 `N_exp` | Any `|z|` above 3.5 fails. This does not depend on the optimizer or the error estimate |
+| D2 fit: theta out of range, or gain above 0.5 | Either above 1 % fails |
+| D3 error estimate: theta, phi sigma ratio at either step | Outside 0.9 to 1.1 fails |
+| D4 pulls: `POLISHED` centre and width | Section 18's limits, pooled and radial |
+
+| Outcome | Reading |
+| --- | --- |
+| D1 fails | Generator and likelihood disagree: reference script or fixture text. D2 to D4 are not read |
+| D1 passes, D4 clears at 80 and 120 | The departure belongs to the reference script. Which of D2, D3 names the defect |
+| D1 passes, D4 clears only at 200 or 1,000 | Method limit at low `N_exp`, against section 18's cap of 200 |
+| D1 passes, D4 does not clear at 1,000 | Hessian pulls do not describe these parameters here, or the method fails. `2 dlnL` and the tangent rows are read to separate the two |
+
