@@ -38,12 +38,23 @@ Tiny job 7470150, `hpa-wn28`, partition `edr2-al9_short_serial`, 51 s, exit 0:0.
 | Part | Where | Result | Evidence |
 | --- | --- | --- | --- |
 | `run_all_checks.py --part static --jobs 2` | Login node (Q8) | 31 pass, 0 fail, 0 skip, 327 s | `<private>/evidence/20261106T044938Z` |
-| Section 17.2 unit runs and `--part units` | Job 7470206, detached tree at the baseline | Pending | `<private>/evidence/baseline-units-7470206` |
+| `tests/skills/hep_detector` discovery | Job 7470206 | 591 run, OK, 4 skipped, 296 s | `<private>/evidence/baseline-units-7470206` |
+| `tests/routing` discovery | Job 7470206 | 21 run, OK, 1 s | Same |
+| `run_all_checks.py --part units --jobs 6` | Job 7470206 | **Exit 1:** 6,797 run, 6,411 passed, 1 failure, 1 error, 384 skipped, 696 s | Same |
 
 The static run had `docs/dev/detector-reconstruction/` present and untracked. The unit job uses a separate tree, so these records cannot affect it.
 
-Failing test IDs are recorded here when the unit job ends; later runs compare against them (R05).
+Job 7470206 ran on `hpa-wn28` at the baseline commit, clean before and after, in 16 min 41 s. Slurm reports `COMPLETED 0:0` because the script does not pass on the suite's exit code; the receipt holds the real result. Skipped tests are kept in the evidence and do not count as passed.
+
+### Failing IDs at the baseline
+
+Later runs compare against these two (R05). Both are preserved as failures, and neither is attributed to this task.
+
+| Test ID | Result | Observed | Suspected cause |
+| --- | --- | --- | --- |
+| `tests.adapters.test_geant4_register.CheckAndDownstream.test_examples_need_an_explicit_source_of_the_installed_version` | Failure, exit 3 where 2 is expected | `cmake not found on PATH`; the job loaded no `cmake` module, though `cmake/3.28` exists | Job environment. Not confirmed by a rerun with the module loaded |
+| `tests.skills.hep_computing.test_environment_manifest.EnvironmentTemplateTests.test_lcg_setup_is_valid_sh_and_refuses_missing_view` | Error, `TimeoutExpired` after 60 s | The script's only file access is a read check of a path under `/cvmfs/sft.cern.ch`. The same test passes alone on the login node in under 1 s | A slow or stalled CVMFS access on the compute node. Not confirmed on a node |
 
 ## Backends and data
 
-K02 and K03 are unresolved. No reconstruction backend has been probed. Site modules on this host include no Geant4 or ACTS. Unprobed means unavailable (R02).
+K02 and K03 are unresolved. No reconstruction backend has been probed. Site modules on this host include no Geant4 or ACTS. Unprobed means unavailable (R02). `/cvmfs/sft.cern.ch` is listed on the login node, which makes LCG views a possible K02 candidate, but nothing has been probed there, and the second failing test above suggests access from compute nodes needs checking first.

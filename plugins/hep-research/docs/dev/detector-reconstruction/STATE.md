@@ -27,11 +27,11 @@ open_questions:
   D2: answered, see decisions.md
 jobs:
   tiny-1: {state: COMPLETED, exit: "0:0", elapsed: "00:00:51", node: hpa-wn28, result: "interpreter hash matches; core imports pass; no credential-like variable names in job or login environment; root.exe exit 0 with libxxhash from /lib64 on this node", job_id: 7470150, script: "<private>/jobs/tiny/tiny.sh", script_sha256: ea8217e77cd21d79fa67c7fe9d0d4beb29d8164c0cb55610ce08325a91305148, command: "sbatch --parsable <private>/jobs/tiny/tiny.sh", approval: "as suggested, approve the commands, kill the bfs search"}
-  baseline-units-1: {state: submitted, job_id: 7470206, script: "<private>/jobs/baseline-units/units.sh", script_sha256: d3d448062ddc63290b166e709a2d81120b58d3050f7f5f694d420f532d7a9b44, command: "sbatch --parsable <private>/jobs/baseline-units/units.sh", approval: "approve the submission"}
+  baseline-units-1: {state: COMPLETED, slurm_exit: "0:0", suite_exit: 1, elapsed: "00:16:41", node: hpa-wn28, result: "see baseline.md, 2 failing IDs", job_id: 7470206, script: "<private>/jobs/baseline-units/units.sh", script_sha256: d3d448062ddc63290b166e709a2d81120b58d3050f7f5f694d420f532d7a9b44, command: "sbatch --parsable <private>/jobs/baseline-units/units.sh", approval: "approve the submission"}
 baseline_static: {evidence: "<private>/evidence/20261106T044938Z", exit: 0, seconds: 327, note: "run on the login node, --jobs 2, under Q8; docs/dev/detector-reconstruction was present and untracked"}
 tasks:
-  T01: {state: in-progress, note: "awaiting checkpoint suite (R28); done-provisional for R24; K defaults used: K01 all F01-F38 kept"}
-next_action: "T01; read baseline-units-1 receipt when it ends"
+  T01: {state: in-progress, note: "done-provisional for R24; awaiting checkpoint suite at the end of P0 (R28); K defaults used: K01 all F01-F38 kept"}
+next_action: "draft K01-K18, then T02-T05 (R24)"
 ```
 
 ## Plan conflicts found
