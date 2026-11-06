@@ -31,7 +31,8 @@ jobs:
 baseline_static: {evidence: "<private>/evidence/20261106T044938Z", exit: 0, seconds: 327, note: "run on the login node, --jobs 2, under Q8; docs/dev/detector-reconstruction was present and untracked"}
 tasks:
   T01: {state: in-progress, note: "done-provisional for R24; awaiting checkpoint suite at the end of P0 (R28); K defaults used: K01 all F01-F38 kept"}
-next_action: "draft K01-K18, then T02-T05 (R24)"
+k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K02, K03, K08, K09, K10, K11, K12, K16, K17, K18]}
+next_action: "T02-T05, then the decision batch (R24)"
 ```
 
 ## Plan conflicts found

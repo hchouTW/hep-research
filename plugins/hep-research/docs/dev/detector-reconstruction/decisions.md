@@ -18,3 +18,157 @@ Earlier, 2026-11-06, verbatim: "choose best version for this task"; "go ahead wi
 | D2 | Reconstruction defines conditions and alignment payloads and reuses g4sim's `geometry_id`; if g4sim S9 is triggered it uses those payloads, which changes a g4sim card and needs the user's approval then | Agent's suggestion, accepted by the user |
 
 User's answer, 2026-11-06, verbatim: "as suggested, approve the commands, kill the bfs search". The approval covers the five commands listed in that reply, and no others.
+
+## K01-K18 drafts
+
+Drafted 2026-11-06 on contracts 3.19.0. Everything here is provisional. "Fixed" means the agent may fix it under R02. "Needs the user" stays Unresolved, and its default applies meanwhile. No threshold, target or budget value is set here.
+
+### K01 scope (agent; hep-detector)
+
+- **Basis:** Section 6, coverage.md (12 families with full documentation, 26 without, 11 of those with no text, tool or run).
+- **Options:** keep all F01-F38; or narrow to families with existing text.
+- **Fixed:** keep all, with variants. Not-applicable only with a physical or readout reason. Support levels are coverage.md's six columns; the BP crosswalk is there.
+- **Rationale:** narrowing is ruled out by Section 1.3 item 6.
+- **Scope, unresolved:** T11 owns the gaps. coverage.md's judgement calls stay open for review.
+- **Impact:** T11 is the largest writing task; the 11 families need sources first (R14: without network approval those cells stay `source-unverified`).
+
+### K02 stack (agent for probes; user for the rest)
+
+- **Basis, read-only probes:** Geant4 11.4.3 (conda env, login node). ROOT 6.32.10 (conda env) and 6.40.02 (module, confirmed in job 7470150). `simreco` in the tree, simulated events only. No ACTS, DD4hep or EDM4hep in the conda envs or modules.
+- **CVMFS:** `/cvmfs/sft.cern.ch` is mounted, but a directory listing stalled in uninterruptible I/O on the login node and a read check timed out on a compute node. Its contents are unprobed.
+- **Options:** decided per workflow in T03 (R16): existing tool, library adapter, native executable.
+- **Fixed:** no reconstruction backend is confirmed. Geant4 and ROOT are simulation and I/O tools, not reconstruction backends. On Slurm a backend is confirmed only after an approved job has run it.
+- **Needs the user:** installation, network, GPU, each submission, the backend's environment.
+- **Default:** unavailable; T03 is `blocked-by-decision` with a ranked option list.
+- **Impact:** blocks T07-T09 and every native workflow. This is the main blocker of P2.
+
+### K03 data (agent for synthetic; user for the rest)
+
+- **Basis:** no reconstruction fixture exists at the F-family level. g4sim's hit format (`simulation_hits`) arrives at S4, not yet.
+- **Options:** agent-generated synthetic fixtures; simulated events from installed Geant4; public open data (download); private data.
+- **Fixed:** synthetic fixtures, role labelled in every record.
+- **Needs the user:** downloads, private or production data.
+- **Default:** synthetic only, so the data-control layer stays incomplete (R14). Simulation never stands in for data (Section 12.1).
+- **Impact:** without an obtainable dataset, no data-control claim is possible.
+
+### K04 contract map (agent)
+
+See contract-map.md. Fixed provisionally: `recipe`, `qualification_record` and `decision_record` get distinct names; `operator_semantics` is reused in part; `tool_contract` stays unchanged. Exit condition: T02 with W1-W7.
+
+### K05 quantities (agent; hep-detector)
+
+- **Basis:** Sections 8.2, 8.4.
+- **Options:** free-text quantities; a closed vocabulary; a vocabulary with required semantics fields.
+- **Fixed:** every port states quantity kind, unit, basis or surface, reference hypothesis and observation level. Energy kinds stay separate: deposited, visible, calibrated, recoil, incident. Periodic angles state period and axis or vector. Electron counts are not energy; spectral power is not counts.
+- **Rationale:** matching units do not establish matching meaning.
+- **Scope, unresolved:** the vocabulary's exact list comes with T02.
+- **Impact:** positive and negative cases: same unit with different kind refused; rank-deficient targets delivered as identifiable components only.
+
+### K06 model (agent; hep-detector)
+
+- **Basis:** Sections 8.4, 11, BP01-BP15.
+- **Options:** model assumptions as free notes; as checked necessary conditions.
+- **Fixed:** each recipe declares noise, threshold or selection, censoring, correlations, template or response. An undeclared necessary assumption counts as unknown, never true (SEL05). Summaries from one source are not assumed independent.
+- **Scope, unresolved:** per-method models come with T03 and T11.
+- **Impact:** every required recipe needs a model-incompatible fixture that ends out-of-domain or failed.
+
+### K07 conditions (agent; detector and computing)
+
+- **Basis:** Section 9, R32, D2.
+- **Options:** tags; resolved payload identities; a conditions service (ruled out by Section 3.1).
+- **Fixed:** runs record resolved payload identities, not tags. R32's fields are the payload shape. Validity on one time axis is the intersection of dependency IOVs; different coordinates are predicates that must all hold. A work unit crossing an IOV binds separately, subdivides or uses a time-varying model. Unknown dependencies disable caching at that level. Nominal geometry identity is g4sim's `geometry_id`.
+- **Rationale:** a floating tag cannot reproduce a run.
+- **Scope, unresolved:** G06 stays: the fixed final-round rule does not change.
+- **Impact:** CAI-T06-1 to 4; A37 and Section 9.6 stay required in T10 and T12.
+
+### K08 evidence (agent; user for confirmation grouping)
+
+- **Basis:** Sections 11.1, 12.1.
+- **Options:** one evidence level; separate scopes.
+- **Fixed:** synthetic, simulation and data-control evidence each state their own scope. Sample roles (tuning, calibration, selection, confirmation) stay separate. Grouping keys include run, conditions source, noise realization and fixture derivation.
+- **Needs the user:** confirmation-role grouping, with K18.
+- **Default:** no confirmation claim.
+
+### K09 quality (agent drafts; user freezes)
+
+- **Basis:** Sections 11.3, 11.4. No universal value exists (Section 14.3).
+- **Options:** freeze per recipe at T04; or per family at T11.
+- **Fixed:** metric families and denominators only, per Section 11.3.1. Thresholds are written per recipe in T04, after T03 names the recipes.
+- **Needs the user:** freezing thresholds.
+- **Default:** no pass/fail scientific-quality claim.
+- **Impact:** low-statistics bins cannot pass; zero observed failures is not a pass.
+
+### K10 budgets (agent for algorithmic; user for Slurm)
+
+- **Basis:** Sections 10.5, 14.2.
+- **Fixed:** algorithmic budgets (seeds, branches, components, iterations) come from each method's sources or existing recipe, with their physics effect evaluated. Calibration rounds do not change.
+- **Needs the user:** anything that becomes a Slurm request or campaign limit. No default: user must choose.
+- **Default:** a limit-driven shrink makes the result inconclusive.
+
+### K11 AI evaluation (agent for development set; user for holdout)
+
+- **Basis:** Sections 14.2-14.5, R22.
+- **Fixed:** four task groups (executable, insufficient information, missing dependency or out of domain, runtime or quality failure), stratified by family, deliverable, executability and risk. Distinct tasks are the statistical unit; repeats measure variability only. Near-duplicates are grouped.
+- **Needs the user:** holdout custody, system under test, harness, reference-answer rules, false-success definition.
+- **Recommended:** a person or a session with no access to this worktree writes and holds the holdout, with only SHA-256 values recorded. False success means reporting execution, a pass or a capability without the evidence for it.
+- **Default:** holdout not established. T13 and T16 are `blocked-by-decision`, and every report says "holdout independence not established".
+
+### K12 performance (agent drafts; user sets targets)
+
+- **Basis:** Section 14.2.
+- **Fixed:** comparisons fix the same scientific work and stage, count initialization, I/O, probes and failed trials, and separate cold from warm. Workload units fit the task (event, frame, scan setting).
+- **Needs the user:** the targets.
+- **Default:** no speed or cost claim. A13 stays `blocked-by-resource` until a GPU is chosen (R30).
+
+### K13 compatibility (agent)
+
+- **Basis:** Section 17.3.
+- **Fixed:** strictest option. Old recipes, contracts and validators keep their behaviour. An unknown required extension stops the reader. Breaking changes need a version boundary, migration and comparison fixtures. Scientific fields are never dropped silently.
+- **Impact:** every contract task includes an old-recipe check.
+
+### K14 task readiness (agent)
+
+- **Basis:** Section 16.
+- **Fixed:** T05 writes the task sheets, with the A-ID to T-ID table (R20) and the `CAI-` table (R37). P1 sheets can be complete now; P2 sheets list blockers and options until K02 is decided.
+
+### K15 recognition (agent)
+
+- **Basis:** Sections 5.5, 5.6, R19.
+- **Fixed:** signatures are per product and scope, multi-label, with each fact keeping value, scope, source, method and validity. File names, array shapes and model confidence are not evidence. Values an LLM extracts stay unconfirmed until checked. Conflicts stay visible.
+- **Scope, unresolved:** first known readers are the plugin's own JSON and CSV products. `uproot` is not in the locked environment, so ROOT files are not readable by the runtime until the user approves that extra. No recognition is claimed without a runtime reader.
+- **Impact:** A43-A49, A59; unknown formats end in restricted delivery.
+
+### K16 selection (agent for rules; user for gates)
+
+- **Basis:** Sections 5.9, 5.11.
+- **Fixed:** select at dataset, run or conditions-stratum level. Keep the Pareto set when no candidate dominates. On insufficient evidence use a predeclared conservative baseline, called a "qualified default choice". No invented weights.
+- **Needs the user:** hard gates and the quality objective.
+- **Default:** no claim beyond the declared baseline.
+- **Impact:** a per-event policy would be a separate recipe, tested as a whole.
+
+### K17 search budget (agent; user for Slurm)
+
+- **Basis:** Section 5.10.
+- **Fixed:** only parameters and ranges in the method card are tunable. Trials are never production quality. All trials and failures are kept and costed. Lower fidelity is not assumed to be the same problem.
+- **Needs the user:** trial budgets that become Slurm requests. Same default as K10.
+
+### K18 selection evidence (agent for rules; user for data)
+
+- **Basis:** Sections 5.10, 14.5.
+- **Fixed:** development, selection and confirmation are split by group, and the selector is fixed before confirmation. An optional ML ranker adds nothing required.
+- **Needs the user:** confirmation data.
+- **Default:** no post-selection quality claim.
+- **Impact:** A50-A60 and DS1-DS3 can run on artificial fixtures, which test rules only.
+
+## Pending for the user
+
+| Item | Needed by | Recommended | Default meanwhile |
+| --- | --- | --- | --- |
+| K02 backend, install, network | T03, then T07-T09 | Decide from the R16 list after T03 | Unavailable; `blocked-by-decision` |
+| K03 downloads or real data | T03, data control | Decide with K02 | Synthetic only |
+| K11 holdout and harness | T13, T16 | See K11 | Not established |
+| K09 thresholds | T04 | Freeze per recipe | No pass/fail claim |
+| K16 gates, objective | T15b | With K09 | Declared baseline only |
+| K12 targets | P5 | After P2 | No speed claim |
+| K08, K18 confirmation | P6 | With K03 | No confirmation claim |
+| K10, K17 Slurm limits | First campaign. No default: user must choose | Asked at that campaign's approval | None submitted |
