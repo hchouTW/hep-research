@@ -99,4 +99,4 @@ The installed plugin copy does not govern (R01).
 | G01-G03 files, `core/canonical`, `contracts/geometry.py`, `geometry_ir.json`, `detector_spec.json`, the two calibration references | Unchanged |
 | Fixtures under `contracts/fixtures` (143 files) | Version lines only |
 
-The anchor check shows that headings survive. It does not re-read the cells whose reference text PR #353 changed.
+The anchor check shows that headings survive. The cells whose reference text PR #353 changed were then compared with their verdicts; no status changes (t11-cells.md, "Effect of PR #353 at 0.57.0").

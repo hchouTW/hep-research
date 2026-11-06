@@ -4,6 +4,22 @@ State: done-provisional, awaiting the checkpoint suite (R28). Citation verdicts 
 
 Parts 1 and 2: 189 cells, 167 documented, 21 `gap-method`, 1 not-applicable (F14 space/time, a readout reason). Every anchor was resolved against the baseline headings. Cells marked `source-unverified` name a source the plugin cites that nobody has re-read here, now checked in t11-citation-findings.md. Documented means text exists, not that anything runs: most bindings are `none`.
 
+## Effect of PR #353 at 0.57.0
+
+The cells below keep the wording they had at 0.56.0. Each has a `partly` verdict, which governs it (see the state line above), and PR #353 changed the plugin text to agree with that verdict. No cell's status changes. All anchors resolve at 0.57.0.
+
+| Family, axis | Citation | Plugin text at 0.57.0 |
+| --- | --- | --- |
+| F01 parameter estimation | Kleinwort | Offsets at scatterers; equivalence for one filtering step |
+| F02 PID/topology | Budjáš | Limited to the separation and the events near the contact |
+| F17 energy | PDG | Cites RPP 2025 sec. 35.10, which does not print the pi/e ratio; particle flow is separate from compensation |
+| F18 finding/association | Arrabito | Chains with a Kalman filter; the tolerance statement no longer carries the citation |
+| F19 finding/association | Chernyak | Mean-time and rising-edge tests; a two-pulse fit is not in the paper |
+| F31 energy/momentum | Named Verzi in the cell | The author is Dawson, PoS ICRC2019 231 |
+| F32 signal extraction | Huege | Background review only; it does not give the vector effective length, the iteration, or the signal power lost |
+
+F20's verdict (`partly`, the faster-channel statement) is not among the text PR #353 changed, and stands as recorded. PR #353's other reference edits, a journal reference for Aharrouche and the image-library parameters in `photon-likelihood-reconstruction.md`, touch no cell statement.
+
 # Part 1: families the inventory first marked documented
 
 Read-only design record. Nothing was run. Baseline tree commit `580dc79e`, plugin 0.56.0. Plan v9.2 sections 5.5, 5.15, 6, 6.6, 7.1.1, BP01-BP08, BP11, BP15.

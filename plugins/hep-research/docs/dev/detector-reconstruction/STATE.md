@@ -27,6 +27,7 @@ open_questions:
   Q8: answered, see decisions.md
   D1: answered, see decisions.md
   D2: answered, see decisions.md
+plugin_installed: {version: 0.57.0, commit: d51566a9, approval: "run those two commands", task: A6, note: "does not govern (R01); needs a restart to load"}
 jobs:
   tiny-1: {state: COMPLETED, exit: "0:0", elapsed: "00:00:51", node: hpa-wn28, result: "interpreter hash matches; core imports pass; no credential-like variable names in job or login environment; root.exe exit 0 with libxxhash from /lib64 on this node", job_id: 7470150, script: "<private>/jobs/tiny/tiny.sh", script_sha256: ea8217e77cd21d79fa67c7fe9d0d4beb29d8164c0cb55610ce08325a91305148, command: "sbatch --parsable <private>/jobs/tiny/tiny.sh", approval: "as suggested, approve the commands, kill the bfs search"}
   baseline-units-1: {state: COMPLETED, slurm_exit: "0:0", suite_exit: 1, elapsed: "00:16:41", node: hpa-wn28, result: "see baseline.md, 2 failing IDs", job_id: 7470206, script: "<private>/jobs/baseline-units/units.sh", script_sha256: d3d448062ddc63290b166e709a2d81120b58d3050f7f5f694d420f532d7a9b44, command: "sbatch --parsable <private>/jobs/baseline-units/units.sh", approval: "approve the submission"}
@@ -48,7 +49,7 @@ tasks:
   T05: {state: done, note: "P1 sheets complete, P2 onward list blockers; record t05-task-sheets.md"}
   T11: {state: in-progress, note: "done-provisional (R28), awaiting checkpoint suite; every applicable cell is sourced or a recorded gap (R14); 10 citation uses unread; plugin defects in t11-citation-findings.md not applied"}
 k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K08, K09, K10, K11, K12, K16, K17, K18]}
-next_action: "B2 step 2: approved unit job on the rebased branch, then T03 and T11 to done if clean; then backup, B3, B4 (U5)"
+next_action: "B2 step 2: job 7472812 (approved, tests e57716dc) pending; B3 review running; then T03 and T11 to done if clean; then backup, B3, B4 (U5)"
 ```
 
 ## Plan conflicts found
