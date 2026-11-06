@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "3.20.0"
+CONTRACTS_VERSION = "3.21.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -233,6 +233,8 @@ CONTRACTS_VERSION = "3.20.0"
 # review_measurement_spec.py --check-bundle refuse with the reason (exit 2). Existing attestations of a 2.0.0 bundle
 # still verify (attestation.py keeps its digest rule). No artifact type, vocabulary term, envelope field or capability
 # changes (measurement:correction-keys-v1 stays): every 3.16 artifact keeps its outcome.
+# 3.21.0 (minor; g4sim S3) adds source_density.json (source-density/1), read by core/simulation/source_density.py, and opens the shapes, placements, modifiers and
+# segmentation of S3 in the IR; the IR's field set does not change. Additive: every 3.20 artifact keeps its outcome, and committed outputs keep the contracts version that wrote them.
 # 3.20.0 (minor; g4sim S2) adds extension.geometry to ext_computational_run.json and rules/geant4_datasets.json. Additive: every 3.19 artifact keeps its
 # outcome, and committed outputs keep the contracts version that wrote them.
 # 3.19.0 (minor; g4sim S1) adds four schemas read by contracts/geometry.py and the g4sim translator: detector_spec.json

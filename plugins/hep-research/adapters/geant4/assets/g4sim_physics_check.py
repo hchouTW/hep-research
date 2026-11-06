@@ -6,6 +6,9 @@ Every function returns findings, each {code, path, message}; an empty list passe
 """
 from __future__ import annotations
 
+import argparse
+import json
+import sys
 from decimal import Decimal
 
 PAI_MODELS = ("PAI", "PAIphoton")
@@ -168,3 +171,9 @@ def card_findings(card: dict, request: dict | None = None, regions=(), ionisatio
         scorers = request.get("scorers", [])
         findings += time_cut_findings(card, scorers) + scorer_findings(scorers, materials, selected_materials) + source_findings(request.get("source", {}))
     return findings
+
+
+if __name__ == "__main__":
+    argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args()
+    print(json.dumps({"status": "rejected", "message": "a library: run g4sim_run.py check-spec or simulate"}))
+    sys.exit(2)

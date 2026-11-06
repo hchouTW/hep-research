@@ -5,15 +5,23 @@ Imported by g4sim_run.py, whose `simulate` command is the entry point. Pure help
 """
 from __future__ import annotations
 
+import argparse
 import csv
 import json
 import math
 import subprocess
+import sys
 from pathlib import Path
 
-import g4sim_physics_check as physics_check
+sys.dont_write_bytecode = True
+ROOT = Path(__file__).resolve().parents[3]
+for folder in (str(ROOT), str(Path(__file__).resolve().parent)):
+    if folder not in sys.path:
+        sys.path.insert(0, folder)
 
-from core.simulation import source_density
+import g4sim_physics_check as physics_check  # noqa: E402
+
+from core.simulation import source_density  # noqa: E402
 
 AXES = {"x": 0, "y": 1, "z": 2}
 CLOSURE_ULP = 2.0 ** -52
@@ -236,3 +244,9 @@ def simulate(card: dict, request: dict, checked: dict, program: Path, work: Path
     (work / "column_map.json").write_text(json.dumps({"scorers": resolved["scorers"], "volume_id": ir["physical"]["volume_id"]}, indent=1) + "\n", encoding="utf-8")
     (work / "summary.json").write_text(json.dumps(summary, indent=1) + "\n", encoding="utf-8")
     return summary
+
+
+if __name__ == "__main__":
+    argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args()
+    print(json.dumps({"status": "rejected", "message": "a library: run g4sim_run.py simulate"}))
+    sys.exit(2)

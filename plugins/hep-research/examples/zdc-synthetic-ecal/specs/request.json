@@ -1,0 +1,48 @@
+{
+ "schema": "simulation-request/1",
+ "source": {
+  "density": "analytic",
+  "particle": "e+",
+  "energy": {
+   "mono": {
+    "energy_MeV": "500"
+   }
+  },
+  "position": {
+   "gaussian_spot": {
+    "frame": "gun",
+    "centre_mm": [
+     "30.495",
+     "-10.165",
+     "0"
+    ],
+    "sigma_mm": [
+     "4.4",
+     "4.4"
+    ]
+   }
+  },
+  "direction": {
+   "fixed": {
+    "frame": "gun",
+    "vector": [
+     0,
+     0,
+     1
+    ]
+   }
+  }
+ },
+ "scorers": [
+  {
+   "name": "crystal_edep",
+   "readout": "ecal",
+   "select": {
+    "tags": [
+     "crystal"
+    ]
+   },
+   "quantity": "edep"
+  }
+ ]
+}
