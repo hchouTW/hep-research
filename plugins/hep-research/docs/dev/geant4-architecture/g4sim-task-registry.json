@@ -498,6 +498,13 @@
    "registered_at": "2026-11-06T22:13:49Z",
    "card_commit": "e9bbf38b",
    "reason": "The separated conservation numbers registered from their trials, before calibration, with the term the limits cannot detect; gate 4 result"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "ad49cf6f5b495cce025bf5edcf8429766e0cb312f729b7128ff2624024c688fe",
+   "registered_at": "2026-11-06T22:39:52Z",
+   "card_commit": "2cf93cb9",
+   "reason": "The relative check's n registered before its runs; absolute check result"
   }
  ]
 }
