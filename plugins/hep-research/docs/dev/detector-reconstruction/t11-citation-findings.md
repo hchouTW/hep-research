@@ -6,7 +6,7 @@ Result: 33 supported, 13 partly, 10 unread, 0 not supported. Read levels: 30 ful
 
 ## Defects in the plugin
 
-Nothing here is applied: P0 changes only this folder. Fixes go to the owning references, in T11's plugin step or a separate change, as the user decides.
+Applied on 2026-11-06 in PR #353, merge commit `3f21d4a2` on `main`, with these exceptions, left for lack of a readable source: Waltenberger and Adam metadata, De Serio's author order, Broniatowski's possible misattribution, and two PDG sec. 36 statements. This branch's baseline does not contain the fix until the re-baseline.
 
 | Family | Reference | Defect |
 | --- | --- | --- |

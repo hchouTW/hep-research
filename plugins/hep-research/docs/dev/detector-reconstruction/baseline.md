@@ -53,7 +53,7 @@ Later runs compare against these two (R05). Both are preserved as failures, and 
 | Test ID | Result | Observed | Suspected cause |
 | --- | --- | --- | --- |
 | `tests.adapters.test_geant4_register.CheckAndDownstream.test_examples_need_an_explicit_source_of_the_installed_version` | Failure, exit 3 where 2 is expected | `cmake not found on PATH`; the job loaded no `cmake` module, though `cmake/3.28` exists | Job environment. **Confirmed:** passes in job 7470679 with `cmake/3.28` loaded |
-| `tests.skills.hep_computing.test_environment_manifest.EnvironmentTemplateTests.test_lcg_setup_is_valid_sh_and_refuses_missing_view` | Error, `TimeoutExpired` after 60 s | The script's only file access is a read check of a path under `/cvmfs/sft.cern.ch`. The same test passes alone on the login node in under 1 s | A slow or stalled CVMFS access on the compute node. Still fails in job 7470679. Supported by job 7470680, where listings under the same tree stalled past 240 s; the exact cause is not known |
+| `tests.skills.hep_computing.test_environment_manifest.EnvironmentTemplateTests.test_lcg_setup_is_valid_sh_and_refuses_missing_view` | Error, `TimeoutExpired` after 60 s | The script's only file access is a read check of a path under `/cvmfs/sft.cern.ch`. The same test passes alone on the login node in under 1 s | A slow or stalled CVMFS access on the compute node. Still fails in job 7470679. Jobs 7471877-7471879 show the same paths fail on all three CPU node sets: `Input/output error` after about 3 minutes on edr1 and intel-g4, no result after 240 s on edr2, while the top of `lcg/` lists in 2-3 s. This points to a site CVMFS problem, not a plugin defect; the root cause is not known |
 
 ### P0 checkpoint
 

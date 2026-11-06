@@ -36,6 +36,7 @@ backup_a1: {path: "<workdir>/backup/20261106T083302Z", bundle_sha256: 448d4dc5e9
 task_log: {path: "<private>/task-log/task-log.jsonl", note: "rebuilt 2026-11-06 from STATE.md, decisions.md, git history and job records, all entries reconstructed; 5 jobs and every user decision present; appended at each step from here (A2)"}
 deviations: {record: deviations.md, count: 6, note: "A3 step 1; none is known to have affected a recorded result"}
 literature: {record: "<private>/evidence/20261106T084851Z-a3fix1/artifacts/t11-literature-record-v3.json", sources: 63, added: "37 sources t11:S27-S63 from 56 citation records; each carries verification_checks (verdict, statement checked, note) from the T11 verification; validate.py exit 0; 2 access-limited flags (S31, S35) and 1 proposed merge (S42/S45, different editions), no search_incomplete flag", level_mapping: "full-text-arxiv and full-text-inspire recorded as full-text; full-text-section recorded as page, a conservative downgrade (strength 2 against 3); the original term is kept in level_as_recorded", note: "A3 step 3; v2 (verdicts not carried) is superseded; the 35 search-log entries are preserved, they were never stored flags"}
+  cvmfs-probe-2: {state: COMPLETED, job_ids: [7471877, 7471878, 7471879], script_sha256: 9cf24222ca0b1250f8092db58b94c8db4036f16bca64ad4fabb19692de4ed248, approval: "merge PR #353 and approve the three CVMFS jobs", result: "views and releases/acts fail on all three node sets"}
 baseline_static: {evidence: "<private>/evidence/20261106T044938Z", exit: 0, seconds: 327, note: "run on the login node, --jobs 2, under Q8; docs/dev/detector-reconstruction was present and untracked"}
 tasks:
   T01: {state: done, note: "checkpoint 7470679 compared; K defaults used: K01"}
@@ -45,7 +46,7 @@ tasks:
   T05: {state: done, note: "P1 sheets complete, P2 onward list blockers; record t05-task-sheets.md"}
   T11: {state: in-progress, note: "done-provisional (R28), awaiting checkpoint suite; every applicable cell is sourced or a recorded gap (R14); 10 citation uses unread; plugin defects in t11-citation-findings.md not applied"}
 k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K08, K09, K10, K11, K12, K16, K17, K18]}
-next_action: "follow finish-plan.md, Phase A: A1, A2 and A3 recorded; next A4, PR 353 state and Gate A"
+next_action: "Phase A closing: A6 is the user's; Phase B starts when 0.57.0 is released"
 ```
 
 ## Plan conflicts found

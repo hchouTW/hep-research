@@ -41,7 +41,7 @@ Non-hit routing uses W6 and W7 inputs. Negative cases: an unknown format ends in
 ## Other findings
 
 - DD4hep 1.38 is on conda-forge (LGPL-3.0-or-later), a possible geometry input for ACTS. EDM4hep and podio are not, under those names.
-- CVMFS: job 7470680 on `hpa-wn28` listed `/cvmfs/sft.cern.ch/lcg` in 2 s, but `views` and `releases/acts` both stalled past 240 s. A listing of `views` also stalled on the login node. One node, one run; the cause is not known.
+- CVMFS: job 7470680 on `hpa-wn28` listed `/cvmfs/sft.cern.ch/lcg` in 2 s, but `views` and `releases/acts` both stalled past 240 s. A listing of `views` also stalled on the login node. Jobs 7471877-7471879 repeated this on one node in each of the three CPU node sets: `views` and `releases/acts` gave `Input/output error` after about 3 minutes, or no result after 240 s. CVMFS is not usable for backends here until the site explains it. A support note is drafted for the user to send.
 
 ## Queries run
 
