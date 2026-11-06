@@ -9,7 +9,7 @@ from __future__ import annotations
 from decimal import Decimal
 
 from core.geometry.numbers import CONTEXT, EPSILON_MM, add, divide, multiply, subtract
-from core.geometry.rotation import rotate
+from core.geometry.rotation import cos_sin, rotate
 
 _ZERO, _ONE = Decimal(0), Decimal(1)
 BOX_FACES = ((0, 1, 3, 2), (4, 6, 7, 5), (0, 4, 5, 1), (2, 3, 7, 6), (0, 2, 6, 4), (1, 5, 7, 3))
@@ -37,6 +37,30 @@ class Polyhedron:
 
 def box(half: tuple) -> Polyhedron:
     return Polyhedron(box_vertices(half), BOX_FACES)
+
+
+def trd(solid: dict) -> Polyhedron:
+    x1, x2, y1, y2, z = (Decimal(solid[key]) for key in ("dx1_mm", "dx2_mm", "dy1_mm", "dy2_mm", "dz_mm"))
+    vertices = [(multiply(Decimal(sx), x), multiply(Decimal(sy), y), multiply(Decimal(sz), z))
+                for sx in (-1, 1) for sy in (-1, 1) for sz, x, y in ((-1, x1, y1), (1, x2, y2))]
+    return Polyhedron(vertices, BOX_FACES)
+
+
+def prism(sides: int, radius: Decimal, half_length: Decimal) -> Polyhedron:
+    """A regular prism along z, with a vertex at phi = 0 (GB23 confirms G4Polyhedra's)."""
+    ring = [cos_sin(divide(multiply(Decimal(360), Decimal(k)), Decimal(sides))) for k in range(sides)]
+    vertices = [(multiply(radius, Decimal(c)), multiply(radius, Decimal(s)), CONTEXT.minus(half_length)) for c, s in ring]
+    vertices += [(multiply(radius, Decimal(c)), multiply(radius, Decimal(s)), half_length) for c, s in ring]
+    side_faces = tuple((k, (k + 1) % sides, sides + (k + 1) % sides, sides + k) for k in range(sides))
+    return Polyhedron(vertices, (tuple(reversed(range(sides))), tuple(range(sides, 2 * sides)), *side_faces))
+
+
+CIRCUMSCRIBED_SIDES = 32
+
+
+def circumscribed(rmax: Decimal, half_length: Decimal) -> Polyhedron:
+    """A prism around a tube: passing against it proves the tube clear, and failing proves nothing (Section 7.3)."""
+    return prism(CIRCUMSCRIBED_SIDES, divide(rmax, Decimal(cos_sin(divide(Decimal(180), Decimal(CIRCUMSCRIBED_SIDES)))[0])), half_length)
 
 
 def _minus(a: tuple, b: tuple) -> tuple:

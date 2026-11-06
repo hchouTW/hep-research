@@ -10,7 +10,7 @@ from decimal import Decimal
 
 from core.canonical import check_hash_scope
 from core.geometry import bitfield, modules, params, rotation
-from core.geometry.numbers import CONTEXT, EPSILON_MM, MINIMUM_GAP_MM, PRECISION, GeometryError, add, as_text, divide
+from core.geometry.numbers import CONTEXT, EPSILON_MM, MINIMUM_GAP_MM, PRECISION, GeometryError, add, as_text, divide, multiply
 
 WORLD = "world"
 DEFAULT_REGION = "default"
@@ -43,10 +43,48 @@ def _solid(template: dict, values: _Values, path: str) -> tuple:
         raise GeometryError("solid-form", "a template has exactly one solid", path)
     (shape, parameters), = solid.items()
     modules.require_open(modules.SHAPES, shape, "shape", path)
+    if shape != "box":
+        return _other_solid(shape, parameters, values, f"{path}/solid/{shape}")[0]
     size = values.vector(parameters["size_mm"], f"{path}/solid/box/size_mm")
     if any(side <= 0 for side in size):
         raise GeometryError("solid-size", "a size is positive", path)
     return size
+
+
+def _other_solid(shape: str, body: dict, values: _Values, path: str) -> tuple:
+    """(bounding size, the IR's half-lengths) of a shape other than a box. A specification gives full lengths; the IR holds what G4 takes."""
+    def length(key: str) -> Decimal:
+        value = values.quantity(body[key], f"{path}/{key}")
+        if value < _ZERO or (value == _ZERO and key not in ("rmin_mm",)):
+            raise GeometryError("solid-size", f"{key} {value} is not positive", path)
+        return value
+
+    def half(value: Decimal) -> str:
+        return as_text(divide(value, Decimal(2)))
+    if shape == "trd":
+        x1, x2, y1, y2, z = (length(key) for key in ("x1_mm", "x2_mm", "y1_mm", "y2_mm", "length_mm"))
+        return (max(x1, x2), max(y1, y2), z), {"dx1_mm": half(x1), "dx2_mm": half(x2), "dy1_mm": half(y1), "dy2_mm": half(y2), "dz_mm": half(z)}
+    if shape == "tube":
+        rmin, rmax, z = length("rmin_mm"), length("rmax_mm"), length("length_mm")
+        if rmin >= rmax:
+            raise GeometryError("solid-size", f"rmin {rmin} is not below rmax {rmax}", path)
+        start = values.quantity(body.get("phi_start_deg", "0"), f"{path}/phi_start_deg")
+        span = values.quantity(body.get("phi_span_deg", "360"), f"{path}/phi_span_deg")
+        if not _ZERO < span <= Decimal(360):
+            raise GeometryError("solid-size", f"phi span {span} is outside (0, 360]", path)
+        diameter = add(rmax, rmax)
+        return (diameter, diameter, z), {"rmin_mm": as_text(rmin), "rmax_mm": as_text(rmax), "dz_mm": half(z), "phi_start_deg": as_text(start), "phi_span_deg": as_text(span)}
+    sides = body["sides"]
+    if isinstance(sides, bool) or not isinstance(sides, int) or sides < 3:
+        raise GeometryError("solid-size", f"sides {sides!r} is not an integer of at least 3", path)
+    radius, z = length("radius_mm"), length("length_mm")
+    apothem = multiply(radius, rotation.cos_sin(divide(Decimal(180), Decimal(sides)))[0])  # G4Polyhedra's rOuter is the apothem (GB23)
+    diameter = add(radius, radius)
+    return (diameter, diameter, z), {"sides": sides, "circumradius_mm": as_text(radius), "apothem_mm": as_text(apothem), "dz_mm": half(z)}
+
+
+def _shape_of(node: dict) -> str:
+    return next(iter(node.get("solid", {"box": None})))
 
 
 def _rotation(placement: dict, values: _Values, path: str):
@@ -130,6 +168,63 @@ def _explicit(child: dict, body: dict, values: _Values, path: str) -> list[dict]
              "index": {name: n} if name else None} for n, item in enumerate(positions)]
 
 
+def _ring(child: dict, body: dict, values: _Values, path: str) -> list[dict]:
+    """Copies around z at the same exact angles 360 k / n, so abutting faces come from one value. orientation radial turns local z outward."""
+    count, name = body["n"], body.get("index")
+    if isinstance(count, bool) or not isinstance(count, int) or count < 1:
+        raise GeometryError("placement-count", f"n {count!r} is not a positive integer", path)
+    radius = values.quantity(body["radius_mm"], f"{path}/radius_mm")
+    first = values.quantity(body.get("phi0_deg", "0"), f"{path}/phi0_deg")
+    tilt = values.quantity(body.get("tilt_deg", "0"), f"{path}/tilt_deg")
+    stagger = values.quantity(body.get("stagger_mm", "0"), f"{path}/stagger_mm")  # outward on odd copies
+    orientation = body.get("orientation", "radial")
+    if orientation not in ("radial", "fixed"):
+        raise GeometryError("ring-form", f"orientation {orientation!r} is neither radial nor fixed", path)
+    z = values.quantity(body.get("z_mm", "0"), f"{path}/z_mm")
+    out = []
+    for k in range(count):
+        angle = add(first, divide(multiply(Decimal(360), Decimal(k)), Decimal(count)))
+        c, s = rotation.cos_sin(angle)
+        reach = add(radius, stagger) if k % 2 else radius
+        active = rotation.IDENTITY
+        if orientation == "radial":
+            active = rotation.product(rotation.active_matrix({"axis": "z", "angle_deg": angle}), rotation.active_matrix({"axis": "y", "angle_deg": Decimal(90)}))
+            if tilt != _ZERO:
+                active = rotation.product(active, rotation.active_matrix({"axis": "x", "angle_deg": tilt}))
+        out.append({"template": child["template"], "centre": (multiply(reach, Decimal(c)), multiply(reach, Decimal(s)), z), "active": active,
+                    "index": {name: k} if name else None})
+    return out
+
+
+def _inside_envelope(centre: tuple, half: tuple, envelope: dict, mode: str, values: _Values, path: str) -> bool:
+    """Whether a cell stays: a circular envelope in x and y, by its centre or by its whole footprint."""
+    radius = values.quantity(envelope["radius_mm"], f"{path}/radius_mm")
+    x, y = abs(centre[0]), abs(centre[1])
+    if mode == "fully_inside":
+        x, y = add(x, half[0]), add(y, half[1])
+    elif mode != "centre_inside":
+        raise GeometryError("clip-form", f"mode {mode!r} is neither centre_inside nor fully_inside", path)
+    return add(multiply(x, x), multiply(y, y)) <= multiply(radius, radius)
+
+
+def _modified(items: list, child: dict, sizes: dict, values: _Values, path: str) -> list:
+    """clip and absent remove cells; the indices of those left keep their values, so removed ones stay vacant numbers (Section 6.2.3)."""
+    for at, modifier in enumerate(child.get("modifiers", [])):
+        (kind, body), = modifier.items()
+        where = f"{path}/modifiers/{at}"
+        modules.require_open(modules.MODIFIERS, kind, "modifier", where)
+        if kind == "absent":
+            removed = [dict(cell) for cell in body["cells"]]
+            for cell in removed:
+                if not any(item["index"] == cell for item in items):
+                    raise GeometryError("absent-unknown", f"{cell!r} is not a cell of this placement", where)
+            items = [item for item in items if item["index"] not in removed]
+        else:
+            half = tuple(divide(side, Decimal(2)) for side in sizes[child["template"]])
+            items = [item for item in items if _inside_envelope(item["centre"], half, body["envelope"], body["mode"], values, where)]
+    return items
+
+
 def _stack(body: dict, mother_size: tuple, sizes: dict, values: _Values, path: str) -> list[dict]:
     axis, start = body["axis"], body["from"]
     if axis not in _AXES or start not in (f"-{axis}", f"+{axis}"):
@@ -182,8 +277,11 @@ def _children(mother: str, node: dict, sizes: dict, values: _Values, path: str, 
                 items = _grid(child, body, values, fields or {}, at)
             elif kind == "explicit":
                 items = _explicit(child, body, values, at)
+            elif kind == "ring":
+                items = _ring(child, body, values, at)
             else:
                 items = (_single if kind == "single" else _linear)(child, body, values, at)
+            items = _modified(items, child, sizes, values, where)
         placed.extend(items)
     return _number_copies(placed, path)
 
@@ -335,8 +433,12 @@ def expand(spec: dict) -> dict:
     regions = _inherited("region", DEFAULT_REGION, nodes, tree, order)
     fields = _inherited("field", NO_FIELD, nodes, tree, order)
     tags = {name: nodes[name].get("tags", []) for name in order}
-    templates = {name: {"half_mm": [as_text(divide(side, Decimal(2))) for side in sizes[name]], "shape": "box",
+    templates = {name: {"half_mm": [as_text(divide(side, Decimal(2))) for side in sizes[name]], "shape": _shape_of(nodes[name]),
                         "material": nodes[name]["material"], "region": regions[name], "field": fields[name]} for name in order}
+    for name in order:
+        if templates[name]["shape"] != "box":
+            shape = templates[name]["shape"]
+            templates[name]["solid"] = _other_solid(shape, nodes[name]["solid"][shape], values, f"/templates/{name}/solid/{shape}")[1]
     placements = [{"mother": mother, "template": item["template"], "copy_number": item["copy_number"],
                    "index": item["index"] or {}, "centre_mm": [as_text(v) for v in item["centre"]],
                    "rotation": None if item["active"] == rotation.IDENTITY

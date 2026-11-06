@@ -29,15 +29,74 @@ def _arbitrary(placement: dict) -> bool:
     return bool(placement["rotation"]) and any(isinstance(value, str) for row in placement["rotation"] for value in row)
 
 
+def _template(ir: dict, placement: dict) -> dict:
+    return ir["physical"]["templates"][placement["template"]]
+
+
 def _polyhedron(ir: dict, placement: dict) -> convex.Polyhedron:
     active = _active(placement) if placement["rotation"] else ((1, 0, 0), (0, 1, 0), (0, 0, 1))
-    return convex.box(_half(ir, placement["template"])).placed(active, tuple(exact(text) for text in placement["centre_mm"]))
+    template = _template(ir, placement)
+    shape, solid = template["shape"], template.get("solid")
+    if shape == "trd":
+        body = convex.trd(solid)
+    elif shape == "polygon_prism":
+        body = convex.prism(solid["sides"], exact(solid["circumradius_mm"]), exact(solid["dz_mm"]))
+    elif shape == "tube":
+        body = convex.circumscribed(exact(solid["rmax_mm"]), exact(solid["dz_mm"]))
+    else:
+        body = convex.box(_half(ir, placement["template"]))
+    return body.placed(active, tuple(exact(text) for text in placement["centre_mm"]))
+
+
+def _curved(ir: dict, placement: dict) -> bool:
+    return _template(ir, placement)["shape"] == "tube"
+
+
+def _about_own_axis(placement: dict) -> bool:
+    """No rotation, or one about the tube's z axis alone."""
+    if not placement["rotation"]:
+        return True
+    active = _active(placement)
+    return Decimal(active[2][2]) == 1
+
+
+def _tube_range(ir: dict, placement: dict) -> tuple:
+    solid = _template(ir, placement)["solid"]
+    z = exact(placement["centre_mm"][2])
+    half = exact(solid["dz_mm"])
+    return exact(solid["rmin_mm"]), exact(solid["rmax_mm"]), subtract(z, half), add(z, half), solid
+
+
+def _coaxial(ir: dict, first: dict, second: dict) -> Decimal | None:
+    """The gap of two tubes on one axis, by cylindrical coordinates (Section 7.3); None when they are not on one axis about their own axes."""
+    if not (_curved(ir, first) and _curved(ir, second) and _about_own_axis(first) and _about_own_axis(second)):
+        return None
+    if any(exact(a) != exact(b) for a, b in zip(first["centre_mm"][:2], second["centre_mm"][:2])):
+        return None
+    r1, R1, z1, Z1, _ = _tube_range(ir, first)
+    r2, R2, z2, Z2, _ = _tube_range(ir, second)
+    return max(subtract(r2, R1), subtract(r1, R2), subtract(z2, Z1), subtract(z1, Z2))
+
+
+UNJUDGED = Decimal(-2)  # a curved shape off its own axis too close to prove clear: rejected, not called an overlap
 
 
 def _rotated_pair(ir: dict, first: dict, second: dict) -> Decimal:
     """Negative when the interiors overlap, otherwise the true minimum distance."""
+    axial = _coaxial(ir, first, second)
+    if axial is not None:
+        return axial
     a, b = _polyhedron(ir, first), _polyhedron(ir, second)
-    return convex.distance(a, b) if convex.disjoint(a, b) else Decimal(-1)
+    if not convex.disjoint(a, b):
+        return UNJUDGED if _curved(ir, first) or _curved(ir, second) else Decimal(-1)
+    gap = convex.distance(a, b)
+    if (_curved(ir, first) or _curved(ir, second)) and gap < MINIMUM_GAP_MM:
+        return UNJUDGED
+    return gap
+
+
+def _plain(ir: dict, placement: dict) -> bool:
+    return _template(ir, placement)["shape"] == "box" and not _arbitrary(placement)
 
 
 def _half(ir: dict, name: str) -> tuple:
@@ -93,10 +152,10 @@ def siblings(ir: dict) -> list[dict]:
                 b, second = placed[later]
                 if subtract(b[0][0], a[1][0]) >= MINIMUM_GAP_MM:
                     break
-                separation = _rotated_pair(ir, first, second) if _arbitrary(first) or _arbitrary(second) else _separation(a, b)
+                separation = _separation(a, b) if _plain(ir, first) and _plain(ir, second) else _rotated_pair(ir, first, second)
                 if abs(separation) < EPSILON_MM or separation >= MINIMUM_GAP_MM:
                     continue
-                code = "sibling-overlap" if separation < 0 else "sibling-too-close"
+                code = "sibling-unjudged" if separation == UNJUDGED else "sibling-overlap" if separation < 0 else "sibling-too-close"
                 out.append(_finding(code, f"{mother}/{first['template']}[{first['copy_number']}]",
                                     f"{second['template']}[{second['copy_number']}] is {separation} mm away"))
     return out

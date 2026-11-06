@@ -101,9 +101,9 @@ class Expansion(unittest.TestCase):
         self.assertEqual(caught.exception.code, "template-cycle")
 
     def test_a_later_shape_or_placement_is_refused(self):
-        tube = spec({"a": {"solid": {"tube": {}}, "material": "G4_Si"}})
-        ring = spec({"a": box(["1", "1", "1"])}, [{"template": "a", "placement": {"ring": {}}}])
-        for document in (tube, ring):
+        cone = spec({"a": {"solid": {"cone": {}}, "material": "G4_Si"}})
+        shell = spec({"a": box(["1", "1", "1"])}, [{"template": "a", "placement": {"single": {"centre_mm": ["0", "0", "0"]}}, "modifiers": [{"shell": {}}]}])
+        for document in (cone, shell):
             with self.assertRaises(GeometryError) as caught:
                 expand.expand(document)
             self.assertEqual(caught.exception.code, "module-not-open")
@@ -388,6 +388,66 @@ class RotatedPlacements(unittest.TestCase):
     def test_a_right_angle_keeps_its_integer_matrix(self):
         document = expand.expand(spec({"plate": box(["10", "4", "2"])}, [single("plate", ["0", "0", "0"], {"axis": "z", "angle_deg": "90"})]))
         self.assertTrue(all(isinstance(value, int) for row in document["physical"]["placements"][0]["rotation"] for value in row))
+
+
+class ShapesRingsAndModifiers(unittest.TestCase):
+    """g4sim S3: `trd`, `tube`, `polygon_prism`, `ring`, `clip`, `absent`, and the rest of the IR row of Section 15.1."""
+
+    def wedge_ring(self, phi0="0", n=12, inner=None):
+        """12 trds whose sides meet exactly: half-widths at each end follow from the angle of one wedge."""
+        tangent = Decimal(1) * rotation.cos_sin(Decimal(15))[1] / rotation.cos_sin(Decimal(15))[0]
+        inner_r, outer_r = Decimal(100), Decimal(120)
+        y1, y2 = 2 * inner_r * tangent, 2 * outer_r * tangent
+        wedge = {"solid": {"trd": {"x1_mm": "10", "x2_mm": "10", "y1_mm": str(y1), "y2_mm": str(y2), "length_mm": "20"}}, "material": "G4_Si"}
+        return spec({"wedge": wedge}, [{"template": "wedge", "placement": {"ring": {"n": n, "radius_mm": "110", "phi0_deg": phi0, "index": "phi"}}}])
+
+    def codes(self, document):
+        return {finding["code"] for finding in overlap.findings(expand.expand(document))}
+
+    def test_a_ring_of_abutting_wedges_passes(self):
+        self.assertEqual(self.codes(self.wedge_ring()), set())
+
+    def test_one_turned_by_a_nanoradian_is_an_overlap(self):
+        document = expand.expand(self.wedge_ring())
+        placement = document["physical"]["placements"][3]
+        angle = Decimal("1e-9") * 180 / Decimal("3.14159265358979323846")
+        extra = rotation.active_matrix({"axis": "z", "angle_deg": angle})
+        turned = rotation.product(extra, rotation.transpose(tuple(tuple(value if isinstance(value, int) else Decimal(value) for value in row) for row in placement["rotation"])))
+        placement["rotation"] = [[value if isinstance(value, int) else str(value) for value in row] for row in rotation.transpose(turned)]
+        self.assertIn("sibling-overlap", {finding["code"] for finding in overlap.findings(document)})
+
+    def test_a_tube_off_its_axis_too_close_to_clear_is_rejected(self):
+        tube = {"solid": {"tube": {"rmin_mm": "0", "rmax_mm": "10", "length_mm": "40"}}, "material": "G4_Si"}
+        document = spec({"tube": tube, "plate": box(["40", "40", "2"])}, [single("tube", ("0", "0", "0"), {"axis": "x", "angle_deg": "30"}), single("plate", ("0", "0", "15"))])
+        self.assertIn("sibling-unjudged", self.codes(document))
+
+    def test_tubes_on_one_axis_are_judged_in_cylindrical_coordinates(self):
+        def tube(rmin, rmax):
+            return {"solid": {"tube": {"rmin_mm": rmin, "rmax_mm": rmax, "length_mm": "40"}}, "material": "G4_Si"}
+        clear = spec({"inner": tube("0", "10"), "outer": tube("10", "20")}, [single("inner"), single("outer")])
+        self.assertEqual(self.codes(clear), set())
+        close = spec({"inner": tube("0", "10"), "outer": tube("10.0000001", "20")}, [single("inner"), single("outer")])
+        self.assertIn("sibling-too-close", self.codes(close))
+
+    def test_the_prism_keeps_its_circumradius_and_gives_g4_the_apothem(self):
+        prism = {"solid": {"polygon_prism": {"sides": 6, "radius_mm": "10", "length_mm": "4"}}, "material": "G4_Si"}
+        solid = expand.expand(spec({"p": prism}, [single("p")]))["physical"]["templates"]["p"]["solid"]
+        self.assertEqual(solid["circumradius_mm"], "1e1")
+        self.assertTrue(solid["apothem_mm"].startswith("8.660254037844386"))
+
+    def test_absent_keeps_the_vacant_numbers(self):
+        child = {"template": "cell", "placement": {"grid": {"n": [2, 2], "pitch_mm": ["5", "5"], "centre_mm": ["0", "0", "0"], "index": ["i", "j"]}},
+                 "modifiers": [{"absent": {"cells": [{"i": 1, "j": 0}]}}]}
+        rows = expand.expand(spec({"cell": box(["2", "2", "2"])}, [child]))["physical"]["placements"]
+        self.assertEqual(sorted(row["copy_number"] for row in rows), [0, 2, 3])
+
+    def test_clip_by_centre_or_whole_cell(self):
+        def kept(mode):
+            child = {"template": "cell", "placement": {"grid": {"n": [3, 3], "pitch_mm": ["10", "10"], "centre_mm": ["0", "0", "0"], "index": ["i", "j"]}},
+                     "modifiers": [{"clip": {"mode": mode, "envelope": {"radius_mm": "11"}}}]}
+            return len(expand.expand(spec({"cell": box(["8", "8", "2"])}, [child]))["physical"]["placements"])
+        self.assertEqual(kept("centre_inside"), 5)
+        self.assertEqual(kept("fully_inside"), 1)
 
 
 if __name__ == "__main__":
