@@ -35,3 +35,20 @@ Reviewer: a second fresh agent, which judged the design before reading the first
 | 9 | Major | Random binning leaves bins short | Stratified generation with margin |
 
 Minor findings (test counts, `se` constant, wrong-minimum limit, photon toy value, overclaiming wording) are also applied.
+
+## Third review and rechecks, on versions 3 and 4
+
+Fresh agents, 2026-11-06, each with no access to the author's reasoning. Unrecorded consultations, not hep-review tiers. Full texts are in `<private>/evidence/20261106T102310Z-b3-review/` and `<private>/evidence/t04-v4/`.
+
+| Review | Of | Verdict | Blocker, major, minor |
+| --- | --- | --- | --- |
+| Third review | Version 3 | Not freeze-ready | 5, 11, 6 |
+| Recheck 1 | Version 4, round 1 | Not freeze-ready | 4, 14, 8 |
+| Recheck 2 | Version 4, round 2 | Fixes needed, no further review | 3, 10, 8 |
+
+The statistical core reproduced in the third review. Its blockers were missing fixture definitions, an unbounded Freeze B, a self-referential fake ceiling, no rule from bins to a workflow result, and undefined metrics. Recheck 1 found a failed evaluation could reopen valid ranges, and T08's clustering was unwritten with targets that failed by arithmetic. Recheck 2's blockers were in the section 18 rules.
+
+Each blocker was checked by the coordinator against the document and the plan, with sample arithmetic recomputed by hand, before it was accepted. Findings and their handling: t04-v4-dispositions.md.
+
+Round 3's changes were not reviewed, as recheck 2 ruled. `calc-t08-reference.py` gained code in that round, which the coordinator read once; it has not been run. The valid-range moves were removed by a coordinator ruling, listed in section 16 of version 4 for the user.
+

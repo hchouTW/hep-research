@@ -37,7 +37,7 @@ jobs:
 backup_a1: {path: "<workdir>/backup/20261106T083302Z", bundle_sha256: 448d4dc5e9d397f4273ce96e4471230c8e9b0397b8829e32caa04ea2fe2fddb9, archive_sha256: 5e39d7a536146a0ae22d8ac07c8b95e6dfae388ea6a25ab95761fb0b2c580e7b, bundle_commit: 2bf2ef92, approval: "approve the backup commands", task: "A1 step 4"}
 backup_a2: {path: "<workdir>/backup/20261106T091043Z", bundle_sha256: 8105206658cc42616a2d3afeca05e21778c570c099b15e8428f263f6caa311da, archive_sha256: 3fc41ab24421f1362160598981c5657611a2c31c10ec881d894e3837f04672f2, bundle_commit: a2281ca3, approval: "rerun the backup and remove the citation worktree", note: "holds the filled task log; predates the B1 rebase"}
 task_log: {path: "<private>/task-log/task-log.jsonl", note: "rebuilt 2026-11-06 from STATE.md, decisions.md, git history and job records, all entries reconstructed; 5 jobs and every user decision present; appended at each step from here (A2)"}
-deviations: {record: deviations.md, count: 6, note: "A3 step 1; none is known to have affected a recorded result"}
+deviations: {record: deviations.md, count: 7, note: "A3 step 1; none is known to have affected a recorded result"}
 literature: {record: "<private>/evidence/20261106T084851Z-a3fix1/artifacts/t11-literature-record-v3.json", sources: 63, added: "37 sources t11:S27-S63 from 56 citation records; each carries verification_checks (verdict, statement checked, note) from the T11 verification; validate.py exit 0; 2 access-limited flags (S31, S35) and 1 proposed merge (S42/S45, different editions), no search_incomplete flag", level_mapping: "full-text-arxiv and full-text-inspire recorded as full-text; full-text-section recorded as page, a conservative downgrade (strength 2 against 3); the original term is kept in level_as_recorded", note: "A3 step 3; v2 (verdicts not carried) is superseded; the 35 search-log entries are preserved, they were never stored flags"}
   cvmfs-probe-2: {state: COMPLETED, job_ids: [7471877, 7471878, 7471879], script_sha256: 9cf24222ca0b1250f8092db58b94c8db4036f16bca64ad4fabb19692de4ed248, approval: "merge PR #353 and approve the three CVMFS jobs", result: "views and releases/acts fail on all three node sets"}
 baseline_static: {evidence: "<private>/evidence/20261106T044938Z", exit: 0, seconds: 327, note: "run on the login node, --jobs 2, under Q8; docs/dev/detector-reconstruction was present and untracked"}
@@ -45,11 +45,11 @@ tasks:
   T01: {state: done, note: "checkpoint 7470679 compared; K defaults used: K01"}
   T02: {state: done, note: "definitions and contract map; fixtures run in T06; provisional defaults K04, K05, K13"}
   T03: {state: in-progress, note: "done-provisional (R28), awaiting checkpoint suite; t03-selection.md, t07-t09-task-sheets.md; gaps stay recorded"}
-  T04: {state: blocked-by-decision, record: blockers/T04.md, draft: t04-prereg.md, deciding: [K09, K12, K16]}
+  T04: {state: blocked-by-decision, record: blockers/T04.md, draft: t04-values-v4.md, review: t04-review.md, note: "third review not freeze-ready; version 4 after three fix rounds; two calculation jobs pending, then section 18 rules, then section 16 choices and Freeze A", deciding: [K09, K12, K16]}
   T05: {state: done, note: "P1 sheets complete, P2 onward list blockers; record t05-task-sheets.md"}
   T11: {state: in-progress, note: "done-provisional (R28), awaiting checkpoint suite; every applicable cell is sourced or a recorded gap (R14); 10 citation uses unread; plugin defects in t11-citation-findings.md not applied"}
 k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K08, K09, K10, K11, K12, K16, K17, K18]}
-next_action: "B2 step 2: job 7472812 (approved, tests e57716dc) pending; B3 review running; then T03 and T11 to done if clean; then backup, B3, B4 (U5)"
+next_action: "Jobs: 7472812 pending (B2 step 2), T04 jobs A and B await approval; then section 18 rules, backup, Freeze A (U5)"
 ```
 
 ## Plan conflicts found
