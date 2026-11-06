@@ -80,6 +80,56 @@ def _linear(child: dict, body: dict, values: _Values, path: str) -> list[dict]:
     return out
 
 
+def _index_widths(names: list, counts: list, fields: dict, path: str) -> list[int]:
+    """The field width of each index of a multi-index placement: the readout's, or the least that holds it. Together they fit a copy number."""
+    widths = [fields.get(name, bitfield.width_for(count)) for name, count in zip(names, counts)]
+    if sum(widths) > bitfield.COPY_FIELD_LIMIT:
+        raise GeometryError("copy-width", f"fields {names} total {sum(widths)} bits; a copy number holds {bitfield.COPY_FIELD_LIMIT}", path)
+    return widths
+
+
+def _grid(child: dict, body: dict, values: _Values, fields: dict, path: str) -> list[dict]:
+    counts, names = body["n"], body.get("index", [])
+    if len(counts) not in (2, 3) or any(isinstance(n, bool) or not isinstance(n, int) or n < 1 for n in counts):
+        raise GeometryError("placement-count", f"n {counts!r} is not two or three positive integers", path)
+    if len(names) != len(counts):
+        raise GeometryError("grid-index", f"{len(counts)} dimensions need as many index names, not {names!r}", path)
+    pitch = [values.quantity(item, f"{path}/pitch_mm/{i}") for i, item in enumerate(body["pitch_mm"])]
+    if len(pitch) != len(counts):
+        raise GeometryError("vector-form", f"{len(counts)} dimensions need as many pitches", path)
+    pitch += [_ZERO] * (3 - len(pitch))
+    centre = values.vector(body["centre_mm"], f"{path}/centre_mm")
+    stagger = values.quantity(body["stagger_mm"], f"{path}/stagger_mm") if "stagger_mm" in body else _ZERO  # along x, on odd rows of j
+    widths = _index_widths(names, counts, fields, path)
+    sizes = list(counts) + [1] * (3 - len(counts))
+    # the position given is the centre of the whole grid, not of its first cell (Section 6.2.2)
+    first = [add(centre[a], CONTEXT.multiply(pitch[a], divide(Decimal(1 - sizes[a]), Decimal(2)))) for a in range(3)]
+    out = []
+    for k in range(sizes[2]):
+        for j in range(sizes[1]):
+            for i in range(sizes[0]):
+                cell = [add(first[a], CONTEXT.multiply(pitch[a], Decimal((i, j, k)[a]))) for a in range(3)]
+                if j % 2:
+                    cell[0] = add(cell[0], stagger)
+                at = (i, j, k)[:len(counts)]
+                packed, shift = 0, 0
+                for value, width in zip(at, widths):
+                    packed += value << shift
+                    shift += width
+                out.append({"template": child["template"], "centre": tuple(cell), "active": rotation.IDENTITY,
+                            "index": dict(zip(names, at)), "packed": packed})
+    return out
+
+
+def _explicit(child: dict, body: dict, values: _Values, path: str) -> list[dict]:
+    name = body.get("index")
+    positions = body["positions_mm"]
+    if not positions:
+        raise GeometryError("placement-count", "an explicit placement has at least one position", path)
+    return [{"template": child["template"], "centre": values.vector(item, f"{path}/positions_mm/{n}"), "active": rotation.IDENTITY,
+             "index": {name: n} if name else None} for n, item in enumerate(positions)]
+
+
 def _stack(body: dict, mother_size: tuple, sizes: dict, values: _Values, path: str) -> list[dict]:
     axis, start = body["axis"], body["from"]
     if axis not in _AXES or start not in (f"-{axis}", f"+{axis}"):
@@ -113,7 +163,7 @@ def _stack(body: dict, mother_size: tuple, sizes: dict, values: _Values, path: s
     return out
 
 
-def _children(mother: str, node: dict, sizes: dict, values: _Values, path: str) -> list[dict]:
+def _children(mother: str, node: dict, sizes: dict, values: _Values, path: str, fields: dict | None = None) -> list[dict]:
     placed = []
     for at, child in enumerate(node.get("children", [])):
         where = f"{path}/children/{at}"
@@ -127,7 +177,13 @@ def _children(mother: str, node: dict, sizes: dict, values: _Values, path: str) 
         else:
             if child.get("template") not in sizes:
                 raise GeometryError("template-unknown", f"{child.get('template')!r} is not a template", where)
-            items = (_single if kind == "single" else _linear)(child, body, values, f"{where}/placement/{kind}")
+            at = f"{where}/placement/{kind}"
+            if kind == "grid":
+                items = _grid(child, body, values, fields or {}, at)
+            elif kind == "explicit":
+                items = _explicit(child, body, values, at)
+            else:
+                items = (_single if kind == "single" else _linear)(child, body, values, at)
         placed.extend(items)
     return _number_copies(placed, path)
 
@@ -137,7 +193,7 @@ def _number_copies(placed: list[dict], path: str) -> list[dict]:
     taken: dict[int, str] = {}
     for item in placed:
         if item["index"]:
-            (name, value), = item["index"].items()
+            value = item["packed"] if "packed" in item else next(iter(item["index"].values()))
             if value in taken:
                 raise GeometryError("copy-collision", f"copy number {value} is used twice in one mother ({taken[value]!r} and "
                                                       f"{item['template']!r}); wrap one in its own template", path)
@@ -273,7 +329,8 @@ def expand(spec: dict) -> dict:
     for name, node in nodes.items():
         if not node["material"].startswith(NIST_PREFIX) and node["material"] not in spec.get("materials", {}):
             raise GeometryError("material-unknown", f"{node['material']!r} is neither a NIST name nor declared", f"/templates/{name}")
-    tree = {name: _children(name, node, sizes, values, f"/templates/{name}") for name, node in nodes.items()}
+    fields = {name: width for readout in spec.get("readout", {}).values() for name, width in readout["fields"].items()}
+    tree = {name: _children(name, node, sizes, values, f"/templates/{name}", fields) for name, node in nodes.items()}
     order = _order(tree)
     regions = _inherited("region", DEFAULT_REGION, nodes, tree, order)
     fields = _inherited("field", NO_FIELD, nodes, tree, order)

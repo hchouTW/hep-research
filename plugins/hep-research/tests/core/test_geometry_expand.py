@@ -101,8 +101,8 @@ class Expansion(unittest.TestCase):
 
     def test_a_later_shape_or_placement_is_refused(self):
         tube = spec({"a": {"solid": {"tube": {}}, "material": "G4_Si"}})
-        grid = spec({"a": box(["1", "1", "1"])}, [{"template": "a", "placement": {"grid": {}}}])
-        for document in (tube, grid):
+        ring = spec({"a": box(["1", "1", "1"])}, [{"template": "a", "placement": {"ring": {}}}])
+        for document in (tube, ring):
             with self.assertRaises(GeometryError) as caught:
                 expand.expand(document)
             self.assertEqual(caught.exception.code, "module-not-open")
@@ -303,6 +303,50 @@ class Identities(unittest.TestCase):
         with self.assertRaises(GeometryError) as caught:
             expand.expand(document)
         self.assertEqual(caught.exception.code, "select-empty")
+
+
+class GridAndExplicit(unittest.TestCase):
+    """g4sim S3: `grid` with bit-packed copy numbers, and `explicit` (Sections 6.2.2, 6.2.6, 15.1)."""
+
+    def grid(self, n, names=("i", "j"), pitch=("10", "10"), **extra):
+        return {"template": "cell", "placement": {"grid": {"n": list(n), "pitch_mm": list(pitch), "centre_mm": ["0", "0", "0"], "index": list(names), **extra}}}
+
+    def placed(self, child, **extra):
+        return expand.expand(spec({"cell": box(["2", "2", "2"])}, [child], **extra))["physical"]["placements"]
+
+    def test_the_position_is_the_centre_of_the_grid(self):
+        centres = [item["centre_mm"][:2] for item in self.placed(self.grid((2, 2)))]
+        self.assertEqual(centres[0], ["-5e0", "-5e0"])
+        self.assertEqual(centres[-1], ["5e0", "5e0"])
+
+    def test_copy_numbers_are_packed_by_field_width(self):
+        """A 6 x 6 grid with 3-bit fields is i + 8 j, never i + 6 j, so the decoded fields are the indices."""
+        rows = self.placed(self.grid((6, 6)), readout={"ecal": {"fields": {"i": 3, "j": 3}}})
+        for row in rows:
+            self.assertEqual(row["copy_number"], row["index"]["i"] + 8 * row["index"]["j"])
+            self.assertEqual(row["copy_number"] & 7, row["index"]["i"])
+            self.assertEqual(row["copy_number"] >> 3, row["index"]["j"])
+
+    def test_fields_of_one_placement_total_at_most_31_bits(self):
+        fields = {"readout": {"ecal": {"fields": {"i": 11, "j": 11, "k": 11}}}}
+        with self.assertRaises(GeometryError) as caught:
+            self.placed(self.grid((2, 2, 2), ("i", "j", "k"), ("10", "10", "10")), **fields)
+        self.assertEqual(caught.exception.code, "copy-width")
+
+    def test_a_grid_needs_an_index_for_each_dimension(self):
+        with self.assertRaises(GeometryError) as caught:
+            self.placed(self.grid((2, 2), ("i",)))
+        self.assertEqual(caught.exception.code, "grid-index")
+
+    def test_stagger_shifts_odd_rows(self):
+        rows = self.placed(self.grid((2, 2), stagger_mm="3"))
+        self.assertEqual({row["index"]["j"]: row["centre_mm"][0] for row in rows if row["index"]["i"] == 0}, {0: "-5e0", 1: "-2e0"})
+
+    def test_explicit_positions_keep_their_order(self):
+        child = {"template": "cell", "placement": {"explicit": {"positions_mm": [["0", "0", "0"], ["5", "0", "0"]], "index": "n"}}}
+        rows = self.placed(child)
+        self.assertEqual([row["copy_number"] for row in rows], [0, 1])
+        self.assertEqual(rows[1]["centre_mm"][0], "5e0")
 
 
 if __name__ == "__main__":

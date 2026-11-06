@@ -531,6 +531,79 @@
          "$ref": "#/$defs/integer"
         }
        }
+      },
+      "grid": {
+       "type": "object",
+       "required": [
+        "n",
+        "pitch_mm",
+        "centre_mm",
+        "index"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "n": {
+         "type": "array",
+         "items": {
+          "$ref": "#/$defs/integer"
+         },
+         "minItems": 2,
+         "maxItems": 3
+        },
+        "pitch_mm": {
+         "type": "array",
+         "items": {
+          "$ref": "#/$defs/quantity"
+         },
+         "minItems": 2,
+         "maxItems": 3
+        },
+        "centre_mm": {
+         "type": "array",
+         "items": {
+          "$ref": "#/$defs/quantity"
+         },
+         "minItems": 3,
+         "maxItems": 3
+        },
+        "index": {
+         "type": "array",
+         "items": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_+-]*$"
+         },
+         "minItems": 2,
+         "maxItems": 3
+        },
+        "stagger_mm": {
+         "$ref": "#/$defs/quantity"
+        }
+       }
+      },
+      "explicit": {
+       "type": "object",
+       "required": [
+        "positions_mm"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "positions_mm": {
+         "type": "array",
+         "minItems": 1,
+         "items": {
+          "type": "array",
+          "items": {
+           "$ref": "#/$defs/quantity"
+          },
+          "minItems": 3,
+          "maxItems": 3
+         }
+        },
+        "index": {
+         "type": "string",
+         "pattern": "^[A-Za-z_][A-Za-z0-9_+-]*$"
+        }
+       }
       }
      }
     }
