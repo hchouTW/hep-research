@@ -162,7 +162,8 @@ class NewDetector : public G4VUserDetectorConstruction {
       manager = new G4FieldManager(static_cast<G4Field*>(nullptr));
     } else {
       const auto& b = fPhysical.at("fields", "physical").at(name, "fields").at("b_tesla", "field").array("b_tesla");
-      auto* field = new G4UniformMagField(G4ThreeVector(Decimal(b[0]) * tesla, Decimal(b[1]) * tesla, Decimal(b[2]) * tesla));
+      const double sign = Control() == "flip_field" ? -1. : 1.;  // the negative test of Section 15.1
+      auto* field = new G4UniformMagField(sign * G4ThreeVector(Decimal(b[0]) * tesla, Decimal(b[1]) * tesla, Decimal(b[2]) * tesla));
       manager = new G4FieldManager(field);
       manager->CreateChordFinder(field);
     }
