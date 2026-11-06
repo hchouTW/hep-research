@@ -1,6 +1,6 @@
 # T04: proposed values (draft, nothing frozen)
 
-> **Do not freeze. Review verdict: redesign needed (t04-review.md).** Four blockers, confirmed by recomputation. In particular, "caught 100 %" below holds only when all 12 bins shift, and the 1 % family rate covers one parameter. Kept as reviewed, for the record.
+> **Do not freeze. Review verdict: redesign needed (t04-review.md).** Four blockers, confirmed by recomputation. In particular, "caught 100 %" below holds only when all 12 bins shift, and the 1 % family rate covers one parameter. Kept as reviewed, for the record. Replaced by t04-values-v2.md.
 
 Proposals for the user. K09, K12 and K16 freeze only on the user's word (R02), and before any run of the recipe concerned. Until then, no pass or fail claim.
 

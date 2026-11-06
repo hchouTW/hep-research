@@ -17,3 +17,21 @@ Reviewer: a fresh agent with no access to the author's reasoning, 2026-11-06. **
 Minor: 0.3 % was a 13-of-4,000 fluctuation (exact 0.49 %); Sidak control covers pulls only; bin in truth, not observed photon count; sum-to-1 gates may be tautological, and unclustered cells sum to 0; "K09 budgets" belongs to K10.
 
 Reviewer found sound: Clopper-Pearson cutoffs, every-bin efficiency false pass 4.7 %, K12.
+
+## Second review, of version 2
+
+Reviewer: a second fresh agent, which judged the design before reading the first review. **Verdict: freeze-ready after fixes.** First-review findings 2, 8 and 9 closed; 1, 3, 4, 5, 6, 7 partly closed. The author recomputed the clustering, charge and binning claims; they hold, except that the charge-dependent bias passed the width gate 66 % of the time in the author's run, not always. Version 3 applies the fixes.
+
+| # | Severity | Finding | Fix in version 3 |
+| --- | --- | --- | --- |
+| 1 | Blocker | T09 had no gate on failed fits | Fit-failure gate on the full population |
+| 2 | Blocker | One design effect does not fit all statistics; count-based minimum unworkable | Bootstrap `se` per statistic; precision minimum instead of `n_eff` |
+| 3 | Blocker | Clopper-Pearson on objects ignores clustering: a true 1 % passed up to 24.7 % | Effective-count bounds: 4.2-5.7 % simulated |
+| 4 | Blocker | "Before any run" conflicted with development checks | Two-step freeze |
+| 5 | Major | Truth bins undefined for fakes and vertices | Reconstructed and event-level bins |
+| 6 | Major | The trimmed mean is not the mean; skew and outliers can pass | Renamed robust centre; mean and RMS reported; limit stated |
+| 7 | Major | A charge-dependent bias cancels; prereg bins dropped | `q/p` gated per charge; one-dimensional diagnostics |
+| 8 | Major | Noise reference treated as exact; fixed fake ceiling | Paired bootstrap; ceiling set at Freeze B |
+| 9 | Major | Random binning leaves bins short | Stratified generation with margin |
+
+Minor findings (test counts, `se` constant, wrong-minimum limit, photon toy value, overclaiming wording) are also applied.
