@@ -7,7 +7,6 @@ Usage: ray_budget.py --detector SPEC --program PATH --work DIR [--rays N] [--see
 from __future__ import annotations
 
 import argparse
-import copy
 import json
 import math
 import subprocess
