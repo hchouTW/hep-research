@@ -449,6 +449,13 @@
    "registered_at": "2026-11-06T20:36:10Z",
    "card_commit": "4f48fa16",
    "reason": "Execution log only (falsifications recorded); thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "27f1b483994ae90290827b851e212015333bd3749ea96d1d68355cb64ad2633a",
+   "registered_at": "2026-11-06T20:40:16Z",
+   "card_commit": "4d205c76",
+   "reason": "Maintainer's decision of 2026-11-06: addendum 11.1 restates GB11, GB12, GB17, GB19, GB20, GB21; GB15 and GB17 numbers registered before their judged runs"
   }
  ]
 }
