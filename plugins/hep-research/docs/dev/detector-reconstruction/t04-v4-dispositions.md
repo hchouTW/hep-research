@@ -371,3 +371,11 @@ Job 7478897, `COMPLETED`, exit `0:0`, 42 s, error logs empty. Evidence: `<privat
 
 All 30 `NODE` lines are within 0.0474. New widths run from 0.9988 to 1.0167, and at 250 MeV are 1.0101 and 1.0118 against 1.0655 and 1.0671. Model and true spread agree within 1.5 % at 250 MeV and better above. Tails are 0.24 to 0.33 %, near the Gaussian 0.27 %. Centres are unchanged. All objects were one-peak, so this tests iso only. Edge, dead and saturation objects and the far and near strata have not been tested with it.
 
+## T08 reference rerun: reading rule
+
+Fixed before any output exists. Script `<private>/evidence/t04-v4/round5/calc-t08-reference.py` (`5f096622f3bbe1b3`), job `<private>/jobs/t04-round5/run.sh` (`ca0c6bf33188d7f6`). Syntax-parsed only, not run. It is round 3's script with two changes: section 7.1's uncertainty and the exact form in `p_closed`. Seeds are unchanged, so the events are job 7474461's.
+
+Void, and goes to the user, unless every `CONST` line and every node's `n`, `b`, `se`, `sd`, `model`, `fired` and `E:` values equal job 7474461's. Only x and y lines, closed-form values and what follows from them may differ.
+
+Section 18's T08 rows apply as written, with `closed` now exact. A value within 1e-4 of a limit is recomputed from its node values before it is read, because the prints have 4 decimals. Any stop goes to the user. With no stop, this job's log replaces job 7474461's T08 log in the freeze list, and the target tables, which should be equal, are confirmed.
+

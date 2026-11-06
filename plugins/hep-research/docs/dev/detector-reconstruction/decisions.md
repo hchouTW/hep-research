@@ -206,3 +206,5 @@ User's answer, 2026-11-06, verbatim: "accept the section 16 recommendations, ver
 User's answers, 2026-11-06, verbatim: "give me best suggestion. I want correct method and right result." then "go ahead with the T08 diagnostic". The third section 18 stop, iso E2 position width, is to be diagnosed, not accepted. Freeze A waits.
 
 User's answer, 2026-11-06, verbatim: "go ahead with option A". The position uncertainty of section 7.1 is to be tested with an added variance term; the estimator is kept.
+
+User's answer, 2026-11-06, verbatim: "adopt the new uncertainty in section 7.1". Section 7.1's one-peak position uncertainty is replaced by the tested form. T08's reference reruns against the unchanged section 18 rule.
