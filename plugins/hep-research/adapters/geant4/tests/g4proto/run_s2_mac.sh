@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # The one Mac job of S2 (g4sim-execution-plan.md): builds g4sim_run, scans the new C++ for G5, and judges gate 4 against the recorded references.
-# Usage: run_s2_mac.sh [build|scan|start|status]   from the plugin root of the g4sim/S2 worktree. Everything is written below ~/g4sim-s2-mac.
+# Usage: run_s2_mac.sh [build|scan|start|spot|regenerate|status]   from the plugin root of the g4sim/S2 worktree. Everything is written below ~/g4sim-s2-mac.
 # start is detached and resumable: run it again after a stop and finished runs are kept. It writes no tracked file.
 set -u
 OUT=~/g4sim-s2-mac
@@ -26,6 +26,30 @@ case "${1:-status}" in
     bash adapters/geant4/tests/g4proto/run_job.sh "$OUT/job" python3 adapters/geant4/tests/g4proto/reacquire/regress.py \
       --facts adapters/geant4/tests/g4proto/reacquire/recorded_runs.json --baselines "$OUT/records" --program "$OUT/build/g4sim_run" \
       --work "$OUT/gate4" --recorded-root ~/Workspace/geant4-work --cores 8
+    ;;
+  spot)  # short runs of different types on the final code: its fixes must leave the old columns alone
+    rm -rf "$OUT/spot"
+    for run in N8-TRK1-scan sp-em-option0 ladder-sf-pvt-control ladder-mu10-field-control F937-closure mirror-testem5_run0 msref-1gv-nominal sp-control mpv-cut-0.3-trial N6-TRK1-var-air; do
+      python3 adapters/geant4/tests/g4proto/reacquire/regress.py --facts adapters/geant4/tests/g4proto/reacquire/recorded_runs.json --baselines "$OUT/records" \
+        --program "$OUT/build/g4sim_run" --work "$OUT/spot" --recorded-root ~/Workspace/geant4-work --cores 8 --only "$run" > /dev/null
+    done
+    python3 - "$OUT" <<'PY'
+import json, os, sys
+done = json.load(open(os.path.join(sys.argv[1], "spot", "regression.json")))
+print(len(done), "spot runs;", sum(v["identical"] for v in done.values()), "identical; different:", [k for k, v in done.items() if not v["identical"]])
+PY
+    ;;
+  regenerate)  # the examples whose outputs record check_geant4_study.py's code hash; the result leaves as a patch and the worktree is put back
+    python3 examples/geant4-thin-silicon/run.py > "$OUT/regenerate-j14.log" 2>&1; echo "j14 exit=$?"
+    python3 examples/design-minimal-spectrometer/run.py > "$OUT/regenerate-design.log" 2>&1; echo "design exit=$?"
+    git add -A -N examples
+    git diff --binary -- examples > "$OUT/regeneration.patch"
+    git diff --stat -- examples | tail -1
+    git reset -q
+    git checkout -- examples
+    git clean -fdq examples
+    git status --short | wc -l
+    shasum -a 256 "$OUT/regeneration.patch"
     ;;
   status)
     python3 - "$OUT" <<'PY'
