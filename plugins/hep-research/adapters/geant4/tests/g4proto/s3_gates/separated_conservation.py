@@ -27,7 +27,8 @@ EM_LIST = {"em_constructor": "G4EmStandardPhysics_option4", "cuts_mm": {"default
 HADRONIC_LIST = {"reference_list": "FTFP_BERT_EMZ", "cuts_mm": {"default": "0.7"}}
 CONFIGS = {"em": {"particle": "e-", "energy_MeV": "1000", "physics": EM_LIST, "kill_MeV": "1", "limits": base.EM},
            "hadronic-99": {"particle": "proton", "energy_MeV": "99000", "physics": HADRONIC_LIST, "kill_MeV": "1000", "limits": base.HADRONIC},
-           "hadronic-1000": {"particle": "proton", "energy_MeV": "1000000", "physics": HADRONIC_LIST, "kill_MeV": "1000", "limits": base.HADRONIC}}
+           "hadronic-1000": {"particle": "proton", "energy_MeV": "1000000", "physics": HADRONIC_LIST, "kill_MeV": "1000", "limits": base.HADRONIC},
+           "hadronic-dense": {"particle": "proton", "energy_MeV": "99000", "physics": HADRONIC_LIST, "kill_MeV": "1000", "limits": base.HADRONIC}}  # a lead block: enough neutrons for the neutron control
 SEED_OFFSET = 940000
 base.CONFIGS = CONFIGS
 base.SEEDS["neutron-control"] = 616
