@@ -6,7 +6,7 @@ Candidate for the user's word (R02, finish-plan B4, decision U5). Not frozen unt
 
 | File | SHA-256 |
 | --- | --- |
-| t04-values-v4.md | `dc6d7b2e60a91e2a98f2066dc8f39fd7f12038eb5db50e1e09e45f22fee3b7ad` |
+| t04-values-v4.md | `c55ff22fee9268e5cf245aee43ae673920baf002086946071cba5b5920789105` |
 | t04-prereg.md | `39495c3f7db0cded7f88b45711a9457f438be0cbd4113370880d69866448a151` |
 | t07-t09-task-sheets.md | `01f3509156734372a725eba77b3604935bf420b74fc5f9670fed4348269906f0` |
 
@@ -38,6 +38,7 @@ Candidate for the user's word (R02, finish-plan B4, decision U5). Not frozen unt
 | job-diag-t08b-7478606/diag-t08-width.log | `519c2628ca9b17caf35dc1272aaf78ff9b07eb35d0f4cdb64273e0e6a02a7f93` |
 | job-diag-t08c-7478897/test-t08-sigma.log | `a478ad84b444154c70e9942b20796e115a28a073c94d910faeb52563dba2d02b` |
 | job-round5-7479146/calc-t08-reference.log | `325e070b5a929a8d77d2cb88d00767e2ab5daa985a2d567c096486249835d0c8` |
+| job-diag-t08d-7480930/test-t08-far-gap.log | `b7e01f066ca02a12f9d68ded5a61562f521a6f0252282690ac593ee154fc4d98` |
 
 ## Not in this freeze
 

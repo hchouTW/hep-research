@@ -403,3 +403,7 @@ Void unless each `REPLAY` line equals job 7479146's `BIN far ... from d 3.0` lin
 
 An outcome the table does not cover goes to the user.
 
+### Result
+
+Job 7480930, `COMPLETED`, exit `0:0`, 4 min 15 s, error log empty, node `hpa-wn30`, the only job of this series not on `hpa-wn28`. Evidence: `<private>/evidence/t04-v4/job-diag-t08d-7480930/`. Not void: all three `REPLAY` lines equal job 7479146's on the fields they print, on another node. First row applies: 21 of 21 nodes within 0.0542, every `GAP` value within its limit, and none within 1e-4; `b_far` within its interpolation limit at all 21 nodes. The claim is widened in section 7.1, and the job is in section 18.1.
+
