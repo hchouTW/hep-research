@@ -17,7 +17,7 @@
    "blocked_on": []
   },
   "S2": {
-   "state": "gates-recorded",
+   "state": "merged",
    "worktree": "../hep-research-g4sim-S2",
    "branch": "g4sim/S2",
    "task_card_sha256": "2180c0bd0c4d499d5852b88df993228956f0f6b318c392221a1424f3e1cdd722",
@@ -107,5 +107,5 @@
   "GB23": "unconfirmed",
   "GB24": "unconfirmed"
  },
- "updated": "2026-11-06T08:33:15Z"
+ "updated": "2026-11-06T08:47:33Z"
 }

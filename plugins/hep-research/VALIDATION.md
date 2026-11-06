@@ -8911,3 +8911,28 @@ that did not write the code found no copying and could not compare side by side,
 **Confirmation** (hsinyichou, maintainer, 2026-11-06, in the Claude Code session): "Yes, I reviewed them". The question it answered, paraphrased here because the packaging check
 forbids one of its phrases: whether Accounting.hh, IrTree.hh, GeometryCheck.cc, g4sim_run.cc, WriteBack.hh, the two legacy Detector.cc files, s2_gates/main.cc and the legacy observer
 ports at `57825b63` were reviewed, and are written from the Geant4 API or carried over from the plugin's own code, with no example code copied or adapted.
+
+## 0.57.0 release check (2026-11-06, E2 and CI)
+
+Release branch `release/0.57.0`, based on main `dfbbb787` (PR #354 merged), with main merged in at `575e309b` for PR #353 (citation corrections in 10 hep-detector reference documents).
+Minor release: g4sim phase S2. Contracts 3.20.0, `CORE_VERSION` 1.7.0, `adapters/geant4` 0.8.0; the version constants were bumped in S2.
+
+What changed on the release branch:
+- the CHANGELOG `0.57.0` section and the g4sim status (S2 `merged`);
+- no regeneration for the release. The only regenerated outputs are those of S2, on E2: `geant4-thin-silicon` and `design-minimal-spectrometer`, 71 files, writer versions, one tool hash
+  and the `sha256` lines that follow, no number changed. Gate record: `docs/dev/geant4-architecture/g4sim-gates/S2.md`.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on `575e309b` (run 42192556674) | success: 25 jobs passed, 3 skipped by the pull-request plan |
+| `run_all_checks.py` (all parts, host CLIs), E2 at `b5784300`, `--jobs 4` | 33 pass, 0 fail, 0 skip; units 6838 tests, 6658 passed, 180 skipped, 0 failures, 516 modules, 0 timed out |
+
+The E2 check ran before PR #353 came in: `575e309b` differs from `b5784300` only by those 10 documents, which CI covers.
+
+E2: macOS arm64, Python 3.13.2, NumPy 2.5.3. `claude-plugin-validate` (Claude Code 2.1.318) and `codex-plugin-load` (codex-cli 0.164.0) pass. The two `hep_authoring` tests that failed in the
+S2 worktree, whose path contains the reviewer label `S2`, pass here.
+
+Open: gate 4 of S2 ran at `ebd4d056`, and the later fixes were checked by spot runs; gate 6 covers a sample of 3 runs; GB9 no longer tests against independent masses; the hadronic conservation
+limits catch large defects only. The custodian's re-evaluation of qualification follows this release and is not recorded here.
+
+Passing checks show software consistency, not physical validity.
