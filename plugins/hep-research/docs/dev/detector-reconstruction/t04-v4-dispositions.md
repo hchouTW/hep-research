@@ -164,3 +164,30 @@ Not applied. Applied together, in the Freeze A commit, then hashed (section 2.1)
 | decisions.md | The user's words for Freeze A, and SHA-256 of each frozen file |
 | blockers/T04.md | Update on freeze |
 | STATE.md | T04 state and `next_action` |
+
+## Section 18 results, jobs 7474461 and 7474462
+
+Both jobs `COMPLETED`, exit `0:0`, all six scripts exit 0, hashes in the receipts match section 18. Evidence: `<private>/evidence/t04-v4/job-a-7474461/`, `job-b-7474462/`. Rules applied as written. **Two stops. No number in version 4 has moved, and none moves until the user answers.**
+
+| Script | Rule | Result | Outcome |
+| --- | --- | --- | --- |
+| T08 | `fired` against closed form | 1 of 30 iso nodes over: E 80, fired 0.83670, closed 0.84327, `dev` 0.00657, limit 0.00640 | **Stop** |
+| T08 | Constant `b_iso` | Worst node E 2378.4: 0.0128 sigma, limit 0.0374 sigma | No action |
+| T08 | iso, edge, dead, near, far `BIN` limits | 154 values, none over. Closest: iso E2 position `|s68 - 1|`, x 0.0410 and y 0.0412, limit 0.0412 | No action |
+| T08 | Far merge | 21 values, none over, largest ratio to limit 0.021 | No action |
+| T08 | Far efficiency | 22 values, none low, largest deficit 0.011 of its limit | No action |
+| T08 | Iso split | 0.00000 in E2-E4 | No action |
+| T09 | Range, pulls | `theta` and `phi` over limits at `N_exp` 80 and 120 (pooled centre -0.90 and -0.71, width 1.68 and 1.67), and also at 200 (-0.92, 1.60). `N_exp` weight also over at 80 (-0.126) | **Stop** (not clear at 200) |
+| T09 | Fit failure, wrong minimum | Fit failure 0, missed better minimum 0 at 80 and above. Any `|pull|` above 5 is 23 %, with Hessian uncertainties, so not clause (b) as defined; it may be the same departure | Follows the stop above |
+| T09 | Dead read as unhit | Patch 100 screen 0.120, patch 200 screen 0.486 | Would set `PATCH` to 200. Held: it uses the same fit |
+| H2 | Tail above penalty | 30: 3 of 600 at `N_exp` 50, exactly 0.5 %, not above it; 0 of 600 at 1,000 | Penalty 30, no action |
+| H2 | Two-source corner | 0 of 600 below the penalty | No action |
+| Rate | Pass at `L` | Largest 7.0 % of 132 rows, limit 7.1 % | No action |
+| Rate | Pass at slack | Smallest 100.0 % | No action |
+| Pull | m = 1, true error 0.10 | Bias 4.0 %, width 4.8 %, limit 7.9 % | No action |
+| Pull | `POOLED` | Centre +1.4 %, width +0.9 %, limit 9 % | No action |
+| Pull | Fail at state `none` | None | No action |
+| Fake | `f_ref` bound | Largest 1.0e-7, limit 1e-3 | `C` = 0.005 |
+
+Coordinator's reading, not a finding. T09: generator and likelihood call the same `shape` and `direction` functions, and no mismatch was seen by reading them. The departure is confined to `theta`, `phi` and, at low `N_exp`, the weight; x, y, z and `t0` stay inside the limits at the pooled level. It does not shrink with `N_exp`, and at the smallest radii the `theta` centre grows with it. `phi` is wrapped before the pull and `theta` is not. Whether the cause is the reference script, its Hessian or the method is not known. T08: the excess is 3.1 standard errors at one of 30 nodes, and only few nodes are off plateau. Chance and a small missing term in the closed form both remain possible.
+
