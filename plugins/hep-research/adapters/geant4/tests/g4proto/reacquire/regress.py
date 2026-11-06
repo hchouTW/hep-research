@@ -3,6 +3,7 @@
 the baseline's probe record, the run is repeated with g4sim_run, and the output hashes and the volume-tree write-back are compared.
 
 Usage: regress.py --facts FACTS.json --baselines DIR --program PATH --work DIR [--cores N] [--only TEXT] [--keep-outputs] [--threads N]
+--recorded-root is S2 gate 4 on the recorded platform: --baselines then needs only runs/<run>/probe-v2.json.gz, the S1 records.
 From the plugin root, in an activated Geant4 environment. Prints JSON with a status key. Exit 0 every run identical, 1 otherwise, 2 bad input.
 """
 from __future__ import annotations
@@ -52,14 +53,19 @@ def tree_differences(expected: dict, record: dict) -> list[str]:
     return [key for key in TREE_KEYS if wanted[key] != found[key]]
 
 
-def run_one(row: dict, reference: dict, record: dict, program: Path, folder: Path, keep: bool = False, threads: int | None = None) -> dict:
+def run_one(row: dict, reference: dict, record: dict, program: Path, folder: Path, keep: bool = False, threads: int | None = None,
+            recorded_root: Path | None = None) -> dict:
     write_inputs(row, record, folder, threads)
     begun = time.perf_counter()
     with (folder / "log.txt").open("w", encoding="utf-8") as log:
         code = subprocess.run([str(program), "ir.json", "spec.json"], cwd=folder, stdout=log, stderr=log, check=False).returncode
     wall = round(time.perf_counter() - begun, 1)
     hashes = {name: reproduce._sha256(folder / name) for name in baseline.HASHED if (folder / name).is_file()}
-    same = {name: hashes.get(name) == value for name, value in reference["hashes"].items()}
+    if recorded_root is None:
+        same = {name: hashes.get(name) == value for name, value in reference["hashes"].items()}
+    else:  # S2 gate 4: the recorded references, judged as the S1 reproduction check judged them
+        states = reproduce.output_states(row, folder, recorded_root)
+        same = {name: state in ("same", reproduce.SAME_BEFORE_COMPLETION) for name, state in states.items()}
     written = folder / "probe-v2.json"
     tree = tree_differences(record, json.loads(written.read_text(encoding="utf-8"))) if written.is_file() else ["no write-back"]
     for name in (*reproduce.BULK, "probe-v2.json") if not keep else ():
@@ -75,10 +81,11 @@ def main(argv=None) -> int:
     parser.add_argument("--only", default="")
     parser.add_argument("--keep-outputs", action="store_true")
     parser.add_argument("--threads", type=int)
+    parser.add_argument("--recorded-root", type=Path, help="S2 gate 4: judge against the recorded outputs below this folder, not the baselines' hashes")
     args = parser.parse_args(argv)
     try:
         facts = json.loads(args.facts.read_text(encoding="utf-8"))
-        references = json.loads((args.baselines / "baselines.json").read_text(encoding="utf-8"))["runs"]
+        references = {} if args.recorded_root else json.loads((args.baselines / "baselines.json").read_text(encoding="utf-8"))["runs"]
     except (OSError, ValueError) as err:
         print(json.dumps({"status": "error", "message": str(err)}))
         return 2
@@ -93,7 +100,7 @@ def main(argv=None) -> int:
             record = json.load(stream)
         taken = cores.take(row.get("threads") or 1)
         try:
-            result = run_one(row, references[row["run"]], record, args.program.resolve(), args.work / "runs" / row["run"], args.keep_outputs, args.threads)
+            result = run_one(row, references.get(row["run"], {}), record, args.program.resolve(), args.work / "runs" / row["run"], args.keep_outputs, args.threads, args.recorded_root)
         finally:
             cores.give(taken)
         results[row["run"]] = result

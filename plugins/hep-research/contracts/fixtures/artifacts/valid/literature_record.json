@@ -1,5 +1,5 @@
 {
- "contract_version": "3.19.0",
+ "contract_version": "3.20.0",
  "artifact_id": "fixture-synthetic-literature-record",
  "artifact_type": "literature-record",
  "objective": "SYNTHETIC structural fixture; values are placeholders, not physics",
@@ -9,7 +9,7 @@
  },
  "versions": {
   "plugin": "0.15.0",
-  "contracts": "3.19.0",
+  "contracts": "3.20.0",
   "profiles": {}
  },
  "provenance": {

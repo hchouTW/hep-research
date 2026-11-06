@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import subprocess
 import sys
 import tempfile
 import unittest
@@ -157,6 +158,35 @@ class OutputChecks(unittest.TestCase):
             log = Path(folder) / "log.txt"
             log.write_text("ok\nGeomVol1002 x\nGeomVol1002 y\n", encoding="utf-8")
             self.assertEqual(driver.overlaps_in_log(log), 2)
+
+
+class Dispatch(unittest.TestCase):
+    """geant4_run.py by schema, and geant4_verify.py tree."""
+
+    def script(self, name):
+        return subprocess.run([sys.executable, "-B", str(ASSETS / name[0]), *name[1:]], capture_output=True, text=True, timeout=120, check=False)
+
+    def test_check_spec_routes_a_run_card_to_its_own_checks(self):
+        with tempfile.TemporaryDirectory() as folder:
+            path = Path(folder) / "run.json"
+            path.write_text(json.dumps(card(extra_constructors=["G4OpticalPhysics"])), encoding="utf-8")
+            done = self.script(["geant4_run.py", "check-spec", "--spec", str(path)])
+            self.assertEqual(json.loads(done.stdout)["status"], "rejected", done.stdout)
+            self.assertIn("optical", done.stdout)
+            path.write_text(json.dumps(card()), encoding="utf-8")
+            self.assertEqual(json.loads(self.script(["geant4_run.py", "check-spec", "--spec", str(path)]).stdout)["status"], "ok")
+
+    def test_tree_reports_a_difference(self):
+        comparison = TreeComparison()
+        with tempfile.TemporaryDirectory() as folder:
+            root = Path(folder)
+            (root / "ir.json").write_text(json.dumps(comparison.ir()), encoding="utf-8")
+            (root / "probe-v2.json").write_text(json.dumps(comparison.record()), encoding="utf-8")
+            (root / "field-managers.thread0.txt").write_text("world none none\nplate field solenoid\n", encoding="utf-8")
+            arguments = ["geant4_verify.py", "tree", "--ir", str(root / "ir.json"), "--write-back", str(root / "probe-v2.json")]
+            self.assertEqual(self.script(arguments).returncode, 0)
+            (root / "field-managers.thread0.txt").write_text("world none none\nplate none solenoid\n", encoding="utf-8")
+            self.assertEqual(self.script(arguments).returncode, 1)
 
 
 class RunRecord(unittest.TestCase):

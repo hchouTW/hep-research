@@ -141,6 +141,9 @@ def program_sources(program: str) -> dict[str, str]:
     return {s: sha256_file(ASSETS / s) for g in PROGRAM_GROUPS[program] for s in SIM_SOURCES[g]}
 
 
+G4SIM_RUN = "g4sim-run/1"
+
+
 def program_of(spec) -> str:
     """layered_sim or element_sim, by the spec's schema (SpecError for anything else)."""
     name = PROGRAMS.get(spec.get("schema")) if isinstance(spec, dict) else None
@@ -817,9 +820,24 @@ def _overrides(items) -> dict[str, str]:
     return out
 
 
+def run_g4sim(args, card_path: Path) -> tuple[str, dict]:
+    """A g4sim-run/1 card: g4sim_run.py runs it from the three specifications (Section 8), so this needs them named."""
+    import types
+
+    import g4sim_run
+    for name in ("detector", "request", "legacy_record"):
+        if not getattr(args, name, None):
+            raise SpecError(f"a g4sim-run/1 card needs --{name.replace('_', '-')}")
+    outcome = g4sim_run.run(types.SimpleNamespace(detector=expand(args.detector), request=expand(args.request), run=card_path, record=expand(args.legacy_record),
+                                               program=_exe(args.exe), work=expand(str(args.work)), observer_revision=args.observer_revision))
+    return outcome["status"], outcome
+
+
 def cmd_run(args) -> tuple[str, dict]:
     spec_path = expand(str(args.spec))
     spec = json.loads(spec_path.read_text(encoding="utf-8"))
+    if spec.get("schema") == G4SIM_RUN:
+        return run_g4sim(args, spec_path)
     program = validate_any(spec)
     build_path = expand(str(args.build_record))
     build = _load_build(build_path)
@@ -857,7 +875,11 @@ def cmd_check_spec(args) -> tuple[str, dict]:
     """B1.6: an element_sim.spec/1 against the schema and the cross-field rules; no Geant4 needed."""
     path = expand(str(args.spec))
     spec = json.loads(path.read_text(encoding="utf-8"))
-    problems = ES.check_spec(spec)
+    if spec.get("schema") == G4SIM_RUN:  # dispatch by schema (g4sim plan, Appendix B): a run card has its own checks of Geant4 behavior
+        import g4sim_run
+        problems = [finding["message"] for finding in g4sim_run.check_card(spec)]
+    else:
+        problems = ES.check_spec(spec)
     return ("ok" if not problems else "rejected"), {"ok": not problems, "problems": problems,
                                                     "spec": {"path": tilde(path), "sha256": sha256_file(path)}}
 
@@ -1381,6 +1403,10 @@ def main(argv=None) -> int:
     for name, req in (("--spec", True), ("--exe", True), ("--build-record", True), ("--work", True),
                       ("--run-id", True), ("--record", True), ("--created", False)):
         p.add_argument(name, required=req)
+    p.add_argument("--detector", help="a g4sim-run/1 card: the detector-spec/1")
+    p.add_argument("--request", help="a g4sim-run/1 card: the simulation-request/1")
+    p.add_argument("--legacy-record", help="a g4sim-run/1 card: the re-acquisition record of a T1-class run")
+    p.add_argument("--observer-revision", default="current", help="a g4sim-run/1 card: layered-early for layered_sim before its leakage-by-face columns")
     p.add_argument("--timeout", type=float, default=86400.0)
     p.add_argument("--data-override", action="append",
                    help="VAR=PATH: point a dataset variable elsewhere (negative control of the data-path check)")

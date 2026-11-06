@@ -78,12 +78,10 @@ sys.path.insert(0, str(PLUGIN))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import geant4_benchmarks as B  # noqa: E402  (sibling: one MPV estimator, CSV reader and bootstrap for both scripts)
 from contracts import CONTRACTS_VERSION  # noqa: E402
-from contracts import geometry  # noqa: E402
 from contracts import trace  # noqa: E402
 from contracts.schema import validate as schema_validate  # noqa: E402
 from contracts.validate import (geant4_tree_thickness_mm, qualification_missing, qualification_reference,  # noqa: E402
                                 qualified_uncertainty, scope_outside)
-from core.geometry import identity  # noqa: E402
 from core.simulation import estimates as E  # noqa: E402
 from core.simulation.summary import SUMMARY_VERSION  # noqa: E402
 from core.stats import batch_means as M, decisions as D  # noqa: E402
@@ -196,6 +194,8 @@ def load_study(path: Path) -> dict:
 
 def load_g4sim(block: dict, folder: Path) -> dict:
     """The three specifications of a study on the g4sim path, with their hashes and the two identities recomputed (g4sim plan, Section 14.1)."""
+    from contracts import geometry  # here, not at the top: a study of an old program keeps its recorded code paths
+    from core.geometry import identity
     texts = {}
     for key in ("detector_spec", "simulation_request", "run_card"):
         file = folder / block[key]["path"]

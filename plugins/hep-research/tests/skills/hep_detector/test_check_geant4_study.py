@@ -82,8 +82,10 @@ class G4simPath(_Tmp):
         super().setUp()
         sys.path.insert(0, str(SCRIPT.parent))
         self.addCleanup(sys.path.remove, str(SCRIPT.parent))
-        global C
+        global C, geometry, identity
         import check_geant4_study as C
+        from contracts import geometry
+        from core.geometry import identity
         fixtures = PLUGIN / "tests/adapters/data"
         self.paths = {"detector_spec": fixtures / "g4sim_geometry_check.spec.json", "run_card": fixtures / "g4sim_geometry_check.run.json"}
         self.copies = {key: self.d / path.name for key, path in self.paths.items()}
@@ -94,10 +96,10 @@ class G4simPath(_Tmp):
     def block(self):
         def entry(key):
             return {"path": self.copies[key].name, "sha256": hashlib.sha256(self.copies[key].read_bytes()).hexdigest()}
-        checked = C.geometry.check_spec(self.copies["detector_spec"].read_bytes())
+        checked = geometry.check_spec(self.copies["detector_spec"].read_bytes())
         request = json.loads(self.copies["simulation_request"].read_text(encoding="utf-8"))
         return {"detector_spec": entry("detector_spec"), "simulation_request": entry("simulation_request"), "run_card": entry("run_card"),
-                "geometry_id": checked["geometry_id"], "request_id": C.identity.request_id(request, checked["geometry_id"])}
+                "geometry_id": checked["geometry_id"], "request_id": identity.request_id(request, checked["geometry_id"])}
 
     def test_the_rule_table_reads_the_run_card_and_the_ir(self):
         loaded = C.load_g4sim(self.block(), self.d)
