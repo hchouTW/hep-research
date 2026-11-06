@@ -1,11 +1,11 @@
 {
- "contract_version": "3.18.0",
+ "contract_version": "3.20.0",
  "artifact_id": "j15-v1-SIM-N6-TRK1",
  "artifact_type": "design-evaluation",
  "objective": "detector system design: design-evaluation written by evaluate_design.py",
  "versions": {
-  "plugin": "0.55.0",
-  "contracts": "3.18.0",
+  "plugin": "0.57.0",
+  "contracts": "3.20.0",
   "plugin_release": {
    "release": "unreleased",
    "digest": "unknown"
@@ -18,7 +18,7 @@
  "inputs": [
   {
    "ref": "candidates/cand-N6.json",
-   "sha256": "40245bd47131a779be7bea873737347fbd0725fe6c82c8f31cd30fdb8a554a78",
+   "sha256": "a235ef32d3f1cc73864c25ca105af94611eb02dde63d564ba47f94da71aca385",
    "artifact_type": "design-candidate",
    "artifact_id": "j15-v1-cand-N6",
    "status": [
@@ -28,7 +28,7 @@
   },
   {
    "ref": "studies/N6-TRK1/study.computational-run.json",
-   "sha256": "377ca7a10c3c58b5e094c27a337d5dbec81b1c9fc1293e6e0b8a343c65f881e7",
+   "sha256": "8d0f9c8d360ce8aadc892f1b5b429517a008231aad83a416daef99e7a84a1a81",
    "artifact_type": "computational-run",
    "artifact_id": "j15-N6-TRK1-study-validated"
   }

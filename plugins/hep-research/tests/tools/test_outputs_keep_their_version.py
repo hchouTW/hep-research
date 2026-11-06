@@ -46,10 +46,10 @@ class WithoutWriterVersions(unittest.TestCase):
         self.assertNotEqual(without_writer_versions(other), without_writer_versions(self.DOC))
 
     def test_a_committed_output_may_be_older_within_the_major_and_never_newer(self):
-        self.assertTrue(written_by_a_supported_contract("3.18.0", "3.19.0"))
-        self.assertTrue(written_by_a_supported_contract("3.19.0", "3.19.0"))
-        self.assertFalse(written_by_a_supported_contract("3.20.0", "3.19.0"))
-        self.assertFalse(written_by_a_supported_contract("2.9.0", "3.19.0"))
+        self.assertTrue(written_by_a_supported_contract("3.18.0", "3.20.0"))
+        self.assertTrue(written_by_a_supported_contract("3.20.0", "3.20.0"))
+        self.assertFalse(written_by_a_supported_contract("3.21.0", "3.20.0"))
+        self.assertFalse(written_by_a_supported_contract("2.9.0", "3.20.0"))
 
     def test_the_input_is_not_changed(self):
         doc = copy.deepcopy(self.DOC)

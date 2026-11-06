@@ -6,6 +6,7 @@ for the study record, copied into a temporary project root and checked with cont
 contracts/dependencies.py, including the phase-2 failure mode: a record relabelled validated-in-scope without the
 input status declarations is caught. Standard library only."""
 import copy
+import hashlib
 import json
 import shutil
 import subprocess
@@ -72,6 +73,55 @@ class _Tmp(unittest.TestCase):
                                "mpv_loss_MeV": {"value": mpv, "se": 0.0005},
                                "tail_fraction": {"value": tail, "se": 0.0004}}}
         return self.write(f"{name}.summary.json", doc)
+
+
+class G4simPath(_Tmp):
+    """physics.g4sim (g4sim plan, Section 14.1): the three specifications are read, their hashes and the two identities recomputed."""
+
+    def setUp(self):
+        super().setUp()
+        sys.path.insert(0, str(SCRIPT.parent))
+        self.addCleanup(sys.path.remove, str(SCRIPT.parent))
+        global C, geometry, identity
+        import check_geant4_study as C
+        from contracts import geometry
+        from core.geometry import identity
+        fixtures = PLUGIN / "tests/adapters/data"
+        self.paths = {"detector_spec": fixtures / "g4sim_geometry_check.spec.json", "run_card": fixtures / "g4sim_geometry_check.run.json"}
+        self.copies = {key: self.d / path.name for key, path in self.paths.items()}
+        for key, path in self.paths.items():
+            shutil.copyfile(path, self.copies[key])
+        self.copies["simulation_request"] = self.write("request.json", {"schema": "simulation-request/1", "source": {"particle": "proton"}})
+
+    def block(self):
+        def entry(key):
+            return {"path": self.copies[key].name, "sha256": hashlib.sha256(self.copies[key].read_bytes()).hexdigest()}
+        checked = geometry.check_spec(self.copies["detector_spec"].read_bytes())
+        request = json.loads(self.copies["simulation_request"].read_text(encoding="utf-8"))
+        return {"detector_spec": entry("detector_spec"), "simulation_request": entry("simulation_request"), "run_card": entry("run_card"),
+                "geometry_id": checked["geometry_id"], "request_id": identity.request_id(request, checked["geometry_id"])}
+
+    def test_the_rule_table_reads_the_run_card_and_the_ir(self):
+        loaded = C.load_g4sim(self.block(), self.d)
+        study = {"physics": {"g4sim_loaded": loaded}}
+        facts = C.derived(study)
+        self.assertEqual(facts["hadronic_list"], "FTFP_BERT")
+        self.assertFalse(facts["em_only"])
+        self.assertAlmostEqual(facts["min_thickness_mm"], 1 / 3, places=9)
+
+    def test_a_changed_file_is_refused(self):
+        block = self.block()
+        with self.copies["run_card"].open("a", encoding="utf-8") as stream:
+            stream.write(" ")
+        with self.assertRaisesRegex(C.StudyError, "run_card"):
+            C.load_g4sim(block, self.d)
+
+    def test_a_wrong_identity_is_refused(self):
+        for key in ("geometry_id", "request_id"):
+            block = self.block()
+            block[key] = "0" * 64
+            with self.assertRaisesRegex(C.StudyError, key):
+                C.load_g4sim(block, self.d)
 
 
 class Spec(_Tmp):

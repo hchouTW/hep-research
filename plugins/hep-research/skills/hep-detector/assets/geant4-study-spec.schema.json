@@ -317,6 +317,82 @@
      "type": "string",
      "minLength": 1,
      "description": "Geant4 program B2: an element_sim.spec/1 (derived by geant4_run.py from-geometry for an F4 study); exactly one of layered_sim_spec and element_sim_spec"
+    },
+    "g4sim": {
+     "type": "object",
+     "description": "g4sim plan, Section 14.1: the three specifications of a study on the g4sim path, and their identities",
+     "required": [
+      "detector_spec",
+      "simulation_request",
+      "run_card",
+      "geometry_id",
+      "request_id"
+     ],
+     "properties": {
+      "detector_spec": {
+       "type": "object",
+       "required": [
+        "path",
+        "sha256"
+       ],
+       "properties": {
+        "path": {
+         "type": "string",
+         "minLength": 1
+        },
+        "sha256": {
+         "type": "string",
+         "pattern": "^[0-9a-f]{64}$"
+        }
+       },
+       "additionalProperties": false
+      },
+      "simulation_request": {
+       "type": "object",
+       "required": [
+        "path",
+        "sha256"
+       ],
+       "properties": {
+        "path": {
+         "type": "string",
+         "minLength": 1
+        },
+        "sha256": {
+         "type": "string",
+         "pattern": "^[0-9a-f]{64}$"
+        }
+       },
+       "additionalProperties": false
+      },
+      "run_card": {
+       "type": "object",
+       "required": [
+        "path",
+        "sha256"
+       ],
+       "properties": {
+        "path": {
+         "type": "string",
+         "minLength": 1
+        },
+        "sha256": {
+         "type": "string",
+         "pattern": "^[0-9a-f]{64}$"
+        }
+       },
+       "additionalProperties": false
+      },
+      "geometry_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{64}$"
+      },
+      "request_id": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{64}$"
+      }
+     },
+     "additionalProperties": false
     }
    },
    "additionalProperties": false,
@@ -329,6 +405,11 @@
     {
      "required": [
       "element_sim_spec"
+     ]
+    },
+    {
+     "required": [
+      "g4sim"
      ]
     }
    ]

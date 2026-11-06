@@ -22,6 +22,7 @@ Checks (subcommands):
             wrong accounting (negative controls: the check must fail); an injection that changes no event is
             reported incomplete (exit 3), never as a pass. element_sim runs take omit-positron-mass and
             double-count-leakage (the calorimeter leakage subtracted again on top of the escape).
+  tree      (g4sim_run) the volume-tree write-back against the IR: placements bit for bit, regions, each thread's fields.
   mirror    a layered_sim mirror run against the local official example (TestEm3 run 0 or TestEm5 run 0) at the
             same settings: only quantities present on both sides, z-tests with a Bonferroni threshold.
   datapaths the data-path comparison of a run record (resolved paths and content hashes against the build record).
@@ -387,6 +388,16 @@ def write_record(args, run_rec: dict, status: str, doc: dict) -> str:
     return tilde(path)
 
 
+def check_tree(args) -> int:
+    """Section 6.2.8: the fields and regions Geant4 used against the IR, on the master and on every worker. Field records sit beside the write-back."""
+    import g4sim_run
+    ir = json.loads(Path(args.ir).read_text(encoding="utf-8"))
+    write_back = Path(args.write_back)
+    problems = g4sim_run.tree_problems(ir, g4sim_run.read_record(write_back), g4sim_run.read_field_records(write_back.parent))
+    print(json.dumps({"status": "failed" if problems else "ok", "problems": problems[:20]}))
+    return 1 if problems else 0
+
+
 def main(argv=None) -> int:
     ap = JsonArgumentParser(description=__doc__.splitlines()[0])
     sub = ap.add_subparsers(dest="command", required=True)
@@ -416,7 +427,13 @@ def main(argv=None) -> int:
             p.add_argument("--example", required=True, choices=sorted(MIRROR))
             p.add_argument("--local-out", required=True)
             p.add_argument("--alpha", type=float, default=0.05)
+    tree = sub.add_parser("tree", help="the volume-tree write-back against the IR: placements, regions and each thread's fields")
+    tree.add_argument("--ir", required=True)
+    tree.add_argument("--write-back", required=True, help="the probe-v2.json of the run")
+    add_status_argument(tree)
     args = ap.parse_args(argv)
+    if args.command == "tree":
+        return check_tree(args)
     inputs = {k: v for k, v in vars(args).items() if k != "status"}
     given = {t.split("=")[0] for t in (sys.argv[1:] if argv is None else argv) if t.startswith("--")}
     defaults = [k for k in ("tolerance", "alpha", "created", "tolerance_um", "tolerance_ps", "status")

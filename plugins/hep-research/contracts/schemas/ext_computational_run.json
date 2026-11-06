@@ -163,6 +163,43 @@
      "type": "string"
     }
    }
+  },
+  "geometry": {
+   "$comment": "g4sim plan, Section 8.10: the identities of a g4sim run and the installed features",
+   "type": "object",
+   "required": [
+    "geometry_id",
+    "request_id",
+    "run_id",
+    "build_hash",
+    "installed_features"
+   ],
+   "properties": {
+    "geometry_id": {
+     "type": "string",
+     "pattern": "^[0-9a-f]{64}$"
+    },
+    "provenance_id": {
+     "type": "string",
+     "pattern": "^[0-9a-f]{64}$"
+    },
+    "request_id": {
+     "type": "string",
+     "pattern": "^[0-9a-f]{64}$"
+    },
+    "run_id": {
+     "type": "string",
+     "pattern": "^[0-9a-f]{64}$"
+    },
+    "build_hash": {
+     "type": "string",
+     "pattern": "^[0-9a-f]{64}$"
+    },
+    "installed_features": {
+     "type": "object"
+    }
+   },
+   "additionalProperties": false
   }
  }
 }

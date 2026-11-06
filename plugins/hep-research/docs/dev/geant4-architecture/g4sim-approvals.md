@@ -2,7 +2,7 @@
 
 Approval packet of phase S0 and the record of approvals given (Part A, Sections E7 and E9, of `g4sim-task.md`).
 
-**Status (2026-11-05):** all Section 20 decisions, both stewards, the five execution choices, the application of the `dependencies.py` common check and the custodian's re-evaluations at the S0 and S1 releases are approved. The custodian is hsinyichou. A re-evaluation follows every release through S9.
+**Status (2026-11-05):** all Section 20 decisions, both stewards, the five execution choices, the application of the `dependencies.py` common check, the custodian's re-evaluations at the S0 and S1 releases and the two approvals due before S2 are approved. The custodian is hsinyichou. A re-evaluation follows every release through S9.
 
 ## How to approve
 
@@ -69,6 +69,17 @@ Approval packet of phase S0 and the record of approvals given (Part A, Sections 
 | `detsim_canonical.py` importing from core | Owner of detector-simulation | `canonical_json`, `check_hash_scope`, `normalize_decimal` and `load_json_strict` come from `core/canonical`; `canonical_sha256` stays imported from `contracts/recipe_semantics.py`, so the cross-check of `canonical_bytes` compares two implementations | Yes | hsinyichou (owner of detector-simulation) | 2026-11-05 | Answer in the Claude Code session to the detsim question: "Approve as recommended" |
 | Wiring the new entry points to the `core/protected` guard | Custodian | Yes: `contracts/geometry.py` (S1), `g4sim_run` and check-spec (S2), `g4kit.py` (S5) are each wired in the phase that delivers them, and that phase's gates add entry-point tests under protected mode. If `contracts/geometry.py` has no command line, the guard applies at the entry points that call it | Yes | hsinyichou (custodian) | 2026-11-05 | Answer in the Claude Code session to the guard question: "Yes, wire them" |
 
+## Section 22 items due before S2
+
+| Item | Who approves | Decision | Approved | Person | Date | Words or link |
+| --- | --- | --- | --- | --- | --- | --- |
+| Adding `physics.g4sim` to the study spec; rule engine reading the three specifications | Owner of the study protocol | A third form of `physics` in `geant4-study-spec/1`, beside `layered_sim_spec` and `element_sim_spec`, and `check_geant4_study.py` reads the three specifications. Additive: old study specs are unaffected (Section 14.1) | Yes | hsinyichou (owner of the study protocol) | 2026-11-05 | Answer in the Claude Code session to the question on `physics.g4sim`: "Approve (Recommended)" |
+| Adding `extension.geometry` to `contracts/schemas/ext_computational_run.json` | hep-computing (owner of the computational-run schema) | `extension.geometry` records the three identities and the installed features of each g4sim run. Additive (Sections 8.10, 14.3) | Yes | hsinyichou (owner of the computational-run schema) | 2026-11-05 | Answer in the Claude Code session to the question on `extension.geometry`: "Approve (Recommended)" |
+| q_max and r_max of legacy physics lists (Section 8.9) | hep-detector design, shown to the maintainer before registration | Pure EM: q_max 1e-7 E, r_max 1e-8 E. Hadronic: q_max 0.60 E + 1 GeV, r_max 0.40 E. Basis in `g4sim-tasks/S2.md` | Yes | hsinyichou (maintainer) | 2026-11-05 | Session message: "approve the limits" |
+| GB9 re-registered (Section E7, item 5) | Maintainer | The limit of 1e-6 could not be met against PDG 2026 masses (neutron 1.9e-5, pion 2.1e-6) because Geant4's mass table is older. It now judges the chain logic with Geant4's own masses; the difference from PDG masses is a stated limitation | Yes | hsinyichou (maintainer) | 2026-11-05 | Answer in the Claude Code session to the GB9 question: "Split the check (Recommended)" |
+| GB7 criterion read as tracked particles | Maintainer | All 111 tracked particles carry G4UserSpecialCuts; the 397 short-lived particles, never tracked, do not | Yes | hsinyichou (maintainer) | 2026-11-05 | Answer in the Claude Code session to the GB7 question: "Accept (Recommended)" |
+| GB6 negative re-registered | Maintainer | An extra step limiter cannot change the output: it draws no random numbers and no recorded run gives it anything to do. The negative now uses an extra discrete process that draws random numbers; the step-limit case stays the process-list negative test | Yes | hsinyichou (maintainer) | 2026-11-05 | Answer in the Claude Code session to the GB6 question: "Use a random-drawing process (Recommended)" |
+
 ## Gaps in Part B (Section E7, item 6)
 
 Part B stays frozen; these decisions fill gaps found while implementing S1.
@@ -77,12 +88,16 @@ Part B stays frozen; these decisions fill gaps found while implementing S1.
 | --- | --- | --- | --- | --- | --- | --- |
 | Composition of volume IDs (glossary, Section 7.1) | "Copy number times stride" cannot be unique: a mother with copy 3 and its copy-0 daughter both give 3, and the world and its first child both give 0 | Volume ID = sum over levels of (copy number + 1) x stride; 0 means no volume at that level. G4 copy numbers and cellIDs are unchanged; the 64-bit and stride limits apply to the widths of copy number + 1 | Yes | hsinyichou (maintainer) | 2026-11-05 | Answer in the Claude Code session to the volume ID question: "Use copy + 1 (Recommended)" |
 | Copy numbers of sibling placements (Sections 6.2.2, 6.2.6) | Part B does not say how placements in one mother get distinct copy numbers, and read-out placements need copy number = index | A placement with named indices keeps copy = its packed index; placements without named indices take the next free numbers after them, in order; two indexed placements that collide in one mother are refused, with a message to wrap one in its own template. In a stack, only sequence items that name an index carry it | Yes | hsinyichou (maintainer) | 2026-11-05 | Answer in the Claude Code session to the sibling question: "Use this rule (Recommended)" |
+| Neutrons ended by nKiller (Section 8.4) | The termination classes do not list `nKiller`, active in FTFP_BERT, so such a neutron would count as physical termination and its energy would stay in the residual | A further killed class: its kinetic energy and U are booked, in `killed_kinetic_neutron_MeV`. Conservation is rerun | Yes | hsinyichou (maintainer) | 2026-11-06 | Answer in the Claude Code session to the nKiller question: "Book as killed (Recommended)" |
 
 ## Execution decisions after S0
 
 | Item | Decision | Scope | Person | Date | Words or link |
 | --- | --- | --- | --- | --- | --- |
 | Baseline environment | New g4sim baselines are recorded on Linux (E5), and each run record stores its wall-clock time | From S2 on. The 112 recorded runs of the inventory keep their E2 reference outputs and their E2 reproduction, because Section 7.4 allows a regenerated baseline only when no usable reference output exists. Gates that name E2 and E5 still run on both. Written into the S2 card at its refresh | hsinyichou (maintainer) | 2026-11-05 | Session message: "use linux as baseline" |
+| Where S2 gate 4 is judged | Development regression runs against E5 working baselines of the 112 runs, rebuilt from the old sources. Gate 4 itself stays as registered: judged on E2 against the recorded references, by one detached job at the end of S2 | From S2 | Yes | hsinyichou (maintainer) | 2026-11-05 | Answer in the Claude Code session to the gate 4 question: "Linux daily, Mac once (Recommended)" |
+| Fixes after the gate 4 and Slurm jobs started | Both jobs finish on `ebd4d056`. The later fixes (nKiller term, dead code, comments, region cuts, limits key, primaries) leave the old columns alone; about 10 short runs of different types are repeated on Linux and on the Mac, and the gate record says so | From S2 | Yes | hsinyichou (maintainer) | 2026-11-06 | Answer in the Claude Code session to the running-jobs question: "Finish, then spot-check (Recommended)" |
+| Reference folder | `~/AMS/hsinyichou/g4sim-references` on this host (`/ceph/sharedfs/work/AMS`), with a `SHA256SUMS` file | From S2 | Yes | hsinyichou (maintainer) | 2026-11-05 | Answer in the Claude Code session to the reference folder question: "AMS area (Recommended)" |
 
 ## Application of the `dependencies.py` common check
 

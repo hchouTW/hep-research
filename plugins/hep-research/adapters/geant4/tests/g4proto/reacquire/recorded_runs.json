@@ -1,0 +1,3532 @@
+[
+ {
+  "run": "geant4-run-mpv-control-minus",
+  "journey": "J14",
+  "program": "layered_sim",
+  "executable": "d39225ea24707abf",
+  "source_commit": "636213ae",
+  "spec_name": "mpv-control-minus.json",
+  "spec_file_sha256": "c24c0aa1f273f2a81bb976133c72b5ff81817b0dbdaa3901cc8462a0dd246e20",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim mpv-control-minus/spec.json",
+  "work": "~/Workspace/geant4-work/j14-a1-75k",
+  "seeds": {
+   "layered_sim": [
+    249066262,
+    1584279867
+   ]
+  },
+  "events": 1200000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "a626e7845ec6fe0a4debfe9a79cc4202d4eebeb5be4a2789e2d371fad8a2cd70",
+  "outputs": {
+   "mpv-control-minus/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "mpv-control-minus/events.csv": "abc56cfc99cd8f8e5b73f9de62f45dca24422058f339821643e54a65fc37759a",
+   "mpv-control-minus/log.txt": "b4c6c144c6f0996cbc0c90275414b682b6832b15579caf58c4c5cc82d98b0229",
+   "mpv-control-minus/materials.json": "31bcc73920f372cf45f2a56b018702086f56ec7dcd1b3c574571ee8d8263a1be",
+   "mpv-control-minus/spec.json": "968d025a8759d5ed0a789ce7253150300c78a187e57f2d298b8a7000c914a7c0"
+  }
+ },
+ {
+  "run": "geant4-run-mpv-control",
+  "journey": "J14",
+  "program": "layered_sim",
+  "executable": "d39225ea24707abf",
+  "source_commit": "636213ae",
+  "spec_name": "mpv-control.json",
+  "spec_file_sha256": "c3ef5abd93e034edb8295c2008cde4a23f4fabf3a8d03292f4c74ab55dd9735e",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim mpv-control/spec.json",
+  "work": "~/Workspace/geant4-work/j14-a1-75k",
+  "seeds": {
+   "layered_sim": [
+    873112160,
+    788934939
+   ]
+  },
+  "events": 1200000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "aaa5373ce5d08c270e742f6992e5389aef5306941d3fe68786e9b84635bdec0b",
+  "outputs": {
+   "mpv-control/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "mpv-control/events.csv": "19cc2c2a10600263308abc12e36af4036cc054bd1538ee1ffeb9321c5cdae4aa",
+   "mpv-control/log.txt": "b4c6c144c6f0996cbc0c90275414b682b6832b15579caf58c4c5cc82d98b0229",
+   "mpv-control/materials.json": "117f972d14b6d11707256e30770fc8f8ed40c7613c51afb1595d61e2213df1b8",
+   "mpv-control/spec.json": "976ede64eb629d9686de9248d181665e94a8acba5e1ccb64980ce1500d50e6ae"
+  }
+ },
+ {
+  "run": "geant4-run-mpv-cut-0.03-trial",
+  "journey": "J14",
+  "program": "layered_sim",
+  "executable": "d39225ea24707abf",
+  "source_commit": "636213ae",
+  "spec_name": "mpv-cut-0.03-trial.json",
+  "spec_file_sha256": "10d78daac4d7248ebeda096f27363023dd1ce5b427b6659dedcaa29e7e7d9d42",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim mpv-cut-0.03-trial/spec.json",
+  "work": "~/Workspace/geant4-work/j14-a1-75k",
+  "seeds": {
+   "layered_sim": [
+    778509115,
+    889208264
+   ]
+  },
+  "events": 64000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "839222a4880391e533415d5dbe16a39850403072d18d69790acaa5b16b74a940",
+  "outputs": {
+   "mpv-cut-0.03-trial/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "mpv-cut-0.03-trial/events.csv": "708d0bed4c4d2e2df7a30ef893a0f274517e7505f33cc66569efc60511b16aab",
+   "mpv-cut-0.03-trial/log.txt": "b4c6c144c6f0996cbc0c90275414b682b6832b15579caf58c4c5cc82d98b0229",
+   "mpv-cut-0.03-trial/materials.json": "efb13ca94c7c8f4c5d1b12c2ecaff8b790374c40a615614a3342a60dde36cd82",
+   "mpv-cut-0.03-trial/spec.json": "4afeb68feb006d8adb0ab542528495f57160673843f5db6ec911f502726debb9"
+  }
+ },
+ {
+  "run": "geant4-run-mpv-cut-0.03",
+  "journey": "J14",
+  "program": "layered_sim",
+  "executable": "d39225ea24707abf",
+  "source_commit": "636213ae",
+  "spec_name": "mpv-cut-0.03.json",
+  "spec_file_sha256": "9085225e39d39e63ad3d45b2ca58e723d888dc8efb6c8e852093cf5c153bfded",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim mpv-cut-0.03/spec.json",
+  "work": "~/Workspace/geant4-work/j14-a1-75k",
+  "seeds": {
+   "layered_sim": [
+    1489878822,
+    1393298945
+   ]
+  },
+  "events": 1200000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "43e455556576a08db46128adcf09b292f4217a880621ef589c6e95b05da7b65c",
+  "outputs": {
+   "mpv-cut-0.03/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "mpv-cut-0.03/events.csv": "49dae7f031439849aa51254c4b7d27afd041bc307c978a7c172d2ef7cb2aab2e",
+   "mpv-cut-0.03/log.txt": "b4c6c144c6f0996cbc0c90275414b682b6832b15579caf58c4c5cc82d98b0229",
+   "mpv-cut-0.03/materials.json": "efb13ca94c7c8f4c5d1b12c2ecaff8b790374c40a615614a3342a60dde36cd82",
+   "mpv-cut-0.03/spec.json": "ebb6bb8f2825158684afebf00fd4240a8b875bf7c8f33eddfcf94b47b7c753a0"
+  }
+ },
+ {
+  "run": "geant4-run-mpv-cut-0.1-trial",
+  "journey": "J14",
+  "program": "layered_sim",
+  "executable": "d39225ea24707abf",
+  "source_commit": "636213ae",
+  "spec_name": "mpv-cut-0.1-trial.json",
+  "spec_file_sha256": "7213d8d2af4769fec090d5191449877fe2af058aa25c401acc6bce369e3b0df6",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim mpv-cut-0.1-trial/spec.json",
+  "work": "~/Workspace/geant4-work/j14-a1-75k",
+  "seeds": {
+   "layered_sim": [
+    444019554,
+    617084170
+   ]
+  },
+  "events": 64000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "59702c45113c39aedd6644a0da07cb011bf6ba61866a22f4645a586c99ad2da5",
+  "outputs": {
+   "mpv-cut-0.1-trial/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "mpv-cut-0.1-trial/events.csv": "03e79ad7cbf037c4e995933a9814a3dff99e03418bc631f747b0bc612231ec19",
+   "mpv-cut-0.1-trial/log.txt": "b4c6c144c6f0996cbc0c90275414b682b6832b15579caf58c4c5cc82d98b0229",
+   "mpv-cut-0.1-trial/materials.json": "efb13ca94c7c8f4c5d1b12c2ecaff8b790374c40a615614a3342a60dde36cd82",
+   "mpv-cut-0.1-trial/spec.json": "8103e227de5024cd97b1bde24a89e7599b37ae7e0e9e7c54220ced13ea3be5dd"
+  }
+ },
+ {
+  "run": "geant4-run-mpv-cut-0.1",
+  "journey": "J14",
+  "program": "layered_sim",
+  "executable": "d39225ea24707abf",
+  "source_commit": "636213ae",
+  "spec_name": "mpv-cut-0.1.json",
+  "spec_file_sha256": "b808d637df60296f1467a9228788e0b3e52917fae784e3f4e01785c1ddee7a28",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim mpv-cut-0.1/spec.json",
+  "work": "~/Workspace/geant4-work/j14-a1-75k",
+  "seeds": {
+   "layered_sim": [
+    68965108,
+    1993520670
+   ]
+  },
+  "events": 1200000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "f20097e0c9b7d3ca5b5d9d1f8a939207f425857f35d87b00f59a5fa1bf27d342",
+  "outputs": {
+   "mpv-cut-0.1/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "mpv-cut-0.1/events.csv": "ccd73b8c60d0ccbd0001d3245dcd768bea872f5e486b3793d01f7dcee5ae92e4",
+   "mpv-cut-0.1/log.txt": "b4c6c144c6f0996cbc0c90275414b682b6832b15579caf58c4c5cc82d98b0229",
+   "mpv-cut-0.1/materials.json": "efb13ca94c7c8f4c5d1b12c2ecaff8b790374c40a615614a3342a60dde36cd82",
+   "mpv-cut-0.1/spec.json": "fc994ba884a6960bf84ed341dcdf7835ffa7f01a8d39b4bbfee28d4b429a0437"
+  }
+ },
+ {
+  "run": "geant4-run-mpv-cut-0.3-trial",
+  "journey": "J14",
+  "program": "layered_sim",
+  "executable": "d39225ea24707abf",
+  "source_commit": "636213ae",
+  "spec_name": "mpv-cut-0.3-trial.json",
+  "spec_file_sha256": "f4d46f9380a8713932e61a3ea1ee1ed0b50f91ea07249c2eb80e78ce1063c8ee",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim mpv-cut-0.3-trial/spec.json",
+  "work": "~/Workspace/geant4-work/j14-a1-75k",
+  "seeds": {
+   "layered_sim": [
+    330769505,
+    1163068904
+   ]
+  },
+  "events": 64000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "78f5aab1d3c3174fa507ac8fa0f54353c71d5f890fb3299987651eb416eeb0be",
+  "outputs": {
+   "mpv-cut-0.3-trial/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "mpv-cut-0.3-trial/events.csv": "119cbbb36b36398583e0bf55460d1a15ba1e172d46824196c3099a78834e8165",
+   "mpv-cut-0.3-trial/log.txt": "b4c6c144c6f0996cbc0c90275414b682b6832b15579caf58c4c5cc82d98b0229",
+   "mpv-cut-0.3-trial/materials.json": "efb13ca94c7c8f4c5d1b12c2ecaff8b790374c40a615614a3342a60dde36cd82",
+   "mpv-cut-0.3-trial/spec.json": "4be1d9913c9f2328f4cda4c10f2a854ac16ff388189e0e1d2eb1589a1aa3cdc8"
+  }
+ },
+ {
+  "run": "geant4-run-mpv-cut-0.3",
+  "journey": "J14",
+  "program": "layered_sim",
+  "executable": "d39225ea24707abf",
+  "source_commit": "636213ae",
+  "spec_name": "mpv-cut-0.3.json",
+  "spec_file_sha256": "49e75dd59146ab0a0c7cdc05ce2fd9ade4399a430c24bbb6512ad4becf109a18",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim mpv-cut-0.3/spec.json",
+  "work": "~/Workspace/geant4-work/j14-a1-75k",
+  "seeds": {
+   "layered_sim": [
+    2005841116,
+    1393707591
+   ]
+  },
+  "events": 1200000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "b775a57d72c670dc5b65a9c55398be111ab52f342713a7c2c6aea8af6de89774",
+  "outputs": {
+   "mpv-cut-0.3/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "mpv-cut-0.3/events.csv": "cc086ea663fc5374c3bebd40e2ed6e9ed2f9a836556e38d29cdc71a92b0fa90d",
+   "mpv-cut-0.3/log.txt": "b4c6c144c6f0996cbc0c90275414b682b6832b15579caf58c4c5cc82d98b0229",
+   "mpv-cut-0.3/materials.json": "efb13ca94c7c8f4c5d1b12c2ecaff8b790374c40a615614a3342a60dde36cd82",
+   "mpv-cut-0.3/spec.json": "65925cd7015131814b17be0b0a88c4f62fb283a9ff62965287e8b6df4791f7b0"
+  }
+ },
+ {
+  "run": "geant4-run-mpv-cut-1.0-trial",
+  "journey": "J14",
+  "program": "layered_sim",
+  "executable": "d39225ea24707abf",
+  "source_commit": "636213ae",
+  "spec_name": "mpv-cut-1.0-trial.json",
+  "spec_file_sha256": "e1566b0f77e8f4ca0f7f5db5d6e767aa7ed3200c8962f0b1a57dd1dc58ad3acd",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim mpv-cut-1.0-trial/spec.json",
+  "work": "~/Workspace/geant4-work/j14-a1-75k",
+  "seeds": {
+   "layered_sim": [
+    1840292537,
+    694536993
+   ]
+  },
+  "events": 64000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "6af6cbb285335dbd2a3c44aec95f4156bc193861fa8afc4f2a79f198b93c1a98",
+  "outputs": {
+   "mpv-cut-1.0-trial/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "mpv-cut-1.0-trial/events.csv": "dc66323dcce2ebe006c1720a97be3dfa325689a674ea0e1f3469ad7a32ca5ac1",
+   "mpv-cut-1.0-trial/log.txt": "b4c6c144c6f0996cbc0c90275414b682b6832b15579caf58c4c5cc82d98b0229",
+   "mpv-cut-1.0-trial/materials.json": "efb13ca94c7c8f4c5d1b12c2ecaff8b790374c40a615614a3342a60dde36cd82",
+   "mpv-cut-1.0-trial/spec.json": "1564232d29311b2145344b987af8ba8228810703dbc6845dd51d5c2902fb62e9"
+  }
+ },
+ {
+  "run": "geant4-run-mpv-cut-1.0",
+  "journey": "J14",
+  "program": "layered_sim",
+  "executable": "d39225ea24707abf",
+  "source_commit": "636213ae",
+  "spec_name": "mpv-cut-1.0.json",
+  "spec_file_sha256": "cc0a422667b218674b5adf81e47d6b496b8fea1d94d14f82a78ff9022f42a207",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim mpv-cut-1.0/spec.json",
+  "work": "~/Workspace/geant4-work/j14-a1-75k",
+  "seeds": {
+   "layered_sim": [
+    550743677,
+    579632
+   ]
+  },
+  "events": 1200000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "4516056ededeb28aa65a64b7c06ef4ddf4a8a2aec51362af042b3b1348633db4",
+  "outputs": {
+   "mpv-cut-1.0/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "mpv-cut-1.0/events.csv": "50cd79477703d32e2f7ccfc8e3f240d5a32b714d05070ea98b0d10dce57badff",
+   "mpv-cut-1.0/log.txt": "b4c6c144c6f0996cbc0c90275414b682b6832b15579caf58c4c5cc82d98b0229",
+   "mpv-cut-1.0/materials.json": "efb13ca94c7c8f4c5d1b12c2ecaff8b790374c40a615614a3342a60dde36cd82",
+   "mpv-cut-1.0/spec.json": "1d7b59d905cdaf49264bcaf39036f48c319e6fd5b11b914f9924048fd84a5890"
+  }
+ },
+ {
+  "run": "geant4-run-mpv-em-option0",
+  "journey": "J14",
+  "program": "layered_sim",
+  "executable": "d39225ea24707abf",
+  "source_commit": "636213ae",
+  "spec_name": "mpv-em-option0.json",
+  "spec_file_sha256": "99adc6b2d629755ca3cbe7d3f40783e17f117009e9e0dbfe4e34d913decdefae",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim mpv-em-option0/spec.json",
+  "work": "~/Workspace/geant4-work/j14-a1-75k",
+  "seeds": {
+   "layered_sim": [
+    1563692327,
+    873739459
+   ]
+  },
+  "events": 1200000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "4f1ae56fcd568ae6c84bc490582bf1c03192f725f86e4ade357420927ab6eec9",
+  "outputs": {
+   "mpv-em-option0/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "mpv-em-option0/events.csv": "da6cf2139ce59231736cb0b4268c71b54ca80211f0e81165542ea8ed0a02e11e",
+   "mpv-em-option0/log.txt": "df3d56f7c6f36e8ba6770df8503f06d35c45529d6407da2cd0763b9b88d30029",
+   "mpv-em-option0/materials.json": "efb13ca94c7c8f4c5d1b12c2ecaff8b790374c40a615614a3342a60dde36cd82",
+   "mpv-em-option0/spec.json": "170eff81ded2a3f1b83b4a90c82b61d4ba3d0c48d9d10e8826761b5a4455b1bd"
+  }
+ },
+ {
+  "run": "geant4-run-mpv-em-option3",
+  "journey": "J14",
+  "program": "layered_sim",
+  "executable": "d39225ea24707abf",
+  "source_commit": "636213ae",
+  "spec_name": "mpv-em-option3.json",
+  "spec_file_sha256": "cbf644e5f912df114eb77f15e736bd1235d53df76347740436038e118d616d3b",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim mpv-em-option3/spec.json",
+  "work": "~/Workspace/geant4-work/j14-a1-75k",
+  "seeds": {
+   "layered_sim": [
+    1588415446,
+    765239594
+   ]
+  },
+  "events": 1200000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "7cfae8dac1f3ddf05fe88a4a0192765d53a21e1fa4441fbc4c43c32d617078fb",
+  "outputs": {
+   "mpv-em-option3/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "mpv-em-option3/events.csv": "a33a934af09a78ecdf5456e61a48b749c3a5e8371394d4d4c2b0c0018d2be4c5",
+   "mpv-em-option3/log.txt": "81f98c2b14d295b8782e0e5caee143e1c015671a12efbe2e33a896df05f111ea",
+   "mpv-em-option3/materials.json": "efb13ca94c7c8f4c5d1b12c2ecaff8b790374c40a615614a3342a60dde36cd82",
+   "mpv-em-option3/spec.json": "ce2e7ad5e2e99836654babd6f72d55472f7a1aa2187d87fb3049a6a9e7dd503f"
+  }
+ },
+ {
+  "run": "geant4-run-mpv-ftfp-bert-emz",
+  "journey": "J14",
+  "program": "layered_sim",
+  "executable": "d39225ea24707abf",
+  "source_commit": "636213ae",
+  "spec_name": "mpv-ftfp-bert-emz.json",
+  "spec_file_sha256": "dce92a9abb060cd6ff43b6483b69c8ce1e7222fc1aa0679911498433dd469177",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim mpv-ftfp-bert-emz/spec.json",
+  "work": "~/Workspace/geant4-work/j14-a1-75k",
+  "seeds": {
+   "layered_sim": [
+    1780726893,
+    1490539708
+   ]
+  },
+  "events": 1200000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "22d41859ec8d053000594fca50b2df86798c380ab162442896fb747fbd517f8b",
+  "outputs": {
+   "mpv-ftfp-bert-emz/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "mpv-ftfp-bert-emz/events.csv": "24bf5474d7c8e2269c0d2edd33dfeb7deea887a8934249dfd13cd727afefd42d",
+   "mpv-ftfp-bert-emz/log.txt": "f3426359e240751fd0771756d3e956e8b58fbaa761f32a0d35d2e889b2325918",
+   "mpv-ftfp-bert-emz/materials.json": "efb13ca94c7c8f4c5d1b12c2ecaff8b790374c40a615614a3342a60dde36cd82",
+   "mpv-ftfp-bert-emz/spec.json": "cbd9a45ae3f09bf3b34e00847f9438a91a28c2afde48ba13380b1566d0dbe562"
+  }
+ },
+ {
+  "run": "geant4-run-mpv-nominal-trial",
+  "journey": "J14",
+  "program": "layered_sim",
+  "executable": "d39225ea24707abf",
+  "source_commit": "636213ae",
+  "spec_name": "mpv-nominal-trial.json",
+  "spec_file_sha256": "573f3cee4531efa70426a728bbfb0739e0cb5697a9ab862b9d3a755026c43ae3",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim mpv-nominal-trial/spec.json",
+  "work": "~/Workspace/geant4-work/j14-a1-75k",
+  "seeds": {
+   "layered_sim": [
+    1587055842,
+    222476076
+   ]
+  },
+  "events": 64000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "c15f8d06c0bc8e46833879b34ec0b2f7cc8f88b3c0dcd8e82662953bf05db781",
+  "outputs": {
+   "mpv-nominal-trial/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "mpv-nominal-trial/events.csv": "a5379fff565c7ef17dd53c337bf2950bd06a7ea614e9c6c8fe86d395dce5b6ae",
+   "mpv-nominal-trial/log.txt": "b4c6c144c6f0996cbc0c90275414b682b6832b15579caf58c4c5cc82d98b0229",
+   "mpv-nominal-trial/materials.json": "efb13ca94c7c8f4c5d1b12c2ecaff8b790374c40a615614a3342a60dde36cd82",
+   "mpv-nominal-trial/spec.json": "822357b925d09abecb5f53da5c611a1dbc285fd8d58e57b15975a66b646616a0"
+  }
+ },
+ {
+  "run": "geant4-run-mpv-nominal",
+  "journey": "J14",
+  "program": "layered_sim",
+  "executable": "d39225ea24707abf",
+  "source_commit": "636213ae",
+  "spec_name": "mpv-nominal.json",
+  "spec_file_sha256": "f244513f9c268fe9d53c0b5031b42b5eb4ceb227975ea5be51288ef420e8c19c",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim mpv-nominal/spec.json",
+  "work": "~/Workspace/geant4-work/j14-a1-75k",
+  "seeds": {
+   "layered_sim": [
+    1209217555,
+    1494846998
+   ]
+  },
+  "events": 1200000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "3851279986218d2bcd80fbd49264738cdb1df309354a90a776f404d21eb5cce9",
+  "outputs": {
+   "mpv-nominal/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "mpv-nominal/events.csv": "66bbb09346faf4c7ca58e29f1b2144659a246658de8af7350e8294d33e6828c4",
+   "mpv-nominal/log.txt": "b4c6c144c6f0996cbc0c90275414b682b6832b15579caf58c4c5cc82d98b0229",
+   "mpv-nominal/materials.json": "efb13ca94c7c8f4c5d1b12c2ecaff8b790374c40a615614a3342a60dde36cd82",
+   "mpv-nominal/spec.json": "4dd7b1df3da318dbec8ea820f59cffa76cb8cd6a35a7060a8b8f131f3e41b24e"
+  }
+ },
+ {
+  "run": "geant4-run-mpv-pai",
+  "journey": "J14",
+  "program": "layered_sim",
+  "executable": "d39225ea24707abf",
+  "source_commit": "636213ae",
+  "spec_name": "mpv-pai.json",
+  "spec_file_sha256": "bb3b13f3479a636071433f0445e67686161902dc418de12f4dfaad516cf9124e",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim mpv-pai/spec.json",
+  "work": "~/Workspace/geant4-work/j14-a1-75k",
+  "seeds": {
+   "layered_sim": [
+    1257579277,
+    757979865
+   ]
+  },
+  "events": 1200000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "b8f7cab829a9277f10058a8ce44a5a67b2bc4a75039cd3a10956a2ff9a2cdb0d",
+  "outputs": {
+   "mpv-pai/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "mpv-pai/events.csv": "61dd5bf409f2e2a73c732e4bc39e13cb5654a8be26d4df82501ba7045e22b1e8",
+   "mpv-pai/log.txt": "84609efdb594ebeea4f5ee590b0df62363293c2a31a5a684bef3a450e62dddb7",
+   "mpv-pai/materials.json": "efb13ca94c7c8f4c5d1b12c2ecaff8b790374c40a615614a3342a60dde36cd82",
+   "mpv-pai/spec.json": "6e6aeaf9da050055dada79296620216a901b4282c2f56f30652b4de6cde1462f"
+  }
+ },
+ {
+  "run": "geant4-run-sp-control-minus",
+  "journey": "J14",
+  "program": "layered_sim",
+  "executable": "d39225ea24707abf",
+  "source_commit": "636213ae",
+  "spec_name": "sp-control-minus.json",
+  "spec_file_sha256": "ebf028d286e6f33459a2c11aa3c8bcffbe7100c6c96c67d66eb579947667e40e",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim sp-control-minus/spec.json",
+  "work": "~/Workspace/geant4-work/j14-a1-75k",
+  "seeds": {
+   "layered_sim": [
+    1298267618,
+    58840610
+   ]
+  },
+  "events": 30000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "e85a37be6acac9bc113b34ef0eff8455e361f083e9b58de45a09fff94f01ec65",
+  "outputs": {
+   "sp-control-minus/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "sp-control-minus/events.csv": "db001275bbbd3ae32312bfb1c73fe150de46dbc55752de4d2f8bb2aa03f36f27",
+   "sp-control-minus/log.txt": "b4c6c144c6f0996cbc0c90275414b682b6832b15579caf58c4c5cc82d98b0229",
+   "sp-control-minus/materials.json": "a2357bdc29dc2cdcee02a31c6f4ce06307c3fac0a436bf9b4ad579a6f95525a4",
+   "sp-control-minus/spec.json": "001b52c807506524ea07ba1887092d2b4030d77070018927651752accfa78567"
+  }
+ },
+ {
+  "run": "geant4-run-sp-control",
+  "journey": "J14",
+  "program": "layered_sim",
+  "executable": "a69ffad7c003aad9",
+  "source_commit": "3f4f9985",
+  "spec_name": "sp-control.json",
+  "spec_file_sha256": "a641a1e32421f90767e18f57943654d771684f1ea1f8a049b6f7a61ac1f8af1b",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.18.1",
+  "command": "~/Workspace/geant4-work/sim-a/layered_sim-build/layered_sim sp-control/spec.json",
+  "work": "~/Workspace/geant4-work/j14",
+  "seeds": {
+   "layered_sim": [
+    1402,
+    50
+   ]
+  },
+  "events": 30000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "0f4add7fd2618b83bd5597b8dd532dc567e44c0155cc8511b0ac595bf7203348",
+  "outputs": {
+   "sp-control/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "sp-control/events.csv": "a8ac87bebfc3942ff086185801d2429ffaf843c2c473764ac32a15b2829a5f97",
+   "sp-control/log.txt": "b4c6c144c6f0996cbc0c90275414b682b6832b15579caf58c4c5cc82d98b0229",
+   "sp-control/materials.json": "0783eb1696083087b4b63e1dcddab259f608b5f98d84b192127ce4ce74e8fd76",
+   "sp-control/spec.json": "40afec869872037a98660e8580c0dda96c19d332b4337202c8daf4839e9ad172"
+  }
+ },
+ {
+  "run": "geant4-run-sp-cut-0.03-trial",
+  "journey": "J14",
+  "program": "layered_sim",
+  "executable": "d39225ea24707abf",
+  "source_commit": "636213ae",
+  "spec_name": "sp-cut-0.03-trial.json",
+  "spec_file_sha256": "7109a97d908ced7c47ac76879cf994774e71b2d2819c3f02e6a2fb3e6f8ff585",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim sp-cut-0.03-trial/spec.json",
+  "work": "~/Workspace/geant4-work/j14-a1-75k",
+  "seeds": {
+   "layered_sim": [
+    22143921,
+    142320123
+   ]
+  },
+  "events": 16000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "ae17e1d93c0450b9e4e3725e9eaa38db8001837b0a6b4a5b80175f01915726e1",
+  "outputs": {
+   "sp-cut-0.03-trial/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "sp-cut-0.03-trial/events.csv": "e4fd959e38ec9c245bce5129a79dda0dde6696111b3e1e9365723deec46d3cab",
+   "sp-cut-0.03-trial/log.txt": "b4c6c144c6f0996cbc0c90275414b682b6832b15579caf58c4c5cc82d98b0229",
+   "sp-cut-0.03-trial/materials.json": "efb13ca94c7c8f4c5d1b12c2ecaff8b790374c40a615614a3342a60dde36cd82",
+   "sp-cut-0.03-trial/spec.json": "17e9fbd64c1a70f0dd47b59b1a7326d04950cd3303cb3fab7569e5d024e5c00f"
+  }
+ },
+ {
+  "run": "geant4-run-sp-cut-0.03",
+  "journey": "J14",
+  "program": "layered_sim",
+  "executable": "d39225ea24707abf",
+  "source_commit": "636213ae",
+  "spec_name": "sp-cut-0.03.json",
+  "spec_file_sha256": "5000d19c945ef191e69d5229ad8e012cbce6c5df1c5047270d6cd47ce5b6ed03",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim sp-cut-0.03/spec.json",
+  "work": "~/Workspace/geant4-work/j14-a1-75k",
+  "seeds": {
+   "layered_sim": [
+    834184368,
+    643049405
+   ]
+  },
+  "events": 17760,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "196eaf76caed7b0a13b78e5ec3621c6bdc42f2659730bd8cff9082ad421715fc",
+  "outputs": {
+   "sp-cut-0.03/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "sp-cut-0.03/events.csv": "2d706ddaa9596ff809f77c170961dc6afed48bb0e9daad1554e5892a7266ada6",
+   "sp-cut-0.03/log.txt": "b4c6c144c6f0996cbc0c90275414b682b6832b15579caf58c4c5cc82d98b0229",
+   "sp-cut-0.03/materials.json": "efb13ca94c7c8f4c5d1b12c2ecaff8b790374c40a615614a3342a60dde36cd82",
+   "sp-cut-0.03/spec.json": "b112fda821f317561c6406891a249af7670c5620bd8d0bdd450a32aa027a6f24"
+  }
+ },
+ {
+  "run": "geant4-run-sp-cut-0.1-trial",
+  "journey": "J14",
+  "program": "layered_sim",
+  "executable": "d39225ea24707abf",
+  "source_commit": "636213ae",
+  "spec_name": "sp-cut-0.1-trial.json",
+  "spec_file_sha256": "d1bccfab9132220e66a677fd6b33d42accd657abeba8b048ed9714a3562b8d76",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim sp-cut-0.1-trial/spec.json",
+  "work": "~/Workspace/geant4-work/j14-a1-75k",
+  "seeds": {
+   "layered_sim": [
+    636302769,
+    250206952
+   ]
+  },
+  "events": 16000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "4c7614cdf4184047c43f18e2b8414b9a2c25180633a9eb85035e5f0e64abe016",
+  "outputs": {
+   "sp-cut-0.1-trial/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "sp-cut-0.1-trial/events.csv": "255741e788040e132b8437e3dfa59bc71075cd6c943257d1fa3a3325a3435d23",
+   "sp-cut-0.1-trial/log.txt": "b4c6c144c6f0996cbc0c90275414b682b6832b15579caf58c4c5cc82d98b0229",
+   "sp-cut-0.1-trial/materials.json": "efb13ca94c7c8f4c5d1b12c2ecaff8b790374c40a615614a3342a60dde36cd82",
+   "sp-cut-0.1-trial/spec.json": "c1ac21eb17ce27774babe0f539be73966e14935e9021ce78c13c65cb3e1300ae"
+  }
+ },
+ {
+  "run": "geant4-run-sp-cut-0.1",
+  "journey": "J14",
+  "program": "layered_sim",
+  "executable": "d39225ea24707abf",
+  "source_commit": "636213ae",
+  "spec_name": "sp-cut-0.1.json",
+  "spec_file_sha256": "80fc4314a881c95b325fcaf46725ff6a32ccf0a0cf6d9b82c34d1f05dee9b311",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim sp-cut-0.1/spec.json",
+  "work": "~/Workspace/geant4-work/j14-a1-75k",
+  "seeds": {
+   "layered_sim": [
+    1088402279,
+    642938016
+   ]
+  },
+  "events": 16000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "b92f1b5c0380ca18ba8978fc009b744fa197d24cad5bc2517704358b55744ebd",
+  "outputs": {
+   "sp-cut-0.1/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "sp-cut-0.1/events.csv": "6cffaab995005a774fe66f8f4f8b8cbf8f1a030181909c73fb18f687a6145099",
+   "sp-cut-0.1/log.txt": "b4c6c144c6f0996cbc0c90275414b682b6832b15579caf58c4c5cc82d98b0229",
+   "sp-cut-0.1/materials.json": "efb13ca94c7c8f4c5d1b12c2ecaff8b790374c40a615614a3342a60dde36cd82",
+   "sp-cut-0.1/spec.json": "72cbad07b0b3593c693783c6723ec0ae0d571a4da9db185b66ef55f09c7afa99"
+  }
+ },
+ {
+  "run": "geant4-run-sp-density-10",
+  "journey": "J14",
+  "program": "layered_sim",
+  "executable": "a69ffad7c003aad9",
+  "source_commit": "3f4f9985",
+  "spec_name": "sp-density-10.json",
+  "spec_file_sha256": "7489a132f6c2cc1d341c9c59e1c7406f9f7e69ac349f5f44df9c80eae189ee0d",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.18.1",
+  "command": "~/Workspace/geant4-work/sim-a/layered_sim-build/layered_sim sp-density-10/spec.json",
+  "work": "~/Workspace/geant4-work/j14",
+  "seeds": {
+   "layered_sim": [
+    1402,
+    40
+   ]
+  },
+  "events": 30000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "47644b7c9b6bb2495adb30a7c58447d5f6409e5e48fb69f8cf0d721398100637",
+  "outputs": {
+   "sp-density-10/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "sp-density-10/events.csv": "95a234ae8c9ec51a94fd334f1591ed97a26758805921b573c3fb2b9711e07ac4",
+   "sp-density-10/log.txt": "b4c6c144c6f0996cbc0c90275414b682b6832b15579caf58c4c5cc82d98b0229",
+   "sp-density-10/materials.json": "be4b104039354dd7c84f72292957b143298bcc5193bf28e92aded5f3223ebbcc",
+   "sp-density-10/spec.json": "97f983c367e4812db48991bae3864c92cd1c59cb7d03a8f9d3b0b1bd680b5616"
+  }
+ },
+ {
+  "run": "geant4-run-sp-em-option0",
+  "journey": "J14",
+  "program": "layered_sim",
+  "executable": "d39225ea24707abf",
+  "source_commit": "636213ae",
+  "spec_name": "sp-em-option0.json",
+  "spec_file_sha256": "a33f58b2a084a6d9769367b24057372393075067a1716dc5077aec3330965943",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim sp-em-option0/spec.json",
+  "work": "~/Workspace/geant4-work/j14-a1-75k",
+  "seeds": {
+   "layered_sim": [
+    277129845,
+    1248318244
+   ]
+  },
+  "events": 30000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "9dceadee9adc8bbe05289421529626208f33e3ebe8d1a1469adf7b47cd7f921b",
+  "outputs": {
+   "sp-em-option0/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "sp-em-option0/events.csv": "f8ffe8d9387a690553b9993742921cf6b42150b6d30f03f0a091a2795fd32b65",
+   "sp-em-option0/log.txt": "df3d56f7c6f36e8ba6770df8503f06d35c45529d6407da2cd0763b9b88d30029",
+   "sp-em-option0/materials.json": "efb13ca94c7c8f4c5d1b12c2ecaff8b790374c40a615614a3342a60dde36cd82",
+   "sp-em-option0/spec.json": "80a9647d8946dcd0fcf137d44035927727bd00fb639ded338c6b8f45e0611a96"
+  }
+ },
+ {
+  "run": "geant4-run-sp-em-option3",
+  "journey": "J14",
+  "program": "layered_sim",
+  "executable": "d39225ea24707abf",
+  "source_commit": "636213ae",
+  "spec_name": "sp-em-option3.json",
+  "spec_file_sha256": "db988cea23f9cd424deb9712a32c56f68dc8d0211de807b9e8e167e4944f53c6",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-a1/layered_sim-build/layered_sim sp-em-option3/spec.json",
+  "work": "~/Workspace/geant4-work/j14-a1-75k",
+  "seeds": {
+   "layered_sim": [
+    1005194603,
+    209207244
+   ]
+  },
+  "events": 30000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "c3b53d67113b90c55d36706824a4d67f3fee029538513ee045ccd53ab35b6849",
+  "outputs": {
+   "sp-em-option3/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "sp-em-option3/events.csv": "16dd557622a7724ffbc405a7e3500631ada0cdf6ba54735ad996f3b638284774",
+   "sp-em-option3/log.txt": "81f98c2b14d295b8782e0e5caee143e1c015671a12efbe2e33a896df05f111ea",
+   "sp-em-option3/materials.json": "efb13ca94c7c8f4c5d1b12c2ecaff8b790374c40a615614a3342a60dde36cd82",
+   "sp-em-option3/spec.json": "35ca8e2d92cad38f14d8b7fa870d46c42c461ddab877d088492baa6cae7da34e"
+  }
+ },
+ {
+  "run": "geant4-run-sp-nominal",
+  "journey": "J14",
+  "program": "layered_sim",
+  "executable": "a69ffad7c003aad9",
+  "source_commit": "3f4f9985",
+  "spec_name": "sp-nominal.json",
+  "spec_file_sha256": "249ede0921da924e115e1f17e1b7f3b237b1b694436532b9928b8790cb18565c",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.18.1",
+  "command": "~/Workspace/geant4-work/sim-a/layered_sim-build/layered_sim sp-nominal/spec.json",
+  "work": "~/Workspace/geant4-work/j14",
+  "seeds": {
+   "layered_sim": [
+    1402,
+    1
+   ]
+  },
+  "events": 30000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "bc27f6398ee5599776bc338c7ea91eb945eed1eb3f4e8dff1d9a92fbd1b1f2a5",
+  "outputs": {
+   "sp-nominal/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "sp-nominal/events.csv": "672605531fcb63de517d16fa04222cdc47a456af2691810e16ffbadee7bbaf96",
+   "sp-nominal/log.txt": "b4c6c144c6f0996cbc0c90275414b682b6832b15579caf58c4c5cc82d98b0229",
+   "sp-nominal/materials.json": "efb13ca94c7c8f4c5d1b12c2ecaff8b790374c40a615614a3342a60dde36cd82",
+   "sp-nominal/spec.json": "4156eed0565fef910006f2a81fc11a50411c930d9cbd2c77e801824fbb8034aa"
+  }
+ },
+ {
+  "run": "geant4-run-N4-TRK1-nominal",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N4-TRK1-nominal.spec.json",
+  "spec_file_sha256": "d92d29bb9cbd45f7f8f08a10192273fade23dc9dbe2e9ae1bf5bbef95e98bc92",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N4-TRK1-nominal/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1837176485,
+    258608551
+   ]
+  },
+  "events": 18976,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "d92d29bb9cbd45f7f8f08a10192273fade23dc9dbe2e9ae1bf5bbef95e98bc92",
+  "outputs": {
+   "N4-TRK1-nominal/column_map.json": "d24f2856a014155e67d40ccf07d14a8654a515c85aae63a309f8625590623b6a",
+   "N4-TRK1-nominal/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N4-TRK1-nominal/events.csv": "2fd0692d8f09ef880f53688a9f02586d4956865f443ec121032ea6add7291889",
+   "N4-TRK1-nominal/log.txt": "aff07dbd370f015f28673bbf69e17ac0f7b4c83a1e675ded6bb02a93404e1e90",
+   "N4-TRK1-nominal/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N4-TRK1-nominal/probe.json": "3c7e5f6c9ed68abce987881fa74d2bccb1663c0a4e7e02a1342edc6ff250ff0d",
+   "N4-TRK1-nominal/spec.json": "d92d29bb9cbd45f7f8f08a10192273fade23dc9dbe2e9ae1bf5bbef95e98bc92"
+  }
+ },
+ {
+  "run": "geant4-run-N4-TRK1-scan",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N4-TRK1-scan.spec.json",
+  "spec_file_sha256": "896ee541c92ab5a82350cb1416f11f75d6bc1fae57aebd7d3db23b2dbabed0f8",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N4-TRK1-scan/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1239040328,
+    2099314607
+   ]
+  },
+  "events": 18976,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "896ee541c92ab5a82350cb1416f11f75d6bc1fae57aebd7d3db23b2dbabed0f8",
+  "outputs": {
+   "N4-TRK1-scan/column_map.json": "d24f2856a014155e67d40ccf07d14a8654a515c85aae63a309f8625590623b6a",
+   "N4-TRK1-scan/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N4-TRK1-scan/events.csv": "0abfaa632ab28ccc8e8722ccd96db8dcd301fa1688fd5fbe3f5a5d825863c600",
+   "N4-TRK1-scan/log.txt": "aff07dbd370f015f28673bbf69e17ac0f7b4c83a1e675ded6bb02a93404e1e90",
+   "N4-TRK1-scan/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N4-TRK1-scan/probe.json": "eb5bc99cf3373c7eb6c034a5abe78e0f3a4d43c703fe67835e9e7e02cdaebb53",
+   "N4-TRK1-scan/spec.json": "896ee541c92ab5a82350cb1416f11f75d6bc1fae57aebd7d3db23b2dbabed0f8"
+  }
+ },
+ {
+  "run": "geant4-run-N4-TRK1-trial",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N4-TRK1-trial.spec.json",
+  "spec_file_sha256": "a7daa6b5681c5f43d489c2c744d3841a82fa2979fdb0c629c9b3e8798261942f",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N4-TRK1-trial/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    412324214,
+    1531243803
+   ]
+  },
+  "events": 1600,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "a7daa6b5681c5f43d489c2c744d3841a82fa2979fdb0c629c9b3e8798261942f",
+  "outputs": {
+   "N4-TRK1-trial/column_map.json": "d24f2856a014155e67d40ccf07d14a8654a515c85aae63a309f8625590623b6a",
+   "N4-TRK1-trial/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N4-TRK1-trial/events.csv": "81ecb6abc2ba5a1f3fad8757ff22d7795eacec8feec522997ff1c9a9e27a8a67",
+   "N4-TRK1-trial/log.txt": "aff07dbd370f015f28673bbf69e17ac0f7b4c83a1e675ded6bb02a93404e1e90",
+   "N4-TRK1-trial/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N4-TRK1-trial/probe.json": "3c7e5f6c9ed68abce987881fa74d2bccb1663c0a4e7e02a1342edc6ff250ff0d",
+   "N4-TRK1-trial/spec.json": "a7daa6b5681c5f43d489c2c744d3841a82fa2979fdb0c629c9b3e8798261942f"
+  }
+ },
+ {
+  "run": "geant4-run-N4-TRK1-var-qgsp-bic",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N4-TRK1-var-qgsp-bic.spec.json",
+  "spec_file_sha256": "7a40acc1ae4e9c0bc2424d73c4fab61ae0572fac037b111be676f875fcf0ca5b",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N4-TRK1-var-qgsp-bic/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    174166489,
+    2058299453
+   ]
+  },
+  "events": 18976,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "7a40acc1ae4e9c0bc2424d73c4fab61ae0572fac037b111be676f875fcf0ca5b",
+  "outputs": {
+   "N4-TRK1-var-qgsp-bic/column_map.json": "d24f2856a014155e67d40ccf07d14a8654a515c85aae63a309f8625590623b6a",
+   "N4-TRK1-var-qgsp-bic/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N4-TRK1-var-qgsp-bic/events.csv": "735bace4681efb56ee62f3beb3bbd46f95681f7e1b22604b8158d77c5518ad9e",
+   "N4-TRK1-var-qgsp-bic/log.txt": "08bd45057d2f7dc292d0aa8d0aae39343f5c9f8068ecd9df44a34a1ad5823599",
+   "N4-TRK1-var-qgsp-bic/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N4-TRK1-var-qgsp-bic/probe.json": "d646aefb445c2aa5f66a8fa21c8f3d446ccacdc5f96a6187306de76b72210ede",
+   "N4-TRK1-var-qgsp-bic/spec.json": "7a40acc1ae4e9c0bc2424d73c4fab61ae0572fac037b111be676f875fcf0ca5b"
+  }
+ },
+ {
+  "run": "geant4-run-N4-TRK1-var-ss",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N4-TRK1-var-ss.spec.json",
+  "spec_file_sha256": "d5216391dd6051839042c618f548810b81f88a8692e4911173f6e346d0cf21fd",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N4-TRK1-var-ss/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    109441740,
+    962123744
+   ]
+  },
+  "events": 18976,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "d5216391dd6051839042c618f548810b81f88a8692e4911173f6e346d0cf21fd",
+  "outputs": {
+   "N4-TRK1-var-ss/column_map.json": "d24f2856a014155e67d40ccf07d14a8654a515c85aae63a309f8625590623b6a",
+   "N4-TRK1-var-ss/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N4-TRK1-var-ss/events.csv": "1428fd254d32642d24e98bf04e080baf051a95a8700ec87292a425a808ac8c3f",
+   "N4-TRK1-var-ss/log.txt": "16b684c9748e3c30dd23610c75a2b23b907838d28ad702cbf863250f9a3ca580",
+   "N4-TRK1-var-ss/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N4-TRK1-var-ss/probe.json": "34aa35fa58b4e4f673b6050b699ef7d1eb52cb3653b2afd58515e02fbb9b1c08",
+   "N4-TRK1-var-ss/spec.json": "d5216391dd6051839042c618f548810b81f88a8692e4911173f6e346d0cf21fd"
+  }
+ },
+ {
+  "run": "geant4-run-N4-TRK100-nominal",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N4-TRK100-nominal.spec.json",
+  "spec_file_sha256": "61912b59fe4695914dd6a3b6f52332e6628e9066c1a454d36dada460f3eca953",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N4-TRK100-nominal/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1238078719,
+    1696690728
+   ]
+  },
+  "events": 7984,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "61912b59fe4695914dd6a3b6f52332e6628e9066c1a454d36dada460f3eca953",
+  "outputs": {
+   "N4-TRK100-nominal/column_map.json": "d24f2856a014155e67d40ccf07d14a8654a515c85aae63a309f8625590623b6a",
+   "N4-TRK100-nominal/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N4-TRK100-nominal/events.csv": "e0fe77080edc6cbbb37a75466cc3f58bcdc7aef649f72a4da726e8bca514723c",
+   "N4-TRK100-nominal/log.txt": "aff07dbd370f015f28673bbf69e17ac0f7b4c83a1e675ded6bb02a93404e1e90",
+   "N4-TRK100-nominal/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N4-TRK100-nominal/probe.json": "3c7e5f6c9ed68abce987881fa74d2bccb1663c0a4e7e02a1342edc6ff250ff0d",
+   "N4-TRK100-nominal/spec.json": "61912b59fe4695914dd6a3b6f52332e6628e9066c1a454d36dada460f3eca953"
+  }
+ },
+ {
+  "run": "geant4-run-N4-TRK100-scan",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N4-TRK100-scan.spec.json",
+  "spec_file_sha256": "6c2093e80b2a857f00230ed4f863ea3273ff147228ee219f0012a7db5bc31aee",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N4-TRK100-scan/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1976050228,
+    1617906662
+   ]
+  },
+  "events": 7984,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "6c2093e80b2a857f00230ed4f863ea3273ff147228ee219f0012a7db5bc31aee",
+  "outputs": {
+   "N4-TRK100-scan/column_map.json": "d24f2856a014155e67d40ccf07d14a8654a515c85aae63a309f8625590623b6a",
+   "N4-TRK100-scan/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N4-TRK100-scan/events.csv": "c89f5f6abbffa72423160fddaa4037291a26643794ff43dbcdc662f7d394c415",
+   "N4-TRK100-scan/log.txt": "aff07dbd370f015f28673bbf69e17ac0f7b4c83a1e675ded6bb02a93404e1e90",
+   "N4-TRK100-scan/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N4-TRK100-scan/probe.json": "eb5bc99cf3373c7eb6c034a5abe78e0f3a4d43c703fe67835e9e7e02cdaebb53",
+   "N4-TRK100-scan/spec.json": "6c2093e80b2a857f00230ed4f863ea3273ff147228ee219f0012a7db5bc31aee"
+  }
+ },
+ {
+  "run": "geant4-run-N4-TRK100-trial",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N4-TRK100-trial.spec.json",
+  "spec_file_sha256": "c7114547300aa087cbd7919379fcbaa4f7863fd28b60cf60cdc0e39f9086c0e4",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N4-TRK100-trial/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    219700876,
+    1692783157
+   ]
+  },
+  "events": 1600,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "c7114547300aa087cbd7919379fcbaa4f7863fd28b60cf60cdc0e39f9086c0e4",
+  "outputs": {
+   "N4-TRK100-trial/column_map.json": "d24f2856a014155e67d40ccf07d14a8654a515c85aae63a309f8625590623b6a",
+   "N4-TRK100-trial/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N4-TRK100-trial/events.csv": "b17f62fabf90b5b7490fecd589e7353441e3ebd530d30f638e40201dd11e7b50",
+   "N4-TRK100-trial/log.txt": "aff07dbd370f015f28673bbf69e17ac0f7b4c83a1e675ded6bb02a93404e1e90",
+   "N4-TRK100-trial/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N4-TRK100-trial/probe.json": "3c7e5f6c9ed68abce987881fa74d2bccb1663c0a4e7e02a1342edc6ff250ff0d",
+   "N4-TRK100-trial/spec.json": "c7114547300aa087cbd7919379fcbaa4f7863fd28b60cf60cdc0e39f9086c0e4"
+  }
+ },
+ {
+  "run": "geant4-run-N4-TRK100-var-emy",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N4-TRK100-var-emy.spec.json",
+  "spec_file_sha256": "d09336e835925d7cbc18fd19d6f971e76978ce067a93706cfb914cf019f5c5f8",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N4-TRK100-var-emy/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    635608568,
+    914392858
+   ]
+  },
+  "events": 7984,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "d09336e835925d7cbc18fd19d6f971e76978ce067a93706cfb914cf019f5c5f8",
+  "outputs": {
+   "N4-TRK100-var-emy/column_map.json": "d24f2856a014155e67d40ccf07d14a8654a515c85aae63a309f8625590623b6a",
+   "N4-TRK100-var-emy/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N4-TRK100-var-emy/events.csv": "dc991b185fa2dabbf69a64f7540079ff64f121c7710208e02d31b5d829ba6c17",
+   "N4-TRK100-var-emy/log.txt": "432191daacf8a240105596b79bd10e2868be2fe591fd8738207eeb9beff3630a",
+   "N4-TRK100-var-emy/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N4-TRK100-var-emy/probe.json": "d0061a6fc2743763a038bd150d303c10c9eaffa322286f764e974500e825c663",
+   "N4-TRK100-var-emy/spec.json": "d09336e835925d7cbc18fd19d6f971e76978ce067a93706cfb914cf019f5c5f8"
+  }
+ },
+ {
+  "run": "geant4-run-N4-TRK100-var-qgsp-bic",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N4-TRK100-var-qgsp-bic.spec.json",
+  "spec_file_sha256": "04e8ada57ccc80e6cf316f83a0b363af5e172c47cd602d5c6bcee1a07a6093bd",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N4-TRK100-var-qgsp-bic/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    2062767238,
+    2145229622
+   ]
+  },
+  "events": 7984,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "04e8ada57ccc80e6cf316f83a0b363af5e172c47cd602d5c6bcee1a07a6093bd",
+  "outputs": {
+   "N4-TRK100-var-qgsp-bic/column_map.json": "d24f2856a014155e67d40ccf07d14a8654a515c85aae63a309f8625590623b6a",
+   "N4-TRK100-var-qgsp-bic/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N4-TRK100-var-qgsp-bic/events.csv": "1aa79ec1ff01d1c08eba74f0680fc4546f5223dbc329eef683bedd27d451a282",
+   "N4-TRK100-var-qgsp-bic/log.txt": "08bd45057d2f7dc292d0aa8d0aae39343f5c9f8068ecd9df44a34a1ad5823599",
+   "N4-TRK100-var-qgsp-bic/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N4-TRK100-var-qgsp-bic/probe.json": "d646aefb445c2aa5f66a8fa21c8f3d446ccacdc5f96a6187306de76b72210ede",
+   "N4-TRK100-var-qgsp-bic/spec.json": "04e8ada57ccc80e6cf316f83a0b363af5e172c47cd602d5c6bcee1a07a6093bd"
+  }
+ },
+ {
+  "run": "geant4-run-N4-chargedgeantino",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N4-chargedgeantino.spec.json",
+  "spec_file_sha256": "956a9035fbf8e421ab58624725a4ae43fc432a69bb07008a50d48bd64e2ac156",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N4-chargedgeantino/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1782265748,
+    1525254587
+   ]
+  },
+  "events": 500,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "956a9035fbf8e421ab58624725a4ae43fc432a69bb07008a50d48bd64e2ac156",
+  "outputs": {
+   "N4-chargedgeantino/column_map.json": "d24f2856a014155e67d40ccf07d14a8654a515c85aae63a309f8625590623b6a",
+   "N4-chargedgeantino/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N4-chargedgeantino/events.csv": "15427eba15699f6b82e3475e5da7d47aafc1db3083644f8fc8abebb575c41abd",
+   "N4-chargedgeantino/log.txt": "aff07dbd370f015f28673bbf69e17ac0f7b4c83a1e675ded6bb02a93404e1e90",
+   "N4-chargedgeantino/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N4-chargedgeantino/probe.json": "3c7e5f6c9ed68abce987881fa74d2bccb1663c0a4e7e02a1342edc6ff250ff0d",
+   "N4-chargedgeantino/spec.json": "956a9035fbf8e421ab58624725a4ae43fc432a69bb07008a50d48bd64e2ac156"
+  }
+ },
+ {
+  "run": "geant4-run-N4-closure",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N4-closure.spec.json",
+  "spec_file_sha256": "564991f97bca71863c454aa8f3f416de612c00d8f193cf8356a8c9aadca46f1f",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N4-closure/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1863554161,
+    815621174
+   ]
+  },
+  "events": 8000,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "564991f97bca71863c454aa8f3f416de612c00d8f193cf8356a8c9aadca46f1f",
+  "outputs": {
+   "N4-closure/column_map.json": "d24f2856a014155e67d40ccf07d14a8654a515c85aae63a309f8625590623b6a",
+   "N4-closure/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N4-closure/events.csv": "837461321af482101d7ce2486b709a74f1e5b353e31b49a05bbb947d25088607",
+   "N4-closure/log.txt": "aff07dbd370f015f28673bbf69e17ac0f7b4c83a1e675ded6bb02a93404e1e90",
+   "N4-closure/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N4-closure/probe.json": "3c7e5f6c9ed68abce987881fa74d2bccb1663c0a4e7e02a1342edc6ff250ff0d",
+   "N4-closure/spec.json": "564991f97bca71863c454aa8f3f416de612c00d8f193cf8356a8c9aadca46f1f"
+  }
+ },
+ {
+  "run": "geant4-run-N4-geantino",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N4-geantino.spec.json",
+  "spec_file_sha256": "d831dc383082798316966023a353d9967e733759ed353be05b729328d2e4c6b6",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N4-geantino/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    647020213,
+    610432243
+   ]
+  },
+  "events": 2000,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "d831dc383082798316966023a353d9967e733759ed353be05b729328d2e4c6b6",
+  "outputs": {
+   "N4-geantino/column_map.json": "d24f2856a014155e67d40ccf07d14a8654a515c85aae63a309f8625590623b6a",
+   "N4-geantino/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N4-geantino/events.csv": "2531b7e989958d5891953bf025d35e29bcae371e1bfd05db40506a77d6384058",
+   "N4-geantino/log.txt": "aff07dbd370f015f28673bbf69e17ac0f7b4c83a1e675ded6bb02a93404e1e90",
+   "N4-geantino/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N4-geantino/probe.json": "3c7e5f6c9ed68abce987881fa74d2bccb1663c0a4e7e02a1342edc6ff250ff0d",
+   "N4-geantino/spec.json": "d831dc383082798316966023a353d9967e733759ed353be05b729328d2e4c6b6"
+  }
+ },
+ {
+  "run": "geant4-run-N6-CAL10-cut-0.1",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N6-CAL10-cut-0.1.spec.json",
+  "spec_file_sha256": "e220cff9f43c7443b5a8a82691d89e706a261fe1a9fdd459282a207824919166",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N6-CAL10-cut-0.1/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    2021851809,
+    215898332
+   ]
+  },
+  "events": 30064,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "e220cff9f43c7443b5a8a82691d89e706a261fe1a9fdd459282a207824919166",
+  "outputs": {
+   "N6-CAL10-cut-0.1/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "N6-CAL10-cut-0.1/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N6-CAL10-cut-0.1/events.csv": "7b0e4ae461ef7c15d61a1c0b249b7b450da313c918170a9abe73066ac553434c",
+   "N6-CAL10-cut-0.1/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "N6-CAL10-cut-0.1/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N6-CAL10-cut-0.1/probe.json": "48fd6d9e6147b531a667806fc72abe24d73294651206aa342a507abef46a8504",
+   "N6-CAL10-cut-0.1/spec.json": "e220cff9f43c7443b5a8a82691d89e706a261fe1a9fdd459282a207824919166"
+  }
+ },
+ {
+  "run": "geant4-run-N6-CAL10-cut-0.3",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N6-CAL10-cut-0.3.spec.json",
+  "spec_file_sha256": "263a574a3342e18fb1676128bcb0be550df44b782267fe8e461ec57cc6c4cb49",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N6-CAL10-cut-0.3/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1904580011,
+    1858165056
+   ]
+  },
+  "events": 30064,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "263a574a3342e18fb1676128bcb0be550df44b782267fe8e461ec57cc6c4cb49",
+  "outputs": {
+   "N6-CAL10-cut-0.3/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "N6-CAL10-cut-0.3/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N6-CAL10-cut-0.3/events.csv": "96907da18725aa94096148805af317764ff221125db11366d54a1be1eabb64ae",
+   "N6-CAL10-cut-0.3/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "N6-CAL10-cut-0.3/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N6-CAL10-cut-0.3/probe.json": "33ab825d8fd2476ba244755e08be11f5ae41fc16f2e3abfad92a72f6e6973ae2",
+   "N6-CAL10-cut-0.3/spec.json": "263a574a3342e18fb1676128bcb0be550df44b782267fe8e461ec57cc6c4cb49"
+  }
+ },
+ {
+  "run": "geant4-run-N6-CAL10-cut-1",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N6-CAL10-cut-1.spec.json",
+  "spec_file_sha256": "ca29356ba729b591b96301d7fb37fbf395e5b975354d1bb489267a8d99bac81b",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N6-CAL10-cut-1/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    25435886,
+    166046683
+   ]
+  },
+  "events": 30064,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "ca29356ba729b591b96301d7fb37fbf395e5b975354d1bb489267a8d99bac81b",
+  "outputs": {
+   "N6-CAL10-cut-1/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "N6-CAL10-cut-1/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N6-CAL10-cut-1/events.csv": "8a43c52c882e72714f0dba9d570190dca39ee649fadc1ee02a89878450accd5b",
+   "N6-CAL10-cut-1/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "N6-CAL10-cut-1/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N6-CAL10-cut-1/probe.json": "0d99b6f1fd67d9b88d8703d3f6b67466d177dbb40d2887da797b24258960e7b1",
+   "N6-CAL10-cut-1/spec.json": "ca29356ba729b591b96301d7fb37fbf395e5b975354d1bb489267a8d99bac81b"
+  }
+ },
+ {
+  "run": "geant4-run-N6-CAL10-nominal",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N6-CAL10-nominal.spec.json",
+  "spec_file_sha256": "951b29165a89caac1dc95e5de073b29a0b1d337c5dc0be3d43580ef76e39d68c",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N6-CAL10-nominal/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1629728382,
+    1588276913
+   ]
+  },
+  "events": 30064,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "951b29165a89caac1dc95e5de073b29a0b1d337c5dc0be3d43580ef76e39d68c",
+  "outputs": {
+   "N6-CAL10-nominal/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "N6-CAL10-nominal/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N6-CAL10-nominal/events.csv": "ecf11f460f71de9c850912fc0f8c43c83b662d696d7346efb70f4af1a90f6ab7",
+   "N6-CAL10-nominal/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "N6-CAL10-nominal/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N6-CAL10-nominal/probe.json": "019ea48348b5acea0fc7d53289dd09771eff2fa7bdc80e203037c6d9480e8ed8",
+   "N6-CAL10-nominal/spec.json": "951b29165a89caac1dc95e5de073b29a0b1d337c5dc0be3d43580ef76e39d68c"
+  }
+ },
+ {
+  "run": "geant4-run-N6-CAL10-trial",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N6-CAL10-trial.spec.json",
+  "spec_file_sha256": "dd7beb13606e263146b683f1acad8f5808c36e6a6f0c35a0efd0b716cdd72cf3",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N6-CAL10-trial/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    270832498,
+    607648207
+   ]
+  },
+  "events": 1600,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "dd7beb13606e263146b683f1acad8f5808c36e6a6f0c35a0efd0b716cdd72cf3",
+  "outputs": {
+   "N6-CAL10-trial/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "N6-CAL10-trial/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N6-CAL10-trial/events.csv": "57896a79664ad80345314e7028e88470dc0797f4e52e9c1555084ab836e8f490",
+   "N6-CAL10-trial/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "N6-CAL10-trial/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N6-CAL10-trial/probe.json": "019ea48348b5acea0fc7d53289dd09771eff2fa7bdc80e203037c6d9480e8ed8",
+   "N6-CAL10-trial/spec.json": "dd7beb13606e263146b683f1acad8f5808c36e6a6f0c35a0efd0b716cdd72cf3"
+  }
+ },
+ {
+  "run": "geant4-run-N6-CAL10-var-emy",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N6-CAL10-var-emy.spec.json",
+  "spec_file_sha256": "3e13be41298ec32498ad9c3fe4e8ea96a8c9dfbf4e0c2cdecee05c8234a00c38",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N6-CAL10-var-emy/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    191383221,
+    608163110
+   ]
+  },
+  "events": 30064,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "3e13be41298ec32498ad9c3fe4e8ea96a8c9dfbf4e0c2cdecee05c8234a00c38",
+  "outputs": {
+   "N6-CAL10-var-emy/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "N6-CAL10-var-emy/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N6-CAL10-var-emy/events.csv": "dc7d36b380876e0bdae86a4fa49643466fb75759a83ae4b08c13b06fa6d56a38",
+   "N6-CAL10-var-emy/log.txt": "1c20aaeaf917fd7d24d104f43ace635aa06005348f35dd7ca3741f0f3df8ba2f",
+   "N6-CAL10-var-emy/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N6-CAL10-var-emy/probe.json": "b6441c6de3253b42310068b2070ddf140eee82acc2ffe16b337b54ce28756d0e",
+   "N6-CAL10-var-emy/spec.json": "3e13be41298ec32498ad9c3fe4e8ea96a8c9dfbf4e0c2cdecee05c8234a00c38"
+  }
+ },
+ {
+  "run": "geant4-run-N6-CC500-nominal",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N6-CC500-nominal.spec.json",
+  "spec_file_sha256": "9cb2676ef5d09f0cd9ae12bb91108b727b97dd78ee821b7e3d094e75d6b8071e",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N6-CC500-nominal/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    2044075352,
+    1593181057
+   ]
+  },
+  "events": 11968,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "9cb2676ef5d09f0cd9ae12bb91108b727b97dd78ee821b7e3d094e75d6b8071e",
+  "outputs": {
+   "N6-CC500-nominal/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "N6-CC500-nominal/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N6-CC500-nominal/events.csv": "3d6054df55c3e49b4c99fb9c90d9591e11e2929d35996a1348b80b7d096a9c0c",
+   "N6-CC500-nominal/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "N6-CC500-nominal/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N6-CC500-nominal/probe.json": "019ea48348b5acea0fc7d53289dd09771eff2fa7bdc80e203037c6d9480e8ed8",
+   "N6-CC500-nominal/spec.json": "9cb2676ef5d09f0cd9ae12bb91108b727b97dd78ee821b7e3d094e75d6b8071e"
+  }
+ },
+ {
+  "run": "geant4-run-N6-CC500-scan",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N6-CC500-scan.spec.json",
+  "spec_file_sha256": "dcf88ac382d0a54ec9c39ee955d62a017774834086bf072db74f11e2781b4329",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N6-CC500-scan/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1926850626,
+    582419352
+   ]
+  },
+  "events": 11968,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "dcf88ac382d0a54ec9c39ee955d62a017774834086bf072db74f11e2781b4329",
+  "outputs": {
+   "N6-CC500-scan/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "N6-CC500-scan/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N6-CC500-scan/events.csv": "5d805f7a2197ace4931a52c7d7daeed116528a7504238fdb004bc52b4503040c",
+   "N6-CC500-scan/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "N6-CC500-scan/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N6-CC500-scan/probe.json": "c250ae9fb208ab8ab431cb56dccd51c455ca8f4114356376376fccf0668aee6b",
+   "N6-CC500-scan/spec.json": "dcf88ac382d0a54ec9c39ee955d62a017774834086bf072db74f11e2781b4329"
+  }
+ },
+ {
+  "run": "geant4-run-N6-CC500-trial",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N6-CC500-trial.spec.json",
+  "spec_file_sha256": "0fdf7883fc7b6dfe0c1d3d3e65e6751e376acfea4ddb07d4c560afdda992ed3f",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N6-CC500-trial/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    741754322,
+    1947324067
+   ]
+  },
+  "events": 1600,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "0fdf7883fc7b6dfe0c1d3d3e65e6751e376acfea4ddb07d4c560afdda992ed3f",
+  "outputs": {
+   "N6-CC500-trial/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "N6-CC500-trial/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N6-CC500-trial/events.csv": "d40d39b639ada35188320f632ae73da17a8453dfd66511fa23438e83fddf2484",
+   "N6-CC500-trial/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "N6-CC500-trial/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N6-CC500-trial/probe.json": "019ea48348b5acea0fc7d53289dd09771eff2fa7bdc80e203037c6d9480e8ed8",
+   "N6-CC500-trial/spec.json": "0fdf7883fc7b6dfe0c1d3d3e65e6751e376acfea4ddb07d4c560afdda992ed3f"
+  }
+ },
+ {
+  "run": "geant4-run-N6-CC500-var-emy",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N6-CC500-var-emy.spec.json",
+  "spec_file_sha256": "92eec3b759304eac2fb62bad0b5da2ff892982fa245767a70580e2dad2ea476e",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N6-CC500-var-emy/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    871590593,
+    130751247
+   ]
+  },
+  "events": 11968,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "92eec3b759304eac2fb62bad0b5da2ff892982fa245767a70580e2dad2ea476e",
+  "outputs": {
+   "N6-CC500-var-emy/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "N6-CC500-var-emy/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N6-CC500-var-emy/events.csv": "0919afbd2d71333dc703654964e1ab2cdc509df0222f44b2d41958e3b72dae59",
+   "N6-CC500-var-emy/log.txt": "1c20aaeaf917fd7d24d104f43ace635aa06005348f35dd7ca3741f0f3df8ba2f",
+   "N6-CC500-var-emy/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N6-CC500-var-emy/probe.json": "b6441c6de3253b42310068b2070ddf140eee82acc2ffe16b337b54ce28756d0e",
+   "N6-CC500-var-emy/spec.json": "92eec3b759304eac2fb62bad0b5da2ff892982fa245767a70580e2dad2ea476e"
+  }
+ },
+ {
+  "run": "geant4-run-N6-TRK1-nominal",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N6-TRK1-nominal.spec.json",
+  "spec_file_sha256": "948579e75cce934587460b5c2e5e7964efbab36fd0e2ae4745fdbc744bcd04e4",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N6-TRK1-nominal/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    2119499626,
+    460729883
+   ]
+  },
+  "events": 12800,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "948579e75cce934587460b5c2e5e7964efbab36fd0e2ae4745fdbc744bcd04e4",
+  "outputs": {
+   "N6-TRK1-nominal/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "N6-TRK1-nominal/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N6-TRK1-nominal/events.csv": "c2c7683d91968b980aca6b274f1f6a9590daa154a77ecd9d6d30d7030e05beda",
+   "N6-TRK1-nominal/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "N6-TRK1-nominal/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N6-TRK1-nominal/probe.json": "019ea48348b5acea0fc7d53289dd09771eff2fa7bdc80e203037c6d9480e8ed8",
+   "N6-TRK1-nominal/spec.json": "948579e75cce934587460b5c2e5e7964efbab36fd0e2ae4745fdbc744bcd04e4"
+  }
+ },
+ {
+  "run": "geant4-run-N6-TRK1-scan",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N6-TRK1-scan.spec.json",
+  "spec_file_sha256": "98e4e6b0a909572d4cf670dc731517cc1592e25df934f74e1cda04cd167dd11d",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N6-TRK1-scan/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    325092226,
+    1893464406
+   ]
+  },
+  "events": 12800,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "98e4e6b0a909572d4cf670dc731517cc1592e25df934f74e1cda04cd167dd11d",
+  "outputs": {
+   "N6-TRK1-scan/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "N6-TRK1-scan/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N6-TRK1-scan/events.csv": "26ed7b9e494adc6b92a19b02999da993d646ac1da5fabfa35e2bfa4026cdb338",
+   "N6-TRK1-scan/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "N6-TRK1-scan/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N6-TRK1-scan/probe.json": "c250ae9fb208ab8ab431cb56dccd51c455ca8f4114356376376fccf0668aee6b",
+   "N6-TRK1-scan/spec.json": "98e4e6b0a909572d4cf670dc731517cc1592e25df934f74e1cda04cd167dd11d"
+  }
+ },
+ {
+  "run": "geant4-run-N6-TRK1-trial",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N6-TRK1-trial.spec.json",
+  "spec_file_sha256": "fbbef577c96bdb23dde180c755a254ed7f47886cb653ff9e2f773614a7a4253f",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N6-TRK1-trial/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    907930551,
+    910625095
+   ]
+  },
+  "events": 1600,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "fbbef577c96bdb23dde180c755a254ed7f47886cb653ff9e2f773614a7a4253f",
+  "outputs": {
+   "N6-TRK1-trial/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "N6-TRK1-trial/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N6-TRK1-trial/events.csv": "564b6cba42fe6801cb22e1877f259f2a921b98e7fdf52427dc9f83caa07f231a",
+   "N6-TRK1-trial/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "N6-TRK1-trial/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N6-TRK1-trial/probe.json": "019ea48348b5acea0fc7d53289dd09771eff2fa7bdc80e203037c6d9480e8ed8",
+   "N6-TRK1-trial/spec.json": "fbbef577c96bdb23dde180c755a254ed7f47886cb653ff9e2f773614a7a4253f"
+  }
+ },
+ {
+  "run": "geant4-run-N6-TRK1-var-air",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N6-TRK1-var-air.spec.json",
+  "spec_file_sha256": "58a5b00675651ec395e513080ce876950745446799b98918c22a37979b80f347",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N6-TRK1-var-air/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    504726025,
+    264821879
+   ]
+  },
+  "events": 12800,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "58a5b00675651ec395e513080ce876950745446799b98918c22a37979b80f347",
+  "outputs": {
+   "N6-TRK1-var-air/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "N6-TRK1-var-air/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N6-TRK1-var-air/events.csv": "09598f2608c54bdd49b3acbb4fbe49fd08df8dd8fe43b791d20e67120665594f",
+   "N6-TRK1-var-air/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "N6-TRK1-var-air/materials.json": "97fea44d6d791f41e890e4f1af1271ba87cf2ee605724f14f2e4c27f9fc703a6",
+   "N6-TRK1-var-air/probe.json": "81ff3ac67d49086fa6da42b3b753c1973f43c89b638a9884392e62dd61640b57",
+   "N6-TRK1-var-air/spec.json": "58a5b00675651ec395e513080ce876950745446799b98918c22a37979b80f347"
+  }
+ },
+ {
+  "run": "geant4-run-N6-TRK1-var-qgsp-bic",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N6-TRK1-var-qgsp-bic.spec.json",
+  "spec_file_sha256": "b4658215c670bb2dfc74115af997cd0f12a6bef8061eb229c4dfec5cb52a0554",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N6-TRK1-var-qgsp-bic/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    948907051,
+    2083956503
+   ]
+  },
+  "events": 12800,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "b4658215c670bb2dfc74115af997cd0f12a6bef8061eb229c4dfec5cb52a0554",
+  "outputs": {
+   "N6-TRK1-var-qgsp-bic/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "N6-TRK1-var-qgsp-bic/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N6-TRK1-var-qgsp-bic/events.csv": "c6c2c69ce575b110978673c049cedfe7df8ccd26659bbc8577586d68ee2aef17",
+   "N6-TRK1-var-qgsp-bic/log.txt": "f3103db55c5836f142f33e57d3179280693a4bbc2fbec24a5736fb214d4a9525",
+   "N6-TRK1-var-qgsp-bic/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N6-TRK1-var-qgsp-bic/probe.json": "7b98e350476397cebe3291de0c888641874055d7364ab7f9845ce2a76d41d910",
+   "N6-TRK1-var-qgsp-bic/spec.json": "b4658215c670bb2dfc74115af997cd0f12a6bef8061eb229c4dfec5cb52a0554"
+  }
+ },
+ {
+  "run": "geant4-run-N6-TRK1-var-ss",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N6-TRK1-var-ss.spec.json",
+  "spec_file_sha256": "0d4f65ac3c760241fded55dc407feebc20948fcf7bc40ad51b8c0fc2d4056f5a",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N6-TRK1-var-ss/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    148998350,
+    378778358
+   ]
+  },
+  "events": 12800,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "0d4f65ac3c760241fded55dc407feebc20948fcf7bc40ad51b8c0fc2d4056f5a",
+  "outputs": {
+   "N6-TRK1-var-ss/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "N6-TRK1-var-ss/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N6-TRK1-var-ss/events.csv": "cfaf79c937d46f0bb2863db445c48fb15e0549e1f84a7b29e91eedaa57889b5e",
+   "N6-TRK1-var-ss/log.txt": "9bdc0abd2044aadc0f814fafd7ffe9934b6e5c1debae8b4c0f5efdba73ae7c35",
+   "N6-TRK1-var-ss/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N6-TRK1-var-ss/probe.json": "2db7d3a50d1fdab018dfeb0e6fd8eacb3fc03426c465c5a79952a7067ee64532",
+   "N6-TRK1-var-ss/spec.json": "0d4f65ac3c760241fded55dc407feebc20948fcf7bc40ad51b8c0fc2d4056f5a"
+  }
+ },
+ {
+  "run": "geant4-run-N6-TRK100-nominal",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N6-TRK100-nominal.spec.json",
+  "spec_file_sha256": "30ec3251c84b8464f39dac7f42765bd6430d26e5970023a71f472ab3fe0c038f",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N6-TRK100-nominal/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    2045403965,
+    2087728645
+   ]
+  },
+  "events": 5728,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "30ec3251c84b8464f39dac7f42765bd6430d26e5970023a71f472ab3fe0c038f",
+  "outputs": {
+   "N6-TRK100-nominal/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "N6-TRK100-nominal/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N6-TRK100-nominal/events.csv": "dde4ebff560a377458076fca7419a5a7e37d691c192280bb5149b562682531c7",
+   "N6-TRK100-nominal/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "N6-TRK100-nominal/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N6-TRK100-nominal/probe.json": "019ea48348b5acea0fc7d53289dd09771eff2fa7bdc80e203037c6d9480e8ed8",
+   "N6-TRK100-nominal/spec.json": "30ec3251c84b8464f39dac7f42765bd6430d26e5970023a71f472ab3fe0c038f"
+  }
+ },
+ {
+  "run": "geant4-run-N6-TRK100-scan",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N6-TRK100-scan.spec.json",
+  "spec_file_sha256": "3d364dc8e9771908da20feacd0e8400a19f24e488f3fafa4460a128296739352",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N6-TRK100-scan/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1212823034,
+    774864251
+   ]
+  },
+  "events": 5728,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "3d364dc8e9771908da20feacd0e8400a19f24e488f3fafa4460a128296739352",
+  "outputs": {
+   "N6-TRK100-scan/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "N6-TRK100-scan/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N6-TRK100-scan/events.csv": "344e526902417426cf88e4e02d4e1795e1a28a3a46995ca67c15a7d89520fd21",
+   "N6-TRK100-scan/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "N6-TRK100-scan/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N6-TRK100-scan/probe.json": "c250ae9fb208ab8ab431cb56dccd51c455ca8f4114356376376fccf0668aee6b",
+   "N6-TRK100-scan/spec.json": "3d364dc8e9771908da20feacd0e8400a19f24e488f3fafa4460a128296739352"
+  }
+ },
+ {
+  "run": "geant4-run-N6-TRK100-trial",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N6-TRK100-trial.spec.json",
+  "spec_file_sha256": "ddf0119c3a319e5a2730c8384042468264388d04796a4ef59397938e18301418",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N6-TRK100-trial/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    40159907,
+    347799347
+   ]
+  },
+  "events": 1600,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "ddf0119c3a319e5a2730c8384042468264388d04796a4ef59397938e18301418",
+  "outputs": {
+   "N6-TRK100-trial/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "N6-TRK100-trial/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N6-TRK100-trial/events.csv": "11c50274cef74ffd705bb58564590d0a5435cee895a9e6fd1b2139646890e39a",
+   "N6-TRK100-trial/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "N6-TRK100-trial/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N6-TRK100-trial/probe.json": "019ea48348b5acea0fc7d53289dd09771eff2fa7bdc80e203037c6d9480e8ed8",
+   "N6-TRK100-trial/spec.json": "ddf0119c3a319e5a2730c8384042468264388d04796a4ef59397938e18301418"
+  }
+ },
+ {
+  "run": "geant4-run-N6-TRK100-var-emy",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N6-TRK100-var-emy.spec.json",
+  "spec_file_sha256": "ab35e4746eac6238e7de6ce62112fa471dc6fbc13b0a848d74d8c3169c0f88a0",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N6-TRK100-var-emy/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    2061045757,
+    1725143199
+   ]
+  },
+  "events": 5728,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "ab35e4746eac6238e7de6ce62112fa471dc6fbc13b0a848d74d8c3169c0f88a0",
+  "outputs": {
+   "N6-TRK100-var-emy/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "N6-TRK100-var-emy/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N6-TRK100-var-emy/events.csv": "b35d60c16f9a89d5c2bdae3d2acc51c1c62465ba25a9bde47c637cff6f19eaec",
+   "N6-TRK100-var-emy/log.txt": "1c20aaeaf917fd7d24d104f43ace635aa06005348f35dd7ca3741f0f3df8ba2f",
+   "N6-TRK100-var-emy/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N6-TRK100-var-emy/probe.json": "b6441c6de3253b42310068b2070ddf140eee82acc2ffe16b337b54ce28756d0e",
+   "N6-TRK100-var-emy/spec.json": "ab35e4746eac6238e7de6ce62112fa471dc6fbc13b0a848d74d8c3169c0f88a0"
+  }
+ },
+ {
+  "run": "geant4-run-N6-TRK100-var-qgsp-bic",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N6-TRK100-var-qgsp-bic.spec.json",
+  "spec_file_sha256": "0952924f0256fb2aa0dee400056ad09ff040bfc45535649e50d406af1922b673",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N6-TRK100-var-qgsp-bic/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    2082200093,
+    1185463107
+   ]
+  },
+  "events": 5728,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "0952924f0256fb2aa0dee400056ad09ff040bfc45535649e50d406af1922b673",
+  "outputs": {
+   "N6-TRK100-var-qgsp-bic/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "N6-TRK100-var-qgsp-bic/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N6-TRK100-var-qgsp-bic/events.csv": "64461caaf55678c0668ce32c2c8ac17bdce95abc95cf09f08ad7173c2fee3733",
+   "N6-TRK100-var-qgsp-bic/log.txt": "f3103db55c5836f142f33e57d3179280693a4bbc2fbec24a5736fb214d4a9525",
+   "N6-TRK100-var-qgsp-bic/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N6-TRK100-var-qgsp-bic/probe.json": "7b98e350476397cebe3291de0c888641874055d7364ab7f9845ce2a76d41d910",
+   "N6-TRK100-var-qgsp-bic/spec.json": "0952924f0256fb2aa0dee400056ad09ff040bfc45535649e50d406af1922b673"
+  }
+ },
+ {
+  "run": "geant4-run-N6-chargedgeantino",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N6-chargedgeantino.spec.json",
+  "spec_file_sha256": "7b2a8d08e7d324e46c52357258cf6d77cd2ab29e92720e8c629dc8d9de8aea76",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N6-chargedgeantino/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1888221399,
+    210724497
+   ]
+  },
+  "events": 500,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "7b2a8d08e7d324e46c52357258cf6d77cd2ab29e92720e8c629dc8d9de8aea76",
+  "outputs": {
+   "N6-chargedgeantino/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "N6-chargedgeantino/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N6-chargedgeantino/events.csv": "64c18adc4e29892e6005c47d43fc8e2084b2ce81be23600a94fe5e4abb54feb1",
+   "N6-chargedgeantino/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "N6-chargedgeantino/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N6-chargedgeantino/probe.json": "019ea48348b5acea0fc7d53289dd09771eff2fa7bdc80e203037c6d9480e8ed8",
+   "N6-chargedgeantino/spec.json": "7b2a8d08e7d324e46c52357258cf6d77cd2ab29e92720e8c629dc8d9de8aea76"
+  }
+ },
+ {
+  "run": "geant4-run-N6-closure",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N6-closure.spec.json",
+  "spec_file_sha256": "b88467aa708d7b01ec0af4b26c69c32ea50091a53d67acbdc6a73854bb58d4c1",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N6-closure/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1382050877,
+    750898200
+   ]
+  },
+  "events": 8000,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "b88467aa708d7b01ec0af4b26c69c32ea50091a53d67acbdc6a73854bb58d4c1",
+  "outputs": {
+   "N6-closure/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "N6-closure/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N6-closure/events.csv": "47ddcca6f7e232e50553947df8d4864ed2236da53ebb524a81b6d3c303eeadb3",
+   "N6-closure/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "N6-closure/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N6-closure/probe.json": "019ea48348b5acea0fc7d53289dd09771eff2fa7bdc80e203037c6d9480e8ed8",
+   "N6-closure/spec.json": "b88467aa708d7b01ec0af4b26c69c32ea50091a53d67acbdc6a73854bb58d4c1"
+  }
+ },
+ {
+  "run": "geant4-run-N6-geantino",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N6-geantino.spec.json",
+  "spec_file_sha256": "54afc98f9c33b024aace756ffb3615105b58357cc775ea21f407f90a98df3c8d",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N6-geantino/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1979764306,
+    1935910723
+   ]
+  },
+  "events": 2000,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "54afc98f9c33b024aace756ffb3615105b58357cc775ea21f407f90a98df3c8d",
+  "outputs": {
+   "N6-geantino/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "N6-geantino/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N6-geantino/events.csv": "4f16a6df83d4af9614357a95b3b6848d6217a8391072507290d3066fa1f9e8d3",
+   "N6-geantino/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "N6-geantino/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N6-geantino/probe.json": "019ea48348b5acea0fc7d53289dd09771eff2fa7bdc80e203037c6d9480e8ed8",
+   "N6-geantino/spec.json": "54afc98f9c33b024aace756ffb3615105b58357cc775ea21f407f90a98df3c8d"
+  }
+ },
+ {
+  "run": "geant4-run-N8-TRK1-nominal",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N8-TRK1-nominal.spec.json",
+  "spec_file_sha256": "5988289f9cc7f50c84b49a3a294498e00b302c32fc16b484e01a50867d15f1e8",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N8-TRK1-nominal/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1695536004,
+    2084199711
+   ]
+  },
+  "events": 9936,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "5988289f9cc7f50c84b49a3a294498e00b302c32fc16b484e01a50867d15f1e8",
+  "outputs": {
+   "N8-TRK1-nominal/column_map.json": "64636298a3ba104180c29edaf68c7fbdc164c2266406030ca2ef1227cc447ebd",
+   "N8-TRK1-nominal/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N8-TRK1-nominal/events.csv": "24037d4a7346fea1d62cb3ac47f143dc2b23e8df1c1cfca7fd5318c083bc1bcc",
+   "N8-TRK1-nominal/log.txt": "cee0ced2c604f66b7e359f1d13409b620db765b8f98c442e3d4c436c6f0dd712",
+   "N8-TRK1-nominal/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N8-TRK1-nominal/probe.json": "b9dd4359d75a43395c50017af1798ec2ed5def5c6d186bd6779ecacb89f9619f",
+   "N8-TRK1-nominal/spec.json": "5988289f9cc7f50c84b49a3a294498e00b302c32fc16b484e01a50867d15f1e8"
+  }
+ },
+ {
+  "run": "geant4-run-N8-TRK1-scan",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N8-TRK1-scan.spec.json",
+  "spec_file_sha256": "a113f7de1e418913ed41dff7a7d13a4109ad75e0c7f78d8e6ceb79451ab75660",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N8-TRK1-scan/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    609423450,
+    977375008
+   ]
+  },
+  "events": 9936,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "a113f7de1e418913ed41dff7a7d13a4109ad75e0c7f78d8e6ceb79451ab75660",
+  "outputs": {
+   "N8-TRK1-scan/column_map.json": "64636298a3ba104180c29edaf68c7fbdc164c2266406030ca2ef1227cc447ebd",
+   "N8-TRK1-scan/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N8-TRK1-scan/events.csv": "e88a710d5e7368f806658aaa98496e51ac09e14c9587da2d15dc33955f726897",
+   "N8-TRK1-scan/log.txt": "cee0ced2c604f66b7e359f1d13409b620db765b8f98c442e3d4c436c6f0dd712",
+   "N8-TRK1-scan/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N8-TRK1-scan/probe.json": "757e4f323d50f6c9e630fe3029e6d6c2e598ae897b8e0193300c8d428015e56e",
+   "N8-TRK1-scan/spec.json": "a113f7de1e418913ed41dff7a7d13a4109ad75e0c7f78d8e6ceb79451ab75660"
+  }
+ },
+ {
+  "run": "geant4-run-N8-TRK1-trial",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N8-TRK1-trial.spec.json",
+  "spec_file_sha256": "e34afbdba4d1ed7f9d19457bc10af5332272de4ffeb4cd4fa83bf0b9be0102c6",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N8-TRK1-trial/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    683182595,
+    1573179540
+   ]
+  },
+  "events": 1600,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "e34afbdba4d1ed7f9d19457bc10af5332272de4ffeb4cd4fa83bf0b9be0102c6",
+  "outputs": {
+   "N8-TRK1-trial/column_map.json": "64636298a3ba104180c29edaf68c7fbdc164c2266406030ca2ef1227cc447ebd",
+   "N8-TRK1-trial/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N8-TRK1-trial/events.csv": "ada296b30029ca0631d9addb564f2c50f4c12c74329abb1344d35a19476c5f87",
+   "N8-TRK1-trial/log.txt": "cee0ced2c604f66b7e359f1d13409b620db765b8f98c442e3d4c436c6f0dd712",
+   "N8-TRK1-trial/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N8-TRK1-trial/probe.json": "b9dd4359d75a43395c50017af1798ec2ed5def5c6d186bd6779ecacb89f9619f",
+   "N8-TRK1-trial/spec.json": "e34afbdba4d1ed7f9d19457bc10af5332272de4ffeb4cd4fa83bf0b9be0102c6"
+  }
+ },
+ {
+  "run": "geant4-run-N8-TRK1-var-qgsp-bic",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N8-TRK1-var-qgsp-bic.spec.json",
+  "spec_file_sha256": "3d9d214e2250f42cee0082d977592cb567b25ffb9c59cbbbdfe327183724cdb9",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N8-TRK1-var-qgsp-bic/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1722048031,
+    435950123
+   ]
+  },
+  "events": 9936,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "3d9d214e2250f42cee0082d977592cb567b25ffb9c59cbbbdfe327183724cdb9",
+  "outputs": {
+   "N8-TRK1-var-qgsp-bic/column_map.json": "64636298a3ba104180c29edaf68c7fbdc164c2266406030ca2ef1227cc447ebd",
+   "N8-TRK1-var-qgsp-bic/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N8-TRK1-var-qgsp-bic/events.csv": "ab039457ff9be7ec1e5b3ea90a5fc03238af83f3564189db4212d8e3bd0c04f8",
+   "N8-TRK1-var-qgsp-bic/log.txt": "0ed9161f58d5ea3d8dd533f46ceb4b7069caecb33cc284350a7a26c21e1115a7",
+   "N8-TRK1-var-qgsp-bic/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N8-TRK1-var-qgsp-bic/probe.json": "149f1bc42633a155e35e7a7a4030295184b07c39fd182225eeeb6a2fdd1e6a40",
+   "N8-TRK1-var-qgsp-bic/spec.json": "3d9d214e2250f42cee0082d977592cb567b25ffb9c59cbbbdfe327183724cdb9"
+  }
+ },
+ {
+  "run": "geant4-run-N8-TRK1-var-ss",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N8-TRK1-var-ss.spec.json",
+  "spec_file_sha256": "3bda47c7fa51856d69e85794a886a9d33be07e45256a6200b844f86fd421f943",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N8-TRK1-var-ss/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1031985652,
+    1726639157
+   ]
+  },
+  "events": 9936,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "3bda47c7fa51856d69e85794a886a9d33be07e45256a6200b844f86fd421f943",
+  "outputs": {
+   "N8-TRK1-var-ss/column_map.json": "64636298a3ba104180c29edaf68c7fbdc164c2266406030ca2ef1227cc447ebd",
+   "N8-TRK1-var-ss/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N8-TRK1-var-ss/events.csv": "e762afcbbf140728df227bf763d71a301007ca97e0f9656f1157ae2286183c21",
+   "N8-TRK1-var-ss/log.txt": "e8f9fa5cb94a95ee639dc711c621103f2a754684c786f2a26f69c1018b6c901d",
+   "N8-TRK1-var-ss/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N8-TRK1-var-ss/probe.json": "4791d1a0be6f6f1347a1afdbe092d210805db5fbea03ef0d3676a5538c93b305",
+   "N8-TRK1-var-ss/spec.json": "3bda47c7fa51856d69e85794a886a9d33be07e45256a6200b844f86fd421f943"
+  }
+ },
+ {
+  "run": "geant4-run-N8-TRK100-nominal",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N8-TRK100-nominal.spec.json",
+  "spec_file_sha256": "3cc2ea7383a3987d1e0c89048d902c110bc982d362ee0a95e0491353160030c7",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N8-TRK100-nominal/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    86790981,
+    482235803
+   ]
+  },
+  "events": 8704,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "3cc2ea7383a3987d1e0c89048d902c110bc982d362ee0a95e0491353160030c7",
+  "outputs": {
+   "N8-TRK100-nominal/column_map.json": "64636298a3ba104180c29edaf68c7fbdc164c2266406030ca2ef1227cc447ebd",
+   "N8-TRK100-nominal/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N8-TRK100-nominal/events.csv": "93f1b102f9965d256d8cdf49f8a34271cdda03a0fdff2cbbd1b103336ee156c4",
+   "N8-TRK100-nominal/log.txt": "cee0ced2c604f66b7e359f1d13409b620db765b8f98c442e3d4c436c6f0dd712",
+   "N8-TRK100-nominal/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N8-TRK100-nominal/probe.json": "b9dd4359d75a43395c50017af1798ec2ed5def5c6d186bd6779ecacb89f9619f",
+   "N8-TRK100-nominal/spec.json": "3cc2ea7383a3987d1e0c89048d902c110bc982d362ee0a95e0491353160030c7"
+  }
+ },
+ {
+  "run": "geant4-run-N8-TRK100-scan",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N8-TRK100-scan.spec.json",
+  "spec_file_sha256": "67946aee4372748402f582d37dad813f9535841097b6ec17905b57af0b299dce",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N8-TRK100-scan/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1895715727,
+    321735281
+   ]
+  },
+  "events": 8704,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "67946aee4372748402f582d37dad813f9535841097b6ec17905b57af0b299dce",
+  "outputs": {
+   "N8-TRK100-scan/column_map.json": "64636298a3ba104180c29edaf68c7fbdc164c2266406030ca2ef1227cc447ebd",
+   "N8-TRK100-scan/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N8-TRK100-scan/events.csv": "09d1cb440ca1ffa78ac1d96660e97144a8e0ad4b8b6dec3529a78f5ffc3064b6",
+   "N8-TRK100-scan/log.txt": "cee0ced2c604f66b7e359f1d13409b620db765b8f98c442e3d4c436c6f0dd712",
+   "N8-TRK100-scan/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N8-TRK100-scan/probe.json": "757e4f323d50f6c9e630fe3029e6d6c2e598ae897b8e0193300c8d428015e56e",
+   "N8-TRK100-scan/spec.json": "67946aee4372748402f582d37dad813f9535841097b6ec17905b57af0b299dce"
+  }
+ },
+ {
+  "run": "geant4-run-N8-TRK100-trial",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N8-TRK100-trial.spec.json",
+  "spec_file_sha256": "07860e787230dfab813d886cae3d77a9524959e36844c524978b0084190794ea",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N8-TRK100-trial/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1780470532,
+    1061260188
+   ]
+  },
+  "events": 1600,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "07860e787230dfab813d886cae3d77a9524959e36844c524978b0084190794ea",
+  "outputs": {
+   "N8-TRK100-trial/column_map.json": "64636298a3ba104180c29edaf68c7fbdc164c2266406030ca2ef1227cc447ebd",
+   "N8-TRK100-trial/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N8-TRK100-trial/events.csv": "a21be3c413e9bf30c542b88061012b9b5d4c3f0f665b1a13521cc8f7d5b0870d",
+   "N8-TRK100-trial/log.txt": "cee0ced2c604f66b7e359f1d13409b620db765b8f98c442e3d4c436c6f0dd712",
+   "N8-TRK100-trial/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N8-TRK100-trial/probe.json": "b9dd4359d75a43395c50017af1798ec2ed5def5c6d186bd6779ecacb89f9619f",
+   "N8-TRK100-trial/spec.json": "07860e787230dfab813d886cae3d77a9524959e36844c524978b0084190794ea"
+  }
+ },
+ {
+  "run": "geant4-run-N8-TRK100-var-emy",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N8-TRK100-var-emy.spec.json",
+  "spec_file_sha256": "b0cc1b244ff5cb06afc7af709a9e6d066e943a834c05da42815f8f6190f0e783",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N8-TRK100-var-emy/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    684394601,
+    230845598
+   ]
+  },
+  "events": 8704,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "b0cc1b244ff5cb06afc7af709a9e6d066e943a834c05da42815f8f6190f0e783",
+  "outputs": {
+   "N8-TRK100-var-emy/column_map.json": "64636298a3ba104180c29edaf68c7fbdc164c2266406030ca2ef1227cc447ebd",
+   "N8-TRK100-var-emy/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N8-TRK100-var-emy/events.csv": "4eab9d7dc7ba4ce9efa70115c43fcc13df73731d4ea4c7e0ffc628dc0cb4b1e6",
+   "N8-TRK100-var-emy/log.txt": "a9928b19c8e288d8f33baa41776cca1df8cb291f4a45eb98f113c5fe626b90b0",
+   "N8-TRK100-var-emy/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N8-TRK100-var-emy/probe.json": "c35abcc60a8225060f480f03944e096601acfc86882d3d03505c1df6d2c3f3b2",
+   "N8-TRK100-var-emy/spec.json": "b0cc1b244ff5cb06afc7af709a9e6d066e943a834c05da42815f8f6190f0e783"
+  }
+ },
+ {
+  "run": "geant4-run-N8-TRK100-var-qgsp-bic",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N8-TRK100-var-qgsp-bic.spec.json",
+  "spec_file_sha256": "61eba5a092d9650002988e827f1dfaa98fa06d49f3e0e37aa2038405e1881e98",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N8-TRK100-var-qgsp-bic/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    320955857,
+    919086173
+   ]
+  },
+  "events": 8704,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "61eba5a092d9650002988e827f1dfaa98fa06d49f3e0e37aa2038405e1881e98",
+  "outputs": {
+   "N8-TRK100-var-qgsp-bic/column_map.json": "64636298a3ba104180c29edaf68c7fbdc164c2266406030ca2ef1227cc447ebd",
+   "N8-TRK100-var-qgsp-bic/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N8-TRK100-var-qgsp-bic/events.csv": "220beead83de81e353f00a506a5b9e754dccf555e6c38e193aaea2d9c14f0cb8",
+   "N8-TRK100-var-qgsp-bic/log.txt": "0ed9161f58d5ea3d8dd533f46ceb4b7069caecb33cc284350a7a26c21e1115a7",
+   "N8-TRK100-var-qgsp-bic/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N8-TRK100-var-qgsp-bic/probe.json": "149f1bc42633a155e35e7a7a4030295184b07c39fd182225eeeb6a2fdd1e6a40",
+   "N8-TRK100-var-qgsp-bic/spec.json": "61eba5a092d9650002988e827f1dfaa98fa06d49f3e0e37aa2038405e1881e98"
+  }
+ },
+ {
+  "run": "geant4-run-N8-chargedgeantino",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N8-chargedgeantino.spec.json",
+  "spec_file_sha256": "74f5552e069280a6e3dbe92f8b05538f3a819e60e44bf0e32ae0ff3ce07ca274",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N8-chargedgeantino/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    2082402404,
+    12795351
+   ]
+  },
+  "events": 500,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "74f5552e069280a6e3dbe92f8b05538f3a819e60e44bf0e32ae0ff3ce07ca274",
+  "outputs": {
+   "N8-chargedgeantino/column_map.json": "64636298a3ba104180c29edaf68c7fbdc164c2266406030ca2ef1227cc447ebd",
+   "N8-chargedgeantino/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N8-chargedgeantino/events.csv": "cd035f6859a96d02b0a51aa346048398095f3760748e8631d163bc6c7214f609",
+   "N8-chargedgeantino/log.txt": "cee0ced2c604f66b7e359f1d13409b620db765b8f98c442e3d4c436c6f0dd712",
+   "N8-chargedgeantino/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N8-chargedgeantino/probe.json": "b9dd4359d75a43395c50017af1798ec2ed5def5c6d186bd6779ecacb89f9619f",
+   "N8-chargedgeantino/spec.json": "74f5552e069280a6e3dbe92f8b05538f3a819e60e44bf0e32ae0ff3ce07ca274"
+  }
+ },
+ {
+  "run": "geant4-run-N8-closure",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N8-closure.spec.json",
+  "spec_file_sha256": "dc14aa172decb4a4b346549e1f4862cf11304235f5ad615b28035bb818928172",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N8-closure/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1895695185,
+    226014163
+   ]
+  },
+  "events": 8000,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "dc14aa172decb4a4b346549e1f4862cf11304235f5ad615b28035bb818928172",
+  "outputs": {
+   "N8-closure/column_map.json": "64636298a3ba104180c29edaf68c7fbdc164c2266406030ca2ef1227cc447ebd",
+   "N8-closure/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N8-closure/events.csv": "79616403a721ca06df414d3aa1e25850ea9711ba054633bb9e214655b18b484a",
+   "N8-closure/log.txt": "cee0ced2c604f66b7e359f1d13409b620db765b8f98c442e3d4c436c6f0dd712",
+   "N8-closure/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N8-closure/probe.json": "b9dd4359d75a43395c50017af1798ec2ed5def5c6d186bd6779ecacb89f9619f",
+   "N8-closure/spec.json": "dc14aa172decb4a4b346549e1f4862cf11304235f5ad615b28035bb818928172"
+  }
+ },
+ {
+  "run": "geant4-run-N8-geantino",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "N8-geantino.spec.json",
+  "spec_file_sha256": "2d7f290e91aaa09e7898c62629bfa6b2b73875ae61702cb4dd28c48c25efb675",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim N8-geantino/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    507118581,
+    1226066706
+   ]
+  },
+  "events": 2000,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "2d7f290e91aaa09e7898c62629bfa6b2b73875ae61702cb4dd28c48c25efb675",
+  "outputs": {
+   "N8-geantino/column_map.json": "64636298a3ba104180c29edaf68c7fbdc164c2266406030ca2ef1227cc447ebd",
+   "N8-geantino/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "N8-geantino/events.csv": "3d8eacbcef555d54f576a453c82c77c49acb3b1fe074e1322a02e081f014778f",
+   "N8-geantino/log.txt": "cee0ced2c604f66b7e359f1d13409b620db765b8f98c442e3d4c436c6f0dd712",
+   "N8-geantino/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "N8-geantino/probe.json": "b9dd4359d75a43395c50017af1798ec2ed5def5c6d186bd6779ecacb89f9619f",
+   "N8-geantino/spec.json": "2d7f290e91aaa09e7898c62629bfa6b2b73875ae61702cb4dd28c48c25efb675"
+  }
+ },
+ {
+  "run": "geant4-run-ladder-balance-e+",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "ladder-balance-e+.spec.json",
+  "spec_file_sha256": "1174ad28b0c84454ff592286fcfb1bf87a005be74649175ff5d7a12bb6a32492",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim ladder-balance-e+/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1517218555,
+    858270055
+   ]
+  },
+  "events": 400,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "8add418d92c1d51df859ee0a9b87aede14f66f33040831200f080cc9460092fe",
+  "outputs": {
+   "ladder-balance-e+/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "ladder-balance-e+/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "ladder-balance-e+/events.csv": "e2e2b664cc74321a3700379cbe468dce15d9db84500457d494dcba990dac9a55",
+   "ladder-balance-e+/log.txt": "d87fb1a1174e435761e515f470e1de6f4c88b57106496e3fa198506ef75e6e4c",
+   "ladder-balance-e+/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "ladder-balance-e+/probe.json": "af2dd65591ef519e3f653f627e17fcd0916e67a73a78dc1f80b98f7a07ca1b7d",
+   "ladder-balance-e+/spec.json": "8add418d92c1d51df859ee0a9b87aede14f66f33040831200f080cc9460092fe"
+  }
+ },
+ {
+  "run": "geant4-run-ladder-balance-e-",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "ladder-balance-e-.spec.json",
+  "spec_file_sha256": "f04824808415e6c053965979c749459f6e9ae3091597beeb5c8c0948cf56e3b7",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim ladder-balance-e-/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    393733961,
+    1642829106
+   ]
+  },
+  "events": 400,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "250c37b37a47be2743a1eddab05c2d264f50c0cd50b899fe7e91b91d3f9f62e0",
+  "outputs": {
+   "ladder-balance-e-/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "ladder-balance-e-/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "ladder-balance-e-/events.csv": "96e7b0d1af10308965877ce8b64139404207dcae3637f2529028d217301d9ee4",
+   "ladder-balance-e-/log.txt": "d87fb1a1174e435761e515f470e1de6f4c88b57106496e3fa198506ef75e6e4c",
+   "ladder-balance-e-/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "ladder-balance-e-/probe.json": "af2dd65591ef519e3f653f627e17fcd0916e67a73a78dc1f80b98f7a07ca1b7d",
+   "ladder-balance-e-/spec.json": "250c37b37a47be2743a1eddab05c2d264f50c0cd50b899fe7e91b91d3f9f62e0"
+  }
+ },
+ {
+  "run": "geant4-run-ladder-field-minus",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "ladder-field-minus.spec.json",
+  "spec_file_sha256": "871cc4edd1bba1b9a81914680aba2f15513c203cf21111db8eef460af0032c9a",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim ladder-field-minus/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    711259250,
+    989495165
+   ]
+  },
+  "events": 500,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "871cc4edd1bba1b9a81914680aba2f15513c203cf21111db8eef460af0032c9a",
+  "outputs": {
+   "ladder-field-minus/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "ladder-field-minus/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "ladder-field-minus/events.csv": "347c5e354b1013c449881b3aa7e25e26c9281b672a2a24934e4c7242146c8e14",
+   "ladder-field-minus/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "ladder-field-minus/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "ladder-field-minus/probe.json": "9e943ce6f23da4837c6150d4f9f7999c2fb9440d56ed961ba055ebcea22ca7c2",
+   "ladder-field-minus/spec.json": "871cc4edd1bba1b9a81914680aba2f15513c203cf21111db8eef460af0032c9a"
+  }
+ },
+ {
+  "run": "geant4-run-ladder-field-plus",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "ladder-field-plus.spec.json",
+  "spec_file_sha256": "3bea403899fcb022bf067058378c6d9bc190988979ae36e229e24b82733b8453",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim ladder-field-plus/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1078732852,
+    1336390724
+   ]
+  },
+  "events": 500,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "3bea403899fcb022bf067058378c6d9bc190988979ae36e229e24b82733b8453",
+  "outputs": {
+   "ladder-field-plus/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "ladder-field-plus/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "ladder-field-plus/events.csv": "06dca3c20812050fb52bedf42699f1e0d29572933506522ee7073d75f667e240",
+   "ladder-field-plus/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "ladder-field-plus/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "ladder-field-plus/probe.json": "dbf31606295650465ea51b1abb3a78ab1dc2488be0691b396c35e315a5ce4a0f",
+   "ladder-field-plus/spec.json": "3bea403899fcb022bf067058378c6d9bc190988979ae36e229e24b82733b8453"
+  }
+ },
+ {
+  "run": "geant4-run-ladder-geantino-pb-control",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "ladder-geantino-pb-control.spec.json",
+  "spec_file_sha256": "54690edd9ddddce2623e3dfed58645a753d4ae8af8977725e72858d6209753f3",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim ladder-geantino-pb-control/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    541253153,
+    1612164896
+   ]
+  },
+  "events": 500,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "5d4642f415d00a290bcb183d4c04ee2ccd1ca1ae739bcf1a09e6c0408cdcb13f",
+  "outputs": {
+   "ladder-geantino-pb-control/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "ladder-geantino-pb-control/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "ladder-geantino-pb-control/events.csv": "c891fc722ac870768e3ff826d3fda94fd6436c69a5eef7105933e01278dda889",
+   "ladder-geantino-pb-control/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "ladder-geantino-pb-control/materials.json": "00c250fdd0a2b5d898b2d5a247a7fdf4641a949388aad985cfdeb7d0d9514ef7",
+   "ladder-geantino-pb-control/probe.json": "876bfceef164653ebe1e65e4665e3fcc7e5fbadf0f060e809ad1975df0ed6c99",
+   "ladder-geantino-pb-control/spec.json": "5d4642f415d00a290bcb183d4c04ee2ccd1ca1ae739bcf1a09e6c0408cdcb13f"
+  }
+ },
+ {
+  "run": "geant4-run-ladder-mu1-trial",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "ladder-mu1-trial.spec.json",
+  "spec_file_sha256": "af95708fd1e0f1e7825779e6d4205f5eb326afd8bfb9f1f82fe0f904b008606a",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim ladder-mu1-trial/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1812276040,
+    2062112116
+   ]
+  },
+  "events": 1600,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "af95708fd1e0f1e7825779e6d4205f5eb326afd8bfb9f1f82fe0f904b008606a",
+  "outputs": {
+   "ladder-mu1-trial/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "ladder-mu1-trial/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "ladder-mu1-trial/events.csv": "9e5564abb0429eca98f4275e8e7d2b40c7b05639b428234ec96a4229121d4151",
+   "ladder-mu1-trial/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "ladder-mu1-trial/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "ladder-mu1-trial/probe.json": "019ea48348b5acea0fc7d53289dd09771eff2fa7bdc80e203037c6d9480e8ed8",
+   "ladder-mu1-trial/spec.json": "af95708fd1e0f1e7825779e6d4205f5eb326afd8bfb9f1f82fe0f904b008606a"
+  }
+ },
+ {
+  "run": "geant4-run-ladder-mu1",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "ladder-mu1.spec.json",
+  "spec_file_sha256": "0faaa91db4f5d79ecd8d6126267d3d5ed605224aa13218c49f04481c62533fc9",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim ladder-mu1/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    100908190,
+    1124466859
+   ]
+  },
+  "events": 4000,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "0faaa91db4f5d79ecd8d6126267d3d5ed605224aa13218c49f04481c62533fc9",
+  "outputs": {
+   "ladder-mu1/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "ladder-mu1/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "ladder-mu1/events.csv": "e30598b3aaf55ef984b8f2e1a93270c3b7fd621c29d7d5544b0e99fd08d7d804",
+   "ladder-mu1/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "ladder-mu1/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "ladder-mu1/probe.json": "019ea48348b5acea0fc7d53289dd09771eff2fa7bdc80e203037c6d9480e8ed8",
+   "ladder-mu1/spec.json": "0faaa91db4f5d79ecd8d6126267d3d5ed605224aa13218c49f04481c62533fc9"
+  }
+ },
+ {
+  "run": "geant4-run-ladder-mu10-field-control",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "ladder-mu10-field-control.spec.json",
+  "spec_file_sha256": "52a707e4c1ddb46ffe662b044da687b77b5701809576f70d3223d7ab4a4923b5",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim ladder-mu10-field-control/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1178268009,
+    872642295
+   ]
+  },
+  "events": 4000,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "52a707e4c1ddb46ffe662b044da687b77b5701809576f70d3223d7ab4a4923b5",
+  "outputs": {
+   "ladder-mu10-field-control/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "ladder-mu10-field-control/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "ladder-mu10-field-control/events.csv": "0e64b9cf06df102c4ed16bccf49c6b9e17ca1c6a20ec6a9665797eee55948e90",
+   "ladder-mu10-field-control/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "ladder-mu10-field-control/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "ladder-mu10-field-control/probe.json": "449f46609528b10fd3b1eb7f4efcd0849595f6d9cd1b3e543c691cab1ca38b46",
+   "ladder-mu10-field-control/spec.json": "52a707e4c1ddb46ffe662b044da687b77b5701809576f70d3223d7ab4a4923b5"
+  }
+ },
+ {
+  "run": "geant4-run-ladder-mu10-trial",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "ladder-mu10-trial.spec.json",
+  "spec_file_sha256": "ed16a1c50930f1c423516a0c36a8accc35408b48d308f68096b9d4c6d7439c14",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim ladder-mu10-trial/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1285279856,
+    52512869
+   ]
+  },
+  "events": 1600,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "ed16a1c50930f1c423516a0c36a8accc35408b48d308f68096b9d4c6d7439c14",
+  "outputs": {
+   "ladder-mu10-trial/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "ladder-mu10-trial/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "ladder-mu10-trial/events.csv": "b31b15949ea181b4f652efa86a7e9cdd2e048a474b535edef052fde06580c45a",
+   "ladder-mu10-trial/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "ladder-mu10-trial/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "ladder-mu10-trial/probe.json": "019ea48348b5acea0fc7d53289dd09771eff2fa7bdc80e203037c6d9480e8ed8",
+   "ladder-mu10-trial/spec.json": "ed16a1c50930f1c423516a0c36a8accc35408b48d308f68096b9d4c6d7439c14"
+  }
+ },
+ {
+  "run": "geant4-run-ladder-mu10",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "ladder-mu10.spec.json",
+  "spec_file_sha256": "4d063a155f1877fa8605281f37387310fb9f06233e1c6e8945a6518073eed33c",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim ladder-mu10/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1506538440,
+    933065901
+   ]
+  },
+  "events": 4000,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "4d063a155f1877fa8605281f37387310fb9f06233e1c6e8945a6518073eed33c",
+  "outputs": {
+   "ladder-mu10/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "ladder-mu10/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "ladder-mu10/events.csv": "be1859de6490d4fdd966ccf54e1b7299393672f6d9a28a5cc7ee8dce0bd20ab9",
+   "ladder-mu10/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "ladder-mu10/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "ladder-mu10/probe.json": "019ea48348b5acea0fc7d53289dd09771eff2fa7bdc80e203037c6d9480e8ed8",
+   "ladder-mu10/spec.json": "4d063a155f1877fa8605281f37387310fb9f06233e1c6e8945a6518073eed33c"
+  }
+ },
+ {
+  "run": "geant4-run-ladder-mu100-trial",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "ladder-mu100-trial.spec.json",
+  "spec_file_sha256": "bd2edba6f60e3272d3c2801a47df4027cc7e2780999535ca240d7dd2bf7b31e2",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim ladder-mu100-trial/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    627701007,
+    1069971730
+   ]
+  },
+  "events": 1600,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "bd2edba6f60e3272d3c2801a47df4027cc7e2780999535ca240d7dd2bf7b31e2",
+  "outputs": {
+   "ladder-mu100-trial/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "ladder-mu100-trial/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "ladder-mu100-trial/events.csv": "f9c6c863969fb667d96954a2140af36e4f5eebd6c3dc0177799c649d0449dffd",
+   "ladder-mu100-trial/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "ladder-mu100-trial/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "ladder-mu100-trial/probe.json": "019ea48348b5acea0fc7d53289dd09771eff2fa7bdc80e203037c6d9480e8ed8",
+   "ladder-mu100-trial/spec.json": "bd2edba6f60e3272d3c2801a47df4027cc7e2780999535ca240d7dd2bf7b31e2"
+  }
+ },
+ {
+  "run": "geant4-run-ladder-mu100",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "ladder-mu100.spec.json",
+  "spec_file_sha256": "2fd3ce6fe74ccc76ef78013305b2635f1eb36dfcd9310e8a0a9c020a3efac1e4",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim ladder-mu100/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1571904993,
+    1846695287
+   ]
+  },
+  "events": 50720,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "2fd3ce6fe74ccc76ef78013305b2635f1eb36dfcd9310e8a0a9c020a3efac1e4",
+  "outputs": {
+   "ladder-mu100/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "ladder-mu100/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "ladder-mu100/events.csv": "c477554d034b89a6ae1e06f8560415abb3cf24e5f4e6a710ecd1c266b0df0345",
+   "ladder-mu100/log.txt": "9e7bc947c147736aa90aef36b09026c4ea339a7207c3b2d563246fdf5747623b",
+   "ladder-mu100/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "ladder-mu100/probe.json": "019ea48348b5acea0fc7d53289dd09771eff2fa7bdc80e203037c6d9480e8ed8",
+   "ladder-mu100/spec.json": "2fd3ce6fe74ccc76ef78013305b2635f1eb36dfcd9310e8a0a9c020a3efac1e4"
+  }
+ },
+ {
+  "run": "geant4-run-ladder-overlap-test",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "ladder-overlap-test.spec.json",
+  "spec_file_sha256": "d8cbf5c0f29ad2bc4e791fb1a01c6fa7603cb756ba92eaf5aec65fd6564f2b7d",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim ladder-overlap-test/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    539231424,
+    835397980
+   ]
+  },
+  "events": 20,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "d8cbf5c0f29ad2bc4e791fb1a01c6fa7603cb756ba92eaf5aec65fd6564f2b7d",
+  "outputs": {
+   "ladder-overlap-test/column_map.json": "5204c9ebf20edd544f147cb606917b3a9cd3cd8e52da54f775a066fce1cd596e",
+   "ladder-overlap-test/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "ladder-overlap-test/events.csv": "3372c6283ec7eec43e3f4e5e25c1f7f43b6d19fc0c3313daf3567453d8d65e17",
+   "ladder-overlap-test/log.txt": "bf9d4ee71d98a6482e8f5511dd7b518c0e4a69a50537bee2e775728482a366fb",
+   "ladder-overlap-test/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "ladder-overlap-test/probe.json": "019ea48348b5acea0fc7d53289dd09771eff2fa7bdc80e203037c6d9480e8ed8",
+   "ladder-overlap-test/spec.json": "d8cbf5c0f29ad2bc4e791fb1a01c6fa7603cb756ba92eaf5aec65fd6564f2b7d"
+  }
+ },
+ {
+  "run": "geant4-run-ladder-sf-pvt-control",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "ladder-sf-pvt-control.spec.json",
+  "spec_file_sha256": "6b6b30038f9429d0fbaf82286633c53f73c1541e39abbd36d75b523fc147f0a8",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim ladder-sf-pvt-control/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1224386623,
+    848318400
+   ]
+  },
+  "events": 4000,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "9e415327de44c22d950f43767d6ea9dd36f419d64783b6d70da3f2f690a55609",
+  "outputs": {
+   "ladder-sf-pvt-control/column_map.json": "e3c48c6aea3a8357d83a9de68cfdfacaf631f2677bf4292967a90f9a7d211a61",
+   "ladder-sf-pvt-control/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "ladder-sf-pvt-control/events.csv": "4116facc6071eb53fb0200c5f8b309cd33d142d619798c47c5c3c005e1cbafa5",
+   "ladder-sf-pvt-control/log.txt": "b8b0d5da34040d44be0793136d0f1a7b7b35a531c910d802dad720ec4dbfa227",
+   "ladder-sf-pvt-control/materials.json": "63b5f3fe4aa3ab49d98a4ece7a9f12e291ebe2412b34c62360a53a84c1ff2d9b",
+   "ladder-sf-pvt-control/probe.json": "a033e1c294a6823172556003de402dad1693fdaeb9c6d7cdbf88fa52e34bd2c3",
+   "ladder-sf-pvt-control/spec.json": "9e415327de44c22d950f43767d6ea9dd36f419d64783b6d70da3f2f690a55609",
+   "ladder-sf-pvt-control/summary.json": "5c14fd74316cf346fe063392e2d5669070a9100b8c5370ac4c36b9254d70711d"
+  }
+ },
+ {
+  "run": "geant4-run-ladder-sf",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "ladder-sf.spec.json",
+  "spec_file_sha256": "177ae3b3fe4e54e7b7557d562bc54c9047ec5fcb7043e68eb34b298622bc1c13",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim ladder-sf/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1069762858,
+    1226705393
+   ]
+  },
+  "events": 4000,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "b44798ab0ae8366fdb300c88e9d22bf05f726e21c624579f5b66528357627851",
+  "outputs": {
+   "ladder-sf/column_map.json": "e3c48c6aea3a8357d83a9de68cfdfacaf631f2677bf4292967a90f9a7d211a61",
+   "ladder-sf/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "ladder-sf/events.csv": "d736982535574f6b025a35a6f590a88ed3009065ea40b2a4ec2410d8b45affca",
+   "ladder-sf/log.txt": "2cf9cef7c91a31e2e3863b0460e6c0a8ca5c6d8e53a9fbaf1e380a64764013cc",
+   "ladder-sf/materials.json": "61330643b39c370b23c2dc5c95340ccd8a38709805dc2b3ecb7f0f20e9499ec6",
+   "ladder-sf/probe.json": "019ea48348b5acea0fc7d53289dd09771eff2fa7bdc80e203037c6d9480e8ed8",
+   "ladder-sf/spec.json": "b44798ab0ae8366fdb300c88e9d22bf05f726e21c624579f5b66528357627851",
+   "ladder-sf/summary.json": "4d44d8837697de81e681c655073b48d3111955e1a8e1aa3d9708ec2f7451e330"
+  }
+ },
+ {
+  "run": "geant4-run-msref-100gv-density-minus",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "msref-100gv-density-minus.spec.json",
+  "spec_file_sha256": "e503f79656d726f4ca9b7ac18b8787d0ea09295b2da319f5b64ef6331ce10bbf",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim msref-100gv-density-minus/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    915059160,
+    1919187662
+   ]
+  },
+  "events": 8000,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "15611e42efe1d36503296caaa0414b7abd89edd20bf989d805592d9810c1401e",
+  "outputs": {
+   "msref-100gv-density-minus/column_map.json": "07758e8a257f11cde01775c816c18d74c43553d773e6ec84a3a51e32b9270c61",
+   "msref-100gv-density-minus/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "msref-100gv-density-minus/events.csv": "0fe1db1e127741a3f6c73059ae2a29289513d1ba2659b6b3dc681fbdffdb0e1e",
+   "msref-100gv-density-minus/log.txt": "08463bd8daca2e314cd52ed24232e4558d3ea7d20cb5a64f7c65859a4b996d03",
+   "msref-100gv-density-minus/materials.json": "2bb611e97687420bfc74f40e535db2a040ab9f6a2cbb200f78618adb667ff1e2",
+   "msref-100gv-density-minus/probe.json": "8ebbf016e9eba027fc2c590a099bbe576aeb1bd5bf2c6b900e04537571bb5508",
+   "msref-100gv-density-minus/spec.json": "15611e42efe1d36503296caaa0414b7abd89edd20bf989d805592d9810c1401e"
+  }
+ },
+ {
+  "run": "geant4-run-msref-100gv-density-plus",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "msref-100gv-density-plus.spec.json",
+  "spec_file_sha256": "e75f86e6c0601444bd7babf0e9960e804564e2e6cb19c68c1d39e4e2280cf90d",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim msref-100gv-density-plus/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    2107135933,
+    2133723527
+   ]
+  },
+  "events": 8000,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "59625bc97611c4b10972394524ce45468a0ae3ac56e2ffb6e981cf2fbc11ae52",
+  "outputs": {
+   "msref-100gv-density-plus/column_map.json": "07758e8a257f11cde01775c816c18d74c43553d773e6ec84a3a51e32b9270c61",
+   "msref-100gv-density-plus/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "msref-100gv-density-plus/events.csv": "f0ba5a5b4b940fe89683ff5dfce77ec8dd58bcec6fc46d51ac810ce993962948",
+   "msref-100gv-density-plus/log.txt": "08463bd8daca2e314cd52ed24232e4558d3ea7d20cb5a64f7c65859a4b996d03",
+   "msref-100gv-density-plus/materials.json": "71c77db96b2e5c3989bfe7c2468df1e8a9d731585204415489650f9f6e49cda5",
+   "msref-100gv-density-plus/probe.json": "9d129b7ccd9ca11e9a5afef7f97b2a45cd826119b8064bfa757ecf550bdc70a5",
+   "msref-100gv-density-plus/spec.json": "59625bc97611c4b10972394524ce45468a0ae3ac56e2ffb6e981cf2fbc11ae52"
+  }
+ },
+ {
+  "run": "geant4-run-msref-100gv-nominal",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "msref-100gv-nominal.spec.json",
+  "spec_file_sha256": "945b87571bd089ab12ff8e241d712865340880b8a6ec4b3123a3b7d119b3615e",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim msref-100gv-nominal/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    956117222,
+    56154954
+   ]
+  },
+  "events": 8000,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "ec85816bdabde1a4aa03e9ec914a34bcd6e47e63c2671df8b3fa027637177579",
+  "outputs": {
+   "msref-100gv-nominal/column_map.json": "07758e8a257f11cde01775c816c18d74c43553d773e6ec84a3a51e32b9270c61",
+   "msref-100gv-nominal/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "msref-100gv-nominal/events.csv": "4dda964ada834c4bb69164d75ea9968c27bb47c52756b63a0a19bc7ab246c83f",
+   "msref-100gv-nominal/log.txt": "08463bd8daca2e314cd52ed24232e4558d3ea7d20cb5a64f7c65859a4b996d03",
+   "msref-100gv-nominal/materials.json": "ca783f9f359922dd0e0c8386974a57bfc931ce4a958e7db742bd9319e563a911",
+   "msref-100gv-nominal/probe.json": "583409f5a2fd1daf9109b26312032386321d20d82e8063fc65211c060038a873",
+   "msref-100gv-nominal/spec.json": "ec85816bdabde1a4aa03e9ec914a34bcd6e47e63c2671df8b3fa027637177579"
+  }
+ },
+ {
+  "run": "geant4-run-msref-1gv-density-minus",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "msref-1gv-density-minus.spec.json",
+  "spec_file_sha256": "d3cf16183fc75afb1321e5b86bb93ef715038a788ffda665ff6f68be3fcd9dd0",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim msref-1gv-density-minus/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    734598311,
+    1212488254
+   ]
+  },
+  "events": 8000,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "97bc7b3c07d1a3717557e81cf9cdc3563d2531e53a376eb6fdb541b5b7d35da6",
+  "outputs": {
+   "msref-1gv-density-minus/column_map.json": "07758e8a257f11cde01775c816c18d74c43553d773e6ec84a3a51e32b9270c61",
+   "msref-1gv-density-minus/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "msref-1gv-density-minus/events.csv": "7c8cfdb1ec5277246927658f31e4ba97930d605aaeb6f210d3a1c59bdddc88ac",
+   "msref-1gv-density-minus/log.txt": "08463bd8daca2e314cd52ed24232e4558d3ea7d20cb5a64f7c65859a4b996d03",
+   "msref-1gv-density-minus/materials.json": "2bb611e97687420bfc74f40e535db2a040ab9f6a2cbb200f78618adb667ff1e2",
+   "msref-1gv-density-minus/probe.json": "8ebbf016e9eba027fc2c590a099bbe576aeb1bd5bf2c6b900e04537571bb5508",
+   "msref-1gv-density-minus/spec.json": "97bc7b3c07d1a3717557e81cf9cdc3563d2531e53a376eb6fdb541b5b7d35da6"
+  }
+ },
+ {
+  "run": "geant4-run-msref-1gv-density-plus",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "msref-1gv-density-plus.spec.json",
+  "spec_file_sha256": "0d7e75a095388e64b85e9351b4005c3a998275989dedfb9d7ba91786450e0199",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim msref-1gv-density-plus/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    48616963,
+    1082062169
+   ]
+  },
+  "events": 8000,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "4b5bac84a3da6ae4c62c26683218713ac4b0b1c5c369b2d23009c6a6658aac96",
+  "outputs": {
+   "msref-1gv-density-plus/column_map.json": "07758e8a257f11cde01775c816c18d74c43553d773e6ec84a3a51e32b9270c61",
+   "msref-1gv-density-plus/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "msref-1gv-density-plus/events.csv": "c5e7516f065378bc29c9f45d4bc00ed9757712735b6618c49b1ea4f65c1fddc9",
+   "msref-1gv-density-plus/log.txt": "08463bd8daca2e314cd52ed24232e4558d3ea7d20cb5a64f7c65859a4b996d03",
+   "msref-1gv-density-plus/materials.json": "71c77db96b2e5c3989bfe7c2468df1e8a9d731585204415489650f9f6e49cda5",
+   "msref-1gv-density-plus/probe.json": "9d129b7ccd9ca11e9a5afef7f97b2a45cd826119b8064bfa757ecf550bdc70a5",
+   "msref-1gv-density-plus/spec.json": "4b5bac84a3da6ae4c62c26683218713ac4b0b1c5c369b2d23009c6a6658aac96"
+  }
+ },
+ {
+  "run": "geant4-run-msref-1gv-nominal",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "msref-1gv-nominal.spec.json",
+  "spec_file_sha256": "70e05b87f3b0ee91cc9164874c98c25a98f7b5d2b8dcc34fc924ec6e41fc4f55",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim msref-1gv-nominal/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    353756236,
+    1941958529
+   ]
+  },
+  "events": 8000,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "91e2e53f5ef36db2bc05be0e4f1b9b2b7278cbc9d7a1198af6f93794964a5af9",
+  "outputs": {
+   "msref-1gv-nominal/column_map.json": "07758e8a257f11cde01775c816c18d74c43553d773e6ec84a3a51e32b9270c61",
+   "msref-1gv-nominal/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "msref-1gv-nominal/events.csv": "757a5eb99bc908f61cfa45d45753a7e8c85d5891e9ac57146d950573e2c20c92",
+   "msref-1gv-nominal/log.txt": "08463bd8daca2e314cd52ed24232e4558d3ea7d20cb5a64f7c65859a4b996d03",
+   "msref-1gv-nominal/materials.json": "ca783f9f359922dd0e0c8386974a57bfc931ce4a958e7db742bd9319e563a911",
+   "msref-1gv-nominal/probe.json": "583409f5a2fd1daf9109b26312032386321d20d82e8063fc65211c060038a873",
+   "msref-1gv-nominal/spec.json": "91e2e53f5ef36db2bc05be0e4f1b9b2b7278cbc9d7a1198af6f93794964a5af9"
+  }
+ },
+ {
+  "run": "geant4-run-msref-500gv-density-minus",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "msref-500gv-density-minus.spec.json",
+  "spec_file_sha256": "b641111eec75f14155f1967011ec90f8dff0745dd92dd4baebac08de7ef7b5ec",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim msref-500gv-density-minus/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    2046892782,
+    714373994
+   ]
+  },
+  "events": 8000,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "9ed39209f5b75faa0499d49c4bd11ad96671f12f473c7d767b23430af051d33a",
+  "outputs": {
+   "msref-500gv-density-minus/column_map.json": "07758e8a257f11cde01775c816c18d74c43553d773e6ec84a3a51e32b9270c61",
+   "msref-500gv-density-minus/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "msref-500gv-density-minus/events.csv": "5db7e7c3b3f36ff221e18ac60256dc6a2f81db8c2159d9ce5976b5e5facc1a83",
+   "msref-500gv-density-minus/log.txt": "08463bd8daca2e314cd52ed24232e4558d3ea7d20cb5a64f7c65859a4b996d03",
+   "msref-500gv-density-minus/materials.json": "2bb611e97687420bfc74f40e535db2a040ab9f6a2cbb200f78618adb667ff1e2",
+   "msref-500gv-density-minus/probe.json": "8ebbf016e9eba027fc2c590a099bbe576aeb1bd5bf2c6b900e04537571bb5508",
+   "msref-500gv-density-minus/spec.json": "9ed39209f5b75faa0499d49c4bd11ad96671f12f473c7d767b23430af051d33a"
+  }
+ },
+ {
+  "run": "geant4-run-msref-500gv-density-plus",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "msref-500gv-density-plus.spec.json",
+  "spec_file_sha256": "82484abafb354ff86d7616f751f6c412bef5874d222237c8db84aa22d5c5a437",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim msref-500gv-density-plus/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    1806217804,
+    744141456
+   ]
+  },
+  "events": 8000,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "41844c0cc8bb05062800481e100caf36a578938e20610f71cb47b573e54ffd63",
+  "outputs": {
+   "msref-500gv-density-plus/column_map.json": "07758e8a257f11cde01775c816c18d74c43553d773e6ec84a3a51e32b9270c61",
+   "msref-500gv-density-plus/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "msref-500gv-density-plus/events.csv": "730768dae394720f4c96db151c7b75dca2f17d2254b7184a952a5e45121b9c40",
+   "msref-500gv-density-plus/log.txt": "08463bd8daca2e314cd52ed24232e4558d3ea7d20cb5a64f7c65859a4b996d03",
+   "msref-500gv-density-plus/materials.json": "71c77db96b2e5c3989bfe7c2468df1e8a9d731585204415489650f9f6e49cda5",
+   "msref-500gv-density-plus/probe.json": "9d129b7ccd9ca11e9a5afef7f97b2a45cd826119b8064bfa757ecf550bdc70a5",
+   "msref-500gv-density-plus/spec.json": "41844c0cc8bb05062800481e100caf36a578938e20610f71cb47b573e54ffd63"
+  }
+ },
+ {
+  "run": "geant4-run-msref-500gv-nominal",
+  "journey": "J15",
+  "program": "element_sim",
+  "executable": "193c678cb9e97fad",
+  "source_commit": "d9db638c",
+  "spec_name": "msref-500gv-nominal.spec.json",
+  "spec_file_sha256": "76c60586ee228a1236b1e30052743e05040be1be35f17100ce539264f02a1c42",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-b3/element_sim-build/element_sim msref-500gv-nominal/spec.json",
+  "work": "~/Workspace/geant4-work/sim-b3/j15/sim",
+  "seeds": {
+   "element_sim": [
+    376158446,
+    1926666929
+   ]
+  },
+  "events": 8000,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "9de17483f498e317b834f467c10b0012b9fe94a2794c86dc2d1dc83135f52a19",
+  "outputs": {
+   "msref-500gv-nominal/column_map.json": "07758e8a257f11cde01775c816c18d74c43553d773e6ec84a3a51e32b9270c61",
+   "msref-500gv-nominal/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "msref-500gv-nominal/events.csv": "0bb4bc024b36d33d0d02dd4c13f7c1ae0031bd8c076246379cf92460c4009e01",
+   "msref-500gv-nominal/log.txt": "08463bd8daca2e314cd52ed24232e4558d3ea7d20cb5a64f7c65859a4b996d03",
+   "msref-500gv-nominal/materials.json": "ca783f9f359922dd0e0c8386974a57bfc931ce4a958e7db742bd9319e563a911",
+   "msref-500gv-nominal/probe.json": "583409f5a2fd1daf9109b26312032386321d20d82e8063fc65211c060038a873",
+   "msref-500gv-nominal/spec.json": "9de17483f498e317b834f467c10b0012b9fe94a2794c86dc2d1dc83135f52a19"
+  }
+ },
+ {
+  "run": "geant4-run-F937-TRK1000-nominal",
+  "journey": "J16",
+  "program": "element_sim",
+  "executable": "db090f9ea07ec303",
+  "source_commit": "2a0b9f29",
+  "spec_name": "F937-TRK1000-nominal.spec.json",
+  "spec_file_sha256": "95d02b3c8e1d49944ffc63be7472652e082641d6960d6790ddd754778f3ab744",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-c2/element_sim-build/element_sim-build/element_sim F937-TRK1000-nominal/spec.json",
+  "work": "~/Workspace/geant4-work/sim-c3/j16/confirm/sim",
+  "seeds": {
+   "element_sim": [
+    1897453848,
+    2082951582
+   ]
+  },
+  "events": 5040,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "95d02b3c8e1d49944ffc63be7472652e082641d6960d6790ddd754778f3ab744",
+  "outputs": {
+   "F937-TRK1000-nominal/column_map.json": "2497a4721009331ded389f4047a53d907e4bdcb4efaac3e986ba3bed7a8277c4",
+   "F937-TRK1000-nominal/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "F937-TRK1000-nominal/events.csv": "b199ad92fce7d5ca64ee52c221d8f6e24deca193cf88b377352a2d3ab071c45e",
+   "F937-TRK1000-nominal/log.txt": "fceab849cbf6675abb8dcbe4eb5c83271e630e04a4eb290fa587cd366077c091",
+   "F937-TRK1000-nominal/materials.json": "f3600f9ceddf87169deec88c2c6398c8a05492bf3647b3fe77a92a80b6b386b5",
+   "F937-TRK1000-nominal/probe.json": "17802632f144c9cd5bd01d25a9e8f4eb2c3469e30cd24aad64ce0ad26e3859d3",
+   "F937-TRK1000-nominal/spec.json": "95d02b3c8e1d49944ffc63be7472652e082641d6960d6790ddd754778f3ab744"
+  }
+ },
+ {
+  "run": "geant4-run-F937-TRK1000-scan",
+  "journey": "J16",
+  "program": "element_sim",
+  "executable": "db090f9ea07ec303",
+  "source_commit": "2a0b9f29",
+  "spec_name": "F937-TRK1000-scan.spec.json",
+  "spec_file_sha256": "bbe70cb4a24d59bd1a2729259ecc9fc75b79547f62019be113ae3f96221308d5",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-c2/element_sim-build/element_sim-build/element_sim F937-TRK1000-scan/spec.json",
+  "work": "~/Workspace/geant4-work/sim-c3/j16/confirm/sim",
+  "seeds": {
+   "element_sim": [
+    365760330,
+    830954590
+   ]
+  },
+  "events": 5040,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "bbe70cb4a24d59bd1a2729259ecc9fc75b79547f62019be113ae3f96221308d5",
+  "outputs": {
+   "F937-TRK1000-scan/column_map.json": "2497a4721009331ded389f4047a53d907e4bdcb4efaac3e986ba3bed7a8277c4",
+   "F937-TRK1000-scan/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "F937-TRK1000-scan/events.csv": "fb66c129ef4a4696054c6663e4c4983ed8ec8621c9329ff446b5adea85ff25c8",
+   "F937-TRK1000-scan/log.txt": "fceab849cbf6675abb8dcbe4eb5c83271e630e04a4eb290fa587cd366077c091",
+   "F937-TRK1000-scan/materials.json": "f3600f9ceddf87169deec88c2c6398c8a05492bf3647b3fe77a92a80b6b386b5",
+   "F937-TRK1000-scan/probe.json": "b04628d0ca7087678662b7588ac5e40da25543e7a8cfa91b2892a5cff3ba7a6b",
+   "F937-TRK1000-scan/spec.json": "bbe70cb4a24d59bd1a2729259ecc9fc75b79547f62019be113ae3f96221308d5"
+  }
+ },
+ {
+  "run": "geant4-run-F937-TRK1000-var-emy",
+  "journey": "J16",
+  "program": "element_sim",
+  "executable": "db090f9ea07ec303",
+  "source_commit": "2a0b9f29",
+  "spec_name": "F937-TRK1000-var-emy.spec.json",
+  "spec_file_sha256": "63f72651e4c2a20bf6e60c6b69952f73d5f9bf1b21307771b7ca8e3f374b0fc6",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-c2/element_sim-build/element_sim-build/element_sim F937-TRK1000-var-emy/spec.json",
+  "work": "~/Workspace/geant4-work/sim-c3/j16/confirm/sim",
+  "seeds": {
+   "element_sim": [
+    1523799163,
+    1005535713
+   ]
+  },
+  "events": 5040,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "63f72651e4c2a20bf6e60c6b69952f73d5f9bf1b21307771b7ca8e3f374b0fc6",
+  "outputs": {
+   "F937-TRK1000-var-emy/column_map.json": "2497a4721009331ded389f4047a53d907e4bdcb4efaac3e986ba3bed7a8277c4",
+   "F937-TRK1000-var-emy/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "F937-TRK1000-var-emy/events.csv": "f615d6458c93dce484917d4f73fe3ccf70f78dedfb9d8041ba4bc0546f8e8e6b",
+   "F937-TRK1000-var-emy/log.txt": "daa4d1ec8672094a2b0c0a56de6db72e7848219b882998370e93f8078711dab8",
+   "F937-TRK1000-var-emy/materials.json": "f3600f9ceddf87169deec88c2c6398c8a05492bf3647b3fe77a92a80b6b386b5",
+   "F937-TRK1000-var-emy/probe.json": "aa9f83a70e81175009fda36b2302a5b62827ce9236d183f56600d0ec0ac5d0e5",
+   "F937-TRK1000-var-emy/spec.json": "63f72651e4c2a20bf6e60c6b69952f73d5f9bf1b21307771b7ca8e3f374b0fc6"
+  }
+ },
+ {
+  "run": "geant4-run-F937-TRK1000-var-qgsp-bic",
+  "journey": "J16",
+  "program": "element_sim",
+  "executable": "db090f9ea07ec303",
+  "source_commit": "2a0b9f29",
+  "spec_name": "F937-TRK1000-var-qgsp-bic.spec.json",
+  "spec_file_sha256": "6449d7828af59e9f99774aa09329959151a9932ccb07d52c952cc2e02c977084",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-c2/element_sim-build/element_sim-build/element_sim F937-TRK1000-var-qgsp-bic/spec.json",
+  "work": "~/Workspace/geant4-work/sim-c3/j16/confirm/sim",
+  "seeds": {
+   "element_sim": [
+    1642082775,
+    516669362
+   ]
+  },
+  "events": 5040,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "6449d7828af59e9f99774aa09329959151a9932ccb07d52c952cc2e02c977084",
+  "outputs": {
+   "F937-TRK1000-var-qgsp-bic/column_map.json": "2497a4721009331ded389f4047a53d907e4bdcb4efaac3e986ba3bed7a8277c4",
+   "F937-TRK1000-var-qgsp-bic/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "F937-TRK1000-var-qgsp-bic/events.csv": "38a743b127a1915175bd1b15b3eede8660279b388ba021c22d7903c8c294ffbd",
+   "F937-TRK1000-var-qgsp-bic/log.txt": "2f4552fc4cc9ebce31d1677ddbdef99f889f1d8170ec4bfa0f2f06d00df7ef3a",
+   "F937-TRK1000-var-qgsp-bic/materials.json": "f3600f9ceddf87169deec88c2c6398c8a05492bf3647b3fe77a92a80b6b386b5",
+   "F937-TRK1000-var-qgsp-bic/probe.json": "7346f2e40cd2062651277875aee97b0e29a87e91b4adb7c399cd384fe0355738",
+   "F937-TRK1000-var-qgsp-bic/spec.json": "6449d7828af59e9f99774aa09329959151a9932ccb07d52c952cc2e02c977084"
+  }
+ },
+ {
+  "run": "geant4-run-F937-chargedgeantino",
+  "journey": "J16",
+  "program": "element_sim",
+  "executable": "db090f9ea07ec303",
+  "source_commit": "2a0b9f29",
+  "spec_name": "F937-chargedgeantino.spec.json",
+  "spec_file_sha256": "05ae18dc8d22c843a529e09eca65bc536d7a9349427f1b888ca683443926680b",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-c2/element_sim-build/element_sim-build/element_sim F937-chargedgeantino/spec.json",
+  "work": "~/Workspace/geant4-work/sim-c3/j16/confirm/sim",
+  "seeds": {
+   "element_sim": [
+    1852966385,
+    1977388672
+   ]
+  },
+  "events": 500,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "05ae18dc8d22c843a529e09eca65bc536d7a9349427f1b888ca683443926680b",
+  "outputs": {
+   "F937-chargedgeantino/column_map.json": "2497a4721009331ded389f4047a53d907e4bdcb4efaac3e986ba3bed7a8277c4",
+   "F937-chargedgeantino/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "F937-chargedgeantino/events.csv": "7526b45af378005e7810eef6d50943131976bb1a527e405b9ea203740924fb8b",
+   "F937-chargedgeantino/log.txt": "fceab849cbf6675abb8dcbe4eb5c83271e630e04a4eb290fa587cd366077c091",
+   "F937-chargedgeantino/materials.json": "f3600f9ceddf87169deec88c2c6398c8a05492bf3647b3fe77a92a80b6b386b5",
+   "F937-chargedgeantino/probe.json": "17802632f144c9cd5bd01d25a9e8f4eb2c3469e30cd24aad64ce0ad26e3859d3",
+   "F937-chargedgeantino/spec.json": "05ae18dc8d22c843a529e09eca65bc536d7a9349427f1b888ca683443926680b"
+  }
+ },
+ {
+  "run": "geant4-run-F937-closure",
+  "journey": "J16",
+  "program": "element_sim",
+  "executable": "db090f9ea07ec303",
+  "source_commit": "2a0b9f29",
+  "spec_name": "F937-closure.spec.json",
+  "spec_file_sha256": "51cd0d993bd5ecef5a107c542252060bdce7681e7222a4404b8cbbb8b26acc59",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-c2/element_sim-build/element_sim-build/element_sim F937-closure/spec.json",
+  "work": "~/Workspace/geant4-work/sim-c3/j16/confirm/sim",
+  "seeds": {
+   "element_sim": [
+    491202088,
+    914379038
+   ]
+  },
+  "events": 8000,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "51cd0d993bd5ecef5a107c542252060bdce7681e7222a4404b8cbbb8b26acc59",
+  "outputs": {
+   "F937-closure/column_map.json": "2497a4721009331ded389f4047a53d907e4bdcb4efaac3e986ba3bed7a8277c4",
+   "F937-closure/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "F937-closure/events.csv": "f7bacbd01b6656645056ec849b87bd6ccbb526d994ef5bc6e23a9d98c1d9bd56",
+   "F937-closure/log.txt": "fceab849cbf6675abb8dcbe4eb5c83271e630e04a4eb290fa587cd366077c091",
+   "F937-closure/materials.json": "f3600f9ceddf87169deec88c2c6398c8a05492bf3647b3fe77a92a80b6b386b5",
+   "F937-closure/probe.json": "17802632f144c9cd5bd01d25a9e8f4eb2c3469e30cd24aad64ce0ad26e3859d3",
+   "F937-closure/spec.json": "51cd0d993bd5ecef5a107c542252060bdce7681e7222a4404b8cbbb8b26acc59"
+  }
+ },
+ {
+  "run": "geant4-run-F937-geantino",
+  "journey": "J16",
+  "program": "element_sim",
+  "executable": "db090f9ea07ec303",
+  "source_commit": "2a0b9f29",
+  "spec_name": "F937-geantino.spec.json",
+  "spec_file_sha256": "26b28eca4c1f4b23027fa81566eee460127329a11561525f46a1ed53bd58c51e",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-c2/element_sim-build/element_sim-build/element_sim F937-geantino/spec.json",
+  "work": "~/Workspace/geant4-work/sim-c3/j16/confirm/sim",
+  "seeds": {
+   "element_sim": [
+    1662438171,
+    1985700028
+   ]
+  },
+  "events": 2000,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "26b28eca4c1f4b23027fa81566eee460127329a11561525f46a1ed53bd58c51e",
+  "outputs": {
+   "F937-geantino/column_map.json": "2497a4721009331ded389f4047a53d907e4bdcb4efaac3e986ba3bed7a8277c4",
+   "F937-geantino/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "F937-geantino/events.csv": "8c6caa3a49ae0efe5ab01d91def9638e90135cad25f44f7454b7d5c54379a657",
+   "F937-geantino/log.txt": "fceab849cbf6675abb8dcbe4eb5c83271e630e04a4eb290fa587cd366077c091",
+   "F937-geantino/materials.json": "f3600f9ceddf87169deec88c2c6398c8a05492bf3647b3fe77a92a80b6b386b5",
+   "F937-geantino/probe.json": "17802632f144c9cd5bd01d25a9e8f4eb2c3469e30cd24aad64ce0ad26e3859d3",
+   "F937-geantino/spec.json": "26b28eca4c1f4b23027fa81566eee460127329a11561525f46a1ed53bd58c51e"
+  }
+ },
+ {
+  "run": "geant4-run-msref-1000gv-density-minus",
+  "journey": "J16",
+  "program": "element_sim",
+  "executable": "db090f9ea07ec303",
+  "source_commit": "2a0b9f29",
+  "spec_name": "msref-1000gv-density-minus.spec.json",
+  "spec_file_sha256": "942b177dca58008e5fac5d311d51cdd34e0f26873f018a01a5a63ab80801bb4b",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-c2/element_sim-build/element_sim-build/element_sim msref-1000gv-density-minus/spec.json",
+  "work": "~/Workspace/geant4-work/sim-c3/j16/confirm/sim",
+  "seeds": {
+   "element_sim": [
+    2031225257,
+    1825382993
+   ]
+  },
+  "events": 8000,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "d8ccd7d87185ae303207825d572c0a3d8b192e73e3894d3bef85250a39fba7bb",
+  "outputs": {
+   "msref-1000gv-density-minus/column_map.json": "07758e8a257f11cde01775c816c18d74c43553d773e6ec84a3a51e32b9270c61",
+   "msref-1000gv-density-minus/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "msref-1000gv-density-minus/events.csv": "d651fb113775245e7e52e09e639a6a4782d7f6f3b4a123e934110956a118f9e9",
+   "msref-1000gv-density-minus/log.txt": "08463bd8daca2e314cd52ed24232e4558d3ea7d20cb5a64f7c65859a4b996d03",
+   "msref-1000gv-density-minus/materials.json": "2bb611e97687420bfc74f40e535db2a040ab9f6a2cbb200f78618adb667ff1e2",
+   "msref-1000gv-density-minus/probe.json": "27b3acccab5ef2483c2e4ff0cf78c1b20fa7b5980e7addf5ee459bb617c0d1a1",
+   "msref-1000gv-density-minus/spec.json": "d8ccd7d87185ae303207825d572c0a3d8b192e73e3894d3bef85250a39fba7bb"
+  }
+ },
+ {
+  "run": "geant4-run-msref-1000gv-density-plus",
+  "journey": "J16",
+  "program": "element_sim",
+  "executable": "db090f9ea07ec303",
+  "source_commit": "2a0b9f29",
+  "spec_name": "msref-1000gv-density-plus.spec.json",
+  "spec_file_sha256": "fabb07578d04d1f8323cc3a1b873b312d84cae95d0e375674375f3157f98811e",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-c2/element_sim-build/element_sim-build/element_sim msref-1000gv-density-plus/spec.json",
+  "work": "~/Workspace/geant4-work/sim-c3/j16/confirm/sim",
+  "seeds": {
+   "element_sim": [
+    1110900193,
+    840474022
+   ]
+  },
+  "events": 8000,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "b700ed52e0f568fb72b4e87c081449d1fdf3de789bccbd4849ad37718d37e71e",
+  "outputs": {
+   "msref-1000gv-density-plus/column_map.json": "07758e8a257f11cde01775c816c18d74c43553d773e6ec84a3a51e32b9270c61",
+   "msref-1000gv-density-plus/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "msref-1000gv-density-plus/events.csv": "85ee0a697e5bdaa5edcee94cf807f034bacdabfabe1bbe3e1fc8c30ee9e26b57",
+   "msref-1000gv-density-plus/log.txt": "08463bd8daca2e314cd52ed24232e4558d3ea7d20cb5a64f7c65859a4b996d03",
+   "msref-1000gv-density-plus/materials.json": "71c77db96b2e5c3989bfe7c2468df1e8a9d731585204415489650f9f6e49cda5",
+   "msref-1000gv-density-plus/probe.json": "abb638f55978258442226eabd85319b3b2a8178747dda0df4ed464a9022aa701",
+   "msref-1000gv-density-plus/spec.json": "b700ed52e0f568fb72b4e87c081449d1fdf3de789bccbd4849ad37718d37e71e"
+  }
+ },
+ {
+  "run": "geant4-run-msref-1000gv-nominal",
+  "journey": "J16",
+  "program": "element_sim",
+  "executable": "db090f9ea07ec303",
+  "source_commit": "2a0b9f29",
+  "spec_name": "msref-1000gv-nominal.spec.json",
+  "spec_file_sha256": "301ab974bb6ec55e6e5e4c788ae461d95ff2b5346131de74e04c6cc635633b7f",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.38.0",
+  "command": "~/Workspace/geant4-work/sim-c2/element_sim-build/element_sim-build/element_sim msref-1000gv-nominal/spec.json",
+  "work": "~/Workspace/geant4-work/sim-c3/j16/confirm/sim",
+  "seeds": {
+   "element_sim": [
+    1976627131,
+    1581286028
+   ]
+  },
+  "events": 8000,
+  "run_manager": "mt",
+  "threads": 8,
+  "spec_sha256": "92e47b951320b85481bbb696db2565f173c360cc4d3fa3b3432e78e0b2c19c61",
+  "outputs": {
+   "msref-1000gv-nominal/column_map.json": "07758e8a257f11cde01775c816c18d74c43553d773e6ec84a3a51e32b9270c61",
+   "msref-1000gv-nominal/datapaths.json": "65675bb381999473b43a69996678a2184f52e218d71fd46db2bb174264f03060",
+   "msref-1000gv-nominal/events.csv": "13b3bc9135dcef4e758c6156fd536eafb5a4018a87e93de7a9a10e56ccb5d6b5",
+   "msref-1000gv-nominal/log.txt": "08463bd8daca2e314cd52ed24232e4558d3ea7d20cb5a64f7c65859a4b996d03",
+   "msref-1000gv-nominal/materials.json": "ca783f9f359922dd0e0c8386974a57bfc931ce4a958e7db742bd9319e563a911",
+   "msref-1000gv-nominal/probe.json": "07d58676003881b6a9a2288751bb001d2893b03dfe646b07cde9a6ec1ab9450f",
+   "msref-1000gv-nominal/spec.json": "92e47b951320b85481bbb696db2565f173c360cc4d3fa3b3432e78e0b2c19c61"
+  }
+ },
+ {
+  "run": "geant4-run-mirror-testem3",
+  "journey": "mirrors",
+  "program": "layered_sim",
+  "executable": "a69ffad7c003aad9",
+  "source_commit": "3f4f9985",
+  "spec_name": "mirror_testem3.json",
+  "spec_file_sha256": "0e8f9fc39189884cfe5f66939e6454e3df619ae4f08bc96f53cef23330ee1583",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.18.1",
+  "command": "~/Workspace/geant4-work/sim-a/layered_sim-build/layered_sim mirror-testem3/spec.json",
+  "work": "~/Workspace/geant4-work/mirror",
+  "seeds": {
+   "layered_sim": [
+    12345,
+    67890
+   ]
+  },
+  "events": 10000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "7ed843e0e2c1a2b1f0f6446a595388021bcb2e7709143eb19853f801ecfc91f6",
+  "outputs": {
+   "mirror-testem3/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "mirror-testem3/events.csv": "3bc09c1191847d5e7e58e1912abe20332d5e133c321d96540739c68ed6a5091f",
+   "mirror-testem3/log.txt": "48afea4ffe5d27adac73d00758b15efc52b2cc1470d4976140e01bd8ec1584ea",
+   "mirror-testem3/materials.json": "14981e27511c483fc643739dac72a3d63fd20b64f599c0450ed544b249471730",
+   "mirror-testem3/spec.json": "24dc95e78eee48d2a75ad639133f748c8088a049372826fd711e9d2893ed7868"
+  }
+ },
+ {
+  "run": "geant4-run-mirror-testem5_run0",
+  "journey": "mirrors",
+  "program": "layered_sim",
+  "executable": "a69ffad7c003aad9",
+  "source_commit": "3f4f9985",
+  "spec_name": "mirror_testem5_run0.json",
+  "spec_file_sha256": "81e1ada42e76660b8353c236d3aac1da7f8b05a349270d1300d66ad789307d78",
+  "geant4": "v11.4.3 (2ee379e6843e55b9c6bbb835d2a2b03cc998fef0)",
+  "plugin_version": "0.18.1",
+  "command": "~/Workspace/geant4-work/sim-a/layered_sim-build/layered_sim mirror-testem5_run0/spec.json",
+  "work": "~/Workspace/geant4-work/mirror",
+  "seeds": {
+   "layered_sim": [
+    24680,
+    13579
+   ]
+  },
+  "events": 100000,
+  "run_manager": "serial",
+  "threads": 1,
+  "spec_sha256": "b593ed89bb8b386eb846fe781f9154aef14c2036f89629f61058777ecc03c5b2",
+  "outputs": {
+   "mirror-testem5_run0/datapaths.json": "2255a80fbd7dbff11a95aadda9a82207b3db72eadc0f7d025ed7b60c0350a754",
+   "mirror-testem5_run0/events.csv": "1332f9accf4d1ab1d0e71215befde9683e15d9808af0fc66fa1d821e5c14fb52",
+   "mirror-testem5_run0/log.txt": "170886b1282a68fdc9f9a6523b4250691855bb28c1adea497a2a5197c35af113",
+   "mirror-testem5_run0/materials.json": "6b955be79819e123abb9a0109c99ab9f3d6b206e51ea23afb5d9e6e2fdd3742b",
+   "mirror-testem5_run0/spec.json": "4451d5129bf39523cc66ae7decf8a85caf2986851231f26627e9cf5c3914fabc"
+  }
+ }
+]

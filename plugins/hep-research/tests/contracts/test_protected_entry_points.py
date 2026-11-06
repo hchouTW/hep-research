@@ -121,6 +121,7 @@ def cli_entries(env: Env):
         ("contracts/validate.py", load_script("contracts/validate.py").main, [a], True, False),
         ("contracts/dependencies.py", load_script("contracts/dependencies.py").main, [a, "--root", str(env.proj)], True, False),
         ("contracts/geometry.py", load_script("contracts/geometry.py").main, [a], False, False),
+        ("g4sim_run.py", load_script("adapters/geant4/assets/g4sim_run.py").main, ["check-spec", "--run", a], False, False),
         ("contracts/comparison/gate.py", load_script("contracts/comparison/gate.py").main, [a, a], True, False),
         ("contracts/project.py", load_script("contracts/project.py").main, [str(env.proj)], False, False),
         ("combine_measurements.py", load_script("skills/hep-statistics/scripts/combine_measurements.py").main, [a], True, False),

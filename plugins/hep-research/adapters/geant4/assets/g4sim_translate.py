@@ -386,14 +386,14 @@ def _old_roles(old: dict) -> dict:
     return {element["name"]: {"role": element["role"], "mother": element.get("mother")} for element in old.get("elements", [])}
 
 
-def legacy_block(record: dict, old: dict, seeding: str) -> dict:
+def legacy_block(record: dict, old: dict, seeding: str, observer_revision: str = "current") -> dict:
     """The legacy block of a T1-class run (Section 7.1): every value from a ProbeV2 record, as float.hex() strings, plus what only
     the old specification knows. A record that did not record, or changed the random state, cannot be used."""
     if record.get("recorded") is not True or record.get("random_state_unchanged") is not True:
         raise TranslationError("the re-acquisition record did not record, or changed the random state")
     geometry = record["base"]["geometry"]
     derived = {item["name"]: item for item in record["materials"]}
-    return {"source": "probe", "seeding": seeding, "positions": geometry["placements"], "logical_volumes": geometry["logical_volumes"],
+    return {"source": "probe", "seeding": seeding, "observer_revision": observer_revision, "positions": geometry["placements"], "logical_volumes": geometry["logical_volumes"],
             "materials": [_material_record(item, derived[item["name"]]) for item in geometry["materials"]],
             "regions": record["regions"], "fields": record["logical_fields"], "processes": record["processes"], "roles": _old_roles(old)}
 
@@ -405,7 +405,7 @@ def _hex_equal(text: str, value: float) -> bool:
 def block_differences(block: dict, record: dict) -> list[str]:
     """Where a legacy block differs from the record it must equal (S1 gate 4)."""
     expected = legacy_block(record, {"elements": []}, block["seeding"])
-    return [key for key in expected if key != "roles" and block.get(key) != expected[key]]
+    return [key for key in expected if key not in ("roles", "observer_revision") and block.get(key) != expected[key]]
 
 
 def position_differences(block: dict, old: dict) -> list[str]:

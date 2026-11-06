@@ -239,6 +239,167 @@
    "registered_at": "2026-11-05T09:25:27Z",
    "card_commit": "f17e583c",
    "reason": "Execution log only (versions, final checks); thresholds unchanged"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "ae601bf4d74161bb15fdaa7b335537c4116375c01e86dd9e760b72a42aab4072",
+   "registered_at": "2026-11-05T17:20:30Z",
+   "card_commit": "6b08af32",
+   "reason": "Refreshed at the start of S2: q_max and r_max of legacy physics lists registered, T2 not needed, execution rules; no threshold loosened"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "4e88188e34c520b06dae13d47dd00d6ea086532a0f5beb74e66df96d2ac83a4f",
+   "registered_at": "2026-11-05T17:43:25Z",
+   "card_commit": "efddbeb5",
+   "reason": "Execution log and the closed open question only; thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "c0f12d8216d5605924e1f8c2bbe1764613b9054cdf0be909c2325631aa62b90e",
+   "registered_at": "2026-11-05T18:07:42Z",
+   "card_commit": "5170ad35",
+   "reason": "Execution log only; thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "b1008b34849d9a5ba74d51863ca282cddf14cff2410bf919cc85a7428ac69231",
+   "registered_at": "2026-11-05T18:50:58Z",
+   "card_commit": "c1e54f8f",
+   "reason": "Execution log only; thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "431732e5b841e44fd3ce7214b55dc40b852f11219286e6efb1d13708743a6809",
+   "registered_at": "2026-11-05T19:00:04Z",
+   "card_commit": "86b342b9",
+   "reason": "Execution log only; thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "c421baa27a2b8c045e07d1ad6732d5ad9f4bab56da33e1440e1f5b9b2afc092b",
+   "registered_at": "2026-11-05T19:07:37Z",
+   "card_commit": "50f346c4",
+   "reason": "Execution log only; thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "7636ec9185220be66023b465fc64dc936cf7f22d08954fd772030bdb03bfe8c0",
+   "registered_at": "2026-11-05T21:41:59Z",
+   "card_commit": "6eb0f2d8",
+   "reason": "Execution log only; thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "4849a016d85f06155f546510a17e325b9b45f01b07f7c86e2fb9acab8aa458bd",
+   "registered_at": "2026-11-05T22:04:14Z",
+   "card_commit": "0fe79f53",
+   "reason": "GB9 re-registered by the maintainer's decision of 2026-11-05: the limit judges the chain logic with Geant4's own masses, because the limit could not be met against PDG 2026 masses; no other threshold changed"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "34f6350931dc3d6d73188931f69d9a3da24f102fe9755e3dda5bb64e51190bae",
+   "registered_at": "2026-11-05T22:12:03Z",
+   "card_commit": "09efb9eb",
+   "reason": "Conservation design registered before any trial run; no threshold changed"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "cd1fe6393c8962c69e62b2d201c53a2cd58a92b8ecebd1504724aebbcbc013b2",
+   "registered_at": "2026-11-05T22:26:22Z",
+   "card_commit": "f1148e68",
+   "reason": "Execution log only; thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "1b5bb28dd5e0a199e6cb1cd3efe2081506267bd1afdeed1b4d6c761172c92d5c",
+   "registered_at": "2026-11-05T22:54:12Z",
+   "card_commit": "384f00e0",
+   "reason": "Two-step registration: N and the trial values, before any calibration run"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "83fafafef9a771289eb6f8ab054d41dd3bc5464946c573fe87b5cab60b675d2b",
+   "registered_at": "2026-11-05T23:17:50Z",
+   "card_commit": "ee6b2ce9",
+   "reason": "GB6's negative re-registered by the maintainer's decision of 2026-11-05; Execution log; no other threshold changed"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "4e408194f98e56ef920784c124b9497ede0eeee641fd266991775d00fef61844",
+   "registered_at": "2026-11-05T23:26:07Z",
+   "card_commit": "e1e7a48c",
+   "reason": "Two-step registration: q, p0, p1 and n, before the reference and under-test runs"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "fb3db7d5bf37e60e3d7bcd1995165af10443734ee32cd1d4c843ca24b89ec441",
+   "registered_at": "2026-11-05T23:39:05Z",
+   "card_commit": "863d95d0",
+   "reason": "Execution log only; thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "56c642ec5d112ddee143f26ef13ca22c4383ddb9058a2b7c9b54c2d50280af5e",
+   "registered_at": "2026-11-05T23:51:00Z",
+   "card_commit": "a918bfcf",
+   "reason": "Execution log only; thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "f4ba52345c48a2bb0506637b2333413c419fac1c040fbd6e142c9b54cba6cd13",
+   "registered_at": "2026-11-06T00:21:47Z",
+   "card_commit": "0133dfd1",
+   "reason": "Execution log only; thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "c913227be75eec5679c18b12605383f25544b489866bd6171d1b62fb1007da02",
+   "registered_at": "2026-11-06T04:41:53Z",
+   "card_commit": "c939847a",
+   "reason": "Execution log only, before the conservation rerun; thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "e0794c9f02b6093ecd743c4c657cc46ad9266c3dc4a5c6611721fda4920ebab3",
+   "registered_at": "2026-11-06T05:24:25Z",
+   "card_commit": "3ac0b81a",
+   "reason": "Two-step registration of the conservation rerun: N and the trial values, before its calibration runs"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "fbeb50f1923d1cda9fc4751a1b2474d50daf089622dc4f48b50c4d21176ad2bc",
+   "registered_at": "2026-11-06T05:53:06Z",
+   "card_commit": "f585cd1a",
+   "reason": "Two-step registration of the conservation rerun: q, p0, p1 and n, before its reference and under-test runs"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "e71332bf56cd6f60c74c79bef3054a879b50675fb3b55f9db41cd1ab11ba7fb7",
+   "registered_at": "2026-11-06T06:15:41Z",
+   "card_commit": "a6779042",
+   "reason": "Execution log only; thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "4e87db590e2fd50e352497aa0f8ecb031513c39fef7c128d09739e9cbda2321d",
+   "registered_at": "2026-11-06T07:37:42Z",
+   "card_commit": "1bbe4388",
+   "reason": "Execution log only; thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "52543a442687c41a499ab6e530a340390e699f3e17f24bf1c6b6f4caa6d927e6",
+   "registered_at": "2026-11-06T07:45:54Z",
+   "card_commit": "02bf1100",
+   "reason": "Execution log only; thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "2180c0bd0c4d499d5852b88df993228956f0f6b318c392221a1424f3e1cdd722",
+   "registered_at": "2026-11-06T08:33:15Z",
+   "card_commit": "4dac8e63",
+   "reason": "Execution log only; thresholds unchanged from the previous registration"
   }
  ]
 }
