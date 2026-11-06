@@ -191,3 +191,8 @@ User's answer, 2026-11-06, verbatim: "accept the draft, use a fresh reviewer". t
 ## T04 version 3
 
 User's answer, 2026-11-06, verbatim: "accept version 3, third review before the freeze". t04-values-v3.md is the working draft. Nothing is frozen. A third fresh review of the then-current draft happens before Freeze A, which comes before any development run.
+
+## T04 section 18 stops
+
+User's answer, 2026-11-06, verbatim: "go ahead with 1, 2, 3(a) and 4 as recommended". Meaning, from the options then shown: (1) the exact sum becomes T08's efficiency reference and section 4.2's values are recomputed; (2) direction enters pulls through mapped angles and the tangent plane; (3a) a corrected rerun with new events and about 4 times as many at `N_exp` 80 and 120, keeping 80 if it clears and otherwise raising the edge to 120; (4) `PATCH` becomes 200. Nothing is frozen. Rule and results: t04-v4-dispositions.md.
+

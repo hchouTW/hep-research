@@ -250,7 +250,31 @@ The rules did not provide for "clears at 120, not at 80". Neither row is claimed
 
 Consequences recorded for the user's decision:
 
-- Version 4 does not say how T09 direction angles enter a pull: no range rule, and nothing at the poles, although the fixture's directions are isotropic and the script drew `theta` only from 0.5 to 2.6. This gap is in the design text as well as the script.
+- Corrected 2026-11-06: an earlier version of this line said version 4 does not define how direction enters a pull. That was wrong, from a search on `theta` and `phi`. Section 7 already names two direction components in the tangent plane at the truth direction. The script departed from version 4 in three ways: it gated `theta` and `phi`, its seventh parameter was `N_exp` where section 7 names `E_vis`, and it drew `theta` only from 0.5 to 2.6 where section 4.3 is isotropic. So the `N` excess at 80 above is on a parameter version 4 does not gate. Section 7 still leaves the tangent frame unstated.
 - Not affected by the defect: x, y, z, `t0` and `N` pulls, the dead screen (x, y, z, `t0`), fit failure, and the H2 results, which use likelihood values, not angle differences.
 - Wrong minimum clause (b) as defined would count the same out-of-range fits unless angles are mapped first.
+
+## Round 4: rule for the user's decisions
+
+Fixed before any output exists. Scripts `<private>/evidence/t04-v4/round4/calc-t08-exact.py` (`038462b5ab04ee49`), `calc-t09-range.py` (`ae61190114225994`), job `<private>/jobs/t04-round4/run.sh` (`aab787a884ccb392`). Syntax-parsed only, not run, not independently reviewed.
+
+`calc-t09-range.py` follows sections 4.3 and 7: isotropic directions; x, y, z, `t0`, two tangent components, `E_vis`; new seed stream; 4,800 events per `N_exp`, 1,600 per radial bin. Limits keep section 18's form, `0.0356 + 1.645 se`, with `se` 1.03 and 0.962 over `sqrt(n)`; section 18's own values follow from it at n = 1,200 and 400.
+
+| Rows | Centre | Width - 1 |
+| --- | --- | --- |
+| Pooled, n = 4,800 | 0.0601 | 0.0584 |
+| Radial, n = 1,600 | 0.0780 | 0.0752 |
+| Dead masked, n = 500 | 0.1114 | 0.1064 |
+
+| Result | Action |
+| --- | --- |
+| `N_exp` 80: pooled and all three radial rows clear | Range stays 80 |
+| 80 not clear, 120 clear on the same four rows | Range and the B1/B2 edge become 120 |
+| Neither clear | Stop |
+| Fit failure above 0.00805, or wrong minimum, clause (a) or (b), above 0.00466, at either `N_exp` (section 18's `0.5 L + 3 se`) | Stop |
+| Dead masked, patch 200: any value over | Goes to the user. `PATCH` stays 200 unless the user changes it |
+| T08: every `NODE` line within its limit | Section 4.2's values become the exact ones printed |
+| T08: any `NODE` line over | Stop |
+
+A row's kept count below its n is fit failure and is read above. A rule not listed leaves version 4 unchanged, and an outcome the table does not cover goes to the user.
 
