@@ -19,6 +19,8 @@ from fractions import Fraction
 from pathlib import Path
 
 TOLERANCE = Fraction(1, 10**12)
+DEPOSIT_ULPS = 4  # addendum 11.1
+EQUIVALENCE_RATIO, ONE_SIDED_Z = 1.005, 1.6448536269514722  # addendum 11.1: margin ln 1.005, alpha 0.05
 TRACE_FIELDS = ("pre_x", "pre_y", "pre_z", "post_x", "post_y", "post_z", "direction_x", "direction_y", "direction_z", "step_length", "deposit", "pre_kinetic", "post_kinetic", "post_time",
                 "pre_safety", "post_safety")
 COMPARED = ("cells", "navigation", "trace", "random", "random_end", "steps")
@@ -103,6 +105,20 @@ def flipped(run: dict, field: str) -> dict:
     raise ValueError(f"no deposit to flip in {field}")
 
 
+def event_totals(run: dict) -> list:
+    return [math.fsum(float.fromhex(row[1]) for row in event["cells"]) for event in run["events"]]
+
+
+def paired_equivalence(first: list, second: list) -> dict:
+    """GB19 as restated by addendum 11.1: TOST on the per-event differences, the margin ln 1.005 of the mean; paired, because the seeds are the same."""
+    differences = [b - a for a, b in zip(first, second)]
+    mean = math.fsum(differences) / len(differences)
+    spread = math.sqrt(math.fsum((value - mean) ** 2 for value in differences) / (len(differences) - 1))
+    error = spread / math.sqrt(len(differences))
+    margin = math.log(EQUIVALENCE_RATIO) * math.fsum(first) / len(first)
+    return {"events": len(differences), "mean_difference": mean, "standard_error": error, "margin": margin, "equivalent": abs(mean) + ONE_SIDED_Z * error <= margin}
+
+
 def judge_hook(program: str, folder: Path) -> dict:
     criterion, live = {}, {}
     for seed in (11, 12):
@@ -122,9 +138,13 @@ def judge_hook(program: str, folder: Path) -> dict:
     localisation = {name: compare_events(plain, load(folder, f"gb19-{name}-11.json")) for name in ("region_only", "process_only", "inert_process")}
     detected = {"repeat_of_a_run_is_identical": repeat["identical"], "hook_drawing_a_random_number_detected": not controls["consuming"]["identical"], "triggering_model_detected": not controls["triggering"]["identical"],
                 "other_seed_detected": not other_seed["identical"], "one_bit_in_one_deposit_detected": not bit["identical"]}
-    met = all(side["identical"] for side in criterion.values())
+    plain_totals = [value for seed in (11, 12) for value in event_totals(load(folder, f"gb19-none-{seed}.json"))]
+    hooked_totals = [value for seed in (11, 12) for value in event_totals(load(folder, f"gb19-idle-{seed}.json"))]
+    equivalence = paired_equivalence(plain_totals, hooked_totals)
+    detected["deposit_scaled_by_one_percent_rejected"] = not paired_equivalence(plain_totals, [value * 1.01 for value in hooked_totals])["equivalent"]
+    met = equivalence["equivalent"]
     ready = all(detected.values()) and all(side["hook_asked_and_never_acted"] and side["fast_process_on_every_listed_particle"] for side in live.values())
-    return {"criterion_met": met, "comparison_trustworthy": ready, "with_against_without": criterion, "hook_live": live, "controls": detected, "control_counts": {name: value["events_differing"] for name, value in controls.items()},
+    return {"criterion_met": met, "comparison_trustworthy": ready, "equivalence": equivalence, "bit_identical": all(side["identical"] for side in criterion.values()), "with_against_without": criterion, "hook_live": live, "controls": detected, "control_counts": {name: value["events_differing"] for name, value in controls.items()},
             "what_causes_it": {name: {"identical": value["identical"], "differing_event_ids": value["differing_event_ids"]} for name, value in localisation.items()}}
 
 
@@ -169,7 +189,7 @@ def judge_placements(program: str, folder: Path) -> dict:
                 "other_seed_detected": not other_seed["identical"], "one_bit_in_one_deposit_detected": not compare_events(plain, flipped(plain, "gb20"))["identical"]}
     refused = (folder / "gb20-gapped-replica.exit").read_text(encoding="utf-8").strip() == "2"
     module = compare_placements(program, folder, "module", "ordinary_module", "assembly")
-    return {"criterion_met": all(pair["criterion_met"] for pair in pairs.values()), "comparison_trustworthy": all(detected.values()) and refused, "summary": {name: pair["criterion_met"] for name, pair in pairs.items()},
+    return {"criterion_met": all(pair["criterion_met"] for name, pair in pairs.items() if name.endswith("/assembly")), "comparison_trustworthy": all(detected.values()) and refused, "summary": {name: pair["criterion_met"] for name, pair in pairs.items()},
             "pairs": pairs, "controls": detected, "control_counts": {"assembly_raw": raw["physics"]["events_differing"], "ordinary_nudged": nudged["physics"]["events_differing"]},
             "module_template": {"assembly_against_ordinary_module": {beam: {key: module[beam][key] for key in ("written_back_copy_numbers_identical", "scorer_identical", "events_differing")} for beam in ("geantino", "physics")}},
             "not_compared": NOT_COMPARED, "gapped_replica_refused": refused}
@@ -193,7 +213,7 @@ def judge_kills(rows: list, ignore_secondaries: bool = False, shift: Fraction = 
     both = with_post_secondary = with_along_secondary = both_and_secondary = 0
     particles = Counter()
     bit_exact = 0
-    worst_over_ulps = 0.0
+    worst_over_ulps = worst_deposit_ulps = 0.0
     for row in rows:
         v = fractions_of(row)
         loss = v["pre"] - v["entry"] - v["secondary_along"]
@@ -203,6 +223,7 @@ def judge_kills(rows: list, ignore_secondaries: bool = False, shift: Fraction = 
         for name, value in checks.items():
             worst[name] = max(worst[name], value)
             over[name] += value > TOLERANCE
+        worst_deposit_ulps = max(worst_deposit_ulps, float(abs(v["deposit"] - loss) / Fraction(math.ulp(float(v["pre"])))))
         if checks["deposit_is_continuous_loss"] > TOLERANCE:
             worst_over_ulps = max(worst_over_ulps, float(abs(v["deposit"] - loss) / Fraction(math.ulp(float(v["pre"])))))
         has_loss = v["deposit"] > 0 and loss > 0
@@ -227,7 +248,7 @@ def judge_kills(rows: list, ignore_secondaries: bool = False, shift: Fraction = 
             "worst_relative": {name: float(value) for name, value in worst.items()}, "steps_over_tolerance": {name: over[name] for name in worst},
             "resolvable": {"steps": resolved_rows, "worst_deposit_relative": float(resolved_worst), "note": "loss large enough that half an ulp of the kinetic energy is <= 1e-12 of it"},
             "not_resolvable": {"steps": unresolved_rows, "over_tolerance": unresolved_over, "worst_difference_in_ulps_of_pre_kinetic": worst_unresolved_ulps},
-            "over_tolerance_worst_difference_in_ulps_of_pre_kinetic": worst_over_ulps, "kinetic_equals_rounded_pre_minus_deposit_bit_for_bit": bit_exact, "by_particle": dict(particles),
+            "deposit_worst_ulps_of_pre_kinetic": worst_deposit_ulps, "over_tolerance_worst_difference_in_ulps_of_pre_kinetic": worst_over_ulps, "kinetic_equals_rounded_pre_minus_deposit_bit_for_bit": bit_exact, "by_particle": dict(particles),
             "deposit_unchanged_by_the_kill": sum(row[5] == row[6] for row in rows), "post_kinetic_zero_and_status_stop_and_kill": sum(row[9] == "0x0p+0" and row[10] == 2 for row in rows)}
 
 
@@ -245,8 +266,10 @@ def judge_kill_runs(folder: Path) -> dict:
                 "sum_off_by_5e-13_passes": just_under["steps_over_tolerance"]["sum"] == 0}
     sum_and_kill = all(value["steps_over_tolerance"]["sum"] == 0 and value["steps_over_tolerance"]["killed_is_kinetic_before_kill"] == 0 for value in judged.values())
     deposit_literal = all(value["steps_over_tolerance"]["deposit_is_continuous_loss"] == 0 for value in judged.values())
+    deposit_in_ulps = all(value["deposit_worst_ulps_of_pre_kinetic"] <= DEPOSIT_ULPS for value in judged.values())
+    detected["kill_booked_as_deposit_exceeds_the_ulp_limit"] = booked["deposit_worst_ulps_of_pre_kinetic"] > DEPOSIT_ULPS
     exercised = judged["plain"]["with_continuous_loss"] > 0 and judged["emit"]["continuous_loss_and_secondary"] > 0 and judged["pixe"]["with_along_step_secondary"] > 0
-    return {"criterion_met": sum_and_kill and deposit_literal and exercised, "comparison_trustworthy": all(detected.values()) and exercised, "killed_and_sum_identities_met": sum_and_kill, "deposit_identity_met_as_written": deposit_literal,
+    return {"criterion_met": sum_and_kill and deposit_in_ulps and exercised, "deposit_within_the_ulp_limit": deposit_in_ulps, "comparison_trustworthy": all(detected.values()) and exercised, "killed_and_sum_identities_met": sum_and_kill, "deposit_identity_met_as_written": deposit_literal,
             "runs": judged, "controls": detected, "control_counts": {"booked_as_deposit": booked["steps_over_tolerance"], "pre_step_energy": early["steps_over_tolerance"], "emit_without_secondaries": no_secondaries["steps_over_tolerance"]}}
 
 

@@ -1,6 +1,6 @@
-# g4sim plan: draft addendum after the S3 prototypes
+# g4sim plan: addendum 11.1 after the S3 prototypes
 
-**Status: draft for targeted review (Section 23, step 4). Nothing here is in force, and Part B is unchanged.** Each proposal below is a recommendation. The maintainer decides, and only then are the passages listed under "Passages to modify" changed.
+**Status: decided by the maintainer on 2026-11-06 ("use your recommendations") and applied to Part B; targeted review (Section 23, step 4) still open.** Each proposal below is the decision taken. For GB20, replica and parameterised are removed.
 
 All results are from E5 (Geant4 11.4.3, conda build, serial). A falsification needs one environment; the fixes will need E2 as well. Archived outputs are below `~/AMS/hsinyichou/g4sim-references/s3-prototypes/`: `em/archive-gb11` (with `SHA256SUMS`) and `steps/` (`verdict.json`, `runs/`).
 

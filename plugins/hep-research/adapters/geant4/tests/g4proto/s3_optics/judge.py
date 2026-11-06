@@ -207,7 +207,7 @@ def judge_radiators(folder: Path, numbers: dict) -> dict:
         report[name] = {"yield_high": yield_high, "photons_high": high["photons"], "strictly_inside": high["strictly_inside"], "on_surface": high["on_surface"], "outside_envelope": high["outside_envelope"], "vertex_volume": high["vertex_volume"],
                         "below_events": below["events"], "below_photons": below["photons"], "below_from_primary": below["photons_from_primary"], "below_upper_limit": limit, "limit_required": design["yield_fraction"] * yield_high,
                         "control_yield": control["photons"] / control["events"], "control_rejected": control_rejected, "inside_strict": inside_strict, "inside_closed": inside_closed,
-                        "criteria_met_on_E5": yield_high > 0 and inside_strict and only_envelope and limit < design["yield_fraction"] * yield_high and control_rejected}
+                        "criteria_met_on_E5": yield_high > 0 and inside_closed and only_envelope and limit < design["yield_fraction"] * yield_high and control_rejected}
         table[name] = {"structure": STRUCTURES[name], "photon_vertex": "on_envelope_surface" if high["on_surface"] == high["photons"] else "along_track_inside_envelope",
                        "alpha_read_back": [tests.hexed(high["alpha_foil_read_back"]), tests.hexed(high["alpha_gas_read_back"])]}
     return {"criteria_met_on_E5": all(item["criteria_met_on_E5"] for item in report.values()), "classes": report, "xtr_radiators_draft": table}

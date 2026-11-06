@@ -40,6 +40,10 @@ def model_names(rows: list) -> list:
     return sorted({row[1] for row in rows})
 
 
+def models_and_fluctuations(rows: list) -> list:
+    return [row[1:] for row in rows]
+
+
 def has_pai(record: dict, particle: str, region: str) -> bool:
     return any(name in PAI_MODEL_NAMES for name in model_names(record["particles"][particle]["regions"][region]))
 
@@ -63,7 +67,7 @@ def judge_pai(program: str, folder: Path, listing: str, mode: str) -> dict:
         wanted = predicted(requests, ionisation)
         found = {name for name in record["particles"] if has_pai(record, name, "tracker")}
         outside_changed = sorted(name for name, item in record["particles"].items() for region in ("calorimeter", "DefaultRegionForTheWorld")
-                                 if model_names(item["regions"][region]) != model_names(plain["particles"][name]["regions"][region]))
+                                 if models_and_fluctuations(item["regions"][region]) != models_and_fluctuations(plain["particles"][name]["regions"][region]))
         rows[label] = {"predicted": len(wanted), "found": len(found), "missing": sorted(wanted - found)[:6], "unexpected": sorted(found - wanted)[:6],
                        "outside_changed": outside_changed[:6], "electron_models": record["particles"]["e-"]["model_count"], "alpha_has_pai": "alpha" in found}
     return {"rows": rows, "agrees": all(not row["missing"] and not row["unexpected"] for row in rows.values()),
@@ -108,8 +112,12 @@ def main() -> int:
     late = {listing: judge_pai(program, folder, listing, "pai-late") for listing in LISTS}
     region_only = {listing: judge_pai(program, folder, listing, "pai-region") for listing in LISTS}
     verdicts = {"as_described": described, "activator_run_again": late, "region_only": region_only, "GB13": judge_birks(program, folder, "FTFP_BERT_EMZ"), "GB14": judge_steps(program, folder)}
-    verdicts["GB11"] = "confirmed" if all(item["agrees"] for item in described.values()) else "falsified"
-    confirmed = verdicts["GB11"] == "confirmed" and verdicts["GB13"]["confirmed"] and verdicts["GB14"]["confirmed"]
+    # addendum 11.1: GB11 and GB12 judge g4sim's own constructor; AddPAIModel through the EM constructors must still do nothing, or the addendum's premise is gone
+    rows = [item["rows"] for item in region_only.values()]
+    verdicts["AddPAIModel_still_does_nothing"] = all(item["nothing_applied"] for item in described.values())
+    verdicts["GB11"] = all(item["agrees"] for item in region_only.values()) and all(not row["alpha"]["alpha_has_pai"] and row["twice"]["electron_models"] > row["electron"]["electron_models"] for row in rows)
+    verdicts["GB12"] = all(not case["outside_changed"] for row in rows for case in row.values())
+    confirmed = verdicts["GB11"] and verdicts["GB12"] and verdicts["AddPAIModel_still_does_nothing"] and verdicts["GB13"]["confirmed"] and verdicts["GB14"]["confirmed"]
     print(json.dumps({"status": "ok" if confirmed else "failed", **verdicts}, indent=1))
     return 0 if confirmed else 1
 

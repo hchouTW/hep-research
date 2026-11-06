@@ -130,3 +130,15 @@ These are not Section 20 decisions. They are how S0 reconciled requirements of t
 | Linter root | Cards are linted with both `--repo <worktree>` (Section E4) and `--repo <plugin root>` (Section 19.2) |  | Yes | hsinyichou (maintainer) | 2026-11-04 | Answer in the Claude Code session to the execution-choices question: "Confirm all five" |
 | Version bump | The plugin is bumped to 0.55.0 on the branch; regenerating committed outputs in E2, the VALIDATION release check and the release manifest are left for the maintainer, because E2 is not reachable from this host. Until then 22 "committed output is current" tests fail |  | Yes | hsinyichou (maintainer) | 2026-11-04 | Answer in the Claude Code session to the execution-choices question: "Confirm all five" |
 | Main language | English is the main text for g4sim documents and for writing Part 7 (user's instruction, 2026-11-04); the header of `geant4-program.md`, which says the Chinese wins, is unchanged |  | Yes | hsinyichou (maintainer) | 2026-11-04 | Answer in the Claude Code session to the execution-choices question: "Confirm all five" |
+
+## Addendum 11.1 (S3 prototypes, 2026-11-06)
+
+| Item | Decision | Person | Date | Words or link |
+| --- | --- | --- | --- | --- |
+| GB11, GB12 | g4sim's own PAI constructor, region only | hsinyichou (maintainer) | 2026-11-06 | "use your recommendations" |
+| GB19 | S8 gate 3 by statistical equivalence; no process without a `fast_sim_envelope` | hsinyichou (maintainer) | 2026-11-06 | "use your recommendations" |
+| GB20 | `placement_impl` keeps assembly only | hsinyichou (maintainer) | 2026-11-06 | "use your recommendations" |
+| GB21 | 1e-12 on the sum; the deposit identity in ulps of the kinetic energy | hsinyichou (maintainer) | 2026-11-06 | "use your recommendations" |
+| GB17 | "Inside the envelope" includes its surface | hsinyichou (maintainer) | 2026-11-06 | "use your recommendations" |
+| GB15, GB17 numbers | K = 70 and sample sizes registered; judged runs on Slurm, about 1 core-hour | hsinyichou (maintainer) | 2026-11-06 | "use your recommendations" |
+| Targeted review of the addendum (Section 23, step 4) | Open | | | |
