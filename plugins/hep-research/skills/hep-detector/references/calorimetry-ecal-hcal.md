@@ -125,7 +125,9 @@ If the calorimeter's response to the electromagnetic component differs from its
 response to the hadronic component (the ratio conventionally written `e/h` differs from
 1, the **non-compensating** case, which is the usual case), then the measured energy
 depends on the fluctuating electromagnetic fraction `f_em`. The pion-to-electron
-response ratio is (approximate; PDG Review of Particle Physics, "Calorimetry")
+response ratio is approximately as follows. PDG RPP 2025, sec. 35.10, states the non-linearity
+and `h/e < 1` but does not print this ratio; its eqs. 35.51-35.52 give the same form per
+channel for dual readout.
 
     pi/e = f_em + (1 - f_em) * h/e
 
@@ -152,8 +154,9 @@ scintillator) whose sensitivity to spallation neutrons tracks the invisible ener
 at a carefully chosen sampling fraction and integration time; fission in uranium
 absorbers adds signal; dual readout uses Cherenkov light, produced mainly by the
 electromagnetic component, next to scintillation to estimate `f_em` per event; offline
-(software) weighting uses longitudinal or fine-grained shower information; particle flow
-replaces calorimeter measurements of charged hadrons by tracks. Intrinsically compensating
+(software) weighting uses longitudinal or fine-grained shower information. Particle flow,
+which replaces calorimeter measurements of charged hadrons by tracks, is a separate approach
+there (secs. 35.10.1.1 and 35.10.1.3), not a route to compensation. Intrinsically compensating
 calorimeters are not used in current large collider experiments.
 
 ## Leakage, dead material, and containment

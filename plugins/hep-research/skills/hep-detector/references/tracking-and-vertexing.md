@@ -161,11 +161,11 @@ Several points routinely cause trouble:
 
 Three variants of the fit address specific failures of the plain filter:
 
-- **Global `chi^2` and broken lines.** All hits are fitted at once, with a scattering
-  angle at each layer as an explicit parameter (general broken lines: Kleinwort, Nucl.
-  Instrum. Methods A 673 (2012) 107). For a linear Gaussian model it gives the same result
-  as the filter plus smoother, and its derivatives with respect to sensor positions make it
-  the natural fit for track-based alignment.
+- **Global `chi^2` and broken lines.** All hits are fitted at once, with offsets at the thin
+  scatterers as explicit parameters and kinks defined by triplets of scatterers (general
+  broken lines: Kleinwort, Nucl. Instrum. Methods A 673 (2012) 107). That paper shows the
+  equivalence with a Kalman filter for one filtering step, and uses the fit for track-based
+  alignment and calibration with Millepede-II.
 - **Deterministic annealing filter.** Each hit carries an assignment weight computed from
   its residual and iterated with a decreasing temperature, so outliers and the wrong side
   of a left-right ambiguity are down-weighted rather than cut.
