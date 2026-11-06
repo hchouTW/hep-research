@@ -8897,3 +8897,17 @@ performance limits are proposals (`g4sim-performance-budget.md`). The custodian'
 this release and is not recorded here.
 
 Passing checks show software consistency, not physical validity.
+
+## G4SIM-S2-G5 (2026-11-06, E2 for the scan; confirmation by the maintainer)
+
+G5 for g4sim phase S2 (gate 10), at `57825b63`: `adapters/geant4/assets/g4sim/Accounting.hh`, `adapters/geant4/assets/g4sim_run/` (`IrTree.hh`, `GeometryCheck.cc`,
+`g4sim_run.cc`, `WriteBack.hh`, the two legacy `Detector.cc` files and the legacy observer ports) and `adapters/geant4/tests/g4proto/s2_gates/main.cc`.
+
+**Evidence**: `adapters/geant4/tests/g4proto/g5_scan.py` at `ebd4d056` against all 5,657 `.cc`, `.hh` and `.icc` files of the Geant4 11.4.3 examples tree, normalized
+lines: 0 shared runs of 3 and of 4 consecutive lines; the positive control found 863 and 880. The fixes after `ebd4d056` were not rescanned. An independent read by an agent
+that did not write the code found no copying and could not compare side by side, because the examples are not on E5. The legacy ports differ from the plugin's own `Actions.cc`,
+`Spec.hh` and main programs only by hooks, the early-observer columns and test-only switches.
+
+**Confirmation** (hsinyichou, maintainer, 2026-11-06, in the Claude Code session, answering "Yes, I reviewed them" to the question): "Have you reviewed Accounting.hh, IrTree.hh,
+GeometryCheck.cc, g4sim_run.cc, WriteBack.hh, the two legacy Detector.cc files, s2_gates/main.cc and the legacy observer ports at 57825b63, and do you confirm they are written
+from the Geant4 API or ported from the plugin's own code, with no example code copied or adapted?"
