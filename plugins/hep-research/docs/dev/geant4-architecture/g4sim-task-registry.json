@@ -491,6 +491,13 @@
    "registered_at": "2026-11-06T22:04:07Z",
    "card_commit": "c1b43e8b",
    "reason": "Gate 4's tolerance and events registered from its independent trial, before the test"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "fd023f104097f48409953133cd7b6a32ed36e6b240e48b8053e6ee9d8fa03b99",
+   "registered_at": "2026-11-06T22:13:49Z",
+   "card_commit": "e9bbf38b",
+   "reason": "The separated conservation numbers registered from their trials, before calibration, with the term the limits cannot detect; gate 4 result"
   }
  ]
 }
