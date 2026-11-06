@@ -31,8 +31,12 @@ jobs:
 baseline_static: {evidence: "<private>/evidence/20261106T044938Z", exit: 0, seconds: 327, note: "run on the login node, --jobs 2, under Q8; docs/dev/detector-reconstruction was present and untracked"}
 tasks:
   T01: {state: in-progress, note: "done-provisional for R24; awaiting checkpoint suite at the end of P0 (R28); K defaults used: K01 all F01-F38 kept"}
+  T02: {state: in-progress, note: "done-provisional: definitions and contract map; fixtures run in T06; provisional defaults K04, K05, K13"}
+  T03: {state: blocked-by-decision, record: blockers/T03.md, options: t03-selection.md, deciding: [K02, K03]}
+  T04: {state: blocked-by-decision, record: blockers/T04.md, draft: t04-prereg.md, deciding: [K02, K09, K12, K16]}
+  T05: {state: in-progress, note: "done-provisional: P1 sheets complete, P2 onward list blockers; record t05-task-sheets.md"}
 k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K02, K03, K08, K09, K10, K11, K12, K16, K17, K18]}
-next_action: "T02-T05, then the decision batch (R24)"
+next_action: "decision batch to the user; P0 checkpoint suite; T06 waits for the 0.57.0 re-baseline (D1)"
 ```
 
 ## Plan conflicts found

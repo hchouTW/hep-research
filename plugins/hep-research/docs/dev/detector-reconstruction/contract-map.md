@@ -44,3 +44,33 @@ Each semantic need takes the first option that works (Section 8.1): existing fie
 - Whether a sidecar is one schema or several.
 - Whether `ext_response.json` needs a new `form` for transfer operators.
 - Exact locations under `contracts/`; the plan leaves these to this decision.
+
+## T02: witnesses W1-W7
+
+Definitions only. Fixtures are written and run in T06 (P1), because P0 changes nothing outside this folder (R07). Passing a witness proves the stated contract behaviour, never instrument quality or a backend's correctness (Section 12.1). The stated algebra of W2, W5 and W7 was checked numerically on 2026-11-06.
+
+Field status: **E** expressible now, **X** needs the proposed sidecar, **N** kept as a typed native reference, **I** still inexpressible.
+
+| Witness | Fixture | Must pass | Must be caught | Status of needed fields |
+| --- | --- | --- | --- | --- |
+| W1 collections, source links, state | Two products with distinct identities, both holding key `0`, plus a reordered subset | Native mapping still reaches the original measurement; surface and state type distinguishable | Dereferencing by row index across products; absent treated as empty; truth role wired to a data-side port | Product identity, object key, revision: **X**. Presence (empty, absent, invalid, not-applicable), role: **X**. Native object: **N** |
+| W2 linear pulse | `M=[[1,1],[0,1],[0,1]]`, `d=[5,2,2]`, `R=I`. Solution `[3,2]`, covariance `[[1.5,-0.5],[-0.5,0.5]]` | Analytic solution and covariance reproduced | First sample removed: rank 1, amplitude unidentifiable, no finite precision from jitter. Amplitude-dependent shape: out of domain, GLS not claimed optimal | Sampling, time origin, retention: **X**. Covariance scope (fixed model only): **X**. Identifiability result: **X** |
+| W3 frames, halos, IOV | Keys `0..9`, cores `[0,5)` and `[5,10)`, halo 1, conditions change at key 5, one missing sample | One output per key by core ownership; each key uses its own conditions; missing sample stays marked | Halo keys counted twice; first payload used for the whole chunk; complete window claimed at stream end | Ownership and accounts: **X**. Per-key payload binding: **X** (R32). Partition: existing `core/partition` to be checked in T06 |
+| W4 shared candidates | H1, H2 share a measurement; H1 goes revision 1 to 2 after reclustering | Sharing allowed; consumers read revision 2 after commit; counting follows the selected hypothesis | Hypothesis deleted early by a unique-use flag; old and new revision both counted; dangling association | Revision scope, selection policy: **X**. Memory ownership: **N** |
+| W5 non-unique inversion | `A=[[1,0,1],[0,1,1]]`, `x1=[1,1,0]`, `x2=[0,0,1]`, both give `[1,1]`; null direction `[1,1,-1]` | Both solutions and the null direction retained; any prior stated | Column-normalizing `A` by default; one solution reported as the unique truth | Operator quantity, unit, normalization: **X**; `ext_response.json` does not fit a non-probability operator, so **N** unless T06 shows an extension is needed |
+| W6 counts, exposure | `count=0` valid; one absent interval; two channels with different exposure | Zero stays an observation; rates use each channel's valid exposure and response | Absent filled with zero; run time as both denominators; energy assigned with no energy observable; Poisson inferred from integer type | Presence: **X**. Exposure: `exposure_record.json` to be reviewed in T06. Count model: **X** |
+| W7 scan, coherent, global | RF: two settings share raw data. Retarding: one setting revisited with different dwell. Global: `y_i=s+b` | Coordinates and overlap kept; setting-time-count kept; only `s+b` reported | Chunk averages; independent Poisson assumed; frequency-time track treated as spatial; unique solution after jitter | Coordinates, overlap, dwell: **X**. Identifiable combinations: **X**. No **I** found, but the three subcases stay separate and replace no native backend |
+
+W1-W7 need no field marked **I** on this reading. T06 must re-check that against 3.20.0 or later.
+
+### Old-recipe comparison (for T06)
+
+| Old item | Check |
+| --- | --- |
+| Recipes under `contracts/semantics/recipes/` (for example `flux_from_counts.json`) | Validate unchanged, before and after, with the same result |
+| Tool contracts in `contracts/tool_contracts/` (16 files) | Same; a new semantic key sent to an old reader is refused clearly (A41) |
+| `ext_response` examples | `response_adapter.py --validate` unchanged |
+
+### Converter responsibilities
+
+A converter is a declared step with its own input and output semantics, version, uncertainty and association handling, and cost (Section 8.4). Any information loss or selection change goes into retention or response, never counted as a harmless format change. None is written in P0.
