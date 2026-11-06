@@ -387,7 +387,7 @@ class ScorerSums {
     else if (scorer.quantity == "edep_charged") value = charged ? deposit / MeV : 0.;
     else if (scorer.quantity == "edep_nonionizing") value = nonIonizing / MeV;
     else if (scorer.quantity == "edep_visible") value = G4LossTableManager::Instance()->EmSaturation()->VisibleEnergyDepositionAtAStep(step) / MeV;
-    else if (scorer.quantity == "track_length") value = charged ? length / mm : 0.;
+    else if (scorer.quantity == "track_length") value = charged || particle->GetParticleName() == "geantino" ? length / mm : 0.;  // a geantino scan measures paths (S3 gate 2)
     if (value == 0.) return;
     fDirect[i] += value;
     if (scorer.segmentation.kind == "none") {
