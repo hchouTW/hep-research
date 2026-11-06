@@ -39,6 +39,7 @@ Done when: the cost of any job over recorded runs is one sum, with no sample.
 Done when: `check-work` passes from the shared folder on E5.
 
 Changed by the maintainer on 2026-11-06 (`g4sim-approvals.md`): the shared references are the Linux outputs of the 112 runs, regenerated from the old programs on Slurm, and the Mac's originals are not copied. So the check is against the E5 baselines' hashes, not `check-work`, whose hashes are E2's.
+Done on 2026-11-06: 112 of 112 equal, in `e5-outputs`.
 
 ## 4. Estimating cost
 
