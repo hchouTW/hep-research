@@ -25,12 +25,15 @@
    "blocked_on": []
   },
   "S3": {
-   "state": "in-progress",
+   "state": "blocked",
    "worktree": "../hep-research-g4sim-S3",
    "branch": "g4sim/S3",
-   "task_card_sha256": "60e9838928d7257597731f56c28450285bc0c0f7aa2c716bfb54bea28ae2dac3",
+   "task_card_sha256": "3a673bbd8dd069da3078e9a19c431ca1d0f54aeaf96f504c10811668e09471b7",
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S3.md",
-   "blocked_on": []
+   "blocked_on": [
+    "E7 item 4: GB11, GB19 and GB20 falsified on E5; targeted review of g4sim-addendum-draft.md by the maintainer",
+    "E7 item 5: rulings on the GB21 deposit identity and the GB17 surface reading"
+   ]
   },
   "S4": {
    "state": "not-started",
@@ -92,7 +95,7 @@
   "GB8": "confirmed",
   "GB9": "confirmed",
   "GB10": "confirmed",
-  "GB11": "unconfirmed",
+  "GB11": "falsified",
   "GB12": "unconfirmed",
   "GB13": "unconfirmed",
   "GB14": "unconfirmed",
@@ -100,12 +103,12 @@
   "GB16": "unconfirmed",
   "GB17": "unconfirmed",
   "GB18": "confirmed",
-  "GB19": "unconfirmed",
-  "GB20": "unconfirmed",
+  "GB19": "falsified",
+  "GB20": "falsified",
   "GB21": "unconfirmed",
   "GB22": "confirmed",
   "GB23": "unconfirmed",
   "GB24": "unconfirmed"
  },
- "updated": "2026-11-06T14:31:40Z"
+ "updated": "2026-11-06T20:36:10Z"
 }
