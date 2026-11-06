@@ -200,3 +200,8 @@ User's answer, 2026-11-06, verbatim: "go ahead with 1, 2, 3(a) and 4 as recommen
 ## T04 section 16
 
 User's answer, 2026-11-06, verbatim: "accept the section 16 recommendations, vertex floor 0.95". Each recommendation of section 16 of t04-values-v4.md is accepted, and the vertex finding floor is 0.95. This is not Freeze A, which needs the user's own word on the final text. The `element_sim` spec for K16 was not named.
+
+## T08 width stop
+
+User's answers, 2026-11-06, verbatim: "give me best suggestion. I want correct method and right result." then "go ahead with the T08 diagnostic". The third section 18 stop, iso E2 position width, is to be diagnosed, not accepted. Freeze A waits.
+

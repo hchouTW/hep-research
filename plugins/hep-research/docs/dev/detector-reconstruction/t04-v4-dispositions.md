@@ -167,13 +167,13 @@ Not applied. Applied together, in the Freeze A commit, then hashed (section 2.1)
 
 ## Section 18 results, jobs 7474461 and 7474462
 
-Both jobs `COMPLETED`, exit `0:0`, all six scripts exit 0, hashes in the receipts match section 18. Evidence: `<private>/evidence/t04-v4/job-a-7474461/`, `job-b-7474462/`. Rules applied as written. **Two stops. No number in version 4 has moved, and none moves until the user answers.**
+Both jobs `COMPLETED`, exit `0:0`, all six scripts exit 0, hashes in the receipts match section 18. Evidence: `<private>/evidence/t04-v4/job-a-7474461/`, `job-b-7474462/`. Rules applied as written. **Two stops recorded then; a third was found later, see the T08 row. No number in version 4 has moved, and none moves until the user answers.**
 
 | Script | Rule | Result | Outcome |
 | --- | --- | --- | --- |
 | T08 | `fired` against closed form | 1 of 30 iso nodes over: E 80, fired 0.83670, closed 0.84327, `dev` 0.00657, limit 0.00640 | **Stop** |
 | T08 | Constant `b_iso` | Worst node E 2378.4: 0.0128 sigma, limit 0.0374 sigma | No action |
-| T08 | iso, edge, dead, near, far `BIN` limits | 154 values, none over. Closest: iso E2 position `|s68 - 1|`, x 0.0410 and y 0.0412, limit 0.0412 | No action |
+| T08 | iso, edge, dead, near, far `BIN` limits | Corrected 2026-11-06: this row read "none over", from a comparison of 4-decimal prints. Iso E2 position y is 0.041206 against 0.041154 from the node values, x 0.041019; 153 others are under | **Stop**, found by the full read |
 | T08 | Far merge | 21 values, none over, largest ratio to limit 0.021 | No action |
 | T08 | Far efficiency | 22 values, none low, largest deficit 0.011 of its limit | No action |
 | T08 | Iso split | 0.00000 in E2-E4 | No action |
@@ -306,4 +306,25 @@ Written from the text by a fresh author; reviewed by a second fresh reviewer: `<
 Fix round 1, then a scoped re-review by a third fresh reviewer: `<private>/evidence/t04-v4/generators-rereview.md`. 0 blockers, 2 major, 8 minor, majors both in section 18's new rows. Code ready for the job by hand trace; nothing has run. Section 18's rows rewritten: ordered, first match applies, every printed outcome listed. n1, n4, n5, n7, n8 fixed in version 4 and the sheets. n2 and n3 left: a docstring claim and two control assertions, correct today, and fixing them would change hashes for no present defect.
 
 Added to the Freeze A edit list, after the table above: `t04-prereg.md` title loses "(draft)"; its State sentences now say frozen at Freeze A, K09 and K16 in version 4 except the `element_sim` spec, K12 targets after P2 (U10). Sheets: the T08 Interfaces list names the saturation flag.
+
+## Full read before Freeze A
+
+Fresh reader: `<private>/evidence/t04-v4/freeze-a-read.md`. Fixes needed, 1 blocker, 4 major, 24 minor. All 17 hashes matched. The blocker is the T08 stop above, confirmed by the coordinator's own recomputation. The user chose to find the cause rather than accept it: "I want correct method and right result", then "go ahead with the T08 diagnostic". Fixes for the majors and minors wait for its outcome, in one batch, so the hashes change once.
+
+## T08 width diagnostic: reading rules
+
+Fixed before any output exists. Script `<private>/evidence/t04-v4/diag-t08b/diag-t08-width.py` (`71437bce63bf10a2`), job `<private>/jobs/t04-diag-t08b/diag.sh` (`770ad76e243c4b2d`). Syntax-parsed only, not run, not independently reviewed. **Every outcome goes to the user. No T04 value moves from this output.** Section 18's rule and limit stay as written.
+
+The script draws 60,000 new iso showers at each of the 9 E2 nodes, 540,000 in all, and at 4 nodes in E3 and E4 for the trend. Bin values use the same trapezoid weights. The limit keeps the rule's form, `0.0356 + 3 se` at the new n, about 0.0395.
+
+Void unless `REPLAY` prints job 7474461's node widths: 1.0671, 1.0717 at 250 MeV; 1.0395, 1.0392 at 500 MeV.
+
+| `BIN E2` values, x and y both | Reading |
+| --- | --- |
+| `raw` within the limit | The excess is not reproduced at this sample size |
+| `raw` over, `cross` within | The term is a deterministic sub-cell shift. `closed` says whether the expected image accounts for it. `quad` says whether adding it to sigma would do |
+| `raw` and `cross` over, `oracle` within | The term comes from the threshold, through cells entering and leaving, not from a fixed shift |
+| `raw`, `cross` and `oracle` over | Cause not found. It is not the threshold; the evidence goes to the user |
+
+An outcome the table does not cover goes to the user. Any fix to section 7.1 needs the user's word and a T08 rerun against the unchanged section 18 rule.
 
