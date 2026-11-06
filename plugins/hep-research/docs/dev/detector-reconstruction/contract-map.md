@@ -74,3 +74,7 @@ W1-W7 need no field marked **I** on this reading. T06 must re-check that against
 ### Converter responsibilities
 
 A converter is a declared step with its own input and output semantics, version, uncertainty and association handling, and cost (Section 8.4). Any information loss or selection change goes into retention or response, never counted as a harmless format change. None is written in P0.
+
+## Preview of contracts 3.20.0
+
+Read 2026-11-06 from the g4sim S2 branch at `6903e4ef`, unreleased, so it can still change. Against this baseline, among the files this map depends on, only two changed: `contracts/__init__.py` and `ext_computational_run.json`, which gains an optional `extension.geometry` block. `geometry_id` there is a 64-character hexadecimal string, usable as R32's nominal geometry identity (D2). `recipe`, `operator_semantics`, `qualification_record`, `decision_record`, `tool_contract`, `ext_response`, `run_workflow.py` and the three G01-G03 files are unchanged, so no decision above changes on this reading. The re-baseline (D1) still re-checks this against the release.

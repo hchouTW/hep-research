@@ -183,3 +183,7 @@ Result: `acts-core` 48.2.0 is confirmed at backend-smoke level on `hpa-wn28` (Se
 ## T04 draft
 
 User's answer, 2026-11-06, verbatim: "accept the draft, use a fresh reviewer". t04-values-draft.md is accepted as the working draft. Nothing is frozen: each workflow's gates are frozen just before its first run, once bin edges exist. A fresh reviewer checks the statistical design first.
+
+## T04 version 3
+
+User's answer, 2026-11-06, verbatim: "accept version 3, third review before the freeze". t04-values-v3.md is the working draft. Nothing is frozen. A third fresh review of the then-current draft happens before Freeze A, which comes before any development run.
