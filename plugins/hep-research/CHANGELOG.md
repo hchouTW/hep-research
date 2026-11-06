@@ -3,12 +3,12 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.57.0 (2026-11-06)
 
-g4sim phase S2 (plugin 0.57.0; proposed adapters: `adapters/geant4` 0.8.0; contracts 3.20.0, `CORE_VERSION` 1.7.0). New `g4sim_run`: legacy mode ports both old observers
+Minor release. g4sim phase S2 (`adapters/geant4` 0.8.0; contracts 3.20.0, `CORE_VERSION` 1.7.0). New `g4sim_run`: legacy mode ports both old observers
 and builds the volume tree from the IR's legacy block; `run.mode: geometry-check` builds a new specification with fields set in pre-order and compares the write-back with the
 IR. `g4sim_run.py`: check-spec, dataset control, identities and timed run records. `g4sim/Accounting.hh`: termination classes, the unreleased-energy table and `conservation.csv`.
-`contracts/rules/geant4_datasets.json`, `extension.geometry`, and `physics.g4sim` read by `check_geant4_study.py`. `geant4_run.py` dispatches by schema, `geant4_verify.py tree`.
+`contracts/rules/geant4_datasets.json`, `extension.geometry`, and `physics.g4sim` read by `check_geant4_study.py`. `geant4_run.py` dispatches by schema, `geant4_verify.py tree`. All 112 recorded runs reproduce bit for bit in legacy mode, on the recorded build and on Linux baselines.
 
 ## 0.56.0 (2026-11-05)
 
