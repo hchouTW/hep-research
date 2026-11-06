@@ -138,8 +138,16 @@ def main() -> int:
     returning = copy.deepcopy(request)
     returning["source"]["particle"] = "e-"
     returning["source"]["energy"] = {"uniform": {"min_MeV": "20", "max_MeV": "60"}}
-    with_field, _ = case("backflow_nominal", spec_in=bent, request_in=returning)
-    without, _ = case("no_backflow", spec_in=bent, request_in=returning, environment={"G4SIM_SCORER_CONTROL": "no_backflow"})
+    bounded = copy.deepcopy(card)  # in vacuum they would circle for ever: KillProcess ends them, and books what it takes
+    bounded["kill_policy"] = {"time_cut_ns": "100"}
+    with_field, field_work = case("backflow_nominal", spec_in=bent, request_in=returning, card_in=bounded)
+    without, _ = case("no_backflow", spec_in=bent, request_in=returning, card_in=bounded, environment={"G4SIM_SCORER_CONTROL": "no_backflow"})
+    unbooked, _ = case("kill_unbooked", spec_in=bent, request_in=returning, card_in=bounded, environment={"G4SIM_ACCOUNTING_CONTROL": "no_killed_process"})
+    with (field_work / "boundary.csv").open(encoding="utf-8", newline="") as handle:
+        backflows = sum(int(row[5]) for row in csv.reader(handle) if row[2] != "balance")
+    checks["backflow_was_exercised"] = backflows > 0
+    checks["conservation_holds_with_kills"] = with_field["conservation"]["largest_residual_MeV"] < BALANCE_TOLERANCE_MEV and with_field["conservation"]["accounting_errors"] == 0
+    checks["unbooked_kill_caught"] = unbooked["conservation"]["largest_residual_MeV"] > BALANCE_TOLERANCE_MEV
     checks["balance_holds_with_backflow"] = with_field["status"] == "ok" and with_field["balance"]["largest_MeV"] < BALANCE_TOLERANCE_MEV
     checks["no_backflow_caught"] = without["balance"]["largest_MeV"] > BALANCE_TOLERANCE_MEV
 

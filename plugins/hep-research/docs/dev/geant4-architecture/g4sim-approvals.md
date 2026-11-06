@@ -141,4 +141,5 @@ These are not Section 20 decisions. They are how S0 reconciled requirements of t
 | GB21 | 1e-12 on the sum; the deposit identity in ulps of the kinetic energy | hsinyichou (maintainer) | 2026-11-06 | "use your recommendations" |
 | GB17 | "Inside the envelope" includes its surface | hsinyichou (maintainer) | 2026-11-06 | "use your recommendations" |
 | GB15, GB17 numbers | K = 70 and sample sizes registered; judged runs on Slurm, about 1 core-hour | hsinyichou (maintainer) | 2026-11-06 | "use your recommendations" |
+| Gate 3 test run | 8,000,000 events per side on Slurm, about 43 billed core-hours | hsinyichou (maintainer) | 2026-11-06 | "approve the gate 3 run" |
 | Targeted review of the addendum (Section 23, step 4) | Open | | | |
