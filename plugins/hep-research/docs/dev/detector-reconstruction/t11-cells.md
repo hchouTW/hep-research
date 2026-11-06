@@ -1,8 +1,8 @@
 # T11: design cells (all 38 families)
 
-State: in progress, not done. Parts 1 and 2 cover the 27 families with plugin text, from the plugin tree and the plan only. Part 3 covers F21, F24, F26-F28 and F33-F38 from papers actually read (t11-sources.md); those cells apply to the named experiment, not a whole family, unless they say otherwise. Nothing was run, and nothing comes from memory.
+State: done-provisional, awaiting the checkpoint suite (R28). Citation verdicts are in t11-citation-findings.md and govern `source-unverified` marks in Parts 1 and 2: where a verdict is `partly`, the cell's statement is limited as that file says; where `unread`, the cell stays `source-unverified`, a recorded gap (R14). Parts 1 and 2 cover the 27 families with plugin text, from the plugin tree and the plan only. Part 3 covers F21, F24, F26-F28 and F33-F38 from papers actually read (t11-sources.md); those cells apply to the named experiment, not a whole family, unless they say otherwise. Nothing was run, and nothing comes from memory.
 
-Parts 1 and 2: 189 cells, 167 documented, 21 `gap-method`, 1 not-applicable (F14 space/time, a readout reason). Every anchor was resolved against the baseline headings. Cells marked `source-unverified` name a source the plugin cites that nobody has re-read here, so T11 cannot be done while they remain (R14). Documented means text exists, not that anything runs: most bindings are `none`.
+Parts 1 and 2: 189 cells, 167 documented, 21 `gap-method`, 1 not-applicable (F14 space/time, a readout reason). Every anchor was resolved against the baseline headings. Cells marked `source-unverified` name a source the plugin cites that nobody has re-read here, now checked in t11-citation-findings.md. Documented means text exists, not that anything runs: most bindings are `none`.
 
 # Part 1: families the inventory first marked documented
 

@@ -59,7 +59,7 @@ Exact APIs are written only after versions are chosen (Section 16). T06 also cre
 
 | Task | Prerequisite | State | Note |
 | --- | --- | --- | --- |
-| T11 coverage design | K01, K08; network for sources (R14) | In progress: t11-cells.md covers 27 families | The 11 families without text need sources. Cells stay `source-unverified` without network approval |
+| T11 coverage design | K01, K08 | Done-provisional: t11-cells.md, all 38 families | 53 method gaps recorded, 10 citation uses unread. Plugin text for the 11 families and the citation fixes are not yet written |
 | T12 reprocessing, performance | T07-T10; GPU for A13 | Blocked | `CAI-T12-1`, `CAI-T12-2`. A13 is `blocked-by-resource` (R14) |
 | T13 AI evaluation | K11, holdout | `blocked-by-decision` | |
 | T15b two-candidate selection | T15a, T03 domain, K16 | `blocked-by-decision` | |
