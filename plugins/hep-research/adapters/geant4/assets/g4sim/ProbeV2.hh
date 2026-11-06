@@ -21,7 +21,9 @@
 #include <vector>
 
 #include "G4ParticleDefinition.hh"
+#include "G4LogicalVolumeStore.hh"
 #include "G4ParticleTable.hh"
+#include "G4Polyhedra.hh"
 #include "G4ProcessManager.hh"
 #include "G4ProcessVector.hh"
 #include "G4VProcess.hh"
@@ -106,6 +108,22 @@ inline std::string Ordered(G4ProcessVector* list) {
 }
 
 // Every particle with a process manager, each with its processes in registration order and the three ordered DoIt lists.
+// G4Polyhedra, which the base probe does not decode: its sides and corners. G4Polyhedra keeps the corners at the circumradius (GB23).
+inline std::string Polyhedra(Writer& w) {
+  std::vector<std::string> rows;
+  for (const G4LogicalVolume* logical : *G4LogicalVolumeStore::GetInstance()) {
+    const auto* solid = dynamic_cast<const G4Polyhedra*>(logical->GetSolid());
+    if (!solid) continue;
+    std::ostringstream o;
+    o << "{\"logical\": " << JsonQuote(logical->GetName()) << ", \"sides\": " << solid->GetNumSide() << ", \"start_phi_rad\": " << w.Hex(solid->GetStartPhi(), true)
+      << ", \"corners_r_mm\": [";
+    for (G4int i = 0; i < solid->GetNumRZCorner(); ++i) o << (i ? ", " : "") << w.Hex(solid->GetCorner(i).r / mm, true);
+    o << "]}";
+    rows.push_back(o.str());
+  }
+  return probe_detail::Join(rows);
+}
+
 inline std::string Processes() {
   std::vector<std::string> rows;
   auto* particles = G4ParticleTable::GetParticleTable()->GetIterator();
@@ -163,7 +181,7 @@ inline ProbeV2Result RunProbeV2(const std::string& note, const std::set<std::str
   o << "{\"probe_version\": " << JsonQuote(kProbeV2Version) << ", \"recorded\": " << (res.recorded ? "true" : "false")
     << ", \"base\": " << body;
   if (res.recorded) {
-    o << ", \"materials\": " << Materials(w) << ", \"regions\": " << Regions(w) << ", \"logical_fields\": "
+    o << ", \"materials\": " << Materials(w) << ", \"polyhedra\": " << Polyhedra(w) << ", \"regions\": " << Regions(w) << ", \"logical_fields\": "
       << LogicalFields(declaredFieldVolumes) << ", \"processes\": " << Processes();
     if (w.BadGeometry()) res.error = "the geometry has an infinite or NaN number";
   }

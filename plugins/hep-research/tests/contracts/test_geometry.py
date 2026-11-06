@@ -156,9 +156,18 @@ class ExplicitFromCsv(unittest.TestCase):
         self.assertEqual(len(result["ir"]["physical"]["placements"]), 2)
         self.assertEqual(result["ir"]["marker"]["source_of_facts"]["explicit:cells.csv"], digest)
 
-    def test_a_changed_file_is_refused(self):
+    def test_a_changed_file_is_refused_without_showing_its_hash(self):
         result = self.check("0" * 64)
         self.assertEqual(result["findings"][0]["code"], "explicit-hash")
+        self.assertNotIn(hashlib.sha256(self.table.read_bytes()).hexdigest(), str(result))
+
+    def test_a_file_outside_the_folder_is_refused(self):
+        for path, code in (("../secret.csv", "explicit-path"), ("/etc/passwd", "path-reference")):  # the canonical check refuses an absolute path first
+            document = self.spec("0" * 64)
+            document["world"]["children"][0]["placement"]["explicit"]["positions_csv"]["path"] = path
+            spec_path = self.root / "spec.json"
+            spec_path.write_text(json.dumps(document), encoding="utf-8")
+            self.assertEqual(geometry.check_file(spec_path)["findings"][0]["code"], code)
 
 
 if __name__ == "__main__":

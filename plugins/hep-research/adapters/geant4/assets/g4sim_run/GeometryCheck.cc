@@ -22,6 +22,7 @@
 #include "G4Material.hh"
 #include "G4NistManager.hh"
 #include "G4PVPlacement.hh"
+#include "G4Polyhedra.hh"
 #include "G4ParticleGun.hh"
 #include "G4ProductionCuts.hh"
 #include "G4Region.hh"
@@ -31,6 +32,8 @@
 #include "G4RunManagerFactory.hh"
 #include "G4SystemOfUnits.hh"
 #include "G4Threading.hh"
+#include "G4Trd.hh"
+#include "G4Tubs.hh"
 #include "G4UniformMagField.hh"
 #include "G4UserRunAction.hh"
 #include "G4VUserActionInitialization.hh"
@@ -78,6 +81,25 @@ G4Material* NewMaterial(const std::string& name, const Value& materials) {
   return material;
 }
 
+// The solid of a template; the IR already holds what G4 takes, so nothing is derived here (the apothem of a prism, for one, GB23).
+G4VSolid* NewSolid(const std::string& name, const Value& node) {
+  const std::string& shape = node.at("shape", "template").str;
+  if (shape == "box") {
+    const auto& half = node.at("half_mm", "template").array("half_mm");
+    return new G4Box(name, Decimal(half[0]), Decimal(half[1]), Decimal(half[2]));
+  }
+  const Value& solid = node.at("solid", "template");
+  const auto length = [&](const char* key) { return Decimal(solid.at(key, "solid")); };
+  if (shape == "trd") return new G4Trd(name, length("dx1_mm"), length("dx2_mm"), length("dy1_mm"), length("dy2_mm"), length("dz_mm"));
+  if (shape == "tube")
+    return new G4Tubs(name, length("rmin_mm"), length("rmax_mm"), length("dz_mm"), length("phi_start_deg") * deg, length("phi_span_deg") * deg);
+  if (shape == "polygon_prism") {
+    const double z[2] = {-length("dz_mm"), length("dz_mm")}, inner[2] = {0., 0.}, outer[2] = {length("apothem_mm"), length("apothem_mm")};
+    return new G4Polyhedra(name, 0., CLHEP::twopi, static_cast<G4int>(solid.at("sides", "solid").num), 2, z, inner, outer);
+  }
+  throw std::runtime_error("template " + name + ": shape " + shape + " is not built");
+}
+
 class NewDetector : public G4VUserDetectorConstruction {
  public:
   NewDetector(const Value& physical, const Value& cuts) : fPhysical(physical), fCuts(cuts) {}
@@ -86,9 +108,7 @@ class NewDetector : public G4VUserDetectorConstruction {
     const Value& materials = fPhysical.at("materials", "physical");
     std::map<std::string, std::vector<G4LogicalVolume*>> regions;
     for (const auto& [name, node] : fPhysical.at("templates", "physical").obj) {
-      const auto& half = node.at("half_mm", "template").array("half_mm");
-      auto* box = new G4Box(name, Decimal(half[0]), Decimal(half[1]), Decimal(half[2]));
-      auto* logical = new G4LogicalVolume(box, NewMaterial(node.at("material", "template").str, materials), name);
+      auto* logical = new G4LogicalVolume(NewSolid(name, node), NewMaterial(node.at("material", "template").str, materials), name);
       fLogicals[name] = logical;
       const std::string& region = node.at("region", "template").str;
       if (region != kDefaultRegion) regions[region].push_back(logical);

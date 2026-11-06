@@ -1,0 +1,121 @@
+{
+ "schema": "detector-spec/1",
+ "params": {},
+ "templates": {
+  "wedge": {
+   "solid": {
+    "trd": {
+     "x1_mm": "10",
+     "x2_mm": "10",
+     "y1_mm": "53.58983848622454129451073169882552661142",
+     "y2_mm": "64.30780618346944955341287803859063193370",
+     "length_mm": "20"
+    }
+   },
+   "material": "G4_Si"
+  },
+  "pipe": {
+   "solid": {
+    "tube": {
+     "rmin_mm": "5",
+     "rmax_mm": "10",
+     "length_mm": "40"
+    }
+   },
+   "material": "G4_Al"
+  },
+  "hex": {
+   "solid": {
+    "polygon_prism": {
+     "sides": 6,
+     "radius_mm": "10",
+     "length_mm": "4"
+    }
+   },
+   "material": "G4_Pb"
+  },
+  "cell": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "4",
+      "4",
+      "4"
+     ]
+    }
+   },
+   "material": "G4_Si"
+  }
+ },
+ "world": {
+  "material": "G4_AIR",
+  "size_mm": [
+   "1000",
+   "1000",
+   "1000"
+  ],
+  "children": [
+   {
+    "template": "wedge",
+    "placement": {
+     "ring": {
+      "n": 12,
+      "radius_mm": "110"
+     }
+    }
+   },
+   {
+    "template": "pipe",
+    "placement": {
+     "single": {
+      "centre_mm": [
+       "0",
+       "0",
+       "200"
+      ]
+     }
+    }
+   },
+   {
+    "template": "hex",
+    "placement": {
+     "single": {
+      "centre_mm": [
+       "0",
+       "0",
+       "300"
+      ],
+      "rotation": {
+       "axis": "z",
+       "angle_deg": "30"
+      }
+     }
+    }
+   },
+   {
+    "template": "cell",
+    "placement": {
+     "grid": {
+      "n": [
+       3,
+       3
+      ],
+      "pitch_mm": [
+       "10",
+       "10"
+      ],
+      "centre_mm": [
+       "0",
+       "0",
+       "-200"
+      ],
+      "index": [
+       "i",
+       "j"
+      ]
+     }
+    }
+   }
+  ]
+ }
+}

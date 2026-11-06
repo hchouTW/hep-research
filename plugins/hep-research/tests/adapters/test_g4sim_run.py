@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import math
 import subprocess
 import sys
 import tempfile
@@ -90,15 +91,17 @@ class TreeComparison(unittest.TestCase):
     """The write-back against the IR: placements, rotation convention, regions and each thread's fields."""
 
     def ir(self):
-        node = {"region": "default", "field": "none"}
-        return {"physical": {"templates": {"world": dict(node), "plate": {"region": "inner", "field": "solenoid"}},
+        node = {"shape": "box", "half_mm": ["1e1", "1e1", "1e1"], "region": "default", "field": "none"}
+        return {"physical": {"templates": {"world": dict(node), "plate": {**node, "half_mm": ["1e0", "1e0", "1e0"], "region": "inner", "field": "solenoid"}},
                              "placements": [{"mother": "world", "template": "plate", "copy_number": 0, "centre_mm": ["1.5", "0", "0"],
                                              "rotation": [[0, 1, 0], [-1, 0, 0], [0, 0, 1]]}]}}
 
     def record(self):
         hexes = [value.hex() for value in (0.0, -1.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0)]  # the object's rotation: the transpose
-        return {"base": {"geometry": {"logical_volumes": [{"id": 0, "name": "world", "region": "DefaultRegionForTheWorld"},
-                                                          {"id": 1, "name": "plate", "region": "inner"}],
+        def box(half):
+            return {"type": "G4Box", "parameters": {key: half.hex() for key in ("half_x_mm", "half_y_mm", "half_z_mm")}}
+        return {"base": {"geometry": {"logical_volumes": [{"id": 0, "name": "world", "region": "DefaultRegionForTheWorld", "solid": box(10.0)},
+                                                          {"id": 1, "name": "plate", "region": "inner", "solid": box(1.0)}],
                                       "placements": [{"name": "world", "copy_number": 0, "mother_logical": None, "translation_mm": [], "rotation": None},
                                                      {"name": "plate", "copy_number": 0, "mother_logical": 0, "rotation": hexes,
                                                       "translation_mm": [(1.5).hex(), (0.0).hex(), (0.0).hex()]}]}}}
@@ -158,6 +161,43 @@ class OutputChecks(unittest.TestCase):
             log = Path(folder) / "log.txt"
             log.write_text("ok\nGeomVol1002 x\nGeomVol1002 y\n", encoding="utf-8")
             self.assertEqual(driver.overlaps_in_log(log), 2)
+
+
+class SolidComparison(unittest.TestCase):
+    """The solid Geant4 built against the IR."""
+
+    def test_a_prism_given_its_circumradius_as_the_apothem_is_caught(self):
+        node = {"shape": "polygon_prism", "solid": {"sides": 6, "circumradius_mm": "1e1"}}
+        right = {"sides": 6, "corners_r_mm": [(0.0).hex(), (10.0).hex()]}
+        wrong = {"sides": 6, "corners_r_mm": [(0.0).hex(), (11.547005383792516).hex()]}  # G4Polyhedra given R as rOuter: R / cos(pi / 6)
+        self.assertEqual(driver.solid_problems({"name": "p", "solid": {"type": "G4Polyhedra"}}, node, right), [])
+        self.assertEqual(len(driver.solid_problems({"name": "p", "solid": {"type": "G4Polyhedra"}}, node, wrong)), 1)
+
+    def test_a_trd_length_off_by_one_ulp_is_caught(self):
+        node = {"shape": "trd", "solid": {"dx1_mm": "5e0", "dx2_mm": "5e0", "dy1_mm": "5e0", "dy2_mm": "5e0", "dz_mm": "1e1"}}
+        parameters = {key: (5.0).hex() for key in ("half_x1_mm", "half_x2_mm", "half_y1_mm", "half_y2_mm")}
+        item = {"name": "t", "solid": {"type": "G4Trd", "parameters": {**parameters, "half_z_mm": (10.0).hex()}}}
+        self.assertEqual(driver.solid_problems(item, node, None), [])
+        item["solid"]["parameters"]["half_z_mm"] = (10.000000000000002).hex()
+        self.assertEqual(driver.solid_problems(item, node, None), ["logical t: half_z_mm differs"])
+
+
+    def test_a_box_of_the_wrong_size_is_caught(self):
+        node = {"shape": "box", "half_mm": ["1e0", "2e0", "3e0"]}
+        parameters = {"half_x_mm": (1.0).hex(), "half_y_mm": (2.0).hex(), "half_z_mm": (3.0).hex()}
+        item = {"name": "b", "solid": {"type": "G4Box", "parameters": parameters}}
+        self.assertEqual(driver.solid_problems(item, node, None), [])
+        parameters["half_y_mm"] = (2.5).hex()
+        self.assertEqual(driver.solid_problems(item, node, None), ["logical b: half_y_mm differs"])
+
+    def test_a_tube_section_is_judged_by_its_angles(self):
+        node = {"shape": "tube", "solid": {"rmin_mm": "0", "rmax_mm": "1e1", "dz_mm": "1e1", "phi_start_deg": "-9e1", "phi_span_deg": "1.8e2"}}
+        parameters = {"rmin_mm": (0.0).hex(), "rmax_mm": (10.0).hex(), "half_z_mm": (10.0).hex(),
+                      "start_phi_rad": (1.5 * math.pi).hex(), "delta_phi_rad": math.pi.hex()}  # G4Tubs holds -90 degrees as 270
+        item = {"name": "t", "solid": {"type": "G4Tubs", "parameters": parameters}}
+        self.assertEqual(driver.solid_problems(item, node, None), [])
+        parameters["delta_phi_rad"] = math.tau.hex()
+        self.assertEqual(driver.solid_problems(item, node, None), ["logical t: delta_phi_rad differs"])
 
 
 class Dispatch(unittest.TestCase):
