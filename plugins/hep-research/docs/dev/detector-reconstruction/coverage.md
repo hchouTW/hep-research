@@ -15,6 +15,8 @@ Reading the columns (R09: six evidence kinds, each yes, no or unprobed; no overa
 
 T11 also found the inventory too strict in places, with text existing for F12's procedure, F23's boundary, F06's walk and wrong-bunch handling, F03's gain drift, F07's cluster counting and partitioning, and F17's digital row (a table row, no method). Where a row here disagrees with t11-cells.md, t11-cells.md governs.
 
+F21, F24, F26-F28 and F33-F38 now have sourced cells in t11-cells.md Part 3, from papers read; the plugin itself still has no text for them, so this table's rows stand.
+
 Status: provisional, awaiting the checkpoint suite (R28). Gaps here are obligations, not not-applicable (Section 1.3 item 6).
 
 ## F01-F38

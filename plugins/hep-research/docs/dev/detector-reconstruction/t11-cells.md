@@ -1,8 +1,8 @@
-# T11: design cells, first pass (27 of 38 families)
+# T11: design cells (all 38 families)
 
-State: in progress, not done. Covers the families with plugin text. Written from the plugin tree and the plan only, nothing from memory and nothing run. F21, F24, F26-F28 and F33-F38 have no plugin text and need sources (R14).
+State: in progress, not done. Parts 1 and 2 cover the 27 families with plugin text, from the plugin tree and the plan only. Part 3 covers F21, F24, F26-F28 and F33-F38 from papers actually read (t11-sources.md); those cells apply to the named experiment, not a whole family, unless they say otherwise. Nothing was run, and nothing comes from memory.
 
-Result: 189 cells, 167 documented, 21 `gap-method`, 1 not-applicable (F14 space/time, a readout reason). Every anchor was resolved against the baseline headings. Cells marked `source-unverified` name a source the plugin cites that nobody has re-read here, so T11 cannot be done while they remain (R14). Documented means text exists, not that anything runs: most bindings are `none`.
+Parts 1 and 2: 189 cells, 167 documented, 21 `gap-method`, 1 not-applicable (F14 space/time, a readout reason). Every anchor was resolved against the baseline headings. Cells marked `source-unverified` name a source the plugin cites that nobody has re-read here, so T11 cannot be done while they remain (R14). Documented means text exists, not that anything runs: most bindings are `none`.
 
 # Part 1: families the inventory first marked documented
 
@@ -759,3 +759,537 @@ Anchors cited for these 15 rows resolve. Corrections:
 5. F03: "gain drift: no method text" is too strong: SIG gives P/T correction for every gaseous detector, and `stability_monitor.py` tests gain series.
 6. F02: "cross-talk: no method text" is partly wrong: FEE gives size and trapping on neighbours, but no correction.
 7. Tool column: `multisample_pid.py` scope names tracker layers and calorimeter samplings, so F07 and F16 PID have a generic binding the inventory omits. Untested on those inputs.
+
+# Part 3: families with no plugin text, from sources read
+
+119 cells: 83 `sourced`, 32 `gap-method`, 4 `not-applicable`. `sourced` means a paper was read for this cell. Variants with their own tables: F21 (SNSPD, KID), F35, F37.
+
+Written from the papers read on 2026-11-06 and plan v9.2 (6.4, 6.5, 6.6, 5.15, 7.1.1, BP09, BP10, BP12). Nothing was run. Source records are in t11-sources-a.json.
+
+Result: 49 cells, 44 `sourced`, 4 `gap-method`, 1 `not-applicable`. F21 has two tables (SNSPD, KID/MKID), because BP09 forbids a shared noise or energy model and one energy cell could not carry both statuses.
+
+Conventions:
+
+- `sourced` means text read gives this method for this axis, within the stated scope. It is scoped to the experiment or device named, never to the whole family. The variant gaps say what stays uncovered.
+- Binding: `none` everywhere. A word search of `adapters/` in the baseline tree found no adapter for these devices.
+- Run evidence: `none` everywhere. Positive and negative cases are design cases taken from the paper or the plan; none has been run here.
+- Numbers are as printed in the source. Figures were not viewed: captions only.
+- Predicates use `&&`, `||`. Each term is a fact to establish per product; a term not established stays unknown (5.5). Predicates are Inferred from the cited sources, scope as stated.
+- Source sections are named by title where the LaTeX source has no numbers.
+
+## F21a SNSPD
+
+E: laboratory infrared photon counting. Only one review read, Natarajan et al. Particle-detector use is not covered.
+
+| Axis | Status | Source | Method | Observable/port | Positive case | Negative case | Binding | Run evidence |
+|---|---|---|---|---|---|---|---|---|
+| Signal extraction | sourced | 1204.5560 sec 2.2.1, 2.2.2, 1.2 | DC bias just below Ic; hotspot forms resistive barrier; voltage pulse across load; Lk and Rn(t) circuit model | voltage pulse, then one count | pulse with rise tau1 and recovery tau2 as in the model | stray light or electrical noise mimics a pulse (dark count) | none | none |
+| Finding/association | gap-method | 1204.5560 sec 3.1, 2.2.4 (reviewed, no method) | names TCSPC and coincidences only; assumes electronics register every pulse; no discriminator or window method | none | none | none | none | none |
+| Parameter estimation | sourced | 1204.5560 sec 2.3.6, 1.2. Scope: multi-element devices for photon number | PNR-SNSPD: parallel elements with series resistors, pulse height scales with elements fired; MESNSPD: interleaved elements read separately | photon number n from pulse height; count rate | n elements firing give an n times taller pulse | plain meander used as photon-number device; low-bias multiphoton regime is much less efficient | none | none |
+| Space/time/direction | sourced | 1204.5560 sec 2.3.8, Fig. 3(c) caption. Scope: time only | TCSPC with ultrafast laser; Gaussian fit to instrument response; FWHM quoted as jitter | arrival time [ps], jitter FWHM [ps] | known laser arrival time, so jitter is the main timing uncertainty | non-uniform wire gives different hotspot resistances and rise times, broadening jitter | none | none |
+| Energy/momentum | not-applicable | 1204.5560 sec 2.2.3 | photon energy is negligible against energy stored in Lk, so energy or photon-number resolution is lost to Joule heating of the hotspot. Scope: the single-wire device reviewed | none; count only | none | energy assigned to a count (plan BP09 forbids it) | none | none |
+| PID/topology | gap-method | 1204.5560 (sections read) | nothing read. Polarization dependence (sec 2.3.7) is a response effect, not identification | none | none | none | none | none |
+| Uncertainty/quality | sourced | 1204.5560 sec 1.2, 2.2.2, 2.3.4, 2.3.8 | eta_sde = coupling x absorption x registering; DCR versus Ibias; dead time tau ~ tau2; latching check | eta_sde, eta_dde, DCR, jitter, recovery time | DCR rises exponentially as Ibias nears Ic, measured per device | eta_dde reported as eta_sde; tau reduced too far gives a latched state with no detection until bias is lowered | none | none |
+
+## F21b KID/MKID
+
+E: millimetre-wave arrays studied for cosmic-ray response, cryogenic. Scope is two experiments: the Bourrion et al. FPGA board (up to 12 MKIDs) and the Karatsu et al. dark-array cosmic-ray test (about 960 pixels per chip). Neither is a photon-pulse analysis.
+
+| Axis | Status | Source | Method | Observable/port | Positive case | Negative case | Binding | Run evidence |
+|---|---|---|---|---|---|---|---|---|
+| Signal extraction | sourced | 1310.5891 MKID instrumentation, Firmware description | frequency comb, IQ up-conversion; per-tone digital down conversion with CIC+FIR low-pass; amplitude and phase per tone; pre-trigger samples for baseline | I, Q per tone; amplitude; phase; delta f | loop-back single tone with noise floor below -100 dBc | resonances not separated enough for the filter, so crosstalk; DC/DC spikes at multiples of 320 kHz | none | none |
+| Finding/association | sourced | 1310.5891 Firmware description; 1901.02387 main text. Scope: cosmic-ray glitches | online: I^2+Q^2 against one threshold per MKID; offline: iterative second-derivative search, 5 sigma, next 3 tau_qp counted as one event | glitch points; event per pixel; multiplicity | large glitches removed first so rms reflects noise only; cross-check method differs by less than 1% in event number | single-pixel events in chip a change strongly with threshold, explained by statistics | none | none |
+| Parameter estimation | sourced | 1901.02387 main text | single exponential fit to glitch tails gives tau_qp; dead-time and rate estimators | tau_qp [ms] | glitch shape resolved at about 1.27 kHz sampling | about 20% of MKIDs dropped for overlapping resonances or fit failures | none | none |
+| Space/time/direction | sourced | 1310.5891 Performance and results, Fig. 1 caption; 1901.02387 main text. Scope: qualitative | relative arrival of phonon signal across pixels; rough location from KID ID via design frequency encoding | sample time [us]; pixel index | sampling shows time differences, impact near pixels 2 and 6 | KID ID read as position: no beam mapping was done, location is rough | none | none |
+| Energy/momentum | sourced | 1310.5891 Introduction, Fig. caption of event traces. Scope: phonon-mediated, thin film, principle only | frequency shift proportional to deposited energy (cited to Swenson et al., not read); pulse amplitude used for spectra | delta f; no calibrated energy shown | delta f proportional to generated quasi-particles | raw amplitude compared across MKIDs: resonance depth and transfer function differ. Energy below 2 Delta is invisible (1901.02387) | none | none |
+| PID/topology | sourced | 1901.02387 main text, Fig. 3 caption. Scope: event class, not particle type | multiplicity above 10 pixels taken as cosmic-ray event | multiplicity; event class | normal cosmic-ray events seen by more than 10 pixels at once | chip b isolated events on a few pixels, poorly understood | none | none |
+| Uncertainty/quality | sourced | 1901.02387 main text, Table 1; 1310.5891 Electronics requirements | dead-time fraction = glitch points x readout step / time; event rate per pixel; dark NEP and tau_qp as array checks; SNR target | dead-time fraction; rate per pixel; pixel yield | measured chip rate consistent with the expected muon rate | L2 dead time is a scaling, not a measurement; simulated energy carries about 10% uncertainty | none | none |
+
+Variant and condition gaps (F21):
+
+- Other superconducting photon sensors: not covered by any source read.
+- MKID photon pulses (single-photon or energy-resolving optical/UV): not covered. Both sources study cosmic-ray glitches.
+- MKID energy calibration: no procedure from delta f to energy read; Bourrion defers physical interpretation.
+- MKID resonance drift and tracking: not covered.
+- MKID pileup: not covered. The 3 tau_qp window is an event-counting rule only.
+- MKID operating point and readout power: not covered.
+- MKID multiplex response: per-resonator threshold and crosstalk condition only, no channel-mixing correction.
+- MKID phase noise model: not covered; rms from the time stream only.
+- SNSPD particle (non-photon) detection: not covered.
+- SNSPD array multiplexing: RSFQ and amplifier/discriminator named in sec 2.4.3, no method.
+- SNSPD pulse discrimination and count-loss correction near dead time: not covered.
+- SNSPD spatial readout: not covered.
+
+Signature facts: variant (SNSPD or KID, never inferred from "superconducting"); representation (pulse, count and timestamp; or I/Q, amplitude, phase, delta f per tone); clock and sample rate; trigger threshold per channel; pre-trigger samples; bindings (SNSPD: Ibias, Ic, temperature, recovery time, efficiency type; KID: tone list, resonance frequency, per-resonator transfer function, tau_qp, frequency-to-pixel map). 5.15: BP01 samples/clock/window; BP09 pulse/IQ/count with variant branch; BP12 count, deadtime.
+
+Applicability:
+
+- SNSPD count: `variant_snspd && pulse_or_count_stream && (bias_point_known || operating_state_recorded) && recovery_time_known`; time: `&& timestamps && reference_clock`; photon number: `&& (pnr_device || multi_element_individual_readout)`; energy: never from a single-wire count.
+- KID glitch/event: `variant_kid && (iq_samples || phase_time_stream) && sample_rate && tone_to_channel_map && threshold_rule`; delta f or energy proxy: `&& resonance_frequency_known && per_resonator_transfer_function`; position: `&& (beam_map || design_frequency_encoding_declared_as_rough)`.
+
+Stays unknown: energy from counts; photon number from a plain meander; position from KID order without a map; dead time without the glitch list; `eta` type if not stated (sec 1.2 warns reports differ).
+
+Recognition: positive, IQ per tone with a tone list. Negative, a pulse list labelled only "superconducting detector": stays unknown; it does not select any branch.
+
+## F24 Superheated bubble chambers and droplets
+
+E: low-background dark-matter searches. Scope is PICO-60 C3F8 (bubble chamber, optical plus acoustic plus pressure) and PICASSO SBD modules (droplets in polymer, acoustic only). Neither scope transfers to the other without saying so.
+
+| Axis | Status | Source | Method | Observable/port | Positive case | Negative case | Binding | Run evidence |
+|---|---|---|---|---|---|---|---|---|
+| Signal extraction | sourced | 1902.04031 Experimental Method, Data Analysis; physics/0508098 sec 5 | PICO: 340 Hz cameras into ring buffers, entropy of frame differences as bubble trigger; piezo acoustics; fast pressure sensor. PICASSO: piezo waveform on 1 MHz FADC, 15 ms re-trigger rejection, 40-130 kHz filter, time-frequency map, integrated to Q | frames; acoustic waveform; pressure rise; Q | PICASSO Q cut nearly fully efficient at medium and high amplitude | PICASSO filter about 50% efficient close to threshold | none | none |
+| Finding/association | sourced | 1902.04031 Data Analysis; physics/0508098 sec 5. Scope: PICO for bubbles | image trigger; multiplicity from pressure rise rate; bubble followed over up to nine frames in 30 ms; near-surface events need both cameras within 30 ms. PICASSO: event if one transducer above threshold, all channels read | bubble count per event; bubble motion in frames (not a particle track) | wall events tagged by motion 10 degrees or more from vertical | near-surface visibility poor, position uncertain without the two-camera requirement | none | none |
+| Parameter estimation | sourced | 1902.04031 Bubble Nucleation Threshold, Data Analysis; physics/0508098 sec 2 | threshold from T and P (Seitz); efficiency curves, monotonic piecewise linear, fitted to neutron calibration by MCMC; AP normalised per thermodynamic condition. PICASSO: sigmoid P(Edep, Eth) with fitted alpha | Seitz threshold [keV]; efficiency curve; AP | calibration singles, doubles, triples match simulation with best-fit efficiency | thresholds 1.20, 1.58, 1.81 keV lack comprehensive recoil calibration and are not in the search | none | none |
+| Space/time/direction | sourced | 1902.04031 Experimental Method, Data Analysis. Scope: PICO optical. No direction of the incident particle | stereo cameras, sub-pixel position, correction for image shifts, per-camera weight by image quality | bubble position [mm]; frame time | fiducial mass raised after finer position and wall tag | failed LEDs and off-centre images degrade quality, so weights must follow them | none | none |
+| Energy/momentum | sourced | 1902.04031 table of conditions, Bubble Nucleation Threshold; physics/0508098 sec 2, 5. Identifiable quantity is threshold only | operating threshold plus efficiency curve; no energy per bubble | threshold [keV]; count above threshold | T and P set threshold, with experimental and theoretical errors | PICASSO amplitude read as energy: it follows droplet size, position, solid angle and transducer response | none | none |
+| PID/topology | sourced | 1902.04031 Introduction, Experimental Method, Background estimates, WIMP search Results | AP separates alphas from recoils; multi-bubble events tag neutrons; alpha chain also seen by time signature | AP; bubble multiplicity; event class | acceptance region set before unmasking from calibration | at the three lowest thresholds, gamma-induced recoils are indistinguishable acoustically | none | none |
+| Uncertainty/quality | sourced | 1902.04031 Background estimates, WIMP search Results; physics/0508098 sec 5, 8 | live time and efficiency-corrected exposure; background from simulation, calibration and multi-bubble rate; profile likelihood with efficiency surfaces. PICASSO: trigger acceptance from second transducer, times Q acceptance | exposure [kg-day]; efficiency; live time; expected background | live-time fraction tracked per condition; PICASSO acceptance measured per detector | multi-bubble rate above simulation, so background left unconstrained; above about 72 C spontaneous nucleation makes SBDs unstable | none | none |
+
+Variant and condition gaps (F24):
+
+- Droplet detectors with optical readout: not covered. Dosimeter visual counting is only mentioned (physics/0508098 sec 1).
+- Droplet localization by piezo: claimed as possible (sec 2 end) and planned (sec 9 end), no method read.
+- Droplet multiplicity: not covered.
+- Optical-acoustic association: no method; PICO treats them as one event, details deferred to a cited paper not read.
+- Overlapping bubbles: not covered.
+- Bubble image finding beyond the trigger entropy: cited earlier PICO processing not read.
+- Threshold scan as an analysis method: conditions listed, no scan method.
+- Gamma response model: PICO says it is under development; only a measured efficiency here.
+- Other fluids (CF3I, Freon mixtures) in chambers: named only.
+
+Signature facts: variant (chamber or droplet emulsion); readouts present (cameras, piezo, pressure); frame rate; acoustic sampling and band; T, P per live period; expansion and recompression cycle; live-time record; camera geometry; transducer positions; calibration set per condition. 5.15: BP01 acoustic samples/clock; BP02 image features with geometry; BP12 count/threshold, exposure/deadtime; BP15 only with a common event clock.
+
+Applicability:
+
+- Count: `thermodynamic_state_per_period && live_time && trigger_rule && (optical_frames || acoustic_waveform || pressure_trace)`.
+- Threshold-identifiable result: `&& fluid_properties && recoil_efficiency_calibration_for_this_threshold`.
+- Position: `optical_frames && camera_geometry && (two_views || second_constraint)`.
+- Alpha rejection: `acoustic_waveform && per_condition_normalisation_from_calibration && threshold_not_gamma_dominated`.
+- Neutron tag: `multiplicity_observable && simulated_or_measured_multiple_fraction`.
+- Fusion: `common_event_id_or_clock && association_policy`.
+
+Stays unknown: per-bubble energy; incident direction; zero as "no bubble" when a period was not live; droplet position from piezo without a stated method; alpha rejection at a threshold not calibrated.
+
+Recognition: positive, frames plus T/P log. Negative, a list of "tracks" from bubble motion read as particle tracks: conflict, reject.
+
+## F26 Compton telescopes and cameras
+
+E: scope is NCT, balloon-borne compact germanium telescope, and Kuchment-Terzioglu cone-transform inversion on synthetic data only. No flight data enter the second paper.
+
+| Axis | Status | Source | Method | Observable/port | Positive case | Negative case | Binding | Run evidence |
+|---|---|---|---|---|---|---|---|---|
+| Signal extraction | sourced | 1106.0323 The NCT instrument. Scope: readout description; strip-to-hit details are in cited papers | onboard electronics return energy and timing of each strip above threshold; 3D interaction positions | strip energy, time; interaction position, energy | 2-4 keV FWHM at 662 keV, 2 mm pitch, 0.5 mm depth resolution as stated | below about 300 keV the background is a factor two under simulation, so excluded | none | none |
+| Finding/association | sourced | 1106.0323 Event Reconstruction | N of 3 or more: CKD figure of merit with N-2 dof over N! orderings, best kept, limit seven; N=2: ordering maximising Klein-Nishina times photoabsorption probability | interaction order | extra interactions give more kinematic checks | two-interaction events have no kinematic dof; ordering often ambiguous, and they are 65.8% of selected events | none | none |
+| Parameter estimation | sourced | 1106.0323 Introduction (scatter formula); 1604.03805 Introduction | Compton formula from energies gives scatter angle; first two sites give the axis | cos(phi), axis vector, Compton circle or cone | 1.2 cm first-interaction cut narrows ARM 10 to 7.4 degrees in simulation | short first separation: strip pitch dominates angular error | none | none |
+| Space/time/direction | sourced | 1106.0323 Image of the Crab Nebula; 1604.03805 Reconstructions in 3D | backprojection of circles; list-mode MLEM, five iterations here. Second paper: cone data to Radon data, three methods, then filtered backprojection | sky image; source position; 3D source function (synthetic) | MLEM shows the Crab, not apparent in raw backprojection | non-admissible detector geometry gives limited-data blurring; formula with singular integrals failed numerically | none | none |
+| Energy/momentum | sourced | 1106.0323 The NCT instrument, Analysis of the Crab spectrum. Scope: assumes full absorption | sum of deposits after ordering; on and off source spectra compared with simulation by chi-squared | reconstructed photon energy [keV]; spectrum | Crab spectrum consistent with simulation, test points not | 511 keV atmospheric line must be cut out; partial absorption has no method here | none | none |
+| PID/topology | sourced | 1106.0323 Background Reduction, Table of cuts. Scope: event rejection, not particle type | CKD rejection, BGO anticoincidence, Earth horizon cut, interaction count 2-7 | accepted event class | simulation: instrumental events effectively eliminated by CKD | real photons dominate the remaining background; CKD does not remove them | none | none |
+| Uncertainty/quality | sourced | 1106.0323 The ARM, Significance of the Crab detection, Analysis of the Crab ARM; 1604.03805 Comparison, Remarks | ARM histogram and FWHM; off-source points; excess variance from independent Poisson classes of circles. Second paper: L2 and H1 errors under added noise | ARM [deg]; excess, sigma_excess; significance | exact sigma 163.4 replaces naive 182.9, as circles cross several points | off-source ARM contains source counts unless modelled; method 2 breaks down at 20% noise | none | none |
+
+Variant and condition gaps (F26):
+
+- Escape hypothesis and incomplete absorption: no method; NCT is designed around full absorption.
+- Polarization: not performed by NCT, stated as lack of counts. Link F37.
+- Electron-tracking Compton: not covered.
+- Two-layer time-of-flight telescopes (COMPTEL) and liquid xenon TPC (LXeGRIT): named in the introduction only.
+- CZT, silicon and other compact telescopes: named by reference only.
+- Compton cameras at finite distance with real data: only synthetic spherical geometry; paper states it assumes pure surface measure and that the correct weight is unclear.
+- Material and passive-mass effects on ordering: not covered; mass model exists, no method.
+- Doppler broadening: named as a limit on ARM, no correction.
+- Ordering error rate: never quantified in text read.
+- Extended sources: stated as future work.
+
+Signature facts: per-event list of interaction position, energy and error; time; multiplicity; detector geometry; mass model; pointing or aspect; veto state; energy window; ordering policy and whether all orderings are kept. 5.15: BP10 multi-site gamma, ordering and escape; BP01/BP02 for raw strips; BP14 only with an azimuth port.
+
+Applicability:
+
+- Order and cone: `multi_site_events && position_energy_with_errors && geometry && (n_sites_ge_3 || two_site_prior_declared)`.
+- Energy: `&& (full_absorption_assumed_and_declared || escape_hypothesis_available)`.
+- Sky image: `cones && pointing && exposure && (backprojection || list_mode_mlem_response || cone_inversion_with_admissible_geometry)`.
+- Polarization: `&& azimuth_response && sufficient_counts`; otherwise unknown.
+
+Stays unknown: first site in two-site events without a stated prior; total energy when escape is not excluded; significance if circles are counted as independent per point.
+
+Recognition: positive, event list with several sites each with position and energy. Negative, a single-site spectrum: not Compton imaging.
+
+## F27 Pair-conversion gamma telescope
+
+E: scope is Fermi LAT only: silicon strip tracker with tungsten converters, CsI calorimeter, segmented ACD. 0902.1089 is the 2009 instrument paper; Pass 8 (2013) is a status proceedings with work then in progress, so its items are not confirmed as final here.
+
+| Axis | Status | Source | Method | Observable/port | Positive case | Negative case | Binding | Run evidence |
+|---|---|---|---|---|---|---|---|---|
+| Signal extraction | sourced | 0902.1089 sec 2.2.1, 2.4.1, 2.4.2 | adjacent strips clustered; time-over-threshold per layer; crystal pedestals and gains, two ends give energy and position along crystal | cluster coordinate; TOT; crystal energy and position | clusters give z plus x or y | x-y pairing ambiguity with two or more particles in a plane | none | none |
+| Finding/association | sourced | 0902.1089 sec 2.4.1; 1303.3514 Tracker Reconstruction | CSPR seeded by calorimeter centroid, then BSPR; Kalman hit search in covariance ellipse. Pass 8: tree-based linking of hits | track candidates, quality order; tree | gaps allowed; first-hit cone at high energy limits backsplash | pre-Pass-8 finding depends on calorimeter; backsplash hits confuse it; conversions rarely clean two-track | none | none |
+| Parameter estimation | sourced | 0902.1089 sec 2.4.1; 1303.3514 Vertexing | Kalman fit with material; energy shared by observed scattering, refit; closest approach gives vertex, covariant combination | track state and covariance; vertex | best track plus second within distance gives vertex | LAT poorly determines single-track energies since calorimeter deposits overlap | none | none |
+| Space/time/direction | sourced | 0902.1089 sec 2.4.1, 2.4.3.2; 1303.3514 Vertexing. Scope: direction, event time not read | vertex or best track, chosen by a classification tree; neutral-energy solution adds calorimeter centroid | photon direction; PSF class | neutral energy solution reduces non-Gaussian tails | thick section about twice worse; tracks may point far from photon when energy goes to gammas | none | none |
+| Energy/momentum | sourced | 0902.1089 sec 2.4.2, 2.4.3.2; 1303.3514 Energy Reconstruction | leakage correction by PC, SP and LK methods, tree picks; tracker as sampling calorimeter at low energy. Pass 8: crystal-level profile fit | best energy; probability knob | LK result on CERN electron beam as stated | near 1 TeV crystal saturation; at about 100 MeV about half the energy can lie in the tracker | none | none |
+| PID/topology | sourced | 0902.1089 sec 2.2.1, 2.4.3.2; 1303.3514 ACD Reconstruction, Event selection | ACD veto only on tiles pointed to by tracks; TOT at track end; topology and shower match into classification trees | gamma probability, event class | 2-track vertex cuts contamination by about an order | blanket ACD veto kills high-energy gammas through backsplash; irreducible background cannot be separated | none | none |
+| Uncertainty/quality | sourced | 0902.1089 sec 2.4.3.2, 2.5; 1303.3514 Event-by-event Errors, Clustering | tree probabilities as knobs; hierarchical Transient, Source, Diffuse classes; reducible background from vertexed versus unvertexed flux; event covariance | effective area, PSF containment, energy dispersion by class | event error from hit composition and material | ghost signals bias calorimeter match; circular error is inaccurate far off axis | none | none |
+
+Variant and condition gaps (F27):
+
+- Spark chamber pair telescopes (EGRET): named only; Thompson 1993 not read.
+- Gas TPC, emulsion and other pair telescopes: not covered.
+- Charge hypothesis for e+ and e-: no charge-sign measurement in text read. The plan condition stays open; do not label tracks by sign.
+- Low-energy scattering tails: named as PSF behaviour, with neutral-energy fix only above sufficient calorimeter energy.
+- Pair polarimetry: preliminary in Pass 8. Link F37.
+- Event time and clock: not read (sec 2.2.4 skipped).
+- Tracker-only and calorimeter-only classes: proposals in Pass 8.
+
+Signature facts: tracker layers and strips, converter map, cluster lists, TOT; calorimeter crystals, gains, pedestals; ACD tile geometry and signal; trigger word; material map; event classes in use and version of the pass. 5.15: BP03 measurements and surfaces; BP04 tracks with errors; BP05 cells with geometry; BP10 pair tracks; BP15 multi-subsystem association.
+
+Applicability:
+
+- Track: `tracker_clusters && surfaces && material_map && (calorimeter_seed || blind_search)`.
+- Vertex: `n_tracks_ge_2 && track_covariance`; otherwise single-track direction, not a failure.
+- Direction: `(vertex || best_track || (conversion_point && calorimeter_centroid))`.
+- Energy: `calorimeter_signals && gains && track_axis && (leakage_model)`; low energy `&& tracker_hit_counts`.
+- Gamma selection: `anticoincidence_signals && track_to_tile_extrapolation && classifier_with_stated_training`.
+
+Stays unknown: charge sign; individual e+ e- energy; vertex above 1 GeV in events without a recognizable one; class purity without a background model.
+
+Recognition: positive, converter-tracker plus calorimeter plus veto. Negative, a magnetic spectrometer: not F27 (6.6).
+
+Coupling to record: finding, energy and fit are iterative here. Energy seeds finding, tracks correct energy, energy sets fit weights. BP10's split into BP03/BP04 and BP05 needs that loop stated.
+
+## F28 Coded aperture and response-encoded imaging
+
+E: scope is the coded-mask variant only, two-dimensional, source at infinity, one review (Braga). Near-field use is excluded by the review.
+
+| Axis | Status | Source | Method | Observable/port | Positive case | Negative case | Binding | Run evidence |
+|---|---|---|---|---|---|---|---|---|
+| Signal extraction | sourced | 1909.08595 The concept, Image formation, Masks and antimasks | event map in detector pixels per energy range and integration time; flat-field factors from equal illumination | shadowgram D [counts per pixel] | multiplicative pixel sensitivity corrected per energy range | additive background variation cannot be flat-fielded out | none | none |
+| Finding/association | gap-method | 1909.08595 (sections read) | no source-finding or peak-selection algorithm; only that a source gives a peak | none | none | none | none | none |
+| Parameter estimation | sourced | 1909.08595 Image formation | D = S (x) M + B; cross-correlate with decoding G, often by FFT; URA, MURA | reconstructed intensity per skybin | M (x) G a delta function gives no intrinsic artifacts | incomplete shadowgrams from the partly coded field give ghost peaks | none | none |
+| Space/time/direction | sourced | 1909.08595 Detector plane resolution, Geometry and fields of view, Image formation | skybin grid, theta = atan(xi/l); resolution from m and Delta s over l; location accuracy scales as resolution over SNR | source direction; location accuracy | m about Delta s gives the lowest position uncertainty | repeated pattern on a large mask gives direction ambiguity (rotating mask named as remedy) | none | none |
+| Energy/momentum | sourced | 1909.08595 Introduction, Signal-to-noise ratio. Scope: flux per energy band | image per energy range; F = N_H S / (A_eff T Delta E) | flux per band | A_eff includes open fraction and detector efficiency | spectrum taken without A_eff; energy redistribution is not treated | none | none |
+| PID/topology | gap-method | 1909.08595 (sections read) | no event classification in text read | none | none | none | none | none |
+| Uncertainty/quality | sourced | 1909.08595 Masks and antimasks, Signal-to-noise ratio | variance sigma^2 = N_S + N_T per skybin; SNR per peak; mask and antimask difference removes background | SNR; variance per skybin; minimum flux | antimask simulation reaches about 62, as Poisson predicts | mask only with 20% ramp: artifacts, SNR about 16; other sources add noise to every peak | none | none |
+
+Variant and condition gaps (F28):
+
+- Collimated imaging: not covered. A collimator appears only as a field-of-view device in a coded-mask camera, and non-imaging collimators are mentioned.
+- Focusing optics (Wolter, NuSTAR, lobster-eye): named as comparisons only, no response or reconstruction.
+- Partially coded field reconstruction: ghost problem stated, no correction read.
+- Extended sources: word absent from text searched; no method.
+- Attitude and pointing bias: `attitude`, `pointing`, `dither` absent from text searched; no method.
+- Iterative or likelihood inversion: only cited.
+- Near-field coded imaging (medical, security): explicitly excluded.
+- Crossed one-dimensional cameras: described, no reconstruction method.
+- Rotating mask timing analysis: named only.
+- Off-axis mask thickness effects: neglected in the derivation as stated.
+
+Signature facts: detector map in raw counts per pixel; energy band; integration time; mask pattern and open fraction; mask-detector distance; cell and pixel size; field class (fully or partly coded); background model or antimask; pointing record; variant. 5.15: BP02 channel features with geometry; BP10 detector maps/shadowgrams and mask/PSF/pointing.
+
+Applicability:
+
+- Coded-mask image: `variant_coded_mask && raw_count_map && mask_pattern && mask_detector_geometry && source_at_infinity && (in_fully_coded_field || partial_coding_handled) && (uniform_background || background_measured || antimask_pair)`.
+- Flux: `&& effective_area_per_band && exposure`.
+- Collimated or focusing input: stays unknown here; a coded-mask decoder is not applicable.
+
+Stays unknown: source intensity from a normalized or cropped map (BP10); a source in the partly coded field without ghost handling; absolute position without pointing.
+
+Recognition: positive, count map plus mask file. Negative, a sky image with no detector map: no inversion here.
+
+## F33 Few-electron and Skipper-CCD readout
+
+E: scope is two Skipper CCD studies (Tiffenberg et al. and SENSEI, Barak et al.), low-temperature, one device each. Links F01/F02 (6.6).
+
+| Axis | Status | Source | Method | Observable/port | Positive case | Negative case | Binding | Run evidence |
+|---|---|---|---|---|---|---|---|---|
+| Signal extraction | sourced | 1706.00028 Technical Description, Signal processing | non-destructive repeat samples of one pixel; average of N samples; sigma = sigma_1/sqrt(N); samples configurable per pixel | sample stream; pixel charge | noise follows the 1/sqrt(N) curve, 0.068 e rms at 4000 samples | correlated noise from switching supplies; slight deviation at N of about 2000 and above | none | none |
+| Finding/association | sourced | 2106.08347 Empirical model, Results, Appendix. Scope: pixel level; masks are defined in SENSEI 2020, not read | single-electron pixels counted after selection, edge and halo masks; jump search between sample groups at 5 std | SEE per pixel; jump count | dark rate falls with halo radius until roughly 30 pixels | above 100 e a jump is treated as a high-energy hit, not charge generation | none | none |
+| Parameter estimation | sourced | 1706.00028 Impact of dark current, Fig. 1 | integer peaks; classify to nearest integer; keep within 3 sigma of an integer | charge state [e] | below 0.1 e rms, n to n+1 error about 3e-7, about 1e-12 after the cut | at 0.14 e rms, tail of dark bin needs a cut 0.84 e above it, 87% efficiency | none | none |
+| Space/time/direction | sourced | 2106.08347 Dark current, Amplifier light. Scope: pixel position and effective exposure, no event time | pixel exposure differs by readout order; mean readout term lambda_DC/2 | pixel index; t_EXP, t_RO | last pixel read has extra t_RO | equal exposure assumed; amplifier-light rate averaged though it is localized | none | none |
+| Energy/momentum | sourced | 1706.00028 Particle Physics. Scope: electron-recoil relation, ionization handoff | electrons to energy with an assumed 3.6 eV per extra pair above gap | charge [e]; electron recoil [eV] | 2 e about 4.7 eV, 3 e about 8.3 eV, as stated | nuclear recoil: ionization efficiency not accurately known at low energies | none | none |
+| PID/topology | sourced | 2106.08347 Semi-empirical model, Transfer Curves. Scope: origin of single-electron events | separate by exposure, readout and space dependence | DC, AL, SC components | SC is exposure-independent and from clocking | extrinsic dark current is in principle indistinguishable from intrinsic | none | none |
+| Uncertainty/quality | sourced | 2106.08347 Transfer Curves, Results, Appendix; 1706.00028 Impact of dark current | linear fits of SEE versus t_EXP and t_RO; V_DD scan for amplifier light; Poisson model of dark counts; misclassification check | lambda_DC, lambda_AL, mu_SC; readout noise | V_DD change from -22 to -21 V cuts amplifier light by two orders | quadrants with excess SEE or high CTI dropped; origin of jumps not settled | none | none |
+
+Variant and condition gaps (F33):
+
+- Other discrete-quanta semiconductor sensors: a depleted field effect transistor mini-array appears in one footnote only.
+- Cluster finding and pixel grouping: not covered; selection deferred to SENSEI 2020.
+- CTI correction: only exclusion of a quadrant and temperature effect, no method.
+- Gain calibration from peaks to electrons: "stable linear gain" stated, no procedure read.
+- Sample correlation beyond the sqrt(N) check: no model.
+- Credible energy-response handoff: only the assumed pair energy; no response for nuclear recoils.
+- Charge diffusion across pixels and depth: bias choice only.
+- Zero/one-electron confusion measured on data: only Gaussian-noise probabilities.
+- Spatial model of amplifier light: paper chose not to study it.
+
+Signature facts: per-pixel sample array or averaged charge with N stated; sigma_1; gain; phase timing (cleaning, exposure, readout); t_EXP and t_RO; read order and pixel map; clocking settings; V_DD; temperature; masks in use; CTI status per quadrant. 5.15: BP01 samples/clock; BP02 pixel features; BP09 repeated samples with discrete-quanta branch.
+
+Applicability:
+
+- Charge state: `repeated_samples_or_averaged_with_N && gain_known && sample_independence_checked && resolved_integer_peaks`.
+- SEE rate: `&& exposure_phase_times && read_order && selection_masks`.
+- Origin split: `&& (several_exposures && several_readout_times) && zero_exposure_images`.
+- Energy: `charge_state && energy_response_declared_for_recoil_kind`.
+
+Stays unknown: nuclear recoil energy from charge (BP09); event time inside an exposure; tracks (not forced, plan F33 row); pixel exposure when the read order is missing.
+
+Recognition: positive, repeated samples per pixel plus phase metadata. Negative, a conventional CCD with no repeats: F01 instead; a charge state may not be claimed.
+
+## Plan statements checked against sources
+
+No plan statement was contradicted. Supported directly: BP09 and F21 no energy from SNSPD counts (1204.5560 sec 2.2.3); BP09 few-electron charge is not recoil energy (1706.00028, ionization efficiency); F24 no continuous energy per bubble (physics/0508098 sec 5, amplitude follows droplet size and position); BP12 independence warning (1106.0323, naive Poisson variance fails); F33 exposure differences (2106.08347).
+
+Refinements to consider:
+
+- F27 row and BP10 imply a conversion vertex with e+/e- tracks. In 0902.1089 a majority of events above 1 GeV lack a recognizable vertex, and single tracks are assigned their own vertex. In 1303.3514 conversions rarely look like clean two-track events. Single-track is a normal output, and no charge sign is read.
+- F28 ghosts/sidelobes: in 1909.08595 URA-type patterns have no intrinsic sidelobes in the fully coded field; ghosts come from partial coding, background and pattern choice. Scope the row accordingly.
+- F24: a PICO-60 caption says higher-energy alphas give larger acoustic signals. Not an energy measurement, so no conflict with the plan.
+
+Access date 2026-11-06. Plan v9.2 rows F34-F38, 5.15, 6.6, 7.1.1, BP13, BP14, W7. Nothing was run.
+
+Conventions:
+
+- Status: `sourced`, `gap-method`, `not-applicable`. Every `sourced` cell states the scope of the one experiment or code it comes from. It is not a family-wide claim.
+- Source text was the arXiv LaTeX e-print of the latest listed version, with the PDF and abstract page fetched too. Section names are those printed in the source, because letters have no numbered sections. Source records: `t11-sources-b.json`.
+- Read level `full-text` means the whole body was read. `page` means only the named sections were read, some paragraphs only up to a length cut-off; the cells rest on those sections alone.
+- Binding is `none` throughout. The baseline tree has no code for these families; its only hits are a generic polarimeter table row and a bibliography mention. Run evidence is `none` throughout. Cases are taken from the sources but are design cases here.
+- Predicates: `&&`, `||`. Each term is a fact to establish. A term not established stays unknown; a name alone does not establish it (5.5).
+- F35 and F37 have one table per variant, as 6.6 requires. A variant with no source is a table of `gap-method` cells, not a stretched neighbour.
+
+## F34 Cyclotron-radiation emission spectroscopy (CRES)
+
+Scope: Project 8 only, Phase I (rectangular waveguide, 83mKr) and Phase II (circular waveguide, 83mKr and T2). Outputs are per-event start frequency and a binned spectrum. No other CRES instrument was read.
+
+| Axis | Status | Source | Method | Observable/port | Positive case | Negative case | Binding | Run evidence |
+|---|---|---|---|---|---|---|---|---|
+| Signal extraction | sourced | 2212.05048 apparatus paragraphs, Fig. "spectrogram"; 2303.12055 Sec. "Radio-frequency system" | amplify, downmix, digitize; FPGA FFT in three tunable windows; spectrogram; SNR trigger on bins | power vs frequency and time; bin 24.4 kHz by 40.96 us (Phase II); SNR = bin power / mean bin power | SNR used instead of absolute power in trigger, reconstruction and spectrum analysis, avoiding amplifier and filter gain variation | weak resonant cavity modes from residual reflections change response with trap position and frequency | none | none |
+| Finding/association | sourced | 2212.05048 reconstruction paragraph; 2303.12055 Sec. "Electron event properties"; 1703.02037 Sec. "Results" (Phase I) | point clustering of high-SNR bins into tracks; tracks close in time grouped as one event. Phase I: segments above SNR 6 dB, next segment begins where previous ended | frequency-time track; event = ordered tracks | chirped tracks with frequency jumps from gas collisions grouped to one electron | first visible track is not the true first track: tracks can be too short or too weak | none | none |
+| Parameter estimation | sourced | 2303.12055 Secs. "Electron event properties", "CRES energy spectrum model", "Tritium analysis procedures"; 2212.05048 Eq. FullModel | start frequency of first track; binned spectrum model S = eps (Y * R_PSF), R_PSF = sum_j A_j (I * L^{*j}); Poisson-likelihood chi-square fits (Kr), Bayesian and frequentist fits (T2) | start frequency [Hz]; binned f_c spectrum; B, A_j, sigma, E0, m_beta | Kr K-line fit with scatter parameters and B free, no background seen | fit that ignores scatter peaks: low-energy tail from undetected first tracks | none | none |
+| Space/time/direction | gap-method | read: 2303.12055 Sec. "Electron event properties" and a keyword search for pitch angle; 1703.02037 Sec. "Results" | no per-event position or pitch-angle estimator in the sections read. Only a cut on event start vs trigger time (Phase I). Pitch and radius appear through simulation and efficiency | none | none | frequency-time track read as a spatial track (W7) | none | none |
+| Energy/identifiable quantity | sourced | 2212.05048 Eq. energytofrequency; 2303.12055 Sec. "Test of the frequency-energy relation"; 1703.02037 Sec. "Cyclotron Radiation Emission Spectroscopy" | f_c = abs(e) B / (2 pi (m_e + E_kin/c^2)); mean B from 83mKr lines; result is energy at decay via start frequency | E_kin [eV] from start frequency and B | Voigt fits to Kr conversion lines verify the relation over 14.3 keV with B free | energy from a later track without the scatter model; B from a different trap configuration | none | none |
+| PID/topology | sourced | 2303.12055 Sec. "Electron event properties"; 2212.05048 selection paragraph | electron event vs RF noise only: upward slope; cuts on number of tracks, first-track duration and SNR, fixed before tritium data | keep/reject per candidate event | zero counts observed in the region above the T2 endpoint over the 82-day run | RF noise fluctuations forming false tracks. No species identification read | none | none |
+| Uncertainty/quality | sourced | 2212.05048 analysis paragraphs, Tab. uncertainties; 2303.12055 Secs. "Field-shifted Kr data analysis", "Background" | efficiency vs frequency from field-shifted Kr; MC coverage and bias of the approximate model; Asimov sets for individual systematics; background limit from counts above endpoint | eps(f_c); coverage; sigma(E0) terms | approximate model gives correct coverage and no bias on ensembles from the un-approximated model | efficiency notch near a TM01 mode: faster chirp, reconstruction tuned for normal slopes loses events | none | none |
+
+Variant and condition gaps:
+
+- Other CRES apparatus: nothing read. The planned cavity geometry is only an outlook sentence in 2212.05048.
+- Incorrect merging of neighbouring chirps (plan negative case): not covered. 2303.12055 reports negligible pileup at its rates and says pileup is studied for future phases.
+- Sidebands: in Phase II they are too weak to detect (2212.05048) and only the carrier is detected (2303.12055). No sideband reconstruction method exists in the sources; matched filtering and machine learning are stated as potential. 1909.08115 was not read.
+- Space and direction: gap above. 2212.05048 says sideband identification could give input for kinematic corrections, which is a prospect, not a method.
+- Overlapping DAQ windows: overlap handled by analysing only the highest-efficiency channel (2303.12055). Other overlap handling not covered.
+
+Signature facts: representation (time series or spectrogram; raw kept only after trigger); axis (downmix offset, window centre, sign, bin sizes); acquisition (trigger rule, window overlap, live time); conditions (trap configuration, mean B, gas composition, collision time); calibration (line source, field-shifted efficiency). 5.15: BP01 samples and clock; BP13 IQ or frequency-time with RF/IF/LO coordinates.
+
+Applicability: `(rf_timeseries || spectrogram) && frequency_axis_known && bin_sizes_known && trigger_rule_known`; track and event: `&& high_snr_bin_clustering_allowed && chirp_sign_known`; energy: `&& start_frequency && mean_B_calibrated && trap_configuration_matches_calibration`; spectrum: `&& efficiency_vs_frequency && (scatter_amplitudes && energy_loss && instrumental_resolution)`.
+Stays unknown: per-event position and pitch; energy from a mid-event track; any spectrum without the missed-track term.
+Recognition: positive, spectrogram with upward chirps and frequency jumps in a trapped-electron cell. Negative, a power spectrum averaged over a tuning step (F35), or a frequency-time plot offered as spatial tracks.
+
+## F35 Resonant and coherent-field readout
+
+Output is a spectrum, a limit or a candidate list, not events. Links per 6.6: F19, F21, F32 not counted here.
+
+### F35-cavity
+
+Scope: HAYSTAC first data run only, photon coupling, tunable cavity with JPA.
+
+| Axis | Status | Source | Method | Observable/port | Positive case | Negative case | Binding | Run evidence |
+|---|---|---|---|---|---|---|---|---|
+| Signal extraction | sourced | 1706.08388 Secs. "Axion search data", "Cuts on spectra", "Cuts on IF bins", "Removing the spectral baseline" | one averaged power spectrum per tuning step; VNA, JPA gain and Y-factor auxiliaries; cut spectra and IF bins; normalize to average baseline, Savitzky-Golay filter, subtract 1 | power vs IF bin [100 Hz bins]; processed spectrum, dimensionless | baseline removed on scales larger than the axion line without structure left in processed spectra | spectra near an intruder mode: single-mode assumption fails, all such spectra cut | none | none |
+| Finding/association | sourced | 1706.08388 Secs. "Analysis overview", "Candidates and Exclusion", "Setting the threshold" | threshold on normalized grand spectrum; bins above it become rescan candidates; correlated neighbouring bins excluded around a candidate | candidate: frequency, threshold coupling, normalized excess | observed candidate count compared with simulated expectation at the chosen threshold | adjacent bins treated as separate candidates: grand-spectrum bins overlap and are correlated | none | none |
+| Parameter estimation | sourced | 1706.08388 Secs. "Combining spectra vertically", "Constructing the combined spectrum", "Accounting for correlations"; rebinning from "Analysis overview" only | rescale by noise and Lorentzian conversion power; inverse-variance (ML) sum of IF bins on one RF bin; rebin and lineshape-weighted sum | combined, rebinned, grand spectrum; delta and sigma per RF bin | m_k spectra per RF bin independent because each spectrum gives at most one IF bin there | quadrature variance applied to correlated neighbouring bins | none | none |
+| Space/time/direction | not-applicable | 1706.08388 Sec. "Axion search data" | readout reason: only one heavily averaged spectrum per iteration is stored, from one cavity mode antenna; no position or direction channel and no within-iteration time | none | none | a per-event or per-position result claimed from these spectra | none | none |
+| Energy/identifiable quantity | sourced | 1706.08388 Secs. "Analysis overview", "Candidates and Exclusion" | excess power at frequency; threshold and SNR give excluded coupling at a chosen confidence, directly from statistics of combined data | frequency [Hz]; magnitude of g_gamma excluded per bin | confidence from Gaussian statistics of the grand spectrum | a field or mass read from one bin without the lineshape and detuning weights | none | none |
+| PID/topology | sourced | 1706.08388 Secs. "Cuts on IF bins", "Candidates and Exclusion", "Rescan data and analysis" | signal vs interference: IF interference sits in the same IF bins; RF interference follows RF across tuning steps; real signal should persist on rescan | bad-bin list; rescan coincidence threshold | candidate fails coincidence threshold in separately processed rescan data | RF interference mimics an axion and is hard to flag before combination | none | none |
+| Uncertainty/quality | sourced | 1706.08388 Secs. "Statistics of the processed spectra", "Accounting for correlations", "SG filter-induced attenuation", App. "Synthetic axion injections" | Gaussian check of bins; simulations for correlation factor xi and filter attenuation eta; hardware injections as fail-safe | xi, eta; SNR per bin | injected narrowband signals give excess, used only as a check | correlation or signal attenuation by the baseline filter left uncorrected | none | none |
+
+### F35-spin
+
+Scope: QUAX ferromagnetic haloscope, one paper; electron spin via YIG spheres coupled to a cavity mode. This is a spin-magnetometer readout. Not extended to other spin systems.
+
+| Axis | Status | Source | Method | Observable/port | Positive case | Negative case | Binding | Run evidence |
+|---|---|---|---|---|---|---|---|---|
+| Signal extraction | sourced | 2001.08940 (no section heads) paragraphs on calibration and search procedure | transmission sets hybrid mode, couples antenna, gives linewidth; JPA and heterodyne; ADC band around mode; FFT at 100 Hz to remove bad bins; rebin to about 5 kHz; degree-five polynomial fit, residuals | power vs frequency; residual sigma_P | noise budget consistent with measured T_n | model of two oscillators fails near a higher cavity mode; four-mode Hamiltonian used instead | none | none |
+| Finding/association | gap-method | 2001.08940 search paragraphs | no candidate threshold or rescan rule stated; only that fluctuations match estimated noise and no significant signal was seen | none | none | none | none | none |
+| Parameter estimation | sourced | 2001.08940 search and limit paragraphs | standard deviation of residuals gives sensitivity; compared with Dicke prediction | sigma_P [W] per run | measured fluctuation close to Dicke value at longest integration | none stated in text | none | none |
+| Space/time/direction | sourced | 2001.08940 interaction and data paragraphs | signal has daily modulation from the angle between B0 and B_a; runs taken at the modulation maximum; 1 ms waterfall spectrogram for fast bursts | run time vs modulation phase | run placed at modulation maximum | run outside the maximum treated as equal sensitivity | none | none |
+| Energy/identifiable quantity | sourced | 2001.08940 Eq. gaee and field paragraphs | sigma_P to field sigma_B; 95% CL limit on g_aee with transduction coefficient k_ac; scan by changing B0 | B field [T]; g_aee | all parameters measured within each run | k_ac is calculated from a model and depends on omega_1 | none | none |
+| PID/topology | gap-method | 2001.08940 search paragraphs | no signal vs interference classification beyond bin removal and the burst check | none | none | none | none | none |
+| Uncertainty/quality | sourced | 2001.08940 calibration paragraphs, Tab. noise budget, search paragraphs | injected calibrated tone gives gain and noise temperature; calibration uncertainty from antenna coupling; thermal-noise check; fake axion added to real data | T_n, gain, calibration uncertainty | analysis keeps signal and SNR for fake axion in real data | unaccounted difference between expected and measured noise | none | none |
+
+### F35-circuit
+
+| Axis | Status | Source | Method | Observable/port | Positive case | Negative case | Binding | Run evidence |
+|---|---|---|---|---|---|---|---|---|
+| Signal extraction | gap-method | none read | none | none | none | none | none | none |
+| Finding/association | gap-method | none read | none | none | none | none | none | none |
+| Parameter estimation | gap-method | none read | none | none | none | none | none | none |
+| Space/time/direction | gap-method | none read | none | none | none | none | none | none |
+| Energy/identifiable quantity | gap-method | none read | none | none | none | none | none | none |
+| PID/topology | gap-method | none read | none | none | none | none | none | none |
+| Uncertainty/quality | gap-method | none read | none | none | none | none | none | none |
+
+No circuit-readout candidate appears in the discovery hits, by title or abstract keyword search.
+
+### F35-broadband
+
+Scope: BREAD conceptual design, read at `page` level by keyword-selected sentences of the introduction, photosensor and sensitivity sections. No data exist in that paper; cells state what it proposes.
+
+| Axis | Status | Source | Method | Observable/port | Positive case | Negative case | Binding | Run evidence |
+|---|---|---|---|---|---|---|---|---|
+| Signal extraction | sourced | 2111.12103 Sec. "Photosensor technologies" | proposed: parabolic reflector focuses barrel signal on a sensor; bolometer with time-modulated input (chopper), or photocounter with thresholding and pulse fitting | NEP or dark count rate | signal shifted to where 1/f noise is subdominant | bolometer on static signal, limited by 1/f noise | none | none |
+| Finding/association | gap-method | 2111.12103 sections above | no candidate method read | none | none | none | none | none |
+| Parameter estimation | gap-method | 2111.12103 sections above | projections only | none | none | none | none | none |
+| Space/time/direction | gap-method | 2111.12103 sections above; App. on focusing not read | none read | none | none | none | none | none |
+| Energy/identifiable quantity | gap-method | 2111.12103 sections above | sensitivity scaling only, not a reconstruction | none | none | none | none | none |
+| PID/topology | gap-method | 2111.12103 sections above | none read | none | none | none | none | none |
+| Uncertainty/quality | gap-method | 2111.12103 sections above | assumed SNR and efficiency in projections only | none | none | none | none | none |
+
+Variant and condition gaps:
+
+- Circuit variant: no source, all seven cells gap.
+- Spin variants other than ferromagnetic YIG (for example nuclear spin): no source. Spin relaxation enters QUAX as tau_s only.
+- Spin scan combination: 2001.08940 reports fifty-six runs at fixed B0; the sections read give no rule for combining overlapping runs.
+- Rescan in spin: not stated. Do not inherit HAYSTAC's rescan.
+- Cavity variants other than HAYSTAC: not read. The paper notes ADMX obtains confidence from Monte Carlo, which is a difference, so HAYSTAC's procedure is not the family's.
+- Broadband: no analysis method beyond sensor signal processing. All non-signal cells are gaps.
+- Wrong RF/IF axis: HAYSTAC aligns bins by coercing LO to bin grid and defines the IF to RF map. An LO sign error case is not treated.
+- Same-raw-interval reuse (W7 RF subcase): HAYSTAC combines separate measurements; shared raw data between settings is not treated.
+
+Averaged spectra: HAYSTAC stores averages of many subspectra, and fluctuations are Gaussian by the central limit theorem, with filter-induced correlations. These bins are not Poisson counts. Only the averaged spectrum is on disk, so raw-level re-analysis is not possible from that product.
+
+Signature facts: variant (cavity, circuit, spin, broadband: each stated, never inferred from a name); representation (raw IQ or averaged spectrum; averaging time; bin width); axis (LO and pump settings, RF/IF map, sign); per-setting response (mode frequency, Q, coupling, form factor or k_ac, noise temperature); order (scan order, tuning, drift, settling); role (discovery or rescan); injection log. 5.15: BP01 where samples are kept; BP13 scan settings with overlap and branch-specific response.
+
+Applicability, cavity: `variant_cavity && spectra_per_setting && rf_if_map && averaging_time && per_setting_noise_and_mode_parameters && (baseline_filter_transfer_known || injection_or_simulation_available)`; candidates: `&& threshold_rule_fixed && rescan_role_declared`.
+Applicability, spin: `variant_spin && hybrid_mode_model && per_run_tau_s_and_N_s && transduction_coefficient && calibrated_gain_and_noise`; limit: `&& modulation_phase_of_run`.
+Circuit: `variant_circuit` selects a gap, nothing else.
+Stays unknown: independence between settings without a raw-interval ledger; any coupling limit without per-setting response; a spin result from cavity constants.
+Recognition: positive, sequence of averaged spectra with tuning steps and auxiliary mode measurements. Negative, a spectrogram with event tracks (F34), or a bare spectrum with no axis semantics (5.15 exclusion).
+
+## F36 Retarding, integrating and scan-encoded spectroscopy
+
+Scope: KATRIN first neutrino-mass campaign (KNM1) only, a MAC-E filter with stepped retarding potential. Output is an integral spectrum R(qU). Source-spectrum inference is handed to statistics and theory by BP13; the fit cell records what the source did.
+
+| Axis | Status | Source | Method | Observable/port | Positive case | Negative case | Binding | Run evidence |
+|---|---|---|---|---|---|---|---|---|
+| Signal extraction | sourced | 2101.05253 Secs. "Electron counting and region of interest", "Data pipeline" | per-pixel trigger; online double trapezoidal filter for energy and time; waveforms not saved; count in fixed ROI over selected pixels | counts per scan step in ROI; timestamp; ADC energy | ROI lower bound chosen so charge-sharing gain and loss compensate | high-rate pileup: energy pushed above ROI, event lost; rate correction applied | none | none |
+| Finding/association | sourced | 2101.05253 Secs. "Data pipeline", "Acquisition of the integral beta-decay spectrum" | assign counts to a scan step by HV set point and handshake; remove first two seconds of each step; quality cuts on slow control | (setting, time, counts) per scan step | steps kept only after read-back reaches set point | acquisition starting before HV is stable, seen as synchronization errors | none | none |
+| Parameter estimation | sourced | 2101.05253 Secs. "Scan combination (stacking)", "Spectral fit", "Covariance-matrix approach", "Monte-Carlo-propagation approach" | sum counts at like steps, average qU over scans; four-parameter shape-only fit; chi-square with covariance, or MC propagation | R(<qU>); signal amplitude, endpoint, background, m^2 | three blind analyses with independent code agree | stacking without stability and HV reproducibility checks; it does not correct scan-to-scan variation | none | none |
+| Space/time/direction | sourced | 2101.05253 Secs. "Electron counting and region of interest", "Pixel combination", "Scan combination (stacking)" | pixel map and timestamps used for selection and stability tests; pixel-wise and scan-wise fits before merging into one effective pixel; pitch angle integrated in transmission, not measured per electron | pixel id; scan time; per-pixel endpoint | no spatial or temporal structure beyond statistics, so merge is justified | merge assumed where fields vary across the analyzing plane; radial variation exists | none | none |
+| Energy/identifiable quantity | sourced | 2101.05253 Secs. "Response and transmission functions", "Analyzing-plane potentials", "Electron counting and region of interest" | threshold qU from monitored retarding potential; transmission condition; response f(E-qU) with scattering probabilities and energy-loss function; detector energy is low-resolution and used for ROI only | qU [eV]; response f(E-qU); integral rate | response measured with monoenergetic electrons from an e-gun | detector energy read as electron energy: per-particle energy is not available at spectrometer resolution | none | none |
+| PID/topology | not-applicable | 2101.05253 Sec. "Electron counting and region of interest" | physical reason in source: background electrons are accelerated like signal and share the detector energy peak, so an energy cut cannot separate them per event; background is an estimated rate | none per event; R_bg in fit | background rate from scan steps above the endpoint | event-level signal label | none | none |
+| Uncertainty/quality | sourced | 2101.05253 Secs. "Background", "Stacking", "Blinding strategy", "Covariance-matrix approach"; Sec. "Acquisition of the integral beta-decay spectrum" | alternating scan direction against drift; model blinding; MC twins; covariance or MC nuisance propagation; over-dispersion term on background; stacking bias from Asimov twins | C matrix; systematic breakdown; stacking uncertainty | MC twins recover inputs before unblinding | background treated as pure Poisson: measured distribution is wider than the Poisson expectation | none | none |
+
+Variant and condition gaps:
+
+- Time-encoded variants: 2007.01020 proposes time-focusing time-of-flight with a time-dependent potential and a time-of-arrival spectrum. It is a simulation study of added hardware at KATRIN, read at `page` level. It gives no measured method, so it is a separate gap; the earlier time-of-flight method it says needs a start time was not read (hit 1308.0532 is a candidate for it).
+- Retarding instruments other than KATRIN: not read.
+- Scan-step-duration background: not significant in KNM1 but seen in a later run, which the sections read only mention. A later campaign's handling is a gap.
+- Per-pixel transmission: KNM1 uses an average over pixels. A per-pixel or per-patch fit is not covered.
+- Deadtime: named by the plan. The source mentions it for high-rate e-gun measurement only; a deadtime correction for beta scans was not read.
+- Link to general magnetic spectrometers (6.6): nothing read.
+
+Counts: raw scan-step counts are the input; do not replace them with averages that drop time or conditions (W7). The source stacks after showing stability and keeps per-scan conditions for MC twins. Revisited steps are combined by summing like steps. Count rate and live time are computed after the two-second cut.
+
+Signature facts: representation (setting, effective time, counts, per pixel or summed); setting (HV set point and read-back, scan order, direction); response version (transmission, energy-loss function, column density, field values); selection (ROI, pixel list, quality flags); background region steps. 5.15: BP12 count with interval and exposure; BP13 retarding counts.
+
+Applicability: `setting_time_counts && retarding_readback && transmission_version && (scan_order_known) && effective_time_known`; stacking: `&& setting_reproducibility_shown && parameter_stability_shown`; pixel merge: `&& no_spatial_trend_shown`; fit handoff: `&& background_region_steps || independent_background_model`.
+Stays unknown: per-electron energy; pitch angle; signal or background label; independence of revisits without condition records.
+Recognition: positive, table of HV settings with times and counts. Negative, a differential detector energy spectrum offered as the science spectrum.
+
+## F37 Radiation polarimetry
+
+Output is Stokes parameters or a modulation curve over an ensemble, not a polarization per photon. ixpeobssim says IXPE recovers polarization on a statistical basis.
+
+### F37-photoelectric
+
+Scope: IXPE as described by ixpeobssim, a simulator and analysis framework based on parametrized response. Its input is reconstructed level-2 events; it does not reconstruct tracks.
+
+| Axis | Status | Source | Method | Observable/port | Positive case | Negative case | Binding | Run evidence |
+|---|---|---|---|---|---|---|---|---|
+| Signal extraction | gap-method | 2203.06384 Secs. "Output data format", "Event weights" | level-1 track images exist; the code cannot generate track images and no image processing is given | none | none | none | none | none |
+| Finding/association | gap-method | 2203.06384 same sections | no track-axis or absorption-point reconstruction given | none | none | none | none | none |
+| Parameter estimation | sourced | 2203.06384 Secs. "Introduction", "Basic polarization analysis" | event Stokes q=2cos2phi, u=2sin2phi; sum over a subset, corrected by effective area and modulation factor; optional weights | q_i, u_i; Q, U, I over subset | Stokes form avoids dependence between polarization degree and angle | single event read as definite polarization: only ensemble sums are interpreted | none | none |
+| Space/time/direction | sourced | 2203.06384 Secs. "Introduction", "Dithering and pointing history" | each event has time, energy, two sky coordinates, azimuth; dithering removed through aspect solution; pointing history kept | sky coordinates; detector coordinates; pointing | dither averages spurious modulation over the detector | exposure computed without the dither pattern | none | none |
+| Energy/identifiable quantity | sourced | 2203.06384 Secs. "Response functions", "Spectro-polarimetric fitting" | Stokes spectra I_k, Q_k, U_k in PI channels with response matrix and modulation response function | Stokes spectra; polarization cubes and maps | fitted with standard tools using effective area for I and modulation response for Q, U | energy dispersion neglected by default in the simple analysis; verify per case | none | none |
+| PID/topology | gap-method | 2203.06384 sections read | no event classification read; weights describe reconstruction quality only | none | none | none | none | none |
+| Uncertainty/quality | sourced | 2203.06384 Secs. "Introduction", "Spectro-polarimetric fitting", "Event weights" | subtraction of spurious modulation (reference, not read); per-bin errors from sums of q^2, u^2; ground truth extension for checks | sigma_Q, sigma_U | ground truth used to test response effects | Q, U or weighted I treated as pure counting statistics: only unweighted I is; end-to-end weight test is a stated limitation | none | none |
+
+### F37-Compton
+
+Scope: POLAR, one paper on a channel-level correction. Polarization reconstruction there is summarized and referred to other papers.
+
+| Axis | Status | Source | Method | Observable/port | Positive case | Negative case | Binding | Run evidence |
+|---|---|---|---|---|---|---|---|---|
+| Signal extraction | sourced | 1507.04474 Secs. "Crosstalk and response non-uniformity modeling" (start), "Conclusion"; abstract | one matrix for crosstalk and non-uniformity, from mono-energetic calibration, applied by linear transformation | channel amplitudes to energy depositions | residual crosstalk near zero in ESRF test runs after correction | uncorrected crosstalk smears energy over channels | none | none |
+| Finding/association | sourced | 1507.04474 Sec. "POLAR instrument" | azimuth from the line joining the two bars with highest deposits, a correlation shown in Monte Carlo | xi, angle to detector x-axis | line correlated with outgoing photon direction | none stated. Bar choice is a proxy, not the true scatter sequence | none | none |
+| Parameter estimation | sourced | 1507.04474 Sec. "POLAR instrument" | fit modulation curve K{1+mu cos[2(xi-xi0)]}; p = mu/mu_100 | mu, xi_0, p | fit over all detected GRB photons | one photon read as polarized | none | none |
+| Space/time/direction | gap-method | 1507.04474 sections above | detector-frame angle only; detector-to-sky rotation not read | none | none | none | none | none |
+| Energy/identifiable quantity | sourced | 1507.04474 abstract, Sec. "Conclusion" | real energy deposition per bar from the transformation, with energy calibration | E_dep per channel | spectra unfolded at known beam energies | none stated | none | none |
+| PID/topology | gap-method | 1507.04474 sections above | none read | none | none | none | none | none |
+| Uncertainty/quality | sourced | 1507.04474 Secs. "POLAR instrument", "Conclusion" | mu_100 from Monte Carlo and 100% polarized beams; residual crosstalk and non-uniformity from test runs; 22Na sources for in-flight calibration | mu_100; residuals | verification on ESRF runs at two energies | a polarization systematic budget is not in the sections read | none | none |
+
+### F37-modulated
+
+| Axis | Status | Source | Method | Observable/port | Positive case | Negative case | Binding | Run evidence |
+|---|---|---|---|---|---|---|---|---|
+| Signal extraction | gap-method | none read | none | none | none | none | none | none |
+| Finding/association | gap-method | none read | none | none | none | none | none | none |
+| Parameter estimation | gap-method | none read | none | none | none | none | none | none |
+| Space/time/direction | gap-method | none read | none | none | none | none | none | none |
+| Energy/identifiable quantity | gap-method | none read | none | none | none | none | none | none |
+| PID/topology | gap-method | none read | none | none | none | none | none | none |
+| Uncertainty/quality | gap-method | none read | none | none | none | none | none | none |
+
+No modulated-readout candidate appears in the discovery hits. Azimuthal modulation in IXPE and POLAR is the analyzer's response, not a modulated readout, so those tables do not fill this one.
+
+Variant and condition gaps:
+
+- Modulated readout: no source, all seven cells gap.
+- Photoelectric track reconstruction and absorption point: gap. Needed from a detector-level source; the plan row requires them.
+- Compton scatter ordering and multi-site reconstruction beyond the two-bar proxy: gap. Link to F26 not assessed.
+- Compton beam polarimeters (hep-ex hits on electron beams): a different measurement, not read.
+- Unpolarized and rotated controls: IXPE correction named, procedure in a reference not read. Detector and sky rotation for POLAR: gap.
+- Scope of ixpeobssim: simulation and high-level analysis; do not read it as the instrument's reconstruction.
+
+Signature facts: variant (photoelectric, Compton, modulated); representation (track image, event azimuth, bar deposits, binned curve); angle convention (period, axis or vector, frame); basis (detector or sky, rotation source); response (modulation factor or mu_100, effective area, version, weighted or unweighted); spurious modulation calibration; pointing or dither history. 5.15: BP02 channel or image features; BP10 multi-site where Compton; BP14 angle/modulation.
+
+Applicability, photoelectric: `variant_photoelectric && event_angle && angle_period_pi && basis_known && modulation_factor && effective_area && spurious_modulation_corrected`; sky products: `&& pointing_history`; fits: `&& (unweighted_I_only_counting_declared)`.
+Applicability, Compton: `variant_compton && bar_deposits && crosstalk_matrix && energy_calibration && mu_100`; sky basis stays a gap.
+Stays unknown: polarization of one photon; degree without modulation factor; sky angle without rotation; a result from a track axis alone.
+Recognition: positive, event list with azimuth and a modulation response, or bar-hit pairs with a calibrated mu_100. Negative, a single track image offered as a measured polarization vector.
+
+## F38 Scanning radiometer and timestream-to-map
+
+Scope: Planck-like simulations only (LFI 70 GHz and 100 GHz, HFI-like). No real data in the sources read. Output is a map with noise description. Cosmological inference is excluded.
+
+| Axis | Status | Source | Method | Observable/port | Positive case | Negative case | Binding | Run evidence |
+|---|---|---|---|---|---|---|---|---|
+| Signal extraction | sourced | 1103.2281 Secs. "Photometric calibration", "Dipole calibration" | gain per detector from the time-dependent orbital dipole, solved as a linear problem, iterated with offsets | gain g; calibrated rings | orbital dipole is known and not fixed on sky | single polarization-sensitive detector: degenerate if polarization modelled, biased if neglected | none | none |
+| Finding/association | sourced | astro-ph/0501504 Sec. "Destriping technique"; 0904.3623 Sec. "Derivation" | pointing assigns samples to pixels; crossing points link baseline segments | hits per pixel; crossing points | baselines sufficiently connected: null space is one-dimensional | crossings clustered in a small region for short segments: errors may blow up | none | none |
+| Parameter estimation | sourced | astro-ph/0412517 Sec. "Map-making problem", "Map-making algorithm"; astro-ph/0501504 Sec. "ROMA and MapCUMBA"; 0904.3623 Sec. "Derivation" | destriping: joint fit of map and baselines, conjugate gradient for amplitudes, then binning; with noise prior (Madam); or ML map with noise filter (ROMA, MapCUMBA) | map m; amplitudes a | Madam approaches the minimum-variance map as base functions increase | ML with noise spectrum assumed perfectly known; in real data it must be estimated | none | none |
+| Space/time/direction | sourced | 0904.3623 Sec. "Derivation"; astro-ph/0501504 Sec. "Methods" | pointing matrix rows (1, cos2psi, sin2psi) on the pixel of the beam centre; no beam deconvolution, map is beam and pixel smoothed | pixel; psi; TOD sample | pixel kept when inverse condition number passes a limit | pixel with fewer than 3 sufficiently different angles: excluded with its samples | none | none |
+| Energy/identifiable quantity | sourced | 0904.3623 Sec. "Derivation"; 1103.2281 Sec. "The map-making problem" | I, Q, U per pixel in calibrated temperature; constant offset is unidentifiable | I, Q, U map | anisotropy and polarization stay identifiable | monopole claimed from the map: same effect as a constant noise offset | none | none |
+| PID/topology | not-applicable | astro-ph/0412517 Sec. "Map-making problem"; 0904.3623 Sec. "Derivation" | readout reason: data are sky-brightness samples per detector modelled as signal plus noise, with no individual particle or event object | none | none | a per-event label invented for samples | none | none |
+| Uncertainty/quality | sourced | astro-ph/0412517 Sec. "Covariance of the output map"; 0904.3623 Sec. "Derivation", "Conclusions"; astro-ph/0501504 Sec. "Conclusions"; 1103.2281 Sec. "Dipole calibration" | map covariance; six residual components; null-space handling by a zero-sum constraint; gain error from Fisher term | C_m; rcond; residual map; sigma_g | residual split into components with analytic estimates for three | pixelisation noise from sub-pixel signal, biasing power spectra unless corrected | none | none |
+
+Variant and condition gaps:
+
+- Modulation (for example a modulator in the optics): nothing read; no hit covers it. 1103.2281 and 0904.3623 use scan-driven angle change only.
+- Filtering and transfer function: not covered. These sources solve baselines rather than filter. Filtering out real signals and signal injection before filtering remain gaps.
+- Ground and balloon scan strategies: not read. Sources are satellite-like.
+- Beam and bandpass: beams idealized or symmetric; asymmetric effects are deferred by astro-ph/0501504 and deconvolution papers were not read. Bandpass mismatch not read.
+- Shared and cross-detector noise: 0904.3623 has a part on correlations between detectors that was not read. No method claimed.
+- Time-domain preparation of detector data (pointing reconstruction, glitches, waveform level): not read, and BP01 is not supported by these sources.
+- Noise estimation from data: named as needed in astro-ph/0501504, not given.
+- Map combination across experiments: not covered.
+
+Null modes and averaging: destriping's matrix is singular. astro-ph/0501504 states an explicit zero-sum condition; 0904.3623 solves orthogonal to the null space, and says this holds exactly only when no pixels are excluded. So a stated constraint is what fixes the offset, not added data. This agrees with W7. Coadding repeated circles into rings is used by these sources, equivalent to uncoadded destriping only for ideal scanning (0904.3623 Sec. "Ring set or not"), so a coadded product must carry that condition. It is not the naive chunk average that W7 forbids.
+
+Signature facts: representation (timestream or coadded rings); pointing and polarization angle psi; scan strategy (spin, repointing, crossings); noise model (white level, knee, slope, prior or none, stationarity intervals); calibration (gain, calibrator); beam treatment; pixelization; solver and baseline length; excluded pixels; null modes named. 5.15: BP13 scan settings; BP14 pointing plus timestream.
+
+Applicability: `timestream && pointing && scan_crossings_sufficient && (noise_spectrum_known || baseline_model_declared) && calibration_known`; polarization: `&& polarization_angle && (at_least_3_distinct_angles_per_pixel || pixel_excluded)`; offset: `&& null_mode_constraint_declared`; gain: `&& (multiple_detectors || polarization_handled_declared)`.
+Stays unknown: monopole; pixels below the condition limit; a map noise claim without a noise model; signal transfer where filtering was applied.
+Recognition: positive, TOD with pointing and detector angles. Negative, a pre-averaged normalized map with no pointing or noise description, offered for global combination.
+
+## Sources and plan comparison
+
+Plan statements checked against sources: none contradicted. Three need a scope note.
+
+1. W7 retarding subcase and the F36 negative case. KATRIN does sum counts at like steps and averages qU over 274 scans before fitting. It does so after stability and reproducibility checks, keeps per-scan conditions for MC twins, and carries a stacking uncertainty. Stacking is thus allowed when those conditions are shown; the plan's wording reads stricter than this.
+2. BP13 says sidebands enter the CRES response. In the Project 8 response read, sidebands are undetected and have no term in the spectrum model; they act through carrier power, SNR and effective volume.
+3. BP14 and W7 on naive averages. Coadding into rings is a legitimate source method under the ideal-scanning condition above.

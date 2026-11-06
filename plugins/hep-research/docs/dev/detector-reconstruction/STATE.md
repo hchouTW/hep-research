@@ -39,7 +39,7 @@ tasks:
   T03: {state: in-progress, note: "done-provisional (R28), awaiting checkpoint suite; t03-selection.md, t07-t09-task-sheets.md; gaps stay recorded"}
   T04: {state: blocked-by-decision, record: blockers/T04.md, draft: t04-prereg.md, deciding: [K09, K12, K16]}
   T05: {state: done, note: "P1 sheets complete, P2 onward list blockers; record t05-task-sheets.md"}
-  T11: {state: in-progress, note: "first pass t11-cells.md, 27 of 38 families; 11 families and source-unverified cells need sources (R14)"}
+  T11: {state: in-progress, note: "cells for all 38 families in t11-cells.md; sources t11-sources.md; 53 gap-method cells recorded; 48 source-unverified lines from plugin citations still open (R14)"}
 k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K08, K09, K10, K11, K12, K16, K17, K18]}
 next_action: "T06 waits for 0.57.0 (D1); T11 sources need network approval; third T04 review before Freeze A"
 ```
