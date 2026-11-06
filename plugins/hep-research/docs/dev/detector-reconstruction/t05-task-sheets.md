@@ -48,12 +48,12 @@ G04-G06 are handled in contract-map.md and T12. G07 stands: control rules are no
 
 | Task | Blocked on | Can be fixed now | Added acceptance |
 | --- | --- | --- | --- |
-| T07 tracking, vertexing | K02, K03, K09 | Sheet structure; finding and refit kept separate | `CAI-T07-1` to `4`; R33 |
-| T08 calorimetry | K02, K03, K09 | Same | `CAI-T08-1`, `CAI-T08-2`; R34 |
-| T09 photon likelihood | K02, K03, K09 | Same | Live, unhit and dead controls; no data-side truth |
-| T10 timing, PID, non-hit, scan replay | K02, K03; a native scan or global solver (R14) | W6 and W7 inputs | `CAI-T10-1`, `CAI-T10-2`; R35 |
+| T07 tracking, vertexing | T06, K09 for pass or fail | Sheet in t07-t09-task-sheets.md | `CAI-T07-1` to `4`; R33 |
+| T08 calorimetry | T06, K09 for pass or fail | Same | `CAI-T08-1`, `CAI-T08-2`; R34 |
+| T09 photon likelihood | T06, K09 for pass or fail | Same | Live, unhit and dead controls; no data-side truth |
+| T10 timing, PID, non-hit, scan replay | T06; a native scan or global solver (R14) | W6 and W7 inputs | `CAI-T10-1`, `CAI-T10-2`; R35 |
 
-Exact APIs are written only after versions are chosen (Section 16).
+Exact APIs are written only after versions are chosen (Section 16). T06 also creates `calibration-alignment-interfaces.md`, the handoff file R37 requires.
 
 ## T11-T13, T15b, T16
 

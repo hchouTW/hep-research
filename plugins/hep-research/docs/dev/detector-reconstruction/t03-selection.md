@@ -1,6 +1,6 @@
 # T03: selection for the three required workflows
 
-State: `in-progress`. K02 and K03 are decided (decisions.md): ACTS for tracking, confirmed at smoke level by job 7470886; development bindings for calorimetry and photon likelihood; data synthetic or Geant4-simulated. Still to write: the complete task sheets for T07-T09. Options not chosen stay listed for the record. Apart from ACTS, nothing below has run on this host. Package facts come from read-only `conda search` queries on conda-forge, 2026-11-06, listed at the end; anything else is marked `unverified`. A package existing is not a confirmed backend: that needs an approved job (R02). Costs are not estimated: no recorded times exist.
+State: done-provisional, awaiting the next checkpoint suite (R28), with gaps kept open. K02 and K03 are decided (decisions.md): ACTS for tracking, confirmed at smoke level by job 7470886; development bindings for calorimetry and photon likelihood; data synthetic or Geant4-simulated. The task sheets are in t07-t09-task-sheets.md. Options not chosen stay listed for the record. Apart from ACTS, nothing below has run on this host. Package facts come from read-only `conda search` queries on conda-forge, 2026-11-06, listed at the end; anything else is marked `unverified`. A package existing is not a confirmed backend: that needs an approved job (R02). Costs are not estimated: no recorded times exist.
 
 ## Tracking and vertexing (BP03, BP04)
 

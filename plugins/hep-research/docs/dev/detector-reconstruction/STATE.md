@@ -36,11 +36,11 @@ baseline_static: {evidence: "<private>/evidence/20261106T044938Z", exit: 0, seco
 tasks:
   T01: {state: done, note: "checkpoint 7470679 compared; K defaults used: K01"}
   T02: {state: done, note: "definitions and contract map; fixtures run in T06; provisional defaults K04, K05, K13"}
-  T03: {state: in-progress, note: "K02, K03 decided; ACTS smoke passed; T07-T09 task sheets still to write; options t03-selection.md"}
-  T04: {state: blocked-by-decision, record: blockers/T04.md, draft: t04-prereg.md, deciding: [K02, K09, K12, K16]}
+  T03: {state: in-progress, note: "done-provisional (R28), awaiting checkpoint suite; t03-selection.md, t07-t09-task-sheets.md; gaps stay recorded"}
+  T04: {state: blocked-by-decision, record: blockers/T04.md, draft: t04-prereg.md, deciding: [K09, K12, K16]}
   T05: {state: done, note: "P1 sheets complete, P2 onward list blockers; record t05-task-sheets.md"}
 k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K08, K09, K10, K11, K12, K16, K17, K18]}
-next_action: "finish T03 task sheets; T04 awaits recipes and K09, K12, K16; T06 waits for the 0.57.0 re-baseline (D1)"
+next_action: "draft T04 values for the user; T06 waits for the 0.57.0 re-baseline (D1)"
 ```
 
 ## Plan conflicts found

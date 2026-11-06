@@ -1,6 +1,6 @@
 # T04: quality and resource preregistration (draft)
 
-State: `blocked-by-decision`. It consumes T03's recipes and the K09, K12, K16 answers. This file fixes the structure, so that values can be frozen before any result exists. No threshold is set here. Entries marked `<freeze>` are the user's (R02); none may be set after seeing results (Section 1.3 item 8).
+State: `blocked-by-decision`. T03's recipes are named in t07-t09-task-sheets.md; it still needs the K09, K12, K16 answers. This file fixes the structure, so that values can be frozen before any result exists. No threshold is set here. Entries marked `<freeze>` are the user's (R02); none may be set after seeing results (Section 1.3 item 8).
 
 ## Per workflow
 
