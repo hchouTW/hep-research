@@ -80,6 +80,12 @@ Approval packet of phase S0 and the record of approvals given (Part A, Sections 
 | GB7 criterion read as tracked particles | Maintainer | All 111 tracked particles carry G4UserSpecialCuts; the 397 short-lived particles, never tracked, do not | Yes | hsinyichou (maintainer) | 2026-11-05 | Answer in the Claude Code session to the GB7 question: "Accept (Recommended)" |
 | GB6 negative re-registered | Maintainer | An extra step limiter cannot change the output: it draws no random numbers and no recorded run gives it anything to do. The negative now uses an extra discrete process that draws random numbers; the step-limit case stays the process-list negative test | Yes | hsinyichou (maintainer) | 2026-11-05 | Answer in the Claude Code session to the GB6 question: "Use a random-drawing process (Recommended)" |
 
+## Section 22 items due before S3
+
+| Item | Who approves | Decision | Approved | Person | Date | Words or link |
+| --- | --- | --- | --- | --- | --- | --- |
+| Consent to add a ProbeV2 call to `zdcsim.cc` | User | One ProbeV2 call, in a copy under the worktree; the supplied file is not modified | Yes | hsinyichou (user) | 2026-11-06 | Answer in the Claude Code session to the S3 question: "Consent, start S3" |
+
 ## Gaps in Part B (Section E7, item 6)
 
 Part B stays frozen; these decisions fill gaps found while implementing S1.
