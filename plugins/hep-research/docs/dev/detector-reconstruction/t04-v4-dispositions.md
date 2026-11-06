@@ -328,3 +328,19 @@ Void unless `REPLAY` prints job 7474461's node widths: 1.0671, 1.0717 at 250 MeV
 
 An outcome the table does not cover goes to the user. Any fix to section 7.1 needs the user's word and a T08 rerun against the unchanged section 18 rule.
 
+## T08 width diagnostic: results
+
+Job 7478606, `COMPLETED`, exit `0:0`, 38 s, error logs empty. Evidence: `<private>/evidence/t04-v4/job-diag-t08b-7478606/`. `REPLAY` printed job 7474461's four widths exactly, so it is not void. **No T04 value has moved.**
+
+| `BIN E2`, limit 0.039527 | x | y |
+| --- | --- | --- |
+| `raw` | 0.040374, over | 0.039683, over |
+| `cross` | 0.040737, over | 0.039370, within by 0.00016 |
+| `closed` | 0.049785 | 0.047645 |
+| `quad` | 0.026758 | 0.026066 |
+| `oracle` | 0.024994 | 0.025769, with widths below 1 |
+
+The excess is reproduced with twice the events. The table's rows read "x and y both", and `cross` splits, so no row applies as written and the outcome goes to the user. In substance the third row fits best. At every node `cross` equals `raw` within noise, and the measured shift `scurve` is 0 to 0.0008 against about 0.011 needed at 250 MeV, so the coordinator's fixed-shift explanation is refuted. `closed` is worse than `raw`, so the expected-image shift is not present in the data, and `quad` improves the width only by inflating sigma with a term that does not exist. `oracle` removes the excess and overshoots, from 0.954 at 250 MeV to about 1 at 4 GeV.
+
+Coordinator's reading, not a finding: section 7.1's sigma counts only the variance of cells kept, so it omits the variance of cells near `T_c` entering and leaving the sum, each with a long lever arm. `oracle` below 1 suggests a second, smaller effect: `v_c = q max(e_c, 0) + sigma_n^2` overstates the variance of empty cells. Neither is tested.
+
