@@ -73,10 +73,9 @@ class Rotation(unittest.TestCase):
             matrix = rotation.active_matrix({"zyx_deg": [D(a) for a in angles]})
             self.assertEqual(rotation.product(matrix, rotation.passive_matrix(matrix)), rotation.IDENTITY)
 
-    def test_thirty_degrees_is_refused_in_s1(self):
-        with self.assertRaises(GeometryError) as caught:
-            rotation.active_matrix({"axis": "z", "angle_deg": D(30)})
-        self.assertEqual(caught.exception.code, "rotation-angle")
+    def test_thirty_degrees_gives_decimals_and_a_right_angle_integers(self):
+        self.assertFalse(rotation.is_exact(rotation.active_matrix({"axis": "z", "angle_deg": D(30)})))
+        self.assertTrue(rotation.is_exact(rotation.active_matrix({"axis": "z", "angle_deg": D(90)})))
 
 
 class Bitfield(unittest.TestCase):

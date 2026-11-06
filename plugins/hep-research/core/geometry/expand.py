@@ -340,7 +340,7 @@ def expand(spec: dict) -> dict:
     placements = [{"mother": mother, "template": item["template"], "copy_number": item["copy_number"],
                    "index": item["index"] or {}, "centre_mm": [as_text(v) for v in item["centre"]],
                    "rotation": None if item["active"] == rotation.IDENTITY
-                   else [list(row) for row in rotation.passive_matrix(item["active"])]}
+                   else [[value if isinstance(value, int) else as_text(value) for value in row] for row in rotation.passive_matrix(item["active"])]}
                   for mother in order for item in tree[mother]]
     physical = {"numerics": {"precision": PRECISION, "rounding": "half-even", "epsilon_mm": as_text(EPSILON_MM),
                              "minimum_gap_mm": as_text(MINIMUM_GAP_MM), "decimal": "decimal/1"},

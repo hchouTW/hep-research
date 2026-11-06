@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 import itertools
+from decimal import Decimal
 import sys
 import unittest
 from pathlib import Path
@@ -11,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from core.geometry import expand, identity, overlap  # noqa: E402
+from core.geometry import expand, identity, overlap, rotation  # noqa: E402
 from core.geometry.numbers import GeometryError  # noqa: E402
 
 
@@ -107,11 +108,9 @@ class Expansion(unittest.TestCase):
                 expand.expand(document)
             self.assertEqual(caught.exception.code, "module-not-open")
 
-    def test_thirty_degrees_is_refused_for_a_single_placement(self):
+    def test_thirty_degrees_is_open_for_a_single_placement(self):
         document = spec({"a": box(["1", "1", "1"])}, [single("a", rotation={"axis": "z", "angle_deg": "30"})])
-        with self.assertRaises(GeometryError) as caught:
-            expand.expand(document)
-        self.assertEqual(caught.exception.code, "rotation-angle")
+        self.assertTrue(all(isinstance(value, str) for value in expand.expand(document)["physical"]["placements"][0]["rotation"][0][:2]))
 
 
 class VolumeIds(unittest.TestCase):
@@ -347,6 +346,48 @@ class GridAndExplicit(unittest.TestCase):
         rows = self.placed(child)
         self.assertEqual([row["copy_number"] for row in rows], [0, 1])
         self.assertEqual(rows[1]["centre_mm"][0], "5e0")
+
+
+class RotatedPlacements(unittest.TestCase):
+    """Section 15.1, IR row: arbitrary angles, the separating-axis test and the true minimum distance."""
+
+    def rotated(self, centre, angle):
+        return single("plate", [str(value) for value in centre], {"axis": "z", "angle_deg": angle})
+
+    def codes(self, *children):
+        document = expand.expand(spec({"plate": box(["10", "4", "2"])}, list(children)))
+        return {finding["code"] for finding in overlap.findings(document)}
+
+    def offset(self, along_u, along_v):
+        c, s = rotation.cos_sin(Decimal(30))
+        return (along_u * c - along_v * s, along_u * s + along_v * c, 0)
+
+    def test_cosine_and_sine_are_exact_to_34_digits(self):
+        c, s = rotation.cos_sin(Decimal(30))
+        self.assertEqual(str(s), "0.5000000000000000000000000000000000")
+        self.assertEqual(str(c)[:34], "0.86602540378443864676372317075293")
+        self.assertEqual(rotation.cos_sin(Decimal(90))[0], 0)
+
+    def test_two_boxes_at_30_degrees_a_hair_apart_are_an_error(self):
+        """Touching on one axis and 5e-7 mm apart on another: the true distance is in (epsilon, c)."""
+        far = self.offset(Decimal(10), Decimal(4) + Decimal("5e-7"))
+        self.assertIn("sibling-too-close", self.codes(self.rotated((0, 0, 0), "30"), self.rotated(far, "30")))
+
+    def test_opposed_vertices_at_true_distance_above_c_pass(self):
+        """Two boxes turned 45 degrees: rhombic sections with opposed vertices 1.2e-6 mm apart."""
+        reach = Decimal(14) / Decimal(2).sqrt()
+        apart = 2 * reach + Decimal("1.2e-6")
+        square = {"plate": box(["10", "10", "2"])}
+        document = expand.expand(spec(square, [single("plate", ["0", "0", "0"], {"axis": "z", "angle_deg": "45"}),
+                                               single("plate", [str(apart), "0", "0"], {"axis": "z", "angle_deg": "45"})]))
+        self.assertEqual({finding["code"] for finding in overlap.findings(document)}, set())
+
+    def test_overlapping_rotated_boxes_are_an_error(self):
+        self.assertIn("sibling-overlap", self.codes(self.rotated((0, 0, 0), "30"), self.rotated((5, 0, 0), "30")))
+
+    def test_a_right_angle_keeps_its_integer_matrix(self):
+        document = expand.expand(spec({"plate": box(["10", "4", "2"])}, [single("plate", ["0", "0", "0"], {"axis": "z", "angle_deg": "90"})]))
+        self.assertTrue(all(isinstance(value, int) for row in document["physical"]["placements"][0]["rotation"] for value in row))
 
 
 if __name__ == "__main__":

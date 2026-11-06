@@ -1,5 +1,5 @@
-"""Computation of the gap rule, containment, minimum feature and the error bound on the IR (Section 7.3). S1 has boxes and
-rotations by multiples of 90 degrees, so every placed volume is an axis-aligned box in its mother and the arithmetic is exact.
+"""Computation of the gap rule, containment, minimum feature and the error bound on the IR (Section 7.3). A placed volume with no arbitrary
+rotation is an axis-aligned box in its mother, judged exactly; one with an arbitrary rotation goes through core/geometry/convex.py.
 
 Returns findings; contracts/geometry.py judges them. Checks run per logical, so the cost follows the number of placements in
 a mother, never the number of touchables (Section 16).
@@ -9,15 +9,35 @@ from __future__ import annotations
 from decimal import Decimal
 from fractions import Fraction
 
-from core.geometry import bound
-from core.geometry.numbers import BOUND_LIMIT_MM, EPSILON_MM, MINIMUM_FEATURE_MM, MINIMUM_GAP_MM, add, exact, subtract
-from core.geometry.rotation import rotate, transpose
+from core.geometry import bound, convex
+from core.geometry.numbers import BOUND_LIMIT_MM, EPSILON_MM, MINIMUM_FEATURE_MM, MINIMUM_GAP_MM, add, exact, multiply, subtract
+from core.geometry.rotation import transpose
 
 WORLD = "world"
 
 
 def _finding(code: str, where: str, message: str) -> dict:
     return {"code": code, "path": where, "message": message}
+
+
+def _active(placement: dict):
+    """The active matrix of a placement: the IR holds the passive one, whose entries are integers or decimal strings."""
+    return transpose(tuple(tuple(value if isinstance(value, int) else exact(value) for value in row) for row in placement["rotation"]))
+
+
+def _arbitrary(placement: dict) -> bool:
+    return bool(placement["rotation"]) and any(isinstance(value, str) for row in placement["rotation"] for value in row)
+
+
+def _polyhedron(ir: dict, placement: dict) -> convex.Polyhedron:
+    active = _active(placement) if placement["rotation"] else ((1, 0, 0), (0, 1, 0), (0, 0, 1))
+    return convex.box(_half(ir, placement["template"])).placed(active, tuple(exact(text) for text in placement["centre_mm"]))
+
+
+def _rotated_pair(ir: dict, first: dict, second: dict) -> Decimal:
+    """Negative when the interiors overlap, otherwise the true minimum distance."""
+    a, b = _polyhedron(ir, first), _polyhedron(ir, second)
+    return convex.distance(a, b) if convex.disjoint(a, b) else Decimal(-1)
 
 
 def _half(ir: dict, name: str) -> tuple:
@@ -28,7 +48,8 @@ def _extent(ir: dict, placement: dict) -> tuple:
     """Lower and upper corner of a placed box in its mother's frame."""
     half = _half(ir, placement["template"])
     if placement["rotation"]:
-        half = tuple(abs(value) for value in rotate(transpose(placement["rotation"]), half))  # the IR holds the passive matrix
+        active = _active(placement)
+        half = tuple(add(add(multiply(abs(Decimal(row[0])), half[0]), multiply(abs(Decimal(row[1])), half[1])), multiply(abs(Decimal(row[2])), half[2])) for row in active)
     centre = tuple(exact(text) for text in placement["centre_mm"])
     return (tuple(subtract(c, h) for c, h in zip(centre, half)), tuple(add(c, h) for c, h in zip(centre, half)))
 
@@ -72,7 +93,7 @@ def siblings(ir: dict) -> list[dict]:
                 b, second = placed[later]
                 if subtract(b[0][0], a[1][0]) >= MINIMUM_GAP_MM:
                     break
-                separation = _separation(a, b)
+                separation = _rotated_pair(ir, first, second) if _arbitrary(first) or _arbitrary(second) else _separation(a, b)
                 if abs(separation) < EPSILON_MM or separation >= MINIMUM_GAP_MM:
                     continue
                 code = "sibling-overlap" if separation < 0 else "sibling-too-close"
@@ -94,27 +115,27 @@ def _chains(ir: dict) -> dict:
     daughters: dict[str, list] = {}
     for placement in ir["physical"]["placements"]:
         daughters.setdefault(placement["mother"], []).append(placement)
-    reach: dict[str, tuple[tuple[Decimal, ...], int, bool]] = {WORLD: ((Decimal(0),) * 3, 0, False)}
+    reach: dict[str, tuple] = {WORLD: ((Decimal(0),) * 3, 0, False, 0)}
     pending = [WORLD]
     while pending:
         mother = pending.pop()
-        centre, depth, turned = reach[mother]
+        centre, depth, turned, arbitrary = reach[mother]
         for placement in daughters.get(mother, []):
             local = tuple(abs(exact(text)) for text in placement["centre_mm"])
             if turned:
                 local = (max(local),) * 3
             sums = tuple(add(a, b) for a, b in zip(centre, local))
             name = placement["template"]
-            known = reach.get(name, ((Decimal(0),) * 3, 0, False))
+            known = reach.get(name, ((Decimal(0),) * 3, 0, False, 0))
             merged = (tuple(max(a, b) for a, b in zip(known[0], sums)), max(known[1], depth + 1),
-                      known[2] or turned or placement["rotation"] is not None)
+                      known[2] or turned or placement["rotation"] is not None, max(known[3], arbitrary + _arbitrary(placement)))
             if merged != reach.get(name):
                 reach[name] = merged
                 pending.append(name)
     out = {}
-    for name, (centre, depth, _) in reach.items():
+    for name, (centre, depth, _, arbitrary) in reach.items():
         half = max(exact(text) for text in templates[name]["half_mm"])
-        out[name] = (max(add(value, half) for value in centre), depth)
+        out[name] = (max(add(value, half) for value in centre), depth, arbitrary)
     return out
 
 
@@ -124,10 +145,10 @@ def chain_reach(ir: dict) -> dict:
 
 
 def error_bounds(ir: dict) -> list[dict]:
-    """The bound of every logical's chain; S1 has no arbitrary rotation, so every level counts k = 1."""
+    """The bound of every logical's chain: a level with an arbitrary rotation counts k = 10, any other k = 1."""
     out = []
-    for name, (largest, depth) in _chains(ir).items():
-        value = bound.error_bound(largest, [False] * depth)
+    for name, (largest, depth, arbitrary) in _chains(ir).items():
+        value = bound.error_bound(largest, [True] * arbitrary + [False] * (depth - arbitrary))
         if value > Fraction(BOUND_LIMIT_MM):
             out.append(_finding("error-bound", name, f"B = {float(value):.3e} mm at X = {largest} mm, depth {depth}: rearrange "
                                                      "it in a local coordinate frame"))

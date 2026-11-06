@@ -5,6 +5,8 @@ product equals the passive matrix the IR holds. A live read with G4GDMLParser co
 """
 from __future__ import annotations
 
+from decimal import Decimal
+
 from xml.sax.saxutils import quoteattr
 
 from core.geometry import rotation as rotations
@@ -20,7 +22,7 @@ def euler_angles(passive) -> tuple:
     for x in _ANGLES:
         for y in _ANGLES:
             for z in _ANGLES:
-                turns = (x // 90, y // 90, z // 90)
+                turns = (Decimal(x), Decimal(y), Decimal(z))
                 built = rotations.product(rotations.product(rotations._about("z", turns[2]), rotations._about("y", turns[1])),
                                           rotations._about("x", turns[0]))
                 if built == wanted:
