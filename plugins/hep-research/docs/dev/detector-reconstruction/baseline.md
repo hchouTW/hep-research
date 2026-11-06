@@ -13,7 +13,7 @@ Recorded 2026-11-06 for task T01. Host-specific locations are written as `<priva
 
 The baseline differs from the `hep-research--v0.56.0` tag only by a custodian record in `g4sim-approvals.md`. The installed plugin copy on this host is 0.54.0 and does not govern (R01).
 
-Planned move: re-baseline onto 0.57.0 before T06 (decisions.md, D1). The g4sim task's branch is at 0.57.0 and contracts 3.20.0, unreleased.
+Moved 2026-11-06 onto 0.57.0 (decisions.md, D1); see "Re-baseline onto 0.57.0" at the end. The table above and the results below it are the 0.56.0 record.
 
 ## Environment
 
@@ -72,3 +72,31 @@ Later jobs load `cmake/3.28`, so the comparison set is now the single LCG test.
 ## Backends and data
 
 K02 and K03 are decided (decisions.md). `acts-core` 48.2.0 is confirmed at smoke level in `<workdir>/env/acts48`; any other backend stays unavailable until an approved job confirms it (R02). Site modules on this host include no Geant4 or ACTS. CVMFS is not a dependable route: t03-selection.md records the listing stalls on the login node and in job 7470680.
+
+## Re-baseline onto 0.57.0
+
+Task B1 and B2 step 1, 2026-11-06.
+
+| Item | 0.56.0 | 0.57.0 |
+| --- | --- | --- |
+| Commit | `580dc79e` | `d51566a9`, the tag `hep-research--v0.57.0` and the tip of `main` when fetched |
+| Plugin | 0.56.0 | 0.57.0 |
+| Contracts | 3.19.0 | 3.20.0 |
+| `CORE_VERSION` | 1.6.0 | 1.7.0 |
+
+The rebase replayed 17 commits with no conflict, and `docs/dev/detector-reconstruction/` was byte-identical before and after. Every branch commit has a new hash. Hashes named in earlier records are the old ones, reachable through the local ref `pre-rebase-0.56.0` (old tip `a2281ca3`) and the backup bundles. The release contains PR #353.
+
+The installed plugin copy does not govern (R01).
+
+### What the comparison covered
+
+| Check | Result |
+| --- | --- |
+| Contract-map names (53) | 2 changed files, 15 unchanged, 36 not file names; see contract-map.md |
+| `geometry_id` of the release's `g4sim_geometry_check.spec.json`, on both trees | Same value, `7bba29fb69e9...`, status `ok` |
+| T11 anchors (81, plus the `name.md#anchor` example in the conventions text) | All resolve at 0.57.0, none newly broken |
+| `hep-detector` references changed | 8 files, all from PR #353; none differs between that merge and the release |
+| G01-G03 files, `core/canonical`, `contracts/geometry.py`, `geometry_ir.json`, `detector_spec.json`, the two calibration references | Unchanged |
+| Fixtures under `contracts/fixtures` (143 files) | Version lines only |
+
+The anchor check shows that headings survive. It does not re-read the cells whose reference text PR #353 changed.

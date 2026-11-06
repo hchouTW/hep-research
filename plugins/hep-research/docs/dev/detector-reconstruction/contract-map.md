@@ -1,6 +1,6 @@
 # Detector reconstruction plan v9.2: contract map (K04, draft)
 
-Status: provisional. Built on contracts 3.19.0; must be redone on 3.20.0 or later before T06 (decisions.md, D1). T02 completes it field by field against W1-W7. Names below are proposals, not existing APIs.
+Status: provisional. Built on contracts 3.19.0, compared row by row with the 3.20.0 release on 2026-11-06 (last section; decisions.md, D1). T02 completes it field by field against W1-W7. Names below are proposals, not existing APIs.
 
 Each semantic need takes the first option that works (Section 8.1): existing field, typed native reference, versioned sidecar, schema migration.
 
@@ -20,7 +20,7 @@ Each semantic need takes the first option that works (Section 8.1): existing fie
 | --- | --- | --- | --- |
 | `ext_response.json` | Typed instrument response | **Reuse** for matrix and parametrized forms; typed native reference for effective areas, PSFs and transfer operators until T02 shows an extension is needed | Section 11.2: not every response is a migration matrix |
 | `run_workflow.py` | Native execution identity | **Reuse** its argv, step and receipt handling; native binaries, libraries and configurations enter as declared inputs | G05: `script_sha256` covers `.py` entries only |
-| `ext_computational_run.json` | Run records | **Reuse.** g4sim S2 extends this schema, so re-check it after re-baselining | Overlap found in the parallel-run review |
+| `ext_computational_run.json` | Run records | **Reuse.** g4sim S2 extended this schema; re-checked at 3.20.0, last section | Overlap found in the parallel-run review |
 | `geometry_ir.json`, `detector_spec.json`, `core/geometry` | Nominal geometry identity in payloads (R32) | **Reuse** `geometry_id`; do not define a second identity | D2 |
 | Calibration reference, N11 naming | Conditions payload naming | **Reuse** | R01, R32 |
 
@@ -61,7 +61,7 @@ Field status: **E** expressible now, **X** needs the proposed sidecar, **N** kep
 | W6 counts, exposure | `count=0` valid; one absent interval; two channels with different exposure | Zero stays an observation; rates use each channel's valid exposure and response | Absent filled with zero; run time as both denominators; energy assigned with no energy observable; Poisson inferred from integer type | Presence: **X**. Exposure: `exposure_record.json` to be reviewed in T06. Count model: **X** |
 | W7 scan, coherent, global | RF: two settings share raw data. Retarding: one setting revisited with different dwell. Global: `y_i=s+b` | Coordinates and overlap kept; setting-time-count kept; only `s+b` reported | Chunk averages; independent Poisson assumed; frequency-time track treated as spatial; unique solution after jitter | Coordinates, overlap, dwell: **X**. Identifiable combinations: **X**. No **I** found, but the three subcases stay separate and replace no native backend |
 
-W1-W7 need no field marked **I** on this reading. T06 must re-check that against 3.20.0 or later.
+W1-W7 need no field marked **I** on this reading. T06 must re-check that against 3.20.0 or later: the release comparison below covers the existing schemas, not the witness fields.
 
 ### Old-recipe comparison (for T06)
 
@@ -75,6 +75,20 @@ W1-W7 need no field marked **I** on this reading. T06 must re-check that against
 
 A converter is a declared step with its own input and output semantics, version, uncertainty and association handling, and cost (Section 8.4). Any information loss or selection change goes into retention or response, never counted as a harmless format change. None is written in P0.
 
-## Preview of contracts 3.20.0
+## Preview of contracts 3.20.0 (superseded by the release comparison below)
 
 Read 2026-11-06 from the g4sim S2 branch at `6903e4ef`, unreleased, so it can still change. Against this baseline, among the files this map depends on, only two changed: `contracts/__init__.py` and `ext_computational_run.json`, which gains an optional `extension.geometry` block. `geometry_id` there is a 64-character hexadecimal string, usable as R32's nominal geometry identity (D2). `recipe`, `operator_semantics`, `qualification_record`, `decision_record`, `tool_contract`, `ext_response`, `run_workflow.py` and the three G01-G03 files are unchanged, so no decision above changes on this reading. The re-baseline (D1) still re-checks this against the release.
+
+## Release comparison, contracts 3.20.0
+
+Task B2 step 1, 2026-11-06, `580dc79e` against `d51566a9`. Every name in the tables above was resolved to its files and diffed.
+
+| Row | Change | Decision |
+| --- | --- | --- |
+| `ext_computational_run.json` | Adds optional `extension.geometry`, as previewed. Required: `geometry_id`, `request_id`, `run_id`, `build_hash`, `installed_features`; optional `provenance_id`; closed. Identities are 64-character hexadecimal strings | **Reuse** stands |
+| `core/geometry` | Not in the preview. `identity.py` gains `in_decimals` and `request_id`; `geometry_id` and `provenance_id` are unchanged. The finish plan reopens K04 for a row like this; it was re-examined | **Reuse** of `geometry_id` stands. The same specification gives the same `geometry_id` on both trees. `request_id` identifies a simulation request and is not a second geometry identity (R32, D2) |
+| `contracts/__init__.py` | Version and a comment | None needed |
+
+The other 15 file names are unchanged: `recipe.json`, `operator_semantics.json`, `qualification_record.json`, `decision_record.json`, `tool_contract.json`, `ext_response.json`, `exposure_record.json`, `geometry_ir.json`, `detector_spec.json`, `run_workflow.py`, `response_adapter.py`, `flux_from_counts.json`, `contracts/semantics/recipes/`, `contracts/tool_contracts/` and `core/partition`. The release also adds `contracts/rules/geant4_datasets.json`, which no row uses.
+
+No decision in this map changes. K04 stays provisional as before.

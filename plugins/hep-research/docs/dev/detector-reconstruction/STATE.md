@@ -3,7 +3,8 @@
 ```yaml
 task_file: hep-research-detector-reconstruction-plan-v9.2-en.md
 task_file_sha256: 452b48a52c4d1bba28cabe7089e261030cc2a0d7500dbd7db7859ae72d0de708
-base: {ref: origin/main, commit: 580dc79e83abbc33b27c69633d9e15658f4f90b6, plugin_version: 0.56.0, contracts_version: 3.19.0}
+base: {ref: hep-research--v0.57.0, commit: d51566a9cd3e97da77483c78434de9b6026b295e, plugin_version: 0.57.0, contracts_version: 3.20.0, core_version: 1.7.0}
+previous_base: {commit: 580dc79e83abbc33b27c69633d9e15658f4f90b6, plugin_version: 0.56.0, contracts_version: 3.19.0, old_branch_tip: a2281ca3, old_tip_ref: pre-rebase-0.56.0, note: "B1 rebase rewrote all 17 branch commits; hashes named in records before B1 are the old ones and stay reachable through this local ref"}
 branch: feature/detector-reconstruction
 private: "<private>, on the group file system with ACLs removed, mode 700 (decisions.md, Q2)"
 worktree: <private>/worktree
@@ -33,6 +34,7 @@ jobs:
   cvmfs-probe-1: {state: COMPLETED, slurm_exit: "0:0", result: "lcg listed in 2 s; views and releases/acts stalled past 240 s", job_id: 7470680, script: "<private>/jobs/cvmfs-probe/cvmfs.sh", script_sha256: 8b4a0c66e43727b44744b0c67b67b0d753ba8a064dbd87de39a54aec11dec136, approval: "approve both jobs and the read-only network queries"}
   acts-confirm-1: {state: COMPLETED, slurm_exit: "0:0", elapsed: "00:00:27", node: hpa-wn28, result: "5 of 5 checks pass; backend-smoke level only", job_id: 7470886, script: "<private>/jobs/acts-confirm/confirm.sh", script_sha256: 3fe1402c5e0242b4d9cffdd51264f44f478930a039116f278a1d1adce6a091b1, approval: "approve the submission"}
 backup_a1: {path: "<workdir>/backup/20261106T083302Z", bundle_sha256: 448d4dc5e9d397f4273ce96e4471230c8e9b0397b8829e32caa04ea2fe2fddb9, archive_sha256: 5e39d7a536146a0ae22d8ac07c8b95e6dfae388ea6a25ab95761fb0b2c580e7b, bundle_commit: 2bf2ef92, approval: "approve the backup commands", task: "A1 step 4"}
+backup_a2: {path: "<workdir>/backup/20261106T091043Z", bundle_sha256: 8105206658cc42616a2d3afeca05e21778c570c099b15e8428f263f6caa311da, archive_sha256: 3fc41ab24421f1362160598981c5657611a2c31c10ec881d894e3837f04672f2, bundle_commit: a2281ca3, approval: "rerun the backup and remove the citation worktree", note: "holds the filled task log; predates the B1 rebase"}
 task_log: {path: "<private>/task-log/task-log.jsonl", note: "rebuilt 2026-11-06 from STATE.md, decisions.md, git history and job records, all entries reconstructed; 5 jobs and every user decision present; appended at each step from here (A2)"}
 deviations: {record: deviations.md, count: 6, note: "A3 step 1; none is known to have affected a recorded result"}
 literature: {record: "<private>/evidence/20261106T084851Z-a3fix1/artifacts/t11-literature-record-v3.json", sources: 63, added: "37 sources t11:S27-S63 from 56 citation records; each carries verification_checks (verdict, statement checked, note) from the T11 verification; validate.py exit 0; 2 access-limited flags (S31, S35) and 1 proposed merge (S42/S45, different editions), no search_incomplete flag", level_mapping: "full-text-arxiv and full-text-inspire recorded as full-text; full-text-section recorded as page, a conservative downgrade (strength 2 against 3); the original term is kept in level_as_recorded", note: "A3 step 3; v2 (verdicts not carried) is superseded; the 35 search-log entries are preserved, they were never stored flags"}
@@ -46,7 +48,7 @@ tasks:
   T05: {state: done, note: "P1 sheets complete, P2 onward list blockers; record t05-task-sheets.md"}
   T11: {state: in-progress, note: "done-provisional (R28), awaiting checkpoint suite; every applicable cell is sourced or a recorded gap (R14); 10 citation uses unread; plugin defects in t11-citation-findings.md not applied"}
 k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K08, K09, K10, K11, K12, K16, K17, K18]}
-next_action: "Phase A closing: A6 is the user's; Phase B starts when 0.57.0 is released"
+next_action: "B2 step 2: approved unit job on the rebased branch, then T03 and T11 to done if clean; then backup, B3, B4 (U5)"
 ```
 
 ## Plan conflicts found
