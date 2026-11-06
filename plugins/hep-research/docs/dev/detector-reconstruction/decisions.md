@@ -25,7 +25,7 @@ Drafted 2026-11-06 on contracts 3.19.0. Everything here is provisional. "Fixed" 
 
 ### K01 scope (agent; hep-detector)
 
-- **Basis:** Section 6, coverage.md (12 families with full documentation, 26 without, 11 of those with no text, tool or run).
+- **Basis:** Section 6, coverage.md (corrected after T11: no family has full documentation; 27 have partial text; 11 have no text, tool or run).
 - **Options:** keep all F01-F38; or narrow to families with existing text.
 - **Fixed:** keep all, with variants. Not-applicable only with a physical or readout reason. Support levels are coverage.md's six columns; the BP crosswalk is there.
 - **Rationale:** narrowing is ruled out by Section 1.3 item 6.
