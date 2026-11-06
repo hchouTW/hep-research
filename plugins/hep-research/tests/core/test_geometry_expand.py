@@ -12,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from core.geometry import expand, identity, overlap, rotation  # noqa: E402
+from core.geometry import expand, gdml, identity, material, overlap, rotation  # noqa: E402
 from core.geometry.numbers import GeometryError  # noqa: E402
 
 
@@ -102,8 +102,8 @@ class Expansion(unittest.TestCase):
 
     def test_a_later_shape_or_placement_is_refused(self):
         cone = spec({"a": {"solid": {"cone": {}}, "material": "G4_Si"}})
-        shell = spec({"a": box(["1", "1", "1"])}, [{"template": "a", "placement": {"single": {"centre_mm": ["0", "0", "0"]}}, "modifiers": [{"shell": {}}]}])
-        for document in (cone, shell):
+        sphere = spec({"a": {"solid": {"sphere_section": {}}, "material": "G4_Si"}})
+        for document in (cone, sphere):
             with self.assertRaises(GeometryError) as caught:
                 expand.expand(document)
             self.assertEqual(caught.exception.code, "module-not-open")
@@ -448,6 +448,67 @@ class ShapesRingsAndModifiers(unittest.TestCase):
             return len(expand.expand(spec({"cell": box(["8", "8", "2"])}, [child]))["physical"]["placements"])
         self.assertEqual(kept("centre_inside"), 5)
         self.assertEqual(kept("fully_inside"), 1)
+
+
+class NonBoxMothersAndShell(unittest.TestCase):
+    """Containment in mothers that are not boxes, shell, rays through the new shapes, and their GDML."""
+
+    TUBE = {"solid": {"tube": {"rmin_mm": "0", "rmax_mm": "10", "length_mm": "40"}}, "material": "G4_AIR"}
+    TRD = {"solid": {"trd": {"x1_mm": "20", "x2_mm": "10", "y1_mm": "20", "y2_mm": "10", "length_mm": "40"}}, "material": "G4_AIR"}
+
+    def codes(self, mother, child, centre=("0", "0", "0")):
+        document = spec({"mother": {**mother, "children": [single("child", centre)]}, "child": child}, [single("mother")])
+        return {finding["code"] for finding in overlap.findings(expand.expand(document))}
+
+    def test_a_box_poking_through_a_tube_wall_is_outside(self):
+        """Inside the tube's bounding box, outside the tube: the corner reaches r = 11.3."""
+        self.assertIn("containment-outside", self.codes(self.TUBE, box(["16", "16", "2"])))
+        self.assertEqual(self.codes(self.TUBE, box(["10", "10", "2"])), set())
+
+    def test_a_box_in_the_narrow_end_of_a_trd_is_outside(self):
+        self.assertIn("containment-outside", self.codes(self.TRD, box(["16", "16", "2"]), ("0", "0", "18")))
+        self.assertEqual(self.codes(self.TRD, box(["16", "16", "2"]), ("0", "0", "-18")), set())
+
+    def test_a_box_in_a_tube_hole_is_outside(self):
+        hollow = {"solid": {"tube": {"rmin_mm": "5", "rmax_mm": "10", "length_mm": "40"}}, "material": "G4_AIR"}
+        self.assertIn("containment-outside", self.codes(hollow, box(["2", "2", "2"])))
+        self.assertEqual(self.codes(hollow, box(["2", "2", "2"]), ("7", "0", "0")), set())
+
+    def test_shell_wraps_a_template_with_the_active_faces(self):
+        crystal = {**box(["20", "20", "50"]), "modifiers": [{"shell": {"material": "G4_MYLAR", "thickness_mm": "1", "faces": ["sides", "front"]}}]}
+        physical = expand.expand(spec({"crystal": crystal}, [single("crystal")]))["physical"]
+        self.assertEqual(physical["templates"]["crystal_shell"]["half_mm"], ["1.1e1", "1.1e1", "2.55e1"])
+        inside = [row for row in physical["placements"] if row["template"] == "crystal"][0]
+        self.assertEqual(inside["mother"], "crystal_shell")
+        self.assertEqual(inside["centre_mm"][2], "5e-1")
+
+    def test_a_shell_that_does_not_fit_is_an_error(self):
+        crystal = {**box(["20", "20", "50"]), "modifiers": [{"shell": {"material": "G4_MYLAR", "thickness_mm": "1", "faces": ["sides"]}}]}
+        document = spec({"cell": {**box(["21", "21", "60"], "G4_AIR"), "children": [single("crystal")]}, "crystal": crystal}, [single("cell")])
+        self.assertIn("containment-outside", {finding["code"] for finding in overlap.findings(expand.expand(document))})
+
+    def test_a_ray_through_a_tube_and_its_hole(self):
+        hollow = {"solid": {"tube": {"rmin_mm": "5", "rmax_mm": "10", "length_mm": "40"}}, "material": "G4_Si"}
+        ir = expand.expand(spec({"pipe": hollow}, [single("pipe")]))
+        length = material.path_by_material(ir, (Decimal(-100), Decimal(0), Decimal(0)), (Decimal(1), Decimal(0), Decimal(0)))["G4_Si"]
+        self.assertEqual(length, Decimal(10))
+
+    def test_a_ray_through_a_trd(self):
+        wedge = {"solid": {"trd": {"x1_mm": "20", "x2_mm": "10", "y1_mm": "20", "y2_mm": "10", "length_mm": "40"}}, "material": "G4_Si"}
+        ir = expand.expand(spec({"wedge": wedge}, [single("wedge")]))
+        length = material.path_by_material(ir, (Decimal(-100), Decimal(0), Decimal(0)), (Decimal(1), Decimal(0), Decimal(0)))["G4_Si"]
+        self.assertEqual(length, Decimal(15))
+
+    def test_the_export_names_each_shape_and_a_general_rotation(self):
+        prism = {"solid": {"polygon_prism": {"sides": 6, "radius_mm": "10", "length_mm": "4"}}, "material": "G4_Si"}
+        ir = expand.expand(spec({"t": self.TRD, "u": self.TUBE, "p": prism}, [single("t", ("-50", "0", "0")), single("u", ("50", "0", "0")),
+                                                                              single("p", ("0", "0", "100"), {"axis": "z", "angle_deg": "30"})]))
+        text = gdml.export(ir)
+        for tag in ("<trd ", "<tube ", "<polyhedra "):
+            self.assertIn(tag, text)
+        rotated = [row for row in ir["physical"]["placements"] if row["template"] == "p"][0]["rotation"]
+        self.assertLess(abs(gdml.euler_angles(rotated)[2] + 30), Decimal("1e-30"))  # GDML takes the passive angle
+        self.assertIn('z="-', text)
 
 
 if __name__ == "__main__":

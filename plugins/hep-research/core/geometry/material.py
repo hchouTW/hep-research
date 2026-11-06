@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
+from core.geometry import convex
 from core.geometry.numbers import CONTEXT, GeometryError, add, divide, exact, multiply, subtract
 from core.geometry.rotation import rotate
 
@@ -36,6 +37,69 @@ def _interval(origin: tuple, direction: tuple, half: tuple):
     return (enter, leave) if enter < leave else None
 
 
+def _dot(a: tuple, b: tuple) -> Decimal:
+    return add(add(multiply(a[0], b[0]), multiply(a[1], b[1])), multiply(a[2], b[2]))
+
+
+def _in_convex(origin: tuple, heading: tuple, body) -> list:
+    """The stretch of a ray inside a convex polyhedron: the planes clip it one by one."""
+    enter, leave = None, None
+    for unit, anchor in convex.planes(body):
+        rate = _dot(unit, heading)
+        height = _dot(unit, tuple(subtract(a, b) for a, b in zip(anchor, origin)))
+        if rate == 0:
+            if height < 0:
+                return []
+            continue
+        at = divide(height, rate)
+        if rate > 0:
+            leave = at if leave is None else min(leave, at)
+        else:
+            enter = at if enter is None else max(enter, at)
+    return [(enter, leave)] if enter is not None and leave is not None and enter < leave else []
+
+
+def _circle(origin: tuple, heading: tuple, radius: Decimal):
+    """Where a ray crosses a cylinder about z, or None."""
+    a = add(multiply(heading[0], heading[0]), multiply(heading[1], heading[1]))
+    if a == 0:
+        return None
+    b = add(multiply(origin[0], heading[0]), multiply(origin[1], heading[1]))
+    c = subtract(add(multiply(origin[0], origin[0]), multiply(origin[1], origin[1])), multiply(radius, radius))
+    disc = subtract(multiply(b, b), multiply(a, c))
+    if disc <= 0:
+        return None
+    root = CONTEXT.sqrt(disc)
+    return divide(subtract(CONTEXT.minus(b), root), a), divide(add(CONTEXT.minus(b), root), a)
+
+
+def _in_tube(origin: tuple, heading: tuple, solid: dict) -> list:
+    if exact(solid["phi_span_deg"]) != 360:
+        raise GeometryError("ray-shape", "a ray through a tube with a phi section is not computed yet")
+    half, rmin, rmax = exact(solid["dz_mm"]), exact(solid["rmin_mm"]), exact(solid["rmax_mm"])
+    span = _interval((Decimal(0), Decimal(0), origin[2]), (Decimal(0), Decimal(0), heading[2]), (Decimal(1), Decimal(1), half))
+    outer = _circle(origin, heading, rmax)
+    if heading[0] == 0 and heading[1] == 0:  # along the axis: inside or outside for its whole length
+        r2 = add(multiply(origin[0], origin[0]), multiply(origin[1], origin[1]))
+        return [span] if span and multiply(rmin, rmin) <= r2 < multiply(rmax, rmax) else []
+    if outer is None:
+        return []
+    low, high = outer
+    if heading[2] != 0:
+        if span is None:
+            return []
+        low, high = max(low, span[0]), min(high, span[1])
+    elif abs(origin[2]) >= half:
+        return []
+    if low >= high:
+        return []
+    inner = _circle(origin, heading, rmin) if rmin > 0 else None
+    if inner is None:
+        return [(low, high)]
+    parts = [(low, min(high, inner[0])), (max(low, inner[1]), high)]
+    return [part for part in parts if part[0] < part[1]]
+
+
 class _Tree:
     def __init__(self, ir: dict):
         self.templates = ir["physical"]["templates"]
@@ -46,6 +110,19 @@ class _Tree:
     def half(self, name: str) -> tuple:
         return tuple(exact(text) for text in self.templates[name]["half_mm"])
 
+    def stretches(self, name: str, origin: tuple, heading: tuple) -> list:
+        """The stretches of a ray inside a template, in its own frame: a tube with a hole can give two."""
+        template = self.templates[name]
+        shape = template["shape"]
+        if shape == "box":
+            found = _interval(origin, heading, self.half(name))
+            return [found] if found else []
+        if shape == "tube":
+            return _in_tube(origin, heading, template["solid"])
+        solid = template["solid"]
+        body = convex.trd(solid) if shape == "trd" else convex.prism(solid["sides"], exact(solid["circumradius_mm"]), exact(solid["dz_mm"]))
+        return _in_convex(origin, heading, body)
+
     def walk(self, name: str, origin: tuple, direction: tuple, start: Decimal, stop: Decimal, out: list) -> None:
         met = []
         for placement in self.daughters.get(name, []):
@@ -54,9 +131,9 @@ class _Tree:
             heading = direction
             if placement["rotation"]:
                 local, heading = rotate(placement["rotation"], local), rotate(placement["rotation"], direction)
-            stretch = _interval(local, heading, self.half(placement["template"]))
-            if stretch and stretch[0] < stop and stretch[1] > start:
-                met.append((max(stretch[0], start), min(stretch[1], stop), placement["template"], local, heading))
+            for stretch in self.stretches(placement["template"], local, heading):
+                if stretch[0] < stop and stretch[1] > start:
+                    met.append((max(stretch[0], start), min(stretch[1], stop), placement["template"], local, heading))
         cursor = start
         for enter, leave, template, local, heading in sorted(met, key=lambda item: item[0]):
             self.add(name, cursor, enter, out)

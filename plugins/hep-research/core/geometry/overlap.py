@@ -10,7 +10,7 @@ from decimal import Decimal
 from fractions import Fraction
 
 from core.geometry import bound, convex
-from core.geometry.numbers import BOUND_LIMIT_MM, EPSILON_MM, MINIMUM_FEATURE_MM, MINIMUM_GAP_MM, add, exact, multiply, subtract
+from core.geometry.numbers import BOUND_LIMIT_MM, CONTEXT, EPSILON_MM, MINIMUM_FEATURE_MM, MINIMUM_GAP_MM, add, exact, multiply, subtract
 from core.geometry.rotation import transpose
 
 WORLD = "world"
@@ -106,6 +106,9 @@ def _half(ir: dict, name: str) -> tuple:
 def _extent(ir: dict, placement: dict) -> tuple:
     """Lower and upper corner of a placed box in its mother's frame."""
     half = _half(ir, placement["template"])
+    if placement["rotation"] and (_arbitrary(placement) or _template(ir, placement)["shape"] != "box"):
+        vertices = _polyhedron(ir, placement).vertices
+        return (tuple(min(v[i] for v in vertices) for i in range(3)), tuple(max(v[i] for v in vertices) for i in range(3)))
     if placement["rotation"]:
         active = _active(placement)
         half = tuple(add(add(multiply(abs(Decimal(row[0])), half[0]), multiply(abs(Decimal(row[1])), half[1])), multiply(abs(Decimal(row[2])), half[2])) for row in active)
@@ -120,18 +123,52 @@ def _face_gap(distance: Decimal) -> str | None:
     return "outside" if distance < 0 else "too-close"
 
 
+def _mother_body(ir: dict, name: str) -> convex.Polyhedron:
+    template = ir["physical"]["templates"][name]
+    if template["shape"] == "trd":
+        return convex.trd(template["solid"])
+    return convex.prism(template["solid"]["sides"], exact(template["solid"]["circumradius_mm"]), exact(template["solid"]["dz_mm"]))
+
+
+def _gaps_in_tube(ir: dict, placement: dict) -> list:
+    """Distances from a daughter to the surfaces of a tube mother, in cylindrical coordinates."""
+    solid = ir["physical"]["templates"][placement["mother"]]["solid"]
+    if exact(solid["phi_span_deg"]) != 360:
+        return [None]
+    rmin, rmax, half = exact(solid["rmin_mm"]), exact(solid["rmax_mm"]), exact(solid["dz_mm"])
+    if _curved(ir, placement) and _about_own_axis(placement) and all(exact(value) == 0 for value in placement["centre_mm"][:2]):
+        inner, outer, low, high, _ = _tube_range(ir, placement)
+        return [subtract(rmax, outer), subtract(low, CONTEXT.minus(half)), subtract(half, high)] + ([subtract(inner, rmin)] if rmin > 0 else [])
+    body = _polyhedron(ir, placement)
+    reach = max(CONTEXT.sqrt(add(multiply(v[0], v[0]), multiply(v[1], v[1]))) for v in body.vertices)
+    zs = [v[2] for v in body.vertices]
+    gaps = [subtract(rmax, reach), subtract(min(zs), CONTEXT.minus(half)), subtract(half, max(zs))]
+    return gaps + ([subtract(convex.nearest_to_axis(body), rmin)] if rmin > 0 else [])
+
+
+def _gaps(ir: dict, placement: dict) -> list:
+    """The distance from a daughter to each surface of its mother: negative outside, None when it cannot be judged."""
+    shape = ir["physical"]["templates"][placement["mother"]]["shape"]
+    if shape == "tube":
+        return _gaps_in_tube(ir, placement)
+    if shape != "box":
+        return convex.face_gaps(_mother_body(ir, placement["mother"]), _polyhedron(ir, placement).vertices)
+    low, high = _extent(ir, placement)
+    half = _half(ir, placement["mother"])
+    return [gap for axis in range(3) for gap in (subtract(low[axis], CONTEXT.minus(half[axis])), subtract(half[axis], high[axis]))]
+
+
 def containment(ir: dict) -> list[dict]:
     out = []
     for placement in ir["physical"]["placements"]:
-        low, high = _extent(ir, placement)
-        half = _half(ir, placement["mother"])
-        for axis in range(3):
-            for gap in (subtract(low[axis], -half[axis]), subtract(half[axis], high[axis])):
-                problem = _face_gap(gap)
-                if problem:
-                    out.append(_finding(f"containment-{problem}", f"{placement['mother']}/{placement['template']}"
-                                                                  f"[{placement['copy_number']}]",
-                                        f"a face lies {gap} mm from its mother's face"))
+        where = f"{placement['mother']}/{placement['template']}[{placement['copy_number']}]"
+        for gap in _gaps(ir, placement):
+            if gap is None:
+                out.append(_finding("containment-unjudged", where, "a daughter of a tube with a phi section cannot be judged yet"))
+                continue
+            problem = _face_gap(gap)
+            if problem:
+                out.append(_finding(f"containment-{problem}", where, f"a face lies {gap} mm from its mother's face"))
     return out
 
 

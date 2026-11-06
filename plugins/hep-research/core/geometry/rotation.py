@@ -6,6 +6,7 @@ cosine computed with 40 digits and rounded to 34 (Section 7.3, item 6); core/geo
 from __future__ import annotations
 
 import decimal
+import math
 from decimal import Decimal
 
 from core.geometry.numbers import CONTEXT, GeometryError
@@ -34,6 +35,24 @@ def cos_sin(angle_deg: Decimal) -> tuple:
     c, s = _series(rest, Decimal(1), 0), _series(rest, rest, 1)
     c, s = {0: (c, s), 1: (_WIDE.minus(s), c), 2: (_WIDE.minus(c), _WIDE.minus(s)), 3: (s, _WIDE.minus(c))}[nearest % 4]
     return CONTEXT.plus(c), CONTEXT.plus(s)
+
+
+def atan2_deg(y: Decimal, x: Decimal) -> Decimal:
+    """atan2 in degrees to 34 digits: a double start, then Newton steps on x sin t - y cos t, so the result does not depend on libm's last bit."""
+    if y == 0 and x == 0:
+        return Decimal(0)
+    size = _WIDE.sqrt(_WIDE.add(_WIDE.multiply(x, x), _WIDE.multiply(y, y)))
+    degrees = Decimal(repr(round(math.degrees(math.atan2(float(y), float(x))), 9)))
+    per_radian = _WIDE.divide(Decimal(180), _PI)
+    for _ in range(4):
+        turns = _WIDE.divide(degrees, Decimal(90))
+        nearest = int(turns.to_integral_value(rounding=decimal.ROUND_HALF_EVEN))
+        rest = _WIDE.multiply(_WIDE.subtract(turns, Decimal(nearest)), _WIDE.divide(_PI, Decimal(2)))
+        c, s = _series(rest, Decimal(1), 0), _series(rest, rest, 1)
+        c, s = {0: (c, s), 1: (_WIDE.minus(s), c), 2: (_WIDE.minus(c), _WIDE.minus(s)), 3: (s, _WIDE.minus(c))}[nearest % 4]
+        step = _WIDE.divide(_WIDE.subtract(_WIDE.multiply(y, c), _WIDE.multiply(x, s)), size)
+        degrees = _WIDE.add(degrees, _WIDE.multiply(step, per_radian))
+    return CONTEXT.plus(degrees)
 
 
 def _turn(angle_deg: Decimal):

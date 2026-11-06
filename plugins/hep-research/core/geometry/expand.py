@@ -6,6 +6,7 @@ params expression. Expansion is pure computation: core.geometry.overlap computes
 """
 from __future__ import annotations
 
+import copy
 from decimal import Decimal
 
 from core.canonical import check_hash_scope
@@ -213,6 +214,8 @@ def _modified(items: list, child: dict, sizes: dict, values: _Values, path: str)
         (kind, body), = modifier.items()
         where = f"{path}/modifiers/{at}"
         modules.require_open(modules.MODIFIERS, kind, "modifier", where)
+        if kind == "shell":
+            raise GeometryError("modifier-form", "shell belongs to a template, not to a placement", where)
         if kind == "absent":
             removed = [dict(cell) for cell in body["cells"]]
             for cell in removed:
@@ -414,10 +417,64 @@ def _frames(spec: dict, values: _Values, templates: dict) -> dict:
     return out
 
 
+def _shell_size(size: list, thickness: str, faces: list) -> list:
+    """The wrapper's size from the template's, in the specification's own expressions."""
+    wide = f"2*({thickness})" if "sides" in faces else "0"
+    deep = f"{('front' in faces) + ('back' in faces)}*({thickness})"
+    return [f"({size[0]})+{wide}", f"({size[1]})+{wide}", f"({size[2]})+{deep}"]
+
+
+def _renamed(children: list, replaced: str, wrapper: str) -> list:
+    out = []
+    for child in children:
+        child = copy.deepcopy(child)
+        if child.get("template") == replaced:
+            child["template"] = wrapper
+        stack = child.get("placement", {}).get("stack")
+        if stack:
+            stack["sequence"] = [wrapper if item == replaced else {**item, "template": wrapper} if isinstance(item, dict) and item.get("template") == replaced else item
+                                 for item in stack["sequence"]]
+        out.append(child)
+    return out
+
+
+def _with_shells(spec: dict) -> dict:
+    """shell (Section 6.2.3): a wrapper template of the shell's material takes the template's place, with the template inside it, offset by the
+    active faces. A wrapper that does not fit where it is placed fails containment: that is the error for insufficient space."""
+    templates = spec.get("templates", {})
+    if not any(node.get("modifiers") for node in templates.values()):
+        return spec
+    spec = copy.deepcopy(spec)
+    for name in list(spec["templates"]):
+        node = spec["templates"][name]
+        modifiers = node.pop("modifiers", [])
+        for at, modifier in enumerate(modifiers):
+            where = f"/templates/{name}/modifiers/{at}"
+            if set(modifier) != {"shell"}:
+                raise GeometryError("modifier-form", f"{sorted(modifier)} is not a template modifier", where)
+            modules.require_open(modules.MODIFIERS, "shell", "modifier", where)
+            shell = modifier["shell"]
+            if "box" not in node["solid"]:
+                raise GeometryError("shell-shape", "a shell wraps a box", where)
+            faces, thickness = shell["faces"], shell["thickness_mm"]
+            if not set(faces) <= {"sides", "front", "back"} or not faces:
+                raise GeometryError("shell-form", f"faces {faces!r}", where)
+            front, back = "front" in faces, "back" in faces
+            shift = "0" if front == back else f"({thickness})/2" if front else f"-({thickness})/2"  # the front face is -z
+            wrapper = f"{name}_shell"
+            spec["templates"][wrapper] = {"solid": {"box": {"size_mm": _shell_size(node["solid"]["box"]["size_mm"], thickness, faces)}}, "material": shell["material"],
+                                          "children": [{"template": name, "placement": {"single": {"centre_mm": ["0", "0", shift]}}}]}
+            for other, holder in [*spec["templates"].items(), ("world", spec["world"])]:
+                if other != wrapper and holder.get("children"):
+                    holder["children"] = _renamed(holder["children"], name, wrapper)
+    return spec
+
+
 def expand(spec: dict) -> dict:
     """The geometry-ir/1 document of a specification."""
     if spec.get("schema") != "detector-spec/1":
         raise GeometryError("schema", f"{spec.get('schema')!r} is not detector-spec/1")
+    spec = _with_shells(spec)
     if WORLD in spec.get("templates", {}):
         raise GeometryError("template-name", f"{WORLD!r} is reserved", "/templates")
     values = _Values(spec.get("params", {}))

@@ -230,6 +230,43 @@
       "items": {
        "$ref": "#/$defs/child"
       }
+     },
+     "modifiers": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "additionalProperties": false,
+       "properties": {
+        "shell": {
+         "type": "object",
+         "required": [
+          "material",
+          "thickness_mm",
+          "faces"
+         ],
+         "additionalProperties": false,
+         "properties": {
+          "material": {
+           "type": "string"
+          },
+          "thickness_mm": {
+           "$ref": "#/$defs/quantity"
+          },
+          "faces": {
+           "type": "array",
+           "minItems": 1,
+           "items": {
+            "enum": [
+             "sides",
+             "front",
+             "back"
+            ]
+           }
+          }
+         }
+        }
+       }
+      }
      }
     }
    }
@@ -656,9 +693,6 @@
       },
       "explicit": {
        "type": "object",
-       "required": [
-        "positions_mm"
-       ],
        "additionalProperties": false,
        "properties": {
         "positions_mm": {
@@ -676,8 +710,37 @@
         "index": {
          "type": "string",
          "pattern": "^[A-Za-z_][A-Za-z0-9_+-]*$"
+        },
+        "positions_csv": {
+         "type": "object",
+         "required": [
+          "path",
+          "sha256"
+         ],
+         "additionalProperties": false,
+         "properties": {
+          "path": {
+           "type": "string"
+          },
+          "sha256": {
+           "type": "string",
+           "pattern": "^[0-9a-f]{64}$"
+          }
+         }
         }
-       }
+       },
+       "oneOf": [
+        {
+         "required": [
+          "positions_mm"
+         ]
+        },
+        {
+         "required": [
+          "positions_csv"
+         ]
+        }
+       ]
       },
       "ring": {
        "type": "object",

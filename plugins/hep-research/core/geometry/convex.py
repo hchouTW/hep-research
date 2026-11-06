@@ -104,6 +104,42 @@ def separating_gap(a: Polyhedron, b: Polyhedron) -> Decimal:
     return best
 
 
+def planes(polyhedron: Polyhedron) -> list:
+    """(unit outward normal, a point on the face) of every face of a polyhedron around the origin."""
+    out = []
+    for loop in polyhedron.faces:
+        normal = _normal(polyhedron, loop)
+        size = _length(normal)
+        unit = tuple(divide(value, size) for value in normal)
+        anchor = polyhedron.vertices[loop[0]]
+        if _dot(unit, anchor) < _ZERO:
+            unit = tuple(CONTEXT.minus(value) for value in unit)
+        out.append((unit, anchor))
+    return out
+
+
+def face_gaps(mother: Polyhedron, points: list) -> list:
+    """For each face of a convex mother, the smallest distance from it inward to any point: negative when a point is outside."""
+    return [min(_dot(unit, _minus(anchor, point)) for point in points) for unit, anchor in planes(mother)]
+
+
+def nearest_to_axis(polyhedron: Polyhedron) -> Decimal:
+    """The least distance in x and y from the z axis to any edge; zero when the footprint's box holds the axis."""
+    xs, ys = [v[0] for v in polyhedron.vertices], [v[1] for v in polyhedron.vertices]
+    if min(xs) <= _ZERO <= max(xs) and min(ys) <= _ZERO <= max(ys):
+        return _ZERO
+    best = None
+    for first, second in polyhedron.edges:
+        p, q = polyhedron.vertices[first], polyhedron.vertices[second]
+        along = (subtract(q[0], p[0]), subtract(q[1], p[1]), _ZERO)
+        flat = (p[0], p[1], _ZERO)
+        size = _dot(along, along)
+        share = _clamp(divide(CONTEXT.minus(_dot(flat, along)), size)) if size > _ZERO else _ZERO
+        value = _length(tuple(add(a, multiply(share, b)) for a, b in zip(flat, along)))
+        best = value if best is None or value < best else best
+    return best
+
+
 def disjoint(a: Polyhedron, b: Polyhedron) -> bool:
     return separating_gap(a, b) >= CONTEXT.minus(EPSILON_MM)
 
