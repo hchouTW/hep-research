@@ -50,7 +50,7 @@ the chain, signal induction, shaping, noise, thresholds, digitization, time pick
   <!-- example: source citation -->
   The ATLAS liquid-argon reconstruction computes its amplitude and time coefficients this
   way, from the pulse shape, its derivative and the noise autocorrelation of pedestal runs
-  (M. Aharrouche et al., arXiv:0709.1094; read 2026-10-25).
+  (M. Aharrouche et al., Nucl. Instrum. Methods A 582 (2007) 429, arXiv:0709.1094; read 2026-10-25).
   <!-- /example -->
 - **Baseline gain.** A constant offset `b` on every sample biases any linear estimate by
   `b sum w`. For unipolar pulses `sum w` is of order one unless a baseline constraint or

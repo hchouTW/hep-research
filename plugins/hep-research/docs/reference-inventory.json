@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 44,
-   "bytes": 694773,
+   "bytes": 695464,
    "uncited": 0
   },
   "hep-measurement": {
@@ -1902,8 +1902,8 @@
   {
    "path": "skills/hep-detector/references/calorimetry-ecal-hcal.md",
    "owner": "hep-detector",
-   "bytes": 16023,
-   "lines": 250,
+   "bytes": 16252,
+   "lines": 253,
    "linked_from_skill_md": true,
    "cited_by": [
     "skills/hep-detector/SKILL.md",
@@ -2117,7 +2117,7 @@
   {
    "path": "skills/hep-detector/references/detector-principles-bibliography.md",
    "owner": "hep-detector",
-   "bytes": 23037,
+   "bytes": 23048,
    "lines": 283,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -2291,7 +2291,7 @@
   {
    "path": "skills/hep-detector/references/front-end-waveform-processing.md",
    "owner": "hep-detector",
-   "bytes": 12708,
+   "bytes": 12749,
    "lines": 172,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -2310,7 +2310,7 @@
   {
    "path": "skills/hep-detector/references/gaseous-and-specialized-tracking-technologies.md",
    "owner": "hep-detector",
-   "bytes": 20710,
+   "bytes": 20735,
    "lines": 324,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -2357,8 +2357,8 @@
   {
    "path": "skills/hep-detector/references/ground-based-detection-arrays.md",
    "owner": "hep-detector",
-   "bytes": 20909,
-   "lines": 296,
+   "bytes": 21108,
+   "lines": 299,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/cosmic-ray-spectrum-and-composition.md",
@@ -2456,8 +2456,8 @@
   {
    "path": "skills/hep-detector/references/noble-liquid-neutrino-and-rare-event-detectors.md",
    "owner": "hep-detector",
-   "bytes": 21180,
-   "lines": 303,
+   "bytes": 21358,
+   "lines": 306,
    "linked_from_skill_md": false,
    "cited_by": [
     "skills/hep-detector/references/detector-case-studies-and-checklists.md",
@@ -2552,7 +2552,7 @@
   {
    "path": "skills/hep-detector/references/photon-likelihood-reconstruction.md",
    "owner": "hep-detector",
-   "bytes": 17669,
+   "bytes": 17667,
    "lines": 265,
    "linked_from_skill_md": true,
    "cited_by": [
@@ -2670,7 +2670,7 @@
    "cited_by_other_skills": [
     "hep-computing"
    ],
-   "last_commit": "ca931ccd 2026-11-02"
+   "last_commit": "f035491a 2026-11-02"
   },
   {
    "path": "skills/hep-detector/references/signal-formation-and-readout.md",
@@ -2765,7 +2765,7 @@
   {
    "path": "skills/hep-detector/references/tracking-and-vertexing.md",
    "owner": "hep-detector",
-   "bytes": 23735,
+   "bytes": 23745,
    "lines": 352,
    "linked_from_skill_md": true,
    "cited_by": [

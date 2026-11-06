@@ -203,8 +203,8 @@ and simulation.
 
 An imaging atmospheric Cherenkov telescope array can fit the camera images directly: each
 pixel's charge is compared with an expected image from a library of simulated showers
-indexed by energy, impact distance, depth of shower maximum, zenith angle and source
-offset, with a pixel
+indexed by energy, impact distance, depth of shower maximum, and zenith and azimuth angle,
+with a pixel
 likelihood that includes night-sky-background noise and the single-photoelectron response
 (Parsons and Hinton, Astropart. Phys. 56 (2014) 26). It is the same structure as above, with
 a tabulated, simulation-driven expected-light model, so it uses more of the image than
