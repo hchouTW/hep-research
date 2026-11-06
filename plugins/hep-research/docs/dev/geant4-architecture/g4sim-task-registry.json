@@ -470,6 +470,13 @@
    "registered_at": "2026-11-06T21:45:13Z",
    "card_commit": "991ede65",
    "reason": "Execution log only (gate 3 result); thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "4919dbffd9d5329a3181889803a593f6193da549bd1b5081f2ee4a5c9e2268af",
+   "registered_at": "2026-11-06T21:53:17Z",
+   "card_commit": "d6e20770",
+   "reason": "Execution log only (output negatives); thresholds unchanged from the previous registration"
   }
  ]
 }
