@@ -51,6 +51,38 @@
      "items": {
       "type": "string"
      }
+    },
+    "em_option": {
+     "type": "string"
+    },
+    "pai": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "region",
+       "particle",
+       "model"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "region": {
+        "type": "string"
+       },
+       "particle": {
+        "type": "string"
+       },
+       "model": {
+        "type": "string"
+       }
+      }
+     }
+    },
+    "user_limits": {
+     "type": "object",
+     "additionalProperties": {
+      "type": "object"
+     }
     }
    }
   },

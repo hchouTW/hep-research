@@ -69,7 +69,7 @@ def ask(program: str, folder: Path, questions: list) -> dict:
     return dict(line.split() for line in (folder / "answers.txt").read_text(encoding="utf-8").splitlines())
 
 
-def gb23(program: str, folder: Path) -> dict:
+def prism_verdicts(program: str, folder: Path) -> dict:
     questions, wanted, control_built_from_radius, control_turned = [], {}, {}, {}
     for number, (sides, radius, length) in enumerate(PRISMS):
         solid = prism_solid(sides, radius, length)
@@ -95,7 +95,7 @@ def gb23(program: str, folder: Path) -> dict:
             "control_vertices_turned_differ": sum(answers[key] != v for key, v in control_turned.items())}
 
 
-def gb24(program: str, folder: Path) -> dict:
+def volume_verdicts(program: str, folder: Path) -> dict:
     questions, wanted = [], {}
 
     def hexes(*values) -> str:
@@ -126,8 +126,8 @@ def main() -> int:
         return 2
     folder = Path(sys.argv[2])
     folder.mkdir(parents=True, exist_ok=True)
-    first = gb23(sys.argv[1], folder)
-    second = gb24(sys.argv[1], folder)
+    first = prism_verdicts(sys.argv[1], folder)
+    second = volume_verdicts(sys.argv[1], folder)
     controls = first["control_radius_as_apothem_differ"] > 0 and first["control_vertices_turned_differ"] > 0
     confirmed = first["confirmed"] and second["confirmed"] and controls
     print(json.dumps({"status": "ok" if confirmed else "failed", "GB23": first, "GB24": second, "controls_detected": controls}, indent=1))

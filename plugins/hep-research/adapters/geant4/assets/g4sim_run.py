@@ -30,6 +30,7 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import g4sim_physics_check as physics_check  # noqa: E402
 import g4sim_translate as translate  # noqa: E402
 from contracts import KNOWN_CAPABILITIES, geometry  # noqa: E402
 from core import constants  # noqa: E402
@@ -67,7 +68,7 @@ def check_card(card: dict, legacy: dict | None = None) -> list[dict]:
     if legacy is not None and card.get("run", {}).get("seeding") != legacy.get("seeding"):
         findings.append({"code": "seeding-differs", "path": "run.seeding",
                          "message": f"the run card says {card.get('run', {}).get('seeding')!r}, the legacy block {legacy.get('seeding')!r}"})
-    return findings
+    return findings + physics_check.card_findings(card)
 
 
 def physics_list(card: dict) -> str:

@@ -1,0 +1,13 @@
+{
+ "$comment": "source-density/1 (g4sim plan, Section 6.3): what an analytic source sampled, written by core/simulation/source_density.py.",
+ "type": "object",
+ "required": ["schema", "particle", "energy", "position", "direction"],
+ "additionalProperties": false,
+ "properties": {
+  "schema": {"const": "source-density/1"},
+  "particle": {"anyOf": [{"type": "string", "minLength": 1}, {"type": "object"}]},
+  "energy": {"type": "object", "required": ["kind", "support"], "properties": {"kind": {"enum": ["mono", "uniform", "log_uniform", "power_law", "gaussian", "list", "cycle"]}, "support": {"enum": ["discrete", "continuous"]}}},
+  "position": {"type": "object", "required": ["kind", "frame"], "properties": {"kind": {"enum": ["point", "box_uniform", "disk_uniform", "gaussian_spot", "sphere_surface"]}, "frame": {"type": "string"}}},
+  "direction": {"type": "object", "required": ["kind", "frame"], "properties": {"kind": {"enum": ["fixed", "cone", "from_point", "isotropic", "cosine_law"]}, "frame": {"type": "string"}}}
+ }
+}
