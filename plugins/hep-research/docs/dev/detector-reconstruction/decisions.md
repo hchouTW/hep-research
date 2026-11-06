@@ -172,6 +172,10 @@ See contract-map.md. Fixed provisionally: `recipe`, `qualification_record` and `
 | K08, K18 confirmation | P6 | With K03 | No confirmation claim |
 | K10, K17 Slurm limits | First campaign. No default: user must choose | Asked at that campaign's approval | None submitted |
 
+## Execution method
+
+User's answer, 2026-11-06, verbatim: "use subagent-driven, show the backup commands". The finish plan runs by subagent-driven development, and the backup commands are shown before they run (Task A1).
+
 ## K02 and K03 decision
 
 User's answer, 2026-11-06, verbatim: "approve K02 as recommended, show the install commands". Recommendation accepted: `acts-core` in a new environment under `<workdir>/env/`, confirmed by one approved job; calorimetry and photon likelihood as labelled development bindings; data synthetic or Geant4-simulated. Consequences recorded: no native backend for those two workflows, a gap in required delivery; no data-control evidence. This approves the direction. Install commands and the confirmation job each need their own approval (R03, R15).

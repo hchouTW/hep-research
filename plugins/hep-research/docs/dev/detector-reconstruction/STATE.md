@@ -32,6 +32,10 @@ jobs:
   checkpoint-p0-1: {state: FAILED, slurm_exit: "1:0", elapsed: "00:17:22", result: "no new failure; 1 baseline error remains, see baseline.md", job_id: 7470679, tested_commit: 1d31ebd3, script: "<private>/jobs/checkpoint-p0/checkpoint.sh", script_sha256: 4f359e1719687390bcc26952cbab0853126ce788d73fcbb47054d0da6a9b08c8, approval: "approve both jobs and the read-only network queries"}
   cvmfs-probe-1: {state: COMPLETED, slurm_exit: "0:0", result: "lcg listed in 2 s; views and releases/acts stalled past 240 s", job_id: 7470680, script: "<private>/jobs/cvmfs-probe/cvmfs.sh", script_sha256: 8b4a0c66e43727b44744b0c67b67b0d753ba8a064dbd87de39a54aec11dec136, approval: "approve both jobs and the read-only network queries"}
   acts-confirm-1: {state: COMPLETED, slurm_exit: "0:0", elapsed: "00:00:27", node: hpa-wn28, result: "5 of 5 checks pass; backend-smoke level only", job_id: 7470886, script: "<private>/jobs/acts-confirm/confirm.sh", script_sha256: 3fe1402c5e0242b4d9cffdd51264f44f478930a039116f278a1d1adce6a091b1, approval: "approve the submission"}
+backup_a1: {path: "<workdir>/backup/20261106T083302Z", bundle_sha256: 448d4dc5e9d397f4273ce96e4471230c8e9b0397b8829e32caa04ea2fe2fddb9, archive_sha256: 5e39d7a536146a0ae22d8ac07c8b95e6dfae388ea6a25ab95761fb0b2c580e7b, approval: "approve the backup commands", task: "A1 step 4"}
+task_log: {path: "<private>/task-log/task-log.jsonl", note: "rebuilt 2026-11-06 from STATE.md, decisions.md, git history and job records, all entries reconstructed; 5 jobs and every user decision present; appended at each step from here (A2)"}
+deviations: {record: deviations.md, count: 6, note: "A3 step 1; none is known to have affected a recorded result"}
+literature: {record: "<private>/evidence/20261106T083702Z-a3lit/artifacts/t11-literature-record-v2.json", sources: 63, added: "37 sources t11:S27-S63 from 56 citation records, validate.py exit 0, 2 access-limited flags (S31, S35), no search_incomplete flag", note: "A3 step 3"}
 baseline_static: {evidence: "<private>/evidence/20261106T044938Z", exit: 0, seconds: 327, note: "run on the login node, --jobs 2, under Q8; docs/dev/detector-reconstruction was present and untracked"}
 tasks:
   T01: {state: done, note: "checkpoint 7470679 compared; K defaults used: K01"}
@@ -41,7 +45,7 @@ tasks:
   T05: {state: done, note: "P1 sheets complete, P2 onward list blockers; record t05-task-sheets.md"}
   T11: {state: in-progress, note: "done-provisional (R28), awaiting checkpoint suite; every applicable cell is sourced or a recorded gap (R14); 10 citation uses unread; plugin defects in t11-citation-findings.md not applied"}
 k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K08, K09, K10, K11, K12, K16, K17, K18]}
-next_action: "follow finish-plan.md, Phase A; user chooses the execution method"
+next_action: "follow finish-plan.md, Phase A: A1, A2 and A3 recorded; next A4, PR 353 state and Gate A"
 ```
 
 ## Plan conflicts found
@@ -49,4 +53,5 @@ next_action: "follow finish-plan.md, Phase A; user chooses the execution method"
 - R06 names `find_python.py --json`; the script at the baseline has no such flag and prints JSON by default. Its default search finds no interpreter on this host, so candidates are listed by folder.
 - R27 Q1's default, "the newest local commit", would select an unreleased task branch on this host. The baseline was chosen by release instead.
 - R09's yes/no/unprobed columns were kept: a coverage draft's `partial` became `no; partly`, the strict reading.
+- No rule in plan v9.2 covers a rebase of the branch onto a later release (finish-plan.md Phase B does it, with D1), and the plan does not mention g4sim, whose released `geometry_id` the reconstruction reuses (D2). Both are listed for the plan's owner as reported by the coordinator; the plan text was not reread here.
 - R03 treats the group space as shared and R27 Q2 places `<private>` in home. The user placed `<private>` on the group file system; it is not shared, because its ACLs were removed (decisions.md, Q2).
