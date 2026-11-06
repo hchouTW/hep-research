@@ -41,7 +41,7 @@ tasks:
   T05: {state: done, note: "P1 sheets complete, P2 onward list blockers; record t05-task-sheets.md"}
   T11: {state: in-progress, note: "done-provisional (R28), awaiting checkpoint suite; every applicable cell is sourced or a recorded gap (R14); 10 citation uses unread; plugin defects in t11-citation-findings.md not applied"}
 k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K08, K09, K10, K11, K12, K16, K17, K18]}
-next_action: "T06 waits for 0.57.0 (D1); T11 sources need network approval; third T04 review before Freeze A"
+next_action: "follow finish-plan.md, Phase A; user chooses the execution method"
 ```
 
 ## Plan conflicts found
