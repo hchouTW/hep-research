@@ -358,6 +358,13 @@
    "registered_at": "2026-11-06T04:41:53Z",
    "card_commit": "c939847a",
    "reason": "Execution log only, before the conservation rerun; thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S2.md",
+   "sha256": "e0794c9f02b6093ecd743c4c657cc46ad9266c3dc4a5c6611721fda4920ebab3",
+   "registered_at": "2026-11-06T05:24:25Z",
+   "card_commit": "3ac0b81a",
+   "reason": "Two-step registration of the conservation rerun: N and the trial values, before its calibration runs"
   }
  ]
 }
