@@ -344,3 +344,19 @@ The excess is reproduced with twice the events. The table's rows read "x and y b
 
 Coordinator's reading, not a finding: section 7.1's sigma counts only the variance of cells kept, so it omits the variance of cells near `T_c` entering and leaving the sum, each with a long lever arm. `oracle` below 1 suggests a second, smaller effect: `v_c = q max(e_c, 0) + sigma_n^2` overstates the variance of empty cells. Neither is tested.
 
+## T08 position uncertainty: test of the candidate
+
+The user chose option A, verbatim: "go ahead with option A". Fixed before any output exists. Script `<private>/evidence/t04-v4/diag-t08c/test-t08-sigma.py` (`d94308d0d2bffefa`), job `<private>/jobs/t04-diag-t08c/diag.sh` (`d25356e1c5774991`). Syntax-parsed only, not run, not independently reviewed.
+
+Candidate, one-peak objects, nothing fitted, no truth used: `sigma_x^2 = sum_c (x_c - x)^2 Var(T_c) / A^2`, likewise y, over the component and its 8-connected ring. `T_c = e_c 1(e_c >= T_c0)`, with `e_c` Gaussian of mean `mu_c = A g_c(x, y)` and variance `q mu_c + sigma_n^2`. Two-peak objects keep their Fisher uncertainty. The estimator and `sigma_A` do not change.
+
+60,000 new iso showers at each of the 9 E2 nodes and at 1.41, 2, 2.83, 4, 8, 16 GeV. Void unless `REPLAY` prints job 7478606's widths: 1.0721, 1.0717 at 250 MeV; 1.0383, 1.0303 at 500 MeV.
+
+| Result | Reading |
+| --- | --- |
+| `BIN E2` `new` within 0.039527 for x and y, and every `NODE` line within its limit of 0.0474, on either side of 1 | The candidate passes. It goes to the user for section 7.1, then T08's reference reruns against the unchanged section 18 rule |
+| `BIN E2` within, some `NODE` over | It works on average only. Goes to the user |
+| `BIN E2` over, on either side of 1 | The candidate fails. Evidence goes to the user; the cause stays open |
+
+An outcome the table does not cover goes to the user. The candidate may not be adjusted after seeing this output and then counted as passed: a changed formula is a new test on new events.
+
