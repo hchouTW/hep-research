@@ -43,6 +43,11 @@ class Checks(unittest.TestCase):
     def test_keys_of_a_study_are_distinct(self):
         self.assertEqual(len(set(response.study_keys(PIPELINE, ["ecal", "hcal"]))), 3)
 
+    def test_two_readouts_of_one_name_are_refused(self):
+        with self.assertRaises(response.ResponseError) as raised:
+            response.study_keys(PIPELINE, ["ecal", "ecal"])
+        self.assertEqual(raised.exception.code, "key-collision")
+
     def test_exhaustion_is_negligible_at_realistic_draws(self):
         self.assertLess(response.exhaustion_bound(1024), 1e-300 + 1e-200)
         self.assertEqual(response.exhaustion_bound(2 ** 15), 1.0)
@@ -59,10 +64,24 @@ class Determinism(unittest.TestCase):
         parts = [response.scintillation_event(PIPELINE, STAGE, event, 9, BINS, MAP) for start in (30, 0, 10, 20) for event in range(start, start + 10)]
         self.assertEqual(sorted(map(str, whole)), sorted(map(str, parts)))
 
+    def test_chunks_of_bins_do_not_matter(self):
+        whole = response.scintillation_event(PIPELINE, STAGE, 4, 9, BINS, MAP)
+        parts = [response.scintillation_event(PIPELINE, STAGE, 4, 9, {at: row}, MAP) for at, row in BINS.items()]
+        self.assertEqual({name: sum(part[name] for part in parts) for name in whole}, whole)
+
     def test_two_readouts_of_a_volume_share_the_photon_draws(self):
+        other = {**MAP, "channels": ["front", "back"]}  # another readout of the same volume: its channels have other names
         first = response.scintillation_event(PIPELINE, STAGE, 4, 9, BINS, MAP)
-        second = response.scintillation_event(dict(PIPELINE), dict(STAGE), 4, 9, BINS, MAP)
-        self.assertEqual(first, second)
+        second = response.scintillation_event(PIPELINE, STAGE, 4, 9, BINS, other)
+        self.assertEqual(list(first.values()), list(second.values()))
+        self.assertGreater(sum(first.values()), 0)
+
+    def test_every_photon_lands_in_exactly_one_channel(self):
+        complete = {**MAP, "form": {"kind": "uniform", "value": [0.6, 0.4]}}
+        key = rng.volume_key(PIPELINE["run_seed"], STAGE["name"], PIPELINE["replica"])
+        for event in range(50):
+            photons = sum(response.bin_photons(rng.SubStream(key, event, 9, at), 100.0, 1.0, *row) for at, row in BINS.items())
+            self.assertEqual(sum(response.scintillation_event(PIPELINE, STAGE, event, 9, BINS, complete).values()), photons)
 
     def test_photon_times_cross_a_block_without_repeating(self):
         times = response.photon_times(PIPELINE, "scintillation", 1, 9, 0, response.PHOTON_BLOCK + 5, 10.0, 2.0)
