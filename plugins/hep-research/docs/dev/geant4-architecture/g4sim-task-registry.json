@@ -561,6 +561,20 @@
    "registered_at": "2026-11-07T00:36:39Z",
    "card_commit": "b796e0d9",
    "reason": "Execution log only (independent read, licence, final regression); thresholds unchanged"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "83932aa4ddeabcef43aaab78793d35f13897fd4e191aa43724390eed8b33aeb7",
+   "registered_at": "2026-11-07T00:41:41Z",
+   "card_commit": "14bc1ef0",
+   "reason": "Appendix B row added; thresholds unchanged"
+  },
+  {
+   "card": "g4sim-tasks/S8.md",
+   "sha256": "3a92262b67174fbb3f90a2ab782d52eb1fe60e1b1d9a69d432988cea91466862",
+   "registered_at": "2026-11-07T00:41:41Z",
+   "card_commit": "14bc1ef0",
+   "reason": "Wording matches Part B; thresholds unchanged"
   }
  ]
 }
