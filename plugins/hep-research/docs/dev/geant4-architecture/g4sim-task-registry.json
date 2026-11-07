@@ -624,6 +624,20 @@
    "registered_at": "2026-11-07T05:07:02Z",
    "card_commit": "b6c5efc8",
    "reason": "Execution log: blocked on the throughput limit; live checks and the StripSigma finding recorded; no threshold changed"
+  },
+  {
+   "card": "g4sim-performance-budget.md",
+   "sha256": "1b1e0a6e75f92409ae64628c4a247e40f52ab89bc350bf8196d4adc4561af637",
+   "registered_at": "2026-11-07T05:14:19Z",
+   "card_commit": "f3696113",
+   "reason": "The measurements of the throughput limit, by the maintainer's decision; no limit changed"
+  },
+  {
+   "card": "g4sim-tasks/S4.md",
+   "sha256": "2e2add51a1fca025c235e626b384c33f2cb10e3282bdf4485c130eb70dd0a069",
+   "registered_at": "2026-11-07T05:14:19Z",
+   "card_commit": "f3696113",
+   "reason": "Execution log: unblocked by the maintainer; no threshold changed"
   }
  ]
 }
