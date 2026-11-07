@@ -44,11 +44,10 @@
    "state": "partially-complete",
    "worktree": "../hep-research-g4sim-S5",
    "branch": "g4sim/S5",
-   "task_card_sha256": "00dd7b5e7aad824502260a0d9b83f7b56fe14ae548d828ccbc962af5032bf3a2",
+   "task_card_sha256": "d906b6f1a7a868557e33094125915bc45a6c4c5ae9ef0d48aea3e297ec37bcbb",
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S5.md",
    "blocked_on": [
-    "E2 regeneration of geant4-thin-silicon and design-minimal-spectrometer",
-    "a person's decision on encoded cellID, deferred to S5 but not in its card"
+    "G5 for the encoded cellID C++, from a reviewer who is not the author"
    ]
   },
   "S6": {
@@ -110,5 +109,5 @@
   "GB23": "confirmed",
   "GB24": "confirmed"
  },
- "updated": "2026-11-07T15:09:07Z"
+ "updated": "2026-11-07T15:40:36Z"
 }
