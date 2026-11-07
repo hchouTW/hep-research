@@ -1630,7 +1630,7 @@ def cmd_handoff(args):
             out.append({'event': row['event'], 'cell': row['cell'], 'adc': code})
     written = response.handoff(args.stage, args.next_stage, out)
     Path(args.handoff_out).write_text(json.dumps(written, indent=1) + '\n', encoding='utf-8')
-    return {'status': 'ok', 'rows_in': len(rows), 'rows_out': len(out), 'handoff': args.handoff_out}
+    return {'status': args.status, 'ok': True, 'command': 'handoff', 'rows_in': len(rows), 'rows_out': len(out), 'handoff_out': args.handoff_out}
 
 
 def main():
@@ -1822,7 +1822,10 @@ def main():
     args = parser.parse_args()
     try:
         if args.command == 'handoff':
-            print(json.dumps(cmd_handoff(args)))
+            try:
+                print(json.dumps(cmd_handoff(args)))
+            except (OSError, KeyError, TypeError) as exc:
+                raise ValueError(f'the hand-off cannot be used: {exc}') from exc
             return 0
         if args.command == 'enc':
             result = enc(args.capacitance, args.peaking, args.order, args.en, args.leakage, args.rp, args.af,

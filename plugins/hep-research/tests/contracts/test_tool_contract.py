@@ -4,6 +4,7 @@ mutated contracts or scopes fail with a specific code. Synthetic values only."""
 import copy
 import json
 import os
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -289,6 +290,8 @@ class DetectorResponseContractTests(unittest.TestCase):
                     self.assertIs(json.loads(p.stdout)["ok"], False)
 
 
+HANDOFF_FOLDER = Path(tempfile.mkdtemp())
+HANDOFF_ARGUMENTS = ["--stage", "adc", "--next-stage", "strips", "--readout", "tracker", "--run-seed", "7", "--noise-sigma", "1", "--threshold", "5", "--lsb", "0.5", "--bits", "12"]
 FRONTEND_OPS = {  # operation id -> (arguments that succeed, arguments that are invalid input)
     "enc": (["--capacitance", "10", "--en", "1", "--leakage", "1000", "--peaking", "25", "--rp", "1e7", "--af", "1e-12"],
             ["--capacitance", "10", "--peaking", "25", "--rp", "0"]),
@@ -322,6 +325,8 @@ FRONTEND_OPS = {  # operation id -> (arguments that succeed, arguments that are 
                 ["--charges", "3000", "3400", "3800", "--injections", "100"]),
     "threshold-trim": (["--spread", "1500", "--trim-bits", "4", "--trim-step", "250", "--dac-nonlinearity", "20"],
                        ["--spread", "1500", "--trim-bits", "40", "--trim-step", "250"]),
+    "handoff": (["--handoff-in", str(HANDOFF_FOLDER / "in.json"), "--handoff-out", str(HANDOFF_FOLDER / "out.json"), *HANDOFF_ARGUMENTS],
+                ["--handoff-in", str(HANDOFF_FOLDER / "missing.json"), "--handoff-out", str(HANDOFF_FOLDER / "out.json"), *HANDOFF_ARGUMENTS]),
 }
 
 
@@ -335,6 +340,9 @@ class FrontendResponseContractTests(unittest.TestCase):
     def setUp(self):
         self.assertTrue(self.PATH.is_file(), "contracts/tool_contracts/frontend_response.json is missing")
         self.doc = json.loads(self.PATH.read_text(encoding="utf-8"))
+        HANDOFF_FOLDER.mkdir(exist_ok=True)
+        self.addCleanup(shutil.rmtree, HANDOFF_FOLDER, ignore_errors=True)
+        (HANDOFF_FOLDER / "in.json").write_text(json.dumps({"schema": "response-handoff/1", "from": "sensor", "to": "adc", "rows": [{"event": 1, "cell": 2, "charge": 40.0}]}), encoding="utf-8")
 
     def test_contract_covers_every_subcommand_and_passes(self):
         ops = [o["operation_id"] for o in self.doc["operations"]]

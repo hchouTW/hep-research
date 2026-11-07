@@ -263,6 +263,7 @@ int Help() {
   std::cout << "simroot: read element_sim per-event ROOT files (element_sim.events/1)\n"
                "  simroot info FILE...\n"
                "  simroot dump FILE... --ntuple N [--columns a,b] [--events A:B] [--out PATH]\n"
+               "  simroot hits FILE --ntuple N --out PATH   (a g4sim hit file, as CSV)\n"
                "  simroot hash FILE...\n"
                "Exit codes: 0 ok; 2 a file is missing, unreadable or inconsistent, or bad usage.\n";
   return 0;
