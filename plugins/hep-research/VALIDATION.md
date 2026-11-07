@@ -8967,6 +8967,28 @@ limits catch large defects only. The custodian's re-evaluation of qualification 
 
 Passing checks show software consistency, not physical validity.
 
+## 0.60.0 release check (2026-11-07, CI and E5)
+
+Release branch `release/0.60.0`, based on main `b7657d81` (PR #364 merged). Minor release: g4sim phase S5, `partially-complete` with the gaps the maintainer accepted. Contracts 3.23.0, `CORE_VERSION` 1.10.0, `adapters/geant4` 0.11.0; the version constants were bumped in S5.
+
+What changed on the release branch:
+- the CHANGELOG `0.60.0` section and the g4sim status (S5 `merged`);
+- no regeneration here: S5 regenerated `geant4-thin-silicon` and `design-minimal-spectrometer` on E5, on the maintainer's word, because the hashes of `check_geant4_study.py` and `geant4_benchmarks.py` recorded in them changed. Gate record: `docs/dev/geant4-architecture/g4sim-gates/S5.md`.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on `1c90e910` (runs 42415824285, 42415824358) | success: 29 jobs passed, 3 skipped by the pull-request plan |
+| `run_all_checks.py`, E5 Slurm node at `222a50e2`, `--jobs 8` | 32 pass, 1 fail; 7,061 tests, 6,674 passed, 384 skipped, 3 failing. All three are environment failures: two pass from a path without `S5`, one needs `cmake`, absent on the node |
+| `mypy` | Clean, 140 source files |
+
+**E2 was not run for this release**: there is no `run_all_checks.py` result on macOS arm64 for 0.60.0, and the committed examples S5 regenerated were written on E5, whose last bits differ from E2's (at most 2.7e-16 relative in the 28 numbers that changed).
+
+Three independent reads of S5's cellID change found real defects, all fixed; the third found the C++ sound and holes in the Python of the forgery check, fixed without changing the C++, so the maintainer's G5 stands. The last fixes have had no read of their own.
+
+Open: the gaps the maintainer accepted (TOF time resolution, calorimeter transverse shape, hit efficiency, beam-test sampling fraction, tracker residuals against data, longitudinal shape as a weak band); the readout limits in the gate record; `design.py` sees an edit of a study record, not one that also rewrites the study's results file and its hashes; simreco's `StripSigma`, corrected after S5.
+
+Passing checks show software consistency, not physical validity.
+
 ## 0.59.0 release check (2026-11-07, CI and E5)
 
 Release branch `release/0.59.0`, based on main `81bd7595` (PR #361 merged). Minor release: g4sim phase S4. Contracts 3.22.0, `CORE_VERSION` 1.9.0, `adapters/geant4` 0.10.0; the version constants were bumped in S4.
