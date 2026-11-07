@@ -68,13 +68,15 @@ def judged(work: Path, simroot: Path, ntuple: str) -> dict:
         rows = list(csv.DictReader(handle))
     fields = json.loads((work / "ir.json").read_text(encoding="utf-8"))["physical"]["readout"]["cal"]["fields"]
     wrong = [row for row in rows if hits.cell_fields(int(row["cell_id"]), fields) != indices(row)]
+    swapped = [{**field, "stride": fields[(at + 1) % len(fields)]["stride"]} for at, field in enumerate(fields)]  # the control: another bitfield must not decode these cells
+    control = sum(hits.cell_fields(int(row["cell_id"]), swapped) != indices(row) for row in rows)
     forward: dict = {}
     backward: dict = {}
     for row in rows:
         forward.setdefault(row["cell_id"], set()).add((row["cell"], row["segment"]))
         backward.setdefault((row["cell"], row["segment"]), set()).add(row["cell_id"])
     one_to_one = all(len(value) == 1 for value in forward.values()) and all(len(value) == 1 for value in backward.values())
-    return {"rows": len(rows), "cells": len(forward), "wrong": len(wrong), "one_to_one": one_to_one, "first_wrong": wrong[0] if wrong else None}
+    return {"rows": len(rows), "cells": len(forward), "wrong": len(wrong), "one_to_one": one_to_one, "wrong_with_another_bitfield": control, "first_wrong": wrong[0] if wrong else None}
 
 
 def main() -> int:
@@ -89,7 +91,7 @@ def main() -> int:
         refused = False
     except (RuntimeError, subprocess.CalledProcessError) as error:
         refused = "g4sim-cellid" in (root / "narrow/out/log.txt").read_text(encoding="utf-8", errors="replace") or "g4sim-cellid" in str(error)
-    held = refused and all(item["rows"] > 0 and item["cells"] > 1 and item["wrong"] == 0 and item["one_to_one"] for item in results.values())
+    held = refused and all(item["rows"] > 0 and item["cells"] > 1 and item["wrong"] == 0 and item["one_to_one"] and item["wrong_with_another_bitfield"] > 0 for item in results.values())
     print(json.dumps({"status": "ok" if held else "failed", **results, "narrow_field_stops_the_run": refused}, indent=1))
     return 0 if held else 1
 
