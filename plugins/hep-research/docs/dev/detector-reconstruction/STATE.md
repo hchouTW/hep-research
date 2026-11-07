@@ -3,8 +3,9 @@
 ```yaml
 task_file: hep-research-detector-reconstruction-plan-v9.2-en.md
 task_file_sha256: 452b48a52c4d1bba28cabe7089e261030cc2a0d7500dbd7db7859ae72d0de708
-base: {ref: hep-research--v0.57.0, commit: d51566a9cd3e97da77483c78434de9b6026b295e, plugin_version: 0.57.0, contracts_version: 3.20.0, core_version: 1.7.0}
+base: {ref: hep-research--v0.58.0, commit: 662f58d46d18daa356caf20982d27e40c417a653, plugin_version: 0.58.0, contracts_version: 3.21.0, core_version: 1.8.0}
 previous_base: {commit: 580dc79e83abbc33b27c69633d9e15658f4f90b6, plugin_version: 0.56.0, contracts_version: 3.19.0, old_branch_tip: a2281ca3, old_tip_ref: pre-rebase-0.56.0, note: "B1 rebase rewrote all 17 branch commits; hashes named in records before B1 are the old ones and stay reachable through this local ref"}
+previous_base_2: {commit: d51566a9cd3e97da77483c78434de9b6026b295e, plugin_version: 0.57.0, contracts_version: 3.20.0, old_branch_tip: 8d45693e, old_tip_ref: pre-rebase-0.57.0, note: "second rebase rewrote all 43 branch commits; hashes named in records before it resolve through that ref"}
 branch: feature/detector-reconstruction
 private: "<private>, on the group file system with ACLs removed, mode 700 (decisions.md, Q2)"
 worktree: <private>/worktree
@@ -51,6 +52,7 @@ backup_a1: {path: "<workdir>/backup/20261106T083302Z", bundle_sha256: 448d4dc5e9
 backup_a2: {path: "<workdir>/backup/20261106T091043Z", bundle_sha256: 8105206658cc42616a2d3afeca05e21778c570c099b15e8428f263f6caa311da, archive_sha256: 3fc41ab24421f1362160598981c5657611a2c31c10ec881d894e3837f04672f2, bundle_commit: a2281ca3, approval: "rerun the backup and remove the citation worktree", note: "holds the filled task log; predates the B1 rebase"}
 backup_b2: {path: "<workdir>/backup/20261106T194259Z", bundle_sha256: cae42545cc8794ab89b1b9cb12a504e87ef8add9aa63015f1969cdfd11ddcb0f, archive_sha256: ac12ce399e6209e43188df2d678c49a69a9a353dc56a53f54c3dfa5ef487fde8, bundle_commit: 21b591a4, approval: "approve the backup, write the T09 and T08 diagnostic job", note: "B2 step 4; bundle and archive verified"}
 backup_b3: {path: "<workdir>/backup/20261106T235844Z", bundle_sha256: 58429c3544483c0336d5383db988e489c4acf6612d6c670432e504025692556f, archive_sha256: f658bde15de25609960d0f1b94dbd6257384490eaa55bdb0283c77f20b750102, bundle_commit: d568f8f1, approval: "approve the backup, continue with Phase C", note: "after Freeze A; bundle and archive verified"}
+backup_b4: {path: "<workdir>/backup/20261107T071752Z", bundle_sha256: 2783708d97e0a6d3fc0daca2df698de747559ace854824676681159bd704e3fb, archive_sha256: 628a0324fb197cec62f934e62022b38836216c0a775b9ccf40044e065536d7f3, bundle_commit: 8d45693e, approval: "approve the backup, push the LCG fix, compare 0.58.0", note: "after Gate C; holds the branch before the 0.58.0 rebase"}
 task_log: {path: "<private>/task-log/task-log.jsonl", note: "rebuilt 2026-11-06 from STATE.md, decisions.md, git history and job records, all entries reconstructed; 5 jobs and every user decision present; appended at each step from here (A2)"}
 deviations: {record: deviations.md, count: 8, note: "A3 step 1; none is known to have affected a recorded result"}
 literature: {record: "<private>/evidence/20261106T084851Z-a3fix1/artifacts/t11-literature-record-v3.json", sources: 63, added: "37 sources t11:S27-S63 from 56 citation records; each carries verification_checks (verdict, statement checked, note) from the T11 verification; validate.py exit 0; 2 access-limited flags (S31, S35) and 1 proposed merge (S42/S45, different editions), no search_incomplete flag", level_mapping: "full-text-arxiv and full-text-inspire recorded as full-text; full-text-section recorded as page, a conservative downgrade (strength 2 against 3); the original term is kept in level_as_recorded", note: "A3 step 3; v2 (verdicts not carried) is superseded; the 35 search-log entries are preserved, they were never stored flags"}
@@ -67,7 +69,7 @@ tasks:
   T15a: {state: done, note: "Gate C clean, job 7487578; artificial fixtures only, no claim on real recipes; readings in decisions.md, T15a readings; reviews evidence/c3-*.md"}
   T11: {state: done, note: "comparison clean with rerun 7474460 (R28); every applicable cell is sourced or a recorded gap (R14); 10 citation uses unread; plugin defects in t11-citation-findings.md not applied"}
 k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K08, K09, K10, K11, K12, K16, K17, K18]}
-next_action: "Gate C backup (needs approval); then Phase D. T07 needs the generator addendum on the user's word"
+next_action: "User: approve the re-baseline unit job; then backup and Phase D. T07 needs the generator addendum on the user's word"
 ```
 
 ## Plan conflicts found

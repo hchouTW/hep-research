@@ -240,7 +240,6 @@ CONTRACTS_VERSION = "3.21.0"
 # reconstruction_recipe.json (reconstruction-recipe/1), conditions_payload.json (conditions-payload/1), binding_evidence.json (binding-evidence/1),
 # selection_record.json (selection-record/1) and input_signature.json (input-signature/1). None is an artifact type; no rule, vocabulary term, envelope
 # field or capability changes: every 3.21 artifact keeps its outcome. Each sidecar lists required_extensions, and a reader stops at an unknown one.
-# field or capability changes: every 3.21 artifact keeps its outcome. Each sidecar lists required_extensions, and a reader stops at an unknown one.
 # The same minor (T14) adds input_inspection.json (input-inspection/1), written by contracts/input_inspector.py and read through contracts/sidecar_reader.py, again no artifact
 # type, and input-signature/1 now tells a number from a boolean when it looks for a hidden conflict.
 # The same minor (T15a) adds candidate_index.json (candidate-index/1) and selection_policy.json (selection-policy/1), read through contracts/sidecar_reader.py, again no artifact type,

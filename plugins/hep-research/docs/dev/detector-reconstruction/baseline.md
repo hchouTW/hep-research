@@ -182,3 +182,17 @@ Job 7487578, commit `596b6875`, Slurm `FAILED`, exit `1:0`, 9 min 48 s, node `hp
 
 First and second rows of the rule apply: clean. The error is the known LCG test. The 14 new contract modules ran and passed, 766 tests. T06, T14 and T15a go to `done`, and Gate C passes. `tests.adapters.test_unbinned_fit` took 29.35 s, the same as the run before, at load average 160 to 178, so the result repeats on `hpa-wn30`. Thread oversubscription stays the leading cause, strongly supported, not proven: no run has compared thread settings on one node.
 
+## Re-baseline onto 0.58.0
+
+User's answer, 2026-11-07, verbatim: "go ahead with the rebase". Tag `hep-research--v0.58.0`, commit `662f58d4`, contracts 3.21.0, `CORE_VERSION` 1.8.0, 66 commits and 259 files after 0.57.0, mostly g4sim S3.
+
+The rebase replayed 43 commits. Conflicts were additive, in `CHANGELOG.md`, `contracts/__init__.py` and `tools/module_timings.json`: both sides kept, and the timings file rebuilt as the release's plus this work's 14 entries. Tracked records came through byte-identical, and the four Freeze A hashes hold. Only those three non-record files differ from the old tip. Every branch commit has a new hash; older hashes resolve through the local ref `pre-rebase-0.57.0`, and job evidence keeps the hashes it ran on.
+
+| Check | Result |
+| --- | --- |
+| `geometry_id` of `g4sim_geometry_check.spec.json`, both trees | Same value, `7bba29fb69e9...`, status `ok`; `provenance_id` same |
+| `core/geometry/identity.py`, `core/canonical` | Unchanged |
+| `recipe.json`, `operator_semantics.json`, `qualification_record.json`, `decision_record.json`, `tool_contract.json`, `ext_response.json`, `exposure_record.json`, `ext_computational_run.json` | Unchanged |
+| `hep-detector` references | Unchanged, so the T11 anchors stand; one asset JSON has version lines only |
+| Fixtures under `contracts/fixtures` (143 files) | Version lines only |
+

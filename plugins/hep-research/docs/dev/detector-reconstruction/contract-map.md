@@ -166,3 +166,17 @@ Owners of what the contract does not hold yet (recorded in decisions.md):
 | `needs-evidence`, `abstained` | `abstained` only when every candidate holds a block no information lifts: a failed check, an unsatisfied condition, a limit. A missing backend is open | SEL08; Section 8.7's worked record; coordinator's ruling |
 | `judge_candidates`, changed | Conflict outranks unsatisfied at every level. A fact outside the signature's product counts for nothing. Two values of a `constraint.` key in scopes of one product conflict. `product_schema` stays multi-label across a label's files: its conflicts are what `_conflicts` names, two values in one scope or a statement that nothing read matches | decisions.md, "T14 rulings"; Sections 5.5, 5.14 (DS2); K15 |
 | Target | `target` and `deliverable` reach the record only: a candidate of another quantity is told apart only by its `requires`. Accepted limit | SEL05 rests on the index author until T15b |
+
+## Release comparison, contracts 3.21.0
+
+2026-11-07, `d51566a9` against `662f58d4`. Rows this release reopens, as the finish plan requires:
+
+| Row | Change | Decision |
+| --- | --- | --- |
+| `detector_spec.json` | Additions only, 301 lines: S3 shapes, placements, modifiers, segmentation | **Reuse** stands |
+| `geometry_ir.json` | Widens: `trd`, `tube`, `polygon_prism`, a `solid` object, rotation entries as decimal strings. The IR's field set does not change | **Reuse** stands |
+| `core/geometry`, `contracts/geometry.py` | New expansion, overlap and segmentation code; explicit positions from a hashed CSV. `identity.py` unchanged. `check_spec` gains optional `folder` and `protected` | **Reuse** of `geometry_id` stands: the same value on both trees |
+| `contracts/__init__.py` | Version and comments | None needed |
+
+No decision in this map changes. New: `source_density.json`, unused here. K04 stays provisional as before.
+
