@@ -61,9 +61,10 @@ tasks:
   T04: {state: done, record: decisions.md, draft: t04-values-v4.md, review: t04-review.md, note: "Freeze A given 2026-11-06, verbatim in decisions.md; hashes in freeze-a.md"}
   T05: {state: done, note: "P1 sheets complete, P2 onward list blockers; record t05-task-sheets.md"}
   T06: {state: in-progress, note: "done-provisional (R28), committed after 5 fix rounds and 4 re-reviews; 12 modules, 422 tests; unit suite waits for the Gate C job; readings in decisions.md, T06 readings; reviews evidence/c1-*.md"}
+  T14: {state: in-progress, note: "done-provisional (R28), committed after 3 fix rounds; JSON and CSV readers, envelope artifacts through their validators; unit suite waits for the Gate C job; rulings in decisions.md, T14 rulings; reviews evidence/c2-*.md"}
   T11: {state: done, note: "comparison clean with rerun 7474460 (R28); every applicable cell is sourced or a recorded gap (R14); 10 citation uses unread; plugin defects in t11-citation-findings.md not applied"}
 k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K08, K09, K10, K11, K12, K16, K17, K18]}
-next_action: "Phase C: T14, then T15a, then the Gate C checkpoint job"
+next_action: "Phase C: T15a, then the Gate C checkpoint job"
 ```
 
 ## Plan conflicts found

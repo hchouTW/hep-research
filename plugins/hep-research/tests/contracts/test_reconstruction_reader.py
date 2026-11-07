@@ -5,28 +5,29 @@ import functools
 import inspect
 import json
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-from contracts import conditions, reconstruction, sidecar_reader  # noqa: E402
+from contracts import conditions, input_inspector, reconstruction, sidecar_reader  # noqa: E402
 from contracts.reconstruction import check_connection, read_sidecar  # noqa: E402
 from tests.contracts.reconstruction_fixtures import (binding_evidence, calibration_payload, candidate_product, code_list,  # noqa: E402
-                                                     collection_witness, consumer, count_product, frame_payloads, frame_product,
+                                                     collection_witness, consumer, count_product, frame_payloads, frame_product, input_signature,
                                                      measurement, port, product, pulse_estimate, pulse_product, quantity, recipe,
                                                      reference, sealed, used_payload)
 
 FUTURE = ["reconstruction:future-semantics-v9"]
 STOPPED = ["reconstruction.reader.unknown_required_extension"]
 # Parameters that hold no document, by function: a new parameter must be read, or be listed here with its reason.
-NOT_A_DOCUMENT = {("check_binding", "context"): "the caller's binding context", ("check_validation_claim", "constraint"): "a constraint name",
+NOT_A_DOCUMENT = {("judge_candidates", "candidates"): "conditions on a signature, judged in the function", ("check_binding", "context"): "the caller's binding context", ("check_validation_claim", "constraint"): "a constraint name",
                   ("dereference", "reference"): "a reference inside a document already read", ("can_recompute", "level"): "a level name",
                   ("iov_holds", "point"): "coordinates", ("affected_payloads", "changed"): "identities, judged in the function",
                   ("reuse_decision", "unknown_dependencies"): "a flag", ("check_connection", "known_extensions"): "the reader's list",
                   ("read_sidecar", "known_extensions"): "the reader's list"}
 READ_BY_THEIR_OWN_SCHEMA = {("check_connection", "converter"), ("check_tool_mapping", "contract")}
-READER_MODULES = {"reconstruction.py", "conditions.py", "sidecar_reader.py"}
+READER_MODULES = {"reconstruction.py", "conditions.py", "sidecar_reader.py", "input_inspector.py"}
 NOT_DRIVEN = {"matrix_rank": "a number table, no document", "payload_identity": "the digest of a payload's content, needed to seal one, reads no meaning",
               "recipe_identity": "the digest evidence binds to, reads no meaning", "read_document": "driven through read_sidecar, which is this function",
               "reader_path": "the decorator itself"}
@@ -58,6 +59,25 @@ def gain_payload():
 
 def used_gain_product():
     return consumer(used_payload(gain_payload()))
+
+
+def inspected_from_a_file(document):
+    """T14: the document as an input file, driven through the inspector."""
+    with tempfile.TemporaryDirectory() as folder:
+        path = Path(folder) / "input.json"
+        path.write_text(json.dumps(document), encoding="utf-8")
+        label = document.get("product_id", "product.a")
+        return input_inspector.inspect_inputs([{"product": label, "path": str(path)}], {"probes": 1, "bytes": 1_000_000, "seconds": 60, "memory_bytes": 1_000_000_000, "tools": 1})
+
+
+def inspection_refused(record):
+    """K13 through the inspector: unknown, and nothing the document says becomes a fact. A file of no known schema keeps only its
+    container, which the parser saw (the user's T14 ruling)."""
+    return record["state"] != "complete" and {fact["key"] for signature in record["signatures"] for fact in signature["facts"]} <= {"container"}
+
+
+def judged_on(signature):
+    return input_inspector.judge_candidates(signature, [{"candidate": "method.a", "requires": {"fact": "representation", "equals": "waveform"}}])
 
 
 def old_response():
@@ -93,6 +113,8 @@ ENTRY_POINTS = [
     ("reconstruction", "check_connection", "converter", lambda d: check_connection(port(), port("input"), d), lambda: Converters.converter(input=quantity(), output=quantity()), refusal_report),
     ("reconstruction", "check_tool_mapping", "contract", lambda d: reconstruction.check_tool_mapping(recipe(), d), lambda: dict(TOOL), refusal_report),
     ("reconstruction", "check_response_free_of_semantics", None, reconstruction.check_response_free_of_semantics, old_response, refusal_report),
+    ("input_inspector", "inspect_inputs", None, inspected_from_a_file, present_product, inspection_refused),
+    ("input_inspector", "judge_candidates", "signature", judged_on, input_signature, lambda answer: not answer[0]["eligible"]),
     ("conditions", "iov_holds", "payload", lambda d: conditions.iov_holds(d, {"position-key": 1}), gain_payload, refusal_false),
     ("conditions", "iov_intersection", "payloads", lambda d: conditions.iov_intersection([d]), gain_payload, refusal_none),
     ("conditions", "check_binding", "payload", lambda d: conditions.check_binding(d, BINDING), gain_payload, refusal_report),
@@ -106,7 +128,7 @@ ENTRY_POINTS = [
 
 
 def public_functions():
-    for module in (reconstruction, conditions, sidecar_reader):
+    for module in (reconstruction, conditions, sidecar_reader, input_inspector):
         for name, function in inspect.getmembers(module, inspect.isfunction):
             if function.__module__ == module.__name__ and not name.startswith("_"):
                 yield name, function
@@ -221,7 +243,7 @@ class EveryReaderPathStops(unittest.TestCase):
 
     def test_no_entry_point_hides_in_a_class_a_partial_or_a_new_module(self):
         """Re-review 2, section 2."""
-        for module in (reconstruction, conditions, sidecar_reader):
+        for module in (reconstruction, conditions, sidecar_reader, input_inspector):
             for name, member in vars(module).items():
                 if name.startswith("_"):
                     continue

@@ -19,7 +19,7 @@ from fractions import Fraction
 
 import numpy
 
-from contracts import conditions
+from contracts import conditions, input_inspector
 from contracts.recipe_semantics import canonical_sha256
 from contracts.schema import Report, load_schema, validate
 from contracts.sidecar_reader import KNOWN_EXTENSIONS, read_document, reader_path
@@ -872,7 +872,7 @@ def _check_signature(signature: dict, report: Report, path: str = "$") -> None:
             report.add("error", f"{path}.facts", "reconstruction.signature.not_evidence", f"{fact['key']}: a {kind} is not evidence (K15)")
         if kind == "llm-extraction" and fact["method"] != "declared":
             report.add("error", f"{path}.facts", "reconstruction.signature.unconfirmed_fact", f"{fact['key']}: an extracted value stays declared until checked")
-        values.setdefault((fact["key"], fact["scope"]), set()).add(fact["value"])
+        values.setdefault((fact["key"], fact["scope"]), set()).add((isinstance(fact["value"], bool), fact["value"]))  # A46: Python calls 1 and True equal
     for (key, _), found in values.items():
         if len(found) > 1 and key not in signature["conflicts"]:
             report.add("error", f"{path}.conflicts", "reconstruction.signature.hidden_conflict", f"{key} has conflicting values and is not listed as a conflict")
@@ -880,7 +880,7 @@ def _check_signature(signature: dict, report: Report, path: str = "$") -> None:
 
 SIDECAR_CHECKS = {"reconstruction-port/1": _check_port, "reconstruction-product/1": _check_product, "conditions-payload/1": conditions._check_payload,
                   "reconstruction-recipe/1": _check_recipe, "binding-evidence/1": _check_evidence, "selection-record/1": _check_selection,
-                  "input-signature/1": _check_signature}
+                  "input-signature/1": _check_signature, "input-inspection/1": input_inspector._check_inspection}
 
 
 def read_sidecar(document, known_extensions=KNOWN_EXTENSIONS) -> Report:

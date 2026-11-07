@@ -12,6 +12,10 @@ responses keep their results and their validators. `hep-detector` writes the `re
 qualified internal or joint constraints before restricting delivery without an external t0; `analysis-workflows.md` limits byte-identical reruns to recipes that declare byte
 reproducibility.
 
+Detector reconstruction, task T14. `contracts/input_inspector.py` forms per-product input signatures from the plugin's JSON sidecars, its envelope artifacts (through `validate_artifact`, with no physics inferred) and CSV tables under a budget the caller
+declares (probes, bytes, seconds, memory, tools), and records every probe, its cost and what stayed unread in the new sidecar `input_inspection.json`. What it cannot read stays
+unknown with a stop reason, and a conflict is never a clean end. ROOT files stay unknown until `uproot` is approved, and a file name establishes nothing. `input-signature/1` now tells a number from a boolean when it looks for a hidden conflict.
+
 ## 0.58.0 (2026-11-07)
 
 Minor release. g4sim phase S3 (`adapters/geant4` 0.9.0; contracts 3.21.0, `CORE_VERSION` 1.8.0). Geometry: `grid`, `ring`, `explicit` (positions or a hashed CSV), `shell`, `clip`, `absent`, `trd`, `tube`, `polygon_prism`, arbitrary rotations

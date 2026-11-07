@@ -240,6 +240,9 @@ CONTRACTS_VERSION = "3.21.0"
 # reconstruction_recipe.json (reconstruction-recipe/1), conditions_payload.json (conditions-payload/1), binding_evidence.json (binding-evidence/1),
 # selection_record.json (selection-record/1) and input_signature.json (input-signature/1). None is an artifact type; no rule, vocabulary term, envelope
 # field or capability changes: every 3.21 artifact keeps its outcome. Each sidecar lists required_extensions, and a reader stops at an unknown one.
+# field or capability changes: every 3.21 artifact keeps its outcome. Each sidecar lists required_extensions, and a reader stops at an unknown one.
+# The same minor (T14) adds input_inspection.json (input-inspection/1), written by contracts/input_inspector.py and read through contracts/sidecar_reader.py, again no artifact
+# type, and input-signature/1 now tells a number from a boolean when it looks for a hidden conflict.
 # 3.20.0 (minor; g4sim S2) adds extension.geometry to ext_computational_run.json and rules/geant4_datasets.json. Additive: every 3.19 artifact keeps its
 # outcome, and committed outputs keep the contracts version that wrote them.
 # 3.19.0 (minor; g4sim S1) adds four schemas read by contracts/geometry.py and the g4sim translator: detector_spec.json

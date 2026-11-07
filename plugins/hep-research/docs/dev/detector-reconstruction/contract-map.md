@@ -37,6 +37,7 @@ Each semantic need takes the first option that works (Section 8.1): existing fie
 
 - A reader that meets an unknown required extension stops; an unknown optional one may be ignored and is reported (K13).
 - Every reader path reads a sidecar one way, `read_document` in `contracts/sidecar_reader.py`: format, extensions, schema and semantic rules. Public functions take whole documents, and a test drives each one with an unknown format and an unknown required extension. A converter and an old tool contract are read by their own schemas, and two digest functions read no meaning.
+- `contracts/input_inspector.py` reads files. A JSON document reaches a fact only through `read_document`, or, for an envelope artifact, through `validate_artifact`, and its two public functions have rows in the same test.
 - Old recipes, tool contracts and response files keep their meaning and their validators.
 - Exception: `ext_response.json` is open, so an old reader does not stop at a new key. `validate.py` warns from contracts 2.8.0 on and exits 0, and `response_adapter.py` drops the key with no message. So no reconstruction semantics go into a response, and a task that writes one calls `check_response_free_of_semantics`.
 - New schemas are additive, a minor contracts bump, and the number is assigned at merge time because g4sim also bumps contracts.
@@ -128,3 +129,21 @@ Owners of what the contract does not hold yet (recorded in decisions.md):
 | Section 10.4 execution fields beyond concurrency, layout, residence and ownership | T12 |
 | Section 8.7 hashes of a formal selection record | T15a |
 | Section 16.1 method index | T15a |
+
+## T14: the inspector (K15, K17)
+
+| Item | Decision | Reason |
+| --- | --- | --- |
+| `contracts/input_inspector.py` | Fourth library module: `inspect_inputs`, `judge_candidates` | Section 5.6. It reads files, which `reconstruction.py` does not |
+| `input_inspection.json` (`input-inspection/1`) | New sidecar, read through `read_document`, not an artifact type | Section 5.6 item 2 and SEL03 need costs, reading scope and stop reasons; `input_signature.json` is closed and describes one product |
+| Probes | `probe.json-document`, `probe.csv-head`; each fixed in `PROBES`, and a record naming anything else is refused. Sizes, chosen here and not physics: JSON 16 MiB whole-document ceiling and 1024 documents per file, CSV 64 KiB window | Section 5.6: fixed parameter combinations; the plan gives no values |
+| Budget | Probes, bytes, seconds, memory and tools, all declared by the caller, with no default. Seconds and memory cover the whole inspection and are watched during a probe. A tool is a registered reader | Section 5.6 item 5; plan K17 row. "No default" is a reading, stricter than K10's |
+| Limits of that budget | The readers are imported before the budget starts, so that cost is not charged, and a stop waits for the end of any import under the watch. A watch runs between Python calls, so one C call (a blocking read, a JSON parse of plain numbers, one NumPy routine, one regular expression of a validator) runs to its end; the overrun is caught when it returns, the probe's facts are dropped and the record says stopped. Memory is the rise of the process's peak resident size, so an earlier higher peak hides a rise below it. A hard stop would need a separate process | Section 5.6: lightweight read-only probes. A59 is met by the stop reason |
+| `family_candidates` | BP IDs from Section 5.15 and the witnesses' Correspondence lines, row by row in `CANDIDATES_BY_CLUE`, each row citing its source | Candidates to check, and no F-ID is formed here. A reading from Sections 5.15, W1-W5 and W7, not an owner's sign-off, to be rechecked before anything depends on it (decisions.md, "T14 rulings") |
+| `judge_candidates` | AND/OR over one signature, states as in SEL05; ranks and selects nothing. A conflict on any branch of an OR gives `conflicting`, even if another branch would pass (decisions.md, "T14 rulings") | Section 5.8; A47-A49. T15a builds its index and record on it |
+| Conflicts | `state: complete` is refused while a conflict is open. A declaration on a list file reaches each product read from it. A declared waveform on removed traces is a conflict. The caller's label is compared with `product_id` | A46, A48; Section 5.5 |
+| Envelope artifacts, such as a `response` | Read through `validate_artifact`, the existing validator. They report `container`, `product_schema` (`artifact-envelope`) and `artifact_type`, with no physics inferred. A refusal keeps no fact. An unknown required capability stops as K13 does | K15, "the plugin's own JSON"; decisions.md, "T14 rulings" |
+| A file that parsed with no known schema | Keeps `container: json` and nothing else, with its stop reason. A K13 stop or a known schema refused on its rules keeps nothing | decisions.md, "T14 rulings"; K13 |
+| Project of the working directory | `validate_artifact` looks upward from the working directory for a project (`guard_report`). Under a project with `agent_policy` the same artifact can stop on a reason that describes the project, not the input, and those reads are not charged to `bytes`. It fails closed | Existing protected-use behaviour, kept |
+| `required_extensions` on an artifact | Refused, at top level or in `extension`. The envelope is open, so its validator would pass the key | K13 |
+| Profile terms in an artifact | The validator takes a profile's vocabulary from a project, which the inspector is not given, so such an artifact stays unknown with `vocab.unknown_term` | Fail closed; passing a project in is later work |

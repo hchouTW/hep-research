@@ -242,3 +242,27 @@ Rulings under the finish plan, each reversible by the user.
 - **Constraint rows.** A constraint row is a row at its own scale, and rows are not scaled: state a constraint at the design's scale. Accepted limit.
 - **Float32 probability operators.** Refused at the ceiling, a true reading of the stored numbers: renormalize in double. `yr` is not in `UNIT_SCALES`, because a year needs a choice.
 - **Row-normalized operators.** `_check_operator` reads columns, so a row-normalized operator with `interpretation: probability` is refused unless its columns also sum to at most 1. Ruling: keep this, the cautious reading. If wrong, an honest operator is refused loudly and the rule is widened later; no wrong result passes.
+
+## T14 rulings
+
+User's answer, 2026-11-07, verbatim: "A and A, record it as a reading, kill the bfs". Meaning, from the options then shown: K15's "plugin's own JSON" includes real plugin artifacts, so T14 reads envelope artifacts such as `response` through their existing validators and reports `container`, `product_schema` and `artifact_type`, with no physics inferred. A conflict on any branch of an OR gives `conflicting`, even if another branch would pass. `CANDIDATES_BY_CLUE` is a reading from Sections 5.15, W1-W5 and W7, not an owner's sign-off, and is to be rechecked before anything depends on it.
+
+### T14 readings, by the coordinator
+
+Rulings under the finish plan, each reversible by the user.
+
+- **Budget.** Holds probes, bytes, seconds, memory and tools, all required (Section 5.6 item 5).
+- **Limits of that budget, accepted.** Seconds are enforced between Python calls during a probe, so one C call or a hung file system runs to its end and is caught on return; a hard stop would need a separate process. The watch makes reads about 5 times slower, and that cost is charged. Memory is the rise of the process's peak resident size, so an earlier higher peak hides a rise below it. Memory stops are tested with a mocked peak.
+- **Probe sizes.** JSON 16 MiB, CSV 64 KiB, 1024 documents per file: named fixed parameters, not physics.
+- **`state: complete`.** Means no open conflict.
+- **Caller's label.** Must match `product_id` for a single product, or it is a conflict.
+- **CSV stops.** `no-rows-in-window`, `no-header`, `not-comma-separated`.
+- **Declarations.** A declaration must state its `kind`.
+- **Runtime probes.** None is required yet, so a conflict is named but none resolves automatically.
+- **Keeping `container`.** A file of no known schema that parsed keeps `container: json`. A K13 stop, or a known schema refused on its rules, keeps nothing.
+- **Artifacts needing a project.** 16 real artifacts in `profiles/` and `examples/ams-flux-ratio` stop at `vocab.unknown_term`: they use profile terms, which the validator gets only from a project, and the inspector is given none. Fails closed. Passing a project in is later work. Accepted limit.
+- **Survey of tracked JSON, once, 2,084 files.** 1,900 give a fact: 515 artifact facts in 14 kinds, 1,385 `container` only. 184 give none: 167 invalid fixtures, refused by design, the 16 above, and one skill asset refused on its own rules.
+- **Import cost.** The readers' one-time import is outside the budget, and a stop waits for any import to end, so nothing is left half loaded.
+- **Hostile strings.** A quadratic regex in `contracts/validate.py`, an existing statistical rule outside T14, can hold the validator for a very long time on a hostile string, about a day at 7 MB by the reviewer's extrapolation. It falls in the accepted limit on one C call. Open, reported to the user.
+- **Project lookup.** An artifact's result depends on any project found above the working directory, and those reads are not charged to `bytes`. Fails closed.
+- **Stop reasons.** `required_extensions` on an artifact stops it with the K13 code. A K13 or rule refusal outranks "no known schema" in a mixed list. `readers-unavailable` is a new stop reason. A 600-product file needs a seconds budget near 6.

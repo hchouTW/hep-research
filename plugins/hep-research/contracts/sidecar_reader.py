@@ -3,7 +3,9 @@
 read_document checks the format, stops at an unknown required extension, and applies the schema and the semantic rules.
 read_sidecar is that function, and every other public function of contracts.reconstruction and contracts.conditions that
 reads a sidecar takes whole documents through reader_path, which calls it on each. So no route acts on a sidecar this reader
-refuses. Two digest functions read no meaning; a converter and an old tool contract are read by their own schemas.
+refuses. contracts.input_inspector reads files, and a JSON document there reaches a fact only through read_document, or, for an
+envelope artifact, through contracts.validate.validate_artifact.
+Two digest functions read no meaning; a converter and an old tool contract are read by their own schemas.
 tests/contracts/test_reconstruction_reader.py drives every public function, enumerated from the modules, with an
 unknown-format document and with a document carrying an unknown required extension.
 
@@ -24,7 +26,7 @@ from contracts.schema import Report, validate
 FORMATS = {"reconstruction-port/1": "reconstruction_port.json", "reconstruction-product/1": "reconstruction_product.json",
            "conditions-payload/1": "conditions_payload.json", "reconstruction-recipe/1": "reconstruction_recipe.json",
            "binding-evidence/1": "binding_evidence.json", "selection-record/1": "selection_record.json",
-           "input-signature/1": "input_signature.json"}
+           "input-signature/1": "input_signature.json", "input-inspection/1": "input_inspection.json"}
 
 KNOWN_EXTENSIONS = frozenset({"reconstruction:estimate-v1", "reconstruction:frames-v1", "reconstruction:candidates-v1",
                               "reconstruction:inversion-v1", "reconstruction:counts-v1", "reconstruction:scan-v1",
