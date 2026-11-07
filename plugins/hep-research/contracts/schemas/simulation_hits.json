@@ -53,6 +53,13 @@
    "additionalProperties": {
     "type": "string"
    }
+  },
+  "scorers": {
+   "type": "array",
+   "description": "the request's scorers in order: a hit row's scorer column is a place in this list",
+   "items": {
+    "type": "string"
+   }
   }
  }
 }

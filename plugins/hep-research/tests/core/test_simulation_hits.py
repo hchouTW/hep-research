@@ -9,6 +9,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
+from contracts.schema import validate  # noqa: E402
 from core.simulation import hits  # noqa: E402
 
 ROWS = [{"event_id": "1", "cell": "5", "edep_MeV": "1.5"}, {"event_id": "1", "cell": "5", "edep_MeV": "0.5"}, {"event_id": "2", "cell": "6", "edep_MeV": "3"}]
@@ -31,6 +32,12 @@ class Closure(unittest.TestCase):
     def test_a_missing_cell_or_a_difference_is_caught(self):
         self.assertFalse(hits.closure({(1, 5.0): 2.0}, {})["ok"])
         self.assertFalse(hits.closure({(1, 5.0): 2.0}, {(1, 5.0): 2.0001})["ok"])
+
+
+class Index(unittest.TestCase):
+    def test_the_index_of_a_run_with_readouts_is_valid(self):
+        record = {"schema": "simulation-hits/1", "geometry_id": "g", "request_id": "r", "events": 1, "first_event": 0, "kinds": ["tracker_hit"], "file_sha256": "a" * 64, "scorers": ["planes"], "readouts": {"planes": "none"}}
+        self.assertTrue(validate(record, "simulation_hits.json").ok)
 
 
 class CellFields(unittest.TestCase):

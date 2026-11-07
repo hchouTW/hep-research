@@ -1083,7 +1083,8 @@ def check_qualification(block: dict, ev: Evaluation) -> None:
     """A record that says validated-in-scope when its own conditions do not hold is a false record, not an unqualified study (S5 gate 7): a condition missing or out of scope, or any entry of a condition that failed beside one that passed. A study with no declared kind keeps row 8 (ART-31)."""
     declared, benchmarks = block.get("declared_scope") or {}, block.get("benchmarks") or []
     missing = qualification_missing(declared, benchmarks) or []
-    conditions = GEANT4_QUALIFICATION.get(declared.get("observable_kind"), ())
+    kind = declared.get("observable_kind")
+    conditions: tuple = GEANT4_QUALIFICATION[kind] if kind in GEANT4_QUALIFICATION else ()
     failed = [f"{item.get('benchmark')}: verdict {item.get('verdict')!r}" for item in benchmarks if isinstance(item, dict) and item.get("benchmark") in conditions and item.get("verdict") != "pass"]
     if missing or failed:
         ev.err("design.qualification_mismatch", f"the study record says validated-in-scope, and its conditions do not hold: {'; '.join(missing + failed)}")
