@@ -652,6 +652,13 @@
    "registered_at": "2026-11-07T06:52:54Z",
    "card_commit": "a6305c78",
    "reason": "Execution log after the independent read's fixes; no threshold changed"
+  },
+  {
+   "card": "g4sim-tasks/S4.md",
+   "sha256": "56aa1d948cc91cde7c10ce14ec1b4e0626280a8444c1f26673adf2cc68b61d26",
+   "registered_at": "2026-11-07T07:34:01Z",
+   "card_commit": "891a86b6",
+   "reason": "Execution log after the second read's fixes; no threshold changed"
   }
  ]
 }
