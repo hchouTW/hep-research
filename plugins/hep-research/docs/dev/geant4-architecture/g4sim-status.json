@@ -44,7 +44,7 @@
    "state": "partially-complete",
    "worktree": "../hep-research-g4sim-S5",
    "branch": "g4sim/S5",
-   "task_card_sha256": "d906b6f1a7a868557e33094125915bc45a6c4c5ae9ef0d48aea3e297ec37bcbb",
+   "task_card_sha256": "aca566a9f54a4186bba5f714b5fa4ee89cf7fa82e5d6286a3057bdc7c1e1635e",
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S5.md",
    "blocked_on": [
     "G5 for the encoded cellID C++, from a reviewer who is not the author"
@@ -109,5 +109,5 @@
   "GB23": "confirmed",
   "GB24": "confirmed"
  },
- "updated": "2026-11-07T15:40:36Z"
+ "updated": "2026-11-07T16:07:21Z"
 }

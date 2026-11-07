@@ -722,6 +722,13 @@
    "registered_at": "2026-11-07T15:40:36Z",
    "card_commit": "b969f246",
    "reason": "Execution log only; thresholds unchanged"
+  },
+  {
+   "card": "g4sim-tasks/S5.md",
+   "sha256": "aca566a9f54a4186bba5f714b5fa4ee89cf7fa82e5d6286a3057bdc7c1e1635e",
+   "registered_at": "2026-11-07T16:07:21Z",
+   "card_commit": "e68ec2b5",
+   "reason": "cellID gate and gate 7 extended after the independent read, before these runs"
   }
  ]
 }
