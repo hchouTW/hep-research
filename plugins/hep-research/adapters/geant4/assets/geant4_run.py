@@ -126,7 +126,7 @@ SIM_SOURCES = {
         "CMakeLists.txt", "Spec.hh", "Spec.cc", "Detector.hh", "Detector.cc", "Field.hh", "Field.cc", "Actions.hh",
         "Actions.cc", "EventFile.hh", "EventFile.cc", "element_sim.cc")),
     "simroot": ("simroot/simroot.cc",),
-    "simreco": ("simreco/CMakeLists.txt", "simreco/Fit.hh", "simreco/simreco.cc"),
+    "simreco": ("simreco/CMakeLists.txt", "simreco/Fit.hh", "simreco/StripDigitization.hh", "simreco/simreco.cc", "simreco/simreco_strip.cc"),
     "g4sim": tuple(f"g4sim/{s}" for s in (
         "MiniJson.hh", "SimHash.hh", "SimSeed.hh", "SimSummary.hh", "SimObservables.hh", "SimProbe.hh", "SimCsv.hh",
         "SimMaterials.hh", "SimPhysics.hh", "Geant4FromConfig.cmake")),  # 0.6.0: the geant4-config build helper

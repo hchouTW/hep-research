@@ -1,5 +1,19 @@
 {
  "$comment": "response-pipeline/1 (g4sim plan, Section 10): the stages, their parameters each with a source_of_facts, and the file handed over between stages. core/simulation/response.py holds the fixed draw order of `sub_streams`.",
+ "$defs": {
+  "stage_handoff": {
+   "$comment": "response-handoff/1: the file between stages 3 and 4 or 4 and 5, so that core imports neither the FE series nor simreco-strip. A row belongs to one event and one cell; its other fields are those of the stage it is addressed to.",
+   "type": "object",
+   "required": ["schema", "from", "to", "rows"],
+   "additionalProperties": false,
+   "properties": {
+    "schema": {"const": "response-handoff/1"},
+    "from": {"type": "string", "minLength": 1},
+    "to": {"type": "string", "minLength": 1},
+    "rows": {"type": "array", "items": {"type": "object", "required": ["event", "cell"], "properties": {"event": {"type": "integer", "minimum": 0, "maximum": 4294967295}, "cell": {"type": "integer", "minimum": 0}}}}
+   }
+  }
+ },
  "type": "object",
  "required": ["schema", "run_seed", "replica", "stages"],
  "additionalProperties": false,

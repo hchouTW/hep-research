@@ -90,6 +90,8 @@
   "assets/simreco/CMakeLists.txt",
   "assets/simreco/Fit.hh",
   "assets/simreco/simreco.cc",
+  "assets/simreco/simreco_strip.cc",
+  "assets/simreco/StripDigitization.hh",
   "assets/simreco/spec.schema.json",
   "assets/simreco/f4_results.schema.json",
   "assets/g4sim/ProbeV2.hh",

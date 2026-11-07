@@ -1,6 +1,7 @@
 """The response pipeline: draws independent of order and chunking, shared volume streams, and the moments of the scintillation formula (Sections 10.2, 10.3)."""
 from __future__ import annotations
 
+import json
 import math
 import random
 import statistics
@@ -11,6 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
+from contracts import schema as contract_schema  # noqa: E402
 from core.simulation import response, rng  # noqa: E402
 
 STAGE = {"name": "scintillation", "kind": "scintillation", "parameters": {"light_yield_per_MeV": {"value": 100.0, "source_of_facts": "synthetic"}, "resolution_scale": {"value": 1.0, "source_of_facts": "synthetic"}}}
@@ -103,6 +105,11 @@ class Stages(unittest.TestCase):
         self.assertEqual(response.read_handoff(document, "electronics")[0]["cell"], 1)
         with self.assertRaises(response.ResponseError):
             response.read_handoff(document, "readout")
+
+    def test_the_handoff_has_the_form_the_contract_gives(self):
+        form = json.loads((ROOT / "contracts/schemas/response_pipeline.json").read_text(encoding="utf-8"))["$defs"]["stage_handoff"]
+        self.assertTrue(contract_schema.validate(response.handoff("sensor", "electronics", [{"event": 3, "cell": 1, "charge": 2.0}]), form).ok)
+        self.assertFalse(contract_schema.validate(response.handoff("sensor", "electronics", [{"cell": 1, "charge": 2.0}]), form).ok)
 
     def test_outside_stages_are_registered(self):
         self.assertEqual(response.external_program({"name": "adc", "kind": "electronics_external"}), "fe4")

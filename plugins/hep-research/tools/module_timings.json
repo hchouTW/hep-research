@@ -43,6 +43,7 @@
   "tests.adapters.test_recasting_templates": 0.1,
   "tests.adapters.test_root_cpp_assets": 0.1,
   "tests.adapters.test_simreco": 22.3,
+  "tests.adapters.test_simreco_strip": 3.0,
   "tests.adapters.test_sr_cr_model_card": 0.1,
   "tests.adapters.test_summary_from_csv": 0.4,
   "tests.adapters.test_unbinned_fit": 272.7,
