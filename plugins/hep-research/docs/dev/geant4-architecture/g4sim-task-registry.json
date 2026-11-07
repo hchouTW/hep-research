@@ -680,6 +680,13 @@
    "registered_at": "2026-11-07T08:56:04Z",
    "card_commit": "2a8f758f",
    "reason": "Execution log: G5 confirmed, all gates evaluated; no threshold changed"
+  },
+  {
+   "card": "g4sim-tasks/S5.md",
+   "sha256": "ec0972cff8583812f9bbeb742b2df81d5e4c534c084290dfd3101a86dbae4ecb",
+   "registered_at": "2026-11-07T11:53:38Z",
+   "card_commit": "1fe276cd",
+   "reason": "Kit benchmarks: sources, thresholds and negative controls, before any run"
   }
  ]
 }
