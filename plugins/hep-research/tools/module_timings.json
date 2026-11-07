@@ -44,6 +44,7 @@
   "tests.adapters.test_root_cpp_assets": 0.1,
   "tests.skills.hep_detector.test_g4kit": 3.0,
   "tests.adapters.test_simreco": 22.3,
+  "tests.adapters.test_simreco_spec_strip": 2.0,
   "tests.adapters.test_simreco_strip": 3.0,
   "tests.adapters.test_g4sim_split": 1.0,
   "tests.adapters.test_g4sim_external": 2.0,

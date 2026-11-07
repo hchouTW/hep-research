@@ -419,7 +419,7 @@ execution layer. Its records are always `unvalidated`.
   `tail_sources_simulated` lists only the stages that ran.
 - From adapter 0.4.1: `field.max_track_time_ns` kills tracks older than that in a field element (a looper in a
   vacuum field region never meets the looper killer under a step limit); the strip digitization draws a random strip
-  phase per plane and event and gives hits sigma = sqrt((p - w)^3 / 12 p) (pitch p, sharing width w), and
+  phase per plane and event and gives hits the RMS error of their cluster position (`StripClusterSigma`: pitch p, sharing width w, threshold t; from 0.61.0, before which simreco used sqrt((p - w)^3 / 12 p), 5% to 72% too small), and
   `simreco_spec.check` refuses a digitization finer than the declared point resolution (tails on would then measure
   better than tails off); shower containment is the calorimeter deposit over the incident energy. A design project
   taken from F1 to F4 with these programs:
