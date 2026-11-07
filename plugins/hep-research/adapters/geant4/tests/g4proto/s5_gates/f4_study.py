@@ -161,12 +161,9 @@ def accepted(view: dict) -> bool:
     return view["status"] == "ok" and view["exit"] == 0 and not view["errors"] and bool(view["verdict_rows"]) and all(item["row"] != BELOW_SCREENING for item in view["verdict_rows"])
 
 
-def forged_field_hash(art: Path) -> None:
-    """A study record whose field condition names another field, with the hash the evaluation binds rewritten: a forgery a hash comparison alone does not see."""
+def rebound(art: Path, document: dict) -> None:
+    """The record rewritten, with the hash the evaluation binds rewritten too: a forgery a hash comparison alone does not see."""
     path = art / "studies/TRK/study.computational-run.json"
-    document = json.loads(path.read_text(encoding="utf-8"))
-    entry = next(item for item in document["extension"]["study"]["benchmarks"] if item["benchmark"] == "field-propagation")
-    entry["scope"]["field_configuration_sha256"] = "0" * 64
     path.write_text(json.dumps(document, indent=1) + "\n", encoding="utf-8")
     evaluation = art / f"evaluations/{EVALUATION}.json"
     bound = json.loads(evaluation.read_text(encoding="utf-8"))
@@ -174,6 +171,32 @@ def forged_field_hash(art: Path) -> None:
         if item["ref"].endswith("study.computational-run.json"):
             item["sha256"] = sha(path)
     evaluation.write_text(json.dumps(bound, indent=1) + "\n", encoding="utf-8")
+
+
+def study_record(art: Path) -> tuple:
+    document = json.loads((art / "studies/TRK/study.computational-run.json").read_text(encoding="utf-8"))
+    return document, next(item for item in document["extension"]["study"]["benchmarks"] if item["benchmark"] == "field-propagation")
+
+
+def forged_field_hash(art: Path) -> None:
+    document, entry = study_record(art)
+    entry["scope"]["field_configuration_sha256"] = "0" * 64
+    rebound(art, document)
+
+
+def forged_everywhere(art: Path) -> None:
+    """The field hash changed wherever the record holds it, so the record agrees with itself; only the study's own files can show it."""
+    document, entry = study_record(art)
+    entry["scope"]["field_configuration_sha256"] = "0" * 64
+    document["extension"]["study"]["declared_scope"]["field_configuration_sha256"] = "0" * 64
+    rebound(art, document)
+
+
+def failed_beside_a_clean_entry(art: Path) -> None:
+    document, entry = study_record(art)
+    document["extension"]["study"]["benchmarks"].append(json.loads(json.dumps(entry)))
+    entry["verdict"] = "fail"
+    rebound(art, document)
 
 
 def changed_derivation(art: Path) -> None:
@@ -190,7 +213,7 @@ def changed_kind(art: Path) -> None:
     path.write_text(json.dumps(document, indent=1) + "\n", encoding="utf-8")
 
 
-CORRUPTIONS = {"field-hash": forged_field_hash, "derivation": changed_derivation, "geometry-kind": changed_kind}
+CORRUPTIONS = {"field-hash": forged_field_hash, "field-hash-everywhere": forged_everywhere, "failed-beside-clean": failed_beside_a_clean_entry, "derivation": changed_derivation, "geometry-kind": changed_kind}
 
 
 def corrupted(root: Path, art: Path, change) -> dict:

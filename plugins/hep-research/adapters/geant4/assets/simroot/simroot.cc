@@ -126,6 +126,10 @@ Table ReadNtuple(G4RootAnalysisReader* reader, const std::string& file, const st
     }
     t.rows.push_back(r);
   }
+  // A column the file lacks is only found at the first row, where the read ends with a warning: an old layout must not read as an empty file.
+  tools::uint64 entries = 0;
+  if (reader->GetNtuple(id)->number_of_entries(entries) && entries != t.rows.size())
+    throw Fail(file + ": ntuple " + name + " holds " + std::to_string(entries) + " rows and " + std::to_string(t.rows.size()) + " were read: its columns are not this program's (a file written by an earlier layout?)");
   return t;
 }
 

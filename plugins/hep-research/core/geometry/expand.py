@@ -383,6 +383,8 @@ def _readout(spec: dict, tree: dict) -> dict:
     out = {}
     for name, readout in spec.get("readout", {}).items():
         where = f"/readout/{name}"
+        if name == "none":
+            raise GeometryError("readout-name", "'none' is reserved: a scorer writes it for no readout", where)
         layout = bitfield.layout(readout["fields"], set(counts) & set(readout["fields"]), where)
         bitfield.check_range(layout, {key: value for key, value in counts.items() if key in readout["fields"]}, where)
         out[name] = {"fields": layout}

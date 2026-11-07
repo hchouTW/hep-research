@@ -24,23 +24,45 @@ IR = {"physical": {"frames": {"beam": {"in": "world", "origin_mm": ["0", "0", "-
 
 class CellEncoding(unittest.TestCase):
     FIELDS = [{"name": "ix", "kind": "copy", "width": 2, "stride": 1}, {"name": "iy", "kind": "copy", "width": 2, "stride": 4}, {"name": "iz", "kind": "segmentation", "width": 3, "stride": 16}]
-    IR = {"physical": {"readout": {"cal": {"fields": FIELDS}}, "placements": [{"template": "crystal", "copy_number": 6, "index": {"ix": 2, "iy": 1}}, {"template": "crystal", "copy_number": 0, "index": {"ix": 0, "iy": 0}}, {"template": "module", "copy_number": 0, "index": {}}]}}
+    PLACED = [{"mother": "world", "template": "module", "copy_number": 0, "index": {}}, {"mother": "module", "template": "crystal", "copy_number": 6, "index": {"ix": 2, "iy": 1}}, {"mother": "module", "template": "crystal", "copy_number": 0, "index": {"ix": 0, "iy": 0}}]
+
+    def encoding(self, placed=None, scorer=None, kind="along_axis", fields=None):
+        ir = {"physical": {"readout": {"cal": {"fields": fields or self.FIELDS}}, "placements": self.PLACED if placed is None else placed}}
+        return simulate.cell_encoding(scorer or {"readout": "cal", "segment_fields": ["iz"]}, kind, ir, ["crystal"])
 
     def test_a_copy_adds_its_indices_at_their_strides_whatever_its_packing(self):
-        encoding = simulate.cell_encoding({"readout": "cal", "segment_fields": ["iz"]}, "along_axis", self.IR)
+        encoding = self.encoding()
         self.assertEqual(encoding["copies"]["crystal"], {"6": str(2 + 4), "0": "0"})
         self.assertEqual(encoding["segments"], [{"stride": 16, "limit": 8}])
 
     def test_a_cellid_above_a_double_stays_exact_as_text(self):
         fields = [{"name": "top", "kind": "copy", "width": 11, "stride": 2 ** 53}]
-        ir = {"physical": {"readout": {"big": {"fields": fields}}, "placements": [{"template": "t", "copy_number": 3, "index": {"top": 3}}]}}
-        self.assertEqual(simulate.cell_encoding({"readout": "big"}, "none", ir)["copies"]["t"]["3"], str(3 * 2 ** 53))
+        placed = [{"mother": "world", "template": "crystal", "copy_number": 3, "index": {"top": 3}}]
+        self.assertEqual(self.encoding(placed, {"readout": "cal"}, "none", fields)["copies"]["crystal"]["3"], str(3 * 2 ** 53))
+
+    def test_two_volumes_of_one_cellid_are_refused(self):
+        unindexed = [{"mother": "world", "template": "crystal", "copy_number": copy, "index": {}} for copy in (0, 1)]
+        outside = [{"mother": "world", "template": "module", "copy_number": copy, "index": {"mi": copy}} for copy in (0, 1)] + [{"mother": "module", "template": "crystal", "copy_number": 0, "index": {"ix": 0}}]
+        two_mothers = [{"mother": "world", "template": name, "copy_number": 0, "index": {}} for name in ("a", "b")] + [{"mother": name, "template": "crystal", "copy_number": 0, "index": {}} for name in ("a", "b")]
+        for placed in (unindexed, outside, two_mothers):
+            with self.subTest(placed=placed[0]):
+                self.assertIn("one cellID", self.encoding(placed)["problem"])
+
+    def test_a_field_filled_at_two_levels_is_refused(self):
+        placed = [{"mother": "world", "template": "module", "copy_number": 1, "index": {"ix": 1}}, {"mother": "module", "template": "crystal", "copy_number": 1, "index": {"ix": 1}}]
+        self.assertIn("two levels", self.encoding(placed)["problem"])
+
+    def test_segment_fields_are_distinct_segmentation_fields_one_per_axis(self):
+        second = {"name": "jz", "kind": "segmentation", "width": 2, "stride": 128}
+        for scorer, kind, fields in (({"readout": "cal"}, "along_axis", None), ({"readout": "cal", "segment_fields": ["iz", "ix"]}, "along_axis", None), ({"readout": "cal"}, "none", None), ({"readout": "cal", "segment_fields": ["ix"]}, "along_axis", None), ({"readout": "cal", "segment_fields": ["iz", "iz"]}, "cartesian_xy", self.FIELDS + [second])):
+            with self.subTest(scorer=scorer, kind=kind):
+                self.assertIn("segment_fields", self.encoding(None, scorer, kind, fields)["problem"])
 
     def test_what_cannot_be_encoded_is_a_problem(self):
-        two = {"physical": {**self.IR["physical"], "placements": [{"template": "t", "copy_number": 0, "index": {"ix": 1}}, {"template": "t", "copy_number": 0, "index": {"ix": 2}}]}}
-        for scorer, kind, ir in (({"readout": "other"}, "none", self.IR), ({"readout": "cal"}, "along_axis", self.IR), ({"readout": "cal", "segment_fields": ["iz", "ix"]}, "along_axis", self.IR), ({"readout": "cal"}, "none", self.IR), ({"readout": "cal", "segment_fields": ["iz"]}, "along_axis", two)):
-            with self.subTest(scorer=scorer, kind=kind):
-                self.assertIn("problem", simulate.cell_encoding(scorer, kind, ir))
+        two = [{"mother": "world", "template": "crystal", "copy_number": 0, "index": {"ix": 1}}, {"mother": "other", "template": "crystal", "copy_number": 0, "index": {"ix": 2}}]
+        self.assertIn("declare two templates", self.encoding(two)["problem"])
+        self.assertIn("no cellID", self.encoding(None, None, "cartesian_zz")["problem"])
+        self.assertIn("not declared", self.encoding(None, {"readout": "other"})["problem"])
 
 
 class Resolution(unittest.TestCase):

@@ -479,6 +479,10 @@ class NonBoxMothersAndShell(unittest.TestCase):
         made = expand.expand(spec(params={"strength": "0.5", "half": "strength / 2"}, fields={"dipole": {"b_tesla": ["0", "0", "half"]}}))
         self.assertEqual([float(value) for value in made["physical"]["fields"]["dipole"]["b_tesla"]], [0.0, 0.0, 0.25])
 
+    def test_a_readout_cannot_be_named_none(self):
+        with self.assertRaises(GeometryError):
+            expand.expand(spec(readout={"none": {"fields": {"i": 2}}}))
+
     def test_a_field_given_by_numbers_keeps_its_text(self):
         made = expand.expand(spec(fields={"dipole": {"b_tesla": ["0", "0", "1"]}}))
         self.assertEqual(made["physical"]["fields"], {"dipole": {"b_tesla": ["0", "0", "1"]}})

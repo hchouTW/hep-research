@@ -143,10 +143,13 @@ inline VolumeKey VolumeId(const G4VTouchable* touchable, const std::vector<long 
 inline std::uint64_t CopyPart(const G4VTouchable* touchable, const CellEncoding& encoding) {
   std::uint64_t id = 0;
   for (int level = 0; level <= touchable->GetHistoryDepth(); ++level) {
-    const auto found = encoding.copies.find(touchable->GetVolume(level)->GetLogicalVolume()->GetName());
-    if (found == encoding.copies.end()) continue;
-    const auto part = found->second.find(touchable->GetCopyNumber(level));
-    if (part != found->second.end()) id += part->second;
+    const G4String& name = touchable->GetVolume(level)->GetLogicalVolume()->GetName();
+    const auto found = encoding.copies.find(name);
+    if (level == touchable->GetHistoryDepth() && found == encoding.copies.end()) continue;  // the world is placed by no template
+    const auto part = found == encoding.copies.end() ? std::map<int, std::uint64_t>::const_iterator() : found->second.find(touchable->GetCopyNumber(level));
+    if (found == encoding.copies.end() || part == found->second.end())
+      G4Exception("CopyPart", "g4sim-cellid", FatalException, ("volume " + name + " copy " + std::to_string(touchable->GetCopyNumber(level)) + " is not in the readout's table").c_str());
+    id += part->second;
   }
   return id;
 }
@@ -314,8 +317,8 @@ class ScorerSums {
     const std::string& hitKind = (*fScorers)[scorer].hitKind;
     if (!hitKind.empty()) {
       const std::uint64_t id = CellId(scorer, volume, bin);
-      if (hitKind == "tracker") HitRecorder::Thread().Tracker(fScoredStep, static_cast<std::uint64_t>(volume), id, bin, value, share, along);
-      else if (hitKind == "calorimeter") HitRecorder::Thread().Calorimeter(fScoredStep, static_cast<std::uint64_t>(volume), id, bin, value, along);
+      if (hitKind == "tracker") HitRecorder::Thread().Tracker(fScoredStep, static_cast<std::uint64_t>(volume), id, static_cast<int>(scorer), bin, value, share, along);
+      else if (hitKind == "calorimeter") HitRecorder::Thread().Calorimeter(fScoredStep, static_cast<std::uint64_t>(volume), id, static_cast<int>(scorer), bin, value, along);
     }
     ScoreCell& cell = fSums[{scorer, volume, bin}];
     cell.value += value;
@@ -331,7 +334,8 @@ class ScorerSums {
     auto known = fCopyParts.find(key);
     if (known == fCopyParts.end()) known = fCopyParts.emplace(key, CopyPart(fScoredStep->GetPreStepPoint()->GetTouchable(), encoding)).first;
     std::uint64_t id = known->second;
-    if (!fScoredGrid) return id;
+    static const bool noSegment = [] { const char* control = std::getenv("G4SIM_HIT_CONTROL"); return control && std::string(control) == "cell_id_no_segment"; }();  // a negative test of cell_id_gate.py
+    if (!fScoredGrid || noSegment) return id;
     const std::vector<int> values = fScoredGrid->AxisValues(bin / fBinStride);
     for (std::size_t axis = 0; axis < values.size(); ++axis) {
       const CellEncoding::Segment& field = encoding.segments.at(axis);
@@ -512,6 +516,8 @@ class ScorerSums {
   }
 
   void Score(std::size_t i, const ScorerSpec& scorer, const G4Step* step, const G4VTouchable* touchable, VolumeKey volume) {
+    fScoredGrid = nullptr;
+    fBinStride = 1;
     const G4Track* track = step->GetTrack();
     const G4ParticleDefinition* particle = track->GetDefinition();
     const G4MaterialCutsCouple* couple = step->GetPreStepPoint()->GetMaterialCutsCouple();
@@ -538,7 +544,6 @@ class ScorerSums {
     const int part = split ? (IsLargeStep(scorer.lightYield.at(touchable->GetVolume()->GetLogicalVolume()->GetName()) * value, ScintillationControl()) ? 0 : 1) : 0;
     const int stride = split ? 2 : 1;
     fBinStride = stride;
-    fScoredGrid = nullptr;
     if (scorer.segmentation.kind == "none") {
       Add(i, volume, part, value);
       return;

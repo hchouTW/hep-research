@@ -1,6 +1,9 @@
 """geometry_id, provenance_id and request_id (Section 7.2): canonical_sha256 of the two parts of the IR, the hash scope checked first."""
 from __future__ import annotations
 
+import hashlib
+import json
+
 from core.canonical import canonical_sha256, require_hash_scope
 
 
@@ -11,6 +14,13 @@ def _digest(part: dict) -> str:
 
 def geometry_id(ir: dict) -> str:
     return _digest(ir["physical"])
+
+
+def field_configuration_sha256(ir: dict) -> str:
+    """B2.8 condition 2's key on the g4sim path: the field of the IR's physical part, each template's field and the field definitions (g4sim plan, Section 19.2 S5)."""
+    physical = ir["physical"]
+    document = {"fields": physical.get("fields"), "templates": {name: node.get("field") for name, node in sorted(physical["templates"].items())}}
+    return hashlib.sha256(json.dumps(document, sort_keys=True, separators=(",", ":")).encode("utf-8")).hexdigest()
 
 
 def provenance_id(ir: dict) -> str:

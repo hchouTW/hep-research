@@ -18,6 +18,7 @@ from pathlib import Path
 PLUGIN = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(PLUGIN))
 sys.path.insert(0, str(PLUGIN / "tests" / "contracts"))
+from contracts import design  # noqa: E402
 from design_fixtures import (NS, copy_fixture, derive, edit, entry, fake_contract, fake_eval, gauss, matrix,  # noqa: E402
                              param, sha256, write_contracts)
 
@@ -362,6 +363,12 @@ class F4Path(Base):
         code, out = ev(self.b, "f4", "--candidate", f"{NS}:cand-B", "--requirement", "REQ-TRK-001", "--study", s, "--id", "SIM-G4")
         self.assertEqual(code, 1, out)
         self.assertEqual([item["code"] for item in out["design_errors"]], ["design.qualification_mismatch"])
+
+    def test_a_failed_entry_beside_a_clean_one_is_an_error(self):
+        evaluation = design.Evaluation(Path("."), ".", {"extension": {"candidate": "x", "denominator": {}}})
+        scope = {"observable_kind": "tracking-resolution"}
+        design.check_qualification({"declared_scope": scope, "benchmarks": [{"benchmark": "field-propagation", "verdict": "fail"}]}, evaluation)
+        self.assertIn("design.qualification_mismatch", [getattr(item, "code", item[0] if isinstance(item, tuple) else item) for item in evaluation.errors])
 
     def test_t46_not_upgraded_study_is_below_screening(self):
         g = self.setup_f4()

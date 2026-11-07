@@ -79,22 +79,47 @@ def resolved_segmentation(block) -> dict:
 SEGMENT_AXES = {"none": 0, "along_axis": 1, "cartesian_xy": 2, "cartesian_xyz": 3, "polar": 2}
 
 
-def cell_encoding(scorer: dict, kind: str, ir: dict) -> dict:
-    """How the program composes a named readout's cellID (Section 6.2.6): what each placed copy adds, as decimal text because a cellID has 64 bits, and the field of each segmentation axis. A `problem` stops check-spec."""
+def cell_encoding(scorer: dict, kind: str, ir: dict, templates: list) -> dict:
+    """How the program composes a named readout's cellID (Section 6.2.6): what each placed copy adds, as decimal text because a cellID has 64 bits, and the field of each segmentation axis. The table replaces Section 6.2.6's copy number times stride (g4sim-approvals.md), so a bitfield need not follow a grid's packing. A `problem` stops check-spec."""
     name = scorer["readout"]
     readout = ir["physical"].get("readout", {}).get(name)
     if readout is None:
         return {"problem": f"readout {name!r} is not declared by the specification"}
+    if kind not in SEGMENT_AXES:
+        return {"problem": f"no cellID for a {kind} segmentation"}
     fields = {field["name"]: field for field in readout["fields"]}
     bound = scorer.get("segment_fields", [])
     unbound = sorted(field["name"] for field in readout["fields"] if field["kind"] == "segmentation" and field["name"] not in bound)
-    if len(bound) != SEGMENT_AXES[kind] or unbound or any(item not in fields for item in bound):
-        return {"problem": f"segment_fields {bound} must name one field of readout {name!r} per axis of a {kind} segmentation, and every field no placement index fills (unbound: {unbound})"}
+    good = len(bound) == SEGMENT_AXES[kind] == len(set(bound)) and all(fields.get(item, {}).get("kind") == "segmentation" for item in bound)
+    if not good or unbound:
+        return {"problem": f"segment_fields {bound} must name one distinct segmentation field of readout {name!r} per axis of a {kind} segmentation, and every field no placement index fills (unbound: {unbound})"}
+    children: dict = {}
     copies: dict = {}
     for placement in ir["physical"]["placements"]:
+        children.setdefault(placement["mother"], []).append(placement)
         part = sum(value * fields[index]["stride"] for index, value in placement["index"].items() if index in fields)
         if copies.setdefault(placement["template"], {}).setdefault(str(placement["copy_number"]), part) != part:
-            return {"problem": f"template {placement['template']} has two placements of copy {placement['copy_number']} with different indices: a cellID cannot tell them apart"}
+            return {"problem": f"template {placement['template']} has two placements of copy {placement['copy_number']} with different indices: the table is by template and copy, so declare two templates"}
+    seen: set = set()
+
+    def walk(mother: str, total: int, used: frozenset) -> str | None:
+        for placement in children.get(mother, []):
+            named = frozenset(placement["index"]) & set(fields)
+            if named & used:
+                return f"field {sorted(named & used)} is filled at two levels of one volume: the values would add"
+            here = total + copies[placement["template"]][str(placement["copy_number"])]
+            if placement["template"] in templates:
+                if here in seen:
+                    return f"two volumes of template {placement['template']} have one cellID: readout {name!r} needs a field for every level that repeats (Section 19, cellIDs are unique)"
+                seen.add(here)
+            found = walk(placement["template"], here, used | named)
+            if found:
+                return found
+        return None
+
+    problem = walk("world", 0, frozenset())
+    if problem:
+        return {"problem": problem}
     return {"copies": {template: {copy: str(part) for copy, part in parts.items()} for template, parts in copies.items()}, "segments": [{"stride": fields[item]["stride"], "limit": 1 << fields[item]["width"]} for item in bound]}
 
 
@@ -114,7 +139,7 @@ def resolved_request(request: dict, ir: dict, folder: Path | None = None) -> dic
             item["hit_kind"] = scorer.get("hit_kind", "")  # a missing one is a finding of check-spec, which comes next
             item["readout"] = scorer.get("readout", "none")
             if item["readout"] != "none":
-                item["cell_id"] = cell_encoding(scorer, item["segmentation"]["kind"], ir)
+                item["cell_id"] = cell_encoding(scorer, item["segmentation"]["kind"], ir, item["templates"])
         if scorer.get("level") == "moments":
             item["moments"] = True
         if scorer["quantity"] == physics_check.SPLIT_QUANTITY:
@@ -371,7 +396,7 @@ def simulate(card: dict, request: dict, checked: dict, program: Path, work: Path
                "effective": {"birks_mm_per_MeV": effective["birks_mm_per_MeV"], "step_functions": effective["step_functions"], "pai": physics_check.effective_pai(requests, ionisation_table(effective)), "models": effective["models"]},
                "geometry_id": checked["geometry_id"]}
     if (work / "hits.root").is_file():
-        (work / "simulation-hits.json").write_text(json.dumps({**hits.index(checked["geometry_id"], card, work / "hits.root", request_identity), "readouts": {item["name"]: item["readout"] for item in resolved["scorers"] if "hit_kind" in item}}, indent=1) + "\n", encoding="utf-8")
+        (work / "simulation-hits.json").write_text(json.dumps({**hits.index(checked["geometry_id"], card, work / "hits.root", request_identity), "scorers": [item["name"] for item in resolved["scorers"]], "readouts": {item["name"]: item["readout"] for item in resolved["scorers"] if "hit_kind" in item}}, indent=1) + "\n", encoding="utf-8")
     (work / "column_map.json").write_text(json.dumps({"scorers": resolved["scorers"], "volume_id": ir["physical"]["volume_id"]}, indent=1) + "\n", encoding="utf-8")
     (work / "summary.json").write_text(json.dumps(summary, indent=1) + "\n", encoding="utf-8")
     return summary

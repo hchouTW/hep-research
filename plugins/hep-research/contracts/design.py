@@ -68,7 +68,7 @@ if __package__ in (None, ""):
 
 from contracts.release_manifest import canonical_sha256  # noqa: E402
 from contracts.schema import validate  # noqa: E402
-from contracts.validate import (SEARCH_SEED_RULE_FROM, SEARCH_SUMMARY_FROM, STICKY_STATUSES, _at_least, qualification_missing, qualification_reference,  # noqa: E402
+from contracts.validate import (GEANT4_QUALIFICATION, SEARCH_SEED_RULE_FROM, SEARCH_SUMMARY_FROM, STICKY_STATUSES, _at_least, qualification_missing, qualification_reference,  # noqa: E402
                                 validate_artifact)
 from core.simulation.seeds import seed_uniqueness_problems  # noqa: E402
 
@@ -1079,6 +1079,44 @@ def check_derivation(proj: Project, ev: Evaluation, cid: str, kind: str, geometr
             ev.err("design.derivation_mismatch", f"the {name} has geometry_id {value}, the candidate {identity} (Section 14.3)")
 
 
+def check_qualification(block: dict, ev: Evaluation) -> None:
+    """A record that says validated-in-scope when its own conditions do not hold is a false record, not an unqualified study (S5 gate 7): a condition missing or out of scope, or any entry of a condition that failed beside one that passed. A study with no declared kind keeps row 8 (ART-31)."""
+    declared, benchmarks = block.get("declared_scope") or {}, block.get("benchmarks") or []
+    missing = qualification_missing(declared, benchmarks) or []
+    conditions = GEANT4_QUALIFICATION.get(declared.get("observable_kind"), ())
+    failed = [f"{item.get('benchmark')}: verdict {item.get('verdict')!r}" for item in benchmarks if isinstance(item, dict) and item.get("benchmark") in conditions and item.get("verdict") != "pass"]
+    if missing or failed:
+        ev.err("design.qualification_mismatch", f"the study record says validated-in-scope, and its conditions do not hold: {'; '.join(missing + failed)}")
+
+
+def check_g4sim_scope(proj: Project, ev: Evaluation, sext: dict, geometry_bytes: bytes) -> None:
+    """On the g4sim path the scope a study declares is recomputed from the files it names, so changing a hash in the record, even in every place it appears, is seen. This stops an edited record, not a forger who also rewrites the study's files and every hash that binds them."""
+    block = sext.get("study") or {}
+    specification = (((block.get("spec") or {}).get("physics") or {}).get("g4sim") or {}).get("detector_spec")
+    if not isinstance(specification, dict):
+        return
+    from contracts import geometry  # here, not at the top: only the g4sim path expands a specification
+    from core.geometry import identity
+    entry = next((item for item in sext.get("input_manifest") or [] if isinstance(item, dict) and item.get("sha256") == specification.get("sha256")), None)
+    try:
+        content = proj.resolve(entry["path"]).read_bytes() if entry else None
+    except OSError as exc:
+        ev.err("design.qualification_mismatch", f"the study's detector-spec is not readable: {exc}")
+        return
+    if content is None or hashlib.sha256(content).hexdigest() != specification.get("sha256"):
+        ev.err("design.qualification_mismatch", "the study's detector-spec is not the file its input_manifest names")
+        return
+    checked = geometry.check_spec(content)
+    if checked["status"] != "ok":
+        ev.err("design.qualification_mismatch", f"the study's detector-spec fails its checks: {checked['findings'][:3]}")
+        return
+    declared = block.get("declared_scope") or {}
+    recomputed = {"field_configuration_sha256": identity.field_configuration_sha256(checked["ir"]), "realization_sha256": specification["sha256"], "geometry_sha256": hashlib.sha256(geometry_bytes).hexdigest()}
+    for key, value in recomputed.items():
+        if declared.get(key) != value:
+            ev.err("design.qualification_mismatch", f"declared {key} {declared.get(key)}, recomputed from the study's files {value}")
+
+
 def check_f4(proj: Project, ev: Evaluation) -> None:
     """ART-30..ART-36, FID-03, FID-05: only a study record that passes the 3.1.0 upgrade rules with validated-in-scope
     counts as F4 (else below screening, row 8); the record must have used this candidate's geometry file, whose
@@ -1105,9 +1143,8 @@ def check_f4(proj: Project, ev: Evaluation) -> None:
         ev.f4_unqualified = True  # ART-31: not reissued, or not passing the upgrade rules
     block: dict = sext["study"] if isinstance(sext.get("study"), dict) else {}
     ev.f4_kind = (block.get("declared_scope") or {}).get("observable_kind")
-    missing = qualification_missing(block.get("declared_scope") or {}, block.get("benchmarks") or [])
-    if "validated-in-scope" in (study.get("status") or []) and missing:  # a label its own conditions contradict: not an unqualified study, a false record (S5 gate 7)
-        ev.err("design.qualification_mismatch", f"the study record says validated-in-scope, and its conditions do not hold: {'; '.join(missing)}")
+    if "validated-in-scope" in (study.get("status") or []):
+        check_qualification(block, ev)
     ref = qualification_reference(ev.f4_kind, block.get("benchmarks") or [])
     ev.f4_qualification_tolerance = float(ref["tolerance"]["total"]) if ref else None
     cid = ext.get("candidate", "")
@@ -1153,6 +1190,8 @@ def check_f4(proj: Project, ev: Evaluation) -> None:
             if geometry.get("geometry_kind", DEFAULT_GEOMETRY_KIND) != kind:
                 ev.err("design.geometry_kind_mismatch", f"the geometry file is of kind {geometry.get('geometry_kind', DEFAULT_GEOMETRY_KIND)!r}, the candidate of {kind!r} (Section 14.3)")
             check_derivation(proj, ev, cid, kind, gdata, sext)
+            if "validated-in-scope" in (study.get("status") or []):
+                check_g4sim_scope(proj, ev, sext, gdata)
             if geometry.get("figure_of_merit") != ev.fom:
                 ev.domain.append(f"the study geometry was generated for {geometry.get('figure_of_merit')}, not {ev.fom} (ART-36)")
             gden = geometry.get("denominator")

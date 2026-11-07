@@ -901,9 +901,8 @@ def _equiv(diff: float, se: float, dof: float, tol: float) -> str:
 
 
 def g4sim_field_sha256(ir: dict) -> str:
-    """B2.8 condition 2's key on the g4sim path: the field of the IR's physical part, each template's field and the field definitions (g4sim plan, Section 19.2 S5)."""
-    physical = ir["physical"]
-    return _canonical_sha({"fields": physical.get("fields"), "templates": {name: node.get("field") for name, node in sorted(physical["templates"].items())}})
+    from core.geometry import identity  # here, not at the top: a study of an old program keeps its recorded code paths
+    return identity.field_configuration_sha256(ir)
 
 
 def bench_field_g4sim(b: dict, cfg_dir: Path) -> dict:
