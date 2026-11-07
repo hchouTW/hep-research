@@ -1,10 +1,10 @@
 {
  "schema": "g4kit/1",
  "name": "calorimeter",
- "version": "1.0.0",
+ "version": "1.1.0",
  "geometry_kind": "calorimeter",
  "role": "calorimetry-em",
- "purpose": "A grid of wrapped sampling towers, each with a tapered guide behind it.",
+ "purpose": "A grid of wrapped sampling towers, each with a tapered guide behind it. A period is absorber, active layer and a support layer of readout and air, as real sampling calorimeters have.",
  "inputs": {
   "layers": {
    "kind": "integer"
@@ -38,6 +38,12 @@
   },
   "world_material": {
    "kind": "material"
+  },
+  "support_mm": {
+   "kind": "length"
+  },
+  "support_material": {
+   "kind": "material"
   }
  },
  "geometric_defaults": {
@@ -50,7 +56,7 @@
  "detector": {
   "schema": "detector-spec/1",
   "params": {
-   "tower_depth_mm": "layers * (absorber_mm + active_mm)",
+   "tower_depth_mm": "layers * (absorber_mm + active_mm + support_mm)",
    "pitch_mm": "tower_side_mm + 2 * wrap_mm + tower_gap_mm",
    "width_x_mm": "towers_x * pitch_mm",
    "width_y_mm": "towers_y * pitch_mm",
@@ -135,7 +141,8 @@
         },
         "sequence": [
          "absorber",
-         "sampler"
+         "sampler",
+         "support"
         ]
        }
       }
@@ -285,6 +292,23 @@
        }
       }
      }
+    ]
+   },
+   "support": {
+    "solid": {
+     "box": {
+      "size_mm": [
+       "tower_side_mm",
+       "tower_side_mm",
+       "support_mm"
+      ]
+     }
+    },
+    "material": {
+     "$input": "support_material"
+    },
+    "tags": [
+     "support"
     ]
    }
   },

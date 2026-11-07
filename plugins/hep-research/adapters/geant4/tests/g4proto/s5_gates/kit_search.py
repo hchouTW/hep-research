@@ -38,7 +38,7 @@ def parameter(value, unit: str) -> dict:
 
 def candidate(base: dict) -> dict:
     values = {"stochastic_term": (0.1, "GeV^0.5"), "constant_term": (0.01, "1"), "noise_term_GeV": (0.0, "GeV"), "depth_x0": (10.0, "1"), "front_position_m": (1.0, "m"), "passive_material": ("G4_Pb", "n/a"), "absorber_x0_mm": (5.612, "mm"),
-              "layers": (10, "1"), "towers_x": (1, "1"), "towers_y": (1, "1"), "active_mm": (3.0, "mm"), "tower_side_mm": (150.0, "mm"), "absorber_material": ("G4_Pb", "n/a"), "active_material": ("G4_PLASTIC_SC_VINYLTOLUENE", "n/a"),
+              "layers": (10, "1"), "towers_x": (1, "1"), "towers_y": (1, "1"), "active_mm": (3.0, "mm"), "support_mm": (1.0, "mm"), "support_material": ("G4_AIR", "n/a"), "tower_side_mm": (150.0, "mm"), "absorber_material": ("G4_Pb", "n/a"), "active_material": ("G4_PLASTIC_SC_VINYLTOLUENE", "n/a"),
               "wrap_material": ("G4_MYLAR", "n/a"), "guide_material": ("G4_PLEXIGLASS", "n/a"), "world_material": ("G4_AIR", "n/a")}
     document = json.loads(json.dumps(base))
     document["artifact_id"] = "cand-KIT"

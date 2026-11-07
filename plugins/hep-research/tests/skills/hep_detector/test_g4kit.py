@@ -22,7 +22,7 @@ CANDIDATE, OTHER = "j15-v1:cand-N4", "j15-v1:cand-N6"
 EXAMPLE = ROOT / "examples/design-minimal-spectrometer/output/artifacts"
 TRACKER = {"planes": 5, "plane_gap_mm": 100.0, "plane_thickness_mm": 0.3, "plane_side_mm": 400.0, "field_tesla": 1.0, "plane_material": "G4_Si", "world_material": "G4_Galactic"}
 CASES = {"planes-tracker": TRACKER,
-         "calorimeter": {"layers": 10, "towers_x": 3, "towers_y": 3, "absorber_mm": 2.0, "active_mm": 3.0, "tower_side_mm": 40.0, "absorber_material": "G4_Pb", "active_material": "G4_PLASTIC_SC_VINYLTOLUENE", "wrap_material": "G4_MYLAR", "guide_material": "G4_PLEXIGLASS", "world_material": "G4_AIR"},
+         "calorimeter": {"layers": 10, "towers_x": 3, "towers_y": 3, "absorber_mm": 2.0, "active_mm": 3.0, "support_mm": 1.0, "support_material": "G4_AIR", "tower_side_mm": 40.0, "absorber_material": "G4_Pb", "active_material": "G4_PLASTIC_SC_VINYLTOLUENE", "wrap_material": "G4_MYLAR", "guide_material": "G4_PLEXIGLASS", "world_material": "G4_AIR"},
          "tof": {"planes": 2, "bars": 8, "bar_length_mm": 1000.0, "bar_width_mm": 100.0, "bar_thickness_mm": 10.0, "plane_gap_mm": 50.0, "bar_material": "G4_PLASTIC_SC_VINYLTOLUENE", "world_material": "G4_AIR"}}
 
 

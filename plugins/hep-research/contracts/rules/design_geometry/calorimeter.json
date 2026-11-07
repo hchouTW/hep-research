@@ -4,7 +4,7 @@
  "geometry": "calorimeter",
  "kit": {
   "name": "calorimeter",
-  "version": "1.0.0"
+  "version": "1.1.0"
  },
  "fields": [
   {
@@ -76,6 +76,26 @@
      "role": "calorimetry-em",
      "name": "active_mm",
      "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "support_mm",
+   "from": {
+    "parameter": {
+     "role": "calorimetry-em",
+     "name": "support_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "support_material",
+   "from": {
+    "parameter": {
+     "role": "calorimetry-em",
+     "name": "support_material",
+     "unit": "n/a"
     }
    }
   },
