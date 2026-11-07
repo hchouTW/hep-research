@@ -18,6 +18,11 @@ def index(geometry_id: str, card: dict, path: Path, request_id: str = "") -> dic
     return {"schema": SCHEMA, "geometry_id": geometry_id, "request_id": request_id, "events": run["events"], "first_event": run.get("first_event", 0), "kinds": list(KINDS[:3]), "file_sha256": digest}
 
 
+def cell_fields(cell_id: int, fields: list) -> dict:
+    """The field dictionary of a cellID (Section 7.5), from a readout's bitfield in the IR."""
+    return {field["name"]: (cell_id // field["stride"]) % (1 << field["width"]) for field in fields}
+
+
 def cell_key(row: dict) -> tuple:
     """(event, cell, segment): a cell is an exact 64-bit volume ID, so it stays an integer here, never a float."""
     return int(row["event_id"]), int(row["cell"]), int(row.get("segment", 0))

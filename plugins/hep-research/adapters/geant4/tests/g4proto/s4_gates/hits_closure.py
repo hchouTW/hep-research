@@ -51,14 +51,19 @@ NTUPLES = ("mc_particles", "tracker_hits", "calorimeter_hits", "contributions", 
 COLUMNS = {
     "mc_particles": {"event_id": "event_numbers", "track_id": "ancestry", "parent_id": "ancestry", "pdg": "particles", "ancestor_pruned": "ancestry", "simulation_status": "status", "born_of_decay": "energy_rule", "x_mm": "vertices", "y_mm": "vertices", "z_mm": "vertices",
                      "px_MeV": "momentum", "py_MeV": "momentum", "pz_MeV": "momentum", "ekin_MeV": "momentum", "end_x_mm": "vertices", "end_y_mm": "vertices", "end_z_mm": "vertices"},
-    "tracker_hits": {"event_id": "event_numbers", "step_index": "path_order", "track_id": "ancestry", "step_track_id": "ancestry", "step_number": "apportion", "cell": "tracker_cells", "segment": "pieces", "x_mm": "tracker_points", "y_mm": "pieces", "z_mm": "tracker_points",
+    "tracker_hits": {"event_id": "event_numbers", "step_index": "path_order", "track_id": "ancestry", "step_track_id": "ancestry", "step_number": "apportion", "cell": "tracker_cells", "segment": "pieces", "scorer": "no_readout", "cell_id": "no_readout", "x_mm": "tracker_points", "y_mm": "pieces", "z_mm": "tracker_points",
                      "px_MeV": "tracker_kinematics", "py_MeV": "tracker_kinematics", "pz_MeV": "tracker_kinematics", "ekin_MeV": "tracker_kinematics", "edep_MeV": "apportion", "time_ns": "times", "path_mm": "apportion"},
-    "calorimeter_hits": {"event_id": "event_numbers", "cell": "contributions", "segment": "pieces", "edep_MeV": "contributions", "x_mm": "block_points", "y_mm": "block_points", "z_mm": "pieces"},
+    "calorimeter_hits": {"event_id": "event_numbers", "cell": "contributions", "segment": "pieces", "scorer": "no_readout", "cell_id": "no_readout", "edep_MeV": "contributions", "x_mm": "block_points", "y_mm": "block_points", "z_mm": "pieces"},
     "contributions": {"event_id": "event_numbers", "cell": "contributions", "segment": "pieces", "track_id": "ancestry", "time_bin": "times", "edep_MeV": "ancestry", "time_ns": "contribution_times", "x_mm": "block_points", "y_mm": "block_points", "z_mm": "pieces"},
     "plane_crossings": {"event_id": "event_numbers", "plane": "crossing_values", "track_id": "crossings", "x_mm": "crossing_values", "y_mm": "crossing_values", "z_mm": "crossing_values", "dx": "crossing_values", "dy": "crossing_values", "dz": "crossing_values", "energy_MeV": "crossing_values", "time_ns": "crossing_values"}}
 CONTROLS = {"ancestor_is_primary": "ancestry", "one_crossing_per_event": "crossings", "pieces_repeat_the_step": "pieces", "crossing_at_pre_step": "crossing_values", "crossing_offset": "crossing_values", "crossing_energy_zero": "crossing_values", "crossing_time_zero": "crossing_values",
             "status_swapped": "status", "threshold_ignored": "energy_rule", "decay_rule_off": "energy_rule", "momentum_zero": "momentum", "secondary_energy_doubled": "momentum", "tracker_kinematics_zero": "tracker_kinematics", "kinematics_across_the_kink": "tracker_kinematics",
             "time_zero": "times", "time_not_interpolated": "times", "contribution_time_not_interpolated": "contribution_times", "equal_split": "apportion"}
+
+
+def no_readout(tracker: list, calorimeter: list) -> bool:
+    """Scorers without a readout write cell_id 0, and each row names its scorer; the caller shows this can fail."""
+    return all(row["cell_id"] == "0" for row in [*calorimeter, *tracker]) and {row["scorer"] for row in tracker} == {"0"} and {row["scorer"] for row in calorimeter} == {"1"}
 
 
 def event_file(path: Path, events: int) -> str:
@@ -303,7 +308,7 @@ def judged(simroot: Path, work: Path, oracle: Path, events: int, offset: int = 0
         key = (*key_of(row, "step_track_id"), row["cell"])
         paths[key] = paths.get(key, 0.0) + float(row["path_mm"])
     path_ratio = middle(value / (2 * SENSOR_HALF_MM * math.hypot(1.0, PRIMARIES[primaries[key[:2]]]["tilt"])) for key, value in paths.items())
-    checks = {"calorimeter": calorimeter["ok"], "tracker": tracker_closure["ok"], "contributions": against_parts["ok"] and {row["cell"] for row in calorimeter_rows} == {row["cell"] for row in parts} and len({row["cell"] for row in calorimeter_rows}) == 1,
+    checks = {"no_readout": no_readout(tracker, calorimeter_rows) and not no_readout([{**tracker[0], "cell_id": "1"}, *tracker[1:]], calorimeter_rows), "calorimeter": calorimeter["ok"], "tracker": tracker_closure["ok"], "contributions": against_parts["ok"] and {row["cell"] for row in calorimeter_rows} == {row["cell"] for row in parts} and len({row["cell"] for row in calorimeter_rows}) == 1,
               "ancestry": not wrong_parent and owners["ok"] and not wrong_tracker and chained > 0 and non_primary_owners > 0 and {key: row["pdg"] for key, row in rows_by_key.items()} == {key: every[key]["pdg"] for key in kept},
               "particles": sorted(set(primaries.values())) == sorted(PRIMARIES) and len(primaries) == len(PRIMARIES) * events,
               "crossings": len(crossing_keys) == len(set(crossing_keys)) and past_the_plane <= crossed and len(past_the_plane) > 1.9 * events and crossed <= kept,

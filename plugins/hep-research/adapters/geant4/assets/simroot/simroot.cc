@@ -126,6 +126,10 @@ Table ReadNtuple(G4RootAnalysisReader* reader, const std::string& file, const st
     }
     t.rows.push_back(r);
   }
+  // A column the file lacks is only found at the first row, where the read ends with a warning: an old layout must not read as an empty file.
+  tools::uint64 entries = 0;
+  if (reader->GetNtuple(id)->number_of_entries(entries) && entries != t.rows.size())
+    throw Fail(file + ": ntuple " + name + " holds " + std::to_string(entries) + " rows and " + std::to_string(t.rows.size()) + " were read: its columns are not this program's (a file written by an earlier layout?)");
   return t;
 }
 
@@ -288,8 +292,8 @@ int DumpHits(const std::vector<std::string>& files, const std::string& ntuple, c
       std::ostringstream line;
       char text[64];
       for (std::size_t c = 0; c < columns.size(); ++c) {
-        if (columns[c].name == "cell_low") continue;
-        if (columns[c].name == "cell_high") std::snprintf(text, sizeof text, "%llu", static_cast<unsigned long long>(g4sim::CellOf(row[c].i, row[c + 1].i)));
+        if (columns[c].name == "cell_low" || columns[c].name == "cell_id_low") continue;
+        if (columns[c].name == "cell_high" || columns[c].name == "cell_id_high") std::snprintf(text, sizeof text, "%llu", static_cast<unsigned long long>(g4sim::CellOf(row[c].i, row[c + 1].i)));
         else if (columns[c].type == 'I') std::snprintf(text, sizeof text, "%lld", row[c].i);
         else if (columns[c].name == "event_id" || columns[c].name == "time_bin") std::snprintf(text, sizeof text, "%.0f", row[c].d);
         else std::snprintf(text, sizeof text, "%.17g", row[c].d);
@@ -304,7 +308,8 @@ int DumpHits(const std::vector<std::string>& files, const std::string& ntuple, c
   if (!out.empty() && !file) throw Fail("cannot write " + out);
   std::ostream& target = out.empty() ? std::cout : file;
   for (std::size_t c = 0; c < columns.size(); ++c) {
-    if (columns[c].name != "cell_low") target << (c ? "," : "") << (columns[c].name == "cell_high" ? "cell" : columns[c].name);
+    if (columns[c].name == "cell_low" || columns[c].name == "cell_id_low") continue;
+    target << (c ? "," : "") << (columns[c].name == "cell_high" ? "cell" : columns[c].name == "cell_id_high" ? "cell_id" : columns[c].name);
   }
   target << '\n';
   for (const std::string& line : lines) target << line << '\n';

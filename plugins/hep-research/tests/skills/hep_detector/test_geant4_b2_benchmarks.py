@@ -144,6 +144,26 @@ class Qualification(unittest.TestCase):
         self.assertIsNone(qualification_missing({"observable_kind": "most-probable-value"}, PASSING))
 
 
+class HelixOnG4sim(unittest.TestCase):
+    """field-propagation of a g4sim run: a quarter turn of a helix, by hand, not by the benchmark's own formula."""
+
+    def verdict(self, y_sign: float) -> str:
+        radius = 1000.0 * 0.6 / (0.299792458 * 1.0)
+        rise = math.pi / 2 * radius / 0.6 * 0.8
+        with tempfile.TemporaryDirectory() as folder:
+            work = Path(folder)
+            (work / "ir.json").write_text(json.dumps({"physical": {"fields": {"dipole": {"b_tesla": ["0", "0", "1"]}}, "templates": {}}}), encoding="utf-8")
+            (work / "primaries.csv").write_text("0,1000,0,0,0,0.6,0,0.8\n", encoding="utf-8")
+            (work / "crossings.csv").write_text(f"event_id,x_mm,y_mm,z_mm\n0,{radius!r},{y_sign * radius!r},{rise!r}\n", encoding="utf-8")
+            return G.bench_field_g4sim({"ir": "ir.json", "primaries": "primaries.csv", "crossings": "crossings.csv", "field_tesla": 1.0}, work)["verdict"]
+
+    def test_a_positive_charge_turns_clockwise_about_the_field(self):
+        self.assertEqual(self.verdict(-1.0), "pass")
+
+    def test_a_track_that_turns_the_other_way_fails(self):
+        self.assertEqual(self.verdict(1.0), "fail")
+
+
 class CoreWidth(unittest.TestCase):
     """multiple-scattering-reference's estimator is Lynch and Dahl's: the sigma of a Gaussian fitted to the central
     98 % (truncated-normal maximum likelihood), not RMS(central 98 %) / 0.8673, which a single-scattering tail inside

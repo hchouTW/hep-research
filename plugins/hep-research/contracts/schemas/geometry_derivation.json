@@ -1,0 +1,57 @@
+{
+ "$comment": "geometry-derivation/1 (g4sim plan, Section 14.2): what g4kit.py made a detector-spec from. contracts/design.py only reads it and compares hashes; it never calls the kit.",
+ "type": "object",
+ "required": [
+  "schema",
+  "design_geometry_sha256",
+  "geometry_kind",
+  "kit",
+  "detector_spec_sha256",
+  "geometry_id"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "schema": {
+   "const": "geometry-derivation/1"
+  },
+  "design_geometry_sha256": {
+   "type": "string",
+   "pattern": "^[0-9a-f]{64}$"
+  },
+  "geometry_kind": {
+   "type": "string",
+   "pattern": "^[a-z0-9][a-z0-9-]{0,63}$"
+  },
+  "kit": {
+   "type": "object",
+   "required": [
+    "name",
+    "version",
+    "sha256"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "name": {
+     "type": "string",
+     "minLength": 1
+    },
+    "version": {
+     "type": "string",
+     "pattern": "^[0-9]+\\.[0-9]+\\.[0-9]+$"
+    },
+    "sha256": {
+     "type": "string",
+     "pattern": "^[0-9a-f]{64}$"
+    }
+   }
+  },
+  "detector_spec_sha256": {
+   "type": "string",
+   "pattern": "^[0-9a-f]{64}$"
+  },
+  "geometry_id": {
+   "type": "string",
+   "pattern": "^[0-9a-f]{64}$"
+  }
+ }
+}

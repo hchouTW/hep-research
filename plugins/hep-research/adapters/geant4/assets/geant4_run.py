@@ -833,6 +833,62 @@ def run_g4sim(args, card_path: Path) -> tuple[str, dict]:
     return outcome["status"], outcome
 
 
+def g4sim_effective_config(work: Path) -> dict:
+    """The geometry a g4sim run really built, from its probe (probe-v2.json, base.geometry): the tree-v1 block a study reads to derive a target's configuration."""
+    base = json.loads((work / "probe-v2.json").read_text(encoding="utf-8"))["base"]
+    if not base.get("recorded"):
+        return {"recorded": False, "source": "declared", "geometry": {"tree": None, "hash_scheme": "tree-v1"}}
+    tree = base["geometry"]
+    return {"recorded": True, "source": "probe", "geometry": {"tree": tree, "hash_scheme": "tree-v1", **geant4_tree_v1({"geometry": {"tree": tree}}, None)}}
+
+
+def simulation_block(card: dict, files: dict, args, work: Path) -> dict:
+    """What the study layer reads of a run: its program, source, field and geometry tree, as run_settings gives them for element_sim."""
+    request = json.loads(files["request"].read_text(encoding="utf-8"))
+    fields = list((json.loads((work / "ir.json").read_text(encoding="utf-8"))["physical"].get("fields") or {}).values())
+    energy = (request["source"].get("energy") or {}).get("mono", {}).get("energy_MeV")
+    block = {"program": {"name": "g4sim_run"}, "events": card["run"]["events"], "logical_run_seed": card["run"]["logical_run_seed"], "seed_scheme": "hash-v1", "spec_sha256": sha256_file(files["run"]),
+             "source": {"particle": request["source"].get("particle"), "energy_MeV": float(energy) if energy is not None else None},
+             "physics": {"reference_list": card["physics"].get("reference_list"), "default_cut_mm": float(card["physics"]["cuts_mm"]["default"])},
+             "field_tesla": [float(value) for value in fields[0]["b_tesla"]] if fields else [0.0, 0.0, 0.0],
+             "effective_config": g4sim_effective_config(work)}
+    _evidence_fields(block, args)
+    return block
+
+
+def cmd_run_spec(args) -> tuple[str, dict]:
+    """A run from detector-spec files, by file path and hash (g4sim plan, Section 18, point 7): g4kit.py wrote them, and a byte changed since is refused before anything runs."""
+    import types
+
+    import g4sim_run
+    files = {}
+    for name in ("detector", "request", "run"):
+        files[name] = expand(getattr(args, name))
+        found, want = sha256_file(files[name]), getattr(args, f"{name}_sha256")
+        if found != want:
+            raise SpecError(f"--{name} {tilde(files[name])} has sha256 {found}, expected {want}: a specification changed since it was written")
+    exe = _exe(args.exe)
+    work = expand(str(args.work)).resolve()
+    card = json.loads(files["run"].read_text(encoding="utf-8"))
+    summary = g4sim_run.simulate(types.SimpleNamespace(detector=files["detector"], request=files["request"], run=files["run"], program=exe, work=work, protected=False))
+    if summary["status"] != "ok":
+        return summary["status"], summary
+    build_hash = sha256_file(exe)
+    created = args.created or datetime.date.today().isoformat()
+    inputs = [*files.values(), *[expand(path) for path in args.input or []]]
+    outputs = {path.name: sha256_file(path) for path in sorted(work.iterdir()) if path.is_file() and path.suffix in (".csv", ".root", ".json")}
+    record = record_skeleton(f"geant4-run-{args.run_id}", f"g4sim_run {args.run_id}: {card['run']['events']} events (a completed run, not a validated result)", created, ["unvalidated"])
+    record["extension"] = {"input_manifest": [{"path": tilde(path), "sha256": sha256_file(path)} for path in inputs],
+                           "tools": [{"name": "g4sim_run", "version": build_hash[:16]}], "commands": [f"{tilde(exe)} --new ir.json run.json request.json"], "environment": {"work": tilde(work)},
+                           "seeds": {"g4sim_run": card["run"]["logical_run_seed"]}, "tolerances": {}, "exit_status": 0, "output_hashes": outputs, "simulation": simulation_block(card, files, args, work),
+                           "geometry": {"geometry_id": summary["geometry_id"], "request_id": summary["request_id"], "run_id": g4sim_run.run_id(summary["geometry_id"], summary["request_id"], card, build_hash), "build_hash": build_hash,
+                                        "installed_features": {"datasets": sorted(json.loads(g4sim_run.DATASETS.read_text(encoding="utf-8"))["physics_lists"][g4sim_run.physics_list(card)])}}}
+    record["versions"]["plugin_release"] = plugin_release()
+    record_path = expand(str(args.record))
+    write_json(record_path, record)
+    return "ok", {**{key: summary[key] for key in ("geometry_id", "request_id", "closure", "rows")}, "record": tilde(record_path)}
+
+
 def cmd_run(args) -> tuple[str, dict]:
     spec_path = expand(str(args.spec))
     spec = json.loads(spec_path.read_text(encoding="utf-8"))
@@ -1126,13 +1182,19 @@ def cmd_reco(args) -> tuple[str, dict]:
     rec_path = expand(str(args.run_record))
     rec = json.loads(rec_path.read_text(encoding="utf-8"))
     sim = (rec.get("extension") or {}).get("simulation") or {}
-    if (sim.get("program") or {}).get("name") != "element_sim":
-        raise SpecError("--run-record is not an element_sim run record")
+    of_g4sim = (sim.get("program") or {}).get("name") == "g4sim_run"
+    if not of_g4sim and (sim.get("program") or {}).get("name") != "element_sim":
+        raise SpecError("--run-record is not an element_sim or g4sim_run run record")
     ef = sim.get("event_file") or {}
-    if ef.get("level") not in ("crossings", "hits"):
+    if not of_g4sim and ef.get("level") not in ("crossings", "hits"):
         raise SpecError("the run has no event file at level crossings or hits (simreco reads the crossings)")
-    run_dir = _run_dir(rec, args.work)
-    spec = json.loads((run_dir / "spec.json").read_text(encoding="utf-8"))
+    run_dir = expand(rec["extension"]["environment"]["work"]) if of_g4sim else _run_dir(rec, args.work)
+    if of_g4sim:
+        import g4sim_reco
+        loaded = [json.loads((run_dir / name).read_text(encoding="utf-8")) for name in ("ir.json", "request.json", "run.json")]
+        spec = g4sim_reco.element_view(*loaded, sim["field_tesla"])
+    else:
+        spec = json.loads((run_dir / "spec.json").read_text(encoding="utf-8"))
     reco_path = expand(str(args.reco_spec))
     reco = json.loads(reco_path.read_text(encoding="utf-8"))
     problems = RS.check(reco, spec)
@@ -1144,14 +1206,19 @@ def cmd_reco(args) -> tuple[str, dict]:
     simroot = expand(args.simroot) if args.simroot else expand((ef.get("simroot") or {}).get("path", "simroot"))
     if not simroot.is_file():
         return "missing-dependency", {"error": f"simroot {tilde(simroot)} not found (--simroot)"}
-    root = run_dir / "events.root"
-    h = subprocess.run([str(simroot), "hash", str(root)], capture_output=True, text=True, timeout=3600)
-    try:
-        content = json.loads(h.stdout).get("content_sha256")
-    except ValueError:
-        content = None
-    if content is None or content != ef.get("content_sha256"):
-        raise SpecError(f"{tilde(root)} does not match the run record's content_sha256 (changed or missing)")
+    root = run_dir / ("hits.root" if of_g4sim else "events.root")
+    if of_g4sim:
+        content = sha256_file(root)
+        if content != rec["extension"]["output_hashes"].get("hits.root"):
+            raise SpecError(f"{tilde(root)} does not match the run record's hash (changed or missing)")
+    else:
+        h = subprocess.run([str(simroot), "hash", str(root)], capture_output=True, text=True, timeout=3600)
+        try:
+            content = json.loads(h.stdout).get("content_sha256")
+        except ValueError:
+            content = None
+        if content is None or content != ef.get("content_sha256"):
+            raise SpecError(f"{tilde(root)} does not match the run record's content_sha256 (changed or missing)")
     bending, bending_source, tof_ps, tof_source = None, "reco spec", None, "reco spec"
     if args.geometry:
         gpath = expand(str(args.geometry))
@@ -1169,17 +1236,21 @@ def cmd_reco(args) -> tuple[str, dict]:
     out_dir = work / args.reco_id
     out_dir.mkdir(parents=True, exist_ok=True)
     cross = out_dir / "crossings.csv"  # a temporary dump: removed after the replicas (never kept, B2.1)
-    with cross.open("w", encoding="utf-8") as fh:
-        d = subprocess.run([str(simroot), "dump", str(root), "--ntuple", "crossings"], stdout=fh,
-                           stderr=subprocess.PIPE, text=True, timeout=3600)
-    if d.returncode != 0:
-        raise SpecError(f"simroot dump failed: {d.stderr[-300:]}")
+    events_csv = out_dir / "events.csv" if of_g4sim else run_dir / "events.csv"
+    if of_g4sim:
+        g4sim_reco.write_columns(simroot, run_dir, spec, cross, events_csv)
+    else:
+        with cross.open("w", encoding="utf-8") as fh:
+            d = subprocess.run([str(simroot), "dump", str(root), "--ntuple", "crossings"], stdout=fh,
+                               stderr=subprocess.PIPE, text=True, timeout=3600)
+        if d.returncode != 0:
+            raise SpecError(f"simroot dump failed: {d.stderr[-300:]}")
     dump_sha = sha256_file(cross)
     replicas = reco.get("replicas", 1)
     outputs, rows, tails = {}, [], RS.tails_on(reco)
     for m in range(replicas):
         csv, summ = out_dir / f"results_r{m:03d}.csv", out_dir / f"summary_r{m:03d}.json"
-        eff = RS.effective(reco, spec, m, {"crossings": str(cross), "events": str(run_dir / "events.csv"),
+        eff = RS.effective(reco, spec, m, {"crossings": str(cross), "events": str(events_csv),
                                            "out_csv": str(csv), "out_summary": str(summ)}, bending, tof_ps)
         effp = out_dir / f"effective_r{m:03d}.json"
         write_json(effp, eff)
@@ -1243,7 +1314,7 @@ def cmd_reco(args) -> tuple[str, dict]:
             "run_record": {"artifact_id": rec["artifact_id"], "sha256": sha256_file(rec_path)},
             "event_file_content_sha256": content, "dumped": {"ntuple": "crossings", "columns": "all",
                                                               "dump_sha256": dump_sha, "kept": False},
-            "events_csv_sha256": sha256_file(run_dir / "events.csv"),
+            "events_csv_sha256": sha256_file(events_csv),
             "point_resolution_bending_um": bending if bending is not None else reco["point_resolution_um"]["bending"],
             "point_resolution_source": bending_source,
             "tof_sigma_t_ps": tof_ps if tof_ps is not None else (reco.get("tof") or {}).get("sigma_t_ps"),
@@ -1399,6 +1470,15 @@ def main(argv=None) -> int:
     p = sub.add_parser("from-geometry", help="design-geometry/1 + realization profile -> element_sim.spec/1")
     for name in ("--geometry", "--profile", "--out"):
         p.add_argument(name, required=True)
+    p = sub.add_parser("run-spec", help="run from detector-spec files, each named with its hash, and write the record")
+    for name in ("detector", "request", "run"):
+        p.add_argument(f"--{name}", required=True)
+        p.add_argument(f"--{name}-sha256", required=True)
+    for name, req in (("--exe", True), ("--work", True), ("--run-id", True), ("--record", True), ("--created", False)):
+        p.add_argument(name, required=req)
+    p.add_argument("--input", action="append", help="another input of the run, listed in input_manifest: the design geometry file (repeatable)")
+    for name in ("--evidence-role", "--point-id", "--seed-group"):
+        p.add_argument(name)
     p = sub.add_parser("run", help="run one spec and write its record")
     for name, req in (("--spec", True), ("--exe", True), ("--build-record", True), ("--work", True),
                       ("--run-id", True), ("--record", True), ("--created", False)):
@@ -1476,7 +1556,7 @@ def main(argv=None) -> int:
     defaults = [k for k in ("jobs", "timeout", "created", "z_max", "seeding", "role", "program", "configure_with",
                             "status") if hasattr(args, k) and f"--{k.replace('_', '-')}" not in given]
     handlers = {"build-sim": cmd_build_sim, "check-spec": cmd_check_spec, "from-geometry": cmd_from_geometry,
-                "run": cmd_run, "scan": cmd_scan, "chunk": cmd_chunk, "summarize": cmd_summarize, "reduce": cmd_reduce,
+                "run": cmd_run, "run-spec": cmd_run_spec, "scan": cmd_scan, "chunk": cmd_chunk, "summarize": cmd_summarize, "reduce": cmd_reduce,
                 "reco": cmd_reco, "table": cmd_table, "oracle": cmd_oracle}
     try:
         status, doc = handlers[args.command](args)

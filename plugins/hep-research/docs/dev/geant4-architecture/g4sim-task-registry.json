@@ -680,6 +680,76 @@
    "registered_at": "2026-11-07T08:56:04Z",
    "card_commit": "2a8f758f",
    "reason": "Execution log: G5 confirmed, all gates evaluated; no threshold changed"
+  },
+  {
+   "card": "g4sim-tasks/S5.md",
+   "sha256": "ec0972cff8583812f9bbeb742b2df81d5e4c534c084290dfd3101a86dbae4ecb",
+   "registered_at": "2026-11-07T11:53:38Z",
+   "card_commit": "1fe276cd",
+   "reason": "Kit benchmarks: sources, thresholds and negative controls, before any run"
+  },
+  {
+   "card": "g4sim-tasks/S5.md",
+   "sha256": "5d6c356e9aeca234a04c25c133af27faf8eefcb322c87c79ac8bf6c7959b6fb3",
+   "registered_at": "2026-11-07T12:07:01Z",
+   "card_commit": "46548886",
+   "reason": "The event count of the kit benchmark run, before it starts; no threshold changed"
+  },
+  {
+   "card": "g4sim-tasks/S5.md",
+   "sha256": "74079d843ecd85f3817a6d3033b8e6f62bb175f82197e7ef74a8b8d21bd11275",
+   "registered_at": "2026-11-07T13:35:33Z",
+   "card_commit": "c67bfe3c",
+   "reason": "sampling-fraction, shower-containment and tof-beta thresholds, before any run"
+  },
+  {
+   "card": "g4sim-tasks/S5.md",
+   "sha256": "0376f6c81567ce6aad08f04bca614071b9917d2ae6f45c5a876c9db118d0ce3c",
+   "registered_at": "2026-11-07T14:54:58Z",
+   "card_commit": "39d63d62",
+   "reason": "Execution log only; thresholds unchanged"
+  },
+  {
+   "card": "g4sim-tasks/S5.md",
+   "sha256": "00dd7b5e7aad824502260a0d9b83f7b56fe14ae548d828ccbc962af5032bf3a2",
+   "registered_at": "2026-11-07T15:09:07Z",
+   "card_commit": "523df222",
+   "reason": "encoded cellID gate, before any run"
+  },
+  {
+   "card": "g4sim-tasks/S5.md",
+   "sha256": "d906b6f1a7a868557e33094125915bc45a6c4c5ae9ef0d48aea3e297ec37bcbb",
+   "registered_at": "2026-11-07T15:40:36Z",
+   "card_commit": "b969f246",
+   "reason": "Execution log only; thresholds unchanged"
+  },
+  {
+   "card": "g4sim-tasks/S5.md",
+   "sha256": "aca566a9f54a4186bba5f714b5fa4ee89cf7fa82e5d6286a3057bdc7c1e1635e",
+   "registered_at": "2026-11-07T16:07:21Z",
+   "card_commit": "e68ec2b5",
+   "reason": "cellID gate and gate 7 extended after the independent read, before these runs"
+  },
+  {
+   "card": "g4sim-tasks/S5.md",
+   "sha256": "43f6d3469de27a357cacd0f8f92c8fdd55003a62eb1fbb98527039731a0f1e80",
+   "registered_at": "2026-11-07T16:39:02Z",
+   "card_commit": "46e0bfa8",
+   "reason": "Execution log only; thresholds unchanged"
+  },
+  {
+   "card": "g4sim-tasks/S5.md",
+   "sha256": "a3cdaf9a840035235c1affb2de7c36b4719726df5e9563e7de3fd8da8dbb2c13",
+   "registered_at": "2026-11-07T17:09:20Z",
+   "card_commit": "2ec8c85b",
+   "reason": "Execution log only (G5); thresholds unchanged"
+  },
+  {
+   "card": "g4sim-tasks/S5.md",
+   "sha256": "193efb82f71ee11296798255bdb617408591b22c015c35db58ad88ca18827d7c",
+   "registered_at": "2026-11-07T17:35:18Z",
+   "card_commit": "871a6ef2",
+   "reason": "gates extended after the third read, before these runs"
   }
  ]
 }

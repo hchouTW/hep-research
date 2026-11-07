@@ -157,9 +157,10 @@ class Scorers(unittest.TestCase):
         self.assertEqual([item["code"] for item in check.hit_findings(scorers, set(), {})], ["hit-overlap"])
         self.assertEqual(check.hit_findings(scorers[:1] + [{"name": "c", "quantity": "edep", "templates": ["block"]}], set(), {}), [])
 
-    def test_a_hit_scorer_has_no_encoded_readout(self):
-        scorers = [{"name": "a", "hit_kind": "tracker", "readout": "strips", "templates": ["plane"]}]
+    def test_a_named_readout_that_cannot_encode_its_cells_is_refused(self):
+        scorers = [{"name": "a", "hit_kind": "tracker", "readout": "strips", "templates": ["plane"], "cell_id": {"problem": "no such readout"}}]
         self.assertEqual([item["code"] for item in check.hit_findings(scorers, set(), {})], ["hit-readout"])
+        self.assertEqual(check.hit_findings([{**scorers[0], "cell_id": {"copies": {}, "segments": []}}], set(), {}), [])
 
     def test_a_keeping_rule_names_a_region_of_the_specification(self):
         truth = {"keep": [{"energy_above_MeV": 5, "region": "inner"}]}

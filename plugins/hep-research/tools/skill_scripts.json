@@ -614,6 +614,13 @@
    ]
   },
   {
+   "path": "skills/hep-detector/scripts/g4kit.py",
+   "depth": 3,
+   "skills": [
+    "hep-detector"
+   ]
+  },
+  {
    "path": "skills/hep-detector/scripts/geant4_benchmarks.py",
    "depth": 3,
    "skills": [
@@ -1634,7 +1641,7 @@
   {
    "skill": "hep-detector",
    "name": "check_citations.py",
-   "source": "skills/hep-detector/references/geant4-study-protocol.md:448",
+   "source": "skills/hep-detector/references/geant4-study-protocol.md:458",
    "matches": []
   },
   {
@@ -1652,7 +1659,7 @@
   {
    "skill": "hep-detector",
    "name": "local_partition.py",
-   "source": "skills/hep-detector/references/geant4-study-protocol.md:382",
+   "source": "skills/hep-detector/references/geant4-study-protocol.md:392",
    "matches": []
   },
   {
@@ -1909,7 +1916,7 @@
   }
  ],
  "counts": {
-  "scripts": 198,
+  "scripts": 199,
   "unresolved": 70,
   "named_without_main": 28
  }

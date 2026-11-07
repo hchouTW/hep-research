@@ -203,11 +203,11 @@ def load_g4sim(block: dict, folder: Path) -> dict:
         found = hashlib.sha256(texts[key]).hexdigest()
         if found != block[key]["sha256"]:
             raise StudyError(f"physics.g4sim.{key}: {block[key]['path']} has sha256 {found}, the study spec says {block[key]['sha256']}")
-    checked = geometry.check_spec(texts["detector_spec"])
+    checked = geometry.check_spec(texts["detector_spec"], folder=(folder / block["detector_spec"]["path"]).parent)
     if checked["status"] != "ok":
         raise StudyError(f"physics.g4sim.detector_spec: {checked['findings'][:3]}")
     request, card = json.loads(texts["simulation_request"]), json.loads(texts["run_card"])
-    found = {"geometry_id": checked["geometry_id"], "request_id": identity.request_id(request, checked["geometry_id"])}
+    found = {"geometry_id": checked["geometry_id"], "request_id": identity.request_id(identity.identified_request(request, checked["ir"]), checked["geometry_id"])}
     for key, value in found.items():
         if value != block[key]:
             raise StudyError(f"physics.g4sim.{key}: recomputed {value}, the study spec says {block[key]}")
@@ -218,7 +218,10 @@ def sim_spec(study: dict) -> tuple[str, dict]:
     """(program, spec) of the study: element_sim when it names an element_sim spec, else layered_sim."""
     loaded = get(study, "physics.g4sim_loaded")
     if isinstance(loaded, dict):  # the rule table's facts come from the run card and the IR, not from an old specification
-        return "g4sim", {"physics": loaded["run_card"]["physics"], "ui_commands": loaded["run_card"].get("ui_commands") or []}
+        source = loaded["request"]["source"]
+        physics = loaded["run_card"]["physics"]
+        return "g4sim", {"physics": {**physics, "default_cut_mm": float(physics["cuts_mm"]["default"])}, "ui_commands": loaded["run_card"].get("ui_commands") or [], "spec_sha256": get(study, "physics.g4sim.run_card.sha256"),
+                         "source": {"particle": source.get("particle"), "energy_MeV": float(((source.get("energy") or {}).get("mono") or {}).get("energy_MeV", "nan"))}}
     es = get(study, "physics.element_sim")
     if isinstance(es, dict):
         return "element_sim", es
@@ -227,7 +230,9 @@ def sim_spec(study: dict) -> tuple[str, dict]:
 
 def spec_hash(program: str, spec: dict) -> str:
     """The spec hash a run record carries: layered_sim's sha256_json, element_sim's sha256 of the spec file the program
-    read (geant4_run.py writes it with sorted keys, one-space indent and a final newline)."""
+    read (geant4_run.py writes it with sorted keys, one-space indent and a final newline), g4sim's sha256 of its run card."""
+    if program == "g4sim":
+        return spec["spec_sha256"]
     if program == "element_sim":
         return hashlib.sha256((json.dumps(spec, indent=1, sort_keys=True) + "\n").encode("utf-8")).hexdigest()
     return sha256_json(spec)
@@ -768,6 +773,9 @@ def bound_inputs(study: dict, declared: dict, qualifying: bool, results: dict | 
         if g and actual.get("geometry_sha256") and g != actual["geometry_sha256"]:
             gaps.append(f"the element_sim spec was derived from geometry sha256 {g}, --geometry has "
                         f"{actual['geometry_sha256']}")
+    if program == "g4sim":  # the realized geometry is the detector-spec the kit made, and the field is in the IR (g4sim plan, Section 19.2 S5)
+        actual["field_configuration_sha256"] = B.g4sim_field_sha256(get(study, "physics.g4sim_loaded.ir"))
+        actual["realization_sha256"] = get(study, "physics.g4sim.detector_spec.sha256")
     if reco is not None:
         actual["reco_spec_sha256"] = B.reco_spec_sha256(get(reco, "extension.reconstruction.reco_spec") or {})
     for key in ("geometry_sha256", "realization_sha256", "field_configuration_sha256", "reco_spec_sha256"):
@@ -777,6 +785,27 @@ def bound_inputs(study: dict, declared: dict, qualifying: bool, results: dict | 
         elif declared.get(key) != actual[key]:
             gaps.append(f"qualification: the declared {key} {declared.get(key)} is not the study's own {actual[key]}")
     return gaps
+
+
+MODEL_FAMILIES = {"electron": ("/e-", "/e+", "e+-", "msc_range_factor"), "hadron": ("hIoni/", "muons/hadrons", "msc_muhad_range_factor")}
+
+
+def family_view(effective: dict, family: str) -> dict:
+    """What a run read back that applies to one family of particles: two lists can differ for heavy hadrons and be the same for electrons."""
+    marks = MODEL_FAMILIES[family]
+    return {"models": {region: {name: value for name, value in rows.items() if any(mark in name for mark in marks)} for region, rows in (effective.get("models") or {}).items()},
+            "parameters": {name: effective.get(name) for name in marks if name in effective}, "step_functions": [row for row in effective.get("step_functions") or [] if any(mark in row for mark in marks)]}
+
+
+def cmd_confirm_models(args) -> tuple[str, dict]:
+    """Section 11 of the g4sim plan: the difference of two physics lists estimates model uncertainty only if they really use different models for the particle concerned. The evidence is what each run read back
+    (effective-em.json), never the lists' names."""
+    first, second = (family_view(load_json(path), args.family) for path in (args.first, args.second))
+    differing = [name for name in first if first[name] != second[name]]
+    record = {"schema": "model-confirmation/1", "lists": [args.first_list, args.second_list], "family": args.family, "first_sha256": sha256_file(Path(args.first)), "second_sha256": sha256_file(Path(args.second)), "differing": differing, "models_differ": bool(differing)}
+    if args.out:
+        Path(args.out).write_text(json.dumps(record, indent=1) + "\n", encoding="utf-8")
+    return ("ok" if differing else "failed"), record
 
 
 def cmd_label(args) -> tuple[str, dict]:
@@ -937,6 +966,9 @@ def cmd_label(args) -> tuple[str, dict]:
             entry = realization_entry(prov.get("realization") or {}, esp, root)
             if entry:
                 manifest.append(entry)
+        g4sim_block = get(study, "physics.g4sim")
+        if isinstance(g4sim_block, dict):  # Section 14.3, item 6: the three specifications of the study
+            manifest += [{"path": _rel(spec_path.parent / g4sim_block[key]["path"], root), "sha256": g4sim_block[key]["sha256"]} for key in ("detector_spec", "simulation_request", "run_card")]
         record = {
             "contract_version": CONTRACTS_VERSION, "artifact_id": study.get("study_id", "geant4-study") + "-study",
             "artifact_type": "computational-run",
@@ -962,6 +994,9 @@ def cmd_label(args) -> tuple[str, dict]:
                                     "phase2_upgrade_eligible_scopes": eligible,
                                     "evidence_overlap": overlap, "evidence_overlap_version": 1,
                                     "highest_usable_label": doc["highest_usable_label"]}}}
+        if isinstance(g4sim_block, dict):  # what design.py compares with the candidate (Section 14.3, item 5)
+            record["extension"]["study"]["spec"] = {"physics": {"g4sim": g4sim_block}}
+            record["extension"].update(nominal_identity(args.run_record or []))
         if installations:
             record["extension"]["study"]["geant4_installations"] = installations
             if doc.get("provenance_notes"):
@@ -989,6 +1024,13 @@ def cmd_label(args) -> tuple[str, dict]:
         write_json(out, record)
         doc["record"] = str(out)
     return "ok", doc
+
+
+def nominal_identity(paths: list) -> dict:
+    """The identities of a study's nominal g4sim run, as the study record carries them (Section 14.3, item 5); nothing when no single run is the nominal one."""
+    runs = [load_json(path).get("extension") or {} for path in paths]
+    nominal = [run["geometry"] for run in runs if "geometry" in run and get(run, "simulation.evidence_role") == "nominal"]
+    return {"geometry": nominal[0]} if len(nominal) == 1 else {}
 
 
 def main(argv=None) -> int:
@@ -1033,12 +1075,19 @@ def main(argv=None) -> int:
                         "evidence records); otherwise the record stays unvalidated and the refusal is reported")
     for sp in sub.choices.values():
         add_status_argument(sp)
+    p = sub.add_parser("confirm-models", help="whether two physics lists used different models, from what their runs read back")
+    for name in ("first", "second"):
+        p.add_argument(f"--{name}", required=True, help="effective-em.json of a run")
+        p.add_argument(f"--{name}-list", required=True)
+    p.add_argument("--family", required=True, choices=sorted(MODEL_FAMILIES))
+    p.add_argument("--out")
+    add_status_argument(p)
     args = ap.parse_args(argv)
     inputs = {k: v for k, v in vars(args).items() if k != "status" and not (k == "effective_config" and v is None)}
     given = {t.split("=")[0] for t in (sys.argv[1:] if argv is None else argv) if t.startswith("--")}
     defaults = [k for k in ("rules", "bootstrap", "seed", "mpv_bin_mev", "tail_threshold_mev", "created", "status")
                 if hasattr(args, k) and f"--{k.replace('_', '-')}" not in given]
-    handlers = {"spec": cmd_spec, "run": cmd_run, "variations": cmd_variations,
+    handlers = {"spec": cmd_spec, "run": cmd_run, "variations": cmd_variations, "confirm-models": cmd_confirm_models,
                 "label": cmd_label}
     try:
         status, doc = handlers[args.command](args)

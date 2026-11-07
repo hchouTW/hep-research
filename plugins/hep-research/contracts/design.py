@@ -68,7 +68,7 @@ if __package__ in (None, ""):
 
 from contracts.release_manifest import canonical_sha256  # noqa: E402
 from contracts.schema import validate  # noqa: E402
-from contracts.validate import (SEARCH_SEED_RULE_FROM, SEARCH_SUMMARY_FROM, STICKY_STATUSES, _at_least, qualification_reference,  # noqa: E402
+from contracts.validate import (GEANT4_QUALIFICATION, SEARCH_SEED_RULE_FROM, SEARCH_SUMMARY_FROM, STICKY_STATUSES, _at_least, qualification_missing, qualification_reference,  # noqa: E402
                                 validate_artifact)
 from core.simulation.seeds import seed_uniqueness_problems  # noqa: E402
 
@@ -76,6 +76,8 @@ PLUGIN_ROOT = Path(__file__).resolve().parents[1]
 CONTRACT_DIR = PLUGIN_ROOT / "contracts" / "tool_contracts"
 ADEQUACY_FILE = PLUGIN_ROOT / "contracts" / "rules" / "design_adequacy.json"
 GEOMETRY_FILE = PLUGIN_ROOT / "contracts" / "rules" / "design_geometry.json"
+GEOMETRY_KIND_FOLDER = PLUGIN_ROOT / "contracts" / "rules" / "design_geometry"
+DEFAULT_GEOMETRY_KIND = "layered-spectrometer"
 TAIL_SOURCES = ("alignment", "calibration-non-uniformity", "noise-digitization", "pattern-recognition")
 FIDELITIES = ("F0", "F1", "F2", "F3", "F4", "F5")
 RANK = {f: i for i, f in enumerate(FIDELITIES)}
@@ -987,12 +989,38 @@ def config_problems(proj: Project, name: str, val: ConfigValue, tokens: list[str
     return out
 
 
+class GeometryKindUnknown(ValueError):
+    """design.geometry_kind_unknown: no mapping file for a geometry kind (g4sim plan, Section 14.3)."""
+
+
+def geometry_mapping(kind: str) -> Path:
+    """The mapping file of a geometry kind: layered-spectrometer keeps the original file, a new kind has its own."""
+    if kind == DEFAULT_GEOMETRY_KIND:
+        return GEOMETRY_FILE
+    path = GEOMETRY_KIND_FOLDER / f"{kind}.json"
+    if not path.is_file():
+        raise GeometryKindUnknown(f"no geometry mapping for kind {kind!r} (contracts/rules/design_geometry/{kind}.json)")
+    return path
+
+
+def candidate_geometry_kinds(proj: Project, cid: str) -> list[str]:
+    """Every geometry_kind stated along the derived_from chain, the candidate first; an absent field inherits."""
+    chain = proj.candidate_chain(cid) or []
+    return [str(proj.docs[path]["extension"]["geometry_kind"]) for path in chain if "geometry_kind" in proj.docs[path]["extension"]]
+
+
+def candidate_geometry_kind(proj: Project, cid: str) -> str:
+    """A candidate's geometry kind: its own, else its base's, else layered-spectrometer."""
+    kinds = candidate_geometry_kinds(proj, cid)
+    return kinds[0] if kinds else DEFAULT_GEOMETRY_KIND
+
+
 def geometry_fields(proj: Project, cid: str, mapping: dict | None = None) -> tuple[dict, list[str], str]:
     """ART-34, ART-35: the geometry fields the mapping table reads from the merged candidate, the parameters read and
     their digest (TRC-05). CV-B2 (mapping 1.1.0): an optional field (a plain parameter expression) is read only when
     the candidate has that parameter in exactly one subsystem of the role, else left out with no parameter ref, so a
     1.0.0 candidate keeps its fields and digest and adding the parameter later changes the digest (stale)."""
-    mapping = mapping or load_json(GEOMETRY_FILE)
+    mapping = mapping or load_json(geometry_mapping(candidate_geometry_kind(proj, cid)))
     ev = Evaluation(Path("."), ".", {"extension": {"candidate": cid, "denominator": {}}})
     subs = proj.effective(cid) or {}
     evaluator = Evaluator(proj, ev, subs, {})
@@ -1017,6 +1045,109 @@ def candidate_geometry_ref(proj: Project, cid: str) -> str | None:
         if ref:
             return ref
     return None
+
+
+def check_derivation(proj: Project, ev: Evaluation, cid: str, kind: str, geometry_bytes: bytes, study_extension: dict) -> None:
+    """Section 14.3, item 5: when a candidate names a derivation record and a geometry_id, the record, the candidate, the study spec and the computational-run all agree, and the record was made from the file read here.
+
+    design.py only reads files and compares hashes: it never calls the kit (Section 14.2).
+    """
+    candidate = next((proj.docs[path]["extension"] for path in proj.candidate_chain(cid) or [] if "geometry_derivation_ref" in proj.docs[path]["extension"] or "geometry_id" in proj.docs[path]["extension"]), None)
+    if candidate is None:
+        return
+    reference, identity = candidate.get("geometry_derivation_ref"), candidate.get("geometry_id")
+    if reference:
+        try:
+            record = json.loads(proj.resolve(reference).read_bytes().decode("utf-8"))
+        except (OSError, ValueError, UnicodeDecodeError) as exc:
+            ev.err("design.derivation_mismatch", f"derivation record {reference!r} is not readable JSON: {exc}")
+            return
+        if not validate(record, "geometry_derivation.json").ok:
+            ev.err("design.derivation_mismatch", f"derivation record {reference!r} is not a geometry-derivation/1 record")
+            return
+        if record.get("design_geometry_sha256") != hashlib.sha256(geometry_bytes).hexdigest():
+            ev.err("design.derivation_mismatch", "the derivation record was not made from the design geometry file read here (Section 14.3)")
+        if record.get("geometry_kind") != kind:
+            ev.err("design.derivation_mismatch", f"the derivation record is of kind {record.get('geometry_kind')!r}, the candidate of {kind!r} (Section 14.3)")
+        if identity and record.get("geometry_id") != identity:
+            ev.err("design.derivation_mismatch", f"the derivation record has geometry_id {record.get('geometry_id')}, the candidate {identity} (Section 14.3)")
+        identity = identity or record.get("geometry_id")
+    run_identity = _nested(study_extension, "geometry").get("geometry_id")
+    spec_identity = _nested(study_extension, "study", "spec", "physics", "g4sim").get("geometry_id")
+    for name, value in (("computational-run", run_identity), ("study spec", spec_identity)):
+        if value != identity:
+            ev.err("design.derivation_mismatch", f"the {name} has geometry_id {value}, the candidate {identity} (Section 14.3)")
+
+
+def check_qualification(block: dict, ev: Evaluation) -> None:
+    """A record that says validated-in-scope when its own conditions do not hold is a false record, not an unqualified study (S5 gate 7): a condition missing or out of scope, or any entry of a condition that failed beside one that passed. A study with no declared kind keeps row 8 (ART-31)."""
+    declared, benchmarks = block.get("declared_scope") or {}, block.get("benchmarks") or []
+    missing = qualification_missing(declared, benchmarks) or []
+    kind = declared.get("observable_kind")
+    conditions: tuple = GEANT4_QUALIFICATION[kind] if isinstance(kind, str) and kind in GEANT4_QUALIFICATION else ()
+    failed = [f"{item.get('benchmark')}: verdict {item.get('verdict')!r}" for item in benchmarks if isinstance(item, dict) and item.get("benchmark") in conditions and item.get("verdict") != "pass"]
+    if missing or failed:
+        ev.err("design.qualification_mismatch", f"the study record says validated-in-scope, and its conditions do not hold: {'; '.join(missing + failed)}")
+
+
+def _nested(document, *keys) -> dict:
+    """A dictionary inside a record, or an empty one when a level is missing or of another type: a malformed record gets a finding, not a traceback."""
+    for key in keys:
+        document = document.get(key) if isinstance(document, dict) else None
+    return document if isinstance(document, dict) else {}
+
+
+def _manifest_file(proj: Project, entry: dict) -> bytes | None:
+    """A file of a study's input_manifest, if it is readable and its hash is the listed one."""
+    path = entry.get("path")
+    try:
+        content = proj.resolve(path).read_bytes() if isinstance(path, str) else None
+    except OSError:
+        return None
+    return content if content is not None and hashlib.sha256(content).hexdigest() == entry.get("sha256") else None
+
+
+def check_g4sim_scope(proj: Project, ev: Evaluation, cid: str, sext: dict, geometry_bytes: bytes) -> None:
+    """On the g4sim path what a study declares is compared with the files it names: the detector-spec's identity and its field, realization and geometry hashes, recomputed, and the benchmark entries against the hashed results file. So an edit of the record alone is seen. Verdicts are not re-derived from the runs, and a forger who also rewrites those files and every hash that binds them is not stopped."""
+    block = _nested(sext, "study")
+    g4sim = _nested(block, "spec", "physics", "g4sim")
+    bound = any("geometry_id" in proj.docs[path]["extension"] or "geometry_derivation_ref" in proj.docs[path]["extension"] for path in proj.candidate_chain(cid) or [])
+    if not (g4sim or bound or isinstance(sext.get("geometry"), dict)):
+        return
+    specification = g4sim.get("detector_spec")
+    if not isinstance(specification, dict) or not isinstance(specification.get("sha256"), str):
+        ev.err("design.qualification_mismatch", "a study on the g4sim path names no detector-spec")
+        return
+    from contracts import geometry  # here, not at the top: only the g4sim path expands a specification
+    from core.geometry import identity
+    manifest = [item for item in sext.get("input_manifest") or [] if isinstance(item, dict)]
+    entry = next((item for item in manifest if item.get("sha256") == specification["sha256"]), None)
+    content = _manifest_file(proj, entry) if entry else None
+    if entry is None or content is None:
+        ev.err("design.qualification_mismatch", "the study's detector-spec is not the file its input_manifest names")
+        return
+    checked = geometry.check_spec(content, folder=proj.resolve(entry["path"]).parent)
+    if checked["status"] != "ok":
+        ev.err("design.qualification_mismatch", f"the study's detector-spec fails its checks: {checked['findings'][:3]}")
+        return
+    if checked["geometry_id"] != g4sim.get("geometry_id"):
+        ev.err("design.qualification_mismatch", f"the detector-spec has geometry_id {checked['geometry_id']}, the study says {g4sim.get('geometry_id')}")
+    declared = _nested(block, "declared_scope")
+    recomputed = {"field_configuration_sha256": identity.field_configuration_sha256(checked["ir"]), "realization_sha256": specification["sha256"], "geometry_sha256": hashlib.sha256(geometry_bytes).hexdigest()}
+    for key, value in recomputed.items():
+        if declared.get(key) != value:
+            ev.err("design.qualification_mismatch", f"declared {key} {declared.get(key)}, recomputed from the study's files {value}")
+    results = []
+    for item in manifest:
+        content = _manifest_file(proj, item) if str(item.get("path")).endswith(".json") else None
+        try:
+            document = json.loads(content.decode("utf-8")) if content else None
+        except ValueError:
+            continue
+        if isinstance(document, dict) and isinstance(document.get("benchmarks"), list):
+            results.append(document["benchmarks"])
+    if block.get("benchmarks") not in results:
+        ev.err("design.qualification_mismatch", "the record's benchmarks are not those of the results file in its input_manifest")
 
 
 def check_f4(proj: Project, ev: Evaluation) -> None:
@@ -1045,14 +1176,22 @@ def check_f4(proj: Project, ev: Evaluation) -> None:
         ev.f4_unqualified = True  # ART-31: not reissued, or not passing the upgrade rules
     block: dict = sext["study"] if isinstance(sext.get("study"), dict) else {}
     ev.f4_kind = (block.get("declared_scope") or {}).get("observable_kind")
+    if "validated-in-scope" in (study.get("status") or []):
+        check_qualification(block, ev)
     ref = qualification_reference(ev.f4_kind, block.get("benchmarks") or [])
     ev.f4_qualification_tolerance = float(ref["tolerance"]["total"]) if ref else None
+    cid = ext.get("candidate", "")
+    kind = candidate_geometry_kind(proj, cid)
+    if len(set(candidate_geometry_kinds(proj, cid))) > 1:
+        ev.err("design.geometry_kind_mismatch", f"candidate {cid} changes the geometry_kind of its base: a derived candidate inherits it (Section 14.3)")
     try:
-        mapping = load_json(GEOMETRY_FILE)
+        mapping = load_json(geometry_mapping(kind))
+    except GeometryKindUnknown as exc:
+        ev.err("design.geometry_kind_unknown", str(exc))
+        return
     except (OSError, ValueError) as exc:
         ev.err("design.contract_unreadable", f"geometry mapping: {exc}")
         return
-    cid = ext.get("candidate", "")
     gref = ext.get("geometry_ref") or candidate_geometry_ref(proj, cid)
     if not gref:
         ev.err("design.binding_incomplete", "an F4 evaluation's candidate names its geometry in geometry_ref (ART-30)")
@@ -1081,6 +1220,11 @@ def check_f4(proj: Project, ev: Evaluation) -> None:
                     ev.stale.append("a geometry parameter changed since the study (ART-35)")
                 else:
                     ev.err("design.contract_mismatch", "the geometry's parameter digest does not match the candidate (ART-35)")
+            if geometry.get("geometry_kind", DEFAULT_GEOMETRY_KIND) != kind:
+                ev.err("design.geometry_kind_mismatch", f"the geometry file is of kind {geometry.get('geometry_kind', DEFAULT_GEOMETRY_KIND)!r}, the candidate of {kind!r} (Section 14.3)")
+            check_derivation(proj, ev, cid, kind, gdata, sext)
+            if "validated-in-scope" in (study.get("status") or []):
+                check_g4sim_scope(proj, ev, cid, sext, gdata)
             if geometry.get("figure_of_merit") != ev.fom:
                 ev.domain.append(f"the study geometry was generated for {geometry.get('figure_of_merit')}, not {ev.fom} (ART-36)")
             gden = geometry.get("denominator")

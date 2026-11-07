@@ -76,16 +76,58 @@ def resolved_segmentation(block) -> dict:
     return {"kind": kind, "width_mm": [float(value) for value in body["width_mm"]]}
 
 
-def selected_templates(select: dict, ir: dict) -> list:
-    tags = ir["marker"]["tags"]
-    wanted = set(select.get("tags", []))
-    return sorted(name for name, own in tags.items() if wanted <= set(own)) if wanted else sorted(select.get("templates", []))
+SEGMENT_AXES = {"none": 0, "along_axis": 1, "cartesian_xy": 2, "cartesian_xyz": 3, "polar": 2}
+
+
+def cell_encoding(scorer: dict, kind: str, ir: dict, templates: list) -> dict:
+    """How the program composes a named readout's cellID (Section 6.2.6): what each placed copy adds, as decimal text because a cellID has 64 bits, and the field of each segmentation axis. The table replaces Section 6.2.6's copy number times stride (g4sim-approvals.md), so a bitfield need not follow a grid's packing. A `problem` stops check-spec."""
+    name = scorer["readout"]
+    readout = ir["physical"].get("readout", {}).get(name)
+    if readout is None:
+        return {"problem": f"readout {name!r} is not declared by the specification"}
+    if kind not in SEGMENT_AXES:
+        return {"problem": f"no cellID for a {kind} segmentation"}
+    fields = {field["name"]: field for field in readout["fields"]}
+    bound = scorer.get("segment_fields", [])
+    unbound = sorted(field["name"] for field in readout["fields"] if field["kind"] == "segmentation" and field["name"] not in bound)
+    good = len(bound) == SEGMENT_AXES[kind] == len(set(bound)) and all(fields.get(item, {}).get("kind") == "segmentation" for item in bound)
+    if not good or unbound:
+        return {"problem": f"segment_fields {bound} must name one distinct segmentation field of readout {name!r} per axis of a {kind} segmentation, and every field no placement index fills (unbound: {unbound})"}
+    children: dict = {}
+    copies: dict = {}
+    for placement in ir["physical"]["placements"]:
+        children.setdefault(placement["mother"], []).append(placement)
+        part = sum(value * fields[index]["stride"] for index, value in placement["index"].items() if index in fields)
+        if copies.setdefault(placement["template"], {}).setdefault(str(placement["copy_number"]), part) != part:
+            return {"problem": f"template {placement['template']} has two placements of copy {placement['copy_number']} with different indices: the table is by template and copy, so declare two templates"}
+    seen: set = {0} if "world" in templates else set()
+
+    def walk(mother: str, total: int, used: frozenset, clash: frozenset) -> str | None:
+        for placement in children.get(mother, []):
+            named = frozenset(placement["index"]) & set(fields)
+            here = total + copies[placement["template"]][str(placement["copy_number"])]
+            repeated = clash | (named & used)
+            if placement["template"] in templates:
+                if repeated:
+                    return f"field {sorted(repeated)} is filled at two levels of one volume: the values would add"
+                if here in seen:
+                    return f"two volumes of template {placement['template']} have one cellID: readout {name!r} needs a field for every level that repeats (Section 19, cellIDs are unique)"
+                seen.add(here)
+            found = walk(placement["template"], here, used | named, repeated)
+            if found:
+                return found
+        return None
+
+    problem = walk("world", 0, frozenset(), frozenset())
+    if problem:
+        return {"problem": problem}
+    return {"copies": {template: {copy: str(part) for copy, part in parts.items()} for template, parts in copies.items()}, "segments": [{"stride": fields[item]["stride"], "limit": 1 << fields[item]["width"]} for item in bound]}
 
 
 def resolved_request(request: dict, ir: dict, folder: Path | None = None) -> dict:
     scorers = []
     for scorer in request.get("scorers", []):
-        item = {"name": scorer["name"], "quantity": scorer["quantity"], "templates": selected_templates(scorer["select"], ir), "segmentation": resolved_segmentation(scorer.get("segmentation"))}
+        item = {"name": scorer["name"], "quantity": scorer["quantity"], "templates": identity.selected_templates(scorer["select"], ir), "segmentation": resolved_segmentation(scorer.get("segmentation"))}
         if "split" in scorer:
             item["split"] = scorer["split"]
         if "apportion_short_step_fraction" in scorer:
@@ -97,6 +139,9 @@ def resolved_request(request: dict, ir: dict, folder: Path | None = None) -> dic
         if scorer.get("level") == "event_file":
             item["hit_kind"] = scorer.get("hit_kind", "")  # a missing one is a finding of check-spec, which comes next
             item["readout"] = scorer.get("readout", "none")
+            if item["readout"] != "none":
+                sharing = [template for other in request["scorers"] if other.get("level") == "event_file" and other.get("readout") == item["readout"] for template in identity.selected_templates(other["select"], ir)]  # a bitfield's cells are unique over every scorer on it
+                item["cell_id"] = cell_encoding(scorer, item["segmentation"]["kind"], ir, sharing)
         if scorer.get("level") == "moments":
             item["moments"] = True
         if scorer["quantity"] == physics_check.SPLIT_QUANTITY:
@@ -113,12 +158,6 @@ def resolved_request(request: dict, ir: dict, folder: Path | None = None) -> dic
         out["truth"] = {"decay_products": "decay_products" in keep, "all": "all" in keep, "energy_rules": rules, "time_bin_ns": float(request.get("truth", {}).get("time_bin_ns", 1)),
                         "planes_z_mm": [_in_world(plane["frame"], [0.0, 0.0, float(plane["z_mm"])], ir["physical"]["frames"])[2] for plane in planes]}
     return out
-
-
-def identified_request(request: dict, ir: dict) -> dict:
-    """The request as `request_id` hashes it (Section 6.3): `select` expanded, so tags that pick the same objects give the same identity."""
-    scorers = [{**{key: value for key, value in scorer.items() if key != "select"}, "templates": selected_templates(scorer["select"], ir)} for scorer in request.get("scorers", [])]
-    return {**request, "scorers": scorers} if "scorers" in request else request
 
 
 def selected_materials(resolved: dict, ir: dict) -> dict:
@@ -302,7 +341,7 @@ def conservation_summary(path: Path) -> dict:
 def failure_reason(log: Path) -> str:
     """The line of a run's log that says why Geant4 stopped it."""
     lines = log.read_text(encoding="utf-8", errors="replace").splitlines() if log.is_file() else []
-    return next((line.strip() for line in reversed(lines) if "the event file" in line or "a segmentation of" in line), "")
+    return next((line.strip() for line in reversed(lines) if any(text in line for text in ("the event file", "a segmentation of", "does not fit its readout field", "is not in the readout's table"))), "")
 
 
 def run_program(program: Path, work: Path, environment=None) -> int:
@@ -352,14 +391,14 @@ def simulate(card: dict, request: dict, checked: dict, program: Path, work: Path
         return {"status": "failed", "exit_status": code, "stage": "run", "reason": failure_reason(work / "log.txt")}
     counts = merge_threads(work)
     moments = merge_moments(work, card["run"]["events"])
-    request_identity = identity.request_id(identified_request(request, ir), checked["geometry_id"])
+    request_identity = identity.request_id(identity.identified_request(request, ir), checked["geometry_id"])
     cells = _rows(work / "cells.csv")
     closure = closure_problems([row for row in cells if row[1] in {item["name"] for item in resolved["scorers"] if item["quantity"] in physics_check.ADDITIVE}])
     summary = {"status": "failed" if closure["failing"] or moments["failing"] else "ok", "rows": counts, "closure": closure, "moments": moments, "request_id": request_identity, "balance": balance_summary(_rows(work / "boundary.csv")), "conservation": conservation_summary(work / "conservation.csv"),
                "effective": {"birks_mm_per_MeV": effective["birks_mm_per_MeV"], "step_functions": effective["step_functions"], "pai": physics_check.effective_pai(requests, ionisation_table(effective)), "models": effective["models"]},
                "geometry_id": checked["geometry_id"]}
     if (work / "hits.root").is_file():
-        (work / "simulation-hits.json").write_text(json.dumps(hits.index(checked["geometry_id"], card, work / "hits.root", request_identity), indent=1) + "\n", encoding="utf-8")
+        (work / "simulation-hits.json").write_text(json.dumps({**hits.index(checked["geometry_id"], card, work / "hits.root", request_identity), "scorers": [item["name"] for item in resolved["scorers"]], "readouts": {item["name"]: item["readout"] for item in resolved["scorers"] if "hit_kind" in item}}, indent=1) + "\n", encoding="utf-8")
     (work / "column_map.json").write_text(json.dumps({"scorers": resolved["scorers"], "volume_id": ir["physical"]["volume_id"]}, indent=1) + "\n", encoding="utf-8")
     (work / "summary.json").write_text(json.dumps(summary, indent=1) + "\n", encoding="utf-8")
     return summary

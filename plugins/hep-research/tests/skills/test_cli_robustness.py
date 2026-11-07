@@ -64,6 +64,7 @@ MISSING_FILE_ARGS = {
                                                    "--out", OUT],
     "skills/hep-detector/scripts/charge_confusion_rate.py": ["template", "--input", M],
     "skills/hep-detector/scripts/evaluate_design.py": ["report", "--artifacts", M],
+    "skills/hep-detector/scripts/g4kit.py": ["derive", "--geometry", M, "--out-detector", OUT, "--out-derivation", OUT],
     "skills/hep-detector/scripts/design_estimates.py": ["precision-from-result", "--result", M],
     "skills/hep-detector/scripts/species_response.py": ["assemble", "--manifest", M],
     "skills/hep-detector/scripts/survival_feeddown.py": ["compute", "--layers", M, "--species", M, "--xs", M],
@@ -252,6 +253,7 @@ MISSING_FILE_ARGS = {
 NO_INPUT_FILE = {  # script: why the missing-file check does not apply
     "adapters/geant4/assets/g4sim_physics_check.py": "a library of g4sim_run.py; only --help",
     "adapters/geant4/assets/g4sim_simulate.py": "a library of g4sim_run.py; only --help",
+    "adapters/geant4/assets/g4sim_reco.py": "a library of geant4_run.py reco; only --help",
     "skills/hep-detector/scripts/cherenkov_angle.py": "numbers on the command line",
     "skills/hep-detector/scripts/pid_separation_power.py": "numbers on the command line",
     "skills/hep-detector/scripts/tracker_resolution.py": "numbers on the command line",

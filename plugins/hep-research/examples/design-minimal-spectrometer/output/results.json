@@ -32,7 +32,7 @@
     "bound": "estimate"
    },
    "F1 charge confusion 500 GV": {
-    "value": 0.009578681159629947,
+    "value": 0.009578681159629945,
     "bound": "optimistic"
    },
    "F1 acceptance 1 GV": {

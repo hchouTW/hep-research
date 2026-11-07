@@ -201,14 +201,14 @@ def truth_findings(request: dict) -> list:
 
 
 def hit_findings(scorers: list, regions: set, truth: dict) -> list:
-    """On resolved scorers: a step is written once, a hit's cell is its volume and bin, and a rule's region exists."""
+    """On resolved scorers: a step is written once, a named readout can encode its cells, and a rule's region exists."""
     findings = []
     claimed: dict = {}
     for scorer in scorers:
         if "hit_kind" not in scorer:
             continue
-        if scorer.get("readout", "none") != "none":
-            findings.append(_finding("hit-readout", f"scorers/{scorer['name']}", "a hit file has no encoded cellID yet: use readout none, and the cell is the volume ID and the bin"))
+        if "problem" in scorer.get("cell_id", {}):
+            findings.append(_finding("hit-readout", f"scorers/{scorer['name']}", scorer["cell_id"]["problem"]))
         for template in scorer["templates"]:
             if template in claimed:
                 findings.append(_finding("hit-overlap", f"scorers/{scorer['name']}", f"template {template} is also written by {claimed[template]}: each step would be written twice"))
