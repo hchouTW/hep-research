@@ -16,6 +16,17 @@ S4 adds the throughput of the response pipeline (Section 16):
 | --- | --- | --- |
 | Response pipeline in Python, on one core | at most 25 % of the transport wall time of the same events on one core | Proposal, written before any measurement, on the reasoning of the scorer overhead: the response should not change what a study costs. If Python cannot meet it, `g4sim_digi` is built (Section 10.2) |
 
+Measurements of this limit, 2026-11-07, E5 login host, shared, one core, light yield 100 per MeV, four channels; the limit stays as written (`g4sim-approvals.md`):
+
+| Workload | Events | Bins per event | Response / transport | Within 0.25 |
+| --- | --- | --- | --- | --- |
+| e+ 1 to 60 MeV, plastic block, the registered measurement | 2,000 | 37 | 3.53 | No |
+| e+ 100 MeV, PbWO4 block | 1,000 | 50 | 1.28 | No |
+| e+ 1 GeV, PbWO4 block | 200 | 139 | 0.40 | No |
+| e+ 10 GeV, PbWO4 block | 30 | 198 | 0.06 | Yes |
+
+The limit names no reference workload, and the ratio follows it: the response grows with bins, the transport with the shower. The last three rows are single short scratch runs. Throughput was about 17,000 bins per second. None of this includes `photon_times`, one draw per detected photon, which can dominate at a high light yield, so a workload with per-photon timing must be measured before `g4sim_digi` is settled in S8.
+
 Measured by `adapters/geant4/tests/g4proto/s4_gates/response_throughput.py`: the transport time is the event loop of a one-thread `g4sim_run` (`G4SIM_INITIALIZED` to `G4SIM_DONE`), and the response time covers photon numbers, their distribution among channels, sensor and electronics for every bin of those events.
 
 Measurements: E5, Geant4 11.4.3, GCC 11.5.0, 2026-11-05, one run each, on a shared host. They are orders of magnitude, not benchmarks. The two proposals should be reviewed against first measurements in S2; a limit may then be tightened.

@@ -159,3 +159,10 @@ These are not Section 20 decisions. They are how S0 reconciled requirements of t
 | Suitability of `allpix.pixel-charge` for charge-sharing tables | Not suitable as it stands: a pinned rerun of the official example, 10 events, no sensor or geometry parameter | hsinyichou (owner of detector-simulation) | 2026-11-07 | The same words, on that evidence |
 | If not suitable | Option A, in place of the charge-sharing capability the row names: S4's response stage reads charge-sharing tables as a hashed declared input, tested with a synthetic table; S4 does not modify `adapters/detector-simulation` | hsinyichou (owner of detector-simulation) | 2026-11-07 | The same words |
 | Bit identity of transcendental sampling between E2 and E5 | Checked by one run on E2, with a script written early in S4 | hsinyichou (maintainer) | 2026-11-07 | The same words |
+
+## During S4 (2026-11-07)
+
+| Item | Decision | Person | Date | Words or link |
+| --- | --- | --- | --- | --- |
+| Response throughput limit, missed at 3.53 against 0.25 | The limit stays at 25%. The measurements of four workloads go into `g4sim-performance-budget.md`. S4 is unblocked. These words do not decide `g4sim_digi`: its S8 conditional item stands as Part B wrote it, and S8 settles it | hsinyichou (maintainer) | 2026-11-07 | "keep the limit, record the table, unblock S4, fix StripSigma after S4" |
+| simreco's `StripSigma`, smaller than the true scatter | Left unchanged in S4, so that gate 9 holds; corrected after S4, with J15 regenerated on E2 | hsinyichou (maintainer) | 2026-11-07 | The same words |
