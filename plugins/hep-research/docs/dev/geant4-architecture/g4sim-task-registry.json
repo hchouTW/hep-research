@@ -673,6 +673,13 @@
    "registered_at": "2026-11-07T08:28:34Z",
    "card_commit": "257615d7",
    "reason": "Unchanged card, registered at the polar fix before the final checks; no threshold changed"
+  },
+  {
+   "card": "g4sim-tasks/S4.md",
+   "sha256": "4ec24bd9af6daaba27e26b866edcca987a880f1ffe50b11c55d7efabc6bc3d4d",
+   "registered_at": "2026-11-07T08:56:04Z",
+   "card_commit": "2a8f758f",
+   "reason": "Execution log: G5 confirmed, all gates evaluated; no threshold changed"
   }
  ]
 }
