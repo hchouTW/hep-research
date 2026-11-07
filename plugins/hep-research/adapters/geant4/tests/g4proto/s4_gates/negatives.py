@@ -74,7 +74,7 @@ CHANGES = (
     ("Independent read", "a crossing on the chord in a field", CROSSING, "if (!smooth)\n", "if (true)\n", EXTERNAL_TESTS),
     ("Independent read", "a track born on a plane counted as crossing", CROSSING, "before * after < 0. || (after == 0. && before != 0.)", "before * after <= 0.", EXTERNAL_TESTS),
     ("Independent read", "two hit scorers on one template accepted", CHECK, "if template in claimed:", "if False:", CHECK_TESTS),
-    ("Independent read", "a hit scorer with an encoded readout accepted", CHECK, 'if scorer.get("readout", "none") != "none":', "if False:", CHECK_TESTS),
+    ("Independent read", "a readout that cannot encode its cells accepted", CHECK, 'if "problem" in scorer.get("cell_id", {}):', "if False:", CHECK_TESTS),
     ("Independent read", "a rule naming no real region accepted", CHECK, 'if isinstance(rule, dict) and "region" in rule and rule["region"] not in regions:', "if False:", CHECK_TESTS),
     ("External sources", "the calibration workflow takes an external source", CHECK, "def card_findings(", "def calibration_findings(request):\n    return []\n\n\ndef card_findings(", CHECK_TESTS),
     ("Reference planes", "a plane without a frame accepted", CHECK, "def card_findings(", "def plane_findings(request):\n    return []\n\n\ndef card_findings(", CHECK_TESTS),
