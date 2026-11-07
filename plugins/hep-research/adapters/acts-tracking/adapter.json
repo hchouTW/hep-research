@@ -42,6 +42,7 @@
   "assets/native/t07_fixture_constants.hpp",
   "assets/native/t07_fixture_generator.cpp",
   "assets/native/t07_generation_constants.hpp",
+  "assets/native/t07_generators.cmake",
   "assets/native/t07_seed_stream.cpp",
   "assets/native/t07_seed_stream.hpp",
   "assets/native/t07_truth_file.cpp",

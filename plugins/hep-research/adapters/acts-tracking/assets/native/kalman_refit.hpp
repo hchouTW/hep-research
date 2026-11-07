@@ -18,6 +18,8 @@ namespace t07 {
 inline constexpr double refit_start_x_mm = -50.0;
 inline constexpr double refit_prior_loc_sigma_mm = 10.0;
 inline constexpr double refit_prior_angle_sigma = 0.1;
+// Not a start only: centred on the assumed q/p, at high momentum this prior is as tight as the measurement. With a field it would pull
+// the fit to truth, so the driver refuses a field until the field stage settles it (D1 stage 2 review, C-M1).
 inline constexpr double refit_prior_relative_qop_sigma = 0.1;
 inline constexpr double refit_prior_time_sigma = 1.0;
 
@@ -54,7 +56,8 @@ class KalmanRefit {
   // The curve through the set's first and last hit with the set's assumed q/p, in this field: hits and what the hit set already
   // assumes, no truth. A straight chord is off by a slope of about k B (q/p) L / 2, and one Kalman pass linearises about that start:
   // on noiseless hits job 7490742 left 3e-4 per GeV in q/p at 3 GeV, and an independent filter gives 0.46 sigma(q/p) at worst at
-  // 1.5 GeV. At zero field the curve is the chord, bit for bit. d1-stage2-report.md, Fix round 1.
+  // 1.5 GeV. At zero field the curve is the chord, bit for bit. Hits are read as if on nominal planes, whatever payload the telescope
+  // carries: harmless at the shifts probed, but a large move of the first or last plane moves the start, for R36's loop to mind.
   RefitStart start_of(const HitSet& hit_set, const DataEvent& event) const;
 
   // Throws std::invalid_argument on a hit set the event does not hold. A fit that fails returns a failed track.

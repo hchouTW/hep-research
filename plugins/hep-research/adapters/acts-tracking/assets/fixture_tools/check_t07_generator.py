@@ -28,14 +28,15 @@ development check of the check, not the generator check of section 2.1. Line pre
   what the text says.
 - GOLDEN: SHA-256 of data and truth files for events 0 and 1 of each stratum. Later jobs compare these lines.
 
-t07-telescope-cai/1 (fixtures cai-clean and cai-sagitta, Freeze A amendment 1) has the same lines, cut to what one track per event
+t07-telescope-cai/1 (fixtures cai-clean and cai-sagitta) has the same lines, cut to what one track per event
 leaves: four strata, one per momentum bin. Per stratum: DRAW-RANGE, TRUTH, and AGREE as above. In sagitta the truth crossing is on the
 displaced plane, so TRUTH adds the displacement back before the helix, and a generator that shifted only its hits fails AGREE. Per
 fixture, pooled over the strata so the family stays small: the shape and correlation tests above, one KS per draw, one independence
-line. Charge follows event_index, so it is a DRAW-RANGE rule, not a test. The first three raw draws of each event must give its vertex,
-which holds the seed stream and draw order to the independent Python stream.
+line. Every draw of a CAI event is held to the independent Python stream as a DRAW-RANGE rule: vertex, charge, track, and each hit's two
+Gaussians, so the seed stream and the whole draw order are checked on every event, and charge needs no statistical test.
 
-The last lines count what the generators wrote to stderr, which section 18 row 4 reads, and how many lines can stop a correct
+CHECK-FINISHED says the run reached its end. It is not section 18 row 1's line, which is a failure of check_generators.py. The last lines
+count what the generators wrote to stderr, which section 18 row 4 reads, and how many lines can stop a correct
 generator at row 3: FAMILY, one line per generator group and one for the run.
 """
 from __future__ import annotations
@@ -66,6 +67,9 @@ Z_LIMIT = 5.0                               # section 2.1
 # length over the 100 mm from vertex to plane 1 for an angle. The stepper's error is expected far below it.
 TRUTH_LOC_TOLERANCE_MM = 1e-3
 TRUTH_ANGLE_TOLERANCE = 1e-5
+# CAI only: the limit of the helix budget in acts_tracking_driver.cpp. At 1e-3 mm a sagitta amplitude 1.8 % off passed (D1 stage 2 review,
+# C-m2); here 0.19 %. Taken from that budget; the largest reading of any earlier job was 6.09e-6 mm.
+CAI_TRUTH_LOC_TOLERANCE_MM = 1e-4
 NOISE_POSITION_SAMPLE = 100000              # noise hits per stratum in the KS test, so that memory stays small
 TRACK_POSITION_SAMPLE = 100000              # track hits per stratum beside them in the bit tests
 GRID_LOW_BITS = 16                          # low bits of the grid integer compared, noise against track
@@ -74,7 +78,7 @@ MINIMUM_HITS_PER_BINADE = 320               # both kinds, so that the smallest o
 LOW_BIT_ATTACK_STEPS_PER_MM = 2.0 ** 46     # D1 re-review N1: a coordinate off this grid was a track hit
 
 FIXTURES = {"clean": (7001, "t07-telescope-clean/1", 1.0), "noise": (7002, "t07-telescope-noise/1", 0.98)}
-CAI_FIXTURES = {"cai-clean": (7003, "t07-telescope-cai/1", 1.0), "cai-sagitta": (7004, "t07-telescope-cai/1", 1.0)}  # amendment 1, section 3.2
+CAI_FIXTURES = {"cai-clean": (7003, "t07-telescope-cai/1", 1.0), "cai-sagitta": (7004, "t07-telescope-cai/1", 1.0)}  # section 3.2
 ALL_FIXTURES = {**FIXTURES, **CAI_FIXTURES}
 GENERATOR_PROGRAM, CAI_GENERATOR_PROGRAM = "t07_fixture_generator", "t07_cai_fixture_generator"
 PLANES = 8
@@ -93,8 +97,8 @@ RESOLUTION_UNIT_MM = 0.0184
 FAR_STEPS, NEAR_STEPS = (5.0, 25.0), (1.0, 5.0)
 SLOPE_HALF = 0.15
 SIGMA_Q_OVER_P_PER_GEV = 0.00412            # section 4.1, Closed-form facts
-SAGITTA_BIAS_IN_SIGMA = 5.0                 # amendment 1, section 4.1
-SAGITTA_TABLE_MM = (0.05404, 0.00772, -0.02316, -0.03860, -0.03860, -0.02316, 0.00772, 0.05404)  # amendment 1, section 4.1
+SAGITTA_BIAS_IN_SIGMA = 5.0                 # section 4.1
+SAGITTA_TABLE_MM = (0.05404, 0.00772, -0.02316, -0.03860, -0.03860, -0.02316, 0.00772, 0.05404)  # section 4.1
 SUM_ALPHA = 1.0 - (CHI2_TAILS[1] - CHI2_TAILS[0])  # a sum of z^2 leaves its range this often
 
 MASK64 = (1 << 64) - 1
@@ -310,14 +314,14 @@ def helix_crossings(start_xyz, direction, q_over_p, plane_x_mm, field_tesla: flo
     return y_end, z_end, phi_end, theta
 
 
-def truth_against_helix(tag: str, vertices_xyz, tracks) -> bool:
+def truth_against_helix(tag: str, vertices_xyz, tracks, loc_tolerance_mm: float = TRUTH_LOC_TOLERANCE_MM) -> bool:
     """TRUTH: one row of vertices_xyz per track."""
     direction = numpy.stack([numpy.ones(len(tracks)), tracks["slope_u"], tracks["slope_v"]], axis=1)
     loc0, loc1, phi, theta = helix_crossings(vertices_xyz, direction, tracks["q_over_p"], PLANE_Z_MM)
     crossings = tracks["crossings"]
     position = max(float(numpy.abs(crossings[:, :, 0] - loc0).max()), float(numpy.abs(crossings[:, :, 1] - loc1).max()))
     angle = max(float(numpy.abs(crossings[:, :, 2] - phi).max()), float(numpy.abs(crossings[:, :, 3] - theta).max()))
-    first = verdict(f"TRUTH {tag} crossings on the helix", position < TRUTH_LOC_TOLERANCE_MM, f"largest {position:.3g} mm, {len(tracks)} tracks")
+    first = verdict(f"TRUTH {tag} crossings on the helix", position < loc_tolerance_mm, f"largest {position:.3g} mm, limit {loc_tolerance_mm:g}, {len(tracks)} tracks")
     second = verdict(f"TRUTH {tag} directions on the helix", angle < TRUTH_ANGLE_TOLERANCE, f"largest {angle:.3g} rad")
     return first and second
 
@@ -556,7 +560,7 @@ def judge_stratum(sample: StratumSample, fixture: str, stratum: int, events_per_
 
 
 def sagitta_displacements_mm() -> numpy.ndarray:
-    """Amendment 1, section 4.1: d_k = A ((z_k - z_c)^2 - mean), A set so that q/p rises by 5 sigma(q/p): 2 A / (k B)."""
+    """Section 4.1: d_k = A ((z_k - z_c)^2 - mean), A set so that q/p rises by 5 sigma(q/p): 2 A / (k B)."""
     offsets_squared = (PLANE_Z_MM - PLANE_Z_MM.mean()) ** 2
     return SAGITTA_BIAS_IN_SIGMA * SIGMA_Q_OVER_P_PER_GEV * GEV_PER_TESLA_MM * FIELD_T / 2.0 * (offsets_squared - offsets_squared.mean())
 
@@ -565,12 +569,31 @@ def cai_displacements_mm(fixture: str) -> numpy.ndarray:
     return sagitta_displacements_mm() if fixture == "cai-sagitta" else numpy.zeros(PLANES)
 
 
+def unit_draw(raw_draw: int) -> float:
+    return (raw_draw >> 11) * 2.0 ** -53
+
+
 def drawn_between(raw_draw: int, lower: float, upper: float) -> float:
-    return lower + (upper - lower) * ((raw_draw >> 11) * 2.0 ** -53)
+    return lower + (upper - lower) * unit_draw(raw_draw)
+
+
+def drawn_gaussian(radial_draw: int, angle_draw: int) -> float:
+    return math.sqrt(-2.0 * math.log(1.0 - unit_draw(radial_draw))) * math.cos(2.0 * math.pi * unit_draw(angle_draw))
+
+
+def cai_expected_draws(digest: bytes, stratum: int) -> dict:
+    """Every draw of one CAI event from the stream, in the order of t07_cai_event_generator.hpp."""
+    raw = stream_raw_draws(digest, 7 + 4 * PLANES)
+    lower, upper = MOMENTUM_BINS_GEV[stratum]
+    smears = [SIGMA_MM * drawn_gaussian(raw[index], raw[index + 1]) for index in range(7, 7 + 4 * PLANES, 2)]
+    return {"u_mm": drawn_between(raw[0], -VERTEX_U_HALF_MM, VERTEX_U_HALF_MM), "z_mm": drawn_between(raw[1], *VERTEX_Z_RANGE_MM),
+            "v_mm": drawn_between(raw[2], -VERTEX_V_HALF_MM, VERTEX_V_HALF_MM), "charge": 1 if unit_draw(raw[3]) < 0.5 else -1,
+            "momentum_gev": math.exp(drawn_between(raw[4], math.log(lower), math.log(upper))), "slope_u": drawn_between(raw[5], -SLOPE_HALF, SLOPE_HALF),
+            "slope_v": drawn_between(raw[6], -SLOPE_HALF, SLOPE_HALF), "smear_loc0_mm": numpy.array(smears[0::2]), "smear_loc1_mm": numpy.array(smears[1::2])}
 
 
 def cai_event_defects(truth, hits, fixture: str, stratum: int) -> list:
-    """Every hard defect of one CAI event, by amendment 1's text. Empty for an honest event."""
+    """Every hard defect of one CAI event, by section 4.1's text. Empty for an honest event."""
     fixture_id = CAI_FIXTURES[fixture][0]
     tracks, vertices, event_index = truth["tracks"], truth["vertices"], int(truth["event_index"])
     defects = []
@@ -587,8 +610,9 @@ def cai_event_defects(truth, hits, fixture: str, stratum: int) -> list:
     track, vertex = tracks[0], vertices[0]
     if int(track["particle_key"]) != 0 or int(track["vertex_index"]) != 0:
         defects.append("track keys")
-    if int(track["charge"]) != (1 if event_index % 2 == 0 else -1):
-        defects.append("charge against event_index")
+    expected = cai_expected_draws(seed_digest(fixture_id, BLOCK, stratum, event_index), stratum)
+    if int(track["charge"]) != expected["charge"]:
+        defects.append("charge against the stream")
     lower, upper = MOMENTUM_BINS_GEV[stratum]
     if not lower <= float(track["momentum_gev"]) < upper:
         defects.append("momentum outside its bin")
@@ -596,10 +620,15 @@ def cai_event_defects(truth, hits, fixture: str, stratum: int) -> list:
         defects.append("q/p against charge and momentum")
     if abs(float(track["slope_u"])) > SLOPE_HALF or abs(float(track["slope_v"])) > SLOPE_HALF:
         defects.append("slope outside its range")
-    expected_vertex = [drawn_between(raw, *limits) for raw, limits in zip(stream_raw_draws(seed_digest(fixture_id, BLOCK, stratum, event_index), 3),
-                                                                          ((-VERTEX_U_HALF_MM, VERTEX_U_HALF_MM), VERTEX_Z_RANGE_MM, (-VERTEX_V_HALF_MM, VERTEX_V_HALF_MM)))]
-    if max(abs(float(vertex[name]) - value) for name, value in zip(("u_mm", "z_mm", "v_mm"), expected_vertex)) > 1e-12:
-        defects.append("vertex against the first three draws")
+    if max(abs(float(vertex[name]) - expected[name]) for name in ("u_mm", "z_mm", "v_mm")) > 1e-12:
+        defects.append("vertex against the stream")
+    if max(abs(float(track[name]) - expected[name]) for name in ("momentum_gev", "slope_u", "slope_v")) > 1e-12:
+        defects.append("track against the stream")
+    if len(hits) == PLANES:
+        grid_step_mm = 1.0 / fixture_files.HIT_GRID_STEPS_PER_MM  # the grid rounds by half of this, and the two libms differ far below it
+        if (numpy.abs(hits["loc0_mm"] - track["crossings"][:, 0] - expected["smear_loc0_mm"]).max() > grid_step_mm
+                or numpy.abs(hits["loc1_mm"] - track["crossings"][:, 1] - expected["smear_loc1_mm"]).max() > grid_step_mm):
+            defects.append("hit smear against the stream")
     if numpy.any(numpy.abs(track["crossings"][:, :2]) >= HALF_WIDTH_MM):
         defects.append("a track left the active area")
     if fixture_files.off_hit_grid(hits["loc0_mm"]) or fixture_files.off_hit_grid(hits["loc1_mm"]):
@@ -651,7 +680,7 @@ def judge_cai_stratum(sample: CaiSample, fixture: str, stratum: int, events_per_
     start = numpy.stack([vertices["z_mm"], vertices["u_mm"], vertices["v_mm"]], axis=1)
     on_nominal_planes = tracks.copy()
     on_nominal_planes["crossings"][:, :, 0] += cai_displacements_mm(fixture)
-    truth_against_helix(tag, start, on_nominal_planes)
+    truth_against_helix(tag, start, on_nominal_planes, CAI_TRUTH_LOC_TOLERANCE_MM)
 
     residuals, kept = numpy.concatenate(sample.residuals)[:events_per_point], numpy.concatenate(sample.kept)[:events_per_point]
     mean_z, variance_z = smearing_z(residuals, kept)
@@ -684,9 +713,9 @@ def judge_cai_fixture(pool: CaiPool, fixture: str) -> None:
 
 
 def check_cai_closed_form() -> None:
-    """Amendment 1's sagitta row against its own definition: plain arithmetic on the planes, no generator output."""
+    """The sagitta row of section 4.1 against its own definition: plain arithmetic on the planes, no generator output."""
     displacements = sagitta_displacements_mm()
-    verdict("TRUTH sagitta table of amendment 1", numpy.round(displacements, 5).tolist() == list(SAGITTA_TABLE_MM), f"{displacements.tolist()} mm")
+    verdict("TRUTH sagitta table of section 4.1", numpy.round(displacements, 5).tolist() == list(SAGITTA_TABLE_MM), f"{displacements.tolist()} mm")
     verdict("TRUTH sagitta displacements sum to zero", abs(float(displacements.sum())) < 1e-12, f"{float(displacements.sum()):.3g} mm")
     design = numpy.vstack([numpy.ones(PLANES), PLANE_Z_MM, PLANE_Z_MM ** 2]).T
     coefficients = numpy.linalg.lstsq(design, displacements, rcond=None)[0]
@@ -821,7 +850,7 @@ def main(argv=None) -> int:
         traceback.print_exc()
         say("STOPPED: the check did not run to its end, so no criterion of this run is read")
         return 2
-    say("ran to its end")
+    say("CHECK-FINISHED")
     say(f"GENERATOR-STDERR {generator_stderr_bytes} bytes")
     label = "RESULT" if full_size else "SMALL-SAMPLE RESULT, not the check of section 2.1:"
     say(f"{label} {'PASS' if not failures else 'FAIL'} ({len(failures)} failed lines)")

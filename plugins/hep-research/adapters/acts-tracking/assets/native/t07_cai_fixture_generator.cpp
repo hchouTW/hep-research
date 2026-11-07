@@ -1,5 +1,4 @@
-// Fixture generator t07-telescope-cai/1, the CAI fixtures of t04-values-v4.md section 4.1, as Freeze A amendment 1 proposes them. A program
-// of its own, so t07_fixture_generator and its output stay as they are. Synthetic design values, no detector implied. Check:
+// Fixture generator t07-telescope-cai/1, the CAI fixtures of t04-values-v4.md section 4.1. A program of its own, so t07_fixture_generator and its output stay as they are. Synthetic design values, no detector implied. Check:
 // check_t07_generator.py. Writes a data file and, apart, a truth file with role truth, as t07_fixture_generator does.
 //
 //   t07_cai_fixture_generator generate --fixture cai-clean|cai-sagitta --block 1|6 --stratum 0..3 --first-event I --count C --data-file D --truth-file T
@@ -112,8 +111,8 @@ int generate(const std::map<std::string, std::string>& flags) {
   truth_header.sigma_loc0_mm = t07::hit_sigma_mm;
   truth_header.sigma_loc1_mm = t07::hit_sigma_mm;
 
-  // Events leave in the order of their seed digests, as in t07_fixture_generator: position in the file does not follow event_index, so it
-  // does not say the charge. The same limit holds: enumerating the four integers with SHA-256 gives the order back.
+  // Events leave in the order of their seed digests, as in t07_fixture_generator: position in the file does not follow event_index.
+  // The same limit holds: enumerating the four integers with SHA-256 gives the order back.
   std::vector<std::pair<t07::Sha256Digest, std::uint64_t>> file_order;
   file_order.reserve(count);
   for (std::uint64_t event_index = first_event; event_index < first_event + count; ++event_index) {

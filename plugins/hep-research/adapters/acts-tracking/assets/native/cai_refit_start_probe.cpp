@@ -1,6 +1,7 @@
 // Why job 7490742's probe left 3e-4 mm and 3e-4 per GeV on noiseless hits, on both routes: separates the refit's start, one Kalman pass,
-// the stepper and the chi2 floor (d1-stage2-report.md, Fix round 1). Frozen geometry, 1 T, noiseless hits, no payload. Each start below
-// goes through the same KalmanRefit::fit. Links no generator code.
+// the stepper and the chi2 floor. Frozen geometry, 1 T, noiseless hits, no payload. Each start below
+// goes through the same KalmanRefit::fit. Links no generator code. A diagnostic: the refit is not yet for use with a field (D1 stage 2
+// review, C-M1), and this program's truth-centred prior is why it reads noiseless tracks only.
 //
 //   cai_refit_start_probe
 //

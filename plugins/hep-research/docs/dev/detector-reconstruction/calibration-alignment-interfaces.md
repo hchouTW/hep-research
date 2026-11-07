@@ -37,7 +37,9 @@ Status words: **tested** means the interface has checks that pass on synthetic f
 
 ## Gaps
 
-None recorded. No backend has been probed for R33-R35 yet; T07, T08 and T10 record any gap here, on a recorded probe, and every Section 18.2 report lists it as open.
+None recorded. T07, T08 and T10 record any gap here, on a recorded probe, and every Section 18.2 report lists it as open.
+
+Probed: `CAI-T07-3`, how a corrected payload reaches ACTS 48.2.0. Jobs 7490742 and 7491894 ran `adapters/acts-tracking/assets/native/cai_payload_probe.cpp` on noiseless tracks. A plane owned by a `SurfacePlacementBase`, with the transforms in the `GeometryContext`, and a rebuilt geometry both work, for each degree of freedom of one plane, so this is no gap. Later stages use the placement route (user's choice 16). Not yet an interface: a payload file, its mapping to plane deltas, a driver flag. The driver refuses a field until the refit's prior on `q/p` is settled. R33-R35 extras are not yet probed.
 
 ## Boundaries for the C&A plan
 

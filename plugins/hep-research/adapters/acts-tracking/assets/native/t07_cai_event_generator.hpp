@@ -10,9 +10,9 @@
 
 namespace t07 {
 
-// Draw order, part of this generator's version: vertex (u, z, v); track (ln p, u slope, v slope); per plane two Gaussians, loc0 before
-// loc1. Charge is drawn from nothing: +1 for an even event_index, -1 for an odd one, so each pair of events is exactly half and half,
-// the nearest one track per event comes to section 4.1's Charge row.
+// Draw order, part of this generator's version: vertex (u, z, v); charge; track (ln p, u slope, v slope); per plane two Gaussians, loc0
+// before loc1. Charge is drawn from the stream, +1 or -1 with equal chance. A rule on event_index would name the file: with the file
+// in seed-digest order, SHA-256 alone gives each candidate's charges, and a parabola through the hits reads them (D1 stage 2 review, C-m1).
 //
 // The deformation moves planes inside their own surface, along loc0, so a track crosses each plane where it crossed the nominal one and
 // the propagation stays on the frozen geometry. Only the local coordinate changes: crossing.loc0 - d_k, in truth and in the hit. Bounds

@@ -166,6 +166,10 @@ def native_includes(source: Path) -> set:
     return reached
 
 
+def cmake_text_of(folder: Path) -> str:
+    return (folder / "CMakeLists.txt").read_text(encoding="utf-8") + (folder / "t07_generators.cmake").read_text(encoding="utf-8")
+
+
 def driver_sources(cmake_text: str) -> list:
     """The sources of the data-side programs, the driver and the CAI probes, and of the common library, from the CMake file."""
     driver = re.search(r"add_executable\(acts_tracking_driver ([^)]*)\)", cmake_text).group(1).split()
@@ -179,12 +183,39 @@ GENERATOR_ONLY_CODE = ("t07_truth_file", "t07_event_generator", "t07_seed_stream
 
 
 def truth_code_reached(folder: Path) -> list:
-    cmake_text = (folder / "CMakeLists.txt").read_text(encoding="utf-8")
-    sources = driver_sources(cmake_text)
+    sources = driver_sources(cmake_text_of(folder))
     reached = set(sources)
     for source in sources:
         reached |= native_includes(folder / source)
     return sorted(name for name in reached if name.startswith(GENERATOR_ONLY_CODE))
+
+
+def field_gate_holds(driver_text: str, kalman_header_text: str) -> bool:
+    """D1 stage 2 review, C-M1: either the driver refuses a field, naming why, or the prior on q/p has been changed."""
+    prior = float(re.search(r"refit_prior_relative_qop_sigma = ([0-9.e+-]+);", kalman_header_text).group(1))
+    return ("if (field != 0.0) {" in driver_text and "(C-M1)" in driver_text) or prior != 0.1
+
+
+class FieldStaysShutUntilThePriorIsSettled(unittest.TestCase):
+    def setUp(self):
+        self.driver = (NATIVE / "acts_tracking_driver.cpp").read_text(encoding="utf-8")
+        self.header = (NATIVE / "kalman_refit.hpp").read_text(encoding="utf-8")
+
+    def test_the_driver_refuses_a_field_while_the_prior_stays(self):
+        self.assertTrue(field_gate_holds(self.driver, self.header))
+
+    def test_opening_the_field_alone_fails(self):
+        self.assertFalse(field_gate_holds(self.driver.replace("if (field != 0.0) {", "if (false) {"), self.header))
+
+    def test_settling_the_prior_lets_the_field_open(self):
+        widened = self.header.replace("refit_prior_relative_qop_sigma = 0.1;", "refit_prior_relative_qop_sigma = 10.0;")
+        self.assertTrue(field_gate_holds(self.driver.replace("if (field != 0.0) {", "if (false) {"), widened))
+
+
+class CheckLinesAgainstSection18(unittest.TestCase):
+    def test_no_line_of_a_good_run_matches_row_1(self):
+        """Section 18 row 1 voids a run on a `ran to its end` line, check_generators.py's failure line. This check must not print those words."""
+        self.assertNotIn("ran to its end", (ADAPTER / "assets" / "fixture_tools" / "check_t07_generator.py").read_text(encoding="utf-8"))
 
 
 class DataSideNeverOpensTruth(unittest.TestCase):
@@ -217,14 +248,24 @@ class DataSideNeverOpensTruth(unittest.TestCase):
             source.write_text('#include "t07_cai_constants.hpp"\n' + source.read_text(encoding="utf-8"), encoding="utf-8")
             self.assertIn("t07_cai_constants.hpp", truth_code_reached(copied))
 
+    def test_what_shapes_a_generator_build_is_in_the_hashed_cmake_file(self):
+        """Section 2.1: t07_generators.cmake is hashed and CMakeLists.txt is not, so nothing in the second may reach a generator."""
+        outer = (NATIVE / "CMakeLists.txt").read_text(encoding="utf-8")
+        self.assertIn("include(t07_generators.cmake)", outer)
+        for name in ("add_library", "add_compile_options", "add_definitions", "CMAKE_CXX", "CMAKE_BUILD_TYPE", "find_package", "add_executable(t07_", "target_link_libraries(t07_"):
+            self.assertNotIn(name, outer)
+        hashed = (NATIVE / "t07_generators.cmake").read_text(encoding="utf-8")
+        for name in ("-ffp-contract=off", "CMAKE_CXX_STANDARD 23", "add_executable(t07_fixture_generator", "add_executable(t07_cai_fixture_generator"):
+            self.assertIn(name, hashed)
+
     def test_both_probes_are_counted_as_data_side(self):
-        sources = driver_sources((NATIVE / "CMakeLists.txt").read_text(encoding="utf-8"))
+        sources = driver_sources(cmake_text_of(NATIVE))
         self.assertIn("cai_payload_probe.cpp", sources)
         self.assertIn("cai_refit_start_probe.cpp", sources)
 
     def test_the_cai_code_stays_out_of_the_clean_and_noise_targets(self):
         """Amendment 1: t07-telescope-cai/1 is apart, so t07_fixture_generator and the driver build from what they built from."""
-        cmake_text = (NATIVE / "CMakeLists.txt").read_text(encoding="utf-8")
+        cmake_text = cmake_text_of(NATIVE)
         self.assertIn("add_executable(t07_fixture_generator t07_fixture_generator.cpp t07_event_generator.cpp t07_seed_stream.cpp t07_truth_file.cpp)", cmake_text)
         self.assertIn("add_executable(acts_tracking_driver acts_tracking_driver.cpp kalman_refit.cpp)", cmake_text)
         self.assertIn("add_library(acts_tracking_common STATIC sha256.cpp t07_data_file.cpp native_product.cpp telescope_geometry.cpp plane_propagation.cpp)", cmake_text)
@@ -233,7 +274,7 @@ class DataSideNeverOpensTruth(unittest.TestCase):
 
     def test_no_header_the_driver_reaches_holds_a_draw_rule(self):
         reached = set()
-        cmake_text = (NATIVE / "CMakeLists.txt").read_text(encoding="utf-8")
+        cmake_text = cmake_text_of(NATIVE)
         for source in driver_sources(cmake_text):
             reached |= native_includes(NATIVE / source)
         text = "".join((NATIVE / name).read_text(encoding="utf-8") for name in sorted(reached))
@@ -621,20 +662,14 @@ class GeneratorCheckCatchesDefects(unittest.TestCase):
 
 # Section 2.1's size: 1,000 events at each of the 4 momentum bins of each occupancy level, the sample the fixture-level tests read.
 def honest_cai_event(fixture: str = "cai-clean", stratum: int = 0, event_index: int = 0) -> tuple:
-    """One event that obeys amendment 1's text, built here with the closed-form helix: (truth, hits). Vertex from the seed stream, the rest from numpy."""
+    """One event that obeys section 4.1's text, every draw from the seed stream, with the closed-form helix in place of ACTS: (truth, hits)."""
     fixture_id = generator_check.CAI_FIXTURES[fixture][0]
     digest = generator_check.seed_digest(fixture_id, generator_check.BLOCK, stratum, event_index)
-    draws = numpy.random.default_rng([fixture_id, stratum, event_index])
-    raw_u, raw_z, raw_v = generator_check.stream_raw_draws(digest, 3)
+    drawn = generator_check.cai_expected_draws(digest, stratum)
     vertices = numpy.zeros(1, dtype=truth_files.VERTEX)
-    vertices["u_mm"] = generator_check.drawn_between(raw_u, -0.05, 0.05)
-    vertices["z_mm"] = generator_check.drawn_between(raw_z, -100.2, -99.8)
-    vertices["v_mm"] = generator_check.drawn_between(raw_v, -30.0, 30.0)
+    vertices["u_mm"], vertices["z_mm"], vertices["v_mm"] = drawn["u_mm"], drawn["z_mm"], drawn["v_mm"]
     tracks = numpy.zeros(1, dtype=truth_files.TRACK)
-    tracks["charge"] = 1 if event_index % 2 == 0 else -1
-    lower, upper = generator_check.MOMENTUM_BINS_GEV[stratum]
-    tracks["momentum_gev"] = math.exp(draws.uniform(math.log(lower), math.log(upper)))
-    tracks["slope_u"], tracks["slope_v"] = draws.uniform(-0.15, 0.15), draws.uniform(-0.15, 0.15)
+    tracks["charge"], tracks["momentum_gev"], tracks["slope_u"], tracks["slope_v"] = drawn["charge"], drawn["momentum_gev"], drawn["slope_u"], drawn["slope_v"]
     tracks["q_over_p"] = tracks["charge"] / tracks["momentum_gev"]
     start = numpy.stack([vertices["z_mm"], vertices["u_mm"], vertices["v_mm"]], axis=1)
     direction = numpy.stack([numpy.ones(1), tracks["slope_u"], tracks["slope_v"]], axis=1)
@@ -644,11 +679,32 @@ def honest_cai_event(fixture: str = "cai-clean", stratum: int = 0, event_index: 
     tracks["hit_keys"] = numpy.arange(8)
     hits = numpy.zeros(8, dtype=fixture_files.HIT)
     hits["hit_key"], hits["plane"] = numpy.arange(8), numpy.arange(1, 9)
-    hits["loc0_mm"] = fixture_files.on_hit_grid(loc0[0] + draws.normal(0, SIGMA_MM, 8))
-    hits["loc1_mm"] = fixture_files.on_hit_grid(loc1[0] + draws.normal(0, SIGMA_MM, 8))
+    hits["loc0_mm"] = fixture_files.on_hit_grid(loc0[0] + drawn["smear_loc0_mm"])
+    hits["loc1_mm"] = fixture_files.on_hit_grid(loc1[0] + drawn["smear_loc1_mm"])
     truth = {"event_digest": digest, "event_index": numpy.uint64(event_index), "momentum_bin": numpy.uint32(stratum), "occupancy_level": numpy.uint32(0),
              "near_separation": numpy.uint32(0), "noise_counts": numpy.zeros(8, dtype=numpy.uint32), "vertices": vertices, "tracks": tracks}
     return truth, hits
+
+
+def charge_read_from_hits(hits) -> int:
+    """The sign of the parabola through loc0 against z: u'' = -k B q/p. Data side only. Holds for both CAI fixtures: the sagitta's rise is at most half of |q/p|."""
+    return -1 if numpy.polyfit(numpy.asarray(generator_check.PLANE_Z_MM), hits["loc0_mm"], 2)[0] > 0 else 1
+
+
+def parity_match(charges_in_file_order, fixture_id: int, block: int, stratum: int) -> float:
+    """D1 stage 2 review, C-m1, by SHA-256 alone: a candidate's digest order gives its event_index order, and parity gave the charge. The share that agrees."""
+    order = sorted(range(len(charges_in_file_order)), key=lambda index: generator_check.seed_digest(fixture_id, block, stratum, index))
+    return float(numpy.mean([charge == (1 if index % 2 == 0 else -1) for charge, index in zip(charges_in_file_order, order)]))
+
+
+def stream_match(charges_in_file_order, fixture_id: int, block: int, stratum: int) -> float:
+    """The accepted search of section 3.2: with the stream as well, the same candidates predict each charge. The share that agrees."""
+    digests = sorted(generator_check.seed_digest(fixture_id, block, stratum, index) for index in range(len(charges_in_file_order)))
+    return float(numpy.mean([charge == generator_check.cai_expected_draws(digest, stratum)["charge"] for charge, digest in zip(charges_in_file_order, digests)]))
+
+
+CAI_CANDIDATES = [(fixture_id, block, stratum) for fixture_id in (7003, 7004) for block in (1, 6) for stratum in range(4)]
+ATTACK_EVENTS = 300  # one standard deviation of a chance match: 2.9 %
 
 
 class CaiCheckCatchesDefects(unittest.TestCase):
@@ -697,11 +753,23 @@ class CaiCheckCatchesDefects(unittest.TestCase):
         def key_moved(truth, hits):
             truth["tracks"]["hit_keys"][0, 0] = 1
 
+        def flip_charge(truth, hits):
+            truth["tracks"]["charge"] = -truth["tracks"]["charge"]
+
+        def slopes_swapped(truth, hits):
+            truth["tracks"]["slope_u"], truth["tracks"]["slope_v"] = truth["tracks"]["slope_v"].copy(), truth["tracks"]["slope_u"].copy()
+
+        def smears_swapped(truth, hits):
+            crossings = truth["tracks"]["crossings"][0]
+            first, second = hits["loc0_mm"] - crossings[:, 0], hits["loc1_mm"] - crossings[:, 1]
+            hits["loc0_mm"], hits["loc1_mm"] = fixture_files.on_hit_grid(crossings[:, 0] + second), fixture_files.on_hit_grid(crossings[:, 1] + first)
+
         cases = {"stratum fields": set_field("momentum_bin", numpy.uint32(2)), "seed digest": set_field("event_index", numpy.uint64(4)),
-                 "track keys": set_track("vertex_index", 1), "charge against event_index": set_track("charge", 1),
+                 "track keys": set_track("vertex_index", 1), "charge against the stream": flip_charge,
                  "momentum outside its bin": set_track("momentum_gev", 6.5), "slope outside its range": set_track("slope_v", 0.2),
                  "not one hit per plane in plane order": swap_hits, "a coordinate is off the hit grid": off_grid,
-                 "vertex against the first three draws": vertex_redrawn, "noise in a CAI fixture": noise, "truth keys against hits": key_moved}
+                 "vertex against the stream": vertex_redrawn, "noise in a CAI fixture": noise, "truth keys against hits": key_moved,
+                 "track against the stream": slopes_swapped, "hit smear against the stream": smears_swapped}
         for name, change in cases.items():
             with self.subTest(defect=name):
                 self.assertIn(name, self.defects_after(change))
@@ -762,7 +830,29 @@ class CaiCheckCatchesDefects(unittest.TestCase):
         self.addCleanup(setattr, generator_check, "SAGITTA_BIAS_IN_SIGMA", honest)
         generator_check.SAGITTA_BIAS_IN_SIGMA = 4.0
         self.quietly(generator_check.check_cai_closed_form)
-        self.assertIn("TRUTH sagitta table of amendment 1", generator_check.failures)
+        self.assertIn("TRUTH sagitta table of section 4.1", generator_check.failures)
+
+    def test_an_amplitude_off_by_half_a_percent_fails_truth(self):
+        """D1 stage 2 review, C-m2: the CAI limit sees 0.19 % of the largest d_k; 1e-3 mm saw only 1.8 %."""
+        def scaled(truth, hits):
+            truth["tracks"]["crossings"][0, :, 0] -= 0.005 * generator_check.sagitta_displacements_mm()
+
+        self.assertTrue([line for line in self.judged("cai-sagitta", scaled, 40) if line.startswith("TRUTH")])
+
+    def test_sha256_alone_no_longer_names_a_cai_file(self):
+        """D1 stage 2 review, C-m1, on events drawn as the generator draws them. Every candidate, the true one included, is at chance."""
+        for fixture, fixture_id in (("cai-clean", 7003), ("cai-sagitta", 7004)):
+            events = sorted((honest_cai_event(fixture, 0, index) for index in range(ATTACK_EVENTS)), key=lambda event: event[0]["event_digest"])
+            charges = [charge_read_from_hits(hits) for _, hits in events]
+            self.assertEqual(charges, [int(truth["tracks"]["charge"][0]) for truth, _ in events])
+            for candidate in CAI_CANDIDATES:
+                with self.subTest(fixture=fixture, candidate=candidate):
+                    self.assertLess(abs(parity_match(charges, *candidate) - 0.5), 0.15)
+            self.assertEqual(stream_match(charges, fixture_id, generator_check.BLOCK, 0), 1.0)  # the accepted search, which needs the stream
+
+    def test_the_attack_would_have_named_a_file_under_the_parity_rule(self):
+        order = sorted(range(ATTACK_EVENTS), key=lambda index: generator_check.seed_digest(7003, 6, 0, index))
+        self.assertEqual(parity_match([1 if index % 2 == 0 else -1 for index in order], 7003, 6, 0), 1.0)
 
     def test_the_family_is_what_the_amendment_states(self):
         """Lines counted as they print, on honest events: two sums per stratum, thirteen tests per fixture. Then the figures of the draft."""
@@ -1526,11 +1616,15 @@ class BuiltCaiGenerator(unittest.TestCase):
         self.assertEqual(fixture_files.data_file_defects(self.work / "events.t07data"), [])
         self.assertEqual(seed_attack((self.work / "events.t07data").read_bytes(), fixture_ids=(7003, 7004)), [])
 
-    def test_position_in_the_file_does_not_follow_the_charge(self):
-        self.assertEqual(self.generate(stratum="0", count="200").returncode, 0)
-        charges = [int(event["tracks"]["charge"][0]) for event in truth_files.iter_truth_events(self.work / "events.t07truth")]
-        self.assertEqual(sum(charges), 0)
-        self.assertLess(abs(sum(charge * (-1) ** position for position, charge in enumerate(charges))), 80)  # 200 if position kept event_index parity
+    def test_sha256_alone_does_not_name_a_real_file(self):
+        """D1 stage 2 review, C-m1, on the generator's own files, charges read from the data side."""
+        for fixture, fixture_id in (("cai-clean", 7003), ("cai-sagitta", 7004)):
+            self.assertEqual(self.generate(fixture=fixture, stratum="0", count=str(ATTACK_EVENTS)).returncode, 0)
+            charges = [charge_read_from_hits(event["hits"]) for event in fixture_files.iter_data_events(self.work / "events.t07data")]
+            self.assertEqual(charges, [int(event["tracks"]["charge"][0]) for event in truth_files.iter_truth_events(self.work / "events.t07truth")])
+            matches = {candidate: parity_match(charges, *candidate) for candidate in CAI_CANDIDATES}
+            print(f"RECORD parity attack on {fixture}: true candidate {matches[(fixture_id, 6, 0)]:.3f}, all from {min(matches.values()):.3f} to {max(matches.values()):.3f}")
+            self.assertLess(max(abs(match - 0.5) for match in matches.values()), 0.15)
 
     def test_the_two_fixtures_have_their_own_seeds(self):
         self.assertEqual(self.generate(fixture="cai-clean", name="first").returncode, 0)

@@ -23,7 +23,7 @@ GeneratedEvent generate_cai_event(const CaiFixture& fixture, std::uint32_t block
   event.truth.vertices.push_back(vertex);
 
   TruthTrack track;
-  track.charge = event_index % 2 == 0 ? 1 : -1;
+  track.charge = stream.uniform() < 0.5 ? 1 : -1;
   track.momentum_gev = std::exp(stream.uniform_between(std::log(momentum_bins_gev[stratum][0]), std::log(momentum_bins_gev[stratum][1])));
   track.slope_u = stream.uniform_between(-slope_half_range, slope_half_range);
   track.slope_v = stream.uniform_between(-slope_half_range, slope_half_range);

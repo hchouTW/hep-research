@@ -140,8 +140,12 @@ int refit(const std::map<std::string, std::string>& flags) {
   if (used != field_text.size() || !std::isfinite(field)) {
     throw std::invalid_argument("--field-tesla is not a number: " + field_text);
   }
+  // D1 stage 2 review, C-M1: the prior on q/p is centred on the assumed value, 10 % wide, as tight as the measurement at high momentum.
+  // With a field that is a truth constraint: in [12, 24) GeV it would narrow pulls to about 0.82 and keep two thirds of a true bias, and
+  // it would constrain CAI-T07-4's mode, against R37. So no refit runs with a field until the prior is settled.
+  // tests/adapters/test_acts_tracking.py fails if this refusal goes while the prior stays.
   if (field != 0.0) {
-    throw std::invalid_argument("refit accepts zero field at this stage: the field stage of T07 is not built");
+    throw std::invalid_argument("refit accepts zero field at this stage: the field stage of T07 is not built, and its prior on q/p is not settled (C-M1)");
   }
 
   refuse_overwriting_input(out_path, data_path);
