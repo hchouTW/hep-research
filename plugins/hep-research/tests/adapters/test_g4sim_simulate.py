@@ -11,7 +11,7 @@ sys.path.insert(0, str(ROOT / "adapters/geant4/assets"))
 
 import g4sim_simulate as simulate  # noqa: E402
 
-from core.geometry import segmentation  # noqa: E402
+from core.geometry import identity, segmentation  # noqa: E402
 from core.geometry.numbers import GeometryError  # noqa: E402
 from core.simulation.source_density import SourceError  # noqa: E402
 
