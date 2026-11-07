@@ -3,7 +3,7 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## 0.60.0 (unreleased)
+## 0.60.0 (2026-11-07)
 
 Minor release. g4sim phase S5 (`adapters/geant4` 0.11.0; contracts 3.23.0, `CORE_VERSION` 1.10.0). Kits and the design loop: the calorimeter, planes_tracker and tof kits in `skills/hep-detector/assets/g4kits/`, `g4kit.py` (`list`, `derive`) and `geometry-derivation/1`; design candidates carry
 `geometry_kind`, `geometry_id` and `geometry_derivation_ref`, `design.py` and `evaluate_design.py` select the mapping by `geometry_mapping(kind)`, and layered-spectrometer keeps its path, its results unchanged. `evaluate_design.py search` runs a kit through `geant4_run.py run-spec`, which takes specification files by path and hash.
