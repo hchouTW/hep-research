@@ -222,3 +222,23 @@ User's answer, 2026-11-06, verbatim: "freeze A as listed". Frozen by hash, with 
 
 From here, a change to any of these is a section 2.3 amendment by the user, labelled "after development", reported under both rules. Outside this freeze: T07's generator, an addendum on the user's word before any T07 development run; the `element_sim` spec, before T15b; K12 targets, after P2; Freeze B items.
 
+
+## T06 readings, by the coordinator
+
+Rulings under the finish plan, each reversible by the user.
+
+- **Evidence stage for routine use.** The plan names no minimum stage. Passed `simulation-pilot` evidence may support `routine`, only where Section 8.4 check 6 holds: the tested domain covers the request, and required checks match and are constructible. Section 5.10, Section 12.1, R14 and R21 still apply, and K09 thresholds may narrow this.
+- **Limits accepted, not defects.** Without a declared estimator, `reported` values are compared on exactly consistent data only, and under a prior only for rows the data alone fix, so a wrong value elsewhere is not caught. `constructible` is a declared boolean the plugin cannot yet verify.
+- **Owners of items outside T06's contract scope.** Section 8.5 forms and learned ports: T11. Section 10.4 fields: T12. Section 8.7 hashes and the method index: T15a.
+- **Connection roles.** Refused only for truth into a data-side port (Section 8.4 check 3) and for `training-calibration` with `validation`, either direction. The second applies K08's separation to port roles, as a reading.
+- **Name-based and silent limits.** `track_as_spatial` is a name check on free-text axes. `iov_intersection` returns `None` for mixed closures without the reason.
+- **Comparator floor.** `relative_tolerance` has a floor of 1e-15 beside its ceiling, by Sections 14.1 and 9.5.
+- **Degenerate components.** A component on a design degenerate at the tolerance but not exactly, or with weights in the row space at the tolerance but not exactly, gets the warning `reconstruction.estimate.component_unchecked` and is not checked. A float comparison was rejected because its parameter error can exceed the tolerance. Accepted limit.
+- **Numerical rank.** Judged on unit-norm columns, so parameter units do not matter. Rows in different units are not scaled. Accepted limit.
+- **Energy loss.** dE/dx is read as a per-length track quantity, not a per-event energy a sensor delivers, so it does not trigger `capability_mismatch`.
+- **`affected_payloads`.** Returns `None` when its input holds anything other than payload documents with a string `payload_id`, and `[]` only for a declared empty set or no change (Section 9.4).
+- **Zero designs.** On an all-zero design only the zero combination is determined (W2, A34).
+- **Global scans.** They have no comparator, so rank is judged at the tolerance ceiling. Column scaling removes units, not an offset, so an uncentred polynomial coordinate can read rank-deficient, failing towards "not determined". Centring is the accepted form. Accepted limit.
+- **Constraint rows.** A constraint row is a row at its own scale, and rows are not scaled: state a constraint at the design's scale. Accepted limit.
+- **Float32 probability operators.** Refused at the ceiling, a true reading of the stored numbers: renormalize in double. `yr` is not in `UNIT_SCALES`, because a year needs a choice.
+- **Row-normalized operators.** `_check_operator` reads columns, so a row-normalized operator with `interpretation: probability` is refused unless its columns also sum to at most 1. Ruling: keep this, the cautious reading. If wrong, an honest operator is refused loudly and the rule is widened later; no wrong result passes.

@@ -1,0 +1,33 @@
+{
+ "$comment": "selection-record/1 (contract-map.md; plan Sections 5.13, 8.7; K16): a replayable record of how a recipe was or was not chosen. Distinct from decision_record.json, to which it may point for a human decision. T15a fills its behaviour; here it is a readable and honest record. Read by contracts/reconstruction.py, not an artifact type.",
+ "type": "object",
+ "required": ["schema", "record_id", "request", "signature_ref", "policy", "candidates", "decision", "trials", "sample_roles", "dependencies", "required_extensions"],
+ "additionalProperties": false,
+ "properties": {
+  "schema": {"const": "selection-record/1"},
+  "record_id": {"$ref": "reconstruction_common.json#/$defs/name"},
+  "request": {"type": "object", "required": ["target", "deliverable"], "additionalProperties": false,
+   "properties": {"target": {"$ref": "reconstruction_common.json#/$defs/name"}, "deliverable": {"$ref": "reconstruction_common.json#/$defs/name"}}},
+  "signature_ref": {"$ref": "reconstruction_common.json#/$defs/name"},
+  "policy": {"type": "object", "required": ["version", "granularity", "target", "quality_contract", "objective", "budgets"], "additionalProperties": false,
+   "properties": {"version": {"$ref": "#/$defs/optional_name"}, "granularity": {"enum": ["dataset", "run", "conditions-stratum"]}, "target": {"$ref": "#/$defs/optional_name"},
+                  "quality_contract": {"$ref": "#/$defs/optional_name"}, "objective": {"$ref": "#/$defs/optional_name"}, "budgets": {"$ref": "#/$defs/optional_name"}}},
+  "candidates": {"type": "array", "items": {"type": "object", "required": ["recipe", "hard_predicates", "quality_evidence", "exclusion_or_probe_reason"], "additionalProperties": false,
+   "properties": {"recipe": {"$ref": "#/$defs/optional_name"}, "hard_predicates": {"$ref": "reconstruction_common.json#/$defs/name"},
+                  "quality_evidence": {"$ref": "#/$defs/optional_name"}, "exclusion_or_probe_reason": {"$ref": "#/$defs/optional_name"}}}},
+  "decision": {"type": "object", "required": ["state", "chosen_recipe", "reason", "decision_record_ref"], "additionalProperties": false,
+   "properties": {"state": {"$comment": "qualified-default is the predeclared conservative baseline of K16", "enum": ["needs-evidence", "abstained", "selected", "qualified-default"]},
+                  "chosen_recipe": {"$ref": "#/$defs/optional_name"}, "reason": {"$ref": "reconstruction_common.json#/$defs/name"},
+                  "decision_record_ref": {"$ref": "#/$defs/optional_name"}}},
+  "trials": {"$comment": "every probe and trial with its cost, failures included (K17)", "type": "array", "items": {"type": "object", "required": ["trial_id", "cost", "outcome"], "additionalProperties": false,
+   "properties": {"trial_id": {"$ref": "reconstruction_common.json#/$defs/name"}, "cost": {"$ref": "reconstruction_common.json#/$defs/name"}, "outcome": {"$ref": "reconstruction_common.json#/$defs/name"}}}},
+  "sample_roles": {"$ref": "reconstruction_common.json#/$defs/names"},
+  "dependencies": {"$ref": "reconstruction_common.json#/$defs/names"},
+  "required_extensions": {"$ref": "reconstruction_common.json#/$defs/extension_ids"},
+  "optional_extensions": {"$ref": "reconstruction_common.json#/$defs/extension_ids"},
+  "extensions": {"$ref": "reconstruction_common.json#/$defs/extension_fields"}
+ },
+ "$defs": {
+  "optional_name": {"anyOf": [{"type": "null"}, {"$ref": "reconstruction_common.json#/$defs/name"}]}
+ }
+}

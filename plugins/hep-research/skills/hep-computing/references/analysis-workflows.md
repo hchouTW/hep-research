@@ -11,8 +11,11 @@ reproducible, partial reruns safe, and the provenance of every number checkable.
 - **A computational-run per step.** Each step leaves a record with its inputs and their SHA-256, the command, the
   environment, seeds, tolerances, exit status and output hashes (`<plugin root>/contracts/schemas/ext_computational_run.json`).
   A later step that consumes an output can check it against the record.
-- **Deterministic outputs.** Seeds are explicit; outputs carry no timestamps, host names or absolute paths, so a
-  rerun on the same inputs is byte-identical and a changed hash means a changed result.
+- **Deterministic outputs.** Seeds are explicit; outputs carry no timestamps, host names or absolute paths. For a
+  recipe that declares byte reproducibility, a rerun on the same inputs is byte-identical and a changed hash means a
+  changed result. Other recipes declare numerical or statistical reproducibility with their comparators (quantities,
+  matching rules and tolerances; or distributions, metrics, sample sizes, statistical checks and tolerances); their
+  hashes check integrity.
 - **Fail loudly.** A step that exits non-zero, or exits zero without writing its outputs, stops the chain; nothing
   downstream runs on a partial result.
 
@@ -88,6 +91,7 @@ reproducible, partial reruns safe, and the provenance of every number checkable.
 
 ## Checks
 
-- A rerun on synthetic inputs is byte-identical (the runner's test does this).
+- A rerun on synthetic inputs of a recipe that declares byte reproducibility is byte-identical (the runner's test does
+  this); any other recipe passes its declared numerical or statistical comparators.
 - Every output of the final step traces back through run records to input checksums.
 - The DAG has no cycle, and no step reads a file it did not declare.

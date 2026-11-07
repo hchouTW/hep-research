@@ -1,0 +1,38 @@
+{
+ "recipes": {
+  "flux_from_counts.json": "e2fc4c1d5dd6f22f80861be23c4819c08945e905f7397fece262d74ca328c216"
+ },
+ "responses": {
+  "contracts/fixtures/artifacts/valid/response.json": "d02dd3a21201e2f1fd78bce7fa3b9d3e356657565ed4a67186dee5b7f6cf8ed5",
+  "contracts/fixtures/artifacts/valid/response_parametrized.json": "6c81cb5d1158c5eacb5593db931dda17796bdc3f908a6de62268c1b73f4d6e73",
+  "contracts/fixtures/artifacts/valid/response_v24.json": "ada48fda59be65a7f7a53817b18f2600ae5d0664ef9b3951c0724f0aaa21f8df",
+  "contracts/fixtures/artifacts/valid/response_v28.json": "2df79394d99b71f0809695e2f0576b449d0d74350ac07afdece32a5c7de0a9e7",
+  "examples/ams-flux-ratio/output/artifacts/response_helium_synthetic-period-1.json": "5af6b1ea2a0b150607553e7553d21c9e7b9c919c181d73cc668d867138d0210a",
+  "examples/ams-flux-ratio/output/artifacts/response_helium_synthetic-period-2.json": "4089f1429f9522f753ba020108724edcdedb8095d88436aa426f272d1ea523a6",
+  "examples/ams-flux-ratio/output/artifacts/response_proton_synthetic-period-1.json": "c6fb797cc174ba1370a499139d2129c130783a6e1edf1617de8f58c3dea43876",
+  "examples/ams-flux-ratio/output/artifacts/response_proton_synthetic-period-2.json": "dad93279cd0b5d88191cbeaf00c18d0a64c596a73f4456a330216a9d283d461f",
+  "examples/collider-angular/output/artifacts/response.json": "3c4636a1d8f3d26922b378f9aaf552a551dc5cf93ad1a6a0ffe05c2847a2a071",
+  "examples/geant4-thin-silicon/output/artifacts/response.json": "7231166f43a528b737fa22be9fad38b3390370347f7c87adf441f6cf8162f6de",
+  "examples/multi-era-fit/output/artifacts/response_e1.json": "de46ef16fc0222af79001c4bba53fc33b00aaad3c08e0fd47cc6be4ffc0ad9c4",
+  "examples/multi-era-fit/output/artifacts/response_e2.json": "dff797ff78a1b2a9f57f532b956e62d79dcc688b578e9456df2ab9064135c64c",
+  "examples/multi-era-fit/output/artifacts/response_mixed.json": "2b9f4dfda27fdd27e1ad277a4f3a808722d704429651ffe18f2704302fe76a9d"
+ },
+ "tool_contracts": {
+  "audit_blinded_outputs.json": "e886c5a82ee88fbcc58b325c109e913d269ca15b6c3def4d466aa59fb164c71a",
+  "calorimeter_resolution.json": "58878d738db7e60491864247531b38eafc42ddf2eb324f37bf33df8e3775c25c",
+  "charge_confusion_rate.json": "0697171ded542419dbcd7f4f56f2ce8049495ffe9608e2f1bcf6c61d1614823e",
+  "cherenkov_angle.json": "fa1f98fa3284d548c51e7630cfdf49aa3d4fcaab141e902e9cb56ada907b5e47",
+  "cosmic_ray_flux.json": "8030fdbb955bb3d31c45f21fc3c5af8ff2aac2d038f7a80bd760e9076eabd2cd",
+  "design_estimates.json": "28214f03e40d82b5037c3fd370ddc5b92fa37fb2142936f33dc38111e82ceb2d",
+  "frontend_response.json": "d2f8bd8884801343415383ccffe99566de0492d4b38984091357e969edea2de3",
+  "mask_blinded_bins.json": "4634bbd246f33fd6c4f5a7a5d401a4d080e13a9409715c3d3260e01452ebd315",
+  "multiple_scattering.json": "f6f68024364fa0e48532539597864f6c4e620ba072de44a3ace5eb73556bf6a5",
+  "pid_separation_power.json": "c68ed35f9ec434ba529bda4c54c83d5859cd49b66de76e23c15258fc7bff1d91",
+  "pileup_reweight.json": "55a78c0f9497b92b05a6421198e2ca9e6a7c312855a3656212dfb483d74fc71c",
+  "release_prepare.json": "0e5ee2416883cd8db34c9ea1d5c9225976ad2792b06d37828a0377d765072011",
+  "solar_modulation_force_field.json": "e08d82ba8100bc7dcb2113a1edb1e03baf90bf6fdbc431aab8cb13bf2752ee69",
+  "tag_and_probe_efficiency.json": "9f0e963b1e8afe007bb015031900788ff253e7b6ec6c27af63990d8fe8f4456d",
+  "toy_spectrometer.json": "558b7562cc51d0fca4eac9b95af19bd95d78d74b79ae7a1b7c0c2605602742f6",
+  "tracker_resolution.json": "d36dbb8e0f7eb27f95c6347c2204a1da13684880fe3a9e32666e032aafc92948"
+ }
+}

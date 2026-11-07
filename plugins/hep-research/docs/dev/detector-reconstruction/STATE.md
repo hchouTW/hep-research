@@ -48,6 +48,7 @@ jobs:
 backup_a1: {path: "<workdir>/backup/20261106T083302Z", bundle_sha256: 448d4dc5e9d397f4273ce96e4471230c8e9b0397b8829e32caa04ea2fe2fddb9, archive_sha256: 5e39d7a536146a0ae22d8ac07c8b95e6dfae388ea6a25ab95761fb0b2c580e7b, bundle_commit: 2bf2ef92, approval: "approve the backup commands", task: "A1 step 4"}
 backup_a2: {path: "<workdir>/backup/20261106T091043Z", bundle_sha256: 8105206658cc42616a2d3afeca05e21778c570c099b15e8428f263f6caa311da, archive_sha256: 3fc41ab24421f1362160598981c5657611a2c31c10ec881d894e3837f04672f2, bundle_commit: a2281ca3, approval: "rerun the backup and remove the citation worktree", note: "holds the filled task log; predates the B1 rebase"}
 backup_b2: {path: "<workdir>/backup/20261106T194259Z", bundle_sha256: cae42545cc8794ab89b1b9cb12a504e87ef8add9aa63015f1969cdfd11ddcb0f, archive_sha256: ac12ce399e6209e43188df2d678c49a69a9a353dc56a53f54c3dfa5ef487fde8, bundle_commit: 21b591a4, approval: "approve the backup, write the T09 and T08 diagnostic job", note: "B2 step 4; bundle and archive verified"}
+backup_b3: {path: "<workdir>/backup/20261106T235844Z", bundle_sha256: 58429c3544483c0336d5383db988e489c4acf6612d6c670432e504025692556f, archive_sha256: f658bde15de25609960d0f1b94dbd6257384490eaa55bdb0283c77f20b750102, bundle_commit: d568f8f1, approval: "approve the backup, continue with Phase C", note: "after Freeze A; bundle and archive verified"}
 task_log: {path: "<private>/task-log/task-log.jsonl", note: "rebuilt 2026-11-06 from STATE.md, decisions.md, git history and job records, all entries reconstructed; 5 jobs and every user decision present; appended at each step from here (A2)"}
 deviations: {record: deviations.md, count: 8, note: "A3 step 1; none is known to have affected a recorded result"}
 literature: {record: "<private>/evidence/20261106T084851Z-a3fix1/artifacts/t11-literature-record-v3.json", sources: 63, added: "37 sources t11:S27-S63 from 56 citation records; each carries verification_checks (verdict, statement checked, note) from the T11 verification; validate.py exit 0; 2 access-limited flags (S31, S35) and 1 proposed merge (S42/S45, different editions), no search_incomplete flag", level_mapping: "full-text-arxiv and full-text-inspire recorded as full-text; full-text-section recorded as page, a conservative downgrade (strength 2 against 3); the original term is kept in level_as_recorded", note: "A3 step 3; v2 (verdicts not carried) is superseded; the 35 search-log entries are preserved, they were never stored flags"}
@@ -59,9 +60,10 @@ tasks:
   T03: {state: done, note: "comparison clean with rerun 7474460 (R28); t03-selection.md, t07-t09-task-sheets.md; gaps stay recorded"}
   T04: {state: done, record: decisions.md, draft: t04-values-v4.md, review: t04-review.md, note: "Freeze A given 2026-11-06, verbatim in decisions.md; hashes in freeze-a.md"}
   T05: {state: done, note: "P1 sheets complete, P2 onward list blockers; record t05-task-sheets.md"}
+  T06: {state: in-progress, note: "done-provisional (R28), committed after 5 fix rounds and 4 re-reviews; 12 modules, 422 tests; unit suite waits for the Gate C job; readings in decisions.md, T06 readings; reviews evidence/c1-*.md"}
   T11: {state: done, note: "comparison clean with rerun 7474460 (R28); every applicable cell is sourced or a recorded gap (R14); 10 citation uses unread; plugin defects in t11-citation-findings.md not applied"}
 k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K08, K09, K10, K11, K12, K16, K17, K18]}
-next_action: "Backup after Freeze A (needs approval); then Phase C, T06"
+next_action: "Phase C: T14, then T15a, then the Gate C checkpoint job"
 ```
 
 ## Plan conflicts found

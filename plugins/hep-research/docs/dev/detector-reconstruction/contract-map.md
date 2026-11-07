@@ -36,7 +36,9 @@ Each semantic need takes the first option that works (Section 8.1): existing fie
 ## Rules for readers
 
 - A reader that meets an unknown required extension stops; an unknown optional one may be ignored and is reported (K13).
+- Every reader path reads a sidecar one way, `read_document` in `contracts/sidecar_reader.py`: format, extensions, schema and semantic rules. Public functions take whole documents, and a test drives each one with an unknown format and an unknown required extension. A converter and an old tool contract are read by their own schemas, and two digest functions read no meaning.
 - Old recipes, tool contracts and response files keep their meaning and their validators.
+- Exception: `ext_response.json` is open, so an old reader does not stop at a new key. `validate.py` warns from contracts 2.8.0 on and exits 0, and `response_adapter.py` drops the key with no message. So no reconstruction semantics go into a response, and a task that writes one calls `check_response_free_of_semantics`.
 - New schemas are additive, a minor contracts bump, and the number is assigned at merge time because g4sim also bumps contracts.
 
 ## Open for T02
@@ -92,3 +94,37 @@ Task B2 step 1, 2026-11-06, `580dc79e` against `d51566a9`. Every name in the tab
 The other 15 file names are unchanged: `recipe.json`, `operator_semantics.json`, `qualification_record.json`, `decision_record.json`, `tool_contract.json`, `ext_response.json`, `exposure_record.json`, `geometry_ir.json`, `detector_spec.json`, `run_workflow.py`, `response_adapter.py`, `flux_from_counts.json`, `contracts/semantics/recipes/`, `contracts/tool_contracts/` and `core/partition`. The release also adds `contracts/rules/geant4_datasets.json`, which no row uses.
 
 No decision in this map changes. K04 stays provisional as before.
+
+## T06 re-check, contracts 3.20.0
+
+Done with the fixtures. W1-W7 need no field marked **I**. Field statuses above stand, with these answers to the open items.
+
+| Open item | Answer |
+| --- | --- |
+| One schema or several | Several: `reconstruction_common.json` (shared definitions), `reconstruction_port.json`, `reconstruction_product.json`, `reconstruction_recipe.json`, `conditions_payload.json`, `binding_evidence.json`, `selection_record.json`, `input_signature.json`. Witness semantics are optional blocks of the product schema; each block declares its required extension |
+| Locations | `contracts/schemas/` and three library modules, `contracts/sidecar_reader.py`, `contracts/reconstruction.py` and `contracts/conditions.py`. They work on parsed documents, with no command line |
+| New `form` in `ext_response.json` | Not needed. The W5 operator stays a typed native reference, described by the `inversion` block; the adapter refuses it as a response |
+| `exposure_record.json` (W6) | Not reused: it records who saw which released data. Live exposure is in the `counts` block |
+| `core/partition` (W3) | Expresses the cores and refuses gaps and overlaps, with no halo. The `frames` block carries halos, ownership and accounts |
+| `contracts/validate.py` | Unchanged. An unreferenced sidecar in an artifacts directory stays an error (`artifacts_dir.not_artifact`) |
+
+Fields added at T06 that the tables above do not name, all **X**:
+
+| Field | Traces to |
+| --- | --- |
+| `selections`, `selection_ref` (`counts`) | W6: zero/absent, exposure and selection are distinguishable |
+| `sideband_sign`, `interval_unit` (`rf-scan` settings) | W7: coordinates must be mapped correctly |
+| `constraint.value` (`global`, optional: an exact constraint only, since a prior has no single value) | W7: state the added constraint or prior explicitly |
+| `reproducibility` (recipe; null for a proposal) | Section 14.1, sheet G03 |
+| `scope.tested_domain`, `checks[].constructible` (`binding_evidence.json`) | Section 8.4, check 6 |
+| `inversion.comparator` | Section 14.1, as for W2 |
+| `frames.fixed_coordinates` | Section 9.3: predicates on several coordinates |
+
+Owners of what the contract does not hold yet (recorded in decisions.md):
+
+| Item | Proposed owner |
+| --- | --- |
+| Section 8.5 forms beyond a covariance (mixtures, intervals, samples), learned-estimator ports | T11, when a method needs them |
+| Section 10.4 execution fields beyond concurrency, layout, residence and ownership | T12 |
+| Section 8.7 hashes of a formal selection record | T15a |
+| Section 16.1 method index | T15a |

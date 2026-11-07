@@ -3,6 +3,15 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+Detector reconstruction, task T06 (contracts minor; the number is assigned at merge). New sidecars, none an artifact type: `reconstruction_port.json`,
+`reconstruction_product.json`, `reconstruction_recipe.json`, `conditions_payload.json`, `binding_evidence.json`, `selection_record.json`, `input_signature.json` and
+`reconstruction_common.json`, read by `contracts/reconstruction.py` and `contracts/conditions.py` through `contracts/sidecar_reader.py`, which reads a document the same way on every path: an unknown format or required extension stops it. Old recipes, tool contracts and
+responses keep their results and their validators. `hep-detector` writes the `response` artifact only when the deliverable is a response product; `event-reconstruction.md` checks
+qualified internal or joint constraints before restricting delivery without an external t0; `analysis-workflows.md` limits byte-identical reruns to recipes that declare byte
+reproducibility.
+
 ## 0.58.0 (2026-11-07)
 
 Minor release. g4sim phase S3 (`adapters/geant4` 0.9.0; contracts 3.21.0, `CORE_VERSION` 1.8.0). Geometry: `grid`, `ring`, `explicit` (positions or a hashed CSV), `shell`, `clip`, `absent`, `trd`, `tube`, `polygon_prism`, arbitrary rotations

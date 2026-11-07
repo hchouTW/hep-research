@@ -1,0 +1,23 @@
+{
+ "$comment": "reconstruction-port/1 (contract-map.md, typed port description; plan Section 8.2; K05): one typed input or output of a reconstruction step. Read by contracts/reconstruction.py, not an artifact type.",
+ "type": "object",
+ "required": ["schema", "port_id", "direction", "native", "quantity", "role", "cardinality", "presence", "required_extensions"],
+ "additionalProperties": false,
+ "properties": {
+  "schema": {"const": "reconstruction-port/1"},
+  "port_id": {"$ref": "reconstruction_common.json#/$defs/name"},
+  "direction": {"enum": ["input", "output"]},
+  "native": {"$ref": "reconstruction_common.json#/$defs/native"},
+  "quantity": {"$ref": "reconstruction_common.json#/$defs/quantity"},
+  "role": {"$ref": "reconstruction_common.json#/$defs/role"},
+  "cardinality": {"$ref": "reconstruction_common.json#/$defs/cardinality"},
+  "presence": {"$comment": "an output's possible presence states, an input's accepted ones", "type": "array", "minItems": 1,
+               "items": {"$ref": "reconstruction_common.json#/$defs/presence"}},
+  "source_ref": {"$comment": "the source a summary came from: summaries of one source are not assumed independent (Section 8.4)", "$ref": "reconstruction_common.json#/$defs/name"},
+  "sample_interval": {"$ref": "reconstruction_common.json#/$defs/measure"},
+  "execution": {"$ref": "reconstruction_common.json#/$defs/execution"},
+  "required_extensions": {"$ref": "reconstruction_common.json#/$defs/extension_ids"},
+  "optional_extensions": {"$ref": "reconstruction_common.json#/$defs/extension_ids"},
+  "extensions": {"$ref": "reconstruction_common.json#/$defs/extension_fields"}
+ }
+}

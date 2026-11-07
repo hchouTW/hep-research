@@ -1,0 +1,24 @@
+{
+ "$comment": "binding-evidence/1 (contract-map.md; plan Section 5.10): what a pilot of one binding showed. Distinct from qualification_record.json, which qualifies a deployment: this qualifies no deployment, so deployment_guarantee is always false. Read by contracts/reconstruction.py, not an artifact type.",
+ "type": "object",
+ "required": ["schema", "evidence_id", "recipe_id", "recipe_sha256", "stage", "state", "scope", "checks", "deployment_guarantee", "required_extensions"],
+ "additionalProperties": false,
+ "properties": {
+  "schema": {"const": "binding-evidence/1"},
+  "evidence_id": {"$ref": "reconstruction_common.json#/$defs/name"},
+  "recipe_id": {"$ref": "reconstruction_common.json#/$defs/name"},
+  "recipe_sha256": {"$ref": "reconstruction_common.json#/$defs/sha256"},
+  "stage": {"enum": ["artificial-witness", "backend-smoke", "simulation-pilot", "data-control"]},
+  "state": {"enum": ["unvalidated", "failed", "inconclusive", "passed"]},
+  "scope": {"$comment": "Section 8.4, check 6: what was tested; tested_domain maps an axis to its tested range, and a request must lie inside it", "type": "object", "required": ["statement", "tested_domain"], "additionalProperties": false,
+   "properties": {"statement": {"$ref": "reconstruction_common.json#/$defs/name"},
+    "tested_domain": {"type": "object", "additionalProperties": {"type": "object", "required": ["min", "max"], "additionalProperties": false, "properties": {"min": {"type": "number"}, "max": {"type": "number"}}}}}},
+  "checks": {"type": "array", "items": {"type": "object", "required": ["check_id", "state", "constructible"], "additionalProperties": false,
+   "properties": {"check_id": {"$ref": "reconstruction_common.json#/$defs/name"}, "state": {"$comment": "Section 11.1 keeps not-applicable apart from a skip", "enum": ["pass", "fail", "inconclusive", "skipped", "not-applicable"]},
+                  "constructible": {"$comment": "Section 8.4, check 6: the check and its denominators can be built for this binding", "type": "boolean"}}}},
+  "deployment_guarantee": {"const": false},
+  "required_extensions": {"$ref": "reconstruction_common.json#/$defs/extension_ids"},
+  "optional_extensions": {"$ref": "reconstruction_common.json#/$defs/extension_ids"},
+  "extensions": {"$ref": "reconstruction_common.json#/$defs/extension_fields"}
+ }
+}

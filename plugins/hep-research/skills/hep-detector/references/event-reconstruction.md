@@ -296,8 +296,9 @@ and runtime, memory, I/O and output volume together.
   peak — validate with another species; agreement of two β measurements is internal consistency only.
 - *CMS-style signal fusion and multiple passes*: record track–cluster relations and what each pass removed; compare at
   a fixed working point; shared-cluster and mask failures are not caught by file hashes.
-- *Online, compressed or LArTPC data*: first confirm what was retained; without t0 report no absolute position; a
-  control without tail sensitivity is inconclusive — do not scale up or publish that performance claim.
+- *Online, compressed or LArTPC data*: first confirm what was retained. Without an external t0, first check qualified
+  internal or joint constraints. Restrict delivery to no absolute position only if the information remains insufficient.
+  A control without tail sensitivity is inconclusive — do not scale up or publish that performance claim.
 - *Iterative alignment*: see [calibration and alignment](calibration-and-alignment.md#iterative-loops-as-contract-steps).
 <!-- /example -->
 

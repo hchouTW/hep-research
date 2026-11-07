@@ -235,6 +235,11 @@ CONTRACTS_VERSION = "3.21.0"
 # changes (measurement:correction-keys-v1 stays): every 3.16 artifact keeps its outcome.
 # 3.21.0 (minor; g4sim S3) adds source_density.json (source-density/1), read by core/simulation/source_density.py, and opens the shapes, placements, modifiers and
 # segmentation of S3 in the IR; the IR's field set does not change. Additive: every 3.20 artifact keeps its outcome, and committed outputs keep the contracts version that wrote them.
+# Next minor, number assigned at merge (detector reconstruction T06) adds eight schemas read by contracts/reconstruction.py and contracts/conditions.py, through contracts/sidecar_reader.py:
+# reconstruction_common.json, reconstruction_port.json (reconstruction-port/1), reconstruction_product.json (reconstruction-product/1),
+# reconstruction_recipe.json (reconstruction-recipe/1), conditions_payload.json (conditions-payload/1), binding_evidence.json (binding-evidence/1),
+# selection_record.json (selection-record/1) and input_signature.json (input-signature/1). None is an artifact type; no rule, vocabulary term, envelope
+# field or capability changes: every 3.21 artifact keeps its outcome. Each sidecar lists required_extensions, and a reader stops at an unknown one.
 # 3.20.0 (minor; g4sim S2) adds extension.geometry to ext_computational_run.json and rules/geant4_datasets.json. Additive: every 3.19 artifact keeps its
 # outcome, and committed outputs keep the contracts version that wrote them.
 # 3.19.0 (minor; g4sim S1) adds four schemas read by contracts/geometry.py and the g4sim translator: detector_spec.json
