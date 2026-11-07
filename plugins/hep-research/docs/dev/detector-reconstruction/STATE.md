@@ -46,6 +46,7 @@ jobs:
   t04-round5-1: {state: COMPLETED, slurm_exit: "0:0", elapsed: "00:05:24", node: hpa-wn28, result: "T08 reference rerun clean, targets equal, no section 18 row fires; see t04-v4-dispositions.md", job_id: 7479146, script: "<private>/jobs/t04-round5/run.sh", script_sha256: ca0c6bf33188d7f6aa65b572c66ebb9e264cd4bea13354e9d774a66d48cc90c5, approval: "approve the T08 reference rerun job"}
   t04-diag-t08d-1: {state: COMPLETED, slurm_exit: "0:0", elapsed: "00:04:15", node: hpa-wn30, result: "far d 6 to 8 measured, clean; see t04-v4-dispositions.md", job_id: 7480930, script: "<private>/jobs/t04-diag-t08d/run.sh", script_sha256: 4a6d14009264c3df260418a0447848d78701d7bae306857ff08d197bbc035959, approval: "approve the far gap test job"}
   checkpoint-c-1: {state: FAILED, slurm_exit: "1:0", elapsed: "00:12:27", node: hpa-wn30, result: "not clean: LCG error as known, two generated-record failures from this work, fixed; see baseline.md", job_id: 7487365, tested_commit: baa9be3d, script: "<private>/jobs/checkpoint-c/checkpoint.sh", script_sha256: 3ec7b3f133fe34ecd64f14640594c08ef29f2963efe19cf155880424a1cb7541, approval: "approve the Gate C checkpoint job"}
+  checkpoint-c-2: {state: FAILED, slurm_exit: "1:0", elapsed: "00:09:48", node: hpa-wn30, result: "clean: only the known LCG error; Gate C passes; see baseline.md", job_id: 7487578, tested_commit: 596b6875, script: "<private>/jobs/checkpoint-c2/checkpoint.sh", script_sha256: b22eac9902f5c1675266e9b5ca29ad02cf32a357510113709c28d5c5f132a004, approval: "approve the Gate C rerun"}
 backup_a1: {path: "<workdir>/backup/20261106T083302Z", bundle_sha256: 448d4dc5e9d397f4273ce96e4471230c8e9b0397b8829e32caa04ea2fe2fddb9, archive_sha256: 5e39d7a536146a0ae22d8ac07c8b95e6dfae388ea6a25ab95761fb0b2c580e7b, bundle_commit: 2bf2ef92, approval: "approve the backup commands", task: "A1 step 4"}
 backup_a2: {path: "<workdir>/backup/20261106T091043Z", bundle_sha256: 8105206658cc42616a2d3afeca05e21778c570c099b15e8428f263f6caa311da, archive_sha256: 3fc41ab24421f1362160598981c5657611a2c31c10ec881d894e3837f04672f2, bundle_commit: a2281ca3, approval: "rerun the backup and remove the citation worktree", note: "holds the filled task log; predates the B1 rebase"}
 backup_b2: {path: "<workdir>/backup/20261106T194259Z", bundle_sha256: cae42545cc8794ab89b1b9cb12a504e87ef8add9aa63015f1969cdfd11ddcb0f, archive_sha256: ac12ce399e6209e43188df2d678c49a69a9a353dc56a53f54c3dfa5ef487fde8, bundle_commit: 21b591a4, approval: "approve the backup, write the T09 and T08 diagnostic job", note: "B2 step 4; bundle and archive verified"}
@@ -61,12 +62,12 @@ tasks:
   T03: {state: done, note: "comparison clean with rerun 7474460 (R28); t03-selection.md, t07-t09-task-sheets.md; gaps stay recorded"}
   T04: {state: done, record: decisions.md, draft: t04-values-v4.md, review: t04-review.md, note: "Freeze A given 2026-11-06, verbatim in decisions.md; hashes in freeze-a.md"}
   T05: {state: done, note: "P1 sheets complete, P2 onward list blockers; record t05-task-sheets.md"}
-  T06: {state: in-progress, note: "done-provisional (R28), committed after 5 fix rounds and 4 re-reviews; 12 modules, 422 tests; unit suite waits for the Gate C job; readings in decisions.md, T06 readings; reviews evidence/c1-*.md"}
-  T14: {state: in-progress, note: "done-provisional (R28), committed after 3 fix rounds; JSON and CSV readers, envelope artifacts through their validators; unit suite waits for the Gate C job; rulings in decisions.md, T14 rulings; reviews evidence/c2-*.md"}
-  T15a: {state: in-progress, note: "done-provisional (R28), committed after 2 fix rounds; artificial fixtures only, no claim on real recipes; unit suite waits for the Gate C job; readings in decisions.md, T15a readings; reviews evidence/c3-*.md"}
+  T06: {state: done, note: "Gate C clean, job 7487578; readings in decisions.md, T06 readings; reviews evidence/c1-*.md"}
+  T14: {state: done, note: "Gate C clean, job 7487578; rulings in decisions.md, T14 rulings; reviews evidence/c2-*.md"}
+  T15a: {state: done, note: "Gate C clean, job 7487578; artificial fixtures only, no claim on real recipes; readings in decisions.md, T15a readings; reviews evidence/c3-*.md"}
   T11: {state: done, note: "comparison clean with rerun 7474460 (R28); every applicable cell is sourced or a recorded gap (R14); 10 citation uses unread; plugin defects in t11-citation-findings.md not applied"}
 k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K08, K09, K10, K11, K12, K16, K17, K18]}
-next_action: "User: approve the Gate C rerun"
+next_action: "Gate C backup (needs approval); then Phase D. T07 needs the generator addendum on the user's word"
 ```
 
 ## Plan conflicts found

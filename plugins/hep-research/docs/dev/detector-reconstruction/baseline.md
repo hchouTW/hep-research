@@ -169,3 +169,16 @@ Not clean. Fourth row of the rule. The error is the known LCG test. The two fail
 All 14 new contract modules ran and passed. T06, T14 and T15a stay provisional. The job reruns at the commit carrying these two fixes, under the same rule; job 7487365 stays recorded as failed.
 
 Timeout of job 7472812: `tests.adapters.test_unbinned_fit` took 29.02 s inside the suite here, against 468.65 s and over 600 s before, and the whole units part 391 s against 734 s and 974 s, with load average 168 to 183 and one BLAS thread per process. This changed the thread limit, and also the node, so it is strong support for thread oversubscription, not proof. Node load alone is excluded.
+
+### Gate C checkpoint, rerun
+
+Job 7487578, commit `596b6875`, Slurm `FAILED`, exit `1:0`, 9 min 48 s, node `hpa-wn30`, tree clean before and after. Evidence: `<private>/evidence/checkpoint-c2-7487578/`.
+
+| Part | Result |
+| --- | --- |
+| `tests/skills/hep_detector` | 594 run, OK, 4 skipped |
+| `tests/routing` | 21 run, OK |
+| `--part units` | 7,604 run, 7,222 passed, 0 failures, 1 error, 381 skipped, 530 modules, all finished, 379 s |
+
+First and second rows of the rule apply: clean. The error is the known LCG test. The 14 new contract modules ran and passed, 766 tests. T06, T14 and T15a go to `done`, and Gate C passes. `tests.adapters.test_unbinned_fit` took 29.35 s, the same as the run before, at load average 160 to 178, so the result repeats on `hpa-wn30`. Thread oversubscription stays the leading cause, strongly supported, not proven: no run has compared thread settings on one node.
+
