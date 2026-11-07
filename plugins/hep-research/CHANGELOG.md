@@ -3,9 +3,9 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## Unreleased
+## 0.59.0 (2026-11-07)
 
-g4sim phase S4 (plugin 0.59.0; proposed adapters: `adapters/geant4` 0.10.0; contracts 3.22.0, `CORE_VERSION` 1.9.0). Random numbers and sampling: Philox4x32-10 with channel and volume streams, Poisson, binomial, multinomial, Gamma, and fsum with
+Minor release. g4sim phase S4 (`adapters/geant4` 0.10.0; contracts 3.22.0, `CORE_VERSION` 1.9.0). Random numbers and sampling: Philox4x32-10 with channel and volume streams, Poisson, binomial, multinomial, Gamma, and fsum with
 partial-sum merging, in `core/simulation/rng.py` and `g4sim/Philox.hh`. Response: `core/simulation/response.py` with the scintillation formula, `response-pipeline/1`, `efficiency-map/1`, the stage hand-off file, FE4 rewired to it, and `simreco_strip`
 registered as `simreco-strip`. Hits: `simulation-hits/1`, `core/simulation/hits.py`, hit output from `g4sim_run`, read by `simroot hits` and reconstructed by `simreco`. Text `external` sources, reference planes and truth keeping; HepMC3 is refused where
 it is not installed. A hit's cell is an exact 64-bit volume ID and a segmentation bin. Scorer level `moments`; `request_id` hashes the resolved selection. `PYTHON-LICENSE.txt` ships with `Philox.hh`. The Python response misses its throughput limit on low-energy workloads (`g4sim-performance-budget.md`); the limit stands and `g4sim_digi` remains an S8 conditional. simreco's `StripSigma` is smaller than the true scatter;

@@ -8959,6 +8959,28 @@ limits catch large defects only. The custodian's re-evaluation of qualification 
 
 Passing checks show software consistency, not physical validity.
 
+## 0.59.0 release check (2026-11-07, CI and E5)
+
+Release branch `release/0.59.0`, based on main `81bd7595` (PR #361 merged). Minor release: g4sim phase S4. Contracts 3.22.0, `CORE_VERSION` 1.9.0, `adapters/geant4` 0.10.0; the version constants were bumped in S4.
+
+What changed on the release branch:
+- the CHANGELOG `0.59.0` section and the g4sim status (S4 `merged`);
+- no regeneration: no committed result changed, and `check_geant4_study.py`, whose hash is recorded in committed outputs, is unchanged. Gate record: `docs/dev/geant4-architecture/g4sim-gates/S4.md`.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on `93a56932` (run 42357608475) | success: 25 jobs passed, 3 skipped by the pull-request plan |
+| `run_all_checks.py`, E5 Slurm node at `39d680cb`, `--jobs 8` | 31 pass, 2 fail; 7,012 tests, 6,624 passed, 384 skipped, 4 failing. All four are environment failures here: two pass from a path without `S4`, and two pass off the Slurm nodes; `ams_optional` fails only on the `lcg` one. The commits after it change records only |
+| `mypy` | Clean, 140 source files |
+
+**E2 was not run for this release**: there is no `run_all_checks.py` result on macOS arm64 for 0.59.0. E2 was used in S4 only for cross-platform sampling, on 200,000 draws per sampler.
+
+Four independent reads of S4's C++ found real defects, and gate 8 passed real faults three times before its final form. What it still does not see is listed in the gate record, under "What the table does not cover".
+
+Open: the Python response misses its throughput limit on low-energy workloads, and `photon_times` is not in that measurement; `g4sim_digi` is undecided, an S8 conditional. simreco's `StripSigma` is too small, to be corrected after S4 and before any S5 closure with `noise-digitization` on. Encoded cellIDs in hit files are deferred to S5. HepMC3 reading is not implemented. No real Garfield++ table was read. No full regression was run: the maintainer accepted the gate 9 spot check. GB13, GB20 and GB21 remain untested on arm64.
+
+Passing checks show software consistency, not physical validity.
+
 ## 0.58.0 release check (2026-11-07, CI and E5)
 
 Release branch `release/0.58.0`, based on main `2e2722fc` (PR #357 merged). Minor release: g4sim phase S3. Contracts 3.21.0, `CORE_VERSION` 1.8.0, `adapters/geant4` 0.9.0; the version constants were bumped in S3.
