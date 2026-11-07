@@ -203,7 +203,7 @@ def load_g4sim(block: dict, folder: Path) -> dict:
         found = hashlib.sha256(texts[key]).hexdigest()
         if found != block[key]["sha256"]:
             raise StudyError(f"physics.g4sim.{key}: {block[key]['path']} has sha256 {found}, the study spec says {block[key]['sha256']}")
-    checked = geometry.check_spec(texts["detector_spec"])
+    checked = geometry.check_spec(texts["detector_spec"], folder=(folder / block["detector_spec"]["path"]).parent)
     if checked["status"] != "ok":
         raise StudyError(f"physics.g4sim.detector_spec: {checked['findings'][:3]}")
     request, card = json.loads(texts["simulation_request"]), json.loads(texts["run_card"])

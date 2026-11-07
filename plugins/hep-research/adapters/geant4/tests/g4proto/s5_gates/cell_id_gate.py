@@ -43,7 +43,7 @@ def specification(fields: dict) -> dict:
     pads = {"solid": {"box": {"size_mm": ["200", "200", "40"]}}, "material": "G4_Galactic", "tags": ["pads"], "children": [{"template": "pad", "placement": {"linear": {"count": 2, "pitch_mm": ["0", "0", str(PAD_PITCH_MM)], "start_mm": ["0", "0", str(-PAD_PITCH_MM / 2)], "index": "p"}}}]}
     children = [{"template": "module", "placement": {"linear": {"count": MODULES, "pitch_mm": ["0", "0", str(MODULE_PITCH_MM)], "start_mm": ["0", "0", str(-MODULE_PITCH_MM / 2)], "index": "m"}}},
                 {"template": "pads", "placement": {"single": {"centre_mm": ["0", "0", str(PAD_START_MM + PAD_PITCH_MM / 2)]}}}]
-    return {"schema": "detector-spec/1", "params": {}, "materials": {}, "templates": {"crystal": crystal, "module": module, "pad": pad, "pads": pads}, "readout": {"cal": {"fields": fields}, "pads": {"fields": {"p": 1}}},
+    return {"schema": "detector-spec/1", "params": {}, "materials": {}, "templates": {"crystal": crystal, "module": module, "pad": pad, "pads": pads}, "readout": {"cal": {"fields": fields}, "pads": {"fields": {"p": 1}}, "flat": {"fields": {"m": 1}}},
             "world": {"material": "G4_Galactic", "size_mm": ["1000", "1000", "1000"], "children": children}}
 
 
@@ -161,8 +161,14 @@ def main() -> int:
     narrow = stops(root, "narrow", program, fields, request("tracker", "mu-", five_bins, list(fields)))
     narrow_calorimeter = stops(root, "narrow-c", program, fields, request("calorimeter", "e-", five_bins, list(fields)))
     old = subprocess.run([str(simroot), "hits", str(args.old_hits), "--ntuple", "tracker_hits", "--out", str(root / "old.csv")], capture_output=True, text=True, timeout=300, check=False)
-    held = all(good(item) for item in results.values()) and pair["holds"] and fault["wrong"] > 0 and narrow and narrow_calorimeter and old.returncode != 0
-    print(json.dumps({"status": "ok" if held else "failed", **results, "two_readouts": pair, "producer_fault_wrong_rows": fault["wrong"], "narrow_field_stops_the_run": [narrow, narrow_calorimeter], "old_file_refused": old.returncode != 0}, indent=1))
+    old_refused = old.returncode != 0 and "were read" in old.stdout + old.stderr
+    try:
+        run(root / "collision", program, {key: value for key, value in fields.items()}, {**request("tracker", "mu-", segmentation, list(fields)), "scorers": [{**request("tracker", "mu-", segmentation, list(fields))["scorers"][0], "readout": "flat", "segment_fields": []}]})
+        collision_refused = False
+    except RuntimeError as error:
+        collision_refused = "hit-readout" in str(error)
+    held = all(good(item) for item in results.values()) and pair["holds"] and fault["wrong"] > 0 and narrow and narrow_calorimeter and old_refused and collision_refused
+    print(json.dumps({"status": "ok" if held else "failed", **results, "two_readouts": pair, "producer_fault_wrong_rows": fault["wrong"], "narrow_field_stops_the_run": [narrow, narrow_calorimeter], "old_file_refused": old_refused, "collision_refused": collision_refused}, indent=1))
     return 0 if held else 1
 
 

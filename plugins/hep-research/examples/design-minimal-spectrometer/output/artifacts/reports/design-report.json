@@ -216,7 +216,7 @@
   },
   {
    "ref": "evaluations/SIM-N4-TRK1.json",
-   "sha256": "8354cfffa435d39dfc5f9c6ea77ac60140575f3834520965139dfe7c00d1f7b1",
+   "sha256": "524197a6605db2e20dddce9f7c9befbe3557a21d7344680136c0371470d5422e",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-SIM-N4-TRK1",
    "status": [
@@ -226,7 +226,7 @@
   },
   {
    "ref": "evaluations/SIM-N6-TRK1-notails.json",
-   "sha256": "bf2e45fe64185337aa904cdcbcb1309888407c432e9d53376f6a8ac63eda77fd",
+   "sha256": "8298421e642d5d74084b2479f2547a04e9230729555660df7cbe9510ee50035d",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-SIM-N6-TRK1-notails",
    "status": [
@@ -236,7 +236,7 @@
   },
   {
    "ref": "evaluations/SIM-N6-TRK1.json",
-   "sha256": "eea91e81673acec93ce07852172e69863c9f71f83a8a42e9fc75f2d68e7edd36",
+   "sha256": "a1f7e3864283ea15861fec443a8ba2ac88def2a22922005b4a28c5e29f65f75b",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-SIM-N6-TRK1",
    "status": [
@@ -246,7 +246,7 @@
   },
   {
    "ref": "evaluations/SIM-N8-TRK1.json",
-   "sha256": "6b314fa567fd82c7ee19b429aba61060067aceeb1939335bb39cf5125a103cfd",
+   "sha256": "87620f8ac1ee1105d03ac8365d872ac3d95a72d721c900f80718bab202e26397",
    "artifact_type": "design-evaluation",
    "artifact_id": "j15-v1-SIM-N8-TRK1",
    "status": [

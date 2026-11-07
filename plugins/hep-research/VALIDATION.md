@@ -8940,7 +8940,7 @@ G5 for g4sim phase S5, at `87f3eb57`: the encoded cellID, in `g4sim_run/NewScore
 
 **Evidence**: `adapters/geant4/tests/g4proto/g5_scan.py`, on those four files, against all 5,657 `.cc`, `.hh` and `.icc` files of the Geant4 11.4.3 examples tree: 0 shared runs of 3 and of 4 consecutive lines; the positive control found 863 and 880. An independent read of the first version, by an agent that did not write the code, compared its added lines by tokens against the examples and found no adaptation; it found defects around the code, fixed and listed in `g4sim-gates/S5.md`.
 
-**Confirmation** (hsinyichou, maintainer, 2026-11-07, in the Claude Code session): "G5 is OK.", given while a second independent read of the final C++ was still running, after being told so.
+**Confirmation** (hsinyichou, maintainer, 2026-11-07, in the Claude Code session): "G5 is OK.", given while a second read was still running. That read was cancelled; a third, complete read then compared `CopyPart`, `AxisValues` and `CellId` by eye with the nearest examples and found no copied structure, which supports the confirmation and cannot prove authorship.
 
 ## 0.57.0 release check (2026-11-06, E2 and CI)
 

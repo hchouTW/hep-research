@@ -199,6 +199,40 @@ def failed_beside_a_clean_entry(art: Path) -> None:
     rebound(art, document)
 
 
+def specification_removed(art: Path) -> None:
+    """The forged hash, with the entry the recomputation starts from deleted."""
+    document, entry = study_record(art)
+    entry["scope"]["field_configuration_sha256"] = "0" * 64
+    document["extension"]["study"]["declared_scope"]["field_configuration_sha256"] = "0" * 64
+    del document["extension"]["study"]["spec"]["physics"]["g4sim"]["detector_spec"]
+    rebound(art, document)
+
+
+def another_specification(art: Path) -> None:
+    """The record pointed at another detector-spec of the project, half the field, with every hash made to agree."""
+    document, entry = study_record(art)
+    block = document["extension"]["study"]
+    source = json.loads((art / "studies/TRK.detector.json").read_text(encoding="utf-8"))
+    source["params"]["field_tesla"] = "0.5"
+    other = art / "studies/OTHER.detector.json"
+    other.write_text(json.dumps(source, indent=1, sort_keys=True) + "\n", encoding="utf-8")
+    digest = sha(other)
+    old = block["spec"]["physics"]["g4sim"]["detector_spec"]["sha256"]
+    for item in document["extension"]["input_manifest"]:
+        if item["sha256"] == old:
+            item.update(path="studies/OTHER.detector.json", sha256=digest)
+    block["spec"]["physics"]["g4sim"]["detector_spec"] = {"path": "../OTHER.detector.json", "sha256": digest}
+    block["declared_scope"]["realization_sha256"] = digest
+    rebound(art, document)
+
+
+def edited_result(art: Path) -> None:
+    """A result far outside its tolerance, the verdict left at pass."""
+    document, entry = study_record(art)
+    entry["geant4"] = 5000.0
+    rebound(art, document)
+
+
 def changed_derivation(art: Path) -> None:
     path = art / "studies/TRK.derivation.json"
     document = json.loads(path.read_text(encoding="utf-8"))
@@ -213,7 +247,7 @@ def changed_kind(art: Path) -> None:
     path.write_text(json.dumps(document, indent=1) + "\n", encoding="utf-8")
 
 
-CORRUPTIONS = {"field-hash": forged_field_hash, "field-hash-everywhere": forged_everywhere, "failed-beside-clean": failed_beside_a_clean_entry, "derivation": changed_derivation, "geometry-kind": changed_kind}
+CORRUPTIONS = {"field-hash": forged_field_hash, "field-hash-everywhere": forged_everywhere, "failed-beside-clean": failed_beside_a_clean_entry, "specification-removed": specification_removed, "another-specification": another_specification, "edited-result": edited_result, "derivation": changed_derivation, "geometry-kind": changed_kind}
 
 
 def corrupted(root: Path, art: Path, change) -> dict:

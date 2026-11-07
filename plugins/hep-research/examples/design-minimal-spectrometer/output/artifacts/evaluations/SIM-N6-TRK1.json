@@ -28,7 +28,7 @@
   },
   {
    "ref": "studies/N6-TRK1/study.computational-run.json",
-   "sha256": "0dc632ba7a3511b70be02c6c24120d34c8202f53bae25c8d6a100f583840da6c",
+   "sha256": "2fb18f4075561f8384e8e3b5a8373f97cf4b6599b5091fb15f2324f714c3e3b3",
    "artifact_type": "computational-run",
    "artifact_id": "j15-N6-TRK1-study-validated"
   }

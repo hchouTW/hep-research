@@ -61,6 +61,11 @@ CONTROLS = {"ancestor_is_primary": "ancestry", "one_crossing_per_event": "crossi
             "time_zero": "times", "time_not_interpolated": "times", "contribution_time_not_interpolated": "contribution_times", "equal_split": "apportion"}
 
 
+def no_readout(tracker: list, calorimeter: list) -> bool:
+    """Scorers without a readout write cell_id 0, and each row names its scorer; the caller shows this can fail."""
+    return all(row["cell_id"] == "0" for row in [*calorimeter, *tracker]) and {row["scorer"] for row in tracker} == {"0"} and {row["scorer"] for row in calorimeter} == {"1"}
+
+
 def event_file(path: Path, events: int) -> str:
     rows = ["# g4sim-events/1"]
     for event in range(FIRST_EVENT, FIRST_EVENT + events):
@@ -303,7 +308,7 @@ def judged(simroot: Path, work: Path, oracle: Path, events: int, offset: int = 0
         key = (*key_of(row, "step_track_id"), row["cell"])
         paths[key] = paths.get(key, 0.0) + float(row["path_mm"])
     path_ratio = middle(value / (2 * SENSOR_HALF_MM * math.hypot(1.0, PRIMARIES[primaries[key[:2]]]["tilt"])) for key, value in paths.items())
-    checks = {"no_readout": all(row["cell_id"] == "0" for row in [*calorimeter_rows, *tracker]) and {row["scorer"] for row in tracker} == {"0"} and {row["scorer"] for row in calorimeter_rows} == {"1"}, "calorimeter": calorimeter["ok"], "tracker": tracker_closure["ok"], "contributions": against_parts["ok"] and {row["cell"] for row in calorimeter_rows} == {row["cell"] for row in parts} and len({row["cell"] for row in calorimeter_rows}) == 1,
+    checks = {"no_readout": no_readout(tracker, calorimeter_rows) and not no_readout([{**tracker[0], "cell_id": "1"}, *tracker[1:]], calorimeter_rows), "calorimeter": calorimeter["ok"], "tracker": tracker_closure["ok"], "contributions": against_parts["ok"] and {row["cell"] for row in calorimeter_rows} == {row["cell"] for row in parts} and len({row["cell"] for row in calorimeter_rows}) == 1,
               "ancestry": not wrong_parent and owners["ok"] and not wrong_tracker and chained > 0 and non_primary_owners > 0 and {key: row["pdg"] for key, row in rows_by_key.items()} == {key: every[key]["pdg"] for key in kept},
               "particles": sorted(set(primaries.values())) == sorted(PRIMARIES) and len(primaries) == len(PRIMARIES) * events,
               "crossings": len(crossing_keys) == len(set(crossing_keys)) and past_the_plane <= crossed and len(past_the_plane) > 1.9 * events and crossed <= kept,

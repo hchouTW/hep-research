@@ -48,6 +48,19 @@ class CellEncoding(unittest.TestCase):
             with self.subTest(placed=placed[0]):
                 self.assertIn("one cellID", self.encoding(placed)["problem"])
 
+    def test_a_selected_world_collides_with_a_zero_cell(self):
+        ir = {"physical": {"readout": {"cal": {"fields": self.FIELDS}}, "placements": self.PLACED}}
+        self.assertIn("one cellID", simulate.cell_encoding({"readout": "cal", "segment_fields": ["iz"]}, "along_axis", ir, ["crystal", "world"])["problem"])
+
+    def test_a_field_repeated_where_nothing_is_selected_is_no_problem(self):
+        placed = [{"mother": "world", "template": "crystal", "copy_number": 0, "index": {}}, {"mother": "world", "template": "side", "copy_number": 1, "index": {"ix": 1}}, {"mother": "side", "template": "leaf", "copy_number": 1, "index": {"ix": 1}}]
+        self.assertNotIn("problem", self.encoding(placed))
+
+    def test_cells_are_unique_over_every_scorer_on_a_readout(self):
+        placed = [{"mother": "world", "template": name, "copy_number": at, "index": {}} for at, name in enumerate(("a", "b"))]
+        ir = {"physical": {"readout": {"cal": {"fields": self.FIELDS}}, "placements": placed}}
+        self.assertIn("one cellID", simulate.cell_encoding({"readout": "cal", "segment_fields": ["iz"]}, "along_axis", ir, ["a", "b"])["problem"])
+
     def test_a_field_filled_at_two_levels_is_refused(self):
         placed = [{"mother": "world", "template": "module", "copy_number": 1, "index": {"ix": 1}}, {"mother": "module", "template": "crystal", "copy_number": 1, "index": {"ix": 1}}]
         self.assertIn("two levels", self.encoding(placed)["problem"])

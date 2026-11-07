@@ -100,24 +100,25 @@ def cell_encoding(scorer: dict, kind: str, ir: dict, templates: list) -> dict:
         part = sum(value * fields[index]["stride"] for index, value in placement["index"].items() if index in fields)
         if copies.setdefault(placement["template"], {}).setdefault(str(placement["copy_number"]), part) != part:
             return {"problem": f"template {placement['template']} has two placements of copy {placement['copy_number']} with different indices: the table is by template and copy, so declare two templates"}
-    seen: set = set()
+    seen: set = {0} if "world" in templates else set()
 
-    def walk(mother: str, total: int, used: frozenset) -> str | None:
+    def walk(mother: str, total: int, used: frozenset, clash: frozenset) -> str | None:
         for placement in children.get(mother, []):
             named = frozenset(placement["index"]) & set(fields)
-            if named & used:
-                return f"field {sorted(named & used)} is filled at two levels of one volume: the values would add"
             here = total + copies[placement["template"]][str(placement["copy_number"])]
+            repeated = clash | (named & used)
             if placement["template"] in templates:
+                if repeated:
+                    return f"field {sorted(repeated)} is filled at two levels of one volume: the values would add"
                 if here in seen:
                     return f"two volumes of template {placement['template']} have one cellID: readout {name!r} needs a field for every level that repeats (Section 19, cellIDs are unique)"
                 seen.add(here)
-            found = walk(placement["template"], here, used | named)
+            found = walk(placement["template"], here, used | named, repeated)
             if found:
                 return found
         return None
 
-    problem = walk("world", 0, frozenset())
+    problem = walk("world", 0, frozenset(), frozenset())
     if problem:
         return {"problem": problem}
     return {"copies": {template: {copy: str(part) for copy, part in parts.items()} for template, parts in copies.items()}, "segments": [{"stride": fields[item]["stride"], "limit": 1 << fields[item]["width"]} for item in bound]}
@@ -139,7 +140,8 @@ def resolved_request(request: dict, ir: dict, folder: Path | None = None) -> dic
             item["hit_kind"] = scorer.get("hit_kind", "")  # a missing one is a finding of check-spec, which comes next
             item["readout"] = scorer.get("readout", "none")
             if item["readout"] != "none":
-                item["cell_id"] = cell_encoding(scorer, item["segmentation"]["kind"], ir, item["templates"])
+                sharing = [template for other in request["scorers"] if other.get("level") == "event_file" and other.get("readout") == item["readout"] for template in identity.selected_templates(other["select"], ir)]  # a bitfield's cells are unique over every scorer on it
+                item["cell_id"] = cell_encoding(scorer, item["segmentation"]["kind"], ir, sharing)
         if scorer.get("level") == "moments":
             item["moments"] = True
         if scorer["quantity"] == physics_check.SPLIT_QUANTITY:
@@ -339,7 +341,7 @@ def conservation_summary(path: Path) -> dict:
 def failure_reason(log: Path) -> str:
     """The line of a run's log that says why Geant4 stopped it."""
     lines = log.read_text(encoding="utf-8", errors="replace").splitlines() if log.is_file() else []
-    return next((line.strip() for line in reversed(lines) if "the event file" in line or "a segmentation of" in line), "")
+    return next((line.strip() for line in reversed(lines) if any(text in line for text in ("the event file", "a segmentation of", "does not fit its readout field", "is not in the readout's table"))), "")
 
 
 def run_program(program: Path, work: Path, environment=None) -> int:
