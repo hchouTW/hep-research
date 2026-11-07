@@ -1,6 +1,6 @@
 # g4sim plan: addendum 11.1 after the S3 prototypes
 
-**Status: decided by the maintainer (2026-11-06, "use your recommendations"; 2026-11-07, the same words on the review's findings) and applied to Part B. Targeted review open (Section 23, step 4): first pass and recheck by an agent that did not write this; the maintainer's acceptance is open (`g4sim-approvals.md`).**
+**Status: decided by the maintainer (2026-11-06, "use your recommendations"; 2026-11-07, the same words on the review's findings) and applied to Part B. Targeted review (Section 23, step 4) closed: a first pass and two rechecks by an agent that did not write this, accepted by the maintainer on 2026-11-07 ("I accept addendum 11.1").**
 
 All results are from E5 (Geant4 11.4.3, conda build, serial). E2 is waived for the S3 prototypes (`g4sim-approvals.md`: "drop the Mac run"): they are confirmed on E5 only, and GB13, GB20 and GB21, which rest on rounding or bit identity, were not tested on arm64. Outputs below `~/AMS/hsinyichou/g4sim-references/s3-prototypes/`: `em/archive-gb11` (with `SHA256SUMS`), `em/logs/judge.out` (the final GB11 to GB14 verdict), `steps/verdict.json` (the falsifying verdict) and `steps/verdict-11.1.json` (the restated one).
 
