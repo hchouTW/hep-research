@@ -65,7 +65,7 @@ tasks:
   T15a: {state: in-progress, note: "done-provisional (R28), committed after 2 fix rounds; artificial fixtures only, no claim on real recipes; unit suite waits for the Gate C job; readings in decisions.md, T15a readings; reviews evidence/c3-*.md"}
   T11: {state: done, note: "comparison clean with rerun 7474460 (R28); every applicable cell is sourced or a recorded gap (R14); 10 citation uses unread; plugin defects in t11-citation-findings.md not applied"}
 k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K08, K09, K10, K11, K12, K16, K17, K18]}
-next_action: "User: approve the Gate C checkpoint job"
+next_action: "User: approve the Gate C checkpoint job 3ec7b3f133fe34ec"
 ```
 
 ## Plan conflicts found

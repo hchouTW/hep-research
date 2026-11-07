@@ -137,3 +137,16 @@ Result: job 7474460, `COMPLETED`, exit `0:0`, 31 s, node `hpa-wn28`, commit `e57
 First row of the table above applies: the comparison is clean apart from the LCG error. With this module counted, the unit suite at 0.57.0 is 6,838 run, 6,456 passed, 0 failures, 1 error, 381 skipped; the skip count equals the one at 0.56.0. Those totals combine two jobs. Job 7472812 stays failed.
 
 Cause of the timeout: not established. Node load does not explain it by itself: the load average was 163 to 166 during this 29 s run, close to the 161 read after job 7472812. The module was 16 times slower inside the suite at 0.56.0 and over 20 times slower at 0.57.0 than alone, so contention inside the job is the leading suspect; neither the job scripts nor the runner limit threads. That is not tested. A hang is unlikely but was not excluded for job 7472812 itself. Any later unit job can hit the same timeout, so one that does is read against this record, not assumed harmless.
+
+## Gate C checkpoint: reading rule
+
+Fixed before the job. Job `<private>/jobs/checkpoint-c/checkpoint.sh` (`3ec7b3f133fe34ec`), commit `baa9be3d`, T06, T14 and T15a. Same steps as job 7472812, with one change: one BLAS thread per process, to test the contention suspected there. The receipt records load before and after the units part.
+
+| Result | Reading |
+| --- | --- |
+| Only the LCG error fails, every module finishes, and the new contract modules ran | Clean. T06, T14 and T15a go to `done` (R28), Gate C passes |
+| Only that, but `tests.adapters.test_unbinned_fit` runs far below 469 s | As above, and contention gains support; still not proven, since this run changes one thing among others |
+| `tests.adapters.test_unbinned_fit` times out again | Not clean. Goes to the user: thread limits did not remove it |
+| Any other failure, error or unfinished module | Recorded with its IDs. Not attributed to this work without evidence. T06, T14 and T15a stay provisional, and it goes to the user |
+
+Slurm `COMPLETED` is not a result; the job exits non-zero on the known LCG error, as before.
