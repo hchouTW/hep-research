@@ -99,6 +99,7 @@ CONFLICT_PROBES = (("sampling.time_", "probe.clock"), ("clock", "probe.clock"), 
 SCHEMA_PROBE = "probe.schema"
 # Section 5.5, the signature dimensions a reader may establish; "detector" stays unknown unless a source states it (Section 5.5,
 # last paragraph: a hardware name may stay unknown).
+ONE_VALUE_PREFIX = "constraint."  # DS2: a constraint holds one value across a product's scopes. `product_schema` does not: each file has its own, and K15 keeps them as labels
 SIGNATURE_DIMENSIONS = ("container", "product_schema", "representation", "retention", "quantity", "coordinates", "acquisition", "sampling", "conditions", "detector")
 # One key must not clear a dimension that needs several; the others are established by any fact under their name.
 DIMENSION_KEYS = {"sampling": ("sampling.interval.value", "sampling.interval.unit", "sampling.time_origin", "sampling.time_system"),
@@ -830,13 +831,24 @@ def _condition_state(state: str, branch=(), open_keys=(), unmet=()) -> dict:
     return {"state": state, "branch": list(branch), "open": list(open_keys), "unmet": list(unmet)}
 
 
+def _same_product(scope: str, product: str) -> bool:
+    """Section 5.5: a signature is per product and scope, so a fact of another product says nothing here. A file's fact reaches the
+    products read from it, and a block's fact belongs to its product."""
+    return scope == product or scope.startswith(f"{product}/") or product.startswith(f"{scope}/")
+
+
 def _fact_state(signature: dict, key: str, expected) -> dict:
-    """SEL05: satisfied, unsatisfied, unknown or conflicting. An unknown necessary condition is not treated as true."""
-    facts = [fact for fact in signature["facts"] if fact["key"] == key]
+    """SEL05: satisfied, unsatisfied, unknown or conflicting. An unknown necessary condition is not treated as true. DS2: "If schema
+    or the internal evidence used has a scope conflict, resolve it first". A schema conflict is what _conflicts names: two values in one scope,
+    or a statement about a product that nothing read in it matches. Two files under one label keep two schemas, as labels (K15). A constraint
+    in two scopes of one product conflicts here too; the inspector keeps those facts at the owner's scope, so this acts on a hand-written window."""
+    facts = [fact for fact in signature["facts"] if fact["key"] == key and _same_product(fact["scope"], signature["scope"]["product"])]
     unit_key = f"{key[:-len('.value')]}.unit" if key.endswith(".value") else None  # 1 ns against 1 ps: the bare 1 means nothing
     if key in signature["conflicts"] or unit_key in signature["conflicts"] or any(fact["method"] == "conflict" for fact in facts):
         return _condition_state("conflicting", open_keys=[key])
     settled = [fact for fact in facts if _settled(fact)]
+    if key.startswith(ONE_VALUE_PREFIX) and any(not _same_value(fact["value"], settled[0]["value"]) for fact in settled):
+        return _condition_state("conflicting", open_keys=[key])
     if not settled or key in signature["unknown"]:
         return _condition_state("unknown", open_keys=[key])
     if any(_same_value(fact["value"], expected) for fact in settled):
@@ -854,6 +866,7 @@ def _judged_condition(signature: dict, condition) -> dict:
     """Section 5.8. AND: one unsatisfied item makes a candidate ineligible, and otherwise unknowns and conflicts forbid routine
     composition. OR: a branch passes only when fully satisfied, and the branch used is named; unused branches may be missing. A
     conflict on any branch gives `conflicting`, even if another branch would pass: the user's ruling (decisions.md, "T14 rulings").
+    So conflict outranks unsatisfied at every level, or an AND inside a branch would hide it. Either state excludes the candidate.
     A malformed condition is unknown: an empty list must not read as vacuously true."""
     shape = set(condition) if isinstance(condition, dict) else None
     if shape == {"fact", "equals"} and isinstance(condition["fact"], str) and condition["fact"] and _fact_value(condition["equals"]):
@@ -863,7 +876,7 @@ def _judged_condition(signature: dict, condition) -> dict:
         if isinstance(items, list) and items:
             parts = [_judged_condition(signature, item) for item in items]
             if shape == {"all_of"}:
-                return _joined(parts, ("unsatisfied", "conflicting", "unknown", "satisfied"), [key for part in parts for key in part["branch"]])
+                return _joined(parts, ("conflicting", "unsatisfied", "unknown", "satisfied"), [key for part in parts for key in part["branch"]])
             used = next((part["branch"] for part in parts if part["state"] == "satisfied"), [])
             return _joined(parts, ("conflicting", "satisfied", "unknown", "unsatisfied"), used)
     return _condition_state("unknown", open_keys=["malformed condition"])
@@ -872,7 +885,7 @@ def _judged_condition(signature: dict, condition) -> dict:
 def _judgment(name, judged: dict) -> dict:
     """Only these fields: a candidate's score, confidence or claimed state is not read and not carried on (A49)."""
     reasons = {"satisfied": "every necessary condition holds", "unsatisfied": f"not satisfied: {', '.join(judged['unmet'])}",
-               "unknown": f"not established: {', '.join(judged['open'])}", "conflicting": f"in conflict or not established: {', '.join(judged['open'])}"}
+               "unknown": f"not established: {', '.join(judged['open'])}", "conflicting": f"in conflict or not established: {', '.join(judged['open'])}" + (f"; not satisfied: {', '.join(judged['unmet'])}" if judged["unmet"] else "")}
     return {"candidate": name, "state": judged["state"], "eligible": judged["state"] == "satisfied", "branch": judged["branch"], "open": judged["open"], "reason": reasons[judged["state"]]}
 
 

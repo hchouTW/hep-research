@@ -1393,6 +1393,116 @@ print(json.dumps({"first": [first["state"], first["stop_reason"]], "second": [se
 """
 
 
+class ConflictsAreNeverHidden(Scratch):
+    """The user's ruling (decisions.md, "T14 rulings"): a conflict on any branch of an OR gives `conflicting`, even if another branch would pass.
+    Conflict outranks unsatisfied at every level of a condition, so an AND inside a branch cannot hide one (C3 review, M1)."""
+
+    PASSING = {"fact": "passes", "equals": True}
+    FAILING = {"fact": "fails", "equals": True}
+    TORN = {"fact": "torn", "equals": True}
+
+    def state_of(self, condition):
+        facts = [signature_fact("passes", True), signature_fact("fails", False), signature_fact("torn", True, scope="product.pulse")]
+        signature = input_signature(facts, unknown=[], conflicts=["torn"])
+        return judge_candidates(signature, [{"candidate": "m", "requires": condition}])[0]
+
+    def test_the_review_probe_on_real_facts(self):
+        """DS2's shape: external available, internal unqualified, and a declaration that disputes `sufficient`."""
+        document = constraint_product(constraint_witness(external="available", internal="unqualified", sufficient=False))
+        dispute = [{"key": "constraint.internal.internal-time-constraint.sufficient", "value": True, "reference": "manifest:artificial", "kind": "declaration"}]
+        signature = only_signature(self.inspected("a.json", document, declared=dispute))
+        internal = {"all_of": [{"fact": "constraint.internal.internal-time-constraint", "equals": "qualified"}, {"fact": "constraint.internal.internal-time-constraint.sufficient", "equals": True}]}
+        external = {"fact": "constraint.external.external-time-origin", "equals": "available"}
+        schema = {"fact": "product_schema", "equals": "reconstruction-product/1"}
+        for branches in ([external, internal], [internal, external]):
+            (judged,) = judge_candidates(signature, [{"candidate": "m", "requires": {"all_of": [schema, {"any_of": branches}]}}])
+            self.assertEqual((judged["state"], judged["eligible"]), ("conflicting", False))
+            self.assertIn("constraint.internal.internal-time-constraint.sufficient", judged["open"])
+
+    def test_every_nesting_keeps_the_conflict(self):
+        for condition in ({"any_of": [self.PASSING, {"all_of": [self.FAILING, self.TORN]}]},
+                          {"any_of": [{"all_of": [self.TORN, self.FAILING]}, self.PASSING]},
+                          {"all_of": [self.PASSING, {"any_of": [self.TORN, self.PASSING]}]},
+                          {"all_of": [self.FAILING, self.TORN]},
+                          {"any_of": [self.PASSING, {"all_of": [self.FAILING, {"any_of": [self.PASSING, {"all_of": [self.FAILING, self.TORN]}]}]}]},
+                          {"all_of": [self.PASSING, {"any_of": [self.PASSING, {"all_of": [self.FAILING, {"any_of": [self.TORN, self.FAILING]}]}]}]}):
+            self.assertEqual(self.state_of(condition)["state"], "conflicting", condition)
+
+    def test_an_unsatisfied_item_stays_visible_beside_a_conflict(self):
+        self.assertIn("fails", self.state_of({"all_of": [self.FAILING, self.TORN]})["reason"])
+
+    def test_with_no_conflict_the_states_keep_their_order(self):
+        """Section 5.8: one unsatisfied item in AND excludes; OR passes on a branch fully satisfied."""
+        unknown = {"fact": "not-stated", "equals": True}
+        for condition, state in (({"all_of": [self.FAILING, unknown]}, "unsatisfied"), ({"any_of": [self.FAILING, unknown]}, "unknown"), ({"any_of": [self.PASSING, unknown]}, "satisfied"),
+                                 ({"any_of": [self.PASSING, {"all_of": [self.FAILING, unknown]}]}, "satisfied"), ({"all_of": [self.PASSING, {"any_of": [self.FAILING, self.PASSING]}]}, "satisfied")):
+            self.assertEqual(self.state_of(condition)["state"], state, condition)
+
+
+class FactScopes(Scratch):
+    """Section 5.5, K15: a signature is per product and scope, and different scopes of one product are multi-label. DS2: a scope conflict on the
+    schema or on the constraint used is resolved first. The inspector keeps `constraint.` facts at the owner's scope, where _conflicts sees them, and
+    `product_schema` at the scope of each file, so two files under one label are two labels, not a conflict (C3 re-review, R1)."""
+
+    CONDITION = {"fact": "constraint.internal.a", "equals": "qualified"}
+
+    def judged(self, facts, condition=None):
+        return judge_candidates(input_signature(facts, unknown=[]), [{"candidate": "m", "requires": condition or self.CONDITION}])[0]
+
+    def test_a_fact_of_another_product_says_nothing_here(self):
+        self.assertEqual(self.judged([signature_fact("constraint.internal.a", "qualified", scope="another.product/other-window")])["state"], "unknown")
+
+    def test_a_narrower_or_wider_scope_of_this_product_counts(self):
+        for scope in ("product.pulse", "product.pulse/block.counts", "file"):
+            signature = input_signature([signature_fact("constraint.internal.a", "qualified", scope=scope)], unknown=[], scope={"product": "file/product.pulse" if scope == "file" else "product.pulse", "window": "whole product"})
+            self.assertEqual(judge_candidates(signature, [{"candidate": "m", "requires": self.CONDITION}])[0]["state"], "satisfied", scope)
+
+    def test_two_values_of_a_constraint_in_sibling_scopes_conflict(self):
+        facts = [signature_fact("constraint.internal.a", "qualified", scope="product.pulse/window-1"), signature_fact("constraint.internal.a", "unqualified", scope="product.pulse/window-2")]
+        self.assertEqual(self.judged(facts)["state"], "conflicting")
+
+    def two_files(self, *declared):
+        """A product and the payload it used, under one label: the real inspector, not a hand-written signature."""
+        product_path, payload_path = self.write("a.json", product("product.hits-a", [measurement(0)])), self.write("b.json", calibration_payload())
+        return inspect_inputs([{"product": "product.hits-a", "path": product_path, "declared": list(declared)}, {"product": "product.hits-a", "path": payload_path}], BUDGET, clock=fixed_clock)
+
+    def test_a_product_beside_its_payload_is_no_conflict(self):
+        """R1: the result at the base of this round stays. Both labels hold, as the inspection says."""
+        record = self.two_files()
+        self.assertEqual((record["state"], record["conflicts"]), ("complete", []))
+        signature = only_signature(record)
+        for schema in ("reconstruction-product/1", "conditions-payload/1"):
+            self.assertEqual(judge_candidates(signature, [{"candidate": "m", "requires": {"fact": "product_schema", "equals": schema}}])[0]["state"], "satisfied", schema)
+
+    def test_a_product_beside_an_envelope_artifact_is_no_conflict(self):
+        artifact = json.loads((ROOT / "contracts/fixtures/artifacts/valid/response_v28.json").read_text(encoding="utf-8"))
+        paths = self.write("a.json", product("product.hits-a", [measurement(0)])), self.write("b.json", artifact)
+        record = inspect_inputs([{"product": "product.hits-a", "path": path} for path in paths], BUDGET, clock=fixed_clock)
+        self.assertEqual(record["conflicts"], [])
+        self.assertEqual(judge_candidates(only_signature(record), [{"candidate": "m", "requires": {"fact": "product_schema", "equals": "reconstruction-product/1"}}])[0]["state"], "satisfied")
+
+    def test_a_genuine_schema_conflict_in_one_owner_still_conflicts(self):
+        """DS2. A statement about the product that matches nothing read in its files."""
+        record = self.two_files({"key": "product_schema", "value": "another-schema", "reference": "manifest:artificial", "kind": "declaration"})
+        self.assertEqual(judge_candidates(only_signature(record), [{"candidate": "m", "requires": {"fact": "product_schema", "equals": "reconstruction-product/1"}}])[0]["state"], "conflicting")
+
+    def test_a_hand_written_schema_in_two_scopes_is_multi_label_as_from_the_inspector(self):
+        facts = [signature_fact("product_schema", "schema-a", scope="product.pulse/window-1"), signature_fact("product_schema", "schema-b", scope="product.pulse/window-2")]
+        self.assertEqual(self.judged(facts, {"fact": "product_schema", "equals": "schema-a"})["state"], "satisfied")
+
+    def test_two_values_of_a_constraint_in_two_files_of_one_product_conflict_through_the_inspector(self):
+        """The rule the reader of a record can see: both values at the owner's scope, listed by the inspection."""
+        first, second = constraint_product(), constraint_product(constraint_witness(external="available", internal="unqualified", sufficient=False))
+        paths = self.write("a.json", first), self.write("b.json", second)
+        record = inspect_inputs([{"product": first["product_id"], "path": path} for path in paths], BUDGET, clock=fixed_clock)
+        self.assertIn("constraint.internal.internal-time-constraint", [item["key"] for item in record["conflicts"]])
+        self.assertEqual(judge_candidates(only_signature(record), [{"candidate": "m", "requires": {"fact": "constraint.internal.internal-time-constraint", "equals": "qualified"}}])[0]["state"], "conflicting")
+
+    def test_two_labels_in_sibling_scopes_stay_multi_label(self):
+        facts = [signature_fact("representation", "count", scope="product.pulse/block.counts"), signature_fact("representation", "waveform", scope="product.pulse/block.retention")]
+        self.assertEqual(self.judged(facts, {"fact": "representation", "equals": "waveform"})["state"], "satisfied")
+
+
 class ColdProcess(Scratch):
     """N1: the test module imports contracts.reconstruction first, so only a fresh process can show the first read. A stop must leave
     no half-imported module: a wrong answer for the life of the process, or an exception, is worse than the overrun."""

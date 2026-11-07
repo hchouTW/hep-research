@@ -243,6 +243,9 @@ CONTRACTS_VERSION = "3.21.0"
 # field or capability changes: every 3.21 artifact keeps its outcome. Each sidecar lists required_extensions, and a reader stops at an unknown one.
 # The same minor (T14) adds input_inspection.json (input-inspection/1), written by contracts/input_inspector.py and read through contracts/sidecar_reader.py, again no artifact
 # type, and input-signature/1 now tells a number from a boolean when it looks for a hidden conflict.
+# The same minor (T15a) adds candidate_index.json (candidate-index/1) and selection_policy.json (selection-policy/1), read through contracts/sidecar_reader.py, again no artifact type,
+# and an optional formal block in selection-record/1, written by contracts/candidate_selection.py. A record without that block keeps its meaning.
+# judge_candidates now ranks a conflict above an unsatisfied item at every level, by the user's T14 ruling, and reads a fact only inside its own product.
 # 3.20.0 (minor; g4sim S2) adds extension.geometry to ext_computational_run.json and rules/geant4_datasets.json. Additive: every 3.19 artifact keeps its
 # outcome, and committed outputs keep the contracts version that wrote them.
 # 3.19.0 (minor; g4sim S1) adds four schemas read by contracts/geometry.py and the g4sim translator: detector_spec.json

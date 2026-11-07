@@ -11,10 +11,10 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-from contracts import conditions, input_inspector, reconstruction, sidecar_reader  # noqa: E402
+from contracts import candidate_selection, conditions, input_inspector, reconstruction, sidecar_reader  # noqa: E402
 from contracts.reconstruction import check_connection, read_sidecar  # noqa: E402
-from tests.contracts.reconstruction_fixtures import (binding_evidence, calibration_payload, candidate_product, code_list,  # noqa: E402
-                                                     collection_witness, consumer, count_product, frame_payloads, frame_product, input_signature,
+from tests.contracts.reconstruction_fixtures import (artificial_inspection, binding_evidence, calibration_payload, candidate_product, code_list,  # noqa: E402
+                                                     collection_witness, consumer, count_product, quality_first_witness, frame_payloads, frame_product, input_signature,
                                                      measurement, port, product, pulse_estimate, pulse_product, quantity, recipe,
                                                      reference, sealed, used_payload)
 
@@ -25,9 +25,9 @@ NOT_A_DOCUMENT = {("judge_candidates", "candidates"): "conditions on a signature
                   ("dereference", "reference"): "a reference inside a document already read", ("can_recompute", "level"): "a level name",
                   ("iov_holds", "point"): "coordinates", ("affected_payloads", "changed"): "identities, judged in the function",
                   ("reuse_decision", "unknown_dependencies"): "a flag", ("check_connection", "known_extensions"): "the reader's list",
-                  ("read_sidecar", "known_extensions"): "the reader's list"}
+                  ("read_sidecar", "known_extensions"): "the reader's list", ("select_candidate", "signature_id"): "an identity inside the inspection, looked up in the function"}
 READ_BY_THEIR_OWN_SCHEMA = {("check_connection", "converter"), ("check_tool_mapping", "contract")}
-READER_MODULES = {"reconstruction.py", "conditions.py", "sidecar_reader.py", "input_inspector.py"}
+READER_MODULES = {"reconstruction.py", "conditions.py", "sidecar_reader.py", "input_inspector.py", "candidate_selection.py"}
 NOT_DRIVEN = {"matrix_rank": "a number table, no document", "payload_identity": "the digest of a payload's content, needed to seal one, reads no meaning",
               "recipe_identity": "the digest evidence binds to, reads no meaning", "read_document": "driven through read_sidecar, which is this function",
               "reader_path": "the decorator itself"}
@@ -84,6 +84,28 @@ def old_response():
     return json.loads((ROOT / "contracts/fixtures/artifacts/valid/response_v28.json").read_text(encoding="utf-8"))
 
 
+def selection_with(**changed):
+    """T15a: the artificial witness DS1 with one argument replaced."""
+    inspection = changed.pop("inspection", None) or artificial_inspection()
+    return candidate_selection.select_candidate(inspection["signatures"][0]["signature_id"] if inspection.get("signatures") else "signature.none", inspection, **dict(quality_first_witness(), **changed))
+
+
+def replay_with(**changed):
+    """T15a: a record against its own inputs with one document replaced."""
+    arguments = dict(quality_first_witness(), inspection=FIXED_INSPECTION)
+    record = changed.pop("record", None) or candidate_selection.select_candidate(FIXED_INSPECTION["signatures"][0]["signature_id"], **arguments)
+    return candidate_selection.check_selection_replay(record, **dict(arguments, **changed))
+
+
+def selection_refused(answer):
+    return answer["decision"]["chosen_recipe"] is None and "formal" not in answer
+
+
+def recorded_selection():
+    return candidate_selection.select_candidate(FIXED_INSPECTION["signatures"][0]["signature_id"], FIXED_INSPECTION, **quality_first_witness())
+
+
+FIXED_INSPECTION = artificial_inspection()
 TOOL = json.loads((ROOT / "contracts/tool_contracts/tracker_resolution.json").read_text(encoding="utf-8"))
 BINDING = {"origin": "measured", "upstream_chain": []}
 # One row per document parameter of each public function: the call, a valid document, and how its refusal looks. A valid
@@ -115,6 +137,17 @@ ENTRY_POINTS = [
     ("reconstruction", "check_response_free_of_semantics", None, reconstruction.check_response_free_of_semantics, old_response, refusal_report),
     ("input_inspector", "inspect_inputs", None, inspected_from_a_file, present_product, inspection_refused),
     ("input_inspector", "judge_candidates", "signature", judged_on, input_signature, lambda answer: not answer[0]["eligible"]),
+    ("candidate_selection", "select_candidate", "inspection", lambda d: selection_with(inspection=d), artificial_inspection, selection_refused),
+    ("candidate_selection", "select_candidate", "index", lambda d: selection_with(index=d), lambda: quality_first_witness()["index"], selection_refused),
+    ("candidate_selection", "select_candidate", "policy", lambda d: selection_with(policy=d), lambda: quality_first_witness()["policy"], selection_refused),
+    ("candidate_selection", "select_candidate", "recipes", lambda d: selection_with(recipes=quality_first_witness()["recipes"][:2] + [d]), lambda: quality_first_witness()["recipes"][2], selection_refused),
+    ("candidate_selection", "select_candidate", "evidence", lambda d: selection_with(evidence=[quality_first_witness()["evidence"][0], d]), lambda: quality_first_witness()["evidence"][1], selection_refused),
+    ("candidate_selection", "check_selection_replay", "record", lambda d: replay_with(record=d), recorded_selection, refusal_report),
+    ("candidate_selection", "check_selection_replay", "inspection", lambda d: replay_with(inspection=d), lambda: FIXED_INSPECTION, refusal_report),
+    ("candidate_selection", "check_selection_replay", "index", lambda d: replay_with(index=d), lambda: quality_first_witness()["index"], refusal_report),
+    ("candidate_selection", "check_selection_replay", "policy", lambda d: replay_with(policy=d), lambda: quality_first_witness()["policy"], refusal_report),
+    ("candidate_selection", "check_selection_replay", "recipes", lambda d: replay_with(recipes=quality_first_witness()["recipes"][:2] + [d]), lambda: quality_first_witness()["recipes"][2], refusal_report),
+    ("candidate_selection", "check_selection_replay", "evidence", lambda d: replay_with(evidence=[quality_first_witness()["evidence"][0], d]), lambda: quality_first_witness()["evidence"][1], refusal_report),
     ("conditions", "iov_holds", "payload", lambda d: conditions.iov_holds(d, {"position-key": 1}), gain_payload, refusal_false),
     ("conditions", "iov_intersection", "payloads", lambda d: conditions.iov_intersection([d]), gain_payload, refusal_none),
     ("conditions", "check_binding", "payload", lambda d: conditions.check_binding(d, BINDING), gain_payload, refusal_report),
@@ -128,7 +161,7 @@ ENTRY_POINTS = [
 
 
 def public_functions():
-    for module in (reconstruction, conditions, sidecar_reader, input_inspector):
+    for module in (reconstruction, conditions, sidecar_reader, input_inspector, candidate_selection):
         for name, function in inspect.getmembers(module, inspect.isfunction):
             if function.__module__ == module.__name__ and not name.startswith("_"):
                 yield name, function
@@ -243,7 +276,7 @@ class EveryReaderPathStops(unittest.TestCase):
 
     def test_no_entry_point_hides_in_a_class_a_partial_or_a_new_module(self):
         """Re-review 2, section 2."""
-        for module in (reconstruction, conditions, sidecar_reader, input_inspector):
+        for module in (reconstruction, conditions, sidecar_reader, input_inspector, candidate_selection):
             for name, member in vars(module).items():
                 if name.startswith("_"):
                     continue

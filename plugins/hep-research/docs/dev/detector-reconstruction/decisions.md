@@ -266,3 +266,23 @@ Rulings under the finish plan, each reversible by the user.
 - **Hostile strings.** A quadratic regex in `contracts/validate.py`, an existing statistical rule outside T14, can hold the validator for a very long time on a hostile string, about a day at 7 MB by the reviewer's extrapolation. It falls in the accepted limit on one C call. Open, reported to the user.
 - **Project lookup.** An artifact's result depends on any project found above the working directory, and those reads are not charged to `bytes`. Fails closed.
 - **Stop reasons.** `required_extensions` on an artifact stops it with the K13 code. A K13 or rule refusal outranks "no known schema" in a mixed list. `readers-unavailable` is a new stop reason. A 600-product file needs a seconds budget near 6.
+
+### Changes to T14 from T15a's review
+
+`judge_candidates` changed after commit b5dbb788. No T14 test changed, and 9 were added. Conflict outranks unsatisfied at every level, as the user's ruling requires. A fact outside the signature's product counts for nothing. `product_schema` has no rule of its own: two files under one label stay two labels (K15), and a schema conflict is what `_conflicts` names, two values in one scope or a statement about the product that nothing read in it matches. Two values of a `constraint.` key in scopes of one product conflict; the inspector keeps those facts at owner scope, so the prefix test acts only on a hand-written window. All other keys stay multi-label. A product beside its payload or an envelope artifact stays `satisfied`. A top-level AND holding a conflict and an unsatisfied item is `conflicting`, so the state can be `needs-evidence` though the unsatisfied item remains; the candidate is out either way, and the key stays in the reason.
+
+## T15a readings, by the coordinator
+
+Rulings under the finish plan, each reversible by the user.
+
+- **Baseline.** Must itself be routine-eligible (glossary, "Qualified / unqualified"; Section 5.9 item 5). An eligible baseline is used outside a tie, per Section 5.9 item 4.
+- **`runtime_evidence: null`.** Counts as no available backend: the plan is silent, K02 states it, and Sections 5.5 and 8.7 fit. `no-available-backend` is an open block, per Section 8.7.
+- **`needs-evidence` against `abstained`.** Follows whether information could lift the block, as SEL08 and Section 5.3 step 7 fit; `abstained` stays for failed checks, unsatisfied conditions and limits.
+- **`role`.** Both sidecars fix it to `artificial-witness`, a self-label, so a real index or policy is refused for now. T15b must gate the witness exception in `_quality` on that role when widening it.
+- **`quality_contract`.** Is `{contract_id, required_checks}`. What a contract contains stays K16's. The tolerance is a stand-in, open for K16.
+- **Other.** Qualification candidates are widened by Section 5.10. `sample_groups` is added to the policy and the record. Rule and reader hashes digest source files, so a later edit makes earlier records stale, as Sections 8.7, 9.4 and 9.8 require: store no golden record.
+- **Failure against missing evidence (DS1, Section 8.4 check 6).** Excluded: evidence stating `failed`, or a `fail` row on a check the recipe or the contract requires. A qualification candidate: evidence stating `inconclusive` or `unvalidated`, or a required row inconclusive, skipped, not applicable or absent.
+- **No listed checks.** A recipe with `checks: []` stays `insufficient-evidence`, even if it covers the contract. This is the coordinator's ruling: the cautious one.
+- **Change to T06.** `_check_evidence` refuses two rows for one check (`reconstruction.evidence.duplicate_check`). It only refuses more, and no T06 test changed.
+- **For K16.** A contract with a check only the whole can pass empties `expert_support`.
+

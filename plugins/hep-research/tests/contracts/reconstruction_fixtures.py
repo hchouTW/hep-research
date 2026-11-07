@@ -1,6 +1,9 @@
 """Synthetic documents for the reconstruction sidecar tests (contract witnesses W1-W7 of plan Section 12, conditions
 payloads of R32). Each builder returns a fresh valid document; a test changes one field to make its negative case.
 Every number is artificial, and passing proves the stated contract behaviour only (Section 12.1)."""
+import json
+import tempfile
+from pathlib import Path
 
 
 def code_list(report) -> list:
@@ -340,6 +343,86 @@ def selection_record(**decision) -> dict:
             "candidates": [{"recipe": "recipe.linear-pulse", "hard_predicates": "unresolved", "quality_evidence": None,
                             "exclusion_or_probe_reason": "required semantics are not established"}],
             "decision": chosen, "trials": [], "sample_roles": [], "dependencies": ["signature.unknown-waveform"], "required_extensions": []}
+
+
+ARTIFICIAL_COST_UNIT = "artificial-cost-unit"  # Section 5.14: times test rules only and have no instrumental meaning
+REQUIRED_CHECK = "artificial.required-tail"
+SCHEMA_CONDITION = {"fact": "product_schema", "equals": "reconstruction-product/1"}
+
+
+def artificial_recipe(name, **fields) -> dict:
+    """A routine recipe of the decision witnesses, runnable and with its own evidence. Values are artificial (K16)."""
+    document = recipe(recipe_id=f"recipe.{name}", status="routine", evidence_ref=f"evidence.{name}", runtime_evidence="artificial runtime note",
+                      method={"card_ref": f"method-card.{name}", "card_sha256": "d" * 64}, checks=[REQUIRED_CHECK])
+    document.update(fields)
+    return document
+
+
+def artificial_evidence(document, state="passed", check_state="pass", stage="artificial-witness", **fields) -> dict:
+    """binding-evidence/1 bound to this very recipe, at the stage that says it is a witness (Section 12.1)."""
+    from contracts.reconstruction import recipe_identity
+    evidence = {"schema": "binding-evidence/1", "evidence_id": document["evidence_ref"], "recipe_id": document["recipe_id"], "recipe_sha256": recipe_identity(document),
+                "stage": stage, "state": state, "scope": {"statement": "artificial fixture only", "tested_domain": {"rate": {"min": 0, "max": 10}}},
+                "checks": [evidence_check(REQUIRED_CHECK, check_state)], "deployment_guarantee": False, "required_extensions": []}
+    evidence.update(fields)
+    return evidence
+
+
+def index_row(document, cost, requires=None, composition=None, **fields) -> dict:
+    from contracts.reconstruction import recipe_identity
+    row = {"recipe_id": document["recipe_id"], "recipe_sha256": recipe_identity(document), "method_ref": document["method"]["card_ref"], "rationale": "listed for this artificial witness",
+           "requires": SCHEMA_CONDITION if requires is None else requires, "cost": None if cost is None else {"value": cost, "unit": ARTIFICIAL_COST_UNIT}, "composition": composition}
+    row.update(fields)
+    return row
+
+
+def candidate_index(documents, rows, **fields) -> dict:
+    """The finite index: one row per candidate, one method row per card. Costs and roles are artificial."""
+    cards = {document["method"]["card_ref"]: document["method"] for document in documents}
+    index = {"schema": "candidate-index/1", "index_id": "index.artificial-witness", "version": "1", "role": "artificial-witness",
+             "methods": [dict(card, version="1", blueprints=["BP01"]) for card in cards.values()], "candidates": rows, "required_extensions": []}
+    index.update(fields)
+    return index
+
+
+def selection_policy(cap=5, baseline=None, **fields) -> dict:
+    """DS1's fixed objective, with its artificial cap and zero overhead (Section 5.14; K16)."""
+    objective = None if cap is None else {"kind": "minimum-cost", "cap": {"value": cap, "unit": ARTIFICIAL_COST_UNIT}}
+    policy = {"schema": "selection-policy/1", "policy_id": "policy.artificial-witness", "version": "1", "role": "artificial-witness", "granularity": "dataset",
+              "target": "amplitude", "deliverable": "local estimate", "quality_contract": {"contract_id": "artificial-quality-contract", "required_checks": [REQUIRED_CHECK]}, "objective": objective,
+              "shared_overhead": {"value": 0, "unit": ARTIFICIAL_COST_UNIT}, "baseline": baseline, "sample_roles": ["selection"], "sample_groups": ["artificial-group"], "required_extensions": []}
+    policy.update(fields)
+    return policy
+
+
+def artificial_inspection(document=None, budget=None, **fields) -> dict:
+    """input-inspection/1 of one artificial product, read by the real inspector, so a condition judges real facts."""
+    from contracts.input_inspector import inspect_inputs
+    document = document or product(objects=[measurement(0)])
+    with tempfile.TemporaryDirectory() as folder:
+        path = Path(folder) / "input.json"
+        path.write_text(json.dumps(document), encoding="utf-8")
+        return inspect_inputs([dict({"product": document["product_id"], "path": str(path)}, **fields)], budget or {"probes": 1, "bytes": 1_000_000, "seconds": 60, "memory_bytes": 10**10, "tools": 1})
+
+
+def quality_first_witness(cap=5) -> dict:
+    """Section 5.14, witness DS1, as the arguments of select_candidate after the signature id. The table is artificial."""
+    fast, reference_recipe, unsettled = artificial_recipe("c-fast"), artificial_recipe("c-reference"), artificial_recipe("c-unknown", evidence_ref=None, status="development")
+    documents = [fast, reference_recipe, unsettled]
+    rows = [index_row(fast, 1), index_row(reference_recipe, 4), index_row(unsettled, 0.5)]
+    return {"index": candidate_index(documents, rows), "policy": selection_policy(cap), "recipes": documents,
+            "evidence": [artificial_evidence(fast, "failed", "fail"), artificial_evidence(reference_recipe)]}
+
+
+def hybrid_policy_witness(**composition) -> dict:
+    """Section 5.14, witness DS3: experts e1 and e2 hold their own evidence; the router is untested and the whole has none."""
+    first, second, router = artificial_recipe("e1"), artificial_recipe("e2"), artificial_recipe("router", status="development", evidence_ref=None)
+    whole = artificial_recipe("hybrid-policy", status="development", evidence_ref=None)
+    held = {"router": "recipe.router", "experts": ["recipe.e1", "recipe.e2"]}
+    held.update(composition)
+    documents = [first, second, router, whole]
+    return {"index": candidate_index([whole], [index_row(whole, 1, composition=held)]), "policy": selection_policy(), "recipes": documents,
+            "evidence": [artificial_evidence(first), artificial_evidence(second)]}
 
 
 def signature_fact(key="representation", value="waveform", kind="reader", method="observed", **fields) -> dict:

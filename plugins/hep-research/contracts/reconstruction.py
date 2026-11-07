@@ -49,6 +49,7 @@ NOT_ROUTINE_STAGES = ("artificial-witness", "backend-smoke")  # Section 12.1: no
 UNIT_SCALES = {"ps": ("time", 1e-12), "ns": ("time", 1e-9), "us": ("time", 1e-6), "µs": ("time", 1e-6), "μs": ("time", 1e-6),  # micro sign and Greek mu
                "ms": ("time", 1e-3), "s": ("time", 1.0), "min": ("time", 60.0), "h": ("time", 3600.0), "d": ("time", 86400.0),  # no yr: a year needs a choice
                "Hz": ("frequency", 1.0), "kHz": ("frequency", 1e3), "MHz": ("frequency", 1e6), "GHz": ("frequency", 1e9)}
+QUALIFICATION_BLOCKS = frozenset({"insufficient-evidence", "cost-unknown", "no-available-backend"})  # Section 5.10: what a pilot of a clearly specified binding can find out
 SEPARATE_SAMPLE_ROLES = frozenset({"training-calibration", "validation"})  # K08: sample roles stay separate
 
 
@@ -845,14 +846,40 @@ def _check_recipe(recipe: dict, report: Report, path: str = "$") -> None:
 
 def _check_evidence(evidence: dict, report: Report, path: str = "$") -> None:
     states = [item["state"] for item in evidence["checks"]]
+    counted = Counter(item["check_id"] for item in evidence["checks"])
+    for check_id in sorted(check_id for check_id, times in counted.items() if times > 1):  # Section 8.4 check 6 judges each check once: rows must not decide by their order
+        report.add("error", f"{path}.checks", "reconstruction.evidence.duplicate_check", f"{check_id} has two rows")
     if evidence["state"] == "passed" and ("pass" not in states or "fail" in states or "inconclusive" in states):
         # Section 9.8: skipped never yields a pass, so a skip alone passes nothing; which checks are required is judged against the recipe
         report.add("error", f"{path}.state", "reconstruction.evidence.pass_without_checks", "passed needs a passed check and no failed or inconclusive one; skipped is not a pass")
 
 
+def _check_formal_selection(record: dict, report: Report, path: str) -> None:
+    """Sections 5.9, 5.13: a formal record agrees with itself, so an edited decision cannot pass as one the rules gave."""
+    formal, decision, chosen = record["formal"], record["decision"], record["decision"]["chosen_recipe"]
+    judged = {item["recipe"]: item for item in formal["judgments"]}
+    if [item["recipe"] for item in formal["judgments"]] != [item["recipe"] for item in record["candidates"]]:
+        report.add("error", f"{path}.formal", "reconstruction.selection.judgments_disagree", "each candidate has one judgment, in the same order")
+    for item in formal["judgments"]:
+        may_qualify = "insufficient-evidence" in item["blocks"] and set(item["blocks"]) <= QUALIFICATION_BLOCKS
+        expected = ("routine-eligible",) if not item["blocks"] else ("qualification-candidate", "excluded") if may_qualify else ("excluded",)  # a recipe with nothing to run stays excluded
+        if item["standing"] not in expected:
+            report.add("error", f"{path}.formal", "reconstruction.selection.standing_disagrees", f"{item['recipe']}: blocks {item['blocks']} do not give {item['standing']}")
+    if chosen is not None and judged.get(chosen, {}).get("standing") != "routine-eligible":
+        report.add("error", f"{path}.decision", "reconstruction.selection.choice_not_eligible", f"{chosen} is not routine-eligible: speed or a score cannot compensate (Section 5.9 item 1)")
+    if (chosen is None) != (formal["restricted_delivery"] is not None):
+        report.add("error", f"{path}.formal", "reconstruction.selection.restriction_disagrees", "a restricted delivery is stated exactly when no recipe is chosen (A52)")
+    if decision["state"] == "qualified-default" and chosen != formal["baseline"]:
+        report.add("error", f"{path}.decision", "reconstruction.selection.default_not_baseline", "a qualified default choice is the predeclared baseline (K16)")
+    if decision["state"] == "selected" and (record["policy"]["objective"] is None or record["policy"]["quality_contract"] is None):
+        report.add("error", f"{path}.decision", "reconstruction.selection.selected_without_objective", "no fixed objective, no selection: use the declared baseline (Section 5.9)")
+
+
 def _check_selection(record: dict, report: Report, path: str = "$") -> None:
     decision = record["decision"]
     chosen, state = decision["chosen_recipe"], decision["state"]
+    if "formal" in record:
+        _check_formal_selection(record, report, path)
     if state in ("needs-evidence", "abstained"):
         if chosen is not None:
             report.add("error", f"{path}.decision", "reconstruction.selection.choice_without_decision", f"{state} names no recipe")
@@ -878,9 +905,29 @@ def _check_signature(signature: dict, report: Report, path: str = "$") -> None:
             report.add("error", f"{path}.conflicts", "reconstruction.signature.hidden_conflict", f"{key} has conflicting values and is not listed as a conflict")
 
 
+def _check_candidate_index(index: dict, report: Report, path: str = "$") -> None:
+    """SEL04: a finite index names each recipe once, and each row's method is a row of the method index (Section 16.1)."""
+    methods = Counter(method["card_ref"] for method in index["methods"])
+    recipes = Counter(candidate["recipe_id"] for candidate in index["candidates"])
+    for counted in (methods, recipes):
+        for name in sorted(name for name, times in counted.items() if times > 1):
+            report.add("error", f"{path}.candidates", "reconstruction.index.duplicate_entry", f"{name} appears twice: a candidate set names each entry once")
+    for candidate in index["candidates"]:
+        if candidate["method_ref"] not in methods:
+            report.add("error", f"{path}.candidates", "reconstruction.index.method_not_indexed", f"{candidate['recipe_id']} refers to {candidate['method_ref']}, which is not in the method index")
+
+
+def _check_selection_policy(policy: dict, report: Report, path: str = "$") -> None:
+    """SEL07: "identical populations and measurement boundaries", so a shared overhead is in the unit of the limit it counts against."""
+    objective = policy["objective"]
+    if objective is not None and objective["cap"]["unit"] != policy["shared_overhead"]["unit"]:
+        report.add("error", f"{path}.shared_overhead", "reconstruction.policy.overhead_unit", "the shared overhead and the cost cap are in different units")
+
+
 SIDECAR_CHECKS = {"reconstruction-port/1": _check_port, "reconstruction-product/1": _check_product, "conditions-payload/1": conditions._check_payload,
                   "reconstruction-recipe/1": _check_recipe, "binding-evidence/1": _check_evidence, "selection-record/1": _check_selection,
-                  "input-signature/1": _check_signature, "input-inspection/1": input_inspector._check_inspection}
+                  "input-signature/1": _check_signature, "input-inspection/1": input_inspector._check_inspection,
+                  "candidate-index/1": _check_candidate_index, "selection-policy/1": _check_selection_policy}
 
 
 def read_sidecar(document, known_extensions=KNOWN_EXTENSIONS) -> Report:

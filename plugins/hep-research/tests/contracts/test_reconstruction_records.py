@@ -282,6 +282,17 @@ class Evidence(unittest.TestCase):
             self.assertIn("reconstruction.recipe.evidence_stage_insufficient", code_list(check_recipe_evidence(document, binding_evidence(stage=stage))), stage)
 
 
+class EvidenceRows(unittest.TestCase):
+    def test_one_check_has_one_row(self):
+        """C3 re-review, r1: two rows for one check make the answer depend on their order."""
+        for states in (("skipped", "pass"), ("pass", "skipped"), ("pass", "pass")):
+            document = binding_evidence(checks=[evidence_check("witness.linear-pulse", state) for state in states])
+            self.assertEqual(code_list(read_sidecar(document)), ["reconstruction.evidence.duplicate_check"], states)
+
+    def test_different_checks_are_read(self):
+        self.assertEqual(code_list(read_sidecar(binding_evidence(checks=[evidence_check("a"), evidence_check("b", "skipped")]))), [])
+
+
 class Selection(unittest.TestCase):
     def test_undecided_record_is_read(self):
         self.assertEqual(code_list(read_sidecar(selection_record())), [])
