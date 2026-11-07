@@ -150,3 +150,12 @@ These are not Section 20 decisions. They are how S0 reconciled requirements of t
 | Library code adapted from Geant4 | Keep it, name the source in the headers, ship `GEANT4-LICENSE.txt` with its notice, correct `licence_boundary` | hsinyichou (maintainer) | 2026-11-07 | "do your best recommendations" |
 | S3 final regression on the earlier build | Accepted for the current code: 112 of 112 identical at `a1933f15`; the later build differs only in `newrun.o`, which legacy runs do not use | hsinyichou (maintainer) | 2026-11-07 | "I accept the regression" |
 | Targeted review of the addendum (Section 23, step 4) | Accepted, after a first pass and two rechecks by an agent that did not write it | hsinyichou (maintainer) | 2026-11-07 | "I accept addendum 11.1" |
+
+## Before S4 (Section 22, 2026-11-07)
+
+| Item | Decision | Person | Date | Words or link |
+| --- | --- | --- | --- | --- |
+| Rewiring FE4 to the response pipeline | Approved: `frontend_response.py` reads and writes the stage hand-off file | hsinyichou (owner of the FE plan) | 2026-11-07 | "approve FE4, option A, run the check on the Mac" |
+| Suitability of `allpix.pixel-charge` for charge-sharing tables | Not suitable as it stands: a pinned rerun of the official example, 10 events, no sensor or geometry parameter | hsinyichou (owner of detector-simulation) | 2026-11-07 | The same words, on that evidence |
+| If not suitable | Option A, in place of the charge-sharing capability the row names: S4's response stage reads charge-sharing tables as a hashed declared input, tested with a synthetic table; S4 does not modify `adapters/detector-simulation` | hsinyichou (owner of detector-simulation) | 2026-11-07 | The same words |
+| Bit identity of transcendental sampling between E2 and E5 | Checked by one run on E2, with a script written early in S4 | hsinyichou (maintainer) | 2026-11-07 | The same words |
