@@ -44,13 +44,15 @@ def without_writer(node):
     return node
 
 
-def same(left: Path, right: Path) -> bool:
-    if left.read_bytes() == right.read_bytes():
+def same(left: Path, right: Path, roots: tuple) -> bool:
+    """Equal bytes, or equal JSON once the writer's versions and the capture's own folder are taken out: from-geometry records the path it read."""
+    texts = [path.read_text(encoding="utf-8", errors="surrogateescape").replace(str(root), "") for path, root in zip((left, right), roots)]
+    if texts[0] == texts[1]:
         return True
     if left.suffix != ".json":
         return False
     try:
-        return without_writer(json.loads(left.read_text(encoding="utf-8"))) == without_writer(json.loads(right.read_text(encoding="utf-8")))
+        return without_writer(json.loads(texts[0])) == without_writer(json.loads(texts[1]))
     except ValueError:
         return False
 
@@ -58,7 +60,7 @@ def same(left: Path, right: Path) -> bool:
 def compare(before: Path, after: Path) -> dict:
     first = {path.relative_to(before) for path in before.rglob("*") if path.is_file()}
     second = {path.relative_to(after) for path in after.rglob("*") if path.is_file()}
-    differing = sorted(str(path) for path in first & second if not same(before / path, after / path))
+    differing = sorted(str(path) for path in first & second if not same(before / path, after / path, (before, after)))
     return {"files": len(first & second), "only_before": sorted(map(str, first - second))[:20], "only_after": sorted(map(str, second - first))[:20], "differing": differing[:40], "differing_count": len(differing)}
 
 

@@ -76,6 +76,8 @@ PLUGIN_ROOT = Path(__file__).resolve().parents[1]
 CONTRACT_DIR = PLUGIN_ROOT / "contracts" / "tool_contracts"
 ADEQUACY_FILE = PLUGIN_ROOT / "contracts" / "rules" / "design_adequacy.json"
 GEOMETRY_FILE = PLUGIN_ROOT / "contracts" / "rules" / "design_geometry.json"
+GEOMETRY_KIND_FOLDER = PLUGIN_ROOT / "contracts" / "rules" / "design_geometry"
+DEFAULT_GEOMETRY_KIND = "layered-spectrometer"
 TAIL_SOURCES = ("alignment", "calibration-non-uniformity", "noise-digitization", "pattern-recognition")
 FIDELITIES = ("F0", "F1", "F2", "F3", "F4", "F5")
 RANK = {f: i for i, f in enumerate(FIDELITIES)}
@@ -987,12 +989,38 @@ def config_problems(proj: Project, name: str, val: ConfigValue, tokens: list[str
     return out
 
 
+class GeometryKindUnknown(ValueError):
+    """design.geometry_kind_unknown: no mapping file for a geometry kind (g4sim plan, Section 14.3)."""
+
+
+def geometry_mapping(kind: str) -> Path:
+    """The mapping file of a geometry kind: layered-spectrometer keeps the original file, a new kind has its own."""
+    if kind == DEFAULT_GEOMETRY_KIND:
+        return GEOMETRY_FILE
+    path = GEOMETRY_KIND_FOLDER / f"{kind}.json"
+    if not path.is_file():
+        raise GeometryKindUnknown(f"no geometry mapping for kind {kind!r} (contracts/rules/design_geometry/{kind}.json)")
+    return path
+
+
+def candidate_geometry_kinds(proj: Project, cid: str) -> list[str]:
+    """Every geometry_kind stated along the derived_from chain, the candidate first; an absent field inherits."""
+    chain = proj.candidate_chain(cid) or []
+    return [str(proj.docs[path]["extension"]["geometry_kind"]) for path in chain if "geometry_kind" in proj.docs[path]["extension"]]
+
+
+def candidate_geometry_kind(proj: Project, cid: str) -> str:
+    """A candidate's geometry kind: its own, else its base's, else layered-spectrometer."""
+    kinds = candidate_geometry_kinds(proj, cid)
+    return kinds[0] if kinds else DEFAULT_GEOMETRY_KIND
+
+
 def geometry_fields(proj: Project, cid: str, mapping: dict | None = None) -> tuple[dict, list[str], str]:
     """ART-34, ART-35: the geometry fields the mapping table reads from the merged candidate, the parameters read and
     their digest (TRC-05). CV-B2 (mapping 1.1.0): an optional field (a plain parameter expression) is read only when
     the candidate has that parameter in exactly one subsystem of the role, else left out with no parameter ref, so a
     1.0.0 candidate keeps its fields and digest and adding the parameter later changes the digest (stale)."""
-    mapping = mapping or load_json(GEOMETRY_FILE)
+    mapping = mapping or load_json(geometry_mapping(candidate_geometry_kind(proj, cid)))
     ev = Evaluation(Path("."), ".", {"extension": {"candidate": cid, "denominator": {}}})
     subs = proj.effective(cid) or {}
     evaluator = Evaluator(proj, ev, subs, {})
@@ -1017,6 +1045,38 @@ def candidate_geometry_ref(proj: Project, cid: str) -> str | None:
         if ref:
             return ref
     return None
+
+
+def check_derivation(proj: Project, ev: Evaluation, cid: str, kind: str, geometry_bytes: bytes, study_extension: dict) -> None:
+    """Section 14.3, item 5: when a candidate names a derivation record and a geometry_id, the record, the candidate, the study spec and the computational-run all agree, and the record was made from the file read here.
+
+    design.py only reads files and compares hashes: it never calls the kit (Section 14.2).
+    """
+    candidate = next((proj.docs[path]["extension"] for path in proj.candidate_chain(cid) or [] if "geometry_derivation_ref" in proj.docs[path]["extension"] or "geometry_id" in proj.docs[path]["extension"]), None)
+    if candidate is None:
+        return
+    reference, identity = candidate.get("geometry_derivation_ref"), candidate.get("geometry_id")
+    if reference:
+        try:
+            record = json.loads(proj.resolve(reference).read_bytes().decode("utf-8"))
+        except (OSError, ValueError, UnicodeDecodeError) as exc:
+            ev.err("design.derivation_mismatch", f"derivation record {reference!r} is not readable JSON: {exc}")
+            return
+        if not validate(record, "geometry_derivation.json").ok:
+            ev.err("design.derivation_mismatch", f"derivation record {reference!r} is not a geometry-derivation/1 record")
+            return
+        if record.get("design_geometry_sha256") != hashlib.sha256(geometry_bytes).hexdigest():
+            ev.err("design.derivation_mismatch", "the derivation record was not made from the design geometry file read here (Section 14.3)")
+        if record.get("geometry_kind") != kind:
+            ev.err("design.derivation_mismatch", f"the derivation record is of kind {record.get('geometry_kind')!r}, the candidate of {kind!r} (Section 14.3)")
+        if identity and record.get("geometry_id") != identity:
+            ev.err("design.derivation_mismatch", f"the derivation record has geometry_id {record.get('geometry_id')}, the candidate {identity} (Section 14.3)")
+        identity = identity or record.get("geometry_id")
+    run_identity = (study_extension.get("geometry") or {}).get("geometry_id")
+    spec_identity = (((study_extension.get("study") or {}).get("spec") or {}).get("physics") or {}).get("g4sim", {}).get("geometry_id")
+    for name, value in (("computational-run", run_identity), ("study spec", spec_identity)):
+        if value is not None and value != identity:
+            ev.err("design.derivation_mismatch", f"the {name} has geometry_id {value}, the candidate {identity} (Section 14.3)")
 
 
 def check_f4(proj: Project, ev: Evaluation) -> None:
@@ -1047,12 +1107,18 @@ def check_f4(proj: Project, ev: Evaluation) -> None:
     ev.f4_kind = (block.get("declared_scope") or {}).get("observable_kind")
     ref = qualification_reference(ev.f4_kind, block.get("benchmarks") or [])
     ev.f4_qualification_tolerance = float(ref["tolerance"]["total"]) if ref else None
+    cid = ext.get("candidate", "")
+    kind = candidate_geometry_kind(proj, cid)
+    if len(set(candidate_geometry_kinds(proj, cid))) > 1:
+        ev.err("design.geometry_kind_mismatch", f"candidate {cid} changes the geometry_kind of its base: a derived candidate inherits it (Section 14.3)")
     try:
-        mapping = load_json(GEOMETRY_FILE)
+        mapping = load_json(geometry_mapping(kind))
+    except GeometryKindUnknown as exc:
+        ev.err("design.geometry_kind_unknown", str(exc))
+        return
     except (OSError, ValueError) as exc:
         ev.err("design.contract_unreadable", f"geometry mapping: {exc}")
         return
-    cid = ext.get("candidate", "")
     gref = ext.get("geometry_ref") or candidate_geometry_ref(proj, cid)
     if not gref:
         ev.err("design.binding_incomplete", "an F4 evaluation's candidate names its geometry in geometry_ref (ART-30)")
@@ -1081,6 +1147,9 @@ def check_f4(proj: Project, ev: Evaluation) -> None:
                     ev.stale.append("a geometry parameter changed since the study (ART-35)")
                 else:
                     ev.err("design.contract_mismatch", "the geometry's parameter digest does not match the candidate (ART-35)")
+            if geometry.get("geometry_kind", DEFAULT_GEOMETRY_KIND) != kind:
+                ev.err("design.geometry_kind_mismatch", f"the geometry file is of kind {geometry.get('geometry_kind', DEFAULT_GEOMETRY_KIND)!r}, the candidate of {kind!r} (Section 14.3)")
+            check_derivation(proj, ev, cid, kind, gdata, sext)
             if geometry.get("figure_of_merit") != ev.fom:
                 ev.domain.append(f"the study geometry was generated for {geometry.get('figure_of_merit')}, not {ev.fom} (ART-36)")
             gden = geometry.get("denominator")

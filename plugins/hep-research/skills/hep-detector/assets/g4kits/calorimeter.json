@@ -1,0 +1,317 @@
+{
+ "schema": "g4kit/1",
+ "name": "calorimeter",
+ "version": "1.0.0",
+ "geometry_kind": "calorimeter",
+ "role": "calorimetry",
+ "purpose": "A grid of wrapped sampling towers, each with a tapered guide behind it.",
+ "inputs": {
+  "layers": {
+   "kind": "integer"
+  },
+  "towers_x": {
+   "kind": "integer"
+  },
+  "towers_y": {
+   "kind": "integer"
+  },
+  "absorber_mm": {
+   "kind": "length"
+  },
+  "active_mm": {
+   "kind": "length"
+  },
+  "tower_side_mm": {
+   "kind": "length"
+  },
+  "absorber_material": {
+   "kind": "material"
+  },
+  "active_material": {
+   "kind": "material"
+  },
+  "wrap_material": {
+   "kind": "material"
+  },
+  "guide_material": {
+   "kind": "material"
+  },
+  "world_material": {
+   "kind": "material"
+  }
+ },
+ "geometric_defaults": {
+  "wrap_mm": "0.1",
+  "tower_gap_mm": "0.2",
+  "guide_mm": "20",
+  "guide_side_mm": "10",
+  "guide_gap_mm": "1"
+ },
+ "detector": {
+  "schema": "detector-spec/1",
+  "params": {
+   "tower_depth_mm": "layers * (absorber_mm + active_mm)",
+   "pitch_mm": "tower_side_mm + 2 * wrap_mm + tower_gap_mm",
+   "width_x_mm": "towers_x * pitch_mm",
+   "width_y_mm": "towers_y * pitch_mm",
+   "tower_plane_mm": "tower_depth_mm + 2 * wrap_mm + tower_gap_mm",
+   "module_mm": "tower_plane_mm + guide_mm + guide_gap_mm",
+   "world_mm": "4 * module_mm + 4 * pitch_mm * (towers_x + towers_y) + 200"
+  },
+  "materials": {},
+  "templates": {
+   "absorber": {
+    "solid": {
+     "box": {
+      "size_mm": [
+       "tower_side_mm",
+       "tower_side_mm",
+       "absorber_mm"
+      ]
+     }
+    },
+    "material": {
+     "$input": "absorber_material"
+    },
+    "tags": [
+     "absorber"
+    ]
+   },
+   "sampler": {
+    "solid": {
+     "box": {
+      "size_mm": [
+       "tower_side_mm",
+       "tower_side_mm",
+       "active_mm"
+      ]
+     }
+    },
+    "material": {
+     "$input": "active_material"
+    },
+    "tags": [
+     "active"
+    ]
+   },
+   "tower": {
+    "solid": {
+     "box": {
+      "size_mm": [
+       "tower_side_mm",
+       "tower_side_mm",
+       "tower_depth_mm"
+      ]
+     }
+    },
+    "material": {
+     "$input": "world_material"
+    },
+    "tags": [
+     "tower"
+    ],
+    "modifiers": [
+     {
+      "shell": {
+       "material": {
+        "$input": "wrap_material"
+       },
+       "thickness_mm": "wrap_mm",
+       "faces": [
+        "sides",
+        "front"
+       ]
+      }
+     }
+    ],
+    "children": [
+     {
+      "placement": {
+       "stack": {
+        "axis": "z",
+        "from": "-z",
+        "repeat": {
+         "$input": "layers"
+        },
+        "sequence": [
+         "absorber",
+         "sampler"
+        ]
+       }
+      }
+     }
+    ]
+   },
+   "guide": {
+    "solid": {
+     "trd": {
+      "x1_mm": "tower_side_mm",
+      "x2_mm": "guide_side_mm",
+      "y1_mm": "tower_side_mm",
+      "y2_mm": "guide_side_mm",
+      "length_mm": "guide_mm"
+     }
+    },
+    "material": {
+     "$input": "guide_material"
+    },
+    "tags": [
+     "guide"
+    ]
+   },
+   "tower_plane": {
+    "solid": {
+     "box": {
+      "size_mm": [
+       "width_x_mm",
+       "width_y_mm",
+       "tower_plane_mm"
+      ]
+     }
+    },
+    "material": {
+     "$input": "world_material"
+    },
+    "tags": [
+     "towers"
+    ],
+    "children": [
+     {
+      "template": "tower",
+      "placement": {
+       "grid": {
+        "n": [
+         {
+          "$input": "towers_x"
+         },
+         {
+          "$input": "towers_y"
+         }
+        ],
+        "pitch_mm": [
+         "pitch_mm",
+         "pitch_mm"
+        ],
+        "centre_mm": [
+         "0",
+         "0",
+         "0"
+        ],
+        "index": [
+         "tower_x",
+         "tower_y"
+        ]
+       }
+      }
+     }
+    ]
+   },
+   "guide_plane": {
+    "solid": {
+     "box": {
+      "size_mm": [
+       "width_x_mm",
+       "width_y_mm",
+       "guide_mm"
+      ]
+     }
+    },
+    "material": {
+     "$input": "world_material"
+    },
+    "tags": [
+     "guides"
+    ],
+    "children": [
+     {
+      "template": "guide",
+      "placement": {
+       "grid": {
+        "n": [
+         {
+          "$input": "towers_x"
+         },
+         {
+          "$input": "towers_y"
+         }
+        ],
+        "pitch_mm": [
+         "pitch_mm",
+         "pitch_mm"
+        ],
+        "centre_mm": [
+         "0",
+         "0",
+         "0"
+        ],
+        "index": [
+         "guide_x",
+         "guide_y"
+        ]
+       }
+      }
+     }
+    ]
+   },
+   "module": {
+    "solid": {
+     "box": {
+      "size_mm": [
+       "width_x_mm",
+       "width_y_mm",
+       "module_mm"
+      ]
+     }
+    },
+    "material": {
+     "$input": "world_material"
+    },
+    "tags": [
+     "module"
+    ],
+    "children": [
+     {
+      "placement": {
+       "stack": {
+        "axis": "z",
+        "from": "-z",
+        "sequence": [
+         "tower_plane",
+         {
+          "spacer_mm": "guide_gap_mm"
+         },
+         "guide_plane"
+        ]
+       }
+      }
+     }
+    ]
+   }
+  },
+  "world": {
+   "material": {
+    "$input": "world_material"
+   },
+   "size_mm": [
+    "world_mm",
+    "world_mm",
+    "world_mm"
+   ],
+   "children": [
+    {
+     "template": "module",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "0"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "frames": {}
+ }
+}

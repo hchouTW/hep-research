@@ -1,0 +1,132 @@
+{
+ "$comment": "g4sim S5 (Section 14.3): the design geometry of the calorimeter kit. Each field is an input of the kit, by name.",
+ "mapping_version": "1.2.0",
+ "geometry": "calorimeter",
+ "kit": {
+  "name": "calorimeter",
+  "version": "1.0.0"
+ },
+ "fields": [
+  {
+   "field": "layers",
+   "from": {
+    "parameter": {
+     "role": "calorimetry",
+     "name": "layers",
+     "unit": "1"
+    }
+   }
+  },
+  {
+   "field": "towers_x",
+   "from": {
+    "parameter": {
+     "role": "calorimetry",
+     "name": "towers_x",
+     "unit": "1"
+    }
+   }
+  },
+  {
+   "field": "towers_y",
+   "from": {
+    "parameter": {
+     "role": "calorimetry",
+     "name": "towers_y",
+     "unit": "1"
+    }
+   }
+  },
+  {
+   "field": "absorber_mm",
+   "from": {
+    "parameter": {
+     "role": "calorimetry",
+     "name": "absorber_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "active_mm",
+   "from": {
+    "parameter": {
+     "role": "calorimetry",
+     "name": "active_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "tower_side_mm",
+   "from": {
+    "parameter": {
+     "role": "calorimetry",
+     "name": "tower_side_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "absorber_material",
+   "from": {
+    "parameter": {
+     "role": "calorimetry",
+     "name": "absorber_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "active_material",
+   "from": {
+    "parameter": {
+     "role": "calorimetry",
+     "name": "active_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "wrap_material",
+   "from": {
+    "parameter": {
+     "role": "calorimetry",
+     "name": "wrap_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "guide_material",
+   "from": {
+    "parameter": {
+     "role": "calorimetry",
+     "name": "guide_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "world_material",
+   "from": {
+    "parameter": {
+     "role": "calorimetry",
+     "name": "world_material",
+     "unit": "n/a"
+    }
+   }
+  }
+ ],
+ "figures_of_merit": {
+  "shower-containment": {
+   "better": "larger",
+   "unit": "1",
+   "denominator": {
+    "energy_GeV": "number",
+    "species": "string"
+   },
+   "tail_sensitive": false
+  }
+ }
+}

@@ -1,0 +1,92 @@
+{
+ "$comment": "g4sim S5 (Section 14.3): the design geometry of the planes_tracker kit. Each field is an input of the kit, by name.",
+ "mapping_version": "1.2.0",
+ "geometry": "planes-tracker",
+ "kit": {
+  "name": "planes_tracker",
+  "version": "1.0.0"
+ },
+ "fields": [
+  {
+   "field": "planes",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "planes",
+     "unit": "1"
+    }
+   }
+  },
+  {
+   "field": "plane_gap_mm",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "plane_gap_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "plane_thickness_mm",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "plane_thickness_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "plane_side_mm",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "plane_side_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "field_tesla",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "field_tesla",
+     "unit": "T"
+    }
+   }
+  },
+  {
+   "field": "plane_material",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "plane_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "world_material",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "world_material",
+     "unit": "n/a"
+    }
+   }
+  }
+ ],
+ "figures_of_merit": {
+  "momentum-resolution-core": {
+   "better": "smaller",
+   "unit": "1",
+   "denominator": {
+    "rigidity_GV": "number",
+    "species": "string"
+   },
+   "tail_sensitive": true
+  }
+ }
+}
