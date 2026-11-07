@@ -473,6 +473,7 @@
   "tests.core.test_source_density": 0.5,
   "tests.examples.test_zdc_synthetic_ecal": 1.0,
   "tests.core.test_simulation_rng": 3.5,
-  "tests.core.test_simulation_response": 2.4
+  "tests.core.test_simulation_response": 2.4,
+  "tests.adapters.test_g4sim_philox": 1.8
  }
 }

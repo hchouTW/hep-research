@@ -133,7 +133,8 @@
   "assets/g4sim_run/NewScorers.hh",
   "assets/g4sim_run/NewSource.hh",
   "assets/g4sim_run/PaiConstructor.hh",
-  "assets/GEANT4-LICENSE.txt"
+  "assets/GEANT4-LICENSE.txt",
+  "assets/g4sim/Philox.hh"
  ],
  "tests": [
   "../../tests/adapters/test_g4sim.py",
