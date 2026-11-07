@@ -33,12 +33,14 @@
    "blocked_on": []
   },
   "S4": {
-   "state": "in-progress",
+   "state": "blocked",
    "worktree": "../hep-research-g4sim-S4",
    "branch": "g4sim/S4",
-   "task_card_sha256": "046044a0aace872251fe893dc9e847e312147c301eea05d3f7b4c9e0422fa7ef",
+   "task_card_sha256": "24f1296dd7144964b23010055aea63dde9e5f44d6a3418a4036504590dc22b11",
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S4.md",
-   "blocked_on": []
+   "blocked_on": [
+    "E7 item 5: the Python response is 3.53 times the transport, limit 0.25 (g4sim-performance-budget.md); the maintainer decides between g4sim_digi in S8 and another limit"
+   ]
   },
   "S5": {
    "state": "not-started",
@@ -107,5 +109,5 @@
   "GB23": "confirmed",
   "GB24": "confirmed"
  },
- "updated": "2026-11-07T05:03:41Z"
+ "updated": "2026-11-07T05:07:02Z"
 }

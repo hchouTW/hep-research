@@ -617,6 +617,13 @@
    "registered_at": "2026-11-07T05:03:41Z",
    "card_commit": "dcb7c2bd",
    "reason": "S4 adds the throughput limit of the response pipeline, before any measurement; no earlier limit changed"
+  },
+  {
+   "card": "g4sim-tasks/S4.md",
+   "sha256": "24f1296dd7144964b23010055aea63dde9e5f44d6a3418a4036504590dc22b11",
+   "registered_at": "2026-11-07T05:07:02Z",
+   "card_commit": "b6c5efc8",
+   "reason": "Execution log: blocked on the throughput limit; live checks and the StripSigma finding recorded; no threshold changed"
   }
  ]
 }
