@@ -40,9 +40,10 @@ def specification(fields: dict) -> dict:
     module = {"solid": {"box": {"size_mm": ["100", "70", "60"]}}, "material": "G4_Galactic", "tags": ["module"],
               "children": [{"template": "crystal", "placement": {"grid": {"n": [COLUMNS, ROWS], "pitch_mm": [str(PITCH_MM), str(PITCH_MM)], "centre_mm": ["0", "0", "0"], "index": ["col", "row"]}}}]}
     pad = {"solid": {"box": {"size_mm": ["200", "200", "1"]}}, "material": "G4_Si", "tags": ["pad"]}
+    pads = {"solid": {"box": {"size_mm": ["200", "200", "40"]}}, "material": "G4_Galactic", "tags": ["pads"], "children": [{"template": "pad", "placement": {"linear": {"count": 2, "pitch_mm": ["0", "0", str(PAD_PITCH_MM)], "start_mm": ["0", "0", str(-PAD_PITCH_MM / 2)], "index": "p"}}}]}
     children = [{"template": "module", "placement": {"linear": {"count": MODULES, "pitch_mm": ["0", "0", str(MODULE_PITCH_MM)], "start_mm": ["0", "0", str(-MODULE_PITCH_MM / 2)], "index": "m"}}},
-                {"template": "pad", "placement": {"linear": {"count": 2, "pitch_mm": ["0", "0", str(PAD_PITCH_MM)], "start_mm": ["0", "0", str(PAD_START_MM)], "index": "p"}}}]
-    return {"schema": "detector-spec/1", "params": {}, "materials": {}, "templates": {"crystal": crystal, "module": module, "pad": pad}, "readout": {"cal": {"fields": fields}, "pads": {"fields": {"p": 1}}},
+                {"template": "pads", "placement": {"single": {"centre_mm": ["0", "0", str(PAD_START_MM + PAD_PITCH_MM / 2)]}}}]
+    return {"schema": "detector-spec/1", "params": {}, "materials": {}, "templates": {"crystal": crystal, "module": module, "pad": pad, "pads": pads}, "readout": {"cal": {"fields": fields}, "pads": {"fields": {"p": 1}}},
             "world": {"material": "G4_Galactic", "size_mm": ["1000", "1000", "1000"], "children": children}}
 
 
