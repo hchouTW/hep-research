@@ -596,6 +596,13 @@
    "registered_at": "2026-11-07T04:25:33Z",
    "card_commit": "3bed28b0",
    "reason": "Cross-platform tolerances and the boundary rule registered from measurement; Section 22 items closed; Execution log"
+  },
+  {
+   "card": "g4sim-tasks/S4.md",
+   "sha256": "ba905e7132b6df0664f7a185af6f2209c1f672bcd6e86df8f7ccee7bde783763",
+   "registered_at": "2026-11-07T04:44:28Z",
+   "card_commit": "3f3f0cc4",
+   "reason": "Gate 7's K and replicas registered from its independent trial, before the test; Execution log"
   }
  ]
 }
