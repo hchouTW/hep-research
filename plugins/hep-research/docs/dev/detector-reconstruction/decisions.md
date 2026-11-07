@@ -343,3 +343,12 @@ User's answer, 2026-11-07, verbatim: "apply the addendum as listed". Applied as 
 | t07-t09-task-sheets.md | `01f3509156734372a725eba77b3604935bf420b74fc5f9670fed4348269906f0`, unchanged |
 
 T07 development runs may start. The field stays closed until the refit's q/p prior is settled (evidence/d1-stage2-review.md, C-M1).
+
+## First T07 development run
+
+User's answer, 2026-11-07, verbatim: "approve the first T07 development run, accept the field limit". Job 7493368, on block 1, tuning. From this job on, a generator regeneration is labelled "after development". The driver accepts only zero field or the fixture's 1 T: a reading from the prior being settled at 1 T, reversible.
+
+### First development run: result
+
+Job 7493368, block 1, 12,000 events, 72,000 tracks at 1 T, refit truth-assisted and counted apart. The field is open for the refit: the prior is one absolute width, 1.0 per GeV, so the assumed q/p is a start, not a constraint, up to the single pass: per the stage 4 review, an assumed value at a bin edge moves a pull by up to 0.06 sigma through linearisation, and by 0.003 sigma at 10 % off. This replaces the earlier "field stays closed" note. Cost: about 11 s per 3,000 events. The job's one failed step was the naming check on two test names, since renamed; no physics step failed.
+

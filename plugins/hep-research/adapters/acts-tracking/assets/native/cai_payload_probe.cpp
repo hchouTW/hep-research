@@ -56,7 +56,7 @@ constexpr double tested_rotation = 1e-2;                // at most 0.6 mm of nor
 constexpr double gev_per_tesla_mm = 0.299792458e-3;
 constexpr double stated_sigma_q_over_p_per_gev = 0.00412;
 constexpr double sagitta_bias_in_sigma = 5.0;
-constexpr double sagitta_bias_tolerance = 0.10;  // of the bias: slope factor up to 4.5 %, prior up to 1.5 % at 3 GeV
+constexpr double sagitta_bias_tolerance = 0.10;  // of the bias: slope factor up to 4.5 %. Unchanged; the old prior, 10 % of q/p, reads 0.21 at 12 GeV
 
 struct ProbeTrack {
   double start_u_mm, start_v_mm, slope_u, slope_v, momentum_gev;
@@ -304,9 +304,6 @@ void sagitta_as_payload(const TelescopeFor& telescope_for, const std::vector<Noi
   const double expected_bias = sagitta_bias_in_sigma * stated_sigma_q_over_p_per_gev;
   double largest_bias_error = 0.0, largest_undone = 0.0;
   for (const NoiselessTrack& track : tracks) {
-    if (track.track.momentum_gev != 3.0) {
-      continue;  // the refit's prior on q/p pulls harder at high momentum (kalman_refit.hpp), which is not what this line reads
-    }
     const double q_over_p = q_over_p_of(track.track);
     t07::DataEvent deformed = track.event;
     for (int plane = 0; plane < t07::plane_count; ++plane) {

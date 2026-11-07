@@ -1,5 +1,5 @@
 // Refit of a known hit set with the ACTS Kalman fitter (recipe reco.track.acts-kf-refit/1, t04-values-v4.md section 8.1):
-// truth-assisted, counted apart, never reported as finding. The driver still refuses a field; the CAI probes run this class at 1 T.
+// truth-assisted, counted apart, never reported as finding. It runs at zero field, or at section 4.1's 1 T.
 #pragma once
 
 #include <cstdint>
@@ -18,9 +18,16 @@ namespace t07 {
 inline constexpr double refit_start_x_mm = -50.0;
 inline constexpr double refit_prior_loc_sigma_mm = 10.0;
 inline constexpr double refit_prior_angle_sigma = 0.1;
-// Not a start only: centred on the assumed q/p, at high momentum this prior is as tight as the measurement. With a field it would pull
-// the fit to truth, so the driver refuses a field until the field stage settles it (D1 stage 2 review, C-M1).
-inline constexpr double refit_prior_relative_qop_sigma = 0.1;
+// The prior on q/p, per GeV: the assumed q/p is the start, and this width keeps it from being a constraint (D1 stage 2 review, C-M1;
+// R37, CAI-T07-4). One width for every track, not a share of the assumed value: the measurement's own width, m = 0.00412 per GeV at 1 T,
+// does not depend on p (section 4.1), so a share of q/p tightens with momentum towards m. A prior s centred on a moves a fit by
+// (m/s)^2 of its distance to a. Lower limit: a set that assumes anywhere inside its track's momentum bin, at most 1/3 per GeV away in
+// [1.5, 3), moves a q/p pull by m (1/3) / s^2, which must stay under the smallest design se of any pull gate, 0.962/sqrt(12000 x 36) =
+// 0.00146 (section 5.1): s at least 0.97. Upper limit: the smoother cancels s^2 down to m^2, and in an independent float64 filter
+// sigma(q/p) stays within 3e-4 of the least-squares value at s = 1, 9e-4 at 10, and is 7e-2 off at 100. So 1. A pull's width then falls
+// short by 8.5e-6 and a true bias by 1.7e-5, at every momentum. Not derived from pulls (section 2.2). Held for 1 T only: at a weaker field
+// m grows towards s, so the driver refuses one. tests/adapters/test_acts_refit_field.py holds this arithmetic.
+inline constexpr double refit_prior_qop_sigma_per_gev = 1.0;
 inline constexpr double refit_prior_time_sigma = 1.0;
 
 struct HitSet {

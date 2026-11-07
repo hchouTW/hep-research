@@ -26,7 +26,7 @@ struct ProductHeader {
   double field_tesla = 0.0;
   std::string qop_status;      // assumed-not-measured at zero field, where the hits carry no q/p
   std::string material_model;  // none: section 4.1 (R33 keeps the model's identity)
-  std::array<double, 5> start_prior{};  // start x in mm; sigma of loc, angle, relative q/p, time
+  std::array<double, 5> start_prior{};  // start x in mm; sigma of loc, angle, q/p per GeV, time
   std::string acts_version;
 };
 

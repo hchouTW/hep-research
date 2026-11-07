@@ -2,7 +2,7 @@
  "id": "adapter:acts-tracking",
  "version": "0.1.0",
  "status": "proposed",
- "purpose": "T07 tracking through a native C++ driver on ACTS 48.2.0, and the fixture generators t07-telescope-clean/1, t07-telescope-noise/1 and t07-telescope-cai/1 on the same geometry; this version holds the telescope geometry, the driver's own product format and the zero-field refit of a known hit set, which is truth-assisted and never finding; optional, required by no skill",
+ "purpose": "T07 tracking through a native C++ driver on ACTS 48.2.0, and the fixture generators t07-telescope-clean/1, t07-telescope-noise/1 and t07-telescope-cai/1 on the same geometry; this version holds the telescope geometry, the driver's own product format and the refit of a known hit set at zero field or the fixture's 1 T, which is truth-assisted and never finding; optional, required by no skill",
  "tools": [
   {
    "name": "ACTS (acts-core, libActsCore.so)",
@@ -51,6 +51,7 @@
   "assets/native/telescope_geometry.hpp"
  ],
  "tests": [
+  "../../tests/adapters/test_acts_refit_field.py",
   "../../tests/adapters/test_acts_tracking.py"
  ],
  "owner_skill": "hep-detector",

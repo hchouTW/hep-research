@@ -82,7 +82,7 @@ def build_parser() -> argparse.ArgumentParser:
     generate.add_argument("--data-file", required=True, help="measurements, role reconstruction-input")
     generate.add_argument("--truth-file", required=True, help="truth, role truth, suffix .t07truth")
     generate.add_argument("--build-dir", help="folder of the built programs")
-    refit = commands.add_parser("refit", help="ACTS Kalman refit of known hit sets: truth-assisted, never finding. Zero field at this stage")
+    refit = commands.add_parser("refit", help="ACTS Kalman refit of known hit sets: truth-assisted, never finding. At zero field or the fixture's 1 T")
     refit.add_argument("--data-file", required=True, help="measurements")
     refit.add_argument("--hit-sets", required=True, help="acts-tracking-hit-sets/1 bound to the data file")
     refit.add_argument("--field-tesla", required=True, type=float)

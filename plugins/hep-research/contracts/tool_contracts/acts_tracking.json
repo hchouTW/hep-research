@@ -246,7 +246,7 @@
   },
   {
    "operation_id": "refit",
-   "summary": "ACTS Kalman refit of known hit sets, zero field at this stage: truth-assisted, counted apart, never reported as finding; predicted, filtered and smoothed states kept apart",
+   "summary": "ACTS Kalman refit of known hit sets, at zero field or the fixture's 1 T: truth-assisted, counted apart, never reported as finding; predicted, filtered and smoothed states kept apart",
    "invocation": {
     "kind": "cli",
     "options": [
@@ -297,7 +297,7 @@
      "kind": "parameter",
      "unit": "T",
      "required": true,
-     "constraint": "0 at this stage"
+     "constraint": "0, or the fixture's 1 T"
     },
     {
      "name": "product_id",

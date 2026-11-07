@@ -172,8 +172,7 @@ RefitResult KalmanRefit::fit(const HitSet& hit_set, const DataEvent& event, cons
   prior(Acts::eBoundLoc1, Acts::eBoundLoc1) = refit_prior_loc_sigma_mm * refit_prior_loc_sigma_mm;
   prior(Acts::eBoundPhi, Acts::eBoundPhi) = refit_prior_angle_sigma * refit_prior_angle_sigma;
   prior(Acts::eBoundTheta, Acts::eBoundTheta) = refit_prior_angle_sigma * refit_prior_angle_sigma;
-  const double sigma_qop = refit_prior_relative_qop_sigma * std::abs(hit_set.assumed_q_over_p);
-  prior(Acts::eBoundQOverP, Acts::eBoundQOverP) = sigma_qop * sigma_qop;
+  prior(Acts::eBoundQOverP, Acts::eBoundQOverP) = refit_prior_qop_sigma_per_gev * refit_prior_qop_sigma_per_gev;
   prior(Acts::eBoundTime, Acts::eBoundTime) = refit_prior_time_sigma * refit_prior_time_sigma;
   const Acts::ParticleHypothesis hypothesis(Acts::PdgParticle::eInvalid, float(particle_mass_gev), 1.0f);
   const auto start = Acts::BoundTrackParameters::createCurvilinear(start_four, refit_start.direction, hit_set.assumed_q_over_p, prior, hypothesis);

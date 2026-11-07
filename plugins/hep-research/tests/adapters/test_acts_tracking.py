@@ -17,7 +17,8 @@ are bounds set from the fit's own approximations, not from a run:
   fitted slope's sigma;
 - chi2 is stored as a 32-bit float.
 
-At zero field the hits carry no q/p: the fit must return the assumed value and the prior variance, and say so.
+At zero field the hits carry no q/p: the fit must return the assumed value and the prior variance, and say so. The refit at 1 T and the
+prior on q/p are tests/adapters/test_acts_refit_field.py's.
 Run from the plugin root: python -m unittest tests.adapters.test_acts_tracking -v
 """
 from __future__ import annotations
@@ -70,7 +71,7 @@ LOC_TOLERANCE_MM = 1e-4
 ANGLE_TOLERANCE_RAD = 1e-6
 COVARIANCE_RELATIVE_TOLERANCE = 1e-3
 CHI2_RELATIVE_TOLERANCE, CHI2_ABSOLUTE_TOLERANCE = 1e-3, 1e-2
-PRIOR_RELATIVE_QOP_SIGMA = 0.1
+PRIOR_QOP_SIGMA_PER_GEV = 1.0  # kalman_refit.hpp says why
 HELIX_TOLERANCE_MM = 1e-4  # acts_tracking_driver.cpp states the budget
 MOMENTUM_ALONG_V_TOLERANCE = 1e-8
 OFFSETS_U = (1.0, -0.5, -1.0, 0.5, 0.25, -1.5, 1.0, 0.25)
@@ -188,28 +189,6 @@ def truth_code_reached(folder: Path) -> list:
     for source in sources:
         reached |= native_includes(folder / source)
     return sorted(name for name in reached if name.startswith(GENERATOR_ONLY_CODE))
-
-
-def field_gate_holds(driver_text: str, kalman_header_text: str) -> bool:
-    """D1 stage 2 review, C-M1: either the driver refuses a field, naming why, or the prior on q/p has been changed."""
-    prior = float(re.search(r"refit_prior_relative_qop_sigma = ([0-9.e+-]+);", kalman_header_text).group(1))
-    return ("if (field != 0.0) {" in driver_text and "(C-M1)" in driver_text) or prior != 0.1
-
-
-class FieldStaysShutUntilThePriorIsSettled(unittest.TestCase):
-    def setUp(self):
-        self.driver = (NATIVE / "acts_tracking_driver.cpp").read_text(encoding="utf-8")
-        self.header = (NATIVE / "kalman_refit.hpp").read_text(encoding="utf-8")
-
-    def test_the_driver_refuses_a_field_while_the_prior_stays(self):
-        self.assertTrue(field_gate_holds(self.driver, self.header))
-
-    def test_opening_the_field_alone_fails(self):
-        self.assertFalse(field_gate_holds(self.driver.replace("if (field != 0.0) {", "if (false) {"), self.header))
-
-    def test_settling_the_prior_lets_the_field_open(self):
-        widened = self.header.replace("refit_prior_relative_qop_sigma = 0.1;", "refit_prior_relative_qop_sigma = 10.0;")
-        self.assertTrue(field_gate_holds(self.driver.replace("if (field != 0.0) {", "if (false) {"), widened))
 
 
 class CheckLinesAgainstSection18(unittest.TestCase):
@@ -1348,9 +1327,13 @@ class BuiltDriver(unittest.TestCase):
         data_file, hit_sets_file = straight_line_files(self.work)
         self.assertEqual(self.refit(data_file, hit_sets_file, field="1e999").returncode, 2)
 
-    def test_a_field_is_refused_until_its_stage_exists(self):
+    def test_only_the_fixture_field_opens(self):
+        """kalman_refit.hpp: the prior on q/p is settled for section 4.1's 1 T. A weaker field would make it a constraint."""
         data_file, hit_sets_file = straight_line_files(self.work)
-        self.assertEqual(self.refit(data_file, hit_sets_file, field="1").returncode, 2)
+        for field in ("0.01", "2", "-1"):
+            with self.subTest(field=field):
+                self.assertEqual(self.refit(data_file, hit_sets_file, field=field).returncode, 2)
+        self.assertEqual(self.refit(data_file, hit_sets_file, field="1").returncode, 0)
 
     def test_the_driver_and_python_write_the_same_bytes(self):
         data_file, hit_sets_file = straight_line_files(self.work)
@@ -1473,7 +1456,7 @@ class StraightLineCase(unittest.TestCase):
         self.assertEqual(self.document["header"]["qop_status"], "assumed-not-measured")
         for case in STRAIGHT_TRACKS:
             record = self.state_of(case[0], case[7][-1], "smoothed")
-            prior_variance = (PRIOR_RELATIVE_QOP_SIGMA * case[6]) ** 2
+            prior_variance = PRIOR_QOP_SIGMA_PER_GEV ** 2
             with self.subTest(track=case[0]):
                 self.assertAlmostEqual(record["parameters"][4], case[6], delta=1e-6 * abs(case[6]))
                 self.assertAlmostEqual(record["covariance"][upper_index(4, 4)], prior_variance, delta=COVARIANCE_RELATIVE_TOLERANCE * prior_variance)

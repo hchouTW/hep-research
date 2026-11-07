@@ -1,18 +1,20 @@
 // Why job 7490742's probe left 3e-4 mm and 3e-4 per GeV on noiseless hits, on both routes: separates the refit's start, one Kalman pass,
 // the stepper and the chi2 floor. Frozen geometry, 1 T, noiseless hits, no payload. Each start below
-// goes through the same KalmanRefit::fit. Links no generator code. A diagnostic: the refit is not yet for use with a field (D1 stage 2
-// review, C-M1), and this program's truth-centred prior is why it reads noiseless tracks only.
+// goes through the same KalmanRefit::fit. Links no generator code. A diagnostic of the start, on noiseless tracks: pulls of the refit are
+// tests/adapters/test_acts_refit_field.py's.
 //
 //   cai_refit_start_probe
 //
 // What each cause predicts, and what an independent numpy filter gave before this ran: an extended Kalman filter and smoother on the
-// closed-form helix, with this file's start, prior and tracks, no ACTS and no stepper. Largest over the seven tracks:
+// closed-form helix, with this file's start, prior and tracks, no ACTS and no stepper. Largest over the seven tracks, with the prior of
+// kalman_refit.hpp; recomputed for that prior before its first run. The same filter with the old prior, 10 % of q/p, gives 0.401322,
+// 1.05027e-03, 1.41151e-03 on the chord row, where job 7492427 read 0.401322, 1.04994e-03, 1.41049e-03.
 //
 //   Start                     chi2         |q/p error|, per GeV   |left-out r|, mm
-//   chord (the old start)     4.01322e-01  1.05027e-03            1.41151e-03
-//   truth                     4.0e-20      3.2e-13                4.3e-13
-//   chord, then a second pass 7.62059e-07  1.22276e-08            2.57650e-08
-//   curve (the new start)     1.04718e-05  9.03694e-09            1.01228e-07
+//   chord (the old start)     4.00703e-01  1.05269e-03            1.41589e-03
+//   truth                     9.6e-25      1.7e-15                1.1e-14
+//   chord, then a second pass 7.70758e-07  1.24039e-08            2.49926e-08
+//   curve (the new start)     1.04718e-05  8.97502e-09            1.01266e-07
 //
 // - If the start is the cause, ACTS reproduces the chord row and collapses on the other three.
 // - If one pass were wrong whatever the start, the truth row would keep the error: it does not, in numpy.
@@ -203,7 +205,7 @@ void run() {
 
   const Reading chord = read_all("chord", fitter, events, [](const ProbeTrack&, const t07::HitSet& hit_set, const t07::DataEvent& event) { return chord_start(hit_set, event); });
   verdict("the chord start reproduces the independent filter, so the refit is a plain Kalman pass from that start",
-          near_share(chord.chi2, 4.01322e-01) && near_share(chord.q_over_p_error, 1.05027e-03) && near_share(chord.left_out_residual, 1.41151e-03), text_of(chord));
+          near_share(chord.chi2, 4.00703e-01) && near_share(chord.q_over_p_error, 1.05269e-03) && near_share(chord.left_out_residual, 1.41589e-03), text_of(chord));
   verdict("control: the chord start is outside the limits the other starts must meet", !within_limits(chord), "limits chi2 " + std::to_string(chi2_limit) + ", q/p 1e-05, r 1e-04");
 
   const Reading truth = read_all("truth", fitter, events, [](const ProbeTrack& track, const t07::HitSet&, const t07::DataEvent&) { return truth_start(track); });

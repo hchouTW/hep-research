@@ -6,7 +6,7 @@
 //   acts_tracking_driver refit --data-file D --hit-sets H --field-tesla B --product-id NAME --product-file P
 //   acts_tracking_driver rewrite-product --product-in P --product-file Q
 //
-// Stage 1 of T07: straight-line case. refit accepts zero field only, until the field stage has its failing check.
+// refit accepts zero field, where the hits carry no q/p, or section 4.1's 1 T, where they do. No noise, finding or vertexing yet.
 #include <Acts/ActsVersion.hpp>
 #include <Acts/Definitions/Algebra.hpp>
 #include <Acts/Geometry/TrackingVolume.hpp>
@@ -140,12 +140,11 @@ int refit(const std::map<std::string, std::string>& flags) {
   if (used != field_text.size() || !std::isfinite(field)) {
     throw std::invalid_argument("--field-tesla is not a number: " + field_text);
   }
-  // D1 stage 2 review, C-M1: the prior on q/p is centred on the assumed value, 10 % wide, as tight as the measurement at high momentum.
-  // With a field that is a truth constraint: in [12, 24) GeV it would narrow pulls to about 0.82 and keep two thirds of a true bias, and
-  // it would constrain CAI-T07-4's mode, against R37. So no refit runs with a field until the prior is settled.
-  // tests/adapters/test_acts_tracking.py fails if this refusal goes while the prior stays.
-  if (field != 0.0) {
-    throw std::invalid_argument("refit accepts zero field at this stage: the field stage of T07 is not built, and its prior on q/p is not settled (C-M1)");
+  // The prior on q/p is settled against sigma(q/p) at section 4.1's field (kalman_refit.hpp). At a weaker field the measurement widens towards
+  // the prior, which would then be a constraint, and the product would still say "measured": an unidentifiable quantity reported with
+  // precision (t04-prereg.md). tests/adapters/test_acts_refit_field.py fails if this goes.
+  if (field != 0.0 && field != t07::field_tesla) {
+    throw std::invalid_argument("refit accepts zero field or the fixture's field of " + std::to_string(t07::field_tesla) + " T, not " + field_text + ": its prior on q/p is settled for that field");
   }
 
   refuse_overwriting_input(out_path, data_path);
@@ -179,7 +178,7 @@ int refit(const std::map<std::string, std::string>& flags) {
   header.field_tesla = field;
   header.qop_status = field == 0.0 ? "assumed-not-measured" : "measured";
   header.material_model = "none";
-  header.start_prior = {t07::refit_start_x_mm, t07::refit_prior_loc_sigma_mm, t07::refit_prior_angle_sigma, t07::refit_prior_relative_qop_sigma,
+  header.start_prior = {t07::refit_start_x_mm, t07::refit_prior_loc_sigma_mm, t07::refit_prior_angle_sigma, t07::refit_prior_qop_sigma_per_gev,
                         t07::refit_prior_time_sigma};
   header.acts_version = acts_version_text();
 
