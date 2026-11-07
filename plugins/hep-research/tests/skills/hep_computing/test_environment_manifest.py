@@ -198,7 +198,13 @@ class EnvironmentTemplateTests(unittest.TestCase):
     def test_lcg_setup_is_valid_sh_and_refuses_missing_view(self):
         sh = self.ADAPTER / "assets" / "lcg_view_setup.sh"
         self.assertEqual(subprocess.run(["sh", "-n", str(sh)], timeout=60).returncode, 0)
-        r = subprocess.run(["sh", "-c", '. "$1"', "sh", str(sh)], capture_output=True, text=True, timeout=60)
+        # The refusal needs no CVMFS: a copy looks under an empty folder, so a stalled mount cannot hang this test.
+        with tempfile.TemporaryDirectory() as folder:
+            text = sh.read_text(encoding="utf-8")
+            self.assertIn("/cvmfs/sft.cern.ch", text)
+            copy = Path(folder) / sh.name
+            copy.write_text(text.replace("/cvmfs/sft.cern.ch", folder), encoding="utf-8")
+            r = subprocess.run(["sh", "-c", '. "$1"', "sh", str(copy)], capture_output=True, text=True, timeout=60)
         self.assertNotEqual(r.returncode, 0)
         self.assertIn("not found", r.stderr)
 
