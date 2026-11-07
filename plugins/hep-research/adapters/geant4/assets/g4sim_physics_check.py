@@ -32,7 +32,7 @@ def _finding(code: str, path: str, message: str) -> dict:
 
 
 def mapped_process(particle: str) -> str:
-    """The process ActivatePAI selects, by the requested particle's identity and not by the process that particle uses (GB11)."""
+    """The process a PAI request selects, by the requested particle's identity and not by the process that particle uses (GB11)."""
     return MAPPED_PROCESS.get(particle, "hIoni")
 
 
@@ -53,12 +53,12 @@ def pai_findings(requests: list, regions, ionisation: dict, requirements=()) -> 
         if region in WORLD_REGION_NAMES:
             findings.append(_finding("pai-region", where, f"region {region!r} means the world's default region to Geant4: name the region explicitly"))
         elif region not in regions:
-            findings.append(_finding("pai-region", where, f"region {region!r} is not in the IR: Geant4 would skip it with a warning"))
+            findings.append(_finding("pai-region", where, f"region {region!r} is not in the IR, and the PAI constructor has no guard of its own"))
         by_region.setdefault(region, []).append((at, particle))
         if particle == ALL_PARTICLES:
             continue
         if particle not in ionisation:
-            findings.append(_finding("pai-particle", where, f"particle {particle!r} is not in the particle table: Geant4 would skip it with a warning"))
+            findings.append(_finding("pai-particle", where, f"particle {particle!r} is not in the particle table, and the PAI constructor has no guard of its own"))
         elif ionisation[particle] not in IONISATION_PROCESSES:
             findings.append(_finding("pai-no-ionisation", where, f"{particle} has none of the four ionization processes"))
         elif ionisation[particle] != mapped_process(particle):
@@ -66,7 +66,7 @@ def pai_findings(requests: list, regions, ionisation: dict, requirements=()) -> 
     for region, rows in by_region.items():
         names = [particle for _, particle in rows]
         if ALL_PARTICLES in names and len(names) > 1:
-            findings.append(_finding("pai-mixed", f"physics.pai/{rows[0][0]}", f"region {region}: `all` mixed with other requests depends on their order"))
+            findings.append(_finding("pai-mixed", f"physics.pai/{rows[0][0]}", f"region {region}: `all` already covers the four processes, so another request would add a second set of models"))
             continue
         mapped = [mapped_process(particle) for particle in names if particle != ALL_PARTICLES]
         for repeated in sorted({name for name in mapped if mapped.count(name) > 1}):
