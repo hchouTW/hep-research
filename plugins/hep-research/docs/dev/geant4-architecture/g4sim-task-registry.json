@@ -512,6 +512,34 @@
    "registered_at": "2026-11-06T23:04:56Z",
    "card_commit": "6ff4c1cb",
    "reason": "Execution log only (relative check, common checks); thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "93ab44b733f9e00bdc46a5d5ac8d5acdf6b57040e619bfba15bb6e62d4f3f4ba",
+   "registered_at": "2026-11-07T00:17:15Z",
+   "card_commit": "12aca275",
+   "reason": "Target behaviors restated as in addendum 11.1 after the targeted review; Execution log"
+  },
+  {
+   "card": "g4sim-tasks/S4.md",
+   "sha256": "cfc7e4d1839f81e7e47d31c398c57ddd10e90a7f9d293874a605e6c4540bdff0",
+   "registered_at": "2026-11-07T00:17:15Z",
+   "card_commit": "12aca275",
+   "reason": "Execution log only: gaps carried from S3"
+  },
+  {
+   "card": "g4sim-tasks/S7.md",
+   "sha256": "03e948cd7ebe7edf505045f795305a39b183b4d143ed57022fc4e9d087de3c01",
+   "registered_at": "2026-11-07T00:17:15Z",
+   "card_commit": "12aca275",
+   "reason": "Straw class rejected by the maintainer's decision; gaps carried from S3"
+  },
+  {
+   "card": "g4sim-tasks/S8.md",
+   "sha256": "05dea5e88a3c7afa03470995e96a472d8e243d450737415028947deb46d53c97",
+   "registered_at": "2026-11-07T00:17:15Z",
+   "card_commit": "12aca275",
+   "reason": "Step 5 of Section 23: GB19, GB20, gate 3 and placement_impl follow addendum 11.1, by the maintainer's decision"
   }
  ]
 }
