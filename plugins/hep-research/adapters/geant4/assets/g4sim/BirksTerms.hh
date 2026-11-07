@@ -1,5 +1,9 @@
 // g4sim/BirksTerms.hh: the Birks variable and visible-energy parts of a step (g4sim plan, Sections 8.8, 9.1; GB13). G4EmSaturation keeps massFactor and
 // effCharge private and computes them only for k_B > 0, so g4sim computes them for every material with the same formulas.
+//
+// OwnBirksTerms is adapted from G4EmSaturation::InitialiseBirksCoefficient, and DepositParts follows G4EmSaturation::VisibleEnergyDeposition, of Geant4 11.4.3
+// (source/processes/electromagnetic/utils/src/G4EmSaturation.cc), because GB13 requires agreement with them. Copyright Holders of the Geant4 Collaboration; Geant4 Software
+// License, Version 1.0, in ../GEANT4-LICENSE.txt. This product includes software developed by Members of the Geant4 Collaboration ( http://cern.ch/geant4 ).
 #ifndef G4SIM_BIRKSTERMS_HH
 #define G4SIM_BIRKSTERMS_HH
 

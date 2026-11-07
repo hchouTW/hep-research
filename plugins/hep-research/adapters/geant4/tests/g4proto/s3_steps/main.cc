@@ -83,6 +83,7 @@ std::string HexWord(std::uint64_t value) {
   return text;
 }
 
+// The public FNV-1a hash; Mix below is the public SplitMix64 finalizer.
 struct Fnv {
   std::uint64_t state = 1469598103934665603ULL;
   void Bytes(const void* start, std::size_t size) {

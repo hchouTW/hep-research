@@ -5,6 +5,9 @@
 //   s3_em birks LIST OUT.json MATERIAL                    visible energy step by step: g4sim's formula against G4EmSaturation
 //   s3_em steps LIST OUT.json none|before|after           step functions and range factors read back; `before` sets them before the EM constructor
 // Serial run manager: the models looked at are the ones the master thread owns. Every double is written with %a.
+//
+// OwnBirksTerms and OwnVisible follow G4EmSaturation.cc, and RegionPai is adapted from G4EmModelActivator::ActivatePAI, of Geant4 11.4.3. Copyright Holders of the Geant4
+// Collaboration; Geant4 Software License, Version 1.0, in adapters/geant4/assets/GEANT4-LICENSE.txt. This product includes software developed by Members of the Geant4 Collaboration ( http://cern.ch/geant4 ).
 #include "G4Box.hh"
 #include "G4BraggModel.hh"
 #include "G4Electron.hh"

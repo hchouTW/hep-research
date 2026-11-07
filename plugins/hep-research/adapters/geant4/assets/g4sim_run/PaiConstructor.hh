@@ -1,5 +1,9 @@
 // PaiConstructor.hh: PAI for a region (g4sim plan, Section 6.2.9 as of addendum 11.1). AddPAIModel does nothing through the EM constructors in Geant4
 // 11.4.3, so this constructor, registered after them, adds the region's models itself and leaves the models outside the region alone.
+//
+// Adapted from G4EmModelActivator::ActivatePAI of Geant4 11.4.3 (source/physics_lists/constructors/electromagnetic/src/G4EmModelActivator.cc): the same mapping, limits, models and
+// order, without SetEmModel and SetFluctModel. Copyright Holders of the Geant4 Collaboration; Geant4 Software License, Version 1.0, in ../GEANT4-LICENSE.txt.
+// This product includes software developed by Members of the Geant4 Collaboration ( http://cern.ch/geant4 ).
 #ifndef G4SIM_PAICONSTRUCTOR_HH
 #define G4SIM_PAICONSTRUCTOR_HH
 

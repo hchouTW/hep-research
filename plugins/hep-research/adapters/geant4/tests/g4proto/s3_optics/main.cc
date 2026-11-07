@@ -133,6 +133,7 @@ double CpuSeconds() { return static_cast<double>(std::clock()) / CLOCKS_PER_SEC;
 
 // --- Shared pieces --------------------------------------------------------------------------------------------------
 
+// Polyvinyltoluene, C9H10 at 1.032 g/cm3: the textbook values, which Geant4's TestEm3 example and others also use.
 G4Material* Plastic(const std::string& name, double birksMmPerMeV) {
   auto* nist = G4NistManager::Instance();
   auto* plastic = new G4Material(name, 1.032 * g / cm3, 2);
