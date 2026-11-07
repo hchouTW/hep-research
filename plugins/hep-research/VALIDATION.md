@@ -8948,3 +8948,24 @@ Open: gate 4 of S2 ran at `ebd4d056`, and the later fixes were checked by spot r
 limits catch large defects only. The custodian's re-evaluation of qualification follows this release and is not recorded here.
 
 Passing checks show software consistency, not physical validity.
+
+## 0.58.0 release check (2026-11-07, CI and E5)
+
+Release branch `release/0.58.0`, based on main `2e2722fc` (PR #357 merged). Minor release: g4sim phase S3. Contracts 3.21.0, `CORE_VERSION` 1.8.0, `adapters/geant4` 0.9.0; the version constants were bumped in S3.
+
+What changed on the release branch:
+- the CHANGELOG `0.58.0` section and the g4sim status (S3 `merged`);
+- no regeneration: no committed result changed, and `check_geant4_study.py`, whose hash is recorded in committed outputs, is unchanged. Gate record: `docs/dev/geant4-architecture/g4sim-gates/S3.md`.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on `758f317f` (run 42324844222) | success: 25 jobs passed, 3 skipped by the pull-request plan |
+| `run_all_checks.py`, E5 Slurm node at `88f15081`, `--jobs 8` | 31 pass, 2 fail; 6,920 tests, 6,531 passed, 384 skipped, 5 failing. One was a real defect in a test, fixed in `7f1ff347` and passing in CI. The other 4 pass where their cause is absent: two on the login host, two from a path without `S3`. `ams_optional` fails on one of those |
+
+**E2 was not run for this release**, unlike the releases before it: there is no `run_all_checks.py` result on macOS arm64 for 0.58.0, and the S3 prototypes are confirmed on E5 only, by the maintainer's decision ("drop the Mac run"). The release was authorized after CI.
+
+The first CI run of PR #357 failed on `lint`, 15 `mypy` errors in `core/geometry`, fixed by annotations in `758f317f`; every other job passed. Local runs had covered one file only.
+
+Open: GB13, GB20 and GB21 were not tested on arm64; killed energy at 1 TeV is not detectable by the absolute conservation check; the pure-EM residual reaches 5e-5 MeV, within its limit, for a reason not established; the thin-layer comparison of Section 11 has not run. The custodian's re-evaluation of qualification follows this release and is not recorded here.
+
+Passing checks show software consistency, not physical validity.
