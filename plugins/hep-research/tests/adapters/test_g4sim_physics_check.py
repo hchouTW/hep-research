@@ -108,7 +108,9 @@ class Scorers(unittest.TestCase):
 
     def test_quantities_of_later_phases_are_refused(self):
         self.assertEqual(self.judge(quantity="photon_detected"), ["scorer-phase"])
-        self.assertEqual(self.judge(level="event_file"), ["scorer-phase"])
+        self.assertEqual(self.judge(level="event_file"), ["scorer-combination"])
+        self.assertEqual(self.judge(level="event_file", hit_kind="calorimeter"), [])
+        self.assertEqual(self.judge(quantity="time_first", level="moments"), ["scorer-combination"])
 
     def test_an_undeclared_birks_constant_is_refused(self):
         scorer = {"name": "s", "quantity": "edep_visible"}
@@ -124,7 +126,21 @@ class Scorers(unittest.TestCase):
     def test_the_source_declares_its_density(self):
         self.assertEqual(check.source_findings({"density": "analytic"}), [])
         self.assertEqual(codes(check.source_findings({})), ["source-density"])
-        self.assertEqual(codes(check.source_findings({"density": "external"})), ["source-density"])
+        self.assertEqual(codes(check.source_findings({"density": "external"})), ["source-format"])
+        self.assertEqual(check.source_findings({"density": "external", "format": "text"}), [])
+        self.assertEqual(codes(check.source_findings({"density": "external", "format": "hepmc3"})), ["source-hepmc3"])
+
+    def test_the_calibration_workflow_refuses_an_external_source(self):
+        self.assertEqual(codes(check.calibration_findings({"source": {"density": "external", "format": "text"}})), ["calibration-source"])
+        self.assertEqual(check.calibration_findings({"source": {"density": "analytic"}}), [])
+
+    def test_a_reference_plane_states_its_frame(self):
+        self.assertEqual(check.plane_findings({"reference_planes": [{"name": "a", "frame": "world"}]}), [])
+        self.assertEqual(codes(check.plane_findings({"reference_planes": [{"name": "a"}]})), ["plane-frame"])
+
+    def test_the_event_range_fits_the_counter(self):
+        self.assertEqual(check.event_range_findings({"run": {"first_event": 2 ** 32 - 10, "events": 10}}), [])
+        self.assertEqual(codes(check.event_range_findings({"run": {"first_event": 2 ** 32 - 10, "events": 11}})), ["event-range"])
 
 
 if __name__ == "__main__":

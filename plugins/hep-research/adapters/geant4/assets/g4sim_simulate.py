@@ -21,7 +21,7 @@ for folder in (str(ROOT), str(Path(__file__).resolve().parent)):
 
 import g4sim_physics_check as physics_check  # noqa: E402
 
-from core.simulation import source_density  # noqa: E402
+from core.simulation import hits, source_density  # noqa: E402
 
 AXES = {"x": 0, "y": 1, "z": 2}
 CLOSURE_ULP = 2.0 ** -52
@@ -79,6 +79,8 @@ def resolved_request(request: dict, ir: dict) -> dict:
             item["rigidity_GV"] = float(scorer["chord_min_rigidity_GV"])
         if "time_window_ns" in scorer:
             item["window_ns"] = [float(value) for value in scorer["time_window_ns"]]
+        if scorer.get("level") == "event_file":
+            item["hit_kind"] = scorer["hit_kind"]
         if scorer["quantity"] == physics_check.SPLIT_QUANTITY:
             templates, materials = ir["physical"]["templates"], ir["physical"]["materials"]
             item["light_yield_per_MeV"] = {name: float(materials.get(templates[name]["material"], {}).get("scintillation", {}).get("yield_per_MeV", 0)) for name in item["templates"]}
@@ -86,6 +88,12 @@ def resolved_request(request: dict, ir: dict) -> dict:
     out = {"source": resolved_source(request["source"], ir["physical"]["frames"]), "scorers": scorers}
     if any(item["quantity"] in physics_check.BIRKS_QUANTITIES for item in scorers):
         out["birks_active"] = True
+    planes = request.get("reference_planes", [])
+    if planes or "truth" in request or any("hit_kind" in item for item in scorers):
+        keep = request.get("truth", {}).get("keep", ["primary"])
+        above = next((rule["energy_above_MeV"] for rule in keep if isinstance(rule, dict) and "energy_above_MeV" in rule), -1)
+        out["truth"] = {"decay_products": "decay_products" in keep, "energy_above_MeV": float(above), "time_bin_ns": float(request.get("truth", {}).get("time_bin_ns", 1)),
+                        "planes_z_mm": [_in_world(plane["frame"], [0.0, 0.0, float(plane["z_mm"])], ir["physical"]["frames"])[2] for plane in planes]}
     return out
 
 
@@ -281,6 +289,8 @@ def simulate(card: dict, request: dict, checked: dict, program: Path, work: Path
     summary = {"status": "failed" if closure["failing"] else "ok", "rows": counts, "closure": closure, "balance": balance_summary(_rows(work / "boundary.csv")), "conservation": conservation_summary(work / "conservation.csv"),
                "effective": {"birks_mm_per_MeV": effective["birks_mm_per_MeV"], "step_functions": effective["step_functions"], "pai": physics_check.effective_pai(requests, ionisation_table(effective)), "models": effective["models"]},
                "geometry_id": checked["geometry_id"]}
+    if (work / "hits.root").is_file():
+        (work / "simulation-hits.json").write_text(json.dumps(hits.index(checked["geometry_id"], card, work / "hits.root"), indent=1) + "\n", encoding="utf-8")
     (work / "column_map.json").write_text(json.dumps({"scorers": resolved["scorers"], "volume_id": ir["physical"]["volume_id"]}, indent=1) + "\n", encoding="utf-8")
     (work / "summary.json").write_text(json.dumps(summary, indent=1) + "\n", encoding="utf-8")
     return summary

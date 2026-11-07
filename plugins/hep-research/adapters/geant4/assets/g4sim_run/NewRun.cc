@@ -31,6 +31,7 @@
 #include "G4UserEventAction.hh"
 #include "G4UserRunAction.hh"
 #include "G4UserStackingAction.hh"
+#include "G4UserTrackingAction.hh"
 #include "G4UserSteppingAction.hh"
 #include "G4VEnergyLossProcess.hh"
 #include "G4VModularPhysicsList.hh"
@@ -56,6 +57,9 @@ struct Shared {
   std::vector<long long> strides;
   std::set<std::string> killedSecondaries;
   long long seed = 0, firstEvent = 0;
+  bool hits = false;
+  g4sim::TruthRules truth;
+  std::vector<g4sim::ReferencePlane> planes;
 };
 
 // Section 6.2.9: the model and fluctuation model each ionization process really uses, in each region, at energies from 1 keV to 100 GeV. Read from Geant4, never predicted.
@@ -161,12 +165,16 @@ class KillPhysics : public G4VPhysicsConstructor {
 
 class Files : public G4UserRunAction {
  public:
-  explicit Files(Shared& shared) : fShared(shared) {}
+  explicit Files(Shared& shared) : fShared(shared) {
+    if (fShared.hits) g4sim::HitRecorder::Book();
+  }
   void BeginOfRunAction(const G4Run*) override {
+    if (fShared.hits) G4AnalysisManager::Instance()->OpenFile("hits.root");
     if (G4Threading::IsMasterThread()) {
       g4sim::WriteBack("g4sim_run", "./probe.json", {});
       if (G4Threading::IsMultithreadedApplication()) return;
     }
+    g4sim::HitRecorder::Thread().Configure(fShared.truth, fShared.planes);
     const std::string thread = std::to_string(G4Threading::G4GetThreadId());
     fCells = std::fopen(("cells.thread" + thread + ".csv").c_str(), "w");
     fBoundary = std::fopen(("boundary.thread" + thread + ".csv").c_str(), "w");
@@ -177,6 +185,10 @@ class Files : public G4UserRunAction {
     g4sim::ScorerSums::Thread().Configure(&fShared.scorers, &fShared.strides, fCells, fBoundary, fCrossings);
   }
   void EndOfRunAction(const G4Run*) override {
+    if (fShared.hits) {
+      G4AnalysisManager::Instance()->Write();
+      G4AnalysisManager::Instance()->CloseFile();
+    }
     if (G4Threading::IsMasterThread() && G4Threading::IsMultithreadedApplication()) return;
     std::ofstream sagitta("sagitta.thread" + std::to_string(G4Threading::G4GetThreadId()) + ".csv");
     for (std::size_t i = 0; i < fShared.scorers.size(); ++i) sagitta << fShared.scorers[i].name << ',' << g4sim::ScorerSums::Thread().ApportionedSteps(i) << ',' << g4sim::ScorerSums::Thread().LongSteps(i) << '\n';
@@ -204,10 +216,12 @@ class EventSums : public G4UserEventAction {
     g4sim::Accounting::Thread().BeginEvent();
     g4sim::ScorerSums::Thread().BeginEvent();
     g4sim::ScorerSums::Thread().SetEvent(fShared.firstEvent + event->GetEventID());
+    if (fShared.hits) g4sim::HitRecorder::Thread().BeginEvent(fShared.firstEvent + event->GetEventID());
   }
   void EndOfEventAction(const G4Event* event) override {
     g4sim::Accounting::Thread().EndEvent(event, fShared.firstEvent);
     g4sim::ScorerSums::Thread().EndEvent(fShared.firstEvent + event->GetEventID());
+    if (fShared.hits) g4sim::HitRecorder::Thread().EndEvent();
   }
 
  private:
@@ -216,11 +230,22 @@ class EventSums : public G4UserEventAction {
 
 class Steps : public G4UserSteppingAction {
  public:
+  explicit Steps(bool hits) : fHits(hits) {}
   void UserSteppingAction(const G4Step* step) override {
     g4sim::Accounting& accounting = g4sim::Accounting::Thread();
     accounting.Step(step);
     g4sim::ScorerSums::Thread().BoundaryStep(step, accounting.Table());
+    if (fHits) g4sim::HitRecorder::Thread().Step(step);
   }
+
+ private:
+  bool fHits;
+};
+
+class Tracks : public G4UserTrackingAction {
+ public:
+  void PreUserTrackingAction(const G4Track* track) override { g4sim::HitRecorder::Thread().BeginTrack(track); }
+  void PostUserTrackingAction(const G4Track* track) override { g4sim::HitRecorder::Thread().EndTrack(track); }
 };
 
 // Class (b): secondaries the kill policy names are never tracked, and are booked here.
@@ -245,7 +270,8 @@ class Actions : public G4VUserActionInitialization {
     auto* files = new Files(fShared);
     SetUserAction(files);
     SetUserAction(new EventSums(fShared));
-    SetUserAction(new Steps());
+    SetUserAction(new Steps(fShared.hits));
+    if (fShared.hits) SetUserAction(new Tracks());
     if (!fShared.killedSecondaries.empty()) SetUserAction(new Stacking(fShared.killedSecondaries));
     SetUserAction(new Primary(fShared));
   }
@@ -294,6 +320,14 @@ int NewRun(const Value& ir, const Value& card, const Value& request) {
   shared.seed = static_cast<long long>(run.at("logical_run_seed", "run").num);
   shared.firstEvent = run.has("first_event") ? static_cast<long long>(run.obj.at("first_event").num) : 0;
   const int threads = run.has("threads") ? static_cast<int>(run.obj.at("threads").num) : 1;
+  if (request.has("truth")) {
+    const Value& truth = request.obj.at("truth");
+    shared.hits = true;
+    shared.truth.decayProducts = truth.at("decay_products", "truth").b;
+    shared.truth.energyThreshold = truth.at("energy_above_MeV", "truth").num;
+    shared.truth.timeBinNs = truth.at("time_bin_ns", "truth").num;
+    for (const auto& plane : truth.at("planes_z_mm", "truth").array("planes_z_mm")) shared.planes.push_back({plane.num});
+  }
   g4sim::KillLimits limits;
   if (card.has("kill_policy")) {
     const Value& policy = card.obj.at("kill_policy");

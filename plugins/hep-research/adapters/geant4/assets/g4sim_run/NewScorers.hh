@@ -32,6 +32,7 @@
 #include "G4VSolid.hh"
 #include "MiniJson.hh"
 #include "NewBuild.hh"
+#include "NewHits.hh"
 #include "ScintillationSplit.hh"
 
 namespace g4sim {
@@ -58,6 +59,7 @@ struct ScorerSpec {
   Segmentation segmentation;
   double fraction = 0.1, rigidityGV = -1., windowLow = -1., windowHigh = -1.;
   std::map<std::string, double> lightYield;  // edep_visible_ly_split: per MeV, by template
+  std::string hitKind;  // level event_file: tracker or calorimeter
   bool Boundary() const { return quantity == "n_crossings" || quantity == "crossing_kinematics" || quantity == "energy_out_by_face"; }
   bool First() const { return quantity == "time_first" || quantity == "first_entry_kinematics"; }
 };
@@ -85,6 +87,7 @@ inline std::vector<ScorerSpec> ReadScorers(const Value& request) {
     if (item.has("split")) spec.split = item.obj.at("split").str;
     if (item.has("fraction")) spec.fraction = item.obj.at("fraction").num;
     if (item.has("rigidity_GV")) spec.rigidityGV = item.obj.at("rigidity_GV").num;
+    if (item.has("hit_kind")) spec.hitKind = item.obj.at("hit_kind").str;
     if (item.has("light_yield_per_MeV"))
       for (const auto& [name, value] : item.obj.at("light_yield_per_MeV").obj) spec.lightYield[name] = value.num;
     if (item.has("window_ns")) {
@@ -249,6 +252,10 @@ class ScorerSums {
         const auto key = std::make_pair(i, volume);
         if (!fFirst.count(key)) fFirst[key] = {pre->GetGlobalTime() / ns, pre->GetKineticEnergy() / MeV, static_cast<double>(step->GetTrack()->GetDefinition()->GetPDGEncoding())};
         continue;
+      }
+      if (!scorer.hitKind.empty() && step->GetTotalEnergyDeposit() > 0.) {
+        if (scorer.hitKind == "tracker") HitRecorder::Thread().Tracker(step, static_cast<double>(volume));
+        else HitRecorder::Thread().Calorimeter(step, static_cast<double>(volume));
       }
       Score(i, scorer, step, touchable, volume);
     }

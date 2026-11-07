@@ -145,8 +145,15 @@ def scorer_findings(scorers: list, materials: dict | None = None, selected_mater
             findings.append(_finding("scorer-combination", where, f"split {split!r} is not apportion or midpoint"))
         if split != "apportion" and ({"apportion_short_step_fraction", "chord_min_rigidity_GV"} & set(scorer)):
             findings.append(_finding("scorer-combination", where, "the short-step fraction and rigidity threshold belong to `apportion`"))
-        if scorer.get("level", "column") != "column":
-            findings.append(_finding("scorer-phase", where, f"level {scorer['level']} arrives in S4"))
+        level = scorer.get("level", "column")
+        if level == "event_file":
+            if quantity != "edep" or scorer.get("hit_kind") not in ("tracker", "calorimeter"):
+                findings.append(_finding("scorer-combination", where, "an event_file scorer is `edep` with hit_kind tracker or calorimeter"))
+        elif level == "moments":
+            if quantity not in ADDITIVE:
+                findings.append(_finding("scorer-combination", where, "`moments` is for linear quantities"))
+        elif level != "column":
+            findings.append(_finding("scorer-quantity", where, f"unknown level {level!r}"))
         if quantity in BIRKS_QUANTITIES and materials is not None:
             for name in (selected_materials or {}).get(scorer.get("name"), ()):
                 if "birks_mm_per_MeV" not in materials.get(name, {}).get("ionisation", {}):
@@ -157,11 +164,37 @@ def scorer_findings(scorers: list, materials: dict | None = None, selected_mater
 
 
 def source_findings(source: dict) -> list:
-    """Section 6.3: the density type is declared, and `external` arrives in S4."""
+    """Section 6.3: the density type is declared; an external source names a text event file, or HepMC3 if the installation record has it."""
     density = source.get("density")
     if density == "analytic":
         return []
-    return [_finding("source-density", "source/density", "an external source arrives in S4" if density == "external" else f"density {density!r} is not declared")]
+    if density != "external":
+        return [_finding("source-density", "source/density", f"density {density!r} is not declared")]
+    if source.get("format") == "hepmc3":
+        return [_finding("source-hepmc3", "source/format", "HepMC3 is not in the installation record of this host: use a text event file, or install it and record it")]
+    if source.get("format") != "text":
+        return [_finding("source-format", "source/format", f"format {source.get('format')!r} is not text or hepmc3")]
+    return []
+
+
+def plane_findings(request: dict) -> list:
+    """Section 6.3: a reference plane states its frame."""
+    return [_finding("plane-frame", f"reference_planes/{at}", f"plane {plane.get('name')!r} states no frame") for at, plane in enumerate(request.get("reference_planes", [])) if not plane.get("frame")]
+
+
+def calibration_findings(request: dict) -> list:
+    """Section 3, principle 7: a calibration workflow needs an analytic density, so an external source is refused there."""
+    if request.get("source", {}).get("density") == "external":
+        return [_finding("calibration-source", "source/density", "the calibration workflow refuses an external source: it has no analytic density")]
+    return []
+
+
+def event_range_findings(card: dict) -> list:
+    """Section 10.2: first_event + number of events fits in the counter's word 0."""
+    run = card.get("run", {})
+    if run.get("first_event", 0) + run.get("events", 0) > 2 ** 32:
+        return [_finding("event-range", "run", "first_event + events exceeds 2^32")]
+    return []
 
 
 def card_findings(card: dict, request: dict | None = None, regions=(), ionisation: dict | None = None, requirements=(), materials=None, selected_materials=None) -> list:
@@ -172,7 +205,7 @@ def card_findings(card: dict, request: dict | None = None, regions=(), ionisatio
         findings += pai_findings(requests, regions, ionisation, requirements)
     if request is not None:
         scorers = request.get("scorers", [])
-        findings += time_cut_findings(card, scorers) + scorer_findings(scorers, materials, selected_materials) + source_findings(request.get("source", {}))
+        findings += time_cut_findings(card, scorers) + scorer_findings(scorers, materials, selected_materials) + source_findings(request.get("source", {})) + plane_findings(request) + event_range_findings(card)
     return findings
 
 
