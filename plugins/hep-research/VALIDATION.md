@@ -8967,6 +8967,22 @@ limits catch large defects only. The custodian's re-evaluation of qualification 
 
 Passing checks show software consistency, not physical validity.
 
+## 0.61.0 release check (2026-11-07, CI and E5)
+
+Release branch `release/0.61.0`, based on main `0e586eeb` (PR #367 merged). Minor release: simreco's strip digitization error. `adapters/geant4` 0.11.1; contracts 3.23.0 and `CORE_VERSION` 1.10.0 unchanged.
+
+What changed on the release branch: the CHANGELOG `0.61.0` section. No regeneration: by the maintainer's decision J15 and J16 keep the old width in their 24 reconstructions with tail sources on, as their recorded simreco hash shows (CHANGELOG, both READMEs, `g4sim-approvals.md`).
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on `aba8b905` | success: 27 jobs passed, 3 skipped by the pull-request plan |
+| `run_all_checks.py`, E5 Slurm node at `aba8b905`, `--jobs 8` | 32 pass, 1 fail; 7,064 tests, 1 failing: `test_examples_need_an_explicit_source_of_the_installed_version`, which needs `cmake`, absent on the node |
+| The fix | chi2/ndof 1.001 of fits with only strip errors, 1.197 with the old simreco on the same events; the width agrees with a direct Monte Carlo of the cluster position to 0.5% |
+
+**E2 was not run for this release.** The first CI run and an E5 run failed on a stale reference inventory after the study protocol's edit, which also failed `test_a_hanging_module_fails_with_a_reason` (it runs the inventory test as its passing module); fixed in `aba8b905`.
+
+Passing checks show software consistency, not physical validity.
+
 ## 0.60.0 release check (2026-11-07, CI and E5)
 
 Release branch `release/0.60.0`, based on main `b7657d81` (PR #364 merged). Minor release: g4sim phase S5, `partially-complete` with the gaps the maintainer accepted. Contracts 3.23.0, `CORE_VERSION` 1.10.0, `adapters/geant4` 0.11.0; the version constants were bumped in S5.
