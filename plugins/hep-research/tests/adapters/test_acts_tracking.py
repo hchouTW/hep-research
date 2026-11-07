@@ -172,8 +172,10 @@ def cmake_text_of(folder: Path) -> str:
 
 
 def driver_sources(cmake_text: str) -> list:
-    """The sources of the data-side programs, the driver and the CAI probes, and of the common library, from the CMake file."""
+    """The sources of the data-side programs, the driver, the finder and the CAI probes, and of the common library, from the CMake file."""
     driver = re.search(r"add_executable\(acts_tracking_driver ([^)]*)\)", cmake_text).group(1).split()
+    driver += re.search(r"add_executable\(acts_tracking_finder ([^)]*)\)", cmake_text).group(1).split()
+    driver += re.search(r"add_executable\(seed_start_probe ([^)]*)\)", cmake_text).group(1).split()
     probe = re.findall(r"add_executable\(cai_\w+_probe ([^)]*)\)", cmake_text)
     probe = " ".join(probe).split()
     common = re.search(r"add_library\(acts_tracking_common STATIC ([^)]*)\)", cmake_text).group(1).split()
@@ -218,6 +220,14 @@ class DataSideNeverOpensTruth(unittest.TestCase):
             source = copied / "acts_tracking_driver.cpp"
             source.write_text('#include "t07_seed_stream.hpp"\n' + source.read_text(encoding="utf-8"), encoding="utf-8")
             self.assertIn("t07_seed_stream.hpp", truth_code_reached(copied))
+
+    def test_a_finder_that_reached_the_truth_code_would_be_caught(self):
+        with tempfile.TemporaryDirectory() as folder:
+            copied = Path(folder) / "native"
+            shutil.copytree(NATIVE, copied)
+            source = copied / "track_finding.cpp"
+            source.write_text('#include "t07_truth_file.hpp"\n' + source.read_text(encoding="utf-8"), encoding="utf-8")
+            self.assertIn("t07_truth_file.hpp", truth_code_reached(copied))
 
     def test_a_probe_that_reached_the_cai_constants_would_be_caught(self):
         with tempfile.TemporaryDirectory() as folder:

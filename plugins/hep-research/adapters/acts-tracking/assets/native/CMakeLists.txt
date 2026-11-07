@@ -8,6 +8,15 @@ include(t07_generators.cmake)
 add_executable(acts_tracking_driver acts_tracking_driver.cpp kalman_refit.cpp)
 target_link_libraries(acts_tracking_driver PRIVATE acts_tracking_common)
 
+# Pattern recognition, recipe reco.track.acts-ckf-planar/1: a program of its own, with no route for a hit set or any other truth-assisted input.
+# Data side: it links no generator, seed code or truth reader (section 3.1), which the build job checks on the binary.
+add_executable(acts_tracking_finder acts_tracking_finder.cpp track_finding.cpp kalman_refit.cpp)
+target_link_libraries(acts_tracking_finder PRIVATE acts_tracking_common)
+
+# Whether a seed's start lies on the helix through its hits, read through the ACTS propagator. Data side too: hand-set tracks, no fixture event.
+add_executable(seed_start_probe seed_start_probe.cpp track_finding.cpp kalman_refit.cpp)
+target_link_libraries(seed_start_probe PRIVATE acts_tracking_common)
+
 # The CAI-T07-3 probe: data side, so it links no generator code.
 add_executable(cai_payload_probe cai_payload_probe.cpp payload_geometry.cpp kalman_refit.cpp)
 target_link_libraries(cai_payload_probe PRIVATE acts_tracking_common)

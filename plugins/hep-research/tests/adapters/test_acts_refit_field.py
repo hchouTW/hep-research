@@ -219,8 +219,6 @@ def counted_apart_defects(document: dict) -> list:
     defects = [f"{name} is {header[name]}" for name, value in expected.items() if header[name] != value]
     if header["start_prior"][3] != SETTLED_PRIOR_PER_GEV:
         defects.append(f"start_prior holds q/p width {header['start_prior'][3]}")
-    if native_product.fit_summary(document)["reported_as_finding"] is not False:
-        defects.append("reported as finding")
     return defects
 
 
@@ -236,7 +234,8 @@ def without_chi2(records) -> list:
 
 
 def zero_field_defects(reference: dict, document: dict) -> list:
-    """The settled prior moves nothing at zero field but q/p's own width. Reference: job 7492427's product. Time carries q/p's width, so it is left out."""
+    """The settled prior moves nothing at zero field but q/p's own width. Reference: job 7492427's product. Time's rows carry q/p's width, so they are left
+    out, and only they (D1 stage 4 review, m3): the time value is held, and q/p's row against loc and angles, which must be exactly absent, as a correlation."""
     defects = []
     for name in reference["header"]:
         if name != "start_prior" and reference["header"][name] != document["header"][name]:
@@ -262,6 +261,12 @@ def zero_field_defects(reference: dict, document: dict) -> list:
         for entry, (row, column) in enumerate(entries):
             if max(row, column) < 4 and abs(old_record["covariance"][entry] - new_record["covariance"][entry]) > ZERO_FIELD_AGREEMENT_SIGMA * sigmas[row] * sigmas[column]:
                 defects.append(f"covariance {row} {column} moved in {old_record['track_key']}")
+            if column == 4 and row < 4:
+                scale = math.sqrt(new_record["covariance"][COVARIANCE_DIAGONAL[row]] * new_record["covariance"][COVARIANCE_DIAGONAL[4]])
+                if abs(new_record["covariance"][entry]) > ZERO_FIELD_AGREEMENT_SIGMA * scale:
+                    defects.append(f"q/p correlated with {PARAMETER_NAMES[row]} in {old_record['track_key']}")
+        if abs(old_record["parameters"][5] - new_record["parameters"][5]) > ZERO_FIELD_AGREEMENT_SIGMA * sigmas[5]:
+            defects.append(f"time moved in {old_record['track_key']}")
     return defects
 
 
@@ -705,7 +710,11 @@ class JudgesFailOnOneDefect(unittest.TestCase):
         moved_chi2["states"][0]["chi2"] = 0.6
         moved_plane = self.zero_field_document()
         moved_plane["states"][0]["plane"] = 2
-        for document in (moved_state, moved_covariance, moved_q_over_p, moved_start, moved_chi2, moved_plane):
+        moved_time = self.zero_field_document()
+        moved_time["parameters"][0]["parameters"][5] = 1000.0
+        correlated = self.zero_field_document()
+        correlated["parameters"][0]["covariance"][4] = 0.5e-4  # loc0 with q/p, a correlation of 0.5
+        for document in (moved_state, moved_covariance, moved_q_over_p, moved_start, moved_chi2, moved_plane, moved_time, correlated):
             self.assertEqual(len(zero_field_defects(reference, document)), 1)
 
 

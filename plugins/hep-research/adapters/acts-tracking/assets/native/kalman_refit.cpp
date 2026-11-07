@@ -25,6 +25,7 @@
 #include <set>
 #include <stdexcept>
 
+#include "plane_hit_link.hpp"
 #include "t07_fixture_constants.hpp"
 
 namespace t07 {
@@ -33,31 +34,6 @@ namespace {
 using Trajectory = Acts::VectorMultiTrajectory;
 using TelescopePropagator = Acts::Propagator<Acts::EigenStepper<>, Acts::Navigator>;
 using TelescopeFitter = Acts::KalmanFitter<TelescopePropagator, Trajectory>;
-
-// The measurement travels inside the source link, as Acts/EventData/detail/TestSourceLink.hpp does it.
-struct PlaneHitLink {
-  std::uint32_t hit_key = 0;
-  const Acts::Surface* surface = nullptr;
-  double loc0_mm = 0.0;
-  double loc1_mm = 0.0;
-  double variance0_mm2 = 0.0;
-  double variance1_mm2 = 0.0;
-};
-
-const Acts::Surface* surface_of_link(const Acts::SourceLink& source_link) { return source_link.get<PlaneHitLink>().surface; }
-
-void calibrate_plane_hit(const Acts::GeometryContext& /*geometry_context*/, const Acts::CalibrationContext& /*calibration_context*/,
-                         const Acts::SourceLink& source_link, Trajectory::TrackStateProxy track_state) {
-  const PlaneHitLink& link = source_link.get<PlaneHitLink>();
-  track_state.setUncalibratedSourceLink(Acts::SourceLink{source_link});
-  track_state.allocateCalibrated(2);
-  track_state.template calibrated<2>() = Acts::Vector2(link.loc0_mm, link.loc1_mm);
-  Acts::SquareMatrix<2> covariance = Acts::SquareMatrix<2>::Zero();
-  covariance(0, 0) = link.variance0_mm2;
-  covariance(1, 1) = link.variance1_mm2;
-  track_state.template calibratedCovariance<2>() = covariance;
-  track_state.setProjectorSubspaceIndices(std::array{Acts::eBoundLoc0, Acts::eBoundLoc1});
-}
 
 template <typename parameters_t, typename covariance_t>
 ParameterRecord parameter_record(const std::string& track_key, std::int32_t state_index, const std::string& state_type,
@@ -154,6 +130,17 @@ RefitResult KalmanRefit::fit(const HitSet& hit_set, const DataEvent& event) cons
 RefitResult KalmanRefit::fit(const HitSet& hit_set, const DataEvent& event, const RefitStart& refit_start) const {
   const std::vector<const PlaneHit*> hits = checked_hits(hit_set, event);
 
+  RefitResult result;
+  result.track.key = hit_set.track_key;
+  result.track.event_ordinal = hit_set.event_ordinal;
+  result.track.assumed_q_over_p = hit_set.assumed_q_over_p;
+  if (hit_set_measures_nothing_of_q_over_p(hits.size(), m_field_along_v_tesla)) {
+    std::cerr << "fit of " << hit_set.track_key << " refused: " << hits.size() << " planes in a field measure no q/p\n";
+    result.track.status = "failed";
+    result.track.failure_category = "fit";  // stays in the product: no failed object leaves a denominator
+    return result;
+  }
+
   std::vector<Acts::SourceLink> source_links;
   for (const PlaneHit* hit : hits) {
     PlaneHitLink link;
@@ -191,10 +178,6 @@ RefitResult KalmanRefit::fit(const HitSet& hit_set, const DataEvent& event, cons
   Acts::TrackContainer track_container{Acts::VectorTrackContainer{}, Trajectory{}};
   auto fitted = m_machinery->fitter.fit(source_links.begin(), source_links.end(), start, fit_options, track_container);
 
-  RefitResult result;
-  result.track.key = hit_set.track_key;
-  result.track.event_ordinal = hit_set.event_ordinal;
-  result.track.assumed_q_over_p = hit_set.assumed_q_over_p;
   if (!fitted.ok()) {
     std::cerr << "fit of " << hit_set.track_key << " failed: " << fitted.error().message() << "\n";
     result.track.status = "failed";

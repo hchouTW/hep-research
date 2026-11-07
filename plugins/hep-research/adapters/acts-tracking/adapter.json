@@ -2,7 +2,7 @@
  "id": "adapter:acts-tracking",
  "version": "0.1.0",
  "status": "proposed",
- "purpose": "T07 tracking through a native C++ driver on ACTS 48.2.0, and the fixture generators t07-telescope-clean/1, t07-telescope-noise/1 and t07-telescope-cai/1 on the same geometry; this version holds the telescope geometry, the driver's own product format and the refit of a known hit set at zero field or the fixture's 1 T, which is truth-assisted and never finding; optional, required by no skill",
+ "purpose": "T07 tracking through a native C++ driver on ACTS 48.2.0, and the fixture generators t07-telescope-clean/1, t07-telescope-noise/1 and t07-telescope-cai/1 on the same geometry; this version holds the telescope geometry, the driver's own product format and the refit of a known hit set at zero field or the fixture's 1 T, which is truth-assisted and never finding, and pattern recognition on hits alone, seeds, CKF and ambiguity resolution, in a program of its own; optional, required by no skill",
  "tools": [
   {
    "name": "ACTS (acts-core, libActsCore.so)",
@@ -13,12 +13,14 @@
  "environment": "none declared",
  "assets": [
   "assets/acts_tracking.py",
+  "assets/fixture_tools/acts_finding_record.py",
   "assets/fixture_tools/acts_native_product.py",
   "assets/fixture_tools/check_t07_generator.py",
   "assets/fixture_tools/t07_fixture_files.py",
   "assets/fixture_tools/t07_truth_files.py",
   "assets/native/CMakeLists.txt",
   "assets/native/acts_tracking_driver.cpp",
+  "assets/native/acts_tracking_finder.cpp",
   "assets/native/cai_payload_probe.cpp",
   "assets/native/cai_refit_start_probe.cpp",
   "assets/native/kalman_refit.cpp",
@@ -27,8 +29,10 @@
   "assets/native/native_product.hpp",
   "assets/native/payload_geometry.cpp",
   "assets/native/payload_geometry.hpp",
+  "assets/native/plane_hit_link.hpp",
   "assets/native/plane_propagation.cpp",
   "assets/native/plane_propagation.hpp",
+  "assets/native/seed_start_probe.cpp",
   "assets/native/sha256.cpp",
   "assets/native/sha256.hpp",
   "assets/native/t07_cai_constants.hpp",
@@ -48,9 +52,12 @@
   "assets/native/t07_truth_file.cpp",
   "assets/native/t07_truth_file.hpp",
   "assets/native/telescope_geometry.cpp",
-  "assets/native/telescope_geometry.hpp"
+  "assets/native/telescope_geometry.hpp",
+  "assets/native/track_finding.cpp",
+  "assets/native/track_finding.hpp"
  ],
  "tests": [
+  "../../tests/adapters/test_acts_finding.py",
   "../../tests/adapters/test_acts_refit_field.py",
   "../../tests/adapters/test_acts_tracking.py"
  ],

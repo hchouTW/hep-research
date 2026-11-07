@@ -2,6 +2,7 @@
 // truth-assisted, counted apart, never reported as finding. It runs at zero field, or at section 4.1's 1 T.
 #pragma once
 
+#include <cstddef>
 #include <cstdint>
 #include <memory>
 #include <string>
@@ -27,6 +28,10 @@ inline constexpr double refit_prior_angle_sigma = 0.1;
 // sigma(q/p) stays within 3e-4 of the least-squares value at s = 1, 9e-4 at 10, and is 7e-2 off at 100. So 1. A pull's width then falls
 // short by 8.5e-6 and a true bias by 1.7e-5, at every momentum. Not derived from pulls (section 2.2). Held for 1 T only: at a weaker field
 // m grows towards s, so the driver refuses one. tests/adapters/test_acts_refit_field.py holds this arithmetic.
+// Domain (D1 stage 4 review, m2): all of that is the prior's share. The single pass also linearises about the start, and that share does not
+// fall with s. Measured on closed-form helix hits in [1.5, 3) GeV, largest move of q/p: 0.003 sigma at 10 % off, 0.06 sigma at a bin edge,
+// 0.21 sigma at a factor 2, 1.22 sigma at the wrong sign. So a set's assumed q/p must be within 10 % of its value, or the fit must be repeated
+// from its own result, as the finder does with a seed's q/p (track_finding.cpp). "A start, not a constraint" holds in that domain only.
 inline constexpr double refit_prior_qop_sigma_per_gev = 1.0;
 inline constexpr double refit_prior_time_sigma = 1.0;
 
@@ -53,6 +58,13 @@ struct RefitResult {
 // error from the fitter. Such a track fails.
 inline bool fit_lost_a_hit(std::int32_t measurements, std::int32_t outliers, std::size_t hit_count) {
   return std::size_t(measurements + outliers) != hit_count;
+}
+
+// Two planes fix a line and no curvature, so in a field their q/p would be the prior speaking under a product that says measured (D1 stage 4
+// review, m5; t04-prereg.md, "Unidentifiable quantity reported with precision"). Such a set fails as a track and stays in the denominator.
+inline constexpr std::size_t planes_to_measure_q_over_p = 3;
+inline bool hit_set_measures_nothing_of_q_over_p(std::size_t plane_count_in_set, double field_along_v_tesla) {
+  return field_along_v_tesla != 0.0 && plane_count_in_set < planes_to_measure_q_over_p;
 }
 
 class KalmanRefit {

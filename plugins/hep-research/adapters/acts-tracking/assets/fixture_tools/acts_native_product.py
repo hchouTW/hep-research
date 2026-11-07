@@ -20,6 +20,7 @@ TEXT_HEADER_FIELDS = ("product_id", "revision", "recipe", "stage", "evidence_cla
 STATE_KINDS = ("measurement", "hole", "outlier")
 STATE_TYPES = ("predicted", "filtered", "smoothed")
 PARAMETER_COUNT, COVARIANCE_COUNT = 6, 21
+FINDING_STAGE = "find-ckf"  # the only stage reported as finding, and only with evidence class data-side (BP03)
 # Only the fields of a product that say what was fitted; two products that differ here cannot be merged into one.
 MERGE_IDENTITY_FIELDS = ("recipe", "stage", "evidence_class", "data_product", "data_sha256", "field_tesla", "qop_status", "material_model",
                          "start_prior", "acts_version")
@@ -291,5 +292,6 @@ def fit_summary(document: dict) -> dict:
     """What a reader must see first: the evidence class, the failures, and that zero field measures no q/p."""
     header = document["header"]
     failed = [track for track in document["tracks"] if track["status"] == "failed"]
-    return {"evidence_class": header["evidence_class"], "stage": header["stage"], "reported_as_finding": False, "tracks": len(document["tracks"]),
+    finding = header["stage"] == FINDING_STAGE and header["evidence_class"] == "data-side"
+    return {"evidence_class": header["evidence_class"], "stage": header["stage"], "reported_as_finding": finding, "tracks": len(document["tracks"]),
             "failed": len(failed), "failure_categories": sorted({track["failure_category"] for track in failed}), "qop_status": header["qop_status"]}

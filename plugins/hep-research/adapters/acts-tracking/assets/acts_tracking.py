@@ -17,6 +17,7 @@ from pathlib import Path
 
 DRIVER = "acts_tracking_driver"
 GENERATOR = "t07_fixture_generator"
+FINDER = "acts_tracking_finder"
 RUN_TIMEOUT_SECONDS = 3600
 EXIT_FAILED, EXIT_INVALID, EXIT_MISSING = 1, 2, 3
 PROGRAM_INVALID_INPUT = 2
@@ -36,7 +37,7 @@ def report(operation: str, status: str, reason: str, exit_code: int, **fields) -
 
 
 def report_finished(operation: str, fields: dict) -> int:
-    """A refit stays ok with some failed tracks, which it counts; with no track fitted the operation failed."""
+    """A refit or a search stays ok with some failed tracks, which it counts; with no track fitted the operation failed."""
     try:
         summary = json.loads(fields["program_stdout"])
     except ValueError:
@@ -89,6 +90,13 @@ def build_parser() -> argparse.ArgumentParser:
     refit.add_argument("--product-id", required=True)
     refit.add_argument("--product-file", required=True, help="acts-tracking-product/1 to write")
     refit.add_argument("--build-dir", help="folder of the built programs")
+    find = commands.add_parser("find", help="ACTS pattern recognition on hits alone: seeds from hits, CKF, ambiguity resolution, fit. Recipe reco.track.acts-ckf-planar/1, data side")
+    find.add_argument("--data-file", required=True, help="measurements")
+    find.add_argument("--product-id", required=True)
+    find.add_argument("--product-file", required=True, help="acts-tracking-product/1 to write, with the states of the selected tracks")
+    find.add_argument("--record-file", required=True, help="acts-tracking-finding-record/1 to write: every event and candidate")
+    find.add_argument("--product-events", required=True, type=int, help="how many events, from the first, keep their states in the product")
+    find.add_argument("--build-dir", help="folder of the built programs")
     return parser
 
 
@@ -104,6 +112,12 @@ def main(argv=None) -> int:
                      "--first-event", str(arguments.first_event), "--count", str(arguments.count), "--data-file", arguments.data_file,
                      "--truth-file", arguments.truth_file]
         return run_program("generate-fixture", arguments.build_dir, GENERATOR, forwarded)
+    if arguments.operation == "find":
+        if not Path(arguments.data_file).is_file():
+            return report("find", "rejected", f"no such input file: {arguments.data_file}", EXIT_INVALID)
+        forwarded = ["--data-file", arguments.data_file, "--product-id", arguments.product_id, "--product-file", arguments.product_file, "--record-file", arguments.record_file,
+                     "--product-events", str(arguments.product_events)]
+        return run_program("find", arguments.build_dir, FINDER, forwarded)
     for input_file in (arguments.data_file, arguments.hit_sets):
         if not Path(input_file).is_file():
             return report("refit", "rejected", f"no such input file: {input_file}", EXIT_INVALID)
