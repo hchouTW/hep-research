@@ -317,3 +317,16 @@ User's answer, 2026-11-07, verbatim: "approve the T07 stage 2 build", which acce
 User's answer, 2026-11-07, verbatim: "take all 16 recommendations". The choices as shown: (1) state 9.16 % for the whole T07 check and 7.45 % for clean and noise, no pooling; (2) add `fixture_id` 7003 and 7004 only; (3) CAI-T07-4 amplitude 5 sigma(q/p), with the stated 0.00412; (4) `k` below 4.6 against that sigma; (5) CAI blocks 1 and 6, block 1 stated as used for interface runs; (6) four strata, a parabolic mode along +u, bending-coordinate bins stated as expected flat, with R37's wording noted; (7) CAI charge drawn at random, not by parity; (8) the generator targets split into their own CMake file, which is what is hashed; (9) a later regeneration only on the user's word, with a new id and version, labelled "after development" if any development run has happened; (10) section 11's negative-case inputs derived from block 1 files, recipe-dependent inputs fixed at Freeze B; (11) a recipe may not link or import a generator, seed code or truth readers; (12) one more full-size job after the amendment is the check of record; (13) `freeze-a.md` records "Amendment 1, before development"; (14) hash table and clause text for T07 only, T08 and T09's clause unchanged; (15) the job of record pins `hpa-wn28`; (16) later stages use the placement route. The exact text and hashes still come to the user before any frozen file changes.
 
 User's answer, 2026-11-07, verbatim: "approve the stage 3 build, accept both rulings". Section 2.1's T07 bullet is two sentences, with T07's detailed limits in the hashed `check_t07_generator.py`. The three v4 sentences on "hashed by the C++ driver" are corrected in the amendment.
+
+## Freeze A amendment 1: applied
+
+User's answer, 2026-11-07, verbatim: "apply Amendment 1 as listed". Label: before development. Applied exactly as shown; copy kept at `<private>/evidence/t04-v4/amendment-1-as-applied.md`.
+
+| File | SHA-256 |
+| --- | --- |
+| t04-values-v4.md | `92f71f561ea14b59034ba68fc52f69773d31262e44b371e9ee47110f0ad2edb6` |
+| freeze-a.md | `cf76e7dac05eede759883f51074ab1cccd8ec5cebb06a8d8f0703dfddf93b0e9` |
+| t04-prereg.md | `39495c3f7db0cded7f88b45711a9457f438be0cbd4113370880d69866448a151`, unchanged |
+| t07-t09-task-sheets.md | `01f3509156734372a725eba77b3604935bf420b74fc5f9670fed4348269906f0`, unchanged |
+
+Next: the check of record, then the addendum, part C, on the user's word, before any T07 development run. `freeze-a.md`'s hash changes at that addendum, and that change is recorded here then.

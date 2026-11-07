@@ -71,7 +71,7 @@ tasks:
   T07: {state: in-progress, note: "stages 1 and 2 committed: telescope, generators, CAI generator, payload probe on both routes, curve start in the refit; job 7491894 passes; generator hashes not frozen; amendment 1 under revision; the refit q/p prior must be settled before the field is opened (evidence/d1-stage2-review.md, C-M1)"}
   T11: {state: done, note: "comparison clean with rerun 7474460 (R28); every applicable cell is sourced or a recorded gap (R14); 10 citation uses unread; plugin defects in t11-citation-findings.md not applied"}
 k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K08, K09, K10, K11, K12, K16, K17, K18]}
-next_action: "User: choices for Freeze A amendment 1; then its text and hashes for the word, then the generator addendum, before any T07 development run"
+next_action: "User: approve the T07 check of record; then the generator addendum on the user's word, before any T07 development run"
 ```
 
 ## Plan conflicts found

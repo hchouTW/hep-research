@@ -1,14 +1,18 @@
 # Freeze A: what is frozen
 
-Candidate for the user's word (R02, finish-plan B4, decision U5). Not frozen until decisions.md holds that word. After it, any change is a section 2.3 amendment, labelled "after development". Paths are under the records folder or `<private>/evidence/t04-v4/`.
+Candidate for the user's word (R02, finish-plan B4, decision U5). Not frozen until decisions.md holds that word. After it, any change is a section 2.3 amendment, labelled "after development", except Amendment 1 and the addendum it names, below. Paths are under the records folder or `<private>/evidence/t04-v4/`.
 
 ## Documents
 
 | File | SHA-256 |
 | --- | --- |
-| t04-values-v4.md | `c55ff22fee9268e5cf245aee43ae673920baf002086946071cba5b5920789105` |
+| t04-values-v4.md, as amended by Amendment 1 | `92f71f561ea14b59034ba68fc52f69773d31262e44b371e9ee47110f0ad2edb6` |
 | t04-prereg.md | `39495c3f7db0cded7f88b45711a9457f438be0cbd4113370880d69866448a151` |
 | t07-t09-task-sheets.md | `01f3509156734372a725eba77b3604935bf420b74fc5f9670fed4348269906f0` |
+
+## Amendment 1, before development
+
+The user's word: decisions.md, "Freeze A amendment 1: direction", "Freeze A amendment 1: choices" and the word on this text that follows them. Made before any T07 development run, so section 2.3's label does not apply. It changed t04-values-v4.md from `c55ff22fee9268e5cf245aee43ae673920baf002086946071cba5b5920789105` to the hash above. t04-prereg.md and t07-t09-task-sheets.md did not change. This file's own hash is in decisions.md. T07's generators, check and job log follow as an addendum, after T07's job of record.
 
 ## Generators and check
 
@@ -45,7 +49,7 @@ Candidate for the user's word (R02, finish-plan B4, decision U5). Not frozen unt
 - T07's generator. It depends on the ACTS driver, and its hash is an addendum on the user's word, before any T07 development run (section 2.1).
 - The `element_sim` spec for K16, frozen by hash before T15b (section 13).
 - K12 targets, drafted after P2 from recorded costs (U10). No speed or cost claim until then.
-- Recipes, configuration, budgets and `r_dev`: Freeze B (section 2.2).
+- Recipes, configuration, budgets, T07's recipe-dependent negative-case inputs and `r_dev`: Freeze B (section 2.2).
 
 ## Choices the generators make where version 4 is silent
 

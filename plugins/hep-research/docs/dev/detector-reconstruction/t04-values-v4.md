@@ -33,15 +33,32 @@ Frozen by hash:
 - this document, including the fixture table, every edge, tolerance, cap, floor, range and the clustering definition;
 - t04-prereg.md and t07-t09-task-sheets.md, after the edits listed in t04-v4-dispositions.md [16]. Prereg's sample roles, failure classes, negative cases and critical false-success table are in force through this hash;
 - these job logs, and the T08 target tables they give: job 7474461's `calc-t09-lowmu.py`, `calc-pull-table.py` and `calc-rate-rule.py`; job 7474462's `calc-t09-null-h2.py` and `calc-fake-reference.py`; diagnostic job 7477066; round 4 job 7477126; the generator check, job 7477787; the two T08 width jobs, 7478606 and 7478897; and round 5 job 7479146's `calc-t08-reference.py`, which replaces job 7474461's T08 log;
-- each fixture generator [R11]. A generator needs no recipe output. T08 and T09 generators are frozen with this document. T07's depends on the ACTS driver: if it is not ready, its hash is an addendum to Freeze A, on the user's word, before any T07 development run. After that, a generator change is a section 2.3 amendment.
+- each fixture generator [R11]. A generator needs no recipe output. T08 and T09 generators are frozen with this document. T07's depends on ACTS: if it is not ready, its hash is an addendum to Freeze A, on the user's word, before any T07 development run. After that, a generator change is a section 2.3 amendment.
 
 A deterministic check ties each generator to the fixture text [R11, S8], on a fixed seed block (block 6), 1,000 events at each of 3 energies or `N_exp` values, and 3,000 events per stratum for draws.
 
 - T08: the reference is `E g_c(x, y)` and its variance `q E g_c + sigma_n^2`, not one draw. Per energy, over cells with mean above 1 MeV, for mean and variance: every `|z|` below 5, and the sum of `z^2` within its 99.9 % chi-square range.
 - T09: hit fraction against `calc-t09-lowmu.py`'s `generate()`, over every channel with both a hit and a miss. Over channels with `mu_i` at least 0.1: mean first time against the same `generate()`; charge moments against the analytic `mu_i + 0.002` and `1.09 (mu_i + 0.002)`, dark counts included, because `generate()` has integer charge and the fixture does not. Same two criteria.
 - Both: drawn distributions, control constants, `E_vis` truth and golden digests, as `check_generators.py` prints them on `DRAW`, `SMOKE`, `TRUTH` and `GOLDEN` lines.
+- T07: the reference is the event's truth crossing and its variance `sigma^2`, not one draw, and the same two criteria apply per stratum and fixture. The check is `check_t07_generator.py`, hashed below, and its other lines and limits are in that file.
 
 Events must be byte-identical under the recorded NumPy version on the same partition. Any digest difference goes to the user. This job ran on one node, `hpa-wn28`, so equality across the partition's nodes is untested.
+
+T07 events have no NumPy. They must be byte-identical under the items below, as recorded by T07's job of record, which runs on `hpa-wn28`. Any digest difference goes to the user. Paths are under `adapters/acts-tracking/assets/`.
+
+| Hashed for T07 | Items |
+| --- | --- |
+| Source of all three generators | `native/`: `t07_generators.cmake`, `telescope_geometry.*`, `plane_propagation.*`, `t07_seed_stream.*`, `t07_data_file.*`, `t07_truth_file.*`, `sha256.*`, `t07_fixture_constants.hpp`, `t07_generation_constants.hpp`, `t07_event_generator.hpp` |
+| Source, clean and noise | `native/`: `t07_event_generator.cpp`, `t07_fixture_generator.cpp` |
+| Source, CAI | `native/`: `t07_cai_constants.hpp`, `t07_cai_event_generator.*`, `t07_cai_fixture_generator.cpp` |
+| Check | `fixture_tools/`: `check_t07_generator.py`, `t07_fixture_files.py`, `t07_truth_files.py` |
+| Binaries | `t07_fixture_generator`, `t07_cai_fixture_generator`, with their compile flags and definitions |
+| Libraries | Every run-time library `ldd` names for those binaries, the loader included; the glibc version |
+| Environment list | `<private>/evidence/acts48-explicit.txt` |
+
+Not hashed: `CMakeLists.txt`, which sets nothing for a generator, and, because no generator's code uses them, the driver, `kalman_refit.*`, `native_product.*`, `payload_geometry.*`, the CAI probes.
+
+T07 digests depend on the `libm` code path, chosen at run time, so on glibc and CPU class. With AVX2 and FMA masked, 2 of 6 sampled truth digests changed, and no data digest (D1 stage 1 review, an emulation). Two FMA hosts agreed on all 6 lines sampled of 24, at an earlier version. Equality across the partition's nodes is untested.
 
 The scripts must have run first. What each result forces is fixed in section 18, before the job. No recipe result exists at that point, so revision is allowed.
 
@@ -55,6 +72,7 @@ Only these items, each by its rule [2]:
 | Configuration | Full effective configuration, by hash |
 | Algorithmic budgets | Seeds, branches, multistart count, iterations (K10), by hash |
 | `r_dev` | Per noise bin, recorded for test F2 (section 8.3). `C` and `tau` are not set here |
+| T07 negative-case inputs that depend on a recipe | Section 11 |
 
 Bin edges and valid ranges are not in this list. All are fixed at Freeze A (sections 3.3, 4), so none depends on recipe output, and none can change at any Freeze B.
 
@@ -64,7 +82,7 @@ The **Freeze-B run** is one run at the recipe hash to be frozen, on a reserved s
 
 ### 2.3 What development may show
 
-If a recipe believed correct falls outside the conditions in section 5.4, or a Freeze-A value proves unreachable, the agent changes nothing [11]. The result stands and is reported. Only the user can amend Freeze A. Such an amendment is labelled "after development", the hash changes, and results are reported under both rules (Section 1.3 items 6 and 8).
+If a recipe believed correct falls outside the conditions in section 5.4, or a Freeze-A value proves unreachable, the agent changes nothing [11]. The result stands and is reported. Only the user can amend Freeze A. Such an amendment is labelled "after development", the hash changes, and results are reported under both rules (Section 1.3 items 6 and 8). Amendment 1 came before any development run, so that label does not apply to it, and `freeze-a.md` records it as "Amendment 1, before development".
 
 ## 3. Sample roles and attempts
 
@@ -72,13 +90,16 @@ If a recipe believed correct falls outside the conditions in section 5.4, or a F
 
 Tuning, Freeze-B and evaluation samples use different seeds, generated from the same fixture. They share geometry, conditions and generator, so they are independent only at the level of random seed (Section 11.3.2). These results support no claim beyond the fixture. Tuning on an evaluation sample uses it up (A54).
 
+For T07, T08 and T09, a recipe may not link or import a generator, seed code or truth readers. This is checked in the build, and the scoring harness hands out files, so bins stay on its side.
+
 ### 3.2 Seeds and development size
 
-Each event's generator state is `numpy.random.SeedSequence([fixture_id, block, stratum, event_index])`, or the same four integers hashed by the C++ driver.
+Each event's generator state is `numpy.random.SeedSequence([fixture_id, block, stratum, event_index])`, or the same four integers hashed by the C++ generator.
 
 | Fixture | `fixture_id` |
 | --- | --- |
 | T07 clean, T07 noise | 7001, 7002 |
+| T07 CAI clean, T07 CAI sagitta | 7003, 7004 |
 | T08 main, edge, dead, saturation | 8001, 8002, 8003, 8004 |
 | T09 main, dead, saturation, two-source | 9001, 9002, 9003, 9004 |
 
@@ -97,6 +118,8 @@ Each event's generator state is `numpy.random.SeedSequence([fixture_id, block, s
 
 Totals, closed form: T07 180,000 events (noise 144,000, clean 36,000); T08 45,000; T09 45,000 (15 samples of 3,000 each).
 
+The CAI fixtures of section 4.1 use two blocks: block 1 for their interface runs and block 6 for the generator check. They are outside these totals and section 4's 12,000 events per bin.
+
 ### 3.3 Valid ranges
 
 Outside a range a pull is ungated (section 10). Every range is fixed at Freeze A. **No range changes at any Freeze B** [R2]: E2 and B2 are required, and a method limit there fails the workflow until the user amends Freeze A (section 16).
@@ -114,7 +137,7 @@ Outside a range a pull is ungated (section 10). Every range is fixed at Freeze A
 | Attempts | At most 2 evaluation attempts per workflow. See section 16 for the cap |
 | Run | One run per attempt, on its declared block. A failure stands (finish-plan D4, step 4) |
 | Between attempts | Only after a recorded method change (R11). A change returns to Freeze B: new recipe hash, new Freeze-B run on block 5, the user's word |
-| On that return [R1] | Valid ranges stay as frozen, and any outcome stays final. Only recipe, configuration and budget hashes and `r_dev` renew. No required test can leave the required set |
+| On that return [R1] | Valid ranges stay as frozen, and any outcome stays final. Only recipe, configuration and budget hashes, T07's recipe-dependent negative-case inputs and `r_dev` renew. No required test can leave the required set |
 | Attempt 2 level | Pass bounds use 99 %, `z = 2.326`, in place of 95 %, on every test. Closed form: a bin at true error 0.10 passes 5 % then 1 %, at most 5.95 % over both, against 9.75 % plain. Five plain attempts would give 22.6 % |
 | Top-up | Never. A short bin stays short |
 | Counted | An inconclusive attempt counts as an attempt |
@@ -131,7 +154,7 @@ Each event belongs to one stratum, fixed by the generator before any random draw
 
 ### 4.1 T07 telescope
 
-Generator and version field: `t07-telescope-clean/1`, `t07-telescope-noise/1`. C++ driver using the ACTS 48.2.0 propagator through the same geometry, as the sheet says. Generator hash: section 2.1. Fixture frame: z along the telescope, u bending, v along the field. In the ACTS frame the telescope runs along x and the field along z, so fixture v is ACTS z, the axis of the vertex seeder [R14].
+Generator and version field: `t07-telescope-clean/1`, `t07-telescope-noise/1`; for the CAI items `t07-telescope-cai/1`. C++ generators using the ACTS 48.2.0 propagator through the same geometry, as the sheet says. Generator hash: section 2.1. Fixture frame: z along the telescope, u bending, v along the field. In the ACTS frame the telescope runs along x and the field along z, so fixture v is ACTS z, the axis of the vertex seeder [R14].
 
 | Parameter | Clean | Noise |
 | --- | --- | --- |
@@ -183,6 +206,20 @@ Closed-form facts of this fixture:
 A recipe that seeds only from planes 1-3 loses 5.9 % on the noise fixture by construction (`1 - 0.98^3`), and fails the floor. That is intended: the denominator is the fixture's, not the recipe's.
 
 **CAI items.** The sheet requires them. `CAI-T07-1`, `-2` and `-3` use the clean geometry with one track per event: 16 measurements, so the fit stays overdetermined without the tested hit in both views. `CAI-T07-4` uses its own sagitta-like deformed variant of that geometry. Tolerances are recorded before each run (R37). They are interface checks, outside these gates and the budget.
+
+Both come from `t07-telescope-cai/1`. What the table does not name is the Clean column above.
+
+| Parameter | CAI clean | CAI sagitta |
+| --- | --- | --- |
+| `fixture_id` | 7003 | 7004 |
+| Tracks, vertices per event | 1, 1. The vertex draws as the first vertex does | Same |
+| Strata | 4: stratum = momentum bin | Same |
+| Charge | Drawn at random, +1 or -1 with equal chance | Same |
+| Plane position | Nominal | Plane i truly at nominal + `d_i` along +u, `d_i = A ((z_i - 175 mm)^2 - 13125 mm^2)`: a parabola in plane position, with mean zero |
+| `A` | None | `5 sigma(q/p) kappa B / 2` = 3.0879e-6 per mm, with the stated `sigma(q/p)` 0.00412 per GeV, `kappa` 0.299792458e-3 GeV/(T mm), `B` 1 T |
+| `d_i`, planes 1 to 8, mm | 0 | 0.05404, 0.00772, -0.02316, -0.03860, -0.03860, -0.02316, 0.00772, 0.05404 |
+
+Closed form: a hit that reads `u - d_i` looks like `q/p` raised by `2 A / (kappa B)` = 0.0206 per GeV, 5 `sigma(q/p)`, with the same sign for both charges, at zero slope. The factor `k` of R37 is recorded with the tolerances before that run, below 4.6, against that stated `sigma(q/p)`. R37 bins a sagitta-like mode in the bending coordinate. This mode is a rigid shift of each plane and does not depend on that coordinate, so those bins are expected flat. A regeneration under R37 happens only on the user's word, with a new id and version, and is labelled "after development" if any development run has happened.
 
 ### 4.2 T08 grid
 
@@ -689,6 +726,8 @@ Required checks with no statistics. They are outside the budget. A pass here mea
 | T08 | Section 9.1, 9.2. Scenarios A15, A32, A38. Double counting of a cell is the sheet's stop |
 | T09 | Section 9.3, 9.4. No data-side truth (A09) |
 
+T07's negative-case inputs are derived from block 1 files of section 4.1's fixtures. Inputs that depend on a recipe are fixed at Freeze B.
+
 ## 12. K12: performance
 
 **No targets yet.** With no recorded cost, a target would be a guess. T07-T09 record cost per stage, cold and warm. Targets are drafted from those records after P2.
@@ -804,6 +843,10 @@ If 0.075 with 30,000: tolerance 0.075, cap 0.0067, which keeps slack 0.035 (`n` 
 - Vertex pulls at worst-case correlation sit exactly at the cap with retention 0.95. There, B = 1,000 jitter of 2.2 % gives about even odds of inconclusive, which is `failed`. Expected correlation is far lower [M8].
 - Adaptive vertex weights may give pull widths away from 1 for a correct fit.
 - No fixture number has been run through a recipe. Retentions in section 4.4 are assumptions.
+- T07 data files: all hits are rounded to one grid, 2^-30 mm, by one code path, so low bits do not tell noise from track hits, and a file holds no seed, stratum, block, event index, `fixture_id` or generator name. This separation is tested, not proven. The tests cover low bits, residues, mantissa tail, decimal form, order and counts. A learned model on joint hits was not tried, nor recovery of the generator's state from noise hits.
+- The seed search section 3.2 allows, and one file per stratum, are recorded limits. For T07, enumerating the four seed integers needs SHA-256 only. All of this assumes recipes are reviewed code, and none of it holds against code the user does not control.
+- The rule of section 3.1 is a review rule, not a sandbox. For T07 its check covers the adapter's folder only, and a dynamic import would pass it. T08 and T09 have no adapter yet.
+- T08 and T09 were read for the same class of leak: seeds sit outside `event["data"]`. T09 times measured on 300 events, dark-only and signal-only agree in low bits, so a gross effect is excluded, not a subtle one. T08 has no noise-versus-signal hits to separate.
 
 ## 18. Scripts and decision rules
 
@@ -848,12 +891,12 @@ All in `<private>/evidence/t04-v4/`. All have now run; results in section 18.1. 
 | Pull | `POOLED` line, six m = 1 jobs at states `none` and `bias`, 3,000 reps, relative `se` 1.3 %: differs by over 9 %, centre or width | Stop. No number moves until the cause is known |
 | Pull | Any fail at state `none` | Stop |
 | Generator check, row 1 | A hash check stops the job, the job stops with no `RESULT` line, or a traceback or `ran to its end` line appears | No criterion of that run is read. Remove the cause; if code changes, new hash. New approval either way |
-| Generator check, row 2 | Any `FAIL` on a T08 or T09 `|z|` line (limit 5), a `defined` line, a `DRAW-RANGE`, `SMOKE` or `TRUTH` line (`TRUTH` deposit limit 6: 72,000 values), or a `DRAW-DIST` line with non-finite values | Defect in the generator or the check: fix, new hash, new approval. Block 6 is reused, since the fix is not a redraw |
-| Generator check, row 3 | Nothing in rows 1 and 2, and a sum of `z^2` outside its range, or a `DRAW-DIST` p-value below 1e-4 | Stop. A correct generator reaches this row with about 3.7 % chance, and block 6 cannot be redrawn. No generator changes until the user answers |
+| Generator check, row 2 | Any `FAIL` on a T07, T08 or T09 `|z|` line (limit 5), a `defined` line, a `DRAW-RANGE`, `SMOKE` or `TRUTH` line (`TRUTH` deposit limit 6: 72,000 values; T07's `TRUTH` limits are in its check), or a `DRAW-DIST` line with non-finite values | Defect in the generator or the check: fix, new hash, new approval. Block 6 is reused, since the fix is not a redraw |
+| Generator check, row 3 | Nothing in rows 1 and 2, and a sum of `z^2` outside its range, or a `DRAW-DIST` p-value below 1e-4 | Stop. A correct generator reaches this row with about 3.7 % chance, and block 6 cannot be redrawn. For T07 that chance is 9.16 % for the whole check (64 sums of `z^2`, 320 `DRAW-DIST` lines) and 7.45 % for clean and noise (48, 294), taking the lines as independent. No generator changes until the user answers |
 | Generator check, row 4 | Nothing in rows 1 to 3, and stderr not empty | Goes to the user, whatever the lines say |
-| Generator check, row 5 | `RESULT PASS`, stderr empty, job exit 0 | Hashes and `GOLDEN` digests go into Freeze A |
+| Generator check, row 5 | `RESULT PASS`, stderr empty, job exit 0 | Hashes and `GOLDEN` digests go into Freeze A. For T07, as its addendum |
 
-For the generator check, the first matching row applies.
+For the generator check, the first matching row applies. T07's check of record is one more full-size job after amendment 1. Its earlier full-size jobs are rehearsals.
 
 `calc-t08-reference.py`'s frozen log is round 5's: job 7479146, `round5/calc-t08-reference.py` (`5f096622f3bbe1b3`). The prefix in the table above is round 3's, run in job A. Round 5 changes section 7.1's uncertainty and the form in `p_closed`, exact up to 250 MeV and Gaussian above, where both give 1 to six places, with the same seeds. The T08 rows stay as fixed, and round 5 was read against them.
 
