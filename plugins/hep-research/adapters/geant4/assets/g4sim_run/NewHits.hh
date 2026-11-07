@@ -3,7 +3,7 @@
 // Truth keeping: the primary, decay products, particles above a threshold, and particles crossing a reference plane are kept. Deposits of a track that is not kept go to its nearest kept
 // ancestor, and a kept particle whose parent was dropped points there with ancestor_pruned set. Keeping is decided per track as it ends, and resolved at the end of the event.
 // A hit's cell is its volume ID and the scorer's segmentation bin, kept exactly (HitColumns.hh). A step apportioned among bins makes one row per bin, each with its share of the deposit and the path, at the
-// mean point of the step in that bin.
+// middle of the step's longest piece in that bin.
 // G4SIM_HIT_CONTROL is for tests only, one fault each, and hits_closure.py must see it: see CONTROLS there. high_cells sets the top bit of every cell, so that a run can carry an ID no double holds through the file and simroot.
 #ifndef G4SIM_NEWHITS_HH
 #define G4SIM_NEWHITS_HH
@@ -133,7 +133,7 @@ class HitRecorder {
     }
   }
 
-  // `deposit` is in MeV: the scorer's value for this cell and bin. `share` is the part of the step in the bin and `along` the mean position of that part along the step, from 0 to 1.
+  // `deposit` is in MeV: the scorer's value for this cell and bin. `share` is the part of the step in the bin and `along` a point of that part along the step, from 0 to 1.
   void Tracker(const G4Step* step, std::uint64_t cell, int segment, double deposit, double share, double along) {
     if (fControl == "pieces_repeat_the_step") share = 1., along = 0.;
     const G4StepPoint* pre = step->GetPreStepPoint();

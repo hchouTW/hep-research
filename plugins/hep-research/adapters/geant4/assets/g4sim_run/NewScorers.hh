@@ -144,7 +144,8 @@ class Grid {
       bins *= count;
       fCount[i] = count <= kMaximumBins ? static_cast<int>(count) : 1;  // the limit below stops a larger one, and an int would not hold it
     }
-    fHighRadius = std::max(std::abs(low.x()), std::abs(high.x()));
+    // The farthest corner of the bounding box, in x and y: a volume wider in y, or a tube sector, reaches past its x extent, and a ring beyond the last would fall silently into it.
+    fHighRadius = std::hypot(std::max(std::abs(low.x()), std::abs(high.x())), std::max(std::abs(low.y()), std::abs(high.y())));
     if (fSegmentation.kind == "polar") bins = std::max(1., std::ceil(fHighRadius / fSegmentation.width[0])) * fSegmentation.phiBins;
     if (bins > kMaximumBins) G4Exception("Grid", "g4sim-segmentation", FatalException, ("a segmentation of " + std::to_string(bins) + " bins: a volume has at most 2^16, the sub-index of its stream (Section 10.2)").c_str());
   }
@@ -175,7 +176,7 @@ class Grid {
       if (Width(i) > 0.) inverse += std::abs(direction[i]) / Width(i);
     return inverse > 0. ? 1. / inverse : HUGE_VAL;
   }
-  // The fraction of a straight line in each bin and the mean position of that part along the line: exact for planes, by 64 pieces for polar.
+  // The fraction of a straight line in each bin and a point of that part: exact for planes, by 64 pieces for polar.
   std::map<int, StepShare> Apportion(const G4ThreeVector& a, const G4ThreeVector& b) const {
     std::vector<double> cuts = {0., 1.};
     if (fSegmentation.kind == "polar") {
