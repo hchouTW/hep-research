@@ -708,6 +708,13 @@
    "registered_at": "2026-11-07T14:54:58Z",
    "card_commit": "39d63d62",
    "reason": "Execution log only; thresholds unchanged"
+  },
+  {
+   "card": "g4sim-tasks/S5.md",
+   "sha256": "00dd7b5e7aad824502260a0d9b83f7b56fe14ae548d828ccbc962af5032bf3a2",
+   "registered_at": "2026-11-07T15:09:07Z",
+   "card_commit": "523df222",
+   "reason": "encoded cellID gate, before any run"
   }
  ]
 }

@@ -44,7 +44,7 @@
    "state": "partially-complete",
    "worktree": "../hep-research-g4sim-S5",
    "branch": "g4sim/S5",
-   "task_card_sha256": "0376f6c81567ce6aad08f04bca614071b9917d2ae6f45c5a876c9db118d0ce3c",
+   "task_card_sha256": "00dd7b5e7aad824502260a0d9b83f7b56fe14ae548d828ccbc962af5032bf3a2",
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S5.md",
    "blocked_on": [
     "E2 regeneration of geant4-thin-silicon and design-minimal-spectrometer",
@@ -110,5 +110,5 @@
   "GB23": "confirmed",
   "GB24": "confirmed"
  },
- "updated": "2026-11-07T14:54:58Z"
+ "updated": "2026-11-07T15:09:07Z"
 }
