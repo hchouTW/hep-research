@@ -286,3 +286,26 @@ Rulings under the finish plan, each reversible by the user.
 - **Change to T06.** `_check_evidence` refuses two rows for one check (`reconstruction.evidence.duplicate_check`). It only refuses more, and no T06 test changed.
 - **For K16.** A contract with a check only the whole can pass empties `expert_support`.
 
+
+## Phase D start
+
+User's answer, 2026-11-07, verbatim: "approve the backup, U12 A, U9 later, start T07". U12: no native backend for calorimetry or photon likelihood is sought; T08 and T09 use development bindings, and the lack is a recorded gap. U9: the K11 holdout owner stays open until the user names one, needed by Phase G.
+
+## T07 stage 1 build
+
+User's answer, 2026-11-07, verbatim: "approve the T07 stage 1 build", which accepted the reading shown with it: this job is not a T07 development run, since it uses seed block 6 and a hand-set straight-line case only. A later build under the same reading needs no new ruling while that stays true.
+
+## Freeze A amendment 1: direction
+
+User's answer, 2026-11-07, verbatim: "A, A, A, one amendment before development". Meaning, from the options shown: (1) CAI fixtures get a separate generator, `t07-telescope-cai/1`, with new `fixture_id` rows; (2) section 18's generator-check rows extend to T07, stating that a correct generator reaches the statistical-excess stop about 7 % of the time; (3) how a corrected payload is applied (`CAI-T07-3`) is probed before the addendum, so any geometry change happens first; one combined amendment, labelled "before development". The exact text and hashes come to the user before any frozen file changes. No frozen file has changed.
+
+User's answer, 2026-11-07, verbatim: "approve the stage 1c build, seed limit A". The amendment adds a rule, for T07, T08 and T09: a recipe may never link or import a generator, checked in the build, and the scoring harness hands out files, so bins stay on its side. The seed search section 3.2 allows, and one file per stratum, are recorded limits. The full-size check in job stage 1c is read as a rehearsal, not as the section 2.1 check of record.
+
+## T07 stage 1 readings, by the coordinator
+
+Rulings under the finish plan, each reversible by the user. Reviews `<private>/evidence/d1-stage1-*.md`; jobs 7489042, 7489159, 7489656, 7490165.
+
+- **Hits.** All hits are rounded to one grid, 2^-30 mm, by one code path, so low bits do not tell noise from track hits. The data file holds no seed, stratum, block, event index, `fixture_id` or generator name.
+- **Separation is tested, not proven.** The tests cover low bits, residues, mantissa tail, decimal form, order and counts. A learned model on joint hits was not tried, nor recovery of the generator's state from noise hits. Enumerating the four seed integers needs SHA-256 only. All assume recipes are reviewed code, as the user's seed ruling does; none holds against code the user does not control.
+- **T08, T09.** Read for the same class of leak: seeds sit outside `event["data"]`. T09 times measured on 300 events, dark-only and signal-only agree in low bits; a gross effect is excluded, not a subtle one. T08 has no noise-versus-signal hits to separate.
+- **Import rule.** Covers the adapter's folder only, and a dynamic import would pass it: a review rule, not a sandbox.

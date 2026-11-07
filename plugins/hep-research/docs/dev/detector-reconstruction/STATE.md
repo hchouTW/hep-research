@@ -68,9 +68,10 @@ tasks:
   T06: {state: done, note: "Gate C clean, job 7487578; readings in decisions.md, T06 readings; reviews evidence/c1-*.md"}
   T14: {state: done, note: "Gate C clean, job 7487578; rulings in decisions.md, T14 rulings; reviews evidence/c2-*.md"}
   T15a: {state: done, note: "Gate C clean, job 7487578; artificial fixtures only, no claim on real recipes; readings in decisions.md, T15a readings; reviews evidence/c3-*.md"}
+  T07: {state: in-progress, note: "stage 1 committed: telescope, generators, product format, straight line; job 7490165 passes; generator hash not frozen; CAI generator, payload probe and Freeze A amendment 1 next"}
   T11: {state: done, note: "comparison clean with rerun 7474460 (R28); every applicable cell is sourced or a recorded gap (R14); 10 citation uses unread; plugin defects in t11-citation-findings.md not applied"}
 k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K08, K09, K10, K11, K12, K16, K17, K18]}
-next_action: "Backup (needs approval); then Phase D. T07 needs the generator addendum on the user's word"
+next_action: "T07: CAI generator and CAI-T07-3 probe, then Freeze A amendment 1 to the user, then the generator addendum, before any T07 development run"
 ```
 
 ## Plan conflicts found

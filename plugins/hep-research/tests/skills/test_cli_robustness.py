@@ -41,6 +41,8 @@ def unique_missing(args):
         shutil.rmtree(base, ignore_errors=True)
 
 MISSING_FILE_ARGS = {
+    "adapters/acts-tracking/assets/acts_tracking.py": ["refit", "--data-file", M, "--hit-sets", M, "--field-tesla", "0", "--product-id", "missing",
+                                                       "--product-file", OUT],
     "skills/hep-review/scripts/review.py": [["verify-export", M], ["r0", "--bundle", M]],
     "skills/hep-theory/scripts/transport_conventions.py": ["diffusion", "--input", M],
     "skills/hep-theory/scripts/bartels_rotation.py": ["average", "--series", M, "--date-column", "date",

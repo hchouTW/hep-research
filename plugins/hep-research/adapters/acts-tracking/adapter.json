@@ -1,0 +1,49 @@
+{
+ "id": "adapter:acts-tracking",
+ "version": "0.1.0",
+ "status": "proposed",
+ "purpose": "T07 tracking through a native C++ driver on ACTS 48.2.0, and the fixture generators t07-telescope-clean/1 and t07-telescope-noise/1 on the same geometry; this version holds the telescope geometry, the driver's own product format and the zero-field refit of a known hit set, which is truth-assisted and never finding; optional, required by no skill",
+ "tools": [
+  {
+   "name": "ACTS (acts-core, libActsCore.so)",
+   "status": "proposed",
+   "tested_versions": []
+  }
+ ],
+ "environment": "none declared",
+ "assets": [
+  "assets/acts_tracking.py",
+  "assets/fixture_tools/acts_native_product.py",
+  "assets/fixture_tools/check_t07_generator.py",
+  "assets/fixture_tools/t07_fixture_files.py",
+  "assets/fixture_tools/t07_truth_files.py",
+  "assets/native/CMakeLists.txt",
+  "assets/native/acts_tracking_driver.cpp",
+  "assets/native/kalman_refit.cpp",
+  "assets/native/kalman_refit.hpp",
+  "assets/native/native_product.cpp",
+  "assets/native/native_product.hpp",
+  "assets/native/plane_propagation.cpp",
+  "assets/native/plane_propagation.hpp",
+  "assets/native/sha256.cpp",
+  "assets/native/sha256.hpp",
+  "assets/native/t07_data_file.cpp",
+  "assets/native/t07_data_file.hpp",
+  "assets/native/t07_event_generator.cpp",
+  "assets/native/t07_event_generator.hpp",
+  "assets/native/t07_fixture_constants.hpp",
+  "assets/native/t07_fixture_generator.cpp",
+  "assets/native/t07_generation_constants.hpp",
+  "assets/native/t07_seed_stream.cpp",
+  "assets/native/t07_seed_stream.hpp",
+  "assets/native/t07_truth_file.cpp",
+  "assets/native/t07_truth_file.hpp",
+  "assets/native/telescope_geometry.cpp",
+  "assets/native/telescope_geometry.hpp"
+ ],
+ "tests": [
+  "../../tests/adapters/test_acts_tracking.py"
+ ],
+ "owner_skill": "hep-detector",
+ "status_rule": "the adapter status is the lowest of its tools' statuses; development jobs have built and run the driver, and it stays proposed until such a run is recorded in VALIDATION.md with its environment and tested version; no tracking quality claim for a real detector"
+}
