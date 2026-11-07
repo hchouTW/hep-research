@@ -8912,6 +8912,18 @@ that did not write the code found no copying and could not compare side by side,
 forbids one of its phrases: whether Accounting.hh, IrTree.hh, GeometryCheck.cc, g4sim_run.cc, WriteBack.hh, the two legacy Detector.cc files, s2_gates/main.cc and the legacy observer
 ports at `57825b63` were reviewed, and are written from the Geant4 API or carried over from the plugin's own code, with no example code copied or adapted.
 
+## G4SIM-S3-G5 (2026-11-07, E5 for the scan; confirmation by the maintainer)
+
+G5 for g4sim phase S3 (gate 7), at `6517797a`: `adapters/geant4/assets/g4sim/KillProcess.hh`, `BirksTerms.hh`, the shape decoding in `ProbeV2.hh`, `Accounting.hh`, `adapters/geant4/assets/g4sim_run/` (`NewBuild.hh`, `NewRun.cc`,
+`NewScorers.hh`, `NewSource.hh`, `PaiConstructor.hh`, `GeometryCheck.cc`, `g4sim_run.cc`) and the prototype programs `main.cc` of `adapters/geant4/tests/g4proto/s3_solids`, `s3_em`, `s3_steps` and `s3_optics`.
+
+**Evidence**: `adapters/geant4/tests/g4proto/g5_scan.py` against all 5,657 `.cc`, `.hh` and `.icc` files of the Geant4 11.4.3 examples tree, normalized lines: 0 shared runs of 3 and of 4 consecutive lines; the positive control found 863 and 880.
+Against `G4EmModelActivator.cc` and `G4EmSaturation.cc`, three files: 0 shared runs, control 445 and 461. An independent read by an agent that did not write the code, side by side with the examples and those two library files: no file reads as an
+example with renamed identifiers; `OwnBirksTerms` and the PAI constructors are adapted from that library code, which their headers now state, under the Geant4 Software License, reproduced in `adapters/geant4/assets/GEANT4-LICENSE.txt`. Resemblances it listed for a reviewer: `KillProcess.hh` and `G4ElectronCapture`,
+the hook of `s3_steps` and Par01, the radiator code of `s3_optics` and TestEm10, `Plastic` of `s3_optics` and TestEm3's scintillator. Its comparison was by keyword and side-by-side reads of the top candidates, not of every file.
+
+**Confirmation** (hsinyichou, maintainer, 2026-11-07, in the Claude Code session): "G5 is OK.", in answer to the request for G5 at that commit, whose suggested wording stated that the files are written from the Geant4 API with no example code copied or adapted, and that `PaiConstructor.hh`, `BirksTerms.hh` and `s3_em/main.cc` are adapted in part from Geant4 library code. This record does not state which files the maintainer read.
+
 ## 0.57.0 release check (2026-11-06, E2 and CI)
 
 Release branch `release/0.57.0`, based on main `dfbbb787` (PR #354 merged), with main merged in at `575e309b` for PR #353 (citation corrections in 10 hep-detector reference documents).
