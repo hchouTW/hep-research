@@ -3,6 +3,10 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## 0.61.0 (unreleased)
+
+Minor release (`adapters/geant4` 0.11.1; contracts and `CORE_VERSION` unchanged). Fixed: simreco gave a digitized strip hit the error sqrt((p - w)^3 / 12 p), which takes the charge-weighted position inside the sharing band to be exact; it now gives the RMS error of the cluster, `StripClusterSigma`, the width `simreco_strip` already used, and `simreco_spec.py`'s check of a digitization finer than the declared resolution uses the same width. On J15's strips (47 and 116 um, sharing 8 um, threshold 0.2) the old width was about 14% too small in the bending plane, and fits with only strip errors gave chi2/ndof 1.20 against 1.00 now. The committed J15 and J16 results are not regenerated, by the maintainer's decision: their 24 reconstructions with tail sources on keep the old width, as their recorded simreco hash shows, and a rerun would give them smaller chi2 and pulls with the same 1/R resolution.
+
 ## 0.60.0 (2026-11-07)
 
 Minor release. g4sim phase S5 (`adapters/geant4` 0.11.0; contracts 3.23.0, `CORE_VERSION` 1.10.0). Kits and the design loop: the calorimeter, planes_tracker and tof kits in `skills/hep-detector/assets/g4kits/`, `g4kit.py` (`list`, `derive`) and `geometry-derivation/1`; design candidates carry

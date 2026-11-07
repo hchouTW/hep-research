@@ -6,15 +6,9 @@
 #include <algorithm>
 #include <cmath>
 
-// simreco's resolution of the strip digitization, kept as it is because the J15 results rest on it. It takes the
-// charge-weighted position inside the sharing band to be exact, sigma^2 = (p - w)^3 / (12 p), which StripCluster does
-// not do: it is smaller than the true scatter, by sqrt(p / (p - w)) at zero threshold. StripClusterSigma is the true one.
-inline double StripSigma(double pitch, double sharing) {
-  double q = std::max(pitch - std::min(sharing, pitch), 0.0);
-  return std::sqrt(q * q * q / (12.0 * pitch));
-}
-
-// The RMS error of StripCluster for a crossing uniform over the strip. Where both strips stay above threshold the
+// The RMS error of StripCluster for a crossing uniform over the strip, the error simreco and simreco_strip give a
+// digitized hit. (Before 0.61.0 simreco used sqrt((p - w)^3 / 12 p), which takes the position inside the sharing band
+// to be exact: 5% to 72% too small, about 14% on J15's bending strips.) Where both strips stay above threshold the
 // cluster runs from t p off the strip centre to the boundary while the crossing moves over w (1/2 - t), so the error
 // falls linearly from (p - w) (1/2 - t) to 0; elsewhere the cluster sits at the centre of a span L = p - w (1 - 2 t).
 inline double StripClusterSigma(double pitch, double sharing, double threshold) {

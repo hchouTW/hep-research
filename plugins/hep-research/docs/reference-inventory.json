@@ -20,7 +20,7 @@
   },
   "hep-detector": {
    "references": 44,
-   "bytes": 698380,
+   "bytes": 698507,
    "uncited": 0
   },
   "hep-measurement": {
@@ -2331,7 +2331,7 @@
   {
    "path": "skills/hep-detector/references/geant4-study-protocol.md",
    "owner": "hep-detector",
-   "bytes": 48115,
+   "bytes": 48242,
    "lines": 467,
    "linked_from_skill_md": false,
    "cited_by": [
@@ -2352,7 +2352,7 @@
    "cited_by_other_skills": [
     "hep-citations"
    ],
-   "last_commit": "d25adee7 2026-10-30"
+   "last_commit": "e0a10d44 2026-11-07"
   },
   {
    "path": "skills/hep-detector/references/ground-based-detection-arrays.md",

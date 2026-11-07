@@ -395,8 +395,8 @@ int main(int argc, char** argv) {
         if (uni.Uniform() >= s.strips.efficiency) continue;
         h.y = StripCluster(yt, pl.centre_y + phase_y, s.strips.pitch_y, s.strips.sharing, s.strips.threshold);
         h.z = StripCluster(zt, pl.centre_z + phase_z, s.strips.pitch_z, s.strips.sharing, s.strips.threshold);
-        h.sigma_y = StripSigma(s.strips.pitch_y, s.strips.sharing);
-        h.sigma_z = StripSigma(s.strips.pitch_z, s.strips.sharing);
+        h.sigma_y = StripClusterSigma(s.strips.pitch_y, s.strips.sharing, s.strips.threshold);
+        h.sigma_z = StripClusterSigma(s.strips.pitch_z, s.strips.sharing, s.strips.threshold);
       } else {
         h.y = yt + s.sigma_y_mm * rng.Next();
         h.z = zt + s.sigma_z_mm * rng.Next();
@@ -425,8 +425,8 @@ int main(int argc, char** argv) {
           h.x_over_x0 = pl.x_over_x0;
           h.y = pl.centre_y + (2 * uni.Uniform() - 1) * pl.half_y;
           h.z = pl.centre_z + (2 * uni.Uniform() - 1) * pl.half_z;
-          h.sigma_y = digi ? StripSigma(s.strips.pitch_y, s.strips.sharing) : s.sigma_y_mm;
-          h.sigma_z = digi ? StripSigma(s.strips.pitch_z, s.strips.sharing) : s.sigma_z_mm;
+          h.sigma_y = digi ? StripClusterSigma(s.strips.pitch_y, s.strips.sharing, s.strips.threshold) : s.sigma_y_mm;
+          h.sigma_z = digi ? StripClusterSigma(s.strips.pitch_z, s.strips.sharing, s.strips.threshold) : s.sigma_z_mm;
           cand[k].push_back(h);
           candTrack[k].push_back(-1);
         }
