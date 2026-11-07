@@ -250,7 +250,9 @@ class ScorerSums {
       if (scorer.windowHigh >= 0. && (pre->GetGlobalTime() / ns < scorer.windowLow || pre->GetGlobalTime() / ns >= scorer.windowHigh)) continue;
       if (scorer.First()) {
         const auto key = std::make_pair(i, volume);
-        if (!fFirst.count(key)) fFirst[key] = {pre->GetGlobalTime() / ns, pre->GetKineticEnergy() / MeV, static_cast<double>(step->GetTrack()->GetDefinition()->GetPDGEncoding())};
+        // earliest in time, not first processed: Geant4 finishes a track before its secondaries, and a fast secondary can arrive sooner
+        const auto earlier = fFirst.find(key);
+        if (earlier == fFirst.end() || pre->GetGlobalTime() / ns < earlier->second[0]) fFirst[key] = {pre->GetGlobalTime() / ns, pre->GetKineticEnergy() / MeV, static_cast<double>(step->GetTrack()->GetDefinition()->GetPDGEncoding())};
         continue;
       }
       if (!scorer.hitKind.empty() && step->GetTotalEnergyDeposit() > 0.) {
