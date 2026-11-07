@@ -49,7 +49,7 @@
    "blocked_on": []
   },
   "S6": {
-   "state": "not-started",
+   "state": "in-progress",
    "worktree": "../hep-research-g4sim-S6",
    "branch": "g4sim/S6",
    "task_card_sha256": "693a9d16765ef0390d886597d1dda1b67bd3786348f634c5241f823b6a1082fc",
@@ -107,5 +107,5 @@
   "GB23": "confirmed",
   "GB24": "confirmed"
  },
- "updated": "2026-11-07T21:46:44Z"
+ "updated": "2026-11-07T23:53:48Z"
 }
