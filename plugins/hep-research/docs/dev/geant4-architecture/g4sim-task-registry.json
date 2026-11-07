@@ -589,6 +589,13 @@
    "registered_at": "2026-11-07T04:02:13Z",
    "card_commit": "b0114f76",
    "reason": "Refreshed at the start of S4, with the maintainer's Section 22 decisions; gate 7's K and sample size follow before the test"
+  },
+  {
+   "card": "g4sim-tasks/S4.md",
+   "sha256": "60fb526fbc2bd7d2794450d7fd83f0b3c30b418162f6e474e658257ce8e90542",
+   "registered_at": "2026-11-07T04:25:33Z",
+   "card_commit": "3bed28b0",
+   "reason": "Cross-platform tolerances and the boundary rule registered from measurement; Section 22 items closed; Execution log"
   }
  ]
 }
