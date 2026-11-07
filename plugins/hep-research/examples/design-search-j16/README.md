@@ -57,7 +57,7 @@ only a human record clears them.
 `live.py` ran one F4 study of the first finalist, `cand-F937`, for 1 TV protons, with J15's campaign code
 (`examples/design-minimal-spectrometer/live.py`, class `Campaign3`). The study ran a 1600-event trial, then 5040 events (A1.9) for the
 nominal, the cut scan and two physics-list variations, reconstructed with every tail source off, and with all four
-on except for the cut scan. It ran the
+on except for the cut scan. Its strip digitization used simreco's width before 0.61.0, about 14% smaller in the bending plane than the cluster's true error; the committed results keep it (see J15's README). It ran the
 benchmarks of the four conditions of the qualification path (material definition, field propagation,
 reconstruction closure and the multiple-scattering reference; the reference passed its agreement test but missed its
 control criterion, below), the reference being a 0.937 mm silicon slab, the planes' x/X0 of 0.01; the aluminium support upstream of the first plane (passive x/X0 0.03) is outside that reference's scope, which is

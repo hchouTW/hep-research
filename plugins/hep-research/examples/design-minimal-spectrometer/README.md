@@ -55,8 +55,10 @@ report flags H1, H2 and H3 as missing; H4 (`design-baseline`) comes only after t
 `simreco` has four switchable tail sources: `alignment`, `calibration-non-uniformity`, `noise-digitization` (strip
 digitization, threshold, efficiency, noise hits) and `pattern-recognition`. Their models are synthetic and illustrative: alignment
 leaves residuals of 5 µm (bending), 10 µm (non-bending) and 20 µrad (rotation); the calibration non-uniformity is a field-map gradient of 1 %; the strips are 47 µm and
-116 µm with 8 µm charge sharing, which gives 10.3 µm and 30.1 µm, slightly coarser than the declared point resolution (10 µm
-bending, 30 µm non-bending in the reconstruction spec); the noise is 0.1 hits per plane; the efficiency is 99 %; the
+116 µm with 8 µm charge sharing and a 0.2 threshold. The recorded runs gave these hits 10.3 µm and 30.1 µm, simreco's width before
+0.61.0; the true RMS of the cluster position, which simreco gives from 0.61.0, is 11.7 µm and 31.7 µm. Both are coarser than the declared
+point resolution (10 µm bending, 30 µm non-bending in the reconstruction spec). The committed results with tail sources on keep the old
+width, by the maintainer's decision: their 1/R resolution does not depend on it, while their chi2 and pulls are larger than a rerun would give; the noise is 0.1 hits per plane; the efficiency is 99 %; the
 association window is 2 mm. They are illustrative, not a measured detector.
 
 ### Against real instruments (§B.4.3)
