@@ -1,9 +1,10 @@
 """acts-tracking-finding-record/1: what acts_tracking_finder did with every event and candidate, read back. Data side: no truth here.
 
-The record holds the search, candidates and selected branches and failure categories (t07-t09-task-sheets.md, Output; BP03), beside the product, which
-holds the selected tracks' states. The reader stops at anything it does not know, and at a record that hides a limit: a candidate of a truncated
-seed is marked search-truncated (BP03; section 8.4), and a failed candidate states its category (t04-prereg.md, Failure classes). Sections cited are
-of t04-values-v4.md. Standard library only.
+The record holds the search, candidates of at least 6 hits and selected branches and failure categories (t07-t09-task-sheets.md, Output; BP03), beside the
+product, which holds the selected tracks' states. The reader stops at anything it does not know, and at a record that hides a limit: a candidate of a
+truncated seed, or of an event whose seed or ambiguity budget ran out, is marked search-truncated (BP03; section 8.4), and a failed candidate states its
+category (t04-prereg.md, Failure classes). acts-tracking-finding-seeds/1, the finder's optional side file, says what became of every seed. Sections cited
+are of t04-values-v4.md. Standard library only.
 """
 from __future__ import annotations
 
@@ -18,7 +19,12 @@ CANDIDATE_CATEGORY_OF_OUTCOME = {"selected": "none", "evicted": "ambiguity", "fi
 EVENT_CATEGORIES = ("none", "seed-or-finding", "search-truncated")
 CONFIGURATION_KEYS = ("seed_plane_triples", "seed_lowest_momentum_gev", "seed_largest_slope_u", "seed_largest_slope_v", "seed_window_sigma", "seed_prior_inflation", "finding_chi2_cut",
                       "finding_least_measurements", "finding_most_holes", "finding_most_branches_per_surface", "finding_most_branches_per_seed", "finding_most_seeds_per_event",
-                      "finding_most_propagator_steps", "ambiguity_most_shared_hits", "ambiguity_most_iterations")
+                      "finding_most_propagator_steps", "ambiguity_most_shared_hits", "ambiguity_most_iterations", "finding_fit_passes", "seed_derivative_step_sigma", "refit_start_x_mm",
+                      "refit_prior_loc_sigma_mm", "refit_prior_angle_sigma", "refit_prior_qop_sigma_per_gev", "refit_prior_time_sigma", "diagnostic_build")
+# What jobs 7493849 to 7494405 wrote, in their order: their configuration hash covers these lines, so a later record can be compared with them key by key.
+EARLIER_CONFIGURATION_KEYS = CONFIGURATION_KEYS[:15]
+SEED_FILE_FORMAT = "acts-tracking-finding-seeds/1"
+SEED_OUTCOMES = ("skipped", "no-start", "filter-error", "step-limit", "no-candidate", "candidates")
 
 
 class RecordFormatError(ValueError):
@@ -68,18 +74,24 @@ def event_defects(event: dict) -> list:
         defects.append(f"event {event['ordinal']} counts {event['selected']} selected")
     if event["seeds_run"] + event["seeds_skipped"] != event["seeds_found"]:
         defects.append(f"event {event['ordinal']} loses seeds between found and run")
+    settled = event["seeds_failed"] + event["seeds_without_candidate"]
+    if settled > event["seeds_run"] or event["seeds_run"] - settled > event["candidates"] + event["seeds_truncated"]:
+        defects.append(f"event {event['ordinal']} runs {event['seeds_run']} seeds and accounts for {settled} failed or empty, with {event['candidates']} candidates")
     truncated = event["seeds_truncated"] > 0 or event["seed_budget_reached"] or event["ambiguity_budget_reached"]
     if event["selected"] == 0 and event["failure_category"] != ("search-truncated" if truncated else "seed-or-finding"):
         defects.append(f"event {event['ordinal']} has no track and says {event['failure_category']}")
     if event["selected"] > 0 and event["failure_category"] != "none":
         defects.append(f"event {event['ordinal']} has tracks and says {event['failure_category']}")
-    if any(item["search_truncated"] for item in found) and event["seeds_truncated"] == 0:
-        defects.append(f"event {event['ordinal']} marks a candidate and no seed")
+    if any(item["search_truncated"] for item in found) and not truncated:
+        defects.append(f"event {event['ordinal']} marks a candidate and no limit")
+    if (event["seed_budget_reached"] or event["ambiguity_budget_reached"]) and not all(item["search_truncated"] for item in found):
+        defects.append(f"event {event['ordinal']} reached an event budget and leaves a candidate unmarked")
     return defects
 
 
-def parse_record(text: str) -> dict:
-    """A whole record, or RecordFormatError. The end record's counts catch a truncated file."""
+def parse_record(text: str, configuration_keys=CONFIGURATION_KEYS, marks_event_budgets: bool = True) -> dict:
+    """A whole record, or RecordFormatError. The end record's counts catch a truncated file. An earlier job's record, read for comparison, names its own keys, and did not yet mark
+    candidates for an event's budgets."""
     lines = text.split("\n")
     if lines[-1] != "":
         raise RecordFormatError("the last line is not finished")
@@ -121,15 +133,44 @@ def parse_record(text: str) -> dict:
         raise RecordFormatError("the record ends before its end record")
     if counted != [len(events), sum(len(event["found"]) for event in events)]:
         raise RecordFormatError("the end record counts other numbers than the record holds")
-    if set(configuration) != set(CONFIGURATION_KEYS):
-        raise RecordFormatError(f"the effective configuration differs: {sorted(set(configuration) ^ set(CONFIGURATION_KEYS))}")
+    if set(configuration) != set(configuration_keys):
+        raise RecordFormatError(f"the effective configuration differs: {sorted(set(configuration) ^ set(configuration_keys))}")
     if (header["recipe"], header["stage"], header["evidence_class"]) != (FINDING_RECIPE, FINDING_STAGE, FINDING_EVIDENCE_CLASS):
         raise RecordFormatError("this record format is finding's alone: a refit or a truth-seeded run is not finding")
     for event in events:
-        defects = event_defects(event)
+        defects = [defect for defect in event_defects(event) if marks_event_budgets or "budget" not in defect]
         if defects:
             raise RecordFormatError(defects[0])
     return {"header": header, "configuration": configuration, "events": events}
+
+
+def iter_seed_events(path):
+    """Each event's seeds, one event at a time, as a list of {planes, hit_keys, outcome, first_candidate, candidates, short_branches}. An o3 file holds over a million."""
+    with open(path, encoding="utf-8") as stream:
+        if stream.readline().rstrip("\n") != SEED_FILE_FORMAT:
+            raise RecordFormatError(f"not {SEED_FILE_FORMAT}")
+        events = 0
+        for line in stream:
+            tokens = line.split()
+            if not tokens or tokens[0] not in ("event", "end") or len(tokens) != (3 if tokens[0] == "event" else 2):
+                raise RecordFormatError(f"expected an event, found {line.strip()}")
+            if tokens[0] == "end":
+                if int(tokens[1]) != events:
+                    raise RecordFormatError(f"the seed file ends at {tokens[1]} events and holds {events}")
+                return
+            if int(tokens[1]) != events:
+                raise RecordFormatError(f"event {tokens[1]} out of order")
+            seeds = [_seed(next(stream).split()) for _ in range(int(tokens[2]))]
+            events += 1
+            yield seeds
+    raise RecordFormatError("the seed file ends before its end record")
+
+
+def _seed(tokens) -> dict:
+    if len(tokens) != 7 or tokens[0] != "seed" or tokens[3] not in SEED_OUTCOMES:
+        raise RecordFormatError(f"not a seed: {tokens}")
+    return {"planes": tokens[1], "hit_keys": [int(key) for key in tokens[2].split(",")], "outcome": tokens[3], "first_candidate": int(tokens[4]), "candidates": int(tokens[5]),
+            "short_branches": int(tokens[6])}
 
 
 def format_record(document: dict) -> str:

@@ -1,12 +1,15 @@
 // The T07 finder: pattern recognition through ACTS on a data file, recipe reco.track.acts-ckf-planar/1 (t04-values-v4.md section 8.1).
 //
-//   acts_tracking_finder --data-file D --product-id NAME --product-file P --record-file R --product-events K
+//   acts_tracking_finder --data-file D --product-id NAME --product-file P --record-file R --product-events K [--seed-file S]
 //
 // It takes hits and nothing else: a truth path or a truth file is refused, and there is no way in for a hit set or a start state. Output:
-// - the record, acts-tracking-finding-record/1: every event and every candidate, with its seed planes, its outcome, its failure category
-//   and whether its search was truncated. acts_finding_record.py reads it. A limit reached is marked, never silent (BP03).
+// - the record, acts-tracking-finding-record/1: every event and every candidate of at least 6 hits, with its seed planes, its outcome, its failure
+//   category and whether its search was truncated. acts_finding_record.py reads it. A limit reached is marked, never silent (BP03).
+// - with --seed-file, acts-tracking-finding-seeds/1: every seed of every event, its three hits and what became of it. An output only, and large at o3
+//   (50 MB per 3,000 events), so optional.
 // - the product, acts-tracking-product/1, for the first K events: per-surface states of the selected tracks, predicted, filtered and smoothed
-//   kept apart. K bounds the size of a text product: 250 MB per 18,000 tracks at job 7493368.
+//   kept apart. K bounds the size of a text product: 250 MB per 18,000 tracks at job 7493368. The product holds the tracks delivered: a fit-failed
+//   candidate stays in the record, with its category, and has no track here, so fit_summary's failed count reads 0 on a finder product.
 // All at section 4.1's field; the seed windows and the q/p prior are settled for it, so no other is offered.
 #include <Acts/ActsVersion.hpp>
 
@@ -34,16 +37,18 @@
 namespace {
 
 constexpr char record_format[] = "acts-tracking-finding-record/1";
+constexpr char seed_file_format[] = "acts-tracking-finding-seeds/1";
 constexpr char finding_recipe[] = "reco.track.acts-ckf-planar/1";
 constexpr char finding_stage[] = "find-ckf";
 constexpr char finding_evidence_class[] = "data-side";
 
 std::map<std::string, std::string> parse_flags(int argc, char** argv) {
   const std::set<std::string> known{"data-file", "product-id", "product-file", "record-file", "product-events"};
+  const std::string optional_output = "seed-file";
   std::map<std::string, std::string> flags;
   for (int index = 1; index < argc; index += 2) {
     const std::string flag = argv[index];
-    if (flag.rfind("--", 0) != 0 || index + 1 >= argc || known.count(flag.substr(2)) == 0) {
+    if (flag.rfind("--", 0) != 0 || index + 1 >= argc || (known.count(flag.substr(2)) == 0 && flag.substr(2) != optional_output)) {
       throw std::invalid_argument("expected a known --flag and its value, got " + flag);
     }
     flags[flag.substr(2)] = argv[index + 1];
@@ -128,6 +133,17 @@ std::string candidate_line(const t07::FoundCandidate& candidate, std::uint32_t e
   return line.str();
 }
 
+std::string seed_lines(const t07::EventFinding& finding) {
+  std::ostringstream lines;
+  lines << "event " << finding.event_ordinal << " " << finding.seeds.size() << "\n";
+  for (const t07::SeedRecord& seed : finding.seeds) {
+    const auto& keys = seed.triple.hit_keys;
+    lines << "seed " << planes_text(seed.triple.planes) << " " << keys[0] << "," << keys[1] << "," << keys[2] << " " << seed.outcome << " " << seed.first_candidate << " " << seed.candidates << " "
+          << seed.short_branches << "\n";
+  }
+  return lines.str();
+}
+
 int run(int argc, char** argv) {
   const auto flags = parse_flags(argc, argv);
   const std::string data_path = flags.at("data-file");
@@ -137,6 +153,12 @@ int run(int argc, char** argv) {
   refuse_overwriting_input(product_path, data_path);
   refuse_overwriting_input(record_path, data_path);
   refuse_overwriting_input(record_path, product_path);
+  const std::string seed_path = flags.count("seed-file") != 0 ? flags.at("seed-file") : "";
+  if (!seed_path.empty()) {
+    refuse_overwriting_input(seed_path, data_path);
+    refuse_overwriting_input(seed_path, record_path);
+    refuse_overwriting_input(seed_path, product_path);
+  }
 
   t07::DataFileReader reader(data_path);  // a truth path stops here, a truth file by its magic, before anything is written
   const std::string data_sha256 = t07::sha256_of_file(data_path);
@@ -166,6 +188,14 @@ int run(int argc, char** argv) {
   record << record_format << "\nrecipe " << finding_recipe << "\nstage " << finding_stage << "\nevidence_class " << finding_evidence_class << "\nproduct_id " << header.product_id
          << "\ndata_sha256 " << data_sha256 << "\nproduct_events " << product_events << "\nconfiguration_sha256 " << t07::hex_of(t07::sha256_of_text(configuration)) << "\n"
          << configuration;
+  std::ofstream seed_stream;
+  if (!seed_path.empty()) {
+    seed_stream.open(seed_path, std::ios::binary);
+    if (!seed_stream) {
+      throw std::runtime_error("cannot write " + seed_path);
+    }
+    seed_stream << seed_file_format << "\n";
+  }
 
   std::size_t events = 0;
   std::size_t candidates = 0;
@@ -176,6 +206,9 @@ int run(int argc, char** argv) {
   for (std::uint32_t ordinal = 0; reader.next(event); ++ordinal) {
     t07::EventFinding finding = finder.find(event, ordinal);
     record << event_line(finding);
+    if (!seed_path.empty()) {
+      seed_stream << seed_lines(finding);
+    }
     for (const t07::FoundCandidate& candidate : finding.candidates) {
       record << candidate_line(candidate, ordinal);
       selected += candidate.outcome == "selected" ? 1 : 0;
@@ -196,6 +229,13 @@ int run(int argc, char** argv) {
   record.close();
   if (!record) {
     throw std::runtime_error("cannot finish " + record_path);
+  }
+  if (!seed_path.empty()) {
+    seed_stream << "end " << events << "\n";
+    seed_stream.close();
+    if (!seed_stream) {
+      throw std::runtime_error("cannot finish " + seed_path);
+    }
   }
   t07::write_whole_file(product_path, t07::encode_product(document));
   std::cout << "{\"status\": \"ok\", \"events\": " << events << ", \"candidates\": " << candidates << ", \"tracks\": " << selected + failed << ", \"failed\": " << failed

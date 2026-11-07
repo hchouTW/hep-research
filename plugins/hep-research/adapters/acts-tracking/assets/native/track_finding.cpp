@@ -46,6 +46,19 @@ using StateCreator = Acts::TrackStateCreator<LinkIterator, FindingContainer>;
 using BranchResult = Acts::CombinatorialKalmanFilterBranchStopperResult;
 using NewStates = Acts::Result<Acts::CkfTypes::BranchVector<Acts::TrackIndexType>>;
 
+// Diagnostic builds only: the two extra targets of CMakeLists.txt define one of these, the recipe's acts_tracking_finder neither (the build job checks its flags,
+// and its record says diagnostic_build none). Nothing at run time reaches them. D1 stage 5d report.
+#if defined(T07_DIAGNOSTIC_SHARED_HITS)
+constexpr std::uint32_t shared_hits_in_use = T07_DIAGNOSTIC_SHARED_HITS;
+constexpr char diagnostic_build[] = "two-shared-hits";
+#elif defined(T07_DIAGNOSTIC_CHORD_SLOPE)
+constexpr std::uint32_t shared_hits_in_use = ambiguity_most_shared_hits;
+constexpr char diagnostic_build[] = "chord-slope";
+#else
+constexpr std::uint32_t shared_hits_in_use = ambiguity_most_shared_hits;
+constexpr char diagnostic_build[] = "none";
+#endif
+
 double plane_x_mm(int plane) { return (plane - 1) * plane_spacing_mm; }
 
 // Largest second derivatives along the telescope of a track of section 4.1, in mm^-1: u'' = -w n (1 + u'^2) and v'' = -w n u' v', as in
@@ -226,8 +239,15 @@ struct HelixPoint {
 std::optional<HelixPoint> helix_at_start(const std::array<Acts::Vector3, 3>& points, double field_along_v_tesla) {
   const Acts::Vector3 field_vector(0.0, 0.0, field_along_v_tesla * Acts::UnitConstants::T);
   const Acts::FreeVector estimate = Acts::estimateTrackParamsFromSeed(points[0], 0.0, points[1], points[2], field_vector);
-  const double q_over_p = estimate[Acts::eFreeQOverP];
-  const Acts::Vector3 tangent(estimate[Acts::eFreeDir0], estimate[Acts::eFreeDir1], estimate[Acts::eFreeDir2]);
+  double q_over_p = estimate[Acts::eFreeQOverP];
+  Acts::Vector3 tangent(estimate[Acts::eFreeDir0], estimate[Acts::eFreeDir1], estimate[Acts::eFreeDir2]);
+#ifdef T07_DIAGNOSTIC_CHORD_SLOPE
+  // The slope along the field from the first and last hit, as job 7494285's prior had it, on the same circle: q/p scales with the transverse share of the tangent.
+  const double transverse_before = std::hypot(tangent.x(), tangent.y());
+  const double chord_slope = (points[2].z() - points[0].z()) / std::hypot(points[2].x() - points[0].x(), points[2].y() - points[0].y());
+  tangent = Acts::Vector3(tangent.x() / transverse_before, tangent.y() / transverse_before, chord_slope).normalized();
+  q_over_p *= std::hypot(tangent.x(), tangent.y()) / transverse_before;
+#endif
   if (!std::isfinite(q_over_p) || q_over_p == 0.0 || !tangent.allFinite() || tangent.x() <= 0.0) {
     return std::nullopt;
   }
@@ -354,8 +374,16 @@ std::vector<std::pair<std::string, std::string>> effective_configuration() {
           {"finding_most_branches_per_seed", std::to_string(finding_most_branches_per_seed)},
           {"finding_most_seeds_per_event", std::to_string(finding_most_seeds_per_event)},
           {"finding_most_propagator_steps", std::to_string(finding_most_propagator_steps)},
-          {"ambiguity_most_shared_hits", std::to_string(ambiguity_most_shared_hits)},
-          {"ambiguity_most_iterations", std::to_string(ambiguity_most_iterations)}};
+          {"ambiguity_most_shared_hits", std::to_string(shared_hits_in_use)},
+          {"ambiguity_most_iterations", std::to_string(ambiguity_most_iterations)},
+          {"finding_fit_passes", std::to_string(finding_fit_passes)},
+          {"seed_derivative_step_sigma", number_text(seed_derivative_step_sigma)},
+          {"refit_start_x_mm", number_text(refit_start_x_mm)},
+          {"refit_prior_loc_sigma_mm", number_text(refit_prior_loc_sigma_mm)},
+          {"refit_prior_angle_sigma", number_text(refit_prior_angle_sigma)},
+          {"refit_prior_qop_sigma_per_gev", number_text(refit_prior_qop_sigma_per_gev)},
+          {"refit_prior_time_sigma", number_text(refit_prior_time_sigma)},
+          {"diagnostic_build", diagnostic_build}};
 }
 
 struct TrackFinder::Machinery {
@@ -368,7 +396,7 @@ namespace {
 
 Acts::GreedyAmbiguityResolution::Config ambiguity_configuration() {
   Acts::GreedyAmbiguityResolution::Config configuration;
-  configuration.maximumSharedHits = ambiguity_most_shared_hits;
+  configuration.maximumSharedHits = shared_hits_in_use;
   configuration.maximumIterations = ambiguity_most_iterations;
   configuration.nMeasurementsMin = finding_least_measurements;
   return configuration;
@@ -452,8 +480,12 @@ EventFinding TrackFinder::find(const DataEvent& event, std::uint32_t event_ordin
   FindingContainer tracks = Acts::TrackContainer{Acts::VectorTrackContainer{}, Trajectory{}};
   std::vector<std::vector<std::size_t>> candidates_of_hit(event.hits.size());
 
+  finding.seeds.reserve(seeds.triples.size());
   for (const HitTriple& triple : seeds.triples) {
+    finding.seeds.push_back({triple, "no-candidate", finding.candidates.size(), 0, 0});
+    SeedRecord& seed = finding.seeds.back();
     if (on_one_candidate(triple, candidates_of_hit)) {
+      seed.outcome = "skipped";
       ++finding.seeds_skipped;
       continue;
     }
@@ -461,6 +493,7 @@ EventFinding TrackFinder::find(const DataEvent& event, std::uint32_t event_ordin
     const std::optional<SeedStart> start = seed_start_of({global_of(event.hits[triple.hit_keys[0]]), global_of(event.hits[triple.hit_keys[1]]), global_of(event.hits[triple.hit_keys[2]])},
                                                          m_sigma_loc0_mm, m_sigma_loc1_mm, m_field_along_v_tesla);
     if (!start) {
+      seed.outcome = "no-start";
       ++finding.seeds_failed;
       continue;
     }
@@ -472,8 +505,10 @@ EventFinding TrackFinder::find(const DataEvent& event, std::uint32_t event_ordin
     auto found = m_machinery->finder.findTracks(start_parameters, options, tracks);
     if (!found.ok()) {
       if (found.error() == Acts::CombinatorialKalmanFilterError::PropagationReachesMaxSteps) {
+        seed.outcome = "step-limit";
         budget.truncated = true;
       } else {
+        seed.outcome = "filter-error";
         ++finding.seeds_failed;
       }
       finding.seeds_truncated += budget.truncated ? 1 : 0;
@@ -484,6 +519,7 @@ EventFinding TrackFinder::find(const DataEvent& event, std::uint32_t event_ordin
     std::size_t kept_from_seed = 0;
     for (auto track : *found) {
       if (track.nMeasurements() < finding_least_measurements) {
+        ++seed.short_branches;
         continue;
       }
       FoundCandidate candidate;
@@ -511,11 +547,22 @@ EventFinding TrackFinder::find(const DataEvent& event, std::uint32_t event_ordin
       ++kept_from_seed;
     }
     finding.seeds_without_candidate += kept_from_seed == 0 ? 1 : 0;
+    seed.candidates = kept_from_seed;
+    seed.outcome = kept_from_seed == 0 ? "no-candidate" : "candidates";
   }
 
   Acts::GreedyAmbiguityResolution::State ambiguity = ambiguity_state_of(finding.candidates);
   if (!finding.candidates.empty()) {
     m_machinery->resolver.resolve(ambiguity);
+  }
+  // resolve() stops early only below the limit, so a track left at or above it means the iterations ran out with a conflict left.
+  for (const std::size_t track : ambiguity.selectedTracks) {
+    finding.ambiguity_budget_reached = finding.ambiguity_budget_reached || ambiguity.sharedMeasurementsPerTrack[track] >= shared_hits_in_use;
+  }
+  if (finding.seed_budget_reached || finding.ambiguity_budget_reached) {
+    for (FoundCandidate& candidate : finding.candidates) {
+      candidate.search_truncated = true;  // the search or the resolution stopped short for the whole event
+    }
   }
   for (std::size_t index = 0; index < finding.candidates.size(); ++index) {
     FoundCandidate& candidate = finding.candidates[index];
@@ -523,9 +570,6 @@ EventFinding TrackFinder::find(const DataEvent& event, std::uint32_t event_ordin
       candidate.outcome = "evicted";
       candidate.failure_category = "ambiguity";
       continue;
-    }
-    if (ambiguity.sharedMeasurementsPerTrack[index] > ambiguity_most_shared_hits) {
-      finding.ambiguity_budget_reached = true;  // resolve() stopped at its iterations with a conflict left
     }
     // The filter's q/p carries the seed's prior and hits twice, so the hit set is fitted again with the refit's wide prior; and since that q/p
     // can sit outside the domain kalman_refit.hpp states, the fit is repeated from its own result.
@@ -536,7 +580,7 @@ EventFinding TrackFinder::find(const DataEvent& event, std::uint32_t event_ordin
     hit_set.hit_keys = candidate.hit_keys;
     RefitResult fit;
     bool fitted = std::isfinite(hit_set.assumed_q_over_p) && hit_set.assumed_q_over_p != 0.0;
-    for (int pass = 0; fitted && pass < 2; ++pass) {
+    for (int pass = 0; fitted && pass < finding_fit_passes; ++pass) {
       fit = m_fitter.fit(hit_set, event);
       fitted = fit.track.status == "fitted";
       if (fitted) {

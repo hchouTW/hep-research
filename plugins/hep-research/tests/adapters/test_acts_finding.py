@@ -20,7 +20,8 @@ Predictions, fixed here before the first run of this recipe. Closed form, unless
   about 0.09, 0.01, 0.002 noise hits at o3, so 2e-6 per seed, 6e-4 per event, 2e-5 per track. Section 8.3's 1e-7 is for a 6-hit chance alignment; this is larger because a seed's
   first windows are wider than a converged track's. An estimate, good to a factor of a few.
 - Duplicates: two tracks of one particle hold more than 50 % of their hits from it, so at least 4 each of at most 8, and ambiguity resolution keeps two only if they share at
-  most 1 hit: at least 6 distinct true hits and 3 or more noise hits on the pair: the chance-candidate rate at most.
+  most 1 hit: at least 6 distinct true hits and 3 or more noise hits on the pair: the chance-candidate rate at most. Correction, stage 5 review m3: ambiguity_most_shared_hits = 1
+  means they share none (track_finding.hpp), so all 8 true hits and at least 4 noise hits. The prediction of 0 stands, on a stronger argument.
 
 Correction after job 7493849, in D1 stage 5 report, Fix round 1. The table above stands as written, and no limit moved. "Expected above 0.999" and the reading of the noise row assumed
 windows near section 4.1's 0.15 mm, which the first recipe's diagonal seed prior did not have; R_floor assumes the same, so R_floor is right and the recipe was wrong. With the correlated
@@ -28,6 +29,10 @@ prior the estimate is efficiency at least about 0.9998, 0.9990, 0.9986 at o1, o2
 
 Correction after job 7494285, Fix round 2. LOST_TO_THE_CHI2_CUT's "0.34 expected" treated 168 cases as independent. The 7 pairs for which 6-7-8 is the only whole triple share one seed
 per track, so a seed that fails counts up to 7 at once. The limit stands: with a start on the helix a seed fails at about 1e-4, so 0.34 stays the expected order.
+
+Correction after job 7494405, stage 5 review m4. The table's "0 expected" for clean fakes stands as written and missed: 2 in clean stratum 2. It reckoned with no track of two particles'
+hits, and a clean fake is one: an exact tie or three owners. Cause open until tests/adapters/test_acts_finding_diagnosis.py reads it. The same job made o3 noise worse than job 7494285 on
+identical events, 640 to 781 lost, which the text of Fix round 2 did not predict. Every reading stays inside its limit, and no limit moved.
 
 Tolerances, fixed before the first run, and they do not move after results (sheet, Stop). A reading outside one is a disagreement with a prediction, for finding the cause:
 
@@ -134,7 +139,8 @@ def expected_chance_seeds(hits_per_plane: float, triples, slope_u: float, slope_
 
 
 def seed_covariances(triple, inflation: float, start_x_mm: float = -50.0) -> tuple:
-    """seed_prior_of by another road, as (u, u', u'') and (v, v') at the start: least squares of a parabola by matrix inverse; the chord through the first and last hit."""
+    """Job 7494285's prior, which the finder no longer holds, as (u, u', u'') and (v, v') at the start: least squares of a parabola by matrix inverse; the chord through the first and last
+    hit. A reference only: the shipped covariance, f^2 J J^T of seed_start_of, is read by seed_start_probe.cpp, by two roads, beside these numbers."""
     positions = 50.0 * (numpy.array(triple, float) - 1.0)
     basis = numpy.stack([numpy.ones(3), positions - start_x_mm, 0.5 * (positions - start_x_mm) ** 2], 1)
     along_u = (inflation * HIT_SIGMA_MM) ** 2 * numpy.linalg.inv(basis.T @ basis)
@@ -258,7 +264,7 @@ class SeedsCoverEveryTwoLostPlanes(unittest.TestCase):
 
 
 class ConfigurationFromTheFixtureAlone(unittest.TestCase):
-    """Every fixed value is arithmetic on sections 4.1 and 7 (section 2.2's forbidden list), so its arithmetic is held here."""
+    """The fixed values are arithmetic on sections 4.1 and 7 (section 2.2's forbidden list), so that arithmetic is held here. seed_prior_inflation is tuned on block 1, as its comment says."""
 
     def setUp(self):
         self.header = (NATIVE / "track_finding.hpp").read_text(encoding="utf-8")
@@ -292,14 +298,15 @@ class ConfigurationFromTheFixtureAlone(unittest.TestCase):
                                      refit_tests.GEV_PER_TESLA_MM / 1.5)
 
     def test_the_prior_of_a_late_seed_is_narrow_where_the_hits_put_it(self):
-        """Job 7493849's cause. Carried to plane 1, a 3-4-5 seed has Lagrange weights 6, -8, 3, so 0.02 sqrt(109) = 0.209 mm, by matrix inverse here and Lagrange in the source; along v, chord
-        weights 2, -1, so 0.02 sqrt(5). The diagonal form added the 0.76 mm of the start to both."""
+        """Job 7493849's cause. Carried to plane 1, a 3-4-5 seed has Lagrange weights 6, -8, 3, so 0.02 sqrt(109) = 0.209 mm, by matrix inverse here; along v, chord weights 2, -1, so
+        0.02 sqrt(5). The diagonal form added the 0.76 mm of the start to both. This holds job 7494285's model, not the shipped start: along v that reads 0.02 sqrt(9), last below."""
         inflation = self.value("seed_prior_inflation")
         sigma_u, sigma_v = position_sigmas_at(seed_covariances((3, 4, 5), 1.0), 0.0)
         self.assertAlmostEqual(sigma_u, HIT_SIGMA_MM * math.sqrt(109.0), delta=1e-6)
         self.assertAlmostEqual(sigma_v, HIT_SIGMA_MM * math.sqrt(5.0), delta=1e-6)
         area = math.pi * self.value("finding_chi2_cut") * inflation ** 2 * sigma_u * sigma_v
         self.assertLess(area, 1.5)  # mm^2: under 0.08 hits at o3's 0.05 per mm^2
+        self.assertLess(area * math.sqrt(9.0 / 5.0), 1.5)  # the last two hits' slope along v, weights 1, 2, -2: seed_start_probe prints the window itself
 
     def test_a_correlation_with_the_wrong_sign_would_widen_that_window(self):
         along_u, along_v = seed_covariances((3, 4, 5), 1.0)
@@ -410,6 +417,22 @@ class RecordFailsOnOneDefect(unittest.TestCase):
         self.document["events"][0]["seeds_run"] = 1
         self.refused(finding_record.format_record(self.document))
 
+    def test_seeds_run_must_balance_their_outcomes(self):
+        self.document["events"][0].update(seeds_failed=2, seeds_without_candidate=1)
+        self.refused(finding_record.format_record(self.document))
+        self.document["events"][0].update(seeds_found=9, seeds_run=7, seeds_failed=1, seeds_without_candidate=1)  # 5 seeds left for 2 candidates
+        self.refused(finding_record.format_record(self.document))
+
+    def test_an_event_budget_reaches_every_candidate(self):
+        """Stage 5 review m9: the mark follows the event's budgets too, not only the seed's."""
+        event = self.document["events"][0]
+        event["ambiguity_budget_reached"] = 1
+        self.refused(finding_record.format_record(self.document))
+        self.assertEqual(len(finding_record.parse_record(finding_record.format_record(self.document), marks_event_budgets=False)["events"]), 1)
+        for item in event["found"]:
+            item["search_truncated"] = True
+        self.assertEqual(len(finding_record.parse_record(finding_record.format_record(self.document))["events"]), 1)
+
     def test_a_truncated_candidate_with_no_truncated_seed_is_refused(self):
         self.document["events"][0]["found"][0]["search_truncated"] = True
         self.refused(finding_record.format_record(self.document))
@@ -424,6 +447,8 @@ class RecordFailsOnOneDefect(unittest.TestCase):
         event["failure_category"] = "seed-or-finding"
         self.assertEqual(finding_record.event_defects(event), [])
         event["seed_budget_reached"] = 1
+        for item in event["found"]:
+            item["search_truncated"] = True
         self.assertEqual(len(finding_record.event_defects(event)), 1)
         event["failure_category"] = "search-truncated"
         self.assertEqual(finding_record.event_defects(event), [])
@@ -513,9 +538,10 @@ def generate(folder: Path, fixture: str, stratum: int, count: int) -> tuple:
     return data_file, truth_file
 
 
-def find(folder: Path, data_file: Path, name: str, product_events: int) -> tuple:
+def find(folder: Path, data_file: Path, name: str, product_events: int, program: Path = FINDER, seed_file: Path = None) -> tuple:
     record_file, product_file = folder / f"{name}.record", folder / f"{name}.product"
-    finished = run_program([FINDER, "--data-file", data_file, "--product-id", name, "--product-file", product_file, "--record-file", record_file, "--product-events", product_events])
+    finished = run_program([program, "--data-file", data_file, "--product-id", name, "--product-file", product_file, "--record-file", record_file, "--product-events", product_events]
+                           + (["--seed-file", seed_file] if seed_file else []))
     return finished, record_file, product_file
 
 
@@ -561,7 +587,7 @@ def stratum_reading(fixture: str, stratum: int, folder: Path) -> dict:
         path.unlink()
     return {"fixture": fixture, "stratum": stratum, "tally": tally, "losses": losses, "events": len(record["events"]), "tracks_by_missed": tracks_by_missed, "lost_by_missed": lost_by_missed, "generate_seconds": generated - started, "search_seconds": searched - generated,
             "stderr_bytes": len(finished.stderr), "product_defects": finding_product_defects(document) + states_apart_defects(document) + record_matches_product(record["events"], document, PRODUCT_EVENTS),
-            "configuration_sha256": record["header"]["configuration_sha256"]}
+            "configuration_sha256": record["header"]["configuration_sha256"], "configuration": record["configuration"]}
 
 
 @unittest.skipUnless(BUILT, NOT_BUILT)
@@ -575,6 +601,9 @@ class DevelopmentRun(unittest.TestCase):
         jobs = [(fixture, stratum) for fixture in ("noise", "clean") for stratum in (11, 8, 5, 2, 10, 7, 4, 1, 9, 6, 3, 0)]  # slowest first
         with concurrent.futures.ThreadPoolExecutor(WORKERS) as pool:
             cls.readings = list(pool.map(lambda job: stratum_reading(job[0], job[1], Path(cls.folder.name)), jobs))
+        print(f"FINDING-CONFIGURATION sha256 {cls.readings[0]['configuration_sha256']}", flush=True)
+        for name, value in cls.readings[0]["configuration"].items():
+            print(f"FINDING-CONFIGURATION {name} {value}", flush=True)
         for item in sorted(cls.readings, key=lambda item: (item["fixture"], item["stratum"])):
             tally = item["tally"]
             print(f"FINDING-READING development reading, not a gate (K09): {item['fixture']} stratum {item['stratum']} events {item['events']} reconstructable {tally['reconstructable']} "
@@ -593,6 +622,7 @@ class DevelopmentRun(unittest.TestCase):
         self.assertEqual(len(self.readings), 24)
         self.assertEqual({item["events"] for item in self.readings}, {EVENTS_PER_BIN})
         self.assertEqual(len({item["configuration_sha256"] for item in self.readings}), 1)
+        self.assertEqual(self.readings[0]["configuration"]["diagnostic_build"], "none")
 
     def test_no_reconstructable_particle_left_a_denominator(self):
         """Section 7's denominator is the generator's: clean holds every track, and the noise fixture about 0.99958 of them."""
@@ -657,12 +687,15 @@ class NegativeCases(unittest.TestCase):
         cls.events = [sorted_hits(hits) for hits in events.values()]
         cls.case_file = folder / "negative.t07data"
         cls.case_file.write_bytes(fixture_files.encode_data_file(HIT_SIGMA_MM, cls.events))
-        cls.finished, record_file, _ = find(folder, cls.case_file, "t07-negative-cases", 0)
+        cls.seed_file = folder / "negative.seeds"
+        cls.finished, record_file, _ = find(folder, cls.case_file, "t07-negative-cases", 0, seed_file=cls.seed_file)
         cls.record = finding_record.parse_record(record_file.read_text(encoding="utf-8"))
+        cls.seeds = list(finding_record.iter_seed_events(cls.seed_file))
         for name, event in zip(cls.names, cls.record["events"]):
             if name.startswith("alone-"):
                 continue
-            print(f"FINDING-NEGATIVE {name}: seeds_found {event['seeds_found']} seeds_truncated {event['seeds_truncated']} seed_budget {event['seed_budget_reached']} candidates {event['candidates']} "
+            print(f"FINDING-NEGATIVE {name}: seeds_found {event['seeds_found']} seeds_truncated {event['seeds_truncated']} seed_budget {event['seed_budget_reached']} "
+                  f"ambiguity_budget {event['ambiguity_budget_reached']} candidates {event['candidates']} "
                   f"selected {event['selected']} category {event['failure_category']}", flush=True)
 
     @classmethod
@@ -719,8 +752,23 @@ class NegativeCases(unittest.TestCase):
         self.assertGreater(event["seeds_truncated"], 0)
         self.assertTrue(any(item["search_truncated"] for item in event["found"]))
         self.assertGreater(event["selected"], 0)  # candidates reaching a limit may be delivered, marked (BP03)
-        by_seed = Counter(item["seed_planes"] for item in event["found"])
-        self.assertLessEqual(max(by_seed.values()), event["seeds_run"] * (header_constant((NATIVE / "track_finding.hpp").read_text(encoding="utf-8"), "finding_most_branches_per_seed") + 1))
+        seeds = self.seeds[self.names.index("branch-explosion")]
+        self.assertEqual(sum(seed["candidates"] for seed in seeds), event["candidates"])
+        most_branches = header_constant((NATIVE / "track_finding.hpp").read_text(encoding="utf-8"), "finding_most_branches_per_seed")
+        self.assertLessEqual(max(seed["candidates"] for seed in seeds), most_branches + 1)  # per seed, which the count by seed type of jobs 7493849 to 7494405 could not fail
+        self.assertEqual(event["ambiguity_budget_reached"], 1)  # 1,221 candidates against 1,000 iterations in job 7494405: the conflicted tracks left are delivered, marked
+        self.assertTrue(all(item["search_truncated"] for item in event["found"]))
+
+    def test_every_seed_has_one_outcome_and_the_counters_agree(self):
+        """Stage 5 review m10: the outcomes of a seed balance the event's counters, in every case of this file."""
+        for name, event, seeds in zip(self.names, self.record["events"], self.seeds):
+            with self.subTest(name=name):
+                outcomes = Counter(seed["outcome"] for seed in seeds)
+                self.assertEqual(len(seeds), event["seeds_found"])
+                self.assertEqual(outcomes["skipped"], event["seeds_skipped"])
+                self.assertEqual(outcomes["no-start"] + outcomes["filter-error"], event["seeds_failed"])
+                self.assertEqual(outcomes["no-candidate"], event["seeds_without_candidate"])
+                self.assertEqual(sum(seed["candidates"] for seed in seeds), event["candidates"])
 
     def test_a_seed_budget_reached_is_marked(self):
         event = self.event("seed-budget")
