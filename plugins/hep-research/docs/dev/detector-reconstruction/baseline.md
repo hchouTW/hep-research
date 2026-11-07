@@ -196,3 +196,7 @@ The rebase replayed 43 commits. Conflicts were additive, in `CHANGELOG.md`, `con
 | `hep-detector` references | Unchanged, so the T11 anchors stand; one asset JSON has version lines only |
 | Fixtures under `contracts/fixtures` (143 files) | Version lines only |
 
+### Unit job at 0.58.0
+
+Job 7488410, commit `31a96930`, Slurm `FAILED`, exit `1:0`, 10 min 13 s, node `hpa-wn30`, tree clean before and after. Evidence: `<private>/evidence/checkpoint-r58-7488410/`. `tests/skills/hep_detector` 594 run, OK, 4 skipped; `tests/routing` 21 run, OK; `--part units` 7,686 run, 7,304 passed, 0 failures, 1 error, 381 skipped, 534 modules, all finished, 379 s. The error is the known LCG test, whose fix merged as PR #360 (`4cbff846`) after this base and reaches this branch at the next rebase. Clean: T06, T14 and T15a stay `done`, and the 14 new contract modules passed, 766 tests. `tests.adapters.test_unbinned_fit` took 29.33 s.
+
