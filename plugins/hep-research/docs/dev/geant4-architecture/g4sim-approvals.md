@@ -175,3 +175,10 @@ These are not Section 20 decisions. They are how S0 reconciled requirements of t
 | Findings of the third independent read, at `7c5e5c65` | Fix them all; audit every written column against an independent check, recording any that has none; one more read limited to these changes. If it finds no high-severity defect, what remains goes in the record as known limits and the code goes to the maintainer for G5 | hsinyichou (maintainer) | 2026-11-07 | "use your recommendations" |
 | Polar ring count, found by the final read at `ba4ebd31` | Fixed before G5: rings reach the farthest corner of the bounding box, in `NewScorers.hh` and `segmentation.py`, with live cases in `split_edges.py`; no further review round | hsinyichou (maintainer) | 2026-11-07 | "fix polar" |
 | S4 final regression | The gate 9 spot check stands in place of the 112-run regression | hsinyichou (maintainer) | 2026-11-07 | "I accept the spot check for the regression" |
+
+## Before S5 (Section 22, 2026-11-07)
+
+| Item | Decision | Person | Date | Words or link |
+| --- | --- | --- | --- | --- |
+| Modifications of design candidates, the mapping schema, `design.py` and `evaluate_design.py` | Approved as decision D4 describes them | hsinyichou (owner of the design loop) | 2026-11-07 | "I own the design loop and approve the S5 changes; StripSigma after S5" |
+| simreco's `StripSigma` | Corrected after S5, not before it. S5's reco-closure runs with nominal Gaussian errors, which the defect does not affect; a closure that needs `noise-digitization` stops for the maintainer | hsinyichou (maintainer) | 2026-11-07 | The same words |
