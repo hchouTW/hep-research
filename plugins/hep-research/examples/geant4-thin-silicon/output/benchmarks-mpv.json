@@ -58,7 +58,7 @@
      {
       "at_claimed_detection_limit": true,
       "csv": null,
-      "detection_limit_relative": 0.06793162748330063,
+      "detection_limit_relative": 0.06793162748330062,
       "injected": "silicon density x 0.931 on the Geant4 side (reference keeps 2.329 g/cm3)",
       "injected_relative": -0.069,
       "relative_difference": -0.05542934573762228,

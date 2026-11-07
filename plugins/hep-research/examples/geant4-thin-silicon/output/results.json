@@ -78,7 +78,7 @@
   "sp": {
    "benchmarks": {
     "stopping-power": {
-     "detection_limit": 0.03940428593124131,
+     "detection_limit": 0.039404285931241304,
      "negative_control": "caught",
      "relative_difference": -0.0018499429437009848,
      "validation_evidence": true,
