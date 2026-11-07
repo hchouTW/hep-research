@@ -47,6 +47,6 @@ The review of 2026-10-24 against `main` 0.38.0 is folded into §H.2.1 of the doc
 ## Working rules for this folder
 
 1. Documentation changes happen only on branch `worktree-geant4-architecture`, in worktree
-   `.claude/worktrees/geant4-architecture`. Change the Chinese original and the English translation together.
+   `.claude/worktrees/geant4-architecture`. Change the Chinese original and the English translation together, except `g4sim-task.zh.md`, which stays frozen at plan version 11 (addendum 11.1).
 2. Do not push to `main` or open a pull request without the maintainer's approval.
 3. Before committing, run at least `tools/check_packaging.py` and `tools/check_layering.py`, and stop if either fails.

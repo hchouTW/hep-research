@@ -1,0 +1,8 @@
+{"schema": "simulation-request/1",
+ "source": {"density": "analytic", "particle": "e+", "energy": {"uniform": {"min_MeV": "50", "max_MeV": "150"}},
+            "position": {"box_uniform": {"frame": "beam", "centre_mm": ["0", "0", "0"], "size_mm": ["20", "20", "0"]}}, "direction": {"fixed": {"frame": "beam", "vector": [0, 0, 1]}}},
+ "scorers": [{"name": "total", "readout": "none", "select": {"tags": ["active"]}, "quantity": "edep"},
+             {"name": "along", "readout": "none", "select": {"tags": ["active"]}, "quantity": "edep", "segmentation": {"along_axis": {"axis": "z", "width_mm": "10"}}, "split": "apportion"},
+             {"name": "visible", "readout": "none", "select": {"tags": ["active"]}, "quantity": "edep_visible"},
+             {"name": "classes", "readout": "none", "select": {"tags": ["active"]}, "quantity": "edep_by_dedx_class"},
+             {"name": "faces", "readout": "none", "select": {"tags": ["active"]}, "quantity": "energy_out_by_face"}]}

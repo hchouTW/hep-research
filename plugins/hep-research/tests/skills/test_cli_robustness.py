@@ -250,6 +250,8 @@ MISSING_FILE_ARGS = {
     "adapters/unbinned-fit/assets/unbinned_fit.py": ["fit", "--data", M, "--config", M],
 }
 NO_INPUT_FILE = {  # script: why the missing-file check does not apply
+    "adapters/geant4/assets/g4sim_physics_check.py": "a library of g4sim_run.py; only --help",
+    "adapters/geant4/assets/g4sim_simulate.py": "a library of g4sim_run.py; only --help",
     "skills/hep-detector/scripts/cherenkov_angle.py": "numbers on the command line",
     "skills/hep-detector/scripts/pid_separation_power.py": "numbers on the command line",
     "skills/hep-detector/scripts/tracker_resolution.py": "numbers on the command line",

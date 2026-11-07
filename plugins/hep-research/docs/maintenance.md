@@ -309,6 +309,7 @@ from the plugin root (each takes `--help`; the seeds are in each `output/report.
 | `examples/published-comparison/` (run after `qed-prediction`: it copies that output's plugin version) | J6 |
 | `examples/recasting/` | J7 |
 | `examples/local-partition/` | - |
+| `examples/zdc-synthetic-ecal/` | - |
 | `examples/batch-partition/` (fake Slurm and HTCondor schedulers) | - |
 | `examples/end-to-end-sample/` | - |
 | `examples/unfolding-coverage/` | J3 |

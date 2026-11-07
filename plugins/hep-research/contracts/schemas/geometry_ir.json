@@ -79,7 +79,10 @@
        },
        "shape": {
         "enum": [
-         "box"
+         "box",
+         "trd",
+         "tube",
+         "polygon_prism"
         ]
        },
        "material": {
@@ -90,6 +93,9 @@
        },
        "field": {
         "type": "string"
+       },
+       "solid": {
+        "type": "object"
        }
       }
      }
@@ -149,10 +155,18 @@
            "minItems": 3,
            "maxItems": 3,
            "items": {
-            "enum": [
-             -1,
-             0,
-             1
+            "anyOf": [
+             {
+              "enum": [
+               -1,
+               0,
+               1
+              ]
+             },
+             {
+              "type": "string",
+              "pattern": "^(0|-?[1-9](\\.[0-9]*[1-9])?e(0|-?[1-9][0-9]*))$"
+             }
             ]
            }
           }

@@ -1,0 +1,289 @@
+#!/usr/bin/env python3
+"""A run of a new specification (g4sim plan, Sections 8, 9.1): resolve the request, check what Geant4 really set, run, merge the workers' files, check closure.
+
+Imported by g4sim_run.py, whose `simulate` command is the entry point. Pure helpers come first, so tests need no Geant4.
+"""
+from __future__ import annotations
+
+import argparse
+import csv
+import json
+import math
+import subprocess
+import sys
+from pathlib import Path
+
+sys.dont_write_bytecode = True
+ROOT = Path(__file__).resolve().parents[3]
+for folder in (str(ROOT), str(Path(__file__).resolve().parent)):
+    if folder not in sys.path:
+        sys.path.insert(0, folder)
+
+import g4sim_physics_check as physics_check  # noqa: E402
+
+from core.simulation import source_density  # noqa: E402
+
+AXES = {"x": 0, "y": 1, "z": 2}
+CLOSURE_ULP = 2.0 ** -52
+CLASSES_PER_DECADE, CLASS_OFFSET, CLASSES_PER_KIND = 4, 40, 200
+KINDS = ("ionizing", "nonionizing", "photon", "zero_length")
+BIRKS_TOLERANCE, EM_TOLERANCE = 1e-12, 1e-9
+THREAD_FILES = ("cells", "boundary", "crossings", "primaries", "conservation")
+
+
+def _in_world(frame: str, vector: list, frames: dict) -> list:
+    """A position in a named frame, in world coordinates. Frames hold an origin in a template; only the world is built so far."""
+    if frame == "world":
+        return vector
+    if frame not in frames:
+        raise source_density.SourceError("source-frame", f"frame {frame!r} is not in the IR")
+    if frames[frame]["in"] != "world":
+        raise source_density.SourceError("source-frame", f"frame {frame!r} lies in {frames[frame]['in']}: only frames in the world are built")
+    return [value + float(origin) for value, origin in zip(vector, frames[frame]["origin_mm"])]
+
+
+def resolved_source(source: dict, frames: dict) -> dict:
+    record = source_density.density(source)
+    record["position"]["centre_mm"] = _in_world(record["position"]["frame"], record["position"]["centre_mm"], frames)
+    if "point_mm" in record["direction"]:
+        record["direction"]["point_mm"] = _in_world(record["direction"]["frame"], record["direction"]["point_mm"], frames)
+    return record
+
+
+def resolved_segmentation(block) -> dict:
+    if block in (None, "none"):
+        return {"kind": "none"}
+    kind, body = next(iter(block.items()))
+    if kind == "along_axis":
+        return {"kind": kind, "axis": AXES[body["axis"]], "width_mm": [float(body["width_mm"])]}
+    if kind == "polar":
+        return {"kind": kind, "width_mm": [float(body["width_r_mm"])], "phi_bins": int(body["phi_bins"])}
+    return {"kind": kind, "width_mm": [float(value) for value in body["width_mm"]]}
+
+
+def selected_templates(select: dict, ir: dict) -> list:
+    tags = ir["marker"]["tags"]
+    wanted = set(select.get("tags", []))
+    return sorted(name for name, own in tags.items() if wanted <= set(own)) if wanted else sorted(select.get("templates", []))
+
+
+def resolved_request(request: dict, ir: dict) -> dict:
+    scorers = []
+    for scorer in request.get("scorers", []):
+        item = {"name": scorer["name"], "quantity": scorer["quantity"], "templates": selected_templates(scorer["select"], ir), "segmentation": resolved_segmentation(scorer.get("segmentation"))}
+        if "split" in scorer:
+            item["split"] = scorer["split"]
+        if "apportion_short_step_fraction" in scorer:
+            item["fraction"] = float(scorer["apportion_short_step_fraction"])
+        if "chord_min_rigidity_GV" in scorer:
+            item["rigidity_GV"] = float(scorer["chord_min_rigidity_GV"])
+        if "time_window_ns" in scorer:
+            item["window_ns"] = [float(value) for value in scorer["time_window_ns"]]
+        scorers.append(item)
+    out = {"source": resolved_source(request["source"], ir["physical"]["frames"]), "scorers": scorers}
+    if any(item["quantity"] in physics_check.BIRKS_QUANTITIES for item in scorers):
+        out["birks_active"] = True
+    return out
+
+
+def selected_materials(resolved: dict, ir: dict) -> dict:
+    templates = ir["physical"]["templates"]
+    return {item["name"]: sorted({templates[name]["material"] for name in item["templates"]}) for item in resolved["scorers"]}
+
+
+def effective_problems(effective: dict, card: dict, ir: dict, resolved: dict) -> list:
+    """Sections 8.7, 8.8: what Geant4 read back against the run card and the specification. Any difference refuses the run."""
+    problems = []
+    materials = ir["physical"]["materials"]
+    for name in sorted({m for scorer, names in selected_materials(resolved, ir).items() for m in names
+                        if next(item for item in resolved["scorers"] if item["name"] == scorer)["quantity"] in physics_check.BIRKS_QUANTITIES}):
+        declared = float(materials[name]["ionisation"]["birks_mm_per_MeV"])
+        actual = effective["birks_mm_per_MeV"].get(name)
+        if actual is None or abs(actual - declared) > BIRKS_TOLERANCE * max(declared, 1.0):
+            problems.append(f"material {name}: Birks constant {actual} mm/MeV in effect, {declared} declared")
+    wanted = card.get("physics", {}).get("em_parameters", {})
+    for key, group in (("step_function_electron", "e+-"), ("step_function_muon_hadron", "muons/hadrons"), ("step_function_light_ion", "light ions"), ("step_function_ion", "general ions")):
+        if key not in wanted:
+            continue
+        line = next((text for text in effective["step_functions"] if group in text), "")
+        ratio, range_mm = line.rsplit("(", 1)[-1].rstrip(") ").replace(" mm", "").split(",") if "(" in line else ("nan", "nan")
+        if abs(float(ratio) - float(wanted[key][0])) > EM_TOLERANCE or abs(float(range_mm) - float(wanted[key][1])) > EM_TOLERANCE:
+            problems.append(f"{key}: ({ratio}, {range_mm}) in effect, {wanted[key]} set")
+    for key in ("msc_range_factor", "msc_muhad_range_factor"):
+        if key in wanted and abs(effective[key] - float(wanted[key])) > EM_TOLERANCE:
+            problems.append(f"{key}: {effective[key]} in effect, {wanted[key]} set")
+    return problems
+
+
+def outside_differences(with_pai: dict, without_pai: dict, requests: list) -> list:
+    """GB12: the models and fluctuation models outside the PAI regions equal those of a run without PAI. A difference is an error (Section 6.2.9)."""
+    regions = {request["region"] for request in requests}
+    problems = [] if without_pai and with_pai else ["no models were read back, so nothing can be compared"]
+    for region, processes in without_pai.items():
+        if region in regions:
+            continue
+        for key, rows in processes.items():
+            if with_pai.get(region, {}).get(key) != rows:
+                problems.append(f"region {region}, {key}: PAI changed the models outside its region")
+    return problems
+
+
+def missing_pai(models: dict, requests: list, ionisation: dict) -> list:
+    """Each process a request maps to really carries a PAI model in its region: Geant4 read back, not check-spec's prediction."""
+    problems = []
+    for row in physics_check.effective_pai(requests, ionisation):
+        found = {key: rows for key, rows in models.get(row["region"], {}).items() if key.startswith(f"{row['process']}/")}
+        if not found:
+            problems.append(f"region {row['region']}, {row['process']}: nothing read back")
+        for key, rows in found.items():
+            if not any(item[0].startswith("PAI") for item in rows):
+                problems.append(f"region {row['region']}, {key}: no PAI model in effect")
+    return problems
+
+
+def ionisation_table(effective: dict) -> dict:
+    return {name: None if value == "none" else value for name, value in effective["ionisation"].items()}
+
+
+def _rows(path: Path) -> list:
+    with path.open(encoding="utf-8", newline="") as handle:
+        return [row for row in csv.reader(handle) if row and not row[0].startswith("#") and row[0] != "event"]
+
+
+def merge_threads(work: Path) -> dict:
+    """The workers' files as one file each, ordered by event, so the output does not depend on the threads."""
+    counts = {}
+    for stem in THREAD_FILES:
+        rows = []
+        header = None
+        for path in sorted(work.glob(f"{stem}.thread*.csv")):
+            if stem == "conservation" and header is None:
+                header = next((line for line in path.read_text(encoding="utf-8").splitlines() if line.startswith("event")), None)
+            rows += _rows(path)
+            path.unlink()
+        rows.sort(key=lambda row: (int(row[0]), row[1:]))
+        with (work / f"{stem}.csv").open("w", encoding="utf-8", newline="") as handle:
+            if header:
+                handle.write(header + "\n")
+            csv.writer(handle, lineterminator="\n").writerows(rows)
+        counts[stem] = len(rows)
+    return counts
+
+
+def closure_problems(cells: list) -> dict:
+    """Section 9.1: per event and scorer, the bins against the direct sum, within n x 2^-52 x sum |x|. Rows: event, scorer, volume, bin, value, n, sum|x|."""
+    sums: dict = {}
+    direct: dict = {}
+    for row in cells:
+        key = (row[0], row[1])
+        if row[2] == "-1":
+            direct[key] = (float(row[4]), int(row[5]), float(row[6]))
+        else:
+            sums.setdefault(key, []).append(float(row[4]))
+    worst, failing = 0.0, 0
+    for key, (value, count, absolute) in direct.items():
+        residual = abs(math.fsum(sums.get(key, [])) - value)
+        limit = count * CLOSURE_ULP * absolute
+        worst = max(worst, residual)
+        failing += residual > limit
+    return {"events_checked": len(direct), "failing": failing, "largest_residual": worst}
+
+
+def class_x(bin_number: int) -> tuple:
+    """A dedx class's kind and its range of x, for reweighting."""
+    kind, index = divmod(bin_number, CLASSES_PER_KIND)
+    low = 10.0 ** ((index - CLASS_OFFSET) / CLASSES_PER_DECADE)
+    return KINDS[kind], low, 10.0 ** ((index + 1 - CLASS_OFFSET) / CLASSES_PER_DECADE)
+
+
+def reweighted(rows: list, birks: float) -> float:
+    """Visible energy from `edep_by_dedx_class` rows (bin, energy), at the classes' geometric centres; a zero-length step keeps its deposit."""
+    total = []
+    for number, energy in rows:
+        kind, low, high = class_x(number)
+        total.append(energy if kind == "zero_length" else energy / (1 + birks * math.sqrt(low * high)))
+    return math.fsum(total)
+
+
+def reweighting_bound(rows: list, birks: float) -> float:
+    """Section 9.1: the sum over classes of the deposit times k_B (b - a) / (1 + k_B a)."""
+    terms = []
+    for number, energy in rows:
+        kind, low, high = class_x(number)
+        terms.append(0.0 if kind == "zero_length" else energy * birks * (high - low) / (1 + birks * low))
+    return math.fsum(terms)
+
+
+def balance_summary(boundary: list) -> dict:
+    """Section 9.1: the energy-balance rows of each envelope."""
+    rows = [row for row in boundary if row[2] == "balance"]
+    values = [abs(float(row[3])) for row in rows]
+    incident = [float(row[6]) for row in rows]
+    return {"events": len(rows), "largest_MeV": max(values, default=0.0), "mean_incident_MeV": math.fsum(incident) / len(incident) if incident else 0.0}
+
+
+def conservation_summary(path: Path) -> dict:
+    with path.open(encoding="utf-8", newline="") as handle:
+        rows = list(csv.DictReader(handle))
+    residuals = [abs(float(row["residual_MeV"])) for row in rows]
+    return {"events": len(rows), "largest_residual_MeV": max(residuals, default=0.0), "accounting_errors": sum(int(row["accounting_errors"]) for row in rows)}
+
+
+def run_program(program: Path, work: Path, environment=None) -> int:
+    with (work / "log.txt").open("a", encoding="utf-8") as log:
+        return subprocess.run([str(program), "--new", "ir.json", "run.json", "request.json"], cwd=work, stdout=log, stderr=log, check=False, env=environment).returncode
+
+
+def simulate(card: dict, request: dict, checked: dict, program: Path, work: Path, environment=None) -> dict:
+    """Preflight with no events, so a wrong setting is refused before any event; then the run."""
+    ir = checked["ir"]
+    resolved = resolved_request(request, ir)
+    findings = physics_check.card_findings(card, request, requirements=ir["physical"]["physics_requirements"], materials=ir["physical"]["materials"], selected_materials=selected_materials(resolved, ir))
+    if findings:
+        return {"status": "rejected", "findings": findings}
+    work.mkdir(parents=True, exist_ok=True)
+    (work / "ir.json").write_text(json.dumps(ir), encoding="utf-8")
+    (work / "request.json").write_text(json.dumps(resolved), encoding="utf-8")
+    preflight = json.loads(json.dumps(card))
+    preflight["run"]["events"] = 0  # the run's own mode: a serial run has built no model tables at this point, and would read back nothing
+    requests = card.get("physics", {}).get("pai", [])
+    plain_models = None
+    if requests:  # the same settings with no PAI, for GB12's comparison
+        plain = json.loads(json.dumps(preflight))
+        plain["physics"]["pai"] = []
+        (work / "run.json").write_text(json.dumps(plain), encoding="utf-8")
+        code = run_program(program, work, environment)
+        if code != 0:
+            return {"status": "failed", "exit_status": code, "stage": "preflight without PAI"}
+        plain_models = json.loads((work / "effective-em.json").read_text(encoding="utf-8"))["models"]
+    (work / "run.json").write_text(json.dumps(preflight), encoding="utf-8")
+    code = run_program(program, work, environment)
+    if code != 0:
+        return {"status": "failed", "exit_status": code, "stage": "preflight"}
+    effective = json.loads((work / "effective-em.json").read_text(encoding="utf-8"))
+    problems = effective_problems(effective, card, ir, resolved)
+    regions = {node["region"] for node in ir["physical"]["templates"].values()}
+    findings = physics_check.pai_findings(requests, regions, ionisation_table(effective), ir["physical"]["physics_requirements"]) if requests else []
+    if requests and not findings:
+        problems += outside_differences(effective["models"], plain_models, requests) + missing_pai(effective["models"], requests, ionisation_table(effective))
+    if problems or findings:
+        return {"status": "rejected", "problems": problems, "findings": findings}
+    (work / "run.json").write_text(json.dumps(card), encoding="utf-8")
+    code = run_program(program, work, environment)
+    if code != 0:
+        return {"status": "failed", "exit_status": code, "stage": "run"}
+    counts = merge_threads(work)
+    cells = _rows(work / "cells.csv")
+    closure = closure_problems([row for row in cells if row[1] in {item["name"] for item in resolved["scorers"] if item["quantity"] in physics_check.ADDITIVE}])
+    summary = {"status": "failed" if closure["failing"] else "ok", "rows": counts, "closure": closure, "balance": balance_summary(_rows(work / "boundary.csv")), "conservation": conservation_summary(work / "conservation.csv"),
+               "effective": {"birks_mm_per_MeV": effective["birks_mm_per_MeV"], "step_functions": effective["step_functions"], "pai": physics_check.effective_pai(requests, ionisation_table(effective)), "models": effective["models"]},
+               "geometry_id": checked["geometry_id"]}
+    (work / "column_map.json").write_text(json.dumps({"scorers": resolved["scorers"], "volume_id": ir["physical"]["volume_id"]}, indent=1) + "\n", encoding="utf-8")
+    (work / "summary.json").write_text(json.dumps(summary, indent=1) + "\n", encoding="utf-8")
+    return summary
+
+
+if __name__ == "__main__":
+    argparse.ArgumentParser(description=__doc__.splitlines()[0]).parse_args()
+    print(json.dumps({"status": "rejected", "message": "a library: run g4sim_run.py simulate"}))
+    sys.exit(2)

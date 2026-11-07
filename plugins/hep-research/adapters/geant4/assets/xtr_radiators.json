@@ -1,0 +1,42 @@
+{
+ "schema": "g4sim-xtr-radiators/1",
+ "note": "Geant4 11.4.3, from the GB17 prototype; photon_vertex says where a class creates its TR photons",
+ "classes": {
+  "G4RegularXTRadiator": {
+   "structure": "regular",
+   "photon_vertex": "along_track_inside_envelope"
+  },
+  "G4TransparentRegXTRadiator": {
+   "structure": "regular",
+   "photon_vertex": "along_track_inside_envelope"
+  },
+  "G4GammaXTRadiator": {
+   "structure": "irregular",
+   "photon_vertex": "along_track_inside_envelope"
+  },
+  "G4GaussXTRadiator": {
+   "structure": "irregular",
+   "photon_vertex": "along_track_inside_envelope"
+  },
+  "G4StrawTubeXTRadiator": {
+   "structure": null,
+   "photon_vertex": "along_track_inside_envelope"
+  },
+  "G4XTRRegularRadModel": {
+   "structure": "regular",
+   "photon_vertex": "on_envelope_surface"
+  },
+  "G4XTRTransparentRegRadModel": {
+   "structure": "regular",
+   "photon_vertex": "on_envelope_surface"
+  },
+  "G4XTRGammaRadModel": {
+   "structure": "irregular",
+   "photon_vertex": "on_envelope_surface"
+  },
+  "G4XTRGaussRadModel": {
+   "structure": "irregular",
+   "photon_vertex": "on_envelope_surface"
+  }
+ }
+}

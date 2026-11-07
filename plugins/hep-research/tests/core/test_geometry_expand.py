@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import copy
 import itertools
+from decimal import Decimal
 import sys
 import unittest
 from pathlib import Path
@@ -11,7 +12,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from core.geometry import expand, identity, overlap  # noqa: E402
+from core.geometry import expand, gdml, identity, material, overlap, rotation  # noqa: E402
 from core.geometry.numbers import GeometryError  # noqa: E402
 
 
@@ -100,18 +101,16 @@ class Expansion(unittest.TestCase):
         self.assertEqual(caught.exception.code, "template-cycle")
 
     def test_a_later_shape_or_placement_is_refused(self):
-        tube = spec({"a": {"solid": {"tube": {}}, "material": "G4_Si"}})
-        grid = spec({"a": box(["1", "1", "1"])}, [{"template": "a", "placement": {"grid": {}}}])
-        for document in (tube, grid):
+        cone = spec({"a": {"solid": {"cone": {}}, "material": "G4_Si"}})
+        sphere = spec({"a": {"solid": {"sphere_section": {}}, "material": "G4_Si"}})
+        for document in (cone, sphere):
             with self.assertRaises(GeometryError) as caught:
                 expand.expand(document)
             self.assertEqual(caught.exception.code, "module-not-open")
 
-    def test_thirty_degrees_is_refused_for_a_single_placement(self):
+    def test_thirty_degrees_is_open_for_a_single_placement(self):
         document = spec({"a": box(["1", "1", "1"])}, [single("a", rotation={"axis": "z", "angle_deg": "30"})])
-        with self.assertRaises(GeometryError) as caught:
-            expand.expand(document)
-        self.assertEqual(caught.exception.code, "rotation-angle")
+        self.assertTrue(all(isinstance(value, str) for value in expand.expand(document)["physical"]["placements"][0]["rotation"][0][:2]))
 
 
 class VolumeIds(unittest.TestCase):
@@ -303,6 +302,213 @@ class Identities(unittest.TestCase):
         with self.assertRaises(GeometryError) as caught:
             expand.expand(document)
         self.assertEqual(caught.exception.code, "select-empty")
+
+
+class GridAndExplicit(unittest.TestCase):
+    """g4sim S3: `grid` with bit-packed copy numbers, and `explicit` (Sections 6.2.2, 6.2.6, 15.1)."""
+
+    def grid(self, n, names=("i", "j"), pitch=("10", "10"), **extra):
+        return {"template": "cell", "placement": {"grid": {"n": list(n), "pitch_mm": list(pitch), "centre_mm": ["0", "0", "0"], "index": list(names), **extra}}}
+
+    def placed(self, child, **extra):
+        return expand.expand(spec({"cell": box(["2", "2", "2"])}, [child], **extra))["physical"]["placements"]
+
+    def test_the_position_is_the_centre_of_the_grid(self):
+        centres = [item["centre_mm"][:2] for item in self.placed(self.grid((2, 2)))]
+        self.assertEqual(centres[0], ["-5e0", "-5e0"])
+        self.assertEqual(centres[-1], ["5e0", "5e0"])
+
+    def test_copy_numbers_are_packed_by_field_width(self):
+        """A 6 x 6 grid with 3-bit fields is i + 8 j, never i + 6 j, so the decoded fields are the indices."""
+        rows = self.placed(self.grid((6, 6)), readout={"ecal": {"fields": {"i": 3, "j": 3}}})
+        for row in rows:
+            self.assertEqual(row["copy_number"], row["index"]["i"] + 8 * row["index"]["j"])
+            self.assertEqual(row["copy_number"] & 7, row["index"]["i"])
+            self.assertEqual(row["copy_number"] >> 3, row["index"]["j"])
+
+    def test_fields_of_one_placement_total_at_most_31_bits(self):
+        fields = {"readout": {"ecal": {"fields": {"i": 11, "j": 11, "k": 11}}}}
+        with self.assertRaises(GeometryError) as caught:
+            self.placed(self.grid((2, 2, 2), ("i", "j", "k"), ("10", "10", "10")), **fields)
+        self.assertEqual(caught.exception.code, "copy-width")
+
+    def test_a_grid_needs_an_index_for_each_dimension(self):
+        with self.assertRaises(GeometryError) as caught:
+            self.placed(self.grid((2, 2), ("i",)))
+        self.assertEqual(caught.exception.code, "grid-index")
+
+    def test_stagger_shifts_odd_rows(self):
+        rows = self.placed(self.grid((2, 2), stagger_mm="3"))
+        self.assertEqual({row["index"]["j"]: row["centre_mm"][0] for row in rows if row["index"]["i"] == 0}, {0: "-5e0", 1: "-2e0"})
+
+    def test_explicit_positions_keep_their_order(self):
+        child = {"template": "cell", "placement": {"explicit": {"positions_mm": [["0", "0", "0"], ["5", "0", "0"]], "index": "n"}}}
+        rows = self.placed(child)
+        self.assertEqual([row["copy_number"] for row in rows], [0, 1])
+        self.assertEqual(rows[1]["centre_mm"][0], "5e0")
+
+
+class RotatedPlacements(unittest.TestCase):
+    """Section 15.1, IR row: arbitrary angles, the separating-axis test and the true minimum distance."""
+
+    def rotated(self, centre, angle):
+        return single("plate", [str(value) for value in centre], {"axis": "z", "angle_deg": angle})
+
+    def codes(self, *children):
+        document = expand.expand(spec({"plate": box(["10", "4", "2"])}, list(children)))
+        return {finding["code"] for finding in overlap.findings(document)}
+
+    def offset(self, along_u, along_v):
+        c, s = rotation.cos_sin(Decimal(30))
+        return (along_u * c - along_v * s, along_u * s + along_v * c, 0)
+
+    def test_cosine_and_sine_are_exact_to_34_digits(self):
+        c, s = rotation.cos_sin(Decimal(30))
+        self.assertEqual(str(s), "0.5000000000000000000000000000000000")
+        self.assertEqual(str(c)[:34], "0.86602540378443864676372317075293")
+        self.assertEqual(rotation.cos_sin(Decimal(90))[0], 0)
+
+    def test_two_boxes_at_30_degrees_a_hair_apart_are_an_error(self):
+        """Touching on one axis and 5e-7 mm apart on another: the true distance is in (epsilon, c)."""
+        far = self.offset(Decimal(10), Decimal(4) + Decimal("5e-7"))
+        self.assertIn("sibling-too-close", self.codes(self.rotated((0, 0, 0), "30"), self.rotated(far, "30")))
+
+    def test_opposed_vertices_at_true_distance_above_c_pass(self):
+        """Two boxes turned 45 degrees: rhombic sections with opposed vertices 1.2e-6 mm apart."""
+        reach = Decimal(14) / Decimal(2).sqrt()
+        apart = 2 * reach + Decimal("1.2e-6")
+        square = {"plate": box(["10", "10", "2"])}
+        document = expand.expand(spec(square, [single("plate", ["0", "0", "0"], {"axis": "z", "angle_deg": "45"}),
+                                               single("plate", [str(apart), "0", "0"], {"axis": "z", "angle_deg": "45"})]))
+        self.assertEqual({finding["code"] for finding in overlap.findings(document)}, set())
+
+    def test_overlapping_rotated_boxes_are_an_error(self):
+        self.assertIn("sibling-overlap", self.codes(self.rotated((0, 0, 0), "30"), self.rotated((5, 0, 0), "30")))
+
+    def test_a_right_angle_keeps_its_integer_matrix(self):
+        document = expand.expand(spec({"plate": box(["10", "4", "2"])}, [single("plate", ["0", "0", "0"], {"axis": "z", "angle_deg": "90"})]))
+        self.assertTrue(all(isinstance(value, int) for row in document["physical"]["placements"][0]["rotation"] for value in row))
+
+
+class ShapesRingsAndModifiers(unittest.TestCase):
+    """g4sim S3: `trd`, `tube`, `polygon_prism`, `ring`, `clip`, `absent`, and the rest of the IR row of Section 15.1."""
+
+    def wedge_ring(self, phi0="0", n=12, inner=None):
+        """12 trds whose sides meet exactly: half-widths at each end follow from the angle of one wedge."""
+        tangent = Decimal(1) * rotation.cos_sin(Decimal(15))[1] / rotation.cos_sin(Decimal(15))[0]
+        inner_r, outer_r = Decimal(100), Decimal(120)
+        y1, y2 = 2 * inner_r * tangent, 2 * outer_r * tangent
+        wedge = {"solid": {"trd": {"x1_mm": "10", "x2_mm": "10", "y1_mm": str(y1), "y2_mm": str(y2), "length_mm": "20"}}, "material": "G4_Si"}
+        return spec({"wedge": wedge}, [{"template": "wedge", "placement": {"ring": {"n": n, "radius_mm": "110", "phi0_deg": phi0, "index": "phi"}}}])
+
+    def codes(self, document):
+        return {finding["code"] for finding in overlap.findings(expand.expand(document))}
+
+    def test_a_ring_of_abutting_wedges_passes(self):
+        self.assertEqual(self.codes(self.wedge_ring()), set())
+
+    def test_one_turned_by_a_nanoradian_is_an_overlap(self):
+        document = expand.expand(self.wedge_ring())
+        placement = document["physical"]["placements"][3]
+        angle = Decimal("1e-9") * 180 / Decimal("3.14159265358979323846")
+        extra = rotation.active_matrix({"axis": "z", "angle_deg": angle})
+        turned = rotation.product(extra, rotation.transpose(tuple(tuple(value if isinstance(value, int) else Decimal(value) for value in row) for row in placement["rotation"])))
+        placement["rotation"] = [[value if isinstance(value, int) else str(value) for value in row] for row in rotation.transpose(turned)]
+        self.assertIn("sibling-overlap", {finding["code"] for finding in overlap.findings(document)})
+
+    def test_a_tube_off_its_axis_too_close_to_clear_is_rejected(self):
+        tube = {"solid": {"tube": {"rmin_mm": "0", "rmax_mm": "10", "length_mm": "40"}}, "material": "G4_Si"}
+        document = spec({"tube": tube, "plate": box(["40", "40", "2"])}, [single("tube", ("0", "0", "0"), {"axis": "x", "angle_deg": "30"}), single("plate", ("0", "0", "15"))])
+        self.assertIn("sibling-unjudged", self.codes(document))
+
+    def test_tubes_on_one_axis_are_judged_in_cylindrical_coordinates(self):
+        def tube(rmin, rmax):
+            return {"solid": {"tube": {"rmin_mm": rmin, "rmax_mm": rmax, "length_mm": "40"}}, "material": "G4_Si"}
+        clear = spec({"inner": tube("0", "10"), "outer": tube("10", "20")}, [single("inner"), single("outer")])
+        self.assertEqual(self.codes(clear), set())
+        close = spec({"inner": tube("0", "10"), "outer": tube("10.0000001", "20")}, [single("inner"), single("outer")])
+        self.assertIn("sibling-too-close", self.codes(close))
+
+    def test_the_prism_keeps_its_circumradius_and_gives_g4_the_apothem(self):
+        prism = {"solid": {"polygon_prism": {"sides": 6, "radius_mm": "10", "length_mm": "4"}}, "material": "G4_Si"}
+        solid = expand.expand(spec({"p": prism}, [single("p")]))["physical"]["templates"]["p"]["solid"]
+        self.assertEqual(solid["circumradius_mm"], "1e1")
+        self.assertTrue(solid["apothem_mm"].startswith("8.660254037844386"))
+
+    def test_absent_keeps_the_vacant_numbers(self):
+        child = {"template": "cell", "placement": {"grid": {"n": [2, 2], "pitch_mm": ["5", "5"], "centre_mm": ["0", "0", "0"], "index": ["i", "j"]}},
+                 "modifiers": [{"absent": {"cells": [{"i": 1, "j": 0}]}}]}
+        rows = expand.expand(spec({"cell": box(["2", "2", "2"])}, [child]))["physical"]["placements"]
+        self.assertEqual(sorted(row["copy_number"] for row in rows), [0, 2, 3])
+
+    def test_clip_by_centre_or_whole_cell(self):
+        def kept(mode):
+            child = {"template": "cell", "placement": {"grid": {"n": [3, 3], "pitch_mm": ["10", "10"], "centre_mm": ["0", "0", "0"], "index": ["i", "j"]}},
+                     "modifiers": [{"clip": {"mode": mode, "envelope": {"radius_mm": "11"}}}]}
+            return len(expand.expand(spec({"cell": box(["8", "8", "2"])}, [child]))["physical"]["placements"])
+        self.assertEqual(kept("centre_inside"), 5)
+        self.assertEqual(kept("fully_inside"), 1)
+
+
+class NonBoxMothersAndShell(unittest.TestCase):
+    """Containment in mothers that are not boxes, shell, rays through the new shapes, and their GDML."""
+
+    TUBE = {"solid": {"tube": {"rmin_mm": "0", "rmax_mm": "10", "length_mm": "40"}}, "material": "G4_AIR"}
+    TRD = {"solid": {"trd": {"x1_mm": "20", "x2_mm": "10", "y1_mm": "20", "y2_mm": "10", "length_mm": "40"}}, "material": "G4_AIR"}
+
+    def codes(self, mother, child, centre=("0", "0", "0")):
+        document = spec({"mother": {**mother, "children": [single("child", centre)]}, "child": child}, [single("mother")])
+        return {finding["code"] for finding in overlap.findings(expand.expand(document))}
+
+    def test_a_box_poking_through_a_tube_wall_is_outside(self):
+        """Inside the tube's bounding box, outside the tube: the corner reaches r = 11.3."""
+        self.assertIn("containment-outside", self.codes(self.TUBE, box(["16", "16", "2"])))
+        self.assertEqual(self.codes(self.TUBE, box(["10", "10", "2"])), set())
+
+    def test_a_box_in_the_narrow_end_of_a_trd_is_outside(self):
+        self.assertIn("containment-outside", self.codes(self.TRD, box(["16", "16", "2"]), ("0", "0", "18")))
+        self.assertEqual(self.codes(self.TRD, box(["16", "16", "2"]), ("0", "0", "-18")), set())
+
+    def test_a_box_in_a_tube_hole_is_outside(self):
+        hollow = {"solid": {"tube": {"rmin_mm": "5", "rmax_mm": "10", "length_mm": "40"}}, "material": "G4_AIR"}
+        self.assertIn("containment-outside", self.codes(hollow, box(["2", "2", "2"])))
+        self.assertEqual(self.codes(hollow, box(["2", "2", "2"]), ("7", "0", "0")), set())
+
+    def test_shell_wraps_a_template_with_the_active_faces(self):
+        crystal = {**box(["20", "20", "50"]), "modifiers": [{"shell": {"material": "G4_MYLAR", "thickness_mm": "1", "faces": ["sides", "front"]}}]}
+        physical = expand.expand(spec({"crystal": crystal}, [single("crystal")]))["physical"]
+        self.assertEqual(physical["templates"]["crystal_shell"]["half_mm"], ["1.1e1", "1.1e1", "2.55e1"])
+        inside = [row for row in physical["placements"] if row["template"] == "crystal"][0]
+        self.assertEqual(inside["mother"], "crystal_shell")
+        self.assertEqual(inside["centre_mm"][2], "5e-1")
+
+    def test_a_shell_that_does_not_fit_is_an_error(self):
+        crystal = {**box(["20", "20", "50"]), "modifiers": [{"shell": {"material": "G4_MYLAR", "thickness_mm": "1", "faces": ["sides"]}}]}
+        document = spec({"cell": {**box(["21", "21", "60"], "G4_AIR"), "children": [single("crystal")]}, "crystal": crystal}, [single("cell")])
+        self.assertIn("containment-outside", {finding["code"] for finding in overlap.findings(expand.expand(document))})
+
+    def test_a_ray_through_a_tube_and_its_hole(self):
+        hollow = {"solid": {"tube": {"rmin_mm": "5", "rmax_mm": "10", "length_mm": "40"}}, "material": "G4_Si"}
+        ir = expand.expand(spec({"pipe": hollow}, [single("pipe")]))
+        length = material.path_by_material(ir, (Decimal(-100), Decimal(0), Decimal(0)), (Decimal(1), Decimal(0), Decimal(0)))["G4_Si"]
+        self.assertEqual(length, Decimal(10))
+
+    def test_a_ray_through_a_trd(self):
+        wedge = {"solid": {"trd": {"x1_mm": "20", "x2_mm": "10", "y1_mm": "20", "y2_mm": "10", "length_mm": "40"}}, "material": "G4_Si"}
+        ir = expand.expand(spec({"wedge": wedge}, [single("wedge")]))
+        length = material.path_by_material(ir, (Decimal(-100), Decimal(0), Decimal(0)), (Decimal(1), Decimal(0), Decimal(0)))["G4_Si"]
+        self.assertEqual(length, Decimal(15))
+
+    def test_the_export_names_each_shape_and_a_general_rotation(self):
+        prism = {"solid": {"polygon_prism": {"sides": 6, "radius_mm": "10", "length_mm": "4"}}, "material": "G4_Si"}
+        ir = expand.expand(spec({"t": self.TRD, "u": self.TUBE, "p": prism}, [single("t", ("-50", "0", "0")), single("u", ("50", "0", "0")),
+                                                                              single("p", ("0", "0", "100"), {"axis": "z", "angle_deg": "30"})]))
+        text = gdml.export(ir)
+        for tag in ("<trd ", "<tube ", "<polyhedra "):
+            self.assertIn(tag, text)
+        rotated = [row for row in ir["physical"]["placements"] if row["template"] == "p"][0]["rotation"]
+        self.assertLess(abs(gdml.euler_angles(rotated)[2] + 30), Decimal("1e-30"))  # GDML takes the passive angle
+        self.assertIn('z="-', text)
 
 
 if __name__ == "__main__":

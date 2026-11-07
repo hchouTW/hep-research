@@ -1,0 +1,69 @@
+{
+  "gb15": {
+    "alpha": 0.05,
+    "mean_margin": 0.005,
+    "variance_margin": 0.03,
+    "joint_power": 0.9,
+    "close_to_margin_fraction": 0.5,
+    "sample_size_safety": 1.25,
+    "beam": {"particle": "e-", "low_MeV": 0.2, "high_MeV": 5.0},
+    "yield_per_MeV": 100.0,
+    "birks_mm_per_MeV": 0.5,
+    "slice_mm": 1.0,
+    "step_bin_edges": [0, 1, 3, 10, 12.5, 25, 100, 1e300],
+    "formula_bin_edges": [0, 3, 10, 12.5, 25, 50, 100, 1e300],
+    "step_sets": [
+      {"name": "step_r1", "resolution": 1.0, "saturation": true, "controls": ["total_deposit"]},
+      {"name": "step_r2", "resolution": 2.0, "saturation": true, "controls": ["untruncated", "resolution_r1", "gaussian_below_limit"]},
+      {"name": "step_r1_no_saturation", "resolution": 1.0, "saturation": false, "controls": ["visible_energy"]}
+    ],
+    "formula_sets": [
+      {"name": "formula_r0p15", "resolution": 0.15, "must_pass": true, "controls": ["without_rounding_term", "width_without_subtraction"]},
+      {"name": "formula_r1", "resolution": 1.0, "must_pass": true, "controls": []},
+      {"name": "formula_r3", "resolution": 3.0, "must_pass": false, "controls": []}
+    ],
+    "component_sets": [
+      {"name": "components_2", "components": 2, "yields": [0.7, 0.3], "events": 300000},
+      {"name": "components_3", "components": 3, "yields": [0.5, 0.3, 0.2], "events": 300000}
+    ],
+    "stack_check": {"name": "secondaries_check", "events": 200000},
+    "trial_events": 300000,
+    "trial_seed": 150000,
+    "judged_seed": 151000,
+    "events_per_process": 1500000
+  },
+  "gb16": {
+    "events": 20,
+    "seed": 160000,
+    "relative_tolerance": 1e-12,
+    "runs": {
+      "scope": ["kill=boundary"],
+      "both_tables": ["outside_table=full"],
+      "leak_open": ["side_table=rindex", "cerenkov=0"],
+      "leak_killed": ["side_table=rindex", "cerenkov=0", "kill=boundary"],
+      "leak_entry": ["side_table=rindex", "cerenkov=0", "kill=entry"],
+      "active_scintillation": ["outside_table=full", "active_volume=inside_scintillator", "active_type=scintillation"],
+      "active_cerenkov": ["outside_table=full", "active_volume=inside_scintillator", "active_type=cerenkov"],
+      "general_alone": ["outside_table=full", "cerenkov_general=1"],
+      "general_active": ["outside_table=full", "cerenkov_general=1", "active_volume=inside_scintillator", "active_type=cerenkov"],
+      "general_alone_worker": ["outside_table=full", "cerenkov_general=1", "worker=1"],
+      "general_active_worker": ["outside_table=full", "cerenkov_general=1", "active_volume=inside_scintillator", "active_type=cerenkov", "worker=1"],
+      "plain_worker": ["outside_table=full", "worker=1"]
+    }
+  },
+  "gb17": {
+    "high": {"particle": "e-", "energy_MeV": 2000.0},
+    "below": {"particle": "proton", "energy_MeV": 50000.0},
+    "control": {"particle": "proton", "energy_MeV": 2000000.0},
+    "upper_limit_level": 0.95,
+    "yield_fraction": 0.01,
+    "stack": {"foil_mm": 0.02, "gap_mm": 0.5, "foils": 200, "alpha_foil": 100.0, "alpha_gas": 40.0},
+    "straw": {"foil_mm": 0.06, "gap_mm": 4.0, "foils": 1},
+    "classes": ["G4RegularXTRadiator", "G4TransparentRegXTRadiator", "G4GammaXTRadiator", "G4GaussXTRadiator", "G4StrawTubeXTRadiator",
+                "G4XTRRegularRadModel", "G4XTRTransparentRegRadModel", "G4XTRGammaRadModel", "G4XTRGaussRadModel"],
+    "slow_tables": ["G4GammaXTRadiator", "G4StrawTubeXTRadiator", "G4XTRGammaRadModel"],
+    "trial_events": 300,
+    "trial_seed": 170000,
+    "judged_seed": 171000
+  }
+}

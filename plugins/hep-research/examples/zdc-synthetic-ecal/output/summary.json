@@ -1,0 +1,18 @@
+{
+ "status": "ok",
+ "label": "synthetic",
+ "findings": [],
+ "geometry_id": "50e39f2d85775dab88f5f3801f163c6407bdbfec2885a139bc3b524e14ad23ae",
+ "provenance_id": "dabf897e505ccec795adf95d4caee347f522f4257ad96ce0bc614bc5b754ef73",
+ "placements": {
+  "beam_monitor": 6,
+  "crystal": 1,
+  "crystal_shell": 36,
+  "pcb": 1,
+  "sipm": 72
+ },
+ "scorers": [
+  "crystal_edep"
+ ],
+ "source_schema": "source-density/1"
+}

@@ -12,6 +12,9 @@ must be one of them. Prints JSON with a status key. Exit 0 valid, 1 refused with
 from __future__ import annotations
 
 import argparse
+import csv
+import hashlib
+import io
 import json
 import sys
 from pathlib import Path
@@ -87,8 +90,32 @@ def claim_findings(spec: dict, claims) -> list[dict]:
     return out
 
 
-def check_spec(text, claims=()) -> dict:
-    """{status, findings, ir, geometry_id, provenance_id}: the whole reading and judging of one specification."""
+def _positions_from_csv(spec: dict, folder: Path, protected: bool = False) -> list:
+    """Reads each explicit placement's CSV, by its recorded hash, into its positions; core/geometry stays pure computation. Returns the sources.
+    A CSV lies inside the specification's folder, and protected mode guards it like the specification itself."""
+    sources = []
+    base = folder.resolve()
+    nodes = [*spec.get("templates", {}).values(), spec["world"]]
+    for node in nodes:
+        for child in node.get("children", []):
+            body = child.get("placement", {}).get("explicit")
+            if not body or "positions_csv" not in body:
+                continue
+            record = body.pop("positions_csv")
+            target = (base / record["path"]).resolve()
+            if Path(record["path"]).is_absolute() or not target.is_relative_to(base):
+                raise GeometryError("explicit-path", "a position file lies inside the specification's folder")
+            guard("contracts.geometry.check_file", paths=[str(target)], flag=protected, capabilities=KNOWN_CAPABILITIES)
+            table = target.read_bytes()
+            if hashlib.sha256(table).hexdigest() != record["sha256"]:
+                raise GeometryError("explicit-hash", f"{record['path']} does not match its recorded hash")
+            body["positions_mm"] = [[cell.strip() for cell in row] for row in csv.reader(io.StringIO(table.decode("utf-8"))) if row]
+            sources.append(record)
+    return sources
+
+
+def check_spec(text, claims=(), folder: Path | None = None, protected: bool = False) -> dict:
+    """{status, findings, ir, geometry_id, provenance_id}: the whole reading and judging of one specification. folder holds its CSV files."""
     try:
         spec = load_spec_json(text, field_types(), unhashed=UNHASHED)
     except CanonicalError as err:
@@ -99,7 +126,12 @@ def check_spec(text, claims=()) -> dict:
         return {"status": "rejected", "findings": findings}
     findings = claim_findings(spec, set(claims))
     try:
+        sources = _positions_from_csv(spec, folder or Path("."), protected)
         ir = expand.expand(spec)
+        for record in sources:
+            ir["marker"]["source_of_facts"][f"explicit:{record['path']}"] = record["sha256"]
+    except OSError as err:
+        return {"status": "rejected", "findings": [*findings, _finding("explicit-file", "", str(err))]}
     except GeometryError as err:
         return {"status": "rejected", "findings": [*findings, _finding(err.code, err.path, str(err))]}
     if "legacy" not in spec:  # legacy mode does not apply the gap rule: the old geometries passed G4's overlap test (Section 7.4)
@@ -117,7 +149,7 @@ def check_spec(text, claims=()) -> dict:
 def check_file(path, claims=(), protected: bool = False) -> dict:
     """check_spec of a file, for callers: protected mode applies here too, so omitting the command line cannot avoid it."""
     guard("contracts.geometry.check_file", paths=[str(path)], flag=protected, capabilities=KNOWN_CAPABILITIES)
-    return check_spec(Path(path).read_bytes(), claims)
+    return check_spec(Path(path).read_bytes(), claims, Path(path).parent, protected)
 
 
 @protected_main("contracts.geometry", capabilities=KNOWN_CAPABILITIES)

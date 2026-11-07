@@ -2,6 +2,7 @@
 is reached through the whole reading procedure."""
 from __future__ import annotations
 
+import hashlib
 import json
 import subprocess
 import sys
@@ -126,6 +127,47 @@ class CommandLine(unittest.TestCase):
             path.write_text("{}", encoding="utf-8")
             self.assertEqual(self.run_it(str(path)).returncode, 1)
             self.assertEqual(self.run_it(str(Path(folder, "missing.json"))).returncode, 2)
+
+
+class ExplicitFromCsv(unittest.TestCase):
+    """An explicit placement read from a CSV by its recorded hash (Section 6.2.2)."""
+
+    def setUp(self):
+        folder = tempfile.TemporaryDirectory()
+        self.addCleanup(folder.cleanup)
+        self.root = Path(folder.name)
+        self.table = self.root / "cells.csv"
+        self.table.write_text("0,0,0\n50,0,0\n", encoding="utf-8")
+
+    def spec(self, digest):
+        child = {"template": "cell", "placement": {"explicit": {"positions_csv": {"path": "cells.csv", "sha256": digest}, "index": "n"}}}
+        return {"schema": "detector-spec/1", "params": {}, "templates": {"cell": {"solid": {"box": {"size_mm": ["2", "2", "2"]}}, "material": "G4_Si"}},
+                "world": {"material": "G4_AIR", "size_mm": ["1000", "1000", "1000"], "children": [child]}}
+
+    def check(self, digest):
+        path = self.root / "spec.json"
+        path.write_text(json.dumps(self.spec(digest)), encoding="utf-8")
+        return geometry.check_file(path)
+
+    def test_the_positions_come_from_the_file_and_its_hash_is_kept(self):
+        digest = hashlib.sha256(self.table.read_bytes()).hexdigest()
+        result = self.check(digest)
+        self.assertEqual(result["status"], "ok", result)
+        self.assertEqual(len(result["ir"]["physical"]["placements"]), 2)
+        self.assertEqual(result["ir"]["marker"]["source_of_facts"]["explicit:cells.csv"], digest)
+
+    def test_a_changed_file_is_refused_without_showing_its_hash(self):
+        result = self.check("0" * 64)
+        self.assertEqual(result["findings"][0]["code"], "explicit-hash")
+        self.assertNotIn(hashlib.sha256(self.table.read_bytes()).hexdigest(), str(result))
+
+    def test_a_file_outside_the_folder_is_refused(self):
+        for path, code in (("../secret.csv", "explicit-path"), ("/etc/passwd", "path-reference")):  # the canonical check refuses an absolute path first
+            document = self.spec("0" * 64)
+            document["world"]["children"][0]["placement"]["explicit"]["positions_csv"]["path"] = path
+            spec_path = self.root / "spec.json"
+            spec_path.write_text(json.dumps(document), encoding="utf-8")
+            self.assertEqual(geometry.check_file(spec_path)["findings"][0]["code"], code)
 
 
 if __name__ == "__main__":

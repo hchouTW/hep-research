@@ -81,6 +81,12 @@ Approval packet of phase S0 and the record of approvals given (Part A, Sections 
 | GB7 criterion read as tracked particles | Maintainer | All 111 tracked particles carry G4UserSpecialCuts; the 397 short-lived particles, never tracked, do not | Yes | hsinyichou (maintainer) | 2026-11-05 | Answer in the Claude Code session to the GB7 question: "Accept (Recommended)" |
 | GB6 negative re-registered | Maintainer | An extra step limiter cannot change the output: it draws no random numbers and no recorded run gives it anything to do. The negative now uses an extra discrete process that draws random numbers; the step-limit case stays the process-list negative test | Yes | hsinyichou (maintainer) | 2026-11-05 | Answer in the Claude Code session to the GB6 question: "Use a random-drawing process (Recommended)" |
 
+## Section 22 items due before S3
+
+| Item | Who approves | Decision | Approved | Person | Date | Words or link |
+| --- | --- | --- | --- | --- | --- | --- |
+| Consent to add a ProbeV2 call to `zdcsim.cc` | User | One ProbeV2 call, in a copy under the worktree; the supplied file is not modified | Yes | hsinyichou (user) | 2026-11-06 | Answer in the Claude Code session to the S3 question: "Consent, start S3" |
+
 ## Gaps in Part B (Section E7, item 6)
 
 Part B stays frozen; these decisions fill gaps found while implementing S1.
@@ -99,6 +105,7 @@ Part B stays frozen; these decisions fill gaps found while implementing S1.
 | Where S2 gate 4 is judged | Development regression runs against E5 working baselines of the 112 runs, rebuilt from the old sources. Gate 4 itself stays as registered: judged on E2 against the recorded references, by one detached job at the end of S2 | From S2 | Yes | hsinyichou (maintainer) | 2026-11-05 | Answer in the Claude Code session to the gate 4 question: "Linux daily, Mac once (Recommended)" |
 | Fixes after the gate 4 and Slurm jobs started | Both jobs finish on `ebd4d056`. The later fixes (nKiller term, dead code, comments, region cuts, limits key, primaries) leave the old columns alone; about 10 short runs of different types are repeated on Linux and on the Mac, and the gate record says so | From S2 | Yes | hsinyichou (maintainer) | 2026-11-06 | Answer in the Claude Code session to the running-jobs question: "Finish, then spot-check (Recommended)" |
 | Reference folder | `~/AMS/hsinyichou/g4sim-references` on this host (`/ceph/sharedfs/work/AMS`), with a `SHA256SUMS` file | From S2 | Yes | hsinyichou (maintainer) | 2026-11-05 | Answer in the Claude Code session to the reference folder question: "AMS area (Recommended)" |
+| Reference outputs on shared storage | The Linux outputs of the 112 runs, regenerated from the old programs on Slurm into `e5-outputs` and checked against the E5 baselines, are the shared references. The Mac's original outputs are not copied | From S3 | Yes | hsinyichou (maintainer) | 2026-11-06 | Session messages: "you can produce in here by slurm" and "We don't need to have \"Mac's originals\"" |
 
 ## Application of the `dependencies.py` common check
 
@@ -123,3 +130,22 @@ These are not Section 20 decisions. They are how S0 reconciled requirements of t
 | Linter root | Cards are linted with both `--repo <worktree>` (Section E4) and `--repo <plugin root>` (Section 19.2) |  | Yes | hsinyichou (maintainer) | 2026-11-04 | Answer in the Claude Code session to the execution-choices question: "Confirm all five" |
 | Version bump | The plugin is bumped to 0.55.0 on the branch; regenerating committed outputs in E2, the VALIDATION release check and the release manifest are left for the maintainer, because E2 is not reachable from this host. Until then 22 "committed output is current" tests fail |  | Yes | hsinyichou (maintainer) | 2026-11-04 | Answer in the Claude Code session to the execution-choices question: "Confirm all five" |
 | Main language | English is the main text for g4sim documents and for writing Part 7 (user's instruction, 2026-11-04); the header of `geant4-program.md`, which says the Chinese wins, is unchanged |  | Yes | hsinyichou (maintainer) | 2026-11-04 | Answer in the Claude Code session to the execution-choices question: "Confirm all five" |
+
+## Addendum 11.1 (S3 prototypes, 2026-11-06)
+
+| Item | Decision | Person | Date | Words or link |
+| --- | --- | --- | --- | --- |
+| GB11, GB12 | g4sim's own PAI constructor, region only | hsinyichou (maintainer) | 2026-11-06 | "use your recommendations" |
+| GB19 | S8 gate 3 by statistical equivalence; no process without a `fast_sim_envelope` | hsinyichou (maintainer) | 2026-11-06 | "use your recommendations" |
+| GB20 | `placement_impl` keeps assembly only | hsinyichou (maintainer) | 2026-11-06 | "use your recommendations" |
+| GB21 | 1e-12 on the sum; the deposit identity in ulps of the kinetic energy | hsinyichou (maintainer) | 2026-11-06 | "use your recommendations" |
+| GB17 | "Inside the envelope" includes its surface | hsinyichou (maintainer) | 2026-11-06 | "use your recommendations" |
+| GB15, GB17 numbers | K = 70 and sample sizes registered; judged runs on Slurm, about 1 core-hour | hsinyichou (maintainer) | 2026-11-06 | "use your recommendations" |
+| Gate 3 test run | 8,000,000 events per side on Slurm, about 43 billed core-hours | hsinyichou (maintainer) | 2026-11-06 | "approve the gate 3 run" |
+| GB21 corrected rule | A step passes within 1e-12 or within 4 ulp of the pre-step kinetic energy, changed after the 4 ulp form failed | hsinyichou (maintainer) | 2026-11-06 | "approve the GB21 rule" |
+| S3 prototypes on E2 | Waived: GB11 to GB17, GB19 to GB21, GB23 and GB24 are confirmed on E5 only, as a stated limitation; Section 23 asks for E2 and E5 | hsinyichou (maintainer) | 2026-11-06 | "drop the Mac run" |
+| S3 final regression | The 112 legacy runs on Slurm with the final code, about 80 core-hours | hsinyichou (maintainer) | 2026-11-06 | "approve the final regression" |
+| Review findings (2026-11-07) | Fix them all; S8 gate 3 by the paired design; check-spec rejects `G4StrawTubeXTRadiator`; `g4sim-task.zh.md` stays frozen | hsinyichou (maintainer) | 2026-11-07 | "use your recommendations" |
+| Library code adapted from Geant4 | Keep it, name the source in the headers, ship `GEANT4-LICENSE.txt` with its notice, correct `licence_boundary` | hsinyichou (maintainer) | 2026-11-07 | "do your best recommendations" |
+| S3 final regression on the earlier build | Accepted for the current code: 112 of 112 identical at `a1933f15`; the later build differs only in `newrun.o`, which legacy runs do not use | hsinyichou (maintainer) | 2026-11-07 | "I accept the regression" |
+| Targeted review of the addendum (Section 23, step 4) | Accepted, after a first pass and two rechecks by an agent that did not write it | hsinyichou (maintainer) | 2026-11-07 | "I accept addendum 11.1" |

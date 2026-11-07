@@ -15,6 +15,7 @@ import argparse
 import gzip
 import hashlib
 import json
+import math
 import os
 import re
 import resource
@@ -29,6 +30,8 @@ if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import g4sim_physics_check as physics_check  # noqa: E402
+import g4sim_simulate as simulate_new  # noqa: E402
 import g4sim_translate as translate  # noqa: E402
 from contracts import KNOWN_CAPABILITIES, geometry  # noqa: E402
 from core import constants  # noqa: E402
@@ -66,7 +69,7 @@ def check_card(card: dict, legacy: dict | None = None) -> list[dict]:
     if legacy is not None and card.get("run", {}).get("seeding") != legacy.get("seeding"):
         findings.append({"code": "seeding-differs", "path": "run.seeding",
                          "message": f"the run card says {card.get('run', {}).get('seeding')!r}, the legacy block {legacy.get('seeding')!r}"})
-    return findings
+    return findings + physics_check.card_findings(card)
 
 
 def physics_list(card: dict) -> str:
@@ -174,6 +177,33 @@ def run(args) -> dict:
     return record
 
 
+SOLID_FIELDS = {"G4Trd": (("half_x1_mm", "dx1_mm"), ("half_x2_mm", "dx2_mm"), ("half_y1_mm", "dy1_mm"), ("half_y2_mm", "dy2_mm"), ("half_z_mm", "dz_mm")),
+                "G4Tubs": (("rmin_mm", "rmin_mm"), ("rmax_mm", "rmax_mm"), ("half_z_mm", "dz_mm"))}
+PRISM_RADIUS_TOLERANCE_MM = 1e-9
+TUBE_ANGLE_TOLERANCE_RAD = 1e-12  # the IR holds degrees, Geant4 radians: the conversion is not exact
+
+
+def solid_problems(item: dict, node: dict, polyhedron: dict | None) -> list[str]:
+    """The solid Geant4 built against the IR: bit for bit in lengths; a prism's corners at its circumradius, which proves the apothem conversion."""
+    shape, solid, name = node["shape"], node.get("solid"), item["name"]
+    if shape == "polygon_prism":
+        if polyhedron is None or polyhedron["sides"] != solid["sides"]:
+            return [f"logical {name}: the prism was not written back with {solid['sides']} sides"]
+        wanted = float(solid["circumradius_mm"])
+        reach = max(float.fromhex(value) for value in polyhedron["corners_r_mm"])  # a solid prism also has corners on its axis
+        return [] if abs(reach - wanted) <= PRISM_RADIUS_TOLERANCE_MM else [f"logical {name}: its outer corners are at {reach} mm, the circumradius is {wanted}"]
+    parameters = item["solid"]["parameters"]
+    if shape == "box":
+        return [f"logical {name}: {key} differs" for key, half in zip(("half_x_mm", "half_y_mm", "half_z_mm"), node["half_mm"]) if float.fromhex(parameters[key]) != float(half)]
+    problems = [f"logical {name}: {key} differs" for key, source in SOLID_FIELDS[item["solid"]["type"]] if float.fromhex(parameters[key]) != float(solid[source])]
+    if shape == "tube":
+        for key, source in (("start_phi_rad", "phi_start_deg"), ("delta_phi_rad", "phi_span_deg")):
+            turn = (float.fromhex(parameters[key]) - math.radians(float(solid[source]))) / math.tau  # G4Tubs may hold the start a whole turn away
+            if abs(turn - (round(turn) if key == "start_phi_rad" else 0)) * math.tau > TUBE_ANGLE_TOLERANCE_RAD:
+                problems.append(f"logical {name}: {key} differs")
+    return problems
+
+
 def tree_problems(ir: dict, record: dict, field_records: dict) -> list[str]:
     """What the write-back says that the IR does not: placements bit for bit, regions, and each thread's fields (Sections 6.2.8, 6.2.10)."""
     physical = ir["physical"]
@@ -198,11 +228,14 @@ def tree_problems(ir: dict, record: dict, field_records: dict) -> list[str]:
         elif wanted is not None and [float.fromhex(text) for text in found] != [float(row[column]) for column in range(3) for row in wanted]:
             problems.append(f"placement {key}: rotation differs")
     problems += [f"placement {key} is not in the IR" for key in written]
+    polyhedra = {item["logical"]: item for item in record.get("polyhedra", [])}
     for item in geometry["logical_volumes"]:
         node = physical["templates"].get(item["name"])
         if node is None:
             problems.append(f"logical {item['name']} is not in the IR")
-        elif node["region"] != "default" and item["region"] != node["region"]:
+            continue
+        problems += solid_problems(item, node, polyhedra.get(item["name"]))
+        if node["region"] != "default" and item["region"] != node["region"]:
             problems.append(f"logical {item['name']}: region {item['region']}, the IR says {node['region']}")
     for thread, rows in field_records.items():
         for name, node in physical["templates"].items():
@@ -280,6 +313,22 @@ def geometry_check(args) -> dict:
     return {"status": "failed" if problems else "ok", "problems": problems[:20], **effective}
 
 
+def simulate(args) -> dict:
+    """A run of a new specification: `separated` accounting, sources and scorers (Section 8)."""
+    card = json.loads(args.run.read_text(encoding="utf-8"))
+    request = json.loads(args.request.read_text(encoding="utf-8"))
+    checked = geometry.check_file(args.detector, protected=args.protected)
+    if checked["status"] != "ok":
+        return {"status": "rejected", "findings": checked["findings"]}
+    findings = check_card(card)
+    if findings:
+        return {"status": "rejected", "findings": findings}
+    missing = missing_datasets(card)
+    if missing:
+        return {"status": "missing-dataset", "missing": missing}
+    return simulate_new.simulate(card, request, checked, args.program.resolve(), args.work.resolve())
+
+
 @protected_main("adapters.geant4.g4sim_run", capabilities=KNOWN_CAPABILITIES)
 def main(argv=None) -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
@@ -297,6 +346,10 @@ def main(argv=None) -> int:
     for name in ("detector", "run", "program", "work"):
         shape.add_argument(f"--{name}", type=Path, required=True)
     shape.add_argument("--protected", action="store_true", help="protected mode (a project with agent_policy needs no flag)")
+    simulating = commands.add_parser("simulate")
+    for name in ("detector", "request", "run", "program", "work"):
+        simulating.add_argument(f"--{name}", type=Path, required=True)
+    simulating.add_argument("--protected", action="store_true", help="protected mode (a project with agent_policy needs no flag)")
     args = parser.parse_args(argv)
     guard(f"adapters.geant4.g4sim_run.{args.command}", paths=[str(args.run)], flag=args.protected, capabilities=KNOWN_CAPABILITIES)
     try:
@@ -305,7 +358,7 @@ def main(argv=None) -> int:
             findings = check_card(card, {"seeding": args.legacy_seeding} if args.legacy_seeding else None)
             print(json.dumps({"status": "rejected" if findings else "ok", "findings": findings}))
             return 2 if findings else 0
-        result = geometry_check(args) if args.command == "geometry-check" else run(args)
+        result = {"geometry-check": geometry_check, "simulate": simulate, "run": run}[args.command](args)
     except (OSError, ValueError, KeyError) as err:
         print(json.dumps({"status": "error", "message": str(err)}))
         return 2

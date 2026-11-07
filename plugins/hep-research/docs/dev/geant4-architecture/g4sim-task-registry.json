@@ -400,6 +400,188 @@
    "registered_at": "2026-11-06T08:33:15Z",
    "card_commit": "4dac8e63",
    "reason": "Execution log only; thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "95c93b3d489bfb161d4b892b57696e202db2ee93dcd2bc0c9964d8975651803f",
+   "registered_at": "2026-11-06T10:20:54Z",
+   "card_commit": "2ba2810b",
+   "reason": "Refreshed at the start of S3: accounting mode of gate 3, limits carried over from S2, baseline versions; no threshold loosened"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "d55f4720bc9a857342cf17d18c0721993705648c58c316fde4f2ddd9363672f6",
+   "registered_at": "2026-11-06T10:24:12Z",
+   "card_commit": "6e945dc3",
+   "reason": "Execution log only; thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "19cf8b0acf2286ea2111dfafd8d7e27859e6737cff1f5c9355c197c342b49f72",
+   "registered_at": "2026-11-06T12:11:53Z",
+   "card_commit": "4e098981",
+   "reason": "Execution log only; thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "b00e3a50bb5a38d22e93df7bbdb900f173b46ec6a27e07ab8bac50b96bf835e2",
+   "registered_at": "2026-11-06T13:45:53Z",
+   "card_commit": "5741492f",
+   "reason": "Execution log only; thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "d69e3f3ad6fac4d21cdfc16bb76fd519b5805c5bf3bdc7e58a24ab2d42a1342f",
+   "registered_at": "2026-11-06T14:01:24Z",
+   "card_commit": "ac1a2238",
+   "reason": "Execution log only; thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "60e9838928d7257597731f56c28450285bc0c0f7aa2c716bfb54bea28ae2dac3",
+   "registered_at": "2026-11-06T14:31:40Z",
+   "card_commit": "9ae0125a",
+   "reason": "Execution log only; thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "3a673bbd8dd069da3078e9a19c431ca1d0f54aeaf96f504c10811668e09471b7",
+   "registered_at": "2026-11-06T20:36:10Z",
+   "card_commit": "4f48fa16",
+   "reason": "Execution log only (falsifications recorded); thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "27f1b483994ae90290827b851e212015333bd3749ea96d1d68355cb64ad2633a",
+   "registered_at": "2026-11-06T20:40:16Z",
+   "card_commit": "4d205c76",
+   "reason": "Maintainer's decision of 2026-11-06: addendum 11.1 restates GB11, GB12, GB17, GB19, GB20, GB21; GB15 and GB17 numbers registered before their judged runs"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "f878acf9f526df9b51f26ef56d9d743c6b5ecc7a51b09ba9e7185db1cb81e570",
+   "registered_at": "2026-11-06T21:12:20Z",
+   "card_commit": "30e02e96",
+   "reason": "Gate 3's K, grouping and events registered from the independent trial, before any test sample; Execution log"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "fc0a8bc9e8dc54812146c3cd563a7585f6a1cd38926ed13f2d205cf5a353ba0b",
+   "registered_at": "2026-11-06T21:45:13Z",
+   "card_commit": "991ede65",
+   "reason": "Execution log only (gate 3 result); thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "4919dbffd9d5329a3181889803a593f6193da549bd1b5081f2ee4a5c9e2268af",
+   "registered_at": "2026-11-06T21:53:17Z",
+   "card_commit": "d6e20770",
+   "reason": "Execution log only (output negatives); thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "336ba95bba6c034e0865c0371df597339cea9b79602ef5b95b82eedac07cfb4e",
+   "registered_at": "2026-11-06T21:58:26Z",
+   "card_commit": "177c9489",
+   "reason": "The maintainer's corrected GB21 rule; designs of gate 4 and the separated conservation checks registered before their runs; E2 waiver"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "5a75a57acaf59f79a35e60d929b6d3930dfce1c369a7bbd303252e9f6f57f652",
+   "registered_at": "2026-11-06T22:04:07Z",
+   "card_commit": "c1b43e8b",
+   "reason": "Gate 4's tolerance and events registered from its independent trial, before the test"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "fd023f104097f48409953133cd7b6a32ed36e6b240e48b8053e6ee9d8fa03b99",
+   "registered_at": "2026-11-06T22:13:49Z",
+   "card_commit": "e9bbf38b",
+   "reason": "The separated conservation numbers registered from their trials, before calibration, with the term the limits cannot detect; gate 4 result"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "ad49cf6f5b495cce025bf5edcf8429766e0cb312f729b7128ff2624024c688fe",
+   "registered_at": "2026-11-06T22:39:52Z",
+   "card_commit": "2cf93cb9",
+   "reason": "The relative check's n registered before its runs; absolute check result"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "b89d23a9b9d6289338601b0ed191dee991f361de8d6eccd2fef859fdf31f8ea4",
+   "registered_at": "2026-11-06T23:04:56Z",
+   "card_commit": "6ff4c1cb",
+   "reason": "Execution log only (relative check, common checks); thresholds unchanged from the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "93ab44b733f9e00bdc46a5d5ac8d5acdf6b57040e619bfba15bb6e62d4f3f4ba",
+   "registered_at": "2026-11-07T00:17:15Z",
+   "card_commit": "12aca275",
+   "reason": "Target behaviors restated as in addendum 11.1 after the targeted review; Execution log"
+  },
+  {
+   "card": "g4sim-tasks/S4.md",
+   "sha256": "cfc7e4d1839f81e7e47d31c398c57ddd10e90a7f9d293874a605e6c4540bdff0",
+   "registered_at": "2026-11-07T00:17:15Z",
+   "card_commit": "12aca275",
+   "reason": "Execution log only: gaps carried from S3"
+  },
+  {
+   "card": "g4sim-tasks/S7.md",
+   "sha256": "03e948cd7ebe7edf505045f795305a39b183b4d143ed57022fc4e9d087de3c01",
+   "registered_at": "2026-11-07T00:17:15Z",
+   "card_commit": "12aca275",
+   "reason": "Straw class rejected by the maintainer's decision; gaps carried from S3"
+  },
+  {
+   "card": "g4sim-tasks/S8.md",
+   "sha256": "05dea5e88a3c7afa03470995e96a472d8e243d450737415028947deb46d53c97",
+   "registered_at": "2026-11-07T00:17:15Z",
+   "card_commit": "12aca275",
+   "reason": "Step 5 of Section 23: GB19, GB20, gate 3 and placement_impl follow addendum 11.1, by the maintainer's decision"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "fbda6b2655d971cf849a6816cf46febdcd17b8736b9d4ec1c3f6b2dc31d06150",
+   "registered_at": "2026-11-07T00:26:40Z",
+   "card_commit": "8c0837ba",
+   "reason": "The card matches the rewritten Part B after the recheck; Execution log"
+  },
+  {
+   "card": "g4sim-tasks/S8.md",
+   "sha256": "94d836b3b690a96f229f86497c457bc9b685a2ee4dd78c4d91dae9ee1aa41943",
+   "registered_at": "2026-11-07T00:26:40Z",
+   "card_commit": "8c0837ba",
+   "reason": "Gate 3 states where its events and power come from; a duplicate GB20 line removed"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "a4f01720c132e7d8935229a291e3266b4a5a21e00187c66e88fe2de04b383dad",
+   "registered_at": "2026-11-07T00:36:39Z",
+   "card_commit": "b796e0d9",
+   "reason": "Execution log only (independent read, licence, final regression); thresholds unchanged"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "83932aa4ddeabcef43aaab78793d35f13897fd4e191aa43724390eed8b33aeb7",
+   "registered_at": "2026-11-07T00:41:41Z",
+   "card_commit": "14bc1ef0",
+   "reason": "Appendix B row added; thresholds unchanged"
+  },
+  {
+   "card": "g4sim-tasks/S8.md",
+   "sha256": "3a92262b67174fbb3f90a2ab782d52eb1fe60e1b1d9a69d432988cea91466862",
+   "registered_at": "2026-11-07T00:41:41Z",
+   "card_commit": "14bc1ef0",
+   "reason": "Wording matches Part B; thresholds unchanged"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "c78f234d2e437a02b5aa9fb8babd7f7d9038f7a62cbebcfa73b11a03a7d6c5ac",
+   "registered_at": "2026-11-07T00:46:26Z",
+   "card_commit": "9d476be0",
+   "reason": "Execution log only (G5); thresholds unchanged"
   }
  ]
 }

@@ -130,6 +130,80 @@
           "maxItems": 3
          }
         }
+       },
+       "trd": {
+        "type": "object",
+        "required": [
+         "x1_mm",
+         "x2_mm",
+         "y1_mm",
+         "y2_mm",
+         "length_mm"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "x1_mm": {
+          "$ref": "#/$defs/quantity"
+         },
+         "x2_mm": {
+          "$ref": "#/$defs/quantity"
+         },
+         "y1_mm": {
+          "$ref": "#/$defs/quantity"
+         },
+         "y2_mm": {
+          "$ref": "#/$defs/quantity"
+         },
+         "length_mm": {
+          "$ref": "#/$defs/quantity"
+         }
+        }
+       },
+       "tube": {
+        "type": "object",
+        "required": [
+         "rmin_mm",
+         "rmax_mm",
+         "length_mm"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "rmin_mm": {
+          "$ref": "#/$defs/quantity"
+         },
+         "rmax_mm": {
+          "$ref": "#/$defs/quantity"
+         },
+         "length_mm": {
+          "$ref": "#/$defs/quantity"
+         },
+         "phi_start_deg": {
+          "$ref": "#/$defs/quantity"
+         },
+         "phi_span_deg": {
+          "$ref": "#/$defs/quantity"
+         }
+        }
+       },
+       "polygon_prism": {
+        "type": "object",
+        "required": [
+         "sides",
+         "radius_mm",
+         "length_mm"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "sides": {
+          "$ref": "#/$defs/integer"
+         },
+         "radius_mm": {
+          "$ref": "#/$defs/quantity"
+         },
+         "length_mm": {
+          "$ref": "#/$defs/quantity"
+         }
+        }
        }
       }
      },
@@ -155,6 +229,43 @@
       "type": "array",
       "items": {
        "$ref": "#/$defs/child"
+      }
+     },
+     "modifiers": {
+      "type": "array",
+      "items": {
+       "type": "object",
+       "additionalProperties": false,
+       "properties": {
+        "shell": {
+         "type": "object",
+         "required": [
+          "material",
+          "thickness_mm",
+          "faces"
+         ],
+         "additionalProperties": false,
+         "properties": {
+          "material": {
+           "type": "string"
+          },
+          "thickness_mm": {
+           "$ref": "#/$defs/quantity"
+          },
+          "faces": {
+           "type": "array",
+           "minItems": 1,
+           "items": {
+            "enum": [
+             "sides",
+             "front",
+             "back"
+            ]
+           }
+          }
+         }
+        }
+       }
       }
      }
     }
@@ -529,6 +640,196 @@
         },
         "repeat": {
          "$ref": "#/$defs/integer"
+        }
+       }
+      },
+      "grid": {
+       "type": "object",
+       "required": [
+        "n",
+        "pitch_mm",
+        "centre_mm",
+        "index"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "n": {
+         "type": "array",
+         "items": {
+          "$ref": "#/$defs/integer"
+         },
+         "minItems": 2,
+         "maxItems": 3
+        },
+        "pitch_mm": {
+         "type": "array",
+         "items": {
+          "$ref": "#/$defs/quantity"
+         },
+         "minItems": 2,
+         "maxItems": 3
+        },
+        "centre_mm": {
+         "type": "array",
+         "items": {
+          "$ref": "#/$defs/quantity"
+         },
+         "minItems": 3,
+         "maxItems": 3
+        },
+        "index": {
+         "type": "array",
+         "items": {
+          "type": "string",
+          "pattern": "^[A-Za-z_][A-Za-z0-9_+-]*$"
+         },
+         "minItems": 2,
+         "maxItems": 3
+        },
+        "stagger_mm": {
+         "$ref": "#/$defs/quantity"
+        }
+       }
+      },
+      "explicit": {
+       "type": "object",
+       "additionalProperties": false,
+       "properties": {
+        "positions_mm": {
+         "type": "array",
+         "minItems": 1,
+         "items": {
+          "type": "array",
+          "items": {
+           "$ref": "#/$defs/quantity"
+          },
+          "minItems": 3,
+          "maxItems": 3
+         }
+        },
+        "index": {
+         "type": "string",
+         "pattern": "^[A-Za-z_][A-Za-z0-9_+-]*$"
+        },
+        "positions_csv": {
+         "type": "object",
+         "required": [
+          "path",
+          "sha256"
+         ],
+         "additionalProperties": false,
+         "properties": {
+          "path": {
+           "type": "string"
+          },
+          "sha256": {
+           "type": "string",
+           "pattern": "^[0-9a-f]{64}$"
+          }
+         }
+        }
+       },
+       "oneOf": [
+        {
+         "required": [
+          "positions_mm"
+         ]
+        },
+        {
+         "required": [
+          "positions_csv"
+         ]
+        }
+       ]
+      },
+      "ring": {
+       "type": "object",
+       "required": [
+        "n",
+        "radius_mm"
+       ],
+       "additionalProperties": false,
+       "properties": {
+        "n": {
+         "$ref": "#/$defs/integer"
+        },
+        "radius_mm": {
+         "$ref": "#/$defs/quantity"
+        },
+        "phi0_deg": {
+         "$ref": "#/$defs/quantity"
+        },
+        "orientation": {
+         "enum": [
+          "radial",
+          "fixed"
+         ]
+        },
+        "tilt_deg": {
+         "$ref": "#/$defs/quantity"
+        },
+        "stagger_mm": {
+         "$ref": "#/$defs/quantity"
+        },
+        "z_mm": {
+         "$ref": "#/$defs/quantity"
+        },
+        "index": {
+         "type": "string",
+         "pattern": "^[A-Za-z_][A-Za-z0-9_+-]*$"
+        }
+       }
+      }
+     }
+    },
+    "modifiers": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+       "absent": {
+        "type": "object",
+        "required": [
+         "cells"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "cells": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+           "type": "object"
+          }
+         }
+        }
+       },
+       "clip": {
+        "type": "object",
+        "required": [
+         "mode",
+         "envelope"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "mode": {
+          "enum": [
+           "centre_inside",
+           "fully_inside"
+          ]
+         },
+         "envelope": {
+          "type": "object",
+          "required": [
+           "radius_mm"
+          ],
+          "additionalProperties": false,
+          "properties": {
+           "radius_mm": {
+            "$ref": "#/$defs/quantity"
+           }
+          }
+         }
         }
        }
       }

@@ -5,7 +5,7 @@ probe, rerun with the recorded seed and number of events, and record the output 
 A baseline belongs to its platform, so nothing here is compared with the E2 references: that is reproduce.py's work, and S2 gate 4 is
 judged against those references. Development regression compares g4sim_run with these records on the same platform.
 
-Usage: baseline.py --facts FACTS.json --work DIR --geant4-config PATH [--cores N] [--only TEXT] [--redo TEXT]
+Usage: baseline.py --facts FACTS.json --work DIR --geant4-config PATH [--cores N] [--only TEXT] [--redo TEXT] [--keep-outputs]
 From the plugin root. Runs share --cores (default all), each taking as many as it has threads, longest first. A finished run is kept in
 baselines.json and skipped on the next start; bulky outputs are deleted once hashed, and the probe record is kept compressed.
 status.json says how far the job is. Prints JSON with a status key. Exit 0 ok, 1 a failed run or build, 2 bad input.
@@ -59,7 +59,7 @@ def environment_record(config: str) -> dict:
             "geant4_prefix": printed_by(config, "--prefix")}
 
 
-def run_one(row: dict, executable: Path, folder: Path) -> dict:
+def run_one(row: dict, executable: Path, folder: Path, keep_outputs: bool = False) -> dict:
     folder.mkdir(parents=True, exist_ok=True)
     spec = sampler.spec_of(row)
     spec.setdefault("output", {}).update({"csv": str(folder / "events.csv"), "materials": str(folder / "materials.json"),
@@ -77,7 +77,7 @@ def run_one(row: dict, executable: Path, folder: Path) -> dict:
         with gzip.open(folder / "probe-v2.json.gz", "wt", encoding="utf-8") as stream:
             stream.write(record_path.read_text(encoding="utf-8"))
         record_path.unlink()
-    for name in reproduce.BULK:
+    for name in () if keep_outputs else reproduce.BULK:
         (folder / name).unlink(missing_ok=True)
     return {"exit": code, "source_commit": row["source_commit"], "seeds": row.get("seeds"), "events": row.get("events"),
             "threads": row.get("threads"), "hashes": hashes, "wall_seconds": round(wall, 1), "load_at_start": round(load, 2),
@@ -106,6 +106,7 @@ def main(argv=None) -> int:
     parser.add_argument("--cores", type=int, default=os.cpu_count() or 1)
     parser.add_argument("--only", default="")
     parser.add_argument("--redo", default="")
+    parser.add_argument("--keep-outputs", action="store_true", help="keep the bulky outputs: a reference copy on shared storage")
     args = parser.parse_args(argv)
     try:
         facts = json.loads(args.facts.read_text(encoding="utf-8"))
@@ -143,7 +144,7 @@ def main(argv=None) -> int:
             running.add(row["run"])
             write_status(work / "status.json", len(wanted), results, running, started)
         try:
-            result = run_one(row, executables[key], work / "runs" / row["run"])
+            result = run_one(row, executables[key], work / "runs" / row["run"], args.keep_outputs)
         finally:
             cores.give(taken)
         with lock:

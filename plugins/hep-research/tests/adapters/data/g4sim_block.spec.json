@@ -1,0 +1,5 @@
+{"schema": "detector-spec/1", "params": {},
+ "materials": {"scintillator": {"base": "G4_POLYSTYRENE", "ionisation": {"birks_mm_per_MeV": "0.126", "facts": "assumed"}, "facts": "assumed"}},
+ "templates": {"block": {"solid": {"box": {"size_mm": ["100", "100", "200"]}}, "material": "scintillator", "tags": ["active"]}},
+ "world": {"material": "G4_Galactic", "size_mm": ["1000", "1000", "1000"], "children": [{"template": "block", "placement": {"single": {"centre_mm": ["0", "0", "0"]}}}]},
+ "frames": {"beam": {"in": "world", "origin_mm": ["0", "0", "-300"]}}}

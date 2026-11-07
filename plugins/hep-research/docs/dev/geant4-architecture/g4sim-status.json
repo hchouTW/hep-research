@@ -25,10 +25,10 @@
    "blocked_on": []
   },
   "S3": {
-   "state": "not-started",
+   "state": "gates-recorded",
    "worktree": "../hep-research-g4sim-S3",
    "branch": "g4sim/S3",
-   "task_card_sha256": "75b1b530e7ba4c4d9a275c2cc185dbb876eb3c20c4e7284b1ddaa656e29f7c25",
+   "task_card_sha256": "c78f234d2e437a02b5aa9fb8babd7f7d9038f7a62cbebcfa73b11a03a7d6c5ac",
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S3.md",
    "blocked_on": []
   },
@@ -36,7 +36,7 @@
    "state": "not-started",
    "worktree": "../hep-research-g4sim-S4",
    "branch": "g4sim/S4",
-   "task_card_sha256": "3ae54f8a569f45170a9db19d7b43668d4e80d3b94e2bc6bd0b423acdbef48c01",
+   "task_card_sha256": "cfc7e4d1839f81e7e47d31c398c57ddd10e90a7f9d293874a605e6c4540bdff0",
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S4.md",
    "blocked_on": []
   },
@@ -60,7 +60,7 @@
    "state": "not-started",
    "worktree": "../hep-research-g4sim-S7",
    "branch": "g4sim/S7",
-   "task_card_sha256": "2c5be345a9b690c5aa0b6891b8c19ef9f4586a9a3ad5e274deed749db121c511",
+   "task_card_sha256": "03e948cd7ebe7edf505045f795305a39b183b4d143ed57022fc4e9d087de3c01",
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S7.md",
    "blocked_on": []
   },
@@ -68,7 +68,7 @@
    "state": "not-started",
    "worktree": "../hep-research-g4sim-S8",
    "branch": "g4sim/S8",
-   "task_card_sha256": "ae2c638cb5b102dd65d3b48a0a63930bf31fec4a0a6afc0c71d37e3a896b0679",
+   "task_card_sha256": "3a92262b67174fbb3f90a2ab782d52eb1fe60e1b1d9a69d432988cea91466862",
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S8.md",
    "blocked_on": []
   },
@@ -92,20 +92,20 @@
   "GB8": "confirmed",
   "GB9": "confirmed",
   "GB10": "confirmed",
-  "GB11": "unconfirmed",
-  "GB12": "unconfirmed",
-  "GB13": "unconfirmed",
-  "GB14": "unconfirmed",
-  "GB15": "unconfirmed",
-  "GB16": "unconfirmed",
-  "GB17": "unconfirmed",
+  "GB11": "confirmed",
+  "GB12": "confirmed",
+  "GB13": "confirmed",
+  "GB14": "confirmed",
+  "GB15": "confirmed",
+  "GB16": "confirmed",
+  "GB17": "confirmed",
   "GB18": "confirmed",
-  "GB19": "unconfirmed",
-  "GB20": "unconfirmed",
-  "GB21": "unconfirmed",
+  "GB19": "confirmed",
+  "GB20": "confirmed",
+  "GB21": "confirmed",
   "GB22": "confirmed",
-  "GB23": "unconfirmed",
-  "GB24": "unconfirmed"
+  "GB23": "confirmed",
+  "GB24": "confirmed"
  },
- "updated": "2026-11-06T08:47:33Z"
+ "updated": "2026-11-07T00:46:26Z"
 }

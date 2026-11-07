@@ -86,10 +86,11 @@ class UnreleasedEnergy {
 struct ConservationRow {
   double incident = 0, deposit = 0, escapeGamma = 0, escapeElectron = 0, escapeNeutrino = 0, escapeOther = 0;
   double killedKineticStacking = 0, killedKineticLooper = 0, killedKineticSpecialCut = 0, killedKineticNeutron = 0, unreleased = 0, eplusResidual = 0;
+  double killedKineticProcess = 0;  // class (a): `separated` mode only, and written only there, so legacy columns cannot move
   long tracksPhysical = 0, tracksEscaped = 0, tracksKilled = 0, accountingErrors = 0;
   double Residual() const {
     return incident - deposit - (escapeGamma + escapeElectron + escapeNeutrino + escapeOther) -
-           (killedKineticStacking + killedKineticLooper + killedKineticSpecialCut + killedKineticNeutron) - unreleased - eplusResidual;
+           (killedKineticStacking + killedKineticLooper + killedKineticSpecialCut + killedKineticNeutron + killedKineticProcess) - unreleased - eplusResidual;
   }
 };
 
@@ -105,7 +106,13 @@ class Accounting {
     if (fOut) return;
     fPath = path;
     fOut = std::fopen(path.c_str(), "w");
-    if (fOut) std::fprintf(fOut, "# CONSERVATION\n%s\n", Header());
+    if (fOut) std::fprintf(fOut, "# CONSERVATION\n%s%s\n", Header(), fSeparated ? ",killed_kinetic_process_MeV" : "");
+  }
+  void SetSeparated() { fSeparated = true; }
+  // Class (a): KillProcess books the kinetic energy it took, which the post-step point no longer holds.
+  void BookKill(double kinetic, const G4ParticleDefinition* particle) {
+    if (AccountingControl() != "no_killed_process") fRow.killedKineticProcess += kinetic;
+    BookResidual(particle);
   }
   void BeginEvent() {
     fRow = ConservationRow();
@@ -136,6 +143,8 @@ class Accounting {
         ++fRow.accountingErrors;
       }
       if (control != "no_escape") BookEscape(particle, kinetic);
+    } else if (name == "KillProcess") {
+      ++fRow.tracksKilled;  // already booked by BookKill
     } else if (name == "UserSpecialCut") {
       ++fRow.tracksKilled;
       if (control == "class_d_kinetic") fRow.killedKineticSpecialCut += step->GetPreStepPoint()->GetKineticEnergy();  // the post-step value is already 0
@@ -176,10 +185,12 @@ class Accounting {
     }
     if (!fOut) return;
     const ConservationRow& r = fRow;
-    std::fprintf(fOut, "%ld,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%ld,%ld,%ld,%ld\n", firstEvent + event->GetEventID(),
+    std::fprintf(fOut, "%ld,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%ld,%ld,%ld,%ld", firstEvent + event->GetEventID(),
                  r.incident / MeV, r.deposit / MeV, r.escapeGamma / MeV, r.escapeElectron / MeV, r.escapeNeutrino / MeV, r.escapeOther / MeV,
                  r.killedKineticStacking / MeV, r.killedKineticLooper / MeV, r.killedKineticSpecialCut / MeV, r.killedKineticNeutron / MeV, r.unreleased / MeV,
                  r.eplusResidual / MeV, r.Residual() / MeV, r.tracksPhysical, r.tracksEscaped, r.tracksKilled, r.accountingErrors);
+    if (fSeparated) std::fprintf(fOut, ",%.17g", r.killedKineticProcess / MeV);
+    std::fputc('\n', fOut);
   }
   void Close() {
     if (fOut) std::fclose(fOut);
@@ -207,6 +218,7 @@ class Accounting {
   ConservationRow fRow;
   std::map<int, int> fEnded;
   std::FILE* fOut = nullptr;
+  bool fSeparated = false;
   std::string fPath;
 };
 

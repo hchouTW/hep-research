@@ -46,7 +46,7 @@ RESTRICTED = re.compile(r"/eos/|/afs/|/cvmfs/ams|lxplus\d+|/Users/|-Users-|/tmp/
 LEGACY = re.compile(r"agentic[-_]ai[-_]skills|3e995a4|\.legacy/|legacy_id|\bported from|migrated (from|routing)"
                     r"|legacy [`a-z-]+ (skill|ledger|spec|tests?|sample|scripts?|repo|checkout)|migration[- ]map|ams-analysis|fetch_legacy", re.I)
 EMAIL = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
-EMAIL_OK = {"noreply@anthropic.com"}
+EMAIL_OK = {"noreply@anthropic.com", "license@geant4.org"}  # the second is in the Geant4 Software License, reproduced verbatim in adapters/geant4/assets/GEANT4-LICENSE.txt
 # Placeholder addresses are exempt only at a reserved domain (RFC 2606 / RFC 6761): example.com/.org/.net and their
 # subdomains, and the .example, .invalid, .test and .localhost top-level domains. A placeholder local part (author@,
 # user@) at any other domain is reported, because author@<real domain> is someone's address.

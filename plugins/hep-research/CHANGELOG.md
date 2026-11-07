@@ -3,6 +3,13 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+g4sim phase S3 (plugin 0.58.0; proposed adapters: `adapters/geant4` 0.9.0; contracts 3.21.0, `CORE_VERSION` 1.8.0). Geometry: `grid`, `ring`, `explicit` (positions or a hashed CSV), `shell`, `clip`, `absent`, `trd`, `tube`, `polygon_prism`, arbitrary rotations
+judged by separating axes and true minimum distances, and `core/geometry/segmentation.py`. Run path of new specifications: `g4sim_run.py simulate`, `g4sim/KillProcess.hh`, `separated` accounting, analytic sources and `source-density/1` (`core/simulation/source_density.py`),
+volume and boundary scorers, and check-spec rules for PAI, user limits, time cuts and scorers. Plan addendum 11.1: `AddPAIModel` does nothing through the EM constructors of Geant4 11.4.3, so g4sim adds PAI itself, for the region only; an idle fast-simulation
+process changes about 1% of histories; `placement_impl` keeps assembly. Synthetic example `examples/zdc-synthetic-ecal`, and `adapters/geant4/assets/xtr_radiators.json`.
+
 ## 0.57.0 (2026-11-06)
 
 Minor release. g4sim phase S2 (`adapters/geant4` 0.8.0; contracts 3.20.0, `CORE_VERSION` 1.7.0). New `g4sim_run`: legacy mode ports both old observers
