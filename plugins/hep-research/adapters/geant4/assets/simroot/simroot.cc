@@ -288,8 +288,8 @@ int DumpHits(const std::vector<std::string>& files, const std::string& ntuple, c
       std::ostringstream line;
       char text[64];
       for (std::size_t c = 0; c < columns.size(); ++c) {
-        if (columns[c].name == "cell_low") continue;
-        if (columns[c].name == "cell_high") std::snprintf(text, sizeof text, "%llu", static_cast<unsigned long long>(g4sim::CellOf(row[c].i, row[c + 1].i)));
+        if (columns[c].name == "cell_low" || columns[c].name == "cell_id_low") continue;
+        if (columns[c].name == "cell_high" || columns[c].name == "cell_id_high") std::snprintf(text, sizeof text, "%llu", static_cast<unsigned long long>(g4sim::CellOf(row[c].i, row[c + 1].i)));
         else if (columns[c].type == 'I') std::snprintf(text, sizeof text, "%lld", row[c].i);
         else if (columns[c].name == "event_id" || columns[c].name == "time_bin") std::snprintf(text, sizeof text, "%.0f", row[c].d);
         else std::snprintf(text, sizeof text, "%.17g", row[c].d);
@@ -304,7 +304,8 @@ int DumpHits(const std::vector<std::string>& files, const std::string& ntuple, c
   if (!out.empty() && !file) throw Fail("cannot write " + out);
   std::ostream& target = out.empty() ? std::cout : file;
   for (std::size_t c = 0; c < columns.size(); ++c) {
-    if (columns[c].name != "cell_low") target << (c ? "," : "") << (columns[c].name == "cell_high" ? "cell" : columns[c].name);
+    if (columns[c].name == "cell_low" || columns[c].name == "cell_id_low") continue;
+    target << (c ? "," : "") << (columns[c].name == "cell_high" ? "cell" : columns[c].name == "cell_id_high" ? "cell_id" : columns[c].name);
   }
   target << '\n';
   for (const std::string& line : lines) target << line << '\n';

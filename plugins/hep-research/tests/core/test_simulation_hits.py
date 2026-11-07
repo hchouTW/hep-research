@@ -33,6 +33,16 @@ class Closure(unittest.TestCase):
         self.assertFalse(hits.closure({(1, 5.0): 2.0}, {(1, 5.0): 2.0001})["ok"])
 
 
+class CellFields(unittest.TestCase):
+    FIELDS = [{"name": "a", "kind": "copy", "width": 3, "stride": 1}, {"name": "b", "kind": "segmentation", "width": 61, "stride": 8}]
+
+    def test_a_cellid_decodes_into_its_fields(self):
+        self.assertEqual(hits.cell_fields(5 + 8 * 9, self.FIELDS), {"a": 5, "b": 9})
+
+    def test_a_cellid_of_64_bits_stays_exact(self):
+        self.assertEqual(hits.cell_fields(2 ** 64 - 1, self.FIELDS), {"a": 7, "b": 2 ** 61 - 1})
+
+
 class Attribution(unittest.TestCase):
     def test_a_hit_on_a_track_that_was_dropped_is_reported(self):
         kept = [{"event_id": "1", "track_id": "1"}]

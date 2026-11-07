@@ -134,7 +134,7 @@ class HitRecorder {
   }
 
   // `deposit` is in MeV: the scorer's value for this cell and bin. `share` is the part of the step in the bin and `along` a point of that part along the step, from 0 to 1.
-  void Tracker(const G4Step* step, std::uint64_t cell, int segment, double deposit, double share, double along) {
+  void Tracker(const G4Step* step, std::uint64_t cell, std::uint64_t cellId, int segment, double deposit, double share, double along) {
     if (fControl == "pieces_repeat_the_step") share = 1., along = 0.;
     const G4StepPoint* pre = step->GetPreStepPoint();
     const G4StepPoint* post = step->GetPostStepPoint();
@@ -143,10 +143,10 @@ class HitRecorder {
     if (fControl == "kinematics_across_the_kink") kinetic = pre->GetKineticEnergy() + along * (post->GetKineticEnergy() - pre->GetKineticEnergy());
     G4ThreeVector momentum = DirectionAt(step, along) * std::sqrt(kinetic * (kinetic + 2. * step->GetTrack()->GetDynamicParticle()->GetMass()));
     if (fControl == "tracker_kinematics_zero") momentum = G4ThreeVector(), kinetic = 0.;
-    fTracker.push_back({fStep++, step->GetTrack()->GetTrackID(), step->GetTrack()->GetCurrentStepNumber(), Marked(cell), segment, Along(step, along), momentum, kinetic, deposit, time, share * step->GetStepLength()});
+    fTracker.push_back({fStep++, step->GetTrack()->GetTrackID(), step->GetTrack()->GetCurrentStepNumber(), Marked(cell), segment, cellId, Along(step, along), momentum, kinetic, deposit, time, share * step->GetStepLength()});
   }
 
-  void Calorimeter(const G4Step* step, std::uint64_t cell, int segment, double deposit, double along) {
+  void Calorimeter(const G4Step* step, std::uint64_t cell, std::uint64_t cellId, int segment, double deposit, double along) {
     const G4StepPoint* pre = step->GetPreStepPoint();
     const G4StepPoint* post = step->GetPostStepPoint();
     cell = Marked(cell);
@@ -154,6 +154,7 @@ class HitRecorder {
     const double time = pre->GetGlobalTime() + (fControl == "contribution_time_not_interpolated" ? 0. : along) * (post->GetGlobalTime() - pre->GetGlobalTime());
     CaloRow& row = fCalorimeter[{cell, segment}];
     if (row.edep == 0.) row.position = position;
+    row.cellId = cellId;
     row.edep += deposit;
     Contribution& part = fContributions[{cell, segment, step->GetTrack()->GetTrackID(), std::floor(time / ns / fRules.timeBinNs)}];
     if (part.edep == 0.) {
@@ -192,6 +193,8 @@ class HitRecorder {
       manager->FillNtupleIColumn(1, at++, CellHigh(row.cell));
       manager->FillNtupleIColumn(1, at++, CellLow(row.cell));
       manager->FillNtupleIColumn(1, at++, row.segment);
+      manager->FillNtupleIColumn(1, at++, CellHigh(row.cellId));
+      manager->FillNtupleIColumn(1, at++, CellLow(row.cellId));
       for (const G4ThreeVector& v : {row.position / mm, row.momentum / MeV})
         for (int i = 0; i < 3; ++i) manager->FillNtupleDColumn(1, at++, v[i]);
       manager->FillNtupleDColumn(1, at++, row.kinetic / MeV);
@@ -206,6 +209,8 @@ class HitRecorder {
       manager->FillNtupleIColumn(2, at++, CellHigh(key.first));
       manager->FillNtupleIColumn(2, at++, CellLow(key.first));
       manager->FillNtupleIColumn(2, at++, key.second);
+      manager->FillNtupleIColumn(2, at++, CellHigh(row.cellId));
+      manager->FillNtupleIColumn(2, at++, CellLow(row.cellId));
       manager->FillNtupleDColumn(2, at++, row.edep);
       for (int i = 0; i < 3; ++i) manager->FillNtupleDColumn(2, at++, row.position[i] / mm);
       manager->AddNtupleRow(2);
@@ -258,10 +263,12 @@ class HitRecorder {
     int step, track, stepNumber;
     std::uint64_t cell;
     int segment;
+    std::uint64_t cellId;
     G4ThreeVector position, momentum;
     double kinetic, edep, time, path;
   };
   struct CaloRow {
+    std::uint64_t cellId = 0;
     double edep = 0.;
     G4ThreeVector position;
   };

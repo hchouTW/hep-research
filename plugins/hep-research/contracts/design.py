@@ -68,7 +68,7 @@ if __package__ in (None, ""):
 
 from contracts.release_manifest import canonical_sha256  # noqa: E402
 from contracts.schema import validate  # noqa: E402
-from contracts.validate import (SEARCH_SEED_RULE_FROM, SEARCH_SUMMARY_FROM, STICKY_STATUSES, _at_least, qualification_reference,  # noqa: E402
+from contracts.validate import (SEARCH_SEED_RULE_FROM, SEARCH_SUMMARY_FROM, STICKY_STATUSES, _at_least, qualification_missing, qualification_reference,  # noqa: E402
                                 validate_artifact)
 from core.simulation.seeds import seed_uniqueness_problems  # noqa: E402
 
@@ -1105,6 +1105,9 @@ def check_f4(proj: Project, ev: Evaluation) -> None:
         ev.f4_unqualified = True  # ART-31: not reissued, or not passing the upgrade rules
     block: dict = sext["study"] if isinstance(sext.get("study"), dict) else {}
     ev.f4_kind = (block.get("declared_scope") or {}).get("observable_kind")
+    missing = qualification_missing(block.get("declared_scope") or {}, block.get("benchmarks") or [])
+    if "validated-in-scope" in (study.get("status") or []) and missing:  # a label its own conditions contradict: not an unqualified study, a false record (S5 gate 7)
+        ev.err("design.qualification_mismatch", f"the study record says validated-in-scope, and its conditions do not hold: {'; '.join(missing)}")
     ref = qualification_reference(ev.f4_kind, block.get("benchmarks") or [])
     ev.f4_qualification_tolerance = float(ref["tolerance"]["total"]) if ref else None
     cid = ext.get("candidate", "")

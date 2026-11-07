@@ -1,16 +1,58 @@
 {
  "$comment": "simulation-hits/1 (g4sim plan, Section 9.2): what a hit file holds, written beside it as this index. The hits themselves are a sparse ROOT file written by g4tools, which simroot turns into columns.",
  "type": "object",
- "required": ["schema", "geometry_id", "request_id", "events", "first_event", "kinds", "file_sha256"],
+ "required": [
+  "schema",
+  "geometry_id",
+  "request_id",
+  "events",
+  "first_event",
+  "kinds",
+  "file_sha256"
+ ],
  "additionalProperties": false,
  "properties": {
-  "schema": {"const": "simulation-hits/1"},
-  "geometry_id": {"type": "string"},
-  "request_id": {"type": "string"},
-  "events": {"type": "integer", "minimum": 0},
-  "first_event": {"type": "integer", "minimum": 0},
-  "kinds": {"type": "array", "items": {"enum": ["mc_particle", "tracker_hit", "calorimeter_hit", "photon_hit"]}},
-  "file_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
-  "closure": {"type": "object"}
+  "schema": {
+   "const": "simulation-hits/1"
+  },
+  "geometry_id": {
+   "type": "string"
+  },
+  "request_id": {
+   "type": "string"
+  },
+  "events": {
+   "type": "integer",
+   "minimum": 0
+  },
+  "first_event": {
+   "type": "integer",
+   "minimum": 0
+  },
+  "kinds": {
+   "type": "array",
+   "items": {
+    "enum": [
+     "mc_particle",
+     "tracker_hit",
+     "calorimeter_hit",
+     "photon_hit"
+    ]
+   }
+  },
+  "file_sha256": {
+   "type": "string",
+   "pattern": "^[0-9a-f]{64}$"
+  },
+  "closure": {
+   "type": "object"
+  },
+  "readouts": {
+   "type": "object",
+   "description": "each hit scorer's readout: none, or the name of the bitfield its cell_id column is encoded by",
+   "additionalProperties": {
+    "type": "string"
+   }
+  }
  }
 }

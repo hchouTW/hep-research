@@ -48,6 +48,16 @@ constexpr int kClassesPerDecade = 4;
 constexpr int kClassOffset = 40;  // log10 x from -10 upward stays positive
 constexpr int kClassesPerKind = 200;
 
+// A named readout's bitfield, resolved by g4sim_simulate.py: what each placed copy adds to the cellID, and each segmentation axis's stride and number of values.
+struct CellEncoding {
+  struct Segment {
+    std::uint64_t stride, limit;
+  };
+  bool named = false;
+  std::map<std::string, std::map<int, std::uint64_t>> copies;
+  std::vector<Segment> segments;
+};
+
 struct Segmentation {
   std::string kind = "none";
   int axis = 2;
@@ -59,6 +69,7 @@ struct ScorerSpec {
   std::string name, quantity, split;
   std::set<std::string> templates;
   Segmentation segmentation;
+  CellEncoding cell;
   double fraction = 0.1, rigidityGV = -1., windowLow = -1., windowHigh = -1.;
   std::map<std::string, double> lightYield;  // edep_visible_ly_split: per MeV, by template
   std::string hitKind;  // level event_file: tracker or calorimeter
@@ -79,6 +90,16 @@ inline Segmentation ReadSegmentation(const Value& block) {
   return out;
 }
 
+inline CellEncoding ReadCellEncoding(const Value& block) {
+  CellEncoding out;
+  out.named = true;
+  for (const auto& [name, copies] : block.at("copies", "cell_id").obj)
+    for (const auto& [copy, part] : copies.obj) out.copies[name][std::stoi(copy)] = std::stoull(part.str);
+  for (const auto& item : block.at("segments", "cell_id").array("segments"))
+    out.segments.push_back({static_cast<std::uint64_t>(item.at("stride", "segment").num), static_cast<std::uint64_t>(item.at("limit", "segment").num)});
+  return out;
+}
+
 inline std::vector<ScorerSpec> ReadScorers(const Value& request) {
   std::vector<ScorerSpec> out;
   for (const auto& item : request.at("scorers", "request").array("scorers")) {
@@ -91,6 +112,7 @@ inline std::vector<ScorerSpec> ReadScorers(const Value& request) {
     if (item.has("fraction")) spec.fraction = item.obj.at("fraction").num;
     if (item.has("rigidity_GV")) spec.rigidityGV = item.obj.at("rigidity_GV").num;
     if (item.has("hit_kind")) spec.hitKind = item.obj.at("hit_kind").str;
+    if (item.has("cell_id")) spec.cell = ReadCellEncoding(item.obj.at("cell_id"));
     if (item.has("moments")) spec.moments = item.obj.at("moments").b;
     if (item.has("light_yield_per_MeV"))
       for (const auto& [name, value] : item.obj.at("light_yield_per_MeV").obj) spec.lightYield[name] = value.num;
@@ -113,6 +135,18 @@ inline VolumeKey VolumeId(const G4VTouchable* touchable, const std::vector<long 
     const int fromTop = level - 1;
     const long long stride = fromTop < static_cast<int>(strides.size()) ? strides[static_cast<std::size_t>(fromTop)] : 0;
     id += static_cast<VolumeKey>(touchable->GetCopyNumber(depth - level) + 1) * stride;
+  }
+  return id;
+}
+
+// The copy-number part of a cellID (Section 6.2.6): each level of the touchable adds what its copy adds.
+inline std::uint64_t CopyPart(const G4VTouchable* touchable, const CellEncoding& encoding) {
+  std::uint64_t id = 0;
+  for (int level = 0; level <= touchable->GetHistoryDepth(); ++level) {
+    const auto found = encoding.copies.find(touchable->GetVolume(level)->GetLogicalVolume()->GetName());
+    if (found == encoding.copies.end()) continue;
+    const auto part = found->second.find(touchable->GetCopyNumber(level));
+    if (part != found->second.end()) id += part->second;
   }
   return id;
 }
@@ -167,6 +201,16 @@ class Grid {
     int index[3];
     for (int i = 0; i < 3; ++i) index[i] = Width(i) > 0. ? Clamp(static_cast<int>(std::floor((local[i] - fLow[i]) / Width(i))), fCount[i]) : 0;
     return index[0] + fCount[0] * (index[1] + fCount[1] * index[2]);
+  }
+  // The value of each segmentation axis in a bin: Bin's composition undone, in the order of the scorer's segment_fields.
+  std::vector<int> AxisValues(int bin) const {
+    const std::string& kind = fSegmentation.kind;
+    if (kind == "none") return {};
+    if (kind == "polar") return {bin / fSegmentation.phiBins, bin % fSegmentation.phiBins};
+    const int index[3] = {bin % fCount[0], (bin / fCount[0]) % fCount[1], bin / (fCount[0] * fCount[1])};
+    if (kind == "along_axis") return {index[fSegmentation.axis]};
+    if (kind == "cartesian_xy") return {index[0], index[1]};
+    return {index[0], index[1], index[2]};
   }
   // The bin width in the direction a step crosses (Section 8.7).
   double CrossingWidth(const G4ThreeVector& direction) const {
@@ -268,12 +312,34 @@ class ScorerSums {
   void Add(std::size_t scorer, VolumeKey volume, int bin, double value, double share = 1., double along = 0.) {
     // A hit takes the scorer's own bin and share, so a segmented hit file closes on the scorer bin by bin (Section 9.2).
     const std::string& hitKind = (*fScorers)[scorer].hitKind;
-    if (hitKind == "tracker") HitRecorder::Thread().Tracker(fScoredStep, static_cast<std::uint64_t>(volume), bin, value, share, along);
-    else if (hitKind == "calorimeter") HitRecorder::Thread().Calorimeter(fScoredStep, static_cast<std::uint64_t>(volume), bin, value, along);
+    if (!hitKind.empty()) {
+      const std::uint64_t id = CellId(scorer, volume, bin);
+      if (hitKind == "tracker") HitRecorder::Thread().Tracker(fScoredStep, static_cast<std::uint64_t>(volume), id, bin, value, share, along);
+      else if (hitKind == "calorimeter") HitRecorder::Thread().Calorimeter(fScoredStep, static_cast<std::uint64_t>(volume), id, bin, value, along);
+    }
     ScoreCell& cell = fSums[{scorer, volume, bin}];
     cell.value += value;
     cell.absolute += std::abs(value);
     ++cell.summands;
+  }
+
+  // A hit's encoded cellID; 0 for a scorer without a named readout. A bin of edep_visible_ly_split holds two cells' worth of parts, undone by fBinStride.
+  std::uint64_t CellId(std::size_t scorer, VolumeKey volume, int bin) {
+    const CellEncoding& encoding = (*fScorers)[scorer].cell;
+    if (!encoding.named) return 0;
+    const auto key = std::make_pair(scorer, volume);
+    auto known = fCopyParts.find(key);
+    if (known == fCopyParts.end()) known = fCopyParts.emplace(key, CopyPart(fScoredStep->GetPreStepPoint()->GetTouchable(), encoding)).first;
+    std::uint64_t id = known->second;
+    if (!fScoredGrid) return id;
+    const std::vector<int> values = fScoredGrid->AxisValues(bin / fBinStride);
+    for (std::size_t axis = 0; axis < values.size(); ++axis) {
+      const CellEncoding::Segment& field = encoding.segments.at(axis);
+      if (static_cast<std::uint64_t>(values[axis]) >= field.limit)
+        G4Exception("ScorerSums", "g4sim-cellid", FatalException, ("segmentation value " + std::to_string(values[axis]) + " does not fit its readout field of " + std::to_string(field.limit) + " values").c_str());
+      id += static_cast<std::uint64_t>(values[axis]) * field.stride;
+    }
+    return id;
   }
 
   // The SD's dispatch: everything a volume scorer does with one step.
@@ -471,6 +537,8 @@ class ScorerSums {
     const bool split = scorer.quantity == "edep_visible_ly_split";
     const int part = split ? (IsLargeStep(scorer.lightYield.at(touchable->GetVolume()->GetLogicalVolume()->GetName()) * value, ScintillationControl()) ? 0 : 1) : 0;
     const int stride = split ? 2 : 1;
+    fBinStride = stride;
+    fScoredGrid = nullptr;
     if (scorer.segmentation.kind == "none") {
       Add(i, volume, part, value);
       return;
@@ -478,6 +546,7 @@ class ScorerSums {
     const G4AffineTransform& toLocal = touchable->GetHistory()->GetTopTransform();
     const G4ThreeVector a = toLocal.TransformPoint(step->GetPreStepPoint()->GetPosition()), b = toLocal.TransformPoint(step->GetPostStepPoint()->GetPosition());
     const Grid grid(scorer.segmentation, touchable->GetVolume()->GetLogicalVolume()->GetSolid());
+    fScoredGrid = &grid;
     const G4ThreeVector chord = b - a;
     const double width = chord.mag() > 0. ? grid.CrossingWidth(chord.unit()) : HUGE_VAL;
     if (!charged || length <= scorer.fraction * width || fControl == "force_post_step") {
@@ -523,6 +592,9 @@ class ScorerSums {
   long long fEvent = 0;
   std::map<std::tuple<std::size_t, VolumeKey, int>, ScoreCell> fSums;
   const G4Step* fScoredStep = nullptr;
+  const Grid* fScoredGrid = nullptr;
+  int fBinStride = 1;
+  std::map<std::pair<std::size_t, VolumeKey>, std::uint64_t> fCopyParts;
   std::map<std::tuple<std::size_t, VolumeKey, int>, MomentCell> fMoments;
   std::map<std::size_t, double> fDirect;
   std::map<std::pair<std::size_t, VolumeKey>, std::array<double, 3>> fFirst;

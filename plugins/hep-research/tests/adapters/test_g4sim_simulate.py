@@ -22,6 +22,27 @@ IR = {"physical": {"frames": {"beam": {"in": "world", "origin_mm": ["0", "0", "-
       "marker": {"tags": {"block": ["active"]}}}
 
 
+class CellEncoding(unittest.TestCase):
+    FIELDS = [{"name": "ix", "kind": "copy", "width": 2, "stride": 1}, {"name": "iy", "kind": "copy", "width": 2, "stride": 4}, {"name": "iz", "kind": "segmentation", "width": 3, "stride": 16}]
+    IR = {"physical": {"readout": {"cal": {"fields": FIELDS}}, "placements": [{"template": "crystal", "copy_number": 6, "index": {"ix": 2, "iy": 1}}, {"template": "crystal", "copy_number": 0, "index": {"ix": 0, "iy": 0}}, {"template": "module", "copy_number": 0, "index": {}}]}}
+
+    def test_a_copy_adds_its_indices_at_their_strides_whatever_its_packing(self):
+        encoding = simulate.cell_encoding({"readout": "cal", "segment_fields": ["iz"]}, "along_axis", self.IR)
+        self.assertEqual(encoding["copies"]["crystal"], {"6": str(2 + 4), "0": "0"})
+        self.assertEqual(encoding["segments"], [{"stride": 16, "limit": 8}])
+
+    def test_a_cellid_above_a_double_stays_exact_as_text(self):
+        fields = [{"name": "top", "kind": "copy", "width": 11, "stride": 2 ** 53}]
+        ir = {"physical": {"readout": {"big": {"fields": fields}}, "placements": [{"template": "t", "copy_number": 3, "index": {"top": 3}}]}}
+        self.assertEqual(simulate.cell_encoding({"readout": "big"}, "none", ir)["copies"]["t"]["3"], str(3 * 2 ** 53))
+
+    def test_what_cannot_be_encoded_is_a_problem(self):
+        two = {"physical": {**self.IR["physical"], "placements": [{"template": "t", "copy_number": 0, "index": {"ix": 1}}, {"template": "t", "copy_number": 0, "index": {"ix": 2}}]}}
+        for scorer, kind, ir in (({"readout": "other"}, "none", self.IR), ({"readout": "cal"}, "along_axis", self.IR), ({"readout": "cal", "segment_fields": ["iz", "ix"]}, "along_axis", self.IR), ({"readout": "cal"}, "none", self.IR), ({"readout": "cal", "segment_fields": ["iz"]}, "along_axis", two)):
+            with self.subTest(scorer=scorer, kind=kind):
+                self.assertIn("problem", simulate.cell_encoding(scorer, kind, ir))
+
+
 class Resolution(unittest.TestCase):
     def test_a_frame_becomes_world_coordinates(self):
         record = simulate.resolved_source(SOURCE, IR["physical"]["frames"])
