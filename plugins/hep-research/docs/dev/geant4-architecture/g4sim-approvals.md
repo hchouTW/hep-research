@@ -147,4 +147,5 @@ These are not Section 20 decisions. They are how S0 reconciled requirements of t
 | S3 final regression | The 112 legacy runs on Slurm with the final code, about 80 core-hours | hsinyichou (maintainer) | 2026-11-06 | "approve the final regression" |
 | Review findings (2026-11-07) | Fix them all; S8 gate 3 by the paired design; check-spec rejects `G4StrawTubeXTRadiator`; `g4sim-task.zh.md` stays frozen | hsinyichou (maintainer) | 2026-11-07 | "use your recommendations" |
 | Library code adapted from Geant4 | Keep it, name the source in the headers, ship `GEANT4-LICENSE.txt` with its notice, correct `licence_boundary` | hsinyichou (maintainer) | 2026-11-07 | "do your best recommendations" |
+| S3 final regression on the earlier build | Accepted for the current code: 112 of 112 identical at `a1933f15`; the later build differs only in `newrun.o`, which legacy runs do not use | hsinyichou (maintainer) | 2026-11-07 | "I accept the regression" |
 | Targeted review of the addendum (Section 23, step 4) | Open | | | |
