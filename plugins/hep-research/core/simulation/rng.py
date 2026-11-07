@@ -25,6 +25,9 @@ EVENT_LIMIT = 2 ** 32
 SUMMAND_LIMIT = 1e290
 SUMMAND_COUNT_LIMIT = 2 ** 48
 INVERSE_LIMIT = 30  # below this mean, Poisson and binomial use the inverse transform
+# Section 10.2, across platforms: continuous values within these ulps; measured on 200,000 draws, E2 against E5, at 3, 1 and 7 (S4 task card)
+CROSS_PLATFORM_ULPS = {"gaussian": 8, "exponential": 4, "gamma": 32}
+BOUNDARY_DISTANCE = 2.0 ** -40  # a discrete value may differ only if a uniform variate lies this close to a decision boundary
 CHANNEL_PREFIX = "g4sim-rng/1\0channel"
 VOLUME_PREFIX = "g4sim-rng/1\0volume"
 
