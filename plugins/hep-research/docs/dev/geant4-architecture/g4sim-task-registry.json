@@ -540,6 +540,20 @@
    "registered_at": "2026-11-07T00:17:15Z",
    "card_commit": "12aca275",
    "reason": "Step 5 of Section 23: GB19, GB20, gate 3 and placement_impl follow addendum 11.1, by the maintainer's decision"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "fbda6b2655d971cf849a6816cf46febdcd17b8736b9d4ec1c3f6b2dc31d06150",
+   "registered_at": "2026-11-07T00:26:40Z",
+   "card_commit": "8c0837ba",
+   "reason": "The card matches the rewritten Part B after the recheck; Execution log"
+  },
+  {
+   "card": "g4sim-tasks/S8.md",
+   "sha256": "94d836b3b690a96f229f86497c457bc9b685a2ee4dd78c4d91dae9ee1aa41943",
+   "registered_at": "2026-11-07T00:26:40Z",
+   "card_commit": "8c0837ba",
+   "reason": "Gate 3 states where its events and power come from; a duplicate GB20 line removed"
   }
  ]
 }
