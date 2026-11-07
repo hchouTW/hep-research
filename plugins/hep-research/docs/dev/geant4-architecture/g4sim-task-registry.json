@@ -638,6 +638,13 @@
    "registered_at": "2026-11-07T05:14:19Z",
    "card_commit": "f3696113",
    "reason": "Execution log: unblocked by the maintainer; no threshold changed"
+  },
+  {
+   "card": "g4sim-tasks/S4.md",
+   "sha256": "526044ec7cfa18e45c2dd1e1b0f3cb3c22ea02f15fc77afb3a6c39369f33f0e2",
+   "registered_at": "2026-11-07T05:57:49Z",
+   "card_commit": "e4953655",
+   "reason": "Execution log and checklist after gates 1 to 10; no threshold changed"
   }
  ]
 }
