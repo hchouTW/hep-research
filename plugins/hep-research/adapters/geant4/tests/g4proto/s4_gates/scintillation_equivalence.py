@@ -40,13 +40,15 @@ def fixture(name: str) -> dict:
     return json.loads((FIXTURES / f"g4sim_block.{name}.json").read_text(encoding="utf-8"))
 
 
-def run(folder: Path, program: Path, events: int) -> int:
+def run(folder: Path, program: Path, events: int, threads: int | None = None) -> int:
     folder.mkdir(parents=True, exist_ok=True)
     spec, request, card = fixture("spec"), fixture("request"), fixture("run")
     spec["materials"]["scintillator"]["scintillation"] = {"yield_per_MeV": str(LIGHT_YIELD), "resolution_scale": "1", "facts": "assumed"}
     request["source"]["energy"] = {"uniform": {"min_MeV": "1", "max_MeV": "60"}}
     request["scorers"] = [{"name": "split", "readout": "none", "select": {"tags": ["active"]}, "quantity": "edep_visible_ly_split", "segmentation": {"along_axis": {"axis": "z", "width_mm": "1"}}, "split": "midpoint"}]
     card["run"]["events"] = events
+    if threads:
+        card["run"]["threads"] = threads
     for name, block in (("spec", spec), ("request", request), ("run", card)):
         (folder / f"{name}.json").write_text(json.dumps(block), encoding="utf-8")
     done = subprocess.run([sys.executable, str(DRIVER), "simulate", "--detector", str(folder / "spec.json"), "--request", str(folder / "request.json"), "--run", str(folder / "run.json"), "--program", str(program.resolve()), "--work", str(folder / "out")],
