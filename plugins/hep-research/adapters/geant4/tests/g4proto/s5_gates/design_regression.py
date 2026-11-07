@@ -16,6 +16,8 @@ from pathlib import Path
 
 EXAMPLES = ("design-minimal-spectrometer", "design-search-j16", "design-space-spectrometer", "design-collider-tracker")
 WRITER_KEYS = {"plugin_version", "contract_version", "contracts", "plugin", "plugin_release", "created", "created_utc", "generated_at", "timestamp", "timestamp_utc", "core", "tool_version"}
+STUDY_CHECK = "check_geant4_study.py"
+STUDY_RECORD = ".computational-run.json"
 PROFILES = {"design-minimal-spectrometer": "j15.realization.json", "design-search-j16": "space.realization.json"}
 
 
@@ -37,7 +39,13 @@ def capture(plugin: Path, out: Path) -> dict:
 
 
 def without_writer(node):
+    """A record without what names its writer. S5 must change check_geant4_study.py, whose code hash study records carry as a tool version, and the records that cite a study hash it in turn: those two fields
+    only are set aside, by name, and every value, verdict, geometry and specification stays compared."""
     if isinstance(node, dict):
+        if node.get("name") == STUDY_CHECK and set(node) == {"name", "version"}:
+            return {"name": STUDY_CHECK}
+        if "ref" in node and "sha256" in node and str(node["ref"]).endswith(STUDY_RECORD):
+            return without_writer({key: value for key, value in node.items() if key != "sha256"})
         return {key: without_writer(value) for key, value in node.items() if key not in WRITER_KEYS}
     if isinstance(node, list):
         return [without_writer(value) for value in node]
