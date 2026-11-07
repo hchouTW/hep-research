@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "3.22.0"
+CONTRACTS_VERSION = "3.23.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -233,6 +233,8 @@ CONTRACTS_VERSION = "3.22.0"
 # review_measurement_spec.py --check-bundle refuse with the reason (exit 2). Existing attestations of a 2.0.0 bundle
 # still verify (attestation.py keeps its digest rule). No artifact type, vocabulary term, envelope field or capability
 # changes (measurement:correction-keys-v1 stays): every 3.16 artifact keeps its outcome.
+# 3.23.0 (minor; g4sim S5) adds geometry_derivation.json (geometry-derivation/1), rules/design_geometry/ (calorimeter, planes-tracker, tof), the oneOf of design_geometry.json by mapping_version, geometry_kind, geometry_id and geometry_derivation_ref of
+# design candidates, and the kit form of design_search_spec.json. The upgrade rules of validate.py are unchanged: a study record of the g4sim path passes them as written. Additive: every 3.22 artifact keeps its outcome, and committed outputs keep the contracts version that wrote them.
 # 3.22.0 (minor; g4sim S4) adds simulation_hits.json (simulation-hits/1), response_pipeline.json (response-pipeline/1, with the stage hand-off response-handoff/1 in $defs) and efficiency_map.json (efficiency-map/1), and the optional
 # scintillation block of detector_spec.json materials. The block reaches the run through the request, so the IR's field set does not change. Additive: every 3.21 artifact keeps its outcome, and committed outputs keep the contracts version that wrote them.
 # 3.21.0 (minor; g4sim S3) adds source_density.json (source-density/1), read by core/simulation/source_density.py, and opens the shapes, placements, modifiers and

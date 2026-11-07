@@ -34,7 +34,7 @@ run. Its fields:
 | `observable` | name, kind (for example `most-probable-value`, `stopping-power`, `energy-deposit`), domain (`em` or `hadronic`), exact definition, unit, whether weights apply, and for leakage `leakage_faces` |
 | `particle` | species and kinetic energy |
 | `geometry_source`, `materials` | where the geometry and materials come from; for each reference material: density, its source, and `reference_origin` (`independent`, never the Geant4 material dump); Z/A, mean excitation energy I and the Sternheimer parameters when a benchmark uses them (stopping power, thin-layer MPV and width) |
-| `physics` | the layered_sim spec, the order of UI commands, and a justification per choice with its source |
+| `physics` | the layered_sim spec, the order of UI commands, and a justification per choice with its source; on the g4sim path `physics.g4sim`: the detector-spec, the simulation request and the run card by path and sha256, with `geometry_id` and `request_id`, which `check_geant4_study.py` recomputes |
 | `convergence_plan` | the cut or step-limit scan, the observables checked (any declared in `observables`) and their tolerances (relative, or absolute per observable declaration) |
 | `statistical_target` | the observable and the relative standard error required |
 | `validation_plan` | the benchmarks and the declared scope (particle, energy range, material, thickness range, observable) |
@@ -136,6 +136,8 @@ coverage. The items say when to look and where, not which list to use.
   procedural rule: no tool can tell a rerun under a new study or point id from a new study, so list every run in
   the study record).
   With n points that need a target all meet it with probability about 0.9^n.
+- **Kit studies.** A study of a kit starts from a design geometry file: `g4kit.py derive` writes the detector-spec and its `geometry-derivation/1` record, and `geant4_run.py run-spec` takes the three files by path and hash, refusing a byte that changed. The candidate names the record and the `geometry_id`, and `design.py` compares them with the study.
+- **Independent reference values.** A reference is independent of the run it judges: a material's `reference_origin: independent` entry, a published measurement or a formula whose source is cited, never a number read from the simulation or the kit's own input. A value derived from Geant4 itself may set a depth or a size, not a threshold.
 - **Shared evidence** (D7). One run often serves several decisions (the nominal feeds the gate, the statistical
   target, the benchmark and the variations); `label` lists such runs in `extension.study.evidence_overlap`, and they
   are not independent evidence.
@@ -145,6 +147,8 @@ coverage. The items say when to look and where, not which list to use.
   `geant4_run.py scan` gives every point its own seeds (its own S under per-event seeding, also when the base spec
   declares it, unless the grid scans `run.logical_run_seed`), so the SE of a difference is that of independent
   samples.
+
+- **Core widths need thousands of events.** A central-98% core width computed in blocks of a few tens of events is biased upward (22% at 20 events per block, against 0.4% at 8,000 events in all, on a 0.3 mm silicon plane): its SE then looks small and the benchmark fails or passes for the wrong reason. Size the reference benchmark's run on its own, as `multiple-scattering-reference` does with 8,000 events; a Gaussian core in `gaussian-core` also needs a width of at least three bins in every block.
 
 ## 5. The validation ladder and verified pitfalls
 
@@ -276,6 +280,12 @@ no remaining gap and a variation table apply as before. A `charge-confusion` stu
 their F4 studies stay unqualified. Every other kind keeps the CV-A1 rule (any covering reference or setup-matched
 benchmark). Every run a qualification benchmark reads is an evidence record of the study (`label --run-record`):
 `dependencies.py` re-derives the reference benchmark's configuration from its run record.
+
+**Kit benchmarks.** Each kit's benchmarks are registered with their tolerance and negative control before the first run (`docs/dev/geant4-architecture/g4sim-tasks/S5.md`), with published data verified by hep-citations; a benchmark with no usable reference is a recorded gap, never a pass. Gates cover calorimeter linearity and resolution, thin-silicon scattering and the material budget of a silicon plane; `sampling-fraction`, `shower-containment`, `reco-closure` and `tof-beta` are labelled checks, not references.
+
+**Model confirmation.** Before two physics lists stand for a model uncertainty, `check_geant4_study.py confirm-models` compares the physics read back from each run, per particle family (`electron`, `hadron`), and refuses a pair that shares its physics for that family: a difference elsewhere in the lists is no difference for the particle concerned. A `FTFP_BERT_EMZ` and `QGSP_BIC_EMZ` pair is refused for electrons.
+
+**The g4sim path.** The four conditions read g4sim records: `material-definition` a geantino scan and the design geometry, `field-propagation` charged geantinos against the helix with the IR's field as the key, `reco-closure` `geant4_run.py reco` of the run's hits, and `multiple-scattering-reference` the crossing directions of a kit of two planes in vacuum. The target's configuration comes from the geometry tree the run's probe recorded (`tree-v1`), so a kit magnet at zero strength attaches no field. `plan-controls` sizes the controls from the nominal run, under `declared-size/1`.
 
 ## 6. Variations
 

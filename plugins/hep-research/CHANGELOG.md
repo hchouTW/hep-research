@@ -3,6 +3,14 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## 0.60.0 (unreleased)
+
+Minor release. g4sim phase S5 (`adapters/geant4` 0.11.0; contracts 3.23.0, `CORE_VERSION` 1.10.0). Kits and the design loop: the calorimeter, planes_tracker and tof kits in `skills/hep-detector/assets/g4kits/`, `g4kit.py` (`list`, `derive`) and `geometry-derivation/1`; design candidates carry
+`geometry_kind`, `geometry_id` and `geometry_derivation_ref`, `design.py` and `evaluate_design.py` select the mapping by `geometry_mapping(kind)`, and layered-spectrometer keeps its path, its results unchanged. `evaluate_design.py search` runs a kit through `geant4_run.py run-spec`, which takes specification files by path and hash.
+A study on the g4sim path reaches F4: `check_geant4_study.py` and `geant4_benchmarks.py` judge D0's four conditions from g4sim records, and `check_geant4_study.py confirm-models` records that two physics lists differ for a particle family. Kit benchmarks against published data, and the protocol's Sections 2, 4 and 5.
+Fixed: a field given by a parameter reached the IR as its name, and `g4sim_run` read it as 0 T without a word; `core/geometry` now evaluates it. The geometry_id of a specification written in numbers does not change. `design.py` refuses a study that names no geometry_id, where the comparison could not fail before.
+Gaps, accepted by the maintainer: TOF time resolution, calorimeter transverse shape, hit efficiency, beam-test sampling fraction, tracker residuals against data, longitudinal shape as a weak band.
+
 ## 0.59.0 (2026-11-07)
 
 Minor release. g4sim phase S4 (`adapters/geant4` 0.10.0; contracts 3.22.0, `CORE_VERSION` 1.9.0). Random numbers and sampling: Philox4x32-10 with channel and volume streams, Poisson, binomial, multinomial, Gamma, and fsum with

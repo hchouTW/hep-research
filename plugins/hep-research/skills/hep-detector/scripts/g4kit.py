@@ -10,6 +10,19 @@ defaults only: every physical value and every material comes from the design geo
 Prints JSON with a status key. Exit 0 ok, 1 the specification fails its checks, 2 bad input.
 """
 from __future__ import annotations
+if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_python_compat.py)
+    import sys as _sys
+    from pathlib import Path as _Path
+    _sys.dont_write_bytecode = True
+    _root = str(_Path(__file__).resolve().parents[3])
+    if _root not in _sys.path:
+        _sys.path.insert(0, _root)
+    try:
+        from core.interpreter_guard import guard as _guard
+    except ImportError:  # copied outside the plugin
+        pass
+    else:
+        _guard()
 
 import argparse
 import hashlib
@@ -18,6 +31,7 @@ import sys
 from decimal import Decimal
 from pathlib import Path
 
+sys.dont_write_bytecode = True
 PLUGIN = Path(__file__).resolve().parents[3]
 sys.path.insert(0, str(PLUGIN))
 
@@ -136,7 +150,7 @@ def main(argv=None) -> int:
         code, result = listing() if args.command == "list" else derive(args)
     except (KitError, OSError, ValueError, KeyError) as error:
         code, result = 2, {"status": "rejected", "error_kind": "invalid-input", "error": str(error)}
-    print(json.dumps(result, indent=1))
+    print(json.dumps({**result, "status_label": "unvalidated"}, indent=1))
     return code
 
 
