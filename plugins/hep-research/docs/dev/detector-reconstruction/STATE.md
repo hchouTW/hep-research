@@ -68,10 +68,10 @@ tasks:
   T06: {state: done, note: "Gate C clean, job 7487578; readings in decisions.md, T06 readings; reviews evidence/c1-*.md"}
   T14: {state: done, note: "Gate C clean, job 7487578; rulings in decisions.md, T14 rulings; reviews evidence/c2-*.md"}
   T15a: {state: done, note: "Gate C clean, job 7487578; artificial fixtures only, no claim on real recipes; readings in decisions.md, T15a readings; reviews evidence/c3-*.md"}
-  T07: {state: in-progress, note: "stages 1 and 2 committed: telescope, generators, CAI generator, payload probe on both routes, curve start in the refit; job 7491894 passes; generator hashes not frozen; amendment 1 under revision; the refit q/p prior must be settled before the field is opened (evidence/d1-stage2-review.md, C-M1)"}
+  T07: {state: in-progress, note: "generators frozen by hash, Freeze A addendum applied, check of record job 7492427; development may start; field closed until the q/p prior is settled (evidence/d1-stage2-review.md, C-M1)"}
   T11: {state: done, note: "comparison clean with rerun 7474460 (R28); every applicable cell is sourced or a recorded gap (R14); 10 citation uses unread; plugin defects in t11-citation-findings.md not applied"}
 k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K08, K09, K10, K11, K12, K16, K17, K18]}
-next_action: "User: approve the T07 check of record; then the generator addendum on the user's word, before any T07 development run"
+next_action: "T07 development: settle the refit q/p prior before the field opens; then field, noise, CKF, ambiguity resolution, vertexing, residuals, derivatives. Backup due"
 ```
 
 ## Plan conflicts found

@@ -330,3 +330,16 @@ User's answer, 2026-11-07, verbatim: "apply Amendment 1 as listed". Label: befor
 | t07-t09-task-sheets.md | `01f3509156734372a725eba77b3604935bf420b74fc5f9670fed4348269906f0`, unchanged |
 
 Next: the check of record, then the addendum, part C, on the user's word, before any T07 development run. `freeze-a.md`'s hash changes at that addendum, and that change is recorded here then.
+
+## Freeze A addendum: T07 generators
+
+User's answer, 2026-11-07, verbatim: "apply the addendum as listed". Applied as shown, on the check of record, job 7492427, commit `adf2d051`. `t07-telescope-clean/1`, `t07-telescope-noise/1` and `t07-telescope-cai/1` are frozen by hash. A later generator change is a section 2.3 amendment.
+
+| File | SHA-256 |
+| --- | --- |
+| freeze-a.md | `669fc90426419f3e691c6b09113b792a64f03d4bdf7c097e3fe3ab6f23423570` |
+| t04-values-v4.md | `92f71f561ea14b59034ba68fc52f69773d31262e44b371e9ee47110f0ad2edb6`, unchanged |
+| t04-prereg.md | `39495c3f7db0cded7f88b45711a9457f438be0cbd4113370880d69866448a151`, unchanged |
+| t07-t09-task-sheets.md | `01f3509156734372a725eba77b3604935bf420b74fc5f9670fed4348269906f0`, unchanged |
+
+T07 development runs may start. The field stays closed until the refit's q/p prior is settled (evidence/d1-stage2-review.md, C-M1).
