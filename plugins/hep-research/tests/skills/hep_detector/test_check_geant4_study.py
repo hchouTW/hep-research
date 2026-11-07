@@ -476,5 +476,20 @@ class RealizationEntryTests(unittest.TestCase):
         self.assertIsNone(self.C.realization_entry({"path": rp, "sha256": self.sha}, esp, inner))
 
 
+
+class ModelConfirmation(unittest.TestCase):
+    EMZ = {"models": {"world": {"eIoni/e-": ["PenIoni"], "hIoni/proton": ["Bragg"], "hIoni/B+": ["Bragg"]}}, "msc_range_factor": 0.08, "msc_muhad_range_factor": 0.2, "step_functions": ["Step function for e+- (0.2, 0.01 mm)", "Step function for muons/hadrons (0.1, 0.05 mm)"]}
+
+    def test_a_pair_differs_only_for_the_particles_it_differs_for(self):
+        hadronic = json.loads(json.dumps(self.EMZ))
+        del hadronic["models"]["world"]["hIoni/B+"]
+        self.assertEqual(C.family_view(self.EMZ, "electron"), C.family_view(hadronic, "electron"))
+        self.assertNotEqual(C.family_view(self.EMZ, "hadron"), C.family_view(hadronic, "hadron"))
+
+    def test_an_em_option_changes_the_electron_view(self):
+        for change in ({"msc_range_factor": 0.04}, {"step_functions": ["Step function for e+- (0.2, 0.1 mm)"]}):
+            self.assertNotEqual(C.family_view(self.EMZ, "electron"), C.family_view({**self.EMZ, **change}, "electron"))
+
+
 if __name__ == "__main__":
     unittest.main()

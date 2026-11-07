@@ -779,6 +779,27 @@ def bound_inputs(study: dict, declared: dict, qualifying: bool, results: dict | 
     return gaps
 
 
+MODEL_FAMILIES = {"electron": ("/e-", "/e+", "e+-", "msc_range_factor"), "hadron": ("hIoni/", "muons/hadrons", "msc_muhad_range_factor")}
+
+
+def family_view(effective: dict, family: str) -> dict:
+    """What a run read back that applies to one family of particles: two lists can differ for heavy hadrons and be the same for electrons."""
+    marks = MODEL_FAMILIES[family]
+    return {"models": {region: {name: value for name, value in rows.items() if any(mark in name for mark in marks)} for region, rows in (effective.get("models") or {}).items()},
+            "parameters": {name: effective.get(name) for name in marks if name in effective}, "step_functions": [row for row in effective.get("step_functions") or [] if any(mark in row for mark in marks)]}
+
+
+def cmd_confirm_models(args) -> tuple[str, dict]:
+    """Section 11 of the g4sim plan: the difference of two physics lists estimates model uncertainty only if they really use different models for the particle concerned. The evidence is what each run read back
+    (effective-em.json), never the lists' names."""
+    first, second = (family_view(load_json(path), args.family) for path in (args.first, args.second))
+    differing = [name for name in first if first[name] != second[name]]
+    record = {"schema": "model-confirmation/1", "lists": [args.first_list, args.second_list], "family": args.family, "first_sha256": sha256_file(Path(args.first)), "second_sha256": sha256_file(Path(args.second)), "differing": differing, "models_differ": bool(differing)}
+    if args.out:
+        Path(args.out).write_text(json.dumps(record, indent=1) + "\n", encoding="utf-8")
+    return ("ok" if differing else "failed"), record
+
+
 def cmd_label(args) -> tuple[str, dict]:
     spec_path = Path(args.spec)
     study = load_study(spec_path)
@@ -1033,12 +1054,19 @@ def main(argv=None) -> int:
                         "evidence records); otherwise the record stays unvalidated and the refusal is reported")
     for sp in sub.choices.values():
         add_status_argument(sp)
+    p = sub.add_parser("confirm-models", help="whether two physics lists used different models, from what their runs read back")
+    for name in ("first", "second"):
+        p.add_argument(f"--{name}", required=True, help="effective-em.json of a run")
+        p.add_argument(f"--{name}-list", required=True)
+    p.add_argument("--family", required=True, choices=sorted(MODEL_FAMILIES))
+    p.add_argument("--out")
+    add_status_argument(p)
     args = ap.parse_args(argv)
     inputs = {k: v for k, v in vars(args).items() if k != "status" and not (k == "effective_config" and v is None)}
     given = {t.split("=")[0] for t in (sys.argv[1:] if argv is None else argv) if t.startswith("--")}
     defaults = [k for k in ("rules", "bootstrap", "seed", "mpv_bin_mev", "tail_threshold_mev", "created", "status")
                 if hasattr(args, k) and f"--{k.replace('_', '-')}" not in given]
-    handlers = {"spec": cmd_spec, "run": cmd_run, "variations": cmd_variations,
+    handlers = {"spec": cmd_spec, "run": cmd_run, "variations": cmd_variations, "confirm-models": cmd_confirm_models,
                 "label": cmd_label}
     try:
         status, doc = handlers[args.command](args)
