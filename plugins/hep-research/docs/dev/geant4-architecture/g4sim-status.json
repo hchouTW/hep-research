@@ -41,12 +41,14 @@
    "blocked_on": []
   },
   "S5": {
-   "state": "in-progress",
+   "state": "blocked",
    "worktree": "../hep-research-g4sim-S5",
    "branch": "g4sim/S5",
    "task_card_sha256": "d890fb46ac7894845d704df67c27cab8ab1951b50d366fb3f24cbc1aac5d39b9",
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S5.md",
-   "blocked_on": []
+   "blocked_on": [
+    "E7 item 6: Section 14.3 item 4 adds geometry_kind to the design geometry file, while item 8 and gate 2 require that file exactly unchanged for layered-spectrometer; J15 records its hash. The maintainer decides."
+   ]
   },
   "S6": {
    "state": "not-started",
@@ -107,5 +109,5 @@
   "GB23": "confirmed",
   "GB24": "confirmed"
  },
- "updated": "2026-11-07T10:23:11Z"
+ "updated": "2026-11-07T10:25:15Z"
 }
