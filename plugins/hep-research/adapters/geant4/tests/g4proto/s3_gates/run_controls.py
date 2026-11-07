@@ -178,6 +178,31 @@ def main() -> int:
     checks["pai_read_back_in_its_region"] = pai_run["status"] == "ok" and any(row[0] == "PAIModel" for row in in_tracker)
     checks["pai_changing_models_outside_refused"] = pai_broken["status"] == "rejected" and bool(pai_broken.get("problems"))
 
+    # S4, Section 10.3: E^L + E^S equals edep_visible bin by bin; n^L counts the steps with mu_s > 10
+    scintillating = copy.deepcopy(spec)
+    scintillating["materials"]["scintillator"]["scintillation"] = {"yield_per_MeV": "100", "resolution_scale": "1", "facts": "assumed"}
+    splitting = copy.deepcopy(request)
+    segments = {"along_axis": {"axis": "z", "width_mm": "20"}}
+    splitting["scorers"] = [{"name": "visible", "readout": "none", "select": {"tags": ["active"]}, "quantity": "edep_visible", "segmentation": segments, "split": "midpoint"},
+                            {"name": "split", "readout": "none", "select": {"tags": ["active"]}, "quantity": "edep_visible_ly_split", "segmentation": segments, "split": "midpoint"}]
+    split_run, split_work = case("split", spec_in=scintillating, request_in=splitting)
+    refused, _ = case("split_no_yield", request_in=splitting)
+    whole: dict = {}
+    parts: dict = {}
+    large_steps = 0
+    for row in rows_of(split_work / "cells.csv"):
+        if row[2] == "-1":
+            continue
+        if row[1] == "visible":
+            whole[(row[0], row[2], int(row[3]))] = float(row[4])
+        else:
+            key = (row[0], row[2], int(row[3]) // 2)
+            parts[key] = parts.get(key, 0.0) + float(row[4])
+            large_steps += int(row[5]) if int(row[3]) % 2 == 0 else 0
+    worst = max((abs(parts.get(key, 0.0) - value) for key, value in whole.items()), default=math.inf)
+    checks["split_closes_on_edep_visible"] = split_run["status"] == "ok" and set(whole) == set(parts) and worst < 1e-9 and large_steps > 0
+    checks["split_without_a_yield_refused"] = refused["status"] == "rejected" and any(item["code"] == "scintillation-undeclared" for item in refused.get("findings", []))
+
     record = source_density.density(request["source"])
     source_card = copy.deepcopy(card)
     source_card["run"]["events"] = 2000

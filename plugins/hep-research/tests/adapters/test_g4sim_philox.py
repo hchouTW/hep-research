@@ -79,6 +79,14 @@ class PhiloxInCpp(unittest.TestCase):
         for group, line in zip(groups, self.ask(text)):
             self.assertEqual(float.fromhex(line), math.fsum(group), json.dumps(group)[:120])
 
+    def test_a_step_at_exactly_ten_is_on_the_poisson_side(self):
+        with tempfile.TemporaryDirectory() as folder:
+            source = Path(folder) / "split.cc"
+            source.write_text('#include <cstdio>\n#include "ScintillationSplit.hh"\nint main() { std::printf("%d %d %d", g4sim::IsLargeStep(10.), g4sim::IsLargeStep(10.000000000000002), g4sim::IsLargeStep(10., true)); }\n', encoding="utf-8")
+            subprocess.run(["c++", "-std=c++17", f"-I{HEADERS}", str(source), "-o", str(Path(folder) / "split")], check=True, timeout=60)
+            done = subprocess.run([str(Path(folder) / "split")], capture_output=True, text=True, check=True, timeout=30)
+        self.assertEqual(done.stdout, "0 1 1")  # the third is the negative control: mu_s = 10 in E^L
+
     def test_fast_math_is_refused(self):
         with tempfile.TemporaryDirectory() as folder:
             source = Path(folder) / "fast.cc"

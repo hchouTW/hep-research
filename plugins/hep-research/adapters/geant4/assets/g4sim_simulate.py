@@ -79,6 +79,9 @@ def resolved_request(request: dict, ir: dict) -> dict:
             item["rigidity_GV"] = float(scorer["chord_min_rigidity_GV"])
         if "time_window_ns" in scorer:
             item["window_ns"] = [float(value) for value in scorer["time_window_ns"]]
+        if scorer["quantity"] == physics_check.SPLIT_QUANTITY:
+            templates, materials = ir["physical"]["templates"], ir["physical"]["materials"]
+            item["light_yield_per_MeV"] = {name: float(materials.get(templates[name]["material"], {}).get("scintillation", {}).get("yield_per_MeV", 0)) for name in item["templates"]}
         scorers.append(item)
     out = {"source": resolved_source(request["source"], ir["physical"]["frames"]), "scorers": scorers}
     if any(item["quantity"] in physics_check.BIRKS_QUANTITIES for item in scorers):

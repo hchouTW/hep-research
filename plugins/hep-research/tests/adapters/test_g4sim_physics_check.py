@@ -115,6 +115,12 @@ class Scorers(unittest.TestCase):
         self.assertEqual(codes(check.scorer_findings([scorer], {"m": {}}, {"s": ["m"]})), ["birks-undeclared"])
         self.assertEqual(check.scorer_findings([scorer], {"m": {"ionisation": {"birks_mm_per_MeV": "0"}}}, {"s": ["m"]}), [])
 
+    def test_a_split_needs_a_scintillation_yield(self):
+        scorer = {"name": "s", "quantity": "edep_visible_ly_split"}
+        declared = {"m": {"ionisation": {"birks_mm_per_MeV": "0.1"}, "scintillation": {"yield_per_MeV": "100", "resolution_scale": "1"}}}
+        self.assertEqual(check.scorer_findings([scorer], declared, {"s": ["m"]}), [])
+        self.assertEqual(codes(check.scorer_findings([scorer], {"m": {"ionisation": {"birks_mm_per_MeV": "0.1"}}}, {"s": ["m"]})), ["scintillation-undeclared"])
+
     def test_the_source_declares_its_density(self):
         self.assertEqual(check.source_findings({"density": "analytic"}), [])
         self.assertEqual(codes(check.source_findings({})), ["source-density"])

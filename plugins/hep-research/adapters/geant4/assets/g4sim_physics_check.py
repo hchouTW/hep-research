@@ -18,13 +18,14 @@ WORLD_REGION_NAMES = ("", "world", "World")
 MAPPED_PROCESS = {"e-": "eIoni", "e+": "eIoni", "mu+": "muIoni", "mu-": "muIoni", "GenericIon": "ionIoni"}
 ALLOWED_USER_LIMITS = {"max_step_mm"}
 
-ADDITIVE = ("edep", "edep_visible", "edep_charged", "edep_nonionizing", "track_length", "edep_by_dedx_class")
+ADDITIVE = ("edep", "edep_visible", "edep_charged", "edep_nonionizing", "track_length", "edep_by_dedx_class", "edep_visible_ly_split")
 BOUNDARY = ("n_crossings", "crossing_kinematics", "energy_out_by_face")
 FIRST = ("time_first", "first_entry_kinematics")
-LATER_QUANTITIES = {"edep_visible_ly_split": "S4", "photon_detected": "S7"}
+LATER_QUANTITIES = {"photon_detected": "S7"}
 SEGMENTATIONS = ("none", "along_axis", "cartesian_xy", "cartesian_xyz", "polar")
 ALLOWED_SEGMENTATION = {**{name: SEGMENTATIONS for name in ADDITIVE}, **{name: ("none", "cartesian_xy") for name in BOUNDARY}, **{name: ("none",) for name in FIRST}}
-BIRKS_QUANTITIES = ("edep_visible", "edep_by_dedx_class")
+BIRKS_QUANTITIES = ("edep_visible", "edep_by_dedx_class", "edep_visible_ly_split")
+SPLIT_QUANTITY = "edep_visible_ly_split"
 
 
 def _finding(code: str, path: str, message: str) -> dict:
@@ -150,6 +151,8 @@ def scorer_findings(scorers: list, materials: dict | None = None, selected_mater
             for name in (selected_materials or {}).get(scorer.get("name"), ()):
                 if "birks_mm_per_MeV" not in materials.get(name, {}).get("ionisation", {}):
                     findings.append(_finding("birks-undeclared", where, f"{name} declares no Birks constant, and Geant4 may set one silently (GB13)"))
+                if quantity == SPLIT_QUANTITY and "scintillation" not in materials.get(name, {}):
+                    findings.append(_finding("scintillation-undeclared", where, f"{name} declares no scintillation yield or RESOLUTIONSCALE (Section 10.3)"))
     return findings
 
 

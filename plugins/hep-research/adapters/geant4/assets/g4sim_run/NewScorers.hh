@@ -32,6 +32,7 @@
 #include "G4VSolid.hh"
 #include "MiniJson.hh"
 #include "NewBuild.hh"
+#include "ScintillationSplit.hh"
 
 namespace g4sim {
 
@@ -56,6 +57,7 @@ struct ScorerSpec {
   std::set<std::string> templates;
   Segmentation segmentation;
   double fraction = 0.1, rigidityGV = -1., windowLow = -1., windowHigh = -1.;
+  std::map<std::string, double> lightYield;  // edep_visible_ly_split: per MeV, by template
   bool Boundary() const { return quantity == "n_crossings" || quantity == "crossing_kinematics" || quantity == "energy_out_by_face"; }
   bool First() const { return quantity == "time_first" || quantity == "first_entry_kinematics"; }
 };
@@ -83,6 +85,8 @@ inline std::vector<ScorerSpec> ReadScorers(const Value& request) {
     if (item.has("split")) spec.split = item.obj.at("split").str;
     if (item.has("fraction")) spec.fraction = item.obj.at("fraction").num;
     if (item.has("rigidity_GV")) spec.rigidityGV = item.obj.at("rigidity_GV").num;
+    if (item.has("light_yield_per_MeV"))
+      for (const auto& [name, value] : item.obj.at("light_yield_per_MeV").obj) spec.lightYield[name] = value.num;
     if (item.has("window_ns")) {
       spec.windowLow = item.obj.at("window_ns").arr[0].num;
       spec.windowHigh = item.obj.at("window_ns").arr[1].num;
@@ -386,12 +390,16 @@ class ScorerSums {
     if (scorer.quantity == "edep") value = deposit / MeV;
     else if (scorer.quantity == "edep_charged") value = charged ? deposit / MeV : 0.;
     else if (scorer.quantity == "edep_nonionizing") value = nonIonizing / MeV;
-    else if (scorer.quantity == "edep_visible") value = G4LossTableManager::Instance()->EmSaturation()->VisibleEnergyDepositionAtAStep(step) / MeV;
+    else if (scorer.quantity == "edep_visible" || scorer.quantity == "edep_visible_ly_split") value = G4LossTableManager::Instance()->EmSaturation()->VisibleEnergyDepositionAtAStep(step) / MeV;
     else if (scorer.quantity == "track_length") value = charged || particle->GetParticleName() == "geantino" ? length / mm : 0.;  // a geantino scan measures paths (S3 gate 2)
     if (value == 0.) return;
     fDirect[i] += value;
+    // edep_visible_ly_split: bin 2b holds E^L_b and 2b + 1 holds E^S_b, by the whole step's mu_s; a row's count of summands is n^L_b for the first (Section 10.3)
+    const bool split = scorer.quantity == "edep_visible_ly_split";
+    const int part = split ? (IsLargeStep(scorer.lightYield.at(touchable->GetVolume()->GetLogicalVolume()->GetName()) * value, ScintillationControl()) ? 0 : 1) : 0;
+    const int stride = split ? 2 : 1;
     if (scorer.segmentation.kind == "none") {
-      Add(i, volume, 0, value);
+      Add(i, volume, part, value);
       return;
     }
     const G4AffineTransform& toLocal = touchable->GetHistory()->GetTopTransform();
@@ -400,15 +408,15 @@ class ScorerSums {
     const G4ThreeVector chord = b - a;
     const double width = chord.mag() > 0. ? grid.CrossingWidth(chord.unit()) : HUGE_VAL;
     if (!charged || length <= scorer.fraction * width || fControl == "force_post_step") {
-      Add(i, volume, grid.Bin(b), value);
+      Add(i, volume, grid.Bin(b) * stride + part, value);
       return;
     }
     Sagitta(i, step, length, grid);
     if (scorer.split == "midpoint") {
-      Add(i, volume, grid.Bin(0.5 * (a + b)), value);
+      Add(i, volume, grid.Bin(0.5 * (a + b)) * stride + part, value);
       return;
     }
-    for (const auto& [bin, share] : grid.Apportion(a, b)) Add(i, volume, bin, value * share);
+    for (const auto& [bin, share] : grid.Apportion(a, b)) Add(i, volume, bin * stride + part, value * share);
   }
 
   // Section 8.7: an apportioned step's sagitta against 10% of the bin width.
