@@ -115,6 +115,32 @@ def effective_problems(effective: dict, card: dict, ir: dict, resolved: dict) ->
     return problems
 
 
+def outside_differences(with_pai: dict, without_pai: dict, requests: list) -> list:
+    """GB12: the models and fluctuation models outside the PAI regions equal those of a run without PAI. A difference is an error (Section 6.2.9)."""
+    regions = {request["region"] for request in requests}
+    problems = [] if without_pai and with_pai else ["no models were read back, so nothing can be compared"]
+    for region, processes in without_pai.items():
+        if region in regions:
+            continue
+        for key, rows in processes.items():
+            if with_pai.get(region, {}).get(key) != rows:
+                problems.append(f"region {region}, {key}: PAI changed the models outside its region")
+    return problems
+
+
+def missing_pai(models: dict, requests: list, ionisation: dict) -> list:
+    """Each process a request maps to really carries a PAI model in its region: Geant4 read back, not check-spec's prediction."""
+    problems = []
+    for row in physics_check.effective_pai(requests, ionisation):
+        found = {key: rows for key, rows in models.get(row["region"], {}).items() if key.startswith(f"{row['process']}/")}
+        if not found:
+            problems.append(f"region {row['region']}, {row['process']}: nothing read back")
+        for key, rows in found.items():
+            if not any(item[0].startswith("PAI") for item in rows):
+                problems.append(f"region {row['region']}, {key}: no PAI model in effect")
+    return problems
+
+
 def ionisation_table(effective: dict) -> dict:
     return {name: None if value == "none" else value for name, value in effective["ionisation"].items()}
 
@@ -219,16 +245,27 @@ def simulate(card: dict, request: dict, checked: dict, program: Path, work: Path
     (work / "ir.json").write_text(json.dumps(ir), encoding="utf-8")
     (work / "request.json").write_text(json.dumps(resolved), encoding="utf-8")
     preflight = json.loads(json.dumps(card))
-    preflight["run"]["events"] = 0
+    preflight["run"]["events"] = 0  # the run's own mode: a serial run has built no model tables at this point, and would read back nothing
+    requests = card.get("physics", {}).get("pai", [])
+    plain_models = None
+    if requests:  # the same settings with no PAI, for GB12's comparison
+        plain = json.loads(json.dumps(preflight))
+        plain["physics"]["pai"] = []
+        (work / "run.json").write_text(json.dumps(plain), encoding="utf-8")
+        code = run_program(program, work, environment)
+        if code != 0:
+            return {"status": "failed", "exit_status": code, "stage": "preflight without PAI"}
+        plain_models = json.loads((work / "effective-em.json").read_text(encoding="utf-8"))["models"]
     (work / "run.json").write_text(json.dumps(preflight), encoding="utf-8")
     code = run_program(program, work, environment)
     if code != 0:
         return {"status": "failed", "exit_status": code, "stage": "preflight"}
     effective = json.loads((work / "effective-em.json").read_text(encoding="utf-8"))
     problems = effective_problems(effective, card, ir, resolved)
-    requests = card.get("physics", {}).get("pai", [])
     regions = {node["region"] for node in ir["physical"]["templates"].values()}
     findings = physics_check.pai_findings(requests, regions, ionisation_table(effective), ir["physical"]["physics_requirements"]) if requests else []
+    if requests and not findings:
+        problems += outside_differences(effective["models"], plain_models, requests) + missing_pai(effective["models"], requests, ionisation_table(effective))
     if problems or findings:
         return {"status": "rejected", "problems": problems, "findings": findings}
     (work / "run.json").write_text(json.dumps(card), encoding="utf-8")
@@ -239,7 +276,7 @@ def simulate(card: dict, request: dict, checked: dict, program: Path, work: Path
     cells = _rows(work / "cells.csv")
     closure = closure_problems([row for row in cells if row[1] in {item["name"] for item in resolved["scorers"] if item["quantity"] in physics_check.ADDITIVE}])
     summary = {"status": "failed" if closure["failing"] else "ok", "rows": counts, "closure": closure, "balance": balance_summary(_rows(work / "boundary.csv")), "conservation": conservation_summary(work / "conservation.csv"),
-               "effective": {"birks_mm_per_MeV": effective["birks_mm_per_MeV"], "step_functions": effective["step_functions"], "pai": physics_check.effective_pai(requests, ionisation_table(effective))},
+               "effective": {"birks_mm_per_MeV": effective["birks_mm_per_MeV"], "step_functions": effective["step_functions"], "pai": physics_check.effective_pai(requests, ionisation_table(effective)), "models": effective["models"]},
                "geometry_id": checked["geometry_id"]}
     (work / "column_map.json").write_text(json.dumps({"scorers": resolved["scorers"], "volume_id": ir["physical"]["volume_id"]}, indent=1) + "\n", encoding="utf-8")
     (work / "summary.json").write_text(json.dumps(summary, indent=1) + "\n", encoding="utf-8")

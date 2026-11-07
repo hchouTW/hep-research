@@ -57,6 +57,28 @@ class ReadBack(unittest.TestCase):
         self.assertEqual(len(simulate.effective_problems(self.EFFECTIVE, card, IR, self.RESOLVED)), 1)
 
 
+class PaiReadBack(unittest.TestCase):
+    PLAIN = {"DefaultRegionForTheWorld": {"eIoni/e-": [["MollerBhabha", "UrbanFluc"]]}, "tracker": {"eIoni/e-": [["MollerBhabha", "UrbanFluc"]]}}
+    REQUESTS = [{"region": "tracker", "particle": "e-", "model": "PAI"}]
+    WITH_PAI = {"DefaultRegionForTheWorld": {"eIoni/e-": [["MollerBhabha", "UrbanFluc"]]}, "tracker": {"eIoni/e-": [["PAIModel", "PAIModel"]]}}
+
+    def test_models_outside_the_region_unchanged_pass(self):
+        self.assertEqual(simulate.outside_differences(self.WITH_PAI, self.PLAIN, self.REQUESTS), [])
+
+    def test_a_changed_fluctuation_model_outside_is_an_error(self):
+        changed = {**self.WITH_PAI, "DefaultRegionForTheWorld": {"eIoni/e-": [["MollerBhabha", "UniFluc"]]}}
+        self.assertEqual(len(simulate.outside_differences(changed, self.PLAIN, self.REQUESTS)), 1)
+
+    def test_an_empty_read_back_is_an_error_and_never_a_pass(self):
+        self.assertEqual(len(simulate.outside_differences({}, {}, self.REQUESTS)), 1)
+        self.assertEqual(len(simulate.missing_pai({}, self.REQUESTS, {"e-": "eIoni"})), 1)
+
+    def test_a_request_geant4_did_not_apply_is_an_error(self):
+        table = {"e-": "eIoni"}
+        self.assertEqual(simulate.missing_pai(self.WITH_PAI, self.REQUESTS, table), [])
+        self.assertEqual(len(simulate.missing_pai(self.PLAIN, self.REQUESTS, table)), 1)
+
+
 class Closure(unittest.TestCase):
     ROWS = [["0", "s", "1", "0", "1.5", "2", "1.5"], ["0", "s", "1", "1", "2.5", "1", "2.5"], ["0", "s", "-1", "-1", "4", "3", "4"]]
 

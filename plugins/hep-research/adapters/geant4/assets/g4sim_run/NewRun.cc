@@ -17,6 +17,11 @@
 #include "G4LossTableManager.hh"
 #include "G4ParticleTable.hh"
 #include "G4ProcessManager.hh"
+#include "G4ProductionCutsTable.hh"
+#include "G4Region.hh"
+#include "G4RegionStore.hh"
+#include "G4VEmFluctuationModel.hh"
+#include "G4VEmModel.hh"
 #include "G4Run.hh"
 #include "G4RunManagerFactory.hh"
 #include "G4SDManager.hh"
@@ -52,6 +57,47 @@ struct Shared {
   std::set<std::string> killedSecondaries;
   long long seed = 0, firstEvent = 0;
 };
+
+// Section 6.2.9: the model and fluctuation model each ionization process really uses, in each region, at energies from 1 keV to 100 GeV. Read from Geant4, never predicted.
+std::string RegionModels() {
+  const auto* table = G4ProductionCutsTable::GetProductionCutsTable();
+  std::map<std::string, std::size_t> couples;
+  for (G4Region* region : *G4RegionStore::GetInstance()) {
+    for (std::size_t i = 0; i < table->GetTableSize(); ++i) {
+      const auto* couple = table->GetMaterialCutsCouple(static_cast<G4int>(i));
+      if (couple->IsUsed() && region->FindCouple(const_cast<G4Material*>(couple->GetMaterial())) == couple) couples[region->GetName()] = i;
+    }
+  }
+  std::ostringstream o;
+  o << "{";
+  bool firstRegion = true;
+  for (const auto& [name, index] : couples) {
+    o << (firstRegion ? "" : ", ") << '"' << name << "\": {";
+    firstRegion = false;
+    bool firstProcess = true;
+    std::set<std::string> seen;
+    for (G4VEnergyLossProcess* item : G4LossTableManager::Instance()->GetEnergyLossProcessVector()) {
+      const std::string process = item->GetProcessName();
+      const G4ParticleDefinition* particle = item->Particle();
+      if ((process != "eIoni" && process != "hIoni" && process != "muIoni" && process != "ionIoni") || !particle) continue;
+      if (!seen.insert(process + "/" + particle->GetParticleName()).second) continue;
+      o << (firstProcess ? "" : ", ") << '"' << process << "/" << particle->GetParticleName() << "\": [";
+      firstProcess = false;
+      bool firstEnergy = true;
+      for (double energy : {1e-3, 1e-2, 1e-1, 1., 1e1, 1e2, 1e3, 1e4, 1e5}) {
+        std::size_t couple = index;
+        G4VEmModel* model = item->SelectModelForMaterial(energy * MeV, couple);
+        G4VEmFluctuationModel* fluctuation = model ? model->GetModelOfFluctuations() : nullptr;
+        o << (firstEnergy ? "" : ", ") << "[\"" << (model ? model->GetName() : "none") << "\", \"" << (fluctuation ? fluctuation->GetName() : "none") << "\"]";
+        firstEnergy = false;
+      }
+      o << "]";
+    }
+    o << "}";
+  }
+  o << "}";
+  return o.str();
+}
 
 // Section 8.7, 8.8 and 6.2.9: what is really in effect, for the driver to compare with the run card.
 void WriteEffective() {
@@ -93,7 +139,7 @@ void WriteEffective() {
     out << (first ? "" : ", ") << '"' << particle->GetParticleName() << "\": \"" << name << '"';
     first = false;
   }
-  out << "}}\n";
+  out << "}, \"models\": " << RegionModels() << "}\n";
 }
 
 class KillPhysics : public G4VPhysicsConstructor {

@@ -3,6 +3,7 @@
 #ifndef G4SIM_PAICONSTRUCTOR_HH
 #define G4SIM_PAICONSTRUCTOR_HH
 
+#include <cstdlib>
 #include <string>
 #include <vector>
 
@@ -45,6 +46,7 @@ class PaiConstructor : public G4VPhysicsConstructor {
         G4VEmModel* below = name == "eIoni" ? static_cast<G4VEmModel*>(new G4MollerBhabhaModel()) : name == "ionIoni" ? static_cast<G4VEmModel*>(new G4LindhardSorensenIonModel()) : new G4BraggModel();
         G4VEmFluctuationModel* fluctuation = name == "ionIoni" ? static_cast<G4VEmFluctuationModel*>(new G4IonFluctuations()) : new G4UniversalFluctuation();
         below->SetHighEnergyLimit(lowest);
+        if (std::getenv("G4SIM_PAI_CONTROL")) item->SetFluctModel(new G4UniversalFluctuation());  // the negative test: this acts on the whole process, as ActivatePAI does
         item->AddEmModel(-1, below, fluctuation, region);
         if (request.model == "PAIphoton") {
           auto* built = new G4PAIPhotModel(particle, "PAIPhotModel");

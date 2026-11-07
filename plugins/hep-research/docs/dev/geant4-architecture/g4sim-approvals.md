@@ -145,4 +145,5 @@ These are not Section 20 decisions. They are how S0 reconciled requirements of t
 | GB21 corrected rule | A step passes within 1e-12 or within 4 ulp of the pre-step kinetic energy, changed after the 4 ulp form failed | hsinyichou (maintainer) | 2026-11-06 | "approve the GB21 rule" |
 | S3 prototypes on E2 | Waived: GB11 to GB17, GB19 to GB21, GB23 and GB24 are confirmed on E5 only, as a stated limitation; Section 23 asks for E2 and E5 | hsinyichou (maintainer) | 2026-11-06 | "drop the Mac run" |
 | S3 final regression | The 112 legacy runs on Slurm with the final code, about 80 core-hours | hsinyichou (maintainer) | 2026-11-06 | "approve the final regression" |
+| Review findings (2026-11-07) | Fix them all; S8 gate 3 by the paired design; check-spec rejects `G4StrawTubeXTRadiator`; `g4sim-task.zh.md` stays frozen | hsinyichou (maintainer) | 2026-11-07 | "use your recommendations" |
 | Targeted review of the addendum (Section 23, step 4) | Open | | | |

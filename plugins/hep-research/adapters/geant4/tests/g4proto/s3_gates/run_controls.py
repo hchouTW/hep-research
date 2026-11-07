@@ -167,6 +167,17 @@ def main() -> int:
     checks["em_parameters_read_back"] = set_right["status"] == "ok"
     checks["em_parameters_too_early_refused"] = too_soon["status"] == "rejected" and bool(too_soon.get("problems"))
 
+    regional = copy.deepcopy(spec)
+    regional["templates"]["block"]["region"] = "tracker"
+    pai_card = copy.deepcopy(card)
+    pai_card["physics"]["pai"] = [{"region": "tracker", "particle": "e-", "model": "PAI"}]
+    pai_card["run"]["events"] = 20
+    pai_run, _ = case("pai", spec_in=regional, card_in=pai_card)
+    pai_broken, _ = case("pai_world_changed", spec_in=regional, card_in=pai_card, environment={"G4SIM_PAI_CONTROL": "1"})
+    in_tracker = pai_run.get("effective", {}).get("models", {}).get("tracker", {}).get("eIoni/e-", [])
+    checks["pai_read_back_in_its_region"] = pai_run["status"] == "ok" and any(row[0] == "PAIModel" for row in in_tracker)
+    checks["pai_changing_models_outside_refused"] = pai_broken["status"] == "rejected" and bool(pai_broken.get("problems"))
+
     record = source_density.density(request["source"])
     source_card = copy.deepcopy(card)
     source_card["run"]["events"] = 2000
