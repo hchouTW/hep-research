@@ -603,6 +603,13 @@
    "registered_at": "2026-11-07T04:44:28Z",
    "card_commit": "3f3f0cc4",
    "reason": "Gate 7's K and replicas registered from its independent trial, before the test; Execution log"
+  },
+  {
+   "card": "g4sim-tasks/S4.md",
+   "sha256": "046044a0aace872251fe893dc9e847e312147c301eea05d3f7b4c9e0422fa7ef",
+   "registered_at": "2026-11-07T04:46:01Z",
+   "card_commit": "4b779fc1",
+   "reason": "Execution log only (gate 7 result); thresholds unchanged"
   }
  ]
 }
