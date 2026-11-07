@@ -8924,6 +8924,16 @@ the hook of `s3_steps` and Par01, the radiator code of `s3_optics` and TestEm10,
 
 **Confirmation** (hsinyichou, maintainer, 2026-11-07, in the Claude Code session): "G5 is OK.", in answer to the request for G5 at that commit, whose suggested wording stated that the files are written from the Geant4 API with no example code copied or adapted, and that `PaiConstructor.hh`, `BirksTerms.hh` and `s3_em/main.cc` are adapted in part from Geant4 library code. This record does not state which files the maintainer read.
 
+## G4SIM-S4-G5 (2026-11-07, E5 for the scan; confirmation by the maintainer)
+
+G5 for g4sim phase S4 (gate 11), at `064c6cca`: `adapters/geant4/assets/g4sim/Philox.hh`, and the hit output, `g4sim_run/NewHits.hh` and `g4sim/HitColumns.hh`.
+
+**Evidence**: `adapters/geant4/tests/g4proto/g5_scan.py` at `39d680cb`, on all 13 C++ files changed since 0.58.0, against all 5,657 `.cc`, `.hh` and `.icc` files of the Geant4 11.4.3 examples tree: 0 shared runs of 3 and of 4 consecutive lines;
+the positive control found 863 and 880. Four independent reads by agents that did not write the code found defects, all fixed or recorded in `g4sim-gates/S4.md`; the first looked for adaptation and found none, by a token scan of the examples, not of Geant4 library
+sources. `Philox.hh`'s fsum follows CPython's `math.fsum`, by design, and says so; the Python Software Foundation License ships as `adapters/geant4/assets/PYTHON-LICENSE.txt`.
+
+**Confirmation** (hsinyichou, maintainer, 2026-11-07, in the Claude Code session): "G5 is OK.", in answer to the request for G5 of those files, which also pointed to "What the table does not cover" in `g4sim-gates/S4.md`.
+
 ## 0.57.0 release check (2026-11-06, E2 and CI)
 
 Release branch `release/0.57.0`, based on main `dfbbb787` (PR #354 merged), with main merged in at `575e309b` for PR #353 (citation corrections in 10 hep-detector reference documents).
