@@ -150,3 +150,22 @@ Fixed before the job. Job `<private>/jobs/checkpoint-c/checkpoint.sh` (`3ec7b3f1
 | Any other failure, error or unfinished module | Recorded with its IDs. Not attributed to this work without evidence. T06, T14 and T15a stay provisional, and it goes to the user |
 
 Slurm `COMPLETED` is not a result; the job exits non-zero on the known LCG error, as before.
+
+### Gate C checkpoint, first run
+
+Job 7487365, commit `baa9be3d`, Slurm `FAILED`, exit `1:0`, 12 min 27 s, node `hpa-wn30`, tree clean before and after. Evidence: `<private>/evidence/checkpoint-c-7487365/`.
+
+| Part | Result |
+| --- | --- |
+| `tests/skills/hep_detector` | 594 run, OK, 4 skipped |
+| `tests/routing` | 21 run, OK |
+| `--part units` | 7,604 run, 7,220 passed, 2 failures, 1 error, 381 skipped, 530 modules, all finished, 391 s |
+
+Not clean. Fourth row of the rule. The error is the known LCG test. The two failures, both from this work, are generated records the static gate does not read:
+
+- `tests.tools.test_skill_scripts.SkillScriptList.test_committed_list_is_up_to_date`: G03 moved lines in a reference file, and `tools/skill_scripts.json` stores them. Regenerated.
+- `tests.tools.test_run_all_checks.TimingCoverageTests.test_at_most_a_tenth_of_the_modules_lack_a_timing`: 64 of 530 modules lacked a timing, limit 53; 14 were T06, T14 and T15a's. Their measured times from this job added to `tools/module_timings.json`.
+
+All 14 new contract modules ran and passed. T06, T14 and T15a stay provisional. The job reruns at the commit carrying these two fixes, under the same rule; job 7487365 stays recorded as failed.
+
+Timeout of job 7472812: `tests.adapters.test_unbinned_fit` took 29.02 s inside the suite here, against 468.65 s and over 600 s before, and the whole units part 391 s against 734 s and 974 s, with load average 168 to 183 and one BLAS thread per process. This changed the thread limit, and also the node, so it is strong support for thread oversubscription, not proof. Node load alone is excluded.
