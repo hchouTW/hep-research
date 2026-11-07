@@ -554,6 +554,13 @@
    "registered_at": "2026-11-07T00:26:40Z",
    "card_commit": "8c0837ba",
    "reason": "Gate 3 states where its events and power come from; a duplicate GB20 line removed"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "a4f01720c132e7d8935229a291e3266b4a5a21e00187c66e88fe2de04b383dad",
+   "registered_at": "2026-11-07T00:36:39Z",
+   "card_commit": "b796e0d9",
+   "reason": "Execution log only (independent read, licence, final regression); thresholds unchanged"
   }
  ]
 }
