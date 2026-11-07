@@ -105,7 +105,8 @@ class Segmentation(unittest.TestCase):
         self.assertEqual(segmentation.bin_count(None, half), 1)
         self.assertEqual(segmentation.bin_count({"along_axis": {"axis": "z", "width_mm": "1"}}, half), 20)
         self.assertEqual(segmentation.bin_count({"cartesian_xy": {"width_mm": ["2", "5"]}}, half), 10)
-        self.assertEqual(segmentation.bin_count({"polar": {"width_r_mm": "1", "phi_bins": 8}}, half), 40)
+        self.assertEqual(segmentation.bin_count({"polar": {"width_r_mm": "1", "phi_bins": 8}}, half), 64)  # rings reach the corner, 7.07 mm
+        self.assertEqual(segmentation.bin_count({"polar": {"width_r_mm": "1", "phi_bins": 1}}, ["10", "200", "20"]), 201)  # wider in y than in x
 
     def test_wrong_forms_are_refused(self):
         half = ["500", "500", "500"]

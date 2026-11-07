@@ -1,0 +1,22 @@
+{
+ "$comment": "efficiency-map/1 (g4sim plan, Section 10.3): the chance that a photon from bin x reaches each channel. S4 uses analytic synthetic maps; mapped ones arrive in S7.",
+ "type": "object",
+ "required": ["schema", "channels", "form", "source_of_facts"],
+ "additionalProperties": false,
+ "properties": {
+  "schema": {"const": "efficiency-map/1"},
+  "channels": {"type": "array", "minItems": 1, "items": {"type": "string", "minLength": 1}},
+  "form": {
+   "type": "object",
+   "required": ["kind"],
+   "additionalProperties": false,
+   "properties": {
+    "kind": {"enum": ["uniform", "linear"]},
+    "value": {"type": "array", "items": {"type": "number", "minimum": 0}},
+    "intercept": {"type": "array", "items": {"type": "number"}},
+    "slope_per_bin": {"type": "array", "items": {"type": "number"}}
+   }
+  },
+  "source_of_facts": {"type": "string", "minLength": 1}
+ }
+}

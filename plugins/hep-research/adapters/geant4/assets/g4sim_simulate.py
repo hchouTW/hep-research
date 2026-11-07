@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import math
 import subprocess
@@ -21,7 +22,8 @@ for folder in (str(ROOT), str(Path(__file__).resolve().parent)):
 
 import g4sim_physics_check as physics_check  # noqa: E402
 
-from core.simulation import source_density  # noqa: E402
+from core.geometry import identity  # noqa: E402
+from core.simulation import hits, rng, source_density  # noqa: E402
 
 AXES = {"x": 0, "y": 1, "z": 2}
 CLOSURE_ULP = 2.0 ** -52
@@ -42,7 +44,20 @@ def _in_world(frame: str, vector: list, frames: dict) -> list:
     return [value + float(origin) for value, origin in zip(vector, frames[frame]["origin_mm"])]
 
 
-def resolved_source(source: dict, frames: dict) -> dict:
+def resolved_external(source: dict, folder: Path) -> dict:
+    """A text event file by its recorded hash, inside the request's folder, as a position CSV is."""
+    base = folder.resolve()
+    target = (base / source["path"]).resolve()
+    if Path(source["path"]).is_absolute() or not target.is_relative_to(base):
+        raise source_density.SourceError("source-path", "an event file lies inside the request's folder")
+    if hashlib.sha256(target.read_bytes()).hexdigest() != source["sha256"]:
+        raise source_density.SourceError("source-hash", f"{source['path']} does not match its recorded hash")
+    return {"density": "external", "external_path": str(target)}
+
+
+def resolved_source(source: dict, frames: dict, folder: Path | None = None) -> dict:
+    if source.get("density") == "external":
+        return resolved_external(source, folder or Path("."))
     record = source_density.density(source)
     record["position"]["centre_mm"] = _in_world(record["position"]["frame"], record["position"]["centre_mm"], frames)
     if "point_mm" in record["direction"]:
@@ -67,7 +82,7 @@ def selected_templates(select: dict, ir: dict) -> list:
     return sorted(name for name, own in tags.items() if wanted <= set(own)) if wanted else sorted(select.get("templates", []))
 
 
-def resolved_request(request: dict, ir: dict) -> dict:
+def resolved_request(request: dict, ir: dict, folder: Path | None = None) -> dict:
     scorers = []
     for scorer in request.get("scorers", []):
         item = {"name": scorer["name"], "quantity": scorer["quantity"], "templates": selected_templates(scorer["select"], ir), "segmentation": resolved_segmentation(scorer.get("segmentation"))}
@@ -79,11 +94,31 @@ def resolved_request(request: dict, ir: dict) -> dict:
             item["rigidity_GV"] = float(scorer["chord_min_rigidity_GV"])
         if "time_window_ns" in scorer:
             item["window_ns"] = [float(value) for value in scorer["time_window_ns"]]
+        if scorer.get("level") == "event_file":
+            item["hit_kind"] = scorer.get("hit_kind", "")  # a missing one is a finding of check-spec, which comes next
+            item["readout"] = scorer.get("readout", "none")
+        if scorer.get("level") == "moments":
+            item["moments"] = True
+        if scorer["quantity"] == physics_check.SPLIT_QUANTITY:
+            templates, materials = ir["physical"]["templates"], ir["physical"]["materials"]
+            item["light_yield_per_MeV"] = {name: float(materials.get(templates[name]["material"], {}).get("scintillation", {}).get("yield_per_MeV", 0)) for name in item["templates"]}
         scorers.append(item)
-    out = {"source": resolved_source(request["source"], ir["physical"]["frames"]), "scorers": scorers}
+    out = {"source": resolved_source(request["source"], ir["physical"]["frames"], folder), "scorers": scorers}
     if any(item["quantity"] in physics_check.BIRKS_QUANTITIES for item in scorers):
         out["birks_active"] = True
+    planes = request.get("reference_planes", [])
+    if planes or "truth" in request or any("hit_kind" in item for item in scorers):
+        keep = request.get("truth", {}).get("keep", ["primary"])
+        rules = [{"above_MeV": float(rule["energy_above_MeV"]), "region": rule.get("region", "")} for rule in keep if isinstance(rule, dict) and "energy_above_MeV" in rule]
+        out["truth"] = {"decay_products": "decay_products" in keep, "all": "all" in keep, "energy_rules": rules, "time_bin_ns": float(request.get("truth", {}).get("time_bin_ns", 1)),
+                        "planes_z_mm": [_in_world(plane["frame"], [0.0, 0.0, float(plane["z_mm"])], ir["physical"]["frames"])[2] for plane in planes]}
     return out
+
+
+def identified_request(request: dict, ir: dict) -> dict:
+    """The request as `request_id` hashes it (Section 6.3): `select` expanded, so tags that pick the same objects give the same identity."""
+    scorers = [{**{key: value for key, value in scorer.items() if key != "select"}, "templates": selected_templates(scorer["select"], ir)} for scorer in request.get("scorers", [])]
+    return {**request, "scorers": scorers} if "scorers" in request else request
 
 
 def selected_materials(resolved: dict, ir: dict) -> dict:
@@ -170,6 +205,41 @@ def merge_threads(work: Path) -> dict:
     return counts
 
 
+def merge_moments(work: Path, events: int) -> dict:
+    """`moments.csv` from the workers' partial sums, one final rounding per cell, so the result does not depend on the threads.
+
+    Rows: scorer, volume, bin, events run, events with a deposit, sum, sum of squares; bin -1 is the direct sum. A mean is the sum over the events run, which is why they are recorded.
+    The bins close on the direct sum within n x 2^-52 x sum |x|, as column rows do (Section 9.1).
+    """
+    cells: dict = {}
+    for path in sorted(work.glob("moments.thread*.csv")):
+        with path.open(encoding="utf-8", newline="") as handle:
+            for row in csv.reader(handle):
+                count = int(row[6])
+                cell = cells.setdefault((row[0], int(row[1]), int(row[2])), {"with_deposit": 0, "summands": 0, "absolute": 0.0, "sum": [], "squares": []})
+                cell["with_deposit"] += int(row[3])
+                cell["summands"] += int(row[4])
+                cell["absolute"] += float.fromhex(row[5])
+                cell["sum"].append([float.fromhex(value) for value in row[7:7 + count]])
+                cell["squares"].append([float.fromhex(value) for value in row[7 + count:]])
+        path.unlink()
+    rows = [[*key, events, cell["with_deposit"], repr(rng.merge_partial_sums(cell["sum"])), repr(rng.merge_partial_sums(cell["squares"]))] for key, cell in sorted(cells.items())]
+    if rows:
+        with (work / "moments.csv").open("w", encoding="utf-8", newline="") as handle:
+            csv.writer(handle, lineterminator="\n").writerows(rows)
+    binned: dict = {}
+    for row in rows:
+        if row[1] != -1:
+            binned.setdefault(row[0], []).append(float(row[5]))
+    failing = []
+    for row in rows:
+        if row[1] == -1:
+            cell = cells[(row[0], -1, -1)]
+            if abs(math.fsum(binned.get(row[0], [])) - float(row[5])) > cell["summands"] * 2.0 ** -52 * cell["absolute"]:
+                failing.append(row[0])
+    return {"rows": len(rows), "failing": failing}
+
+
 def closure_problems(cells: list) -> dict:
     """Section 9.1: per event and scorer, the bins against the direct sum, within n x 2^-52 x sum |x|. Rows: event, scorer, volume, bin, value, n, sum|x|."""
     sums: dict = {}
@@ -229,16 +299,24 @@ def conservation_summary(path: Path) -> dict:
     return {"events": len(rows), "largest_residual_MeV": max(residuals, default=0.0), "accounting_errors": sum(int(row["accounting_errors"]) for row in rows)}
 
 
+def failure_reason(log: Path) -> str:
+    """The line of a run's log that says why Geant4 stopped it."""
+    lines = log.read_text(encoding="utf-8", errors="replace").splitlines() if log.is_file() else []
+    return next((line.strip() for line in reversed(lines) if "the event file" in line or "a segmentation of" in line), "")
+
+
 def run_program(program: Path, work: Path, environment=None) -> int:
     with (work / "log.txt").open("a", encoding="utf-8") as log:
         return subprocess.run([str(program), "--new", "ir.json", "run.json", "request.json"], cwd=work, stdout=log, stderr=log, check=False, env=environment).returncode
 
 
-def simulate(card: dict, request: dict, checked: dict, program: Path, work: Path, environment=None) -> dict:
+def simulate(card: dict, request: dict, checked: dict, program: Path, work: Path, environment=None, folder: Path | None = None) -> dict:
     """Preflight with no events, so a wrong setting is refused before any event; then the run."""
     ir = checked["ir"]
-    resolved = resolved_request(request, ir)
+    resolved = resolved_request(request, ir, folder)
     findings = physics_check.card_findings(card, request, requirements=ir["physical"]["physics_requirements"], materials=ir["physical"]["materials"], selected_materials=selected_materials(resolved, ir))
+    regions = {record["region"] for record in ir["physical"]["templates"].values()} - {"default"}
+    findings += physics_check.hit_findings(resolved["scorers"], regions, request.get("truth", {}))
     if findings:
         return {"status": "rejected", "findings": findings}
     work.mkdir(parents=True, exist_ok=True)
@@ -254,12 +332,12 @@ def simulate(card: dict, request: dict, checked: dict, program: Path, work: Path
         (work / "run.json").write_text(json.dumps(plain), encoding="utf-8")
         code = run_program(program, work, environment)
         if code != 0:
-            return {"status": "failed", "exit_status": code, "stage": "preflight without PAI"}
+            return {"status": "failed", "exit_status": code, "stage": "preflight without PAI", "reason": failure_reason(work / "log.txt")}
         plain_models = json.loads((work / "effective-em.json").read_text(encoding="utf-8"))["models"]
     (work / "run.json").write_text(json.dumps(preflight), encoding="utf-8")
     code = run_program(program, work, environment)
     if code != 0:
-        return {"status": "failed", "exit_status": code, "stage": "preflight"}
+        return {"status": "failed", "exit_status": code, "stage": "preflight", "reason": failure_reason(work / "log.txt")}
     effective = json.loads((work / "effective-em.json").read_text(encoding="utf-8"))
     problems = effective_problems(effective, card, ir, resolved)
     regions = {node["region"] for node in ir["physical"]["templates"].values()}
@@ -271,13 +349,17 @@ def simulate(card: dict, request: dict, checked: dict, program: Path, work: Path
     (work / "run.json").write_text(json.dumps(card), encoding="utf-8")
     code = run_program(program, work, environment)
     if code != 0:
-        return {"status": "failed", "exit_status": code, "stage": "run"}
+        return {"status": "failed", "exit_status": code, "stage": "run", "reason": failure_reason(work / "log.txt")}
     counts = merge_threads(work)
+    moments = merge_moments(work, card["run"]["events"])
+    request_identity = identity.request_id(identified_request(request, ir), checked["geometry_id"])
     cells = _rows(work / "cells.csv")
     closure = closure_problems([row for row in cells if row[1] in {item["name"] for item in resolved["scorers"] if item["quantity"] in physics_check.ADDITIVE}])
-    summary = {"status": "failed" if closure["failing"] else "ok", "rows": counts, "closure": closure, "balance": balance_summary(_rows(work / "boundary.csv")), "conservation": conservation_summary(work / "conservation.csv"),
+    summary = {"status": "failed" if closure["failing"] or moments["failing"] else "ok", "rows": counts, "closure": closure, "moments": moments, "request_id": request_identity, "balance": balance_summary(_rows(work / "boundary.csv")), "conservation": conservation_summary(work / "conservation.csv"),
                "effective": {"birks_mm_per_MeV": effective["birks_mm_per_MeV"], "step_functions": effective["step_functions"], "pai": physics_check.effective_pai(requests, ionisation_table(effective)), "models": effective["models"]},
                "geometry_id": checked["geometry_id"]}
+    if (work / "hits.root").is_file():
+        (work / "simulation-hits.json").write_text(json.dumps(hits.index(checked["geometry_id"], card, work / "hits.root", request_identity), indent=1) + "\n", encoding="utf-8")
     (work / "column_map.json").write_text(json.dumps({"scorers": resolved["scorers"], "volume_id": ir["physical"]["volume_id"]}, indent=1) + "\n", encoding="utf-8")
     (work / "summary.json").write_text(json.dumps(summary, indent=1) + "\n", encoding="utf-8")
     return summary

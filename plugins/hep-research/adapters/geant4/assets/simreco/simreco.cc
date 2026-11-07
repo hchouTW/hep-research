@@ -29,6 +29,7 @@
 #include "SimHash.hh"
 #include "SimObservables.hh"
 #include "SimSummary.hh"
+#include "StripDigitization.hh"
 
 using minijson::JsonError;
 using minijson::Value;
@@ -253,14 +254,6 @@ double BzAt(const Spec& s, double x, const std::vector<double>& delta) {
   return 0.;
 }
 
-// the position resolution of the strip digitization: outside the sharing band (width w around each boundary) the
-// cluster sits at the strip centre (uniform error over p - w), inside it the charge-weighted position is exact
-// (linear sharing): sigma^2 = (p - w)^3 / (12 p)
-inline double StripSigma(double pitch, double sharing) {
-  double q = std::max(pitch - std::min(sharing, pitch), 0.0);
-  return std::sqrt(q * q * q / (12.0 * pitch));
-}
-
 struct Measured {
   std::vector<Hit> hits;
   std::vector<int> planeIndex;  // index into s.trackers
@@ -400,29 +393,8 @@ int main(int argc, char** argv) {
         // error: J15 at 100 GV)
         double phase_y = uni.Uniform() * s.strips.pitch_y, phase_z = uni.Uniform() * s.strips.pitch_z;
         if (uni.Uniform() >= s.strips.efficiency) continue;
-        auto cluster = [&](double u, double centre, double pitch) {
-          // two strips share the charge linearly within the sharing width around a strip boundary
-          double rel = (u - centre) / pitch;
-          double strip = std::floor(rel);
-          double f = rel - strip;  // position within the strip, [0, 1)
-          double w = s.strips.sharing / pitch;
-          double q0 = 1, q1 = 0, nb = strip + 1;
-          if (f > 1 - w / 2) {
-            q1 = (f - (1 - w / 2)) / w;
-            q0 = 1 - q1;
-          } else if (f < w / 2) {
-            q1 = (w / 2 - f) / w;
-            q0 = 1 - q1;
-            nb = strip - 1;
-          }
-          double c0 = centre + (strip + 0.5) * pitch, c1 = centre + (nb + 0.5) * pitch;
-          bool k0 = q0 >= s.strips.threshold, k1 = q1 >= s.strips.threshold;
-          if (!k0 && !k1) return c0;
-          double sq = (k0 ? q0 : 0) + (k1 ? q1 : 0);
-          return ((k0 ? q0 * c0 : 0) + (k1 ? q1 * c1 : 0)) / sq;
-        };
-        h.y = cluster(yt, pl.centre_y + phase_y, s.strips.pitch_y);
-        h.z = cluster(zt, pl.centre_z + phase_z, s.strips.pitch_z);
+        h.y = StripCluster(yt, pl.centre_y + phase_y, s.strips.pitch_y, s.strips.sharing, s.strips.threshold);
+        h.z = StripCluster(zt, pl.centre_z + phase_z, s.strips.pitch_z, s.strips.sharing, s.strips.threshold);
         h.sigma_y = StripSigma(s.strips.pitch_y, s.strips.sharing);
         h.sigma_z = StripSigma(s.strips.pitch_z, s.strips.sharing);
       } else {

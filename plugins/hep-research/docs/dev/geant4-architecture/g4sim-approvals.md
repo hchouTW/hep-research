@@ -150,3 +150,27 @@ These are not Section 20 decisions. They are how S0 reconciled requirements of t
 | Library code adapted from Geant4 | Keep it, name the source in the headers, ship `GEANT4-LICENSE.txt` with its notice, correct `licence_boundary` | hsinyichou (maintainer) | 2026-11-07 | "do your best recommendations" |
 | S3 final regression on the earlier build | Accepted for the current code: 112 of 112 identical at `a1933f15`; the later build differs only in `newrun.o`, which legacy runs do not use | hsinyichou (maintainer) | 2026-11-07 | "I accept the regression" |
 | Targeted review of the addendum (Section 23, step 4) | Accepted, after a first pass and two rechecks by an agent that did not write it | hsinyichou (maintainer) | 2026-11-07 | "I accept addendum 11.1" |
+
+## Before S4 (Section 22, 2026-11-07)
+
+| Item | Decision | Person | Date | Words or link |
+| --- | --- | --- | --- | --- |
+| Rewiring FE4 to the response pipeline | Approved: `frontend_response.py` reads and writes the stage hand-off file | hsinyichou (owner of the FE plan) | 2026-11-07 | "approve FE4, option A, run the check on the Mac" |
+| Suitability of `allpix.pixel-charge` for charge-sharing tables | Not suitable as it stands: a pinned rerun of the official example, 10 events, no sensor or geometry parameter | hsinyichou (owner of detector-simulation) | 2026-11-07 | The same words, on that evidence |
+| If not suitable | Option A, in place of the charge-sharing capability the row names: S4's response stage reads charge-sharing tables as a hashed declared input, tested with a synthetic table; S4 does not modify `adapters/detector-simulation` | hsinyichou (owner of detector-simulation) | 2026-11-07 | The same words |
+| Bit identity of transcendental sampling between E2 and E5 | Checked by one run on E2, with a script written early in S4 | hsinyichou (maintainer) | 2026-11-07 | The same words |
+
+## During S4 (2026-11-07)
+
+| Item | Decision | Person | Date | Words or link |
+| --- | --- | --- | --- | --- |
+| Response throughput limit, missed at 3.53 against 0.25 | The limit stays at 25%. The measurements of four workloads go into `g4sim-performance-budget.md`. S4 is unblocked. These words do not decide `g4sim_digi`: its S8 conditional item stands as Part B wrote it, and S8 settles it | hsinyichou (maintainer) | 2026-11-07 | "keep the limit, record the table, unblock S4, fix StripSigma after S4" |
+| simreco's `StripSigma`, smaller than the true scatter | Left unchanged in S4, so that gate 9 holds; corrected after S4, with J15 regenerated on E2 | hsinyichou (maintainer) | 2026-11-07 | The same words |
+| Findings of the independent read of S4's C++ at `28cfefa7` | Fix them all in S4; cell IDs stored exactly as two 32-bit columns; ship the PSF licence text with `Philox.hh`; rewrite gate 8 so that the reviewer's mutation fails it; rerun gates 8 to 10 and the full checks; a fresh read of the changed code before G5 | hsinyichou (maintainer) | 2026-11-07 | "use your recommendations" |
+| Findings of the second independent read, at `08e870ce` | Fix them all; implement `moments`; gate 8 checks values, with a control per fault; a third read, limited to what changed | hsinyichou (maintainer) | 2026-11-07 | "use your recommendations" |
+| `sub_index` in channel streams | Back to Section 10.2: it stays 0, and rows sharing a cell are refused. `simreco_strip` takes one crossing per cell and event until encoded strip cells exist | hsinyichou (maintainer) | 2026-11-07 | The same words |
+| Encoded cellID in hit files (Section 9.2) | Deferred to S5, a recorded deviation: a hit is its volume ID and bin in S4, and a named readout is refused | hsinyichou (maintainer) | 2026-11-07 | The same words |
+| `request_id` | Hashed on the resolved request, as Section 6.3 says, with committed outputs checked first | hsinyichou (maintainer) | 2026-11-07 | The same words |
+| Findings of the third independent read, at `7c5e5c65` | Fix them all; audit every written column against an independent check, recording any that has none; one more read limited to these changes. If it finds no high-severity defect, what remains goes in the record as known limits and the code goes to the maintainer for G5 | hsinyichou (maintainer) | 2026-11-07 | "use your recommendations" |
+| Polar ring count, found by the final read at `ba4ebd31` | Fixed before G5: rings reach the farthest corner of the bounding box, in `NewScorers.hh` and `segmentation.py`, with live cases in `split_edges.py`; no further review round | hsinyichou (maintainer) | 2026-11-07 | "fix polar" |
+| S4 final regression | The gate 9 spot check stands in place of the 112-run regression | hsinyichou (maintainer) | 2026-11-07 | "I accept the spot check for the regression" |

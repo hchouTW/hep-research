@@ -96,6 +96,25 @@
      },
      "pressure_Pa": {
       "$ref": "#/$defs/quantity"
+     },
+     "scintillation": {
+      "type": "object",
+      "required": [
+       "yield_per_MeV",
+       "resolution_scale"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "yield_per_MeV": {
+        "$ref": "#/$defs/quantity"
+       },
+       "resolution_scale": {
+        "$ref": "#/$defs/quantity"
+       },
+       "facts": {
+        "type": "string"
+       }
+      }
      }
     }
    }

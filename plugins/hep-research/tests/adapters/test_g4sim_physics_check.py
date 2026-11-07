@@ -108,17 +108,67 @@ class Scorers(unittest.TestCase):
 
     def test_quantities_of_later_phases_are_refused(self):
         self.assertEqual(self.judge(quantity="photon_detected"), ["scorer-phase"])
-        self.assertEqual(self.judge(level="event_file"), ["scorer-phase"])
+        self.assertEqual(self.judge(level="event_file"), ["scorer-combination"])
+        self.assertEqual(self.judge(level="event_file", hit_kind="calorimeter"), [])
+        self.assertEqual(self.judge(quantity="time_first", level="moments"), ["scorer-combination"])
 
     def test_an_undeclared_birks_constant_is_refused(self):
         scorer = {"name": "s", "quantity": "edep_visible"}
         self.assertEqual(codes(check.scorer_findings([scorer], {"m": {}}, {"s": ["m"]})), ["birks-undeclared"])
         self.assertEqual(check.scorer_findings([scorer], {"m": {"ionisation": {"birks_mm_per_MeV": "0"}}}, {"s": ["m"]}), [])
 
+    def test_a_split_needs_a_scintillation_yield(self):
+        scorer = {"name": "s", "quantity": "edep_visible_ly_split"}
+        declared = {"m": {"ionisation": {"birks_mm_per_MeV": "0.1"}, "scintillation": {"yield_per_MeV": "100", "resolution_scale": "1"}}}
+        self.assertEqual(check.scorer_findings([scorer], declared, {"s": ["m"]}), [])
+        self.assertEqual(codes(check.scorer_findings([scorer], {"m": {"ionisation": {"birks_mm_per_MeV": "0.1"}}}, {"s": ["m"]})), ["scintillation-undeclared"])
+
     def test_the_source_declares_its_density(self):
         self.assertEqual(check.source_findings({"density": "analytic"}), [])
         self.assertEqual(codes(check.source_findings({})), ["source-density"])
-        self.assertEqual(codes(check.source_findings({"density": "external"})), ["source-density"])
+        self.assertEqual(codes(check.source_findings({"density": "external"})), ["source-format"])
+        self.assertEqual(check.source_findings({"density": "external", "format": "text"}), [])
+        self.assertEqual(codes(check.source_findings({"density": "external", "format": "hepmc3"})), ["source-hepmc3"])
+
+    def test_the_calibration_workflow_refuses_an_external_source(self):
+        self.assertEqual(codes(check.calibration_findings({"source": {"density": "external", "format": "text"}})), ["calibration-source"])
+        self.assertEqual(check.calibration_findings({"source": {"density": "analytic"}}), [])
+
+    def test_a_reference_plane_states_its_frame(self):
+        self.assertEqual(check.plane_findings({"reference_planes": [{"name": "a", "frame": "world"}]}), [])
+        self.assertEqual(codes(check.plane_findings({"reference_planes": [{"name": "a"}]})), ["plane-frame"])
+
+    def test_a_time_bin_has_a_width_and_a_keeping_rule_is_known(self):
+        self.assertEqual([item["code"] for item in check.truth_findings({"truth": {"time_bin_ns": 0}})], ["truth-rule"])
+        self.assertEqual([item["code"] for item in check.truth_findings({"truth": {"keep": ["primary", {"energy_above_MeV": 5, "region": "tracker"}, "all", "decay_products"]}})], [])
+        self.assertEqual([item["code"] for item in check.truth_findings({"truth": {"keep": ["everything"]}})], ["truth-rule"])
+        for width in ("nan", "inf", "-1"):
+            self.assertEqual([item["code"] for item in check.truth_findings({"truth": {"time_bin_ns": width}})], ["truth-rule"])
+        self.assertEqual([item["code"] for item in check.truth_findings({"truth": {"keep": [{"energy_above_MeV": -1}]}})], ["truth-rule"])
+
+    def test_a_scorer_name_is_a_word(self):
+        for name in ("event", "#first", "a,b", "two words"):
+            with self.subTest(name=name):
+                self.assertIn("scorer-name", [item["code"] for item in check.scorer_findings([{"name": name, "quantity": "edep"}])])
+        self.assertNotIn("scorer-name", [item["code"] for item in check.scorer_findings([{"name": "calo.front-1", "quantity": "edep"}])])
+
+    def test_a_step_is_written_to_one_hit_scorer(self):
+        scorers = [{"name": "a", "hit_kind": "calorimeter", "readout": "none", "templates": ["block"]}, {"name": "b", "hit_kind": "tracker", "readout": "none", "templates": ["block", "plane"]}]
+        self.assertEqual([item["code"] for item in check.hit_findings(scorers, set(), {})], ["hit-overlap"])
+        self.assertEqual(check.hit_findings(scorers[:1] + [{"name": "c", "quantity": "edep", "templates": ["block"]}], set(), {}), [])
+
+    def test_a_hit_scorer_has_no_encoded_readout(self):
+        scorers = [{"name": "a", "hit_kind": "tracker", "readout": "strips", "templates": ["plane"]}]
+        self.assertEqual([item["code"] for item in check.hit_findings(scorers, set(), {})], ["hit-readout"])
+
+    def test_a_keeping_rule_names_a_region_of_the_specification(self):
+        truth = {"keep": [{"energy_above_MeV": 5, "region": "inner"}]}
+        self.assertEqual([item["code"] for item in check.hit_findings([], {"outer"}, truth)], ["truth-rule"])
+        self.assertEqual(check.hit_findings([], {"inner"}, truth), [])
+
+    def test_the_event_range_fits_the_counter(self):
+        self.assertEqual(check.event_range_findings({"run": {"first_event": 2 ** 32 - 10, "events": 10}}), [])
+        self.assertEqual(codes(check.event_range_findings({"run": {"first_event": 2 ** 32 - 10, "events": 11}})), ["event-range"])
 
 
 if __name__ == "__main__":

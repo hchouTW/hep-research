@@ -223,7 +223,7 @@ class Declaration(unittest.TestCase):
         self.assertEqual(doc["id"], "adapter:geant4")
         self.assertEqual(doc["owner_skill"], "hep-detector")
         lb = doc["licence_boundary"]
-        for phrase in ("Geant4 Software License, Version 1.0, 28 June 2006", "Apache-2.0", "Geant4 itself is not bundled", "GEANT4-LICENSE.txt",
+        for phrase in ("Geant4 Software License, Version 1.0, 28 June 2006", "Apache-2.0", "Geant4 itself is not bundled", "PYTHON-LICENSE.txt", "GEANT4-LICENSE.txt",
                        "separate executable", "JSON and CSV", "G5"):
             self.assertIn(phrase, lb)
         listed = set(doc["assets"])
@@ -233,7 +233,7 @@ class Declaration(unittest.TestCase):
         # adapter 0.2.0 (A2.8): every file under g4sim/ and schemas/, and summary_from_csv.py, is an asset; adapter
         # 0.3.0 (B1.9): also every file under element_sim/ and simroot/, and element_spec.py; 0.4.0 (B2.9): every file
         # under simreco/ and simreco_spec.py; 0.6.0: g4sim/Geant4FromConfig.cmake (registered installations)
-        self.assertEqual(doc["version"], "0.9.0")
+        self.assertEqual(doc["version"], "0.10.0")
         on_disk = {f"assets/{p.relative_to(ASSETS)}" for d in ("g4sim", "schemas", "element_sim", "simroot", "simreco")
                    for p in (ASSETS / d).iterdir() if p.is_file()}
         self.assertLessEqual(on_disk | {"assets/summary_from_csv.py", "assets/element_spec.py",
@@ -778,7 +778,7 @@ class BoundaryArtifacts(_Tmp):
                      if p.suffix in (".cc", ".hh", ".cmake") or p.name == "CMakeLists.txt"}
             if group == "g4sim":  # selftest.cc is built by the tests only; 0.6.0: the geant4-config build helper
                 files = {f for f in files if f.endswith((".hh", ".cmake"))}
-                files -= {"g4sim/BirksTerms.hh", "g4sim/KillProcess.hh"}  # g4sim S3: compiled only into g4sim_run
+                files -= {"g4sim/BirksTerms.hh", "g4sim/KillProcess.hh", "g4sim/Philox.hh", "g4sim/ScintillationSplit.hh", "g4sim/HitColumns.hh", "g4sim/ExternalEvents.hh", "g4sim/PlaneCrossing.hh"}  # g4sim S3, S4: compiled only into g4sim_run
                 files -= {"g4sim/ProbeV2.hh", "g4sim/Accounting.hh"}  # g4sim S1: compiled only into re-acquisition copies, so it is no source of these programs
             with self.subTest(group=group):
                 self.assertEqual(files, set(listed))

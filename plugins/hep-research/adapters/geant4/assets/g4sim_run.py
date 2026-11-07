@@ -146,7 +146,7 @@ def run(args) -> dict:
     ir = checked["ir"]
     ir["physical"]["legacy"] = block
     geometry_identity = identity.geometry_id(ir)
-    request_identity = identity.request_id(request, geometry_identity)
+    request_identity = identity.request_id(simulate_new.identified_request(request, ir), geometry_identity)
     build_hash = _sha256(args.program)
     work = args.work.resolve()
     work.mkdir(parents=True, exist_ok=True)
@@ -326,7 +326,7 @@ def simulate(args) -> dict:
     missing = missing_datasets(card)
     if missing:
         return {"status": "missing-dataset", "missing": missing}
-    return simulate_new.simulate(card, request, checked, args.program.resolve(), args.work.resolve())
+    return simulate_new.simulate(card, request, checked, args.program.resolve(), args.work.resolve(), folder=args.request.resolve().parent)
 
 
 @protected_main("adapters.geant4.g4sim_run", capabilities=KNOWN_CAPABILITIES)

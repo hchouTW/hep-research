@@ -6,6 +6,7 @@
 //   simroot dump FILE... --ntuple N [--columns a,b] [--events A:B] [--out PATH]
 //                                                     rows sorted by key as CSV (floats %.17g), stdout or PATH
 //   simroot hash FILE...                              content_sha256 (JSON)
+//   simroot hits FILE... --ntuple N [--out PATH]       a g4sim_run hit file (g4sim.hits/1): one ntuple as CSV, rows sorted
 // Several files are read as one logical run (the same logical-run seed, column map, program, program sources and
 // Geant4 version in every run row, else refused): rows of each ntuple are joined and sorted by key; the processes rows
 // are deduplicated by process_id (the same number must name the same process); a duplicate key elsewhere is refused.
@@ -28,6 +29,7 @@
 #include "G4RootAnalysisReader.hh"
 #include "G4coutDestination.hh"
 #include "G4ios.hh"
+#include "HitColumns.hh"
 #include "SimHash.hh"
 #include "SimSummary.hh"
 
@@ -261,12 +263,55 @@ int Help() {
   std::cout << "simroot: read element_sim per-event ROOT files (element_sim.events/1)\n"
                "  simroot info FILE...\n"
                "  simroot dump FILE... --ntuple N [--columns a,b] [--events A:B] [--out PATH]\n"
+               "  simroot hits FILE --ntuple N --out PATH   (a g4sim hit file, as CSV)\n"
                "  simroot hash FILE...\n"
                "Exit codes: 0 ok; 2 a file is missing, unreadable or inconsistent, or bad usage.\n";
   return 0;
 }
 
 }  // namespace
+
+// A hit file of g4sim_run (g4sim.hits/1): one ntuple as CSV, rows sorted, whatever the order the workers merged them in; its own format, so the element_sim path and its hash stay as they are.
+int DumpHits(const std::vector<std::string>& files, const std::string& ntuple, const std::string& out) {
+  const g4sim::HitNtuple* found = nullptr;
+  for (const auto& item : g4sim::HitNtuples())
+    if (ntuple == item.name) found = &item;
+  if (!found) throw Fail("no hit ntuple " + ntuple);
+  std::vector<Column> columns;
+  for (const auto& column : found->columns) columns.push_back({column.name, column.type});
+  std::vector<std::string> lines;
+  for (const std::string& file : files) {
+    G4RootAnalysisReader* reader = G4RootAnalysisReader::Instance();
+    reader->SetVerboseLevel(0);
+    const Table table = ReadNtuple(reader, file, ntuple, columns);
+    for (const Row& row : table.rows) {
+      std::ostringstream line;
+      char text[64];
+      for (std::size_t c = 0; c < columns.size(); ++c) {
+        if (columns[c].name == "cell_low") continue;
+        if (columns[c].name == "cell_high") std::snprintf(text, sizeof text, "%llu", static_cast<unsigned long long>(g4sim::CellOf(row[c].i, row[c + 1].i)));
+        else if (columns[c].type == 'I') std::snprintf(text, sizeof text, "%lld", row[c].i);
+        else if (columns[c].name == "event_id" || columns[c].name == "time_bin") std::snprintf(text, sizeof text, "%.0f", row[c].d);
+        else std::snprintf(text, sizeof text, "%.17g", row[c].d);
+        line << (c ? "," : "") << text;
+      }
+      lines.push_back(line.str());
+    }
+  }
+  std::sort(lines.begin(), lines.end());
+  std::ofstream file;
+  if (!out.empty()) file.open(out);
+  if (!out.empty() && !file) throw Fail("cannot write " + out);
+  std::ostream& target = out.empty() ? std::cout : file;
+  for (std::size_t c = 0; c < columns.size(); ++c) {
+    if (columns[c].name != "cell_low") target << (c ? "," : "") << (columns[c].name == "cell_high" ? "cell" : columns[c].name);
+  }
+  target << '\n';
+  for (const std::string& line : lines) target << line << '\n';
+  target.flush();
+  if (!target) throw Fail("could not finish writing the hits");
+  return 0;
+}
 
 int main(int argc, char** argv) {
   ToStderr sink;
@@ -293,8 +338,16 @@ int main(int argc, char** argv) {
       return Usage(e.what());
     }
   }
-  if (cmd != "info" && cmd != "dump" && cmd != "hash") return Usage("unknown subcommand " + cmd);
+  if (cmd != "info" && cmd != "dump" && cmd != "hash" && cmd != "hits") return Usage("unknown subcommand " + cmd);
   if (files.empty()) return Usage("no input file");
+  if (cmd == "hits") {
+    try {
+      return DumpHits(files, ntuple, out);
+    } catch (const std::exception& e) {
+      std::printf("{\"status\": \"rejected\", \"message\": %s}\n", JsonQuote(e.what()).c_str());
+      return 2;
+    }
+  }
   try {
     LogicalRun run = Read(files);
     if (cmd == "hash") {

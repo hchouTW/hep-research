@@ -80,6 +80,17 @@ class Identities(unittest.TestCase):
     def test_a_binary_float_is_hashed_as_its_decimal_string(self):
         self.assertEqual(driver.identity.in_decimals({"a": [0.25, 1, "x"]}), {"a": ["0.25", 1, "x"]})
 
+    def test_a_request_is_identified_by_what_it_selects(self):
+        ir = {"marker": {"tags": {"block": ["active"], "plane": ["tracker"]}}}
+
+        def identity_of(select, extra=None):
+            request = {"schema": "simulation-request/1", "scorers": [{"name": "a", "quantity": "edep", "select": select, **(extra or {})}]}
+            return driver.identity.request_id(driver.simulate_new.identified_request(request, ir), "a" * 64)
+
+        self.assertEqual(identity_of({"tags": ["active"]}), identity_of({"templates": ["block"]}))
+        self.assertNotEqual(identity_of({"tags": ["active"]}), identity_of({"tags": ["tracker"]}))
+        self.assertNotEqual(identity_of({"tags": ["active"]}), identity_of({"tags": ["active"]}, {"level": "moments"}))
+
     def test_the_run_identity_follows_the_build_and_the_card(self):
         base = driver.run_id("a" * 64, "b" * 64, card(), "c" * 64)
         self.assertNotEqual(base, driver.run_id("a" * 64, "b" * 64, card(), "d" * 64))

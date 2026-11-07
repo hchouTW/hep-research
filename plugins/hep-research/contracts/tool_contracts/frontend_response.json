@@ -2643,6 +2643,202 @@
     "network": false,
     "subprocess": false
    }
+  },
+  {
+   "operation_id": "handoff",
+   "summary": "Stage 4 of the g4sim response pipeline through its hand-off file: noise, threshold and ADC per row, with the draws of core's normative stage",
+   "invocation": {
+    "kind": "cli",
+    "output": "json-stdout",
+    "options": [
+     {
+      "flag": "--handoff-in",
+      "input": "handoff_in"
+     },
+     {
+      "flag": "--handoff-out",
+      "input": "handoff_out"
+     },
+     {
+      "flag": "--stage",
+      "input": "stage"
+     },
+     {
+      "flag": "--next-stage",
+      "input": "next_stage"
+     },
+     {
+      "flag": "--readout",
+      "input": "readout"
+     },
+     {
+      "flag": "--run-seed",
+      "input": "run_seed"
+     },
+     {
+      "flag": "--replica",
+      "input": "replica"
+     },
+     {
+      "flag": "--noise-sigma",
+      "input": "noise_sigma"
+     },
+     {
+      "flag": "--threshold",
+      "input": "threshold"
+     },
+     {
+      "flag": "--lsb",
+      "input": "lsb"
+     },
+     {
+      "flag": "--bits",
+      "input": "bits"
+     },
+     {
+      "flag": "--status",
+      "input": "status"
+     }
+    ]
+   },
+   "inputs": [
+    {
+     "name": "handoff_in",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "a response-handoff/1 file addressed to this stage"
+    },
+    {
+     "name": "handoff_out",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "the file for the next stage"
+    },
+    {
+     "name": "stage",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "this stage's name in response-pipeline/1"
+    },
+    {
+     "name": "next_stage",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "the stage that reads the output"
+    },
+    {
+     "name": "readout",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "the readout system, which keys the channel stream"
+    },
+    {
+     "name": "run_seed",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": true,
+     "constraint": "the run's logical seed, an integer"
+    },
+    {
+     "name": "replica",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "the replica number, an integer",
+     "default": 0
+    },
+    {
+     "name": "noise_sigma",
+     "kind": "charge",
+     "unit": "{Q}",
+     "required": true,
+     "constraint": "electronics noise, in the rows' charge unit"
+    },
+    {
+     "name": "threshold",
+     "kind": "charge",
+     "unit": "{Q}",
+     "required": true,
+     "constraint": "threshold, in the rows' charge unit"
+    },
+    {
+     "name": "lsb",
+     "kind": "charge",
+     "unit": "{Q}",
+     "required": true,
+     "constraint": "ADC step, in the rows' charge unit, > 0"
+    },
+    {
+     "name": "bits",
+     "kind": "counts",
+     "unit": "1",
+     "required": true,
+     "constraint": "ADC bits, an integer"
+    },
+    {
+     "name": "status",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "one of the core artifact_statuses; echoed as status",
+     "default": "unvalidated"
+    }
+   ],
+   "outputs": [
+    {
+     "name": "status",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "command",
+     "kind": "label",
+     "unit": "n/a"
+    },
+    {
+     "name": "rows_in",
+     "kind": "counts",
+     "unit": "1"
+    },
+    {
+     "name": "rows_out",
+     "kind": "counts",
+     "unit": "1"
+    },
+    {
+     "name": "handoff_out",
+     "kind": "label",
+     "unit": "n/a"
+    }
+   ],
+   "failure_states": [
+    {
+     "exit_code": 1,
+     "status": "failed",
+     "meaning": "the hand-off could not be written or a row could not be processed; stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"failed\", \"error\": ...} and stderr one line"
+    },
+    {
+     "exit_code": 2,
+     "status": "invalid-input",
+     "meaning": "an argument is missing or malformed, or the hand-off file is unreadable or addressed to another stage; stdout carries {\"status\": \"failed\", \"ok\": false, \"error_kind\": \"invalid-input\", \"error\": ...} and stderr one line"
+    }
+   ],
+   "required_capabilities": [],
+   "purposes": [
+    "exploration",
+    "fixed-execution",
+    "validation"
+   ],
+   "side_effects": {
+    "writes_files": true,
+    "network": false,
+    "subprocess": false
+   }
   }
  ]
 }

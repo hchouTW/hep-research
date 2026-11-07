@@ -8,6 +8,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
+import re
 import sys
 from decimal import Decimal
 
@@ -18,13 +20,14 @@ WORLD_REGION_NAMES = ("", "world", "World")
 MAPPED_PROCESS = {"e-": "eIoni", "e+": "eIoni", "mu+": "muIoni", "mu-": "muIoni", "GenericIon": "ionIoni"}
 ALLOWED_USER_LIMITS = {"max_step_mm"}
 
-ADDITIVE = ("edep", "edep_visible", "edep_charged", "edep_nonionizing", "track_length", "edep_by_dedx_class")
+ADDITIVE = ("edep", "edep_visible", "edep_charged", "edep_nonionizing", "track_length", "edep_by_dedx_class", "edep_visible_ly_split")
 BOUNDARY = ("n_crossings", "crossing_kinematics", "energy_out_by_face")
 FIRST = ("time_first", "first_entry_kinematics")
-LATER_QUANTITIES = {"edep_visible_ly_split": "S4", "photon_detected": "S7"}
+LATER_QUANTITIES = {"photon_detected": "S7"}
 SEGMENTATIONS = ("none", "along_axis", "cartesian_xy", "cartesian_xyz", "polar")
 ALLOWED_SEGMENTATION = {**{name: SEGMENTATIONS for name in ADDITIVE}, **{name: ("none", "cartesian_xy") for name in BOUNDARY}, **{name: ("none",) for name in FIRST}}
-BIRKS_QUANTITIES = ("edep_visible", "edep_by_dedx_class")
+BIRKS_QUANTITIES = ("edep_visible", "edep_by_dedx_class", "edep_visible_ly_split")
+SPLIT_QUANTITY = "edep_visible_ly_split"
 
 
 def _finding(code: str, path: str, message: str) -> dict:
@@ -123,6 +126,8 @@ def scorer_findings(scorers: list, materials: dict | None = None, selected_mater
     names: set = set()
     for at, scorer in enumerate(scorers):
         where, quantity = f"scorers/{at}", scorer.get("quantity")
+        if not re.fullmatch(r"[A-Za-z0-9_.-]+", str(scorer.get("name"))) or scorer.get("name") == "event":
+            findings.append(_finding("scorer-name", where, f"name {scorer.get('name')!r}: a name is a word, and `event` heads a file's columns"))
         if scorer.get("name") in names:
             findings.append(_finding("scorer-name", where, f"{scorer.get('name')} appears twice"))
         names.add(scorer.get("name"))
@@ -144,21 +149,89 @@ def scorer_findings(scorers: list, materials: dict | None = None, selected_mater
             findings.append(_finding("scorer-combination", where, f"split {split!r} is not apportion or midpoint"))
         if split != "apportion" and ({"apportion_short_step_fraction", "chord_min_rigidity_GV"} & set(scorer)):
             findings.append(_finding("scorer-combination", where, "the short-step fraction and rigidity threshold belong to `apportion`"))
-        if scorer.get("level", "column") != "column":
-            findings.append(_finding("scorer-phase", where, f"level {scorer['level']} arrives in S4"))
+        level = scorer.get("level", "column")
+        if level == "event_file":
+            if quantity != "edep" or scorer.get("hit_kind") not in ("tracker", "calorimeter"):
+                findings.append(_finding("scorer-combination", where, "an event_file scorer is `edep` with hit_kind tracker or calorimeter"))
+        elif level == "moments":
+            if quantity not in ADDITIVE:
+                findings.append(_finding("scorer-combination", where, "`moments` is for linear quantities"))
+        elif level != "column":
+            findings.append(_finding("scorer-quantity", where, f"unknown level {level!r}"))
         if quantity in BIRKS_QUANTITIES and materials is not None:
             for name in (selected_materials or {}).get(scorer.get("name"), ()):
                 if "birks_mm_per_MeV" not in materials.get(name, {}).get("ionisation", {}):
                     findings.append(_finding("birks-undeclared", where, f"{name} declares no Birks constant, and Geant4 may set one silently (GB13)"))
+                if quantity == SPLIT_QUANTITY and "scintillation" not in materials.get(name, {}):
+                    findings.append(_finding("scintillation-undeclared", where, f"{name} declares no scintillation yield or RESOLUTIONSCALE (Section 10.3)"))
     return findings
 
 
 def source_findings(source: dict) -> list:
-    """Section 6.3: the density type is declared, and `external` arrives in S4."""
+    """Section 6.3: the density type is declared; an external source names a text event file, or HepMC3 if the installation record has it."""
     density = source.get("density")
     if density == "analytic":
         return []
-    return [_finding("source-density", "source/density", "an external source arrives in S4" if density == "external" else f"density {density!r} is not declared")]
+    if density != "external":
+        return [_finding("source-density", "source/density", f"density {density!r} is not declared")]
+    if source.get("format") == "hepmc3":
+        return [_finding("source-hepmc3", "source/format", "HepMC3 is not in the installation record of this host: use a text event file, or install it and record it")]
+    if source.get("format") != "text":
+        return [_finding("source-format", "source/format", f"format {source.get('format')!r} is not text or hepmc3")]
+    return []
+
+
+def plane_findings(request: dict) -> list:
+    """Section 6.3: a reference plane states its frame."""
+    return [_finding("plane-frame", f"reference_planes/{at}", f"plane {plane.get('name')!r} states no frame") for at, plane in enumerate(request.get("reference_planes", [])) if not plane.get("frame")]
+
+
+def truth_findings(request: dict) -> list:
+    """Section 9.3: the keeping rules are known ones, and a time bin has a width."""
+    truth = request.get("truth", {})
+    findings = []
+    width = float(truth.get("time_bin_ns", 1))
+    if not math.isfinite(width) or width <= 0:
+        findings.append(_finding("truth-rule", "truth/time_bin_ns", "a time bin has a positive, finite width"))
+    for at, rule in enumerate(truth.get("keep", [])):
+        known = rule in ("primary", "decay_products", "all") or (isinstance(rule, dict) and "energy_above_MeV" in rule and set(rule) <= {"energy_above_MeV", "region"} and 0 <= float(rule["energy_above_MeV"]) < math.inf)
+        if not known:
+            findings.append(_finding("truth-rule", f"truth/keep/{at}", f"unknown keeping rule {rule!r}"))
+    return findings
+
+
+def hit_findings(scorers: list, regions: set, truth: dict) -> list:
+    """On resolved scorers: a step is written once, a hit's cell is its volume and bin, and a rule's region exists."""
+    findings = []
+    claimed: dict = {}
+    for scorer in scorers:
+        if "hit_kind" not in scorer:
+            continue
+        if scorer.get("readout", "none") != "none":
+            findings.append(_finding("hit-readout", f"scorers/{scorer['name']}", "a hit file has no encoded cellID yet: use readout none, and the cell is the volume ID and the bin"))
+        for template in scorer["templates"]:
+            if template in claimed:
+                findings.append(_finding("hit-overlap", f"scorers/{scorer['name']}", f"template {template} is also written by {claimed[template]}: each step would be written twice"))
+            claimed[template] = scorer["name"]
+    for at, rule in enumerate(truth.get("keep", [])):
+        if isinstance(rule, dict) and "region" in rule and rule["region"] not in regions:
+            findings.append(_finding("truth-rule", f"truth/keep/{at}", f"region {rule['region']!r} is not a named region of this specification"))
+    return findings
+
+
+def calibration_findings(request: dict) -> list:
+    """Section 3, principle 7: a calibration workflow needs an analytic density, so an external source is refused there."""
+    if request.get("source", {}).get("density") == "external":
+        return [_finding("calibration-source", "source/density", "the calibration workflow refuses an external source: it has no analytic density")]
+    return []
+
+
+def event_range_findings(card: dict) -> list:
+    """Section 10.2: first_event + number of events fits in the counter's word 0."""
+    run = card.get("run", {})
+    if run.get("first_event", 0) + run.get("events", 0) > 2 ** 32:
+        return [_finding("event-range", "run", "first_event + events exceeds 2^32")]
+    return []
 
 
 def card_findings(card: dict, request: dict | None = None, regions=(), ionisation: dict | None = None, requirements=(), materials=None, selected_materials=None) -> list:
@@ -169,7 +242,7 @@ def card_findings(card: dict, request: dict | None = None, regions=(), ionisatio
         findings += pai_findings(requests, regions, ionisation, requirements)
     if request is not None:
         scorers = request.get("scorers", [])
-        findings += time_cut_findings(card, scorers) + scorer_findings(scorers, materials, selected_materials) + source_findings(request.get("source", {}))
+        findings += time_cut_findings(card, scorers) + scorer_findings(scorers, materials, selected_materials) + source_findings(request.get("source", {})) + plane_findings(request) + truth_findings(request) + event_range_findings(card)
     return findings
 
 

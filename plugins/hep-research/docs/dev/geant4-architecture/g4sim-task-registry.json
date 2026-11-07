@@ -582,6 +582,104 @@
    "registered_at": "2026-11-07T00:46:26Z",
    "card_commit": "9d476be0",
    "reason": "Execution log only (G5); thresholds unchanged"
+  },
+  {
+   "card": "g4sim-tasks/S4.md",
+   "sha256": "94945476236caa1fa9f819c79e36304c5f2fade202e59c797bde19743ade30d3",
+   "registered_at": "2026-11-07T04:02:13Z",
+   "card_commit": "b0114f76",
+   "reason": "Refreshed at the start of S4, with the maintainer's Section 22 decisions; gate 7's K and sample size follow before the test"
+  },
+  {
+   "card": "g4sim-tasks/S4.md",
+   "sha256": "60fb526fbc2bd7d2794450d7fd83f0b3c30b418162f6e474e658257ce8e90542",
+   "registered_at": "2026-11-07T04:25:33Z",
+   "card_commit": "3bed28b0",
+   "reason": "Cross-platform tolerances and the boundary rule registered from measurement; Section 22 items closed; Execution log"
+  },
+  {
+   "card": "g4sim-tasks/S4.md",
+   "sha256": "ba905e7132b6df0664f7a185af6f2209c1f672bcd6e86df8f7ccee7bde783763",
+   "registered_at": "2026-11-07T04:44:28Z",
+   "card_commit": "3f3f0cc4",
+   "reason": "Gate 7's K and replicas registered from its independent trial, before the test; Execution log"
+  },
+  {
+   "card": "g4sim-tasks/S4.md",
+   "sha256": "046044a0aace872251fe893dc9e847e312147c301eea05d3f7b4c9e0422fa7ef",
+   "registered_at": "2026-11-07T04:46:01Z",
+   "card_commit": "4b779fc1",
+   "reason": "Execution log only (gate 7 result); thresholds unchanged"
+  },
+  {
+   "card": "g4sim-performance-budget.md",
+   "sha256": "4014174c17b73d2d27af5b46845e3ad0135ea54bb6fd22a40441cb55b43c370c",
+   "registered_at": "2026-11-07T05:03:41Z",
+   "card_commit": "dcb7c2bd",
+   "reason": "S4 adds the throughput limit of the response pipeline, before any measurement; no earlier limit changed"
+  },
+  {
+   "card": "g4sim-tasks/S4.md",
+   "sha256": "24f1296dd7144964b23010055aea63dde9e5f44d6a3418a4036504590dc22b11",
+   "registered_at": "2026-11-07T05:07:02Z",
+   "card_commit": "b6c5efc8",
+   "reason": "Execution log: blocked on the throughput limit; live checks and the StripSigma finding recorded; no threshold changed"
+  },
+  {
+   "card": "g4sim-performance-budget.md",
+   "sha256": "1b1e0a6e75f92409ae64628c4a247e40f52ab89bc350bf8196d4adc4561af637",
+   "registered_at": "2026-11-07T05:14:19Z",
+   "card_commit": "f3696113",
+   "reason": "The measurements of the throughput limit, by the maintainer's decision; no limit changed"
+  },
+  {
+   "card": "g4sim-tasks/S4.md",
+   "sha256": "2e2add51a1fca025c235e626b384c33f2cb10e3282bdf4485c130eb70dd0a069",
+   "registered_at": "2026-11-07T05:14:19Z",
+   "card_commit": "f3696113",
+   "reason": "Execution log: unblocked by the maintainer; no threshold changed"
+  },
+  {
+   "card": "g4sim-tasks/S4.md",
+   "sha256": "526044ec7cfa18e45c2dd1e1b0f3cb3c22ea02f15fc77afb3a6c39369f33f0e2",
+   "registered_at": "2026-11-07T05:57:49Z",
+   "card_commit": "e4953655",
+   "reason": "Execution log and checklist after gates 1 to 10; no threshold changed"
+  },
+  {
+   "card": "g4sim-tasks/S4.md",
+   "sha256": "9da74de6690b2c70b90d406d7bb7c25ea8282be1d3716131ffb22646b6be883a",
+   "registered_at": "2026-11-07T06:52:54Z",
+   "card_commit": "a6305c78",
+   "reason": "Execution log after the independent read's fixes; no threshold changed"
+  },
+  {
+   "card": "g4sim-tasks/S4.md",
+   "sha256": "56aa1d948cc91cde7c10ce14ec1b4e0626280a8444c1f26673adf2cc68b61d26",
+   "registered_at": "2026-11-07T07:34:01Z",
+   "card_commit": "891a86b6",
+   "reason": "Execution log after the second read's fixes; no threshold changed"
+  },
+  {
+   "card": "g4sim-tasks/S4.md",
+   "sha256": "ee95f487d20124c9f7b32fab962a5fee8aeff27e42aad144a28051128a06d081",
+   "registered_at": "2026-11-07T08:10:23Z",
+   "card_commit": "dec3b923",
+   "reason": "Execution log after the third read's fixes; no threshold changed"
+  },
+  {
+   "card": "g4sim-tasks/S4.md",
+   "sha256": "ee95f487d20124c9f7b32fab962a5fee8aeff27e42aad144a28051128a06d081",
+   "registered_at": "2026-11-07T08:28:34Z",
+   "card_commit": "257615d7",
+   "reason": "Unchanged card, registered at the polar fix before the final checks; no threshold changed"
+  },
+  {
+   "card": "g4sim-tasks/S4.md",
+   "sha256": "4ec24bd9af6daaba27e26b866edcca987a880f1ffe50b11c55d7efabc6bc3d4d",
+   "registered_at": "2026-11-07T08:56:04Z",
+   "card_commit": "2a8f758f",
+   "reason": "Execution log: G5 confirmed, all gates evaluated; no threshold changed"
   }
  ]
 }
