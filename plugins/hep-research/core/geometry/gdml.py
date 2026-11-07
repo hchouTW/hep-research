@@ -78,7 +78,8 @@ def _twice(text: str) -> Decimal:
 
 
 def _solid(name: str, template: dict) -> list[str]:
-    label, solid = _attr("name", name + "_solid"), template.get("solid")
+    label = _attr("name", name + "_solid")
+    solid: dict = template.get("solid") or {}
     if template["shape"] == "trd":
         sizes = " ".join(_attr(key, _twice(solid[source])) for key, source in (("x1", "dx1_mm"), ("x2", "dx2_mm"), ("y1", "dy1_mm"), ("y2", "dy2_mm"), ("z", "dz_mm")))
         return [f"    <trd {label} {sizes} lunit=\"mm\"/>"]

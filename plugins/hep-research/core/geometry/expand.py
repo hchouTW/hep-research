@@ -275,15 +275,15 @@ def _children(mother: str, node: dict, sizes: dict, values: _Values, path: str, 
         else:
             if child.get("template") not in sizes:
                 raise GeometryError("template-unknown", f"{child.get('template')!r} is not a template", where)
-            at = f"{where}/placement/{kind}"
+            placement_path = f"{where}/placement/{kind}"
             if kind == "grid":
-                items = _grid(child, body, values, fields or {}, at)
+                items = _grid(child, body, values, fields or {}, placement_path)
             elif kind == "explicit":
-                items = _explicit(child, body, values, at)
+                items = _explicit(child, body, values, placement_path)
             elif kind == "ring":
-                items = _ring(child, body, values, at)
+                items = _ring(child, body, values, placement_path)
             else:
-                items = (_single if kind == "single" else _linear)(child, body, values, at)
+                items = (_single if kind == "single" else _linear)(child, body, values, placement_path)
             items = _modified(items, child, sizes, values, where)
         placed.extend(items)
     return _number_copies(placed, path)

@@ -36,7 +36,8 @@ def _template(ir: dict, placement: dict) -> dict:
 def _polyhedron(ir: dict, placement: dict) -> convex.Polyhedron:
     active = _active(placement) if placement["rotation"] else ((1, 0, 0), (0, 1, 0), (0, 0, 1))
     template = _template(ir, placement)
-    shape, solid = template["shape"], template.get("solid")
+    shape = template["shape"]
+    solid: dict = template.get("solid") or {}
     if shape == "trd":
         body = convex.trd(solid)
     elif shape == "polygon_prism":

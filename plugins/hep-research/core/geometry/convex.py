@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from decimal import Decimal
 
-from core.geometry.numbers import CONTEXT, EPSILON_MM, add, divide, multiply, subtract
+from core.geometry.numbers import CONTEXT, EPSILON_MM, GeometryError, add, divide, multiply, subtract
 from core.geometry.rotation import cos_sin, rotate
 
 _ZERO, _ONE = Decimal(0), Decimal(1)
@@ -101,6 +101,8 @@ def separating_gap(a: Polyhedron, b: Polyhedron) -> Decimal:
         on_b = [_dot(unit, vertex) for vertex in b.vertices]
         gap = max(subtract(min(on_b), max(on_a)), subtract(min(on_a), max(on_b)))
         best = gap if best is None or gap > best else best
+    if best is None:
+        raise GeometryError("convex-form", "two solids with no separating direction")
     return best
 
 
@@ -137,6 +139,8 @@ def nearest_to_axis(polyhedron: Polyhedron) -> Decimal:
         share = _clamp(divide(CONTEXT.minus(_dot(flat, along)), size)) if size > _ZERO else _ZERO
         value = _length(tuple(add(a, multiply(share, b)) for a, b in zip(flat, along)))
         best = value if best is None or value < best else best
+    if best is None:
+        raise GeometryError("convex-form", "a solid with no edge")
     return best
 
 
