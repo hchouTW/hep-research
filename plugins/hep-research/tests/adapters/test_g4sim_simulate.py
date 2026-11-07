@@ -38,7 +38,7 @@ class Resolution(unittest.TestCase):
         self.assertEqual(simulate.resolved_segmentation(None), {"kind": "none"})
 
     def test_tags_select_templates(self):
-        self.assertEqual(simulate.selected_templates({"tags": ["active"]}, IR), ["block"])
+        self.assertEqual(identity.selected_templates({"tags": ["active"]}, IR), ["block"])
 
 
 class ReadBack(unittest.TestCase):

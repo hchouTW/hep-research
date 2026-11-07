@@ -76,16 +76,10 @@ def resolved_segmentation(block) -> dict:
     return {"kind": kind, "width_mm": [float(value) for value in body["width_mm"]]}
 
 
-def selected_templates(select: dict, ir: dict) -> list:
-    tags = ir["marker"]["tags"]
-    wanted = set(select.get("tags", []))
-    return sorted(name for name, own in tags.items() if wanted <= set(own)) if wanted else sorted(select.get("templates", []))
-
-
 def resolved_request(request: dict, ir: dict, folder: Path | None = None) -> dict:
     scorers = []
     for scorer in request.get("scorers", []):
-        item = {"name": scorer["name"], "quantity": scorer["quantity"], "templates": selected_templates(scorer["select"], ir), "segmentation": resolved_segmentation(scorer.get("segmentation"))}
+        item = {"name": scorer["name"], "quantity": scorer["quantity"], "templates": identity.selected_templates(scorer["select"], ir), "segmentation": resolved_segmentation(scorer.get("segmentation"))}
         if "split" in scorer:
             item["split"] = scorer["split"]
         if "apportion_short_step_fraction" in scorer:
@@ -113,12 +107,6 @@ def resolved_request(request: dict, ir: dict, folder: Path | None = None) -> dic
         out["truth"] = {"decay_products": "decay_products" in keep, "all": "all" in keep, "energy_rules": rules, "time_bin_ns": float(request.get("truth", {}).get("time_bin_ns", 1)),
                         "planes_z_mm": [_in_world(plane["frame"], [0.0, 0.0, float(plane["z_mm"])], ir["physical"]["frames"])[2] for plane in planes]}
     return out
-
-
-def identified_request(request: dict, ir: dict) -> dict:
-    """The request as `request_id` hashes it (Section 6.3): `select` expanded, so tags that pick the same objects give the same identity."""
-    scorers = [{**{key: value for key, value in scorer.items() if key != "select"}, "templates": selected_templates(scorer["select"], ir)} for scorer in request.get("scorers", [])]
-    return {**request, "scorers": scorers} if "scorers" in request else request
 
 
 def selected_materials(resolved: dict, ir: dict) -> dict:
@@ -352,7 +340,7 @@ def simulate(card: dict, request: dict, checked: dict, program: Path, work: Path
         return {"status": "failed", "exit_status": code, "stage": "run", "reason": failure_reason(work / "log.txt")}
     counts = merge_threads(work)
     moments = merge_moments(work, card["run"]["events"])
-    request_identity = identity.request_id(identified_request(request, ir), checked["geometry_id"])
+    request_identity = identity.request_id(identity.identified_request(request, ir), checked["geometry_id"])
     cells = _rows(work / "cells.csv")
     closure = closure_problems([row for row in cells if row[1] in {item["name"] for item in resolved["scorers"] if item["quantity"] in physics_check.ADDITIVE}])
     summary = {"status": "failed" if closure["failing"] or moments["failing"] else "ok", "rows": counts, "closure": closure, "moments": moments, "request_id": request_identity, "balance": balance_summary(_rows(work / "boundary.csv")), "conservation": conservation_summary(work / "conservation.csv"),

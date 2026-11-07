@@ -28,5 +28,19 @@ def in_decimals(value):
     return value
 
 
+def selected_templates(select: dict, ir: dict) -> list:
+    """The templates a scorer's `select` picks: tags that pick the same objects pick the same list."""
+    tags = ir["marker"]["tags"]
+    wanted = set(select.get("tags", []))
+    return sorted(name for name, own in tags.items() if wanted <= set(own)) if wanted else sorted(select.get("templates", []))
+
+
+def identified_request(request: dict, ir: dict) -> dict:
+    """The request as `request_id` hashes it (Section 6.3): `select` expanded, so tags that pick the same objects give the same identity."""
+    if "scorers" not in request:
+        return request
+    return {**request, "scorers": [{**{key: value for key, value in scorer.items() if key != "select"}, "templates": selected_templates(scorer["select"], ir)} for scorer in request["scorers"]]}
+
+
 def request_id(request: dict, geometry_identity: str) -> str:
     return _digest(in_decimals({"request": request, "geometry_id": geometry_identity}))

@@ -833,6 +833,39 @@ def run_g4sim(args, card_path: Path) -> tuple[str, dict]:
     return outcome["status"], outcome
 
 
+def cmd_run_spec(args) -> tuple[str, dict]:
+    """A run from detector-spec files, by file path and hash (g4sim plan, Section 18, point 7): g4kit.py wrote them, and a byte changed since is refused before anything runs."""
+    import types
+
+    import g4sim_run
+    files = {}
+    for name in ("detector", "request", "run"):
+        files[name] = expand(getattr(args, name))
+        found, want = sha256_file(files[name]), getattr(args, f"{name}_sha256")
+        if found != want:
+            raise SpecError(f"--{name} {tilde(files[name])} has sha256 {found}, expected {want}: a specification changed since it was written")
+    exe = _exe(args.exe)
+    work = expand(str(args.work)).resolve()
+    card = json.loads(files["run"].read_text(encoding="utf-8"))
+    summary = g4sim_run.simulate(types.SimpleNamespace(detector=files["detector"], request=files["request"], run=files["run"], program=exe, work=work, protected=False))
+    if summary["status"] != "ok":
+        return summary["status"], summary
+    build_hash = sha256_file(exe)
+    created = args.created or datetime.date.today().isoformat()
+    inputs = [*files.values(), *[expand(path) for path in args.input or []]]
+    outputs = {path.name: sha256_file(path) for path in sorted(work.iterdir()) if path.is_file() and path.suffix in (".csv", ".root", ".json")}
+    record = record_skeleton(f"geant4-run-{args.run_id}", f"g4sim_run {args.run_id}: {card['run']['events']} events (a completed run, not a validated result)", created, ["unvalidated"])
+    record["extension"] = {"input_manifest": [{"path": tilde(path), "sha256": sha256_file(path)} for path in inputs],
+                           "tools": [{"name": "g4sim_run", "version": build_hash[:16]}], "commands": [f"{tilde(exe)} --new ir.json run.json request.json"], "environment": {"work": tilde(work)},
+                           "seeds": {"g4sim_run": card["run"]["logical_run_seed"]}, "tolerances": {}, "exit_status": 0, "output_hashes": outputs,
+                           "geometry": {"geometry_id": summary["geometry_id"], "request_id": summary["request_id"], "run_id": g4sim_run.run_id(summary["geometry_id"], summary["request_id"], card, build_hash), "build_hash": build_hash,
+                                        "installed_features": {"datasets": sorted(json.loads(g4sim_run.DATASETS.read_text(encoding="utf-8"))["physics_lists"][g4sim_run.physics_list(card)])}}}
+    record["versions"]["plugin_release"] = plugin_release()
+    record_path = expand(str(args.record))
+    write_json(record_path, record)
+    return "ok", {**{key: summary[key] for key in ("geometry_id", "request_id", "closure", "rows")}, "record": tilde(record_path)}
+
+
 def cmd_run(args) -> tuple[str, dict]:
     spec_path = expand(str(args.spec))
     spec = json.loads(spec_path.read_text(encoding="utf-8"))
@@ -1399,6 +1432,13 @@ def main(argv=None) -> int:
     p = sub.add_parser("from-geometry", help="design-geometry/1 + realization profile -> element_sim.spec/1")
     for name in ("--geometry", "--profile", "--out"):
         p.add_argument(name, required=True)
+    p = sub.add_parser("run-spec", help="run from detector-spec files, each named with its hash, and write the record")
+    for name in ("detector", "request", "run"):
+        p.add_argument(f"--{name}", required=True)
+        p.add_argument(f"--{name}-sha256", required=True)
+    for name, req in (("--exe", True), ("--work", True), ("--run-id", True), ("--record", True), ("--created", False)):
+        p.add_argument(name, required=req)
+    p.add_argument("--input", action="append", help="another input of the run, listed in input_manifest: the design geometry file (repeatable)")
     p = sub.add_parser("run", help="run one spec and write its record")
     for name, req in (("--spec", True), ("--exe", True), ("--build-record", True), ("--work", True),
                       ("--run-id", True), ("--record", True), ("--created", False)):
@@ -1476,7 +1516,7 @@ def main(argv=None) -> int:
     defaults = [k for k in ("jobs", "timeout", "created", "z_max", "seeding", "role", "program", "configure_with",
                             "status") if hasattr(args, k) and f"--{k.replace('_', '-')}" not in given]
     handlers = {"build-sim": cmd_build_sim, "check-spec": cmd_check_spec, "from-geometry": cmd_from_geometry,
-                "run": cmd_run, "scan": cmd_scan, "chunk": cmd_chunk, "summarize": cmd_summarize, "reduce": cmd_reduce,
+                "run": cmd_run, "run-spec": cmd_run_spec, "scan": cmd_scan, "chunk": cmd_chunk, "summarize": cmd_summarize, "reduce": cmd_reduce,
                 "reco": cmd_reco, "table": cmd_table, "oracle": cmd_oracle}
     try:
         status, doc = handlers[args.command](args)

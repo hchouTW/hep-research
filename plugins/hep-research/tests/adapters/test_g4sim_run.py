@@ -85,7 +85,7 @@ class Identities(unittest.TestCase):
 
         def identity_of(select, extra=None):
             request = {"schema": "simulation-request/1", "scorers": [{"name": "a", "quantity": "edep", "select": select, **(extra or {})}]}
-            return driver.identity.request_id(driver.simulate_new.identified_request(request, ir), "a" * 64)
+            return driver.identity.request_id(driver.identity.identified_request(request, ir), "a" * 64)
 
         self.assertEqual(identity_of({"tags": ["active"]}), identity_of({"templates": ["block"]}))
         self.assertNotEqual(identity_of({"tags": ["active"]}), identity_of({"tags": ["tracker"]}))

@@ -99,7 +99,7 @@ class G4simPath(_Tmp):
         checked = geometry.check_spec(self.copies["detector_spec"].read_bytes())
         request = json.loads(self.copies["simulation_request"].read_text(encoding="utf-8"))
         return {"detector_spec": entry("detector_spec"), "simulation_request": entry("simulation_request"), "run_card": entry("run_card"),
-                "geometry_id": checked["geometry_id"], "request_id": identity.request_id(request, checked["geometry_id"])}
+                "geometry_id": checked["geometry_id"], "request_id": identity.request_id(identity.identified_request(request, checked["ir"]), checked["geometry_id"])}
 
     def test_the_rule_table_reads_the_run_card_and_the_ir(self):
         loaded = C.load_g4sim(self.block(), self.d)

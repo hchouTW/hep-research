@@ -207,7 +207,7 @@ def load_g4sim(block: dict, folder: Path) -> dict:
     if checked["status"] != "ok":
         raise StudyError(f"physics.g4sim.detector_spec: {checked['findings'][:3]}")
     request, card = json.loads(texts["simulation_request"]), json.loads(texts["run_card"])
-    found = {"geometry_id": checked["geometry_id"], "request_id": identity.request_id(request, checked["geometry_id"])}
+    found = {"geometry_id": checked["geometry_id"], "request_id": identity.request_id(identity.identified_request(request, checked["ir"]), checked["geometry_id"])}
     for key, value in found.items():
         if value != block[key]:
             raise StudyError(f"physics.g4sim.{key}: recomputed {value}, the study spec says {block[key]}")

@@ -3,7 +3,7 @@
  "name": "calorimeter",
  "version": "1.0.0",
  "geometry_kind": "calorimeter",
- "role": "calorimetry",
+ "role": "calorimetry-em",
  "purpose": "A grid of wrapped sampling towers, each with a tapered guide behind it.",
  "inputs": {
   "layers": {

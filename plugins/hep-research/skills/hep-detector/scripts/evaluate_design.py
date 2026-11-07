@@ -2055,7 +2055,7 @@ def search_design(args) -> dict:
     ext = {"input_manifest": [{"path": args.spec, "sha256": spec_sha}, {"path": cur_rel, "sha256": sha256(proj.root / cur_rel)}]
            + [{"path": r, "sha256": sha256(proj.root / r)} for r in chain_rels]
            + [{"path": p, "sha256": h} for p, h in assets]
-           + ([{"path": g4["realization"], "sha256": sha256(proj.root / g4["realization"])}] if g4 else []),
+           + ([{"path": g4["realization"], "sha256": sha256(proj.root / g4["realization"])}] if g4 and "realization" in g4 else []),
            "tools": [{"name": "evaluate_design.search", "version": plugin_version()}]
            + [{"name": Path(e).stem, "version": plugin_version()} for e in used_tools],
            "commands": [" ".join(argv)],
@@ -2103,16 +2103,19 @@ def geant4_refinement(args, proj: design.Project, space: SearchSpace, spec: dict
     if scripts not in sys.path:
         sys.path.insert(0, scripts)
     from design_search_lib.geant4_values import Geant4SearchError, Geant4Values
+    from design_search_lib.kit_values import KitSearchError, KitValues
     g4 = spec["geant4"]
+    of_a_kit = design.candidate_geometry_kind(proj, spec["base_candidate"]) != design.DEFAULT_GEOMETRY_KIND  # the layered-spectrometer keeps its current path (Section 18, point 7)
+    if of_a_kit != ("kit" in g4):
+        raise UsageError("a new geometry kind searches through geant4.kit, and the layered-spectrometer through geant4.realization and reco")
     budget = spec["budget"]["geant4"]
     cfg_path = os.environ.get("HEP_GEANT4_CONFIG")
     if not cfg_path:
         raise UsageError("budget.geant4 > 0 needs HEP_GEANT4_CONFIG (element_sim, simreco, build_record)")
     cfg = json.loads(Path(os.path.expanduser(cfg_path)).read_text(encoding="utf-8"))
     try:
-        vals = Geant4Values(cfg, Path(args.geant4_work).expanduser().resolve() / args.id, proj.root, args.id, g4,
-                            created())
-    except Geant4SearchError as exc:
+        vals = (KitValues if of_a_kit else Geant4Values)(cfg, Path(args.geant4_work).expanduser().resolve() / args.id, proj.root, args.id, g4, created())
+    except (Geant4SearchError, KitSearchError) as exc:
         raise UsageError(str(exc)) from None
     labels = [t["label"] for t in objectives]
     by_label = {t["label"]: t for t in objectives}
@@ -2171,7 +2174,7 @@ def geant4_refinement(args, proj: design.Project, space: SearchSpace, spec: dict
                 try:
                     row[label] = vals.value(Path(__file__).resolve(), doc, cid, short, points[k]["effective_digest"],
                                             label, by_label[label], seed, group if paired else None, k)
-                except Geant4SearchError as exc:
+                except (Geant4SearchError, KitSearchError) as exc:
                     row[label] = {"value": None, "error": str(exc)[:500], "seed": seed}
             results[k] = row
             points[k].setdefault("geant4", []).append({"generation": gen, "seed_group": group if paired else None,
@@ -2227,7 +2230,7 @@ def geant4_refinement(args, proj: design.Project, space: SearchSpace, spec: dict
         order = ranked
     record = {"targets": g4["targets"], "events": vals.events, "blocks": vals.blocks, "top_k": g4["top_k"],
               "generations_declared": g4["generations"], "offspring": g4["offspring"],
-              "realization": g4["realization"], "reco": g4["reco"], "versions": vals.versions,
+              **({"realization": g4["realization"], "reco": g4["reco"]} if "realization" in g4 else {"kit": g4["kit"], "evidence": vals.evidence}), "versions": vals.versions,
               "gate_g_c2a": gate, "generations": generations, "runs": vals.runs, "cache_hits": vals.cache_hits,
               "labels": labels,
               "note": "Geant4 search values select designs; they are optimistic (no tail source), are not "

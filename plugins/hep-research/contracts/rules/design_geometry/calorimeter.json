@@ -11,7 +11,7 @@
    "field": "layers",
    "from": {
     "parameter": {
-     "role": "calorimetry",
+     "role": "calorimetry-em",
      "name": "layers",
      "unit": "1"
     }
@@ -21,7 +21,7 @@
    "field": "towers_x",
    "from": {
     "parameter": {
-     "role": "calorimetry",
+     "role": "calorimetry-em",
      "name": "towers_x",
      "unit": "1"
     }
@@ -31,7 +31,7 @@
    "field": "towers_y",
    "from": {
     "parameter": {
-     "role": "calorimetry",
+     "role": "calorimetry-em",
      "name": "towers_y",
      "unit": "1"
     }
@@ -40,18 +40,40 @@
   {
    "field": "absorber_mm",
    "from": {
-    "parameter": {
-     "role": "calorimetry",
-     "name": "absorber_mm",
-     "unit": "mm"
-    }
+    "quotient": [
+     {
+      "product": [
+       {
+        "parameter": {
+         "role": "calorimetry-em",
+         "name": "depth_x0",
+         "unit": "1"
+        }
+       },
+       {
+        "parameter": {
+         "role": "calorimetry-em",
+         "name": "absorber_x0_mm",
+         "unit": "mm"
+        }
+       }
+      ]
+     },
+     {
+      "parameter": {
+       "role": "calorimetry-em",
+       "name": "layers",
+       "unit": "1"
+      }
+     }
+    ]
    }
   },
   {
    "field": "active_mm",
    "from": {
     "parameter": {
-     "role": "calorimetry",
+     "role": "calorimetry-em",
      "name": "active_mm",
      "unit": "mm"
     }
@@ -61,7 +83,7 @@
    "field": "tower_side_mm",
    "from": {
     "parameter": {
-     "role": "calorimetry",
+     "role": "calorimetry-em",
      "name": "tower_side_mm",
      "unit": "mm"
     }
@@ -71,7 +93,7 @@
    "field": "absorber_material",
    "from": {
     "parameter": {
-     "role": "calorimetry",
+     "role": "calorimetry-em",
      "name": "absorber_material",
      "unit": "n/a"
     }
@@ -81,7 +103,7 @@
    "field": "active_material",
    "from": {
     "parameter": {
-     "role": "calorimetry",
+     "role": "calorimetry-em",
      "name": "active_material",
      "unit": "n/a"
     }
@@ -91,7 +113,7 @@
    "field": "wrap_material",
    "from": {
     "parameter": {
-     "role": "calorimetry",
+     "role": "calorimetry-em",
      "name": "wrap_material",
      "unit": "n/a"
     }
@@ -101,7 +123,7 @@
    "field": "guide_material",
    "from": {
     "parameter": {
-     "role": "calorimetry",
+     "role": "calorimetry-em",
      "name": "guide_material",
      "unit": "n/a"
     }
@@ -111,7 +133,7 @@
    "field": "world_material",
    "from": {
     "parameter": {
-     "role": "calorimetry",
+     "role": "calorimetry-em",
      "name": "world_material",
      "unit": "n/a"
     }
@@ -127,6 +149,15 @@
     "species": "string"
    },
    "tail_sensitive": false
+  },
+  "calorimeter-energy-resolution": {
+   "better": "smaller",
+   "unit": "1",
+   "denominator": {
+    "energy_GeV": "number",
+    "species": "string"
+   },
+   "tail_sensitive": true
   }
  }
 }
