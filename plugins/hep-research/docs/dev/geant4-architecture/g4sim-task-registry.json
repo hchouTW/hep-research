@@ -575,6 +575,13 @@
    "registered_at": "2026-11-07T00:41:41Z",
    "card_commit": "14bc1ef0",
    "reason": "Wording matches Part B; thresholds unchanged"
+  },
+  {
+   "card": "g4sim-tasks/S3.md",
+   "sha256": "c78f234d2e437a02b5aa9fb8babd7f7d9038f7a62cbebcfa73b11a03a7d6c5ac",
+   "registered_at": "2026-11-07T00:46:26Z",
+   "card_commit": "9d476be0",
+   "reason": "Execution log only (G5); thresholds unchanged"
   }
  ]
 }
