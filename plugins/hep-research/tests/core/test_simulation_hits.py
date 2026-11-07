@@ -57,6 +57,11 @@ class Columns(unittest.TestCase):
         crossings = hits.columns_for_simreco(rows, [{"event_id": "1", "track_id": "1", "parent_id": "0", "pdg": "2212"}], {5: 0})
         self.assertEqual([item["x_mm"] for item in crossings], [10.0])
 
+    def test_a_plane_deposit_is_every_piece_of_the_track_in_it(self):
+        rows = [{**self.hit(1, 1, 1, "5"), "edep_MeV": "0.25"}, {**self.hit(2, 1, 1, "5"), "edep_MeV": "2"}, {**self.hit(3, 1, 7, "5"), "edep_MeV": "9"}]
+        crossings = hits.columns_for_simreco(rows, [{"event_id": "1", "track_id": "1", "parent_id": "0", "pdg": "2212"}], {5: 0})
+        self.assertEqual([item["edep_MeV"] for item in crossings], [2.25])
+
     def test_every_primary_of_an_event_counts(self):
         particles = [{"event_id": "1", "track_id": track, "parent_id": "0", "pdg": "2212"} for track in ("1", "2")]
         self.assertEqual([item["track_id"] for item in hits.columns_for_simreco([self.hit(1, 2, 2, "5"), self.hit(2, 1, 1, "5")], particles, {5: 0})], [2, 1])

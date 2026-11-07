@@ -26,6 +26,7 @@ SPLIT_TESTS = ("tests.adapters.test_g4sim_split",)
 HIT_TESTS = ("tests.core.test_simulation_hits",)
 EXTERNAL_TESTS = ("tests.adapters.test_g4sim_external",)
 STRIP_TESTS = ("tests.adapters.test_simreco_strip",)
+CROSSING = "adapters/geant4/assets/g4sim/PlaneCrossing.hh"
 HITS, EVENTS, COLUMNS, STRIP = "core/simulation/hits.py", "adapters/geant4/assets/g4sim/ExternalEvents.hh", "adapters/geant4/assets/g4sim/HitColumns.hh", "adapters/geant4/assets/simreco/simreco_strip.cc"
 SPLIT = "adapters/geant4/assets/g4sim/ScintillationSplit.hh"
 GROUP_WORD = "word3 = self.sub_index << 16 | self.groups_used\n"
@@ -61,16 +62,20 @@ CHANGES = (
     ("Independent read", "a negative count accepted", EVENTS, "if (current < 0 || left < 0) refuse", "if (current < 0) refuse", EXTERNAL_TESTS),
     ("Independent read", "a file ending inside an event accepted", EVENTS, 'if (left > 0) refuse("the file ends', 'if (false) refuse("the file ends', EXTERNAL_TESTS),
     ("Independent read", "two rows sharing draws accepted in core", RESPONSE, 'if len(set(keys)) != len(keys):', 'if False:', PYTHON_TESTS),
-    ("Independent read", "two rows sharing draws accepted in simreco_strip", STRIP, "if (!seen.insert({event, cell, sub_index}).second) throw", "seen.insert({event, cell, sub_index}); if (false) throw", STRIP_TESTS),
+    ("Independent read", "two rows sharing draws accepted in simreco_strip", STRIP, "if (!seen.insert({event, cell}).second) throw", "seen.insert({event, cell}); if (false) throw", STRIP_TESTS),
     ("Independent read", "a cell of 2^53 or more accepted", STRIP, 'Whole(row, "cell", 9007199254740992.)', 'Whole(row, "cell", 1e30)', STRIP_TESTS),
-    ("Independent read", "the sub-index left out of the counter", STRIP, "sub_index << 16 | group", "group", STRIP_TESTS),
     ("Independent read", "fsum of -0.0 keeps the sign", HEADER, "if (value != 0.) partials.push_back(value);", "partials.push_back(value);", HEADER_TESTS),
     ("Independent read", "chunks merged by rounding their partials", HEADER, "  return Fsum(all);\n}", "  return RoundPartials(all);\n}", HEADER_TESTS),
     ("Independent read", "a summand out of range accepted in C++", HEADER, "if (!std::isfinite(value) || std::fabs(value) > 1e290) throw", "if (false) throw", HEADER_TESTS),
-    ("Independent read", "a zero time bin accepted", CHECK, 'if float(truth.get("time_bin_ns", 1)) <= 0:', 'if False:', CHECK_TESTS),
+    ("Independent read", "a zero time bin accepted", CHECK, "if not math.isfinite(width) or width <= 0:", "if width == -2:", CHECK_TESTS),
+    ("Independent read", "a nan time bin accepted", CHECK, "if not math.isfinite(width) or width <= 0:", "if width <= 0:", CHECK_TESTS),
+    ("Independent read", "a negative energy threshold accepted", CHECK, 'and 0 <= float(rule["energy_above_MeV"]) < math.inf)', ")", CHECK_TESTS),
+    ("Independent read", "a plane deposit from the first piece only", HITS, 'math.fsum(deposits[(event, track, cell)])', 'float(row["edep_MeV"])', HIT_TESTS),
+    ("Independent read", "a crossing on the chord in a field", CROSSING, "if (!smooth)\n", "if (true)\n", EXTERNAL_TESTS),
+    ("Independent read", "a track born on a plane counted as crossing", CROSSING, "before * after < 0. || (after == 0. && before != 0.)", "before * after <= 0.", EXTERNAL_TESTS),
     ("Independent read", "two hit scorers on one template accepted", CHECK, "if template in claimed:", "if False:", CHECK_TESTS),
     ("Independent read", "a hit scorer with an encoded readout accepted", CHECK, 'if scorer.get("readout", "none") != "none":', "if False:", CHECK_TESTS),
-    ("Independent read", "a rule naming no real region accepted", CHECK, "if region is not None and region not in regions:", "if False:", CHECK_TESTS),
+    ("Independent read", "a rule naming no real region accepted", CHECK, 'if isinstance(rule, dict) and "region" in rule and rule["region"] not in regions:', "if False:", CHECK_TESTS),
     ("External sources", "the calibration workflow takes an external source", CHECK, "def card_findings(", "def calibration_findings(request):\n    return []\n\n\ndef card_findings(", CHECK_TESTS),
     ("Reference planes", "a plane without a frame accepted", CHECK, "def card_findings(", "def plane_findings(request):\n    return []\n\n\ndef card_findings(", CHECK_TESTS),
 )

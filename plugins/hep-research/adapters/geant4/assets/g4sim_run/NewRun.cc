@@ -177,6 +177,7 @@ class Files : public G4UserRunAction {
     g4sim::HitRecorder::Thread().Configure(fShared.truth, fShared.planes);
     const std::string thread = std::to_string(G4Threading::G4GetThreadId());
     fCells = std::fopen(("cells.thread" + thread + ".csv").c_str(), "w");
+    fMoments = std::fopen(("moments.thread" + thread + ".csv").c_str(), "w");
     fBoundary = std::fopen(("boundary.thread" + thread + ".csv").c_str(), "w");
     fCrossings = std::fopen(("crossings.thread" + thread + ".csv").c_str(), "w");
     Primaries() = std::fopen(("primaries.thread" + thread + ".csv").c_str(), "w");
@@ -192,7 +193,8 @@ class Files : public G4UserRunAction {
     if (G4Threading::IsMasterThread() && G4Threading::IsMultithreadedApplication()) return;
     std::ofstream sagitta("sagitta.thread" + std::to_string(G4Threading::G4GetThreadId()) + ".csv");
     for (std::size_t i = 0; i < fShared.scorers.size(); ++i) sagitta << fShared.scorers[i].name << ',' << g4sim::ScorerSums::Thread().ApportionedSteps(i) << ',' << g4sim::ScorerSums::Thread().LongSteps(i) << '\n';
-    for (std::FILE* file : {fCells, fBoundary, fCrossings, Primaries()})
+    if (fMoments) g4sim::ScorerSums::Thread().WriteMoments(fMoments);
+    for (std::FILE* file : {fCells, fMoments, fBoundary, fCrossings, Primaries()})
       if (file) std::fclose(file);
     Primaries() = nullptr;
     g4sim::Accounting::Thread().Close();
@@ -205,6 +207,7 @@ class Files : public G4UserRunAction {
  private:
   Shared& fShared;
   std::FILE* fCells = nullptr;
+  std::FILE* fMoments = nullptr;
   std::FILE* fBoundary = nullptr;
   std::FILE* fCrossings = nullptr;
 };
@@ -324,8 +327,7 @@ int NewRun(const Value& ir, const Value& card, const Value& request) {
     const Value& truth = request.obj.at("truth");
     shared.hits = true;
     shared.truth.decayProducts = truth.at("decay_products", "truth").b;
-    shared.truth.energyThreshold = truth.at("energy_above_MeV", "truth").num;
-    shared.truth.energyRegion = truth.at("energy_region", "truth").str;
+    for (const auto& rule : truth.at("energy_rules", "truth").array("energy_rules")) shared.truth.energy.push_back({rule.at("above_MeV", "energy rule").num, rule.at("region", "energy rule").str});
     shared.truth.all = truth.at("all", "truth").b;
     shared.truth.timeBinNs = truth.at("time_bin_ns", "truth").num;
     for (const auto& plane : truth.at("planes_z_mm", "truth").array("planes_z_mm")) shared.planes.push_back({plane.num});

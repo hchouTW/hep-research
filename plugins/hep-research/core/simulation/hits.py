@@ -54,6 +54,9 @@ def columns_for_simreco(tracker_rows: list, particles: list, planes: dict) -> li
     """
     codes = {(int(row["event_id"]), int(row["track_id"])): int(row["pdg"]) for row in particles}
     primaries = {(int(row["event_id"]), int(row["track_id"])) for row in particles if int(row["parent_id"]) == 0}
+    deposits: dict = {}
+    for row in tracker_rows:  # a plane's deposit is every piece of every step of the track in it, and the crossing is the first
+        deposits.setdefault((int(row["event_id"]), int(row["step_track_id"]), int(row["cell"])), []).append(float(row["edep_MeV"]))
     seen: set = set()
     out = []
     for row in sorted(tracker_rows, key=lambda item: (int(item["event_id"]), int(item["step_index"]))):
@@ -64,5 +67,5 @@ def columns_for_simreco(tracker_rows: list, particles: list, planes: dict) -> li
         momentum = [float(row[key]) for key in ("px_MeV", "py_MeV", "pz_MeV")]
         size = math.sqrt(math.fsum(value * value for value in momentum)) or 1.0
         out.append(dict(zip(CROSSING_COLUMNS, (event, planes[cell], track, codes.get((event, track), 0), float(row["x_mm"]), float(row["y_mm"]), float(row["z_mm"]), *(value / size for value in momentum),
-                                               float(row["ekin_MeV"]), float(row["time_ns"]), float(row["edep_MeV"])))))
+                                               float(row["ekin_MeV"]), float(row["time_ns"]), math.fsum(deposits[(event, track, cell)])))))
     return out

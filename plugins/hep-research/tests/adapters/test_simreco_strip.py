@@ -107,26 +107,12 @@ class SimrecoStrip(unittest.TestCase):
                     width = math.sqrt(statistics.fmean((row[axis] - truth[row["event"]][axis]) ** 2 for row in kept))
                     self.assertAlmostEqual(width / kept[0][f"sigma_{axis}"], 1.0, delta=0.03)
 
-    def test_two_hits_of_one_cell_draw_apart_and_match_core(self):
-        rows = [{"event": 3, "cell": 8, "sub_index": at, "y_mm": 1.0, "z_mm": 2.0} for at in range(40)]
-        status, kept = self.digitized(rows, efficiency=0.5)
-        self.assertEqual(status, 0)
-        expected = [at for at in range(40) if self.chance(3, 8, at) < 0.5]
-        self.assertEqual([row.get("sub_index", 0) for row in kept], expected)
-        self.assertTrue(0 < len(expected) < 40)
-
-    @staticmethod
-    def chance(event, cell, sub_index):
-        stream = rng.SubStream(KEY, event, cell, sub_index)
-        stream.group(), stream.group()
-        return stream.group()[0]
-
     def test_rows_that_would_share_their_draws_are_refused(self):
         status, _ = self.digitized([{"event": 3, "cell": 8, "y_mm": 1.0, "z_mm": 2.0}] * 2)
         self.assertEqual(status, 1)
 
     def test_identities_a_double_cannot_hold_are_refused(self):
-        for bad in ({"cell": 2 ** 53}, {"cell": 2 ** 64 + 5}, {"cell": -1}, {"event": 5.7}, {"event": 2 ** 32}, {"sub_index": 2 ** 16}):
+        for bad in ({"cell": 2 ** 53}, {"cell": 2 ** 64 + 5}, {"cell": -1}, {"event": 5.7}, {"event": 2 ** 32}):
             with self.subTest(bad=bad):
                 status, _ = self.digitized([{"event": 1, "cell": 2, "y_mm": 0.0, "z_mm": 0.0, **bad}])
                 self.assertEqual(status, 1)

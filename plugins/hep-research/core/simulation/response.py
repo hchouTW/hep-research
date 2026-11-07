@@ -212,7 +212,7 @@ def external_program(stage: dict) -> str:
 def read_handoff(document: dict, stage_to: str) -> list:
     if document.get("schema") != HANDOFF_SCHEMA or document.get("to") != stage_to:
         raise ResponseError("handoff-form", f"not a hand-off to {stage_to}")
-    keys = [(row["event"], row["cell"], row.get("sub_index", 0)) for row in document["rows"]]
+    keys = [(row["event"], row["cell"]) for row in document["rows"]]
     if len(set(keys)) != len(keys):
-        raise ResponseError("handoff-rows", "two rows share an event, a cell and a sub_index, so they would share their draws")
+        raise ResponseError("handoff-rows", "two rows share an event and a cell, so they would share their draws: a channel stream has sub-index 0 (Section 10.2)")
     return document["rows"]

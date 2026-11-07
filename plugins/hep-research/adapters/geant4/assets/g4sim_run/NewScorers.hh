@@ -33,6 +33,7 @@
 #include "MiniJson.hh"
 #include "NewBuild.hh"
 #include "NewHits.hh"
+#include "Philox.hh"
 #include "ScintillationSplit.hh"
 
 namespace g4sim {
@@ -60,6 +61,7 @@ struct ScorerSpec {
   double fraction = 0.1, rigidityGV = -1., windowLow = -1., windowHigh = -1.;
   std::map<std::string, double> lightYield;  // edep_visible_ly_split: per MeV, by template
   std::string hitKind;  // level event_file: tracker or calorimeter
+  bool moments = false;  // level moments
   bool Boundary() const { return quantity == "n_crossings" || quantity == "crossing_kinematics" || quantity == "energy_out_by_face"; }
   bool First() const { return quantity == "time_first" || quantity == "first_entry_kinematics"; }
 };
@@ -88,6 +90,7 @@ inline std::vector<ScorerSpec> ReadScorers(const Value& request) {
     if (item.has("fraction")) spec.fraction = item.obj.at("fraction").num;
     if (item.has("rigidity_GV")) spec.rigidityGV = item.obj.at("rigidity_GV").num;
     if (item.has("hit_kind")) spec.hitKind = item.obj.at("hit_kind").str;
+    if (item.has("moments")) spec.moments = item.obj.at("moments").b;
     if (item.has("light_yield_per_MeV"))
       for (const auto& [name, value] : item.obj.at("light_yield_per_MeV").obj) spec.lightYield[name] = value.num;
     if (item.has("window_ns")) {
@@ -115,6 +118,12 @@ inline VolumeKey VolumeId(const G4VTouchable* touchable, const std::vector<long 
 
 inline int Clamp(int value, int count) { return value < 0 ? 0 : value >= count ? count - 1 : value; }
 
+constexpr long long kMaximumBins = 65536;
+
+struct StepShare {
+  double fraction = 0., along = 0.;
+};
+
 // A step's local geometry against one segmentation.
 class Grid {
  public:
@@ -127,6 +136,8 @@ class Grid {
       fCount[i] = width > 0. ? std::max(1, static_cast<int>(std::ceil((high[i] - low[i]) / width - 1e-9))) : 1;
     }
     fHighRadius = std::max(std::abs(low.x()), std::abs(high.x()));
+    const long long bins = fSegmentation.kind == "polar" ? static_cast<long long>(std::max(1., std::ceil(fHighRadius / fSegmentation.width[0]))) * fSegmentation.phiBins : static_cast<long long>(fCount[0]) * fCount[1] * fCount[2];
+    if (bins > kMaximumBins) G4Exception("Grid", "g4sim-segmentation", FatalException, ("a segmentation of " + std::to_string(bins) + " bins: a volume has at most 2^16, the sub-index of its stream (Section 10.2)").c_str());
   }
   double Width(int axis) const {
     const std::string& kind = fSegmentation.kind;
@@ -155,8 +166,8 @@ class Grid {
       if (Width(i) > 0.) inverse += std::abs(direction[i]) / Width(i);
     return inverse > 0. ? 1. / inverse : HUGE_VAL;
   }
-  // The fraction of a straight line in each bin: exact for planes, by 64 pieces for polar.
-  std::map<int, double> Apportion(const G4ThreeVector& a, const G4ThreeVector& b) const {
+  // The fraction of a straight line in each bin and the mean position of that part along the line: exact for planes, by 64 pieces for polar.
+  std::map<int, StepShare> Apportion(const G4ThreeVector& a, const G4ThreeVector& b) const {
     std::vector<double> cuts = {0., 1.};
     if (fSegmentation.kind == "polar") {
       for (int i = 1; i < 64; ++i) cuts.push_back(i / 64.);
@@ -171,10 +182,12 @@ class Grid {
       }
     }
     std::sort(cuts.begin(), cuts.end());
-    std::map<int, double> out;
+    std::map<int, StepShare> out;
     for (std::size_t i = 0; i + 1 < cuts.size(); ++i) {
-      const double middle = 0.5 * (cuts[i] + cuts[i + 1]);
-      out[Bin(a + middle * (b - a))] += cuts[i + 1] - cuts[i];
+      const double middle = 0.5 * (cuts[i] + cuts[i + 1]), width = cuts[i + 1] - cuts[i];
+      StepShare& share = out[Bin(a + middle * (b - a))];
+      share.along = (share.along * share.fraction + middle * width) / (share.fraction + width);
+      share.fraction += width;
     }
     return out;
   }
@@ -184,6 +197,12 @@ class Grid {
   G4ThreeVector fLow;
   int fCount[3];
   double fHighRadius = 0.;
+};
+
+// Section 9.1, level `moments`: no row per event, only the sum and the sum of squares of each cell. They are kept as partial sums, so that merging the threads gives the same result however the events fell.
+struct MomentCell {
+  std::vector<double> sum, squares;
+  long events = 0;
 };
 
 struct ScoreCell {
@@ -231,11 +250,11 @@ class ScorerSums {
     for (auto& row : fEnvelopes) row = EnvelopeRow();
   }
 
-  void Add(std::size_t scorer, VolumeKey volume, int bin, double value) {
+  void Add(std::size_t scorer, VolumeKey volume, int bin, double value, double share = 1., double along = 0.) {
     // A hit takes the scorer's own bin and share, so a segmented hit file closes on the scorer bin by bin (Section 9.2).
     const std::string& hitKind = (*fScorers)[scorer].hitKind;
-    if (hitKind == "tracker") HitRecorder::Thread().Tracker(fScoredStep, static_cast<std::uint64_t>(volume), bin, value);
-    else if (hitKind == "calorimeter") HitRecorder::Thread().Calorimeter(fScoredStep, static_cast<std::uint64_t>(volume), bin, value);
+    if (hitKind == "tracker") HitRecorder::Thread().Tracker(fScoredStep, static_cast<std::uint64_t>(volume), bin, value, share, along);
+    else if (hitKind == "calorimeter") HitRecorder::Thread().Calorimeter(fScoredStep, static_cast<std::uint64_t>(volume), bin, value, along);
     ScoreCell& cell = fSums[{scorer, volume, bin}];
     cell.value += value;
     cell.absolute += std::abs(value);
@@ -325,6 +344,16 @@ class ScorerSums {
     }
   }
 
+  void WriteMoments(std::FILE* file) const {
+    for (const auto& [key, cell] : fMoments) {
+      const auto& [scorer, volume, bin] = key;
+      std::fprintf(file, "%s,%lld,%d,%ld,%zu", (*fScorers)[scorer].name.c_str(), volume, bin, cell.events, cell.sum.size());
+      for (double value : cell.sum) std::fprintf(file, ",%a", value);
+      for (double value : cell.squares) std::fprintf(file, ",%a", value);
+      std::fprintf(file, "\n");
+    }
+  }
+
   void EndEvent(long long event) {
     fEvent = event;
     std::map<std::size_t, double> totals;
@@ -336,9 +365,19 @@ class ScorerSums {
       absolute[scorer] += cell.absolute;
       summands[scorer] += cell.summands;
       if (fControl == "drop_bin" && bin == 0) continue;
+      if ((*fScorers)[scorer].moments) {
+        AddMoment({scorer, volume, bin}, cell.value);
+        continue;
+      }
       std::fprintf(fCells, "%lld,%s,%lld,%d,%.17g,%ld,%.17g\n", event, (*fScorers)[scorer].name.c_str(), volume, bin, cell.value, cell.summands, cell.absolute);
     }
-    for (const auto& [scorer, value] : fDirect) std::fprintf(fCells, "%lld,%s,-1,-1,%.17g,%ld,%.17g\n", event, (*fScorers)[scorer].name.c_str(), value, summands[scorer], absolute[scorer]);
+    for (const auto& [scorer, value] : fDirect) {
+      if ((*fScorers)[scorer].moments) AddMoment({scorer, -1, -1}, value);
+    }
+    for (const auto& [scorer, value] : fDirect) {
+      if ((*fScorers)[scorer].moments) continue;
+      std::fprintf(fCells, "%lld,%s,-1,-1,%.17g,%ld,%.17g\n", event, (*fScorers)[scorer].name.c_str(), value, summands[scorer], absolute[scorer]);
+    }
     fDirect.clear();
     for (const auto& [key, first] : fFirst) std::fprintf(fCells, "%lld,%s,%lld,0,%.17g,%.0f,%.17g\n", event, (*fScorers)[key.first].name.c_str(), key.second, first[0], first[2], first[1]);
     for (std::size_t i = 0; i < fScorers->size(); ++i) {
@@ -382,6 +421,13 @@ class ScorerSums {
     return std::string(normal[axis] < 0 ? "-" : "+") + "xyz"[axis];
   }
 
+  void AddMoment(const std::tuple<std::size_t, VolumeKey, int>& key, double value) {
+    MomentCell& cell = fMoments[key];
+    AddToPartials(cell.sum, value);
+    AddToPartials(cell.squares, value * value);
+    ++cell.events;
+  }
+
   void Score(std::size_t i, const ScorerSpec& scorer, const G4Step* step, const G4VTouchable* touchable, VolumeKey volume) {
     const G4Track* track = step->GetTrack();
     const G4ParticleDefinition* particle = track->GetDefinition();
@@ -418,15 +464,15 @@ class ScorerSums {
     const G4ThreeVector chord = b - a;
     const double width = chord.mag() > 0. ? grid.CrossingWidth(chord.unit()) : HUGE_VAL;
     if (!charged || length <= scorer.fraction * width || fControl == "force_post_step") {
-      Add(i, volume, grid.Bin(b) * stride + part, value);
+      Add(i, volume, grid.Bin(b) * stride + part, value, 1., 1.);
       return;
     }
     Sagitta(i, step, length, grid);
     if (scorer.split == "midpoint") {
-      Add(i, volume, grid.Bin(0.5 * (a + b)) * stride + part, value);
+      Add(i, volume, grid.Bin(0.5 * (a + b)) * stride + part, value, 1., 0.5);
       return;
     }
-    for (const auto& [bin, share] : grid.Apportion(a, b)) Add(i, volume, bin * stride + part, value * share);
+    for (const auto& [bin, share] : grid.Apportion(a, b)) Add(i, volume, bin * stride + part, value * share.fraction, share.fraction, share.along);
   }
 
   // Section 8.7: an apportioned step's sagitta against 10% of the bin width.
@@ -457,6 +503,7 @@ class ScorerSums {
   long long fEvent = 0;
   std::map<std::tuple<std::size_t, VolumeKey, int>, ScoreCell> fSums;
   const G4Step* fScoredStep = nullptr;
+  std::map<std::tuple<std::size_t, VolumeKey, int>, MomentCell> fMoments;
   std::map<std::size_t, double> fDirect;
   std::map<std::pair<std::size_t, VolumeKey>, std::array<double, 3>> fFirst;
   std::vector<EnvelopeRow> fEnvelopes;

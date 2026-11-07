@@ -138,6 +138,7 @@
   "assets/GEANT4-LICENSE.txt",
   "assets/PYTHON-LICENSE.txt",
   "assets/g4sim/ExternalEvents.hh",
+  "assets/g4sim/PlaneCrossing.hh",
   "assets/g4sim/Philox.hh",
   "assets/g4sim/ScintillationSplit.hh",
   "assets/g4sim/HitColumns.hh",

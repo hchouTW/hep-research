@@ -142,6 +142,9 @@ class Scorers(unittest.TestCase):
         self.assertEqual([item["code"] for item in check.truth_findings({"truth": {"time_bin_ns": 0}})], ["truth-rule"])
         self.assertEqual([item["code"] for item in check.truth_findings({"truth": {"keep": ["primary", {"energy_above_MeV": 5, "region": "tracker"}, "all", "decay_products"]}})], [])
         self.assertEqual([item["code"] for item in check.truth_findings({"truth": {"keep": ["everything"]}})], ["truth-rule"])
+        for width in ("nan", "inf", "-1"):
+            self.assertEqual([item["code"] for item in check.truth_findings({"truth": {"time_bin_ns": width}})], ["truth-rule"])
+        self.assertEqual([item["code"] for item in check.truth_findings({"truth": {"keep": [{"energy_above_MeV": -1}]}})], ["truth-rule"])
 
     def test_a_step_is_written_to_one_hit_scorer(self):
         scorers = [{"name": "a", "hit_kind": "calorimeter", "readout": "none", "templates": ["block"]}, {"name": "b", "hit_kind": "tracker", "readout": "none", "templates": ["block", "plane"]}]

@@ -23,7 +23,7 @@ for folder in (str(ROOT), str(Path(__file__).resolve().parent)):
 import g4sim_physics_check as physics_check  # noqa: E402
 
 from core.geometry import identity  # noqa: E402
-from core.simulation import hits, source_density  # noqa: E402
+from core.simulation import hits, rng, source_density  # noqa: E402
 
 AXES = {"x": 0, "y": 1, "z": 2}
 CLOSURE_ULP = 2.0 ** -52
@@ -95,8 +95,10 @@ def resolved_request(request: dict, ir: dict, folder: Path | None = None) -> dic
         if "time_window_ns" in scorer:
             item["window_ns"] = [float(value) for value in scorer["time_window_ns"]]
         if scorer.get("level") == "event_file":
-            item["hit_kind"] = scorer["hit_kind"]
+            item["hit_kind"] = scorer.get("hit_kind", "")  # a missing one is a finding of check-spec, which comes next
             item["readout"] = scorer.get("readout", "none")
+        if scorer.get("level") == "moments":
+            item["moments"] = True
         if scorer["quantity"] == physics_check.SPLIT_QUANTITY:
             templates, materials = ir["physical"]["templates"], ir["physical"]["materials"]
             item["light_yield_per_MeV"] = {name: float(materials.get(templates[name]["material"], {}).get("scintillation", {}).get("yield_per_MeV", 0)) for name in item["templates"]}
@@ -107,10 +109,16 @@ def resolved_request(request: dict, ir: dict, folder: Path | None = None) -> dic
     planes = request.get("reference_planes", [])
     if planes or "truth" in request or any("hit_kind" in item for item in scorers):
         keep = request.get("truth", {}).get("keep", ["primary"])
-        energy_rule = next((rule for rule in keep if isinstance(rule, dict) and "energy_above_MeV" in rule), {})
-        out["truth"] = {"decay_products": "decay_products" in keep, "all": "all" in keep, "energy_above_MeV": float(energy_rule.get("energy_above_MeV", -1)), "energy_region": energy_rule.get("region", ""), "time_bin_ns": float(request.get("truth", {}).get("time_bin_ns", 1)),
+        rules = [{"above_MeV": float(rule["energy_above_MeV"]), "region": rule.get("region", "")} for rule in keep if isinstance(rule, dict) and "energy_above_MeV" in rule]
+        out["truth"] = {"decay_products": "decay_products" in keep, "all": "all" in keep, "energy_rules": rules, "time_bin_ns": float(request.get("truth", {}).get("time_bin_ns", 1)),
                         "planes_z_mm": [_in_world(plane["frame"], [0.0, 0.0, float(plane["z_mm"])], ir["physical"]["frames"])[2] for plane in planes]}
     return out
+
+
+def identified_request(request: dict, ir: dict) -> dict:
+    """The request as `request_id` hashes it (Section 6.3): `select` expanded, so tags that pick the same objects give the same identity."""
+    scorers = [{**{key: value for key, value in scorer.items() if key != "select"}, "templates": selected_templates(scorer["select"], ir)} for scorer in request.get("scorers", [])]
+    return {**request, "scorers": scorers} if "scorers" in request else request
 
 
 def selected_materials(resolved: dict, ir: dict) -> dict:
@@ -197,6 +205,32 @@ def merge_threads(work: Path) -> dict:
     return counts
 
 
+def merge_moments(work: Path) -> dict:
+    """`moments.csv` from the workers' partial sums, one final rounding per cell, so the result does not depend on the threads. Rows: scorer, volume, bin, events, sum, sum of squares; bin -1 is the direct sum."""
+    cells: dict = {}
+    for path in sorted(work.glob("moments.thread*.csv")):
+        for row in _rows(path):
+            count = int(row[4])
+            cell = cells.setdefault((row[0], int(row[1]), int(row[2])), {"events": 0, "sum": [], "squares": []})
+            cell["events"] += int(row[3])
+            cell["sum"].append([float.fromhex(value) for value in row[5:5 + count]])
+            cell["squares"].append([float.fromhex(value) for value in row[5 + count:]])
+        path.unlink()
+    rows = [[*key, cell["events"], repr(rng.merge_partial_sums(cell["sum"])), repr(rng.merge_partial_sums(cell["squares"]))] for key, cell in sorted(cells.items())]
+    if rows:
+        with (work / "moments.csv").open("w", encoding="utf-8", newline="") as handle:
+            csv.writer(handle, lineterminator="\n").writerows(rows)
+    binned: dict = {}
+    direct: dict = {}
+    for row in rows:
+        if row[1] == -1:
+            direct[row[0]] = float(row[4])
+        else:
+            binned.setdefault(row[0], []).append(float(row[4]))
+    failing = sorted(name for name, value in direct.items() if abs(math.fsum(binned.get(name, [])) - value) > 1e-9 * abs(value))
+    return {"rows": len(rows), "failing": failing}
+
+
 def closure_problems(cells: list) -> dict:
     """Section 9.1: per event and scorer, the bins against the direct sum, within n x 2^-52 x sum |x|. Rows: event, scorer, volume, bin, value, n, sum|x|."""
     sums: dict = {}
@@ -256,6 +290,12 @@ def conservation_summary(path: Path) -> dict:
     return {"events": len(rows), "largest_residual_MeV": max(residuals, default=0.0), "accounting_errors": sum(int(row["accounting_errors"]) for row in rows)}
 
 
+def failure_reason(log: Path) -> str:
+    """The line of a run's log that says why Geant4 stopped it."""
+    lines = log.read_text(encoding="utf-8", errors="replace").splitlines() if log.is_file() else []
+    return next((line.strip() for line in reversed(lines) if "the event file" in line or "a segmentation of" in line), "")
+
+
 def run_program(program: Path, work: Path, environment=None) -> int:
     with (work / "log.txt").open("a", encoding="utf-8") as log:
         return subprocess.run([str(program), "--new", "ir.json", "run.json", "request.json"], cwd=work, stdout=log, stderr=log, check=False, env=environment).returncode
@@ -300,15 +340,17 @@ def simulate(card: dict, request: dict, checked: dict, program: Path, work: Path
     (work / "run.json").write_text(json.dumps(card), encoding="utf-8")
     code = run_program(program, work, environment)
     if code != 0:
-        return {"status": "failed", "exit_status": code, "stage": "run"}
+        return {"status": "failed", "exit_status": code, "stage": "run", "reason": failure_reason(work / "log.txt")}
     counts = merge_threads(work)
+    moments = merge_moments(work)
+    request_identity = identity.request_id(identified_request(request, ir), checked["geometry_id"])
     cells = _rows(work / "cells.csv")
     closure = closure_problems([row for row in cells if row[1] in {item["name"] for item in resolved["scorers"] if item["quantity"] in physics_check.ADDITIVE}])
-    summary = {"status": "failed" if closure["failing"] else "ok", "rows": counts, "closure": closure, "balance": balance_summary(_rows(work / "boundary.csv")), "conservation": conservation_summary(work / "conservation.csv"),
+    summary = {"status": "failed" if closure["failing"] or moments["failing"] else "ok", "rows": counts, "closure": closure, "moments": moments, "request_id": request_identity, "balance": balance_summary(_rows(work / "boundary.csv")), "conservation": conservation_summary(work / "conservation.csv"),
                "effective": {"birks_mm_per_MeV": effective["birks_mm_per_MeV"], "step_functions": effective["step_functions"], "pai": physics_check.effective_pai(requests, ionisation_table(effective)), "models": effective["models"]},
                "geometry_id": checked["geometry_id"]}
     if (work / "hits.root").is_file():
-        (work / "simulation-hits.json").write_text(json.dumps(hits.index(checked["geometry_id"], card, work / "hits.root", identity.request_id(request, checked["geometry_id"])), indent=1) + "\n", encoding="utf-8")
+        (work / "simulation-hits.json").write_text(json.dumps(hits.index(checked["geometry_id"], card, work / "hits.root", request_identity), indent=1) + "\n", encoding="utf-8")
     (work / "column_map.json").write_text(json.dumps({"scorers": resolved["scorers"], "volume_id": ir["physical"]["volume_id"]}, indent=1) + "\n", encoding="utf-8")
     (work / "summary.json").write_text(json.dumps(summary, indent=1) + "\n", encoding="utf-8")
     return summary

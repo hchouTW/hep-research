@@ -2,7 +2,7 @@
  "$comment": "response-pipeline/1 (g4sim plan, Section 10): the stages, their parameters each with a source_of_facts, and the file handed over between stages. core/simulation/response.py holds the fixed draw order of `sub_streams`.",
  "$defs": {
   "stage_handoff": {
-   "$comment": "response-handoff/1: the file between stages 3 and 4 or 4 and 5, so that core imports neither the FE series nor simreco-strip. A row is one event, cell and sub_index, which give it its sub-stream, so no two rows share them; its other fields are those of the stage it is addressed to. simreco_strip reads JSON numbers as doubles and refuses a cell of 2^53 or more.",
+   "$comment": "response-handoff/1: the file between stages 3 and 4 or 4 and 5, so that core imports neither the FE series nor simreco-strip. A row is one event and one cell, which give it its sub-stream, so no two rows share them; its other fields are those of the stage it is addressed to. simreco_strip reads JSON numbers as doubles and refuses a cell of 2^53 or more.",
    "type": "object",
    "required": ["schema", "from", "to", "rows"],
    "additionalProperties": false,
@@ -10,7 +10,7 @@
     "schema": {"const": "response-handoff/1"},
     "from": {"type": "string", "minLength": 1},
     "to": {"type": "string", "minLength": 1},
-    "rows": {"type": "array", "items": {"type": "object", "required": ["event", "cell"], "properties": {"event": {"type": "integer", "minimum": 0, "maximum": 4294967295}, "cell": {"type": "integer", "minimum": 0}, "sub_index": {"type": "integer", "minimum": 0, "maximum": 65535}}}}
+    "rows": {"type": "array", "items": {"type": "object", "required": ["event", "cell"], "properties": {"event": {"type": "integer", "minimum": 0, "maximum": 4294967295}, "cell": {"type": "integer", "minimum": 0}}}}
    }
   }
  },

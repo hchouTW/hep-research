@@ -139,7 +139,7 @@ class Stages(unittest.TestCase):
         with self.assertRaises(response.ResponseError) as raised:
             response.read_handoff(response.handoff("sensor", "adc", rows), "adc")
         self.assertEqual(raised.exception.code, "handoff-rows")
-        self.assertEqual(len(response.read_handoff(response.handoff("sensor", "adc", [rows[0], {**rows[1], "sub_index": 1}]), "adc")), 2)
+        self.assertEqual(len(response.read_handoff(response.handoff("sensor", "adc", [rows[0], {**rows[1], "cell": 2}]), "adc")), 2)
 
     def test_the_handoff_has_the_form_the_contract_gives(self):
         form = json.loads((ROOT / "contracts/schemas/response_pipeline.json").read_text(encoding="utf-8"))["$defs"]["stage_handoff"]

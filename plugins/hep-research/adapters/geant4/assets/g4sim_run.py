@@ -146,7 +146,7 @@ def run(args) -> dict:
     ir = checked["ir"]
     ir["physical"]["legacy"] = block
     geometry_identity = identity.geometry_id(ir)
-    request_identity = identity.request_id(request, geometry_identity)
+    request_identity = identity.request_id(simulate_new.identified_request(request, ir), geometry_identity)
     build_hash = _sha256(args.program)
     work = args.work.resolve()
     work.mkdir(parents=True, exist_ok=True)

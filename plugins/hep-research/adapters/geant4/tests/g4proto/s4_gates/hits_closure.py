@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """S4 gate 8: a hit file read back through simroot agrees with the scorers, and its truth is the truth (g4sim plan, Sections 9.2, 9.3, 19.2).
 
-Two silicon planes and a block scored in 10 mm bins, two primaries per event, and event numbers above 2^31. Each event is run twice from one seed: with the rules under test, and with every track
-kept, which gives the whole ancestry. Attribution is then judged against that ancestry, not against the file's own claims. Each control must break the check named for it, or the checks prove nothing.
+Two silicon planes in 0.1 mm strips and a block in 10 mm bins, two tilted primaries per event, and event numbers above 2^31. Each event is run twice from one seed: with the rules under test, and with every
+track kept, which gives the whole ancestry. Attribution is judged against that ancestry, and values against what the geometry and the kinematics fix, not against the file's own claims. Each control is one fault,
+and must break the check named for it, or the checks prove nothing. A scorer at level `moments` is compared with the same scorer at level `column`, and a one-thread run with the two-thread run.
 
 Usage: hits_closure.py --program PATH --simroot PATH --work DIR [--events N]   In an activated Geant4 environment. Prints JSON with a status key. Exit 0 pass, 1 fail.
 """
@@ -12,8 +13,10 @@ import argparse
 import csv
 import hashlib
 import json
+import math
 import os
 import shutil
+import statistics
 import subprocess
 import sys
 from pathlib import Path
@@ -31,21 +34,34 @@ PLANE_Z_MM = -150.0
 REGION = "inner"
 SENSOR_Z_MM = (-200.0, -180.0)
 SENSOR_HALF_MM = 0.5
-PIONS_MEV, PROTONS_MEV = 200.0, 500.0
+PIONS_MEV, PROTONS_MEV = 200.0, 500.0  # along z
+TILT = 0.2  # transverse over longitudinal momentum, in y
+START_Y_MM = -40.0
 PION_PDG, PROTON_PDG = 211, 2212
+PROTON_MASS_MEV = 938.27208816
+LIGHT_MM_PER_NS = 299.792458
+SENSOR_THICKNESS_MM = 1.0
+STRIP_MM, BIN_MM = 0.1, 10.0
+SIDE_MM, BLOCK_HALF_MM, WORLD_HALF_MM = 100.0, 100.0, 500.0
+ENERGY_RULE_MEV = 10.0
+EDGE_MM = 1e-6
+MASS_TABLE_MEV = 1e-3  # Geant4's proton mass is not the CODATA value; the momentum is compared exactly
 TOP_BIT = 2 ** 63
-CONTROLS = {"ancestor_is_primary": "ancestry", "one_crossing_per_event": "crossings"}
+KEEP = ["primary", "decay_products", {"energy_above_MeV": 1000, "region": REGION}, {"energy_above_MeV": ENERGY_RULE_MEV}]
+CONTROLS = {"ancestor_is_primary": "ancestry", "one_crossing_per_event": "crossings", "pieces_repeat_the_step": "pieces", "crossing_at_pre_step": "crossing_points", "status_swapped": "status",
+            "threshold_ignored": "energy_rule", "momentum_zero": "momentum", "time_zero": "times"}
+THREADED_FILES = ("mc_particles", "tracker_hits", "calorimeter_hits", "contributions", "plane_crossings")
 
 
 def event_file(path: Path, events: int) -> str:
     rows = ["# g4sim-events/1"]
     for event in range(FIRST_EVENT, FIRST_EVENT + events):
-        rows += [f"event {event} 2", f"{PION_PDG} 5 0 {START_Z_MM} 0 0 {PIONS_MEV}", f"{PROTON_PDG} -5 0 {START_Z_MM} 0 0 {PROTONS_MEV}"]
+        rows += [f"event {event} 2", f"{PION_PDG} 5 {START_Y_MM} {START_Z_MM} 0 {TILT * PIONS_MEV} {PIONS_MEV}", f"{PROTON_PDG} -5 {START_Y_MM} {START_Z_MM} 0 {TILT * PROTONS_MEV} {PROTONS_MEV}"]
     path.write_text("\n".join(rows) + "\n", encoding="utf-8")
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def run(root: Path, name: str, events: int, keep: list, program: Path, control: str = "") -> Path:
+def run(root: Path, name: str, events: int, keep: list, program: Path, control: str = "", threads: int = 2) -> Path:
     folder = root / name
     folder.mkdir()
     digest = event_file(folder / "events.txt", events)
@@ -53,11 +69,12 @@ def run(root: Path, name: str, events: int, keep: list, program: Path, control: 
             "templates": {"sensor": {"solid": {"box": {"size_mm": ["100", "100", "1"]}}, "material": "G4_Si", "tags": ["tracker"], "region": REGION}, "block": {"solid": {"box": {"size_mm": ["100", "100", "200"]}}, "material": "plastic", "tags": ["active"]}},
             "world": {"material": "G4_Galactic", "size_mm": ["1000", "1000", "1000"], "children": [{"template": "sensor", "placement": {"explicit": {"positions_mm": [["0", "0", "-200"], ["0", "0", "-180"]]}}}, {"template": "block", "placement": {"single": {"centre_mm": ["0", "0", "0"]}}}]}, "frames": {}}
     request = {"schema": "simulation-request/1", "source": {"density": "external", "format": "text", "path": "events.txt", "sha256": digest},
-               "scorers": [{"name": "planes", "readout": "none", "select": {"tags": ["tracker"]}, "quantity": "edep", "level": "event_file", "hit_kind": "tracker"},
-                           {"name": "cells", "readout": "none", "select": {"tags": ["active"]}, "quantity": "edep", "level": "event_file", "hit_kind": "calorimeter", "segmentation": {"along_axis": {"axis": "z", "width_mm": "10"}}, "split": "apportion"}],
+               "scorers": [{"name": "planes", "readout": "none", "select": {"tags": ["tracker"]}, "quantity": "edep", "level": "event_file", "hit_kind": "tracker", "segmentation": {"along_axis": {"axis": "y", "width_mm": str(STRIP_MM)}}, "split": "apportion"},
+                           {"name": "cells", "readout": "none", "select": {"tags": ["active"]}, "quantity": "edep", "level": "event_file", "hit_kind": "calorimeter", "segmentation": {"along_axis": {"axis": "z", "width_mm": str(BIN_MM)}}, "split": "apportion"},
+                           {"name": "by_event", "readout": "none", "select": {"tags": ["active"]}, "quantity": "edep"}, {"name": "summed", "readout": "none", "select": {"tags": ["active"]}, "quantity": "edep", "level": "moments"}],
                "reference_planes": [{"name": "front", "frame": "world", "z_mm": str(PLANE_Z_MM)}], "truth": {"keep": keep, "time_bin_ns": 1}}
     card = {"schema": "g4sim-run/1", "physics": {"reference_list": "FTFP_BERT_EMZ", "cuts_mm": {"default": "0.7"}}, "accounting": "separated",
-            "run": {"events": events, "first_event": FIRST_EVENT, "logical_run_seed": 4242, "mode": "mt", "seeding": "per-event", "threads": 2}}
+            "run": {"events": events, "first_event": FIRST_EVENT, "logical_run_seed": 4242, "mode": "mt", "seeding": "per-event", "threads": threads}}
     for label, block in (("spec", spec), ("request", request), ("run", card)):
         (folder / f"{label}.json").write_text(json.dumps(block), encoding="utf-8")
     environment = {**os.environ, "G4SIM_HIT_CONTROL": control} if control else None
@@ -85,12 +102,40 @@ def scorer_sums(work: Path, name: str, offset: int = 0) -> dict:
     return sums
 
 
+def decay_products(rows: list) -> set:
+    """Tracks the `decay_products` rule may keep: the oracle does not record the creator, so any child of a charged pion or muon counts; the rule is judged by its upper bound only."""
+    unstable = {(int(row["event_id"]), int(row["track_id"])) for row in rows if abs(int(row["pdg"])) in (211, 13)}
+    return {(int(row["event_id"]), int(row["track_id"])) for row in rows if (int(row["event_id"]), int(row["parent_id"])) in unstable}
+
+
 def nearest_kept(parents: dict, kept: set, event: int, track: int) -> int:
     """The nearest kept ancestor of a track, walking the whole ancestry; 0 above the primaries."""
     parent = parents[(event, track)]
     while parent and (event, parent) not in kept:
         parent = parents[(event, parent)]
     return parent
+
+
+def inside(position: float, start: float, width: float, index: int) -> bool:
+    return start + index * width - EDGE_MM <= position <= start + (index + 1) * width + EDGE_MM
+
+
+def moments_agree(work: Path) -> bool:
+    """A cell's sum and sum of squares at level `moments` are the same doubles as those of the per-event rows of level `column`."""
+    values: dict = {}
+    with (work / "cells.csv").open(encoding="utf-8", newline="") as handle:
+        for row in csv.reader(handle):
+            if row[1] == "by_event" and row[2] != "-1":
+                values.setdefault((int(row[2]), int(row[3])), []).append(float(row[4]))
+    with (work / "moments.csv").open(encoding="utf-8", newline="") as handle:
+        rows = {(int(row[1]), int(row[2])): row for row in csv.reader(handle) if row[0] == "summed" and row[2] != "-1"}
+    return len(rows) > 0 and set(rows) == set(values) and all(int(rows[key][3]) == len(found) and float(rows[key][4]) == math.fsum(found) and float(rows[key][5]) == math.fsum(value * value for value in found) for key, found in values.items())
+
+
+def flight_ns(momentum_z: float, mass: float, length_z: float) -> float:
+    """Along the tilted line, in vacuum."""
+    momentum = momentum_z * math.hypot(1.0, TILT)
+    return length_z * math.hypot(1.0, TILT) * math.hypot(momentum, mass) / momentum / LIGHT_MM_PER_NS
 
 
 def judged(simroot: Path, work: Path, oracle: Path, events: int, offset: int = 0) -> dict:
@@ -128,11 +173,38 @@ def judged(simroot: Path, work: Path, oracle: Path, events: int, offset: int = 0
     tracker = hits.closure(hits.sums_by_cell(tables["tracker_hits"]), scorer_sums(work, "planes", offset))
     against_parts = hits.closure(hits.sums_by_cell(tables["calorimeter_hits"]), hits.sums_by_cell(tables["contributions"]))
     index = json.loads((work / "simulation-hits.json").read_text(encoding="utf-8"))
-    checks = {"calorimeter": calorimeter["ok"], "tracker": tracker["ok"], "contributions": against_parts["ok"], "ancestry": not wrong_parent and owners["ok"] and not wrong_tracker and chained > 0 and non_primary_owners > 0,
-              "crossings": len(crossing_keys) == len(set(crossing_keys)) and past_the_plane <= crossed_primaries and len(past_the_plane) > 1.9 * events and {key[:2] for key in crossing_keys} <= kept, "status": 0 not in statuses and statuses == {1, 2},
+    primary_rows = [row for row in particles if int(row["parent_id"]) == 0]
+    protons = [row for row in primary_rows if int(row["pdg"]) == PROTON_PDG]
+    momentum = all(abs(float(row["py_MeV"]) - TILT * PROTONS_MEV) < 1e-6 and abs(float(row["pz_MeV"]) - PROTONS_MEV) < 1e-6 and abs(float(row["ekin_MeV"]) - (math.sqrt(PROTONS_MEV ** 2 * (1 + TILT ** 2) + PROTON_MASS_MEV ** 2) - PROTON_MASS_MEV)) < MASS_TABLE_MEV for row in protons) and len(protons) == events
+    strips_right = all(inside(float(row["y_mm"]), -SIDE_MM / 2, STRIP_MM, int(row["segment"])) for row in tables["tracker_hits"])
+    bins_right = all(inside(float(row["z_mm"]), -BLOCK_HALF_MM, BIN_MM, int(row["segment"])) for name in ("calorimeter_hits", "contributions") for row in tables[name])
+    paths: dict = {}
+    pieces: dict = {}
+    for row in tables["tracker_hits"]:
+        if (int(row["event_id"]), int(row["step_track_id"])) in primaries:
+            key = (row["event_id"], row["step_track_id"], row["cell"])
+            paths[key] = paths.get(key, 0.0) + float(row["path_mm"])
+            pieces[key] = pieces.get(key, 0) + 1
+    path_ratio = statistics.median(value / (SENSOR_THICKNESS_MM * math.hypot(1.0, TILT)) for value in paths.values())
+    plane_rows = tables["plane_crossings"]
+    points_right = all(abs(float(row["z_mm"]) - PLANE_Z_MM) < 1e-9 for row in plane_rows)
+    on_the_line = statistics.median(abs(float(row["y_mm"]) - (START_Y_MM + TILT * (PLANE_Z_MM - START_Z_MM))) for row in plane_rows if (int(row["event_id"]), int(row["track_id"])) in primaries)
+    directions_right = statistics.median(abs(float(row["dy"]) / float(row["dz"]) - TILT) for row in plane_rows if (int(row["event_id"]), int(row["track_id"])) in primaries)
+    proton_tracks = {(int(row["event_id"]), int(row["track_id"])) for row in protons}
+    first_sensor = statistics.median(float(row["time_ns"]) for row in tables["tracker_hits"] if (int(row["event_id"]), int(row["step_track_id"])) in proton_tracks and float(row["z_mm"]) < SENSOR_Z_MM[0] + SENSOR_HALF_MM)
+    expected_time = flight_ns(PROTONS_MEV, PROTON_MASS_MEV, SENSOR_Z_MM[0] - START_Z_MM)
+    times = abs(first_sensor / expected_time - 1) < 0.02 and min(float(row["time_ns"]) for row in tables["contributions"]) > 0
+    left = {(row["event_id"], row["track_id"]) for row in particles if max(abs(float(row[f"end_{axis}_mm"])) for axis in "xyz") >= WORLD_HALF_MM - EDGE_MM}
+    status_right = all((int(row["simulation_status"]) == 2) == ((row["event_id"], row["track_id"]) in left) for row in particles)
+    above = {(int(row["event_id"]), int(row["track_id"])) for row in full["mc_particles"] if float(row["ekin_MeV"]) > ENERGY_RULE_MEV}
+    decayed_or_crossed = {key[:2] for key in crossing_keys} | primaries | {key for key in kept if key in decay_products(full["mc_particles"])}
+    energy_rule = above <= kept and kept <= above | decayed_or_crossed and len(above - primaries) > 0
+    checks = {"pieces": strips_right and bins_right and abs(path_ratio - 1) < 0.02 and max(pieces.values()) > 1, "crossing_points": points_right and on_the_line < 1.0 and directions_right < 0.02, "momentum": momentum, "times": times, "energy_rule": energy_rule, "moments": moments_agree(work),
+              "calorimeter": calorimeter["ok"], "tracker": tracker["ok"], "contributions": against_parts["ok"], "ancestry": not wrong_parent and owners["ok"] and not wrong_tracker and chained > 0 and non_primary_owners > 0,
+              "crossings": len(crossing_keys) == len(set(crossing_keys)) and past_the_plane <= crossed_primaries and len(past_the_plane) > 1.9 * events and {key[:2] for key in crossing_keys} <= kept, "status": statuses == {1, 2} and status_right,
               "event_numbers": min(key[0] for key in kept) == FIRST_EVENT, "segments": len({key[2] for key in hits.sums_by_cell(tables["calorimeter_hits"])}) > 5, "planes": len({key[1] for key in hits.sums_by_cell(tables["tracker_hits"])}) == 2,
               "index": contract_schema.validate(index, "simulation_hits.json").ok and len(index["request_id"]) > 0}
-    return {"checks": checks, "counts": {"particles": len(particles), "kept_with_a_kept_non_primary_parent": chained, "non_primary_owners": non_primary_owners, "wrong_parents": len(wrong_parent), "wrong_tracker_owners": len(wrong_tracker), "crossings": len(crossing_keys), "cells": calorimeter["cells"], "worst_relative": calorimeter["worst_relative"]}}
+    return {"checks": checks, "counts": {"particles": len(particles), "kept_with_a_kept_non_primary_parent": chained, "non_primary_owners": non_primary_owners, "wrong_parents": len(wrong_parent), "wrong_tracker_owners": len(wrong_tracker), "crossings": len(crossing_keys), "cells": calorimeter["cells"], "worst_relative": calorimeter["worst_relative"], "path_ratio": path_ratio, "most_pieces_of_a_step": max(pieces.values()), "crossing_off_the_line_mm": on_the_line, "crossing_direction_off": directions_right, "first_sensor_ns": first_sensor, "expected_ns": expected_time, "kept_by_energy": len(above - primaries)}}
 
 
 def region_rule(simroot: Path, work: Path) -> dict:
@@ -153,14 +225,19 @@ def main() -> int:
     shutil.rmtree(root, ignore_errors=True)
     root.mkdir(parents=True)
     program, simroot = args.program.resolve(), args.simroot.resolve()
-    keep = ["primary", "decay_products"]
     oracle = run(root, "oracle", args.events, ["all"], program)
-    nominal = judged(simroot, run(root, "nominal", args.events, keep, program), oracle, args.events)
+    work = run(root, "nominal", args.events, KEEP, program)
+    nominal = judged(simroot, work, oracle, args.events)
     controls = {}
     for control, check in CONTROLS.items():
-        controls[control] = not judged(simroot, run(root, control, args.events, keep, program, control), oracle, args.events)["checks"][check]
-    high = judged(simroot, run(root, "high_cells", args.events, keep, program, "high_cells"), oracle, args.events, offset=TOP_BIT)["checks"]
+        faulty = judged(simroot, run(root, control, args.events, KEEP, program, control), oracle, args.events)["checks"]
+        controls[control] = not faulty[check]
+    high = judged(simroot, run(root, "high_cells", args.events, KEEP, program, "high_cells"), oracle, args.events, offset=TOP_BIT)["checks"]
     controls["cells_above_2_63_exact"] = high["calorimeter"] and high["tracker"]
+    single = run(root, "one_thread", args.events, KEEP, program, threads=1)
+    for name in THREADED_FILES:
+        ntuple(simroot, single, name)
+    nominal["checks"]["threads"] = all((work / f"{name}.csv").read_bytes() == (single / f"{name}.csv").read_bytes() for name in (*THREADED_FILES, "moments"))
     region = region_rule(simroot, run(root, "region_rule", args.events, ["primary", {"energy_above_MeV": 0.01, "region": REGION}], program))
     nominal["region_rule"] = region
     passed = all(nominal["checks"].values()) and all(controls.values()) and region["ok"]

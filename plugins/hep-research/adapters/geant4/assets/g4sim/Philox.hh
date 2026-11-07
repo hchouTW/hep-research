@@ -44,22 +44,24 @@ inline double UniformOf(std::uint32_t high, std::uint32_t low) {
 inline std::array<double, 2> UniformsOf(const PhiloxWords& words) { return {UniformOf(words[0], words[1]), UniformOf(words[2], words[3])}; }
 
 // Shewchuk partial sums: an exact representation of a chunk's sum, which a chunk hands over instead of a rounded double.
+inline void AddToPartials(std::vector<double>& partials, double value) {
+  if (!std::isfinite(value) || std::fabs(value) > 1e290) throw std::range_error("a summand is outside the range of Section 10.2");
+  std::size_t kept = 0;
+  for (double other : partials) {
+    if (std::fabs(value) < std::fabs(other)) std::swap(value, other);
+    const double high = value + other;
+    const volatile double rounded = high - value;
+    const double low = other - rounded;
+    if (low != 0.) partials[kept++] = low;
+    value = high;
+  }
+  partials.resize(kept);
+  if (value != 0.) partials.push_back(value);  // as CPython: a zero leaves no partial, so a sum of -0.0 is 0.0
+}
+
 inline std::vector<double> PartialSums(const std::vector<double>& values) {
   std::vector<double> partials;
-  for (double value : values) {
-    if (!std::isfinite(value) || std::fabs(value) > 1e290) throw std::range_error("a summand is outside the range of Section 10.2");
-    std::size_t kept = 0;
-    for (double other : partials) {
-      if (std::fabs(value) < std::fabs(other)) std::swap(value, other);
-      const double high = value + other;
-      const volatile double rounded = high - value;
-      const double low = other - rounded;
-      if (low != 0.) partials[kept++] = low;
-      value = high;
-    }
-    partials.resize(kept);
-    if (value != 0.) partials.push_back(value);  // as CPython: a zero leaves no partial, so a sum of -0.0 is 0.0
-  }
+  for (double value : values) AddToPartials(partials, value);
   return partials;
 }
 

@@ -8,6 +8,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import math
 import sys
 from decimal import Decimal
 
@@ -186,10 +187,11 @@ def truth_findings(request: dict) -> list:
     """Section 9.3: the keeping rules are known ones, and a time bin has a width."""
     truth = request.get("truth", {})
     findings = []
-    if float(truth.get("time_bin_ns", 1)) <= 0:
-        findings.append(_finding("truth-rule", "truth/time_bin_ns", "a time bin has a positive width"))
+    width = float(truth.get("time_bin_ns", 1))
+    if not math.isfinite(width) or width <= 0:
+        findings.append(_finding("truth-rule", "truth/time_bin_ns", "a time bin has a positive, finite width"))
     for at, rule in enumerate(truth.get("keep", [])):
-        known = rule in ("primary", "decay_products", "all") or (isinstance(rule, dict) and "energy_above_MeV" in rule and set(rule) <= {"energy_above_MeV", "region"})
+        known = rule in ("primary", "decay_products", "all") or (isinstance(rule, dict) and "energy_above_MeV" in rule and set(rule) <= {"energy_above_MeV", "region"} and 0 <= float(rule["energy_above_MeV"]) < math.inf)
         if not known:
             findings.append(_finding("truth-rule", f"truth/keep/{at}", f"unknown keeping rule {rule!r}"))
     return findings
@@ -208,9 +210,9 @@ def hit_findings(scorers: list, regions: set, truth: dict) -> list:
             if template in claimed:
                 findings.append(_finding("hit-overlap", f"scorers/{scorer['name']}", f"template {template} is also written by {claimed[template]}: each step would be written twice"))
             claimed[template] = scorer["name"]
-    region = next((rule["region"] for rule in truth.get("keep", []) if isinstance(rule, dict) and "region" in rule), None)
-    if region is not None and region not in regions:
-        findings.append(_finding("truth-rule", "truth/keep", f"region {region!r} is not a named region of this specification"))
+    for at, rule in enumerate(truth.get("keep", [])):
+        if isinstance(rule, dict) and "region" in rule and rule["region"] not in regions:
+            findings.append(_finding("truth-rule", f"truth/keep/{at}", f"region {rule['region']!r} is not a named region of this specification"))
     return findings
 
 

@@ -58,7 +58,7 @@ class NewSource : public G4VUserPrimaryGeneratorAction {
     ReseedEvent(fSeed, global);
     if (fSource.has("external_path")) {
       const auto found = fExternal.find(global);
-      if (found == fExternal.end()) throw std::runtime_error("the event file has no event " + std::to_string(global));
+      if (found == fExternal.end()) G4Exception("NewSource", "g4sim-external", FatalException, ("the event file has no event " + std::to_string(global)).c_str());
       for (const ExternalParticle& row : found->second) {
         auto* vertex = new G4PrimaryVertex(G4ThreeVector(row.position[0], row.position[1], row.position[2]) * mm, 0.);
         auto* particle = new G4PrimaryParticle(ExternalDefinition(row.pdg));
