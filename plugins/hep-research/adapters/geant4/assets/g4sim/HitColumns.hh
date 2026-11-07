@@ -22,7 +22,7 @@ inline const std::vector<HitNtuple>& HitNtuples() {
   static const std::vector<HitNtuple> ntuples = {
       {"mc_particles", {{"event_id", 'I'}, {"track_id", 'I'}, {"parent_id", 'I'}, {"pdg", 'I'}, {"ancestor_pruned", 'I'}, {"x_mm", 'D'}, {"y_mm", 'D'}, {"z_mm", 'D'}, {"px_MeV", 'D'}, {"py_MeV", 'D'}, {"pz_MeV", 'D'},
                         {"end_x_mm", 'D'}, {"end_y_mm", 'D'}, {"end_z_mm", 'D'}}},
-      {"tracker_hits", {{"event_id", 'I'}, {"step_index", 'I'}, {"track_id", 'I'}, {"cell", 'D'}, {"x_mm", 'D'}, {"y_mm", 'D'}, {"z_mm", 'D'}, {"px_MeV", 'D'}, {"py_MeV", 'D'}, {"pz_MeV", 'D'}, {"edep_MeV", 'D'}, {"time_ns", 'D'}, {"path_mm", 'D'}}},
+      {"tracker_hits", {{"event_id", 'I'}, {"step_index", 'I'}, {"track_id", 'I'}, {"cell", 'D'}, {"x_mm", 'D'}, {"y_mm", 'D'}, {"z_mm", 'D'}, {"px_MeV", 'D'}, {"py_MeV", 'D'}, {"pz_MeV", 'D'}, {"ekin_MeV", 'D'}, {"edep_MeV", 'D'}, {"time_ns", 'D'}, {"path_mm", 'D'}}},
       {"calorimeter_hits", {{"event_id", 'I'}, {"cell", 'D'}, {"edep_MeV", 'D'}, {"x_mm", 'D'}, {"y_mm", 'D'}, {"z_mm", 'D'}}},
       {"contributions", {{"event_id", 'I'}, {"cell", 'D'}, {"track_id", 'I'}, {"time_bin", 'I'}, {"edep_MeV", 'D'}, {"time_ns", 'D'}, {"x_mm", 'D'}, {"y_mm", 'D'}, {"z_mm", 'D'}}},
       {"plane_crossings", {{"event_id", 'I'}, {"plane", 'I'}, {"x_mm", 'D'}, {"y_mm", 'D'}, {"z_mm", 'D'}, {"dx", 'D'}, {"dy", 'D'}, {"dz", 'D'}, {"energy_MeV", 'D'}, {"time_ns", 'D'}}}};

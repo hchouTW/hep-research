@@ -1616,10 +1616,39 @@ def _fail(message, kind='failed'):
     return 1
 
 
+def cmd_handoff(args):
+    """Stage 4 of the response pipeline through its hand-off file: the same draws as core's normative stage, so core need not import this script."""
+    from core.simulation import response, rng
+    document = json.loads(Path(args.handoff_in).read_text(encoding='utf-8'))
+    rows = response.read_handoff(document, args.stage)
+    out = []
+    key = rng.channel_key(args.run_seed, args.readout, args.stage, args.replica)
+    for row in rows:
+        stream = rng.SubStream(key, row['event'], row['cell'])
+        code = response.electronics_response(stream, row['charge'], args.noise_sigma, args.threshold, args.lsb, args.bits)
+        if code is not None:
+            out.append({'event': row['event'], 'cell': row['cell'], 'adc': code})
+    written = response.handoff(args.stage, args.next_stage, out)
+    Path(args.handoff_out).write_text(json.dumps(written, indent=1) + '\n', encoding='utf-8')
+    return {'status': 'ok', 'rows_in': len(rows), 'rows_out': len(out), 'handoff': args.handoff_out}
+
+
 def main():
     parser = JsonArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = parser.add_subparsers(dest='command', required=True)
 
+    p = sub.add_parser('handoff', help="stage 4 of the g4sim response pipeline, through its hand-off file")
+    p.add_argument('--handoff-in', required=True, help='a response-handoff/1 file addressed to this stage')
+    p.add_argument('--handoff-out', required=True, help='the file for the next stage')
+    p.add_argument('--stage', required=True, help='this stage\'s name in response-pipeline/1')
+    p.add_argument('--next-stage', required=True, help='the stage that reads the output')
+    p.add_argument('--readout', required=True, help='the readout system, which keys the channel stream')
+    p.add_argument('--run-seed', type=int, required=True, help='the run\'s logical seed')
+    p.add_argument('--replica', type=int, default=0, help='the replica number (default 0)')
+    p.add_argument('--noise-sigma', type=float, required=True, help='electronics noise, in the input\'s charge units')
+    p.add_argument('--threshold', type=float, required=True, help='threshold, in the same units')
+    p.add_argument('--lsb', type=float, required=True, help='ADC step, in the same units')
+    p.add_argument('--bits', type=int, required=True, help='ADC bits')
     p = sub.add_parser('enc', help='equivalent noise charge')
     p.add_argument('--capacitance', type=float, required=True, help='total input capacitance, pF')
     p.add_argument('--peaking', type=float, required=True, help='peaking time t_p, ns')
@@ -1792,6 +1821,9 @@ def main():
                        help='status label of the inputs, echoed as status (default unvalidated)')
     args = parser.parse_args()
     try:
+        if args.command == 'handoff':
+            print(json.dumps(cmd_handoff(args)))
+            return 0
         if args.command == 'enc':
             result = enc(args.capacitance, args.peaking, args.order, args.en, args.leakage, args.rp, args.af,
                          args.temperature)

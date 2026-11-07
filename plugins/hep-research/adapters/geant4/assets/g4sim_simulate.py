@@ -7,6 +7,7 @@ from __future__ import annotations
 
 import argparse
 import csv
+import hashlib
 import json
 import math
 import subprocess
@@ -42,7 +43,20 @@ def _in_world(frame: str, vector: list, frames: dict) -> list:
     return [value + float(origin) for value, origin in zip(vector, frames[frame]["origin_mm"])]
 
 
-def resolved_source(source: dict, frames: dict) -> dict:
+def resolved_external(source: dict, folder: Path) -> dict:
+    """A text event file by its recorded hash, inside the request's folder, as a position CSV is."""
+    base = folder.resolve()
+    target = (base / source["path"]).resolve()
+    if Path(source["path"]).is_absolute() or not target.is_relative_to(base):
+        raise source_density.SourceError("source-path", "an event file lies inside the request's folder")
+    if hashlib.sha256(target.read_bytes()).hexdigest() != source["sha256"]:
+        raise source_density.SourceError("source-hash", f"{source['path']} does not match its recorded hash")
+    return {"density": "external", "external_path": str(target)}
+
+
+def resolved_source(source: dict, frames: dict, folder: Path | None = None) -> dict:
+    if source.get("density") == "external":
+        return resolved_external(source, folder or Path("."))
     record = source_density.density(source)
     record["position"]["centre_mm"] = _in_world(record["position"]["frame"], record["position"]["centre_mm"], frames)
     if "point_mm" in record["direction"]:
@@ -67,7 +81,7 @@ def selected_templates(select: dict, ir: dict) -> list:
     return sorted(name for name, own in tags.items() if wanted <= set(own)) if wanted else sorted(select.get("templates", []))
 
 
-def resolved_request(request: dict, ir: dict) -> dict:
+def resolved_request(request: dict, ir: dict, folder: Path | None = None) -> dict:
     scorers = []
     for scorer in request.get("scorers", []):
         item = {"name": scorer["name"], "quantity": scorer["quantity"], "templates": selected_templates(scorer["select"], ir), "segmentation": resolved_segmentation(scorer.get("segmentation"))}
@@ -85,7 +99,7 @@ def resolved_request(request: dict, ir: dict) -> dict:
             templates, materials = ir["physical"]["templates"], ir["physical"]["materials"]
             item["light_yield_per_MeV"] = {name: float(materials.get(templates[name]["material"], {}).get("scintillation", {}).get("yield_per_MeV", 0)) for name in item["templates"]}
         scorers.append(item)
-    out = {"source": resolved_source(request["source"], ir["physical"]["frames"]), "scorers": scorers}
+    out = {"source": resolved_source(request["source"], ir["physical"]["frames"], folder), "scorers": scorers}
     if any(item["quantity"] in physics_check.BIRKS_QUANTITIES for item in scorers):
         out["birks_active"] = True
     planes = request.get("reference_planes", [])
@@ -245,10 +259,10 @@ def run_program(program: Path, work: Path, environment=None) -> int:
         return subprocess.run([str(program), "--new", "ir.json", "run.json", "request.json"], cwd=work, stdout=log, stderr=log, check=False, env=environment).returncode
 
 
-def simulate(card: dict, request: dict, checked: dict, program: Path, work: Path, environment=None) -> dict:
+def simulate(card: dict, request: dict, checked: dict, program: Path, work: Path, environment=None, folder: Path | None = None) -> dict:
     """Preflight with no events, so a wrong setting is refused before any event; then the run."""
     ir = checked["ir"]
-    resolved = resolved_request(request, ir)
+    resolved = resolved_request(request, ir, folder)
     findings = physics_check.card_findings(card, request, requirements=ir["physical"]["physics_requirements"], materials=ir["physical"]["materials"], selected_materials=selected_materials(resolved, ir))
     if findings:
         return {"status": "rejected", "findings": findings}

@@ -39,14 +39,21 @@ def owners_are_kept(particles: list, owned: list) -> list:
     return sorted({(int(row["event_id"]), int(row["track_id"])) for row in owned} - kept)[:10]
 
 
-def columns_for_simreco(tracker_rows: list, planes: dict) -> list:
-    """The first primary hit in each tracker plane, as simreco's crossing rows; `planes` maps a cell to a plane number."""
+CROSSING_COLUMNS = ("event_id", "plane_id", "track_id", "pdg", "x_mm", "y_mm", "z_mm", "dx", "dy", "dz", "ekin_MeV", "t_ns", "edep_MeV")
+
+
+def columns_for_simreco(tracker_rows: list, particles: list, planes: dict) -> list:
+    """The first primary hit in each tracker plane, as simreco's crossing rows; `planes` maps a cell to a plane number, and `particles` gives the PDG code."""
+    codes = {(int(row["event_id"]), int(row["track_id"])): int(row["pdg"]) for row in particles}
     seen: set = set()
     out = []
     for row in sorted(tracker_rows, key=lambda item: (int(item["event_id"]), int(item["step_index"]))):
-        key = (int(row["event_id"]), float(row["cell"]))
-        if int(row["track_id"]) != 1 or key in seen or float(row["cell"]) not in planes:
+        event, track, cell = int(row["event_id"]), int(row["track_id"]), float(row["cell"])
+        if track != 1 or (event, cell) in seen or cell not in planes:
             continue
-        seen.add(key)
-        out.append({"event_id": key[0], "plane_id": planes[float(row["cell"])], "x_mm": float(row["x_mm"]), "y_mm": float(row["y_mm"]), "z_mm": float(row["z_mm"]), "time_ns": float(row["time_ns"])})
+        seen.add((event, cell))
+        momentum = [float(row[key]) for key in ("px_MeV", "py_MeV", "pz_MeV")]
+        size = math.sqrt(math.fsum(value * value for value in momentum)) or 1.0
+        out.append(dict(zip(CROSSING_COLUMNS, (event, planes[cell], track, codes.get((event, track), 0), float(row["x_mm"]), float(row["y_mm"]), float(row["z_mm"]), *(value / size for value in momentum),
+                                               float(row["ekin_MeV"]), float(row["time_ns"]), float(row["edep_MeV"])))))
     return out

@@ -26,6 +26,7 @@ POISSON_LIMIT = 10.0
 ROUNDING_VARIANCE = 1.0 / 12.0
 PHOTON_BLOCK = 2 ** 15
 YIELD_STAGE = "yield_variation"
+EXTERNAL_STAGES = {"electronics_external": "fe4", "readout_external": "simreco-strip"}  # programs core does not import; each is reached through the hand-off file
 MINIMUM_ACCEPTANCE = 0.5  # a lower bound on the acceptance of PTRS and BTPE, per attempt
 
 
@@ -161,6 +162,13 @@ def electronics_response(stream: rng.SubStream, charge: float, noise_sigma: floa
 def handoff(stage_from: str, stage_to: str, event_rows: list) -> dict:
     """The file between stages 3 and 4 or 4 and 5, so that core imports neither the FE series nor simreco-strip."""
     return {"schema": HANDOFF_SCHEMA, "from": stage_from, "to": stage_to, "rows": event_rows}
+
+
+def external_program(stage: dict) -> str:
+    """The registered program of a stage that runs outside core."""
+    if stage["kind"] not in EXTERNAL_STAGES:
+        raise ResponseError("stage-kind", f"stage {stage['name']} runs in core")
+    return EXTERNAL_STAGES[stage["kind"]]
 
 
 def read_handoff(document: dict, stage_to: str) -> list:

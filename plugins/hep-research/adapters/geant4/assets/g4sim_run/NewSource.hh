@@ -7,6 +7,9 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <fstream>
+#include <map>
+#include <stdexcept>
 #include <string>
 #include <vector>
 
@@ -14,6 +17,8 @@
 #include "G4IonTable.hh"
 #include "G4ParticleGun.hh"
 #include "G4ParticleTable.hh"
+#include "G4PrimaryParticle.hh"
+#include "G4PrimaryVertex.hh"
 #include "G4PhysicalConstants.hh"
 #include "G4SystemOfUnits.hh"
 #include "G4ThreeVector.hh"
@@ -30,17 +35,62 @@ inline G4ThreeVector Vector(const Value& rows) {
   return {Decimal(v[0]), Decimal(v[1]), Decimal(v[2])};
 }
 
+// A text event file, `g4sim-events/1`: a line `event ID COUNT`, then COUNT lines `PDG X_MM Y_MM Z_MM PX_MEV PY_MEV PZ_MEV`. The driver has checked its hash.
+struct ExternalParticle {
+  int pdg;
+  G4ThreeVector position, momentum;
+};
+
+inline std::map<long long, std::vector<ExternalParticle>> ReadExternalEvents(const std::string& path) {
+  std::ifstream in(path);
+  if (!in) throw std::runtime_error("cannot read " + path);
+  std::map<long long, std::vector<ExternalParticle>> events;
+  std::string word;
+  while (in >> word) {
+    if (word == "#") {
+      std::getline(in, word);
+      continue;
+    }
+    long long id = 0;
+    int count = 0;
+    if (word != "event" || !(in >> id >> count)) throw std::runtime_error(path + ": expected `event ID COUNT`");
+    auto& rows = events[id];
+    for (int i = 0; i < count; ++i) {
+      ExternalParticle row{};
+      double x, y, z, px, py, pz;
+      if (!(in >> row.pdg >> x >> y >> z >> px >> py >> pz)) throw std::runtime_error(path + ": a short particle line");
+      row.position = {x, y, z};
+      row.momentum = {px, py, pz};
+      rows.push_back(row);
+    }
+  }
+  return events;
+}
+
 class NewSource : public G4VUserPrimaryGeneratorAction {
  public:
   NewSource(const Value& source, long long seed, long long firstEvent, std::FILE* primaries)
       : fSource(source), fSeed(seed), fFirst(firstEvent), fPrimaries(primaries), fGun(1) {
     const char* control = std::getenv("G4SIM_SOURCE_CONTROL");
     fScale = control && std::string(control) == "wide_energy" ? 1.1 : 1.;
+    if (source.has("external_path")) fExternal = ReadExternalEvents(source.obj.at("external_path").str);
   }
 
   void GeneratePrimaries(G4Event* event) override {
     const long long global = fFirst + event->GetEventID();
     ReseedEvent(fSeed, global);
+    if (fSource.has("external_path")) {
+      const auto found = fExternal.find(global);
+      if (found == fExternal.end()) throw std::runtime_error("the event file has no event " + std::to_string(global));
+      for (const ExternalParticle& row : found->second) {
+        auto* vertex = new G4PrimaryVertex(row.position * mm, 0.);
+        auto* particle = new G4PrimaryParticle(row.pdg);
+        particle->SetMomentum(row.momentum.x() * MeV, row.momentum.y() * MeV, row.momentum.z() * MeV);
+        vertex->SetPrimary(particle);
+        event->AddPrimaryVertex(vertex);
+      }
+      return;
+    }
     if (!fParticle) fParticle = Particle();
     const double energy = Energy(global) * fScale;
     const G4ThreeVector position = Position();
@@ -140,6 +190,7 @@ class NewSource : public G4VUserPrimaryGeneratorAction {
   std::FILE* fPrimaries;
   G4ParticleGun fGun;
   G4ParticleDefinition* fParticle = nullptr;
+  std::map<long long, std::vector<ExternalParticle>> fExternal;
   double fScale = 1.;
 };
 

@@ -326,7 +326,7 @@ def simulate(args) -> dict:
     missing = missing_datasets(card)
     if missing:
         return {"status": "missing-dataset", "missing": missing}
-    return simulate_new.simulate(card, request, checked, args.program.resolve(), args.work.resolve())
+    return simulate_new.simulate(card, request, checked, args.program.resolve(), args.work.resolve(), folder=args.request.resolve().parent)
 
 
 @protected_main("adapters.geant4.g4sim_run", capabilities=KNOWN_CAPABILITIES)

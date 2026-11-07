@@ -36,9 +36,12 @@ class Attribution(unittest.TestCase):
 class Columns(unittest.TestCase):
     def test_simreco_takes_the_first_primary_hit_in_each_plane(self):
         def row(step, track, cell):
-            return {"event_id": "1", "step_index": step, "track_id": track, "cell": cell, "x_mm": "1", "y_mm": "2", "z_mm": "3", "time_ns": "4"}
+            return {"event_id": "1", "step_index": step, "track_id": track, "cell": cell, "x_mm": "1", "y_mm": "2", "z_mm": "3", "px_MeV": "3", "py_MeV": "0", "pz_MeV": "4", "ekin_MeV": "9", "edep_MeV": "0.5", "time_ns": "4"}
         rows = [row(2, 1, 5.0), row(1, 1, 5.0), row(3, 2, 6.0), row(4, 1, 9.0)]
-        self.assertEqual([(item["plane_id"]) for item in hits.columns_for_simreco(rows, {5.0: 0, 6.0: 1})], [0])
+        crossings = hits.columns_for_simreco(rows, [{"event_id": "1", "track_id": "1", "pdg": "2212"}], {5.0: 0, 6.0: 1})
+        self.assertEqual([item["plane_id"] for item in crossings], [0])
+        self.assertEqual(tuple(crossings[0]), hits.CROSSING_COLUMNS)
+        self.assertEqual((crossings[0]["pdg"], crossings[0]["dx"], crossings[0]["dz"]), (2212, 0.6, 0.8))
 
     def test_the_index_records_the_file(self):
         with tempfile.TemporaryDirectory() as folder:

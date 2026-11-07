@@ -106,7 +106,7 @@ class HitRecorder {
 
   void Tracker(const G4Step* step, double cell) {
     const G4StepPoint* pre = step->GetPreStepPoint();
-    fTracker.push_back({fStep++, step->GetTrack()->GetTrackID(), cell, pre->GetPosition(), pre->GetMomentum(), step->GetTotalEnergyDeposit(), pre->GetGlobalTime(), step->GetStepLength()});
+    fTracker.push_back({fStep++, step->GetTrack()->GetTrackID(), cell, pre->GetPosition(), pre->GetMomentum(), pre->GetKineticEnergy(), step->GetTotalEnergyDeposit(), pre->GetGlobalTime(), step->GetStepLength()});
   }
 
   void Calorimeter(const G4Step* step, double cell) {
@@ -146,6 +146,7 @@ class HitRecorder {
       manager->FillNtupleDColumn(1, at++, row.cell);
       for (const G4ThreeVector& v : {row.position / mm, row.momentum / MeV})
         for (int i = 0; i < 3; ++i) manager->FillNtupleDColumn(1, at++, v[i]);
+      manager->FillNtupleDColumn(1, at++, row.kinetic / MeV);
       manager->FillNtupleDColumn(1, at++, row.edep / MeV);
       manager->FillNtupleDColumn(1, at++, row.time / ns);
       manager->FillNtupleDColumn(1, at++, row.path / mm);
@@ -201,7 +202,7 @@ class HitRecorder {
     int step, track;
     double cell;
     G4ThreeVector position, momentum;
-    double edep, time, path;
+    double kinetic, edep, time, path;
   };
   struct CaloRow {
     double edep = 0.;

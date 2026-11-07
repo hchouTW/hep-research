@@ -104,6 +104,12 @@ class Stages(unittest.TestCase):
         with self.assertRaises(response.ResponseError):
             response.read_handoff(document, "readout")
 
+    def test_outside_stages_are_registered(self):
+        self.assertEqual(response.external_program({"name": "adc", "kind": "electronics_external"}), "fe4")
+        self.assertEqual(response.external_program({"name": "strips", "kind": "readout_external"}), "simreco-strip")
+        with self.assertRaises(response.ResponseError):
+            response.external_program({"name": "s", "kind": "sensor"})
+
     def test_electronics_applies_the_threshold(self):
         stream = rng.SubStream(rng.channel_key(1, "ecal", "adc", 0), 0, 3)
         self.assertIsNone(response.electronics_response(stream, 0.0, 0.1, 5.0, 0.5, 12))
