@@ -4,7 +4,7 @@
  "geometry": "planes-tracker",
  "kit": {
   "name": "planes_tracker",
-  "version": "1.0.0"
+  "version": "1.1.0"
  },
  "fields": [
   {
@@ -73,6 +73,17 @@
     "parameter": {
      "role": "tracking",
      "name": "world_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "materials",
+   "optional": true,
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "materials",
      "unit": "n/a"
     }
    }

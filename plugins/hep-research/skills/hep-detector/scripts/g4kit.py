@@ -49,10 +49,10 @@ def as_quantity(value) -> str:
 def input_values(kit: dict, fields: dict) -> dict:
     """Every input of the kit, from the design geometry file, or a geometric default; nothing else may come in."""
     unknown = sorted(set(fields) - set(kit["inputs"]) - set(kit["geometric_defaults"]))
-    missing = sorted(set(kit["inputs"]) - set(fields))
+    missing = sorted(name for name, item in kit["inputs"].items() if name not in fields and not item.get("optional"))
     if unknown or missing:
         raise KitError(f"kit {kit['name']}: missing inputs {missing}, unknown fields {unknown}")
-    values = {**kit["geometric_defaults"], **fields}
+    values = {**kit["geometric_defaults"], "materials": {}, **fields}
     for name, item in kit["inputs"].items():
         value = values[name]
         if item["kind"] == "integer" and (isinstance(value, bool) or not isinstance(value, int) and not (isinstance(value, float) and value.is_integer())):

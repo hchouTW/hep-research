@@ -4,7 +4,7 @@
  "geometry": "tof",
  "kit": {
   "name": "tof",
-  "version": "1.0.0"
+  "version": "1.1.0"
  },
  "fields": [
   {
@@ -83,6 +83,17 @@
     "parameter": {
      "role": "timing",
      "name": "world_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "materials",
+   "optional": true,
+   "from": {
+    "parameter": {
+     "role": "timing",
+     "name": "materials",
      "unit": "n/a"
     }
    }

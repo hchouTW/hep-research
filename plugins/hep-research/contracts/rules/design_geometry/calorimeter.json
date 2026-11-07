@@ -4,7 +4,7 @@
  "geometry": "calorimeter",
  "kit": {
   "name": "calorimeter",
-  "version": "1.1.0"
+  "version": "1.2.0"
  },
  "fields": [
   {
@@ -155,6 +155,17 @@
     "parameter": {
      "role": "calorimetry-em",
      "name": "world_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "materials",
+   "optional": true,
+   "from": {
+    "parameter": {
+     "role": "calorimetry-em",
+     "name": "materials",
      "unit": "n/a"
     }
    }
