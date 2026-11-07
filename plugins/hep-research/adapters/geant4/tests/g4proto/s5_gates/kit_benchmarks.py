@@ -2,7 +2,8 @@
 """S5 gates 5 and 6: the kit benchmarks registered in the task card, each with its negative control (g4sim plan, Section 15.3).
 
 Every geometry comes from a kit through g4kit.py. Values and thresholds are the card's; this script only computes them.
-  run NAME --program PATH --work DIR [--events N]   one benchmark: linearity, resolution, scattering, material
+  run NAME --program PATH --work DIR [--events N]   one benchmark: linearity, resolution, scattering, material; points a part has done are read back
+  part K --parts N --program PATH --work DIR [--events N]   the K-th of N balanced shares of the calorimeter points, for parallel jobs; each point keeps its seed, so a share changes no result
 Prints JSON with a status key. Exit 0 the benchmark passes and its control fails, 1 otherwise.
 """
 from __future__ import annotations
@@ -71,13 +72,20 @@ def active_totals(work: Path, events: int) -> list:
 
 def calorimeter_point(root: Path, name: str, fields: dict, particle: str, energy_gev: float, events: int, program: Path, physics_list: str = LISTS[0]) -> dict:
     folder = root / name
+    root.mkdir(parents=True, exist_ok=True)
+    done = folder / "point.json"
+    if done.is_file():
+        return json.loads(done.read_text(encoding="utf-8"))
+    shutil.rmtree(folder, ignore_errors=True)
     folder.mkdir(parents=True)
     depth = fields["layers"] * (fields["absorber_mm"] + fields["active_mm"] + fields["support_mm"])
     derive(folder, "calorimeter", {**COMMON, **fields})
     request = {"schema": "simulation-request/1", "source": beam(particle, energy_gev * 1000.0, [0, 0, -(depth / 2 + 60)], [0, 0, 1]), "scorers": [{"name": "active", "readout": "none", "select": {"tags": ["active"]}, "quantity": "edep"}]}
     totals = active_totals(simulate(folder, program, request, events, physics_list), events)
     mean, spread = statistics.fmean(totals), statistics.stdev(totals)
-    return {"energy_GeV": energy_gev, "mean_MeV": mean, "mean_error": spread / math.sqrt(events), "relative_width": spread / mean, "width_error": spread / mean / math.sqrt(2 * events)}
+    point = {"energy_GeV": energy_gev, "mean_MeV": mean, "mean_error": spread / math.sqrt(events), "relative_width": spread / mean, "width_error": spread / mean / math.sqrt(2 * events)}
+    done.write_text(json.dumps(point), encoding="utf-8")
+    return point
 
 
 def linear_fit(points: list) -> tuple:
@@ -95,11 +103,33 @@ def largest_deviation(points: list) -> float:
     return max(abs(point["mean_MeV"] / (slope * point["energy_GeV"] + offset) - 1) for point in points)
 
 
+LINEARITY_RUNS = (("nominal", SCECAL), ("ten-layers", {**SCECAL, "layers": 10}))
+DOUBLED = {**AHCAL, "absorber_mm": 2 * AHCAL["absorber_mm"]}
+RESOLUTION_RUNS = (*((name, AHCAL, name) for name in LISTS), ("double", DOUBLED, LISTS[0]))
+
+
+def calorimeter_points() -> list:
+    """Every calorimeter point, as the arguments of calorimeter_point after `root`; the time of one grows with its energy."""
+    points = [("linearity", f"{tag}-{energy}", fields, "e-", energy, LISTS[0]) for tag, fields in LINEARITY_RUNS for energy in LINEARITY_GEV]
+    return points + [("resolution", f"{tag}-{energy}", fields, "e+", energy, physics_list) for tag, fields, physics_list in RESOLUTION_RUNS for energy in RESOLUTION_GEV]
+
+
+def share(index: int, parts: int) -> list:
+    """The longest-first assignment of the points to `parts` jobs: the index-th share."""
+    loads = [0.0] * parts
+    shares: list = [[] for _ in range(parts)]
+    for point in sorted(calorimeter_points(), key=lambda item: (-item[4], item[0], item[1])):
+        least = loads.index(min(loads))
+        shares[least].append(point)
+        loads[least] += point[4]
+    return shares[index]
+
+
 def linearity(root: Path, program: Path, events: int) -> dict:
     def run(tag: str, fields: dict) -> list:
-        return [calorimeter_point(root, f"{tag}-{energy}", fields, "e-", energy, events, program) for energy in LINEARITY_GEV]
-    nominal = run("nominal", SCECAL)
-    control = run("ten-layers", {**SCECAL, "layers": 10})
+        return [calorimeter_point(root / "linearity", f"{tag}-{energy}", fields, "e-", energy, events, program) for energy in LINEARITY_GEV]
+    nominal = run(*LINEARITY_RUNS[0])
+    control = run(*LINEARITY_RUNS[1])
     deviation, control_deviation = largest_deviation(nominal), largest_deviation(control)
     return {"status": "ok" if deviation <= LINEARITY_LIMIT < control_deviation else "failed", "largest_deviation": deviation, "limit": LINEARITY_LIMIT, "control_deviation": control_deviation, "points": nominal, "control_points": control}
 
@@ -119,11 +149,11 @@ def stochastic_fit(points: list) -> tuple:
 def resolution(root: Path, program: Path, events: int) -> dict:
     results, passed = {}, True
     for physics_list in LISTS:
-        points = [calorimeter_point(root, f"{physics_list}-{energy}", AHCAL, "e+", energy, events, program, physics_list) for energy in RESOLUTION_GEV]
+        points = [calorimeter_point(root / "resolution", f"{physics_list}-{energy}", AHCAL, "e+", energy, events, program, physics_list) for energy in RESOLUTION_GEV]
         stochastic, constant = stochastic_fit(points)
         results[physics_list] = {"a": stochastic, "b": constant, "points": points}
         passed = passed and abs(stochastic - STOCHASTIC) <= STOCHASTIC_BAND
-    doubled = [calorimeter_point(root, f"double-{energy}", {**AHCAL, "absorber_mm": 2 * AHCAL["absorber_mm"]}, "e+", energy, events, program) for energy in RESOLUTION_GEV]
+    doubled = [calorimeter_point(root / "resolution", f"double-{energy}", DOUBLED, "e+", energy, events, program) for energy in RESOLUTION_GEV]
     control = stochastic_fit(doubled)[0]
     caught = abs(control - STOCHASTIC) > STOCHASTIC_BAND
     return {"status": "ok" if passed and caught else "failed", "reference_a": STOCHASTIC, "band": STOCHASTIC_BAND, "lists": results, "control_a": control, "control_caught": caught}
@@ -140,6 +170,7 @@ def truncated_rms(values: list) -> float:
 def scattering_row(root: Path, momentum_gev: int, wafers: int, events: int, program: Path) -> float:
     """RMS98 in 0.1 mrad after `wafers` wafers of 50 um: the direction at the entry of the next plane, across vacuum, of the primary."""
     folder = root / f"p{momentum_gev}-w{wafers}"
+    shutil.rmtree(folder, ignore_errors=True)
     folder.mkdir(parents=True)
     derive(folder, "planes-tracker", {"planes": wafers + 1, "plane_gap_mm": 50.0, "plane_thickness_mm": 0.05, "plane_side_mm": 2000.0, "field_tesla": 0.0, "plane_material": "G4_Si", "world_material": "G4_Galactic"})
     half = (wafers + 1) * 50.05 / 2
@@ -174,6 +205,7 @@ def scattering(root: Path, program: Path, events: int) -> dict:
 def path_x0_percent(root: Path, name: str, start_y_mm: float, program: Path) -> float:
     """x/X0 of one 200 um plane: a geantino's path in it over Geant4's own radiation length, read back from the run."""
     folder = root / name
+    shutil.rmtree(folder, ignore_errors=True)
     folder.mkdir(parents=True)
     derive(folder, "planes-tracker", {"planes": 1, "plane_gap_mm": 10.0, "plane_thickness_mm": 0.2, "plane_side_mm": 100.0, "field_tesla": 0.0, "plane_material": "G4_Si", "world_material": "G4_Galactic"})
     request = {"schema": "simulation-request/1", "source": beam("geantino", 1000.0, [-60, start_y_mm, 0], [1, 0, 0]), "scorers": [{"name": "path", "readout": "none", "select": {"tags": ["tracker"]}, "quantity": "track_length"}]}
@@ -202,11 +234,21 @@ def main() -> int:
     for name in ("program", "simroot", "work"):
         running.add_argument(f"--{name}", type=Path, required=True)
     running.add_argument("--events", type=int, default=2000)
+    sharing = commands.add_parser("part")
+    sharing.add_argument("index", type=int)
+    sharing.add_argument("--parts", type=int, required=True)
+    for name in ("program", "simroot", "work"):
+        sharing.add_argument(f"--{name}", type=Path, required=True)
+    sharing.add_argument("--events", type=int, default=2000)
     args = parser.parse_args()
     SIMROOT = args.simroot.resolve()
     root = args.work.resolve()
-    shutil.rmtree(root, ignore_errors=True)
-    root.mkdir(parents=True)
+    root.mkdir(parents=True, exist_ok=True)
+    if args.command == "part":
+        for benchmark, name, fields, particle, energy, physics_list in share(args.index, args.parts):
+            calorimeter_point(root / benchmark, name, fields, particle, energy, args.events, args.program.resolve(), physics_list)
+        print(json.dumps({"status": "ok", "part": args.index}))
+        return 0
     result = {"linearity": linearity, "resolution": resolution, "scattering": scattering, "material": material}[args.name](root, args.program.resolve(), args.events)
     print(json.dumps({**result, "events": args.events}, indent=1))
     return 0 if result["status"] == "ok" else 1
