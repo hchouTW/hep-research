@@ -1,5 +1,5 @@
 // Refit of a known hit set with the ACTS Kalman fitter (recipe reco.track.acts-kf-refit/1, t04-values-v4.md section 8.1):
-// truth-assisted, counted apart, never reported as finding. This file is stage 1 of T07: zero field only.
+// truth-assisted, counted apart, never reported as finding. The driver still refuses a field; the CAI probes run this class at 1 T.
 #pragma once
 
 #include <cstdint>
@@ -28,6 +28,12 @@ struct HitSet {
   std::vector<std::uint32_t> hit_keys;
 };
 
+// Where the fit starts, at x = refit_start_x_mm. direction is a unit vector.
+struct RefitStart {
+  Acts::Vector3 position_mm;
+  Acts::Vector3 direction;
+};
+
 struct RefitResult {
   TrackRecord track;
   std::vector<StateRecord> states;
@@ -45,14 +51,23 @@ class KalmanRefit {
   KalmanRefit(const TelescopeGeometry& telescope, double field_along_v_tesla, double sigma_loc0_mm, double sigma_loc1_mm);
   ~KalmanRefit();
 
+  // The curve through the set's first and last hit with the set's assumed q/p, in this field: hits and what the hit set already
+  // assumes, no truth. A straight chord is off by a slope of about k B (q/p) L / 2, and one Kalman pass linearises about that start:
+  // on noiseless hits job 7490742 left 3e-4 per GeV in q/p at 3 GeV, and an independent filter gives 0.46 sigma(q/p) at worst at
+  // 1.5 GeV. At zero field the curve is the chord, bit for bit. d1-stage2-report.md, Fix round 1.
+  RefitStart start_of(const HitSet& hit_set, const DataEvent& event) const;
+
   // Throws std::invalid_argument on a hit set the event does not hold. A fit that fails returns a failed track.
   RefitResult fit(const HitSet& hit_set, const DataEvent& event) const;
+  // The same from a stated start: cai_refit_start_probe.cpp compares starts through this. The prior stays centred on the start.
+  RefitResult fit(const HitSet& hit_set, const DataEvent& event, const RefitStart& start) const;
 
  private:
   struct Machinery;
   const TelescopeGeometry& m_telescope;
   double m_sigma_loc0_mm;
   double m_sigma_loc1_mm;
+  double m_field_along_v_tesla;
   std::unique_ptr<Machinery> m_machinery;
 };
 

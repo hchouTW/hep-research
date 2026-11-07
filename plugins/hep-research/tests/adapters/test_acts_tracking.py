@@ -60,7 +60,8 @@ from contracts.reconstruction import check_products, dereference, read_sidecar  
 BUILD_DIR = os.environ.get("HEP_ACTS_TRACKING_BUILD", "")
 DRIVER = Path(BUILD_DIR) / "acts_tracking_driver"
 GENERATOR = Path(BUILD_DIR) / "t07_fixture_generator"
-BUILT = bool(BUILD_DIR) and DRIVER.is_file() and GENERATOR.is_file()
+CAI_GENERATOR = Path(BUILD_DIR) / "t07_cai_fixture_generator"
+BUILT = bool(BUILD_DIR) and DRIVER.is_file() and GENERATOR.is_file() and CAI_GENERATOR.is_file()
 NOT_BUILT = "HEP_ACTS_TRACKING_BUILD names no built program: this test needs the T07 build job, which runs it"
 
 SIGMA_MM = 0.020
@@ -166,13 +167,15 @@ def native_includes(source: Path) -> set:
 
 
 def driver_sources(cmake_text: str) -> list:
-    """The driver's sources and those of the common library, from the CMake file."""
+    """The sources of the data-side programs, the driver and the CAI probes, and of the common library, from the CMake file."""
     driver = re.search(r"add_executable\(acts_tracking_driver ([^)]*)\)", cmake_text).group(1).split()
+    probe = re.findall(r"add_executable\(cai_\w+_probe ([^)]*)\)", cmake_text)
+    probe = " ".join(probe).split()
     common = re.search(r"add_library\(acts_tracking_common STATIC ([^)]*)\)", cmake_text).group(1).split()
-    return driver + common
+    return driver + probe + common
 
 
-GENERATOR_ONLY_CODE = ("t07_truth_file", "t07_event_generator", "t07_seed_stream", "t07_generation_constants")
+GENERATOR_ONLY_CODE = ("t07_truth_file", "t07_event_generator", "t07_seed_stream", "t07_generation_constants", "t07_cai")
 
 
 def truth_code_reached(folder: Path) -> list:
@@ -206,21 +209,43 @@ class DataSideNeverOpensTruth(unittest.TestCase):
             source.write_text('#include "t07_seed_stream.hpp"\n' + source.read_text(encoding="utf-8"), encoding="utf-8")
             self.assertIn("t07_seed_stream.hpp", truth_code_reached(copied))
 
+    def test_a_probe_that_reached_the_cai_constants_would_be_caught(self):
+        with tempfile.TemporaryDirectory() as folder:
+            copied = Path(folder) / "native"
+            shutil.copytree(NATIVE, copied)
+            source = copied / "payload_geometry.cpp"
+            source.write_text('#include "t07_cai_constants.hpp"\n' + source.read_text(encoding="utf-8"), encoding="utf-8")
+            self.assertIn("t07_cai_constants.hpp", truth_code_reached(copied))
+
+    def test_both_probes_are_counted_as_data_side(self):
+        sources = driver_sources((NATIVE / "CMakeLists.txt").read_text(encoding="utf-8"))
+        self.assertIn("cai_payload_probe.cpp", sources)
+        self.assertIn("cai_refit_start_probe.cpp", sources)
+
+    def test_the_cai_code_stays_out_of_the_clean_and_noise_targets(self):
+        """Amendment 1: t07-telescope-cai/1 is apart, so t07_fixture_generator and the driver build from what they built from."""
+        cmake_text = (NATIVE / "CMakeLists.txt").read_text(encoding="utf-8")
+        self.assertIn("add_executable(t07_fixture_generator t07_fixture_generator.cpp t07_event_generator.cpp t07_seed_stream.cpp t07_truth_file.cpp)", cmake_text)
+        self.assertIn("add_executable(acts_tracking_driver acts_tracking_driver.cpp kalman_refit.cpp)", cmake_text)
+        self.assertIn("add_library(acts_tracking_common STATIC sha256.cpp t07_data_file.cpp native_product.cpp telescope_geometry.cpp plane_propagation.cpp)", cmake_text)
+        reached = native_includes(NATIVE / "t07_fixture_generator.cpp") | native_includes(NATIVE / "t07_event_generator.cpp")
+        self.assertEqual(sorted(name for name in reached if name.startswith(("t07_cai", "payload_geometry"))), [])
+
     def test_no_header_the_driver_reaches_holds_a_draw_rule(self):
         reached = set()
         cmake_text = (NATIVE / "CMakeLists.txt").read_text(encoding="utf-8")
         for source in driver_sources(cmake_text):
             reached |= native_includes(NATIVE / source)
         text = "".join((NATIVE / name).read_text(encoding="utf-8") for name in sorted(reached))
-        for name in ("near_event_modulus", "known_blocks", "momentum_bins_gev", "clean_fixture_id", "EventSeedStream"):
+        for name in ("near_event_modulus", "known_blocks", "momentum_bins_gev", "clean_fixture_id", "EventSeedStream", "cai_sagitta_curvature_per_mm", "cai_blocks"):
             self.assertNotIn(name, text)
 
 
-def seed_attack(raw: bytes, event_limit: int = 64) -> list:
+def seed_attack(raw: bytes, event_limit: int = 64, fixture_ids: tuple = (7001, 7002)) -> list:
     """The attack of the D1 review: enumerate the four integers of section 3.2 and look for the event's seed, or a hash of it, in the
     file. With the seed, the stream gives every vertex and track bit for bit. Returns what it recovered."""
     wanted = {}
-    for fixture_id in (7001, 7002):
+    for fixture_id in fixture_ids:
         for block in (1, 2, 3, 4, 5, 6, 11, 12):
             for stratum in range(12):
                 for event_index in range(event_limit):
@@ -595,6 +620,179 @@ class GeneratorCheckCatchesDefects(unittest.TestCase):
 
 
 # Section 2.1's size: 1,000 events at each of the 4 momentum bins of each occupancy level, the sample the fixture-level tests read.
+def honest_cai_event(fixture: str = "cai-clean", stratum: int = 0, event_index: int = 0) -> tuple:
+    """One event that obeys amendment 1's text, built here with the closed-form helix: (truth, hits). Vertex from the seed stream, the rest from numpy."""
+    fixture_id = generator_check.CAI_FIXTURES[fixture][0]
+    digest = generator_check.seed_digest(fixture_id, generator_check.BLOCK, stratum, event_index)
+    draws = numpy.random.default_rng([fixture_id, stratum, event_index])
+    raw_u, raw_z, raw_v = generator_check.stream_raw_draws(digest, 3)
+    vertices = numpy.zeros(1, dtype=truth_files.VERTEX)
+    vertices["u_mm"] = generator_check.drawn_between(raw_u, -0.05, 0.05)
+    vertices["z_mm"] = generator_check.drawn_between(raw_z, -100.2, -99.8)
+    vertices["v_mm"] = generator_check.drawn_between(raw_v, -30.0, 30.0)
+    tracks = numpy.zeros(1, dtype=truth_files.TRACK)
+    tracks["charge"] = 1 if event_index % 2 == 0 else -1
+    lower, upper = generator_check.MOMENTUM_BINS_GEV[stratum]
+    tracks["momentum_gev"] = math.exp(draws.uniform(math.log(lower), math.log(upper)))
+    tracks["slope_u"], tracks["slope_v"] = draws.uniform(-0.15, 0.15), draws.uniform(-0.15, 0.15)
+    tracks["q_over_p"] = tracks["charge"] / tracks["momentum_gev"]
+    start = numpy.stack([vertices["z_mm"], vertices["u_mm"], vertices["v_mm"]], axis=1)
+    direction = numpy.stack([numpy.ones(1), tracks["slope_u"], tracks["slope_v"]], axis=1)
+    loc0, loc1, phi, theta = generator_check.helix_crossings(start, direction, tracks["q_over_p"], generator_check.PLANE_Z_MM)
+    loc0 = loc0 - generator_check.cai_displacements_mm(fixture)
+    tracks["crossings"] = numpy.stack([loc0, loc1, phi, theta], axis=2)
+    tracks["hit_keys"] = numpy.arange(8)
+    hits = numpy.zeros(8, dtype=fixture_files.HIT)
+    hits["hit_key"], hits["plane"] = numpy.arange(8), numpy.arange(1, 9)
+    hits["loc0_mm"] = fixture_files.on_hit_grid(loc0[0] + draws.normal(0, SIGMA_MM, 8))
+    hits["loc1_mm"] = fixture_files.on_hit_grid(loc1[0] + draws.normal(0, SIGMA_MM, 8))
+    truth = {"event_digest": digest, "event_index": numpy.uint64(event_index), "momentum_bin": numpy.uint32(stratum), "occupancy_level": numpy.uint32(0),
+             "near_separation": numpy.uint32(0), "noise_counts": numpy.zeros(8, dtype=numpy.uint32), "vertices": vertices, "tracks": tracks}
+    return truth, hits
+
+
+class CaiCheckCatchesDefects(unittest.TestCase):
+    """Each rule of the CAI lines fails on one defect in an event that is honest otherwise, and passes the honest event."""
+
+    def setUp(self):
+        generator_check.failures.clear()
+        self.addCleanup(generator_check.failures.clear)
+
+    def quietly(self, function, *arguments):
+        with redirect_stdout(io.StringIO()):
+            return function(*arguments)
+
+    def defects_after(self, change, fixture="cai-clean") -> list:
+        truth, hits = honest_cai_event(fixture, 1, 3)
+        change(truth, hits)
+        return generator_check.cai_event_defects(truth, hits, fixture, 1)
+
+    def test_honest_events_have_no_defect(self):
+        for fixture in generator_check.CAI_FIXTURES:
+            for stratum in range(4):
+                for event_index in (0, 1):
+                    with self.subTest(fixture=fixture, stratum=stratum, event_index=event_index):
+                        truth, hits = honest_cai_event(fixture, stratum, event_index)
+                        self.assertEqual(generator_check.cai_event_defects(truth, hits, fixture, stratum), [])
+
+    def test_one_defect_is_named(self):
+        def set_field(name, value):
+            return lambda truth, hits: truth.__setitem__(name, value)
+
+        def set_track(name, value):
+            return lambda truth, hits: truth["tracks"].__setitem__(name, value)
+
+        def swap_hits(truth, hits):
+            hits["plane"][[0, 1]] = hits["plane"][[1, 0]]
+
+        def off_grid(truth, hits):
+            hits["loc0_mm"][2] += 1e-11
+
+        def vertex_redrawn(truth, hits):
+            truth["vertices"]["v_mm"] = truth["vertices"]["v_mm"] + 1e-6
+
+        def noise(truth, hits):
+            truth["noise_counts"][3] = 1
+
+        def key_moved(truth, hits):
+            truth["tracks"]["hit_keys"][0, 0] = 1
+
+        cases = {"stratum fields": set_field("momentum_bin", numpy.uint32(2)), "seed digest": set_field("event_index", numpy.uint64(4)),
+                 "track keys": set_track("vertex_index", 1), "charge against event_index": set_track("charge", 1),
+                 "momentum outside its bin": set_track("momentum_gev", 6.5), "slope outside its range": set_track("slope_v", 0.2),
+                 "not one hit per plane in plane order": swap_hits, "a coordinate is off the hit grid": off_grid,
+                 "vertex against the first three draws": vertex_redrawn, "noise in a CAI fixture": noise, "truth keys against hits": key_moved}
+        for name, change in cases.items():
+            with self.subTest(defect=name):
+                self.assertIn(name, self.defects_after(change))
+
+    def test_a_second_track_or_vertex_is_a_defect(self):
+        truth, hits = honest_cai_event()
+        truth["tracks"] = numpy.concatenate([truth["tracks"], truth["tracks"]])
+        self.assertIn("track count", generator_check.cai_event_defects(truth, hits, "cai-clean", 0))
+        truth, hits = honest_cai_event()
+        truth["vertices"] = numpy.concatenate([truth["vertices"], truth["vertices"]])
+        self.assertIn("vertex count", generator_check.cai_event_defects(truth, hits, "cai-clean", 0))
+
+    def judged(self, fixture: str, change=None, events: int = 400) -> list:
+        """The failed lines of one stratum after change(truth, hits) on every event."""
+        sample, pool = generator_check.CaiSample(), generator_check.CaiPool()
+        for event_index in range(events):
+            truth, hits = honest_cai_event(fixture, 0, event_index)
+            if change is not None:
+                change(truth, hits)
+            sample.add(truth, hits, fixture, 0)
+        generator_check.failures.clear()
+        self.quietly(generator_check.judge_cai_stratum, sample, fixture, 0, events, pool)
+        return list(generator_check.failures)
+
+    def test_an_honest_stratum_passes_for_both_fixtures(self):
+        self.assertEqual(self.judged("cai-clean"), [])
+        self.assertEqual(self.judged("cai-sagitta"), [])
+
+    def test_a_sagitta_fixture_that_shifted_truth_only_fails_agree(self):
+        def hits_on_nominal_planes(truth, hits):
+            hits["loc0_mm"] = fixture_files.on_hit_grid(hits["loc0_mm"] + generator_check.sagitta_displacements_mm())
+
+        self.assertTrue([line for line in self.judged("cai-sagitta", hits_on_nominal_planes) if line.startswith("AGREE") and "hit mean" in line])
+
+    def test_a_deformation_of_the_wrong_sign_or_none_fails_truth(self):
+        def wrong_sign(truth, hits):
+            truth["tracks"]["crossings"][0, :, 0] += 2.0 * generator_check.sagitta_displacements_mm()
+            hits["loc0_mm"] = fixture_files.on_hit_grid(hits["loc0_mm"] + 2.0 * generator_check.sagitta_displacements_mm())
+
+        def no_deformation(truth, hits):
+            truth["tracks"]["crossings"][0, :, 0] += generator_check.sagitta_displacements_mm()
+            hits["loc0_mm"] = fixture_files.on_hit_grid(hits["loc0_mm"] + generator_check.sagitta_displacements_mm())
+
+        for change in (wrong_sign, no_deformation):
+            with self.subTest(change=change.__name__):
+                self.assertTrue([line for line in self.judged("cai-sagitta", change) if line.startswith("TRUTH")])
+
+    def test_a_clean_fixture_with_the_deformation_fails_truth(self):
+        def deformed(truth, hits):
+            truth["tracks"]["crossings"][0, :, 0] -= generator_check.sagitta_displacements_mm()
+
+        self.assertTrue([line for line in self.judged("cai-clean", deformed) if line.startswith("TRUTH")])
+
+    def test_the_closed_form_lines_pass_and_a_wrong_bias_fails(self):
+        self.quietly(generator_check.check_cai_closed_form)
+        self.assertEqual(generator_check.failures, [])
+        honest = generator_check.SAGITTA_BIAS_IN_SIGMA
+        self.addCleanup(setattr, generator_check, "SAGITTA_BIAS_IN_SIGMA", honest)
+        generator_check.SAGITTA_BIAS_IN_SIGMA = 4.0
+        self.quietly(generator_check.check_cai_closed_form)
+        self.assertIn("TRUTH sagitta table of amendment 1", generator_check.failures)
+
+    def test_the_family_is_what_the_amendment_states(self):
+        """Lines counted as they print, on honest events: two sums per stratum, thirteen tests per fixture. Then the figures of the draft."""
+        before = dict(generator_check.family_counts)
+        for fixture in generator_check.CAI_FIXTURES:
+            pool = generator_check.CaiPool()
+            for stratum in range(4):
+                sample = generator_check.CaiSample()
+                for event_index in range(60):
+                    sample.add(*honest_cai_event(fixture, stratum, event_index), fixture, stratum)
+                self.quietly(generator_check.judge_cai_stratum, sample, fixture, stratum, 60, pool)
+            self.quietly(generator_check.judge_cai_fixture, pool, fixture)
+        self.assertEqual(generator_check.family_counts["sums"] - before["sums"], 16)
+        self.assertEqual(generator_check.family_counts["tests"] - before["tests"], 26)
+        self.assertEqual(round(100.0 * generator_check.false_stop_chance(48, 294), 2), 7.45)
+        self.assertEqual(round(100.0 * generator_check.false_stop_chance(16, 26), 2), 1.84)
+        self.assertEqual(round(100.0 * generator_check.false_stop_chance(64, 320), 2), 9.16)
+
+    def test_a_cai_fixture_calls_its_own_program(self):
+        with tempfile.TemporaryDirectory() as folder:
+            work = Path(folder)
+            for name, code in ((generator_check.GENERATOR_PROGRAM, 1), (generator_check.CAI_GENERATOR_PROGRAM, 0)):
+                program = work / name
+                program.write_text(f"#!/bin/sh\nexit {code}\n", encoding="utf-8")
+                program.chmod(0o755)
+            generator_check.run_generator(work, "cai-sagitta", 0, 0, 1, work, "probe")
+            with self.assertRaises(subprocess.CalledProcessError):
+                generator_check.run_generator(work, "clean", 0, 0, 1, work, "probe")
+
+
 FULL_SIZE_TRACKS = generator_check.FULL_EVENTS_PER_POINT * sum(generator_check.TRACKS) * len(generator_check.MOMENTUM_BINS_GEV)
 
 
@@ -1300,6 +1498,52 @@ class BuiltGenerator(unittest.TestCase):
     def test_an_unknown_flag_is_refused(self):
         finished = subprocess.run([str(GENERATOR), "seed-vector", "--fixture-id", "7001", "--block", "6", "--stratum", "0", "--event-index", "0", "--draws", "1",
                                    "--salt", "1"], capture_output=True, text=True, timeout=60)
+        self.assertEqual(finished.returncode, 2, finished.stderr)
+
+
+@unittest.skipUnless(BUILT, NOT_BUILT)
+class BuiltCaiGenerator(unittest.TestCase):
+    def setUp(self):
+        self.folder = tempfile.TemporaryDirectory()
+        self.addCleanup(self.folder.cleanup)
+        self.work = Path(self.folder.name)
+
+    def generate(self, fixture="cai-clean", block="6", stratum="1", first_event="0", count="4", name="events") -> subprocess.CompletedProcess:
+        return subprocess.run([str(CAI_GENERATOR), "generate", "--fixture", fixture, "--block", block, "--stratum", stratum, "--first-event", first_event, "--count", count,
+                               "--data-file", str(self.work / f"{name}.t07data"), "--truth-file", str(self.work / f"{name}.t07truth")], capture_output=True, text=True, timeout=120)
+
+    def test_events_obey_the_text_and_the_files_keep_their_roles(self):
+        for fixture in generator_check.CAI_FIXTURES:
+            with self.subTest(fixture=fixture):
+                finished = self.generate(fixture=fixture)
+                self.assertEqual(finished.returncode, 0, finished.stderr)
+                self.assertEqual(generator_check.file_identity_defects(self.work / "events.t07data", self.work / "events.t07truth", fixture, 1, 4), [])
+                for truth, data_event in zip(truth_files.iter_truth_events(self.work / "events.t07truth"), fixture_files.iter_data_events(self.work / "events.t07data"), strict=True):
+                    self.assertEqual(generator_check.cai_event_defects(truth, data_event["hits"], fixture, 1), [])
+
+    def test_the_data_file_holds_no_seed_and_the_same_grid(self):
+        self.assertEqual(self.generate(fixture="cai-sagitta", count="10").returncode, 0)
+        self.assertEqual(fixture_files.data_file_defects(self.work / "events.t07data"), [])
+        self.assertEqual(seed_attack((self.work / "events.t07data").read_bytes(), fixture_ids=(7003, 7004)), [])
+
+    def test_position_in_the_file_does_not_follow_the_charge(self):
+        self.assertEqual(self.generate(stratum="0", count="200").returncode, 0)
+        charges = [int(event["tracks"]["charge"][0]) for event in truth_files.iter_truth_events(self.work / "events.t07truth")]
+        self.assertEqual(sum(charges), 0)
+        self.assertLess(abs(sum(charge * (-1) ** position for position, charge in enumerate(charges))), 80)  # 200 if position kept event_index parity
+
+    def test_the_two_fixtures_have_their_own_seeds(self):
+        self.assertEqual(self.generate(fixture="cai-clean", name="first").returncode, 0)
+        self.assertEqual(self.generate(fixture="cai-sagitta", name="second").returncode, 0)
+        self.assertNotEqual(fixture_files.file_sha256(self.work / "first.t07data"), fixture_files.file_sha256(self.work / "second.t07data"))
+
+    def test_one_bad_argument_is_refused(self):
+        self.assertEqual(self.generate(block="2").returncode, 2)
+        self.assertEqual(self.generate(block="11").returncode, 2)
+        self.assertEqual(self.generate(stratum="4").returncode, 2)
+        self.assertEqual(self.generate(fixture="clean").returncode, 2)
+        self.assertEqual(self.generate(count=str(2 ** 32 + 1)).returncode, 2)
+        finished = subprocess.run([str(CAI_GENERATOR), "seed-vector", "--fixture-id", "7003"], capture_output=True, text=True, timeout=60)
         self.assertEqual(finished.returncode, 2, finished.stderr)
 
 

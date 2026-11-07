@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
-"""Generator-agreement check of t07-telescope-clean/1 and t07-telescope-noise/1: t04-values-v4.md section 2.1, adapted to T07 in
-the form it sets for T08 and T09. Seed block 6 only: this script creates no tuning, Freeze-B or evaluation event. Every constant
+"""Generator-agreement check of t07-telescope-clean/1, t07-telescope-noise/1 and t07-telescope-cai/1: t04-values-v4.md section 2.1,
+adapted to T07 in the form it sets for T08 and T09. Seed block 6 only: this script creates no tuning, Freeze-B or evaluation event. Every constant
 below is written here from version 4, apart from the generator, so a wrong constant there shows as a disagreement. Needs an
 approved job, not a login node.
 
@@ -28,7 +28,15 @@ development check of the check, not the generator check of section 2.1. Line pre
   what the text says.
 - GOLDEN: SHA-256 of data and truth files for events 0 and 1 of each stratum. Later jobs compare these lines.
 
-The last lines count what the generator wrote to stderr, which section 18 row 4 reads.
+t07-telescope-cai/1 (fixtures cai-clean and cai-sagitta, Freeze A amendment 1) has the same lines, cut to what one track per event
+leaves: four strata, one per momentum bin. Per stratum: DRAW-RANGE, TRUTH, and AGREE as above. In sagitta the truth crossing is on the
+displaced plane, so TRUTH adds the displacement back before the helix, and a generator that shifted only its hits fails AGREE. Per
+fixture, pooled over the strata so the family stays small: the shape and correlation tests above, one KS per draw, one independence
+line. Charge follows event_index, so it is a DRAW-RANGE rule, not a test. The first three raw draws of each event must give its vertex,
+which holds the seed stream and draw order to the independent Python stream.
+
+The last lines count what the generators wrote to stderr, which section 18 row 4 reads, and how many lines can stop a correct
+generator at row 3: FAMILY, one line per generator group and one for the run.
 """
 from __future__ import annotations
 
@@ -66,6 +74,9 @@ MINIMUM_HITS_PER_BINADE = 320               # both kinds, so that the smallest o
 LOW_BIT_ATTACK_STEPS_PER_MM = 2.0 ** 46     # D1 re-review N1: a coordinate off this grid was a track hit
 
 FIXTURES = {"clean": (7001, "t07-telescope-clean/1", 1.0), "noise": (7002, "t07-telescope-noise/1", 0.98)}
+CAI_FIXTURES = {"cai-clean": (7003, "t07-telescope-cai/1", 1.0), "cai-sagitta": (7004, "t07-telescope-cai/1", 1.0)}  # amendment 1, section 3.2
+ALL_FIXTURES = {**FIXTURES, **CAI_FIXTURES}
+GENERATOR_PROGRAM, CAI_GENERATOR_PROGRAM = "t07_fixture_generator", "t07_cai_fixture_generator"
 PLANES = 8
 PLANE_Z_MM = numpy.arange(PLANES) * 50.0
 HALF_WIDTH_MM = 150.0
@@ -81,10 +92,15 @@ VERTEX_Z_RANGE_MM = (-100.2, -99.8)
 RESOLUTION_UNIT_MM = 0.0184
 FAR_STEPS, NEAR_STEPS = (5.0, 25.0), (1.0, 5.0)
 SLOPE_HALF = 0.15
+SIGMA_Q_OVER_P_PER_GEV = 0.00412            # section 4.1, Closed-form facts
+SAGITTA_BIAS_IN_SIGMA = 5.0                 # amendment 1, section 4.1
+SAGITTA_TABLE_MM = (0.05404, 0.00772, -0.02316, -0.03860, -0.03860, -0.02316, 0.00772, 0.05404)  # amendment 1, section 4.1
+SUM_ALPHA = 1.0 - (CHI2_TAILS[1] - CHI2_TAILS[0])  # a sum of z^2 leaves its range this often
 
 MASK64 = (1 << 64) - 1
 failures: list = []
 generator_stderr_bytes = 0
+family_counts = {"sums": 0, "tests": 0}     # lines that section 18 row 3 reads
 
 
 def say(text: str) -> None:
@@ -95,7 +111,18 @@ def verdict(label: str, passed: bool, detail: str) -> bool:
     say(f"{'PASS' if passed else 'FAIL'} {label}: {detail}")
     if not passed:
         failures.append(label)
+    family_counts["sums"] += label.endswith("sum z^2 in range")
+    family_counts["tests"] += label.startswith("DRAW-DIST")
     return bool(passed)
+
+
+def false_stop_chance(sums: int, tests: int) -> float:
+    """Section 18 row 3: the chance that a correct generator trips one of these lines, taking them as independent."""
+    return 1.0 - (1.0 - SUM_ALPHA) ** sums * (1.0 - ALPHA) ** tests
+
+
+def family_line(name: str, sums: int, tests: int) -> None:
+    say(f"FAMILY {name}: {sums} sums of z^2 at {SUM_ALPHA:g}, {tests} tests at {ALPHA:g}, false stop {100.0 * false_stop_chance(sums, tests):.2f} %")
 
 
 def criteria(tag: str, z_values) -> bool:
@@ -390,7 +417,7 @@ def event_defects(truth, hits, fixture: str, stratum: int) -> list:
 
 def file_identity_defects(data_file, truth_file, fixture: str, stratum: int, event_count: int) -> list:
     """Both file headers against the text, the truth file's hold on its data file, and the data file's allowed fields."""
-    fixture_id, generator, _ = FIXTURES[fixture]
+    fixture_id, generator, _ = ALL_FIXTURES[fixture]
     data_header, truth_header = fixture_files.read_data_header(data_file), truth_files.read_truth_header(truth_file)
     expected = {"generator": generator, "fixture_id": fixture_id, "block": BLOCK, "stratum": stratum, "event_count": event_count, "sigma_loc0_mm": SIGMA_MM,
                 "sigma_loc1_mm": SIGMA_MM, "data_sha256": fixture_files.file_sha256(data_file)}
@@ -528,10 +555,175 @@ def judge_stratum(sample: StratumSample, fixture: str, stratum: int, events_per_
         verdict(f"DRAW-RANGE {tag} every plane kept", bool(all_kept.all()), f"{all_kept.size} hits")
 
 
-def call_generator(build_dir: Path, *arguments) -> subprocess.CompletedProcess:
+def sagitta_displacements_mm() -> numpy.ndarray:
+    """Amendment 1, section 4.1: d_k = A ((z_k - z_c)^2 - mean), A set so that q/p rises by 5 sigma(q/p): 2 A / (k B)."""
+    offsets_squared = (PLANE_Z_MM - PLANE_Z_MM.mean()) ** 2
+    return SAGITTA_BIAS_IN_SIGMA * SIGMA_Q_OVER_P_PER_GEV * GEV_PER_TESLA_MM * FIELD_T / 2.0 * (offsets_squared - offsets_squared.mean())
+
+
+def cai_displacements_mm(fixture: str) -> numpy.ndarray:
+    return sagitta_displacements_mm() if fixture == "cai-sagitta" else numpy.zeros(PLANES)
+
+
+def drawn_between(raw_draw: int, lower: float, upper: float) -> float:
+    return lower + (upper - lower) * ((raw_draw >> 11) * 2.0 ** -53)
+
+
+def cai_event_defects(truth, hits, fixture: str, stratum: int) -> list:
+    """Every hard defect of one CAI event, by amendment 1's text. Empty for an honest event."""
+    fixture_id = CAI_FIXTURES[fixture][0]
+    tracks, vertices, event_index = truth["tracks"], truth["vertices"], int(truth["event_index"])
+    defects = []
+    if int(truth["momentum_bin"]) != stratum or int(truth["occupancy_level"]) != 0 or int(truth["near_separation"]) != 0:
+        defects.append("stratum fields")
+    if truth["event_digest"] != seed_digest(fixture_id, BLOCK, stratum, event_index):
+        defects.append("seed digest")
+    if len(tracks) != 1:
+        defects.append("track count")
+    if len(vertices) != 1:
+        defects.append("vertex count")
+    if len(tracks) != 1 or len(vertices) != 1:
+        return defects
+    track, vertex = tracks[0], vertices[0]
+    if int(track["particle_key"]) != 0 or int(track["vertex_index"]) != 0:
+        defects.append("track keys")
+    if int(track["charge"]) != (1 if event_index % 2 == 0 else -1):
+        defects.append("charge against event_index")
+    lower, upper = MOMENTUM_BINS_GEV[stratum]
+    if not lower <= float(track["momentum_gev"]) < upper:
+        defects.append("momentum outside its bin")
+    if abs(float(track["q_over_p"]) * float(track["momentum_gev"]) - float(track["charge"])) > 1e-12:
+        defects.append("q/p against charge and momentum")
+    if abs(float(track["slope_u"])) > SLOPE_HALF or abs(float(track["slope_v"])) > SLOPE_HALF:
+        defects.append("slope outside its range")
+    expected_vertex = [drawn_between(raw, *limits) for raw, limits in zip(stream_raw_draws(seed_digest(fixture_id, BLOCK, stratum, event_index), 3),
+                                                                          ((-VERTEX_U_HALF_MM, VERTEX_U_HALF_MM), VERTEX_Z_RANGE_MM, (-VERTEX_V_HALF_MM, VERTEX_V_HALF_MM)))]
+    if max(abs(float(vertex[name]) - value) for name, value in zip(("u_mm", "z_mm", "v_mm"), expected_vertex)) > 1e-12:
+        defects.append("vertex against the first three draws")
+    if numpy.any(numpy.abs(track["crossings"][:, :2]) >= HALF_WIDTH_MM):
+        defects.append("a track left the active area")
+    if fixture_files.off_hit_grid(hits["loc0_mm"]) or fixture_files.off_hit_grid(hits["loc1_mm"]):
+        defects.append("a coordinate is off the hit grid")
+    if int(truth["noise_counts"].sum()) != 0:
+        defects.append("noise in a CAI fixture")
+    if not numpy.array_equal(hits["hit_key"], numpy.arange(len(hits))) or not numpy.array_equal(hits["plane"], numpy.arange(1, PLANES + 1)):
+        defects.append("not one hit per plane in plane order")
+    if not numpy.array_equal(track["hit_keys"], numpy.arange(PLANES)):
+        defects.append("truth keys against hits")
+    return defects
+
+
+class CaiSample:
+    """What one (CAI fixture, stratum) run keeps."""
+
+    def __init__(self):
+        self.tracks, self.vertices, self.residuals, self.kept = [], [], [], []
+        self.defects = 0
+        self.defect_names = set()
+
+    def add(self, truth, hits, fixture: str, stratum: int) -> None:
+        found = cai_event_defects(truth, hits, fixture, stratum)
+        self.defects += len(found)
+        self.defect_names.update(found)
+        tracks = truth["tracks"]
+        keys = tracks["hit_keys"]
+        kept = keys != truth_files.NO_HIT_KEY
+        residuals = numpy.zeros(keys.shape + (2,))
+        residuals[kept, 0] = hits["loc0_mm"][keys[kept]] - tracks["crossings"][:, :, 0][kept]
+        residuals[kept, 1] = hits["loc1_mm"][keys[kept]] - tracks["crossings"][:, :, 1][kept]
+        self.tracks.append(tracks)
+        self.vertices.append(truth["vertices"])
+        self.residuals.append(residuals)
+        self.kept.append(kept)
+
+
+class CaiPool:
+    """What the per-fixture tests read, across the four strata."""
+
+    def __init__(self):
+        self.residuals, self.kept, self.tracks, self.vertices, self.scaled_log_momentum = [], [], [], [], []
+
+
+def judge_cai_stratum(sample: CaiSample, fixture: str, stratum: int, events_per_point: int, pool: CaiPool) -> None:
+    tag = f"{fixture} stratum {stratum}"
+    verdict(f"DRAW-RANGE {tag}", sample.defects == 0, f"{sample.defects} defects {sorted(sample.defect_names)}")
+    tracks, vertices = numpy.concatenate(sample.tracks), numpy.concatenate(sample.vertices)
+    start = numpy.stack([vertices["z_mm"], vertices["u_mm"], vertices["v_mm"]], axis=1)
+    on_nominal_planes = tracks.copy()
+    on_nominal_planes["crossings"][:, :, 0] += cai_displacements_mm(fixture)
+    truth_against_helix(tag, start, on_nominal_planes)
+
+    residuals, kept = numpy.concatenate(sample.residuals)[:events_per_point], numpy.concatenate(sample.kept)[:events_per_point]
+    mean_z, variance_z = smearing_z(residuals, kept)
+    criteria(f"AGREE {tag} hit mean", mean_z)
+    criteria(f"AGREE {tag} hit variance", variance_z)
+    all_kept = numpy.concatenate(sample.kept)
+    verdict(f"DRAW-RANGE {tag} every plane kept", bool(all_kept.all()), f"{all_kept.size} hits")
+
+    lower, upper = MOMENTUM_BINS_GEV[stratum]
+    pool.residuals.append(residuals)
+    pool.kept.append(kept)
+    pool.tracks.append(tracks)
+    pool.vertices.append(vertices)
+    pool.scaled_log_momentum.append((numpy.log(tracks["momentum_gev"]) - math.log(lower)) / (math.log(upper) - math.log(lower)))
+
+
+def judge_cai_fixture(pool: CaiPool, fixture: str) -> None:
+    hit_shape_tests(fixture, numpy.concatenate(pool.residuals), numpy.concatenate(pool.kept))
+    tracks, vertices, log_momentum = numpy.concatenate(pool.tracks), numpy.concatenate(pool.vertices), numpy.concatenate(pool.scaled_log_momentum)
+    uniform_test(f"{fixture} ln p in its bin", log_momentum, 0.0, 1.0)
+    uniform_test(f"{fixture} slope u", tracks["slope_u"], -SLOPE_HALF, SLOPE_HALF)
+    uniform_test(f"{fixture} slope v", tracks["slope_v"], -SLOPE_HALF, SLOPE_HALF)
+    uniform_test(f"{fixture} vertex u", vertices["u_mm"], -VERTEX_U_HALF_MM, VERTEX_U_HALF_MM)
+    uniform_test(f"{fixture} vertex z", vertices["z_mm"], *VERTEX_Z_RANGE_MM)
+    uniform_test(f"{fixture} vertex v", vertices["v_mm"], -VERTEX_V_HALF_MM, VERTEX_V_HALF_MM)
+    draw_independence_test(fixture, ((tracks["slope_u"], tracks["slope_v"]), (log_momentum, tracks["slope_u"]), (log_momentum, tracks["slope_v"]),
+                                     (tracks["charge"], tracks["slope_u"]), (tracks["charge"], tracks["slope_v"]), (tracks["charge"], log_momentum),
+                                     (vertices["u_mm"], vertices["z_mm"]), (vertices["u_mm"], vertices["v_mm"]), (vertices["z_mm"], vertices["v_mm"]),
+                                     (vertices["v_mm"], tracks["slope_v"])))
+
+
+def check_cai_closed_form() -> None:
+    """Amendment 1's sagitta row against its own definition: plain arithmetic on the planes, no generator output."""
+    displacements = sagitta_displacements_mm()
+    verdict("TRUTH sagitta table of amendment 1", numpy.round(displacements, 5).tolist() == list(SAGITTA_TABLE_MM), f"{displacements.tolist()} mm")
+    verdict("TRUTH sagitta displacements sum to zero", abs(float(displacements.sum())) < 1e-12, f"{float(displacements.sum()):.3g} mm")
+    design = numpy.vstack([numpy.ones(PLANES), PLANE_Z_MM, PLANE_Z_MM ** 2]).T
+    coefficients = numpy.linalg.lstsq(design, displacements, rcond=None)[0]
+    leftover = float(numpy.abs(displacements - design @ coefficients).max())
+    verdict("TRUTH sagitta mode is a parabola in plane position, all of it", leftover < 1e-12, f"leftover {leftover:.3g} mm")
+    rise = 2.0 * float(coefficients[2]) / (GEV_PER_TESLA_MM * FIELD_T)
+    verdict("TRUTH sagitta rise in q/p is 5 sigma(q/p)", abs(rise - SAGITTA_BIAS_IN_SIGMA * SIGMA_Q_OVER_P_PER_GEV) < 1e-9, f"{rise:.6f} per GeV")
+
+
+def run_cai_check(build_dir: Path, work_dir: Path, events_per_stratum: int, events_per_point: int) -> None:
+    check_cai_closed_form()
+    for fixture in CAI_FIXTURES:
+        pool = CaiPool()
+        for stratum in range(len(MOMENTUM_BINS_GEV)):
+            folder = work_dir / f"{fixture}-{stratum}"
+            folder.mkdir(parents=True, exist_ok=True)
+            data_file, truth_file = run_generator(build_dir, fixture, stratum, 0, events_per_stratum, folder, "draws")
+            defects = file_identity_defects(data_file, truth_file, fixture, stratum, events_per_stratum)
+            verdict(f"SMOKE {fixture} stratum {stratum} file fields and identities", not defects, f"{defects}")
+            sample = CaiSample()
+            first_events, digests = {}, []
+            for data_event, truth_event in zip(fixture_files.iter_data_events(data_file), truth_files.iter_truth_events(truth_file), strict=True):
+                digests.append(truth_event["event_digest"])
+                if int(truth_event["event_index"]) < 2:
+                    first_events[int(truth_event["event_index"])] = event_bytes(data_event, truth_event)
+                sample.add(truth_event, data_event["hits"], fixture, stratum)
+            verdict(f"SMOKE {fixture} stratum {stratum} events run in seed-digest order", digests == sorted(digests), f"{len(digests)} events")
+            judge_cai_stratum(sample, fixture, stratum, events_per_point, pool)
+            smoke_stratum(build_dir, fixture, stratum, folder, first_events)
+            shutil.rmtree(folder)
+        judge_cai_fixture(pool, fixture)
+
+
+def call_generator(build_dir: Path, *arguments, program: str = GENERATOR_PROGRAM) -> subprocess.CompletedProcess:
     """Every call goes through here: section 18 row 4 reads the generator's stderr."""
     global generator_stderr_bytes
-    finished = subprocess.run([str(build_dir / "t07_fixture_generator"), *arguments], capture_output=True, text=True)
+    finished = subprocess.run([str(build_dir / program), *arguments], capture_output=True, text=True)
     sys.stderr.write(finished.stderr)
     generator_stderr_bytes += len(finished.stderr)
     finished.check_returncode()
@@ -541,7 +733,8 @@ def call_generator(build_dir: Path, *arguments) -> subprocess.CompletedProcess:
 def run_generator(build_dir: Path, fixture: str, stratum: int, first_event: int, count: int, folder: Path, label: str) -> tuple:
     data_file, truth_file = folder / f"{label}.t07data", folder / f"{label}{fixture_files.TRUTH_SUFFIX}"
     call_generator(build_dir, "generate", "--fixture", fixture, "--block", str(BLOCK), "--stratum", str(stratum), "--first-event", str(first_event),
-                   "--count", str(count), "--data-file", str(data_file), "--truth-file", str(truth_file))
+                   "--count", str(count), "--data-file", str(data_file), "--truth-file", str(truth_file),
+                   program=CAI_GENERATOR_PROGRAM if fixture in CAI_FIXTURES else GENERATOR_PROGRAM)
     return data_file, truth_file
 
 
@@ -557,7 +750,8 @@ def smoke_stratum(build_dir: Path, fixture: str, stratum: int, folder: Path, ful
         alone[event_index] = event_bytes(next(fixture_files.iter_data_events(data_file)), next(truth_files.iter_truth_events(truth_file)))
     verdict(f"SMOKE {fixture} stratum {stratum} regenerates alone, in any order", alone == full_events, "events 1, then 0")
     data_file, truth_file = run_generator(build_dir, fixture, stratum, 0, 2, folder, "golden")
-    say(f"GOLDEN {FIXTURES[fixture][1]} stratum {stratum} data {fixture_files.file_sha256(data_file)} truth {fixture_files.file_sha256(truth_file)}")
+    name = f"{CAI_FIXTURES[fixture][1]} {fixture}" if fixture in CAI_FIXTURES else FIXTURES[fixture][1]
+    say(f"GOLDEN {name} stratum {stratum} data {fixture_files.file_sha256(data_file)} truth {fixture_files.file_sha256(truth_file)}")
 
 
 def check_seed_rule(build_dir: Path) -> None:
@@ -603,6 +797,11 @@ def run_check(build_dir: Path, work_dir: Path, events_per_stratum: int, events_p
             smoke_stratum(build_dir, fixture, stratum, folder, first_events)
             shutil.rmtree(folder)
         judge_fixture(pool, fixture)
+    before_cai = dict(family_counts)
+    run_cai_check(build_dir, work_dir, events_per_stratum, events_per_point)
+    family_line("clean and noise", before_cai["sums"], before_cai["tests"])
+    family_line("cai", family_counts["sums"] - before_cai["sums"], family_counts["tests"] - before_cai["tests"])
+    family_line("whole run", family_counts["sums"], family_counts["tests"])
 
 
 def main(argv=None) -> int:

@@ -309,3 +309,5 @@ Rulings under the finish plan, each reversible by the user. Reviews `<private>/e
 - **Separation is tested, not proven.** The tests cover low bits, residues, mantissa tail, decimal form, order and counts. A learned model on joint hits was not tried, nor recovery of the generator's state from noise hits. Enumerating the four seed integers needs SHA-256 only. All assume recipes are reviewed code, as the user's seed ruling does; none holds against code the user does not control.
 - **T08, T09.** Read for the same class of leak: seeds sit outside `event["data"]`. T09 times measured on 300 events, dark-only and signal-only agree in low bits; a gross effect is excluded, not a subtle one. T08 has no noise-versus-signal hits to separate.
 - **Import rule.** Covers the adapter's folder only, and a dynamic import would pass it: a review rule, not a sandbox.
+
+User's answer, 2026-11-07, verbatim: "approve the T07 stage 2 build", which accepted the reading shown with it: this job, with the field on and a new generator, is still not a T07 development run, since no fixture event reaches a recipe.

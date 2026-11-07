@@ -22,3 +22,15 @@ target_link_libraries(acts_tracking_driver PRIVATE acts_tracking_common)
 
 add_executable(t07_fixture_generator t07_fixture_generator.cpp t07_event_generator.cpp t07_seed_stream.cpp t07_truth_file.cpp)
 target_link_libraries(t07_fixture_generator PRIVATE acts_tracking_common)
+
+# t07-telescope-cai/1 is a program of its own, so the two targets above are built as before (Freeze A amendment 1).
+add_executable(t07_cai_fixture_generator t07_cai_fixture_generator.cpp t07_cai_event_generator.cpp t07_seed_stream.cpp t07_truth_file.cpp)
+target_link_libraries(t07_cai_fixture_generator PRIVATE acts_tracking_common)
+
+# The CAI-T07-3 probe: data side, so it links no generator code.
+add_executable(cai_payload_probe cai_payload_probe.cpp payload_geometry.cpp kalman_refit.cpp)
+target_link_libraries(cai_payload_probe PRIVATE acts_tracking_common)
+
+# What the refit's start does to a noiseless fit (d1-stage2-report.md, Fix round 1). Data side too.
+add_executable(cai_refit_start_probe cai_refit_start_probe.cpp kalman_refit.cpp)
+target_link_libraries(cai_refit_start_probe PRIVATE acts_tracking_common)
