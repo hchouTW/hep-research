@@ -17,12 +17,16 @@ from pathlib import Path
 
 PLUGIN = Path(__file__).resolve().parents[5]
 COPIED = ("core", "contracts", "adapters/geant4/assets/g4sim", "tests/__init__.py", "tests/core/__init__.py", "tests/adapters/__init__.py", "tests/core/test_simulation_rng.py", "tests/core/test_simulation_response.py",
-          "tests/adapters/test_g4sim_philox.py", "tests/adapters/test_g4sim_physics_check.py", "adapters/geant4/assets/g4sim_physics_check.py", "adapters/detector-simulation/assets/garfield/gas_table_query.py", "tests/adapters/test_g4sim_split.py")
+          "tests/adapters/test_g4sim_philox.py", "tests/adapters/test_g4sim_physics_check.py", "adapters/geant4/assets/g4sim_physics_check.py", "adapters/detector-simulation/assets/garfield/gas_table_query.py", "tests/adapters/test_g4sim_split.py", "tests/adapters/test_g4sim_external.py", "tests/adapters/test_simreco_strip.py", "tests/core/test_simulation_hits.py", "adapters/geant4/assets/simreco")
 RNG, RESPONSE, HEADER, CHECK = "core/simulation/rng.py", "core/simulation/response.py", "adapters/geant4/assets/g4sim/Philox.hh", "adapters/geant4/assets/g4sim_physics_check.py"
 PYTHON_TESTS = ("tests.core.test_simulation_rng", "tests.core.test_simulation_response")
 HEADER_TESTS = ("tests.adapters.test_g4sim_philox",)
 CHECK_TESTS = ("tests.adapters.test_g4sim_physics_check",)
 SPLIT_TESTS = ("tests.adapters.test_g4sim_split",)
+HIT_TESTS = ("tests.core.test_simulation_hits",)
+EXTERNAL_TESTS = ("tests.adapters.test_g4sim_external",)
+STRIP_TESTS = ("tests.adapters.test_simreco_strip",)
+HITS, EVENTS, COLUMNS, STRIP = "core/simulation/hits.py", "adapters/geant4/assets/g4sim/ExternalEvents.hh", "adapters/geant4/assets/g4sim/HitColumns.hh", "adapters/geant4/assets/simreco/simreco_strip.cc"
 SPLIT = "adapters/geant4/assets/g4sim/ScintillationSplit.hh"
 GROUP_WORD = "word3 = self.sub_index << 16 | self.groups_used\n"
 SAMPLED_BIN = "stream = rng.SubStream(key, event, volume_id, bin_index)\n        photons = bin_photons("
@@ -47,6 +51,26 @@ CHANGES = (
     ("Counter word 3", "a sub-index of 2^16 accepted", RNG, "if not 0 <= sub_index < MAXIMUM_SUB_INDEX:", "if not 0 <= sub_index:", PYTHON_TESTS),
     ("Split closure", "a step with mu_s = 10 in E^L", SPLIT, ": mean > kGaussianRegimeMean", ": mean >= kGaussianRegimeMean", SPLIT_TESTS),
     ("Split closure", "a split without a yield accepted", CHECK, 'findings.append(_finding("scintillation-undeclared"', '(lambda *_: None)(_finding("scintillation-undeclared"', CHECK_TESTS),
+    ("Independent read", "cells read as floats", HITS, 'return int(row["event_id"]), int(row["cell"]), int(row.get("segment", 0))', 'return int(row["event_id"]), float(row["cell"]), int(row.get("segment", 0))', HIT_TESTS),
+    ("Independent read", "the segment left out of a cell", HITS, 'return int(row["event_id"]), int(row["cell"]), int(row.get("segment", 0))', 'return int(row["event_id"]), int(row["cell"]), 0', HIT_TESTS),
+    ("Independent read", "the owner taken for the track that made the step", HITS, 'int(row["step_track_id"])', 'int(row["track_id"])', HIT_TESTS),
+    ("Independent read", "only track 1 counts as a primary", HITS, 'if int(row["parent_id"]) == 0}', 'if int(row["track_id"]) == 1}', HIT_TESTS),
+    ("Independent read", "a cell split wrongly across its columns", COLUMNS, "static_cast<std::uint32_t>(cell >> 32)", "static_cast<std::uint32_t>(cell >> 31)", EXTERNAL_TESTS),
+    ("Independent read", "an event allowed twice", EVENTS, 'if (!events.emplace(current, std::vector<ExternalParticle>{}).second) refuse', 'events.emplace(current, std::vector<ExternalParticle>{}); if (false) refuse', EXTERNAL_TESTS),
+    ("Independent read", "a line read past its end", EVENTS, " || (particle >> extra)) refuse", ") refuse", EXTERNAL_TESTS),
+    ("Independent read", "a negative count accepted", EVENTS, "if (current < 0 || left < 0) refuse", "if (current < 0) refuse", EXTERNAL_TESTS),
+    ("Independent read", "a file ending inside an event accepted", EVENTS, 'if (left > 0) refuse("the file ends', 'if (false) refuse("the file ends', EXTERNAL_TESTS),
+    ("Independent read", "two rows sharing draws accepted in core", RESPONSE, 'if len(set(keys)) != len(keys):', 'if False:', PYTHON_TESTS),
+    ("Independent read", "two rows sharing draws accepted in simreco_strip", STRIP, "if (!seen.insert({event, cell, sub_index}).second) throw", "seen.insert({event, cell, sub_index}); if (false) throw", STRIP_TESTS),
+    ("Independent read", "a cell of 2^53 or more accepted", STRIP, 'Whole(row, "cell", 9007199254740992.)', 'Whole(row, "cell", 1e30)', STRIP_TESTS),
+    ("Independent read", "the sub-index left out of the counter", STRIP, "sub_index << 16 | group", "group", STRIP_TESTS),
+    ("Independent read", "fsum of -0.0 keeps the sign", HEADER, "if (value != 0.) partials.push_back(value);", "partials.push_back(value);", HEADER_TESTS),
+    ("Independent read", "chunks merged by rounding their partials", HEADER, "  return Fsum(all);\n}", "  return RoundPartials(all);\n}", HEADER_TESTS),
+    ("Independent read", "a summand out of range accepted in C++", HEADER, "if (!std::isfinite(value) || std::fabs(value) > 1e290) throw", "if (false) throw", HEADER_TESTS),
+    ("Independent read", "a zero time bin accepted", CHECK, 'if float(truth.get("time_bin_ns", 1)) <= 0:', 'if False:', CHECK_TESTS),
+    ("Independent read", "two hit scorers on one template accepted", CHECK, "if template in claimed:", "if False:", CHECK_TESTS),
+    ("Independent read", "a hit scorer with an encoded readout accepted", CHECK, 'if scorer.get("readout", "none") != "none":', "if False:", CHECK_TESTS),
+    ("Independent read", "a rule naming no real region accepted", CHECK, "if region is not None and region not in regions:", "if False:", CHECK_TESTS),
     ("External sources", "the calibration workflow takes an external source", CHECK, "def card_findings(", "def calibration_findings(request):\n    return []\n\n\ndef card_findings(", CHECK_TESTS),
     ("Reference planes", "a plane without a frame accepted", CHECK, "def card_findings(", "def plane_findings(request):\n    return []\n\n\ndef card_findings(", CHECK_TESTS),
 )

@@ -3,7 +3,7 @@
 //
 // Philox is Salmon, Moraes, Dror and Shaw, SC11 (2011), doi:10.1145/2063384.2063405. Keys are never computed here: the driver derives them with canonical/1 in Python and passes the two
 // words, so C++ needs no canonical encoder (Section 22). fsum is the algorithm of CPython's math.fsum, Shewchuk partial sums with its half-even correction, which Section 10.2 requires to be kept
-// exactly (Python Software Foundation License). Compile without -ffast-math or any reassociation, and on x86 with SSE2 arithmetic: fsum depends on exact IEEE double operations.
+// exactly (Python Software Foundation License, reproduced in assets/PYTHON-LICENSE.txt). Compile without -ffast-math or any reassociation, and on x86 with SSE2 arithmetic: fsum depends on exact IEEE double operations.
 #ifndef G4SIM_PHILOX_HH
 #define G4SIM_PHILOX_HH
 
@@ -58,7 +58,7 @@ inline std::vector<double> PartialSums(const std::vector<double>& values) {
       value = high;
     }
     partials.resize(kept);
-    partials.push_back(value);
+    if (value != 0.) partials.push_back(value);  // as CPython: a zero leaves no partial, so a sum of -0.0 is 0.0
   }
   return partials;
 }
@@ -84,6 +84,13 @@ inline double RoundPartials(const std::vector<double>& partials) {
 }
 
 inline double Fsum(const std::vector<double>& values) { return RoundPartials(PartialSums(values)); }
+
+// One final rounding over every chunk's partial sums, as core.simulation.rng.merge_partial_sums: partials from several chunks are not ordered, so they are summed again.
+inline double MergePartialSums(const std::vector<std::vector<double>>& chunks) {
+  std::vector<double> all;
+  for (const std::vector<double>& chunk : chunks) all.insert(all.end(), chunk.begin(), chunk.end());
+  return Fsum(all);
+}
 
 }  // namespace g4sim
 

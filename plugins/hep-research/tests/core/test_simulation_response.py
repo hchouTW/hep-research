@@ -129,10 +129,17 @@ class Stages(unittest.TestCase):
             response.share_charge(10.0, [{"offset": 0, "fraction": 0.5}])
 
     def test_the_handoff_is_addressed(self):
-        document = response.handoff("sensor", "electronics", [{"cell": 1, "charge": 2.0}])
+        document = response.handoff("sensor", "electronics", [{"event": 0, "cell": 1, "charge": 2.0}])
         self.assertEqual(response.read_handoff(document, "electronics")[0]["cell"], 1)
         with self.assertRaises(response.ResponseError):
             response.read_handoff(document, "readout")
+
+    def test_rows_that_would_share_their_draws_are_refused(self):
+        rows = [{"event": 0, "cell": 1, "charge": 2.0}, {"event": 0, "cell": 1, "charge": 3.0}]
+        with self.assertRaises(response.ResponseError) as raised:
+            response.read_handoff(response.handoff("sensor", "adc", rows), "adc")
+        self.assertEqual(raised.exception.code, "handoff-rows")
+        self.assertEqual(len(response.read_handoff(response.handoff("sensor", "adc", [rows[0], {**rows[1], "sub_index": 1}]), "adc")), 2)
 
     def test_the_handoff_has_the_form_the_contract_gives(self):
         form = json.loads((ROOT / "contracts/schemas/response_pipeline.json").read_text(encoding="utf-8"))["$defs"]["stage_handoff"]

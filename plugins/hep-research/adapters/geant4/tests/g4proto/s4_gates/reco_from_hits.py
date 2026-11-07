@@ -128,7 +128,7 @@ def main() -> int:
     work = root / "run"
     simroot = args.simroot.resolve()
     tracker, particles = read_ntuple(simroot, work, "tracker_hits"), read_ntuple(simroot, work, "mc_particles")
-    cells = sorted({float(row["cell"]) for row in tracker})
+    cells = sorted({int(row["cell"]) for row in tracker})
     planes = {cell: at for at, cell in enumerate(cells)}
     crossings = hits.columns_for_simreco(tracker, particles, planes)
     with (root / "crossings.csv").open("w", encoding="utf-8", newline="") as handle:

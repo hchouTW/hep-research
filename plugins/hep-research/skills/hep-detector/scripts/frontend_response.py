@@ -1624,10 +1624,10 @@ def cmd_handoff(args):
     out = []
     key = rng.channel_key(args.run_seed, args.readout, args.stage, args.replica)
     for row in rows:
-        stream = rng.SubStream(key, row['event'], row['cell'])
+        stream = rng.SubStream(key, row['event'], row['cell'], row.get('sub_index', 0))
         code = response.electronics_response(stream, row['charge'], args.noise_sigma, args.threshold, args.lsb, args.bits)
         if code is not None:
-            out.append({'event': row['event'], 'cell': row['cell'], 'adc': code})
+            out.append({**{name: row[name] for name in ('event', 'cell', 'sub_index') if name in row}, 'adc': code})
     written = response.handoff(args.stage, args.next_stage, out)
     Path(args.handoff_out).write_text(json.dumps(written, indent=1) + '\n', encoding='utf-8')
     return {'status': args.status, 'ok': True, 'command': 'handoff', 'rows_in': len(rows), 'rows_out': len(out), 'handoff_out': args.handoff_out}

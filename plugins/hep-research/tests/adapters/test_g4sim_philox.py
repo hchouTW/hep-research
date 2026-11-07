@@ -37,7 +37,21 @@ int main() {
       std::vector<double> v(n);
       std::string text;
       for (auto& x : v) { std::cin >> text; x = std::strtod(text.c_str(), nullptr); }
-      std::printf("%a\n", g4sim::Fsum(v));
+      try {
+        if (kind == "sum") {
+          std::printf("%a\n", g4sim::Fsum(v));
+        } else {
+          std::vector<std::vector<double>> chunks;
+          for (std::size_t at = 0; at < 5; ++at) {
+            std::vector<double> part;
+            for (std::size_t i = at; i < n; i += 5) part.push_back(v[i]);
+            chunks.push_back(g4sim::PartialSums(part));
+          }
+          std::printf("%a\n", g4sim::MergePartialSums(chunks));
+        }
+      } catch (const std::range_error&) {
+        std::printf("refused\n");
+      }
     }
   }
 }
@@ -65,6 +79,7 @@ class PhiloxInCpp(unittest.TestCase):
         generator = random.Random(11)
         cases = [[generator.getrandbits(32) for _ in range(6)] for _ in range(2000)] + [[0] * 6, [0xFFFFFFFF] * 6]
         lines = self.ask("".join("philox " + " ".join(map(str, case)) + "\n" for case in cases))
+        self.assertEqual(len(lines), len(cases))
         for case, line in zip(cases, lines):
             words = rng.philox4x32_10(tuple(case[:4]), tuple(case[4:]))
             cells = line.split()
@@ -76,8 +91,25 @@ class PhiloxInCpp(unittest.TestCase):
         groups = [[2.0 ** 53, 1.0, 2.0 ** -80], [1e16, 1.0, 1e-16], [1.0, -1.0], []]
         groups += [[generator.uniform(-1, 1) * 10.0 ** generator.randint(-30, 30) for _ in range(generator.randint(1, 400))] for _ in range(300)]
         text = "".join(f"sum {len(group)} " + " ".join(value.hex() for value in group) + "\n" for group in groups)
-        for group, line in zip(groups, self.ask(text)):
+        lines = self.ask(text)
+        self.assertEqual(len(lines), len(groups))
+        for group, line in zip(groups, lines):
             self.assertEqual(float.fromhex(line), math.fsum(group), json.dumps(group)[:120])
+
+    def test_a_negative_zero_sums_as_in_cpython(self):
+        self.assertEqual(self.ask("sum 1 -0x0p+0\n"), [math.fsum([-0.0]).hex().replace("0x0.0p+0", "0x0p+0")])
+
+    def test_merged_chunks_equal_one_run_and_core(self):
+        generator = random.Random(13)
+        groups = [[2.0 ** 53, 1.0, 2.0 ** -80, -(2.0 ** 53), 1.0], [1e16, 1.0, 1e-16, -1e16, 3.0, 1e-3]]
+        groups += [[generator.uniform(-1, 1) * 10.0 ** generator.randint(-30, 30) for _ in range(generator.randint(5, 300))] for _ in range(200)]
+        lines = self.ask("".join(f"merge {len(group)} " + " ".join(value.hex() for value in group) + "\n" for group in groups))
+        self.assertEqual(len(lines), len(groups))
+        for group, line in zip(groups, lines):
+            self.assertEqual(float.fromhex(line), rng.merge_partial_sums([rng.partial_sums(group[at::5]) for at in range(5)]))
+
+    def test_summands_out_of_range_are_refused_as_in_core(self):
+        self.assertEqual(self.ask(f"sum 2 1.0 {1e300.hex()}\nsum 1 inf\n"), ["refused", "refused"])
 
     def test_a_step_at_exactly_ten_is_on_the_poisson_side(self):
         with tempfile.TemporaryDirectory() as folder:

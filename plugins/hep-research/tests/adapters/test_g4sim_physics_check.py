@@ -138,6 +138,25 @@ class Scorers(unittest.TestCase):
         self.assertEqual(check.plane_findings({"reference_planes": [{"name": "a", "frame": "world"}]}), [])
         self.assertEqual(codes(check.plane_findings({"reference_planes": [{"name": "a"}]})), ["plane-frame"])
 
+    def test_a_time_bin_has_a_width_and_a_keeping_rule_is_known(self):
+        self.assertEqual([item["code"] for item in check.truth_findings({"truth": {"time_bin_ns": 0}})], ["truth-rule"])
+        self.assertEqual([item["code"] for item in check.truth_findings({"truth": {"keep": ["primary", {"energy_above_MeV": 5, "region": "tracker"}, "all", "decay_products"]}})], [])
+        self.assertEqual([item["code"] for item in check.truth_findings({"truth": {"keep": ["everything"]}})], ["truth-rule"])
+
+    def test_a_step_is_written_to_one_hit_scorer(self):
+        scorers = [{"name": "a", "hit_kind": "calorimeter", "readout": "none", "templates": ["block"]}, {"name": "b", "hit_kind": "tracker", "readout": "none", "templates": ["block", "plane"]}]
+        self.assertEqual([item["code"] for item in check.hit_findings(scorers, set(), {})], ["hit-overlap"])
+        self.assertEqual(check.hit_findings(scorers[:1] + [{"name": "c", "quantity": "edep", "templates": ["block"]}], set(), {}), [])
+
+    def test_a_hit_scorer_has_no_encoded_readout(self):
+        scorers = [{"name": "a", "hit_kind": "tracker", "readout": "strips", "templates": ["plane"]}]
+        self.assertEqual([item["code"] for item in check.hit_findings(scorers, set(), {})], ["hit-readout"])
+
+    def test_a_keeping_rule_names_a_region_of_the_specification(self):
+        truth = {"keep": [{"energy_above_MeV": 5, "region": "inner"}]}
+        self.assertEqual([item["code"] for item in check.hit_findings([], {"outer"}, truth)], ["truth-rule"])
+        self.assertEqual(check.hit_findings([], {"inner"}, truth), [])
+
     def test_the_event_range_fits_the_counter(self):
         self.assertEqual(check.event_range_findings({"run": {"first_event": 2 ** 32 - 10, "events": 10}}), [])
         self.assertEqual(codes(check.event_range_findings({"run": {"first_event": 2 ** 32 - 10, "events": 11}})), ["event-range"])

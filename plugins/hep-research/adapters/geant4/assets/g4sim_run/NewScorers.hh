@@ -232,6 +232,10 @@ class ScorerSums {
   }
 
   void Add(std::size_t scorer, VolumeKey volume, int bin, double value) {
+    // A hit takes the scorer's own bin and share, so a segmented hit file closes on the scorer bin by bin (Section 9.2).
+    const std::string& hitKind = (*fScorers)[scorer].hitKind;
+    if (hitKind == "tracker") HitRecorder::Thread().Tracker(fScoredStep, static_cast<std::uint64_t>(volume), bin, value);
+    else if (hitKind == "calorimeter") HitRecorder::Thread().Calorimeter(fScoredStep, static_cast<std::uint64_t>(volume), bin, value);
     ScoreCell& cell = fSums[{scorer, volume, bin}];
     cell.value += value;
     cell.absolute += std::abs(value);
@@ -255,10 +259,7 @@ class ScorerSums {
         if (earlier == fFirst.end() || pre->GetGlobalTime() / ns < earlier->second[0]) fFirst[key] = {pre->GetGlobalTime() / ns, pre->GetKineticEnergy() / MeV, static_cast<double>(step->GetTrack()->GetDefinition()->GetPDGEncoding())};
         continue;
       }
-      if (!scorer.hitKind.empty() && step->GetTotalEnergyDeposit() > 0.) {
-        if (scorer.hitKind == "tracker") HitRecorder::Thread().Tracker(step, static_cast<double>(volume));
-        else HitRecorder::Thread().Calorimeter(step, static_cast<double>(volume));
-      }
+      fScoredStep = step;
       Score(i, scorer, step, touchable, volume);
     }
   }
@@ -455,6 +456,7 @@ class ScorerSums {
   bool fMixNonIonizing = false;
   long long fEvent = 0;
   std::map<std::tuple<std::size_t, VolumeKey, int>, ScoreCell> fSums;
+  const G4Step* fScoredStep = nullptr;
   std::map<std::size_t, double> fDirect;
   std::map<std::pair<std::size_t, VolumeKey>, std::array<double, 3>> fFirst;
   std::vector<EnvelopeRow> fEnvelopes;

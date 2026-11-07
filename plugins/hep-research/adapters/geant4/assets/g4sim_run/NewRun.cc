@@ -325,6 +325,8 @@ int NewRun(const Value& ir, const Value& card, const Value& request) {
     shared.hits = true;
     shared.truth.decayProducts = truth.at("decay_products", "truth").b;
     shared.truth.energyThreshold = truth.at("energy_above_MeV", "truth").num;
+    shared.truth.energyRegion = truth.at("energy_region", "truth").str;
+    shared.truth.all = truth.at("all", "truth").b;
     shared.truth.timeBinNs = truth.at("time_bin_ns", "truth").num;
     for (const auto& plane : truth.at("planes_z_mm", "truth").array("planes_z_mm")) shared.planes.push_back({plane.num});
   }
