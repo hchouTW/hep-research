@@ -474,6 +474,19 @@ class NonBoxMothersAndShell(unittest.TestCase):
         self.assertIn("containment-outside", self.codes(hollow, box(["2", "2", "2"])))
         self.assertEqual(self.codes(hollow, box(["2", "2", "2"]), ("7", "0", "0")), set())
 
+    def test_a_field_given_by_a_parameter_reaches_the_ir_as_its_value(self):
+        # the program reads the text as a number: a name it cannot read would be a field of 0 T, silently
+        made = expand.expand(spec(params={"strength": "0.5", "half": "strength / 2"}, fields={"dipole": {"b_tesla": ["0", "0", "half"]}}))
+        self.assertEqual([float(value) for value in made["physical"]["fields"]["dipole"]["b_tesla"]], [0.0, 0.0, 0.25])
+
+    def test_a_field_given_by_numbers_keeps_its_text(self):
+        made = expand.expand(spec(fields={"dipole": {"b_tesla": ["0", "0", "1"]}}))
+        self.assertEqual(made["physical"]["fields"], {"dipole": {"b_tesla": ["0", "0", "1"]}})
+
+    def test_a_field_naming_an_unknown_parameter_is_an_error(self):
+        with self.assertRaises(GeometryError):
+            expand.expand(spec(fields={"dipole": {"b_tesla": ["0", "0", "missing"]}}))
+
     def test_shell_wraps_a_template_with_the_active_faces(self):
         crystal = {**box(["20", "20", "50"]), "modifiers": [{"shell": {"material": "G4_MYLAR", "thickness_mm": "1", "faces": ["sides", "front"]}}]}
         physical = expand.expand(spec({"crystal": crystal}, [single("crystal")]))["physical"]

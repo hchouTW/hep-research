@@ -1,7 +1,8 @@
 {
  "schema": "g4kit/1",
  "name": "planes_tracker",
- "version": "1.1.0",
+ "version": "1.2.0",
+ "field_input": "field_tesla",
  "geometry_kind": "planes-tracker",
  "role": "tracking",
  "purpose": "A telescope of equal planes along x in a uniform field along z, the geometry simreco reads.",
@@ -29,6 +30,14 @@
   },
   "materials": {
    "kind": "materials",
+   "optional": true
+  },
+  "point_resolution_um": {
+   "kind": "declared",
+   "optional": true
+  },
+  "layer_x_over_x0": {
+   "kind": "declared",
    "optional": true
   }
  },

@@ -1075,7 +1075,7 @@ def check_derivation(proj: Project, ev: Evaluation, cid: str, kind: str, geometr
     run_identity = (study_extension.get("geometry") or {}).get("geometry_id")
     spec_identity = (((study_extension.get("study") or {}).get("spec") or {}).get("physics") or {}).get("g4sim", {}).get("geometry_id")
     for name, value in (("computational-run", run_identity), ("study spec", spec_identity)):
-        if value is not None and value != identity:
+        if value != identity:
             ev.err("design.derivation_mismatch", f"the {name} has geometry_id {value}, the candidate {identity} (Section 14.3)")
 
 

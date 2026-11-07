@@ -129,6 +129,7 @@
   "assets/g4sim/KillProcess.hh",
   "assets/g4sim_physics_check.py",
   "assets/g4sim_simulate.py",
+  "assets/g4sim_reco.py",
   "assets/xtr_radiators.json",
   "assets/g4sim_run/NewBuild.hh",
   "assets/g4sim_run/NewRun.cc",

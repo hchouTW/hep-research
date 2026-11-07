@@ -477,6 +477,26 @@ class RealizationEntryTests(unittest.TestCase):
 
 
 
+class G4simStudy(unittest.TestCase):
+    STUDY = {"physics": {"g4sim": {"run_card": {"sha256": "a" * 64}}, "g4sim_loaded": {"run_card": {"physics": {"reference_list": "FTFP_BERT_EMZ", "cuts_mm": {"default": "0.7"}}}, "request": {"source": {"particle": "proton", "energy": {"mono": {"energy_MeV": 433.0}}}}}}}
+
+    def test_a_run_is_compared_with_its_request_and_run_card(self):
+        program, view = C.sim_spec(self.STUDY)
+        self.assertEqual(view["source"], {"particle": "proton", "energy_MeV": 433.0})
+        self.assertEqual(view["physics"]["default_cut_mm"], 0.7)
+        self.assertEqual(C.spec_hash(program, view), "a" * 64)
+
+    def test_the_record_carries_the_identity_of_its_one_nominal_run(self):
+        with tempfile.TemporaryDirectory() as folder:
+            paths = []
+            for name, role in (("a", "nominal"), ("b", "calibration")):
+                paths.append(Path(folder) / f"{name}.json")
+                paths[-1].write_text(json.dumps({"extension": {"geometry": {"geometry_id": name}, "simulation": {"evidence_role": role}}}), encoding="utf-8")
+            self.assertEqual(C.nominal_identity(paths), {"geometry": {"geometry_id": "a"}})
+            self.assertEqual(C.nominal_identity(paths[1:]), {})
+            self.assertEqual(C.nominal_identity(paths + paths[:1]), {})
+
+
 class ModelConfirmation(unittest.TestCase):
     EMZ = {"models": {"world": {"eIoni/e-": ["PenIoni"], "hIoni/proton": ["Bragg"], "hIoni/B+": ["Bragg"]}}, "msc_range_factor": 0.08, "msc_muhad_range_factor": 0.2, "step_functions": ["Step function for e+- (0.2, 0.01 mm)", "Step function for muons/hadrons (0.1, 0.05 mm)"]}
 

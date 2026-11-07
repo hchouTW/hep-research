@@ -54,6 +54,8 @@ def input_values(kit: dict, fields: dict) -> dict:
         raise KitError(f"kit {kit['name']}: missing inputs {missing}, unknown fields {unknown}")
     values = {**kit["geometric_defaults"], "materials": {}, **fields}
     for name, item in kit["inputs"].items():
+        if item.get("optional") and name not in values:
+            continue
         value = values[name]
         if item["kind"] == "integer" and (isinstance(value, bool) or not isinstance(value, int) and not (isinstance(value, float) and value.is_integer())):
             raise KitError(f"input {name} is a whole number, not {value!r}")
@@ -78,6 +80,17 @@ def detector_spec(kit: dict, values: dict) -> dict:
     spec = filled(kit["detector"], values, kit)
     numbers = {name: as_quantity(values[name]) for name, item in kit["inputs"].items() if item["kind"] in NUMERIC}
     spec["params"] = {**numbers, **{name: as_quantity(value) for name, value in kit["geometric_defaults"].items() if name not in numbers}, **spec["params"]}
+    return without_zero_field(spec, kit, values)
+
+
+def without_zero_field(spec: dict, kit: dict, values: dict) -> dict:
+    """A kit's magnet at zero strength is no magnet: the specification attaches no field, so a run of it can be an isolated target (Section 12)."""
+    strength = kit.get("field_input")
+    if strength is None or Decimal(str(values[strength])) != 0:
+        return spec
+    del spec["fields"]
+    for node in [spec["world"], *spec["templates"].values()]:
+        node.pop("field", None)
     return spec
 
 

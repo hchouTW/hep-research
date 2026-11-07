@@ -218,7 +218,10 @@ def sim_spec(study: dict) -> tuple[str, dict]:
     """(program, spec) of the study: element_sim when it names an element_sim spec, else layered_sim."""
     loaded = get(study, "physics.g4sim_loaded")
     if isinstance(loaded, dict):  # the rule table's facts come from the run card and the IR, not from an old specification
-        return "g4sim", {"physics": loaded["run_card"]["physics"], "ui_commands": loaded["run_card"].get("ui_commands") or []}
+        source = loaded["request"]["source"]
+        physics = loaded["run_card"]["physics"]
+        return "g4sim", {"physics": {**physics, "default_cut_mm": float(physics["cuts_mm"]["default"])}, "ui_commands": loaded["run_card"].get("ui_commands") or [], "spec_sha256": get(study, "physics.g4sim.run_card.sha256"),
+                         "source": {"particle": source.get("particle"), "energy_MeV": float(((source.get("energy") or {}).get("mono") or {}).get("energy_MeV", "nan"))}}
     es = get(study, "physics.element_sim")
     if isinstance(es, dict):
         return "element_sim", es
@@ -227,7 +230,9 @@ def sim_spec(study: dict) -> tuple[str, dict]:
 
 def spec_hash(program: str, spec: dict) -> str:
     """The spec hash a run record carries: layered_sim's sha256_json, element_sim's sha256 of the spec file the program
-    read (geant4_run.py writes it with sorted keys, one-space indent and a final newline)."""
+    read (geant4_run.py writes it with sorted keys, one-space indent and a final newline), g4sim's sha256 of its run card."""
+    if program == "g4sim":
+        return spec["spec_sha256"]
     if program == "element_sim":
         return hashlib.sha256((json.dumps(spec, indent=1, sort_keys=True) + "\n").encode("utf-8")).hexdigest()
     return sha256_json(spec)
@@ -768,6 +773,9 @@ def bound_inputs(study: dict, declared: dict, qualifying: bool, results: dict | 
         if g and actual.get("geometry_sha256") and g != actual["geometry_sha256"]:
             gaps.append(f"the element_sim spec was derived from geometry sha256 {g}, --geometry has "
                         f"{actual['geometry_sha256']}")
+    if program == "g4sim":  # the realized geometry is the detector-spec the kit made, and the field is in the IR (g4sim plan, Section 19.2 S5)
+        actual["field_configuration_sha256"] = B.g4sim_field_sha256(get(study, "physics.g4sim_loaded.ir"))
+        actual["realization_sha256"] = get(study, "physics.g4sim.detector_spec.sha256")
     if reco is not None:
         actual["reco_spec_sha256"] = B.reco_spec_sha256(get(reco, "extension.reconstruction.reco_spec") or {})
     for key in ("geometry_sha256", "realization_sha256", "field_configuration_sha256", "reco_spec_sha256"):
@@ -958,6 +966,9 @@ def cmd_label(args) -> tuple[str, dict]:
             entry = realization_entry(prov.get("realization") or {}, esp, root)
             if entry:
                 manifest.append(entry)
+        g4sim_block = get(study, "physics.g4sim")
+        if isinstance(g4sim_block, dict):  # Section 14.3, item 6: the three specifications of the study
+            manifest += [{"path": _rel(spec_path.parent / g4sim_block[key]["path"], root), "sha256": g4sim_block[key]["sha256"]} for key in ("detector_spec", "simulation_request", "run_card")]
         record = {
             "contract_version": CONTRACTS_VERSION, "artifact_id": study.get("study_id", "geant4-study") + "-study",
             "artifact_type": "computational-run",
@@ -983,6 +994,9 @@ def cmd_label(args) -> tuple[str, dict]:
                                     "phase2_upgrade_eligible_scopes": eligible,
                                     "evidence_overlap": overlap, "evidence_overlap_version": 1,
                                     "highest_usable_label": doc["highest_usable_label"]}}}
+        if isinstance(g4sim_block, dict):  # what design.py compares with the candidate (Section 14.3, item 5)
+            record["extension"]["study"]["spec"] = {"physics": {"g4sim": g4sim_block}}
+            record["extension"].update(nominal_identity(args.run_record or []))
         if installations:
             record["extension"]["study"]["geant4_installations"] = installations
             if doc.get("provenance_notes"):
@@ -1010,6 +1024,13 @@ def cmd_label(args) -> tuple[str, dict]:
         write_json(out, record)
         doc["record"] = str(out)
     return "ok", doc
+
+
+def nominal_identity(paths: list) -> dict:
+    """The identities of a study's nominal g4sim run, as the study record carries them (Section 14.3, item 5); nothing when no single run is the nominal one."""
+    runs = [load_json(path).get("extension") or {} for path in paths]
+    nominal = [run["geometry"] for run in runs if "geometry" in run and get(run, "simulation.evidence_role") == "nominal"]
+    return {"geometry": nominal[0]} if len(nominal) == 1 else {}
 
 
 def main(argv=None) -> int:

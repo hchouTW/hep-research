@@ -152,6 +152,7 @@ if __name__ == "__main__":  # hep-research interpreter guard (tests/tools/test_p
         _guard()
 
 import argparse
+import csv
 import gzip
 import hashlib
 import json
@@ -899,6 +900,64 @@ def _equiv(diff: float, se: float, dof: float, tol: float) -> str:
     return {"pass": "pass", "fail": "fail", "unresolved": "unresolved"}[equivalence(diff, se, dof, tol)["verdict"]]
 
 
+def g4sim_field_sha256(ir: dict) -> str:
+    """B2.8 condition 2's key on the g4sim path: the field of the IR's physical part, each template's field and the field definitions (g4sim plan, Section 19.2 S5)."""
+    physical = ir["physical"]
+    return _canonical_sha({"fields": physical.get("fields"), "templates": {name: node.get("field") for name, node in sorted(physical["templates"].items())}})
+
+
+def bench_field_g4sim(b: dict, cfg_dir: Path) -> dict:
+    """field-propagation on the g4sim path: charged geantinos at an angle to a uniform field along z, against the analytic helix, at reference planes in the field. Each ray's start comes from the run's primaries."""
+    ir = json.loads((cfg_dir / b["ir"]).read_text(encoding="utf-8"))
+    field = float(b["field_tesla"])
+    starts = {int(row[0]): [float(value) for value in row[1:8]] for row in csv.reader((cfg_dir / b["primaries"]).open(encoding="utf-8")) if row and row[0].isdigit()}
+    tolerance = float(b.get("tolerance_um", 0.5))
+    worst, compared = 0.0, 0
+    for row in csv.DictReader((cfg_dir / b["crossings"]).open(encoding="utf-8")):
+        energy, x0, y0, z0, ux, uy, uz = starts[int(row["event_id"])]
+        transverse = math.hypot(ux, uy)
+        radius = energy * transverse / (0.299792458 * abs(field))  # mm: a massless charged geantino, p = E
+        turned = (float(row["z_mm"]) - z0) / uz * transverse / radius * (1 if field > 0 else -1)  # a positive charge turns clockwise about +z
+        cosine, sine = ux / transverse, uy / transverse
+        along, across = radius * math.sin(turned), -radius * (1 - math.cos(turned))
+        x = x0 + along * cosine - across * sine
+        y = y0 + along * sine + across * cosine
+        worst = max(worst, math.hypot(float(row["x_mm"]) - x, float(row["y_mm"]) - y) * 1000)
+        compared += 1
+    if not compared:
+        raise BenchmarkError("field-propagation: no crossing to compare")
+    return {"statistic": "largest in-plane distance from the analytic helix (um)", "geant4": worst, "reference_value": 0.0, "compared": compared, "verdict": "pass" if worst <= tolerance else "fail", "problems": [], "tolerance": {"in_plane_um": tolerance},
+            "scope": {"field_configuration_sha256": g4sim_field_sha256(ir)}, "reference": {"source": "analytic helix of a charged particle in a uniform field", "version": "exact", "validity": "deterministic: charged geantinos have no interactions"}}
+
+
+def bench_material_g4sim(b: dict, study: dict, cfg_dir: Path) -> dict:
+    """material-definition on the g4sim path: every material of the planes has a study-spec entry of independent origin, Geant4's radiation length agrees with it, and a geantino's path over that independent length reproduces the
+    candidate's declared x/X0 per plane; scope the design geometry and the detector-spec the kit made from it."""
+    geometry = cfg_dir / b["geometry"]
+    design_geometry = json.loads(geometry.read_text(encoding="utf-8"))
+    probe = json.loads((cfg_dir / b["probe"]).read_text(encoding="utf-8"))
+    lengths = {item["name"]: float.fromhex(item["radiation_length_mm"]) for item in probe["materials"]}
+    tolerance = float(b.get("tolerance_relative", 0.01))
+    fields = design_geometry["fields"]
+    name = fields["plane_material"]
+    entry = next((item for item in study.get("materials", []) if item.get("name") == name), None)
+    problems = []
+    if entry is None or entry.get("reference_origin") != "independent":
+        raise BenchmarkError(f"material-definition: {name} has no study-spec material of independent origin")
+    if abs(lengths[name] / entry["radiation_length_mm"] - 1) > tolerance:
+        problems.append(f"{name}: Geant4's radiation length {lengths[name]:.5g} mm differs from the independent {entry['radiation_length_mm']} mm")
+    with (cfg_dir / b["cells"]).open(encoding="utf-8", newline="") as handle:
+        paths = [float(row[4]) for row in csv.reader(handle) if row[1] == b.get("scorer", "path") and row[2] == "-1"]
+    if not paths:
+        raise BenchmarkError("material-definition: the geantino run has no path")
+    per_plane = statistics.fmean(paths) / int(fields["planes"]) / entry["radiation_length_mm"]
+    declared = float(fields["layer_x_over_x0"])
+    if abs(per_plane / declared - 1) > tolerance:
+        problems.append(f"x/X0 per plane {per_plane:.6g} differs from the declared {declared:.6g}")
+    return {"statistic": "x/X0 of a plane, a geantino path over the independent radiation length", "geant4": per_plane, "reference_value": declared, "verdict": "pass" if not problems else "fail", "problems": problems, "tolerance": {"relative": tolerance},
+            "scope": {"geometry_sha256": file_sha256(geometry), "realization_sha256": file_sha256(cfg_dir / b["detector"])}, "reference": {"source": "the study spec's independent material entry", "version": "as declared", "validity": "a geantino has no interactions"}}
+
+
 def bench_field_propagation(b: dict, cfg_dir: Path) -> dict:
     """field-propagation (verification): charged geantinos of an element_sim run against the analytic helix
     (core/simulation/helix.py, the oracle of B1.7) from the run's crossings (simroot dump); scope the field
@@ -1203,9 +1262,9 @@ def bench_regression(b: dict, cfg_dir: Path) -> dict:
 def evaluate_detector(b: dict, study: dict, cfg_dir: Path) -> dict:
     name = b["benchmark"]
     if name == "field-propagation":
-        return bench_field_propagation(b, cfg_dir)
+        return bench_field_g4sim(b, cfg_dir) if b.get("g4sim") else bench_field_propagation(b, cfg_dir)
     if name == "material-definition":
-        return bench_material_definition(b, study, cfg_dir)
+        return bench_material_g4sim(b, study, cfg_dir) if b.get("g4sim") else bench_material_definition(b, study, cfg_dir)
     if name == "reco-closure":
         return bench_reco_closure(b, cfg_dir)
     if name == "field-propagation-muon":
@@ -1650,6 +1709,8 @@ def cmd_scope_keys(args) -> tuple[str, dict]:
     if args.element_spec:
         out["field_configuration_sha256"] = field_configuration_sha256(
             json.loads(Path(args.element_spec).read_text(encoding="utf-8")))
+    if args.ir:
+        out["field_configuration_sha256"] = g4sim_field_sha256(json.loads(Path(args.ir).read_text(encoding="utf-8")))
     if args.reco_spec:
         out["reco_spec_sha256"] = reco_spec_sha256(json.loads(Path(args.reco_spec).read_text(encoding="utf-8")))
     if args.geometry:
@@ -1657,7 +1718,7 @@ def cmd_scope_keys(args) -> tuple[str, dict]:
     if args.realization:
         out["realization_sha256"] = file_sha256(Path(args.realization))
     if not out:
-        raise BenchmarkError("scope-keys needs at least one of --element-spec, --reco-spec, --geometry, --realization")
+        raise BenchmarkError("scope-keys needs at least one of --element-spec, --ir, --reco-spec, --geometry, --realization")
     return "ok", {"scope_keys": out}
 
 
@@ -1679,7 +1740,7 @@ def main(argv=None) -> int:
     p.add_argument("--benchmark", default="multiple-scattering-reference", choices=DECLARED_BENCHMARKS)
     p.add_argument("--index", type=int, default=0, help="which benchmark of that name in the config (0)")
     p = sub.add_parser("scope-keys", help="the declared-scope keys of a detector-level study (CV-B2)")
-    for name in ("--element-spec", "--reco-spec", "--geometry", "--realization"):
+    for name in ("--element-spec", "--ir", "--reco-spec", "--geometry", "--realization"):
         p.add_argument(name)
     for sp in sub.choices.values():
         add_status_argument(sp)

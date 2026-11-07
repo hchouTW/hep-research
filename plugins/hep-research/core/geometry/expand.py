@@ -470,6 +470,16 @@ def _with_shells(spec: dict) -> dict:
     return spec
 
 
+def _field_vector(items: list, values: _Values, path: str) -> list:
+    """A field's three components as the program reads them, numbers: an expression becomes its value, and a number keeps its text, so a specification written in numbers keeps its geometry_id."""
+    def is_number(text) -> bool:
+        try:
+            return Decimal(text).is_finite()
+        except ArithmeticError:
+            return False
+    return [item if is_number(item) else as_text(value) for item, value in zip(items, values.vector(items, path))]
+
+
 def expand(spec: dict) -> dict:
     """The geometry-ir/1 document of a specification."""
     if spec.get("schema") != "detector-spec/1":
@@ -508,7 +518,7 @@ def expand(spec: dict) -> dict:
                                                                "strides": _level_strides(tree)},
                 "materials": _without_sources(spec.get("materials", {})), "physics_requirements": _requirements(spec, tags)}
     if spec.get("fields"):  # optional: a specification with no field keeps its geometry_id (Section 7.1)
-        physical["fields"] = spec["fields"]
+        physical["fields"] = {name: {**field, "b_tesla": _field_vector(field["b_tesla"], values, f"/fields/{name}/b_tesla")} for name, field in spec["fields"].items()}
     marker = {"tags": {name: sorted(own) for name, own in tags.items() if own}, "derivations": spec.get("params", {}),
               "source_of_facts": spec.get("source_of_facts", {}), "material_sources": _sources(spec.get("materials", {}))}
     document = {"schema": "geometry-ir/1", "physical": physical, "marker": marker}

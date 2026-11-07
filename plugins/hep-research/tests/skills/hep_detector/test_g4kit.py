@@ -48,6 +48,14 @@ class Kits(unittest.TestCase):
                 self.assertEqual(record["detector_spec_sha256"], hashlib.sha256((self.work / "detector.json").read_bytes()).hexdigest())
                 self.assertEqual(record["design_geometry_sha256"], hashlib.sha256((self.work / "design.geometry.json").read_bytes()).hexdigest())
 
+    def test_a_tracker_magnet_at_zero_strength_is_no_field(self):
+        self.assertEqual(derive(self.work, "planes-tracker", {**TRACKER, "field_tesla": 0.0}).returncode, 0)
+        spec = json.loads((self.work / "detector.json").read_text(encoding="utf-8"))
+        self.assertNotIn("fields", spec)
+        self.assertNotIn("field", spec["world"])
+        self.assertEqual(derive(self.work, "planes-tracker", TRACKER).returncode, 0)
+        self.assertEqual(json.loads((self.work / "detector.json").read_text(encoding="utf-8"))["world"]["field"], "dipole")
+
     def test_a_derivation_is_reproducible(self):
         first = derive(self.work, "tof", CASES["tof"])
         second = derive(self.work, "tof", CASES["tof"])
@@ -126,11 +134,14 @@ class Binding(unittest.TestCase):
             (self.artifacts / "studies/derivation.json").write_text(json.dumps(record), encoding="utf-8")
         project = design.Project(self.artifacts, None)
         evaluation = design.Evaluation(Path("."), ".", {"extension": {"candidate": CANDIDATE, "denominator": {}}})
-        design.check_derivation(project, evaluation, CANDIDATE, design.candidate_geometry_kind(project, CANDIDATE), self.geometry.read_bytes(), geometry or {})
+        design.check_derivation(project, evaluation, CANDIDATE, design.candidate_geometry_kind(project, CANDIDATE), self.geometry.read_bytes(), self.study() if geometry is None else geometry)
         return [getattr(item, "code", item[0] if isinstance(item, tuple) else item) for item in evaluation.errors]
 
     def record(self, **changes) -> dict:
         return {"schema": "geometry-derivation/1", "design_geometry_sha256": hashlib.sha256(self.geometry.read_bytes()).hexdigest(), "geometry_kind": "tof", "kit": {"name": "tof", "version": "1.0.0", "sha256": "0" * 64}, "detector_spec_sha256": "1" * 64, "geometry_id": self.identity, **changes}
+
+    def study(self) -> dict:
+        return {"geometry": {"geometry_id": self.identity}, "study": {"spec": {"physics": {"g4sim": {"geometry_id": self.identity}}}}}
 
     def bound(self) -> dict:
         return {"geometry_kind": "tof", "geometry_derivation_ref": "studies/derivation.json", "geometry_id": self.identity}
@@ -151,7 +162,12 @@ class Binding(unittest.TestCase):
         wrong = "d" * 64
         for extension in ({"geometry": {"geometry_id": wrong}}, {"study": {"spec": {"physics": {"g4sim": {"geometry_id": wrong}}}}}):
             with self.subTest(extension=sorted(extension)):
-                self.assertIn("design.derivation_mismatch", self.errors(self.record(), self.bound(), extension))
+                self.assertIn("design.derivation_mismatch", self.errors(self.record(), self.bound(), {**self.study(), **extension}))
+
+    def test_a_study_that_names_no_identity_is_refused(self):
+        for missing in ("geometry", "study"):
+            with self.subTest(missing=missing):
+                self.assertIn("design.derivation_mismatch", self.errors(self.record(), self.bound(), {key: value for key, value in self.study().items() if key != missing}))
 
     def set_kind(self, name: str, kind: str) -> None:
         path = self.artifacts / f"candidates/{name}.json"
