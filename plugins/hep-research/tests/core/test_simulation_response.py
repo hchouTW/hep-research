@@ -1,6 +1,7 @@
 """The response pipeline: draws independent of order and chunking, shared volume streams, and the moments of the scintillation formula (Sections 10.2, 10.3)."""
 from __future__ import annotations
 
+import hashlib
 import json
 import math
 import random
@@ -18,6 +19,14 @@ from core.simulation import response, rng  # noqa: E402
 STAGE = {"name": "scintillation", "kind": "scintillation", "parameters": {"light_yield_per_MeV": {"value": 100.0, "source_of_facts": "synthetic"}, "resolution_scale": {"value": 1.0, "source_of_facts": "synthetic"}}}
 PIPELINE = {"schema": response.SCHEMA, "run_seed": 7, "replica": 0, "stages": [STAGE]}
 MAP = {"schema": "efficiency-map/1", "channels": ["a", "b"], "form": {"kind": "uniform", "value": [0.2, 0.3]}, "source_of_facts": "synthetic"}
+DRIFT_TABLE = b"""format garfield-gas-table-query-output/1
+pressure_torr 760.0
+temperature_k 293.15
+interpolation 1 constant constant
+point 1 300 0.006 0.0 0.0 0.006
+point 0 100 0.002 0.0 0.0 0.002
+end 2
+"""  # the lines adapters/detector-simulation/assets/garfield/gas_table_query.py writes
 BINS = {0: (0.5, 0.1, 3), 1: (0.0, 0.05, 0), 2: (1.0, 0.0, 5)}
 
 
@@ -110,6 +119,48 @@ class Stages(unittest.TestCase):
         form = json.loads((ROOT / "contracts/schemas/response_pipeline.json").read_text(encoding="utf-8"))["$defs"]["stage_handoff"]
         self.assertTrue(contract_schema.validate(response.handoff("sensor", "electronics", [{"event": 3, "cell": 1, "charge": 2.0}]), form).ok)
         self.assertFalse(contract_schema.validate(response.handoff("sensor", "electronics", [{"cell": 1, "charge": 2.0}]), form).ok)
+
+    def test_a_table_stage_must_declare_its_table(self):
+        for kind in response.TABLE_STAGES:
+            with self.subTest(kind=kind), self.assertRaises(response.ResponseError) as raised:
+                response.check_pipeline({"stages": [{"name": "t", "kind": kind, "parameters": {}}]})
+            self.assertEqual(raised.exception.code, "table-reference")
+
+    def test_a_drift_table_is_referenced_by_its_detsim_run(self):
+        table = {"path": "drift.txt", "sha256": "0" * 64}
+        with self.assertRaises(response.ResponseError):
+            response.check_pipeline({"stages": [{"name": "t", "kind": "drift_table", "parameters": {}, "table": table}]})
+        document = {**PIPELINE, "stages": [{"name": "t", "kind": "drift_table", "parameters": {}, "table": {**table, "detsim_run_id": "a" * 32}}]}
+        response.check_pipeline(document)
+        self.assertTrue(contract_schema.validate(document, "response_pipeline.json").ok)
+
+    def test_a_table_with_other_bytes_is_refused(self):
+        stage = {"name": "t", "table": {"sha256": hashlib.sha256(DRIFT_TABLE).hexdigest()}}
+        self.assertEqual(response.verify_table(stage, DRIFT_TABLE), DRIFT_TABLE)
+        with self.assertRaises(response.ResponseError) as raised:
+            response.verify_table(stage, DRIFT_TABLE + b"\n")
+        self.assertEqual(raised.exception.code, "table-hash")
+
+    def test_drift_speed_interpolates_and_refuses_to_extrapolate(self):
+        points = response.drift_points(DRIFT_TABLE)
+        self.assertEqual(points, [(100.0, 0.002), (300.0, 0.006)])
+        self.assertAlmostEqual(response.drift_speed(points, 200.0), 0.004, places=15)
+        self.assertEqual(response.drift_speed(points, 100.0), 0.002)
+        with self.assertRaises(response.ResponseError) as raised:
+            response.drift_speed(points, 301.0)
+        self.assertEqual(raised.exception.code, "drift-range")
+
+    def test_the_format_line_is_the_one_the_query_writes(self):
+        writer = (ROOT / "adapters/detector-simulation/assets/garfield/gas_table_query.py").read_text(encoding="utf-8")
+        self.assertIn(f'FORMAT = "{response.DRIFT_TABLE_FORMAT}"', writer)
+        self.assertIn('lines = ["format " + FORMAT', writer)
+        self.assertIn("""f"point {point['index']} {point['field_v_per_cm']} {vx.value!r} {vy.value!r} {vz.value!r} \"""", writer)
+
+    def test_a_table_cut_short_or_of_another_kind_is_refused(self):
+        for content in (DRIFT_TABLE.replace(b"end 2", b"end 3"), DRIFT_TABLE.rsplit(b"end", 1)[0], b"something else\n", b""):
+            with self.subTest(content=content), self.assertRaises(response.ResponseError) as raised:
+                response.drift_points(content)
+            self.assertEqual(raised.exception.code, "drift-table")
 
     def test_outside_stages_are_registered(self):
         self.assertEqual(response.external_program({"name": "adc", "kind": "electronics_external"}), "fe4")

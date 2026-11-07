@@ -16,12 +16,15 @@ Charge sharing is a declared, hashed table: `allpix.pixel-charge` cannot supply 
 """
 from __future__ import annotations
 
+import hashlib
 import math
 
 from core.simulation import rng
 
 SCHEMA = "response-pipeline/1"
 HANDOFF_SCHEMA = "response-handoff/1"
+DRIFT_TABLE_FORMAT = "garfield-gas-table-query-output/1"
+TABLE_STAGES = ("charge_sharing", "drift_table")  # stages whose numbers live in a declared, hashed file
 POISSON_LIMIT = 10.0
 ROUNDING_VARIANCE = 1.0 / 12.0
 PHOTON_BLOCK = 2 ** 15
@@ -41,6 +44,11 @@ def check_pipeline(document: dict) -> None:
     names = [stage["name"] for stage in document["stages"]]
     if len(set(names)) != len(names):
         raise ResponseError("stage-name", "two stages share a name")
+    for stage in document["stages"]:
+        if stage["kind"] in TABLE_STAGES and "table" not in stage:
+            raise ResponseError("table-reference", f"stage {stage['name']} declares no table")
+        if stage["kind"] == "drift_table" and "detsim_run_id" not in stage.get("table", {}):
+            raise ResponseError("table-reference", f"stage {stage['name']}: a drift table is referenced by its detsim run_id")
     for stage in document["stages"]:
         for key, parameter in stage["parameters"].items():
             if not isinstance(parameter, dict) or not parameter.get("source_of_facts"):
@@ -143,6 +151,36 @@ def share_charge(charge: float, offsets: list) -> dict:
     if abs(total - 1.0) > 1e-12:
         raise ResponseError("charge-table", f"fractions sum to {total}")
     return {row["offset"]: charge * row["fraction"] for row in offsets}
+
+
+def verify_table(stage: dict, content: bytes) -> bytes:
+    """The bytes of a stage's table, refused unless they are the ones the pipeline declared."""
+    found = hashlib.sha256(content).hexdigest()
+    if found != stage["table"]["sha256"]:
+        raise ResponseError("table-hash", f"stage {stage['name']}: the table hashes to {found}")
+    return content
+
+
+def drift_points(content: bytes) -> list:
+    """(field in V/cm, drift speed in cm/ns) of a complete Garfield++ gas-table query output, in rising field."""
+    lines = content.decode("ascii").splitlines()
+    if not lines or lines[0].split() != ["format", DRIFT_TABLE_FORMAT]:
+        raise ResponseError("drift-table", f"not a {DRIFT_TABLE_FORMAT} file")
+    points = [(float(words[2]), float(words[6])) for words in map(str.split, lines) if words[0] == "point"]
+    if lines[-1].split() != ["end", str(len(points))] or not points:
+        raise ResponseError("drift-table", "the table is incomplete")
+    return sorted(points)
+
+
+def drift_speed(points: list, field: float) -> float:
+    """Linear between the table's points; outside them the query made no statement, so it is refused rather than extrapolated."""
+    if not points[0][0] <= field <= points[-1][0]:
+        raise ResponseError("drift-range", f"field {field} V/cm is outside the table, {points[0][0]} to {points[-1][0]}")
+    above = next(at for at, point in enumerate(points) if point[0] >= field)
+    if points[above][0] == field:
+        return points[above][1]
+    (low_field, low_speed), (high_field, high_speed) = points[above - 1], points[above]
+    return low_speed + (high_speed - low_speed) * (field - low_field) / (high_field - low_field)
 
 
 def sensor_response(stream: rng.SubStream, photoelectrons: int, gain: float, excess_noise: float, dark_rate_per_ns: float, gate_ns: float) -> float:

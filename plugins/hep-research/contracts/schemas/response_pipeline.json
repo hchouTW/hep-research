@@ -32,6 +32,17 @@
      "name": {"type": "string", "minLength": 1},
      "kind": {"enum": ["scintillation", "ionisation", "efficiency_map", "charge_sharing", "drift_table", "sensor", "electronics", "electronics_external", "readout_external"]},
      "readout": {"type": "string"},
+     "table": {
+      "$comment": "A declared, hashed table: charge_sharing and drift_table need one. A drift table is the output of a Garfield++ gas-table query, referenced by its detsim run_id.",
+      "type": "object",
+      "required": ["path", "sha256"],
+      "additionalProperties": false,
+      "properties": {
+       "path": {"type": "string", "minLength": 1},
+       "sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+       "detsim_run_id": {"type": "string", "pattern": "^[0-9a-f]{32}$"}
+      }
+     },
      "parameters": {"type": "object", "additionalProperties": {"type": "object", "required": ["value", "source_of_facts"], "additionalProperties": false, "properties": {"value": {}, "source_of_facts": {"type": "string", "minLength": 1}}}}
     }
    }

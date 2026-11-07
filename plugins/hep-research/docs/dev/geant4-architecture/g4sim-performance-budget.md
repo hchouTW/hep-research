@@ -10,7 +10,13 @@ Section 16 of the plan. The gates of S2 (gate 7) and S8 (gate 1) are judged agai
 | MT merge time | at most 5 % of the run's wall time | Proposal, not measured, for the same reason |
 | check-spec for 10⁶ touchables | at most 300 s | Expansion and the gap rule, measured on E5 at 10⁵ placements in one mother: 2.8 s and 2.9 s, linear, so about 60 s at 10⁶. check-spec itself arrives in S2 |
 
-S4 adds the throughput of the response pipeline (Section 16).
+S4 adds the throughput of the response pipeline (Section 16):
+
+| Quantity | Limit | Basis |
+| --- | --- | --- |
+| Response pipeline in Python, on one core | at most 25 % of the transport wall time of the same events on one core | Proposal, written before any measurement, on the reasoning of the scorer overhead: the response should not change what a study costs. If Python cannot meet it, `g4sim_digi` is built (Section 10.2) |
+
+Measured by `adapters/geant4/tests/g4proto/s4_gates/response_throughput.py`: the transport time is the event loop of a one-thread `g4sim_run` (`G4SIM_INITIALIZED` to `G4SIM_DONE`), and the response time covers photon numbers, their distribution among channels, sensor and electronics for every bin of those events.
 
 Measurements: E5, Geant4 11.4.3, GCC 11.5.0, 2026-11-05, one run each, on a shared host. They are orders of magnitude, not benchmarks. The two proposals should be reviewed against first measurements in S2; a limit may then be tightened.
 
