@@ -205,29 +205,38 @@ def merge_threads(work: Path) -> dict:
     return counts
 
 
-def merge_moments(work: Path) -> dict:
-    """`moments.csv` from the workers' partial sums, one final rounding per cell, so the result does not depend on the threads. Rows: scorer, volume, bin, events, sum, sum of squares; bin -1 is the direct sum."""
+def merge_moments(work: Path, events: int) -> dict:
+    """`moments.csv` from the workers' partial sums, one final rounding per cell, so the result does not depend on the threads.
+
+    Rows: scorer, volume, bin, events run, events with a deposit, sum, sum of squares; bin -1 is the direct sum. A mean is the sum over the events run, which is why they are recorded.
+    The bins close on the direct sum within n x 2^-52 x sum |x|, as column rows do (Section 9.1).
+    """
     cells: dict = {}
     for path in sorted(work.glob("moments.thread*.csv")):
-        for row in _rows(path):
-            count = int(row[4])
-            cell = cells.setdefault((row[0], int(row[1]), int(row[2])), {"events": 0, "sum": [], "squares": []})
-            cell["events"] += int(row[3])
-            cell["sum"].append([float.fromhex(value) for value in row[5:5 + count]])
-            cell["squares"].append([float.fromhex(value) for value in row[5 + count:]])
+        with path.open(encoding="utf-8", newline="") as handle:
+            for row in csv.reader(handle):
+                count = int(row[6])
+                cell = cells.setdefault((row[0], int(row[1]), int(row[2])), {"with_deposit": 0, "summands": 0, "absolute": 0.0, "sum": [], "squares": []})
+                cell["with_deposit"] += int(row[3])
+                cell["summands"] += int(row[4])
+                cell["absolute"] += float.fromhex(row[5])
+                cell["sum"].append([float.fromhex(value) for value in row[7:7 + count]])
+                cell["squares"].append([float.fromhex(value) for value in row[7 + count:]])
         path.unlink()
-    rows = [[*key, cell["events"], repr(rng.merge_partial_sums(cell["sum"])), repr(rng.merge_partial_sums(cell["squares"]))] for key, cell in sorted(cells.items())]
+    rows = [[*key, events, cell["with_deposit"], repr(rng.merge_partial_sums(cell["sum"])), repr(rng.merge_partial_sums(cell["squares"]))] for key, cell in sorted(cells.items())]
     if rows:
         with (work / "moments.csv").open("w", encoding="utf-8", newline="") as handle:
             csv.writer(handle, lineterminator="\n").writerows(rows)
     binned: dict = {}
-    direct: dict = {}
+    for row in rows:
+        if row[1] != -1:
+            binned.setdefault(row[0], []).append(float(row[5]))
+    failing = []
     for row in rows:
         if row[1] == -1:
-            direct[row[0]] = float(row[4])
-        else:
-            binned.setdefault(row[0], []).append(float(row[4]))
-    failing = sorted(name for name, value in direct.items() if abs(math.fsum(binned.get(name, [])) - value) > 1e-9 * abs(value))
+            cell = cells[(row[0], -1, -1)]
+            if abs(math.fsum(binned.get(row[0], [])) - float(row[5])) > cell["summands"] * 2.0 ** -52 * cell["absolute"]:
+                failing.append(row[0])
     return {"rows": len(rows), "failing": failing}
 
 
@@ -323,12 +332,12 @@ def simulate(card: dict, request: dict, checked: dict, program: Path, work: Path
         (work / "run.json").write_text(json.dumps(plain), encoding="utf-8")
         code = run_program(program, work, environment)
         if code != 0:
-            return {"status": "failed", "exit_status": code, "stage": "preflight without PAI"}
+            return {"status": "failed", "exit_status": code, "stage": "preflight without PAI", "reason": failure_reason(work / "log.txt")}
         plain_models = json.loads((work / "effective-em.json").read_text(encoding="utf-8"))["models"]
     (work / "run.json").write_text(json.dumps(preflight), encoding="utf-8")
     code = run_program(program, work, environment)
     if code != 0:
-        return {"status": "failed", "exit_status": code, "stage": "preflight"}
+        return {"status": "failed", "exit_status": code, "stage": "preflight", "reason": failure_reason(work / "log.txt")}
     effective = json.loads((work / "effective-em.json").read_text(encoding="utf-8"))
     problems = effective_problems(effective, card, ir, resolved)
     regions = {node["region"] for node in ir["physical"]["templates"].values()}
@@ -342,7 +351,7 @@ def simulate(card: dict, request: dict, checked: dict, program: Path, work: Path
     if code != 0:
         return {"status": "failed", "exit_status": code, "stage": "run", "reason": failure_reason(work / "log.txt")}
     counts = merge_threads(work)
-    moments = merge_moments(work)
+    moments = merge_moments(work, card["run"]["events"])
     request_identity = identity.request_id(identified_request(request, ir), checked["geometry_id"])
     cells = _rows(work / "cells.csv")
     closure = closure_problems([row for row in cells if row[1] in {item["name"] for item in resolved["scorers"] if item["quantity"] in physics_check.ADDITIVE}])

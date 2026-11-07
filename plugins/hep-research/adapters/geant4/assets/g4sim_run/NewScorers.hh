@@ -29,6 +29,7 @@
 #include "G4TouchableHistory.hh"
 #include "G4Track.hh"
 #include "G4VSensitiveDetector.hh"
+#include "G4LogicalVolumeStore.hh"
 #include "G4VSolid.hh"
 #include "MiniJson.hh"
 #include "NewBuild.hh"
@@ -118,10 +119,16 @@ inline VolumeKey VolumeId(const G4VTouchable* touchable, const std::vector<long 
 
 inline int Clamp(int value, int count) { return value < 0 ? 0 : value >= count ? count - 1 : value; }
 
-constexpr long long kMaximumBins = 65536;
+constexpr double kMaximumBins = 65536.;
 
+inline bool EqualSplitControl() {  // a negative test of hits_closure.py: hits and scorers share this, so closure cannot see it
+  const char* control = std::getenv("G4SIM_HIT_CONTROL");
+  return control && std::string(control) == "equal_split";
+}
+
+// The part of a step in one bin, and a point of the step that lies in it: the middle of its longest piece, since the mean of two pieces of a re-entered bin can lie outside it.
 struct StepShare {
-  double fraction = 0., along = 0.;
+  double fraction = 0., along = 0., longest = 0.;
 };
 
 // A step's local geometry against one segmentation.
@@ -131,12 +138,14 @@ class Grid {
     G4ThreeVector low, high;
     solid->BoundingLimits(low, high);
     fLow = low;
+    double bins = 1.;
     for (int i = 0; i < 3; ++i) {
-      const double width = Width(i);
-      fCount[i] = width > 0. ? std::max(1, static_cast<int>(std::ceil((high[i] - low[i]) / width - 1e-9))) : 1;
+      const double width = Width(i), count = width > 0. ? std::max(1., std::ceil((high[i] - low[i]) / width - 1e-9)) : 1.;
+      bins *= count;
+      fCount[i] = count <= kMaximumBins ? static_cast<int>(count) : 1;  // the limit below stops a larger one, and an int would not hold it
     }
     fHighRadius = std::max(std::abs(low.x()), std::abs(high.x()));
-    const long long bins = fSegmentation.kind == "polar" ? static_cast<long long>(std::max(1., std::ceil(fHighRadius / fSegmentation.width[0]))) * fSegmentation.phiBins : static_cast<long long>(fCount[0]) * fCount[1] * fCount[2];
+    if (fSegmentation.kind == "polar") bins = std::max(1., std::ceil(fHighRadius / fSegmentation.width[0])) * fSegmentation.phiBins;
     if (bins > kMaximumBins) G4Exception("Grid", "g4sim-segmentation", FatalException, ("a segmentation of " + std::to_string(bins) + " bins: a volume has at most 2^16, the sub-index of its stream (Section 10.2)").c_str());
   }
   double Width(int axis) const {
@@ -185,10 +194,14 @@ class Grid {
     std::map<int, StepShare> out;
     for (std::size_t i = 0; i + 1 < cuts.size(); ++i) {
       const double middle = 0.5 * (cuts[i] + cuts[i + 1]), width = cuts[i + 1] - cuts[i];
+      if (width <= 0.) continue;  // two planes crossed at one point
       StepShare& share = out[Bin(a + middle * (b - a))];
-      share.along = (share.along * share.fraction + middle * width) / (share.fraction + width);
       share.fraction += width;
+      if (width > share.longest) share.longest = width, share.along = middle;
     }
+    static const bool equalSplit = EqualSplitControl();
+    if (equalSplit)
+      for (auto& [bin, share] : out) share.fraction = 1. / static_cast<double>(out.size());
     return out;
   }
 
@@ -202,7 +215,8 @@ class Grid {
 // Section 9.1, level `moments`: no row per event, only the sum and the sum of squares of each cell. They are kept as partial sums, so that merging the threads gives the same result however the events fell.
 struct MomentCell {
   std::vector<double> sum, squares;
-  long events = 0;
+  long events = 0, summands = 0;  // events with a deposit here; the steps behind the sum, for the closure bound of Section 9.1
+  double absolute = 0.;
 };
 
 struct ScoreCell {
@@ -347,7 +361,7 @@ class ScorerSums {
   void WriteMoments(std::FILE* file) const {
     for (const auto& [key, cell] : fMoments) {
       const auto& [scorer, volume, bin] = key;
-      std::fprintf(file, "%s,%lld,%d,%ld,%zu", (*fScorers)[scorer].name.c_str(), volume, bin, cell.events, cell.sum.size());
+      std::fprintf(file, "%s,%lld,%d,%ld,%ld,%a,%zu", (*fScorers)[scorer].name.c_str(), volume, bin, cell.events, cell.summands, cell.absolute, cell.sum.size());
       for (double value : cell.sum) std::fprintf(file, ",%a", value);
       for (double value : cell.squares) std::fprintf(file, ",%a", value);
       std::fprintf(file, "\n");
@@ -366,13 +380,13 @@ class ScorerSums {
       summands[scorer] += cell.summands;
       if (fControl == "drop_bin" && bin == 0) continue;
       if ((*fScorers)[scorer].moments) {
-        AddMoment({scorer, volume, bin}, cell.value);
+        AddMoment({scorer, volume, bin}, cell.value, cell.summands, cell.absolute);
         continue;
       }
       std::fprintf(fCells, "%lld,%s,%lld,%d,%.17g,%ld,%.17g\n", event, (*fScorers)[scorer].name.c_str(), volume, bin, cell.value, cell.summands, cell.absolute);
     }
     for (const auto& [scorer, value] : fDirect) {
-      if ((*fScorers)[scorer].moments) AddMoment({scorer, -1, -1}, value);
+      if ((*fScorers)[scorer].moments) AddMoment({scorer, -1, -1}, value, summands[scorer], absolute[scorer]);
     }
     for (const auto& [scorer, value] : fDirect) {
       if ((*fScorers)[scorer].moments) continue;
@@ -421,8 +435,10 @@ class ScorerSums {
     return std::string(normal[axis] < 0 ? "-" : "+") + "xyz"[axis];
   }
 
-  void AddMoment(const std::tuple<std::size_t, VolumeKey, int>& key, double value) {
+  void AddMoment(const std::tuple<std::size_t, VolumeKey, int>& key, double value, long summands, double absolute) {
     MomentCell& cell = fMoments[key];
+    cell.summands += summands;
+    cell.absolute += absolute;
     AddToPartials(cell.sum, value);
     AddToPartials(cell.squares, value * value);
     ++cell.events;
@@ -472,7 +488,10 @@ class ScorerSums {
       Add(i, volume, grid.Bin(0.5 * (a + b)) * stride + part, value, 1., 0.5);
       return;
     }
-    for (const auto& [bin, share] : grid.Apportion(a, b)) Add(i, volume, bin * stride + part, value * share.fraction, share.fraction, share.along);
+    const std::map<int, StepShare> shares = grid.Apportion(a, b);
+    std::vector<std::pair<int, StepShare>> inOrder(shares.begin(), shares.end());  // a hit's rows follow the path, whichever way the bins are numbered
+    std::sort(inOrder.begin(), inOrder.end(), [](const auto& left, const auto& right) { return left.second.along < right.second.along; });
+    for (const auto& [bin, share] : inOrder) Add(i, volume, bin * stride + part, value * share.fraction, share.fraction, share.along);
   }
 
   // Section 8.7: an apportioned step's sagitta against 10% of the bin width.
@@ -509,6 +528,15 @@ class ScorerSums {
   std::vector<EnvelopeRow> fEnvelopes;
   std::vector<long> fLong, fApportioned;
 };
+
+// Before any event, so that a segmentation over the limit stops the run even if nothing reaches it.
+inline void CheckSegmentations(const std::vector<ScorerSpec>& scorers) {
+  for (const ScorerSpec& scorer : scorers) {
+    if (scorer.segmentation.kind == "none") continue;
+    for (const std::string& name : scorer.templates)
+      if (const G4LogicalVolume* logical = G4LogicalVolumeStore::GetInstance()->GetVolume(name, false)) Grid(scorer.segmentation, logical->GetSolid());
+  }
+}
 
 class Dispatcher : public G4VSensitiveDetector {
  public:

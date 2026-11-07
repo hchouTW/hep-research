@@ -4,8 +4,7 @@
 // ancestor, and a kept particle whose parent was dropped points there with ancestor_pruned set. Keeping is decided per track as it ends, and resolved at the end of the event.
 // A hit's cell is its volume ID and the scorer's segmentation bin, kept exactly (HitColumns.hh). A step apportioned among bins makes one row per bin, each with its share of the deposit and the path, at the
 // mean point of the step in that bin.
-// G4SIM_HIT_CONTROL is for tests only, each a negative test of hits_closure.py: ancestor_is_primary, one_crossing_per_event, pieces_repeat_the_step, crossing_at_pre_step, status_swapped, threshold_ignored,
-// momentum_zero, time_zero. high_cells sets the top bit of every cell, so that a run can carry an ID no double holds through the file and simroot.
+// G4SIM_HIT_CONTROL is for tests only, one fault each, and hits_closure.py must see it: see CONTROLS there. high_cells sets the top bit of every cell, so that a run can carry an ID no double holds through the file and simroot.
 #ifndef G4SIM_NEWHITS_HH
 #define G4SIM_NEWHITS_HH
 
@@ -95,10 +94,10 @@ class HitRecorder {
     row.pdg = track->GetDefinition()->GetPDGEncoding();
     row.vertex = track->GetVertexPosition();
     row.momentum = fControl == "momentum_zero" ? G4ThreeVector() : track->GetMomentum();
-    row.kinetic = track->GetKineticEnergy();
+    row.kinetic = track->GetKineticEnergy() * (fControl == "secondary_energy_doubled" && track->GetParentID() != 0 ? 2. : 1.);
     const G4VProcess* creator = track->GetCreatorProcess();
-    const bool decay = creator && creator->GetProcessType() == fDecay;
-    row.kept = fRules.all || (track->GetParentID() == 0 && fRules.primary) || (decay && fRules.decayProducts);
+    row.decay = creator && creator->GetProcessType() == fDecay;
+    row.kept = fRules.all || (track->GetParentID() == 0 && fRules.primary) || (row.decay && fRules.decayProducts && fControl != "decay_rule_off");
   }
 
   void EndTrack(const G4Track* track) {
@@ -121,15 +120,15 @@ class HitRecorder {
       const double z = fPlanes[i].z * mm;
       if (!StepCrosses(pre->GetPosition().z() - z, post->GetPosition().z() - z)) continue;
       if (!fCrossed.insert({fControl == "one_crossing_per_event" ? 0 : track->GetTrackID(), i}).second) continue;
-      const G4VProcess* ended = post->GetProcessDefinedStep();
-      const bool smooth = ended && ended->GetProcessType() == fTransportation;
+      const bool smooth = EndedSmoothly(step);
       const auto vector = [](const G4ThreeVector& v) { return Vector3{v.x(), v.y(), v.z()}; };
       const PlaneCrossing crossing = CrossingOf(vector(pre->GetPosition()), vector(pre->GetMomentumDirection()), vector(post->GetPosition()), vector(post->GetMomentumDirection()), step->GetStepLength(), z, smooth);
       G4ThreeVector point(crossing.position[0], crossing.position[1], crossing.position[2]);
       if (fControl == "crossing_at_pre_step") point = pre->GetPosition();
-      // What the step deposited is lost along it; a discrete loss belongs to its end, so it is not spread over the crossing.
-      const double energy = std::max(pre->GetKineticEnergy() - crossing.fraction * step->GetTotalEnergyDeposit(), post->GetKineticEnergy());
-      fCrossings.push_back({static_cast<int>(i), track->GetTrackID(), point, G4ThreeVector(crossing.direction[0], crossing.direction[1], crossing.direction[2]), energy, pre->GetGlobalTime() + crossing.fraction * (post->GetGlobalTime() - pre->GetGlobalTime())});
+      if (fControl == "crossing_offset") point += G4ThreeVector(0., 0.5 * mm, 0.);
+      const double energy = fControl == "crossing_energy_zero" ? 0. : KineticAt(step, crossing.fraction);
+      const double time = fControl == "crossing_time_zero" ? 0. : pre->GetGlobalTime() + crossing.fraction * (post->GetGlobalTime() - pre->GetGlobalTime());
+      fCrossings.push_back({static_cast<int>(i), track->GetTrackID(), point, G4ThreeVector(crossing.direction[0], crossing.direction[1], crossing.direction[2]), energy, time});
       fTracks[track->GetTrackID()].kept = true;
     }
   }
@@ -139,8 +138,12 @@ class HitRecorder {
     if (fControl == "pieces_repeat_the_step") share = 1., along = 0.;
     const G4StepPoint* pre = step->GetPreStepPoint();
     const G4StepPoint* post = step->GetPostStepPoint();
-    const double time = fControl == "time_zero" ? 0. : pre->GetGlobalTime() + along * (post->GetGlobalTime() - pre->GetGlobalTime());
-    fTracker.push_back({fStep++, step->GetTrack()->GetTrackID(), Marked(cell), segment, Along(step, along), pre->GetMomentum() + along * (post->GetMomentum() - pre->GetMomentum()), pre->GetKineticEnergy() + along * (post->GetKineticEnergy() - pre->GetKineticEnergy()), deposit, time, share * step->GetStepLength()});
+    const double time = fControl == "time_zero" ? 0. : pre->GetGlobalTime() + (fControl == "time_not_interpolated" ? 0. : along) * (post->GetGlobalTime() - pre->GetGlobalTime());
+    double kinetic = KineticAt(step, along);
+    if (fControl == "kinematics_across_the_kink") kinetic = pre->GetKineticEnergy() + along * (post->GetKineticEnergy() - pre->GetKineticEnergy());
+    G4ThreeVector momentum = DirectionAt(step, along) * std::sqrt(kinetic * (kinetic + 2. * step->GetTrack()->GetDynamicParticle()->GetMass()));
+    if (fControl == "tracker_kinematics_zero") momentum = G4ThreeVector(), kinetic = 0.;
+    fTracker.push_back({fStep++, step->GetTrack()->GetTrackID(), step->GetTrack()->GetCurrentStepNumber(), Marked(cell), segment, Along(step, along), momentum, kinetic, deposit, time, share * step->GetStepLength()});
   }
 
   void Calorimeter(const G4Step* step, std::uint64_t cell, int segment, double deposit, double along) {
@@ -148,7 +151,7 @@ class HitRecorder {
     const G4StepPoint* post = step->GetPostStepPoint();
     cell = Marked(cell);
     const G4ThreeVector position = Along(step, along);
-    const double time = pre->GetGlobalTime() + along * (post->GetGlobalTime() - pre->GetGlobalTime());
+    const double time = pre->GetGlobalTime() + (fControl == "contribution_time_not_interpolated" ? 0. : along) * (post->GetGlobalTime() - pre->GetGlobalTime());
     CaloRow& row = fCalorimeter[{cell, segment}];
     if (row.edep == 0.) row.position = position;
     row.edep += deposit;
@@ -172,6 +175,7 @@ class HitRecorder {
       manager->FillNtupleIColumn(0, at++, row.pdg);
       manager->FillNtupleIColumn(0, at++, parent != row.parent ? 1 : 0);
       manager->FillNtupleIColumn(0, at++, row.status);
+      manager->FillNtupleIColumn(0, at++, row.decay ? 1 : 0);
       for (const G4ThreeVector& v : {row.vertex / mm, row.momentum / MeV})
         for (int i = 0; i < 3; ++i) manager->FillNtupleDColumn(0, at++, v[i]);
       manager->FillNtupleDColumn(0, at++, row.kinetic / MeV);
@@ -184,6 +188,7 @@ class HitRecorder {
       manager->FillNtupleIColumn(1, at++, row.step);
       manager->FillNtupleIColumn(1, at++, Owner(row.track));
       manager->FillNtupleIColumn(1, at++, row.track);
+      manager->FillNtupleIColumn(1, at++, row.stepNumber);
       manager->FillNtupleIColumn(1, at++, CellHigh(row.cell));
       manager->FillNtupleIColumn(1, at++, CellLow(row.cell));
       manager->FillNtupleIColumn(1, at++, row.segment);
@@ -245,12 +250,12 @@ class HitRecorder {
   using ContributionKey = std::tuple<std::uint64_t, int, int, double>;  // cell, segment, track, time bin
   struct TrackRow {
     int parent = 0, pdg = 0, status = kNotEnded;
-    bool kept = false;
+    bool kept = false, decay = false;
     double kinetic = 0.;
     G4ThreeVector vertex, momentum, end;
   };
   struct TrackerRow {
-    int step, track;
+    int step, track, stepNumber;
     std::uint64_t cell;
     int segment;
     G4ThreeVector position, momentum;
@@ -269,6 +274,18 @@ class HitRecorder {
     G4ThreeVector position, direction;
     double energy, time;
   };
+
+  // A step's post-step energy and direction hold what a discrete process did at its end, so neither is spread along the step: what the step deposited is lost along it, and the direction turns
+  // only when Transportation ended the step, which is then the curve of a field.
+  static double KineticAt(const G4Step* step, double along) { return std::max(step->GetPreStepPoint()->GetKineticEnergy() - along * step->GetTotalEnergyDeposit(), step->GetPostStepPoint()->GetKineticEnergy()); }
+  static bool EndedSmoothly(const G4Step* step) {
+    const G4VProcess* ended = step->GetPostStepPoint()->GetProcessDefinedStep();
+    return ended && ended->GetProcessType() == fTransportation;
+  }
+  static G4ThreeVector DirectionAt(const G4Step* step, double along) {
+    const G4ThreeVector& first = step->GetPreStepPoint()->GetMomentumDirection();
+    return EndedSmoothly(step) ? (first + along * (step->GetPostStepPoint()->GetMomentumDirection() - first)).unit() : first;
+  }
 
   static G4ThreeVector Along(const G4Step* step, double along) { return step->GetPreStepPoint()->GetPosition() + along * (step->GetPostStepPoint()->GetPosition() - step->GetPreStepPoint()->GetPosition()); }
 

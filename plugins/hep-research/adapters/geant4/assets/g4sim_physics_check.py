@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import re
 import sys
 from decimal import Decimal
 
@@ -125,6 +126,8 @@ def scorer_findings(scorers: list, materials: dict | None = None, selected_mater
     names: set = set()
     for at, scorer in enumerate(scorers):
         where, quantity = f"scorers/{at}", scorer.get("quantity")
+        if not re.fullmatch(r"[A-Za-z0-9_.-]+", str(scorer.get("name"))) or scorer.get("name") == "event":
+            findings.append(_finding("scorer-name", where, f"name {scorer.get('name')!r}: a name is a word, and `event` heads a file's columns"))
         if scorer.get("name") in names:
             findings.append(_finding("scorer-name", where, f"{scorer.get('name')} appears twice"))
         names.add(scorer.get("name"))

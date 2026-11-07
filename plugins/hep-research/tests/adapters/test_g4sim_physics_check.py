@@ -146,6 +146,12 @@ class Scorers(unittest.TestCase):
             self.assertEqual([item["code"] for item in check.truth_findings({"truth": {"time_bin_ns": width}})], ["truth-rule"])
         self.assertEqual([item["code"] for item in check.truth_findings({"truth": {"keep": [{"energy_above_MeV": -1}]}})], ["truth-rule"])
 
+    def test_a_scorer_name_is_a_word(self):
+        for name in ("event", "#first", "a,b", "two words"):
+            with self.subTest(name=name):
+                self.assertIn("scorer-name", [item["code"] for item in check.scorer_findings([{"name": name, "quantity": "edep"}])])
+        self.assertNotIn("scorer-name", [item["code"] for item in check.scorer_findings([{"name": "calo.front-1", "quantity": "edep"}])])
+
     def test_a_step_is_written_to_one_hit_scorer(self):
         scorers = [{"name": "a", "hit_kind": "calorimeter", "readout": "none", "templates": ["block"]}, {"name": "b", "hit_kind": "tracker", "readout": "none", "templates": ["block", "plane"]}]
         self.assertEqual([item["code"] for item in check.hit_findings(scorers, set(), {})], ["hit-overlap"])

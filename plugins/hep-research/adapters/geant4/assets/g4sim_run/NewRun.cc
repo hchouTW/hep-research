@@ -374,6 +374,7 @@ int NewRun(const Value& ir, const Value& card, const Value& request) {
   manager->SetUserInitialization(new Actions(shared));
   std::printf("G4SIM_START %.3f\n", g4sim::Now());
   manager->Initialize();
+  g4sim::CheckSegmentations(shared.scorers);
   std::printf("G4SIM_INITIALIZED %.3f\n", g4sim::Now());
   std::fflush(stdout);
   // G4EmSaturation sets its particles and per-material terms here, not at SetBirksActive, which ran before the materials existed; built-in constants appear now too (GB13)
