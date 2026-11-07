@@ -20,9 +20,12 @@ EVENT_CATEGORIES = ("none", "seed-or-finding", "search-truncated")
 CONFIGURATION_KEYS = ("seed_plane_triples", "seed_lowest_momentum_gev", "seed_largest_slope_u", "seed_largest_slope_v", "seed_window_sigma", "seed_prior_inflation", "finding_chi2_cut",
                       "finding_least_measurements", "finding_most_holes", "finding_most_branches_per_surface", "finding_most_branches_per_seed", "finding_most_seeds_per_event",
                       "finding_most_propagator_steps", "ambiguity_most_shared_hits", "ambiguity_most_iterations", "finding_fit_passes", "seed_derivative_step_sigma", "refit_start_x_mm",
-                      "refit_prior_loc_sigma_mm", "refit_prior_angle_sigma", "refit_prior_qop_sigma_per_gev", "refit_prior_time_sigma", "diagnostic_build")
+                      "refit_prior_loc_sigma_mm", "refit_prior_angle_sigma", "refit_prior_qop_sigma_per_gev", "refit_prior_time_sigma", "diagnostic_build",
+                      "seed_slope_along_v", "seed_covariance_phi_term")
 # What jobs 7493849 to 7494405 wrote, in their order: their configuration hash covers these lines, so a later record can be compared with them key by key.
 EARLIER_CONFIGURATION_KEYS = CONFIGURATION_KEYS[:15]
+# What job 7496491 wrote: the two keys after these name the seed's code, the slope along v and the covariance's phi term, so that the hash tells recipes apart (D1 stage 5e review, m5).
+STAGE_5D_CONFIGURATION_KEYS = CONFIGURATION_KEYS[:23]
 SEED_FILE_FORMAT = "acts-tracking-finding-seeds/1"
 SEED_OUTCOMES = ("skipped", "no-start", "filter-error", "step-limit", "no-candidate", "candidates")
 

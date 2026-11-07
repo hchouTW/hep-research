@@ -5,8 +5,12 @@
 // search sees the fault: 0.5 mm by arithmetic at 1.5 GeV for 6-7-8.
 //
 // It also reads the shipped covariance (stage 5 review, m6): the sigma at each plane by two roads, each eigenvector of the start's covariance carried by the propagator,
-// and each hit coordinate moved by one sigma and the start rebuilt. They must agree within seed_sigma_agreement, fixed before the first run. Beside them, printed and not
-// judged: Lagrange's sigma along u, and along v the chord through the first and last hit (job 7494285's prior) and the line through the first hit with the last two's slope.
+// and each hit coordinate moved by one sigma and the start rebuilt. They must agree within seed_sigma_agreement, fixed before the first run. Beside them: Lagrange's sigma
+// along u, printed, and along v the chord through the first and last hit and the line through the first hit with the last two's slope (ACTS's own, job 7496491).
+// Since stage 5e the recipe's start takes the chord slope, so along v the covariance road must lie nearer the chord's sigma than the last two's on every plane where
+// they differ (D1 stage 5e brief: a slope back to the last two fails). It adds no limit; the midpoint between the two decides. What supports it is the margin on each
+// plane, not the spread of either: in the closed-form replica of D1 stage 5e the chord-slope road lies at least 0.907 of the way from that midpoint to the chord's sigma
+// on all 252 such planes of these tracks (at 1-2-3, plane 8), and the last-two road lies on the last two's side of it on all 252.
 #include <Acts/Definitions/Algebra.hpp>
 #include <Acts/Definitions/TrackParametrization.hpp>
 #include <Acts/Utilities/UnitVectors.hpp>
@@ -164,11 +168,14 @@ int main() {
         const double hits_u = std::sqrt(of_hits.along_u[plane]);
         const double hits_v = std::sqrt(of_hits.along_v[plane]);
         const bool agreed = std::abs(sigma_u - hits_u) <= seed_sigma_agreement * hits_u && std::abs(sigma_v - hits_v) <= seed_sigma_agreement * hits_v;
-        failed += agreed ? 0 : 1;
         const double plane_x = double(plane) * t07::plane_spacing_mm;
-        std::cout << (agreed ? "WINDOW" : "FAIL window") << " seed " << planes.first << "-" << planes.middle << "-" << planes.last << " p " << track.momentum_gev << " q " << track.charge << " slopes " << track.slope_u
+        const double chord_v = inflated_mm * chord_norm(seed_x, plane_x);
+        const double last_two_v = inflated_mm * last_two_norm(seed_x, plane_x);
+        const bool reads_chord = std::abs(sigma_v - chord_v) <= std::abs(sigma_v - last_two_v);
+        failed += agreed && reads_chord ? 0 : 1;
+        std::cout << (agreed && reads_chord ? "WINDOW" : "FAIL window") << " seed " << planes.first << "-" << planes.middle << "-" << planes.last << " p " << track.momentum_gev << " q " << track.charge << " slopes " << track.slope_u
                   << " " << track.slope_v << " plane " << plane + 1 << ": covariance u " << sigma_u << " v " << sigma_v << ", hits u " << hits_u << " v " << hits_v << ", Lagrange u "
-                  << inflated_mm * lagrange_norm(seed_x, plane_x) << ", chord v " << inflated_mm * chord_norm(seed_x, plane_x) << ", last-two v " << inflated_mm * last_two_norm(seed_x, plane_x) << "\n";
+                  << inflated_mm * lagrange_norm(seed_x, plane_x) << ", chord v " << chord_v << ", last-two v " << last_two_v << ", v reads " << (reads_chord ? "chord" : "last-two") << "\n";
       }
       t07::HitSet seed_hits;
       seed_hits.track_key = "control";

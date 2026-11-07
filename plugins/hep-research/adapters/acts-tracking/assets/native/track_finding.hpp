@@ -44,9 +44,10 @@ inline constexpr double seed_largest_slope_v = 0.16;
 // hits is lost to this cut at any size this fixture reaches.
 inline constexpr double seed_window_sigma = 5.0;
 // A seed starts on ACTS's helix for its three hits, with the covariance of that start from the hits' own errors (seed_start_of). Both are needed.
-// That helix passes through all three hits along u. Along v it passes through the first hit, with the slope of the last two alone, as libActsCore's
-// estimateTrackParamsFromSeed computes it (read from its disassembly, D1 stage 5d report), so noise moves it off the other two, and job 7494285's chord
-// through the first and last hit was narrower.
+// Along u that helix passes through all three hits. Along v it passes through the first hit with the slope from the first to the last hit, over their
+// straight transverse distance (the chord): libActsCore's estimateTrackParamsFromSeed takes the slope of the last two hits alone (D1 stage 5d report), which
+// job 7496491 showed costs o3 noise tracks, 781 lost against 584 with the chord (user's choice, decisions.md "Recipe choice after stage 5d"). The chord
+// against the arc: at 1.5 GeV a slope low by at most 4e-5 of itself, under 1e-3 mm at the seed's own hits and at plane 1 (D1 stage 5e report).
 // ACTS makes a hole only when no hit passes, so on a plane where a track lost its hit a foreign hit inside the window is taken with no hole beside
 // it and drags the track off: a diagonal prior's window of 30 to 300 mm^2 at plane 1 cost job 7493849 1 to 2 % of noise-fixture tracks (D1 stage 5
 // report, Fix round 1). And a correlated prior holds only about a centre on the track: job 7494285's, a parabola, missed a 6-7-8 seed's own hits by
@@ -61,8 +62,8 @@ inline constexpr double finding_chi2_cut = 16.0;
 // Section 7: reconstructable means at least 6 hits on distinct planes, of 8. So a branch with 3 holes cannot reach 6 and stops.
 inline constexpr std::size_t finding_least_measurements = 6;
 inline constexpr unsigned int finding_most_holes = 2;
-// Budgets (K10). The widest window, 6-7-8 at plane 1, is about 14 mm^2 (seed_start_probe prints it; 9 was job 7494285's prior, with the chord), so
-// about 0.7 hits at o3 where tracks fan out at 0.04 per mm^2 over 0.0115 of noise: 16 per surface leaves an honest event far from the limit, and 32
+// Budgets (K10). The widest window, 6-7-8 at plane 1, is about 9 mm^2 with the chord slope (seed_start_probe prints it; 14 with the last two's slope,
+// job 7496491), so under 0.7 hits at o3 where tracks fan out at 0.04 per mm^2 over 0.0115 of noise: 16 per surface leaves an honest event far from the limit, and 32
 // per seed likewise, so a mark means something. A seed reaching either limit is marked search-truncated. Correction: with the diagonal prior this
 // comment gave a tail of 1e-7 from noise alone, leaving out the fan; job 7493849 reached the limits in 43 % of o3 noise events.
 inline constexpr std::size_t finding_most_branches_per_surface = 16;
@@ -73,13 +74,17 @@ inline constexpr std::size_t finding_most_seeds_per_event = 10000;
 inline constexpr unsigned int finding_most_propagator_steps = 10000;
 // A selected hit set is fitted, then fitted again from its own q/p: the filter's q/p can sit outside the domain kalman_refit.hpp states. Iterations (K10).
 inline constexpr int finding_fit_passes = 2;
-// ACTS's default, and it does not mean what its name says. resolve() leaves its loop only when the largest shared count among the tracks left is below
-// this value (libActsCore, the jb at 0x852033; the doc comment "Maximum amount of shared hits per track" says otherwise). So 1 means selected tracks share
-// no hit. Each eviction goes to the track with the largest share of shared hits, then the fewest hits, then the largest chi2. The consequence for
-// duplicates: two tracks of one particle hold at least 4 of its hits each (section 7, more than 50 % of at least 6), so sharing none they hold all 8,
-// with at least 2 noise hits each. The price: a track that took one foreign hit, on a plane where it has none of its own, loses that hit's owner or itself.
-// Correction: this comment said "at most one hit" until job 7494405's review. The value stays until the results say otherwise (D1 stage 5d report).
-inline constexpr std::uint32_t ambiguity_most_shared_hits = 1;
+// The name does not say what the value means. resolve() leaves its loop only when the largest shared count among the tracks left is below this value
+// (libActsCore, the jb at 0x852033; the doc comment "Maximum amount of shared hits per track" says otherwise). So 2 means each selected track holds at most
+// one hit that another selected track also holds, and two delivered tracks may share a hit. Each eviction goes to the track with the largest share of shared
+// hits, then the fewest hits, then the largest chi2. A development value for Freeze B (user, decisions.md "Recipe choice after stage 5d"), by the rule fixed in
+// the D1 stage 5d report before its job: it recovers o3 noise losses on the paired table, 163 of 174 ambiguity losses in job 7496491 and none lost in exchange,
+// with fakes and duplicates on both fixtures inside RARE_RATE_LIMIT. Section 7's reason: a track that took one foreign hit, on a plane where it has none of its
+// own, still matches its particle, so it should not cost that hit's owner or itself. Not from a pull or a T08 target. The consequence for duplicates: two tracks
+// of one particle hold at least 4 of its hits each (section 7, more than 50 % of at least 6) and share at most one: at least 12 hits on the pair, at most 9 of
+// them the particle's (8 planes, one counted twice), so at least 3 hits not its own.
+// Correction: until stage 5e the value was ACTS's default 1, which means no shared hit, and this comment first said "at most one hit" of that value.
+inline constexpr std::uint32_t ambiguity_most_shared_hits = 2;
 // ACTS's default: each iteration evicts one candidate, and an o3 event holds far fewer. Reaching it with a conflict left marks the event and all its
 // candidates search-truncated.
 inline constexpr std::uint32_t ambiguity_most_iterations = 1000;

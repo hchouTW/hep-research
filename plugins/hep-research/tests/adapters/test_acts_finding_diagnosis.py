@@ -1,10 +1,17 @@
-"""adapters/acts-tracking: what jobs 7494285 and 7494405 could not show (D1 stage 5 review m1, m3, m4, m7, m10; D1 stage 5d report). A diagnosis on block 1, tuning, not a gate reading.
+"""adapters/acts-tracking: the user's two recipe changes after job 7496491, read event by event against what they replace (D1 stage 5e brief; decisions.md, "Recipe choice
+after stage 5d"). A development reading of block 1, tuning, not a gate reading (K09).
 
-Every finder reads the same data files: the current one, the kept binaries of earlier jobs (HEP_ACTS_TRACKING_EARLIER_FINDERS, name=path pairs joined by commas) and the two diagnostic builds of
-CMakeLists.txt. So a track lost by one and kept by another is a paired fact, not a fluctuation. It prints each fake of the detailed stratum with its fit, owners and hits, each lost particle, the
-evicted candidates of those events, lost tracks by class for each pair of finders, what became of true seeds, and how many tracks had a foreign hit inside each window on plane 1. Lines start
-DIAGNOSIS-. Records, seed files and truth stay under HEP_ACTS_TRACKING_EVIDENCE/diagnosis, and the detailed stratum's data file too: the noise data files are 600 MB each, and the frozen generators
-remake them. Truth is read here, after the finders have finished. Tests fail only on a binary that does not read its own job's numbers, or on a behaviour or a configuration that moved.
+Five finders read the same data files. The recipe: the slope along v from the first and last hit, the phi term in the seed covariance, ambiguity_most_shared_hits 2. The temporary
+build acts_finder_no_phi_term of CMakeLists.txt, the recipe without the phi term, which measures that term's own effect. And the three kept binaries of job 7496491
+(HEP_ACTS_TRACKING_KEPT_FINDERS, name=path pairs joined by commas, hash-checked by the build job): its recipe (the last two's slope, 1 shared hit), its chord-slope build and its
+two-shared-hits build. So a track lost by one and kept by another is a paired fact, not a fluctuation. Pairs: job 7496491's recipe against the recipe, the whole change; the chord-slope
+build against no-phi, shared hits 2 given the chord; the two-shared-hits build against no-phi, the chord given shared hits 2; no-phi against the recipe, the phi term alone.
+
+It prints each fake and each lost particle of the detailed stratum under the recipe with its fit, owners and hits, the evicted candidates of those events, lost tracks by class for each
+finder and pair, hits on two selected tracks, what became of true seeds, and how many tracks had a foreign hit inside each window on plane 1. Lines start DIAGNOSIS-. Records, seed files
+and truth stay under HEP_ACTS_TRACKING_EVIDENCE/diagnosis, and the detailed stratum's data file too: the noise data files are 600 MB each, and the frozen generators remake them. Truth is
+read here, after the finders have finished. Tests fail only on a kept binary that does not decide as it did in job 7496491 (its records, HEP_ACTS_TRACKING_KEPT_RECORDS), on a no-phi build
+that searches otherwise than job 7496491's chord-slope build, or on a configuration that moved beyond what it names. The predictions are in the D1 stage 5e report, fixed before the job.
 Run from the plugin root: python -m unittest tests.adapters.test_acts_finding_diagnosis -v
 """
 from __future__ import annotations
@@ -24,16 +31,27 @@ from tests.adapters import test_acts_finding as finding_tests
 finding_record, truth_files, fixture_files = finding_tests.finding_record, finding_tests.truth_files, finding_tests.fixture_files
 
 EVIDENCE_DIR = os.environ.get("HEP_ACTS_TRACKING_EVIDENCE", "")
-EARLIER_FINDERS = dict(pair.split("=", 1) for pair in os.environ.get("HEP_ACTS_TRACKING_EARLIER_FINDERS", "").split(",") if pair)
-RUNNABLE = finding_tests.BUILT and bool(EVIDENCE_DIR) and bool(EARLIER_FINDERS)
-NOT_RUNNABLE = "needs the T07 build job: HEP_ACTS_TRACKING_BUILD, HEP_ACTS_TRACKING_EVIDENCE and HEP_ACTS_TRACKING_EARLIER_FINDERS"
+KEPT_FINDERS = dict(pair.split("=", 1) for pair in os.environ.get("HEP_ACTS_TRACKING_KEPT_FINDERS", "").split(",") if pair)
+KEPT_RECORDS = os.environ.get("HEP_ACTS_TRACKING_KEPT_RECORDS", "")
+RUNNABLE = finding_tests.BUILT and bool(EVIDENCE_DIR) and bool(KEPT_FINDERS) and bool(KEPT_RECORDS)
+NOT_RUNNABLE = "needs the T07 build job: HEP_ACTS_TRACKING_BUILD, HEP_ACTS_TRACKING_EVIDENCE, HEP_ACTS_TRACKING_KEPT_FINDERS and HEP_ACTS_TRACKING_KEPT_RECORDS"
 
-CURRENT, CHORD_SLOPE, TWO_SHARED_HITS = "current", "chord-slope", "two-shared-hits"
-JOB_BEFORE_HELIX, JOB_OF_HELIX = "job-7494285", "job-7494405"
+RECIPE, NO_PHI_TERM = "recipe", "no-phi-term"
+KEPT_RECIPE, KEPT_CHORD_SLOPE, KEPT_TWO_SHARED_HITS = "job-7496491", "job-7496491-chord-slope", "job-7496491-two-shared-hits"
+NAME_IN_JOB_7496491 = {KEPT_RECIPE: "current", KEPT_CHORD_SLOPE: "chord-slope", KEPT_TWO_SHARED_HITS: "two-shared-hits"}  # its record files' names
 DETAILED_CASE = ("clean", 2)
-CASES = (DETAILED_CASE, ("noise", 2), ("noise", 5), ("noise", 8), ("noise", 11))  # the review's stratum, and the o3 noise strata, one per momentum bin
-LOST_IN_ITS_JOB = {JOB_BEFORE_HELIX: {("clean", 2): 5, ("noise", 2): 185, ("noise", 5): 146, ("noise", 8): 151, ("noise", 11): 158},  # FINDING-READING of each job
-                   JOB_OF_HELIX: {("clean", 2): 6, ("noise", 2): 187, ("noise", 5): 192, ("noise", 8): 188, ("noise", 11): 214}}
+CASES = (DETAILED_CASE, ("noise", 2), ("noise", 5), ("noise", 8), ("noise", 11))  # the stage 5 review's stratum, and the o3 noise strata, one per momentum bin: job 7496491's
+LOST_IN_JOB_7496491 = {KEPT_RECIPE: {("clean", 2): 6, ("noise", 2): 187, ("noise", 5): 192, ("noise", 8): 188, ("noise", 11): 214},  # DIAGNOSIS-READING of job 7496491
+                       KEPT_CHORD_SLOPE: {("clean", 2): 3, ("noise", 2): 134, ("noise", 5): 143, ("noise", 8): 150, ("noise", 11): 157},
+                       KEPT_TWO_SHARED_HITS: {("clean", 2): 3, ("noise", 2): 154, ("noise", 5): 147, ("noise", 8): 149, ("noise", 11): 168}}
+COMPARISONS = ((KEPT_RECIPE, RECIPE), (KEPT_CHORD_SLOPE, NO_PHI_TERM), (KEPT_TWO_SHARED_HITS, NO_PHI_TERM), (NO_PHI_TERM, RECIPE))
+SEEDED = (RECIPE, NO_PHI_TERM, KEPT_CHORD_SLOPE)  # finders that write a seed file here
+# Job 7496491's recipe hash b795b0c1... over the 23 lines of DIAGNOSIS-CONFIGURATION current in its log, with one value changed, ambiguity_most_shared_hits 1 to 2, and two keys added
+# that name the seed's code, seed_slope_along_v chord and seed_covariance_phi_term present (D1 stage 5e review, m5): recomputed.
+RECIPE_CONFIGURATION_SHA256 = "2448d935fd8a20d8856be6772d7dfbaa774819f74a0a90d139cdc680531a3050"
+# The kept binaries wrote job 7496491's 23 keys; they are compared over those, and lack the two added ones.
+DIFFERS_FROM_THE_RECIPE = {KEPT_RECIPE: ["ambiguity_most_shared_hits"], KEPT_CHORD_SLOPE: ["ambiguity_most_shared_hits", "diagnostic_build"], KEPT_TWO_SHARED_HITS: ["diagnostic_build"],
+                           NO_PHI_TERM: ["diagnostic_build", "seed_covariance_phi_term"]}
 SEED_TRIPLES = ((1, 2, 3), (1, 2, 4), (3, 4, 5), (6, 7, 8))
 PLANE_SPACING_MM = 50.0
 HIT_SIGMA_MM = finding_tests.HIT_SIGMA_MM
@@ -83,7 +101,8 @@ def parabola_chi2(plane_x_mm, loc0_mm, loc1_mm) -> tuple:
 
 def seed_window(seed_points, plane_x_mm: float, slope_rule: str) -> tuple:
     """Where a seed's start puts a plane it has not reached, and the residual variances there, in a linear model: Lagrange along u, along v a straight line in the arc length through the first hit.
-    slope_rule: "chord" takes the first and last hit (job 7494285), "last-two" the middle and last (ACTS's estimate, read from its disassembly). seed_points: (x, u, v) of the three hits."""
+    slope_rule: "chord" takes the first and last hit (job 7494285, and the recipe since stage 5e), "last-two" the middle and last (ACTS's estimate, read from its disassembly; job 7496491's
+    recipe). seed_points: (x, u, v) of the three hits."""
     x_seed = [point[0] for point in seed_points]
     weights_u = [math.prod((plane_x_mm - other) / (x_seed[index] - other) for other in x_seed if other != x_seed[index]) for index in range(3)]
     centre_u = sum(weight * point[1] for weight, point in zip(weights_u, seed_points))
@@ -144,6 +163,11 @@ def configuration_hash(configuration: dict, keys) -> str:
 def behaviour_of(event: dict) -> list:
     """What a finder decided in one event, leaving out the marks of the record."""
     return [(item["hit_keys"], item["seed_planes"], item["outcome"], item["search_chi2"], item["fit_chi2"]) for item in event["found"]]
+
+
+def search_of(event: dict) -> list:
+    """What a finder's search found in one event, before ambiguity resolution: the candidates, in order. Shared hits change only what comes after."""
+    return [(item["hit_keys"], item["seed_planes"], item["measurements"], item["holes"], item["search_chi2"], item["q_over_p"]) for item in event["found"]]
 
 
 # ---- The printed readings.
@@ -212,11 +236,13 @@ def fate_in_finder(particle: dict, event: dict) -> str:
 
 
 def analysed_case(case: tuple, data_file: Path, truth_file: Path, runs: dict, seed_files: dict) -> dict:
-    """Every finder's record against truth, event by event."""
+    """Every finder's record against truth, event by event, and the kept binaries against their own records of job 7496491."""
     fixture, stratum = case
     label = f"{fixture} stratum {stratum}"
-    records = {name: finding_record.parse_record(path.read_text(encoding="utf-8"), finding_record.EARLIER_CONFIGURATION_KEYS if name in EARLIER_FINDERS else finding_record.CONFIGURATION_KEYS, name not in EARLIER_FINDERS)
+    records = {name: finding_record.parse_record(path.read_text(encoding="utf-8"), finding_record.STAGE_5D_CONFIGURATION_KEYS if name in KEPT_FINDERS else finding_record.CONFIGURATION_KEYS)
                for name, path in runs.items()}
+    in_job_7496491 = {name: finding_record.parse_record((Path(KEPT_RECORDS) / f"diagnosis-{fixture}-{stratum}-{old}.record").read_text(encoding="utf-8"), finding_record.STAGE_5D_CONFIGURATION_KEYS)
+                      for name, old in NAME_IN_JOB_7496491.items() if name in records}
     tally = {name: Counter() for name in runs}
     categories = {name: Counter() for name in runs}
     paired = defaultdict(Counter)
@@ -224,9 +250,9 @@ def analysed_case(case: tuple, data_file: Path, truth_file: Path, runs: dict, se
     fate_counts = Counter()
     intruders = Counter()
     ambiguity_shares = Counter()
-    changed_events = {name: 0 for name in runs}
+    changed_events = {name: 0 for name in in_job_7496491}
+    search_changed_events = 0
     seed_streams = {name: finding_record.iter_seed_events(path) for name, path in seed_files.items()}
-    comparisons = [(JOB_BEFORE_HELIX, CURRENT), (CURRENT, CHORD_SLOPE), (CURRENT, TWO_SHARED_HITS)]
     for ordinal, (truth_event, data_event) in enumerate(zip(truth_files.iter_truth_events(truth_file), fixture_files.iter_data_events(data_file))):
         particles = finding_tests.particles_of(truth_event)
         missed = [finding_tests.missed_planes_of(track) for track in truth_event["tracks"]]
@@ -235,34 +261,38 @@ def analysed_case(case: tuple, data_file: Path, truth_file: Path, runs: dict, se
         rows = data_event["hits"]
         plane_of_hit = rows["plane"]
         lost = {}
+        for name, earlier in in_job_7496491.items():
+            changed_events[name] += behaviour_of(records[name]["events"][ordinal]) != behaviour_of(earlier["events"][ordinal])
+        if NO_PHI_TERM in records and KEPT_CHORD_SLOPE in records:
+            search_changed_events += (search_of(records[NO_PHI_TERM]["events"][ordinal]) != search_of(records[KEPT_CHORD_SLOPE]["events"][ordinal])
+                                      or seeds.get(NO_PHI_TERM) != seeds.get(KEPT_CHORD_SLOPE))
         for name, record in records.items():
             event = record["events"][ordinal]
             scores = finding_tests.scored_event(finding_tests.tracks_of(event), particles)
             tally[name].update({key: scores[key] for key in ("reconstructable", "with_primary", "reconstructed", "fakes", "matched", "duplicates")})
+            tally[name]["hits_on_two_tracks"] += finding_tests.hits_on_two_selected(event)
             lost[name] = set(scores["lost"])
-            if name != JOB_OF_HELIX and JOB_OF_HELIX in records:
-                changed_events[name] += behaviour_of(event) != behaviour_of(records[JOB_OF_HELIX]["events"][ordinal])
             for index in scores["lost"]:
                 category = finding_tests.loss_category(particles[index], event)
                 if name in seeds:
                     hit_of_plane = {int(rows["plane"][key]): key for key in particles[index]["hit_keys"]}
                     fates = seed_fates(hit_of_plane, seeds[name])
                     category = finer_loss(category, fates)
-                    if name == CURRENT:
+                    if name == RECIPE:
                         fate_counts.update((missed_class(missed[index]), triple, outcome) for triple, outcome in fates.items())
                 categories[name][(missed_class(missed[index]), category)] += 1
-                if name == CURRENT and category == "ambiguity":
+                if name == RECIPE and category == "ambiguity":
                     owned = set(particles[index]["hit_keys"])
                     best = min((sum(shared_with_selected(item, [other for other in event["found"] if other["outcome"] == "selected"]).values())
                                 for item in event["found"] if item["outcome"] == "evicted" and 2 * len(owned & set(item["hit_keys"])) > len(item["hit_keys"])), default=-1)
                     ambiguity_shares[min(best, 4)] += 1
-        for first, second in comparisons:
+        for first, second in COMPARISONS:
             if first in lost and second in lost:
                 for index, particle in enumerate(particles):
                     if len(particle["hit_keys"]) >= finding_tests.LEAST_HITS and (index in lost[first] or index in lost[second]):
                         side = "both" if index in lost[first] and index in lost[second] else f"only-{first}" if index in lost[first] else f"only-{second}"
                         paired[(first, second)][(missed_class(missed[index]), side)] += 1
-        for seed in seeds.get(CURRENT, ()):
+        for seed in seeds.get(RECIPE, ()):
             owners = {owner_of_hit.get(key, NOISE_OWNER) for key in seed["hit_keys"]}
             seed_counts[(seed["planes"], "true" if len(owners) == 1 and NOISE_OWNER not in owners else "other", seed["outcome"])] += 1
         loc0_of_plane_1, loc1_of_plane_1 = rows["loc0_mm"][plane_of_hit == 1], rows["loc1_mm"][plane_of_hit == 1]
@@ -280,19 +310,19 @@ def analysed_case(case: tuple, data_file: Path, truth_file: Path, runs: dict, se
         if case == DETAILED_CASE:
             print_detailed_event(label, ordinal, truth_event, data_event, records, seeds, particles, lost)
     return {"case": case, "label": label, "tally": tally, "categories": categories, "paired": paired, "seed_counts": seed_counts, "fate_counts": fate_counts, "intruders": intruders,
-            "ambiguity_shares": ambiguity_shares, "changed_events": changed_events, "configurations": {name: record["configuration"] for name, record in records.items()},
-            "hashes": {name: record["header"]["configuration_sha256"] for name, record in records.items()}}
+            "ambiguity_shares": ambiguity_shares, "changed_events": changed_events, "search_changed_events": search_changed_events,
+            "configurations": {name: record["configuration"] for name, record in records.items()}, "hashes": {name: record["header"]["configuration_sha256"] for name, record in records.items()}}
 
 
 def print_detailed_event(label: str, ordinal: int, truth_event, data_event, records: dict, seeds: dict, particles: list, lost: dict) -> None:
-    """The review's list, for each fake and each lost particle of the detailed stratum under the current finder, then what the earlier finder did with the same particles."""
-    event = records[CURRENT]["events"][ordinal]
-    view = EventView(label, ordinal, truth_event, data_event, event, seeds[CURRENT])
+    """The stage 5 review's list, for each fake and each lost particle of the detailed stratum under the recipe, then what the other finders did with the same particles."""
+    event = records[RECIPE]["events"][ordinal]
+    view = EventView(label, ordinal, truth_event, data_event, event, seeds[RECIPE])
     fakes = [item for item in view.selected if is_fake(item["hit_keys"], view.owner_of_hit)]
-    gone = sorted(lost[CURRENT])
-    if not fakes and not gone and not lost.get(JOB_BEFORE_HELIX):
+    gone = sorted(lost[RECIPE])
+    if not fakes and not gone and not lost.get(KEPT_RECIPE):
         return
-    print(f"DIAGNOSIS-EVENT {label} event {ordinal}: fakes {len(fakes)} lost {gone} lost in {JOB_BEFORE_HELIX} {sorted(lost.get(JOB_BEFORE_HELIX, ()))} near_separation {int(truth_event['near_separation'])} "
+    print(f"DIAGNOSIS-EVENT {label} event {ordinal}: fakes {len(fakes)} lost {gone} lost in {KEPT_RECIPE} {sorted(lost.get(KEPT_RECIPE, ()))} near_separation {int(truth_event['near_separation'])} "
           f"seeds_truncated {event['seeds_truncated']}", flush=True)
     for item in fakes:
         owners = [owner for owner, _ in owner_counts(item["hit_keys"], view.owner_of_hit).most_common() if owner != NOISE_OWNER]
@@ -302,7 +332,7 @@ def print_detailed_event(label: str, ordinal: int, truth_event, data_event, reco
         view.print_block("LOST", [index])
     for index in sorted(set(gone) | {owner for item in fakes for owner in owner_counts(item["hit_keys"], view.owner_of_hit) if owner != NOISE_OWNER}):
         for name in records:
-            if name != CURRENT:
+            if name != RECIPE:
                 print(f"DIAGNOSIS-ELSEWHERE {label} event {ordinal} particle {index} in {name}: {fate_in_finder(particles[index], records[name]['events'][ordinal])}", flush=True)
 
 
@@ -310,22 +340,24 @@ def print_case(reading: dict) -> None:
     label = reading["label"]
     for name, tally in reading["tally"].items():
         print(f"DIAGNOSIS-READING {label} {name}: reconstructable {tally['reconstructable']} lost {tally['reconstructable'] - tally['with_primary']} reconstructed {tally['reconstructed']} fakes {tally['fakes']} "
-              f"matched {tally['matched']} duplicates {tally['duplicates']}", flush=True)
+              f"matched {tally['matched']} duplicates {tally['duplicates']} hits_on_two_tracks {tally['hits_on_two_tracks']}", flush=True)
         for (klass, category), count in sorted(reading["categories"][name].items()):
             print(f"DIAGNOSIS-LOST-CLASS {label} {name} {klass} {category}: {count}", flush=True)
     for pair, cells in reading["paired"].items():
         for (klass, side), count in sorted(cells.items()):
             print(f"DIAGNOSIS-PAIRED {label} {pair[0]} against {pair[1]} {klass} {side}: {count}", flush=True)
     for (planes, kind, outcome), count in sorted(reading["seed_counts"].items()):
-        print(f"DIAGNOSIS-SEEDS {label} current seed {planes} {kind} {outcome}: {count}", flush=True)
+        print(f"DIAGNOSIS-SEEDS {label} recipe seed {planes} {kind} {outcome}: {count}", flush=True)
     for (klass, triple, outcome), count in sorted(reading["fate_counts"].items()):
-        print(f"DIAGNOSIS-SEED-FATE {label} current lost {klass} own seed {triple} {outcome}: {count}", flush=True)
+        print(f"DIAGNOSIS-SEED-FATE {label} recipe lost {klass} own seed {triple} {outcome}: {count}", flush=True)
     for cell in sorted({key[:3] for key in reading["intruders"]}, key=str):
         klass, triple, (in_chord, in_last_two) = cell
         counts = {key[3]: count for key, count in reading["intruders"].items() if key[:3] == cell}
         print(f"DIAGNOSIS-INTRUDER {label} {klass} seed {triple} foreign hit in chord window {int(in_chord)} in last-two window {int(in_last_two)}: {counts}", flush=True)
-    print(f"DIAGNOSIS-AMBIGUITY {label} current ambiguity losses by fewest hits an evicted majority candidate shares with selected tracks (4 means 4 or more, -1 no such candidate): "
+    print(f"DIAGNOSIS-AMBIGUITY {label} recipe ambiguity losses by fewest hits an evicted majority candidate shares with selected tracks (4 means 4 or more, -1 no such candidate): "
           f"{dict(sorted(reading['ambiguity_shares'].items()))}", flush=True)
+    print(f"DIAGNOSIS-SAME {label}: events where a kept binary decided otherwise than in job 7496491 {reading['changed_events']}; events where {NO_PHI_TERM} searched otherwise than "
+          f"{KEPT_CHORD_SLOPE} {reading['search_changed_events']}", flush=True)
 
 
 def run_case(case: tuple, folder: Path) -> tuple:
@@ -337,7 +369,7 @@ def run_case(case: tuple, folder: Path) -> tuple:
 def run_finder(job: tuple, folder: Path) -> tuple:
     case, name, program, data_file = job
     title = f"diagnosis-{case[0]}-{case[1]}-{name}"
-    seed_file = folder / f"{title}.seeds" if name in (CURRENT, CHORD_SLOPE) else None
+    seed_file = folder / f"{title}.seeds" if name in SEEDED else None
     _, record_file, product_file = finding_tests.find(folder, data_file, title, 0, program=program, seed_file=seed_file)
     product_file.unlink()
     return case, name, record_file, seed_file
@@ -350,7 +382,7 @@ class PairedDiagnosis(unittest.TestCase):
         folder = Path(EVIDENCE_DIR) / "diagnosis"
         folder.mkdir(parents=True, exist_ok=True)
         build = Path(finding_tests.BUILD_DIR)
-        finders = {**{name: Path(path) for name, path in EARLIER_FINDERS.items()}, CURRENT: finding_tests.FINDER, CHORD_SLOPE: build / "acts_finder_chord_slope", TWO_SHARED_HITS: build / "acts_finder_two_shared_hits"}
+        finders = {**{name: Path(path) for name, path in KEPT_FINDERS.items()}, RECIPE: finding_tests.FINDER, NO_PHI_TERM: build / "acts_finder_no_phi_term"}
         with concurrent.futures.ThreadPoolExecutor(finding_tests.WORKERS) as pool:
             files = {case: (data_file, truth_file) for case, data_file, truth_file in pool.map(lambda case: run_case(case, folder), CASES)}
             jobs = [(case, name, program, files[case][0]) for case in reversed(CASES) for name, program in finders.items()]
@@ -364,41 +396,47 @@ class PairedDiagnosis(unittest.TestCase):
             cls.readings.append(reading)
             if case != DETAILED_CASE:
                 files[case][0].unlink()
-        hashes = cls.readings[0]["hashes"]
-        configurations = cls.readings[0]["configurations"]
-        for name, value in hashes.items():
-            print(f"DIAGNOSIS-CONFIGURATION {name} configuration_sha256 {value} over the earlier keys {configuration_hash(configurations[name], finding_record.EARLIER_CONFIGURATION_KEYS)}", flush=True)
-        for key, value in configurations[CURRENT].items():
-            print(f"DIAGNOSIS-CONFIGURATION current {key} {value}", flush=True)
+        for name, value in cls.readings[0]["hashes"].items():
+            print(f"DIAGNOSIS-CONFIGURATION {name} configuration_sha256 {value}", flush=True)
+        for key, value in cls.readings[0]["configurations"][RECIPE].items():
+            print(f"DIAGNOSIS-CONFIGURATION recipe {key} {value}", flush=True)
 
-    def test_each_kept_binary_reads_its_own_job(self):
-        for reading in self.readings:
-            for name, lost_of_case in LOST_IN_ITS_JOB.items():
-                tally = reading["tally"].get(name)
-                with self.subTest(case=reading["case"], name=name):
-                    self.assertIsNotNone(tally)
-                    self.assertEqual(tally["reconstructable"] - tally["with_primary"], lost_of_case[reading["case"]])
-
-    def test_the_current_finder_decides_as_job_7494405_did(self):
-        """This stage changes marks and prints, not the recipe: every candidate, outcome, search chi2 and fit, event by event."""
+    def test_every_finder_ran(self):
         for reading in self.readings:
             with self.subTest(case=reading["case"]):
-                self.assertEqual(reading["changed_events"][CURRENT], 0)
+                self.assertEqual(set(reading["tally"]), {RECIPE, NO_PHI_TERM, KEPT_RECIPE, KEPT_CHORD_SLOPE, KEPT_TWO_SHARED_HITS})
 
-    def test_no_configuration_value_changed(self):
-        """Stage 5 review m7: the earlier jobs' hash, recomputed from today's values of the same keys."""
-        reading = self.readings[0]
-        current = reading["configurations"][CURRENT]
-        for name in EARLIER_FINDERS:
+    def test_each_kept_binary_decides_as_in_job_7496491(self):
+        """Its own records of job 7496491, event by event: every candidate, outcome, search chi2 and fit. And its lost count, as that job printed it."""
+        for reading in self.readings:
+            for name, lost_of_case in LOST_IN_JOB_7496491.items():
+                tally = reading["tally"][name]
+                with self.subTest(case=reading["case"], name=name):
+                    self.assertEqual(reading["changed_events"][name], 0)
+                    self.assertEqual(tally["reconstructable"] - tally["with_primary"], lost_of_case[reading["case"]])
+
+    def test_the_no_phi_build_searches_as_the_chord_slope_build_did(self):
+        """The promoted chord is the code of job 7496491's chord-slope build, and the build without the phi term holds the covariance that build had: its seeds and candidates must be
+        the same event by event, every seed outcome, hit, search chi2 and q/p. Only ambiguity resolution, at 2 shared hits, may decide otherwise."""
+        for reading in self.readings:
+            with self.subTest(case=reading["case"]):
+                self.assertEqual(reading["search_changed_events"], 0)
+
+    def test_the_configuration_moved_by_the_changed_keys_only(self):
+        """Stage 5e brief and review m5: job 7496491's recipe hash, one value changed (ambiguity_most_shared_hits 1 to 2) and the two seed-code keys added, and each other build differs
+        from the recipe in what it names. The kept binaries over the keys they wrote."""
+        configurations, hashes = self.readings[0]["configurations"], self.readings[0]["hashes"]
+        recipe = configurations[RECIPE]
+        self.assertEqual(hashes[RECIPE], RECIPE_CONFIGURATION_SHA256)
+        self.assertEqual(configuration_hash(recipe, finding_record.CONFIGURATION_KEYS), RECIPE_CONFIGURATION_SHA256)
+        self.assertEqual((recipe["ambiguity_most_shared_hits"], recipe["diagnostic_build"], recipe["seed_slope_along_v"], recipe["seed_covariance_phi_term"]), ("2", "none", "chord", "present"))
+        self.assertEqual((configurations[NO_PHI_TERM]["diagnostic_build"], configurations[NO_PHI_TERM]["seed_slope_along_v"], configurations[NO_PHI_TERM]["seed_covariance_phi_term"]),
+                         ("no-phi-term", "chord", "absent"))
+        for name in KEPT_FINDERS:
             with self.subTest(name=name):
-                self.assertEqual(configuration_hash(current, finding_record.EARLIER_CONFIGURATION_KEYS), reading["hashes"][name])
-        self.assertEqual(current["diagnostic_build"], "none")
-
-    def test_a_diagnostic_build_differs_in_what_it_names(self):
-        configurations = self.readings[0]["configurations"]
-        current = configurations[CURRENT]
-        differing = {name: sorted(key for key, value in configurations[name].items() if value != current[key]) for name in (CHORD_SLOPE, TWO_SHARED_HITS)}
-        self.assertEqual(differing, {CHORD_SLOPE: ["diagnostic_build"], TWO_SHARED_HITS: ["ambiguity_most_shared_hits", "diagnostic_build"]})
+                self.assertEqual(set(configurations[name]), set(finding_record.STAGE_5D_CONFIGURATION_KEYS))
+        differing = {name: sorted(key for key, value in configurations[name].items() if value != recipe[key]) for name in DIFFERS_FROM_THE_RECIPE}
+        self.assertEqual(differing, DIFFERS_FROM_THE_RECIPE)
 
 
 class TrackJudges(unittest.TestCase):
@@ -448,6 +486,23 @@ class TrackJudges(unittest.TestCase):
         self.assertEqual(finer_loss("seed-or-finding", {"3-4-5": "skipped"}), "seed-failed-or-skipped")
         self.assertEqual(finer_loss("seed-or-finding", {"3-4-5": "candidates"}), "search-kept-other-hits")
         self.assertEqual(finer_loss("ambiguity", {}), "ambiguity")
+
+    def test_the_search_leaves_out_what_resolution_decides(self):
+        item = {"hit_keys": [1, 2, 3, 4, 5, 6], "seed_planes": "1-2-3", "measurements": 6, "holes": 2, "search_chi2": 5.5, "q_over_p": 0.25, "outcome": "selected", "fit_chi2": 7.5}
+        resolved_otherwise = dict(item, outcome="evicted", fit_chi2=0.0)
+        self.assertEqual(search_of({"found": [item]}), search_of({"found": [resolved_otherwise]}))
+        self.assertNotEqual(behaviour_of({"found": [item]}), behaviour_of({"found": [resolved_otherwise]}))
+        self.assertNotEqual(search_of({"found": [item]}), search_of({"found": [dict(item, search_chi2=5.6)]}))
+
+    def test_the_recipe_hash_is_job_7496491s_with_one_value_changed(self):
+        """The 23 values of job 7496491's DIAGNOSIS-CONFIGURATION current, ambiguity_most_shared_hits 2 in place of 1, then the two seed-code keys of stage 5e."""
+        values = ("1-2-3,1-2-4,3-4-5,6-7-8", "1.5", "0.25", "0.16", "5", "1.5", "16", "6", "2", "16", "32", "10000", "10000", "2", "1000", "2", "0.050000000000000003", "-50", "10", "0.10000000000000001",
+                  "1", "1", "none", "chord", "present")
+        configuration = dict(zip(finding_record.CONFIGURATION_KEYS, values))
+        self.assertEqual(configuration_hash(configuration, finding_record.CONFIGURATION_KEYS), RECIPE_CONFIGURATION_SHA256)
+        for key, other in (("ambiguity_most_shared_hits", "1"), ("seed_slope_along_v", "last-two"), ("seed_covariance_phi_term", "absent")):
+            with self.subTest(key=key):
+                self.assertNotEqual(configuration_hash(dict(configuration, **{key: other}), finding_record.CONFIGURATION_KEYS), RECIPE_CONFIGURATION_SHA256)
 
     def test_the_configuration_hash_covers_the_finder_text(self):
         expected = hashlib.sha256(b"configuration one 1\nconfiguration two 2\n").hexdigest()

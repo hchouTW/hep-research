@@ -46,18 +46,19 @@ using StateCreator = Acts::TrackStateCreator<LinkIterator, FindingContainer>;
 using BranchResult = Acts::CombinatorialKalmanFilterBranchStopperResult;
 using NewStates = Acts::Result<Acts::CkfTypes::BranchVector<Acts::TrackIndexType>>;
 
-// Diagnostic builds only: the two extra targets of CMakeLists.txt define one of these, the recipe's acts_tracking_finder neither (the build job checks its flags,
-// and its record says diagnostic_build none). Nothing at run time reaches them. D1 stage 5d report.
-#if defined(T07_DIAGNOSTIC_SHARED_HITS)
-constexpr std::uint32_t shared_hits_in_use = T07_DIAGNOSTIC_SHARED_HITS;
-constexpr char diagnostic_build[] = "two-shared-hits";
-#elif defined(T07_DIAGNOSTIC_CHORD_SLOPE)
-constexpr std::uint32_t shared_hits_in_use = ambiguity_most_shared_hits;
-constexpr char diagnostic_build[] = "chord-slope";
+// Diagnostic build only, temporary: acts_finder_no_phi_term of CMakeLists.txt defines this, so that job measures the phi term's own effect (D1 stage 5e brief).
+// The recipe's acts_tracking_finder does not (the build job checks its flags, and its record says diagnostic_build none). Nothing at run time reaches it. It comes
+// out at the next stage.
+#if defined(T07_DIAGNOSTIC_NO_PHI_TERM)
+constexpr char diagnostic_build[] = "no-phi-term";
+constexpr char seed_covariance_phi_term[] = "absent";
 #else
-constexpr std::uint32_t shared_hits_in_use = ambiguity_most_shared_hits;
 constexpr char diagnostic_build[] = "none";
+constexpr char seed_covariance_phi_term[] = "present";
 #endif
+// The seed's code is not a number, so the record names it: the configuration hash then tells this recipe from job 7496491's, which took the last two's slope and
+// had no phi term (D1 stage 5e review, m5). helix_at_start takes the chord unconditionally.
+constexpr char seed_slope_along_v[] = "chord";
 
 double plane_x_mm(int plane) { return (plane - 1) * plane_spacing_mm; }
 
@@ -241,13 +242,12 @@ std::optional<HelixPoint> helix_at_start(const std::array<Acts::Vector3, 3>& poi
   const Acts::FreeVector estimate = Acts::estimateTrackParamsFromSeed(points[0], 0.0, points[1], points[2], field_vector);
   double q_over_p = estimate[Acts::eFreeQOverP];
   Acts::Vector3 tangent(estimate[Acts::eFreeDir0], estimate[Acts::eFreeDir1], estimate[Acts::eFreeDir2]);
-#ifdef T07_DIAGNOSTIC_CHORD_SLOPE
-  // The slope along the field from the first and last hit, as job 7494285's prior had it, on the same circle: q/p scales with the transverse share of the tangent.
+  // ACTS's slope along the field is that of the last two hits alone (D1 stage 5d report). The recipe takes it from the first and last hit over their straight
+  // transverse distance, on the same circle, so q/p scales with the transverse share of the tangent (track_finding.hpp states why, and the chord against the arc).
   const double transverse_before = std::hypot(tangent.x(), tangent.y());
   const double chord_slope = (points[2].z() - points[0].z()) / std::hypot(points[2].x() - points[0].x(), points[2].y() - points[0].y());
   tangent = Acts::Vector3(tangent.x() / transverse_before, tangent.y() / transverse_before, chord_slope).normalized();
   q_over_p *= std::hypot(tangent.x(), tangent.y()) / transverse_before;
-#endif
   if (!std::isfinite(q_over_p) || q_over_p == 0.0 || !tangent.allFinite() || tangent.x() <= 0.0) {
     return std::nullopt;
   }
@@ -277,19 +277,29 @@ std::optional<SeedStart> seed_start_of(const std::array<Acts::Vector3, 3>& point
   if (!centre) {
     return std::nullopt;
   }
-  // Curvilinear frame (Acts/Utilities/UnitVectors.hpp). A shift of the start inside the plane x = refit_start_x_mm, projected on U and V, is the shift
-  // of the track to first order, since a move along T stays on the track.
+  // Curvilinear frame (Acts/Utilities/UnitVectors.hpp): the covariance is of bound parameters on the plane through the centre perpendicular to T. A start
+  // moved by m inside the plane x = refit_start_x_mm meets that surface after a path -T.m. Its position there, projected on U and V, is m projected on U and V
+  // to first order. Its direction is not the one at x = refit_start_x_mm: over that path the azimuth falls by w (-T.m), w = (q/p) k B as in helix_at_start,
+  // so phi on the surface is phi at x = refit_start_x_mm plus w (T.m). Theta and q/p do not change along a helix in this field. Correction: until stage 5e
+  // this comment said a move along T stays on the track, true of position only, and the phi term was missing; job 7496491's seed probe showed it (D1 stage 5d
+  // report, section 5). The sign: a term of the other sign or none leaves the covariance and the hit roads 114 % and 53 % apart at worst, and this sign 0.9 %,
+  // by the closed-form replica of D1 stage 5e (tests/adapters/test_acts_finding.py, SeedStartClosedForm).
   const auto curvilinear_axes = Acts::createCurvilinearUnitVectors(centre->direction);
   const Acts::Vector3 axis_u = curvilinear_axes.first;
   const Acts::Vector3 axis_v = curvilinear_axes.second;
   using StartVector = Eigen::Matrix<double, 5, 1>;
   const auto bound_of = [&](const HelixPoint& point) {
     const Acts::Vector3 moved_mm = point.position_mm - centre->position_mm;
+    double phi = std::atan2(point.direction.y(), point.direction.x());
+#ifndef T07_DIAGNOSTIC_NO_PHI_TERM
+    phi += centre->q_over_p * field_along_v_tesla * Acts::UnitConstants::T * centre->direction.dot(moved_mm);
+#endif
     StartVector bound;
-    bound << axis_u.dot(moved_mm), axis_v.dot(moved_mm), std::atan2(point.direction.y(), point.direction.x()), std::acos(point.direction.z() / point.direction.norm()), point.q_over_p;
+    bound << axis_u.dot(moved_mm), axis_v.dot(moved_mm), phi, std::acos(point.direction.z() / point.direction.norm()), point.q_over_p;
     return bound;
   };
-  // The start as a function of the six hit coordinates, differentiated: the covariance is that of the function in use, so no factor of the slopes is left out.
+  // The start as a function of the six hit coordinates, differentiated: the covariance is of the function shipped, helix_at_start with its chord slope, along u
+  // and v alike, since every column is a difference of that function; none is written apart.
   Eigen::Matrix<double, 5, 6> jacobian;
   for (int hit = 0; hit < 3; ++hit) {
     for (int coordinate = 0; coordinate < 2; ++coordinate) {
@@ -374,7 +384,7 @@ std::vector<std::pair<std::string, std::string>> effective_configuration() {
           {"finding_most_branches_per_seed", std::to_string(finding_most_branches_per_seed)},
           {"finding_most_seeds_per_event", std::to_string(finding_most_seeds_per_event)},
           {"finding_most_propagator_steps", std::to_string(finding_most_propagator_steps)},
-          {"ambiguity_most_shared_hits", std::to_string(shared_hits_in_use)},
+          {"ambiguity_most_shared_hits", std::to_string(ambiguity_most_shared_hits)},
           {"ambiguity_most_iterations", std::to_string(ambiguity_most_iterations)},
           {"finding_fit_passes", std::to_string(finding_fit_passes)},
           {"seed_derivative_step_sigma", number_text(seed_derivative_step_sigma)},
@@ -383,7 +393,9 @@ std::vector<std::pair<std::string, std::string>> effective_configuration() {
           {"refit_prior_angle_sigma", number_text(refit_prior_angle_sigma)},
           {"refit_prior_qop_sigma_per_gev", number_text(refit_prior_qop_sigma_per_gev)},
           {"refit_prior_time_sigma", number_text(refit_prior_time_sigma)},
-          {"diagnostic_build", diagnostic_build}};
+          {"diagnostic_build", diagnostic_build},
+          {"seed_slope_along_v", seed_slope_along_v},
+          {"seed_covariance_phi_term", seed_covariance_phi_term}};
 }
 
 struct TrackFinder::Machinery {
@@ -396,7 +408,7 @@ namespace {
 
 Acts::GreedyAmbiguityResolution::Config ambiguity_configuration() {
   Acts::GreedyAmbiguityResolution::Config configuration;
-  configuration.maximumSharedHits = shared_hits_in_use;
+  configuration.maximumSharedHits = ambiguity_most_shared_hits;
   configuration.maximumIterations = ambiguity_most_iterations;
   configuration.nMeasurementsMin = finding_least_measurements;
   return configuration;
@@ -557,7 +569,7 @@ EventFinding TrackFinder::find(const DataEvent& event, std::uint32_t event_ordin
   }
   // resolve() stops early only below the limit, so a track left at or above it means the iterations ran out with a conflict left.
   for (const std::size_t track : ambiguity.selectedTracks) {
-    finding.ambiguity_budget_reached = finding.ambiguity_budget_reached || ambiguity.sharedMeasurementsPerTrack[track] >= shared_hits_in_use;
+    finding.ambiguity_budget_reached = finding.ambiguity_budget_reached || ambiguity.sharedMeasurementsPerTrack[track] >= ambiguity_most_shared_hits;
   }
   if (finding.seed_budget_reached || finding.ambiguity_budget_reached) {
     for (FoundCandidate& candidate : finding.candidates) {

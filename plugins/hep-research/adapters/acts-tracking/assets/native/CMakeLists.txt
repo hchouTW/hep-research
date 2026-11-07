@@ -13,14 +13,12 @@ target_link_libraries(acts_tracking_driver PRIVATE acts_tracking_common)
 add_executable(acts_tracking_finder acts_tracking_finder.cpp track_finding.cpp kalman_refit.cpp)
 target_link_libraries(acts_tracking_finder PRIVATE acts_tracking_common)
 
-# Two diagnostic builds of the finder, one value each, for the job that shows a cause (D1 stage 5d report). Never the recipe: the build job refuses the definitions on
-# acts_tracking_finder, and each record names its build. Data side, like the finder.
-add_executable(acts_finder_chord_slope acts_tracking_finder.cpp track_finding.cpp kalman_refit.cpp)
-target_link_libraries(acts_finder_chord_slope PRIVATE acts_tracking_common)
-target_compile_definitions(acts_finder_chord_slope PRIVATE T07_DIAGNOSTIC_CHORD_SLOPE)
-add_executable(acts_finder_two_shared_hits acts_tracking_finder.cpp track_finding.cpp kalman_refit.cpp)
-target_link_libraries(acts_finder_two_shared_hits PRIVATE acts_tracking_common)
-target_compile_definitions(acts_finder_two_shared_hits PRIVATE T07_DIAGNOSTIC_SHARED_HITS=2)
+# One temporary diagnostic build of the finder: the recipe without the seed covariance's phi term, so a job measures that term's own effect (D1 stage 5e brief). It
+# comes out at the next stage. Never the recipe: the build job refuses the definition on acts_tracking_finder and on seed_start_probe, and its record names its
+# build. Data side, like the finder.
+add_executable(acts_finder_no_phi_term acts_tracking_finder.cpp track_finding.cpp kalman_refit.cpp)
+target_link_libraries(acts_finder_no_phi_term PRIVATE acts_tracking_common)
+target_compile_definitions(acts_finder_no_phi_term PRIVATE T07_DIAGNOSTIC_NO_PHI_TERM)
 
 # Whether a seed's start lies on the helix through its hits, read through the ACTS propagator. Data side too: hand-set tracks, no fixture event.
 add_executable(seed_start_probe seed_start_probe.cpp track_finding.cpp kalman_refit.cpp)

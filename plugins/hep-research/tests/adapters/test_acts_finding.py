@@ -21,7 +21,10 @@ Predictions, fixed here before the first run of this recipe. Closed form, unless
   first windows are wider than a converged track's. An estimate, good to a factor of a few.
 - Duplicates: two tracks of one particle hold more than 50 % of their hits from it, so at least 4 each of at most 8, and ambiguity resolution keeps two only if they share at
   most 1 hit: at least 6 distinct true hits and 3 or more noise hits on the pair: the chance-candidate rate at most. Correction, stage 5 review m3: ambiguity_most_shared_hits = 1
-  means they share none (track_finding.hpp), so all 8 true hits and at least 4 noise hits. The prediction of 0 stands, on a stronger argument.
+  means they share none (track_finding.hpp), so all 8 true hits and at least 4 noise hits. The prediction of 0 stands, on a stronger argument. Correction, stage 5e: the value is
+  now 2, a development value for Freeze B (decisions.md, "Recipe choice after stage 5d"), which means each selected track holds at most one hit another selected track holds,
+  so the first argument of this item is again the one that applies: at least 3 hits on the pair are not the particle's. Its reason is not the duplicates but section 7's match:
+  a track that took one foreign hit in place of a hole still matches its particle. The prediction of 0 stands; job 7496491 read 0 at this value.
 
 Correction after job 7493849, in D1 stage 5 report, Fix round 1. The table above stands as written, and no limit moved. "Expected above 0.999" and the reading of the noise row assumed
 windows near section 4.1's 0.15 mm, which the first recipe's diagonal seed prior did not have; R_floor assumes the same, so R_floor is right and the recipe was wrong. With the correlated
@@ -33,6 +36,10 @@ per track, so a seed that fails counts up to 7 at once. The limit stands: with a
 Correction after job 7494405, stage 5 review m4. The table's "0 expected" for clean fakes stands as written and missed: 2 in clean stratum 2. It reckoned with no track of two particles'
 hits, and a clean fake is one: an exact tie or three owners. Cause open until tests/adapters/test_acts_finding_diagnosis.py reads it. The same job made o3 noise worse than job 7494285 on
 identical events, 640 to 781 lost, which the text of Fix round 2 did not predict. Every reading stays inside its limit, and no limit moved.
+
+Stage 5e, the user's two changes after job 7496491 (decisions.md, "Recipe choice after stage 5d"): the seed start takes the slope along v from the first and last hit, its covariance
+holds the phi term it lacked, and ambiguity_most_shared_hits is 2. The table above and the tolerances below stand as written, and no limit moved. Their predictions are in the D1 stage 5e
+report, fixed before its job.
 
 Tolerances, fixed before the first run, and they do not move after results (sheet, Stop). A reading outside one is a disagreement with a prediction, for finding the cause:
 
@@ -156,6 +163,126 @@ def position_sigmas_at(covariances, plane_x_mm: float, start_x_mm: float = -50.0
     return math.sqrt(along_u @ covariances[0] @ along_u), math.sqrt(along_v @ covariances[1] @ along_v)
 
 
+# ---- The seed start of track_finding.cpp in closed form (D1 stage 5e), numpy only, no ACTS: a replica of seed_start_of and of seed_start_probe's two roads, so that
+# the slope rule and the phi term are judged before a build. It reproduces job 7496491's probe: every hit road to 1e-4 and every covariance road inside the spread the
+# probe's one-sided eigenvector steps allow (D1 stage 5e report). Sign conventions are its own: phi falls at w per unit path, w the signed curvature times the transverse
+# share, so a charge here is the probe's opposite charge, a mirror image; nothing judged depends on that.
+
+SEED_START_X_MM = -50.0
+SEED_DERIVATIVE_STEP = 0.05
+SEED_SIGMA_AGREEMENT = 0.02  # seed_start_probe.cpp's seed_sigma_agreement
+
+
+def helix_crossings(position_mm, direction, turn_per_mm: float) -> numpy.ndarray:
+    """(u, v) at the eight planes of a helix with phi falling at turn_per_mm per unit path, from any start."""
+    direction = numpy.asarray(direction, float) / numpy.linalg.norm(direction)
+    phi, transverse = math.atan2(direction[1], direction[0]), math.hypot(direction[0], direction[1])
+    rows = []
+    for plane in range(PLANES):
+        sine = math.sin(phi) - turn_per_mm * (50.0 * plane - position_mm[0]) / transverse
+        end_phi = math.asin(sine)
+        path_mm = (phi - end_phi) / turn_per_mm
+        rows.append((position_mm[1] + transverse / turn_per_mm * (math.cos(end_phi) - math.cos(phi)), position_mm[2] + path_mm * direction[2]))
+    return numpy.array(rows)
+
+
+def replica_helix_at_start(points, slope_rule: str) -> tuple:
+    """The circle through three transverse points, its tangent at the first, the slope along v by slope_rule ("chord": first to last over their straight transverse
+    distance, the recipe; "last-two": ACTS's), carried to x = SEED_START_X_MM. Returns position, unit direction, turn per mm."""
+    first, middle, last = (numpy.asarray(point, float) for point in points)
+    a, b, c = first[:2], middle[:2], last[:2]
+    twice_area = 2.0 * (a[0] * (b[1] - c[1]) + b[0] * (c[1] - a[1]) + c[0] * (a[1] - b[1]))
+    centre = numpy.array([(a @ a) * (b[1] - c[1]) + (b @ b) * (c[1] - a[1]) + (c @ c) * (a[1] - b[1]), (a @ a) * (c[0] - b[0]) + (b @ b) * (a[0] - c[0]) + (c @ c) * (b[0] - a[0])]) / twice_area
+    radius = float(numpy.linalg.norm(a - centre))
+    tangent = numpy.array([-(a - centre)[1], (a - centre)[0]]) / radius
+    tangent = tangent if tangent @ (b - a) > 0 else -tangent
+    counterclockwise = (b - a)[0] * (c - b)[1] - (b - a)[1] * (c - b)[0] > 0
+    lower, upper = (first, last) if slope_rule == "chord" else (middle, last)
+    cotangent = (upper[2] - lower[2]) / float(numpy.linalg.norm(upper[:2] - lower[:2]))
+    transverse = 1.0 / math.sqrt(1.0 + cotangent ** 2)
+    turn_per_mm = (-1.0 if counterclockwise else 1.0) * transverse / radius
+    phi_at_seed = math.atan2(tangent[1], tangent[0])
+    phi_at_start = math.asin(math.sin(phi_at_seed) - turn_per_mm * (SEED_START_X_MM - first[0]) / transverse)
+    path_mm = (phi_at_seed - phi_at_start) / turn_per_mm
+    position = numpy.array([SEED_START_X_MM, first[1] + transverse / turn_per_mm * (math.cos(phi_at_start) - math.cos(phi_at_seed)), first[2] + path_mm * cotangent * transverse])
+    return position, numpy.array([transverse * math.cos(phi_at_start), transverse * math.sin(phi_at_start), cotangent * transverse]), turn_per_mm
+
+
+def curvilinear_axes_of(direction) -> tuple:
+    axis_u = numpy.array([-direction[1], direction[0], 0.0]) / math.hypot(direction[0], direction[1])
+    return axis_u, numpy.cross(direction, axis_u)
+
+
+def replica_seed_start(points, slope_rule: str, phi_term_sign: float, inflation: float) -> tuple:
+    """seed_start_of: the centre and f^2 J J^T, J the central difference of the bound start in the hit coordinates. phi_term_sign 1 adds w (T . m), the recipe; 0 and -1 are the
+    defects. The fifth parameter is the turn per mm, q/p times k B: a constant factor, which changes no road."""
+    position, direction, turn_per_mm = replica_helix_at_start(points, slope_rule)
+    axis_u, axis_v = curvilinear_axes_of(direction)
+
+    def bound_of(start) -> numpy.ndarray:
+        moved = start[0] - position
+        phi = math.atan2(start[1][1], start[1][0]) + phi_term_sign * turn_per_mm * (direction @ moved)
+        return numpy.array([axis_u @ moved, axis_v @ moved, phi, math.acos(start[1][2] / numpy.linalg.norm(start[1])), start[2]])
+
+    jacobian = numpy.zeros((5, 6))
+    step_mm = SEED_DERIVATIVE_STEP * HIT_SIGMA_MM
+    for hit in range(3):
+        for coordinate in range(2):
+            above, below = [numpy.array(point, float) for point in points], [numpy.array(point, float) for point in points]
+            above[hit][coordinate + 1] += step_mm
+            below[hit][coordinate + 1] -= step_mm
+            jacobian[:, 2 * hit + coordinate] = (bound_of(replica_helix_at_start(above, slope_rule)) - bound_of(replica_helix_at_start(below, slope_rule))) * (HIT_SIGMA_MM / (2.0 * step_mm))
+    return position, direction, turn_per_mm, inflation ** 2 * jacobian @ jacobian.T
+
+
+def replica_roads(points, slope_rule: str, phi_term_sign: float, inflation: float) -> dict:
+    """seed_start_probe's two roads, sigma of u and v at each plane: each eigenvector of the covariance carried along, and each hit coordinate moved by one inflated sigma."""
+    position, direction, turn_per_mm, covariance = replica_seed_start(points, slope_rule, phi_term_sign, inflation)
+    centre = helix_crossings(position, direction, turn_per_mm)
+    axis_u, axis_v = curvilinear_axes_of(direction)
+    phi, theta = math.atan2(direction[1], direction[0]), math.acos(direction[2])
+    eigenvalues, eigenvectors = numpy.linalg.eigh(covariance)
+    of_covariance = numpy.zeros((PLANES, 2))
+    for eigenvalue, axis in zip(eigenvalues, eigenvectors.T):
+        if eigenvalue > 0.0:
+            step = math.sqrt(eigenvalue) * axis
+            moved_direction = numpy.array([math.cos(phi + step[2]) * math.sin(theta + step[3]), math.sin(phi + step[2]) * math.sin(theta + step[3]), math.cos(theta + step[3])])
+            of_covariance += (helix_crossings(position + step[0] * axis_u + step[1] * axis_v, moved_direction, turn_per_mm + step[4]) - centre) ** 2
+    of_hits = numpy.zeros((PLANES, 2))
+    for hit in range(3):
+        for coordinate in (1, 2):
+            moved_points = [numpy.array(point, float) for point in points]
+            moved_points[hit][coordinate] += inflation * HIT_SIGMA_MM
+            moved_position, moved_direction, moved_turn = replica_helix_at_start(moved_points, slope_rule)
+            of_hits += (helix_crossings(moved_position, moved_direction, moved_turn) - centre) ** 2
+    return {"covariance": numpy.sqrt(of_covariance), "hits": numpy.sqrt(of_hits), "centre": centre}
+
+
+CHORD_SLOPE_LINE = "const double chord_slope = (points[2].z() - points[0].z()) / std::hypot(points[2].x() - points[0].x(), points[2].y() - points[0].y());"
+PHI_TERM_LINE = "phi += centre->q_over_p * field_along_v_tesla * Acts::UnitConstants::T * centre->direction.dot(moved_mm);"
+DIAGNOSTIC_DEFINITIONS = {"T07_DIAGNOSTIC_NO_PHI_TERM"}  # stage 5e's one temporary build; it comes out at the next stage
+
+
+def recipe_choice_defects(header_text: str, source_text: str) -> list:
+    """The user's two changes after job 7496491 (decisions.md, "Recipe choice after stage 5d"), as the source must hold them for the recipe's build: the chord slope outside
+    any diagnostic block, the phi term with its sign and on in the recipe (only the no-phi build leaves it out), and ambiguity_most_shared_hits 2. A guard of the source text,
+    exact lines, not of behaviour: seed_start_probe in the build job judges the behaviour (RecipeChoiceInTheSource)."""
+    defects = []
+    if header_constant(header_text, "ambiguity_most_shared_hits") != 2:
+        defects.append(f"ambiguity_most_shared_hits is {header_constant(header_text, 'ambiguity_most_shared_hits'):g}, not 2")
+    used = set(re.findall(r"#\s*if(?:n?def\s+|\s+defined\s*\(\s*)(\w+)", source_text))
+    if used != DIAGNOSTIC_DEFINITIONS:
+        defects.append(f"diagnostic definitions {sorted(used)}, not {sorted(DIAGNOSTIC_DEFINITIONS)}")
+    lines = [line.strip() for line in source_text.splitlines()]
+    if CHORD_SLOPE_LINE not in lines or "tangent = Acts::Vector3(tangent.x() / transverse_before, tangent.y() / transverse_before, chord_slope).normalized();" not in lines:
+        defects.append("the slope along v is not the chord's")
+    if PHI_TERM_LINE not in lines:
+        defects.append("the phi term is absent or its sign is not +w (T . m)")
+    elif lines[lines.index(PHI_TERM_LINE) - 1] != "#ifndef T07_DIAGNOSTIC_NO_PHI_TERM":
+        defects.append("the phi term is not on in the recipe's build")
+    return defects
+
+
 def scored_event(tracks, particles) -> dict:
     """Section 7. tracks: reconstructed tracks in track-index order, {"hit_keys", "chi2", "ndf"}; particles: {"hit_keys": hits it left}, each hit key of one particle at most.
 
@@ -179,6 +306,12 @@ def scored_event(tracks, particles) -> dict:
     return {"reconstructable": len(reconstructable), "with_primary": sum(index in matched for index in reconstructable), "lost": [index for index in reconstructable if index not in matched],
             "reconstructed": len(tracks), "fakes": fakes, "matched": all_matched, "duplicates": all_matched - len(matched),
             "primaries": {particle: min(candidates)[3] for particle, candidates in matched.items()}}
+
+
+def hits_on_two_selected(event: dict) -> int:
+    """Hits held by more than one selected track of an event: what ambiguity_most_shared_hits 2 allows, at most one per track (track_finding.hpp)."""
+    held = Counter(key for item in event["found"] if item["outcome"] == "selected" for key in item["hit_keys"])
+    return sum(count > 1 for count in held.values())
 
 
 def loss_category(particle, event: dict) -> str:
@@ -299,14 +432,15 @@ class ConfigurationFromTheFixtureAlone(unittest.TestCase):
 
     def test_the_prior_of_a_late_seed_is_narrow_where_the_hits_put_it(self):
         """Job 7493849's cause. Carried to plane 1, a 3-4-5 seed has Lagrange weights 6, -8, 3, so 0.02 sqrt(109) = 0.209 mm, by matrix inverse here; along v, chord weights 2, -1, so
-        0.02 sqrt(5). The diagonal form added the 0.76 mm of the start to both. This holds job 7494285's model, not the shipped start: along v that reads 0.02 sqrt(9), last below."""
+        0.02 sqrt(5). The diagonal form added the 0.76 mm of the start to both. Along v this is the shipped start again since stage 5e, which takes the chord slope (track_finding.hpp);
+        from job 7494405 to job 7496491 it took the last two hits' slope, weights 1, 2, -2, 0.02 sqrt(9), and the 0.090 mm reading of job 7496491 was that. SeedStartClosedForm holds
+        the shipped function itself, and seed_start_probe reads it."""
         inflation = self.value("seed_prior_inflation")
         sigma_u, sigma_v = position_sigmas_at(seed_covariances((3, 4, 5), 1.0), 0.0)
         self.assertAlmostEqual(sigma_u, HIT_SIGMA_MM * math.sqrt(109.0), delta=1e-6)
         self.assertAlmostEqual(sigma_v, HIT_SIGMA_MM * math.sqrt(5.0), delta=1e-6)
         area = math.pi * self.value("finding_chi2_cut") * inflation ** 2 * sigma_u * sigma_v
         self.assertLess(area, 1.5)  # mm^2: under 0.08 hits at o3's 0.05 per mm^2
-        self.assertLess(area * math.sqrt(9.0 / 5.0), 1.5)  # the last two hits' slope along v, weights 1, 2, -2: seed_start_probe prints the window itself
 
     def test_a_correlation_with_the_wrong_sign_would_widen_that_window(self):
         along_u, along_v = seed_covariances((3, 4, 5), 1.0)
@@ -325,6 +459,97 @@ class ConfigurationFromTheFixtureAlone(unittest.TestCase):
         text = (NATIVE / "track_finding.cpp").read_text(encoding="utf-8")
         for word in ("sigma_68", "trimmed", "tail_of_pulls", "pull_scale", "target_"):
             self.assertNotIn(word, self.header + text)
+
+
+class RecipeChoiceInTheSource(unittest.TestCase):
+    """D1 stage 5e brief: a test fails on each defect alone: the phi term's sign flipped or the term absent, the slope back to the last two, shared hits back to 1. These guard the
+    source text only (stage 5e review m3): a reformat of the same code fails them, and a sign defect written elsewhere passes them. The behaviour is judged in the build job: the
+    phi term by seed_start_probe's 2 % agreement of its two roads (step probe-seed-start), the slope by that probe's chord judge along v, shared hits by the record's configuration
+    (DevelopmentRun and tests.adapters.test_acts_finding_diagnosis, test_the_configuration_moved_by_the_changed_keys_only), and all three together by the paired comparison."""
+
+    def setUp(self):
+        self.header = (NATIVE / "track_finding.hpp").read_text(encoding="utf-8")
+        self.source = (NATIVE / "track_finding.cpp").read_text(encoding="utf-8")
+
+    def test_the_shipped_source_holds_both_changes(self):
+        self.assertEqual(recipe_choice_defects(self.header, self.source), [])
+
+    def test_each_defect_alone_is_named(self):
+        defects = {
+            "shared hits 1": (self.header.replace("ambiguity_most_shared_hits = 2;", "ambiguity_most_shared_hits = 1;"), self.source),
+            "phi sign flipped": (self.header, self.source.replace(PHI_TERM_LINE, PHI_TERM_LINE.replace("phi +=", "phi -="))),
+            "phi absent": (self.header, self.source.replace(PHI_TERM_LINE, "")),
+            "phi off in the recipe": (self.header, self.source.replace("#ifndef T07_DIAGNOSTIC_NO_PHI_TERM", "#ifdef T07_DIAGNOSTIC_NO_PHI_TERM")),
+            "slope of the last two": (self.header, self.source.replace("(points[2].z() - points[0].z()) / std::hypot(points[2].x() - points[0].x(), points[2].y() - points[0].y())",
+                                                                       "(points[2].z() - points[1].z()) / std::hypot(points[2].x() - points[1].x(), points[2].y() - points[1].y())")),
+            "chord back under a diagnostic block": (self.header, self.source.replace("  const double transverse_before", "#ifdef T07_DIAGNOSTIC_CHORD_SLOPE\n  const double transverse_before", 1)),
+        }
+        for name, (header, source) in defects.items():
+            with self.subTest(defect=name):
+                self.assertNotEqual((header, source), (self.header, self.source))
+                self.assertEqual(len(recipe_choice_defects(header, source)), 1, recipe_choice_defects(header, source))
+
+
+class SeedStartClosedForm(unittest.TestCase):
+    """The shipped seed start, by the replica above, before any build: the phi term of D1 stage 5d report section 5 with the sign that brings the probe's two roads together,
+    and the chord along v. These judge the replica, not the C++: seed_start_probe.cpp reads the C++ in the build job (step probe-seed-start), and the paired comparison of
+    tests.adapters.test_acts_finding_diagnosis reads its effect. They hold the arithmetic the stage 5e predictions rest on."""
+
+    INFLATION = 1.5  # track_finding.hpp's seed_prior_inflation, read in test_the_replica_uses_the_shipped_inflation
+    WORST_TRACKS = ((1.5, 1.0, 0.15, 0.15), (1.5, 1.0, -0.15, 0.15), (1.5, -1.0, 0.15, -0.15), (1.5, -1.0, -0.15, -0.15))  # where job 7496491's probe failed worst
+
+    def points_of(self, momentum_gev: float, charge: float, slope_u: float, slope_v: float, triple) -> list:
+        turn_per_mm = charge / momentum_gev * refit_tests.GEV_PER_TESLA_MM
+        truth = helix_crossings(numpy.array([-100.0, 0.0, 0.0]), numpy.array([1.0, slope_u, slope_v]), turn_per_mm)
+        return [numpy.array([50.0 * (plane - 1), truth[plane - 1, 0], truth[plane - 1, 1]]) for plane in triple]
+
+    def worst_disagreement(self, slope_rule: str, phi_term_sign: float) -> float:
+        worst = 0.0
+        for track in self.WORST_TRACKS:
+            for triple in ((3, 4, 5), (6, 7, 8)):
+                roads = replica_roads(self.points_of(*track, triple), slope_rule, phi_term_sign, self.INFLATION)
+                worst = max(worst, float(numpy.max(numpy.abs(roads["covariance"] / roads["hits"] - 1.0))))
+        return worst
+
+    def test_the_replica_uses_the_shipped_inflation(self):
+        self.assertEqual(header_constant((NATIVE / "track_finding.hpp").read_text(encoding="utf-8"), "seed_prior_inflation"), self.INFLATION)
+
+    def test_the_replica_reads_job_7496491s_hit_roads(self):
+        """seed_start_probe.log of job 7496491, last two's slope, no term: hits u, v. The hit road does not depend on the term, and is the same for a mirror image."""
+        logged = {((1, 2, 3), 0.15, 0.15, 8): (1.28945, 0.298104), ((6, 7, 8), 0.15, 0.15, 1): (1.31934, 0.216193), ((3, 4, 5), 0.0, 0.0, 1): (0.312534, 0.089916), ((6, 7, 8), 0.0, 0.0, 1): (1.29562, 0.213717)}
+        for (triple, slope_u, slope_v, plane), expected in logged.items():
+            with self.subTest(triple=triple, plane=plane):
+                roads = replica_roads(self.points_of(1.5, 1.0, slope_u, slope_v, triple), "last-two", 0.0, self.INFLATION)
+                for value, reference in zip(roads["hits"][plane - 1], expected):
+                    self.assertAlmostEqual(value / reference, 1.0, delta=2e-4)
+
+    def test_with_the_term_the_roads_agree_within_the_probes_limit(self):
+        self.assertLess(self.worst_disagreement("chord", 1.0), SEED_SIGMA_AGREEMENT)
+
+    def test_the_term_flipped_or_left_out_fails_that_limit(self):
+        for sign in (-1.0, 0.0):
+            with self.subTest(sign=sign):
+                self.assertGreater(self.worst_disagreement("chord", sign), 10.0 * SEED_SIGMA_AGREEMENT)
+
+    def test_along_v_the_chord_slope_reads_the_chord_and_the_last_two_does_not(self):
+        """A 3-4-5 seed at plane 1, zero slope: chord weights 2, -1, 0.03 sqrt(5) = 0.067 mm; last two 1, 2, -2, 0.03 x 3 = 0.090 mm (job 7496491 read 0.0899)."""
+        points = self.points_of(1.5, 1.0, 0.0, 0.0, (3, 4, 5))
+        chord, last_two = 0.03 * math.sqrt(5.0), 0.09
+        self.assertAlmostEqual(replica_roads(points, "chord", 1.0, self.INFLATION)["covariance"][0, 1], chord, delta=0.002)
+        self.assertAlmostEqual(replica_roads(points, "last-two", 1.0, self.INFLATION)["covariance"][0, 1], last_two, delta=0.002)
+
+    def test_the_chord_start_meets_its_own_hits(self):
+        """seed_start_probe's seed_miss_limit_mm, 0.005. The chord's slope is low against the arc's by at most theta^2 / 24, theta the turn over the seed: under 1e-3 mm."""
+        worst = 0.0
+        for track in self.WORST_TRACKS:
+            for triple in ((1, 2, 3), (1, 2, 4), (3, 4, 5), (6, 7, 8)):
+                points = self.points_of(*track, triple)
+                centre = replica_roads(points, "chord", 1.0, self.INFLATION)["centre"]
+                worst = max(worst, max(float(numpy.max(numpy.abs(centre[point_plane - 1] - point[1:]))) for point, point_plane in zip(points, triple)))
+        self.assertLess(worst, 1e-3)
+        radius_mm = 1.5 / refit_tests.GEV_PER_TESLA_MM / math.sqrt(1.0 + 0.16 ** 2)
+        turn = 150.0 * math.hypot(1.0, 0.25) / radius_mm
+        self.assertLess((turn / 2.0) / math.sin(turn / 2.0) - 1.0, 5e-5)
 
 
 class SectionSevenScoring(unittest.TestCase):
@@ -360,6 +585,12 @@ class SectionSevenScoring(unittest.TestCase):
         self.assertEqual(by_chi2["primaries"][0], 1)
         by_index = scored_event([self.track([0, 1, 2, 3, 4, 5]), self.track([0, 1, 2, 3, 4, 6])], self.particles)
         self.assertEqual(by_index["primaries"][0], 0)
+
+    def test_a_hit_on_two_selected_tracks_is_counted_once(self):
+        event = {"found": [{"outcome": "selected", "hit_keys": [0, 1, 2]}, {"outcome": "selected", "hit_keys": [2, 3, 4]}, {"outcome": "evicted", "hit_keys": [3, 4, 5]}]}
+        self.assertEqual(hits_on_two_selected(event), 1)
+        event["found"][1]["outcome"] = "evicted"
+        self.assertEqual(hits_on_two_selected(event), 0)
 
     def test_a_lost_particle_says_why(self):
         particle = self.particles[0]
@@ -582,6 +813,7 @@ def stratum_reading(fixture: str, stratum: int, folder: Path) -> dict:
         tally.update({name: event[name] for name in ("seeds_found", "seeds_run", "seeds_skipped", "seeds_failed", "seeds_without_candidate", "seeds_truncated", "candidates", "selected")})
         tally["fit_failed"] += sum(item["outcome"] == "fit-failed" for item in event["found"])
         tally["evicted"] += sum(item["outcome"] == "evicted" for item in event["found"])
+        tally["hits_on_two_tracks"] += hits_on_two_selected(event)
         tally["truncated_events"] += int(event["seeds_truncated"] > 0 or event["seed_budget_reached"] or event["ambiguity_budget_reached"])
     for path in (data_file, truth_file, record_file, product_file):
         path.unlink()
@@ -611,7 +843,8 @@ class DevelopmentRun(unittest.TestCase):
                   f"matched {tally['matched']} duplicates {tally['duplicates']}", flush=True)
             print(f"FINDING-SEARCH {item['fixture']} stratum {item['stratum']} per event: seeds_found {tally['seeds_found'] / item['events']:.1f} seeds_run {tally['seeds_run'] / item['events']:.1f} "
                   f"candidates {tally['candidates'] / item['events']:.2f}; totals: seeds_failed {tally['seeds_failed']} seeds_without_candidate {tally['seeds_without_candidate']} "
-                  f"seeds_truncated {tally['seeds_truncated']} truncated_events {tally['truncated_events']} evicted {tally['evicted']} fit_failed {tally['fit_failed']} losses {dict(item['losses'])}", flush=True)
+                  f"seeds_truncated {tally['seeds_truncated']} truncated_events {tally['truncated_events']} evicted {tally['evicted']} fit_failed {tally['fit_failed']} "
+                  f"hits_on_two_tracks {tally['hits_on_two_tracks']} losses {dict(item['losses'])}", flush=True)
             worst = sorted(item["lost_by_missed"], key=lambda missed: -item["lost_by_missed"][missed])[:8]
             print(f"FINDING-LOSS-PATTERN {item['fixture']} stratum {item['stratum']} lost/tracks by missed planes: all hits kept {item['lost_by_missed'][()]}/{item['tracks_by_missed'][()]}; "
                   + ", ".join(f"{missed} {item['lost_by_missed'][missed]}/{item['tracks_by_missed'][missed]}" for missed in worst if missed), flush=True)
@@ -623,6 +856,8 @@ class DevelopmentRun(unittest.TestCase):
         self.assertEqual({item["events"] for item in self.readings}, {EVENTS_PER_BIN})
         self.assertEqual(len({item["configuration_sha256"] for item in self.readings}), 1)
         self.assertEqual(self.readings[0]["configuration"]["diagnostic_build"], "none")
+        self.assertEqual(self.readings[0]["configuration"]["ambiguity_most_shared_hits"], "2")  # in the record's configuration too (stage 5e brief)
+        self.assertEqual((self.readings[0]["configuration"]["seed_slope_along_v"], self.readings[0]["configuration"]["seed_covariance_phi_term"]), ("chord", "present"))  # review m5
 
     def test_no_reconstructable_particle_left_a_denominator(self):
         """Section 7's denominator is the generator's: clean holds every track, and the noise fixture about 0.99958 of them."""
