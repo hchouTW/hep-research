@@ -223,7 +223,7 @@ class Declaration(unittest.TestCase):
         self.assertEqual(doc["id"], "adapter:geant4")
         self.assertEqual(doc["owner_skill"], "hep-detector")
         lb = doc["licence_boundary"]
-        for phrase in ("Geant4 Software License, Version 1.0, 28 June 2006", "Apache-2.0", "Nothing of Geant4 is bundled",
+        for phrase in ("Geant4 Software License, Version 1.0, 28 June 2006", "Apache-2.0", "Geant4 itself is not bundled", "GEANT4-LICENSE.txt",
                        "separate executable", "JSON and CSV", "G5"):
             self.assertIn(phrase, lb)
         listed = set(doc["assets"])
