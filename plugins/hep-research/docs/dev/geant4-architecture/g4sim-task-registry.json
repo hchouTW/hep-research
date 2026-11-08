@@ -785,6 +785,13 @@
    "registered_at": "2026-11-08T19:58:54Z",
    "card_commit": "7700d14a",
    "reason": "after the second judged run, on the maintainer's word ('use real field map to quantity'; 'cleared the collaboration-derived lines for magnetic field'): the bore field integral's reference moves to the official AMS-02 map, 0.12856 T m; tolerance 20% unchanged; the failed run stays on record"
+  },
+  {
+   "card": "g4sim-tasks/S7.md",
+   "sha256": "48fb701eb0f261bf859f41a2e97a7c36f61f863d97cc20393c757e22e4bf09b1",
+   "registered_at": "2026-11-08T20:44:50Z",
+   "card_commit": "51c12fb7",
+   "reason": "after the second independent read, on the maintainer's word ('do it based on your recommendation'): gate 5 adds the SameMaterial entry negative and the XTR conservation pair; no other threshold changed; build 25 carries the fixes, and gates 1, 2, 4 and the cases are rerun as a reproduction check, not re-judged"
   }
  ]
 }
