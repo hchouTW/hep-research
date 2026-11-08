@@ -771,6 +771,13 @@
    "registered_at": "2026-11-08T13:53:25Z",
    "card_commit": "80c9e037",
    "reason": "before the judged runs: gate 1, 2 and 4 event counts derived from trials, gate 3 recorded as a gap (no qualifying TR yield data), the 27 rows of the reference-case table; the Section 19.2 thresholds unchanged"
+  },
+  {
+   "card": "g4sim-tasks/S7.md",
+   "sha256": "a80bf4e633783c9ae0f9c65eacecb64caf0e2ec58ca8bca1691b6a751ade66c6",
+   "registered_at": "2026-11-08T19:03:39Z",
+   "card_commit": "e9dc4c6d",
+   "reason": "after the first judged run, on the maintainer's word: new designs of gates 1 (power 0.99, 60,000 photons) and 4 (whole-bar source, expected-count mean test, 1,000 events), the RICH replica row; margins and alpha unchanged; the first run stays on record"
   }
  ]
 }
