@@ -83,6 +83,34 @@
      "additionalProperties": {
       "type": "object"
      }
+    },
+    "optical": {
+     "type": "object",
+     "additionalProperties": false,
+     "description": "G4OpticalParameters process activation (S7); a process left out keeps Geant4's default (active).",
+     "properties": {
+      "cerenkov": {
+       "type": "boolean"
+      },
+      "scintillation": {
+       "type": "boolean"
+      },
+      "absorption": {
+       "type": "boolean"
+      },
+      "rayleigh": {
+       "type": "boolean"
+      },
+      "mie": {
+       "type": "boolean"
+      },
+      "boundary": {
+       "type": "boolean"
+      },
+      "wls": {
+       "type": "boolean"
+      }
+     }
     }
    }
   },

@@ -113,6 +113,102 @@
        },
        "facts": {
         "type": "string"
+       },
+       "components": {
+        "type": "array",
+        "minItems": 1,
+        "maxItems": 3,
+        "description": "Each component's yield fraction, emission spectrum, rise and decay time (S7); the fractions add to 1.",
+        "items": {
+         "type": "object",
+         "required": [
+          "fraction",
+          "spectrum",
+          "rise_ns",
+          "decay_ns"
+         ],
+         "additionalProperties": false,
+         "properties": {
+          "fraction": {
+           "$ref": "#/$defs/quantity"
+          },
+          "spectrum": {
+           "$ref": "#/$defs/spectrum"
+          },
+          "rise_ns": {
+           "$ref": "#/$defs/quantity"
+          },
+          "decay_ns": {
+           "$ref": "#/$defs/quantity"
+          }
+         }
+        }
+       }
+      }
+     },
+     "optical": {
+      "type": "object",
+      "additionalProperties": false,
+      "description": "Optical property tables (Section 6.2.7, S7); a material that has them is used only inside optical_scope.",
+      "required": [
+       "rindex"
+      ],
+      "properties": {
+       "rindex": {
+        "$ref": "#/$defs/spectrum"
+       },
+       "absorption_length_mm": {
+        "$ref": "#/$defs/spectrum"
+       },
+       "rayleigh_length_mm": {
+        "$ref": "#/$defs/spectrum"
+       },
+       "mie": {
+        "type": "object",
+        "required": [
+         "length_mm",
+         "forward_g",
+         "backward_g",
+         "forward_ratio"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "length_mm": {
+          "$ref": "#/$defs/spectrum"
+         },
+         "forward_g": {
+          "$ref": "#/$defs/quantity"
+         },
+         "backward_g": {
+          "$ref": "#/$defs/quantity"
+         },
+         "forward_ratio": {
+          "$ref": "#/$defs/quantity"
+         }
+        }
+       },
+       "wls": {
+        "type": "object",
+        "required": [
+         "absorption_length_mm",
+         "emission",
+         "time_constant_ns"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "absorption_length_mm": {
+          "$ref": "#/$defs/spectrum"
+         },
+         "emission": {
+          "$ref": "#/$defs/spectrum"
+         },
+         "time_constant_ns": {
+          "$ref": "#/$defs/quantity"
+         }
+        }
+       },
+       "facts": {
+        "type": "string"
        }
       }
      }
@@ -636,6 +732,78 @@
      }
     }
    }
+  },
+  "optical_surfaces": {
+   "type": "object",
+   "description": "Optical surfaces (Section 6.2.7, S7): a skin around one template, or a border from one template into another; a border's templates are each placed once in the tree.",
+   "additionalProperties": {
+    "type": "object",
+    "required": [
+     "model",
+     "finish",
+     "type"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "skin": {
+      "type": "string"
+     },
+     "border": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "minItems": 2,
+      "maxItems": 2
+     },
+     "model": {
+      "enum": [
+       "glisur",
+       "unified"
+      ]
+     },
+     "finish": {
+      "enum": [
+       "polished",
+       "polishedfrontpainted",
+       "polishedbackpainted",
+       "ground",
+       "groundfrontpainted",
+       "groundbackpainted"
+      ]
+     },
+     "type": {
+      "enum": [
+       "dielectric_dielectric",
+       "dielectric_metal"
+      ]
+     },
+     "sigma_alpha_deg": {
+      "$ref": "#/$defs/quantity"
+     },
+     "reflectivity": {
+      "$ref": "#/$defs/spectrum"
+     },
+     "efficiency": {
+      "$ref": "#/$defs/spectrum"
+     },
+     "facts": {
+      "type": "string"
+     }
+    },
+    "oneOf": [
+     {
+      "required": [
+       "skin"
+      ]
+     },
+     {
+      "required": [
+       "border"
+      ]
+     }
+    ]
+   }
   }
  },
  "$defs": {
@@ -817,6 +985,11 @@
             "properties": {
              "spacer_mm": {
               "$ref": "#/$defs/quantity"
+             },
+             "material": {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_+-]*$",
+              "description": "A gap volume of this material (S7, optical_scope); without it the gap is the mother's material."
              }
             }
            }
@@ -1019,6 +1192,31 @@
        }
       }
      }
+    }
+   }
+  },
+  "spectrum": {
+   "type": "object",
+   "required": [
+    "energy_eV",
+    "value"
+   ],
+   "additionalProperties": false,
+   "description": "A property against photon energy (S7): energies rising, at least two points, one value per energy.",
+   "properties": {
+    "energy_eV": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/quantity"
+     },
+     "minItems": 2
+    },
+    "value": {
+     "type": "array",
+     "items": {
+      "$ref": "#/$defs/quantity"
+     },
+     "minItems": 2
     }
    }
   }

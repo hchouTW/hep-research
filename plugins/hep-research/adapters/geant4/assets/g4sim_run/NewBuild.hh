@@ -36,6 +36,7 @@
 #include "G4UserLimits.hh"
 #include "G4VUserDetectorConstruction.hh"
 #include "FieldMap.hh"
+#include "Optics.hh"
 #include "MiniJson.hh"
 
 namespace g4sim {
@@ -78,6 +79,7 @@ inline G4Material* NewMaterial(const std::string& name, const Value& materials) 
     if (ionisation.has("birks_mm_per_MeV")) material->GetIonisation()->SetBirksConstant(Decimal(ionisation.obj.at("birks_mm_per_MeV")) * mm / MeV);
     if (ionisation.has("mean_excitation_eV")) material->GetIonisation()->SetMeanExcitationEnergy(Decimal(ionisation.obj.at("mean_excitation_eV")) * eV);
   }
+  if (auto* table = OpticalTable(definition)) material->SetMaterialPropertiesTable(table);  // S7: optics, only inside optical_scope
   return material;
 }
 
@@ -148,9 +150,18 @@ class NewDetector : public G4VUserDetectorConstruction {
       // G4SIM_BUILDER_CONTROL=overlap is the negative test of Section 15.1: the IR layer refused such a placement, so the shift is applied here
       const double shift = Control() == "overlap" && static_cast<G4int>(placement.at("copy_number", "placement").num) == 1 ? -10. : 0.;
       fChildren[mother].push_back(name);
-      new G4PVPlacement(rotation, G4ThreeVector(Decimal(c[0]) + shift, Decimal(c[1]), Decimal(c[2])), fLogicals.at(name), name, fLogicals.at(mother), false,
-                        static_cast<G4int>(placement.at("copy_number", "placement").num), !std::getenv("G4SIM_NO_OVERLAP_CHECK"));
+      fPlaced[name].push_back(new G4PVPlacement(rotation, G4ThreeVector(Decimal(c[0]) + shift, Decimal(c[1]), Decimal(c[2])), fLogicals.at(name), name, fLogicals.at(mother), false,
+                                                static_cast<G4int>(placement.at("copy_number", "placement").num), !std::getenv("G4SIM_NO_OVERLAP_CHECK")));
     }
+    if (fPhysical.has("optical_surfaces")) BuildSurfaces(fPhysical.obj.at("optical_surfaces"), fLogicals, fPlaced);
+    // G4SIM_BUILDER_CONTROL=leak_scope, for the tests of Section 15.1 only: the world takes the optical material of a template in the scope, a
+    // specification check-spec refuses, so photons enter a volume outside optical_scope and only KillProcess stops them (GB16)
+    if (Control() == "leak_scope")
+      for (const auto& [name, logical] : fLogicals)
+        if (name != kWorld && logical->GetMaterial()->GetMaterialPropertiesTable()) {
+          fLogicals.at(kWorld)->SetMaterial(logical->GetMaterial());
+          break;
+        }
     std::printf("G4SIM_TREE_BUILT %.3f\n", Now());
     std::fflush(stdout);
     for (const auto& [name, logicals] : regions) {
@@ -273,6 +284,7 @@ class NewDetector : public G4VUserDetectorConstruction {
   const Value* fLimits;
   std::map<std::string, G4LogicalVolume*> fLogicals;
   G4VPhysicalVolume* fWorld = nullptr;
+  std::map<std::string, std::vector<G4VPhysicalVolume*>> fPlaced;  // each template's physical volumes, for border surfaces
   std::map<std::string, std::vector<std::string>> fChildren;
 };
 

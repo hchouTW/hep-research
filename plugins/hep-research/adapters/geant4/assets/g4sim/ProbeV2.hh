@@ -30,6 +30,7 @@
 #include "G4ProcessManager.hh"
 #include "G4ProcessVector.hh"
 #include "G4VProcess.hh"
+#include "Optics.hh"
 #include "SimProbe.hh"
 
 namespace g4sim {
@@ -211,7 +212,7 @@ inline ProbeV2Result RunProbeV2(const std::string& note, const std::set<std::str
   o << "{\"probe_version\": " << JsonQuote(kProbeV2Version) << ", \"recorded\": " << (res.recorded ? "true" : "false")
     << ", \"base\": " << body;
   if (res.recorded) {
-    o << ", \"materials\": " << Materials(w) << ", \"polyhedra\": " << Polyhedra(w) << ", \"curved_solids\": " << CurvedSolids(w) << ", \"regions\": " << Regions(w) << ", \"logical_fields\": "
+    o << ", \"materials\": " << Materials(w) << ", \"polyhedra\": " << Polyhedra(w) << ", \"curved_solids\": " << CurvedSolids(w) << ", \"optical\": " << OpticalRecord(w) << ", \"regions\": " << Regions(w) << ", \"logical_fields\": "
       << LogicalFields(declaredFieldVolumes) << ", \"processes\": " << Processes();
     if (w.BadGeometry()) res.error = "the geometry has an infinite or NaN number";
   }

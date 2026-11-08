@@ -142,6 +142,7 @@
   "assets/g4sim/PlaneCrossing.hh",
   "assets/g4sim/Philox.hh",
   "assets/g4sim/FieldMap.hh",
+  "assets/g4sim/Optics.hh",
   "assets/g4sim/ScintillationSplit.hh",
   "assets/g4sim/HitColumns.hh",
   "assets/g4sim_run/NewHits.hh"

@@ -37,6 +37,9 @@
 #include "G4VModularPhysicsList.hh"
 #include "G4VPhysicsConstructor.hh"
 #include "G4VUserActionInitialization.hh"
+#include "G4OpticalParameters.hh"
+#include "G4OpticalPhoton.hh"
+#include "G4OpticalPhysics.hh"
 #include "KillProcess.hh"
 #include "MiniJson.hh"
 #include "NewBuild.hh"
@@ -58,6 +61,7 @@ struct Shared {
   std::set<std::string> killedSecondaries;
   long long seed = 0, firstEvent = 0;
   bool hits = false;
+  bool optical = false;  // S7: G4OpticalPhysics is on, so the conservation file carries the optical-photon terms
   g4sim::TruthRules truth;
   std::vector<g4sim::ReferencePlane> planes;
 };
@@ -182,6 +186,7 @@ class Files : public G4UserRunAction {
     fCrossings = std::fopen(("crossings.thread" + thread + ".csv").c_str(), "w");
     Primaries() = std::fopen(("primaries.thread" + thread + ".csv").c_str(), "w");
     g4sim::Accounting::Thread().SetSeparated();
+    if (fShared.optical) g4sim::Accounting::Thread().SetOptical();
     g4sim::Accounting::Thread().Open("conservation.thread" + thread + ".csv");
     g4sim::ScorerSums::Thread().Configure(&fShared.scorers, &fShared.strides, fCells, fBoundary, fCrossings);
   }
@@ -237,6 +242,8 @@ class Steps : public G4UserSteppingAction {
   void UserSteppingAction(const G4Step* step) override {
     g4sim::Accounting& accounting = g4sim::Accounting::Thread();
     accounting.Step(step);
+    // an optical photon is its own class (Section 8.4): it enters no outflow, crossing or hit sum
+    if (step->GetTrack()->GetDefinition() == G4OpticalPhoton::OpticalPhotonDefinition()) return;
     g4sim::ScorerSums::Thread().BoundaryStep(step, accounting.Table());
     if (fHits) g4sim::HitRecorder::Thread().Step(step);
   }
@@ -311,6 +318,21 @@ void SetEmParameters(const Value& physics) {
   if (block.has("msc_muhad_range_factor")) parameters->SetMscMuHadRangeFactor(Decimal(block.obj.at("msc_muhad_range_factor")));
 }
 
+// S7: the run card's process activation, and finite rise times whenever a scintillation component has one (Section 6.2.7).
+void SetOpticalParameters(const Value& physics, const Value& physical) {
+  auto* parameters = G4OpticalParameters::Instance();
+  if (physics.has("optical")) {
+    static const std::map<std::string, std::string> processes = {{"cerenkov", "Cerenkov"}, {"scintillation", "Scintillation"}, {"absorption", "OpAbsorption"},
+                                                                 {"rayleigh", "OpRayleigh"}, {"mie", "OpMieHG"}, {"boundary", "OpBoundary"}, {"wls", "OpWLS"}};
+    for (const auto& [key, process] : processes)
+      if (physics.obj.at("optical").has(key)) parameters->SetProcessActivation(process, physics.obj.at("optical").obj.at(key).b);
+  }
+  for (const auto& [name, material] : physical.at("materials", "physical").obj)
+    if (material.has("scintillation") && material.obj.at("scintillation").has("components"))
+      for (const auto& component : material.obj.at("scintillation").obj.at("components").array("components"))
+        if (Decimal(component.at("rise_ns", "component")) > 0) parameters->SetScintFiniteRiseTime(true);
+}
+
 }  // namespace
 
 int NewRun(const Value& ir, const Value& card, const Value& request) {
@@ -367,6 +389,24 @@ int NewRun(const Value& ir, const Value& card, const Value& request) {
     std::vector<g4sim::PaiRequest> requests;
     for (const auto& item : physics.obj.at("pai").array("pai")) requests.push_back({item.at("region", "pai").str, item.at("particle", "pai").str, item.at("model", "pai").str});
     if (!requests.empty()) list->RegisterPhysics(new g4sim::PaiConstructor(requests));
+  }
+  bool optical = false;
+  if (physics.has("extra_constructors"))
+    for (const auto& name : physics.obj.at("extra_constructors").array("extra_constructors")) {
+      if (name.str != "G4OpticalPhysics") {
+        std::cerr << "unknown extra constructor " << name.str << std::endl;  // check-spec refuses it first; this is the program's own guard
+        return 2;
+      }
+      optical = true;
+    }
+  if (optical) {  // S7: optical physics, kept inside optical_scope by KillProcess (GB16)
+    list->RegisterPhysics(new G4OpticalPhysics(0));
+    shared.optical = true;
+    limits.scoped = true;
+    for (const auto& requirement : ir.at("physical", "ir").at("physics_requirements", "physical").array("physics_requirements"))
+      if (requirement.at("need", "requirement").str == "optical_scope")
+        for (const auto& name : requirement.at("templates", "optical_scope").array("templates")) limits.opticalScope.insert(name.str);
+    SetOpticalParameters(physics, ir.at("physical", "ir"));
   }
   if (limits.Any()) list->RegisterPhysics(new KillPhysics(limits));
   if (request.has("birks_active")) G4EmParameters::Instance()->SetBirksActive(true);

@@ -5,7 +5,7 @@ Usage: g4sim_run.py check-spec --run RUN.json [--detector DETECTOR.json]
        g4sim_run.py run --detector D.json --request R.json --run RUN.json --record PROBE.json --program PATH --work DIR
        g4sim_run.py geometry-check --detector D.json --run RUN.json --program PATH --work DIR
 check-spec holds the checks of Geant4 behavior (Appendix B); S2 has three: nothing may call SetSurfaceTolerance, the run card's seeding must
-equal the legacy block's, and optical physics is refused before S7. run needs a re-acquisition record for the legacy block (T1 class).
+equal the legacy block's, and optical physics (S7) comes only through G4OpticalPhysics with separated accounting. run needs a re-acquisition record for the legacy block (T1 class).
 A project with agent_policy, or --protected, runs this in protected mode. Prints JSON with a status key. Exit 0 ok, 1 the run failed,
 2 refused or bad input, 3 a missing dataset.
 """
@@ -42,6 +42,7 @@ from core.protected.guard import guard, protected_main  # noqa: E402
 DATASETS = ROOT / "contracts/rules/geant4_datasets.json"
 SURFACE_TOLERANCE = re.compile(r"surface.?tolerance|world.?maximum.?extent", re.IGNORECASE)
 OPTICAL = re.compile(r"optical", re.IGNORECASE)
+OPTICAL_CONSTRUCTOR = "G4OpticalPhysics"
 TIMING_FIELDS = ("wall_seconds", "cpu_seconds", "startup_seconds", "threads", "load_at_start")
 BEAM_ON_MARK = "G4SIM_BEAM_ON "
 MERGE_MARK = "G4SIM_MERGE_SECONDS "
@@ -58,14 +59,22 @@ def check_card(card: dict, legacy: dict | None = None) -> list[dict]:
     for command in commands:
         if SURFACE_TOLERANCE.search(command):
             findings.append({"code": "surface-tolerance", "path": "ui_commands", "message": f"would call SetSurfaceTolerance: {command}"})
-        if OPTICAL.search(command):
-            findings.append({"code": "optical-before-s7", "path": "ui_commands", "message": f"optical physics is refused before S7: {command}"})
+        if OPTICAL.search(command):  # optical settings come through the run card, where check-spec sees them
+            findings.append({"code": "optical-ui-command", "path": "ui_commands", "message": f"optical settings belong in physics.optical, not a UI command: {command}"})
     for key, value in physics.items():
         if SURFACE_TOLERANCE.search(key):
             findings.append({"code": "surface-tolerance", "path": f"physics.{key}", "message": "would call SetSurfaceTolerance"})
     for name in (*physics.get("extra_constructors", ()), physics.get("reference_list") or "", physics.get("em_constructor") or ""):
-        if OPTICAL.search(name):
-            findings.append({"code": "optical-before-s7", "path": "physics", "message": f"optical physics is refused before S7: {name}"})
+        if OPTICAL.search(name) and name != OPTICAL_CONSTRUCTOR:
+            findings.append({"code": "optical-constructor", "path": "physics", "message": f"optical physics comes only through {OPTICAL_CONSTRUCTOR}: {name}"})
+    if OPTICAL_CONSTRUCTOR in physics.get("extra_constructors", ()):
+        # the optical-photon class of Section 8.4 exists only in separated accounting; legacy accounting would book photons as ordinary tracks
+        if card.get("accounting") != "separated":
+            findings.append({"code": "optical-class-missing", "path": "accounting", "message": "optical physics needs separated accounting, which holds the optical-photon class"})
+        if legacy is not None:
+            findings.append({"code": "optical-legacy", "path": "physics", "message": "legacy mode keeps the old programs, which have no optical physics"})
+    elif "optical" in physics:
+        findings.append({"code": "optical-without-constructor", "path": "physics.optical", "message": f"physics.optical needs {OPTICAL_CONSTRUCTOR} in extra_constructors"})
     if legacy is not None and card.get("run", {}).get("seeding") != legacy.get("seeding"):
         findings.append({"code": "seeding-differs", "path": "run.seeding",
                          "message": f"the run card says {card.get('run', {}).get('seeding')!r}, the legacy block {legacy.get('seeding')!r}"})
@@ -245,6 +254,81 @@ def solid_problems(item: dict, node: dict, polyhedron: dict | None, curved: dict
     return problems
 
 
+OPTICAL_RELATIVE_TOLERANCE = 1e-12  # energies pass through Geant4's eV: x * eV / eV need not return x exactly
+SURFACE_ENUMS = {"model": {"glisur": 0, "unified": 1},
+                 "finish": {"polished": 0, "polishedfrontpainted": 1, "polishedbackpainted": 2, "ground": 3, "groundfrontpainted": 4, "groundbackpainted": 5},
+                 "type": {"dielectric_metal": 0, "dielectric_dielectric": 1}}
+
+
+def expected_optical_table(material: dict) -> dict:
+    """What OpticalTable (Optics.hh) builds from an IR material: {property: spectrum or number}, in the units of the write-back."""
+    table = {}
+    optical = material.get("optical", {})
+    for key, source in (("RINDEX", "rindex"), ("ABSLENGTH", "absorption_length_mm"), ("RAYLEIGH", "rayleigh_length_mm")):
+        if source in optical:
+            table[key] = optical[source]
+    if "mie" in optical:
+        table.update({"MIEHG": optical["mie"]["length_mm"], "MIEHG_FORWARD": optical["mie"]["forward_g"],
+                      "MIEHG_BACKWARD": optical["mie"]["backward_g"], "MIEHG_FORWARD_RATIO": optical["mie"]["forward_ratio"]})
+    if "wls" in optical:
+        table.update({"WLSABSLENGTH": optical["wls"]["absorption_length_mm"], "WLSCOMPONENT": optical["wls"]["emission"],
+                      "WLSTIMECONSTANT": optical["wls"]["time_constant_ns"]})
+    components = material.get("scintillation", {}).get("components")
+    if components:
+        table.update({"SCINTILLATIONYIELD": material["scintillation"]["yield_per_MeV"], "RESOLUTIONSCALE": material["scintillation"]["resolution_scale"]})
+        for number, component in enumerate(components, start=1):
+            table.update({f"SCINTILLATIONCOMPONENT{number}": component["spectrum"], f"SCINTILLATIONTIMECONSTANT{number}": component["decay_ns"],
+                          f"SCINTILLATIONRISETIME{number}": component["rise_ns"], f"SCINTILLATIONYIELD{number}": component["fraction"]})
+    return table
+
+
+def _close(held: str, wanted) -> bool:
+    got, value = float.fromhex(held), float(wanted)
+    return abs(got - value) <= OPTICAL_RELATIVE_TOLERANCE * max(abs(value), 1e-300)
+
+
+def _table_problems(where: str, held: dict, wanted: dict) -> list[str]:
+    problems = [f"{where}: {key} is {'missing' if key in wanted else 'not in the IR'}" for key in sorted(set(wanted) ^ set(held))]
+    for key in sorted(set(wanted) & set(held)):
+        if isinstance(wanted[key], dict):
+            pairs = list(zip(held[key]["energy_eV"], wanted[key]["energy_eV"])) + list(zip(held[key]["value"], wanted[key]["value"]))
+            if len(held[key]["value"]) != len(wanted[key]["value"]) or not all(_close(a, b) for a, b in pairs):
+                problems.append(f"{where}: {key} differs")
+        elif not _close(held[key], wanted[key]):
+            problems.append(f"{where}: {key} differs")
+    return problems
+
+
+def optical_problems(ir: dict, record: dict) -> list[str]:
+    """S7: each material's optical table and each optical surface as Geant4 holds them, against the IR (a wrong refractive index is the
+    negative test of Section 15.1)."""
+    physical = ir["physical"]
+    held = record.get("optical", {"materials": {}, "surfaces": {}})
+    problems = []
+    used = {node["material"] for node in physical["templates"].values()}
+    wanted = {name: expected_optical_table(material) for name, material in physical["materials"].items() if name in used}
+    wanted = {name: table for name, table in wanted.items() if table}
+    for name in sorted(set(wanted) | set(held["materials"])):
+        if name not in held["materials"] or name not in wanted:
+            problems.append(f"material {name}: an optical table {'was not built' if name in wanted else 'is not in the IR'}")
+            continue
+        problems += _table_problems(f"material {name}", held["materials"][name], wanted[name])
+    surfaces = physical.get("optical_surfaces", {})
+    for name in sorted(set(surfaces) | set(held["surfaces"])):
+        if name not in held["surfaces"] or name not in surfaces:
+            problems.append(f"surface {name}: {'not built' if name in surfaces else 'not in the IR'}")
+            continue
+        got, entry = held["surfaces"][name], surfaces[name]
+        if ("skin" in entry) != ("skin" in got) or got.get("skin", got.get("border")) != entry.get("skin", entry.get("border")):
+            problems.append(f"surface {name}: placed on {got.get('skin', got.get('border'))}, the IR says {entry.get('skin', entry.get('border'))}")
+        problems += [f"surface {name}: {key} differs" for key, names in SURFACE_ENUMS.items() if got[key] != names[entry[key]]]
+        alpha = math.radians(float(entry.get("sigma_alpha_deg", 0)))
+        if abs(float.fromhex(got["sigma_alpha_rad"]) - alpha) > TUBE_ANGLE_TOLERANCE_RAD:
+            problems.append(f"surface {name}: sigma_alpha differs")
+        problems += _table_problems(f"surface {name}", got["table"], {key.upper(): entry[key] for key in ("reflectivity", "efficiency") if key in entry})
+    return problems
+
+
 def tree_problems(ir: dict, record: dict, field_records: dict) -> list[str]:
     """What the write-back says that the IR does not: placements bit for bit, regions, and each thread's fields (Sections 6.2.8, 6.2.10)."""
     physical = ir["physical"]
@@ -346,7 +430,7 @@ def geometry_check(args) -> dict:
     if code != 0:
         return {"status": "failed", "exit_status": code}
     record = read_record(work / "probe-v2.json")
-    problems = tree_problems(checked["ir"], record, read_field_records(work)) + material_problems(record) + simulate_new.field_sample_problems(staged, work)
+    problems = tree_problems(checked["ir"], record, read_field_records(work)) + material_problems(record) + optical_problems(checked["ir"], record) + simulate_new.field_sample_problems(staged, work)
     overlaps = overlaps_in_log(work / "log.txt")
     if overlaps:
         problems.append(f"Geant4's overlap test reported {overlaps} overlap(s)")

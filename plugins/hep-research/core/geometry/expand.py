@@ -10,7 +10,7 @@ import copy
 from decimal import Decimal
 
 from core.canonical import check_hash_scope
-from core.geometry import bitfield, fieldmap, modules, params, rotation
+from core.geometry import bitfield, fieldmap, modules, optics, params, rotation
 from core.geometry.numbers import CONTEXT, EPSILON_MM, MINIMUM_GAP_MM, PRECISION, GeometryError, add, as_text, divide, multiply
 
 WORLD = "world"
@@ -298,8 +298,6 @@ def _stack(body: dict, mother_size: tuple, sizes: dict, values: _Values, path: s
         for at, item in enumerate(body["sequence"]):
             where = f"{path}/sequence/{at}"
             if isinstance(item, dict) and "spacer_mm" in item:
-                if "material" in item:
-                    raise GeometryError("module-not-open", "a gap volume with a material opens with optical_scope", where)
                 length = values.quantity(item["spacer_mm"], f"{where}/spacer_mm")
                 face = add(face, CONTEXT.multiply(Decimal(sign), length))
                 continue
@@ -538,6 +536,15 @@ def _field_vector(items: list, values: _Values, path: str) -> list:
     return [item if is_number(item) else as_text(value) for item, value in zip(items, values.vector(items, path))]
 
 
+def _touchables(tree: dict, order: list) -> dict:
+    """How many times each template is placed in the whole tree."""
+    touchables = {WORLD: 1}
+    for mother in order:
+        for item in tree[mother]:
+            touchables[item["template"]] = touchables.get(item["template"], 0) + touchables.get(mother, 0)
+    return touchables
+
+
 def _map_field(name: str, field: dict, nodes: dict, tree: dict, order: list, templates: dict) -> dict:
     """A field map in the IR (Section 6.2.8, S7): its hash and grid, never its path, and the one template whose local frame
     holds the grid. That template is placed once in the whole tree, so the frame is one transform, and its bounding box lies
@@ -550,10 +557,7 @@ def _map_field(name: str, field: dict, nodes: dict, tree: dict, order: list, tem
     if len(owners) != 1:
         raise GeometryError("field-map-frame", f"a field map is declared by exactly one template, not {owners}", where)
     owner = owners[0]
-    touchables = {WORLD: 1}
-    for mother in order:
-        for item in tree[mother]:
-            touchables[item["template"]] = touchables.get(item["template"], 0) + touchables.get(mother, 0)
+    touchables = _touchables(tree, order)
     if touchables.get(owner, 0) != 1:
         raise GeometryError("field-map-frame", f"template {owner!r} holds a field map, so it must be placed once in the tree, not {touchables.get(owner, 0)} times", where)
     for axis, ((low, high), half) in enumerate(zip(fieldmap.extent(grid), templates[owner]["half_mm"])):
@@ -566,13 +570,15 @@ def expand(spec: dict) -> dict:
     """The geometry-ir/1 document of a specification."""
     if spec.get("schema") != "detector-spec/1":
         raise GeometryError("schema", f"{spec.get('schema')!r} is not detector-spec/1")
-    spec = _with_shells(spec)
+    spec = optics.with_gap_volumes(_with_shells(spec))
     if WORLD in spec.get("templates", {}):
         raise GeometryError("template-name", f"{WORLD!r} is reserved", "/templates")
     values = _Values(spec.get("params", {}))
     nodes = {**spec.get("templates", {}), WORLD: spec["world"]}
     sizes = {name: _solid(node, values, f"/templates/{name}") for name, node in spec.get("templates", {}).items()}
     sizes[WORLD] = values.vector(spec["world"]["size_mm"], "/world/size_mm")
+    for name, material in spec.get("materials", {}).items():
+        optics.check_material(name, material)
     for name, node in nodes.items():
         if not node["material"].startswith(NIST_PREFIX) and node["material"] not in spec.get("materials", {}):
             raise GeometryError("material-unknown", f"{node['material']!r} is neither a NIST name nor declared", f"/templates/{name}")
@@ -599,12 +605,16 @@ def expand(spec: dict) -> dict:
                 "readout": _readout(spec, tree), "volume_id": {"rule": "sum of (copy_number + 1) * stride",
                                                                "strides": _level_strides(tree)},
                 "materials": _without_sources(spec.get("materials", {})), "physics_requirements": _requirements(spec, tags)}
+    touchables = _touchables(tree, order)
+    optics.scope_findings(spec, templates, physical["physics_requirements"], tree, lambda name: touchables.get(name, 0) == 1)
+    if spec.get("optical_surfaces"):  # optional, like fields: a specification with none keeps its geometry_id
+        physical["optical_surfaces"] = _without_sources(spec["optical_surfaces"])
     if spec.get("fields"):  # optional: a specification with no field keeps its geometry_id (Section 7.1)
         physical["fields"] = {name: _map_field(name, field, nodes, tree, order, templates) if "map" in field
                               else {**field, "b_tesla": _field_vector(field["b_tesla"], values, f"/fields/{name}/b_tesla")}
                               for name, field in spec["fields"].items()}
     marker = {"tags": {name: sorted(own) for name, own in tags.items() if own}, "derivations": spec.get("params", {}),
-              "source_of_facts": spec.get("source_of_facts", {}), "material_sources": _sources(spec.get("materials", {}))}
+              "source_of_facts": spec.get("source_of_facts", {}), "material_sources": {**_sources(spec.get("materials", {})), **_sources(spec.get("optical_surfaces", {}), "/optical_surfaces")}}
     document = {"schema": "geometry-ir/1", "physical": physical, "marker": marker}
     issues = check_hash_scope(document)
     if issues:

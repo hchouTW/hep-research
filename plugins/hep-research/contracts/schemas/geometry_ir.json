@@ -314,6 +314,10 @@
        }
       ]
      }
+    },
+    "optical_surfaces": {
+     "type": "object",
+     "description": "Optical surfaces (S7): skin or border, model, finish, type and tables, as the specification gives them"
     }
    }
   },

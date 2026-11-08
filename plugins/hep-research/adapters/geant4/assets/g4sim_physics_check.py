@@ -234,6 +234,17 @@ def event_range_findings(card: dict) -> list:
     return []
 
 
+def optical_findings(card: dict, requirements) -> list:
+    """A new-mode run (S7): G4OpticalPhysics is the one extra constructor g4sim_run builds, and it runs only with a specification that declares
+    optical_scope, the templates KillProcess keeps photons in (GB16). Any other name would be ignored by the program, so it is refused here."""
+    extra = card.get("physics", {}).get("extra_constructors", ())
+    findings = [{"code": "extra-constructor-unknown", "path": "physics.extra_constructors", "message": f"g4sim_run builds only G4OpticalPhysics, not {name}"}
+                for name in extra if name != "G4OpticalPhysics"]
+    if "G4OpticalPhysics" in extra and not any(requirement.get("need") == "optical_scope" for requirement in requirements):
+        findings.append({"code": "optical-no-scope", "path": "physics.extra_constructors", "message": "optical physics needs an optical_scope requirement in the specification"})
+    return findings
+
+
 def card_findings(card: dict, request: dict | None = None, regions=(), ionisation: dict | None = None, requirements=(), materials=None, selected_materials=None) -> list:
     """All of the above that the inputs at hand can judge. Without `ionisation` the PAI semantics wait for the effective config."""
     findings = limit_findings(card)
@@ -242,6 +253,7 @@ def card_findings(card: dict, request: dict | None = None, regions=(), ionisatio
         findings += pai_findings(requests, regions, ionisation, requirements)
     if request is not None:
         scorers = request.get("scorers", [])
+        findings += optical_findings(card, requirements)
         findings += time_cut_findings(card, scorers) + scorer_findings(scorers, materials, selected_materials) + source_findings(request.get("source", {})) + plane_findings(request) + truth_findings(request) + event_range_findings(card)
     return findings
 

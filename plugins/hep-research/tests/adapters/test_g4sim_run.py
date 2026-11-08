@@ -42,9 +42,28 @@ class CheckSpec(unittest.TestCase):
         document["ui_commands"] = ["/geometry/setWorldMaximumExtent 1000"]
         self.assertEqual(codes(driver.check_card(document)), ["surface-tolerance"])
 
-    def test_an_optical_constructor_is_refused_before_s7(self):
-        self.assertEqual(codes(driver.check_card(card(extra_constructors=["G4OpticalPhysics"]))), ["optical-before-s7"])
+    def test_optical_physics_needs_the_optical_photon_class(self):
+        # S7 lifts S2's rejection: G4OpticalPhysics with separated accounting, which holds the optical-photon class (Section 8.4)
+        separated = card(extra_constructors=["G4OpticalPhysics"])
+        separated["accounting"] = "separated"
+        self.assertEqual(driver.check_card(separated), [])
+        self.assertEqual(codes(driver.check_card(card(extra_constructors=["G4OpticalPhysics"]))), ["optical-class-missing"])
+        self.assertEqual(codes(driver.check_card(separated, {"seeding": "per-event"})), ["optical-legacy"])
         self.assertEqual(driver.check_card(card(extra_constructors=["G4StepLimiterPhysics"])), [])
+
+    def test_other_optical_routes_are_refused(self):
+        self.assertEqual(codes(driver.check_card(card(extra_constructors=["G4OpticalPhysicsLegacy"]))), ["optical-constructor"])
+        document = card()
+        document["ui_commands"] = ["/process/optical/cerenkov/setMaxPhotons 10"]
+        self.assertEqual(codes(driver.check_card(document)), ["optical-ui-command"])
+        self.assertEqual(codes(driver.check_card(card(optical={"rayleigh": False}))), ["optical-without-constructor"])
+
+    def test_a_new_mode_run_needs_optical_scope_and_knows_one_constructor(self):
+        optical = card(extra_constructors=["G4OpticalPhysics"])
+        scope = [{"need": "optical_scope", "templates": ["a"]}]
+        self.assertEqual(driver.physics_check.optical_findings(optical, scope), [])
+        self.assertEqual(codes(driver.physics_check.optical_findings(optical, [])), ["optical-no-scope"])
+        self.assertEqual(codes(driver.physics_check.optical_findings(card(extra_constructors=["G4StepLimiterPhysics"]), [])), ["extra-constructor-unknown"])
 
     def test_seeding_must_equal_the_legacy_block(self):
         self.assertEqual(codes(driver.check_card(card(), {"seeding": "stream"})), ["seeding-differs"])
@@ -373,6 +392,42 @@ class FieldMapReadBack(unittest.TestCase):
         (self.folder / "m.txt").write_bytes((self.folder / "m.txt").read_bytes() + b"\n")
         with self.assertRaises(ValueError):
             driver.simulate_new.stage_field_maps(self.checked, self.work)
+
+
+class OpticalReadBack(unittest.TestCase):
+    """S7: the optical tables and surfaces Geant4 holds against the IR; a wrong refractive index is the negative test of Section 15.1."""
+
+    IR = {"physical": {"templates": {"r": {"material": "glass"}}, "materials": {"glass": {"optical": {"rindex": {"energy_eV": ["1.5", "4"], "value": ["1.5", "1.52"]}}}},
+                       "optical_surfaces": {"pc": {"skin": "r", "model": "unified", "finish": "polished", "type": "dielectric_metal",
+                                                   "efficiency": {"energy_eV": ["1.5", "4"], "value": ["0.25", "0.25"]}}}}}
+
+    @staticmethod
+    def spectrum(energies, values):
+        return {"energy_eV": [value.hex() for value in energies], "value": [value.hex() for value in values]}
+
+    def record(self, index=(1.5, 1.52), finish=0):
+        return {"optical": {"materials": {"glass": {"RINDEX": self.spectrum((1.5, 4.0), index)}},
+                            "surfaces": {"pc": {"skin": "r", "model": 1, "finish": finish, "type": 0, "sigma_alpha_rad": (0.0).hex(),
+                                                "table": {"EFFICIENCY": self.spectrum((1.5, 4.0), (0.25, 0.25))}}}}}
+
+    def test_tables_built_as_the_ir_says_pass(self):
+        self.assertEqual(driver.optical_problems(self.IR, self.record()), [])
+
+    def test_a_wrong_refractive_index_is_caught(self):
+        self.assertEqual(driver.optical_problems(self.IR, self.record(index=(1.515, 1.5352))), ["material glass: RINDEX differs"])
+
+    def test_a_wrong_finish_and_a_missing_table_are_caught(self):
+        self.assertEqual(driver.optical_problems(self.IR, self.record(finish=3)), ["surface pc: finish differs"])
+        record = self.record()
+        del record["optical"]["materials"]["glass"]
+        self.assertEqual(driver.optical_problems(self.IR, record), ["material glass: an optical table was not built"])
+
+    def test_the_expected_table_is_what_the_builder_makes(self):
+        material = {"optical": {"rindex": {"energy_eV": ["1", "2"], "value": ["1.5", "1.5"]}, "wls": {"absorption_length_mm": {"energy_eV": ["1", "2"], "value": ["1", "1"]},
+                    "emission": {"energy_eV": ["1", "2"], "value": ["1", "0"]}, "time_constant_ns": "0.5"}},
+                    "scintillation": {"yield_per_MeV": "8000", "resolution_scale": "1", "components": [{"fraction": "1", "spectrum": {"energy_eV": ["1", "2"], "value": ["1", "1"]}, "rise_ns": "0.9", "decay_ns": "2.1"}]}}
+        self.assertEqual(sorted(driver.expected_optical_table(material)), ["RESOLUTIONSCALE", "RINDEX", "SCINTILLATIONCOMPONENT1", "SCINTILLATIONRISETIME1",
+                         "SCINTILLATIONTIMECONSTANT1", "SCINTILLATIONYIELD", "SCINTILLATIONYIELD1", "WLSABSLENGTH", "WLSCOMPONENT", "WLSTIMECONSTANT"])
 
 
 if __name__ == "__main__":
