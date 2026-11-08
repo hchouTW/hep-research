@@ -1,0 +1,77 @@
+{
+ "phase": "S7",
+ "case_id": "cms-endcap-csc",
+ "card_case": "CMS endcap CSC",
+ "level": "L2",
+ "label": "an approximate reconstruction from the cited claims, not the experiment's geometry",
+ "experiment": "CMS",
+ "subsystem": "endcap muon system, cathode strip chambers of both endcaps (LHC start-up configuration)",
+ "corresponding_kit": "endcap_disks",
+ "cited_claims": [
+  "detector-atlas:C020",
+  "detector-atlas:C142",
+  "detector-atlas:C143",
+  "detector-atlas:C144",
+  "detector-atlas:C145",
+  "detector-atlas:C146",
+  "detector-atlas:C147",
+  "detector-atlas:C148"
+ ],
+ "quantities": [
+  {
+   "name": "chambers",
+   "definition": "cathode strip chambers in the expanded IR (both endcaps)",
+   "reference": 468,
+   "tolerance_relative": 0,
+   "derivation": "72 ME1/1 + 72 ME1/2 + 72 ME1/3 + 36 ME2/1 + 72 ME2/2 + 36 ME3/1 + 72 ME3/2 + 36 ME4/1 (detector-atlas:C142, 2008); per endcap 36 per 10-degree ring and 18 per 20-degree ring (C147, 2010): 2 x (5 x 36 + 3 x 18) = 468",
+   "sources": [],
+   "independence": {
+    "verified": true,
+    "result": "a design count stated by the 2008 detector paper and, ring by ring, by the 2010 CSC paper; not a simulation output; it checks the ring placements"
+   },
+   "negative_control": {
+    "change": "one ME4/1 chamber fewer in each endcap",
+    "pointer": "/templates/endcap/children/15/placement/ring/n",
+    "value": 8,
+    "expected_shift_relative": -0.0043
+   },
+   "detection_limit_relative": 0,
+   "measure": {
+    "kind": "count",
+    "tag": "chamber"
+   }
+  },
+  {
+   "name": "gas_gaps",
+   "definition": "gas gaps (sensitive layers) in the expanded IR, both endcaps",
+   "reference": 2808,
+   "tolerance_relative": 0,
+   "derivation": "468 chambers (detector-atlas:C142) x 6 gas gaps between 7 cathode panels, one anode wire plane each (C143)",
+   "sources": [],
+   "independence": {
+    "verified": true,
+    "result": "design counts from the 2008 detector paper, not a simulation output"
+   },
+   "negative_control": {
+    "change": "ME2/2 and ME3/2 chambers (one template, 144 chambers) with 5 gas gaps",
+    "pointer": "/templates/chamber_me234_2/children/0/placement/linear/count",
+    "value": 5,
+    "expected_shift_relative": -0.0513
+   },
+   "detection_limit_relative": 0,
+   "measure": {
+    "kind": "count",
+    "tag": "gas_gap"
+   }
+  }
+ ],
+ "approximations": [
+  "chambers are trd envelopes with the 1997 TDR outer length and top and bottom widths (C148, design; the ME1/1 row belongs to a superseded ME1/1 design); the as-built dimensions are not confirmed by a read source",
+  "inside a chamber only the 6 gas gaps (9.5 mm, 7 mm in ME1/1; C143, C144) at the anode-plane separation of 25.4 mm (22 mm in ME1/1; C146) are modelled; the cathode panels (16.2 mm, C143), strips, wires, frames and electronics are not, and the chamber thickness is 6 x the separation",
+  "station z positions and ring radii are not sourced (figure labels unreadable): each ring sits on its own planes 200 mm apart, alternate chambers of a ring on two planes so that neighbours do not intersect, with the trapezoid's apex on the beam line; the two endcaps are translated copies 12 m apart",
+  "gas density from the ideal-gas law at 293.15 K and 101325 Pa (not sourced); the count does not depend on it",
+  "ME4/2 (installed after the 2008 description) is not included"
+ ],
+ "status": "comparison with cited values: not validated",
+ "result": null
+}

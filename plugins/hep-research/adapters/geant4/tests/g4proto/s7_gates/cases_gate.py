@@ -17,6 +17,7 @@ Exit 0 every case passes, 1 otherwise, 2 bad input.
 from __future__ import annotations
 
 import argparse
+from decimal import Decimal
 import csv
 import importlib.util
 import json
@@ -57,7 +58,7 @@ def card_rows() -> list:
             break
         cells = [cell.strip() for cell in line.strip("|").split("|")]
         reference = float(re.match(r"-?[\d,.]+(?:e-?\d+)?", cells[3]).group(0).replace(",", ""))
-        tolerance = 0.0 if cells[4] == "exact" else float(cells[4].split("%")[0]) / 100
+        tolerance = 0.0 if cells[4] == "exact" else float(Decimal(cells[4].split("%")[0]) / 100)  # decimal: 5.2% is 0.052, not 0.052000000000000005
         rows.append({"case": cells[0], "level": cells[1], "quantity": cells[2], "reference": reference, "tolerance": tolerance})
     return rows
 

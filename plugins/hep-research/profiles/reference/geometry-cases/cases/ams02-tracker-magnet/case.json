@@ -1,0 +1,148 @@
+{
+ "phase": "S7",
+ "case_id": "ams02-tracker-magnet",
+ "card_case": "AMS-02 tracker in the permanent magnet",
+ "level": "L1",
+ "label": "an approximate reconstruction from the cited claims, not the experiment's geometry",
+ "experiment": "AMS-02",
+ "subsystem": "silicon tracker, nine layers, in the field of the permanent magnet (parametrized approximation, not the AMS measured map)",
+ "corresponding_kit": "barrel_tracker",
+ "cited_claims": [
+  "ams02:C93",
+  "ams02:C94",
+  "ams02:C199",
+  "ams02:C200",
+  "ams02:C201",
+  "ams02:C202",
+  "ams02:C203",
+  "ams02:C204",
+  "ams02:C211"
+ ],
+ "quantities": [
+  {
+   "name": "silicon_layers",
+   "definition": "number of silicon layers (volumes tagged silicon_layer) in the expanded IR",
+   "reference": 9,
+   "tolerance_relative": 0,
+   "derivation": "nine layers L1-L9 (ams02:C94, S01 Section 1.2) of the flown configuration; the Layer-0 upgrade (ams02:C101) is not part of it",
+   "sources": [],
+   "independence": {
+    "verified": true,
+    "result": "a design count from the tier-1 review, not a simulation output; the case is built from the same count, so it checks how the layers are expressed across the field and no-field mothers, not physics"
+   },
+   "negative_control": {
+    "change": "the upgrade's Layer 0 (ams02:C101) added 100 mm above L1, mixing the 2026 configuration into the flown one",
+    "pointer": "/world/children/2/placement/explicit/positions_mm",
+    "value": [
+     [
+      "0",
+      "0",
+      "l1_z_mm + 100"
+     ],
+     [
+      "0",
+      "0",
+      "l1_z_mm - lever_arm_mm"
+     ]
+    ],
+    "expected_shift_relative": 0.111
+   },
+   "detection_limit_relative": 0,
+   "measure": {
+    "kind": "count",
+    "tag": "silicon_layer"
+   }
+  },
+  {
+   "name": "layer_silicon_x0",
+   "definition": "x/X0 of the silicon of one layer (L1, tag L1) at normal incidence",
+   "reference": 0.003202,
+   "tolerance_relative": 0.03,
+   "derivation": "0.030 cm (ams02:C202, 300 micrometres) / 9.370 cm (PDG silicon: 21.82 g/cm2 at 2.329 g/cm3, ams02:C208) = 0.0032017; consistent with about 0.4% X0 per plane, mostly silicon (thesis, research only) and about 1% X0 for an inner plane with two layers and its support (ams02:C203)",
+   "sources": [
+    {
+     "source": "PDG Atomic and Nuclear Properties, silicon (Si) (2024 web edition; ledger ams02:S74)",
+     "url": "https://pdg.lbl.gov/2024/AtomicNuclearProperties/HTML/silicon_Si.html",
+     "read_level": "page",
+     "verified": "2026-11-08",
+     "value": "radiation length 21.82 g/cm2 (9.370 cm at 2.329 g/cm3)"
+    }
+   ],
+   "independence": {
+    "verified": true,
+    "result": "independent of Geant4: the sensor thickness from the tracker proceedings, the radiation length PDG's tabulation (G4_Si's density 2.33 g/cm3 differs from PDG's 2.329 by 0.04%). The reference is not a Geant4 output. Geant4 computes radiation lengths with the same Tsai formula PDG tabulates, so agreement validates the geometry and the material definition (composition and density), not Geant4's radiation-length physics."
+   },
+   "negative_control": {
+    "change": "sensors 0.33 mm thick",
+    "pointer": "/params/silicon_mm",
+    "value": "0.33",
+    "expected_shift_relative": 0.1
+   },
+   "detection_limit_relative": 0.03,
+   "measure": {
+    "kind": "path_x0",
+    "request": "request.json"
+   },
+   "tolerance_basis": "fixed before any measurement: the reference uses the specification's thickness and PDG's silicon, so the residual is Geant4's radiation length of silicon (expected within 1%) and the geantino path (exact); 3% as the S6 TOF case"
+  },
+  {
+   "name": "bore_field_integral",
+   "definition": "integral of Bx along the magnet axis (x = y = 0) over |z| < 714 mm, in T m, from the field map Geant4 reads",
+   "reference": 0.098,
+   "tolerance_relative": 0.2,
+   "derivation": "BL^2 = 0.14 T m^2 'when considering the average Bx over |z| < 71.4 cm' (ams02:C201, Casadei thesis 2003, tier 3, the AMS-01 configuration of the same magnet), read with L the length of that interval, 1.428 m: average Bx = 0.14 / 1.428^2 T and its integral over the interval 0.14 / 1.428 = 0.09804 T m (derived; the thesis does not spell out L)",
+   "sources": [],
+   "independence": {
+    "verified": true,
+    "result": "independent of Geant4 and of this map's calibration: the reference is the thesis's bending power, not a Geant4 or map output, and the map is calibrated only at its centre (|B(0)| = 0.14 T, ams02:C93), so the integral tests the axial shape of the parametrized 64-sector Halbach model (length 800 mm, radii 557.5 and 649 mm) against the published bending power. Shared inputs: the outer radius and the magnetization law come from the same thesis. Known tension: the thesis's plateau of about 1.6 kG (Fig. 4.3 near 1.75 kG) against the tier-1 1.4 kG; a profile of the thesis's shape normalised to 1.4 kG would integrate to about 12.5% less than its BL^2 implies."
+   },
+   "negative_control": {
+    "change": "the map's bx and by columns exchanged (a frame mistake: the field along y), the file magnet-field-map-swapped.txt written by make_field_map.py --swap-xy",
+    "pointer": "/fields/magnet/map",
+    "value": {
+     "path": "magnet-field-map-swapped.txt",
+     "sha256": "d956b21f8e45d94abba61454888be4f54e75725d68813fb55aca97115a4d664b"
+    },
+    "expected_shift_relative": -1.0
+   },
+   "detection_limit_relative": 0.2,
+   "measure": {
+    "kind": "field_integral",
+    "field": "magnet",
+    "from_mm": [
+     "0",
+     "0",
+     "-714"
+    ],
+    "to_mm": [
+     "0",
+     "0",
+     "714"
+    ],
+    "component": "x"
+   },
+   "tolerance_basis": "fixed before any measurement and before the map's integral was computed: 12.5% from the thesis's 1.6 kG plateau against the tier-1 1.4 kG to which the map is calibrated, about 5% for the ideal uniform-magnetization model (no glue gaps, no block segmentation within a sector, the 1997-2010 field change below 1%) and the unstated definition of L; 20%"
+  }
+ ],
+ "approximations": [
+  "the field map is a PARAMETRIZED APPROXIMATION, NOT THE AMS MEASURED MAP (maintainer's decision, g4sim-approvals.md, 'AMS-02 tracker field map'): 64 uniformly magnetized sectors (ams02:C93) with the ideal Halbach law alpha = 2 phi + pi/2 of ams02:C200 turned by -90 degrees so that the central field lies along +x (ams02:C211; with the thesis's law as printed it lies along -y), shell 800 mm long, inner radius 557.5 mm (ams02:C93), outer radius 649 mm (ams02:C199, tier 3)",
+  "Br is not published: it is CALIBRATED so that |B(0)| = 0.14 T (ams02:C93), giving Br = 1.2377 T; the central field is therefore an input of the map, not a quantity",
+  "the map is a 15 x 15 x 31 grid (100 mm in x and y, 50 mm in z) in bore's frame, covering |x|, |y| <= 700 mm and |z| <= 750 mm; nodes inside the shell carry B = mu0 (H + M) and are not crossed by any track of the case; trilinear interpolation between nodes",
+  "the sign of Bx (+x) is a convention: no source read states it numerically (ams02:C211)",
+  "the field is attached to the template bore (a vacuum cylinder of the magnet's outer radius over |z| < 714 mm), placed once; L1 and L9 lie outside it in no field; the magnet's Nd-Fe-B shell is not a volume (no source read gives its composition or density, and no quantity crosses it)",
+  "layer z positions are assumed (ams02:C204: not published): L1 at +1600 mm and L9 3.0 m below it (ams02:C94), L2 at +600 mm, the inner planes at +300, 0 and -300 mm with layers 15 mm either side; no quantity depends on them",
+  "each layer is a 300 micrometre silicon disc of 500 mm radius (about 1 m diameter, ams02:C203); ladders, sensor gaps, hybrids and support planes are not modelled",
+  "the temperature dependence of the field (-0.09%/C, ams02:C175) is ignored"
+ ],
+ "field_map": {
+  "label": "parametrized approximation, not the AMS measured map",
+  "file": "magnet-field-map.txt",
+  "sha256": "bab68647d404d4a76c91951af9bf3680f9e6719cfdbdafbb4daf424c77228804",
+  "generator": "make_field_map.py (python3 with numpy; reproduces the file byte for byte)",
+  "control_file": "magnet-field-map-swapped.txt",
+  "control_sha256": "d956b21f8e45d94abba61454888be4f54e75725d68813fb55aca97115a4d664b",
+  "calibration": "Br chosen so that |B(0)| = 0.14 T along +x; Br = 1.2377 T"
+ },
+ "status": "comparison with cited values: not validated",
+ "result": null
+}

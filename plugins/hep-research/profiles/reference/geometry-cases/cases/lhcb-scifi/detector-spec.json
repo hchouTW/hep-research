@@ -1,0 +1,577 @@
+{
+ "schema": "detector-spec/1",
+ "params": {
+  "mat_width_mm": "130.6",
+  "mat_length_mm": "2424",
+  "mat_gap_mm": "0.35",
+  "mirror_gap_mm": "2",
+  "pitch_x_mm": "531",
+  "pitch_s_mm": "532",
+  "stereo_deg": "5",
+  "mat_mm": "1350 / 1000",
+  "honeycomb_mm": "19.7",
+  "cfrp_mm": "0.2",
+  "glue_mm": "260 / 1000",
+  "polyimide_mm": "25 / 1000",
+  "module_width_mm": "4 * mat_width_mm + 3 * mat_gap_mm",
+  "module_height_mm": "2 * mat_length_mm + mirror_gap_mm",
+  "module_thickness_mm": "2 * cfrp_mm + 2 * honeycomb_mm + 2 * glue_mm + 4 * polyimide_mm + mat_mm"
+ },
+ "materials": {
+  "Fibre_mat": {
+   "composition": {
+    "C": "0.92257",
+    "H": "0.07743"
+   },
+   "density_g_cm3": "1.18",
+   "facts": "polystyrene (C8H8) at table 7's mat density; the fibre and epoxy composite's composition is not sourced"
+  },
+  "Polyaramid_honeycomb": {
+   "composition": {
+    "C": "0.70580",
+    "H": "0.04231",
+    "N": "0.11758",
+    "O": "0.13431"
+   },
+   "density_g_cm3": "0.032",
+   "facts": "meta-aramid repeat unit C14H10N2O2 at table 7's density; the honeycomb's resin is not sourced"
+  },
+  "CFRP": {
+   "composition": {
+    "C": "1"
+   },
+   "density_g_cm3": "1.54",
+   "facts": "carbon only at table 7's CFRP density; the resin is not modelled"
+  },
+  "Glue": {
+   "composition": {
+    "C": "0.74094",
+    "H": "0.07107",
+    "O": "0.18799"
+   },
+   "density_g_cm3": "1.16",
+   "facts": "a bisphenol-A epoxy, C21H24O4, at table 7's density; the glue is not named"
+  },
+  "Polyimide": {
+   "composition": {
+    "C": "0.69114",
+    "H": "0.02636",
+    "N": "0.07327",
+    "O": "0.20923"
+   },
+   "density_g_cm3": "1.41",
+   "facts": "Kapton-type polyimide C22H10N2O5 at table 7's density"
+  }
+ },
+ "templates": {
+  "cfrp": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "module_width_mm",
+      "module_height_mm",
+      "cfrp_mm"
+     ]
+    }
+   },
+   "material": "CFRP",
+   "tags": [
+    "cfrp"
+   ]
+  },
+  "honeycomb": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "module_width_mm",
+      "module_height_mm",
+      "honeycomb_mm"
+     ]
+    }
+   },
+   "material": "Polyaramid_honeycomb",
+   "tags": [
+    "honeycomb"
+   ]
+  },
+  "glue": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "module_width_mm",
+      "module_height_mm",
+      "glue_mm"
+     ]
+    }
+   },
+   "material": "Glue",
+   "tags": [
+    "glue"
+   ]
+  },
+  "polyimide": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "module_width_mm",
+      "module_height_mm",
+      "polyimide_mm"
+     ]
+    }
+   },
+   "material": "Polyimide",
+   "tags": [
+    "polyimide"
+   ]
+  },
+  "mat": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "mat_width_mm",
+      "mat_length_mm",
+      "mat_mm"
+     ]
+    }
+   },
+   "material": "Fibre_mat",
+   "tags": [
+    "fibre_mat"
+   ]
+  },
+  "mat_layer": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "module_width_mm",
+      "module_height_mm",
+      "mat_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "tags": [
+    "mat_layer"
+   ],
+   "children": [
+    {
+     "template": "mat",
+     "placement": {
+      "grid": {
+       "n": [
+        4,
+        2
+       ],
+       "pitch_mm": [
+        "mat_width_mm + mat_gap_mm",
+        "mat_length_mm + mirror_gap_mm"
+       ],
+       "centre_mm": [
+        "0",
+        "0",
+        "0"
+       ],
+       "index": [
+        "imat",
+        "ihalf"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "module": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "module_width_mm",
+      "module_height_mm",
+      "module_thickness_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "tags": [
+    "module"
+   ],
+   "children": [
+    {
+     "placement": {
+      "stack": {
+       "axis": "z",
+       "from": "-z",
+       "sequence": [
+        "cfrp",
+        "honeycomb",
+        "glue",
+        "polyimide",
+        "polyimide",
+        "mat_layer",
+        "polyimide",
+        "polyimide",
+        "glue",
+        "honeycomb",
+        "cfrp"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "layer_x10": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "6400",
+      "4860",
+      "module_thickness_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "tags": [
+    "layer"
+   ],
+   "children": [
+    {
+     "template": "module",
+     "placement": {
+      "linear": {
+       "count": 10,
+       "pitch_mm": [
+        "pitch_x_mm",
+        "0",
+        "0"
+       ],
+       "start_mm": [
+        "0 - 9 * pitch_x_mm / 2",
+        "0",
+        "0"
+       ],
+       "index": "module"
+      }
+     }
+    }
+   ]
+  },
+  "layer_s10": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "6400",
+      "4860",
+      "module_thickness_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "tags": [
+    "layer"
+   ],
+   "children": [
+    {
+     "template": "module",
+     "placement": {
+      "linear": {
+       "count": 10,
+       "pitch_mm": [
+        "pitch_s_mm",
+        "0",
+        "0"
+       ],
+       "start_mm": [
+        "0 - 9 * pitch_s_mm / 2",
+        "0",
+        "0"
+       ],
+       "index": "module"
+      }
+     }
+    }
+   ]
+  },
+  "layer_x12": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "6400",
+      "4860",
+      "module_thickness_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "tags": [
+    "layer"
+   ],
+   "children": [
+    {
+     "template": "module",
+     "placement": {
+      "linear": {
+       "count": 12,
+       "pitch_mm": [
+        "pitch_x_mm",
+        "0",
+        "0"
+       ],
+       "start_mm": [
+        "0 - 11 * pitch_x_mm / 2",
+        "0",
+        "0"
+       ],
+       "index": "module"
+      }
+     }
+    }
+   ]
+  },
+  "layer_s12": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "6400",
+      "4860",
+      "module_thickness_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "tags": [
+    "layer"
+   ],
+   "children": [
+    {
+     "template": "module",
+     "placement": {
+      "linear": {
+       "count": 12,
+       "pitch_mm": [
+        "pitch_s_mm",
+        "0",
+        "0"
+       ],
+       "start_mm": [
+        "0 - 11 * pitch_s_mm / 2",
+        "0",
+        "0"
+       ],
+       "index": "module"
+      }
+     }
+    }
+   ]
+  },
+  "station_10": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "7000",
+      "5600",
+      "400"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "tags": [
+    "station"
+   ],
+   "children": [
+    {
+     "template": "layer_x10",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "-150"
+       ]
+      }
+     }
+    },
+    {
+     "template": "layer_s10",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "-50"
+       ],
+       "rotation": {
+        "axis": "z",
+        "angle_deg": "stereo_deg"
+       }
+      }
+     }
+    },
+    {
+     "template": "layer_s10",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "50"
+       ],
+       "rotation": {
+        "axis": "z",
+        "angle_deg": "0 - stereo_deg"
+       }
+      }
+     }
+    },
+    {
+     "template": "layer_x10",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "150"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "station_12": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "7000",
+      "5600",
+      "400"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "tags": [
+    "station"
+   ],
+   "children": [
+    {
+     "template": "layer_x12",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "-150"
+       ]
+      }
+     }
+    },
+    {
+     "template": "layer_s12",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "-50"
+       ],
+       "rotation": {
+        "axis": "z",
+        "angle_deg": "stereo_deg"
+       }
+      }
+     }
+    },
+    {
+     "template": "layer_s12",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "50"
+       ],
+       "rotation": {
+        "axis": "z",
+        "angle_deg": "0 - stereo_deg"
+       }
+      }
+     }
+    },
+    {
+     "template": "layer_x12",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "150"
+       ]
+      }
+     }
+    }
+   ]
+  }
+ },
+ "world": {
+  "material": "G4_Galactic",
+  "size_mm": [
+   "8000",
+   "8000",
+   "6000"
+  ],
+  "children": [
+   {
+    "template": "station_10",
+    "placement": {
+     "single": {
+      "centre_mm": [
+       "0",
+       "0",
+       "-1500"
+      ]
+     }
+    }
+   },
+   {
+    "template": "station_10",
+    "placement": {
+     "single": {
+      "centre_mm": [
+       "0",
+       "0",
+       "0"
+      ]
+     }
+    }
+   },
+   {
+    "template": "station_12",
+    "placement": {
+     "single": {
+      "centre_mm": [
+       "0",
+       "0",
+       "1500"
+      ]
+     }
+    }
+   }
+  ]
+ },
+ "source_of_facts": {
+  "/params/mat_width_mm": "claim:detector-atlas:C161",
+  "/params/mat_length_mm": "claim:detector-atlas:C161",
+  "/params/mat_gap_mm": "claim:detector-atlas:C162",
+  "/params/mirror_gap_mm": "claim:detector-atlas:C162",
+  "/params/pitch_x_mm": "claim:detector-atlas:C162",
+  "/params/pitch_s_mm": "claim:detector-atlas:C162",
+  "/params/stereo_deg": "claim:detector-atlas:C157",
+  "/params/mat_mm": "claim:detector-atlas:C163",
+  "/params/honeycomb_mm": "claim:detector-atlas:C160",
+  "/params/cfrp_mm": "claim:detector-atlas:C160",
+  "/params/glue_mm": "claim:detector-atlas:C163",
+  "/params/polyimide_mm": "claim:detector-atlas:C163",
+  "/materials/Fibre_mat/density_g_cm3": "claim:detector-atlas:C163",
+  "/materials/Polyaramid_honeycomb/density_g_cm3": "claim:detector-atlas:C163",
+  "/materials/CFRP/density_g_cm3": "claim:detector-atlas:C163",
+  "/materials/Glue/density_g_cm3": "claim:detector-atlas:C163",
+  "/materials/Polyimide/density_g_cm3": "claim:detector-atlas:C163"
+ }
+}

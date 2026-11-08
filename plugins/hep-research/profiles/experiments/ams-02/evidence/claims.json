@@ -5558,5 +5558,362 @@
     "limitations": "Absence in the sources read. Digitizing the CAD drawing would be an estimate, not a cited value.",
     "verification_strength": "full-text",
     "numeric_quotation_allowed": false
+  },
+  {
+    "id": "ams02:C199",
+    "claim": "AMS-01 permanent magnet (the same magnet AMS-02 flies): inner and outer radii of the shell ri = 55.7 cm and ro = 64.9 cm; built from 2 cm thick Nd-Fe-B layers of about 5 x 5 cm2 blocks cut in 64 orientations, glued rings reaching 80 cm height",
+    "claim_types": [
+      "detector_fact"
+    ],
+    "claim_type_note": null,
+    "support_kind": "third_party_context",
+    "source_ids": [
+      "ams02:S69"
+    ],
+    "location": "Section 4.2.1, pp. 61-62",
+    "scope": {
+      "text": "permanent magnet shell, AMS-01 configuration",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "AMS-02 tracker in the permanent magnet, reference case (g4sim S7)"
+    },
+    "limitations": "Tier-3 thesis; the only source read for the outer radius. Its inner radius 55.7 cm agrees with S01's 1115 mm inner diameter (C93) to 0.2 mm; use C93 for the inner radius.",
+    "verification_strength": "full-text",
+    "numeric_quotation_allowed": true,
+    "last_reviewed": "2026-11-08",
+    "evidence_status": "public-fact"
+  },
+  {
+    "id": "ams02:C200",
+    "claim": "AMS-01 permanent magnet magnetization law: the cylindrical shell has a magnetization of constant modulus whose direction in the (x, y) plane is alpha = 2 phi + pi/2 (eq. 4.11, an ideal Halbach dipole), giving an internal field B = Br ln(ri/ro) as printed (eq. 4.12; physically Br ln(ro/ri)), Br being the ring's residual flux density",
+    "claim_types": [
+      "detector_fact"
+    ],
+    "claim_type_note": null,
+    "support_kind": "third_party_context",
+    "source_ids": [
+      "ams02:S69"
+    ],
+    "location": "Section 4.2.1, eqs. (4.11)-(4.12), pp. 60-61",
+    "scope": {
+      "text": "permanent magnet field model, AMS-01 configuration",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "AMS-02 tracker in the permanent magnet, reference case (g4sim S7)"
+    },
+    "limitations": "Tier-3 thesis; S01 (Fig. 3b, C93) shows only the 64 sector directions, without the word Halbach. The printed log ratio is inverted. The thesis's axes are not tied to S01's frame: with this law the central field of a sector model lies along -y in S01-style axes, so a map in the AMS frame (field along x, C211) needs the law turned by 90 degrees. Br is not given.",
+    "verification_strength": "full-text",
+    "numeric_quotation_allowed": true,
+    "last_reviewed": "2026-11-08",
+    "evidence_status": "public-fact"
+  },
+  {
+    "id": "ams02:C201",
+    "claim": "AMS-01-era magnet field profile: Bx roughly constant (about 1.6 kG) within +-30 cm along z, decreasing rapidly for |z| > 40 cm to about 200 G at |z| ~ 65 cm; nominal bending power BL^2 = 0.14 T m^2 'when considering the average Bx over |z| < 71.4 cm'",
+    "claim_types": [
+      "detector_fact",
+      "performance_number"
+    ],
+    "claim_type_note": null,
+    "support_kind": "third_party_context",
+    "source_ids": [
+      "ams02:S69"
+    ],
+    "location": "Section 4.2.1, p. 62 and Fig. 4.3",
+    "scope": {
+      "text": "magnet axial field profile and bending power, AMS-01 configuration",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "AMS-02 tracker in the permanent magnet, reference case (g4sim S7)"
+    },
+    "limitations": "Tier-3 thesis of the AMS-01 configuration; whether Fig. 4.3 is measured or computed is not stated. CONFLICT: the 1.6 kG plateau (Fig. 4.3 peaks near 1.75 kG, read by eye) disagrees with 1.4 kG at the centre in C93, C112, C175, while S01 states the field did not change within 1% since 1997; tier 1 wins for the central field. The definition of L in BL^2 is not spelled out; read as the length of the averaging interval, 1.428 m, it gives an integral of Bx over |z| < 71.4 cm of 0.14/1.428 = 0.098 T m (derived, not stated).",
+    "verification_strength": "full-text",
+    "numeric_quotation_allowed": true,
+    "last_reviewed": "2026-11-08",
+    "evidence_status": "public-fact"
+  },
+  {
+    "id": "ams02:C202",
+    "claim": "AMS-02 tracker silicon sensors are 300 micrometres thick (72 x 41 mm2 in S70, 72 x 40 mm2 in S71), arranged into 192 ladders of 9 to 15 sensors",
+    "claim_types": [
+      "detector_fact"
+    ],
+    "claim_type_note": null,
+    "support_kind": "third_party_context",
+    "source_ids": [
+      "ams02:S70",
+      "ams02:S71"
+    ],
+    "location": "S70 Section 2, p. 3; S71 Section 2, p. 3",
+    "scope": {
+      "text": "tracker sensor thickness",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "AMS-02 tracker in the permanent magnet, reference case (g4sim S7)"
+    },
+    "limitations": "Proceedings (tier 3), nominal; the sensor width and count differ between proceedings (2264 in S70, 2284 in other proceedings), so they are not used.",
+    "verification_strength": "full-text",
+    "numeric_quotation_allowed": true,
+    "last_reviewed": "2026-11-08",
+    "evidence_status": "public-fact"
+  },
+  {
+    "id": "ams02:C203",
+    "claim": "AMS-02 tracker layers: nine almost circular layers of about 1 m diameter; seven layers are inside the magnet bore on four support planes; the total thickness of one internal plane, two silicon layers and the support, is about 1% X0",
+    "claim_types": [
+      "detector_fact"
+    ],
+    "claim_type_note": null,
+    "support_kind": "third_party_context",
+    "source_ids": [
+      "ams02:S70"
+    ],
+    "location": "Section 2, pp. 3-4",
+    "scope": {
+      "text": "tracker layer outline and inner planes",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "AMS-02 tracker in the permanent magnet, reference case (g4sim S7)"
+    },
+    "limitations": "Proceedings (tier 3); '~1 m' and 'about 1%' are approximate. The support planes' structure (honeycomb, carbon skins: C94) has no thickness or density in the sources read.",
+    "verification_strength": "full-text",
+    "numeric_quotation_allowed": true,
+    "last_reviewed": "2026-11-08",
+    "evidence_status": "public-fact"
+  },
+  {
+    "id": "ams02:C204",
+    "claim": "AMS-02 tracker layer positions: no source read gives the z of layers L1-L9 or of the three inner planes numerically; S01 gives only their order (L1 on top of the TRD, L2 above the magnet, L3-L8 on three planes inside it, L9 between the RICH and the ECAL) and the 3.0 m L1-L9 lever arm (C94), and its Fig. 4a is schematic",
+    "claim_types": [
+      "detector_fact"
+    ],
+    "claim_type_note": null,
+    "support_kind": "absence_search",
+    "source_ids": [
+      "ams02:S01",
+      "ams02:S70",
+      "ams02:S71"
+    ],
+    "location": "searched S01 Section 1.2 and Fig. 4a, S70, S71",
+    "scope": {
+      "text": "search result, 2026-11-08",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "AMS-02 tracker in the permanent magnet, reference case (g4sim S7)"
+    },
+    "limitations": "Absence in the sources read. Candidates not reachable: Alpat et al., NIM A 613 (2010) 207; Lubelsmeyer et al., NIM A 654 (2011) 639. A case placing layers uses assumed z values that no quantity depends on.",
+    "verification_strength": "full-text",
+    "numeric_quotation_allowed": false,
+    "last_reviewed": "2026-11-08",
+    "evidence_status": "public-fact"
+  },
+  {
+    "id": "ams02:C205",
+    "claim": "AMS-02 RICH radiators (pre-flight design): silica aerogel n = 1.050 and sodium fluoride n = 1.334; lateral conical mirror of reflectivity above 85% at 420 nm",
+    "claim_types": [
+      "detector_fact"
+    ],
+    "claim_type_note": null,
+    "support_kind": "third_party_context",
+    "source_ids": [
+      "ams02:S72"
+    ],
+    "location": "Section 2, p. 2",
+    "scope": {
+      "text": "RICH radiator refractive indices",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "AMS-02 RICH, reference case L3 (g4sim S7)"
+    },
+    "limitations": "Pre-flight proceedings (tier 3); S01 (C70) gives the flown indices to two decimals, 1.05 and 1.33, consistent with these. The wavelength at which the index is quoted and its dispersion are not stated.",
+    "verification_strength": "full-text",
+    "numeric_quotation_allowed": true,
+    "last_reviewed": "2026-11-08",
+    "evidence_status": "public-fact"
+  },
+  {
+    "id": "ams02:C206",
+    "claim": "AMS-02 RICH tile arrangement: no source read gives the positions of the 92 aerogel and 16 NaF tiles; S01 says only that the NaF tiles form a central radiator surrounded by the aerogel tiles (C70)",
+    "claim_types": [
+      "detector_fact"
+    ],
+    "claim_type_note": null,
+    "support_kind": "absence_search",
+    "source_ids": [
+      "ams02:S01",
+      "ams02:S72"
+    ],
+    "location": "searched S01 Section 1.6, S72",
+    "scope": {
+      "text": "search result, 2026-11-08",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "AMS-02 RICH, reference case L3 (g4sim S7)"
+    },
+    "limitations": "Absence in the sources read; the website (S17 family) and Giovacchini NIM A 1055 (2023) 168434 were not read for the layout. A case arranging the tiles uses a constructed layout chosen to give the published counts.",
+    "verification_strength": "full-text",
+    "numeric_quotation_allowed": false,
+    "last_reviewed": "2026-11-08",
+    "evidence_status": "public-fact"
+  },
+  {
+    "id": "ams02:C207",
+    "claim": "AMS-02 ECAL composite: lead-fibre-glue volume composition 1:0.57:0.15, average density 6.8 g/cm3, total active size 68.5 x 68.5 x 16.7 cm3, about 638 kg, total depth 17 radiation lengths (0.6 nuclear interaction lengths)",
+    "claim_types": [
+      "detector_fact"
+    ],
+    "claim_type_note": null,
+    "support_kind": "third_party_context",
+    "source_ids": [
+      "ams02:S73"
+    ],
+    "location": "Section 2, p. 2",
+    "scope": {
+      "text": "ECAL composition and depth",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "AMS-02 ECAL, reference case L1 (g4sim S7)"
+    },
+    "limitations": "Proceedings (tier 3). The glue's composition is not given. INTERNAL TENSION: with PDG densities (lead 11.35, polystyrene 1.060 g/cm3) and glue near 1.06 g/cm3 the stated volume ratio implies 7.04 g/cm3, 3.6% above the stated 6.8; the 17 X0 is consistent with S01 (C71) and C50.",
+    "verification_strength": "full-text",
+    "numeric_quotation_allowed": true,
+    "last_reviewed": "2026-11-08",
+    "evidence_status": "public-fact"
+  },
+  {
+    "id": "ams02:C208",
+    "claim": "PDG material tables used for derived material budgets: lead density 11.35 g/cm3, radiation length 6.37 g/cm2; silicon 2.329 g/cm3, 21.82 g/cm2 (9.370 cm); polyethylene (CH2)n 44.77 g/cm2, mass fractions H 0.143711, C 0.856289; polystyrene 1.060 g/cm3, 43.79 g/cm2; silica aerogel (generic entry, rho = 0.2 g/cm3, 0.97 SiO2 and 0.03 H2O by mass) 27.25 g/cm2",
+    "claim_types": [
+      "general_method"
+    ],
+    "claim_type_note": null,
+    "support_kind": "general_method",
+    "source_ids": [
+      "ams02:S74"
+    ],
+    "location": "PDG AtomicNuclearProperties pages lead_Pb, silicon_Si, polyethylene, polystyrene, silica_aerogel (2024)",
+    "scope": {
+      "text": "material constants",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "derived material budgets of the g4sim S7 AMS-02 cases"
+    },
+    "limitations": "General tables, not AMS hardware; the aerogel entry is PDG's generic 0.2 g/cm3 aerogel, not the AMS-02 tiles, whose density is not in the sources read. Polypropylene has the same (CH2)n composition as polyethylene, so the polyethylene radiation length applies to the TRD fleece's fibre blend.",
+    "verification_strength": "page",
+    "numeric_quotation_allowed": true,
+    "last_reviewed": "2026-11-08",
+    "evidence_status": "public-fact"
+  },
+  {
+    "id": "ams02:C209",
+    "claim": "Sodium fluoride: density 2.558 g/cm3 (standard state), molar mass 41.988 g/mol",
+    "claim_types": [
+      "general_method"
+    ],
+    "claim_type_note": null,
+    "support_kind": "general_method",
+    "source_ids": [
+      "ams02:S75"
+    ],
+    "location": "infobox",
+    "scope": {
+      "text": "material constant",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "RICH NaF radiator material, g4sim S7 case"
+    },
+    "limitations": "Tier-6 encyclopaedia value for the crystal; not a property of the AMS-02 tiles; enters no case quantity (the Cherenkov angle depends on the index, not the density).",
+    "verification_strength": "page",
+    "numeric_quotation_allowed": true,
+    "last_reviewed": "2026-11-08",
+    "evidence_status": "public-fact"
+  },
+  {
+    "id": "ams02:C210",
+    "claim": "Derived (computation of the g4sim S7 ECAL case, not a published value): from the 1:0.57:0.15 lead-fibre-glue volume ratio (C207) with PDG densities (C208), fibre and glue both taken as polystyrene (1.060 g/cm3), the mass fractions are lead 0.93699 and polystyrene 0.06301; at the published 6.8 g/cm3 and 166.5 mm (C71) the depth is 16.8 X0 by PDG radiation lengths, at the composition's own 7.04 g/cm3 it is 17.4 X0",
+    "claim_types": [
+      "general_method"
+    ],
+    "claim_type_note": null,
+    "support_kind": "general_method",
+    "source_ids": [
+      "ams02:S73",
+      "ams02:S74",
+      "ams02:S01"
+    ],
+    "location": "computation by the g4sim S7 case author, 2026-11-08",
+    "scope": {
+      "text": "derived ECAL mass fractions and depth",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "AMS-02 ECAL, reference case L1 (g4sim S7)"
+    },
+    "limitations": "Derived. The glue as polystyrene is an assumption (its composition is not published); replacing it by an epoxy-like CHO resin changes the radiation length by less than 0.5%.",
+    "verification_strength": "page",
+    "numeric_quotation_allowed": true,
+    "last_reviewed": "2026-11-08",
+    "evidence_status": "public-fact"
+  },
+  {
+    "id": "ams02:C211",
+    "claim": "AMS coordinate system: concentric with the centre of the magnet; the x axis is parallel to the main component of the magnetic field, the z axis parallel to the magnet bore; the (y-z) plane is the bending plane",
+    "claim_types": [
+      "detector_fact"
+    ],
+    "claim_type_note": null,
+    "support_kind": "primary",
+    "source_ids": [
+      "ams02:S01"
+    ],
+    "location": "Section 1, p. 6",
+    "scope": {
+      "text": "AMS frame",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "AMS-02 tracker in the permanent magnet, reference case (g4sim S7)"
+    },
+    "limitations": "Defines axes only; the sign of Bx relative to the frame is not stated numerically in the sources read.",
+    "verification_strength": "full-text",
+    "numeric_quotation_allowed": true,
+    "last_reviewed": "2026-11-08",
+    "evidence_status": "public-fact"
+  },
+  {
+    "id": "ams02:C212",
+    "claim": "AMS-02 TRD radiator given as 22 mm of fleece (10 micrometre polypropylene/polyethylene fibres, 0.06 g/cm3, LRP 375 BK) interleaved between the 20 layers; the TRD is 80 cm high, 200 cm wide at its top plane and 150 cm at its bottom plane",
+    "claim_types": [
+      "detector_fact"
+    ],
+    "claim_type_note": null,
+    "support_kind": "third_party_context",
+    "source_ids": [
+      "ams02:S76"
+    ],
+    "location": "Section 1, pp. 1-2",
+    "scope": {
+      "text": "TRD radiator and envelope",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "AMS-02 TRD, reference case L1 (g4sim S7)"
+    },
+    "limitations": "Proceedings (tier 3). CONFLICT: S01 (tier 1, C67) gives 20 mm; the case uses 20 mm and uses 22 mm only as its negative control.",
+    "verification_strength": "full-text",
+    "numeric_quotation_allowed": true,
+    "last_reviewed": "2026-11-08",
+    "evidence_status": "public-fact"
   }
 ]

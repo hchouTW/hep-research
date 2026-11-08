@@ -1,0 +1,74 @@
+{
+ "phase": "S7",
+ "case_id": "cms-phase1-bpix",
+ "card_case": "CMS Phase-1 BPIX",
+ "level": "L2",
+ "label": "an approximate reconstruction from the cited claims, not the experiment's geometry",
+ "experiment": "CMS",
+ "subsystem": "Phase-1 barrel pixel detector (BPIX), four layers of sensors",
+ "corresponding_kit": "barrel_tracker",
+ "cited_claims": [
+  "detector-atlas:C149",
+  "detector-atlas:C150",
+  "detector-atlas:C151",
+  "detector-atlas:C152",
+  "detector-atlas:C153",
+  "eic:C26"
+ ],
+ "quantities": [
+  {
+   "name": "modules",
+   "definition": "BPIX modules in the expanded IR (four layers)",
+   "reference": 1184,
+   "tolerance_relative": 0,
+   "derivation": "96 + 224 + 352 + 512 (detector-atlas:C149, Table 1); built as 12, 28, 44 and 64 ladders of eight modules (C150); 148 ladders (C150) = 1184 / 8",
+   "sources": [],
+   "independence": {
+    "verified": true,
+    "result": "a design count from the collaboration's detector paper, not a simulation output; it checks how the ring and linear placements are expressed"
+   },
+   "negative_control": {
+    "change": "layer 3 with 42 ladders instead of 44 (336 modules)",
+    "pointer": "/world/children/2/placement/ring/n",
+    "value": 42,
+    "expected_shift_relative": -0.0135
+   },
+   "detection_limit_relative": 0,
+   "measure": {
+    "kind": "count",
+    "tag": "module"
+   }
+  },
+  {
+   "name": "sensor_x0",
+   "definition": "x/X0 of one layer-1 sensor at normal incidence (a geantino along the sensor normal through its centre region)",
+   "reference": 0.003042,
+   "tolerance_relative": 0.01,
+   "derivation": "0.0285 cm (approximately 285 um, detector-atlas:C153) x 2.329 g/cm3 / 21.82 g/cm2 (PDG silicon, eic:C26) = 0.003042",
+   "sources": [],
+   "independence": {
+    "verified": true,
+    "result": "independent of Geant4: CMS's design thickness and PDG's tabulation. The paper's material budget (section 2, Figure 3) is a GEANT4 simulation output and the 0.8% X0 of an L2 module does not state its method; neither is used. Geant4 computes radiation lengths with the same Tsai formula, so agreement validates the geometry and the material definition, not Geant4's radiation-length physics."
+   },
+   "negative_control": {
+    "change": "the FPIX sensor thickness of 300 um (detector-atlas:C153)",
+    "pointer": "/params/sensor_thickness_mm",
+    "value": "0.300",
+    "expected_shift_relative": 0.0526
+   },
+   "detection_limit_relative": 0.01,
+   "measure": {
+    "kind": "path_x0",
+    "request": "request.json"
+   }
+  }
+ ],
+ "approximations": [
+  "only the sensors: readout chips, HDI, cables, ladders' carbon-fibre and cooling are not modelled",
+  "each module is the full 18.6 x 66.6 mm2 sensor (C152), 285 um thick, as a flat silicon box of PDG density 2.329 g/cm3; the eight modules of a ladder are spaced 540/8 = 67.5 mm along z (C150)",
+  "ladders alternate between two radii 2.9 mm apart around the cited average radius of each layer; 2.9 mm is the difference of layer 1's inner two module radii (27.5 and 30.4 mm, C151), used for every layer because the other layers' radii are not sourced (Fig. 16 is a drawing); layer 1's third radius (32.6 mm) and the r-phi overlap of 0.5-1.0 mm are not reproduced",
+  "no tilt of the ladders and no tilted or flipped modules"
+ ],
+ "status": "comparison with cited values: not validated",
+ "result": null
+}

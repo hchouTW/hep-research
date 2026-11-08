@@ -4622,5 +4622,787 @@
    "valid_for": "CMS ECAL: detector as described in 2008 (as built for LHC start-up)",
    "conditions": null
   }
+ },
+ {
+  "id": "detector-atlas:C141",
+  "claim": "PbWO4 crystals emit blue-green scintillation light with a broad maximum at 420-430 nm; the refractive index is n = 2.29 around the peak wavelength.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S02"
+  ],
+  "location": "section 4.1, page 90",
+  "scope": {
+   "text": "CMS ECAL: detector as described in 2008 (as built for LHC start-up)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": "A single index around the peak; the dispersion n(lambda) and the birefringence of PbWO4 (refs [64,66,67] of the paper, not read) are not given. The 1997 TDR (detector-atlas:S13) quotes 2.3 at 500 nm in section 2.3.1, page 35, and 2.30 without a wavelength in Table 1.1 (C131).",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "ECAL",
+   "quantity": "emission maximum; refractive index around the peak",
+   "value": "420-430; 2.29",
+   "unit": "nm; 1",
+   "kind": "design",
+   "valid_for": "CMS ECAL: detector as described in 2008 (as built for LHC start-up)",
+   "conditions": "material property (measured; the paper cites refs [64,66,67])"
+  }
+ },
+ {
+  "id": "detector-atlas:C142",
+  "claim": "The CMS Endcap Muon system consists of 468 cathode strip chambers: 72 ME1/1, 72 ME1/2, 72 ME1/3, 36 ME2/1, 72 ME2/2, 36 ME3/1, 72 ME3/2 and 36 ME4/1; the chambers are trapezoidal and cover 10 or 20 degrees in phi, and all except the ME1/3 ring overlap to give contiguous phi coverage.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S02"
+  ],
+  "location": "section 7.2, page 197",
+  "scope": {
+   "text": "CMS endcap muon CSCs: detector as described in 2008 (LHC start-up configuration, without ME4/2)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": "Counts for both endcaps together; the per-endcap split (half of each) is stated in C147. ME4/2, added later, is not part of this description.",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "muon system (CSC)",
+   "quantity": "chambers (both endcaps); per ring ME1/1, ME1/2, ME1/3, ME2/1, ME2/2, ME3/1, ME3/2, ME4/1; phi coverage per chamber",
+   "value": "468; 72, 72, 72, 36, 72, 36, 72, 36; 10 or 20",
+   "unit": "chambers; chambers; degrees",
+   "kind": "design",
+   "valid_for": "CMS endcap muon CSCs: detector as described in 2008 (LHC start-up configuration, without ME4/2)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C143",
+  "claim": "The CSCs are multiwire proportional chambers of 6 anode wire planes interleaved among 7 cathode panels; the panels are 16.2 mm thick (a 12.7 mm polycarbonate honeycomb core with two 1.6 mm FR4 skins) and define 6 gas gaps of 9.5 mm.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S02"
+  ],
+  "location": "section 7.2, page 197; section 7.2.1, page 200",
+  "scope": {
+   "text": "CMS endcap muon CSCs: detector as described in 2008 (LHC start-up configuration, without ME4/2)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": "The 9.5 mm gap is for the chambers other than ME1/1 (C144). 16.2 + 9.5 = 25.7 mm differs by 1.2% from the anode-plane separation of 2.54 cm stated in C146; not resolved.",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "muon system (CSC)",
+   "quantity": "anode wire planes; cathode panels; panel thickness; gas gap",
+   "value": "6; 7; 16.2; 9.5",
+   "unit": "planes; panels; mm; mm",
+   "kind": "design",
+   "valid_for": "CMS endcap muon CSCs: detector as described in 2008 (LHC start-up configuration, without ME4/2)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C144",
+  "claim": "In the ME1/1 chambers the gas gap is 7 mm and the anode wires are tilted by 29 degrees.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S02"
+  ],
+  "location": "section 7.2.1, page 202",
+  "scope": {
+   "text": "CMS endcap muon CSCs: detector as described in 2008 (LHC start-up configuration, without ME4/2)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": "Supersedes the 1997 design (6 mm, 25 degrees; S15).",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "muon system (CSC)",
+   "quantity": "ME1/1 gas gap; ME1/1 wire tilt",
+   "value": "7; 29",
+   "unit": "mm; degrees",
+   "kind": "design",
+   "valid_for": "CMS endcap muon CSCs: detector as described in 2008 (LHC start-up configuration, without ME4/2)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C145",
+  "claim": "The nominal CSC gas mixture is 40% Ar + 50% CO2 + 10% CF4.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S02"
+  ],
+  "location": "section 7.2.1, page 201",
+  "scope": {
+   "text": "CMS endcap muon CSCs: detector as described in 2008 (LHC start-up configuration, without ME4/2)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": "Temperature and pressure of operation are not stated in the read passage.",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "muon system (CSC)",
+   "quantity": "gas mixture Ar; CO2; CF4",
+   "value": "40; 50; 10",
+   "unit": "% (volume)",
+   "kind": "design",
+   "valid_for": "CMS endcap muon CSCs: detector as described in 2008 (LHC start-up configuration, without ME4/2)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C146",
+  "claim": "The distance between CSC anode planes is 2.54 cm, except for the ME1/1 chambers, for which it is 2.2 cm.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S14"
+  ],
+  "location": "section 2, page 2",
+  "scope": {
+   "text": "CMS endcap muon CSCs: chambers as installed for the 2008 cosmic-ray run (2010 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "muon system (CSC)",
+   "quantity": "anode-plane separation; ME1/1 anode-plane separation",
+   "value": "2.54; 2.2",
+   "unit": "cm; cm",
+   "kind": "design",
+   "valid_for": "CMS endcap muon CSCs: chambers as installed for the 2008 cosmic-ray run (2010 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C147",
+  "claim": "Per endcap there are 36 chambers in each of the rings ME1/1, ME1/2, ME1/3, ME2/2 and ME3/2, and 18 in each of ME2/1, ME3/1 and ME4/1; strips per chamber are 80, except 64 in ME1/1b and ME1/3 and 48 in ME1/1a.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S14"
+  ],
+  "location": "Table 1, page 3",
+  "scope": {
+   "text": "CMS endcap muon CSCs: chambers as installed for the 2008 cosmic-ray run (2010 paper)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": "ME1/1 is listed as ME1/1a and ME1/1b (one chamber, two strip sections). 2 x (5 x 36 + 3 x 18) = 468 agrees with C142.",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "muon system (CSC)",
+   "quantity": "chambers per ring per endcap (10-degree rings; 20-degree rings); strips per chamber",
+   "value": "36; 18; 80 (64 ME1/1b and ME1/3; 48 ME1/1a)",
+   "unit": "chambers; chambers; strips",
+   "kind": "design",
+   "valid_for": "CMS endcap muon CSCs: chambers as installed for the 2008 cosmic-ray run (2010 paper)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C148",
+  "claim": "TDR Table 4.1.1 gives the chamber outer dimensions (length; top width; bottom width) as ME1/1 1680; 613; 311 mm, ME1/2 1800; 1078; 740 mm, ME1/3 1900; 1192; 859 mm, ME2/1 2065; 1534; 751 mm, ME3/1 1845; 1534; 835 mm, ME4/1 1665; 1534; 903 mm and ME2/2, ME3/2, ME4/2 3380; 1530; 895 mm.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S15"
+  ],
+  "location": "Table 4.1.1, page 145",
+  "scope": {
+   "text": "CMS endcap muon CSCs: design of 1997 (muon TDR; partly superseded)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": "1997 design; the ME1/1 entries belong to a superseded ME1/1 design (C144). Whether these are the as-built dimensions is not confirmed by the 2008 paper, which states only that the largest chambers (ME2/2, ME3/2) are about 3.4 x 1.5 m2.",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "muon system (CSC)",
+   "quantity": "chamber length; top width; bottom width per ring (ME1/1, ME1/2, ME1/3, ME2/1, ME3/1, ME4/1, ME234/2)",
+   "value": "1680; 613; 311 | 1800; 1078; 740 | 1900; 1192; 859 | 2065; 1534; 751 | 1845; 1534; 835 | 1665; 1534; 903 | 3380; 1530; 895",
+   "unit": "mm",
+   "kind": "design",
+   "valid_for": "CMS endcap muon CSCs: design of 1997 (muon TDR; partly superseded)",
+   "conditions": "design (1997)"
+  }
+ },
+ {
+  "id": "detector-atlas:C149",
+  "claim": "The Phase-1 barrel pixel detector has four layers L1-L4 at average radii of 29, 68, 109 and 160 mm, each extending from -270 to +270 mm in z, with 96, 224, 352 and 512 modules.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S16"
+  ],
+  "location": "section 2, page 4; Table 1, page 5",
+  "scope": {
+   "text": "CMS Phase-1 pixel detector (installed 2017): barrel pixel (BPIX) as described in the 2021 paper",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": "Radii are layer averages; ladders alternate between inner and outer radii (C150, C151).",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "tracker (Phase-1 pixel, BPIX)",
+   "quantity": "layer radii L1-L4; z extent; modules per layer L1-L4",
+   "value": "29; 68; 109; 160; -270 to +270; 96; 224; 352; 512",
+   "unit": "mm; mm; modules",
+   "kind": "design",
+   "valid_for": "CMS Phase-1 pixel detector (installed 2017): barrel pixel (BPIX) as described in the 2021 paper",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C150",
+  "claim": "Each BPIX ladder supports eight detector modules; the mechanics consists of 148 ladders with 25 variants in shape; the ladders are 540 mm long, alternate between inner and outer positions and give between 0.5 mm and 1.0 mm of overlap in r-phi in the active area of the sensors.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S16"
+  ],
+  "location": "section 4.1, pages 27-28",
+  "scope": {
+   "text": "CMS Phase-1 pixel detector (installed 2017): barrel pixel (BPIX) as described in the 2021 paper",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": "The inner and outer radii are given for layer 1 only (C151).",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "tracker (Phase-1 pixel, BPIX)",
+   "quantity": "modules per ladder; ladders; ladder length; r-phi overlap",
+   "value": "eight; 148; 540; 0.5 to 1.0",
+   "unit": "modules; ladders; mm; mm",
+   "kind": "design",
+   "valid_for": "CMS Phase-1 pixel detector (installed 2017): barrel pixel (BPIX) as described in the 2021 paper",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C151",
+  "claim": "In the innermost BPIX layer the radial positions of the modules are 27.5, 30.4 and 32.6 mm.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S16"
+  ],
+  "location": "section 4.1, page 27",
+  "scope": {
+   "text": "CMS Phase-1 pixel detector (installed 2017): barrel pixel (BPIX) as described in the 2021 paper",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "tracker (Phase-1 pixel, BPIX)",
+   "quantity": "L1 module radial positions",
+   "value": "27.5; 30.4; 32.6",
+   "unit": "mm",
+   "kind": "design",
+   "valid_for": "CMS Phase-1 pixel detector (installed 2017): barrel pixel (BPIX) as described in the 2021 paper",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C152",
+  "claim": "A BPIX module is a planar silicon sensor of 18.6 x 66.6 mm2 (active area 16.2 x 64.8 mm2) with 160 x 416 pixels, bump-bonded to 2 x 8 readout chips, mounted with the sensor surface parallel to the beam and its long side along the beam line.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S16"
+  ],
+  "location": "section 3, page 8; section 2, page 4",
+  "scope": {
+   "text": "CMS Phase-1 pixel detector (installed 2017): barrel pixel (BPIX) as described in the 2021 paper",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "tracker (Phase-1 pixel, BPIX)",
+   "quantity": "sensor size; active area; pixels",
+   "value": "18.6 x 66.6; 16.2 x 64.8; 160 x 416",
+   "unit": "mm2; mm2; pixels",
+   "kind": "design",
+   "valid_for": "CMS Phase-1 pixel detector (installed 2017): barrel pixel (BPIX) as described in the 2021 paper",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C153",
+  "claim": "The BPIX sensors were produced on approximately 285 um thick wafers; the FPIX sensors are 300 um thick.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S16"
+  ],
+  "location": "section 3.1, pages 9-10",
+  "scope": {
+   "text": "CMS Phase-1 pixel detector (installed 2017): barrel pixel (BPIX) as described in the 2021 paper",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "tracker (Phase-1 pixel, BPIX)",
+   "quantity": "BPIX sensor thickness; FPIX sensor thickness",
+   "value": "approximately 285; 300",
+   "unit": "um; um",
+   "kind": "design",
+   "valid_for": "CMS Phase-1 pixel detector (installed 2017): barrel pixel (BPIX) as described in the 2021 paper",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C154",
+  "claim": "RICH1 uses a C4F10 gas radiator with a refractive index n = 1.0014 for Cherenkov light of wavelength 400 nm at standard temperature and pressure; the average path length of particles inside the radiator is approximately 110 cm.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S03"
+  ],
+  "location": "section 7 (introduction), pages 76-77",
+  "scope": {
+   "text": "LHCb Upgrade I detector (design / as built)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": "The paper does not define STP; the Run 1 paper gives 0 C and 101.325 kPa (C156). The path length is an average over tracks, not a dimension. The dispersion of n is not given.",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "LHCb",
+   "subsystem": "RICH",
+   "quantity": "RICH1 radiator refractive index at 400 nm (STP); average path length in the radiator",
+   "value": "1.0014; 400; approximately 110",
+   "unit": "1; nm; cm",
+   "kind": "design",
+   "valid_for": "LHCb Upgrade I detector (design / as built)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C155",
+  "claim": "RICH2 uses a CF4 gas radiator with n = 1.0005 for Cherenkov light of wavelength 400 nm at STP and an average track path of 167 cm.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S03"
+  ],
+  "location": "section 7 (introduction), page 77",
+  "scope": {
+   "text": "LHCb Upgrade I detector (design / as built)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": "The admixture of CO2 in the Upgrade I CF4 is not stated (Run 1: about 5%, C156). The path is an average over tracks.",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "LHCb",
+   "subsystem": "RICH",
+   "quantity": "RICH2 radiator refractive index at 400 nm (STP); average track path",
+   "value": "1.0005; 400; 167",
+   "unit": "1; nm; cm",
+   "kind": "design",
+   "valid_for": "LHCb Upgrade I detector (design / as built)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C156",
+  "claim": "The refractive indices of the C4F10 and CF4 radiators are 1.0014 and 1.0005 at 0 C, 101.325 kPa and 400 nm; about 5% CO2 is added to the CF4 to quench scintillation.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S17"
+  ],
+  "location": "section 2.1, page 4",
+  "scope": {
+   "text": "LHCb RICH, Run 1 detector (2010-2012)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": "Run 1 detector; gives the conditions that the Upgrade I paper calls STP.",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "LHCb",
+   "subsystem": "RICH",
+   "quantity": "C4F10 index; CF4 index; temperature; pressure; wavelength; CO2 admixture",
+   "value": "1.0014; 1.0005; 0; 101.325; 400; 5",
+   "unit": "1; 1; C; kPa; nm; %",
+   "kind": "design",
+   "valid_for": "LHCb RICH, Run 1 detector (2010-2012)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C157",
+  "claim": "The SciFi tracker has 12 detection planes in 3 stations (T1, T2, T3) of 4 layers each in an X-U-V-X configuration, the stereo layers rotated by +-5 degrees.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S03"
+  ],
+  "location": "section 6.1.2, page 57",
+  "scope": {
+   "text": "LHCb Upgrade I detector (design / as built)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "LHCb",
+   "subsystem": "SciFi tracker",
+   "quantity": "detection planes; stations; layers per station; stereo angle",
+   "value": "12; 3; 4; 5",
+   "unit": "planes; stations; layers; degrees",
+   "kind": "design",
+   "valid_for": "LHCb Upgrade I detector (design / as built)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C158",
+  "claim": "The T3 station is instrumented with six modules on each C-Frame and the T1 and T2 stations have one module less on each side; each C-Frame holds two layers with 10-12 modules in total, depending on the station.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S03"
+  ],
+  "location": "section 6.1.2, page 58; section 6.3.2, page 61",
+  "scope": {
+   "text": "LHCb Upgrade I detector (design / as built)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": "Read here as six modules per layer and side in T3 and five in T1 and T2 (12 and 10 per layer); the C-Frame wording is ambiguous, and the reading is checked against the SiPM count (C159): 4 x (10 + 10 + 12) = 128 = 4096 / 32.",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "LHCb",
+   "subsystem": "SciFi tracker",
+   "quantity": "T3 modules per C-Frame; modules per C-Frame (two layers)",
+   "value": "six; 10-12",
+   "unit": "modules; modules",
+   "kind": "design",
+   "valid_for": "LHCb Upgrade I detector (design / as built)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C159",
+  "claim": "The SciFi readout has 524 288 SiPM channels in 4096 arrays of 128 channels; 16 SiPM arrays sit at the readout end of each module.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S03"
+  ],
+  "location": "section 6.4, page 63; section 6.1.3, page 58",
+  "scope": {
+   "text": "LHCb Upgrade I detector (design / as built)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": "Each module has two readout ends (four fibre mats up, four down; C160), so 32 arrays per module.",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "LHCb",
+   "subsystem": "SciFi tracker",
+   "quantity": "SiPM channels; SiPM arrays; channels per array; arrays per module readout end",
+   "value": "524 288; 4096; 128; 16",
+   "unit": "channels; arrays; channels; arrays",
+   "kind": "design",
+   "valid_for": "LHCb Upgrade I detector (design / as built)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C160",
+  "claim": "A SciFi module is built from eight fibre mats (four up, four down) and two half-panels, each a 19.7 mm thick polyaramid honeycomb core laminated on the outer side with a single 0.2 mm carbon-fibre reinforced polymer (CFRP) skin.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S03"
+  ],
+  "location": "section 6.1.3, page 58; section 6.3.2, page 61",
+  "scope": {
+   "text": "LHCb Upgrade I detector (design / as built)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "LHCb",
+   "subsystem": "SciFi tracker",
+   "quantity": "fibre mats per module; honeycomb thickness; CFRP skin thickness",
+   "value": "eight; 19.7; 0.2",
+   "unit": "mats; mm; mm",
+   "kind": "design",
+   "valid_for": "LHCb Upgrade I detector (design / as built)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C161",
+  "claim": "Fibre mats are wound from six layers of 250 um scintillating fibres in a hexagonal matrix of 275 um horizontal pitch and cut to 2424 mm length and 130.6 mm width.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S03"
+  ],
+  "location": "section 6.3.1, page 61; section 6.1.2, page 57",
+  "scope": {
+   "text": "LHCb Upgrade I detector (design / as built)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "LHCb",
+   "subsystem": "SciFi tracker",
+   "quantity": "fibre layers per mat; fibre diameter; fibre pitch; mat length; mat width",
+   "value": "six; 250; 275; 2424; 130.6",
+   "unit": "layers; um; um; mm; mm",
+   "kind": "design",
+   "valid_for": "LHCb Upgrade I detector (design / as built)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C162",
+  "claim": "SciFi modules are positioned with a pitch of 531 mm in the X layers, leaving 8 mm between the edge fibres, and 532 mm in the stereo layers; neighbouring fibre mats are 0.35 mm apart and the top and bottom mats 2 mm apart.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S03"
+  ],
+  "location": "section 6.3.2, page 62",
+  "scope": {
+   "text": "LHCb Upgrade I detector (design / as built)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "LHCb",
+   "subsystem": "SciFi tracker",
+   "quantity": "module pitch X layers; gap between edge fibres; module pitch stereo layers; gap between mats; gap between top and bottom mats",
+   "value": "531; 8; 532; 0.35; 2",
+   "unit": "mm",
+   "kind": "design",
+   "valid_for": "LHCb Upgrade I detector (design / as built)",
+   "conditions": null
+  }
+ },
+ {
+  "id": "detector-atlas:C163",
+  "claim": "Table 7 estimates a SciFi module at a minimum of 1.03% X0 for perpendicular tracks from its components (thickness x layers; X0; fraction of X0; density): fibre mat 1350 um x 1, 33.2 cm, 0.407%, 1180 kg/m3; honeycomb 19700 um x 2, 1300 cm, 0.303%, 32 kg/m3; CFRP 200 um x 2, 27.6 cm, 0.145%, 1540 kg/m3; glue 260 um x 2, 36.1 cm, 0.144%, 1160 kg/m3; polyimide 25 um x 4, 35 cm, 0.029%, 1410 kg/m3; densities and radiation lengths from the PDG (ref. [88]).",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S03"
+  ],
+  "location": "section 6.3.3, table 7, pages 62-63",
+  "scope": {
+   "text": "LHCb Upgrade I detector (design / as built)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": "An estimate from thicknesses and PDG 2020 radiation lengths (ref. [88], not read here), not a simulation output; excludes the sidewalls (+0.145%) and the mirror end-piece (+1.15%). The table gives no chemical compositions; the fibre-mat X0 is that of the fibre and epoxy composite. The 13.7% X0 of the three stations (fig. 46) is a simulation output and is not this claim.",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "LHCb",
+   "subsystem": "SciFi tracker",
+   "quantity": "module material at normal incidence; fibre mat; honeycomb; CFRP; glue; polyimide (thickness x layers, X0, fraction, density)",
+   "value": "1.03; 1350 x 1, 33.2, 0.407, 1180; 19700 x 2, 1300, 0.303, 32; 200 x 2, 27.6, 0.145, 1540; 260 x 2, 36.1, 0.144, 1160; 25 x 4, 35, 0.029, 1410",
+   "unit": "% X0; um, cm, % X0, kg/m3",
+   "kind": "design",
+   "valid_for": "LHCb Upgrade I detector (design / as built)",
+   "conditions": "estimate (design; perpendicular tracks, outside sidewalls and mirror)"
+  }
  }
 ]

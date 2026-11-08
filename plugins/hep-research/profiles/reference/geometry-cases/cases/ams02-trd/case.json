@@ -1,0 +1,81 @@
+{
+ "phase": "S7",
+ "case_id": "ams02-trd",
+ "card_case": "AMS-02 TRD",
+ "level": "L1",
+ "label": "an approximate reconstruction from the cited claims, not the experiment's geometry",
+ "experiment": "AMS-02",
+ "subsystem": "Transition Radiation Detector: 20 layers of fleece radiator and straw tubes",
+ "corresponding_kit": "trd",
+ "cited_claims": [
+  "ams02:C67",
+  "ams02:C208",
+  "ams02:C212"
+ ],
+ "quantities": [
+  {
+   "name": "straw_layers",
+   "definition": "number of straw-tube layers (volumes tagged straw_layer) in the expanded IR",
+   "reference": 20,
+   "tolerance_relative": 0,
+   "derivation": "20 layers (ams02:C67, S01 Section 1.3: 328 modules on 20 layers, 4 + 12 + 4)",
+   "sources": [],
+   "independence": {
+    "verified": true,
+    "result": "a design count from the tier-1 review, not a simulation output; the case is built from the same count, so it checks how the layers are expressed (one top layer and a linear placement of 19), not physics"
+   },
+   "negative_control": {
+    "change": "the linear placement holds 18 layers instead of 19 (one layer lost)",
+    "pointer": "/templates/trd/children/1/placement/linear/count",
+    "value": 18,
+    "expected_shift_relative": -0.05
+   },
+   "detection_limit_relative": 0,
+   "measure": {
+    "kind": "count",
+    "tag": "straw_layer"
+   }
+  },
+  {
+   "name": "layer_radiator_x0",
+   "definition": "x/X0 of the fleece radiator of one layer (the top layer, tag radiator_top) at normal incidence",
+   "reference": 0.00268,
+   "tolerance_relative": 0.03,
+   "derivation": "2.0 cm (ams02:C67, S01 tier 1; the 22 mm of ams02:C212, tier 3, is not used) x 0.06 g/cm3 (ams02:C67) / 44.77 g/cm2 (PDG polyethylene, ams02:C208; polypropylene has the same (CH2)n composition) = 0.0026804. The straw gas is not part of the quantity (its density at the flight pressure and temperature is not in the sources read).",
+   "sources": [
+    {
+     "source": "PDG Atomic and Nuclear Properties, polyethylene (2024 web edition; ledger ams02:S74)",
+     "url": "https://pdg.lbl.gov/2024/AtomicNuclearProperties/HTML/polyethylene.html",
+     "read_level": "page",
+     "verified": "2026-11-08",
+     "value": "radiation length 44.77 g/cm2; mass fractions H 0.143711, C 0.856289"
+    }
+   ],
+   "independence": {
+    "verified": true,
+    "result": "independent of Geant4: thickness and density from the tier-1 review (S01), radiation length PDG's tabulation for (CH2)n. The reference is not a Geant4 output. Geant4 computes radiation lengths with the same Tsai formula PDG tabulates, so agreement validates the geometry and the material definition (composition and density), not Geant4's radiation-length physics."
+   },
+   "negative_control": {
+    "change": "the 22 mm radiator of the tier-3 proceedings (ams02:C212) instead of S01's 20 mm",
+    "pointer": "/params/radiator_mm",
+    "value": "22",
+    "expected_shift_relative": 0.1
+   },
+   "detection_limit_relative": 0.03,
+   "measure": {
+    "kind": "path_x0",
+    "request": "request.json"
+   },
+   "tolerance_basis": "fixed before any measurement: the reference uses the specification's own thickness and density, so the residual is Geant4's radiation length of (CH2)n against PDG's (expected within 1%) and the geantino path (exact); 3%, as the S6 TOF case, keeps the 10% control outside"
+  }
+ ],
+ "approximations": [
+  "the fleece radiator is a homogeneous slab of polyethylene at 0.06 g/cm3; its fibre structure (10 micrometre fibres, ams02:C212) matters for transition radiation, not for the radiation length",
+  "fleece thickness 20 mm (S01, tier 1); the 22 mm of the 2013 proceedings (tier 3) is the negative control",
+  "each straw layer is a 6 mm slab of G4_Xe (NIST xenon gas) across the whole 2 m width: the straw walls (72 micrometre kapton-aluminium, research only), wires and the 10% CO2 are not modelled; no case quantity crosses the gas",
+  "the tapered octagon (80 cm high, 200 cm and 150 cm wide, ams02:C212) is a 2 m square prism of the maximum tube length; layer orientations (4 x, 12 y, 4 x) and the support structure are not modelled",
+  "the TRD sits at the origin; its flight position (z = 80-155 cm, from flight-data vertices) is not modelled"
+ ],
+ "status": "comparison with cited values: not validated",
+ "result": null
+}

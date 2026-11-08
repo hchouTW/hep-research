@@ -1,0 +1,67 @@
+{
+ "phase": "S7",
+ "case_id": "ams02-ecal",
+ "card_case": "AMS-02 ECAL",
+ "level": "L1",
+ "label": "an approximate reconstruction from the cited claims, not the experiment's geometry",
+ "experiment": "AMS-02",
+ "subsystem": "electromagnetic calorimeter: lead and scintillating-fibre sandwich as one homogenized block",
+ "corresponding_kit": null,
+ "cited_claims": [
+  "ams02:C50",
+  "ams02:C71",
+  "ams02:C207",
+  "ams02:C208",
+  "ams02:C210"
+ ],
+ "quantities": [
+  {
+   "name": "depth_x0",
+   "definition": "x/X0 of the calorimeter at normal incidence through the centre of the active area",
+   "reference": 17,
+   "tolerance_relative": 0.04,
+   "derivation": "17 radiation lengths (ams02:C71, S01 Section 1.7; also ams02:C50, ams02:C207). From the composition: 166.5 mm (ams02:C71) at 6.8 g/cm3 (ams02:C207) with lead 0.93699 and polystyrene 0.06301 by mass (ams02:C210, derived from 1:0.57:0.15 by volume and PDG densities) and PDG radiation lengths 6.37 and 43.79 g/cm2 (ams02:C208) gives 16.82 X0 (-1.1%); at the composition's own density 7.04 g/cm3 it gives 17.42 X0 (+2.5%)",
+   "sources": [
+    {
+     "source": "PDG Atomic and Nuclear Properties, lead (Pb) (2024 web edition; ledger ams02:S74)",
+     "url": "https://pdg.lbl.gov/2024/AtomicNuclearProperties/HTML/lead_Pb.html",
+     "read_level": "page",
+     "verified": "2026-11-08",
+     "value": "radiation length 6.37 g/cm2 (0.5612 cm at 11.35 g/cm3)"
+    },
+    {
+     "source": "PDG Atomic and Nuclear Properties, polystyrene (2024 web edition; ledger ams02:S74)",
+     "url": "https://pdg.lbl.gov/2024/AtomicNuclearProperties/HTML/polystyrene.html",
+     "read_level": "page",
+     "verified": "2026-11-08",
+     "value": "radiation length 43.79 g/cm2 (41.31 cm at 1.060 g/cm3)"
+    }
+   ],
+   "independence": {
+    "verified": true,
+    "result": "independent of Geant4: the 17 X0 is the collaboration's published depth (S01, tier 1), and the composition, density and thickness are design values from S01 and the ECAL proceedings, the radiation lengths PDG's. The reference is not a Geant4 output. Geant4 computes radiation lengths with the same Tsai formula PDG tabulates, so agreement validates the geometry and the material definition (composition and density), not Geant4's radiation-length physics."
+   },
+   "negative_control": {
+    "change": "eight superlayers instead of nine (148 mm)",
+    "pointer": "/params/depth_mm",
+    "value": "148",
+    "expected_shift_relative": -0.111
+   },
+   "detection_limit_relative": 0.04,
+   "measure": {
+    "kind": "path_x0",
+    "request": "request.json"
+   },
+   "tolerance_basis": "fixed before any measurement from the approximations: the published 17 has two significant figures (+-2.9%), the stated density 6.8 g/cm3 and the volume ratio disagree by 3.6% (ams02:C207), the glue's composition is unknown (below 0.5%); the composition-derived values lie at -1.1% and +2.5%; 4% keeps the 11% control outside"
+  }
+ ],
+ "approximations": [
+  "the sandwich of 98 grooved lead foils and 1 mm fibres is one homogeneous block of the published mean density 6.8 g/cm3, with lead and polystyrene mixed by the mass fractions of the published 1:0.57:0.15 volume ratio; at normal incidence the depth in X0 depends only on the areal masses, not on the layering",
+  "fibres and glue both as polystyrene (G4_POLYSTYRENE): the glue's composition is not published (ams02:C210)",
+  "the last foil of the last superlayer is aluminium (website, research only) and is modelled as lead",
+  "active area 648 x 648 mm2 and depth 166.5 mm (S01); the proceedings' 68.5 x 68.5 x 16.7 cm3 and the mechanical structure are not modelled",
+  "the 9 superlayers, their fibre orientations and the 1296 readout cells (ams02:C71) are not modelled: the case is L1"
+ ],
+ "status": "comparison with cited values: not validated",
+ "result": null
+}

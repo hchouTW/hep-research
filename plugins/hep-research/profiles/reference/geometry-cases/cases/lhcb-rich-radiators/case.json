@@ -1,0 +1,86 @@
+{
+ "phase": "S7",
+ "case_id": "lhcb-rich-radiators",
+ "card_case": "LHCb RICH radiators",
+ "level": "L3",
+ "label": "an approximate reconstruction from the cited claims, not the experiment's geometry",
+ "experiment": "LHCb",
+ "subsystem": "RICH1 (C4F10) and RICH2 (CF4) gas radiators, Upgrade I",
+ "corresponding_kit": "cherenkov",
+ "cited_claims": [
+  "detector-atlas:C154",
+  "detector-atlas:C155",
+  "detector-atlas:C156"
+ ],
+ "quantities": [
+  {
+   "name": "cherenkov_angle_c4f10",
+   "definition": "mean Cherenkov angle (rad) of the photons a 100 GeV (kinetic) muon emits in the RICH1 C4F10 radiator, detected inside the gas; per-event mean, averaged over events",
+   "reference": 0.0528737,
+   "tolerance_relative": 0.02,
+   "derivation": "arccos(1/(n beta)) with n = 1.0014 at 400 nm and STP (detector-atlas:C154; 0 C and 101.325 kPa, C156) and beta = 0.99999944 for T = 100000 MeV and the muon mass 105.6583755 MeV (core/constants, CODATA 2022): 0.0528737 rad (0.0528842 at beta = 1). Tolerance 2%: n printed to 1e-4 moves the angle by -1.80% / +1.77% for n -+ 0.00005.",
+   "sources": [],
+   "independence": {
+    "verified": true,
+    "result": "independent of Geant4: a closed form of the index LHCb states at 400 nm and the muon kinematics; no simulation enters the reference (the simulated resolutions and photoelectron yields of the Upgrade I paper's table 9 are not used). Geant4 samples the same relation, so agreement validates the optical material, the photon accounting and the reading of the angle, not Cherenkov physics."
+   },
+   "negative_control": {
+    "change": "RICH1 filled with RICH2's index (1.0005)",
+    "pointer": "/materials/C4F10/optical/rindex/value",
+    "value": [
+     "1.0005",
+     "1.0005"
+    ],
+    "expected_shift_relative": -0.402
+   },
+   "detection_limit_relative": 0.02,
+   "measure": {
+    "kind": "cherenkov_angle",
+    "request": "request-c4f10.json",
+    "run": "run.json"
+   }
+  },
+  {
+   "name": "cherenkov_angle_cf4",
+   "definition": "mean Cherenkov angle (rad) of the photons a 100 GeV (kinetic) muon emits in the RICH2 CF4 radiator, detected inside the gas; per-event mean, averaged over events",
+   "reference": 0.0315986,
+   "tolerance_relative": 0.052,
+   "derivation": "arccos(1/(n beta)) with n = 1.0005 at 400 nm and STP (detector-atlas:C155, C156) and beta = 0.99999944 as above: 0.0315986 rad (0.0316162 at beta = 1). Tolerance 5.2%: n printed to 1e-4 moves the angle by -5.14% / +4.88% for n -+ 0.00005.",
+   "sources": [],
+   "independence": {
+    "verified": true,
+    "result": "independent of Geant4: a closed form of the index LHCb states at 400 nm and the muon kinematics; no simulation enters the reference (the simulated resolutions and photoelectron yields of the Upgrade I paper's table 9 are not used). Geant4 samples the same relation, so agreement validates the optical material, the photon accounting and the reading of the angle, not Cherenkov physics."
+   },
+   "negative_control": {
+    "change": "RICH2 filled with RICH1's index (1.0014)",
+    "pointer": "/materials/CF4/optical/rindex/value",
+    "value": [
+     "1.0014",
+     "1.0014"
+    ],
+    "expected_shift_relative": 0.673
+   },
+   "detection_limit_relative": 0.052,
+   "measure": {
+    "kind": "cherenkov_angle",
+    "request": "request-cf4.json",
+    "run": "run.json"
+   }
+  }
+ ],
+ "approximations": [
+  "each radiator is a 400 x 400 mm2 box of gas whose length is the stated average path in it (110 cm for RICH1, approximately; 167 cm for RICH2; C154, C155), not the RICH enclosures, mirrors, windows or photon detectors",
+  "the index is constant over 390-410 nm at its 400 nm value: the dispersion is not sourced",
+  "pure CF4: the Run 1 radiator had about 5% CO2 (C156) and the Upgrade I admixture is not stated; pure C4F10",
+  "gas densities from the ideal-gas law at 0 C and 101.325 kPa (C156) with stoichiometric molar masses; the angle does not depend on them",
+  "the world has no refractive index, so a photon reaching a radiator face is absorbed; the 300 x 300 x 1 mm3 silicon sensor 1 mm inside the downstream face (efficiency 1, reflectivity 0) is a measuring device, not LHCb's MaPMTs"
+ ],
+ "cherenkov_handling": {
+  "option": "full_optical_tracking",
+  "label": "(a)",
+  "scintillation": "none: the gases carry no scintillation yield, so no efficiency map is needed",
+  "note": "every Cherenkov photon is tracked; the angle is read from the photons the primary emitted (parent track 1)"
+ },
+ "status": "comparison with cited values: not validated",
+ "result": null
+}
