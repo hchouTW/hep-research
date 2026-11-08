@@ -229,6 +229,57 @@ class SolidComparison(unittest.TestCase):
         self.assertEqual(driver.solid_problems(item, node, None), ["logical t: delta_phi_rad differs"])
 
 
+    # S7's shapes, read back from ProbeV2's curved_solids and polyhedra.
+    CONE = {"shape": "cone", "solid": {"rmin1_mm": "2e0", "rmax1_mm": "1e1", "rmin2_mm": "3e0", "rmax2_mm": "2e1", "dz_mm": "1.5e1",
+                                       "phi_start_deg": "1e1", "phi_span_deg": "3e2"}}
+    SHELL = {"shape": "sphere_section", "solid": {"rmin_mm": "9e1", "rmax_mm": "1e2", "phi_start_deg": "0", "phi_span_deg": "3.6e2",
+                                                  "theta_start_deg": "1e1", "theta_span_deg": "4e1"}}
+    PCONE = {"shape": "polycone", "solid": {"z_mm": ["-1e1", "0", "1e1"], "rmin_mm": ["0", "1e0", "0"], "rmax_mm": ["5e0", "8e0", "5e0"],
+                                            "phi_start_deg": "0", "phi_span_deg": "3.6e2"}}
+    PHEDRA = {"shape": "polyhedra", "solid": {"sides": 6, "z_mm": ["-1e1", "1e1"], "circumradius_rmin_mm": ["2e0", "2e0"],
+                                              "circumradius_rmax_mm": ["1e1", "1.2e1"]}}
+
+    @staticmethod
+    def cone_back(**change):
+        held = {"logical": "c", "type": "G4Cons", "rmin1_mm": (2.0).hex(), "rmax1_mm": (10.0).hex(), "rmin2_mm": (3.0).hex(),
+                "rmax2_mm": (20.0).hex(), "half_z_mm": (15.0).hex(), "start_phi_rad": math.radians(10).hex(), "delta_phi_rad": math.radians(300).hex()}
+        return {**held, **change}
+
+    def test_a_cone_read_back_as_built_passes_and_one_wrong_radius_is_caught(self):
+        self.assertEqual(driver.solid_problems({"name": "c"}, self.CONE, None, self.cone_back()), [])
+        self.assertEqual(driver.solid_problems({"name": "c"}, self.CONE, None, self.cone_back(rmax2_mm=(20.000000000000004).hex())),
+                         ["logical c: rmax2_mm differs"])
+        self.assertEqual(driver.solid_problems({"name": "c"}, self.CONE, None, self.cone_back(delta_phi_rad=math.radians(360).hex())),
+                         ["logical c: delta_phi_rad differs"])
+
+    def test_a_shape_with_no_read_back_is_an_error(self):
+        self.assertEqual(driver.solid_problems({"name": "c"}, self.CONE, None, None), ["logical c: no G4Cons was written back"])
+        self.assertEqual(driver.solid_problems({"name": "c"}, self.CONE, None, {**self.cone_back(), "type": "G4Tubs"}), ["logical c: no G4Cons was written back"])
+
+    def test_a_sphere_section_is_judged_by_its_theta_range(self):
+        held = {"logical": "s", "type": "G4Sphere", "rmin_mm": (90.0).hex(), "rmax_mm": (100.0).hex(), "start_phi_rad": (0.0).hex(),
+                "delta_phi_rad": math.tau.hex(), "start_theta_rad": math.radians(10).hex(), "delta_theta_rad": math.radians(40).hex()}
+        self.assertEqual(driver.solid_problems({"name": "s"}, self.SHELL, None, held), [])
+        held["delta_theta_rad"] = math.radians(50).hex()
+        self.assertEqual(driver.solid_problems({"name": "s"}, self.SHELL, None, held), ["logical s: delta_theta_rad differs"])
+
+    def test_a_polycone_is_judged_by_its_corners(self):
+        corners = [(0.0, 10.0), (1.0, 0.0), (0.0, -10.0), (5.0, -10.0), (8.0, 0.0), (5.0, 10.0)]  # as Geant4 wrote them back on build 20
+        held = {"logical": "p", "type": "G4Polycone", "start_phi_rad": (0.0).hex(), "end_phi_rad": math.tau.hex(),
+                "corners": [[r.hex(), z.hex()] for r, z in corners]}
+        self.assertEqual(driver.solid_problems({"name": "p"}, self.PCONE, None, held), [])
+        held["corners"][4] = [(7.0).hex(), (0.0).hex()]
+        self.assertEqual(len(driver.solid_problems({"name": "p"}, self.PCONE, None, held)), 1)
+
+    def test_a_polyhedra_given_its_circumradii_as_apothems_is_caught(self):
+        right = {"sides": 6, "corners_r_mm": [value.hex() for value in (2.0, 2.0, 10.0, 12.0)]}
+        stretch = 1 / math.cos(math.pi / 6)  # G4Polyhedra given R as its rOuter puts its corners at R / cos(pi / 6)
+        wrong = {"sides": 6, "corners_r_mm": [(value * stretch).hex() for value in (2.0, 2.0, 10.0, 12.0)]}
+        self.assertEqual(driver.solid_problems({"name": "h"}, self.PHEDRA, right), [])
+        self.assertEqual(len(driver.solid_problems({"name": "h"}, self.PHEDRA, wrong)), 1)
+        self.assertEqual(len(driver.solid_problems({"name": "h"}, self.PHEDRA, {**right, "sides": 8})), 1)
+
+
 class Dispatch(unittest.TestCase):
     """geant4_run.py by schema, and geant4_verify.py tree."""
 

@@ -89,6 +89,17 @@ def _solid(name: str, template: dict) -> list[str]:
     if template["shape"] == "polygon_prism":  # G4Polyhedra's rmax is the apothem (GB23)
         planes = [f"      <zplane {_attr('rmin', 0)} {_attr('rmax', solid['apothem_mm'])} {_attr('z', z)}/>" for z in (CONTEXT.minus(exact(solid["dz_mm"])), exact(solid["dz_mm"]))]
         return [f"    <polyhedra {label} {_attr('numsides', solid['sides'])} {_attr('startphi', 0)} {_attr('deltaphi', 360)} aunit=\"deg\" lunit=\"mm\">", *planes, "    </polyhedra>"]
+    if template["shape"] == "cone":
+        return [f"    <cone {label} " + " ".join(_attr(k, solid[s]) for k, s in (("rmin1", "rmin1_mm"), ("rmax1", "rmax1_mm"), ("rmin2", "rmin2_mm"), ("rmax2", "rmax2_mm"))) + f" {_attr('z', _twice(solid['dz_mm']))} "
+                f"{_attr('startphi', solid['phi_start_deg'])} {_attr('deltaphi', solid['phi_span_deg'])} aunit=\"deg\" lunit=\"mm\"/>"]
+    if template["shape"] == "sphere_section":
+        return [f"    <sphere {label} {_attr('rmin', solid['rmin_mm'])} {_attr('rmax', solid['rmax_mm'])} {_attr('startphi', solid['phi_start_deg'])} {_attr('deltaphi', solid['phi_span_deg'])} "
+                f"{_attr('starttheta', solid['theta_start_deg'])} {_attr('deltatheta', solid['theta_span_deg'])} aunit=\"deg\" lunit=\"mm\"/>"]
+    if template["shape"] in ("polycone", "polyhedra"):  # G4Polyhedra's radii are apothems (GB23)
+        inner, outer = (("rmin_mm", "rmax_mm") if template["shape"] == "polycone" else ("apothem_rmin_mm", "apothem_rmax_mm"))
+        planes = [f"      <zplane {_attr('rmin', a)} {_attr('rmax', b)} {_attr('z', z)}/>" for z, a, b in zip(solid["z_mm"], solid[inner], solid[outer])]
+        sides = f"{_attr('numsides', solid['sides'])} " if template["shape"] == "polyhedra" else ""
+        return [f"    <{template['shape']} {label} {sides}{_attr('startphi', solid['phi_start_deg'])} {_attr('deltaphi', solid['phi_span_deg'])} aunit=\"deg\" lunit=\"mm\">", *planes, f"    </{template['shape']}>"]
     x, y, z = (_twice(half) for half in template["half_mm"])
     return [f"    <box {label} {_attr('x', x)} {_attr('y', y)} {_attr('z', z)} lunit=\"mm\"/>"]
 

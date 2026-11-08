@@ -82,7 +82,11 @@
          "box",
          "trd",
          "tube",
-         "polygon_prism"
+         "polygon_prism",
+         "cone",
+         "sphere_section",
+         "polycone",
+         "polyhedra"
         ]
        },
        "material": {

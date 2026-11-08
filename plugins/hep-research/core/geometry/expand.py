@@ -75,6 +75,8 @@ def _other_solid(shape: str, body: dict, values: _Values, path: str) -> tuple:
             raise GeometryError("solid-size", f"phi span {span} is outside (0, 360]", path)
         diameter = add(rmax, rmax)
         return (diameter, diameter, z), {"rmin_mm": as_text(rmin), "rmax_mm": as_text(rmax), "dz_mm": half(z), "phi_start_deg": as_text(start), "phi_span_deg": as_text(span)}
+    if shape in ("cone", "sphere_section", "polycone", "polyhedra"):
+        return _s7_solid(shape, body, values, path, length, half)
     sides = body["sides"]
     if isinstance(sides, bool) or not isinstance(sides, int) or sides < 3:
         raise GeometryError("solid-size", f"sides {sides!r} is not an integer of at least 3", path)
@@ -82,6 +84,60 @@ def _other_solid(shape: str, body: dict, values: _Values, path: str) -> tuple:
     apothem = multiply(radius, rotation.cos_sin(divide(Decimal(180), Decimal(sides)))[0])  # G4Polyhedra's rOuter is the apothem (GB23)
     diameter = add(radius, radius)
     return (diameter, diameter, z), {"sides": sides, "circumradius_mm": as_text(radius), "apothem_mm": as_text(apothem), "dz_mm": half(z)}
+
+
+def _phi(body: dict, values: _Values, path: str) -> tuple:
+    start = values.quantity(body.get("phi_start_deg", "0"), f"{path}/phi_start_deg")
+    span = values.quantity(body.get("phi_span_deg", "360"), f"{path}/phi_span_deg")
+    if not _ZERO < span <= Decimal(360):
+        raise GeometryError("solid-size", f"phi span {span} is outside (0, 360]", path)
+    return as_text(start), as_text(span)
+
+
+def _s7_solid(shape: str, body: dict, values: _Values, path: str, length, half) -> tuple:
+    """S7's shapes (Section 6.2.1): the parameters of G4Cons, G4Sphere, G4Polycone and G4Polyhedra, with a bounding box for the
+    gap rule. polyhedra radii are circumradii in the specification and apothems in the IR, as for polygon_prism (GB23)."""
+    phi_start, phi_span = _phi(body, values, path)
+    if shape == "cone":
+        rmin1 = length("rmin1_mm") if "rmin1_mm" in body else _ZERO
+        rmin2 = length("rmin2_mm") if "rmin2_mm" in body else _ZERO
+        rmax1, rmax2, z = length("rmax1_mm"), length("rmax2_mm"), length("length_mm")
+        if rmin1 >= rmax1 or rmin2 >= rmax2:
+            raise GeometryError("solid-size", f"a cone's inner radius is not below its outer radius at both ends ({rmin1}/{rmax1}, {rmin2}/{rmax2})", path)
+        diameter = add(max(rmax1, rmax2), max(rmax1, rmax2))
+        return (diameter, diameter, z), {"rmin1_mm": as_text(rmin1), "rmax1_mm": as_text(rmax1), "rmin2_mm": as_text(rmin2), "rmax2_mm": as_text(rmax2), "dz_mm": half(z), "phi_start_deg": phi_start, "phi_span_deg": phi_span}
+    if shape == "sphere_section":
+        rmin = length("rmin_mm") if "rmin_mm" in body else _ZERO
+        rmax = length("rmax_mm")
+        if rmin >= rmax:
+            raise GeometryError("solid-size", f"rmin {rmin} is not below rmax {rmax}", path)
+        theta_start = values.quantity(body.get("theta_start_deg", "0"), f"{path}/theta_start_deg")
+        theta_span = values.quantity(body.get("theta_span_deg", "180"), f"{path}/theta_span_deg")
+        if theta_start < _ZERO or theta_span <= _ZERO or add(theta_start, theta_span) > Decimal(180):
+            raise GeometryError("solid-size", f"theta {theta_start} + {theta_span} is outside [0, 180]", path)
+        diameter = add(rmax, rmax)
+        return (diameter, diameter, diameter), {"rmin_mm": as_text(rmin), "rmax_mm": as_text(rmax), "phi_start_deg": phi_start, "phi_span_deg": phi_span, "theta_start_deg": as_text(theta_start), "theta_span_deg": as_text(theta_span)}
+    zs = [values.quantity(item, f"{path}/z_mm/{i}") for i, item in enumerate(body["z_mm"])]
+    inner = [values.quantity(item, f"{path}/rmin_mm/{i}") for i, item in enumerate(body["rmin_mm"])]
+    outer = [values.quantity(item, f"{path}/rmax_mm/{i}") for i, item in enumerate(body["rmax_mm"])]
+    if len(zs) < 2 or not len(zs) == len(inner) == len(outer):
+        raise GeometryError("solid-size", "z_mm, rmin_mm and rmax_mm need the same number of planes, at least two", path)
+    if any(b < a for a, b in zip(zs, zs[1:])) or zs[0] == zs[-1]:
+        raise GeometryError("solid-size", f"the z planes {zs} do not rise", path)
+    if any(r < _ZERO or r >= R for r, R in zip(inner, outer)):
+        raise GeometryError("solid-size", "each plane needs 0 <= rmin < rmax", path)
+    reach = max(abs(zs[0]), abs(zs[-1]))
+    planes = {"z_mm": [as_text(z) for z in zs]}
+    if shape == "polycone":
+        diameter = add(max(outer), max(outer))
+        return (diameter, diameter, add(reach, reach)), {**planes, "rmin_mm": [as_text(r) for r in inner], "rmax_mm": [as_text(r) for r in outer], "phi_start_deg": phi_start, "phi_span_deg": phi_span}
+    sides = body["sides"]
+    if isinstance(sides, bool) or not isinstance(sides, int) or sides < 3:
+        raise GeometryError("solid-size", f"sides {sides!r} is not an integer of at least 3", path)
+    factor = rotation.cos_sin(divide(Decimal(180), Decimal(sides)))[0]  # G4Polyhedra's radii are apothems (GB23)
+    diameter = add(max(outer), max(outer))
+    return (diameter, diameter, add(reach, reach)), {"sides": sides, **planes, "circumradius_rmin_mm": [as_text(r) for r in inner], "circumradius_rmax_mm": [as_text(r) for r in outer],
+                                                     "apothem_rmin_mm": [as_text(multiply(r, factor)) for r in inner], "apothem_rmax_mm": [as_text(multiply(r, factor)) for r in outer], "phi_start_deg": phi_start, "phi_span_deg": phi_span}
 
 
 def _shape_of(node: dict) -> str:

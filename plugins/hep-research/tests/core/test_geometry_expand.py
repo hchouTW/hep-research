@@ -4,15 +4,20 @@ from __future__ import annotations
 
 import copy
 import itertools
+import json
+import math
 from decimal import Decimal
 import sys
 import unittest
 from pathlib import Path
+from xml.etree import ElementTree
+from unittest import mock
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
-from core.geometry import expand, gdml, identity, material, overlap, rotation  # noqa: E402
+from core.geometry import expand, gdml, identity, material, modules, overlap, rotation  # noqa: E402
+from contracts import geometry as geometry_contract  # noqa: E402
 from core.geometry.numbers import GeometryError  # noqa: E402
 
 
@@ -101,12 +106,12 @@ class Expansion(unittest.TestCase):
         self.assertEqual(caught.exception.code, "template-cycle")
 
     def test_a_later_shape_or_placement_is_refused(self):
-        cone = spec({"a": {"solid": {"cone": {}}, "material": "G4_Si"}})
-        sphere = spec({"a": {"solid": {"sphere_section": {}}, "material": "G4_Si"}})
-        for document in (cone, sphere):
+        # Every module is open from S7 on, so the guard is tested on a table with the cone taken out.
+        cone = spec({"a": {"solid": {"cone": {"rmax1_mm": "1", "rmax2_mm": "1", "length_mm": "1"}}, "material": "G4_Si"}})
+        with mock.patch.object(modules, "BUILT", modules.BUILT - {"cone"}):
             with self.assertRaises(GeometryError) as caught:
-                expand.expand(document)
-            self.assertEqual(caught.exception.code, "module-not-open")
+                expand.expand(cone)
+        self.assertEqual(caught.exception.code, "module-not-open")
 
     def test_thirty_degrees_is_open_for_a_single_placement(self):
         document = spec({"a": box(["1", "1", "1"])}, [single("a", rotation={"axis": "z", "angle_deg": "30"})])
@@ -526,6 +531,121 @@ class NonBoxMothersAndShell(unittest.TestCase):
         rotated = [row for row in ir["physical"]["placements"] if row["template"] == "p"][0]["rotation"]
         self.assertLess(abs(gdml.euler_angles(rotated)[2] + 30), Decimal("1e-30"))  # GDML takes the passive angle
         self.assertIn('z="-', text)
+
+
+def s7_shapes():
+    """One of each S7 shape (Section 6.2.3), placed apart in the world."""
+    templates = {
+        "cone": {"solid": {"cone": {"rmin1_mm": "2", "rmax1_mm": "10", "rmin2_mm": "3", "rmax2_mm": "20", "length_mm": "30",
+                                    "phi_start_deg": "10", "phi_span_deg": "300"}}, "material": "G4_Si"},
+        "shell": {"solid": {"sphere_section": {"rmin_mm": "90", "rmax_mm": "100", "theta_start_deg": "10", "theta_span_deg": "40"}},
+                  "material": "G4_Al"},
+        "pcone": {"solid": {"polycone": {"z_mm": ["-10", "0", "10"], "rmin_mm": ["0", "1", "0"], "rmax_mm": ["5", "8", "5"]}},
+                  "material": "G4_Si"},
+        "phedra": {"solid": {"polyhedra": {"sides": 6, "z_mm": ["-10", "10"], "rmin_mm": ["2", "2"], "rmax_mm": ["10", "12"]}},
+                   "material": "G4_Si"}}
+    centres = {"cone": ("-200", "0", "0"), "shell": ("200", "0", "0"), "pcone": ("0", "200", "0"), "phedra": ("0", "-200", "0")}
+    return spec(templates, [single(name, centre) for name, centre in centres.items()])
+
+
+class S7Shapes(unittest.TestCase):
+    """Cone, sphere section, polycone and polyhedra (S7): their IR, their GDML, and the Section 15.1 refusals."""
+
+    def setUp(self):
+        self.templates = expand.expand(s7_shapes())["physical"]["templates"]
+
+    def refused(self, name, **solid):
+        document = s7_shapes()
+        shape = next(iter(document["templates"][name]["solid"]))
+        document["templates"][name]["solid"][shape].update(solid)
+        with self.assertRaises(GeometryError) as caught:
+            expand.expand(document)
+        return caught.exception.code
+
+    def test_the_four_shapes_expand_with_no_findings(self):
+        self.assertEqual(codes(expand.expand(s7_shapes())), [])
+        self.assertEqual({self.templates[name]["shape"] for name in ("cone", "shell", "pcone", "phedra")},
+                         {"cone", "sphere_section", "polycone", "polyhedra"})
+
+    def test_a_cone_keeps_its_radii_and_halves_its_length(self):
+        solid = self.templates["cone"]["solid"]
+        self.assertEqual([Decimal(solid[key]) for key in ("rmin1_mm", "rmax1_mm", "rmin2_mm", "rmax2_mm", "dz_mm")], [2, 10, 3, 20, 15])
+        self.assertEqual(self.templates["cone"]["half_mm"], ["2e1", "2e1", "1.5e1"])
+
+    def test_a_full_turn_is_the_default_section(self):
+        solid = self.templates["shell"]["solid"]
+        self.assertEqual((Decimal(solid["phi_start_deg"]), Decimal(solid["phi_span_deg"])), (0, 360))
+
+    def test_a_polycone_bounds_its_largest_plane(self):
+        self.assertEqual([Decimal(value) for value in self.templates["pcone"]["half_mm"]], [8, 8, 10])
+
+    def test_a_polyhedra_holds_both_radii_and_the_apothem_is_r_cos_pi_over_n(self):
+        solid = self.templates["phedra"]["solid"]
+        self.assertEqual([Decimal(value) for value in solid["circumradius_rmax_mm"]], [10, 12])
+        for circumradius, apothem in zip(solid["circumradius_rmax_mm"] + solid["circumradius_rmin_mm"], solid["apothem_rmax_mm"] + solid["apothem_rmin_mm"]):
+            self.assertAlmostEqual(float(apothem), float(circumradius) * math.cos(math.pi / 6), places=14)
+            self.assertLess(Decimal(apothem), Decimal(circumradius))
+
+    def test_out_of_range_parameters_are_refused(self):
+        cases = [("cone", {"rmin1_mm": "10"}), ("cone", {"phi_span_deg": "0"}), ("cone", {"phi_span_deg": "361"}),
+                 ("shell", {"rmin_mm": "100"}), ("shell", {"theta_start_deg": "150", "theta_span_deg": "40"}),
+                 ("pcone", {"z_mm": ["-10", "10", "0"]}), ("pcone", {"rmin_mm": ["0", "8", "0"]}), ("pcone", {"z_mm": ["-10", "10"]}),
+                 ("phedra", {"sides": 2}), ("phedra", {"rmin_mm": ["10", "2"]})]
+        for name, solid in cases:
+            with self.subTest(name=name, solid=solid):
+                self.assertIn(self.refused(name, **solid), ("solid-size", "solid-angle"))
+
+    def test_the_exported_polyhedra_has_its_apothems_not_its_circumradii(self):
+        text = gdml.export(expand.expand(s7_shapes()))
+        root = ElementTree.fromstring(text)
+        polyhedra = root.find(".//polyhedra")
+        rmax = [float(plane.get("rmax")) for plane in polyhedra.findall("zplane")]
+        self.assertEqual(polyhedra.get("numsides"), "6")
+        self.assertAlmostEqual(rmax[0], 10 * math.cos(math.pi / 6), places=12)
+        self.assertNotEqual(rmax[0], 10.0)  # the circumradius given as G4Polyhedra's rmax would build a larger prism (GB23)
+        for tag in ("cone", "sphere", "polycone"):
+            self.assertIsNotNone(root.find(f".//{tag}"), tag)
+
+    def test_a_daughter_through_a_polyhedra_mothers_flat_is_caught(self):
+        mother = {"solid": {"polyhedra": {"sides": 6, "z_mm": ["-10", "10"], "rmin_mm": ["0", "0"], "rmax_mm": ["10", "10"]}},
+                  "material": "G4_AIR", "children": [single("b", ("9.5", "0", "0"))]}
+        document = spec({"b": box(["1", "1", "1"]), "h": mother}, [single("h")])
+        self.assertIn("containment-outside", codes(expand.expand(document)))
+        mother["children"] = [single("b", ("8", "0", "0"))]
+        self.assertEqual(codes(expand.expand(document)), [])
+
+    def test_a_daughter_of_a_cone_mother_is_reported_unjudged(self):
+        mother = {"solid": {"cone": {"rmax1_mm": "10", "rmax2_mm": "20", "length_mm": "30"}}, "material": "G4_AIR", "children": [single("b")]}
+        self.assertEqual(codes(expand.expand(spec({"b": box(["1", "1", "1"]), "c": mother}, [single("c")]))), ["containment-unjudged"])
+
+    def test_the_schema_requires_each_shapes_parameters(self):
+        self.assertEqual(geometry_contract.check_spec(json.dumps(s7_shapes()).encode())["status"], "ok")
+        for name, key in (("cone", "rmax2_mm"), ("shell", "rmax_mm"), ("pcone", "z_mm"), ("phedra", "sides")):
+            document = s7_shapes()
+            shape = next(iter(document["templates"][name]["solid"]))
+            del document["templates"][name]["solid"][shape][key]
+            with self.subTest(shape=shape):
+                checked = geometry_contract.check_spec(json.dumps(document).encode())
+                self.assertEqual(checked["status"], "rejected")
+                self.assertTrue(any(finding["path"].endswith(key) for finding in checked["findings"]))
+
+
+class ModuleTable(unittest.TestCase):
+    """Section 15.4: every shape of the table is built by the C++ builder and written by the GDML exporter."""
+
+    def test_every_shape_has_a_builder_and_an_exported_solid(self):
+        builder = (ROOT / "adapters/geant4/assets/g4sim_run/NewBuild.hh").read_text(encoding="utf-8")
+        exporter = (ROOT / "core/geometry/gdml.py").read_text(encoding="utf-8")
+        for shape in modules.SHAPES:
+            with self.subTest(shape=shape):
+                self.assertIn(f'shape == "{shape}"', builder)
+                self.assertTrue(shape == "box" or f'"{shape}"' in exporter)
+
+    def test_every_module_is_built(self):
+        for table in (modules.SHAPES, modules.PLACEMENTS, modules.MODIFIERS):
+            for name, phase in table.items():
+                with self.subTest(name=name):
+                    self.assertTrue(int(phase[1:]) <= modules.OPEN_PHASE or name in modules.BUILT)
 
 
 if __name__ == "__main__":

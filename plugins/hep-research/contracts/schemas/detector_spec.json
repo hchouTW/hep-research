@@ -223,6 +223,145 @@
           "$ref": "#/$defs/quantity"
          }
         }
+       },
+       "cone": {
+        "type": "object",
+        "required": [
+         "rmax1_mm",
+         "rmax2_mm",
+         "length_mm"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "rmin1_mm": {
+          "$ref": "#/$defs/quantity"
+         },
+         "rmax1_mm": {
+          "$ref": "#/$defs/quantity"
+         },
+         "rmin2_mm": {
+          "$ref": "#/$defs/quantity"
+         },
+         "rmax2_mm": {
+          "$ref": "#/$defs/quantity"
+         },
+         "length_mm": {
+          "$ref": "#/$defs/quantity"
+         },
+         "phi_start_deg": {
+          "$ref": "#/$defs/quantity"
+         },
+         "phi_span_deg": {
+          "$ref": "#/$defs/quantity"
+         }
+        }
+       },
+       "sphere_section": {
+        "type": "object",
+        "required": [
+         "rmax_mm"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "rmin_mm": {
+          "$ref": "#/$defs/quantity"
+         },
+         "rmax_mm": {
+          "$ref": "#/$defs/quantity"
+         },
+         "phi_start_deg": {
+          "$ref": "#/$defs/quantity"
+         },
+         "phi_span_deg": {
+          "$ref": "#/$defs/quantity"
+         },
+         "theta_start_deg": {
+          "$ref": "#/$defs/quantity"
+         },
+         "theta_span_deg": {
+          "$ref": "#/$defs/quantity"
+         }
+        }
+       },
+       "polycone": {
+        "type": "object",
+        "required": [
+         "z_mm",
+         "rmin_mm",
+         "rmax_mm"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "z_mm": {
+          "type": "array",
+          "items": {
+           "$ref": "#/$defs/quantity"
+          },
+          "minItems": 2
+         },
+         "rmin_mm": {
+          "type": "array",
+          "items": {
+           "$ref": "#/$defs/quantity"
+          },
+          "minItems": 2
+         },
+         "rmax_mm": {
+          "type": "array",
+          "items": {
+           "$ref": "#/$defs/quantity"
+          },
+          "minItems": 2
+         },
+         "phi_start_deg": {
+          "$ref": "#/$defs/quantity"
+         },
+         "phi_span_deg": {
+          "$ref": "#/$defs/quantity"
+         }
+        }
+       },
+       "polyhedra": {
+        "type": "object",
+        "required": [
+         "sides",
+         "z_mm",
+         "rmin_mm",
+         "rmax_mm"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "sides": {
+          "$ref": "#/$defs/integer"
+         },
+         "z_mm": {
+          "type": "array",
+          "items": {
+           "$ref": "#/$defs/quantity"
+          },
+          "minItems": 2
+         },
+         "rmin_mm": {
+          "type": "array",
+          "items": {
+           "$ref": "#/$defs/quantity"
+          },
+          "minItems": 2
+         },
+         "rmax_mm": {
+          "type": "array",
+          "items": {
+           "$ref": "#/$defs/quantity"
+          },
+          "minItems": 2
+         },
+         "phi_start_deg": {
+          "$ref": "#/$defs/quantity"
+         },
+         "phi_span_deg": {
+          "$ref": "#/$defs/quantity"
+         }
+        }
        }
       }
      },

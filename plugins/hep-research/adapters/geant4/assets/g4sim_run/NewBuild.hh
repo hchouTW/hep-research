@@ -20,7 +20,10 @@
 #include "G4Material.hh"
 #include "G4NistManager.hh"
 #include "G4PVPlacement.hh"
+#include "G4Cons.hh"
+#include "G4Polycone.hh"
 #include "G4Polyhedra.hh"
+#include "G4Sphere.hh"
 #include "G4ProductionCuts.hh"
 #include "G4Region.hh"
 #include "G4RotationMatrix.hh"
@@ -91,6 +94,22 @@ inline G4VSolid* NewSolid(const std::string& name, const Value& node) {
   if (shape == "polygon_prism") {
     const double z[2] = {-length("dz_mm"), length("dz_mm")}, inner[2] = {0., 0.}, outer[2] = {length("apothem_mm"), length("apothem_mm")};
     return new G4Polyhedra(name, 0., CLHEP::twopi, static_cast<G4int>(solid.at("sides", "solid").num), 2, z, inner, outer);
+  }
+  const auto angle = [&](const char* key) { return Decimal(solid.at(key, "solid")) * deg; };
+  if (shape == "cone")
+    return new G4Cons(name, length("rmin1_mm"), length("rmax1_mm"), length("rmin2_mm"), length("rmax2_mm"), length("dz_mm"), angle("phi_start_deg"), angle("phi_span_deg"));
+  if (shape == "sphere_section")
+    return new G4Sphere(name, length("rmin_mm"), length("rmax_mm"), angle("phi_start_deg"), angle("phi_span_deg"), angle("theta_start_deg"), angle("theta_span_deg"));
+  if (shape == "polycone" || shape == "polyhedra") {  // the IR's polyhedra radii are already apothems, as G4Polyhedra takes them (GB23)
+    const bool cone = shape == "polycone";
+    const auto& zs = solid.at("z_mm", "solid").array("z_mm");
+    const auto& inner = solid.at(cone ? "rmin_mm" : "apothem_rmin_mm", "solid").array("rmin");
+    const auto& outer = solid.at(cone ? "rmax_mm" : "apothem_rmax_mm", "solid").array("rmax");
+    std::vector<double> z, rmin, rmax;
+    for (std::size_t i = 0; i < zs.size(); ++i) z.push_back(Decimal(zs[i])), rmin.push_back(Decimal(inner[i])), rmax.push_back(Decimal(outer[i]));
+    const G4int planes = static_cast<G4int>(z.size());
+    if (cone) return new G4Polycone(name, angle("phi_start_deg"), angle("phi_span_deg"), planes, z.data(), rmin.data(), rmax.data());
+    return new G4Polyhedra(name, angle("phi_start_deg"), angle("phi_span_deg"), static_cast<G4int>(solid.at("sides", "solid").num), planes, z.data(), rmin.data(), rmax.data());
   }
   throw std::runtime_error("template " + name + ": shape " + shape + " is not built");
 }

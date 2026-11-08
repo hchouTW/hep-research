@@ -183,9 +183,48 @@ PRISM_RADIUS_TOLERANCE_MM = 1e-9
 TUBE_ANGLE_TOLERANCE_RAD = 1e-12  # the IR holds degrees, Geant4 radians: the conversion is not exact
 
 
-def solid_problems(item: dict, node: dict, polyhedron: dict | None) -> list[str]:
+def _angle_problems(name: str, held: dict, solid: dict, pairs: tuple) -> list[str]:
+    """Angles Geant4 holds in radians against the IR's degrees; a start may sit a whole turn away."""
+    problems = []
+    for key, source in pairs:
+        turn = (float.fromhex(held[key]) - math.radians(float(solid[source]))) / math.tau
+        if abs(turn - (round(turn) if key.startswith("start") else 0)) * math.tau > TUBE_ANGLE_TOLERANCE_RAD:
+            problems.append(f"logical {name}: {key} differs")
+    return problems
+
+
+def s7_solid_problems(name: str, shape: str, solid: dict, curved: dict | None, polyhedron: dict | None) -> list[str]:
+    """S7's shapes as Geant4 built them (ProbeV2's curved_solids and polyhedra): lengths bit for bit, angles to 1e-12 rad, and a
+    polyhedra's corners at the circumradii, which proves the apothem conversion (GB23)."""
+    if shape == "polyhedra":
+        if polyhedron is None or polyhedron["sides"] != solid["sides"]:
+            return [f"logical {name}: the polyhedra was not written back with {solid['sides']} sides"]
+        got = sorted(float.fromhex(value) for value in polyhedron["corners_r_mm"])
+        want = sorted(float(value) for value in solid["circumradius_rmin_mm"] + solid["circumradius_rmax_mm"])
+        if len(got) != len(want) or any(abs(a - b) > PRISM_RADIUS_TOLERANCE_MM for a, b in zip(got, want)):
+            return [f"logical {name}: its corners are at {got} mm, the circumradii are {want}"]
+        return []
+    wanted = {"cone": "G4Cons", "sphere_section": "G4Sphere", "polycone": "G4Polycone"}[shape]
+    if curved is None or curved["type"] != wanted:
+        return [f"logical {name}: no {wanted} was written back"]
+    if shape == "cone":
+        problems = [f"logical {name}: {key} differs" for key, source in (("rmin1_mm", "rmin1_mm"), ("rmax1_mm", "rmax1_mm"), ("rmin2_mm", "rmin2_mm"), ("rmax2_mm", "rmax2_mm"), ("half_z_mm", "dz_mm")) if float.fromhex(curved[key]) != float(solid[source])]
+        return problems + _angle_problems(name, curved, solid, (("start_phi_rad", "phi_start_deg"), ("delta_phi_rad", "phi_span_deg")))
+    if shape == "sphere_section":
+        problems = [f"logical {name}: {key} differs" for key in ("rmin_mm", "rmax_mm") if float.fromhex(curved[key]) != float(solid[key])]
+        return problems + _angle_problems(name, curved, solid, (("start_phi_rad", "phi_start_deg"), ("delta_phi_rad", "phi_span_deg"), ("start_theta_rad", "theta_start_deg"), ("delta_theta_rad", "theta_span_deg")))
+    got = sorted((float.fromhex(r), float.fromhex(z)) for r, z in curved["corners"])
+    want = sorted([(float(r), float(z)) for r, z in zip(solid["rmax_mm"], solid["z_mm"])] + [(float(r), float(z)) for r, z in zip(solid["rmin_mm"], solid["z_mm"])])
+    if got != want:
+        return [f"logical {name}: its (r, z) corners {got} are not the planes' {want}"]
+    return []
+
+
+def solid_problems(item: dict, node: dict, polyhedron: dict | None, curved: dict | None = None) -> list[str]:
     """The solid Geant4 built against the IR: bit for bit in lengths; a prism's corners at its circumradius, which proves the apothem conversion."""
     shape, solid, name = node["shape"], node.get("solid"), item["name"]
+    if shape in ("cone", "sphere_section", "polycone", "polyhedra"):
+        return s7_solid_problems(name, shape, solid, curved, polyhedron)
     if shape == "polygon_prism":
         if polyhedron is None or polyhedron["sides"] != solid["sides"]:
             return [f"logical {name}: the prism was not written back with {solid['sides']} sides"]
@@ -229,12 +268,13 @@ def tree_problems(ir: dict, record: dict, field_records: dict) -> list[str]:
             problems.append(f"placement {key}: rotation differs")
     problems += [f"placement {key} is not in the IR" for key in written]
     polyhedra = {item["logical"]: item for item in record.get("polyhedra", [])}
+    curved = {item["logical"]: item for item in record.get("curved_solids", [])}
     for item in geometry["logical_volumes"]:
         node = physical["templates"].get(item["name"])
         if node is None:
             problems.append(f"logical {item['name']} is not in the IR")
             continue
-        problems += solid_problems(item, node, polyhedra.get(item["name"]))
+        problems += solid_problems(item, node, polyhedra.get(item["name"]), curved.get(item["name"]))
         if node["region"] != "default" and item["region"] != node["region"]:
             problems.append(f"logical {item['name']}: region {item['region']}, the IR says {node['region']}")
     for thread, rows in field_records.items():

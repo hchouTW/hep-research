@@ -44,6 +44,10 @@ def _polyhedron(ir: dict, placement: dict) -> convex.Polyhedron:
         body = convex.prism(solid["sides"], exact(solid["circumradius_mm"]), exact(solid["dz_mm"]))
     elif shape == "tube":
         body = convex.circumscribed(exact(solid["rmax_mm"]), exact(solid["dz_mm"]))
+    elif shape == "polyhedra":  # its largest circumradius over the whole length: a prism that holds it
+        body = convex.prism(solid["sides"], max(exact(r) for r in solid["circumradius_rmax_mm"]), _half(ir, placement["template"])[2])
+    elif shape in ("cone", "sphere_section", "polycone"):  # the circumscribed polyhedron of its bounding cylinder: conservative (Section 7.3)
+        body = convex.circumscribed(_half(ir, placement["template"])[0], _half(ir, placement["template"])[2])
     else:
         body = convex.box(_half(ir, placement["template"]))
     return body.placed(active, tuple(exact(text) for text in placement["centre_mm"]))
@@ -147,11 +151,22 @@ def _gaps_in_tube(ir: dict, placement: dict) -> list:
     return gaps + ([subtract(convex.nearest_to_axis(body), rmin)] if rmin > 0 else [])
 
 
+def _uniform_prism(solid: dict) -> bool:
+    """A polyhedra of one section along its length, solid and whole in phi: a prism, judged as one."""
+    return len(set(solid["circumradius_rmax_mm"])) == 1 and all(exact(r) == 0 for r in solid["circumradius_rmin_mm"]) and exact(solid["phi_span_deg"]) == 360 and exact(solid["z_mm"][0]) == CONTEXT.minus(exact(solid["z_mm"][-1]))
+
+
 def _gaps(ir: dict, placement: dict) -> list:
     """The distance from a daughter to each surface of its mother: negative outside, None when it cannot be judged."""
-    shape = ir["physical"]["templates"][placement["mother"]]["shape"]
+    template = ir["physical"]["templates"][placement["mother"]]
+    shape = template["shape"]
     if shape == "tube":
         return _gaps_in_tube(ir, placement)
+    if shape == "polyhedra" and _uniform_prism(template["solid"]):
+        solid = template["solid"]
+        return convex.face_gaps(convex.prism(solid["sides"], exact(solid["circumradius_rmax_mm"][0]), exact(solid["z_mm"][-1])), _polyhedron(ir, placement).vertices)
+    if shape in ("cone", "sphere_section", "polycone", "polyhedra"):
+        return [None]  # a daughter of these mothers cannot be judged yet (a recorded limit of S7)
     if shape != "box":
         return convex.face_gaps(_mother_body(ir, placement["mother"]), _polyhedron(ir, placement).vertices)
     low, high = _extent(ir, placement)
@@ -165,7 +180,7 @@ def containment(ir: dict) -> list[dict]:
         where = f"{placement['mother']}/{placement['template']}[{placement['copy_number']}]"
         for gap in _gaps(ir, placement):
             if gap is None:
-                out.append(_finding("containment-unjudged", where, "a daughter of a tube with a phi section cannot be judged yet"))
+                out.append(_finding("containment-unjudged", where, f"a daughter of a {ir['physical']['templates'][placement['mother']]['shape']} mother cannot be judged yet (a tube only with a phi section)"))
                 continue
             problem = _face_gap(gap)
             if problem:
