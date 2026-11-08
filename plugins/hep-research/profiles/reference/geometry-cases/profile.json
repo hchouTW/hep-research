@@ -24,7 +24,7 @@
  "adapters": {
   "required": [],
   "optional": [
-   "geant4"
+   "adapter:geant4"
   ]
  },
  "depends_on": [
@@ -42,5 +42,6 @@
     "tests/test_cases.py"
    ]
   }
- ]
+ ],
+ "evidence_namespace": "geometry-cases"
 }

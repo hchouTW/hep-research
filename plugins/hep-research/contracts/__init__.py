@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "3.23.0"
+CONTRACTS_VERSION = "3.24.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -233,6 +233,9 @@ CONTRACTS_VERSION = "3.23.0"
 # review_measurement_spec.py --check-bundle refuse with the reason (exit 2). Existing attestations of a 2.0.0 bundle
 # still verify (attestation.py keeps its digest rule). No artifact type, vocabulary term, envelope field or capability
 # changes (measurement:correction-keys-v1 stays): every 3.16 artifact keeps its outcome.
+# 3.24.0 (minor; g4sim S6): the reference profile template lets a profile hold reference cases instead of an evidence ledger
+# (cases/, coverage.json; evidence optional), as Section 13.1 lays out reference:geometry-cases. Additive: every 3.23 profile and
+# artifact keeps its outcome, and committed outputs keep the contracts version that wrote them.
 # 3.23.0 (minor; g4sim S5) adds geometry_derivation.json (geometry-derivation/1), rules/design_geometry/ (calorimeter, planes-tracker, tof), the oneOf of design_geometry.json by mapping_version, geometry_kind, geometry_id and geometry_derivation_ref of
 # design candidates, the kit form of design_search_spec.json, and scorers and readouts of simulation_hits.json; design.py adds design.qualification_mismatch. The upgrade rules of validate.py are unchanged: a study record of the g4sim path passes them as written. Additive for every honest record: a 3.22 record whose conditions contradict its validated-in-scope label moves from row 8 to an error, and no recorded study does. The hit file gains columns, so simroot refuses a file of the earlier layout. Committed outputs keep the contracts version that wrote them.
 # 3.22.0 (minor; g4sim S4) adds simulation_hits.json (simulation-hits/1), response_pipeline.json (response-pipeline/1, with the stage hand-off response-handoff/1 in $defs) and efficiency_map.json (efficiency-map/1), and the optional

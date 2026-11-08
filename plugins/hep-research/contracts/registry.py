@@ -35,9 +35,10 @@ TEMPLATES: dict[Any, dict[str, list[str]]] = {
                    "optional": ["scripts", "README.md"]},
     "theory-domain": {"required": ["profile.json", "index.md", "conventions.json", "models", "derivations", "predictions", "benchmarks", "evidence", "tests"],
                       "optional": ["scripts", "README.md"]},
-    # a plugin-wide sourced reference (D13: the detector atlas): an evidence ledger, never bound by a project
-    "reference": {"required": ["profile.json", "index.md", "conventions.json", "evidence", "tests"],
-                  "optional": ["README.md"]},
+    # a plugin-wide sourced reference (D13: the detector atlas): an evidence ledger, never bound by a project; or, from 3.24.0,
+    # reference cases that cite other profiles' claims and hold none of their own (g4sim plan, Section 13.1)
+    "reference": {"required": ["profile.json", "index.md", "conventions.json", "tests"],
+                  "optional": ["README.md", "evidence", "cases", "coverage.json"]},
 }
 REGISTRY_BUDGET, INDEX_BUDGET = 3072, 4096
 DEMONSTRATED = {"demonstrated-on-synthetic-data", "tested-in-declared-environment"}

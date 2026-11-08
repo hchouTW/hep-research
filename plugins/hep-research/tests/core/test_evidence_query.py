@@ -18,7 +18,7 @@ from core.evidence import query as q  # noqa: E402
 LEDGER = ROOT / "docs" / "evidence" / "statistics"
 PUBLIC_LEDGERS = [d for d in (LEDGER, ROOT / "profiles" / "experiments" / "eic" / "evidence",
                               ROOT / "profiles" / "experiments" / "ams-02" / "evidence") if (d / "claims.json").is_file()]
-TODAY = date(2026, 10, 21)  # the latest verification in the public ledgers (hepstats:S07)
+TODAY = date(2026, 11, 8)  # the latest verification in the public ledgers (the g4sim S6 claims of ams-02 and eic)
 FILES = {"sources": "sources.json", "claims": "claims.json"}
 
 
@@ -95,7 +95,7 @@ class PublicLedger(unittest.TestCase):
                                 for r in p["rows"]])
 
     def test_default_page_respects_the_byte_cap(self):
-        code, page = cli("--sources", LEDGER / "sources.json", "--claims", LEDGER / "claims.json", "--today", "2026-10-21")
+        code, page = cli("--sources", LEDGER / "sources.json", "--claims", LEDGER / "claims.json", "--today", "2026-11-08")
         self.assertEqual(code, 0)
         self.assertLessEqual(page["returned"], q.PAGE_SIZE)
         self.assertLessEqual(len(q._dumps(page).encode()), q.MAX_BYTES)
