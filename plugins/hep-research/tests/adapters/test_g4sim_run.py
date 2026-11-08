@@ -296,6 +296,18 @@ class SolidComparison(unittest.TestCase):
         held["corners"][4] = [(7.0).hex(), (0.0).hex()]
         self.assertEqual(len(driver.solid_problems({"name": "p"}, self.PCONE, None, held)), 1)
 
+    def test_a_full_turn_polycone_is_not_judged_by_its_start(self):
+        # G4Polycone puts 0 for the start of a full turn (Geant4 11.4.3), whatever start the solid names; a partial one keeps its start
+        corners = [(0.0, 10.0), (1.0, 0.0), (0.0, -10.0), (5.0, -10.0), (8.0, 0.0), (5.0, 10.0)]
+        held = {"logical": "p", "type": "G4Polycone", "start_phi_rad": (0.0).hex(), "end_phi_rad": math.tau.hex(), "corners": [[r.hex(), z.hex()] for r, z in corners]}
+        turned = {**self.PCONE, "solid": {**self.PCONE["solid"], "phi_start_deg": "30", "phi_span_deg": "360"}}
+        self.assertEqual(driver.solid_problems({"name": "p"}, turned, None, held), [])
+        partial = {**turned, "solid": {**turned["solid"], "phi_span_deg": "300"}}
+        held_partial = {**held, "end_phi_rad": math.radians(300).hex()}  # a partial turn whose start Geant4 lost is still caught
+        self.assertEqual(driver.solid_problems({"name": "p"}, partial, None, held_partial), ["logical p: its phi section differs"])
+        held_partial["start_phi_rad"], held_partial["end_phi_rad"] = math.radians(30).hex(), math.radians(330).hex()
+        self.assertEqual(driver.solid_problems({"name": "p"}, partial, None, held_partial), [])
+
     def test_a_polyhedra_given_its_circumradii_as_apothems_is_caught(self):
         right = {"sides": 6, "start_phi_rad": (0.0).hex(), "corners_r_mm": [value.hex() for value in (2.0, 2.0, 10.0, 12.0)]}
         stretch = 1 / math.cos(math.pi / 6)  # G4Polyhedra given R as its rOuter puts its corners at R / cos(pi / 6)

@@ -231,7 +231,9 @@ def s7_solid_problems(name: str, shape: str, solid: dict, curved: dict | None, p
         return problems + _angle_problems(name, curved, solid, (("start_phi_rad", "phi_start_deg"), ("delta_phi_rad", "phi_span_deg"), ("start_theta_rad", "theta_start_deg"), ("delta_theta_rad", "theta_span_deg")))
     start = (float.fromhex(curved["start_phi_rad"]) - math.radians(float(solid["phi_start_deg"]))) / math.tau
     span = float.fromhex(curved["end_phi_rad"]) - float.fromhex(curved["start_phi_rad"]) - math.radians(float(solid["phi_span_deg"]))
-    if abs(start - round(start)) * math.tau > TUBE_ANGLE_TOLERANCE_RAD or abs(span) > TUBE_ANGLE_TOLERANCE_RAD:
+    # G4Polycone sets the start of a full turn to 0 whatever it was given (observed on Geant4 11.4.3): no start to compare then
+    full_turn = float(solid["phi_span_deg"]) == 360.0
+    if (not full_turn and abs(start - round(start)) * math.tau > TUBE_ANGLE_TOLERANCE_RAD) or abs(span) > TUBE_ANGLE_TOLERANCE_RAD:
         return [f"logical {name}: its phi section differs"]
     got = sorted((float.fromhex(r), float.fromhex(z)) for r, z in curved["corners"])
     want = sorted([(float(r), float(z)) for r, z in zip(solid["rmax_mm"], solid["z_mm"])] + [(float(r), float(z)) for r, z in zip(solid["rmin_mm"], solid["z_mm"])])

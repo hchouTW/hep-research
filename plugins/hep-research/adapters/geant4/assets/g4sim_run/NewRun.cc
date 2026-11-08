@@ -65,6 +65,8 @@ struct Shared {
   long long seed = 0, firstEvent = 0;
   bool hits = false;
   bool optical = false;  // S7: G4OpticalPhysics is on, so the conservation file carries the optical-photon terms
+  std::set<std::string> opticalScope;  // S7: the logical names inside optical_scope, for the steps-outside count
+  bool xtr = false;      // S7: g4sim_xtr is on, so the conservation file carries the TR source term
   g4sim::TruthRules truth;
   std::vector<g4sim::ReferencePlane> planes;
 };
@@ -197,7 +199,8 @@ class Files : public G4UserRunAction {
     Primaries() = std::fopen(("primaries.thread" + thread + ".csv").c_str(), "w");
     if (fShared.optical) fPhotons = std::fopen(("photons.thread" + thread + ".csv").c_str(), "w");
     g4sim::Accounting::Thread().SetSeparated();
-    if (fShared.optical) g4sim::Accounting::Thread().SetOptical();
+    if (fShared.optical) g4sim::Accounting::Thread().SetOptical(fShared.opticalScope);
+    if (fShared.xtr) g4sim::Accounting::Thread().SetXtr();
     g4sim::Accounting::Thread().Open("conservation.thread" + thread + ".csv");
     g4sim::ScorerSums::Thread().Configure(&fShared.scorers, &fShared.strides, fCells, fBoundary, fCrossings);
     g4sim::ScorerSums::Thread().SetPhotons(fPhotons);
@@ -419,7 +422,10 @@ int NewRun(const Value& ir, const Value& card, const Value& request) {
         return 2;
       }
     }
-  if (xtr) list->RegisterPhysics(new g4sim::XtrConstructor(g4sim::ReadXtrRadiators(ir.at("physical", "ir"), physics)));  // S7, Section 6.2.9
+  if (xtr) {  // S7, Section 6.2.9
+    list->RegisterPhysics(new g4sim::XtrConstructor(g4sim::ReadXtrRadiators(ir.at("physical", "ir"), physics)));
+    shared.xtr = true;
+  }
   if (optical) {  // S7: optical physics, kept inside optical_scope by KillProcess (GB16)
     list->RegisterPhysics(new G4OpticalPhysics(0));
     shared.optical = true;
@@ -427,6 +433,7 @@ int NewRun(const Value& ir, const Value& card, const Value& request) {
     for (const auto& requirement : ir.at("physical", "ir").at("physics_requirements", "physical").array("physics_requirements"))
       if (requirement.at("need", "requirement").str == "optical_scope")
         for (const auto& name : requirement.at("templates", "optical_scope").array("templates")) limits.opticalScope.insert(name.str);
+    shared.opticalScope = limits.opticalScope;
     SetOpticalParameters(physics, ir.at("physical", "ir"));
   }
   if (limits.Any()) list->RegisterPhysics(new KillPhysics(limits));

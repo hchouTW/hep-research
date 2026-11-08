@@ -4,6 +4,9 @@
 A test that merely exists proves nothing, so a scratch copy of the code is first run unchanged, and must pass, then with one change at a time,
 and must fail. The two rows that live in Geant4 (a wrong refractive index; optical photons killed by KillProcess booked as killed kinetic
 energy) are runs of g4sim_run with the builder and accounting controls; the second must break conservation by more than the 1e-6 MeV of S3.
+After the second independent read (2026-11-08) two more: photons let into a volume outside the scope through OpBoundary's SameMaterial
+status (the entry judged by status alone) must show steps outside the scope, which the as-built run keeps at 0; and an XTR run whose TR
+photons are left out of the source term must break conservation, which the as-built XTR run holds (inputs in transition_radiation/).
 Usage: negatives.py --work DIR [--program PATH]   Prints JSON with a status key. Exit 0 every change caught, 1 otherwise, 2 bad input.
 """
 from __future__ import annotations
@@ -25,6 +28,7 @@ OPTICS, RADIATOR, EXPAND, CHECK, MAP, CONTRACT, DRIVER = ("core/geometry/optics.
 T_OPTICS, T_RADIATOR, T_EXPAND, T_RUN, T_MAP, T_FIELD = ("tests.core.test_geometry_optics",), ("tests.core.test_geometry_xtr",), ("tests.core.test_geometry_expand",), \
     ("tests.adapters.test_g4sim_run",), ("tests.core.test_simulation_efficiency_map",), ("tests.core.test_geometry_fieldmap",)
 BALANCE_TOLERANCE_MEV = 1e-6
+RADIATOR_INPUTS = Path(__file__).resolve().parent / "transition_radiation"
 
 # Section 15.1 row, change, file, text replaced, replacement, tests that must fail
 CHANGES = (
@@ -109,16 +113,39 @@ def live(work: Path, program: Path) -> list:
                             ({"G4SIM_BUILDER_CONTROL": "leak_scope", "G4SIM_ACCOUNTING_CONTROL": "optical_as_killed"}, "photons killed by KillProcess booked as killed kinetic energy")):
         out = folder / f"leak-{len(rows)}"
         result = go(["simulate", "--detector", str(spec), "--request", str(request), "--run", str(folder / "run.json")], controls, out)
-        conservation = list(csv.DictReader((out / "conservation.csv").open(encoding="utf-8"))) if (out / "conservation.csv").is_file() else []
+        conservation = read_conservation(out, result, label)
         largest = max((abs(float(item["residual_MeV"])) for item in conservation), default=None)
         killed = sum(int(item.get("optical_killed_scope", 0)) for item in conservation)
-        if result.get("status") != "ok":
-            raise RuntimeError(f"the run '{label}' failed: {json.dumps(result)[:300]}")
+        outside = sum(int(item["optical_steps_outside"]) for item in conservation)
         breaks = largest is not None and largest > BALANCE_TOLERANCE_MEV
         negative = "G4SIM_ACCOUNTING_CONTROL" in controls
-        rows.append({"row": "Optical photons (Geant4)", "change": label, "caught": breaks if negative else None, "conservation_holds": (not breaks) if not negative else None,
-                     "largest_residual_MeV": largest, "killed_in_scope_terms": killed, "run_status": result.get("status")})
+        rows.append({"row": "Optical photons (Geant4)", "change": label, "caught": breaks if negative else None,
+                     "conservation_holds": (not breaks and outside == 0) if not negative else None,
+                     "largest_residual_MeV": largest, "killed_in_scope_terms": killed, "steps_outside_scope": outside, "run_status": result.get("status")})
+    # the entry into a volume outside the scope judged by OpBoundary's refraction and transmission statuses alone: SameMaterial lets photons in
+    out = folder / f"leak-{len(rows)}"
+    controls = {"G4SIM_BUILDER_CONTROL": "leak_scope", "G4SIM_KILL_CONTROL": "entry_by_status"}
+    label = "photons entering a volume outside the scope through SameMaterial, the entry judged by status"
+    result = go(["simulate", "--detector", str(spec), "--request", str(request), "--run", str(folder / "run.json")], controls, out)
+    outside = sum(int(item["optical_steps_outside"]) for item in read_conservation(out, result, label))
+    rows.append({"row": "Optical photons (Geant4)", "change": label, "caught": outside > 0, "steps_outside_scope": outside, "run_status": result.get("status")})
+    # XTR: the TR photons' energy is a source term of the identity (Geant4's XTR does not take it from the parent)
+    for controls, label in (({}, "control: an XTR run, the TR photons booked as a source term"), ({"G4SIM_ACCOUNTING_CONTROL": "no_tr_source"}, "an XTR run, the TR photons left out of the source term")):
+        out = folder / f"radiator-{len(rows)}"
+        result = go(["simulate", "--detector", str(RADIATOR_INPUTS / "spec.json"), "--request", str(RADIATOR_INPUTS / "request.json"), "--run", str(RADIATOR_INPUTS / "run.json")], controls, out)
+        conservation = read_conservation(out, result, label)
+        largest = max(abs(float(item["residual_MeV"])) for item in conservation)
+        produced = sum(float(item["xtr_created_MeV"]) > 0 for item in conservation)
+        breaks = largest > BALANCE_TOLERANCE_MEV
+        rows.append({"row": "XTR (Geant4)", "change": label, "caught": breaks if controls else None, "conservation_holds": None if controls else (not breaks and produced > 0),
+                     "largest_residual_MeV": largest, "events_with_tr": produced, "run_status": result.get("status")})
     return rows
+
+
+def read_conservation(out: Path, result: dict, label: str) -> list:
+    if result.get("status") != "ok" or not (out / "conservation.csv").is_file():
+        raise RuntimeError(f"the run '{label}' failed: {json.dumps(result)[:300]}")
+    return list(csv.DictReader((out / "conservation.csv").open(encoding="utf-8")))
 
 
 def main(argv=None) -> int:
