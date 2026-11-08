@@ -130,12 +130,14 @@ def escape_counts(folder: Path) -> tuple[int, int, dict]:
     rows = _rows(folder / "conservation.csv")
     fates = {key: sum(int(row[key]) for row in rows) for key in ("optical_produced", "optical_boundary_absorbed", "optical_killed_scope", "optical_absorbed",
                                                                  "optical_escaped", "optical_other", "optical_detected", "optical_wls")}
+    # the time cut's kills have their own column since build 26 (optical_killed_time); before, they were in optical_killed_scope
+    fates["optical_killed_time"] = sum(int(row.get("optical_killed_time", 0)) for row in rows)
     return fates["optical_produced"], fates["optical_boundary_absorbed"], fates
 
 
 def escape(args) -> dict:
     produced, escaped, fates = escape_counts(args.run)
-    if fates["optical_absorbed"] or fates["optical_other"] or fates["optical_wls"] or produced != escaped + fates["optical_killed_scope"]:
+    if fates["optical_absorbed"] or fates["optical_other"] or fates["optical_wls"] or produced != escaped + fates["optical_killed_scope"] + fates["optical_killed_time"]:
         return {"status": "rejected", "message": "a photon ended other than by escaping or by the time cut", "fates": fates}
     reference = escape_reference(args.index)
     fraction = escaped / produced
