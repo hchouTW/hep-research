@@ -4180,5 +4180,447 @@
    "valid_for": "observatory as completed in 2008 (2015 paper)",
    "conditions": null
   }
+ },
+ {
+  "id": "detector-atlas:C124",
+  "claim": "The barrel ECAL covers |eta| < 1.479 with 360-fold granularity in phi and (2 x 85)-fold in eta, a total of 61 200 crystals.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S02"
+  ],
+  "location": "section 4.2, page 92",
+  "scope": {
+   "text": "CMS ECAL: detector as described in 2008 (as built for LHC start-up)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-07",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "ECAL",
+   "quantity": "barrel eta coverage; phi segments; eta segments; crystals",
+   "value": "1.479; 360; 2 x 85; 61200",
+   "unit": "1; crystals; crystals; crystals",
+   "kind": "design",
+   "valid_for": "CMS ECAL: detector as described in 2008 (as built for LHC start-up)",
+   "conditions": "design (as built)"
+  }
+ },
+ {
+  "id": "detector-atlas:C125",
+  "claim": "Barrel crystals are tapered (shape slightly varying with eta), with a front face of about 22 x 22 mm2, a rear face of 26 x 26 mm2 and a length of 230 mm corresponding to 25.8 X0.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S02"
+  ],
+  "location": "section 4.2, page 92",
+  "scope": {
+   "text": "CMS ECAL: detector as described in 2008 (as built for LHC start-up)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": "Front and rear faces are rounded nominal values; the true crystals are 17 shape pairs varying with eta (see C05 and the TDR Table 3.1 values in C11). 25.8 X0 is CMS's conversion with X0 = 0.89 cm.",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-07",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "ECAL",
+   "quantity": "barrel crystal front face; rear face; length; depth",
+   "value": "22 x 22; 26 x 26; 230; 25.8",
+   "unit": "mm2; mm2; mm; X0",
+   "kind": "design",
+   "valid_for": "CMS ECAL: detector as described in 2008 (as built for LHC start-up)",
+   "conditions": "design (nominal; 'approximately')"
+  }
+ },
+ {
+  "id": "detector-atlas:C126",
+  "claim": "Barrel crystal axes make a small angle (3 degrees) with the vector from the nominal interaction vertex in both phi and eta; front-face centres are at a radius of 1.29 m; the barrel crystal volume is 8.14 m3 and the weight 67.4 t.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S02"
+  ],
+  "location": "section 4.2, page 92",
+  "scope": {
+   "text": "CMS ECAL: detector as described in 2008 (as built for LHC start-up)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-07",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "ECAL",
+   "quantity": "off-pointing angle; front-face radius; barrel crystal volume; barrel crystal weight",
+   "value": "3; 1.29; 8.14; 67.4",
+   "unit": "deg; m; m3; t",
+   "kind": "design",
+   "valid_for": "CMS ECAL: detector as described in 2008 (as built for LHC start-up)",
+   "conditions": "design (as built)"
+  }
+ },
+ {
+  "id": "detector-atlas:C127",
+  "claim": "Barrel crystals sit in an alveolar structure (submodule) with 0.1 mm walls (aluminium plus two glass-fibre-epoxy layers); nominal crystal-to-crystal distance is 0.35 mm inside a submodule and 0.5 mm between submodules.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S02"
+  ],
+  "location": "section 4.2, page 92",
+  "scope": {
+   "text": "CMS ECAL: detector as described in 2008 (as built for LHC start-up)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": "The split of the 0.1 mm wall between aluminium and glass-fibre layers is not given; an L1 material budget of the walls needs that split from another source.",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-07",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "ECAL",
+   "quantity": "alveolar wall thickness; crystal gap in submodule; gap between submodules",
+   "value": "0.1; 0.35; 0.5",
+   "unit": "mm",
+   "kind": "design",
+   "valid_for": "CMS ECAL: detector as described in 2008 (as built for LHC start-up)",
+   "conditions": "design (nominal)"
+  }
+ },
+ {
+  "id": "detector-atlas:C128",
+  "claim": "Each barrel submodule holds a left/right pair of one crystal shape, with 17 such pairs in total; modules of 400 or 500 crystals, four per supermodule separated by 4 mm aluminium conical webs; a supermodule holds 1700 crystals; eighteen supermodules of 20 degrees in phi form a half barrel.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S02"
+  ],
+  "location": "section 4.2, page 92",
+  "scope": {
+   "text": "CMS ECAL: detector as described in 2008 (as built for LHC start-up)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": "36 supermodules in total is arithmetic from '18 per half barrel' here; it is stated explicitly in the TDR (C10). 36 x 1700 = 61 200 is consistent with C01.",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-07",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "ECAL",
+   "quantity": "crystal shape pairs; crystals per module; crystals per supermodule; supermodules per half barrel",
+   "value": "17; 400 or 500; 1700; eighteen",
+   "unit": "pairs; crystals; crystals; supermodules",
+   "kind": "design",
+   "valid_for": "CMS ECAL: detector as described in 2008 (as built for LHC start-up)",
+   "conditions": "design (as built)"
+  }
+ },
+ {
+  "id": "detector-atlas:C129",
+  "claim": "Endcap (1.479 < |eta| < 3.0): identically shaped crystals with a rear face 30 x 30 mm2, front face 28.62 x 28.62 mm2 and length 220 mm (24.7 X0); 7324 crystals per endcap, 3662 per Dee, in 5 x 5 supercrystals (138 standard and 18 partial per Dee); crystals point at a focus 1300 mm beyond the interaction point (off-pointing 2 to 8 degrees); the IP-to-endcap-envelope distance is 315.4 cm.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S02"
+  ],
+  "location": "section 4.2, pages 92-93; chapter 4 introduction, page 90",
+  "scope": {
+   "text": "CMS ECAL: detector as described in 2008 (as built for LHC start-up)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": "The 315.4 cm envelope distance takes account of the estimated 1.6 cm shift toward the IP with the 4 T field on (page 93). Conflicts with the 1997 TDR endcap design (C12); this 2008 description is the one to use.",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-07",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "ECAL",
+   "quantity": "endcap rear face; front face; length; depth; crystals per endcap; crystals per Dee",
+   "value": "30 x 30; 28.62 x 28.62; 220; 24.7; 7324; 3662",
+   "unit": "mm2; mm2; mm; X0; crystals; crystals",
+   "kind": "design",
+   "valid_for": "CMS ECAL: detector as described in 2008 (as built for LHC start-up)",
+   "conditions": "design (as built)"
+  }
+ },
+ {
+  "id": "detector-atlas:C130",
+  "claim": "CMS quotes PbWO4 density 8.28 g/cm3, radiation length 0.89 cm and Moliere radius 2.2 cm, citing the Review of Particle Physics (PDG, Phys. Lett. B 592 (2004) 1).",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S02"
+  ],
+  "location": "section 4.1, page 90; reference [62]",
+  "scope": {
+   "text": "CMS ECAL: detector as described in 2008 (as built for LHC start-up)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": "Secondary to PDG 2004 (not read here). Density 8.28 differs from current PDG 8.300 (C14, C15); Moliere radius 2.2 cm differs from PDG 1.959 / 2.00 cm (definition of critical energy).",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-07",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "ECAL",
+   "quantity": "PbWO4 density; radiation length; Moliere radius",
+   "value": "8.28; 0.89; 2.2",
+   "unit": "g/cm3; cm; cm",
+   "kind": "design",
+   "valid_for": "CMS ECAL: detector as described in 2008 (as built for LHC start-up)",
+   "conditions": "material property quoted from PDG 2004 (computed tabulation)"
+  }
+ },
+ {
+  "id": "detector-atlas:C131",
+  "claim": "TDR Table 1.1 gives for PbWO4: density 8.28 g/cm3, radiation length 0.89 cm, interaction length 22.4 cm, Moliere radius 2.19 cm, refractive index 2.30.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S13"
+  ],
+  "location": "Table 1.1, page 4",
+  "scope": {
+   "text": "CMS ECAL: design of December 1997 (TDR)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": "The table cites no source in the read text. Section 1.4 (page 6) quotes 'the PbWO4 Molière radius of 21.9 mm', consistent with 2.19 cm. The interaction length 22.4 cm differs from PDG's 20.27 / 20.7 cm.",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-07",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "ECAL",
+   "quantity": "PbWO4 density; X0; lambda_I; Moliere radius",
+   "value": "8.28; 0.89; 22.4; 2.19",
+   "unit": "g/cm3; cm; cm; cm",
+   "kind": "design",
+   "valid_for": "CMS ECAL: design of December 1997 (TDR)",
+   "conditions": "material property (tabulated; source of the numbers not stated in the table)"
+  }
+ },
+ {
+  "id": "detector-atlas:C132",
+  "claim": "TDR barrel design: front face at radius 1.29 m, square cross-section about 22 x 22 mm2, length 230 mm corresponding to 25.8 X0, 3 degree tilt in phi and eta, 61 200 crystals; Table 1.2 lists 36 supermodules of 1700 crystals (20 in phi, 85 in eta), typical crystal dimension 21.8 x 21.8 x 230 mm3 and depth 25.8 X0, barrel envelope r 1238 to 1750 mm.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S13"
+  ],
+  "location": "section 1.6.1 (page 11) and Table 1.2 (page 12)",
+  "scope": {
+   "text": "CMS ECAL: design of December 1997 (TDR)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": "Design values; agree with the 2008 description for the barrel. The '»' is a text-extraction rendering of 'approximately'.",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-07",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "ECAL",
+   "quantity": "barrel front radius; crystal cross-section; length; depth; supermodules",
+   "value": "1.29; ~22 x 22 (typical 21.8 x 21.8); 230; 25.8; 36",
+   "unit": "m; mm2; mm; X0; supermodules",
+   "kind": "design",
+   "valid_for": "CMS ECAL: design of December 1997 (TDR)",
+   "conditions": "design (1997)"
+  }
+ },
+ {
+  "id": "detector-atlas:C133",
+  "claim": "TDR Table 3.1: barrel crystal type 1 (at eta = 0) front section AF 21.83, BF 23.59, CF 21.85 mm and rear section AR 25.84, BR 25.48, CR 25.86 mm; type 17 (eta max) front AF 21.83, BF 24.29, CF 22.21 mm and rear AR 23.74, BR 26.07, CR 24.15 mm; crystal length 230 mm; 2 x 17 crystal types.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S13"
+  ],
+  "location": "Table 3.1, page 50 (dimensions defined in TDR Fig. 3.5)",
+  "scope": {
+   "text": "CMS ECAL: design of December 1997 (TDR)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": "The meaning of A, B, C (edges of the trapezoidal faces) is defined only in TDR Fig. 3.5, which was not read (figure, not extractable as text). Do not build a trapezoid from these without reading Fig. 3.5. Design values; whether they are the as-built shapes is not stated in the 2008 paper.",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-07",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "ECAL",
+   "quantity": "barrel crystal type-1 and type-17 face dimensions",
+   "value": "type 1: AF 21.83, BF 23.59, CF 21.85, AR 25.84, BR 25.48, CR 25.86; type 17: AF 21.83, BF 24.29, CF 22.21, AR 23.74, BR 26.07, CR 24.15",
+   "unit": "mm",
+   "kind": "design",
+   "valid_for": "CMS ECAL: design of December 1997 (TDR)",
+   "conditions": "design (1997)"
+  }
+ },
+ {
+  "id": "detector-atlas:C134",
+  "claim": "TDR endcap design (superseded): tapered crystals of 24.7 x 24.7 x 220 mm3 (24.7 X0) in supercrystals of 36; 10 764 crystals per endcap (21 528 total).",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S13"
+  ],
+  "location": "section 1.6.2 (page 13) and Table 1.2 (page 12)",
+  "scope": {
+   "text": "CMS ECAL: design of December 1997 (TDR)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": "CONFLICT with the 2008 description (C06: 28.62/30 x 30 x 220 mm, 5 x 5 supercrystals, 7324 per endcap). The as-built endcap is the 2008 one; do not use this claim for geometry. The document that records the redesign was not identified in this session.",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-07",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "ECAL",
+   "quantity": "endcap crystal dimension; crystals per endcap (1997 design)",
+   "value": "24.7 x 24.7 x 220; 10764",
+   "unit": "mm3; crystals",
+   "kind": "design",
+   "valid_for": "CMS ECAL: design of December 1997 (TDR)",
+   "conditions": "design (1997), superseded"
+  }
+ },
+ {
+  "id": "detector-atlas:C135",
+  "claim": "TDR: a total thickness of about 26 X0 at eta = 0 is required to limit longitudinal leakage, corresponding to 23 cm crystals in the barrel; the preshower (a total of 3 X0 of lead) in the endcap allows slightly shorter crystals (22 cm).",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S13"
+  ],
+  "location": "section 1.4, pages 6-7",
+  "scope": {
+   "text": "CMS ECAL: design of December 1997 (TDR)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": null,
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-07",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "ECAL",
+   "quantity": "required ECAL thickness at eta=0; preshower lead",
+   "value": "about 26; 3",
+   "unit": "X0; X0",
+   "kind": "design",
+   "valid_for": "CMS ECAL: design of December 1997 (TDR)",
+   "conditions": "design requirement (1997)"
+  }
+ },
+ {
+  "id": "detector-atlas:C140",
+  "claim": "Preshower (endcap, 1.653 < |eta| < 2.6): total thickness 20 cm; the material traversed at eta = 1.653 before the first sensor plane is 2 X0, followed by a further 1 X0 before the second plane.",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "support_kind": "primary",
+  "source_ids": [
+   "detector-atlas:S02"
+  ],
+  "location": "section 4.6 and 4.6.1, page 106",
+  "scope": {
+   "text": "CMS ECAL: detector as described in 2008 (as built for LHC start-up)",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": null
+  },
+  "limitations": "Endcap only; stated at eta = 1.653 only. Not needed for the barrel-crystal L1 case.",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-07",
+  "evidence_status": "public-fact",
+  "atlas": {
+   "experiment": "CMS",
+   "subsystem": "ECAL",
+   "quantity": "preshower thickness; X0 before plane 1; X0 between planes",
+   "value": "20; 2; 1",
+   "unit": "cm; X0; X0",
+   "kind": "design",
+   "valid_for": "CMS ECAL: detector as described in 2008 (as built for LHC start-up)",
+   "conditions": null
+  }
  }
 ]

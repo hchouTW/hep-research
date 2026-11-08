@@ -322,5 +322,35 @@
   "notes": null,
   "verification_limitations": "Read: abstract, sections 1 and 1.2 (introduction, observatory design), the duty-cycle passage of section 2 (hybrid design), 3.1 (surface detector overview) and 4.1-4.2 (fluorescence detector).",
   "formal_status": "arXiv version"
+ },
+ {
+  "id": "detector-atlas:S13",
+  "title": "The CMS electromagnetic calorimeter project: Technical Design Report",
+  "authors": "CMS Collaboration",
+  "year": 1997,
+  "year_text": "15 December 1997 (title page)",
+  "dois": [],
+  "url": "https://inspirehep.net/files/f8969bbc0a799aabcb70beadd5f8b17e",
+  "locator_text": "INSPIRE-HEP record 1614057 (https://inspirehep.net/literature/1614057), file ECAL_TDR.pdf sourced from CDS",
+  "arxiv_ids": [],
+  "report_numbers": [
+   "CERN-LHCC-97-033",
+   "CMS-TDR-4"
+  ],
+  "inspire_id": "1614057",
+  "tier": 1,
+  "tier_range": null,
+  "tier_text": "1: the collaboration's technical design report",
+  "verification_level": "full-text",
+  "verification_note": "full text obtained from the publisher or repository PDF and converted to text (pypdf); the ECAL chapter or section and every cited passage read at its location; the document was not read cover to cover",
+  "verification_date": "2026-11-07",
+  "publication_date": "1997-12",
+  "data_taking_period": null,
+  "supersedes": [],
+  "superseded_by": [],
+  "supersession_note": "A design document. For the as-built detector, detector-atlas:S02 (2008) is preferred; the endcap crystal design in this TDR (24.7 x 24.7 x 220 mm3, supercrystals of 36, 10 764 crystals per endcap) differs from the 2008 description and must not be used for the endcap.",
+  "notes": "Identifier looked up at INSPIRE-HEP (query 'r CERN-LHCC-97-033', run 2026-11-07, 1 hit). No DOI on the record.",
+  "verification_limitations": "Read: chapter 1 (sections 1.3, 1.4, 1.6.1, 1.6.2, 1.6.4, Tables 1.1 and 1.2, pages 4-16) and Table 3.1 (page 50). PDF text extraction garbles Greek letters and tables; table values were read in reading order and cross-checked against the surrounding text. Page numbers are printed page numbers. PDF sha256 96cb4c9378ee36c120eea8f5a6e5953b12be11dc641e16d6793b5634dcd4d2eb.",
+  "formal_status": "technical design report, CERN-LHCC-97-033, CMS-TDR-4"
  }
 ]

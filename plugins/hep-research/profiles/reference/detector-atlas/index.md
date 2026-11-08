@@ -10,7 +10,7 @@ operating) and `valid_for` (the configuration). Read it with
 | Experiment | Claims | Source |
 |---|---|---|
 | ATLAS | 11 | detector paper, JINST 3 (2008) S08003 |
-| CMS | 9 | detector paper, JINST 3 (2008) S08004 |
+| CMS | 22 | detector paper, JINST 3 (2008) S08004; ECAL TDR, CERN-LHCC-97-033 (ECAL crystals, g4sim S6) |
 | LHCb | 10 | LHCb Upgrade I, arXiv:2305.10515 (original and upgraded configurations) |
 | IceCube | 10 | instrumentation paper, arXiv:1612.05093 |
 | Super-Kamiokande | 10 | calibration paper, arXiv:1307.0162 (phases SK-I to SK-IV) |

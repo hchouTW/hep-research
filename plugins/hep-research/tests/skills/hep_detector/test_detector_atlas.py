@@ -39,7 +39,7 @@ def user_atlas(tmp: Path, mutate=None) -> Path:
 
 class Validate(unittest.TestCase):
     def test_shipped_atlas_validates(self):
-        code, out, err = run("validate", "--today", "2026-10-17")
+        code, out, err = run("validate", "--today", "2026-11-08")
         self.assertEqual(code, 0, err)
         self.assertEqual(out["status"], "ok")
         self.assertEqual(out["claims"], N_CLAIMS)
@@ -80,7 +80,7 @@ class Render(unittest.TestCase):
     def test_one_experiment(self):
         code, out, _ = run("render", "--experiment", "CMS")
         self.assertEqual(code, 0)
-        self.assertEqual(out["rows"], 9)
+        self.assertEqual(out["rows"], 22)
 
 
 class Query(unittest.TestCase):

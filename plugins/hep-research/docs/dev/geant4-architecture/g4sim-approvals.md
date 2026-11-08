@@ -191,3 +191,12 @@ These are not Section 20 decisions. They are how S0 reconciled requirements of t
 | S5 open items | Encoded cellID is built in S5, and a forged condition of an F4 study is an error in `design.py` | hsinyichou (maintainer) | 2026-11-07 | "fix "Encoded cellID" and "Forged field hash in gate 7" items" |
 | G5 of the S5 C++ | Confirmed for the encoded cellID code at `87f3eb57`: `NewScorers.hh`, `NewHits.hh`, `HitColumns.hh`, `simroot.cc`. Given while a second read was still running; that read was cancelled, and a third, complete one followed, recorded in `g4sim-gates/S5.md` | hsinyichou (maintainer) | 2026-11-07 | "G5 is OK." |
 | simreco's `StripSigma`, after S5 | Corrected in 0.61.0: simreco gives a digitized hit `StripClusterSigma`. J15 and J16 are not regenerated, replacing the earlier "with J15 regenerated on E2": their event files exist only on E2, and Linux events would mix platforms inside a study. Their 24 tails-on reconstructions keep the old width, recorded in the CHANGELOG and J15's README | hsinyichou (maintainer) | 2026-11-07 | "ignore Mac site.", then "A" for not regenerating |
+
+## Before S6 (Section 22, 2026-11-08)
+
+| Item | Decision | Who | Date | Words |
+| --- | --- | --- | --- | --- |
+| ePIC ZDC case | The hadronic section only, at L2, as a dated snapshot of the ePIC simulation geometry release 26.11.0 (Tier 2, marked "status: development"), labelled as such; the EM section is left out, its design not settled (three public descriptions differ) | hsinyichou (maintainer) | 2026-11-08 | "use your recommendations" |
+| Peer-reviewed papers by ePIC members without an ePIC Collaboration byline | Tier 3 under the eic source policy, context only | hsinyichou (maintainer) | 2026-11-08 | "use your recommendations" |
+| AMS-02 TOF sources | The maintainer supplied NIM A 623 (2010) 968 and NIM A 743 (2014) 22, read for the case's Tier 1 values; the PDFs are not committed | hsinyichou (maintainer) | 2026-11-08 | "AMS paper PDF in /ceph/sharedfs/work/AMS/hsinyichou/hep-research-tasks" |
+
