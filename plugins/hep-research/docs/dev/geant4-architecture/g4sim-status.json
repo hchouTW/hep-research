@@ -57,12 +57,16 @@
    "blocked_on": []
   },
   "S7": {
-   "state": "in-progress",
+   "state": "blocked",
    "worktree": "../hep-research-g4sim-S7",
    "branch": "g4sim/S7",
    "task_card_sha256": "a80bf4e633783c9ae0f9c65eacecb64caf0e2ec58ca8bca1691b6a751ade66c6",
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S7.md",
-   "blocked_on": []
+   "blocked_on": [
+    "ams02-tracker-magnet: the bore field integral fails its registered tolerance (+36% against 20%); its reference's definition rests on an unstated length: the maintainer decides",
+    "ams02-rich-replica: FTFP_BERT has no dataset entry; probe it or run the case with FTFP_BERT_EMZ: the maintainer decides",
+    "G5 for the S7 C++ (a second read of the fixes is suggested first)"
+   ]
   },
   "S8": {
    "state": "not-started",
