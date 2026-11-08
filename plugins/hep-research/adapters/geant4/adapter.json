@@ -137,6 +137,7 @@
   "assets/g4sim_run/NewScorers.hh",
   "assets/g4sim_run/NewSource.hh",
   "assets/g4sim_run/PaiConstructor.hh",
+  "assets/g4sim_run/XtrConstructor.hh",
   "assets/GEANT4-LICENSE.txt",
   "assets/PYTHON-LICENSE.txt",
   "assets/g4sim/ExternalEvents.hh",

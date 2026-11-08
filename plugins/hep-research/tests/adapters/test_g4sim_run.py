@@ -484,5 +484,42 @@ class EfficiencyMapTool(unittest.TestCase):
         self.assertAlmostEqual(sum(sum(row["detected"]) for row in document["form"]["bins"]) / 3000, 0.1, delta=0.02)
 
 
+class TransitionRadiators(unittest.TestCase):
+    """XTR rules 4 and 5 on the run card, with the Section 15.1 negatives: an irregular requirement paired with a regular-foil-stack class, and
+    G4StrawTubeXTRadiator, which has no foil count (addendum 11.1); and the process read back after the run."""
+
+    REQUIREMENTS = [{"need": "transition_radiation", "templates": ["radiator"], "structure": "irregular"}]
+
+    @staticmethod
+    def card_with(radiator_class, constructor=True):
+        document = card(xtr=[{"envelope": "radiator", "radiator_class": radiator_class}])
+        if constructor:
+            document["physics"]["extra_constructors"] = ["g4sim_xtr"]
+        return document
+
+    def test_a_compatible_class_passes(self):
+        self.assertEqual(driver.physics_check.radiator_findings(self.card_with("G4GammaXTRadiator"), self.REQUIREMENTS), [])
+
+    def test_an_irregular_requirement_with_a_regular_class_is_refused(self):
+        self.assertEqual(codes(driver.physics_check.radiator_findings(self.card_with("G4XTRRegularRadModel"), self.REQUIREMENTS)), ["xtr-incompatible"])
+
+    def test_the_straw_tube_class_is_refused(self):
+        self.assertEqual(codes(driver.physics_check.radiator_findings(self.card_with("G4StrawTubeXTRadiator"), self.REQUIREMENTS)), ["xtr-class-structureless"])
+
+    def test_the_constructor_and_both_sides_must_be_there(self):
+        self.assertEqual(codes(driver.physics_check.radiator_findings(self.card_with("G4GammaXTRadiator", constructor=False), self.REQUIREMENTS)), ["xtr-constructor"])
+        self.assertEqual(codes(driver.physics_check.radiator_findings(card(extra_constructors=["g4sim_xtr"]), self.REQUIREMENTS)), ["xtr-class-missing"])
+        self.assertEqual(codes(driver.physics_check.radiator_findings(self.card_with("G4GammaXTRadiator"), [])), ["xtr-requirement-missing"])
+        self.assertEqual(codes(driver.physics_check.radiator_findings(self.card_with("G4MadeUpXTRadiator"), self.REQUIREMENTS)), ["xtr-class-unknown"])
+
+    def test_the_process_is_read_back_on_the_named_particles_only(self):
+        probe = {"processes": [{"particle": "e-", "registered": ["eIoni", "xtr_radiator"]}, {"particle": "e+", "registered": ["xtr_radiator"]},
+                               {"particle": "mu-", "registered": ["muIoni"]}]}
+        radiators = [{"envelope": "radiator", "radiator_class": "G4GammaXTRadiator"}]
+        self.assertEqual(driver.simulate_new.radiator_process_problems(radiators, probe), [])
+        self.assertEqual(driver.simulate_new.radiator_process_problems([{**radiators[0], "particles": ["e-"]}], probe), ["e+: xtr_radiator, which the card does not name"])
+        self.assertEqual(driver.simulate_new.radiator_process_problems(radiators, {}), ["no process list was read back"])
+
+
 if __name__ == "__main__":
     unittest.main()

@@ -43,6 +43,7 @@
 #include "G4Scintillation.hh"
 #include "G4Electron.hh"
 #include "KillProcess.hh"
+#include "XtrConstructor.hh"
 #include "MiniJson.hh"
 #include "NewBuild.hh"
 #include "NewScorers.hh"
@@ -407,15 +408,17 @@ int NewRun(const Value& ir, const Value& card, const Value& request) {
     for (const auto& item : physics.obj.at("pai").array("pai")) requests.push_back({item.at("region", "pai").str, item.at("particle", "pai").str, item.at("model", "pai").str});
     if (!requests.empty()) list->RegisterPhysics(new g4sim::PaiConstructor(requests));
   }
-  bool optical = false;
+  bool optical = false, xtr = false;
   if (physics.has("extra_constructors"))
     for (const auto& name : physics.obj.at("extra_constructors").array("extra_constructors")) {
-      if (name.str != "G4OpticalPhysics") {
+      if (name.str == "G4OpticalPhysics") optical = true;
+      else if (name.str == "g4sim_xtr") xtr = true;
+      else {
         std::cerr << "unknown extra constructor " << name.str << std::endl;  // check-spec refuses it first; this is the program's own guard
         return 2;
       }
-      optical = true;
     }
+  if (xtr) list->RegisterPhysics(new g4sim::XtrConstructor(g4sim::ReadXtrRadiators(ir.at("physical", "ir"), physics)));  // S7, Section 6.2.9
   if (optical) {  // S7: optical physics, kept inside optical_scope by KillProcess (GB16)
     list->RegisterPhysics(new G4OpticalPhysics(0));
     shared.optical = true;

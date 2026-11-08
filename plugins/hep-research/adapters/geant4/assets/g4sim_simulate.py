@@ -440,6 +440,20 @@ def field_sample_problems(staged: dict, work: Path) -> list:
     return problems
 
 
+def radiator_process_problems(radiators: list, probe: dict) -> list:
+    """Each radiator's process, xtr_<envelope> as XtrConstructor.hh names it, read back on the particles the card names (e- and e+ when it
+    names none) and on no other."""
+    if not probe.get("processes"):
+        return ["no process list was read back"]
+    problems = []
+    for item in radiators:
+        process_name = f"xtr_{item['envelope']}"
+        wanted = set(item.get("particles") or ("e-", "e+"))
+        carrying = {row["particle"] for row in probe["processes"] if process_name in row["registered"]}
+        problems += [f"{name}: {'no ' + process_name if name in wanted else process_name + ', which the card does not name'}" for name in sorted(wanted ^ carrying)]
+    return problems
+
+
 def simulate(card: dict, request: dict, checked: dict, program: Path, work: Path, environment=None, folder: Path | None = None) -> dict:
     """Preflight with no events, so a wrong setting is refused before any event; then the run."""
     ir = checked["ir"]
@@ -489,6 +503,11 @@ def simulate(card: dict, request: dict, checked: dict, program: Path, work: Path
     summary = {"status": "failed" if closure["failing"] or moments["failing"] else "ok", "rows": counts, "closure": closure, "moments": moments, "request_id": request_identity, "balance": balance_summary(_rows(work / "boundary.csv")), "conservation": conservation_summary(work / "conservation.csv"),
                "effective": {"birks_mm_per_MeV": effective["birks_mm_per_MeV"], "step_functions": effective["step_functions"], "pai": physics_check.effective_pai(requests, ionisation_table(effective)), "models": effective["models"]},
                "geometry_id": checked["geometry_id"]}
+    radiators = card.get("physics", {}).get("xtr", [])
+    if radiators:  # S7: each radiator's process on the particles the card names, and on no other (read back by ProbeV2)
+        summary["xtr"] = radiator_process_problems(radiators, json.loads((work / "probe-v2.json").read_text(encoding="utf-8")) if (work / "probe-v2.json").is_file() else {})
+        if summary["xtr"]:
+            summary["status"] = "failed"
     if (work / "hits.root").is_file():
         (work / "simulation-hits.json").write_text(json.dumps({**hits.index(checked["geometry_id"], card, work / "hits.root", request_identity), "scorers": [item["name"] for item in resolved["scorers"]], "readouts": {item["name"]: item["readout"] for item in resolved["scorers"] if "hit_kind" in item}}, indent=1) + "\n", encoding="utf-8")
     (work / "column_map.json").write_text(json.dumps({"scorers": resolved["scorers"], "volume_id": ir["physical"]["volume_id"]}, indent=1) + "\n", encoding="utf-8")

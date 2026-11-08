@@ -640,6 +640,43 @@
         }
        }
       }
+     },
+     "structure": {
+      "enum": [
+       "regular",
+       "irregular"
+      ],
+      "description": "transition_radiation (S7): the radiator's foil stack; the Geant4 class belongs to the run card"
+     },
+     "foil_material": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_+-]*$"
+     },
+     "gas_material": {
+      "type": "string",
+      "pattern": "^[A-Za-z_][A-Za-z0-9_+-]*$"
+     },
+     "foil_thickness_um": {
+      "$ref": "#/$defs/quantity"
+     },
+     "gap_um": {
+      "$ref": "#/$defs/quantity"
+     },
+     "foils": {
+      "$ref": "#/$defs/integer"
+     },
+     "axis": {
+      "enum": [
+       "x",
+       "y",
+       "z"
+      ]
+     },
+     "alpha_foil": {
+      "$ref": "#/$defs/quantity"
+     },
+     "alpha_gas": {
+      "$ref": "#/$defs/quantity"
      }
     }
    }

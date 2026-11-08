@@ -69,6 +69,11 @@ inline G4Material* NewMaterial(const std::string& name, const Value& materials) 
     if (!base) throw std::runtime_error("material " + name + ": unknown base");
     material = definition.has("density_g_cm3") ? new G4Material(name, Decimal(definition.obj.at("density_g_cm3")) * g / cm3, base)
                                                : new G4Material(name, base->GetDensity(), base);
+  } else if (definition.has("components")) {  // S7: a mixture of materials by mass fraction, as an XTR envelope's foil-gas mixture
+    const auto& components = definition.obj.at("components").array("components");
+    material = new G4Material(name, Decimal(definition.at("density_g_cm3", "material")) * g / cm3, static_cast<G4int>(components.size()));
+    for (const auto& component : components)
+      material->AddMaterial(NewMaterial(component.at("material", "component").str, materials), Decimal(component.at("mass_fraction", "component")));
   } else {
     const auto& composition = definition.at("composition", "material").obj;
     material = new G4Material(name, Decimal(definition.at("density_g_cm3", "material")) * g / cm3, static_cast<G4int>(composition.size()));

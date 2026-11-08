@@ -12,6 +12,7 @@ import math
 import re
 import sys
 from decimal import Decimal
+from pathlib import Path
 
 PAI_MODELS = ("PAI", "PAIphoton")
 ALL_PARTICLES = "all"
@@ -235,12 +236,44 @@ def event_range_findings(card: dict) -> list:
     return []
 
 
+BUILT_CONSTRUCTORS = {"G4OpticalPhysics", "g4sim_xtr"}
+RADIATOR_CONSTRUCTOR = "g4sim_xtr"
+RADIATOR_TABLE = Path(__file__).resolve().parent / "xtr_radiators.json"
+
+
+def radiator_findings(card: dict, requirements, table: dict | None = None) -> list:
+    """XTR rules 4 and 5 (Section 6.2.9, S7): the g4sim_xtr constructor attaches one radiator per transition_radiation requirement, named by
+    its envelope; the run card's class must be in the adapter's table with the requirement's structure. G4StrawTubeXTRadiator has no foil
+    count and no structure, so it is refused (addendum 11.1)."""
+    table = table if table is not None else json.loads(RADIATOR_TABLE.read_text(encoding="utf-8"))["classes"]
+    physics = card.get("physics", {})
+    radiators = {item.get("envelope"): item for item in physics.get("xtr", [])}
+    wanted = {requirement["templates"][0]: requirement for requirement in requirements if requirement.get("need") == "transition_radiation" and requirement.get("templates")}
+    findings = []
+    if (wanted or radiators) and RADIATOR_CONSTRUCTOR not in physics.get("extra_constructors", ()):
+        findings.append({"code": "xtr-constructor", "path": "physics.extra_constructors", "message": f"XTR is attached by {RADIATOR_CONSTRUCTOR} in extra_constructors (rule 4)"})
+    for envelope in sorted(set(wanted) - set(radiators)):
+        findings.append({"code": "xtr-class-missing", "path": "physics.xtr", "message": f"the radiator of envelope {envelope} has no class in the run card"})
+    for envelope in sorted(set(radiators) - set(wanted)):
+        findings.append({"code": "xtr-requirement-missing", "path": "physics.xtr", "message": f"{envelope} is no transition_radiation envelope of the specification"})
+    for envelope in sorted(set(wanted) & set(radiators)):
+        name = radiators[envelope].get("radiator_class")
+        entry = table.get(name)
+        if entry is None:
+            findings.append({"code": "xtr-class-unknown", "path": "physics.xtr", "message": f"{name} is not in xtr_radiators.json"})
+        elif entry["structure"] is None:
+            findings.append({"code": "xtr-class-structureless", "path": "physics.xtr", "message": f"{name} has no foil count and no structure, so g4sim cannot check it (addendum 11.1)"})
+        elif entry["structure"] != wanted[envelope]["structure"]:
+            findings.append({"code": "xtr-incompatible", "path": "physics.xtr", "message": f"{name} builds the structure {entry['structure']}, the specification's radiator is {wanted[envelope]['structure']} (rule 5)"})
+    return findings
+
+
 def optical_findings(card: dict, requirements, scorers=()) -> list:
     """A new-mode run (S7): G4OpticalPhysics is the one extra constructor g4sim_run builds, and it runs only with a specification that declares
     optical_scope, the templates KillProcess keeps photons in (GB16). Any other name would be ignored by the program, so it is refused here."""
     extra = card.get("physics", {}).get("extra_constructors", ())
-    findings = [{"code": "extra-constructor-unknown", "path": "physics.extra_constructors", "message": f"g4sim_run builds only G4OpticalPhysics, not {name}"}
-                for name in extra if name != "G4OpticalPhysics"]
+    findings = [{"code": "extra-constructor-unknown", "path": "physics.extra_constructors", "message": f"g4sim_run builds only {sorted(BUILT_CONSTRUCTORS)}, not {name}"}
+                for name in extra if name not in BUILT_CONSTRUCTORS]
     if "G4OpticalPhysics" in extra and not any(requirement.get("need") == "optical_scope" for requirement in requirements):
         findings.append({"code": "optical-no-scope", "path": "physics.extra_constructors", "message": "optical physics needs an optical_scope requirement in the specification"})
     if "G4OpticalPhysics" not in extra:
@@ -278,7 +311,7 @@ def card_findings(card: dict, request: dict | None = None, regions=(), ionisatio
         findings += pai_findings(requests, regions, ionisation, requirements)
     if request is not None:
         scorers = request.get("scorers", [])
-        findings += optical_findings(card, requirements, scorers)
+        findings += optical_findings(card, requirements, scorers) + radiator_findings(card, requirements)
         findings += time_cut_findings(card, scorers) + scorer_findings(scorers, materials, selected_materials) + source_findings(request.get("source", {})) + plane_findings(request) + truth_findings(request) + event_range_findings(card)
     return findings
 

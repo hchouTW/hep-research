@@ -10,7 +10,7 @@ import copy
 from decimal import Decimal
 
 from core.canonical import check_hash_scope
-from core.geometry import bitfield, fieldmap, modules, optics, params, rotation
+from core.geometry import bitfield, fieldmap, modules, optics, params, rotation, xtr
 from core.geometry.numbers import CONTEXT, EPSILON_MM, MINIMUM_GAP_MM, PRECISION, GeometryError, add, as_text, divide, multiply
 
 WORLD = "world"
@@ -607,6 +607,7 @@ def expand(spec: dict) -> dict:
                 "materials": _without_sources(spec.get("materials", {})), "physics_requirements": _requirements(spec, tags)}
     touchables = _touchables(tree, order)
     optics.scope_findings(spec, templates, physical["physics_requirements"], tree, lambda name: touchables.get(name, 0) == 1)
+    xtr.check(spec, templates, physical["physics_requirements"], tree)
     if spec.get("optical_surfaces"):  # optional, like fields: a specification with none keeps its geometry_id
         physical["optical_surfaces"] = _without_sources(spec["optical_surfaces"])
     if spec.get("fields"):  # optional: a specification with no field keeps its geometry_id (Section 7.1)
