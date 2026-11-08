@@ -630,6 +630,42 @@ class S7Shapes(unittest.TestCase):
                 self.assertTrue(any(finding["path"].endswith(key) for finding in checked["findings"]))
 
 
+class CurvedNeighbours(unittest.TestCase):
+    """The gap rule for S7's curved shapes: a sphere section bounded by its own section, touching flat faces legal, and a conservative
+    bound that fails reported as unjudged, never as an overlap; boxes that are clear skip the exact test without changing a verdict."""
+
+    def cap(self, centre_z="-360"):
+        mirror = {"solid": {"sphere_section": {"rmin_mm": "800", "rmax_mm": "805", "theta_start_deg": "0", "theta_span_deg": "15"}}, "material": "G4_Si"}
+        vessel = {**box(["600", "600", "1000"], "G4_AIR"), "children": [single("mirror", ("0", "0", centre_z))]}
+        return spec({"mirror": mirror, "vessel": vessel}, [single("vessel")])
+
+    def test_a_mirror_cap_off_its_spheres_centre_fits_its_vessel(self):
+        self.assertEqual(codes(expand.expand(self.cap())), [])  # the whole sphere would reach 805 mm, the vessel 500
+
+    def test_a_cap_through_the_vessel_wall_is_caught(self):
+        self.assertIn("containment-outside", codes(expand.expand(self.cap("-200"))))  # its top at 605 mm
+
+    def test_a_cone_on_a_box_face_is_legal(self):
+        cone = {"solid": {"cone": {"rmax1_mm": "15", "rmax2_mm": "30", "length_mm": "30"}}, "material": "G4_GLASS_PLATE"}
+        document = spec({"cone": cone, "plate": box(["100", "100", "5"])}, [single("plate"), single("cone", ("0", "0", "17.5"))])
+        self.assertEqual(codes(expand.expand(document)), [])
+
+    def test_two_cones_whose_bounds_meet_are_unjudged_not_overlapping(self):
+        cone = {"solid": {"cone": {"rmax1_mm": "10", "rmax2_mm": "10", "length_mm": "10"}}, "material": "G4_Si"}
+        # diagonal, so the boxes overlap and the exact test runs: the true gap is 20.08 - 20 mm, the 32-sided prisms reach 10.048 mm each
+        document = spec({"cone": cone}, [single("cone", ("0", "0", "0")), single("cone", ("14.2", "14.2", "0"))])
+        self.assertEqual(set(codes(expand.expand(document))), {"sibling-unjudged"})
+
+    def test_clear_boxes_skip_the_exact_test_and_keep_the_verdict(self):
+        tube = {"solid": {"tube": {"rmin_mm": "0", "rmax_mm": "3", "length_mm": "100"}}, "material": "G4_KAPTON"}
+        plane = {**box(["10", "200", "100"], "G4_AIR"), "children": [{"template": "straw", "placement": {"linear": {"count": 6, "pitch_mm": ["0", "6.1", "0"], "start_mm": ["0", "-15.25", "0"]}}}]}
+        self.assertEqual(codes(expand.expand(spec({"straw": tube, "plane": plane}, [single("plane")]))), [])
+        plane["children"][0]["placement"]["linear"]["pitch_mm"] = ["0", "6", "0"]  # touching straws: boxes meeting in a plane, legal
+        self.assertEqual(codes(expand.expand(spec({"straw": tube, "plane": plane}, [single("plane")]))), [])
+        plane["children"][0]["placement"]["linear"]["pitch_mm"] = ["0", "5.9", "0"]  # overlapping boxes: the exact test, and the tubes overlap
+        self.assertIn("sibling-unjudged", codes(expand.expand(spec({"straw": tube, "plane": plane}, [single("plane")]))))
+
+
 class ModuleTable(unittest.TestCase):
     """Section 15.4: every shape of the table is built by the C++ builder and written by the GDML exporter."""
 

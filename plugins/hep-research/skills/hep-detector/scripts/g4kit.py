@@ -39,7 +39,9 @@ from contracts import KNOWN_CAPABILITIES, geometry  # noqa: E402
 from core.protected.guard import guard, protected_main  # noqa: E402
 
 KITS = Path(__file__).resolve().parents[1] / "assets/g4kits"
-NUMERIC = ("integer", "length", "physical")
+NUMERIC = ("integer", "length", "physical", "angle")
+# S7: inputs that are not numbers: a list of particle names (a PAI requirement), one word (a radiator structure), a spectrum {energy_eV, value}
+NAMES, WORD, SPECTRUM = "names", "word", "spectrum"
 
 
 class KitError(ValueError):
@@ -73,8 +75,12 @@ def input_values(kit: dict, fields: dict) -> dict:
         value = values[name]
         if item["kind"] == "integer" and (isinstance(value, bool) or not isinstance(value, int) and not (isinstance(value, float) and value.is_integer())):
             raise KitError(f"input {name} is a whole number, not {value!r}")
-        if item["kind"] == "material" and not isinstance(value, str):
-            raise KitError(f"input {name} is a material name, not {value!r}")
+        if item["kind"] in ("material", WORD) and not isinstance(value, str):
+            raise KitError(f"input {name} is a word, not {value!r}")
+        if item["kind"] == NAMES and not (isinstance(value, list) and value and all(isinstance(entry, str) for entry in value)):
+            raise KitError(f"input {name} is a list of names, not {value!r}")
+        if item["kind"] == SPECTRUM and not (isinstance(value, dict) and set(value) == {"energy_eV", "value"}):
+            raise KitError(f"input {name} is a spectrum {{energy_eV, value}}, not {value!r}")
     return values
 
 
@@ -83,7 +89,10 @@ def filled(node, values: dict, kit: dict):
     if isinstance(node, dict):
         if set(node) == {"$input"}:
             value = values[node["$input"]]
-            return int(value) if kit["inputs"].get(node["$input"], {}).get("kind") == "integer" else value
+            kind = kit["inputs"].get(node["$input"], {}).get("kind")
+            if kind == "integer":
+                return int(value)
+            return as_quantity(value) if kind in NUMERIC else value  # a number placed directly (S7: a requirement's field) is a decimal string
         return {key: filled(value, values, kit) for key, value in node.items()}
     if isinstance(node, list):
         return [filled(value, values, kit) for value in node]

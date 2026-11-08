@@ -56,7 +56,7 @@ def _other_solid(shape: str, body: dict, values: _Values, path: str) -> tuple:
     """(bounding size, the IR's half-lengths) of a shape other than a box. A specification gives full lengths; the IR holds what G4 takes."""
     def length(key: str) -> Decimal:
         value = values.quantity(body[key], f"{path}/{key}")
-        if value < _ZERO or (value == _ZERO and key not in ("rmin_mm",)):
+        if value < _ZERO or (value == _ZERO and key not in ("rmin_mm", "rmin1_mm", "rmin2_mm")):  # an inner radius may be 0
             raise GeometryError("solid-size", f"{key} {value} is not positive", path)
         return value
 

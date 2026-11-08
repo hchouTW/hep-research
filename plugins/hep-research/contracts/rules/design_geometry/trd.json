@@ -1,0 +1,213 @@
+{
+ "$comment": "g4sim S7 (Section 12): the design geometry of the trd kit. Each field is an input of the kit, by name.",
+ "mapping_version": "1.2.0",
+ "geometry": "trd",
+ "kit": {
+  "name": "trd",
+  "version": "1.0.0"
+ },
+ "fields": [
+  {
+   "field": "layers",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "layers",
+     "unit": "1"
+    }
+   }
+  },
+  {
+   "field": "radiator_thickness_mm",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "radiator_thickness_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "module_width_mm",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "module_width_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "straws",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "straws",
+     "unit": "1"
+    }
+   }
+  },
+  {
+   "field": "straw_radius_mm",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "straw_radius_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "straw_wall_mm",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "straw_wall_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "straw_length_mm",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "straw_length_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "radiator_material",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "radiator_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "foil_material",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "foil_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "gas_material",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "gas_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "drift_gas_material",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "drift_gas_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "wall_material",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "wall_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "world_material",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "world_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "radiator_structure",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "radiator_structure",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "foils",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "foils",
+     "unit": "1"
+    }
+   }
+  },
+  {
+   "field": "foil_thickness_um",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "foil_thickness_um",
+     "unit": "um"
+    }
+   }
+  },
+  {
+   "field": "gap_um",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "gap_um",
+     "unit": "um"
+    }
+   }
+  },
+  {
+   "field": "pai_particles",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "pai_particles",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "materials",
+   "optional": true,
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "materials",
+     "unit": "n/a"
+    }
+   }
+  }
+ ],
+ "figures_of_merit": {
+  "pid-rejection": {
+   "better": "larger",
+   "unit": "1",
+   "denominator": {
+    "momentum_GeV": "number",
+    "species": "string"
+   },
+   "tail_sensitive": true
+  }
+ }
+}

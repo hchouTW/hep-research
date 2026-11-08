@@ -1,0 +1,232 @@
+{
+ "$comment": "g4sim S7 (Section 12): the design geometry of the cherenkov kit. Each field is an input of the kit, by name.",
+ "mapping_version": "1.2.0",
+ "geometry": "cherenkov",
+ "kit": {
+  "name": "cherenkov",
+  "version": "1.0.0"
+ },
+ "fields": [
+  {
+   "field": "vessel_x_mm",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "vessel_x_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "vessel_y_mm",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "vessel_y_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "vessel_z_mm",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "vessel_z_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "mirror_radius_mm",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "mirror_radius_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "mirror_thickness_mm",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "mirror_thickness_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "mirror_theta_span_deg",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "mirror_theta_span_deg",
+     "unit": "deg"
+    }
+   }
+  },
+  {
+   "field": "mirror_centre_z_mm",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "mirror_centre_z_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "detector_side_mm",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "detector_side_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "detector_thickness_mm",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "detector_thickness_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "detector_z_mm",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "detector_z_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "guide_entrance_radius_mm",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "guide_entrance_radius_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "guide_exit_radius_mm",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "guide_exit_radius_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "guide_length_mm",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "guide_length_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "gas_material",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "gas_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "mirror_material",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "mirror_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "guide_material",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "guide_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "detector_material",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "detector_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "world_material",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "world_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "mirror_reflectivity",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "mirror_reflectivity",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "detector_efficiency",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "detector_efficiency",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "materials",
+   "from": {
+    "parameter": {
+     "role": "particle-id",
+     "name": "materials",
+     "unit": "n/a"
+    }
+   }
+  }
+ ],
+ "figures_of_merit": {
+  "pid-separation-power": {
+   "better": "larger",
+   "unit": "1",
+   "denominator": {
+    "momentum_GeV": "number",
+    "species": "string"
+   },
+   "tail_sensitive": true
+  }
+ }
+}

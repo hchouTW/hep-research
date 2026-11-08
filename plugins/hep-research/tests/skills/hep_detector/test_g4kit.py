@@ -23,7 +23,13 @@ EXAMPLE = ROOT / "examples/design-minimal-spectrometer/output/artifacts"
 TRACKER = {"planes": 5, "plane_gap_mm": 100.0, "plane_thickness_mm": 0.3, "plane_side_mm": 400.0, "field_tesla": 1.0, "plane_material": "G4_Si", "world_material": "G4_Galactic"}
 CASES = {"planes-tracker": TRACKER,
          "calorimeter": {"layers": 10, "towers_x": 3, "towers_y": 3, "absorber_mm": 2.0, "active_mm": 3.0, "support_mm": 1.0, "support_material": "G4_AIR", "tower_side_mm": 40.0, "absorber_material": "G4_Pb", "active_material": "G4_PLASTIC_SC_VINYLTOLUENE", "wrap_material": "G4_MYLAR", "guide_material": "G4_PLEXIGLASS", "world_material": "G4_AIR"},
-         "tof": {"planes": 2, "bars": 8, "bar_length_mm": 1000.0, "bar_width_mm": 100.0, "bar_thickness_mm": 10.0, "plane_gap_mm": 50.0, "bar_material": "G4_PLASTIC_SC_VINYLTOLUENE", "world_material": "G4_AIR"}}
+         "tof": {"planes": 2, "bars": 8, "bar_length_mm": 1000.0, "bar_width_mm": 100.0, "bar_thickness_mm": 10.0, "plane_gap_mm": 50.0, "bar_material": "G4_PLASTIC_SC_VINYLTOLUENE", "world_material": "G4_AIR"},
+         # S7's kits (Section 12); each was also built and read back by g4sim_run geometry-check on build 22
+         "barrel-tracker": {"modules": 20, "layer_radius_mm": 100.0, "module_length_mm": 60.0, "module_width_mm": 30.0, "sensor_thickness_mm": 0.3, "tilt_deg": 12.0, "stagger_mm": 2.0, "sensor_material": "G4_Si", "world_material": "G4_AIR", "pai_particles": ["e-", "mu-", "proton"]},
+         "endcap-disks": {"disks": 3, "disk_pitch_mm": 100.0, "wedges": 12, "inner_apothem_mm": 100.0, "outer_apothem_mm": 300.0, "wedge_inner_width_mm": 52.59, "wedge_outer_width_mm": 159.77, "wedge_thickness_mm": 0.5, "disk_inner_radius_mm": 95.0, "disk_outer_radius_mm": 320.0, "wedge_material": "G4_Si", "world_material": "G4_AIR"},
+         "trd": {"layers": 4, "radiator_thickness_mm": 21.5, "module_width_mm": 130.0, "straws": 20, "straw_radius_mm": 3.0, "straw_wall_mm": 0.07, "straw_length_mm": 500.0, "radiator_material": "radiator_mix", "foil_material": "mylar", "gas_material": "air", "drift_gas_material": "G4_Xe", "wall_material": "G4_KAPTON", "world_material": "G4_AIR", "radiator_structure": "regular", "foils": 100, "foil_thickness_um": 15.0, "gap_um": 200.0, "pai_particles": ["e-", "proton"], "materials": {"mylar": {"base": "G4_MYLAR", "density_g_cm3": "1.39"}, "air": {"base": "G4_AIR", "density_g_cm3": "0.00120479"}, "radiator_mix": {"density_g_cm3": "0.0980974790697674418604651162790698", "components": [{"material": "mylar", "mass_fraction": "0.988575293734879183771547978048"}, {"material": "air", "mass_fraction": "0.0114247062651208162284520219517767"}]}}},
+         "cherenkov": {"vessel_x_mm": 600.0, "vessel_y_mm": 600.0, "vessel_z_mm": 1000.0, "mirror_radius_mm": 800.0, "mirror_thickness_mm": 5.0, "mirror_theta_span_deg": 15.0, "mirror_centre_z_mm": -360.0, "detector_side_mm": 100.0, "detector_thickness_mm": 5.0, "detector_z_mm": -400.0, "guide_entrance_radius_mm": 30.0, "guide_exit_radius_mm": 15.0, "guide_length_mm": 30.0, "gas_material": "C4F10_optical", "mirror_material": "glass_optical", "guide_material": "glass_optical", "detector_material": "G4_Si", "world_material": "G4_AIR", "mirror_reflectivity": {"energy_eV": ["2.0", "4.0"], "value": ["0.9", "0.9"]}, "detector_efficiency": {"energy_eV": ["2.0", "4.0"], "value": ["0.2", "0.25"]}, "materials": {"C4F10_optical": {"base": "G4_AIR", "optical": {"rindex": {"energy_eV": ["2.0", "4.0"], "value": ["1.0014", "1.0014"]}}}, "glass_optical": {"base": "G4_GLASS_PLATE", "optical": {"rindex": {"energy_eV": ["2.0", "4.0"], "value": ["1.5", "1.5"]}}}}},
+         "shell-veto": {"shell_inner_radius_mm": 500.0, "shell_thickness_mm": 8.0, "shell_length_mm": 800.0, "readouts": 8, "readout_side_mm": 8.0, "readout_length_mm": 50.0, "shell_material": "G4_PLASTIC_SC_VINYLTOLUENE", "readout_material": "G4_PLEXIGLASS", "world_material": "G4_AIR"}}
 
 
 def derive(folder: Path, kind: str, fields: dict) -> subprocess.CompletedProcess:
@@ -77,6 +83,19 @@ class Kits(unittest.TestCase):
     def test_a_kit_that_makes_an_illegal_geometry_fails(self):
         done = derive(self.work, "tof", {**CASES["tof"], "bars": 0})
         self.assertEqual(done.returncode, 1, done.stdout)
+
+    def test_the_s7_kits_carry_their_requirements(self):
+        needs = {"barrel-tracker": ["thin_layer_ionisation"], "trd": ["transition_radiation", "thin_layer_ionisation"], "cherenkov": ["optical_scope"]}
+        for kind, wanted in needs.items():
+            with self.subTest(kind=kind):
+                self.assertEqual(derive(self.work, kind, CASES[kind]).returncode, 0)
+                spec = json.loads((self.work / "detector.json").read_text(encoding="utf-8"))
+                self.assertEqual([item["need"] for item in spec["physics_requirements"]], wanted)
+
+    def test_a_list_word_or_spectrum_input_of_the_wrong_type_is_refused(self):
+        for kind, field, value in (("barrel-tracker", "pai_particles", "e-"), ("trd", "radiator_structure", 1), ("cherenkov", "detector_efficiency", [0.2])):
+            with self.subTest(field=field):
+                self.assertEqual(derive(self.work, kind, {**CASES[kind], field: value}).returncode, 2)
 
     def test_a_kit_has_geometric_defaults_only(self):
         for path in sorted(KITS.glob("*.json")):
