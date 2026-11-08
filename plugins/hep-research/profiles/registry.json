@@ -91,6 +91,13 @@
    "version": "0.2.0",
    "scope": "Sourced detector facts (design, achieved, operating) for six large experiments; read via detector_atlas.py",
    "path": "reference/detector-atlas"
+  },
+  {
+   "id": "reference:geometry-cases",
+   "kind": "reference",
+   "version": "0.1.0",
+   "scope": "Geometry reference cases reconstructed from cited claims (CMS ECAL L1, AMS-02 TOF L1, ePIC ZDC hadronic L2); g4sim S6",
+   "path": "reference/geometry-cases"
   }
  ]
 }

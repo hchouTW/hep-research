@@ -1,0 +1,46 @@
+{
+ "id": "reference:geometry-cases",
+ "kind": "reference",
+ "version": "0.1.0",
+ "scope": "Reference cases of the g4sim plan (Section 13): detector-specs reconstructed from cited claims of other profiles, each with its level of detail, cited claims, an independence result for its reference values, tolerances registered in the task card, a negative control and detection limit, and the label 'an approximate reconstruction from the cited claims, not the experiment's geometry'. S6: CMS ECAL barrel crystal (L1), AMS-02 TOF (L1), ePIC ZDC hadronic section (L2).",
+ "exclusions": [
+  "Claims of its own: every value is a claim of a profile it depends on",
+  "The experiments' own geometries: a case is an approximate reconstruction, and its comparison with cited values is validation, never confirmation",
+  "Private AMS-02 material: only the public experiment:ams-02 profile",
+  "The ePIC ZDC EM section, whose design is not settled, and the S7 cases"
+ ],
+ "compatible": {
+  "core": ">=1.0,<2.0",
+  "contracts": ">=3.23,<4.0"
+ },
+ "related_skills": [
+  "hep-detector"
+ ],
+ "resources": {
+  "index": "index.md",
+  "conventions": "conventions.json"
+ },
+ "vocabulary_extensions": {},
+ "adapters": {
+  "required": [],
+  "optional": [
+   "geant4"
+  ]
+ },
+ "depends_on": [
+  "reference:detector-atlas",
+  "experiment:ams-02",
+  "experiment:eic"
+ ],
+ "maintainer": "hchouTW (public-document reference; not endorsed by any collaboration)",
+ "capabilities": [
+  {
+   "name": "geometry-reference-cases",
+   "status": "tested-in-declared-environment",
+   "scope": "Each case's detector-spec resolves every value to a claim of a profile it depends on, its case.json copies the task card's tolerances, and its quantities agree with their cited references within tolerance on E5 (Geant4 11.4.3) while its negative controls fail; not the truth of any claim, and not the experiments' geometry",
+   "tests": [
+    "tests/test_cases.py"
+   ]
+  }
+ ]
+}

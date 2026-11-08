@@ -49,6 +49,24 @@ class CheckSpec(unittest.TestCase):
         self.assertEqual(codes(driver.check_card(card(), {"seeding": "stream"})), ["seeding-differs"])
 
 
+class Claims(unittest.TestCase):
+    """A specification that cites claims runs only with the claims of the profiles it depends on (g4sim plan, Section 13.2)."""
+
+    def test_a_cited_value_needs_its_claims(self):
+        import tempfile, types
+        case = Path(__file__).resolve().parents[2] / "profiles/reference/geometry-cases/cases/cms-ecal-barrel-crystal"
+        with tempfile.TemporaryDirectory() as folder:
+            work = Path(folder)
+            (work / "run.json").write_text(json.dumps({"schema": "g4sim-run/1", "physics": {"reference_list": "NOT_A_LIST", "cuts_mm": {"default": "0.7"}}, "accounting": "separated", "run": {"events": 1, "first_event": 0, "logical_run_seed": 1, "mode": "mt", "seeding": "per-event", "threads": 1}}), encoding="utf-8")  # refused after the geometry check, so nothing runs
+            claims = work / "claims.json"
+            claims.write_text(json.dumps(["detector-atlas:C125", "detector-atlas:C130"]), encoding="utf-8")
+            args = dict(detector=case / "detector-spec.json", request=case / "request.json", run=work / "run.json", program=work / "none", work=work / "out", protected=False)
+            without = driver.simulate(types.SimpleNamespace(**args, claims=None))
+            self.assertIn("facts-claim", {item["code"] for item in without["findings"]})
+            with self.assertRaises(ValueError):  # past the geometry check, refused at the run card's physics list
+                driver.simulate(types.SimpleNamespace(**args, claims=claims))
+
+
 class Datasets(unittest.TestCase):
     def setUp(self):
         folder = tempfile.TemporaryDirectory()

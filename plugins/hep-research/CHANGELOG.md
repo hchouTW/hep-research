@@ -3,6 +3,10 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## 0.62.0 (unreleased)
+
+Minor release. g4sim phase S6 (`adapters/geant4` 0.12.0; contracts and core unchanged). `reference:geometry-cases` 0.1.0, with three cases reconstructed from cited claims and labelled "an approximate reconstruction from the cited claims, not the experiment's geometry": a CMS ECAL barrel crystal (L1), the AMS-02 TOF (L1) and the ePIC ZDC hadronic section (L2), each with a reference independent of Geant4, a tolerance registered before the run, a negative control and a detection limit. Claims added: `reference:detector-atlas` 0.2.0 (CMS ECAL), `experiment:ams-02` 2.1.0 (TOF, from NIM A 623 and NIM A 743), `experiment:eic` 0.2.0 (ZDC, from the ePIC simulation geometry 26.11.0 and public papers). `g4sim_run.py simulate --claims` runs a specification whose values cite claims.
+
 ## 0.61.0 (2026-11-07)
 
 Minor release (`adapters/geant4` 0.11.1; contracts and `CORE_VERSION` unchanged). Fixed: simreco gave a digitized strip hit the error sqrt((p - w)^3 / 12 p), which takes the charge-weighted position inside the sharing band to be exact; it now gives the RMS error of the cluster, `StripClusterSigma`, the width `simreco_strip` already used, and `simreco_spec.py`'s check of a digitization finer than the declared resolution uses the same width. On J15's strips (47 and 116 um, sharing 8 um, threshold 0.2) the old width was about 14% too small in the bending plane, and fits with only strip errors gave chi2/ndof 1.20 against 1.00 now. The committed J15 and J16 results are not regenerated, by the maintainer's decision: their 24 reconstructions with tail sources on keep the old width, as their recorded simreco hash shows, and a rerun would give them smaller chi2 and pulls with the same 1/R resolution.

@@ -298,7 +298,7 @@ Listed when Jaccard >= 0.08 or containment (shared / smaller file) >= 0.15.
 | `transformer-architectures.md` | hep-ml | 5.5 | no | 4 | - | 9257d7b5 2026-10-15 |
 | `uncertainty-and-calibration.md` | hep-ml | 6.9 | yes | 10 | hep-statistics | 485e96cb 2026-10-17 |
 | `domains/computing.md` | hep-review | 1.8 | no | 3 | - | dbebc92c 2026-10-29 |
-| `domains/index.md` | hep-review | 1.8 | yes | 95 | hep-authoring, hep-citations, hep-computing, hep-detector, hep-measurement, hep-ml, hep-statistics, hep-theory | dbebc92c 2026-10-29 |
+| `domains/index.md` | hep-review | 1.8 | yes | 96 | hep-authoring, hep-citations, hep-computing, hep-detector, hep-measurement, hep-ml, hep-statistics, hep-theory | dbebc92c 2026-10-29 |
 | `domains/statistics.md` | hep-review | 2.1 | no | 24 | hep-authoring, hep-detector, hep-measurement, hep-statistics, hep-theory | dbebc92c 2026-10-29 |
 | `evaluation-and-claims.md` | hep-review | 3.8 | yes | 2 | - | 92975d12 2026-10-29 |
 | `evidence-and-adjudication.md` | hep-review | 3.4 | yes | 2 | - | dbebc92c 2026-10-29 |

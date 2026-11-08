@@ -1,0 +1,56 @@
+{
+ "schema": "geometry-cases-coverage/1",
+ "note": "every module the S6 cases use, with the cases that cover it (g4sim S6 gate 4)",
+ "modules": {
+  "material:base": [
+   "epic-zdc-hadronic"
+  ],
+  "material:composition": [
+   "ams02-tof",
+   "cms-ecal-barrel-crystal",
+   "epic-zdc-hadronic"
+  ],
+  "placement:linear": [
+   "ams02-tof"
+  ],
+  "placement:single": [
+   "ams02-tof",
+   "cms-ecal-barrel-crystal",
+   "epic-zdc-hadronic"
+  ],
+  "placement:stack": [
+   "epic-zdc-hadronic"
+  ],
+  "quantity:edep": [
+   "epic-zdc-hadronic"
+  ],
+  "quantity:track_length": [
+   "ams02-tof",
+   "cms-ecal-barrel-crystal",
+   "epic-zdc-hadronic"
+  ],
+  "rotation": [
+   "ams02-tof"
+  ],
+  "segmentation:cartesian_xy": [
+   "epic-zdc-hadronic"
+  ],
+  "segmentation:none": [
+   "ams02-tof",
+   "cms-ecal-barrel-crystal",
+   "epic-zdc-hadronic"
+  ],
+  "shape:box": [
+   "ams02-tof",
+   "epic-zdc-hadronic"
+  ],
+  "shape:trd": [
+   "cms-ecal-barrel-crystal"
+  ],
+  "source:box_uniform": [
+   "ams02-tof",
+   "cms-ecal-barrel-crystal",
+   "epic-zdc-hadronic"
+  ]
+ }
+}

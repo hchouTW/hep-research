@@ -3943,6 +3943,7 @@
     "profiles/reference/detector-atlas/index.md",
     "profiles/reference/detector-atlas/profile.json",
     "profiles/reference/detector-atlas/tests/test_atlas_ledger.py",
+    "profiles/reference/geometry-cases/profile.json",
     "profiles/theory/cr-secondary-antiprotons/README.md",
     "profiles/theory/cr-secondary-antiprotons/profile.json",
     "profiles/theory/cr-secondary-ratio/README.md",
