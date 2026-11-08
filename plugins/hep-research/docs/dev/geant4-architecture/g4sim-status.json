@@ -64,7 +64,6 @@
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S7.md",
    "blocked_on": [
     "ams02-tracker-magnet: the bore field integral fails its registered tolerance (+36% against 20%); its reference's definition rests on an unstated length: the maintainer decides",
-    "ams02-rich-replica: FTFP_BERT has no dataset entry; probe it or run the case with FTFP_BERT_EMZ: the maintainer decides",
     "G5 for the S7 C++ (a second read of the fixes is suggested first)"
    ]
   },
