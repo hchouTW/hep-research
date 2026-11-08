@@ -8976,6 +8976,24 @@ limits catch large defects only. The custodian's re-evaluation of qualification 
 
 Passing checks show software consistency, not physical validity.
 
+## 0.63.0 release check (2026-11-08, CI and E5)
+
+Release branch `release/0.63.0`, based on main `f2145691` (PR #373 merged). Minor release: g4sim phase S7. Contracts 3.25.0, `CORE_VERSION` 1.11.0, `adapters/geant4` 0.13.0; profiles `reference:geometry-cases` 0.2.0, `reference:detector-atlas` 0.3.0, `experiment:eic` 0.3.0, `experiment:ams-02` 2.2.0.
+
+What changed on the release branch: the CHANGELOG `0.63.0` section and the g4sim status (S7 `merged`). No regeneration here: S7 regenerated the eic routing example for the eic profile's new version. Gate record: `docs/dev/geant4-architecture/g4sim-gates/S7.md`.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on PR #373 at `d8f5a64b` | success (27 pass, 3 skipped); a first run at `41d67be7` failed lint on 10 mypy errors in S7's new Python, fixed at `d8f5a64b` with no change in behaviour |
+| `run_all_checks.py`, E5 Slurm node at `a7849893`, `--jobs 8` | 33 pass, 1 fail; 3 failing tests, all environmental: two pass from a path without `S7`, one needs `cmake`, absent on the node |
+| `mypy` | Clean, 144 source files |
+| S7 gates | 1, 2, 4, 5 (20 of 20) and 6 (G5) pass; 3 is a recorded gap (no qualifying TR yield data), so S7 is partially complete; gates 1, 2, 4 and every case reproduce identically on the final build 26 |
+| Reference cases | 13 validated-in-scope (comparison with cited values, not confirmation), every negative control caught; the RICH replica labelled synthetic, +0.56% within 3% |
+
+**E2 was not run for this release.** G5 was confirmed by the maintainer for the S7 C++ at `4ee3288a` (G4SIM-S7-G5). The `ams02-tracker-magnet` field-integral reference derives from the official AMS-02 field map, collaboration-internal and not committed; the maintainer cleared the derived value for publication. Gates 1 and 4 failed at their first registration and were redesigned on the maintainer's word; every failed run stays in the gate record.
+
+Passing checks show software consistency, not physical validity.
+
 ## 0.62.0 release check (2026-11-08, CI and E5)
 
 Release branch `release/0.62.0`, based on main `c3a47c02` (PR #370 merged). Minor release: g4sim phase S6. Contracts 3.24.0, `CORE_VERSION` 1.10.0, `adapters/geant4` 0.12.0; profiles `reference:geometry-cases` 0.1.0, `reference:detector-atlas` 0.2.0, `experiment:ams-02` 2.1.0, `experiment:eic` 0.2.0.
