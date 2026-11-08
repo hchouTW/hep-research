@@ -177,6 +177,26 @@ def _uniform_prism(solid: dict) -> bool:
     return len(set(solid["circumradius_rmax_mm"])) == 1 and all(exact(r) == 0 for r in solid["circumradius_rmin_mm"]) and exact(solid["phi_span_deg"]) == 360 and exact(solid["z_mm"][0]) == CONTEXT.minus(exact(solid["z_mm"][-1]))
 
 
+def _solid_cone(solid: dict) -> bool:
+    """A cone with no inner radius and a whole phi range: its inside is convex, so a convex daughter lies in it when its vertices do."""
+    return exact(solid["rmin1_mm"]) == 0 and exact(solid["rmin2_mm"]) == 0 and exact(solid["phi_span_deg"]) == 360
+
+
+def _gaps_in_cone(solid: dict, vertices: list) -> list:
+    """Distances from a convex daughter's vertices to a solid cone mother's surfaces (S7): the two flat ends, and the slanted side,
+    whose radius runs linearly from rmax1 at -dz to rmax2 at +dz; the side's distance is the radial one times cos of the half-opening
+    angle, the perpendicular distance to that surface."""
+    r1, r2, half = exact(solid["rmax1_mm"]), exact(solid["rmax2_mm"]), exact(solid["dz_mm"])
+    length = add(half, half)
+    cosine = CONTEXT.divide(length, CONTEXT.sqrt(add(multiply(length, length), multiply(subtract(r2, r1), subtract(r2, r1)))))
+    side = []
+    for x, y, z in vertices:
+        radius = add(r1, CONTEXT.divide(multiply(subtract(r2, r1), add(z, half)), length))
+        side.append(multiply(subtract(radius, CONTEXT.sqrt(add(multiply(x, x), multiply(y, y)))), cosine))
+    zs = [vertex[2] for vertex in vertices]
+    return [min(side), subtract(min(zs), CONTEXT.minus(half)), subtract(half, max(zs))]
+
+
 def _gaps(ir: dict, placement: dict) -> list:
     """The distance from a daughter to each surface of its mother: negative outside, None when it cannot be judged."""
     template = ir["physical"]["templates"][placement["mother"]]
@@ -186,6 +206,8 @@ def _gaps(ir: dict, placement: dict) -> list:
     if shape == "polyhedra" and _uniform_prism(template["solid"]):
         solid = template["solid"]
         return convex.face_gaps(convex.prism(solid["sides"], exact(solid["circumradius_rmax_mm"][0]), exact(solid["z_mm"][-1])), _polyhedron(ir, placement).vertices)
+    if shape == "cone" and _solid_cone(template["solid"]):
+        return _gaps_in_cone(template["solid"], _polyhedron(ir, placement).vertices)
     if shape in ("cone", "sphere_section", "polycone", "polyhedra"):
         return [None]  # a daughter of these mothers cannot be judged yet (a recorded limit of S7)
     if shape != "box":

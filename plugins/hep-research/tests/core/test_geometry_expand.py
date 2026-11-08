@@ -614,8 +614,17 @@ class S7Shapes(unittest.TestCase):
         mother["children"] = [single("b", ("8", "0", "0"))]
         self.assertEqual(codes(expand.expand(document)), [])
 
-    def test_a_daughter_of_a_cone_mother_is_reported_unjudged(self):
+    def test_a_daughter_of_a_solid_cone_is_judged_by_its_vertices(self):
         mother = {"solid": {"cone": {"rmax1_mm": "10", "rmax2_mm": "20", "length_mm": "30"}}, "material": "G4_AIR", "children": [single("b")]}
+        document = spec({"b": box(["1", "1", "1"]), "c": mother}, [single("c")])
+        self.assertEqual(codes(expand.expand(document)), [])
+        mother["children"] = [single("b", ("0", "10.8", "-14"))]  # at z = -13.5 the side lies at r = 10.25: the corner at 11.3 is outside
+        self.assertIn("containment-outside", codes(expand.expand(document)))
+        mother["children"] = [single("b", ("0", "10.8", "14"))]  # near the wide end the side lies at r = 19.75: inside
+        self.assertEqual(codes(expand.expand(document)), [])
+
+    def test_a_daughter_of_a_hollow_cone_is_reported_unjudged(self):
+        mother = {"solid": {"cone": {"rmin1_mm": "2", "rmax1_mm": "10", "rmin2_mm": "2", "rmax2_mm": "20", "length_mm": "30"}}, "material": "G4_AIR", "children": [single("b", ("0", "5", "0"))]}
         self.assertEqual(codes(expand.expand(spec({"b": box(["1", "1", "1"]), "c": mother}, [single("c")]))), ["containment-unjudged"])
 
     def test_the_schema_requires_each_shapes_parameters(self):
