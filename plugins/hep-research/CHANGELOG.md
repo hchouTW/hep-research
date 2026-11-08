@@ -3,7 +3,7 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## 0.62.0 (unreleased)
+## 0.62.0 (2026-11-08)
 
 Minor release. g4sim phase S6 (`adapters/geant4` 0.12.0; contracts 3.24.0, core unchanged). `reference:geometry-cases` 0.1.0, with three cases reconstructed from cited claims and labelled "an approximate reconstruction from the cited claims, not the experiment's geometry": a CMS ECAL barrel crystal (L1), the AMS-02 TOF (L1) and the ePIC ZDC hadronic section (L2), each with a reference independent of Geant4, a tolerance registered before the run, a negative control and a detection limit. Claims added: `reference:detector-atlas` 0.2.0 (CMS ECAL), `experiment:ams-02` 2.1.0 (TOF, from NIM A 623 and NIM A 743), `experiment:eic` 0.2.0 (ZDC, from the ePIC simulation geometry 26.11.0 and public papers). `g4sim_run.py simulate --claims` runs a specification whose values cite claims. The reference profile template accepts reference cases (`cases/`, `coverage.json`) and no longer requires an evidence ledger.
 
