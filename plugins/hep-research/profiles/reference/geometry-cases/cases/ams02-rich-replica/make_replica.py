@@ -128,7 +128,7 @@ def main(argv: list) -> int:
                "position": {"box_uniform": {"frame": "world", "centre_mm": ["226", "0", "530"], "size_mm": ["0", "0", "0"]}},
                "direction": {"fixed": {"frame": "world", "vector": ["0", "0", "-1"]}}},
                "scorers": [{"name": "plane", "readout": "none", "select": {"tags": ["plane"]}, "quantity": "photon_detected"}]}
-    card = {"schema": "g4sim-run/1", "physics": {"reference_list": "FTFP_BERT", "cuts_mm": {"default": "0.7"}, "extra_constructors": ["G4OpticalPhysics"],
+    card = {"schema": "g4sim-run/1", "physics": {"reference_list": "FTFP_BERT_EMZ", "cuts_mm": {"default": "0.7"}, "extra_constructors": ["G4OpticalPhysics"],
             "optical": {"wls": False}}, "accounting": "separated",
             "run": {"events": 300, "first_event": 0, "logical_run_seed": 20261112, "mode": "mt", "seeding": "per-event", "threads": 4}}
     out.mkdir(parents=True, exist_ok=True)

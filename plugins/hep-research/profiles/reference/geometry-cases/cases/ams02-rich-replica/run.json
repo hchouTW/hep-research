@@ -1,7 +1,7 @@
 {
  "schema": "g4sim-run/1",
  "physics": {
-  "reference_list": "FTFP_BERT",
+  "reference_list": "FTFP_BERT_EMZ",
   "cuts_mm": {
    "default": "0.7"
   },
