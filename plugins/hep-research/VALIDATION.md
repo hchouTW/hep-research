@@ -8942,6 +8942,15 @@ G5 for g4sim phase S5, at `87f3eb57`: the encoded cellID, in `g4sim_run/NewScore
 
 **Confirmation** (hsinyichou, maintainer, 2026-11-07, in the Claude Code session): "G5 is OK.", given while a second read was still running. That read was cancelled; a third, complete read then compared `CopyPart`, `AxisValues` and `CellId` by eye with the nearest examples and found no copied structure, which supports the confirmation and cannot prove authorship.
 
+## G4SIM-S7-G5 (2026-11-08, E5 for the scan; confirmation by the maintainer)
+
+G5 for g4sim phase S7 (gate 6), at `4ee3288a` (build 26): `adapters/geant4/assets/g4sim/Accounting.hh`, `FieldMap.hh`, `KillProcess.hh`, `Optics.hh`, `ProbeV2.hh` and `adapters/geant4/assets/g4sim_run/NewBuild.hh`, `NewRun.cc`, `NewScorers.hh`, `NewSource.hh`, `XtrConstructor.hh`.
+
+**Evidence**: `adapters/geant4/tests/g4proto/g5_scan.py` at `c675e0a5`, on those ten files, against all 5,657 `.cc`, `.hh` and `.icc` files of the Geant4 11.4.3 examples tree: 0 shared runs of 3 and of 4 consecutive lines; the positive control found 863 and 880 (`g4sim-references/s7/g5/scan-b26-*.json`).
+Three independent reads by agents that did not write the code (the S7 C++ at `5d2ae24c`; the C++ since `6f2f4895` at `8b9e4130`; the fix commit `62e69568`) found defects, all fixed (`6d8f9b9b`, `62e69568`, `4ee3288a`) and recorded in `g4sim-gates/S7.md`. The second judged each file written from the API, with no example or library source adapted, and named the nearest resemblances: OpBoundary's cached lookup (LXe, OpNovice2), the random polarization (OpNovice), the XTR if-chain (TestEm10), the tabulated field (purging magnet), all with different code. The third found no adaptation in the fixes. The examples' sources were not installed on this host for those reads; they compared from the API headers and the scan.
+
+**Confirmation** (hsinyichou, maintainer, 2026-11-08, in the Claude Code session): "G5 is OK.", in answer to the request for G5 at that commit, whose suggested wording named the ten files and stated that they are written from the Geant4 API, with no example code copied or adapted. This record does not state which files the maintainer read.
+
 ## 0.57.0 release check (2026-11-06, E2 and CI)
 
 Release branch `release/0.57.0`, based on main `dfbbb787` (PR #354 merged), with main merged in at `575e309b` for PR #353 (citation corrections in 10 hep-detector reference documents).
