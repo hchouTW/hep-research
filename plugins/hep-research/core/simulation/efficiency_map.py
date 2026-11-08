@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import hashlib
 import math
+from typing import Any
 
 from core.canonical import canonical_json
 from core.simulation import rng
@@ -78,8 +79,8 @@ def build(*, template: str, component: int, spectrum: dict, segmentation: dict, 
         raise MapError("map-segmentation", "the segmentation has no width")
     total = math.prod(bin_counts(segmentation, half_mm))
     index = {name: at for at, name in enumerate(channels)}
-    bins = {b: {"emitted": 0, "detected": [0] * len(channels), "times": []} for b in range(total)}
-    cells = {} if segmentation["kind"] == "along_axis" else None
+    bins: dict[int, dict[str, Any]] = {b: {"emitted": 0, "detected": [0] * len(channels), "times": []} for b in range(total)}
+    cells: dict[tuple, list[int]] | None = {} if segmentation["kind"] == "along_axis" else None
     for local in emitted.values():
         b = bin_of(segmentation, half_mm, local)
         bins[b]["emitted"] += 1
@@ -111,7 +112,7 @@ def build(*, template: str, component: int, spectrum: dict, segmentation: dict, 
         for transit in entry["times"]:
             counts[min(int(transit / edges[-1] * TRANSIT_BINS), TRANSIT_BINS - 1)] += 1
         rows.append({"bin": b, "emitted": entry["emitted"], "detected": entry["detected"], "transit_counts": counts})
-    document = {"schema": SCHEMA, "channels": list(channels), "form": {
+    document: dict[str, Any] = {"schema": SCHEMA, "channels": list(channels), "form": {
         "kind": FORM, "template": template, "component": component, "emission_spectrum": spectrum, "segmentation": segmentation,
         "half_mm": [float(value) for value in half_mm], "transit_edges_ns": edges, "bins": rows, "hashes": hashes}}
     if cells is not None:

@@ -144,7 +144,7 @@ def photon_times(document: dict, stage_name: str, event: int, volume_id: int, bi
         for _ in range(min(PHOTON_BLOCK, photons - start)):
             first, second = stream.group()
             delay = -decay_ns * math.log(first) - (rise_ns * math.log(stream.group()[0]) if rise_ns > 0 else 0.0)
-            transit = efficiency_map.transit_ns(map_document, bin_index, second) if mapped else -transit_ns * math.log(second)
+            transit = efficiency_map.transit_ns(map_document, bin_index, second) if mapped and map_document is not None else -transit_ns * math.log(second)
             times.append(delay + transit)
     return times
 

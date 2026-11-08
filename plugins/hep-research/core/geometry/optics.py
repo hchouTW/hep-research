@@ -78,7 +78,9 @@ def check_material(name: str, material: dict) -> None:
 
 def has_tables(material: dict | None) -> bool:
     """Whether Geant4 would give this material an optical property table."""
-    return bool(material) and ("optical" in material or bool(material.get("scintillation", {}).get("components")))
+    if not material:
+        return False
+    return "optical" in material or bool(material.get("scintillation", {}).get("components"))
 
 
 def with_gap_volumes(spec: dict) -> dict:
