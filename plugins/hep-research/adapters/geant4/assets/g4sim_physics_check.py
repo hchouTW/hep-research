@@ -23,9 +23,10 @@ ALLOWED_USER_LIMITS = {"max_step_mm"}
 ADDITIVE = ("edep", "edep_visible", "edep_charged", "edep_nonionizing", "track_length", "edep_by_dedx_class", "edep_visible_ly_split")
 BOUNDARY = ("n_crossings", "crossing_kinematics", "energy_out_by_face")
 FIRST = ("time_first", "first_entry_kinematics")
-LATER_QUANTITIES = {"photon_detected": "S7"}
+PHOTON = ("photon_detected",)  # S7: a count per detecting volume, with optical physics on
+LATER_QUANTITIES: dict = {}  # empty since photon_detected opened in S7
 SEGMENTATIONS = ("none", "along_axis", "cartesian_xy", "cartesian_xyz", "polar")
-ALLOWED_SEGMENTATION = {**{name: SEGMENTATIONS for name in ADDITIVE}, **{name: ("none", "cartesian_xy") for name in BOUNDARY}, **{name: ("none",) for name in FIRST}}
+ALLOWED_SEGMENTATION = {**{name: SEGMENTATIONS for name in ADDITIVE}, **{name: ("none", "cartesian_xy") for name in BOUNDARY}, **{name: ("none",) for name in FIRST + PHOTON}}
 BIRKS_QUANTITIES = ("edep_visible", "edep_by_dedx_class", "edep_visible_ly_split")
 SPLIT_QUANTITY = "edep_visible_ly_split"
 
@@ -234,7 +235,7 @@ def event_range_findings(card: dict) -> list:
     return []
 
 
-def optical_findings(card: dict, requirements) -> list:
+def optical_findings(card: dict, requirements, scorers=()) -> list:
     """A new-mode run (S7): G4OpticalPhysics is the one extra constructor g4sim_run builds, and it runs only with a specification that declares
     optical_scope, the templates KillProcess keeps photons in (GB16). Any other name would be ignored by the program, so it is refused here."""
     extra = card.get("physics", {}).get("extra_constructors", ())
@@ -242,6 +243,30 @@ def optical_findings(card: dict, requirements) -> list:
                 for name in extra if name != "G4OpticalPhysics"]
     if "G4OpticalPhysics" in extra and not any(requirement.get("need") == "optical_scope" for requirement in requirements):
         findings.append({"code": "optical-no-scope", "path": "physics.extra_constructors", "message": "optical physics needs an optical_scope requirement in the specification"})
+    if "G4OpticalPhysics" not in extra:
+        findings += [{"code": "photon-detected-without-optics", "path": f"scorers/{at}", "message": "photon_detected counts optical photons, which need G4OpticalPhysics"}
+                     for at, scorer in enumerate(scorers) if scorer.get("quantity") in PHOTON]
+    return findings
+
+
+def validation_findings(card: dict, materials: dict, material: str, effective: dict, resolution_scale: float) -> list:
+    """check-spec of a validation run with full optical tracking (Section 10.4, S7): optical physics on; the material's RESOLUTIONSCALE equals
+    the digitization's r; and, read back from Geant4, G4Scintillation holds G4EmSaturation and ScintillationByParticleType is off. The
+    material declares its Birks constant, without which the saturation would use one Geant4 may set silently (GB13)."""
+    findings = []
+    if "G4OpticalPhysics" not in card.get("physics", {}).get("extra_constructors", ()):
+        findings.append({"code": "validation-not-optical", "path": "physics.extra_constructors", "message": "a validation run tracks the light: it needs G4OpticalPhysics"})
+    declared = materials.get(material, {})
+    scale = declared.get("scintillation", {}).get("resolution_scale")
+    if scale is None or float(scale) != float(resolution_scale):
+        findings.append({"code": "validation-resolution-scale", "path": f"materials.{material}", "message": f"RESOLUTIONSCALE {scale} in the full optical run, r = {resolution_scale} in the digitization"})
+    if "birks_mm_per_MeV" not in declared.get("ionisation", {}):
+        findings.append({"code": "birks-undeclared", "path": f"materials.{material}", "message": f"{material} declares no Birks constant (GB13)"})
+    optical = effective.get("optical", {})
+    if optical.get("scintillation_saturation") is not True:
+        findings.append({"code": "validation-saturation", "path": "effective-em.optical", "message": "G4Scintillation holds no G4EmSaturation"})
+    if optical.get("scintillation_by_particle_type") is not False:
+        findings.append({"code": "validation-by-particle-type", "path": "effective-em.optical", "message": "ScintillationByParticleType is not off"})
     return findings
 
 
@@ -253,7 +278,7 @@ def card_findings(card: dict, request: dict | None = None, regions=(), ionisatio
         findings += pai_findings(requests, regions, ionisation, requirements)
     if request is not None:
         scorers = request.get("scorers", [])
-        findings += optical_findings(card, requirements)
+        findings += optical_findings(card, requirements, scorers)
         findings += time_cut_findings(card, scorers) + scorer_findings(scorers, materials, selected_materials) + source_findings(request.get("source", {})) + plane_findings(request) + truth_findings(request) + event_range_findings(card)
     return findings
 

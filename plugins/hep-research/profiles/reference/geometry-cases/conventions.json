@@ -1,5 +1,6 @@
 {
  "unit_system": "millimetre, gram per cubic centimetre and radiation lengths, as the detector-spec contract uses them",
  "geometry-cases:level": "L1 up to the material budget, L2 up to the readout segmentation, L3 up to the response (g4sim plan, term table)",
- "geometry-cases:status": "'validated-in-scope (comparison with cited values, not confirmation)' only when the reference is verified independent of Geant4 and every negative control is caught (Section 13.3); otherwise 'comparison with cited values: not validated'"
+ "geometry-cases:status": "'validated-in-scope (comparison with cited values, not confirmation)' only when the reference is verified independent of Geant4 and every negative control is caught (Section 13.3); otherwise 'comparison with cited values: not validated'",
+ "geometry-cases:cherenkov": "an L3 case with optics names its Cherenkov handling (g4sim plan, Section 10.4): 'full_optical_tracking', option (a), with scintillation by efficiency maps; or 'declared_negligible', option (b), with a validation run whose Cherenkov fraction of the photoelectrons lies below the declared precision"
 }

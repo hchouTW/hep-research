@@ -430,5 +430,59 @@ class OpticalReadBack(unittest.TestCase):
                          "SCINTILLATIONTIMECONSTANT1", "SCINTILLATIONYIELD", "SCINTILLATIONYIELD1", "WLSABSLENGTH", "WLSCOMPONENT", "WLSTIMECONSTANT"])
 
 
+class ValidationRun(unittest.TestCase):
+    """check-spec of a full optical validation run (Section 10.4): RESOLUTIONSCALE equal to r, saturation attached, by-particle-type off."""
+
+    MATERIALS = {"lyso": {"scintillation": {"yield_per_MeV": "27000", "resolution_scale": "1.2"}, "ionisation": {"birks_mm_per_MeV": "0.008"}}}
+    EFFECTIVE = {"optical": {"scintillation_saturation": True, "scintillation_by_particle_type": False}}
+
+    def test_a_matching_validation_run_passes(self):
+        self.assertEqual(driver.physics_check.validation_findings(card(extra_constructors=["G4OpticalPhysics"]), self.MATERIALS, "lyso", self.EFFECTIVE, 1.2), [])
+
+    def test_a_validation_run_whose_resolutionscale_differs_from_r_is_caught(self):
+        found = driver.physics_check.validation_findings(card(extra_constructors=["G4OpticalPhysics"]), self.MATERIALS, "lyso", self.EFFECTIVE, 1.0)
+        self.assertEqual(codes(found), ["validation-resolution-scale"])
+
+    def test_geant4_settings_read_back_are_judged(self):
+        effective = {"optical": {"scintillation_saturation": False, "scintillation_by_particle_type": True}}
+        self.assertEqual(codes(driver.physics_check.validation_findings(card(), self.MATERIALS, "lyso", effective, 1.2)),
+                         ["validation-not-optical", "validation-saturation", "validation-by-particle-type"])
+
+
+class EfficiencyMapTool(unittest.TestCase):
+    """g4sim_efficiency_map.py build on a mapping run's files."""
+
+    def test_a_map_is_built_from_the_run_files(self):
+        tool = importlib.util.spec_from_file_location("g4sim_efficiency_map", ASSETS / "g4sim_efficiency_map.py")
+        module = importlib.util.module_from_spec(tool)
+        tool.loader.exec_module(module)
+        work = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, work)
+        component = {"fraction": "1", "spectrum": {"energy_eV": ["2", "3"], "value": ["1", "1"]}, "rise_ns": "0", "decay_ns": "2"}
+        ir = {"physical": {"templates": {"world": {"shape": "box", "half_mm": ["5e2", "5e2", "5e2"], "material": "G4_AIR"},
+                                         "bar": {"shape": "box", "half_mm": ["1e1", "1e1", "5e0"], "material": "scint"}},
+                           "placements": [{"mother": "world", "template": "bar", "copy_number": 0, "centre_mm": ["1e2", "0", "0"], "rotation": None}],
+                           "materials": {"scint": {"scintillation": {"yield_per_MeV": "1", "resolution_scale": "1", "components": [component]}}}}}
+        (work / "ir.json").write_text(json.dumps(ir), encoding="utf-8")
+        (work / "summary.json").write_text(json.dumps({"request_id": "r" * 64}), encoding="utf-8")
+        draw = __import__("random").Random(3)
+        primaries, photons = [], []
+        for event in range(3000):
+            x, y, z = 100 + draw.uniform(-10, 10), draw.uniform(-10, 10), draw.uniform(-5, 5)
+            primaries.append(f"{event},3e-06,{x},{y},{z},0,0,1")
+            if draw.random() < 0.1:
+                photons.append(f"{event},pe,7,1.0,{draw.expovariate(1.0)},3,{x},{y},{z}")
+        (work / "primaries.csv").write_text("\n".join(primaries) + "\n", encoding="utf-8")
+        (work / "photons.csv").write_text("\n".join(photons) + "\n", encoding="utf-8")
+        (work / "seg.json").write_text(json.dumps({"kind": "cartesian_xyz", "width_mm": ["10", "20", "10"]}), encoding="utf-8")
+        code = module.main(["build", "--work", str(work), "--template", "bar", "--material", "scint", "--segmentation", str(work / "seg.json"), "--out", str(work / "map.json")])
+        self.assertEqual(code, 0)
+        document = json.loads((work / "map.json").read_text(encoding="utf-8"))
+        self.assertEqual(document["channels"], ["pe/7"])
+        self.assertEqual([row["emitted"] > 0 for row in document["form"]["bins"]], [True, True])
+        self.assertEqual(sum(row["emitted"] for row in document["form"]["bins"]), 3000)
+        self.assertAlmostEqual(sum(sum(row["detected"]) for row in document["form"]["bins"]) / 3000, 0.1, delta=0.02)
+
+
 if __name__ == "__main__":
     unittest.main()

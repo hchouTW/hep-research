@@ -64,6 +64,19 @@ class Cases(unittest.TestCase):
                     self.assertTrue(all(q["independence"]["verified"] for q in document["quantities"]))
                     self.assertTrue(all(item["control_caught"] for item in document["result"]["quantities"]))
 
+    def test_an_optical_l3_case_chooses_its_cherenkov_handling(self):
+        for case in sorted((ROOT / "cases").iterdir()):
+            document = json.loads((case / "case.json").read_text(encoding="utf-8"))
+            spec = json.loads((case / "detector-spec.json").read_text(encoding="utf-8"))
+            optical = any(item.get("need") == "optical_scope" for item in spec.get("physics_requirements", []))
+            if document["level"] != "L3" or not optical:
+                continue
+            with self.subTest(case=case.name):
+                handling = document["cherenkov_handling"]
+                self.assertIn(handling["option"], ("full_optical_tracking", "declared_negligible"))
+                if handling["option"] == "declared_negligible":
+                    self.assertLess(handling["validation"]["cherenkov_fraction"], handling["validation"]["declared_precision"])
+
     def test_coverage_lists_every_module_used(self):
         coverage = json.loads((ROOT / "coverage.json").read_text(encoding="utf-8"))["modules"]
         for case in sorted((ROOT / "cases").iterdir()):

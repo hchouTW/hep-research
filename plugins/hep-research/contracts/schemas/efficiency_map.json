@@ -1,5 +1,5 @@
 {
- "$comment": "efficiency-map/1 (g4sim plan, Section 10.3): the chance that a photon from bin x reaches each channel. S4 uses analytic synthetic maps; mapped ones arrive in S7.",
+ "$comment": "efficiency-map/1 (g4sim plan, Sections 10.3, 10.4): the chance that a photon from bin x reaches each channel. S4 uses analytic synthetic maps; S7 adds mapped ones, built from a mapping run by core/simulation/efficiency_map.py.",
  "type": "object",
  "required": ["schema", "channels", "form", "source_of_facts"],
  "additionalProperties": false,
@@ -11,10 +11,21 @@
    "required": ["kind"],
    "additionalProperties": false,
    "properties": {
-    "kind": {"enum": ["uniform", "linear"]},
+    "kind": {"enum": ["uniform", "linear", "mapped"]},
     "value": {"type": "array", "items": {"type": "number", "minimum": 0}},
     "intercept": {"type": "array", "items": {"type": "number"}},
-    "slope_per_bin": {"type": "array", "items": {"type": "number"}}
+    "slope_per_bin": {"type": "array", "items": {"type": "number"}},
+    "template": {"type": "string", "minLength": 1},
+    "component": {"type": "integer", "minimum": 1, "maximum": 3},
+    "emission_spectrum": {"type": "object", "required": ["energy_eV", "value"]},
+    "segmentation": {"type": "object", "required": ["kind"]},
+    "half_mm": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "number", "minimum": 0}},
+    "transit_edges_ns": {"type": "array", "minItems": 2, "items": {"type": "number", "minimum": 0}},
+    "bins": {"type": "array", "items": {"type": "object", "required": ["bin", "emitted", "detected", "transit_counts"], "additionalProperties": false, "properties": {
+     "bin": {"type": "integer", "minimum": 0}, "emitted": {"type": "integer", "minimum": 1},
+     "detected": {"type": "array", "items": {"type": "integer", "minimum": 0}}, "transit_counts": {"type": "array", "items": {"type": "integer", "minimum": 0}}}}},
+    "hashes": {"type": "object", "required": ["materials_sha256", "surfaces_sha256", "mapping_run_id"]},
+    "transverse": {"type": "object", "required": ["side", "cells"]}
    }
   },
   "source_of_facts": {"type": "string", "minLength": 1}

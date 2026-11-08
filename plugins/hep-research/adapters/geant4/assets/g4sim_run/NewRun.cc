@@ -40,6 +40,8 @@
 #include "G4OpticalParameters.hh"
 #include "G4OpticalPhoton.hh"
 #include "G4OpticalPhysics.hh"
+#include "G4Scintillation.hh"
+#include "G4Electron.hh"
 #include "KillProcess.hh"
 #include "MiniJson.hh"
 #include "NewBuild.hh"
@@ -124,7 +126,13 @@ void WriteEffective() {
     out << (first ? "" : ", ") << '"' << line << '"';
     first = false;
   }
-  out << "], \"birks_mm_per_MeV\": {";
+  out << "]";
+  // S7, the validation run of Section 10.4: whether G4Scintillation holds G4EmSaturation, and ScintillationByParticleType, read from Geant4
+  const G4ProcessManager* electron = G4Electron::Definition()->GetProcessManager();
+  if (const auto* scintillation = electron ? dynamic_cast<const G4Scintillation*>(electron->GetProcess("Scintillation")) : nullptr)
+    out << ", \"optical\": {\"scintillation_saturation\": " << (scintillation->GetSaturation() ? "true" : "false")
+        << ", \"scintillation_by_particle_type\": " << (G4OpticalParameters::Instance()->GetScintByParticleType() ? "true" : "false") << "}";
+  out << ", \"birks_mm_per_MeV\": {";
   first = true;
   for (const G4Material* material : *G4Material::GetMaterialTable()) {
     out << (first ? "" : ", ") << '"' << material->GetName() << "\": " << material->GetIonisation()->GetBirksConstant() / (mm / MeV);
@@ -185,10 +193,12 @@ class Files : public G4UserRunAction {
     fBoundary = std::fopen(("boundary.thread" + thread + ".csv").c_str(), "w");
     fCrossings = std::fopen(("crossings.thread" + thread + ".csv").c_str(), "w");
     Primaries() = std::fopen(("primaries.thread" + thread + ".csv").c_str(), "w");
+    if (fShared.optical) fPhotons = std::fopen(("photons.thread" + thread + ".csv").c_str(), "w");
     g4sim::Accounting::Thread().SetSeparated();
     if (fShared.optical) g4sim::Accounting::Thread().SetOptical();
     g4sim::Accounting::Thread().Open("conservation.thread" + thread + ".csv");
     g4sim::ScorerSums::Thread().Configure(&fShared.scorers, &fShared.strides, fCells, fBoundary, fCrossings);
+    g4sim::ScorerSums::Thread().SetPhotons(fPhotons);
   }
   void EndOfRunAction(const G4Run*) override {
     if (fShared.hits) {
@@ -199,7 +209,7 @@ class Files : public G4UserRunAction {
     std::ofstream sagitta("sagitta.thread" + std::to_string(G4Threading::G4GetThreadId()) + ".csv");
     for (std::size_t i = 0; i < fShared.scorers.size(); ++i) sagitta << fShared.scorers[i].name << ',' << g4sim::ScorerSums::Thread().ApportionedSteps(i) << ',' << g4sim::ScorerSums::Thread().LongSteps(i) << '\n';
     if (fMoments) g4sim::ScorerSums::Thread().WriteMoments(fMoments);
-    for (std::FILE* file : {fCells, fMoments, fBoundary, fCrossings, Primaries()})
+    for (std::FILE* file : {fCells, fMoments, fBoundary, fCrossings, fPhotons, Primaries()})
       if (file) std::fclose(file);
     Primaries() = nullptr;
     g4sim::Accounting::Thread().Close();
@@ -215,6 +225,7 @@ class Files : public G4UserRunAction {
   std::FILE* fMoments = nullptr;
   std::FILE* fBoundary = nullptr;
   std::FILE* fCrossings = nullptr;
+  std::FILE* fPhotons = nullptr;
 };
 
 class EventSums : public G4UserEventAction {
@@ -242,8 +253,13 @@ class Steps : public G4UserSteppingAction {
   void UserSteppingAction(const G4Step* step) override {
     g4sim::Accounting& accounting = g4sim::Accounting::Thread();
     accounting.Step(step);
-    // an optical photon is its own class (Section 8.4): it enters no outflow, crossing or hit sum
-    if (step->GetTrack()->GetDefinition() == G4OpticalPhoton::OpticalPhotonDefinition()) return;
+    // an optical photon is its own class (Section 8.4): it enters no outflow, crossing or hit sum, only photon_detected
+    const G4ParticleDefinition* particle = step->GetTrack()->GetDefinition();
+    if (particle == G4OpticalPhoton::OpticalPhotonDefinition()) {
+      const G4OpBoundaryProcess* boundary = g4sim::Accounting::Boundary(particle);
+      if (step->GetPostStepPoint()->GetStepStatus() == fGeomBoundary && boundary && boundary->GetStatus() == Detection) g4sim::ScorerSums::Thread().PhotonDetected(step);
+      return;
+    }
     g4sim::ScorerSums::Thread().BoundaryStep(step, accounting.Table());
     if (fHits) g4sim::HitRecorder::Thread().Step(step);
   }
@@ -321,6 +337,7 @@ void SetEmParameters(const Value& physics) {
 // S7: the run card's process activation, and finite rise times whenever a scintillation component has one (Section 6.2.7).
 void SetOpticalParameters(const Value& physics, const Value& physical) {
   auto* parameters = G4OpticalParameters::Instance();
+  parameters->SetScintByParticleType(false);  // Section 10.4: the validation run needs it off, and no run card switches it on
   if (physics.has("optical")) {
     static const std::map<std::string, std::string> processes = {{"cerenkov", "Cerenkov"}, {"scintillation", "Scintillation"}, {"absorption", "OpAbsorption"},
                                                                  {"rayleigh", "OpRayleigh"}, {"mie", "OpMieHG"}, {"boundary", "OpBoundary"}, {"wls", "OpWLS"}};

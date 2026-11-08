@@ -31,7 +31,7 @@ CLOSURE_ULP = 2.0 ** -52
 CLASSES_PER_DECADE, CLASS_OFFSET, CLASSES_PER_KIND = 4, 40, 200
 KINDS = ("ionizing", "nonionizing", "photon", "zero_length")
 BIRKS_TOLERANCE, EM_TOLERANCE = 1e-12, 1e-9
-THREAD_FILES = ("cells", "boundary", "crossings", "primaries", "conservation")
+THREAD_FILES = ("cells", "boundary", "crossings", "primaries", "conservation", "photons")
 
 
 def _in_world(frame: str, vector: list, frames: dict) -> list:
@@ -366,6 +366,27 @@ def _to_world(ir: dict, template: str, point: list) -> list:
     while template != "world":
         placement = next(item for item in placements if item["template"] == template)
         point, template = _to_mother(placement, point), placement["mother"]
+    return point
+
+
+def _chain(ir: dict, template: str) -> list:
+    """The placements from the world down to a template placed once in the tree."""
+    placements, chain = ir["physical"]["placements"], []
+    while template != "world":
+        found = [item for item in placements if item["template"] == template]
+        if len(found) != 1:
+            raise ValueError(f"template {template} is placed {len(found)} times at one level; a frame needs one placement")
+        chain.append(found[0])
+        template = found[0]["mother"]
+    return chain[::-1]
+
+
+def to_local(ir: dict, template: str, point: list) -> list:
+    """A world point in a once-placed template's frame: level by level, p_daughter = P (p_mother - centre)."""
+    for placement in _chain(ir, template):
+        rows = placement["rotation"] or [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+        shifted = [point[i] - float(placement["centre_mm"][i]) for i in range(3)]
+        point = [sum(float(rows[i][j]) * shifted[j] for j in range(3)) for i in range(3)]
     return point
 
 

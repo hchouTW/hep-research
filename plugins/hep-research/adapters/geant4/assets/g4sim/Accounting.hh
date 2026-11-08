@@ -201,6 +201,7 @@ class Accounting {
       for (G4int i = 0; i < vertex->GetNumberOfParticle(); ++i) {
         const G4PrimaryParticle* primary = vertex->GetPrimary(i);
         const G4ParticleDefinition* particle = primary->GetParticleDefinition();
+        if (particle == G4OpticalPhoton::OpticalPhotonDefinition()) continue;  // a primary photon (a mapping run) is in the optical terms only
         fRow.incident += primary->GetKineticEnergy() + (particle->GetPDGEncoding() == -11 ? 2 * CLHEP::electron_mass_c2 : fUnreleased.Of(particle));
       }
     }
@@ -282,11 +283,15 @@ class Accounting {
       r.opticalEnergyOther += energy;
     }
   }
+ public:
+  // The thread's OpBoundary process, whose status says what happened to a photon at a boundary step (S7).
   static const G4OpBoundaryProcess* Boundary(const G4ParticleDefinition* photon) {
     static G4ThreadLocal const G4OpBoundaryProcess* boundary = nullptr;
     if (!boundary && photon->GetProcessManager()) boundary = dynamic_cast<const G4OpBoundaryProcess*>(photon->GetProcessManager()->GetProcess("OpBoundary"));
     return boundary;
   }
+
+ private:
   void BookEscape(const G4ParticleDefinition* particle, double kinetic) {
     const int pdg = particle->GetPDGEncoding();
     const double equivalent = kinetic + (pdg == -11 ? 2 * CLHEP::electron_mass_c2 : fUnreleased.Of(particle));

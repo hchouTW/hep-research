@@ -106,8 +106,11 @@ class Scorers(unittest.TestCase):
         self.assertEqual(self.judge(split="apportion"), ["scorer-combination"])
         self.assertEqual(self.judge(segmentation={"along_axis": {}}, split="midpoint", apportion_short_step_fraction="0.1"), ["scorer-combination"])
 
-    def test_quantities_of_later_phases_are_refused(self):
-        self.assertEqual(self.judge(quantity="photon_detected"), ["scorer-phase"])
+    def test_photon_detected_opens_in_s7_with_no_segmentation(self):
+        self.assertEqual(self.judge(quantity="photon_detected", segmentation="none"), [])
+        self.assertEqual(self.judge(quantity="photon_detected", segmentation={"along_axis": {"axis": "z", "width_mm": "1"}}), ["scorer-combination"])
+
+    def test_scorer_levels_take_their_quantities(self):
         self.assertEqual(self.judge(level="event_file"), ["scorer-combination"])
         self.assertEqual(self.judge(level="event_file", hit_kind="calorimeter"), [])
         self.assertEqual(self.judge(quantity="time_first", level="moments"), ["scorer-combination"])

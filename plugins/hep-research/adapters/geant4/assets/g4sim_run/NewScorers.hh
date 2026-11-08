@@ -346,6 +346,32 @@ class ScorerSums {
     return id;
   }
 
+  // S7, photon_detected (Section 8.6): an optical photon OpBoundary detected on entering a scorer's template is one count in that volume's cell,
+  // and one row of photons.csv: event, scorer, volume, arrival time, transit time since emission, photon energy, emission point.
+  void PhotonDetected(const G4Step* step) {
+    const G4StepPoint* post = step->GetPostStepPoint();
+    const G4VTouchable* touchable = post->GetTouchable();
+    if (!touchable || !touchable->GetVolume()) return;
+    const std::string& name = touchable->GetVolume()->GetLogicalVolume()->GetName();
+    const G4Track* track = step->GetTrack();
+    for (std::size_t i = 0; i < fScorers->size(); ++i) {
+      const ScorerSpec& scorer = (*fScorers)[i];
+      if (scorer.quantity != "photon_detected" || !scorer.templates.count(name)) continue;
+      const VolumeKey volume = VolumeId(touchable, *fStrides);
+      fScoredStep = step;
+      fScoredGrid = nullptr;
+      fBinStride = 1;
+      Add(i, volume, 0, 1.);
+      fDirect[i] += 1.;
+      if (fPhotons) {
+        const G4ThreeVector vertex = track->GetVertexPosition() / mm;
+        std::fprintf(fPhotons, "%lld,%s,%lld,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g\n", fEvent, scorer.name.c_str(), volume, post->GetGlobalTime() / ns,
+                     track->GetLocalTime() / ns, step->GetPreStepPoint()->GetKineticEnergy() / eV, vertex.x(), vertex.y(), vertex.z());
+      }
+    }
+  }
+  void SetPhotons(std::FILE* photons) { fPhotons = photons; }
+
   // The SD's dispatch: everything a volume scorer does with one step.
   void VolumeStep(const G4Step* step) {
     const G4StepPoint* pre = step->GetPreStepPoint();
@@ -592,6 +618,7 @@ class ScorerSums {
   std::FILE* fCells = nullptr;
   std::FILE* fBoundary = nullptr;
   std::FILE* fCrossings = nullptr;
+  std::FILE* fPhotons = nullptr;
   std::string fControl;
   bool fMixNonIonizing = false;
   long long fEvent = 0;
