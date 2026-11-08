@@ -3,6 +3,12 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## 0.63.0 (unreleased)
+
+Minor release. g4sim phase S7 (`adapters/geant4` 0.13.0; contracts 3.25.0, `CORE_VERSION` 1.11.0). Shapes: cone, sphere_section, polycone and polyhedra (given by apothem), in the expander, the gap rule, GDML and Geant4's read-back. Field maps: g4sim-field-map/1 files read by their SHA-256, interpolated alike in `core/geometry/fieldmap.py` and `g4sim/FieldMap.hh`, and checked against Geant4's field at sample points.
+Optics: material properties and surfaces, `optical_scope` kept by KillProcess (a photon entering an out-of-scope volume, by direction across the boundary, or born in one, takes no step there; `optical_steps_outside` counts any that do), the optical photon as its own class in the conservation file. Efficiency maps with the `photon_detected` readout; a validation run needs Cerenkov off. XTR: the transition_radiation requirement, the regular-foil rules and the `g4sim_xtr` constructor; Geant4's XTR adds each TR photon without taking its energy from the parent, so the conservation file books it as a source term (`xtr_created_MeV`).
+Kits: barrel_tracker, endcap_disks, trd, cherenkov, shell_veto. Reference cases of Part B 13.4 in `reference:geometry-cases` and the profiles they cite (detector atlas, eic, ams-02); the RICH replica is labelled synthetic. Gate 3 (TR yield against sourced data) is a gap: no qualifying dataset; S7 is partially complete.
+
 ## 0.62.0 (2026-11-08)
 
 Minor release. g4sim phase S6 (`adapters/geant4` 0.12.0; contracts 3.24.0, core unchanged). `reference:geometry-cases` 0.1.0, with three cases reconstructed from cited claims and labelled "an approximate reconstruction from the cited claims, not the experiment's geometry": a CMS ECAL barrel crystal (L1), the AMS-02 TOF (L1) and the ePIC ZDC hadronic section (L2), each with a reference independent of Geant4, a tolerance registered before the run, a negative control and a detection limit. Claims added: `reference:detector-atlas` 0.2.0 (CMS ECAL), `experiment:ams-02` 2.1.0 (TOF, from NIM A 623 and NIM A 743), `experiment:eic` 0.2.0 (ZDC, from the ePIC simulation geometry 26.11.0 and public papers). `g4sim_run.py simulate --claims` runs a specification whose values cite claims. The reference profile template accepts reference cases (`cases/`, `coverage.json`) and no longer requires an evidence ledger.
