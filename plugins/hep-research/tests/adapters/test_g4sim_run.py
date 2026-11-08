@@ -434,7 +434,7 @@ class ValidationRun(unittest.TestCase):
     """check-spec of a full optical validation run (Section 10.4): RESOLUTIONSCALE equal to r, saturation attached, by-particle-type off."""
 
     MATERIALS = {"lyso": {"scintillation": {"yield_per_MeV": "27000", "resolution_scale": "1.2"}, "ionisation": {"birks_mm_per_MeV": "0.008"}}}
-    EFFECTIVE = {"optical": {"scintillation_saturation": True, "scintillation_by_particle_type": False}}
+    EFFECTIVE = {"optical": {"scintillation_saturation": True, "scintillation_by_particle_type": False, "cerenkov_active": False}}
 
     def test_a_matching_validation_run_passes(self):
         self.assertEqual(driver.physics_check.validation_findings(card(extra_constructors=["G4OpticalPhysics"]), self.MATERIALS, "lyso", self.EFFECTIVE, 1.2), [])
@@ -444,9 +444,9 @@ class ValidationRun(unittest.TestCase):
         self.assertEqual(codes(found), ["validation-resolution-scale"])
 
     def test_geant4_settings_read_back_are_judged(self):
-        effective = {"optical": {"scintillation_saturation": False, "scintillation_by_particle_type": True}}
+        effective = {"optical": {"scintillation_saturation": False, "scintillation_by_particle_type": True, "cerenkov_active": True}}
         self.assertEqual(codes(driver.physics_check.validation_findings(card(), self.MATERIALS, "lyso", effective, 1.2)),
-                         ["validation-not-optical", "validation-saturation", "validation-by-particle-type"])
+                         ["validation-not-optical", "validation-saturation", "validation-by-particle-type", "validation-cerenkov"])
 
 
 class EfficiencyMapTool(unittest.TestCase):

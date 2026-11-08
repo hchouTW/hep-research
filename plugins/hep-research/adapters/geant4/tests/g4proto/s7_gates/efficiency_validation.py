@@ -76,7 +76,8 @@ def setup(folder: Path) -> dict:
                   "scorers": [{"name": "pe", "readout": "none", "select": {"tags": ["sensor"]}, "quantity": "photon_detected"},
                               {"name": "split", "readout": "none", "select": {"tags": ["scint"]}, "quantity": "edep_visible_ly_split",
                                "segmentation": {"cartesian_xyz": {"width_mm": SEGMENTATION["width_mm"]}}, "split": "midpoint"}]}
-    card = {"schema": "g4sim-run/1", "physics": {"reference_list": "FTFP_BERT_EMZ", "cuts_mm": {"default": "0.7"}, "extra_constructors": ["G4OpticalPhysics"]},
+    card = {"schema": "g4sim-run/1", "physics": {"reference_list": "FTFP_BERT_EMZ", "cuts_mm": {"default": "0.7"}, "extra_constructors": ["G4OpticalPhysics"],
+                                                 "optical": {"cerenkov": False}},  # the map is for scintillation light (Section 10.4)
             "accounting": "separated", "run": {"events": 200, "first_event": 0, "logical_run_seed": RUN_SEED, "mode": "mt", "seeding": "per-event", "threads": 8}}
     mapping = json.loads(json.dumps(card))
     mapping["run"]["events"] = 400000

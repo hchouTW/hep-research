@@ -132,7 +132,8 @@ void WriteEffective() {
   const G4ProcessManager* electron = G4Electron::Definition()->GetProcessManager();
   if (const auto* scintillation = electron ? dynamic_cast<const G4Scintillation*>(electron->GetProcess("Scintillation")) : nullptr)
     out << ", \"optical\": {\"scintillation_saturation\": " << (scintillation->GetSaturation() ? "true" : "false")
-        << ", \"scintillation_by_particle_type\": " << (G4OpticalParameters::Instance()->GetScintByParticleType() ? "true" : "false") << "}";
+        << ", \"scintillation_by_particle_type\": " << (G4OpticalParameters::Instance()->GetScintByParticleType() ? "true" : "false")
+        << ", \"cerenkov_active\": " << (G4OpticalParameters::Instance()->GetProcessActivation("Cerenkov") ? "true" : "false") << "}";
   out << ", \"birks_mm_per_MeV\": {";
   first = true;
   for (const G4Material* material : *G4Material::GetMaterialTable()) {

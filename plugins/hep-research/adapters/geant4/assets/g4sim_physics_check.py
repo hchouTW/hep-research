@@ -300,6 +300,8 @@ def validation_findings(card: dict, materials: dict, material: str, effective: d
         findings.append({"code": "validation-saturation", "path": "effective-em.optical", "message": "G4Scintillation holds no G4EmSaturation"})
     if optical.get("scintillation_by_particle_type") is not False:
         findings.append({"code": "validation-by-particle-type", "path": "effective-em.optical", "message": "ScintillationByParticleType is not off"})
+    if optical.get("cerenkov_active") is not False:  # a map is for scintillation light only (Section 10.4): Cherenkov light would enter N_full alone
+        findings.append({"code": "validation-cerenkov", "path": "physics.optical.cerenkov", "message": "a validation run of a scintillation map runs with Cerenkov off"})
     return findings
 
 
