@@ -57,7 +57,7 @@
    "blocked_on": []
   },
   "S7": {
-   "state": "in-progress",
+   "state": "partially-complete",
    "worktree": "../hep-research-g4sim-S7",
    "branch": "g4sim/S7",
    "task_card_sha256": "32b13a703de18406b9fccb78497d216793d51228d2521d05884b7e72f1e4183c",
