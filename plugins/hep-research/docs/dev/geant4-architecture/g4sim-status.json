@@ -57,12 +57,17 @@
    "blocked_on": []
   },
   "S7": {
-   "state": "in-progress",
+   "state": "blocked",
    "worktree": "../hep-research-g4sim-S7",
    "branch": "g4sim/S7",
    "task_card_sha256": "2f8e92db9aae43cea794e7bdce3cc9da8732f9a9ddda5677fdcab0f9274a0249",
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S7.md",
-   "blocked_on": []
+   "blocked_on": [
+    "gate 1 failed as registered (escape fraction, TOST p = 0.072): the maintainer decides",
+    "gate 4 failed as registered (mean photoelectrons +0.56%, TOST p = 0.053): the maintainer decides",
+    "G5 for the S7 C++",
+    "the RICH replica of the task package (Section E12)"
+   ]
   },
   "S8": {
    "state": "not-started",

@@ -158,6 +158,8 @@ def measure(name: str, q: dict, spec: dict, case_folder: Path, work: Path, claim
         request = q["_request_override"]
     if m["kind"] == "path_x0":
         folder.mkdir(parents=True)
+        for extra in case_folder.glob("*.txt"):  # a field map beside the specification (found in the judged run: the tracker case could not run)
+            shutil.copy2(extra, folder / extra.name)
         S6.CLAIMS[:] = [claims]
         return S6.path_x0(folder, spec, request, program)
     if m["kind"] == "cherenkov_angle":
