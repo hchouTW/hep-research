@@ -1,0 +1,49 @@
+{
+ "schema": "simulation-request/1",
+ "source": {
+  "density": "analytic",
+  "particle": "geantino",
+  "energy": {
+   "mono": {
+    "energy_MeV": "1000"
+   }
+  },
+  "position": {
+   "box_uniform": {
+    "frame": "world",
+    "centre_mm": [
+     "30",
+     "30",
+     "-1500"
+    ],
+    "size_mm": [
+     "1",
+     "1",
+     "0"
+    ]
+   }
+  },
+  "direction": {
+   "fixed": {
+    "frame": "world",
+    "vector": [
+     "0",
+     "0",
+     "1"
+    ]
+   }
+  }
+ },
+ "scorers": [
+  {
+   "name": "path",
+   "readout": "none",
+   "select": {
+    "tags": [
+     "upper"
+    ]
+   },
+   "quantity": "track_length"
+  }
+ ]
+}

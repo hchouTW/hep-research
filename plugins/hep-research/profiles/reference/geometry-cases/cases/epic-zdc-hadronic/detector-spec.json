@@ -1,0 +1,225 @@
+{
+ "schema": "detector-spec/1",
+ "params": {
+  "steel_mm": "20",
+  "air_mm": "1.212",
+  "pcb_mm": "1.6",
+  "foil_mm": "0.15",
+  "scintillator_mm": "4.0",
+  "cell_mm": "48.8",
+  "plate_x_mm": "576",
+  "plate_y_mm": "588",
+  "layers": "64"
+ },
+ "materials": {
+  "Steel235": {
+   "composition": {
+    "Fe": "0.998",
+    "C": "0.002"
+   },
+   "density_g_cm3": "7.85"
+  },
+  "FR4": {
+   "base": "G4_SILICON_DIOXIDE",
+   "density_g_cm3": "1.86"
+  }
+ },
+ "templates": {
+  "plate": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "plate_x_mm",
+      "plate_y_mm",
+      "steel_mm"
+     ]
+    }
+   },
+   "material": "Steel235",
+   "tags": [
+    "absorber"
+   ]
+  },
+  "gap": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "plate_x_mm",
+      "plate_y_mm",
+      "air_mm"
+     ]
+    }
+   },
+   "material": "G4_AIR"
+  },
+  "pcb": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "plate_x_mm",
+      "plate_y_mm",
+      "pcb_mm"
+     ]
+    }
+   },
+   "material": "FR4"
+  },
+  "foil": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "plate_x_mm",
+      "plate_y_mm",
+      "foil_mm"
+     ]
+    }
+   },
+   "material": "G4_POLYSTYRENE"
+  },
+  "tiles_even": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "11 * cell_mm",
+      "12 * cell_mm",
+      "scintillator_mm"
+     ]
+    }
+   },
+   "material": "G4_POLYSTYRENE",
+   "tags": [
+    "scintillator"
+   ]
+  },
+  "tiles_odd": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "11 * cell_mm",
+      "11 * cell_mm",
+      "scintillator_mm"
+     ]
+    }
+   },
+   "material": "G4_POLYSTYRENE",
+   "tags": [
+    "scintillator"
+   ]
+  },
+  "section": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "600",
+      "610",
+      "(layers / 2) * 2 * (steel_mm + 2 * air_mm + pcb_mm + 2 * foil_mm + scintillator_mm) + steel_mm"
+     ]
+    }
+   },
+   "material": "G4_AIR",
+   "children": [
+    {
+     "placement": {
+      "stack": {
+       "axis": "z",
+       "from": "-z",
+       "repeat": 32,
+       "sequence": [
+        {
+         "template": "pair",
+         "index": "pair"
+        }
+       ]
+      }
+     }
+    },
+    {
+     "template": "plate",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "(layers / 2) * (steel_mm + 2 * air_mm + pcb_mm + 2 * foil_mm + scintillator_mm)"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "pair": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "600",
+      "610",
+      "2 * (steel_mm + 2 * air_mm + pcb_mm + 2 * foil_mm + scintillator_mm)"
+     ]
+    }
+   },
+   "material": "G4_AIR",
+   "children": [
+    {
+     "placement": {
+      "stack": {
+       "axis": "z",
+       "from": "-z",
+       "repeat": 1,
+       "sequence": [
+        "plate",
+        "gap",
+        "pcb",
+        "foil",
+        "tiles_even",
+        "foil",
+        "gap",
+        "plate",
+        "gap",
+        "pcb",
+        "foil",
+        "tiles_odd",
+        "foil",
+        "gap"
+       ]
+      }
+     }
+    }
+   ]
+  }
+ },
+ "world": {
+  "material": "G4_Galactic",
+  "size_mm": [
+   "2000",
+   "2000",
+   "4000"
+  ],
+  "children": [
+   {
+    "template": "section",
+    "placement": {
+     "single": {
+      "centre_mm": [
+       "0",
+       "0",
+       "0"
+      ]
+     }
+    }
+   }
+  ]
+ },
+ "source_of_facts": {
+  "/params/steel_mm": "claim:eic:C11",
+  "/params/air_mm": "claim:eic:C11",
+  "/params/pcb_mm": "claim:eic:C11",
+  "/params/foil_mm": "claim:eic:C11",
+  "/params/scintillator_mm": "claim:eic:C11",
+  "/params/layers": "claim:eic:C11",
+  "/params/cell_mm": "claim:eic:C13",
+  "/params/plate_x_mm": "claim:eic:C12",
+  "/params/plate_y_mm": "claim:eic:C12",
+  "/materials/Steel235/density_g_cm3": "claim:eic:C15",
+  "/materials/FR4/density_g_cm3": "claim:eic:C15"
+ }
+}

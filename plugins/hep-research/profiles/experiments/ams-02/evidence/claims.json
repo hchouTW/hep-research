@@ -5198,5 +5198,365 @@
     "numeric_quotation_allowed": false,
     "last_reviewed": "2026-10-14",
     "evidence_status": "public-fact"
+  },
+  {
+    "id": "ams02:C186",
+    "claim": "AMS-02 TOF arrangement: two orthogonal planes of TOF counters above the magnet bore (Upper TOF) and two orthogonal planes below it (Lower TOF); the four layers are numbered 0,1 (upper) and 2,3 (lower); the upper TOF is attached to the TRD support structure and the lower TOF to the Unique Support Structure (USS)",
+    "claim_types": [
+      "detector_fact"
+    ],
+    "claim_type_note": null,
+    "support_kind": "primary",
+    "source_ids": [
+      "ams02:S67",
+      "ams02:S66",
+      "ams02:S01",
+      "ams02:S65"
+    ],
+    "location": "S01 Section 1, p. 4; S905 Section 2, p. 1",
+    "scope": {
+      "text": "as-flown AMS-02 (permanent magnet), 2011 onwards",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "AMS-02 TOF geometry, reference case L1"
+    },
+    "limitations": "Layer numbering differs: 1-4 in S906, 0-3 in S905 and S907. Separation: see C910.",
+    "verification_strength": "full-text",
+    "numeric_quotation_allowed": false,
+    "last_reviewed": "2026-11-08",
+    "evidence_status": "public-fact"
+  },
+  {
+    "id": "ams02:C187",
+    "claim": "Number of scintillator paddles per TOF layer, top to bottom: 8, 8, 10, 8 (34 paddles, 144 PMTs); in each layer all but the two external paddles are rectangular (6 or 8), the two external ones are trapezoidal",
+    "claim_types": [
+      "detector_fact"
+    ],
+    "claim_type_note": null,
+    "support_kind": "primary",
+    "source_ids": [
+      "ams02:S66",
+      "ams02:S67",
+      "ams02:S64",
+      "ams02:S65",
+      "ams02:S61",
+      "ams02:S62"
+    ],
+    "location": "S904 Section 2 p. 1; S905 Section 2 p. 1; S01 Section 1.4 p. 14; S901 Section 3 p. 4; S902 abstract and Section 2",
+    "scope": {
+      "text": "as-built AMS-02 TOF (post-flight descriptions S904, S905); design papers agree",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "AMS-02 TOF geometry, reference case L1"
+    },
+    "limitations": "Settled by Tier 2 (S906 counts per layer and the counter list of Table 2; S907). The Table 2 locator is a paraphrase of the table rows, not a sentence. The 144 PMTs: S907 'The 144 photomultipliers, connected to the 34 TOF paddles'.",
+    "verification_strength": "full-text",
+    "numeric_quotation_allowed": true,
+    "last_reviewed": "2026-11-08",
+    "evidence_status": "public-fact"
+  },
+  {
+    "id": "ams02:C188",
+    "claim": "TOF paddle (scintillator) thickness: 1 cm",
+    "claim_types": [
+      "detector_fact"
+    ],
+    "claim_type_note": null,
+    "support_kind": "primary",
+    "source_ids": [
+      "ams02:S66",
+      "ams02:S67",
+      "ams02:S64",
+      "ams02:S65",
+      "ams02:S63",
+      "ams02:S62"
+    ],
+    "location": "S904 Section 2 p. 1; S905 Section 2 p. 1; S903 Section 3.2; S902 Section 2 p. 2",
+    "scope": {
+      "text": "all AMS-02 TOF paddles",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "AMS-02 TOF geometry, reference case L1"
+    },
+    "limitations": "Nominal, no tolerance in any source. S906 Table 3 lists the scintillator as '2 x 1 cm plastic' per half (2.06 g/cm2).",
+    "verification_strength": "full-text",
+    "numeric_quotation_allowed": true,
+    "last_reviewed": "2026-11-08",
+    "evidence_status": "public-fact"
+  },
+  {
+    "id": "ams02:C189",
+    "claim": "Per-counter TOF paddle lengths from S906 Table 2 (cm): layer 1: 102-107 130.5, 101/108 126.5 (trapezoidal); layer 2: 202 127.0, 203 132.2, 204 132.2, 205 132.2, 206 132.2, 207 127.0, 201/208 117.2 (trapezoidal); layer 3: 302 117.2, 303 127.0, 304 132.2, 305 132.2, 306 132.2, 307 132.2, 308 127.0, 309 117.2, 301/310 110.0 (trapezoidal); layer 4: 402-407 134.0, 401/408 130.0 (trapezoidal). Overall range 110.0-134.0 cm",
+    "claim_types": [
+      "detector_fact"
+    ],
+    "claim_type_note": null,
+    "support_kind": "primary",
+    "source_ids": [
+      "ams02:S66",
+      "ams02:S67",
+      "ams02:S64",
+      "ams02:S63",
+      "ams02:S65",
+      "ams02:S61"
+    ],
+    "location": "S904 Section 2 p. 1; S903 Section 3.2; S905 Section 2 p. 1; S901 Section 3 p. 4",
+    "scope": {
+      "text": "AMS-02 TOF paddles; range over all paddles, no per-paddle table",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "AMS-02 TOF geometry, reference case L1"
+    },
+    "limitations": "RESOLUTION of the 117-134 vs 110-135 cm conflict: S906 Table 2 gives 110.0-134.0 cm. 117-134 (S903, S904) omits the two 110.0 cm trapezoids 301 and 310; 110-135 (S905, S907) is a rounded envelope. S907's split ('internal 110-135', 'external 110 cm') disagrees with Table 2 (internal 117.2-134.0; external 110.0-130.0) and should not be used. The case should use the Table 2 per-counter values. Table 2 does not say whether 'Length' includes light guides; it is read as the scintillator length (pairs such as 202/303 assume the 2xx/3xx numbering of Figs. 11-12).",
+    "verification_strength": "full-text",
+    "numeric_quotation_allowed": true,
+    "last_reviewed": "2026-11-08",
+    "evidence_status": "public-fact"
+  },
+  {
+    "id": "ams02:C190",
+    "claim": "TOF paddle width: 12 cm for the rectangular paddles, 18 to 26 cm for the trapezoidal external paddles",
+    "claim_types": [
+      "detector_fact"
+    ],
+    "claim_type_note": null,
+    "support_kind": "primary",
+    "source_ids": [
+      "ams02:S67",
+      "ams02:S66",
+      "ams02:S65",
+      "ams02:S63",
+      "ams02:S62"
+    ],
+    "location": "S905 Section 2 p. 1; S903 Sections 3 and 3.2; S902 Section 3",
+    "scope": {
+      "text": "AMS-02 TOF paddles",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "AMS-02 TOF geometry, reference case L1"
+    },
+    "limitations": "Width settled by S907 (Tier 2); S906 supports 12 cm only indirectly (12 cm2 cross-section at 1 cm thickness). The trapezoid outline is NOT settled: see C914.",
+    "verification_strength": "full-text",
+    "numeric_quotation_allowed": true,
+    "last_reviewed": "2026-11-08",
+    "evidence_status": "public-fact"
+  },
+  {
+    "id": "ams02:C191",
+    "claim": "Neighbouring paddles in a TOF layer overlap by 0.5 cm and are staggered by 1.5 cm in z (alternating, Fig. 11b of S906); the two layers of each plane run in x and y respectively",
+    "claim_types": [
+      "detector_fact"
+    ],
+    "claim_type_note": null,
+    "support_kind": "primary",
+    "source_ids": [
+      "ams02:S66",
+      "ams02:S67",
+      "ams02:S64",
+      "ams02:S65",
+      "ams02:S63",
+      "ams02:S62"
+    ],
+    "location": "S904 Section 2; S905 Section 2; S903 Section 3; S902 Section 2 (orthogonality of the two planes of each half is also in S01 Section 1, see C901)",
+    "scope": {
+      "text": "AMS-02 TOF planes",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "AMS-02 TOF geometry, reference case L1"
+    },
+    "limitations": "New L1 input from S906: the 1.5 cm z stagger between neighbouring paddles (shown for layer 1 in Fig. 11b; the text states it for every layer). In S906 Figs. 11-12, layer 1 (1xx) and layer 4 (4xx) paddles run along X and layers 2-3 along Y, in that paper's frame; the frame of the as-flown detector was not compared.",
+    "verification_strength": "full-text",
+    "numeric_quotation_allowed": true,
+    "last_reviewed": "2026-11-08",
+    "evidence_status": "public-fact"
+  },
+  {
+    "id": "ams02:C192",
+    "claim": "TOF scintillator material: Eljen Technology EJ-200 (polyvinyltoluene base)",
+    "claim_types": [
+      "detector_fact"
+    ],
+    "claim_type_note": null,
+    "support_kind": "primary",
+    "source_ids": [
+      "ams02:S66",
+      "ams02:S67",
+      "ams02:S64",
+      "ams02:S63",
+      "ams02:S62",
+      "ams02:S68"
+    ],
+    "location": "S904 footnote 1, p. 1; S903 Section 3.2; S902 Section 3; S909 property table",
+    "scope": {
+      "text": "AMS-02 TOF flight counters",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "AMS-02 TOF geometry, reference case L1"
+    },
+    "limitations": "Settled by Tier 2. The PVT base comes from the manufacturer (S909, C909); the papers do not name the polymer.",
+    "verification_strength": "full-text",
+    "numeric_quotation_allowed": false,
+    "last_reviewed": "2026-11-08",
+    "evidence_status": "public-fact"
+  },
+  {
+    "id": "ams02:C193",
+    "claim": "EJ-200 per manufacturer: density 1.023 g/cm3, polymer base polyvinyltoluene, 5.17e22 H atoms/cm3 and 4.69e22 C atoms/cm3, refractive index 1.58",
+    "claim_types": [
+      "general_method"
+    ],
+    "claim_type_note": null,
+    "support_kind": "general_method",
+    "source_ids": [
+      "ams02:S68"
+    ],
+    "location": "Eljen EJ-200 product page, property table (EJ-200 column)",
+    "scope": {
+      "text": "EJ-200 nominal product data",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "material constant"
+    },
+    "limitations": "Manufacturer nominal values, undated page; 0.9% lower density than PDG PVT. The atom densities give an H mass fraction of 0.0847, consistent with PDG PVT (0.085).",
+    "verification_strength": "page",
+    "numeric_quotation_allowed": true,
+    "last_reviewed": "2026-11-07",
+    "evidence_status": "public-fact"
+  },
+  {
+    "id": "ams02:C194",
+    "claim": "Vertical distance between the upper and lower TOF: 'about 120 cm' for the flown AMS-02 (S907); in the 2010 design paper for the superconducting-magnet configuration the two planes are at +-626 mm in z (125.2 cm apart) in the experiment frame (S906)",
+    "claim_types": [
+      "detector_fact"
+    ],
+    "claim_type_note": null,
+    "support_kind": "primary",
+    "source_ids": [
+      "ams02:S67",
+      "ams02:S66"
+    ],
+    "location": "S907 Section 3 p. 23; S906 Section 2(b) p. 969",
+    "scope": {
+      "text": "UTOF-LTOF separation",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "AMS-02 TOF geometry, reference case L1"
+    },
+    "limitations": "CONFLICT by configuration: 125.2 cm (S906, superconducting magnet, design) vs 'about 120 cm' (S907, permanent magnet, as flown). Neither paper says whether the planes moved when the magnet was exchanged, nor which point of a plane (centre of the two layers, mid-stagger) the distance refers to, nor the z of the individual layers. For the as-flown case use S907's ~120 cm with a declared tolerance of several cm; do not use +-626 mm for the flown detector. The earlier absence statement (search of 2026-11-07, before S906/S907 were read) is withdrawn.",
+    "verification_strength": "full-text",
+    "numeric_quotation_allowed": true,
+    "last_reviewed": "2026-11-08",
+    "evidence_status": "public-fact"
+  },
+  {
+    "id": "ams02:C195",
+    "claim": "Design-stage statements that differ from the flown AMS-02 TOF and must not be used for it: AMS-01 TOF planes had 14 BC408 counters each (1 cm thick, 0.5 mm carbon-fibre shell, 3 R5900 PMTs per side); the 2002-2004 AMS-02 TOF papers describe the superconducting-magnet configuration",
+    "claim_types": [
+      "detector_fact"
+    ],
+    "claim_type_note": null,
+    "support_kind": "primary",
+    "source_ids": [
+      "ams02:S61",
+      "ams02:S01"
+    ],
+    "location": "S901 Section 2 (AMS-01) and Section 1; S01 Section 1 p. 4",
+    "scope": {
+      "text": "AMS-01 and pre-2010 AMS-02 design",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "conflict record for the reference case"
+    },
+    "limitations": "Recorded so that AMS-01 numbers are not copied into the AMS-02 case. The AMS-02 TOF carbon-fibre cover thickness is not stated in any source read (S901 says only 'thin carbon fiber shells'). S906 also targets the superconducting configuration; its counter list and material table are hardware facts, its plane z positions are not (C910). Plane area: S906 'about 1.6 m2' per layer versus S903 'about 1.2 m2' (unresolved, not needed for L1).",
+    "verification_strength": "full-text",
+    "numeric_quotation_allowed": false,
+    "last_reviewed": "2026-11-08",
+    "evidence_status": "public-fact"
+  },
+  {
+    "claim_type_note": null,
+    "evidence_status": "public-fact",
+    "last_reviewed": "2026-11-08",
+    "id": "ams02:C196",
+    "claim": "TOF material traversed at normal incidence per half (S906 Table 3, g/cm2 and % X0, UTOF / LTOF): plastic scintillator 2 x 1 cm 2.06 / 2.06, 4.7 / 4.7; counter cover 4 x 1 mm carbon 0.23 / 0.23, 0.5 / 0.5; layer support 4 x 0.7 mm carbon 0.32 / 0.32, 0.7 / 0.7; detector support aluminium honeycomb 0.71 / 0.75, 2.95 / 3.3; minimum thickness 3.40 / 3.32, 9.2 / 8.85; filling foam 15 mm Rohacell 0.32 / 0.32, 0.7 / 0.7 (about 50% of the area); counter fixtures 18 mm carbon 2.15 / 2.15, 4.7 / 4.7 (4% of the area); both halves at normal incidence 6.72 g/cm2 or 18.05% X0",
+    "claim_types": [
+      "detector_fact"
+    ],
+    "support_kind": "primary",
+    "source_ids": [
+      "ams02:S66"
+    ],
+    "location": "S906 Section 6 text and Table 3, pp. 977-978",
+    "scope": {
+      "text": "TOF material budget, normal incidence",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "AMS-02 TOF geometry, reference case L1"
+    },
+    "limitations": "Design/hand calculation by the TOF group; the method (X0 values used) is not stated. Cross-check with PDG X0 (C908, C915): scintillator 2.06/43.90 = 4.69% and the carbon rows 0.23/42.70 = 0.54%, 0.32/42.70 = 0.75% agree; UTOF honeycomb 0.71/24.01 = 2.96% agrees, but LTOF honeycomb 0.75/24.01 = 3.12% vs the printed 3.3%; fixtures 2.15/42.70 = 5.0% vs the printed 4.7% (resin not modelled). INTERNAL INCONSISTENCY: the component rows sum to 3.32 g/cm2 and 8.85% (UTOF) and 3.36 g/cm2 and 9.2% (LTOF), but the 'Minimum thickness' row prints UTOF 3.40 / 9.2 and LTOF 3.32 / 8.85, i.e. the halves appear swapped and 0.04 g/cm2 is unaccounted for; the two-half total 18.05% X0 equals the sum of the components. Use the component rows, not the per-half minimum row. Written for the superconducting configuration; the supports are TOF hardware and were space-qualified as described.",
+    "verification_strength": "full-text",
+    "numeric_quotation_allowed": true
+  },
+  {
+    "claim_type_note": null,
+    "evidence_status": "public-fact",
+    "last_reviewed": "2026-11-08",
+    "id": "ams02:C197",
+    "claim": "TOF supports and enclosures: each counter wrapped in aluminized mylar and enclosed in a rigid carbon-fibre box; light aluminized carbon-fibre covers enclose each layer; counters fixed to covers and honeycomb plate by carbon-fibre brackets, soft open-cell rubber foam between counters; UTOF honeycomb support 10 cm thick with aluminium perimeter beams, rigidly connected to the TRD support; LTOF honeycomb 5 cm thick with an octagonal aluminium structure, fixed vertically by 16 tension rods to the USS; TOF allotted 268 kg including support structure",
+    "claim_types": [
+      "detector_fact"
+    ],
+    "support_kind": "primary",
+    "source_ids": [
+      "ams02:S66"
+    ],
+    "location": "S906 Section 2(c) p. 969, Section 4.2.1 p. 972, Section 6 p. 977",
+    "scope": {
+      "text": "TOF mechanics",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "AMS-02 TOF geometry, reference case L1"
+    },
+    "limitations": "Honeycomb cell size, skins and areal densities other than Table 3 are not given; 268 kg is an allotment, not a measured mass.",
+    "verification_strength": "full-text",
+    "numeric_quotation_allowed": true
+  },
+  {
+    "claim_type_note": null,
+    "evidence_status": "public-fact",
+    "last_reviewed": "2026-11-08",
+    "id": "ams02:C198",
+    "claim": "Outline of the trapezoidal TOF paddles (which edges are parallel, cut angles, short-side width): not stated numerically in any source read; only the width range 18-26 cm (S907, S905) and the lengths of S906 Table 2; the outline is visible only in the CAD drawings of S906 Figs. 11-12, which carry no dimensions",
+    "claim_types": [
+      "detector_fact"
+    ],
+    "support_kind": "absence_search",
+    "source_ids": [
+      "ams02:S66",
+      "ams02:S67"
+    ],
+    "location": "searched S906, S907, S901-S905",
+    "scope": {
+      "text": "search result, 2026-11-08",
+      "species": [],
+      "range": null,
+      "data_period": null,
+      "analysis": "AMS-02 TOF geometry, reference case L1"
+    },
+    "limitations": "Absence in the sources read. Digitizing the CAD drawing would be an estimate, not a cited value.",
+    "verification_strength": "full-text",
+    "numeric_quotation_allowed": false
   }
 ]

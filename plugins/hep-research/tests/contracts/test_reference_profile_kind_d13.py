@@ -48,15 +48,15 @@ class ReferenceKind(unittest.TestCase):
         self.assertEqual([f for f in rep.findings if f.severity == "error"], [])
 
     def test_template(self):
-        self.assertEqual(set(TEMPLATES["reference"]["required"]),
-                         {"profile.json", "index.md", "conventions.json", "evidence", "tests"})
+        self.assertEqual(set(TEMPLATES["reference"]["required"]), {"profile.json", "index.md", "conventions.json", "tests"})
+        self.assertLessEqual({"evidence", "cases", "coverage.json"}, set(TEMPLATES["reference"]["optional"]))  # 3.24.0: a profile of reference cases holds no ledger
         with tempfile.TemporaryDirectory() as d:
             copy = Path(d) / "detector-atlas"
             shutil.copytree(ATLAS, copy)
             shutil.rmtree(copy / "evidence")
             rep = Report()
             check_profile_dir(copy, Path(d), rep, "local")
-            self.assertIn("profile.template_violation", {f.code for f in rep.findings})
+            self.assertTrue({"profile.template_violation", "profile.missing_resource"} & {f.code for f in rep.findings})  # an atlas without its ledger is still refused
 
     def test_plugin_registry_with_the_atlas(self):
         reg = load_registry()

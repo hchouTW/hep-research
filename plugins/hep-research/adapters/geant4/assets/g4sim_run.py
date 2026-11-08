@@ -317,7 +317,8 @@ def simulate(args) -> dict:
     """A run of a new specification: `separated` accounting, sources and scorers (Section 8)."""
     card = json.loads(args.run.read_text(encoding="utf-8"))
     request = json.loads(args.request.read_text(encoding="utf-8"))
-    checked = geometry.check_file(args.detector, protected=args.protected)
+    claims = json.loads(args.claims.read_text(encoding="utf-8")) if getattr(args, "claims", None) else []
+    checked = geometry.check_file(args.detector, claims, protected=args.protected)
     if checked["status"] != "ok":
         return {"status": "rejected", "findings": checked["findings"]}
     findings = check_card(card)
@@ -349,6 +350,7 @@ def main(argv=None) -> int:
     simulating = commands.add_parser("simulate")
     for name in ("detector", "request", "run", "program", "work"):
         simulating.add_argument(f"--{name}", type=Path, required=True)
+    simulating.add_argument("--claims", type=Path, help="a JSON list of the claim ids of the profiles the specification depends on, as contracts/geometry.py --claims")
     simulating.add_argument("--protected", action="store_true", help="protected mode (a project with agent_policy needs no flag)")
     args = parser.parse_args(argv)
     guard(f"adapters.geant4.g4sim_run.{args.command}", paths=[str(args.run)], flag=args.protected, capabilities=KNOWN_CAPABILITIES)

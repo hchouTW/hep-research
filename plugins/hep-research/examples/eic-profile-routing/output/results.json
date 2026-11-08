@@ -1,14 +1,14 @@
 {
- "plugin_version": "0.54.0",
+ "plugin_version": "0.62.0",
  "profile": {
   "id": "experiment:eic",
-  "version": "0.1.0"
+  "version": "0.2.0"
  },
  "project_config": {
   "experiments": [
    {
     "profile": "experiment:eic",
-    "version": "0.1.0"
+    "version": "0.2.0"
    }
   ],
   "theory": []
@@ -89,6 +89,7 @@
   "profiles/experiments/eic/profile.json",
   "profiles/experiments/synthetic-collider/profile.json",
   "profiles/reference/detector-atlas/profile.json",
+  "profiles/reference/geometry-cases/profile.json",
   "profiles/registry.json",
   "profiles/theory/cr-secondary-antiprotons/profile.json",
   "profiles/theory/cr-secondary-ratio/profile.json",

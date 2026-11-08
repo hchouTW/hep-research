@@ -229,5 +229,416 @@
   "numeric_quotation_allowed": false,
   "last_reviewed": "2026-10-04",
   "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C10",
+  "claim": "In ePIC geometry release 26.11.0 the default far-forward configuration includes two ZDC parts: a LYSO crystal electromagnetic section (ZDC_Crystal_LYSO.xml) and an iron/scintillator SiPM-on-tile hadronic section (ZDC_SiPMonTile.xml)",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S10"
+  ],
+  "location": "configurations/craterlake.yml (far_forward: default) and compact/far_forward/default.xml, tag 26.11.0",
+  "scope": {
+   "text": "ePIC: ZDC configuration of the released simulation geometry 26.11.0; design-phase, status development",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Software release, not a frozen engineering design; other ZDC variants exist in the repository; alternative configurations zdc_lyso_sipm.yml and zdc_sipm_on_tile_only.yml exist",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C11",
+  "claim": "ePIC geometry 26.11.0: the ZDC hadronic section has 64 repeated layers, each of 2 cm Steel235 absorber, 0.40 cm polystyrene scintillator (sensitive), 0.16 cm FR4 PCB, two 0.015 cm ESR-foil slices (modelled as polystyrene) and two 0.1212 cm air gaps, followed by one 2 cm steel back plate",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S10"
+  ],
+  "location": "compact/far_forward/ZDC_SiPMonTile.xml, <define> constants and <layer> slices, tag 26.11.0",
+  "scope": {
+   "text": "ePIC: ZDC hadronic-section layer stack as a design value in the released simulation geometry; status development",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Design value as encoded for simulation (file status 'development', version 1.0); ESR foil modelled as polystyrene; layer thickness 2.8324 cm and total length 183.27 cm are derived here by arithmetic, not stated in the file",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C12",
+  "claim": "ePIC geometry 26.11.0: the ZDC hadronic section envelope is 60 cm wide and 61 cm high with absorber plates 57.6 cm x 58.8 cm; its front face is 35.8 m from the interaction point along an axis rotated by the ion crossing angle, which definitions.xml sets to -0.025 rad",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S10"
+  ],
+  "location": "compact/far_forward/ZDC_SiPMonTile.xml (width, height, absorber_width, absorber_height, r_pos_front_face, rotateY_angle); compact/definitions.xml (CrossingAngle), tag 26.11.0",
+  "scope": {
+   "text": "ePIC: ZDC hadronic-section placement and transverse size as design values in the released simulation geometry",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "The 35.8 m is a radial distance along the rotated axis (z = cos(angle) r, x = sin(angle) r per the file); simulation placement, not a survey value",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C13",
+  "claim": "ePIC geometry 26.11.0: the ZDC hadronic-section readout is a staggered Cartesian grid of 48.8 mm x 48.8 mm cells, with 12 rows by 11 columns of tiles in even layers and 11 rows by 11 columns in odd layers; each layer is a separate longitudinal readout layer",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S10"
+  ],
+  "location": "compact/far_forward/ZDC_SiPMonTile.xml (<readouts>, scintillator_layout constants); src/ZeroDegreeCalorimeterSiPMonTile_geo.cpp (even/odd slice sizes and offsets), tag 26.11.0",
+  "scope": {
+   "text": "ePIC: ZDC hadronic-section readout segmentation as a design value in the released simulation geometry",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "The per-layer cell counts 132 and 121 and the total 8096 are derived here (rows x columns x 32 layers each), not stated in the file; the staggering semantics of CartesianGridXYStaggered were not read; the even/odd scintillator sheets are offset by +-tile/4 in x in the geometry plugin",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C14",
+  "claim": "ePIC geometry 26.11.0: the ZDC electromagnetic section is an array of LYSO crystals 3 cm x 3 cm in cross-section and 7 cm long over a 60 cm x 60 cm active area, in a 0.3 mm carbon-fibre frame with a 2.5 mm polyethylene photosensor socket, placed at 35.5 m + 5.9 cm + 19.2 cm along the ion-crossing-angle axis, one readout cell per crystal",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S10"
+  ],
+  "location": "compact/far_forward/ZDC_Crystal_LYSO.xml (<define>, <module>, <readouts>); src/ZDC_Crystal_geo.cpp (nx x ny loop), tag 26.11.0",
+  "scope": {
+   "text": "ePIC: ZDC electromagnetic-section crystal layout as a design value in the released simulation geometry",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "20 x 20 = 400 crystals is derived (nx = active width / cell width), not stated; the file has no status line; other public sources give different crystal sizes (eic:C24, eic:C25): the EM section is not frozen",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C15",
+  "claim": "ePIC geometry 26.11.0 defines the ZDC materials as Steel235 (7.85 g/cm3; Fe 0.998, C 0.002 by mass), Polystyrene (1.032 g/cm3, composite C19 H21, Birks constant 0.126 mm/MeV), Fr4 (1.86 g/cm3) and LYSO (7.125 g/cm3; Lu 0.71813, Y 0.03613, Si 0.06338, O 0.18046, Ce 0.00190)",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S10"
+  ],
+  "location": "compact/materials.xml, entries Steel235, Polystyrene, Fr4, LYSO, tag 26.11.0",
+  "scope": {
+   "text": "ePIC: material definitions used by the released simulation geometry; design values",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Polystyrene is written as C19 H21, not the usual (C8H8)n; reproduce as written for a like-for-like case or record the deviation; the LYSO composition is annotated 'given by the Taiwan Applied Crystals'",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact"
+ },
+ {
+  "id": "eic:C16",
+  "claim": "A 2026 collaboration-author talk describes the ePIC ZDC hadronic design as a 64-layer SiPM-on-tile iron sampling calorimeter with 1.3 mm SiPMs on 48.8 x 48.8 mm tiles, 8096 channels (121/132 per layer), alternate layers shifted by half a cell and removable layers for SiPM annealing",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "third_party_context",
+  "source_ids": [
+   "eic:S11"
+  ],
+  "location": "slide 3 'ZDC HCAL Design Overview' (PDF page 3)",
+  "scope": {
+   "text": "ePIC: ZDC hadronic-section design value stated in a Tier 3 talk; preliminary context",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Tier 3 slides, preliminary; agrees with the counts derived from eic:C13 (32 x 132 + 32 x 121 = 8096), which is corroboration of a design count, not independent physics",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "preliminary-context",
+  "quote_note": "Quote transcribed from a pypdf text extraction of the PDF; where the extraction dropped spaces between words, spaces were restored; no other change."
+ },
+ {
+  "id": "eic:C17",
+  "claim": "A 2024-2025 design paper proposes an iron-scintillator SiPM-on-tile ZDC of overall dimensions 60 x 60 x 162 cm3 with 96 x 98 x 20 mm steel blocks, 3 mm thick 25 cm2 hexagonal scintillator cells read by SiPMs, a four-layer staggered cell layout (H4), and 64 layers of 20 mm Fe and 3.0 mm scintillator in its simulation",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "third_party_context",
+  "source_ids": [
+   "eic:S06"
+  ],
+  "location": "arXiv:2406.12877v2 PDF, Section 2 (p. 2) and the Fig. 3 legend (p. 4)",
+  "scope": {
+   "text": "ePIC: a proposed ZDC hadronic design (2024-2025), predating the square-tile geometry of eic:C13; design value context",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Superseded in tile shape and thickness by the 26.11.0 geometry (square 48.8 mm, 4 mm); the overall length 162 cm differs from the 183.27 cm derived from eic:C11; sampling fraction 2.1% and all resolutions in the paper are Geant4 simulation projections",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-07",
+  "evidence_status": "preliminary-context",
+  "quote_note": "Quote transcribed from a pypdf text extraction of the PDF; where the extraction dropped spaces between words, spaces were restored; no other change."
+ },
+ {
+  "id": "eic:C18",
+  "claim": "The same design paper describes the earlier ECCE baseline ZDC as a 12-layer lead/silicon-pad section (21 cm) plus a 30-layer lead/scintillator section with a depth of 7 lambda, located at about z = 35 m and nominally covering theta < 5.5 mrad (eta > 6)",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "third_party_context",
+  "source_ids": [
+   "eic:S06"
+  ],
+  "location": "arXiv:2406.12877v2 PDF, Section 1 (p. 1)",
+  "scope": {
+   "text": "ePIC: secondary statement of the predecessor (ECCE) ZDC design; historical design value context, not the ePIC design",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Secondary attribution (the paper cites the ECCE papers, not read here); not the current ePIC design",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-07",
+  "evidence_status": "preliminary-context",
+  "quote_note": "Quote transcribed from a pypdf text extraction of the PDF; where the extraction dropped spaces between words, spaces were restored; no other change."
+ },
+ {
+  "id": "eic:C19",
+  "claim": "The EIC Yellow Report (2021) lists a far-forward ZDC concept at (x, z) = (0.96 m, 37.5 m) with dimensions 60 cm x 60 cm x 2 m and acceptance theta < 5.5 mrad (about 4.0 mrad at phi = pi)",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S02"
+  ],
+  "location": "arXiv:2103.05419v3 PDF, Table 11.44, printed p. 548 (PDF p. 566)",
+  "scope": {
+   "text": "EIC facility: Yellow Report far-forward concept (2021), predating ePIC; design value of a concept, not the ePIC design",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Concept placement for the 2021 IR layout; the ePIC 26.11.0 geometry places the ZDC at 35.5-35.8 m (eic:C12, eic:C14)",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-07",
+  "evidence_status": "public-fact",
+  "quote_note": "Quote transcribed from a pypdf text extraction of the PDF; where the extraction dropped spaces between words, spaces were restored; no other change."
+ },
+ {
+  "id": "eic:C20",
+  "claim": "The EIC Yellow Report requires a ZDC of at least 60 x 60 cm2 with electromagnetic and hadronic sections, a longitudinal size of about 10 interaction lengths and a transverse size of about 2 interaction lengths, a hadronic energy resolution better than 50%/sqrt(E) and an angular resolution of at least 3 mrad/sqrt(E)",
+  "claim_types": [
+   "detector_fact",
+   "performance_number"
+  ],
+  "claim_type_note": null,
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S02"
+  ],
+  "location": "arXiv:2103.05419v3 PDF, Sec. 11.6.5 'Summary of the current design', printed pp. 558-560; Sec. 8 summary PDF p. 413",
+  "scope": {
+   "text": "EIC facility: Yellow Report design targets for a ZDC (2021); design target, not a design value",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Requirements (design targets); 'anticipated' and '~' in the text; not ePIC-specific",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-07",
+  "evidence_status": "public-fact",
+  "quote_note": "Quote transcribed from a pypdf text extraction of the PDF; where the extraction dropped spaces between words, spaces were restored; no other change."
+ },
+ {
+  "id": "eic:C21",
+  "claim": "A 2025 irradiation paper describes its ZDC prototype as 23 active layers interleaved with 22 absorber layers of 2 cm steel, 25 square tiles per active layer in a 5 x 5 grid with odd and even layers diagonally shifted, 563 channels, about 10 percent of the final ZDC design in channel count and volume, and states that 2 cm of steel corresponds to 1.14 X0 and approximately 0.5 lambda_I",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "third_party_context",
+  "source_ids": [
+   "eic:S07"
+  ],
+  "location": "arXiv:2512.20852v4 PDF, abstract and Section 2 (pp. 1-3)",
+  "scope": {
+   "text": "ePIC: ZDC prototype geometry (test device), not the final design; design value of a prototype",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Prototype only. The 1.14 X0 agrees with PDG iron (2/1.757 = 1.138, eic:C26); the 0.5 lambda_I does not (2/16.77 = 0.119): treat the lambda_I statement as an error in the source, do not use it",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-07",
+  "evidence_status": "preliminary-context",
+  "quote_note": "Quote transcribed from a pypdf text extraction of the PDF; where the extraction dropped spaces between words, spaces were restored; no other change."
+ },
+ {
+  "id": "eic:C22",
+  "claim": "A 2026 beam-test preprint describes a 15-layer SiPM-on-tile ZDC prototype with a 5 x 5 array of 48.8 mm x 48.8 mm x 4 mm EJ-212 tiles per layer interleaved with 20 mm steel plates (1.1 X0), alternate layers shifted diagonally by half a cell, about 17 X0 long, 28.7 cm x 29.5 cm x 61.0 cm, with 370 instrumented channels (O(10%) of the full ZDC), tested in April 2025",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "third_party_context",
+  "source_ids": [
+   "eic:S08"
+  ],
+  "location": "arXiv:2603.14167v2 PDF, abstract, Sections 2.1 and 3.1 (pp. 1-4)",
+  "scope": {
+   "text": "ePIC: ZDC beam-test prototype geometry; prototype design value and test-beam context",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Prototype; confirms the 48.8 mm square tile and 4 mm scintillator used in eic:C11/eic:C13; its energy and position results are test-beam results compared with Geant4",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-07",
+  "evidence_status": "preliminary-context",
+  "quote_note": "Quote transcribed from a pypdf text extraction of the PDF; where the extraction dropped spaces between words, spaces were restored; no other change."
+ },
+ {
+  "id": "eic:C23",
+  "claim": "DIS2024 proceedings describe the ePIC ZDC as positioned before the B2 dipole, receiving neutral particles below 5 mrad through an exit window, with an electromagnetic section of 20-cm-long LYSO or PbWO4 crystals and a hadronic section similar to the ePIC forward hadron calorimeter",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "third_party_context",
+  "source_ids": [
+   "eic:S09"
+  ],
+  "location": "arXiv:2409.02811v1 PDF, section 'Zero degree calorimeter', p. 5",
+  "scope": {
+   "text": "ePIC: ZDC concept as described in 2024 proceedings; preliminary design context",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Mid-2024; the 20 cm crystal length disagrees with eic:C14 (7 cm) and eic:C24 (8 X0); the text has the typo 'PbOW4'",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-07",
+  "evidence_status": "preliminary-context",
+  "quote_note": "Quote transcribed from a pypdf text extraction of the PDF; where the extraction dropped spaces between words, spaces were restored; no other change."
+ },
+ {
+  "id": "eic:C24",
+  "claim": "A 2025 RIKEN progress report places the ePIC ZDC about 35 m from the collision point between the hadron and electron beam lines and describes its first section as crystal towers 8 X0 thick, 2 x 2 cm2 crystals in a 30 x 30 grid, with LYSO selected",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "third_party_context",
+  "source_ids": [
+   "eic:S12"
+  ],
+  "location": "RIKEN Accel. Prog. Rep. 58 (2025) p. 58 PDF, column 1 and column 2",
+  "scope": {
+   "text": "ePIC: ZDC electromagnetic-section design value from a 2025 progress report; preliminary",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Disagrees with the 26.11.0 geometry (3 x 3 cm crystals, 7 cm long, 20 x 20; eic:C14); the text says the design is 'currently underway'",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "preliminary-context",
+  "quote_note": "Quote transcribed from a pypdf text extraction of the PDF; where the extraction dropped spaces between words, spaces were restored; no other change."
+ },
+ {
+  "id": "eic:C25",
+  "claim": "ZDC design history: the first EIC ZDC design (a crystal calorimeter plus three types of sampling calorimeters) was adopted as the ePIC baseline (2023 report); a January 2024 talk shows a cost-reduction revision with a smaller EM calorimeter and the Pb-Si imaging hadronic calorimeter removed",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "third_party_context",
+  "source_ids": [
+   "eic:S13",
+   "eic:S14"
+  ],
+  "location": "RIKEN Accel. Prog. Rep. 56 (2023) p. 50 (column 1); EIC-Asia 2024 slides, slide 8",
+  "scope": {
+   "text": "ePIC: design evolution of the ZDC; preliminary context, no design value used",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Tier 3; superseded intermediate designs",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": false,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "preliminary-context"
  }
 ]
