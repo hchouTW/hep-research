@@ -360,6 +360,16 @@ def _to_mother(placement: dict, point: list) -> list:
     return [sum(float(rows[j][i]) * point[j] for j in range(3)) + float(placement["centre_mm"][i]) for i in range(3)]
 
 
+def axis_to_world(ir: dict, template: str, vector: list) -> list:
+    """A vector along a once-placed template's axes, in world components: the rotations alone, level by level (a field map's B)."""
+    placements = ir["physical"]["placements"]
+    while template != "world":
+        placement = next(item for item in placements if item["template"] == template)
+        rows = placement["rotation"] or [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+        vector, template = [sum(float(rows[j][i]) * vector[j] for j in range(3)) for i in range(3)], placement["mother"]
+    return vector
+
+
 def _to_world(ir: dict, template: str, point: list) -> list:
     """A point of a template placed once in the tree, in world coordinates (check-spec requires a field map's frame to be placed once)."""
     placements = ir["physical"]["placements"]
@@ -410,7 +420,7 @@ def stage_field_maps(checked: dict, work: Path) -> dict:
                                      ((x, y, z) for x in (-1, 1) for y in (-1, 1) for z in (-1, 1))]
         local += [[draw.uniform(-h, h) for h in half] for _ in range(FIELD_SAMPLES - len(local))]
         points = [(point, _to_world(checked["ir"], wanted["frame_template"], point)) for point in local]
-        staged[name] = (parsed, points)
+        staged[name] = (parsed, points, wanted["frame_template"], checked["ir"])
         lines += [f"{name} {x.hex()} {y.hex()} {z.hex()}" for _, (x, y, z) in points]
     if lines:
         (work / "field-samples.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
@@ -422,7 +432,9 @@ def field_sample_problems(staged: dict, work: Path) -> list:
     grid and the frame's transform together."""
     if not staged:
         return []
-    wanted = [(name, fieldmap.interpolate(parsed["grid"], parsed["values"], local)) for name, (parsed, points) in sorted(staged.items()) for local, _ in points]
+    # the grid holds components along the frame template's axes; Geant4 is handed them in world components
+    wanted = [(name, axis_to_world(ir, frame, fieldmap.interpolate(parsed["grid"], parsed["values"], local)))
+              for name, (parsed, points, frame, ir) in sorted(staged.items()) for local, _ in points]
     files = sorted(work.glob("field-samples.thread*.txt"))
     if not files:
         return ["no thread wrote the field at the sample points"]

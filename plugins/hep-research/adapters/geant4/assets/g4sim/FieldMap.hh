@@ -79,19 +79,23 @@ inline std::shared_ptr<const FieldGrid> ReadFieldGrid(const std::string& path, c
 
 class MapField : public G4MagneticField {
  public:
-  MapField(std::shared_ptr<const FieldGrid> grid, const G4AffineTransform& toLocal, double sign) : fGrid(std::move(grid)), fToLocal(toLocal), fSign(sign) {}
+  MapField(std::shared_ptr<const FieldGrid> grid, const G4AffineTransform& toLocal, double sign)
+      : fGrid(std::move(grid)), fToLocal(toLocal), fToGlobal(toLocal.Inverse()), fSign(sign) {}
 
   void GetFieldValue(const G4double point[4], G4double* field) const override {
     const G4ThreeVector local = fToLocal.TransformPoint(G4ThreeVector(point[0], point[1], point[2]));
     const double at[3] = {local.x() / mm, local.y() / mm, local.z() / mm};
     double b[3];
     fGrid->At(at, b);
-    for (int k = 0; k < 3; ++k) field[k] = fSign * b[k] * tesla;
+    // the grid holds components along the frame template's axes: turned back into the global frame (rotation only)
+    const G4ThreeVector global = fToGlobal.TransformAxis(G4ThreeVector(b[0], b[1], b[2]));
+    for (int k = 0; k < 3; ++k) field[k] = fSign * global[k] * tesla;
   }
 
  private:
   std::shared_ptr<const FieldGrid> fGrid;
   G4AffineTransform fToLocal;  // global to the frame template's local frame, composed as G4NavigationLevel does
+  G4AffineTransform fToGlobal;
   double fSign;
 };
 

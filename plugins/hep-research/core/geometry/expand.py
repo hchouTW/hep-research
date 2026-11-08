@@ -134,7 +134,8 @@ def _s7_solid(shape: str, body: dict, values: _Values, path: str, length, half) 
     sides = body["sides"]
     if isinstance(sides, bool) or not isinstance(sides, int) or sides < 3:
         raise GeometryError("solid-size", f"sides {sides!r} is not an integer of at least 3", path)
-    factor = rotation.cos_sin(divide(Decimal(180), Decimal(sides)))[0]  # G4Polyhedra's radii are apothems (GB23)
+    # G4Polyhedra's z-plane radii are apothems (GB23): it divides them by cos(phi_span / (2 sides)), which is cos(180 / sides) for a whole turn
+    factor = rotation.cos_sin(divide(Decimal(phi_span), multiply(Decimal(2), Decimal(sides))))[0]
     diameter = add(max(outer), max(outer))
     return (diameter, diameter, add(reach, reach)), {"sides": sides, **planes, "circumradius_rmin_mm": [as_text(r) for r in inner], "circumradius_rmax_mm": [as_text(r) for r in outer],
                                                      "apothem_rmin_mm": [as_text(multiply(r, factor)) for r in inner], "apothem_rmax_mm": [as_text(multiply(r, factor)) for r in outer], "phi_start_deg": phi_start, "phi_span_deg": phi_span}
@@ -566,6 +567,23 @@ def _map_field(name: str, field: dict, nodes: dict, tree: dict, order: list, tem
     return {"map": {"sha256": field["map"]["sha256"], "frame_template": owner, **grid}}
 
 
+def _literal_numbers(node, path: str) -> None:
+    """A material's numbers are literals: the IR keeps them as written and the program reads them as numbers, so an expression such as
+    "1540 / 1000" would be read as 1540 (found in S7); params belong to geometry, not to materials."""
+    if isinstance(node, dict):
+        for key, value in node.items():
+            if key != "facts":
+                _literal_numbers(value, f"{path}/{key}")
+    elif isinstance(node, list):
+        for at, value in enumerate(node):
+            _literal_numbers(value, f"{path}/{at}")
+    elif isinstance(node, str) and path.rsplit("/", 1)[-1] not in ("base", "material", "state") and not path.endswith(("/components/material",)):
+        try:
+            Decimal(node)
+        except ArithmeticError as err:
+            raise GeometryError("material-number", f"{node!r} is not a literal number; a material takes no expression", path) from err
+
+
 def expand(spec: dict) -> dict:
     """The geometry-ir/1 document of a specification."""
     if spec.get("schema") != "detector-spec/1":
@@ -579,6 +597,7 @@ def expand(spec: dict) -> dict:
     sizes[WORLD] = values.vector(spec["world"]["size_mm"], "/world/size_mm")
     for name, material in spec.get("materials", {}).items():
         optics.check_material(name, material)
+        _literal_numbers(material, f"/materials/{name}")
     for name, node in nodes.items():
         if not node["material"].startswith(NIST_PREFIX) and node["material"] not in spec.get("materials", {}):
             raise GeometryError("material-unknown", f"{node['material']!r} is neither a NIST name nor declared", f"/templates/{name}")

@@ -58,6 +58,11 @@ class CheckSpec(unittest.TestCase):
         self.assertEqual(codes(driver.check_card(document)), ["optical-ui-command"])
         self.assertEqual(codes(driver.check_card(card(optical={"rayleigh": False}))), ["optical-without-constructor"])
 
+    def test_killing_optical_photons_on_the_stack_is_refused(self):
+        document = card(extra_constructors=["G4OpticalPhysics"])
+        document["kill_policy"] = {"kill_secondaries": ["opticalphoton"]}
+        self.assertIn("optical-stacking-kill", codes(driver.physics_check.optical_findings(document, [{"need": "optical_scope", "templates": ["a"]}])))
+
     def test_a_new_mode_run_needs_optical_scope_and_knows_one_constructor(self):
         optical = card(extra_constructors=["G4OpticalPhysics"])
         scope = [{"need": "optical_scope", "templates": ["a"]}]
@@ -257,7 +262,7 @@ class SolidComparison(unittest.TestCase):
     PCONE = {"shape": "polycone", "solid": {"z_mm": ["-1e1", "0", "1e1"], "rmin_mm": ["0", "1e0", "0"], "rmax_mm": ["5e0", "8e0", "5e0"],
                                             "phi_start_deg": "0", "phi_span_deg": "3.6e2"}}
     PHEDRA = {"shape": "polyhedra", "solid": {"sides": 6, "z_mm": ["-1e1", "1e1"], "circumradius_rmin_mm": ["2e0", "2e0"],
-                                              "circumradius_rmax_mm": ["1e1", "1.2e1"]}}
+                                              "circumradius_rmax_mm": ["1e1", "1.2e1"], "phi_start_deg": "0", "phi_span_deg": "3.6e2"}}
 
     @staticmethod
     def cone_back(**change):
@@ -292,12 +297,22 @@ class SolidComparison(unittest.TestCase):
         self.assertEqual(len(driver.solid_problems({"name": "p"}, self.PCONE, None, held)), 1)
 
     def test_a_polyhedra_given_its_circumradii_as_apothems_is_caught(self):
-        right = {"sides": 6, "corners_r_mm": [value.hex() for value in (2.0, 2.0, 10.0, 12.0)]}
+        right = {"sides": 6, "start_phi_rad": (0.0).hex(), "corners_r_mm": [value.hex() for value in (2.0, 2.0, 10.0, 12.0)]}
         stretch = 1 / math.cos(math.pi / 6)  # G4Polyhedra given R as its rOuter puts its corners at R / cos(pi / 6)
-        wrong = {"sides": 6, "corners_r_mm": [(value * stretch).hex() for value in (2.0, 2.0, 10.0, 12.0)]}
+        wrong = {"sides": 6, "start_phi_rad": (0.0).hex(), "corners_r_mm": [(value * stretch).hex() for value in (2.0, 2.0, 10.0, 12.0)]}
         self.assertEqual(driver.solid_problems({"name": "h"}, self.PHEDRA, right), [])
         self.assertEqual(len(driver.solid_problems({"name": "h"}, self.PHEDRA, wrong)), 1)
         self.assertEqual(len(driver.solid_problems({"name": "h"}, self.PHEDRA, {**right, "sides": 8})), 1)
+        self.assertEqual(driver.solid_problems({"name": "h"}, self.PHEDRA, {**right, "start_phi_rad": (0.1).hex()}), ["logical h: start_phi_rad differs"])
+
+    def test_a_partial_polyhedra_divides_by_cos_of_its_own_section(self):
+        sys.path.insert(0, str(ROOT / "tests/core"))
+        from core.geometry import expand
+        spec = {"schema": "detector-spec/1", "params": {}, "templates": {"h": {"solid": {"polyhedra": {"sides": 4, "z_mm": ["-1", "1"], "rmin_mm": ["0", "0"], "rmax_mm": ["10", "10"],
+                "phi_start_deg": "0", "phi_span_deg": "180"}}, "material": "G4_Si"}},
+                "world": {"material": "G4_AIR", "size_mm": ["100", "100", "100"], "children": [{"template": "h", "placement": {"single": {"centre_mm": ["0", "0", "0"]}}}]}}
+        apothem = float(expand.expand(spec)["physical"]["templates"]["h"]["solid"]["apothem_rmax_mm"][0])
+        self.assertAlmostEqual(apothem, 10 * math.cos(math.radians(180 / 8)), places=12)  # G4Polyhedra divides by cos(span / 2n), not cos(180 / n)
 
 
 class Dispatch(unittest.TestCase):
@@ -357,19 +372,22 @@ class FieldMapReadBack(unittest.TestCase):
         self.work.mkdir()
         self.staged = driver.simulate_new.stage_field_maps(self.checked, self.work)
 
-    def answer(self, flip=1.0, thread="0"):
-        """What a correct build writes: the field of the map at each global point, in the order of field-samples.txt."""
+    def answer(self, flip=1.0, thread="0", local_components=False):
+        """What a correct build writes: the field of the map at each global point, in world components, in the order of field-samples.txt."""
         rows = []
-        for name, (parsed, points) in self.staged.items():
+        for name, (parsed, points, frame, ir) in self.staged.items():
             for local, _ in points:
-                rows.append(" ".join([name, *[(flip * value).hex() for value in driver.simulate_new.fieldmap.interpolate(parsed["grid"], parsed["values"], local)]]))
+                field = driver.simulate_new.fieldmap.interpolate(parsed["grid"], parsed["values"], local)
+                if not local_components:
+                    field = driver.simulate_new.axis_to_world(ir, frame, field)
+                rows.append(" ".join([name, *[(flip * value).hex() for value in field]]))
         (self.work / f"field-samples.thread{thread}.txt").write_text("\n".join(rows) + "\n", encoding="utf-8")
 
     def test_the_map_is_copied_and_sampled_in_world_coordinates(self):
         self.assertEqual((self.work / "field-map.magnet.txt").read_bytes(), (self.folder / "m.txt").read_bytes())
         lines = (self.work / "field-samples.txt").read_text(encoding="utf-8").splitlines()
         self.assertEqual(len(lines), driver.simulate_new.FIELD_SAMPLES)
-        _, points = self.staged["magnet"]
+        _, points, _, _ = self.staged["magnet"]
         local, world = points[1]  # the bore is turned 90 degrees about z: local (x, y) lies at world (-y, x)
         self.assertEqual([round(value, 9) for value in world], [round(-local[1], 9), round(local[0], 9), round(local[2], 9)])
 
@@ -377,6 +395,10 @@ class FieldMapReadBack(unittest.TestCase):
         self.answer()
         self.answer(thread="-1")
         self.assertEqual(driver.simulate_new.field_sample_problems(self.staged, self.work), [])
+
+    def test_a_field_left_in_the_frames_axes_is_caught(self):
+        self.answer(local_components=True)  # the bore is turned 90 degrees about z: its axes are not the world's
+        self.assertEqual(len(driver.simulate_new.field_sample_problems(self.staged, self.work)), 1)
 
     def test_a_flipped_field_is_caught(self):
         self.answer(flip=-1.0)

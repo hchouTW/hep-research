@@ -3,7 +3,7 @@
 
 Usage: g4sim_run.py check-spec --run RUN.json [--detector DETECTOR.json]
        g4sim_run.py run --detector D.json --request R.json --run RUN.json --record PROBE.json --program PATH --work DIR
-       g4sim_run.py geometry-check --detector D.json --run RUN.json --program PATH --work DIR
+       g4sim_run.py geometry-check --detector D.json --run RUN.json --program PATH --work DIR [--claims CLAIMS.json]
 check-spec holds the checks of Geant4 behavior (Appendix B); S2 has three: nothing may call SetSurfaceTolerance, the run card's seeding must
 equal the legacy block's, and optical physics (S7) comes only through G4OpticalPhysics with separated accounting. run needs a re-acquisition record for the legacy block (T1 class).
 A project with agent_policy, or --protected, runs this in protected mode. Prints JSON with a status key. Exit 0 ok, 1 the run failed,
@@ -210,6 +210,9 @@ def s7_solid_problems(name: str, shape: str, solid: dict, curved: dict | None, p
     if shape == "polyhedra":
         if polyhedron is None or polyhedron["sides"] != solid["sides"]:
             return [f"logical {name}: the polyhedra was not written back with {solid['sides']} sides"]
+        start = (float.fromhex(polyhedron["start_phi_rad"]) - math.radians(float(solid["phi_start_deg"]))) / math.tau
+        if abs(start - round(start)) * math.tau > TUBE_ANGLE_TOLERANCE_RAD:
+            return [f"logical {name}: start_phi_rad differs"]
         got = sorted(float.fromhex(value) for value in polyhedron["corners_r_mm"])
         want = sorted(float(value) for value in solid["circumradius_rmin_mm"] + solid["circumradius_rmax_mm"])
         if len(got) != len(want) or any(abs(a - b) > PRISM_RADIUS_TOLERANCE_MM for a, b in zip(got, want)):
@@ -219,11 +222,17 @@ def s7_solid_problems(name: str, shape: str, solid: dict, curved: dict | None, p
     if curved is None or curved["type"] != wanted:
         return [f"logical {name}: no {wanted} was written back"]
     if shape == "cone":
-        problems = [f"logical {name}: {key} differs" for key, source in (("rmin1_mm", "rmin1_mm"), ("rmax1_mm", "rmax1_mm"), ("rmin2_mm", "rmin2_mm"), ("rmax2_mm", "rmax2_mm"), ("half_z_mm", "dz_mm")) if float.fromhex(curved[key]) != float(solid[source])]
+        # G4Cons puts 1e3 kRadTolerance (1e-6 mm) in place of one zero inner radius when the other is not zero
+        problems = [f"logical {name}: {key} differs" for key, source in (("rmin1_mm", "rmin1_mm"), ("rmax1_mm", "rmax1_mm"), ("rmin2_mm", "rmin2_mm"), ("rmax2_mm", "rmax2_mm"), ("half_z_mm", "dz_mm"))
+                    if float.fromhex(curved[key]) != float(solid[source]) and not (key.startswith("rmin") and float(solid[source]) == 0 and float.fromhex(curved[key]) <= 1e-6)]
         return problems + _angle_problems(name, curved, solid, (("start_phi_rad", "phi_start_deg"), ("delta_phi_rad", "phi_span_deg")))
     if shape == "sphere_section":
         problems = [f"logical {name}: {key} differs" for key in ("rmin_mm", "rmax_mm") if float.fromhex(curved[key]) != float(solid[key])]
         return problems + _angle_problems(name, curved, solid, (("start_phi_rad", "phi_start_deg"), ("delta_phi_rad", "phi_span_deg"), ("start_theta_rad", "theta_start_deg"), ("delta_theta_rad", "theta_span_deg")))
+    start = (float.fromhex(curved["start_phi_rad"]) - math.radians(float(solid["phi_start_deg"]))) / math.tau
+    span = float.fromhex(curved["end_phi_rad"]) - float.fromhex(curved["start_phi_rad"]) - math.radians(float(solid["phi_span_deg"]))
+    if abs(start - round(start)) * math.tau > TUBE_ANGLE_TOLERANCE_RAD or abs(span) > TUBE_ANGLE_TOLERANCE_RAD:
+        return [f"logical {name}: its phi section differs"]
     got = sorted((float.fromhex(r), float.fromhex(z)) for r, z in curved["corners"])
     want = sorted([(float(r), float(z)) for r, z in zip(solid["rmax_mm"], solid["z_mm"])] + [(float(r), float(z)) for r, z in zip(solid["rmin_mm"], solid["z_mm"])])
     if got != want:
@@ -411,7 +420,8 @@ def read_field_records(folder: Path) -> dict:
 
 def geometry_check(args) -> dict:
     card = json.loads(args.run.read_text(encoding="utf-8"))
-    checked = geometry.check_spec(args.detector.read_bytes(), folder=args.detector.parent)
+    claims = json.loads(args.claims.read_text(encoding="utf-8")) if getattr(args, "claims", None) else []  # S7: a cited specification, as simulate
+    checked = geometry.check_spec(args.detector.read_bytes(), claims, folder=args.detector.parent)
     if checked["status"] != "ok":
         return {"status": "rejected", "findings": checked["findings"]}
     findings = check_card(card)
@@ -473,6 +483,7 @@ def main(argv=None) -> int:
     shape = commands.add_parser("geometry-check")
     for name in ("detector", "run", "program", "work"):
         shape.add_argument(f"--{name}", type=Path, required=True)
+    shape.add_argument("--claims", type=Path, help="a JSON list of the claim ids of the profiles the specification depends on, as contracts/geometry.py --claims")
     shape.add_argument("--protected", action="store_true", help="protected mode (a project with agent_policy needs no flag)")
     simulating = commands.add_parser("simulate")
     for name in ("detector", "request", "run", "program", "work"):

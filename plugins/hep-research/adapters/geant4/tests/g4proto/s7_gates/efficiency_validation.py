@@ -10,7 +10,7 @@ declared. The validation run tracks every photon (photon_detected gives N_full p
 cartesian bins; the digitization of the same events' bins through the map gives N_map, so the two samples are paired. Statistics: the
 relative difference of the means and of the standard deviations, margins +-1% and +-5% (Section 19.2 defaults), alpha = 0.05; joint power
 0.9 over K = 2 tests, so 0.9^(1/2) each at a true difference of 0. The standard error adds, to a paired bootstrap over events, the variance
-between Dirichlet replicas of the map, which does not shrink with events; if that alone keeps the power below 0.9, the mapping run needs more
+between Dirichlet replicas of the map (the photon streams held fixed, so the spread is the map's own), which does not shrink with events; if that alone keeps the power below 0.9, the mapping run needs more
 photons (the margins are never relaxed). The validation conditions are checked first: physics_check.validation_findings on the run's
 effective config, efficiency_map.validation_response_findings and component_findings. Prints JSON with a status key. Exit 0 pass, 1 fail,
 2 bad input.
@@ -109,8 +109,9 @@ def read_run(folder: Path) -> tuple[dict, dict]:
     return {event: full.get(event, 0) for event in primaries}, bins
 
 
-def digitize(bins: dict, events: list, document: dict, replica: int, material: dict) -> list:
-    pipeline = {"schema": "response-pipeline/1", "run_seed": RUN_SEED, "replica": replica, "stages": []}
+def digitize(bins: dict, events: list, document: dict, map_replica: int, material: dict) -> list:
+    """N_map per event; the photon streams are the nominal ones for every map replica, so a replica's spread is the map's own error."""
+    pipeline = {"schema": "response-pipeline/1", "run_seed": RUN_SEED, "replica": 0, "stages": []}
     stage = {"name": "scintillation", "kind": "scintillation", "parameters": {
         "light_yield_per_MeV": {"value": float(material["scintillation"]["yield_per_MeV"]), "source_of_facts": "the material"},
         "resolution_scale": {"value": float(material["scintillation"]["resolution_scale"]), "source_of_facts": "the material"}}}
@@ -118,7 +119,7 @@ def digitize(bins: dict, events: list, document: dict, replica: int, material: d
     for event in events:
         total = 0
         for volume, rows in bins.get(event, {}).items():
-            channels = response.scintillation_event(pipeline, stage, event, volume, {b: tuple(v) for b, v in rows.items()}, document)
+            channels = response.scintillation_event(pipeline, stage, event, volume, {b: tuple(v) for b, v in rows.items()}, document, map_replica=map_replica)
             total += sum(channels.values())
         out.append(total)
     return out

@@ -119,7 +119,7 @@ def field_integral(folder: Path, spec: dict, measure: dict, claims: Path, progra
             "run": {"events": 1, "first_event": 0, "logical_run_seed": 20261108, "mode": "geometry-check", "seeding": "per-event", "threads": 1}}
     (folder / "run.json").write_text(json.dumps(card), encoding="utf-8")
     done = subprocess.run([sys.executable, "-B", str(DRIVER), "geometry-check", "--detector", str(folder / "spec.json"), "--run", str(folder / "run.json"), "--program", str(program),
-                           "--work", str(folder / "out")], capture_output=True, text=True, timeout=3600, check=False)
+                           "--work", str(folder / "out"), "--claims", str(claims)], capture_output=True, text=True, timeout=3600, check=False)
     report = json.loads(done.stdout.strip().splitlines()[-1])
     if report["status"] != "ok":
         raise RuntimeError(json.dumps(report)[:800])
@@ -132,8 +132,8 @@ def field_integral(folder: Path, spec: dict, measure: dict, claims: Path, progra
         point = [a + (b - a) * t for a, b in zip(start, end)]
         b = fieldmap.interpolate(parsed["grid"], parsed["values"], point)
         value = math.hypot(*b) if measure.get("component", "magnitude") == "magnitude" else b["xyz".index(measure["component"])]
-        weight = abs(t * length - length / 2) if measure.get("weight") == "distance_from_centre" else 1.0
-        total += value * weight * length / steps / 1000.0  # tesla times metres (and metres again with the distance weight)
+        weight = abs(t * length - length / 2) / 1000.0 if measure.get("weight") == "distance_from_centre" else 1.0  # metres
+        total += value * weight * length / steps / 1000.0  # tesla metres, or tesla square metres with the distance weight
     return total
 
 

@@ -14,7 +14,9 @@
 #include <string>
 
 #include "Accounting.hh"
+#include "G4OpBoundaryProcess.hh"
 #include "G4OpticalPhoton.hh"
+#include "G4GeometryTolerance.hh"
 #include "G4Step.hh"
 #include "G4VPhysicalVolume.hh"
 #include "G4Track.hh"
@@ -42,8 +44,18 @@ class KillProcess : public G4VDiscreteProcess {
   G4VParticleChange* PostStepDoIt(const G4Track& track, const G4Step& step) override {
     aParticleChange.Initialize(track);
     if (fLimits.scoped && track.GetDefinition() == G4OpticalPhoton::OpticalPhotonDefinition()) {
+      // Killed only on entering a volume outside the scope (Section 6.2.9): at a boundary step the post-step point lies in the next volume
+      // even when OpBoundary, which acts first, reflected the photon back; so the entry is OpBoundary's refraction or transmission this step,
+      // or the photon was already in such a volume.
+      const G4VPhysicalVolume* here = step.GetPreStepPoint()->GetPhysicalVolume();
       const G4VPhysicalVolume* next = step.GetPostStepPoint()->GetPhysicalVolume();
-      const bool outside = next && !fLimits.opticalScope.count(next->GetLogicalVolume()->GetName());
+      const auto outsideScope = [this](const G4VPhysicalVolume* volume) { return volume && !fLimits.opticalScope.count(volume->GetLogicalVolume()->GetName()); };
+      const G4OpBoundaryProcess* boundary = Accounting::Boundary(track.GetDefinition());
+      const bool entering = step.GetPostStepPoint()->GetStepStatus() == fGeomBoundary && boundary &&
+                            (boundary->GetStatus() == FresnelRefraction || boundary->GetStatus() == Transmission);
+      // a reflected photon's next step starts on the boundary in the next volume and returns with zero length: not an entry either
+      const bool inside_outside = outsideScope(here) && step.GetStepLength() > G4GeometryTolerance::GetInstance()->GetSurfaceTolerance();
+      const bool outside = inside_outside || (entering && outsideScope(next));
       if (!outside && !Limited(track)) return &aParticleChange;  // forced, and nothing to do
       Accounting::Thread().BookOpticalKill(track.GetKineticEnergy());
       aParticleChange.ProposeEnergy(0.);

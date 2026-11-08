@@ -639,6 +639,16 @@ class S7Shapes(unittest.TestCase):
                 self.assertTrue(any(finding["path"].endswith(key) for finding in checked["findings"]))
 
 
+class MaterialNumbers(unittest.TestCase):
+    def test_a_material_number_written_as_an_expression_is_refused(self):
+        document = spec({"a": box(["1", "1", "1"], "gas")}, [single("a")], materials={"gas": {"base": "G4_Ar", "density_g_cm3": "1540 / 1000"}})
+        with self.assertRaises(GeometryError) as caught:
+            expand.expand(document)
+        self.assertEqual(caught.exception.code, "material-number")
+        document["materials"]["gas"]["density_g_cm3"] = "1.54"
+        self.assertEqual(codes(expand.expand(document)), [])
+
+
 class CurvedNeighbours(unittest.TestCase):
     """The gap rule for S7's curved shapes: a sphere section bounded by its own section, touching flat faces legal, and a conservative
     bound that fails reported as unjudged, never as an overlap; boxes that are clear skip the exact test without changing a verdict."""

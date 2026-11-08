@@ -22,6 +22,7 @@
 #include "G4EmSaturation.hh"
 #include "G4Field.hh"
 #include "G4FieldManager.hh"
+#include "G4OpticalPhoton.hh"
 #include "G4LogicalVolume.hh"
 #include "G4LossTableManager.hh"
 #include "G4Step.hh"
@@ -376,6 +377,8 @@ class ScorerSums {
 
   // The SD's dispatch: everything a volume scorer does with one step.
   void VolumeStep(const G4Step* step) {
+    // an optical photon is its own class (Section 8.4): the deposit OpBoundary books on a detection enters no scorer
+    if (step->GetTrack()->GetDefinition() == G4OpticalPhoton::OpticalPhotonDefinition()) return;
     const G4StepPoint* pre = step->GetPreStepPoint();
     const G4VTouchable* touchable = pre->GetTouchable();
     const G4LogicalVolume* logical = touchable->GetVolume()->GetLogicalVolume();

@@ -276,6 +276,8 @@ def optical_findings(card: dict, requirements, scorers=()) -> list:
                 for name in extra if name not in BUILT_CONSTRUCTORS]
     if "G4OpticalPhysics" in extra and not any(requirement.get("need") == "optical_scope" for requirement in requirements):
         findings.append({"code": "optical-no-scope", "path": "physics.extra_constructors", "message": "optical physics needs an optical_scope requirement in the specification"})
+    if "opticalphoton" in card.get("kill_policy", {}).get("kill_secondaries", ()):  # Section 8.4: a stacking kill would book photons as killed energy
+        findings.append({"code": "optical-stacking-kill", "path": "kill_policy.kill_secondaries", "message": "optical photons are their own class; switch processes off in physics.optical instead of killing them"})
     if "G4OpticalPhysics" not in extra:
         findings += [{"code": "photon-detected-without-optics", "path": f"scorers/{at}", "message": "photon_detected counts optical photons, which need G4OpticalPhysics"}
                      for at, scorer in enumerate(scorers) if scorer.get("quantity") in PHOTON]

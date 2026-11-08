@@ -39,7 +39,7 @@ CHANGES = (
     ("Efficiency maps", "a validation run whose RESOLUTIONSCALE differs from r", CHECK, "if scale is None or float(scale) != float(resolution_scale):", "if False:", T_RUN),
     ("Optics", "a wrong refractive index read back as equal", DRIVER, "    return abs(got - value) <= OPTICAL_RELATIVE_TOLERANCE * max(abs(value), 1e-300)", "    return True", T_RUN),
     ("Shapes", "a cone parameter out of range accepted", EXPAND, "        if rmin1 >= rmax1 or rmin2 >= rmax2:", "        if False:", T_EXPAND),
-    ("Shapes", "a polyhedra given its circumradius as the apothem", EXPAND, "    factor = rotation.cos_sin(divide(Decimal(180), Decimal(sides)))[0]", "    factor = Decimal(1)", T_EXPAND),
+    ("Shapes", "a polyhedra given its circumradius as the apothem", EXPAND, "    factor = rotation.cos_sin(divide(Decimal(phi_span), multiply(Decimal(2), Decimal(sides))))[0]", "    factor = Decimal(1)", T_EXPAND),
     ("Field maps", "a field-map file with a mismatched hash accepted", CONTRACT, "        if hashlib.sha256(map_bytes).hexdigest() != record[\"sha256\"]:", "        if False:", T_FIELD),
     ("Optical physics", "optical physics with no optical-photon class accepted", DRIVER, "        if card.get(\"accounting\") != \"separated\":", "        if False:", T_RUN),
 )
@@ -95,6 +95,7 @@ def live(work: Path, program: Path) -> list:
     driver = PLUGIN / "adapters/geant4/assets/g4sim_run.py"
 
     def go(command: list, controls: dict, out: Path) -> dict:
+        shutil.rmtree(out, ignore_errors=True)  # never read a former run's files
         done = subprocess.run([sys.executable, str(driver), *command, "--program", str(program), "--work", str(out)], capture_output=True, text=True, timeout=3000,
                               check=False, env={**os.environ, **controls})
         return json.loads(done.stdout) if done.stdout.strip().startswith("{") else {"status": "error", "stderr": done.stderr[-400:]}
@@ -111,6 +112,8 @@ def live(work: Path, program: Path) -> list:
         conservation = list(csv.DictReader((out / "conservation.csv").open(encoding="utf-8"))) if (out / "conservation.csv").is_file() else []
         largest = max((abs(float(item["residual_MeV"])) for item in conservation), default=None)
         killed = sum(int(item.get("optical_killed_scope", 0)) for item in conservation)
+        if result.get("status") != "ok":
+            raise RuntimeError(f"the run '{label}' failed: {json.dumps(result)[:300]}")
         breaks = largest is not None and largest > BALANCE_TOLERANCE_MEV
         negative = "G4SIM_ACCOUNTING_CONTROL" in controls
         rows.append({"row": "Optical photons (Geant4)", "change": label, "caught": breaks if negative else None, "conservation_holds": (not breaks) if not negative else None,

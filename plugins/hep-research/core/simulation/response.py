@@ -116,8 +116,9 @@ def efficiencies(map_document: dict, bin_index: int, replica: int = 0) -> list:
     return values
 
 
-def scintillation_event(document: dict, stage: dict, event: int, volume_id: int, bins: dict, map_document: dict, factor: float = 1.0) -> dict:
-    """Photoelectrons per channel of one volume in one event. `bins` is {bin: (E^L, E^S, n^L)}; each bin has its own sub-stream, so the order of the bins does not matter."""
+def scintillation_event(document: dict, stage: dict, event: int, volume_id: int, bins: dict, map_document: dict, factor: float = 1.0, map_replica: int | None = None) -> dict:
+    """Photoelectrons per channel of one volume in one event. `bins` is {bin: (E^L, E^S, n^L)}; each bin has its own sub-stream, so the order of the bins does not matter.
+    A mapped map takes the pipeline's replica unless `map_replica` names another (S7: a test of the map alone holds the photon streams fixed)."""
     parameters = stage["parameters"]
     light_yield, scale = parameters["light_yield_per_MeV"]["value"], parameters["resolution_scale"]["value"]
     key = rng.volume_key(document["run_seed"], stage["name"], document["replica"])
@@ -125,7 +126,7 @@ def scintillation_event(document: dict, stage: dict, event: int, volume_id: int,
     for bin_index, (large, small, steps) in bins.items():
         stream = rng.SubStream(key, event, volume_id, bin_index)
         photons = bin_photons(stream, light_yield, scale, large, small, steps, factor)
-        for name, count in zip(map_document["channels"], stream.multinomial(photons, efficiencies(map_document, bin_index, document["replica"]))):
+        for name, count in zip(map_document["channels"], stream.multinomial(photons, efficiencies(map_document, bin_index, document["replica"] if map_replica is None else map_replica))):
             channels[name] += count
     return channels
 

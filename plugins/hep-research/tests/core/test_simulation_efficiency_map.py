@@ -149,6 +149,15 @@ class Digitization(unittest.TestCase):
         with self.assertRaises(response.ResponseError):
             response.efficiencies(self.map, 9)
 
+    def test_a_map_replica_can_be_drawn_with_the_photon_streams_fixed(self):
+        stage = {"name": "s", "parameters": {"light_yield_per_MeV": {"value": 500.0}, "resolution_scale": {"value": 1.0}}}
+        bins = {2: (4.0, 0.5, 30)}
+        nominal = response.scintillation_event(self.PIPELINE, stage, 3, 9, bins, self.map)
+        self.assertEqual(response.scintillation_event(self.PIPELINE, stage, 3, 9, bins, self.map, map_replica=0), nominal)
+        coupled = response.scintillation_event({**self.PIPELINE, "replica": 7}, stage, 3, 9, bins, self.map)
+        held = response.scintillation_event(self.PIPELINE, stage, 3, 9, bins, self.map, map_replica=7)
+        self.assertNotEqual(coupled, held)  # the coupled replica also changes the photon numbers
+
     def test_mapped_transit_times_replace_the_exponential(self):
         plain = response.photon_times(self.PIPELINE, "s", 1, 9, 0, 500, 10.0, 2.0)
         mapped = response.photon_times(self.PIPELINE, "s", 1, 9, 0, 500, 10.0, 2.0, map_document=self.map)
