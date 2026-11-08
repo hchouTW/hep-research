@@ -13,7 +13,8 @@ ROOT = Path(__file__).resolve().parents[2]
 VALIDATE = ROOT / "contracts" / "validate.py"
 ARTIFACTS = ROOT / "examples" / "ams-flux-ratio" / "output" / "artifacts"
 AMS_PROFILE = ROOT / "profiles" / "experiments" / "ams-02" / "profile.json"
-AMS_VERSION = json.loads((Path(__file__).resolve().parents[2] / "profiles/experiments/ams-02/profile.json").read_text(encoding="utf-8"))["version"]
+_AMS_PROFILE = Path(__file__).resolve().parents[2] / "profiles/experiments/ams-02/profile.json"
+AMS_VERSION = json.loads(_AMS_PROFILE.read_text(encoding="utf-8"))["version"] if _AMS_PROFILE.is_file() else None  # absent in the AMS-optional copy
 
 
 def run(*args):
