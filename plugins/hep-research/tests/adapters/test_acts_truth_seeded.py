@@ -23,7 +23,8 @@ The rules, quoted, with none added:
   those are fakes or take a hit from a reconstructable particle the run lost, are printed (TRUTH-SEEDED-NON-RECONSTRUCTABLE; stage 6 review m2).
 
 Development sample: all 12 strata of fixtures 7001 and 7002, block 1, 3,000 events each, as the finding module (section 3.2: block 1, any size within approved jobs). The predictions
-are in the D1 stage 6 report, fixed before the job. Tolerances below are fixed before the job and do not move after results (sheet, Stop). The built tests need the build job and skip
+are in the D1 stage 6 report, fixed before the job. Tolerances below are fixed before the job and do not move after results (sheet, Stop); the clean one, refuted by job 7512409,
+was replaced on the user's word by the replica's exact check (D1 stage 6c, tests/adapters/test_acts_truth_seeded_replica.py). The built tests need the build job and skip
 without it; that job counts a skip as a failure. Run from the plugin root: python -m unittest tests.adapters.test_acts_truth_seeded -v
 """
 from __future__ import annotations
@@ -31,6 +32,8 @@ from __future__ import annotations
 import concurrent.futures
 import hashlib
 import math
+import os
+import shutil
 import tempfile
 import time
 import unittest
@@ -67,7 +70,14 @@ PRODUCT_EVENTS = 50
 # prior, so a primary that left out its own plane-1 hit is a start surface skipped, not chance: at most 1 in 1,000 on clean.
 PLANE_ONE_HELD_SHARE = 0.999
 # Clean, per stratum: lost tracks the truth-seeded run may have, from the close pairs of o3 (event 2169, D1 stage 5e report); none at o1 and o2.
+# REFUTED, kept as a record (D1 stage 6c): its basis, that only close pairs lose clean tracks, is refuted by job 7512409, where 35 of 36 clean losses are the own branch's Gaussian
+# tail under the chi2 cut and the hole stop, which an independent linear Kalman replica reproduces particle for particle (decisions.md, "Stage 6b diagnostic: results"). The user
+# replaced it by an exact check against that replica (decisions.md, "After stage 6b: the user's choices"): tests/adapters/test_acts_truth_seeded_replica.py, which reads the clean
+# files TruthSeededRun keeps. No test reads this constant any more.
 CLEAN_LOST_LIMIT_OF_LEVEL = (0, 0, 3)
+# D1 stage 6c: with HEP_ACTS_TRACKING_EVIDENCE set, the clean data file, truth file and truth-seeded record of every stratum stay in this folder under it, for the replica's check.
+EVIDENCE_DIR = os.environ.get("HEP_ACTS_TRACKING_EVIDENCE", "")
+KEPT_FOLDER = "truth-seeded-kept"
 LOST_PRINTED_PER_STRATUM = 40
 
 
@@ -362,8 +372,9 @@ def file_sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def stratum_reading(fixture: str, stratum: int, folder: Path) -> dict:
-    """Generate one stratum, run the finder and the truth-seeded run on the same data file, score both event by event, then delete the files. Truth is read after the finder."""
+def stratum_reading(fixture: str, stratum: int, folder: Path, kept: Path = None) -> dict:
+    """Generate one stratum, run the finder and the truth-seeded run on the same data file, score both event by event, then delete the files. Truth is read after the finder. With
+    kept, a clean stratum's data file, truth file and truth-seeded record move there instead (D1 stage 6c: the replica's check reads them)."""
     started = time.monotonic()
     data_file, truth_file = finding_tests.generate(folder, fixture, stratum, finding_tests.EVENTS_PER_BIN)
     _, finder_record_file, finder_product_file = finding_tests.find(folder, data_file, f"t07-paired-find-{fixture}-{stratum}", 0)
@@ -424,8 +435,12 @@ def stratum_reading(fixture: str, stratum: int, folder: Path) -> dict:
     fixture_id = finding_tests.FIXTURE_IDS[fixture]
     difference, bound, percentile = paired_difference(per_event["finder"], per_event["seeded"], per_event["reconstructable"], (fixture_id, finding_tests.TUNING_BLOCK, stratum))
     summary = native_product.fit_summary(document)
+    keep = (data_file, truth_file, record_file) if kept is not None and fixture == "clean" else ()
+    for path in keep:
+        shutil.move(str(path), str(kept / path.name))
     for path in (data_file, truth_file, start_file, finder_record_file, finder_product_file, record_file, product_file):
-        path.unlink()
+        if path not in keep:
+            path.unlink()
     return {"fixture": fixture, "stratum": stratum, "level": level, "events": len(seeded["events"]), "tally": tally, "losses": losses, "lost_lines": lost_lines, "difference": difference,
             "bound": bound, "percentile": percentile, "plane_one": plane_one, "unreconstructable": unreconstructable, "finder_hash": finder["header"]["configuration_sha256"], "seeded_header": seeded["header"], "seeded_configuration": seeded["configuration"],
             "finder_configuration": finder["configuration"], "finding_reader_refused": finding_reader_refused, "summary": summary, "product_stage": document["header"]["stage"],
@@ -440,9 +455,12 @@ class TruthSeededRun(unittest.TestCase):
     def setUpClass(cls):
         cls.folder = tempfile.TemporaryDirectory()
         cls.addClassCleanup(cls.folder.cleanup)
+        kept = Path(EVIDENCE_DIR) / KEPT_FOLDER if EVIDENCE_DIR else None
+        if kept is not None:
+            kept.mkdir(parents=True, exist_ok=True)
         jobs = [(fixture, stratum) for fixture in ("noise", "clean") for stratum in (11, 8, 5, 2, 10, 7, 4, 1, 9, 6, 3, 0)]  # slowest first
         with concurrent.futures.ThreadPoolExecutor(finding_tests.WORKERS) as pool:
-            cls.readings = sorted(pool.map(lambda job: stratum_reading(job[0], job[1], Path(cls.folder.name)), jobs), key=lambda item: (item["fixture"], item["stratum"]))
+            cls.readings = sorted(pool.map(lambda job: stratum_reading(job[0], job[1], Path(cls.folder.name), kept), jobs), key=lambda item: (item["fixture"], item["stratum"]))
         first = cls.readings[0]
         print(f"TRUTH-SEEDED-CONFIGURATION configuration_sha256 {first['seeded_header']['configuration_sha256']} recipe_configuration_sha256 "
               f"{first['seeded_header']['recipe_configuration_sha256']} finder configuration_sha256 {first['finder_hash']}", flush=True)
@@ -497,12 +515,8 @@ class TruthSeededRun(unittest.TestCase):
                     held, total = item["plane_one"]
                     self.assertGreaterEqual(held, PLANE_ONE_HELD_SHARE * total)
 
-    def test_clean_losses_within_the_tolerance(self):
-        for item in self.readings:
-            if item["fixture"] == "clean":
-                seeded = item["tally"]["seeded"]
-                with self.subTest(stratum=item["stratum"]):
-                    self.assertLessEqual(seeded["reconstructable"] - seeded["with_primary"], CLEAN_LOST_LIMIT_OF_LEVEL[item["level"]])
+    # test_clean_losses_within_the_tolerance stood here until D1 stage 6c: it held CLEAN_LOST_LIMIT_OF_LEVEL, whose basis job 7512409 refuted (see the constant). Its replacement,
+    # the exact check against the replica, is tests/adapters/test_acts_truth_seeded_replica.py, CleanLossesEqualTheReplica, run by the build job after this module.
 
 
 @unittest.skipUnless(RUNNABLE, NOT_RUNNABLE)

@@ -17,6 +17,7 @@
   "assets/fixture_tools/acts_native_product.py",
   "assets/fixture_tools/check_t07_generator.py",
   "assets/fixture_tools/t07_fixture_files.py",
+  "assets/fixture_tools/t07_kalman_replica.py",
   "assets/fixture_tools/t07_truth_files.py",
   "assets/native/CMakeLists.txt",
   "assets/native/acts_tracking_driver.cpp",
@@ -63,7 +64,8 @@
   "../../tests/adapters/test_acts_refit_field.py",
   "../../tests/adapters/test_acts_tracking.py",
   "../../tests/adapters/test_acts_truth_seeded.py",
-  "../../tests/adapters/test_acts_truth_seeded_diagnosis.py"
+  "../../tests/adapters/test_acts_truth_seeded_diagnosis.py",
+  "../../tests/adapters/test_acts_truth_seeded_replica.py"
  ],
  "owner_skill": "hep-detector",
  "status_rule": "the adapter status is the lowest of its tools' statuses; development jobs have built and run the driver, and it stays proposed until such a run is recorded in VALIDATION.md with its environment and tested version; no tracking quality claim for a real detector"
