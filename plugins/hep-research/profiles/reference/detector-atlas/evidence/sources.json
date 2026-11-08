@@ -50,7 +50,7 @@
   "superseded_by": [],
   "supersession_note": null,
   "notes": null,
-  "verification_limitations": "Describes the detector of 2008 (before the 2017 pixel upgrade). Read: chapter 1 (section 1.1, general concept).",
+  "verification_limitations": "Describes the detector of 2008 (before the 2017 pixel upgrade). Read: chapter 1 (section 1.1, general concept). Also read (2026-11-08, g4sim S6 and S7 research): sections 4.1, 4.2, 4.3.1 (Table 4.1), 4.5 and 4.8 (ECAL) and 7.2 (CSC, pages 197-202).",
   "formal_status": "journal article, JINST 3 (2008) S08004"
  },
  {
@@ -77,7 +77,7 @@
   "superseded_by": [],
   "supersession_note": null,
   "notes": null,
-  "verification_limitations": "Describes the upgraded detector (Run 3) and compares with the 2009-2018 VELO. Read: sections 1, 2.1, 2.2 and 3.1 (table 1).",
+  "verification_limitations": "Describes the upgraded detector (Run 3) and compares with the 2009-2018 VELO. Read: sections 1, 2.1, 2.2 and 3.1 (table 1). Also read (2026-11-08, arXiv v2, g4sim S7 research): sections 6.1-6.4 (SciFi) and 7 (introduction), 7.1.1, 7.2-7.3 and 7.6 (RICH). Table 7 of section 6.3.3 is an estimate from thicknesses and PDG radiation lengths; figure 46 and table 9 are simulation outputs.",
   "formal_status": "journal article (the arXiv version states: Published in JINST 19 (2024) P05065)"
  },
  {
@@ -352,5 +352,133 @@
   "notes": "Identifier looked up at INSPIRE-HEP (query 'r CERN-LHCC-97-033', run 2026-11-07, 1 hit). No DOI on the record.",
   "verification_limitations": "Read: chapter 1 (sections 1.3, 1.4, 1.6.1, 1.6.2, 1.6.4, Tables 1.1 and 1.2, pages 4-16) and Table 3.1 (page 50). PDF text extraction garbles Greek letters and tables; table values were read in reading order and cross-checked against the surrounding text. Page numbers are printed page numbers. PDF sha256 96cb4c9378ee36c120eea8f5a6e5953b12be11dc641e16d6793b5634dcd4d2eb.",
   "formal_status": "technical design report, CERN-LHCC-97-033, CMS-TDR-4"
+ },
+ {
+  "id": "detector-atlas:S14",
+  "title": "Performance of the CMS Cathode Strip Chambers with Cosmic Rays",
+  "authors": "CMS Collaboration (S. Chatrchyan et al.)",
+  "year": 2010,
+  "year_text": null,
+  "dois": [
+   "10.1088/1748-0221/5/03/T03018"
+  ],
+  "url": "https://arxiv.org/pdf/0911.4992",
+  "locator_text": "https://arxiv.org/abs/0911.4992 (v2, 23 Feb 2010)",
+  "arxiv_ids": [
+   "0911.4992"
+  ],
+  "report_numbers": [
+   "CMS-CFT-09-011"
+  ],
+  "inspire_id": "838159",
+  "tier": 1,
+  "tier_range": null,
+  "tier_text": "1: collaboration paper, JINST 5 (2010) T03018",
+  "verification_level": "full-text",
+  "verification_note": "full text obtained from the arXiv PDF (v2) and converted to text; section 2 and Table 1 (page 3) read at their location; the document was not read cover to cover",
+  "verification_date": "2026-11-08",
+  "publication_date": "2010-03",
+  "data_taking_period": null,
+  "supersedes": [],
+  "superseded_by": [],
+  "supersession_note": null,
+  "notes": null,
+  "verification_limitations": "Read: section 2 and Table 1 only, in arXiv v2, not the JINST version of record. Describes the chambers as installed for the 2008 cosmic-ray run (no ME4/2).",
+  "formal_status": "journal article, JINST 5 (2010) T03018"
+ },
+ {
+  "id": "detector-atlas:S15",
+  "title": "The CMS muon project: Technical Design Report",
+  "authors": "CMS Collaboration",
+  "year": 1997,
+  "year_text": null,
+  "dois": [],
+  "url": "https://inspirehep.net/files/ed0c187f69bf816e10e69a74ef233d18",
+  "locator_text": "INSPIRE-HEP record 1614056 (https://inspirehep.net/literature/1614056), file LHCC-97-032.pdf",
+  "arxiv_ids": [],
+  "report_numbers": [
+   "CERN-LHCC-97-032",
+   "CMS-TDR-3"
+  ],
+  "inspire_id": "1614056",
+  "tier": 1,
+  "tier_range": null,
+  "tier_text": "1: the collaboration's technical design report",
+  "verification_level": "full-text",
+  "verification_note": "full text obtained from the INSPIRE-hosted PDF and converted to text; the endcap muon section and every cited passage read at its location; the document was not read cover to cover",
+  "verification_date": "2026-11-08",
+  "publication_date": "1997-12",
+  "data_taking_period": null,
+  "supersedes": [],
+  "superseded_by": [],
+  "supersession_note": "A design document: 540 chambers including ME4/2, ME1/1 gas gap 6 mm and wire tilt 25 degrees, gas Ar-CO2-CF4 30-50-20. The 2008 description (detector-atlas:S02: 468 chambers, ME1/1 gap 7 mm, tilt 29 degrees, 40-50-10) supersedes these; the chamber outer dimensions of Table 4.1.1 are not restated there.",
+  "notes": null,
+  "verification_limitations": "Read: section 4.1 text and Table 4.1.1 (pages 144-145) and section 4.5.6 (page 196). Whether the Table 4.1.1 dimensions are the as-built ones is not confirmed by a later read source.",
+  "formal_status": "technical design report, CERN-LHCC-97-032, CMS-TDR-3"
+ },
+ {
+  "id": "detector-atlas:S16",
+  "title": "The CMS Phase-1 Pixel Detector Upgrade",
+  "authors": "The Tracker Group of the CMS Collaboration (W. Adam et al.)",
+  "year": 2021,
+  "year_text": null,
+  "dois": [
+   "10.1088/1748-0221/16/02/P02027"
+  ],
+  "url": "https://arxiv.org/pdf/2012.14304",
+  "locator_text": "https://arxiv.org/abs/2012.14304 (v1, 22 Dec 2020)",
+  "arxiv_ids": [
+   "2012.14304"
+  ],
+  "report_numbers": [],
+  "inspire_id": "1838384",
+  "tier": 1,
+  "tier_range": null,
+  "tier_text": "1: the collaboration's (Tracker Group) detector paper, JINST 16 (2021) P02027",
+  "verification_level": "full-text",
+  "verification_note": "full text obtained from the arXiv PDF (v1) and converted to text; sections 2, 3, 3.1, 3.4 and 4.1 and Tables 1-3 read at their location; the document was not read cover to cover; journal metadata from INSPIRE",
+  "verification_date": "2026-11-08",
+  "publication_date": "2021-02",
+  "data_taking_period": null,
+  "supersedes": [],
+  "superseded_by": [],
+  "supersession_note": null,
+  "notes": "The material budget of section 2 and Figure 3 is from GEANT4-based simulation models: never a reference for a Geant4 comparison. The 0.8% X0 of one L2 module (section 3.4) does not state how it was obtained.",
+  "verification_limitations": "Read arXiv v1, not the JINST version of record. Per-ladder radii are given for layer 1 only (Fig. 16 is a drawing).",
+  "formal_status": "journal article, JINST 16 (2021) P02027"
+ },
+ {
+  "id": "detector-atlas:S17",
+  "title": "Performance of the LHCb RICH detector at the LHC",
+  "authors": "LHCb RICH group (M. Adinolfi et al.)",
+  "year": 2013,
+  "year_text": null,
+  "dois": [
+   "10.1140/epjc/s10052-013-2431-9"
+  ],
+  "url": "https://arxiv.org/pdf/1211.6759",
+  "locator_text": "https://arxiv.org/abs/1211.6759 (v2, 17 Sep 2013)",
+  "arxiv_ids": [
+   "1211.6759"
+  ],
+  "report_numbers": [
+   "CERN-LHCB-DP-2012-003",
+   "LHCB-DP-2012-003"
+  ],
+  "inspire_id": "1204778",
+  "tier": 1,
+  "tier_range": null,
+  "tier_text": "1: collaboration (RICH group) detector performance paper, Eur. Phys. J. C 73 (2013) 2431",
+  "verification_level": "full-text",
+  "verification_note": "full text obtained from the arXiv PDF (v2) and converted to text; sections 2.1, 4.2, 4.3 and table 1 read at their location; the document was not read cover to cover; metadata from INSPIRE",
+  "verification_date": "2026-11-08",
+  "publication_date": "2013",
+  "data_taking_period": null,
+  "supersedes": [],
+  "superseded_by": [],
+  "supersession_note": null,
+  "notes": null,
+  "verification_limitations": "Describes the Run 1 detector (HPD readout, aerogel radiator), not the Upgrade I configuration. Simulation columns of table 1 and the simulated resolutions of section 4.2 are simulation outputs.",
+  "formal_status": "journal article, Eur. Phys. J. C 73 (2013) 2431"
  }
 ]

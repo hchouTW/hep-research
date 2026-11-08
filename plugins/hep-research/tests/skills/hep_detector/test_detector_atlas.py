@@ -80,7 +80,7 @@ class Render(unittest.TestCase):
     def test_one_experiment(self):
         code, out, _ = run("render", "--experiment", "CMS")
         self.assertEqual(code, 0)
-        self.assertEqual(out["rows"], 22)
+        self.assertEqual(out["rows"], 35)  # 22 CMS claims, and 13 more from g4sim S7 (C141-C163)
 
 
 class Query(unittest.TestCase):
@@ -98,9 +98,16 @@ class Query(unittest.TestCase):
         self.assertEqual(code, 0)
         self.assertEqual((len(out["rows"]), out["total"], out["next_page"]), (20, N_CLAIMS, 1))
         self.assertLessEqual(len(json.dumps(out).encode()), 16384)
-        last_page = (N_CLAIMS - 1) // 20
-        code, last, _ = run("query", "--page", str(last_page))
-        self.assertEqual((len(last["rows"]), last["next_page"]), (N_CLAIMS - 20 * last_page, None))
+        # every claim on exactly one page, in order, when a page is shortened by the byte budget too
+        seen, page = [], 0
+        while page is not None:
+            code, out, _ = run("query", "--page", str(page))
+            self.assertEqual(code, 0)
+            self.assertLessEqual(len(out["rows"]), 20)
+            seen += [row["claim_id"] for row in out["rows"]]
+            page = out["next_page"]
+        self.assertEqual(len(seen), N_CLAIMS)
+        self.assertEqual(len(set(seen)), N_CLAIMS)
 
     def test_unknown_and_profile_link(self):
         code, out, _ = run("query", "--experiment", "no such experiment")

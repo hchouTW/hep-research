@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import math
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -41,9 +42,33 @@ class CheckSpec(unittest.TestCase):
         document["ui_commands"] = ["/geometry/setWorldMaximumExtent 1000"]
         self.assertEqual(codes(driver.check_card(document)), ["surface-tolerance"])
 
-    def test_an_optical_constructor_is_refused_before_s7(self):
-        self.assertEqual(codes(driver.check_card(card(extra_constructors=["G4OpticalPhysics"]))), ["optical-before-s7"])
+    def test_optical_physics_needs_the_optical_photon_class(self):
+        # S7 lifts S2's rejection: G4OpticalPhysics with separated accounting, which holds the optical-photon class (Section 8.4)
+        separated = card(extra_constructors=["G4OpticalPhysics"])
+        separated["accounting"] = "separated"
+        self.assertEqual(driver.check_card(separated), [])
+        self.assertEqual(codes(driver.check_card(card(extra_constructors=["G4OpticalPhysics"]))), ["optical-class-missing"])
+        self.assertEqual(codes(driver.check_card(separated, {"seeding": "per-event"})), ["optical-legacy"])
         self.assertEqual(driver.check_card(card(extra_constructors=["G4StepLimiterPhysics"])), [])
+
+    def test_other_optical_routes_are_refused(self):
+        self.assertEqual(codes(driver.check_card(card(extra_constructors=["G4OpticalPhysicsLegacy"]))), ["optical-constructor"])
+        document = card()
+        document["ui_commands"] = ["/process/optical/cerenkov/setMaxPhotons 10"]
+        self.assertEqual(codes(driver.check_card(document)), ["optical-ui-command"])
+        self.assertEqual(codes(driver.check_card(card(optical={"rayleigh": False}))), ["optical-without-constructor"])
+
+    def test_killing_optical_photons_on_the_stack_is_refused(self):
+        document = card(extra_constructors=["G4OpticalPhysics"])
+        document["kill_policy"] = {"kill_secondaries": ["opticalphoton"]}
+        self.assertIn("optical-stacking-kill", codes(driver.physics_check.optical_findings(document, [{"need": "optical_scope", "templates": ["a"]}])))
+
+    def test_a_new_mode_run_needs_optical_scope_and_knows_one_constructor(self):
+        optical = card(extra_constructors=["G4OpticalPhysics"])
+        scope = [{"need": "optical_scope", "templates": ["a"]}]
+        self.assertEqual(driver.physics_check.optical_findings(optical, scope), [])
+        self.assertEqual(codes(driver.physics_check.optical_findings(optical, [])), ["optical-no-scope"])
+        self.assertEqual(codes(driver.physics_check.optical_findings(card(extra_constructors=["G4StepLimiterPhysics"]), [])), ["extra-constructor-unknown"])
 
     def test_seeding_must_equal_the_legacy_block(self):
         self.assertEqual(codes(driver.check_card(card(), {"seeding": "stream"})), ["seeding-differs"])
@@ -229,6 +254,79 @@ class SolidComparison(unittest.TestCase):
         self.assertEqual(driver.solid_problems(item, node, None), ["logical t: delta_phi_rad differs"])
 
 
+    # S7's shapes, read back from ProbeV2's curved_solids and polyhedra.
+    CONE = {"shape": "cone", "solid": {"rmin1_mm": "2e0", "rmax1_mm": "1e1", "rmin2_mm": "3e0", "rmax2_mm": "2e1", "dz_mm": "1.5e1",
+                                       "phi_start_deg": "1e1", "phi_span_deg": "3e2"}}
+    SHELL = {"shape": "sphere_section", "solid": {"rmin_mm": "9e1", "rmax_mm": "1e2", "phi_start_deg": "0", "phi_span_deg": "3.6e2",
+                                                  "theta_start_deg": "1e1", "theta_span_deg": "4e1"}}
+    PCONE = {"shape": "polycone", "solid": {"z_mm": ["-1e1", "0", "1e1"], "rmin_mm": ["0", "1e0", "0"], "rmax_mm": ["5e0", "8e0", "5e0"],
+                                            "phi_start_deg": "0", "phi_span_deg": "3.6e2"}}
+    PHEDRA = {"shape": "polyhedra", "solid": {"sides": 6, "z_mm": ["-1e1", "1e1"], "circumradius_rmin_mm": ["2e0", "2e0"],
+                                              "circumradius_rmax_mm": ["1e1", "1.2e1"], "phi_start_deg": "0", "phi_span_deg": "3.6e2"}}
+
+    @staticmethod
+    def cone_back(**change):
+        held = {"logical": "c", "type": "G4Cons", "rmin1_mm": (2.0).hex(), "rmax1_mm": (10.0).hex(), "rmin2_mm": (3.0).hex(),
+                "rmax2_mm": (20.0).hex(), "half_z_mm": (15.0).hex(), "start_phi_rad": math.radians(10).hex(), "delta_phi_rad": math.radians(300).hex()}
+        return {**held, **change}
+
+    def test_a_cone_read_back_as_built_passes_and_one_wrong_radius_is_caught(self):
+        self.assertEqual(driver.solid_problems({"name": "c"}, self.CONE, None, self.cone_back()), [])
+        self.assertEqual(driver.solid_problems({"name": "c"}, self.CONE, None, self.cone_back(rmax2_mm=(20.000000000000004).hex())),
+                         ["logical c: rmax2_mm differs"])
+        self.assertEqual(driver.solid_problems({"name": "c"}, self.CONE, None, self.cone_back(delta_phi_rad=math.radians(360).hex())),
+                         ["logical c: delta_phi_rad differs"])
+
+    def test_a_shape_with_no_read_back_is_an_error(self):
+        self.assertEqual(driver.solid_problems({"name": "c"}, self.CONE, None, None), ["logical c: no G4Cons was written back"])
+        self.assertEqual(driver.solid_problems({"name": "c"}, self.CONE, None, {**self.cone_back(), "type": "G4Tubs"}), ["logical c: no G4Cons was written back"])
+
+    def test_a_sphere_section_is_judged_by_its_theta_range(self):
+        held = {"logical": "s", "type": "G4Sphere", "rmin_mm": (90.0).hex(), "rmax_mm": (100.0).hex(), "start_phi_rad": (0.0).hex(),
+                "delta_phi_rad": math.tau.hex(), "start_theta_rad": math.radians(10).hex(), "delta_theta_rad": math.radians(40).hex()}
+        self.assertEqual(driver.solid_problems({"name": "s"}, self.SHELL, None, held), [])
+        held["delta_theta_rad"] = math.radians(50).hex()
+        self.assertEqual(driver.solid_problems({"name": "s"}, self.SHELL, None, held), ["logical s: delta_theta_rad differs"])
+
+    def test_a_polycone_is_judged_by_its_corners(self):
+        corners = [(0.0, 10.0), (1.0, 0.0), (0.0, -10.0), (5.0, -10.0), (8.0, 0.0), (5.0, 10.0)]  # as Geant4 wrote them back on build 20
+        held = {"logical": "p", "type": "G4Polycone", "start_phi_rad": (0.0).hex(), "end_phi_rad": math.tau.hex(),
+                "corners": [[r.hex(), z.hex()] for r, z in corners]}
+        self.assertEqual(driver.solid_problems({"name": "p"}, self.PCONE, None, held), [])
+        held["corners"][4] = [(7.0).hex(), (0.0).hex()]
+        self.assertEqual(len(driver.solid_problems({"name": "p"}, self.PCONE, None, held)), 1)
+
+    def test_a_full_turn_polycone_is_not_judged_by_its_start(self):
+        # G4Polycone puts 0 for the start of a full turn (Geant4 11.4.3), whatever start the solid names; a partial one keeps its start
+        corners = [(0.0, 10.0), (1.0, 0.0), (0.0, -10.0), (5.0, -10.0), (8.0, 0.0), (5.0, 10.0)]
+        held = {"logical": "p", "type": "G4Polycone", "start_phi_rad": (0.0).hex(), "end_phi_rad": math.tau.hex(), "corners": [[r.hex(), z.hex()] for r, z in corners]}
+        turned = {**self.PCONE, "solid": {**self.PCONE["solid"], "phi_start_deg": "30", "phi_span_deg": "360"}}
+        self.assertEqual(driver.solid_problems({"name": "p"}, turned, None, held), [])
+        partial = {**turned, "solid": {**turned["solid"], "phi_span_deg": "300"}}
+        held_partial = {**held, "end_phi_rad": math.radians(300).hex()}  # a partial turn whose start Geant4 lost is still caught
+        self.assertEqual(driver.solid_problems({"name": "p"}, partial, None, held_partial), ["logical p: its phi section differs"])
+        held_partial["start_phi_rad"], held_partial["end_phi_rad"] = math.radians(30).hex(), math.radians(330).hex()
+        self.assertEqual(driver.solid_problems({"name": "p"}, partial, None, held_partial), [])
+
+    def test_a_polyhedra_given_its_circumradii_as_apothems_is_caught(self):
+        right = {"sides": 6, "start_phi_rad": (0.0).hex(), "corners_r_mm": [value.hex() for value in (2.0, 2.0, 10.0, 12.0)]}
+        stretch = 1 / math.cos(math.pi / 6)  # G4Polyhedra given R as its rOuter puts its corners at R / cos(pi / 6)
+        wrong = {"sides": 6, "start_phi_rad": (0.0).hex(), "corners_r_mm": [(value * stretch).hex() for value in (2.0, 2.0, 10.0, 12.0)]}
+        self.assertEqual(driver.solid_problems({"name": "h"}, self.PHEDRA, right), [])
+        self.assertEqual(len(driver.solid_problems({"name": "h"}, self.PHEDRA, wrong)), 1)
+        self.assertEqual(len(driver.solid_problems({"name": "h"}, self.PHEDRA, {**right, "sides": 8})), 1)
+        self.assertEqual(driver.solid_problems({"name": "h"}, self.PHEDRA, {**right, "start_phi_rad": (0.1).hex()}), ["logical h: start_phi_rad differs"])
+
+    def test_a_partial_polyhedra_divides_by_cos_of_its_own_section(self):
+        sys.path.insert(0, str(ROOT / "tests/core"))
+        from core.geometry import expand
+        spec = {"schema": "detector-spec/1", "params": {}, "templates": {"h": {"solid": {"polyhedra": {"sides": 4, "z_mm": ["-1", "1"], "rmin_mm": ["0", "0"], "rmax_mm": ["10", "10"],
+                "phi_start_deg": "0", "phi_span_deg": "180"}}, "material": "G4_Si"}},
+                "world": {"material": "G4_AIR", "size_mm": ["100", "100", "100"], "children": [{"template": "h", "placement": {"single": {"centre_mm": ["0", "0", "0"]}}}]}}
+        apothem = float(expand.expand(spec)["physical"]["templates"]["h"]["solid"]["apothem_rmax_mm"][0])
+        self.assertAlmostEqual(apothem, 10 * math.cos(math.radians(180 / 8)), places=12)  # G4Polyhedra divides by cos(span / 2n), not cos(180 / n)
+
+
 class Dispatch(unittest.TestCase):
     """geant4_run.py by schema, and geant4_verify.py tree."""
 
@@ -268,6 +366,193 @@ class RunRecord(unittest.TestCase):
         for field in driver.TIMING_FIELDS:
             broken = {key: value for key, value in self.RECORD.items() if key != field}
             self.assertEqual(driver.record_problems(broken), [f"run record lacks {field}"])
+
+
+class FieldMapReadBack(unittest.TestCase):
+    """Section 6.2.8 (S7): the map staged by its hash, and the field each thread gave at the sample points against this side's reading."""
+
+    def setUp(self):
+        sys.path.insert(0, str(ROOT / "tests/core"))
+        from test_geometry_fieldmap import magnet_spec, map_text
+        self.folder = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.folder)
+        map_bytes = map_text().encode()
+        (self.folder / "m.txt").write_bytes(map_bytes)
+        (self.folder / "spec.json").write_text(json.dumps(magnet_spec(driver.simulate_new.hashlib.sha256(map_bytes).hexdigest())), encoding="utf-8")
+        self.checked = driver.geometry.check_file(self.folder / "spec.json")
+        self.work = self.folder / "work"
+        self.work.mkdir()
+        self.staged = driver.simulate_new.stage_field_maps(self.checked, self.work)
+
+    def answer(self, flip=1.0, thread="0", local_components=False):
+        """What a correct build writes: the field of the map at each global point, in world components, in the order of field-samples.txt."""
+        rows = []
+        for name, (parsed, points, frame, ir) in self.staged.items():
+            for local, _ in points:
+                field = driver.simulate_new.fieldmap.interpolate(parsed["grid"], parsed["values"], local)
+                if not local_components:
+                    field = driver.simulate_new.axis_to_world(ir, frame, field)
+                rows.append(" ".join([name, *[(flip * value).hex() for value in field]]))
+        (self.work / f"field-samples.thread{thread}.txt").write_text("\n".join(rows) + "\n", encoding="utf-8")
+
+    def test_the_map_is_copied_and_sampled_in_world_coordinates(self):
+        self.assertEqual((self.work / "field-map.magnet.txt").read_bytes(), (self.folder / "m.txt").read_bytes())
+        lines = (self.work / "field-samples.txt").read_text(encoding="utf-8").splitlines()
+        self.assertEqual(len(lines), driver.simulate_new.FIELD_SAMPLES)
+        _, points, _, _ = self.staged["magnet"]
+        local, world = points[1]  # the bore is turned 90 degrees about z: local (x, y) lies at world (-y, x)
+        self.assertEqual([round(value, 9) for value in world], [round(-local[1], 9), round(local[0], 9), round(local[2], 9)])
+
+    def test_a_build_that_reads_the_map_passes(self):
+        self.answer()
+        self.answer(thread="-1")
+        self.assertEqual(driver.simulate_new.field_sample_problems(self.staged, self.work), [])
+
+    def test_a_field_left_in_the_frames_axes_is_caught(self):
+        self.answer(local_components=True)  # the bore is turned 90 degrees about z: its axes are not the world's
+        self.assertEqual(len(driver.simulate_new.field_sample_problems(self.staged, self.work)), 1)
+
+    def test_a_flipped_field_is_caught(self):
+        self.answer(flip=-1.0)
+        self.assertEqual(len(driver.simulate_new.field_sample_problems(self.staged, self.work)), 1)
+
+    def test_no_answer_is_an_error_and_an_old_answer_is_removed(self):
+        self.assertEqual(driver.simulate_new.field_sample_problems(self.staged, self.work), ["no thread wrote the field at the sample points"])
+        self.answer()
+        driver.simulate_new.stage_field_maps(self.checked, self.work)
+        self.assertEqual(list(self.work.glob("field-samples.thread*.txt")), [])
+
+    def test_a_map_changed_after_check_spec_is_refused(self):
+        (self.folder / "m.txt").write_bytes((self.folder / "m.txt").read_bytes() + b"\n")
+        with self.assertRaises(ValueError):
+            driver.simulate_new.stage_field_maps(self.checked, self.work)
+
+
+class OpticalReadBack(unittest.TestCase):
+    """S7: the optical tables and surfaces Geant4 holds against the IR; a wrong refractive index is the negative test of Section 15.1."""
+
+    IR = {"physical": {"templates": {"r": {"material": "glass"}}, "materials": {"glass": {"optical": {"rindex": {"energy_eV": ["1.5", "4"], "value": ["1.5", "1.52"]}}}},
+                       "optical_surfaces": {"pc": {"skin": "r", "model": "unified", "finish": "polished", "type": "dielectric_metal",
+                                                   "efficiency": {"energy_eV": ["1.5", "4"], "value": ["0.25", "0.25"]}}}}}
+
+    @staticmethod
+    def spectrum(energies, values):
+        return {"energy_eV": [value.hex() for value in energies], "value": [value.hex() for value in values]}
+
+    def record(self, index=(1.5, 1.52), finish=0):
+        return {"optical": {"materials": {"glass": {"RINDEX": self.spectrum((1.5, 4.0), index)}},
+                            "surfaces": {"pc": {"skin": "r", "model": 1, "finish": finish, "type": 0, "sigma_alpha_rad": (0.0).hex(),
+                                                "table": {"EFFICIENCY": self.spectrum((1.5, 4.0), (0.25, 0.25))}}}}}
+
+    def test_tables_built_as_the_ir_says_pass(self):
+        self.assertEqual(driver.optical_problems(self.IR, self.record()), [])
+
+    def test_a_wrong_refractive_index_is_caught(self):
+        self.assertEqual(driver.optical_problems(self.IR, self.record(index=(1.515, 1.5352))), ["material glass: RINDEX differs"])
+
+    def test_a_wrong_finish_and_a_missing_table_are_caught(self):
+        self.assertEqual(driver.optical_problems(self.IR, self.record(finish=3)), ["surface pc: finish differs"])
+        record = self.record()
+        del record["optical"]["materials"]["glass"]
+        self.assertEqual(driver.optical_problems(self.IR, record), ["material glass: an optical table was not built"])
+
+    def test_the_expected_table_is_what_the_builder_makes(self):
+        material = {"optical": {"rindex": {"energy_eV": ["1", "2"], "value": ["1.5", "1.5"]}, "wls": {"absorption_length_mm": {"energy_eV": ["1", "2"], "value": ["1", "1"]},
+                    "emission": {"energy_eV": ["1", "2"], "value": ["1", "0"]}, "time_constant_ns": "0.5"}},
+                    "scintillation": {"yield_per_MeV": "8000", "resolution_scale": "1", "components": [{"fraction": "1", "spectrum": {"energy_eV": ["1", "2"], "value": ["1", "1"]}, "rise_ns": "0.9", "decay_ns": "2.1"}]}}
+        self.assertEqual(sorted(driver.expected_optical_table(material)), ["RESOLUTIONSCALE", "RINDEX", "SCINTILLATIONCOMPONENT1", "SCINTILLATIONRISETIME1",
+                         "SCINTILLATIONTIMECONSTANT1", "SCINTILLATIONYIELD", "SCINTILLATIONYIELD1", "WLSABSLENGTH", "WLSCOMPONENT", "WLSTIMECONSTANT"])
+
+
+class ValidationRun(unittest.TestCase):
+    """check-spec of a full optical validation run (Section 10.4): RESOLUTIONSCALE equal to r, saturation attached, by-particle-type off."""
+
+    MATERIALS = {"lyso": {"scintillation": {"yield_per_MeV": "27000", "resolution_scale": "1.2"}, "ionisation": {"birks_mm_per_MeV": "0.008"}}}
+    EFFECTIVE = {"optical": {"scintillation_saturation": True, "scintillation_by_particle_type": False, "cerenkov_active": False}}
+
+    def test_a_matching_validation_run_passes(self):
+        self.assertEqual(driver.physics_check.validation_findings(card(extra_constructors=["G4OpticalPhysics"]), self.MATERIALS, "lyso", self.EFFECTIVE, 1.2), [])
+
+    def test_a_validation_run_whose_resolutionscale_differs_from_r_is_caught(self):
+        found = driver.physics_check.validation_findings(card(extra_constructors=["G4OpticalPhysics"]), self.MATERIALS, "lyso", self.EFFECTIVE, 1.0)
+        self.assertEqual(codes(found), ["validation-resolution-scale"])
+
+    def test_geant4_settings_read_back_are_judged(self):
+        effective = {"optical": {"scintillation_saturation": False, "scintillation_by_particle_type": True, "cerenkov_active": True}}
+        self.assertEqual(codes(driver.physics_check.validation_findings(card(), self.MATERIALS, "lyso", effective, 1.2)),
+                         ["validation-not-optical", "validation-saturation", "validation-by-particle-type", "validation-cerenkov"])
+
+
+class EfficiencyMapTool(unittest.TestCase):
+    """g4sim_efficiency_map.py build on a mapping run's files."""
+
+    def test_a_map_is_built_from_the_run_files(self):
+        tool = importlib.util.spec_from_file_location("g4sim_efficiency_map", ASSETS / "g4sim_efficiency_map.py")
+        module = importlib.util.module_from_spec(tool)
+        tool.loader.exec_module(module)
+        work = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, work)
+        component = {"fraction": "1", "spectrum": {"energy_eV": ["2", "3"], "value": ["1", "1"]}, "rise_ns": "0", "decay_ns": "2"}
+        ir = {"physical": {"templates": {"world": {"shape": "box", "half_mm": ["5e2", "5e2", "5e2"], "material": "G4_AIR"},
+                                         "bar": {"shape": "box", "half_mm": ["1e1", "1e1", "5e0"], "material": "scint"}},
+                           "placements": [{"mother": "world", "template": "bar", "copy_number": 0, "centre_mm": ["1e2", "0", "0"], "rotation": None}],
+                           "materials": {"scint": {"scintillation": {"yield_per_MeV": "1", "resolution_scale": "1", "components": [component]}}}}}
+        (work / "ir.json").write_text(json.dumps(ir), encoding="utf-8")
+        (work / "summary.json").write_text(json.dumps({"request_id": "r" * 64}), encoding="utf-8")
+        draw = __import__("random").Random(3)
+        primaries, photons = [], []
+        for event in range(3000):
+            x, y, z = 100 + draw.uniform(-10, 10), draw.uniform(-10, 10), draw.uniform(-5, 5)
+            primaries.append(f"{event},3e-06,{x},{y},{z},0,0,1")
+            if draw.random() < 0.1:
+                photons.append(f"{event},pe,7,1.0,{draw.expovariate(1.0)},3,{x},{y},{z}")
+        (work / "primaries.csv").write_text("\n".join(primaries) + "\n", encoding="utf-8")
+        (work / "photons.csv").write_text("\n".join(photons) + "\n", encoding="utf-8")
+        (work / "seg.json").write_text(json.dumps({"kind": "cartesian_xyz", "width_mm": ["10", "20", "10"]}), encoding="utf-8")
+        code = module.main(["build", "--work", str(work), "--template", "bar", "--material", "scint", "--segmentation", str(work / "seg.json"), "--out", str(work / "map.json")])
+        self.assertEqual(code, 0)
+        document = json.loads((work / "map.json").read_text(encoding="utf-8"))
+        self.assertEqual(document["channels"], ["pe/7"])
+        self.assertEqual([row["emitted"] > 0 for row in document["form"]["bins"]], [True, True])
+        self.assertEqual(sum(row["emitted"] for row in document["form"]["bins"]), 3000)
+        self.assertAlmostEqual(sum(sum(row["detected"]) for row in document["form"]["bins"]) / 3000, 0.1, delta=0.02)
+
+
+class TransitionRadiators(unittest.TestCase):
+    """XTR rules 4 and 5 on the run card, with the Section 15.1 negatives: an irregular requirement paired with a regular-foil-stack class, and
+    G4StrawTubeXTRadiator, which has no foil count (addendum 11.1); and the process read back after the run."""
+
+    REQUIREMENTS = [{"need": "transition_radiation", "templates": ["radiator"], "structure": "irregular"}]
+
+    @staticmethod
+    def card_with(radiator_class, constructor=True):
+        document = card(xtr=[{"envelope": "radiator", "radiator_class": radiator_class}])
+        if constructor:
+            document["physics"]["extra_constructors"] = ["g4sim_xtr"]
+        return document
+
+    def test_a_compatible_class_passes(self):
+        self.assertEqual(driver.physics_check.radiator_findings(self.card_with("G4GammaXTRadiator"), self.REQUIREMENTS), [])
+
+    def test_an_irregular_requirement_with_a_regular_class_is_refused(self):
+        self.assertEqual(codes(driver.physics_check.radiator_findings(self.card_with("G4XTRRegularRadModel"), self.REQUIREMENTS)), ["xtr-incompatible"])
+
+    def test_the_straw_tube_class_is_refused(self):
+        self.assertEqual(codes(driver.physics_check.radiator_findings(self.card_with("G4StrawTubeXTRadiator"), self.REQUIREMENTS)), ["xtr-class-structureless"])
+
+    def test_the_constructor_and_both_sides_must_be_there(self):
+        self.assertEqual(codes(driver.physics_check.radiator_findings(self.card_with("G4GammaXTRadiator", constructor=False), self.REQUIREMENTS)), ["xtr-constructor"])
+        self.assertEqual(codes(driver.physics_check.radiator_findings(card(extra_constructors=["g4sim_xtr"]), self.REQUIREMENTS)), ["xtr-class-missing"])
+        self.assertEqual(codes(driver.physics_check.radiator_findings(self.card_with("G4GammaXTRadiator"), [])), ["xtr-requirement-missing"])
+        self.assertEqual(codes(driver.physics_check.radiator_findings(self.card_with("G4MadeUpXTRadiator"), self.REQUIREMENTS)), ["xtr-class-unknown"])
+
+    def test_the_process_is_read_back_on_the_named_particles_only(self):
+        probe = {"processes": [{"particle": "e-", "registered": ["eIoni", "xtr_radiator"]}, {"particle": "e+", "registered": ["xtr_radiator"]},
+                               {"particle": "mu-", "registered": ["muIoni"]}]}
+        radiators = [{"envelope": "radiator", "radiator_class": "G4GammaXTRadiator"}]
+        self.assertEqual(driver.simulate_new.radiator_process_problems(radiators, probe), [])
+        self.assertEqual(driver.simulate_new.radiator_process_problems([{**radiators[0], "particles": ["e-"]}], probe), ["e+: xtr_radiator, which the card does not name"])
+        self.assertEqual(driver.simulate_new.radiator_process_problems(radiators, {}), ["no process list was read back"])
 
 
 if __name__ == "__main__":

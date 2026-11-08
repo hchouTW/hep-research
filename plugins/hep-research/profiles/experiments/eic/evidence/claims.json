@@ -640,5 +640,317 @@
   "numeric_quotation_allowed": false,
   "last_reviewed": "2026-11-08",
   "evidence_status": "preliminary-context"
+ },
+ {
+  "id": "eic:C26",
+  "claim": "PDG tabulates for iron a density of 7.874 g/cm3, a radiation length of 13.84 g/cm2 (1.757 cm) and a nuclear interaction length of 132.1 g/cm2 (16.77 cm); for fused quartz (SiO2) a density of 2.200 g/cm3 and a radiation length of 27.05 g/cm2 (12.29 cm); for silicon a density of 2.329 g/cm3 and a radiation length of 21.82 g/cm2 (9.370 cm)",
+  "claim_types": [
+   "general_method"
+  ],
+  "claim_type_note": null,
+  "support_kind": "general_method",
+  "source_ids": [
+   "eic:S15"
+  ],
+  "location": "pdg.lbl.gov/2025/AtomicNuclearProperties/HTML/iron_Fe.html, silicon_dioxide_fused_quartz.html and silicon_Si.html, property tables (rows Density, Nuclear interaction length, Radiation length)",
+  "scope": {
+   "text": "ePIC geometry cases: PDG reference material data used as the independent reference against design values; general reference data, not an ePIC statement",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Tier 4 reference data owned by the skills; tabulated without uncertainties; Geant4 uses the same radiation-length formula, so agreement checks a geometry and its material definitions, not radiation-length physics",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "quote_note": "Values copied from the HTML property tables; quotation 'Radiation length 13.84 g cm-2 1.757 cm' (iron), 'Radiation length 27.05 g cm-2 12.29 cm' (fused quartz), 'Radiation length 21.82 g cm-2 9.370 cm' (silicon)."
+ },
+ {
+  "id": "eic:C27",
+  "claim": "ePIC geometry 26.11.0: the hpDIRC has 12 bar boxes, each with 10 bars across (y) and 4 bar pieces along z: '<constant name=\"DIRCBox_count\" value=\"12\" comment=\"Number of DIRC boxes. 12 - default\"/> ... <constant name=\"DIRCBar_count_y\" value=\"10\" comment=\"Number of bars per box in y direction\"/> <constant name=\"DIRCBar_count_z\" value=\"4\" comment=\"Number of bars per box in z direction\"/>'",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S10"
+  ],
+  "location": "compact/pid/dirc.xml at tag 26.11.0, <define> block (lines 44-49)",
+  "scope": {
+   "text": "ePIC: hpDIRC bar-box and bar counts as design values in the released simulation geometry; status development",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Software release, not an engineering drawing; the file documents DIRCBox_count = 1 for a single module; the four pieces per long bar are equal 1140 mm pieces in the geometry, unlike the PDR's three 1225 mm BaBar bars plus one new bar (eic:C31)",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "quote_note": "Quote copied verbatim from the raw file at the tag."
+ },
+ {
+  "id": "eic:C28",
+  "claim": "ePIC geometry 26.11.0: hpDIRC bar height 17.25 mm, width 35.0 mm, gap 0.15 mm, piece length 114.00 cm, glue 0.025 mm, radial position of the bar centre 76.5875 cm: '<constant name=\"DIRCBar_gap\" value=\"0.15 * mm\"/> <constant name=\"DIRCBar_height\" value=\"17.25 * mm\"/> <constant name=\"DIRCBar_width\" value=\"35.0 * mm\"/> <constant name=\"DIRCGlue_thickness\" value=\"0.025 * mm\"/> <constant name=\"DIRCBar_length\" value=\"114.00 * cm\"/> <constant name=\"DIRCBar_center\" value=\"76.5875 * cm\" comment=\"Radial position of center of bar\"/>'",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S10"
+  ],
+  "location": "compact/pid/dirc.xml at tag 26.11.0, <define> block, Bar section (lines 70-75)",
+  "scope": {
+   "text": "ePIC: hpDIRC bar dimensions as design values in the released simulation geometry; status development",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "The long-bar length disagrees across sources: 4 x (1140.0 + 0.025) = 4560.1 mm here, 4580 mm and 4880 mm in the PDR draft (eic:C31, eic:C30), 4600 mm in DIS2024 proceedings; use no length as an equality reference. The height agrees with the PDR mechanics (17.25 mm, eic:C31); the PDR description and the proceedings round it to 17 mm",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "quote_note": "Quote copied verbatim from the raw file at the tag."
+ },
+ {
+  "id": "eic:C29",
+  "claim": "ePIC geometry 26.11.0: the hpDIRC bars are of material QuartzOptical, SiO2 at a density of 2.2 g/cm3: '<material name=\"QuartzOptical\"> <D type=\"density\" value=\"2.2\" unit=\"g/cm3\"/> <composite n=\"1\" ref=\"Si\"/> <composite n=\"2\" ref=\"O\"/>' and dirc.xml '<bar ... material=\"QuartzOptical\"'",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S10"
+  ],
+  "location": "compact/optical_materials.xml lines 1101-1107 and compact/pid/dirc.xml <bar>, tag 26.11.0",
+  "scope": {
+   "text": "ePIC: hpDIRC radiator material definition as a design value in the released simulation geometry; status development",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "The optical tables (RINDEX__DIRCQuartz, ABSLENGTH__DIRCQuartz) are not part of this claim; the prism and the outer lens layers use the same material",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "quote_note": "Quote copied verbatim from the raw file at the tag."
+ },
+ {
+  "id": "eic:C30",
+  "claim": "The EIC PDR draft (Dec 2024) describes the hpDIRC as 12 sectors in a 12-sided polygonal barrel, each bar box with ten fused-silica radiator bars, 120 long bars in total, and gives in its description paragraph a bar length of 4880 mm, a cross-section of 17 mm x 35 mm and an inner radius of 'about 760 cm'",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S16"
+  ],
+  "location": "EIC PDR draft v1, Sec. 8.3.4.3, 'General device description', printed p. 154, and 'Bars', printed p. 155",
+  "scope": {
+   "text": "ePIC: hpDIRC layout as described in the PDR draft; design value",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "PDR DRAFT. The paragraph introduces the hpDIRC 'as implemented in a detailed and test beam-vetted Geant4 simulation', so its counts describe the simulation design input. 4880 mm conflicts with 4580 mm in the same section (eic:C31) and with the geometry (eic:C28); 'about 760 cm' is evidently a unit typo (the geometry's bar centre is at 76.6 cm)",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "quote_note": "Quote transcribed from a pypdf text extraction of the PDF; line numbers printed in the margin removed and, where the extraction dropped spaces between words, spaces restored; no other change."
+ },
+ {
+  "id": "eic:C31",
+  "claim": "The EIC PDR draft (Dec 2024) hpDIRC mechanics: each bar box contains 10 long radiator bars, 35 mm wide, 17.25 mm thick and 4580 mm long, spaced 0.15 mm apart; each long bar is made of four shorter bars bonded together, three of 1225 mm repurposed from BaBar and a fourth newly manufactured",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S16"
+  ],
+  "location": "EIC PDR draft v1, Sec. 8.3.4.3, 'Subsystem mechanics and integration', printed p. 160",
+  "scope": {
+   "text": "ePIC: hpDIRC bar mechanics as described in the PDR draft; design value",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "PDR DRAFT. Its sentence on the fourth bar ('to meet the ePIC total length requirement of 905 mm') is garbled (3 x 1225 + 905 = 4580); 4580 mm disagrees with 4880 mm (eic:C30) and with the geometry's 4560.1 mm (eic:C28)",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "quote_note": "Quote transcribed from a pypdf text extraction of the PDF; line numbers printed in the margin removed and, where the extraction dropped spaces between words, spaces restored; no other change."
+ },
+ {
+  "id": "eic:C32",
+  "claim": "ePIC geometry 26.11.0: the dRICH has 6 azimuthal sectors, a 4.0 cm aerogel radiator, a snout front outer radius of 90.0 cm, 1.0 cm radial walls, and per sector a sensor-box extrusion 50.0 cm long in z between radii 108 cm and DRICH_rmax2 + 5 cm (DRICH_rmax2 = ForwardPIDRegion_rmax = 180.0 cm), 42 degrees wide, rotated to (isec + 0.5) x 360/nSectors degrees: '<constant name=\"DRICH_num_sectors\" value=\"6\"/>', '<constant name=\"DRICH_rmax0\" value=\"90.0*cm\"/>', '<constant name=\"DRICH_wall_thickness\" value=\"1.0*cm\"/>', '<constant name=\"DRICH_sensorbox_length\" value=\"50.0*cm\"/>', '<constant name=\"DRICH_sensorbox_rmin\" value=\"108*cm\"/>', '<constant name=\"DRICH_sensorbox_rmax\" value=\"DRICH_rmax2 + 5*cm\"/>', '<constant name=\"DRICH_sensorbox_dphi\" value=\"42*degree\"/>', '<constant name=\"DRICH_aerogel_thickness\" value=\"4.0*cm\"/>', '<radiator rmin=\"DRICH_rmin0 + DRICH_wall_thickness + 0.2*cm\" rmax=\"DRICH_rmax0 - DRICH_wall_thickness - 0.2*cm\"', DRICH_geo.cpp 'RotationZ sectorRotation((isec + 0.5) * 2 * M_PI / nSectors);'",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S10"
+  ],
+  "location": "compact/pid/drich.xml <define> (lines 14-29) and <radiator>; compact/definitions.xml line 493 (ForwardPIDRegion_rmax = 180.0*cm); src/DRICH_geo.cpp lines 273-293, tag 26.11.0",
+  "scope": {
+   "text": "ePIC: dRICH sector count, radiator and sensor-box dimensions as design values in the released simulation geometry; development geometry",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Software release, not an engineering drawing; the aerogel is one azimuthally continuous cone in the geometry, the sectors are the mirror and sensor sets and their sensor-box extrusions; the bore radius (DRICH_rmin0) depends on further region constants not read here. The vessel length 120 cm disagrees with the PDR's 1.27 m",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "quote_note": "Quote copied verbatim from the raw file at the tag."
+ },
+ {
+  "id": "eic:C33",
+  "claim": "ePIC geometry 26.11.0: the dRICH aerogel material Aerogel_DRICH has a density of 0.110 g/cm3 and a tabulated refractive index of 1.026 at 3.0995 eV (400 nm with the file's 1240 eV nm convention), labelled 'n = 1.026': '<!-- dRICH aerogel, n = 1.026 -->', '3.0995*eV 1.026', '<material name=\"Aerogel_DRICH\"> <D type=\"density\" value=\"0.110\" unit=\"g/cm3\"/>'",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S10"
+  ],
+  "location": "compact/optical_materials.xml lines 754-830 (aerogel RINDEX table, value at line 809) and 1075-1083 (material definition), tag 26.11.0",
+  "scope": {
+   "text": "ePIC: dRICH aerogel refractive index and density as design values in the released simulation geometry; development geometry",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Only the 400 nm point is corroborated (eic:C34, eic:C35); the rest of the dispersion table and its upstream origin (drich-dev, cisbani/dRICh) were not verified. The composition is written as fractions (2.32-0.11)/(2.32-0.0012) of Air and the rest SiliconDioxide, which DD4hep (master, not the version of an eic-shell release) reads as mass fractions: an unconfirmed observation, not used here",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "quote_note": "Quote copied verbatim from the raw file at the tag."
+ },
+ {
+  "id": "eic:C34",
+  "claim": "The EIC PDR draft (Dec 2024) describes the dRICH as modular with 6 sectors around the beam line, states that the selected aerogel radiator has refractive index n = 1.026 at lambda = 400 nm and that the selected indices dictate a minimum thickness of 4 cm for the aerogel",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S16"
+  ],
+  "location": "EIC PDR draft v1, Sec. 8.3.4.4, 'Device concept and technological choice', printed p. 169",
+  "scope": {
+   "text": "ePIC: dRICH sector count and aerogel index as design values in the PDR draft",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "PDR DRAFT; the index is a design selection. The same passage gives the gas index n = 1.00086 at STP without a wavelength, which therefore has no comparable reference here; the PDR's 1.27 m length disagrees with the geometry's 120 cm",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "quote_note": "Quote transcribed from a pypdf text extraction of the PDF; line numbers printed in the margin removed and, where the extraction dropped spaces between words, spaces restored; no other change."
+ },
+ {
+  "id": "eic:C35",
+  "claim": "A 2026 dRICH simulation paper states that aerogel of index 1.026 is the new current default for the detector, replacing a sample of average index 1.019 originally planned, and that the radiator is planned to be 4 cm thick",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "third_party_context",
+  "source_ids": [
+   "eic:S17"
+  ],
+  "location": "arXiv:2602.12931v1, Sec. 2, p. 3",
+  "scope": {
+   "text": "ePIC: dRICH aerogel design choice as stated in a 2026 simulation paper; design value, preliminary context",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Tier 3 until the maintainers rule on subsystem bylines; corroborates that the index 1.026 is still the default after the PDR draft; its performance numbers are Geant4 projections and are not used",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "preliminary-context",
+  "quote_note": "Quote transcribed from a pypdf text extraction of the PDF; line numbers printed in the margin removed and, where the extraction dropped spaces between words, spaces restored; no other change."
+ },
+ {
+  "id": "eic:C36",
+  "claim": "ePIC geometry 26.11.0: the barrel TOF has 144 modules (staves) in phi on an rphi layout of radius BarrelTOF_scale x 64.6 cm with BarrelTOF_scale = 1.0, tilted by 18 degrees, silicon sensors 0.35 mm thick, 30.0 mm wide and 2 cm long, covering z from -112.5 cm (BarrelTOF1_zmin = 112.5 cm) to +147.5 cm (BarrelTOF2_zmax): '<constant name=\"BarrelTOF_Sensor_thickness\" value=\"0.35*mm\"/>', '<constant name=\"BarrelTOF_Sensor_width_design\" value=\"30.0*mm\"/>', '<constant name=\"BarrelTOF_scale\" value=\"1.0\"/>', '<constant name=\"BarrelTOF_Module_tiltangle\" value=\"18*degree\"/>', '<constant name=\"BarrelTOF_Module_nphi\" value=\"144\"/>', '<constant name=\"BarrelTOF_Sensor_length\" value=\"2*cm\"/>', '<rphi_layout phi_tilt=\"BarrelTOF_Module_tiltangle\" nphi=\"BarrelTOF_Module_nphi\" phi0=\"0.0\" rc=\"BarrelTOF_radius\" dr=\"0.0*mm\"/>', definitions_craterlake.xml '<constant name=\"BarrelTOF1_zmin\" value=\"112.5*cm\"/>', '<constant name=\"BarrelTOF2_zmax\" value=\"147.5*cm\"/>', '<constant name=\"BarrelTOF_radius_design\" value=\"64.6*cm\"/>'",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S10"
+  ],
+  "location": "compact/tracking/tof_barrel.xml <define> (lines 18-60) and <layer> (line 380); compact/tracking/definitions_craterlake.xml lines 45-50, tag 26.11.0",
+  "scope": {
+   "text": "ePIC: barrel TOF stave layout and sensor dimensions as design values in the released simulation geometry; tof_barrel.xml says 'Status: development, Version: 1.0'",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "Development geometry; each stave is two half staves (BarrelTOF1 and BarrelTOF2) of sensors, Kapton, carbon foam and services; the 0.35 mm silicon is not the active thickness (the PDR says likely 50 um); the sensor material 'Silicon' was not traced in materials.xml",
+  "verification_strength": "full-text",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "quote_note": "Quote copied verbatim from the raw file at the tag."
+ },
+ {
+  "id": "eic:C37",
+  "claim": "The EIC PDR draft (Dec 2024) states that the barrel TOF consists of 144 tilted staves, each made of two half staves with a total length of around 270 cm, sitting at a radial position of around 65 cm, with a stave angle of 18 degrees in its Table 8.21",
+  "claim_types": [
+   "detector_fact"
+  ],
+  "claim_type_note": null,
+  "support_kind": "primary",
+  "source_ids": [
+   "eic:S16"
+  ],
+  "location": "EIC PDR draft v1, Sec. 8.3.4.1, 'General device description', printed p. 106, and Table 8.21, printed p. 113",
+  "scope": {
+   "text": "ePIC: barrel TOF stave count and layout as design values in the PDR draft",
+   "species": [],
+   "range": null,
+   "data_period": null,
+   "analysis": "none"
+  },
+  "limitations": "PDR DRAFT; internally inconsistent radius (around 65 cm here, 63 cm on p. 112) and z range (-117.5 to +171.5 cm in Table 8.21 against 'around 270 cm'), both differing from the geometry (eic:C36); only the count and the tilt agree with the geometry",
+  "verification_strength": "page",
+  "numeric_quotation_allowed": true,
+  "last_reviewed": "2026-11-08",
+  "evidence_status": "public-fact",
+  "quote_note": "Quote transcribed from a pypdf text extraction of the PDF; line numbers printed in the margin removed and, where the extraction dropped spaces between words, spaces restored; no other change."
  }
 ]

@@ -1,0 +1,59 @@
+{
+ "phase": "S7",
+ "case_id": "cms-ecal-barrel-crystal-optics",
+ "card_case": "CMS ECAL crystal optics",
+ "level": "L3",
+ "label": "an approximate reconstruction from the cited claims, not the experiment's geometry",
+ "experiment": "CMS",
+ "subsystem": "ECAL barrel, one PbWO4 crystal with optical properties",
+ "corresponding_kit": null,
+ "cited_claims": [
+  "detector-atlas:C125",
+  "detector-atlas:C130",
+  "detector-atlas:C131",
+  "detector-atlas:C141"
+ ],
+ "quantities": [
+  {
+   "name": "cherenkov_angle",
+   "definition": "mean Cherenkov angle (rad) of the photons a 10 GeV (kinetic) muon emits along the crystal axis, detected inside the crystal before they reach a face; per-event mean, averaged over events",
+   "reference": 1.11886,
+   "tolerance_relative": 0.001,
+   "derivation": "arccos(1/(n beta)) with n = 2.29 around the 420-430 nm peak (detector-atlas:C141) and beta = 0.99994534 for T = 10000 MeV and the muon mass 105.6583755 MeV (core/constants, CODATA 2022): 1.118864 rad. Tolerance 0.1%: n printed to 0.01 moves the angle by +-0.094% for n +- 0.005; the muon's scattering over the 15 mm before the sensor (about 2 mrad) and its energy loss shift the mean by less than 0.003%.",
+   "sources": [],
+   "independence": {
+    "verified": true,
+    "result": "independent of Geant4: a closed form of the index CMS states and the muon kinematics; no simulation enters the reference. Geant4 samples the same relation cos(theta) = 1/(n beta), so agreement validates the optical material, the photon accounting and the reading of the angle, not Cherenkov physics."
+   },
+   "negative_control": {
+    "change": "the TDR's index 2.30 (Table 1.1, detector-atlas:C131) instead of 2.29",
+    "pointer": "/materials/PbWO4_optical/optical/rindex/value",
+    "value": [
+     "2.30",
+     "2.30"
+    ],
+    "expected_shift_relative": 0.0019
+   },
+   "detection_limit_relative": 0.001,
+   "measure": {
+    "kind": "cherenkov_angle",
+    "request": "request.json",
+    "run": "run.json"
+   }
+  }
+ ],
+ "approximations": [
+  "one barrel crystal as the S6 case's symmetric trd, 22 x 22 to 26 x 26 x 230 mm3 nominal (detector-atlas:C125), in vacuum",
+  "PbWO4 isotropic with a single index 2.29, constant over 420-430 nm (C141): the dispersion and the birefringence of PbWO4 are not sourced; no absorption length (the TDR's > 3 m is a bound) and no surface finish (the depolished face) are modelled",
+  "no scintillation: the intrinsic photon yield of PbWO4 is unsourced (only collected photoelectrons per MeV are stated), so the case uses none and measures Cherenkov light only",
+  "the world has no refractive index, so a photon reaching a crystal face is absorbed there; the 18 x 18 x 1 mm3 silicon sensor 15 mm inside the front face (efficiency 1, reflectivity 0) is a measuring device, not CMS's APDs, and sees only photons that no surface turned"
+ ],
+ "cherenkov_handling": {
+  "option": "full_optical_tracking",
+  "label": "(a)",
+  "scintillation": "none: the material carries no scintillation yield, so no efficiency map is needed",
+  "note": "every Cherenkov photon is tracked; the angle is read from the photons the primary emitted (parent track 1)"
+ },
+ "status": "comparison with cited values: not validated",
+ "result": null
+}

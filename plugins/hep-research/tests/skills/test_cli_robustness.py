@@ -220,6 +220,7 @@ MISSING_FILE_ARGS = {
     "adapters/geant4/assets/g4sim_inventory.py": [["check-work", "--facts", M, "--work-root", OUT, "--out", OUT]],
     "adapters/geant4/assets/g4sim_translate.py": [["check", M]],
     "adapters/geant4/assets/g4sim_run.py": [["check-spec", "--run", M]],
+    "adapters/geant4/assets/g4sim_efficiency_map.py": [["build", "--work", M, "--template", "t", "--material", "m", "--segmentation", M, "--out", OUT]],
     "adapters/geant4/assets/geant4_run.py": [["run", "--spec", M, "--exe", M, "--build-record", M, "--work", OUT,
                                               "--run-id", "r", "--record", OUT], ["check-spec", "--spec", M],
                                              ["from-geometry", "--geometry", M, "--profile", M, "--out", OUT],

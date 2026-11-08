@@ -1,0 +1,147 @@
+{
+ "schema": "detector-spec/1",
+ "params": {
+  "crystal_length_mm": "230",
+  "front_side_mm": "22",
+  "rear_side_mm": "26"
+ },
+ "materials": {
+  "PbWO4_optical": {
+   "composition": {
+    "Pb": "0.45534",
+    "W": "0.40401",
+    "O": "0.14065"
+   },
+   "density_g_cm3": "8.28",
+   "optical": {
+    "rindex": {
+     "energy_eV": [
+      "2.883353",
+      "2.952005"
+     ],
+     "value": [
+      "2.29",
+      "2.29"
+     ]
+    },
+    "facts": "one index, 2.29 around the emission peak of 420-430 nm (C141), constant over that band; no absorption, no scintillation"
+   }
+  }
+ },
+ "templates": {
+  "sensor": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "18",
+      "18",
+      "1"
+     ]
+    }
+   },
+   "material": "G4_Si",
+   "tags": [
+    "optical",
+    "sensor"
+   ]
+  },
+  "crystal": {
+   "solid": {
+    "trd": {
+     "x1_mm": "front_side_mm",
+     "x2_mm": "rear_side_mm",
+     "y1_mm": "front_side_mm",
+     "y2_mm": "rear_side_mm",
+     "length_mm": "crystal_length_mm"
+    }
+   },
+   "material": "PbWO4_optical",
+   "tags": [
+    "optical",
+    "crystal"
+   ],
+   "children": [
+    {
+     "template": "sensor",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "-100"
+       ]
+      }
+     }
+    }
+   ]
+  }
+ },
+ "world": {
+  "material": "G4_Galactic",
+  "size_mm": [
+   "1000",
+   "1000",
+   "1000"
+  ],
+  "children": [
+   {
+    "template": "crystal",
+    "placement": {
+     "single": {
+      "centre_mm": [
+       "0",
+       "0",
+       "0"
+      ]
+     }
+    }
+   }
+  ]
+ },
+ "physics_requirements": [
+  {
+   "need": "optical_scope",
+   "select": {
+    "tags": [
+     "optical"
+    ]
+   }
+  }
+ ],
+ "optical_surfaces": {
+  "sensor_surface": {
+   "skin": "sensor",
+   "model": "unified",
+   "finish": "polished",
+   "type": "dielectric_metal",
+   "reflectivity": {
+    "energy_eV": [
+     "2.883353",
+     "2.952005"
+    ],
+    "value": [
+     "0",
+     "0"
+    ]
+   },
+   "efficiency": {
+    "energy_eV": [
+     "2.883353",
+     "2.952005"
+    ],
+    "value": [
+     "1",
+     "1"
+    ]
+   }
+  }
+ },
+ "source_of_facts": {
+  "/params/crystal_length_mm": "claim:detector-atlas:C125",
+  "/params/front_side_mm": "claim:detector-atlas:C125",
+  "/params/rear_side_mm": "claim:detector-atlas:C125",
+  "/materials/PbWO4_optical/optical/rindex/value": "claim:detector-atlas:C141",
+  "/materials/PbWO4_optical/optical/rindex/energy_eV": "claim:detector-atlas:C141",
+  "/materials/PbWO4_optical/density_g_cm3": "claim:detector-atlas:C130"
+ }
+}

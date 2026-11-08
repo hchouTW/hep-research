@@ -22,6 +22,7 @@
 #include "G4EmSaturation.hh"
 #include "G4Field.hh"
 #include "G4FieldManager.hh"
+#include "G4OpticalPhoton.hh"
 #include "G4LogicalVolume.hh"
 #include "G4LossTableManager.hh"
 #include "G4Step.hh"
@@ -346,8 +347,38 @@ class ScorerSums {
     return id;
   }
 
+  // S7, photon_detected (Section 8.6): an optical photon OpBoundary detected on entering a scorer's template is one count in that volume's cell,
+  // and one row of photons.csv: event, scorer, volume, arrival time, transit time since emission, photon energy, emission point, and the
+  // direction it arrived in (the Cherenkov-angle gate reads it where no surface turned the photon), and the track that emitted it.
+  void PhotonDetected(const G4Step* step) {
+    const G4StepPoint* post = step->GetPostStepPoint();
+    const G4VTouchable* touchable = post->GetTouchable();
+    if (!touchable || !touchable->GetVolume()) return;
+    const std::string& name = touchable->GetVolume()->GetLogicalVolume()->GetName();
+    const G4Track* track = step->GetTrack();
+    for (std::size_t i = 0; i < fScorers->size(); ++i) {
+      const ScorerSpec& scorer = (*fScorers)[i];
+      if (scorer.quantity != "photon_detected" || !scorer.templates.count(name)) continue;
+      const VolumeKey volume = VolumeId(touchable, *fStrides);
+      fScoredStep = step;
+      fScoredGrid = nullptr;
+      fBinStride = 1;
+      Add(i, volume, 0, 1.);
+      fDirect[i] += 1.;
+      if (fPhotons) {
+        const G4ThreeVector vertex = track->GetVertexPosition() / mm, direction = step->GetPreStepPoint()->GetMomentumDirection();
+        std::fprintf(fPhotons, "%lld,%s,%lld,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%d\n", fEvent, scorer.name.c_str(), volume, post->GetGlobalTime() / ns,
+                     track->GetLocalTime() / ns, step->GetPreStepPoint()->GetKineticEnergy() / eV, vertex.x(), vertex.y(), vertex.z(), direction.x(), direction.y(), direction.z(),
+                     track->GetParentID());
+      }
+    }
+  }
+  void SetPhotons(std::FILE* photons) { fPhotons = photons; }
+
   // The SD's dispatch: everything a volume scorer does with one step.
   void VolumeStep(const G4Step* step) {
+    // an optical photon is its own class (Section 8.4): the deposit OpBoundary books on a detection enters no scorer
+    if (step->GetTrack()->GetDefinition() == G4OpticalPhoton::OpticalPhotonDefinition()) return;
     const G4StepPoint* pre = step->GetPreStepPoint();
     const G4VTouchable* touchable = pre->GetTouchable();
     const G4LogicalVolume* logical = touchable->GetVolume()->GetLogicalVolume();
@@ -592,6 +623,7 @@ class ScorerSums {
   std::FILE* fCells = nullptr;
   std::FILE* fBoundary = nullptr;
   std::FILE* fCrossings = nullptr;
+  std::FILE* fPhotons = nullptr;
   std::string fControl;
   bool fMixNonIonizing = false;
   long long fEvent = 0;

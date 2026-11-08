@@ -1,0 +1,42 @@
+{
+ "schema": "simulation-request/1",
+ "source": {
+  "density": "analytic",
+  "particle": "opticalphoton",
+  "energy": {
+   "mono": {
+    "energy_MeV": "3e-6"
+   }
+  },
+  "position": {
+   "box_uniform": {
+    "frame": "world",
+    "centre_mm": [
+     "0",
+     "0",
+     "0"
+    ],
+    "size_mm": [
+     "18",
+     "18",
+     "18"
+    ]
+   }
+  },
+  "direction": {
+   "isotropic": {}
+  }
+ },
+ "scorers": [
+  {
+   "name": "e",
+   "readout": "none",
+   "select": {
+    "tags": [
+     "optical"
+    ]
+   },
+   "quantity": "edep"
+  }
+ ]
+}

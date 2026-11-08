@@ -1,0 +1,149 @@
+{
+ "schema": "g4kit/1",
+ "name": "endcap_disks",
+ "version": "1.0.0",
+ "geometry_kind": "endcap-disks",
+ "role": "tracking",
+ "purpose": "Disks of trapezoidal wedges on a ring, repeated along the beam; the wedge widths come from the design, which closes the polygon.",
+ "inputs": {
+  "disks": {
+   "kind": "integer"
+  },
+  "disk_pitch_mm": {
+   "kind": "length"
+  },
+  "wedges": {
+   "kind": "integer"
+  },
+  "inner_apothem_mm": {
+   "kind": "length"
+  },
+  "outer_apothem_mm": {
+   "kind": "length"
+  },
+  "wedge_inner_width_mm": {
+   "kind": "length"
+  },
+  "wedge_outer_width_mm": {
+   "kind": "length"
+  },
+  "wedge_thickness_mm": {
+   "kind": "length"
+  },
+  "disk_inner_radius_mm": {
+   "kind": "length"
+  },
+  "disk_outer_radius_mm": {
+   "kind": "length"
+  },
+  "wedge_material": {
+   "kind": "material"
+  },
+  "world_material": {
+   "kind": "material"
+  },
+  "materials": {
+   "kind": "materials",
+   "optional": true
+  }
+ },
+ "geometric_defaults": {
+  "disk_margin_mm": "0.5"
+ },
+ "detector": {
+  "schema": "detector-spec/1",
+  "params": {
+   "wedge_mid_mm": "(inner_apothem_mm + outer_apothem_mm) / 2",
+   "wedge_radial_mm": "outer_apothem_mm - inner_apothem_mm",
+   "disk_thickness_mm": "wedge_thickness_mm + 2 * disk_margin_mm",
+   "first_disk_mm": "0 - (disks - 1) * disk_pitch_mm / 2",
+   "world_mm": "4 * (disk_outer_radius_mm + disks * disk_pitch_mm) + 200"
+  },
+  "materials": {
+   "$input": "materials"
+  },
+  "templates": {
+   "wedge": {
+    "solid": {
+     "trd": {
+      "x1_mm": "wedge_thickness_mm",
+      "x2_mm": "wedge_thickness_mm",
+      "y1_mm": "wedge_inner_width_mm",
+      "y2_mm": "wedge_outer_width_mm",
+      "length_mm": "wedge_radial_mm"
+     }
+    },
+    "material": {
+     "$input": "wedge_material"
+    },
+    "tags": [
+     "sensor"
+    ]
+   },
+   "disk": {
+    "solid": {
+     "tube": {
+      "rmin_mm": "disk_inner_radius_mm",
+      "rmax_mm": "disk_outer_radius_mm",
+      "length_mm": "disk_thickness_mm"
+     }
+    },
+    "material": {
+     "$input": "world_material"
+    },
+    "tags": [
+     "disk"
+    ],
+    "children": [
+     {
+      "template": "wedge",
+      "placement": {
+       "ring": {
+        "n": {
+         "$input": "wedges"
+        },
+        "radius_mm": "wedge_mid_mm",
+        "orientation": "radial",
+        "index": "wedge"
+       }
+      }
+     }
+    ]
+   }
+  },
+  "world": {
+   "material": {
+    "$input": "world_material"
+   },
+   "size_mm": [
+    "world_mm",
+    "world_mm",
+    "world_mm"
+   ],
+   "children": [
+    {
+     "template": "disk",
+     "placement": {
+      "linear": {
+       "count": {
+        "$input": "disks"
+       },
+       "pitch_mm": [
+        "0",
+        "0",
+        "disk_pitch_mm"
+       ],
+       "start_mm": [
+        "0",
+        "0",
+        "first_disk_mm"
+       ],
+       "index": "disk"
+      }
+     }
+    }
+   ]
+  },
+  "frames": {}
+ }
+}

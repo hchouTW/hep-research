@@ -54,7 +54,7 @@ class ShippedLedgerTests(unittest.TestCase):
     def test_shipped_ledger_is_valid(self):
         report = run(*ledger())
         self.assertEqual(report["status"], "pass", report["errors"] + report["warnings"])
-        self.assertEqual(report["counts"], {"sources": 68, "claims": 198})
+        self.assertEqual(report["counts"], {"sources": 76, "claims": 212})
 
     def test_c184_is_the_s06_break_fit(self):
         # transcribed from the cached S06 PDF, page 171103-6
@@ -94,8 +94,8 @@ class ShippedLedgerTests(unittest.TestCase):
 
     def test_ledger_ids_are_contiguous(self):
         sources, claims = ledger()
-        self.assertEqual([s["id"] for s in sources], [q(f"S{n:02d}") for n in range(1, 69)])
-        self.assertEqual(sorted(c["id"] for c in claims), sorted(q(f"C{n:02d}") for n in range(1, 199)))
+        self.assertEqual([s["id"] for s in sources], [q(f"S{n:02d}") for n in range(1, 77)])
+        self.assertEqual(sorted(c["id"] for c in claims), sorted(q(f"C{n:02d}") for n in range(1, 213)))
 
     def test_scope_and_limitation_text_are_kept(self):
         _, claims = ledger()

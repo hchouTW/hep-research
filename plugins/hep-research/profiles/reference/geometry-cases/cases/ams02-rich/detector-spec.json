@@ -1,0 +1,913 @@
+{
+ "schema": "detector-spec/1",
+ "params": {
+  "aerogel_side_mm": "113",
+  "aerogel_thickness_mm": "25",
+  "naf_side_mm": "85",
+  "naf_thickness_mm": "5",
+  "layout_radius_mm": "650",
+  "sensor_mm": "1"
+ },
+ "materials": {
+  "aerogel": {
+   "base": "G4_SILICON_DIOXIDE",
+   "density_g_cm3": "0.200",
+   "optical": {
+    "rindex": {
+     "energy_eV": [
+      "2.5",
+      "3.5"
+     ],
+     "value": [
+      "1.050",
+      "1.050"
+     ]
+    }
+   }
+  },
+  "naf": {
+   "composition": {
+    "Na": "0.54752",
+    "F": "0.45248"
+   },
+   "density_g_cm3": "2.558",
+   "optical": {
+    "rindex": {
+     "energy_eV": [
+      "2.5",
+      "3.5"
+     ],
+     "value": [
+      "1.334",
+      "1.334"
+     ]
+    }
+   }
+  }
+ },
+ "templates": {
+  "sensor_aerogel": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "aerogel_side_mm",
+      "aerogel_side_mm",
+      "sensor_mm"
+     ]
+    }
+   },
+   "material": "G4_Si",
+   "tags": [
+    "optical",
+    "sensor"
+   ]
+  },
+  "aerogel_tile": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "aerogel_side_mm",
+      "aerogel_side_mm",
+      "aerogel_thickness_mm"
+     ]
+    }
+   },
+   "material": "aerogel",
+   "tags": [
+    "optical",
+    "aerogel_tile"
+   ],
+   "children": [
+    {
+     "template": "sensor_aerogel",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "(aerogel_thickness_mm - sensor_mm) / 2"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "sensor_naf": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "naf_side_mm",
+      "naf_side_mm",
+      "sensor_mm"
+     ]
+    }
+   },
+   "material": "G4_Si",
+   "tags": [
+    "optical",
+    "sensor"
+   ]
+  },
+  "naf_tile": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "naf_side_mm",
+      "naf_side_mm",
+      "naf_thickness_mm"
+     ]
+    }
+   },
+   "material": "naf",
+   "tags": [
+    "optical",
+    "naf_tile"
+   ],
+   "children": [
+    {
+     "template": "sensor_naf",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "(naf_thickness_mm - sensor_mm) / 2"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "aerogel_plane": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "1400",
+      "1400",
+      "aerogel_thickness_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "children": [
+    {
+     "template": "aerogel_tile",
+     "placement": {
+      "explicit": {
+       "positions_mm": [
+        [
+         "0 - 5 * aerogel_side_mm",
+         "0 - 5 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 4 * aerogel_side_mm",
+         "0 - 5 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 3 * aerogel_side_mm",
+         "0 - 5 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 2 * aerogel_side_mm",
+         "0 - 5 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 1 * aerogel_side_mm",
+         "0 - 5 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0",
+         "0 - 5 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "1 * aerogel_side_mm",
+         "0 - 5 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "2 * aerogel_side_mm",
+         "0 - 5 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "3 * aerogel_side_mm",
+         "0 - 5 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "4 * aerogel_side_mm",
+         "0 - 5 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "5 * aerogel_side_mm",
+         "0 - 5 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 5 * aerogel_side_mm",
+         "0 - 4 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 4 * aerogel_side_mm",
+         "0 - 4 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 3 * aerogel_side_mm",
+         "0 - 4 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 2 * aerogel_side_mm",
+         "0 - 4 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 1 * aerogel_side_mm",
+         "0 - 4 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0",
+         "0 - 4 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "1 * aerogel_side_mm",
+         "0 - 4 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "2 * aerogel_side_mm",
+         "0 - 4 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "3 * aerogel_side_mm",
+         "0 - 4 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "4 * aerogel_side_mm",
+         "0 - 4 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "5 * aerogel_side_mm",
+         "0 - 4 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 5 * aerogel_side_mm",
+         "0 - 3 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 4 * aerogel_side_mm",
+         "0 - 3 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 3 * aerogel_side_mm",
+         "0 - 3 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 2 * aerogel_side_mm",
+         "0 - 3 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 1 * aerogel_side_mm",
+         "0 - 3 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0",
+         "0 - 3 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "1 * aerogel_side_mm",
+         "0 - 3 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "2 * aerogel_side_mm",
+         "0 - 3 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "3 * aerogel_side_mm",
+         "0 - 3 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "4 * aerogel_side_mm",
+         "0 - 3 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "5 * aerogel_side_mm",
+         "0 - 3 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 5 * aerogel_side_mm",
+         "0 - 2 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 4 * aerogel_side_mm",
+         "0 - 2 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 3 * aerogel_side_mm",
+         "0 - 2 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 2 * aerogel_side_mm",
+         "0 - 2 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 1 * aerogel_side_mm",
+         "0 - 2 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0",
+         "0 - 2 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "1 * aerogel_side_mm",
+         "0 - 2 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "2 * aerogel_side_mm",
+         "0 - 2 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "3 * aerogel_side_mm",
+         "0 - 2 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "4 * aerogel_side_mm",
+         "0 - 2 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "5 * aerogel_side_mm",
+         "0 - 2 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 5 * aerogel_side_mm",
+         "0 - 1 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 4 * aerogel_side_mm",
+         "0 - 1 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 3 * aerogel_side_mm",
+         "0 - 1 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 2 * aerogel_side_mm",
+         "0 - 1 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "2 * aerogel_side_mm",
+         "0 - 1 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "3 * aerogel_side_mm",
+         "0 - 1 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "4 * aerogel_side_mm",
+         "0 - 1 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "5 * aerogel_side_mm",
+         "0 - 1 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 5 * aerogel_side_mm",
+         "0",
+         "0"
+        ],
+        [
+         "0 - 4 * aerogel_side_mm",
+         "0",
+         "0"
+        ],
+        [
+         "0 - 3 * aerogel_side_mm",
+         "0",
+         "0"
+        ],
+        [
+         "0 - 2 * aerogel_side_mm",
+         "0",
+         "0"
+        ],
+        [
+         "2 * aerogel_side_mm",
+         "0",
+         "0"
+        ],
+        [
+         "3 * aerogel_side_mm",
+         "0",
+         "0"
+        ],
+        [
+         "4 * aerogel_side_mm",
+         "0",
+         "0"
+        ],
+        [
+         "5 * aerogel_side_mm",
+         "0",
+         "0"
+        ],
+        [
+         "0 - 5 * aerogel_side_mm",
+         "1 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 4 * aerogel_side_mm",
+         "1 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 3 * aerogel_side_mm",
+         "1 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 2 * aerogel_side_mm",
+         "1 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "2 * aerogel_side_mm",
+         "1 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "3 * aerogel_side_mm",
+         "1 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "4 * aerogel_side_mm",
+         "1 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "5 * aerogel_side_mm",
+         "1 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 5 * aerogel_side_mm",
+         "2 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 4 * aerogel_side_mm",
+         "2 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 3 * aerogel_side_mm",
+         "2 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 2 * aerogel_side_mm",
+         "2 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 1 * aerogel_side_mm",
+         "2 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0",
+         "2 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "1 * aerogel_side_mm",
+         "2 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "2 * aerogel_side_mm",
+         "2 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "3 * aerogel_side_mm",
+         "2 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "4 * aerogel_side_mm",
+         "2 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "5 * aerogel_side_mm",
+         "2 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 5 * aerogel_side_mm",
+         "3 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 4 * aerogel_side_mm",
+         "3 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 3 * aerogel_side_mm",
+         "3 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 2 * aerogel_side_mm",
+         "3 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 1 * aerogel_side_mm",
+         "3 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0",
+         "3 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "1 * aerogel_side_mm",
+         "3 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "2 * aerogel_side_mm",
+         "3 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "3 * aerogel_side_mm",
+         "3 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "4 * aerogel_side_mm",
+         "3 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "5 * aerogel_side_mm",
+         "3 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 5 * aerogel_side_mm",
+         "4 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 4 * aerogel_side_mm",
+         "4 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 3 * aerogel_side_mm",
+         "4 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 2 * aerogel_side_mm",
+         "4 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 1 * aerogel_side_mm",
+         "4 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0",
+         "4 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "1 * aerogel_side_mm",
+         "4 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "2 * aerogel_side_mm",
+         "4 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "3 * aerogel_side_mm",
+         "4 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "4 * aerogel_side_mm",
+         "4 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "5 * aerogel_side_mm",
+         "4 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 5 * aerogel_side_mm",
+         "5 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 4 * aerogel_side_mm",
+         "5 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 3 * aerogel_side_mm",
+         "5 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 2 * aerogel_side_mm",
+         "5 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0 - 1 * aerogel_side_mm",
+         "5 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "0",
+         "5 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "1 * aerogel_side_mm",
+         "5 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "2 * aerogel_side_mm",
+         "5 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "3 * aerogel_side_mm",
+         "5 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "4 * aerogel_side_mm",
+         "5 * aerogel_side_mm",
+         "0"
+        ],
+        [
+         "5 * aerogel_side_mm",
+         "5 * aerogel_side_mm",
+         "0"
+        ]
+       ],
+       "index": "tile"
+      }
+     },
+     "modifiers": [
+      {
+       "clip": {
+        "mode": "centre_inside",
+        "envelope": {
+         "radius_mm": "layout_radius_mm"
+        }
+       }
+      }
+     ]
+    }
+   ]
+  },
+  "naf_plane": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "400",
+      "400",
+      "naf_thickness_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "children": [
+    {
+     "template": "naf_tile",
+     "placement": {
+      "grid": {
+       "n": [
+        4,
+        4
+       ],
+       "pitch_mm": [
+        "naf_side_mm",
+        "naf_side_mm"
+       ],
+       "centre_mm": [
+        "0",
+        "0",
+        "0"
+       ],
+       "index": [
+        "i",
+        "j"
+       ]
+      }
+     }
+    }
+   ]
+  },
+  "radiator": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "1400",
+      "1400",
+      "aerogel_thickness_mm + naf_thickness_mm"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "children": [
+    {
+     "template": "aerogel_plane",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "naf_thickness_mm / 2"
+       ]
+      }
+     }
+    },
+    {
+     "template": "naf_plane",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "0 - aerogel_thickness_mm / 2"
+       ]
+      }
+     }
+    }
+   ]
+  }
+ },
+ "world": {
+  "material": "G4_Galactic",
+  "size_mm": [
+   "2000",
+   "2000",
+   "2000"
+  ],
+  "children": [
+   {
+    "template": "radiator",
+    "placement": {
+     "single": {
+      "centre_mm": [
+       "0",
+       "0",
+       "0"
+      ]
+     }
+    }
+   }
+  ]
+ },
+ "physics_requirements": [
+  {
+   "need": "optical_scope",
+   "select": {
+    "tags": [
+     "optical"
+    ]
+   }
+  }
+ ],
+ "optical_surfaces": {
+  "aerogel_sensor_surface": {
+   "skin": "sensor_aerogel",
+   "model": "unified",
+   "finish": "polished",
+   "type": "dielectric_metal",
+   "reflectivity": {
+    "energy_eV": [
+     "2.5",
+     "3.5"
+    ],
+    "value": [
+     "0",
+     "0"
+    ]
+   },
+   "efficiency": {
+    "energy_eV": [
+     "2.5",
+     "3.5"
+    ],
+    "value": [
+     "1",
+     "1"
+    ]
+   }
+  },
+  "naf_sensor_surface": {
+   "skin": "sensor_naf",
+   "model": "unified",
+   "finish": "polished",
+   "type": "dielectric_metal",
+   "reflectivity": {
+    "energy_eV": [
+     "2.5",
+     "3.5"
+    ],
+    "value": [
+     "0",
+     "0"
+    ]
+   },
+   "efficiency": {
+    "energy_eV": [
+     "2.5",
+     "3.5"
+    ],
+    "value": [
+     "1",
+     "1"
+    ]
+   }
+  }
+ },
+ "source_of_facts": {
+  "/params/aerogel_side_mm": "claim:ams02:C70",
+  "/params/aerogel_thickness_mm": "claim:ams02:C70",
+  "/params/naf_side_mm": "claim:ams02:C70",
+  "/params/naf_thickness_mm": "claim:ams02:C70",
+  "/params/layout_radius_mm": "claim:ams02:C206",
+  "/materials/aerogel/density_g_cm3": "claim:ams02:C208",
+  "/materials/aerogel/optical/rindex/value/0": "claim:ams02:C205",
+  "/materials/aerogel/optical/rindex/value/1": "claim:ams02:C205",
+  "/materials/naf/density_g_cm3": "claim:ams02:C209",
+  "/materials/naf/composition/Na": "claim:ams02:C209",
+  "/materials/naf/composition/F": "claim:ams02:C209",
+  "/materials/naf/optical/rindex/value/0": "claim:ams02:C205",
+  "/materials/naf/optical/rindex/value/1": "claim:ams02:C205"
+ }
+}

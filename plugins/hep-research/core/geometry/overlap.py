@@ -11,7 +11,7 @@ from fractions import Fraction
 
 from core.geometry import bound, convex
 from core.geometry.numbers import BOUND_LIMIT_MM, CONTEXT, EPSILON_MM, MINIMUM_FEATURE_MM, MINIMUM_GAP_MM, add, exact, multiply, subtract
-from core.geometry.rotation import transpose
+from core.geometry.rotation import cos_sin, transpose
 
 WORLD = "world"
 
@@ -33,6 +33,18 @@ def _template(ir: dict, placement: dict) -> dict:
     return ir["physical"]["templates"][placement["template"]]
 
 
+def _section_extent(solid: dict) -> tuple:
+    """A sphere section's own bounding box (S7): the z slab its theta range spans and the radius it reaches across z, so a mirror cap
+    placed at its sphere's centre is judged where it lies, not as the whole sphere. Exact for a full phi range, conservative otherwise."""
+    rmin, rmax = exact(solid["rmin_mm"]), exact(solid["rmax_mm"])
+    first, last = exact(solid["theta_start_deg"]), add(exact(solid["theta_start_deg"]), exact(solid["theta_span_deg"]))
+    (c1, s1), (c2, s2) = (tuple(Decimal(value) for value in cos_sin(first)), tuple(Decimal(value) for value in cos_sin(last)))
+    top = multiply(rmax, c1) if c1 >= 0 else multiply(rmin, c1)
+    bottom = multiply(rmax, c2) if c2 <= 0 else multiply(rmin, c2)
+    reach = rmax if first <= 90 <= last else multiply(rmax, max(s1, s2))
+    return (CONTEXT.minus(reach), CONTEXT.minus(reach), bottom), (reach, reach, top)
+
+
 def _polyhedron(ir: dict, placement: dict) -> convex.Polyhedron:
     active = _active(placement) if placement["rotation"] else ((1, 0, 0), (0, 1, 0), (0, 0, 1))
     template = _template(ir, placement)
@@ -44,13 +56,22 @@ def _polyhedron(ir: dict, placement: dict) -> convex.Polyhedron:
         body = convex.prism(solid["sides"], exact(solid["circumradius_mm"]), exact(solid["dz_mm"]))
     elif shape == "tube":
         body = convex.circumscribed(exact(solid["rmax_mm"]), exact(solid["dz_mm"]))
+    elif shape == "polyhedra":  # its largest circumradius over the whole length: a prism that holds it
+        body = convex.prism(solid["sides"], max(exact(r) for r in solid["circumradius_rmax_mm"]), _half(ir, placement["template"])[2])
+    elif shape == "sphere_section":  # the circumscribed prism of its own slab and reach, centred where the section lies
+        low, high = _section_extent(solid)
+        middle = CONTEXT.divide(add(low[2], high[2]), Decimal(2))
+        body = convex.circumscribed(high[0], CONTEXT.divide(subtract(high[2], low[2]), Decimal(2))).placed(((1, 0, 0), (0, 1, 0), (0, 0, 1)), (Decimal(0), Decimal(0), middle))
+    elif shape in ("cone", "polycone"):  # the circumscribed polyhedron of its bounding cylinder: conservative (Section 7.3)
+        body = convex.circumscribed(_half(ir, placement["template"])[0], _half(ir, placement["template"])[2])
     else:
         body = convex.box(_half(ir, placement["template"]))
     return body.placed(active, tuple(exact(text) for text in placement["centre_mm"]))
 
 
 def _curved(ir: dict, placement: dict) -> bool:
-    return _template(ir, placement)["shape"] == "tube"
+    """A shape judged through a circumscribed polyhedron: passing proves it clear, failing proves nothing, so a failure is unjudged."""
+    return _template(ir, placement)["shape"] in ("tube", "cone", "sphere_section", "polycone")
 
 
 def _about_own_axis(placement: dict) -> bool:
@@ -107,6 +128,10 @@ def _half(ir: dict, name: str) -> tuple:
 def _extent(ir: dict, placement: dict) -> tuple:
     """Lower and upper corner of a placed box in its mother's frame."""
     half = _half(ir, placement["template"])
+    if _template(ir, placement)["shape"] == "sphere_section" and not placement["rotation"]:
+        low, high = _section_extent(_template(ir, placement)["solid"])
+        centre = tuple(exact(text) for text in placement["centre_mm"])
+        return tuple(add(c, value) for c, value in zip(centre, low)), tuple(add(c, value) for c, value in zip(centre, high))
     if placement["rotation"] and (_arbitrary(placement) or _template(ir, placement)["shape"] != "box"):
         vertices = _polyhedron(ir, placement).vertices
         return (tuple(min(v[i] for v in vertices) for i in range(3)), tuple(max(v[i] for v in vertices) for i in range(3)))
@@ -147,11 +172,44 @@ def _gaps_in_tube(ir: dict, placement: dict) -> list:
     return gaps + ([subtract(convex.nearest_to_axis(body), rmin)] if rmin > 0 else [])
 
 
+def _uniform_prism(solid: dict) -> bool:
+    """A polyhedra of one section along its length, solid and whole in phi: a prism, judged as one."""
+    return len(set(solid["circumradius_rmax_mm"])) == 1 and all(exact(r) == 0 for r in solid["circumradius_rmin_mm"]) and exact(solid["phi_span_deg"]) == 360 and exact(solid["z_mm"][0]) == CONTEXT.minus(exact(solid["z_mm"][-1]))
+
+
+def _solid_cone(solid: dict) -> bool:
+    """A cone with no inner radius and a whole phi range: its inside is convex, so a convex daughter lies in it when its vertices do."""
+    return exact(solid["rmin1_mm"]) == 0 and exact(solid["rmin2_mm"]) == 0 and exact(solid["phi_span_deg"]) == 360
+
+
+def _gaps_in_cone(solid: dict, vertices: list) -> list:
+    """Distances from a convex daughter's vertices to a solid cone mother's surfaces (S7): the two flat ends, and the slanted side,
+    whose radius runs linearly from rmax1 at -dz to rmax2 at +dz; the side's distance is the radial one times cos of the half-opening
+    angle, the perpendicular distance to that surface."""
+    r1, r2, half = exact(solid["rmax1_mm"]), exact(solid["rmax2_mm"]), exact(solid["dz_mm"])
+    length = add(half, half)
+    cosine = CONTEXT.divide(length, CONTEXT.sqrt(add(multiply(length, length), multiply(subtract(r2, r1), subtract(r2, r1)))))
+    side = []
+    for x, y, z in vertices:
+        radius = add(r1, CONTEXT.divide(multiply(subtract(r2, r1), add(z, half)), length))
+        side.append(multiply(subtract(radius, CONTEXT.sqrt(add(multiply(x, x), multiply(y, y)))), cosine))
+    zs = [vertex[2] for vertex in vertices]
+    return [min(side), subtract(min(zs), CONTEXT.minus(half)), subtract(half, max(zs))]
+
+
 def _gaps(ir: dict, placement: dict) -> list:
     """The distance from a daughter to each surface of its mother: negative outside, None when it cannot be judged."""
-    shape = ir["physical"]["templates"][placement["mother"]]["shape"]
+    template = ir["physical"]["templates"][placement["mother"]]
+    shape = template["shape"]
     if shape == "tube":
         return _gaps_in_tube(ir, placement)
+    if shape == "polyhedra" and _uniform_prism(template["solid"]):
+        solid = template["solid"]
+        return convex.face_gaps(convex.prism(solid["sides"], exact(solid["circumradius_rmax_mm"][0]), exact(solid["z_mm"][-1])), _polyhedron(ir, placement).vertices)
+    if shape == "cone" and _solid_cone(template["solid"]):
+        return _gaps_in_cone(template["solid"], _polyhedron(ir, placement).vertices)
+    if shape in ("cone", "sphere_section", "polycone", "polyhedra"):
+        return [None]  # a daughter of these mothers cannot be judged yet (a recorded limit of S7)
     if shape != "box":
         return convex.face_gaps(_mother_body(ir, placement["mother"]), _polyhedron(ir, placement).vertices)
     low, high = _extent(ir, placement)
@@ -165,7 +223,7 @@ def containment(ir: dict) -> list[dict]:
         where = f"{placement['mother']}/{placement['template']}[{placement['copy_number']}]"
         for gap in _gaps(ir, placement):
             if gap is None:
-                out.append(_finding("containment-unjudged", where, "a daughter of a tube with a phi section cannot be judged yet"))
+                out.append(_finding("containment-unjudged", where, f"a daughter of a {ir['physical']['templates'][placement['mother']]['shape']} mother cannot be judged yet (a tube only with a phi section)"))
                 continue
             problem = _face_gap(gap)
             if problem:
@@ -190,7 +248,11 @@ def siblings(ir: dict) -> list[dict]:
                 b, second = placed[later]
                 if subtract(b[0][0], a[1][0]) >= MINIMUM_GAP_MM:
                     break
-                separation = _separation(a, b) if _plain(ir, first) and _plain(ir, second) else _rotated_pair(ir, first, second)
+                # the extents contain the solids (S7): boxes at least c apart prove the pair clear, and boxes that meet only in a plane prove
+                # the interiors disjoint, as touching faces do; only boxes that overlap need the exact test of the solids
+                boxes = _separation(a, b)
+                clear = boxes >= MINIMUM_GAP_MM or abs(boxes) < EPSILON_MM
+                separation = boxes if (_plain(ir, first) and _plain(ir, second)) or clear else _rotated_pair(ir, first, second)
                 if abs(separation) < EPSILON_MM or separation >= MINIMUM_GAP_MM:
                     continue
                 code = "sibling-unjudged" if separation == UNJUDGED else "sibling-overlap" if separation < 0 else "sibling-too-close"

@@ -1,0 +1,675 @@
+{
+ "schema": "detector-spec/1",
+ "params": {
+  "me11_length_mm": "1680",
+  "me11_top_mm": "613",
+  "me11_bottom_mm": "311",
+  "me12_length_mm": "1800",
+  "me12_top_mm": "1078",
+  "me12_bottom_mm": "740",
+  "me13_length_mm": "1900",
+  "me13_top_mm": "1192",
+  "me13_bottom_mm": "859",
+  "me21_length_mm": "2065",
+  "me21_top_mm": "1534",
+  "me21_bottom_mm": "751",
+  "me31_length_mm": "1845",
+  "me31_top_mm": "1534",
+  "me31_bottom_mm": "835",
+  "me41_length_mm": "1665",
+  "me41_top_mm": "1534",
+  "me41_bottom_mm": "903",
+  "me234_2_length_mm": "3380",
+  "me234_2_top_mm": "1530",
+  "me234_2_bottom_mm": "895",
+  "gap_mm": "9.5",
+  "gap11_mm": "7",
+  "pitch_mm": "2.54 * 10",
+  "pitch11_mm": "2.2 * 10"
+ },
+ "materials": {
+  "CSC_gas": {
+   "composition": {
+    "Ar": "0.34156",
+    "C": "0.15404",
+    "O": "0.34197",
+    "F": "0.16243"
+   },
+   "density_g_cm3": "0.001945",
+   "state": "gas",
+   "temperature_K": "293.15",
+   "pressure_Pa": "101325",
+   "facts": "mass fractions of 40% Ar + 50% CO2 + 10% CF4 by volume (C145); density of that ideal-gas mixture at 293.15 K and 101325 Pa, conditions not sourced"
+  }
+ },
+ "templates": {
+  "gap_me11": {
+   "solid": {
+    "trd": {
+     "x1_mm": "gap11_mm",
+     "x2_mm": "gap11_mm",
+     "y1_mm": "me11_bottom_mm",
+     "y2_mm": "me11_top_mm",
+     "length_mm": "me11_length_mm"
+    }
+   },
+   "material": "CSC_gas",
+   "tags": [
+    "gas_gap"
+   ]
+  },
+  "chamber_me11": {
+   "solid": {
+    "trd": {
+     "x1_mm": "6 * pitch11_mm",
+     "x2_mm": "6 * pitch11_mm",
+     "y1_mm": "me11_bottom_mm",
+     "y2_mm": "me11_top_mm",
+     "length_mm": "me11_length_mm"
+    }
+   },
+   "material": "G4_Galactic",
+   "tags": [
+    "chamber"
+   ],
+   "children": [
+    {
+     "template": "gap_me11",
+     "placement": {
+      "linear": {
+       "count": 6,
+       "pitch_mm": [
+        "pitch11_mm",
+        "0",
+        "0"
+       ],
+       "start_mm": [
+        "0 - 5 * pitch11_mm / 2",
+        "0",
+        "0"
+       ],
+       "index": "layer"
+      }
+     }
+    }
+   ]
+  },
+  "gap_me12": {
+   "solid": {
+    "trd": {
+     "x1_mm": "gap_mm",
+     "x2_mm": "gap_mm",
+     "y1_mm": "me12_bottom_mm",
+     "y2_mm": "me12_top_mm",
+     "length_mm": "me12_length_mm"
+    }
+   },
+   "material": "CSC_gas",
+   "tags": [
+    "gas_gap"
+   ]
+  },
+  "chamber_me12": {
+   "solid": {
+    "trd": {
+     "x1_mm": "6 * pitch_mm",
+     "x2_mm": "6 * pitch_mm",
+     "y1_mm": "me12_bottom_mm",
+     "y2_mm": "me12_top_mm",
+     "length_mm": "me12_length_mm"
+    }
+   },
+   "material": "G4_Galactic",
+   "tags": [
+    "chamber"
+   ],
+   "children": [
+    {
+     "template": "gap_me12",
+     "placement": {
+      "linear": {
+       "count": 6,
+       "pitch_mm": [
+        "pitch_mm",
+        "0",
+        "0"
+       ],
+       "start_mm": [
+        "0 - 5 * pitch_mm / 2",
+        "0",
+        "0"
+       ],
+       "index": "layer"
+      }
+     }
+    }
+   ]
+  },
+  "gap_me13": {
+   "solid": {
+    "trd": {
+     "x1_mm": "gap_mm",
+     "x2_mm": "gap_mm",
+     "y1_mm": "me13_bottom_mm",
+     "y2_mm": "me13_top_mm",
+     "length_mm": "me13_length_mm"
+    }
+   },
+   "material": "CSC_gas",
+   "tags": [
+    "gas_gap"
+   ]
+  },
+  "chamber_me13": {
+   "solid": {
+    "trd": {
+     "x1_mm": "6 * pitch_mm",
+     "x2_mm": "6 * pitch_mm",
+     "y1_mm": "me13_bottom_mm",
+     "y2_mm": "me13_top_mm",
+     "length_mm": "me13_length_mm"
+    }
+   },
+   "material": "G4_Galactic",
+   "tags": [
+    "chamber"
+   ],
+   "children": [
+    {
+     "template": "gap_me13",
+     "placement": {
+      "linear": {
+       "count": 6,
+       "pitch_mm": [
+        "pitch_mm",
+        "0",
+        "0"
+       ],
+       "start_mm": [
+        "0 - 5 * pitch_mm / 2",
+        "0",
+        "0"
+       ],
+       "index": "layer"
+      }
+     }
+    }
+   ]
+  },
+  "gap_me21": {
+   "solid": {
+    "trd": {
+     "x1_mm": "gap_mm",
+     "x2_mm": "gap_mm",
+     "y1_mm": "me21_bottom_mm",
+     "y2_mm": "me21_top_mm",
+     "length_mm": "me21_length_mm"
+    }
+   },
+   "material": "CSC_gas",
+   "tags": [
+    "gas_gap"
+   ]
+  },
+  "chamber_me21": {
+   "solid": {
+    "trd": {
+     "x1_mm": "6 * pitch_mm",
+     "x2_mm": "6 * pitch_mm",
+     "y1_mm": "me21_bottom_mm",
+     "y2_mm": "me21_top_mm",
+     "length_mm": "me21_length_mm"
+    }
+   },
+   "material": "G4_Galactic",
+   "tags": [
+    "chamber"
+   ],
+   "children": [
+    {
+     "template": "gap_me21",
+     "placement": {
+      "linear": {
+       "count": 6,
+       "pitch_mm": [
+        "pitch_mm",
+        "0",
+        "0"
+       ],
+       "start_mm": [
+        "0 - 5 * pitch_mm / 2",
+        "0",
+        "0"
+       ],
+       "index": "layer"
+      }
+     }
+    }
+   ]
+  },
+  "gap_me31": {
+   "solid": {
+    "trd": {
+     "x1_mm": "gap_mm",
+     "x2_mm": "gap_mm",
+     "y1_mm": "me31_bottom_mm",
+     "y2_mm": "me31_top_mm",
+     "length_mm": "me31_length_mm"
+    }
+   },
+   "material": "CSC_gas",
+   "tags": [
+    "gas_gap"
+   ]
+  },
+  "chamber_me31": {
+   "solid": {
+    "trd": {
+     "x1_mm": "6 * pitch_mm",
+     "x2_mm": "6 * pitch_mm",
+     "y1_mm": "me31_bottom_mm",
+     "y2_mm": "me31_top_mm",
+     "length_mm": "me31_length_mm"
+    }
+   },
+   "material": "G4_Galactic",
+   "tags": [
+    "chamber"
+   ],
+   "children": [
+    {
+     "template": "gap_me31",
+     "placement": {
+      "linear": {
+       "count": 6,
+       "pitch_mm": [
+        "pitch_mm",
+        "0",
+        "0"
+       ],
+       "start_mm": [
+        "0 - 5 * pitch_mm / 2",
+        "0",
+        "0"
+       ],
+       "index": "layer"
+      }
+     }
+    }
+   ]
+  },
+  "gap_me41": {
+   "solid": {
+    "trd": {
+     "x1_mm": "gap_mm",
+     "x2_mm": "gap_mm",
+     "y1_mm": "me41_bottom_mm",
+     "y2_mm": "me41_top_mm",
+     "length_mm": "me41_length_mm"
+    }
+   },
+   "material": "CSC_gas",
+   "tags": [
+    "gas_gap"
+   ]
+  },
+  "chamber_me41": {
+   "solid": {
+    "trd": {
+     "x1_mm": "6 * pitch_mm",
+     "x2_mm": "6 * pitch_mm",
+     "y1_mm": "me41_bottom_mm",
+     "y2_mm": "me41_top_mm",
+     "length_mm": "me41_length_mm"
+    }
+   },
+   "material": "G4_Galactic",
+   "tags": [
+    "chamber"
+   ],
+   "children": [
+    {
+     "template": "gap_me41",
+     "placement": {
+      "linear": {
+       "count": 6,
+       "pitch_mm": [
+        "pitch_mm",
+        "0",
+        "0"
+       ],
+       "start_mm": [
+        "0 - 5 * pitch_mm / 2",
+        "0",
+        "0"
+       ],
+       "index": "layer"
+      }
+     }
+    }
+   ]
+  },
+  "gap_me234_2": {
+   "solid": {
+    "trd": {
+     "x1_mm": "gap_mm",
+     "x2_mm": "gap_mm",
+     "y1_mm": "me234_2_bottom_mm",
+     "y2_mm": "me234_2_top_mm",
+     "length_mm": "me234_2_length_mm"
+    }
+   },
+   "material": "CSC_gas",
+   "tags": [
+    "gas_gap"
+   ]
+  },
+  "chamber_me234_2": {
+   "solid": {
+    "trd": {
+     "x1_mm": "6 * pitch_mm",
+     "x2_mm": "6 * pitch_mm",
+     "y1_mm": "me234_2_bottom_mm",
+     "y2_mm": "me234_2_top_mm",
+     "length_mm": "me234_2_length_mm"
+    }
+   },
+   "material": "G4_Galactic",
+   "tags": [
+    "chamber"
+   ],
+   "children": [
+    {
+     "template": "gap_me234_2",
+     "placement": {
+      "linear": {
+       "count": 6,
+       "pitch_mm": [
+        "pitch_mm",
+        "0",
+        "0"
+       ],
+       "start_mm": [
+        "0 - 5 * pitch_mm / 2",
+        "0",
+        "0"
+       ],
+       "index": "layer"
+      }
+     }
+    }
+   ]
+  },
+  "endcap": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "16600",
+      "16600",
+      "3200"
+     ]
+    }
+   },
+   "material": "G4_Galactic",
+   "tags": [
+    "endcap"
+   ],
+   "children": [
+    {
+     "template": "chamber_me11",
+     "placement": {
+      "ring": {
+       "n": 18,
+       "radius_mm": "me11_bottom_mm * me11_length_mm / (me11_top_mm - me11_bottom_mm) + me11_length_mm / 2",
+       "phi0_deg": "0",
+       "orientation": "radial",
+       "z_mm": "-1500"
+      }
+     }
+    },
+    {
+     "template": "chamber_me11",
+     "placement": {
+      "ring": {
+       "n": 18,
+       "radius_mm": "me11_bottom_mm * me11_length_mm / (me11_top_mm - me11_bottom_mm) + me11_length_mm / 2",
+       "phi0_deg": "10",
+       "orientation": "radial",
+       "z_mm": "-1300"
+      }
+     }
+    },
+    {
+     "template": "chamber_me12",
+     "placement": {
+      "ring": {
+       "n": 18,
+       "radius_mm": "me12_bottom_mm * me12_length_mm / (me12_top_mm - me12_bottom_mm) + me12_length_mm / 2",
+       "phi0_deg": "0",
+       "orientation": "radial",
+       "z_mm": "-1100"
+      }
+     }
+    },
+    {
+     "template": "chamber_me12",
+     "placement": {
+      "ring": {
+       "n": 18,
+       "radius_mm": "me12_bottom_mm * me12_length_mm / (me12_top_mm - me12_bottom_mm) + me12_length_mm / 2",
+       "phi0_deg": "10",
+       "orientation": "radial",
+       "z_mm": "-900"
+      }
+     }
+    },
+    {
+     "template": "chamber_me13",
+     "placement": {
+      "ring": {
+       "n": 18,
+       "radius_mm": "me13_bottom_mm * me13_length_mm / (me13_top_mm - me13_bottom_mm) + me13_length_mm / 2",
+       "phi0_deg": "0",
+       "orientation": "radial",
+       "z_mm": "-700"
+      }
+     }
+    },
+    {
+     "template": "chamber_me13",
+     "placement": {
+      "ring": {
+       "n": 18,
+       "radius_mm": "me13_bottom_mm * me13_length_mm / (me13_top_mm - me13_bottom_mm) + me13_length_mm / 2",
+       "phi0_deg": "10",
+       "orientation": "radial",
+       "z_mm": "-500"
+      }
+     }
+    },
+    {
+     "template": "chamber_me21",
+     "placement": {
+      "ring": {
+       "n": 9,
+       "radius_mm": "me21_bottom_mm * me21_length_mm / (me21_top_mm - me21_bottom_mm) + me21_length_mm / 2",
+       "phi0_deg": "0",
+       "orientation": "radial",
+       "z_mm": "-300"
+      }
+     }
+    },
+    {
+     "template": "chamber_me21",
+     "placement": {
+      "ring": {
+       "n": 9,
+       "radius_mm": "me21_bottom_mm * me21_length_mm / (me21_top_mm - me21_bottom_mm) + me21_length_mm / 2",
+       "phi0_deg": "20",
+       "orientation": "radial",
+       "z_mm": "-100"
+      }
+     }
+    },
+    {
+     "template": "chamber_me234_2",
+     "placement": {
+      "ring": {
+       "n": 18,
+       "radius_mm": "me234_2_bottom_mm * me234_2_length_mm / (me234_2_top_mm - me234_2_bottom_mm) + me234_2_length_mm / 2",
+       "phi0_deg": "0",
+       "orientation": "radial",
+       "z_mm": "100"
+      }
+     }
+    },
+    {
+     "template": "chamber_me234_2",
+     "placement": {
+      "ring": {
+       "n": 18,
+       "radius_mm": "me234_2_bottom_mm * me234_2_length_mm / (me234_2_top_mm - me234_2_bottom_mm) + me234_2_length_mm / 2",
+       "phi0_deg": "10",
+       "orientation": "radial",
+       "z_mm": "300"
+      }
+     }
+    },
+    {
+     "template": "chamber_me31",
+     "placement": {
+      "ring": {
+       "n": 9,
+       "radius_mm": "me31_bottom_mm * me31_length_mm / (me31_top_mm - me31_bottom_mm) + me31_length_mm / 2",
+       "phi0_deg": "0",
+       "orientation": "radial",
+       "z_mm": "500"
+      }
+     }
+    },
+    {
+     "template": "chamber_me31",
+     "placement": {
+      "ring": {
+       "n": 9,
+       "radius_mm": "me31_bottom_mm * me31_length_mm / (me31_top_mm - me31_bottom_mm) + me31_length_mm / 2",
+       "phi0_deg": "20",
+       "orientation": "radial",
+       "z_mm": "700"
+      }
+     }
+    },
+    {
+     "template": "chamber_me234_2",
+     "placement": {
+      "ring": {
+       "n": 18,
+       "radius_mm": "me234_2_bottom_mm * me234_2_length_mm / (me234_2_top_mm - me234_2_bottom_mm) + me234_2_length_mm / 2",
+       "phi0_deg": "0",
+       "orientation": "radial",
+       "z_mm": "900"
+      }
+     }
+    },
+    {
+     "template": "chamber_me234_2",
+     "placement": {
+      "ring": {
+       "n": 18,
+       "radius_mm": "me234_2_bottom_mm * me234_2_length_mm / (me234_2_top_mm - me234_2_bottom_mm) + me234_2_length_mm / 2",
+       "phi0_deg": "10",
+       "orientation": "radial",
+       "z_mm": "1100"
+      }
+     }
+    },
+    {
+     "template": "chamber_me41",
+     "placement": {
+      "ring": {
+       "n": 9,
+       "radius_mm": "me41_bottom_mm * me41_length_mm / (me41_top_mm - me41_bottom_mm) + me41_length_mm / 2",
+       "phi0_deg": "0",
+       "orientation": "radial",
+       "z_mm": "1300"
+      }
+     }
+    },
+    {
+     "template": "chamber_me41",
+     "placement": {
+      "ring": {
+       "n": 9,
+       "radius_mm": "me41_bottom_mm * me41_length_mm / (me41_top_mm - me41_bottom_mm) + me41_length_mm / 2",
+       "phi0_deg": "20",
+       "orientation": "radial",
+       "z_mm": "1500"
+      }
+     }
+    }
+   ]
+  }
+ },
+ "world": {
+  "material": "G4_Galactic",
+  "size_mm": [
+   "20000",
+   "20000",
+   "20000"
+  ],
+  "children": [
+   {
+    "template": "endcap",
+    "placement": {
+     "single": {
+      "centre_mm": [
+       "0",
+       "0",
+       "6000"
+      ]
+     }
+    }
+   },
+   {
+    "template": "endcap",
+    "placement": {
+     "single": {
+      "centre_mm": [
+       "0",
+       "0",
+       "-6000"
+      ]
+     }
+    }
+   }
+  ]
+ },
+ "source_of_facts": {
+  "/params/me11_length_mm": "claim:detector-atlas:C148",
+  "/params/me11_top_mm": "claim:detector-atlas:C148",
+  "/params/me11_bottom_mm": "claim:detector-atlas:C148",
+  "/params/me12_length_mm": "claim:detector-atlas:C148",
+  "/params/me12_top_mm": "claim:detector-atlas:C148",
+  "/params/me12_bottom_mm": "claim:detector-atlas:C148",
+  "/params/me13_length_mm": "claim:detector-atlas:C148",
+  "/params/me13_top_mm": "claim:detector-atlas:C148",
+  "/params/me13_bottom_mm": "claim:detector-atlas:C148",
+  "/params/me21_length_mm": "claim:detector-atlas:C148",
+  "/params/me21_top_mm": "claim:detector-atlas:C148",
+  "/params/me21_bottom_mm": "claim:detector-atlas:C148",
+  "/params/me31_length_mm": "claim:detector-atlas:C148",
+  "/params/me31_top_mm": "claim:detector-atlas:C148",
+  "/params/me31_bottom_mm": "claim:detector-atlas:C148",
+  "/params/me41_length_mm": "claim:detector-atlas:C148",
+  "/params/me41_top_mm": "claim:detector-atlas:C148",
+  "/params/me41_bottom_mm": "claim:detector-atlas:C148",
+  "/params/me234_2_length_mm": "claim:detector-atlas:C148",
+  "/params/me234_2_top_mm": "claim:detector-atlas:C148",
+  "/params/me234_2_bottom_mm": "claim:detector-atlas:C148",
+  "/params/gap_mm": "claim:detector-atlas:C143",
+  "/params/gap11_mm": "claim:detector-atlas:C144",
+  "/params/pitch_mm": "claim:detector-atlas:C146",
+  "/params/pitch11_mm": "claim:detector-atlas:C146",
+  "/materials/CSC_gas/composition": "claim:detector-atlas:C145"
+ }
+}

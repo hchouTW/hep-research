@@ -1,0 +1,68 @@
+{
+ "schema": "detector-spec/1",
+ "params": {
+  "side_mm": "648",
+  "depth_mm": "166.5"
+ },
+ "materials": {
+  "ecal_composite": {
+   "components": [
+    {
+     "material": "G4_Pb",
+     "mass_fraction": "0.93699"
+    },
+    {
+     "material": "G4_POLYSTYRENE",
+     "mass_fraction": "0.06301"
+    }
+   ],
+   "density_g_cm3": "6.8"
+  }
+ },
+ "templates": {
+  "ecal": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "side_mm",
+      "side_mm",
+      "depth_mm"
+     ]
+    }
+   },
+   "material": "ecal_composite",
+   "tags": [
+    "ecal"
+   ]
+  }
+ },
+ "world": {
+  "material": "G4_Galactic",
+  "size_mm": [
+   "2000",
+   "2000",
+   "2000"
+  ],
+  "children": [
+   {
+    "template": "ecal",
+    "placement": {
+     "single": {
+      "centre_mm": [
+       "0",
+       "0",
+       "0"
+      ]
+     }
+    }
+   }
+  ]
+ },
+ "source_of_facts": {
+  "/params/side_mm": "claim:ams02:C71",
+  "/params/depth_mm": "claim:ams02:C71",
+  "/materials/ecal_composite/density_g_cm3": "claim:ams02:C207",
+  "/materials/ecal_composite/components/0/mass_fraction": "claim:ams02:C210",
+  "/materials/ecal_composite/components/1/mass_fraction": "claim:ams02:C210"
+ }
+}

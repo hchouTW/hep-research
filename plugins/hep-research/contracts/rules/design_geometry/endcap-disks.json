@@ -1,0 +1,152 @@
+{
+ "$comment": "g4sim S7 (Section 12): the design geometry of the endcap_disks kit. Each field is an input of the kit, by name.",
+ "mapping_version": "1.2.0",
+ "geometry": "endcap-disks",
+ "kit": {
+  "name": "endcap_disks",
+  "version": "1.0.0"
+ },
+ "fields": [
+  {
+   "field": "disks",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "disks",
+     "unit": "1"
+    }
+   }
+  },
+  {
+   "field": "disk_pitch_mm",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "disk_pitch_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "wedges",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "wedges",
+     "unit": "1"
+    }
+   }
+  },
+  {
+   "field": "inner_apothem_mm",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "inner_apothem_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "outer_apothem_mm",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "outer_apothem_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "wedge_inner_width_mm",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "wedge_inner_width_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "wedge_outer_width_mm",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "wedge_outer_width_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "wedge_thickness_mm",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "wedge_thickness_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "disk_inner_radius_mm",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "disk_inner_radius_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "disk_outer_radius_mm",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "disk_outer_radius_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "wedge_material",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "wedge_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "world_material",
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "world_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "materials",
+   "optional": true,
+   "from": {
+    "parameter": {
+     "role": "tracking",
+     "name": "materials",
+     "unit": "n/a"
+    }
+   }
+  }
+ ],
+ "figures_of_merit": {
+  "material-budget": {
+   "better": "smaller",
+   "unit": "1",
+   "denominator": {
+    "eta": "number"
+   },
+   "tail_sensitive": false
+  }
+ }
+}

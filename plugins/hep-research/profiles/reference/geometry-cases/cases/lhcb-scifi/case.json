@@ -1,0 +1,76 @@
+{
+ "phase": "S7",
+ "case_id": "lhcb-scifi",
+ "card_case": "LHCb SciFi",
+ "level": "L2",
+ "label": "an approximate reconstruction from the cited claims, not the experiment's geometry",
+ "experiment": "LHCb",
+ "subsystem": "SciFi tracker, Upgrade I: three stations of four layers of modules",
+ "corresponding_kit": null,
+ "cited_claims": [
+  "detector-atlas:C157",
+  "detector-atlas:C158",
+  "detector-atlas:C159",
+  "detector-atlas:C160",
+  "detector-atlas:C161",
+  "detector-atlas:C162",
+  "detector-atlas:C163"
+ ],
+ "quantities": [
+  {
+   "name": "modules",
+   "definition": "SciFi modules in the expanded IR (12 layers)",
+   "reference": 128,
+   "tolerance_relative": 0,
+   "derivation": "4 layers x (10 + 10 + 12) modules in T1, T2, T3 (detector-atlas:C157; C158: six per side in T3, one less per side in T1 and T2); independently 4096 SiPM arrays (C159) / (16 arrays at each of a module's two readout ends, C159, C160) = 128",
+   "sources": [],
+   "independence": {
+    "verified": true,
+    "result": "a design count derived from two independent statements of the collaboration's detector paper (module layout and SiPM count), which agree; not a simulation output"
+   },
+   "negative_control": {
+    "change": "one module fewer in each X layer of T1 and T2 (9 instead of 10)",
+    "pointer": "/templates/layer_x10/children/0/placement/linear/count",
+    "value": 9,
+    "expected_shift_relative": -0.0313
+   },
+   "detection_limit_relative": 0,
+   "measure": {
+    "kind": "count",
+    "tag": "module"
+   }
+  },
+  {
+   "name": "cfrp_x0",
+   "definition": "x/X0 of the two CFRP skins of one module at normal incidence (a geantino through the last X layer of T3, inside a fibre mat)",
+   "reference": 0.00145,
+   "tolerance_relative": 0.02,
+   "derivation": "LHCb table 7: 2 x 200 um / 27.6 cm = 0.145% X0 (detector-atlas:C163), an estimate from the thickness and the PDG 2020 radiation length",
+   "sources": [],
+   "independence": {
+    "verified": true,
+    "result": "independent of Geant4: table 7 is LHCb's estimate from component thicknesses and PDG radiation lengths, not a simulation (the 13.7% X0 of figure 46 is simulated and is not used). Geant4 computes the radiation length of the modelled carbon with the Tsai formula; agreement validates the skins' thickness, density and the carbon-only material within the stated approximation, not radiation-length physics. Tolerance 2%: the printed 0.145% (+-0.34%) and 27.6 cm (+-0.18%), and the carbon-only composition, whose difference from LHCb's 42.5 g/cm2 (27.6 cm x 1.54 g/cm3) is not sourced here and is taken as at most 1.5%."
+   },
+   "negative_control": {
+    "change": "CFRP skins 0.18 mm instead of 0.2 mm",
+    "pointer": "/params/cfrp_mm",
+    "value": "0.18",
+    "expected_shift_relative": -0.1
+   },
+   "detection_limit_relative": 0.02,
+   "measure": {
+    "kind": "path_x0",
+    "request": "request.json"
+   }
+  }
+ ],
+ "approximations": [
+  "each module is the stack of table 7's components (C163) over the full module outline, 4 x 130.6 mm + 3 x 0.35 mm wide and 2 x 2424 mm + 2 mm high (C161, C162): CFRP 0.2, honeycomb 19.7, glue 0.26, polyimide 2 x 0.025, the fibre-mat layer (eight mats of 1.35 mm on a 4 x 2 grid), polyimide 2 x 0.025, glue, honeycomb, CFRP; the order of glue and polyimide within the stack is not sourced",
+  "materials have table 7's densities, with compositions that are not sourced: CFRP as carbon only, polyaramid as C14H10N2O2, the glue as a bisphenol-A epoxy, the polyimide as C22H10N2O5, the fibre mat as polystyrene (the TiO2-loaded epoxy is not modelled); only the CFRP enters a quantity",
+  "sidewalls (+0.145% X0), mirror end-pieces (+1.15% X0), SiPMs, readout boxes and C-Frames are not modelled",
+  "modules are placed at the cited pitches (531 mm X, 532 mm stereo) and the stereo layers rotated by +-5 degrees about z as a whole; the z positions of the layers (100 mm apart) and stations (1.5 m apart) are not sourced",
+  "the per-module total of 1.03% X0 (table 7) needs a path scorer summing several materials, which the S7 path_x0 measure does not provide; it is not a quantity of this case"
+ ],
+ "status": "comparison with cited values: not validated",
+ "result": null
+}

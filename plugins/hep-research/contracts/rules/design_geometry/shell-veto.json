@@ -1,0 +1,123 @@
+{
+ "$comment": "g4sim S7 (Section 12): the design geometry of the shell_veto kit. Each field is an input of the kit, by name.",
+ "mapping_version": "1.2.0",
+ "geometry": "shell-veto",
+ "kit": {
+  "name": "shell_veto",
+  "version": "1.0.0"
+ },
+ "fields": [
+  {
+   "field": "shell_inner_radius_mm",
+   "from": {
+    "parameter": {
+     "role": "veto",
+     "name": "shell_inner_radius_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "shell_thickness_mm",
+   "from": {
+    "parameter": {
+     "role": "veto",
+     "name": "shell_thickness_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "shell_length_mm",
+   "from": {
+    "parameter": {
+     "role": "veto",
+     "name": "shell_length_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "readouts",
+   "from": {
+    "parameter": {
+     "role": "veto",
+     "name": "readouts",
+     "unit": "1"
+    }
+   }
+  },
+  {
+   "field": "readout_side_mm",
+   "from": {
+    "parameter": {
+     "role": "veto",
+     "name": "readout_side_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "readout_length_mm",
+   "from": {
+    "parameter": {
+     "role": "veto",
+     "name": "readout_length_mm",
+     "unit": "mm"
+    }
+   }
+  },
+  {
+   "field": "shell_material",
+   "from": {
+    "parameter": {
+     "role": "veto",
+     "name": "shell_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "readout_material",
+   "from": {
+    "parameter": {
+     "role": "veto",
+     "name": "readout_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "world_material",
+   "from": {
+    "parameter": {
+     "role": "veto",
+     "name": "world_material",
+     "unit": "n/a"
+    }
+   }
+  },
+  {
+   "field": "materials",
+   "optional": true,
+   "from": {
+    "parameter": {
+     "role": "veto",
+     "name": "materials",
+     "unit": "n/a"
+    }
+   }
+  }
+ ],
+ "figures_of_merit": {
+  "veto-inefficiency": {
+   "better": "smaller",
+   "unit": "1",
+   "denominator": {
+    "species": "string",
+    "position_mm": "number"
+   },
+   "tail_sensitive": true
+  }
+ }
+}

@@ -19,7 +19,7 @@ from __future__ import annotations
 import hashlib
 import math
 
-from core.simulation import rng
+from core.simulation import efficiency_map, rng
 
 SCHEMA = "response-pipeline/1"
 HANDOFF_SCHEMA = "response-handoff/1"
@@ -101,9 +101,14 @@ def yield_factor(document: dict, event: int, volume_id: int, relative_width: flo
     return rng.SubStream(key, event, volume_id).gamma(shape) / shape
 
 
-def efficiencies(map_document: dict, bin_index: int) -> list:
-    """epsilon_c(x_b) of an analytic efficiency-map/1."""
+def efficiencies(map_document: dict, bin_index: int, replica: int = 0) -> list:
+    """epsilon_c(x_b) of an efficiency-map/1: analytic (S4), or mapped (S7), where the pipeline's replica r > 0 takes the map's Dirichlet replica r."""
     form = map_document["form"]
+    if form["kind"] == efficiency_map.FORM:
+        try:
+            return efficiency_map.efficiencies(map_document, bin_index, replica)
+        except efficiency_map.MapError as err:
+            raise ResponseError("efficiency-map", str(err)) from err
     count = len(map_document["channels"])
     values = list(form["value"]) if form["kind"] == "uniform" else [a + b * bin_index for a, b in zip(form["intercept"], form["slope_per_bin"])]
     if len(values) != count or any(value < 0 for value in values) or math.fsum(values) > 1.0:
@@ -111,8 +116,9 @@ def efficiencies(map_document: dict, bin_index: int) -> list:
     return values
 
 
-def scintillation_event(document: dict, stage: dict, event: int, volume_id: int, bins: dict, map_document: dict, factor: float = 1.0) -> dict:
-    """Photoelectrons per channel of one volume in one event. `bins` is {bin: (E^L, E^S, n^L)}; each bin has its own sub-stream, so the order of the bins does not matter."""
+def scintillation_event(document: dict, stage: dict, event: int, volume_id: int, bins: dict, map_document: dict, factor: float = 1.0, map_replica: int | None = None) -> dict:
+    """Photoelectrons per channel of one volume in one event. `bins` is {bin: (E^L, E^S, n^L)}; each bin has its own sub-stream, so the order of the bins does not matter.
+    A mapped map takes the pipeline's replica unless `map_replica` names another (S7: a test of the map alone holds the photon streams fixed)."""
     parameters = stage["parameters"]
     light_yield, scale = parameters["light_yield_per_MeV"]["value"], parameters["resolution_scale"]["value"]
     key = rng.volume_key(document["run_seed"], stage["name"], document["replica"])
@@ -120,20 +126,26 @@ def scintillation_event(document: dict, stage: dict, event: int, volume_id: int,
     for bin_index, (large, small, steps) in bins.items():
         stream = rng.SubStream(key, event, volume_id, bin_index)
         photons = bin_photons(stream, light_yield, scale, large, small, steps, factor)
-        for name, count in zip(map_document["channels"], stream.multinomial(photons, efficiencies(map_document, bin_index))):
+        for name, count in zip(map_document["channels"], stream.multinomial(photons, efficiencies(map_document, bin_index, document["replica"] if map_replica is None else map_replica))):
             channels[name] += count
     return channels
 
 
-def photon_times(document: dict, stage_name: str, event: int, volume_id: int, bin_index: int, photons: int, decay_ns: float, transit_ns: float) -> list:
-    """A time per detected photon: an exponential delay and an exponential transit, from one output group each, in blocks of 2^15 photons."""
+def photon_times(document: dict, stage_name: str, event: int, volume_id: int, bin_index: int, photons: int, decay_ns: float, transit_ns: float,
+                 map_document: dict | None = None, rise_ns: float = 0.0) -> list:
+    """A time per detected photon, emission delay plus transit, from one output group each, in blocks of 2^15 photons. The transit is
+    exponential, or with a mapped map drawn from the bin's arrival-time distribution (S7); a component with a rise time adds an exponential
+    rise from a second group, so the delay is the convolution of rise and decay (Section 10.4)."""
+    mapped = map_document is not None and map_document["form"]["kind"] == efficiency_map.FORM
     times = []
     for start in range(0, photons, PHOTON_BLOCK):
         key = rng.volume_key(document["run_seed"], f"{stage_name}/time/{start // PHOTON_BLOCK}", document["replica"])
         stream = rng.SubStream(key, event, volume_id, bin_index)
         for _ in range(min(PHOTON_BLOCK, photons - start)):
             first, second = stream.group()
-            times.append(-decay_ns * math.log(first) - transit_ns * math.log(second))
+            delay = -decay_ns * math.log(first) - (rise_ns * math.log(stream.group()[0]) if rise_ns > 0 else 0.0)
+            transit = efficiency_map.transit_ns(map_document, bin_index, second) if mapped and map_document is not None else -transit_ns * math.log(second)
+            times.append(delay + transit)
     return times
 
 

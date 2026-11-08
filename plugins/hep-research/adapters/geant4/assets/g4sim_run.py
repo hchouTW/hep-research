@@ -3,9 +3,9 @@
 
 Usage: g4sim_run.py check-spec --run RUN.json [--detector DETECTOR.json]
        g4sim_run.py run --detector D.json --request R.json --run RUN.json --record PROBE.json --program PATH --work DIR
-       g4sim_run.py geometry-check --detector D.json --run RUN.json --program PATH --work DIR
+       g4sim_run.py geometry-check --detector D.json --run RUN.json --program PATH --work DIR [--claims CLAIMS.json]
 check-spec holds the checks of Geant4 behavior (Appendix B); S2 has three: nothing may call SetSurfaceTolerance, the run card's seeding must
-equal the legacy block's, and optical physics is refused before S7. run needs a re-acquisition record for the legacy block (T1 class).
+equal the legacy block's, and optical physics (S7) comes only through G4OpticalPhysics with separated accounting. run needs a re-acquisition record for the legacy block (T1 class).
 A project with agent_policy, or --protected, runs this in protected mode. Prints JSON with a status key. Exit 0 ok, 1 the run failed,
 2 refused or bad input, 3 a missing dataset.
 """
@@ -42,6 +42,7 @@ from core.protected.guard import guard, protected_main  # noqa: E402
 DATASETS = ROOT / "contracts/rules/geant4_datasets.json"
 SURFACE_TOLERANCE = re.compile(r"surface.?tolerance|world.?maximum.?extent", re.IGNORECASE)
 OPTICAL = re.compile(r"optical", re.IGNORECASE)
+OPTICAL_CONSTRUCTOR = "G4OpticalPhysics"
 TIMING_FIELDS = ("wall_seconds", "cpu_seconds", "startup_seconds", "threads", "load_at_start")
 BEAM_ON_MARK = "G4SIM_BEAM_ON "
 MERGE_MARK = "G4SIM_MERGE_SECONDS "
@@ -58,14 +59,22 @@ def check_card(card: dict, legacy: dict | None = None) -> list[dict]:
     for command in commands:
         if SURFACE_TOLERANCE.search(command):
             findings.append({"code": "surface-tolerance", "path": "ui_commands", "message": f"would call SetSurfaceTolerance: {command}"})
-        if OPTICAL.search(command):
-            findings.append({"code": "optical-before-s7", "path": "ui_commands", "message": f"optical physics is refused before S7: {command}"})
+        if OPTICAL.search(command):  # optical settings come through the run card, where check-spec sees them
+            findings.append({"code": "optical-ui-command", "path": "ui_commands", "message": f"optical settings belong in physics.optical, not a UI command: {command}"})
     for key, value in physics.items():
         if SURFACE_TOLERANCE.search(key):
             findings.append({"code": "surface-tolerance", "path": f"physics.{key}", "message": "would call SetSurfaceTolerance"})
     for name in (*physics.get("extra_constructors", ()), physics.get("reference_list") or "", physics.get("em_constructor") or ""):
-        if OPTICAL.search(name):
-            findings.append({"code": "optical-before-s7", "path": "physics", "message": f"optical physics is refused before S7: {name}"})
+        if OPTICAL.search(name) and name != OPTICAL_CONSTRUCTOR:
+            findings.append({"code": "optical-constructor", "path": "physics", "message": f"optical physics comes only through {OPTICAL_CONSTRUCTOR}: {name}"})
+    if OPTICAL_CONSTRUCTOR in physics.get("extra_constructors", ()):
+        # the optical-photon class of Section 8.4 exists only in separated accounting; legacy accounting would book photons as ordinary tracks
+        if card.get("accounting") != "separated":
+            findings.append({"code": "optical-class-missing", "path": "accounting", "message": "optical physics needs separated accounting, which holds the optical-photon class"})
+        if legacy is not None:
+            findings.append({"code": "optical-legacy", "path": "physics", "message": "legacy mode keeps the old programs, which have no optical physics"})
+    elif "optical" in physics:
+        findings.append({"code": "optical-without-constructor", "path": "physics.optical", "message": f"physics.optical needs {OPTICAL_CONSTRUCTOR} in extra_constructors"})
     if legacy is not None and card.get("run", {}).get("seeding") != legacy.get("seeding"):
         findings.append({"code": "seeding-differs", "path": "run.seeding",
                          "message": f"the run card says {card.get('run', {}).get('seeding')!r}, the legacy block {legacy.get('seeding')!r}"})
@@ -132,9 +141,11 @@ def read_record(path: Path) -> dict:
 def run(args) -> dict:
     detector_text = args.detector.read_bytes()
     detector, request, card = (json.loads(path.read_text(encoding="utf-8")) for path in (args.detector, args.request, args.run))
-    checked = geometry.check_spec(detector_text)
+    checked = geometry.check_spec(detector_text, folder=args.detector.parent)
     if checked["status"] != "ok":
         return {"status": "rejected", "findings": checked["findings"]}
+    if checked.get("field_map_files"):  # legacy mode keeps the old programs' fields (Section 6.2.8)
+        return {"status": "rejected", "findings": [{"code": "field-map-legacy", "path": "/fields", "message": "a field map is not available in legacy mode"}]}
     old = translate.merge(detector, request, card)
     block = translate.legacy_block(read_record(args.record), old, card["run"]["seeding"], args.observer_revision)
     findings = check_card(card, block)
@@ -183,9 +194,59 @@ PRISM_RADIUS_TOLERANCE_MM = 1e-9
 TUBE_ANGLE_TOLERANCE_RAD = 1e-12  # the IR holds degrees, Geant4 radians: the conversion is not exact
 
 
-def solid_problems(item: dict, node: dict, polyhedron: dict | None) -> list[str]:
+def _angle_problems(name: str, held: dict, solid: dict, pairs: tuple) -> list[str]:
+    """Angles Geant4 holds in radians against the IR's degrees; a start may sit a whole turn away."""
+    problems = []
+    for key, source in pairs:
+        turn = (float.fromhex(held[key]) - math.radians(float(solid[source]))) / math.tau
+        if abs(turn - (round(turn) if key.startswith("start") else 0)) * math.tau > TUBE_ANGLE_TOLERANCE_RAD:
+            problems.append(f"logical {name}: {key} differs")
+    return problems
+
+
+def s7_solid_problems(name: str, shape: str, solid: dict, curved: dict | None, polyhedron: dict | None) -> list[str]:
+    """S7's shapes as Geant4 built them (ProbeV2's curved_solids and polyhedra): lengths bit for bit, angles to 1e-12 rad, and a
+    polyhedra's corners at the circumradii, which proves the apothem conversion (GB23)."""
+    if shape == "polyhedra":
+        if polyhedron is None or polyhedron["sides"] != solid["sides"]:
+            return [f"logical {name}: the polyhedra was not written back with {solid['sides']} sides"]
+        start = (float.fromhex(polyhedron["start_phi_rad"]) - math.radians(float(solid["phi_start_deg"]))) / math.tau
+        if abs(start - round(start)) * math.tau > TUBE_ANGLE_TOLERANCE_RAD:
+            return [f"logical {name}: start_phi_rad differs"]
+        got = sorted(float.fromhex(value) for value in polyhedron["corners_r_mm"])
+        want = sorted(float(value) for value in solid["circumradius_rmin_mm"] + solid["circumradius_rmax_mm"])
+        if len(got) != len(want) or any(abs(a - b) > PRISM_RADIUS_TOLERANCE_MM for a, b in zip(got, want)):
+            return [f"logical {name}: its corners are at {got} mm, the circumradii are {want}"]
+        return []
+    wanted = {"cone": "G4Cons", "sphere_section": "G4Sphere", "polycone": "G4Polycone"}[shape]
+    if curved is None or curved["type"] != wanted:
+        return [f"logical {name}: no {wanted} was written back"]
+    if shape == "cone":
+        # G4Cons puts 1e3 kRadTolerance (1e-6 mm) in place of one zero inner radius when the other is not zero
+        problems = [f"logical {name}: {key} differs" for key, source in (("rmin1_mm", "rmin1_mm"), ("rmax1_mm", "rmax1_mm"), ("rmin2_mm", "rmin2_mm"), ("rmax2_mm", "rmax2_mm"), ("half_z_mm", "dz_mm"))
+                    if float.fromhex(curved[key]) != float(solid[source]) and not (key.startswith("rmin") and float(solid[source]) == 0 and float.fromhex(curved[key]) <= 1e-6)]
+        return problems + _angle_problems(name, curved, solid, (("start_phi_rad", "phi_start_deg"), ("delta_phi_rad", "phi_span_deg")))
+    if shape == "sphere_section":
+        problems = [f"logical {name}: {key} differs" for key in ("rmin_mm", "rmax_mm") if float.fromhex(curved[key]) != float(solid[key])]
+        return problems + _angle_problems(name, curved, solid, (("start_phi_rad", "phi_start_deg"), ("delta_phi_rad", "phi_span_deg"), ("start_theta_rad", "theta_start_deg"), ("delta_theta_rad", "theta_span_deg")))
+    start = (float.fromhex(curved["start_phi_rad"]) - math.radians(float(solid["phi_start_deg"]))) / math.tau
+    span = float.fromhex(curved["end_phi_rad"]) - float.fromhex(curved["start_phi_rad"]) - math.radians(float(solid["phi_span_deg"]))
+    # G4Polycone sets the start of a full turn to 0 whatever it was given (observed on Geant4 11.4.3): no start to compare then
+    full_turn = float(solid["phi_span_deg"]) == 360.0
+    if (not full_turn and abs(start - round(start)) * math.tau > TUBE_ANGLE_TOLERANCE_RAD) or abs(span) > TUBE_ANGLE_TOLERANCE_RAD:
+        return [f"logical {name}: its phi section differs"]
+    got = sorted((float.fromhex(r), float.fromhex(z)) for r, z in curved["corners"])
+    want = sorted([(float(r), float(z)) for r, z in zip(solid["rmax_mm"], solid["z_mm"])] + [(float(r), float(z)) for r, z in zip(solid["rmin_mm"], solid["z_mm"])])
+    if got != want:
+        return [f"logical {name}: its (r, z) corners {got} are not the planes' {want}"]
+    return []
+
+
+def solid_problems(item: dict, node: dict, polyhedron: dict | None, curved: dict | None = None) -> list[str]:
     """The solid Geant4 built against the IR: bit for bit in lengths; a prism's corners at its circumradius, which proves the apothem conversion."""
     shape, solid, name = node["shape"], node.get("solid"), item["name"]
+    if shape in ("cone", "sphere_section", "polycone", "polyhedra"):
+        return s7_solid_problems(name, shape, solid, curved, polyhedron)
     if shape == "polygon_prism":
         if polyhedron is None or polyhedron["sides"] != solid["sides"]:
             return [f"logical {name}: the prism was not written back with {solid['sides']} sides"]
@@ -201,6 +262,81 @@ def solid_problems(item: dict, node: dict, polyhedron: dict | None) -> list[str]
             turn = (float.fromhex(parameters[key]) - math.radians(float(solid[source]))) / math.tau  # G4Tubs may hold the start a whole turn away
             if abs(turn - (round(turn) if key == "start_phi_rad" else 0)) * math.tau > TUBE_ANGLE_TOLERANCE_RAD:
                 problems.append(f"logical {name}: {key} differs")
+    return problems
+
+
+OPTICAL_RELATIVE_TOLERANCE = 1e-12  # energies pass through Geant4's eV: x * eV / eV need not return x exactly
+SURFACE_ENUMS = {"model": {"glisur": 0, "unified": 1},
+                 "finish": {"polished": 0, "polishedfrontpainted": 1, "polishedbackpainted": 2, "ground": 3, "groundfrontpainted": 4, "groundbackpainted": 5},
+                 "type": {"dielectric_metal": 0, "dielectric_dielectric": 1}}
+
+
+def expected_optical_table(material: dict) -> dict:
+    """What OpticalTable (Optics.hh) builds from an IR material: {property: spectrum or number}, in the units of the write-back."""
+    table = {}
+    optical = material.get("optical", {})
+    for key, source in (("RINDEX", "rindex"), ("ABSLENGTH", "absorption_length_mm"), ("RAYLEIGH", "rayleigh_length_mm")):
+        if source in optical:
+            table[key] = optical[source]
+    if "mie" in optical:
+        table.update({"MIEHG": optical["mie"]["length_mm"], "MIEHG_FORWARD": optical["mie"]["forward_g"],
+                      "MIEHG_BACKWARD": optical["mie"]["backward_g"], "MIEHG_FORWARD_RATIO": optical["mie"]["forward_ratio"]})
+    if "wls" in optical:
+        table.update({"WLSABSLENGTH": optical["wls"]["absorption_length_mm"], "WLSCOMPONENT": optical["wls"]["emission"],
+                      "WLSTIMECONSTANT": optical["wls"]["time_constant_ns"]})
+    components = material.get("scintillation", {}).get("components")
+    if components:
+        table.update({"SCINTILLATIONYIELD": material["scintillation"]["yield_per_MeV"], "RESOLUTIONSCALE": material["scintillation"]["resolution_scale"]})
+        for number, component in enumerate(components, start=1):
+            table.update({f"SCINTILLATIONCOMPONENT{number}": component["spectrum"], f"SCINTILLATIONTIMECONSTANT{number}": component["decay_ns"],
+                          f"SCINTILLATIONRISETIME{number}": component["rise_ns"], f"SCINTILLATIONYIELD{number}": component["fraction"]})
+    return table
+
+
+def _close(held: str, wanted) -> bool:
+    got, value = float.fromhex(held), float(wanted)
+    return abs(got - value) <= OPTICAL_RELATIVE_TOLERANCE * max(abs(value), 1e-300)
+
+
+def _table_problems(where: str, held: dict, wanted: dict) -> list[str]:
+    problems = [f"{where}: {key} is {'missing' if key in wanted else 'not in the IR'}" for key in sorted(set(wanted) ^ set(held))]
+    for key in sorted(set(wanted) & set(held)):
+        if isinstance(wanted[key], dict):
+            pairs = list(zip(held[key]["energy_eV"], wanted[key]["energy_eV"])) + list(zip(held[key]["value"], wanted[key]["value"]))
+            if len(held[key]["value"]) != len(wanted[key]["value"]) or not all(_close(a, b) for a, b in pairs):
+                problems.append(f"{where}: {key} differs")
+        elif not _close(held[key], wanted[key]):
+            problems.append(f"{where}: {key} differs")
+    return problems
+
+
+def optical_problems(ir: dict, record: dict) -> list[str]:
+    """S7: each material's optical table and each optical surface as Geant4 holds them, against the IR (a wrong refractive index is the
+    negative test of Section 15.1)."""
+    physical = ir["physical"]
+    held = record.get("optical", {"materials": {}, "surfaces": {}})
+    problems = []
+    used = {node["material"] for node in physical["templates"].values()}
+    wanted = {name: expected_optical_table(material) for name, material in physical["materials"].items() if name in used}
+    wanted = {name: table for name, table in wanted.items() if table}
+    for name in sorted(set(wanted) | set(held["materials"])):
+        if name not in held["materials"] or name not in wanted:
+            problems.append(f"material {name}: an optical table {'was not built' if name in wanted else 'is not in the IR'}")
+            continue
+        problems += _table_problems(f"material {name}", held["materials"][name], wanted[name])
+    surfaces = physical.get("optical_surfaces", {})
+    for name in sorted(set(surfaces) | set(held["surfaces"])):
+        if name not in held["surfaces"] or name not in surfaces:
+            problems.append(f"surface {name}: {'not built' if name in surfaces else 'not in the IR'}")
+            continue
+        got, entry = held["surfaces"][name], surfaces[name]
+        if ("skin" in entry) != ("skin" in got) or got.get("skin", got.get("border")) != entry.get("skin", entry.get("border")):
+            problems.append(f"surface {name}: placed on {got.get('skin', got.get('border'))}, the IR says {entry.get('skin', entry.get('border'))}")
+        problems += [f"surface {name}: {key} differs" for key, names in SURFACE_ENUMS.items() if got[key] != names[entry[key]]]
+        alpha = math.radians(float(entry.get("sigma_alpha_deg", 0)))
+        if abs(float.fromhex(got["sigma_alpha_rad"]) - alpha) > TUBE_ANGLE_TOLERANCE_RAD:
+            problems.append(f"surface {name}: sigma_alpha differs")
+        problems += _table_problems(f"surface {name}", got["table"], {key.upper(): entry[key] for key in ("reflectivity", "efficiency") if key in entry})
     return problems
 
 
@@ -229,12 +365,13 @@ def tree_problems(ir: dict, record: dict, field_records: dict) -> list[str]:
             problems.append(f"placement {key}: rotation differs")
     problems += [f"placement {key} is not in the IR" for key in written]
     polyhedra = {item["logical"]: item for item in record.get("polyhedra", [])}
+    curved = {item["logical"]: item for item in record.get("curved_solids", [])}
     for item in geometry["logical_volumes"]:
         node = physical["templates"].get(item["name"])
         if node is None:
             problems.append(f"logical {item['name']} is not in the IR")
             continue
-        problems += solid_problems(item, node, polyhedra.get(item["name"]))
+        problems += solid_problems(item, node, polyhedra.get(item["name"]), curved.get(item["name"]))
         if node["region"] != "default" and item["region"] != node["region"]:
             problems.append(f"logical {item['name']}: region {item['region']}, the IR says {node['region']}")
     for thread, rows in field_records.items():
@@ -285,7 +422,8 @@ def read_field_records(folder: Path) -> dict:
 
 def geometry_check(args) -> dict:
     card = json.loads(args.run.read_text(encoding="utf-8"))
-    checked = geometry.check_spec(args.detector.read_bytes())
+    claims = json.loads(args.claims.read_text(encoding="utf-8")) if getattr(args, "claims", None) else []  # S7: a cited specification, as simulate
+    checked = geometry.check_spec(args.detector.read_bytes(), claims, folder=args.detector.parent)
     if checked["status"] != "ok":
         return {"status": "rejected", "findings": checked["findings"]}
     findings = check_card(card)
@@ -298,12 +436,13 @@ def geometry_check(args) -> dict:
     work.mkdir(parents=True, exist_ok=True)
     (work / "ir.json").write_text(json.dumps(checked["ir"]), encoding="utf-8")
     (work / "run.json").write_text(json.dumps(card), encoding="utf-8")
+    staged = simulate_new.stage_field_maps(checked, work)
     with (work / "log.txt").open("w", encoding="utf-8") as log:
         code = subprocess.run([str(args.program.resolve()), "--geometry-check", "ir.json", "run.json"], cwd=work, stdout=log, stderr=log, check=False).returncode
     if code != 0:
         return {"status": "failed", "exit_status": code}
     record = read_record(work / "probe-v2.json")
-    problems = tree_problems(checked["ir"], record, read_field_records(work)) + material_problems(record)
+    problems = tree_problems(checked["ir"], record, read_field_records(work)) + material_problems(record) + optical_problems(checked["ir"], record) + simulate_new.field_sample_problems(staged, work)
     overlaps = overlaps_in_log(work / "log.txt")
     if overlaps:
         problems.append(f"Geant4's overlap test reported {overlaps} overlap(s)")
@@ -346,6 +485,7 @@ def main(argv=None) -> int:
     shape = commands.add_parser("geometry-check")
     for name in ("detector", "run", "program", "work"):
         shape.add_argument(f"--{name}", type=Path, required=True)
+    shape.add_argument("--claims", type=Path, help="a JSON list of the claim ids of the profiles the specification depends on, as contracts/geometry.py --claims")
     shape.add_argument("--protected", action="store_true", help="protected mode (a project with agent_policy needs no flag)")
     simulating = commands.add_parser("simulate")
     for name in ("detector", "request", "run", "program", "work"):

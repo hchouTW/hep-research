@@ -203,11 +203,18 @@ def query(args, defaults):
     hits = [r for r in rows if _match(r, args)]
     if args.page < 0:
         raise InputError("--page must be >= 0")
-    start = args.page * PAGE_ROWS
-    page = hits[start:start + PAGE_ROWS]
-    while page and len(json.dumps(page).encode()) > PAGE_BYTES - 2048:
-        page = page[:-1]
-    nxt = args.page + 1 if start + len(page) < len(hits) and page else None
+    # pages are cut in order from the first row, each at most PAGE_ROWS rows and within the byte budget, so a page the budget
+    # shortens moves the next page's start instead of skipping rows (page N used to start at N * PAGE_ROWS whatever page N-1 held)
+    start, number = 0, 0
+    while True:
+        page = hits[start:start + PAGE_ROWS]
+        while len(page) > 1 and len(json.dumps(page).encode()) > PAGE_BYTES - 2048:
+            page = page[:-1]
+        if number == args.page or not page:
+            break
+        start, number = start + len(page), number + 1
+    page = page if number == args.page else []
+    nxt = args.page + 1 if page and start + len(page) < len(hits) else None
     out = {"total": len(hits), "page": args.page, "rows": page, "next_page": nxt,
            "order": ["bound experiment profile", "user atlas", "plugin atlas"]}
     if not hits:

@@ -1,0 +1,105 @@
+{
+ "phase": "S7",
+ "case_id": "epic-hpdirc",
+ "card_case": "ePIC hpDIRC bars",
+ "level": "L1",
+ "label": "an approximate reconstruction from the cited claims, not the experiment's geometry",
+ "experiment": "ePIC",
+ "subsystem": "barrel PID, high-performance DIRC: bar boxes and fused-silica radiator bars, as in the ePIC simulation geometry 26.11.0, status development",
+ "corresponding_kit": "cherenkov",
+ "cited_claims": [
+  "eic:C26",
+  "eic:C27",
+  "eic:C28",
+  "eic:C29",
+  "eic:C30",
+  "eic:C31"
+ ],
+ "quantities": [
+  {
+   "name": "bar_boxes",
+   "definition": "bar boxes (volumes tagged barbox) in the expanded IR",
+   "reference": 12,
+   "tolerance_relative": 0,
+   "derivation": "DIRCBox_count = 12 (eic:C27); the PDR draft states 12 sectors and 12 bar boxes (eic:C30, Tier 2)",
+   "sources": [],
+   "independence": {
+    "verified": true,
+    "result": "a design count, not a simulation output; the PDR draft (a document other than the geometry release) states the same 12 sectors, so the count checks how the case expresses the ring, not physics"
+   },
+   "negative_control": {
+    "change": "11 bar boxes in the ring",
+    "pointer": "/world/children/0/placement/ring/n",
+    "value": 11,
+    "expected_shift_relative": -0.0833
+   },
+   "detection_limit_relative": 0,
+   "measure": {
+    "kind": "count",
+    "tag": "barbox"
+   }
+  },
+  {
+   "name": "bar_pieces",
+   "definition": "fused-silica bar pieces (volumes tagged bar) in the expanded IR: 10 long bars per box, each of 4 bonded pieces",
+   "reference": 480,
+   "tolerance_relative": 0,
+   "derivation": "12 x 10 x 4 (DIRCBox_count, DIRCBar_count_y, DIRCBar_count_z, eic:C27); the PDR draft states 120 long bars of four bonded shorter bars each (eic:C30, eic:C31, Tier 2): 120 x 4 = 480",
+   "sources": [],
+   "independence": {
+    "verified": true,
+    "result": "a design count, not a simulation output; the PDR draft states 120 long bars of four pieces independently of the geometry file; the count does not depend on the disputed bar length"
+   },
+   "negative_control": {
+    "change": "9 bars across a box instead of 10",
+    "pointer": "/templates/barbox/children/0/placement/grid/n/1",
+    "value": 9,
+    "expected_shift_relative": -0.1
+   },
+   "detection_limit_relative": 0,
+   "measure": {
+    "kind": "count",
+    "tag": "bar"
+   }
+  },
+  {
+   "name": "bar_x0",
+   "definition": "x/X0 of one fused-silica bar for a geantino crossing it radially at normal incidence (box 0, y = 10 mm, z = 100 mm)",
+   "reference": 0.14036,
+   "tolerance_relative": 0.01,
+   "derivation": "17.25 mm (bar height, eic:C28; also the PDR mechanics, eic:C31) / 122.9 mm (PDG fused quartz at 2.200 g/cm3, eic:C26); the geometry's QuartzOptical has the same density, 2.2 g/cm3 (eic:C29)",
+   "sources": [
+    {
+     "source": "PDG Atomic and Nuclear Properties (2025 web edition), eic:S15 via claim eic:C26",
+     "url": "https://pdg.lbl.gov/2025/AtomicNuclearProperties/",
+     "read_level": "page",
+     "verified": "2026-11-08",
+     "value": "fused quartz: density 2.200 g/cm3, radiation length 27.05 g/cm2 (12.29 cm)"
+    }
+   ],
+   "independence": {
+    "verified": true,
+    "result": "independent of Geant4: the thickness and density are design values written as input to the ePIC simulation (release 26.11.0), not outputs of it, and the radiation length is PDG's tabulation; the reference is not a Geant4 output. Geant4 computes radiation lengths with the same Tsai formula, so agreement validates the geometry and the material definition, not Geant4's radiation-length physics. The 17.25 mm height is chosen over the 17 mm of the PDR description (eic:C30) and of Tier 3 proceedings: the geometry and the PDR mechanics (both Tier 2) give 17.25 mm, and 17 mm reads as a rounding."
+   },
+   "negative_control": {
+    "change": "QuartzOptical at 2.32 g/cm3 (the NIST default of G4_SILICON_DIOXIDE) instead of 2.2",
+    "pointer": "/materials/QuartzOptical/density_g_cm3",
+    "value": "2.32",
+    "expected_shift_relative": 0.0545
+   },
+   "detection_limit_relative": 0.01,
+   "measure": {
+    "kind": "path_x0",
+    "request": "request.json"
+   }
+  }
+ ],
+ "approximations": [
+  "only the bar boxes and the bars are modelled: no prisms, lenses, mirrors, glue volumes, rails or readout boxes; the glue layers (0.025 mm, eic:C28) are left as air gaps of the box",
+  "the bar length is disputed (geometry 4 x 1140.0 mm + glue = 4560.1 mm, eic:C28; PDR draft 4580 mm, eic:C31, and 4880 mm, eic:C30; Tier 3 proceedings 4600 mm): the case uses the geometry's 1140 mm pieces (Tier 2, development) for construction only, and no quantity depends on the length",
+  "the box envelope is exactly the bar array (no carbon-fibre walls); the first box sits at phi = 0 and the ring's centre is at z = 0, the DIRC's offset along z is not modelled",
+  "QuartzOptical (Si1 O2 by atom count, 2.2 g/cm3) as G4_SILICON_DIOXIDE at 2.2 g/cm3; no optical tables: this case is L1, the Cherenkov response of the bars is not part of it"
+ ],
+ "status": "comparison with cited values: not validated",
+ "result": null
+}

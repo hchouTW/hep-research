@@ -1,25 +1,98 @@
 {
  "schema": "geometry-cases-coverage/1",
- "note": "every module the S6 cases use, with the cases that cover it (g4sim S6 gate 4)",
+ "note": "every module the cases use, with the cases that cover it (g4sim S6 gate 4; S7 adds its shapes, field maps and optics)",
  "modules": {
+  "field:map": [
+   "ams02-tracker-magnet"
+  ],
   "material:base": [
+   "ams02-rich",
+   "ams02-rich-replica",
+   "ams02-trd",
+   "cms-ecal-barrel-supermodule",
+   "epic-drich",
+   "epic-hpdirc",
    "epic-zdc-hadronic"
+  ],
+  "material:components": [
+   "ams02-ecal"
   ],
   "material:composition": [
+   "ams02-rich",
+   "ams02-rich-replica",
    "ams02-tof",
    "cms-ecal-barrel-crystal",
-   "epic-zdc-hadronic"
+   "cms-ecal-barrel-crystal-optics",
+   "cms-ecal-barrel-supermodule",
+   "cms-endcap-csc",
+   "cms-phase1-bpix",
+   "epic-zdc-hadronic",
+   "lhcb-rich-radiators",
+   "lhcb-scifi"
+  ],
+  "modifier:clip": [
+   "ams02-rich"
+  ],
+  "optics:material": [
+   "ams02-rich",
+   "ams02-rich-replica",
+   "cms-ecal-barrel-crystal-optics",
+   "epic-drich",
+   "lhcb-rich-radiators"
+  ],
+  "optics:surface": [
+   "ams02-rich",
+   "ams02-rich-replica",
+   "cms-ecal-barrel-crystal-optics",
+   "epic-drich",
+   "lhcb-rich-radiators"
+  ],
+  "placement:explicit": [
+   "ams02-rich",
+   "ams02-rich-replica",
+   "ams02-tracker-magnet"
+  ],
+  "placement:grid": [
+   "ams02-rich",
+   "cms-ecal-barrel-supermodule",
+   "epic-hpdirc",
+   "lhcb-scifi"
   ],
   "placement:linear": [
-   "ams02-tof"
+   "ams02-tof",
+   "ams02-trd",
+   "cms-endcap-csc",
+   "cms-phase1-bpix",
+   "lhcb-scifi"
+  ],
+  "placement:ring": [
+   "cms-endcap-csc",
+   "cms-phase1-bpix",
+   "epic-drich",
+   "epic-hpdirc",
+   "epic-tof"
   ],
   "placement:single": [
+   "ams02-ecal",
+   "ams02-rich",
+   "ams02-rich-replica",
    "ams02-tof",
+   "ams02-tracker-magnet",
+   "ams02-trd",
    "cms-ecal-barrel-crystal",
-   "epic-zdc-hadronic"
+   "cms-ecal-barrel-crystal-optics",
+   "cms-ecal-barrel-supermodule",
+   "cms-endcap-csc",
+   "epic-drich",
+   "epic-zdc-hadronic",
+   "lhcb-rich-radiators",
+   "lhcb-scifi"
   ],
   "placement:stack": [
-   "epic-zdc-hadronic"
+   "ams02-trd",
+   "cms-ecal-barrel-supermodule",
+   "epic-zdc-hadronic",
+   "lhcb-scifi"
   ],
   "quantity:edep": [
    "epic-zdc-hadronic"
@@ -28,6 +101,13 @@
    "ams02-tof",
    "cms-ecal-barrel-crystal",
    "epic-zdc-hadronic"
+  ],
+  "requirement:optical_scope": [
+   "ams02-rich",
+   "ams02-rich-replica",
+   "cms-ecal-barrel-crystal-optics",
+   "epic-drich",
+   "lhcb-rich-radiators"
   ],
   "rotation": [
    "ams02-tof"
@@ -41,11 +121,36 @@
    "epic-zdc-hadronic"
   ],
   "shape:box": [
+   "ams02-ecal",
+   "ams02-rich",
+   "ams02-rich-replica",
    "ams02-tof",
-   "epic-zdc-hadronic"
+   "ams02-trd",
+   "cms-ecal-barrel-crystal-optics",
+   "cms-ecal-barrel-supermodule",
+   "cms-endcap-csc",
+   "cms-phase1-bpix",
+   "epic-drich",
+   "epic-hpdirc",
+   "epic-tof",
+   "epic-zdc-hadronic",
+   "lhcb-rich-radiators",
+   "lhcb-scifi"
+  ],
+  "shape:cone": [
+   "ams02-rich-replica"
   ],
   "shape:trd": [
-   "cms-ecal-barrel-crystal"
+   "cms-ecal-barrel-crystal",
+   "cms-ecal-barrel-crystal-optics",
+   "cms-ecal-barrel-supermodule",
+   "cms-endcap-csc",
+   "epic-drich"
+  ],
+  "shape:tube": [
+   "ams02-rich-replica",
+   "ams02-tracker-magnet",
+   "epic-drich"
   ],
   "source:box_uniform": [
    "ams02-tof",

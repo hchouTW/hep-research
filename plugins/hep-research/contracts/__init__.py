@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "3.24.0"
+CONTRACTS_VERSION = "3.25.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -233,6 +233,9 @@ CONTRACTS_VERSION = "3.24.0"
 # review_measurement_spec.py --check-bundle refuse with the reason (exit 2). Existing attestations of a 2.0.0 bundle
 # still verify (attestation.py keeps its digest rule). No artifact type, vocabulary term, envelope field or capability
 # changes (measurement:correction-keys-v1 stays): every 3.16 artifact keeps its outcome.
+# 3.25.0 (minor; g4sim S7) opens detector_spec.json to the cone, sphere_section, polycone and polyhedra shapes, field maps (g4sim-field-map/1 files read by hash), optical properties and surfaces, and the
+# optical_scope and transition_radiation requirements; geometry_ir.json carries them (the IR's minor change: new optional fields, geometry-ir/1 unchanged); efficiency_map.json gains the photon_detected readout;
+# rules/design_geometry/ adds the barrel-tracker, endcap-disks, trd, cherenkov and shell-veto kits. Additive: every 3.24 artifact keeps its outcome, and committed outputs keep the contracts version that wrote them.
 # 3.24.0 (minor; g4sim S6): the reference profile template lets a profile hold reference cases instead of an evidence ledger
 # (cases/, coverage.json; evidence optional), as Section 13.1 lays out reference:geometry-cases. Additive: every 3.23 profile and
 # artifact keeps its outcome, and committed outputs keep the contracts version that wrote them.

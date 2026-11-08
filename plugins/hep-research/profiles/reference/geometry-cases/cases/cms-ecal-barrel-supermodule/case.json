@@ -1,0 +1,51 @@
+{
+ "phase": "S7",
+ "case_id": "cms-ecal-barrel-supermodule",
+ "card_case": "CMS ECAL barrel supermodule",
+ "level": "L2",
+ "label": "an approximate reconstruction from the cited claims, not the experiment's geometry",
+ "experiment": "CMS",
+ "subsystem": "ECAL barrel, one supermodule (readout segmentation)",
+ "corresponding_kit": null,
+ "cited_claims": [
+  "detector-atlas:C124",
+  "detector-atlas:C125",
+  "detector-atlas:C127",
+  "detector-atlas:C128",
+  "detector-atlas:C130",
+  "detector-atlas:C132"
+ ],
+ "quantities": [
+  {
+   "name": "crystals",
+   "definition": "barrel crystal volumes in one supermodule of the expanded IR",
+   "reference": 1700,
+   "tolerance_relative": 0,
+   "derivation": "20 in phi x 85 in eta (detector-atlas:C132, TDR Table 1.2); 'a supermodule holds 1700 crystals' (detector-atlas:C128, 2008); 360 x 170 / 36 = 1700 from the barrel totals (detector-atlas:C124, C128). Four modules of 400 or 500 crystals (C128) can sum to 1700 only as one of 500 (25 eta rows of 20) and three of 400 (20 rows of 20).",
+   "sources": [],
+   "independence": {
+    "verified": true,
+    "result": "a design count stated by CMS in two documents (2008 paper and 1997 TDR) and by the barrel totals, not a simulation output; the case checks how the segmentation is expressed (grid, stack), not physics"
+   },
+   "negative_control": {
+    "change": "one eta row fewer in the 500-crystal module (24 x 20)",
+    "pointer": "/templates/module500/children/0/placement/grid/n/0",
+    "value": 24,
+    "expected_shift_relative": -0.0118
+   },
+   "detection_limit_relative": 0,
+   "measure": {
+    "kind": "count",
+    "tag": "crystal"
+   }
+  }
+ ],
+ "approximations": [
+  "the supermodule is flat: the crystals sit on a rectangular 85 x 20 grid of pitch rear face + 0.35 mm (detector-atlas:C127), not on the pointing, 3-degree off-pointing barrel geometry (C126); every crystal is the nominal 22 x 22 to 26 x 26 x 230 mm3 trd of the S6 case, not the 17 shape pairs",
+  "which module holds 500 crystals is not sourced (the order of the modules in eta was not read); the 500-crystal module is placed first",
+  "the 4 mm aluminium webs (C128) are flat plates between the modules; the alveolar walls (C127), submodules and the 0.5 mm gaps between submodules are not modelled",
+  "aluminium is Geant4's G4_Al; the webs' alloy is not sourced"
+ ],
+ "status": "comparison with cited values: not validated",
+ "result": null
+}

@@ -23,10 +23,14 @@
 #include "G4ParticleDefinition.hh"
 #include "G4LogicalVolumeStore.hh"
 #include "G4ParticleTable.hh"
+#include "G4Cons.hh"
+#include "G4Polycone.hh"
 #include "G4Polyhedra.hh"
+#include "G4Sphere.hh"
 #include "G4ProcessManager.hh"
 #include "G4ProcessVector.hh"
 #include "G4VProcess.hh"
+#include "Optics.hh"
 #include "SimProbe.hh"
 
 namespace g4sim {
@@ -124,6 +128,33 @@ inline std::string Polyhedra(Writer& w) {
   return probe_detail::Join(rows);
 }
 
+// S7's curved solids, which the base probe does not decode: each one's parameters as Geant4 holds them, lengths in mm and angles in radians.
+inline std::string CurvedSolids(Writer& w) {
+  std::vector<std::string> rows;
+  for (const G4LogicalVolume* logical : *G4LogicalVolumeStore::GetInstance()) {
+    const G4VSolid* solid = logical->GetSolid();
+    std::ostringstream o;
+    o << "{\"logical\": " << JsonQuote(logical->GetName()) << ", ";
+    if (const auto* c = dynamic_cast<const G4Cons*>(solid)) {
+      o << "\"type\": \"G4Cons\", \"rmin1_mm\": " << w.Hex(c->GetInnerRadiusMinusZ() / mm, true) << ", \"rmax1_mm\": " << w.Hex(c->GetOuterRadiusMinusZ() / mm, true)
+        << ", \"rmin2_mm\": " << w.Hex(c->GetInnerRadiusPlusZ() / mm, true) << ", \"rmax2_mm\": " << w.Hex(c->GetOuterRadiusPlusZ() / mm, true) << ", \"half_z_mm\": " << w.Hex(c->GetZHalfLength() / mm, true)
+        << ", \"start_phi_rad\": " << w.Hex(c->GetStartPhiAngle(), true) << ", \"delta_phi_rad\": " << w.Hex(c->GetDeltaPhiAngle(), true) << "}";
+    } else if (const auto* s = dynamic_cast<const G4Sphere*>(solid)) {
+      o << "\"type\": \"G4Sphere\", \"rmin_mm\": " << w.Hex(s->GetInnerRadius() / mm, true) << ", \"rmax_mm\": " << w.Hex(s->GetOuterRadius() / mm, true)
+        << ", \"start_phi_rad\": " << w.Hex(s->GetStartPhiAngle(), true) << ", \"delta_phi_rad\": " << w.Hex(s->GetDeltaPhiAngle(), true)
+        << ", \"start_theta_rad\": " << w.Hex(s->GetStartThetaAngle(), true) << ", \"delta_theta_rad\": " << w.Hex(s->GetDeltaThetaAngle(), true) << "}";
+    } else if (const auto* p = dynamic_cast<const G4Polycone*>(solid)) {
+      o << "\"type\": \"G4Polycone\", \"start_phi_rad\": " << w.Hex(p->GetStartPhi(), true) << ", \"end_phi_rad\": " << w.Hex(p->GetEndPhi(), true) << ", \"corners\": [";
+      for (G4int i = 0; i < p->GetNumRZCorner(); ++i) o << (i ? ", " : "") << "[" << w.Hex(p->GetCorner(i).r / mm, true) << ", " << w.Hex(p->GetCorner(i).z / mm, true) << "]";
+      o << "]}";
+    } else {
+      continue;
+    }
+    rows.push_back(o.str());
+  }
+  return probe_detail::Join(rows);
+}
+
 inline std::string Processes() {
   std::vector<std::string> rows;
   auto* particles = G4ParticleTable::GetParticleTable()->GetIterator();
@@ -181,7 +212,7 @@ inline ProbeV2Result RunProbeV2(const std::string& note, const std::set<std::str
   o << "{\"probe_version\": " << JsonQuote(kProbeV2Version) << ", \"recorded\": " << (res.recorded ? "true" : "false")
     << ", \"base\": " << body;
   if (res.recorded) {
-    o << ", \"materials\": " << Materials(w) << ", \"polyhedra\": " << Polyhedra(w) << ", \"regions\": " << Regions(w) << ", \"logical_fields\": "
+    o << ", \"materials\": " << Materials(w) << ", \"polyhedra\": " << Polyhedra(w) << ", \"curved_solids\": " << CurvedSolids(w) << ", \"optical\": " << OpticalRecord(w) << ", \"regions\": " << Regions(w) << ", \"logical_fields\": "
       << LogicalFields(declaredFieldVolumes) << ", \"processes\": " << Processes();
     if (w.BadGeometry()) res.error = "the geometry has an infinite or NaN number";
   }

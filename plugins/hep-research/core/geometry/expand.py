@@ -10,7 +10,7 @@ import copy
 from decimal import Decimal
 
 from core.canonical import check_hash_scope
-from core.geometry import bitfield, modules, params, rotation
+from core.geometry import bitfield, fieldmap, modules, optics, params, rotation, xtr
 from core.geometry.numbers import CONTEXT, EPSILON_MM, MINIMUM_GAP_MM, PRECISION, GeometryError, add, as_text, divide, multiply
 
 WORLD = "world"
@@ -56,7 +56,7 @@ def _other_solid(shape: str, body: dict, values: _Values, path: str) -> tuple:
     """(bounding size, the IR's half-lengths) of a shape other than a box. A specification gives full lengths; the IR holds what G4 takes."""
     def length(key: str) -> Decimal:
         value = values.quantity(body[key], f"{path}/{key}")
-        if value < _ZERO or (value == _ZERO and key not in ("rmin_mm",)):
+        if value < _ZERO or (value == _ZERO and key not in ("rmin_mm", "rmin1_mm", "rmin2_mm")):  # an inner radius may be 0
             raise GeometryError("solid-size", f"{key} {value} is not positive", path)
         return value
 
@@ -75,6 +75,8 @@ def _other_solid(shape: str, body: dict, values: _Values, path: str) -> tuple:
             raise GeometryError("solid-size", f"phi span {span} is outside (0, 360]", path)
         diameter = add(rmax, rmax)
         return (diameter, diameter, z), {"rmin_mm": as_text(rmin), "rmax_mm": as_text(rmax), "dz_mm": half(z), "phi_start_deg": as_text(start), "phi_span_deg": as_text(span)}
+    if shape in ("cone", "sphere_section", "polycone", "polyhedra"):
+        return _s7_solid(shape, body, values, path, length, half)
     sides = body["sides"]
     if isinstance(sides, bool) or not isinstance(sides, int) or sides < 3:
         raise GeometryError("solid-size", f"sides {sides!r} is not an integer of at least 3", path)
@@ -82,6 +84,61 @@ def _other_solid(shape: str, body: dict, values: _Values, path: str) -> tuple:
     apothem = multiply(radius, rotation.cos_sin(divide(Decimal(180), Decimal(sides)))[0])  # G4Polyhedra's rOuter is the apothem (GB23)
     diameter = add(radius, radius)
     return (diameter, diameter, z), {"sides": sides, "circumradius_mm": as_text(radius), "apothem_mm": as_text(apothem), "dz_mm": half(z)}
+
+
+def _phi(body: dict, values: _Values, path: str) -> tuple:
+    start = values.quantity(body.get("phi_start_deg", "0"), f"{path}/phi_start_deg")
+    span = values.quantity(body.get("phi_span_deg", "360"), f"{path}/phi_span_deg")
+    if not _ZERO < span <= Decimal(360):
+        raise GeometryError("solid-size", f"phi span {span} is outside (0, 360]", path)
+    return as_text(start), as_text(span)
+
+
+def _s7_solid(shape: str, body: dict, values: _Values, path: str, length, half) -> tuple:
+    """S7's shapes (Section 6.2.1): the parameters of G4Cons, G4Sphere, G4Polycone and G4Polyhedra, with a bounding box for the
+    gap rule. polyhedra radii are circumradii in the specification and apothems in the IR, as for polygon_prism (GB23)."""
+    phi_start, phi_span = _phi(body, values, path)
+    if shape == "cone":
+        rmin1 = length("rmin1_mm") if "rmin1_mm" in body else _ZERO
+        rmin2 = length("rmin2_mm") if "rmin2_mm" in body else _ZERO
+        rmax1, rmax2, z = length("rmax1_mm"), length("rmax2_mm"), length("length_mm")
+        if rmin1 >= rmax1 or rmin2 >= rmax2:
+            raise GeometryError("solid-size", f"a cone's inner radius is not below its outer radius at both ends ({rmin1}/{rmax1}, {rmin2}/{rmax2})", path)
+        diameter = add(max(rmax1, rmax2), max(rmax1, rmax2))
+        return (diameter, diameter, z), {"rmin1_mm": as_text(rmin1), "rmax1_mm": as_text(rmax1), "rmin2_mm": as_text(rmin2), "rmax2_mm": as_text(rmax2), "dz_mm": half(z), "phi_start_deg": phi_start, "phi_span_deg": phi_span}
+    if shape == "sphere_section":
+        rmin = length("rmin_mm") if "rmin_mm" in body else _ZERO
+        rmax = length("rmax_mm")
+        if rmin >= rmax:
+            raise GeometryError("solid-size", f"rmin {rmin} is not below rmax {rmax}", path)
+        theta_start = values.quantity(body.get("theta_start_deg", "0"), f"{path}/theta_start_deg")
+        theta_span = values.quantity(body.get("theta_span_deg", "180"), f"{path}/theta_span_deg")
+        if theta_start < _ZERO or theta_span <= _ZERO or add(theta_start, theta_span) > Decimal(180):
+            raise GeometryError("solid-size", f"theta {theta_start} + {theta_span} is outside [0, 180]", path)
+        diameter = add(rmax, rmax)
+        return (diameter, diameter, diameter), {"rmin_mm": as_text(rmin), "rmax_mm": as_text(rmax), "phi_start_deg": phi_start, "phi_span_deg": phi_span, "theta_start_deg": as_text(theta_start), "theta_span_deg": as_text(theta_span)}
+    zs = [values.quantity(item, f"{path}/z_mm/{i}") for i, item in enumerate(body["z_mm"])]
+    inner = [values.quantity(item, f"{path}/rmin_mm/{i}") for i, item in enumerate(body["rmin_mm"])]
+    outer = [values.quantity(item, f"{path}/rmax_mm/{i}") for i, item in enumerate(body["rmax_mm"])]
+    if len(zs) < 2 or not len(zs) == len(inner) == len(outer):
+        raise GeometryError("solid-size", "z_mm, rmin_mm and rmax_mm need the same number of planes, at least two", path)
+    if any(b < a for a, b in zip(zs, zs[1:])) or zs[0] == zs[-1]:
+        raise GeometryError("solid-size", f"the z planes {zs} do not rise", path)
+    if any(r < _ZERO or r >= R for r, R in zip(inner, outer)):
+        raise GeometryError("solid-size", "each plane needs 0 <= rmin < rmax", path)
+    reach = max(abs(zs[0]), abs(zs[-1]))
+    planes = {"z_mm": [as_text(z) for z in zs]}
+    if shape == "polycone":
+        diameter = add(max(outer), max(outer))
+        return (diameter, diameter, add(reach, reach)), {**planes, "rmin_mm": [as_text(r) for r in inner], "rmax_mm": [as_text(r) for r in outer], "phi_start_deg": phi_start, "phi_span_deg": phi_span}
+    sides = body["sides"]
+    if isinstance(sides, bool) or not isinstance(sides, int) or sides < 3:
+        raise GeometryError("solid-size", f"sides {sides!r} is not an integer of at least 3", path)
+    # G4Polyhedra's z-plane radii are apothems (GB23): it divides them by cos(phi_span / (2 sides)), which is cos(180 / sides) for a whole turn
+    factor = rotation.cos_sin(divide(Decimal(phi_span), multiply(Decimal(2), Decimal(sides))))[0]
+    diameter = add(max(outer), max(outer))
+    return (diameter, diameter, add(reach, reach)), {"sides": sides, **planes, "circumradius_rmin_mm": [as_text(r) for r in inner], "circumradius_rmax_mm": [as_text(r) for r in outer],
+                                                     "apothem_rmin_mm": [as_text(multiply(r, factor)) for r in inner], "apothem_rmax_mm": [as_text(multiply(r, factor)) for r in outer], "phi_start_deg": phi_start, "phi_span_deg": phi_span}
 
 
 def _shape_of(node: dict) -> str:
@@ -242,8 +299,6 @@ def _stack(body: dict, mother_size: tuple, sizes: dict, values: _Values, path: s
         for at, item in enumerate(body["sequence"]):
             where = f"{path}/sequence/{at}"
             if isinstance(item, dict) and "spacer_mm" in item:
-                if "material" in item:
-                    raise GeometryError("module-not-open", "a gap volume with a material opens with optical_scope", where)
                 length = values.quantity(item["spacer_mm"], f"{where}/spacer_mm")
                 face = add(face, CONTEXT.multiply(Decimal(sign), length))
                 continue
@@ -482,17 +537,67 @@ def _field_vector(items: list, values: _Values, path: str) -> list:
     return [item if is_number(item) else as_text(value) for item, value in zip(items, values.vector(items, path))]
 
 
+def _touchables(tree: dict, order: list) -> dict:
+    """How many times each template is placed in the whole tree."""
+    touchables = {WORLD: 1}
+    for mother in order:
+        for item in tree[mother]:
+            touchables[item["template"]] = touchables.get(item["template"], 0) + touchables.get(mother, 0)
+    return touchables
+
+
+def _map_field(name: str, field: dict, nodes: dict, tree: dict, order: list, templates: dict) -> dict:
+    """A field map in the IR (Section 6.2.8, S7): its hash and grid, never its path, and the one template whose local frame
+    holds the grid. That template is placed once in the whole tree, so the frame is one transform, and its bounding box lies
+    on the grid."""
+    where = f"/fields/{name}/map"
+    grid = field["map"].get("grid")
+    if grid is None:  # contracts/geometry.py reads the file by its hash and adds the grid
+        raise GeometryError("field-map-unread", "the field map was not read; check the specification with contracts/geometry.py", where)
+    owners = [template for template in order if nodes[template].get("field") == name]
+    if len(owners) != 1:
+        raise GeometryError("field-map-frame", f"a field map is declared by exactly one template, not {owners}", where)
+    owner = owners[0]
+    touchables = _touchables(tree, order)
+    if touchables.get(owner, 0) != 1:
+        raise GeometryError("field-map-frame", f"template {owner!r} holds a field map, so it must be placed once in the tree, not {touchables.get(owner, 0)} times", where)
+    for axis, ((low, high), half) in enumerate(zip(fieldmap.extent(grid), templates[owner]["half_mm"])):
+        if low > -Decimal(half) or high < Decimal(half):
+            raise GeometryError("field-map-coverage", f"axis {'xyz'[axis]}: the grid spans [{low}, {high}] mm, template {owner!r} reaches +-{half} mm", where)
+    return {"map": {"sha256": field["map"]["sha256"], "frame_template": owner, **grid}}
+
+
+def _literal_numbers(node, path: str) -> None:
+    """A material's numbers are literals: the IR keeps them as written and the program reads them as numbers, so an expression such as
+    "1540 / 1000" would be read as 1540 (found in S7); params belong to geometry, not to materials."""
+    if isinstance(node, dict):
+        for key, value in node.items():
+            if key != "facts":
+                _literal_numbers(value, f"{path}/{key}")
+    elif isinstance(node, list):
+        for at, value in enumerate(node):
+            _literal_numbers(value, f"{path}/{at}")
+    elif isinstance(node, str) and path.rsplit("/", 1)[-1] not in ("base", "material", "state") and not path.endswith(("/components/material",)):
+        try:
+            Decimal(node)
+        except ArithmeticError as err:
+            raise GeometryError("material-number", f"{node!r} is not a literal number; a material takes no expression", path) from err
+
+
 def expand(spec: dict) -> dict:
     """The geometry-ir/1 document of a specification."""
     if spec.get("schema") != "detector-spec/1":
         raise GeometryError("schema", f"{spec.get('schema')!r} is not detector-spec/1")
-    spec = _with_shells(spec)
+    spec = optics.with_gap_volumes(_with_shells(spec))
     if WORLD in spec.get("templates", {}):
         raise GeometryError("template-name", f"{WORLD!r} is reserved", "/templates")
     values = _Values(spec.get("params", {}))
     nodes = {**spec.get("templates", {}), WORLD: spec["world"]}
     sizes = {name: _solid(node, values, f"/templates/{name}") for name, node in spec.get("templates", {}).items()}
     sizes[WORLD] = values.vector(spec["world"]["size_mm"], "/world/size_mm")
+    for name, material in spec.get("materials", {}).items():
+        optics.check_material(name, material)
+        _literal_numbers(material, f"/materials/{name}")
     for name, node in nodes.items():
         if not node["material"].startswith(NIST_PREFIX) and node["material"] not in spec.get("materials", {}):
             raise GeometryError("material-unknown", f"{node['material']!r} is neither a NIST name nor declared", f"/templates/{name}")
@@ -519,10 +624,17 @@ def expand(spec: dict) -> dict:
                 "readout": _readout(spec, tree), "volume_id": {"rule": "sum of (copy_number + 1) * stride",
                                                                "strides": _level_strides(tree)},
                 "materials": _without_sources(spec.get("materials", {})), "physics_requirements": _requirements(spec, tags)}
+    touchables = _touchables(tree, order)
+    optics.scope_findings(spec, templates, physical["physics_requirements"], tree, lambda name: touchables.get(name, 0) == 1)
+    xtr.check(spec, templates, physical["physics_requirements"], tree)
+    if spec.get("optical_surfaces"):  # optional, like fields: a specification with none keeps its geometry_id
+        physical["optical_surfaces"] = _without_sources(spec["optical_surfaces"])
     if spec.get("fields"):  # optional: a specification with no field keeps its geometry_id (Section 7.1)
-        physical["fields"] = {name: {**field, "b_tesla": _field_vector(field["b_tesla"], values, f"/fields/{name}/b_tesla")} for name, field in spec["fields"].items()}
+        physical["fields"] = {name: _map_field(name, field, nodes, tree, order, templates) if "map" in field
+                              else {**field, "b_tesla": _field_vector(field["b_tesla"], values, f"/fields/{name}/b_tesla")}
+                              for name, field in spec["fields"].items()}
     marker = {"tags": {name: sorted(own) for name, own in tags.items() if own}, "derivations": spec.get("params", {}),
-              "source_of_facts": spec.get("source_of_facts", {}), "material_sources": _sources(spec.get("materials", {}))}
+              "source_of_facts": spec.get("source_of_facts", {}), "material_sources": {**_sources(spec.get("materials", {})), **_sources(spec.get("optical_surfaces", {}), "/optical_surfaces")}}
     document = {"schema": "geometry-ir/1", "physical": physical, "marker": marker}
     issues = check_hash_scope(document)
     if issues:

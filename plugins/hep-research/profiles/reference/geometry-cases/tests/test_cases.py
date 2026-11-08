@@ -17,10 +17,11 @@ from contracts import geometry  # noqa: E402
 
 LABEL = "an approximate reconstruction from the cited claims, not the experiment's geometry"
 GATE = PLUGIN / "adapters/geant4/tests/g4proto/s6_gates/cases_gate.py"
+S7_GATE = PLUGIN / "adapters/geant4/tests/g4proto/s7_gates/cases_gate.py"
 
 
-def gate():
-    spec = importlib.util.spec_from_file_location("cases_gate", GATE)
+def gate(path: Path = GATE):
+    spec = importlib.util.spec_from_file_location(path.parent.name + "_cases_gate", path)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     return module
@@ -42,10 +43,13 @@ class Cases(unittest.TestCase):
                 self.assertEqual(geometry.check_file(case / "detector-spec.json", set())["status"], "rejected")
 
     def test_every_case_copies_the_card(self):
-        rows = gate().card_rows()
+        rows, s7_rows = gate().card_rows(), gate(S7_GATE).card_rows()
         for case in sorted((ROOT / "cases").iterdir()):
             document = json.loads((case / "case.json").read_text(encoding="utf-8"))
-            registered = sorted((r["reference"], r["tolerance"]) for r in rows if r["case"].startswith(document["card_case"]))
+            if document.get("phase") == "S7":  # S7's card names each case exactly
+                registered = sorted((r["reference"], r["tolerance"]) for r in s7_rows if r["case"] == document["card_case"])
+            else:
+                registered = sorted((r["reference"], r["tolerance"]) for r in rows if r["case"].startswith(document["card_case"]))
             with self.subTest(case=case.name):
                 self.assertTrue(registered)
                 self.assertEqual(sorted((q["reference"], q["tolerance_relative"]) for q in document["quantities"]), registered)
@@ -63,6 +67,19 @@ class Cases(unittest.TestCase):
                 if document["status"].startswith("validated-in-scope"):
                     self.assertTrue(all(q["independence"]["verified"] for q in document["quantities"]))
                     self.assertTrue(all(item["control_caught"] for item in document["result"]["quantities"]))
+
+    def test_an_optical_l3_case_chooses_its_cherenkov_handling(self):
+        for case in sorted((ROOT / "cases").iterdir()):
+            document = json.loads((case / "case.json").read_text(encoding="utf-8"))
+            spec = json.loads((case / "detector-spec.json").read_text(encoding="utf-8"))
+            optical = any(item.get("need") == "optical_scope" for item in spec.get("physics_requirements", []))
+            if document["level"] != "L3" or not optical:
+                continue
+            with self.subTest(case=case.name):
+                handling = document["cherenkov_handling"]
+                self.assertIn(handling["option"], ("full_optical_tracking", "declared_negligible"))
+                if handling["option"] == "declared_negligible":
+                    self.assertLess(handling["validation"]["cherenkov_fraction"], handling["validation"]["declared_precision"])
 
     def test_coverage_lists_every_module_used(self):
         coverage = json.loads((ROOT / "coverage.json").read_text(encoding="utf-8"))["modules"]

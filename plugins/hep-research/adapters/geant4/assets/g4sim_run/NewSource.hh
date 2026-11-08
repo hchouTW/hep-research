@@ -17,6 +17,7 @@
 #include "G4IonTable.hh"
 #include "G4ParticleGun.hh"
 #include "G4ParticleTable.hh"
+#include "G4OpticalPhoton.hh"
 #include "G4PrimaryParticle.hh"
 #include "G4PrimaryVertex.hh"
 #include "G4PhysicalConstants.hh"
@@ -76,6 +77,11 @@ class NewSource : public G4VUserPrimaryGeneratorAction {
     fGun.SetParticleEnergy(energy * MeV);
     fGun.SetParticlePosition(position * mm);
     fGun.SetParticleMomentumDirection(direction);
+    if (fParticle == G4OpticalPhoton::OpticalPhotonDefinition()) {  // S7: a random linear polarization across the direction, drawn last
+      const G4ThreeVector across = direction.orthogonal().unit(), other = direction.cross(across);
+      const double angle = CLHEP::twopi * G4UniformRand();
+      fGun.SetParticlePolarization(std::cos(angle) * across + std::sin(angle) * other);
+    }
     fGun.GeneratePrimaryVertex(event);
     if (fPrimaries) std::fprintf(fPrimaries, "%lld,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g\n", global, energy, position.x(), position.y(), position.z(), direction.x(), direction.y(), direction.z());
   }

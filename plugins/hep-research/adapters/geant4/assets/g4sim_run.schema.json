@@ -83,6 +83,60 @@
      "additionalProperties": {
       "type": "object"
      }
+    },
+    "optical": {
+     "type": "object",
+     "additionalProperties": false,
+     "description": "G4OpticalParameters process activation (S7); a process left out keeps Geant4's default (active).",
+     "properties": {
+      "cerenkov": {
+       "type": "boolean"
+      },
+      "scintillation": {
+       "type": "boolean"
+      },
+      "absorption": {
+       "type": "boolean"
+      },
+      "rayleigh": {
+       "type": "boolean"
+      },
+      "mie": {
+       "type": "boolean"
+      },
+      "boundary": {
+       "type": "boolean"
+      },
+      "wls": {
+       "type": "boolean"
+      }
+     }
+    },
+    "xtr": {
+     "type": "array",
+     "description": "XTR radiators (S7): one per transition_radiation requirement, by its envelope template, with the Geant4 class (rule 5, xtr_radiators.json) and the particles it acts on.",
+     "items": {
+      "type": "object",
+      "required": [
+       "envelope",
+       "radiator_class"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "envelope": {
+        "type": "string"
+       },
+       "radiator_class": {
+        "type": "string"
+       },
+       "particles": {
+        "type": "array",
+        "items": {
+         "type": "string"
+        }
+       }
+      }
+     }
     }
    }
   },

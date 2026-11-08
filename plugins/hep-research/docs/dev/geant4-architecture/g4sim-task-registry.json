@@ -764,6 +764,48 @@
    "registered_at": "2026-11-08T02:21:09Z",
    "card_commit": "26b146da",
    "reason": "Execution log only; thresholds unchanged"
+  },
+  {
+   "card": "g4sim-tasks/S7.md",
+   "sha256": "2f8e92db9aae43cea794e7bdce3cc9da8732f9a9ddda5677fdcab0f9274a0249",
+   "registered_at": "2026-11-08T13:53:25Z",
+   "card_commit": "80c9e037",
+   "reason": "before the judged runs: gate 1, 2 and 4 event counts derived from trials, gate 3 recorded as a gap (no qualifying TR yield data), the 27 rows of the reference-case table; the Section 19.2 thresholds unchanged"
+  },
+  {
+   "card": "g4sim-tasks/S7.md",
+   "sha256": "a80bf4e633783c9ae0f9c65eacecb64caf0e2ec58ca8bca1691b6a751ade66c6",
+   "registered_at": "2026-11-08T19:03:39Z",
+   "card_commit": "e9dc4c6d",
+   "reason": "after the first judged run, on the maintainer's word: new designs of gates 1 (power 0.99, 60,000 photons) and 4 (whole-bar source, expected-count mean test, 1,000 events), the RICH replica row; margins and alpha unchanged; the first run stays on record"
+  },
+  {
+   "card": "g4sim-tasks/S7.md",
+   "sha256": "4c8666f44520426e0b63576cbce5b071755d71c9f864fdaeb22dab6507fc8ecf",
+   "registered_at": "2026-11-08T19:58:54Z",
+   "card_commit": "7700d14a",
+   "reason": "after the second judged run, on the maintainer's word ('use real field map to quantity'; 'cleared the collaboration-derived lines for magnetic field'): the bore field integral's reference moves to the official AMS-02 map, 0.12856 T m; tolerance 20% unchanged; the failed run stays on record"
+  },
+  {
+   "card": "g4sim-tasks/S7.md",
+   "sha256": "48fb701eb0f261bf859f41a2e97a7c36f61f863d97cc20393c757e22e4bf09b1",
+   "registered_at": "2026-11-08T20:44:50Z",
+   "card_commit": "51c12fb7",
+   "reason": "after the second independent read, on the maintainer's word ('do it based on your recommendation'): gate 5 adds the SameMaterial entry negative and the XTR conservation pair; no other threshold changed; build 25 carries the fixes, and gates 1, 2, 4 and the cases are rerun as a reproduction check, not re-judged"
+  },
+  {
+   "card": "g4sim-tasks/S7.md",
+   "sha256": "32b13a703de18406b9fccb78497d216793d51228d2521d05884b7e72f1e4183c",
+   "registered_at": "2026-11-08T21:05:18Z",
+   "card_commit": "fe88fde4",
+   "reason": "after the read of the second-read fixes, on the maintainer's same word ('do it based on your recommendation'): gate 5 adds the born-outside negative and the reflecting-skin over-kill pair; the fourth registration's gate 5 run was cancelled before it ran; no other threshold changed; build 26 carries the fixes; gates 1, 2, 4 and the cases are rerun as a reproduction check, not re-judged"
+  },
+  {
+   "card": "g4sim-tasks/S7.md",
+   "sha256": "1442b573abd3ab29390008ca1182e2014dbfb2e8f17291e31aaecfcdfb4cf7f7",
+   "registered_at": "2026-11-08T22:26:17Z",
+   "card_commit": "7313366b",
+   "reason": "the execution log's closing entry only; thresholds as at the fifth registration"
   }
  ]
 }

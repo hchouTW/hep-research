@@ -12,6 +12,7 @@ import math
 import re
 import sys
 from decimal import Decimal
+from pathlib import Path
 
 PAI_MODELS = ("PAI", "PAIphoton")
 ALL_PARTICLES = "all"
@@ -23,9 +24,10 @@ ALLOWED_USER_LIMITS = {"max_step_mm"}
 ADDITIVE = ("edep", "edep_visible", "edep_charged", "edep_nonionizing", "track_length", "edep_by_dedx_class", "edep_visible_ly_split")
 BOUNDARY = ("n_crossings", "crossing_kinematics", "energy_out_by_face")
 FIRST = ("time_first", "first_entry_kinematics")
-LATER_QUANTITIES = {"photon_detected": "S7"}
+PHOTON = ("photon_detected",)  # S7: a count per detecting volume, with optical physics on
+LATER_QUANTITIES: dict = {}  # empty since photon_detected opened in S7
 SEGMENTATIONS = ("none", "along_axis", "cartesian_xy", "cartesian_xyz", "polar")
-ALLOWED_SEGMENTATION = {**{name: SEGMENTATIONS for name in ADDITIVE}, **{name: ("none", "cartesian_xy") for name in BOUNDARY}, **{name: ("none",) for name in FIRST}}
+ALLOWED_SEGMENTATION = {**{name: SEGMENTATIONS for name in ADDITIVE}, **{name: ("none", "cartesian_xy") for name in BOUNDARY}, **{name: ("none",) for name in FIRST + PHOTON}}
 BIRKS_QUANTITIES = ("edep_visible", "edep_by_dedx_class", "edep_visible_ly_split")
 SPLIT_QUANTITY = "edep_visible_ly_split"
 
@@ -234,6 +236,77 @@ def event_range_findings(card: dict) -> list:
     return []
 
 
+BUILT_CONSTRUCTORS = {"G4OpticalPhysics", "g4sim_xtr"}
+RADIATOR_CONSTRUCTOR = "g4sim_xtr"
+RADIATOR_TABLE = Path(__file__).resolve().parent / "xtr_radiators.json"
+
+
+def radiator_findings(card: dict, requirements, table: dict | None = None) -> list:
+    """XTR rules 4 and 5 (Section 6.2.9, S7): the g4sim_xtr constructor attaches one radiator per transition_radiation requirement, named by
+    its envelope; the run card's class must be in the adapter's table with the requirement's structure. G4StrawTubeXTRadiator has no foil
+    count and no structure, so it is refused (addendum 11.1)."""
+    table = table if table is not None else json.loads(RADIATOR_TABLE.read_text(encoding="utf-8"))["classes"]
+    physics = card.get("physics", {})
+    radiators = {item.get("envelope"): item for item in physics.get("xtr", [])}
+    wanted = {requirement["templates"][0]: requirement for requirement in requirements if requirement.get("need") == "transition_radiation" and requirement.get("templates")}
+    findings = []
+    if (wanted or radiators) and RADIATOR_CONSTRUCTOR not in physics.get("extra_constructors", ()):
+        findings.append({"code": "xtr-constructor", "path": "physics.extra_constructors", "message": f"XTR is attached by {RADIATOR_CONSTRUCTOR} in extra_constructors (rule 4)"})
+    for envelope in sorted(set(wanted) - set(radiators)):
+        findings.append({"code": "xtr-class-missing", "path": "physics.xtr", "message": f"the radiator of envelope {envelope} has no class in the run card"})
+    for envelope in sorted(set(radiators) - set(wanted)):
+        findings.append({"code": "xtr-requirement-missing", "path": "physics.xtr", "message": f"{envelope} is no transition_radiation envelope of the specification"})
+    for envelope in sorted(set(wanted) & set(radiators)):
+        name = radiators[envelope].get("radiator_class")
+        entry = table.get(name)
+        if entry is None:
+            findings.append({"code": "xtr-class-unknown", "path": "physics.xtr", "message": f"{name} is not in xtr_radiators.json"})
+        elif entry["structure"] is None:
+            findings.append({"code": "xtr-class-structureless", "path": "physics.xtr", "message": f"{name} has no foil count and no structure, so g4sim cannot check it (addendum 11.1)"})
+        elif entry["structure"] != wanted[envelope]["structure"]:
+            findings.append({"code": "xtr-incompatible", "path": "physics.xtr", "message": f"{name} builds the structure {entry['structure']}, the specification's radiator is {wanted[envelope]['structure']} (rule 5)"})
+    return findings
+
+
+def optical_findings(card: dict, requirements, scorers=()) -> list:
+    """A new-mode run (S7): G4OpticalPhysics is the one extra constructor g4sim_run builds, and it runs only with a specification that declares
+    optical_scope, the templates KillProcess keeps photons in (GB16). Any other name would be ignored by the program, so it is refused here."""
+    extra = card.get("physics", {}).get("extra_constructors", ())
+    findings = [{"code": "extra-constructor-unknown", "path": "physics.extra_constructors", "message": f"g4sim_run builds only {sorted(BUILT_CONSTRUCTORS)}, not {name}"}
+                for name in extra if name not in BUILT_CONSTRUCTORS]
+    if "G4OpticalPhysics" in extra and not any(requirement.get("need") == "optical_scope" for requirement in requirements):
+        findings.append({"code": "optical-no-scope", "path": "physics.extra_constructors", "message": "optical physics needs an optical_scope requirement in the specification"})
+    if "opticalphoton" in card.get("kill_policy", {}).get("kill_secondaries", ()):  # Section 8.4: a stacking kill would book photons as killed energy
+        findings.append({"code": "optical-stacking-kill", "path": "kill_policy.kill_secondaries", "message": "optical photons are their own class; switch processes off in physics.optical instead of killing them"})
+    if "G4OpticalPhysics" not in extra:
+        findings += [{"code": "photon-detected-without-optics", "path": f"scorers/{at}", "message": "photon_detected counts optical photons, which need G4OpticalPhysics"}
+                     for at, scorer in enumerate(scorers) if scorer.get("quantity") in PHOTON]
+    return findings
+
+
+def validation_findings(card: dict, materials: dict, material: str, effective: dict, resolution_scale: float) -> list:
+    """check-spec of a validation run with full optical tracking (Section 10.4, S7): optical physics on; the material's RESOLUTIONSCALE equals
+    the digitization's r; and, read back from Geant4, G4Scintillation holds G4EmSaturation and ScintillationByParticleType is off. The
+    material declares its Birks constant, without which the saturation would use one Geant4 may set silently (GB13)."""
+    findings = []
+    if "G4OpticalPhysics" not in card.get("physics", {}).get("extra_constructors", ()):
+        findings.append({"code": "validation-not-optical", "path": "physics.extra_constructors", "message": "a validation run tracks the light: it needs G4OpticalPhysics"})
+    declared = materials.get(material, {})
+    scale = declared.get("scintillation", {}).get("resolution_scale")
+    if scale is None or float(scale) != float(resolution_scale):
+        findings.append({"code": "validation-resolution-scale", "path": f"materials.{material}", "message": f"RESOLUTIONSCALE {scale} in the full optical run, r = {resolution_scale} in the digitization"})
+    if "birks_mm_per_MeV" not in declared.get("ionisation", {}):
+        findings.append({"code": "birks-undeclared", "path": f"materials.{material}", "message": f"{material} declares no Birks constant (GB13)"})
+    optical = effective.get("optical", {})
+    if optical.get("scintillation_saturation") is not True:
+        findings.append({"code": "validation-saturation", "path": "effective-em.optical", "message": "G4Scintillation holds no G4EmSaturation"})
+    if optical.get("scintillation_by_particle_type") is not False:
+        findings.append({"code": "validation-by-particle-type", "path": "effective-em.optical", "message": "ScintillationByParticleType is not off"})
+    if optical.get("cerenkov_active") is not False:  # a map is for scintillation light only (Section 10.4): Cherenkov light would enter N_full alone
+        findings.append({"code": "validation-cerenkov", "path": "physics.optical.cerenkov", "message": "a validation run of a scintillation map runs with Cerenkov off"})
+    return findings
+
+
 def card_findings(card: dict, request: dict | None = None, regions=(), ionisation: dict | None = None, requirements=(), materials=None, selected_materials=None) -> list:
     """All of the above that the inputs at hand can judge. Without `ionisation` the PAI semantics wait for the effective config."""
     findings = limit_findings(card)
@@ -242,6 +315,7 @@ def card_findings(card: dict, request: dict | None = None, regions=(), ionisatio
         findings += pai_findings(requests, regions, ionisation, requirements)
     if request is not None:
         scorers = request.get("scorers", [])
+        findings += optical_findings(card, requirements, scorers) + radiator_findings(card, requirements)
         findings += time_cut_findings(card, scorers) + scorer_findings(scorers, materials, selected_materials) + source_findings(request.get("source", {})) + plane_findings(request) + truth_findings(request) + event_range_findings(card)
     return findings
 

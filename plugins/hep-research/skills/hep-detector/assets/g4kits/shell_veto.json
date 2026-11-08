@@ -1,0 +1,167 @@
+{
+ "schema": "g4kit/1",
+ "name": "shell_veto",
+ "version": "1.0.0",
+ "geometry_kind": "shell-veto",
+ "role": "veto",
+ "purpose": "A cylindrical scintillator shell around the beam with rings of readout blocks at both ends.",
+ "inputs": {
+  "shell_inner_radius_mm": {
+   "kind": "length"
+  },
+  "shell_thickness_mm": {
+   "kind": "length"
+  },
+  "shell_length_mm": {
+   "kind": "length"
+  },
+  "readouts": {
+   "kind": "integer"
+  },
+  "readout_side_mm": {
+   "kind": "length"
+  },
+  "readout_length_mm": {
+   "kind": "length"
+  },
+  "shell_material": {
+   "kind": "material"
+  },
+  "readout_material": {
+   "kind": "material"
+  },
+  "world_material": {
+   "kind": "material"
+  },
+  "materials": {
+   "kind": "materials",
+   "optional": true
+  }
+ },
+ "geometric_defaults": {
+  "readout_gap_mm": "0.5"
+ },
+ "detector": {
+  "schema": "detector-spec/1",
+  "params": {
+   "shell_outer_mm": "shell_inner_radius_mm + shell_thickness_mm",
+   "readout_radius_mm": "shell_inner_radius_mm + shell_thickness_mm / 2",
+   "readout_z_mm": "shell_length_mm / 2 + readout_gap_mm + readout_length_mm / 2",
+   "back_readout_z_mm": "0 - readout_z_mm",
+   "ring_pitch_mm": "2 * readout_z_mm",
+   "ring_inner_mm": "readout_radius_mm - readout_side_mm",
+   "ring_outer_mm": "readout_radius_mm + readout_side_mm",
+   "ring_length_mm": "readout_length_mm + 2 * readout_gap_mm",
+   "world_mm": "4 * (shell_outer_mm + shell_length_mm + readout_length_mm) + 200"
+  },
+  "materials": {
+   "$input": "materials"
+  },
+  "templates": {
+   "shell": {
+    "solid": {
+     "tube": {
+      "rmin_mm": "shell_inner_radius_mm",
+      "rmax_mm": "shell_outer_mm",
+      "length_mm": "shell_length_mm"
+     }
+    },
+    "material": {
+     "$input": "shell_material"
+    },
+    "tags": [
+     "active",
+     "veto"
+    ]
+   },
+   "readout": {
+    "solid": {
+     "box": {
+      "size_mm": [
+       "readout_side_mm",
+       "readout_side_mm",
+       "readout_length_mm"
+      ]
+     }
+    },
+    "material": {
+     "$input": "readout_material"
+    },
+    "tags": [
+     "readout"
+    ]
+   },
+   "readout_ring": {
+    "solid": {
+     "tube": {
+      "rmin_mm": "ring_inner_mm",
+      "rmax_mm": "ring_outer_mm",
+      "length_mm": "ring_length_mm"
+     }
+    },
+    "material": {
+     "$input": "world_material"
+    },
+    "children": [
+     {
+      "template": "readout",
+      "placement": {
+       "ring": {
+        "n": {
+         "$input": "readouts"
+        },
+        "radius_mm": "readout_radius_mm",
+        "orientation": "fixed",
+        "index": "readout"
+       }
+      }
+     }
+    ]
+   }
+  },
+  "world": {
+   "material": {
+    "$input": "world_material"
+   },
+   "size_mm": [
+    "world_mm",
+    "world_mm",
+    "world_mm"
+   ],
+   "children": [
+    {
+     "template": "shell",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "0"
+       ]
+      }
+     }
+    },
+    {
+     "template": "readout_ring",
+     "placement": {
+      "linear": {
+       "count": 2,
+       "pitch_mm": [
+        "0",
+        "0",
+        "ring_pitch_mm"
+       ],
+       "start_mm": [
+        "0",
+        "0",
+        "back_readout_z_mm"
+       ],
+       "index": "end"
+      }
+     }
+    }
+   ]
+  },
+  "frames": {}
+ }
+}
