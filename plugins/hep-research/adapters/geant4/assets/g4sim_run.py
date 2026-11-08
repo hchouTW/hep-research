@@ -132,9 +132,11 @@ def read_record(path: Path) -> dict:
 def run(args) -> dict:
     detector_text = args.detector.read_bytes()
     detector, request, card = (json.loads(path.read_text(encoding="utf-8")) for path in (args.detector, args.request, args.run))
-    checked = geometry.check_spec(detector_text)
+    checked = geometry.check_spec(detector_text, folder=args.detector.parent)
     if checked["status"] != "ok":
         return {"status": "rejected", "findings": checked["findings"]}
+    if checked.get("field_map_files"):  # legacy mode keeps the old programs' fields (Section 6.2.8)
+        return {"status": "rejected", "findings": [{"code": "field-map-legacy", "path": "/fields", "message": "a field map is not available in legacy mode"}]}
     old = translate.merge(detector, request, card)
     block = translate.legacy_block(read_record(args.record), old, card["run"]["seeding"], args.observer_revision)
     findings = check_card(card, block)
@@ -325,7 +327,7 @@ def read_field_records(folder: Path) -> dict:
 
 def geometry_check(args) -> dict:
     card = json.loads(args.run.read_text(encoding="utf-8"))
-    checked = geometry.check_spec(args.detector.read_bytes())
+    checked = geometry.check_spec(args.detector.read_bytes(), folder=args.detector.parent)
     if checked["status"] != "ok":
         return {"status": "rejected", "findings": checked["findings"]}
     findings = check_card(card)
@@ -338,12 +340,13 @@ def geometry_check(args) -> dict:
     work.mkdir(parents=True, exist_ok=True)
     (work / "ir.json").write_text(json.dumps(checked["ir"]), encoding="utf-8")
     (work / "run.json").write_text(json.dumps(card), encoding="utf-8")
+    staged = simulate_new.stage_field_maps(checked, work)
     with (work / "log.txt").open("w", encoding="utf-8") as log:
         code = subprocess.run([str(args.program.resolve()), "--geometry-check", "ir.json", "run.json"], cwd=work, stdout=log, stderr=log, check=False).returncode
     if code != 0:
         return {"status": "failed", "exit_status": code}
     record = read_record(work / "probe-v2.json")
-    problems = tree_problems(checked["ir"], record, read_field_records(work)) + material_problems(record)
+    problems = tree_problems(checked["ir"], record, read_field_records(work)) + material_problems(record) + simulate_new.field_sample_problems(staged, work)
     overlaps = overlaps_in_log(work / "log.txt")
     if overlaps:
         problems.append(f"Geant4's overlap test reported {overlaps} overlap(s)")

@@ -559,10 +559,8 @@
    "type": "object",
    "additionalProperties": {
     "type": "object",
-    "required": [
-     "b_tesla"
-    ],
     "additionalProperties": false,
+    "description": "A uniform field (S3), or a field map (S7, Section 6.2.8): a g4sim-field-map/1 file inside the specification's folder, read by its recorded hash, in the local frame of the one template that declares the field.",
     "properties": {
      "b_tesla": {
       "type": "array",
@@ -571,8 +569,37 @@
       },
       "minItems": 3,
       "maxItems": 3
+     },
+     "map": {
+      "type": "object",
+      "required": [
+       "path",
+       "sha256"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "path": {
+        "type": "string"
+       },
+       "sha256": {
+        "type": "string",
+        "pattern": "^[0-9a-f]{64}$"
+       }
+      }
      }
-    }
+    },
+    "oneOf": [
+     {
+      "required": [
+       "b_tesla"
+      ]
+     },
+     {
+      "required": [
+       "map"
+      ]
+     }
+    ]
    }
   },
   "legacy": {

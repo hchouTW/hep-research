@@ -10,7 +10,7 @@ import copy
 from decimal import Decimal
 
 from core.canonical import check_hash_scope
-from core.geometry import bitfield, modules, params, rotation
+from core.geometry import bitfield, fieldmap, modules, params, rotation
 from core.geometry.numbers import CONTEXT, EPSILON_MM, MINIMUM_GAP_MM, PRECISION, GeometryError, add, as_text, divide, multiply
 
 WORLD = "world"
@@ -538,6 +538,30 @@ def _field_vector(items: list, values: _Values, path: str) -> list:
     return [item if is_number(item) else as_text(value) for item, value in zip(items, values.vector(items, path))]
 
 
+def _map_field(name: str, field: dict, nodes: dict, tree: dict, order: list, templates: dict) -> dict:
+    """A field map in the IR (Section 6.2.8, S7): its hash and grid, never its path, and the one template whose local frame
+    holds the grid. That template is placed once in the whole tree, so the frame is one transform, and its bounding box lies
+    on the grid."""
+    where = f"/fields/{name}/map"
+    grid = field["map"].get("grid")
+    if grid is None:  # contracts/geometry.py reads the file by its hash and adds the grid
+        raise GeometryError("field-map-unread", "the field map was not read; check the specification with contracts/geometry.py", where)
+    owners = [template for template in order if nodes[template].get("field") == name]
+    if len(owners) != 1:
+        raise GeometryError("field-map-frame", f"a field map is declared by exactly one template, not {owners}", where)
+    owner = owners[0]
+    touchables = {WORLD: 1}
+    for mother in order:
+        for item in tree[mother]:
+            touchables[item["template"]] = touchables.get(item["template"], 0) + touchables.get(mother, 0)
+    if touchables.get(owner, 0) != 1:
+        raise GeometryError("field-map-frame", f"template {owner!r} holds a field map, so it must be placed once in the tree, not {touchables.get(owner, 0)} times", where)
+    for axis, ((low, high), half) in enumerate(zip(fieldmap.extent(grid), templates[owner]["half_mm"])):
+        if low > -Decimal(half) or high < Decimal(half):
+            raise GeometryError("field-map-coverage", f"axis {'xyz'[axis]}: the grid spans [{low}, {high}] mm, template {owner!r} reaches +-{half} mm", where)
+    return {"map": {"sha256": field["map"]["sha256"], "frame_template": owner, **grid}}
+
+
 def expand(spec: dict) -> dict:
     """The geometry-ir/1 document of a specification."""
     if spec.get("schema") != "detector-spec/1":
@@ -576,7 +600,9 @@ def expand(spec: dict) -> dict:
                                                                "strides": _level_strides(tree)},
                 "materials": _without_sources(spec.get("materials", {})), "physics_requirements": _requirements(spec, tags)}
     if spec.get("fields"):  # optional: a specification with no field keeps its geometry_id (Section 7.1)
-        physical["fields"] = {name: {**field, "b_tesla": _field_vector(field["b_tesla"], values, f"/fields/{name}/b_tesla")} for name, field in spec["fields"].items()}
+        physical["fields"] = {name: _map_field(name, field, nodes, tree, order, templates) if "map" in field
+                              else {**field, "b_tesla": _field_vector(field["b_tesla"], values, f"/fields/{name}/b_tesla")}
+                              for name, field in spec["fields"].items()}
     marker = {"tags": {name: sorted(own) for name, own in tags.items() if own}, "derivations": spec.get("params", {}),
               "source_of_facts": spec.get("source_of_facts", {}), "material_sources": _sources(spec.get("materials", {}))}
     document = {"schema": "geometry-ir/1", "physical": physical, "marker": marker}

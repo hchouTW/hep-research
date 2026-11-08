@@ -2,6 +2,7 @@
 #ifndef G4SIM_NEWBUILD_HH
 #define G4SIM_NEWBUILD_HH
 
+#include <array>
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
@@ -34,6 +35,7 @@
 #include "G4UniformMagField.hh"
 #include "G4UserLimits.hh"
 #include "G4VUserDetectorConstruction.hh"
+#include "FieldMap.hh"
 #include "MiniJson.hh"
 
 namespace g4sim {
@@ -129,6 +131,7 @@ class NewDetector : public G4VUserDetectorConstruction {
       if (region != kDefaultRegion) regions[region].push_back(logical);
     }
     auto* world = new G4PVPlacement(nullptr, {}, fLogicals.at(kWorld), kWorld, nullptr, false, 0, true);
+    fWorld = world;
     for (const auto& placement : fPhysical.at("placements", "physical").array("placements")) {
       const auto& c = placement.at("centre_mm", "placement").array("centre_mm");
       G4RotationMatrix* rotation = nullptr;
@@ -169,6 +172,7 @@ class NewDetector : public G4VUserDetectorConstruction {
     std::set<std::string> done;
     std::ofstream record("field-managers.thread" + std::to_string(G4Threading::G4GetThreadId()) + ".txt");
     Assign(kWorld, managers, done, record);
+    WriteFieldSamples(managers);
     if (fAttach) fAttach(fLogicals);
   }
 
@@ -177,16 +181,76 @@ class NewDetector : public G4VUserDetectorConstruction {
     auto found = managers.find(name);
     if (found != managers.end()) return found->second;
     G4FieldManager* manager = nullptr;
+    const double sign = Control() == "flip_field" ? -1. : 1.;  // the negative test of Section 15.1
+    const Value& declared = name == kNoField ? fPhysical : fPhysical.at("fields", "physical").at(name, "fields");
     if (name == kNoField) {
       manager = new G4FieldManager(static_cast<G4Field*>(nullptr));
+    } else if (declared.has("map")) {
+      const Value& map = declared.at("map", "field");
+      std::array<double, 3> origin{}, step{};
+      std::array<long, 3> count{};
+      for (int axis = 0; axis < 3; ++axis) {
+        origin[axis] = Decimal(map.at("origin_mm", "map").array("origin_mm")[axis]);
+        step[axis] = Decimal(map.at("step_mm", "map").array("step_mm")[axis]);
+        count[axis] = static_cast<long>(map.at("count", "map").array("count")[axis].num);
+      }
+      auto grid = ReadFieldGrid("field-map." + name + ".txt", origin, step, count);
+      auto* field = new MapField(grid, ToLocal(map.at("frame_template", "map").str), sign);
+      manager = new G4FieldManager(field);
+      manager->CreateChordFinder(field);
     } else {
-      const auto& b = fPhysical.at("fields", "physical").at(name, "fields").at("b_tesla", "field").array("b_tesla");
-      const double sign = Control() == "flip_field" ? -1. : 1.;  // the negative test of Section 15.1
+      const auto& b = declared.at("b_tesla", "field").array("b_tesla");
       auto* field = new G4UniformMagField(sign * G4ThreeVector(Decimal(b[0]) * tesla, Decimal(b[1]) * tesla, Decimal(b[2]) * tesla));
       manager = new G4FieldManager(field);
       manager->CreateChordFinder(field);
     }
     return managers[name] = manager;
+  }
+
+  // Global to the local frame of a template placed once in the tree (check-spec requires it of a field map's frame), composed level by
+  // level as G4NavigationLevel composes a touchable's transform.
+  G4AffineTransform ToLocal(const std::string& frame) const {
+    std::vector<std::string> chain;
+    for (std::string name = frame; name != kWorld;) {
+      chain.push_back(name);
+      std::string mother;
+      for (const auto& [parent, children] : fChildren)
+        for (const auto& child : children)
+          if (child == name) mother = parent;
+      if (mother.empty()) throw std::runtime_error("field map frame " + frame + " is not placed");
+      name = mother;
+    }
+    G4AffineTransform transform;
+    G4LogicalVolume* mother = fWorld->GetLogicalVolume();
+    for (auto step = chain.rbegin(); step != chain.rend(); ++step) {
+      G4VPhysicalVolume* placed = nullptr;
+      for (std::size_t i = 0; i < mother->GetNoDaughters(); ++i)
+        if (mother->GetDaughter(i)->GetLogicalVolume() == fLogicals.at(*step)) placed = mother->GetDaughter(i);
+      if (!placed) throw std::runtime_error("field map frame " + frame + ": " + *step + " is not a daughter of " + mother->GetName());
+      G4AffineTransform next;
+      next.InverseProduct(transform, G4AffineTransform(placed->GetRotation(), placed->GetTranslation()));
+      transform = next;
+      mother = placed->GetLogicalVolume();
+    }
+    return transform;
+  }
+
+  // The read-back of a field (Section 6.2.8): g4sim_run.py lists global points in field-samples.txt; each thread writes the field its
+  // manager gives there, in hexadecimal tesla, and the driver compares it with its own reading of the map.
+  void WriteFieldSamples(std::map<std::string, G4FieldManager*>& managers) {
+    std::ifstream in("field-samples.txt");
+    if (!in) return;
+    std::ofstream out("field-samples.thread" + std::to_string(G4Threading::G4GetThreadId()) + ".txt");
+    std::string name, x, y, z;
+    while (in >> name >> x >> y >> z) {
+      const G4double point[4] = {std::strtod(x.c_str(), nullptr) * mm, std::strtod(y.c_str(), nullptr) * mm, std::strtod(z.c_str(), nullptr) * mm, 0.};
+      G4double b[6] = {0., 0., 0., 0., 0., 0.};
+      const G4Field* field = Manager(name, managers)->GetDetectorField();
+      if (field) field->GetFieldValue(point, b);
+      char line[256];
+      std::snprintf(line, sizeof line, "%s %a %a %a\n", name.c_str(), b[0] / tesla, b[1] / tesla, b[2] / tesla);
+      out << line;
+    }
   }
 
   void Assign(const std::string& name, std::map<std::string, G4FieldManager*>& managers, std::set<std::string>& done, std::ofstream& record) {
@@ -208,6 +272,7 @@ class NewDetector : public G4VUserDetectorConstruction {
   Attach fAttach;
   const Value* fLimits;
   std::map<std::string, G4LogicalVolume*> fLogicals;
+  G4VPhysicalVolume* fWorld = nullptr;
   std::map<std::string, std::vector<std::string>> fChildren;
 };
 

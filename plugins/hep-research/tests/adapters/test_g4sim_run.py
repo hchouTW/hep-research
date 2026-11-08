@@ -5,6 +5,7 @@ from __future__ import annotations
 import importlib.util
 import json
 import math
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -319,6 +320,59 @@ class RunRecord(unittest.TestCase):
         for field in driver.TIMING_FIELDS:
             broken = {key: value for key, value in self.RECORD.items() if key != field}
             self.assertEqual(driver.record_problems(broken), [f"run record lacks {field}"])
+
+
+class FieldMapReadBack(unittest.TestCase):
+    """Section 6.2.8 (S7): the map staged by its hash, and the field each thread gave at the sample points against this side's reading."""
+
+    def setUp(self):
+        sys.path.insert(0, str(ROOT / "tests/core"))
+        from test_geometry_fieldmap import magnet_spec, map_text
+        self.folder = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, self.folder)
+        map_bytes = map_text().encode()
+        (self.folder / "m.txt").write_bytes(map_bytes)
+        (self.folder / "spec.json").write_text(json.dumps(magnet_spec(driver.simulate_new.hashlib.sha256(map_bytes).hexdigest())), encoding="utf-8")
+        self.checked = driver.geometry.check_file(self.folder / "spec.json")
+        self.work = self.folder / "work"
+        self.work.mkdir()
+        self.staged = driver.simulate_new.stage_field_maps(self.checked, self.work)
+
+    def answer(self, flip=1.0, thread="0"):
+        """What a correct build writes: the field of the map at each global point, in the order of field-samples.txt."""
+        rows = []
+        for name, (parsed, points) in self.staged.items():
+            for local, _ in points:
+                rows.append(" ".join([name, *[(flip * value).hex() for value in driver.simulate_new.fieldmap.interpolate(parsed["grid"], parsed["values"], local)]]))
+        (self.work / f"field-samples.thread{thread}.txt").write_text("\n".join(rows) + "\n", encoding="utf-8")
+
+    def test_the_map_is_copied_and_sampled_in_world_coordinates(self):
+        self.assertEqual((self.work / "field-map.magnet.txt").read_bytes(), (self.folder / "m.txt").read_bytes())
+        lines = (self.work / "field-samples.txt").read_text(encoding="utf-8").splitlines()
+        self.assertEqual(len(lines), driver.simulate_new.FIELD_SAMPLES)
+        _, points = self.staged["magnet"]
+        local, world = points[1]  # the bore is turned 90 degrees about z: local (x, y) lies at world (-y, x)
+        self.assertEqual([round(value, 9) for value in world], [round(-local[1], 9), round(local[0], 9), round(local[2], 9)])
+
+    def test_a_build_that_reads_the_map_passes(self):
+        self.answer()
+        self.answer(thread="-1")
+        self.assertEqual(driver.simulate_new.field_sample_problems(self.staged, self.work), [])
+
+    def test_a_flipped_field_is_caught(self):
+        self.answer(flip=-1.0)
+        self.assertEqual(len(driver.simulate_new.field_sample_problems(self.staged, self.work)), 1)
+
+    def test_no_answer_is_an_error_and_an_old_answer_is_removed(self):
+        self.assertEqual(driver.simulate_new.field_sample_problems(self.staged, self.work), ["no thread wrote the field at the sample points"])
+        self.answer()
+        driver.simulate_new.stage_field_maps(self.checked, self.work)
+        self.assertEqual(list(self.work.glob("field-samples.thread*.txt")), [])
+
+    def test_a_map_changed_after_check_spec_is_refused(self):
+        (self.folder / "m.txt").write_bytes((self.folder / "m.txt").read_bytes() + b"\n")
+        with self.assertRaises(ValueError):
+            driver.simulate_new.stage_field_maps(self.checked, self.work)
 
 
 if __name__ == "__main__":

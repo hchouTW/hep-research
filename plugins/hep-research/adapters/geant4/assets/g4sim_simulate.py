@@ -10,6 +10,7 @@ import csv
 import hashlib
 import json
 import math
+import random
 import subprocess
 import sys
 from pathlib import Path
@@ -22,7 +23,7 @@ for folder in (str(ROOT), str(Path(__file__).resolve().parent)):
 
 import g4sim_physics_check as physics_check  # noqa: E402
 
-from core.geometry import identity  # noqa: E402
+from core.geometry import fieldmap, identity  # noqa: E402
 from core.simulation import hits, rng, source_density  # noqa: E402
 
 AXES = {"x": 0, "y": 1, "z": 2}
@@ -349,6 +350,75 @@ def run_program(program: Path, work: Path, environment=None) -> int:
         return subprocess.run([str(program), "--new", "ir.json", "run.json", "request.json"], cwd=work, stdout=log, stderr=log, check=False, env=environment).returncode
 
 
+FIELD_SAMPLE_TOLERANCE_T = 1e-9  # the same grid and interpolation on both sides; only the transform's rounding differs
+FIELD_SAMPLES = 64
+
+
+def _to_mother(placement: dict, point: list) -> list:
+    """A point of the daughter's frame in its mother's: the IR holds Geant4's passive rotation P, so p_mother = P^T p + centre."""
+    rows = placement["rotation"] or [[1, 0, 0], [0, 1, 0], [0, 0, 1]]
+    return [sum(float(rows[j][i]) * point[j] for j in range(3)) + float(placement["centre_mm"][i]) for i in range(3)]
+
+
+def _to_world(ir: dict, template: str, point: list) -> list:
+    """A point of a template placed once in the tree, in world coordinates (check-spec requires a field map's frame to be placed once)."""
+    placements = ir["physical"]["placements"]
+    while template != "world":
+        placement = next(item for item in placements if item["template"] == template)
+        point, template = _to_mother(placement, point), placement["mother"]
+    return point
+
+
+def stage_field_maps(checked: dict, work: Path) -> dict:
+    """Copies each field map the IR names into the run folder, as field-map.<name>.txt, after hashing the bytes again (Section 6.2.8),
+    and lists sample points for the read-back. Returns {field: (map, [(local, global) points])}."""
+    for stale in [*work.glob("field-samples.thread*.txt"), work / "field-samples.txt"]:  # a rerun in the same folder never reads an old answer
+        stale.unlink(missing_ok=True)
+    staged = {}
+    lines = []
+    for name, path in sorted(checked.get("field_map_files", {}).items()):
+        wanted = checked["ir"]["physical"]["fields"][name]["map"]
+        map_bytes = Path(path).read_bytes()
+        if hashlib.sha256(map_bytes).hexdigest() != wanted["sha256"]:
+            raise ValueError(f"field map {name}: {path} changed after check-spec")
+        (work / f"field-map.{name}.txt").write_bytes(map_bytes)
+        parsed = fieldmap.parse(map_bytes.decode("utf-8"))
+        half = [float(value) for value in checked["ir"]["physical"]["templates"][wanted["frame_template"]]["half_mm"]]
+        draw = random.Random(wanted["sha256"])  # the points follow the map, so a rerun samples the same points
+        local = [[0.0, 0.0, 0.0]] + [[sign * 0.9 * h for sign, h in zip(signs, half)] for signs in
+                                     ((x, y, z) for x in (-1, 1) for y in (-1, 1) for z in (-1, 1))]
+        local += [[draw.uniform(-h, h) for h in half] for _ in range(FIELD_SAMPLES - len(local))]
+        points = [(point, _to_world(checked["ir"], wanted["frame_template"], point)) for point in local]
+        staged[name] = (parsed, points)
+        lines += [f"{name} {x.hex()} {y.hex()} {z.hex()}" for _, (x, y, z) in points]
+    if lines:
+        (work / "field-samples.txt").write_text("\n".join(lines) + "\n", encoding="utf-8")
+    return staged
+
+
+def field_sample_problems(staged: dict, work: Path) -> list:
+    """The field each thread's manager gave at the sample points against this side's reading of the map: proves the file read, the
+    grid and the frame's transform together."""
+    if not staged:
+        return []
+    wanted = [(name, fieldmap.interpolate(parsed["grid"], parsed["values"], local)) for name, (parsed, points) in sorted(staged.items()) for local, _ in points]
+    files = sorted(work.glob("field-samples.thread*.txt"))
+    if not files:
+        return ["no thread wrote the field at the sample points"]
+    problems = []
+    for path in files:
+        rows = [line.split() for line in path.read_text(encoding="utf-8").splitlines()]
+        if len(rows) != len(wanted):
+            problems.append(f"{path.name}: {len(rows)} samples for {len(wanted)} points")
+            continue
+        for number, (row, (name, field)) in enumerate(zip(rows, wanted)):
+            got = [float.fromhex(value) for value in row[1:4]]
+            if row[0] != name or any(abs(a - b) > FIELD_SAMPLE_TOLERANCE_T for a, b in zip(got, field)):
+                problems.append(f"{path.name}, field {name}, sample {number}: {got} T, the map gives {field}")
+                break
+    return problems
+
+
 def simulate(card: dict, request: dict, checked: dict, program: Path, work: Path, environment=None, folder: Path | None = None) -> dict:
     """Preflight with no events, so a wrong setting is refused before any event; then the run."""
     ir = checked["ir"]
@@ -360,6 +430,7 @@ def simulate(card: dict, request: dict, checked: dict, program: Path, work: Path
         return {"status": "rejected", "findings": findings}
     work.mkdir(parents=True, exist_ok=True)
     (work / "ir.json").write_text(json.dumps(ir), encoding="utf-8")
+    staged = stage_field_maps(checked, work)
     (work / "request.json").write_text(json.dumps(resolved), encoding="utf-8")
     preflight = json.loads(json.dumps(card))
     preflight["run"]["events"] = 0  # the run's own mode: a serial run has built no model tables at this point, and would read back nothing
@@ -378,7 +449,7 @@ def simulate(card: dict, request: dict, checked: dict, program: Path, work: Path
     if code != 0:
         return {"status": "failed", "exit_status": code, "stage": "preflight", "reason": failure_reason(work / "log.txt")}
     effective = json.loads((work / "effective-em.json").read_text(encoding="utf-8"))
-    problems = effective_problems(effective, card, ir, resolved)
+    problems = effective_problems(effective, card, ir, resolved) + field_sample_problems(staged, work)
     regions = {node["region"] for node in ir["physical"]["templates"].values()}
     findings = physics_check.pai_findings(requests, regions, ionisation_table(effective), ir["physical"]["physics_requirements"]) if requests else []
     if requests and not findings:

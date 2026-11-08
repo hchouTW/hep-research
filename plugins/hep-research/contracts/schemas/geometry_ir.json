@@ -245,7 +245,75 @@
      "type": "object"
     },
     "fields": {
-     "type": "object"
+     "type": "object",
+     "additionalProperties": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+       "b_tesla": {
+        "type": "array",
+        "minItems": 3,
+        "maxItems": 3
+       },
+       "map": {
+        "type": "object",
+        "required": [
+         "sha256",
+         "frame_template",
+         "origin_mm",
+         "step_mm",
+         "count"
+        ],
+        "additionalProperties": false,
+        "properties": {
+         "sha256": {
+          "type": "string",
+          "pattern": "^[0-9a-f]{64}$"
+         },
+         "frame_template": {
+          "type": "string"
+         },
+         "origin_mm": {
+          "type": "array",
+          "items": {
+           "type": "string"
+          },
+          "minItems": 3,
+          "maxItems": 3
+         },
+         "step_mm": {
+          "type": "array",
+          "items": {
+           "type": "string"
+          },
+          "minItems": 3,
+          "maxItems": 3
+         },
+         "count": {
+          "type": "array",
+          "items": {
+           "type": "integer",
+           "minimum": 2
+          },
+          "minItems": 3,
+          "maxItems": 3
+         }
+        }
+       }
+      },
+      "oneOf": [
+       {
+        "required": [
+         "b_tesla"
+        ]
+       },
+       {
+        "required": [
+         "map"
+        ]
+       }
+      ]
+     }
     }
    }
   },
