@@ -88,13 +88,13 @@
   {
    "name": "bore_field_integral",
    "definition": "integral of Bx along the magnet axis (x = y = 0) over |z| < 714 mm, in T m, from the field map Geant4 reads",
-   "reference": 0.098,
+   "reference": 0.12856,
    "tolerance_relative": 0.2,
-   "derivation": "BL^2 = 0.14 T m^2 'when considering the average Bx over |z| < 71.4 cm' (ams02:C201, Casadei thesis 2003, tier 3, the AMS-01 configuration of the same magnet), read with L the length of that interval, 1.428 m: average Bx = 0.14 / 1.428^2 T and its integral over the interval 0.14 / 1.428 = 0.09804 T m (derived; the thesis does not spell out L)",
+   "derivation": "collaboration-derived: the integral of Bx over x = y = 0, |z| <= 714 mm (2,000 midpoints, trilinear) of the official AMS-02 permanent-magnet field map (ams02_permanent_magnet_fieldmap.txt, SHA-256 34dd0ca9..., 201^3 nodes, 20 mm step, collaboration-internal, kept outside the repository; the maintainer cleared this derived value, 2026-11-08): 0.128559 T m, rounded to 0.12856",
    "sources": [],
    "independence": {
     "verified": true,
-    "result": "independent of Geant4 and of this map's calibration: the reference is the thesis's bending power, not a Geant4 or map output, and the map is calibrated only at its centre (|B(0)| = 0.14 T, ams02:C93), so the integral tests the axial shape of the parametrized 64-sector Halbach model (length 800 mm, radii 557.5 and 649 mm) against the published bending power. Shared inputs: the outer radius and the magnetization law come from the same thesis. Known tension: the thesis's plateau of about 1.6 kG (Fig. 4.3 near 1.75 kG) against the tier-1 1.4 kG; a profile of the thesis's shape normalised to 1.4 kG would integrate to about 12.5% less than its BL^2 implies."
+    "result": "independent of Geant4 and of the parametrized map: the reference is computed in Python from the official map, which the parametrized 64-sector Halbach model (length 800 mm, radii 557.5 and 649 mm, calibrated only at |B(0)| = 0.14 T, ams02:C93) does not use. Known before this reference was set: the parametrized map's measured integral, 0.1335 T m (second judged run), +3.8% from it."
    },
    "negative_control": {
     "change": "the map's bx and by columns exchanged (a frame mistake: the field along y), the file magnet-field-map-swapped.txt written by make_field_map.py --swap-xy",
@@ -121,7 +121,12 @@
     ],
     "component": "x"
    },
-   "tolerance_basis": "fixed before any measurement and before the map's integral was computed: 12.5% from the thesis's 1.6 kG plateau against the tier-1 1.4 kG to which the map is calibrated, about 5% for the ideal uniform-magnetization model (no glue gaps, no block segmentation within a sector, the 1997-2010 field change below 1%) and the unstated definition of L; 20%"
+   "tolerance_basis": "fixed before any measurement and before the map's integral was computed: 12.5% from the thesis's 1.6 kG plateau against the tier-1 1.4 kG to which the map is calibrated, about 5% for the ideal uniform-magnetization model (no glue gaps, no block segmentation within a sector, the 1997-2010 field change below 1%) and the unstated definition of L; 20%; kept unchanged at 20% when the reference moved to the official map (the maintainer's decision: margins unchanged)",
+   "superseded_reference": {
+    "value": 0.098,
+    "derivation": "BL^2 = 0.14 T m^2 'when considering the average Bx over |z| < 71.4 cm' (ams02:C201, Casadei thesis 2003, tier 3, the AMS-01 configuration of the same magnet), read with L the length of that interval, 1.428 m: average Bx = 0.14 / 1.428^2 T and its integral over the interval 0.14 / 1.428 = 0.09804 T m (derived; the thesis does not spell out L)",
+    "why": "failed at the second judged run (0.1335 T m, +36%) because its length L is not stated by the source; replaced on the maintainer's word 'use real field map to quantity' (2026-11-08), the failed run kept on record"
+   }
   }
  ],
  "approximations": [
