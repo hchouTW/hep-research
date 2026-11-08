@@ -125,7 +125,7 @@ def main(argv: list) -> int:
     spec["source_of_facts"]["/materials/aerogel/optical/rindex"] = "claim:ams02:C205"
     spec["source_of_facts"]["/materials/naf/optical/rindex"] = "claim:ams02:C205"
     request = {"schema": "simulation-request/1", "source": {"density": "analytic", "particle": "proton", "energy": {"mono": {"energy_MeV": "100000"}},
-               "position": {"box_uniform": {"frame": "world", "centre_mm": ["226", "0", "530"], "size_mm": ["0", "0", "0"]}},
+               "position": {"box_uniform": {"frame": "world", "centre_mm": ["226", "0", "530"], "size_mm": ["0.1", "0.1", "0"]}},
                "direction": {"fixed": {"frame": "world", "vector": ["0", "0", "-1"]}}},
                "scorers": [{"name": "plane", "readout": "none", "select": {"tags": ["plane"]}, "quantity": "photon_detected"}]}
     card = {"schema": "g4sim-run/1", "physics": {"reference_list": "FTFP_BERT_EMZ", "cuts_mm": {"default": "0.7"}, "extra_constructors": ["G4OpticalPhysics"],
