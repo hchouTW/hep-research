@@ -1,7 +1,7 @@
 // The T07 finder: pattern recognition through ACTS on a data file, recipe reco.track.acts-ckf-planar/1 (t04-values-v4.md section 8.1).
 //
 //   acts_tracking_finder --data-file D --product-id NAME --product-file P --record-file R --product-events K [--seed-file S]
-//                        [--ambiguity-trace-file T --ambiguity-trace-events E1,E2,...]
+//                        [--ambiguity-trace-file T --ambiguity-trace-events E1,E2,...] [--vertex-recipe reco.vertex.acts-amvf/1]
 //
 // It takes hits and nothing else: a truth path or a truth file is refused, and there is no way in for a hit set or a start state. Section 7's comparator that
 // starts from truth is another program, on the scoring side, and this one does not compile its entry (CMakeLists.txt; tests/adapters/test_acts_finding.py,
@@ -16,6 +16,10 @@
 // - the product, acts-tracking-product/1, for the first K events: per-surface states of the selected tracks, predicted, filtered and smoothed
 //   kept apart. K bounds the size of a text product: 250 MB per 18,000 tracks at job 7493368. The product holds the tracks delivered: a fit-failed
 //   candidate stays in the record, with its category, and has no track here, so fit_summary's failed count reads 0 on a finder product.
+// - with --vertex-recipe, the record is acts-tracking-finding-record/2: the same lines, plus recipe reco.vertex.acts-amvf/1 on the delivered tracks
+//   (track_vertexing.hpp), its configuration and its hash in the header, and after each event's candidates one vertexing line, its vertices with their
+//   position, covariance and fit quality, and per vertex its tracks with their weights. The vertex step reads the fits after they are made and changes no
+//   track, so removing those lines leaves the /1 record of the same run byte for byte (acts_finding_record.finding_lines_of). Without it, /1 as before.
 // All at section 4.1's field; the seed windows and the q/p prior are settled for it, so no other is offered.
 #include <Acts/ActsVersion.hpp>
 
@@ -26,6 +30,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <set>
 #include <sstream>
 #include <stdexcept>
@@ -39,10 +44,12 @@
 #include "t07_fixture_constants.hpp"
 #include "telescope_geometry.hpp"
 #include "track_finding.hpp"
+#include "track_vertexing.hpp"
 
 namespace {
 
 constexpr char record_format[] = "acts-tracking-finding-record/1";
+constexpr char vertex_record_format[] = "acts-tracking-finding-record/2";  // with the vertex step (D1 stage 7)
 constexpr char seed_file_format[] = "acts-tracking-finding-seeds/1";
 constexpr char trace_file_format[] = "acts-tracking-ambiguity-trace/1";
 constexpr char finding_recipe[] = "reco.track.acts-ckf-planar/1";
@@ -52,10 +59,12 @@ constexpr char finding_evidence_class[] = "data-side";
 std::map<std::string, std::string> parse_flags(int argc, char** argv) {
   const std::set<std::string> known{"data-file", "product-id", "product-file", "record-file", "product-events"};
   const std::set<std::string> optional_outputs{"seed-file", "ambiguity-trace-file", "ambiguity-trace-events"};
+  const std::set<std::string> optional_steps{"vertex-recipe"};
   std::map<std::string, std::string> flags;
   for (int index = 1; index < argc; index += 2) {
     const std::string flag = argv[index];
-    if (flag.rfind("--", 0) != 0 || index + 1 >= argc || (known.count(flag.substr(2)) == 0 && optional_outputs.count(flag.substr(2)) == 0)) {
+    if (flag.rfind("--", 0) != 0 || index + 1 >= argc ||
+        (known.count(flag.substr(2)) == 0 && optional_outputs.count(flag.substr(2)) == 0 && optional_steps.count(flag.substr(2)) == 0)) {
       throw std::invalid_argument("expected a known --flag and its value, got " + flag);
     }
     flags[flag.substr(2)] = argv[index + 1];
@@ -67,6 +76,9 @@ std::map<std::string, std::string> parse_flags(int argc, char** argv) {
   }
   if (flags.count("ambiguity-trace-file") != flags.count("ambiguity-trace-events")) {
     throw std::invalid_argument("--ambiguity-trace-file and --ambiguity-trace-events go together");
+  }
+  if (flags.count("vertex-recipe") != 0 && flags.at("vertex-recipe") != t07::vertex_recipe) {
+    throw std::invalid_argument("--vertex-recipe names " + flags.at("vertex-recipe") + ", and only " + t07::vertex_recipe + " is built");
   }
   return flags;
 }
@@ -129,6 +141,36 @@ std::string configuration_text() {
     text += "configuration " + name + " " + value + "\n";
   }
   return text;
+}
+
+std::string vertex_configuration_text(const t07::TrackVertexer& vertexer) {
+  std::string text;
+  for (const auto& [name, value] : vertexer.configuration()) {
+    text += "vertex_configuration " + name + " " + value + "\n";
+  }
+  return text;
+}
+
+// One event's vertex step: its line, then each vertex and its tracks. Keys: event-<ordinal>-vertex-<index>, in ACTS's order.
+std::string vertex_lines(const t07::EventVertices& vertices, std::uint32_t event_ordinal) {
+  std::ostringstream lines;
+  lines << "vertexing " << event_ordinal << " " << vertices.status << " " << vertices.input_tracks << " " << vertices.unconverted_tracks << " " << vertices.vertices.size() << "\n";
+  for (std::size_t index = 0; index < vertices.vertices.size(); ++index) {
+    const t07::FoundVertex& vertex = vertices.vertices[index];
+    const std::string key = "event-" + std::to_string(event_ordinal) + "-vertex-" + std::to_string(index);
+    lines << "vertex " << key << " " << event_ordinal;
+    for (const double value : vertex.position_mm) {
+      lines << " " << number_text(value);
+    }
+    for (const double value : vertex.covariance) {
+      lines << " " << number_text(value);
+    }
+    lines << " " << number_text(vertex.chi2) << " " << number_text(vertex.ndf) << " " << vertex.tracks.size() << "\n";
+    for (const t07::VertexTrack& track : vertex.tracks) {
+      lines << "vertex-track " << key << " " << track.track_key << " " << number_text(track.weight) << " " << number_text(track.chi2) << " " << number_text(track.compatibility) << "\n";
+    }
+  }
+  return lines.str();
 }
 
 std::string event_line(const t07::EventFinding& finding) {
@@ -196,6 +238,11 @@ int run(int argc, char** argv) {
   const std::string data_sha256 = t07::sha256_of_file(data_path);
   const t07::TelescopeGeometry telescope = t07::build_telescope_geometry();
   const t07::TrackFinder finder(telescope, t07::field_tesla, reader.header().sigma_loc0_mm, reader.header().sigma_loc1_mm);
+  // The vertex step only when asked for by its recipe's name: without it the record stays /1, as every earlier job wrote it.
+  std::unique_ptr<const t07::TrackVertexer> vertexer;
+  if (flags.count("vertex-recipe") != 0) {
+    vertexer = std::make_unique<const t07::TrackVertexer>(telescope, t07::field_tesla);
+  }
 
   t07::ProductDocument document;
   t07::ProductHeader& header = document.header;
@@ -217,9 +264,13 @@ int run(int argc, char** argv) {
   if (!record) {
     throw std::runtime_error("cannot write " + record_path);
   }
-  record << record_format << "\nrecipe " << finding_recipe << "\nstage " << finding_stage << "\nevidence_class " << finding_evidence_class << "\nproduct_id " << header.product_id
+  record << (vertexer ? vertex_record_format : record_format) << "\nrecipe " << finding_recipe << "\nstage " << finding_stage << "\nevidence_class " << finding_evidence_class << "\nproduct_id " << header.product_id
          << "\ndata_sha256 " << data_sha256 << "\nproduct_events " << product_events << "\nconfiguration_sha256 " << t07::hex_of(t07::sha256_of_text(configuration)) << "\n"
          << configuration;
+  if (vertexer) {
+    const std::string vertex_configuration = vertex_configuration_text(*vertexer);
+    record << "vertex_recipe " << t07::vertex_recipe << "\nvertex_configuration_sha256 " << t07::hex_of(t07::sha256_of_text(vertex_configuration)) << "\n" << vertex_configuration;
+  }
   std::ofstream seed_stream;
   if (!seed_path.empty()) {
     seed_stream.open(seed_path, std::ios::binary);
@@ -243,6 +294,8 @@ int run(int argc, char** argv) {
   std::size_t selected = 0;
   std::size_t failed = 0;
   std::size_t truncated_events = 0;
+  std::size_t vertices = 0;
+  std::size_t vertexing_failed = 0;
   t07::DataEvent event;
   for (std::uint32_t ordinal = 0; reader.next(event); ++ordinal) {
     const bool trace_this = traced_events.count(ordinal) != 0;
@@ -264,6 +317,17 @@ int run(int argc, char** argv) {
       selected += candidate.outcome == "selected" ? 1 : 0;
       failed += candidate.outcome == "fit-failed" ? 1 : 0;
     }
+    if (vertexer) {
+      // After the fit, on the delivered tracks only; it reads them and changes none.
+      const t07::EventVertices found = vertexer->vertex(finding.fits);
+      record << vertex_lines(found, ordinal);
+      if (found.status != "ok") {
+        // Kept by the scoring side with the finder's stderr (D1 stage 7b): one line per failed event, with ACTS's own message.
+        std::cerr << "vertexing event " << ordinal << " failed: " << found.failure << "\n";
+      }
+      vertices += found.vertices.size();
+      vertexing_failed += found.status == "ok" ? 0 : 1;
+    }
     ++events;
     candidates += finding.candidates.size();
     truncated_events += finding.search_truncated() ? 1 : 0;
@@ -275,7 +339,11 @@ int run(int argc, char** argv) {
       }
     }
   }
-  record << "end " << events << " " << candidates << "\n";
+  record << "end " << events << " " << candidates;
+  if (vertexer) {
+    record << " " << vertices;
+  }
+  record << "\n";
   record.close();
   if (!record) {
     throw std::runtime_error("cannot finish " + record_path);
@@ -299,7 +367,11 @@ int run(int argc, char** argv) {
   }
   t07::write_whole_file(product_path, t07::encode_product(document));
   std::cout << "{\"status\": \"ok\", \"events\": " << events << ", \"candidates\": " << candidates << ", \"tracks\": " << selected + failed << ", \"failed\": " << failed
-            << ", \"search_truncated_events\": " << truncated_events << ", \"stage\": \"" << finding_stage << "\", \"evidence_class\": \"" << finding_evidence_class << "\"}\n";
+            << ", \"search_truncated_events\": " << truncated_events;
+  if (vertexer) {
+    std::cout << ", \"vertex_recipe\": \"" << t07::vertex_recipe << "\", \"vertices\": " << vertices << ", \"vertexing_failed_events\": " << vertexing_failed;
+  }
+  std::cout << ", \"stage\": \"" << finding_stage << "\", \"evidence_class\": \"" << finding_evidence_class << "\"}\n";
   return 0;
 }
 

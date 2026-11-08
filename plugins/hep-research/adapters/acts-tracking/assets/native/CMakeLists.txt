@@ -9,8 +9,9 @@ add_executable(acts_tracking_driver acts_tracking_driver.cpp kalman_refit.cpp)
 target_link_libraries(acts_tracking_driver PRIVATE acts_tracking_common)
 
 # Pattern recognition, recipe reco.track.acts-ckf-planar/1: a program of its own, with no route for a hit set or any other truth-assisted input.
-# Data side: it links no generator, seed code or truth reader (section 3.1), which the build job checks on the binary.
-add_executable(acts_tracking_finder acts_tracking_finder.cpp track_finding.cpp kalman_refit.cpp)
+# Data side: it links no generator, seed code or truth reader (section 3.1), which the build job checks on the binary. With --vertex-recipe it also runs
+# recipe reco.vertex.acts-amvf/1 on its delivered tracks (track_vertexing.cpp, compiled here and nowhere else).
+add_executable(acts_tracking_finder acts_tracking_finder.cpp track_finding.cpp kalman_refit.cpp track_vertexing.cpp)
 target_link_libraries(acts_tracking_finder PRIVATE acts_tracking_common)
 
 # Section 7's truth-seeded run, a comparator: scoring side, never reported as finding. Its own program (decisions.md, "T07 stage 5"), so the finder above stays

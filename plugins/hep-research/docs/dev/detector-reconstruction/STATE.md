@@ -76,7 +76,7 @@ tasks:
   T07: {state: in-progress, note: "generators frozen; stage 4: q/p prior settled, field open for the refit, first development run job 7493368, refit pulls, truth-assisted, counted apart, a tuning reading; next noise, CKF, ambiguity resolution, vertexing, residuals, derivatives"}
   T11: {state: done, note: "comparison clean with rerun 7474460 (R28); every applicable cell is sourced or a recorded gap (R14); 10 citation uses unread; plugin defects in t11-citation-findings.md not applied"}
 k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K08, K09, K10, K11, K12, K16, K17, K18]}
-next_action: "T07: vertexing; then residuals and derivatives (CAI-T07-1,2,4), sidecars, zero-field refit capability line"
+next_action: "T07: the user on stage 7b (vertex configuration for Freeze B, refuted prediction tests); then residuals and derivatives (CAI-T07-1,2,4), sidecars"
 ```
 
 ## Plan conflicts found

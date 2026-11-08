@@ -729,6 +729,7 @@ class FindingIsNeverARefit(unittest.TestCase):
 
 FINDER_FLAGS = {"data-file", "product-id", "product-file", "record-file", "product-events"}
 FINDER_OPTIONAL_OUTPUTS = {"seed-file", "ambiguity-trace-file", "ambiguity-trace-events"}
+FINDER_OPTIONAL_STEPS = {"vertex-recipe"}  # D1 stage 7: the vertex step on the delivered tracks, by its recipe's name; it takes no input
 TRUTH_SEEDED_ONLY = ("find_from_starts", "PlaneStart", "truth_seeded", "truth-seeded", ".t07truth", "t07starts", "truth-starts", "start-file")
 
 
@@ -739,10 +740,13 @@ def finder_truth_input_defects(finder_source: str, finding_source: str, cmake_te
     defects = []
     known = re.search(r"const std::set<std::string> known\{([^}]*)\}", finder_source)
     optional = re.search(r"const std::set<std::string> optional_outputs\{([^}]*)\}", finder_source)
+    steps = re.search(r"const std::set<std::string> optional_steps\{([^}]*)\}", finder_source)
     if not known or set(re.findall(r'"([^"]+)"', known.group(1))) != FINDER_FLAGS:
         defects.append("the finder's required flags are not the hits and its outputs")
     if not optional or set(re.findall(r'"([^"]+)"', optional.group(1))) != FINDER_OPTIONAL_OUTPUTS:
         defects.append("the finder's optional flags are not its outputs")
+    if not steps or set(re.findall(r'"([^"]+)"', steps.group(1))) != FINDER_OPTIONAL_STEPS:
+        defects.append("the finder's optional steps are not the vertex step alone")
     named = [word for word in TRUTH_SEEDED_ONLY if word in finder_source]
     if named:
         defects.append(f"the finder's program names {named}")
@@ -773,13 +777,15 @@ class FinderStaysTruthFree(unittest.TestCase):
     def test_each_truth_input_alone_is_named(self):
         required = 'known{"data-file", "product-id", "product-file", "record-file", "product-events"}'
         optional = 'optional_outputs{"seed-file", "ambiguity-trace-file", "ambiguity-trace-events"}'
-        finder_target = "add_executable(acts_tracking_finder acts_tracking_finder.cpp track_finding.cpp kalman_refit.cpp)"
+        steps = 'optional_steps{"vertex-recipe"}'
+        finder_target = "add_executable(acts_tracking_finder acts_tracking_finder.cpp track_finding.cpp kalman_refit.cpp track_vertexing.cpp)"
         defects = {
             "a truth file flag": (self.finder.replace(required, required.replace('"product-events"', '"product-events", "truth-file"')), self.finding, self.cmake),
             "a particle file as an optional flag": (self.finder.replace(optional, optional.replace('"seed-file"', '"seed-file", "particle-file"')), self.finding, self.cmake),
+            "a truth vertex file as an optional step": (self.finder.replace(steps, steps.replace('"vertex-recipe"', '"vertex-recipe", "truth-vertex-file"')), self.finding, self.cmake),
             "the probe compiles truth-seeded code": (self.finder, self.finding, self.cmake.replace("add_executable(seed_start_probe seed_start_probe.cpp", "add_executable(seed_start_probe seed_start_probe.cpp truth_seeded_search.cpp")),
             "a call of the truth-seeded entry": (self.finder.replace("finder.find(event, ordinal, trace_this)", "finder.find_from_starts(event, ordinal, {})"), self.finding, self.cmake),
-            "the target compiles truth-seeded code": (self.finder, self.finding, self.cmake.replace(finder_target, finder_target.replace("kalman_refit.cpp)", "kalman_refit.cpp truth_seeded_search.cpp)"))),
+            "the target compiles truth-seeded code": (self.finder, self.finding, self.cmake.replace(finder_target, finder_target.replace("track_vertexing.cpp)", "track_vertexing.cpp truth_seeded_search.cpp)"))),
             "the entry defined where the finder compiles it": (self.finder, self.finding + "\nEventFinding TrackFinder::find_from_starts(\n", self.cmake),
         }
         for name, sources in defects.items():
