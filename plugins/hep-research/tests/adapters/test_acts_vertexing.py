@@ -22,9 +22,13 @@ estimate less 1.645 x event-bootstrap se, B = 1,000, seeded from (fixture id, bl
 
 Predictions, fixed in the D1 stage 7 report before the first run of this recipe; a reading outside one is a disagreement with a prediction, for finding the cause, not a gate
 result, and the limit does not move after results (sheet, Stop):
-- Far vertex finding efficiency at least FAR_EFFICIENCY_PREDICTED in every stratum.
-- Far wrong-assignment rate at most WRONG_ASSIGNMENT_PREDICTED in every stratum (section 4.1's ideal is 0.020 %, 0.027 % at o3).
-- Far unmatched, split and merged vertices each at most FAR_ODD_PER_EVENT_PREDICTED per event in every stratum.
+- Far vertex finding efficiency at least FAR_EFFICIENCY_PREDICTED in every stratum (P1).
+- Far wrong-assignment rate at most WRONG_ASSIGNMENT_PREDICTED in every stratum (section 4.1's ideal is 0.020 %, 0.027 % at o3) (P2).
+- Far unmatched, split and merged vertices each at most FAR_ODD_PER_EVENT_PREDICTED per event in every stratum (P3).
+  P1, P2, P3 and P15 below were refuted in job 7524096. On the user's word after it (decisions.md, "After stage 7b: the user's choices": "make them readings, defaults until
+  Freeze B") they fail nothing since: VERTEX-READING and VERTEX-BAD print their numbers beside the old prediction (former_prediction_readings). The constants stay, as the record
+  of what was predicted. Every check of correctness stays enforced: failed events, byte, track and product equality, positive-definite covariances, chi2 below zero, P16, the
+  frame, the pulls, the files' bound and vertices in every stratum (stratum_check_defects, vertex_prediction_defects).
 - Far pulls, x, y, z: centre within PULL_CENTRE_Z design standard errors (1.03 / sqrt n, section 5.1), sigma_68 inside PULL_WIDTH_PREDICTED. Section 8.5: adaptive weights
   guarantee no Gaussian pull, so this range is wider than a gate's and says what this design expects, nothing more.
 - No event fails its vertex step and no delivered track fails to reach the reference line.
@@ -80,11 +84,13 @@ VERTEX_FLOOR = 0.95  # section 8.5, a gate after K09; printed beside the reading
 COORDINATES = ("x", "y", "z")
 
 # Predictions (D1 stage 7 report), fixed before the first run.
+# P1, P2, P3 and P15: refuted in job 7524096, readings since (user, decisions.md "After stage 7b: the user's choices"). Kept as the record of the prediction; they fail nothing.
 FAR_EFFICIENCY_PREDICTED = 0.995
 WRONG_ASSIGNMENT_PREDICTED = 0.002
 FAR_ODD_PER_EVENT_PREDICTED = 0.002
-LARGE_VARIANCE_SHARE_PREDICTED = 0.001  # stage 7b fix round 1 (report P15)
-HIGH_CHI2_TRACKS_PREDICTED = 5          # stage 7b fix round 1 (report P16)
+LARGE_VARIANCE_SHARE_PREDICTED = 0.001  # stage 7b fix round 1 (report P15); a reading since job 7524096, and still a reason to keep a stratum's record
+HIGH_CHI2_TRACKS_PREDICTED = 5          # stage 7b fix round 1 (report P16): enforced
+REFUTED_IN = "refuted in job 7524096, a reading since"
 PULL_CENTRE_Z = 4.0
 PULL_WIDTH_PREDICTED = (0.90, 1.15)
 PRODUCT_CHECK = ("clean", 0, 50)  # fixture, stratum, events and product events: the product with and without the vertex step (review m1)
@@ -212,18 +218,39 @@ def stratum_vertex_tally(scored: list) -> dict:
     return {"tally": tally, "pulls": numpy.asarray(pulls, float).reshape(-1, 3), "residuals": numpy.asarray(residuals, float).reshape(-1, 3), "events": len(scored)}
 
 
-def vertex_prediction_defects(far: dict) -> list:
-    """The module's predictions, far events of one stratum. A defect is a disagreement with a prediction, not a gate result."""
-    tally, events, defects = far["tally"], far["events"], []
+def former_prediction_readings(far: dict, raw: Counter) -> list:
+    """P1, P2, P3 and P15, refuted in job 7524096: each as a reading, its number beside the old prediction, and whether it lies inside. They fail nothing."""
+    tally, events = far["tally"], far["events"]
     efficiency = tally["found"] / tally["reconstructable"] if tally["reconstructable"] else float("nan")
-    if not efficiency >= FAR_EFFICIENCY_PREDICTED:
-        defects.append(f"far efficiency {efficiency:.5f}, predicted at least {FAR_EFFICIENCY_PREDICTED}")
     rate = tally["wrong"] / tally["assigned"] if tally["assigned"] else float("nan")
-    if not rate <= WRONG_ASSIGNMENT_PREDICTED:
-        defects.append(f"far wrong assignment {tally['wrong']} of {tally['assigned']}, predicted at most {WRONG_ASSIGNMENT_PREDICTED}")
-    for name in ("unmatched", "split", "merged"):
-        if tally[name] > FAR_ODD_PER_EVENT_PREDICTED * events:
-            defects.append(f"far {name} {tally[name]} in {events} events, predicted at most {FAR_ODD_PER_EVENT_PREDICTED} per event")
+    readings = [f"P1 far efficiency {efficiency:.5f} against the old prediction at least {FAR_EFFICIENCY_PREDICTED}: {'inside' if efficiency >= FAR_EFFICIENCY_PREDICTED else 'outside'}",
+                f"P2 far wrong assignment {rate:.5f} against the old prediction at most {WRONG_ASSIGNMENT_PREDICTED}: {'inside' if rate <= WRONG_ASSIGNMENT_PREDICTED else 'outside'}"]
+    readings += [f"P3 far {name} {tally[name]} against the old prediction at most {FAR_ODD_PER_EVENT_PREDICTED * events:g}: {'inside' if tally[name] <= FAR_ODD_PER_EVENT_PREDICTED * events else 'outside'}"
+                 for name in ("unmatched", "split", "merged")]
+    allowed = LARGE_VARIANCE_SHARE_PREDICTED * raw["vertices"]
+    readings.append(f"P15 vertices with a variance above {LARGE_VARIANCE_MM2:g} mm^2 {raw['large_variance']} against the old prediction at most {allowed:g}: "
+                    f"{'inside' if raw['large_variance'] <= allowed else 'outside'}")
+    return readings
+
+
+def stratum_check_defects(raw: Counter) -> list:
+    """The checks of correctness on a stratum's record, enforced after job 7524096 as before: vertices in the stratum (a stratum with no counts is not decided), no covariance
+    that is not positive definite, no chi2 below zero, no failed event, and P16."""
+    defects = []
+    if raw["vertices"] <= 0:
+        defects.append("no vertex counted: not decided")
+    for name in ("not_positive_definite", "chi2_negative", "failed_events"):
+        if raw[name] > 0:
+            defects.append(f"{name} {raw[name]}")
+    if raw["high_chi2_held_tracks"] > HIGH_CHI2_TRACKS_PREDICTED:
+        defects.append(f"P16 held tracks with chi2Track above {HIGH_TRACK_CHI2:g}: {raw['high_chi2_held_tracks']}, at most {HIGH_CHI2_TRACKS_PREDICTED}")
+    return defects
+
+
+def vertex_prediction_defects(far: dict) -> list:
+    """The predictions still enforced on far events of one stratum, P4 and P5: pull centre and width per coordinate. P1 to P3 are readings since job 7524096
+    (former_prediction_readings). A defect is a disagreement with a prediction, not a gate result."""
+    defects = []
     pulls = far["pulls"]
     for axis, name in enumerate(COORDINATES):
         if len(pulls) == 0:
@@ -454,15 +481,39 @@ class PredictionsCanDisagree(unittest.TestCase):
 
     def test_each_defect_is_named(self):
         self.assertEqual(vertex_prediction_defects(self.far()), [])
-        self.assertEqual(len(vertex_prediction_defects(self.far(found=-30))), 1)
-        self.assertEqual(len(vertex_prediction_defects(self.far(wrong=40))), 1)
-        self.assertEqual(len(vertex_prediction_defects(self.far(merged=6))), 1)
+        # P1, P2 and P3 are readings since job 7524096: past their old limits they fail nothing, and the reading says outside.
+        for changes in ({"found": -30}, {"wrong": 40}, {"merged": 6}):
+            with self.subTest(changes=changes):
+                self.assertEqual(vertex_prediction_defects(self.far(**changes)), [])
+                self.assertEqual(sum(text.endswith("outside") for text in former_prediction_readings(self.far(**changes), Counter(vertices=5000))), 1)
         wide = self.far()
         wide["pulls"] = wide["pulls"] * numpy.array([1.0, 1.3, 1.0])
         self.assertEqual(len(vertex_prediction_defects(wide)), 1)
         shifted = self.far()
         shifted["pulls"] = shifted["pulls"] + numpy.array([0.0, 0.0, 0.1])
         self.assertEqual(len(vertex_prediction_defects(shifted)), 1)
+
+    def test_a_stratum_like_job_7524096s_o1_passes_and_a_bad_vertex_still_fails(self):
+        """The user's choice after job 7524096: noise stratum 0 read efficiency 0.985405 (4,726 of 4,796), wrong assignment 72 of 14,165, merged 78, 5,405 vertices and a pull width
+        near 1. Its former predictions are outside and fail nothing; one vertex not positive definite, one chi2 below zero, one failed event or P16 past its limit still fail."""
+        generator = numpy.random.default_rng(11)
+        far = {"tally": Counter({"reconstructable": 4796, "found": 4726, "assigned": 14165, "wrong": 72, "unmatched": 0, "split": 0, "merged": 78}), "events": 2400,
+               "pulls": generator.standard_normal((4730, 3)), "residuals": numpy.zeros((4730, 3))}
+        raw = Counter({"vertices": 5405, "large_variance": 6, "high_chi2_held_tracks": 0})  # 6 > 5.405: P15 outside too
+        self.assertEqual(stratum_check_defects(raw) + vertex_prediction_defects(far), [])
+        self.assertEqual(sum(text.endswith("outside") for text in former_prediction_readings(far, raw)), 4)  # P1, P2, P3 merged, P15
+        for bad in ({"not_positive_definite": 1}, {"chi2_negative": 1}, {"failed_events": 1}, {"high_chi2_held_tracks": 6}, {"vertices": -5405}):
+            with self.subTest(bad=bad):
+                worse = raw.copy()
+                worse.update(bad)
+                self.assertEqual(len(stratum_check_defects(worse)), 1)
+        self.assertEqual(len(vertex_step_defects(self.non_positive_definite_record())), 1)  # and the reader refuses such a record
+
+    def non_positive_definite_record(self) -> str:
+        document = honest_vertex_record()
+        vertex = document["events"][0]["vertexing"]["vertices"][0]
+        vertex["covariance"] = [1.0, 2.0, 0.0, 1.0, 0.0, 1.0]
+        return finding_record.format_record(document)
 
     def test_the_efficiency_bound_is_the_efficiency_readings_bound(self):
         reconstructable = numpy.full(2400, 2)
@@ -724,7 +775,7 @@ class VertexDevelopmentRun(unittest.TestCase):
             raw = item["raw"]
             # Every stratum, read or refused (D1 stage 7b): its bad vertices, failed events and ACTS's messages.
             print(f"VERTEX-BAD {item['fixture']} stratum {item['stratum']} vertices {raw['vertices']} not_positive_definite {raw['not_positive_definite']} chi2_negative "
-                  f"{raw['chi2_negative']} failed_events {raw['failed_events']} failure_messages {dict(item['failures'].most_common())}; readings, no section 8 gate, enforced as predictions P15 and P16: "
+                  f"{raw['chi2_negative']} failed_events {raw['failed_events']} failure_messages {dict(item['failures'].most_common())}; readings, no section 8 gate (P15 {REFUTED_IN}, P16 enforced as a prediction): "
                   f"variance_above_{LARGE_VARIANCE_MM2:g}_mm2 {raw['large_variance']} tracks_chi2_above_{HIGH_TRACK_CHI2:g}_at_weight_above_{HELD_WEIGHT:g} {raw['high_chi2_held_tracks']}; "
                   f"record_kept {int(item['record_kept'])}", flush=True)
             if item["error"] is not None:
@@ -738,7 +789,7 @@ class VertexDevelopmentRun(unittest.TestCase):
             efficiency, bound, percentile = item["efficiency"]
             print(f"VERTEX-READING development reading, not a gate (K09): {population_line(item, 'far')}; lower bound (estimate - 1.645 se, event bootstrap B "
                   f"{BOOTSTRAP_REPLICATES}) {bound:.6f}, 5 % percentile, reading only, {percentile:.6f}; section 8.5 floor {VERTEX_FLOOR}: "
-                  f"{'at or above' if bound >= VERTEX_FLOOR else 'below'}", flush=True)
+                  f"{'at or above' if bound >= VERTEX_FLOOR else 'below'}; former predictions, {REFUTED_IN}: {'; '.join(former_prediction_readings(item['far'], item['raw']))}", flush=True)
             print(f"VERTEX-NEAR reported, not gated (section 8.4): {population_line(item, 'near')}", flush=True)
             for population in ("far", "near"):
                 pulls = item[population]["pulls"]
@@ -780,20 +831,11 @@ class VertexDevelopmentRun(unittest.TestCase):
                 self.assertEqual(item["far"]["tally"]["truth_vertices"] + item["near"]["tally"]["truth_vertices"], VERTICES_OF_LEVEL[item["stratum"] % 3] * item["events"])
 
     def test_no_vertex_is_bad(self):
-        """D1 stage 7b predictions: no covariance that is not positive definite and no chi2 below zero, counted in every stratum, refused or not. A stratum with no counts is not
-        decided, and fails here (review m2)."""
+        """Enforced: vertices in every stratum (a stratum with no counts is not decided, review m2), no covariance that is not positive definite, no chi2 below zero, no failed
+        event, P16; counted in every stratum, refused or not. P15 is a reading since job 7524096 (VERTEX-BAD prints it)."""
         for item in self.readings:
             with self.subTest(fixture=item["fixture"], stratum=item["stratum"]):
-                self.assertGreater(item["raw"]["vertices"], 0)
-                self.assertEqual((item["raw"]["not_positive_definite"], item["raw"]["chi2_negative"]), (0, 0))
-
-    def test_the_prior_readings_against_their_predictions(self):
-        """D1 stage 7b fix round 1, readings with no gate (review m3): few vertices with a variance above 1 mm^2, few held tracks with chi2Track above 100."""
-        for item in self.readings:
-            with self.subTest(fixture=item["fixture"], stratum=item["stratum"]):
-                raw = item["raw"]
-                self.assertLessEqual(raw["large_variance"], LARGE_VARIANCE_SHARE_PREDICTED * raw["vertices"])
-                self.assertLessEqual(raw["high_chi2_held_tracks"], HIGH_CHI2_TRACKS_PREDICTED)
+                self.assertEqual(stratum_check_defects(item["raw"]), [])
 
     def test_the_vertex_step_moved_no_track(self):
         """The /2 record of each diagnosis stratum, its vertex lines left out, is job 7502411's /1 record byte for byte."""
