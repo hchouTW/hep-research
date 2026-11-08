@@ -8967,6 +8967,23 @@ limits catch large defects only. The custodian's re-evaluation of qualification 
 
 Passing checks show software consistency, not physical validity.
 
+## 0.62.0 release check (2026-11-08, CI and E5)
+
+Release branch `release/0.62.0`, based on main `c3a47c02` (PR #370 merged). Minor release: g4sim phase S6. Contracts 3.24.0, `CORE_VERSION` 1.10.0, `adapters/geant4` 0.12.0; profiles `reference:geometry-cases` 0.1.0, `reference:detector-atlas` 0.2.0, `experiment:ams-02` 2.1.0, `experiment:eic` 0.2.0.
+
+What changed on the release branch: the CHANGELOG `0.62.0` section and the g4sim status (S6 `merged`). No regeneration here: S6 regenerated the eic routing example for the eic profile's new version. Gate record: `docs/dev/geant4-architecture/g4sim-gates/S6.md`.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on PR #370 | success |
+| `run_all_checks.py`, E5 Slurm node at `69a75f66`, `--jobs 8` | 33 pass, 1 fail; 3 failing tests, all environmental: two pass from a path without `S6`, one needs `cmake`, absent on the node |
+| `mypy` | Clean, 140 source files |
+| Reference cases | CMS ECAL crystal 25.771 X0 against 25.77; AMS-02 TOF half 0.04661 X0 against 0.0466 and 34 counters; ePIC ZDC steel 73.64 X0 against 73.73 and 8,096 cells; every negative control caught |
+
+**E2 was not run for this release.** No C++ changed in S6, so no G5 was due. The cases compare with cited values: validation, not confirmation, and none is an experiment's geometry. The AMS-02 TOF values rest on two NIM A papers the maintainer supplied, read in full; the PDFs are not committed. The ePIC ZDC case follows a development simulation geometry.
+
+Passing checks show software consistency, not physical validity.
+
 ## 0.61.0 release check (2026-11-07, CI and E5)
 
 Release branch `release/0.61.0`, based on main `0e586eeb` (PR #367 merged). Minor release: simreco's strip digitization error. `adapters/geant4` 0.11.1; contracts 3.23.0 and `CORE_VERSION` 1.10.0 unchanged.
