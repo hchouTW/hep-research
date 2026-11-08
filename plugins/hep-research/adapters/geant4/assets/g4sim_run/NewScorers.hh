@@ -347,7 +347,8 @@ class ScorerSums {
   }
 
   // S7, photon_detected (Section 8.6): an optical photon OpBoundary detected on entering a scorer's template is one count in that volume's cell,
-  // and one row of photons.csv: event, scorer, volume, arrival time, transit time since emission, photon energy, emission point.
+  // and one row of photons.csv: event, scorer, volume, arrival time, transit time since emission, photon energy, emission point, and the
+  // direction it arrived in (the Cherenkov-angle gate reads it where no surface turned the photon), and the track that emitted it.
   void PhotonDetected(const G4Step* step) {
     const G4StepPoint* post = step->GetPostStepPoint();
     const G4VTouchable* touchable = post->GetTouchable();
@@ -364,9 +365,10 @@ class ScorerSums {
       Add(i, volume, 0, 1.);
       fDirect[i] += 1.;
       if (fPhotons) {
-        const G4ThreeVector vertex = track->GetVertexPosition() / mm;
-        std::fprintf(fPhotons, "%lld,%s,%lld,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g\n", fEvent, scorer.name.c_str(), volume, post->GetGlobalTime() / ns,
-                     track->GetLocalTime() / ns, step->GetPreStepPoint()->GetKineticEnergy() / eV, vertex.x(), vertex.y(), vertex.z());
+        const G4ThreeVector vertex = track->GetVertexPosition() / mm, direction = step->GetPreStepPoint()->GetMomentumDirection();
+        std::fprintf(fPhotons, "%lld,%s,%lld,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%.17g,%d\n", fEvent, scorer.name.c_str(), volume, post->GetGlobalTime() / ns,
+                     track->GetLocalTime() / ns, step->GetPreStepPoint()->GetKineticEnergy() / eV, vertex.x(), vertex.y(), vertex.z(), direction.x(), direction.y(), direction.z(),
+                     track->GetParentID());
       }
     }
   }
