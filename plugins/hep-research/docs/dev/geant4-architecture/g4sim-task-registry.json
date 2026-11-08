@@ -757,6 +757,13 @@
    "registered_at": "2026-11-08T00:30:21Z",
    "card_commit": "5b3c0f6e",
    "reason": "cases, tolerances and negative controls, before any run"
+  },
+  {
+   "card": "g4sim-tasks/S6.md",
+   "sha256": "426631c74e2d7fa8d536253a85a8c554da7c6a78a32de0bbcecf77bca1d404b7",
+   "registered_at": "2026-11-08T02:21:09Z",
+   "card_commit": "26b146da",
+   "reason": "Execution log only; thresholds unchanged"
   }
  ]
 }
