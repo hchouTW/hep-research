@@ -202,3 +202,9 @@ These are not Section 20 decisions. They are how S0 reconciled requirements of t
 | Peer-reviewed papers by ePIC members without an ePIC Collaboration byline | Tier 3 under the eic source policy, context only | hsinyichou (maintainer) | 2026-11-08 | "use your recommendations" |
 | AMS-02 TOF sources | The maintainer supplied NIM A 623 (2010) 968 and NIM A 743 (2014) 22, read for the case's Tier 1 values; the PDFs are not committed | hsinyichou (maintainer) | 2026-11-08 | "AMS paper PDF in /ceph/sharedfs/work/AMS/hsinyichou/hep-research-tasks" |
 
+
+## During S7 (2026-11-08)
+
+| Item | Decision | Who | Date | Words |
+| --- | --- | --- | --- | --- |
+| Slurm submissions in S7 | The agent submits the Slurm jobs S7 needs without asking each time, and reports each one; E7 stops for failed gates, missing data and contradictions still apply | hsinyichou (maintainer) | 2026-11-08 | "auto summit slurm job if need." |
