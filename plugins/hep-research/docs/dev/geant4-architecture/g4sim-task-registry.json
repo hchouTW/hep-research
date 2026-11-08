@@ -764,6 +764,13 @@
    "registered_at": "2026-11-08T02:21:09Z",
    "card_commit": "26b146da",
    "reason": "Execution log only; thresholds unchanged"
+  },
+  {
+   "card": "g4sim-tasks/S7.md",
+   "sha256": "2f8e92db9aae43cea794e7bdce3cc9da8732f9a9ddda5677fdcab0f9274a0249",
+   "registered_at": "2026-11-08T13:53:25Z",
+   "card_commit": "80c9e037",
+   "reason": "before the judged runs: gate 1, 2 and 4 event counts derived from trials, gate 3 recorded as a gap (no qualifying TR yield data), the 27 rows of the reference-case table; the Section 19.2 thresholds unchanged"
   }
  ]
 }
