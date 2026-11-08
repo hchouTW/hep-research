@@ -7,6 +7,7 @@
   ],
   "material:base": [
    "ams02-rich",
+   "ams02-rich-replica",
    "ams02-trd",
    "cms-ecal-barrel-supermodule",
    "epic-drich",
@@ -18,6 +19,7 @@
   ],
   "material:composition": [
    "ams02-rich",
+   "ams02-rich-replica",
    "ams02-tof",
    "cms-ecal-barrel-crystal",
    "cms-ecal-barrel-crystal-optics",
@@ -33,18 +35,21 @@
   ],
   "optics:material": [
    "ams02-rich",
+   "ams02-rich-replica",
    "cms-ecal-barrel-crystal-optics",
    "epic-drich",
    "lhcb-rich-radiators"
   ],
   "optics:surface": [
    "ams02-rich",
+   "ams02-rich-replica",
    "cms-ecal-barrel-crystal-optics",
    "epic-drich",
    "lhcb-rich-radiators"
   ],
   "placement:explicit": [
    "ams02-rich",
+   "ams02-rich-replica",
    "ams02-tracker-magnet"
   ],
   "placement:grid": [
@@ -70,6 +75,7 @@
   "placement:single": [
    "ams02-ecal",
    "ams02-rich",
+   "ams02-rich-replica",
    "ams02-tof",
    "ams02-tracker-magnet",
    "ams02-trd",
@@ -98,6 +104,7 @@
   ],
   "requirement:optical_scope": [
    "ams02-rich",
+   "ams02-rich-replica",
    "cms-ecal-barrel-crystal-optics",
    "epic-drich",
    "lhcb-rich-radiators"
@@ -116,6 +123,7 @@
   "shape:box": [
    "ams02-ecal",
    "ams02-rich",
+   "ams02-rich-replica",
    "ams02-tof",
    "ams02-trd",
    "cms-ecal-barrel-crystal-optics",
@@ -129,6 +137,9 @@
    "lhcb-rich-radiators",
    "lhcb-scifi"
   ],
+  "shape:cone": [
+   "ams02-rich-replica"
+  ],
   "shape:trd": [
    "cms-ecal-barrel-crystal",
    "cms-ecal-barrel-crystal-optics",
@@ -137,6 +148,7 @@
    "epic-drich"
   ],
   "shape:tube": [
+   "ams02-rich-replica",
    "ams02-tracker-magnet",
    "epic-drich"
   ],

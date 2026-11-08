@@ -7,7 +7,8 @@
 
 A scintillator bar with a photodetector on one end, one scintillation component (the validation run's condition of Section 10.4), Birks
 declared. The validation run tracks every photon (photon_detected gives N_full per event) and scores edep_visible_ly_split in the map's
-cartesian bins; the digitization of the same events' bins through the map gives N_map, so the two samples are paired. Statistics: the
+cartesian bins; the digitization of the same events' bins through the map gives N_map, so the two samples are paired. The mean is
+compared with N_map's expectation given the deposits (photon-number mean times the bin's efficiencies), the width with a drawn N_map. Statistics: the
 relative difference of the means and of the standard deviations, margins +-1% and +-5% (Section 19.2 defaults), alpha = 0.05; joint power
 0.9 over K = 2 tests, so 0.9^(1/2) each at a true difference of 0. The standard error adds, to a paired bootstrap over events, the variance
 between Dirichlet replicas of the map (the photon streams held fixed, so the spread is the map's own), which does not shrink with events; if that alone keeps the power below 0.9, the mapping run needs more
@@ -71,7 +72,9 @@ def setup(folder: Path) -> dict:
                                                   "reflectivity": {"energy_eV": E2, "value": ["0", "0"]}, "efficiency": {"energy_eV": E2, "value": ["0.3", "0.3"]}}}}
     validation = {"schema": "simulation-request/1", "birks_active": True,
                   "source": {"density": "analytic", "particle": "mu-", "energy": {"mono": {"energy_MeV": "1000"}},
-                             "position": {"box_uniform": {"frame": "world", "centre_mm": ["-150", "0", "0"], "size_mm": ["0", "16", "180"]}},
+                             # the muons cover the whole bar, as the map's bins do: with z within +-90 of +-100 mm and y within +-8 of +-10 mm,
+                             # the end and edge bins were sampled in part, and the map biased the mean by about +0.4% (first judged run)
+                             "position": {"box_uniform": {"frame": "world", "centre_mm": ["-150", "0", "0"], "size_mm": ["0", "20", "200"]}},
                              "direction": {"fixed": {"frame": "world", "vector": ["1", "0", "0"]}}},
                   "scorers": [{"name": "pe", "readout": "none", "select": {"tags": ["sensor"]}, "quantity": "photon_detected"},
                               {"name": "split", "readout": "none", "select": {"tags": ["scint"]}, "quantity": "edep_visible_ly_split",
@@ -125,6 +128,21 @@ def digitize(bins: dict, events: list, document: dict, map_replica: int, materia
     return out
 
 
+def expected(bins: dict, events: list, document: dict, map_replica: int, material: dict) -> list:
+    """E[N_map] per event given its deposits: the photon-number expectation of each bin (Section 10.3) times the bin's efficiencies. The mean
+    test compares N_full with it, so the digitization's own random draw, which the comparison does not need, adds no variance (S7 redesign
+    after the first judged run, g4sim-approvals.md)."""
+    light, scale = float(material["scintillation"]["yield_per_MeV"]), float(material["scintillation"]["resolution_scale"])
+    out = []
+    for event in events:
+        total = 0.0
+        for rows in bins.get(event, {}).values():
+            for b, (large, small, steps) in rows.items():
+                total += response.photon_moments(light, scale, large, small, steps)[0] * math.fsum(efficiency_map.efficiencies(document, b, map_replica))
+        out.append(total)
+    return out
+
+
 def relative(full: list, mapped: list) -> tuple[float, float]:
     return statistics.fmean(mapped) / statistics.fmean(full) - 1, statistics.stdev(mapped) / statistics.stdev(full) - 1
 
@@ -149,17 +167,21 @@ def analysis(run: Path, map_path: Path, replicas: int) -> dict:
     events = sorted(full)
     n_full = [full[event] for event in events]
     nominal = digitize(bins, events, document, 0, material)
-    mean_rel, width_rel = relative(n_full, nominal)
+    expect = expected(bins, events, document, 0, material)
+    mean_rel = statistics.fmean(expect) / statistics.fmean(n_full) - 1
+    width_rel = relative(n_full, nominal)[1]
     draw = random.Random(RUN_SEED)
     boot = []
     for _ in range(BOOTSTRAP):
         picks = [draw.randrange(len(events)) for _ in events]
-        boot.append(relative([n_full[i] for i in picks], [nominal[i] for i in picks]))
+        boot.append((statistics.fmean(expect[i] for i in picks) / statistics.fmean(n_full[i] for i in picks) - 1,
+                     relative([n_full[i] for i in picks], [nominal[i] for i in picks])[1]))
     se_stat = [statistics.stdev(item[k] for item in boot) for k in (0, 1)]
-    by_replica = [relative(n_full, digitize(bins, events, document, replica, material)) for replica in efficiency_map.replicas(document, replicas)]
+    by_replica = [(statistics.fmean(expected(bins, events, document, replica, material)) / statistics.fmean(n_full) - 1,
+                   relative(n_full, digitize(bins, events, document, replica, material))[1]) for replica in efficiency_map.replicas(document, replicas)]
     se_map = [statistics.stdev(item[k] for item in by_replica) for k in (0, 1)]
-    return {"events": len(events), "mean_full": statistics.fmean(n_full), "mean_map": statistics.fmean(nominal), "sd_full": statistics.stdev(n_full),
-            "sd_map": statistics.stdev(nominal), "relative": [mean_rel, width_rel], "se_stat": se_stat, "se_map": se_map}
+    return {"events": len(events), "mean_full": statistics.fmean(n_full), "mean_map_expected": statistics.fmean(expect), "mean_map_drawn": statistics.fmean(nominal),
+            "sd_full": statistics.stdev(n_full), "sd_map": statistics.stdev(nominal), "relative": [mean_rel, width_rel], "se_stat": se_stat, "se_map": se_map}
 
 
 def compare(args) -> dict:

@@ -1,0 +1,24 @@
+{
+ "schema": "g4sim-run/1",
+ "physics": {
+  "reference_list": "FTFP_BERT",
+  "cuts_mm": {
+   "default": "0.7"
+  },
+  "extra_constructors": [
+   "G4OpticalPhysics"
+  ],
+  "optical": {
+   "wls": false
+  }
+ },
+ "accounting": "separated",
+ "run": {
+  "events": 300,
+  "first_event": 0,
+  "logical_run_seed": 20261112,
+  "mode": "mt",
+  "seeding": "per-event",
+  "threads": 4
+ }
+}

@@ -7,6 +7,7 @@ into its detector-spec, or into a request with "file", and the value it takes). 
   count             how many volumes of the templates carrying a tag the expanded IR holds
   cherenkov_angle   the mean angle of the photons the primary itself emitted, detected inside the radiator's own medium (gate 2's method);
                     request and run card named
+  photon_count      the mean per event of detected photons of a parent emitted within a z range; request and run card named
   field_integral    the integral of |B|, or of B times the distance from the centre, along a line, from the field map Geant4 reads, after a
                     geometry check has shown Geant4's field equal to this reading at the sample points
 Each case's tolerances must equal the task card's rows (| Case | Level | Quantity | Reference | Tolerance |); a quantity within tolerance
@@ -109,6 +110,19 @@ def cherenkov_angle(out: Path) -> float:
     return statistics.fmean(statistics.fmean(values) for values in by_event.values())
 
 
+def photon_count(out: Path, measure: dict) -> float:
+    """The mean per event of the detected photons a given parent emitted with their emission point inside a z range (the RICH replica's
+    photons reaching its detection plane from aerogel, before any digitization)."""
+    low, high = (float(value) for value in measure["vertex_z_mm"])
+    events = [int(row[0]) for row in csv.reader((out / "primaries.csv").open(encoding="utf-8")) if row and row[0] != "event"]
+    counts = dict.fromkeys(events, 0)
+    with (out / "photons.csv").open(encoding="utf-8", newline="") as handle:
+        for row in csv.reader(handle):
+            if row and row[0] != "event" and int(row[12]) == int(measure.get("parent", 1)) and low <= float(row[8]) <= high:
+                counts[int(row[0])] += 1
+    return statistics.fmean(counts.values())
+
+
 def field_integral(folder: Path, spec: dict, measure: dict, claims: Path, program: Path, case_folder: Path) -> float:
     """After a geometry check passes (Geant4's field equals this reading at the sample points), the integral along the measure's line."""
     from core.geometry import fieldmap
@@ -162,9 +176,10 @@ def measure(name: str, q: dict, spec: dict, case_folder: Path, work: Path, claim
             shutil.copy2(extra, folder / extra.name)
         S6.CLAIMS[:] = [claims]
         return S6.path_x0(folder, spec, request, program)
-    if m["kind"] == "cherenkov_angle":
+    if m["kind"] in ("cherenkov_angle", "photon_count"):
         card = json.loads((case_folder / m["run"]).read_text(encoding="utf-8"))
-        return cherenkov_angle(simulate(folder, spec, request, card, claims, program, case_folder))
+        out = simulate(folder, spec, request, card, claims, program, case_folder)
+        return cherenkov_angle(out) if m["kind"] == "cherenkov_angle" else photon_count(out, m)
     raise ValueError(f"unknown measure {m['kind']}")
 
 

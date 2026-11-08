@@ -20,6 +20,7 @@ Detector-specs reconstructed from cited claims, each "an approximate reconstruct
 | `epic-tof` | L1 | staves; sensor_x0 | see `case.json` |
 | `lhcb-rich-radiators` | L3 | cherenkov_angle_c4f10; cherenkov_angle_cf4 | see `case.json` |
 | `lhcb-scifi` | L2 | modules; cfrp_x0 | see `case.json` |
+| `ams02-rich-replica` | L3 | aerogel_photons_at_plane (synthetic: a comparison with the task package's replica, never validation) | see `case.json` |
 
 Each `case.json` gives the level, the cited claims, each quantity's reference value with its derivation and sources, the result of verifying that the reference does not come from Geant4, the tolerance (copied from the task card of its phase, `g4sim-tasks/S6.md` or `S7.md`), the negative control and detection limit, the declared approximations, and the last result. A comparison with cited values is validation, not confirmation. `coverage.json` lists the modules the cases use.
 

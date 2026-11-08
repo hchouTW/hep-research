@@ -1,0 +1,66 @@
+{
+ "phase": "S7",
+ "case_id": "ams02-rich-replica",
+ "card_case": "AMS-02 RICH replica (synthetic)",
+ "level": "L3",
+ "label_status": "synthetic",
+ "label": "an approximate reconstruction from the cited claims, not the experiment's geometry",
+ "experiment": "AMS-02",
+ "subsystem": "RICH replica of the g4sim task package (examples/ams02-rich-replica, status synthetic): radiator, foil, conical mirror, detection plane",
+ "corresponding_kit": "cherenkov",
+ "cited_claims": [
+  "ams02:C70",
+  "ams02:C205"
+ ],
+ "user_supplied": {
+  "rich_sim.cc": "128ecf26a6d21853951796c097d5df94102a1bd140db8f2e90e6432341841b36",
+  "rich_params.cfg": "a96efa38471b3b45b4e325f3cb3e7ee86f612178649f4cf70e1afc47f7acf575",
+  "note": "the task package's replica, a Geant4 simulation built from public parameters (Section E12); make_replica.py writes this case's three specifications from rich_params.cfg"
+ },
+ "cherenkov_handling": {
+  "option": "full_optical_tracking",
+  "note": "Section 10.4 and E12: efficiency maps do not apply to Cherenkov light; the replica tracks every photon"
+ },
+ "quantities": [
+  {
+   "name": "aerogel_photons_at_plane",
+   "definition": "mean number per event of the optical photons the primary (parent track 1) emits in the aerogel (emission z 470.75 to 495.75 mm) that enter the detection plane, before any digitization; a 100 GeV proton straight down through the full aerogel tile at (226, 0) mm, 300 events",
+   "reference": 126.71333333333334,
+   "tolerance_relative": 0.03,
+   "derivation": "rich_sim.cc (SHA-256 128ecf26...) built here against the same Geant4 11.4.3 and run with --species p --ekn 100 --theta-max 0 --point 226 0 --n 300 --seed 1: hits with horigin 1 and hprim 1, 126.71 per event, sd 14.70, se 0.85 (.g4sim-work/rich-replica/ref.root). Tolerance 3%: three times the combined statistical error of two 300-event samples (3 x sqrt(2) x 0.85 / 126.7 = 2.8%), fixed before the g4sim run",
+   "sources": [
+    "the task package's rich_sim.cc and rich_params.cfg (user-supplied, synthetic)"
+   ],
+   "independence": {
+    "verified": false,
+    "result": "not independent of Geant4: both numbers are Geant4 simulations of the same parameters (a comparison with another simulation, Section E12): a regression and consistency check, never validation"
+   },
+   "negative_control": {
+    "change": "aerogel tiles 20 mm thick instead of 25",
+    "pointer": "/params/aero_mm",
+    "value": "20",
+    "expected_shift_relative": -0.2
+   },
+   "detection_limit_relative": 0.03,
+   "measure": {
+    "kind": "photon_count",
+    "request": "request.json",
+    "run": "run.json",
+    "parent": 1,
+    "vertex_z_mm": [
+     "470.75",
+     "495.75"
+    ]
+   }
+  }
+ ],
+ "approximations": [
+  "The 32 aerogel tiles rich_sim.cc clips to the 600 mm aperture with a boolean intersection are left out: arbitrary CSG is outside g4sim's shape list (Section 2.2), a core-module requirement (Section 13.2); the beam crosses a full tile far from them",
+  "NaF tiles 84.75 mm at a pitch of 84.75 mm instead of 85: rich_sim.cc's 340 mm NaF square overlaps the 339 mm hole of its aerogel lattice by 0.5 mm on each side (it places volumes without an overlap check); g4sim's gap rule refuses the overlap",
+  "The detection plane is a 1 mm vacuum slab with a skin of efficiency 1, as rich_sim.cc's recording slab; its quantum efficiency, light-guide losses, pixels and central hole belong to its Python digitization and are not compared",
+  "rich_sim.cc sets Cerenkov MaxPhotonsPerStep 300, MaxBetaChange 10 and TrackSecondariesFirst; g4sim's run card has no such settings and keeps Geant4's defaults (they split steps; the expected photon number does not change)",
+  "The rich volumes sit in a 2000 x 2000 x 1800 mm optical-vacuum box, rich_sim.cc's world; g4sim's world outside it has no refractive index"
+ ],
+ "status": "comparison with cited values: not validated",
+ "result": null
+}

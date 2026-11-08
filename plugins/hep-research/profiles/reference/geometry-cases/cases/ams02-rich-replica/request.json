@@ -1,0 +1,49 @@
+{
+ "schema": "simulation-request/1",
+ "source": {
+  "density": "analytic",
+  "particle": "proton",
+  "energy": {
+   "mono": {
+    "energy_MeV": "100000"
+   }
+  },
+  "position": {
+   "box_uniform": {
+    "frame": "world",
+    "centre_mm": [
+     "226",
+     "0",
+     "530"
+    ],
+    "size_mm": [
+     "0",
+     "0",
+     "0"
+    ]
+   }
+  },
+  "direction": {
+   "fixed": {
+    "frame": "world",
+    "vector": [
+     "0",
+     "0",
+     "-1"
+    ]
+   }
+  }
+ },
+ "scorers": [
+  {
+   "name": "plane",
+   "readout": "none",
+   "select": {
+    "tags": [
+     "plane"
+    ]
+   },
+   "quantity": "photon_detected"
+  }
+ ]
+}
