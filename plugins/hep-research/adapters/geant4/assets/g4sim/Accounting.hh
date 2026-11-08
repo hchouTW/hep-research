@@ -137,7 +137,10 @@ class Accounting {
     fOptical = true;
     fScope = scope;
   }
-  void SetXtr() { fXtr = true; }
+  void SetXtr() {
+    fXtr = true;
+    fTrSource = AccountingControl() != "no_tr_source";  // the negative control leaves the source term out, its column still written
+  }
   // An optical photon KillProcess took outside the scope or at the time cut: the optical terms only (the negative control books it as killed)
   void BookOpticalKill(double kinetic, bool atTimeCut) {
     if (AccountingControl() == "optical_as_killed") fRow.killedKineticProcess += kinetic;
@@ -165,7 +168,7 @@ class Accounting {
 
   void Step(const G4Step* step) {
     const G4Track* track = step->GetTrack();
-    if (fXtr && AccountingControl() != "no_tr_source")
+    if (fXtr && fTrSource)
       if (const auto* secondaries = step->GetSecondaryInCurrentStep())
         for (const G4Track* secondary : *secondaries) {
           const G4VProcess* creator = secondary->GetCreatorProcess();
@@ -345,6 +348,7 @@ class Accounting {
   bool fSeparated = false;
   bool fOptical = false;
   bool fXtr = false;
+  bool fTrSource = true;
   std::set<std::string> fScope;  // the logical names inside optical_scope
   double fPendingOpticalKill = -1.;
   bool fPendingAtTimeCut = false;  // set by KillProcess in PostStepDoIt, taken by the stepping action of the same step

@@ -1,0 +1,124 @@
+{
+ "schema": "detector-spec/1",
+ "params": {},
+ "materials": {
+  "glass_optical": {
+   "base": "G4_GLASS_PLATE",
+   "optical": {
+    "rindex": {
+     "energy_eV": [
+      "2.5",
+      "3.5"
+     ],
+     "value": [
+      "1.5",
+      "1.5"
+     ]
+    },
+    "absorption_length_mm": {
+     "energy_eV": [
+      "2.5",
+      "3.5"
+     ],
+     "value": [
+      "100",
+      "100"
+     ]
+    }
+   }
+  }
+ },
+ "templates": {
+  "block": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "20",
+      "20",
+      "20"
+     ]
+    }
+   },
+   "material": "glass_optical",
+   "tags": [
+    "optical"
+   ]
+  },
+  "wrapper": {
+   "solid": {
+    "box": {
+     "size_mm": [
+      "30",
+      "30",
+      "30"
+     ]
+    }
+   },
+   "material": "G4_AIR",
+   "children": [
+    {
+     "template": "block",
+     "placement": {
+      "single": {
+       "centre_mm": [
+        "0",
+        "0",
+        "0"
+       ]
+      }
+     }
+    }
+   ]
+  }
+ },
+ "world": {
+  "material": "G4_Galactic",
+  "size_mm": [
+   "1000",
+   "1000",
+   "1000"
+  ],
+  "children": [
+   {
+    "template": "wrapper",
+    "placement": {
+     "single": {
+      "centre_mm": [
+       "0",
+       "0",
+       "0"
+      ]
+     }
+    }
+   }
+  ]
+ },
+ "physics_requirements": [
+  {
+   "need": "optical_scope",
+   "select": {
+    "tags": [
+     "optical"
+    ]
+   }
+  }
+ ],
+ "optical_surfaces": {
+  "wrap": {
+   "skin": "block",
+   "model": "unified",
+   "finish": "polished",
+   "type": "dielectric_metal",
+   "reflectivity": {
+    "energy_eV": [
+     "2.5",
+     "3.5"
+    ],
+    "value": [
+     "1",
+     "1"
+    ]
+   }
+  }
+ }
+}

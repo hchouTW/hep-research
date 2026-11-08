@@ -17,6 +17,7 @@
 #include "Accounting.hh"
 #include "G4OpBoundaryProcess.hh"
 #include "G4OpticalPhoton.hh"
+#include "G4Exception.hh"
 #include "G4GeometryTolerance.hh"
 #include "G4Navigator.hh"
 #include "G4TransportationManager.hh"
@@ -36,7 +37,13 @@ struct KillLimits {
 
 class KillProcess : public G4VDiscreteProcess {
  public:
-  explicit KillProcess(const KillLimits& limits) : G4VDiscreteProcess("KillProcess", fUserDefined), fLimits(limits) {}
+  // G4SIM_KILL_CONTROL names one negative test of Section 15.1, for tests only: entry_by_status (the entry judged by OpBoundary's refraction
+  // and transmission statuses alone, which lets a photon through on SameMaterial), kill_on_contact (every boundary step into a volume outside
+  // the scope taken as an entry, so reflected photons die), born_outside_off (a photon born outside the scope left alone)
+  explicit KillProcess(const KillLimits& limits) : G4VDiscreteProcess("KillProcess", fUserDefined), fLimits(limits) {
+    const char* control = std::getenv("G4SIM_KILL_CONTROL");
+    fControl = control ? control : "";
+  }
   G4bool IsApplicable(const G4ParticleDefinition&) override { return true; }
   G4double GetMeanFreePath(const G4Track&, G4double, G4ForceCondition*) override { return DBL_MAX; }
   G4double PostStepGetPhysicalInteractionLength(const G4Track& track, G4double, G4ForceCondition* condition) override {
@@ -56,16 +63,11 @@ class KillProcess : public G4VDiscreteProcess {
       const G4VPhysicalVolume* here = step.GetPreStepPoint()->GetPhysicalVolume();
       const G4VPhysicalVolume* next = step.GetPostStepPoint()->GetPhysicalVolume();
       const auto outsideScope = [this](const G4VPhysicalVolume* volume) { return volume && !fLimits.opticalScope.count(volume->GetLogicalVolume()->GetName()); };
-      // G4SIM_KILL_CONTROL=entry_by_status, the negative test of Section 15.1 for tests only: the entry judged by OpBoundary's refraction and
-      // transmission statuses alone, which lets a photon through on SameMaterial (the leak_scope control's world)
-      const char* control = std::getenv("G4SIM_KILL_CONTROL");
-      const G4OpBoundaryProcess* boundary = Accounting::Boundary(track.GetDefinition());
-      const bool byStatus = control && std::string(control) == "entry_by_status";
-      const bool passes = byStatus ? boundary && (boundary->GetStatus() == FresnelRefraction || boundary->GetStatus() == Transmission) : Passes(step);
-      const bool entering = step.GetPostStepPoint()->GetStepStatus() == fGeomBoundary && passes;
+      // the normal is asked for only at a boundary step, where the navigator has one (elsewhere it warns, GeomNav0003)
+      const bool entering = step.GetPostStepPoint()->GetStepStatus() == fGeomBoundary && outsideScope(next) && Passes(track, step);
       // a reflected photon's next step starts on the boundary in the next volume and returns with zero length: not an entry either
       const bool inside_outside = outsideScope(here) && step.GetStepLength() > G4GeometryTolerance::GetInstance()->GetSurfaceTolerance();
-      const bool outside = BornOutside(track, here) || inside_outside || (entering && outsideScope(next));
+      const bool outside = BornOutside(track, here) || inside_outside || entering;
       if (!outside && !Limited(track)) return &aParticleChange;  // forced, and nothing to do
       Accounting::Thread().BookOpticalKill(track.GetKineticEnergy(), !outside);
       aParticleChange.ProposeEnergy(0.);
@@ -79,17 +81,27 @@ class KillProcess : public G4VDiscreteProcess {
   }
 
  private:
-  // The first step of a photon whose birth volume lies outside the scope (the step number is 1 from the first step's length on). The volume
-  // is the track's before the step (in the step length) and the pre-step point's after it: by PostStepDoIt the track holds the next volume.
+  // The first step of a photon whose birth volume lies outside the scope (the step number is 1 from the first step's length on): the track's
+  // volume when the step length is asked for, the pre-step point's in PostStepDoIt, the same volume.
   bool BornOutside(const G4Track& track, const G4VPhysicalVolume* volume) const {
-    return track.GetCurrentStepNumber() == 1 && volume && !fLimits.opticalScope.count(volume->GetLogicalVolume()->GetName());
+    return fControl != "born_outside_off" && track.GetCurrentStepNumber() == 1 && volume && !fLimits.opticalScope.count(volume->GetLogicalVolume()->GetName());
   }
-  // Whether the photon crossed the boundary of this step rather than turning back: the normal is the navigator's, as OpBoundary reads it.
-  static bool Passes(const G4Step& step) {
+  // Whether the photon crossed the boundary of this step rather than turning back: the normal is the navigator's, as OpBoundary reads it,
+  // which treats an invalid one as fatal at the same step; so does this. A direction along the surface (after . n == 0) counts as turned
+  // back: the photon is then killed at its next step, which optical_steps_outside counts.
+  bool Passes(const G4Track& track, const G4Step& step) const {
+    if (fControl == "kill_on_contact") return true;
+    if (fControl == "entry_by_status") {
+      const G4OpBoundaryProcess* boundary = Accounting::Boundary(track.GetDefinition());
+      return boundary && (boundary->GetStatus() == FresnelRefraction || boundary->GetStatus() == Transmission);
+    }
     G4bool valid = false;
     G4Navigator* navigator = G4TransportationManager::GetTransportationManager()->GetNavigatorForTracking();
     const G4ThreeVector normal = navigator->GetGlobalExitNormal(step.GetPostStepPoint()->GetPosition(), &valid);
-    if (!valid) return true;  // no normal to judge by: treated as an entry, so a photon is never let through unseen
+    if (!valid) {
+      G4Exception("g4sim::KillProcess", "g4sim-optical-scope", FatalException, "no valid surface normal at a boundary step of an optical photon");
+      return true;
+    }
     const double before = step.GetPreStepPoint()->GetMomentumDirection().dot(normal), after = step.GetPostStepPoint()->GetMomentumDirection().dot(normal);
     return (before > 0.) == (after > 0.);
   }
@@ -101,6 +113,7 @@ class KillProcess : public G4VDiscreteProcess {
     return slow || late;
   }
   KillLimits fLimits;
+  std::string fControl;
 };
 
 }  // namespace g4sim

@@ -7,6 +7,9 @@ energy) are runs of g4sim_run with the builder and accounting controls; the seco
 After the second independent read (2026-11-08) two more: photons let into a volume outside the scope through OpBoundary's SameMaterial
 status (the entry judged by status alone) must show steps outside the scope, which the as-built run keeps at 0; and an XTR run whose TR
 photons are left out of the source term must break conservation, which the as-built XTR run holds (inputs in transition_radiation/).
+After the read of those fixes: photons born outside the scope left alone must show steps outside it; and in a block inside the scope whose
+skin reflects every photon back from an out-of-scope wrapper (reflecting_skin/), every boundary contact taken as an entry must kill
+photons, which the as-built run never does (each photon ends absorbed in the block).
 Usage: negatives.py --work DIR [--program PATH]   Prints JSON with a status key. Exit 0 every change caught, 1 otherwise, 2 bad input.
 """
 from __future__ import annotations
@@ -29,6 +32,7 @@ T_OPTICS, T_RADIATOR, T_EXPAND, T_RUN, T_MAP, T_FIELD = ("tests.core.test_geomet
     ("tests.adapters.test_g4sim_run",), ("tests.core.test_simulation_efficiency_map",), ("tests.core.test_geometry_fieldmap",)
 BALANCE_TOLERANCE_MEV = 1e-6
 RADIATOR_INPUTS = Path(__file__).resolve().parent / "transition_radiation"
+SKIN_INPUTS = Path(__file__).resolve().parent / "reflecting_skin"
 
 # Section 15.1 row, change, file, text replaced, replacement, tests that must fail
 CHANGES = (
@@ -129,6 +133,22 @@ def live(work: Path, program: Path) -> list:
     result = go(["simulate", "--detector", str(spec), "--request", str(request), "--run", str(folder / "run.json")], controls, out)
     outside = sum(int(item["optical_steps_outside"]) for item in read_conservation(out, result, label))
     rows.append({"row": "Optical photons (Geant4)", "change": label, "caught": outside > 0, "steps_outside_scope": outside, "run_status": result.get("status")})
+    # photons born outside the scope (the leak_scope world has the radiator's optical tables) left alone: they take steps there
+    out = folder / f"leak-{len(rows)}"
+    label = "photons born outside the scope left alone"
+    result = go(["simulate", "--detector", str(spec), "--request", str(request), "--run", str(folder / "run.json")],
+                {"G4SIM_BUILDER_CONTROL": "leak_scope", "G4SIM_KILL_CONTROL": "born_outside_off"}, out)
+    outside = sum(int(item["optical_steps_outside"]) for item in read_conservation(out, result, label))
+    rows.append({"row": "Optical photons (Geant4)", "change": label, "caught": outside > 0, "steps_outside_scope": outside, "run_status": result.get("status")})
+    # over-killing: a reflected photon must not die at a boundary with a volume outside the scope
+    for controls, label in (({}, "control: photons reflected by a skin from an out-of-scope wrapper"), ({"G4SIM_KILL_CONTROL": "kill_on_contact"}, "every boundary contact with an out-of-scope volume taken as an entry")):
+        out = folder / f"skin-{len(rows)}"
+        result = go(["simulate", "--detector", str(SKIN_INPUTS / "spec.json"), "--request", str(SKIN_INPUTS / "request.json"), "--run", str(SKIN_INPUTS / "run.json")], controls, out)
+        conservation = read_conservation(out, result, label)
+        fates = {key: sum(int(item[key]) for item in conservation) for key in ("optical_produced", "optical_absorbed", "optical_killed_scope", "optical_steps_outside")}
+        holds = fates["optical_produced"] > 0 and fates["optical_absorbed"] == fates["optical_produced"] and fates["optical_killed_scope"] == 0 and fates["optical_steps_outside"] == 0
+        rows.append({"row": "Optical photons (Geant4)", "change": label, "caught": fates["optical_killed_scope"] > 0 if controls else None,
+                     "conservation_holds": None if controls else holds, **fates, "run_status": result.get("status")})
     # XTR: the TR photons' energy is a source term of the identity (Geant4's XTR does not take it from the parent)
     for controls, label in (({}, "control: an XTR run, the TR photons booked as a source term"), ({"G4SIM_ACCOUNTING_CONTROL": "no_tr_source"}, "an XTR run, the TR photons left out of the source term")):
         out = folder / f"radiator-{len(rows)}"

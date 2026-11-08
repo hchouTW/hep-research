@@ -340,6 +340,22 @@ void SetEmParameters(const Value& physics) {
 }
 
 // S7: the run card's process activation, and finite rise times whenever a scintillation component has one (Section 6.2.7).
+// Whether OpBoundary's post-step action runs before KillProcess's for the optical photon, as KillProcess needs (both ordered by default,
+// KillPhysics registered after G4OpticalPhysics); read from the process manager after initialization.
+bool OpBoundaryActsFirst() {
+  G4ProcessManager* manager = G4OpticalPhoton::OpticalPhotonDefinition()->GetProcessManager();
+  G4ProcessVector* actions = manager ? manager->GetPostStepProcessVector(typeDoIt) : nullptr;
+  if (!actions) return false;
+  G4int boundary = -1, kill = -1;
+  for (G4int i = 0; i < static_cast<G4int>(actions->size()); ++i) {
+    const G4String& name = (*actions)[i]->GetProcessName();
+    if (name == "OpBoundary") boundary = i;
+    if (name == "KillProcess") kill = i;
+  }
+  // G4SteppingManager invokes the post-step actions in the order of this vector, so the process acting first has the smaller index
+  return boundary >= 0 && kill >= 0 && boundary < kill;
+}
+
 void SetOpticalParameters(const Value& physics, const Value& physical) {
   auto* parameters = G4OpticalParameters::Instance();
   parameters->SetScintByParticleType(false);  // Section 10.4: the validation run needs it off, and no run card switches it on
@@ -443,6 +459,10 @@ int NewRun(const Value& ir, const Value& card, const Value& request) {
   std::printf("G4SIM_START %.3f\n", g4sim::Now());
   manager->Initialize();
   g4sim::CheckSegmentations(shared.scorers);
+  if (shared.optical && !OpBoundaryActsFirst()) {  // KillProcess reads OpBoundary's result of the same step (KillProcess.hh)
+    std::cerr << "KillProcess's post-step action comes before OpBoundary's for opticalphoton" << std::endl;
+    return 2;
+  }
   std::printf("G4SIM_INITIALIZED %.3f\n", g4sim::Now());
   std::fflush(stdout);
   // G4EmSaturation sets its particles and per-material terms here, not at SetBirksActive, which ran before the materials existed; built-in constants appear now too (GB13)
