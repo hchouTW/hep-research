@@ -2,7 +2,7 @@
  "id": "adapter:acts-tracking",
  "version": "0.1.0",
  "status": "proposed",
- "purpose": "T07 tracking through a native C++ driver on ACTS 48.2.0, and the fixture generators t07-telescope-clean/1, t07-telescope-noise/1 and t07-telescope-cai/1 on the same geometry; this version holds the telescope geometry, the driver's own product format and the refit of a known hit set at zero field or the fixture's 1 T, which is truth-assisted and never finding, and pattern recognition on hits alone, seeds, CKF and ambiguity resolution, in a program of its own; optional, required by no skill",
+ "purpose": "T07 tracking through a native C++ driver on ACTS 48.2.0, and the fixture generators t07-telescope-clean/1, t07-telescope-noise/1 and t07-telescope-cai/1 on the same geometry; this version holds the telescope geometry, the driver's own product format and the refit of a known hit set at zero field or the fixture's 1 T, which is truth-assisted and never finding, and pattern recognition on hits alone, seeds, CKF and ambiguity resolution, in a program of its own, beside a scoring-side program for the truth-seeded comparator that shares its steps after the start and is never finding; optional, required by no skill",
  "tools": [
   {
    "name": "ACTS (acts-core, libActsCore.so)",
@@ -21,6 +21,7 @@
   "assets/native/CMakeLists.txt",
   "assets/native/acts_tracking_driver.cpp",
   "assets/native/acts_tracking_finder.cpp",
+  "assets/native/acts_truth_seeded_run.cpp",
   "assets/native/cai_payload_probe.cpp",
   "assets/native/cai_refit_start_probe.cpp",
   "assets/native/kalman_refit.cpp",
@@ -54,12 +55,15 @@
   "assets/native/telescope_geometry.cpp",
   "assets/native/telescope_geometry.hpp",
   "assets/native/track_finding.cpp",
-  "assets/native/track_finding.hpp"
+  "assets/native/track_finding.hpp",
+  "assets/native/truth_seeded_search.cpp"
  ],
  "tests": [
   "../../tests/adapters/test_acts_finding.py",
   "../../tests/adapters/test_acts_refit_field.py",
-  "../../tests/adapters/test_acts_tracking.py"
+  "../../tests/adapters/test_acts_tracking.py",
+  "../../tests/adapters/test_acts_truth_seeded.py",
+  "../../tests/adapters/test_acts_truth_seeded_diagnosis.py"
  ],
  "owner_skill": "hep-detector",
  "status_rule": "the adapter status is the lowest of its tools' statuses; development jobs have built and run the driver, and it stays proposed until such a run is recorded in VALIDATION.md with its environment and tested version; no tracking quality claim for a real detector"

@@ -1,6 +1,8 @@
 // Pattern recognition of recipe reco.track.acts-ckf-planar/1 (t04-values-v4.md section 8.1): seeds from the hits, the ACTS combinatorial Kalman
 // filter, greedy ambiguity resolution, and a Kalman fit of each selected hit set. Data side: it reads hits and what section 4.1 states of the
-// telescope, and nothing here may reach truth, a generator or seed code. A truth-seeded run is not this recipe's output and has no route here.
+// telescope, and nothing here may reach truth, a generator or seed code. Section 7's truth-seeded run shares the steps after the start, by one code path
+// (TrackFinder::search_resolve_fit), so "the same recipe" holds by construction; its entry, find_from_starts, is defined in truth_seeded_search.cpp, which
+// only the scoring-side program acts_truth_seeded_run compiles (CMakeLists.txt), so the finder holds no route to it. Its output is not this recipe's.
 //
 // Every number below is development configuration and belongs to Freeze B (section 2.2, Configuration and Algorithmic budgets). None comes from
 // a pull or a T08 target. Each is section 4.1 or 7, or arithmetic on them, as its comment says, except seed_prior_inflation, tuned on block 1 as
@@ -9,12 +11,16 @@
 
 #include <Acts/Definitions/Algebra.hpp>
 #include <Acts/Definitions/TrackParametrization.hpp>
+#include <Acts/EventData/BoundTrackParameters.hpp>
+#include <Acts/EventData/ParticleHypothesis.hpp>
 
 #include <array>
 #include <cstddef>
 #include <cstdint>
+#include <functional>
 #include <memory>
 #include <optional>
+#include <set>
 #include <string>
 #include <utility>
 #include <vector>
@@ -140,6 +146,17 @@ struct FoundCandidate {
   std::vector<std::uint32_t> hit_keys;  // along the track
 };
 
+// One traced search: ACTS's own VERBOSE lines of the CKF and the navigator, every branch it returned with its states, and this file's budget marks.
+struct SearchTrace {
+  std::size_t search = 0;   // position in EventFinding::seeds
+  std::string result;       // ok, or the error ACTS returned for the whole search
+  bool truncated = false;   // a per-surface or per-seed branch budget, or the step limit, acted
+  bool step_limit = false;  // the propagator's step budget ended the search
+  std::size_t extra_branches = 0;
+  std::string acts_log;
+  std::string branches;
+};
+
 struct EventFinding {
   std::uint32_t event_ordinal = 0;
   std::size_t hit_count = 0;
@@ -155,6 +172,8 @@ struct EventFinding {
   std::vector<SeedRecord> seeds;  // every seed found, in search order
   std::vector<FoundCandidate> candidates;
   std::vector<RefitResult> fits;  // of the selected candidates that were fitted
+  std::string ambiguity_trace;    // ACTS's own VERBOSE lines from resolve(), for an event asked for by name only: an output, nothing reads it back
+  std::vector<SearchTrace> search_traces;  // for searches asked for by index only (D1 stage 6b): an output, nothing reads it back
 
   bool search_truncated() const { return seed_budget_reached || ambiguity_budget_reached || seeds_truncated > 0; }
 };
@@ -162,14 +181,47 @@ struct EventFinding {
 // Every limit and cut, by name: BP03, "All seed/branch/resource limits enter the effective configuration".
 std::vector<std::pair<std::string, std::string>> effective_configuration();
 
+// A start given on a telescope plane rather than made from this event's hits: bound parameters loc0, loc1, phi, theta, q/p, time and their covariance.
+// Only section 7's truth-seeded run makes these, on the scoring side (acts_truth_seeded_run.cpp); the finder's program has no input that could carry one.
+struct PlaneStart {
+  std::uint32_t label = 0;  // what the record names the start by: the particle's position in its truth event
+  int plane = 0;            // 1..8
+  Acts::BoundVector parameters = Acts::BoundVector::Zero();
+  Acts::BoundMatrix covariance = Acts::BoundMatrix::Zero();
+};
+
 class TrackFinder {
  public:
   TrackFinder(const TelescopeGeometry& telescope, double field_along_v_tesla, double sigma_loc0_mm, double sigma_loc1_mm);
   ~TrackFinder();
 
-  EventFinding find(const DataEvent& event, std::uint32_t event_ordinal) const;
+  // The recipe: seeds from the hits, then the steps after the start. trace_ambiguity asks for ACTS's own removal sequence of this event (D1 stage 6
+  // brief): the same configuration with a VERBOSE logger, so the decisions are the same; it fills EventFinding::ambiguity_trace.
+  EventFinding find(const DataEvent& event, std::uint32_t event_ordinal, bool trace_ambiguity = false) const;
+
+  // Section 7's truth-seeded run: the same steps after the start, one search from each start in order, none skipped. Defined in truth_seeded_search.cpp,
+  // compiled only into the scoring-side program: the finder's binary has no such symbol (the build job reads it).
+  EventFinding find_from_starts(const DataEvent& event, std::uint32_t event_ordinal, const std::vector<PlaneStart>& starts) const;
+  // The same, with ACTS's own log of the searches whose start labels are named, and of the event's ambiguity resolution if trace_ambiguity (D1 stage 6b).
+  EventFinding find_from_starts(const DataEvent& event, std::uint32_t event_ordinal, const std::vector<PlaneStart>& starts, const std::set<std::uint32_t>& traced_labels,
+                                bool trace_ambiguity) const;
 
  private:
+  // One search's start, as find and find_from_starts hand it over. outcome "skipped" or "no-start" settles the search before it runs (no parameters);
+  // otherwise the CKF runs from parameters.
+  struct StartStep {
+    HitTriple triple;
+    std::string outcome;
+    std::optional<Acts::BoundTrackParameters> parameters;
+  };
+  // Asked for the next start until it answers none; it sees which candidates hold each hit so far, for the finder's skip rule.
+  using StartSource = std::function<std::optional<StartStep>(const std::vector<std::vector<std::size_t>>& candidates_of_hit)>;
+  // The steps after the start, one code path for both: the CKF search with this recipe's selector, windows, branch stopper and budgets from each start,
+  // then greedy ambiguity resolution and the fit of each selected hit set. finding arrives with its event fields set.
+  void search_resolve_fit(const DataEvent& event, EventFinding& finding, const StartSource& next_start, bool trace_ambiguity,
+                          const std::set<std::size_t>& traced_searches) const;
+  Acts::ParticleHypothesis hypothesis() const;
+
   struct Machinery;
   const TelescopeGeometry& m_telescope;
   double m_field_along_v_tesla;

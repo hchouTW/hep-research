@@ -1,12 +1,18 @@
 // The T07 finder: pattern recognition through ACTS on a data file, recipe reco.track.acts-ckf-planar/1 (t04-values-v4.md section 8.1).
 //
 //   acts_tracking_finder --data-file D --product-id NAME --product-file P --record-file R --product-events K [--seed-file S]
+//                        [--ambiguity-trace-file T --ambiguity-trace-events E1,E2,...]
 //
-// It takes hits and nothing else: a truth path or a truth file is refused, and there is no way in for a hit set or a start state. Output:
+// It takes hits and nothing else: a truth path or a truth file is refused, and there is no way in for a hit set or a start state. Section 7's comparator that
+// starts from truth is another program, on the scoring side, and this one does not compile its entry (CMakeLists.txt; tests/adapters/test_acts_finding.py,
+// FinderStaysTruthFree, keeps its names out of this file). Output:
 // - the record, acts-tracking-finding-record/1: every event and every candidate of at least 6 hits, with its seed planes, its outcome, its failure
 //   category and whether its search was truncated. acts_finding_record.py reads it. A limit reached is marked, never silent (BP03).
 // - with --seed-file, acts-tracking-finding-seeds/1: every seed of every event, its three hits and what became of it. An output only, and large at o3
 //   (50 MB per 3,000 events), so optional.
+// - with --ambiguity-trace-file, acts-tracking-ambiguity-trace/1: for the event ordinals named, ACTS's own VERBOSE lines from GreedyAmbiguityResolution::
+//   resolve, each removal with its track, nMeas, nShared and chi2 (D1 stage 6 brief, Resolver removal order). An output only: the record is the same with
+//   or without it, and the event ordinals are positions in the data file, not truth.
 // - the product, acts-tracking-product/1, for the first K events: per-surface states of the selected tracks, predicted, filtered and smoothed
 //   kept apart. K bounds the size of a text product: 250 MB per 18,000 tracks at job 7493368. The product holds the tracks delivered: a fit-failed
 //   candidate stays in the record, with its category, and has no track here, so fit_summary's failed count reads 0 on a finder product.
@@ -38,17 +44,18 @@ namespace {
 
 constexpr char record_format[] = "acts-tracking-finding-record/1";
 constexpr char seed_file_format[] = "acts-tracking-finding-seeds/1";
+constexpr char trace_file_format[] = "acts-tracking-ambiguity-trace/1";
 constexpr char finding_recipe[] = "reco.track.acts-ckf-planar/1";
 constexpr char finding_stage[] = "find-ckf";
 constexpr char finding_evidence_class[] = "data-side";
 
 std::map<std::string, std::string> parse_flags(int argc, char** argv) {
   const std::set<std::string> known{"data-file", "product-id", "product-file", "record-file", "product-events"};
-  const std::string optional_output = "seed-file";
+  const std::set<std::string> optional_outputs{"seed-file", "ambiguity-trace-file", "ambiguity-trace-events"};
   std::map<std::string, std::string> flags;
   for (int index = 1; index < argc; index += 2) {
     const std::string flag = argv[index];
-    if (flag.rfind("--", 0) != 0 || index + 1 >= argc || (known.count(flag.substr(2)) == 0 && flag.substr(2) != optional_output)) {
+    if (flag.rfind("--", 0) != 0 || index + 1 >= argc || (known.count(flag.substr(2)) == 0 && optional_outputs.count(flag.substr(2)) == 0)) {
       throw std::invalid_argument("expected a known --flag and its value, got " + flag);
     }
     flags[flag.substr(2)] = argv[index + 1];
@@ -58,21 +65,36 @@ std::map<std::string, std::string> parse_flags(int argc, char** argv) {
       throw std::invalid_argument("--" + name + " is required");
     }
   }
+  if (flags.count("ambiguity-trace-file") != flags.count("ambiguity-trace-events")) {
+    throw std::invalid_argument("--ambiguity-trace-file and --ambiguity-trace-events go together");
+  }
   return flags;
 }
 
-std::uint32_t count_from_text(const std::string& text) {
+std::uint32_t count_from_text(const std::string& text, const std::string& what = "--product-events") {
   std::size_t used = 0;
   unsigned long long value = 0;
   try {
     value = std::stoull(text, &used);
   } catch (const std::exception&) {
-    throw std::invalid_argument("--product-events is not a count: " + text);
+    throw std::invalid_argument(what + " is not a count: " + text);
   }
   if (used != text.size() || text.front() == '-' || value > 0xFFFFFFFFull) {
-    throw std::invalid_argument("--product-events is not a count: " + text);
+    throw std::invalid_argument(what + " is not a count: " + text);
   }
   return std::uint32_t(value);
+}
+
+std::set<std::uint32_t> ordinals_from_text(const std::string& text) {
+  std::set<std::uint32_t> ordinals;
+  std::istringstream stream(text);
+  for (std::string item; std::getline(stream, item, ',');) {
+    ordinals.insert(count_from_text(item, "--ambiguity-trace-events"));
+  }
+  if (ordinals.empty()) {
+    throw std::invalid_argument("--ambiguity-trace-events names no event");
+  }
+  return ordinals;
 }
 
 void refuse_overwriting_input(const std::string& written, const std::string& input) {
@@ -159,6 +181,16 @@ int run(int argc, char** argv) {
     refuse_overwriting_input(seed_path, record_path);
     refuse_overwriting_input(seed_path, product_path);
   }
+  const std::string trace_path = flags.count("ambiguity-trace-file") != 0 ? flags.at("ambiguity-trace-file") : "";
+  const std::set<std::uint32_t> traced_events = trace_path.empty() ? std::set<std::uint32_t>{} : ordinals_from_text(flags.at("ambiguity-trace-events"));
+  if (!trace_path.empty()) {
+    for (const std::string& other : {data_path, record_path, product_path}) {
+      refuse_overwriting_input(trace_path, other);
+    }
+    if (!seed_path.empty()) {
+      refuse_overwriting_input(trace_path, seed_path);
+    }
+  }
 
   t07::DataFileReader reader(data_path);  // a truth path stops here, a truth file by its magic, before anything is written
   const std::string data_sha256 = t07::sha256_of_file(data_path);
@@ -196,6 +228,15 @@ int run(int argc, char** argv) {
     }
     seed_stream << seed_file_format << "\n";
   }
+  std::ofstream trace_stream;
+  if (!trace_path.empty()) {
+    trace_stream.open(trace_path, std::ios::binary);
+    if (!trace_stream) {
+      throw std::runtime_error("cannot write " + trace_path);
+    }
+    trace_stream << trace_file_format << "\n";
+  }
+  std::size_t traced = 0;
 
   std::size_t events = 0;
   std::size_t candidates = 0;
@@ -204,8 +245,17 @@ int run(int argc, char** argv) {
   std::size_t truncated_events = 0;
   t07::DataEvent event;
   for (std::uint32_t ordinal = 0; reader.next(event); ++ordinal) {
-    t07::EventFinding finding = finder.find(event, ordinal);
+    const bool trace_this = traced_events.count(ordinal) != 0;
+    t07::EventFinding finding = finder.find(event, ordinal, trace_this);
     record << event_line(finding);
+    if (trace_this) {
+      std::size_t lines = 0;
+      for (const char letter : finding.ambiguity_trace) {
+        lines += letter == '\n' ? 1 : 0;
+      }
+      trace_stream << "event " << ordinal << " lines " << lines << "\n" << finding.ambiguity_trace;
+      ++traced;
+    }
     if (!seed_path.empty()) {
       seed_stream << seed_lines(finding);
     }
@@ -229,6 +279,16 @@ int run(int argc, char** argv) {
   record.close();
   if (!record) {
     throw std::runtime_error("cannot finish " + record_path);
+  }
+  if (!trace_path.empty()) {
+    if (traced != traced_events.size()) {
+      throw std::invalid_argument("--ambiguity-trace-events names an event the data file does not hold");
+    }
+    trace_stream << "end " << traced << "\n";
+    trace_stream.close();
+    if (!trace_stream) {
+      throw std::runtime_error("cannot finish " + trace_path);
+    }
   }
   if (!seed_path.empty()) {
     seed_stream << "end " << events << "\n";

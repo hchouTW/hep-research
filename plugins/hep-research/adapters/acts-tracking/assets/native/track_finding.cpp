@@ -26,6 +26,7 @@
 #include <cmath>
 #include <functional>
 #include <iostream>
+#include <set>
 #include <sstream>
 #include <stdexcept>
 
@@ -46,18 +47,12 @@ using StateCreator = Acts::TrackStateCreator<LinkIterator, FindingContainer>;
 using BranchResult = Acts::CombinatorialKalmanFilterBranchStopperResult;
 using NewStates = Acts::Result<Acts::CkfTypes::BranchVector<Acts::TrackIndexType>>;
 
-// Diagnostic build only, temporary: acts_finder_no_phi_term of CMakeLists.txt defines this, so that job measures the phi term's own effect (D1 stage 5e brief).
-// The recipe's acts_tracking_finder does not (the build job checks its flags, and its record says diagnostic_build none). Nothing at run time reaches it. It comes
-// out at the next stage.
-#if defined(T07_DIAGNOSTIC_NO_PHI_TERM)
-constexpr char diagnostic_build[] = "no-phi-term";
-constexpr char seed_covariance_phi_term[] = "absent";
-#else
+// No diagnostic build is left: stage 5e's acts_finder_no_phi_term came out at stage 6, as stated (D1 stage 5e report). The three keys stay, each with its one
+// value, so the configuration text, and its hash, is job 7502411's recipe's line for line, and still differs from job 7496491's recipe in three lines (D1 stage 6
+// report, Tidy). The seed's code is not a number, so the record names it: helix_at_start takes the chord, and bound_of adds the phi term, unconditionally. The
+// keys are labels beside the code, not readings of it: seed_start_probe judges the code (D1 stage 5e review, m5).
 constexpr char diagnostic_build[] = "none";
 constexpr char seed_covariance_phi_term[] = "present";
-#endif
-// The seed's code is not a number, so the record names it: the configuration hash then tells this recipe from job 7496491's, which took the last two's slope and
-// had no phi term (D1 stage 5e review, m5). helix_at_start takes the chord unconditionally.
 constexpr char seed_slope_along_v[] = "chord";
 
 double plane_x_mm(int plane) { return (plane - 1) * plane_spacing_mm; }
@@ -291,9 +286,7 @@ std::optional<SeedStart> seed_start_of(const std::array<Acts::Vector3, 3>& point
   const auto bound_of = [&](const HelixPoint& point) {
     const Acts::Vector3 moved_mm = point.position_mm - centre->position_mm;
     double phi = std::atan2(point.direction.y(), point.direction.x());
-#ifndef T07_DIAGNOSTIC_NO_PHI_TERM
     phi += centre->q_over_p * field_along_v_tesla * Acts::UnitConstants::T * centre->direction.dot(moved_mm);
-#endif
     StartVector bound;
     bound << axis_u.dot(moved_mm), axis_v.dot(moved_mm), phi, std::acos(point.direction.z() / point.direction.norm()), point.q_over_p;
     return bound;
@@ -441,6 +434,47 @@ Acts::GreedyAmbiguityResolution::State ambiguity_state_of(const std::vector<Foun
   return state;
 }
 
+// The CKF of this recipe, with its propagator: one definition for the finder's own and for a traced search, which differs in its loggers alone (D1 stage 6b
+// brief: ACTS's own branch history from its VERBOSE lines). Loggers write to log; the propagator's stays at ERROR, since its steps say nothing of branches.
+TelescopeFinder make_telescope_finder(const TelescopeGeometry& telescope, double field_along_v_tesla, Acts::Logging::Level level, std::ostream* log) {
+  auto field = std::make_shared<Acts::ConstantBField>(Acts::Vector3(0.0, 0.0, field_along_v_tesla * Acts::UnitConstants::T));
+  Acts::EigenStepper<> stepper(field);
+  Acts::Navigator::Config navigator_config;
+  navigator_config.trackingGeometry = telescope.tracking_geometry;
+  Acts::Navigator navigator(navigator_config, Acts::getDefaultLogger("Navigator", level, log));
+  TelescopePropagator propagator(std::move(stepper), std::move(navigator), Acts::getDefaultLogger("Propagator", Acts::Logging::ERROR, log));
+  return TelescopeFinder(std::move(propagator), Acts::getDefaultLogger("Finder", level, log));
+}
+
+// Every branch a traced search returned, short ones too, state by state: plane, kind (m measurement, h hole, o outlier), hit key or -, chi2.
+std::string branches_text(const FindingContainer& tracks, const TelescopeGeometry& telescope) {
+  std::ostringstream text;
+  text.precision(6);
+  for (auto track : tracks) {
+    std::vector<std::string> states;
+    for (auto state : track.trackStatesReversed()) {
+      const auto flags = state.typeFlags();
+      const char kind = flags.isOutlier() ? 'o' : flags.isMeasurement() ? 'm' : flags.isHole() ? 'h' : 'x';
+      std::ostringstream item;
+      item.precision(6);
+      item << telescope.plane_number_of(state.referenceSurface()) << ":" << kind << ":";
+      if (kind == 'm' || kind == 'o') {
+        item << state.getUncalibratedSourceLink().template get<PlaneHitLink>().hit_key << ":" << state.chi2();
+      } else {
+        item << "-:-";
+      }
+      states.push_back(item.str());
+    }
+    std::reverse(states.begin(), states.end());
+    text << "branch " << track.index() << " measurements " << track.nMeasurements() << " holes " << track.nHoles() << " chi2 " << track.chi2() << " states";
+    for (const std::string& item : states) {
+      text << " " << item;
+    }
+    text << "\n";
+  }
+  return text.str();
+}
+
 }  // namespace
 
 TrackFinder::TrackFinder(const TelescopeGeometry& telescope, double field_along_v_tesla, double sigma_loc0_mm, double sigma_loc1_mm)
@@ -449,27 +483,56 @@ TrackFinder::TrackFinder(const TelescopeGeometry& telescope, double field_along_
       m_sigma_loc0_mm(sigma_loc0_mm),
       m_sigma_loc1_mm(sigma_loc1_mm),
       m_fitter(telescope, field_along_v_tesla, sigma_loc0_mm, sigma_loc1_mm) {
-  auto field = std::make_shared<Acts::ConstantBField>(Acts::Vector3(0.0, 0.0, field_along_v_tesla * Acts::UnitConstants::T));
-  Acts::EigenStepper<> stepper(field);
-  Acts::Navigator::Config navigator_config;
-  navigator_config.trackingGeometry = telescope.tracking_geometry;
-  Acts::Navigator navigator(navigator_config, Acts::getDefaultLogger("Navigator", Acts::Logging::ERROR, &std::cerr));
-  TelescopePropagator propagator(std::move(stepper), std::move(navigator), Acts::getDefaultLogger("Propagator", Acts::Logging::ERROR, &std::cerr));
-  m_machinery.reset(new Machinery{TelescopeFinder(std::move(propagator), Acts::getDefaultLogger("Finder", Acts::Logging::ERROR, &std::cerr)),
+  m_machinery.reset(new Machinery{make_telescope_finder(telescope, field_along_v_tesla, Acts::Logging::ERROR, &std::cerr),
                                   {},
                                   Acts::GreedyAmbiguityResolution(ambiguity_configuration(), Acts::getDefaultLogger("Ambiguity", Acts::Logging::ERROR, &std::cerr))});
 }
 
 TrackFinder::~TrackFinder() = default;
 
-EventFinding TrackFinder::find(const DataEvent& event, std::uint32_t event_ordinal) const {
+Acts::ParticleHypothesis TrackFinder::hypothesis() const { return Acts::ParticleHypothesis(Acts::PdgParticle::eInvalid, float(particle_mass_gev), 1.0f); }
+
+EventFinding TrackFinder::find(const DataEvent& event, std::uint32_t event_ordinal, bool trace_ambiguity) const {
   EventFinding finding;
   finding.event_ordinal = event_ordinal;
   finding.hit_count = event.hits.size();
   const SeedSearch seeds = find_seeds(event, m_sigma_loc0_mm, m_field_along_v_tesla);
   finding.seeds_found = seeds.triples.size();
   finding.seed_budget_reached = seeds.reached_budget;
+  finding.seeds.reserve(seeds.triples.size());
 
+  // The seeds, in search order: a seed whose three hits already lie on one candidate is skipped, and one with no usable helix has no start. Both are settled
+  // before any search, as until stage 6; the start is the curvilinear one at x = refit_start_x_mm.
+  std::size_t next = 0;
+  const Acts::ParticleHypothesis particle = hypothesis();
+  const StartSource next_seed = [&](const std::vector<std::vector<std::size_t>>& candidates_of_hit) -> std::optional<StartStep> {
+    if (next == seeds.triples.size()) {
+      return std::nullopt;
+    }
+    const HitTriple& triple = seeds.triples[next++];
+    StartStep step;
+    step.triple = triple;
+    if (on_one_candidate(triple, candidates_of_hit)) {
+      step.outcome = "skipped";
+      return step;
+    }
+    const std::optional<SeedStart> start = seed_start_of({global_of(event.hits[triple.hit_keys[0]]), global_of(event.hits[triple.hit_keys[1]]), global_of(event.hits[triple.hit_keys[2]])},
+                                                         m_sigma_loc0_mm, m_sigma_loc1_mm, m_field_along_v_tesla);
+    if (!start) {
+      step.outcome = "no-start";
+      return step;
+    }
+    const Acts::Vector4 start_four(start->position_mm.x(), start->position_mm.y(), start->position_mm.z(), 0.0);
+    step.parameters.emplace(Acts::BoundTrackParameters::createCurvilinear(start_four, start->direction, start->q_over_p, start->covariance, particle));
+    return step;
+  };
+  search_resolve_fit(event, finding, next_seed, trace_ambiguity, {});
+  return finding;
+}
+
+void TrackFinder::search_resolve_fit(const DataEvent& event, EventFinding& finding, const StartSource& next_start, bool trace_ambiguity,
+                                     const std::set<std::size_t>& traced_searches) const {
+  const std::uint32_t event_ordinal = finding.event_ordinal;
   const EventLinks event_links = links_of(hits_by_plane(event), m_telescope, m_sigma_loc0_mm, m_sigma_loc1_mm);
   SeedBudget budget;
   BudgetedSelector selector{budgeted_measurement_selector(), &budget};
@@ -488,33 +551,58 @@ EventFinding TrackFinder::find(const DataEvent& event, std::uint32_t event_ordin
   // Material: none (section 4.1), so scattering and energy loss are off.
   const TelescopeFinder::Options options(m_telescope.geometry_context, m_telescope.field_context, std::cref(m_telescope.calibration_context), extensions, plain_options, false, false);
 
-  const Acts::ParticleHypothesis hypothesis(Acts::PdgParticle::eInvalid, float(particle_mass_gev), 1.0f);
   FindingContainer tracks = Acts::TrackContainer{Acts::VectorTrackContainer{}, Trajectory{}};
   std::vector<std::vector<std::size_t>> candidates_of_hit(event.hits.size());
 
-  finding.seeds.reserve(seeds.triples.size());
-  for (const HitTriple& triple : seeds.triples) {
+  while (const std::optional<StartStep> step = next_start(candidates_of_hit)) {
+    const HitTriple& triple = step->triple;
     finding.seeds.push_back({triple, "no-candidate", finding.candidates.size(), 0, 0});
     SeedRecord& seed = finding.seeds.back();
-    if (on_one_candidate(triple, candidates_of_hit)) {
+    if (step->outcome == "skipped") {
       seed.outcome = "skipped";
       ++finding.seeds_skipped;
       continue;
     }
     ++finding.seeds_run;
-    const std::optional<SeedStart> start = seed_start_of({global_of(event.hits[triple.hit_keys[0]]), global_of(event.hits[triple.hit_keys[1]]), global_of(event.hits[triple.hit_keys[2]])},
-                                                         m_sigma_loc0_mm, m_sigma_loc1_mm, m_field_along_v_tesla);
-    if (!start) {
+    if (!step->parameters) {
       seed.outcome = "no-start";
       ++finding.seeds_failed;
       continue;
     }
-    const Acts::Vector4 start_four(start->position_mm.x(), start->position_mm.y(), start->position_mm.z(), 0.0);
-    const auto start_parameters = Acts::BoundTrackParameters::createCurvilinear(start_four, start->direction, start->q_over_p, start->covariance, hypothesis);
+    const Acts::BoundTrackParameters& start_parameters = *step->parameters;
 
     tracks.clear();
     budget = SeedBudget{};
-    auto found = m_machinery->finder.findTracks(start_parameters, options, tracks);
+    // A traced search runs the same CKF, configuration and options with VERBOSE loggers (make_telescope_finder), so it decides the same; only its log differs.
+    const std::size_t search_index = finding.seeds.size() - 1;
+    const bool traced = traced_searches.count(search_index) != 0;
+    std::ostringstream acts_log;
+    std::optional<TelescopeFinder> traced_finder;
+    if (traced) {
+      traced_finder.emplace(make_telescope_finder(m_telescope, m_field_along_v_tesla, Acts::Logging::VERBOSE, &acts_log));
+    }
+    auto found = (traced ? *traced_finder : m_machinery->finder).findTracks(start_parameters, options, tracks);
+    if (traced) {
+      SearchTrace trace;
+      trace.search = search_index;
+      trace.result = found.ok() ? "ok" : found.error().message();
+      // Stage 6b review m5: a step-limit search is marked truncated below; its trace says so too, and names the step limit.
+      trace.step_limit = !found.ok() && found.error() == Acts::CombinatorialKalmanFilterError::PropagationReachesMaxSteps;
+      trace.truncated = budget.truncated || trace.step_limit;
+      trace.extra_branches = budget.extra_branches;
+      trace.acts_log = acts_log.str();
+      // Every branch the container holds, dropped ones too, on an error as well (stage 6b review m6: the branches made up to an error tell which failed); then, if ACTS
+      // returned, the ones it returned.
+      trace.branches = branches_text(tracks, m_telescope);
+      if (found.ok()) {
+        trace.branches += "returned";
+        for (auto track : *found) {
+          trace.branches += " " + std::to_string(track.index());
+        }
+        trace.branches += "\n";
+      }
+      finding.search_traces.push_back(std::move(trace));
+    }
     if (!found.ok()) {
       if (found.error() == Acts::CombinatorialKalmanFilterError::PropagationReachesMaxSteps) {
         seed.outcome = "step-limit";
@@ -564,7 +652,14 @@ EventFinding TrackFinder::find(const DataEvent& event, std::uint32_t event_ordin
   }
 
   Acts::GreedyAmbiguityResolution::State ambiguity = ambiguity_state_of(finding.candidates);
-  if (!finding.candidates.empty()) {
+  if (!finding.candidates.empty() && trace_ambiguity) {
+    // ACTS's own sequence (D1 stage 6 brief, Resolver removal order): libActsCore's resolve() writes each removal at VERBOSE ("remove track", its nMeas,
+    // nShared and chi2). The same configuration and the same state, so the same decisions; only the logger differs.
+    std::ostringstream trace;
+    const Acts::GreedyAmbiguityResolution traced(ambiguity_configuration(), Acts::getDefaultLogger("Ambiguity", Acts::Logging::VERBOSE, &trace));
+    traced.resolve(ambiguity);
+    finding.ambiguity_trace = trace.str();
+  } else if (!finding.candidates.empty()) {
     m_machinery->resolver.resolve(ambiguity);
   }
   // resolve() stops early only below the limit, so a track left at or above it means the iterations ran out with a conflict left.
@@ -617,7 +712,6 @@ EventFinding TrackFinder::find(const DataEvent& event, std::uint32_t event_ordin
 
   const bool none_selected = finding.fits.empty();
   finding.failure_category = !none_selected ? "none" : (finding.search_truncated() ? "search-truncated" : "seed-or-finding");
-  return finding;
 }
 
 }  // namespace t07

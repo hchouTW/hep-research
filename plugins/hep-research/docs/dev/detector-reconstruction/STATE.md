@@ -75,7 +75,7 @@ tasks:
   T07: {state: in-progress, note: "generators frozen; stage 4: q/p prior settled, field open for the refit, first development run job 7493368, refit pulls, truth-assisted, counted apart, a tuning reading; next noise, CKF, ambiguity resolution, vertexing, residuals, derivatives"}
   T11: {state: done, note: "comparison clean with rerun 7474460 (R28); every applicable cell is sourced or a recorded gap (R14); 10 citation uses unread; plugin defects in t11-citation-findings.md not applied"}
 k_decisions: {state: drafted, provisional: true, record: decisions.md, contract_map: contract-map.md, needs_user: [K08, K09, K10, K11, K12, K16, K17, K18]}
-next_action: "T07: truth-seeded scoring-side program, with the resolver removal sequence printed for events 2169 and 654; then vertexing"
+next_action: "T07: the user decides R1 (section 7 start sigma) and the clean truth-seeded tolerance after stage 6b; then vertexing"
 ```
 
 ## Plan conflicts found

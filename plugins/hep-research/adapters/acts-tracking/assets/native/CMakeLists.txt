@@ -13,12 +13,12 @@ target_link_libraries(acts_tracking_driver PRIVATE acts_tracking_common)
 add_executable(acts_tracking_finder acts_tracking_finder.cpp track_finding.cpp kalman_refit.cpp)
 target_link_libraries(acts_tracking_finder PRIVATE acts_tracking_common)
 
-# One temporary diagnostic build of the finder: the recipe without the seed covariance's phi term, so a job measures that term's own effect (D1 stage 5e brief). It
-# comes out at the next stage. Never the recipe: the build job refuses the definition on acts_tracking_finder and on seed_start_probe, and its record names its
-# build. Data side, like the finder.
-add_executable(acts_finder_no_phi_term acts_tracking_finder.cpp track_finding.cpp kalman_refit.cpp)
-target_link_libraries(acts_finder_no_phi_term PRIVATE acts_tracking_common)
-target_compile_definitions(acts_finder_no_phi_term PRIVATE T07_DIAGNOSTIC_NO_PHI_TERM)
+# Section 7's truth-seeded run, a comparator: scoring side, never reported as finding. Its own program (decisions.md, "T07 stage 5"), so the finder above stays
+# truth-free: truth_seeded_search.cpp, the only definition of find_from_starts, is compiled here and nowhere else, and the finder's link line and symbols are read by
+# the build job. The steps after the start are track_finding.cpp's, the same source the finder compiles. It links no generator, seed code or truth reader either:
+# its truth comes in as a start file the scoring side writes.
+add_executable(acts_truth_seeded_run acts_truth_seeded_run.cpp truth_seeded_search.cpp track_finding.cpp kalman_refit.cpp)
+target_link_libraries(acts_truth_seeded_run PRIVATE acts_tracking_common)
 
 # Whether a seed's start lies on the helix through its hits, read through the ACTS propagator. Data side too: hand-set tracks, no fixture event.
 add_executable(seed_start_probe seed_start_probe.cpp track_finding.cpp kalman_refit.cpp)

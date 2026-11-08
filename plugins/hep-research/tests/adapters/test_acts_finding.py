@@ -2,8 +2,9 @@
 
 Sections cited are of t04-values-v4.md. Everything printed here is a development reading of block 1, tuning, not a gate result: pass or fail waits
 for K09 (sheet, Acceptance) and tuning runs feed nothing (section 2.2). Truth enters here, on the scoring side, and never reaches the finder: its only
-input is a data file. Efficiency, fake and duplicate are section 7's, word for word, in scored_event. The section 7 truth-seeded run is not built, so
-gate "Efficiency, noise (a)" has no comparator yet.
+input is a data file. Efficiency, fake and duplicate are section 7's, word for word, in scored_event. Correction, stage 6: the section 7 truth-seeded run is
+built, a program of its own on the scoring side (acts_truth_seeded_run), and gate "Efficiency, noise (a)" is read against it in tests/adapters/test_acts_truth_seeded.py;
+FinderStaysTruthFree below fails if this finder gains a truth input.
 
 Predictions, fixed here before the first run of this recipe. Closed form, unless named:
 
@@ -36,6 +37,9 @@ per track, so a seed that fails counts up to 7 at once. The limit stands: with a
 Correction after job 7494405, stage 5 review m4. The table's "0 expected" for clean fakes stands as written and missed: 2 in clean stratum 2. It reckoned with no track of two particles'
 hits, and a clean fake is one: an exact tie or three owners. Cause open until tests/adapters/test_acts_finding_diagnosis.py reads it. The same job made o3 noise worse than job 7494285 on
 identical events, 640 to 781 lost, which the text of Fix round 2 did not predict. Every reading stays inside its limit, and no limit moved.
+
+Stage 6 (D1 stage 6 brief): only tidy changes reach the finder. The no-phi build is gone, the steps after the start are one function shared with the truth-seeded run, and an
+optional output prints ACTS's own ambiguity removal sequence for named events. The record is predicted byte for byte as job 7502411's, and the configuration hash unchanged.
 
 Stage 5e, the user's two changes after job 7496491 (decisions.md, "Recipe choice after stage 5d"): the seed start takes the slope along v from the first and last hit, its covariance
 holds the phi term it lacked, and ambiguity_most_shared_hits is 2. The table above and the tolerances below stand as written, and no limit moved. Their predictions are in the D1 stage 5e
@@ -260,12 +264,12 @@ def replica_roads(points, slope_rule: str, phi_term_sign: float, inflation: floa
 
 CHORD_SLOPE_LINE = "const double chord_slope = (points[2].z() - points[0].z()) / std::hypot(points[2].x() - points[0].x(), points[2].y() - points[0].y());"
 PHI_TERM_LINE = "phi += centre->q_over_p * field_along_v_tesla * Acts::UnitConstants::T * centre->direction.dot(moved_mm);"
-DIAGNOSTIC_DEFINITIONS = {"T07_DIAGNOSTIC_NO_PHI_TERM"}  # stage 5e's one temporary build; it comes out at the next stage
+DIAGNOSTIC_DEFINITIONS = set()  # none since stage 6: stage 5e's one temporary build, acts_finder_no_phi_term, came out as stated (D1 stage 6 brief, Tidy)
 
 
 def recipe_choice_defects(header_text: str, source_text: str) -> list:
     """The user's two changes after job 7496491 (decisions.md, "Recipe choice after stage 5d"), as the source must hold them for the recipe's build: the chord slope outside
-    any diagnostic block, the phi term with its sign and on in the recipe (only the no-phi build leaves it out), and ambiguity_most_shared_hits 2. A guard of the source text,
+    any diagnostic block, the phi term with its sign and under no preprocessor block (since stage 6 no build leaves it out), and ambiguity_most_shared_hits 2. A guard of the source text,
     exact lines, not of behaviour: seed_start_probe in the build job judges the behaviour (RecipeChoiceInTheSource)."""
     defects = []
     if header_constant(header_text, "ambiguity_most_shared_hits") != 2:
@@ -278,8 +282,15 @@ def recipe_choice_defects(header_text: str, source_text: str) -> list:
         defects.append("the slope along v is not the chord's")
     if PHI_TERM_LINE not in lines:
         defects.append("the phi term is absent or its sign is not +w (T . m)")
-    elif lines[lines.index(PHI_TERM_LINE) - 1] != "#ifndef T07_DIAGNOSTIC_NO_PHI_TERM":
-        defects.append("the phi term is not on in the recipe's build")
+    # Stage 6 review m6: the line above the phi term, any conditional inside seed_start_of's body, and any #if 0 in the file. One defect for all three, since each is the same
+    # fault, a build that may leave the term out.
+    body = source_text[source_text.find("std::optional<SeedStart> seed_start_of("):]
+    body = body[:body.find("\n}\n")] if "std::optional<SeedStart> seed_start_of(" in source_text else ""
+    conditional_in_body = any(line.strip().startswith("#if") for line in body.splitlines())
+    if_zero = any(re.match(r"#\s*if\s+0\b", line) for line in lines)
+    above = PHI_TERM_LINE in lines and lines[lines.index(PHI_TERM_LINE) - 1].startswith("#")
+    if PHI_TERM_LINE in lines and (above or conditional_in_body or if_zero):
+        defects.append("a preprocessor conditional above the phi term, inside seed_start_of, or #if 0 in the file, so a build may leave code out")
     return defects
 
 
@@ -479,7 +490,10 @@ class RecipeChoiceInTheSource(unittest.TestCase):
             "shared hits 1": (self.header.replace("ambiguity_most_shared_hits = 2;", "ambiguity_most_shared_hits = 1;"), self.source),
             "phi sign flipped": (self.header, self.source.replace(PHI_TERM_LINE, PHI_TERM_LINE.replace("phi +=", "phi -="))),
             "phi absent": (self.header, self.source.replace(PHI_TERM_LINE, "")),
-            "phi off in the recipe": (self.header, self.source.replace("#ifndef T07_DIAGNOSTIC_NO_PHI_TERM", "#ifdef T07_DIAGNOSTIC_NO_PHI_TERM")),
+            "phi under a preprocessor block": (self.header, self.source.replace(PHI_TERM_LINE, "#if 0\n    " + PHI_TERM_LINE + "\n#endif")),
+            "phi under #if 0 with a comment between": (self.header, self.source.replace(PHI_TERM_LINE, "#if 0\n    // the term\n    " + PHI_TERM_LINE + "\n#endif")),
+            "a conditional elsewhere in seed_start_of": (self.header, self.source.replace("  SeedStart start;\n", "#if 1\n  SeedStart start;\n#endif\n", 1)),
+            "#if 0 elsewhere in the file": (self.header, self.source + "\n#if 0\n#endif\n"),
             "slope of the last two": (self.header, self.source.replace("(points[2].z() - points[0].z()) / std::hypot(points[2].x() - points[0].x(), points[2].y() - points[0].y())",
                                                                        "(points[2].z() - points[1].z()) / std::hypot(points[2].x() - points[1].x(), points[2].y() - points[1].y())")),
             "chord back under a diagnostic block": (self.header, self.source.replace("  const double transverse_before", "#ifdef T07_DIAGNOSTIC_CHORD_SLOPE\n  const double transverse_before", 1)),
@@ -711,6 +725,67 @@ class FindingIsNeverARefit(unittest.TestCase):
         self.assertIn('known{"data-file", "product-id", "product-file", "record-file", "product-events"}', source)
         for word in ("truth_file", "t07_seed_stream", "t07_event_generator", "generation_constants", "read_hit_sets"):
             self.assertNotIn(word, source + (NATIVE / "track_finding.cpp").read_text(encoding="utf-8") + (NATIVE / "track_finding.hpp").read_text(encoding="utf-8"))
+
+
+FINDER_FLAGS = {"data-file", "product-id", "product-file", "record-file", "product-events"}
+FINDER_OPTIONAL_OUTPUTS = {"seed-file", "ambiguity-trace-file", "ambiguity-trace-events"}
+TRUTH_SEEDED_ONLY = ("find_from_starts", "PlaneStart", "truth_seeded", "truth-seeded", ".t07truth", "t07starts", "truth-starts", "start-file")
+
+
+def finder_truth_input_defects(finder_source: str, finding_source: str, cmake_text: str) -> list:
+    """Section 3.1 and decisions.md, "T07 stage 5": the finder stays truth-free. Its flags are exactly the hits, its outputs and the named-event trace; its program names
+    nothing of the truth-seeded run; its CMake target compiles neither truth-seeded source; and find_from_starts is defined in truth_seeded_search.cpp alone, which only
+    acts_truth_seeded_run compiles. The build job reads the same on the binary: link line and symbols."""
+    defects = []
+    known = re.search(r"const std::set<std::string> known\{([^}]*)\}", finder_source)
+    optional = re.search(r"const std::set<std::string> optional_outputs\{([^}]*)\}", finder_source)
+    if not known or set(re.findall(r'"([^"]+)"', known.group(1))) != FINDER_FLAGS:
+        defects.append("the finder's required flags are not the hits and its outputs")
+    if not optional or set(re.findall(r'"([^"]+)"', optional.group(1))) != FINDER_OPTIONAL_OUTPUTS:
+        defects.append("the finder's optional flags are not its outputs")
+    named = [word for word in TRUTH_SEEDED_ONLY if word in finder_source]
+    if named:
+        defects.append(f"the finder's program names {named}")
+    target = re.search(r"add_executable\(acts_tracking_finder ([^)]*)\)", cmake_text)
+    if not target or set(target.group(1).split()) & {"truth_seeded_search.cpp", "acts_truth_seeded_run.cpp"}:
+        defects.append("the finder's target compiles truth-seeded code")
+    if "TrackFinder::find_from_starts(" in finding_source:
+        defects.append("track_finding.cpp, which the finder compiles, defines find_from_starts")
+    compiled_by = re.findall(r"add_executable\((\w+) ([^)]*)\)", cmake_text)
+    others = sorted(name for name, sources in compiled_by if "truth_seeded_search.cpp" in sources.split() and name not in ("acts_tracking_finder", "acts_truth_seeded_run"))
+    if others or not any(name == "acts_truth_seeded_run" and "truth_seeded_search.cpp" in sources.split() for name, sources in compiled_by):
+        defects.append(f"truth_seeded_search.cpp is compiled by {others or 'no program'}, not by acts_truth_seeded_run alone")
+    return defects
+
+
+class FinderStaysTruthFree(unittest.TestCase):
+    """D1 stage 6 brief: a test that fails if the finder gains a truth input. Driven with the shipped sources and with one defect each."""
+
+    def setUp(self):
+        self.finder = (NATIVE / "acts_tracking_finder.cpp").read_text(encoding="utf-8")
+        self.finding = (NATIVE / "track_finding.cpp").read_text(encoding="utf-8")
+        self.cmake = (NATIVE / "CMakeLists.txt").read_text(encoding="utf-8")
+
+    def test_the_shipped_finder_is_truth_free(self):
+        self.assertEqual(finder_truth_input_defects(self.finder, self.finding, self.cmake), [])
+        self.assertIn("EventFinding TrackFinder::find_from_starts(", (NATIVE / "truth_seeded_search.cpp").read_text(encoding="utf-8"))
+
+    def test_each_truth_input_alone_is_named(self):
+        required = 'known{"data-file", "product-id", "product-file", "record-file", "product-events"}'
+        optional = 'optional_outputs{"seed-file", "ambiguity-trace-file", "ambiguity-trace-events"}'
+        finder_target = "add_executable(acts_tracking_finder acts_tracking_finder.cpp track_finding.cpp kalman_refit.cpp)"
+        defects = {
+            "a truth file flag": (self.finder.replace(required, required.replace('"product-events"', '"product-events", "truth-file"')), self.finding, self.cmake),
+            "a particle file as an optional flag": (self.finder.replace(optional, optional.replace('"seed-file"', '"seed-file", "particle-file"')), self.finding, self.cmake),
+            "the probe compiles truth-seeded code": (self.finder, self.finding, self.cmake.replace("add_executable(seed_start_probe seed_start_probe.cpp", "add_executable(seed_start_probe seed_start_probe.cpp truth_seeded_search.cpp")),
+            "a call of the truth-seeded entry": (self.finder.replace("finder.find(event, ordinal, trace_this)", "finder.find_from_starts(event, ordinal, {})"), self.finding, self.cmake),
+            "the target compiles truth-seeded code": (self.finder, self.finding, self.cmake.replace(finder_target, finder_target.replace("kalman_refit.cpp)", "kalman_refit.cpp truth_seeded_search.cpp)"))),
+            "the entry defined where the finder compiles it": (self.finder, self.finding + "\nEventFinding TrackFinder::find_from_starts(\n", self.cmake),
+        }
+        for name, sources in defects.items():
+            with self.subTest(defect=name):
+                self.assertNotEqual(sources, (self.finder, self.finding, self.cmake))
+                self.assertEqual(len(finder_truth_input_defects(*sources)), 1, finder_truth_input_defects(*sources))
 
 
 class StatesStayApart(unittest.TestCase):
