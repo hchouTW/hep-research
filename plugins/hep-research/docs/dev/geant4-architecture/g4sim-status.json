@@ -60,12 +60,11 @@
    "state": "blocked",
    "worktree": "../hep-research-g4sim-S7",
    "branch": "g4sim/S7",
-   "task_card_sha256": "48fb701eb0f261bf859f41a2e97a7c36f61f863d97cc20393c757e22e4bf09b1",
+   "task_card_sha256": "32b13a703de18406b9fccb78497d216793d51228d2521d05884b7e72f1e4183c",
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S7.md",
    "blocked_on": [
-    "the judged gate 5 run and the reproduction check on build 25 (fourth registration)",
-    "an independent read of the fix diff (62e69568)",
-    "G5 for the S7 C++ at build 25"
+    "the judged gate 5 run and the reproduction check on build 26 (fifth registration)",
+    "G5 for the S7 C++ at build 26"
    ]
   },
   "S8": {
