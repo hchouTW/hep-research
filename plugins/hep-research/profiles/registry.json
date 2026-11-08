@@ -4,14 +4,14 @@
   {
    "id": "experiment:ams-02",
    "kind": "experiment",
-   "version": "2.0.0",
+   "version": "2.1.0",
    "scope": "AMS-02 on the ISS: charged cosmic rays, public evidence ledger, public-domain methods (access-controlled content lives in the companion plugin ams02-research)",
    "path": "experiments/ams-02"
   },
   {
    "id": "experiment:eic",
    "kind": "experiment",
-   "version": "0.1.0",
+   "version": "0.2.0",
    "scope": "Electron-Ion Collider facility context and the ePIC experiment, public documents only",
    "path": "experiments/eic"
   },

@@ -60,16 +60,17 @@ class NewerLiteratureTests(unittest.TestCase):
 
     def test_a_newer_source_enters_the_ledger_at_the_level_read(self):
         sources, claims = vel.load_ledger(ROOT / "evidence" / "sources.json", ROOT / "evidence" / "claims.json")
-        new = dict(sources[0], id="ams02:S61", title="A paper published after the last verification (test record)",
-                   year=2026, year_text="2026", publication_date="2026-09-30", verification_level="metadata-only",
-                   verification_note=None, verification_date="2026-10-02", data_taking_period=None,
+        new_id = f"ams02:S{max(int(s['id'].split(':S')[1]) for s in sources) + 1:02d}"
+        new = dict(sources[0], id=new_id, title="A paper published after the last verification (test record)",
+                   year=2026, year_text="2026", publication_date="2026-11-01", verification_level="metadata-only",
+                   verification_note=None, verification_date="2026-11-08", data_taking_period=None,
                    supersedes=[], superseded_by=[], dois=[], locator_text="test")
-        claim = dict(claims[0], id=f"ams02:C{max(int(c['id'].split(':C')[1]) for c in claims) + 1}", source_ids=["ams02:S61"], claim="test claim",
+        claim = dict(claims[0], id=f"ams02:C{max(int(c['id'].split(':C')[1]) for c in claims) + 1}", source_ids=[new_id], claim="test claim",
                      verification_strength="metadata-only", numeric_quotation_allowed=False)
-        ok = vel.check_ledger(sources + [new], claims + [claim], date(2026, 10, 2), 365, "ams02")
+        ok = vel.check_ledger(sources + [new], claims + [claim], date(2026, 11, 8), 365, "ams02")
         self.assertEqual(ok["status"], "pass", ok["errors"])
         over = dict(claim, verification_strength="full-text")
-        bad = vel.check_ledger(sources + [new], claims + [over], date(2026, 10, 2), 365, "ams02")
+        bad = vel.check_ledger(sources + [new], claims + [over], date(2026, 11, 8), 365, "ams02")
         self.assertIn("claim.stronger_than_sources", {e["code"] for e in bad["errors"]})
 
 
