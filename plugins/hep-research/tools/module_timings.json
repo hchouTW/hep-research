@@ -481,6 +481,10 @@
   "tests.core.test_simulation_rng": 3.5,
   "tests.core.test_simulation_response": 2.4,
   "tests.adapters.test_g4sim_philox": 1.8,
-  "tests.core.test_simulation_hits": 0.1
+  "tests.core.test_simulation_hits": 0.1,
+  "tests.core.test_geometry_fieldmap": 0.29,
+  "tests.core.test_geometry_optics": 0.17,
+  "tests.core.test_geometry_xtr": 0.19,
+  "tests.core.test_simulation_efficiency_map": 5.14
  }
 }

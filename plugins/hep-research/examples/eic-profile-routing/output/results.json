@@ -1,14 +1,14 @@
 {
- "plugin_version": "0.62.0",
+ "plugin_version": "0.63.0",
  "profile": {
   "id": "experiment:eic",
-  "version": "0.2.0"
+  "version": "0.3.0"
  },
  "project_config": {
   "experiments": [
    {
     "profile": "experiment:eic",
-    "version": "0.2.0"
+    "version": "0.3.0"
    }
   ],
   "theory": []
