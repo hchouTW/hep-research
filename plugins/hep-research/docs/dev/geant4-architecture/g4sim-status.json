@@ -60,7 +60,7 @@
    "state": "partially-complete",
    "worktree": "../hep-research-g4sim-S7",
    "branch": "g4sim/S7",
-   "task_card_sha256": "32b13a703de18406b9fccb78497d216793d51228d2521d05884b7e72f1e4183c",
+   "task_card_sha256": "1442b573abd3ab29390008ca1182e2014dbfb2e8f17291e31aaecfcdfb4cf7f7",
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S7.md"
   },
   "S8": {

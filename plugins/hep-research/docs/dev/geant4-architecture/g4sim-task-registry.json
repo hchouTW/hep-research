@@ -799,6 +799,13 @@
    "registered_at": "2026-11-08T21:05:18Z",
    "card_commit": "fe88fde4",
    "reason": "after the read of the second-read fixes, on the maintainer's same word ('do it based on your recommendation'): gate 5 adds the born-outside negative and the reflecting-skin over-kill pair; the fourth registration's gate 5 run was cancelled before it ran; no other threshold changed; build 26 carries the fixes; gates 1, 2, 4 and the cases are rerun as a reproduction check, not re-judged"
+  },
+  {
+   "card": "g4sim-tasks/S7.md",
+   "sha256": "1442b573abd3ab29390008ca1182e2014dbfb2e8f17291e31aaecfcdfb4cf7f7",
+   "registered_at": "2026-11-08T22:26:17Z",
+   "card_commit": "7313366b",
+   "reason": "the execution log's closing entry only; thresholds as at the fifth registration"
   }
  ]
 }
