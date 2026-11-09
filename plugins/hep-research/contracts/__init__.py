@@ -1,5 +1,5 @@
 """Versioned research contracts of the hep-research plugin (single canonical location)."""
-CONTRACTS_VERSION = "3.26.0"
+CONTRACTS_VERSION = "3.27.0"
 # Capabilities this reader implements; an artifact whose required_capabilities lists any other is rejected (F08).
 # stats:result-semantics (2.2.0): the artifact relies on the statistical-result semantic rules (contracts.validate,
 # _stat_semantics); a 2.1 reader does not implement them and must refuse it rather than read it under weaker rules.
@@ -233,6 +233,10 @@ CONTRACTS_VERSION = "3.26.0"
 # review_measurement_spec.py --check-bundle refuse with the reason (exit 2). Existing attestations of a 2.0.0 bundle
 # still verify (attestation.py keeps its digest rule). No artifact type, vocabulary term, envelope field or capability
 # changes (measurement:correction-keys-v1 stays): every 3.16 artifact keeps its outcome.
+# 3.27.0 (minor; g4sim S9) adds alignment_overlay.json (alignment-overlay/1: shifts and small rotations of IR placements, applied by
+# core/geometry/alignment.py after expansion) and condition_snapshot.json (condition-snapshot/1: IOV-indexed conditions of a readout's cells, for
+# the response layer, core/simulation/conditions.py), and the optional `alignment` field of geometry_ir.json's physical part (the IR's minor change:
+# geometry-ir/1 unchanged; an IR without an overlay keeps its geometry_id). Additive: every 3.26 artifact keeps its outcome.
 # 3.26.0 (minor; g4sim S8) makes the fast_sim_envelope requirement of detector_spec.json operational: core/geometry/fast_sim.py checks it (no
 # daughter inside an envelope, a region of its own, no model in the specification) and the IR carries it in physics_requirements (the IR's minor
 # change: geometry-ir/1 and its field set unchanged). The run card's placement_impl and physics.fast_sim belong to adapters/geant4. Additive:
