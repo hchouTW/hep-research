@@ -457,7 +457,8 @@ def geometry_check(args) -> dict:
 
 def diff(args) -> dict:
     """S9's diff tool: the placements in which two specifications' IRs differ, each with an optional alignment overlay."""
-    checked = [geometry.check_file(detector, overlay_path=overlay) for detector, overlay in ((args.detector, args.overlay), (args.against, args.against_overlay))]
+    claims = json.loads(args.claims.read_text(encoding="utf-8")) if args.claims else []
+    checked = [geometry.check_file(detector, claims, overlay_path=overlay) for detector, overlay in ((args.detector, args.overlay), (args.against, args.against_overlay))]
     for side, result in zip(("detector", "against"), checked):
         if result["status"] != "ok":
             return {"status": "rejected", "side": side, "findings": result["findings"]}
@@ -511,6 +512,7 @@ def main(argv=None) -> int:
     comparing.add_argument("--overlay", type=Path)
     comparing.add_argument("--against", type=Path, required=True)
     comparing.add_argument("--against-overlay", type=Path)
+    comparing.add_argument("--claims", type=Path, help="a JSON list of the claim ids the specifications depend on, as contracts/geometry.py --claims")
     comparing.add_argument("--protected", action="store_true", help="protected mode (a project with agent_policy needs no flag)")
     args = parser.parse_args(argv)
     guard(f"adapters.geant4.g4sim_run.{args.command}", paths=[str(args.run if hasattr(args, "run") else args.detector)], flag=args.protected, capabilities=KNOWN_CAPABILITIES)
