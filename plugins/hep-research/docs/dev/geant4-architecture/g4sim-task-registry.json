@@ -806,6 +806,13 @@
    "registered_at": "2026-11-08T22:26:17Z",
    "card_commit": "7313366b",
    "reason": "the execution log's closing entry only; thresholds as at the fifth registration"
+  },
+  {
+   "card": "g4sim-tasks/S8.md",
+   "sha256": "33ee8a3b86846cab53ecb3d3732effdbd1cee69b69c2ae425705ee0f68f4f7d0",
+   "registered_at": "2026-11-09T01:59:08Z",
+   "card_commit": "c5b26a35",
+   "reason": "refreshed at the start of S8: baseline, the conditional items settled (g4sim_digi built, GDML import not triggered), every gate's design and gate 2's ulp tolerances fixed before any judged run; gate 3 step 1 (the independent trial and the rule); no threshold loosened"
   }
  ]
 }
