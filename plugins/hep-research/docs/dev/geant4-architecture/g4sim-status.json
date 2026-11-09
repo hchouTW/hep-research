@@ -64,12 +64,11 @@
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S7.md"
   },
   "S8": {
-   "state": "in-progress",
+   "state": "gates-recorded",
    "worktree": "../hep-research-g4sim-S8",
    "branch": "g4sim/S8",
    "task_card_sha256": "38f48ba02aad3d32c9fa114fc95d65f176f38c05827cf4a3171d68b1ea423007",
-   "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S8.md",
-   "blocked_on": []
+   "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S8.md"
   },
   "S9": {
    "state": "not-started",
