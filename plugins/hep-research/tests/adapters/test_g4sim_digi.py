@@ -46,21 +46,21 @@ class G4simDigi(unittest.TestCase):
         job.write_text(json.dumps(gate.digitize.job_with_keys(gate.fixture_jobs(1)["A"])), encoding="utf-8")
         bins = self.folder / "bins.csv"
         bins.write_text("0,3,1,0x1p-3,0x1p-6,2\n0,3,1,0x1p-3,0x1p-6,2\n", encoding="ascii")
-        done = subprocess.run([str(self.program), str(job), str(bins), str(self.folder / "c.csv"), str(self.folder / "t.csv")], capture_output=True, text=True, check=False)
+        done = subprocess.run([str(self.program), str(job), str(bins), str(self.folder / "c.csv"), str(self.folder / "t.csv")], capture_output=True, text=True, check=False, timeout=600)
         self.assertEqual(done.returncode, 2)
         self.assertIn("bin-twice", done.stderr)
         crlf = self.folder / "bins-crlf.csv"
         crlf.write_bytes(b"0,3,1,0x1p-3,0x1p-6,2\r\n")
         keyed = gate.digitize.job_with_keys(gate.fixture_jobs(1)["A"])
         job.write_text(json.dumps(keyed), encoding="utf-8")
-        done = subprocess.run([str(self.program), str(job), str(crlf), str(self.folder / "c.csv"), str(self.folder / "t.csv")], capture_output=True, text=True, check=False)
+        done = subprocess.run([str(self.program), str(job), str(crlf), str(self.folder / "c.csv"), str(self.folder / "t.csv")], capture_output=True, text=True, check=False, timeout=600)
         self.assertEqual(done.returncode, 0, done.stderr)
         job.write_text(json.dumps({**keyed, "channels": []}), encoding="utf-8")
-        done = subprocess.run([str(self.program), str(job), str(crlf), str(self.folder / "c.csv"), str(self.folder / "t.csv")], capture_output=True, text=True, check=False)
+        done = subprocess.run([str(self.program), str(job), str(crlf), str(self.folder / "c.csv"), str(self.folder / "t.csv")], capture_output=True, text=True, check=False, timeout=600)
         self.assertEqual(done.returncode, 2)
         self.assertIn("at least one", done.stderr)
         job.write_text(json.dumps({"schema": "other"}), encoding="utf-8")
-        done = subprocess.run([str(self.program), str(job), str(bins), str(self.folder / "c.csv")], capture_output=True, text=True, check=False)
+        done = subprocess.run([str(self.program), str(job), str(bins), str(self.folder / "c.csv")], capture_output=True, text=True, check=False, timeout=600)
         self.assertEqual(done.returncode, 2)
 
 
