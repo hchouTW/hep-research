@@ -600,6 +600,13 @@ class ScaleAndHooks(unittest.TestCase):
         self.assertEqual(sorted(models), ["absorb", "idle"])
         self.assertTrue(all(model["test_only"] for model in models.values()))
 
+    def test_the_process_is_read_back_where_the_card_names_it_and_nowhere_else(self):
+        probe = {"processes": [{"particle": "e-", "registered": ["eIoni", "fastSimProcess_massGeom"]}, {"particle": "gamma", "registered": ["phot"]}]}
+        self.assertEqual(driver.simulate_new.fast_sim_process_problems(card(fast_sim={"model": "idle", "particles": ["e-"]}), probe), [])
+        self.assertEqual(driver.simulate_new.fast_sim_process_problems(card(fast_sim={"model": "idle", "particles": ["e-", "gamma"]}), probe), ["gamma: no fastSimProcess_massGeom"])
+        self.assertEqual(driver.simulate_new.fast_sim_process_problems(card(), probe), ["e-: fastSimProcess_massGeom, which the card does not name"])
+        self.assertEqual(driver.simulate_new.fast_sim_process_problems(card(), {}), ["no process list was read back"])
+
     def test_legacy_mode_has_neither(self):
         legacy = {"seeding": "per-event"}
         self.assertIn("s8-legacy", codes(driver.check_card({**card(), "placement_impl": [{"mother": "stack", "template": "cell", "kind": "assembly"}]}, legacy)))

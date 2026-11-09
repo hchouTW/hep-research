@@ -452,6 +452,19 @@ def field_sample_problems(staged: dict, work: Path) -> list:
     return problems
 
 
+FAST_SIM_PROCESS = "fastSimProcess_massGeom"  # the name G4FastSimulationHelper::ActivateFastSimulation gives the process (read back on 11.4.3)
+
+
+def fast_sim_process_problems(card: dict, probe: dict) -> list:
+    """The fast-simulation process on exactly the particles the run card names (S8, GB19), and on no particle when it names none: a run
+    with no fast_sim_envelope attaches no process (S8 gate 3). Read back by ProbeV2."""
+    if not probe.get("processes"):
+        return ["no process list was read back"]
+    wanted = set((card.get("physics", {}).get("fast_sim") or {}).get("particles", []))
+    carrying = {row["particle"] for row in probe["processes"] if FAST_SIM_PROCESS in row["registered"]}
+    return [f"{name}: {'no ' + FAST_SIM_PROCESS if name in wanted else FAST_SIM_PROCESS + ', which the card does not name'}" for name in sorted(wanted ^ carrying)]
+
+
 def radiator_process_problems(radiators: list, probe: dict) -> list:
     """Each radiator's process, xtr_<envelope> as XtrConstructor.hh names it, read back on the particles the card names (e- and e+ when it
     names none) and on no other."""
@@ -521,6 +534,10 @@ def simulate(card: dict, request: dict, checked: dict, program: Path, work: Path
         summary["xtr"] = radiator_process_problems(radiators, json.loads((work / "probe-v2.json").read_text(encoding="utf-8")) if (work / "probe-v2.json").is_file() else {})
         if summary["xtr"]:
             summary["status"] = "failed"
+    # S8: the fast-simulation process only where the card names it, and nowhere in a run without a hook
+    summary["fast_sim"] = fast_sim_process_problems(card, json.loads((work / "probe-v2.json").read_text(encoding="utf-8")) if (work / "probe-v2.json").is_file() else {})
+    if summary["fast_sim"]:
+        summary["status"] = "failed"
     if (work / "hits.root").is_file():
         (work / "simulation-hits.json").write_text(json.dumps({**hits.index(checked["geometry_id"], card, work / "hits.root", request_identity), "scorers": [item["name"] for item in resolved["scorers"]], "readouts": {item["name"]: item["readout"] for item in resolved["scorers"] if "hit_kind" in item}}, indent=1) + "\n", encoding="utf-8")
     (work / "column_map.json").write_text(json.dumps({"scorers": resolved["scorers"], "volume_id": ir["physical"]["volume_id"]}, indent=1) + "\n", encoding="utf-8")
