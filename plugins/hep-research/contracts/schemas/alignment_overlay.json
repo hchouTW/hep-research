@@ -1,0 +1,73 @@
+{
+ "$comment": "alignment-overlay/1: An alignment overlay layer (g4sim S9, Section 17): shifts and small rotations of IR placements named by mother, template and copy number, applied to a detector-spec's IR by core/geometry/alignment.py; an applied overlay yields a new geometry_id.",
+ "type": "object",
+ "required": [
+  "schema",
+  "shifts"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "schema": {
+   "const": "alignment-overlay/1"
+  },
+  "description": {
+   "type": "string"
+  },
+  "source_of_facts": {
+   "type": "object",
+   "description": "where the shifts come from (a survey, a track-based alignment), as a specification's source_of_facts"
+  },
+  "shifts": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "mother",
+     "template",
+     "copy_number",
+     "delta_mm"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "mother": {
+      "type": "string"
+     },
+     "template": {
+      "type": "string"
+     },
+     "copy_number": {
+      "type": "integer",
+      "minimum": 0
+     },
+     "delta_mm": {
+      "type": "array",
+      "items": {
+       "type": "string"
+      },
+      "minItems": 3,
+      "maxItems": 3,
+      "description": "the shift of the placement's centre in its mother's frame, decimal strings"
+     },
+     "rotation": {
+      "type": "object",
+      "required": [
+       "zyx_deg"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "zyx_deg": {
+        "type": "array",
+        "items": {
+         "type": "string"
+        },
+        "minItems": 3,
+        "maxItems": 3
+       }
+      },
+      "description": "an active rotation about the placement's centre, Rz Ry Rx, applied after the placement's own"
+     }
+    }
+   }
+  }
+ }
+}
