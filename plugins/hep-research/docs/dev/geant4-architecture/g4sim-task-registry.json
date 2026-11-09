@@ -834,6 +834,13 @@
    "registered_at": "2026-11-09T05:18:53Z",
    "card_commit": "70fac4f3",
    "reason": "refreshed at the start of S9: baseline, the research need, GB10 confirmed, the gate designs fixed before any judged evaluation; no threshold loosened"
+  },
+  {
+   "card": "g4sim-tasks/S9.md",
+   "sha256": "77093fa506ec27c29c1de449aab83032d23235e86fa065d7ca0b525f63d39b41",
+   "registered_at": "2026-11-09T06:37:23Z",
+   "card_commit": "1d6522b2",
+   "reason": "the execution log's closing entry only; thresholds as at the previous registration"
   }
  ]
 }
