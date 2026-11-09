@@ -8984,6 +8984,23 @@ limits catch large defects only. The custodian's re-evaluation of qualification 
 
 Passing checks show software consistency, not physical validity.
 
+## 0.65.0 release check (2026-11-09, CI and E5)
+
+Release branch `release/0.65.0`, based on main `3e3a1909` (PR #379 merged). Minor release: g4sim phase S9, the last phase of the g4sim plan. Contracts 3.27.0, `CORE_VERSION` 1.13.0, `adapters/geant4` 0.15.0.
+
+What changed on the release branch: the CHANGELOG `0.65.0` section and the g4sim status (S9 `merged`). No regeneration: S9 changed no example or committed output. Gate record: `docs/dev/geant4-architecture/g4sim-gates/S9.md`.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on PR #379 at `f8ec3fae` | success (27 pass, 3 skipped) |
+| `run_all_checks.py`, E5 Slurm node at `48949b4e`, `--jobs 8` | 33 pass, 1 fail: one environmental test, which needs `cmake`, absent on the node |
+| `mypy` | Clean (every S9 commit's gate) |
+| S9 gates | 1: five distinct geometry_ids for the nominal and four overlaid IRs of the CMS Phase-1 BPIX case; 2: the diff tool exact for every overlay; 3: 2 of 2 negatives |
+
+**E2 was not run for this release.** S9 has no Geant4 run and no new C++, so no G5 was due.
+
+Passing checks show software consistency, not physical validity.
+
 ## 0.64.0 release check (2026-11-09, CI and E5)
 
 Release branch `release/0.64.0`, based on main `148e084c` (PR #376 merged). Minor release: g4sim phase S8. Contracts 3.26.0, `CORE_VERSION` 1.12.0, `adapters/geant4` 0.14.0.
