@@ -1,5 +1,5 @@
 {
- "contract_version": "3.25.0",
+ "contract_version": "3.26.0",
  "artifact_id": "fixture-synthetic-design-spec",
  "artifact_type": "design-spec",
  "objective": "SYNTHETIC structural fixture; values are placeholders, not physics",
@@ -9,7 +9,7 @@
  },
  "versions": {
   "plugin": "0.36.0",
-  "contracts": "3.25.0",
+  "contracts": "3.26.0",
   "profiles": {}
  },
  "provenance": {
