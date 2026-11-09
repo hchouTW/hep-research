@@ -485,6 +485,10 @@
   "tests.core.test_geometry_fieldmap": 0.29,
   "tests.core.test_geometry_optics": 0.17,
   "tests.core.test_geometry_xtr": 0.19,
-  "tests.core.test_simulation_efficiency_map": 5.14
+  "tests.core.test_simulation_efficiency_map": 5.14,
+  "tests.adapters.test_g4sim_digi": 6.83,
+  "tests.core.test_geometry_fast_sim": 0.24,
+  "tests.core.test_geometry_overlap_scale": 1.36,
+  "tests.core.test_simulation_digitize": 0.29
  }
 }

@@ -26,6 +26,7 @@ _DECIMAL_PARTS = re.compile(r"([+-]?)(0|[1-9][0-9]*)(?:\.([0-9]+))?(?:[eE]([+-]?
 _ENVIRONMENT_REFERENCE = re.compile(r"\$(\{|\(|[A-Z_])")  # ${...}, $(...) or $NAME; canonical/1 rule: an upper-case NAME
 # only, so a JSON Schema "#/$defs" or a lower-case word after "$" in free text is not refused (decision D-W3a-4)
 _DRIVE_PATH = re.compile(r"[A-Za-z]:[\\/]")
+_LONE_SURROGATE = re.compile("[\ud800-\udfff]")  # one search instead of a Python loop over the characters (S8: 10^6 placements)
 FIELD_TYPES = ("integer", "quantity")
 
 
@@ -52,7 +53,7 @@ def _issue(code: str, path: str, message: str) -> dict:
 
 def _string_issues(text: str, path: str, exempt: bool) -> list[dict]:
     issues = []
-    if any(0xD800 <= ord(c) <= 0xDFFF for c in text):
+    if _LONE_SURROGATE.search(text):
         issues.append(_issue("lone-surrogate", path, "a lone surrogate cannot be encoded in UTF-8"))
     if not exempt:
         if text.startswith(("/", "~")) or _DRIVE_PATH.match(text):

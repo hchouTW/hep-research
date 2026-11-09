@@ -196,6 +196,9 @@ class Accounting {
       if (control != "no_escape") BookEscape(particle, kinetic);
     } else if (name == "KillProcess") {
       ++fRow.tracksKilled;  // already booked by BookKill
+    } else if (process && process->GetProcessType() == fParameterisation) {  // S8: a fast-simulation model ended the track; the step booked its deposit
+      ++fRow.tracksKilled;
+      BookResidual(particle);
     } else if (name == "UserSpecialCut") {
       ++fRow.tracksKilled;
       if (control == "class_d_kinetic") fRow.killedKineticSpecialCut += step->GetPreStepPoint()->GetKineticEnergy();  // the post-step value is already 0

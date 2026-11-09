@@ -137,6 +137,27 @@
        }
       }
      }
+    },
+    "fast_sim": {
+     "type": "object",
+     "required": [
+      "model",
+      "particles"
+     ],
+     "additionalProperties": false,
+     "description": "Fast-simulation hook (S8): the model attached to every fast_sim_envelope of the specification, by name in fast_sim_models.json, and the particles whose process managers get G4FastSimulationManagerProcess. A run with no fast_sim_envelope attaches no process; the particles are named, never all (GB19, addendum 11.1).",
+     "properties": {
+      "model": {
+       "type": "string"
+      },
+      "particles": {
+       "type": "array",
+       "minItems": 1,
+       "items": {
+        "type": "string"
+       }
+      }
+     }
     }
    }
   },
@@ -215,6 +236,30 @@
    "type": "array",
    "items": {
     "type": "string"
+   }
+  },
+  "placement_impl": {
+   "type": "array",
+   "description": "How the builder implements placements (S8, Section 16): each entry names a (mother, template) pair of the IR whose placements are built as G4AssemblyVolume imprints with a SetCopyNo pass, instead of G4PVPlacement. Only assembly, for a template with no daughters of its own (GB20, addendum 11.1).",
+   "items": {
+    "type": "object",
+    "required": [
+     "mother",
+     "template",
+     "kind"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "mother": {
+      "type": "string"
+     },
+     "template": {
+      "type": "string"
+     },
+     "kind": {
+      "type": "string"
+     }
+    }
    }
   }
  }

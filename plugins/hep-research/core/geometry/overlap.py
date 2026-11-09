@@ -236,6 +236,47 @@ def _separation(a: tuple, b: tuple) -> Decimal:
     return max(max(subtract(b[0][i], a[1][i]), subtract(a[0][i], b[1][i])) for i in range(3))
 
 
+CELL_MARGIN = Decimal("1.001")  # cells a little wider than needed, so the rounding of a division cannot move a pair two cells apart
+
+
+def _cell_of(corner: tuple, size: Decimal) -> tuple:
+    return tuple(int(CONTEXT.divide(value, size).to_integral_value(rounding="ROUND_FLOOR")) for value in corner)
+
+
+def _near_pairs(placed: list) -> list[tuple[int, int]]:
+    """Index pairs (i < j) of the boxes, sorted by their low x, whose separation can be below the minimum gap: a spatial hash on the low
+    corners with cells of the largest box side plus the gap, so such a pair lies in the same or an adjacent cell (|lo_a - lo_b| < side + gap
+    on every axis). Linear in the placements of a regular layout, where the sweep along x met a whole plane of cells (Section 16, S8)."""
+    side = max((subtract(box[1][i], box[0][i]) for box, _ in placed for i in range(3)), default=Decimal(0))
+    size = CONTEXT.multiply(add(side, MINIMUM_GAP_MM), CELL_MARGIN)
+    if size <= 0:
+        return [(i, j) for i in range(len(placed)) for j in range(i + 1, len(placed))]
+    cells: dict[tuple, list[int]] = {}
+    for index, (box, _) in enumerate(placed):
+        cells.setdefault(_cell_of(box[0], size), []).append(index)
+    neighbours = [(dx, dy, dz) for dx in (-1, 0, 1) for dy in (-1, 0, 1) for dz in (-1, 0, 1)]
+    pairs = set()
+    for (cx, cy, cz), members in cells.items():
+        for dx, dy, dz in neighbours:
+            for j in cells.get((cx + dx, cy + dy, cz + dz), ()):
+                for i in members:
+                    if i < j:
+                        pairs.add((i, j))
+    return sorted(pairs)
+
+
+FLOAT_SLACK = 1e-12  # relative: the error of a float separation is a few ulp of the coordinates, far below this
+
+
+def _clear_in_floats(a: tuple, b: tuple, slack: float) -> bool:
+    """A float pre-test (S8): boxes whose float separation exceeds c by more than the slack are clear; anything nearer, touching faces
+    included, goes to the exact Decimal test, so no finding changes."""
+    return max(max(b[0][i] - a[1][i], a[0][i] - b[1][i]) for i in range(3)) >= FLOAT_GAP + slack
+
+
+FLOAT_GAP = float(MINIMUM_GAP_MM)
+
+
 def siblings(ir: dict) -> list[dict]:
     by_mother: dict[str, list] = {}
     for placement in ir["physical"]["placements"]:
@@ -243,21 +284,23 @@ def siblings(ir: dict) -> list[dict]:
     out = []
     for mother, placed in by_mother.items():
         placed.sort(key=lambda item: item[0][0][0])
-        for at, (a, first) in enumerate(placed):
-            for later in range(at + 1, len(placed)):  # by index: a slice would copy the rest for every placement
-                b, second = placed[later]
-                if subtract(b[0][0], a[1][0]) >= MINIMUM_GAP_MM:
-                    break
-                # the extents contain the solids (S7): boxes at least c apart prove the pair clear, and boxes that meet only in a plane prove
-                # the interiors disjoint, as touching faces do; only boxes that overlap need the exact test of the solids
-                boxes = _separation(a, b)
-                clear = boxes >= MINIMUM_GAP_MM or abs(boxes) < EPSILON_MM
-                separation = boxes if (_plain(ir, first) and _plain(ir, second)) or clear else _rotated_pair(ir, first, second)
-                if abs(separation) < EPSILON_MM or separation >= MINIMUM_GAP_MM:
-                    continue
-                code = "sibling-unjudged" if separation == UNJUDGED else "sibling-overlap" if separation < 0 else "sibling-too-close"
-                out.append(_finding(code, f"{mother}/{first['template']}[{first['copy_number']}]",
-                                    f"{second['template']}[{second['copy_number']}] is {separation} mm away"))
+        rough = [tuple(tuple(float(value) for value in corner) for corner in box) for box, _ in placed]
+        reach = max((abs(value) for box in rough for corner in box for value in corner), default=0.0)
+        slack = FLOAT_SLACK * (1.0 + reach)
+        for at, later in _near_pairs(placed):
+            if _clear_in_floats(rough[at], rough[later], slack):
+                continue
+            (a, first), (b, second) = placed[at], placed[later]
+            # the extents contain the solids (S7): boxes at least c apart prove the pair clear, and boxes that meet only in a plane prove
+            # the interiors disjoint, as touching faces do; only boxes that overlap need the exact test of the solids
+            boxes = _separation(a, b)
+            clear = boxes >= MINIMUM_GAP_MM or abs(boxes) < EPSILON_MM
+            separation = boxes if (_plain(ir, first) and _plain(ir, second)) or clear else _rotated_pair(ir, first, second)
+            if abs(separation) < EPSILON_MM or separation >= MINIMUM_GAP_MM:
+                continue
+            code = "sibling-unjudged" if separation == UNJUDGED else "sibling-overlap" if separation < 0 else "sibling-too-close"
+            out.append(_finding(code, f"{mother}/{first['template']}[{first['copy_number']}]",
+                                f"{second['template']}[{second['copy_number']}] is {separation} mm away"))
     return out
 
 
