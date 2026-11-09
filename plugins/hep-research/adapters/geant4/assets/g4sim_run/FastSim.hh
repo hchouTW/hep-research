@@ -1,5 +1,6 @@
 // g4sim_run/FastSim.hh: the fast-simulation hook (g4sim plan, Sections 6.2.9, 16, S8). Written from the Geant4 API (no example code copied
-// or adapted).
+// or adapted); it follows the API's pattern as Geant4's Par01 and Par03 examples use it (a model on a region, created in ConstructSDandField;
+// KillPrimaryTrack with ProposeTotalEnergyDeposited).
 //
 // A fast_sim_envelope requirement names envelope templates, each the only root of its own region (core/geometry/fast_sim.py). The run card's
 // physics.fast_sim names one model of fast_sim_models.json and the particles whose process managers get G4FastSimulationManagerProcess:
@@ -31,8 +32,6 @@
 #include "G4VPhysicsConstructor.hh"
 
 namespace g4sim {
-
-constexpr const char* kFastSimProcess = "G4FastSimulationManagerProcess";  // the process name Accounting sees on a step a model ended
 
 struct FastSimSetup {
   std::string model;
@@ -86,7 +85,8 @@ class FastSimConstructor : public G4VPhysicsConstructor {
 
 // In ConstructSDandField: one model per envelope region, on this thread
 inline void AttachFastSimModels(const FastSimSetup& setup) {
-  for (const std::string& name : setup.regions) {
+  const std::set<std::string> regions(setup.regions.begin(), setup.regions.end());  // one model per region, however many envelopes share it
+  for (const std::string& name : regions) {
     G4Region* region = G4RegionStore::GetInstance()->GetRegion(name, false);
     if (!region) throw std::runtime_error("fast simulation: the envelope's region " + name + " was not built");
     MakeFastSimModel(setup.model, region);  // registers itself with the region's G4FastSimulationManager, which owns it

@@ -11,7 +11,9 @@
 //
 // Python's math.lgamma is CPython's own Lanczos approximation, not the C library's lgamma (on glibc the two differ in about 45% of values),
 // so LogGamma below is CPython 3.13.2's m_lgamma for positive arguments (Modules/mathmodule.c, lanczos_sum and m_lgamma), adapted under the
-// Python Software Foundation License (assets/PYTHON-LICENSE.txt). Compile with -ffp-contract=off and without -ffast-math.
+// Python Software Foundation License (assets/PYTHON-LICENSE.txt): Copyright (c) 2001-2024 Python Software Foundation; All Rights Reserved.
+// The constants and steps of PTRS and BTPE follow rng.py, which read them from NumPy's distributions.c (BSD licence, NumPy developers).
+// Compile with -ffp-contract=off and without -ffast-math.
 #pragma once
 
 #include <cmath>

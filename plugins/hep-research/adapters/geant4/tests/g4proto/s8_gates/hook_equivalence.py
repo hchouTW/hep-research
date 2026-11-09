@@ -146,17 +146,21 @@ def tost(trial: dict, none_run: Path, idle_run: Path) -> dict:
 def closure(runs: list) -> dict:
     rows = []
     for folder in runs:
-        request = json.loads((folder / "request.json").read_text(encoding="utf-8"))
-        energy = float(request["source"]["energy"]["mono"]["energy_MeV"])
-        _, table = per_event(folder)
+        source = json.loads((folder / "request.json").read_text(encoding="utf-8"))["source"]  # the resolved request: source-density/1
+        primaries = [(int(row[0]), float(row[1])) for row in csv.reader((folder / "primaries.csv").open(encoding="utf-8", newline=""))]  # event, kinetic MeV
+        incident = dict(primaries)
+        energy = max(incident.values())
+        events_in_order, table = per_event(folder)
         deposits = [sum(values) for values in zip(*table.values())] if table else []
-        events = sum(1 for _ in (folder / "primaries.csv").open(encoding="utf-8"))
-        tolerance = 2.0 ** -52 * energy  # Section 9.1 with n = 1: the model books one deposit
-        worst = max((abs(value - energy) for value in deposits), default=math.inf)
+        events = len(primaries)
+        # Section 9.1 with n = 1 (the model books one deposit): |deposit - incident| <= 2^-52 incident, event by event
+        deviations = [abs(value - incident[event]) - 2.0 ** -52 * incident[event] for event, value in zip(events_in_order, deposits)]
+        worst = max((abs(value - incident[event]) for event, value in zip(events_in_order, deposits)), default=math.inf)
+        tolerance = 2.0 ** -52 * energy
         conservation = list(csv.DictReader((folder / "conservation.csv").open(encoding="utf-8", newline="")))
         residual = max(abs(float(row["residual_MeV"])) for row in conservation)
-        holds = len(deposits) == events and worst <= tolerance and residual <= 1e-6
-        rows.append({"run": folder.name, "particle": request["source"]["particle"], "energy_MeV": energy, "events": events, "scored_events": len(deposits),
+        holds = len(deposits) == events and all(value <= 0 for value in deviations) and residual <= 1e-6
+        rows.append({"run": folder.name, "particle": source["particle"], "energy_MeV": energy, "events": events, "scored_events": len(deposits),
                      "largest_deviation_MeV": worst, "tolerance_MeV": tolerance, "largest_conservation_residual_MeV": residual, "holds": holds})
     return {"status": "ok" if rows and all(row["holds"] for row in rows) else "failed", "rows": rows}
 

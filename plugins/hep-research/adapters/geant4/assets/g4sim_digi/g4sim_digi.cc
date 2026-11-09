@@ -17,6 +17,7 @@
 // Exit 0 done, 2 bad input. Compile with -ffp-contract=off and without -ffast-math (Samplers.hh, Philox.hh).
 #include <algorithm>
 #include <charconv>
+#include <cstdint>
 #include <cstring>
 #include <cmath>
 #include <cstdio>
@@ -50,8 +51,13 @@ class RowWriter {
     fBuffer.reserve(1 << 20);
   }
   ~RowWriter() {
+    if (fOut) std::fclose(fOut);  // only after a failure: Close reports errors
+  }
+  void Close() {
     Flush();
-    std::fclose(fOut);
+    const bool failed = std::ferror(fOut) != 0;
+    if (std::fclose(fOut) != 0 || failed) throw std::runtime_error("writing an output file failed");
+    fOut = nullptr;
   }
   RowWriter& Int(long long value) {
     char text[24];
@@ -82,7 +88,7 @@ class RowWriter {
 
  private:
   void Flush() {
-    std::fwrite(fBuffer.data(), 1, fBuffer.size(), fOut);
+    if (std::fwrite(fBuffer.data(), 1, fBuffer.size(), fOut) != fBuffer.size()) throw std::runtime_error("writing an output file failed");
     fBuffer.clear();
   }
   std::FILE* fOut;
@@ -93,6 +99,34 @@ struct Bin {
   double large = 0, small = 0;
   long long steps = 0;
 };
+
+// Strict field parsing, refused rather than read in part: Python's int() and float() take the whole field or fail
+long long WholeInteger(const std::string& text, const std::string& what) {
+  long long value = 0;
+  const auto [end, error] = std::from_chars(text.data(), text.data() + text.size(), value);
+  if (error != std::errc() || end != text.data() + text.size()) throw minijson::JsonError(what + " " + text + " is not an integer");
+  return value;
+}
+
+unsigned long long WholeUnsigned(const std::string& text, const std::string& what) {
+  unsigned long long value = 0;
+  const auto [end, error] = std::from_chars(text.data(), text.data() + text.size(), value);
+  if (error != std::errc() || end != text.data() + text.size()) throw minijson::JsonError(what + " " + text + " is not an unsigned 64-bit integer");
+  return value;
+}
+
+double WholeNumber(const std::string& text, const std::string& what) {
+  char* end = nullptr;
+  const double value = std::strtod(text.c_str(), &end);
+  if (text.empty() || *end != '\0' || !std::isfinite(value)) throw minijson::JsonError(what + " " + text + " is not a finite number");
+  return value;
+}
+
+double Positive(const Value& node, const std::string& what) {
+  const double value = node.number(what);
+  if (!(value > 0) || !std::isfinite(value)) throw minijson::JsonError(what + " must be positive");
+  return value;
+}
 
 g4sim::StreamKey KeyOf(const Value& pair, const std::string& where) {
   const auto& words = pair.array(where);
@@ -139,13 +173,17 @@ Job ReadJob(const Value& j) {
     const Value& transit = timing.at("transit", "timing");
     const std::string kind = transit.at("kind", "transit").str;
     if (kind == "exponential") {
-      job.transitNs = transit.at("transit_ns", "transit").number("transit_ns");
+      job.transitNs = Positive(transit.at("transit_ns", "transit"), "transit_ns");
     } else if (kind == "mapped") {
       job.mapped = true;
       for (const auto& edge : transit.at("edges_ns", "transit").array("edges_ns")) job.edges.push_back(edge.number("edge"));
       for (const auto& [bin, counts] : transit.at("counts", "transit").obj) {
         std::vector<long long> row;
-        for (const auto& count : counts.array("counts")) row.push_back(static_cast<long long>(count.number("count")));
+        for (const auto& count : counts.array("counts")) {
+          const double value = count.number("count");
+          if (value < 0 || value != std::floor(value)) throw minijson::JsonError("a transit count is a non-negative integer");
+          row.push_back(static_cast<long long>(value));
+        }
         job.transitCounts[std::stoll(bin)] = row;
       }
     } else {
@@ -160,8 +198,10 @@ Job ReadJob(const Value& j) {
   const Value& electronics = j.at("electronics", "job");
   job.noiseSigma = electronics.at("noise_sigma", "electronics").number("noise_sigma");
   job.threshold = electronics.at("threshold", "electronics").number("threshold");
-  job.lsb = electronics.at("lsb", "electronics").number("lsb");
-  job.bits = static_cast<int>(electronics.at("bits", "electronics").number("bits"));
+  job.lsb = Positive(electronics.at("lsb", "electronics"), "lsb");
+  const double bits = electronics.at("bits", "electronics").number("bits");
+  if (bits != std::floor(bits) || bits < 1 || bits > 62) throw minijson::JsonError("bits is an integer from 1 to 62");
+  job.bits = static_cast<int>(bits);
   const Value& keys = j.at("keys", "job");
   job.stageKey = KeyOf(keys.at("stage", "keys"), "keys.stage");
   job.yieldKey = KeyOf(keys.at("yield", "keys"), "keys.yield");
@@ -225,6 +265,7 @@ int Run(const std::string& jobPath, const std::string& binsPath, const std::stri
   std::map<std::pair<long long, unsigned long long>, std::map<long long, Bin>> grouped;
   std::set<std::tuple<long long, unsigned long long, long long>> seen;
   std::ifstream bins(binsPath);
+  if (!bins) throw minijson::JsonError("cannot read " + binsPath);
   std::string line;
   while (std::getline(bins, line)) {
     if (line.empty()) continue;
@@ -233,11 +274,13 @@ int Run(const std::string& jobPath, const std::string& binsPath, const std::stri
     std::string field;
     while (std::getline(row, field, ',')) fields.push_back(field);
     if (fields.size() != 6) throw minijson::JsonError("a bins row has six fields: " + line);
-    const long long event = std::stoll(fields[0]);
-    const unsigned long long volume = std::stoull(fields[1]);
-    const long long bin = std::stoll(fields[2]);
+    const long long event = WholeInteger(fields[0], "event");
+    const unsigned long long volume = WholeUnsigned(fields[1], "volume");
+    const long long bin = WholeInteger(fields[2], "bin");
+    if (bin < 0 || bin >= (1LL << 16)) throw g4sim::StreamError("sub-index", "bin " + fields[2] + " needs more than 16 bits");
+    if (volume > (UINT64_MAX - (job.channels - 1)) / job.channels) throw g4sim::StreamError("identity-range", "volume " + fields[1] + " times the channels leaves 64 bits");
     if (!seen.insert({event, volume, bin}).second) throw g4sim::StreamError("bin-twice", "event " + fields[0] + ", volume " + fields[1] + ": bin " + fields[2] + " appears twice");
-    grouped[{event, volume}][bin] = {std::strtod(fields[3].c_str(), nullptr), std::strtod(fields[4].c_str(), nullptr), std::stoll(fields[5])};
+    grouped[{event, volume}][bin] = {WholeNumber(fields[3], "E_large"), WholeNumber(fields[4], "E_small"), WholeInteger(fields[5], "n_large")};
   }
   RowWriter channels(channelsPath);
   std::unique_ptr<RowWriter> times(job.timing ? new RowWriter(timesPath) : nullptr);
@@ -272,11 +315,14 @@ int Run(const std::string& jobPath, const std::string& binsPath, const std::stri
       const double charge = total ? std::max(sensor.Gaussian(static_cast<double>(total) * job.gain, job.excessNoise * job.gain * std::sqrt(static_cast<double>(total))), 0.0) : 0.0;
       g4sim::SubStream electronics(job.electronicsKey, static_cast<std::uint64_t>(event), cell);
       const double signal = electronics.Gaussian(charge, job.noiseSigma);  // response.electronics_response
-      const long long top = (1LL << job.bits) - 1;
-      const long long code = signal < job.threshold ? -1 : std::min(static_cast<long long>(signal / job.lsb), top);
+      const long long top = (1LL << job.bits) - 1;  // bits <= 62
+      const double scaled = signal / job.lsb;  // int() truncates toward zero, and min() caps it: clamped in double before the cast
+      const long long code = signal < job.threshold ? -1 : scaled >= static_cast<double>(top) ? top : static_cast<long long>(std::max(scaled, -9.0e18));
       channels.Int(event).Unsigned(volume).Unsigned(at).Int(photoelectrons[at]).Bits(charge).Int(code).End();
     }
   }
+  channels.Close();
+  if (times) times->Close();
   return 0;
 }
 

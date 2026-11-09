@@ -46,7 +46,9 @@ class Digitize(unittest.TestCase):
         for change, code in ((lambda j: j.update(schema="x"), "schema"), (lambda j: j.update(channels=["a", "a"]), "channels"),
                              (lambda j: j["efficiencies"].update({"0": [0.7, 0.6]}), "efficiencies"),
                              (lambda j: j["timing"].update(decay_ns=0.0), "timing"), (lambda j: j["sensor"].update(name="scintillation"), "stage-name"),
-                             (lambda j: j["timing"]["transit"].update(kind="gaussian"), "transit")):
+                             (lambda j: j["timing"]["transit"].update(kind="gaussian"), "transit"), (lambda j: j["timing"]["transit"].pop("transit_ns"), "transit"),
+                             (lambda j: j["electronics"].update(bits=63), "electronics"), (lambda j: j["electronics"].update(lsb=0.0), "electronics"),
+                             (lambda j: j.update(timing={}), "timing")):
             job = copy.deepcopy(JOB)
             change(job)
             with self.assertRaises(digitize.DigiError) as caught:

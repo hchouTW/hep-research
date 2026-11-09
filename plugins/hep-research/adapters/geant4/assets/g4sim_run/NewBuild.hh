@@ -160,8 +160,7 @@ class NewDetector : public G4VUserDetectorConstruction {
       const G4int copy = static_cast<G4int>(placement.at("copy_number", "placement").num);
       const bool check = !std::getenv("G4SIM_NO_OVERLAP_CHECK");
       if (fAssembled.count({mother, name})) {
-        fPlaced[name].push_back(Imprint(mother, name, rotation, where, copy, check));
-        delete rotation;  // the imprint keeps its own copy of the rotation
+        fPlaced[name].push_back(Imprint(mother, name, rotation, where, copy, check));  // the imprint takes over the IR's rotation
       } else {
         fPlaced[name].push_back(new G4PVPlacement(rotation, where, fLogicals.at(name), name, fLogicals.at(mother), false, copy, check));
       }
@@ -300,10 +299,13 @@ class NewDetector : public G4VUserDetectorConstruction {
   G4VPhysicalVolume* fWorld = nullptr;
   // placement_impl (S8, Section 16): the IR's placements of a (mother, template) pair built as imprints of one G4AssemblyVolume holding the
   // template at the origin, in the IR's order, so each lands where its G4PVPlacement would have, as the mother's next daughter. The imprint
-  // takes the active rotation, the transpose of the IR's passive matrix (exact); MakeImprint numbers from the mother's daughter count and
-  // names av_..., so the SetCopyNo pass of GB20 and a SetName give the copy number and name an ordinary placement has. Only for a template
-  // with no daughters of its own, which check-spec enforces: the imprint removes the template's level from the copy chain otherwise.
-  G4VPhysicalVolume* Imprint(const std::string& mother, const std::string& name, const G4RotationMatrix* rotation, const G4ThreeVector& where, G4int copy, bool check) {
+  // takes the active rotation, the transpose of the IR's passive matrix; MakeImprint numbers from the mother's daughter count and names
+  // av_..., so the SetCopyNo pass of GB20 and a SetName give the copy number and name an ordinary placement has. MakeImprint also rebuilds
+  // the rotation through G4ReflectionFactory, which renormalizes it (up to 2 ulp from the IR's matrix in about half of generic rotations,
+  // found by S8's independent read), so the IR's own matrix is put back on the imprinted volume: its rotation then has the bits
+  // G4PVPlacement(pRot, pos) holds. Only for a template with no daughters of its own, which check-spec enforces: the imprint removes the
+  // template's level from the copy chain otherwise.
+  G4VPhysicalVolume* Imprint(const std::string& mother, const std::string& name, G4RotationMatrix* rotation, const G4ThreeVector& where, G4int copy, bool check) {
     G4AssemblyVolume*& assembly = fAssemblies[{mother, name}];
     if (!assembly) {
       assembly = new G4AssemblyVolume();
@@ -318,6 +320,9 @@ class NewDetector : public G4VUserDetectorConstruction {
     G4VPhysicalVolume* placed = host->GetDaughter(static_cast<G4int>(before));
     placed->SetCopyNo(copy);
     placed->SetName(name);
+    G4RotationMatrix* rebuilt = placed->GetRotation();
+    placed->SetRotation(rotation);  // the IR's matrix, as an ordinary placement holds it (nullptr for the identity)
+    if (rebuilt != rotation) delete rebuilt;
     return placed;
   }
 

@@ -40,10 +40,20 @@ def check_job(job: dict) -> None:
             raise DigiError("efficiencies", f"bin {bin_index}: {values}")
     timing = job.get("timing")
     if timing is not None:
-        if timing["transit"]["kind"] not in TRANSIT_KINDS:
-            raise DigiError("transit", f"transit {timing['transit']['kind']!r}")
+        if not isinstance(timing, dict) or "transit" not in timing:
+            raise DigiError("timing", "timing is null or an object with decay_ns and transit")
+        transit = timing["transit"]
+        if transit["kind"] not in TRANSIT_KINDS:
+            raise DigiError("transit", f"transit {transit['kind']!r}")
         if timing["decay_ns"] <= 0 or timing.get("rise_ns", 0.0) < 0:
             raise DigiError("timing", "decay must be positive and rise not negative")
+        if transit["kind"] == "exponential" and not transit.get("transit_ns", 0.0) > 0:
+            raise DigiError("transit", "an exponential transit needs a positive transit_ns")
+        if transit["kind"] == "mapped" and any(not isinstance(count, int) or count < 0 for counts in transit["counts"].values() for count in counts):
+            raise DigiError("transit", "transit counts are non-negative integers")
+    electronics = job["electronics"]
+    if not isinstance(electronics["bits"], int) or not 1 <= electronics["bits"] <= 62 or not electronics["lsb"] > 0:
+        raise DigiError("electronics", "bits is an integer from 1 to 62 and lsb positive (g4sim_digi holds codes in 64 bits)")
     names = [job["stage"]["name"], job["sensor"]["name"], job["electronics"]["name"]]
     if len(set(names)) != 3:
         raise DigiError("stage-name", "the scintillation, sensor and electronics stages need distinct names")
