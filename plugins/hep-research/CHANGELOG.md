@@ -3,6 +3,12 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## 0.65.1 (2026-11-09)
+
+Patch release; contracts 3.27.0, `CORE_VERSION` 1.13.0 and `adapters/geant4` 0.15.0 unchanged.
+
+- **`FTFP_BERT` accepted by g4sim** (PR #382): `contracts/rules/geant4_datasets.json` has an entry for `FTFP_BERT` (EM option 0): G4ENSDFSTATEDATA, G4LEDATA, G4LEVELGAMMADATA (the silent case) and G4PARTICLEXSDATA. `g4sim_run.py` had refused the list although the program builds it, which also left the `ams02-rich-replica` case of the S7 gate record unevaluated. The entry was probed on E2 with `g4sim_run`, not `element_sim`: 10 protons and 10 positrons into a PbWO4 array. A control probe of `FTFP_BERT_EMZ` missed G4LEVELGAMMADATA, which its E5 entry has, so the table comment calls the entries lower bounds. `probe_datasets.py` lists the new case for an E5 rerun.
+
 ## 0.65.0 (2026-11-09)
 
 Minor release. g4sim phase S9 (`adapters/geant4` 0.15.0; contracts 3.27.0, `CORE_VERSION` 1.13.0). Conditions and alignment, started on the maintainer's word for studies that need both. Alignment overlay layers (`alignment-overlay/1`): shifts and small rotations of IR placements by mother, template and copy number, applied after expansion so the gap rule and the error bounds judge the misaligned geometry; an applied overlay always gives a new `geometry_id`, a shift of zero included, and a placement the IR does not hold is refused. `g4sim_run.py diff` lists the placements in which two IRs differ, and `--overlay` runs a misaligned geometry.
