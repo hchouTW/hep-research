@@ -8984,6 +8984,24 @@ limits catch large defects only. The custodian's re-evaluation of qualification 
 
 Passing checks show software consistency, not physical validity.
 
+## 0.64.0 release check (2026-11-09, CI and E5)
+
+Release branch `release/0.64.0`, based on main `148e084c` (PR #376 merged). Minor release: g4sim phase S8. Contracts 3.26.0, `CORE_VERSION` 1.12.0, `adapters/geant4` 0.14.0.
+
+What changed on the release branch: the CHANGELOG `0.64.0` section and the g4sim status (S8 `merged`). No regeneration: S8 changed no example or committed output. Gate record: `docs/dev/geant4-architecture/g4sim-gates/S8.md`.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on PR #376 at `eb2dd160` | success (27 pass, 3 skipped) |
+| `run_all_checks.py`, E5 Slurm node at `883a3f3d`, `--jobs 8` | 33 pass, 1 fail: the three environmental failures (two pass from a path without `S8`, one needs `cmake`, absent on the node) and `test_unbinned_fit` over 600 s on a loaded node, which passed alone in 31 s (job 7532919) |
+| `mypy` | Clean (every S8 commit's gate) |
+| S8 gates | 1 to 5 pass: check-spec at 10⁶ touchables in 94 s; `g4sim_digi` bit-identical with Python at every level of Section 10.2; the idle hook equivalent on all six observables over 150,802 paired events, the absorb closure exact; 4 of 4 negatives; G5 |
+| S7 reference cases on the S8 build | every quantity and control identical to build 26 |
+
+**E2 was not run for this release.** G5 was confirmed by the maintainer for the S8 C++ at `e98cd989` (G4SIM-S8-G5). `g4sim_digi` meets the throughput budget on the registered workload but not with a time per detected photon; no gate judges it.
+
+Passing checks show software consistency, not physical validity.
+
 ## 0.63.0 release check (2026-11-08, CI and E5)
 
 Release branch `release/0.63.0`, based on main `f2145691` (PR #373 merged). Minor release: g4sim phase S7. Contracts 3.25.0, `CORE_VERSION` 1.11.0, `adapters/geant4` 0.13.0; profiles `reference:geometry-cases` 0.2.0, `reference:detector-atlas` 0.3.0, `experiment:eic` 0.3.0, `experiment:ams-02` 2.2.0.
