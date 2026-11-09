@@ -813,6 +813,13 @@
    "registered_at": "2026-11-09T01:59:08Z",
    "card_commit": "c5b26a35",
    "reason": "refreshed at the start of S8: baseline, the conditional items settled (g4sim_digi built, GDML import not triggered), every gate's design and gate 2's ulp tolerances fixed before any judged run; gate 3 step 1 (the independent trial and the rule); no threshold loosened"
+  },
+  {
+   "card": "g4sim-tasks/S8.md",
+   "sha256": "38f48ba02aad3d32c9fa114fc95d65f176f38c05827cf4a3171d68b1ea423007",
+   "registered_at": "2026-11-09T02:15:15Z",
+   "card_commit": "440b9392",
+   "reason": "gate 3 step 2: the independent trial's grouping (K = 6), variances and the events of the test (150,802 paired events per run, seed 940002), registered before the test runs; thresholds as at the previous registration"
   }
  ]
 }
