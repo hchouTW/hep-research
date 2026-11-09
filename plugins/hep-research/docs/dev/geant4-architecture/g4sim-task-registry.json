@@ -827,6 +827,13 @@
    "registered_at": "2026-11-09T04:07:04Z",
    "card_commit": "d1f5af6a",
    "reason": "the execution log's closing entry only; thresholds as at the gate 3 step 2 registration"
+  },
+  {
+   "card": "g4sim-tasks/S9.md",
+   "sha256": "bf5e7b5c461d9e3552d2119abb9dad4e137751e0c7e64d241d76fe4057e7b7d7",
+   "registered_at": "2026-11-09T05:18:53Z",
+   "card_commit": "70fac4f3",
+   "reason": "refreshed at the start of S9: baseline, the research need, GB10 confirmed, the gate designs fixed before any judged evaluation; no threshold loosened"
   }
  ]
 }
