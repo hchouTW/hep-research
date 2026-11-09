@@ -322,9 +322,10 @@ class DatasetTable(unittest.TestCase):
 
     def test_every_list_of_the_recorded_runs_is_in_the_table(self):
         table = json.loads((ROOT / "contracts/rules/geant4_datasets.json").read_text(encoding="utf-8"))["physics_lists"]
-        for name in ("FTFP_BERT_EMZ", "FTFP_BERT_EMY", "FTFP_BERT__SS", "QGSP_BIC_EMZ", "G4EmStandardPhysics_option4"):
+        for name in ("FTFP_BERT", "FTFP_BERT_EMZ", "FTFP_BERT_EMY", "FTFP_BERT__SS", "QGSP_BIC_EMZ", "G4EmStandardPhysics_option4"):
             self.assertIn("G4LEDATA", table[name])
         self.assertIn("G4LEVELGAMMADATA", table["FTFP_BERT_EMZ"])
+        self.assertIn("G4LEVELGAMMADATA", table["FTFP_BERT"])  # the archived beam-test list (EM option 0), probed with g4sim_run on E2
         self.assertNotIn("G4LEVELGAMMADATA", table["G4EmStandardPhysics"])
 
 
