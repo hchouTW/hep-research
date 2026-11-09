@@ -3,7 +3,7 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## 0.63.0 (unreleased)
+## 0.63.0 (2026-11-08)
 
 Minor release. g4sim phase S7 (`adapters/geant4` 0.13.0; contracts 3.25.0, `CORE_VERSION` 1.11.0). Shapes: cone, sphere_section, polycone and polyhedra (given by apothem), in the expander, the gap rule, GDML and Geant4's read-back. Field maps: g4sim-field-map/1 files read by their SHA-256, interpolated alike in `core/geometry/fieldmap.py` and `g4sim/FieldMap.hh`, and checked against Geant4's field at sample points.
 Optics: material properties and surfaces, `optical_scope` kept by KillProcess (a photon entering an out-of-scope volume, by direction across the boundary, or born in one, takes no step there; `optical_steps_outside` counts any that do), the optical photon as its own class in the conservation file. Efficiency maps with the `photon_detected` readout; a validation run needs Cerenkov off. XTR: the transition_radiation requirement, the regular-foil rules and the `g4sim_xtr` constructor; Geant4's XTR adds each TR photon without taking its energy from the parent, so the conservation file books it as a source term (`xtr_created_MeV`).
