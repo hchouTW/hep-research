@@ -24,6 +24,8 @@ Both measurement directions are shifted, each in its own run: loc0 by +SHIFT_MM,
 - sigma of the mean, fixed before the run from the fixture's generated statistics: the closed-form unbiased-residual width sigma sqrt(1 + h_j), h_j the leave-one-out leverage of plane
   j in its view (quadratic in u, linear in v, hits sigma 0.020 mm), over sqrt(CAI_EVENTS). The fit's own mean R* must equal sigma^2 (1 + h_j) within COVARIANCE_AGREEMENT
   (a deterministic check of the residual covariance; the priors and the coupling of the views move it by under 1e-4).
+  Job 7537235 refuted this (P8) at stratum 0's end planes: a reading since, on the user's word; it prints inside or outside, and fails only on a ratio that
+  is not finite and positive.
 
 R33 checks on the nominal run: every measurement state holds its four residuals, its measurement output and every fitted track its track output (the reader refuses otherwise);
 the product's residuals equal this module's recomputation from the product's own states (native_product.recomputed_residuals), to RECOMPUTE_RELATIVE; pull widths r / sqrt(R) are 1
@@ -120,7 +122,8 @@ SHIFT_MM = 0.0625  # 2^-4 mm: 3.1 hit sigma, 145 sigma of the mean; on the 2^-30
 SHIFT_CASES = (("loc0", 0, SHIFT_MM), ("loc1", 1, -SHIFT_MM))  # coordinate, index, true displacement d
 MEAN_N_SIGMA = 4.5
 WIDTH_N_SIGMA = 4.5
-COVARIANCE_AGREEMENT = 2e-3
+COVARIANCE_AGREEMENT = 2e-3  # P8's tolerance: refuted in job 7537235, a reading since (user, decisions.md "After job 7537235"); kept as the record, fails nothing
+P8_REFUTED_IN = "refuted in job 7537235, a reading since"
 VIEW_PARAMETERS = (3, 2)  # u bends: position, slope, curvature; v: position, slope
 # R33, deterministic.
 RECOMPUTE_RELATIVE = 1e-9
@@ -1189,16 +1192,21 @@ class TrackFitOutputsRun(unittest.TestCase):
         self.assertEqual(defects, [])
 
     def test_the_unbiased_covariance_is_the_closed_form(self):
-        defects = []
+        """P8, refuted in job 7537235 (stratum 0 end planes, 1.002027 at plane 8 loc0): a reading since, on the user's word. The closed form's fixed
+        design misses a term roughly second order in curvature (d1-stage8-reading.md). Correctness is enforced by CAI-T07-2 against ACTS's unbiased state
+        and a leave-one-out refit. Only a ratio that is not finite and positive fails here."""
+        broken = []
         for stratum in CAI_STRATA:
             for plane in range(1, 9):
                 rows = self.nominal[stratum][("unbiased", plane)]
                 for view in (0, 1):
                     ratio = float(numpy.mean(rows[:, 2 + view])) / unbiased_sigma_mm(view, plane) ** 2
-                    print(f"R33-UNBIASED-COVARIANCE stratum {stratum} plane {plane} {('loc0', 'loc1')[view]} mean R / closed form {ratio:.6f}", flush=True)
-                    if abs(ratio - 1.0) > COVARIANCE_AGREEMENT:
-                        defects.append(f"stratum {stratum} plane {plane} view {view}: {ratio:.6f}")
-        self.assertEqual(defects, [])
+                    inside = "inside" if abs(ratio - 1.0) <= COVARIANCE_AGREEMENT else "outside"
+                    print(f"R33-UNBIASED-COVARIANCE stratum {stratum} plane {plane} {('loc0', 'loc1')[view]} mean R / closed form {ratio:.6f}; "
+                          f"former prediction (P8), {P8_REFUTED_IN}: within {COVARIANCE_AGREEMENT:g} of 1: {inside}", flush=True)
+                    if not (math.isfinite(ratio) and ratio > 0.0):
+                        broken.append(f"stratum {stratum} plane {plane} view {view}: {ratio}")
+        self.assertEqual(broken, [])
 
     def test_cai_t07_1_nominal_means_are_zero(self):
         defects = []
