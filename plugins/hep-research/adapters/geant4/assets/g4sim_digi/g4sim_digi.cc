@@ -56,8 +56,9 @@ class RowWriter {
   void Close() {
     Flush();
     const bool failed = std::ferror(fOut) != 0;
-    if (std::fclose(fOut) != 0 || failed) throw std::runtime_error("writing an output file failed");
-    fOut = nullptr;
+    const int closed = std::fclose(fOut);
+    fOut = nullptr;  // closed once, whatever happens next: the destructor must not close it again
+    if (closed != 0 || failed) throw std::runtime_error("writing an output file failed");
   }
   RowWriter& Int(long long value) {
     char text[24];
@@ -100,7 +101,8 @@ struct Bin {
   long long steps = 0;
 };
 
-// Strict field parsing, refused rather than read in part: Python's int() and float() take the whole field or fail
+// Strict field parsing, refused rather than read in part (digitize.py's writers emit plain decimal integers and float.hex() values; a CR of a
+// CRLF line is removed first). Stricter than Python's int(), which also takes surrounding blanks and a leading +.
 long long WholeInteger(const std::string& text, const std::string& what) {
   long long value = 0;
   const auto [end, error] = std::from_chars(text.data(), text.data() + text.size(), value);
@@ -159,6 +161,7 @@ Job ReadJob(const Value& j) {
   job.resolutionScale = stage.at("resolution_scale", "stage").number("resolution_scale");
   if (stage.has("yield_relative_width")) job.yieldWidth = stage.obj.at("yield_relative_width").number("yield_relative_width");
   job.channels = j.at("channels", "job").array("channels").size();
+  if (job.channels == 0) throw minijson::JsonError("channels: at least one");
   for (const auto& [bin, values] : j.at("efficiencies", "job").obj) {
     std::vector<double> row;
     for (const auto& value : values.array("efficiencies")) row.push_back(value.number("efficiency"));
@@ -268,6 +271,7 @@ int Run(const std::string& jobPath, const std::string& binsPath, const std::stri
   if (!bins) throw minijson::JsonError("cannot read " + binsPath);
   std::string line;
   while (std::getline(bins, line)) {
+    if (!line.empty() && line.back() == '\r') line.pop_back();
     if (line.empty()) continue;
     std::vector<std::string> fields;
     std::stringstream row(line);
@@ -315,6 +319,7 @@ int Run(const std::string& jobPath, const std::string& binsPath, const std::stri
       const double charge = total ? std::max(sensor.Gaussian(static_cast<double>(total) * job.gain, job.excessNoise * job.gain * std::sqrt(static_cast<double>(total))), 0.0) : 0.0;
       g4sim::SubStream electronics(job.electronicsKey, static_cast<std::uint64_t>(event), cell);
       const double signal = electronics.Gaussian(charge, job.noiseSigma);  // response.electronics_response
+      if (std::isnan(signal)) throw g4sim::StreamError("signal-nan", "a NaN signal: check gain, noise and the bins' energies");  // Python's int(nan) raises
       const long long top = (1LL << job.bits) - 1;  // bits <= 62
       const double scaled = signal / job.lsb;  // int() truncates toward zero, and min() caps it: clamped in double before the cast
       const long long code = signal < job.threshold ? -1 : scaled >= static_cast<double>(top) ? top : static_cast<long long>(std::max(scaled, -9.0e18));

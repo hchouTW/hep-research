@@ -102,6 +102,8 @@ def digitize(job: dict, rows: list) -> tuple[list, list]:
     electronics_key = rng.channel_key(job["run_seed"], job["readout"], electronics["name"], job["replica"])
     grouped: dict = {}
     for event, volume, bin_index, large, small, steps in rows:
+        if not (math.isfinite(large) and math.isfinite(small)):
+            raise DigiError("bin-energy", f"event {event}, volume {volume}, bin {bin_index}: energies must be finite")
         bins = grouped.setdefault((event, volume), {})
         if bin_index in bins:
             raise DigiError("bin-twice", f"event {event}, volume {volume}: bin {bin_index} appears twice")

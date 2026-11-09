@@ -269,9 +269,10 @@ class Steps : public G4UserSteppingAction {
       if (step->GetPostStepPoint()->GetStepStatus() == fGeomBoundary && boundary && boundary->GetStatus() == Detection) g4sim::ScorerSums::Thread().PhotonDetected(step);
       return;
     }
-    // S8: Geant4 calls no sensitive detector on a step a fast-simulation model made (G4FastSimulationManagerProcess, of type fParameterisation)
-    // unless the model asked for it (G4FastStep::ForceSteppingHitInvocation), so only then is its deposit handed to the SD of the volume the
-    // step lies in, as an ordinary step's would be: the hook's deposit is scored once. The step has zero length, so edep_visible sees about 0.
+    // S8: by default Geant4 calls no sensitive detector on a step a fast-simulation model made (G4FastSimulationManagerProcess, of type
+    // fParameterisation; the step keeps AvoidHitInvocation). Such a step's deposit is handed here to the SD of the volume it lies in, as an
+    // ordinary step's would be; a model that calls G4FastStep::ForceSteppingHitInvocation gets Geant4's own call instead and is not forwarded,
+    // so the deposit is scored once either way. The step has zero length, so edep_visible sees about 0.
     const G4VProcess* defined = step->GetPostStepPoint()->GetProcessDefinedStep();
     if (defined && defined->GetProcessType() == fParameterisation && step->GetControlFlag() == AvoidHitInvocation)
       if (G4VSensitiveDetector* detector = step->GetPreStepPoint()->GetSensitiveDetector()) detector->Hit(const_cast<G4Step*>(step));

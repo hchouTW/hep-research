@@ -58,6 +58,9 @@ class Digitize(unittest.TestCase):
             digitize.digitize(JOB, ROWS + [ROWS[0]])
         self.assertEqual(caught.exception.code, "bin-twice")
         with self.assertRaises(digitize.DigiError) as caught:
+            digitize.digitize(JOB, [(0, 5, 0, float("inf"), 0.0, 1)])
+        self.assertEqual(caught.exception.code, "bin-energy")
+        with self.assertRaises(digitize.DigiError) as caught:
             digitize.digitize(JOB, [(0, 5, 7, 0.1, 0.0, 1)])
         self.assertEqual(caught.exception.code, "efficiencies")
 
