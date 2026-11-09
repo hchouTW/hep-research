@@ -6,7 +6,8 @@
 //   acts_tracking_driver refit --data-file D --hit-sets H --field-tesla B --product-id NAME --product-file P
 //   acts_tracking_driver rewrite-product --product-in P --product-file Q
 //
-// refit accepts zero field, where the hits carry no q/p, or section 4.1's 1 T, where they do. No noise, finding or vertexing yet.
+// refit accepts zero field, where the hits carry no q/p, or section 4.1's 1 T, where they do. No noise, finding or vertexing here. From D1 stage 8 it
+// writes acts-tracking-product/2: the /1 records, unchanged, and the R33 outputs of each fit (track_fit_outputs.hpp). rewrite-product reads either version.
 #include <Acts/ActsVersion.hpp>
 #include <Acts/Definitions/Algebra.hpp>
 #include <Acts/Geometry/TrackingVolume.hpp>
@@ -35,6 +36,7 @@
 #include "t07_data_file.hpp"
 #include "t07_fixture_constants.hpp"
 #include "telescope_geometry.hpp"
+#include "track_fit_outputs.hpp"
 
 namespace {
 
@@ -167,6 +169,7 @@ int refit(const std::map<std::string, std::string>& flags) {
   const t07::KalmanRefit fitter(telescope, field, reader.header().sigma_loc0_mm, reader.header().sigma_loc1_mm);
 
   t07::ProductDocument document;
+  document.format_version = 2;  // R33's outputs (D1 stage 8)
   t07::ProductHeader& header = document.header;
   header.product_id = product_id;
   header.recipe = "reco.track.acts-kf-refit/1";
@@ -181,6 +184,10 @@ int refit(const std::map<std::string, std::string>& flags) {
   header.start_prior = {t07::refit_start_x_mm, t07::refit_prior_loc_sigma_mm, t07::refit_prior_angle_sigma, t07::refit_prior_qop_sigma_per_gev,
                         t07::refit_prior_time_sigma};
   header.acts_version = acts_version_text();
+  header.r33_conventions = t07::r33_conventions_name;
+  header.alignment_parametrization = t07::alignment_parametrization_name;
+  header.alignment_frame = t07::alignment_frame_name;
+  header.alignment_level = t07::alignment_level_name;
 
   std::map<std::string, int> seen_keys;
   std::size_t failed = 0;
@@ -194,11 +201,16 @@ int refit(const std::map<std::string, std::string>& flags) {
       if (++seen_keys[hit_set->track_key] > 1) {
         throw std::invalid_argument("refused: track key twice: " + hit_set->track_key);
       }
-      t07::RefitResult result = fitter.fit(*hit_set, event);
+      t07::RefitOutputs outputs;
+      t07::RefitResult result = fitter.fit(*hit_set, event, outputs);
       failed += result.track.status == "failed" ? 1 : 0;
       document.tracks.push_back(result.track);
       document.states.insert(document.states.end(), result.states.begin(), result.states.end());
       document.parameters.insert(document.parameters.end(), result.parameters.begin(), result.parameters.end());
+      document.track_outputs.insert(document.track_outputs.end(), outputs.track_output.begin(), outputs.track_output.end());
+      document.residuals.insert(document.residuals.end(), outputs.residuals.begin(), outputs.residuals.end());
+      document.measurement_outputs.insert(document.measurement_outputs.end(), outputs.measurement_outputs.begin(), outputs.measurement_outputs.end());
+      document.residual_covariances.insert(document.residual_covariances.end(), outputs.residual_covariance.begin(), outputs.residual_covariance.end());
     }
   }
   t07::write_whole_file(out_path, t07::encode_product(document));
@@ -496,13 +508,99 @@ void check_product(SelfTest& test) {
   test.check_refused("a product without its end record is refused", [&] { t07::decode_product(text.substr(0, last_record)); });
   test.check_refused("an unknown record is refused", [&] { t07::decode_product(text.substr(0, last_record) + "seed x\n" + text.substr(last_record)); });
   test.check_refused("a wrong count is refused", [&] { t07::decode_product(text.substr(0, last_record) + "end 9 9 9\n"); });
-  test.check_refused("another format is refused", [&] { t07::decode_product("acts-tracking-product/2\n" + text.substr(text.find('\n') + 1)); });
+  test.check_refused("another format is refused", [&] { t07::decode_product("acts-tracking-product/3\n" + text.substr(text.find('\n') + 1)); });
+  test.check_refused("a /1 product under the /2 name is refused", [&] { t07::decode_product("acts-tracking-product/2\n" + text.substr(text.find('\n') + 1)); });
   std::string not_finite = text;
   not_finite.replace(not_finite.find("0.33333333333333331"), 19, "nan");
   test.check_refused("a number that is not finite is refused", [&] { t07::decode_product(not_finite); });
   std::string smoothed_lost = text;
   smoothed_lost.replace(smoothed_lost.find(" smoothed "), 10, " unknown ");
   test.check_refused("an unknown state type is refused", [&] { t07::decode_product(smoothed_lost); });
+}
+
+// acts-tracking-product/2: the sample with its R33 records, one per kind the measurement state needs.
+t07::ProductDocument sample_r33_document() {
+  t07::ProductDocument document = sample_document();
+  document.format_version = 2;
+  document.header.r33_conventions = t07::r33_conventions_name;
+  document.header.alignment_parametrization = t07::alignment_parametrization_name;
+  document.header.alignment_frame = t07::alignment_frame_name;
+  document.header.alignment_level = t07::alignment_level_name;
+  document.track_outputs.push_back({"track-0", 1, 0.33333333333333331, 1.0, 0, "collision", "none", "off"});
+  for (const char* type : {"predicted", "filtered", "smoothed", "unbiased"}) {
+    document.residuals.push_back({"track-0", 0, type, {0.25, -1e-300}, {4e-4, 1e-7, 3e-4}});
+  }
+  t07::MeasurementOutputRecord output;
+  output.track_key = "track-0";
+  output.geometry_id = 72057594037927936ull;  // 2^56, the shape of a volume identifier
+  output.projector = {0, 1};
+  output.local_slope = {0.15, -0.1};
+  output.incidence_rad = 0.17;
+  output.path_factor = 1.016;
+  for (std::size_t index = 0; index < output.alignment_derivative.size(); ++index) {
+    output.alignment_derivative[index] = 0.1 * double(index) - 0.55;
+    output.reference_derivative[index] = index == 0 || index == 7 ? -1.0 : 0.0;
+  }
+  document.measurement_outputs.push_back(output);
+  document.residual_covariances.push_back({"track-0", 1, {2e-4, 1e-7, 1.5e-4}});
+  return document;
+}
+
+void check_r33_product(SelfTest& test) {
+  const std::string text = t07::encode_product(sample_r33_document());
+  const t07::ProductDocument decoded = t07::decode_product(text);
+  test.check("a /2 product reads back to the same bytes", decoded.format_version == 2 && t07::encode_product(decoded) == text);
+  test.check("a /2 product starts with its name", text.rfind("acts-tracking-product/2\n", 0) == 0);
+  // Every line of /1 but its name and its end, in order, is a line of /2: drop /2's name, its two header lines, its R33 records and its end.
+  auto lines_of = [](const std::string& whole) {
+    std::vector<std::string> lines;
+    std::istringstream stream(whole);
+    for (std::string line; std::getline(stream, line);) {
+      lines.push_back(line);
+    }
+    return lines;
+  };
+  std::vector<std::string> version_one = lines_of(t07::encode_product(sample_document()));
+  version_one = std::vector<std::string>(version_one.begin() + 1, version_one.end() - 1);
+  std::vector<std::string> kept;
+  for (const std::string& line : lines_of(text)) {
+    bool r33 = false;
+    for (const char* start : {"acts-tracking-product/", "r33_conventions ", "alignment_parametrization ", "track_output ", "residual ", "measurement_output ",
+                              "residual_covariance ", "end "}) {
+      r33 = r33 || line.rfind(start, 0) == 0;
+    }
+    if (!r33) {
+      kept.push_back(line);
+    }
+  }
+  test.check("every /1 record line of a /2 product is /1's, in order", kept == version_one && !kept.empty());
+  auto without = [&](const std::string& start) {
+    std::string cut = text;
+    const std::size_t from = cut.find(start);
+    cut.erase(from, cut.find('\n', from) + 1 - from);
+    return cut;
+  };
+  test.check_refused("a measurement without its unbiased residual is refused", [&] { t07::decode_product(without("residual track-0 0 unbiased")); });
+  test.check_refused("a measurement without its measurement output is refused", [&] { t07::decode_product(without("measurement_output ")); });
+  test.check_refused("a fitted track without its track output is refused", [&] { t07::decode_product(without("track_output ")); });
+  test.check_refused("a fitted track without its residual covariance is refused", [&] { t07::decode_product(without("residual_covariance ")); });
+  test.check_refused("a product without its alignment parametrization is refused", [&] { t07::decode_product(without("alignment_parametrization ")); });
+  std::string short_covariance = text;
+  short_covariance.replace(short_covariance.find("residual_covariance track-0 1 "), 30, "residual_covariance track-0 2 ");
+  test.check_refused("a residual covariance of the wrong size is refused", [&] { t07::decode_product(short_covariance); });
+  std::string mixed = text;
+  mixed.replace(mixed.find("residual track-0 0 unbiased"), 27, "residual track-0 0 smoothed");
+  test.check_refused("a residual type twice is refused", [&] { t07::decode_product(mixed); });
+  std::string wrong_charge = text;
+  wrong_charge.replace(wrong_charge.find("track_output track-0 1 "), 23, "track_output track-0 -1 ");
+  test.check_refused("a charge against the sign of q/p is refused", [&] { t07::decode_product(wrong_charge); });
+  std::string wrong_field = text;
+  wrong_field.replace(wrong_field.find("collision none off"), 18, "collision none on");
+  test.check_refused("a field other than the header's is refused", [&] { t07::decode_product(wrong_field); });
+  test.check_refused("R33 records in a /1 product are refused", [&] { t07::decode_product("acts-tracking-product/1\n" + text.substr(text.find('\n') + 1)); });
+  t07::ProductDocument r33_as_version_one = sample_r33_document();
+  r33_as_version_one.format_version = 1;
+  test.check_refused("a /1 document holding R33 records is not written", [&] { t07::encode_product(r33_as_version_one); });
 }
 
 int self_test(const std::map<std::string, std::string>& flags) {
@@ -516,6 +614,7 @@ int self_test(const std::map<std::string, std::string>& flags) {
   check_data_file(test, work_dir);
   check_lost_hits(test);
   check_product(test);
+  check_r33_product(test);
   return test.finish();
 }
 

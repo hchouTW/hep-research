@@ -88,7 +88,7 @@ def build_parser() -> argparse.ArgumentParser:
     refit.add_argument("--hit-sets", required=True, help="acts-tracking-hit-sets/1 bound to the data file")
     refit.add_argument("--field-tesla", required=True, type=float)
     refit.add_argument("--product-id", required=True)
-    refit.add_argument("--product-file", required=True, help="acts-tracking-product/1 to write")
+    refit.add_argument("--product-file", required=True, help="acts-tracking-product/2 to write, with the R33 outputs of each fit")
     refit.add_argument("--build-dir", help="folder of the built programs")
     find = commands.add_parser("find", help="ACTS pattern recognition on hits alone: seeds from hits, CKF, ambiguity resolution, fit. Recipe reco.track.acts-ckf-planar/1, data side")
     find.add_argument("--data-file", required=True, help="measurements")

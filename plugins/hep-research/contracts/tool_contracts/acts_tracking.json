@@ -311,7 +311,7 @@
      "kind": "parameter",
      "unit": "n/a",
      "required": true,
-     "constraint": "acts-tracking-product/1 to write"
+     "constraint": "acts-tracking-product/2 to write, with the R33 outputs of each fit"
     },
     {
      "name": "build_dir",

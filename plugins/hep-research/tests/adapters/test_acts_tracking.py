@@ -176,7 +176,7 @@ def driver_sources(cmake_text: str) -> list:
     driver = re.search(r"add_executable\(acts_tracking_driver ([^)]*)\)", cmake_text).group(1).split()
     driver += re.search(r"add_executable\(acts_tracking_finder ([^)]*)\)", cmake_text).group(1).split()
     driver += re.search(r"add_executable\(seed_start_probe ([^)]*)\)", cmake_text).group(1).split()
-    probe = re.findall(r"add_executable\(cai_\w+_probe ([^)]*)\)", cmake_text)
+    probe = re.findall(r"add_executable\(cai_\w+_(?:probe|check) ([^)]*)\)", cmake_text)
     probe = " ".join(probe).split()
     common = re.search(r"add_library\(acts_tracking_common STATIC ([^)]*)\)", cmake_text).group(1).split()
     return driver + probe + common
@@ -349,7 +349,7 @@ class ProductFormat(unittest.TestCase):
         defects = {"no end record": self.text[:end_at],
                    "unknown record": self.text[:end_at] + "seed x\n" + self.text[end_at:],
                    "wrong count": self.text[:end_at] + "end 9 9 9\n",
-                   "other format": self.text.replace(native_product.PRODUCT_FORMAT, "acts-tracking-product/2", 1),
+                   "other format": self.text.replace(native_product.PRODUCT_FORMAT, "acts-tracking-product/3", 1),
                    "not finite": self.text.replace("0.33333333333333331", "nan", 1),
                    "unknown state type": self.text.replace(" smoothed ", " unknown ", 1),
                    "failed without a category": self.text.replace(" failed fit ", " failed none ", 1),

@@ -18,6 +18,9 @@ namespace {
 
 constexpr std::array<const char*, 3> state_kinds{"measurement", "hole", "outlier"};
 constexpr std::array<const char*, 3> state_types{"predicted", "filtered", "smoothed"};
+constexpr std::array<const char*, 4> residual_types{"predicted", "filtered", "smoothed", "unbiased"};  // never mixed (BP03)
+constexpr std::array<const char*, 3> topologies{"collision", "cosmic", "resonance-candidate"};       // R33
+constexpr std::array<const char*, 3> constraints{"none", "beam", "vertex"};                          // R33
 
 std::string number_text(double value) {
   if (!std::isfinite(value)) {
@@ -68,6 +71,16 @@ class TokenLine {
     }
     return value;
   }
+  std::uint64_t unsigned_integer(std::size_t index) const {
+    const std::string& token = text(index);
+    char* end = nullptr;
+    errno = 0;
+    const unsigned long long value = std::strtoull(token.c_str(), &end, 10);
+    if (*end != '\0' || end == token.c_str() || errno == ERANGE || token[0] == '-') {
+      refuse("not an unsigned integer: " + token);
+    }
+    return value;
+  }
   std::int64_t integer(std::size_t index) const {
     const std::string& token = text(index);
     char* end = nullptr;
@@ -114,7 +127,21 @@ std::string encode_product(const ProductDocument& document) {
            {"qop_status", header.qop_status}, {"material_model", header.material_model}, {"acts_version", header.acts_version}}) {
     require_token(value, name);
   }
-  std::string text = std::string(product_format) + "\n";
+  if (document.format_version != 1 && document.format_version != 2) {
+    throw std::runtime_error("a product is version 1 or 2");
+  }
+  const bool with_r33 = document.format_version == 2;
+  if (!with_r33 && (!document.track_outputs.empty() || !document.residuals.empty() || !document.measurement_outputs.empty() ||
+                    !document.residual_covariances.empty())) {
+    throw std::runtime_error("R33 records belong to acts-tracking-product/2 only");
+  }
+  if (with_r33) {
+    require_token(header.r33_conventions, "r33_conventions");
+    require_token(header.alignment_parametrization, "alignment_parametrization");
+    require_token(header.alignment_frame, "alignment_frame");
+    require_token(header.alignment_level, "alignment_level");
+  }
+  std::string text = std::string(with_r33 ? product_format_r33 : product_format) + "\n";
   text += "product_id " + header.product_id + "\n";
   text += "revision " + std::to_string(header.revision) + "\n";
   text += "recipe " + header.recipe + "\n";
@@ -128,6 +155,10 @@ std::string encode_product(const ProductDocument& document) {
   text += "material_model " + header.material_model + "\n";
   text += "start_prior" + numbers_text(header.start_prior) + "\n";
   text += "acts_version " + header.acts_version + "\n";
+  if (with_r33) {
+    text += "r33_conventions " + header.r33_conventions + "\n";
+    text += "alignment_parametrization " + header.alignment_parametrization + " " + header.alignment_frame + " " + header.alignment_level + "\n";
+  }
   for (const TrackRecord& track : document.tracks) {
     require_token(track.key, "track key");
     text += "track " + track.key + " " + std::to_string(track.event_ordinal) + " " + track.status + " " + track.failure_category + " " +
@@ -143,9 +174,33 @@ std::string encode_product(const ProductDocument& document) {
     text += "parameters " + record.track_key + " " + std::to_string(record.state_index) + " " + record.state_type + numbers_text(record.parameters) +
             numbers_text(record.covariance) + "\n";
   }
-  text += "end " + std::to_string(document.tracks.size()) + " " + std::to_string(document.states.size()) + " " +
-          std::to_string(document.parameters.size()) + "\n";
-  return text;
+  for (const TrackOutputRecord& output : document.track_outputs) {
+    text += "track_output " + output.track_key + " " + std::to_string(output.charge) + " " + number_text(output.q_over_p) + " " + number_text(output.q_over_p_variance) +
+            " " + std::to_string(output.reference_state_index) + " " + output.topology + " " + output.constraint + " " + output.field + "\n";
+  }
+  for (const ResidualRecord& residual : document.residuals) {
+    text += "residual " + residual.track_key + " " + std::to_string(residual.state_index) + " " + residual.state_type + numbers_text(residual.residual) +
+            numbers_text(residual.covariance) + "\n";
+  }
+  for (const MeasurementOutputRecord& output : document.measurement_outputs) {
+    text += "measurement_output " + output.track_key + " " + std::to_string(output.state_index) + " " + std::to_string(output.geometry_id) + " " +
+            std::to_string(output.projector[0]) + " " + std::to_string(output.projector[1]) + numbers_text(output.local_slope) + " " + number_text(output.incidence_rad) +
+            " " + number_text(output.thickness_mm) + " " + number_text(output.path_factor) + " " + number_text(output.sensitive_path_mm) +
+            numbers_text(output.alignment_derivative) + numbers_text(output.reference_derivative) + "\n";
+  }
+  for (const ResidualCovarianceRecord& record : document.residual_covariances) {
+    text += "residual_covariance " + record.track_key + " " + std::to_string(record.measurement_count);
+    for (const double value : record.covariance) {
+      text += " " + number_text(value);
+    }
+    text += "\n";
+  }
+  text += "end " + std::to_string(document.tracks.size()) + " " + std::to_string(document.states.size()) + " " + std::to_string(document.parameters.size());
+  if (with_r33) {
+    text += " " + std::to_string(document.track_outputs.size()) + " " + std::to_string(document.residuals.size()) + " " +
+            std::to_string(document.measurement_outputs.size()) + " " + std::to_string(document.residual_covariances.size());
+  }
+  return text + "\n";
 }
 
 ProductDocument decode_product(const std::string& text) {
@@ -170,10 +225,15 @@ ProductDocument decode_product(const std::string& text) {
   ProductHeader& header = document.header;
   {
     const TokenLine first = next_line();
-    if (first.size() != 1 || first.text(0) != product_format) {
-      first.refuse("not " + std::string(product_format));
+    if (first.size() == 1 && first.text(0) == product_format) {
+      document.format_version = 1;
+    } else if (first.size() == 1 && first.text(0) == product_format_r33) {
+      document.format_version = 2;
+    } else {
+      first.refuse("not " + std::string(product_format) + " or " + std::string(product_format_r33));
     }
   }
+  const bool with_r33 = document.format_version == 2;
   header.product_id = keyed("product_id", 1).text(1);
   {
     const TokenLine fields = keyed("revision", 1);
@@ -201,10 +261,33 @@ ProductDocument decode_product(const std::string& text) {
     }
   }
   header.acts_version = keyed("acts_version", 1).text(1);
+  if (with_r33) {
+    header.r33_conventions = keyed("r33_conventions", 1).text(1);
+    const TokenLine fields = keyed("alignment_parametrization", 3);
+    header.alignment_parametrization = fields.text(1);
+    header.alignment_frame = fields.text(2);
+    header.alignment_level = fields.text(3);
+    if (header.alignment_frame != "local" && header.alignment_frame != "global") {
+      fields.refuse("an alignment frame is local or global (R32)");
+    }
+  }
 
   std::set<std::string> track_keys;
   std::set<std::pair<std::string, std::int32_t>> state_keys;
   std::set<std::tuple<std::string, std::int32_t, std::string>> parameter_keys;
+  std::map<std::pair<std::string, std::int32_t>, std::string> state_kind_of;
+  std::map<std::string, std::string> status_of;
+  std::set<std::string> output_keys;
+  std::set<std::tuple<std::string, std::int32_t, std::string>> residual_keys;
+  std::set<std::pair<std::string, std::int32_t>> measurement_output_keys;
+  std::set<std::string> covariance_keys;
+  std::map<std::string, std::int32_t> measured_of;  // measurement states per track, the residual covariance's size
+  auto known_measurement = [&](const TokenLine& fields, const std::string& track_key, std::int32_t state_index) {
+    const auto found = state_kind_of.find(std::make_pair(track_key, state_index));
+    if (found == state_kind_of.end() || (found->second != "measurement" && found->second != "outlier")) {
+      fields.refuse("an R33 record of a state that holds no hit of this product");
+    }
+  };
   while (true) {
     const TokenLine fields = next_line();
     if (fields.size() == 0) {
@@ -232,6 +315,7 @@ ProductDocument decode_product(const std::string& text) {
       if (!track_keys.insert(track.key).second) {
         fields.refuse("track key twice: " + track.key);
       }
+      status_of[track.key] = track.status;
       document.tracks.push_back(track);
     } else if (record == "state" && fields.size() == 13) {
       StateRecord state;
@@ -259,6 +343,8 @@ ProductDocument decode_product(const std::string& text) {
       if (!state_keys.insert(std::make_pair(state.track_key, state.index)).second) {
         fields.refuse("a state twice");
       }
+      state_kind_of[std::make_pair(state.track_key, state.index)] = state.kind;
+      measured_of[state.track_key] += state.kind == "measurement" ? 1 : 0;
       document.states.push_back(state);
     } else if (record == "parameters" && fields.size() == 31) {
       ParameterRecord parameters;
@@ -281,10 +367,105 @@ ProductDocument decode_product(const std::string& text) {
         fields.refuse("parameters twice");
       }
       document.parameters.push_back(parameters);
-    } else if (record == "end" && fields.size() == 4) {
+    } else if (with_r33 && record == "track_output" && fields.size() == 9) {
+      TrackOutputRecord output;
+      output.track_key = fields.text(1);
+      output.charge = fields.small_integer(2);
+      output.q_over_p = fields.number(3);
+      output.q_over_p_variance = fields.number(4);
+      output.reference_state_index = fields.small_integer(5);
+      output.topology = fields.text(6);
+      output.constraint = fields.text(7);
+      output.field = fields.text(8);
+      const auto status = status_of.find(output.track_key);
+      if (status == status_of.end() || status->second != "fitted") {
+        fields.refuse("a track_output of a track that is not a fitted track of this product");
+      }
+      if (output.charge != 1 && output.charge != -1) {
+        fields.refuse("a charge is +1 or -1");
+      }
+      if ((output.charge > 0) != (output.q_over_p > 0.0) || output.q_over_p == 0.0 || !(output.q_over_p_variance > 0.0)) {
+        fields.refuse("the charge is the sign of q/p, and q/p has a positive variance");
+      }
+      if (!is_one_of(output.topology, topologies) || !is_one_of(output.constraint, constraints) || output.field != (header.field_tesla == 0.0 ? "off" : "on")) {
+        fields.refuse("an unknown topology or constraint, or a field other than the header's");
+      }
+      known_measurement(fields, output.track_key, output.reference_state_index);
+      if (!output_keys.insert(output.track_key).second) {
+        fields.refuse("a track_output twice");
+      }
+      document.track_outputs.push_back(output);
+    } else if (with_r33 && record == "residual" && fields.size() == 9) {
+      ResidualRecord residual;
+      residual.track_key = fields.text(1);
+      residual.state_index = fields.small_integer(2);
+      residual.state_type = fields.text(3);
+      if (!is_one_of(residual.state_type, residual_types)) {
+        fields.refuse("unknown residual type " + residual.state_type);
+      }
+      for (std::size_t index = 0; index < 2; ++index) {
+        residual.residual[index] = fields.number(4 + index);
+      }
+      for (std::size_t index = 0; index < 3; ++index) {
+        residual.covariance[index] = fields.number(6 + index);
+      }
+      known_measurement(fields, residual.track_key, residual.state_index);
+      if (!residual_keys.insert(std::make_tuple(residual.track_key, residual.state_index, residual.state_type)).second) {
+        fields.refuse("a residual twice");
+      }
+      document.residuals.push_back(residual);
+    } else if (with_r33 && record == "measurement_output" && fields.size() == 36) {
+      MeasurementOutputRecord output;
+      output.track_key = fields.text(1);
+      output.state_index = fields.small_integer(2);
+      output.geometry_id = fields.unsigned_integer(3);
+      if (output.geometry_id == 0) {
+        fields.refuse("a geometry identifier is positive");
+      }
+      output.projector = {fields.small_integer(4), fields.small_integer(5)};
+      output.local_slope = {fields.number(6), fields.number(7)};
+      output.incidence_rad = fields.number(8);
+      output.thickness_mm = fields.number(9);
+      output.path_factor = fields.number(10);
+      output.sensitive_path_mm = fields.number(11);
+      for (std::size_t index = 0; index < 12; ++index) {
+        output.alignment_derivative[index] = fields.number(12 + index);
+        output.reference_derivative[index] = fields.number(24 + index);
+      }
+      known_measurement(fields, output.track_key, output.state_index);
+      if (!measurement_output_keys.insert(std::make_pair(output.track_key, output.state_index)).second) {
+        fields.refuse("a measurement_output twice");
+      }
+      document.measurement_outputs.push_back(output);
+    } else if (with_r33 && record == "residual_covariance" && fields.size() >= 3) {
+      ResidualCovarianceRecord covariance;
+      covariance.track_key = fields.text(1);
+      covariance.measurement_count = fields.small_integer(2);
+      const auto status = status_of.find(covariance.track_key);
+      if (status == status_of.end() || status->second != "fitted") {
+        fields.refuse("a residual_covariance of a track that is not a fitted track of this product");
+      }
+      const std::int32_t measured = measured_of[covariance.track_key];
+      const std::size_t size = std::size_t(2 * measured) * std::size_t(2 * measured + 1) / 2;
+      if (covariance.measurement_count != measured || fields.size() != 3 + size) {
+        fields.refuse("a residual_covariance that does not cover the track's measurements");
+      }
+      for (std::size_t index = 0; index < size; ++index) {
+        covariance.covariance.push_back(fields.number(3 + index));
+      }
+      if (!covariance_keys.insert(covariance.track_key).second) {
+        fields.refuse("a residual_covariance twice");
+      }
+      document.residual_covariances.push_back(covariance);
+    } else if (record == "end" && fields.size() == (with_r33 ? 8u : 4u)) {
       if (std::size_t(fields.integer(1)) != document.tracks.size() || std::size_t(fields.integer(2)) != document.states.size() ||
           std::size_t(fields.integer(3)) != document.parameters.size()) {
         fields.refuse("the end record counts other numbers than the product holds");
+      }
+      if (with_r33 && (std::size_t(fields.integer(4)) != document.track_outputs.size() || std::size_t(fields.integer(5)) != document.residuals.size() ||
+                       std::size_t(fields.integer(6)) != document.measurement_outputs.size() ||
+                       std::size_t(fields.integer(7)) != document.residual_covariances.size())) {
+        fields.refuse("the end record counts other R33 numbers than the product holds");
       }
       break;
     } else {
@@ -293,6 +474,29 @@ ProductDocument decode_product(const std::string& text) {
   }
   if (std::getline(stream, line)) {
     throw std::runtime_error("text after the end record");
+  }
+  if (with_r33) {  // R33 completeness: every state with a hit has all four residuals and its measurement output; every fitted track its track output
+    for (const auto& [key, kind] : state_kind_of) {     // and, with a measurement, its residual covariance
+      if (kind != "measurement" && kind != "outlier") {
+        continue;
+      }
+      for (const char* type : residual_types) {
+        if (residual_keys.count(std::make_tuple(key.first, key.second, std::string(type))) == 0) {
+          throw std::runtime_error("a measurement state without its " + std::string(type) + " residual: " + key.first);
+        }
+      }
+      if (measurement_output_keys.count(key) == 0) {
+        throw std::runtime_error("a measurement state without its measurement_output: " + key.first);
+      }
+    }
+    for (const auto& [key, status] : status_of) {
+      if (status == "fitted" && output_keys.count(key) == 0) {
+        throw std::runtime_error("a fitted track without its track_output: " + key);
+      }
+      if (status == "fitted" && measured_of[key] > 0 && covariance_keys.count(key) == 0) {
+        throw std::runtime_error("a fitted track without its residual_covariance: " + key);
+      }
+    }
   }
   return document;
 }

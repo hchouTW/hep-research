@@ -32,3 +32,7 @@ target_link_libraries(cai_payload_probe PRIVATE acts_tracking_common)
 # What the refit's start does to a noiseless fit. Data side too.
 add_executable(cai_refit_start_probe cai_refit_start_probe.cpp kalman_refit.cpp)
 target_link_libraries(cai_refit_start_probe PRIVATE acts_tracking_common)
+
+# CAI-T07-2 and the R33 cross-checks against ACTS's own unbiased state (D1 stage 8): data side, it links no generator code. The placement route is payload_geometry.cpp's.
+add_executable(cai_track_output_check cai_track_output_check.cpp payload_geometry.cpp kalman_refit.cpp)
+target_link_libraries(cai_track_output_check PRIVATE acts_tracking_common)

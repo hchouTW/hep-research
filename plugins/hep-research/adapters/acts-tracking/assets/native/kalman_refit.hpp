@@ -2,9 +2,12 @@
 // truth-assisted, counted apart, never reported as finding. It runs at zero field, or at section 4.1's 1 T.
 #pragma once
 
+#include <Acts/Definitions/TrackParametrization.hpp>
+
 #include <cstddef>
 #include <cstdint>
 #include <memory>
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -54,6 +57,25 @@ struct RefitResult {
   std::vector<ParameterRecord> parameters;
 };
 
+// The R33 outputs of one fit (track_fit_outputs.hpp, t07-r33/1), in the product's records (acts-tracking-product/2), state indices along the
+// track as in RefitResult. acts_unbiased is not written to the product: ACTS's own calculateUnbiasedParametersCovariance (Utilities/TrackHelpers.hpp)
+// at each measurement, loc0 and loc1 of its unbiased state and covariance, filled only when with_acts_unbiased is set, so cai_track_output_check.cpp
+// can hold the plugin's formula against it.
+struct ActsUnbiasedReading {
+  std::int32_t state_index = 0;
+  std::array<double, 2> loc{};
+  std::array<double, 3> covariance{};  // 00, 01, 11 of the unbiased state's loc0, loc1
+};
+
+struct RefitOutputs {
+  bool with_acts_unbiased = false;  // set by the caller, kept by fit(): only cai_track_output_check asks for ACTS's unbiased state
+  std::vector<TrackOutputRecord> track_output;  // one for a fitted track, none for a failed one
+  std::vector<ResidualRecord> residuals;
+  std::vector<MeasurementOutputRecord> measurement_outputs;
+  std::vector<ResidualCovarianceRecord> residual_covariance;  // one for a fitted track, none for a failed one
+  std::vector<ActsUnbiasedReading> acts_unbiased;  // empty unless with_acts_unbiased
+};
+
 // A fit that used fewer hits than the known set is not a fit of that set (BP03): a surface the track missed drops a hit with no
 // error from the fitter. Such a track fails.
 inline bool fit_lost_a_hit(std::int32_t measurements, std::int32_t outliers, std::size_t hit_count) {
@@ -83,8 +105,13 @@ class KalmanRefit {
   RefitResult fit(const HitSet& hit_set, const DataEvent& event) const;
   // The same from a stated start: cai_refit_start_probe.cpp compares starts through this. The prior stays centred on the start.
   RefitResult fit(const HitSet& hit_set, const DataEvent& event, const RefitStart& start) const;
+  // The same fit, and its R33 outputs (D1 stage 8). The fit itself is the one above, bit for bit: the outputs only read its states.
+  RefitResult fit(const HitSet& hit_set, const DataEvent& event, RefitOutputs& outputs) const;
 
  private:
+  RefitResult fit_from(const HitSet& hit_set, const DataEvent& event, const RefitStart& start, RefitOutputs* outputs) const;
+  // J_{k<-ref} per state, or nullopt with failure set when the smoothed reference state cannot be carried to a surface.
+  std::optional<std::vector<Acts::BoundMatrix>> reference_transports(const RefitResult& result, std::int32_t reference, std::string& failure) const;
   struct Machinery;
   const TelescopeGeometry& m_telescope;
   double m_sigma_loc0_mm;
