@@ -218,3 +218,9 @@ These are not Section 20 decisions. They are how S0 reconciled requirements of t
 | S7 lines derived from the AMS-02 field map | The derived reference of the bore field integral (0.12856 T m) and its derivation may be committed and pushed; the map file itself stays outside the repository | hsinyichou (maintainer) | 2026-11-08 | "cleared the collaboration-derived lines for magnetic field" |
 | S7 C++ fixes after the second independent read | Fix the five findings (XTR conservation, optical_scope entry by direction, photon end map, killed-photon column split, full-turn polycone read-back); rebuild; rerun gates 1 and 4 and the 13 cases as a reproduction check, not a re-judgement; add an XTR conservation run and a steps-outside count to gate 5 (card update, fourth registration); an independent read of the fix diff; then G5 on the final C++ | hsinyichou (maintainer) | 2026-11-08 | "do it based on your recommendation" |
 | G5 of the S7 C++ | Confirmed for the S7 C++ at `4ee3288a` (build 26): `Accounting.hh`, `FieldMap.hh`, `KillProcess.hh`, `Optics.hh`, `ProbeV2.hh`, `NewBuild.hh`, `NewRun.cc`, `NewScorers.hh`, `NewSource.hh`, `XtrConstructor.hh`; after three independent reads, their fixes, and a scan of the final files (`VALIDATION.md`, G4SIM-S7-G5) | hsinyichou (maintainer) | 2026-11-08 | "G5 is OK." |
+
+## During S8 (2026-11-09)
+
+| Item | Decision | Who | Date | Words |
+| --- | --- | --- | --- | --- |
+| Slurm submissions in S8 | The agent submits the Slurm jobs S8 needs without asking each time, and reports each one; E7 stops for failed gates, missing data and contradictions still apply | hsinyichou (maintainer) | 2026-11-09 | Answer "Yes, auto-submit in S8 (Recommended)" to the question whether S7's permission should hold for S8 |
