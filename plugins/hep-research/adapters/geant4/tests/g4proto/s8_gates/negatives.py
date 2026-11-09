@@ -66,8 +66,8 @@ def code_changes(work: Path) -> list:
         if missing:
             rows.append({"row": row, "change": change, "caught": False, "why": f"the text to change does not occur once in {name}: {missing[0][:60]!r}"})
             continue
-        for old, new in replacements:
-            changed = changed.replace(old, new)
+        for old, replacement in replacements:
+            changed = changed.replace(old, replacement)
         path.write_text(changed, encoding="utf-8")
         done = run_tests(root, tests)
         path.write_text(original, encoding="utf-8")

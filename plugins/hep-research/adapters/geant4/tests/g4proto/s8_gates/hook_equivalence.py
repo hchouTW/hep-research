@@ -131,7 +131,7 @@ def derive(none_run: Path, idle_run: Path, beam: float) -> dict:
             "events_needed": math.ceil(needed), "floor_events": FLOOR_EVENTS, "events_to_register": max(math.ceil(needed), FLOOR_EVENTS), "rows": rows}
 
 
-def test(trial: dict, none_run: Path, idle_run: Path) -> dict:
+def tost(trial: dict, none_run: Path, idle_run: Path) -> dict:
     count, x, y = load_pair(none_run, idle_run)
     critical = normal_quantile(1 - ALPHA)
     rows = []
@@ -186,7 +186,7 @@ def main(argv=None) -> int:
             result = derive(args.none_run, args.idle_run, args.beam)
             args.out.write_text(json.dumps(result, indent=1) + "\n", encoding="utf-8")
         elif args.command == "test":
-            result = test(json.loads(args.trial.read_text(encoding="utf-8")), args.none_run, args.idle_run)
+            result = tost(json.loads(args.trial.read_text(encoding="utf-8")), args.none_run, args.idle_run)
         else:
             result = closure(args.runs)
     except (OSError, ValueError, KeyError) as err:
