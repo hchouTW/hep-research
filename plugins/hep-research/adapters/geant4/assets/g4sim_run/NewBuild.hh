@@ -14,6 +14,7 @@
 #include <string>
 #include <vector>
 
+#include "G4AssemblyVolume.hh"
 #include "G4Box.hh"
 #include "G4ChordFinder.hh"
 #include "G4FieldManager.hh"
@@ -155,9 +156,17 @@ class NewDetector : public G4VUserDetectorConstruction {
       // G4SIM_BUILDER_CONTROL=overlap is the negative test of Section 15.1: the IR layer refused such a placement, so the shift is applied here
       const double shift = Control() == "overlap" && static_cast<G4int>(placement.at("copy_number", "placement").num) == 1 ? -10. : 0.;
       fChildren[mother].push_back(name);
-      fPlaced[name].push_back(new G4PVPlacement(rotation, G4ThreeVector(Decimal(c[0]) + shift, Decimal(c[1]), Decimal(c[2])), fLogicals.at(name), name, fLogicals.at(mother), false,
-                                                static_cast<G4int>(placement.at("copy_number", "placement").num), !std::getenv("G4SIM_NO_OVERLAP_CHECK")));
+      const G4ThreeVector where(Decimal(c[0]) + shift, Decimal(c[1]), Decimal(c[2]));
+      const G4int copy = static_cast<G4int>(placement.at("copy_number", "placement").num);
+      const bool check = !std::getenv("G4SIM_NO_OVERLAP_CHECK");
+      if (fAssembled.count({mother, name})) {
+        fPlaced[name].push_back(Imprint(mother, name, rotation, where, copy, check));
+        delete rotation;  // the imprint keeps its own copy of the rotation
+      } else {
+        fPlaced[name].push_back(new G4PVPlacement(rotation, where, fLogicals.at(name), name, fLogicals.at(mother), false, copy, check));
+      }
     }
+    if (!fAssemblies.empty()) std::printf("G4SIM_ASSEMBLED %zu\n", fAssemblies.size());  // placement_impl took effect, for the run record
     if (fPhysical.has("optical_surfaces")) BuildSurfaces(fPhysical.obj.at("optical_surfaces"), fLogicals, fPlaced);
     // G4SIM_BUILDER_CONTROL=leak_scope, for the tests of Section 15.1 only: the world takes the optical material of a template in the scope, a
     // specification check-spec refuses, so photons enter a volume outside optical_scope and only KillProcess stops them (GB16)
@@ -289,6 +298,35 @@ class NewDetector : public G4VUserDetectorConstruction {
   const Value* fLimits;
   std::map<std::string, G4LogicalVolume*> fLogicals;
   G4VPhysicalVolume* fWorld = nullptr;
+  // placement_impl (S8, Section 16): the IR's placements of a (mother, template) pair built as imprints of one G4AssemblyVolume holding the
+  // template at the origin, in the IR's order, so each lands where its G4PVPlacement would have, as the mother's next daughter. The imprint
+  // takes the active rotation, the transpose of the IR's passive matrix (exact); MakeImprint numbers from the mother's daughter count and
+  // names av_..., so the SetCopyNo pass of GB20 and a SetName give the copy number and name an ordinary placement has. Only for a template
+  // with no daughters of its own, which check-spec enforces: the imprint removes the template's level from the copy chain otherwise.
+  G4VPhysicalVolume* Imprint(const std::string& mother, const std::string& name, const G4RotationMatrix* rotation, const G4ThreeVector& where, G4int copy, bool check) {
+    G4AssemblyVolume*& assembly = fAssemblies[{mother, name}];
+    if (!assembly) {
+      assembly = new G4AssemblyVolume();
+      G4Transform3D origin;
+      assembly->AddPlacedVolume(fLogicals.at(name), origin);
+    }
+    G4LogicalVolume* host = fLogicals.at(mother);
+    const std::size_t before = host->GetNoDaughters();
+    G4Transform3D transform(rotation ? rotation->inverse() : G4RotationMatrix(), where);
+    assembly->MakeImprint(host, transform, 0, check);
+    if (host->GetNoDaughters() != before + 1) throw std::runtime_error("assembly of " + name + " in " + mother + ": an imprint placed " + std::to_string(host->GetNoDaughters() - before) + " volumes, not one");
+    G4VPhysicalVolume* placed = host->GetDaughter(static_cast<G4int>(before));
+    placed->SetCopyNo(copy);
+    placed->SetName(name);
+    return placed;
+  }
+
+ public:
+  void SetAssembled(std::set<std::pair<std::string, std::string>> pairs) { fAssembled = std::move(pairs); }
+
+ private:
+  std::set<std::pair<std::string, std::string>> fAssembled;
+  std::map<std::pair<std::string, std::string>, G4AssemblyVolume*> fAssemblies;
   std::map<std::string, std::vector<G4VPhysicalVolume*>> fPlaced;  // each template's physical volumes, for border surfaces
   std::map<std::string, std::vector<std::string>> fChildren;
 };

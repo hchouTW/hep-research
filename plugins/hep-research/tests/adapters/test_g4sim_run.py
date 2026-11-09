@@ -555,5 +555,56 @@ class TransitionRadiators(unittest.TestCase):
         self.assertEqual(driver.simulate_new.radiator_process_problems(radiators, {}), ["no process list was read back"])
 
 
+
+class ScaleAndHooks(unittest.TestCase):
+    """S8's run-card rules (Sections 6.2.9, 16) with the Section 15.1 negatives that belong to the run card: replica or parameterised, which
+    addendum 11.1 removes; assembly for a placement whose template has daughters of its own."""
+    PHYSICAL = {"placements": [{"mother": "world", "template": "stack"}, {"mother": "stack", "template": "cell"}, {"mother": "stack", "template": "frame"},
+                               {"mother": "frame", "template": "bar"}]}
+    ENVELOPE = [{"need": "fast_sim_envelope", "templates": ["calo"]}]
+
+    def test_assembly_of_a_template_without_daughters_passes(self):
+        self.assertEqual(driver.physics_check.placement_findings({"placement_impl": [{"mother": "stack", "template": "cell", "kind": "assembly"}]}, self.PHYSICAL), [])
+
+    def test_replica_and_parameterised_are_refused(self):  # Section 15.1, S8
+        for kind in ("replica", "parameterised"):
+            self.assertEqual(codes(driver.physics_check.placement_findings({"placement_impl": [{"mother": "stack", "template": "cell", "kind": kind}]}, self.PHYSICAL)),
+                             ["placement-impl-removed"])
+        self.assertEqual(codes(driver.physics_check.placement_findings({"placement_impl": [{"mother": "stack", "template": "cell", "kind": "voxel"}]}, None)),
+                         ["placement-impl-unknown"])
+
+    def test_assembly_of_a_template_with_daughters_is_refused(self):  # Section 15.1, S8: the imprint removes the template's level
+        self.assertEqual(codes(driver.physics_check.placement_findings({"placement_impl": [{"mother": "stack", "template": "frame", "kind": "assembly"}]}, self.PHYSICAL)),
+                         ["placement-impl-daughters"])
+
+    def test_a_pair_the_ir_does_not_place_or_named_twice_is_refused(self):
+        twice = [{"mother": "stack", "template": "cell", "kind": "assembly"}] * 2
+        self.assertEqual(codes(driver.physics_check.placement_findings({"placement_impl": twice}, self.PHYSICAL)), ["placement-impl-twice"])
+        self.assertEqual(codes(driver.physics_check.placement_findings({"placement_impl": [{"mother": "world", "template": "cell", "kind": "assembly"}]}, self.PHYSICAL)),
+                         ["placement-impl-pair"])
+
+    def test_fast_sim_needs_its_envelope_and_the_envelope_its_model(self):
+        hook = card(fast_sim={"model": "idle", "particles": ["e-", "gamma"]})
+        self.assertEqual(driver.physics_check.fast_sim_findings(hook, self.ENVELOPE), [])
+        self.assertEqual(driver.physics_check.fast_sim_findings(card(), []), [])
+        self.assertEqual(codes(driver.physics_check.fast_sim_findings(hook, [])), ["fast-sim-envelope-missing"])
+        self.assertEqual(codes(driver.physics_check.fast_sim_findings(card(), self.ENVELOPE)), ["fast-sim-model-missing"])
+
+    def test_fast_sim_model_and_particles(self):
+        self.assertEqual(codes(driver.physics_check.fast_sim_findings(card(fast_sim={"model": "frozen_showers", "particles": ["e-"]}), self.ENVELOPE)), ["fast-sim-model-unknown"])
+        self.assertEqual(codes(driver.physics_check.fast_sim_findings(card(fast_sim={"model": "idle", "particles": ["all"]}), self.ENVELOPE)), ["fast-sim-particles"])
+        self.assertEqual(codes(driver.physics_check.fast_sim_findings(card(fast_sim={"model": "idle", "particles": ["e-", "e-"]}), self.ENVELOPE)), ["fast-sim-particles"])
+
+    def test_the_test_models_are_listed(self):
+        models = json.loads((ASSETS / "fast_sim_models.json").read_text(encoding="utf-8"))["models"]
+        self.assertEqual(sorted(models), ["absorb", "idle"])
+        self.assertTrue(all(model["test_only"] for model in models.values()))
+
+    def test_legacy_mode_has_neither(self):
+        legacy = {"seeding": "per-event"}
+        self.assertIn("s8-legacy", codes(driver.check_card({**card(), "placement_impl": [{"mother": "stack", "template": "cell", "kind": "assembly"}]}, legacy)))
+        self.assertIn("s8-legacy", codes(driver.check_card(card(fast_sim={"model": "idle", "particles": ["e-"]}), legacy)))
+
+
 if __name__ == "__main__":
     unittest.main()

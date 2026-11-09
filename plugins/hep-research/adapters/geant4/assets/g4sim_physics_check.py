@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""check-spec rules of S3 (g4sim plan, Sections 6.2.9, 8.4, 8.6, 9.1): PAI semantics, the G4UserLimits restriction, time cuts and scorer combinations.
+"""check-spec rules of S3 (g4sim plan, Sections 6.2.9, 8.4, 8.6, 9.1): PAI semantics, the G4UserLimits restriction, time cuts and scorer combinations;
+from S8 the run card's placement_impl and fast_sim block (Sections 6.2.9, 16).
 
 A particle's ionization process name comes from the effective config after initialization (`ionisation`), never from an assumption here.
 Every function returns findings, each {code, path, message}; an empty list passes.
@@ -307,15 +308,75 @@ def validation_findings(card: dict, materials: dict, material: str, effective: d
     return findings
 
 
-def card_findings(card: dict, request: dict | None = None, regions=(), ionisation: dict | None = None, requirements=(), materials=None, selected_materials=None) -> list:
-    """All of the above that the inputs at hand can judge. Without `ionisation` the PAI semantics wait for the effective config."""
-    findings = limit_findings(card)
+PLACEMENT_IMPLEMENTATIONS = ("assembly",)
+REMOVED_IMPLEMENTATIONS = ("replica", "parameterised")  # addendum 11.1: they change histories (GB20)
+FAST_SIM_NEED = "fast_sim_envelope"
+FAST_SIM_MODELS = Path(__file__).resolve().parent / "fast_sim_models.json"
+
+
+def placement_findings(card: dict, physical: dict | None) -> list:
+    """placement_impl (S8, Section 16): each entry names a (mother, template) pair the IR places, built as an assembly; only for a template
+    with no daughters of its own, because the imprint removes that template's level from the copy chain (GB20, addendum 11.1)."""
+    entries = card.get("placement_impl", [])
+    if not entries:
+        return []
+    findings = []
+    placements = (physical or {}).get("placements", [])
+    pairs = {(item["mother"], item["template"]) for item in placements}
+    mothers = {item["mother"] for item in placements}
+    seen = set()
+    for at, entry in enumerate(entries):
+        path, kind, pair = f"placement_impl[{at}]", entry.get("kind"), (entry.get("mother"), entry.get("template"))
+        if kind in REMOVED_IMPLEMENTATIONS:
+            findings.append({"code": "placement-impl-removed", "path": path, "message": f"{kind} is not offered: it changes histories and copy numbers (GB20, addendum 11.1); only assembly is"})
+        elif kind not in PLACEMENT_IMPLEMENTATIONS:
+            findings.append({"code": "placement-impl-unknown", "path": path, "message": f"{kind!r} is not a placement implementation; only assembly is"})
+        if pair in seen:
+            findings.append({"code": "placement-impl-twice", "path": path, "message": f"{pair[1]} in {pair[0]} is named twice"})
+        seen.add(pair)
+        if physical is None:
+            continue
+        if pair not in pairs:
+            findings.append({"code": "placement-impl-pair", "path": path, "message": f"the IR places no {pair[1]} in {pair[0]}"})
+        elif pair[1] in mothers:
+            findings.append({"code": "placement-impl-daughters", "path": path, "message": f"{pair[1]} has daughters of its own: an imprint would remove its level from the copy chain (GB20)"})
+    return findings
+
+
+def fast_sim_findings(card: dict, requirements) -> list:
+    """The fast-simulation hook (S8): a fast_sim_envelope requirement and the run card's fast_sim block go together; the model is one of
+    fast_sim_models.json, and the particles are named, never all (GB19, addendum 11.1)."""
+    block = card.get("physics", {}).get("fast_sim")
+    envelopes = [item for item in requirements if item.get("need") == FAST_SIM_NEED]
+    if not block and not envelopes:
+        return []
+    if not envelopes:
+        return [{"code": "fast-sim-envelope-missing", "path": "physics.fast_sim", "message": "the run card attaches a fast-simulation model, but the specification has no fast_sim_envelope"}]
+    if not block:
+        return [{"code": "fast-sim-model-missing", "path": "physics.fast_sim", "message": "the specification declares a fast_sim_envelope, but the run card names no model"}]
+    findings = []
+    models = json.loads(FAST_SIM_MODELS.read_text(encoding="utf-8"))["models"]
+    if block.get("model") not in models:
+        findings.append({"code": "fast-sim-model-unknown", "path": "physics.fast_sim.model", "message": f"{block.get('model')!r} is not in fast_sim_models.json"})
+    particles = block.get("particles", [])
+    if not particles or ALL_PARTICLES in particles:
+        findings.append({"code": "fast-sim-particles", "path": "physics.fast_sim.particles", "message": "name the particles: attaching the process to all of them changes histories (GB19)"})
+    if len(set(particles)) != len(particles):
+        findings.append({"code": "fast-sim-particles", "path": "physics.fast_sim.particles", "message": "a particle is named twice"})
+    return findings
+
+
+def card_findings(card: dict, request: dict | None = None, regions=(), ionisation: dict | None = None, requirements=(), materials=None, selected_materials=None,
+                  physical: dict | None = None) -> list:
+    """All of the above that the inputs at hand can judge. Without `ionisation` the PAI semantics wait for the effective config; without the
+    IR's `physical` part, placement_impl is judged by its kinds only."""
+    findings = limit_findings(card) + placement_findings(card, physical)
     requests = card.get("physics", {}).get("pai", [])
     if requests and ionisation is not None:
         findings += pai_findings(requests, regions, ionisation, requirements)
     if request is not None:
         scorers = request.get("scorers", [])
-        findings += optical_findings(card, requirements, scorers) + radiator_findings(card, requirements)
+        findings += optical_findings(card, requirements, scorers) + radiator_findings(card, requirements) + fast_sim_findings(card, requirements)
         findings += time_cut_findings(card, scorers) + scorer_findings(scorers, materials, selected_materials) + source_findings(request.get("source", {})) + plane_findings(request) + truth_findings(request) + event_range_findings(card)
     return findings
 

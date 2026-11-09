@@ -470,7 +470,8 @@ def simulate(card: dict, request: dict, checked: dict, program: Path, work: Path
     """Preflight with no events, so a wrong setting is refused before any event; then the run."""
     ir = checked["ir"]
     resolved = resolved_request(request, ir, folder)
-    findings = physics_check.card_findings(card, request, requirements=ir["physical"]["physics_requirements"], materials=ir["physical"]["materials"], selected_materials=selected_materials(resolved, ir))
+    findings = physics_check.card_findings(card, request, requirements=ir["physical"]["physics_requirements"], materials=ir["physical"]["materials"], selected_materials=selected_materials(resolved, ir),
+                                          physical=ir["physical"])
     regions = {record["region"] for record in ir["physical"]["templates"].values()} - {"default"}
     findings += physics_check.hit_findings(resolved["scorers"], regions, request.get("truth", {}))
     if findings:

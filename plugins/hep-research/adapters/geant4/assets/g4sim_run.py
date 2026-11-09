@@ -75,6 +75,9 @@ def check_card(card: dict, legacy: dict | None = None) -> list[dict]:
             findings.append({"code": "optical-legacy", "path": "physics", "message": "legacy mode keeps the old programs, which have no optical physics"})
     elif "optical" in physics:
         findings.append({"code": "optical-without-constructor", "path": "physics.optical", "message": f"physics.optical needs {OPTICAL_CONSTRUCTOR} in extra_constructors"})
+    if legacy is not None and (card.get("placement_impl") or "fast_sim" in physics):  # S8's builder and hook are the new program's
+        findings.append({"code": "s8-legacy", "path": "placement_impl" if card.get("placement_impl") else "physics.fast_sim",
+                         "message": "legacy mode keeps the old programs' builders, which have no placement_impl and no fast-simulation hook"})
     if legacy is not None and card.get("run", {}).get("seeding") != legacy.get("seeding"):
         findings.append({"code": "seeding-differs", "path": "run.seeding",
                          "message": f"the run card says {card.get('run', {}).get('seeding')!r}, the legacy block {legacy.get('seeding')!r}"})

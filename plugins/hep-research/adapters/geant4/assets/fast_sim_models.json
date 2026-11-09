@@ -1,0 +1,14 @@
+{
+ "schema": "g4sim-fast-sim-models/1",
+ "note": "Fast-simulation models g4sim_run can attach to a fast_sim_envelope (S8). This plan delivers only the hook and two test models; a study's substitute model is added here with its C++ class and validated under hep-ml's protocol by the study, not by the g4sim gates.",
+ "models": {
+  "idle": {
+   "test_only": true,
+   "description": "never triggers: ModelTrigger returns false and draws no random number (S8 gate 3, the idle hook)"
+  },
+  "absorb": {
+   "test_only": true,
+   "description": "triggers on entering the envelope, kills the track and books its kinetic energy as the deposit of that step (S8 gate 3, the closure)"
+  }
+ }
+}

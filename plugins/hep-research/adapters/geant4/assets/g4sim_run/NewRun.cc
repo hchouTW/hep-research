@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "Accounting.hh"
+#include "FastSim.hh"
 #include "G4EmParameters.hh"
 #include "G4EmSaturation.hh"
 #include "G4Event.hh"
@@ -35,6 +36,8 @@
 #include "G4UserSteppingAction.hh"
 #include "G4VEnergyLossProcess.hh"
 #include "G4VModularPhysicsList.hh"
+#include "G4VProcess.hh"
+#include "G4VSensitiveDetector.hh"
 #include "G4VPhysicsConstructor.hh"
 #include "G4VUserActionInitialization.hh"
 #include "G4OpticalParameters.hh"
@@ -67,6 +70,7 @@ struct Shared {
   bool optical = false;  // S7: G4OpticalPhysics is on, so the conservation file carries the optical-photon terms
   std::set<std::string> opticalScope;  // S7: the logical names inside optical_scope, for the steps-outside count
   bool xtr = false;      // S7: g4sim_xtr is on, so the conservation file carries the TR source term
+  g4sim::FastSimSetup fastSim;  // S8: the model and particles of physics.fast_sim, and the envelopes' regions
   g4sim::TruthRules truth;
   std::vector<g4sim::ReferencePlane> planes;
 };
@@ -265,6 +269,11 @@ class Steps : public G4UserSteppingAction {
       if (step->GetPostStepPoint()->GetStepStatus() == fGeomBoundary && boundary && boundary->GetStatus() == Detection) g4sim::ScorerSums::Thread().PhotonDetected(step);
       return;
     }
+    // S8: Geant4 calls no sensitive detector on a step a fast-simulation model made (G4FastSimulationManagerProcess, of type fParameterisation),
+    // so its deposit is handed to the SD of the volume the step lies in here, as an ordinary step's would be: the hook's deposit is scored
+    const G4VProcess* defined = step->GetPostStepPoint()->GetProcessDefinedStep();
+    if (defined && defined->GetProcessType() == fParameterisation)
+      if (G4VSensitiveDetector* detector = step->GetPreStepPoint()->GetSensitiveDetector()) detector->Hit(const_cast<G4Step*>(step));
     g4sim::ScorerSums::Thread().BoundaryStep(step, accounting.Table());
     if (fHits) g4sim::HitRecorder::Thread().Step(step);
   }
@@ -411,8 +420,21 @@ int NewRun(const Value& ir, const Value& card, const Value& request) {
       G4SDManager::GetSDMpointer()->AddNewDetector(dispatcher);
       logicals.at(name)->SetSensitiveDetector(dispatcher);
     }
+    if (shared.fastSim.Any()) g4sim::AttachFastSimModels(shared.fastSim);  // thread-local models, after the regions exist (S8)
   };
-  manager->SetUserInitialization(new g4sim::NewDetector(ir.at("physical", "ir"), physics.at("cuts_mm", "physics"), attach, userLimits));
+  auto* detector = new g4sim::NewDetector(ir.at("physical", "ir"), physics.at("cuts_mm", "physics"), attach, userLimits);
+  if (card.has("placement_impl")) {  // S8: check-spec admits assembly only, for a template with no daughters of its own
+    std::set<std::pair<std::string, std::string>> assembled;
+    for (const auto& item : card.obj.at("placement_impl").array("placement_impl")) {
+      if (item.at("kind", "placement_impl").str != "assembly") {
+        std::cerr << "placement_impl kind " << item.at("kind", "placement_impl").str << " is not built" << std::endl;  // the program's own guard
+        return 2;
+      }
+      assembled.insert({item.at("mother", "placement_impl").str, item.at("template", "placement_impl").str});
+    }
+    detector->SetAssembled(std::move(assembled));
+  }
+  manager->SetUserInitialization(detector);
   std::string error;
   const auto text = [&](const char* key) { return physics.has(key) ? physics.obj.at(key).str : std::string(); };
   const bool tooEarly = std::getenv("G4SIM_EM_TOO_EARLY") != nullptr;  // the negative test of Section 15.1: the EM constructor resets these (GB14)
@@ -441,6 +463,21 @@ int NewRun(const Value& ir, const Value& card, const Value& request) {
   if (xtr) {  // S7, Section 6.2.9
     list->RegisterPhysics(new g4sim::XtrConstructor(g4sim::ReadXtrRadiators(ir.at("physical", "ir"), physics)));
     shared.xtr = true;
+  }
+  if (physics.has("fast_sim")) {  // S8: the hook on the named particles only (GB19); its models attach per thread in ConstructSDandField
+    const Value& block = physics.obj.at("fast_sim");
+    shared.fastSim.model = block.at("model", "fast_sim").str;
+    for (const auto& name : block.at("particles", "fast_sim").array("particles")) shared.fastSim.particles.push_back(name.str);
+    const Value& physical = ir.at("physical", "ir");
+    for (const auto& requirement : physical.at("physics_requirements", "physical").array("physics_requirements"))
+      if (requirement.at("need", "requirement").str == "fast_sim_envelope")
+        for (const auto& name : requirement.at("templates", "fast_sim_envelope").array("templates"))
+          shared.fastSim.regions.push_back(physical.at("templates", "physical").at(name.str, "templates").at("region", "template").str);
+    if (shared.fastSim.regions.empty()) {
+      std::cerr << "physics.fast_sim with no fast_sim_envelope in the IR" << std::endl;
+      return 2;
+    }
+    list->RegisterPhysics(new g4sim::FastSimConstructor(shared.fastSim.particles));
   }
   if (optical) {  // S7: optical physics, kept inside optical_scope by KillProcess (GB16)
     list->RegisterPhysics(new G4OpticalPhysics(0));

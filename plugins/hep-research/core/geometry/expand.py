@@ -10,7 +10,7 @@ import copy
 from decimal import Decimal
 
 from core.canonical import check_hash_scope
-from core.geometry import bitfield, fieldmap, modules, optics, params, rotation, xtr
+from core.geometry import bitfield, fast_sim, fieldmap, modules, optics, params, rotation, xtr
 from core.geometry.numbers import CONTEXT, EPSILON_MM, MINIMUM_GAP_MM, PRECISION, GeometryError, add, as_text, divide, multiply
 
 WORLD = "world"
@@ -519,6 +519,8 @@ def _with_shells(spec: dict) -> dict:
             front, back = "front" in faces, "back" in faces
             shift = "0" if front == back else f"({thickness})/2" if front else f"-({thickness})/2"  # the front face is -z
             wrapper = f"{name}_shell"
+            if wrapper in spec["templates"]:  # a logical-level check (S8): two logicals would share the name, and the wrapper would replace the template
+                raise GeometryError("template-name", f"{wrapper!r} is taken; the shell's wrapper needs it", where)
             spec["templates"][wrapper] = {"solid": {"box": {"size_mm": _shell_size(node["solid"]["box"]["size_mm"], thickness, faces)}}, "material": shell["material"],
                                           "children": [{"template": name, "placement": {"single": {"centre_mm": ["0", "0", shift]}}}]}
             for other, holder in [*spec["templates"].items(), ("world", spec["world"])]:
@@ -627,6 +629,7 @@ def expand(spec: dict) -> dict:
     touchables = _touchables(tree, order)
     optics.scope_findings(spec, templates, physical["physics_requirements"], tree, lambda name: touchables.get(name, 0) == 1)
     xtr.check(spec, templates, physical["physics_requirements"], tree)
+    fast_sim.check(nodes, templates, physical["physics_requirements"], tree)
     if spec.get("optical_surfaces"):  # optional, like fields: a specification with none keeps its geometry_id
         physical["optical_surfaces"] = _without_sources(spec["optical_surfaces"])
     if spec.get("fields"):  # optional: a specification with no field keeps its geometry_id (Section 7.1)
