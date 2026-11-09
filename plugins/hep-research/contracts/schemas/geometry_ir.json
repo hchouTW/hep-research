@@ -318,6 +318,29 @@
     "optical_surfaces": {
      "type": "object",
      "description": "Optical surfaces (S7): skin or border, model, finish, type and tables, as the specification gives them"
+    },
+    "alignment": {
+     "type": "object",
+     "required": [
+      "overlay_sha256",
+      "placements"
+     ],
+     "additionalProperties": false,
+     "description": "An applied alignment overlay (S9): its canonical SHA-256 and the placements it moved, as [mother, template, copy_number]; optional, so an IR without one keeps its geometry_id",
+     "properties": {
+      "overlay_sha256": {
+       "type": "string",
+       "pattern": "^[0-9a-f]{64}$"
+      },
+      "placements": {
+       "type": "array",
+       "items": {
+        "type": "array",
+        "minItems": 3,
+        "maxItems": 3
+       }
+      }
+     }
     }
    }
   },

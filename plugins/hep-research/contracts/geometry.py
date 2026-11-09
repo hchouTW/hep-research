@@ -25,13 +25,14 @@ if str(ROOT) not in sys.path:
 
 from contracts import KNOWN_CAPABILITIES  # noqa: E402
 from contracts.schema import SCHEMA_DIR, validate  # noqa: E402
-from core.canonical import CanonicalError, load_spec_json  # noqa: E402
-from core.geometry import expand, fieldmap, identity, overlap  # noqa: E402
+from core.canonical import CanonicalError, load_json_strict, load_spec_json  # noqa: E402
+from core.geometry import alignment, expand, fieldmap, identity, overlap  # noqa: E402
 from core.geometry.numbers import GeometryError  # noqa: E402
 from core.protected.guard import guard, protected_main  # noqa: E402
 
 SPEC_SCHEMA = "detector_spec.json"
 IR_SCHEMA = "geometry_ir.json"
+OVERLAY_SCHEMA = "alignment_overlay.json"
 CLAIM_PREFIX = "claim:"
 UNHASHED = ("legacy",)  # what the translator keeps for the round trip; expansion never reads it, so no identity depends on it
 
@@ -139,8 +140,10 @@ def _field_maps(spec: dict, folder: Path, protected: bool = False) -> dict:
     return out
 
 
-def check_spec(text, claims=(), folder: Path | None = None, protected: bool = False) -> dict:
-    """{status, findings, ir, geometry_id, provenance_id}: the whole reading and judging of one specification. folder holds its CSV files."""
+def check_spec(text, claims=(), folder: Path | None = None, protected: bool = False, overlay: dict | None = None) -> dict:
+    """{status, findings, ir, geometry_id, provenance_id}: the whole reading and judging of one specification. folder holds its CSV files.
+    An alignment-overlay/1 (S9) is applied to the expanded IR before the gap rule and the error bounds, so a misaligned geometry is judged
+    as any other, and its geometry_id is the overlaid IR's."""
     try:
         spec = load_spec_json(text, field_types(), unhashed=UNHASHED)
     except CanonicalError as err:
@@ -154,6 +157,12 @@ def check_spec(text, claims=(), folder: Path | None = None, protected: bool = Fa
         sources = _positions_from_csv(spec, folder or Path("."), protected)
         maps = _field_maps(spec, folder or Path("."), protected)
         ir = expand.expand(spec)
+        if overlay is not None:
+            overlay_report = validate(overlay, OVERLAY_SCHEMA)
+            overlay_findings = [_finding("overlay-schema", issue.path, issue.message) for issue in overlay_report.findings if issue.severity == "error"]
+            if overlay_findings:
+                return {"status": "rejected", "findings": [*findings, *overlay_findings]}
+            ir = alignment.apply(ir, overlay)
         for record in sources:
             ir["marker"]["source_of_facts"][f"explicit:{record['path']}"] = record["sha256"]
         for record, _ in maps.values():
@@ -176,10 +185,17 @@ def check_spec(text, claims=(), folder: Path | None = None, protected: bool = Fa
     return result
 
 
-def check_file(path, claims=(), protected: bool = False) -> dict:
-    """check_spec of a file, for callers: protected mode applies here too, so omitting the command line cannot avoid it."""
-    guard("contracts.geometry.check_file", paths=[str(path)], flag=protected, capabilities=KNOWN_CAPABILITIES)
-    return check_spec(Path(path).read_bytes(), claims, Path(path).parent, protected)
+def check_file(path, claims=(), protected: bool = False, overlay_path=None) -> dict:
+    """check_spec of a file, for callers: protected mode applies here too, so omitting the command line cannot avoid it. overlay_path names
+    an alignment-overlay/1 file (S9), read strictly."""
+    guard("contracts.geometry.check_file", paths=[str(path)] + ([str(overlay_path)] if overlay_path else []), flag=protected, capabilities=KNOWN_CAPABILITIES)
+    overlay = None
+    if overlay_path is not None:
+        try:
+            overlay = load_json_strict(Path(overlay_path).read_bytes())
+        except CanonicalError as err:
+            return {"status": "rejected", "findings": [_finding(err.code, "", f"overlay: {err}")]}
+    return check_spec(Path(path).read_bytes(), claims, Path(path).parent, protected, overlay)
 
 
 @protected_main("contracts.geometry", capabilities=KNOWN_CAPABILITIES)
@@ -189,10 +205,11 @@ def main(argv=None) -> int:
     parser.add_argument("--out", type=Path)
     parser.add_argument("--claims", type=Path)
     parser.add_argument("--protected", action="store_true", help="protected mode (a project with agent_policy needs no flag)")
+    parser.add_argument("--overlay", type=Path, help="an alignment-overlay/1 applied to the IR (S9)")
     args = parser.parse_args(argv)
     try:
         claims = json.loads(args.claims.read_text(encoding="utf-8")) if args.claims else []
-        result = check_file(args.spec, claims, args.protected)
+        result = check_file(args.spec, claims, args.protected, args.overlay)
     except (OSError, ValueError) as err:
         print(json.dumps({"status": "error", "message": str(err)}))
         return 2

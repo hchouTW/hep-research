@@ -11,13 +11,18 @@ For each (event, volume): the yield factor; for each bin, on the volume stream o
 channel order, then, if timing is on, one time per detected photon (response.photon_times), given to the channels in channel order; then for
 each channel c, cell volume x C + c, the sensor on its channel stream and the electronics on theirs. Every draw comes from the sub-stream
 the response-pipeline/1 table names, so the order of events, volumes and bins does not matter (Section 10.2).
+
+Conditions (S9, Section 17): a job may carry `conditions`, a condition-snapshot/1 of its readout whose cells are {volume, channel}, and
+`event_time_ns`, each event's time. A channel then takes the conditions of its cell at its event's time: gain_factor multiplies the sensor
+gain, threshold replaces the electronics threshold, and a dead channel reads no code. Every draw is still made, so a condition changes no
+other channel's numbers. g4sim_digi does not read conditions: job_with_keys refuses such a job.
 """
 from __future__ import annotations
 
 import math
 import struct
 
-from core.simulation import efficiency_map, response, rng
+from core.simulation import conditions, efficiency_map, response, rng
 
 SCHEMA = "g4sim-digi-job/1"
 TRANSIT_KINDS = ("exponential", "mapped")
@@ -54,6 +59,16 @@ def check_job(job: dict) -> None:
     electronics = job["electronics"]
     if not isinstance(electronics["bits"], int) or not 1 <= electronics["bits"] <= 62 or not electronics["lsb"] > 0:
         raise DigiError("electronics", "bits is an integer from 1 to 62 and lsb positive (g4sim_digi holds codes in 64 bits)")
+    if "conditions" in job:
+        snapshot = job["conditions"]
+        if snapshot.get("readout") != job["readout"]:
+            raise DigiError("conditions", f"the snapshot is of readout {snapshot.get('readout')!r}, the job's is {job['readout']!r}")
+        try:
+            conditions.check_snapshot(snapshot, fields=("volume", "channel"))
+        except conditions.ConditionError as err:
+            raise DigiError(err.code, str(err)) from err
+        if not isinstance(job.get("event_time_ns"), dict):
+            raise DigiError("event-time", "a job with conditions gives each event's time in event_time_ns")
     names = [job["stage"]["name"], job["sensor"]["name"], job["electronics"]["name"]]
     if len(set(names)) != 3:
         raise DigiError("stage-name", "the scintillation, sensor and electronics stages need distinct names")
@@ -70,6 +85,8 @@ TIME_BLOCKS = 64  # keys for 64 blocks of 2^15 photons: 2^21 detected photons in
 def job_with_keys(job: dict, blocks: int = TIME_BLOCKS) -> dict:
     """The job for g4sim_digi: the same job with the two key words of every stream it draws from, computed here with canonical/1, so the
     C++ side needs no canonical encoder (g4sim/Philox.hh)."""
+    if "conditions" in job:
+        raise DigiError("conditions-python-only", "g4sim_digi does not read conditions: digitize the job in Python")
     seed, replica, stage = job["run_seed"], job["replica"], job["stage"]["name"]
     keys = {"stage": list(rng.volume_key(seed, stage, replica)), "yield": list(rng.volume_key(seed, response.YIELD_STAGE, replica)),
             "sensor": list(rng.channel_key(seed, job["readout"], job["sensor"]["name"], replica)),
@@ -133,10 +150,21 @@ def digitize(job: dict, rows: list) -> tuple[list, list]:
                     start += drawn
         for at in range(count):
             cell = volume * count + at
-            charge = response.sensor_response(rng.SubStream(sensor_key, event, cell), photoelectrons[at], sensor["gain"], sensor["excess_noise"],
-                                              sensor["dark_rate_per_ns"], sensor["gate_ns"])
+            state = {"gain_factor": 1.0, "dead": False}
+            if "conditions" in job:
+                time = job["event_time_ns"].get(str(event))
+                if time is None:
+                    raise DigiError("event-time", f"event {event} has no time")
+                try:
+                    state = conditions.at(job["conditions"], time, {"volume": volume, "channel": at})
+                except conditions.ConditionError as err:
+                    raise DigiError(err.code, str(err)) from err
+            charge = response.sensor_response(rng.SubStream(sensor_key, event, cell), photoelectrons[at], sensor["gain"] * state["gain_factor"],
+                                              sensor["excess_noise"], sensor["dark_rate_per_ns"], sensor["gate_ns"])
             code = response.electronics_response(rng.SubStream(electronics_key, event, cell), charge, electronics["noise_sigma"],
-                                                 electronics["threshold"], electronics["lsb"], electronics["bits"])
+                                                 state.get("threshold", electronics["threshold"]), electronics["lsb"], electronics["bits"])
+            if state["dead"]:
+                code = None
             channel_rows.append((event, volume, at, photoelectrons[at], charge, code))
     time_rows.sort(key=lambda row: row[:4])  # stable: within a (event, volume, bin, channel) the draw order is kept
     return channel_rows, time_rows

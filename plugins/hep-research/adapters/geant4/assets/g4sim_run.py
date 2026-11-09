@@ -36,7 +36,7 @@ import g4sim_translate as translate  # noqa: E402
 from contracts import KNOWN_CAPABILITIES, geometry  # noqa: E402
 from core import constants  # noqa: E402
 from core.canonical import canonical_sha256, require_hash_scope  # noqa: E402
-from core.geometry import identity  # noqa: E402
+from core.geometry import alignment, identity  # noqa: E402
 from core.protected.guard import guard, protected_main  # noqa: E402
 
 DATASETS = ROOT / "contracts/rules/geant4_datasets.json"
@@ -426,7 +426,7 @@ def read_field_records(folder: Path) -> dict:
 def geometry_check(args) -> dict:
     card = json.loads(args.run.read_text(encoding="utf-8"))
     claims = json.loads(args.claims.read_text(encoding="utf-8")) if getattr(args, "claims", None) else []  # S7: a cited specification, as simulate
-    checked = geometry.check_spec(args.detector.read_bytes(), claims, folder=args.detector.parent)
+    checked = geometry.check_file(args.detector, claims, overlay_path=getattr(args, "overlay", None))
     if checked["status"] != "ok":
         return {"status": "rejected", "findings": checked["findings"]}
     findings = check_card(card)
@@ -455,12 +455,22 @@ def geometry_check(args) -> dict:
     return {"status": "failed" if problems else "ok", "problems": problems[:20], **effective}
 
 
+def diff(args) -> dict:
+    """S9's diff tool: the placements in which two specifications' IRs differ, each with an optional alignment overlay."""
+    claims = json.loads(args.claims.read_text(encoding="utf-8")) if args.claims else []
+    checked = [geometry.check_file(detector, claims, overlay_path=overlay) for detector, overlay in ((args.detector, args.overlay), (args.against, args.against_overlay))]
+    for side, result in zip(("detector", "against"), checked):
+        if result["status"] != "ok":
+            return {"status": "rejected", "side": side, "findings": result["findings"]}
+    return {"status": "ok", "geometry_ids": [item["geometry_id"] for item in checked], **alignment.diff(checked[0]["ir"], checked[1]["ir"])}
+
+
 def simulate(args) -> dict:
     """A run of a new specification: `separated` accounting, sources and scorers (Section 8)."""
     card = json.loads(args.run.read_text(encoding="utf-8"))
     request = json.loads(args.request.read_text(encoding="utf-8"))
     claims = json.loads(args.claims.read_text(encoding="utf-8")) if getattr(args, "claims", None) else []
-    checked = geometry.check_file(args.detector, claims, protected=args.protected)
+    checked = geometry.check_file(args.detector, claims, protected=args.protected, overlay_path=getattr(args, "overlay", None))
     if checked["status"] != "ok":
         return {"status": "rejected", "findings": checked["findings"]}
     findings = check_card(card)
@@ -495,15 +505,24 @@ def main(argv=None) -> int:
         simulating.add_argument(f"--{name}", type=Path, required=True)
     simulating.add_argument("--claims", type=Path, help="a JSON list of the claim ids of the profiles the specification depends on, as contracts/geometry.py --claims")
     simulating.add_argument("--protected", action="store_true", help="protected mode (a project with agent_policy needs no flag)")
+    for command in (shape, simulating):
+        command.add_argument("--overlay", type=Path, help="an alignment-overlay/1 applied to the specification's IR (S9); its geometry_id is the overlaid IR's")
+    comparing = commands.add_parser("diff", help="S9: the placements in which two IRs differ")
+    comparing.add_argument("--detector", type=Path, required=True)
+    comparing.add_argument("--overlay", type=Path)
+    comparing.add_argument("--against", type=Path, required=True)
+    comparing.add_argument("--against-overlay", type=Path)
+    comparing.add_argument("--claims", type=Path, help="a JSON list of the claim ids the specifications depend on, as contracts/geometry.py --claims")
+    comparing.add_argument("--protected", action="store_true", help="protected mode (a project with agent_policy needs no flag)")
     args = parser.parse_args(argv)
-    guard(f"adapters.geant4.g4sim_run.{args.command}", paths=[str(args.run)], flag=args.protected, capabilities=KNOWN_CAPABILITIES)
+    guard(f"adapters.geant4.g4sim_run.{args.command}", paths=[str(args.run if hasattr(args, "run") else args.detector)], flag=args.protected, capabilities=KNOWN_CAPABILITIES)
     try:
         if args.command == "check-spec":
             card = json.loads(args.run.read_text(encoding="utf-8"))
             findings = check_card(card, {"seeding": args.legacy_seeding} if args.legacy_seeding else None)
             print(json.dumps({"status": "rejected" if findings else "ok", "findings": findings}))
             return 2 if findings else 0
-        result = {"geometry-check": geometry_check, "simulate": simulate, "run": run}[args.command](args)
+        result = {"geometry-check": geometry_check, "simulate": simulate, "run": run, "diff": diff}[args.command](args)
     except (OSError, ValueError, KeyError) as err:
         print(json.dumps({"status": "error", "message": str(err)}))
         return 2

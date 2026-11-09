@@ -3,6 +3,11 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## 0.65.0 (unreleased)
+
+Minor release. g4sim phase S9 (`adapters/geant4` 0.15.0; contracts 3.27.0, `CORE_VERSION` 1.13.0). Conditions and alignment, started on the maintainer's word for studies that need both. Alignment overlay layers (`alignment-overlay/1`): shifts and small rotations of IR placements by mother, template and copy number, applied after expansion so the gap rule and the error bounds judge the misaligned geometry; an applied overlay always gives a new `geometry_id`, a shift of zero included, and a placement the IR does not hold is refused. `g4sim_run.py diff` lists the placements in which two IRs differ, and `--overlay` runs a misaligned geometry.
+Condition snapshots (`condition-snapshot/1`): gains, thresholds, dead channels and temperatures per cell, in tables indexed by intervals of validity that may not overlap, looked up by event time in the response layer: `core/simulation/digitize.py` applies them per channel without moving any draw; `g4sim_digi` does not read them.
+
 ## 0.64.0 (2026-11-09)
 
 Minor release. g4sim phase S8 (`adapters/geant4` 0.14.0; contracts 3.26.0, `CORE_VERSION` 1.12.0). Scale: check-spec handles 10⁶ touchables within the budget (10⁶ cells in one mother in 94 s): the sibling check uses a spatial hash, so a regular layout costs about one neighbourhood per placement, with its findings unchanged; a shell's wrapper may no longer take an existing template's name. `placement_impl` in the run card builds a placement of a template with no daughters as G4AssemblyVolume imprints, byte-identical to ordinary placements (copy numbers, names and the IR's rotation kept); replica and parameterised are refused (addendum 11.1).
