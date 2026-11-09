@@ -8942,6 +8942,14 @@ G5 for g4sim phase S5, at `87f3eb57`: the encoded cellID, in `g4sim_run/NewScore
 
 **Confirmation** (hsinyichou, maintainer, 2026-11-07, in the Claude Code session): "G5 is OK.", given while a second read was still running. That read was cancelled; a third, complete read then compared `CopyPart`, `AxisValues` and `CellId` by eye with the nearest examples and found no copied structure, which supports the confirmation and cannot prove authorship.
 
+## G4SIM-S8-G5 (2026-11-09, E5 for the scan; confirmation by the maintainer)
+
+G5 for g4sim phase S8 (gate 5), at `e98cd989`: `adapters/geant4/assets/g4sim_run/FastSim.hh`, the assembly builder in `g4sim_run/NewBuild.hh`, the S8 changes of `g4sim_run/NewRun.cc` and `g4sim/Accounting.hh`, and `adapters/geant4/assets/g4sim_digi/Samplers.hh` and `g4sim_digi.cc`.
+
+**Evidence**: `adapters/geant4/tests/g4proto/g5_scan.py` on those six files against all 5,657 `.cc`, `.hh` and `.icc` files of the Geant4 11.4.3 examples tree: 0 shared runs of 3 and of 4 consecutive lines; the positive control found 863 and 880 (`g4sim-references/s8/g5/scan-*.json`). Two independent reads by agents that did not write the code: the first judged the files written from the API, named the closest resemblances (the absorb model's `KillPrimaryTrack` with `ProposeTotalEnergyDeposited` and the model creation in `ConstructSDandField`, as in Par01 and Par03; the assembly from the project's own S3 prototype), confirmed `LogGamma` character for character against CPython 3.13.2's `Modules/mathmodule.c`, and found defects fixed at `70af0c20`; the second read those fixes, found error-path defects fixed at `e98cd989`, and no adaptation. `LogGamma` is adapted from CPython under the Python Software Foundation License (`adapters/geant4/assets/PYTHON-LICENSE.txt`); the PTRS and BTPE constants come through `rng.py` from NumPy's `distributions.c` (BSD).
+
+**Confirmation** (hsinyichou, maintainer, 2026-11-09, in the Claude Code session): "agree G5 wording", in answer to the wording: "G5 for S8: I reviewed the S8 C++ at commit e98cd989: g4sim_run/FastSim.hh, the assembly builder in g4sim_run/NewBuild.hh, the S8 changes in g4sim_run/NewRun.cc and g4sim/Accounting.hh, and g4sim_digi/Samplers.hh and g4sim_digi.cc. They are written from the Geant4 API, with no example code copied or adapted. The fast-simulation hook follows the Par01/Par03 API pattern. LogGamma is adapted from CPython 3.13.2 under the PSF License, and the PTRS/BTPE constants come from NumPy (BSD) through rng.py."
+
 ## G4SIM-S7-G5 (2026-11-08, E5 for the scan; confirmation by the maintainer)
 
 G5 for g4sim phase S7 (gate 6), at `4ee3288a` (build 26): `adapters/geant4/assets/g4sim/Accounting.hh`, `FieldMap.hh`, `KillProcess.hh`, `Optics.hh`, `ProbeV2.hh` and `adapters/geant4/assets/g4sim_run/NewBuild.hh`, `NewRun.cc`, `NewScorers.hh`, `NewSource.hh`, `XtrConstructor.hh`.

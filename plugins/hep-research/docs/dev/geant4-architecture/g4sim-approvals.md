@@ -224,3 +224,4 @@ These are not Section 20 decisions. They are how S0 reconciled requirements of t
 | Item | Decision | Who | Date | Words |
 | --- | --- | --- | --- | --- |
 | Slurm submissions in S8 | The agent submits the Slurm jobs S8 needs without asking each time, and reports each one; E7 stops for failed gates, missing data and contradictions still apply | hsinyichou (maintainer) | 2026-11-09 | Answer "Yes, auto-submit in S8 (Recommended)" to the question whether S7's permission should hold for S8 |
+| G5 of the S8 C++ | Confirmed for the S8 C++ at `e98cd989`: `FastSim.hh`, the assembly builder in `NewBuild.hh`, the S8 changes of `NewRun.cc` and `Accounting.hh`, `g4sim_digi/Samplers.hh` and `g4sim_digi.cc`; after two independent reads and their fixes and a scan of the final files (`VALIDATION.md`, G4SIM-S8-G5) | hsinyichou (maintainer) | 2026-11-09 | "agree G5 wording" |
