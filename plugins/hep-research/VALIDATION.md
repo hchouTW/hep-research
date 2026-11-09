@@ -8984,6 +8984,32 @@ limits catch large defects only. The custodian's re-evaluation of qualification 
 
 Passing checks show software consistency, not physical validity.
 
+## 0.65.1 release check (2026-11-09, CI and E2)
+
+Release commit `b51f502f` on `release/0.65.1`, based on main `d85dde30` (PR #382 merged). Patch release: the `FTFP_BERT` entry of `contracts/rules/geant4_datasets.json`, its case in `probe_datasets.py` and its assertion in `tests/adapters/test_g4proto_reacquire.py`. Contracts 3.27.0, `CORE_VERSION` 1.13.0 and `adapters/geant4` 0.15.0 unchanged.
+
+What changed on the release branch:
+- version 0.65.1 in both manifests, `pyproject.toml`, the README, two assets, the six theory-profile scripts, `usine_translate.py` and `examples/bc-usine-reproduction/run.py`;
+- a CHANGELOG `0.65.1` section.
+
+No regeneration: committed outputs keep the versions that wrote them, and the change alters no committed result.
+
+How the entry was measured: E2 (macOS arm64, Geant4 11.4.3), with `g4sim_run` built from adapters/geant4 0.15.0, not `element_sim`. Each dataset was pointed at an empty folder, with serial runs and per-event seeding: 10 protons at 3 GeV/c and 10 positrons at 796.6 MeV into a 6x6 PbWO4 array. Both runs need G4ENSDFSTATEDATA, G4LEDATA, G4LEVELGAMMADATA (the silent case) and G4PARTICLEXSDATA. A control probe of `FTFP_BERT_EMZ` with the proton run did not find G4LEVELGAMMADATA, which its E5 entry has. The probe was not rerun on E5.
+
+| Check | Result |
+|---|---|
+| CI `tests.yml` on PR #382 at `3dcaf6f3` | success (27 pass, 3 skipped) |
+| `run_all_checks.py`, E2 at `3dcaf6f3` (miniconda Python 3.13.2) | 34 pass, 0 fail; 7217 tests, 0 failures, 231 skipped |
+| `run_all_checks.py --no-cli --jobs 4`, E2 (`~/.venvs/hep-research-e2`, Python 3.13.2) at `b51f502f` | 32 pass, 0 fail, 2 skipped (CLI host checks); 7217 tests, 0 failures, 180 skipped |
+| `check_relocation.py`, E2 at `b51f502f`, `TMPDIR` on local disk | 32 pass, 1 fail, 1 skipped (`codex-plugin-load`); 7217 tests, 1 failure, 197 skipped; two runs, the same failure. `claude-plugin-validate` passes |
+| A 20-event g4sim run with `FTFP_BERT` (e+ 197 MeV, PbWO4 array) | completes; conservation residual about 1e-13 MeV |
+
+The one relocation failure, `tests.skills.hep_ml.test_assets_smoke` `test_ddp_skeleton_two_gloo_processes` (two gloo processes on loopback), is the known one of 0.53.0 and 0.54.0. It passes 3 of 3 times alone on E2, it passes in the full `run_all_checks.py`, and no file it reads changed in this release.
+
+**E5 was not run for this release.**
+
+Passing checks show software consistency, not physical validity.
+
 ## 0.65.0 release check (2026-11-09, CI and E5)
 
 Release branch `release/0.65.0`, based on main `3e3a1909` (PR #379 merged). Minor release: g4sim phase S9, the last phase of the g4sim plan. Contracts 3.27.0, `CORE_VERSION` 1.13.0, `adapters/geant4` 0.15.0.
