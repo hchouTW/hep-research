@@ -232,3 +232,5 @@ These are not Section 20 decisions. They are how S0 reconciled requirements of t
 | Item | Decision | Who | Date | Words |
 | --- | --- | --- | --- | --- |
 | Start of S9 and its research need (Sections 17, E11) | S9 starts; studies need both the alignment overlays and the time-dependent conditions | hsinyichou (maintainer) | 2026-11-09 | "start S9"; answer "Both alignment and conditions" to the question which research need to record |
+| Slurm submissions in S9 | The agent submits the Slurm jobs S9 needs without asking each time, and reports each one | hsinyichou (maintainer) | 2026-11-09 | Answer "Slurm, auto-submit in S9 (Recommended)" |
+| Push, PR, merge and release of S9 | After the full checks and the final record: push g4sim/S9, open the PR, merge it once CI passes, then release 0.65.0 | hsinyichou (maintainer) | 2026-11-09 | Answer "Push, PR, merge, release (Recommended)" |
