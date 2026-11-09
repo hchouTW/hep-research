@@ -3,7 +3,7 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
-## 0.64.0 (unreleased)
+## 0.64.0 (2026-11-09)
 
 Minor release. g4sim phase S8 (`adapters/geant4` 0.14.0; contracts 3.26.0, `CORE_VERSION` 1.12.0). Scale: check-spec handles 10⁶ touchables within the budget (10⁶ cells in one mother in 94 s): the sibling check uses a spatial hash, so a regular layout costs about one neighbourhood per placement, with its findings unchanged; a shell's wrapper may no longer take an existing template's name. `placement_impl` in the run card builds a placement of a template with no daughters as G4AssemblyVolume imprints, byte-identical to ordinary placements (copy numbers, names and the IR's rotation kept); replica and parameterised are refused (addendum 11.1).
 Fast-simulation hooks: a `fast_sim_envelope` requirement (an envelope with no daughters, alone in its own region) and the run card's `physics.fast_sim` (a model of `fast_sim_models.json` and the particles it acts on, never all of them); `simulate` reads back the process on exactly those particles. A model's deposit reaches the scorers, and the track it ends is booked. This plan ships only the hook and two test models: an idle hook keeps every mean deposit within ln 1.005, though it changes about a third of the events, and the absorb model closes exactly. Substitute models are validated by the studies that use them.

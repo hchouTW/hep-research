@@ -64,7 +64,7 @@
    "gate_record": "docs/dev/geant4-architecture/g4sim-gates/S7.md"
   },
   "S8": {
-   "state": "gates-recorded",
+   "state": "merged",
    "worktree": "../hep-research-g4sim-S8",
    "branch": "g4sim/S8",
    "task_card_sha256": "6af2aebb75d0b87c9db77a9a61c1e3c00338f461fa28be22bf2bc4193d24da50",
