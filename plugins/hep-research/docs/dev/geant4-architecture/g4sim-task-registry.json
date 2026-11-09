@@ -820,6 +820,13 @@
    "registered_at": "2026-11-09T02:15:15Z",
    "card_commit": "440b9392",
    "reason": "gate 3 step 2: the independent trial's grouping (K = 6), variances and the events of the test (150,802 paired events per run, seed 940002), registered before the test runs; thresholds as at the previous registration"
+  },
+  {
+   "card": "g4sim-tasks/S8.md",
+   "sha256": "6af2aebb75d0b87c9db77a9a61c1e3c00338f461fa28be22bf2bc4193d24da50",
+   "registered_at": "2026-11-09T04:07:04Z",
+   "card_commit": "d1f5af6a",
+   "reason": "the execution log's closing entry only; thresholds as at the gate 3 step 2 registration"
   }
  ]
 }
