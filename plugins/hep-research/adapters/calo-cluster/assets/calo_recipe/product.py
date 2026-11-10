@@ -1,12 +1,17 @@
-"""calo-cluster-product/1, the recipe's own product format (plan 8.3; T08 interfaces), with its writer and its reader.
+"""calo-cluster-product/1 and /2, the recipe's own product format (plan 8.3; T08 interfaces), with its writer and its reader.
+
+/2 (D2 stage 2, ruling 2) is written exactly when the gain step consumed a calo-gain-payload/1: its gain step carries that
+payload's format, channel map and source, all three. /1 is written for a stage 1 calo-calibration-payload/1 gain and never
+carries them, so job 7552825's products are unchanged byte for byte; both are read. The two differ in nothing else.
 
 JSON Lines, UTF-8, one object per line, keys sorted, numbers as Python writes them (shortest round-trip form, so the bytes
 read back to the same values), no NaN or infinity anywhere. Line 1 is the header (HEADER_KEYS), then one line per event in
-input order (EVENT_KEYS), then the end line {"end": FORMAT, "events": N}. Nothing follows it.
+input order (EVENT_KEYS), then the end line {"end": <the header's format>, "events": N}. Nothing follows it.
 
 Header: the product identity, recipe, named energy kind ("clustered deposited energy", t04-values-v4.md section 7; never
 incident energy), units, frame and channel rule, grid, the input by format and SHA-256, the configuration by SHA-256, the
-chain (each step's payload identity in chain order, the gain's role stated), and the retention scope (plan 8.3, R34).
+chain (each step's payload identity in chain order, the gain's role stated; a calo-gain-payload/1 gain adds its format, channel
+map identity and the payload it was derived from, D2 stage 2), and the retention scope (plan 8.3, R34).
 
 Event: the dead channels (no value, never zero); the input, clustered and unclustered sums of e_c and the unclustered count;
 the event sum with its uncertainty and saturation flag; cells, one row per cell of a kept component, in CELL_FIELDS order:
@@ -31,8 +36,11 @@ from dataclasses import dataclass
 import numpy
 
 from . import ENERGY_KIND, RECIPE
+from .gain_payload import FORMAT as GAIN_FORMAT, channel_map_identity
 
 FORMAT = "calo-cluster-product/1"
+FORMAT_GAIN_PAYLOAD = "calo-cluster-product/2"     # the gain step consumed a calo-gain-payload/1
+FORMATS = (FORMAT, FORMAT_GAIN_PAYLOAD)
 ENERGY_KINDS = {ENERGY_KIND}
 HEADER_KEYS = {"format", "recipe", "product_id", "energy_kind", "energy_unit", "position_unit", "frame", "grid", "input",
                "configuration", "chain", "retention", "cell_fields", "events"}
@@ -55,6 +63,9 @@ RETENTION = {
 INPUT_KEYS = {"format", "role", "sha256", "events"}
 CHAIN_STEP_KEYS = {"pedestal": {"order", "step", "operation", "payload_id", "origin", "round", "derived_against"},
                    "gain": {"order", "step", "operation", "role", "payload_id", "origin", "round", "derived_against"}}
+# A calo-gain-payload/1 gain (D2 stage 2) adds its format, channel map and source to the gain step, and makes the product /2;
+# a product made with a stage 1 payload stays /1, byte for byte as before. A reader before stage 2 refuses /2.
+GAIN_PAYLOAD_KEYS = {"format", "channel_map", "derived_from"}
 KINDS = {"one-peak", "two-peak"}
 STATUSES = {"ok", "singular-fisher", "non-positive-variance"}
 FAILURES = {None, "sharing-undefined", "singular-fisher", "non-positive-variance"}
@@ -76,7 +87,8 @@ def dumps(doc) -> str:
 
 
 def header_document(product_id: str, nx: int, ny: int, input_sha256: str, events: int, configuration_sha256: str, chain: list) -> dict:
-    return {"format": FORMAT, "recipe": RECIPE, "product_id": product_id, "energy_kind": ENERGY_KIND, "energy_unit": "MeV",
+    product_format = FORMAT_GAIN_PAYLOAD if "channel_map" in chain[1] else FORMAT
+    return {"format": product_format, "recipe": RECIPE, "product_id": product_id, "energy_kind": ENERGY_KIND, "energy_unit": "MeV",
             "position_unit": "cell", "frame": FRAME, "grid": {"nx": nx, "ny": ny},
             "input": {"format": "calo-cells/1", "role": "reconstruction-input", "sha256": input_sha256, "events": events},
             "configuration": {"format": "calo-cluster-configuration/1", "sha256": configuration_sha256}, "chain": chain,
@@ -115,7 +127,7 @@ class Writer:
     """Writes a product line by line; finish() writes the end line. A product without it is refused as incomplete."""
 
     def __init__(self, stream, header: dict):
-        self.stream, self.expected, self.count = stream, header["events"], 0
+        self.stream, self.expected, self.count, self.format = stream, header["events"], 0, header["format"]
         check_header(header)
         stream.write(dumps(header) + "\n")
 
@@ -128,11 +140,11 @@ class Writer:
     def finish(self) -> None:
         if self.count != self.expected:
             raise ProductError(f"{self.count} events written, the header says {self.expected}")
-        self.stream.write(dumps({"end": FORMAT, "events": self.count}) + "\n")
+        self.stream.write(dumps({"end": self.format, "events": self.count}) + "\n")
 
 
 def product_text(product: Product) -> str:
-    lines = [dumps(product.header)] + [dumps(e) for e in product.events] + [dumps({"end": FORMAT, "events": len(product.events)})]
+    lines = [dumps(product.header)] + [dumps(e) for e in product.events] + [dumps({"end": product.header["format"], "events": len(product.events)})]
     return "\n".join(lines) + "\n"
 
 
@@ -171,8 +183,8 @@ def _hex64(value, where):
 
 def check_header(header: dict) -> None:
     _keys(header, HEADER_KEYS, "header")
-    if header["format"] != FORMAT:
-        _refuse("header.format", f"{header['format']!r} is not {FORMAT}")
+    if header["format"] not in FORMATS:
+        _refuse("header.format", f"{header['format']!r} is not one of {FORMATS}")
     if header["recipe"] != RECIPE:
         _refuse("header.recipe", f"{header['recipe']!r} is not {RECIPE}")
     if header["energy_kind"] not in ENERGY_KINDS:
@@ -196,10 +208,21 @@ def check_header(header: dict) -> None:
     if not isinstance(chain, list) or [s.get("step") if isinstance(s, dict) else None for s in chain] != ["pedestal", "gain"]:
         _refuse("header.chain", "the chain must be pedestal then gain, in that order")
     for order, step in enumerate(chain, 1):
-        _keys(step, CHAIN_STEP_KEYS[step["step"]], f"header.chain[{order - 1}]")
+        keys = CHAIN_STEP_KEYS[step["step"]]
+        if step["step"] == "gain" and header["format"] == FORMAT_GAIN_PAYLOAD:
+            keys = keys | GAIN_PAYLOAD_KEYS          # /2 carries all three; /1 none of them
+        _keys(step, keys, f"header.chain[{order - 1}]")
         if step["order"] != order:
             _refuse(f"header.chain[{order - 1}].order", "chain order is not recorded in sequence")
         _hex64(step["payload_id"], f"header.chain[{order - 1}].payload_id")
+    if header["format"] == FORMAT_GAIN_PAYLOAD:
+        if chain[1]["format"] != GAIN_FORMAT:
+            _refuse("header.chain[1].format", f"{chain[1]['format']!r} is not {GAIN_FORMAT}")
+        _hex64(chain[1]["channel_map"], "header.chain[1].channel_map")
+        if chain[1]["channel_map"] != channel_map_identity(header["grid"]["nx"], header["grid"]["ny"]):
+            _refuse("header.chain[1].channel_map", "the gain payload's channel map is not this grid's")
+        if chain[1]["derived_from"] is not None:
+            _hex64(chain[1]["derived_from"], "header.chain[1].derived_from")
     if chain[0]["operation"] != "subtract" or chain[1]["operation"] not in ("multiply", "divide"):
         _refuse("header.chain", "pedestal subtracts; the gain multiplies or divides")
     if chain[1]["derived_against"] != [chain[0]["payload_id"]]:
@@ -346,8 +369,8 @@ def read_text(text: str) -> Product:
         check_event(doc, i, header)
         events.append(doc)
     end = parse_line(lines[n + 1], "end line")
-    if end != {"end": FORMAT, "events": n}:
-        _refuse("end line", f"expected {{'end': {FORMAT!r}, 'events': {n}}}")
+    if end != {"end": header["format"], "events": n}:
+        _refuse("end line", f"expected {{'end': {header['format']!r}, 'events': {n}}}")
     return Product(header=header, events=events)
 
 

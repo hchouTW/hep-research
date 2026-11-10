@@ -5,7 +5,7 @@
  "operations": [
   {
    "operation_id": "reconstruct",
-   "summary": "reco.calo.cell-cluster/1, a development binding: the cell chain (pedestal, then gain, each with its payload identity in chain order; raw kept beside calibrated) and t04-values-v4.md section 7.1 clustering of every event of a calo-cells/1 readout, written as calo-cluster-product/1 with sharing fractions per object; energy kind clustered deposited energy, never incident energy",
+   "summary": "reco.calo.cell-cluster/1, a development binding: the cell chain (pedestal, then gain, each with its payload identity in chain order; raw kept beside calibrated) and t04-values-v4.md section 7.1 clustering of every event of a calo-cells/1 readout, written as calo-cluster-product/1 (or /2 with a calo-gain-payload/1 gain) with sharing fractions per object; energy kind clustered deposited energy, never incident energy",
    "invocation": {
     "kind": "cli",
     "options": [
@@ -56,14 +56,14 @@
      "kind": "path",
      "unit": "n/a",
      "required": true,
-     "constraint": "a calo-calibration-payload/1 file, role conditions, step gain, operation multiply or divide (its role in the chain), derived against the pedestal payload given"
+     "constraint": "a calo-gain-payload/1 file (gain per channel of its channel map, the map's identity, its role, and for a derived payload the payload it came from and the channels it changed), or a calo-calibration-payload/1 file with step gain; role conditions, operation multiply or divide (its role in the chain), derived against the pedestal payload given; a calo-gain-payload/1 for another channel map than the readout grid's is refused"
     },
     {
      "name": "product",
      "kind": "path",
      "unit": "n/a",
      "required": true,
-     "constraint": "the calo-cluster-product/1 file to write; written only when the run finishes"
+     "constraint": "the product file to write: calo-cluster-product/1 for a calo-calibration-payload/1 gain, calo-cluster-product/2 for a calo-gain-payload/1 gain (its gain step names that payload's format, channel map and source); written only when the run finishes; an existing file is refused, never overwritten, so a product made with one payload is never replaced by another's"
     },
     {
      "name": "product_id",
@@ -161,7 +161,7 @@
     {
      "exit_code": 2,
      "status": "invalid-input",
-     "meaning": "an input is refused (missing, malformed, a readout kind other than analog, a role other than reconstruction-input, a payload bound on another upstream chain, a configuration key that is not version 4's); stdout carries status rejected (core/status.py) and the reason; no product is written"
+     "meaning": "an input is refused (missing, malformed, a readout kind other than analog, a role other than reconstruction-input, a payload bound on another upstream chain, a gain payload for another channel map, a configuration key that is not version 4's, a product file that already exists); stdout carries status rejected (core/status.py) and the reason; no product is written"
     },
     {
      "exit_code": 3,
@@ -182,7 +182,7 @@
   },
   {
    "operation_id": "check-product",
-   "summary": "Read a calo-cluster-product/1 back, refusing a malformed or incomplete product, and check on every event that no cell is counted twice (the T08 sheet's stop)",
+   "summary": "Read a calo-cluster-product/1 or /2 back, refusing a malformed or incomplete product, and check on every event that no cell is counted twice (the T08 sheet's stop)",
    "invocation": {
     "kind": "cli",
     "options": [
@@ -199,7 +199,7 @@
      "kind": "path",
      "unit": "n/a",
      "required": true,
-     "constraint": "a calo-cluster-product/1 file"
+     "constraint": "a calo-cluster-product/1 or calo-cluster-product/2 file"
     }
    ],
    "outputs": [

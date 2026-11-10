@@ -8,7 +8,9 @@ against the pedestal payload this chain applies (R32: a payload bound on top of 
 
 The readout's saturated flag passes through unchanged: it was set before the gain (t04-values-v4.md section 4.2), and no step
 here sets or clears it. A dead cell has no value at any step (NaN), and is never in a cluster (section 7.1).
-Both steps are linear and the gain step is multiplicative with no additive term, the case of plan R37's CAI-T08-1.
+Both steps are linear and the gain step is multiplicative with no additive term, the case of plan R37's CAI-T08-1: no
+cell-level step follows the gain (the readout clips before it; T_c and T_s are clustering's selections, not cell steps).
+A calo-gain-payload/1 gain is refused against another channel map than the readout grid's (D2 stage 2).
 """
 from __future__ import annotations
 
@@ -17,6 +19,7 @@ from dataclasses import dataclass
 import numpy
 
 from .cell_input import InputError, Payload
+from .gain_payload import check_channel_map
 
 CHAIN_ORDER = ("pedestal", "gain")
 GAIN_ROLE = {"multiply": "multiplies: E = c (ADC - pedestal)", "divide": "divides: E = (ADC - pedestal) / g"}
@@ -34,12 +37,22 @@ class CellChain:
 
 
 def chain_record(pedestal: Payload, gain: Payload) -> list:
-    """The chain as the product records it: one entry per step, in chain order."""
+    """The chain as the product records it: one entry per step, in chain order. A calo-gain-payload/1 gain also records its
+    format, channel map and source (D2 stage 2); a stage 1 calo-calibration-payload/1 gain records exactly what it did before."""
     check_chain(pedestal, gain)
+    gain_record = {"order": 2, "step": "gain", "operation": gain.operation, "role": GAIN_ROLE[gain.operation], "payload_id": gain.identity,
+                   "origin": gain.origin, "round": gain.round, "derived_against": list(gain.derived_against)}
+    if gain.channel_map is not None:
+        gain_record.update({"format": gain.format, "channel_map": gain.channel_map, "derived_from": gain.derived_from})
     return [{"order": 1, "step": "pedestal", "operation": "subtract", "payload_id": pedestal.identity, "origin": pedestal.origin,
              "round": pedestal.round, "derived_against": list(pedestal.derived_against)},
-            {"order": 2, "step": "gain", "operation": gain.operation, "role": GAIN_ROLE[gain.operation], "payload_id": gain.identity,
-             "origin": gain.origin, "round": gain.round, "derived_against": list(gain.derived_against)}]
+            gain_record]
+
+
+def gain_step(after_pedestal, gain, operation: str):
+    """The gain step alone, E = c (ADC - pedestal) or (ADC - pedestal) / g. The chain and the fixed-membership re-evaluation
+    (recalibration.py) both apply it, so they share one arithmetic. No cell-level step follows it in this chain."""
+    return after_pedestal * gain if operation == "multiply" else after_pedestal / gain
 
 
 def check_chain(pedestal: Payload, gain: Payload) -> None:
@@ -59,10 +72,11 @@ def apply(raw: numpy.ndarray, live: numpy.ndarray, saturated: numpy.ndarray, ped
     shape = raw.shape
     if pedestal.values.size != raw.size:
         raise InputError(f"payloads cover {pedestal.values.size} channels, the readout has {raw.size}")
+    check_channel_map(gain, shape[0], shape[1], "gain payload")
     ped = pedestal.values.reshape(shape)
     g = gain.values.reshape(shape)
     with numpy.errstate(invalid="ignore"):
         after = numpy.where(live, raw - ped, numpy.nan)
-        energy = numpy.where(live, after * g if gain.operation == "multiply" else after / g, numpy.nan)
+        energy = numpy.where(live, gain_step(after, g, gain.operation), numpy.nan)
     return CellChain(raw=numpy.where(live, raw, numpy.nan), pedestal=ped, after_pedestal=after, gain=g, energy=energy,
                      live=live.copy(), saturated=saturated & live)

@@ -1,9 +1,14 @@
 #!/usr/bin/env python3
 """reco.calo.cell-cluster/1, the T08 development binding (decisions.md, U12 A): cell chain and section 7.1 clustering on a
-calo-cells/1 readout, written as calo-cluster-product/1. A development binding in Python, not a native backend.
+calo-cells/1 readout, written as calo-cluster-product/1 (stage 1 gain payload) or /2 (calo-gain-payload/1). A development
+binding in Python, not a native backend.
 
 Operations (contracts/tool_contracts/calo_cluster.json):
-  reconstruct    readout + pedestal and gain payloads -> product. Data side: it reads no truth and imports no generator.
+  reconstruct    readout + pedestal and gain payloads -> product. Data side: it reads no truth and imports no generator. The gain
+                 payload is calo-calibration-payload/1 (stage 1) or calo-gain-payload/1, which carries its channel map and is
+                 refused against another one, and makes the product calo-cluster-product/2 (D2 stage 2; /1 otherwise, as in
+                 stage 1). A product is never overwritten: an existing target is refused, so a
+                 product made with one payload is never replaced by another's.
   check-product  read a product back, refusing a malformed or incomplete one, and run the double-count check on every event.
 
 Output: one JSON object on stdout with the status and the reason. Exit 0 ok; 1 failed (check-product found a cell counted
@@ -36,33 +41,38 @@ def parser() -> argparse.ArgumentParser:
     rec = sub.add_parser("reconstruct", help="cell chain and section 7.1 clustering of every event of a readout")
     rec.add_argument("--cells", required=True, help="calo-cells/1 readout, role reconstruction-input")
     rec.add_argument("--pedestal-payload", required=True, help="calo-calibration-payload/1, step pedestal (chain step 1)")
-    rec.add_argument("--gain-payload", required=True, help="calo-calibration-payload/1, step gain (chain step 2)")
-    rec.add_argument("--product", required=True, help="calo-cluster-product/1 to write; not written on refusal")
+    rec.add_argument("--gain-payload", required=True,
+                     help="calo-gain-payload/1, or calo-calibration-payload/1 with step gain (chain step 2)")
+    rec.add_argument("--product", required=True, help="calo-cluster-product/1, or /2 for a calo-gain-payload/1 gain, to write; not written on refusal; never an existing file")
     rec.add_argument("--product-id", required=True, help="the product's identity")
     rec.add_argument("--configuration", help="calo-cluster-configuration/1; default the t08-grid/1 configuration beside this script")
     chk = sub.add_parser("check-product", help="read a product back and check that no cell is counted twice")
-    chk.add_argument("--product", required=True, help="calo-cluster-product/1 to read")
+    chk.add_argument("--product", required=True, help="calo-cluster-product/1 or /2 to read")
     return ap
 
 
 def reconstruct(args) -> int:
-    from calo_recipe import ENERGY_KIND, cell_chain, cell_input, clustering, configuration, product
+    from calo_recipe import ENERGY_KIND, cell_chain, cell_input, clustering, configuration, gain_payload, product
     started = time.perf_counter()
     for name, path in (("cells", args.cells), ("pedestal payload", args.pedestal_payload), ("gain payload", args.gain_payload)):
         if not Path(path).is_file():
             return report("reconstruct", "rejected", f"no such input file: {name} {path}", EXIT_INVALID)
+    target = Path(args.product)
+    if target.exists():
+        return report("reconstruct", "rejected", f"a product is never overwritten: {target} exists ({existing_gain(target)}); "
+                      "a product made with one payload is never replaced by another's", EXIT_INVALID)
     try:
         cfg = configuration.load(args.configuration)
         readout = cell_input.read_file(args.cells, cell_input.read_cells, "cells")
         pedestal = cell_input.read_file(args.pedestal_payload, cell_input.read_payload, "pedestal payload")
-        gain = cell_input.read_file(args.gain_payload, cell_input.read_payload, "gain payload")
+        gain = cell_input.read_file(args.gain_payload, gain_payload.read_gain, "gain payload")
         chain = cell_chain.chain_record(pedestal, gain)
         if (readout.header["nx"], readout.header["ny"]) != (cfg.cells_x, cfg.cells_y):
             raise cell_input.InputError(f"readout grid {readout.header['nx']} x {readout.header['ny']} is not the configuration's")
+        gain_payload.check_channel_map(gain, readout.header["nx"], readout.header["ny"], "gain payload")
     except (configuration.ConfigurationError, cell_input.InputError) as exc:
         return report("reconstruct", "rejected", str(exc), EXIT_INVALID)
     header = product.header_document(args.product_id, cfg.cells_x, cfg.cells_y, readout.sha256, readout.events, cfg.sha256, chain)
-    target = Path(args.product)
     partial = target.with_name(target.name + ".partial")
     objects = failures = fisher_failures = 0
     try:
@@ -89,6 +99,16 @@ def reconstruct(args) -> int:
     if failures:
         return report("reconstruct", "failed", f"{failures} component(s) with undefined sharing (recorded in the product)", EXIT_FAILED, **fields)
     return report("reconstruct", "ok", "", 0, **fields)
+
+
+def existing_gain(path: Path) -> str:
+    """The gain payload an existing product names, for the refusal's reason; it is never read further."""
+    try:
+        with open(path, encoding="utf-8") as stream:
+            header = json.loads(stream.readline())
+        return f"made with gain payload {header['chain'][1]['payload_id']}"
+    except (OSError, ValueError, KeyError, IndexError, TypeError):
+        return "not a readable calo-cluster product"
 
 
 def check_product(args) -> int:

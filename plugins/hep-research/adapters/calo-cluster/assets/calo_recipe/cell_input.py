@@ -66,6 +66,11 @@ class Payload:
     round: int | None
     identity: str
     document: dict
+    # Set by gain_payload.read for a calo-gain-payload/1 (D2 stage 2); a calo-calibration-payload/1 keeps these defaults.
+    format: str = PAYLOAD_FORMAT
+    channel_map: str | None = None
+    derived_from: str | None = None
+    changed_channels: tuple = ()
 
 
 def cells_bytes(raw, live, saturated, raw_unit: str = "adc", readout: str = READOUT_KIND) -> bytes:

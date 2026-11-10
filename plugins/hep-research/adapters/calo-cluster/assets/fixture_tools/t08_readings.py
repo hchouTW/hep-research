@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Scoring side of T08: development readings of one stratum's calo-cluster-product/1 against its t08-truth/1 file.
+"""Scoring side of T08: development readings of one stratum's calo-cluster-product/1 (or /2) against its t08-truth/1 file.
 
 Development readings only (K09 not frozen, Freeze B not reached): nothing here is compared with a gate of t04-values-v4.md,
 and no line is a pass or fail of a quality gate. One check is a gate of this job: the sheet's stop, no cell counted twice

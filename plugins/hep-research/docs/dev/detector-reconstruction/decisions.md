@@ -439,3 +439,24 @@ User, 2026-11-10, verbatim: "start the close-out". Job 7551619 (hpa-wn34, build.
 ## T08, D2 stage 1: cell chain and clustering
 
 User, 2026-11-10, verbatim: "auto continue next" (after the T07 close-out). U12 A (2026-11-07): development binding. `adapters/calo-cluster`, `proposed`. The ten section 7.1 cases the definition leaves open were coded by the implementer without reading the reference, then compared by the coordinator with the frozen reference clusterer (`evidence/t04-v4/round5/calc-t08-reference.py`, behind job 7479146's log): every choice that can move a number matches; the singular-fit rule was then aligned with the reference (neither object kept). Job 7552825 (hpa-wn34, build.sh dbacc342, manifest 8f628036), auto-submitted, PASS: 0 double-counted cells in 15 strata, conservation to 1e-15, no singular fit; pulls and efficiencies are development readings (`d2-stage1-reading.md`), no verdict before K09.
+
+## T08, D2 stage 2: gain payload, CAI-T08-1 and CAI-T08-2
+
+2026-11-10, coordinator, under the user's "auto continue next". Job of record 7554028 (hpa-wn34, 7 min 29 s, PASS).
+
+- **Gain payload.** A new format `calo-gain-payload/1` beside stage 1's `calo-calibration-payload/1`, which is unchanged, so that stage 1 products stay byte-equal (checked against job 7552825, 127 comparisons). It holds the channel map identity, per-channel gains, the role, and for a derived payload its source and changed channels (R32).
+- **Product format.** Products consuming `calo-gain-payload/1` are `calo-cluster-product/2`; `/1` is still read. Why: new fields mean a version bump (stage 9 rule). Older readers refuse `/2` (they fail closed).
+- **CAI-T08-1 rules, fixed before the job.**
+  - Well above threshold: min(E_old, E_new) ≥ 2 T_c.
+  - Changed channels: ix % 8 == 3 and iy % 8 == 3, gain ×1.25.
+  - Tolerance: 1e-12 of scale.
+  - Floors: at least 100 asserted objects per run, and at least 100 asserted one-peak objects per role over the three strata.
+  - Strata: main E3 iso, far and near.
+  - Two-peak objects are asserted with their fractions held at the product's values (R37's f fixed); the recipe's re-sharing is recorded.
+  - The job's nominal gain is 1; a non-unit old gain is covered by hand-made tests only (review F1).
+- **Limits recorded.** The overwrite refusal is a check before writing (sequential writers). There is no CLI re-evaluation operation (a gap for the C&A plan).
+- **Readings.** Two predicted readings were refuted and explained in the coordinator's reading:
+  - near one-peak components that split into two peaks under the changed gain keep their channel set;
+  - the changed cells hold about 2 % of an object's energy, not 10–15 %.
+  
+  CAI-T08-2 has no numeric assertion (R37).
