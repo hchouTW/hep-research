@@ -40,7 +40,7 @@
   },
   "hep-statistics": {
    "references": 14,
-   "bytes": 209683,
+   "bytes": 210102,
    "uncited": 0
   },
   "hep-theory": {
@@ -4193,8 +4193,8 @@
   {
    "path": "skills/hep-statistics/references/core-stats-guide.md",
    "owner": "hep-statistics",
-   "bytes": 14797,
-   "lines": 149,
+   "bytes": 15216,
+   "lines": 153,
    "linked_from_skill_md": true,
    "cited_by": [
     "profiles/experiments/ams-02/modules/methods/inference-and-unfolding.md",

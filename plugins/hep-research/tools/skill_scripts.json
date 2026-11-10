@@ -1065,6 +1065,41 @@
    ]
   },
   {
+   "path": "skills/hep-statistics/scripts/calib_chain.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_contract.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_data.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_deps.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
+   "path": "skills/hep-statistics/scripts/calib_use.py",
+   "depth": 3,
+   "skills": [
+    "hep-statistics"
+   ]
+  },
+  {
    "path": "skills/hep-statistics/scripts/combine_asymmetric.py",
    "depth": 3,
    "skills": [
@@ -1916,7 +1951,7 @@
   }
  ],
  "counts": {
-  "scripts": 199,
+  "scripts": 204,
   "unresolved": 70,
   "named_without_main": 28
  }

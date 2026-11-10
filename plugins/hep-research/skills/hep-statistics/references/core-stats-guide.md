@@ -130,6 +130,10 @@ SciPy) with exit 2 and a JSON message, and every script prints `--help` without 
   region, validated on a cut of the control region; envelope kept apart; NumPy and SciPy at run time.
 - `periodicity_scan.py`: generalized Lomb-Scargle with a surrogate global p (white, AR(1), OU);
   `time_structure.py`: change points (toy-calibrated false alarms) and lags with surrogates. NumPy at run time.
+- `calib_chain.py`, `calib_contract.py`, `calib_deps.py`, `calib_data.py`, `calib_use.py`: the simulator parameter
+  calibration workflow (`docs/dev/simulator-calibration/`, phase 0; library `core/calibration/`): stage graph,
+  candidate methods and P4; the contract checker; dependencies and version ids; lineage, reads and failure
+  records; evidence grades of Appendix C and the "outcome already determined" lookup.
 - Inference scripts of hep-measurement, the pyhf and Combine starting points and the unbinned fit: [command
   reference](core-stats-commands.md#inference-scripts-outside-hep-statistics).
 
