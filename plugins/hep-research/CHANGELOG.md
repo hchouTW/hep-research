@@ -3,6 +3,14 @@
 Release notes for the plugin. Each entry says what changed in behavior; evidence is in [VALIDATION.md](VALIDATION.md).
 Software checks establish contract consistency only, not physical validity.
 
+## Unreleased
+
+Simulator parameter calibration workflow, phase 0 (abstract model and contracts; `docs/dev/simulator-calibration/`). Proposed: a minor release; version numbers are assigned at merge.
+
+- **`core/calibration/`** (steward hep-statistics): `use` (the evidence-grade decision table of Part B Appendix C, agreeing input by input with the reference table of v7.37.4, SHA-256 `c5279adf…`, and the "outcome already determined" lookup), `deps` (hash citations, cycles, roles derived from usage, acyclic version ids), `chain` (stage graph, injection-point splitting, candidate methods, gate P4), `data` (raw-unit lineage, the single-writer ledger of reads and failure records, the reuse and failure-record inputs), `contract` (the section 5.2 checker in phase-0 scope; model-quantity rules deferred to phase 2 and listed in its output). Stage-graph fixtures: the toy detector with its subgraph and bimodal variants, ECAL, RICH and tracker (all `synthetic`).
+- **Scripts** `skills/hep-statistics/scripts/calib_chain.py`, `calib_contract.py`, `calib_deps.py`, `calib_data.py`, `calib_use.py`.
+- **Schemas** `contracts/schemas/calibration_*.json`: the seven abstract objects (stage graph, mechanism, functional, control variable, reference, degeneracy mode, parameter index), contract, data release, plan, `calibration_result.json` (with k, k0 and the unused observables, D11), the ledger and the fixture format. Not yet an artifact type of the envelope: `calibration-result` is first written in phase 2.
+
 ## 0.65.1 (2026-11-09)
 
 Patch release; contracts 3.27.0, `CORE_VERSION` 1.13.0 and `adapters/geant4` 0.15.0 unchanged.

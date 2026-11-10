@@ -1,0 +1,633 @@
+{
+ "type": "object",
+ "required": [
+  "schema",
+  "series",
+  "stage_graph",
+  "parameters",
+  "models",
+  "observables",
+  "event_samples",
+  "references",
+  "estimators",
+  "model_discrepancy",
+  "upstream",
+  "validation",
+  "numerics",
+  "data",
+  "acceptance",
+  "intended_use",
+  "scope"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "schema": {
+   "const": "calibration-contract/1"
+  },
+  "series": {
+   "type": "string",
+   "minLength": 1
+  },
+  "previous_version_sha256": {
+   "type": "string",
+   "pattern": "^[0-9a-f]{64}$"
+  },
+  "simulator": {
+   "type": "string",
+   "minLength": 1
+  },
+  "stage_graph": {
+   "$ref": "calibration_stage_graph.json"
+  },
+  "parameters": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "name",
+     "role",
+     "nodes"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "type": "string",
+      "minLength": 1
+     },
+     "role": {
+      "enum": [
+       "theta",
+       "phi",
+       "psi"
+      ]
+     },
+     "nodes": {
+      "type": "array",
+      "items": {
+       "type": "string",
+       "minLength": 1
+      },
+      "minItems": 1
+     },
+     "mechanism": {
+      "$ref": "calibration_mechanism.json"
+     },
+     "physical_bounds": {
+      "type": "array",
+      "items": {
+       "type": "number"
+      }
+     },
+     "sampling_bounds": {
+      "type": "array",
+      "items": {
+       "type": "number"
+      }
+     },
+     "source": {
+      "type": "string",
+      "minLength": 1
+     },
+     "uncertainty": {
+      "enum": [
+       "negligible",
+       "non-negligible"
+      ]
+     },
+     "index": {
+      "$ref": "calibration_parameter_index.json"
+     },
+     "spec_pointer": {
+      "type": "string",
+      "minLength": 1
+     }
+    }
+   },
+   "minItems": 1
+  },
+  "models": {
+   "type": "object",
+   "required": [],
+   "additionalProperties": false,
+   "properties": {
+    "enumerated": {
+     "type": "array",
+     "items": {
+      "type": "object"
+     }
+    },
+    "absorbed": {
+     "type": "array",
+     "items": {
+      "type": "object"
+     }
+    },
+    "physics_list_confirmations": {
+     "type": "array",
+     "items": {
+      "type": "object"
+     }
+    }
+   }
+  },
+  "source": {
+   "type": "object"
+  },
+  "observables": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "name",
+     "role",
+     "functional",
+     "link",
+     "block",
+     "estimator",
+     "binning"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "type": "string",
+      "minLength": 1
+     },
+     "role": {
+      "enum": [
+       "calibration",
+       "validation",
+       "measurement"
+      ]
+     },
+     "functional": {
+      "$ref": "calibration_functional.json"
+     },
+     "range": {
+      "enum": [
+       "positive",
+       "signed",
+       "unit-interval",
+       "correlation",
+       "simplex"
+      ]
+     },
+     "link": {
+      "enum": [
+       "log",
+       "identity",
+       "logit",
+       "fisher-z",
+       "alr",
+       "ilr"
+      ]
+     },
+     "block": {
+      "enum": [
+       "gaussian",
+       "binomial",
+       "poisson"
+      ]
+     },
+     "estimator": {
+      "type": "string",
+      "minLength": 1
+     },
+     "binning": {
+      "type": "object"
+     },
+     "control_variable": {
+      "$ref": "calibration_control_variable.json"
+     },
+     "sample": {
+      "type": "string",
+      "minLength": 1
+     },
+     "vector": {
+      "type": "object",
+      "required": [
+       "K",
+       "bins",
+       "data_side"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "K": {
+        "type": "integer",
+        "minimum": 1
+       },
+       "bins": {
+        "type": "array",
+        "items": {
+         "type": "string",
+         "minLength": 1
+        },
+        "minItems": 1
+       },
+       "reference_category": {
+        "type": "string",
+        "minLength": 1
+       },
+       "contrast_basis": {
+        "type": "array"
+       },
+       "data_side": {
+        "enum": [
+         "count",
+         "gaussian-summary"
+        ]
+       },
+       "merging_rule": {
+        "type": "object"
+       }
+      }
+     },
+     "bin_of": {
+      "type": "string",
+      "minLength": 1
+     },
+     "shape_class": {
+      "enum": [
+       "free-omega",
+       "absolute",
+       "conditioned"
+      ]
+     },
+     "N_decl": {
+      "type": "object",
+      "required": [
+       "value",
+       "basis"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "value": {
+        "type": "number"
+       },
+       "basis": {
+        "type": "string",
+        "minLength": 1
+       }
+      }
+     },
+     "redeclared_from": {
+      "type": "object",
+      "required": [
+       "shape",
+       "excluded_bins"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "shape": {
+        "type": "string",
+        "minLength": 1
+       },
+       "excluded_bins": {
+        "type": "array",
+        "items": {
+         "type": "string",
+         "minLength": 1
+        },
+        "minItems": 1
+       }
+      }
+     },
+     "value_conventions": {
+      "type": "object"
+     },
+     "degeneracy_hints": {
+      "type": "array",
+      "items": {
+       "$ref": "calibration_degeneracy_mode.json"
+      }
+     }
+    }
+   },
+   "minItems": 1
+  },
+  "event_samples": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "id",
+     "normalization"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "id": {
+      "type": "string",
+      "minLength": 1
+     },
+     "normalization": {
+      "enum": [
+       "free",
+       "absolute"
+      ]
+     },
+     "components": {
+      "type": "array",
+      "items": {
+       "type": "object"
+      }
+     },
+     "sim_absolute_normalization": {
+      "type": "object"
+     }
+    }
+   }
+  },
+  "references": {
+   "type": "array",
+   "items": {
+    "$ref": "calibration_reference.json"
+   }
+  },
+  "estimators": {
+   "type": "object",
+   "required": [
+    "shared_implementation",
+    "uses_truth"
+   ],
+   "additionalProperties": true,
+   "properties": {
+    "shared_implementation": {
+     "type": "boolean"
+    },
+    "uses_truth": {
+     "type": "boolean"
+    }
+   }
+  },
+  "model_discrepancy": {
+   "type": "object",
+   "required": [
+    "form"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "form": {
+     "enum": [
+      "fixed",
+      "inferred"
+     ]
+    },
+    "kernel": {
+     "type": "object"
+    },
+    "components": {
+     "type": "array"
+    }
+   }
+  },
+  "upstream": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "result_sha256",
+     "usages"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "result_sha256": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+     },
+     "usages": {
+      "type": "array",
+      "items": {
+       "enum": [
+        "phi-center",
+        "nuisance-posterior",
+        "xi",
+        "fixed-value",
+        "variation-set",
+        "envelope"
+       ]
+      },
+      "minItems": 1
+     },
+     "role": {
+      "enum": [
+       "central",
+       "variation"
+      ]
+     }
+    }
+   }
+  },
+  "validation": {
+   "type": "object",
+   "required": [
+    "mode",
+    "N_dc"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "mode": {
+     "enum": [
+      "none",
+      "holdout",
+      "cross-validation"
+     ]
+    },
+    "N_dc": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "n",
+       "c",
+       "construction"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "n": {
+        "type": "object"
+       },
+       "c": {
+        "type": "number"
+       },
+       "construction": {
+        "type": "string",
+        "minLength": 1
+       }
+      }
+     }
+    },
+    "N_d": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "n",
+       "c",
+       "construction"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "n": {
+        "type": "object"
+       },
+       "c": {
+        "type": "number"
+       },
+       "construction": {
+        "type": "string",
+        "minLength": 1
+       }
+      }
+     }
+    },
+    "unused": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "observable",
+       "reason",
+       "clause"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "observable": {
+        "type": "string",
+        "minLength": 1
+       },
+       "reason": {
+        "type": "string",
+        "minLength": 1
+       },
+       "clause": {
+        "type": "string",
+        "minLength": 1
+       }
+      }
+     }
+    },
+    "alternatives": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "kind"
+      ],
+      "additionalProperties": true,
+      "properties": {
+       "kind": {
+        "enum": [
+         "simulation-setting",
+         "parameter-shift"
+        ]
+       },
+       "description": {
+        "type": "string",
+        "minLength": 1
+       },
+       "physics_list": {
+        "type": "string",
+        "minLength": 1
+       }
+      }
+     }
+    },
+    "exact_relations": {
+     "type": "array",
+     "items": {
+      "type": "object",
+      "required": [
+       "sample",
+       "observables"
+      ],
+      "additionalProperties": false,
+      "properties": {
+       "sample": {
+        "type": "string",
+        "minLength": 1
+       },
+       "observables": {
+        "type": "array",
+        "items": {
+         "type": "string",
+         "minLength": 1
+        },
+        "minItems": 2
+       }
+      }
+     }
+    },
+    "folds": {
+     "type": "array"
+    }
+   }
+  },
+  "numerics": {
+   "type": "object",
+   "required": [
+    "precision"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "precision": {
+     "const": "double"
+    }
+   }
+  },
+  "data": {
+   "type": "object",
+   "required": [
+    "calibration_releases"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "calibration_releases": {
+     "type": "array",
+     "items": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+     },
+     "minItems": 1
+    },
+    "validation_releases": {
+     "type": "array",
+     "items": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+     }
+    }
+   }
+  },
+  "acceptance": {
+   "type": "object"
+  },
+  "intended_use": {
+   "type": "array",
+   "items": {
+    "type": "string",
+    "minLength": 1
+   },
+   "minItems": 1
+  },
+  "scope": {
+   "type": "object"
+  },
+  "a0_summary": {
+   "type": "object",
+   "required": [],
+   "additionalProperties": false,
+   "properties": {
+    "unreachable_thresholds": {
+     "type": "array",
+     "items": {
+      "type": "string",
+      "minLength": 1
+     }
+    }
+   }
+  },
+  "thresholds": {
+   "type": "object"
+  }
+ },
+ "$comment": "calibration-contract/1 (Part B section 5.1, 5.2): locked by its hash before the validation data are opened; it holds no data values. calib_contract.py check applies the rules of section 5.2."
+}

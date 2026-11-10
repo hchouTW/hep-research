@@ -1,0 +1,125 @@
+{
+ "type": "object",
+ "required": [
+  "schema",
+  "status",
+  "lineage",
+  "observables",
+  "declarations"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "schema": {
+   "const": "calibration-data-release/1"
+  },
+  "status": {
+   "type": "array",
+   "items": {
+    "enum": [
+     "observed",
+     "synthetic",
+     "asimov",
+     "simulated",
+     "preliminary"
+    ]
+   },
+   "minItems": 1
+  },
+  "submitter": {
+   "type": "string",
+   "minLength": 1
+  },
+  "commitment_sha256": {
+   "type": "string",
+   "pattern": "^[0-9a-f]{64}$"
+  },
+  "lineage": {
+   "type": "object",
+   "required": [
+    "raw_units"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "raw_units": {
+     "type": "array",
+     "items": {
+      "type": "string",
+      "minLength": 1
+     },
+     "minItems": 1
+    },
+    "derived_from": {
+     "type": "array",
+     "items": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{64}$"
+     }
+    },
+    "selection": {
+     "type": "string",
+     "minLength": 1
+    }
+   }
+  },
+  "observables": {
+   "type": "array",
+   "items": {
+    "type": "object",
+    "required": [
+     "name"
+    ],
+    "additionalProperties": false,
+    "properties": {
+     "name": {
+      "type": "string",
+      "minLength": 1
+     }
+    }
+   },
+   "minItems": 1
+  },
+  "samples": {
+   "type": "object"
+  },
+  "declarations": {
+   "type": "object",
+   "required": [
+    "representation_format",
+    "derivation_relations",
+    "uncertainty_sources",
+    "relative_systematic_correlation",
+    "has_value"
+   ],
+   "additionalProperties": false,
+   "properties": {
+    "representation_format": {
+     "type": "string",
+     "minLength": 1
+    },
+    "derivation_relations": {
+     "type": "array"
+    },
+    "uncertainty_sources": {
+     "type": "object"
+    },
+    "relative_systematic_correlation": {
+     "type": "string",
+     "minLength": 1
+    },
+    "has_value": {
+     "type": "object"
+    },
+    "untestable_reasons": {
+     "type": "object"
+    },
+    "shared_events": {
+     "type": "array"
+    }
+   }
+  },
+  "content": {
+   "type": "object"
+  }
+ },
+ "$comment": "calibration-data-release/1 (section 5.1): values and their declarations. Validation releases carry only a commitment hash until opened; observed and expected components are sealed (calib_data.py)."
+}

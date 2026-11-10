@@ -67,7 +67,7 @@ hep-statistics/
 | `SKILL.md` | entry point: invariants, Step 0 for a quick question and the task-to-tool table (default tool, fallback, or "no shipped tool"), workflow, context resolution |
 | `references/` | fourteen references: PDF, nPDF and FF fit statistics (chi2 forms, t0, tolerances, reweighting, profiling), the `core/stats` decision guide and its command reference, combinations (BLUE, Peelle, likelihood-level), nuisance modeling, likelihood fitting (including sWeights and weighted unbinned fits), unfolding, inference recipes, statistical tools (pyhf, Combine), astroparticle statistics, binned time series (documented; its time-bin covariance recipe demonstrated on synthetic data by `test_time_series_covariance.py`), ML-assisted inference, RooFit and RooStats methods, inference reasoning |
 | `assets/` | `combine.example.json`: SYNTHETIC input for `combine_measurements.py` (two experiments, shared luminosity) |
-| `scripts/` | twenty-seven helpers (listed below); the executable checks themselves (limits, template fits, unfolding diagnostics, Poisson diagnostics, toys, covariance and response validation) live in `core/stats/` |
+| `scripts/` | thirty-two helpers (listed below); the executable checks themselves (limits, template fits, unfolding diagnostics, Poisson diagnostics, toys, covariance and response validation) live in `core/stats/` |
 
 Scripts:
 
@@ -89,6 +89,7 @@ Scripts:
 - `roofit_fit_check.py`: RooFit status, pulls, cross-checks with core.
 - `extract_names.py`: the naming extractor for nuisances, channels and processes.
 - `discrete_profile.py`, `eft_scan.py`, `pcl_efficiency_ratio.py`, `ratio_estimation.py`, `sweighted_fit.py`.
+- `calib_chain.py`, `calib_contract.py`, `calib_deps.py`, `calib_data.py`, `calib_use.py`: the simulator parameter calibration workflow (`docs/dev/simulator-calibration/`, phase 0): stage graph, candidate methods and P4; the contract checker; dependencies, roles and version ids; raw-unit lineage, reads and failure records; evidence grades (Appendix C) and the "outcome already determined" lookup. Thin CLIs over `core/calibration/`.
 - `result_artifact.py`: writes a `statistical-result` from a tool's output; `--paradigm bayesian` from `bayes_diagnostics.py diagnose` output with priors and sampler.
 
 Outside this folder: `core/stats/` (executable checks), `adapters/pyhf-combine/assets/` (pyhf and Combine starting points), `adapters/unbinned-fit/assets/` (unbinned fits), `adapters/unfolding/assets/unfold.py` (iterative unfolding through pyunfold or RooUnfold, validated by closure, stress tests and toy coverage).

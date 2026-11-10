@@ -1,0 +1,39 @@
+{
+ "type": "object",
+ "required": [
+  "schema",
+  "kernels"
+ ],
+ "additionalProperties": false,
+ "properties": {
+  "schema": {
+   "const": "calibration-plan/1"
+  },
+  "kernels": {
+   "type": "object"
+  },
+  "design_points": {
+   "type": "array"
+  },
+  "event_budget": {
+   "type": "object"
+  },
+  "seeds": {
+   "type": "object"
+  },
+  "storage": {
+   "type": "object"
+  },
+  "node_binding": {
+   "type": "object"
+  },
+  "recording_level": {
+   "type": "string",
+   "minLength": 1
+  },
+  "proposal": {
+   "type": "object"
+  }
+ },
+ "$comment": "calibration-plan/1 (section 5.1): not locked; its hash enters kappa. kernels: {node: {stored: {inputs, outputs, steps}, support_declared, registration}}."
+}
