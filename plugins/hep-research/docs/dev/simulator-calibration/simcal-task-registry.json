@@ -64,6 +64,13 @@
    "registered_at": "2026-11-10T07:37:04Z",
    "card_commit": "b5b88332",
    "reason": "execution log only (approval A7, A6 table fix); thresholds as at the first registration"
+  },
+  {
+   "card": "simcal-tasks/phase-0.md",
+   "sha256": "0c19448e7b00821275ef898ee200fa8f53d3815e11d3b4a598df3135f530fab7",
+   "registered_at": "2026-11-10T07:39:12Z",
+   "card_commit": "ade91e86",
+   "reason": "execution log only (supplied decision table does not match); thresholds as at the first registration"
   }
  ]
 }
