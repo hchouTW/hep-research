@@ -1,0 +1,150 @@
+#!/usr/bin/env python3
+"""Exhaustive Appendix C checks of core/calibration/use against the reference decision table (simulator calibration
+phase 0 gate; simcal-tasks/phase-0.md, "Thresholds and test designs").
+
+The scope of Appendix C is 31.6 million (own inputs, upstreams) cases: a full pass takes about two core-hours, the
+mutant check about two per mutant, so the gate runs are split into shards (batch work, section 14.1) and the unit
+suite (test_calibration_use.py) runs a fixed strided slice of the same functions. A shard k of n takes the cases with
+index i, i mod n == k - 1, of the reference's own cases() order.
+
+Checks (--check):
+  agree       calib_use's assign, effective, allowed_uses, variation_upstream_admissible and derive_role equal the
+              reference's on every case of the shard (outcome or rejection);
+  invariants  the reference's check() with calib_use's functions in place of its own, on the shard: no violation;
+  mutants     the reference's mutants (its mutation_check list) each run on the shard with the reference functions;
+              a mutant is caught by the full scope when at least one shard reports a violation for it;
+  lookup      the "outcome already determined" lookup against an independent enumeration, and mutant 25 (C.2 only),
+              on the shard of the lookup scope.
+Output: one JSON object with status ok (exit 0), failed (exit 1: a disagreement or violation; for mutants, never: a
+mutant not caught in one shard is reported, not failed), or rejected (exit 2: bad arguments or the reference's hash).
+Standard library only.
+"""
+from __future__ import annotations
+
+import argparse
+import contextlib
+import io
+import itertools
+import json
+import sys
+import time
+from pathlib import Path
+
+HERE = Path(__file__).resolve().parent
+ROOT = HERE.parents[1]
+sys.path.insert(0, str(ROOT))
+sys.path.insert(0, str(HERE))
+
+
+def shard(iterable, k: int, n: int):
+    return itertools.islice(iterable, k - 1, None, n)
+
+
+def run_agree(ref, use, deps, k, n):
+    from test_calibration_use import outcome
+    bad, count = [], 0
+    for c, ups in shard(ref.cases(), k, n):
+        count += 1
+        pairs = [("assign", outcome(use.assign, c), outcome(ref.assign, c)),
+                 ("effective", outcome(use.effective, c, ups), outcome(ref.effective, c, ups))]
+        eff = pairs[1][2]
+        if eff[0] == "ok":
+            pairs.append(("allowed_uses", use.allowed_uses(*eff[1]), ref.allowed_uses(*eff[1])))
+        for u in ups:
+            pairs.append(("variation_upstream_admissible", use.variation_upstream_admissible(u),
+                          ref.variation_upstream_admissible(u)))
+            pairs.append(("derive_role", deps.derive_role(u["usages"]), ref.derive_role(u["usages"])))
+        for name, a, b in pairs:
+            if a != b and len(bad) < 20:
+                bad.append({"function": name, "case": repr(c), "upstreams": repr(ups), "calib_use": repr(a),
+                            "reference": repr(b)})
+    return {"cases": count, "disagreements": bad}, not bad
+
+
+def _with_shard(ref, k, n, fn):
+    orig = ref.cases
+    ref.cases = lambda: shard(orig(), k, n)
+    try:
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            res = fn()
+        return res, out.getvalue()
+    finally:
+        ref.cases = orig
+
+
+def run_invariants(ref, use, deps, k, n):
+    names = ("assign", "effective", "allowed_uses", "variation_upstream_admissible", "derive_role", "inherited_flags")
+    saved = {x: getattr(ref, x) for x in names}
+    try:
+        ref.assign, ref.effective, ref.allowed_uses = use.assign, use.effective, use.allowed_uses
+        ref.variation_upstream_admissible, ref.derive_role = use.variation_upstream_admissible, deps.derive_role
+        ref.inherited_flags = use.inherited_flags
+        errors, printed = _with_shard(ref, k, n, ref.check)
+    finally:
+        for x, v in saved.items():
+            setattr(ref, x, v)
+    return {"printed": printed.strip(), "violations": errors[:20]}, not errors
+
+
+def run_mutants(ref, use, deps, k, n):
+    argv = sys.argv
+    sys.argv = argv[:1]            # the reference reads its own --part=k/n (a mutant subset) from sys.argv
+    try:
+        _, printed = _with_shard(ref, k, n, ref.mutation_check)
+    finally:
+        sys.argv = argv
+    caught = {}
+    for line in printed.splitlines():
+        if line.startswith("mutant "):
+            name, verdict = line[len("mutant "):].rsplit(": ", 1)
+            caught[name] = verdict == "caught"
+    return {"mutants": caught}, True
+
+
+def run_lookup(ref, use, deps, k, n):
+    from test_calibration_use import independent_lookup, lookup_scope
+    bad, count, c2_caught = [], 0, 0
+    for c, ups, und in shard(lookup_scope(), k, n):
+        count += 1
+        got = use.outcome_determined(c, ups, und)
+        det, seen = independent_lookup(c, ups, und)
+        if (got["determined"], {(g, frozenset(u)) for g, u in got["outcomes"]}) != (det, seen) and len(bad) < 20:
+            bad.append({"case": repr(c), "upstreams": repr(ups), "undecided": list(und)})
+        if ups and independent_lookup(c, ups, und, c2_only=True)[0] != got["determined"]:
+            c2_caught += 1
+    return {"cases": count, "disagreements": bad, "mutant_c2_only_caught_in": c2_caught}, not bad
+
+
+CHECKS = {"agree": run_agree, "invariants": run_invariants, "mutants": run_mutants, "lookup": run_lookup}
+
+
+def main(argv=None) -> int:
+    ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
+    ap.add_argument("--check", required=True, choices=sorted(CHECKS))
+    ap.add_argument("--part", default="1/1", help="shard k/n (1-based), default 1/1 (the full scope)")
+    args = ap.parse_args(argv)
+    try:
+        k, n = (int(x) for x in args.part.split("/"))
+        if not 1 <= k <= n:
+            raise ValueError
+    except ValueError:
+        print(json.dumps({"status": "rejected", "error": f"--part must be k/n with 1 <= k <= n, not {args.part!r}"}))
+        return 2
+    try:
+        from test_calibration_use import REF  # loads the reference after checking its SHA-256
+    except AssertionError as exc:
+        print(json.dumps({"status": "rejected", "error": str(exc)}))
+        return 2
+    from core.calibration import deps, use
+    t0 = time.time()
+    detail, ok = CHECKS[args.check](REF, use, deps, k, n)
+    out = {"status": "ok" if ok else "failed", "check": args.check, "part": f"{k}/{n}",
+           "reference_sha256": "c5279adf41acfcfb21e8aa67295756d1a551361e6a9aa5fa68d98bb4f17a3de3",
+           "seconds": round(time.time() - t0, 1), **detail}
+    print(json.dumps(out, indent=1))
+    return 0 if ok else 1
+
+
+if __name__ == "__main__":
+    sys.exit(main())
