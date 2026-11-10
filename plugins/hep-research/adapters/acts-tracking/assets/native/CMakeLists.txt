@@ -5,7 +5,9 @@ cmake_minimum_required(VERSION 3.28)
 project(acts_tracking CXX)
 include(t07_generators.cmake)
 
-add_executable(acts_tracking_driver acts_tracking_driver.cpp kalman_refit.cpp)
+# D1 stage 9 (CAI-T07-3): the refit applies an alignment payload through the placement route, so the driver compiles the payload reader and payload_geometry.cpp,
+# data side both: no generator, seed or truth code reaches them (tests/adapters/test_acts_tracking.py).
+add_executable(acts_tracking_driver acts_tracking_driver.cpp kalman_refit.cpp payload_geometry.cpp alignment_payload.cpp)
 target_link_libraries(acts_tracking_driver PRIVATE acts_tracking_common)
 
 # Pattern recognition, recipe reco.track.acts-ckf-planar/1: a program of its own, with no route for a hit set or any other truth-assisted input.

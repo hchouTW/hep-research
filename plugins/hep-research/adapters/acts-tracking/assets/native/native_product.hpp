@@ -10,6 +10,11 @@
 // track_output and one residual_covariance per fitted track, four residual records (predicted, filtered, smoothed, unbiased;
 // never mixed, BP03) and one measurement_output per measured state (kind measurement or outlier). A document's version is
 // stated, never guessed from its content, so a /1 document is written byte for byte as before.
+// D1 stage 9: a /2 product of a refit that applied an alignment payload (CAI-T07-3; alignment_payload.hpp) holds one more header line,
+// alignment_payload <content identity> <origin> <derived_against> <derived_from> <round>, right after alignment_parametrization, and only then: R32's
+// "every reconstruction product records the identity and round of each payload it consumed". A product with no payload is byte for byte as before; the
+// round is none, since t07-alignment-payload/1 comes from no loop (R36). The finder and the truth-seeded run write /2 too when asked for R33's outputs
+// (r33_product_outputs.hpp), with the same records.
 #pragma once
 
 #include <array>
@@ -41,6 +46,12 @@ struct ProductHeader {
   std::string alignment_parametrization;
   std::string alignment_frame;
   std::string alignment_level;
+  // Version 2 only, and only when a payload was applied (D1 stage 9): its content identity, origin, the geometry it binds to, its source and its round.
+  std::string alignment_payload_sha256;  // empty: no payload, no line
+  std::string alignment_payload_origin;
+  std::string alignment_payload_derived_against;
+  std::string alignment_payload_derived_from;
+  std::string alignment_payload_round;
 };
 
 struct TrackRecord {

@@ -256,7 +256,8 @@ class DataSideNeverOpensTruth(unittest.TestCase):
         """Amendment 1: t07-telescope-cai/1 is apart, so t07_fixture_generator and the driver build from what they built from."""
         cmake_text = cmake_text_of(NATIVE)
         self.assertIn("add_executable(t07_fixture_generator t07_fixture_generator.cpp t07_event_generator.cpp t07_seed_stream.cpp t07_truth_file.cpp)", cmake_text)
-        self.assertIn("add_executable(acts_tracking_driver acts_tracking_driver.cpp kalman_refit.cpp)", cmake_text)
+        # D1 stage 9: the driver also compiles the data-side payload reader and the placement route (CAI-T07-3); still no CAI generator code (below, and truth_code_reached).
+        self.assertIn("add_executable(acts_tracking_driver acts_tracking_driver.cpp kalman_refit.cpp payload_geometry.cpp alignment_payload.cpp)", cmake_text)
         self.assertIn("add_library(acts_tracking_common STATIC sha256.cpp t07_data_file.cpp native_product.cpp telescope_geometry.cpp plane_propagation.cpp)", cmake_text)
         reached = native_includes(NATIVE / "t07_fixture_generator.cpp") | native_includes(NATIVE / "t07_event_generator.cpp")
         self.assertEqual(sorted(name for name in reached if name.startswith(("t07_cai", "payload_geometry"))), [])

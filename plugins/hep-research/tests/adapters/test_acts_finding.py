@@ -728,7 +728,7 @@ class FindingIsNeverARefit(unittest.TestCase):
 
 
 FINDER_FLAGS = {"data-file", "product-id", "product-file", "record-file", "product-events"}
-FINDER_OPTIONAL_OUTPUTS = {"seed-file", "ambiguity-trace-file", "ambiguity-trace-events"}
+FINDER_OPTIONAL_OUTPUTS = {"seed-file", "ambiguity-trace-file", "ambiguity-trace-events", "r33-outputs"}  # D1 stage 9: R33's outputs of the delivered tracks, an output; it takes no input
 FINDER_OPTIONAL_STEPS = {"vertex-recipe"}  # D1 stage 7: the vertex step on the delivered tracks, by its recipe's name; it takes no input
 TRUTH_SEEDED_ONLY = ("find_from_starts", "PlaneStart", "truth_seeded", "truth-seeded", ".t07truth", "t07starts", "truth-starts", "start-file")
 
@@ -776,7 +776,7 @@ class FinderStaysTruthFree(unittest.TestCase):
 
     def test_each_truth_input_alone_is_named(self):
         required = 'known{"data-file", "product-id", "product-file", "record-file", "product-events"}'
-        optional = 'optional_outputs{"seed-file", "ambiguity-trace-file", "ambiguity-trace-events"}'
+        optional = 'optional_outputs{"seed-file", "ambiguity-trace-file", "ambiguity-trace-events", "r33-outputs"}'
         steps = 'optional_steps{"vertex-recipe"}'
         finder_target = "add_executable(acts_tracking_finder acts_tracking_finder.cpp track_finding.cpp kalman_refit.cpp track_vertexing.cpp)"
         defects = {

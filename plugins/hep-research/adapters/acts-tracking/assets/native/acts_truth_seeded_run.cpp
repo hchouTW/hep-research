@@ -2,8 +2,10 @@
 // "Truth-seeded run"; t07-t09-task-sheets.md T07, Acceptance; decisions.md, "T07 stage 5": a separate scoring-side program, the finder stays truth-free).
 //
 //   acts_truth_seeded_run --data-file D --start-file S --product-id NAME --product-file P --record-file R --product-events K
-//                         [--trace-file T --trace-starts E:P,E:P,...] [--reading-start-angle-sigma X]
+//                         [--trace-file T --trace-starts E:P,E:P,...] [--reading-start-angle-sigma X] [--r33-outputs t07-r33/1]
 //
+// D1 stage 9 (stage 8 review m1): with --r33-outputs t07-r33/1 the product is acts-tracking-product/2, the same /1 records plus R33's outputs of each delivered
+// track of the first K events (r33_product_outputs.hpp, the finder's own helper). An output only: the record is the same with or without it.
 // D1 stage 6b, diagnostics, outputs only: --trace-file writes, for each named (event ordinal, particle) start, ACTS's own VERBOSE lines of the CKF and the
 // navigator, every branch of that search with its states (on an ACTS error too, with the error), and this recipe's budget marks, and ACTS's ambiguity lines of those events. The record is the same
 // with or without it. --reading-start-angle-sigma replaces section 7's 0.01 for phi and theta by X: NOT section 7, a reading only, never the default, for no
@@ -28,6 +30,7 @@
 #include <fstream>
 #include <iostream>
 #include <map>
+#include <memory>
 #include <set>
 #include <sstream>
 #include <stdexcept>
@@ -37,6 +40,7 @@
 
 #include "kalman_refit.hpp"
 #include "native_product.hpp"
+#include "r33_product_outputs.hpp"
 #include "sha256.hpp"
 #include "t07_data_file.hpp"
 #include "t07_fixture_constants.hpp"
@@ -71,7 +75,7 @@ struct TruthStart {
 
 std::map<std::string, std::string> parse_flags(int argc, char** argv) {
   const std::set<std::string> known{"data-file", "start-file", "product-id", "product-file", "record-file", "product-events"};
-  const std::set<std::string> optional{"trace-file", "trace-starts", "reading-start-angle-sigma"};
+  const std::set<std::string> optional{"trace-file", "trace-starts", "reading-start-angle-sigma", "r33-outputs"};
   std::map<std::string, std::string> flags;
   for (int index = 1; index < argc; index += 2) {
     const std::string flag = argv[index];
@@ -349,6 +353,11 @@ int run(int argc, char** argv) {
   const std::vector<std::vector<TruthStart>> starts = read_start_file(start_path, data_sha256, reader.header().event_count);
   const t07::TelescopeGeometry telescope = t07::build_telescope_geometry();
   const t07::TrackFinder finder(telescope, t07::field_tesla, reader.header().sigma_loc0_mm, reader.header().sigma_loc1_mm);
+  const bool with_r33_outputs = t07::r33_outputs_asked(flags);
+  std::unique_ptr<const t07::KalmanRefit> outputs_fitter;
+  if (with_r33_outputs) {
+    outputs_fitter = std::make_unique<const t07::KalmanRefit>(telescope, t07::field_tesla, reader.header().sigma_loc0_mm, reader.header().sigma_loc1_mm);
+  }
 
   t07::ProductDocument document;
   t07::ProductHeader& header = document.header;
@@ -364,6 +373,9 @@ int run(int argc, char** argv) {
   header.material_model = "none";
   header.start_prior = {t07::refit_start_x_mm, t07::refit_prior_loc_sigma_mm, t07::refit_prior_angle_sigma, t07::refit_prior_qop_sigma_per_gev, t07::refit_prior_time_sigma};
   header.acts_version = acts_version_text();
+  if (with_r33_outputs) {
+    t07::name_r33_conventions(document);
+  }
 
   const std::string recipe_configuration = recipe_configuration_text();
   const std::string configuration = recipe_configuration + start_configuration_text(sigma_phi, sigma_theta);
@@ -431,6 +443,9 @@ int run(int argc, char** argv) {
         document.tracks.push_back(fit.track);
         document.states.insert(document.states.end(), fit.states.begin(), fit.states.end());
         document.parameters.insert(document.parameters.end(), fit.parameters.begin(), fit.parameters.end());
+      }
+      if (outputs_fitter) {
+        t07::add_r33_outputs_of(*outputs_fitter, finding, event, document);
       }
     }
   }

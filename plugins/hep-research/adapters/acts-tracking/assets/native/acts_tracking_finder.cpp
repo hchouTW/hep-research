@@ -1,7 +1,7 @@
 // The T07 finder: pattern recognition through ACTS on a data file, recipe reco.track.acts-ckf-planar/1 (t04-values-v4.md section 8.1).
 //
 //   acts_tracking_finder --data-file D --product-id NAME --product-file P --record-file R --product-events K [--seed-file S]
-//                        [--ambiguity-trace-file T --ambiguity-trace-events E1,E2,...] [--vertex-recipe reco.vertex.acts-amvf/1]
+//                        [--ambiguity-trace-file T --ambiguity-trace-events E1,E2,...] [--vertex-recipe reco.vertex.acts-amvf/1] [--r33-outputs t07-r33/1]
 //
 // It takes hits and nothing else: a truth path or a truth file is refused, and there is no way in for a hit set or a start state. Section 7's comparator that
 // starts from truth is another program, on the scoring side, and this one does not compile its entry (CMakeLists.txt; tests/adapters/test_acts_finding.py,
@@ -20,6 +20,8 @@
 //   (track_vertexing.hpp), its configuration and its hash in the header, and after each event's candidates one vertexing line, its vertices with their
 //   position, covariance and fit quality, and per vertex its tracks with their weights. The vertex step reads the fits after they are made and changes no
 //   track, so removing those lines leaves the /1 record of the same run byte for byte (acts_finding_record.finding_lines_of). Without it, /1 as before.
+// - with --r33-outputs t07-r33/1 (D1 stage 9; stage 8 review m1), the product is acts-tracking-product/2: the same /1 records, plus R33's outputs of each
+//   delivered track of the first K events (r33_product_outputs.hpp). An output only: it takes no input, and the record is the same with or without it.
 // All at section 4.1's field; the seed windows and the q/p prior are settled for it, so no other is offered.
 #include <Acts/ActsVersion.hpp>
 
@@ -39,6 +41,7 @@
 
 #include "kalman_refit.hpp"
 #include "native_product.hpp"
+#include "r33_product_outputs.hpp"
 #include "sha256.hpp"
 #include "t07_data_file.hpp"
 #include "t07_fixture_constants.hpp"
@@ -58,7 +61,7 @@ constexpr char finding_evidence_class[] = "data-side";
 
 std::map<std::string, std::string> parse_flags(int argc, char** argv) {
   const std::set<std::string> known{"data-file", "product-id", "product-file", "record-file", "product-events"};
-  const std::set<std::string> optional_outputs{"seed-file", "ambiguity-trace-file", "ambiguity-trace-events"};
+  const std::set<std::string> optional_outputs{"seed-file", "ambiguity-trace-file", "ambiguity-trace-events", "r33-outputs"};
   const std::set<std::string> optional_steps{"vertex-recipe"};
   std::map<std::string, std::string> flags;
   for (int index = 1; index < argc; index += 2) {
@@ -238,6 +241,12 @@ int run(int argc, char** argv) {
   const std::string data_sha256 = t07::sha256_of_file(data_path);
   const t07::TelescopeGeometry telescope = t07::build_telescope_geometry();
   const t07::TrackFinder finder(telescope, t07::field_tesla, reader.header().sigma_loc0_mm, reader.header().sigma_loc1_mm);
+  // R33's outputs only when asked for (D1 stage 9): a second KalmanRefit with the finder's own geometry, field and sigmas, which fits each delivered hit set again with outputs.
+  const bool with_r33_outputs = t07::r33_outputs_asked(flags);
+  std::unique_ptr<const t07::KalmanRefit> outputs_fitter;
+  if (with_r33_outputs) {
+    outputs_fitter = std::make_unique<const t07::KalmanRefit>(telescope, t07::field_tesla, reader.header().sigma_loc0_mm, reader.header().sigma_loc1_mm);
+  }
   // The vertex step only when asked for by its recipe's name: without it the record stays /1, as every earlier job wrote it.
   std::unique_ptr<const t07::TrackVertexer> vertexer;
   if (flags.count("vertex-recipe") != 0) {
@@ -258,6 +267,9 @@ int run(int argc, char** argv) {
   header.material_model = "none";
   header.start_prior = {t07::refit_start_x_mm, t07::refit_prior_loc_sigma_mm, t07::refit_prior_angle_sigma, t07::refit_prior_qop_sigma_per_gev, t07::refit_prior_time_sigma};
   header.acts_version = acts_version_text();
+  if (with_r33_outputs) {
+    t07::name_r33_conventions(document);
+  }
 
   const std::string configuration = configuration_text();
   std::ofstream record(record_path, std::ios::binary);
@@ -336,6 +348,9 @@ int run(int argc, char** argv) {
         document.tracks.push_back(fit.track);
         document.states.insert(document.states.end(), fit.states.begin(), fit.states.end());
         document.parameters.insert(document.parameters.end(), fit.parameters.begin(), fit.parameters.end());
+      }
+      if (outputs_fitter) {
+        t07::add_r33_outputs_of(*outputs_fitter, finding, event, document);
       }
     }
   }

@@ -4,6 +4,10 @@
 native/track_fit_outputs.hpp: a track_output per fitted track, four residual records per measurement state (predicted, filtered,
 smoothed, unbiased; never mixed, BP03) and a measurement_output per state with a hit (measurement or outlier), a residual_covariance per
 fitted track, and the header lines r33_conventions and alignment_parametrization. /1 is still read, as every earlier job wrote it.
+D1 stage 9: a /2 product of a refit that applied an alignment payload (CAI-T07-3; t07_alignment_payload.py) holds one more header line, right after
+alignment_parametrization and only then: alignment_payload <content identity> <origin> <derived_against> <derived_from> <round>, read into
+header["alignment_payload"] (ALIGNMENT_PAYLOAD_FIELDS); with no payload, the bytes are as before. The finder's and the truth-seeded run's products are /2 too when they
+were asked for R33's outputs (version_one_of gives back the /1 product of the same run).
 The reader refuses a /2 product that lacks any R33 record a measurement or a fitted track needs (r33_outputs lists them). The residual
 algebra here (residual_of, unbiased_from_smoothed) is this module's own, so recomputed_residuals is a check of the driver's, not a copy.
 
@@ -31,6 +35,7 @@ CONSTRAINTS = ("none", "beam", "vertex")
 R33_COLLECTIONS = ("track_outputs", "residuals", "measurement_outputs", "residual_covariances")
 ALIGNMENT_PARAMETRIZATION = ["t07-plane-rigid/1", "local", "sensor"]  # name, frame, level (R32)
 R33_HEADER_FIELDS = ("r33_conventions", "alignment_parametrization")
+ALIGNMENT_PAYLOAD_FIELDS = ("content_sha256", "origin", "derived_against", "derived_from", "round")  # the optional header line alignment_payload (D1 stage 9)
 # What R33 asks per measurement and per track, as r33_outputs returns it; every key must be there for every measurement of a /2 product.
 R33_MEASUREMENT_FIELDS = ("surface", "geometry_id", "measurement", "measurement_covariance", "residuals", "local_derivative", "reference_derivative", "alignment_derivative",
                           "local_slope", "incidence_rad", "sensitive_path_mm", "path_factor", "thickness_mm")
@@ -245,6 +250,17 @@ def parse_product(text: str) -> dict:
     width = len(fields)
     try:
         document = {"header": _header_from_lines(lines[1:1 + width], fields)}
+        if len(lines) > 1 + width and lines[1 + width].split(" ")[0] == "alignment_payload":
+            tokens = lines[1 + width].split(" ")
+            if not with_r33 or len(tokens) != 1 + len(ALIGNMENT_PAYLOAD_FIELDS) or tokens[2] not in ("nominal", "measured"):
+                raise ProductFormatError("an alignment_payload line belongs to a /2 product and holds identity, origin (nominal or measured), derived_against, derived_from and round")
+            payload = dict(zip(ALIGNMENT_PAYLOAD_FIELDS, tokens[1:]))
+            identities = [payload["content_sha256"], payload["derived_against"]] + ([] if payload["derived_from"] == "none" else [payload["derived_from"]])
+            round_is_count = payload["round"].isascii() and payload["round"].isdigit() and payload["round"][0] != "0" and len(payload["round"]) <= 9
+            if not all(len(token) == 64 and set(token) <= set("0123456789abcdef") for token in identities) or not (payload["round"] == "none" or round_is_count):
+                raise ProductFormatError("an alignment_payload line holds 64-character lowercase hexadecimal identities, a source that is one or none, and a round that is a count or none")
+            document["header"]["alignment_payload"] = payload
+            width += 1
         if with_r33:  # a /1 document stays the dict it always was: no format key means /1
             document = {"format": PRODUCT_FORMAT_R33, **document}
         document.update({name: [] for name in collections})
@@ -291,6 +307,10 @@ def format_product(document: dict) -> str:
             lines.append(f"field_tesla {_number_text(header[name])}")
         else:
             lines.append(f"{name} {header[name]}")
+    if "alignment_payload" in header:
+        if not with_r33:
+            raise ProductFormatError("an applied alignment payload is recorded in acts-tracking-product/2 only")
+        lines.append(" ".join(["alignment_payload"] + [header["alignment_payload"][name] for name in ALIGNMENT_PAYLOAD_FIELDS]))
     for track in document["tracks"]:
         lines.append(" ".join(["track", track["key"], str(track["event_ordinal"]), track["status"], track["failure_category"], str(track["measurements"]),
                                str(track["holes"]), str(track["outliers"]), _number_text(track["chi2"]), str(track["measured_coordinates"]),
@@ -368,6 +388,8 @@ def merge_products(first: dict, second: dict, product_id: str) -> dict:
     for name in MERGE_IDENTITY_FIELDS + (R33_HEADER_FIELDS if first.get("format") == PRODUCT_FORMAT_R33 else ()):
         if first["header"][name] != second["header"][name]:
             raise ProductFormatError(f"the products differ in {name}, so one header cannot describe both")
+    if first["header"].get("alignment_payload") != second["header"].get("alignment_payload"):
+        raise ProductFormatError("the products differ in alignment_payload, so one header cannot describe both")
     shared = {track["key"] for track in first["tracks"]} & {track["key"] for track in second["tracks"]}
     if shared:
         raise ProductFormatError(f"both products hold the keys {sorted(shared)}")
@@ -519,6 +541,15 @@ def closed_form_residual_derivative(local_position, local_direction) -> list:
     l0, l1 = float(local_position[0]), float(local_position[1])
     change = ((-1.0, 0.0, slope0, slope0 * l1, -slope0 * l0, l1), (0.0, -1.0, slope1, slope1 * l1, -slope1 * l0, -l0))
     return [[-value for value in row] for row in change]
+
+
+def version_one_of(document: dict) -> dict:
+    """The /1 document a /2 one holds: its /1 records, unchanged, without the R33 records and header lines (D1 stage 9: the finder's and the
+    truth-seeded run's products with and without R33's outputs). format_product of it is the /1 product of the same run, byte for byte."""
+    if document.get("format") != PRODUCT_FORMAT_R33:
+        raise ProductFormatError("only a /2 product holds R33 records to drop")
+    header = {name: value for name, value in document["header"].items() if name not in R33_HEADER_FIELDS + ("alignment_payload",)}
+    return {"header": header, "tracks": document["tracks"], "states": document["states"], "parameters": document["parameters"]}
 
 
 def r33_outputs(document: dict) -> dict:

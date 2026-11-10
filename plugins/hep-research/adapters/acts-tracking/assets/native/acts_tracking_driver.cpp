@@ -3,8 +3,14 @@
 // magic, and neither the truth code nor the seed stream nor the generation constants are linked here.
 //
 //   acts_tracking_driver self-test --work-dir DIR
-//   acts_tracking_driver refit --data-file D --hit-sets H --field-tesla B --product-id NAME --product-file P
+//   acts_tracking_driver refit --data-file D --hit-sets H --field-tesla B --product-id NAME --product-file P [--alignment-payload A]
 //   acts_tracking_driver rewrite-product --product-in P --product-file Q
+//   acts_tracking_driver geometry-id
+//
+// D1 stage 9 (CAI-T07-3): with --alignment-payload, the refit applies t07-alignment-payload/1 (alignment_payload.hpp) through the placement route
+// (payload_geometry.hpp, PlacedTelescope::with_deltas; user's choice 16), and the product's header records the payload it consumed. A malformed payload, one
+// that names a plane the telescope has not, and one derived against another nominal geometry are refused before any fit, exit 2. Without the flag the refit
+// is as before, byte for byte. geometry-id prints the nominal geometry identity a payload must be derived against.
 //
 // refit accepts zero field, where the hits carry no q/p, or section 4.1's 1 T, where they do. No noise, finding or vertexing here. From D1 stage 8 it
 // writes acts-tracking-product/2: the /1 records, unchanged, and the R33 outputs of each fit (track_fit_outputs.hpp). rewrite-product reads either version.
@@ -23,14 +29,17 @@
 #include <iomanip>
 #include <iostream>
 #include <map>
+#include <optional>
 #include <set>
 #include <sstream>
 #include <stdexcept>
 #include <string>
 #include <vector>
 
+#include "alignment_payload.hpp"
 #include "kalman_refit.hpp"
 #include "native_product.hpp"
+#include "payload_geometry.hpp"
 #include "plane_propagation.hpp"
 #include "sha256.hpp"
 #include "t07_data_file.hpp"
@@ -126,7 +135,7 @@ HitSetFile read_hit_sets(const std::string& path) {
 }
 
 int refit(const std::map<std::string, std::string>& flags) {
-  require_only(flags, {"data-file", "hit-sets", "field-tesla", "product-id", "product-file"});
+  require_only(flags, {"data-file", "hit-sets", "field-tesla", "product-id", "product-file", "alignment-payload"});
   const std::string data_path = required(flags, "data-file");
   const std::string hit_sets_path = required(flags, "hit-sets");
   const std::string out_path = required(flags, "product-file");
@@ -151,6 +160,14 @@ int refit(const std::map<std::string, std::string>& flags) {
 
   refuse_overwriting_input(out_path, data_path);
   refuse_overwriting_input(out_path, hit_sets_path);
+  // D1 stage 9: a payload is read and checked against this build's nominal geometry before anything else is read or fitted.
+  const auto payload_flag = flags.find("alignment-payload");
+  std::optional<t07::AlignmentPayload> payload;
+  if (payload_flag != flags.end()) {
+    refuse_overwriting_input(out_path, payload_flag->second);
+    t07::refuse_truth_path(payload_flag->second);
+    payload = t07::parse_alignment_payload_for(t07::read_whole_file(payload_flag->second), t07::nominal_geometry_id());
+  }
   t07::DataFileReader reader(data_path);  // a truth path stops here, before any other input is read
   const std::string data_sha256 = t07::sha256_of_file(data_path);
   const HitSetFile hit_set_file = read_hit_sets(hit_sets_path);
@@ -165,7 +182,12 @@ int refit(const std::map<std::string, std::string>& flags) {
     throw std::invalid_argument("refused: a hit set names an event the data file does not hold");
   }
 
-  const t07::TelescopeGeometry telescope = t07::build_telescope_geometry();
+  // With a payload, the planes are placed (payload_geometry.hpp) and the payload's deltas are the context; placed_planes outlives every fit.
+  std::optional<t07::PlacedTelescope> placed_planes;
+  if (payload.has_value()) {
+    placed_planes.emplace();
+  }
+  const t07::TelescopeGeometry telescope = payload.has_value() ? placed_planes->with_deltas(payload->deltas) : t07::build_telescope_geometry();
   const t07::KalmanRefit fitter(telescope, field, reader.header().sigma_loc0_mm, reader.header().sigma_loc1_mm);
 
   t07::ProductDocument document;
@@ -188,6 +210,13 @@ int refit(const std::map<std::string, std::string>& flags) {
   header.alignment_parametrization = t07::alignment_parametrization_name;
   header.alignment_frame = t07::alignment_frame_name;
   header.alignment_level = t07::alignment_level_name;
+  if (payload.has_value()) {
+    header.alignment_payload_sha256 = payload->content_sha256;
+    header.alignment_payload_origin = payload->origin;
+    header.alignment_payload_derived_against = payload->derived_against;
+    header.alignment_payload_derived_from = payload->derived_from;
+    header.alignment_payload_round = "none";  // t07-alignment-payload/1 comes from no loop (R36)
+  }
 
   std::map<std::string, int> seen_keys;
   std::size_t failed = 0;
@@ -216,6 +245,12 @@ int refit(const std::map<std::string, std::string>& flags) {
   t07::write_whole_file(out_path, t07::encode_product(document));
   std::cout << "{\"status\": \"ok\", \"tracks\": " << document.tracks.size() << ", \"failed\": " << failed
             << ", \"stage\": \"" << header.stage << "\", \"evidence_class\": \"" << header.evidence_class << "\"}\n";
+  return 0;
+}
+
+int geometry_id(const std::map<std::string, std::string>& flags) {
+  require_only(flags, {});
+  std::cout << t07::nominal_geometry_id() << "\n";
   return 0;
 }
 
@@ -603,6 +638,60 @@ void check_r33_product(SelfTest& test) {
   test.check_refused("a /1 document holding R33 records is not written", [&] { t07::encode_product(r33_as_version_one); });
 }
 
+// D1 stage 9: t07-alignment-payload/1 and the product line that records it. Each refusal is one defect of an honest payload.
+void check_alignment_payload(SelfTest& test) {
+  const std::string geometry = t07::nominal_geometry_id();
+  test.check("the nominal geometry identity is 64 hexadecimal characters", geometry.size() == 64 && geometry.find_first_not_of("0123456789abcdef") == std::string::npos);
+  test.check("the nominal geometry text names eight rectangles", t07::nominal_geometry_text().rfind("t07-telescope-nominal/1\nplanes 8\nplane 1 rectangle ", 0) == 0);
+  const std::string head = "t07-alignment-payload/1\nparametrization t07-plane-rigid/1 local sensor\nderived_against " + geometry + "\norigin measured\nderived_from none\n";
+  const std::string honest = head + "plane 4 0.0625 0 0 0 0 0\nend 1\n";
+  const t07::AlignmentPayload read = t07::parse_alignment_payload_for(honest, geometry);
+  test.check("a payload maps its plane record to that plane's delta and leaves the others nominal",
+             read.planes == std::vector<int>{4} && read.deltas[3].shift_loc0_mm == 0.0625 && read.deltas[3].shift_loc1_mm == 0.0 && read.deltas[0].shift_loc0_mm == 0.0);
+  test.check("a payload's identity is the SHA-256 of its bytes", read.content_sha256 == t07::hex_of(t07::sha256_of_text(honest)));
+  test.check_refused("a payload derived against another geometry is refused", [&] { t07::parse_alignment_payload_for(honest, std::string(64, '0')); });
+  test.check_refused("a payload naming plane 9 is refused", [&] { t07::parse_alignment_payload(head + "plane 9 0.0625 0 0 0 0 0\nend 1\n"); });
+  test.check_refused("a payload naming plane 0 is refused", [&] { t07::parse_alignment_payload(head + "plane 0 0.0625 0 0 0 0 0\nend 1\n"); });
+  test.check_refused("a payload naming a plane twice is refused", [&] { t07::parse_alignment_payload(head + "plane 4 0.0625 0 0 0 0 0\nplane 4 0 0 0 0 0 0\nend 2\n"); });
+  test.check_refused("a plane record with five values is refused", [&] { t07::parse_alignment_payload(head + "plane 4 0.0625 0 0 0 0\nend 1\n"); });
+  test.check_refused("a value that is not a decimal number is refused", [&] { t07::parse_alignment_payload(head + "plane 4 nan 0 0 0 0 0\nend 1\n"); });
+  test.check_refused("a wrong end count is refused", [&] { t07::parse_alignment_payload(head + "plane 4 0.0625 0 0 0 0 0\nend 2\n"); });
+  test.check_refused("a payload without its end record is refused", [&] { t07::parse_alignment_payload(head + "plane 4 0.0625 0 0 0 0 0\n"); });
+  test.check_refused("another parametrization is refused", [&] { t07::parse_alignment_payload("t07-alignment-payload/1\nparametrization other/1 local sensor" + honest.substr(honest.find("\nderived_against"))); });
+  test.check_refused("another format is refused", [&] { t07::parse_alignment_payload("t07-alignment-payload/2" + honest.substr(honest.find('\n'))); });
+  test.check_refused("an unfinished last line is refused", [&] { t07::parse_alignment_payload(honest.substr(0, honest.size() - 1)); });
+  // Fix round 1, m5: nominal is the ideal geometry, so a nominal payload that moves a plane is refused; one that moves none is read.
+  std::string nominal_moved = honest;
+  nominal_moved.replace(nominal_moved.find("origin measured"), 15, "origin nominal");
+  test.check_refused("a payload labelled nominal that moves a plane is refused", [&] { t07::parse_alignment_payload(nominal_moved); });
+  test.check("a payload labelled nominal that moves no plane is read", t07::parse_alignment_payload(head.substr(0, head.find("origin measured")) + "origin nominal\nderived_from none\nend 0\n").planes.empty());
+  t07::ProductDocument document = sample_r33_document();
+  document.header.alignment_payload_sha256 = read.content_sha256;
+  document.header.alignment_payload_origin = read.origin;
+  document.header.alignment_payload_derived_against = read.derived_against;
+  document.header.alignment_payload_derived_from = read.derived_from;
+  document.header.alignment_payload_round = "none";
+  const std::string with_payload = t07::encode_product(document);
+  const t07::ProductDocument payload_read = t07::decode_product(with_payload);
+  test.check("a /2 product that consumed a payload records it and reads back to the same bytes",
+             with_payload.find("\nalignment_payload " + read.content_sha256 + " measured " + geometry + " none none\n") != std::string::npos &&
+                 payload_read.header.alignment_payload_sha256 == read.content_sha256 && t07::encode_product(payload_read) == with_payload);
+  test.check("a /2 product with no payload has no payload line", t07::encode_product(sample_r33_document()).find("alignment_payload ") == std::string::npos);
+  t07::ProductDocument version_one = sample_document();
+  version_one.header.alignment_payload_sha256 = read.content_sha256;
+  version_one.header.alignment_payload_origin = "measured";
+  version_one.header.alignment_payload_derived_against = geometry;
+  version_one.header.alignment_payload_derived_from = "none";
+  version_one.header.alignment_payload_round = "none";
+  test.check_refused("a /1 product does not record a payload", [&] { t07::encode_product(version_one); });
+  const std::string moved_line = with_payload.substr(0, with_payload.find("\ntrack ") + 1) + "alignment_payload x measured y none none\n" + with_payload.substr(with_payload.find("\ntrack ") + 1);
+  test.check_refused("a payload line among the records is refused", [&] { t07::decode_product(moved_line); });
+  // Fix round 1, n4: the line's identities are 64 lowercase hexadecimal characters.
+  std::string short_identity = with_payload;
+  short_identity.replace(short_identity.find("alignment_payload " + read.content_sha256), 18 + 64, "alignment_payload " + read.content_sha256.substr(0, 63));
+  test.check_refused("a payload line with an identity that is not 64 hexadecimal characters is refused", [&] { t07::decode_product(short_identity); });
+}
+
 int self_test(const std::map<std::string, std::string>& flags) {
   require_only(flags, {"work-dir"});
   const std::string work_dir = required(flags, "work-dir");
@@ -615,6 +704,7 @@ int self_test(const std::map<std::string, std::string>& flags) {
   check_lost_hits(test);
   check_product(test);
   check_r33_product(test);
+  check_alignment_payload(test);
   return test.finish();
 }
 
@@ -633,7 +723,10 @@ int main(int argc, char** argv) {
     if (command == "rewrite-product") {
       return rewrite_product(flags);
     }
-    throw std::invalid_argument("the command is self-test, refit or rewrite-product");
+    if (command == "geometry-id") {
+      return geometry_id(flags);
+    }
+    throw std::invalid_argument("the command is self-test, refit, rewrite-product or geometry-id");
   } catch (const std::invalid_argument& error) {
     std::cerr << "invalid input: " << error.what() << "\n";
     return 2;

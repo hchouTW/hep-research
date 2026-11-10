@@ -7,6 +7,7 @@
 #include <fstream>
 #include <limits>
 #include <map>
+#include <optional>
 #include <set>
 #include <sstream>
 #include <stdexcept>
@@ -141,6 +142,18 @@ std::string encode_product(const ProductDocument& document) {
     require_token(header.alignment_frame, "alignment_frame");
     require_token(header.alignment_level, "alignment_level");
   }
+  const bool with_payload = !header.alignment_payload_sha256.empty();
+  if (with_payload) {
+    if (!with_r33) {
+      throw std::runtime_error("an applied alignment payload is recorded in acts-tracking-product/2 only");
+    }
+    for (const auto& [name, value] : std::vector<std::pair<std::string, std::string>>{
+             {"alignment_payload", header.alignment_payload_sha256}, {"alignment_payload origin", header.alignment_payload_origin},
+             {"alignment_payload derived_against", header.alignment_payload_derived_against}, {"alignment_payload derived_from", header.alignment_payload_derived_from},
+             {"alignment_payload round", header.alignment_payload_round}}) {
+      require_token(value, name);
+    }
+  }
   std::string text = std::string(with_r33 ? product_format_r33 : product_format) + "\n";
   text += "product_id " + header.product_id + "\n";
   text += "revision " + std::to_string(header.revision) + "\n";
@@ -158,6 +171,10 @@ std::string encode_product(const ProductDocument& document) {
   if (with_r33) {
     text += "r33_conventions " + header.r33_conventions + "\n";
     text += "alignment_parametrization " + header.alignment_parametrization + " " + header.alignment_frame + " " + header.alignment_level + "\n";
+  }
+  if (with_payload) {
+    text += "alignment_payload " + header.alignment_payload_sha256 + " " + header.alignment_payload_origin + " " + header.alignment_payload_derived_against + " " +
+            header.alignment_payload_derived_from + " " + header.alignment_payload_round + "\n";
   }
   for (const TrackRecord& track : document.tracks) {
     require_token(track.key, "track key");
@@ -271,6 +288,37 @@ ProductDocument decode_product(const std::string& text) {
       fields.refuse("an alignment frame is local or global (R32)");
     }
   }
+  // D1 stage 9: the optional alignment_payload line, right after the header and before any record. The first record line is read here and, when it is not
+  // that line, handed to the loop below unread.
+  std::optional<TokenLine> pending;
+  {
+    TokenLine fields = next_line();
+    if (fields.size() > 0 && fields.text(0) == "alignment_payload") {
+      if (!with_r33 || fields.size() != 6) {
+        fields.refuse("an alignment_payload line belongs to a /2 product and holds identity, origin, derived_against, derived_from and round");
+      }
+      header.alignment_payload_sha256 = fields.text(1);
+      header.alignment_payload_origin = fields.text(2);
+      header.alignment_payload_derived_against = fields.text(3);
+      header.alignment_payload_derived_from = fields.text(4);
+      header.alignment_payload_round = fields.text(5);
+      if (header.alignment_payload_origin != "nominal" && header.alignment_payload_origin != "measured") {
+        fields.refuse("an alignment payload's origin is nominal or measured (R32)");
+      }
+      // D1 stage 9 fix round 1, n4: the identities are 64 lowercase hexadecimal characters; the source may be none, the round none or a count.
+      auto is_identity = [](const std::string& token) {
+        return token.size() == 64 && token.find_first_not_of("0123456789abcdef") == std::string::npos;
+      };
+      const std::string& payload_round = header.alignment_payload_round;
+      const bool round_is_count = !payload_round.empty() && payload_round.size() <= 9 && payload_round.find_first_not_of("0123456789") == std::string::npos && payload_round[0] != '0';
+      if (!is_identity(header.alignment_payload_sha256) || !is_identity(header.alignment_payload_derived_against) ||
+          (header.alignment_payload_derived_from != "none" && !is_identity(header.alignment_payload_derived_from)) || (payload_round != "none" && !round_is_count)) {
+        fields.refuse("an alignment_payload line holds 64-character lowercase hexadecimal identities, a source that is one or none, and a round that is a count or none");
+      }
+    } else {
+      pending.emplace(std::move(fields));
+    }
+  }
 
   std::set<std::string> track_keys;
   std::set<std::pair<std::string, std::int32_t>> state_keys;
@@ -289,7 +337,8 @@ ProductDocument decode_product(const std::string& text) {
     }
   };
   while (true) {
-    const TokenLine fields = next_line();
+    const TokenLine fields = pending.has_value() ? *pending : next_line();
+    pending.reset();
     if (fields.size() == 0) {
       fields.refuse("an empty line");
     }
