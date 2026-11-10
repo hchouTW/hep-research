@@ -85,6 +85,13 @@
    "registered_at": "2026-11-10T07:42:41Z",
    "card_commit": "de427f0f",
    "reason": "execution log only (reference implementation supplied, phase unblocked); thresholds as at the first registration"
+  },
+  {
+   "card": "simcal-tasks/phase-0.md",
+   "sha256": "e81e2eb8ae3cafd1e3c746c10b0a050803a5950d4d90c0be4cedf8b5bd5681f9",
+   "registered_at": "2026-11-10T07:58:57Z",
+   "card_commit": "c4fa708f",
+   "reason": "execution log only (worktree moved to ceph); thresholds as at the first registration"
   }
  ]
 }

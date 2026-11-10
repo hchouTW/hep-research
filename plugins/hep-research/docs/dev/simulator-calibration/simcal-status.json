@@ -3,15 +3,15 @@
  "phases": {
   "phase-0": {
    "state": "in-progress",
-   "worktree": "../hep-research-simcal-phase-0",
+   "worktree": "/ceph/work/AMS/hsinyichou/hep-research-simcal-private/hep-research-simcal-phase-0",
    "branch": "simcal/phase-0",
-   "task_card_sha256": "99b25274b1af1155578dd37f445420317666958bf11d1c04d12d8b27727edecd",
+   "task_card_sha256": "e81e2eb8ae3cafd1e3c746c10b0a050803a5950d4d90c0be4cedf8b5bd5681f9",
    "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-0.md",
    "blocked_on": []
   },
   "phase-1": {
    "state": "not-started",
-   "worktree": "../hep-research-simcal-phase-1",
+   "worktree": "/ceph/work/AMS/hsinyichou/hep-research-simcal-private/hep-research-simcal-phase-1",
    "branch": "simcal/phase-1",
    "task_card_sha256": "2fde1fcde79ab4b5b07325801727436671fb5694b91628bf48a3bf2635027cc4",
    "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-1.md",
@@ -19,7 +19,7 @@
   },
   "phase-2": {
    "state": "not-started",
-   "worktree": "../hep-research-simcal-phase-2",
+   "worktree": "/ceph/work/AMS/hsinyichou/hep-research-simcal-private/hep-research-simcal-phase-2",
    "branch": "simcal/phase-2",
    "task_card_sha256": "dae97aeb68444f672739376458950f16716b77bb893d8bdc885daf2ff12ce490",
    "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-2.md",
@@ -27,7 +27,7 @@
   },
   "phase-3": {
    "state": "not-started",
-   "worktree": "../hep-research-simcal-phase-3",
+   "worktree": "/ceph/work/AMS/hsinyichou/hep-research-simcal-private/hep-research-simcal-phase-3",
    "branch": "simcal/phase-3",
    "task_card_sha256": "e5581f56bc91717cf992e0cef42a25358b5f989901fb32988f19ed8501278f79",
    "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-3.md",
@@ -35,7 +35,7 @@
   },
   "phase-4": {
    "state": "not-started",
-   "worktree": "../hep-research-simcal-phase-4",
+   "worktree": "/ceph/work/AMS/hsinyichou/hep-research-simcal-private/hep-research-simcal-phase-4",
    "branch": "simcal/phase-4",
    "task_card_sha256": "80e961f3b2e6fdacee6828a0d996e706b101ca7a9251819b350e310641c236db",
    "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-4.md",
@@ -43,7 +43,7 @@
   },
   "phase-5": {
    "state": "not-started",
-   "worktree": "../hep-research-simcal-phase-5",
+   "worktree": "/ceph/work/AMS/hsinyichou/hep-research-simcal-private/hep-research-simcal-phase-5",
    "branch": "simcal/phase-5",
    "task_card_sha256": "a358a75e0ca3419fbeb58bba6392afaa39589b436ddb5ba22006589aa0c79ab0",
    "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-5.md",
@@ -67,5 +67,5 @@
   },
   "note": "Phase 0 uses no g4sim item (§17: DAG only, no simulation). S7 gate record read: merged partially complete, gate 3 (TR yield) a recorded gap; no phase-0 item depends on it."
  },
- "updated": "2026-11-10T07:42:41Z"
+ "updated": "2026-11-10T07:58:57Z"
 }
