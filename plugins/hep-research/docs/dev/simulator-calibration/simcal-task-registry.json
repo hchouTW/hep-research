@@ -1,5 +1,48 @@
 {
  "schema": "simcal-task-registry/1",
  "note": "One entry per registration, oldest first. The latest entry of a card is the one in force; gate records cite it. Phase 0 adds the first entries (simcal-task.md, Section E9).",
- "registrations": []
+ "registrations": [
+  {
+   "card": "simcal-tasks/phase-0.md",
+   "sha256": "a2641ceb0694cc111192a847477d7640ce03456ae549c10c78b2633113911925",
+   "registered_at": "2026-11-10T07:27:36Z",
+   "card_commit": "d9b4f114",
+   "reason": "first registration (phase 0, simcal-task.md E9 step 4): drafts refreshed from Part B and the decision index (regenerated identically), maintainer's answer to Open question 6 added; execution log opened; lint_task.py 0 errors"
+  },
+  {
+   "card": "simcal-tasks/phase-1.md",
+   "sha256": "2fde1fcde79ab4b5b07325801727436671fb5694b91628bf48a3bf2635027cc4",
+   "registered_at": "2026-11-10T07:27:36Z",
+   "card_commit": "d9b4f114",
+   "reason": "first registration (phase 0, simcal-task.md E9 step 4): drafts refreshed from Part B and the decision index (regenerated identically), maintainer's answer to Open question 6 added; lint_task.py 0 errors"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "dae97aeb68444f672739376458950f16716b77bb893d8bdc885daf2ff12ce490",
+   "registered_at": "2026-11-10T07:27:36Z",
+   "card_commit": "d9b4f114",
+   "reason": "first registration (phase 0, simcal-task.md E9 step 4): drafts refreshed from Part B and the decision index (regenerated identically), maintainer's answer to Open question 6 added; lint_task.py 0 errors"
+  },
+  {
+   "card": "simcal-tasks/phase-3.md",
+   "sha256": "e5581f56bc91717cf992e0cef42a25358b5f989901fb32988f19ed8501278f79",
+   "registered_at": "2026-11-10T07:27:36Z",
+   "card_commit": "d9b4f114",
+   "reason": "first registration (phase 0, simcal-task.md E9 step 4): drafts refreshed from Part B and the decision index (regenerated identically), maintainer's answer to Open question 6 added; lint_task.py 0 errors"
+  },
+  {
+   "card": "simcal-tasks/phase-4.md",
+   "sha256": "80e961f3b2e6fdacee6828a0d996e706b101ca7a9251819b350e310641c236db",
+   "registered_at": "2026-11-10T07:27:36Z",
+   "card_commit": "d9b4f114",
+   "reason": "first registration (phase 0, simcal-task.md E9 step 4): drafts refreshed from Part B and the decision index (regenerated identically), maintainer's answer to Open question 6 added; lint_task.py 0 errors"
+  },
+  {
+   "card": "simcal-tasks/phase-5.md",
+   "sha256": "a358a75e0ca3419fbeb58bba6392afaa39589b436ddb5ba22006589aa0c79ab0",
+   "registered_at": "2026-11-10T07:27:36Z",
+   "card_commit": "d9b4f114",
+   "reason": "first registration (phase 0, simcal-task.md E9 step 4): drafts refreshed from Part B and the decision index (regenerated identically), maintainer's answer to Open question 6 added; lint_task.py 0 errors"
+  }
+ ]
 }
