@@ -141,6 +141,13 @@
    "registered_at": "2026-11-10T16:16:01Z",
    "card_commit": "103429aa",
    "reason": "execution log only (repeated gate runs, checks, gates recorded, E8 report); thresholds and test design as registered ca717b11"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "680945fb49eaf2b06d61e96b1d7b127698fe87bad8e870451524a6d786699882",
+   "registered_at": "2026-11-10T21:46:08Z",
+   "card_commit": "84006811",
+   "reason": "execution log only (worktree, blocked report on the 25 author decisions); thresholds as at the first registration"
   }
  ]
 }
