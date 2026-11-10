@@ -44,6 +44,8 @@ class Config:
     phi_cols: np.ndarray | None = None             # n x q: linear response to shift-mode phi (unit-normal units)
     phi_resp: object = None                        # callable(phi[, tp]) -> n-vector: nonlinear part of the response
     degeneracy_modes: list = field(default_factory=list)
+    val: dict | None = None                        # validation rows: {J, m0, V_data, V_MC, U, S, constraints,
+                                                   #  phi_cols} (identity link)
 
 
 class LinearProblem:
@@ -119,6 +121,41 @@ class LinearProblem:
             except TypeError:
                 g[:n] = g[:n] + self.cfg.phi_resp(phis)
         return g
+
+    # -- validation rows (holdout)
+    def h_val(self, tp, phis=None):
+        v = self.cfg.val
+        g = v["m0"] + v["J"] @ np.asarray(tp, float)[:self.d] + self.val_noise
+        if phis is not None and v.get("phi_cols") is not None:
+            g = g + v["phi_cols"] @ np.asarray(phis, float)
+        return g + self.val_pert
+
+    @property
+    def val_noise(self):
+        if not hasattr(self, "_val_noise"):
+            v = self.cfg.val
+            r = np.random.default_rng([self.mc_seed, 77])
+            self._val_noise = r.multivariate_normal(np.zeros(len(v["m0"])), v["V_MC"]) if np.any(v["V_MC"]) \
+                else np.zeros(len(v["m0"]))
+        return self._val_noise
+
+    val_pert = 0.0
+
+    def val_columns(self):
+        v = self.cfg.val
+        nv = len(v["m0"])
+        U = v.get("U") if v.get("U") is not None else np.zeros((nv, self.layout.n_nu))
+        S = v.get("S") if v.get("S") is not None else np.zeros((nv, self.layout.n_eta))
+        return U, S
+
+    def simulate_val(self, beta_truth, rng, phis=None):
+        v = self.cfg.val
+        sl = self.layout.slices()
+        U, S = self.val_columns()
+        mu = v["m0"] + v["J"] @ beta_truth[:self.d] + U @ beta_truth[sl["nu"]] + S @ beta_truth[sl["eta"]]
+        if phis is not None and v.get("phi_cols") is not None:
+            mu = mu + v["phi_cols"] @ np.asarray(phis, float)
+        return rng.multivariate_normal(mu, v["V_data"])
 
     def mc_f_or_one(self):
         return np.where(self.tau > 0, self.mc_f, 1.0) if self.mc_f is not None else 1.0
