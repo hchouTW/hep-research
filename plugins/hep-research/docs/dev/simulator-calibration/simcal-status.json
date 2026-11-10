@@ -19,39 +19,13 @@
    "note": "started on top of the unmerged simcal/phase-0 (PR #385) on the user's word, 2026-11-10"
   },
   "phase-2": {
-   "state": "blocked",
+   "state": "in-progress",
    "worktree": "/ceph/work/AMS/hsinyichou/hep-research-simcal-private/hep-research-simcal-phase-2",
    "branch": "simcal/phase-2",
    "task_card_sha256": "680945fb49eaf2b06d61e96b1d7b127698fe87bad8e870451524a6d786699882",
    "gate_record": "docs/dev/simulator-calibration/simcal-gates/phase-2.md",
-   "blocked_on": [
-    "D1",
-    "D2",
-    "D3",
-    "D4 (open part)",
-    "D8",
-    "D9",
-    "D10",
-    "D29",
-    "D34",
-    "D39",
-    "D40",
-    "D45",
-    "D46",
-    "D47",
-    "D48",
-    "D50",
-    "D51",
-    "D52",
-    "D55",
-    "D57 (open part)",
-    "D58",
-    "D67",
-    "D68",
-    "D73 (open part)",
-    "D81"
-   ],
-   "note": "started on top of the unmerged simcal/phase-1 (PR #386) on the user's word, 2026-11-10; blocked at Section E4 step 2: 25 items need the author (Section E7 item 1)"
+   "blocked_on": [],
+   "note": "started on top of the unmerged simcal/phase-1 (PR #386) on the user's word, 2026-11-10; unblocked by approval A8 (the 25 author items), 2026-11-10"
   },
   "phase-3": {
    "state": "not-started",
@@ -95,5 +69,5 @@
   },
   "note": "Phase 0 uses no g4sim item (§17: DAG only, no simulation). S7 gate record read: merged partially complete, gate 3 (TR yield) a recorded gap; no phase-0 item depends on it."
  },
- "updated": "2026-11-10T21:45:59Z"
+ "updated": "2026-11-10T21:48:46Z"
 }
