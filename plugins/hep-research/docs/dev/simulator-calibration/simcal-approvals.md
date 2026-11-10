@@ -13,6 +13,7 @@ Each was given in Chinese in a Claude session and is quoted here in the translat
 | A3 | 2026-11-09 | The M1 note of `decision-sheet.md`: U in the fixed-map mode | the author | “Proceed as recommended; the fixed-map mode need not keep the linear construction; the second PDE-split route should be researched and taken into consideration.” | Appendix E, "Author decision of 2026-11-09 (fixed-map mode)" |
 | A4 | 2026-11-09 | The 24 plugin-source rules (b′), the three choices of the D28 verification (b″), and the proposals of D86 and D87 | the author | “I agree to adopt them” | Appendix E, "Author's acceptance of 2026-11-09 (plugin-source rules, D28 choices, D86, D87)" |
 | A5 | 2026-11-10 | The PDE split (§19-g4c; §6.7 "PDE split") | the author | “Adopt in principle: route 2, route 3 when the PDE depends on wavelength, and a mandatory comparison with a nominal-PDE mapping run. Before writing, check the Geant4 `DielectricMetal` branch, revise the text on the four points, and then send it to independent verification.” | Appendix E, "Author decision of 2026-11-10 (PDE split)" |
+| A6 | 2026-11-10 | D5 and D11: the readings of `decision-sheet.md` (c), quoted in the packet rows below | the author (the user, in the Claude session of 2026-11-10, phase 0) | “accept the D5 and D11 readings” (given in English) | Not yet applied in Part B: the author's own change (a new part of Appendix E) applies it; phase 0 implements the readings as recorded here |
 
 Still open from these decisions: D68 together with §19-14.1f and D3 (A1). The A3 sentence on the second PDE-split route was answered by A5.
 
@@ -22,8 +23,8 @@ In the order of the phase they block. **Proposal or reading** is the first part 
 
 | Item | Part B line | Where | Kind | Blocks | Proposal or reading (source) | Tie-in | Approved | Date | Words or link |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| D5 | 4089 | §2.1, §9.2 | needs the author | phase 0 | decision-sheet: Reading: the sub-shape left after a bin is excluded from a free-ω count shape is a new free-ω shape. The contract declares its own N_decl with a recorded basis, and N_decl ≥ 10 is required. A missing declaration means rejection. |  |  |  |  |
-| D11 | 4095 | §10.1 | needs the author | phase 0 | decision-sheet: Reading: add k, k₀ and the unused-observable list with reasons to the `calibration-result` schema. |  |  |  |  |
+| D5 | 4089 | §2.1, §9.2 | needs the author | phase 0 | decision-sheet: Reading: the sub-shape left after a bin is excluded from a free-ω count shape is a new free-ω shape. The contract declares its own N_decl with a recorded basis, and N_decl ≥ 10 is required. A missing declaration means rejection. | yes (A6) | 2026-11-10 | “accept the D5 and D11 readings” (record A6) |
+| D11 | 4095 | §10.1 | needs the author | phase 0 | decision-sheet: Reading: add k, k₀ and the unused-observable list with reasons to the `calibration-result` schema. | yes (A6) | 2026-11-10 | “accept the D5 and D11 readings” (record A6) |
 | D37 | 4121 | §2.2, §5.2 `parameters[]` | needs the author | phase 1 | Part B: the effect on θ̂ propagated via A is ≤ 0.1σ_tot^design, as for the class-discretization bound of §5.4. | D86 and D87 use its criterion |  |  |  |
 | D41 | 4125 | §3.3, §6.7, §7.1, §8.2 G4 | needs the author | phase 1 | Part B: the events that enter observable k (its bin for counts); the author defines the determining region of tail functionals. |  |  |  |  |
 | D42 | 4126 | §6.7, §8.2 P5 row and note 3 | needs the author | phase 1 | Part B: either add "V_MC,kk ≤ f·V^unc_data,kk for each Gaussian-block observable" to the P5 row and note 3, or delete the clause from §6.7. |  |  |  |  |
