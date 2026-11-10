@@ -240,9 +240,12 @@ class Phase1Scripts(unittest.TestCase):
         self.assertEqual((rc, out["status"]), (2, "rejected"))                       # review F10
 
     def test_calib_emulator_is_a_stub(self):
+        plan = self.put("plan.json", {"schema": "calibration-plan/1", "kernels": {}})
         for cmd in ("train", "p6", "ask", "tell"):
-            rc, out = run("calib_emulator.py", cmd)
+            rc, out = run("calib_emulator.py", cmd, "--plan", plan)
             self.assertEqual((rc, out["status"]), (3, "incomplete"))
+        rc, out = run("calib_emulator.py", "p6", "--plan", self.d / "absent.json")
+        self.assertEqual((rc, out["status"]), (2, "rejected"))
 
     def test_calib_contract_preflight(self):
         sys.path.insert(0, str(ROOT / "tests" / "core"))

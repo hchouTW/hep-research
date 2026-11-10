@@ -2,8 +2,9 @@
 """The surrogate model of the simulator calibration workflow (Part B sections 6.4, 8.2 note 4; owner of the training
 set, P6, the surrogate domain and the ask/tell state file). Phase 1 delivers the interface stub only.
 
-  calib_emulator.py train | p6 | ask | tell [...]
-Every command answers status incomplete (exit 3): the surrogate model, its training set (D80), P6 and ask/tell are
+  calib_emulator.py train | p6 | ask | tell --plan FILE
+FILE is a calibration-plan/1 (an unreadable one is bad input: exit 2). Every command then answers status incomplete
+(exit 3): the surrogate model, its training set (D80), P6 and ask/tell are
 delivered in phase 3 (section 17). Standard library only.
 """
 from __future__ import annotations
@@ -31,10 +32,15 @@ def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
     sub = ap.add_subparsers(dest="cmd", required=True)
     for name in ("train", "p6", "ask", "tell"):
-        sub.add_parser(name).add_argument("rest", nargs="*")
+        sub.add_parser(name).add_argument("--plan", required=True)
     args = ap.parse_args(argv)
     fn = {"train": emulator.training_set, "p6": emulator.p6, "ask": emulator.ask, "tell": emulator.tell}[args.cmd]
-    return io.run(fn)
+
+    def go():
+        if not isinstance(io.load(args.plan), dict):
+            raise io.InputError("--plan: a calibration-plan/1 object")
+        return fn()
+    return io.run(go)
 
 
 if __name__ == "__main__":

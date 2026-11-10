@@ -47,9 +47,9 @@ CLAIMS = [
      "tests.core.test_stats_p0_regressions.T02T03ToyTails.test_zero_exceedances_give_a_bound_not_a_zero"),
     (GUIDE, "it refuses `dagostini`",
      "tests.skills.hep_statistics.test_core_stats_guide.RoutedCommandsRun.test_regularized_scan_refuses_dagostini"),
-    (GUIDE, "marked ones refuse to run without NumPy (and SciPy) with exit 2 and a JSON message",
+    (GUIDE, "Marked scripts exit 2 with a JSON message without NumPy (and SciPy)",
      "tests.skills.hep_statistics.test_core_stats_guide.DependencyMarkers.test_markers_match_imports"),
-    (GUIDE, "every script prints `--help` without them",
+    (GUIDE, "all print `--help` without them",
      "tests.skills.hep_statistics.test_cli_input_fuzz.CliInputFuzz.test_help_without_numpy"),
     # hep-statistics capability-matrix rows
     (MATRIX, "the output carries `status` and `method_kind: asymptotic`",

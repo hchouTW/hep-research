@@ -49,9 +49,9 @@ NO_SUPPRESSION_RUNS = ["beam1", "beam2", "beam3", "beam4", "light", "track5", "t
 def provenance() -> dict:
     try:
         commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True,
-                                check=True).stdout.strip()
+                                check=True, timeout=60).stdout.strip()
         dirty = bool(subprocess.run(["git", "status", "--porcelain", "--", *FILES], cwd=ROOT, capture_output=True,
-                                    text=True).stdout.strip())
+                                    text=True, timeout=60).stdout.strip())
     except (OSError, subprocess.CalledProcessError):
         commit, dirty = None, None
     return {"commit": commit, "dirty": dirty, "python": sys.version.split()[0], "numpy": np.__version__,
