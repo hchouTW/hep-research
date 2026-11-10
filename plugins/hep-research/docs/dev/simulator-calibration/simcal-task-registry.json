@@ -155,6 +155,13 @@
    "registered_at": "2026-11-10T21:53:23Z",
    "card_commit": "50c61c2c",
    "reason": "refreshed at the start of phase 2 from Part B, the index and approval A8, before any run: work packages, the three gate test designs, seeds and the designs of the fifteen section 8.7 calibrations registered; configurations fixed by re-registration before each run (tightening only); lint_task.py 0 errors"
+  },
+  {
+   "card": "simcal-tasks/phase-2.md",
+   "sha256": "f95333cb4b028123ea0419eefc6d581068a725b4de3391576e49beec3f327f19",
+   "registered_at": "2026-11-10T22:34:05Z",
+   "card_commit": "6cf90549",
+   "reason": "execution log only (WP1 to WP4 part 1: readings implemented and engine checks); thresholds and test designs as registered 51facff0"
   }
  ]
 }
