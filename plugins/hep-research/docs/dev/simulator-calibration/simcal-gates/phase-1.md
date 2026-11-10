@@ -11,7 +11,7 @@
 | Phase | 1 (Evaluation and design stage) |
 | Worktree | `/ceph/work/AMS/hsinyichou/hep-research-simcal-private/hep-research-simcal-phase-1` (in the private ceph folder, like phase 0) |
 | Branch | `simcal/phase-1`, from `simcal/phase-0` 1a27ab10 (unmerged, PR #385; continued on the user's word) |
-| Commit | Gate runs and calibrations at `e940ef2e`; repository checks at CHECKS_COMMIT |
+| Commit | Gate runs and calibrations at `e940ef2e`; the full repository checks at `e940ef2e`, and the fixes they called for at `4462715b`, which change nothing that decides a gate (the emulator stub's input, the gate harness's subprocess timeouts, the documented-claims registry) |
 | Task-card SHA-256 (as registered) | `ca717b11c66be98b8d551f562f6ec2b6f7faecfc884c90b6b87aabd1c645726f` (registered before the repeated gate runs; earlier registrations `32bc1e6d…` and `fd133e30…`; later registrations change the execution log only) |
 | Environment | Login host: Python 3.13.2 (conda env `ml`, NumPy 2.2.2, SciPy 1.16.1), `TMPDIR` on the private ceph folder. Batch: NSTCCore Slurm, partition `edr1-al9_short_serial`, account `ams`, interpreter `/ceph/work/AMS/hsinyichou/hep-detector-reco/env/py313/bin/python3.13` (3.13.18, NumPy 2.4.6, SciPy 1.17.1) |
 | hep-research and g4sim versions | hep-research 0.65.1 plus `simcal/phase-0`; g4sim not used (§17: phases 0–2 do not depend on g4sim) |
@@ -62,8 +62,14 @@ The other §8.7 values that phase-1 results use stay design values: f = 0.1 (pha
 
 ## Repository checks (E4 step 7)
 
-- `tools/check_layering.py`, `tools/check_wiring.py`, `tools/check_packaging.py`, `tools/check_naming.py`: pass.
-- `tools/run_all_checks.py --jobs 4 --no-cli` at CHECKS_COMMIT: CHECKS_RESULT.
+- `tools/run_all_checks.py --jobs 4 --no-cli` at `e940ef2e` (49 min): 7,397 tests in 553 modules, 7,092 passed, 298 skipped, 7 failed. The checks: 30 pass, 2 fail (`unittest`, and `ams_optional` through the same `test_revocation`), 2 skipped (`--no-cli`). Run record `.simcal-work/checks1/check-run-2026-11-10T160513Z.json` (worktree, untracked).
+  - Four of the failures were caused by phase 1 and are fixed in `4462715b`:
+    - `test_cli_contract`: the emulator stub now reads a `--plan`;
+    - `test_subprocess_timeouts`: the gate harness's `git` calls now have timeouts;
+    - two `test_documented_output_claims` quotes, for the guide wording the user chose.
+  - Those four tests, the calibration modules and the script tests were rerun at `4462715b` and pass. In that targeted run, `test_cli_robustness.test_help_under_isolated_mode` failed for five hep-ml scripts under the concurrent load. It passes alone and passed in the full run, and phase 1 touches none of these scripts.
+  - The other three failures also fail on a clean `origin/main` copy (phase 0's record): `tests.contracts.test_revocation` (2 tests, ceph ACL semantics) and `test_event_display_templates.PythonPipeline.test_export_bundle_check`.
+- `check_layering`, `check_wiring` (also `--since origin/main`), `check_packaging`, `check_naming` and `skill_scripts.py --check` pass at `4462715b`.
 - `contracts/validate.py`: phase 1 writes no `artifacts_dir` artifact. Its fixture, contract, plan and release are checked against their schemas by `test_calibration_schemas`.
 
 ## Open items carried to the next phase
