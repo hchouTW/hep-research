@@ -383,3 +383,199 @@ class DecisionBook:
         if last is None or last.get("status") == "incomplete":
             return "incomplete"
         return "passed" if last.get("status") == "passed" else "failed"
+
+
+# ------------------------------------------------------------------ the toy path (sections 9.2, 9.4, 6.6, 7.3)
+def _toy_problem(problem, data, pert):
+    return F.view(problem, data=data, h=lambda tp, _p=pert: problem.h(tp) + _p)
+
+
+def holdout_toy(problem, fit, truth, rng, shift_prior: bool = True, alt_shift=None, n_start=None, seed=None):
+    """One complete holdout toy (section 9.2): calibration and validation data from the model's event-level noise at
+    the truth (shift-mode phi drawn from its prior, the fit still fixing them at nominal, section 6.6 item 1; an
+    alternative's shift s_a delta-hat_a added to both predictions for power toys), the toy's own replica-difference
+    perturbations of both predictions, its fit by section 7.4 with V-hat frozen at the nominal fit's. Returns
+    (converged, residual, toy fit)."""
+    q = len(getattr(problem, "shift_names", []) or [])
+    phis = rng.normal(size=q) if (q and shift_prior) else None
+    data = problem.simulate(truth, rng, phis) if phis is not None else problem.simulate(truth, rng)
+    yv = problem.simulate_val(truth, rng, phis)
+    if alt_shift is not None:
+        dc, dv = alt_shift
+        data.y_gauss = data.y_gauss + dc
+        yv = yv + dv
+    pert = problem.replica_pert(rng)
+    pv = problem.replica_pert_val(rng)
+    tp = _toy_problem(problem, data, pert)
+    tp.h_val = lambda x, phis=None, _p=pv: problem.h_val(x) + _p
+    ft = F.find_extremum(tp, seed if seed is not None else int(rng.integers(2 ** 31)), truth, frozen=fit.ref,
+                         n_start=n_start) if n_start != 0 else F.iterate(tp, truth, frozen=fit.ref)
+    if not ft.converged:
+        return False, None, ft
+    pc = holdout_pieces(tp, ft, yv)
+    return True, pc["r"], ft
+
+
+def reference_distribution(problem, fit, Cp, n: int, seed, n_start=None, carried=(0, 0)) -> dict:
+    """The T_v reference distribution with complete toys under the null hypothesis (truth: the nominal fit's
+    convergence point), counted per section 7.3 (no replacement; non-converged toys count as T >= observed; the
+    ratio test on X summed over attempts before any p-value)."""
+    def member(i):
+        rng = np.random.default_rng([F._seed_int(seed), int(i)])
+        ok, r, _ = holdout_toy(problem, fit, fit.beta, rng, n_start=n_start, seed=(F._seed_int(seed), int(i)))
+        return ok, (t_v(r, Cp) if ok else None), {}
+    res = F.run_testing_ensemble(member, n, range(n), carried_X=carried[0], carried_n=carried[1])
+    return {"T": res.values, "X": res.X, "n": n, "ratio_failed": res.ratio_failed, "k_star": res.k_star}
+
+
+def toy_pvalue(T_obs: float, ref: dict) -> dict:
+    """The p-value only after the ratio test passed (section 7.3); otherwise V is incomplete."""
+    if ref["ratio_failed"]:
+        return {"status": "incomplete", "finding": "validate.ratio_test", "X": ref["X"]}
+    return {"status": "ok", "p": F.testing_pvalue(T_obs, ref["T"], ref["X"] - 0), "X": ref["X"]}
+
+
+def estimate_c_r_toys(problem, fit, s, constraints, seed, n=None, n_start=None) -> dict:
+    """C-hat_r from its own set of null toys (their own replicas, separate from the reference toys), an estimation
+    ensemble with replacement (section 7.3), n >= max(500, 10k)."""
+    U, _ = complement(s, constraints)
+    n = n or chat_min_toys(U.shape[1])
+
+    def member(i):
+        rng = np.random.default_rng([F._seed_int(seed), 1, int(i)])
+        ok, r, _ = holdout_toy(problem, fit, fit.beta, rng, n_start=n_start, seed=(F._seed_int(seed), 1, int(i)))
+        return ok, r, {}
+    res = F.run_estimation_ensemble(member, n, range(10 * n + 100))
+    if res.ratio_failed:
+        return {"status": "incomplete", "finding": "validate.ratio_test", "X": res.X}
+    est = estimate_c_r(np.array(res.values), s, constraints)
+    w = F.w_factor(F.eps_hat(res.X, len(res.values)))
+    return {"status": "ok", **est, "X": res.X, "w": w}
+
+
+def power_toys(problem, fit, Cp, ref: dict, alt: dict, n: int, seed, alpha: float = 0.05, level: float = 0.975,
+               n_start=None) -> dict:
+    """The toy path of section 9.4 for one alternative: toys with the truth m_nom(theta-hat) + s_a delta-hat_a
+    (`alt` = {dc, dv, s_a}), each redoing the fit and T_v, rejected when p <= alpha with the calibrated reference
+    distribution; non-converged toys count as not rejecting; the one-sided Clopper-Pearson lower bound at `level`."""
+    if ref["ratio_failed"]:
+        return {"status": "incomplete", "finding": "validate.ratio_test"}
+    sa = alt["s_a"]
+    rej, X = 0, 0
+    for i in range(n):
+        rng = np.random.default_rng([F._seed_int(seed), 2, int(i)])
+        ok, r, _ = holdout_toy(problem, fit, fit.beta, rng, alt_shift=(sa * alt["dc"], sa * alt["dv"]),
+                               n_start=n_start, seed=(F._seed_int(seed), 2, int(i)))
+        if not ok:
+            X += 1
+            continue
+        if F.testing_pvalue(t_v(r, Cp), ref["T"], ref["X"]) <= alpha:
+            rej += 1
+    if X >= F.k_star(n, False):
+        return {"status": "incomplete", "finding": "validate.ratio_test", "X": X}
+    return {"status": "ok", "rejections": rej, "n": n, "X": X, "rate": rej / n,
+            "lower": clopper_pearson_lower(rej, n, level)}
+
+
+# ------------------------------------------------------------------ cross-validation (section 9.3)
+def fold_fit(problem, rows, seed, frozen=None, n_start=None):
+    """The training fit of one fold (the calibration rows not in the fold): section 7.4 with multi-start; the fold's
+    own V-hat at convergence."""
+    sub = problem.subset(np.setdiff1d(np.arange(problem.cfg.J.shape[0]), rows))
+    b0 = sub_initial(sub)
+    f = F.find_extremum(sub, seed, b0, frozen=frozen, n_start=n_start) if n_start != 0 else F.iterate(sub, b0,
+                                                                                                    frozen=frozen)
+    return sub, f
+
+
+def sub_initial(sub):
+    lk = L.Likelihood(sub.layout, sub.data, sub.reference(np.zeros(len(sub.layout.theta)), None))
+    return lk.initial_beta(dict(zip(sub.layout.theta, np.zeros(len(sub.layout.theta)))))
+
+
+def out_of_fold_residual(problem, sub, f, rows):
+    """r_f = y_f - (h_f(beta-hat_f) + U_f nu-hat + S_f eta-hat): the out-of-fold residual of the fold's rows."""
+    c = problem.cfg
+    sl = sub.layout.slices()
+    th = f.beta[:sub.d]
+    mu = c.m0[rows] + c.J[rows] @ th + problem.e0[rows] + (problem.pert[rows] if np.ndim(problem.pert) else 0.0)
+    if c.U is not None:
+        mu = mu + c.U[rows] @ f.beta[sl["nu"]]
+    if c.S is not None:
+        mu = mu + c.S[rows] @ f.beta[sl["eta"]]
+    return problem.data.y_gauss[rows] - mu
+
+
+def cv_statistic(problem, folds, seed, Cplus: dict, factors: dict, n_start=None, g5=None) -> dict:
+    """T_cv = sum_f r_f^T C-hat_{r,f}^+ r_f (times the fold's correction factor). A fold that does not converge or
+    fails G5 makes cross-validation unusable: T_cv not computed, V incomplete, remedy plan (section 9.3)."""
+    T, parts = 0.0, []
+    for fi, rows in enumerate(folds):
+        sub, f = fold_fit(problem, rows, (F._seed_int(seed), fi), n_start=n_start)
+        if not f.converged:
+            return {"status": "incomplete", "finding": "validate.fold_not_converged", "fold": fi, "remedy": "plan"}
+        if g5 is not None and g5(sub, f)["status"] != "passed":
+            return {"status": "incomplete", "finding": "validate.fold_g5", "fold": fi, "remedy": "plan"}
+        r = out_of_fold_residual(problem, sub, f, rows)
+        q = float(r @ Cplus[fi] @ r) * factors.get(fi, 1.0)
+        parts.append(q)
+        T += q
+    return {"status": "ok", "T_cv": T, "parts": parts}
+
+
+def cv_toy(problem, folds, truth, rng, seed, n_start=None, g5=None, frozen_by_fold=None):
+    """One cross-validation toy: data at the truth, its own replica perturbation reused at the theta of every fold
+    (section 6.6), every fold refitted with that fold's V-hat frozen (section 7.3). Returns (status, residuals by
+    fold)."""
+    data = problem.simulate(truth, rng)
+    pert = problem.replica_pert(rng)
+    tp = problem.with_data(data)
+    tp.pert = pert
+    res, conv, g5s = [], [], []
+    for fi, rows in enumerate(folds):
+        sub, f = fold_fit(tp, rows, (F._seed_int(seed), fi), (frozen_by_fold or {}).get(fi), n_start)
+        conv.append(f.converged)
+        if not f.converged:
+            break
+        g5s.append(True if g5 is None else g5(sub, f)["status"] == "passed")
+        res.append(out_of_fold_residual(tp, sub, f, rows))
+    st = cv_toy_status(conv, g5s if len(g5s) == len(folds) else g5s + [True] * (len(folds) - len(g5s)))
+    return st, res
+
+
+def cv_ensemble(problem, folds, truth, n_req: int, seed, n_start=None, g5=None, replacement: bool = True) -> dict:
+    """A cross-validation toy ensemble (C-hat_{r,f} with replacement; reference toys without): members are toys;
+    non-converged toys enter the ratio test with eps_max,cv; toys failing G5 are renewed and not counted in the ratio
+    test; the summed G5 proportion (D68: over toys with G5 decided) > 20% at the end of an attempt makes V
+    incomplete with no redo; renewal stops at F_G5 > 0.25 sum n_req (section 9.3, 14.1, 19-14.1f)."""
+    eps = F.eps_max_cv(len(folds))
+    kst = F.k_star(n_req, replacement, eps)
+    vals, X, g5f, decided, i = [], 0, 0, 0, 0
+    while len(vals) < n_req:
+        if g5_stop(g5f, n_req):
+            break
+        if X >= kst:
+            break
+        rng = np.random.default_rng([F._seed_int(seed), 3, i])
+        st, res = cv_toy(problem, folds, truth, rng, (F._seed_int(seed), 3, i), n_start, g5)
+        i += 1
+        if st == "not-converged":
+            X += 1
+            if not replacement:
+                vals.append(None)
+            continue
+        decided += 1
+        if st == "g5-failed":
+            g5f += 1
+            continue
+        vals.append(res)
+        if not replacement and len(vals) >= n_req:
+            break
+    prop = g5_proportion(g5f, decided)
+    if prop > 0.20:
+        return {"status": "incomplete", "finding": "validate.cv_g5_proportion", "proportion": prop,
+                "remedy": "plan", "redo": False}
+    if X >= kst:
+        return {"status": "incomplete", "finding": "validate.ratio_test", "X": X, "k_star": kst, "eps_max": eps}
+    return {"status": "ok", "values": [v for v in vals if v is not None], "X": X, "g5_failed": g5f,
+            "proportion": prop, "eps_max": eps}

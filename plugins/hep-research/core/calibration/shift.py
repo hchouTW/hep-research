@@ -178,20 +178,20 @@ def g9(problem, fit: F.Fit, p8_result: dict, seed=None, c: float = C_INFO, t_lin
             "refits": {f"{l},{k}": rf[(l, k)]["theta"].tolist() for (l, k) in rf}}
 
 
-def d_columns(problem, fit: F.Fit, rf: dict, h_v_shift, h_v, sigma: float = 1.0) -> np.ndarray:
-    """d_l = (d mu_v / d phi_l + J_v d beta-hat / d phi_l |refit) sigma_phi_l (section 9.2), with the symmetric
-    differences of the +-1 sigma refits (D52 (b)): `h_v_shift(tp, phi)` and `h_v(tp)` are the validation predictors.
-    The sign is a plus: a refit is "data unchanged, phi in the model moved"."""
+def d_columns(problem, fit: F.Fit, rf: dict, mu_v, sigma: float = 1.0, sign: float = 1.0,
+              direct: bool = True) -> np.ndarray:
+    """d_l = (d mu_v / d phi_l + J_v d beta-hat / d phi_l |refit) sigma_phi_l (section 9.2), from the symmetric
+    differences of the +-1 sigma refits (D52 (b)). `mu_v(beta, phis)` is the validation prediction at the full beta
+    (theta, phi_P, nu, eta) with the shift phi at `phis`. The sign is a plus (a refit is "data unchanged, phi in the
+    model moved"); `sign=-1` and `direct=False` (only the indirect effect) are the negative controls of section
+    15.3.1."""
     q = len(problem.shift_names)
-    lay = problem.layout
-    n0 = len(lay.theta) + len(lay.phi_P)
-    tp = fit.beta[:n0]
     cols = []
+    zero = np.zeros(q)
     for l in range(q):
         e = np.zeros(q)
         e[l] = 1.0
-        dmu = 0.5 * (h_v_shift(tp, e) - h_v_shift(tp, -e))
-        tpp, tpm = rf[(l, 1)]["beta"][:n0], rf[(l, -1)]["beta"][:n0]
-        resp = 0.5 * (h_v(tpp) - h_v(tpm))
-        cols.append((dmu + resp) * sigma)
+        dmu = 0.5 * (mu_v(fit.beta, e) - mu_v(fit.beta, -e)) if direct else 0.0
+        resp = 0.5 * (mu_v(rf[(l, 1)]["beta"], zero) - mu_v(rf[(l, -1)]["beta"], zero))
+        cols.append((dmu + sign * resp) * sigma)
     return np.stack(cols, axis=1)

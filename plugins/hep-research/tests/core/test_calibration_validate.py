@@ -260,5 +260,124 @@ class Records(unittest.TestCase):
             self.book.decide("x" * 64, "pass")
 
 
+
+
+# ---------------------------------------------------------------- WP4 part 2: toy path, shift mode, cross-validation
+from core.calibration import shift as Sh  # noqa: E402
+
+
+def shift_config():
+    rng = np.random.default_rng(0)
+    cfg = T.linear_config(n=12, d=2)
+    cfg.phi_cols = (cfg.J[:, 0] * 0.8)[:, None]
+    Jv = rng.normal(size=(6, 2))
+    cfg.val = {"J": Jv, "m0": np.full(6, 5.0), "V_data": np.eye(6) * 0.5, "V_MC": np.zeros((6, 6)),
+               "phi_cols": (-0.8 * Jv[:, 0])[:, None]}
+    return cfg
+
+
+class ShiftModeResidual(unittest.TestCase):
+    def test_d_l_size_and_negative_controls(self):
+        """With the true phi drawn from its prior, C_r with sum d_l d_l^T gives size alpha; only the indirect
+        effect, or the refit derivative with a minus sign, gives a null rejection rate outside alpha +- 25%
+        (sections 9.2, 15.3.1)."""
+        cfg = shift_config()
+        crit = stats.chi2.ppf(0.95, 6)
+        res = {"ok": [], "minus": [], "indirect": []}
+        for s in range(400):
+            p = T.make(cfg, [0.5, -0.3], data_seed=10 + s, mc_seed=1)
+            rng = np.random.default_rng([s, 9])
+            phi = rng.normal(size=1)
+            p.data = p.simulate(p.truth, rng, phi)
+            yv = p.simulate_val(p.truth, rng, phi)
+            f = F.iterate(p, T.initial_beta(p), lndet=False)
+            rf = Sh.refits(p, f, multistart=False)
+
+            def mu_v(beta, phis, p=p):
+                return p.h_val(beta[:2], phis)
+            for lab, kw in (("ok", {}), ("minus", {"sign": -1.0}), ("indirect", {"direct": False})):
+                pc = V.holdout_pieces(p, f, yv, d_cols=Sh.d_columns(p, f, rf, mu_v, **kw))
+                Cp, _ = V.c_r_plus(pc["C_r"], pc["s"], [])
+                res[lab].append(V.t_v(pc["r"], Cp) > crit)
+        rate = {k: float(np.mean(v)) for k, v in res.items()}
+        self.assertAlmostEqual(rate["ok"], 0.05, delta=0.025)
+        self.assertGreater(rate["minus"], 0.0625 + 0.05)
+        self.assertGreater(rate["indirect"], 0.0625 + 0.03)
+
+
+def small_holdout():
+    rng = np.random.default_rng(0)
+    cfg = T.linear_config(n=12, d=2, mc_ratio=0.1)
+    cfg.val = {"J": rng.normal(size=(5, 2)), "m0": np.full(5, 5.0), "V_data": np.eye(5) * 0.5,
+               "V_MC": np.eye(5) * 0.05}
+    return cfg
+
+
+class ToyPath(unittest.TestCase):
+    def test_reference_distribution_and_ratio_gate(self):
+        p = T.make(small_holdout(), [0.5, -0.3], 3, 4)
+        yv = p.simulate_val(p.truth, np.random.default_rng(1))
+        f = F.iterate(p, T.initial_beta(p))
+        pc = V.holdout_pieces(p, f, yv)
+        Cp, k = V.c_r_plus(pc["C_r"], pc["s"], [])
+        ref = V.reference_distribution(p, f, Cp, 500, 7, n_start=0)
+        self.assertEqual(ref["X"], 0)
+        self.assertAlmostEqual(np.mean(ref["T"]), k, delta=1.0)
+        self.assertEqual(V.toy_pvalue(V.t_v(pc["r"], Cp), ref)["status"], "ok")
+        self.assertEqual(V.toy_pvalue(1.0, {**ref, "ratio_failed": True})["status"], "incomplete")
+
+    def test_chat_minimum_and_factor(self):
+        self.assertEqual(V.chat_min_toys(5), 500)
+        self.assertEqual(V.chat_min_toys(60), 600)
+        self.assertAlmostEqual(V.chat_factor(500, 5), 493 / 499)
+        with self.assertRaises(V.ValidationError):
+            V.estimate_c_r(np.zeros((100, 3)), np.ones(3), [])
+
+
+class CrossValidation(unittest.TestCase):
+    def setUp(self):
+        self.p = T.make(T.linear_config(n=16, d=2, mc_ratio=0.1), [0.5, -0.3], 3, 4)
+        self.folds = [np.arange(0, 4), np.arange(4, 8), np.arange(8, 12), np.arange(12, 16)]
+        self.f = F.iterate(self.p, T.initial_beta(self.p))
+
+    def test_fold_failure_makes_v_incomplete(self):
+        """A fold that fails G5 on the actual data: T_cv not computed, V incomplete, remedy plan (section 15.3.8)."""
+        r = V.cv_statistic(self.p, self.folds, 5, {}, {}, n_start=0,
+                           g5=lambda sub, f: {"status": "failed"})
+        self.assertEqual((r["status"], r["finding"], r["remedy"]), ("incomplete", "validate.fold_g5", "plan"))
+
+    def test_g5_proportion_rule(self):
+        """G5 failing in 25% of toys: V incomplete, no redo; 10%: renewal, the decision proceeds; not counted in the
+        ratio test (sections 9.3, 15.3.8; D68)."""
+        def g5_rate(rate):
+            state = {"i": 0}
+
+            def g5(sub, f):
+                state["i"] += 1
+                fail = (state["i"] % 4 == 0) if rate == 0.25 else (state["i"] % 10 == 0)
+                return {"status": "failed" if fail else "passed"}
+            return g5
+        bad = V.cv_ensemble(self.p, self.folds[:1], self.f.beta, 60, 11, n_start=0, g5=g5_rate(0.25))
+        self.assertEqual(bad["finding"], "validate.cv_g5_proportion")
+        self.assertFalse(bad["redo"])
+        ok = V.cv_ensemble(self.p, self.folds[:1], self.f.beta, 60, 11, n_start=0, g5=g5_rate(0.10))
+        self.assertEqual(ok["status"], "ok")
+        self.assertEqual(ok["X"], 0)
+        self.assertGreater(ok["g5_failed"], 0)
+
+    def test_cv_statistic_runs(self):
+        ens = V.cv_ensemble(self.p, self.folds, self.f.beta, 500, 11, n_start=0)
+        self.assertEqual(ens["status"], "ok")
+        C, fac = {}, {}
+        for fi, rows in enumerate(self.folds):
+            R = np.array([v[fi] for v in ens["values"]])
+            e = V.estimate_c_r(R, np.sqrt(np.diag(self.p.cfg.V_data[np.ix_(rows, rows)])), [])
+            C[fi], fac[fi] = e["C_plus"], e["factor"]
+        st = V.cv_statistic(self.p, self.folds, 5, C, fac, n_start=0)
+        self.assertEqual(st["status"], "ok")
+        self.assertEqual(len(st["parts"]), 4)
+        self.assertEqual(ens["eps_max"], 0.02)
+
+
 if __name__ == "__main__":
     unittest.main()

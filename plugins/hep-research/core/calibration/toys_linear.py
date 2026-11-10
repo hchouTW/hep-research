@@ -197,7 +197,7 @@ class LinearProblem:
         return V
 
     # -- toys
-    def simulate(self, beta_truth: np.ndarray, rng: np.random.Generator, nu_eta_from=None) -> L.Data:
+    def simulate(self, beta_truth: np.ndarray, rng: np.random.Generator, phis=None) -> L.Data:
         """Event-level data at the truth (Gaussian rows with the data covariance at the truth, counts as Poisson), the
         constraint centres of nu and eta sampled around their true values (the profile construction, section 6.6).
         The truth carries no MC noise (the analytic truth of section 8.7 note 4)."""
@@ -214,6 +214,13 @@ class LinearProblem:
             mu = mu + c.U @ nu
         if c.S is not None:
             mu = mu + c.S @ eta
+        if phis is not None and c.phi_cols is not None:
+            mu = mu + c.phi_cols @ np.asarray(phis, float)
+            if c.phi_resp is not None:
+                try:
+                    mu = mu + c.phi_resp(np.asarray(phis, float), np.asarray(th, float))
+                except TypeError:
+                    mu = mu + c.phi_resp(np.asarray(phis, float))
         y = rng.multivariate_normal(mu, self.V_data_at(th))
         out = L.Data(y_gauss=y, nu0=rng.normal(nu, 1.0) if lay.n_nu else None,
                      eta0=rng.normal(eta, 1.0) if lay.n_eta else None)
@@ -232,6 +239,36 @@ class LinearProblem:
             b = rng.multivariate_normal(np.zeros(n), self.cfg.V_MC)
             out[:n] = (a - b) / math.sqrt(2.0)
         return out
+
+    def replica_pert_val(self, rng: np.random.Generator) -> np.ndarray:
+        v = self.cfg.val
+        nv = len(v["m0"])
+        if not np.any(v["V_MC"]):
+            return np.zeros(nv)
+        a = rng.multivariate_normal(np.zeros(nv), v["V_MC"])
+        b = rng.multivariate_normal(np.zeros(nv), v["V_MC"])
+        return (a - b) / math.sqrt(2.0)
+
+    def subset(self, rows) -> "LinearProblem":
+        """The problem restricted to the Gaussian calibration rows `rows` (a training fold, section 9.3): same truth,
+        MC noise and data on those rows."""
+        rows = np.asarray(rows, int)
+        c = self.cfg
+        sub = Config(c.J[rows], c.m0[rows], c.V_data[np.ix_(rows, rows)], c.V_MC[np.ix_(rows, rows)], c.bounds,
+                     c.prior, None if c.U is None else c.U[rows], None if c.S is None else c.S[rows],
+                     None if c.quad is None else c.quad[rows], c.count_c, None if c.e1 is None else c.e1[rows],
+                     [np.asarray(v)[rows] for v in c.constraints if np.all(np.asarray(v)[np.setdiff1d(
+                         np.arange(len(c.m0)), rows)] == 0)], None, None, c.bimodal,
+                     None if c.phi_cols is None else c.phi_cols[rows], None, list(c.degeneracy_modes))
+        p = LinearProblem(sub, self.mc_seed)
+        p._mc_seed = self.mc_seed
+        p.e0 = self.e0[rows]
+        p.e1n = None if self.e1n is None else self.e1n[rows]
+        if self.data is not None:
+            p.data = L.Data(y_gauss=self.data.y_gauss[rows], nu0=self.data.nu0, eta0=self.data.eta0)
+        p.pert = self.pert[rows] if np.ndim(self.pert) else self.pert
+        p.truth = self.truth
+        return p
 
     def with_data(self, data: L.Data, mc_seed=None):
         p = LinearProblem(self.cfg, self.mc_seed if mc_seed is None else mc_seed, data, self.truth)
