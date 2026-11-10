@@ -1,5 +1,5 @@
 {
- "note": "Seconds per test module, from CI checks (Python 3.13); used only to order and shard modules (tools/run_all_checks.py --shard). Refresh with --write-timings; a module missing here gets the median. The seven reconstruction-v12 modules (test_workflow_b1, test_check_definitions, test_executor_b2, test_control_layer, test_control_layer_model, test_control_layer_c2, test_control_layer_review330) were added from a local run (Linux, 2026-10-29) until the next CI refresh. The four cross-platform modules (test_interpreter_guard, test_hostcaps, test_partition_guard_variables, test_skill_scripts) carry the median until the next CI refresh. The four detector-simulation modules (test_detsim_identity, test_detsim_schemas, test_detsim_plan, test_detsim_missing_dependency) were added from a local run (macOS arm64, 2026-11-01) until the next CI refresh. test_outputs_keep_their_version was added from a local run (Linux, 2026-11-04) until the next CI refresh. test_g4sim_run and test_g4proto_conservation were added from a local run (Linux, 2026-11-06) until the next CI refresh. The seven simulator-calibration phase-0 modules (test_calibration_use, test_calibration_contract, test_calibration_data, test_calibration_chain, test_calibration_deps, test_calibration_schemas, test_calib_scripts) were added from a local run (Linux, 2026-11-10) until the next CI refresh.",
+ "note": "Seconds per test module, from CI checks (Python 3.13); used only to order and shard modules (tools/run_all_checks.py --shard). Refresh with --write-timings; a module missing here gets the median. The seven reconstruction-v12 modules (test_workflow_b1, test_check_definitions, test_executor_b2, test_control_layer, test_control_layer_model, test_control_layer_c2, test_control_layer_review330) were added from a local run (Linux, 2026-10-29) until the next CI refresh. The four cross-platform modules (test_interpreter_guard, test_hostcaps, test_partition_guard_variables, test_skill_scripts) carry the median until the next CI refresh. The four detector-simulation modules (test_detsim_identity, test_detsim_schemas, test_detsim_plan, test_detsim_missing_dependency) were added from a local run (macOS arm64, 2026-11-01) until the next CI refresh. test_outputs_keep_their_version was added from a local run (Linux, 2026-11-04) until the next CI refresh. test_g4sim_run and test_g4proto_conservation were added from a local run (Linux, 2026-11-06) until the next CI refresh. The seven simulator-calibration phase-0 modules (test_calibration_use, test_calibration_contract, test_calibration_data, test_calibration_chain, test_calibration_deps, test_calibration_schemas, test_calib_scripts) were added from a local run (Linux, 2026-11-10) until the next CI refresh, and so were the six phase-1 modules (test_calibration_toy, test_calibration_reweight, test_calibration_linear, test_calibration_design, test_calibration_kernel_check, test_calibration_preflight).",
  "source": "median of the passing runs of each module in GitHub Actions runs 39573953922 (PR #191 head ad0fc1f8) and the main run on a5663baa, ubuntu-latest, --jobs 4, Python 3.13 units shards (2 samples per module); refreshed 2026-10-21",
  "seconds": {
   "tests.adapters.test_adapter_declarations": 0.1,
@@ -496,6 +496,12 @@
   "tests.core.test_calibration_data": 0.1,
   "tests.core.test_calibration_deps": 0.1,
   "tests.core.test_calibration_use": 125.0,
-  "tests.skills.test_calib_scripts": 2.5
+  "tests.skills.test_calib_scripts": 16.4,
+  "tests.core.test_calibration_toy": 2.5,
+  "tests.core.test_calibration_reweight": 3.3,
+  "tests.core.test_calibration_linear": 2.6,
+  "tests.core.test_calibration_design": 5.5,
+  "tests.core.test_calibration_kernel_check": 51.1,
+  "tests.core.test_calibration_preflight": 1.7
  }
 }
