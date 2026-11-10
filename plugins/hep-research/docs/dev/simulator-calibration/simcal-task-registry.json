@@ -127,6 +127,13 @@
    "registered_at": "2026-11-10T14:27:38Z",
    "card_commit": "618cf38a",
    "reason": "before any gate run: gate-2 electronics case on the runs without zero suppression (threshold left out of that case), criterion (ii) over the observables of the runs the node acts in (tightening), s_k^2 as the bootstrap's limit, data errors per data sample; thresholds unchanged; execution log"
+  },
+  {
+   "card": "simcal-tasks/phase-1.md",
+   "sha256": "ca717b11c66be98b8d551f562f6ec2b6f7faecfc884c90b6b87aabd1c645726f",
+   "registered_at": "2026-11-10T15:13:20Z",
+   "card_commit": "eee18408",
+   "reason": "after the independent review, before repeating the gate runs at the fixed code (tightening only): gate-2 criterion (ii) with the paired covariance over the runs whose node kernel reads the case's parameters (F3); the electronics case's plan records its filtering as ignorable (F7); rerun streams per (seed, point) in gate 2 and calibration 1 (F4); thresholds unchanged; the first gate run and calibration run superseded"
   }
  ]
 }
