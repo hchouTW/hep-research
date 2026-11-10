@@ -117,13 +117,51 @@ def run_lookup(ref, use, deps, k, n):
 
 
 CHECKS = {"agree": run_agree, "invariants": run_invariants, "mutants": run_mutants, "lookup": run_lookup}
+# The registered gate campaign (simcal-tasks/phase-0.md, test design): item i of the campaign -> (check, k, n).
+GATE_SHARDS = ([("agree", k, 32) for k in range(1, 33)] + [("invariants", k, 32) for k in range(1, 33)]
+               + [("lookup", k, 4) for k in range(1, 5)])
+
+
+def summarize(folder: Path) -> dict:
+    """Gate verdict from the per-item outputs item-<i>.json: every registered shard present exactly once and ok."""
+    seen, bad, cases = {}, [], {}
+    for f in sorted(folder.glob("item-*.json")):
+        d = json.loads(f.read_text())
+        key = (d.get("check"), d.get("part"))
+        seen[key] = seen.get(key, 0) + 1
+        if d.get("status") != "ok":
+            bad.append({"file": f.name, "status": d.get("status")})
+        cases[d.get("check")] = cases.get(d.get("check"), 0) + int(d.get("cases", 0))
+    want = {(c, f"{k}/{n}") for c, k, n in GATE_SHARDS}
+    missing = sorted(f"{c} {p}" for c, p in want - set(seen))
+    dup = sorted(f"{c} {p}" for (c, p), m in seen.items() if m > 1)
+    status = "failed" if bad else "incomplete" if (missing or dup) else "ok"
+    return {"status": status, "shards_expected": len(want), "shards_found": len(seen), "missing": missing,
+            "duplicates": dup, "not_ok": bad, "cases": cases}
 
 
 def main(argv=None) -> int:
     ap = argparse.ArgumentParser(description=__doc__.split("\n\n")[0])
-    ap.add_argument("--check", required=True, choices=sorted(CHECKS))
+    ap.add_argument("--check", choices=sorted(CHECKS))
     ap.add_argument("--part", default="1/1", help="shard k/n (1-based), default 1/1 (the full scope)")
+    ap.add_argument("--item", type=int, help=f"run item i (0-based) of the registered gate campaign "
+                    f"({len(GATE_SHARDS)} items) instead of --check/--part")
+    ap.add_argument("--out", help="also write the JSON result to this file (its folder must exist)")
+    ap.add_argument("--summarize", metavar="DIR", help="gate verdict from the item-<i>.json files in DIR")
     args = ap.parse_args(argv)
+    if args.summarize:
+        out = summarize(Path(args.summarize))
+        print(json.dumps(out, indent=1))
+        return {"ok": 0, "failed": 1}.get(out["status"], 3)
+    if args.item is not None:
+        if not 0 <= args.item < len(GATE_SHARDS):
+            print(json.dumps({"status": "rejected", "error": f"--item must be 0..{len(GATE_SHARDS) - 1}"}))
+            return 2
+        c, k, n = GATE_SHARDS[args.item]
+        args.check, args.part = c, f"{k}/{n}"
+    if not args.check:
+        print(json.dumps({"status": "rejected", "error": "give --check, --item or --summarize"}))
+        return 2
     try:
         k, n = (int(x) for x in args.part.split("/"))
         if not 1 <= k <= n:
@@ -142,7 +180,12 @@ def main(argv=None) -> int:
     out = {"status": "ok" if ok else "failed", "check": args.check, "part": f"{k}/{n}",
            "reference_sha256": "c5279adf41acfcfb21e8aa67295756d1a551361e6a9aa5fa68d98bb4f17a3de3",
            "seconds": round(time.time() - t0, 1), **detail}
-    print(json.dumps(out, indent=1))
+    if args.item is not None:
+        out["item"] = args.item
+    text = json.dumps(out, indent=1)
+    print(text)
+    if args.out:
+        Path(args.out).write_text(text + "\n")
     return 0 if ok else 1
 
 

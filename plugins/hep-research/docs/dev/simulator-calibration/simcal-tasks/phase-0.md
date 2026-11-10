@@ -20,7 +20,7 @@ Deliver the content of phase 0 of §17 so that its gate holds: The negative test
 
 **Content (§17, verbatim)**
 
-- [ ] Seven schemas; the DAG format, injection-point splitting, three fixtures (ECAL, RICH, tracker; ECAL and tracker each contain a pair of overlapping modules, for tests of redundant measurements); the **graph structure** of the toy detector and subgraph variants (DAG only, no simulation); `calib_chain` (candidate methods, P4); contract, data release and plan schemas; `calib_contract check`; in `calib_deps`, hash references, cycle checks and derivation of upstream roles from usage; `calib_use` (per the decision table of Appendix C, including the `incomplete` of rule 0); in `calib_data`, raw-unit lineage, validation-read and fit-read events (including registration of read channels and contract drafts), failure records (`pending`/`final`/`withdrawn`), and derivation of the reuse input (Appendix C.1); acyclic computation of version ids
+- [x] Seven schemas; the DAG format, injection-point splitting, three fixtures (ECAL, RICH, tracker; ECAL and tracker each contain a pair of overlapping modules, for tests of redundant measurements); the **graph structure** of the toy detector and subgraph variants (DAG only, no simulation); `calib_chain` (candidate methods, P4); contract, data release and plan schemas; `calib_contract check`; in `calib_deps`, hash references, cycle checks and derivation of upstream roles from usage; `calib_use` (per the decision table of Appendix C, including the `incomplete` of rule 0); in `calib_data`, raw-unit lineage, validation-read and fit-read events (including registration of read channels and contract drafts), failure records (`pending`/`final`/`withdrawn`), and derivation of the reuse input (Appendix C.1); acyclic computation of version ids
 
 **Placement bullets of §17 (verbatim; they place work in phases 0 and 2)**
 
@@ -33,12 +33,12 @@ Deliver the content of phase 0 of §17 so that its gate holds: The negative test
 
 **Scripts and homes (Inferred from §13, §14 and the content)**
 
-- [ ] `calib_chain.py` (DAG, injection-point split, candidate methods, P4)
-- [ ] `calib_contract.py check` (contract rules of §5.2; in phase 0 only the declarations of the locking-stage checks, §17)
-- [ ] `calib_deps.py` (hash references, cycle checks, upstream roles from usage)
-- [ ] `calib_use.py` (Appendix C decision table, rule 0 `incomplete`)
-- [ ] `calib_data.py` (raw-unit lineage, read events, failure records, reuse input of Appendix C.1)
-- [ ] `contracts/` (the seven abstract-object schemas; contract, data release, plan and result schemas; §13)
+- [x] `calib_chain.py` (DAG, injection-point split, candidate methods, P4)
+- [x] `calib_contract.py check` (contract rules of §5.2; in phase 0 only the declarations of the locking-stage checks, §17)
+- [x] `calib_deps.py` (hash references, cycle checks, upstream roles from usage)
+- [x] `calib_use.py` (Appendix C decision table, rule 0 `incomplete`)
+- [x] `calib_data.py` (raw-unit lineage, read events, failure records, reuse input of Appendix C.1)
+- [x] `contracts/` (the seven abstract-object schemas; contract, data release, plan and result schemas; §13)
 
 **This phase's tests (Inferred; refresh from §15)**
 
@@ -89,8 +89,8 @@ Confirmed in hep-research `main` at 5c2d1c7 (0.65.1): `contracts/` with `validat
 
 Needs the author (each must be approved in `simcal-approvals.md` before the phase starts; Section E7, item 1):
 
-- D5 (line 4089; needs the author)
-- D11 (line 4095; needs the author)
+- D5 (line 4089; needs the author): approved, record A6 of `simcal-approvals.md` (2026-11-10)
+- D11 (line 4095; needs the author): approved, record A6 of `simcal-approvals.md` (2026-11-10)
 
 Implemented as Part B writes them, the author confirming later (computation results; D19, D25 and the open §14.1 items, by front matter line 38), or settled by plugin source:
 
@@ -123,19 +123,30 @@ Accepted or decided items that this phase implements (their text in Part B is no
 
 - none
 
+**Test design of the gate (registered before the gate run; no tolerance, no threshold to calibrate)**:
+
+1. *Exhaustive tests of Appendix C*, scope as Appendix C defines it: the reference's own cases (197,376 own input combinations, each with no upstream and every single upstream, and the ordered pairs of upstreams for those reaching `validated-in-scope` under some resolution): 31,593,216 cases, enumerated by the reference implementation `reference/calib_use_decision_table.py` (SHA-256 `c5279adf…`, checked before every run). Harness `tests/core/calibration_exhaustive.py`; shard k of n takes the cases with index i, i mod n = k − 1, in the reference's order.
+   - **agree**: `calib_use`'s `assign`, `effective`, `allowed_uses`, `variation_upstream_admissible` and `derive_role` equal the reference's on every case (same value, or both reject). Pass: zero disagreements in every shard.
+   - **invariants**: the reference's `check()` run with `calib_use`'s functions in place of its own. Pass: zero violations in every shard.
+   - **lookup** (section 10.2 rule 0, D63, D13): over every own combination of the scope with at least one undecided input (each non-empty subset of {mandatory gate, P7, V}; only the mandatory gate in mode `none`), with no upstream and with each capped central upstream (`failed`, `projection`, `calibrated-unvalidated`), `outcome_determined` equals the independent enumeration of the test module. Pass: zero disagreements.
+   - **mutants**: each of the reference's 24 mutants is caught (at least one violation) and mutant 25 (lookup with C.2 only) is caught. A violation on a subset of the scope is a violation of the scope, so a mutant caught on the fixed slice (every 2000th case from the first; for mutant 25, the lookup run) is caught; the slice run is the evidence. Pass: all 25 caught.
+   - The full-scope runs are 32 shards each for agree and invariants and 4 for lookup (about 5 core-hours; batch work per E7 item 3, submitted only with the user's approval). Every shard must complete; a missing shard leaves the gate `incomplete`, never passed.
+2. *Named cases of section 15.3* in phase-0 scope, and the negative test of P4 (section 15.3.1): the unit tests `tests/core/test_calibration_{use,deps,chain,data,contract}.py`, `tests/contracts/test_calibration_schemas.py` and `tests/skills/test_calib_scripts.py`. Pass: all pass; each negative test is shown caught by its expected finding code or grade.
+3. *The three fixtures derive candidate methods and reachability*: `ecal`, `rich`, `tracker` in `core/calibration/data/` give a candidate method for every parameter and P4 `passed` (`test_calibration_chain.Fixtures`, and `calib_chain.py candidates` / `p4` in `test_calib_scripts`). Pass: every parameter has a candidate and P4 passes.
+
 Rule: every value above is registered in this card before the run that it judges; it may be tightened, never loosened.
 
 ## Validation
 
 #### Environment
 
-- Python with the standard library plus NumPy/SciPy (§14). Batch work on Linux and Slurm through `core/partition/` and `batch_campaign.py` (§14.1), under the submission rules of `simcal-task.md` Section E7, item 3.
+- Python 3.13.2 (`HEP_RESEARCH_PYTHON`: conda env `ml`; NumPy 2.2.2, SciPy 1.16.1); phase 0 uses the standard library only. Worktree, outputs (`.simcal-work/`) and `TMPDIR` on the private ceph folder `/ceph/work/AMS/hsinyichou/hep-research-simcal-private/` (user's instruction). Batch work on Linux and Slurm (NSTCCore, partition `edr1-al9_short_serial`, account `ams`) through `core/partition/` and `batch_campaign.py` (§14.1), under the submission rules of `simcal-task.md` Section E7, item 3.
 - hep-research 0.65.1 or later; for g4sim items, the g4sim stages of §17 `merged` (`g4sim-status.json`).
 
 #### Risks and stop points
 
-- D5 and D11 need the author before this phase (index)
-- The reference implementation at `c5279adf…` is not in the package (`simcal-task.md`, Section E7, item 2)
+- D5, D11 approved (A6); the reference implementation supplied (`reference/`, `c5279adf…`)
+- The full-scope Appendix C runs exceed the standing 2 CPU-hour campaign budget: the user's approval of the campaign is needed (E7 item 3)
 
 #### Execution log
 
@@ -172,6 +183,18 @@ Rule: every value above is registered in this card before the run that it judges
 - 2026-11-10: the user pointed to `hep-research-tasks/calib_use_decision_table-v7.37.py` (763 lines, written 07:39): SHA-256 `d7e1e25b0774533db13d69fd11bbc8626a597c96c9d8cd6cd0387a651aac2231`, docstring workflow **v7.37** (latest change note v7.37); no whitespace variant matches `c5279adf…`. Fourth non-matching version; not used. Phase 0 stays blocked.
 - 2026-11-10: the user supplied `hep-research-tasks/calib_use_decision_table-v7.37.4.py` (781 lines, docstring workflow v7.37.4): SHA-256 `c5279adf41acfcfb21e8aa67295756d1a551361e6a9aa5fa68d98bb4f17a3de3`, **matches** Part B (header line 15). Copied unchanged into the records as `docs/dev/simulator-calibration/reference/calib_use_decision_table.py` (the name Part B uses, line 3920), its hash re-checked after the copy. Open question 2 is answered. E7 item 2 resolved; with A6 and A7 recorded, phase 0 is set `in-progress` and continues at E4 step 5. Reason for the folder: the file is an attachment of Part B, kept with the records; the Appendix C tests read it from there and check its hash first.
 - 2026-11-10: on the user's decision ("Move whole worktree", asked under E7 item 7), the phase-0 worktree moved from `/dicos_ui_home/hsinyichou/hep-research-simcal-phase-0` to the private folder `/ceph/work/AMS/hsinyichou/hep-research-simcal-private/` (mode 700, group ACLs removed, as for the reconstruction task), as `hep-research-simcal-private/hep-research-simcal-phase-0`. Reason: Slurm work of later phases and its outputs belong on ceph (storage limit of home). Done as `git worktree remove` of the clean worktree (only ignored baseline outputs and caches lost) and `git worktree add` from the same branch at 8949a1ce; the three E2 checks hold at the new path; the reference table's SHA-256 re-checked. Later phases' worktrees go in the same folder. The E2 commands' `../` paths are read relative to that folder.
+- 2026-11-10, implementation decisions (E4 step 9; none contradicts Part B):
+  - Layout: `core/calibration/` (steward hep-statistics, `core/OWNERS.json`) has one module per owning script of §14 (`use`, `deps`, `chain`, `data`, `contract`) plus `io` (script I/O); the scripts in `skills/hep-statistics/scripts/` are thin CLIs. Each check exists once: `use` calls `deps.derive_role`, `contract` calls `chain`, `deps` and `data`. Reason: §14's one-implementation rule with a library the later phases import.
+  - Fixtures as JSON in `core/calibration/data/` (`calibration-fixture/1`): the toy detector of §15.1 with its subgraph and bimodal variants, and ECAL, RICH, tracker graphs built from the §3.1 derivation tables; all `synthetic`. The toy detector's momentum reference is a known input on the track branch observed through E/p (§3.4 merging example).
+  - Exhaustive tests: the scope is 31.6 million cases (about 2 core-hours per pass), so the unit suite runs a fixed slice (1/2000; lookup 1/23, a stride coprime to the 4 upstream variants and 7 undecided subsets the scope cycles through) and the full scope is the sharded gate run (test design above). Appendix C says the lookup tests are "added to the reference implementation"; the reference is fixed by its hash, so they live in `test_calibration_use.py` with an independent enumeration. Reported for the author's information (not a blocker).
+  - `calib_contract check` in phase 0: the rules that need model quantities (clause 9 items 2, 3, 4 for N_exp, 8, 12, 13; the standardized N_d and N_d,c decisions) are phase 2 and listed under `deferred` in its output; the g4sim model identity is phase 3; `preflight` (A0) phase 1. Readings: a ψ must declare `uncertainty: negligible` (the 0.1σ_tot^design bound of D37, approved A7, is computed in phase 1); the link must be the one of the §2.1 table for the declared range (positive→log, signed→identity, (0,1)→logit, (−1,1)→Fisher z, simplex→alr/ilr); "contains data values" is a refused set of value keys plus the closed schema; a positive-definite kernel is a matrix passing Cholesky or a named kernel family known to be positive definite; this engine version supports Gaussian blocks only, so binomial and Poisson blocks are rejected under clause 10 item 3 until phase 2.
+  - `calib_chain`: a parameter acting on several nodes takes the methods every node allows; a learned density ratio is a candidate only on a node declared as a post-hoc correction with stored inputs and outputs (phase 5 implements it); with a g4sim node binding the candidates are refused as `incomplete` (Table 2 of §11.4, phase 3).
+  - `calib_data`: the reuse input `fit` counts every read (any kind, channel or κ) on a validation unit before κ's first validation read, since none is exempt under the current rules; a failure record with the same sequence number as the read counts as earlier; the ledger is one JSON file written atomically under an exclusive lock file.
+  - `calib_deps`: the parent list is normalized (sorted, deduplicated) inside update_digest as well as in the version id, so the order of listing parents is not content.
+  - `calibration_result.json` is a standalone schema (with k, k₀ and the unused observables, D11); registering `calibration-result` as an envelope artifact type (a contracts minor version) is left to phase 2, which first writes a result.
+  - §15.3 cases left to later phases by §17: the `calib_validate.py` cases of §15.3.14 (phase 2); the propagation cases of §15.3.17 (joint fits, the four source-set shapes; phase 2). Phase 0 tests hash citations, cycles, roles and the use rules of §15.3.17.
+  - Named-case readings: "P7 power insufficient" is the P7-failed input; "k₀ = 0 determined before opening" decides V (no undecided input), so the lineage gap does not count.
+  - Temporary files on ceph (`TMPDIR` in the private folder, outside any git repository), on the user's instruction.
 
 ## Open Questions
 
