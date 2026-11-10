@@ -5,6 +5,10 @@ no physics and no fit lives here. The programs are built from assets/native by C
 The folder of the built programs comes from --build-dir or HEP_ACTS_TRACKING_BUILD. A missing program is a failed result with
 its reason, never a fallback (docs/adapter-authoring.md, Honesty rules). Output: one JSON object on stdout, with the status, the
 reason and the exact command run. Exit 0 ok, 1 program failed, 2 invalid input, 3 program missing (core/status.py).
+
+D1 stage 10: refit forwards --alignment-payload and find --r33-outputs, each only when given, as the programs take them. The wrapper
+checks that a named input file exists and reads none: the driver is the one reader of an alignment payload and of its rules, and the
+finder the one judge of --r33-outputs, so their refusals come back unchanged (exit 2, status rejected, the program's stderr as reason).
 """
 from __future__ import annotations
 
@@ -69,12 +73,12 @@ def run_program(operation: str, build_dir: str | None, program: str, arguments: 
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
+    parser = argparse.ArgumentParser(description=__doc__.splitlines()[0], allow_abbrev=False)
     commands = parser.add_subparsers(dest="operation", required=True)
-    self_test = commands.add_parser("self-test", help="geometry, propagation, file and product checks of the driver")
+    self_test = commands.add_parser("self-test", allow_abbrev=False, help="geometry, propagation, file and product checks of the driver")
     self_test.add_argument("--work-dir", required=True, help="writable folder for its small files")
     self_test.add_argument("--build-dir", help="folder of the built programs")
-    generate = commands.add_parser("generate-fixture", help="events of t07-telescope-clean/1 or t07-telescope-noise/1")
+    generate = commands.add_parser("generate-fixture", allow_abbrev=False, help="events of t07-telescope-clean/1 or t07-telescope-noise/1")
     generate.add_argument("--fixture", required=True, choices=("clean", "noise"))
     generate.add_argument("--block", required=True, type=int, help="seed block of t04-values-v4.md section 3.2")
     generate.add_argument("--stratum", required=True, type=int, help="3 x momentum bin + occupancy level, 0 to 11")
@@ -83,21 +87,59 @@ def build_parser() -> argparse.ArgumentParser:
     generate.add_argument("--data-file", required=True, help="measurements, role reconstruction-input")
     generate.add_argument("--truth-file", required=True, help="truth, role truth, suffix .t07truth")
     generate.add_argument("--build-dir", help="folder of the built programs")
-    refit = commands.add_parser("refit", help="ACTS Kalman refit of known hit sets: truth-assisted, never finding. At zero field or the fixture's 1 T")
+    refit = commands.add_parser("refit", allow_abbrev=False, help="ACTS Kalman refit of known hit sets: truth-assisted, never finding. At zero field or the fixture's 1 T")
     refit.add_argument("--data-file", required=True, help="measurements")
     refit.add_argument("--hit-sets", required=True, help="acts-tracking-hit-sets/1 bound to the data file")
     refit.add_argument("--field-tesla", required=True, type=float)
     refit.add_argument("--product-id", required=True)
-    refit.add_argument("--product-file", required=True, help="acts-tracking-product/2 to write, with the R33 outputs of each fit")
+    refit.add_argument("--product-file", required=True, help="acts-tracking-product/2 to write, with the R33 outputs of each fit; with --alignment-payload its "
+                       "header line alignment_payload records the payload applied")
+    refit.add_argument("--alignment-payload", help="t07-alignment-payload/1, role alignment conditions (R32): applied by the driver through the placement route, "
+                       "read and checked by it alone. Among the refusals, exit 2, the driver's own text as the reason: a malformed payload, a plane the telescope has "
+                       "not, one labelled nominal that moves a plane, one derived against another nominal geometry, a truth path, and the product file itself. "
+                       "Without it the refit is as before, byte for byte")
     refit.add_argument("--build-dir", help="folder of the built programs")
-    find = commands.add_parser("find", help="ACTS pattern recognition on hits alone: seeds from hits, CKF, ambiguity resolution, fit. Recipe reco.track.acts-ckf-planar/1, data side")
+    find = commands.add_parser("find", allow_abbrev=False, help="ACTS pattern recognition on hits alone: seeds from hits, CKF, ambiguity resolution, fit. Recipe reco.track.acts-ckf-planar/1, data side")
     find.add_argument("--data-file", required=True, help="measurements")
     find.add_argument("--product-id", required=True)
-    find.add_argument("--product-file", required=True, help="acts-tracking-product/1 to write, with the states of the selected tracks")
+    find.add_argument("--product-file", required=True, help="acts-tracking-product/1 to write, with the states of the selected tracks; "
+                      "acts-tracking-product/2, with R33's outputs of each of those tracks, with --r33-outputs")
     find.add_argument("--record-file", required=True, help="acts-tracking-finding-record/1 to write: every event and candidate")
     find.add_argument("--product-events", required=True, type=int, help="how many events, from the first, keep their states in the product")
+    find.add_argument("--r33-outputs", help="the R33 conventions, t07-r33/1, the one value the finder takes: the product becomes acts-tracking-product/2 "
+                      "with R33's outputs of the delivered tracks of the first --product-events events. An output only; the record is the same with or without it")
     find.add_argument("--build-dir", help="folder of the built programs")
     return parser
+
+
+def input_files(arguments: argparse.Namespace) -> list:
+    """The files an operation reads, which must exist before its program runs; an optional one only when given."""
+    if arguments.operation == "find":
+        return [arguments.data_file]
+    if arguments.operation == "refit":
+        return [arguments.data_file, arguments.hit_sets] + ([arguments.alignment_payload] if arguments.alignment_payload is not None else [])
+    return []
+
+
+def program_and_arguments(arguments: argparse.Namespace) -> tuple:
+    """The program an operation runs and the arguments it passes, built without running anything. An optional flag is passed only when given."""
+    if arguments.operation == "self-test":
+        return DRIVER, ["self-test", "--work-dir", arguments.work_dir]
+    if arguments.operation == "generate-fixture":
+        return GENERATOR, ["generate", "--fixture", arguments.fixture, "--block", str(arguments.block), "--stratum", str(arguments.stratum),
+                           "--first-event", str(arguments.first_event), "--count", str(arguments.count), "--data-file", arguments.data_file,
+                           "--truth-file", arguments.truth_file]
+    if arguments.operation == "find":
+        forwarded = ["--data-file", arguments.data_file, "--product-id", arguments.product_id, "--product-file", arguments.product_file, "--record-file", arguments.record_file,
+                     "--product-events", str(arguments.product_events)]
+        if arguments.r33_outputs is not None:
+            forwarded += ["--r33-outputs", arguments.r33_outputs]
+        return FINDER, forwarded
+    forwarded = ["refit", "--data-file", arguments.data_file, "--hit-sets", arguments.hit_sets, "--field-tesla", repr(arguments.field_tesla),
+                 "--product-id", arguments.product_id, "--product-file", arguments.product_file]
+    if arguments.alignment_payload is not None:
+        forwarded += ["--alignment-payload", arguments.alignment_payload]
+    return DRIVER, forwarded
 
 
 def main(argv=None) -> int:
@@ -105,25 +147,11 @@ def main(argv=None) -> int:
         arguments = build_parser().parse_args(argv)
     except SystemExit as stop:
         return EXIT_INVALID if stop.code else 0
-    if arguments.operation == "self-test":
-        return run_program("self-test", arguments.build_dir, DRIVER, ["self-test", "--work-dir", arguments.work_dir])
-    if arguments.operation == "generate-fixture":
-        forwarded = ["generate", "--fixture", arguments.fixture, "--block", str(arguments.block), "--stratum", str(arguments.stratum),
-                     "--first-event", str(arguments.first_event), "--count", str(arguments.count), "--data-file", arguments.data_file,
-                     "--truth-file", arguments.truth_file]
-        return run_program("generate-fixture", arguments.build_dir, GENERATOR, forwarded)
-    if arguments.operation == "find":
-        if not Path(arguments.data_file).is_file():
-            return report("find", "rejected", f"no such input file: {arguments.data_file}", EXIT_INVALID)
-        forwarded = ["--data-file", arguments.data_file, "--product-id", arguments.product_id, "--product-file", arguments.product_file, "--record-file", arguments.record_file,
-                     "--product-events", str(arguments.product_events)]
-        return run_program("find", arguments.build_dir, FINDER, forwarded)
-    for input_file in (arguments.data_file, arguments.hit_sets):
+    for input_file in input_files(arguments):
         if not Path(input_file).is_file():
-            return report("refit", "rejected", f"no such input file: {input_file}", EXIT_INVALID)
-    forwarded = ["refit", "--data-file", arguments.data_file, "--hit-sets", arguments.hit_sets, "--field-tesla", repr(arguments.field_tesla),
-                 "--product-id", arguments.product_id, "--product-file", arguments.product_file]
-    return run_program("refit", arguments.build_dir, DRIVER, forwarded)
+            return report(arguments.operation, "rejected", f"no such input file: {input_file}", EXIT_INVALID)
+    program, forwarded = program_and_arguments(arguments)
+    return run_program(arguments.operation, arguments.build_dir, program, forwarded)
 
 
 if __name__ == "__main__":

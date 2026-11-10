@@ -66,6 +66,7 @@ Every built test needs the build job and skips without it; that job counts a ski
 from __future__ import annotations
 
 import hashlib
+import json
 import math
 import os
 import subprocess
@@ -830,6 +831,85 @@ class CaiRefitRun(unittest.TestCase):
             print(f"CAI-T07-4 stratum {stratum} second pass from each fit's own q/p: mean |change| {float(numpy.mean(passes)):.2e} largest {float(numpy.max(passes)):.2e} sigma "
                   f"(predicted at most {SECOND_PASS_PREDICTED_SIGMA}; a reading)", flush=True)
         self.assertEqual(verdict["defects"], [])
+
+
+# ---- D1 stage 10, built: the wrapper's refit with the stage 9 payloads against the driver called directly.
+WRAPPER = outputs_tests.ADAPTER / "assets" / "acts_tracking.py"
+WRAPPER_TRACKS = 200  # hit sets of CAI clean stratum 0: enough for every plane and both charges, a second or so per refit
+
+
+def run_wrapper(arguments) -> tuple:
+    finished = subprocess.run([sys.executable, str(WRAPPER), *[str(item) for item in arguments], "--build-dir", BUILD_DIR], capture_output=True, text=True, timeout=3600)
+    return finished.returncode, json.loads(finished.stdout)
+
+
+@unittest.skipUnless(BUILT, NOT_BUILT)
+class WrapperRefitRun(unittest.TestCase):
+    """The wrapper forwards --alignment-payload and changes nothing: its product bytes are the driver's, and a refusal is the driver's own, passed through."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.folder = tempfile.TemporaryDirectory()
+        cls.addClassCleanup(cls.folder.cleanup)
+        cls.work = Path(cls.folder.name)
+        cls.geometry = run_program([DRIVER, "geometry-id"]).stdout.strip()
+        clean = CaiFiles(cls.work, "cai-clean", CAI_STRATA[0])
+        cls.data_file = clean.data_file
+        cls.hit_sets = cls.work / "wrapper.hitsets"
+        cls.hit_sets.write_text(fixture_files.hit_sets_text(fixture_files.file_sha256(cls.data_file), clean.hit_sets[:WRAPPER_TRACKS]), encoding="utf-8")
+        parent = honest_payload(cls.geometry)
+        cls.payloads = {"none": None, "stage 9 parent": parent}
+        for name, parameter in CASE_PARAMETER.items():
+            cls.payloads[f"stage 9 derived {name}"] = alignment_payload.derive_subset(parent, {SHIFTED_PLANE: [parameter]})
+
+    def arguments(self, product: Path, payload: Path = None) -> list:
+        return (["refit", "--data-file", self.data_file, "--hit-sets", self.hit_sets, "--field-tesla", FIELD_TESLA, "--product-id", "wrapper-check", "--product-file", product]
+                + (["--alignment-payload", payload] if payload else []))
+
+    def payload_file(self, name: str, text: str) -> Path:
+        if text is None:
+            return None
+        path = self.work / f"{name.replace(' ', '-')}.t07payload"
+        path.write_text(text, encoding="ascii")
+        return path
+
+    def test_the_products_are_the_drivers_bytes(self):
+        for name, text in self.payloads.items():
+            payload = self.payload_file(name, text)
+            direct, through = self.work / "direct.product", self.work / "wrapper.product"
+            finished = run_program([DRIVER, *self.arguments(direct, payload)])
+            exit_code, report = run_wrapper(self.arguments(through, payload))
+            equal = direct.read_bytes() == through.read_bytes()
+            header = native_product.parse_product(through.read_text(encoding="utf-8"))["header"]
+            print(f"WRAPPER-REFIT {name}: wrapper exit {exit_code} status {report['status']}, product bytes equal to the driver's {equal}, "
+                  f"{len(through.read_bytes())} bytes, payload line {'present' if 'alignment_payload' in header else 'absent'}", flush=True)
+            with self.subTest(payload=name):
+                self.assertEqual((exit_code, report["status"], report["program_exit"]), (0, "ok", 0), report.get("reason"))
+                self.assertEqual(report["command"], [str(item) for item in [DRIVER, *self.arguments(through, payload)]])
+                self.assertEqual(report["program_stdout"], finished.stdout)
+                self.assertTrue(equal)
+                if text is None:
+                    self.assertNotIn("alignment_payload", header)
+                else:
+                    self.assertEqual(header["alignment_payload"]["content_sha256"], alignment_payload.payload_content_id(text))
+            direct.unlink()
+            through.unlink()
+
+    def test_a_wrong_payload_is_the_drivers_refusal(self):
+        for name, text in wrong_payloads(self.geometry).items():
+            payload = self.payload_file("wrong", text)
+            direct, through = self.work / "wrong-direct.product", self.work / "wrong-wrapper.product"
+            finished = run_program([DRIVER, *self.arguments(direct, payload)], check=False)
+            exit_code, report = run_wrapper(self.arguments(through, payload))
+            print(f"WRAPPER-REFIT refused {name}: driver exit {finished.returncode}, wrapper exit {exit_code} status {report['status']}, stderr equal "
+                  f"{report.get('program_stderr') == finished.stderr}, reason {report['reason'][:120]}", flush=True)
+            with self.subTest(payload=name):
+                self.assertEqual(finished.returncode, 2, finished.stderr)
+                self.assertEqual((exit_code, report["status"], report["program_exit"]), (2, "rejected", 2))
+                self.assertEqual(report["program_stderr"], finished.stderr)
+                self.assertEqual(report["reason"], finished.stderr.strip())
+                self.assertTrue("alignment payload" in report["reason"] or "alignment-payload" in report["reason"], report["reason"])
+                self.assertFalse(direct.exists() or through.exists())
 
 
 if __name__ == "__main__":

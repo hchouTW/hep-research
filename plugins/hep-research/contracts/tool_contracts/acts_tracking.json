@@ -271,6 +271,10 @@
       "input": "product_file"
      },
      {
+      "flag": "--alignment-payload",
+      "input": "alignment_payload"
+     },
+     {
       "flag": "--build-dir",
       "input": "build_dir"
      }
@@ -311,7 +315,14 @@
      "kind": "parameter",
      "unit": "n/a",
      "required": true,
-     "constraint": "acts-tracking-product/2 to write, with the R33 outputs of each fit"
+     "constraint": "acts-tracking-product/2 to write, with the R33 outputs of each fit; with alignment_payload its header line alignment_payload records the payload applied (content identity, origin, derived_against, derived_from, round none), without it the product is as before, byte for byte"
+    },
+    {
+     "name": "alignment_payload",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "path of a t07-alignment-payload/1 file, role alignment conditions (R32; its sidecar is conditions-payload/1): applied by the driver through the placement route and read and checked by the driver alone; among the refusals, exit 2, before any fit: a malformed payload, a plane the telescope has not, one labelled nominal that moves a plane, one derived against another nominal geometry (acts_tracking_driver geometry-id), a truth path, and the product file itself"
     },
     {
      "name": "build_dir",
@@ -367,7 +378,7 @@
     {
      "exit_code": 2,
      "status": "invalid-input",
-     "meaning": "an argument or input is refused; stdout carries status rejected (core/status.py). A truth file offered as data ends here"
+     "meaning": "an argument or input is refused; stdout carries status rejected (core/status.py). A truth file offered as data, and an alignment payload the driver refuses, end here, with the driver's own refusal as the reason (its stderr, trimmed)"
     },
     {
      "exit_code": 3,
@@ -413,6 +424,10 @@
       "input": "product_events"
      },
      {
+      "flag": "--r33-outputs",
+      "input": "r33_outputs"
+     },
+     {
       "flag": "--build-dir",
       "input": "build_dir"
      }
@@ -439,7 +454,7 @@
      "kind": "parameter",
      "unit": "n/a",
      "required": true,
-     "constraint": "acts-tracking-product/1 to write"
+     "constraint": "acts-tracking-product/1 to write; acts-tracking-product/2, with R33's outputs of each delivered track of the first product_events events, with r33_outputs"
     },
     {
      "name": "record_file",
@@ -454,6 +469,13 @@
      "unit": "1",
      "required": true,
      "constraint": "events, from the first, whose selected tracks keep their states in the product"
+    },
+    {
+     "name": "r33_outputs",
+     "kind": "parameter",
+     "unit": "n/a",
+     "required": false,
+     "constraint": "t07-r33/1, the R33 conventions, the one value the finder takes (another is refused, exit 2): the product becomes acts-tracking-product/2; an output only, it takes no input and the record is the same with or without it"
     },
     {
      "name": "build_dir",
@@ -509,7 +531,7 @@
     {
      "exit_code": 2,
      "status": "invalid-input",
-     "meaning": "an argument or input is refused; stdout carries status rejected (core/status.py). A truth file offered as data ends here"
+     "meaning": "an argument or input is refused; stdout carries status rejected (core/status.py). A truth file offered as data, and an r33_outputs other than t07-r33/1, end here, with the finder's own refusal as the reason (its stderr, trimmed)"
     },
     {
      "exit_code": 3,

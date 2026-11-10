@@ -18,6 +18,9 @@ Every built test needs the build job and skips without it; that job counts a ski
 """
 from __future__ import annotations
 
+import json
+import subprocess
+import sys
 import tempfile
 import time
 import unittest
@@ -166,6 +169,67 @@ class R33OutputsOfFoundTracks(unittest.TestCase):
                 with self.subTest(program=name, fixture=fixture):
                     self.assertEqual(r33_counts_defects(document), [])
                     self.assertEqual(missing, [])
+
+
+# ---- D1 stage 10, built: the wrapper's find with and without --r33-outputs against the finder called directly.
+WRAPPER = finding_tests.ADAPTER / "assets" / "acts_tracking.py"
+WRAPPER_EVENTS = 200
+WRAPPER_PRODUCT_EVENTS = 60
+WRAPPER_STRATUM = ("noise", 1)
+
+
+@unittest.skipUnless(finding_tests.BUILT, finding_tests.NOT_BUILT)
+class WrapperFindRun(unittest.TestCase):
+    """The wrapper forwards --r33-outputs and changes nothing: its product and record bytes are the finder's, and a wrong value is the finder's own refusal."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.folder = tempfile.TemporaryDirectory()
+        cls.addClassCleanup(cls.folder.cleanup)
+        cls.work = Path(cls.folder.name)
+        cls.data_file, truth_file = finding_tests.generate(cls.work, *WRAPPER_STRATUM, WRAPPER_EVENTS)
+        truth_file.unlink()
+
+    def arguments(self, stem: str, extra: list) -> list:
+        return ["--data-file", self.data_file, "--product-id", "wrapper-check", "--product-file", self.work / f"{stem}.product", "--record-file", self.work / f"{stem}.record",
+                "--product-events", WRAPPER_PRODUCT_EVENTS] + extra
+
+    def wrapper(self, stem: str, extra: list) -> tuple:
+        finished = subprocess.run([sys.executable, str(WRAPPER), "find", *[str(item) for item in self.arguments(stem, extra)], "--build-dir", finding_tests.BUILD_DIR],
+                                  capture_output=True, text=True, timeout=3600)
+        return finished.returncode, json.loads(finished.stdout)
+
+    def test_the_product_and_the_record_are_the_finders_bytes(self):
+        for label, extra, version in (("without", [], "acts-tracking-product/1\n"), ("with", R33_FLAG, "acts-tracking-product/2\n")):
+            finished = finding_tests.run_program([finding_tests.FINDER, *self.arguments("direct", extra)])
+            exit_code, report = self.wrapper("wrapper", extra)
+            outputs = {kind: ((self.work / f"direct.{kind}").read_bytes(), (self.work / f"wrapper.{kind}").read_bytes()) for kind in ("product", "record")}
+            first_line = outputs["product"][1].split(b"\n", 1)[0].decode()
+            print(f"WRAPPER-FIND {WRAPPER_STRATUM[0]} stratum {WRAPPER_STRATUM[1]} events {WRAPPER_EVENTS} {label} --r33-outputs: wrapper exit {exit_code} status {report['status']}, "
+                  f"product bytes equal {outputs['product'][0] == outputs['product'][1]} ({len(outputs['product'][1])} bytes, {first_line}), "
+                  f"record bytes equal {outputs['record'][0] == outputs['record'][1]}", flush=True)
+            with self.subTest(r33_outputs=label):
+                self.assertEqual((exit_code, report["status"], report["program_exit"]), (0, "ok", 0), report.get("reason"))
+                self.assertEqual(report["command"], [str(item) for item in [finding_tests.FINDER, *self.arguments("wrapper", extra)]])
+                self.assertEqual(report["program_stdout"], finished.stdout)
+                self.assertTrue(outputs["product"][1].startswith(version.encode()))
+                self.assertEqual(outputs["product"][0], outputs["product"][1])
+                self.assertEqual(outputs["record"][0], outputs["record"][1])
+            for kind in ("product", "record"):
+                for side in ("direct", "wrapper"):
+                    (self.work / f"{side}.{kind}").unlink()
+
+    def test_another_conventions_name_is_the_finders_refusal(self):
+        extra = ["--r33-outputs", "t07-r33/2"]
+        finished = finding_tests.run_program([finding_tests.FINDER, *self.arguments("wrong-direct", extra)], check=False)
+        exit_code, report = self.wrapper("wrong-wrapper", extra)
+        print(f"WRAPPER-FIND refused t07-r33/2: finder exit {finished.returncode}, wrapper exit {exit_code} status {report['status']}, stderr equal "
+              f"{report.get('program_stderr') == finished.stderr}, reason {report['reason'][:120]}", flush=True)
+        self.assertEqual(finished.returncode, 2, finished.stderr)
+        self.assertEqual((exit_code, report["status"], report["program_exit"]), (2, "rejected", 2))
+        self.assertEqual(report["program_stderr"], finished.stderr)
+        self.assertEqual(report["reason"], finished.stderr.strip())
+        self.assertIn("--r33-outputs", report["reason"])
 
 
 if __name__ == "__main__":

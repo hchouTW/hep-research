@@ -23,6 +23,7 @@ Run from the plugin root: python -m unittest tests.adapters.test_acts_tracking -
 """
 from __future__ import annotations
 
+import argparse
 import ast
 import copy
 import hashlib
@@ -1210,6 +1211,243 @@ class WrapperForwardsAndReports(unittest.TestCase):
         declaration = json.loads((ADAPTER / "adapter.json").read_text(encoding="utf-8"))
         self.assertEqual(declaration["status"], "proposed")
         self.assertEqual(declaration["tools"][0]["tested_versions"], [])
+
+
+# D1 stage 10: the wrapper, the manifest and the tool contract carry the driver interfaces of stages 8 and 9, --alignment-payload on refit and
+# --r33-outputs on find. The formats each help text names are read from the native sources, so a program that writes another format fails here.
+WRAPPER_SOURCE = ADAPTER / "assets" / "acts_tracking.py"
+WRAPPER_IMPORTS = {"__future__", "argparse", "json", "os", "subprocess", "sys", "pathlib"}
+FORMAT_SOURCES = ("native_product.hpp", "acts_tracking_driver.cpp", "acts_tracking_finder.cpp", "r33_product_outputs.hpp", "alignment_payload.hpp", "track_fit_outputs.hpp")
+FINDER_NAMES_R33 = "  if (with_r33_outputs) {\n    t07::name_r33_conventions(document);\n  }\n"
+
+
+def wrapper_option_helps(parser: argparse.ArgumentParser = None) -> dict:
+    """{(operation, flag): help} of the wrapper's subcommands."""
+    parser = parser or wrapper.build_parser()
+    commands = next(action for action in parser._actions if isinstance(action, argparse._SubParsersAction))
+    return {(name, flag): action.help for name, sub in commands.choices.items() for action in sub._actions for flag in action.option_strings if flag.startswith("--")}
+
+
+def native_constant(text: str, name: str) -> str:
+    found = re.search(rf'\b{name}\[\] = "([^"]+)";', text)
+    return found.group(1) if found else ""
+
+
+def format_written(body: str, versions: dict, default: str) -> str:
+    found = re.search(r"document\.format_version = (\d);", body)
+    return versions.get(found.group(1) if found else default, "")
+
+
+def wrapper_format_defects(helps: dict, sources: dict) -> list:
+    """What each wrapper help text says the programs read or write, against what the native sources say: the product format of the refit and of the finder
+    with and without --r33-outputs, the payload format and the R33 conventions name, and that the programs take the two flags."""
+    product = sources["native_product.hpp"]
+    versions = {"1": native_constant(product, "product_format"), "2": native_constant(product, "product_format_r33")}
+    default = re.search(r"int format_version = (\d);", product).group(1)
+    driver, finder, outputs = sources["acts_tracking_driver.cpp"], sources["acts_tracking_finder.cpp"], sources["r33_product_outputs.hpp"]
+    refit_body = driver[driver.index("int refit("):driver.index("int geometry_id(")]
+    finder_run = finder[finder.index("int run("):]
+    naming = outputs[outputs.index("inline void name_r33_conventions("):]
+    naming = naming[:naming.index("\n}\n")]
+    refit_writes, finder_plain, finder_r33 = format_written(refit_body, versions, default), format_written(finder_run, versions, default), format_written(naming, versions, default)
+    payload_format = native_constant(sources["alignment_payload.hpp"], "alignment_payload_format")
+    conventions = native_constant(sources["track_fit_outputs.hpp"], "r33_conventions_name")
+    defects = []
+    if not re.search(r'require_only\(flags, \{[^}]*"alignment-payload"', refit_body):
+        defects.append("the driver's refit takes no --alignment-payload")
+    if not re.search(r'optional_outputs\{[^}]*"r33-outputs"', finder):
+        defects.append("the finder takes no --r33-outputs")
+    if FINDER_NAMES_R33 not in finder_run:
+        defects.append("the finder does not name the R33 conventions only under --r33-outputs")
+    refit_product = helps.get(("refit", "--product-file"), "")
+    if refit_writes not in refit_product or (versions["1"] if refit_writes == versions["2"] else versions["2"]) in refit_product:
+        defects.append(f"refit --product-file does not name what the refit writes, {refit_writes}: {refit_product}")
+    # Fix round 1, F3: the payload's header line, and only with the flag that gives it.
+    if "alignment_payload" not in refit_product or "--alignment-payload" not in refit_product:
+        defects.append(f"refit --product-file does not name the alignment_payload line that --alignment-payload adds: {refit_product}")
+    if payload_format not in helps.get(("refit", "--alignment-payload"), ""):
+        defects.append(f"refit --alignment-payload does not name {payload_format}")
+    # Fix round 1, F3: without the flag the finder writes /1 and with it /2, and the help puts each format with its condition: the plain format before the
+    # semicolon, the R33 format after it, beside --r33-outputs.
+    if finder_plain != versions["1"] or finder_r33 != versions["2"]:
+        defects.append(f"the finder writes {finder_plain} without --r33-outputs and {finder_r33} with it, not {versions['1']} and {versions['2']}")
+    find_product = helps.get(("find", "--product-file"), "")
+    plain_part, _, flagged_part = find_product.partition(";")
+    if finder_plain not in plain_part or finder_r33 in plain_part or finder_r33 not in flagged_part or "--r33-outputs" not in flagged_part:
+        defects.append(f"find --product-file does not name {finder_plain}, and then {finder_r33} with --r33-outputs: {find_product}")
+    r33_help = helps.get(("find", "--r33-outputs"), "")
+    if conventions not in r33_help or finder_r33 not in r33_help:
+        defects.append(f"find --r33-outputs does not name {conventions} and {finder_r33}")
+    return defects
+
+
+def wrapper_reader_defects(source: str) -> list:
+    """The wrapper forwards and reads no input: it imports only the standard modules it uses and opens no file. A tripwire, not a proof (fix round 1, F9): the
+    substring checks would also flag a harmless comment, and would miss a read through a helper module the wrapper imported, which the import check refuses."""
+    imported = set()
+    for node in ast.walk(ast.parse(source)):
+        if isinstance(node, ast.Import):
+            imported |= {alias.name.split(".")[0] for alias in node.names}
+        elif isinstance(node, ast.ImportFrom):
+            imported.add((node.module or "").split(".")[0])
+    defects = [f"the wrapper imports {name}" for name in sorted(imported - WRAPPER_IMPORTS)]
+    defects += [f"the wrapper calls {call}" for call in ("open(", "read_text(", "read_bytes(") if call in source]
+    return defects
+
+
+class WrapperCarriesTheStageEightAndNineInterfaces(unittest.TestCase):
+    """D1 stage 10: --alignment-payload and --r33-outputs, forwarded exactly and only when given; the contract, the manifest and the help texts name them."""
+
+    def setUp(self):
+        self.folder = tempfile.TemporaryDirectory()
+        self.addCleanup(self.folder.cleanup)
+        self.build = Path(self.folder.name)
+        self.sources = {name: (NATIVE / name).read_text(encoding="utf-8") for name in FORMAT_SOURCES}
+        self.contract = json.loads((ROOT / "contracts" / "tool_contracts" / "acts_tracking.json").read_text(encoding="utf-8"))
+        self.payload_format = native_constant(self.sources["alignment_payload.hpp"], "alignment_payload_format")
+        self.conventions = native_constant(self.sources["track_fit_outputs.hpp"], "r33_conventions_name")
+
+    def planned(self, *arguments) -> tuple:
+        return wrapper.program_and_arguments(wrapper.build_parser().parse_args(list(arguments)))
+
+    def test_refit_forwards_the_payload_exactly_and_only_when_given(self):
+        given = ["refit", "--data-file", "d.t07data", "--hit-sets", "h.hitsets", "--field-tesla", "1", "--product-id", "p", "--product-file", "out.product"]
+        plain = ["refit", "--data-file", "d.t07data", "--hit-sets", "h.hitsets", "--field-tesla", "1.0", "--product-id", "p", "--product-file", "out.product"]
+        self.assertEqual(self.planned(*given), (wrapper.DRIVER, plain))
+        self.assertEqual(self.planned(*given, "--alignment-payload", "a.t07payload"), (wrapper.DRIVER, plain + ["--alignment-payload", "a.t07payload"]))
+        self.assertEqual(self.planned("refit", "--alignment-payload", "a.t07payload", *given[1:]), (wrapper.DRIVER, plain + ["--alignment-payload", "a.t07payload"]))
+        self.assertEqual(self.planned(*given, "--build-dir", "b"), (wrapper.DRIVER, plain))
+
+    def test_find_forwards_r33_outputs_exactly_and_only_when_given(self):
+        given = ["find", "--data-file", "d.t07data", "--product-id", "p", "--product-file", "out.product", "--record-file", "out.record", "--product-events", "60"]
+        plain = given[1:]
+        self.assertEqual(self.planned(*given), (wrapper.FINDER, plain))
+        self.assertEqual(self.planned(*given, "--r33-outputs", "t07-r33/1"), (wrapper.FINDER, plain + ["--r33-outputs", "t07-r33/1"]))
+        # The finder is the one judge of the value: another is forwarded as given, and the finder refuses it.
+        self.assertEqual(self.planned(*given, "--r33-outputs", "t07-r33/2"), (wrapper.FINDER, plain + ["--r33-outputs", "t07-r33/2"]))
+
+    def test_the_other_operations_forward_as_before(self):
+        self.assertEqual(self.planned("self-test", "--work-dir", "w"), (wrapper.DRIVER, ["self-test", "--work-dir", "w"]))
+        self.assertEqual(self.planned("generate-fixture", "--fixture", "noise", "--block", "1", "--stratum", "2", "--first-event", "0", "--count", "3", "--data-file", "d",
+                                      "--truth-file", "t.t07truth"),
+                         (wrapper.GENERATOR, ["generate", "--fixture", "noise", "--block", "1", "--stratum", "2", "--first-event", "0", "--count", "3", "--data-file", "d",
+                                              "--truth-file", "t.t07truth"]))
+
+    def recording_program(self, name: str, exit_code: int = 0, message: str = "") -> Path:
+        """A stand-in that writes its arguments one per line and a message to stderr."""
+        seen = self.build / f"{name}.arguments"
+        program = self.build / name
+        program.write_text(f"#!/bin/sh\nprintf '%s\\n' \"$@\" > '{seen}'\nprintf '%s\\n' '{message}' >&2\nexit {exit_code}\n", encoding="utf-8")
+        program.chmod(program.stat().st_mode | stat.S_IXUSR)
+        return seen
+
+    def invoke(self, *arguments) -> tuple:
+        captured = io.StringIO()
+        with redirect_stdout(captured):
+            exit_code = wrapper.main(list(arguments))
+        return exit_code, json.loads(captured.getvalue())
+
+    def inputs(self) -> tuple:
+        names = [self.build / name for name in ("in.t07data", "in.hitsets", "in.t07payload")]
+        for path in names:
+            path.write_text("x", encoding="utf-8")
+        return tuple(str(path) for path in names)
+
+    def test_the_program_receives_the_flags_as_given(self):
+        data_file, hit_sets, payload = self.inputs()
+        seen = self.recording_program("acts_tracking_driver")
+        exit_code, report = self.invoke("refit", "--data-file", data_file, "--hit-sets", hit_sets, "--field-tesla", "1", "--product-id", "p", "--product-file", "out",
+                                        "--alignment-payload", payload, "--build-dir", str(self.build))
+        self.assertEqual((exit_code, report["status"]), (0, "ok"))
+        expected = ["refit", "--data-file", data_file, "--hit-sets", hit_sets, "--field-tesla", "1.0", "--product-id", "p", "--product-file", "out", "--alignment-payload", payload]
+        self.assertEqual(seen.read_text(encoding="utf-8").splitlines(), expected)
+        self.assertEqual(report["command"][1:], expected)
+        seen = self.recording_program("acts_tracking_finder")
+        exit_code, report = self.invoke("find", "--data-file", data_file, "--product-id", "p", "--product-file", "out", "--record-file", "rec", "--product-events", "5",
+                                        "--r33-outputs", "t07-r33/1", "--build-dir", str(self.build))
+        self.assertEqual(exit_code, 0)
+        self.assertEqual(seen.read_text(encoding="utf-8").splitlines(),
+                         ["--data-file", data_file, "--product-id", "p", "--product-file", "out", "--record-file", "rec", "--product-events", "5", "--r33-outputs", "t07-r33/1"])
+
+    def test_a_missing_payload_is_refused_before_the_program(self):
+        data_file, hit_sets, _ = self.inputs()
+        seen = self.recording_program("acts_tracking_driver")
+        absent = str(self.build / "absent.t07payload")
+        exit_code, report = self.invoke("refit", "--data-file", data_file, "--hit-sets", hit_sets, "--field-tesla", "0", "--product-id", "p", "--product-file", "out",
+                                        "--alignment-payload", absent, "--build-dir", str(self.build))
+        self.assertEqual((exit_code, report["status"], report["reason"]), (2, "rejected", f"no such input file: {absent}"))
+        self.assertFalse(seen.exists())
+
+    def test_the_programs_refusal_comes_back_unchanged(self):
+        data_file, hit_sets, payload = self.inputs()
+        refusal = "invalid input: refused: the alignment payload names plane 9, and the telescope has planes 1 to 8"
+        self.recording_program("acts_tracking_driver", 2, refusal)
+        exit_code, report = self.invoke("refit", "--data-file", data_file, "--hit-sets", hit_sets, "--field-tesla", "0", "--product-id", "p", "--product-file", "out",
+                                        "--alignment-payload", payload, "--build-dir", str(self.build))
+        self.assertEqual((exit_code, report["status"], report["program_exit"], report["reason"], report["program_stderr"]), (2, "rejected", 2, refusal, refusal + "\n"))
+
+    def test_the_help_texts_name_the_formats_the_programs_write(self):
+        self.assertEqual(wrapper_format_defects(wrapper_option_helps(), self.sources), [])
+
+    def test_a_help_text_or_a_program_that_disagrees_is_caught(self):
+        helps = wrapper_option_helps()
+        product_v1, product_v2 = native_constant(self.sources["native_product.hpp"], "product_format"), native_constant(self.sources["native_product.hpp"], "product_format_r33")
+        refit_one = {**helps, ("refit", "--product-file"): helps[("refit", "--product-file")].replace(product_v2, product_v1)}
+        finder_plain_only = {**helps, ("find", "--product-file"): "acts-tracking-product/1 to write, with the states of the selected tracks"}
+        other_payload = {**helps, ("refit", "--alignment-payload"): helps[("refit", "--alignment-payload")].replace(self.payload_format, "t07-alignment-payload/2")}
+        no_conventions = {**helps, ("find", "--r33-outputs"): helps[("find", "--r33-outputs")].replace(self.conventions, "the conventions")}
+        driver_one = {**self.sources, "acts_tracking_driver.cpp": self.sources["acts_tracking_driver.cpp"].replace("document.format_version = 2;  // R33", "document.format_version = 1;  // R33")}
+        finder_always = {**self.sources, "acts_tracking_finder.cpp": self.sources["acts_tracking_finder.cpp"].replace(FINDER_NAMES_R33, "  t07::name_r33_conventions(document);\n")}
+        finder_swapped = {**helps, ("find", "--product-file"): "acts-tracking-product/2 to write, with R33's outputs; acts-tracking-product/1 with --r33-outputs"}
+        refit_no_line = {**helps, ("refit", "--product-file"): helps[("refit", "--product-file")].replace("alignment_payload", "payload")}
+        refit_no_flag = {**helps, ("refit", "--product-file"): helps[("refit", "--product-file")].replace("--alignment-payload", "a payload")}
+        finder_always_two = {**self.sources, "acts_tracking_finder.cpp": self.sources["acts_tracking_finder.cpp"].replace(
+            "  t07::ProductDocument document;\n", "  t07::ProductDocument document;\n  document.format_version = 2;\n", 1)}
+        finder_without = {**self.sources, "acts_tracking_finder.cpp": self.sources["acts_tracking_finder.cpp"].replace('"ambiguity-trace-events", "r33-outputs"}', '"ambiguity-trace-events"}')}
+        driver_without = {**self.sources, "acts_tracking_driver.cpp": self.sources["acts_tracking_driver.cpp"].replace('"product-file", "alignment-payload"}', '"product-file"}')}
+        for name, (case_helps, case_sources) in {"refit help naming /1": (refit_one, self.sources), "find help without /2": (finder_plain_only, self.sources),
+                                                 "another payload format": (other_payload, self.sources), "no conventions name": (no_conventions, self.sources),
+                                                 "a refit writing /1": (helps, driver_one), "a finder naming R33 always": (helps, finder_always),
+                                                 "a finder without the flag": (helps, finder_without), "a driver without the flag": (helps, driver_without),
+                                                 "find help with the formats swapped": (finder_swapped, self.sources), "refit help without the payload line": (refit_no_line, self.sources),
+                                                 "refit help without the payload flag": (refit_no_flag, self.sources), "a finder always at /2": (helps, finder_always_two)}.items():
+            with self.subTest(case=name):
+                self.assertTrue(case_helps != helps or case_sources != self.sources, "the defect was not made")
+                self.assertTrue(wrapper_format_defects(case_helps, case_sources))
+
+    def test_a_flag_is_not_taken_from_its_abbreviation(self):
+        """fix round 1, F8: allow_abbrev=False, so --alignment is not --alignment-payload and --r33 is not --r33-outputs."""
+        for arguments in (["refit", "--data-file", "d", "--hit-sets", "h", "--field-tesla", "0", "--product-id", "p", "--product-file", "o", "--alignment", "a"],
+                          ["find", "--data-file", "d", "--product-id", "p", "--product-file", "o", "--record-file", "r", "--product-events", "1", "--r33", "t07-r33/1"]):
+            with self.subTest(operation=arguments[0]), redirect_stderr(io.StringIO()):
+                self.assertEqual(wrapper.main(arguments), wrapper.EXIT_INVALID)
+
+    def test_the_wrapper_reads_no_input_itself(self):
+        source = WRAPPER_SOURCE.read_text(encoding="utf-8")
+        self.assertEqual(wrapper_reader_defects(source), [])
+        self.assertTrue(wrapper_reader_defects(source + "\nimport t07_alignment_payload\n"))
+        self.assertTrue(wrapper_reader_defects(source + "\nPAYLOAD = Path('p').read_text()\n"))
+
+    def test_the_contract_names_the_flags_and_the_formats(self):
+        operations = {operation["operation_id"]: operation for operation in self.contract["operations"]}
+        for operation_id, flag, name, words in (("refit", "--alignment-payload", "alignment_payload", (self.payload_format, "alignment conditions")),
+                                                ("find", "--r33-outputs", "r33_outputs", (self.conventions, "acts-tracking-product/2"))):
+            with self.subTest(operation=operation_id):
+                operation = operations[operation_id]
+                self.assertIn({"flag": flag, "input": name}, operation["invocation"]["options"])
+                item = next(item for item in operation["inputs"] if item["name"] == name)
+                self.assertFalse(item["required"])
+                for word in words:
+                    self.assertIn(word, item["constraint"])
+        refit_product = next(item for item in operations["refit"]["inputs"] if item["name"] == "product_file")["constraint"]
+        find_product = next(item for item in operations["find"]["inputs"] if item["name"] == "product_file")["constraint"]
+        self.assertTrue(refit_product.startswith("acts-tracking-product/2 ") and "alignment_payload" in refit_product, refit_product)
+        self.assertTrue(find_product.startswith("acts-tracking-product/1 ") and "acts-tracking-product/2" in find_product and "r33_outputs" in find_product, find_product)
+
+    def test_the_manifest_names_the_flags_and_the_formats(self):
+        purpose = json.loads((ADAPTER / "adapter.json").read_text(encoding="utf-8"))["purpose"]
+        for word in ("--alignment-payload", "--r33-outputs", self.payload_format, self.conventions, "acts-tracking-product/2", "alignment_payload header line"):
+            self.assertIn(word, purpose)
 
 
 def run_driver(*arguments) -> subprocess.CompletedProcess:
